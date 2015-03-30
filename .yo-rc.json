@@ -1,8 +1,0 @@
-{
-  "generator-backbone-marionette": {
-    "bootstrapFormat": "less",
-    "templateFramework": "lodash",
-    "includeFontAwesome": true,
-    "file": "${file}"
-  }
-}

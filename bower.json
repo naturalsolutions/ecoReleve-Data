@@ -2,13 +2,10 @@
   "name": "test",
   "version": "0.1.0",
   "dependencies": {
-    "jquery": "~2.1.0",
-    "lodash": "~2.4.1",
-    "almond": "~0.2.9",
-    "marionette": "~2.0.1",
-    "fontawesome": "~4.1.0",      
-    "requirejs": "~2.1.10",    
-    "components-bootstrap": "~3.1.1" 
+    "almond": "~0.3.1",
+    "marionette": "~2.4.1",
+    "requirejs": "~2.1.16",
+    "bootstrap": "~3.3.4",
+    "leaflet": "~0.7.3"
   }
 }
-

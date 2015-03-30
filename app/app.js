@@ -10,9 +10,9 @@ function() {
 	};
 	
 	Layout = Backbone.Marionette.LayoutView.extend({
-				el : '#main',
-				template: "app/templates/main-layout.ejs",						
-			});
+		el : '#main',
+		template: "app/templates/main-layout.html",
+	});
 
 	layout = new Layout();
 	
