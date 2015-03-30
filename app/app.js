@@ -17,6 +17,6 @@ function() {
 	layout = new Layout();
 	
 	layout.render();
-	
+	console.log('start');
 	return app;
 });

@@ -47,6 +47,5 @@ require([
 ],
 function(marionette, app, router) {
 	app.router = new router();
-	console.log('app start')
 	Backbone.history.start({ pushState: true });
 });

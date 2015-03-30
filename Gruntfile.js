@@ -1,13 +1,22 @@
 module.exports = function(grunt) {
 	grunt.initConfig({
+
+		/*==========  Watch Tasks  ==========*/
+
 		watch: {
 			options: {
 				nospawn: true,
 				livereload: true
 			},
+			configFiles: {
+				files: [ 'Gruntfile.js'],
+				options: {
+					reload: true
+				}
+			},
 			jst: {
 				files: [
-					'app/templates/**/*.html'
+					'app/**/*.html'
 				],
 				tasks: ['jst']
 			},
@@ -19,44 +28,50 @@ module.exports = function(grunt) {
 			livereload: {
 				files: [
 					'*.html',
-					'app/styles/{,*/}*.css',
-					'app/scripts/{,*/}*.js',
+					'app/styles/**/*.css',
+					'app/**/*.js',
 				]
 			}
-		},		
-		clean: {
-			dist: ['build'],
-		},   
-		jshint: {
-			all: [
-				'Gruntfile.js',
-				'app/**/*.js',
-				'app/modules/**/*.js',
-			]
-		},
-		requirejs: {
-			compile: {
-				options: {
-					baseUrl: "app",
-					mainConfigFile: "app/main.js",
-					include: "main",
-					name: "../bower_components/almond/almond",
-					out: "build/prod.js"
-				}
-			} 
 		},
 		less: {
 			dist: {
 				files: {
-					'app/styles/main.css' : 'app/styles/main.less'
+					'app/styles/main.css': 'app/styles/main.less'
+				},
+				tasks: ['autoprefixer'],
+				options: {
+					compress: false,
+					sourceMap: true,
+					sourceMapFilename: 'app/styles/main.css.map',
+					sourceMapURL: 'map.css.map'
 				}
 			}
 		},
-		
+		autoprefixer: {
+			dist: {
+				files: {
+					'app/styles/main.css': 'app/styles/main.css'
+				}
+			}
+		},
 		jst: {
 			compile: {
 				files: {
-					'build/templates.js': ['app/templates/**/*.html']
+					'build/templates.js': ['app/**/*.html']
+				}
+			}
+		},
+
+
+
+		requirejs: {
+			compile: {
+				options: {
+					baseUrl: 'app',
+					mainConfigFile: 'app/main.js',
+					include: 'main',
+					name: '../bower_components/almond/almond',
+					out: 'build/prod.js'
 				}
 			}
 		},
@@ -78,15 +93,16 @@ module.exports = function(grunt) {
 				}
 			}
 		}, 
-		cssmin: {
-			dist: {
-				files: {
-					'app/styles/main.css': [
-						'build/styles/{,*/}*.css',
-						'app/styles/{,*/}*.css'
-					]
-				}
-			}
+
+		/*==========  Build Tasks  ==========*/
+		clean: {
+			dist: ['build'],
+		},
+		jshint: {
+			all: [
+				'Gruntfile.js',
+				'app/**/*.js',
+			]
 		},
 		fileblocks: {
 			options: {
@@ -108,19 +124,29 @@ module.exports = function(grunt) {
 				}
 			},
 		},
+
 	});
 
-	grunt.loadNpmTasks('grunt-contrib-clean');
-	grunt.loadNpmTasks('grunt-contrib-connect');
-	grunt.loadNpmTasks('grunt-contrib-cssmin');
-	grunt.loadNpmTasks('grunt-contrib-concat');	
+
+	/*==========  Loaded Tasks  ==========*/
+
 	grunt.loadNpmTasks('grunt-requirejs');
+
 	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-contrib-jst');
-	grunt.loadNpmTasks('grunt-contrib-less');
+
 	grunt.loadNpmTasks('grunt-contrib-jasmine');
-	grunt.loadNpmTasks('grunt-file-blocks');
+
+	grunt.loadNpmTasks('grunt-contrib-jst');
+
+	grunt.loadNpmTasks('grunt-contrib-clean');
+
+	grunt.loadNpmTasks('grunt-contrib-less');
+
 	grunt.loadNpmTasks('grunt-contrib-jshint');
+
+	grunt.loadNpmTasks('grunt-file-blocks');
+
+	/*==========  Regitred Tasks  ==========*/
 	
 	grunt.registerTask('build', [
 		'jshint',
@@ -128,7 +154,6 @@ module.exports = function(grunt) {
 		'jst',
 		'less',
 		'requirejs',
-		'cssmin',
 		'jasmine'
 	]);
 
