@@ -43,7 +43,7 @@ module.exports = function(grunt) {
 					compress: false,
 					sourceMap: true,
 					sourceMapFilename: 'app/styles/main.css.map',
-					sourceMapURL: 'map.css.map'
+					sourceMapURL: 'main.css.map'
 				}
 			}
 		},
@@ -61,8 +61,6 @@ module.exports = function(grunt) {
 				}
 			}
 		},
-
-
 
 		requirejs: {
 			compile: {
@@ -157,7 +155,7 @@ module.exports = function(grunt) {
 		'jasmine'
 	]);
 
-	grunt.registerTask('develop', ['build', 'fileblocks:develop', 'watch']);
+	grunt.registerTask('dev', ['build', 'fileblocks:develop', 'watch']);
 
 	grunt.registerTask('release', ['build', 'fileblocks:prod']);
 };
