@@ -1,0 +1,92 @@
+.loginPage{
+	background: #000;
+	color: white;
+
+	text-align: center;
+	background: url(./img/bg-login.jpg) center center no-repeat;
+	background-position: center;
+	background-attachment: fixed;
+	background-size: cover;
+
+	.loginForm{
+		position: absolute;
+		padding: 25px 50px;
+		height: 500px;
+		width: 400px;
+		background: rgba(0,0,0,0.7);
+		margin: auto;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		font-size: 15px;	
+
+		h1{
+			font-weight: bold;
+			margin: 0px;
+			padding: 25px;
+		}
+		h2{
+			font-size: 15px;
+			font-weight: 300;
+		}
+		.help-block{
+			transition: all .5s ease;
+			margin: 0px;
+			background: #e7332a;
+			color: white;
+			padding-left: 15px;
+			line-height: 50px;
+			text-align: left;
+		}
+		.hidden{
+			display: none;
+		}
+		#username{
+			background: transparent;
+			color: white;
+			box-shadow: none;
+			border: none;
+			height: 55px;
+			border-radius: 0px;
+		}
+		#password{
+			background: transparent;
+			color: white;
+			box-shadow: none;
+			border: none;
+			height: 55px;
+			border-radius: 0px;
+		}
+		button[type="submit"]{
+			margin-top: 20px;
+			background: white;
+			border: none;
+			box-shadow: 0px;
+			border-radius: 2px;
+			color: #0a73ba;
+		}
+		.form-group{
+			margin: 0px;
+		}
+		.wrapper{
+			border: 1px solid white;
+			border-radius: 2px;
+		}
+
+		::-webkit-input-placeholder { /* WebKit browsers */
+			color: white;
+		}
+		:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+			color: white;
+			opacity:  1;
+		}
+		::-moz-placeholder { /* Mozilla Firefox 19+ */
+			color: white;
+			opacity:  1;
+		}
+		:-ms-input-placeholder { /* Internet Explorer 10+ */
+			color: white;
+		}
+	}
+}

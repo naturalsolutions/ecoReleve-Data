@@ -38,7 +38,6 @@ module.exports = function(grunt) {
 				files: {
 					'app/styles/main.css': 'app/styles/main.less'
 				},
-				tasks: ['autoprefixer'],
 				options: {
 					compress: false,
 					sourceMap: true,
@@ -155,7 +154,7 @@ module.exports = function(grunt) {
 		'jasmine'
 	]);
 
-	grunt.registerTask('dev', ['build', 'fileblocks:develop', 'watch']);
+	grunt.registerTask('dev', ['build', 'fileblocks:develop']);
 
 	grunt.registerTask('release', ['build', 'fileblocks:prod']);
 };

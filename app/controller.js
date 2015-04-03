@@ -1,8 +1,16 @@
-define(['app'], function(app){
+define(['marionette', 'config', './base/home/lyt-home'],
+function(Marionette, config, LytHome){
 	'use strict';
-	return Backbone.Marionette.Controller.extend({
-		login: function(){
-			console.log('login!');
+	return Marionette.Object.extend({
+		initialize: function(){
+			this.rgMain=this.options.app.rootView.rgMain;
+			this.rgHeader=this.options.app.rootView.rgHeader;
 		},
+
+		home: function() {
+			Backbone.history.navigate('');
+			this.rgMain.show(new LytHome());
+		},
+
 	});
 });

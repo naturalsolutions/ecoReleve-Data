@@ -1,51 +1,56 @@
 require.config({ 
-	baseUrl: "app",
-    paths: {
-		'router'				: 'router',
+	baseUrl: 'app',
+		paths : {
 		'app'					: 'app',
+		'config'				: 'config',
+		'router'				: 'router',
+		'controller'			: 'controller',
 		'templates'				: '../build/templates',
+		'lyt-rootview'				: './base/rootview/lyt-rootview',
+		
+		/*==========  Bower  ==========*/
+		
 		'jquery'				: '../bower_components/jquery/dist/jquery',
 		'backbone'				: '../bower_components/backbone/backbone',
 		'underscore'			: '../bower_components/underscore/underscore',
 		'marionette'			: '../bower_components/marionette/lib/core/backbone.marionette',
 		'backbone.babysitter'	: '../bower_components/backbone.babysitter/lib/backbone.babysitter',
 		'backbone.wreqr'		: '../bower_components/backbone.wreqr/lib/backbone.wreqr',
+		'sha1'					: '../bower_components/sha1/bin/sha1',
+		'transition-region'		: '../bower_components/marionette.transition-region/marionette.transition-region',
+		'jqueryui'				: '../bower_components/jqueryui/jquery-ui.min',
+
+		/*==========  Custom  ==========*/
 
 	},
 	shim : {
 		jquery : {
 			exports : 'jQuery'
 		},
+		jqueryui: {
+			exports: '$ui'
+		},
 		underscore : {
 			exports : '_'
 		},
 		backbone : {
-			deps : ['jquery', 'underscore'],
 			exports : 'Backbone'
 		},
 		marionette : {
-			deps : ['jquery', 'underscore', 'backbone'],
 			exports : 'Marionette'
 		},
-		app : {
-			deps : ['jquery', 'underscore', 'backbone', 'marionette'],
-		},
-		router : {
-			deps : ['app'],
-		},
+
 		templates :{
-			deps : ['underscore']
-		}
+			deps : ['underscore'],
+			exports : 'Templates',
+		},
+		sha1: {
+			exports: 'sha1'
+		},
 	},
 });
 
-require([
-	"marionette",
-	"app",
-	"router",
-	"templates",
-],
-function(marionette, app, router) {
-	app.router = new router();
-	Backbone.history.start({ pushState: true });
+
+require(['app', 'templates'], function(app){
+		app.start();
 });

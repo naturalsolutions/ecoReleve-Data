@@ -6,6 +6,9 @@
     "marionette": "~2.4.1",
     "requirejs": "~2.1.16",
     "bootstrap": "~3.3.4",
-    "leaflet": "~0.7.3"
+    "leaflet": "~0.7.3",
+    "sha1": "https://bitbucket.org/keesey/sha1.git",
+    "marionette.transition-region": "https://github.com/jmeas/marionette.transition-region.git",
+    "jqueryui": "~1.11.4"
   }
 }
