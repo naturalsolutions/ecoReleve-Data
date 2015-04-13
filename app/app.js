@@ -1,22 +1,23 @@
-define([],
-function() {
-	var app = {}, Layout = {}, JST = window.JST = window.JST || {};
+define(['marionette', 'lyt-rootview', 'router', 'controller'],
+function(Marionette, Lyt_rootview, Router, Controller) {
 
-	app = new Backbone.Marionette.Application();
-	
+
+	var app = {}, JST = window.JST = window.JST || {};
+
 	Backbone.Marionette.Renderer.render = function(template, data){
 		if (!JST[template]) throw "Template '" + template + "' not found!";
 		return JST[template](data);
 	};
-	
-	Layout = Backbone.Marionette.LayoutView.extend({
-		el : '#main',
-		template: "app/templates/main-layout.html",
+
+	app = new Marionette.Application();
+
+	app.on('start', function() {
+		app.rootView = new Lyt_rootview();
+		app.rootView.render();
+		app.controller = new Controller({app : app});
+		app.router = new Router({controller: app.controller});
+		Backbone.history.start();
 	});
 
-	layout = new Layout();
-	
-	layout.render();
-	console.log('start');
 	return app;
 });
