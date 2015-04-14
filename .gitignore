@@ -5,8 +5,8 @@ app/styles/main.css
 
 *.pyc
 *.ini
-ecoReleve_Sensor.egg-info/*
-ecorelevesensor.egg-info/*
+*.egg-info/*
+*.egg-info/*
 *.egg
 build/*
 dist/*
