@@ -10,7 +10,7 @@ AppConfig.read('./development.ini')
 settings = AppConfig['app:main']
 con_string = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.url'])
 TestPrefix = '%%Test%%'
-
+postgre = 'postgresql+psycopg2://postgre@localhost:5432/ecoReleve_test'
 class TestMyViewSuccessCondition(unittest.TestCase):
 
     
@@ -20,7 +20,7 @@ class TestMyViewSuccessCondition(unittest.TestCase):
         self.config = testing.setUp()
         from sqlalchemy import create_engine
 
-        engine = create_engine(con_string)
+        engine = create_engine(postgre)
         from .Models import (
             Base, ObservationDynProp,
             ProtocoleType,

@@ -4,6 +4,13 @@ python:
   - "3.3"
   - "3.4"
 # command to install dependencies
+before_script:
+  - cp Back/database.travis.yml config/database.travis.yml
+  - psql -c 'create database ecoReleve_test;' -U postgres
+install: 
+	- python setup.py develop
+	- pip install psycopg2 
+
 script: python setup.py test -q
 branches:
   only:
