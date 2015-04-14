@@ -8,12 +8,12 @@ from datetime import datetime
 class ObjectWithDynProp:
 
 
+    Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}        
+
     def __init__(self,ObjContext):
-        self.Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}        
         self.ObjContext = ObjContext
         self.PropDynValuesOfNow = {}
-        self.LoadNowValues()
-    
+
     def GetType(self):
         raise Exception("GetType not implemented in children")
 
@@ -60,7 +60,7 @@ class ObjectWithDynProp:
                 print('valeur modifiée pour ' + nameProp)
                 NouvelleValeur = self.GetNewValue(nameProp)
                 NouvelleValeur.StartDate = datetime.today()
-                setattr(NouvelleValeur,self.Cle[self.GetDynProps(nameProp).TypeProp],valeur)
+                setattr(NouvelleValeur,Cle[self.GetDynProps(nameProp).TypeProp],valeur)
 
                 self.PropDynValuesOfNow[nameProp] = valeur
                 self.GetDynPropValues().append(NouvelleValeur)
@@ -87,13 +87,16 @@ class ObjectWithDynProp:
             row = OrderedDict(curValue)
             self.PropDynValuesOfNow[row['Name']] = self.GetRealValue(row)
         print(self.PropDynValuesOfNow)
+
     def GetRealValue(self,row):
-        return row[self.Cle[row['TypeProp']]]
+        return row[Cle[row['TypeProp']]]
+
     def UpdateFromJson(self,DTOObject):
         for curProp in DTOObject:
             print('Affectation propriété ' + curProp)
             print(DTOObject[curProp])
             self.SetProperty(curProp,DTOObject[curProp])
+
     def GetFlatObject(self):
         resultat = {}
         # Get static Properties        
@@ -111,8 +114,6 @@ class ObjectWithDynProp:
         # TODO: manage foreign key
         #for curFK in self.__table__.foreign_keys:
         #   print(dir(curFK))
-
-
         return resultat
 
     def GetSchemaFromStaticProps(self):

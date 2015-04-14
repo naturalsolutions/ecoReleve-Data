@@ -14,7 +14,7 @@ class Observation(Base,ObjectWithDynProp):
     ObservationDynPropValues = relationship('ObservationDynPropValue',backref='Observation')
     
     @orm.reconstructor
-    def init_on_load(self):        
+    def init_on_load(self):
         ObjectWithDynProp.__init__(self,DBSession)
         
         
@@ -31,8 +31,12 @@ class Observation(Base,ObjectWithDynProp):
 
     def GetType(self):
         return self.ProtocoleType
-        
+
+
+
 class ObservationDynPropValue(Base):
+
+
     __tablename__ = 'ObservationDynPropValue'
 
     ID = Column(Integer,Sequence('ObservationDynPropValue__id_seq'), primary_key=True)
@@ -43,10 +47,11 @@ class ObservationDynPropValue(Base):
     ValueFloat =  Column(Float)
     FK_ObservationDynProp = Column(Integer, ForeignKey('ObservationDynProp.ID'))
     FK_Observation = Column(Integer, ForeignKey('Observation.ID'))
-    
-        
+
 
 class ObservationDynProp(Base):
+
+
     __tablename__ = 'ObservationDynProp'
 
     ID = Column(Integer,Sequence('ObservationDynProp__id_seq'), primary_key=True)
@@ -55,7 +60,10 @@ class ObservationDynProp(Base):
     ProtocoleType_ObservationDynProps = relationship('ProtocoleType_ObservationDynProp',backref='ObservationDynProp')
     ObservationDynPropValues = relationship('ObservationDynPropValue',backref='ObservationDynProp')
 
+
 class ProtocoleType(Base,ObjectTypeWithDynProp):
+
+
     @orm.reconstructor
     def init_on_load(self):        
         ObjectTypeWithDynProp.__init__(self,DBSession)
@@ -67,18 +75,11 @@ class ProtocoleType(Base,ObjectTypeWithDynProp):
     Status = Column(Integer)
     ProtocoleType_ObservationDynProps = relationship('ProtocoleType_ObservationDynProp',backref='ProtocoleType')
     Observations = relationship('Observation',backref='ProtocoleType')
-    
-    def GetDynPropContextTable(self):
-        return 'ProtocoleType_ObservationDynProp'
-
-    def GetDynPropTable(self):
-        return 'ObservationDynProp'
-
-    def Get_FKToDynPropTable(self):
-        return 'FK_ObservationDynProp'        
 
 
 class ProtocoleType_ObservationDynProp(Base):
+
+
     __tablename__ = 'ProtocoleType_ObservationDynProp'
 
     ID = Column(Integer,Sequence('ProtocoleType_ObservationDynProp__id_seq'), primary_key=True)

@@ -1,9 +1,10 @@
-from ecoreleve_server.Models import Base
+from ecoreleve_server.Models import Base,DynPropNames
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
 from datetime import datetime
+
 
 class ObjectTypeWithDynProp:
 
@@ -12,16 +13,28 @@ class ObjectTypeWithDynProp:
         self.ObjContext = ObjContext        
 
     def GetDynPropContextTable(self):
-        return self.__tablename__ + '_' + self.__tablename__.replace('Type','') + 'DynProp'
+        if self.__tablename__ in DynPropNames and 'DynPropContextTable' in DynPropNames[self.__tablename__] :
+            return DynPropNames[self.__tablename__]['DynPropContextTable']
+        else :
+            return self.__tablename__ + '_' + self.__tablename__.replace('Type','') + 'DynProp'
 
     def GetFK_DynPropContextTable(self):
-        return 'FK_' + self.__tablename__
+        if self.__tablename__ in DynPropNames and 'FK_DynPropContextTable' in DynPropNames[self.__tablename__] :
+            return DynPropNames[self.__tablename__]['FK_DynPropContextTable']
+        else :
+            return 'FK_' + self.__tablename__
 
     def GetDynPropTable(self):
-        return self.__tablename__.replace('Type','') + 'DynProp'
+        if self.__tablename__ in DynPropNames and 'DynPropTable' in DynPropNames[self.__tablename__] :
+            return DynPropNames[self.__tablename__]['DynPropTable']
+        else :
+            return self.__tablename__.replace('Type','') + 'DynProp'
 
     def Get_FKToDynPropTable(self):
-        return 'FK_' + self.__tablename__.replace('Type','') + 'DynProp'        
+        if self.__tablename__ in DynPropNames and 'FKToDynPropTable' in DynPropNames[self.__tablename__] :
+            return DynPropNames[self.__tablename__]['FKToDynPropTable']
+        else :
+            return 'FK_' + self.__tablename__.replace('Type','') + 'DynProp'        
 
     def AddDynamicPropInSchemaDTO(self,SchemaDTO):
         curQuery = 'select * from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '

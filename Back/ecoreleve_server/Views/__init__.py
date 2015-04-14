@@ -13,7 +13,7 @@ def add_routes(config):
     config.add_route('core/currentUser', 'ecoReleve-Core/currentUser')
 
     ##### Monitored sites #####
-    config.add_route('monitoredSites/id', 'ecoReleve-Core/monitoredSites')
+    config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites')
     config.add_route('monitoredSites/id', 'ecoReleve-Core/monitoredSites/{id}')
     
 
@@ -25,9 +25,11 @@ def add_routes(config):
 
     ##### Protocols #####
     config.add_route('protocol', 'ecoReleve-Core/protocol') # list of existing protocols
-    config.add_route('protocol', 'ecoReleve-Core/protocol/{name}') # list of iteration for a given protocol
-    config.add_route('protocol', 'ecoReleve-Core/protocol/{name}/{id}')
+    config.add_route('protocol/name', 'ecoReleve-Core/protocol/{name}') # list of iteration for a given protocol
+    config.add_route('protocol/name/id', 'ecoReleve-Core/protocol/{name}/{id}')
 
+    config.add_route('observation/id', 'ecoReleve-Core/observation/{id}')
+    config.add_route('observation', 'ecoReleve-Core/observation')
 
 
 
