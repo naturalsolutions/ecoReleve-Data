@@ -7,7 +7,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus.flowables import PageBreak
 from reportlab.lib import colors
-from ecorelevesensor.utils.spreadsheettable import SpreadsheetTable
+from ecoreleve_server.utils.spreadsheettable import SpreadsheetTable
 from reportlab.lib.pagesizes import letter, landscape
 
 class PDFrenderer(object):
