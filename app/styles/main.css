@@ -1,6 +1,6 @@
 @import '../../bower_components/jqueryui/themes/base/jquery-ui.min.css';
 @import url(http://fonts.googleapis.com/css?family=Exo+2:400,100,100italic,200,200italic,300,300italic,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic);
-@import "../../bower_components/RenecoFonts/style.css";
+@import "../../bower_components/reneco-fonts/style.css";
 /*==========  Bower Style Dependancies  ==========*/
 /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
 html {
@@ -6551,22 +6551,197 @@ button.close {
     display: none !important;
   }
 }
-[class^="reneco"]:after,
-[class*="reneco"]:after {
-  font-family: 'reneco-font';
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 0px;
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/**
+
+	TODO:
+	- import google font as local font
+
+**/
+/*==========  general  ==========*/
+/**
+
+	TODO:
+	- Convert colors to rgba
+
+**/
+/* colors */
+html,
+body,
+main {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Exo 2', sans-serif;
+}
+body header {
+  display: none;
+}
+body.app main {
+  padding-top: 50px;
+}
+body.app header {
+  display: block;
+}
+a {
+  color: white;
+  cursor: pointer;
+}
+a:hover,
+a:focus,
+a:visited {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  color: white;
+}
+.ns-no-padding {
+  padding: 0px;
+}
+.ns-full-height {
+  overflow: auto;
+  height: 100%;
 }
 /*==========  UI  ==========*/
+/* approx.. */
+.tile {
+  text-align: center;
+  height: 150px;
+  float: left;
+  margin: 0px 0px 15px 15px;
+  color: white;
+  opacity: 1;
+  position: relative;
+  border-radius: 3px;
+  transition: opacity ease .5s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.tile.small_tile {
+  width: 150px;
+}
+.tile.big_tile {
+  width: 315px;
+}
+.tile.last {
+  margin-left: 60px;
+}
+.tile.first {
+  margin-left: 30px;
+}
+.tile p {
+  font-size: 16px;
+  font-weight: normal;
+  padding-bottom: 10px;
+}
+.tile p .reneco {
+  font-size: 4em;
+  padding-bottom: 5px;
+  display: block;
+}
+.tile:hover,
+.tile:focus,
+.tile:visited {
+  opacity: 0.8;
+}
+@media screen and (max-width: 768px) {
+  .tile.small_tile,
+  .tile.big-tile,
+  .tile.last,
+  .tile.first {
+    margin-left: 0px!important;
+    width: 100%;
+  }
+}
+.tile-locked {
+  cursor: not-allowed;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+.tile-blue {
+  background-color: #2e8bcc;
+}
+.tile-green {
+  background-color: #339933;
+}
+.tile-red {
+  background-color: #e51400;
+}
+.tile-yellow {
+  background-color: #ffc40d;
+}
+.tile-orange {
+  background-color: #f39c12;
+}
+.tile-pink {
+  background-color: #e671b8;
+}
+.tile-purple {
+  background-color: #7b4f9d;
+}
+.tile-lime {
+  background-color: #8cbf26;
+}
+.tile-magenta {
+  background-color: #ff0097;
+}
+.tile-teal {
+  background-color: #00aba9;
+}
+.tile-turquoise {
+  background-color: #1abc9c;
+}
+.tile-green-sea {
+  background-color: #16a085;
+}
+.tile-emerald {
+  background-color: #2ecc71;
+}
+.tile-nephritis {
+  background-color: #27ae60;
+}
+.tile-peter-river {
+  background-color: #3498db;
+}
+.tile-belize-hole {
+  background-color: #2980b9;
+}
+.tile-amethyst {
+  background-color: #9b59b6;
+}
+.tile-wisteria {
+  background-color: #8e44ad;
+}
+.tile-wet-asphalt {
+  background-color: #34495e;
+}
+.tile-midnight-blue {
+  background-color: #2c3e50;
+}
+.tile-sun-flower {
+  background-color: #f1c40f;
+}
+.tile-carrot {
+  background-color: #e67e22;
+}
+.tile-pumpkin {
+  background-color: #d35400;
+}
+.tile-alizarin {
+  background-color: #e74c3c;
+}
+.tile-pomegranate {
+  background-color: #c0392b;
+}
+.tile-silver {
+  background-color: #bdc3c7;
+}
+.tile-concrete {
+  background-color: #95a5a6;
+}
+.tile-asbestos {
+  background-color: #7f8c8d;
+}
 /*==========  base  ==========*/
-.loginPage {
+.login-page {
   background: #000;
   color: white;
   text-align: center;
@@ -6575,7 +6750,7 @@ button.close {
   background-attachment: fixed;
   background-size: cover;
 }
-.loginPage .loginForm {
+.login-page .login-form {
   position: absolute;
   padding: 25px 50px;
   height: 500px;
@@ -6588,16 +6763,16 @@ button.close {
   right: 0;
   font-size: 15px;
 }
-.loginPage .loginForm h1 {
+.login-page .login-form h1 {
   font-weight: bold;
   margin: 0px;
   padding: 25px;
 }
-.loginPage .loginForm h2 {
+.login-page .login-form h2 {
   font-size: 15px;
   font-weight: 300;
 }
-.loginPage .loginForm .help-block {
+.login-page .login-form .help-block {
   transition: all .5s ease;
   margin: 0px;
   background: #e7332a;
@@ -6606,10 +6781,10 @@ button.close {
   line-height: 50px;
   text-align: left;
 }
-.loginPage .loginForm .hidden {
+.login-page .login-form .hidden {
   display: none;
 }
-.loginPage .loginForm #username {
+.login-page .login-form #username {
   background: transparent;
   color: white;
   box-shadow: none;
@@ -6617,7 +6792,7 @@ button.close {
   height: 55px;
   border-radius: 0px;
 }
-.loginPage .loginForm #password {
+.login-page .login-form #password {
   background: transparent;
   color: white;
   box-shadow: none;
@@ -6625,7 +6800,7 @@ button.close {
   height: 55px;
   border-radius: 0px;
 }
-.loginPage .loginForm button[type="submit"] {
+.login-page .login-form button[type="submit"] {
   margin-top: 20px;
   background: white;
   border: none;
@@ -6633,39 +6808,77 @@ button.close {
   border-radius: 2px;
   color: #0a73ba;
 }
-.loginPage .loginForm .form-group {
+.login-page .login-form .form-group {
   margin: 0px;
 }
-.loginPage .loginForm .wrapper {
+.login-page .login-form .wrapper {
   border: 1px solid white;
   border-radius: 2px;
 }
-.loginPage .loginForm ::-webkit-input-placeholder {
+.login-page .login-form ::-webkit-input-placeholder {
   /* WebKit browsers */
   color: white;
 }
-.loginPage .loginForm :-moz-placeholder {
+.login-page .login-form :-moz-placeholder {
   /* Mozilla Firefox 4 to 18 */
   color: white;
   opacity: 1;
 }
-.loginPage .loginForm ::-moz-placeholder {
+.login-page .login-form ::-moz-placeholder {
   /* Mozilla Firefox 19+ */
   color: white;
   opacity: 1;
 }
-.loginPage .loginForm :-ms-input-placeholder {
+.login-page .login-form :-ms-input-placeholder {
   /* Internet Explorer 10+ */
   color: white;
 }
-.homePage {
-  background: grey;
+.home-page {
+  background: url(img/bg-home.jpg) center center no-repeat;
+  background-position: center;
+  background-attachment: fixed;
+  background-size: cover;
+}
+.home-page canvas {
+  margin: 0 !important;
+  opacity: 0.9;
+  transition: .5s opacity ease;
+  position: relative;
+  left: -20px;
+}
+.home-page canvas:hover {
+  opacity: 1;
+}
+.home-page h2 {
+  font-size: 30px;
+}
+@media screen and (min-width: 768px) and (max-width: 1199px) {
+  .home-page .container {
+    width: 750px!important;
+  }
+  .home-page div.wrapper {
+    width: 515px;
+    margin: 0 auto;
+  }
+  .home-page .tile.first {
+    margin-left: 15px;
+  }
+  .home-page .tile.last {
+    margin-left: 15px;
+  }
+}
+@media screen and (max-width: 768px) {
+  .home-page .wrapper {
+    width: 100%;
+  }
 }
 header {
   background: #2ecc40;
   z-index: 10;
   color: white;
-  height: 50px;
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
   font-weight: 400;
 }
 header nav.navbar {
@@ -6682,12 +6895,5 @@ header .nav > li > a:hover,
 header a:hover {
   background: #42d052;
   color: white;
-}
-html,
-body,
-main,
-.full-height {
-  height: 100%;
-  font-family: 'Exo 2', sans-serif;
 }
 /*# sourceMappingURL=main.css.map */

@@ -1,3 +1,11 @@
+/**
+
+	TODO:
+	- header class hide : see router.js & app.js
+
+**/
+
+
 define(['marionette', 'config'],
 function(Marionette, config) {
 	'use strict';
@@ -15,6 +23,10 @@ function(Marionette, config) {
 			}).done( function() {
 				Backbone.history.navigate('login', {trigger: true});
 			});
+		},
+
+		onShow: function(){
+			
 		},
 	});
 });

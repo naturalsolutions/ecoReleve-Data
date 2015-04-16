@@ -6,7 +6,8 @@ require.config({
 		'router'				: 'router',
 		'controller'			: 'controller',
 		'templates'				: '../build/templates',
-		'lyt-rootview'				: './base/rootview/lyt-rootview',
+		'lyt-rootview'			: './base/rootview/lyt-rootview',
+		'transition-region'		: './base/transition-region/transition-region',
 		
 		/*==========  Bower  ==========*/
 		
@@ -17,7 +18,6 @@ require.config({
 		'backbone.babysitter'	: '../bower_components/backbone.babysitter/lib/backbone.babysitter',
 		'backbone.wreqr'		: '../bower_components/backbone.wreqr/lib/backbone.wreqr',
 		'sha1'					: '../bower_components/sha1/bin/sha1',
-		'transition-region'		: '../bower_components/marionette.transition-region/marionette.transition-region',
 		'jqueryui'				: '../bower_components/jqueryui/jquery-ui.min',
 
 		/*==========  Custom  ==========*/
@@ -51,6 +51,6 @@ require.config({
 });
 
 
-require(['app', 'templates'], function(app){
+require(['app', 'templates', 'transition-region'], function(app){
 		app.start();
 });
