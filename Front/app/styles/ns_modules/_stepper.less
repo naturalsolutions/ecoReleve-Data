@@ -1,0 +1,599 @@
+div.fuelux{
+	height: 100%;
+	padding: 10px 0px;
+	& .wizard{
+		height: 100%;
+		overflow:  hidden;
+		border: none;
+		box-shadow: 15px -15px 20px -5px rgba(39, 38, 38, 0.5);
+		& .stepper-header {
+			background-color: #449d44;
+			padding:1%;
+			color: white; 
+			font-weight: 600;
+			font-size: 16px;
+					}
+		.step-content.export{
+			z-index: 1000;
+			height: calc(~"100% - 46px");
+		}
+		.grid {
+			.container-fluid {
+				position:relative;
+				height: 80%;
+				margin-bottom: 5%;
+			}
+
+			.backgrid-paginator{
+				position:relative;
+				height:5%;
+			}
+		}
+		#grid-row {
+			height: 100%;
+			position:relative;
+		}
+	}
+	& .actions{
+		// position: relative;
+		// height: 10%;
+
+		// //bottom: -90px;
+
+		button.btn-custom{
+			position: absolute;
+			height: 100%;
+			width: 150px;
+			bottom: 0;
+			overflow: hidden;
+			transition: background .3s;
+			background: rgba(92,184,92,0.3);
+			color: white;
+			border: none;
+			padding: 0px;
+			vertical-align: middle;
+			border-radius: 3px;
+			text-transform: uppercase;
+			&:hover{
+				background: rgba(68,157,68,0.5);
+				color: white!important;
+			}
+			&:focus{
+				background: rgba(68,157,68,0.5);
+				color: white!important;
+			}
+			&:disabled {
+				//disalbe + cursor doesn't work;
+				cursor: not-allowed!important;
+			}
+			&.btn-next{
+				right: 0;
+				i{
+					float: right!important;
+				}
+				&.finished{
+					span.ctrl{
+						padding: 10px;
+					}
+				}
+			}
+
+
+			@fz: 25px;
+			i.action-picto{
+				line-height: inherit;
+				font-size: inherit!important;
+				background: rgba(0,0,0,0.2);
+				padding: 10px 15px;
+				margin:0px!important;
+				display: block;
+				float: left;
+				font-size: @fz!important;
+			}
+			span.ctrl{
+				margin: 0px!important;
+				vertical-align: 2px;
+				display: block;
+				float: left;
+				padding: 10px 15px;
+				font-size: @fz!important;
+			}
+
+		}
+
+	}
+	.steps{
+		margin-left: 0px!important;
+		height: 46px;
+		width: 100%!important;
+		overflow: hidden;
+		.chevron{
+
+		}
+	}
+	.step-content{
+		z-index: 1000;
+		height: calc(~"100% - 46px");
+		//padding: 1%!important;
+		//overflow: auto;
+		//padding-top:2%!important; //ul height
+		.step-pane{
+			position: relative;
+			overflow: auto;
+			//top: -46px;
+			height: 100%;
+			div.wrapper{
+				padding: 10px;
+			}
+		}
+	}
+	
+}	
+	
+.obscur { 
+	background: rgba(0, 0, 0, 0.35); 
+	overflow: hidden;
+}
+
+.step-grid {
+	width: 85%;
+	padding: 2% 0%;
+}
+
+.stepper-modal{
+	.full-modal{
+		position:absolute;
+		height: 90%;
+		overflow:hidden;
+		
+		.modal-dialog{
+			height:100%;
+			margin-top: 0px;
+			overflow: hidden;
+			width: 70%!important;
+
+			.modal-content {
+				height: 100%;
+				overflow: hidden;
+				
+				.modal-body {
+					height:80%;
+					overflow: hidden!important;
+					padding:0!important;
+					
+					.modal-panel-left {
+						height: 100%!important;
+						overflow: auto;
+					}
+
+					.modal-main-panel{
+						height: 100%;
+						.grid {
+							height:100%!important;
+							.container-fluid{
+								height: 90%!important;
+								#grid-row{
+									height: 95%!important;
+								}
+							}
+
+							.backgrid-paginator{
+								padding: 1% 0px;
+							}
+						}
+					}
+				}
+
+			}
+		}
+
+	}
+
+}
+
+
+
+
+//
+// Variables
+// --------------------------------------------------
+
+
+// Global values
+// --------------------------------------------------
+
+
+// Grays
+// -------------------------
+@black:                 #000;
+@grayDarker:            #222;
+@grayDark:              #333;
+@gray:                  #555;
+@grayLight:             #999;
+@grayLighter:           #eee;
+@white:                 #fff;
+
+
+// Accent colors
+// -------------------------
+@blue:                  #049cdb;
+@blueDark:              #0064cd;
+@green:                 #46a546;
+@red:                   #9d261d;
+@yellow:                #ffc40d;
+@orange:                #f89406;
+@pink:                  #c3325f;
+@purple:                #7a43b6;
+
+
+// Scaffolding
+// -------------------------
+@bodyBackground:        @white;
+@textColor:             @grayDark;
+
+
+// Links
+// -------------------------
+@linkColor:             #08c;
+@linkColorHover:        darken(@linkColor, 15%);
+
+
+// Typography
+// -------------------------
+@sansFontFamily:        "Helvetica Neue", Helvetica, Arial, sans-serif;
+@serifFontFamily:       Georgia, "Times New Roman", Times, serif;
+@monoFontFamily:        Monaco, Menlo, Consolas, "Courier New", monospace;
+
+@baseFontSize:          14px;
+@baseFontFamily:        @sansFontFamily;
+@baseLineHeight:        20px;
+@altFontFamily:         @serifFontFamily;
+
+@headingsFontFamily:    inherit; // empty to use BS default, @baseFontFamily
+@headingsFontWeight:    bold;    // instead of browser default, bold
+@headingsColor:         inherit; // empty to use BS default, @textColor
+
+
+// Component sizing
+// -------------------------
+// Based on 14px font-size and 20px line-height
+
+@fontSizeLarge:         @baseFontSize * 1.25; // ~18px
+@fontSizeSmall:         @baseFontSize * 0.85; // ~12px
+@fontSizeMini:          @baseFontSize * 0.75; // ~11px
+
+@paddingLarge:          11px 19px; // 44px
+@paddingSmall:          2px 10px;  // 26px
+@paddingMini:           0 6px;   // 22px
+
+@baseBorderRadius:      4px;
+@borderRadiusLarge:     6px;
+@borderRadiusSmall:     3px;
+
+
+// Tables
+// -------------------------
+@tableBackground:                   transparent; // overall background-color
+@tableBackgroundAccent:             #f9f9f9; // for striping
+@tableBackgroundHover:              #f5f5f5; // for hover
+@tableBorder:                       #ddd; // table and cell border
+
+// Buttons
+// -------------------------
+@btnBackground:                     @white;
+@btnBackgroundHighlight:            darken(@white, 10%);
+@btnBorder:                         #ccc;
+
+@btnPrimaryBackground:              @linkColor;
+@btnPrimaryBackgroundHighlight:     spin(@btnPrimaryBackground, 20%);
+
+@btnInfoBackground:                 #5bc0de;
+@btnInfoBackgroundHighlight:        #2f96b4;
+
+@btnSuccessBackground:              #62c462;
+@btnSuccessBackgroundHighlight:     #51a351;
+
+@btnWarningBackground:              lighten(@orange, 15%);
+@btnWarningBackgroundHighlight:     @orange;
+
+@btnDangerBackground:               #ee5f5b;
+@btnDangerBackgroundHighlight:      #bd362f;
+
+@btnInverseBackground:              #444;
+@btnInverseBackgroundHighlight:     @grayDarker;
+
+
+// Forms
+// -------------------------
+@inputBackground:               @white;
+@inputBorder:                   #ccc;
+@inputBorderRadius:             @baseBorderRadius;
+@inputDisabledBackground:       @grayLighter;
+@formActionsBackground:         #f5f5f5;
+@inputHeight:                   @baseLineHeight + 10px; // base line-height + 8px vertical padding + 2px top/bottom border
+
+
+// Dropdowns
+// -------------------------
+@dropdownBackground:            @white;
+@dropdownBorder:                rgba(0,0,0,.2);
+@dropdownDividerTop:            #e5e5e5;
+@dropdownDividerBottom:         @white;
+
+@dropdownLinkColor:             @grayDark;
+@dropdownLinkColorHover:        @white;
+@dropdownLinkColorActive:       @white;
+
+@dropdownLinkBackgroundActive:  @linkColor;
+@dropdownLinkBackgroundHover:   @dropdownLinkBackgroundActive;
+
+
+
+// COMPONENT VARIABLES
+// --------------------------------------------------
+
+
+// Z-index master list
+// -------------------------
+// Used for a bird's eye view of components dependent on the z-axis
+// Try to avoid customizing these :)
+@zindexDropdown:          1000;
+@zindexPopover:           1010;
+@zindexTooltip:           1030;
+@zindexFixedNavbar:       1030;
+@zindexModalBackdrop:     1040;
+@zindexModal:             1050;
+
+
+// Sprite icons path
+// -------------------------
+@iconSpritePath:          "../img/glyphicons-halflings.png";
+@iconWhiteSpritePath:     "../img/glyphicons-halflings-white.png";
+
+
+// Input placeholder text color
+// -------------------------
+@placeholderText:         @grayLight;
+
+
+// Hr border color
+// -------------------------
+@hrBorder:                @grayLighter;
+
+
+// Horizontal forms & lists
+// -------------------------
+@horizontalComponentOffset:       180px;
+
+
+// Wells
+// -------------------------
+@wellBackground:                  #f5f5f5;
+
+
+// Navbar
+// -------------------------
+@navbarCollapseWidth:             979px;
+@navbarCollapseDesktopWidth:      @navbarCollapseWidth + 1;
+
+@navbarHeight:                    40px;
+@navbarBackgroundHighlight:       #ffffff;
+@navbarBackground:                darken(@navbarBackgroundHighlight, 5%);
+@navbarBorder:                    darken(@navbarBackground, 12%);
+
+@navbarText:                      #777;
+@navbarLinkColor:                 #777;
+@navbarLinkColorHover:            @grayDark;
+@navbarLinkColorActive:           @gray;
+@navbarLinkBackgroundHover:       transparent;
+@navbarLinkBackgroundActive:      darken(@navbarBackground, 5%);
+
+@navbarBrandColor:                @navbarLinkColor;
+
+// Inverted navbar
+@navbarInverseBackground:                #111111;
+@navbarInverseBackgroundHighlight:       #222222;
+@navbarInverseBorder:                    #252525;
+
+@navbarInverseText:                      @grayLight;
+@navbarInverseLinkColor:                 @grayLight;
+@navbarInverseLinkColorHover:            @white;
+@navbarInverseLinkColorActive:           @navbarInverseLinkColorHover;
+@navbarInverseLinkBackgroundHover:       transparent;
+@navbarInverseLinkBackgroundActive:      @navbarInverseBackground;
+
+@navbarInverseSearchBackground:          lighten(@navbarInverseBackground, 25%);
+@navbarInverseSearchBackgroundFocus:     @white;
+@navbarInverseSearchBorder:              @navbarInverseBackground;
+@navbarInverseSearchPlaceholderColor:    #ccc;
+
+@navbarInverseBrandColor:                @navbarInverseLinkColor;
+
+
+// Pagination
+// -------------------------
+@paginationBackground:                #fff;
+@paginationBorder:                    #ddd;
+@paginationActiveBackground:          #f5f5f5;
+
+
+// Hero unit
+// -------------------------
+@heroUnitBackground:              @grayLighter;
+@heroUnitHeadingColor:            inherit;
+@heroUnitLeadColor:               inherit;
+
+
+// Form states and alerts
+// -------------------------
+@warningText:             #c09853;
+@warningBackground:       #fcf8e3;
+@warningBorder:           darken(spin(@warningBackground, -10), 3%);
+
+@errorText:               #b94a48;
+@errorBackground:         #f2dede;
+@errorBorder:             darken(spin(@errorBackground, -10), 3%);
+
+@successText:             #468847;
+@successBackground:       #dff0d8;
+@successBorder:           darken(spin(@successBackground, -10), 5%);
+
+@infoText:                #3a87ad;
+@infoBackground:          #d9edf7;
+@infoBorder:              darken(spin(@infoBackground, -10), 7%);
+
+#stepper{
+.wizard {
+
+	.clearfix;
+	
+	//border: 1px solid @navbarBorder;
+	border-radius: @baseBorderRadius;
+	box-shadow: 5px -5px 20px -0px rgba(75,75,75, 0.5);
+	background-color: @tableBackgroundAccent;
+	position: relative;
+	width: calc(~"100% - 350px");
+	margin: auto;
+	overflow: hidden;
+
+	> .step-nav {
+		list-style: none outside none;
+		padding: 0;
+		margin: 0;
+		width: 4000px;
+
+		&.previous-disabled {
+			li {
+				&.complete {
+					cursor: default;
+
+					&:hover {
+						background: #f3f4f5;
+						color: @successText;
+						cursor: default;
+
+						.chevron:before {
+							border-left-color: #f3f4f5;
+						}
+					}
+				}
+			}
+		}
+		
+		li {
+			float: left;
+			margin: 0;
+			padding: 0 20px 0 30px;
+			height: 46px;
+			line-height: 46px;
+			position: relative;
+			background: #ededed;
+			color: @grayLight;
+			font-size: 16px;
+			cursor: not-allowed;
+
+			.chevron {
+				border: 24px solid transparent;
+				border-left: 14px solid @navbarBorder;
+				border-right: 0;
+				display: block;
+				position: absolute;
+				right: -14px;
+				top: 0;
+				z-index: 1;
+			}
+
+			.chevron:before {
+				border: 24px solid transparent;
+				border-left: 14px solid #ededed;
+				border-right: 0;
+				content: "";
+				display: block;
+				position: absolute;
+				right: 1px;
+				top: -24px;
+			}
+
+			&.complete {
+				background: #f3f4f5;
+				color: @successText;
+
+				&:hover {
+					background: #e7eff8;
+					cursor: pointer;
+
+					.chevron:before {
+						border-left: 14px solid #e7eff8;
+					}
+				}
+
+				.chevron:before {
+					border-left: 14px solid #f3f4f5;
+				}
+
+				.badge {
+					background-color: @successText;
+				}
+
+			}
+			&.active {
+				background: #f1f6fc;
+				color: @infoText;
+				cursor: default;
+
+				.chevron:before {
+					border-left: 14px solid #f1f6fc;
+				}
+
+				.badge {
+					background-color: @infoText;
+				}
+			}
+
+			.badge {
+				margin-right: 8px;
+			}
+
+		}
+
+		li:first-child {
+			border-radius: 4px 0 0 4px;
+			padding-left: 20px;
+		}
+	}
+
+	.step-content {
+		border-top: 1px solid #D4D4D4;
+		//padding: 10px;
+		float: left;
+		width: 100%;
+
+		.step-pane {
+			display: none;
+		}
+
+		> .active {
+			display: block;
+
+			.btn-group {
+				.active {
+					display: inline-block;
+				}
+			}
+		}
+	}
+
+	// when complete
+	&.complete {
+		> .actions .glyphicon-arrow-right:before {
+			display: none;
+		}
+		> .actions .glyphicon-arrow-right {
+			margin-left: 0;
+		}
+	}
+	.incorrect{
+		border-bottom: 2px solid @btnWarningBackgroundHighlight;
+	}
+}
+}

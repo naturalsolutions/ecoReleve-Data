@@ -1,0 +1,122 @@
+
+<div id="filter-collapse" class="panel-collapse collapse in cleafix">
+	<form role="form">
+		<fieldset>
+			<legend>Select station(s)</legend>
+			<span class="col-xs-3">
+				<label >Id</label>
+				<input name="allSt-PK" class="form-control"  type="text" id="PK"/>
+			</span>
+			<span class="col-xs-9" id="allSt-Monitored">
+					<label>Monitored site type</label><br/>
+					<select name="allSt-monitoredSiteType" class="form-control">
+						<option></option>
+					</select>
+			</span>
+			<span class="allSt-name col-xs-4">
+				<label >Name</label>
+				<select id="allSt-Name-op" class="form-control" >
+					<option>Is</option>
+					<option>Is not</option>
+					<option>Contains</option>
+				</select>
+			</span>
+			<span id="stationType" class='col-xs-8 allSt-name'>
+				<label>&nbsp;</label>
+				<input name="allSt-Name" id ="st-station" class="form-control" type="text"/>
+			</span> 
+			<div class="clear"></div>
+			<span class='col-xs-12' id='allSt-SitesNameCont'>
+				<label >Name</label>
+				<select class="form-control" id="stMonitoredSiteName" name='allSt-siteName'/>
+			</span>
+		</fieldset>
+		<fieldset>
+			<legend>date</legend>
+			<div class="col-xs-4">
+				<select id="allSt-beginDate-op" class="form-control" >
+					<option>=</option>
+					<option>&lt;</option>
+					<option>&lt;=</option>
+					<option>&gt;</option>
+					<option>&gt;=</option>
+				</select>
+			</div>
+			<div class=" date col-xs-8">
+				<input type="text" name="allSt-beginDate" class="form-control pickerDate" type="text" placeholder="dd/mm/yyyy">
+			</div>
+			<div class="clear"></div>
+			<div class="col-xs-4">
+					<select id="allSt-endDate-op" class="form-control">
+						<option>&lt;</option>
+						<option>&lt;=</option>
+					</select>
+			</div>
+			<div class="col-xs-8">
+				<input type="text" name="allSt-endDate" class="form-control pickerDate" type="text" placeholder="dd/mm/yyyy">
+			</div>
+		 </fieldset>
+		 <fieldset>
+			<legend>field caracteristics</legend>
+				<div class="col-xs-12 col-lg-4">
+					<label>Fieldworker</label><br/>
+					<select name="allSt-fieldWorker" class="form-control">
+						<option></option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-lg-4">
+					<label>Field activity</label><br/>
+					<select name="allSt-fieldActivity" class="form-control">
+						<option></option>
+					</select>
+				</div>
+				<div class="col-xs-12 col-lg-4">
+					<label>Region</label><br/>
+					<select name="allSt-region" class="form-control">
+						<option></option>
+					</select>
+				</div>
+
+		</fieldset>
+		 <fieldset>
+			<legend>Coordinates</legend>
+			<div class="col-xs-3">
+				<label >min lat</label>
+				<input name="allSt-minLat" class="form-control  coords coord-min"  type="text" />
+			</div>
+			<div class="col-xs-3">
+				<label>min lon</label>
+				<input name="allSt-minLon" class="form-control coords coord-min" type="text" />
+			</div>
+			<div class="col-xs-3">
+				<label>max lat</label>
+				<input name="allSt-maxLat" type="text" class="form-control coords coord-max"/>
+			</div>
+			 <div class="col-xs-3">
+				<label>max lon</label>
+				<input name="allSt-maxLon" type="text" class="form-control coords coord-max"/>
+			</div>
+		</fieldset>
+		<div class="col-xs-12">
+		<label>Individual</label><br/>
+			<div class="input-group  picker">
+				<input class="form-control pickerInput required" name="allSt-indivId" type="text">
+				<span class="input-group-addon picker"><span class="glyphicon-plus"></span></span> 
+			</div>
+		</div>
+		<div class="allSt-btn-group col-xs-12">
+
+			<button id="allSt-filter-btn" type="submit"
+					class="small btn btn-labeled btn-success pull-right">
+					 FILTER
+				<span class="btn-label">
+					<i class="icon reneco reneco-search "/>
+				</span>
+			</button>
+			<button id="allSt-clear-btn" class="small btn btn-labeled">
+				CLEAR
+			</button>
+		</div>
+	</form>
+</div>
+

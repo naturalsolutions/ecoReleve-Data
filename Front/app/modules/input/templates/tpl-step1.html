@@ -1,0 +1,82 @@
+<div class="wrapper">
+	<div class="ui segment">
+		<div class="ui fluid basic large form segment"> 
+			<div class="grouped fields">
+				<legend for="male">select an action</legend>
+				<div class="tile-inside-container">
+
+					<div class="new tile-inside">
+							<h4>Create a new station</h4>
+							<div class="center">
+								<i class="fa fa-3x huge icon reneco reneco-stations "></i>
+								<i class="fa fa-3x icon reneco reneco-add"></i>
+							</div>
+							<div class="radio">
+								<label for="st10">
+									<input type="radio" name="stationtype" value="new" checked class="stationtype" id ="st10">
+									new station with coordinates
+								</label>
+							</div>
+							<div class="radio">
+								  <label>
+										<input type="radio" name="stationtype" value="newSc">
+										new station without coordinates
+								  </label>
+							</div>
+							<div class="radio">
+								  <label>
+									<input type="radio" name="stationtype" value="newSt">
+									new station from monitored site
+								</label>
+							</div>
+					</div>
+
+					<div class="field tile-inside radio-select">
+						<h4>Last imported station(s)</h4>
+						<div class="center">
+							<i class="fa fa-3x huge icon reneco reneco-stations "></i>
+							<i class="fa fa-3x icon reneco reneco-import"></i>
+						</div>
+						<div class="radio">
+							<label for="st2">
+								<input type="radio" name="stationtype" class="stationtype" value="imported" id ="st2" >    
+								last imported station(s)
+							</label>
+						</div>
+					</div>
+
+
+
+
+
+
+					<div class="field tile-inside radio-select">
+						<h4>Existing station(s)</h4>
+						<div class="center">
+							<i class="fa fa-3x huge icon reneco reneco-stations "></i>
+							<i class="fa fa-3x icon reneco reneco-search"></i>
+						</div>
+						<div class="radio">
+							<label for="st3">
+								<input type="radio" name="stationtype" value="old" id ="st3" class="stationtype">
+								from existing stations
+							</label>
+						</div>
+						<div class="radio">
+							<label>
+							<input type="radio" name="stationtype" value="monitoredSite">
+							from monitored site
+							</label>
+						</div>
+					</div>
+
+
+
+
+
+
+				</div>
+			</div>
+		</div> 
+	</div>
+</div>

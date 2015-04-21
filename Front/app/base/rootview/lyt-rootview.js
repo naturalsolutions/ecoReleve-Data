@@ -5,7 +5,7 @@ function(Marionette) {
 	return Marionette.LayoutView.extend({
 		el: 'body',
 		template: 'app/base/rootview/tpl-rootview.html',
-		className: 'full-height',
+		className: 'ns-full-height',
 
 		regions: {
 			rgHeader: 'header',

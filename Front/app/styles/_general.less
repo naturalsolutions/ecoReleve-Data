@@ -1,0 +1,37 @@
+
+html, body, main{
+	height: 100%;
+	overflow: hidden;
+	font-family: 'Exo 2', sans-serif;
+}
+
+body{
+	header{
+		display: none;
+	}
+	&.app{
+		main{
+			padding-top: 50px;
+		}
+		header{
+			display: block;
+		}
+	}
+}
+
+a{
+	cursor: pointer;
+	&:hover, &:focus, &:visited{
+		cursor: pointer;
+		text-decoration: none;
+		color: inherit;
+	}
+}
+
+.no-padding, .ns-no-padding{
+	padding: 0px;
+}
+.ns-full-height{
+	overflow: auto;
+	height: 100%;
+}

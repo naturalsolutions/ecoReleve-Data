@@ -1,9 +1,17 @@
-define(['marionette', 'sha1', 'config', 'jqueryui'],
-function(Marionette, sha1, config, $ui) {
+/**
+
+	TODO:
+	- error msg
+	- autocomplete vincent plugin (bb collection)
+
+**/
+
+define(['marionette', 'backbone', 'sha1', 'config', 'jqueryui'],
+function(Marionette, Backbone, sha1, config, $ui) {
 	'use strict';
 	return Marionette.LayoutView.extend({
 		template: 'app/base/login/tpl/tpl-login.html',
-		className: 'full-height loginPage',
+		className: 'login-page ns-full-height',
 
 		collection: new Backbone.Collection(),
 
@@ -45,9 +53,6 @@ function(Marionette, sha1, config, $ui) {
 							}) );
 						}
 					});
-				},
-				error: function(msg){
-
 				}
 			});
 

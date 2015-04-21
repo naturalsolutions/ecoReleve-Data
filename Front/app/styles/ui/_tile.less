@@ -1,0 +1,211 @@
+
+/* approx.. */
+@small_tile: 150px;
+@margin: 15px;
+@big_tile: @small_tile*2+@margin;
+@height_tile: 150px;
+
+
+.tile{
+	color: white;
+	text-align: center;
+	height: @height_tile;
+	float: left;
+	margin: 0px 0px @margin @margin;
+	color: white;
+	opacity: 1;
+	position: relative;
+	border-radius: 3px;
+	transition: opacity ease .5s;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	&.small_tile{
+		width: @small_tile;
+	}
+	&.big_tile{
+		width: @big_tile;
+	}
+	&.last{
+		margin-left: @margin*4;
+	}
+	&.first{
+		margin-left: @margin*2;
+	}
+
+	p{
+		font-size: 16px;
+		font-weight: normal;
+		padding-bottom: 10px;
+		.reneco{
+			font-size: 4em;
+			padding-bottom: 5px;
+			display: block;
+		}
+	}
+	&:hover, &:focus, &:visited{
+		color: white;
+		opacity: 0.8;
+	}
+
+
+}
+
+@media screen and (max-width: @screen-sm){
+	.tile{
+		&.small_tile, &.big-tile, &.last, &.first{
+			margin-left: 0px!important;
+			width: 100%;
+		}
+	}
+}
+
+
+.tile-locked
+{
+	cursor: not-allowed;
+	background-color: rgba(0,0,0,0.5)!important;
+}
+
+
+
+.tile-blue
+{
+	background-color: @blue;
+}
+.tile-green
+{
+	background-color: @green;
+}
+.tile-red
+{
+	background-color: @red;
+}
+.tile-yellow
+{
+	background-color: @yellow;
+}
+.tile-orange
+{
+	background-color: @orange;
+}
+.tile-pink
+{
+	background-color: @pink;
+}
+.tile-purple
+{
+	background-color: @purple;
+}
+.tile-lime
+{
+	background-color: @lime;
+}
+.tile-magenta
+{
+	background-color: @magenta;
+}
+.tile-teal
+{
+	background-color: @teal;
+}
+.tile-turquoise 	
+{
+	background-color: @turquoise;
+}
+.tile-green-sea 	
+{
+	background-color: @green-sea;
+}
+.tile-emerald
+{
+	background-color: @emerald;
+}
+.tile-nephritis
+{
+	background-color: @nephritis;
+}
+.tile-peter-river
+{
+	background-color: @peter-river;
+}
+.tile-belize-hole
+{
+	background-color: @belize-hole;
+}
+.tile-amethyst
+{
+	background-color: @amethyst;
+}
+.tile-wisteria
+{
+	background-color: @wisteria;
+}
+.tile-wet-asphalt
+{
+	background-color: @wet-asphalt;
+}
+.tile-midnight-blue
+{
+	background-color: @midnight-blue;
+}
+.tile-sun-flower
+{
+	background-color: @sun-flower;
+}
+.tile-carrot
+{
+	background-color: @carrot;
+}
+.tile-pumpkin
+{
+	background-color: @pumpkin;
+}
+.tile-alizarin
+{
+	background-color: @alizarin;
+}
+.tile-pomegranate
+{
+	background-color: @pomegranate;
+}
+.tile-silver
+{
+	background-color: @silver;
+}
+.tile-concrete
+{
+	background-color: @concrete;
+}
+.tile-asbestos
+{
+	background-color: @asbestos;
+}
+
+
+.tile-inside-container{
+	text-align: center;
+}
+.tile-inside{
+	display: inline-block;
+	min-height: 300px;
+	width: 250px;
+	background: rgba(0,0,0,0.7);
+	border-radius: 3px;
+	vertical-align: top;
+	color: white;
+	margin: 2%;
+	padding: 10px;
+	cursor: pointer;
+	&.smile{
+		min-height: 250px;
+		width: 200px;
+	}
+	.radio{
+		text-align: left;
+	}
+	&:hover{
+		background: rgba(0,0,0,0.9);
+	}
+}

@@ -15,7 +15,8 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 		app.rootView = new Lyt_rootview();
 		app.rootView.render();
 		app.controller = new Controller({app : app});
-		app.router = new Router({controller: app.controller});
+		app.router = new Router({controller: app.controller, app: app});
+		
 		Backbone.history.start();
 	});
 
