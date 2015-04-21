@@ -9907,6 +9907,8 @@ define('modules/input/layouts/lyt-step1',[
 		events:{
 			'click .manual-tile' : 'selectMode'
 		},
+
+
 		datachanged_radio: function(e){
 			var target= $(e.target);
 			var val=$(target).attr('value');
@@ -9929,8 +9931,8 @@ define('modules/input/layouts/lyt-step1',[
 			}
 		}, 
 		updateModel : function(value){
+			console.log('Change Model')
 			this.model.set('start_stationtype' , value);
-			console.log();
 			for(var key in this.model.attributes) {
 				if(key != 'start_stationtype'){
 					this.model.set(key,null);
@@ -18194,8 +18196,6 @@ define('modules/input/layouts/lyt-step2',[
 			'click #removeFieldWorkerInput' : 'removeInput',
 			'change select.fiedworker' : 'checkFWName',
 			'change input[name="Precision"]' : 'checkAccuracyValue',
-			//'focusout input[name="Date_"]':'checkDateField',
-			//'click .bootstrap-datetimepicker-widget' : 'updateDateField',
 			'change #impfieldActivity' : 'updateStationFA',
 			'change td.select-cell.editable' : 'updateStation'
 		},
@@ -18212,6 +18212,7 @@ define('modules/input/layouts/lyt-step2',[
 			this.sites = new MonitoredSites();
 			this.listenTo(this.sites, 'reset', this.updateName); 
 			var stationType = this.model.get('start_stationtype');
+			console.log(stationType);
 			if(stationType =='new' ||  stationType =='newSc' ||  stationType =='newSt'){
 				$('#btnPrev').css('display','');
 				var stationForm = new StationView();

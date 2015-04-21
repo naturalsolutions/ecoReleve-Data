@@ -9,3 +9,5 @@ Front/app/styles/main.css
 *.egg-info
 *.egg-info/*
 *.egg
+build/*
+dist/*
