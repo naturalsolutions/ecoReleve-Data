@@ -1,4 +1,11 @@
-bower_components/*
-node_modules/*
-build/*
 app/styles/main.css
+Front/bower_components/*
+Front/node_modules/*
+
+Front/app/styles/main.css
+
+*.pyc
+*.ini
+*.egg-info
+*.egg-info/*
+*.egg
