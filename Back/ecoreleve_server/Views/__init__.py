@@ -15,21 +15,31 @@ def add_routes(config):
     ##### Monitored sites #####
     config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites')
     config.add_route('monitoredSites/id', 'ecoReleve-Core/monitoredSites/{id}')
-    
 
     ##### Stations #####
-    config.add_route('station/area', 'ecoReleve-Core/area')
-    config.add_route('station/locality', 'ecoReleve-Core/locality')
-    config.add_route('station', 'ecoReleve-Core/station') # list of existing station
-    config.add_route('station/id', 'ecoReleve-Core/station/{id}')
+    config.add_route('area', 'ecoReleve-Core/area')
+    config.add_route('locality', 'ecoReleve-Core/locality')
+    config.add_route('stations', 'ecoReleve-Core/stations') 
+    config.add_route('stations/id', 'ecoReleve-Core/stations/{id}')
 
     ##### Protocols #####
-    config.add_route('protocol', 'ecoReleve-Core/protocol') # list of existing protocols
-    config.add_route('protocol/name', 'ecoReleve-Core/protocol/{name}') # list of iteration for a given protocol
-    config.add_route('protocol/name/id', 'ecoReleve-Core/protocol/{name}/{id}')
+    config.add_route('protocols', 'ecoReleve-Core/protocols')
+    config.add_route('protocols/name', 'ecoReleve-Core/protocols/{name}')
+    config.add_route('protocols/name/id', 'ecoReleve-Core/protocols/{name}/{id}')
 
-    config.add_route('observation/id', 'ecoReleve-Core/observation/{id}')
-    config.add_route('observation', 'ecoReleve-Core/observation')
+    config.add_route('observation/id', 'ecoReleve-Core/observations/{id}')
+    config.add_route('observation', 'ecoReleve-Core/observations')
+
+    ##### Sensors datas (Argos + GSM + RFID) #####
+    config.add_route('sensors/datas', 'ecoReleve-Sensor/{type}/datas')
+    config.add_route('sensors/id/datas', 'ecoReleve-Sensor/{type}/{id}/datas')
+
+    ##### Sensors caracteristics(Argos + GSM + RFID) #####
+    config.add_route('sensors', 'ecoReleve-Sensor/{type}')
+    config.add_route('sensors/id', 'ecoReleve-Sensor/{type}/{id}')
+
+
+
 
 
 

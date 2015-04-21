@@ -40,11 +40,9 @@ class ObjectTypeWithDynProp:
         curQuery = 'select * from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
-        print (curQuery)
         Values = self.ObjContext.execute(curQuery).fetchall()
 
         for curValue in Values : 
-           print(curValue)
            SchemaDTO[curValue['Name']] = {
                 'Name': curValue['Name'],
                 'type':'String',

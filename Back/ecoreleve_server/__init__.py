@@ -25,7 +25,6 @@ from ecoreleve_server.Models import (
     ObservationDynPropValue,
     Observation
     )
-from ecoreleve_server.Views import add_routes
 
 
 def datetime_adapter(obj, request):
@@ -49,23 +48,30 @@ def main(global_config, **settings):
     Base.metadata.create_all(engine)
     Base.metadata.reflect(views=True, extend_existing=False)
 
-    # curObs = DBSession.query(Observation).one()
-    # #curObs.__init__()
-    # # curObs.LoadNowValues()
-    # #DBSession.add(curObs)
+    # curObs = DBSession.query(Observation).first()
+    # # #curObs.__init__()
+    # # #DBSession.add(curObs)
     # bezin = {
-    #     'Name':'Name from JSON',
-    #     'Bezin': ' Bzein from JSON',
-    #     'Numerci' : 51
+        
+    #     'Toto': ' Bzein from JSON',
+    #     'Tutu' : 51
     # }
     # curObs.UpdateFromJson(bezin)
     # print(curObs.GetDTOWithSchema())
     # print ('Valeur à modifier')
     # curObs.SetProperty('Bezin','Valeur modifié après JSON')
     # print('Valeur à ne pas modifier ')
-    # curObs.SetProperty('Bezin','Valeur modifié après JSON')
+    # curObs.SetProperty('Toto','Bzein from JSON')
     # transaction.commit()
-
+    # request = testing.DummyRequest(
+    #         matchdict={
+    #         'ID': 91
+    #         },
+    #         json_body = {
+    #         'Toto': 'MaValeurTOTO',
+    #         'Tutu': '18'
+    #         })
+    # setObservation(request)
     config = Configurator(settings=settings)
     # Add renderer for datetime objects
     json_renderer = JSON()

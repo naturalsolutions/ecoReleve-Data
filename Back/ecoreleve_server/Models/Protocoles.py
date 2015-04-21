@@ -27,6 +27,7 @@ class Observation(Base,ObjectWithDynProp):
         return self.ObservationDynPropValues
 
     def GetDynProps(self,nameProp):
+        print(nameProp)
         return  DBSession.query(ObservationDynProp).filter(ObservationDynProp.Name==nameProp).one()
 
     def GetType(self):
@@ -86,11 +87,4 @@ class ProtocoleType_ObservationDynProp(Base):
     Required = Column(Integer,nullable=False)
     FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
     FK_ObservationDynProp = Column(Integer, ForeignKey('ObservationDynProp.ID'))
-    
-    
-
-    
-
-        
-    
 

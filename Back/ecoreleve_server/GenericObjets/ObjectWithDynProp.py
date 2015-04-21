@@ -4,15 +4,17 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
 from datetime import datetime
+import transaction
+
+Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}
 
 class ObjectWithDynProp:
 
 
-    Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}        
-
     def __init__(self,ObjContext):
         self.ObjContext = ObjContext
         self.PropDynValuesOfNow = {}
+        self.LoadNowValues()
 
     def GetType(self):
         raise Exception("GetType not implemented in children")
@@ -33,18 +35,14 @@ class ObjectWithDynProp:
         return 'FK_' + self.__tablename__ + 'DynProp'
         
     def GetSelfFKName(self):
-        return 'FK_' + self.__tablename__ + 'DynProp'   
+        return 'FK_' + self.__tablename__ + 'DynProp'
 
     def GetSelfFKNameInValueTable(self):
-        return 'FK_' + self.__tablename__   
+        return 'FK_' + self.__tablename__
         
     def GetpkValue(self) :
         return self.ID
     
-    def LoadNowValues(self):
-        self.PropDynValuesOfNow = None
-        raise Exception("LoadNowValues not implemented in children")
-        
     def GetProperty(self,nameProp) :
         if hasattr(self,nameProp):
             return getattr(self,nameProp) 
@@ -64,6 +62,7 @@ class ObjectWithDynProp:
 
                 self.PropDynValuesOfNow[nameProp] = valeur
                 self.GetDynPropValues().append(NouvelleValeur)
+
             else:
                 print('valeur non modifiée pour ' + nameProp)
                 return
@@ -74,19 +73,16 @@ class ObjectWithDynProp:
         raise Exception("GetNewValue not implemented in children")
         
     def LoadNowValues(self):
-        curQuery = 'select * from ' + self.GetDynPropValuesTable() + ' V JOIN ' + self.GetDynPropTable() + ' P ON P.' + self.GetDynPropValuesTableID() + '= V.' + self.GetDynPropFKName() + ' where '
+        curQuery = 'select V.*, P.Name,P.TypeProp from ' + self.GetDynPropValuesTable() + ' V JOIN ' + self.GetDynPropTable() + ' P ON P.' + self.GetDynPropValuesTableID() + '= V.' + self.GetDynPropFKName() + ' where '
         curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery += 'where V2.' + self.GetDynPropFKName() + ' = ' + self.GetDynPropFKName() + ' and V2.' + self.GetSelfFKName() + ' = V.' + self.GetSelfFKName() + ' '
         curQuery += 'AND V2.startdate > V.startdate)'
         curQuery +=  'and v.' + self.GetSelfFKNameInValueTable() + ' =  ' + str(self.GetpkValue() )
-        print (curQuery)
         Values = self.ObjContext.execute(curQuery).fetchall()
 
         for curValue in Values : 
-            print(curValue)
             row = OrderedDict(curValue)
             self.PropDynValuesOfNow[row['Name']] = self.GetRealValue(row)
-        print(self.PropDynValuesOfNow)
 
     def GetRealValue(self,row):
         return row[Cle[row['TypeProp']]]
@@ -94,18 +90,15 @@ class ObjectWithDynProp:
     def UpdateFromJson(self,DTOObject):
         for curProp in DTOObject:
             print('Affectation propriété ' + curProp)
-            print(DTOObject[curProp])
             self.SetProperty(curProp,DTOObject[curProp])
 
     def GetFlatObject(self):
         resultat = {}
         # Get static Properties        
         for curStatProp in self.__table__.columns:
-            print(curStatProp.key)
             resultat[curStatProp.key] = self.GetProperty(curStatProp.key)
         # Get static Properties            
         for curDynProp in self.PropDynValuesOfNow:
-            print(curDynProp)
             resultat[curDynProp] = self.GetProperty(curDynProp)
 
         # Add TypeName in JSON
@@ -119,7 +112,6 @@ class ObjectWithDynProp:
     def GetSchemaFromStaticProps(self):
         resultat = {}
         for curStatProp in self.__table__.columns:
-            print(curStatProp.key)
             resultat[curStatProp.key] = {
                 'Name': curStatProp.key,
                 'type':'String',
