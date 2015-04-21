@@ -1,3 +1,4 @@
+
 Front/bower_components/*
 Front/node_modules/*
 Front/build/*
@@ -5,8 +6,9 @@ Front/app/styles/main.css
 Front/app/styles/main.css.map
 
 
-*.pyc
-*.ini
-*.egg-info
-*.egg-info/*
-*.egg
+
+**/*.pyc
+**/*.ini
+**/*.egg-info
+**/*.egg-info/*
+**/*.egg

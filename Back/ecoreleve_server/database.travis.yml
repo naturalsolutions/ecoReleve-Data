@@ -1,0 +1,5 @@
+postgresql: &postgresql
+  adapter: postgresql
+  username: postgres
+  database: ecoReleve_test
+
