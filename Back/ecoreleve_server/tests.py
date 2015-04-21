@@ -10,20 +10,33 @@ from paste.deploy.loadwsgi import appconfig
 from webtest import TestApp
 from ecoreleve_server import main
 
+
 here = os.path.dirname(__file__)
 settings = appconfig('config:' + os.path.join(here,'../','development.ini'))
 
 settings['sqlalchemy.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.url'])
 TestPrefix = '%%Test%%'
+con_string = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.url'])
+TestPrefix = '%%Test%%'
+
 
 class BaseTest(unittest.TestCase):
 
-    # @classmethod
-    # def setUpClass(cls):
-    #     # cls.engine = engine_from_config(settings, 'sqlalchemy.')
-    #     cls.engine = create_engine(settings['sqlalchemy.url'])
-    #     cls.DBSession = sessionmaker()
+
     def setUp(self):
+
+        print ('TEST setup')
+        self.config = testing.setUp()
+        from sqlalchemy import create_engine
+
+        engine = create_engine(settings['sqlalchemy.url'])
+        from .Models import (
+            Base, ObservationDynProp,
+            ProtocoleType,
+            ProtocoleType_ObservationDynProp,
+            ObservationDynPropValue,
+            Observation
+            )
 
         self.engine = create_engine(settings['sqlalchemy.url'])
         self.config = testing.setUp()
