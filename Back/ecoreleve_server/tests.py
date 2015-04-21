@@ -1,76 +1,116 @@
-import unittest
+import unittest,os
 import transaction
 import configparser
 from pyramid import testing
 from urllib.parse import quote_plus
-from .Models import DBSession
+from sqlalchemy.orm import sessionmaker
+from .Models import Base,DBSession
+from sqlalchemy import create_engine, engine_from_config
+from paste.deploy.loadwsgi import appconfig
+from webtest import TestApp
+from ecoreleve_server import main
 
-AppConfig = configparser.ConfigParser()
-AppConfig.read('./development.ini')
-settings = AppConfig['app:main']
-con_string = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.url'])
+here = os.path.dirname(__file__)
+settings = appconfig('config:' + os.path.join(here,'../','development.ini'))
+
+settings['sqlalchemy.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.url'])
 TestPrefix = '%%Test%%'
 
-class TestMyViewSuccessCondition(unittest.TestCase):
+class BaseTest(unittest.TestCase):
 
-    
-
+    # @classmethod
+    # def setUpClass(cls):
+    #     # cls.engine = engine_from_config(settings, 'sqlalchemy.')
+    #     cls.engine = create_engine(settings['sqlalchemy.url'])
+    #     cls.DBSession = sessionmaker()
     def setUp(self):
-        print ('TEST setup')
+
+        self.engine = create_engine(settings['sqlalchemy.url'])
         self.config = testing.setUp()
-        from sqlalchemy import create_engine
+        # self.engine = create_engine(settings['sqlalchemy.url'])
+        self.connection = self.engine.connect()
+        self.trans = self.connection.begin()
 
-        engine = create_engine(con_string)
-        from .Models import (
-            Base, ObservationDynProp,
-            ProtocoleType,
-            ProtocoleType_ObservationDynProp,
-            ObservationDynPropValue,
-            Observation
-            )
-        DBSession.configure(bind=engine)
-        Base.metadata.create_all(engine)
-        self.InsertDataForTest()
+        DBSession.configure(bind=self.connection)
+        self.DBSession = DBSession()
 
-            # protocol = ProtocoleType(Name = 'Prot_Test', Status=4)
-            # obsDynProp1 = ObservationDynProp(Name = 'Toto', TypeProp = 'String')
-            # obsDynProp2 = ObservationDynProp(Name = 'Tutu', TypeProp = 'Float')
-
-            # protContext1 = ProtocoleType_ObservationDynProp(Required = 1, ProtocoleType = protocol, ObservationDynProp = obsDynProp1)
-            # protContext2 = ProtocoleType_ObservationDynProp(Required = 1, ProtocoleType = protocol, ObservationDynProp = obsDynProp2)
-
-            # obs = Observation(Name='one',ProtocoleType = protocol)
-            # DBSession.add(protContext1)
-            # DBSession.add(protContext2)
-            # DBSession.add(obs)
+        Base.session = self.DBSession
 
     def tearDown(self):
+
         print ('TearDown')
-        DBSession.remove()
         testing.tearDown()
+        self.trans.rollback()
+        self.DBSession.rollback()
+        self.DBSession.close()
 
-    def test_passing_view(self):
+class IntegrationTestBase(BaseTest):
+    @classmethod
+    def setUpClass(cls):
+        cls.ecoreleve_server = main({}, **settings)
+        super(IntegrationTestBase, cls).setUpClass()
+
+    def setUp(self):
+        self.ecoreleve_server = TestApp(self.ecoreleve_server)
+        self.config = testing.setUp()
+        super(IntegrationTestBase, self).setUp()
+
+class TestView(BaseTest) :
+    def setUp(self):
+        """ This sets up the application registry with the
+        registrations your application declares in its ``includeme``
+        function.
+        """
+        from ecoreleve_server import main
+        app = main({},**settings)
+        self.config = testing.setUp()
+        self.config.include('app')
+    
+    InsertedInfo = {
+    'Obs1' :
+    {
+    'name' : 'one'
+    }
+    }
+
+    def test_passing_getObservation(self):
+
         from .Views.views import getObservation
-        print ('in the test loop')
-        request = testing.DummyRequest( matchdict={'ID': self.InsertedInfo['Obs1']['id']})
-       
-        print (request)
+        self.InsertDataForTest()
+        request = testing.DummyRequest( matchdict={'ID': 91}, json_body = {})
         info = getObservation(request)
-        print (info)
-
         self.assertEqual(info['data']['Name'], self.InsertedInfo['Obs1']['name'])
-        # self.assertEqual(info['project'], 'ecoReleve_Server')
 
-    def CleanData(self):
-        # delete from ObservationDynPropValue
-        # delete from ProtocoleType_ObservationDynProp
-        # delete from ObservationDynProp
-        # delete from observation
-        # delete from protocoletype
-        # 
-        return 
+    def test_passing_setObservation(self):
+
+        from .Views.views import setObservation
+        self.InsertDataForTest()
+        request = testing.DummyRequest(
+            matchdict={
+            'ID': 91
+            },
+            json_body = {
+            'Toto': 'MaValeurTOTO',
+            'Tutu': '18'
+            })
+
+        info = setObservation(request)
+        self.assertEqual(info['data']['Toto'],'MaValeurTOTO')
+    
+    def InitDynProp(self):
+
+        protocol = ProtocoleType(Name = 'Prot_Test', Status=4)
+        obsDynProp1 = ObservationDynProp(Name = 'Toto', TypeProp = 'String')
+        obsDynProp2 = ObservationDynProp(Name = 'Tutu', TypeProp = 'Float')
+        protContext1 = ProtocoleType_ObservationDynProp(Required = 1, ProtocoleType = protocol, ObservationDynProp = obsDynProp1)
+        protContext2 = ProtocoleType_ObservationDynProp(Required = 1, ProtocoleType = protocol, ObservationDynProp = obsDynProp2)
+
+        self.DBSession.add(protContext1)
+        self.DBSession.add(protContext2)
 
     def InsertDataForTest(self):
+
+        print('insert DATA for test ')
         self.InsertedInfo = {}
         from .Models import (
             Base, ObservationDynProp,
@@ -80,22 +120,14 @@ class TestMyViewSuccessCondition(unittest.TestCase):
             Observation
             )
         with transaction.manager:
-            obs = Observation(Name=TestPrefix + 'one',ProtocoleType = DBSession.query(ProtocoleType).get(4))
-            DBSession.add(obs)
-            DBSession.flush()
+            obs = Observation(Name=TestPrefix + 'one',ProtocoleType = self.DBSession.query(ProtocoleType).get(4))
+            self.DBSession.add(obs)
+            self.DBSession.flush()
             self.InsertedInfo['Obs1'] = {
                 'id':obs.ID,
                 'name': TestPrefix + 'one'
             }
 
-
-            # obsDynProp1 = ObservationDynProp(Name = 'Toto', TypeProp = 'String')
-            # obsDynProp2 = ObservationDynProp(Name = 'Tutu', TypeProp = 'Float')
-
-            # protContext1 = ProtocoleType_ObservationDynProp(Required = 1, ProtocoleType = protocol, ObservationDynProp = obsDynProp1)
-            # protContext2 = ProtocoleType_ObservationDynProp(Required = 1, ProtocoleType = protocol, ObservationDynProp = obsDynProp2)
-
-            # obs = Observation(Name='one',ProtocoleType = protocol)
 # class TestMyViewFailureCondition(unittest.TestCase):
 
 
@@ -107,10 +139,10 @@ class TestMyViewSuccessCondition(unittest.TestCase):
 #             Base,Observation
             
 #             )
-#         DBSession.configure(bind=engine)
+#         self.DBSession.configure(bind=engine)
 
 #     def tearDown(self):
-#         DBSession.remove()
+#         self.DBSession.remove()
 #         testing.tearDown()
 
 #     def test_failing_view(self):
