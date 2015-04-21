@@ -45,6 +45,7 @@
 		}
 	}
 	&:hover, &:focus, &:visited{
+		color: white;
 		opacity: 0.8;
 	}
 
@@ -183,3 +184,28 @@
 }
 
 
+.tile-inside-container{
+	text-align: center;
+}
+.tile-inside{
+	display: inline-block;
+	min-height: 300px;
+	width: 250px;
+	background: rgba(0,0,0,0.7);
+	border-radius: 3px;
+	vertical-align: top;
+	color: white;
+	margin: 2%;
+	padding: 10px;
+	cursor: pointer;
+	&.smile{
+		min-height: 250px;
+		width: 200px;
+	}
+	.radio{
+		text-align: left;
+	}
+	&:hover{
+		background: rgba(0,0,0,0.9);
+	}
+}

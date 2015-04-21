@@ -1,6 +1,6 @@
 define({
 	root: window.location.pathname.replace(/\/(?:index.html)?$/, ''),
-	serverUrl: 'http://ecwp-dbm/ThesaurusCore',
+	serverUrl: 'http://192.168.1.199/ThesaurusCore',
 	sensorUrl: 'http://127.0.0.1/ecoReleve-Sensor/',
 	coreUrl: 'http://127.0.0.1/eco/',
 	siteName: 'Marseille',

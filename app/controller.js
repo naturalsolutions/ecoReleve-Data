@@ -1,7 +1,7 @@
 define(['marionette', 'config', 
 
 	'./base/home/lyt-home',
-	'./base/home/lyt-home',
+	'./modules/input/layouts/lyt-input',
 
 ],function( Marionette, config, 
 
@@ -23,7 +23,7 @@ define(['marionette', 'config',
 		},
 
 		input: function(){
-
+			this.rgMain.show(new LytInput());
 		},
 
 
