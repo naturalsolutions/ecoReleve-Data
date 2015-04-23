@@ -1,9 +1,8 @@
-define(['marionette'],
-function(Marionette) {
+define(['underscore', 'marionette'],
+function(_, Marionette) {
 	'use strict';
 	return Marionette.TransitionRegion = Marionette.Region.extend({
 		transitionInCss: {
-			opacity: 0
 		},
 
 		concurrentTransition: false,

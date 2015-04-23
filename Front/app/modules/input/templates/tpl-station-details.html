@@ -1,76 +1,63 @@
-
 <div id="stationPanel">
-
-	<div class="clearfix" id="stationHeader">
+	<br>
+	<div class="row form-group" id="stationHeader">
 		<span class="col-md-12 col-lg-6">
 			
-			<span class="navigation">
-					<a class="arrow-left-station glyphicon pointer  glyphicon-triangle-left" nav="prev"></a> 
-			</span>
-			<span class="navigation">
-					<a class="arrow-right-station glyphicon pointer glyphicon-triangle-right" nav="next"></a>
-			</span> 
+				<button id="arrow-left-station" class="btn pull-left" nav="prev">
+					<i class="glyphicon glyphicon-triangle-left"></i>
+				</button>
+				<button id="arrow-right-station" class="btn pull-left" nav="prev">
+					<i class="glyphicon glyphicon-triangle-right"></i>
+				</button>
 		</span>
 		<div class="col-md-12 col-lg-6">
 			<button id="editSt-btn" type="submit" class="small btn btn-labeled btn-success pull-right">
-					Edit
+					Edit &nbsp;
 					<span class="btn-label">
-							<i class="icon reneco reneco-edit "></i>
+						<i class="reneco reneco-edit"></i>
 					</span>
 			</button>
 		</div>
-
-	</div>
-	<div class="separator"></div>
-	<div class="clearfix stationName col-xs-12">
-
-		 <h3 class="break" id="stDetailsTitle">Station: <%= Name %></h3>
-
 	</div>
 
-	<div class="separator"></div>
+	<legend class="break" id="stDetailsTitle">Station: <%= Name %></legend>
 
 
-	<div class="clearfix">
-		<div class="col-lg-4 col-md-12" id="">
+
+	<div class="row">
+		<div class="form-group col-lg-4 col-md-12" id="">
 			<label>id</label>
 			<div><%= PK %></div>
 		</div>
-		<div class="col-lg-4 col-md-12" id="">
+		<div class="form-group col-lg-4 col-md-12" id="">
 			<label>latitude</label>
 			<div><%= LAT %></div>
 		</div>
-		<div class="col-lg-4 col-md-12" id="">
+		<div class="form-group col-lg-4 col-md-12" id="">
 			<label>longitude</label>
 			<div><%= LON %></div>
 		</div>
-		<!--<div class="col-lg-4 col-md-12" id="">
-			 <label>elev</label>
-					<div>_</div>
-		</div> -->
 	</div>
 
-	<div class="separator"></div>
 
-	<div class="clearfix">
-		<div class="col-lg-4 col-md-12" id="">
+	<div class="row">
+		<div class="form-group col-lg-4 col-md-12" id="">
 			<label>region</label>
 			<div><%= Region %></div>
 		</div>
-		<div class="col-lg-8 col-md-12" id="">
+		<div class="form-group col-lg-8 col-md-12" id="">
 			<label>place</label>
 			<div>
 				<input class='autocompTree_st blackFont form-control editField' disabled name='stPlace' startId='1000265' type='text' id='stPlace'>
 			</div> 
 		</div>
 	</div>
-	<div class="separator"></div>
-	<div class="clearfix" >
-		<div class="col-md-12 col-lg-5" id="">
+	<div class="row" >
+		<div class="form-group col-md-12 col-lg-5" id="">
 			<label>accuracy(m)</label>
 			<div><input name="stAccuracy" class="blackFont form-control editField" disabled type="number"></div>
 		</div>
-		<div class="col-xs-12" id="">
+		<div class="form-group col-xs-12" id="">
 			<label>distance from obs</label>
 			<div>
 				<select id="stDistFromObs" class="blackFont form-control editField" disabled name="stDistance">
@@ -83,30 +70,30 @@
 		</div>
 	</div>
 	<br>
-	<div class="clearfix" id="stNameSite" >
+	<div class="row" id="stNameSite" >
 		<div class="col-sm-3">
-			<i class="icon small reneco reneco-site" id="icon-age"></i> 
+			<i class="icon-two reneco reneco-site"></i> 
 		</div>
-		<div class="col-sm-9">
+		<div class="form-group col-sm-9">
 			<label>site</label>
 			<div><%= id_site %></div>
 		</div>
 	</div>
-	<div class="clearfix" >
-		<div class="col-xs-3">
-			<i class="icon small reneco reneco-time" id="icon-age"></i> 
+	<div class="row" >
+		<div class="form-group col-xs-3">
+			<i class="icon-two reneco reneco-time"></i> 
 		</div>
-		<div class="col-xs-9">
+		<div class="form-group col-xs-9">
 			<label>time</label>
 			<div><%= Date_ %></div>
 		</div>
 	</div>
 	<br>
-	<div class="clearfix" >
-		<div class="col-xs-3">
-			<i class="icon small reneco reneco-fieldactivity" id="icon-age"></i> 
+	<div class="row" >
+		<div class="form-group col-xs-3">
+			<i class="icon-two reneco reneco-fieldactivity"></i> 
 		</div>
-		<div class="col-xs-9">
+		<div class="form-group col-xs-9">
 			<label>field activity</label>
 			<div>
 				<select  name="st_FieldActivity_Name" disabled class="blackFont form-control editField">
@@ -116,20 +103,19 @@
 		</div>
 	</div>
 
-	<div class="separator"></div>
 
-	<div class="clearfix" >
-		<div class="col-xs-12">
-			<i class="icon small reneco reneco-users" id="icon-age"></i> 
-		</div>
-		<div class="col-xs-12 no-padding">
+	<div class="row" >
+		<div class="form-group col-xs-12">
 			<div class="panel-group" id="accordionFW">
 				<div class="panel panel-default">
 					<div class="panel-heading">
 							<span class="panel-title">
 							<a data-toggle="collapse" data-parent="" href="#collapseThree" class="collapsed">
-							<label>Field workers</label>
-							<i class="glyphicon pull-right"></i>
+								<h5>
+									<i class="reneco reneco-users"></i> 
+									&nbsp;Field workers&nbsp;
+									<span class="caret"></span>
+								</h5>
 							</a>
 							</span>
 					</div>

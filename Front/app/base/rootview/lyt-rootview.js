@@ -1,5 +1,5 @@
-define(['marionette',],
-function(Marionette) {
+define(['marionette', 'transition-region'],
+function(Marionette, TransitionRegion) {
 	'use strict';
 
 	return Marionette.LayoutView.extend({
@@ -9,8 +9,12 @@ function(Marionette) {
 
 		regions: {
 			rgHeader: 'header',
-			rgMain: 'main',
+			rgMain: new Marionette.TransitionRegion({
+				el: 'main'
+			}),
 			rgFooter: 'footer'
 		},
+
+
 	});
 });

@@ -30,13 +30,14 @@ define([
 
 		},
 
-		initialize: function(args){
-			this.name=args.name;
-			this.template=args.tpl;
+		initialize: function(options){
+			this.name=options.name;
+			this.template=options.tpl;
 
-			this.model=args.model; //global model
+			this.model=options.model; //global model
 			this.stepAttributes=[]; //all attributes per step
 			this.initModel();
+
 		},
 		initModel: function(){
 			this.parseOneTpl(this.template);

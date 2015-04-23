@@ -1,134 +1,130 @@
 <form id="newStForm">
-	<!--<div class="col-xs-12"><h3 id="input-station-title">New station</h3></div>
-	<div class="clear"></div>
-		<!--<div id="stationType">
-			<div class="radio-inline">
-				  <label><input type="radio" name="position" value ="1" checked>coordinates</label>
-			</div>
-			<div class="radio-inline">
-				  <label><input type="radio" name="position" value ="0">without coordinates</label>
-			</div>
-			<div class="radio-inline">
-				  <label><input type="radio" name="position" value ="2">from monitored site</label>
-			</div>
-		</div>-->
-
+	<br>
 	<fieldset>
 		<legend>identification</legend>
-		<div class='col-xs-5'>
-			<label>station name*</label>
-			<div data-editors="Name"></div>
-			<div id='error-Name' class='error'></div>
-		</div>
-		<div class='col-xs-6'>
-			<label>date*</label>
-			<div class="input-group date" data-editors="Date_">
+		<div class="row">
+			<div class="form-group col-xs-5">
+				<label>station name*</label>
+				<div data-editors="Name"></div>
+				<div id="error-Name" class="error"></div>
 			</div>
-			<div id='error-Date_' class='error'></div>
+			<div class="form-group col-xs-6">
+				<label>date*</label>
+				<div class="date" data-editors="Date_">
+				</div>
+				<div id="error-Date_" class="error"></div>
+			</div>
 		</div>
 	</fieldset>
 	<fieldset>
 		<legend>location</legend>
-
-			<div class='col-xs-10 masqued' id="stRegion">
+		<div class="row">
+			<div class="form-group col-xs-10 hidden" id="stRegion">
 				<label>region*</label>
 				<div data-editors="Region"></div>
-				<div id='error-Region' class='error'></div>
+				<div id="error-Region" class="error"></div>
 			</div>
+		</div>
+		<div class="row">
 			<div id="stCoordinates">
-				<div class='col-xs-4'>
+				<div class="form-group col-xs-4">
 				<label>latitude*</label>
 				<div data-editors="LAT"></div>
-				<div id='error-LAT' class='error'></div>
+				<div id="error-LAT" class="error"></div>
 
 				</div>
-				<div class='col-xs-4'>
+				<div class="form-group col-xs-4">
 					<label>longitude*</label>
 					<div data-editors="LON"></div>
-					<div id='error-LON' class='error'></div>
+					<div id="error-LON" class="error"></div>
 				</div>
-				<div class='col-xs-3'>
+				<div class="form-group col-xs-4">
 					<label>accuracy(m)*</label>
 					<div data-editors="Precision"></div>
-					<div id='error-Precision' class='error'></div>
+					<div id="error-Precision" class="error"></div>
 				</div>
 
-				<div class='col-xs-1'>
-					<br>
-					<i class="icon-action icon mini reneco reneco-site" id="getPosition"></i>
+				<div class="form-group col-xs-12">
+					<button type="button" id="getPosition" class="btn">
+						<i class="icon-action icon mini reneco reneco-site" id="getPosition"></i> Geolocation
+					</button>
 				</div>
 			</div>
-			<div id="stMonitoredSite" class="masqued">
-				<div class='col-xs-5'>
+		</div>
+
+		<div class="row">
+			<div id="stMonitoredSite" class="hidden">
+				<div class="form-group col-xs-5">
 				<label>site type*</label>
-				<select class="form-control" id="stMonitoredSiteType" name='type_site'>
+				<select class="form-control" id="stMonitoredSiteType" name="type_site">
 					<option></option>
 				</select>
 				</div>
-				<div class='col-xs-5'>
+				<div class="form-group col-xs-5">
 					<label>site name*</label>
-					<select class="form-control" id="stMonitoredSiteName" name='id_site'>
+					<select class="form-control" id="stMonitoredSiteName" name="id_site">
 						<option></option>
 					</select>
 				</div>
 			</div>
+		</div>
 	</fieldset>
-	<fieldset id='station-fieldWorkers' insertedWorkersNb="1">
+	<fieldset id="station-fieldWorkers" insertedWorkersNb="1">
 	<legend>field caracteristics</legend>
-	<div>
-		<div class='col-xs-11'>
-			<label>field activity*</label>
-			<div data-editors="FieldActivity_Name"></div>
-			<div id='error-FieldActivity_Name' class='error'></div>
+		<div class="row">
+			<div class="form-group col-xs-12">
+				<label>field activity*</label>
+				<div data-editors="FieldActivity_Name"></div>
+				<div id="error-FieldActivity_Name" class="error"></div>
+			</div>
 		</div>
 
-		<div class="col-xs-6">
-			<label>observer 1*</label><br/>
-			<div data-editors="FieldWorker1"></div>
-			<div id='error-FieldWorker1' class='error'></div>
-		</div>
-		<div class="col-xs-5">
-			<label>total observers*</label><br/>
-			<div data-editors="NbFieldWorker"></div>
-			<div id='error-NbFieldWorker' class='error'></div>
+		<div class="row">
+			<div class="form-group col-xs-6">
+				<label>observer 1*</label>
+				<div data-editors="FieldWorker1"></div>
+				<div id="error-FieldWorker1" class="error"></div>
+			</div>
+			<div class="form-group col-xs-6">
+				<label>total observers*</label>
+				<div data-editors="NbFieldWorker"></div>
+				<div id="error-NbFieldWorker" class="error"></div>
+			</div>
+			<div class="form-group col-xs-12">
+				<button type="button" id="addFieldWorkerInput" class="btn">
+					<i class="glyphicon glyphicon-plus"></i>
+					Add an observer
+				</button>
+			</div>
+
 		</div>
 
-		<div id="addFieldWorkerInput" class='col-xs-1'>
-			<br>
-			<a><i class="icon-action icon mini reneco reneco-add"></i></a>
+		<div class="row">
+			<div class="form-group col-xs-6 hidden" id="FieldWorker2-field">
+				<label>observer 2</label>
+				<div data-editors="FieldWorker2"></div>
+			</div>
+			<div class="form-group col-xs-6 hidden" id="FieldWorker3-field">
+				<label>observer 3</label>
+				<div data-editors="FieldWorker3"></div>
+			</div>
+			<div class="form-group col-xs-6 hidden" id="FieldWorker4-field">
+				<label>observer 4</label>
+				<div data-editors="FieldWorker4"></div>
+			</div>
+			<div class="form-group col-xs-6 hidden" id="FieldWorker5-field">
+				<label>observer 5</label>
+				<div data-editors="FieldWorker5"></div>
+			</div>
 		</div>
 
-
-		<div class='col-xs-5 masqued' id='FieldWorker2-field'>
-			<label>observer 2</label>
-			<div data-editors="FieldWorker2"></div>
+		<div class="row">
+			<div class="form-group col-xs-12">
+				<button type="button" id="removeFieldWorkerInput" class="btn hidden">
+					<i class="glyphicon glyphicon-remove"></i>
+					Remove an observer
+				</button>
+			</div>
 		</div>
-		<div class='col-xs-5 masqued' id='FieldWorker3-field'>
-			<label>observer 3</label>
-			<div data-editors="FieldWorker3"></div>
-		</div>
-		<div id="removeFieldWorkerInput" class='col-xs-2 masqued'>
-			<br>
-			<i class="icon-action icon mini reneco reneco-close"></i>
-		</div>
-		<div class='col-xs-5 masqued' id='FieldWorker4-field'>
-			<label>observer 4</label>
-			<div data-editors="FieldWorker4"></div>
-		</div>
-		<div class='col-xs-5 masqued' id='FieldWorker5-field'>
-			<label>observer 5</label>
-			<div data-editors="FieldWorker5"></div>
-		</div>
-		<!--<div class="masqued">
-			<div data-editors="id_site"></div>
-			<div data-editors="precision"></div>
-			<div data-editors="name_site"></div>
-		</div>  -->
-
-
-		
-	</div>
-	<br>
-  </fieldset>
-  <br><br><br>
+	</fieldset>
 </form>

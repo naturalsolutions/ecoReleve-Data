@@ -2,7 +2,6 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 
 		/*==========  Watch Tasks  ==========*/
-
 		watch: {
 			options: {
 				nospawn: true,

@@ -1,3 +1,9 @@
+/**
+
+	TODO:
+	- DbClick
+
+**/
 
 define([
 	'jquery',
@@ -196,11 +202,11 @@ define([
 			var id = parseInt($(row).find(':first-child').text());
 			var currentStation = this.grid.collection.where({ PK: id})[0];
 			this.radio.command('generateStation', currentStation);
-			$('table.backgrid tr').removeClass('backgrid-selected-row');
-			$(row).addClass('backgrid-selected-row');
+			$('table.backgrid tr').removeClass('active');
+			$(row).addClass('active');
 		},
 		navigate : function(evt){
-			//alert('double click');
+			alert('double click');
 			this.detail(evt);
 			this.radio.command('navigateNextStep');
 		}

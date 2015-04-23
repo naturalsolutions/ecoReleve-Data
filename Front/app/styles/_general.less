@@ -5,6 +5,10 @@ html, body, main{
 	font-family: 'Exo 2', sans-serif;
 }
 
+html, body{
+	background: rgba(0, 0, 0, 0.85);
+}
+
 body{
 	header{
 		display: none;
@@ -31,7 +35,67 @@ a{
 .no-padding, .ns-no-padding{
 	padding: 0px;
 }
-.ns-full-height{
+.full-height, .ns-full-height{
 	overflow: auto;
 	height: 100%;
+}
+
+
+.col-border {
+	border-right: 1px solid @gray-lighter;
+}
+
+li.list-group-item{
+	overflow: hidden;
+	cursor: pointer;
+	&.validated{
+		border: 1px solid @main-green;
+		background: @main-green;
+		color: white;
+	}
+}
+
+
+
+/*==========  scroll bar design  ==========*/
+::-webkit-scrollbar-thumb {
+	background: @gray-light;
+	width: 10px;
+	border: 1px solid #999;
+	margin: 5px;
+}
+::-webkit-scrollbar{
+	background: @gray-lighter;
+	width: 10px;
+	height: 10px;
+	margin: 5px;
+	cursor: pointer;
+}
+
+.break{
+	word-wrap : break-word;
+}
+
+.noselect {
+	cursor : pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.rotate3d{
+	transition: all .3s ease;
+	transform: perspective( 1000px ) rotateY( 90deg );
+}
+
+
+//fuck off
+#btnPrev{
+	left: -100%;
+}
+#btnNext{
+	right: -100%;
 }

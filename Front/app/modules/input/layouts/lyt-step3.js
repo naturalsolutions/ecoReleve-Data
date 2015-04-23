@@ -38,8 +38,8 @@ define([
 			'change select[name="st_FieldActivity_Name"]' : 'updateFieldActivity',
 
 			'click a.pkProtocol' : 'getProtoByPkId',
-			'click .arrow-right-station' :'nextStation',
-			'click .arrow-left-station' :'prevStation',
+			'click #arrow-right-station' :'nextStation',
+			'click #arrow-left-station' :'prevStation',
 
 			'click #addInstance'  : 'addForm',
 
@@ -100,10 +100,10 @@ define([
 						$('#formsIdList ul').html('');
 						this.getProtocol(protoName,idProto);
 						this.selectedProtoId = idProto;   
-						$('#idProtosContainer').addClass('masqued');
+						$('#idProtosContainer').addClass('hidden');
 					} else {
 						this.genInterfaceForCurrentProto(pk_list,protoName );
-						$('#idProtosContainer').removeClass('masqued');
+						$('#idProtosContainer').removeClass('hidden');
 					}
 				}
 			}
@@ -127,7 +127,7 @@ define([
 						// bug, empty method dont work
 						$('#formsContainer').html('');
 						this.activeProtcolsObj = {};
-						$('#NsFormButton').addClass('masqued');
+						$('#NsFormButton').addClass('hidden');
 					}
 				},
 				error: function(data){
@@ -281,10 +281,10 @@ define([
 			if(_.isEmpty(this.activeProtcolsObj)){
 				 this.formsRegion.empty();
 				$('#formsContainer').html('');
-				$('#NsFormButton').addClass('masqued');
+				$('#NsFormButton').addClass('hidden');
 
 			} else {
-				$('#NsFormButton').removeClass('masqued');
+				$('#NsFormButton').removeClass('hidden');
 			}
 				for(var key in this.activeProtcolsObj) {
 						var nbProtoInstances = this.activeProtcolsObj[key].PK_data.length;
@@ -314,9 +314,11 @@ define([
 
 
 
+
+
 				this.swiper = new Swiper('.swiper-container', {
 					spaceBetween: 30,
-					slidesPerView: 'auto',
+					slidesPerView: 2,
 					simulateTouch: false,
 					mousewheelControl: true,
 				});
@@ -325,11 +327,11 @@ define([
 
 				$('#proto_name-left').on('click', function(e){
 					e.preventDefault();
-					_this.swiper.swipePrev();
+					_this.swiper.slidePrev();
 				});
 				$('#proto_name-right').on('click', function(e){
 					e.preventDefault();
-					_this.swiper.swipeNext();
+					_this.swiper.slideNext();
 				});
 
 				// activate first protocol display in active protocols obj

@@ -186,26 +186,61 @@
 
 .tile-inside-container{
 	text-align: center;
+	.tile-inside{
+		display: inline-block;
+		min-height: 300px;
+		width: 250px;
+		background: @gray;
+		border-radius: 3px;
+		vertical-align: top;
+		color: white;
+		margin: 2%;
+		padding: 10px;
+		cursor: pointer;
+		&.smile{
+			min-height: 250px;
+			width: 200px;
+		}
+		.radio{
+			text-align: left;
+		}
+		&:hover{
+			background: @gray-dark;
+		}
+		.picto{
+			padding: 20px;
+			i{
+				font-size: 1.5em;
+			}
+			i:first-child{
+				font-size: 3.5em;
+			}
+		}
+	}
 }
-.tile-inside{
-	display: inline-block;
-	min-height: 300px;
-	width: 250px;
-	background: rgba(0,0,0,0.7);
-	border-radius: 3px;
-	vertical-align: top;
-	color: white;
-	margin: 2%;
-	padding: 10px;
+
+//export
+.exp-file{
 	cursor: pointer;
-	&.smile{
-		min-height: 250px;
-		width: 200px;
+	display: inline-block;
+	background: #ffffff;
+	border: 1px solid #dedede;
+	color: #cacaca!important; 
+	border-radius: 5px;
+	padding: 20px;
+	margin: 20px 50px;
+	color: white;
+	min-height: 300px;
+	transition: .1s all;
+	width: 20%;
+	&.active{
+		background: #39b34a;
+		color: white!important;
 	}
-	.radio{
-		text-align: left;
+	label{
+		cursor: pointer;
 	}
-	&:hover{
-		background: rgba(0,0,0,0.9);
+	i.icon{
+		font-size: 10em!important; 
 	}
 }
