@@ -12231,6 +12231,9 @@ div.fuelux .step-content .step-pane div.wrapper {
 #stepper .wizard .incorrect {
   border-bottom: 2px solid #f89406;
 }
+.export-layout .step-pane {
+  display: none;
+}
 /*==========  base  ==========*/
 .login-page {
   background: #000;
