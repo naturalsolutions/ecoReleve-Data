@@ -54,7 +54,7 @@ Install those packages with `pip` or `conda` :
 - pandas=0.15.0
 
 Then run the setup install : 
-	- `python setup.py install`
+- `python setup.py install`
 
 
 ## Technolgies && Usage
