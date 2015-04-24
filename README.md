@@ -27,6 +27,8 @@ The data entry forms are fully customizable to allow users to design their own p
 
  - [Node.js](https://nodejs.org/) (for [npm](https://www.npmjs.com/))
  - [bower](http://bower.io/) `npm install -g bower`
+ - [python3.4](https://www.python.org/download/releases/3.4.0/) (for Windows you can install [miniconda3.4](http://conda.pydata.org/miniconda.html))
+
 
 *Verify that node is in your PATH*
 
@@ -41,7 +43,18 @@ optional but recommended :
 - `grunt build`
 
 #### Back
--
+
+Install those packages with `pip` or `conda` :
+
+- pyodbc (for SQL Server database) or psycopg2 (for PostrgreSQL database)
+- reportlab
+- [scikit-learn](http://scikit-learn.org/stable/)
+- [sqlalchemy](http://www.sqlalchemy.org/)
+- zope.interface
+- pandas=0.15.0
+
+Then run the setup install : 
+- `python setup.py install`
 
 
 ## Technolgies && Usage
@@ -71,13 +84,24 @@ optional but recommended :
 
 ### Back
 
+ >[Pyramid](http://docs.pylonsproject.org/projects/pyramid/en/latest/)
+ >[SQLAlchemy](http://www.sqlalchemy.org/)
+
+You have to configure the [development.ini](https://github.com/NaturalSolutions/ecoReleve-Data-refact/tree/master/Back/development.ini.default) which can be found in the [Back folder](https://github.com/NaturalSolutions/ecoReleve-Data-refact/tree/master/Back/)
+And run `pserve development.ini` command in order to launch Pyramid server.
+
+
 ## Test && Quality
 
 
 
 ## Workflow && Contribution
 
+For this project, Natural Solutions (NS) is based upon the collaborative development process of Git. That means we use the process of creation of new branches for new functionalities or issues and we use the merge process from Github with his “pull request” system. 
 
+To contributing at this project you have to fork it into your own Git repository. If you want to fix an issue or develop/improve a new functionality, you have to create a new branch on you Git repo. When the task is done you can send a “pull request” to the NS repo and your request will be reviewed and commented by other contributors. Finally, if it’s all good your pull request is accepted and merged.
+
+![gitWorkflow](http://img11.hostingpics.net/pics/424731gitflow.png)
 
 ## Demo
 
