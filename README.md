@@ -44,13 +44,14 @@ optional but recommended :
 
 #### Back
 
-Install those package with `pip` or `conda` :
+Install those packages with `pip` or `conda` :
 
 - pyodbc (for SQL Server database) or psycopg2 (for PostrgreSQL database)
 - reportlab
 - [scikit-learn](http://scikit-learn.org/stable/)
 - [sqlalchemy](http://www.sqlalchemy.org/)
 - zope.interface
+- pandas=0.15.0
 
 Then run the setup install : 
 	- `python setup.py install`
