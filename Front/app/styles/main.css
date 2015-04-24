@@ -11315,6 +11315,9 @@ body.app main {
 body.app header {
   display: block;
 }
+.container {
+  height: 100%;
+}
 a {
   cursor: pointer;
 }
@@ -11333,6 +11336,9 @@ a:visited {
 .ns-full-height {
   overflow: auto;
   height: 100%;
+}
+.ns-mid-height {
+  height: 50%;
 }
 .col-border {
   border-right: 1px solid #eeeeee;
@@ -11375,12 +11381,6 @@ li.list-group-item.validated {
 .rotate3d {
   transition: all .3s ease;
   transform: perspective(1000px) rotateY(90deg);
-}
-#btnPrev {
-  left: -100%;
-}
-#btnNext {
-  right: -100%;
 }
 /*==========  UI  ==========*/
 /* approx.. */
@@ -12250,7 +12250,7 @@ div.fuelux .step-content .step-pane div.wrapper {
   color: white;
 }
 .app {
-  background: url(img/bg-home.jpg) center center no-repeat;
+  background: url(img/bg-test.jpg) center center no-repeat;
   background-position: center;
   background-attachment: fixed;
   background-size: cover;

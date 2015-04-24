@@ -10,7 +10,7 @@ function(Marionette) {
 		animateIn: function() {
 			this.$el.removeClass('zoomOutDown');
 
-			this.$el.addClass('zoomInUp');
+			this.$el.addClass('zoomInDown');
 
 			this.$el.animate(
 				{ opacity: 1 },

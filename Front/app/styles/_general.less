@@ -23,6 +23,10 @@ body{
 	}
 }
 
+.container{
+	height: 100%;
+}
+
 a{
 	cursor: pointer;
 	&:hover, &:focus, &:visited{
@@ -35,11 +39,13 @@ a{
 .no-padding, .ns-no-padding{
 	padding: 0px;
 }
-.full-height, .ns-full-height{
+.full-height, .ns-full-height, {
 	overflow: auto;
 	height: 100%;
 }
-
+.ns-mid-height{
+	height: 50%;
+}
 
 .col-border {
 	border-right: 1px solid @gray-lighter;
@@ -93,9 +99,9 @@ li.list-group-item{
 
 
 //fuck off
-#btnPrev{
-	left: -100%;
-}
-#btnNext{
-	right: -100%;
-}
+// #btnPrev{
+// 	left: -100%;
+// }
+// #btnNext{
+// 	right: -100%;
+// }

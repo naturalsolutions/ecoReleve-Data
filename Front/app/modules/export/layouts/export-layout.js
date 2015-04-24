@@ -16,7 +16,6 @@ define([
 	'../views/step5',
 
 	'fuelux'
-
 ], function(
 	Marionette, Radio,
 	Step1, Step2_Filters, Step2_Map, Step3_Map, Step4_Columns, Step4_Preview, Step5
@@ -29,15 +28,11 @@ define([
 
 		regions: {
 			step_1_Container: '#step1',
-
 			step_2_Filters_Container: '#step2-filters',
 			step_2_Map_Container: '#step2-map',
-
 			step_3_Map_Container: '#step3-map',
-
 			step_4_Columns_Container: '#step4-columns',
 			step_4_Preview_Container: '#step4-preview',
-
 			step_5_Container: '#step5',
 		},
 
@@ -222,22 +217,16 @@ define([
 					this.$el.find('#btnNext').addClass('finished').find( 'span'
 						).html('Export').parent().find('.icon').removeClass('rightarrow').addClass('import');
 						$('#btnNext').removeAttr('disabled');
-					break;
-
+					break;q
 				default:
-
 					break;
-
 			}
 		},
 
 		finish: function() {
 			this.finished = true;
-		this.lastStep.initFile();
-		this.finished = false;
-
-
-
+			this.lastStep.initFile();
+			this.finished = false;
 		},
 
 

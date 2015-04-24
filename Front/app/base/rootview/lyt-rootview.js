@@ -14,7 +14,5 @@ function(Marionette, TransitionRegion) {
 			}),
 			rgFooter: 'footer'
 		},
-
-
 	});
 });
