@@ -6,18 +6,24 @@
 **/
 define(['jquery', 'marionette', 'backbone', 'config', './base/login/lyt-login', './base/header/lyt-header'],
 function($, Marionette, Backbone, config, LytLogin, LytHeader){
+
+
 	'use strict';
 	return Marionette.AppRouter.extend({
 		appRoutes: {
+
 			'input(/)' : 'input',
+			'export(/)' : 'export',
+
 			'*route(/:page)': 'home',
 		},
 
-		execute: function(callback, args)
-		{
+		execute: function(callback, args){
 			$.ajax({
+				
 				context: this,
 				url: config.coreUrl + 'security/has_access'
+
 			}).done( function() {
 
 				$('body').addClass('app');
@@ -32,15 +38,12 @@ function($, Marionette, Backbone, config, LytLogin, LytHeader){
 				Backbone.history.navigate('login', {trigger: true});
 
 			});
-
 		},
 
 		insertHeader: function(){
-
 			if(!this.options.controller.rgHeader.hasView()){
 				this.options.controller.rgHeader.show( new LytHeader());
 			}
-
 		},
 
 	});

@@ -58,7 +58,6 @@ define([
 			this.sites = new MonitoredSites();
 			this.listenTo(this.sites, 'reset', this.updateName); 
 			var stationType = this.model.get('start_stationtype');
-			console.log(stationType);
 			if(stationType =='new' ||  stationType =='newSc' ||  stationType =='newSt'){
 				$('#btnPrev').css('display','');
 				var stationForm = new StationView();
@@ -77,9 +76,9 @@ define([
 					zoom : 8,
 					element: 'map',
 				});
-				// this.rightRegion.show(this.map);
+
 				this.map.init();
-				// this.map.addMarker(false, 33.06, -3.96);
+				this.map.addMarker(false, 33.06, -3.96);
 				
 				
 
@@ -101,12 +100,12 @@ define([
 				this.leftRegion.show(new FilterView({model:this.model}));
 				this.rightRegion.show(new GridView({model:this.model}));
 				if (stationType =='old') {
-					//$('#allSt-Monitored').addClass('masqued');
-					$('#allSt-Monitored').addClass('masqued');
-					//$('#st-station').removeClass('masqued');
-					$('#allSt-SitesNameCont').addClass('masqued');
+					//$('#allSt-Monitored').addClass('hidden');
+					$('#allSt-Monitored').addClass('hidden');
+					//$('#st-station').removeClass('hidden');
+					$('#allSt-SitesNameCont').addClass('hidden');
 				} else {
-					$('.allSt-name').addClass('masqued');
+					$('.allSt-name').addClass('hidden');
 				}
 				$('#stepper-header span').text('old stations');
 			}
@@ -150,18 +149,17 @@ define([
 
 					this.features = features;
 
-					// this.map = new NsMap({
-					// 	com: this.com,
-					// 	cluster: true,
-					// 	popup: true,
-					// 	selection :false,
-					// 	geoJson: this.features,
-					// 	element: 'map'
-					// });
+					this.map = new NsMap({
+						com: this.com,
+						cluster: true,
+						popup: true,
+						selection :false,
+						geoJson: this.features,
+						element: 'map'
+					});
 
-					// this.rightRegion.show(this.map);
-					// this.map.init();
-					// //map.addCollection(lastImportedStations);
+					this.map.init();
+					map.addCollection(lastImportedStations);
 				} else {
 					// no stored waypoints
 					$('#inputStLeft').html('<h4> there is not stored imported waypoints, please use import module to do that. </h4>');
@@ -213,9 +211,9 @@ define([
 		updateStationType : function(value){
 			if(value == "new"){
 				// station with coordinates
-				$('#stRegion').addClass('masqued');
-				$('#stMonitoredSite').addClass('masqued');
-				$('#stCoordinates').removeClass('masqued');
+				$('#stRegion').addClass('hidden');
+				$('#stMonitoredSite').addClass('hidden');
+				$('#stCoordinates').removeClass('hidden');
  
 				for(var key in this.stepAttributes) {
 					var field = this.stepAttributes[key];
@@ -230,9 +228,9 @@ define([
 				$('#stepper-header span').text('New station with coordinates');
 
 			} else if(value == "newSc"){
-				$('#stRegion').removeClass('masqued');
-				$('#stCoordinates').addClass('masqued');
-				$('#stMonitoredSite').addClass('masqued');
+				$('#stRegion').removeClass('hidden');
+				$('#stCoordinates').addClass('hidden');
+				$('#stMonitoredSite').addClass('hidden');
 
 				for(var key in this.stepAttributes) {
 					var field = this.stepAttributes[key];
@@ -247,9 +245,9 @@ define([
 				$('#stepper-header span').text('New station without coordinates');
 			}
 			else {
-				$('#stMonitoredSite').removeClass('masqued');
-				$('#stRegion').addClass('masqued');
-				$('#stCoordinates').addClass('masqued');
+				$('#stMonitoredSite').removeClass('hidden');
+				$('#stRegion').addClass('hidden');
+				$('#stCoordinates').addClass('hidden');
 				for(var key in this.stepAttributes) {
 					var field = this.stepAttributes[key];
 					if(field.name =='station_id_site' || field.name =='station_type_site'){
@@ -525,7 +523,7 @@ define([
 				$('#inputImpStFieldContainer p').text('');
 				if(!model.get('FieldActivity_Name')){
 					// display field activity container
-					$('#inputImpStFieldContainer').removeClass('masqued');
+					$('#inputImpStFieldContainer').removeClass('hidden');
 						/* if ( $('#impfieldActivity option').length == 1) {
 							var fieldList = getFieldActivity.getElements('theme/list');
 							$('#impfieldActivity').append(fieldList);
@@ -535,7 +533,7 @@ define([
 						$('#inputImpStFieldContainer p').text('');*/
 						$('#btnNext').addClass('disabled');
 				} else {
-					$('#inputImpStFieldContainer').addClass('masqued');
+					$('#inputImpStFieldContainer').addClass('hidden');
 					// activate next step
 					$('#btnNext').removeClass('disabled');
 				}
@@ -595,10 +593,12 @@ define([
 			var nbInsertedWorkersFields = parseInt($(stFieldWorkers).attr('insertedWorkersNb'));
 			if (nbInsertedWorkersFields < 5){
 				var nbFdW = nbInsertedWorkersFields + 1;
-				// element to show ( masqued by default)
+				// element to show ( hidden by default)
 				var ele = '#FieldWorker' + nbFdW + '-field';
-				$(ele).removeClass('masqued');
-				$('#removeFieldWorkerInput').removeClass('masqued');
+				$(ele).removeClass('hidden');
+
+				
+				$('#removeFieldWorkerInput').removeClass('hidden');
 				// update stored value for nb displayed fields 
 				$(stFieldWorkers).attr('insertedWorkersNb', nbFdW);
 			}
@@ -607,14 +607,14 @@ define([
 			var stFieldWorkers = $('#station-fieldWorkers');
 			var actualFDNumber = parseInt($(stFieldWorkers).attr('insertedworkersnb'));
 			//var nbFdW = actualFDNumber + 1;
-				// element to show ( masqued by default)
+				// element to show ( hidden by default)
 			var ele = '#FieldWorker' + actualFDNumber + '-field';
 			var fieldFW = 'FieldWorker' + actualFDNumber;
 			$('select[name="' + fieldFW + '"]').val('');
-			$(ele).addClass('masqued');
+			$(ele).addClass('hidden');
 			$(stFieldWorkers).attr('insertedworkersnb',(actualFDNumber -1));
 			if (actualFDNumber == 2){
-				$('#removeFieldWorkerInput').addClass('masqued');
+				$('#removeFieldWorkerInput').addClass('hidden');
 			}
 			$('input[name="NbFieldWorker"').val(actualFDNumber -1);
 		},

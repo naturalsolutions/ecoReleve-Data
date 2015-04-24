@@ -37,11 +37,12 @@ require.config({
 		'backbone.babysitter'	: '../bower_components/backbone.babysitter/lib/backbone.babysitter',
 		'backbone.wreqr'		: '../bower_components/backbone.wreqr/lib/backbone.wreqr',
 		'radio'					: '../bower_components/backbone.radio/build/backbone.radio',
+		'bootstrap'				: '../bower_components/bootstrap/dist/js/bootstrap',
 		'sha1'					: '../bower_components/sha1/bin/sha1',
 		'sweetAlert'			:'../bower_components/sweetalert/lib/sweet-alert.min',
 		'moment'				: '../bower_components/moment/min/moment.min',
 		'dateTimePicker'		: '../bower_components/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker',
-		'backbone_forms'		: '../bower_components/backbone-forms/distribution.amd/backbone-forms.min',
+		'backbone_forms'		: '../bower_components/backbone-forms/distribution.amd/backbone-forms',
 		'backbone.paginator'	: '../bower_components/backbone.paginator/lib/backbone.paginator.min',
 
 		'backgridSelect_all'	:'../bower_components/backgrid-select-all/backgrid-select-all.min',
@@ -53,6 +54,10 @@ require.config({
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
 		'backgrid.paginator'	: 'vendors/backgrid-paginator',
+
+		//temporary
+
+		'fuelux'	: '../bower_components/fuelux/dist/js/fuelux',
 	},
 
 	shim : {
@@ -74,6 +79,10 @@ require.config({
 		},
 		radio : {
 			exports : 'Radio'
+		},
+		bootstrap: {
+			deps: ['jquery'],
+			exports : 'Bootstrap'
 		},
 		templates :{
 			deps : ['underscore'],
@@ -130,7 +139,10 @@ require.config({
 			deps:['fancytree'],
 			exports : 'AutocompTree'
 		},
-
+		fuelux:{
+			deps:['jquery','bootstrap'],
+			exports: 'Fuelux'
+		},
 
 	},
 });

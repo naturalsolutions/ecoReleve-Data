@@ -173,7 +173,10 @@ define([
 			$(formContent).find('select').addClass('form-control');
 			$(formContent).find('textarea').addClass('form-control');
 			$('#' + this.formRegion).html(this.BBForm.el);
-			$('#' + this.buttonRegion).html(this.template);
+
+
+			var html = Marionette.Renderer.render(this.template);
+			$('#' + this.buttonRegion).html(html);
 			this.radio.command('updateForm');
 			this.displaybuttons();
 			this.createAutocompTree();

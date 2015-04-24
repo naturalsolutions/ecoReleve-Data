@@ -38,8 +38,8 @@ define([
 			});
 			this.com = options.com;
 			if(options.com){
-			  this.com = options.com;   
-			  this.com.addModule(this);
+				this.com = options.com;
+				this.com.addModule(this);
 			}
 			this.locations = new Locations();
 			// add each model of the view collection to the pageableCollection
@@ -58,8 +58,8 @@ define([
 				var idNumber = Number(id);
 				var currentModel = this.locations.findWhere({PK: idNumber});
 				// unselect rows and select clicked row
-				$('table.backgrid tr').removeClass('backgrid-selected-row');
-				$(tr).addClass('backgrid-selected-row');
+				$('table.backgrid tr').removeClass('active');
+				$(tr).addClass('active');
 				Radio.channel('input').command('updateMap', currentModel);
 				Radio.channel('input').command('generateStation', currentModel);
 				$('#btnNext').removeClass('disabled');
@@ -116,6 +116,7 @@ define([
 			];
 			// Initialize a new Grid instance
 			this.grid = new Backgrid.Grid({
+				className: 'table',
 				columns: columns,
 				collection: this.locations
 			});

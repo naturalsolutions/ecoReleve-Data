@@ -191,12 +191,12 @@ define([
 			if (stationType =='Name'){
 				this.filter.siteName.Value = null;
 				//this.filter.siteName = null;
-				$('#stMonitoredSiteName').addClass('masqued');
-				$('#st-station').removeClass('masqued');
+				$('#stMonitoredSiteName').addClass('hidden');
+				$('#st-station').removeClass('hidden');
 			} else {
 				this.filter.Name = null;
-				$('#stMonitoredSiteName').removeClass('masqued');
-				$('#st-station').addClass('masqued');
+				$('#stMonitoredSiteName').removeClass('hidden');
+				$('#st-station').addClass('hidden');
 			}
 		},
 	   updateSiteName : function(e){

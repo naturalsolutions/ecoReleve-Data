@@ -83,7 +83,7 @@ define([
 			// mask name site row if value is null
 			var siteName = this.model.get('id_site');
 			if(!siteName){
-				$('#stNameSite').addClass('masqued');
+				$('#stNameSite').addClass('hidden');
 			}
 		},
 		checkAccuracyValue : function(){
