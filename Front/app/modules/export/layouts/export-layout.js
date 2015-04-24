@@ -24,7 +24,7 @@ define([
 
 	return Marionette.LayoutView.extend({
 		template: 'app/modules/export/templates/export.html',
-		className: 'full-height animated',
+		className: 'full-height',
 
 		regions: {
 			step_1_Container: '#step1',
@@ -71,6 +71,8 @@ define([
 				1000
 			);
 
+			this.$el.find('#importWizard').addClass('animated');
+
 			this.$el.find('#importWizard').addClass('slideInDown');
 			this.$el.find('#importWizard').removeClass('hidden');
 
@@ -83,6 +85,8 @@ define([
 
 		// Same as above, except this time we trigger 'animateOut'
 		animateOut: function() {
+			this.$el.find('#importWizard').addClass('animated');
+			
 			this.$el.find('#btnPrev').animate(
 				{ left : '-100%'},
 				1000

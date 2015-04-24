@@ -44,19 +44,18 @@ require.config({
 		'dateTimePicker'		: '../bower_components/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker',
 		'backbone_forms'		: '../bower_components/backbone-forms/distribution.amd/backbone-forms',
 		'backbone.paginator'	: '../bower_components/backbone.paginator/lib/backbone.paginator.min',
-
-		'backgridSelect_all'	:'../bower_components/backgrid-select-all/backgrid-select-all.min',
 		'L'						: '../bower_components/leaflet/dist/leaflet',
 		'leaflet_cluster'		: '../bower_components/leaflet.markercluster/dist/leaflet.markercluster',
 		'leaflet_google'		: '../bower_components/leaflet-plugins/layer/tile/Google',
 		'swiper'				: '../bower_components/swiper/dist/js/swiper',
 		'simplePagination'		: '../bower_components/simplePagination.js/jquery.simplePagination',
+		'dropzone'		: '../bower_components/dropzone/dist/dropzone',
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
 		'backgrid.paginator'	: 'vendors/backgrid-paginator',
+		'backgridSelect_all'	:'vendors/backgrid-select-all',
 
 		//temporary
-
 		'fuelux'	: '../bower_components/fuelux/dist/js/fuelux',
 	},
 
@@ -110,8 +109,7 @@ require.config({
 			exports: 'backgrid.paginator',
 		},
 		backgridSelect_all : {
-			deps:['backgrid'],
-			exports : 'backgridSelect_all'
+			exports : 'BackgridSelect_all'
 		},
 		leaflet_cluster : {
 			deps:['L'],
@@ -143,7 +141,10 @@ require.config({
 			deps:['jquery','bootstrap'],
 			exports: 'Fuelux'
 		},
-
+		dropzone : {
+			deps: ['jquery'],
+			exports : 'Dropzone'
+		}
 	},
 });
 

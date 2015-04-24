@@ -7,6 +7,7 @@ define(['marionette', 'config',
 	/*==========  modules  ==========*/
 	'./modules/input/layouts/lyt-input',
 	'./modules/export/layouts/export-layout',
+	'./modules/import/layouts/lyt-import-gpx',
 
 
 ],function( Marionette, config, 
@@ -15,7 +16,8 @@ define(['marionette', 'config',
 
 	/*==========  modules  ==========*/
 	LytInput,
-	LytExport
+	LytExport,
+	LytImport
 
 ){
 
@@ -38,6 +40,10 @@ define(['marionette', 'config',
 
 		export: function(){
 			this.rgMain.show(new LytExport());
+		},
+
+		import: function(){
+			this.rgMain.show(new LytImport());
 		},
 
 	});

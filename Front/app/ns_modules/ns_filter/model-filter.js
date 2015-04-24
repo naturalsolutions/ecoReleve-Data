@@ -4,10 +4,10 @@ define([
 	'backbone',
 	'config',
 	'radio',
-	'bbForms',
+	'backbone_forms',
 	'moment',
-	'text!filter/tpl-filters.html',
 
+	
 
 ], function($, _, Backbone, config, Radio, BbForms, moment, tpl){
 	'use strict';
@@ -64,6 +64,7 @@ define([
 
 		initFilters: function(data){
 			var form;
+
 			for(var key in data){
 
 				 form = this.initFilter(data, key);
@@ -110,19 +111,20 @@ define([
 				},
 				defaults: {
 					Column : fieldName,
-				}  
+				}
 			});
 
 
 			var mod = new md();
 
+			var tpl = Marionette.Renderer.render('app/ns_modules/ns_filter/tpl-filters.html', {filterName: key});
+
 			form = new BbForms({
 				template: _.template(tpl),
 				model: mod,
 				data: {
-				  Column: key,
+					Column: key,
 				},
-				templateData: {filterName: key}
 			}).render();
 
 			return form;

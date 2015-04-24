@@ -1,6 +1,5 @@
 define([
 	'ns_stepper/lyt-stepperOrchestrator',
-	//'stepper/lyt-stepperOrchestrator',
 
 ], function(StepperOrchestrator) {
 
