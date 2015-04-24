@@ -101,7 +101,7 @@ For this project, Natural Solutions (NS) is based upon the collaborative develop
 
 To contributing at this project you have to fork it into your own Git repository. If you want to fix an issue or develop/improve a new functionality, you have to create a new branch on you Git repo. When the task is done you can send a “pull request” to the NS repo and your request will be reviewed and commented by other contributors. Finally, if it’s all good your pull request is accepted and merged.
 
-![gitWorkflow](http://www.hostingpics.net/viewer.php?id=424731gitflow.png)
+![gitWorkflow](http://img11.hostingpics.net/pics/424731gitflow.png)
 
 ## Demo
 
