@@ -2,7 +2,6 @@ EcoReleve-Data
 ========================
 
 
-
 A free and open source biodiversity data entry software
 
 Ecologists have struggled with environmental data management issues for many years now. It has become urgent to focus on building the technological solutions required for a more efficient process of data collection, exchange, and analysis.
@@ -21,7 +20,9 @@ The data entry forms are fully customizable to allow users to design their own p
 
 ## Features
 
+
 ## Instalation
+
 
 ### Requirements
 
@@ -53,7 +54,7 @@ Install those packages with `pip` or `conda` :
 - zope.interface
 - pandas=0.15.0
 
-Then run the setup install : 
+Run the setup install : 
 - `python setup.py install`
 
 
@@ -87,23 +88,35 @@ Then run the setup install :
  >[Pyramid](http://docs.pylonsproject.org/projects/pyramid/en/latest/)
  >[SQLAlchemy](http://www.sqlalchemy.org/)
 
+
 You have to configure the [development.ini](https://github.com/NaturalSolutions/ecoReleve-Data-refact/tree/master/Back/development.ini.default) which can be found in the [Back folder](https://github.com/NaturalSolutions/ecoReleve-Data-refact/tree/master/Back/)
-And run `pserve development.ini` command in order to launch Pyramid server.
+Run `pserve development.ini` command in order to launch a Pyramid server.
 
+#### Database configuaration
 
-## Test && Quality
+## Quality && Test
 
+### Style Guide
 
+### Test
 
 ## Workflow && Contribution
 
-For this project, Natural Solutions (NS) is based upon the collaborative development process of Git. That means we use the process of creation of new branches for new functionalities or issues and we use the merge process from Github with his “pull request” system. 
-
-To contributing at this project you have to fork it into your own Git repository. If you want to fix an issue or develop/improve a new functionality, you have to create a new branch on you Git repo. When the task is done you can send a “pull request” to the NS repo and your request will be reviewed and commented by other contributors. Finally, if it’s all good your pull request is accepted and merged.
+Natural Solutions (NS) is based upon the collaborative development process of Git/GitHub.
 
 ![gitWorkflow](http://img11.hostingpics.net/pics/424731gitflow.png)
 
+If you want to contribute on this project, please create a new pull request :
+1. Fork the repository into your own GitHub repository in order to work on this one,
+2. Then create a new branch first,
+3. Finally, send a pull request to the [main repository](https://github.com/NaturalSolutions/ecoReleve-Data-refact/) when the task is ready for review.
+4. When the pull request received at least one validation comment from an owner member of the repository, it will be merge to this one.
+
+Thank you!
+
+
 ## Demo
+
 
 ## Commercial Support
 
