@@ -25,6 +25,7 @@
     "simplePagination.js": "https://github.com/flaviusmatis/simplePagination.js.git",
     "fuelux": "~3.7.0",
     "animate.css": "https://github.com/daneden/animate.css.git#~3.2.6",
-    "dropzone": "~4.0.1"
+    "dropzone": "~4.0.1",
+    "fancytree": "~2.9.0"
   }
 }

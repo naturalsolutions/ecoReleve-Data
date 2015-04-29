@@ -5,9 +5,9 @@ define(['marionette', 'config',
 
 
 	/*==========  modules  ==========*/
-	'./modules/input/layouts/lyt-input',
 	'./modules/export/layouts/export-layout',
 	'./modules/import/layouts/lyt-import-gpx',
+	'./modules/input/layouts/lyt-input',
 
 
 ],function( Marionette, config, 
@@ -15,9 +15,9 @@ define(['marionette', 'config',
 	LytHome,
 
 	/*==========  modules  ==========*/
-	LytInput,
 	LytExport,
-	LytImport
+	LytImport,
+	LytInput
 
 ){
 
