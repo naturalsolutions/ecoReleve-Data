@@ -1,6 +1,7 @@
 EcoReleve-Data
 ========================
 
+[![Join the chat at https://gitter.im/NaturalSolutions/ecoReleve-Data](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/NaturalSolutions/ecoReleve-Data?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
 A free and open source biodiversity data entry software
@@ -21,12 +22,16 @@ The data entry forms are fully customizable to allow users to design their own p
 
 ## Features
 
+
 ## Instalation
+
 
 ### Requirements
 
  - [Node.js](https://nodejs.org/) (for [npm](https://www.npmjs.com/))
  - [bower](http://bower.io/) `npm install -g bower`
+ - [python3.4](https://www.python.org/download/releases/3.4.0/) (for Windows you can install [miniconda3.4](http://conda.pydata.org/miniconda.html))
+
 
 *Verify that node is in your PATH*
 
@@ -41,7 +46,18 @@ optional but recommended :
 - `grunt build`
 
 #### Back
--
+
+Install those packages with `pip` or `conda` :
+
+- pyodbc (for SQL Server database) or psycopg2 (for PostrgreSQL database)
+- reportlab
+- [scikit-learn](http://scikit-learn.org/stable/)
+- [sqlalchemy](http://www.sqlalchemy.org/)
+- zope.interface
+- pandas=0.15.0
+
+Run the setup install : 
+- `python setup.py install`
 
 
 ## Technolgies && Usage
@@ -71,15 +87,38 @@ optional but recommended :
 
 ### Back
 
-## Test && Quality
+ >[Pyramid](http://docs.pylonsproject.org/projects/pyramid/en/latest/)
+ >[SQLAlchemy](http://www.sqlalchemy.org/)
 
 
+You have to configure the [development.ini](https://github.com/NaturalSolutions/ecoReleve-Data-refact/tree/master/Back/development.ini.default) which can be found in the [Back folder](https://github.com/NaturalSolutions/ecoReleve-Data-refact/tree/master/Back/)
+Run `pserve development.ini` command in order to launch a Pyramid server.
+
+#### Database configuaration
+
+## Quality && Test
+
+### Style Guide
+
+### Test
 
 ## Workflow && Contribution
 
+Natural Solutions (NS) is based upon the collaborative development process of Git/GitHub.
+
+![gitWorkflow](http://img11.hostingpics.net/pics/424731gitflow.png)
+
+If you want to contribute on this project, please create a new pull request :
+1. Fork the repository into your own GitHub repository in order to work on this one,
+2. Then create a new branch first,
+3. Finally, send a pull request to the [main repository](https://github.com/NaturalSolutions/ecoReleve-Data-refact/) when the task is ready for review.
+4. When the pull request received at least one validation comment from an owner member of the repository, it will be merge to this one.
+
+Thank you!
 
 
 ## Demo
+
 
 ## Commercial Support
 

@@ -14,6 +14,7 @@ function($, Marionette, Backbone, config, LytLogin, LytHeader){
 
 			'input(/)' : 'input',
 			'export(/)' : 'export',
+			'import(/)' : 'import',
 
 			'*route(/:page)': 'home',
 		},
