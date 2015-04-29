@@ -66,6 +66,9 @@
 {
 	cursor: not-allowed;
 	background-color: rgba(0,0,0,0.5)!important;
+	&:hover{
+		opacity: 1;
+	}
 }
 
 
@@ -184,6 +187,53 @@
 }
 
 
+.tile-inside{
+	display: inline-block;
+	min-height: 300px;
+	width: 250px;
+	background: rgba(0,0,0,0.7);
+	border-radius: 3px;
+	vertical-align: top;
+	color: white;
+	margin: 2%;
+	padding: 10px;
+	cursor: pointer;
+	&.smile{
+		min-height: 250px;
+		width: 200px;
+	}
+	.radio{
+		text-align: left;
+	}
+	&:hover{
+		background: rgba(0,0,0,0.9);
+	}
+}
+
+.echapment{
+	height: 100%;
+	overflow: auto;
+}
+
+
+.manual-tle{
+	padding: 20px;
+	margin: 20px 50px;
+	color: white;
+	min-height: 300px;
+	min-width: 200px;
+	transition: .3s all;
+	&:hover{
+		background: rgba(0,0,0,0.7)
+	}
+	i:not(.huge){
+		font-size: 25px;
+	}
+
+}
+
+
+
 .tile-inside-container{
 	text-align: center;
 	.tile-inside{
@@ -219,6 +269,39 @@
 	}
 }
 
+
+.manual-tile-import{
+	text-align: center;
+	color: white;
+	height: 250px;
+	transition: .3s all;
+	position: relative;
+	.radio{
+		position: absolute;
+		bottom: 20px;
+		right: 0;
+		left: 0;
+		text-align: center!important;
+		label{
+			padding: 0px;
+		}
+		input{
+			position: relative;
+			margin: 0px;
+			margin-top: 10px;
+
+		}
+	}
+	&.disable{
+		opacity: .6;
+		&:hover{
+			//background: rgba(0,0,0,0.7);
+			cursor: not-allowed;
+		}
+	}
+}
+
+
 //export
 .exp-file{
 	cursor: pointer;
@@ -244,3 +327,7 @@
 		font-size: 10em!important; 
 	}
 }
+
+
+
+

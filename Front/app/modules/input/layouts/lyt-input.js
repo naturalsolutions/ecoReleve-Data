@@ -28,7 +28,7 @@ define([
 		===================================================*/
 
 		template: 'app/modules/input/templates/tpl-entry.html',
-		className: 'ns-full-height',
+		className: 'ns-full-height animated',
 
 		regions: {
 			stepperRegion : '#stepper',
@@ -81,8 +81,43 @@ define([
 			});
 
 			this.stepperRegion.show( this.stepper );
-
 		},
+
+		animateIn: function() {
+			this.$el.find('#btnPrev').animate(
+				{ left : '0'},
+				1000
+			);
+			this.$el.find('#btnNext').animate(
+				{ right : '0' },
+				1000
+			);
+			this.$el.find('#wizard').addClass('slideInDown');
+			
+			this.$el.animate(
+				{ opacity: 1 },
+				500,
+				_.bind(this.trigger, this, 'animateIn')
+			);
+		},
+		animateOut: function() {
+			this.$el.find('#btnPrev').animate(
+				{ left : '-100%'},
+				1000
+			);
+			this.$el.find('#btnNext').animate(
+				{ right : '-100%' },
+				1000
+			);
+			this.$el.find('#wizard').addClass('zoomOutDown');
+			this.$el.animate(
+				{ opacity : 0 },
+				500,
+				_.bind(this.trigger, this, 'animateOut')
+			);
+		},
+
+
 		onShow : function(){
 
 			// add indiv window container
