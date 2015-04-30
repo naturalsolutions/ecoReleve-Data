@@ -44,7 +44,7 @@ require.config({
 		'dateTimePicker'		: '../bower_components/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker',
 		'backbone_forms'		: '../bower_components/backbone-forms/distribution.amd/backbone-forms',
 		'backbone.paginator'	: '../bower_components/backbone.paginator/lib/backbone.paginator.min',
-
+		'requirejs-text'		: '../bower_components/text/text',
 		'backgridSelect_all'	:'../bower_components/backgrid-select-all/backgrid-select-all.min',
 		'L'						: '../bower_components/leaflet/dist/leaflet',
 		'leaflet_cluster'		: '../bower_components/leaflet.markercluster/dist/leaflet.markercluster',
@@ -59,6 +59,14 @@ require.config({
 
 		'fuelux'	: '../bower_components/fuelux/dist/js/fuelux',
 	},
+
+	packages: [
+	    {
+	        name: 'NaturalJS-Form',
+	        location: '../bower_components/NaturalJS-Form',
+	        main: 'NsFormsModule'
+	    },
+	],
 
 	shim : {
 		jquery : {

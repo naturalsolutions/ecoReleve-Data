@@ -10,7 +10,7 @@ define([
 
     return Marionette.LayoutView.extend({
 
-        template: 'app/Demo/tpl-Obs.html',
+        template: 'app/Demo/tpl-Sta.html',
         nsform: null,
         nsgrid: null,
         model: null,
@@ -38,8 +38,8 @@ define([
             this.nsform = new NsForm({
                 name: 'StaForm',
                 modelurl: '/ecoReleve-Core/stations/',
-                buttonRegion: ['ObsFormButton'],
-                formRegion: 'ObsForm',
+                buttonRegion: ['StaFormButton'],
+                formRegion: 'StaForm',
                 displayMode: this.displayMode,
                 objecttype: options.objtype,
                 id: this.id,

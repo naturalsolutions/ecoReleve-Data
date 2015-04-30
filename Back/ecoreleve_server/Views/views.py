@@ -65,8 +65,6 @@ def getStation(request):
 def setStation(request):
     print('***********************PUT*****************')
     data = request.json_body
-    #ModuleName = request.params['FormName']
-    #curObs = DBSession.query(Observation).get(data['ID'])
     curObs = DBSession.query(Station).get(data['id'])
     curObs.UpdateFromJson(data)
     

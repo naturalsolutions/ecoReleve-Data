@@ -74,6 +74,7 @@ class ProtocoleType(Base,ObjectTypeWithDynProp):
     ID = Column(Integer,Sequence('ProtocoleType__id_seq'), primary_key=True)
     Name = Column(Unicode(250))
     Status = Column(Integer)
+    OriginalId = Column(Unicode(250))
     ProtocoleType_ObservationDynProps = relationship('ProtocoleType_ObservationDynProp',backref='ProtocoleType')
     Observations = relationship('Observation',backref='ProtocoleType')
 

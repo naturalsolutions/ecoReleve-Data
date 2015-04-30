@@ -48,7 +48,7 @@ class ObjectTypeWithDynProp:
         print(Editable)
         for curValue in Values : 
             curEditable = Editable
-            CurModuleField = list(filter(lambda x : x.Name == curValue['Name'],FrontModule.ModuleFields ))
+            CurModuleField = list(filter(lambda x : x.Name == curValue['Name'],FrontModule.ModuleFields and (x.TypeObj = self.ID ))
             if (len(CurModuleField)> 0 ):
                 # Conf définie dans FrontModule                
                 CurModuleField = CurModuleField[0]
