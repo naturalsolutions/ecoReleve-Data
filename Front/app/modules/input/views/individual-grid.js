@@ -8,11 +8,8 @@ define([
 	'backgrid.paginator',
 	'marionette',
 	'radio',
-	'config',
-
-
-	'text!modules2/input/templates/individual-list.html'
-], function(moment, $, _, Backbone, PageableCollection, Backgrid, Paginator, Marionette, Radio, config, template) {
+	'config'
+], function(moment, $, _, Backbone, PageableCollection, Backgrid, Paginator, Marionette, Radio, config) {
 
 	'use strict';
 

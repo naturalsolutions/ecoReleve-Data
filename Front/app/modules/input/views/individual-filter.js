@@ -4,16 +4,15 @@ define([
 	"backbone",
 	'marionette',
 	'radio',
-	'utils/datalist',
-	'utils/forms',
-	'config',
-	'text!modules2/input/templates/individual-filter.html'
-], function($, _, Backbone, Marionette, Radio, datalist, forms, config, template) {
+	//'utils/datalist',
+	//'utils/forms',
+	'config'
+], function($, _, Backbone, Marionette, Radio,  config) {  //datalist, forms,
 
 	"use strict";
 
 	return Marionette.ItemView.extend({
-		template: template,
+		template: 'app/modules/input/templates/individual-filter.html',
 
 		events: {
 			'click #clear-btn': 'clear',
@@ -55,7 +54,7 @@ define([
 					data: {}
 				};
 				source.data.field_name = id;
-				datalist.fill(source, list);
+				//datalist.fill(source, list);
 			}
 		},
 
@@ -72,7 +71,7 @@ define([
 				}
 				// value is null
 				else {
-					forms.resetInput(input);
+					//forms.resetInput(input);
 					input.prop('disabled', true);
 				}
 				select.val(op);
@@ -130,7 +129,7 @@ define([
 					break;
 				case 'null':
 				case 'not null':
-					forms.resetInput(input);
+					//forms.resetInput(input);
 					input.prop('disabled', true);
 					this.setFilter(name, null, op);
 					break;
