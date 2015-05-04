@@ -60,6 +60,6 @@ SELECT pk_Input
            ,[fieldClass]
            FROM formbuilder.dbo.Input
 
- 
+ -- TODO Import Table pour les propriétés des input: InputProperty
  
 END

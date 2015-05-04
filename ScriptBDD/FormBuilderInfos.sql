@@ -30,3 +30,5 @@ CREATE TABLE FormBuilderInputInfos
 	[editorClass] [varchar](100) NULL,
 	[fieldClass] [varchar](100) NULL,
 )
+
+-- TODO Table pour les propriétés des input: InputProperty

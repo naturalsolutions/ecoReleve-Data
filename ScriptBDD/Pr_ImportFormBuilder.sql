@@ -16,7 +16,14 @@ BEGIN
  SELECT FI.Name,'FormBuilder-' + convert(varchar,FI.FBID),4 FROM FormBuilderFormsInfos FI
  WHERE NOT EXISTS (SELECT * FROM ProtocoleType PT WHERE REPLACE(PT.OriginalId,'FormBuilder-','') = FI.FBID)
  
- select * from @NewProtocole
+-- TODO : Gestion de mise à jour des protocole existant, s'appuyer sur Original_ID
+
+ 
+select * from @NewProtocole
+
+-- TODO Gestion de la même propriétés dynamqiue avec plusieurs types.
+-- TODO gestion de la compatibilité des type FB-ERD.
+-- TODO definir le type de la propriétés dynamique en fonction du type FB et attributs
 
 
  DECLARE  @NewDynProp TABLE
@@ -30,9 +37,14 @@ BEGIN
  OUTPUT INSERTED.ID,INSERTED.NAME,INSERTED.TypeProp INTO @NewDynProp 
  SELECT DISTINCT FI.Name,CASE   WHEN FI.type IN('Number','NumberPicker') THEN 'Integer' WHEN FI.type IN ('DatePicker') THEN 'Date' ELSE 'String' END  FROM FormBuilderInputInfos FI
  WHERE NOT EXISTS (SELECT * FROM ProtocoleType PT WHERE REPLACE(PT.OriginalId,'FormBuilder-','') = FI.FBID)
+-- TO s'appuyer sur syscolumns à patir de la table Observation pour enelver les propriétés statiques.
+-- Faire un not exists
+select o.name from sysobjects o JOIN  syscolumns s on s.id=o.id
+where o.type='U' and o.name ='Observation'
 
+-- TODO : Suppression des liens ProtocoleType_ObservationDynProp
 
--- INSERTION DES NOUVELLES ASSOCIATIONS DYNPROP/TYPE
+-- INSERTION DES NOUVELLES DYNPROP/TYPE
 INSERT INTO [NewModelERD].[dbo].[ProtocoleType_ObservationDynProp]
            ([Required]
            ,[FK_ProtocoleType]
@@ -43,8 +55,7 @@ FROM FormBuilderInputInfos FI JOIN FormBuilderFormsInfos FF ON FI.fk_form = FF.F
 JOIN ProtocoleType PT on REPLACE(PT.OriginalId,'FormBuilder-','') = FF.FBID 
 where not exists (select * from [ProtocoleType_ObservationDynProp] ODN where ODN.FK_ProtocoleType = PT.ID AND ODN.FK_ObservationDynProp = OD.ID)
 
-
-
+-- TODO SUPPRESSION de la configuration
 
  -- INSERTION DE LA CONFIGURATION
 INSERT INTO [NewModelERD].[dbo].[ModuleField]
