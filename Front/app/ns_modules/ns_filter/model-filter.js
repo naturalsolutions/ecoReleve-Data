@@ -398,12 +398,12 @@ define([
 					break;
 				//todo : verify those 2
 				case '>=':
-					if(!(dateA.isAfter(dateB)) || !(dateB.isSame(dateA))){
+					if(!(dateA.isAfter(dateB)) && !(dateB.isSame(dateA))){
 						return false;
 					};
 					break;
 				case '<=':
-					if(!(dateA.isBefore(dateB)) || !(dateB.isSame(dateA))){
+					if(!(dateA.isBefore(dateB)) && !(dateB.isSame(dateA))){
 						return false;
 					};
 					break;
