@@ -6,7 +6,8 @@ define([
 	'backbone_forms',
 	'autocompTree',
 	'radio',
-	'config'
+	'config',
+	'./NsFormsCustomFields'
 ], function ($, _, Backbone, Marionette, BackboneForm, AutocompTree,Radio, config 
 ){
 	return Marionette.ItemView.extend({

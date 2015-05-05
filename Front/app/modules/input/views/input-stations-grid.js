@@ -206,7 +206,6 @@ define([
 			$(row).addClass('active');
 		},
 		navigate : function(evt){
-			alert('double click');
 			this.detail(evt);
 			this.radio.command('navigateNextStep');
 		}
