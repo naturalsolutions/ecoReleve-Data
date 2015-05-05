@@ -19,6 +19,7 @@ class ModuleField(Base):
     __tablename__ = 'ModuleField'
     ID = Column(Integer,Sequence('ModuleField__id_seq'), primary_key=True)
     FK_FrontModule = Column(Integer, ForeignKey('FrontModule.ID'))
+    TypeObj = Column(Unicode(250))
     Name = Column(Unicode(250))
     LabelFr = Column(Unicode(250))
     Required = Column(Integer)
