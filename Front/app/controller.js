@@ -7,8 +7,9 @@ define(['marionette', 'config',
 	/*==========  modules  ==========*/
 	'./modules/input/layouts/lyt-input',
 	'./modules/export/layouts/export-layout',
+	'./Demo/lyt-Obs',
+	'./Demo/lyt-Sta',
 	'./modules/import/layouts/lyt-import-gpx',
-
 
 ],function( Marionette, config, 
 
@@ -17,8 +18,9 @@ define(['marionette', 'config',
 	/*==========  modules  ==========*/
 	LytInput,
 	LytExport,
+	LytObs,
+	LytSta
 	LytImport
-
 ){
 
 	'use strict';
@@ -41,6 +43,14 @@ define(['marionette', 'config',
 		export: function(){
 			this.rgMain.show(new LytExport());
 		},
+		obs: function(options){
+			this.rgMain.show(new LytObs({id:options}));
+		},
+
+		sta: function(options){
+			this.rgMain.show(new LytSta({id:options}));
+		},
+
 
 		import: function(){
 			this.rgMain.show(new LytImport());
