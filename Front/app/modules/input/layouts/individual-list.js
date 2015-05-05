@@ -2,16 +2,16 @@ define([
 	'moment',
 	'marionette',
 	'config',
-	'modules2/input/views/individual-filter',
-	'modules2/input/views/individual-grid',
-	'text!modules2/input/templates/modalIndivSelect.html'
-], function(moment, Marionette, config, FilterView, GridView, template) {
+	'../views/individual-filter',
+	'../views/individual-grid'
+], function(moment, Marionette, config, FilterView, GridView) {
 
 	'use strict';
 
 	return Marionette.LayoutView.extend({
 		//className: 'container-fluid no-padding',
-		template: template,
+		template: 'app/modules/input/templates/modalIndivSelect.html',
+
 
 		regions: {
 			left: '#filter-left-panel',
