@@ -15,6 +15,7 @@ function($, Marionette, Backbone, config, LytLogin, LytHeader){
 			'stations/:id': 'sta',
 			'input(/)' : 'input',
 			'export(/)' : 'export',
+			'import(/)' : 'import',
 
 			'*route(/:page)': 'home',
 		},

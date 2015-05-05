@@ -1,7 +1,10 @@
 define([
 	'backbone',
 	'moment',
-], function(Backbone, moment) {
+	'collections/waypoints',
+], function(
+	Backbone, moment, Waypoints
+){
 	'use strict';
 	return {
 		gpxParser: function(xml) {
@@ -17,7 +20,7 @@ define([
 						var lat = $(this).attr('lat');
 						var lon = $(this).attr('lon');
 						// convert lat & long to number and round to 5 decimals
-						var latitude = parseFloat(lat);   // parseFloat(lat).toFixed(5);
+						var latitude = parseFloat(lat);// parseFloat(lat).toFixed(5);
 						var longitude = parseFloat(lon);
 						var waypointName = $(this).find('name').text();
 						var waypointTime, time;
