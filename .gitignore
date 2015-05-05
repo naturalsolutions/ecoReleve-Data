@@ -12,3 +12,5 @@ Front/app/styles/main.css.map
 **/*.egg-info
 **/*.egg-info/*
 **/*.egg
+*.css
+*.css.map

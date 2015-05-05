@@ -50,23 +50,23 @@ require.config({
 		'leaflet_google'		: '../bower_components/leaflet-plugins/layer/tile/Google',
 		'swiper'				: '../bower_components/swiper/dist/js/swiper',
 		'simplePagination'		: '../bower_components/simplePagination.js/jquery.simplePagination',
-		'dropzone'		: '../bower_components/dropzone/dist/dropzone',
+		'dropzone'				: '../bower_components/dropzone/dist/dropzone',
+		//'NaturalJS-Form'		:'../bower_components/NaturalJS-Form/NsFormsModule',
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
 		'backgrid.paginator'	: 'vendors/backgrid-paginator',
 		'backgridSelect_all'	:'vendors/backgrid-select-all',
-
 		//temporary
-		'fuelux'	: '../bower_components/fuelux/dist/js/fuelux',
+		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
 	},
 
-	packages: [
+	/*packages: [
 	    {
 	        name: 'NaturalJS-Form',
 	        location: '../bower_components/NaturalJS-Form',
 	        main: 'NsFormsModule'
 	    },
-	],
+	],*/
 
 	shim : {
 		jquery : {
