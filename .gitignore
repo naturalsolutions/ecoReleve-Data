@@ -5,7 +5,7 @@ Front/build/*
 **/*.css
 **/*.css.map
 Front/app/config.js
-
+npm-debug.log
 
 
 **/*.pyc
