@@ -157,6 +157,6 @@ class ObjectWithDynProp:
         resultat = {
             'schema':schema,
             'data' : data,
-            'fieldsets' : self.GetType().GetFieldSets(FrontModule,data)
+            'fieldsets' : self.GetType().GetFieldSets(FrontModule,schema)
         }
         return resultat

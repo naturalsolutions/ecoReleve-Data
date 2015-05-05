@@ -48,7 +48,7 @@ class ObjectTypeWithDynProp:
         print(Editable)
         for curValue in Values : 
             curEditable = Editable
-            CurModuleField = list(filter(lambda x : x.Name == curValue['Name'],FrontModule.ModuleFields and (x.TypeObj = self.ID ))
+            CurModuleField = list(filter(lambda x : x.Name == curValue['Name'],FrontModule.ModuleFields ))
             if (len(CurModuleField)> 0 ):
                 # Conf définie dans FrontModule                
                 CurModuleField = CurModuleField[0]
@@ -80,14 +80,14 @@ class ObjectTypeWithDynProp:
            resultat[curValue['Name']] = curValue
         return resultat
 
-    def GetFieldSets(self,FrontModule,data) :
+    def GetFieldSets(self,FrontModule,Schema) :
         Legends = FrontModule.Legends.split(';')
         fields = []
         resultat = []
         for i in range(len(Legends)):
             resultat.append({'fields':[],'legend':Legends[i]})
 
-        for curProp in data:
+        for curProp in Schema:
             CurModuleField = list(filter(lambda x : x.Name == curProp,FrontModule.ModuleFields ))
             if (len(CurModuleField)> 0 ):
                 CurModuleField = CurModuleField[0]
