@@ -25,7 +25,7 @@ from ecoreleve_server.Models import (
     ObservationDynPropValue,
     Observation
     )
-
+from ecoreleve_server.Views import add_routes
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects.

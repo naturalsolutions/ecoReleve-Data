@@ -32,7 +32,7 @@ def getObservation(request):
     id = request.matchdict['id']
     ModuleName = request.params['FormName']
     curObs = DBSession.query(Observation).get(id)
-    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName).first()
+    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName and FrontModule.TypeObj == curObs.FK_ProtocoleType).first()
     DisplayMode = request.params['DisplayMode']
     print(Conf)
     return curObs.GetDTOWithSchema(Conf,DisplayMode)
@@ -56,15 +56,17 @@ def getStation(request):
     id = request.matchdict['id']
     ModuleName = request.params['FormName']
     curSta = DBSession.query(Station).get(id)
-    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName).first()
+    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     DisplayMode = request.params['DisplayMode']
     print(curSta)
     return curSta.GetDTOWithSchema(Conf,DisplayMode)
 
-@view_config(route_name='station', renderer='json', request_method = 'PUT')
+@view_config(route_name='stations', renderer='json', request_method = 'PUT')
 def setStation(request):
     print('***********************PUT*****************')
     data = request.json_body
+    #ModuleName = request.params['FormName']
+    #curObs = DBSession.query(Observation).get(data['ID'])
     curObs = DBSession.query(Station).get(data['id'])
     curObs.UpdateFromJson(data)
     
