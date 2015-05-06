@@ -10,7 +10,8 @@ define(['jquery', 'marionette', 'backbone', 'config', './base/login/lyt-login', 
 	'use strict';
 	return Marionette.AppRouter.extend({
 		appRoutes: {
-
+			'observations/:id': 'obs',
+			'stations/:id': 'sta',
 			'input(/)' : 'input',
 			'export(/)' : 'export',
 			'import(/)' : 'import',

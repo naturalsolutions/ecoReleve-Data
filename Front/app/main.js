@@ -42,6 +42,7 @@ require.config({
 		'dateTimePicker'		: '../bower_components/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker',
 		'backbone_forms'		: '../bower_components/backbone-forms/distribution.amd/backbone-forms',
 		'backbone.paginator'	: '../bower_components/backbone.paginator/lib/backbone.paginator.min',
+		'requirejs-text'		: '../bower_components/requirejs-text/text',
 		'L'						: '../bower_components/leaflet/dist/leaflet',
 		'leaflet_cluster'		: '../bower_components/leaflet.markercluster/dist/leaflet.markercluster',
 		'leaflet_google'		: '../bower_components/leaflet-plugins/layer/tile/Google',
@@ -49,15 +50,16 @@ require.config({
 		'dropzone'				: '../bower_components/dropzone/dist/dropzone',
 		'fancytree'				: '../bower_components/fancytree/dist/jquery.fancytree-all.min',
 
+
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
 		'backgrid.paginator'	: 'vendors/backgrid-paginator',
 		'backgridSelect_all'	:'vendors/backgrid-select-all',
 
-		//temporary
 		'simplePagination'		: '../bower_components/simplePagination.js/jquery.simplePagination',
-		'fuelux'	: '../bower_components/fuelux/dist/js/fuelux',
+		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
 	},
+
 
 	shim : {
 		jquery : {

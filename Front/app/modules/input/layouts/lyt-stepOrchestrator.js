@@ -1,7 +1,8 @@
 define([
 	'ns_stepper/lyt-stepperOrchestrator',
+	'radio'
 
-], function(StepperOrchestrator) {
+], function(StepperOrchestrator,Radio) {
 
 	'use strict';
 
@@ -10,6 +11,8 @@ define([
 		/*==========  Next / Prev  ==========*/
 		onShow: function(){
 			StepperOrchestrator.prototype.onShow.apply(this, arguments);
+			this.radio = Radio.channel('input');
+            this.radio.comply('navigateNextStep', this.nextStep, this);
 		},
 		nextStep: function(){
 			var currentStep = this.steps[this.currentStep];

@@ -7,7 +7,7 @@ define([
 	'sweetAlert',
 
 	'./lyt-stepOrchestrator',
-	//'./individual-list',
+	'./individual-list',
 
 	'./lyt-step1',
 
@@ -17,7 +17,7 @@ define([
 
 
 ], function($, _, Backbone, Marionette, Swal,
-	StepperOrchestrator, //IndivFilter,
+	StepperOrchestrator, IndivFilter,
 	Step1, Step2, Step3
 ){
 

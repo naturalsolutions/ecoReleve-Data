@@ -69,18 +69,10 @@ define([
 				$('#filters').append(form.el);
 				this.forms.push(form);
 			};
-
-				
-
 		},
 
 		displayFilter: function(){
-
 		},
-
-
-
-
 
 		initFilter: function(data, key){
 			var form;
@@ -356,8 +348,8 @@ define([
 		},
 
 		testDate: function(val, op, objVal){
-			var dateA = moment(val);
-			var dateB = moment(objVal);
+			var dateA = moment(objVal);
+			var dateB =  moment(val);
 
 			switch(op.toLowerCase()){
 				case '=':
@@ -376,18 +368,19 @@ define([
 					};
 					break;
 				case '<':
-					if(!(dateA.isBefore(dateB))){
+					//moment('2010-10-20').isBefore('2010-10-21'); // true
+					if(!(moment(dateA).isBefore(dateB))){
 						return false;
 					};
 					break;
 				//todo : verify those 2
 				case '>=':
-					if(!(dateA.isAfter(dateB)) || !(dateB.isSame(dateA))){
+					if(!(dateA.isAfter(dateB)) && !(dateB.isSame(dateA))){
 						return false;
 					};
 					break;
 				case '<=':
-					if(!(dateA.isBefore(dateB)) || !(dateB.isSame(dateA))){
+					if(!(dateA.isBefore(dateB)) && !(dateB.isSame(dateA))){
 						return false;
 					};
 					break;

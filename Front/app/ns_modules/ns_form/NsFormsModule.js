@@ -7,8 +7,10 @@ define([
 	'fancytree',
 	'autocompTree',
 	'radio',
-	'config'
-], function ($, _, Backbone, Marionette, BackboneForm, FT, AutocompTree, Radio, config 
+
+	'config',
+	'./NsFormsCustomFields'
+], function ($, _, Backbone, Marionette, BackboneForm, AutocompTree,Radio, config 
 ){
 	return Marionette.ItemView.extend({
 		BBForm: null,
