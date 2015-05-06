@@ -17,10 +17,10 @@ define(['marionette', 'config',
 	LytExport,
 	LytImport,
 	LytInput,
-	LytStations
+	LytStations,
 
 	LytObs,
-	LytSta,
+	LytSta
 
 ){
 	'use strict';
