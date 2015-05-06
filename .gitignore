@@ -4,7 +4,7 @@ Front/node_modules/*
 Front/build/*
 Front/app/styles/main.css
 Front/app/styles/main.css.map
-
+**/config.js
 
 
 **/*.pyc
