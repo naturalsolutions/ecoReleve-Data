@@ -3,7 +3,7 @@ define([
     'underscore',
     'backbone',
     'marionette',
-    'ns_form/NSFormsModule'
+    'ns_form/NSFormsModuleGit'
 
 ], function ($, _, Backbone, Marionette,NsForm) {
     'use strict';
