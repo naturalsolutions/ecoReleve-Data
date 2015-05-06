@@ -48,30 +48,6 @@ def main(global_config, **settings):
     Base.metadata.create_all(engine)
     Base.metadata.reflect(views=True, extend_existing=False)
 
-    # curObs = DBSession.query(Observation).first()
-    # # #curObs.__init__()
-    # # #DBSession.add(curObs)
-    # bezin = {
-        
-    #     'Toto': ' Bzein from JSON',
-    #     'Tutu' : 51
-    # }
-    # curObs.UpdateFromJson(bezin)
-    # print(curObs.GetDTOWithSchema())
-    # print ('Valeur à modifier')
-    # curObs.SetProperty('Bezin','Valeur modifié après JSON')
-    # print('Valeur à ne pas modifier ')
-    # curObs.SetProperty('Toto','Bzein from JSON')
-    # transaction.commit()
-    # request = testing.DummyRequest(
-    #         matchdict={
-    #         'ID': 91
-    #         },
-    #         json_body = {
-    #         'Toto': 'MaValeurTOTO',
-    #         'Tutu': '18'
-    #         })
-    # setObservation(request)
     config = Configurator(settings=settings)
     # Add renderer for datetime objects
     json_renderer = JSON()
@@ -90,13 +66,12 @@ def main(global_config, **settings):
             settings['auth.secret'],
             cookie_name='ecoReleve-Core',
             callback=role_loader,
-            hashalg='sha512',
+            hashalg='sha1',
             max_age=86400)
     authz_policy = ACLAuthorizationPolicy()
-
-    # config.set_authentication_policy(authn_policy)
-    # config.set_authorization_policy(authz_policy)
-    # config.set_root_factory(SecurityRoot)
+    config.set_authentication_policy(authn_policy)
+    config.set_authorization_policy(authz_policy)
+    config.set_root_factory(SecurityRoot)
 
     # Set the default permission level to 'read'
     config.set_default_permission('read')
