@@ -19,7 +19,7 @@ define(['marionette', 'config',
 	LytInput,
 	LytExport,
 	LytObs,
-	LytSta
+	LytSta,
 	LytImport
 ){
 
