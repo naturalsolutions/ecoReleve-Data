@@ -69,6 +69,7 @@ define([
 				com: this.com,
 				collection: collection
 			});
+
 			this.mapRegion.show(this.map);
 			
 			this.filtersList={
