@@ -19,13 +19,6 @@ from ecoreleve_server.Models import (
 
 from ecoreleve_server.GenericObjets.FrontModules import (FrontModule,ModuleField)
 
-@view_config(route_name='security/has_access', renderer='json', request_method = 'GET')
-def AcessOK(request):
-    return True
-
-@view_config(route_name='core/user', renderer='json', request_method = 'GET')
-def GetUser(request):
-    return "Moi même"    
 
 @view_config(route_name='observation/id', renderer='json', request_method = 'GET')
 def getObservation(request):
