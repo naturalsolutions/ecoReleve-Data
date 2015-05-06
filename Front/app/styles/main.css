@@ -11305,7 +11305,6 @@ body {
   height: 100%;
   overflow: hidden;
   font-family: 'Exo 2', sans-serif;
-  background: rgba(0, 0, 0, 0.85);
 }
 body.app {
   background: url(img/bg-home.jpg) center center no-repeat;
@@ -11839,6 +11838,10 @@ li.list-group-item.validated {
 .backgrid td.renderable {
   text-align: left;
 }
+table.backgrid th {
+  background: transparent;
+  text-transform: uppercase;
+}
 table.backgrid tr {
   cursor: pointer;
 }
@@ -11850,6 +11853,12 @@ table.backgrid td {
 }
 table.backgrid a {
   color: inherit;
+}
+.dark table.backgrid {
+  color: #C0C0C0;
+}
+.dark table.backgrid th a {
+  color: #C0C0C0;
 }
 .tab-content {
   height: calc(100% - 200px);
@@ -11952,6 +11961,46 @@ table.backgrid a {
 }
 .swiper-header #protosListContainer.swiper-container .swiper-wrapper .swiper-slide .onglet.active {
   background: #777777;
+}
+.pannels-container {
+  background: #2d2d30;
+  overflow: hidden;
+  height: 100%;
+}
+.pannels-container .pannel {
+  position: absolute;
+  right: -100%;
+  transition: .5s all;
+}
+.pannels-container .pannel.active {
+  right: 0;
+}
+.functions {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 100;
+}
+.panel-title a {
+  transition: .5s all;
+  padding: 20px;
+  width: 100%;
+  display: block;
+}
+.panel-title a:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+.panel-title a i.glyphicon {
+  float: right;
+}
+.panel-title a i.glyphicon:after {
+  content: "\e114";
+}
+.panel-title a.collapsed i.glyphicon {
+  float: right;
+}
+.panel-title a.collapsed i.glyphicon:after {
+  content: "\e080";
 }
 /*==========  ns_modules  ==========*/
 #btnPrev {
