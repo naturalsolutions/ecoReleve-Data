@@ -19,3 +19,4 @@ DynPropNames = {
 }
 
 from .Protocoles import *
+from .User import User
