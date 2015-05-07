@@ -13,6 +13,7 @@ class ObjectTypeWithDynProp:
 
 
     def __init__(self,ObjContext):
+        print('Init ObjTyoe')
         self.ObjContext = ObjContext
         self.DynPropNames = self.GetDynPropNames()
 
@@ -42,7 +43,10 @@ class ObjectTypeWithDynProp:
 
     def AddDynamicPropInSchemaDTO(self,SchemaDTO,FrontModule,DisplayMode):
         curQuery = 'select * from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
-        curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
+        if self.ID :
+            curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
+            print(curQuery)
+
         Values = self.ObjContext.execute(curQuery).fetchall()
         Editable = (DisplayMode.lower()  == 'edit')
         print(Editable)
@@ -55,6 +59,7 @@ class ObjectTypeWithDynProp:
                 # TODO : Gestion champ read ONly
                 if (CurModuleField.FormRender & 2) == 0:
                     curEditable = False
+                
                 SchemaDTO[curValue['Name']] = CurModuleField.GetDTOFromConf(curEditable,ModuleField.GetClassFromSize(CurModuleField.FieldSize))
             else:
                 SchemaDTO[curValue['Name']] = {

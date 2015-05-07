@@ -83,7 +83,7 @@ define([
             //console.log(this.model);
             var url = this.modelurl
             var ctx = this;
-            url += this.id;
+           	url += this.id;
 
             $.ajax({
                 url: url,
@@ -93,7 +93,10 @@ define([
                 dataType: 'json',
                 success: function (resp) {                    
                     ctx.model.schema = resp.schema;
-                    ctx.model.attributes = resp.data;
+                    if (resp.data){
+                    	ctx.model.attributes = resp.data;
+                    	ctx.model.id = resp.data['id'] ;
+                    }
                     if (resp.fieldsets) {
                         // if fieldset present in response, we get it
                         ctx.model.fieldsets = resp.fieldsets;

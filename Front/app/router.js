@@ -12,7 +12,7 @@ function($, Marionette, Backbone, config, LytLogin, LytHeader){
 	return Marionette.AppRouter.extend({
 		appRoutes: {
 			'observations/:id': 'obs',
-			'stations/:id': 'sta',
+			'stations(/:id)': 'sta',
 			'input(/)' : 'input',
 			'export(/)' : 'export',
 			'import(/)' : 'import',

@@ -43,29 +43,29 @@ def setObservation(request):
     return {}
 
 
-@view_config(route_name='stations/id', renderer='json', request_method = 'GET')
-def getStation(request):
-    print('***************** GET STATION ***********************')
-    id = request.matchdict['id']
-    ModuleName = request.params['FormName']
-    curSta = DBSession.query(Station).get(id)
-    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
-    DisplayMode = request.params['DisplayMode']
-    print(curSta)
-    return curSta.GetDTOWithSchema(Conf,DisplayMode)
+# @view_config(route_name='stations/id', renderer='json', request_method = 'GET')
+# def getStation(request):
+#     print('***************** GET STATION ***********************')
+#     id = request.matchdict['id']
+#     ModuleName = request.params['FormName']
+#     curSta = DBSession.query(Station).get(id)
+#     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+#     DisplayMode = request.params['DisplayMode']
+#     print(curSta)
+#     return curSta.GetDTOWithSchema(Conf,DisplayMode)
 
-@view_config(route_name='stations', renderer='json', request_method = 'PUT')
-def setStation(request):
-    print('***********************PUT*****************')
-    data = request.json_body
-    #ModuleName = request.params['FormName']
-    #curObs = DBSession.query(Observation).get(data['ID'])
-    curObs = DBSession.query(Station).get(data['id'])
-    curObs.UpdateFromJson(data)
+# @view_config(route_name='stations', renderer='json', request_method = 'PUT')
+# def setStation(request):
+#     print('***********************PUT*****************')
+#     data = request.json_body
+#     #ModuleName = request.params['FormName']
+#     #curObs = DBSession.query(Observation).get(data['ID'])
+#     curObs = DBSession.query(Station).get(data['id'])
+#     curObs.UpdateFromJson(data)
     
-    #result = curObs.GetDTOWithSchema('')
-    transaction.commit()
-    return {}    
+#     #result = curObs.GetDTOWithSchema('')
+#     transaction.commit()
+#     return {}    
 
 @view_config(route_name='observation', renderer='json', request_method = 'POST')
 def CreateObservation(request):

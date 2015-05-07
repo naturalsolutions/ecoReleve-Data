@@ -1,5 +1,22 @@
 
 
+
+### test if the match url is integer
+def integers(*segment_names):
+    def predicate(info, request):
+        match = info['match']
+        for segment_name in segment_names:
+            try:
+                print (segment_names)
+                match[segment_name] = int(match[segment_name])
+                if int(match[segment_name]) == 0 :
+                    print(' ****** ACTIONS FORMS ******')
+                    return False
+            except (TypeError, ValueError):
+                return False
+        return True
+    return predicate
+
 def add_routes(config):
     config.add_route('weekData', 'ecoReleve-Sensor/weekData')
     
@@ -19,13 +36,14 @@ def add_routes(config):
     ##### Stations #####
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
-    config.add_route('stations', 'ecoReleve-Core/stations') 
-    config.add_route('stations/id', 'ecoReleve-Core/stations/{id}')
+    config.add_route('stations', 'ecoReleve-Core/stations/') 
+    config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
+    config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
 
     ##### Protocols #####
     config.add_route('protocols', 'ecoReleve-Core/protocols')
-    config.add_route('protocols/name', 'ecoReleve-Core/protocols/{name}')
-    config.add_route('protocols/name/id', 'ecoReleve-Core/protocols/{name}/{id}')
+    config.add_route('protocols/name', 'ecoReleve-Core/protocols/')
+    config.add_route('protocols/name/id', 'ecoReleve-Core/protocols/{id}')
 
     config.add_route('observation/id', 'ecoReleve-Core/observations/{id}')
     config.add_route('observation', 'ecoReleve-Core/observations')
