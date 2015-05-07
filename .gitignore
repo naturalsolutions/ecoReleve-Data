@@ -4,8 +4,11 @@ Front/node_modules/*
 Front/build/*
 Front/app/styles/main.css
 Front/app/styles/main.css.map
-**/config.js
 
+**/*.css
+**/*.css.map
+
+**/config.js
 
 **/*.pyc
 **/*.ini
@@ -14,3 +17,4 @@ Front/app/styles/main.css.map
 **/*.egg
 *.css
 *.css.map
+npm-debug.log

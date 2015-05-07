@@ -1,0 +1,52 @@
+define([
+	'jquery',
+	'backbone',
+	'backbone_forms',
+	'dateTimePicker'
+], function(
+	$, Backbone, Form
+){
+	'use strict';
+	return Form.editors.DateTimePickerBS = Form.editors.Base.extend({
+
+
+		previousValue: '',
+
+		events: {
+			'hide': "hasChanged"
+		},
+
+		hasChanged: function(currentValue) {
+			if (currentValue !== this.previousValue){
+				this.previousValue = currentValue;
+				this.trigger('change', this);
+			}
+		},
+
+		initialize: function(options) {
+			Form.editors.Base.prototype.initialize.call(this, options);
+			this.template = options.template || this.constructor.template;
+		},
+
+		getValue: function() {
+			var date= new Date
+			return this.el.children['Date_'].value
+		},
+
+		render: function(){
+			var $el = $($.trim(this.template({
+				dateFormat: this.schema.options[0]["dateFormat"],
+				value: this.schema.options[0]["defaultValue"]
+			})));
+			this.setElement($el);
+
+			$($el[0]).datetimepicker();
+
+			return this;
+		},
+
+		}, {
+		// STATICS
+			template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><span class="input-group-addon"><span class="glyphicon-calendar glyphicon"></span></span><input id="c24_Date_" name="Date_" class="form-control" type="text" placeholder="jj/mm/aaaa hh:mm:ss" data-date-format="DD/MM/YYYY HH:mm:ss"></div>', null, Form.templateSettings)
+	});
+});
