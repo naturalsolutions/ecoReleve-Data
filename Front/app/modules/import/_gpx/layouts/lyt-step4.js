@@ -10,9 +10,9 @@ define([
 	'ns_stepper/lyt-step',
 	'collections/waypoints',
 	'tmp/getUsers',
-
+	'translater'
 ], function($, _, Backbone, Marionette, Radio, config, Swal,
-	Step, Waypoints, getUsers
+	Step, Waypoints, getUsers,Translater
 ){
 
 	'use strict';
@@ -22,10 +22,13 @@ define([
 		events : {
 			'change .fiedWrk' : 'checkFWName'
 		},
-		show : function(){
-			// $('#btnNext').addClass('masqued');
-		},
 		importFile: function(){
+			var ImportingDataAlert = this.translater.getValueFromKey('import.ImportingDataAlert');
+			var loadingDataAlert = this.translater.getValueFromKey('import.loadingDataAlert');
+			var importingDataWarning = this.translater.getValueFromKey('import.importingDataWarning');
+			var importServerError = this.translater.getValueFromKey('import.importServerError');
+
+
 			// create a new collection for models to import
 			var filteredCollection  = new Waypoints(this.model.get('data_FileContent').where({import: true}));
 			var fieldWorkersNumber = this.model.get(this.name + '_import-fwnb');
@@ -67,13 +70,13 @@ define([
 					var message = resp.response;
 					var nb = msg.substring(0,1);
 					if(nb =="0"){
-						message = 'Selected waypoint(s) are already imported';
+						message = importingDataWarning;
 						typeAlert ='warning';
 					}
 					this.model.set('ajax_msg', msg) ; 
 					result = true; 
 					Swal({
-						title: "Importing data",
+						title: ImportingDataAlert,
 						text: message,
 						type: typeAlert,
 						showCancelButton: false,
@@ -88,8 +91,8 @@ define([
 				},
 				error: function(data){
 					Swal({
-						title: "Loading data error",
-						text: 'Error sending gpx data to the server.',
+						title: loadingDataAlert,
+						text: importServerError,
 						type: 'error',
 						showCancelButton: false,
 						confirmButtonColor: 'rgb(147, 14, 14)',
@@ -102,6 +105,8 @@ define([
 		},
 		onShow: function(){
 			this.getUsersList();
+			this.translater = Translater.getTranslater();
+            this.$el.i18n();
 		},
 		generateDatalist : function(data){
 			var UsersList = '';
@@ -112,6 +117,9 @@ define([
 			$('#import-worker1').append(UsersList);
 		},
 		checkFWName : function(e){
+			var fieldWorkerNameErr = this.translater.getValueFromKey('import.fieldWorkerNameErr');
+			var fieldWorkerNameErrMsg = this.translater.getValueFromKey('import.fieldWorkerNameErrMsg');
+			
 			var selectedField = $(e.target);
 			var fieldName = $(e.target).attr('name');
 			var selectedOp = $(e.target).find(":selected")[0];
@@ -122,8 +130,8 @@ define([
 				if ($(this).attr('name') != fieldName){
 					if (selectedName && (selectedValue == selectedName)){
 						Swal({
-							title: "Name error",
-							text: 'This name is already selected, please select another name.',
+							title: fieldWorkerNameErr,
+							text: fieldWorkerNameErrMsg,
 							type: 'error',
 							showCancelButton: false,
 							confirmButtonColor: 'rgb(147, 14, 14)',

@@ -1,6 +1,7 @@
 define([
 	'ns_stepper/lyt-stepperOrchestrator',
-	'radio'
+	'radio',
+	'i18n'
 ], function(StepperOrchestrator, Radio) {
 
 	'use strict';
@@ -21,6 +22,7 @@ define([
 			
 			this.$el.find('#btnPrev').css('left', '0');
 			this.$el.find('#btnNext').css('right', '0');
+			this.$el.i18n();
 		},
 
 		displayPrev: function() {

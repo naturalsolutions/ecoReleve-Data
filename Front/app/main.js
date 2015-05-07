@@ -14,6 +14,7 @@ require.config({
 		'lyt-rootview'			: './base/rootview/lyt-rootview',
 		'transition-region'		: './base/transition-region/transition-region',
 		'google': './vendors/google-maps-loader',
+		'translater'            : 'translater', 
 		
 		
 		/*==========  NS modules  ==========*/
@@ -51,6 +52,7 @@ require.config({
 		'swiper'				: '../bower_components/swiper/dist/js/swiper',
 		'simplePagination'		: '../bower_components/simplePagination.js/jquery.simplePagination',
 		'dropzone'				: '../bower_components/dropzone/dist/dropzone',
+		'i18n'					: '../bower_components/i18n/i18next',
 		//'NaturalJS-Form'		:'../bower_components/NaturalJS-Form/NsFormsModule',
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
@@ -153,11 +155,15 @@ require.config({
 		dropzone : {
 			deps: ['jquery'],
 			exports : 'Dropzone'
+		},
+		Translater : {
+			deps: ['i18n']
 		}
 	},
 });
 
 
-require(['app', 'templates'], function(app){
+require(['app', 'templates'], function(app,templates){
 		app.start();
+		//this.translater = Translater.getTranslater();
 });

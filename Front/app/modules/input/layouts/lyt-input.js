@@ -13,7 +13,7 @@ define([
 	'./lyt-step2',
 
 	'./lyt-step3',
-
+	'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,
 	StepperOrchestrator, IndivFilter,
@@ -81,6 +81,7 @@ define([
 			});
 
 			this.stepperRegion.show( this.stepper );
+			this.$el.i18n();
 		},
 
 		animateIn: function() {

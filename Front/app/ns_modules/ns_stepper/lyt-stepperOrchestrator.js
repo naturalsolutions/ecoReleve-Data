@@ -5,7 +5,8 @@ define([
 	'marionette',
 	'sweetAlert',
 	'ns_stepper/lyt-step',
-], function($, _, Backbone, Marionette, swal, LS) {
+	'translater'
+], function($, _, Backbone, Marionette, swal, LS,Translater) {
 
 	'use strict';
 
@@ -61,7 +62,7 @@ define([
 		onShow: function(){
 			this.initNavSteps();
 			this.toStep(0);
-			
+			this.$el.i18n();
 		},
 
 		onRender: function(){
@@ -134,7 +135,9 @@ define([
 		
 
 		toStep: function(numstep){
-
+			var translater = Translater.getTranslater();
+			var nextBtnLabel = translater.getValueFromKey('stepper.btnNext');
+			var finishBtnLabel = translater.getValueFromKey('stepper.btnFinish');
 			this.currentStep = numstep;
 			this.step_content.show( this.steps[this.currentStep], {preventDestroy: true} );
 			this.check();
@@ -145,12 +148,12 @@ define([
 
 				//this.$el.find('#btnNext').attr( 'disabled', 'disabled');
 				this.$el.find('#btnNext').addClass('finished').find( 'span'
-					).html('Finish').parent().find('.icon').removeClass('rightarrow').addClass('validate');
+					).html(finishBtnLabel).parent().find('.icon').removeClass('rightarrow').addClass('validate');
 
 			}
 			else {
 				 this.$el.find('#btnNext').removeClass('finished').find( 'span'
-					).html('Next').parent().find('.icon').removeClass('validate').addClass('rightarrow');
+					).html(nextBtnLabel).parent().find('.icon').removeClass('validate').addClass('rightarrow');
 			}
 
 			this.displayPrev(this.currentStep);

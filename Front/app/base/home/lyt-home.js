@@ -1,6 +1,7 @@
-define(['marionette'],
-function(Marionette) {
+define(['marionette','translater','i18n'],
+function(Marionette, Translater) {
 	'use strict';
+
 	return Marionette.LayoutView.extend({
 		template: 'app/base/home/tpl/tpl-home.html',
 		className: 'home-page ns-full-height animated',
@@ -31,6 +32,10 @@ function(Marionette) {
 				500,
 				_.bind(this.trigger, this, 'animateOut')
 			);
-		}
+		},
+		onShow : function(options) {
+			this.translater = Translater.getTranslater();
+            this.$el.i18n();
+        }
 	});
 });

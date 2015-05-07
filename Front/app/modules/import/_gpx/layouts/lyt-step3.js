@@ -14,12 +14,12 @@ define([
 
 	'../../views/import-map',
 	'../../views/import-grid',
-
+	'translater'
 ], function(
 	$, _, Backbone, Marionette, Radio, Swal,
 	Step, Com, NSFilter,
 	Waypoints,
-	Map, Grid
+	Map, Grid,Translater
 ){
 
 	'use strict';
@@ -86,6 +86,8 @@ define([
 			});
 
 			this.com.setMotherColl(collection);
+			this.translater = Translater.getTranslater();
+            this.$el.i18n();
 		},
 
 		filter: function(){
@@ -114,11 +116,14 @@ define([
 			});
 		},
 		nextOK: function(){
+			var WaypointsError = this.translater.getValueFromKey('import.waypointsError');
+			var WaypointsErrorMsg = this.translater.getValueFromKey('import.waypointsErrorMsg');
+
 			var collection =this.model.get('data_FileContent').where({import: true});
 			if(collection.length == 0){
 			Swal({
-				title: "No waypoints selected",
-				text: 'Please select at least one waypoint to import.',
+				title: WaypointsError,
+				text: WaypointsErrorMsg,
 				type: 'error',
 				showCancelButton: false,
 				confirmButtonColor: 'rgb(147, 14, 14)',

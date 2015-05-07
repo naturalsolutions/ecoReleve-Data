@@ -1,0 +1,60 @@
+{
+	"tiles" :{
+		"input" : "Saisie",
+		"manual-import" : "Import",
+		"auto-import" : "Import automatique",
+		"export" : "Export",
+		"sites" : "Sites monitorés",
+		"individuals" : "Individus",
+		"validation" : "Validation",
+		"data" : "Mes données",
+		"stations" : "Stations",
+		"objects" : "Objets"
+	},
+	"stepper" : {
+			"btnNext" : "Suivant",
+			"btnPrev"  : "Précédent",
+			"btnFinish" : "Fin"
+	},
+	"button" : {
+		"search" : "Rechercher",
+		"clear" : "Nétoyer",
+		"reset" : "Annuler"
+	},
+	"shared" : {
+		"fieldworker" : "Observateur",
+		"fieldworkersNb" : "Nombre d'observateurs"
+	},
+	"input" : {
+		"step1Label" : "Sélectionnez une action",
+		"step1NewSt" :"Créer une nouvelle station"
+	},
+	"import" : {
+		"stepper" : {
+			"step1GPXLabel" : "Données",
+			"step2GPXLabel" : "Details",
+			"step3GPXLabel" : "Metadonnées"
+		},
+		"gpxHelp" : "GPX ou GPS eXchange Format est un format d'échange de données GPS. Il peut être utilisé pour décrire des points d'intéret (waypoints), des tracés et des itinéraires .",
+		"fileSelection" : "Sélectionnez un fichier",
+		"fileSelectionMsg" : "Merci de sélectionner un fichier au format GPX (format d'export de GPS)",
+		"fileSelectionSuccessMsg" : "Fichier est chargé avec succès. Vous avez ",
+		"loadingFileMsg" : "  points chargés sur un total de  ",
+		"fileDataError" : " Merci de vérifier les points suivants:",
+		"fileTypeMsgError" : "Merci de vérifier la structure du fichier.",
+		"fileApiError" : "File API n'est pas supportée par cette version de navigateur",
+		"fileBrowserApiError" : "Merci de mettre à jour votre navigateur et réessayer ou utiliser un autre navigateur",
+		"fileTypeError"  : "Type de fichier non supporté",
+		"fileTypeAlertMsg" : "Merci de sélectionner un fichier GPX",
+		"waypoint" : " point",
+		"waypointsError" : "Aucun point n'est sélectionné",
+		"waypointsErrorMsg" : "Merci de sélectionner au moins un point à importer.",
+		"globalFieldActivity" : "Activité globale",
+		"ImportingDataAlert" : "Import de données",
+		"loadingDataAlert" : "Erreur de transfert",
+		"importingDataWarning" : "Les points sélectionnés sont déjà importés",
+		"importServerError" : "Erreur de transfert de données vers le serveur.",
+		"fieldWorkerNameErr" : "Erreur de nom",
+		"fieldWorkerNameErrMsg" : "Ce nom est déjà sélectionné. Merci de choisir un autre nom."
+	}
+}

@@ -2,8 +2,7 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'marionette',
-	
+	'marionette',	
 ], function($, _, Backbone, Marionette) {
 
 	'use strict';

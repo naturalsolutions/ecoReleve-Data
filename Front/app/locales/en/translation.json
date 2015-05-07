@@ -1,0 +1,69 @@
+{
+	"tiles" :{
+		"input" : "Manual entry",
+		"manual-import" : "Manual import",
+		"auto-import" : "Automatic import",
+		"export" : "export",
+		"sites" : "Monitored sites",
+		"individuals" : "Individuals",
+		"validation" : "Validate",
+		"data" : "My data",
+		"stations" : "Stations",
+		"objects" : "Objects"
+	},
+	"header" : {
+
+
+	},
+	"stepper" : {
+			"btnNext" : "NEXT",
+			"btnPrev"  : "PREV",
+			"btnFinish" : "FINISH"
+	},
+	"button" : {
+		"search" : "Search",
+		"clear" : "Clear",
+		"reset" : "Reset"
+
+	},
+	"shared" : {
+		"fieldworker" : "fieldworker",
+		"fieldworkersNb" : "field workers number"
+
+	},
+	"input" : {
+		"step1Label" : "Select an action",
+		"step1NewSt" :"Create a new station"
+
+	},
+	"import" : {
+		"stepper" : {
+			"step1GPXLabel" : "Data",
+			"step2GPXLabel" : "Details",
+			"step3GPXLabel" : "Metadata"
+		},
+		"gpxHelp" : "GPX, or GPS eXchange Format is an XML schema designed as a common GPS data format. It can be used to describe waypoints, tracks, and routes.",
+		"fileSelection" : "select a file",
+		"fileSelectionMsg" : "Please select a file exported from your GPS in GPX format.",
+		"fileSelectionSuccessMsg" : "Gpx file is successfully loaded. You have",
+		"loadingFileMsg" : "  waypoints are loaded from a total of ",
+		"fileDataError" : " Please check data for the following waypoints:",
+		"fileTypeMsgError" : "Please check gpx file structure. There is not stored waypoints !",
+		"fileApiError" : "File API is not supported by this version of browser",
+		"fileBrowserApiError" : "Please update your browser and check again, or use another browser",
+		"fileTypeError"  : "File type is not supported",
+		"fileTypeAlertMsg" : "Please select a GPX file",
+		"waypoint" : " waypoint",
+		"waypointsError" : "No waypoints selected",
+		"waypointsErrorMsg" : "Please select at least one waypoint to import.",
+		"fieldActivity" : "Field activity",
+		"globalFieldActivity" : "Global field activity",
+		"ImportingDataAlert" : "Importing data",
+		"loadingDataAlert" : "Loading data error",
+		"importingDataWarning" : "Selected waypoint(s) are already imported",
+		"importServerError" : "Error sending gpx data to the server.",
+		"fieldWorkerNameErr" : "Name error",
+		"fieldWorkerNameErrMsg" : "This name is already selected, please select another name."
+	}
+
+}

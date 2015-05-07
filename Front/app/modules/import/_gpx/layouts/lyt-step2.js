@@ -10,11 +10,11 @@ define([
 
 	'collections/waypoints',
 	'tmp/xmlParser',
-
+	'translater'
 
 ], function(
 	$, _, Backbone, Marionette, Radio, Swal,
-	Step, Waypoints, xmlParser
+	Step, Waypoints, xmlParser,Translater
 ){
 
 	'use strict';
@@ -32,7 +32,9 @@ define([
 
 		onShow: function(){
 			$('#step-nav').show();
-			 $('#btnPrev').show();
+			$('#btnPrev').show();
+			this.translater = Translater.getTranslater();
+            this.$el.i18n();
 		},
 
 		onRender: function () {
@@ -59,6 +61,17 @@ define([
 		},
 		
 		parseFichier: function(e){ 
+			var fileSelectionSuccessMsg = this.translater.getValueFromKey('import.fileSelectionSuccessMsg');
+			var waypointLabel = this.translater.getValueFromKey('import.waypoint');
+			var alertTitle = this.translater.getValueFromKey('import.fileTypeError');
+			var alertText = this.translater.getValueFromKey('import.fileTypeAlertMsg');
+			var alertApiMsg = this.translater.getValueFromKey('import.fileApiError');
+			var alertBrowserUpdateMsg = this.translater.getValueFromKey('import.fileBrowserApiError');
+			var textLoadedPoints = this.translater.getValueFromKey('import.loadingFileMsg');
+			var waypointLabel = this.translater.getValueFromKey('import.waypoint');
+			var importCheckMsg = this.translater.getValueFromKey('import.fileDataError');
+			var fileTypeMsgError = this.translater.getValueFromKey('fileTypeMsgError');
+
 			var loading = false;
 			var self = this;
 			//var selected_file = document.querySelector('#FileInput');
@@ -76,8 +89,8 @@ define([
 						this.model.set(this.name + '_FileName', "");
 						//alert('File type is not supported. Please select a "gpx" file');
 						Swal({
-							title: "File type is not supported",
-							text: 'Please select a "gpx" file',
+							title: alertTitle,
+							text: alertText,
 							type: 'error',
 							showCancelButton: false,
 							confirmButtonColor: 'rgb(147, 14, 14)',
@@ -89,29 +102,19 @@ define([
 							xml = e.target.result;
 							// get waypoints collection
 							
-							console.log(xmlParser.gpxParser(xml));
-
 							var importResulr =  xmlParser.gpxParser(xml);
-
-
-
 							self.waypointList =  importResulr[0];
 							var errosList = importResulr[1];
-							// display parsing message
-							console.log(self);
-							console.log(self.waypointList);
-
-
 							var nbWaypoints = self.waypointList.length;
 							self.model.set(self.name + '_FileContent', self.waypointList);
 							if ((nbWaypoints > 0) && (errosList.length == 0)){
-								$('#importGpxMsg').text('Gpx file is successfully loaded. You have ' + nbWaypoints + ' waypoints.');
+								$('#importGpxMsg').text(fileSelectionSuccessMsg + nbWaypoints + waypointLabel + '(s).');
 								loading = true;
 								
 							}
 							else if((nbWaypoints > 0) && (errosList.length > 0)){
-								$('#importGpxMsg').text( nbWaypoints + '  waypoints are loaded from a total of ' + (nbWaypoints + errosList.length )+' waypoints.');
-								$('#importGpxMsg').append(' Please check data for the following waypoints:<br/>');
+								$('#importGpxMsg').text( nbWaypoints + textLoadedPoints + (nbWaypoints + errosList.length )+  waypointLabel + '(s).');
+								$('#importGpxMsg').append(importCheckMsg + ':<br/>');
 								// read errors array
 								for(var i=0; i< errosList.length; i++){
 									$('#importGpxMsg').append(errosList[i] + '<br/>');
@@ -119,7 +122,7 @@ define([
 								loading = true;
 
 							} else {
-								$('#importGpxMsg').text('Please check gpx file structure. There is not stored waypoints !');
+								$('#importGpxMsg').text(fileTypeMsgError);
 								
 							}
 						};
@@ -129,8 +132,8 @@ define([
 				} catch (e) {
 					//alert('File API is not supported by this version of browser. Please update your browser and check again, or use another browser');
 					Swal({
-							title: "File API is not supported by this version of browser",
-							text: 'Please update your browser and check again, or use another browser',
+							title: alertApiMsg,
+							text: alertBrowserUpdateMsg,
 							type: 'error',
 							showCancelButton: false,
 							confirmButtonColor: 'rgb(147, 14, 14)',

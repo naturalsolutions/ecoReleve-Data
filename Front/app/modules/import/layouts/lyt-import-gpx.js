@@ -4,6 +4,7 @@ define([
 	'backbone',
 	'marionette',
 	'radio',
+	'translater',
 	'sweetAlert',
 
 	//import GPX
@@ -23,7 +24,8 @@ define([
 	'../_gsm/layouts/lyt-stepOrchestrator', 
 	'../_gsm/layouts/lyt-step1',
 
-], function($, _, Backbone, Marionette, Radio, 	Swal,
+
+], function($, _, Backbone, Marionette, Radio, Translater,Swal,
 
 	//GPX
 	GPX_StepperOrchestrator, GPX_Step2, GPX_Step3, GPX_Step4,
@@ -59,8 +61,9 @@ define([
 				this.type = options.type;
 			}
 			else
-				this.type = 'gpx';
+			this.type = 'gpx';
 			this.model = new Backbone.Model(); 
+			this.translater = Translater.getTranslater();
 		},
 
 		animateIn: function() {
@@ -97,9 +100,10 @@ define([
 		},
 
 		init_GSM_stepper : function() {
+			var stepLabel = this.translater.getValueFromKey('import.stepper.step1GPXLabel');
 			var SecondStep = new GSM_Step2({
 				model : this.model,
-				name : 'Data',
+				name : stepLabel,
 				tpl : 'app/modules/import/_gsm/templates/tpl-step1.html',
 			});
 
@@ -112,7 +116,7 @@ define([
 		},
 
 		init_RFID_stepper : function() {
-			
+			var stepLabel = this.translater.getValueFromKey('import.stepper.step1GPXLabel');
 			var SecondStep = new RFID_Step2({
 				model: this.model,
 				name: 'RFID-decoder',
@@ -121,7 +125,7 @@ define([
 
 			var ThirdStep = new RFID_Step3({
 				model: this.model,
-				name: 'Data',
+				name: stepLabel,
 				tpl: 'app/modules/import/_rfid/templates/tpl-step2.html',
 
 			});
@@ -139,24 +143,26 @@ define([
 		},
 
 		init_GPX_stepper : function() {
-
+			var step1Label = this.translater.getValueFromKey('import.stepper.step1GPXLabel');
+			var step2Label = this.translater.getValueFromKey('import.stepper.step2GPXLabel');
+			var step3Label = this.translater.getValueFromKey('import.stepper.step3GPXLabel');
 			var SecondStep = new GPX_Step2({
 				model: this.model,
-				name: 'Data',
+				name: step1Label,
 				tpl: 'app/modules/import/_gpx/templates/tpl-step2.html',
 
 			});
 
 			var ThirdStep = new GPX_Step3({
 				model: this.model,
-				name: 'Detail',
+				name: step2Label,
 				tpl: 'app/modules/import/_gpx/templates/tpl-step3.html',
 			});
 
 			
 			var FourthStep = new GPX_Step4({
 				model: this.model,
-				name: 'Metadata',
+				name: step3Label,
 				tpl: 'app/modules/import/_gpx/templates/tpl-step4.html',
 			});
 
@@ -175,6 +181,7 @@ define([
 			$('body').addClass('home-page full-height');
 			$('#stepper-header span').html('Import');
 			$('#main-region').addClass('full-height obscur');
+			 this.$el.i18n();
 		 },
 		onDestroy : function () {
 			$('#main-region').removeClass('obscur');

@@ -7,6 +7,7 @@ define({
     siteName: "Missour. Morocco",
     dateLabel: 'jj/mm/aaaa hh:mm:ss',
     dateFormats: ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm:ss'],
+    language : 'fr',
     mapDefault: {
         zoom: 9,
         center: [-4.094755, 33.006721]
