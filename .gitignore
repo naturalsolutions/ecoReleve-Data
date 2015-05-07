@@ -5,10 +5,16 @@ Front/build/*
 **/*.css
 **/*.css.map
 
+**/*.css
+**/*.css.map
 
+**/config.js
 
 **/*.pyc
 **/*.ini
 **/*.egg-info
 **/*.egg-info/*
 **/*.egg
+*.css
+*.css.map
+npm-debug.log

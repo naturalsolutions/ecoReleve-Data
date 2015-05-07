@@ -43,8 +43,10 @@ function(Marionette, Backbone, sha1, config, $ui) {
 				success: function(data){
 					ctx.users = [];
 					data.each(function(m){
-						ctx.users.push(m.get('fullname'));
+						ctx.users.push(m.get('Login'));
 					});
+					console.log(ctx.users)
+
 					$( "#username" ).autocomplete({
 						source: function( request, response ) {
 							var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
@@ -60,7 +62,7 @@ function(Marionette, Backbone, sha1, config, $ui) {
 
 
 		checkUsername: function() {
-			var user = this.collection.findWhere({fullname: $('#username').val()});
+			var user = this.collection.findWhere({Login: $('#username').val()});
 			if (!user) {
 				this.fail('#login-group', 'Invalid username');
 			}
@@ -69,7 +71,7 @@ function(Marionette, Backbone, sha1, config, $ui) {
 		login: function(elt) {
 			elt.preventDefault();
 			elt.stopPropagation();
-			var user = this.collection.findWhere({fullname: $('#username').val()});
+			var user = this.collection.findWhere({Login: $('#username').val()});
 			var url = config.coreUrl + 'security/login';
 			var self = this;
 			if (user) {
@@ -78,7 +80,7 @@ function(Marionette, Backbone, sha1, config, $ui) {
 					type: 'POST',
 					url: url,
 					data:{
-						user_id: user.get('PK_id'),
+						user_id: user.get('ID'),
 						password: sha1.hash($('#password').val())
 					}
 				}).done( function() {

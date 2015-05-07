@@ -6,10 +6,9 @@ define([
 	'radio',
 	'backbone_forms',
 	'moment',
+	'vendors/backboneForm-editors'
 
-	
-
-], function($, _, Backbone, config, Radio, BbForms, moment, tpl){
+], function($, _, Backbone, config, Radio, BbForms, moment, tpl, BE){
 	'use strict';
 	return Backbone.Model.extend({
 
@@ -41,7 +40,7 @@ define([
 			else{
 				this.getFields();
 			}
-		}, 
+		},
 
 
 
@@ -66,28 +65,14 @@ define([
 			var form;
 
 			for(var key in data){
-
-				 form = this.initFilter(data, key);
-
+				form = this.initFilter(data, key);
 				$('#filters').append(form.el);
-
 				this.forms.push(form);
-				
 			};
-				/*
-				$('#filters #dateTimePicker').each(function(){
-					$(this).datetimepicker();
-				});*/
-				//$('#filters').load('filter/tpl-filters.html');
 		},
 
 		displayFilter: function(){
-
 		},
-
-
-
-
 
 		initFilter: function(data, key){
 			var form;
@@ -127,28 +112,21 @@ define([
 				},
 			}).render();
 
+
 			return form;
 		},
-
-		/*
-		setTemplate: function(tpl){
-			console.log('template');
-			this.template = _.template(tpl);
-			
-		},
-		*/
 
 
 		getValueOptions: function(type){
 			var valueOptions;
 			switch(type){
-				case "Select": 
+				case 'Select': 
 					return valueOptions = [];
 					break;
-				case "DATETIME":
+				case 'DateTimePickerBS':
 					return valueOptions = [{
-						dateFormat: 'd/m/yyyy',
-						defaultValue: new Date().getDate() + "/" + (new Date().getMonth() + 1) + "/" + new Date().getFullYear() 
+						dateFormat: 'dd/mm/yyyy',
+						defaultValue: new Date().getDate() + '/' + (new Date().getMonth() + 1) + '/' + new Date().getFullYear() 
 						}];
 					break;
 				default:
@@ -160,16 +138,16 @@ define([
 		getOpOptions: function(type){
 			var operatorsOptions;
 			switch(type){
-				case "String": 
+				case 'String': 
 					return operatorsOptions= ['Is', 'Is not', 'Contains'];
 					break;
-				case "Select": 
+				case 'Select': 
 					return operatorsOptions= ['Is', 'Is not'];
 					break;
-				case "DATETIME":
+				case 'DateTimePickerBS':
 					return operatorsOptions= ['<', '>', '=', '<>', '<=', '>='];
 					break;
-				case "Checkboxes":
+				case 'Checkboxes':
 					return operatorsOptions= ['='];
 				default:
 					return operatorsOptions= ['<', '>', '=', '<>', '<=', '>='];
@@ -180,20 +158,20 @@ define([
 		getFieldType: function(type){
 			var typeField;
 			switch(type){
-				case "String": 
-					return typeField="Text";
+				case 'String': 
+					return typeField='Text';
 					break;
 				case 'Select': 
 					return typeField='Select';
 					break;
-				case "DATETIME":
-					return typeField="BackboneDatepicker"; //DateTime
+				case 'DateTimePickerBS':
+					return typeField='DateTimePickerBS';
 					break;
 				case 'Checkboxes':
-					return typeField="Checkboxes";
+					return typeField='Checkboxes';
 					break;
 				default:
-					return typeField="Number";
+					return typeField='Number';
 					break;
 			}  
 		},
@@ -246,7 +224,7 @@ define([
 			var optTpl;
 			$('#'+type+' select[name=Value]').append('<option value=""></option>');
 			for (var i = 0; i < list.length; i++) {
-				optTpl = '<option value="'+list[i]+'">'+list[i]+'</option>';
+				optTpl = '<option value=""'+list[i]+'>'+list[i]+'</option>';
 				$('#'+type+' select[name=Value]').append(optTpl);
 			};
 		},
@@ -370,8 +348,8 @@ define([
 		},
 
 		testDate: function(val, op, objVal){
-			var dateA = moment(val);
-			var dateB = moment(objVal);
+			var dateA = moment(objVal);
+			var dateB =  moment(val);
 
 			switch(op.toLowerCase()){
 				case '=':
@@ -390,18 +368,19 @@ define([
 					};
 					break;
 				case '<':
-					if(!(dateA.isBefore(dateB))){
+					//moment('2010-10-20').isBefore('2010-10-21'); // true
+					if(!(moment(dateA).isBefore(dateB))){
 						return false;
 					};
 					break;
 				//todo : verify those 2
 				case '>=':
-					if(!(dateA.isAfter(dateB)) || !(dateB.isSame(dateA))){
+					if(!(dateA.isAfter(dateB)) && !(dateB.isSame(dateA))){
 						return false;
 					};
 					break;
 				case '<=':
-					if(!(dateA.isBefore(dateB)) || !(dateB.isSame(dateA))){
+					if(!(dateA.isBefore(dateB)) && !(dateB.isSame(dateA))){
 						return false;
 					};
 					break;

@@ -4,9 +4,12 @@ define([
 	'backbone',
 	'marionette',
 	'backbone_forms',
+	'fancytree',
 	'autocompTree',
 	'radio',
-	'config'
+
+	'config',
+	'./NsFormsCustomFields'
 ], function ($, _, Backbone, Marionette, BackboneForm, AutocompTree,Radio, config 
 ){
 	return Marionette.ItemView.extend({

@@ -1,28 +1,31 @@
 define(['marionette', 'config', 
 
-
 	'./base/home/lyt-home',
 
-
 	/*==========  modules  ==========*/
-	'./modules/input/layouts/lyt-input',
 	'./modules/export/layouts/export-layout',
+	'./Demo/lyt-Obs',
+	'./Demo/lyt-Sta',
 	'./modules/import/layouts/lyt-import-gpx',
-
+	'./modules/input/layouts/lyt-input',
+	'./modules/stations/layouts/lyt-stations'
 
 ],function( Marionette, config, 
-
 	LytHome,
 
 	/*==========  modules  ==========*/
-	LytInput,
 	LytExport,
-	LytImport
+	LytImport,
+	LytInput,
+	LytStations,
+
+	LytObs,
+	LytSta
 
 ){
-
 	'use strict';
 	return Marionette.Object.extend({
+
 		initialize: function(){
 			this.rgMain=this.options.app.rootView.rgMain;
 			this.rgHeader=this.options.app.rootView.rgHeader;
@@ -41,11 +44,22 @@ define(['marionette', 'config',
 		export: function(){
 			this.rgMain.show(new LytExport());
 		},
+		obs: function(options){
+			this.rgMain.show(new LytObs({id:options}));
+		},
+
+		sta: function(options){
+			this.rgMain.show(new LytSta({id:options}));
+		},
+
 
 		import: function(){
 			this.rgMain.show(new LytImport());
 		},
 
-	});
+		stations: function(){
+			this.rgMain.show(new LytStations());
+		},
 
+	});
 });

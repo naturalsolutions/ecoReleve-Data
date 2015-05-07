@@ -1,9 +1,10 @@
-from ecoreleve_server.Models import Base,DBSession
+from ecoreleve_server.Models import Base,DBSession,Station
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
+from ..GenericObjets.FrontModules import FrontModule,ModuleField
 
 
 class Observation(Base,ObjectWithDynProp):
@@ -12,7 +13,8 @@ class Observation(Base,ObjectWithDynProp):
     Name = Column(Unicode(250))
     FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
     ObservationDynPropValues = relationship('ObservationDynPropValue',backref='Observation')
-    
+    FK_Station = Column(Integer, ForeignKey('Station.ID'))
+
     @orm.reconstructor
     def init_on_load(self):
         ObjectWithDynProp.__init__(self,DBSession)
@@ -37,7 +39,6 @@ class Observation(Base,ObjectWithDynProp):
 
 class ObservationDynPropValue(Base):
 
-
     __tablename__ = 'ObservationDynPropValue'
 
     ID = Column(Integer,Sequence('ObservationDynPropValue__id_seq'), primary_key=True)
@@ -52,7 +53,6 @@ class ObservationDynPropValue(Base):
 
 class ObservationDynProp(Base):
 
-
     __tablename__ = 'ObservationDynProp'
 
     ID = Column(Integer,Sequence('ObservationDynProp__id_seq'), primary_key=True)
@@ -63,7 +63,6 @@ class ObservationDynProp(Base):
 
 
 class ProtocoleType(Base,ObjectTypeWithDynProp):
-
 
     @orm.reconstructor
     def init_on_load(self):        
@@ -79,7 +78,6 @@ class ProtocoleType(Base,ObjectTypeWithDynProp):
 
 
 class ProtocoleType_ObservationDynProp(Base):
-
 
     __tablename__ = 'ProtocoleType_ObservationDynProp'
 
