@@ -19,7 +19,6 @@ module.exports = function(grunt) {
 				],
 				tasks: ['jst']
 			},
-			
 			css: {
 				files: 'app/styles/**/*.less',
 				tasks: ['less']
@@ -59,7 +58,6 @@ module.exports = function(grunt) {
 				}
 			}
 		},
-
 		requirejs: {
 			compile: {
 				options: {
@@ -72,7 +70,6 @@ module.exports = function(grunt) {
 					out: 'build/prod.js',
 					optimize : 'none',
 
-					
 					done: function(done, output) {
 					var duplicates = require('rjs-build-analysis').duplicates(output);
 					
@@ -159,7 +156,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-file-blocks');
 
 	/*==========  Regitred Tasks  ==========*/
-	
+
 	grunt.registerTask('build', [
 		//'jshint',
 		'clean:dist',

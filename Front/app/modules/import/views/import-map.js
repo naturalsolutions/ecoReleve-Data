@@ -46,13 +46,13 @@ define([
 
 		onShow: function(){
 			this.map = new NsMap({
-				//cluster: true,
-				//popup: false,
-				//geoJson: this.features,
-				//com : this.com,
+				cluster: true,
+				popup: false,
+				geoJson: this.features,
+				com : this.com,
 				//legend : true,
-				//bbox: true,
-				//selection : true,
+				bbox: true,
+				selection : true,
 				element: 'map',
 			});
 			this.map.init();

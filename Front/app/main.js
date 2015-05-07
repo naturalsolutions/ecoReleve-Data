@@ -24,10 +24,8 @@ require.config({
 		'ns_map'				: 'ns_modules/ns_map',
 		'ns_stepper'			: 'ns_modules/ns_stepper',
 
-		'fancytree' : 'vendors/jquery.fancytree-all',
 		'autocompTree' : 'vendors/jquery.autocompTree',
-		
-		
+
 		/*==========  Bower  ==========*/
 		'jquery'				: '../bower_components/jquery/jquery.min',
 		'jqueryui'				: '../bower_components/jqueryui/jquery-ui.min',
@@ -49,24 +47,19 @@ require.config({
 		'leaflet_cluster'		: '../bower_components/leaflet.markercluster/dist/leaflet.markercluster',
 		'leaflet_google'		: '../bower_components/leaflet-plugins/layer/tile/Google',
 		'swiper'				: '../bower_components/swiper/dist/js/swiper',
-		'simplePagination'		: '../bower_components/simplePagination.js/jquery.simplePagination',
 		'dropzone'				: '../bower_components/dropzone/dist/dropzone',
-		//'NaturalJS-Form'		:'../bower_components/NaturalJS-Form/NsFormsModule',
+		'fancytree'				: '../bower_components/fancytree/dist/jquery.fancytree-all.min',
+
+
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
 		'backgrid.paginator'	: 'vendors/backgrid-paginator',
 		'backgridSelect_all'	:'vendors/backgrid-select-all',
-		//temporary
+
+		'simplePagination'		: '../bower_components/simplePagination.js/jquery.simplePagination',
 		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
 	},
 
-	/*packages: [
-	    {
-	        name: 'NaturalJS-Form',
-	        location: '../bower_components/NaturalJS-Form',
-	        main: 'NsFormsModule'
-	    },
-	],*/
 
 	shim : {
 		jquery : {
@@ -139,7 +132,6 @@ require.config({
 			exports : 'SimplePagination'
 		},
 		fancytree :  {
-			deps:['jquery','jqueryui'],
 			exports : 'Fancytree'
 		},
 		autocompTree : {
