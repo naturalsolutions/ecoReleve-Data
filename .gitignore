@@ -2,8 +2,8 @@
 Front/bower_components/*
 Front/node_modules/*
 Front/build/*
-Front/app/styles/main.css
-Front/app/styles/main.css.map
+**/*.css
+**/*.css.map
 
 **/*.css
 **/*.css.map
