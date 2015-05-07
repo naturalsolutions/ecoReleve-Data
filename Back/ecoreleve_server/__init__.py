@@ -18,12 +18,7 @@ from ecoreleve_server.renderers.gpxrenderer import GPXRenderer
 from ecoreleve_server.Models import (
     DBSession,
     Base,
-    dbConfig,
-    ObservationDynProp,
-    ProtocoleType,
-    ProtocoleType_ObservationDynProp,
-    ObservationDynPropValue,
-    Observation
+    dbConfig
     )
 from ecoreleve_server.Views import add_routes
 
