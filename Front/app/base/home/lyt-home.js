@@ -1,5 +1,5 @@
-define(['marionette','translater','i18n'],
-function(Marionette, Translater) {
+define(['marionette','i18n'],
+function(Marionette) {
 	'use strict';
 
 	return Marionette.LayoutView.extend({
@@ -34,7 +34,7 @@ function(Marionette, Translater) {
 			);
 		},
 		onShow : function(options) {
-			this.translater = Translater.getTranslater();
+			//this.translater = Translater.getTranslater();
             this.$el.i18n();
         }
 	});

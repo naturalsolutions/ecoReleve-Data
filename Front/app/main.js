@@ -156,14 +156,16 @@ require.config({
 			deps: ['jquery'],
 			exports : 'Dropzone'
 		},
-		Translater : {
-			deps: ['i18n']
-		}
+		i18n : {
+			deps: ['jquery'],
+			exports : '$'
+		},
+
 	},
 });
 
 
-require(['app', 'templates'], function(app,templates){
+require(['app', 'templates','translater'], function(app,templates,Translater){
 		app.start();
-		//this.translater = Translater.getTranslater();
+		this.translater = Translater.getTranslater();
 });
