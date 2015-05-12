@@ -16,12 +16,18 @@ eval_ = Eval()
 class ListObjectWithDynProp():
 
 
-
-    def __init__(self,ObjContext,ObjWithDynProp):
+    def __init__(self,ObjContext,ObjWithDynProp, searchInfo = None):
         self.ObjContext = ObjContext
         self.ListPropDynValuesOfNow = {}
         self.ObjWithDynProp = ObjWithDynProp
         self.DynPropList = self.GetAllDynPropName()
+        if searchInfo is None :
+            self.statValues = None
+            self.dynValues = None
+        else : 
+            self.LoadListNowValues(criteria=searchInfo['criteria'])
+             #  TODO add offset , limit and order_by to the query
+
     def GetDynPropValueView (self): 
 
         table = Base.metadata.tables[self.ObjWithDynProp.__tablename__+'DynPropValuesNow']
@@ -45,12 +51,17 @@ class ListObjectWithDynProp():
             dynValues = self.ObjContext.execute(curQueryDynVal).fetchall()
             #  TODO add offset , limit and order_by to the query
             #  
-            return statValues,dynValues
+            self.statValues = statValues
+            self.dynValues = dynValues
 
+    def GetTypeProp (self,dynPropName) : 
+        
+        typeProp = self.DynPropList['TypeProp'].where(self.DynPropList['Name']==dynPropName).dropna().values[0]
+        return typeProp
     def WhereInDynProp (self,query,criteriaObj) :
 
-        dynPropName = criteriaObj['NameProp']
-        typeProp = self.DynPropList['TypeProp'].where(self.DynPropList['Name']==dynPropName).dropna().values[0]
+        dynPropName = criteriaObj['Column']
+        typeProp = self.GetTypeProp(dynPropName)
 
         print ('\n\n********* typeProp ************ ')
         print(typeProp)
@@ -70,8 +81,8 @@ class ListObjectWithDynProp():
 
     def GetQueryInStatProp (self,query,obj) :
 
-        if hasattr(self.ObjWithDynProp,obj['NameProp']) :
-            query=query.where(eval_.eval_binary_expr(getattr(self.ObjWithDynProp,obj['NameProp']),obj['Operator'],obj['Value']))
+        if hasattr(self.ObjWithDynProp,obj['Column']) :
+            query=query.where(eval_.eval_binary_expr(getattr(self.ObjWithDynProp,obj['Column']),obj['Operator'],obj['Value']))
             print('\n\n________StatProp query : ______________')
             print (query)
         return query
@@ -81,12 +92,13 @@ class ListObjectWithDynProp():
         fullQueryDynVal = select([self.GetDynPropValueView()])
         fullQueryStatVal = select([self.ObjWithDynProp])
         subQuery = select([self.ObjWithDynProp.ID])
+
         if criteria != [] :
             for obj in criteria:
                 if obj['Value'] != None and obj['Value']!='':
                     subQuery = self.GetQueryInStatProp(subQuery,obj)
                     fullQueryStatVal = self.GetQueryInStatProp(fullQueryStatVal,obj)
-                    if obj['NameProp'] in list(self.DynPropList['Name']) :
+                    if obj['Column'] in list(self.DynPropList['Name']) :
 
                         queryDynVal = self.GetQueryInDynProp(obj)
                         subQuery = subQuery.where(exists(queryDynVal))
@@ -99,20 +111,27 @@ class ListObjectWithDynProp():
         return fullQueryDynVal,fullQueryStatVal
 
     def GetFlatList(self) :
-        # TODO 
-        statVal,dynVal = self.LoadListNowValues()
-        statVal = pd.DataFrame(data=statVal)
-        dynVal = self.GetFlatDynVal(pd.DataFrame(data=dynVal),statVal)
+
+        statValDF = pd.DataFrame(data=self.statValues, columns = self.ObjWithDynProp.__table__.columns.keys())
+        dynValDF = pd.DataFrame(data=self.dynValues, columns = self.GetDynPropValueView().columns.keys())
+        allVal = self.GetFlatDynVal(dynValDF,statValDF)
+
+        return allVal.to_json(orient='records',date_format='iso')
 
     def GetFlatDynVal (self, dynValDF,statValDF) :
 
         Fk_Obj = self.ObjWithDynProp().GetSelfFKNameInValueTable()
-        for row in self.DynPropList :
-            statValDF[row['Name']] = None
+        statValDF = statValDF.set_index(self.ObjWithDynProp.ID.name)
 
-        for row in dynValDF : 
-            statValDF[row['Name']][row['ID'] ==row[Fk_Obj]] = dynValDF
-        return 
+        for nameProp in list(self.DynPropList['Name']):
+            statValDF[nameProp] = None
+
+        for i in dynValDF.index :
+            row = dynValDF.ix[i]
+            typeProp = self.GetTypeProp(row['Name'])
+            statValDF.loc[row[Fk_Obj],row['Name']]= row['Value'+typeProp]
+
+        return statValDF.reset_index()
 
 
 

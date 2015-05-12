@@ -15,8 +15,8 @@ class ObjectWithDynProp:
     def __init__(self,ObjContext):
         self.ObjContext = ObjContext
         self.PropDynValuesOfNow = {}
-        if self.ID != None :
-            self.LoadNowValues()
+        #if self.ID != None :
+        #   self.LoadNowValues()
 
     def GetType(self):
         raise Exception("GetType not implemented in children")

@@ -64,6 +64,7 @@ def getStation(request):
     curSta = DBSession.query(Station).get(id)
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     DisplayMode = request.params['DisplayMode']
+    curSta.LoadNowValues()
     print(curSta)
     return curSta.GetDTOWithSchema(Conf,DisplayMode)
     
@@ -74,6 +75,7 @@ def updateStation(request):
     data = request.json_body
     id = request.matchdict['id']
     curObs = DBSession.query(Station).get(id)
+    curSta.LoadNowValues()
     curObs.UpdateFromJson(data)
     transaction.commit()
     return {}
