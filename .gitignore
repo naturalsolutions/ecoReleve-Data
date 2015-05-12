@@ -5,8 +5,8 @@ Front/build/*
 **/*.css
 **/*.css.map
 
-Front/style/*.css
-Front/style/*.css.map
+Front/styles/*.css
+Front/styles/*.css.map
 
 **/config.js
 
