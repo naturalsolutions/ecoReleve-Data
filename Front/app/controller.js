@@ -4,11 +4,13 @@ define(['marionette', 'config',
 
 	/*==========  modules  ==========*/
 	'./modules/export/layouts/export-layout',
-	'./Demo/lyt-Obs',
-	'./Demo/lyt-Sta',
+
 	'./modules/import/layouts/lyt-import-gpx',
 	'./modules/input/layouts/lyt-input',
-	'./modules/stations/layouts/lyt-stations'
+	'./modules/stations/layouts/lyt-stations',
+
+	'./Demo/lyt-Obs',
+	'./Demo/lyt-Sta',
 
 ],function( Marionette, config, 
 	LytHome,

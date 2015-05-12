@@ -5,8 +5,8 @@ Front/build/*
 **/*.css
 **/*.css.map
 
-**/*.css
-**/*.css.map
+Front/app/styles/*.css
+Front/app/styles/*.css.map
 
 **/config.js
 
@@ -15,6 +15,6 @@ Front/build/*
 **/*.egg-info
 **/*.egg-info/*
 **/*.egg
-*.css
-*.css.map
+
 npm-debug.log
+web.config
