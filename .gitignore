@@ -18,3 +18,4 @@ Front/build/*
 *.css
 *.css.map
 npm-debug.log
+web.config
