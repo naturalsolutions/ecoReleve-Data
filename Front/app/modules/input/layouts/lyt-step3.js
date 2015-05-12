@@ -18,6 +18,7 @@ define([
 	'tmp/getUsers',
 
 	'models/station',
+	'i18n'
 
 ], function($, _, Backbone, Marionette, Radio, config, Swiper,
 	Swal, simplePagination,
@@ -67,6 +68,7 @@ define([
 			this.protosToRemove = [];
 		},
 		onShow: function(){
+			this.$el.i18n();
 			var content = getUsers.getElements('user');
 			$('#usersList').append(content);
 			this.addViews();

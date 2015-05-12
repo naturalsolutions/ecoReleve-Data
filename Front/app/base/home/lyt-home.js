@@ -34,7 +34,6 @@ function(Marionette) {
 			);
 		},
 		onShow : function(options) {
-			//this.translater = Translater.getTranslater();
             this.$el.i18n();
         }
 	});

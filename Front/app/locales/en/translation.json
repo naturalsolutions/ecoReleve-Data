@@ -23,17 +23,60 @@
 	"button" : {
 		"search" : "Search",
 		"clear" : "Clear",
-		"reset" : "Reset"
+		"reset" : "Reset",
+		"edit" :"Edit",
+		"add" : "Add",
+		"addObserver" : "Add a field worker",
+		"removeObserver" : "Remove an observer"
 
 	},
 	"shared" : {
 		"fieldworker" : "fieldworker",
-		"fieldworkersNb" : "field workers number"
-
+		"fieldworkersNb" : "field workers number",
+		"fieldactivity" : "field activity",
+		"coordinates" : "Coordinates",
+		"coordinatesMinLat" : "min lat",
+		"coordinatesMinLon" : "min lon",
+		"coordinatesMaxLat" :"max lat",
+		"coordinatesMaxLon" :"max lon",
+		"individual" : "Individual",
+		"region" : "Region",
+		"place" : "Place",
+		"accuracy" : "accuracy(m)",
+		"distanceObs" :"distance from obs",
+		"date" : "time",
+		"option" : {
+			"is" : "Is",
+			"isNot" : "Is not",
+			"contains" : "Contains"
+		}
 	},
 	"input" : {
+		"stepper" : {
+			"step1inputLabel" : "Start",
+			"step2inputLabel" : "Station",
+			"step3inputLabel" : "Protocols"
+		},
 		"step1Label" : "Select an action",
-		"step1NewSt" :"Create a new station"
+		"step1NewSt" :"Create a new station",
+		"step1ImpSt" : "Last imported station(s)",
+		"step1ExistSt" : "Existing station(s)",
+		"step1NewStCoords" : "new station with coordinates",
+		"step1NewStWitoutCoords" : "new station without coordinates",
+		"step1NewStMonitoredSite" : "new station from monitored site",
+		"step1ImpStLbel" : "last imported station(s)",
+		"step1ExistStLabel" : "from existing stations",
+		"step1ExistSitesLabel" :"from monitored sites",
+		"newStLocation" : "location",
+		"geolocation" : "Geolocation",
+		"newStLocationRegion" : "region*",
+		"newStLocationAccuracy" :"accuracy(m)*",
+		"newStName" : "station name*",
+		"newSiteType" :"site type*",
+		"newSiteName" :"site name*",
+		"fieldCaracteristics" : "field characteristics",
+		"allStFilterMonitoredSitesType" :"Monitored site type",
+		"allStFilterName" :"Name"
 
 	},
 	"import" : {

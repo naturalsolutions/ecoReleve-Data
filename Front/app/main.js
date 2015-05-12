@@ -164,7 +164,6 @@ require.config({
 	},
 });
 
-
 require(['app', 'templates','translater'], function(app,templates,Translater){
 		app.start();
 		this.translater = Translater.getTranslater();

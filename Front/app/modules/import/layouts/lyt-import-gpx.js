@@ -143,9 +143,10 @@ define([
 		},
 
 		init_GPX_stepper : function() {
-			var step1Label = this.translater.getValueFromKey('import.stepper.step1GPXLabel');
-			var step2Label = this.translater.getValueFromKey('import.stepper.step2GPXLabel');
-			var step3Label = this.translater.getValueFromKey('import.stepper.step3GPXLabel');
+			var step1Label = this.translater.getValueFromKey('import.stepper.step1GPXLabel'),
+			step2Label = this.translater.getValueFromKey('import.stepper.step2GPXLabel'),
+			step3Label = this.translater.getValueFromKey('import.stepper.step3GPXLabel');
+			
 			var SecondStep = new GPX_Step2({
 				model: this.model,
 				name: step1Label,

@@ -13,11 +13,11 @@ define([
 	'./lyt-step2',
 
 	'./lyt-step3',
-	'i18n'
+	'translater'
 
 ], function($, _, Backbone, Marionette, Swal,
 	StepperOrchestrator, IndivFilter,
-	Step1, Step2, Step3
+	Step1, Step2, Step3, Translater
 ){
 
 	'use strict';
@@ -42,7 +42,7 @@ define([
 		},
 		initialize: function(){
 			this.model = new Backbone.Model();
-				
+			this.translater = Translater.getTranslater();
 			/*
 			this.radio = Radio.channel('individual');
 			this.radio.comply('filterMask', this.filterMask, this);
@@ -50,23 +50,26 @@ define([
 		},
 
 		onRender: function(){
+			var step1Label = this.translater.getValueFromKey('input.stepper.step1inputLabel'),
+			step2Label = this.translater.getValueFromKey('input.stepper.step2inputLabel'),
+			step3Label = this.translater.getValueFromKey('input.stepper.step3inputLabel');
 
 			var FirstStep = new Step1({
 				model: this.model,
-				name: 'start',
+				name: step1Label,
 				tpl: 'app/modules/input/templates/tpl-step1.html'
 			});
 
 			var SecondStep = new Step2({
 				model: this.model,
-				name: 'station',
+				name: step2Label,
 				tpl: 'app/modules/input/templates/tpl-step2.html'
 			});
 
 			
 			var ThirdStep = new Step3({
 				model: this.model,
-				name: 'protocols',
+				name: step3Label,
 				tpl: 'app/modules/input/templates/tpl-step3.html',
 			});
 

@@ -9,6 +9,7 @@ define([
 	'tmp/getItems',
 	'tmp/getUsers',
 	'models/station',
+	'i18n'
 
 ], function($,Marionette, Radio, config, Swal,
 	getFieldActivity, getItems, getUsers, Station
@@ -31,6 +32,7 @@ define([
 			accuracy : 'input[name="stAccuracy"]'
 		},
 		onShow : function(){
+			this.$el.i18n();
 			this.generateSelectLists();
 			this.checkSiteNameDisplay();
 			this.getUsersList();

@@ -11,7 +11,7 @@
 					<input name="allSt-PK" class="form-control"  type="text" id="PK"/>
 				</div>
 				<div class="form-group col-xs-9" id="allSt-Monitored">
-						<label>Monitored site type</label><br/>
+						<label data-i18n="input.allStFilterMonitoredSitesType">Monitored site type</label><br/>
 						<select name="allSt-monitoredSiteType" class="form-control">
 							<option></option>
 						</select>
@@ -20,11 +20,11 @@
 
 			<div class="row">
 				<div class="form-group allSt-name col-xs-4">
-					<label >Name</label>
+					<label data-i18n="input.allStFilterName">Name</label>
 					<select id="allSt-Name-op" class="form-control" >
-						<option>Is</option>
-						<option>Is not</option>
-						<option>Contains</option>
+						<option data-i18n="shared.option.is">Is</option>
+						<option data-i18n="shared.option.isNot">Is not</option>
+						<option data-i18n="shared.option.contains">Contains</option>
 					</select>
 				</div>
 				<div id="stationType" class='form-group col-xs-8 allSt-name'>
@@ -36,7 +36,7 @@
 
 			<div class="row">
 				<div class="form-group col-xs-12" id='allSt-SitesNameCont'>
-					<label >Name</label>
+					<label data-i18n="input.allStFilterName">Name</label>
 					<select class="form-control" id="stMonitoredSiteName" name='allSt-siteName'/>
 				</div>
 			</div>
@@ -72,22 +72,22 @@
 			</div>
 		</fieldset>
 		<fieldset>
-			<legend class="text-capitalize">Field caracteristics</legend>
+			<legend class="text-capitalize" data-i18n="input.fieldCaracteristics">Field caracteristics</legend>
 			<div class="row">
 				<div class="form-group col-xs-12 col-lg-4">
-					<label>Fieldworker</label><br/>
+					<label  data-i18n="shared.fieldworker">Fieldworker</label><br/>
 					<select name="allSt-fieldWorker" class="form-control">
 						<option></option>
 					</select>
 				</div>
 				<div class="form-group col-xs-12 col-lg-4">
-					<label>Field activity</label><br/>
+					<label data-i18n="shared.fieldactivity">Field activity</label><br/>
 					<select name="allSt-fieldActivity" class="form-control">
 						<option></option>
 					</select>
 				</div>
 				<div class="form-group col-xs-12 col-lg-4">
-					<label>Region</label><br/>
+					<label data-i18n="shared.region">Region</label><br/>
 					<select name="allSt-region" class="form-control">
 						<option></option>
 					</select>
@@ -95,29 +95,29 @@
 			</div>
 		</fieldset>
 		<fieldset>
-			<legend class="text-capitalize">Coordinates</legend>
+			<legend class="text-capitalize" data-i18n="shared.coordinates">Coordinates</legend>
 			<div class="row">
 				<div class="form-group col-xs-3">
-					<label >min lat</label>
+					<label data-i18n="shared.coordinatesMinLat">min lat</label>
 					<input name="allSt-minLat" class="form-control  coords coord-min"  type="text" />
 				</div>
 				<div class="form-group col-xs-3">
-					<label>min lon</label>
+					<label data-i18n="shared.coordinatesMinLon">min lon</label>
 					<input name="allSt-minLon" class="form-control coords coord-min" type="text" />
 				</div>
 				<div class="form-group col-xs-3">
-					<label>max lat</label>
+					<label data-i18n="shared.coordinatesMaxLat">max lat</label>
 					<input name="allSt-maxLat" type="text" class="form-control coords coord-max"/>
 				</div>
 				 <div class="form-group col-xs-3">
-					<label>max lon</label>
+					<label data-i18n="shared.coordinatesMaxLon">max lon</label>
 					<input name="allSt-maxLon" type="text" class="form-control coords coord-max"/>
 				</div>
 			</div>
 		</fieldset>
 		<div class="row">
 			<div class="form-group col-xs-12">
-			<label>Individual</label><br/>
+			<label  data-i18n="shared.individual">Individual</label><br/>
 				<div class="input-group  picker">
 					<input class="form-control pickerInput required" name="allSt-indivId" type="text">
 					<span class="input-group-addon picker"><span class="glyphicon-plus"></span></span>
@@ -129,12 +129,12 @@
 			<div class="allSt-btn-group col-xs-12">
 				<button id="allSt-filter-btn" type="submit"
 						class="small btn btn-labeled btn-success pull-right">
-						 FILTER
+						 <span data-i18n="button.search">Search</span>
 					<span class="btn-label">
 						<i class="icon reneco reneco-search "/>
 					</span>
 				</button>
-				<button id="allSt-clear-btn" class="small btn btn-labeled">
+				<button id="allSt-clear-btn" class="small btn btn-labeled" data-i18n="button.clear">
 					CLEAR
 				</button>
 			</div>

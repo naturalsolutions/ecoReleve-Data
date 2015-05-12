@@ -16,8 +16,8 @@ define([
 	'tmp/getUsers',
 	'tmp/getFieldActivity',
 	'tmp/getRegions',
-	
 	'models/station',
+	'i18n'
 
 ], function($, _, Backbone, Marionette, Radio,
 	moment, datetime, Swal, BbForms, config,
@@ -39,9 +39,11 @@ define([
 				template: _.template(html)
 			}).render();
 			this.el =  this.form.el;
+			$(this.el).i18n();
 			this.radio = Radio.channel('input');
 		},
 		onShow : function(){
+			
 			var self = this;
 			var datefield = $("input[name='Date_']");
 			$(datefield).attr('placeholder', config.dateLabel);
@@ -64,7 +66,7 @@ define([
 			this.generateSelectLists();
 		},
 		onBeforeDestroy: function() {
-		  $('div.bootstrap-datetimepicker-widget').remove();
+			$('div.bootstrap-datetimepicker-widget').remove();
 		},
 		generateSelectLists : function(){
 			var content = getUsers.getElements('user');
@@ -104,7 +106,6 @@ define([
 				}
 				this.radio.command('changeDate');
 			}
-
 		}
 	});
 });
