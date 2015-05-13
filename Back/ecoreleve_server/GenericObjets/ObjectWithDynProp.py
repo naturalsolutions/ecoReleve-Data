@@ -15,7 +15,8 @@ class ObjectWithDynProp:
     def __init__(self,ObjContext):
         self.ObjContext = ObjContext
         self.PropDynValuesOfNow = {}
-        self.LoadNowValues()
+        if self.ID != None :
+            self.LoadNowValues()
 
     def GetType(self):
         raise Exception("GetType not implemented in children")
@@ -52,12 +53,14 @@ class ObjectWithDynProp:
 
     def SetProperty(self,nameProp,valeur) :
         if hasattr(self,nameProp):
+            print(nameProp+'\n')
             setattr(self,nameProp,valeur)
+            print(getattr(self,nameProp))
         else:
             if (nameProp in self.GetType().DynPropNames):
                 if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):
                     # on affecte si il y a une valeur et si elle est différente de la valeur existante
-                    #print('valeur modifiée pour ' + nameProp)
+                    print('valeur modifiée pour ' + nameProp)
                     NouvelleValeur = self.GetNewValue(nameProp)
                     NouvelleValeur.StartDate = datetime.today()
                     setattr(NouvelleValeur,Cle[self.GetDynProps(nameProp).TypeProp],valeur)
@@ -66,7 +69,7 @@ class ObjectWithDynProp:
                     self.GetDynPropValues().append(NouvelleValeur)
 
                 else:
-                    #print('valeur non modifiée pour ' + nameProp)
+                    print('valeur non modifiée pour ' + nameProp)
                     return
             else :
                 print('propriété inconnue ' + nameProp)
@@ -153,10 +156,15 @@ class ObjectWithDynProp:
         if (DisplayMode.lower() != 'edit'):
             for curName in schema:
                 schema[curName]['editorAttrs'] = { 'disabled' : True }
-        data =   self.GetFlatObject()              
         resultat = {
             'schema':schema,
-            'data' : data,
             'fieldsets' : self.GetType().GetFieldSets(FrontModule,schema)
         }
+
+        if self.ID :
+            data =   self.GetFlatObject()
+            resultat['data'] = data
+            resultat['data']['id'] = self.ID
+        else :
+            resultat['data'] = {'id':0}
         return resultat

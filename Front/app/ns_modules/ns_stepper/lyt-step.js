@@ -43,6 +43,22 @@ define([
 		},
 
 
+		animateIn: function() {
+			this.$el.animate(
+				{ left: 0 },
+				ANIMATION_DURATION,
+				_.bind(this.trigger, this, 'animateIn')
+			);
+		},
+
+		animateOut: function() {
+			this.$el.animate(
+				{ left: -500 },
+				ANIMATION_DURATION,
+				_.bind(this.trigger, this, 'animateOut')
+			);
+		},
+
 
 		parseOneTpl: function(myTpl){// Initialisation du model à partir du template
 
@@ -53,7 +69,6 @@ define([
 			$(tpl).find('input:not(:checkbox,:radio)').each(function(){
 
 				var name= ctx.name+'_' + this.name;
-			   
 
 				var rq = $(this).hasClass('required');
 				var obj={name : name, required : rq, };

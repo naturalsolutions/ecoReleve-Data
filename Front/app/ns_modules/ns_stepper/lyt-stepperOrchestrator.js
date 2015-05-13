@@ -5,9 +5,9 @@ define([
 	'marionette',
 	'sweetAlert',
 	'ns_stepper/lyt-step',
-	'translater'
-], function($, _, Backbone, Marionette, swal, LS,Translater) {
-
+	'translater',
+	'transition-region',
+], function($, _, Backbone, Marionette, swal, LS,Translater,TransitionRegion) {
 	'use strict';
 
 	return Marionette.LayoutView.extend({
@@ -34,6 +34,9 @@ define([
 
 		regions: {
 			StepManager: '#StepManager',
+			/*step_content: new Marionette.TransitionRegion({
+				el: '#step-content'
+			}),*/
 			step_content: '#step-content',
 			actions: '#actions',
 		},

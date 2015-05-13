@@ -2,15 +2,19 @@
 Front/bower_components/*
 Front/node_modules/*
 Front/build/*
-Front/app/styles/main.css
-Front/app/styles/main.css.map
-**/config.js
+**/*.css
+**/*.css.map
 
+Front/app/styles/*.css
+Front/app/styles/*.css.map
+
+**/config.js
 
 **/*.pyc
 **/*.ini
 **/*.egg-info
 **/*.egg-info/*
 **/*.egg
-*.css
-*.css.map
+
+npm-debug.log
+web.config

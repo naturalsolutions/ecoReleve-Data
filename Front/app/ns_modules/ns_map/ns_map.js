@@ -32,36 +32,31 @@ define([
 		// Store the private instance id.
 		this._instanceID = getNewInstanceID();
 		//check if there is a communicator
-
 		if(options.com){
 			this.com = options.com;
 			this.com.addModule(this);
 		}
+
 		this.url=options.url;
 		this.geoJson=options.geoJson;
 
-		this.geoJsonLayers = [];
+		this.elem = options.element || 'map';
 
-		this.zoom = options.zoom;
-
-		this.elem = options.element;
+		this.zoom = options.zoom || this.zoom;
+		this.disableClustring = options.disableClustring || this.disableClustring;
 		this.bbox = options.bbox || this.bbox;
-		this.cluster = options.cluster;
-		this.popup = options.popup;
-		this.legend = options.legend;
+		this.area = options.area || this.area;
+		this.cluster = options.cluster || this.cluster;
+		this.popup = options.popup || this.popup;
+		this.legend = options.legend || this.legend;
+		this.selection = options.selection || this.selection;
 
-
-		this.selection = options.selection;
 
 		this.dict={}; //list of markers
 		this.selectedMarkers = {}; // list of selected markers
-		this.url = options.url;
-		this.geoJson = options.geoJson;
 
+		this.geoJsonLayers = [];
 		this.initIcons();
-		// Return this object reference.
-		return( this );
-	
 	}
 
 	Map.prototype = {
@@ -84,35 +79,6 @@ define([
 		destroy: function(){
 			this.map.remove();
 			console.info('detroy map');
-		},
-
-		initialize: function(options) {
-			//check if there is a communicator
-			if(options.com){
-				this.com = options.com;
-				this.com.addModule(this);
-			}
-
-			this.url=options.url;
-			this.geoJson=options.geoJson;
-
-			this.elem = options.element || 'map';
-
-			this.zoom = options.zoom || this.zoom;
-			this.disableClustring = options.disableClustring || this.disableClustring;
-			this.bbox = options.bbox || this.bbox;
-			this.area = options.area || this.area;
-			this.cluster = options.cluster || this.cluster;
-			this.popup = options.popup || this.popup;
-			this.legend = options.legend || this.legend;
-			this.selection = options.selection || this.selection;
-
-
-			this.dict={}; //list of markers
-			this.selectedMarkers = {}; // list of selected markers
-
-			this.geoJsonLayers = [];
-			this.initIcons();
 		},
 
 		action: function(action, params){
@@ -471,9 +437,9 @@ define([
 			});
 
 			this.markersLayer = new CustomMarkerClusterGroup({
-					disableClusteringAtZoom : this.disableClustring, //2km
-					maxClusterRadius: 100,
-					polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
+				disableClusteringAtZoom : this.disableClustring, //2km
+				maxClusterRadius: 100,
+				polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
 			});
 
 

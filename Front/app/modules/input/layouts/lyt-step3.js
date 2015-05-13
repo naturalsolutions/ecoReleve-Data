@@ -7,10 +7,15 @@ define([
 	'config',
 	'swiper',
 	'sweetAlert',
+	
 	'simplePagination',
 
+
 	'ns_stepper/lyt-step',
+
+
 	'ns_form/NsFormsModule',
+
 
 	'../views/station-details',
 
@@ -849,17 +854,6 @@ define([
 				}
 			}
 		},
-
-
-
-
-
-
-
-
-
-
-
 
 		sweetAlert : function(title,type,message){
 
