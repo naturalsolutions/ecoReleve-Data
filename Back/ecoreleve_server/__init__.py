@@ -19,7 +19,8 @@ from ecoreleve_server.Models import (
     DBSession,
     Base,
     dbConfig,
-    Station
+    Station,
+    Observation
     )
 from ecoreleve_server.GenericObjets import *
 from ecoreleve_server.Views import add_routes
@@ -71,9 +72,9 @@ def main(global_config, **settings):
     config.set_root_factory(SecurityRoot)
 
     criteria = [
-    {'Column' : 'TOTO',
+    {'Column' : 'Name',
     'Operator' : 'Contains',
-    'Value' : 'blah'
+    'Value' : 'Tru'
     },
     # {'NameProp' : 'LAT',
     # 'Operator' : '=',
@@ -81,7 +82,7 @@ def main(global_config, **settings):
     # }
     ]
     searchInfo = {'criteria' : criteria}
-    listObj = ListObjectWithDynProp(DBSession,Station,searchInfo)
+    listObj = ListObjectWithDynProp(DBSession,Observation,searchInfo)
     print ('\n\n\n______RESULT static____________')
     print (listObj.statValues)
     print('\nlength : '+str(len(listObj.statValues)))

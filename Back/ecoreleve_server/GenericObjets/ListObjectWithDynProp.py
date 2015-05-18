@@ -57,6 +57,8 @@ class ListObjectWithDynProp():
     def GetTypeProp (self,dynPropName) : 
         
         typeProp = self.DynPropList['TypeProp'].where(self.DynPropList['Name']==dynPropName).dropna().values[0]
+        if typeProp == 'Integer':
+            typeProp = 'Int'
         return typeProp
     def WhereInDynProp (self,query,criteriaObj) :
 
@@ -88,7 +90,7 @@ class ListObjectWithDynProp():
         return query
 
     def GetFullQueries (self,criteria) :
-
+        #### Build queries to get StaticProp and DynamicProp ####
         fullQueryDynVal = select([self.GetDynPropValueView()])
         fullQueryStatVal = select([self.ObjWithDynProp])
         subQuery = select([self.ObjWithDynProp.ID])
@@ -112,14 +114,19 @@ class ListObjectWithDynProp():
 
     def GetFlatList(self) :
 
-        statValDF = pd.DataFrame(data=self.statValues, columns = self.ObjWithDynProp.__table__.columns.keys())
-        dynValDF = pd.DataFrame(data=self.dynValues, columns = self.GetDynPropValueView().columns.keys())
-        allVal = self.GetFlatDynVal(dynValDF,statValDF)
+        allVal = pd.DataFrame()
+        if len(self.statValues) > 0 :
+            statValDF = pd.DataFrame(data=self.statValues, columns = self.ObjWithDynProp.__table__.columns.keys())
+            if len(self.dynValues) > 0 :
+                dynValDF = pd.DataFrame(data=self.dynValues, columns = self.GetDynPropValueView().columns.keys())
+                allVal = self.GetFlatDynVal(dynValDF,statValDF)
+            else :
+                allVal = statValDF
 
         return allVal.to_json(orient='records',date_format='iso')
 
     def GetFlatDynVal (self, dynValDF,statValDF) :
-
+        #### add DynProp to staticProp as flat field ####
         Fk_Obj = self.ObjWithDynProp().GetSelfFKNameInValueTable()
         statValDF = statValDF.set_index(self.ObjWithDynProp.ID.name)
 
