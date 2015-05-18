@@ -49,6 +49,14 @@
 			"is" : "Is",
 			"isNot" : "Is not",
 			"contains" : "Contains"
+		},
+		"alertMsg" : {
+			"errorLoadingStation" : "Error in loading station from server",
+			"fieldWorkerNameErrMsg" : "This name is already selected, please select another name.",
+			"fieldWorkerNameErr" : "Name error",
+			"finishMsg" : "Finish",
+			"redoMsg" : "Redo",
+			"finishTitleMsg" : " Well done !"
 		}
 	},
 	"input" : {
@@ -76,8 +84,10 @@
 		"newSiteName" :"site name*",
 		"fieldCaracteristics" : "field characteristics",
 		"allStFilterMonitoredSitesType" :"Monitored site type",
-		"allStFilterName" :"Name"
-
+		"allStFilterName" :"Name",
+		"stationNavigationAlert" : "You don't have next or prev station for filtred data",
+		"stationNavigationTitle" : "Updationg station",
+		"importStMsg" : "There is not stored imported waypoints, please use import module to do that."
 	},
 	"import" : {
 		"stepper" : {
@@ -104,9 +114,7 @@
 		"ImportingDataAlert" : "Importing data",
 		"loadingDataAlert" : "Loading data error",
 		"importingDataWarning" : "Selected waypoint(s) are already imported",
-		"importServerError" : "Error sending gpx data to the server.",
-		"fieldWorkerNameErr" : "Name error",
-		"fieldWorkerNameErrMsg" : "This name is already selected, please select another name."
+		"importServerError" : "Error sending gpx data to the server."
 	}
 
 }

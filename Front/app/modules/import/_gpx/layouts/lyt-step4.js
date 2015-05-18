@@ -117,8 +117,8 @@ define([
 			$('#import-worker1').append(UsersList);
 		},
 		checkFWName : function(e){
-			var fieldWorkerNameErr = this.translater.getValueFromKey('import.fieldWorkerNameErr');
-			var fieldWorkerNameErrMsg = this.translater.getValueFromKey('import.fieldWorkerNameErrMsg');
+			var fieldWorkerNameErr = this.translater.getValueFromKey('shared.alertMsg.fieldWorkerNameErr');
+			var fieldWorkerNameErrMsg = this.translater.getValueFromKey('shared.alertMsg.fieldWorkerNameErrMsg');
 			
 			var selectedField = $(e.target);
 			var fieldName = $(e.target).attr('name');

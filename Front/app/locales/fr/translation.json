@@ -44,6 +44,14 @@
 			"is" : "est",
 			"isNot" : "n'est pas",
 			"contains" : "Contient"
+		},
+		"alertMsg" : {
+			"errorLoadingStation" : "Erreur de chargement de données du serveur",
+			"fieldWorkerNameErrMsg" : "Ce nom est déjà sélectionné. Merci de choisir un autre nom.",
+			"fieldWorkerNameErr" : "Erreur de nom",
+			"finishMsg" : "Fin",
+			"redoMsg" : "Refaire",
+			"finishTitleMsg" : " Bien fait !"
 		}
 	},
 	"input" : {
@@ -71,7 +79,10 @@
 		"newSiteName" :"nom de site*",
 		"fieldCaracteristics" : "caractéristiques",
 		"allStFilterMonitoredSitesType" :"type de site suivi",
-		"allStFilterName" :"Nom"
+		"allStFilterName" :"Nom",
+		"stationNavigationAlert" : "Pas de station suivante ou précédente pour les données filtrés",
+		"stationNavigationTitle" : "Mise à jour de station",
+		"importStMsg" : "Pas de stations importées."
 	},
 	"import" : {
 		"stepper" : {

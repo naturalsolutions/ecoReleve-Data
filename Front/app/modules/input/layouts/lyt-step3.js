@@ -23,14 +23,14 @@ define([
 	'tmp/getUsers',
 
 	'models/station',
-	'i18n'
+	'translater'
 
 ], function($, _, Backbone, Marionette, Radio, config, Swiper,
 	Swal, simplePagination,
 	Step, NsFormsModule,
 	StationDetails,
 	getProtocolsList, getUsers,
-	Station
+	Station, Translater
 ){
 
 	'use strict';
@@ -74,6 +74,7 @@ define([
 		},
 		onShow: function(){
 			this.$el.i18n();
+			this.translater = Translater.getTranslater();
 			var content = getUsers.getElements('user');
 			$('#usersList').append(content);
 			this.addViews();
@@ -385,8 +386,6 @@ define([
 				}
 			}
 		},
-
-
 		genInterfaceForCurrentProto: function(pkList, protocolName){
 			this.formsRegion.empty();
 			
@@ -464,6 +463,10 @@ define([
 			//$(this.ui.addProto).val('');
 		},
 		getNextInCollection : function(collection, stId, order){
+			var navigationMsg = this.translater.getValueFromKey('input.stationNavigationAlert'),
+			updateStationAlertTitle = this.translater.getValueFromKey('input.stationNavigationTitle'),
+			updateStationErr = this.translater.getValueFromKey('shared.alertMsg.errorLoadingStation');
+
 			//get order of current model in station to select next one
 			var newId, increment = 1 ;
 			var self = this;
@@ -473,7 +476,7 @@ define([
 			var currentOrderVal;
 			if (ln == 1){
 				//alert('You don\'t have next or prev record');
-				this.sweetAlert('navigation','warning','You don\'t have next or prev station for filtred data');
+				this.sweetAlert('navigation','warning',navigationMsg);
 			} else {
 				for (var i=0;i<ln; i++){
 					if(collection.models[i].get('PK') == stId){
@@ -494,7 +497,7 @@ define([
 				var firstPage = collection.state.firstPage
 				 // for next
 				if (((order=='next') && (currentPage == lastPage)) || ((order=='prev') && (currentPage == firstPage))) {
-					this.sweetAlert('navigation','warning','You don\'t have next or prev station for filtred data');
+					this.sweetAlert('navigation','warning',navigationMsg);
 				}
 				else {
 					// 
