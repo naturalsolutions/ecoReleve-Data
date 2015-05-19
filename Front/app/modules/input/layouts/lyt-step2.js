@@ -60,7 +60,7 @@ define([
 			var stationType = this.model.get('start_stationtype');
 			if(Number.isInteger(stationType)){
 				$('#btnPrev').css('display','');
-				$('#btnNext').addClass('NsFormModuleSaveStaForm');
+				//$('#btnNext').addClass('NsFormModuleSaveStaForm');
 				var stationForm = new StationView({objecttype:stationType});
 
 				var formModel = stationForm.nsform.model;
