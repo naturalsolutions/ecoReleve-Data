@@ -43,6 +43,8 @@ def count (request) :
 def getForms(request) :
 
     typeSta = request.params['ObjectType']
+    print('***************** GET FORMS ***********************')
+    print (typeSta)
     ModuleName = 'StaForm'
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     newSta = Station(FK_StationType = typeSta)

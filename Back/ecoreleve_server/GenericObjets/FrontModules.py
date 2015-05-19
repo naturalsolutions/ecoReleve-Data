@@ -42,12 +42,21 @@ class ModuleField(Base):
         return FieldSizeToClass[FieldSize]
 
     def GetDTOFromConf(self,IsEditable,CssClass):    
-        print(self.InputType)
-        return {
+        print('***************** GetDTOFromConf ***********************')
+        
+        print(self.Name)
+
+        dto = {
             'Name': self.Name,
             'type': self.InputType,
             'title' : self.LabelFr,
             'editable' : IsEditable,
             'editorClass' : str(self.editorClass) ,
-            'fieldClass' : str(self.fieldClass) + ' ' + CssClass
-            }     
+            'fieldClass' : str(self.fieldClass) + ' ' + CssClass,
+            'validators': [],
+            'options': [],
+            }
+        print (dto)
+        if self.Required == 1 :
+            dto['validators'].append("required")
+        return dto

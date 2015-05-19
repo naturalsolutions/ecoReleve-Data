@@ -57,15 +57,17 @@ define([
 			this.sites = new MonitoredSites();
 			this.listenTo(this.sites, 'reset', this.updateName); 
 			var stationType = this.model.get('start_stationtype');
-			if(stationType =='new' ||  stationType =='newSc' ||  stationType =='newSt'){
+			if(Number.isInteger(stationType)){
 				$('#btnPrev').css('display','');
-				var stationForm = new StationView();
-				var formModel = stationForm.form.model;
-				this.initModel(stationType,stationForm);
+				$('#btnNext').addClass('NsFormModuleSaveStaForm');
+				var stationForm = new StationView({objecttype:stationType});
+
+				var formModel = stationForm.nsform.model;
+				//this.initModel(stationType,stationForm);
 				this.leftRegion.show(stationForm);
 				// get stored values
 				this.feedTpl();
-				this.updateStationType(stationType);
+				//this.updateStationType(stationType);
 				
 
 
@@ -170,8 +172,8 @@ define([
 		initModel: function(type,formView){
 			
 			this.stepAttributes = [];
-			if ((type==='new' || type==='newSc' || type==='newSt')	&& formView  ){
-				var model =  formView.form.model;
+			if ((Number.isInteger(type)) && formView  ){
+				var model =  formView.nsform.model;
 				var schema = model.schema || {};
 				for(var key in schema) {
 					
@@ -207,7 +209,7 @@ define([
 				}
 			}
 		},
-		updateStationType : function(value){
+		/*updateStationType : function(value){
 			if(value == "new"){
 				// station with coordinates
 				$('#stRegion').addClass('hidden');
@@ -259,7 +261,9 @@ define([
 				//$('#input-station-title').text('New station from monitored site');
 				$('#stepper-header span').text('New station from monitored site');
 			}
-		},
+		},*/
+
+		
 		feedTpl: function(){
 			var ctx=this;
 			this.$el.find('input:not(:checkbox,:radio,:submit)').each(function(){
@@ -412,7 +416,7 @@ define([
 			}
 		},
 		nextOK: function(){
-			var result = false; 
+			/*var result = false; 
 			var stationType = this.model.get('start_stationtype');
 			if (stationType =='imported' || stationType =='old' || stationType =='monitoredSite') {
 				return true;
@@ -484,7 +488,7 @@ define([
 					});
 				}
 			});
-			return result;
+			return result;*/
 		},
 
 

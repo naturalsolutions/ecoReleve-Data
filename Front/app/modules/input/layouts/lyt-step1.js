@@ -26,7 +26,7 @@ define([
 		},
 
 		onShow: function(){
-			this.updateModel('new');
+			this.updateModel(1);
 		},
 
 		updateModel : function(value){

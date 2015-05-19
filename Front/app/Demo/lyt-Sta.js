@@ -56,7 +56,7 @@ define([
 	            	if (_this.objtype) {
 	            		this.model.set('FK_StationType',_this.objtype) ;
 	            	}
-            		this.model.set('creationDate',new Date()) ;
+            		this.model.set('creationDate',new Date());
         		},
         		
 			});

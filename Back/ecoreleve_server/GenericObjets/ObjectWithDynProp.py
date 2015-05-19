@@ -127,13 +127,15 @@ class ObjectWithDynProp:
         resultat = {}
         for curStatProp in self.__table__.columns:
             curEditable = Editable
-            CurModuleField = list(filter(lambda x : x.Name == curStatProp.key ,FrontModule.ModuleFields ))
+            print ('\n***************GetSchemaFromStaticProps***************************\n\n')
+
+            type_ = self.GetType().ID
+            CurModuleField = list(filter(lambda x : x.Name == curStatProp.key and x.TypeObj== str(type_) ,FrontModule.ModuleFields ))
             if (len(CurModuleField)> 0 ):
                 # Conf définie dans FrontModule
                 CurModuleField = CurModuleField[0]
                 if (CurModuleField.FormRender & 2) == 0:
                     curEditable = False
-
                 resultat[CurModuleField.Name] = CurModuleField.GetDTOFromConf(curEditable,str(ModuleField.GetClassFromSize(2)))
             else:
                     
