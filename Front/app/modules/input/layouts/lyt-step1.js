@@ -26,7 +26,9 @@ define([
 		},
 
 		onShow: function(){
-			this.updateModel('new');
+
+			this.updateModel(1);
+
 			this.$el.i18n();
 		},
 

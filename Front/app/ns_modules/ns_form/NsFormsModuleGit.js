@@ -44,7 +44,7 @@ define([
             }
             else {
                 this.id = 0;
-            }            
+            }
             if (options.displayMode) {
                 this.displayMode = options.displayMode;
             }
@@ -54,7 +54,7 @@ define([
             if (options.objecttype) {
                 this.objecttype = options.objecttype;
             }
-            else { 
+            else {
                 this.objecttype = null;
             }
             this.objecttype = options.objecttype;
@@ -83,7 +83,7 @@ define([
             //console.log(this.model);
             var url = this.modelurl
             var ctx = this;
-           	url += this.id;
+            url += this.id;
 
             $.ajax({
                 url: url,
@@ -91,12 +91,9 @@ define([
                 type: 'GET',
                 data: { FormName: this.name, ObjectType: this.objecttype, DisplayMode: this.displayMode },
                 dataType: 'json',
-                success: function (resp) {                    
+                success: function (resp) {
                     ctx.model.schema = resp.schema;
-                    if (resp.data){
-                    	ctx.model.attributes = resp.data;
-                    	ctx.model.id = resp.data['id'] ;
-                    }
+                    ctx.model.attributes = resp.data;
                     if (resp.fieldsets) {
                         // if fieldset present in response, we get it
                         ctx.model.fieldsets = resp.fieldsets;
@@ -107,7 +104,7 @@ define([
                     ctx.showForm();
                 },
                 error: function (data) {
-                    alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objecttype);
+                    //alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objecttype);
                 }
             });
         },
@@ -121,36 +118,40 @@ define([
             this.buttonRegion.forEach(function (entry) {
                 $('#' + entry).html(ctx.template);
             });
+            
 
+            
             this.displaybuttons();
         },
 
-        
+
 
         displaybuttons: function () {
             var ctx = this;
-            this.buttonRegion.forEach(function (entry) {
-                if (ctx.displayMode == 'edit') {
-                    $('#' + entry).find('.NsFormModuleCancel' + ctx.name).attr('style', 'display:');
-                    $('#' + entry).find('.NsFormModuleSave' + ctx.name).attr('style', 'display:');
-                    $('#' + entry).find('.NsFormModuleClear' + ctx.name).attr('style', 'display:');
-                    $('#' + entry).find('.NsFormModuleEdit' + ctx.name).attr('style', 'display:none');
-                }
-                else {
-                    $('#' + entry).find('.NsFormModuleCancel' + ctx.name).attr('style', 'display:none');
-                    $('#' + entry).find('.NsFormModuleSave' + ctx.name).attr('style', 'display:none');
-                    $('#' + entry).find('.NsFormModuleClear' + ctx.name).attr('style', 'display:none');
-                    $('#' + entry).find('.NsFormModuleEdit' + ctx.name).attr('style', 'display:');
-                }
 
-                // $('#' + this.buttonRegion).on('click #NsFormModuleSave', this.butClickSave);
+            if (ctx.displayMode == 'edit') {
+                $('.NsFormModuleCancel' + ctx.name).attr('style', 'display:');
+                $('.NsFormModuleSave' + ctx.name).attr('style', 'display:');
+                $('.NsFormModuleClear' + ctx.name).attr('style', 'display:');
+                $('.NsFormModuleEdit' + ctx.name).attr('style', 'display:none');
+                console.log($('#' + this.formRegion));
+                $('#' + this.formRegion).find('input:enabled:first').focus()
                 
-            });
+            }
+            else {
+                $('.NsFormModuleCancel' + ctx.name).attr('style', 'display:none');
+                $('.NsFormModuleSave' + ctx.name).attr('style', 'display:none');
+                $('.NsFormModuleClear' + ctx.name).attr('style', 'display:none');
+                $('.NsFormModuleEdit' + ctx.name).attr('style', 'display:');
+            }
+
+
             $('.NsFormModuleSave' + ctx.name).click($.proxy(ctx.butClickSave, ctx));
             $('.NsFormModuleEdit' + ctx.name).click($.proxy(ctx.butClickEdit, ctx));
             $('.NsFormModuleClear' + ctx.name).click($.proxy(ctx.butClickClear, ctx));
+            $('.NsFormModuleCancel' + ctx.name).click($.proxy(ctx.butClickCancel, ctx));
         },
-        butClickSave: function (e) {           
+        butClickSave: function (e) {
             this.BBForm.commit();
 
             if (this.model.attributes["id"] == 0) {
@@ -167,12 +168,13 @@ define([
 
                     success: function (model, response) {
                         // Getting ID of created record, from the model (has beeen affected during model.save in the response)
+                        ctx.saveSuccess(model, response);
                         ctx.id = ctx.model.id;
                         _this.savingSuccess(response);
                         if (ctx.redirectAfterPost != "") {
                             // If redirect after creation
                             var TargetUrl = ctx.redirectAfterPost.replace('@id', ctx.id);
-                            
+
                             if (window.location.href == window.location.origin + TargetUrl) {
                                 // if same page, relaod
                                 window.location.reload();
@@ -194,6 +196,7 @@ define([
                     error: function(response){
                         _this.savingError(response);
                     }
+
                 });
             }
             else {
@@ -201,7 +204,9 @@ define([
                 this.model.save(null, {
                     success: function (model, response) {
                         _this.savingSuccess(response);
-
+                        console.log(model);
+                        console.log(response);
+                        ctx.saveSuccess(model, response);
                         ctx.displayMode = 'display';
                         // reaload updated record from AJAX Call
                         ctx.initModel();
@@ -218,6 +223,15 @@ define([
         butClickEdit: function (e) {
             e.preventDefault();
             this.displayMode = 'edit';
+            this.initModel();
+            this.displaybuttons();
+
+            
+
+        },
+        butClickCancel: function (e) {
+            e.preventDefault();
+            this.displayMode = 'display';
             this.initModel();
             this.displaybuttons();
         },
@@ -243,9 +257,13 @@ define([
         BeforeShow: function () {
             // to be extended called after render, before the show function
         },
-        
 
-
+        saveSuccess: function (model, response) {
+            // To be extended, called after save on model if success
+        },
+        saveError: function (data, response) {
+            // To be extended, called after save on model if error
+        },
     });
 
 });
