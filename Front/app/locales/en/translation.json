@@ -1,0 +1,120 @@
+{
+	"tiles" :{
+		"input" : "Manual entry",
+		"manual-import" : "Manual import",
+		"auto-import" : "Automatic import",
+		"export" : "export",
+		"sites" : "Monitored sites",
+		"individuals" : "Individuals",
+		"validation" : "Validate",
+		"data" : "My data",
+		"stations" : "Stations",
+		"objects" : "Objects"
+	},
+	"header" : {
+
+
+	},
+	"stepper" : {
+			"btnNext" : "NEXT",
+			"btnPrev"  : "PREV",
+			"btnFinish" : "FINISH"
+	},
+	"button" : {
+		"search" : "Search",
+		"clear" : "Clear",
+		"reset" : "Reset",
+		"edit" :"Edit",
+		"add" : "Add",
+		"addObserver" : "Add a field worker",
+		"removeObserver" : "Remove an observer"
+
+	},
+	"shared" : {
+		"fieldworker" : "fieldworker",
+		"fieldworkersNb" : "field workers number",
+		"fieldactivity" : "field activity",
+		"coordinates" : "Coordinates",
+		"coordinatesMinLat" : "min lat",
+		"coordinatesMinLon" : "min lon",
+		"coordinatesMaxLat" :"max lat",
+		"coordinatesMaxLon" :"max lon",
+		"individual" : "Individual",
+		"region" : "Region",
+		"place" : "Place",
+		"accuracy" : "accuracy(m)",
+		"distanceObs" :"distance from obs",
+		"date" : "time",
+		"option" : {
+			"is" : "Is",
+			"isNot" : "Is not",
+			"contains" : "Contains"
+		},
+		"alertMsg" : {
+			"errorLoadingStation" : "Error in loading station from server",
+			"fieldWorkerNameErrMsg" : "This name is already selected, please select another name.",
+			"fieldWorkerNameErr" : "Name error",
+			"finishMsg" : "Finish",
+			"redoMsg" : "Redo",
+			"finishTitleMsg" : " Well done !"
+		}
+	},
+	"input" : {
+		"stepper" : {
+			"step1inputLabel" : "Start",
+			"step2inputLabel" : "Station",
+			"step3inputLabel" : "Protocols"
+		},
+		"step1Label" : "Select an action",
+		"step1NewSt" :"Create a new station",
+		"step1ImpSt" : "Last imported station(s)",
+		"step1ExistSt" : "Existing station(s)",
+		"step1NewStCoords" : "new station with coordinates",
+		"step1NewStWitoutCoords" : "new station without coordinates",
+		"step1NewStMonitoredSite" : "new station from monitored site",
+		"step1ImpStLbel" : "last imported station(s)",
+		"step1ExistStLabel" : "from existing stations",
+		"step1ExistSitesLabel" :"from monitored sites",
+		"newStLocation" : "location",
+		"geolocation" : "Geolocation",
+		"newStLocationRegion" : "region*",
+		"newStLocationAccuracy" :"accuracy(m)*",
+		"newStName" : "station name*",
+		"newSiteType" :"site type*",
+		"newSiteName" :"site name*",
+		"fieldCaracteristics" : "field characteristics",
+		"allStFilterMonitoredSitesType" :"Monitored site type",
+		"allStFilterName" :"Name",
+		"stationNavigationAlert" : "You don't have next or prev station for filtred data",
+		"stationNavigationTitle" : "Updationg station",
+		"importStMsg" : "There is not stored imported waypoints, please use import module to do that."
+	},
+	"import" : {
+		"stepper" : {
+			"step1GPXLabel" : "Data",
+			"step2GPXLabel" : "Details",
+			"step3GPXLabel" : "Metadata"
+		},
+		"gpxHelp" : "GPX, or GPS eXchange Format is an XML schema designed as a common GPS data format. It can be used to describe waypoints, tracks, and routes.",
+		"fileSelection" : "select a file",
+		"fileSelectionMsg" : "Please select a file exported from your GPS in GPX format.",
+		"fileSelectionSuccessMsg" : "Gpx file is successfully loaded. You have",
+		"loadingFileMsg" : "  waypoints are loaded from a total of ",
+		"fileDataError" : " Please check data for the following waypoints:",
+		"fileTypeMsgError" : "Please check gpx file structure. There is not stored waypoints !",
+		"fileApiError" : "File API is not supported by this version of browser",
+		"fileBrowserApiError" : "Please update your browser and check again, or use another browser",
+		"fileTypeError"  : "File type is not supported",
+		"fileTypeAlertMsg" : "Please select a GPX file",
+		"waypoint" : " waypoint",
+		"waypointsError" : "No waypoints selected",
+		"waypointsErrorMsg" : "Please select at least one waypoint to import.",
+		"fieldActivity" : "Field activity",
+		"globalFieldActivity" : "Global field activity",
+		"ImportingDataAlert" : "Importing data",
+		"loadingDataAlert" : "Loading data error",
+		"importingDataWarning" : "Selected waypoint(s) are already imported",
+		"importServerError" : "Error sending gpx data to the server."
+	}
+
+}

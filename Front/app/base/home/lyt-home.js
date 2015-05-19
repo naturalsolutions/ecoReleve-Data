@@ -1,6 +1,7 @@
-define(['marionette'],
+define(['marionette','i18n'],
 function(Marionette) {
 	'use strict';
+
 	return Marionette.LayoutView.extend({
 		template: 'app/base/home/tpl/tpl-home.html',
 		className: 'home-page ns-full-height animated',
@@ -31,6 +32,9 @@ function(Marionette) {
 				500,
 				_.bind(this.trigger, this, 'animateOut')
 			);
-		}
+		},
+		onShow : function(options) {
+            this.$el.i18n();
+        }
 	});
 });

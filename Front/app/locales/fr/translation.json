@@ -1,0 +1,115 @@
+{
+	"tiles" :{
+		"input" : "Saisie",
+		"manual-import" : "Import",
+		"auto-import" : "Import automatique",
+		"export" : "Export",
+		"sites" : "Sites monitorés",
+		"individuals" : "Individus",
+		"validation" : "Validation",
+		"data" : "Mes données",
+		"stations" : "Stations",
+		"objects" : "Objets"
+	},
+	"stepper" : {
+			"btnNext" : "Suivant",
+			"btnPrev"  : "Précédent",
+			"btnFinish" : "Fin"
+	},
+	"button" : {
+		"search" : "Rechercher",
+		"clear" : "Nettoyer",
+		"reset" : "Annuler",
+		"edit" :"Editer",
+		"add" : "Ajouter",
+		"addObserver" : "Ajouter un observateur",
+		"removeObserver" : "Enlever un observateur"
+	},
+	"shared" : {
+		"fieldworker" : "Observateur",
+		"fieldworkersNb" : "Nombre d'observateurs",
+		"fieldactivity" : "activité",
+		"coordinates" : "Coordonnées",
+		"coordinatesMinLat" : "lat min",
+		"coordinatesMinLon" : "lon min",
+		"coordinatesMaxLat" :"lat max",
+		"coordinatesMaxLon" :"lon max",
+		"individual" : "Individu",
+		"region" : "Région",
+		"place" : "lieu",
+		"accuracy" : "précision(m)",
+		"distanceObs" :"distance de l'observateur",
+		"date" : "date",
+		"option" : {
+			"is" : "est",
+			"isNot" : "n'est pas",
+			"contains" : "Contient"
+		},
+		"alertMsg" : {
+			"errorLoadingStation" : "Erreur de chargement de données du serveur",
+			"fieldWorkerNameErrMsg" : "Ce nom est déjà sélectionné. Merci de choisir un autre nom.",
+			"fieldWorkerNameErr" : "Erreur de nom",
+			"finishMsg" : "Fin",
+			"redoMsg" : "Refaire",
+			"finishTitleMsg" : " Bien fait !"
+		}
+	},
+	"input" : {
+		"stepper" : {
+			"step1inputLabel" : "Type de station",
+			"step2inputLabel" : "Details de station",
+			"step3inputLabel" : "Saisie de protocoles"
+		},
+		"step1Label" : "Sélectionnez une action",
+		"step1NewSt" :"Créer une nouvelle station",
+		"step1ImpSt" : "Dernières stations importées",
+		"step1ExistSt" : "Stations existantes",
+		"step1NewStCoords" : "Avec coordonnées",
+		"step1NewStWitoutCoords" : "Sans coordonnées",
+		"step1NewStMonitoredSite" : "Site suivi",
+		"step1ImpStLbel" : "stations importées",
+		"step1ExistStLabel" : "stations existantes",
+		"step1ExistSitesLabel" :"sites suivis",
+		"newStLocation" : "position",
+		"geolocation" : "position courante",
+		"newStLocationRegion" : "région*",
+		"newStLocationAccuracy" :"précision(m)*",
+		"newStName" : "nom de station*",
+		"newSiteType" :"type de site*",
+		"newSiteName" :"nom de site*",
+		"fieldCaracteristics" : "caractéristiques",
+		"allStFilterMonitoredSitesType" :"type de site suivi",
+		"allStFilterName" :"Nom",
+		"stationNavigationAlert" : "Pas de station suivante ou précédente pour les données filtrés",
+		"stationNavigationTitle" : "Mise à jour de station",
+		"importStMsg" : "Pas de stations importées."
+	},
+	"import" : {
+		"stepper" : {
+			"step1GPXLabel" : "Données",
+			"step2GPXLabel" : "Details",
+			"step3GPXLabel" : "Metadonnées"
+		},
+		"gpxHelp" : "GPX ou GPS eXchange Format est un format d'échange de données GPS. Il peut être utilisé pour décrire des points d'intéret (waypoints), des tracés et des itinéraires .",
+		"fileSelection" : "Sélectionnez un fichier",
+		"fileSelectionMsg" : "Merci de sélectionner un fichier au format GPX (format d'export de GPS)",
+		"fileSelectionSuccessMsg" : "Fichier est chargé avec succès. Vous avez ",
+		"loadingFileMsg" : "  points chargés sur un total de  ",
+		"fileDataError" : " Merci de vérifier les points suivants:",
+		"fileTypeMsgError" : "Merci de vérifier la structure du fichier.",
+		"fileApiError" : "File API n'est pas supportée par cette version de navigateur",
+		"fileBrowserApiError" : "Merci de mettre à jour votre navigateur et réessayer ou utiliser un autre navigateur",
+		"fileTypeError"  : "Type de fichier non supporté",
+		"fileTypeAlertMsg" : "Merci de sélectionner un fichier GPX",
+		"waypoint" : " point",
+		"waypointsError" : "Aucun point n'est sélectionné",
+		"waypointsErrorMsg" : "Merci de sélectionner au moins un point à importer.",
+		"globalFieldActivity" : "Activité globale",
+		"ImportingDataAlert" : "Import de données",
+		"loadingDataAlert" : "Erreur de transfert",
+		"importingDataWarning" : "Les points sélectionnés sont déjà importés",
+		"importServerError" : "Erreur de transfert de données vers le serveur.",
+		"fieldWorkerNameErr" : "Erreur de nom",
+		"fieldWorkerNameErrMsg" : "Ce nom est déjà sélectionné. Merci de choisir un autre nom."
+	}
+}

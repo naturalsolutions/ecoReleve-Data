@@ -2,12 +2,12 @@
 		<div class="ui fluid basic large form segment"> 
 			<div class="grouped fields">
 				<br>
-				<h4 class="text-center" for="male">select an action</h4>
+				<h4 class="text-center" for="male" data-i18n="input.step1Label">select an action</h4>
 				<br>
 				<div class="tile-inside-container">
 
 					<div class="new tile-inside noselect">
-						<h4>Create a new station</h4>
+						<h4 data-i18n="input.step1NewSt">Create a new station</h4>
 						<div class="picto">
 							<i class="fa fa-3x huge icon reneco reneco-stations "></i>
 							<i class="fa fa-3x icon reneco reneco-add"></i>
@@ -15,25 +15,25 @@
 						<div class="radio">
 							<label for="st10">
 								<input type="radio" name="stationtype" value="new" checked class="stationtype" id ="st10">
-								new station with coordinates
+								<span data-i18n="input.step1NewStCoords">new station with coordinates</span>
 							</label>
 						</div>
 						<div class="radio">
 							<label>
 									<input type="radio" name="stationtype" value="newSc">
-									new station without coordinates
+									<span data-i18n="input.step1NewStWitoutCoords">new station without coordinates</span>
 							</label>
 						</div>
 						<div class="radio">
 							<label>
 								<input type="radio" name="stationtype" value="newSt">
-								new station from monitored site
+								<span data-i18n="input.step1NewStMonitoredSite">new station from monitored site</span>
 							</label>
 						</div>
 					</div>
 
 					<div class="field tile-inside radio-select noselect">
-						<h4>Last imported station(s)</h4>
+						<h4 data-i18n="input.step1ImpSt">Last imported station(s)</h4>
 						<div class="picto">
 							<i class="fa fa-3x huge icon reneco reneco-stations "></i>
 							<i class="fa fa-3x icon reneco reneco-import"></i>
@@ -41,13 +41,13 @@
 						<div class="radio">
 							<label for="st2">
 								<input type="radio" name="stationtype" class="stationtype" value="imported" id ="st2" >
-								last imported station(s)
+								<span data-i18n="input.step1ImpStLbel">last imported station(s)</span>
 							</label>
 						</div>
 					</div>
 
 					<div class="field tile-inside radio-select noselect">
-						<h4>Existing station(s)</h4>
+						<h4 data-i18n="input.step1ExistSt">Existing station(s)</h4>
 						<div class="picto">
 							<i class="fa fa-3x huge icon reneco reneco-stations "></i>
 							<i class="fa fa-3x icon reneco reneco-search"></i>
@@ -55,13 +55,13 @@
 						<div class="radio">
 							<label for="st3">
 								<input type="radio" name="stationtype" value="old" id ="st3" class="stationtype">
-								from existing stations
+								<span data-i18n="input.step1ExistStLabel">from existing stations</span>
 							</label>
 						</div>
 						<div class="radio">
 							<label>
 							<input type="radio" name="stationtype" value="monitoredSite">
-							from monitored site
+							<span data-i18n="input.step1ExistSitesLabel">from monitored sites</span>
 							</label>
 						</div>
 					</div>

@@ -4,10 +4,10 @@ define([
 	'backbone',
 	'marionette',
 	'sweetAlert',
-	'ns_stepper/lyt-step', 
+	'ns_stepper/lyt-step',
+	'translater',
 	'transition-region',
-], function($, _, Backbone, Marionette, swal, LS, TransitionRegion) {
-
+], function($, _, Backbone, Marionette, swal, LS,Translater,TransitionRegion) {
 	'use strict';
 
 	return Marionette.LayoutView.extend({
@@ -65,7 +65,7 @@ define([
 		onShow: function(){
 			this.initNavSteps();
 			this.toStep(0);
-			
+			this.$el.i18n();
 		},
 
 		onRender: function(){
@@ -74,7 +74,10 @@ define([
 
 		initNavSteps: function(){
 			for (var i = 0; i < this.steps.length; i++) {
-				this.$el.find('#step-nav').append('<li class="step-item" id="'+this.steps[i].name+'"  disabled=disabled><span class="badge">'+(i+1)+'</span><span class="hidden-xs">'+this.steps[i].name+'</span><span class="chevron"></span></li>');
+				var id = this.steps[i].name;
+				// delete space
+				id = id.replace(/ /g,"");
+				this.$el.find('#step-nav').append('<li class="step-item" id="'+ id +'"  disabled=disabled><span class="badge">'+(i+1)+'</span><span class="hidden-xs">'+this.steps[i].name+'</span><span class="chevron"></span></li>');
 			};
 		},
 
@@ -138,7 +141,9 @@ define([
 		
 
 		toStep: function(numstep){
-
+			var translater = Translater.getTranslater();
+			var nextBtnLabel = translater.getValueFromKey('stepper.btnNext');
+			var finishBtnLabel = translater.getValueFromKey('stepper.btnFinish');
 			this.currentStep = numstep;
 			this.step_content.show( this.steps[this.currentStep], {preventDestroy: true} );
 			this.check();
@@ -149,18 +154,13 @@ define([
 
 				//this.$el.find('#btnNext').attr( 'disabled', 'disabled');
 				this.$el.find('#btnNext').addClass('finished').find( 'span'
-					).html('Finish').parent().find('.icon').removeClass('rightarrow').addClass('validate');
-
+					).html(finishBtnLabel).parent().find('.icon').removeClass('rightarrow').addClass('validate');
 			}
 			else {
 				 this.$el.find('#btnNext').removeClass('finished').find( 'span'
-					).html('Next').parent().find('.icon').removeClass('validate').addClass('rightarrow');
+					).html(nextBtnLabel).parent().find('.icon').removeClass('validate').addClass('rightarrow');
 			}
-
 			this.displayPrev(this.currentStep);
-			
-
-
 		},
 
 		check: function(){
@@ -190,13 +190,21 @@ define([
 		},
 
 		styleNav: function(){
+			var id = this.steps[this.currentStep].name;
+			var idCompleteStep ;
+			// delete space
+			id = id.replace(/ /g,"");
 			this.$el.find('#step-nav li.step-item.active').removeClass('active');
-			this.$el.find('#step-nav li#'+this.steps[this.currentStep].name).addClass('active');
+			this.$el.find('#step-nav li#'+ id).addClass('active');
 			for (var i = 0; i < this.currentStep; i++) {
-				this.$el.find('#step-nav li#'+this.steps[i].name).addClass('complete');
+				idCompleteStep = this.steps[i].name;
+				idCompleteStep = idCompleteStep.replace(/ /g,"");
+				this.$el.find('#step-nav li#'+idCompleteStep).addClass('complete');
 			};
 			for (var i = this.currentStep; i < this.steps.length; i++) {
-				this.$el.find('#step-nav li#'+this.steps[i].name).removeClass('complete');
+				idCompleteStep = this.steps[i].name;
+				idCompleteStep = idCompleteStep.replace(/ /g,"");
+				this.$el.find('#step-nav li#'+idCompleteStep).removeClass('complete');
 			};
 		},
 
@@ -247,17 +255,19 @@ define([
 		},
 
 		alert_end: function() {
+			var finishMsg = translater.getValueFromKey('shared.alertMsg.finishMsg'),
+			redoMsg = translater.getValueFromKey('shared.alertMsg.redoMsg'),
+			finishTitleMsg = translater.getValueFromKey('shared.alertMsg.finishTitleMsg');
 
 			var self = this;
 			swal({
-
-				title: " Well done ! ",
+				title: finishTitleMsg,
 				text: "",
 				type: "success",
 				showCancelButton: true,
 				confirmButtonColor: "green",
-				confirmButtonText: "Redo",
-				cancelButtonText: "Finish",
+				confirmButtonText: redoMsg,
+				cancelButtonText: finishMsg,
 				closeOnConfirm: true,
 				closeOnCancel: true
 				},

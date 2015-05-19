@@ -7,7 +7,7 @@ from datetime import datetime
 from .FrontModules import FrontModule,ModuleField
 
 
-DynPropType = {'string':'Text','float':'Text','date':'Date','integer':'Text'}
+DynPropType = {'string':'Text','float':'Text','date':'Date','integer':'Text','int':'Text'}
 
 class ObjectTypeWithDynProp:
 

@@ -1,8 +1,8 @@
 define([
 	'ns_stepper/lyt-stepperOrchestrator',
-	'radio'
-
-], function(StepperOrchestrator,Radio) {
+	'radio',
+	'translater'
+], function(StepperOrchestrator,Radio,Translater) {
 
 	'use strict';
 
@@ -24,8 +24,9 @@ define([
 		},
 
 		prevStep: function(){
+			var translater = Translater.getTranslater();
 			if(this.currentStep === (this.steps.length - 1)){
-				this.$el.find('#btnNext').find( 'span').text('Next');
+				this.$el.find('#btnNext').find( 'span').text(translater.getValueFromKey('stepper.btnNext'));
 			}
 			this.currentStep === 0 ? this.currentStep : this.currentStep--;
 			this.toStep(this.currentStep);

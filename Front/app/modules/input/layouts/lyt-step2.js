@@ -21,11 +21,12 @@ define([
 	'collections/monitoredsites',
 	'models/position',
 	'models/station',
+	'translater'
 
 ], function($, _, Backbone, Marionette, config, Swal, dateTimePicker, Radio,
 	Step, NsMap, Com,
 	StationView, Grid, FilterView, GridView,
-	MonitoredSites, Position, Station
+	MonitoredSites, Position, Station, Translater
 ){
 
 	'use strict';
@@ -49,7 +50,7 @@ define([
 			rightRegion : '#inputStRight'
 		},
 		onShow: function(){
-			
+			this.translater = Translater.getTranslater();
 			this.radio = Radio.channel('input');
 			this.radio.comply('generateStation', this.generateStation, this);
 			this.radio.comply('movePoint', this.movePoint, this);
@@ -57,15 +58,17 @@ define([
 			this.sites = new MonitoredSites();
 			this.listenTo(this.sites, 'reset', this.updateName); 
 			var stationType = this.model.get('start_stationtype');
-			if(stationType =='new' ||  stationType =='newSc' ||  stationType =='newSt'){
+			if(Number.isInteger(stationType)){
 				$('#btnPrev').css('display','');
-				var stationForm = new StationView();
-				var formModel = stationForm.form.model;
-				this.initModel(stationType,stationForm);
+				//$('#btnNext').addClass('NsFormModuleSaveStaForm');
+				var stationForm = new StationView({objecttype:stationType});
+
+				var formModel = stationForm.nsform.model;
+				//this.initModel(stationType,stationForm);
 				this.leftRegion.show(stationForm);
 				// get stored values
 				this.feedTpl();
-				this.updateStationType(stationType);
+				//this.updateStationType(stationType);
 				
 
 
@@ -111,6 +114,7 @@ define([
 		},
 
 		last_imported_stations : function () {
+				var importMsg = this.translater.getValueFromKey('input.importStMsg');
 				this.initModel('import',null);
 				var ln = this.lastImportedStations.length;
 				if (ln > 0){
@@ -161,7 +165,7 @@ define([
 					map.addCollection(lastImportedStations);
 				} else {
 					// no stored waypoints
-					$('#inputStLeft').html('<h4> there is not stored imported waypoints, please use import module to do that. </h4>');
+					$('#inputStLeft').html('<h4>' + importMsg + '</h4>');
 				}
 				$('#stepper-header span').text('Last imported station(s)');
 				
@@ -170,8 +174,8 @@ define([
 		initModel: function(type,formView){
 			
 			this.stepAttributes = [];
-			if ((type==='new' || type==='newSc' || type==='newSt')	&& formView  ){
-				var model =  formView.form.model;
+			if ((Number.isInteger(type)) && formView  ){
+				var model =  formView.nsform.model;
 				var schema = model.schema || {};
 				for(var key in schema) {
 					
@@ -207,7 +211,7 @@ define([
 				}
 			}
 		},
-		updateStationType : function(value){
+		/*updateStationType : function(value){
 			if(value == "new"){
 				// station with coordinates
 				$('#stRegion').addClass('hidden');
@@ -259,7 +263,9 @@ define([
 				//$('#input-station-title').text('New station from monitored site');
 				$('#stepper-header span').text('New station from monitored site');
 			}
-		},
+		},*/
+
+		
 		feedTpl: function(){
 			var ctx=this;
 			this.$el.find('input:not(:checkbox,:radio,:submit)').each(function(){
@@ -412,7 +418,7 @@ define([
 			}
 		},
 		nextOK: function(){
-			var result = false; 
+			/*var result = false; 
 			var stationType = this.model.get('start_stationtype');
 			if (stationType =='imported' || stationType =='old' || stationType =='monitoredSite') {
 				return true;
@@ -484,7 +490,7 @@ define([
 					});
 				}
 			});
-			return result;
+			return result;*/
 		},
 
 
@@ -618,6 +624,8 @@ define([
 			$('input[name="NbFieldWorker"').val(actualFDNumber -1);
 		},
 		checkFWName : function(e){
+			var fieldWorkerNameErrMsg = this.translater.getValueFromKey('shared.alertMsg.fieldWorkerNameErrMsg'),
+			nameErr = this.translater.getValueFromKey('shared.alertMsg.fieldWorkerNameErr');
 			var fieldWorkersNb = $('input[name="NbFieldWorker"');
 			var selectedField = $(e.target);
 			var fieldName = $(e.target).attr('name');
@@ -630,8 +638,8 @@ define([
 					if (selectedName && (selectedValue == selectedName)){
 						//alert('this name is already selected, please select another name');
 						Swal({
-							title: "Wrong name",
-							text: 'This name is already selected, please select another name.',
+							title: nameErr , 
+							text: fieldWorkerNameErrMsg,
 							type: 'error',
 							showCancelButton: false,
 							confirmButtonColor: 'rgb(147, 14, 14)',

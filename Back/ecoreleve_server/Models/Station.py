@@ -1,5 +1,19 @@
 from ecoreleve_server.Models import Base,DBSession
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_
+from sqlalchemy import (Column,
+ DateTime,
+ Float,
+ ForeignKey,
+ Index,
+ Integer,
+ Numeric,
+ String,
+ Text,
+ Unicode,
+ text,
+ Sequence,
+ orm,
+ and_,
+ func)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
@@ -18,12 +32,14 @@ class Station(Base,ObjectWithDynProp):
     LON = Column(Numeric(9,5))
     ELE = Column(Integer)
     precision = Column( Integer)
-    fieldActivityId = Column(Integer, ForeignKey('fieldActivity.ID'))
+    fieldActivityId = Column(Integer, ForeignKey('fieldActivity.ID'),nullable=True)
     creator = Column( Integer)
-    creationDate = Column(DateTime)
+    creationDate = Column(DateTime, server_default=func.now())
     Observations = relationship('Observation',backref='Station')
     StationDynPropValues = relationship('StationDynPropValue',backref='Station')
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
+    FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
+
     @orm.reconstructor
     def init_on_load(self):
         ObjectWithDynProp.__init__(self,DBSession)
@@ -84,7 +100,7 @@ class StationType(Base,ObjectTypeWithDynProp):
     ID = Column(Integer,Sequence('StationType__id_seq'), primary_key=True)
     Name = Column(Unicode(250))
     Status = Column(Integer)
-    ProtocoleType_ObservationDynProps = relationship('StationType_StationDynProp',backref='StationType')
+    StationType_StationDynProp = relationship('StationType_StationDynProp',backref='StationType')
     Stations = relationship('Station',backref='StationType')
 
 

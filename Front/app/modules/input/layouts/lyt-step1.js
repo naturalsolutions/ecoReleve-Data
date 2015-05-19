@@ -5,7 +5,7 @@ define([
 	'marionette',
 
 	'ns_stepper/lyt-step',
-
+	'i18n'
 ], function($, _, Backbone, Marionette, Step) {
 
 	'use strict';
@@ -26,7 +26,10 @@ define([
 		},
 
 		onShow: function(){
-			this.updateModel('new');
+
+			this.updateModel(1);
+
+			this.$el.i18n();
 		},
 
 		updateModel : function(value){

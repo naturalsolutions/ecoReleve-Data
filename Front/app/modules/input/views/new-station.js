@@ -1,4 +1,4 @@
-//radio
+
 
 define([
 	'jquery',
@@ -16,13 +16,15 @@ define([
 	'tmp/getUsers',
 	'tmp/getFieldActivity',
 	'tmp/getRegions',
-	
 	'models/station',
+	'ns_form/NSFormsModuleGit',
+	'i18n'
+
 
 ], function($, _, Backbone, Marionette, Radio,
 	moment, datetime, Swal, BbForms, config,
 	getUsers, getFieldActivity, getRegions,
-	Station
+	Station,NsForm
 ){
 	'use strict';
 	return Marionette.ItemView.extend({
@@ -31,19 +33,45 @@ define([
 			'focusout input[name="Date_"]':'checkDate',
 		},
 		initialize: function(options) {
-			var tmp = 'app/modules/input/templates/tpl-new-station.html';
-			var station = new Station();
-			var html = Marionette.Renderer.render('app/modules/input/templates/tpl-new-station.html');
-			this.form = new BbForms({
+			//var tmp = 'app/modules/input/templates/tpl-new-station.html';
+			//var station = new Station();
+			//var html = Marionette.Renderer.render('app/modules/input/templates/tpl-new-station.html');
+			
+			var self = this;
+			this.stationType = options.objecttype;
+
+			var NSFormAMoi = NsForm.extend({
+				onSavingModel: function () {
+	            	if (self.stationType) {
+	            		this.model.set('FK_StationType',self.stationType) ;
+	            	}
+        		},
+        		
+			});
+
+			this.nsform = new NSFormAMoi({
+                name: 'StaForm',
+                modelurl: '/ecoReleve-Core/stations/',
+                buttonRegion: ['StaFormButton'],
+                formRegion: 'StaForm',
+                //redirectAfterPost : window.location + '/@id' ,
+                displayMode: 'edit',
+                objecttype: this.stationType,
+            });
+
+			/*this.form = new BbForms({
 				model: station,
 				template: _.template(html)
 			}).render();
+
 			this.el =  this.form.el;
-			this.radio = Radio.channel('input');
+			$(this.el).i18n();
+			his.radio = Radio.channel('input');*/
 		},
 		onShow : function(){
+			
 			var self = this;
-			var datefield = $("input[name='Date_']");
+			var datefield = $("input[name='StationDate']");
 			$(datefield).attr('placeholder', config.dateLabel);
 			$('#stMonitoredSiteType').attr('disabled','disabled');
 			$('#stMonitoredSiteName').attr('disabled','disabled');
@@ -52,7 +80,7 @@ define([
 				maxDate : new Date()
 			});
 
-			$(datefield).data('DateTimePicker').format('DD/MM/YYYY HH:mm:ss');
+			$(datefield).data('DateTimePicker').format('DD/MM/YYY HH:mm:ss');
 			
 			$(datefield).on('dp.show', function(e) {
 				$(this).val('');
@@ -64,9 +92,9 @@ define([
 			this.generateSelectLists();
 		},
 		onBeforeDestroy: function() {
-		  $('div.bootstrap-datetimepicker-widget').remove();
+			$('div.bootstrap-datetimepicker-widget').remove();
 		},
-		generateSelectLists : function(){
+		/*generateSelectLists : function(){
 			var content = getUsers.getElements('user');
 			$('select[name^="FieldWorker"]').append(content);
 			var fieldList = getFieldActivity.getElements('theme/list');
@@ -74,12 +102,12 @@ define([
 			var regionList = getRegions.getElements('station/area_coord',true);
 			$('select[name="Region"]').append(regionList);
 			/*var sites  = getSitesTypes.getElements('monitoredSite/type');
-			$('select[name="id_site"]').append(sites);*/
-		},
+			$('select[name="id_site"]').append(sites);
+		},*/
 		checkDate: function(){
 			var siteType = $('#stMonitoredSiteType');
 			var siteName = $('#stMonitoredSiteName');
-			var datefield = $("input[name='Date_']");
+			var datefield = $("input[name='StationDate']");
 			var date = $(datefield).val();
 			var date = moment($(datefield).val(),"DD/MM/YYYY HH:mm:ss");    //28/01/2015 15:02:28
 			var now = moment();
@@ -104,7 +132,6 @@ define([
 				}
 				this.radio.command('changeDate');
 			}
-
 		}
 	});
 });
