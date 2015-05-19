@@ -18,8 +18,11 @@ from ecoreleve_server.renderers.gpxrenderer import GPXRenderer
 from ecoreleve_server.Models import (
     DBSession,
     Base,
-    dbConfig
+    dbConfig,
+    Station,
+    Observation
     )
+from ecoreleve_server.GenericObjets import *
 from ecoreleve_server.Views import add_routes
 
 def datetime_adapter(obj, request):
@@ -67,6 +70,27 @@ def main(global_config, **settings):
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(authz_policy)
     config.set_root_factory(SecurityRoot)
+
+    criteria = [
+    {'Column' : 'Name',
+    'Operator' : 'Contains',
+    'Value' : 'Tru'
+    },
+    # {'NameProp' : 'LAT',
+    # 'Operator' : '=',
+    # 'Value' : '1'
+    # }
+    ]
+    searchInfo = {'criteria' : criteria}
+    listObj = ListObjectWithDynProp(DBSession,Observation,searchInfo)
+    print ('\n\n\n______RESULT static____________')
+    print (listObj.statValues)
+    print('\nlength : '+str(len(listObj.statValues)))
+    print ('\n\n\n______RESULT dynamic____________')
+    print (listObj.dynValues)
+    print('\nlength : '+str(len(listObj.dynValues)))
+    print(listObj.GetFlatList())
+
 
     # Set the default permission level to 'read'
     config.set_default_permission('read')
