@@ -67,6 +67,7 @@
 		var methods = {
 			init: function (parametres) {                
 				//Fusion des paramètres envoyer avec les params par defaut
+
 				if (parametres) {
 					var parametres = $.extend(defauts, parametres);
 				};
@@ -95,7 +96,10 @@
 					$me.val(parametres.inputValue);
 
 					//Initialisation de l'arbre
-					tree = $('#treeView' + $me.attr("id")).fancytree({
+					console.log($('#treeView' + $me.attr("id")));
+					console.log(parametres.webservices);
+					console.log(dataToSend);
+					$('#treeView' + $me.attr("id")).fancytree({
 						debugLevel: 0,
 						extensions: ["filter"],
 						autoActivate: false,
@@ -117,6 +121,8 @@
 						},
 						//Permet si l'arbre et en mode filter d'afficher les enfants des termes filtrés -> submatch
 						renderNode: function (event, data) {
+							console.log('render');
+
 							var node = data.node;
 							if (data.tree.options.hideExpand.isHide) {
 								data.tree.options.hideExpand.nbExpand--;
@@ -172,8 +178,10 @@
 					});
 					//Permet l'affichage du treeview au focus sur l'input
 
+
 					$me.focus(function () {
-						
+						console.log('focus');
+
 						$("div[id^=treeView]").each(function () {
 							$(this).css('display', 'none');
 						});

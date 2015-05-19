@@ -2,7 +2,7 @@ define([
 	'jquery',
 	'backbone',
 	'backbone_forms',
-	'dateTimePicker'
+
 ], function(
 	$, Backbone, Form
 ){
@@ -29,7 +29,7 @@ define([
 		},
 
 		getValue: function() {
-			var date= new Date
+			var date= new Date;
 			return this.el.children['Date_'].value
 		},
 
