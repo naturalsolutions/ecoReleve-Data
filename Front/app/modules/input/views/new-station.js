@@ -1,4 +1,4 @@
-//radio
+
 
 define([
 	'jquery',
@@ -16,9 +16,10 @@ define([
 	'tmp/getUsers',
 	'tmp/getFieldActivity',
 	'tmp/getRegions',
-	
 	'models/station',
 	'ns_form/NSFormsModuleGit',
+	'i18n'
+
 
 ], function($, _, Backbone, Marionette, Radio,
 	moment, datetime, Swal, BbForms, config,
@@ -62,10 +63,13 @@ define([
 				model: station,
 				template: _.template(html)
 			}).render();
-			this.el =  this.form.el;*/
-			this.radio = Radio.channel('input');
+
+			this.el =  this.form.el;
+			$(this.el).i18n();
+			his.radio = Radio.channel('input');*/
 		},
 		onShow : function(){
+			
 			var self = this;
 			var datefield = $("input[name='StationDate']");
 			$(datefield).attr('placeholder', config.dateLabel);
@@ -76,7 +80,7 @@ define([
 				maxDate : new Date()
 			});
 
-			$(datefield).data('DateTimePicker').format('DD/MM/YYYY HH:mm:ss');
+			$(datefield).data('DateTimePicker').format('DD/MM/YYY HH:mm:ss');
 			
 			$(datefield).on('dp.show', function(e) {
 				$(this).val('');
@@ -88,7 +92,7 @@ define([
 			this.generateSelectLists();
 		},
 		onBeforeDestroy: function() {
-		  $('div.bootstrap-datetimepicker-widget').remove();
+			$('div.bootstrap-datetimepicker-widget').remove();
 		},
 		/*generateSelectLists : function(){
 			var content = getUsers.getElements('user');
@@ -128,7 +132,6 @@ define([
 				}
 				this.radio.command('changeDate');
 			}
-
 		}
 	});
 });

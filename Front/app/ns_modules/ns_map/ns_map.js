@@ -177,7 +177,7 @@ define([
 
 				this.map = new L.Map(this.elem, {
 					center: this.center ,
-					zoom: this.zoom,
+					zoom: this.zoom || 4,
 					minZoom: 2,
 					inertia: false,
 					zoomAnimation: true,

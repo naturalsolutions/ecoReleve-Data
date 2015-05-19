@@ -9,7 +9,7 @@
 		<legend>identification</legend>
 		<div class="row">
 			<div class="form-group col-xs-5">
-				<label>station name*</label>
+				<label data-i18n="input.newStName">station name*</label>
 				<div data-editors="Name"></div>
 				<div id="error-Name" class="error"></div>
 			</div>
@@ -22,10 +22,10 @@
 		</div>
 	</fieldset>
 	<fieldset>
-		<legend>location</legend>
+		<legend data-i18n="input.newStLocation">location</legend>
 		<div class="row">
 			<div class="form-group col-xs-10 hidden" id="stRegion">
-				<label>region*</label>
+				<label data-i18n="input.newStLocationRegion">region*</label>
 				<div data-editors="Region"></div>
 				<div id="error-Region" class="error"></div>
 			</div>
@@ -33,25 +33,25 @@
 		<div class="row">
 			<div id="stCoordinates">
 				<div class="form-group col-xs-4">
-				<label>latitude*</label>
+				<label data-i18n="input.newStLocationLat">latitude*</label>
 				<div data-editors="LAT"></div>
 				<div id="error-LAT" class="error"></div>
 	
 				</div>
 				<div class="form-group col-xs-4">
-					<label>longitude*</label>
+					<label data-i18n="input.newStLocationLon">longitude*</label>
 					<div data-editors="LON"></div>
 					<div id="error-LON" class="error"></div>
 				</div>
 				<div class="form-group col-xs-4">
-					<label>accuracy(m)*</label>
+					<label data-i18n="input.newStLocationAccuracy">accuracy(m)*</label>
 					<div data-editors="Precision"></div>
 					<div id="error-Precision" class="error"></div>
 				</div>
 	
 				<div class="form-group col-xs-12">
 					<button type="button" id="getPosition" class="btn">
-						<i class="icon-action icon mini reneco reneco-site" id="getPosition"></i> Geolocation
+						<i class="icon-action icon mini reneco reneco-site" id="getPosition"></i><span data-i18n="input.geolocation">Geolocation</span>
 					</button>
 				</div>
 			</div>
@@ -60,13 +60,13 @@
 		<div class="row">
 			<div id="stMonitoredSite" class="hidden">
 				<div class="form-group col-xs-5">
-				<label>site type*</label>
+				<label data-i18n="input.newSiteType">site type*</label>
 				<select class="form-control" id="stMonitoredSiteType" name="type_site">
 					<option></option>
 				</select>
 				</div>
 				<div class="form-group col-xs-5">
-					<label>site name*</label>
+					<label data-i18n="input.newSiteName">site name*</label>
 					<select class="form-control" id="stMonitoredSiteName" name="id_site">
 						<option></option>
 					</select>
@@ -75,62 +75,61 @@
 		</div>
 	</fieldset>
 	<fieldset id="station-fieldWorkers" insertedWorkersNb="1">
-	<legend>field caracteristics</legend>
+	<legend data-i18n="input.fieldCaracteristics">field caracteristics</legend>
 		<div class="row">
 			<div class="form-group col-xs-12">
-				<label>field activity*</label>
+				<label  data-i18n="shared.fieldactivity">field activity*</label>
 				<div data-editors="FieldActivity_Name"></div>
 				<div id="error-FieldActivity_Name" class="error"></div>
 			</div>
 		</div> -->
-
-<!-- 		<div class="row">
-	<div class="form-group col-xs-6">
-		<label>observer 1*</label>
-		<div data-editors="FieldWorker1"></div>
-		<div id="error-FieldWorker1" class="error"></div>
-	</div>
-	<div class="form-group col-xs-6">
-		<label>total observers*</label>
-		<div data-editors="NbFieldWorker"></div>
-		<div id="error-NbFieldWorker" class="error"></div>
-	</div>
-	<div class="form-group col-xs-12">
-		<button type="button" id="addFieldWorkerInput" class="btn">
-			<i class="glyphicon glyphicon-plus"></i>
-			Add an observer
-		</button>
-	</div>
+<!-- 
+		<div class="row">
+			<div class="form-group col-xs-6">
+				<label><span data-i18n="shared.fieldworker">observer</span> 1*</label>
+				<div data-editors="FieldWorker1"></div>
+				<div id="error-FieldWorker1" class="error"></div>
+			</div>
+			<div class="form-group col-xs-6">
+				<label  data-i18n="shared.fieldworkersNb">total observers*</label>
+				<div data-editors="NbFieldWorker"></div>
+				<div id="error-NbFieldWorker" class="error"></div>
+			</div>
+			<div class="form-group col-xs-12">
+				<button type="button" id="addFieldWorkerInput" class="btn">
+					<i class="glyphicon glyphicon-plus"></i>
+					<span  data-i18n="button.addObserver">Add an observer</span>
+				</button>
+			</div>
 
 </div>
 
-<div class="row">
-	<div class="form-group col-xs-6 hidden" id="FieldWorker2-field">
-		<label>observer 2</label>
-		<div data-editors="FieldWorker2"></div>
-	</div>
-	<div class="form-group col-xs-6 hidden" id="FieldWorker3-field">
-		<label>observer 3</label>
-		<div data-editors="FieldWorker3"></div>
-	</div>
-	<div class="form-group col-xs-6 hidden" id="FieldWorker4-field">
-		<label>observer 4</label>
-		<div data-editors="FieldWorker4"></div>
-	</div>
-	<div class="form-group col-xs-6 hidden" id="FieldWorker5-field">
-		<label>observer 5</label>
-		<div data-editors="FieldWorker5"></div>
-	</div>
-</div>
+		<div class="row">
+			<div class="form-group col-xs-6 hidden" id="FieldWorker2-field">
+				<label><span data-i18n="shared.fieldworker">observer</span> 2</label>
+				<div data-editors="FieldWorker2"></div>
+			</div>
+			<div class="form-group col-xs-6 hidden" id="FieldWorker3-field">
+				<label><span data-i18n="shared.fieldworker">observer</span> 3</label>
+				<div data-editors="FieldWorker3"></div>
+			</div>
+			<div class="form-group col-xs-6 hidden" id="FieldWorker4-field">
+				<label><span data-i18n="shared.fieldworker">observer</span> 4</label>
+				<div data-editors="FieldWorker4"></div>
+			</div>
+			<div class="form-group col-xs-6 hidden" id="FieldWorker5-field">
+				<label><span data-i18n="shared.fieldworker">observer</span> 5</label>
+				<div data-editors="FieldWorker5"></div>
+			</div>
+		</div>
 
-<div class="row">
-	<div class="form-group col-xs-12">
-		<button type="button" id="removeFieldWorkerInput" class="btn hidden">
-			<i class="glyphicon glyphicon-remove"></i>
-			Remove an observer
-		</button>
-	</div>
-</div>
+		<div class="row">
+			<div class="form-group col-xs-12">
+				<button type="button" id="removeFieldWorkerInput" class="btn hidden">
+					<i class="glyphicon glyphicon-remove"></i>
+					<span  data-i18n="button.removeObserver">Remove an observer</span>
+				</button>
+			</div>
+		</div>
 	</fieldset>
-</form>
- -->
+</form> -->

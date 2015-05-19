@@ -13,8 +13,8 @@ define([
 	'tmp/getRegions',
 	'tmp/getSitesTypes',
 	'tmp/getSitesNames',
-	
-	'dateTimePicker'
+	'dateTimePicker',
+	'i18n'
 
 ], function($, Marionette, Swal, config, Radio,
 	getUsers, forms, getFieldActivity, getRegions, getSitesTypes, getSitesNames
@@ -97,6 +97,7 @@ define([
 			// this.$el.find('.panel-body').css({'background-color' : 'white'});
 			/*$('.dateTimePicker').datetimepicker({
 			}); */
+			this.$el.i18n();
 			var self = this;
 			$(this.ui.indivId).change( function() {  
 				self.getIndivId();

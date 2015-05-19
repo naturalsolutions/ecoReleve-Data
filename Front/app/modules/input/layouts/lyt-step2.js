@@ -21,11 +21,12 @@ define([
 	'collections/monitoredsites',
 	'models/position',
 	'models/station',
+	'translater'
 
 ], function($, _, Backbone, Marionette, config, Swal, dateTimePicker, Radio,
 	Step, NsMap, Com,
 	StationView, Grid, FilterView, GridView,
-	MonitoredSites, Position, Station
+	MonitoredSites, Position, Station, Translater
 ){
 
 	'use strict';
@@ -49,7 +50,7 @@ define([
 			rightRegion : '#inputStRight'
 		},
 		onShow: function(){
-			
+			this.translater = Translater.getTranslater();
 			this.radio = Radio.channel('input');
 			this.radio.comply('generateStation', this.generateStation, this);
 			this.radio.comply('movePoint', this.movePoint, this);
@@ -113,6 +114,7 @@ define([
 		},
 
 		last_imported_stations : function () {
+				var importMsg = this.translater.getValueFromKey('input.importStMsg');
 				this.initModel('import',null);
 				var ln = this.lastImportedStations.length;
 				if (ln > 0){
@@ -163,7 +165,7 @@ define([
 					map.addCollection(lastImportedStations);
 				} else {
 					// no stored waypoints
-					$('#inputStLeft').html('<h4> there is not stored imported waypoints, please use import module to do that. </h4>');
+					$('#inputStLeft').html('<h4>' + importMsg + '</h4>');
 				}
 				$('#stepper-header span').text('Last imported station(s)');
 				
@@ -622,6 +624,8 @@ define([
 			$('input[name="NbFieldWorker"').val(actualFDNumber -1);
 		},
 		checkFWName : function(e){
+			var fieldWorkerNameErrMsg = this.translater.getValueFromKey('shared.alertMsg.fieldWorkerNameErrMsg'),
+			nameErr = this.translater.getValueFromKey('shared.alertMsg.fieldWorkerNameErr');
 			var fieldWorkersNb = $('input[name="NbFieldWorker"');
 			var selectedField = $(e.target);
 			var fieldName = $(e.target).attr('name');
@@ -634,8 +638,8 @@ define([
 					if (selectedName && (selectedValue == selectedName)){
 						//alert('this name is already selected, please select another name');
 						Swal({
-							title: "Wrong name",
-							text: 'This name is already selected, please select another name.',
+							title: nameErr , 
+							text: fieldWorkerNameErrMsg,
 							type: 'error',
 							showCancelButton: false,
 							confirmButtonColor: 'rgb(147, 14, 14)',
