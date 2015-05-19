@@ -14,8 +14,8 @@ def users(request):
     """Return the list of all the users with their ids.
     """
     query = select([
-        User.id,
-        User.Login
+        User.id.label('PK_id'),
+        User.Login.label('fullname')
     ]).order_by(User.Lastname, User.Firstname)
     return [dict(row) for row in DBSession.execute(query).fetchall()]
     
@@ -27,7 +27,8 @@ def current_user(request):
     """Return the list of all the users with their ids.
     """
     query = select([
-        User.id,
-        User.Login
+        User.id.label('PK_id'),
+        User.Login.label('fullname')
     ]).where(User.id == request.authenticated_userid)
+    print 
     return dict(DBSession.execute(query).fetchone())

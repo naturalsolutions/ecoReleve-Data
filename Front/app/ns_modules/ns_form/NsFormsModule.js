@@ -4,13 +4,12 @@ define([
 	'backbone',
 	'marionette',
 	'backbone_forms',
-	'fancytree',
-	'autocompTree',
 	'radio',
-
 	'config',
+	'autocompTree',
+	'fancytree',
 	'./NsFormsCustomFields'
-], function ($, _, Backbone, Marionette, BackboneForm, AutocompTree,Radio, config 
+], function ($, _, Backbone, Marionette, BackboneForm,Radio, config, AutocompTree 
 ){
 	return Marionette.ItemView.extend({
 		BBForm: null,

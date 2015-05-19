@@ -84,7 +84,7 @@ class StationType(Base,ObjectTypeWithDynProp):
     ID = Column(Integer,Sequence('StationType__id_seq'), primary_key=True)
     Name = Column(Unicode(250))
     Status = Column(Integer)
-    ProtocoleType_ObservationDynProps = relationship('StationType_StationDynProp',backref='StationType')
+    StationType_StationDynProp = relationship('StationType_StationDynProp',backref='StationType')
     Stations = relationship('Station',backref='StationType')
 
 

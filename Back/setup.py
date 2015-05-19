@@ -18,6 +18,7 @@ requires = [
     'transaction',
     'zope.sqlalchemy',
     'waitress',
+    'webtest'
     ]
 
 setup(name='ecoReleve_Server',

@@ -12,7 +12,7 @@
 		</span>
 		<div class="col-md-12 col-lg-6">
 			<button id="editSt-btn" type="submit" class="small btn btn-labeled btn-success pull-right">
-					Edit &nbsp;
+					<span data-i18n="button.edit">Edit</span> &nbsp;
 					<span class="btn-label">
 						<i class="reneco reneco-edit"></i>
 					</span>
@@ -46,7 +46,7 @@
 			<div><%= Region %></div>
 		</div>
 		<div class="form-group col-lg-8 col-md-12" id="">
-			<label>place</label>
+			<label data-i18n="shared.place">place</label>
 			<div>
 				<input class='autocompTree_st blackFont form-control editField' disabled name='stPlace' startId='1000265' type='text' id='stPlace'>
 			</div> 
@@ -54,11 +54,11 @@
 	</div>
 	<div class="row" >
 		<div class="form-group col-md-12 col-lg-5" id="">
-			<label>accuracy(m)</label>
+			<label data-i18n="shared.accuracy">accuracy(m)</label>
 			<div><input name="stAccuracy" class="blackFont form-control editField" disabled type="number"></div>
 		</div>
 		<div class="form-group col-xs-12" id="">
-			<label>distance from obs</label>
+			<label data-i18n="shared.distanceObs">distance from obs</label>
 			<div>
 				<select id="stDistFromObs" class="blackFont form-control editField" disabled name="stDistance">
 					<option value="NULL"></option>
@@ -84,7 +84,7 @@
 			<i class="icon-two reneco reneco-time"></i> 
 		</div>
 		<div class="form-group col-xs-9">
-			<label>time</label>
+			<label data-i18n="shared.date">time</label>
 			<div><%= Date_ %></div>
 		</div>
 	</div>
@@ -94,7 +94,7 @@
 			<i class="icon-two reneco reneco-fieldactivity"></i> 
 		</div>
 		<div class="form-group col-xs-9">
-			<label>field activity</label>
+			<label data-i18n="shared.fieldactivity">field activity</label>
 			<div>
 				<select  name="st_FieldActivity_Name" disabled class="blackFont form-control editField">
 					<option></option>
@@ -113,7 +113,7 @@
 							<a data-toggle="collapse" data-parent="" href="#collapseThree" class="collapsed">
 								<h5>
 									<i class="reneco reneco-users"></i> 
-									&nbsp;Field workers&nbsp;
+									&nbsp;<span data-i18n="shared.fieldworker">Field worker</span>s&nbsp;
 									<span class="caret"></span>
 								</h5>
 							</a>
@@ -121,25 +121,25 @@
 					</div>
 					<div id="collapseThree" class="panel-collapse collapse">
 						<div class="panel-body">
-							<label>field worker 1</label>
+							<label><span data-i18n="shared.fieldworker">Field worker</span> 1</label>
 							<select  class="blackFont form-control fieldworker editField" disabled name="detailsStFW1" >
 								<option></option>
 							</select>
-							<label>field worker 2</label>
+							<label><span data-i18n="shared.fieldworker">Field worker</span> 2</label>
 							<select  class="blackFont form-control fieldworker editField" disabled name="detailsStFW2">
 								<option></option>
 							</select>
-							<label>field worker 3</label>
+							<label><span data-i18n="shared.fieldworker">Field worker</span> 3</label>
 							<select  class="blackFont form-control fieldworker editField" disabled name="detailsStFW3">
 									<option></option>
 							</select>
 
-							<label>field worker 4</label>
+							<label><span data-i18n="shared.fieldworker">Field worker</span> 4</label>
 							<select class="blackFont form-control fieldworker editField" disabled name="detailsStFW4">
 								<option></option>
 							</select>
 
-							<label>field worker 5</label>
+							<label><span data-i18n="shared.fieldworker">Field worker</span> 5</label>
 							<select  class="blackFont form-control fieldworker editField" disabled name="detailsStFW5">
 								<option></option>
 							</select>
