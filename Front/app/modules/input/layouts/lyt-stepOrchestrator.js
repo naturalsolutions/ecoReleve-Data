@@ -9,10 +9,13 @@ define([
 	return StepperOrchestrator.extend({
 		
 		/*==========  Next / Prev  ==========*/
+
+
+		/*
 		onShow: function(){
 			StepperOrchestrator.prototype.onShow.apply(this, arguments);
 			this.radio = Radio.channel('input');
-            this.radio.comply('navigateNextStep', this.nextStep, this);
+			this.radio.comply('navigateNextStep', this.nextStep, this);
 		},
 		nextStep: function(){
 			var currentStep = this.steps[this.currentStep];
@@ -30,7 +33,7 @@ define([
 			}
 			this.currentStep === 0 ? this.currentStep : this.currentStep--;
 			this.toStep(this.currentStep);
-		},
+		},*/
 
 
 	});

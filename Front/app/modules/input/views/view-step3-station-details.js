@@ -5,33 +5,49 @@ define([
 	'config',
 	'sweetAlert',
 
-	'tmp/getFieldActivity',
-	'tmp/getItems',
-	'tmp/getUsers',
-	'models/station',
+	// 'tmp/getFieldActivity',
+	// 'tmp/getItems',
+	// 'tmp/getUsers',
+	// 'models/station',
+	'ns_form/NSFormsModuleGit',
 	'i18n'
 
-], function($,Marionette, Radio, config, Swal,
-	getFieldActivity, getItems, getUsers, Station
+], function($,Marionette, Radio, config, Swal, NsFormsModule
+	//getFieldActivity, getItems, getUsers, Station
 ){
 	'use strict';
 	return Marionette.ItemView.extend({
-		template:  'app/modules/input/templates/tpl-station-details.html',
+		template:  'app/modules/input/templates/tpl-step3-station-details.html',
 		events : {
-			'change input[name="stAccuracy"]' : 'checkAccuracyValue',
-			'change .fieldworker' : 'checkFWName',
-			'change .editField' : 'updateStationData',
-			'change .indivNumber' : 'updateTotalIndivNumber',
-			'focusout #stPlace' : 'updateStationData',
-			'click #treeViewstPlace ul li'  : 'updatePlace',
-			'click #editSt-btn' :'editStation'
+
 		},
 		ui : {
-			fieldActivity : 'select[name="st_FieldActivity_Name"]',
-			places : 'select[name="stPlace"]',
-			accuracy : 'input[name="stAccuracy"]'
+
 		},
+
+
+		onShow: function(){
+			this.stationType = this.options.stationType;
+			this.stationId = this.options.stationId;
+
+			var _this = this;
+			
+			this.nsform = new NsFormsModule({
+				name: 'StaForm',
+				modelurl: config.coreUrl+'stations/',
+				buttonRegion: ['stationFormBtns'],
+				formRegion: 'stationForm',
+				displayMode: 'display',
+				objecttype: _this.stationType,
+				id: _this.stationId,
+				reloadAfterSave : false,
+			});
+		},
+
+
+		/*
 		onShow : function(){
+
 			this.$el.i18n();
 			this.generateSelectLists();
 			this.checkSiteNameDisplay();
@@ -240,6 +256,6 @@ define([
 					$( this ).attr('disabled','disabled');
 				}
 			});
-		}
+		}*/
 	});
 });

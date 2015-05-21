@@ -10,10 +10,9 @@ define([
 	'./individual-list',
 
 	'./lyt-step1',
-
 	'./lyt-step2',
-
 	'./lyt-step3',
+	
 	'translater'
 
 ], function($, _, Backbone, Marionette, Swal,

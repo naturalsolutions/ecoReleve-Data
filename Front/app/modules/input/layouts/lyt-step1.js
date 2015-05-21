@@ -27,7 +27,7 @@ define([
 
 		onShow: function(){
 
-			this.updateModel(1);
+			this.updateModel(3);
 
 			this.$el.i18n();
 		},
@@ -40,6 +40,8 @@ define([
 				}
 			}
 		},
+
+		
 
 	});
 });

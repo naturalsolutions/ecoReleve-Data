@@ -61,17 +61,13 @@ div.fuelux{
 			vertical-align: middle;
 			border-radius: 3px;
 			text-transform: uppercase;
-			&:hover{
+			&:not([disabled]):hover{
 				background: rgba(68,157,68,0.5);
 				color: white!important;
 			}
-			&:focus{
+			&:not([disabled]):focus{
 				background: rgba(68,157,68,0.5);
 				color: white!important;
-			}
-			&:disabled {
-				//disalbe + cursor doesn't work;
-				cursor: not-allowed!important;
 			}
 			&.btn-next{
 				right: 0;
@@ -84,7 +80,6 @@ div.fuelux{
 					}
 				}
 			}
-
 
 			@fz: 25px;
 			i.action-picto{
@@ -107,6 +102,7 @@ div.fuelux{
 			}
 
 		}
+
 
 	}
 	.steps{

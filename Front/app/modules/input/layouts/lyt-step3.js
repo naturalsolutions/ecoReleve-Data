@@ -17,19 +17,21 @@ define([
 	'ns_form/NsFormsModule',
 
 
-	'../views/station-details',
+	'../views/view-step3-station-details',
 
-	'tmp/getProtocolsList',
-	'tmp/getUsers',
+	// 'tmp/getProtocolsList',
+	// 'tmp/getUsers',
 
-	'models/station',
+	// 'models/station',
 	'translater'
 
 ], function($, _, Backbone, Marionette, Radio, config, Swiper,
 	Swal, simplePagination,
 	Step, NsFormsModule,
-	StationDetails,
+	ViewStationDetail,
+	/*
 	getProtocolsList, getUsers,
+	*/
 	Station, Translater
 ){
 
@@ -40,6 +42,7 @@ define([
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
 		events : {
+			/*
 			'click #tabProtsUl a' : 'updateForm',
 			'change select[name="st_FieldActivity_Name"]' : 'updateFieldActivity',
 
@@ -55,24 +58,47 @@ define([
 			'change .indivNumber' : 'updateTotalIndiv',
 			'change input[type="number"]' : 'checkNumberVal',
 			'focusout input.oneRequired' : 'updateFieldsConstraints'
+			*/
 			//'change .editField' : 'updateStationData'
 			//'click #NsFormModuleSave', 'showEditBtn'
 		},
+
+
 		regions: {
-			stationRegion: '#stContainer',
+			rgStation: '#rgStation',
+
 			formsRegion : '#formsContainer'
 		},
+
+
+
+
+		/*
 		ui:{
 			addProto : 'select[name="add-protocol"]',
 			 protosList : '#tabProtsUl'
-		},
+		},*/
 
 		initModel: function(myTpl){
 			//this.parseOneTpl(this.template);
 			this.activeProtcolsObj = []; 
 			this.protosToRemove = [];
 		},
+
+
+
+
+
 		onShow: function(){
+			var stationType = this.model.get('start_stationtype');
+			var stationId = this.model.get('station');
+
+			this.rgStation.show(new ViewStationDetail({
+				stationId: stationId,
+				stationType: stationType
+			}));
+
+			/*
 			this.$el.i18n();
 			this.translater = Translater.getTranslater();
 			var content = getUsers.getElements('user');
@@ -85,6 +111,7 @@ define([
 			this.radio.comply('successCommitForm', this.successState, this);
 			this.radio.comply('editState', this.editState, this);
 			this.radio.comply('updateStation', this.updateSation, this);
+			*/
 		},
 		updateForm : function(e,element){
 			var selectedProtoName;
