@@ -25,6 +25,7 @@ def getObservation(request):
     id = request.matchdict['id']
     ModuleName = request.params['FormName']
     curObs = DBSession.query(Observation).get(id)
+    print(curObs)
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName and FrontModule.TypeObj == curObs.FK_ProtocoleType).first()
     DisplayMode = request.params['DisplayMode']
     print(Conf)

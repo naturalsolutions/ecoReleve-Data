@@ -46,9 +46,10 @@ class ObjectWithDynProp:
         return self.ID
     
     def GetProperty(self,nameProp) :
-        if hasattr(self,nameProp):
-            return getattr(self,nameProp) 
-        else:
+
+        try :
+            return getattr(self,nameProp)
+        except :
             return self.PropDynValuesOfNow[nameProp]
 
     def SetProperty(self,nameProp,valeur) :
@@ -106,13 +107,21 @@ class ObjectWithDynProp:
 
     def GetFlatObject(self):
         resultat = {}
-        # Get static Properties        
-        for curStatProp in self.__table__.columns:
-
-            resultat[curStatProp.key] = self.GetProperty(curStatProp.key)
-        # Get static Properties            
-        for curDynProp in self.PropDynValuesOfNow:
-            resultat[curDynProp] = self.GetProperty(curDynProp)
+        
+        max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow))
+        for i in range(max_iter) :
+            # Get static Properties # 
+            try : 
+                curStatProp = list(self.__table__.columns)[i]
+                resultat[curStatProp.key] = self.GetProperty(curStatProp.key)
+            except :
+                pass
+            # Get dynamic Properties # 
+            try : 
+                curDynPropName = list(self.PropDynValuesOfNow)[i]
+                resultat[curDynPropName] = self.GetProperty(curDynPropName)
+            except Exception as e :
+                pass
 
         # Add TypeName in JSON
         resultat['TypeName'] = self.GetType().Name
@@ -125,12 +134,14 @@ class ObjectWithDynProp:
     def GetSchemaFromStaticProps(self,FrontModule,DisplayMode):
         Editable = (DisplayMode.lower()  == 'edit')
         resultat = {}
-        for curStatProp in self.__table__.columns:
-            curEditable = Editable
-            print ('\n***************GetSchemaFromStaticProps***************************\n\n')
+        print ('\n***************GetSchemaFromStaticProps***************************\n\n')
+        type_ = self.GetType().ID
+        Fields = self.ObjContext.query(ModuleField).filter(ModuleField.FK_FrontModule == FrontModule.ID).all()
+        curEditable = Editable
 
-            type_ = self.GetType().ID
-            CurModuleField = list(filter(lambda x : x.Name == curStatProp.key and x.TypeObj== str(type_) ,FrontModule.ModuleFields ))
+        for curStatProp in self.__table__.columns:
+
+            CurModuleField = list(filter(lambda x : x.Name == curStatProp.key and (x.TypeObj== str(type_) or x.TypeObj == None) , Fields))
             if (len(CurModuleField)> 0 ):
                 # Conf définie dans FrontModule
                 CurModuleField = CurModuleField[0]
@@ -138,7 +149,6 @@ class ObjectWithDynProp:
                     curEditable = False
                 resultat[CurModuleField.Name] = CurModuleField.GetDTOFromConf(curEditable,str(ModuleField.GetClassFromSize(2)))
             else:
-                    
                 resultat[curStatProp.key] = {
                 'Name': curStatProp.key,
                 'type': 'Text',
@@ -152,15 +162,17 @@ class ObjectWithDynProp:
         return resultat
         
     def GetDTOWithSchema(self,FrontModule,DisplayMode):
-        
+
         schema = self.GetSchemaFromStaticProps(FrontModule,DisplayMode)
-        self.GetType().AddDynamicPropInSchemaDTO(schema,FrontModule,DisplayMode)
+        ObjType = self.GetType()
+        ObjType.AddDynamicPropInSchemaDTO(schema,FrontModule,DisplayMode)
+
         if (DisplayMode.lower() != 'edit'):
             for curName in schema:
                 schema[curName]['editorAttrs'] = { 'disabled' : True }
         resultat = {
             'schema':schema,
-            'fieldsets' : self.GetType().GetFieldSets(FrontModule,schema)
+            'fieldsets' : ObjType.GetFieldSets(FrontModule,schema)
         }
 
         if self.ID :

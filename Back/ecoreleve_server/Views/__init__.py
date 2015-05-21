@@ -36,14 +36,17 @@ def add_routes(config):
     ##### Stations #####
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
-    config.add_route('stations', 'ecoReleve-Core/stations/') 
+    config.add_route('stations', 'ecoReleve-Core/stations') 
     config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
+    config.add_route('stations/id/protocols', 'ecoReleve-Core/stations/{id}/protocols',custom_predicates = (integers('id'),))
+    config.add_route('stations/id/protocols/proto_id', 'ecoReleve-Core/stations/{id}/protocols/{proto_id}',custom_predicates = (integers('id'),))
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
 
     ##### Protocols #####
-    config.add_route('protocols', 'ecoReleve-Core/protocols')
-    config.add_route('protocols/name', 'ecoReleve-Core/protocols/')
-    config.add_route('protocols/name/id', 'ecoReleve-Core/protocols/{id}')
+    # config.add_route('protocols', 'ecoReleve-Core/protocols')
+    config.add_route('protocols', 'ecoReleve-Core/protocols/')
+    config.add_route('protocols/id', 'ecoReleve-Core/protocols/{id}',custom_predicates = (integers('id'),)) 
+    config.add_route('protocols/action', 'ecoReleve-Core/protocols/{action}') 
 
     config.add_route('observation/id', 'ecoReleve-Core/observations/{id}')
     config.add_route('observation', 'ecoReleve-Core/observations')
