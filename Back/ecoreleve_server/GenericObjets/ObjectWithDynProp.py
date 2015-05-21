@@ -130,7 +130,7 @@ class ObjectWithDynProp:
             print ('\n***************GetSchemaFromStaticProps***************************\n\n')
 
             type_ = self.GetType().ID
-            CurModuleField = list(filter(lambda x : x.Name == curStatProp.key and x.TypeObj== str(type_) ,FrontModule.ModuleFields ))
+            CurModuleField = list(filter(lambda x : x.Name == curStatProp.key and (x.TypeObj== str(type_) or x.TypeObj == None) ,FrontModule.ModuleFields ))
             if (len(CurModuleField)> 0 ):
                 # Conf définie dans FrontModule
                 CurModuleField = CurModuleField[0]
