@@ -131,6 +131,10 @@ class ListObjectWithDynProp():
         #### Get list of dynamic properties and their TypeProp
         ListNameDynProp =dynValDF[['Name','TypeProp']].drop_duplicates()
 
+        # for i in ListNameDynProp.index :
+        #     statValDF[ListNameDynProp.ix[i]['Name']] = None
+        # print(statValDF)
+
         for nameProp in list(self.DynPropList['Name']):
             statValDF[nameProp] = None
 
@@ -138,6 +142,7 @@ class ListObjectWithDynProp():
             row = dynValDF.ix[i]
             typeProp = self.GetTypeProp(row['Name'])
             statValDF.loc[row[Fk_Obj],row['Name']]= row['Value'+typeProp]
+            
 
         return statValDF.reset_index()
 
