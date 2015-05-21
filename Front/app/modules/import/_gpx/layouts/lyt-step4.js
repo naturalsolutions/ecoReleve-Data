@@ -34,6 +34,7 @@ define([
 			var fieldWorkersNumber = this.model.get(this.name + '_import-fwnb');
 			var user1 = this.model.get(this.name + '_importWorker1');
 			var self = this;
+			var dataToPush = new Array();
 			filteredCollection.each(function(model) {
 				//model.set('fieldActivity', self.selectedActivity);
 				// get current value, if not exisits, replace it with the global val
@@ -49,18 +50,22 @@ define([
 				model.set('fieldActivity',currentFieldActivity);
 				model.set('Precision', 10);
 				model.set('fieldWorkersNumber', fieldWorkersNumber);
+				dataToPush.push(model.toJSON());
 			});
 			// send filtred collection to the server
-			var url=config.coreUrl + 'station/addMultStation/insert';
+			console.log(filteredCollection);
+			var url=config.coreUrl + 'stations/';
 			var result = false; 
 			$.ajax({
 				url:url,
 				context:this,
 				type:'POST',
-				data: JSON.stringify(filteredCollection.models),
-				dataType:'json',
+				data: {data : JSON.stringify(dataToPush)},
+				ContentType:"application/json",
+				dataType : 'json',
 				async: false,
 				success: function(resp){
+					console.log(resp);
 					var typeAlert = 'success';
 					var storedCollection = new Waypoints();
 					storedCollection.fetch();

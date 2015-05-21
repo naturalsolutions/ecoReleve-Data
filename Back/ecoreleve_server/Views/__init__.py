@@ -41,9 +41,10 @@ def add_routes(config):
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
 
     ##### Protocols #####
-    config.add_route('protocols', 'ecoReleve-Core/protocols')
-    config.add_route('protocols/name', 'ecoReleve-Core/protocols/')
-    config.add_route('protocols/name/id', 'ecoReleve-Core/protocols/{id}')
+    # config.add_route('protocols', 'ecoReleve-Core/protocols')
+    config.add_route('protocols', 'ecoReleve-Core/protocols/')
+    config.add_route('protocols/id', 'ecoReleve-Core/protocols/{id}',custom_predicates = (integers('id'),)) 
+    config.add_route('protocols/action', 'ecoReleve-Core/protocols/{action}') 
 
     config.add_route('observation/id', 'ecoReleve-Core/observations/{id}')
     config.add_route('observation', 'ecoReleve-Core/observations')

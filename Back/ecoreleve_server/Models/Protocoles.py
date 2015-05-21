@@ -1,20 +1,34 @@
 from ecoreleve_server.Models import Base,DBSession,Station
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_
+from sqlalchemy import (
+    Column,
+     DateTime,
+     Float,
+     ForeignKey,
+     Index,
+     Integer,
+     Numeric,
+     String,
+     Text,
+     Unicode,
+     text,
+     Sequence,
+    orm,
+    and_,
+    func)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from ..GenericObjets.FrontModules import FrontModule,ModuleField
-
+from datetime import datetime
 
 class Observation(Base,ObjectWithDynProp):
     __tablename__ = 'Observation'
     ID =  Column(Integer,Sequence('Observation__id_seq'), primary_key=True)
-    Name = Column(Unicode(250))
     FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
     ObservationDynPropValues = relationship('ObservationDynPropValue',backref='Observation')
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
-
+    creationDate = Column(DateTime,default = func.now())
     @orm.reconstructor
     def init_on_load(self):
         ObjectWithDynProp.__init__(self,DBSession)
@@ -33,7 +47,10 @@ class Observation(Base,ObjectWithDynProp):
         return  DBSession.query(ObservationDynProp).filter(ObservationDynProp.Name==nameProp).one()
 
     def GetType(self):
-        return self.ProtocoleType
+        if self.ProtocoleType != None :
+            return self.ProtocoleType
+        else :
+            return DBSession.query(ProtocoleType).get(self.FK_ProtocoleType)
 
 
 
