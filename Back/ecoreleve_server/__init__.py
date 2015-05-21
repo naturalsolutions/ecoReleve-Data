@@ -72,9 +72,9 @@ def main(global_config, **settings):
     config.set_root_factory(SecurityRoot)
 
     # criteria = [
-    # {'Column' : 'Name',
+    # {'Column' : 'Poids',
     # 'Operator' : 'Contains',
-    # 'Value' : 'Tru'
+    # 'Value' : '1'
     # },
     # # {'NameProp' : 'LAT',
     # # 'Operator' : '=',
@@ -83,12 +83,12 @@ def main(global_config, **settings):
     # ]
     # searchInfo = {'criteria' : criteria}
     # listObj = ListObjectWithDynProp(DBSession,Observation,searchInfo)
-    # print ('\n\n\n______RESULT static____________')
-    # print (listObj.statValues)
-    # print('\nlength : '+str(len(listObj.statValues)))
+    # # print ('\n\n\n______RESULT static____________')
+    # # print (listObj.statValues)
+    # # print('\nlength : '+str(len(listObj.statValues)))
     # print ('\n\n\n______RESULT dynamic____________')
-    # print (listObj.dynValues)
-    # print('\nlength : '+str(len(listObj.dynValues)))
+    # # print (listObj.dynValues)
+    # # print('\nlength : '+str(len(listObj.dynValues)))
     # print(listObj.GetFlatList())
 
 
