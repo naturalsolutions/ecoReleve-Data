@@ -45,14 +45,14 @@ class ObjectTypeWithDynProp:
         curQuery = 'select * from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
         if self.ID :
             curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
-            print(curQuery)
 
         Values = self.ObjContext.execute(curQuery).fetchall()
         Editable = (DisplayMode.lower()  == 'edit')
-        print(Editable)
+        Fields = self.ObjContext.query(ModuleField).filter(ModuleField.FK_FrontModule == FrontModule.ID).all()
+        count = 0
         for curValue in Values : 
             curEditable = Editable
-            CurModuleField = list(filter(lambda x : x.Name == curValue['Name'],FrontModule.ModuleFields ))
+            CurModuleField = list(filter(lambda x : x.Name == curValue['Name'], Fields))
             if (len(CurModuleField)> 0 ):
                 # Conf définie dans FrontModule                
                 CurModuleField = CurModuleField[0]
@@ -70,9 +70,6 @@ class ObjectTypeWithDynProp:
                 'editorClass' : 'form-control' ,
                 'fieldClass' : ModuleField.GetClassFromSize(2)
                 }
-
-
-
            
     def GetDynPropNames(self):
         curQuery = 'select D.Name from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
@@ -92,8 +89,9 @@ class ObjectTypeWithDynProp:
         for i in range(len(Legends)):
             resultat.append({'fields':[],'legend':Legends[i]})
 
+        Fields = self.ObjContext.query(ModuleField).filter(ModuleField.FK_FrontModule == FrontModule.ID).all()
         for curProp in Schema:
-            CurModuleField = list(filter(lambda x : x.Name == curProp,FrontModule.ModuleFields ))
+            CurModuleField = list(filter(lambda x : x.Name == curProp,Fields))
             if (len(CurModuleField)> 0 ):
                 CurModuleField = CurModuleField[0]
                 curIndex = Legends.index(CurModuleField.Legend)

@@ -2,12 +2,15 @@ from pyramid.view import view_config
 from ..Models import (
     DBSession,
     Station,
-    StationType
+    StationType,
+    Observation
     )
 from ecoreleve_server.GenericObjets.FrontModules import (FrontModule,ModuleField)
+from ecoreleve_server.GenericObjets import ListObjectWithDynProp
 import transaction
 import json
-
+from datetime import datetime
+from pyramid.security import NO_PERMISSION_REQUIRED
 prefix = 'stations'
 
 
@@ -56,7 +59,7 @@ def getFields(request) :
 #     ## TODO return fields Station
     return
 
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getStation(request):
 
     print('***************** GET STATION ***********************')
@@ -67,8 +70,12 @@ def getStation(request):
     # if Form value exists in request --> return data with schema else return only data
     if 'FormName' in request.params :
         ModuleName = request.params['FormName']
-        DisplayMode = request.params['DisplayMode']
-        Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+        try :
+            DisplayMode = request.params['DisplayMode']
+        except : 
+            DisplayMode = 'display'
+
+        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='StaForm' ).first()
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
     else : 
         response  = curSta.GetFlatObject()
@@ -122,3 +129,48 @@ def insertListNewStations(data):
     print ('_______type : '+str(type(data)))
     res = Station().InsertDTO(data)
     return res 
+
+@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+def GetProtocolsofStation (request) :
+
+    sta_id = request.matchdict['id']
+    data = {}
+    searchInfo = {}
+    criteria = {'Column': 'FK_Station', 'Operator':'=','Value':sta_id}
+    print (request.params)
+    try : 
+        if 'criteria' in request.params or request.params == {} :
+            print (' ********************** criteria params ==> Search ****************** ')
+
+            searchInfo = data
+            searchInfo['criteria'] = []
+            searchInfo['criteria'].append(criteria)
+            listObj = ListObjectWithDynProp(DBSession,Observation,searchInfo)
+            response = listObj.GetFlatList()
+    except : 
+        pass
+
+    try :
+        if 'FormName' in request.params : 
+            print (' ********************** Forms in params ==> DATA + FORMS ****************** ')
+            ModuleName = request.params['FormName']
+            try :
+                DisplayMode = request.params['DisplayMode']
+            except : 
+                DisplayMode = 'display'
+
+            listObs = DBSession.query(Observation).filter(Observation.FK_Station == sta_id)
+
+            if listObs :
+                listObsWithSchema = []
+                for obs in listObs : 
+                    start = datetime.now()
+                    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+                    obs.LoadNowValues()
+                    listObsWithSchema.append(obs.GetDTOWithSchema(Conf,DisplayMode))
+
+            response = listObsWithSchema
+    except Exception as e :
+        print (e)
+        pass
+    return response 

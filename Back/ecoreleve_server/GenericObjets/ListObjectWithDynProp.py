@@ -11,6 +11,7 @@ import transaction
 from ecoreleve_server.utils import Eval
 import pandas as pd
 
+
 eval_ = Eval()
 
 class ListObjectWithDynProp():
@@ -49,6 +50,7 @@ class ListObjectWithDynProp():
             curQueryDynVal,curQueryStatVal = self.GetFullQueries(criteria)
             statValues = self.ObjContext.execute(curQueryStatVal).fetchall()
             dynValues = self.ObjContext.execute(curQueryDynVal).fetchall()
+
             #  TODO add offset , limit and order_by to the query
             #  
             self.statValues = statValues
@@ -66,7 +68,6 @@ class ListObjectWithDynProp():
         typeProp = self.GetTypeProp(dynPropName)
 
         print ('\n\n********* typeProp ************ ')
-        print(typeProp)
         query = query.where(and_(self.GetDynPropValueView().c['Name'] == dynPropName
             , eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+typeProp],criteriaObj['Operator'],criteriaObj['Value'])
             ))
@@ -77,16 +78,13 @@ class ListObjectWithDynProp():
         query = select([self.GetDynPropValueView()]).where(
             self.GetDynPropValueView().c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] == self.ObjWithDynProp.ID)
         query = self.WhereInDynProp(query,obj)
-        print('\n\n________DynProp query : ______________')
-        print (query)
+
         return query
 
     def GetQueryInStatProp (self,query,obj) :
 
         if hasattr(self.ObjWithDynProp,obj['Column']) :
             query=query.where(eval_.eval_binary_expr(getattr(self.ObjWithDynProp,obj['Column']),obj['Operator'],obj['Value']))
-            print('\n\n________StatProp query : ______________')
-            print (query)
         return query
 
     def GetFullQueries (self,criteria) :
@@ -129,6 +127,9 @@ class ListObjectWithDynProp():
         #### add DynProp to staticProp as flat field ####
         Fk_Obj = self.ObjWithDynProp().GetSelfFKNameInValueTable()
         statValDF = statValDF.set_index(self.ObjWithDynProp.ID.name)
+        print('\n\n________DynProp Col : ______________')
+        #### Get list of dynamic properties and their TypeProp
+        ListNameDynProp =dynValDF[['Name','TypeProp']].drop_duplicates()
 
         for nameProp in list(self.DynPropList['Name']):
             statValDF[nameProp] = None
