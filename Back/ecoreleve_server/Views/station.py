@@ -59,7 +59,7 @@ def getFields(request) :
 #     ## TODO return fields Station
     return
 
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
 def getStation(request):
 
     print('***************** GET STATION ***********************')
@@ -130,7 +130,7 @@ def insertListNewStations(data):
     res = Station().InsertDTO(data)
     return res 
 
-@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET')
 def GetProtocolsofStation (request) :
 
     sta_id = request.matchdict['id']
