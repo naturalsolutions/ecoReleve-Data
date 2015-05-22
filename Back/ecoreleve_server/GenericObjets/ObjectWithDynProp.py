@@ -99,7 +99,7 @@ class ObjectWithDynProp:
 
     def UpdateFromJson(self,DTOObject):
         print('UpdateFromJson')
-        print(DTOObject)
+
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id'):
