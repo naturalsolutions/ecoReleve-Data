@@ -17,13 +17,12 @@ define([
 		id: null,
 		reloadAfterSave: true,
 		template: tpl,
-		regions: {
-			nsFormButtonRegion: '#NsFormButton'
-		},
 		redirectAfterPost: "",
+		eventsBinded :false,
 
 		initialize: function (options) {
 			this.modelurl = options.modelurl;
+
 			this.name = options.name;
 			this.buttonRegion = options.buttonRegion;
 			this.formRegion = options.formRegion;
@@ -36,7 +35,7 @@ define([
 				this.template = _.template($(options.template).html(), variables);
 			}
 			else {
-				// else use defualt template
+				// else use default template
 				this.template = _.template($(tpl).html(), variables);
 			}
 
@@ -62,31 +61,42 @@ define([
 			}
 			this.objecttype = options.objecttype;
 
-
-			this.displaybuttons();
 			if (options.model) {
-				// If a model is given, no ajax call to initialize the form
 				this.model = options.model;
-				this.BBForm = new BackboneForm(this.model);
+				this.BBForm = new BackboneForm({ model: this.model, fieldsets: this.model.fieldsets});
 				this.showForm();
 			}
 			else {
-				// otherwise, use ajax call to get form information
 				this.initModel();
 			}
+
+
 			if (options.redirectAfterPost) {
 				// allow to redirect after creation (post) using the id of created object
 				this.redirectAfterPost = options.redirectAfterPost;
 			}
 
+
 		},
+
+
 
 		initModel: function () {
 			//initialize model from AJAX call
-			this.model = new Backbone.Model();
+			var _this = this;
+
+			if(!this.model){
+				this.model = new Backbone.Model();
+			}
+
+			console.log(this.model);
+
 			var url = this.modelurl
-			var ctx = this;
+
 			url += this.id;
+
+			console.log(url);
+
 
 			$.ajax({
 				url: url,
@@ -95,16 +105,16 @@ define([
 				data: { FormName: this.name, ObjectType: this.objecttype, DisplayMode: this.displayMode },
 				dataType: 'json',
 				success: function (resp) {
-					ctx.model.schema = resp.schema;
-					ctx.model.attributes = resp.data;
+					_this.model.schema = resp.schema;
+					_this.model.attributes = resp.data;
 					if (resp.fieldsets) {
 						// if fieldset present in response, we get it
-						ctx.model.fieldsets = resp.fieldsets;
+						_this.model.fieldsets = resp.fieldsets;
 					}
 					// give the url to model to manage save
-					ctx.model.urlRoot = this.modelurl;
-					ctx.BBForm = new BackboneForm({ model: ctx.model, data: ctx.model.data, fieldsets: ctx.model.fieldsets, schema: ctx.model.schema });
-					ctx.showForm();
+					_this.model.urlRoot = this.modelurl;
+					_this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
+					_this.showForm();
 				},
 				error: function (data) {
 					//alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objecttype);
@@ -115,70 +125,84 @@ define([
 			this.BBForm.render();
 			// Call extendable function before the show call
 			this.BeforeShow();
-			var ctx = this;
+			var _this = this;
 			$('#' + this.formRegion).html(this.BBForm.el);
 
 			this.buttonRegion.forEach(function (entry) {
-				$('#' + entry).html(ctx.template);
+				$('#' + entry).html(_this.template);
 			});
 
 			this.displaybuttons();
 
+			if(!this.eventsBinded){
+				this.bindEvents();
+			}
 			this.afterShow();
+		},
+
+		bindEvents: function(){
+			var _this = this;
+			var name = this.name;
+			$('.NsFormModuleCancel' + name).on('click', function(){
+				_this.butClickCancel(this);
+				console.log('cancel');
+			})
+			$('.NsFormModuleSave' + name).on('click', function(){
+				_this.butClickSave(this);
+			})
+			$('.NsFormModuleClear' + name).on('click', function(){
+				_this.butClickClear(this);
+			})
+			$('.NsFormModuleEdit' + name).on('click', function(){
+				_this.butClickEdit(this);
+			});
+			this.eventsBinded = true;
+		},
+
+
+		displaybuttons: function () {
+			var name = this.name;
+
+			if(this.displayMode == 'edit'){
+				$('.NsFormModuleCancel'+name).removeClass('hidden');
+				$('.NsFormModuleSave'+name).removeClass('hidden');
+				$('.NsFormModuleClear'+name).removeClass('hidden');
+
+				$('.NsFormModuleEdit'+name).addClass('hidden');
+				$('#' + this.formRegion).find('input:enabled:first').focus();
+			}else{
+				$('.NsFormModuleCancel'+name).addClass('hidden');
+				$('.NsFormModuleSave'+name).addClass('hidden');
+				$('.NsFormModuleClear'+name).addClass('hidden');
+
+				$('.NsFormModuleEdit'+name).removeClass('hidden');
+			}
 		},
 
 		afterShow: function(){
 
 		},
 
-		displaybuttons: function () {
-			var ctx = this;
-
-			if (ctx.displayMode == 'edit') {
-				$('.NsFormModuleCancel' + ctx.name).attr('style', 'display:');
-				$('.NsFormModuleSave' + ctx.name).attr('style', 'display:');
-				$('.NsFormModuleClear' + ctx.name).attr('style', 'display:');
-				$('.NsFormModuleEdit' + ctx.name).attr('style', 'display:none');
-				$('#' + this.formRegion).find('input:enabled:first').focus()
-
-			}
-			else {
-				$('.NsFormModuleCancel' + ctx.name).attr('style', 'display:none');
-				$('.NsFormModuleSave' + ctx.name).attr('style', 'display:none');
-				$('.NsFormModuleClear' + ctx.name).attr('style', 'display:none');
-				$('.NsFormModuleEdit' + ctx.name).attr('style', 'display:');
-			}
-
-
-			$('.NsFormModuleSave' + ctx.name).click($.proxy(ctx.butClickSave, ctx));
-			$('.NsFormModuleEdit' + ctx.name).click($.proxy(ctx.butClickEdit, ctx));
-			$('.NsFormModuleClear' + ctx.name).click($.proxy(ctx.butClickClear, ctx));
-			$('.NsFormModuleCancel' + ctx.name).click($.proxy(ctx.butClickCancel, ctx));
-		},
 		butClickSave: function (e) {
 			this.BBForm.commit();
 			if (this.model.attributes["id"] == 0) {
 				// To force post when model.save()
 				this.model.attributes["id"] = null;
 			}
-
-			var ctx = this;
 			var _this = this;
 			this.onSavingModel();
-
-
 
 			if (this.model.id == 0) {
 				// New Record
 				this.model.save(null, {
 					success: function (model, response) {
 						// Getting ID of created record, from the model (has beeen affected during model.save in the response)
-						ctx.savingSuccess(model, response);
-						ctx.id = ctx.model.id;
+						_this.savingSuccess(model, response);
+						_this.id = _this.model.id;
 						
-						if (ctx.redirectAfterPost != "") {
+						if (_this.redirectAfterPost != "") {
 							// If redirect after creation
-							var TargetUrl = ctx.redirectAfterPost.replace('@id', ctx.id);
+							var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
 
 							if (window.location.href == window.location.origin + TargetUrl) {
 								// if same page, relaod
@@ -191,8 +215,8 @@ define([
 						}
 						else {
 							// If no redirect after creation
-							if (ctx.reloadAfterSave) {
-								ctx.reloadAfterSave();
+							if (_this.reloadAfterSave) {
+								_this.reloadAfterSave();
 							}
 						}
 					},
@@ -208,8 +232,8 @@ define([
 				this.model.save(null, {
 					success: function (model, response) {
 						_this.savingSuccess(model, response);
-						if (ctx.reloadAfterSave) {
-							ctx.reloadingAfterSave();
+						if (_this.reloadAfterSave) {
+							_this.reloadingAfterSave();
 						}
 					},
 					error: function (response) {
@@ -220,13 +244,11 @@ define([
 			this.afterSavingModel();
 		},
 		butClickEdit: function (e) {
-			e.preventDefault();
 			this.displayMode = 'edit';
 			this.initModel();
 			this.displaybuttons();
 		},
 		butClickCancel: function (e) {
-			e.preventDefault();
 			this.displayMode = 'display';
 			this.initModel();
 			this.displaybuttons();
@@ -238,6 +260,9 @@ define([
 			$(formContent).find('textarea').val('');
 			$(formContent).find('input[type="checkbox"]').attr('checked', false);
 		},
+
+
+
 		reloadingAfterSave: function () {
 			this.displayMode = 'display';
 			// reaload created record from AJAX Call
@@ -245,10 +270,15 @@ define([
 			this.showForm();
 			this.displaybuttons();
 		},
+
+
+
+
+
+
 		onSavingModel: function () {
 			// To be extended, calld after commit before save on model
 		},
-		
 		afterSavingModel: function () {
 			// To be extended called after model.save()
 		},

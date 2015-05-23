@@ -21,24 +21,35 @@
 }
 
 
-.panel-title{
-	a{
-		transition: .5s all;
-		&:hover{
+.panel-group .panel + .panel{
+	margin-top: 10px;
+}
+
+.panel-heading{
+	padding: 0px;
+	.panel-title{
+		a{
 			background: rgba(0,0,0,0.1);
-		}
-		padding: 20px;
-		width: 100%;
-		display: block;
-		i.glyphicon{
-			float: right;
-			&:after { content: "\e114"; }
-		}
-		&.collapsed{
+			transition: .2s all;
+			&:hover{
+				background: rgba(0,0,0,0.3);
+			}
+			&:not(.collapsed){
+				background: rgba(0,0,0,0.3);
+			}
+			padding: 20px;
+			width: 100%;
+			display: block;
 			i.glyphicon{
 				float: right;
-				&:after { content: "\e080"; }
-			}	
+				&:after { content: "\e114"; }
+			}
+			&.collapsed{
+				i.glyphicon{
+					float: right;
+					&:after { content: "\e080"; }
+				}	
+			}
 		}
 	}
 }

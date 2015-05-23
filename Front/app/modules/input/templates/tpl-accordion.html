@@ -1,0 +1,13 @@
+<div class="panel panel-default">
+	<div class="panel-heading" role="tab" id="<%= type %>">
+		<h4 class="panel-title">
+		<a data-toggle="collapse" data-parent="#accordion" href="#<%= type %>Collapse" aria-expanded="true" aria-controls="<%= type %>Collapse" class="<%= collapseTitle %>">
+			<span><%= name %></span><span class="badge pull-right"><%= count %></span>
+		</a>
+		</h4>
+	</div>
+	<div id="<%= type %>Collapse" class="panel-collapse collapse <%= collapseBody %>" role="tabpanel" aria-labelledby="<%= type %>">
+		<div class="panel-body">
+		</div>
+	</div>
+</div>

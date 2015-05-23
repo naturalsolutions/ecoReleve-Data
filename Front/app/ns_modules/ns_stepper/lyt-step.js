@@ -79,7 +79,6 @@ define([
 
 				var name= _this.name+'_' + this.name;
 
-				
 				var obj={name : name};
 
 				_this.stepAttributes.push(obj);
@@ -89,7 +88,6 @@ define([
 			var radioCreated = [] ;
 			$(tpl).find('input:radio').each(function(){
 				var name= _this.name+'_' + this.name;
-				
 				
 				if (radioCreated.indexOf(this.name)==-1){
 					radioCreated.push(this.name);

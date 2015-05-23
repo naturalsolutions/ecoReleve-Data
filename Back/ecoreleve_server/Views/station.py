@@ -50,7 +50,7 @@ def getForms(request) :
     ModuleName = 'StaForm'
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     newSta = Station(FK_StationType = typeSta)
-    
+    newSta.init_on_load()
     schema = newSta.GetDTOWithSchema(Conf,'edit')
     del schema['schema']['creationDate']
     return schema
@@ -137,6 +137,7 @@ def GetProtocolsofStation (request) :
     data = {}
     searchInfo = {}
     criteria = {'Column': 'FK_Station', 'Operator':'=','Value':sta_id}
+    response= []
     print (request.params)
     try : 
         if 'criteria' in request.params or request.params == {} :
@@ -162,12 +163,16 @@ def GetProtocolsofStation (request) :
             listObs = DBSession.query(Observation).filter(Observation.FK_Station == sta_id)
 
             if listObs :
-                listObsWithSchema = []
+                listObsWithSchema = {}
                 for obs in listObs : 
-                    start = datetime.now()
+                    typeName = obs.GetType().Name
                     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
                     obs.LoadNowValues()
-                    listObsWithSchema.append(obs.GetDTOWithSchema(Conf,DisplayMode))
+                    try :
+                        listObsWithSchema[typeName].append(obs.GetDTOWithSchema(Conf,DisplayMode))
+                    except :
+                        listObsWithSchema[typeName] = []
+                        listObsWithSchema[typeName].append(obs.GetDTOWithSchema(Conf,DisplayMode))
 
             response = listObsWithSchema
     except Exception as e :

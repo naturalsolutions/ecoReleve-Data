@@ -14,7 +14,7 @@ define([
 	'ns_stepper/lyt-step',
 
 
-	'ns_form/NsFormsModule',
+	'ns_form/NSFormsModuleGit',
 
 
 	'../views/view-step3-station-details',
@@ -42,34 +42,18 @@ define([
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
 		events : {
-			/*
-			'click #tabProtsUl a' : 'updateForm',
-			'change select[name="st_FieldActivity_Name"]' : 'updateFieldActivity',
-
-			'click a.pkProtocol' : 'getProtoByPkId',
-			'click #arrow-right-station' :'nextStation',
-			'click #arrow-left-station' :'prevStation',
-
-			'click #addInstance'  : 'addForm',
-
-			'click .onglet a': 'activeOnglet',
-			'click .deleteProt' : 'deleteProtocol',
-			'click .deleteProInstance' : 'deleteProtInstance',
-			'change .indivNumber' : 'updateTotalIndiv',
-			'change input[type="number"]' : 'checkNumberVal',
-			'focusout input.oneRequired' : 'updateFieldsConstraints'
-			*/
-			//'change .editField' : 'updateStationData'
-			//'click #NsFormModuleSave', 'showEditBtn'
 		},
 
 
 		regions: {
 			rgStation: '#rgStation',
-
-			formsRegion : '#formsContainer'
+			rgProtos : '#rgProtos'
 		},
 
+
+		ui: {
+			accordion : '#accordion'
+		},
 
 
 
@@ -90,29 +74,122 @@ define([
 
 
 		onShow: function(){
-			var stationType = this.model.get('start_stationtype');
-			var stationId = this.model.get('station');
 
+			var stationType = this.model.get('start_stationtype');
+			this.stationId = this.model.get('station');
+
+			this.stationId = 3;
+			
 			this.rgStation.show(new ViewStationDetail({
-				stationId: stationId,
+				stationId: this.stationId,
 				stationType: stationType
 			}));
+
+			var jqxhr = $.ajax({
+				url: config.coreUrl+'stations/'+this.stationId+'/protocols',
+				method: 'GET',
+				context: this,
+				data : {
+					FormName: 'ObsForm',
+					DisplayMode : 'display'
+				},
+				contentType:'application/json'
+			})
+			.done(function(resp) {
+				this.displayFormTypes(resp);
+			})
+			.fail(function(resp) {
+				console.log(resp);
+			});
+
 
 			/*
 			this.$el.i18n();
 			this.translater = Translater.getTranslater();
-			var content = getUsers.getElements('user');
-			$('#usersList').append(content);
-			this.addViews();
-			this.getProtocols();
-			
-			this.radio = Radio.channel('froms');
-			this.radio.comply('updateForm', this.updateFormUI, this);
-			this.radio.comply('successCommitForm', this.successState, this);
-			this.radio.comply('editState', this.editState, this);
-			this.radio.comply('updateStation', this.updateSation, this);
 			*/
 		},
+
+		displayFormTypes: function(resp){
+			var first = true;
+			for(var name in resp){
+
+				var count = resp[name].length;
+				var type = name.replace(/ /g,'');
+				var collapseBody = ''; var collapseTitle = 'collapsed';
+				if(first){collapseBody='in'; collapseTitle = '';}
+				first=false;
+
+				var tpl = Marionette.Renderer.render('app/modules/input/templates/tpl-accordion.html', {
+						name : name,
+						type : type,
+						count: count,
+						collapseBody : collapseBody,
+						collapseTitle : collapseTitle
+				});
+				this.ui.accordion.append(tpl);
+				this.displayFormInstances(resp[name], type);
+			}
+		},
+
+		displayFormInstances: function(obs, type){
+
+			for (var i = 0; i < obs.length; i++) {
+				var key = type+i;
+
+				this.ui.accordion.find('#'+type+'Collapse > .panel-body').append('<div id="'+key+'"></div><div id="stationFormBtns'+key+'"></div>');
+
+				var Md = Backbone.Model.extend({
+					schema : obs[i].schema,
+					fieldsets: obs[i].fieldsets,
+				});
+
+				var model = new Md(obs[i].data);
+
+				var mode = 'edit';
+				if(model.get('id') > 0){
+					mode = 'display';
+				}
+
+				model.urlRoot = config.coreUrl+'stations/'+this.stationId+'/protocols/';
+
+				this.nsform = new NsFormsModule({
+					name: type,
+					unique : i,
+					model: model,
+					id : model.get('id'),
+					modelurl : config.coreUrl+'stations/'+this.stationId+'/protocols/',
+					buttonRegion: ['stationFormBtns'+key],
+					formRegion: key,
+					displayMode: mode,
+					reloadAfterSave : false,
+				});
+			}
+
+		},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		updateForm : function(e,element){
 			var selectedProtoName;
 			if(!element){
