@@ -98,8 +98,9 @@ def getListofProtocolTypes (request):
 def getProtocol (request):
     id = request.matchdict['id']
     curProt = DBSession.query(Observation).get(id)
-    curProt.LoadNowValues()
 
+    curProt.LoadNowValues()
+    print (curProt.PropDynValuesOfNow) 
     # if Form value exists in request --> return data with schema else return only data
     if 'FormName' in request.params :
         ModuleName = request.params['FormName']
@@ -107,8 +108,8 @@ def getProtocol (request):
             DisplayMode = request.params['DisplayMode']
         except : 
             DisplayMode = 'display'
-
         Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='ObsForm' ).first()
+        curProt.LoadNowValues()
         response = curProt.GetDTOWithSchema(Conf,DisplayMode)
     else : 
         response  = curProt.GetFlatObject()

@@ -70,25 +70,25 @@ def main(global_config, **settings):
     config.set_authorization_policy(authz_policy)
     config.set_root_factory(SecurityRoot)
 
-    criteria = [
+    # criteria = [
     # {'Column' : 'Poids',
     # 'Operator' : 'Contains',
     # 'Value' : '1'
     # },
-    {'Column' : 'Name',
-    'Operator' : 'Contains',
-    'Value' : 'M29'
-    }
-    ]
-    searchInfo = {'criteria' : criteria}
-    listObj = ListObjectWithDynProp(DBSession,Station,searchInfo)
-    # print ('\n\n\n______RESULT static____________')
-    # print (listObj.statValues)
-    # print('\nlength : '+str(len(listObj.statValues)))
-    print ('\n\n\n______RESULT dynamic____________')
-    # print (listObj.dynValues)
-    # print('\nlength : '+str(len(listObj.dynValues)))
-    print(listObj.GetFlatList())
+    # # {'Column' : 'Name',
+    # # 'Operator' : 'Contains',
+    # # 'Value' : 'M29'
+    # # }
+    # ]
+    # searchInfo = {'criteria' : criteria}
+    # listObj = ListObjectWithDynProp(DBSession,Observation,searchInfo)
+    # # print ('\n\n\n______RESULT static____________')
+    # # print (listObj.statValues)
+    # # print('\nlength : '+str(len(listObj.statValues)))
+    # print ('\n\n\n______RESULT dynamic____________')
+    # # print (listObj.dynValues)
+    # # print('\nlength : '+str(len(listObj.dynValues)))
+    # print(listObj.GetFlatList())
 
 
     # Set the default permission level to 'read'

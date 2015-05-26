@@ -66,7 +66,7 @@ def getFields(request) :
 #     ## TODO return fields Station
     return
 
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getStation(request):
 
     print('***************** GET STATION ***********************')
@@ -206,12 +206,12 @@ def insertListNewStations(request):
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchStation(request):
 
-    data = request.params
+    # data = request.params
     
-    searchInfo = data.mixed()
-    print (json.loads(searchInfo))
-    # listObj = ListObjectWithDynProp(DBSession,Station,searchInfo)
-    # response = listObj.GetFlatList()
+    # searchInfo = data.mixed()
+    # print (json.loads(searchInfo))
+    listObj = ListObjectWithDynProp(DBSession,Station,searchInfo)
+    response = listObj.GetFlatList()
     # return response
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
@@ -291,5 +291,35 @@ def updateObservation(request):
     curObs.UpdateFromJson(data)
     transaction.commit()
     return {}
+
+@view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+def GetObservation(request):
+
+    print('*********************** GET Observation *****************')
+    
+    id_obs = request.matchdict['obs_id']
+    id_sta = request.matchdict['id']
+    
+    try :
+        curObs = DBSession.query(Observation).filter(and_(Observation.ID ==id_obs, Observation.FK_Station == id_sta )).one()
+        curObs.LoadNowValues()
+        # if Form value exists in request --> return data with schema else return only data
+        if 'FormName' in request.params :
+            ModuleName = request.params['FormName']
+            try :
+                DisplayMode = request.params['DisplayMode']
+            except : 
+                DisplayMode = 'display'
+
+            Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='ObsForm' ).first()
+            response = curObs.GetDTOWithSchema(Conf,DisplayMode)
+        else : 
+            response  = curObs.GetFlatObject()
+
+    except Exception as e :
+        print(e)
+        response = {}
+
+    return response
 
 
