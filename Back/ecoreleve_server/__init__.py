@@ -59,7 +59,6 @@ def main(global_config, **settings):
     config.add_renderer('gpx', GPXRenderer)
 
     # Set up authentication and authorization
-
     authn_policy = AuthTktAuthenticationPolicy(
             settings['auth.secret'],
             cookie_name='ecoReleve-Core',
@@ -76,9 +75,9 @@ def main(global_config, **settings):
     # 'Operator' : 'Contains',
     # 'Value' : '1'
     # },
-    # # {'NameProp' : 'LAT',
-    # # 'Operator' : '=',
-    # # 'Value' : '1'
+    # # {'Column' : 'Name',
+    # # 'Operator' : 'Contains',
+    # # 'Value' : 'M29'
     # # }
     # ]
     # searchInfo = {'criteria' : criteria}

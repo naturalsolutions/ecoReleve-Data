@@ -1,5 +1,5 @@
 from ecoreleve_server.Models import Base,DBSession
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_,text
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 
@@ -45,7 +45,7 @@ class ModuleField(Base):
         print('***************** GetDTOFromConf ***********************')
         
         print(self.Name)
-
+        
         dto = {
             'Name': self.Name,
             'type': self.InputType,
@@ -56,7 +56,16 @@ class ModuleField(Base):
             'validators': [],
             'options': [],
             }
-        print (dto)
+        if self.InputType == 'Select' and self.QueryName != None : 
+            print (self.QueryName)
+            result = DBSession.execute(text(self.QueryName)).fetchall()
+
+            for row in result :
+                temp = {}
+                for key in row.keys() : 
+                    temp[key]= row[key]
+                dto['options'].append(temp)
+            dto['options'] = sorted(dto['options'], key=lambda k: k['label'])
         if self.Required == 1 :
             dto['validators'].append("required")
         return dto
