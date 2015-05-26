@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base
+from ecoreleve_server.Models import Base,DBSession
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
@@ -11,9 +11,11 @@ Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':
 
 class ObjectWithDynProp:
 
-
+    ObjContext = DBSession
+    PropDynValuesOfNow = {}
+    
     def __init__(self,ObjContext):
-        self.ObjContext = ObjContext
+        self.ObjContext = DBSession
         self.PropDynValuesOfNow = {}
         #if self.ID != None :
         #   self.LoadNowValues()
