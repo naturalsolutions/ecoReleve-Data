@@ -2,13 +2,14 @@ from pyramid.view import view_config
 from ..Models import (
     DBSession,
     Observation,
-    ProtocoleType
+    ProtocoleType,
+    FieldActivity_ProtocoleType
     )
 from ecoreleve_server.GenericObjets.FrontModules import (FrontModule,ModuleField)
 import transaction
 import json
 from datetime import datetime
-from sqlalchemy import func,select,and_, or_
+from sqlalchemy import func,select,and_, or_, join
 from pyramid.security import NO_PERMISSION_REQUIRED
 from collections import OrderedDict
 
@@ -22,7 +23,7 @@ def updateListProtocols(request):
     # update a list of protocols 
     return
 
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnProtocols(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -46,6 +47,7 @@ def getForms(request) :
     ModuleName = 'ObsForm'
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     newProto = Observation(FK_ProtocoleType = typeProto)
+    # newProto.init_on_load()
 
     schema = newProto.GetDTOWithSchema(Conf,'edit')
     # del schema['schema']['creationDate']
@@ -80,7 +82,18 @@ def getListofProtocol (request):
 
 @view_config(route_name= 'protocolTypes', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getListofProtocolTypes (request):
-    query = select([ProtocoleType.ID, ProtocoleType.Name]).where(ProtocoleType.Status == 4)
+
+    if 'FieldActivityID' in request.params :
+        fieldActivityID = request.params['FieldActivityID']
+
+        join_table = join(ProtocoleType,FieldActivity_ProtocoleType,ProtocoleType.ID == FieldActivity_ProtocoleType.FK_ProtocoleType )
+        query = select([ProtocoleType.ID, ProtocoleType.Name]
+            ).where(and_(ProtocoleType.Status == 4 ,FieldActivity_ProtocoleType.FK_fieldActivity == fieldActivityID)
+            ).select_from(join_table)
+
+    else : 
+        query = select([ProtocoleType.ID, ProtocoleType.Name]).where(ProtocoleType.Status == 4)
+
     result = DBSession.execute(query).fetchall()
     print('********* protocoles types ******************')
     print (type(result[0]))

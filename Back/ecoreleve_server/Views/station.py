@@ -10,9 +10,11 @@ from ecoreleve_server.GenericObjets import ListObjectWithDynProp
 import transaction
 import json
 from datetime import datetime
+import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_,cast, DATE
+from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 
 
@@ -120,8 +122,9 @@ def insertOneNewStation (request) :
     for items , value in request.json_body.items() :
         if value != "" :
             data[items] = value
-
-    newSta = Station(FK_StationType = data['FK_StationType'])
+    print('------------------------------')
+    print (data)
+    newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid)
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
@@ -148,6 +151,7 @@ def insertListNewStations(request):
         newRow['precision'] = row['Precision']
         newRow['creationDate'] = dateNow
         newRow['creator'] = request.authenticated_userid
+        newRow['FK_StationType']=4
         newRow['id'] = row['id']
 
         try :
@@ -206,13 +210,38 @@ def insertListNewStations(request):
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchStation(request):
 
-    # data = request.params
+    data = request.params
     
-    # searchInfo = data.mixed()
-    # print (json.loads(searchInfo))
+    searchInfo = {}
+
+    if 'lastImported' in data :
+        o = aliased(Station)
+        
+        criteria = [
+        {'Column' : 'creator',
+        'Operator' : '=',
+        'Value' : request.authenticated_userid
+        },
+        {'Query':'Observation',
+        'Column': 'None',
+        'Operator' : 'not exists',
+        'Value': select([Observation]).where(Observation.FK_Station == Station.ID)
+        },
+        {'Query':'Station',
+        'Column': 'None',
+        'Operator' : 'not exists',
+        'Value': select([o]).where(cast(o.creationDate,DATE) > cast(Station.creationDate,DATE))
+        },
+        {'Column' : 'FK_StationType',
+        'Operator' : '=',
+        'Value' : 4
+        },
+        ]
+        searchInfo['criteria'] = criteria
+
     listObj = ListObjectWithDynProp(DBSession,Station,searchInfo)
     response = listObj.GetFlatList()
-    # return response
+    return response
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def GetProtocolsofStation (request) :
