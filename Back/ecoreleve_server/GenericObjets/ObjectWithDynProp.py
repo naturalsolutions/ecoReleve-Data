@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base
+from ecoreleve_server.Models import Base,DBSession
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
@@ -11,9 +11,11 @@ Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':
 
 class ObjectWithDynProp:
 
-
+    ObjContext = DBSession
+    PropDynValuesOfNow = {}
+    
     def __init__(self,ObjContext):
-        self.ObjContext = ObjContext
+        self.ObjContext = DBSession
         self.PropDynValuesOfNow = {}
         #if self.ID != None :
         #   self.LoadNowValues()
@@ -22,6 +24,7 @@ class ObjectWithDynProp:
         raise Exception("GetType not implemented in children")
 
     def GetDynPropValuesTable(self):
+
         return self.__tablename__ + 'DynPropValue'
         
     def GetDynPropValuesTableID(self):
@@ -31,13 +34,14 @@ class ObjectWithDynProp:
         return 'ID'
         
     def GetDynPropTable(self):
+
         return self.__tablename__ + 'DynProp'
         
     def GetDynPropFKName(self):
         return 'FK_' + self.__tablename__ + 'DynProp'
         
-    def GetSelfFKName(self):
-        return 'FK_' + self.__tablename__ + 'DynProp'
+    # def GetSelfFKName(self):
+    #     return 'FK_' + self.__tablename__ + 'DynProp'  ###### ====> Not used , the same thing as GetDynPropFKName Why ?? 
 
     def GetSelfFKNameInValueTable(self):
         return 'FK_' + self.__tablename__
@@ -83,11 +87,13 @@ class ObjectWithDynProp:
     def LoadNowValues(self):
         curQuery = 'select V.*, P.Name,P.TypeProp from ' + self.GetDynPropValuesTable() + ' V JOIN ' + self.GetDynPropTable() + ' P ON P.' + self.GetDynPropValuesTableID() + '= V.' + self.GetDynPropFKName() + ' where '
         curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
-        curQuery += 'where V2.' + self.GetDynPropFKName() + ' = ' + self.GetDynPropFKName() + ' and V2.' + self.GetSelfFKName() + ' = V.' + self.GetSelfFKName() + ' '
+        curQuery += 'where V2.' + self.GetDynPropFKName() + ' = ' + self.GetDynPropFKName() + ' and V2.' + self.GetSelfFKNameInValueTable() + ' = V.' + self.GetSelfFKNameInValueTable() + ' '
         curQuery += 'AND V2.startdate > V.startdate)'
         curQuery +=  'and v.' + self.GetSelfFKNameInValueTable() + ' =  ' + str(self.GetpkValue() )
+        print(curQuery)
         Values = self.ObjContext.execute(curQuery).fetchall()
-
+        print('**NOW Values ***')
+        print (Values)
         for curValue in Values : 
             row = OrderedDict(curValue)
             self.PropDynValuesOfNow[row['Name']] = self.GetRealValue(row)
@@ -99,7 +105,7 @@ class ObjectWithDynProp:
 
     def UpdateFromJson(self,DTOObject):
         print('UpdateFromJson')
-        print(DTOObject)
+
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id'):

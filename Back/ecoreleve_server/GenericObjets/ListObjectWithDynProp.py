@@ -1,7 +1,8 @@
 from ecoreleve_server.Models import Base
 from sqlalchemy import (Column, DateTime, Float,
  ForeignKey, Index, Integer, Numeric,
-  String, Text, Unicode, text,Sequence, select,and_,or_, exists)
+  String, Text, Unicode, Sequence, select,and_,or_, exists)
+from sqlalchemy.sql import text
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
@@ -85,6 +86,10 @@ class ListObjectWithDynProp():
 
         if hasattr(self.ObjWithDynProp,obj['Column']) :
             query=query.where(eval_.eval_binary_expr(getattr(self.ObjWithDynProp,obj['Column']),obj['Operator'],obj['Value']))
+        elif 'Query' in obj :
+            if obj['Operator'] == 'not exists' :
+                query = query.where(~exists(obj['Value']))
+                print (query)
         return query
 
     def GetFullQueries (self,criteria) :

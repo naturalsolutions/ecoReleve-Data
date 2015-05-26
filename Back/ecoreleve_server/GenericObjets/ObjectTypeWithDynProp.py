@@ -49,7 +49,7 @@ class ObjectTypeWithDynProp:
         Values = self.ObjContext.execute(curQuery).fetchall()
         Editable = (DisplayMode.lower()  == 'edit')
         Fields = self.ObjContext.query(ModuleField).filter(ModuleField.FK_FrontModule == FrontModule.ID).all()
-        count = 0
+        
         for curValue in Values : 
             curEditable = Editable
             CurModuleField = list(filter(lambda x : x.Name == curValue['Name'], Fields))

@@ -24,6 +24,7 @@ from ecoreleve_server.Models import (
     )
 from ecoreleve_server.GenericObjets import *
 from ecoreleve_server.Views import add_routes
+from ecoreleve_server.Views.station import searchStation
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects.
@@ -59,7 +60,6 @@ def main(global_config, **settings):
     config.add_renderer('gpx', GPXRenderer)
 
     # Set up authentication and authorization
-
     authn_policy = AuthTktAuthenticationPolicy(
             settings['auth.secret'],
             cookie_name='ecoReleve-Core',
@@ -71,14 +71,16 @@ def main(global_config, **settings):
     config.set_authorization_policy(authz_policy)
     config.set_root_factory(SecurityRoot)
 
+    # data = {'lastImported':True}
+    # print (searchStation(data))
     # criteria = [
     # {'Column' : 'Poids',
     # 'Operator' : 'Contains',
     # 'Value' : '1'
     # },
-    # # {'NameProp' : 'LAT',
-    # # 'Operator' : '=',
-    # # 'Value' : '1'
+    # # {'Column' : 'Name',
+    # # 'Operator' : 'Contains',
+    # # 'Value' : 'M29'
     # # }
     # ]
     # searchInfo = {'criteria' : criteria}

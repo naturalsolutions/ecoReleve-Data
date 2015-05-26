@@ -15,12 +15,14 @@ from sqlalchemy import (Column,
  and_,
  func,
  insert,
- select)
+ select,
+ UniqueConstraint)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from ..GenericObjets.FrontModules import FrontModule,ModuleField
+from ecoreleve_server.Models import FieldActivity
 from datetime import datetime
 from collections import OrderedDict
 import pandas as pd 
@@ -40,12 +42,15 @@ class Station(Base,ObjectWithDynProp):
     precision = Column( Integer)
     fieldActivityId = Column(Integer, ForeignKey('fieldActivity.ID'),nullable=True)
     creator = Column( Integer)
-    creationDate = Column(DateTime, server_default=func.now())
+    creationDate = Column(DateTime, default=func.now())
     Observations = relationship('Observation',backref='Station')
     StationDynPropValues = relationship('StationDynPropValue',backref='Station')
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
 
+    __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON', name='_unique_constraint_lat_lon_date'),)
+
+    
     @orm.reconstructor
     def init_on_load(self):
         ObjectWithDynProp.__init__(self,DBSession)
@@ -68,76 +73,6 @@ class Station(Base,ObjectWithDynProp):
             return self.StationType
         else :
             return DBSession.query(StationType).get(self.FK_StationType)
-
-    def InsertDTO (self,DTO) : 
-
-        data_to_insert = []
-        format_dt = '%Y-%m-%d %H:%M:%S'
-        format_dtBis = '%Y-%d-%m %H:%M:%S'
-        dateNow = datetime.now()
-
-        ##### Rename field and convert date #####
-        for row in DTO :
-            newRow = {}
-            newRow['LAT'] = row['latitude']
-            newRow['LON'] = row['longitude']
-            newRow['Name'] = row['name']
-            newRow['fieldActivityId'] = 1
-            newRow['precision'] = row['Precision']
-            newRow['creationDate'] = dateNow
-            newRow['id'] = row['id']
-            try :
-                newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dt)
-            except :
-                newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dtBis)
-            data_to_insert.append(newRow)
-
-        ##### Load date into pandas DataFrame then round LAT,LON into decimal(5) #####
-        DF_to_check = pd.DataFrame(data_to_insert)
-        DF_to_check['LAT'] = np.round(DF_to_check['LAT'],decimals = 5)
-        DF_to_check['LON'] = np.round(DF_to_check['LON'],decimals = 5)
-        
-        ##### Get min/max Value to query potential duplicated stations #####
-        maxDate = DF_to_check['StationDate'].max(axis=1)
-        minDate = DF_to_check['StationDate'].min(axis=1)
-        maxLon = DF_to_check['LON'].max(axis=1)
-        minLon = DF_to_check['LON'].min(axis=1)
-        maxLat = DF_to_check['LAT'].max(axis=1)
-        minLat = DF_to_check['LAT'].min(axis=1)
-
-        ##### Retrieve potential duplicated stations from Database #####
-        query = select([Station]).where(
-            and_(
-                Station.StationDate.between(minDate,maxDate),
-                Station.LAT.between(minLat,maxLat)
-                ))
-        result_to_check = DBSession.execute(query).fetchall()
-
-        if result_to_check :
-            ##### IF potential duplicated stations, load them into pandas DataFrame then join data to insert on LAT,LON,DATE #####
-            result_to_check = pd.DataFrame(data=result_to_check, columns = Station.__table__.columns.keys())
-            result_to_check['LAT'] = result_to_check['LAT'].astype(float)
-            result_to_check['LON'] = result_to_check['LON'].astype(float)
-
-            merge_check = pd.merge(DF_to_check,result_to_check , on =['LAT','LON','StationDate'])
-
-            ##### Get only non existing data to insert #####
-            DF_to_check = DF_to_check[~DF_to_check['id'].isin(merge_check['id'])]
-
-        DF_to_check = DF_to_check.drop(['id'],1)
-        data_to_insert = json.loads(DF_to_check.to_json(orient='records',date_format='iso'))
-
-        ##### Build block insert statement and returning ID of new created stations #####
-        if len(data_to_insert) != 0 :
-            stmt = self.__table__.insert(returning=[Station.ID]).values(data_to_insert)
-            res = DBSession.execute(stmt).fetchall()
-            result = list(map(lambda y: y[0], res))
-        else : 
-            result = []
-
-        response = {'exist': len(DTO)-len(data_to_insert), 'new': len(data_to_insert)}
-        
-        return response
 
 
 class StationDynProp(Base):
@@ -189,9 +124,4 @@ class StationType_StationDynProp(Base):
     FK_StationDynProp = Column(Integer, ForeignKey('StationDynProp.ID'))
 
 
-class fieldActivity(Base):
 
-    __tablename__ = 'fieldActivity'
-
-    ID = Column(Integer,Sequence('fieldActivity__id_seq'), primary_key=True)
-    Name = Column(Unicode(250),nullable=False)
