@@ -78,7 +78,7 @@ define([
 			var stationType = this.model.get('start_stationtype');
 			this.stationId = this.model.get('station');
 
-			this.stationId = 3;
+			this.stationId = 1;
 			
 			this.rgStation.show(new ViewStationDetail({
 				stationId: this.stationId,
@@ -96,7 +96,7 @@ define([
 				contentType:'application/json'
 			})
 			.done(function(resp) {
-				this.displayFormTypes(resp);
+				this.displayProtos(resp);
 			})
 			.fail(function(resp) {
 				console.log(resp);
@@ -109,11 +109,11 @@ define([
 			*/
 		},
 
-		displayFormTypes: function(resp){
+		displayProtos: function(protos){
 			var first = true;
-			for(var name in resp){
+			for(var name in protos){
 
-				var count = resp[name].length;
+				var count = protos[name].length;
 				var type = name.replace(/ /g,'');
 				var collapseBody = ''; var collapseTitle = 'collapsed';
 				if(first){collapseBody='in'; collapseTitle = '';}
@@ -127,16 +127,22 @@ define([
 						collapseTitle : collapseTitle
 				});
 				this.ui.accordion.append(tpl);
-				this.displayFormInstances(resp[name], type);
+				this.displayObs(protos[name], type);
+
 			}
 		},
 
-		displayFormInstances: function(obs, type){
-
+		displayObs: function(obs, type){
+			
 			for (var i = 0; i < obs.length; i++) {
+
 				var key = type+i;
 
-				this.ui.accordion.find('#'+type+'Collapse > .panel-body').append('<div id="'+key+'"></div><div id="stationFormBtns'+key+'"></div>');
+				var classes;
+				(i==0)? classes="" : classes = "hidden";
+
+				this.ui.accordion.find('#'+type+'Collapse > .panel-body').append('<div id="page'+type+i+'" class="'+classes+'"> <div id="'+key+'"></div><div id="stationFormBtns'+key+'"></div></div>');
+
 
 				var Md = Backbone.Model.extend({
 					schema : obs[i].schema,
@@ -163,10 +169,26 @@ define([
 					displayMode: mode,
 					reloadAfterSave : false,
 				});
+
+				this.paginateObs(obs.length, type);
 			}
 
 		},
 
+		paginateObs: function(nsObs, type){
+				var _this = this;
+				var current = _this.ui.accordion.find('#page'+type+'0');
+				this.ui.accordion.find('#'+type+'Pagination').pagination({
+					items: nsObs,
+					cssStyle: 'light-theme',
+					hrefTextPrefix: '',
+					onPageClick: function(pageNumber){
+						current.addClass('hidden');
+						current = _this.ui.accordion.find('#page'+type+(pageNumber-1)); 
+						current.removeClass('hidden');
+					},
+				});
+		},
 
 
 

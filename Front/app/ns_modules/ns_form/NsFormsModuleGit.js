@@ -18,7 +18,6 @@ define([
 		reloadAfterSave: true,
 		template: tpl,
 		redirectAfterPost: "",
-		eventsBinded :false,
 
 		initialize: function (options) {
 			this.modelurl = options.modelurl;
@@ -70,12 +69,10 @@ define([
 				this.initModel();
 			}
 
-
 			if (options.redirectAfterPost) {
 				// allow to redirect after creation (post) using the id of created object
 				this.redirectAfterPost = options.redirectAfterPost;
 			}
-
 
 		},
 
@@ -89,14 +86,9 @@ define([
 				this.model = new Backbone.Model();
 			}
 
-			console.log(this.model);
-
 			var url = this.modelurl
 
 			url += this.id;
-
-			console.log(url);
-
 
 			$.ajax({
 				url: url,
@@ -134,48 +126,45 @@ define([
 
 			this.displaybuttons();
 
-			if(!this.eventsBinded){
-				this.bindEvents();
-			}
+			this.bindEvents();
 			this.afterShow();
 		},
 
 		bindEvents: function(){
 			var _this = this;
 			var name = this.name;
-			$('.NsFormModuleCancel' + name).on('click', function(){
-				_this.butClickCancel(this);
-				console.log('cancel');
-			})
-			$('.NsFormModuleSave' + name).on('click', function(){
-				_this.butClickSave(this);
-			})
-			$('.NsFormModuleClear' + name).on('click', function(){
-				_this.butClickClear(this);
-			})
-			$('.NsFormModuleEdit' + name).on('click', function(){
+			$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit' + name).on('click', function(){
 				_this.butClickEdit(this);
 			});
-			this.eventsBinded = true;
+			$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel' + name).on('click', function(){
+				_this.butClickCancel(this);
+			});
+			$('#'+this.buttonRegion[0]).find('.NsFormModuleSave' + name).on('click', function(){
+				_this.butClickSave(this);
+			});
+			$('#'+this.buttonRegion[0]).find('.NsFormModuleClear' + name).on('click', function(){
+				_this.butClickClear(this);
+			});
 		},
 
 
 		displaybuttons: function () {
 			var name = this.name;
 
+
 			if(this.displayMode == 'edit'){
-				$('.NsFormModuleCancel'+name).removeClass('hidden');
-				$('.NsFormModuleSave'+name).removeClass('hidden');
-				$('.NsFormModuleClear'+name).removeClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel'+name).removeClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleSave'+name).removeClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleClear'+name).removeClass('hidden');
 
-				$('.NsFormModuleEdit'+name).addClass('hidden');
-				$('#' + this.formRegion).find('input:enabled:first').focus();
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit'+name).addClass('hidden');
+				$('#'+this.buttonRegion[0]).find('#' + this.formRegion).find('input:enabled:first').focus();
 			}else{
-				$('.NsFormModuleCancel'+name).addClass('hidden');
-				$('.NsFormModuleSave'+name).addClass('hidden');
-				$('.NsFormModuleClear'+name).addClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel'+name).addClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleSave'+name).addClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleClear'+name).addClass('hidden');
 
-				$('.NsFormModuleEdit'+name).removeClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit'+name).removeClass('hidden');
 			}
 		},
 
@@ -184,62 +173,65 @@ define([
 		},
 
 		butClickSave: function (e) {
-			this.BBForm.commit();
-			if (this.model.attributes["id"] == 0) {
-				// To force post when model.save()
-				this.model.attributes["id"] = null;
-			}
-			var _this = this;
-			this.onSavingModel();
+			var errors = this.BBForm.commit();
 
-			if (this.model.id == 0) {
-				// New Record
-				this.model.save(null, {
-					success: function (model, response) {
-						// Getting ID of created record, from the model (has beeen affected during model.save in the response)
-						_this.savingSuccess(model, response);
-						_this.id = _this.model.id;
-						
-						if (_this.redirectAfterPost != "") {
-							// If redirect after creation
-							var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
+			if(Object.keys(errors).length == 0){
+				if (this.model.attributes["id"] == 0) {
+					// To force post when model.save()
+					this.model.attributes["id"] = null;
+				}
+				var _this = this;
+				this.onSavingModel();
 
-							if (window.location.href == window.location.origin + TargetUrl) {
-								// if same page, relaod
-								window.location.reload();
+				if (this.model.id == 0) {
+					// New Record
+					this.model.save(null, {
+						success: function (model, response) {
+							// Getting ID of created record, from the model (has beeen affected during model.save in the response)
+							_this.savingSuccess(model, response);
+							_this.id = _this.model.id;
+							
+							if (_this.redirectAfterPost != "") {
+								// If redirect after creation
+								var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
+
+								if (window.location.href == window.location.origin + TargetUrl) {
+									// if same page, relaod
+									window.location.reload();
+								}
+								else {
+									// otherwise redirect
+									window.location.href = TargetUrl;
+								}
 							}
 							else {
-								// otherwise redirect
-								window.location.href = TargetUrl;
+								// If no redirect after creation
+								if (_this.reloadAfterSave) {
+									_this.reloadAfterSave();
+								}
 							}
+						},
+						error: function (response) {
+							_this.savingError(response);
 						}
-						else {
-							// If no redirect after creation
-							if (_this.reloadAfterSave) {
-								_this.reloadAfterSave();
-							}
-						}
-					},
-					error: function (response) {
-						_this.savingError(response);
-					}
 
-				});
-			}
-			else {
-				// UAfter update of existing record
-				this.model.id = this.model.get('id');
-				this.model.save(null, {
-					success: function (model, response) {
-						_this.savingSuccess(model, response);
-						if (_this.reloadAfterSave) {
-							_this.reloadingAfterSave();
+					});
+				}
+				else {
+					// UAfter update of existing record
+					this.model.id = this.model.get('id');
+					this.model.save(null, {
+						success: function (model, response) {
+							_this.savingSuccess(model, response);
+							if (_this.reloadAfterSave) {
+								_this.reloadingAfterSave();
+							}
+						},
+						error: function (response) {
+							_this.savingError(response);
 						}
-					},
-					error: function (response) {
-						_this.savingError(response);
-					}
-				});
+					});
+				}
 			}
 			this.afterSavingModel();
 		},
