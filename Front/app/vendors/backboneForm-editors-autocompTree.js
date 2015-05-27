@@ -9,7 +9,7 @@ define([
 	_, $, Backbone, Form, autocompTree, config
 ){
 	'use strict';
-	return Form.editors.AutocompTreeEditor = Form.editors.Base.extend({
+	return Form.editors.ThesaurusPicker = Form.editors.Base.extend({
 
 
 		previousValue: '',

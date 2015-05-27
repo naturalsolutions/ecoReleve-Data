@@ -41,8 +41,7 @@ define([
 		/*===================================================
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
-		events : {
-		},
+
 
 
 		regions: {
@@ -52,10 +51,14 @@ define([
 
 
 		ui: {
-			accordion : '#accordion'
+			accordion : '#accordion',
+			protoList : '#protoList'
 		},
 
+		events : {
+			'click #addProto' : 'addProto',
 
+		},
 
 		/*
 		ui:{
@@ -96,11 +99,16 @@ define([
 				contentType:'application/json'
 			})
 			.done(function(resp) {
-				this.displayProtos(resp);
+				this.initProtos(resp);
 			})
 			.fail(function(resp) {
 				console.log(resp);
 			});
+
+
+			this.protoList4Add();
+
+			this.protos = new Backbone.Collection();
 
 
 			/*
@@ -109,47 +117,66 @@ define([
 			*/
 		},
 
-		displayProtos: function(protos){
+		initProtos: function(protos){
 			var first = true;
 			for(var name in protos){
 
-				var count = protos[name].length;
+				var nbObs = protos[name].length; 
 				var type = name.replace(/ /g,'');
-				var collapseBody = ''; var collapseTitle = 'collapsed';
-				if(first){collapseBody='in'; collapseTitle = '';}
+
+				//create accordion patern of each proto type
+				this.createProtoPatern(nbObs, name, first);
 				first=false;
 
-				var tpl = Marionette.Renderer.render('app/modules/input/templates/tpl-accordion.html', {
-						name : name,
-						type : type,
-						count: count,
-						collapseBody : collapseBody,
-						collapseTitle : collapseTitle
-				});
-				this.ui.accordion.append(tpl);
-				this.displayObs(protos[name], type);
-
+				//create each obs
+				for (var i = 0; i < nbObs; i++) {
+					this.addObs(protos[name][i], type, i);
+				}
+				//init pagination once obs created
+				this.paginateObs(nbObs, type);
 			}
 		},
 
-		displayObs: function(obs, type){
+		createProtoPatern: function(nbObs, name, first){
+			var nbObs = nbObs;
+			var type = name.replace(/ /g,'');
+
+			var collapseBody = ''; var collapseTitle = 'collapsed';
+			if(first){collapseBody='in'; collapseTitle = '';}
+
+			this.protos.add({name : name, nbObs : nbObs});
+
+			var tpl = Marionette.Renderer.render('app/modules/input/templates/tpl-accordion.html', {
+					name : name,
+					type : type,
+					count: nbObs,
+					collapseBody : collapseBody,
+					collapseTitle : collapseTitle
+			});
+			this.ui.accordion.append(tpl);
+
 			
-			for (var i = 0; i < obs.length; i++) {
+		},
 
-				var key = type+i;
+		addObs: function(obs, type, i, objectType){
 
-				var classes;
-				(i==0)? classes="" : classes = "hidden";
+			var type = type.replace(/ /g,'');
 
-				this.ui.accordion.find('#'+type+'Collapse > .panel-body').append('<div id="page'+type+i+'" class="'+classes+'"> <div id="'+key+'"></div><div id="stationFormBtns'+key+'"></div></div>');
+			var key = type+i;
+
+			var classes;
+			(i==0)? classes="" : classes = "hidden";
 
 
+			this.ui.accordion.find('#'+type+'Collapse > .panel-body').append('<div id="page'+type+i+'" class="'+classes+'"> <div id="'+key+'"></div><div id="stationFormBtns'+key+'"></div></div>');
+
+			if(obs != 0){
 				var Md = Backbone.Model.extend({
-					schema : obs[i].schema,
-					fieldsets: obs[i].fieldsets,
+					schema : obs.schema,
+					fieldsets: obs.fieldsets,
 				});
 
-				var model = new Md(obs[i].data);
+				var model = new Md(obs.data);
 
 				var mode = 'edit';
 				if(model.get('id') > 0){
@@ -167,28 +194,86 @@ define([
 					buttonRegion: ['stationFormBtns'+key],
 					formRegion: key,
 					displayMode: mode,
-					reloadAfterSave : false,
+					reloadAfterSave : true,
 				});
+			}else{
+				this.nsform = new NsFormsModule({
+					name: type,
+					unique : i,
+					id : 0,
+					modelurl : config.coreUrl+'protocols/',
+					buttonRegion: ['stationFormBtns'+key],
+					formRegion: key,
+					displayMode: 'edit',
+					reloadAfterSave : true,
+					objecttype: objectType
+				});
+				//this.ui.accordion.find('#'+type+'Pagination').pagination('updateItems', i+1);
+			}
+		},
 
-				this.paginateObs(obs.length, type);
+		paginateObs: function(nbObs, type){
+			var _this = this;
+
+			var type = type.replace(/ /g,'');
+
+			var current = _this.ui.accordion.find('#page'+type+'0');
+			this.ui.accordion.find('#'+type+'Pagination').pagination({
+				items: nbObs,
+				cssStyle: 'light-theme',
+				hrefTextPrefix: '',
+				onPageClick: function(pageNumber){
+					current.addClass('hidden');
+					current = _this.ui.accordion.find('#page'+type+(pageNumber-1)); 
+					current.removeClass('hidden');
+				},
+			});
+		},
+
+		protoList4Add: function(){
+			var _this = this;
+			this.protoSelectList = new Backbone.Collection();
+			this.protoSelectList.fetch({
+				url: config.coreUrl+'/protocolTypes',
+				reset: true,
+				success: function(){
+					_.each(_this.protoSelectList.models,function( model ){
+						_this.ui.protoList.append(new Option(model.get('Name'), model.get('ID')));
+					},this);
+				},
+			});
+		},
+
+
+		addProto: function(){
+			var name = this.ui.protoList.find(":selected").text();
+			var objectType = this.ui.protoList.val();
+			var nbObs=0;
+
+			var proto = this.protos.findWhere({'name' : name});
+
+			if(proto){
+				nbObs = proto.get('nbObs');
+				proto.set({'nbObs' : (nbObs+1)});
+			}else{
+				this.createProtoPatern(1, name, 0, objectType);
+				this.protos.add({name : name, nbObs : 1});
 			}
 
+			this.addObs(0, name, nbObs, objectType);
+			this.paginateObs(nbObs+1, name);
 		},
 
-		paginateObs: function(nsObs, type){
-				var _this = this;
-				var current = _this.ui.accordion.find('#page'+type+'0');
-				this.ui.accordion.find('#'+type+'Pagination').pagination({
-					items: nsObs,
-					cssStyle: 'light-theme',
-					hrefTextPrefix: '',
-					onPageClick: function(pageNumber){
-						current.addClass('hidden');
-						current = _this.ui.accordion.find('#page'+type+(pageNumber-1)); 
-						current.removeClass('hidden');
-					},
-				});
-		},
+
+
+
+
+
+
+
+
+
+
 
 
 

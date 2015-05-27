@@ -90,6 +90,8 @@ define([
 
 			url += this.id;
 
+
+
 			$.ajax({
 				url: url,
 				context: this,
@@ -175,7 +177,7 @@ define([
 		butClickSave: function (e) {
 			var errors = this.BBForm.commit();
 
-			if(Object.keys(errors).length == 0){
+			if(!errors){
 				if (this.model.attributes["id"] == 0) {
 					// To force post when model.save()
 					this.model.attributes["id"] = null;
