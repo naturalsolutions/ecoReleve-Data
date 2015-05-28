@@ -20,5 +20,12 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 		Backbone.history.start();
 	});
 
+	$( document ).ajaxStart(function(e) {
+		$('#header-loader').removeClass('hidden');
+	});
+	$( document ).ajaxStop(function() {
+		$('#header-loader').addClass('hidden');
+	});
+
 	return app;
 });

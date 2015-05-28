@@ -29,6 +29,7 @@ class fieldActivity(Base):
     Name = Column(Unicode(250),nullable=False)
 
 
+
 class FieldActivity_ProtocoleType (Base) :
     __tablename__ = 'FieldActivity_ProtocoleType'
 

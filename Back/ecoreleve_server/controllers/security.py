@@ -5,6 +5,7 @@ Created on Mon Aug 25 13:00:16 2014
 """
 
 from ecoreleve_server.Models import DBSession , User
+import transaction 
 
 from pyramid.security import (
     ALL_PERMISSIONS,
@@ -27,5 +28,6 @@ class SecurityRoot(object):
 
 # Useful fucntions #
 def role_loader(user_id, request):
-    return DBSession.query(User.Role).filter(User.id==user_id).one()
-    
+    result = DBSession.query(User.Role).filter(User.id==user_id).one()
+    transaction.commit()
+    return result

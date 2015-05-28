@@ -57,8 +57,7 @@ define([
 			}
 			this.model=options.model;
 			this.listenTo(this.model,'change', this.modelChanged);
-			this.keyboard();
-			
+			//this.keyboard();
 		},
 
 
@@ -101,18 +100,14 @@ define([
 						if(e.ctrlKey)
 						ctx.prevStep();
 					break;
-
 					case 38: // up
 					break;
-
 					case 39: // right
 						if(e.ctrlKey)
 						ctx.nextStep();
 					break;
-
 					case 40: // down
 					break;
-
 					default: return; // exit this handler for other keys
 				}
 				//e.preventDefault(); // prevent the default action (scroll / move caret)
@@ -122,6 +117,7 @@ define([
 		/*==========  Next / Prev  ==========*/
 
 		nextStep: function(){
+
 			if(this.steps[this.currentStep].nextOK()) {
 				if (this.currentStep >= this.steps.length-1) {
 				this.finish();
@@ -130,8 +126,20 @@ define([
 					this.currentStep++;
 					this.toStep(this.currentStep);
 				}
-				
 			}
+			//for ajaxcall 
+			this.disableNext();
+		},
+
+		nextStepWithoutCheck: function(){
+				if (this.currentStep >= this.steps.length-1) {
+				this.finish();
+
+				} else {
+					this.currentStep++;
+					this.toStep(this.currentStep);
+				}
+				
 		},
 
 		prevStep: function(){
@@ -151,7 +159,6 @@ define([
 
 
 			if (this.currentStep==this.steps.length-1){
-
 				//this.$el.find('#btnNext').attr( 'disabled', 'disabled');
 				this.$el.find('#btnNext').addClass('finished').find( 'span'
 					).html(finishBtnLabel).parent().find('.icon').removeClass('rightarrow').addClass('validate');
@@ -164,14 +171,16 @@ define([
 		},
 
 		check: function(){
-
 			if(this.steps[this.currentStep].validate()) {
-				this.$el.find('#btnNext').removeAttr('disabled').show();                
+				this.$el.find('#btnNext').prop("disabled", false);
 			}
 			else{
-				/*this.$el.find('#btnNext').attr( 'disabled', 'disabled' );*/
-				this.$el.find('#btnNext').hide();
+				this.$el.find('#btnNext').prop("disabled", true);
 			}
+		},
+
+		disableNext: function(){
+			this.$el.find('#btnNext').prop("disabled", true);
 		},
 
 
@@ -180,10 +189,11 @@ define([
 			if (this.currentStep==0){
 				/* this.$el.find('#btnPrev').attr( 'disabled', 'disabled');*/
 				this.$el.find('#btnPrev').hide();
- 
+
 			}
 			else {
 				/*  this.$el.find('#btnPrev').removeAttr('disabled'); */
+
 				this.$el.find('#btnPrev').show();
 			}
 
@@ -210,9 +220,9 @@ define([
 
 
 		GetStepByName: function(StepName){
-			   for (var i=0; i < this.steps.length; i++){
+			for (var i=0; i < this.steps.length; i++){
 				if (this.steps[i].name == StepName ) return this.steps[i].Name ;
-			}  
+			}
 			return null;
 		},
 
