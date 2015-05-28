@@ -9,11 +9,11 @@ define([
 	'radio',
 
 	'ns_stepper/lyt-step',
-	'ns_map/ns_map',
+
 	'ns_modules/ns_com',
 
 	
-	'../views/new-station',
+	'../views/view-step2-new',
 	'../views/input-grid',
 	'../views/input-stations-filter',
 	'../views/input-stations-grid',
@@ -24,7 +24,7 @@ define([
 	'translater'
 
 ], function($, _, Backbone, Marionette, config, Swal, dateTimePicker, Radio,
-	Step, NsMap, Com,
+	Step, Com,
 	StationView, Grid, FilterView, GridView,
 	MonitoredSites, Position, Station, Translater
 ){
@@ -34,16 +34,17 @@ define([
 		className: 'ns-full-height',
 		events : {
 			'change input[type=radio][name="position"]' :'updateStationType',
-			'click #getPosition' : 'getCurrentPosition',
-			'change input[name="LAT"]' : 'getCoordinates',
-			'change input[name="LON"]' : 'getCoordinates',
+			
+
 			'click span.picker': 'filterIndivShow',
 			'click #addFieldWorkerInput' : 'addInput',
 			'click #removeFieldWorkerInput' : 'removeInput',
 			'change select.fiedworker' : 'checkFWName',
 			'change input[name="Precision"]' : 'checkAccuracyValue',
+
 			'change #impfieldActivity' : 'updateStationFA',
-			'change td.select-cell.editable' : 'updateStation'
+			'change td.select-cell.editable' : 'updateStation',
+
 		},
 		regions: {
 			leftRegion : '#inputStLeft',
@@ -51,51 +52,37 @@ define([
 		},
 		onShow: function(){
 			this.translater = Translater.getTranslater();
-			this.radio = Radio.channel('input');
-			this.radio.comply('generateStation', this.generateStation, this);
-			this.radio.comply('movePoint', this.movePoint, this);
-			this.radio.comply('changeDate', this.updateDate, this);
-			this.sites = new MonitoredSites();
-			this.listenTo(this.sites, 'reset', this.updateName); 
+			this.parent.disableNext();
 			var stationType = this.model.get('start_stationtype');
+			this.loadStationView(stationType);
+		},
+
+		loadStationView: function(type){
+			switch(type){
+				case 3:
+					var stationForm = new StationView({ type: type, parent: this });
+					this.leftRegion.show(stationForm);
+					this.feedTpl();
+					break;
+				case 2:
+					break;
+				case 1:
+					break;
+				default:
+					return false;
+					break;
+			}
+
+			/*
 			if(Number.isInteger(stationType)){
-				$('#btnPrev').css('display','');
-				//$('#btnNext').addClass('NsFormModuleSaveStaForm');
-				var stationForm = new StationView({objecttype:stationType});
-
-				var formModel = stationForm.nsform.model;
-				//this.initModel(stationType,stationForm);
-				this.leftRegion.show(stationForm);
-				// get stored values
-				this.feedTpl();
-				//this.updateStationType(stationType);
-				
-
-
-				$('#inputStRight').html('<div id="map"></div>');
-				this.map = new NsMap({
-					popup: true,
-					zoom : 8,
-					element: 'map',
-				});
-
-				this.map.init();
-				this.map.addMarker(false, 33.06, -3.96);
-				
-				
-
-				
 			} else if(stationType =='imported'){
 				$('#btnNext').addClass('disabled');
-
 				this.lastImportedStations = new Backbone.Collection();
 				this.lastImportedStations.url = config.coreUrl + 'station/last_imported/';
 				var self = this;
 				this.lastImportedStations.fetch().done(function(){
 					self.last_imported_stations();
 				});
-				
-
 			} else {
 				// from existed stations/monitored sites
 				this.initModel('old',null);
@@ -110,10 +97,12 @@ define([
 					$('.allSt-name').addClass('hidden');
 				}
 				$('#stepper-header span').text('old stations');
-			}
+			}*/
 		},
 
-		last_imported_stations : function () {
+
+
+/*		last_imported_stations : function () {
 				var importMsg = this.translater.getValueFromKey('input.importStMsg');
 				this.initModel('import',null);
 				var ln = this.lastImportedStations.length;
@@ -168,11 +157,11 @@ define([
 					$('#inputStLeft').html('<h4>' + importMsg + '</h4>');
 				}
 				$('#stepper-header span').text('Last imported station(s)');
-				
 		},
 
+		
 		initModel: function(type,formView){
-			
+			console.log('passed');
 			this.stepAttributes = [];
 			if ((Number.isInteger(type)) && formView  ){
 				var model =  formView.nsform.model;
@@ -211,7 +200,9 @@ define([
 				}
 			}
 		},
-		/*updateStationType : function(value){
+		
+
+		updateStationType : function(value){
 			if(value == "new"){
 				// station with coordinates
 				$('#stRegion').addClass('hidden');
@@ -263,35 +254,9 @@ define([
 				//$('#input-station-title').text('New station from monitored site');
 				$('#stepper-header span').text('New station from monitored site');
 			}
-		},*/
-
-		
-		feedTpl: function(){
-			var ctx=this;
-			this.$el.find('input:not(:checkbox,:radio,:submit)').each(function(){
-				var id = ctx.name + '_' + $(this).attr('name'); 
-				$(this).val( ctx.model.get(id)) ;						 
-			});
-
-			this.$el.find('input:checkbox').each(function(){
-				var id = ctx.name + '_' + $(this).attr('name');
-				var tmp=ctx.model.get(id);
-				if(tmp){ $(this).attr('checked', 'checked') }
-			});
-			this.$el.find('input:radio').each(function(){
-				var id = ctx.name + '_' + $(this).attr('name');
-				var tmp=ctx.model.get(id);
-				if($(this).val() == tmp){ 
-					$(this).attr('checked', 'checked');
-				}
-			});
-			this.$el.find('select').each(function(){
-				var id = ctx.name + '_' + $(this).attr('name');
-				var val=ctx.model.get(id);
-				if(val)
-				$(this).val(val);
-			});
 		},
+
+
 		datachanged_select: function(e){
 			
 			var target= $(e.target);
@@ -322,45 +287,10 @@ define([
 				this.model.set(this.name + '_' + target.attr('name')  , val);
 			}
 		},
-		getCurrentPosition : function(){
-			if(navigator.geolocation) {
-				var loc = navigator.geolocation.getCurrentPosition(this.myPosition,this.erreurPosition);
-			} else {
-				//alert("Ce navigateur ne supporte pas la géolocalisation");
-				Swal(
-					{
-						title: "Wrong file type",
-						text: 'The browser dont support geolocalization API',
-						type: 'error',
-						showCancelButton: false,
-						confirmButtonColor: 'rgb(147, 14, 14)',
-						confirmButtonText: "OK",
 
-						closeOnConfirm: true,
-						
-				 });
-			}
-		},
-		myPosition : function(position){
-			var latitude = parseFloat((position.coords.latitude).toFixed(5));
-			var longitude = parseFloat((position.coords.longitude).toFixed(5));
-			// update map
-			var pos = new Position();
-			pos.set("latitude",latitude);
-			pos.set("longitude",longitude);
-			pos.set("label","current station");
-			pos.set("id","_");
-			//this.map.updateMarkerPos(1, latitude, longitude );
-			Radio.channel('input').command('movePoint', pos);
 
-				//position.coords.altitude +"\n";
-		},
-		movePoint : function(position){
-			var latitude  =position.get("latitude");
-			var longitude = position.get("longitude");
-			//this.map.updateMarkerPos(1, latitude, longitude );
-			this.map.addMarker(false, latitude, longitude );
-		},
+
+
 		erreurPosition : function(error){
 			var info = "Erreur lors de la géolocalisation : ";
 			switch(error.code) {
@@ -408,7 +338,7 @@ define([
 					this.model.set('station_LAT',latitude);
 					this.model.set('station_LON',longitude);
 					//this.getPosModel(latitude,longitude);
-					Radio.channel('input').command('movePoint', position);
+					this.movePoint(position);
 					//this.map.updateMarkerPos(1, latitude, longitude );
 					this.map.addMarker(false, latitude, longitude );
 				}
@@ -417,84 +347,7 @@ define([
 				this.model.set('station_LON',null);
 			}
 		},
-		nextOK: function(){
-			/*var result = false; 
-			var stationType = this.model.get('start_stationtype');
-			if (stationType =='imported' || stationType =='old' || stationType =='monitoredSite') {
-				return true;
-			}
-			// create a station model from stored data in global model
-			var station = new Station();
-			for (var attribute in this.model.attributes) {
-				// check attribute name
-				var attr = attribute.substring(0, 7);
-				if ( (attr =='station') && (attribute != 'station_position')){
-					// attribute name
-					var attrName = attribute.substring(8, attribute.length);
-					station.set(attrName, this.model.get(attribute));
-				}
-			}
-			var url= config.coreUrl +'station/addStation/insert';
-			
-			$.ajax({
-				url:url,
-				context:this,
-				type:'POST',
-				data:  station.attributes,
-				dataType:'json',
-				async: false,
-				success: function(data){
-					var PK = Number(data.PK);
-					if(PK){
-						station.set('PK',PK);
-						station.set('Region',data.Region);
-						station.set('UTM20',data.UTM20);
-						this.model.set('station_position', station);
-						result = true;
-					} else if (data==null) {
-						//alert('this station is already saved, please modify date or coordinates');
-						Swal({
-							title: "Wrong values",
-							text: 'This station is already saved, please modify date or coordinates.',
-							type: 'error',
-							showCancelButton: false,
-							confirmButtonColor: 'rgb(147, 14, 14)',
-							confirmButtonText: "OK",
-							closeOnConfirm: true,
-						});
-					} 
 
-					else {
-						//alert('error in creating new station');
-						Swal({
-							title: "Wrong values",
-							text: 'Error in creating new station.',
-							type: 'error',
-							showCancelButton: false,
-							confirmButtonColor: 'rgb(147, 14, 14)',
-							confirmButtonText: "OK",
-							closeOnConfirm: true,
-						});
-					}
-				},
-				error: function(data, textStatus, jqXHR){
-					//alert('error in creating new station');
-					Swal({
-							title: "Wrong values",
-							text: 'Error in creating new station. ' + data.responseText,
-							type: 'error',
-							showCancelButton: false,
-							confirmButtonColor: 'rgb(147, 14, 14)',
-							confirmButtonText: "OK",
-							closeOnConfirm: true,
-					});
-				}
-			});
-			return result;*/
-		},
-
-
-		
 		generateStation : function(model){
 			var stationType = this.model.get('start_stationtype');
 			if (stationType =='imported') {
@@ -508,17 +361,17 @@ define([
 					model.set('FieldWorker4',''); 
 				}
 				var fieldWorker5 = model.get('FieldWorker5');
-				if(!fieldWorker5){
+				if(!fieldWorker5){ 
 					model.set('FieldWorker5',''); 
 				}
-				/*var id = model.get('id');
-				if(id){
-					model.unset('id'); 
-				}
-				var utm = model.get('UTM');
-				if(id){
-					model.unset('UTM'); 
-				}*/
+				// var id = model.get('id');
+				// if(id){
+				// 	model.unset('id'); 
+				// }
+				// var utm = model.get('UTM');
+				// if(id){
+				// 	model.unset('UTM'); 
+				// }
 				model.set('id_site','');
 				var fieldWorkersNumber = model.get('NbFieldWorker');
 				if(!fieldWorkersNumber){
@@ -529,13 +382,13 @@ define([
 				if(!model.get('FieldActivity_Name')){
 					// display field activity container
 					$('#inputImpStFieldContainer').removeClass('hidden');
-						/* if ( $('#impfieldActivity option').length == 1) {
-							var fieldList = getFieldActivity.getElements('theme/list');
-							$('#impfieldActivity').append(fieldList);
-						}
-						// init values
-						$('#impfieldActivity').val('');
-						$('#inputImpStFieldContainer p').text('');*/
+					 // if ( $('#impfieldActivity option').length == 1) {
+						// 	var fieldList = getFieldActivity.getElements('theme/list');
+						// 	$('#impfieldActivity').append(fieldList);
+						// }
+						// // init values
+						// $('#impfieldActivity').val('');
+						// $('#inputImpStFieldContainer p').text('');
 						$('#btnNext').addClass('disabled');
 				} else {
 					$('#inputImpStFieldContainer').addClass('hidden');
@@ -592,6 +445,7 @@ define([
 			}
 		  // Radio.channel('input').command('grid:updateFieldActivity', e);
 		},
+
 		addInput : function(){
 			// get actual number of inserted fields stored in "fieldset#station-fieldWorkers" tag
 			var stFieldWorkers = $('#station-fieldWorkers');
@@ -608,6 +462,7 @@ define([
 				$(stFieldWorkers).attr('insertedWorkersNb', nbFdW);
 			}
 		},
+
 		removeInput : function(){
 			var stFieldWorkers = $('#station-fieldWorkers');
 			var actualFDNumber = parseInt($(stFieldWorkers).attr('insertedworkersnb'));
@@ -623,57 +478,8 @@ define([
 			}
 			$('input[name="NbFieldWorker"').val(actualFDNumber -1);
 		},
-		checkFWName : function(e){
-			var fieldWorkerNameErrMsg = this.translater.getValueFromKey('shared.alertMsg.fieldWorkerNameErrMsg'),
-			nameErr = this.translater.getValueFromKey('shared.alertMsg.fieldWorkerNameErr');
-			var fieldWorkersNb = $('input[name="NbFieldWorker"');
-			var selectedField = $(e.target);
-			var fieldName = $(e.target).attr('name');
-			var selectedOp = $(e.target).find(":selected")[0];
-			var selectedName = $(selectedOp).val();
-			var nbFW = 0;
-			$(".fiedworker").each(function() {
-				var selectedValue = $(this).val();
-				if ($(this).attr('name') != fieldName){
-					if (selectedName && (selectedValue == selectedName)){
-						//alert('this name is already selected, please select another name');
-						Swal({
-							title: nameErr , 
-							text: fieldWorkerNameErrMsg,
-							type: 'error',
-							showCancelButton: false,
-							confirmButtonColor: 'rgb(147, 14, 14)',
-							confirmButtonText: "OK",
-							closeOnConfirm: true,
-						});
-						$(selectedField).val('');
-					}
-				}
-				if(selectedValue){
-					nbFW+=1;
-				}
-				// ...
-			});
-			// update totalNbFieldworkers
-			$(fieldWorkersNb).val(nbFW);
-			$(fieldWorkersNb).change();
-		},
-		checkAccuracyValue : function(){
-			var element = $('input[name="Precision"]');
-			var value = parseInt($(element).val());
-			if(value < 0 ){
-				//alert('please input a valid value (>0) ');
-				
-				$(element).val('');
-			}
-		},
-		updateDate : function(){
-			var dateVal =$("input[name='Date_']").val();
-			if (dateVal){
-				this.model.set('station_Date_' , dateVal);
-				this.loadMonitoredSites(dateVal);
-			}
-		},		  
+
+
 		loadMonitoredSites: function(date) {
 			var that=this;
 			$.ajax({
@@ -694,6 +500,16 @@ define([
 				$('#stMonitoredSiteType').html(content);
 			});
 		},
+
+		updateDate : function(){
+			var dateVal =$("input[name='Date_']").val();
+			if (dateVal){
+				this.model.set('station_Date_' , dateVal);
+				this.loadMonitoredSites(dateVal);
+			}
+		},
+
+
 		updateSitePos: function(e) {
 
 			var type =  $('#stMonitoredSiteType').val();
@@ -726,21 +542,9 @@ define([
 			html.sort();
 			var content = '<option value=""></option>' + html.join(' ');
 			$('#stMonitoredSiteName').html(content);
-		}/*,
-		checkDateField : function(e){
-			var dateValue = $(e.target).val();
-			var siteType = $('#stMonitoredSiteType');
-			var siteName = $('#stMonitoredSiteName'); 
-			if(!dateValue){
-				$(siteType).val('');
-				$(siteType).attr('disabled','disabled');
-				$(siteName).val('');
-				$(siteName).attr('disabled','disabled');
-			} else {
-				$(siteType).removeAttr('disabled');
-				$(siteName).removeAttr('disabled');
-			}
-		}*/
+		},*/
+
+
 
 	});
 });

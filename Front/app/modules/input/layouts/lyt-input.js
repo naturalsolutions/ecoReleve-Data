@@ -10,10 +10,9 @@ define([
 	'./individual-list',
 
 	'./lyt-step1',
-
 	'./lyt-step2',
-
 	'./lyt-step3',
+	
 	'translater'
 
 ], function($, _, Backbone, Marionette, Swal,
@@ -75,9 +74,9 @@ define([
 			});
 
 			this.steps=[];
-			this.steps[0]= FirstStep;
-			this.steps[1]= SecondStep;
-			this.steps[2]= ThirdStep;
+			// this.steps[0]= FirstStep;
+			// this.steps[1]= SecondStep;
+			this.steps[0]= ThirdStep;
 
 			this.stepper = new StepperOrchestrator({
 				model: this.model,

@@ -47,6 +47,7 @@ def getForms(request) :
     ModuleName = 'ObsForm'
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     newProto = Observation(FK_ProtocoleType = typeProto)
+
     # newProto.init_on_load()
 
     schema = newProto.GetDTOWithSchema(Conf,'edit')

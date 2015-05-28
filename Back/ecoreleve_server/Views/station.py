@@ -261,6 +261,7 @@ def GetProtocolsofStation (request) :
     data = {}
     searchInfo = {}
     criteria = {'Column': 'FK_Station', 'Operator':'=','Value':sta_id}
+
     response = []
     curSta = DBSession.query(Station).get(sta_id)
     try : 
