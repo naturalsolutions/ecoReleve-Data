@@ -147,6 +147,12 @@ define([
 			$('#'+this.buttonRegion[0]).find('.NsFormModuleClear' + name).on('click', function(){
 				_this.butClickClear(this);
 			});
+
+			$('#'+this.buttonRegion[0]).find('.NsFormModuleDelete' + name).on('click', function(){
+				_this.butClickDelete(this);
+			});
+
+
 		},
 
 
@@ -173,6 +179,7 @@ define([
 		afterShow: function(){
 
 		},
+
 
 		butClickSave: function (e) {
 			var errors = this.BBForm.commit();
@@ -255,6 +262,14 @@ define([
 			$(formContent).find('input[type="checkbox"]').attr('checked', false);
 		},
 
+		butClickDelete: function(){
+			this.afterDelete(); 
+		},
+
+
+		afterDelete: function(){
+			
+		},
 
 
 		reloadingAfterSave: function () {
@@ -264,11 +279,6 @@ define([
 			this.showForm();
 			this.displaybuttons();
 		},
-
-
-
-
-
 
 		onSavingModel: function () {
 			// To be extended, calld after commit before save on model
