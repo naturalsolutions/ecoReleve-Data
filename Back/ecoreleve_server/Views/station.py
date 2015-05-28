@@ -3,7 +3,8 @@ from ..Models import (
     DBSession,
     Station,
     StationType,
-    Observation
+    Observation,
+    FieldActivity_ProtocoleType
     )
 from ecoreleve_server.GenericObjets.FrontModules import (FrontModule,ModuleField)
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -90,6 +91,16 @@ def getStation(request):
         response  = curSta.GetFlatObject()
 
     return response
+
+
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
+def deleteStation(request):
+    id_ = request.matchdict['id']
+    curSta = DBSession.query(Station).get(id_)
+    DBSession.delete(curSta)
+    transaction.commit()
+
+    return True
 
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateStation(request):
@@ -230,7 +241,7 @@ def searchStation(request):
         {'Query':'Station',
         'Column': 'None',
         'Operator' : 'not exists',
-        'Value': select([o]).where(cast(o.creationDate,DATE) > cast(Station.creationDate,DATE))
+        'Value': select([o]).where(cast(o.creationDate,DATE) > cast(Station.creationDate,DATE)) 
         },
         {'Column' : 'FK_StationType',
         'Operator' : '=',
@@ -251,7 +262,7 @@ def GetProtocolsofStation (request) :
     searchInfo = {}
     criteria = {'Column': 'FK_Station', 'Operator':'=','Value':sta_id}
     response = []
-
+    curSta = DBSession.query(Station).get(sta_id)
     try : 
         if 'criteria' in request.params or request.params == {} :
             print (' ********************** criteria params ==> Search ****************** ')
@@ -259,8 +270,8 @@ def GetProtocolsofStation (request) :
             searchInfo = data
             searchInfo['criteria'] = []
             searchInfo['criteria'].append(criteria)
-            listObj = ListObjectWithDynProp(DBSession,Observation,searchInfo)
-            response = listObj.GetFlatList()
+            listObs = ListObjectWithDynProp(DBSession,Observation,searchInfo)
+            response = listObs.GetFlatList()
     except : 
         pass
 
@@ -273,19 +284,45 @@ def GetProtocolsofStation (request) :
             except : 
                 DisplayMode = 'display'
 
-            listObs = DBSession.query(Observation).filter(Observation.FK_Station == sta_id)
+            listObs = list(DBSession.query(Observation).filter(Observation.FK_Station == sta_id))
+            listProtoType =list(DBSession.query(FieldActivity_ProtocoleType
+                ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
+            Conf = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleName ).first()
 
-            if listObs :
+            if listObs or listProtoType:
+                max_iter = max(len(listObs),len(listProtoType))
                 listObsWithSchema = {}
-                for obs in listObs : 
-                    typeName = obs.GetType().Name
-                    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
-                    obs.LoadNowValues()
-                    try :
-                        listObsWithSchema[typeName].append(obs.GetDTOWithSchema(Conf,DisplayMode))
-                    except :
-                        listObsWithSchema[typeName] = []
-                        listObsWithSchema[typeName].append(obs.GetDTOWithSchema(Conf,DisplayMode))
+                print ('_________________ Max ITER _________')
+                print (max_iter)
+                print (' LENGTH listObs : '+str(len(listObs)))
+                print (' LENGTH listProtoType : '+str(len(listProtoType)))
+
+                for i in range(max_iter) :
+
+                    try : 
+                        obs = listObs[i]
+                        typeName = obs.GetType().Name
+                        obs.LoadNowValues()
+                        try :
+                            listObsWithSchema[typeName].append(obs.GetDTOWithSchema(Conf,DisplayMode))
+                        except :
+                            listObsWithSchema[typeName] = []
+                            listObsWithSchema[typeName].append(obs.GetDTOWithSchema(Conf,DisplayMode))
+                            pass
+                    except : 
+                        pass
+
+                    try : 
+                        virginObs = Observation(FK_ProtocoleType =listProtoType[i].FK_ProtocoleType)
+                        viginTypeName = virginObs.GetType().Name
+                        try :
+                            listObsWithSchema[viginTypeName].append(virginObs.GetDTOWithSchema(Conf,DisplayMode))
+                        except :
+                            listObsWithSchema[viginTypeName] = []
+                            listObsWithSchema[viginTypeName].append(virginObs.GetDTOWithSchema(Conf,DisplayMode))
+                            pass
+                    except : 
+                        pass
 
             response = listObsWithSchema
     except Exception as e :

@@ -58,9 +58,7 @@ class ObjectWithDynProp:
 
     def SetProperty(self,nameProp,valeur) :
         if hasattr(self,nameProp):
-            print(nameProp+'\n')
             setattr(self,nameProp,valeur)
-            print(getattr(self,nameProp))
         else:
             if (nameProp in self.GetType().DynPropNames):
                 if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):
@@ -90,16 +88,13 @@ class ObjectWithDynProp:
         curQuery += 'where V2.' + self.GetDynPropFKName() + ' = ' + self.GetDynPropFKName() + ' and V2.' + self.GetSelfFKNameInValueTable() + ' = V.' + self.GetSelfFKNameInValueTable() + ' '
         curQuery += 'AND V2.startdate > V.startdate)'
         curQuery +=  'and v.' + self.GetSelfFKNameInValueTable() + ' =  ' + str(self.GetpkValue() )
-        print(curQuery)
+
         Values = self.ObjContext.execute(curQuery).fetchall()
-        print('**NOW Values ***')
-        print (Values)
+
         for curValue in Values : 
             row = OrderedDict(curValue)
             self.PropDynValuesOfNow[row['Name']] = self.GetRealValue(row)
-        print(self.PropDynValuesOfNow)
 
-        
     def GetRealValue(self,row):
         return row[Cle[row['TypeProp']]]
 
@@ -140,7 +135,6 @@ class ObjectWithDynProp:
     def GetSchemaFromStaticProps(self,FrontModule,DisplayMode):
         Editable = (DisplayMode.lower()  == 'edit')
         resultat = {}
-        print ('\n***************GetSchemaFromStaticProps***************************\n\n')
         type_ = self.GetType().ID
         Fields = self.ObjContext.query(ModuleField).filter(ModuleField.FK_FrontModule == FrontModule.ID).all()
         curEditable = Editable
