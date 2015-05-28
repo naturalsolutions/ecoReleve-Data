@@ -42,10 +42,7 @@ class ModuleField(Base):
         return FieldSizeToClass[FieldSize]
 
     def GetDTOFromConf(self,IsEditable,CssClass):    
-        print('***************** GetDTOFromConf ***********************')
-        
-        print(self.Name)
-        
+
         dto = {
             'Name': self.Name,
             'type': self.InputType,
@@ -57,7 +54,6 @@ class ModuleField(Base):
             'options': [],
             }
         if self.InputType == 'Select' and self.QueryName != None : 
-            print (self.QueryName)
             result = DBSession.execute(text(self.QueryName)).fetchall()
 
             for row in result :

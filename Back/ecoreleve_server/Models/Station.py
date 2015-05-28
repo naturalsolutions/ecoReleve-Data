@@ -43,8 +43,8 @@ class Station(Base,ObjectWithDynProp):
     fieldActivityId = Column(Integer, ForeignKey('fieldActivity.ID'),nullable=True)
     creator = Column( Integer)
     creationDate = Column(DateTime, default=func.now())
-    Observations = relationship('Observation',backref='Station')
-    StationDynPropValues = relationship('StationDynPropValue',backref='Station')
+    Observations = relationship('Observation',backref='Station',cascade="all, delete-orphan")
+    StationDynPropValues = relationship('StationDynPropValue',backref='Station',cascade="all, delete-orphan")
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
 
@@ -97,7 +97,7 @@ class StationDynPropValue(Base):
     ValueFloat =  Column(Float)
     FK_StationDynProp = Column(Integer, ForeignKey('StationDynProp.ID'))
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
-
+    # station = relationship('Station',cascade="all, delete-orphan", single_parent = True)
 
 class StationType(Base,ObjectTypeWithDynProp):
 
