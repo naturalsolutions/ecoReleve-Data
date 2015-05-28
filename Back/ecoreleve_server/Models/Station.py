@@ -22,6 +22,7 @@ from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from ..GenericObjets.FrontModules import FrontModule,ModuleField
+from ecoreleve_server.Models import FieldActivity
 from datetime import datetime
 from collections import OrderedDict
 import pandas as pd 
@@ -41,9 +42,9 @@ class Station(Base,ObjectWithDynProp):
     precision = Column( Integer)
     fieldActivityId = Column(Integer, ForeignKey('fieldActivity.ID'),nullable=True)
     creator = Column( Integer)
-    creationDate = Column(DateTime, server_default=func.now())
-    Observations = relationship('Observation',backref='Station')
-    StationDynPropValues = relationship('StationDynPropValue',backref='Station')
+    creationDate = Column(DateTime, default=func.now())
+    Observations = relationship('Observation',backref='Station',cascade="all, delete-orphan")
+    StationDynPropValues = relationship('StationDynPropValue',backref='Station',cascade="all, delete-orphan")
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
 
@@ -96,7 +97,7 @@ class StationDynPropValue(Base):
     ValueFloat =  Column(Float)
     FK_StationDynProp = Column(Integer, ForeignKey('StationDynProp.ID'))
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
-
+    # station = relationship('Station',cascade="all, delete-orphan", single_parent = True)
 
 class StationType(Base,ObjectTypeWithDynProp):
 
@@ -123,9 +124,4 @@ class StationType_StationDynProp(Base):
     FK_StationDynProp = Column(Integer, ForeignKey('StationDynProp.ID'))
 
 
-class fieldActivity(Base):
 
-    __tablename__ = 'fieldActivity'
-
-    ID = Column(Integer,Sequence('fieldActivity__id_seq'), primary_key=True)
-    Name = Column(Unicode(250),nullable=False)

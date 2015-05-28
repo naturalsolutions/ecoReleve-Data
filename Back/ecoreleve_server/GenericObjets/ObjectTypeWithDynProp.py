@@ -13,7 +13,6 @@ class ObjectTypeWithDynProp:
 
 
     def __init__(self,ObjContext):
-        print('Init ObjTyoe')
         self.ObjContext = ObjContext
         self.DynPropNames = self.GetDynPropNames()
 
