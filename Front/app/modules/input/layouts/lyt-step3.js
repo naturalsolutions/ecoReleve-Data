@@ -87,6 +87,7 @@ define([
 				},
 				contentType:'application/json'
 			}).done(function(resp) {
+				console.log(resp);
 				this.initProtos(resp);
 			}).fail(function(resp) {
 				console.log(resp);
@@ -258,15 +259,18 @@ define([
 
 		initProtos: function(protos){
 			var first = true;
+
+
+			var objectType;
 			for(var name in protos){
-				this.createProtoPatern(protos[name], name, first);
+				this.createProtoPatern(protos[name], name, first, objectType);
 				first=false;
 			}
 
 
 		},
 
-		createProtoPatern: function(obsList, name, first){
+		createProtoPatern: function(obsList, name, first, objectType){
 			var type = name.replace(/ /g,'');
 			var nbObs = obsList.length; 
 			var collapseBody = ''; var collapseTitle = 'collapsed';
@@ -303,7 +307,7 @@ define([
 				proto.nbObs++;
 				proto.addObs(0, proto.nbObs, objectType);
 			}else{
-				proto = this.createProtoPatern([], name, false);
+				proto = this.createProtoPatern([], name, false, objectType);
 				proto.nbObs++;
 				proto.addObs(0, 0, objectType);
 				proto.current = $('#'+proto.type).find(proto.indexPageList[0]);
