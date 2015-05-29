@@ -286,46 +286,56 @@ def GetProtocolsofStation (request) :
                 DisplayMode = 'display'
 
             listObs = list(DBSession.query(Observation).filter(Observation.FK_Station == sta_id))
-            listProtoType =list(DBSession.query(FieldActivity_ProtocoleType
+            listType =list(DBSession.query(FieldActivity_ProtocoleType
                 ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
             Conf = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleName ).first()
 
-            if listObs or listProtoType:
-                max_iter = max(len(listObs),len(listProtoType))
-                listObsWithSchema = {}
+            if listObs or listType:
+                max_iter = max(len(listObs),len(listType))
+                listProto = {}
                 print ('_________________ Max ITER _________')
                 print (max_iter)
                 print (' LENGTH listObs : '+str(len(listObs)))
-                print (' LENGTH listProtoType : '+str(len(listProtoType)))
+                print (' LENGTH listProtoType : '+str(len(listType)))
 
                 for i in range(max_iter) :
 
                     try : 
                         obs = listObs[i]
                         typeName = obs.GetType().Name
+                        typeID = obs.GetType().ID
                         obs.LoadNowValues()
                         try :
-                            listObsWithSchema[typeName].append(obs.GetDTOWithSchema(Conf,DisplayMode))
+                            listProto[typeID]['obs'].append(obs.GetDTOWithSchema(Conf,DisplayMode))
                         except :
-                            listObsWithSchema[typeName] = []
-                            listObsWithSchema[typeName].append(obs.GetDTOWithSchema(Conf,DisplayMode))
+                            print('_____except_____ Obs')
+
+                            listObsWithSchema = []
+                            listObsWithSchema.append(obs.GetDTOWithSchema(Conf,DisplayMode))
+                            listProto[typeID] = {'Name': typeName,'obs':listObsWithSchema}
                             pass
                     except : 
+                        print('exceptGlob OBS') 
                         pass
 
                     try : 
-                        virginObs = Observation(FK_ProtocoleType =listProtoType[i].FK_ProtocoleType)
+                        print('_____try_____ Virgin')
+                        virginTypeID = listType[i].FK_ProtocoleType
+                        virginObs = Observation(FK_ProtocoleType = virginTypeID)
                         viginTypeName = virginObs.GetType().Name
                         try :
-                            listObsWithSchema[viginTypeName].append(virginObs.GetDTOWithSchema(Conf,DisplayMode))
+                            listProto[virginTypeID]['obs'].append(virginObs.GetDTOWithSchema(Conf,DisplayMode))
                         except :
-                            listObsWithSchema[viginTypeName] = []
-                            listObsWithSchema[viginTypeName].append(virginObs.GetDTOWithSchema(Conf,DisplayMode))
+                            print('_____except_____ Virgin')
+                            listSchema = []
+                            listSchema.append(virginObs.GetDTOWithSchema(Conf,DisplayMode))
+                            listProto[virginTypeID] = {'Name': viginTypeName,'obs':listSchema}
                             pass
-                    except : 
+                    except :
+                        print('exceptGlob VIRGIN') 
                         pass
 
-            response = listObsWithSchema
+            response = listProto
     except Exception as e :
         print (e)
         pass
