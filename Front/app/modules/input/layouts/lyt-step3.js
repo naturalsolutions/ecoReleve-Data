@@ -67,7 +67,7 @@ define([
 		},
 
 		onShow: function(){
-
+			var _this = this;
 			var stationType = this.model.get('start_stationtype');
 			this.stationId = this.model.get('station');
 			this.stationId = 1;
@@ -77,25 +77,23 @@ define([
 				stationType: stationType
 			}));
 
-			var jqxhr = $.ajax({
-				url: config.coreUrl+'stations/'+this.stationId+'/protocols',
-				method: 'GET',
-				context: this,
+
+			var ProtoList = Backbone.Collection.extend({
+
+			url: config.coreUrl+'stations/'+this.stationId+'/protocols',
+			});
+			this.protos = new ProtoList();
+			this.protos.fetch({
 				data : {
 					FormName: 'ObsForm',
-					DisplayMode : 'display'
+					DisplayMode : 'edit'
 				},
-				contentType:'application/json'
-			}).done(function(resp) {
-				console.log(resp);
-				this.initProtos(resp);
-			}).fail(function(resp) {
-				console.log(resp);
+				success: function(){
+					_this.initProtos();
+				}
 			});
 
 			this.protoList4Add();
-			this.protos = new Backbone.Collection();
-
 
 			this.protocols = {};
 
@@ -113,9 +111,11 @@ define([
 					this.first = options.first;
 					this.name = options.name;
 					this.obsList = options.obsList;
+					this.type = this.options.type;
+					this.stationId = options.stationId;
+
 
 					this.nbObs = this.obsList.length;
-					this.type = this.name.replace(/ /g,'');
 
 
 					this.model = new Backbone.Model({
@@ -155,7 +155,7 @@ define([
 
 					var NSForm = NsFormsModule.extend({
 						afterDelete: function(){
-							_this.deleteProto(index);
+							_this.deleteProto(index, this);
 						},
 					});
 
@@ -164,12 +164,14 @@ define([
 						var Md = Backbone.Model.extend({
 							schema : obs.schema,
 							fieldsets: obs.fieldsets,
+							urlRoot : config.coreUrl+'stations/'+this.stationId+'/protocols/'
 						});
-
 						var model = new Md(obs.data);
-						var mode = 'edit';
 
-						model.urlRoot = config.coreUrl+'stations/'+this.stationId+'/protocols/';
+						var mode = 'edit';
+						if(obs.data.id!=0){
+							mode = 'display';
+						}
 
 						var nsform = new NSForm({
 							name: this.type,
@@ -220,7 +222,19 @@ define([
 					});
 				},
 
-				deleteProto: function(i){
+				deleteProto: function(i, form){
+
+					var jqxhr = $.ajax({
+						url: config.coreUrl+'stations/'+this.stationId+'/protocols/'+form.model.get('ID'),
+						method: 'DELETE',
+						context: this,
+						contentType:'application/json'
+					}).done(function(resp) {
+						console.log('deleted');
+					}).fail(function(resp) {
+						console.log(resp);
+					});
+
 
 					if(this.indexPageList.length>1){
 						var index= this.indexPageList.indexOf('#page'+this.type+i);
@@ -257,21 +271,27 @@ define([
 		},
 
 
-		initProtos: function(protos){
+		initProtos: function(){
+			var obsList = [];
+			var name;
 			var first = true;
-
-
 			var objectType;
-			for(var name in protos){
-				this.createProtoPatern(protos[name], name, first, objectType);
+
+
+			_.each(this.protos.models,function( model ){
+				obsList = model.get('obs');
+				name = model.get('Name');
+				objectType = model.get('ID');
+				console.log()
+				this.createProtoPatern(obsList, name, first, objectType);
 				first=false;
-			}
+			},this);
 
 
 		},
 
 		createProtoPatern: function(obsList, name, first, objectType){
-			var type = name.replace(/ /g,'');
+			var type = '_'+objectType+'_';
 			var nbObs = obsList.length; 
 			var collapseBody = ''; var collapseTitle = 'collapsed';
 			if(first){collapseBody='in'; collapseTitle = '';}
@@ -289,7 +309,9 @@ define([
 				parent: this,
 				first: first,
 				name : name,
-				obsList : obsList
+				type : type,
+				obsList : obsList,
+				stationId: this.stationId
 			});
 
 			this.protocols[name] = protocol;

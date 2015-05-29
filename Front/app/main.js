@@ -51,13 +51,19 @@ require.config({
 		'dropzone'				: '../bower_components/dropzone/dist/dropzone',
 		'i18n'					: '../bower_components/i18n/i18next',
 		'fancytree'				: '../bower_components/fancytree/dist/jquery.fancytree-all.min',
+		
+		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
+		
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
 		'backgrid.paginator'	: 'vendors/backgrid-paginator',
 		'backgridSelect_all'	:'vendors/backgrid-select-all',
 
-		'simplePagination'		: '../bower_components/simplePagination.js/jquery.simplePagination',
-		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
+		'simplePagination'		: 'vendors/jquery.simplePagination',
+
+
+
+
 	},
 
 
