@@ -324,13 +324,17 @@ def GetProtocolsofStation (request) :
                         viginTypeName = virginObs.GetType().Name
                         try :
                             if virginTypeID not in listProto :
-                                listProto[virginTypeID]['obs'].append(virginObs.GetDTOWithSchema(Conf,DisplayMode))
+                                virginForm = virginObs.GetDTOWithSchema(Conf,DisplayMode)
+                                virginForm['data']['FK_ProtocoleType'] = virginTypeID
+                                listProto[virginTypeID]['obs'].append(virginForm)
                         except :
-
-                            listSchema = []
-                            listSchema.append(virginObs.GetDTOWithSchema(Conf,DisplayMode))
-                            listProto[virginTypeID] = {'Name': viginTypeName,'obs':listSchema}
-                            pass
+                            if virginTypeID not in listProto :
+                                listSchema = []
+                                virginForm = virginObs.GetDTOWithSchema(Conf,DisplayMode)
+                                virginForm['data']['FK_ProtocoleType'] = virginTypeID
+                                listSchema.append(virginForm)
+                                listProto[virginTypeID] = {'Name': viginTypeName,'obs':listSchema}
+                                pass
 
                     except :
                         
@@ -346,6 +350,7 @@ def GetProtocolsofStation (request) :
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST')
 def insertNewProtocol (request) :
+    print('********************** :°°°°°°°°° :=):):):) -_-_-_-_-è_-_-_-_-_-_-_-_-')
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
@@ -373,7 +378,7 @@ def updateObservation(request):
     return {}
 
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'DELETE')
-def updateObservation(request):
+def deleteObservation(request):
 
     print('*********************** DELETE Observation *****************')
 
@@ -384,7 +389,7 @@ def updateObservation(request):
     return {}
 
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-def GetObservation(request):
+def getObservation(request):
 
     print('*********************** GET Observation *****************')
     
@@ -412,5 +417,37 @@ def GetObservation(request):
         response = {}
 
     return response
+
+@view_config(route_name= prefix+'/id/protocols/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+def actionOnObs(request):
+    print ('\n*********************** Action **********************\n')
+    dictActionFunc = {
+    'count' : countObs,
+    'forms' : getObsForms,
+    '0' : getObsForms,
+    'fields': getObsFields
+    }
+    actionName = request.matchdict['action']
+    return dictActionFunc[actionName](request)
+
+def countObs (request) :
+#   ## TODO count stations
+    return
+
+def getObsForms(request) :
+
+    typeObs = request.params['ObjectType']
+    print('***************** GET FORMS ***********************')
+    ModuleName = 'ObsForm'
+    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+    newObs = Observation(FK_ProtocoleType = typeObs)
+    newObs.init_on_load()
+    schema = newObs.GetDTOWithSchema(Conf,'edit')
+    del schema['schema']['creationDate']
+    return schema
+
+def getObsFields(request) :
+#     ## TODO return fields Station
+    return
 
 

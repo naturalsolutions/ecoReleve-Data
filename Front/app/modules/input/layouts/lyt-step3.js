@@ -14,7 +14,7 @@ define([
 
 	'ns_form/NSFormsModuleGit',
 
-	'../views/view-step3-station-details',
+	'../views/view-step3-station',
 	// 'tmp/getProtocolsList',
 	// 'tmp/getUsers',
 
@@ -26,7 +26,7 @@ define([
 	Step, NsFormsModule,
 	ViewStationDetail,
 	/*
-	getProtocolsList, getUsers,
+	getProtocolsList, getUsers,²
 	*/
 	Station, Translater
 ){
@@ -37,8 +37,6 @@ define([
 		/*===================================================
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
-
-
 
 		regions: {
 			rgStation: '#rgStation',
@@ -71,39 +69,56 @@ define([
 			var stationType = this.model.get('start_stationtype');
 			this.stationId = this.model.get('station');
 			this.stationId = 1;
+
 			
 			this.rgStation.show(new ViewStationDetail({
 				stationId: this.stationId,
-				stationType: stationType
+				stationType: stationType,
+				parent: this
 			}));
 
 
-			var ProtoList = Backbone.Collection.extend({
-
-			url: config.coreUrl+'stations/'+this.stationId+'/protocols',
-			});
-			this.protos = new ProtoList();
-			this.protos.fetch({
-				data : {
-					FormName: 'ObsForm',
-					DisplayMode : 'edit'
+			var ProtoColl = Backbone.Collection.extend({
+				url: config.coreUrl+'stations/'+this.stationId+'/protocols',
+				fetch: function(options) {
+					var that = this; 
+					if(!options){
+						var options= {};
+					}
+					_this.ui.accordion.empty();
+					options.data = {
+						FormName: 'ObsForm',
+						DisplayMode : 'edit'
+					};
+					options.success = function(protos){
+						that.fetchSuccess(protos);
+					};
+					return Backbone.Collection.prototype.fetch.call(this, options);
 				},
-				success: function(){
-					_this.initProtos();
-				}
-			});
+				fetchSuccess: function(protos){
+					var obsList = [];
+					var name;
+					var first = true;
+					var objectType;
+					_.each(protos.models,function( model ){
+						obsList = model.get('obs');
+						name = model.get('Name');
+						objectType = model.get('ID');
+						console.log()
+						this.createProtoPatern(obsList, name, first, objectType);
+						first=false;
+					}, _this);
+				},
+			})
+
+			this.protos = new ProtoColl();
+			this.protos.fetch();
 
 			this.protoList4Add();
 
 			this.protocols = {};
 
-
-			/*
-			this.$el.i18n();
-			this.translater = Translater.getTranslater();
-			*/
-
-			this.Proto = Marionette.LayoutView.extend({
+			this.Proto = Backbone.Model.extend({
 				template : false,
 
 				initialize: function(options){
@@ -111,12 +126,10 @@ define([
 					this.first = options.first;
 					this.name = options.name;
 					this.obsList = options.obsList;
-					this.type = this.options.type;
+					this.type = options.type;
 					this.stationId = options.stationId;
 
-
 					this.nbObs = this.obsList.length;
-
 
 					this.model = new Backbone.Model({
 						name : this.name,
@@ -125,9 +138,7 @@ define([
 						collapseBody : this.collapseBody,
 						collapseTitle : this.collapseTitle
 					});
-
 					this.indexPageList = [];
-
 					this.initProto();
 				},
 
@@ -178,7 +189,7 @@ define([
 							unique : index,
 							model: model,
 							id : model.get('id'),
-							modelurl : config.coreUrl+'stations/'+this.stationId+'/protocols/',
+							modelurl : config.coreUrl+'stations/'+this.stationId+'/protocols',
 							buttonRegion: ['stationFormBtns'+key],
 							formRegion: key,
 							displayMode: mode,
@@ -189,7 +200,7 @@ define([
 							name: this.type,
 							unique : index,
 							id : 0,
-							modelurl : config.coreUrl+'protocols/',
+							modelurl : config.coreUrl+'stations/'+this.stationId+'/protocols',
 							buttonRegion: ['stationFormBtns'+key],
 							formRegion: key,
 							displayMode: 'edit',
@@ -201,6 +212,8 @@ define([
 					}
 					this.updateNbObs();
 				},
+
+				
 
 				paginateObs: function(){
 					var _this = this;
@@ -260,6 +273,7 @@ define([
 						this.updateNbObs();
 					}else{
 						$('#'+this.type).remove();
+
 						delete this.parent.protocols[this.name];
 					}
 				},
@@ -268,27 +282,12 @@ define([
 					$('#'+this.type).find('.badge').html(this.nbObs);
 				},
 			});
+			/*
+			this.$el.i18n();
+			this.translater = Translater.getTranslater();
+			*/
 		},
 
-
-		initProtos: function(){
-			var obsList = [];
-			var name;
-			var first = true;
-			var objectType;
-
-
-			_.each(this.protos.models,function( model ){
-				obsList = model.get('obs');
-				name = model.get('Name');
-				objectType = model.get('ID');
-				console.log()
-				this.createProtoPatern(obsList, name, first, objectType);
-				first=false;
-			},this);
-
-
-		},
 
 		createProtoPatern: function(obsList, name, first, objectType){
 			var type = '_'+objectType+'_';
@@ -296,15 +295,15 @@ define([
 			var collapseBody = ''; var collapseTitle = 'collapsed';
 			if(first){collapseBody='in'; collapseTitle = '';}
 
-			var tpl = Marionette.Renderer.render('app/modules/input/templates/tpl-accordion.html', {
+			var tpl = JST['app/modules/input/templates/tpl-accordion.html']({
 					name : name,
 					type : type,
 					nbObs: nbObs,
 					collapseBody : collapseBody,
 					collapseTitle : collapseTitle
 			});
-			this.ui.accordion.append(tpl);
 
+			this.ui.accordion.append(tpl);
 			var protocol = new this.Proto({
 				parent: this,
 				first: first,
@@ -324,6 +323,7 @@ define([
 			var objectType = this.ui.protoList.val();
 
 			var proto =this.protocols[name];
+
 
 			if(proto){
 				proto.nbObs++;
