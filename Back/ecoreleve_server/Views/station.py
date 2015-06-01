@@ -280,27 +280,24 @@ def GetProtocolsofStation (request) :
         if 'FormName' in request.params : 
             print (' ********************** Forms in params ==> DATA + FORMS ****************** ')
             ModuleName = request.params['FormName']
-            try :
-                DisplayMode = request.params['DisplayMode']
-            except : 
-                DisplayMode = 'display'
+
 
             listObs = list(DBSession.query(Observation).filter(Observation.FK_Station == sta_id))
             listType =list(DBSession.query(FieldActivity_ProtocoleType
                 ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
             Conf = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleName ).first()
 
-            if listObs or listType:
-                max_iter = max(len(listObs),len(listType))
-                listProto = {}
-                print ('_________________ Max ITER _________')
-                print (max_iter)
-                print (' LENGTH listObs : '+str(len(listObs)))
-                print (' LENGTH listProtoType : '+str(len(listType)))
+            ### TODO : if protocols exists, append the new protocol form at the after : 2 loops, no choice
 
-                for i in range(max_iter) :
+
+            if listObs or listType:
+                # max_iter = max(len(listObs),len(listType))
+                listProto = {}
+
+                for i in range(len(listObs)) :
 
                     try : 
+                        DisplayMode = 'display'
                         obs = listObs[i]
                         typeName = obs.GetType().Name
                         typeID = obs.GetType().ID
@@ -308,34 +305,44 @@ def GetProtocolsofStation (request) :
                         try :
                             listProto[typeID]['obs'].append(obs.GetDTOWithSchema(Conf,DisplayMode))
                         except :
-                            print('_____except_____ Obs')
+                            
 
                             listObsWithSchema = []
                             listObsWithSchema.append(obs.GetDTOWithSchema(Conf,DisplayMode))
                             listProto[typeID] = {'Name': typeName,'obs':listObsWithSchema}
                             pass
                     except : 
-                        print('exceptGlob OBS') 
+                      
                         pass
 
+                for i in range(len(listType)) :
                     try : 
-                        print('_____try_____ Virgin')
+                        DisplayMode = 'edit'
+                       
                         virginTypeID = listType[i].FK_ProtocoleType
                         virginObs = Observation(FK_ProtocoleType = virginTypeID)
                         viginTypeName = virginObs.GetType().Name
                         try :
-                            listProto[virginTypeID]['obs'].append(virginObs.GetDTOWithSchema(Conf,DisplayMode))
+                            if virginTypeID not in listProto :
+                                virginForm = virginObs.GetDTOWithSchema(Conf,DisplayMode)
+                                virginForm['data']['FK_ProtocoleType'] = virginTypeID
+                                listProto[virginTypeID]['obs'].append(virginForm)
                         except :
-                            print('_____except_____ Virgin')
-                            listSchema = []
-                            listSchema.append(virginObs.GetDTOWithSchema(Conf,DisplayMode))
-                            listProto[virginTypeID] = {'Name': viginTypeName,'obs':listSchema}
-                            pass
+                            if virginTypeID not in listProto :
+                                listSchema = []
+                                virginForm = virginObs.GetDTOWithSchema(Conf,DisplayMode)
+                                virginForm['data']['FK_ProtocoleType'] = virginTypeID
+                                listSchema.append(virginForm)
+                                listProto[virginTypeID] = {'Name': viginTypeName,'obs':listSchema}
+                                pass
+
                     except :
-                        print('exceptGlob VIRGIN') 
+                        
                         pass
 
-            response = listProto
+            globalListProto = [{'ID':objID, 'Name':listProto[objID]['Name'],'obs':listProto[objID]['obs'] } for objID in listProto.keys()]
+
+            response = globalListProto
     except Exception as e :
         print (e)
         pass
@@ -343,6 +350,7 @@ def GetProtocolsofStation (request) :
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST')
 def insertNewProtocol (request) :
+    print('********************** :°°°°°°°°° :=):):):) -_-_-_-_-è_-_-_-_-_-_-_-_-')
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
@@ -369,8 +377,19 @@ def updateObservation(request):
     transaction.commit()
     return {}
 
+@view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'DELETE')
+def deleteObservation(request):
+
+    print('*********************** DELETE Observation *****************')
+
+    id_obs = request.matchdict['obs_id']
+    curObs = DBSession.query(Observation).get(id_obs)
+    DBSession.delete(curObs)
+    transaction.commit()
+    return {}
+
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-def GetObservation(request):
+def getObservation(request):
 
     print('*********************** GET Observation *****************')
     
@@ -398,5 +417,37 @@ def GetObservation(request):
         response = {}
 
     return response
+
+@view_config(route_name= prefix+'/id/protocols/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+def actionOnObs(request):
+    print ('\n*********************** Action **********************\n')
+    dictActionFunc = {
+    'count' : countObs,
+    'forms' : getObsForms,
+    '0' : getObsForms,
+    'fields': getObsFields
+    }
+    actionName = request.matchdict['action']
+    return dictActionFunc[actionName](request)
+
+def countObs (request) :
+#   ## TODO count stations
+    return
+
+def getObsForms(request) :
+
+    typeObs = request.params['ObjectType']
+    print('***************** GET FORMS ***********************')
+    ModuleName = 'ObsForm'
+    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+    newObs = Observation(FK_ProtocoleType = typeObs)
+    newObs.init_on_load()
+    schema = newObs.GetDTOWithSchema(Conf,'edit')
+    del schema['schema']['creationDate']
+    return schema
+
+def getObsFields(request) :
+#     ## TODO return fields Station
+    return
 
 

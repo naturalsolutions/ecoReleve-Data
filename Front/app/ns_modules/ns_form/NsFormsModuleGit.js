@@ -88,7 +88,7 @@ define([
 
 			var url = this.modelurl
 
-			url += this.id;
+			url += '/'+this.id;
 
 
 
@@ -177,7 +177,6 @@ define([
 		},
 
 		afterShow: function(){
-
 		},
 
 
@@ -185,13 +184,14 @@ define([
 			var errors = this.BBForm.commit();
 
 			if(!errors){
-				if (this.model.attributes["id"] == 0) {
-					// To force post when model.save()
+					if (this.model.attributes["id"] == 0) {
+						// To force post when model.save()
 					this.model.attributes["id"] = null;
 				}
 				var _this = this;
 				this.onSavingModel();
 
+				console.log(this.model);
 				if (this.model.id == 0) {
 					// New Record
 					this.model.save(null, {
@@ -209,7 +209,7 @@ define([
 									window.location.reload();
 								}
 								else {
-									// otherwise redirect
+									// otpherwise redirect
 									window.location.href = TargetUrl;
 								}
 							}
