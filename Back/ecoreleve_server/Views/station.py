@@ -350,7 +350,7 @@ def GetProtocolsofStation (request) :
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST')
 def insertNewProtocol (request) :
-    print('********************** :°°°°°°°°° :=):):):) -_-_-_-_-è_-_-_-_-_-_-_-_-')
+
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
