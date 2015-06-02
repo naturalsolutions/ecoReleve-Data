@@ -23,7 +23,6 @@
     "backbone.radio": "~0.9.0",
     "simplePagination.js": "https://github.com/flaviusmatis/simplePagination.js.git",
     "fuelux": "~3.7.0",
-    "animate.css": "https://github.com/daneden/animate.css.git#~3.2.6",
     "dropzone": "~4.0.1",
     "jquery": "~2.1.4",
     "requirejs-text": "~2.0.14",
