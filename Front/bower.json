@@ -26,8 +26,9 @@
     "animate.css": "https://github.com/daneden/animate.css.git#~3.2.6",
     "dropzone": "~4.0.1",
     "jquery": "~2.1.4",
-    "requirejs-text":"~2.0.14",
-    "i18n" : "https://github.com/jamuhl/i18next.git",
-    "fancytree": "~2.9.0"
+    "requirejs-text": "~2.0.14",
+    "i18n": "https://github.com/jamuhl/i18next.git",
+    "fancytree": "~2.9.0",
+    "reneco-fonts": "*"
   }
 }
