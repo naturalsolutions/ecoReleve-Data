@@ -9,7 +9,7 @@ define([
 	_, $, Backbone, Form, autocompTree, config
 ){
 	'use strict';
-	return Form.editors.ThesaurusPicker = Form.editors.Base.extend({
+	return Form.editors.Thesaurus = Form.editors.Base.extend({
 
 
 		previousValue: '',
@@ -46,13 +46,10 @@ define([
 		},
 
 		render: function(){
-
 			var $el = $(this.template);
 			this.setElement($el);
 
-
 			var _this= this;
-
 
 			_(function() {
 				_this.$el.find('#' + _this.id ).autocompTree({
@@ -68,7 +65,6 @@ define([
 					startId: _this.startId
 				});
 			}).defer();
-
 			return this;
 		},
 

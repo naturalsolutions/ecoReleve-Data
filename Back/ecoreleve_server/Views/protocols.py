@@ -12,7 +12,7 @@ from datetime import datetime
 from sqlalchemy import func,select,and_, or_, join
 from pyramid.security import NO_PERMISSION_REQUIRED
 from collections import OrderedDict
-
+from .station import insertNewProtocol
 
 
 
@@ -22,6 +22,11 @@ def updateListProtocols(request):
     # TODO 
     # update a list of protocols 
     return
+
+@view_config(route_name= prefix, renderer='json', request_method = 'POST')
+def insertProtocols(request):
+
+    return insertNewProtocol (request)
 
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnProtocols(request):

@@ -56,8 +56,6 @@ define([
 				orderSeparator: ' ',
 			});
 
-			
-			Radio.channel('import').command('initGrid');
 
 			this.grid = new Grid({
 				collections : collection,
@@ -71,50 +69,45 @@ define([
 			});
 
 			this.mapRegion.show(this.map);
-			
+
 			this.filtersList={
-				name : "String",
-				latitude: "Number",
-				longitude : "Number",
-				datetime: "DateTimePickerBS",
-				waypointTime: "DATETIME",
+				1 : {
+					name : "name",
+					type : "String",
+					label : "Name"
+				},
+				2 : {
+					name : "latitude",
+					type : "Number",
+					label : "Latitude"
+				},
+				3 : {
+					name : "longitude",
+					type : "Number",
+					label : "Longitude"
+				},
+				4 : {
+					name : "waypointTime",
+					type : "DateTimePicker",
+					label : "Date"
+				}
 			};
 			this.filters = new NSFilter({
 				filters: this.filtersList,
 				channel: 'modules',
 				com: this.com,
 				clientSide: true,
+				// template: 'filter/tpl-filters.html',
+				filterContainer: 'filters'
 			});
 
 			this.com.setMotherColl(collection);
 			this.translater = Translater.getTranslater();
-            this.$el.i18n();
+			this.$el.i18n();
 		},
 
 		filter: function(){
 			this.filters.update();
-		},
-		
-		setFieldActivity : function(e){
-			var currentFieldVal = $(e.target).val();
-			this.$el.find('#locations tr').each(function(){
-				$(this).find('select').val(currentFieldVal);
-			});
-			var collection = this.model.get('data_FileContent') ; 
-			 collection.each(function(model) {
-				model.set('fieldActivity',currentFieldVal);
-			});
-		},
-
-		resetFieldActivity : function(e){
-			this.$el.find('#importFieldActivity').val('');
-			this.$el.find('#locations tr').each(function(){
-				$(this).find('select').val('');
-			});
-			var collection = this.model.get('data_FileContent') ; 
-			 collection.each(function(model) {
-				model.set('fieldActivity','');
-			});
 		},
 		nextOK: function(){
 			/*var WaypointsError = this.translater.getValueFromKey('import.waypointsError');

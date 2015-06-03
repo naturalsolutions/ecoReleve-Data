@@ -57,6 +57,7 @@ define([
 
 		this.geoJsonLayers = [];
 		this.initIcons();
+		L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images';
 	}
 
 	Map.prototype = {

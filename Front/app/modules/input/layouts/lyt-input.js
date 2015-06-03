@@ -74,9 +74,9 @@ define([
 			});
 
 			this.steps=[];
-			// this.steps[0]= FirstStep;
-			// this.steps[1]= SecondStep;
-			this.steps[0]= ThirdStep;
+			this.steps[0]= FirstStep;
+			this.steps[1]= SecondStep;
+			this.steps[2]= ThirdStep;
 
 			this.stepper = new StepperOrchestrator({
 				model: this.model,

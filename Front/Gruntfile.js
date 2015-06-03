@@ -1,4 +1,4 @@
-module.exports = function(grunt) {
+ module.exports = function(grunt) {
 	grunt.initConfig({
 
 		/*==========  Watch Tasks  ==========*/
@@ -25,7 +25,7 @@ module.exports = function(grunt) {
 			},
 			livereload: {
 				files: [
-					'*.html',
+					'build/*.js',
 					'app/styles/**/*.css',
 					'app/**/*.js',
 				]

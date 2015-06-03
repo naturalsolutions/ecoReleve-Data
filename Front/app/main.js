@@ -44,20 +44,23 @@ require.config({
 		'backbone_forms'		: '../bower_components/backbone-forms/distribution.amd/backbone-forms',
 		'backbone.paginator'	: '../bower_components/backbone.paginator/lib/backbone.paginator.min',
 		'requirejs-text'		: '../bower_components/requirejs-text/text',
-		'L'						: '../bower_components/leaflet/dist/leaflet',
+		'L'						: '../bower_components/leaflet/dist/leaflet-src',
 		'leaflet_cluster'		: '../bower_components/leaflet.markercluster/dist/leaflet.markercluster',
 		'leaflet_google'		: '../bower_components/leaflet-plugins/layer/tile/Google',
 		'swiper'				: '../bower_components/swiper/dist/js/swiper',
 		'dropzone'				: '../bower_components/dropzone/dist/dropzone',
 		'i18n'					: '../bower_components/i18n/i18next',
 		'fancytree'				: '../bower_components/fancytree/dist/jquery.fancytree-all.min',
+
+		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
+
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
 		'backgrid.paginator'	: 'vendors/backgrid-paginator',
 		'backgridSelect_all'	:'vendors/backgrid-select-all',
 
-		'simplePagination'		: '../bower_components/simplePagination.js/jquery.simplePagination',
-		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
+		'simplePagination'		: 'vendors/jquery.simplePagination',
+
 	},
 
 

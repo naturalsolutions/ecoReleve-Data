@@ -2,132 +2,216 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'config',
-	'radio',
 	'backbone_forms',
+	'requirejs-text!./Templates/tpl-filters.html',
+	'requirejs-text!./Templates/tpl-CheckBoxes.html',
+
+
 	'moment',
+
 	'vendors/backboneForm-editors'
 
-], function($, _, Backbone, config, Radio, BbForms, moment, tpl, BE){
+], function ($, _, Backbone, BbForms, tpl, tplcheck, moment) {
 	'use strict';
-	return Backbone.Model.extend({
+	return Backbone.View.extend({
 
+
+		events: {
+			"click input": 'clickedCheck'
+		},
 
 		/*=====================================
 		=            Filter Module            =
 		=====================================*/
-		
-		initialize: function(options){
-			this.channel= options.channel;
-			this.radio=Radio.channel(this.channel);
-			this.clientSide = options.clientSide;
 
+		initialize: function (options) {
+			this.filterContainer = options.filterContainer
+			this.channel = options.channel;
+
+			this.clientSide = options.clientSide;
+			this.name = options.name || '';
 			this.com = options.com;
+
 			this.url = options.url;
 
-			this.datas={};
+			this.datas = {};
 			this.form;
 			this.datas;
 
 			this.url = options.url + 'getFilters';
 
-			this.forms=[];
-			
-			
-			if(options.filters){
+			this.forms = [];
+
+
+			this.forms = [];
+
+			// If filters are given we use them
+			if (options.filters) {
 				this.initFilters(options.filters);
 			}
-			else{
-				this.getFields();
+			else {
+				// Otherwise initialized from AJAX call
+				this.getFilters();
 			}
 		},
 
 
-
-		getFields: function(){
-			var ctx=this;
-
+		getFilters: function () {
+			var _this = this;
+			this.forms = [];
 			var jqxhr = $.ajax({
-				url: ctx.url,
-				data: JSON.stringify({criteria: ctx.datas}),
-				contentType:'application/json',
-				type:'GET',
+				url: _this.url,
+				data: JSON.stringify({
+					FilterName: _this.name
+				}),
+				contentType: 'application/json',
+				type: 'GET',
 				context: this,
-			}).done(function(data){
+			}).done(function (data) {
 				this.initFilters(data);
-				this.datas=data;
-			}).fail(function(msg){
-				console.log(msg);
+				this.datas = data;
+			}).fail(function (msg) {
 			});
+
+
+
+
+
 		},
 
-		initFilters: function(data){
+		initFilters: function (data) {
 			var form;
 
-			for(var key in data){
-				form = this.initFilter(data, key);
-				$('#filters').append(form.el);
+			for (var key in data) {
+				form = this.initFilter(data[key]);
+				$('#' + this.filterContainer).append(form.el);
+				if (data[key].type == 'Checkboxes') {
+					$('#' + this.filterContainer).find("input[type='checkbox']").each(function () {
+						$(this).prop('checked', true);
+					});
+				}
+				$('#' + this.filterContainer + " input[type='checkbox']").on('click', this.clickedCheck);
+
+				$('#' + this.filterContainer + ' #dateTimePicker').each(function () {
+					$(this).datetimepicker();
+				});
+
 				this.forms.push(form);
 			};
 		},
 
-		displayFilter: function(){
-		},
 
-		initFilter: function(data, key){
+		initFilter: function (dataRow) {
 			var form;
-			var type=data[key];
-			var fieldName = key;
-			var classe ='';
-			if(fieldName == 'Status') classe = 'hidden';
+			var fieldName = dataRow['name'];
+			var classe = '';
+			var editorClass = 'form-control filter';
+			var type = dataRow['type'];
+			var template = tpl;
+
+			if (fieldName == 'Status') classe = 'hidden';
+
+
+			var options = this.getValueOptions(dataRow);
+
+			if (type == 'Select' || type == 'Checkboxes') {
+				editorClass += ' list-inline ';
+				options = dataRow['options'];
+				if (type == 'Checkboxes') {
+					options.splice(0, 0, { label: 'All', val: -1, checked: true });
+					template = tplcheck;
+				}
+				else {
+					options.splice(0, 0, { label: ' ', val: -1 });
+				}
+			}
+
+			var schm = {
+				Column: { name: 'Column', type: 'Hidden', title: dataRow['label'], value: fieldName },
+				ColumnType: { name: 'ColumnType', title:'',type: 'Hidden', value: type },
+				Operator: {
+					type: 'Select', title: dataRow['label'], options: this.getOpOptions(type), editorClass: 'form-control ' + classe,
+				},
+				
+				Value: {
+					type: this.getFieldType(type),
+					title: dataRow['label'],
+					editorClass: editorClass,
+					options: this.getValueOptions(dataRow)
+				}
+			}
+
+			var Formdata = {
+				ColumnType: type,
+				Column: fieldName,
+				Operator: schm['Operator'].options[0]
+			};
+
 
 			var md = Backbone.Model.extend({
-				schema : {
-					Column : {type: 'Hidden', title: null, value: fieldName},
-					Operator : {type : 'Select', title: null, options: this.getOpOptions(type),editorClass: 'form-control '+classe,
-					 },
-						
-					Value : {
-						type : this.getFieldType(type),
-						title : fieldName,
-						editorClass: 'form-control filter', 
-						options: this.getValueOptions(type)
-					}
-				},
+				schema: schm,
 				defaults: {
-					Column : fieldName,
+					Column: fieldName,
+					ColumnType: type,
 				}
 			});
 
 
 			var mod = new md();
 
-			var tpl = Marionette.Renderer.render('app/ns_modules/ns_filter/tpl-filters.html', {filterName: key});
-
 			form = new BbForms({
-				template: _.template(tpl),
+				template: _.template(template),
 				model: mod,
-				data: {
-					Column: key,
-				},
+				data: Formdata,
+				templateData: { filterName: dataRow['label'],ColumnType:type }
 			}).render();
-
 
 			return form;
 		},
 
 
-		getValueOptions: function(type){
+		changeInput: function (options) {
+		},
+
+
+
+
+		clickedCheck: function (e) {
+			// Keep the new check value
+			var IsChecked = e.target.checked;
+			if (e.target.value > 0) {
+				//'Not checkall', We change the checkall if new target value is uncheked
+				$(this).parent().parent().find('input:checkbox').each(function () {
+					if (this.value == -1 && !IsChecked) {
+						$(this).prop('checked', IsChecked);
+					}
+				});
+			}
+			else {
+				// CheckAll, all check input affected to checkAll Value
+				$(this).parent().parent().find('input:checkbox').each(function () {
+					$(this).prop('checked', IsChecked);
+				});
+			}
+
+		},
+
+		displayFilter: function () {
+
+		},
+
+
+		getValueOptions: function (DataRow) {
 			var valueOptions;
-			switch(type){
-				case 'Select': 
-					return valueOptions = [];
+			switch (DataRow['type']) {
+				case "Select": case 'Checkboxes':
+					return DataRow['options']
 					break;
-				case 'DateTimePickerBS':
+				case "DATETIME":
 					return valueOptions = [{
-						dateFormat: 'dd/mm/yyyy',
-						defaultValue: new Date().getDate() + '/' + (new Date().getMonth() + 1) + '/' + new Date().getFullYear() 
-						}];
+						dateFormat: 'd/m/yyyy',
+						defaultValue: new Date().getDate() + "/" + (new Date().getMonth() + 1) + "/" + new Date().getFullYear()
+					}];
 					break;
 				default:
 					return valueOptions = '';
@@ -135,257 +219,260 @@ define([
 			}
 		},
 
-		getOpOptions: function(type){
+
+
+		getOpOptions: function (type) {
 			var operatorsOptions;
-			switch(type){
-				case 'String': 
-					return operatorsOptions= ['Is', 'Is not', 'Contains'];
+			switch (type) {
+				case "String":
+					return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' }];
 					break;
-				case 'Select': 
-					return operatorsOptions= ['Is', 'Is not'];
+				case "DATETIME":
+					return operatorsOptions = ['<', '>', '=', '<>', '<=', '>='];
 					break;
-				case 'DateTimePickerBS':
-					return operatorsOptions= ['<', '>', '=', '<>', '<=', '>='];
+				case "Select":
+					return operatorsOptions = ['Is', 'Is not'];
 					break;
-				case 'Checkboxes':
-					return operatorsOptions= ['='];
+				case "Checkboxes":
+					return operatorsOptions = ['Checked'];
+					break;
+					break;
 				default:
-					return operatorsOptions= ['<', '>', '=', '<>', '<=', '>='];
+					return operatorsOptions = ['<', '>', '=', '<>', '<=', '>='];
 					break;
 			}
 		},
 
-		getFieldType: function(type){
+
+
+
+
+
+		getFieldType: function (type) {
 			var typeField;
-			switch(type){
-				case 'String': 
-					return typeField='Text';
+			switch (type) {
+				case "String":
+					return typeField = "Text";
 					break;
-				case 'Select': 
-					return typeField='Select';
+				case "DateTimePicker":
+					console.log('passed');
+					return typeField = "DateTimePicker"; 
 					break;
-				case 'DateTimePickerBS':
-					return typeField='DateTimePickerBS';
+				case "Select":
+					return typeField = "Select";
 					break;
-				case 'Checkboxes':
-					return typeField='Checkboxes';
+				case "Checkboxes":
+					return typeField = "Checkboxes";
 					break;
 				default:
-					return typeField='Number';
+					return typeField = "Number";
 					break;
-			}  
+			}
 		},
 
-		update: function(){
-			var filters= [];
+
+
+
+
+		update: function () {
+			var filters = [];
 			var currentForm, value;
 			for (var i = 0; i < this.forms.length; i++) {
-				currentForm=this.forms[i];
-				if(!currentForm.validate() && currentForm.getValue().Value){
+				currentForm = this.forms[i];
+				if (!currentForm.validate() && currentForm.getValue().Value) {
 
 					value = currentForm.getValue();
 
 					filters.push(value);
-					
+
 
 
 					currentForm.$el.find('input.filter').addClass('active');
-				}else{
+				} else {
 					currentForm.$el.find('input.filter').removeClass('active')
 
 				};
 			};
 
-
-			this.radio.command(this.channel+':grid:update', { filters : filters });
-
-			if(this.clientSide){
+			
+			if (this.clientSide) {
 				this.clientFilter(filters)
+			}else{
+				//this.interaction('filter', filters)
 			}
-
 		},
 
 
 
 
-
-		feed: function(type){
-			$.ajax({
-				url: config.coreUrl+'monitoredSite/'+type,
-				context: this,
-			}).done(function( data ) {
-				this.feedOpt(type, data);
-			}).fail(function( msg ) {
-				console.log(msg);
-			});
-		},
-
-		feedOpt: function(type, list){
-			var optTpl;
-			$('#'+type+' select[name=Value]').append('<option value=""></option>');
-			for (var i = 0; i < list.length; i++) {
-				optTpl = '<option value=""'+list[i]+'>'+list[i]+'</option>';
-				$('#'+type+' select[name=Value]').append(optTpl);
-			};
+		reset: function () {
+			$('#' + this.filterContainer).empty();
+			if (this.clientSide) {
+				this.initFilters(this.filters);
+			}
+			else {
+				// Otherwise initialized from AJAX call
+				this.getFilters();
+			}
 		},
 
 
-		clientFilter: function(filters){
+		///////////////////////// FILTRE CLIENT //////////////////////////////
+
+		clientFilter: function (filters) {
+
 			var tmp = this.com.getMotherColl();
 			var mod = [];
 			var filter;
 			var col, op, val;
 			var result = [];
 			var ctx = this;
-			
+
 
 			var pass, rx, objVal;
-			if(filters.length){
+			if (filters.length) {
 				var coll = _.clone(tmp);
-				_.filter(coll.models, function(obj){
+				_.filter(coll.models, function (obj) {
 					pass = true;
 
 					for (var i = filters.length - 1; i >= 0; i--) {
-						if(pass){
+						if (pass) {
 							filter = filters[i];
 							col = filter['Column'];
 							op = filter['Operator'];
 							val = filter['Value'];
 
+
 							objVal = obj.attributes[col];
 
-							//date
-							if(moment.isMoment(val)){
+
+							//todo : debug, all fields pass as a date
+							if (moment.isDate(new Date(val))) {
 								pass = ctx.testDate(val, op, objVal);
-							}else{
+							} else {
 								pass = ctx.testMatch(val, op, objVal);
 							};
 						}
 					};
-					if(pass){
+					if (pass) {
 						mod.push(obj);
 					};
 				});
 				coll.reset(mod);
 				this.com.action('filter', coll);
-			}else{
+				console.log(coll);
+
+			} else {
 				this.com.action('filter', tmp);
+				console.log(tmp);
+
 			}
 		},
 
 
-		/*
-		reset: function(){
-			$('#filters').find('select').each(function(){
-				$(this).prop('selectedIndex',0);                
-			});
-			$('#filters').find('input').each(function(){
-				$(this).reload();
-			});
-		},*/
-
-
-		testMatch : function(val, op, objVal){
+		testMatch: function (val, op, objVal) {
 			var rx;
-			switch(op.toLowerCase()){
+			switch (op.toLowerCase()) {
 				case 'is':
 					val = val.toUpperCase();
-					rx = new RegExp('^'+val+'$');
-					if(!rx.test(objVal.toUpperCase())){
-					   return false;
+					rx = new RegExp('^' + val + '$');
+					if (!rx.test(objVal.toUpperCase())) {
+						return false;
 					};
 					break;
 				case 'is not':
 					val = val.toUpperCase();
-					rx = new RegExp('^(^'+val+')$'); //todo : not sure
-					if(!rx.test(objVal.toUpperCase())){
-					   return false;
+					rx = new RegExp('^(^' + val + ')$'); //todo : not sure
+					if (!rx.test(objVal.toUpperCase())) {
+						return false;
 					};
 					break;
 				case 'contains':
 					val = val.toUpperCase();
 					rx = new RegExp(val);
-					if(!rx.test(objVal.toUpperCase())){
-					   return false;
+					if (!rx.test(objVal.toUpperCase())) {
+						return false;
 					};
 					break;
 				case '=':
-					if(!(objVal == val)){
+					if (!(objVal == val)) {
 						return false;
 					};
 					break;
 				case '<>':
-					if(!(objVal != val)){
+					if (!(objVal != val)) {
 						return false;
 					};
 					break;
 				case '>':
-					if(!(objVal > val)){
+					if (!(objVal > val)) {
 						return false;
 					};
 					break;
 				case '<':
-					if(!(objVal < val)){
+					if (!(objVal < val)) {
 						return false;
 					};
 					break;
 				case '>=':
-					if(!(objVal >= val)){
+					if (!(objVal >= val)) {
 						return false;
 					};
 					break;
 				case '<=':
-					if(!(objVal <= val)){
+					if (!(objVal <= val)) {
 						return false;
 					};
 					break;
 				default:
-					console.warn('wrong opperator');
 					return false;
 					break;
 			};
 			return true;
 		},
 
-		testDate: function(val, op, objVal){
-			var dateA = moment(objVal);
-			var dateB =  moment(val);
+		testDate: function (val, op, objVal) {
+			var dateA = moment(val);
+			var dateB = moment(objVal);
 
-			switch(op.toLowerCase()){
+			console.log('DATEA');
+			console.log(dateA);
+			console.log('\n\n\n DATEB');
+			console.log(dateB);
+
+			switch (op.toLowerCase()) {
 				case '=':
-					if(!(dateB.isSame(dateA))){
+					if (!(dateB.isSame(dateA))) {
 						return false;
 					};
 					break;
 				case '!=':
-					if(dateB.isSame(dateA)){
+					if (dateB.isSame(dateA)) {
 						return false;
 					};
 					break;
 				case '>':
-					if(!(dateA.isAfter(dateB))){
+					if (!(dateA.isAfter(dateB))) {
 						return false;
 					};
 					break;
 				case '<':
-					//moment('2010-10-20').isBefore('2010-10-21'); // true
-					if(!(moment(dateA).isBefore(dateB))){
+					if (!(dateA.isBefore(dateB))) {
 						return false;
 					};
 					break;
-				//todo : verify those 2
+					//todo : verify those 2
 				case '>=':
-					if(!(dateA.isAfter(dateB)) && !(dateB.isSame(dateA))){
+					if (!(dateA.isAfter(dateB)) || !(dateB.isSame(dateA))) {
 						return false;
 					};
 					break;
 				case '<=':
-					if(!(dateA.isBefore(dateB)) && !(dateB.isSame(dateA))){
+					if (!(dateA.isBefore(dateB)) || !(dateB.isSame(dateA))) {
 						return false;
 					};
 					break;
 				default:
-					console.log('wrong opperator');
 					return false;
 					break;
 
@@ -394,7 +481,18 @@ define([
 
 		},
 
+		interaction: function (action, id) {
+			if (this.com) {
+				this.com.action(action, id);
+			} else {
+				this.action(action, id);
+			}
+		},
+
+		action: function (action, params) {
+			// Rien à faire
+			return;
+		},
 
 	});
 });
-

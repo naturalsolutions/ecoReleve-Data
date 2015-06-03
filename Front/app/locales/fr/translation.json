@@ -104,7 +104,7 @@
 		"waypoint" : " point",
 		"waypointsError" : "Aucun point n'est sélectionné",
 		"waypointsErrorMsg" : "Merci de sélectionner au moins un point à importer.",
-		"globalFieldActivity" : "Activité globale",
+		"globalFieldActivity" : "Sélectionnez une activité globale (optionnel)",
 		"ImportingDataAlert" : "Import de données",
 		"loadingDataAlert" : "Erreur de transfert",
 		"importingDataWarning" : "Les points sélectionnés sont déjà importés",
