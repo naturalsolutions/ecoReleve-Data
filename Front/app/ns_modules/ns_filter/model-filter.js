@@ -6,7 +6,10 @@ define([
 	'requirejs-text!./Templates/tpl-filters.html',
 	'requirejs-text!./Templates/tpl-CheckBoxes.html',
 
-	'moment'
+
+	'moment',
+
+	'vendors/backboneForm-editors'
 
 ], function ($, _, Backbone, BbForms, tpl, tplcheck, moment) {
 	'use strict';
@@ -222,7 +225,7 @@ define([
 			var operatorsOptions;
 			switch (type) {
 				case "String":
-					return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' }, { label: 'IN', val: 'IN' }, ];
+					return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' }];
 					break;
 				case "DATETIME":
 					return operatorsOptions = ['<', '>', '=', '<>', '<=', '>='];
@@ -251,8 +254,9 @@ define([
 				case "String":
 					return typeField = "Text";
 					break;
-				case "DATETIME":
-					return typeField = "BackboneDatepicker"; //DateTime
+				case "DateTimePicker":
+					console.log('passed');
+					return typeField = "DateTimePicker"; 
 					break;
 				case "Select":
 					return typeField = "Select";
@@ -294,7 +298,7 @@ define([
 			if (this.clientSide) {
 				this.clientFilter(filters)
 			}else{
-				this.interaction('filter', filters)
+				//this.interaction('filter', filters)
 			}
 		},
 
@@ -338,10 +342,12 @@ define([
 							op = filter['Operator'];
 							val = filter['Value'];
 
+
 							objVal = obj.attributes[col];
 
-							//date
-							if (moment.isMoment(val)) {
+
+							//todo : debug, all fields pass as a date
+							if (moment.isDate(new Date(val))) {
 								pass = ctx.testDate(val, op, objVal);
 							} else {
 								pass = ctx.testMatch(val, op, objVal);
@@ -428,6 +434,11 @@ define([
 		testDate: function (val, op, objVal) {
 			var dateA = moment(val);
 			var dateB = moment(objVal);
+
+			console.log('DATEA');
+			console.log(dateA);
+			console.log('\n\n\n DATEB');
+			console.log(dateB);
 
 			switch (op.toLowerCase()) {
 				case '=':

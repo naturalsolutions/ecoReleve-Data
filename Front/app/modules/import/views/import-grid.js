@@ -111,5 +111,30 @@ define([
 		},
 
 
+
+		checkSelect: function (e) {
+			console.log(e);
+			var id = $(e.target).parent().parent().find('td').html();
+			this.grid.interaction('selection', id);
+		},
+
+		checkSelectAll: function (e) {
+			var ids = _.pluck(this.grid.collection.models, 'id');
+			if (!$(e.target).is(':checked')) {
+				this.grid.interaction('resetAll', ids);
+			} else {
+				this.grid.interaction('selectionMultiple', ids);
+			}
+		},
+
+		focus: function (e) {
+			console.log(e);
+			if ($(e.target).is('td')) {
+				var tr = $(e.target).parent();
+				var id = tr.find('td').first().text();
+				this.grid.interaction('focus', id);
+			}
+		},
+
 	});
 });

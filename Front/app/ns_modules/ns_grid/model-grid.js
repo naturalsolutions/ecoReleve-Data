@@ -414,28 +414,6 @@ define([
 			};
 		},
 
-		checkSelect: function (e) {
-			var id = $(e.target).parent().parent().find('td').html();
-			this.interaction('selection', id);
-		},
-
-		checkSelectAll: function (e) {
-			var ids = _.pluck(this.grid.collection.models, 'id');
-			if (!$(e.target).is(':checked')) {
-				this.interaction('resetAll', ids);
-			} else {
-				this.interaction('selectionMultiple', ids);
-			}
-		},
-
-		focus: function (e) {
-			if ($(e.target).is('td')) {
-				var tr = $(e.target).parent();
-				var id = tr.find('td').first().text();
-				this.interaction('focus', id);
-			}
-		},
-
 
 		filter: function (args) {
 			if (this.coll) {
