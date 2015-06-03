@@ -96,7 +96,7 @@
 			"step3GPXLabel" : "Metadata"
 		},
 		"gpxHelp" : "GPX, or GPS eXchange Format is an XML schema designed as a common GPS data format. It can be used to describe waypoints, tracks, and routes.",
-		"fileSelection" : "select a file",
+		"fileSelection" : "select a file*",
 		"fileSelectionMsg" : "Please select a file exported from your GPS in GPX format.",
 		"fileSelectionSuccessMsg" : "Gpx file is successfully loaded. You have",
 		"loadingFileMsg" : "  waypoints are loaded from a total of ",
@@ -110,7 +110,7 @@
 		"waypointsError" : "No waypoints selected",
 		"waypointsErrorMsg" : "Please select at least one waypoint to import.",
 		"fieldActivity" : "Field activity",
-		"globalFieldActivity" : "Global field activity",
+		"globalFieldActivity" : "Select a global field activity (optional)",
 		"ImportingDataAlert" : "Importing data",
 		"loadingDataAlert" : "Loading data error",
 		"importingDataWarning" : "Selected waypoint(s) are already imported",

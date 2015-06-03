@@ -28,6 +28,8 @@ define([
 		events : {
 			'click #reset' : 'reset',
 			'change input:file' : 'datachanged_FileName',
+			'change #importFieldActivity' : 'setFieldActivity',
+			'click #resetFieldActivity' : 'resetFieldActivity'
 		},
 
 		onShow: function(){
@@ -45,16 +47,16 @@ define([
 			//Step.prototype.parseOneTpl.call(this);
 			this.name = 'data';
 			this.waypointList = new Waypoints();
-			this.model.set(this.name + '_FileContent', null);
+			this.model.set('data_FileContent', null);
 			this.parseOneTpl(this.template);
-			this.model.set(this.name + '_FileName', "");
-			var obj={name : this.name + '_FileName',required : true};
+			this.model.set('data_FileName', '');
+			var obj={name : 'data_FileName',required : true};
 			this.stepAttributes = [obj] ;
 
 		},
 
 		feedTpl: function(){
-			var NomFichier = this.model.get(this.name + '_FileName');
+			var NomFichier = this.model.get('data_FileName');
 			this.$el.find('#FileName').val(NomFichier) ;
 		 /*   this.$el.find('#FileInput').val(NomFichier) ;*/
 
@@ -72,7 +74,7 @@ define([
 			var importCheckMsg = this.translater.getValueFromKey('import.fileDataError');
 			var fileTypeMsgError = this.translater.getValueFromKey('fileTypeMsgError');
 
-			var loading = false;
+			this.loading = false;
 			var self = this;
 			//var selected_file = document.querySelector('#FileInput');
 			var selected_file = $('#FileInput').get(0).files[0];
@@ -86,7 +88,7 @@ define([
 					var fileType = tab[1];
 					fileType = fileType.toUpperCase();
 					if (fileType != 'GPX') {
-						this.model.set(this.name + '_FileName', "");
+						this.model.set('data_FileName', '');
 						//alert('File type is not supported. Please select a "gpx" file');
 						Swal({
 							title: alertTitle,
@@ -106,10 +108,11 @@ define([
 							self.waypointList =  importResulr[0];
 							var errosList = importResulr[1];
 							var nbWaypoints = self.waypointList.length;
-							self.model.set(self.name + '_FileContent', self.waypointList);
+							self.model.set('data_FileContent', self.waypointList);
 							if ((nbWaypoints > 0) && (errosList.length == 0)){
 								$('#importGpxMsg').text(fileSelectionSuccessMsg + nbWaypoints + waypointLabel + '(s).');
-								loading = true;
+								self.loading = true;
+								self.displayFieldActivity(true);
 								
 							}
 							else if((nbWaypoints > 0) && (errosList.length > 0)){
@@ -119,10 +122,12 @@ define([
 								for(var i=0; i< errosList.length; i++){
 									$('#importGpxMsg').append(errosList[i] + '<br/>');
 								}
-								loading = true;
+								self.loading = true;
+								self.displayFieldActivity(true);
 
 							} else {
 								$('#importGpxMsg').text(fileTypeMsgError);
+								self.displayFieldActivity(false);
 								
 							}
 						};
@@ -140,9 +145,9 @@ define([
 							confirmButtonText: "OK",
 							closeOnConfirm: true,
 						});
-					this.model.set(this.name + '_FileName', "");
+					this.model.set('data_FileName', '');
 				}
-				return loading;
+				//return loading;
 			//}
 		},
 
@@ -153,9 +158,41 @@ define([
 			val = tab[tab.length-1];
 
 			$('#FileName').val(val)  ;
-			this.model.set(this.name + '_FileName', val);
+			this.model.set( 'data_FileName', val);
 			this.parseFichier(e);
 			
+		},
+		nextOK: function(){
+			return this.loading;
+		},
+		displayFieldActivity : function(val){
+			var fAContainer = $("#importSelectGlobalActivity");
+			if(val){
+				$(fAContainer).css('display','');
+			} else {
+				$(fAContainer).css('display','none');
+			}
+		},
+		setFieldActivity : function(e){
+			var currentFieldVal = $(e.target).val();
+			/*this.$el.find('#locations tr').each(function(){
+				$(this).find('select').val(currentFieldVal);
+			});*/
+			var collection = this.model.get('data_FileContent') ; 
+			 collection.each(function(model) {
+				model.set('fieldActivity',currentFieldVal);
+			});
+		},
+
+		resetFieldActivity : function(e){
+			this.$el.find('#importFieldActivity').val('');
+			/*this.$el.find('#locations tr').each(function(){
+				$(this).find('select').val('');
+			});*/
+			var collection = this.model.get('data_FileContent') ; 
+			 collection.each(function(model) {
+				model.set('fieldActivity','');
+			});
 		}
 	});
 
