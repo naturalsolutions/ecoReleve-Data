@@ -31,4 +31,15 @@ CREATE TABLE FormBuilderInputInfos
 	[fieldClass] [varchar](100) NULL,
 )
 
+if not exists (select * from sys.tables t join sys.schemas s on (t.schema_id = s.schema_id) where s.name = 'dbo' and t.name = 'FormBuilderInputProperty') 
+create table dbo.FormBuilderInputProperty ( 
+ID Integer not null IDENTITY(1,1) ,
+FBID integer not null,
+fk_input integer not null,
+name varchar(255) not null,
+value varchar(255) not null,
+creationDate datetime null,
+valueType varchar(10) not null,
+PRIMARY KEY (ID)
+ )
 -- TODO Table pour les propriétés des input: InputProperty
