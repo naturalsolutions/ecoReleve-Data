@@ -1,0 +1,14 @@
+{
+    "name": "NaturalJS-Grid",
+    "version": "0.1.0",
+    "main": "model-grid.js",
+    "ignore": [],
+    "dependencies": {
+        "backbone.radio": "^0.8.3",
+        "backgrid": "^0.3.5",
+        "backbone-paginator": "https://github.com/backbone-paginator/backbone.paginator.git#2.0.2",
+        "backgrid-paginator": "^0.3.5",
+        "backgrid-select-all": "^0.3.5"
+    },
+    "devDependencies": {}
+}
