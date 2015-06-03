@@ -222,10 +222,12 @@ def insertListNewStations(request):
 def searchStation(request):
 
     data = request.params
-    
     searchInfo = {}
+    searchInfo['criteria'] = []
+    if 'criteria' in data : 
+        searchInfo['criteria'].extend(data['criteria'])
 
-    if 'lastImported' in data :
+    elif 'lastImported' in data :
         o = aliased(Station)
         
         criteria = [
@@ -248,8 +250,9 @@ def searchStation(request):
         'Value' : 4
         },
         ]
-        searchInfo['criteria'] = criteria
 
+        searchInfo['criteria'].extend(criteria)
+    print(searchInfo['criteria'])
     listObj = ListObjectWithDynProp(DBSession,Station,searchInfo)
     response = listObj.GetFlatList()
     return response
@@ -260,7 +263,7 @@ def GetProtocolsofStation (request) :
     sta_id = request.matchdict['id']
     data = {}
     searchInfo = {}
-    criteria = {'Column': 'FK_Station', 'Operator':'=','Value':sta_id}
+    criteria = [{'Column': 'FK_Station', 'Operator':'=','Value':sta_id}]
 
     response = []
     curSta = DBSession.query(Station).get(sta_id)
@@ -270,7 +273,7 @@ def GetProtocolsofStation (request) :
 
             searchInfo = data
             searchInfo['criteria'] = []
-            searchInfo['criteria'].append(criteria)
+            searchInfo['criteria'].extend(criteria)
             listObs = ListObjectWithDynProp(DBSession,Observation,searchInfo)
             response = listObs.GetFlatList()
     except : 
@@ -279,8 +282,8 @@ def GetProtocolsofStation (request) :
     try :
         if 'FormName' in request.params : 
             print (' ********************** Forms in params ==> DATA + FORMS ****************** ')
+            print(request.params)
             ModuleName = request.params['FormName']
-
 
             listObs = list(DBSession.query(Observation).filter(Observation.FK_Station == sta_id))
             listType =list(DBSession.query(FieldActivity_ProtocoleType
@@ -288,6 +291,7 @@ def GetProtocolsofStation (request) :
             Conf = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleName ).first()
 
             ### TODO : if protocols exists, append the new protocol form at the after : 2 loops, no choice
+
 
 
             if listObs or listType:
@@ -328,6 +332,7 @@ def GetProtocolsofStation (request) :
                                 virginForm['data']['FK_ProtocoleType'] = virginTypeID
                                 listProto[virginTypeID]['obs'].append(virginForm)
                         except :
+
                             if virginTypeID not in listProto :
                                 listSchema = []
                                 virginForm = virginObs.GetDTOWithSchema(Conf,DisplayMode)
