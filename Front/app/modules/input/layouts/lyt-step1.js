@@ -14,34 +14,17 @@ define([
 		/*===================================================
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
-		events:{
-			'click .manual-tile' : 'selectMode'
-		},
-
 
 		datachanged_radio: function(e){
 			var target= $(e.target);
 			var val=$(target).attr('value');
-			this.updateModel(val);
+			this.model.set('start_stationtype' , val);
 		},
 
 		onShow: function(){
-
-			this.updateModel(3);
-
+			this.model.set('start_stationtype' , 1);
 			this.$el.i18n();
 		},
-
-		updateModel : function(value){
-			this.model.set('start_stationtype' , value);
-			for(var key in this.model.attributes) {
-				if(key != 'start_stationtype'){
-					this.model.set(key,null);
-				}
-			}
-		},
-
-		
 
 	});
 });

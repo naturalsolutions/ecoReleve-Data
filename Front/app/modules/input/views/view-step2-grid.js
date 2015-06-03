@@ -12,7 +12,6 @@ define([
 	'marionette',
 	'config',
 	'moment',
-	'radio',
 
 	'backgrid',
 	'backbone.paginator',
@@ -20,7 +19,7 @@ define([
 
 	'models/station'
 
-], function($, _, Backbone,  Marionette, config, moment, Radio,
+], function($, _, Backbone,  Marionette, config, moment,
 	Backgrid, PageableCollection, Paginator,
 	Station
 ){
@@ -35,11 +34,9 @@ define([
 			'dblclick tbody > tr' : 'navigate'
 		},
 		initialize: function(options) {
-			this.radio = Radio.channel('input');
-			this.radio.comply('updateStationsGrid', this.update, this);
 			var Stations = PageableCollection.extend({
 				sortCriteria: {'PK':'desc'},
-				url: config.coreUrl + 'search/station',
+				url: config.coreUrl + 'stations?lastImported=true',
 				mode: 'server',
 				model: Station,
 				state:{
@@ -56,7 +53,7 @@ define([
 						return JSON.stringify(criteria);},
 				},
 				fetch: function(options) {
-					options.type = 'POST';
+					options.type = 'GET';
 					PageableCollection.prototype.fetch.call(this, options);
 				}
 			});
@@ -154,23 +151,19 @@ define([
 				columns: columns,
 				collection: stations,
 			});
-			var that=this;
-			var searchCriteria ={};
-			var oldStations = this.model.get('oldStations');
-			if(oldStations){searchCriteria = oldStations.searchCriteria || {}; }
-			stations.searchCriteria = searchCriteria;
-			stations.fetch( {reset: true,   success : function(resp){ 
-						that.$el.find('#stations-count').html(stations.state.totalRecords+' stations');
-						that.model.set('oldStations', that.grid.collection);
-						}
-			} );
+
+
+
+			stations.fetch( {reset: true,   success : function(resp){
+				}
+			});
 
 			this.paginator = new Backgrid.Extension.Paginator({
 				collection: stations
 			});
-		
-			//$('#stationsGridContainer').css('height','90%');
 		},
+
+
 		update: function(args) {
 			var that=this;
 			this.grid.collection.searchCriteria = args.filter;
@@ -181,7 +174,6 @@ define([
 			   that.model.set('oldStations' , that.grid.collection);
 			}
 			});
-			
 		},
 		onShow: function() { 
 			$('#stationsGridContainer').append(this.grid.render().el);
@@ -205,6 +197,11 @@ define([
 			$('table.backgrid tr').removeClass('active');
 			$(row).addClass('active');
 		},
+
+
+
+
+		
 		navigate : function(evt){
 			this.detail(evt);
 			this.radio.command('navigateNextStep');
