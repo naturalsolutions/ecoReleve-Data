@@ -4,13 +4,13 @@ define([
 	'backbone',
 	'backbone.paginator',
 	'backgrid',
+	'ns_grid/model-grid',
 	'backgrid.paginator',
 	'marionette',
 	'radio',
-
 	'backgridSelect_all',
 ], function(
-	$, _, Backbone, PageableCollection, Backgrid, Paginator, Marionette, Radio
+	$, _, Backbone, PageableCollection, Backgrid, NsGrid, Paginator, Marionette, Radio
 ){
 	'use strict';
 	return Marionette.ItemView.extend({
@@ -97,13 +97,31 @@ define([
 				})
 			},
 			];
-
-			this.grid = new Backgrid.Grid({
+			/*
+			this.grid = new NsGrid.Grid({
 				columns: columns,
 				collection: this.locations
 			});
+			*/
+			this.grid = new NsGrid({
+				//name: curName,
+                channel: 'modules',
+                //url: 'api/Sample/',
+                pageSize: this.PageSize,
+                pagingServerSide: false,
+                //totalElement: 'NbElements',
+                com: this.com,
+                columns: columns,
+				collection: this.locations
+                //filterCriteria: filter
+             });
 
-			this.$el.find("#locations").append(this.grid.render().el);
+			//this.$el.find("#locations").append(this.grid.render().el);
+
+			var Grid = this.grid.displayGrid();
+
+            this.$el.find('#locations').html(this.grid.displayGrid());
+            //this.$el.find('#paginator').html(this.grid.displayPaginator());
 		},
 
 		action: function(action, params){
@@ -198,10 +216,12 @@ define([
 			}
 		},
 
-		filter: function(coll){
-			this.grid.collection = coll;
+		filter: function(params){
+			this.grid.update({ filters: params });
+			//this.grid.filter(params);
+			/*this.grid.collection = coll;
 			this.grid.body.collection = coll;
-			this.grid.body.refresh();
+			this.grid.body.refresh();*/
 		},
 
 		
