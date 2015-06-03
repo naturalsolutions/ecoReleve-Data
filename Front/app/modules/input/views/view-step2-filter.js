@@ -54,6 +54,33 @@ define([
 			datePicker : 'input.pickerDate'
 		
 		},
+
+
+		initialize: function(options){
+			this.stationType = options.type;
+		},
+
+		onShow: function(){
+
+		},
+
+
+		initFilters: function(){
+
+		},
+
+
+
+
+
+
+
+
+
+
+
+
+		/*
 		initialize: function(options) {
 			this.radio = Radio.channel('input');
 			this.radio.comply('indivId', this.updateIndivId, this);
@@ -95,8 +122,7 @@ define([
 			// this.$el.find('.panel-heading').css({'border-radius':'0px'});
 
 			// this.$el.find('.panel-body').css({'background-color' : 'white'});
-			/*$('.dateTimePicker').datetimepicker({
-			}); */
+
 			this.$el.i18n();
 			var self = this;
 			$(this.ui.indivId).change( function() {  
@@ -316,6 +342,6 @@ define([
 				}
 
 			}
-		}
+		}*/
 	});
 });

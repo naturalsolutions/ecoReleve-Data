@@ -7,7 +7,7 @@ define([
 	$, Backbone, Form
 ){
 	'use strict';
-	return Form.editors.DateTimePickerBS = Form.editors.Base.extend({
+	return Form.editors.DateTimePicker = Form.editors.Base.extend({
 
 
 		previousValue: '',
@@ -38,10 +38,12 @@ define([
 			var options = this.options;
 			var schema = this.schema;
 
+
 			var $el = $($.trim(this.template({
 				value : options.model.get(this.options.key),
 				editorClass : schema.editorClass,
-				disabled : (options.schema.editable) ? '' : 'disabled'
+
+				disabled : (options.schema.editable='undefined') ? '' : 'disabled'
 			})));
 			this.setElement($el);
 

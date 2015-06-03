@@ -56,9 +56,6 @@ define([
 				orderSeparator: ' ',
 			});
 
-		
-			Radio.channel('import').command('initGrid');
-
 
 			this.grid = new Grid({
 				collections : collection,
@@ -72,17 +69,7 @@ define([
 			});
 
 			this.mapRegion.show(this.map);
-			/*
-			this.filtersList={
 
-				name : "String",
-				latitude: "Number",
-				longitude : "Number",
-				datetime: "DateTimePickerBS",
-				waypointTime: "DATETIME",
-
-			};
-			*/
 			this.filtersList={
 				1 : {
 					name : "name",
@@ -99,17 +86,11 @@ define([
 					type : "Number",
 					label : "Longitude"
 				},
-				/*4 : {
-					name : "datetime",
-					type : "BackboneDatepicker",
-					label : "Datetime"
-				}
-				5 : {
+				4 : {
 					name : "waypointTime",
-					type : "DATETIME",
-					label : "Waypoint time"
-				}*/
-				
+					type : "DateTimePicker",
+					label : "Date"
+				}
 			};
 			this.filters = new NSFilter({
 				filters: this.filtersList,
@@ -122,7 +103,7 @@ define([
 
 			this.com.setMotherColl(collection);
 			this.translater = Translater.getTranslater();
-            this.$el.i18n();
+			this.$el.i18n();
 		},
 
 		filter: function(){
