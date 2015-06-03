@@ -45,8 +45,6 @@ define([
 			this.translater = Translater.getTranslater();
 			this.parent.disableNext();
 			var stationType = this.model.get('start_stationtype');
-
-			console.log(stationType);
 			this.loadStationView(stationType);
 		},
 

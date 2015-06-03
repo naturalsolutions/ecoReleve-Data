@@ -13,15 +13,12 @@ define([
 	'config',
 	'moment',
 
-	'backgrid',
-	'backbone.paginator',
-	'backgrid.paginator',
+	'models/station',
+	'ns_grid/model-grid',
 
-	'models/station'
 
 ], function($, _, Backbone,  Marionette, config, moment,
-	Backgrid, PageableCollection, Paginator,
-	Station
+	Station, NsGrid
 ){
 
 	'use strict';
@@ -34,31 +31,6 @@ define([
 			'dblclick tbody > tr' : 'navigate'
 		},
 		initialize: function(options) {
-			var Stations = PageableCollection.extend({
-				sortCriteria: {'PK':'desc'},
-				url: config.coreUrl + 'stations?lastImported=true',
-				mode: 'server',
-				model: Station,
-				state:{
-					pageSize: 25,
-				},
-				queryParams: {
-					offset: function() {return (this.state.currentPage - 1) * this.state.pageSize;},
-					criteria: function() {return JSON.stringify(this.searchCriteria);},
-					order_by: function() {
-						var criteria = [];
-						for(var crit in this.sortCriteria){
-							criteria.push(crit + ':' + this.sortCriteria[crit]);
-						}
-						return JSON.stringify(criteria);},
-				},
-				fetch: function(options) {
-					options.type = 'GET';
-					PageableCollection.prototype.fetch.call(this, options);
-				}
-			});
-
-			var stations = new Stations();
 
 			var myHeaderCell = Backgrid.HeaderCell.extend({
 				onClick: function (e) {
@@ -146,38 +118,23 @@ define([
 			}
 
 			];
-			// Initialize a new Grid instance
-			this.grid = new Backgrid.Grid({
+
+			this.grid = new NsGrid({
+				pageSize: 20,
+				pagingServerSide: false,
+				com: this.com,
 				columns: columns,
-				collection: stations,
+				url: config.coreUrl + 'stations/?lastImported=true',
 			});
 
 
-
-			stations.fetch( {reset: true,   success : function(resp){
-				}
-			});
-
-			this.paginator = new Backgrid.Extension.Paginator({
-				collection: stations
-			});
 		},
 
 
-		update: function(args) {
-			var that=this;
-			this.grid.collection.searchCriteria = args.filter;
-			// Go to page 1
-			this.grid.collection.state.currentPage = 1;
-			this.grid.collection.fetch({reset: true, success:function(){
-			   that.$el.find('#stations-count').html(that.grid.collection.state.totalRecords+' stations');
-			   that.model.set('oldStations' , that.grid.collection);
-			}
-			});
-		},
 		onShow: function() { 
-			$('#stationsGridContainer').append(this.grid.render().el);
-			this.$el.append(this.paginator.render().el);
+			var _this= this;
+			this.$el.find('#stationsGridContainer').html(_this.grid.displayGrid());
+			//this.$el.append(this.paginator.render().el);
 		},
 		onDestroy: function(){
 			$('#main-panel').css('padding-top', '20');

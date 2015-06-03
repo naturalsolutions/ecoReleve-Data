@@ -2,14 +2,13 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'radio',
 	'backgrid',
 	'backbone.paginator',
 	'backgrid.paginator',
 	'ns_grid/model-col-generator',
 	'moment'
 	//'backgridSelect_all',
-], function ($, _, Backbone, Radio, Backgrid, PageColl, Paginator, colGene,moment) {
+], function ($, _, Backbone, Radio, PageColl, Paginator, colGene, moment) {
 	'use strict';
 	return Backbone.Model.extend({
 
@@ -67,13 +66,10 @@ define([
 
 			this.sortCriteria = options.sortCriteria || {};
 			this.name = options.name || 'default';
-			this.channel = options.channel;
-			this.radio = Radio.channel(this.channel);
 
 			if (options.totalElement) {
 				this.totalElement = options.totalElement;
 			}
-			this.radio.comply(this.channel + ':grid:update', this.update, this);
 
 			this.url = options.url;
 			this.pageSize = options.pageSize;
@@ -142,6 +138,7 @@ define([
 
 		initCollectionFromServer: function () {
 			if (this.pagingServerSide) {
+
 				this.initCollectionPaginable();
 			} else if (this.pageSize) {
 				this.initCollectionPaginableClient();
@@ -201,10 +198,10 @@ define([
 		},
 
 		updateMap: function (params) {
-			this.radio.command(this.channel + ':map:update', { params: params });
 		},
 
 		initCollectionPaginableClient: function () {
+			console.log('passed');
 			var PageCollection = PageColl.extend({
 				url: this.url + 'search?name=' + this.name,
 				mode: 'client',
