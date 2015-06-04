@@ -222,39 +222,50 @@ def insertListNewStations(request):
 def searchStation(request):
 
     data = request.params
+    data = {}
+    data['offset']=0
+    data['per_page'] = 5
+    data['order_by'] = ['fieldActivityId:desc', 'ID:asc']
     searchInfo = {}
     searchInfo['criteria'] = []
     if 'criteria' in data : 
         searchInfo['criteria'].extend(data['criteria'])
 
-    elif 'lastImported' in data :
-        o = aliased(Station)
+    
+    # elif 'lastImported' in data :
+    #     o = aliased(Station)
         
-        criteria = [
-        {'Column' : 'creator',
-        'Operator' : '=',
-        'Value' : request.authenticated_userid
-        },
-        {'Query':'Observation',
-        'Column': 'None',
-        'Operator' : 'not exists',
-        'Value': select([Observation]).where(Observation.FK_Station == Station.ID)
-        },
-        {'Query':'Station',
-        'Column': 'None',
-        'Operator' : 'not exists',
-        'Value': select([o]).where(cast(o.creationDate,DATE) > cast(Station.creationDate,DATE)) 
-        },
-        {'Column' : 'FK_StationType',
-        'Operator' : '=',
-        'Value' : 4
-        },
-        ]
+    #     criteria = [
+    #     {'Column' : 'creator',
+    #     'Operator' : '=',
+    #     'Value' : request.authenticated_userid
+    #     },
+    #     {'Query':'Observation',
+    #     'Column': 'None',
+    #     'Operator' : 'not exists',
+    #     'Value': select([Observation]).where(Observation.FK_Station == Station.ID)
+    #     },
+    #     {'Query':'Station',
+    #     'Column': 'None',
+    #     'Operator' : 'not exists',
+    #     'Value': select([o]).where(cast(o.creationDate,DATE) > cast(Station.creationDate,DATE)) 
+    #     },
+    #     {'Column' : 'FK_StationType',
+    #     'Operator' : '=',
+    #     'Value' : 4
+    #     },
+    #     ]
 
-        searchInfo['criteria'].extend(criteria)
-    print(searchInfo['criteria'])
-    listObj = ListObjectWithDynProp(DBSession,Station,searchInfo)
-    response = listObj.GetFlatList()
+    #     searchInfo['criteria'].extend(criteria)
+    searchInfo['offset'] = data['offset']
+    searchInfo['per_page'] = data['per_page']
+    searchInfo['order_by'] = data['order_by']
+    listObj = ListObjectWithDynProp(Station)
+    response = listObj.GetFlatList(searchInfo)
+    print(len(response))
+    print('ORDER')
+    for row in response : 
+        print (row['ID'])
     return response
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
@@ -264,13 +275,12 @@ def GetProtocolsofStation (request) :
     data = {}
     searchInfo = {}
     criteria = [{'Column': 'FK_Station', 'Operator':'=','Value':sta_id}]
-
     response = []
     curSta = DBSession.query(Station).get(sta_id)
     try : 
         if 'criteria' in request.params or request.params == {} :
             print (' ********************** criteria params ==> Search ****************** ')
-
+            
             searchInfo = data
             searchInfo['criteria'] = []
             searchInfo['criteria'].extend(criteria)
