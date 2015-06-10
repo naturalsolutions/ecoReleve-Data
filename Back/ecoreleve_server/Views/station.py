@@ -57,7 +57,7 @@ def getForms(request) :
 
     typeSta = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
-    ModuleName = 'StaForm'
+    ModuleName = 'Station'
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     newSta = Station(FK_StationType = typeSta)
     newSta.init_on_load()
@@ -85,7 +85,8 @@ def getStation(request):
         except : 
             DisplayMode = 'display'
 
-        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='StaForm' ).first()
+        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='Station' ).first()
+        print(Conf)
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
     else : 
         response  = curSta.GetFlatObject()
@@ -221,15 +222,20 @@ def insertListNewStations(request):
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchStation(request):
 
-    data = request.params
+    data = request.params.mixed()
     searchInfo = {}
+    print(type(data))
+    
+    data['criteria'] = json.loads(data['criteria'])
+    print(data)
     searchInfo['criteria'] = []
-    if 'criteria' in data : 
-        searchInfo['criteria'].extend(data['criteria'])
+    if 'criteria' in data: 
+        searchInfo['criteria'].extend(list(data['criteria']))
+        print(searchInfo['criteria'])
 
-    elif 'lastImported' in data :
+    if 'lastImported' in data :
         o = aliased(Station)
-        
+        print('-*********************** LAST IMPORTED !!!!!!!!! ******')
         criteria = [
         {'Column' : 'creator',
         'Operator' : '=',
@@ -252,9 +258,11 @@ def searchStation(request):
         ]
 
         searchInfo['criteria'].extend(criteria)
+    print('\n\n---------------------------------------')
     print(searchInfo['criteria'])
     listObj = ListObjectWithDynProp(DBSession,Station,searchInfo)
-    response = listObj.GetFlatList()
+    response = json.loads(listObj.GetFlatList())
+    print (type(response))
     return response
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)

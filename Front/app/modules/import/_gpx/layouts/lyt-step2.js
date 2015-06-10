@@ -36,7 +36,7 @@ define([
 			$('#step-nav').show();
 			$('#btnPrev').show();
 			this.translater = Translater.getTranslater();
-            this.$el.i18n();
+			this.$el.i18n();
 		},
 
 		onRender: function () {

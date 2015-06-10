@@ -26,6 +26,10 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 	$( document ).ajaxStop(function() {
 		$('#header-loader').addClass('hidden');
 	});
+	$( document ).ajaxError(function() {
+		console.error('an error appended');
+		$('#header-loader').addClass('hidden');
+	});
 
 	return app;
 });

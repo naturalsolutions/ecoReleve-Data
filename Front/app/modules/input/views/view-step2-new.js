@@ -30,7 +30,7 @@ define([
 
 	'use strict';
 
-	return Marionette.ItemView.extend({
+	return Marionette.LayoutView.extend({
 
 		template: 'app/modules/input/views/templates/tpl-step2-new.html',
 		events : {
@@ -40,7 +40,6 @@ define([
 			'click #getPosition' : 'getCurrentPosition',
 			'focusout input[name="Date_"]':'checkDate',
 		},
-
 
 		initialize: function(options) {
 			this.parent = options.parent;
@@ -64,6 +63,7 @@ define([
 					if(!_this.parent.model.get('station')){
 						_this.parent.model.set('station', response.id);
 					}
+					$('#btnNext').removeClass('NsFormModuleSaveStaForm');
 					_this.parent.parent.nextStepWithoutCheck();
 				},
 				savingError: function (model, response) {
@@ -91,15 +91,15 @@ define([
 				parent: this.parent
 			});
 
-			
-
 			// TODO : fix
+			/*
 			this.parent.on('ns_modules__step_nextOk', function(){
 				_this.nsform.butClickSave();
-			});
+			});*/
 		},
 
 		onShow : function(){
+			$('#btnNext').addClass('NsFormModuleSaveStaForm');
 
 			$('#inputStRight').html('<div id="map"></div>');
 			this.map = new NsMap({
@@ -109,73 +109,12 @@ define([
 			});
 			this.map.init();
 			this.map.addMarker(false, 33.06, -3.96);
-			
-		},
-		/*
-		checkDate: function(){
-			var siteType = $('#stMonitoredSiteType');
-			var siteName = $('#stMonitoredSiteName');
-			var datefield = $("input[name='StationDate']");
-			var date = $(datefield).val();
-			var date = moment($(datefield).val(),"DD/MM/YYYY HH:mm:ss"); //28/01/2015 15:02:28
-			var now = moment();
-			if (now < date) {
-				//alert('Please input a valid date');
-				Swal({
-				title: "Error in date value",
-				text: 'Please input a valid date.',
-				type: 'error',
-				showCancelButton: false,
-				confirmButtonColor: 'rgb(147, 14, 14)',
-				confirmButtonText: "OK",
-				closeOnConfirm: true,
-				});
-				$(datefield).val('');
-				$(siteType).attr('disabled','disabled');
-				$(siteName).attr('disabled','disabled');
-			} else {
-				if(date){
-					$(siteType).removeAttr('disabled');
-					$(siteName).removeAttr('disabled');
-				}
-				//this.radio.command('changeDate');
-			}
 		},
 
-		getCurrentPosition : function(){
-			if(navigator.geolocation) {
-				var loc = navigator.geolocation.getCurrentPosition(this.myPosition,this.erreurPosition);
-			} else {
-				Swal(
-					{
-						title: "Wrong file type",
-						text: 'The browser dont support geolocalization API',
-						type: 'error',
-						showCancelButton: false,
-						confirmButtonColor: 'rgb(147, 14, 14)',
-						confirmButtonText: "OK",
-						closeOnConfirm: true,
-				 });
-			}
-		},
 
-		myPosition : function(position){
-			var latitude = parseFloat((position.coords.latitude).toFixed(5));
-			var longitude = parseFloat((position.coords.longitude).toFixed(5));
-			// update map
-			var pos = new Position();
-			pos.set("latitude",latitude);
-			pos.set("longitude",longitude);
-			pos.set("label","current station");
-			pos.set("id","_");
-			this.movePoint(pos);
-		},
+		onDestroy: function(){
+			this.nsform.unbind();
+		}
 
-		movePoint : function(position){
-			var latitude  =position.get("latitude");
-			var longitude = position.get("longitude");
-			this.map.addMarker(false, latitude, longitude );
-		},
-	*/
 	});
 });

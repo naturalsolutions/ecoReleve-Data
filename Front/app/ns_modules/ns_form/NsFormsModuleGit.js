@@ -132,28 +132,7 @@ define([
 			this.afterShow();
 		},
 
-		bindEvents: function(){
-			var _this = this;
-			var name = this.name;
-			$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit' + name).on('click', function(){
-				_this.butClickEdit(this);
-			});
-			$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel' + name).on('click', function(){
-				_this.butClickCancel(this);
-			});
-			$('#'+this.buttonRegion[0]).find('.NsFormModuleSave' + name).on('click', function(){
-				_this.butClickSave(this);
-			});
-			$('#'+this.buttonRegion[0]).find('.NsFormModuleClear' + name).on('click', function(){
-				_this.butClickClear(this);
-			});
 
-			$('#'+this.buttonRegion[0]).find('.NsFormModuleDelete' + name).on('click', function(){
-				_this.butClickDelete(this);
-			});
-
-
-		},
 
 
 		displaybuttons: function () {
@@ -296,6 +275,63 @@ define([
 		savingError: function (response) {
 			// To be extended, called after save on model if error
 		},
+
+
+		bindEvents: function(){
+			var _this = this;
+			var name = this.name;
+
+			/*==========  Edit  ==========*/
+			this.onEditEvt = $.proxy(function(){
+				this.butClickEdit();
+			}, this);
+
+			$('.NsFormModuleEdit' + name).on('click', this.onEditEvt);
+
+			/*==========  Cancel  ==========*/
+			this.onCancelEvt = $.proxy(function(){
+				this.butClickCancel();
+			}, this);
+
+			$('.NsFormModuleCancel' + name).on('click', this.onCancelEvt);
+
+			/*==========  save  ==========*/
+			this.onSaveEvt = $.proxy(function(){
+				this.butClickSave();
+			}, this);
+
+			$('.NsFormModuleSave' + name).on('click', this.onSaveEvt);
+
+			/*==========  Clear  ==========*/
+			this.onClearEvt = $.proxy(function(){
+				this.butClickClear();
+			}, this);
+
+			$('.NsFormModuleClear' + name).on('click', this.onClearEvt);
+
+			/*==========  Delete  ==========*/
+			this.onDeleteEvt = $.proxy(function(){
+				this.butClickDelete();
+			}, this);
+
+			$('.NsFormModuleDelete' + name).on('click', this.onDeleteEvt);
+		},
+
+
+		unbind: function(){
+			var _this = this;
+			var name = this.name;
+
+			$('.NsFormModuleEdit' + name).off('click', this.onEditEvt);
+			$('.NsFormModuleCancel' + name).off('click', this.onCancelEvt);
+			$('.NsFormModuleSave' + name).off('click', this.onSaveEvt);
+			$('.NsFormModuleClear' + name).off('click', this.onClearEvt);
+			$('.NsFormModuleDelete' + name).off('click', this.onDeleteEvt);
+		},
+
+		destroy: function(){
+			this.unbind();
+		}
 	});
 
 });

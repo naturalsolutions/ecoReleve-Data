@@ -26,7 +26,6 @@ define([
 
 		initialize: function (options) {
 			this.filterContainer = options.filterContainer
-			this.channel = options.channel;
 
 			this.clientSide = options.clientSide;
 			this.name = options.name || '';
@@ -255,7 +254,6 @@ define([
 					return typeField = "Text";
 					break;
 				case "DateTimePicker":
-					console.log('passed');
 					return typeField = "DateTimePicker"; 
 					break;
 				case "Select":
@@ -296,9 +294,9 @@ define([
 
 			
 			if (this.clientSide) {
-				this.clientFilter(filters)
+				this.clientFilter(filters);
 			}else{
-				//this.interaction('filter', filters)
+				this.interaction('filter', filters);
 			}
 		},
 

@@ -153,7 +153,7 @@ define([
 			var ctx = this;
 			var PageCollection = PageColl.extend({
 				sortCriteria: ctx.sortCriteria,
-				url: this.url + 'search?name=' + this.name,
+				url: this.url,
 				mode: 'server',
 				state: {
 					pageSize: this.pageSize
@@ -201,9 +201,8 @@ define([
 		},
 
 		initCollectionPaginableClient: function () {
-			console.log('passed');
 			var PageCollection = PageColl.extend({
-				url: this.url + 'search?name=' + this.name,
+				url: this.url,
 				mode: 'client',
 				state: {
 					pageSize: this.pageSize
@@ -222,7 +221,7 @@ define([
 
 		initCollectionNotPaginable: function () {
 			this.collection = new Backbone.Collection.extend({
-				url: this.url + 'search?name=' + this.name,
+				url: this.url,
 			});
 		},
 
@@ -413,6 +412,7 @@ define([
 
 
 		filter: function (args) {
+			console.log('passed');
 			if (this.coll) {
 				// Client Grid Management
 				this.grid.collection = args;
