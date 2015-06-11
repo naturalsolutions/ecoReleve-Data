@@ -2,14 +2,13 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'radio',
 	'backgrid',
 	'backbone.paginator',
 	'backgrid.paginator',
 	'ns_grid/model-col-generator',
 	'moment'
 	//'backgridSelect_all',
-], function ($, _, Backbone, Radio, Backgrid, PageColl, Paginator, colGene,moment) {
+], function ($, _, Backbone, Radio, PageColl, Paginator, colGene, moment) {
 	'use strict';
 	return Backbone.Model.extend({
 
@@ -67,13 +66,10 @@ define([
 
 			this.sortCriteria = options.sortCriteria || {};
 			this.name = options.name || 'default';
-			this.channel = options.channel;
-			this.radio = Radio.channel(this.channel);
 
 			if (options.totalElement) {
 				this.totalElement = options.totalElement;
 			}
-			this.radio.comply(this.channel + ':grid:update', this.update, this);
 
 			this.url = options.url;
 			this.pageSize = options.pageSize;
@@ -142,6 +138,7 @@ define([
 
 		initCollectionFromServer: function () {
 			if (this.pagingServerSide) {
+
 				this.initCollectionPaginable();
 			} else if (this.pageSize) {
 				this.initCollectionPaginableClient();
@@ -156,7 +153,7 @@ define([
 			var ctx = this;
 			var PageCollection = PageColl.extend({
 				sortCriteria: ctx.sortCriteria,
-				url: this.url + 'search?name=' + this.name,
+				url: this.url,
 				mode: 'server',
 				state: {
 					pageSize: this.pageSize
@@ -201,12 +198,11 @@ define([
 		},
 
 		updateMap: function (params) {
-			this.radio.command(this.channel + ':map:update', { params: params });
 		},
 
 		initCollectionPaginableClient: function () {
 			var PageCollection = PageColl.extend({
-				url: this.url + 'search?name=' + this.name,
+				url: this.url,
 				mode: 'client',
 				state: {
 					pageSize: this.pageSize
@@ -225,7 +221,7 @@ define([
 
 		initCollectionNotPaginable: function () {
 			this.collection = new Backbone.Collection.extend({
-				url: this.url + 'search?name=' + this.name,
+				url: this.url,
 			});
 		},
 
@@ -416,6 +412,7 @@ define([
 
 
 		filter: function (args) {
+			console.log('passed');
 			if (this.coll) {
 				// Client Grid Management
 				this.grid.collection = args;

@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DynPropNames
+from ecoreleve_server.Models import Base,DynPropNames,DBSession
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
@@ -13,7 +13,7 @@ class ObjectTypeWithDynProp:
 
 
     def __init__(self,ObjContext):
-        self.ObjContext = ObjContext
+        self.ObjContext = DBSession
         self.DynPropNames = self.GetDynPropNames()
 
     def GetDynPropContextTable(self):

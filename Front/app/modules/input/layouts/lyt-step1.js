@@ -15,6 +15,8 @@ define([
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
 
+		template: 'app/modules/input/templates/tpl-step1.html',
+
 		datachanged_radio: function(e){
 			var target= $(e.target);
 			var val=$(target).attr('value');

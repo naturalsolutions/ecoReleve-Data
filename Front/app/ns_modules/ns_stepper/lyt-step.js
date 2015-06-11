@@ -33,7 +33,7 @@ define([
 		initialize: function(options){
 
 			this.name=options.name;
-			this.template=options.tpl;
+			//this.template=options.tpl;
 
 			this.model=options.model; //global model
 
@@ -62,9 +62,7 @@ define([
 
 		parseOneTpl: function(tpl){// Initialisation du model à partir du template
 			var _this = this;
-			var elemIndex = 0;+
-
-
+			var elemIndex = 0;
 
 			$(tpl).find('input:not(:checkbox,:radio)').each(function(){
 				var name= _this.name+'_' + this.name;

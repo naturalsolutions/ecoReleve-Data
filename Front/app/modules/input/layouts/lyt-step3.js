@@ -15,20 +15,14 @@ define([
 	'ns_form/NSFormsModuleGit',
 
 	'../views/view-step3-station',
-	// 'tmp/getProtocolsList',
-	// 'tmp/getUsers',
 
-	// 'models/station',
 	'translater'
 
 ], function($, _, Backbone, Marionette, Radio, config, Swiper,
 	Swal, simplePagination,
 	Step, NsFormsModule,
 	ViewStationDetail,
-	/*
-	getProtocolsList, getUsers,²
-	*/
-	Station, Translater
+	Translater
 ){
 
 	'use strict';
@@ -52,11 +46,7 @@ define([
 			'click #addProto' : 'addProto',
 		},
 
-		/*
-		ui:{
-			addProto : 'select[name="add-protocol"]',
-			 protosList : '#tabProtsUl'
-		},*/
+		template: 'app/modules/input/templates/tpl-step3.html',
 
 		initModel: function(myTpl){
 			//this.parseOneTpl(this.template);
@@ -68,15 +58,12 @@ define([
 			var _this = this;
 			var stationType = this.model.get('start_stationtype');
 			this.stationId = this.model.get('station');
-			this.stationId = 1;
-
 			
 			this.rgStation.show(new ViewStationDetail({
 				stationId: this.stationId,
 				stationType: stationType,
 				parent: this
 			}));
-
 
 			var ProtoColl = Backbone.Collection.extend({
 				url: config.coreUrl+'stations/'+this.stationId+'/protocols',
@@ -140,10 +127,6 @@ define([
 					});
 					this.indexPageList = [];
 					this.initProto();
-				},
-
-				onShow : function(){
-					
 				},
 
 				initProto: function(){

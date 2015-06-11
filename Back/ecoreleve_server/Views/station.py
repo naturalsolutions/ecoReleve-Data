@@ -146,9 +146,10 @@ def insertOneNewStation (request) :
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
+    print(newSta.__dict__)
     DBSession.add(newSta)
     DBSession.flush()
-    transaction.commit()
+    # transaction.commit()
     return {'id': newSta.ID}
 
 def insertListNewStations(request):
@@ -229,14 +230,21 @@ def insertListNewStations(request):
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchStation(request):
 
-    data = request.params
+    data = request.params.mixed()
     searchInfo = {}
+    print(type(data))
+    
+    data['criteria'] = json.loads(data['criteria'])
+    print(data)
     searchInfo['criteria'] = []
-    if 'criteria' in data : 
-        searchInfo['criteria'].extend(data['criteria'])
+    if 'criteria' in data: 
+        searchInfo['criteria'].extend(list(data['criteria']))
+        print(searchInfo['criteria'])
 
     if 'lastImported' in data :
-        o = aliased(Station)  # create an alias to build subquery 
+
+        o = aliased(Station)
+        print('-*********************** LAST IMPORTED !!!!!!!!! ******')
 
         criteria = [
         {'Column' : 'creator',
@@ -258,11 +266,13 @@ def searchStation(request):
         'Value' : 4 # => TypeID of GPX station
         },
         ]
+
     searchInfo['criteria'].extend(criteria)
     listObj = ListObjectWithDynProp(Station)
     response = listObj.GetFlatList(searchInfo)
     print(len(response))
     transaction.commit()
+
     return response
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
@@ -290,7 +300,7 @@ def GetProtocolsofStation (request) :
         if 'FormName' in request.params : 
             print (' ********************** Forms in params ==> DATA + FORMS ****************** ')
             print(request.params)
-            ModuleName = request.params['FormName']
+            ModuleName = 'Observation'
 
             listObs = list(DBSession.query(Observation).filter(Observation.FK_Station == sta_id))
             listType =list(DBSession.query(FieldActivity_ProtocoleType
