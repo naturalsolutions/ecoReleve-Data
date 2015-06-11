@@ -37,14 +37,15 @@ prefix = 'stations'
 #     # can search/filter
 #     return
 
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET' , permission = NO_PERMISSION_REQUIRED)
 def actionOnStations(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     'count' : count,
     'forms' : getForms,
     '0' : getForms,
-    'fields': getFields
+    'fields': getFields,
+    'filters': getFilters
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -52,22 +53,27 @@ def actionOnStations(request):
 def count (request) :
 #   ## TODO count stations
     return
+def getFilters (request):
+    return Station().GetFilters()
 
 def getForms(request) :
 
     typeSta = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
-    ModuleName = 'StaForm'
+    ModuleName = 'Station'
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     newSta = Station(FK_StationType = typeSta)
     newSta.init_on_load()
     schema = newSta.GetDTOWithSchema(Conf,'edit')
     del schema['schema']['creationDate']
+    transaction.commit()
     return schema
 
 def getFields(request) :
-#     ## TODO return fields Station
-    return
+### TODO return fields Station
+
+    cols = Station().GetGridFields()
+    return cols
 
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getStation(request):
@@ -85,11 +91,11 @@ def getStation(request):
         except : 
             DisplayMode = 'display'
 
-        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='StaForm' ).first()
+        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='Station' ).first()
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
     else : 
         response  = curSta.GetFlatObject()
-
+    transaction.commit()
     return response
 
 
@@ -125,6 +131,7 @@ def insertStation(request):
         print (data['data'])
         print('_______INsert LIST')
 
+        transaction.commit()
         return insertListNewStations(request)
 
 def insertOneNewStation (request) :
@@ -141,6 +148,7 @@ def insertOneNewStation (request) :
     newSta.UpdateFromJson(data)
     DBSession.add(newSta)
     DBSession.flush()
+    transaction.commit()
     return {'id': newSta.ID}
 
 def insertListNewStations(request):
@@ -215,57 +223,46 @@ def insertListNewStations(request):
         result = []
 
     response = {'exist': len(DTO)-len(data_to_insert), 'new': len(data_to_insert)}
-    
+    transaction.commit()
     return response 
 
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchStation(request):
 
     data = request.params
-    data = {}
-    data['offset']=0
-    data['per_page'] = 5
-    data['order_by'] = ['fieldActivityId:desc', 'ID:asc']
     searchInfo = {}
     searchInfo['criteria'] = []
     if 'criteria' in data : 
         searchInfo['criteria'].extend(data['criteria'])
 
-    
-    # elif 'lastImported' in data :
-    #     o = aliased(Station)
-        
-    #     criteria = [
-    #     {'Column' : 'creator',
-    #     'Operator' : '=',
-    #     'Value' : request.authenticated_userid
-    #     },
-    #     {'Query':'Observation',
-    #     'Column': 'None',
-    #     'Operator' : 'not exists',
-    #     'Value': select([Observation]).where(Observation.FK_Station == Station.ID)
-    #     },
-    #     {'Query':'Station',
-    #     'Column': 'None',
-    #     'Operator' : 'not exists',
-    #     'Value': select([o]).where(cast(o.creationDate,DATE) > cast(Station.creationDate,DATE)) 
-    #     },
-    #     {'Column' : 'FK_StationType',
-    #     'Operator' : '=',
-    #     'Value' : 4
-    #     },
-    #     ]
+    if 'lastImported' in data :
+        o = aliased(Station)  # create an alias to build subquery 
 
-    #     searchInfo['criteria'].extend(criteria)
-    searchInfo['offset'] = data['offset']
-    searchInfo['per_page'] = data['per_page']
-    searchInfo['order_by'] = data['order_by']
+        criteria = [
+        {'Column' : 'creator',
+        'Operator' : '=',
+        'Value' : request.authenticated_userid
+        },
+        {'Query':'Observation',
+        'Column': 'None',
+        'Operator' : 'not exists',
+        'Value': select([Observation]).where(Observation.FK_Station == Station.ID) # keep only stations without Observations
+        },
+        {'Query':'Station',
+        'Column': 'None',
+        'Operator' : 'not exists',
+        'Value': select([o]).where(cast(o.creationDate,DATE) > cast(Station.creationDate,DATE)) # keep only the last importation day
+        },
+        {'Column' : 'FK_StationType',
+        'Operator' : '=',
+        'Value' : 4 # => TypeID of GPX station
+        },
+        ]
+    searchInfo['criteria'].extend(criteria)
     listObj = ListObjectWithDynProp(Station)
     response = listObj.GetFlatList(searchInfo)
     print(len(response))
-    print('ORDER')
-    for row in response : 
-        print (row['ID'])
+    transaction.commit()
     return response
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
@@ -361,6 +358,7 @@ def GetProtocolsofStation (request) :
     except Exception as e :
         print (e)
         pass
+    transaction.commit()
     return response
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST')
@@ -378,6 +376,7 @@ def insertNewProtocol (request) :
     newProto.UpdateFromJson(data)
     DBSession.add(newProto)
     DBSession.flush()
+    transaction.commit()
     return {'id': newProto.ID}
 
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'PUT')
@@ -422,7 +421,7 @@ def getObservation(request):
             except : 
                 DisplayMode = 'display'
 
-            Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='ObsForm' ).first()
+            Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='Observation' ).first()
             response = curObs.GetDTOWithSchema(Conf,DisplayMode)
         else : 
             response  = curObs.GetFlatObject()
@@ -430,7 +429,7 @@ def getObservation(request):
     except Exception as e :
         print(e)
         response = {}
-
+    transaction.commit()
     return response
 
 @view_config(route_name= prefix+'/id/protocols/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
@@ -453,12 +452,13 @@ def getObsForms(request) :
 
     typeObs = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
-    ModuleName = 'ObsForm'
+    ModuleName = 'Observation'
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     newObs = Observation(FK_ProtocoleType = typeObs)
     newObs.init_on_load()
     schema = newObs.GetDTOWithSchema(Conf,'edit')
     del schema['schema']['creationDate']
+    transaction.commit()
     return schema
 
 def getObsFields(request) :
