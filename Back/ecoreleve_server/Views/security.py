@@ -20,6 +20,8 @@ def login(request):
     if user is not None and user.check_password(pwd):
         headers = remember(request, user_id)
         response = request.response
+
+        print(headers)
         response.headerlist.extend(headers)
         transaction.commit()
         return response

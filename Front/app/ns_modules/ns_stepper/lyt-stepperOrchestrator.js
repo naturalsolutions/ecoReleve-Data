@@ -48,16 +48,22 @@ define([
 		},
 
 		initialize: function(options){
-
-			this.steps=options.steps;
-			var current;
-			for(var i=0; i < this.steps.length; i++){
-				current=this.steps[i];
-				current.parent = this;
-			}
 			this.model=options.model;
+
+			this.stepsProto=options.steps;
+			this.steps= [];
+
+
+			for(var i=0; i < this.stepsProto.length; i++){
+				this.steps[i] = new this.stepsProto[i];
+				this.steps[i].name = 'a';
+				this.steps[i].model = this.model;
+				this.steps[i].parent = this;
+			}
+			
 			this.listenTo(this.model,'change', this.modelChanged);
-			//this.keyboard();
+
+			this.first = true;
 		},
 
 
@@ -65,6 +71,7 @@ define([
 			this.initNavSteps();
 			this.toStep(0);
 			this.$el.i18n();
+			this.first = false;
 		},
 
 		onRender: function(){
@@ -117,7 +124,7 @@ define([
 		/*==========  Next / Prev  ==========*/
 
 		nextStep: function(){
-
+			this.lastOne= this.currentStep;
 			if(this.steps[this.currentStep].nextOK()) {
 				if (this.currentStep >= this.steps.length-1) {
 				this.finish();
@@ -143,6 +150,7 @@ define([
 		},
 
 		prevStep: function(){
+			this.lastOne= this.currentStep;
 			this.currentStep === 0 ? this.currentStep : this.currentStep--;
 			this.toStep(this.currentStep);
 		},
@@ -153,7 +161,25 @@ define([
 			var nextBtnLabel = translater.getValueFromKey('stepper.btnNext');
 			var finishBtnLabel = translater.getValueFromKey('stepper.btnFinish');
 			this.currentStep = numstep;
-			this.step_content.show( this.steps[this.currentStep], {preventDestroy: true} );
+
+
+			var tmpStep = this.steps[this.currentStep];
+
+			this.currentStepLast = this.currentStep;
+
+			this.step_content.show( this.steps[this.currentStep]);
+
+
+
+			if(!this.first){
+				console.log(this.lastOne);
+				this.steps[this.lastOne] = new this.stepsProto[this.lastOne];
+				this.steps[this.lastOne].name = 'a';
+				this.steps[this.lastOne].model = this.model;
+				this.steps[this.lastOne].parent = this;
+			}else{
+				this.lastOne= 0;
+			}
 			this.check();
 			this.styleNav();
 
@@ -292,8 +318,14 @@ define([
 
 		finish: function() {
 			this.alert_end();
-		}
+		},
 
+
+		onDestroy: function(){
+			for (var i = this.steps.length - 1; i >= 0; i--) {
+				this.steps[i].destroy();
+			};
+		},
 	});
 
 });

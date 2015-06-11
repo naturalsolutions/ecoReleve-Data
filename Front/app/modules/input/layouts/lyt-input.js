@@ -54,34 +54,16 @@ define([
 			step2Label = this.translater.getValueFromKey('input.stepper.step2inputLabel'),
 			step3Label = this.translater.getValueFromKey('input.stepper.step3inputLabel');
 
-			var FirstStep = new Step1({
-				model: this.model,
-				name: step1Label,
-				tpl: 'app/modules/input/templates/tpl-step1.html'
-			});
-
-			var SecondStep = new Step2({
-				model: this.model,
-				name: step2Label,
-				tpl: 'app/modules/input/templates/tpl-step2.html'
-			});
-
-			
-			var ThirdStep = new Step3({
-				model: this.model,
-				name: step3Label,
-				tpl: 'app/modules/input/templates/tpl-step3.html',
-			});
-
 			this.steps=[];
-			this.steps[0]= FirstStep;
-			this.steps[1]= SecondStep;
-			this.steps[2]= ThirdStep;
+			this.steps[0]= Step1;
+			this.steps[1]= Step2;
+			this.steps[2]= Step3;
 
 			this.stepper = new StepperOrchestrator({
 				model: this.model,
 				steps: this.steps
 			});
+
 
 			this.stepperRegion.show( this.stepper );
 			this.$el.i18n();

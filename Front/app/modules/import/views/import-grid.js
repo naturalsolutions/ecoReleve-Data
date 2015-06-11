@@ -113,7 +113,6 @@ define([
 
 
 		checkSelect: function (e) {
-			console.log(e);
 			var id = $(e.target).parent().parent().find('td').html();
 			this.grid.interaction('selection', id);
 		},

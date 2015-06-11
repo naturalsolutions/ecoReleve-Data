@@ -1,5 +1,5 @@
 from ecoreleve_server.Models import Base,DBSession
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_,text
+from sqlalchemy import Column, DateTime, Float,Boolean, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_,text
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 
@@ -13,7 +13,7 @@ class FrontModule(Base):
     TypeObj = Column(Integer)
     Legends = Column(Unicode(2500))
     ModuleFields = relationship('ModuleField',lazy='dynamic',back_populates='FrontModule')
-
+    # ModuleGrids = relationship('ModuleGrid',lazy='dynamic',back_populates='FrontModule')
 
 class ModuleField(Base):
     __tablename__ = 'ModuleField'
@@ -32,6 +32,13 @@ class ModuleField(Base):
     QueryName = Column(Unicode(500))
     IsSearchable = Column(Integer)
     Legend = Column(Unicode(500))
+    GridOrder = Column(Integer)
+    GridDisplay = Column(Boolean)
+    GridEditable = Column(Boolean)
+    GridCell = Column(String)
+    FilterOrder = Column(Integer)
+
+
     FrontModule = relationship("FrontModule", back_populates="ModuleFields")
 
     def GetMachin(self):
@@ -41,7 +48,22 @@ class ModuleField(Base):
     def GetClassFromSize(FieldSize):
         return FieldSizeToClass[FieldSize]
 
-    def GetDTOFromConf(self,IsEditable,CssClass):    
+
+    def GenerateFilter (self) :
+
+        filter_ = {
+        'name' : self.Name,
+        'type' : self.InputType,
+        'label' : self.LabelFr
+        }
+
+        if self.InputType == 'Select' and self.QueryName != None : 
+            result = DBSession.execute(text(self.QueryName)).fetchall()
+            filter_['optionValues'] = [{row['label']:row['val']} for row in result]
+            # filter_['optionValues'].sort(key=lambda k: k.key)
+        return filter_
+
+    def GetDTOFromConf(self,IsEditable,CssClass):
 
         dto = {
             'Name': self.Name,
@@ -65,3 +87,66 @@ class ModuleField(Base):
         if self.Required == 1 :
             dto['validators'].append("required")
         return dto
+
+    def GenerateColumn (self):
+
+
+        self.column = {
+        'name' : self.Name,
+        'label' : self.LabelFr,
+        'editable' : self.GridEditable,
+        'renderable': self.GridDisplay,
+        'cell' : self.GridCell,
+        }
+
+        if self.GridCell == 'select' and 'SELECT' in self.QueryName :
+             result = DBSession.execute(text(self.QueryName)).fetchall()
+             self.column['optionValues'] = [[row['label'],row['val']] for row in result]
+
+        return self.column
+
+
+class ModuleGrid (Base) :
+    __tablename__ = 'ModuleGrid'
+
+    ID = Column(Integer,Sequence('ModuleGrid__id_seq'), primary_key=True)
+    FK_FrontModule = Column(Integer, ForeignKey('FrontModule.ID'))
+    Name = Column(String)
+    Label = Column(String)
+    Display = Column(Boolean)
+    FieldSize = Column(Integer)
+    Cell = Column(String)
+    Editable = Column(Boolean)
+    FieldOrder = Column(Integer)
+    QueryName = Column(String)
+    FK_TypeObj =  Column(Integer)
+
+    # ObjNature = relationship("FrontModule", back_populates="ModuleGrid")
+
+    def GenerateColumn (self):
+
+
+        self.column = {
+        'name' : self.Name,
+        'label' : self.Label,
+        'editable' : self.Editable,
+        'renderable': self.Display,
+        'cell' : self.Cell,
+        }
+
+
+
+        if self.Cell == 'select' and 'SELECT' in self.QueryName :
+             result = DBSession.execute(text(self.QueryName)).fetchall()
+             self.column['optionValues'] = [[row['name'],row['val']] for row in result]
+
+        return self.column
+
+
+# class ObjNature (Base) :
+#     __tablename__ : 'ObjNature'
+
+#     ID = Column(Integer,Sequence('ObjNature__id_seq'), primary_key=True)
+#     Name = Column(String)
+
+#     ModuleGrids = relationship('ModuleGrids',lazy='dynamic',back_populates='ObjNature')
