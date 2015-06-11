@@ -38,6 +38,7 @@ class ListObjectWithDynProp():
     def GetAllDynPropName(self) :
         DynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
         query = select([DynPropTable.c['Name'],DynPropTable.c['TypeProp']]).group_by(DynPropTable.c['Name'],DynPropTable.c['TypeProp'])
+
         result = self.ObjContext.execute(query).fetchall()
 
         result = pd.DataFrame(result,columns=['Name','TypeProp'])
@@ -98,7 +99,7 @@ class ListObjectWithDynProp():
         fullQueryStatVal = select([self.ObjWithDynProp])
         subQuery = select([self.ObjWithDynProp.ID])
 
-        if criteria != [] :
+        if criteria != [] or criteria != {}:
             for obj in criteria:
                 if obj['Value'] != None and obj['Value']!='':
                     subQuery = self.GetQueryInStatProp(subQuery,obj)

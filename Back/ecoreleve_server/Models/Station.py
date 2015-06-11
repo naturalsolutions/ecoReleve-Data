@@ -32,6 +32,7 @@ import json
 class Station(Base,ObjectWithDynProp):
 
     __tablename__ = 'Station'
+    
 
     ID = Column(Integer,Sequence('Stations__id_seq'), primary_key=True)
     StationDate =  Column(DateTime, index=True, nullable=False)

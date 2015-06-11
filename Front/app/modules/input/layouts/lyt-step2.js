@@ -41,26 +41,25 @@ define([
 			rightRegion : '#inputStRight'
 		},
 
+		template: 'app/modules/input/templates/tpl-step2.html',
+
 		onShow: function(){
 			this.translater = Translater.getTranslater();
 			this.parent.disableNext();
 			var stationType = this.model.get('start_stationtype');
-
-			console.log(stationType);
 			this.loadStationView(stationType);
 		},
 
 		loadStationView: function(type){
 			if(type <= 3){
-				var stationForm = new StationView({ type: type, parent: this });
+				var stationForm = new StationView({
+					type: type,
+					parent: this
+				});
 				this.leftRegion.show(stationForm);
-				this.feedTpl();
 			}else{
 
-				var firlterView = new FilterView();
-				this.leftRegion.show(firlterView);
-				var gridView = new GridView({ type: type, parent: this });
-				this.rightRegion.show(gridView);
+
 				switch(type){
 					case 'last':
 						break;
@@ -71,6 +70,18 @@ define([
 					default: 
 						break;
 				}
+
+				this.com = new Com();
+				var firlterView = new FilterView({
+					parent: this
+				});
+				this.leftRegion.show(firlterView);
+
+				var gridView = new GridView({
+					type: type,
+					parent: this
+				});
+				this.rightRegion.show(gridView);
 			}
 		},
 

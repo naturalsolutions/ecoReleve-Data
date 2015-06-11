@@ -62,11 +62,12 @@ def main(global_config, **settings):
     # Set up authentication and authorization
     authn_policy = AuthTktAuthenticationPolicy(
             settings['auth.secret'],
-            cookie_name='ecoReleve-Core',
+            cookie_name='ecoReleve-Core',   
             callback=role_loader,
-            hashalg='sha1',
+            hashalg='sha',
             max_age=86400)
     authz_policy = ACLAuthorizationPolicy()
+
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(authz_policy)
     config.set_root_factory(SecurityRoot)
