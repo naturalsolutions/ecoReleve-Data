@@ -37,11 +37,9 @@ prefix = 'stations'
 #     # can search/filter
 #     return
 
-<<<<<<< HEAD
+
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-=======
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET' , permission = NO_PERMISSION_REQUIRED)
->>>>>>> 0452317c58aa351018a9438b1cd390f930b8cb68
+
 def actionOnStations(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
