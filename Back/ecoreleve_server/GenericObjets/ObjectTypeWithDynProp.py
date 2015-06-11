@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DynPropNames
+from ecoreleve_server.Models import Base,DynPropNames,DBSession
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
@@ -13,7 +13,7 @@ class ObjectTypeWithDynProp:
 
 
     def __init__(self,ObjContext):
-        self.ObjContext = ObjContext
+        self.ObjContext = DBSession
         self.DynPropNames = self.GetDynPropNames()
 
     def GetDynPropContextTable(self):
@@ -80,6 +80,14 @@ class ObjectTypeWithDynProp:
         for curValue in Values : 
            resultat[curValue['Name']] = curValue
         return resultat
+
+    def GetDynProps(self):
+        curQuery = 'select D.Name , D.TypeProp from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
+        #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
+        curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
+        Values = self.ObjContext.execute(curQuery).fetchall()
+
+        return Values
 
     def GetFieldSets(self,FrontModule,Schema) :
         Legends = FrontModule.Legends.split(';')

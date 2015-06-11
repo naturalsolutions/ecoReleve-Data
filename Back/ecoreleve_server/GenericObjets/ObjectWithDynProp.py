@@ -1,11 +1,13 @@
 from ecoreleve_server.Models import Base,DBSession
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,select, and_, or_,distinct
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
 from datetime import datetime
-from .FrontModules import FrontModule,ModuleField
+from .FrontModules import FrontModule,ModuleField, ModuleGrid
 import transaction
+
+
 
 Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}
 
@@ -19,6 +21,100 @@ class ObjectWithDynProp:
         self.PropDynValuesOfNow = {}
         #if self.ID != None :
         #   self.LoadNowValues()
+    def GetAllProp (self) :
+        try : 
+            type_ = self.GetType()
+        except :
+            type_ = None
+        dynPropTable = Base.metadata.tables[self.GetDynPropTable()]
+
+        if type_ :
+            result = type_.GetDynProps()
+        else :
+            result = DBSession.execute(select([dynPropTable])).fetchall()
+
+        statProps = [{'name': statProp.key, 'type': statProp.type} for statProp in self.__table__.columns ]
+        dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp}for dynProp in result]
+       
+        statProps.extend(dynProps)
+
+        return statProps
+
+    def GetFrontModuleID (self) :
+        if not hasattr(self,'FrontModule') :
+            self.FrontModule = DBSession.query(FrontModule).filter(FrontModule.Name==self.__tablename__).one()
+        return self.FrontModule.ID
+
+    def GetGridFields (self):
+        try:
+            typeID = self.GetType().ID
+            gridFields = DBSession.query(ModuleField
+            ).filter(and_(ModuleField.FK_FrontModule == self.GetFrontModuleID(), and_(ModuleField.GridDisplay == True ,ModuleField.TypeObj == typeID )) ).all()
+         
+        except:
+            print('EXCPETION \n\n')
+            typeID = 0
+            gridFields = DBSession.query(ModuleField).filter(and_(ModuleField.FK_FrontModule == self.GetFrontModuleID(), ModuleField.GridDisplay == True) ).all()
+        
+        gridFields.sort(key=lambda x: x.GridOrder)
+        cols = []
+
+        for curProp in self.GetAllProp():
+            curPropName = curProp['name']
+            print(curPropName)
+
+            gridField = list(filter(lambda x : x.Name == curPropName,gridFields))
+            if len(gridField)>0 :
+                cols.append(gridField[0].GenerateColumn())
+
+
+        return cols
+
+    def GetFilters (self) :
+
+        filters = []
+        defaultFilters = []
+        # print(self.GetAllProp())
+
+        try:
+            typeID = self.GetType().ID
+            filterFields = DBSession.query(ModuleField).filter(
+                and_(
+                    ModuleField.FK_FrontModule == self.GetFrontModuleID()
+                    , or_( ModuleField.TypeObj == typeID,ModuleField.TypeObj == None)
+                    )).all()
+
+        except :
+            print('EXCPETION \n\n')
+            typeID = 0
+            filterFields = DBSession.query(ModuleField).filter(ModuleField.FK_FrontModule == self.GetFrontModuleID()).all()
+
+      
+        for curProp in self.GetAllProp():
+            curPropName = curProp['name']
+            print(curPropName)
+
+            filterField = list(filter(lambda x : x.Name == curPropName 
+                and x.IsSearchable == 1 ,filterFields))
+    
+            if len(filterField)>0 :
+                # print('IN CONF\n')
+                # print (filterField[0].Name)
+                filters.append(filterField[0].GenerateFilter())
+
+            elif len(list(filter(lambda x : x.Name == curPropName, filterFields))) == 0: 
+                # print('WITHOUT\n')
+                # print(curProp)
+                filter_ = {
+                'name' : curPropName,
+                'label' : curPropName,
+                'type' : 'String'
+                }
+                defaultFilters.append(filter_)
+
+        filters.extend(defaultFilters)
+
+        return filters
 
     def GetType(self):
         raise Exception("GetType not implemented in children")
