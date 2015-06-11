@@ -342,10 +342,8 @@ define([
 
 
 							objVal = obj.attributes[col];
-
-
-							//todo : debug, all fields pass as a date
-							if (moment.isDate(new Date(val))) {
+							var isDate = moment(objVal,'YYYY-MM-DD hh:mm:ss').isValid();  
+							if (isDate) {
 								pass = ctx.testDate(val, op, objVal);
 							} else {
 								pass = ctx.testMatch(val, op, objVal);
@@ -358,12 +356,9 @@ define([
 				});
 				coll.reset(mod);
 				this.com.action('filter', coll);
-				console.log(coll);
 
 			} else {
 				this.com.action('filter', tmp);
-				console.log(tmp);
-
 			}
 		},
 
@@ -432,41 +427,35 @@ define([
 		testDate: function (val, op, objVal) {
 			var dateA = moment(val);
 			var dateB = moment(objVal);
-
-			console.log('DATEA');
-			console.log(dateA);
-			console.log('\n\n\n DATEB');
-			console.log(dateB);
-
 			switch (op.toLowerCase()) {
 				case '=':
 					if (!(dateB.isSame(dateA))) {
 						return false;
 					};
 					break;
-				case '!=':
+				case '<>':
 					if (dateB.isSame(dateA)) {
 						return false;
 					};
 					break;
 				case '>':
-					if (!(dateA.isAfter(dateB))) {
+					if ((dateA.isAfter(dateB))) {
 						return false;
 					};
 					break;
 				case '<':
-					if (!(dateA.isBefore(dateB))) {
+					if ((dateA.isBefore(dateB))) {
 						return false;
 					};
 					break;
 					//todo : verify those 2
 				case '>=':
-					if (!(dateA.isAfter(dateB)) || !(dateB.isSame(dateA))) {
+					if ((dateA.isAfter(dateB)) || (dateB.isSame(dateA))) {
 						return false;
 					};
 					break;
 				case '<=':
-					if (!(dateA.isBefore(dateB)) || !(dateB.isSame(dateA))) {
+					if ((dateA.isBefore(dateB)) || (dateB.isSame(dateA))) {
 						return false;
 					};
 					break;
