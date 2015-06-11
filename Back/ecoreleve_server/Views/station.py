@@ -14,7 +14,7 @@ from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE
+from sqlalchemy import select, and_,cast, DATE,func
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 
@@ -37,7 +37,7 @@ prefix = 'stations'
 #     # can search/filter
 #     return
 
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnStations(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -51,7 +51,11 @@ def actionOnStations(request):
 
 def count (request) :
 #   ## TODO count stations
-    return
+    print('*****************  STATION COUNT***********************')
+    #nb = DBSession.query(func.count(Station.ID))
+    nb = DBSession.query(Station).count()
+    print(nb)
+    return nb
 
 def getForms(request) :
 
