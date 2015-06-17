@@ -172,7 +172,6 @@ define([
 
 
 			if(!this.first){
-				console.log(this.lastOne);
 				this.steps[this.lastOne] = new this.stepsProto[this.lastOne];
 				this.steps[this.lastOne].name = 'a';
 				this.steps[this.lastOne].model = this.model;
