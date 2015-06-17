@@ -17,7 +17,7 @@ from ecoreleve_server.Models import (
     Station
     )
 
-from ecoreleve_server.GenericObjets.FrontModules import (FrontModule,ModuleField)
+from ecoreleve_server.GenericObjets.FrontModules import FrontModule
 
 
 @view_config(route_name='observation/id', renderer='json', request_method = 'GET')

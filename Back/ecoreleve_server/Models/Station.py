@@ -17,11 +17,12 @@ from sqlalchemy import (Column,
  insert,
  select,
  UniqueConstraint)
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
-from ..GenericObjets.FrontModules import FrontModule,ModuleField
+from ..GenericObjets.FrontModules import FrontModule,ModuleGrid
 from ecoreleve_server.Models import FieldActivity
 from datetime import datetime
 from collections import OrderedDict
@@ -50,8 +51,28 @@ class Station(Base,ObjectWithDynProp):
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
     FK_Place = Column(Integer)
     
+    FieldWorkers = relationship('Station_FieldWorker',backref='Station',cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON', name='_unique_constraint_lat_lon_date'),)
 
+    @hybrid_property
+    def FieldWorkersNames (self):
+        if self.FieldWorkers:
+            fws_name = {}
+            fw_string = 'FieldWorker'
+            for i in range(len(self.FieldWorkers)) :
+                fws_name[fw_string+str(i+1)] = self.FieldWorkers[i].FieldWorkerName
+            return fws_name
+        else:
+            return None
+    @FieldWorkersNames.setter
+    def FieldWorkersNames(self, values):
+        if not self.FieldWorkers:
+            fws=[]
+            for val in values : 
+                fws.append(Station_FieldWorker( FK_FieldWorker = val, FK_Station=self.ID))
+        # else:
+        #     self.FieldWorkers = self.accounts[0]
+            self.FieldWorkers = fws
     
     @orm.reconstructor
     def init_on_load(self):
@@ -124,6 +145,36 @@ class StationType_StationDynProp(Base):
     Required = Column(Integer,nullable=False)
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
     FK_StationDynProp = Column(Integer, ForeignKey('StationDynProp.ID'))
+
+
+class Station_FieldWorker (Base) :
+
+    __tablename__ = 'Station_FieldWorker'
+
+    ID = Column(Integer,Sequence('Station_FieldWorker__id_seq'), primary_key=True)
+    FK_Station = Column(Integer,ForeignKey('Station.ID'))
+    FK_FieldWorker = Column(Integer,ForeignKey('User.ID'))
+
+    FieldWorker = relationship('User')
+
+    @hybrid_property
+    def FieldWorkerName (self):
+        if self.FieldWorker:
+            return self.FieldWorker.Login
+        else:
+            return None
+
+    # @balance.setter
+    # def FieldWorkerName(self, values):
+    #     if not self.accounts:
+    #         account = Account(owner=self)
+    #     else:
+    #         account = self.accounts[0]
+    #     account.balance = value
+
+    # @balance.expression
+    # def balance(cls):
+    #     return SavingsAccount.balance
 
 
 

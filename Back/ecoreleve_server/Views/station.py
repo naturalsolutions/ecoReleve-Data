@@ -6,7 +6,7 @@ from ..Models import (
     Observation,
     FieldActivity_ProtocoleType
     )
-from ecoreleve_server.GenericObjets.FrontModules import (FrontModule,ModuleField)
+from ecoreleve_server.GenericObjets.FrontModules import FrontModule
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
 import transaction
 import json
@@ -44,8 +44,8 @@ def actionOnStations(request):
     'count' : count,
     'forms' : getForms,
     '0' : getForms,
-    'fields': getFields,
-    'filters': getFilters
+    'getFields': getFields,
+    'getFilters': getFilters
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -54,13 +54,19 @@ def count (request) :
 #   ## TODO count stations
     return
 def getFilters (request):
-    return Station().GetFilters()
+
+    filtersList = Station().GetFilters()
+    filters = {}
+    for i in range(len(filtersList)) :
+        filters[str(i)] = filtersList[i]
+
+    return filters
 
 def getForms(request) :
 
     typeSta = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
-    ModuleName = 'Station'
+    ModuleName = 'StationForm'
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     newSta = Station(FK_StationType = typeSta)
     newSta.init_on_load()
@@ -71,7 +77,23 @@ def getForms(request) :
 
 def getFields(request) :
 ### TODO return fields Station
-
+    
+    ### GET example #####
+    sta = DBSession.query(Station).get(1)
+    fieldworkers = sta.StationDynPropValues
+    print(fieldworkers)
+    # 
+    #### INSERT example #####
+    # sta = Station(FK_StationType = 1 , StationDate='12/12/2015 00:00:00' , fieldActivityId = 1)
+    # sta.FieldWorkersNames = [1,2,6,1,1,1,1,1]
+    # DBSession.add(sta)
+    # transaction.commit()
+    # 
+    # # #### DELETE  example #####
+    # curSta = DBSession.query(Station).get(2484)
+    # DBSession.delete(curSta)
+    # transaction.commit()
+    
     cols = Station().GetGridFields()
     return cols
 
@@ -91,7 +113,7 @@ def getStation(request):
         except : 
             DisplayMode = 'display'
 
-        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='Station' ).first()
+        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='StationForm' ).first()
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
     else : 
         response  = curSta.GetFlatObject()
@@ -234,12 +256,16 @@ def searchStation(request):
     searchInfo = {}
     print(type(data))
     
-    data['criteria'] = json.loads(data['criteria'])
+    
     print(data)
     searchInfo['criteria'] = []
     if 'criteria' in data: 
-        searchInfo['criteria'].extend(list(data['criteria']))
-        print(searchInfo['criteria'])
+        data['criteria'] = json.loads(data['criteria'])
+        if data['criteria'] != {} :
+
+
+            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+            print(searchInfo['criteria'])
 
     if 'lastImported' in data :
 
@@ -252,7 +278,7 @@ def searchStation(request):
         'Value' : request.authenticated_userid
         },
         {'Query':'Observation',
-        'Column': 'None',
+        'Column': 'FK_ProtocoleType',
         'Operator' : 'not exists',
         'Value': select([Observation]).where(Observation.FK_Station == Station.ID) # keep only stations without Observations
         },
@@ -267,12 +293,13 @@ def searchStation(request):
         },
         ]
 
-    searchInfo['criteria'].extend(criteria)
+        searchInfo['criteria'].extend(criteria)
+
     listObj = ListObjectWithDynProp(Station)
     response = listObj.GetFlatList(searchInfo)
     print(len(response))
     transaction.commit()
-
+    print (response)
     return response
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
@@ -300,7 +327,7 @@ def GetProtocolsofStation (request) :
         if 'FormName' in request.params : 
             print (' ********************** Forms in params ==> DATA + FORMS ****************** ')
             print(request.params)
-            ModuleName = 'Observation'
+            ModuleName = 'ObservationForm'
 
             listObs = list(DBSession.query(Observation).filter(Observation.FK_Station == sta_id))
             listType =list(DBSession.query(FieldActivity_ProtocoleType
