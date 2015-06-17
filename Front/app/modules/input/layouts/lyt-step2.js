@@ -59,19 +59,43 @@ define([
 				this.leftRegion.show(stationForm);
 			}else{
 
-
+				var urlParams;
 				switch(type){
 					case 'last':
+						urlParams = [{'lastImported':true}];
 						break;
 					case 'old':
 						break;
 					case 'monitored':
+						urlParams = [{'monitored':true}];
+
+
 						break;
 					default: 
 						break;
 				}
+				var self = this; 
+				var myCom = Com;
+				console.log(Com);
+				myCom.prototype.action = function (action, ids) {
 
-				this.com = new Com();
+					
+					if (action == 'rowclicked') {
+						console.log('new action')
+							self.currentModel = ids;
+						}
+					
+				};
+				/*
+					action : function(action, ids) {
+						Com.prototype.action.apply(self,arguments);
+						if (action == 'rowclicked') {
+							self.currentModel = ids;
+
+						}
+					}
+				});*/
+				this.com = new myCom();
 				var firlterView = new FilterView({
 					parent: this
 				});
@@ -79,7 +103,8 @@ define([
 
 				var gridView = new GridView({
 					type: type,
-					parent: this
+					parent: this,
+					urlParams : urlParams
 				});
 				this.rightRegion.show(gridView);
 			}

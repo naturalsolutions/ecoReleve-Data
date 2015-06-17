@@ -4,9 +4,10 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
 from datetime import datetime
-from .FrontModules import FrontModule,ModuleField, ModuleGrid
+from .FrontModules import FrontModule,ModuleForm, ModuleGrid
 import transaction
-
+from operator import itemgetter
+from collections import OrderedDict
 
 
 Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}
@@ -48,13 +49,13 @@ class ObjectWithDynProp:
     def GetGridFields (self):
         try:
             typeID = self.GetType().ID
-            gridFields = DBSession.query(ModuleField
-            ).filter(and_(ModuleField.FK_FrontModule == self.GetFrontModuleID(), and_(ModuleField.GridDisplay == True ,ModuleField.TypeObj == typeID )) ).all()
+            gridFields = DBSession.query(ModuleGrid
+            ).filter(and_(ModuleGrid.FK_FrontModule == self.GetFrontModuleID(), and_(ModuleGrid.GridDisplay == True ,ModuleGrid.TypeObj == typeID )) ).all()
          
         except:
             print('EXCPETION \n\n')
             typeID = 0
-            gridFields = DBSession.query(ModuleField).filter(and_(ModuleField.FK_FrontModule == self.GetFrontModuleID(), ModuleField.GridDisplay == True) ).all()
+            gridFields = DBSession.query(ModuleGrid).filter(and_(ModuleGrid.FK_FrontModule == self.GetFrontModuleID(), ModuleGrid.GridDisplay == True) ).all()
         
         gridFields.sort(key=lambda x: x.GridOrder)
         cols = []
@@ -78,16 +79,16 @@ class ObjectWithDynProp:
 
         try:
             typeID = self.GetType().ID
-            filterFields = DBSession.query(ModuleField).filter(
+            filterFields = DBSession.query(ModuleGrid).filter(
                 and_(
-                    ModuleField.FK_FrontModule == self.GetFrontModuleID()
-                    , or_( ModuleField.TypeObj == typeID,ModuleField.TypeObj == None)
+                    ModuleGrid.FK_FrontModule == self.GetFrontModuleID()
+                    , or_( ModuleGrid.TypeObj == typeID,ModuleGrid.TypeObj == None)
                     )).all()
 
         except :
             print('EXCPETION \n\n')
             typeID = 0
-            filterFields = DBSession.query(ModuleField).filter(ModuleField.FK_FrontModule == self.GetFrontModuleID()).all()
+            filterFields = DBSession.query(ModuleGrid).filter(ModuleGrid.FK_FrontModule == self.GetFrontModuleID()).all()
 
       
         for curProp in self.GetAllProp():
@@ -108,7 +109,7 @@ class ObjectWithDynProp:
                 filter_ = {
                 'name' : curPropName,
                 'label' : curPropName,
-                'type' : 'String'
+                'type' : 'Text'
                 }
                 defaultFilters.append(filter_)
 
@@ -232,26 +233,28 @@ class ObjectWithDynProp:
         Editable = (DisplayMode.lower()  == 'edit')
         resultat = {}
         type_ = self.GetType().ID
-        Fields = self.ObjContext.query(ModuleField).filter(ModuleField.FK_FrontModule == FrontModule.ID).all()
+        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).order_by(ModuleForm.FormOrder).all()
         curEditable = Editable
 
         for curStatProp in self.__table__.columns:
 
-            CurModuleField = list(filter(lambda x : x.Name == curStatProp.key and (x.TypeObj== str(type_) or x.TypeObj == None) , Fields))
-            if (len(CurModuleField)> 0 ):
+            CurModuleForm = list(filter(lambda x : x.Name == curStatProp.key and (x.TypeObj== str(type_) or x.TypeObj == None) , Fields))
+            if (len(CurModuleForm)> 0 ):
                 # Conf définie dans FrontModule
-                CurModuleField = CurModuleField[0]
-                if (CurModuleField.FormRender & 2) == 0:
+                CurModuleForm = CurModuleForm[0]
+                if (CurModuleForm.FormRender & 2) == 0:
                     curEditable = False
-                resultat[CurModuleField.Name] = CurModuleField.GetDTOFromConf(curEditable,str(ModuleField.GetClassFromSize(2)))
+                resultat[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,str(ModuleForm.GetClassFromSize(2)))
             else:
+                print('no conf : '+curStatProp.key)
                 resultat[curStatProp.key] = {
                 'Name': curStatProp.key,
                 'type': 'Text',
                 'title' : curStatProp.key,
                 'editable' : curEditable,
                 'editorClass' : 'form-control' ,
-                'fieldClass' : ModuleField.GetClassFromSize(2)
+                'fieldClass' : ModuleForm.GetClassFromSize(2),
+
                 }
 
             
@@ -266,10 +269,11 @@ class ObjectWithDynProp:
         if (DisplayMode.lower() != 'edit'):
             for curName in schema:
                 schema[curName]['editorAttrs'] = { 'disabled' : True }
-        resultat = {
+        
+        resultat = { 
             'schema':schema,
-            'fieldsets' : ObjType.GetFieldSets(FrontModule,schema)
-        }
+            'fieldsets' : ObjType.GetFieldSets(FrontModule,schema) 
+            }
 
         if self.ID :
             data =   self.GetFlatObject()
@@ -278,3 +282,4 @@ class ObjectWithDynProp:
         else :
             resultat['data'] = {'id':0}
         return resultat
+

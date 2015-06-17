@@ -66,6 +66,9 @@ def add_routes(config):
      ##### Protocols types #####
     config.add_route('protocolTypes', 'ecoReleve-Core/protocolTypes')
 
+    ##### FieldActivity ##### 
+    config.add_route('fieldActivity', 'ecoReleve-Core/fieldActivity')
+    
 
     ##### Sensors datas (Argos + GSM + RFID) #####
     config.add_route('sensors/datas', 'ecoReleve-Sensor/{type}/datas')

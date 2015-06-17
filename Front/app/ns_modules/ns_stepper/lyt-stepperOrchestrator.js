@@ -53,8 +53,9 @@ define([
 			this.stepsProto=options.steps;
 			this.steps= [];
 
-
 			for(var i=0; i < this.stepsProto.length; i++){
+				console.log(this.stepsProto[i]);
+
 				this.steps[i] = new this.stepsProto[i];
 				this.steps[i].name = 'a';
 				this.steps[i].model = this.model;

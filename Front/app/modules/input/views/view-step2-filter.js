@@ -38,7 +38,7 @@ define([
 					label : "Name"
 				},
 				2 : {
-					name : "latitude",
+					name : "LAT",
 					type : "Number",
 					label : "Latitude"
 				},
@@ -48,13 +48,14 @@ define([
 					label : "Longitude"
 				},
 				4 : {
-					name : "waypointTime",
+					name : "StationDate",
 					type : "DateTimePicker",
 					label : "Date"
 				}
 			};
 			this.filters = new NSFilter({
-				filters: filtersList,
+				//filters: filtersList,
+				url: config.coreUrl + 'stations/',
 				com: this.com,
 				filterContainer: 'filters'
 			});

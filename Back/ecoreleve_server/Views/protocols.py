@@ -3,9 +3,10 @@ from ..Models import (
     DBSession,
     Observation,
     ProtocoleType,
-    FieldActivity_ProtocoleType
+    FieldActivity_ProtocoleType,
+    fieldActivity
     )
-from ecoreleve_server.GenericObjets.FrontModules import (FrontModule,ModuleField)
+from ecoreleve_server.GenericObjets.FrontModules import FrontModule
 import transaction
 import json
 from datetime import datetime
@@ -134,4 +135,13 @@ def getProtocol (request):
         response  = curProt.GetFlatObject()
     return response
 
+@view_config(route_name= 'fieldActivity', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+def getFieldActivityList (request) :
 
+    query = select([fieldActivity.ID.label('value'), fieldActivity.Name.label('label')])
+    result = DBSession.execute(query).fetchall()
+    print (dict(result))
+    res = []
+    for row in result :
+        res.append({'label':row['label'], 'value': row['value']})
+    return sorted(res , key = lambda x : x['label'])

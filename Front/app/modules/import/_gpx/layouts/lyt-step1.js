@@ -17,8 +17,13 @@ define([
         events: {
             'click #radio-tile': 'checkRadio',
         },
+        initialize :function () {
+			Step.prototype.initialize.apply(this, arguments);
+			console.log('init GPX stepp 1 ');
 
+		},
         onShow: function(){
+			Step.prototype.onShow.apply(this, arguments);
            
         },
 

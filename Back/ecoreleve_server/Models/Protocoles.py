@@ -19,7 +19,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
-from ..GenericObjets.FrontModules import FrontModule,ModuleField
+from ..GenericObjets.FrontModules import FrontModule,ModuleForm
 from datetime import datetime
 
 class Observation(Base,ObjectWithDynProp):
