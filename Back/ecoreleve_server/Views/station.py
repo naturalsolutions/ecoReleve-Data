@@ -55,7 +55,8 @@ def count (request) :
     return
 def getFilters (request):
 
-    filtersList = Station().GetFilters()
+    ModuleType = 'StationGrid'
+    filtersList = Station().GetFilters(ModuleType)
     filters = {}
     for i in range(len(filtersList)) :
         filters[str(i)] = filtersList[i]
@@ -79,9 +80,10 @@ def getFields(request) :
 ### TODO return fields Station
     
     ### GET example #####
-    sta = DBSession.query(Station).get(1)
-    fieldworkers = sta.StationDynPropValues
-    print(fieldworkers)
+    
+    # sta = DBSession.query(Station).get(1)
+    # fieldworkers = sta.StationDynPropValues
+    # print(fieldworkers)
     # 
     #### INSERT example #####
     # sta = Station(FK_StationType = 1 , StationDate='12/12/2015 00:00:00' , fieldActivityId = 1)
@@ -93,8 +95,9 @@ def getFields(request) :
     # curSta = DBSession.query(Station).get(2484)
     # DBSession.delete(curSta)
     # transaction.commit()
+    ModuleType = 'StationGrid'
     
-    cols = Station().GetGridFields()
+    cols = Station().GetGridFields(ModuleType)
     return cols
 
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
@@ -282,11 +285,11 @@ def searchStation(request):
         'Operator' : 'not exists',
         'Value': select([Observation]).where(Observation.FK_Station == Station.ID) # keep only stations without Observations
         },
-        {'Query':'Station',
-        'Column': 'None',
-        'Operator' : 'not exists',
-        'Value': select([o]).where(cast(o.creationDate,DATE) > cast(Station.creationDate,DATE)) # keep only the last importation day
-        },
+        # {'Query':'Station',
+        # 'Column': 'None',
+        # 'Operator' : 'not exists',
+        # 'Value': select([o]).where(cast(o.creationDate,DATE) >= cast(Station.creationDate,DATE)) # keep only the last importation day
+        # },
         {'Column' : 'FK_StationType',
         'Operator' : '=',
         'Value' : 4 # => TypeID of GPX station

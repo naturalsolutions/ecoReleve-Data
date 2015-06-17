@@ -41,23 +41,25 @@ class ObjectWithDynProp:
 
         return statProps
 
-    def GetFrontModuleID (self) :
+    def GetFrontModuleID (self,ModuleType) :
         if not hasattr(self,'FrontModule') :
-            self.FrontModule = DBSession.query(FrontModule).filter(FrontModule.Name==self.__tablename__).one()
+            self.FrontModule = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleType).one()
         return self.FrontModule.ID
 
-    def GetGridFields (self):
+    def GetGridFields (self,ModuleType):
         try:
             typeID = self.GetType().ID
             gridFields = DBSession.query(ModuleGrid
-            ).filter(and_(ModuleGrid.FK_FrontModule == self.GetFrontModuleID(), and_(ModuleGrid.GridDisplay == True ,ModuleGrid.TypeObj == typeID )) ).all()
+            ).filter(and_(ModuleGrid.FK_FrontModule == self.GetFrontModuleID(ModuleType), 
+                or_(ModuleGrid.FK_TypeObj == typeID ,ModuleGrid.FK_TypeObj ==None ))).all()
          
         except:
             print('EXCPETION \n\n')
             typeID = 0
-            gridFields = DBSession.query(ModuleGrid).filter(and_(ModuleGrid.FK_FrontModule == self.GetFrontModuleID(), ModuleGrid.GridDisplay == True) ).all()
+            gridFields = DBSession.query(ModuleGrid).filter(
+                ModuleGrid.FK_FrontModule == self.GetFrontModuleID(ModuleType) ).all()
         
-        gridFields.sort(key=lambda x: x.GridOrder)
+        gridFields.sort(key=lambda x: str(x.GridOrder))
         cols = []
 
         for curProp in self.GetAllProp():
@@ -71,7 +73,7 @@ class ObjectWithDynProp:
 
         return cols
 
-    def GetFilters (self) :
+    def GetFilters (self,ModuleType) :
 
         filters = []
         defaultFilters = []
@@ -81,14 +83,14 @@ class ObjectWithDynProp:
             typeID = self.GetType().ID
             filterFields = DBSession.query(ModuleGrid).filter(
                 and_(
-                    ModuleGrid.FK_FrontModule == self.GetFrontModuleID()
+                    ModuleGrid.FK_FrontModule == self.GetFrontModuleID(ModuleType)
                     , or_( ModuleGrid.TypeObj == typeID,ModuleGrid.TypeObj == None)
                     )).all()
 
         except :
             print('EXCPETION \n\n')
             typeID = 0
-            filterFields = DBSession.query(ModuleGrid).filter(ModuleGrid.FK_FrontModule == self.GetFrontModuleID()).all()
+            filterFields = DBSession.query(ModuleGrid).filter(ModuleGrid.FK_FrontModule == self.GetFrontModuleID(ModuleType)).all()
 
       
         for curProp in self.GetAllProp():
@@ -101,6 +103,8 @@ class ObjectWithDynProp:
             if len(filterField)>0 :
                 # print('IN CONF\n')
                 # print (filterField[0].Name)
+                print (filterField[0])
+                # 
                 filters.append(filterField[0].GenerateFilter())
 
             elif len(list(filter(lambda x : x.Name == curPropName, filterFields))) == 0: 
@@ -114,7 +118,6 @@ class ObjectWithDynProp:
                 defaultFilters.append(filter_)
 
         filters.extend(defaultFilters)
-
         return filters
 
     def GetType(self):
