@@ -70,6 +70,7 @@ define([
 		},
 
 		animateIn: function() {
+			console.log('plouf');
 			this.$el.find('#btnPrev').animate(
 				{ left : '0'},
 				1000
@@ -87,6 +88,7 @@ define([
 			);
 		},
 		animateOut: function() {
+			console.log('plouf');
 			this.$el.find('#btnPrev').animate(
 				{ left : '-100%'},
 				1000
