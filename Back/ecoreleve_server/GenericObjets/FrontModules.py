@@ -5,11 +5,11 @@ from sqlalchemy.orm import relationship
 
 FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
 
-def isRenderable (self,int_Render) :
+def isRenderable (int_Render) :
         return int(int_Render) > 0 
 
-def isEditable (self,int_GridRender) :
-    return int(int_GridRender) > 2
+def isEditable (int_Render) :
+    return int(int_Render) > 2
 
 
 class FrontModule(Base):
@@ -97,20 +97,21 @@ class ModuleGrid (Base) :
     FilterDefaultValue = Column (String)
     FilterRender = Column (Integer)
     FilterType = Column (String)
+    FilterClass = Column (String)
 
     FrontModule = relationship("FrontModule", back_populates="ModuleGrids")
     
     def GenerateColumn (self):
         column = {
         'name' : self.Name,
-        'label' : self.LabelFr,
-        'editable' : isRenderable(self.GridRender),
-        'renderable': isEditable(self.GridRender),
+        'label' : self.Label,
+        'renderable': isRenderable(self.GridRender),
+        'editable': isEditable(self.GridRender),
         'cell' : self.CellType,
         }
 
         if self.CellType == 'select' and 'SELECT' in self.Options :
-             result = DBSession.execute(text(self.QueryName)).fetchall()
+             result = DBSession.execute(text(self.Options)).fetchall()
              column['optionValues'] = [[row['label'],row['val']] for row in result]
 
         return column
@@ -120,15 +121,18 @@ class ModuleGrid (Base) :
         filter_ = {
             'name' : self.Name,
             'type' : self.FilterType,
-            'label' : self.LabelFr,
-            'editable' : isEditable(self.FilterRend),
+            'label' : self.Label,
+            'editable' : isEditable(int(self.FilterRender)),
             # 'editorClass' : str(self.FilterClass) ,
-            'fieldClass' : str(self.FilterClass) + ' ' + FieldSizeToClass[Filtersize],
             'validators': [],
             'options': [],
             }
+        if (self.FilterClass) : 
+            filter_['fieldClass'] = self.FilterClass+ ' ' + FieldSizeToClass[self.FilterSize] 
+        else :  
+            filter_['fieldClass'] = FieldSizeToClass[self.FilterSize],
 
         if self.FilterType == 'Select' and self.Options != None : 
-            result = DBSession.execute(text(self.QueryName)).fetchall()
+            result = DBSession.execute(text(self.Options)).fetchall()
             filter_['options'] = [{'label':row['label'],'val':row['val']} for row in result]
-            return filter_
+        return filter_
