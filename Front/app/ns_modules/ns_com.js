@@ -80,6 +80,7 @@ define([
 
 
 		action: function(action, ids){
+			console.log('in acton')
 			if(action === 'selection' || action === 'selection'){
 				this.updateMotherColl(ids);
 			}

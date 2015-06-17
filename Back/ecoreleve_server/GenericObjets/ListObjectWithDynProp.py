@@ -7,7 +7,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
 from datetime import datetime
-from .FrontModules import FrontModule,ModuleField
+from .FrontModules import FrontModule,ModuleGrid
 import transaction
 from ecoreleve_server.utils import Eval
 import pandas as pd

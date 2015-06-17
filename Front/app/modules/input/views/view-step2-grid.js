@@ -25,12 +25,17 @@ define([
 		},
 		initialize: function(options) {
 			this.com = options.parent.com;
+			if ( options.urlParams) {
+				this.urlParams = options.urlParams; 
+				console.log(this.urlParams);
+			}
+
 			this.parent = options.parent;
 			var myCell = Backgrid.NumberCell.extend({
 				decimals: 5
 			});
 			
-			var columns = [{
+			/*var columns = [{
 				name: 'ID',
 				label: 'ID',
 				editable: false,
@@ -42,10 +47,10 @@ define([
 				editable: false,
 				cell:'string',
 			}, {
-				name: 'Date_',
+				name: 'StationDate',
 				label: 'date',
 				editable: false,
-				cell: 'string',
+				cell: 'date',
 			}, {
 				name: 'LAT',
 				label: 'Lat',
@@ -73,14 +78,18 @@ define([
 				cell: 'string',
 			}
 
-			];
+			];*/
+
+
 
 			this.grid = new NsGrid({
 				pageSize: 20,
 				pagingServerSide: false,
 				com: this.com,
-				columns: columns,
-				url: config.coreUrl + 'stations/?lastImported=',
+				//columns: columns,
+				url: config.coreUrl+'stations/',
+				urlParams : this.urlParams,
+				rowClicked : true
 			});
 		},
 
@@ -91,8 +100,8 @@ define([
 		},
 
 		setStation: function(e) {
-			var row = $(e.currentTarget);
-			var id = parseInt($(row).find(':first-child').text());
+			var row = $(e.target);
+			console.log(this.com.currentModel)
 			this.parent.model.set('station', id);
 			var currentStation = this.grid.collection.where({ ID: id })[0];
 			this.parent.model.set('start_stationtype', currentStation.get('FK_StationType'));

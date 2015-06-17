@@ -10,11 +10,12 @@ define([
 
 	'collections/waypoints',
 	'tmp/xmlParser',
-	'translater'
+	'translater',
+	'config'
 
 ], function(
 	$, _, Backbone, Marionette, Radio, Swal,
-	Step, Waypoints, xmlParser,Translater
+	Step, Waypoints, xmlParser,Translater,config
 ){
 
 	'use strict';
@@ -31,8 +32,35 @@ define([
 			'change #importFieldActivity' : 'setFieldActivity',
 			'click #resetFieldActivity' : 'resetFieldActivity'
 		},
+		initialize :function () {
+			var self = this ;
+			Step.prototype.initialize.apply(self, arguments);
+			console.log('init GPX stepp 1 ');
+			this.collection =  new Backbone.Collection();
+			
+
+			this.collection.url = config.coreUrl + 'fieldActivity';
+
+			this.collection.fetch({ 
+				success : function (data) {
+					console.log(data)
+					_/*.each(data, function (FA) {
+						console.log(FA);
+					})*/
+				for (var i in data.models ) {
+					var current = data.models[i];
+					$('#importFieldActivity').append('<option value ='+current.get('value')+'>'+current.get('label')+'</option>');
+				}
+				}
+			});
+			
+
+			
+		},
 
 		onShow: function(){
+			Step.prototype.onShow.apply(this, arguments);
+
 			$('#step-nav').show();
 			$('#btnPrev').show();
 			this.translater = Translater.getTranslater();
