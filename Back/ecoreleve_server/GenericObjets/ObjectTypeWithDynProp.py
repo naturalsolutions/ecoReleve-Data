@@ -4,7 +4,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
 from datetime import datetime
-from .FrontModules import FrontModule,ModuleField
+from .FrontModules import FrontModule,ModuleForm
 
 
 DynPropType = {'string':'Text','float':'Text','date':'Date','integer':'Text','int':'Text'}
@@ -47,19 +47,19 @@ class ObjectTypeWithDynProp:
 
         Values = self.ObjContext.execute(curQuery).fetchall()
         Editable = (DisplayMode.lower()  == 'edit')
-        Fields = self.ObjContext.query(ModuleField).filter(ModuleField.FK_FrontModule == FrontModule.ID).all()
+        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).all()
         
         for curValue in Values : 
             curEditable = Editable
-            CurModuleField = list(filter(lambda x : x.Name == curValue['Name'], Fields))
-            if (len(CurModuleField)> 0 ):
+            CurModuleForm = list(filter(lambda x : x.Name == curValue['Name'], Fields))
+            if (len(CurModuleForm)> 0 ):
                 # Conf définie dans FrontModule                
-                CurModuleField = CurModuleField[0]
+                CurModuleForm = CurModuleForm[0]
                 # TODO : Gestion champ read ONly
-                if (CurModuleField.FormRender & 2) == 0:
+                if (CurModuleForm.FormRender & 2) == 0:
                     curEditable = False
                 
-                SchemaDTO[curValue['Name']] = CurModuleField.GetDTOFromConf(curEditable,ModuleField.GetClassFromSize(CurModuleField.FieldSize))
+                SchemaDTO[curValue['Name']] = CurModuleForm.GetDTOFromConf(curEditable,ModuleForm.GetClassFromSize(CurModuleForm.FieldSizeEdit))
             else:
                 SchemaDTO[curValue['Name']] = {
                 'Name': curValue['Name'],
@@ -67,7 +67,8 @@ class ObjectTypeWithDynProp:
                 'title' : curValue['Name'],
                 'editable' : curEditable,
                 'editorClass' : 'form-control' ,
-                'fieldClass' : ModuleField.GetClassFromSize(2)
+                'fieldClass' : ModuleForm.GetClassFromSize(2),
+
                 }
            
     def GetDynPropNames(self):
@@ -90,23 +91,38 @@ class ObjectTypeWithDynProp:
         return Values
 
     def GetFieldSets(self,FrontModule,Schema) :
-        Legends = FrontModule.Legends.split(';')
+       
         fields = []
-        resultat = []
-        for i in range(len(Legends)):
-            resultat.append({'fields':[],'legend':Legends[i]})
+        other = []
+        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).all()
+        Legends = sorted ([(obj.Legend,obj.FormOrder)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
+        print(Legends)
+        Legends1= [obj[0] for obj in Legends] 
+        Legends = sorted(set(Legends1), key = Legends1.index)
+        
 
-        Fields = self.ObjContext.query(ModuleField).filter(ModuleField.FK_FrontModule == FrontModule.ID).all()
+        resultat = list(Legends)
+        Legends.append('Other')
+        print(Legends)
         for curProp in Schema:
-            CurModuleField = list(filter(lambda x : x.Name == curProp,Fields))
-            if (len(CurModuleField)> 0 ):
-                CurModuleField = CurModuleField[0]
-                curIndex = Legends.index(CurModuleField.Legend)
-                resultat[curIndex]['fields'].insert(CurModuleField.FormOrder,CurModuleField.Name)
+            CurModuleForm = list(filter(lambda x : x.Name == curProp,Fields))
+            if (len(CurModuleForm)> 0 ):
+                CurModuleForm = CurModuleForm[0]
+                curIndex = Legends.index(CurModuleForm.Legend)
+                try :
+                    resultat[curIndex]['fields'].insert(CurModuleForm.FormOrder,CurModuleForm.Name)
+                except :
+                    resultat[curIndex] = {'fields' : [CurModuleForm.Name] , 'legend' : Legends[curIndex] }
             else:
-                resultat[0]['fields'].append(curProp)
+                other.append(curProp)
+
+        resultat.append({'fields':[],'legend':'Other'})
+        for i in other :
+            curIndex = Legends.index('Other')
+            resultat[curIndex]['fields'].append(i)
 
 
+        print (resultat)
         return resultat
 
 

@@ -115,6 +115,7 @@ define([
 
 			if (type == 'Select' || type == 'Checkboxes') {
 				editorClass += ' list-inline ';
+				console.log(dataRow);
 				options = dataRow['options'];
 				if (type == 'Checkboxes') {
 					options.splice(0, 0, { label: 'All', val: -1, checked: true });
@@ -223,7 +224,7 @@ define([
 		getOpOptions: function (type) {
 			var operatorsOptions;
 			switch (type) {
-				case "String":
+				case "Text":
 					return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' }];
 					break;
 				case "DATETIME":
@@ -250,7 +251,7 @@ define([
 		getFieldType: function (type) {
 			var typeField;
 			switch (type) {
-				case "String":
+				case "Text":
 					return typeField = "Text";
 					break;
 				case "DateTimePicker":

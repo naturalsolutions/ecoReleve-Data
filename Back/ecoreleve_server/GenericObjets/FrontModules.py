@@ -5,64 +5,52 @@ from sqlalchemy.orm import relationship
 
 FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
 
+def isRenderable (int_Render) :
+        return int(int_Render) > 0 
+
+def isEditable (int_Render) :
+    return int(int_Render) > 2
+
 
 class FrontModule(Base):
     __tablename__ = 'FrontModule'
     ID =  Column(Integer,Sequence('FrontModule__id_seq'), primary_key=True)
     Name = Column(Unicode(250))
-    TypeObj = Column(Integer)
-    Legends = Column(Unicode(2500))
-    ModuleFields = relationship('ModuleField',lazy='dynamic',back_populates='FrontModule')
-    # ModuleGrids = relationship('ModuleGrid',lazy='dynamic',back_populates='FrontModule')
+    TypeModule = Column(Unicode(250))
+    Comments = Column(String)
 
-class ModuleField(Base):
-    __tablename__ = 'ModuleField'
-    ID = Column(Integer,Sequence('ModuleField__id_seq'), primary_key=True)
+    ModuleForms = relationship('ModuleForm',lazy='dynamic',back_populates='FrontModule')
+    ModuleGrids = relationship('ModuleGrid',lazy='dynamic',back_populates='FrontModule')
+
+class ModuleForm(Base):
+    __tablename__ = 'ModuleForm'
+    ID = Column(Integer,Sequence('ModuleForm__id_seq'), primary_key=True)
     FK_FrontModule = Column(Integer, ForeignKey('FrontModule.ID'))
     TypeObj = Column(Unicode(250))
     Name = Column(Unicode(250))
     LabelFr = Column(Unicode(250))
     Required = Column(Integer)
-    FieldSize = Column(Integer)
+    FieldSizeEdit = Column(Integer)
+    FieldSizeDisplay = Column(Integer)
     InputType = Column(Unicode(100))
     editorClass = Column(Unicode(100))
+    displayClass = Column(Unicode(150))
     fieldClass = Column(Unicode(100))
     FormRender = Column(Integer)
     FormOrder = Column(Integer)
-    QueryName = Column(Unicode(500))
-    IsSearchable = Column(Integer)
     Legend = Column(Unicode(500))
-    GridOrder = Column(Integer)
-    GridDisplay = Column(Boolean)
-    GridEditable = Column(Boolean)
-    GridCell = Column(String)
-    FilterOrder = Column(Integer)
+    Options = Column (String)
+    Validators = Column(String)
 
+    FrontModule = relationship("FrontModule", back_populates="ModuleForms")
 
-    FrontModule = relationship("FrontModule", back_populates="ModuleFields")
-
-    def GetMachin(self):
-        return "machin"
         
     @staticmethod
     def GetClassFromSize(FieldSize):
         return FieldSizeToClass[FieldSize]
 
 
-    def GenerateFilter (self) :
-
-        filter_ = {
-        'name' : self.Name,
-        'type' : self.InputType,
-        'label' : self.LabelFr
-        }
-
-        if self.InputType == 'Select' and self.QueryName != None : 
-            result = DBSession.execute(text(self.QueryName)).fetchall()
-            filter_['optionValues'] = [{row['label']:row['val']} for row in result]
-            # filter_['optionValues'].sort(key=lambda k: k.key)
-        return filter_
-
+   
     def GetDTOFromConf(self,IsEditable,CssClass):
 
         dto = {
@@ -73,10 +61,10 @@ class ModuleField(Base):
             'editorClass' : str(self.editorClass) ,
             'fieldClass' : str(self.fieldClass) + ' ' + CssClass,
             'validators': [],
-            'options': [],
+            'options': []
             }
-        if self.InputType == 'Select' and self.QueryName != None : 
-            result = DBSession.execute(text(self.QueryName)).fetchall()
+        if self.InputType == 'Select' and self.Options != None : 
+            result = DBSession.execute(text(self.Options)).fetchall()
 
             for row in result :
                 temp = {}
@@ -88,65 +76,63 @@ class ModuleField(Base):
             dto['validators'].append("required")
         return dto
 
-    def GenerateColumn (self):
-
-
-        self.column = {
-        'name' : self.Name,
-        'label' : self.LabelFr,
-        'editable' : self.GridEditable,
-        'renderable': self.GridDisplay,
-        'cell' : self.GridCell,
-        }
-
-        if self.GridCell == 'select' and 'SELECT' in self.QueryName :
-             result = DBSession.execute(text(self.QueryName)).fetchall()
-             self.column['optionValues'] = [[row['label'],row['val']] for row in result]
-
-        return self.column
-
 
 class ModuleGrid (Base) :
     __tablename__ = 'ModuleGrid'
 
     ID = Column(Integer,Sequence('ModuleGrid__id_seq'), primary_key=True)
     FK_FrontModule = Column(Integer, ForeignKey('FrontModule.ID'))
+    FK_TypeObj =  Column(Integer)
     Name = Column(String)
     Label = Column(String)
-    Display = Column(Boolean)
-    FieldSize = Column(Integer)
-    Cell = Column(String)
-    Editable = Column(Boolean)
-    FieldOrder = Column(Integer)
+    GridRender = Column(Integer)
+    GridSize = Column(Integer)
+    CellType = Column(String)
+    GridOrder = Column(Integer)
     QueryName = Column(String)
-    FK_TypeObj =  Column(Integer)
+    Options = Column (String)
+    FilterOrder = Column (Integer)
+    FilterSize = Column (Integer)
+    IsSearchable = Column(BIT)
+    FilterDefaultValue = Column (String)
+    FilterRender = Column (Integer)
+    FilterType = Column (String)
+    FilterClass = Column (String)
 
-    # ObjNature = relationship("FrontModule", back_populates="ModuleGrid")
-
+    FrontModule = relationship("FrontModule", back_populates="ModuleGrids")
+    
     def GenerateColumn (self):
-
-
-        self.column = {
+        column = {
         'name' : self.Name,
         'label' : self.Label,
-        'editable' : self.Editable,
-        'renderable': self.Display,
-        'cell' : self.Cell,
+        'renderable': isRenderable(self.GridRender),
+        'editable': isEditable(self.GridRender),
+        'cell' : self.CellType,
         }
 
+        if self.CellType == 'select' and 'SELECT' in self.Options :
+             result = DBSession.execute(text(self.Options)).fetchall()
+             column['optionValues'] = [[row['label'],row['val']] for row in result]
 
+        return column
 
-        if self.Cell == 'select' and 'SELECT' in self.QueryName :
-             result = DBSession.execute(text(self.QueryName)).fetchall()
-             self.column['optionValues'] = [[row['name'],row['val']] for row in result]
+    def GenerateFilter (self) :
 
-        return self.column
+        filter_ = {
+            'name' : self.Name,
+            'type' : self.FilterType,
+            'label' : self.Label,
+            'editable' : isEditable(int(self.FilterRender)),
+            # 'editorClass' : str(self.FilterClass) ,
+            'validators': [],
+            'options': [],
+            }
+        if (self.FilterClass) : 
+            filter_['fieldClass'] = self.FilterClass+ ' ' + FieldSizeToClass[self.FilterSize] 
+        else :  
+            filter_['fieldClass'] = FieldSizeToClass[self.FilterSize],
 
-
-# class ObjNature (Base) :
-#     __tablename__ : 'ObjNature'
-
-#     ID = Column(Integer,Sequence('ObjNature__id_seq'), primary_key=True)
-#     Name = Column(String)
-
-#     ModuleGrids = relationship('ModuleGrids',lazy='dynamic',back_populates='ObjNature')
+        if self.FilterType == 'Select' and self.Options != None : 
+            result = DBSession.execute(text(self.Options)).fetchall()
+            filter_['options'] = [{'label':row['label'],'val':row['val']} for row in result]
+        return filter_

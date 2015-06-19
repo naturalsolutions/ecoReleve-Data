@@ -34,6 +34,8 @@ define([
 				this.com.addModule(this);
 			}
 
+
+
 			if (options.rowClicked) {
 				var clickFunction = options.rowClicked.clickFunction
 				this.RowType = Backgrid.Row.extend({
@@ -41,6 +43,7 @@ define([
 						"click": "onClick"
 					},
 					onClick: function () {
+						console.log('click o nrow');
 						_this.interaction('rowclicked', {
 							model: this.model,
 							//parent: options.rowClicked.parent
@@ -72,6 +75,8 @@ define([
 			}
 
 			this.url = options.url;
+
+			
 			this.pageSize = options.pageSize;
 
 
@@ -82,7 +87,18 @@ define([
 				this.colGene = new colGene({ url: this.url + 'getFields?name=' + this.name, paginable: this.pagingServerSide, checkedColl: options.checkedColl });
 				this.columns = this.colGene.columns;
 			}
+			if (options.urlParams) {
 
+				for (var i = 0 ; i<options.urlParams.length; i++) {
+
+					if (i==0) { this.url+='?';
+					}
+					
+					var key = Object.keys(options.urlParams[i]);
+					this.url+= key +'='+options.urlParams[i][key]+'&';
+				}
+				console.log(this.url);
+			}
 			if (options.collection) {
 				this.collection = options.collection;
 				this.coll = true;
@@ -365,6 +381,8 @@ define([
 
 		interaction: function (action, id) {
 			if (this.com) {
+				console.log(id);
+				console.log(action);
 				this.com.action(action, id);
 			} else {
 				this.action(action, id);
