@@ -43,20 +43,60 @@ define([
 		},
 
 
-		animateIn: function() {
-			this.$el.animate(
-				{ left: 0 },
-				ANIMATION_DURATION,
-				_.bind(this.trigger, this, 'animateIn')
-			);
+		animateIn: function(options) {
+			this.$el.css({'position' : 'relative'});
+			switch(options){
+				case 'next':
+					this.$el.css({'left' : '100%'});
+					this.$el.animate(
+						{ left: '0px'},
+						400,
+						_.bind(this.trigger, this, 'animateIn')
+					);
+					break;
+				case 'prev':
+					this.$el.css({'left' : '-100%'});
+					this.$el.animate(
+						{ left: '0px'},
+						400,
+						_.bind(this.trigger, this, 'animateIn')
+					);
+					break;
+				default:
+					this.$el.animate(
+						{ left: '0px'},
+						0,
+						_.bind(this.trigger, this, 'animateIn')
+					);
+					break;
+			}
 		},
 
-		animateOut: function() {
-			this.$el.animate(
-				{ left: -500 },
-				ANIMATION_DURATION,
-				_.bind(this.trigger, this, 'animateOut')
-			);
+		animateOut: function(options) {
+			this.$el.css({'position' : 'relative'});
+			switch(options){
+				case 'next':
+					this.$el.animate(
+						{ left: '-100%' },
+						400,
+						_.bind(this.trigger, this, 'animateOut')
+					);
+					break;
+				case 'prev':
+					this.$el.animate(
+						{ left: '100%' },
+						400,
+						_.bind(this.trigger, this, 'animateOut')
+					);
+					break;
+				default:
+					this.$el.animate(
+						{ left: '0px'},
+						0,
+						_.bind(this.trigger, this, 'animateOut')
+					);
+					break;
+			}
 		},
 
 

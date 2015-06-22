@@ -27,7 +27,7 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 		$('#header-loader').addClass('hidden');
 	});
 	$( document ).ajaxError(function() {
-		console.error('an error appended');
+		console.error('Error from the server');
 		$('#header-loader').addClass('hidden');
 	});
 

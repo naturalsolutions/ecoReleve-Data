@@ -61,12 +61,15 @@ div.fuelux{
 			vertical-align: middle;
 			border-radius: 3px;
 			text-transform: uppercase;
+			&:not([disabled]){
+				background: rgba(68,157,68,0.6);
+			}
 			&:not([disabled]):hover{
-				background: rgba(68,157,68,0.5);
+				background: rgba(68,157,68,0.7);
 				color: white!important;
 			}
 			&:not([disabled]):focus{
-				background: rgba(68,157,68,0.5);
+				background: rgba(68,157,68,0.7);
 				color: white!important;
 			}
 			&.btn-next{

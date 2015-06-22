@@ -60,7 +60,7 @@ def getFilters (request):
     filters = {}
     for i in range(len(filtersList)) :
         filters[str(i)] = filtersList[i]
-
+    transaction.commit()
     return filters
 
 def getForms(request) :
@@ -98,6 +98,7 @@ def getFields(request) :
     ModuleType = 'StationGrid'
     
     cols = Station().GetGridFields(ModuleType)
+    transaction.commit()
     return cols
 
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
@@ -274,7 +275,7 @@ def searchStation(request):
 
         o = aliased(Station)
         print('-*********************** LAST IMPORTED !!!!!!!!! ******')
-
+        obs = aliased(Observation)
         criteria = [
         {'Column' : 'creator',
         'Operator' : '=',
@@ -283,7 +284,7 @@ def searchStation(request):
         {'Query':'Observation',
         'Column': 'FK_ProtocoleType',
         'Operator' : 'not exists',
-        'Value': select([Observation]).where(Observation.FK_Station == Station.ID) # keep only stations without Observations
+        'Value': select([obs]).where(obs.FK_Station == Station.ID) # keep only stations without Observations
         },
         # {'Query':'Station',
         # 'Column': 'None',

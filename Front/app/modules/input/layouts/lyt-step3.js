@@ -57,6 +57,7 @@ define([
 		onShow: function(){
 			var _this = this;
 			var stationType = this.model.get('start_stationtype');
+			console.log(stationType);
 			this.stationId = this.model.get('station');
 			
 			this.rgStation.show(new ViewStationDetail({

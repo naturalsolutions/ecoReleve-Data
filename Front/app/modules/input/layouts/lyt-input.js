@@ -40,13 +40,44 @@ define([
 			'click button.filterCancel' :'filterCancel',
 			'click .closeStepper' : 'closeStepper'
 		},
+
 		initialize: function(){
 			this.model = new Backbone.Model();
 			this.translater = Translater.getTranslater();
-			/*
-			this.radio = Radio.channel('individual');
-			this.radio.comply('filterMask', this.filterMask, this);
-			*/
+		},
+
+		animateIn: function() {
+			this.$el.find('#btnPrev').animate(
+				{ left : '0'},
+				500 
+			);
+			this.$el.find('#btnNext').animate(
+				{ right : '0' },
+				500
+			);
+			this.$el.find('#wizard').addClass('slideInDown');
+			
+			this.$el.animate(
+				{ opacity: 1 },
+				500,
+				_.bind(this.trigger, this, 'animateIn')
+			);
+		},
+		animateOut: function() {
+			this.$el.find('#btnPrev').animate(
+				{ left : '-100%'},
+				500
+			);
+			this.$el.find('#btnNext').animate(
+				{ right : '-100%' },
+				500
+			);
+			this.$el.find('#wizard').addClass('zoomOutDown');
+			this.$el.animate(
+				{ opacity : 0 },
+				500,
+				_.bind(this.trigger, this, 'animateOut')
+			);
 		},
 
 		onRender: function(){
@@ -64,81 +95,13 @@ define([
 				steps: this.steps
 			});
 
-
 			this.stepperRegion.show( this.stepper );
 			this.$el.i18n();
-		},
-
-		animateIn: function() {
-			console.log('plouf');
-			this.$el.find('#btnPrev').animate(
-				{ left : '0'},
-				1000
-			);
-			this.$el.find('#btnNext').animate(
-				{ right : '0' },
-				1000
-			);
-			this.$el.find('#wizard').addClass('slideInDown');
-			
-			this.$el.animate(
-				{ opacity: 1 },
-				500,
-				_.bind(this.trigger, this, 'animateIn')
-			);
-		},
-		animateOut: function() {
-			console.log('plouf');
-			this.$el.find('#btnPrev').animate(
-				{ left : '-100%'},
-				1000
-			);
-			this.$el.find('#btnNext').animate(
-				{ right : '-100%' },
-				1000
-			);
-			this.$el.find('#wizard').addClass('zoomOutDown');
-			this.$el.animate(
-				{ opacity : 0 },
-				500,
-				_.bind(this.trigger, this, 'animateOut')
-			);
 		},
 
 
 		onShow : function(){
 
-			// add indiv window container
-			$('#stepper-header span').html('Manual entry');
-			
-			$('#stepper').append('<div id="indivFilter" class="stepper-modal"></div>');
-
-		},
-		filterIndivShow : function(e){
-
-			$(e.target).parent().parent().parent().find('input').addClass('target');
-			var modal = new IndivFilter();
-			// navigate to the modal by simulating a click
-			var element = '<a class="btn" data-toggle="modal" data-target="#myModal" id="indivIdModal">-</a>';
-			$('body').append(element);
-			this.indivFilterRegion.show(modal);
-			$('#indivIdModal').click();
-
-		},
-		filterMask : function(){
-
-			var inputIndivId = $('input.pickerInput');
-			$(inputIndivId).removeClass('target');
-			this.indivFilterRegion.reset();
-			$('#indivIdModal').remove();
-			$('div.modal-backdrop.fade.in').remove();
-
-		},
-		filterCancel : function(){
-			
-			$('input.pickerInput').val('');
-			this.filterMask();
-			
 		},
 
 	});
