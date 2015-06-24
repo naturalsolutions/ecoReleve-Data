@@ -39,6 +39,9 @@ define([
 			gridRegion: '#gridContainer',
 			mapRegion : '#mapContainer'
 		},
+
+		template: 'app/modules/import/_gpx/templates/tpl-step3.html',
+
 		feedTpl: function(){
 			
 		},

@@ -31,12 +31,9 @@ define([
 		},
 
 		initialize: function(options){
-
 			this.name=options.name;
 			//this.template=options.tpl;
-
 			this.model=options.model; //global model
-
 		},
 		initModel: function(tpl){
 			this.parseOneTpl(tpl);
@@ -50,7 +47,7 @@ define([
 					this.$el.css({'left' : '100%'});
 					this.$el.animate(
 						{ left: '0px'},
-						400,
+						200,
 						_.bind(this.trigger, this, 'animateIn')
 					);
 					break;
@@ -58,7 +55,7 @@ define([
 					this.$el.css({'left' : '-100%'});
 					this.$el.animate(
 						{ left: '0px'},
-						400,
+						200,
 						_.bind(this.trigger, this, 'animateIn')
 					);
 					break;
