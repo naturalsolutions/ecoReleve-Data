@@ -51,7 +51,7 @@ class Station(Base,ObjectWithDynProp):
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
     FK_Place = Column(Integer)
     
-    FieldWorkers = relationship('Station_FieldWorker',backref='Station',cascade="all, delete-orphan")
+    FieldWorkers = relationship('Station_FieldWorker', backref='Station',cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON', name='_unique_constraint_lat_lon_date'),)
 
     @hybrid_property
@@ -163,18 +163,6 @@ class Station_FieldWorker (Base) :
             return self.FieldWorker.Login
         else:
             return None
-
-    # @balance.setter
-    # def FieldWorkerName(self, values):
-    #     if not self.accounts:
-    #         account = Account(owner=self)
-    #     else:
-    #         account = self.accounts[0]
-    #     account.balance = value
-
-    # @balance.expression
-    # def balance(cls):
-    #     return SavingsAccount.balance
 
 
 
