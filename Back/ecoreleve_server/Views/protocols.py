@@ -49,7 +49,6 @@ def getForms(request) :
 
     typeProto = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
-    print (typeProto)
     ModuleName = 'ObsForm'
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
     newProto = Observation(FK_ProtocoleType = typeProto)
@@ -103,7 +102,6 @@ def getListofProtocolTypes (request):
 
     result = DBSession.execute(query).fetchall()
     print('********* protocoles types ******************')
-    print (type(result[0]))
     res = []
     for row in result:
         elem = {}
@@ -111,7 +109,6 @@ def getListofProtocolTypes (request):
         elem['Name'] = row['Name']
         res.append(elem)
     res = sorted(res, key=lambda k: k['Name']) 
-    #print ((res)[0])
     return res
 
 @view_config(route_name= prefix + '/id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
@@ -120,7 +117,6 @@ def getProtocol (request):
     curProt = DBSession.query(Observation).get(id)
 
     curProt.LoadNowValues()
-    print (curProt.PropDynValuesOfNow) 
     # if Form value exists in request --> return data with schema else return only data
     if 'FormName' in request.params :
         ModuleName = request.params['FormName']
@@ -140,7 +136,6 @@ def getFieldActivityList (request) :
 
     query = select([fieldActivity.ID.label('value'), fieldActivity.Name.label('label')])
     result = DBSession.execute(query).fetchall()
-    print (dict(result))
     res = []
     for row in result :
         res.append({'label':row['label'], 'value': row['value']})

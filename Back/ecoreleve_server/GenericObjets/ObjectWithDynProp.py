@@ -16,14 +16,14 @@ class ObjectWithDynProp:
 
     ObjContext = DBSession
     PropDynValuesOfNow = {}
-    
+
     def __init__(self,ObjContext):
         self.ObjContext = DBSession
         self.PropDynValuesOfNow = {}
         #if self.ID != None :
         #   self.LoadNowValues()
     def GetAllProp (self) :
-        try : 
+        try :
             type_ = self.GetType()
         except :
             type_ = None
@@ -36,7 +36,7 @@ class ObjectWithDynProp:
 
         statProps = [{'name': statProp.key, 'type': statProp.type} for statProp in self.__table__.columns ]
         dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp}for dynProp in result]
-       
+
         statProps.extend(dynProps)
 
         return statProps
@@ -50,26 +50,21 @@ class ObjectWithDynProp:
         try:
             typeID = self.GetType().ID
             gridFields = DBSession.query(ModuleGrid
-            ).filter(and_(ModuleGrid.FK_FrontModule == self.GetFrontModuleID(ModuleType), 
+            ).filter(and_(ModuleGrid.FK_FrontModule == self.GetFrontModuleID(ModuleType),
                 or_(ModuleGrid.FK_TypeObj == typeID ,ModuleGrid.FK_TypeObj ==None ))).all()
-         
+
         except:
-            print('EXCPETION \n\n')
-            typeID = 0
             gridFields = DBSession.query(ModuleGrid).filter(
                 ModuleGrid.FK_FrontModule == self.GetFrontModuleID(ModuleType) ).all()
-        
+
         gridFields.sort(key=lambda x: str(x.GridOrder))
         cols = []
 
         for curProp in self.GetAllProp():
             curPropName = curProp['name']
-            print(curPropName)
-
             gridField = list(filter(lambda x : x.Name == curPropName,gridFields))
             if len(gridField)>0 :
                 cols.append(gridField[0].GenerateColumn())
-
 
         return cols
 
@@ -77,8 +72,6 @@ class ObjectWithDynProp:
 
         filters = []
         defaultFilters = []
-        # print(self.GetAllProp())
-
         try:
             typeID = self.GetType().ID
             filterFields = DBSession.query(ModuleGrid).filter(
@@ -86,30 +79,19 @@ class ObjectWithDynProp:
                     ModuleGrid.FK_FrontModule == self.GetFrontModuleID(ModuleType)
                     , or_( ModuleGrid.TypeObj == typeID,ModuleGrid.TypeObj == None)
                     )).all()
-
         except :
-            print('EXCPETION \n\n')
-            typeID = 0
             filterFields = DBSession.query(ModuleGrid).filter(ModuleGrid.FK_FrontModule == self.GetFrontModuleID(ModuleType)).all()
 
-      
+
         for curProp in self.GetAllProp():
             curPropName = curProp['name']
-            print(curPropName)
-
-            filterField = list(filter(lambda x : x.Name == curPropName 
+            filterField = list(filter(lambda x : x.Name == curPropName
                 and x.IsSearchable == 1 ,filterFields))
-    
+
             if len(filterField)>0 :
-                # print('IN CONF\n')
-                # print (filterField[0].Name)
-                print (filterField[0])
-                # 
                 filters.append(filterField[0].GenerateFilter())
 
-            elif len(list(filter(lambda x : x.Name == curPropName, filterFields))) == 0: 
-                # print('WITHOUT\n')
-                # print(curProp)
+            elif len(list(filter(lambda x : x.Name == curPropName, filterFields))) == 0:
                 filter_ = {
                 'name' : curPropName,
                 'label' : curPropName,
@@ -126,29 +108,29 @@ class ObjectWithDynProp:
     def GetDynPropValuesTable(self):
 
         return self.__tablename__ + 'DynPropValue'
-        
+
     def GetDynPropValuesTableID(self):
         return 'ID'
 
     def GetMyIDName(self):
         return 'ID'
-        
+
     def GetDynPropTable(self):
 
         return self.__tablename__ + 'DynProp'
-        
+
     def GetDynPropFKName(self):
         return 'FK_' + self.__tablename__ + 'DynProp'
-        
+
     # def GetSelfFKName(self):
-    #     return 'FK_' + self.__tablename__ + 'DynProp'  ###### ====> Not used , the same thing as GetDynPropFKName Why ?? 
+    #     return 'FK_' + self.__tablename__ + 'DynProp'  ###### ====> Not used , the same thing as GetDynPropFKName Why ??
 
     def GetSelfFKNameInValueTable(self):
         return 'FK_' + self.__tablename__
-        
+
     def GetpkValue(self) :
         return self.ID
-    
+
     def GetProperty(self,nameProp) :
 
         try :
@@ -179,9 +161,9 @@ class ObjectWithDynProp:
                 # si la propriété dynamique existe déjà et que la valeur à affectée est identique à la valeur existente
                 # => alors on insére pas d'historique car pas de chanegement
 
-    def GetNewValue(self):      
+    def GetNewValue(self):
         raise Exception("GetNewValue not implemented in children")
-        
+
     def LoadNowValues(self):
         curQuery = 'select V.*, P.Name,P.TypeProp from ' + self.GetDynPropValuesTable() + ' V JOIN ' + self.GetDynPropTable() + ' P ON P.' + self.GetDynPropValuesTableID() + '= V.' + self.GetDynPropFKName() + ' where '
         curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
@@ -191,7 +173,7 @@ class ObjectWithDynProp:
 
         Values = self.ObjContext.execute(curQuery).fetchall()
 
-        for curValue in Values : 
+        for curValue in Values :
             row = OrderedDict(curValue)
             self.PropDynValuesOfNow[row['Name']] = self.GetRealValue(row)
 
@@ -208,17 +190,17 @@ class ObjectWithDynProp:
 
     def GetFlatObject(self):
         resultat = {}
-        
+
         max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow))
         for i in range(max_iter) :
-            # Get static Properties # 
-            try : 
+            # Get static Properties #
+            try :
                 curStatProp = list(self.__table__.columns)[i]
                 resultat[curStatProp.key] = self.GetProperty(curStatProp.key)
             except :
                 pass
-            # Get dynamic Properties # 
-            try : 
+            # Get dynamic Properties #
+            try :
                 curDynPropName = list(self.PropDynValuesOfNow)[i]
                 resultat[curDynPropName] = self.GetProperty(curDynPropName)
             except Exception as e :
@@ -249,7 +231,6 @@ class ObjectWithDynProp:
                     curEditable = False
                 resultat[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,str(ModuleForm.GetClassFromSize(2)))
             else:
-                print('no conf : '+curStatProp.key)
                 resultat[curStatProp.key] = {
                 'Name': curStatProp.key,
                 'type': 'Text',
@@ -260,9 +241,9 @@ class ObjectWithDynProp:
 
                 }
 
-            
+
         return resultat
-        
+
     def GetDTOWithSchema(self,FrontModule,DisplayMode):
 
         schema = self.GetSchemaFromStaticProps(FrontModule,DisplayMode)
@@ -272,10 +253,10 @@ class ObjectWithDynProp:
         if (DisplayMode.lower() != 'edit'):
             for curName in schema:
                 schema[curName]['editorAttrs'] = { 'disabled' : True }
-        
-        resultat = { 
+
+        resultat = {
             'schema':schema,
-            'fieldsets' : ObjType.GetFieldSets(FrontModule,schema) 
+            'fieldsets' : ObjType.GetFieldSets(FrontModule,schema)
             }
 
         if self.ID :
