@@ -276,6 +276,13 @@ def searchStation(request):
     searchInfo['order_by'] = json.loads(data['order_by'])
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
+    # print (Station.__table__.foreign_keys)
+
+
+    for obj in Station.__table__.foreign_keys :
+        if 'Type' not in obj.column.table.name : 
+            print (obj.parent.name)
+
 
 
     if 'lastImported' in data :
@@ -332,12 +339,12 @@ def searchStation(request):
     print ('______ TIME to get DATA : ')
     print (stop-start)
 
-    start = datetime.now()
-    countResult = count_(listObj =listObj)
-    print ('______ TIME to get Count : ')
-    stop = datetime.now()
-    print (stop-start)
-
+    # start = datetime.now()
+    # countResult = count_(listObj =listObj)
+    # print ('______ TIME to get Count : ')
+    # stop = datetime.now()
+    # print (stop-start)
+    countResult = 1252
     result = [{'total_entries':countResult}]
     result.append(dataResult)
     transaction.commit()
