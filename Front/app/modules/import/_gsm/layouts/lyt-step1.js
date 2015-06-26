@@ -18,6 +18,7 @@ define([
 	return Step.extend({
 
 		className: 'full-height',
+		template : 'app/modules/import/_gsm/templates/tpl-step1.html',
 		
 		initialize: function() {
 			Step.prototype.initialize.apply(this, arguments);

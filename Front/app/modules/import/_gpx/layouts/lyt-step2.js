@@ -32,6 +32,8 @@ define([
 			'change #importFieldActivity' : 'setFieldActivity',
 			'click #resetFieldActivity' : 'resetFieldActivity'
 		},
+		template: 'app/modules/import/_gpx/templates/tpl-step2.html',
+
 		initialize :function () {
 			var self = this ;
 			Step.prototype.initialize.apply(self, arguments);
@@ -43,8 +45,7 @@ define([
 
 			this.collection.fetch({ 
 				success : function (data) {
-					console.log(data)
-					_/*.each(data, function (FA) {
+					/*_.each(data, function (FA) {
 						console.log(FA);
 					})*/
 				for (var i in data.models ) {

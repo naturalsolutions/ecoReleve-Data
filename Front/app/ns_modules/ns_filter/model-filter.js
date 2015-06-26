@@ -115,7 +115,6 @@ define([
 
 			if (type == 'Select' || type == 'Checkboxes') {
 				editorClass += ' list-inline ';
-				console.log(dataRow);
 				options = dataRow['options'];
 				if (type == 'Checkboxes') {
 					options.splice(0, 0, { label: 'All', val: -1, checked: true });

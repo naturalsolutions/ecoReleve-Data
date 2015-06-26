@@ -51,6 +51,7 @@ define([
 		},
 
 		loadStationView: function(type){
+			var _this = this; 
 			if(type <= 3){
 				var stationForm = new StationView({
 					type: type,
@@ -74,28 +75,9 @@ define([
 					default: 
 						break;
 				}
-				var self = this; 
-				var myCom = Com;
-				console.log(Com);
-				myCom.prototype.action = function (action, ids) {
 
-					
-					if (action == 'rowclicked') {
-						console.log('new action')
-							self.currentModel = ids;
-						}
-					
-				};
-				/*
-					action : function(action, ids) {
-						Com.prototype.action.apply(self,arguments);
-						if (action == 'rowclicked') {
-							self.currentModel = ids;
 
-						}
-					}
-				});*/
-				this.com = new myCom();
+				this.com = new Com();
 				var firlterView = new FilterView({
 					parent: this
 				});
