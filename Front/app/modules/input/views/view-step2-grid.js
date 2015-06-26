@@ -39,11 +39,12 @@ define([
 
 			this.grid = new NsGrid({
 				pageSize: 20,
-				pagingServerSide: false,
+				pagingServerSide: true,
 				com: this.com,
 				url: config.coreUrl+'stations/',
 				urlParams : this.urlParams,
-				rowClicked : true
+				rowClicked : true,
+				totalElement : 'stations-count'
 			});
 
 			this.grid.rowClicked = function(row){
@@ -58,6 +59,7 @@ define([
 			var _this= this;
 			this.$el.find('#stationsGridContainer').html(_this.grid.displayGrid());
 			this.$el.find('#stationsGridPaginator').html(_this.grid.displayPaginator());
+
 		},
 
 		rowClicked: function(row) {

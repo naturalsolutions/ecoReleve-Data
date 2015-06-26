@@ -113,10 +113,11 @@ define([
 			this.filters.update();
 		},
 		nextOK: function(){
-			/*var WaypointsError = this.translater.getValueFromKey('import.waypointsError');
+			var WaypointsError = this.translater.getValueFromKey('import.waypointsError');
 			var WaypointsErrorMsg = this.translater.getValueFromKey('import.waypointsErrorMsg');
-*/
+
 			var collection =this.model.get('data_FileContent').where({import: true});
+			console.log(collection)
 			if(collection.length == 0){
 			Swal({
 				title: WaypointsError,

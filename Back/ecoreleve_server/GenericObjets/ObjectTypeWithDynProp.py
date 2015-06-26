@@ -96,14 +96,13 @@ class ObjectTypeWithDynProp:
         other = []
         Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).all()
         Legends = sorted ([(obj.Legend,obj.FormOrder)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
-        print(Legends)
+
         Legends1= [obj[0] for obj in Legends] 
         Legends = sorted(set(Legends1), key = Legends1.index)
         
 
         resultat = list(Legends)
         Legends.append('Other')
-        print(Legends)
         for curProp in Schema:
             CurModuleForm = list(filter(lambda x : x.Name == curProp,Fields))
             if (len(CurModuleForm)> 0 ):
@@ -120,9 +119,6 @@ class ObjectTypeWithDynProp:
         for i in other :
             curIndex = Legends.index('Other')
             resultat[curIndex]['fields'].append(i)
-
-
-        print (resultat)
         return resultat
 
 
