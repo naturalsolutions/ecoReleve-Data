@@ -29,15 +29,15 @@ define([
 			'change input:file' : 'datachanged_file',
 			'change select' : 'datachanged_select',
 			'click #step-nav li' : 'changeStep',
-			//'click .finished': 'finish'
 		},
 
 		regions: {
 			StepManager: '#StepManager',
-			/*step_content: new Marionette.TransitionRegion({
-				el: '#step-content'
-			}),*/
-			step_content: '#step-content',
+			step_content: {
+				regionClass: Marionette.TransitionRegion,
+				selector: '#step-content'
+			},
+			//step_content: '#step-content',
 			actions: '#actions',
 		},
 
@@ -54,8 +54,6 @@ define([
 			this.steps= [];
 
 			for(var i=0; i < this.stepsProto.length; i++){
-				console.log(this.stepsProto[i]);
-
 				this.steps[i] = new this.stepsProto[i];
 				this.steps[i].name = 'a';
 				this.steps[i].model = this.model;
@@ -125,6 +123,7 @@ define([
 		/*==========  Next / Prev  ==========*/
 
 		nextStep: function(){
+			this.from = 'next';
 			this.lastOne= this.currentStep;
 			if(this.steps[this.currentStep].nextOK()) {
 				if (this.currentStep >= this.steps.length-1) {
@@ -137,20 +136,22 @@ define([
 			}
 			//for ajaxcall 
 			this.disableNext();
+
 		},
 
 		nextStepWithoutCheck: function(){
-				if (this.currentStep >= this.steps.length-1) {
+			this.from = 'next';
+			if (this.currentStep >= this.steps.length-1) {
 				this.finish();
-
-				} else {
-					this.currentStep++;
-					this.toStep(this.currentStep);
-				}
-				
+			} else {
+				this.currentStep++;
+				this.toStep(this.currentStep);
+			}
 		},
 
 		prevStep: function(){
+			this.from = 'prev';
+			if(this.currentStep == 0) Backbone.history.navigate('', {trigger: true});
 			this.lastOne= this.currentStep;
 			this.currentStep === 0 ? this.currentStep : this.currentStep--;
 			this.toStep(this.currentStep);
@@ -168,12 +169,11 @@ define([
 
 			this.currentStepLast = this.currentStep;
 
-			this.step_content.show( this.steps[this.currentStep]);
+			this.step_content.show( this.steps[this.currentStep], this.from);
 
 
 
 			if(!this.first){
-				console.log(this.lastOne);
 				this.steps[this.lastOne] = new this.stepsProto[this.lastOne];
 				this.steps[this.lastOne].name = 'a';
 				this.steps[this.lastOne].model = this.model;
@@ -213,16 +213,15 @@ define([
 
 		/*==========  Style Nav Steps  ==========*/
 		displayPrev: function() {
-			if (this.currentStep==0){
-				/* this.$el.find('#btnPrev').attr( 'disabled', 'disabled');*/
+			/*
+			if(this.currentStep==0){
+				//this.$el.find('#btnPrev').attr( 'disabled', 'disabled');
 				this.$el.find('#btnPrev').hide();
-
 			}
-			else {
-				/*  this.$el.find('#btnPrev').removeAttr('disabled'); */
-
-				this.$el.find('#btnPrev').show();
-			}
+			else{
+				//this.$el.find('#btnPrev').removeAttr('disabled'); 
+			}*/
+			this.$el.find('#btnPrev').show();
 
 		},
 

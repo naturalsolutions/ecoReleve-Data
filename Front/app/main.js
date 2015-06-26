@@ -28,7 +28,7 @@ require.config({
 		'autocompTree' : 'vendors/jquery.autocompTree',
 
 		/*==========  Bower  ==========*/
-		'jquery'				: '../bower_components/jquery/jquery.min',
+		'jquery'				: '../bower_components/jquery/jquery',
 		'jqueryui'				: '../bower_components/jqueryui/jquery-ui.min',
 		'underscore'			: '../bower_components/underscore/underscore',
 		'backbone'				: '../bower_components/backbone/backbone',

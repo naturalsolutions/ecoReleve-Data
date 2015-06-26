@@ -33,8 +33,10 @@ function(Marionette) {
 				_.bind(this.trigger, this, 'animateOut')
 			);
 		},
+
+
 		onShow : function(options) {
-            this.$el.i18n();
-        }
+			this.$el.i18n();
+		}
 	});
 });

@@ -77,6 +77,7 @@ function(Marionette, Backbone, sha1, config, $ui) {
 					context: this,
 					type: 'POST',
 					url: url,
+					async: true,
 					data:{
 						user_id: user.get('PK_id'),
 						password: sha1.hash($('#password').val())

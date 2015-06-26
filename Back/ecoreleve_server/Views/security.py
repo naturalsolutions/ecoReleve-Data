@@ -41,4 +41,3 @@ def logout(request):
 def has_access(request):
     transaction.commit()
     return request.response
-
