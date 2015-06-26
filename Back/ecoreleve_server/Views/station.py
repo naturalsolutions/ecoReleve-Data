@@ -18,7 +18,6 @@ import numpy as np
 from sqlalchemy import select, and_,cast, DATE
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
-from sqlalchemy_utils.functions import group_foreign_keys
 
 
 prefix = 'stations'
