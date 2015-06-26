@@ -28,6 +28,7 @@ define([
 
 		collection: new Backbone.Collection(),
 		className: 'import-container-rfid container',
+		template: 'app/modules/import/_rfid/templates/tpl-step2.html',
 
 		events: {
 			/*'click .finished': 'importFile',*/

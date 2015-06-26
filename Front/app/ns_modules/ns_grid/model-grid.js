@@ -16,10 +16,7 @@ define([
 		/*===================================
 		=            Grid module            =
 		===================================*/
-		events: {
-			// 'click table.backgrid th input': 'checkSelectAll',
-		},
-
+		
 		init: false,
 		pagingServerSide: true,
 		coll: false,
@@ -40,19 +37,15 @@ define([
 				var clickFunction = options.rowClicked.clickFunction
 				this.RowType = Backgrid.Row.extend({
 					events: {
-						"click": "onClick"
+						'click': 'onClick',
+						'dblclick' : 'onDbClick'
 					},
-					onClick: function () {
-						console.log('click o nrow');
-						_this.interaction('rowclicked', {
-							model: this.model,
-							//parent: options.rowClicked.parent
-						});
-
+					onClick: function (e) {
+						_this.interaction('rowClicked', this);
+					},
+					onDbClick: function(e){
+						_this.interaction('rowDbClicked', this);
 					}
-				});
-				Backbone.on("rowclicked", function (options) {
-					clickFunction(options);
 				});
 			}
 
@@ -97,7 +90,6 @@ define([
 					var key = Object.keys(options.urlParams[i]);
 					this.url+= key +'='+options.urlParams[i][key]+'&';
 				}
-				console.log(this.url);
 			}
 			if (options.collection) {
 				this.collection = options.collection;
@@ -262,7 +254,6 @@ define([
 			
 			this.affectTotalRecords();
 			if (options.init && !jQuery.isEmptyObject(this.sortCriteria)) {
-				console.log($('th'));
 
 				for (var key in this.sortCriteria) {
 					$('th.' + key).addClass(this.sortCriteria[key]);
@@ -368,9 +359,11 @@ define([
 				case 'filter':
 					this.filter(params);
 					break;
-				case 'rowclicked':
-					// Rien à faire
+				case 'rowClicked':
+					this.rowClicked(params);
 					break;
+				case 'rowDbClicked':
+					this.rowDbClicked(params);
 				default:
 					console.warn('verify the action name');
 					break;
@@ -379,14 +372,20 @@ define([
 
 
 
+
+
 		interaction: function (action, id) {
 			if (this.com) {
-				console.log(id);
-				console.log(action);
 				this.com.action(action, id);
 			} else {
 				this.action(action, id);
 			}
+		},
+
+		rowClicked: function(params){
+		},
+
+		rowDbClicked: function(params){
 		},
 
 		hilight: function () {
@@ -430,7 +429,6 @@ define([
 
 
 		filter: function (args) {
-			console.log('passed');
 			if (this.coll) {
 				// Client Grid Management
 				this.grid.collection = args;

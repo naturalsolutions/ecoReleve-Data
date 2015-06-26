@@ -22,6 +22,9 @@ define([
 		events : {
 			'change .fiedWrk' : 'checkFWName'
 		},
+
+		template: 'app/modules/import/_gpx/templates/tpl-step4.html',
+		
 		importFile: function(){
 			var ImportingDataAlert = this.translater.getValueFromKey('import.ImportingDataAlert');
 			var loadingDataAlert = this.translater.getValueFromKey('import.loadingDataAlert');
