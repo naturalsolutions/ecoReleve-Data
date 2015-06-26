@@ -227,19 +227,23 @@ class ObjectWithDynProp:
             if (len(CurModuleForm)> 0 ):
                 # Conf définie dans FrontModule
                 CurModuleForm = CurModuleForm[0]
-                if (CurModuleForm.FormRender & 2) == 0:
+                if CurModuleForm.FormRender > 0:
                     curEditable = False
-                resultat[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,str(ModuleForm.GetClassFromSize(2)))
-            else:
-                resultat[curStatProp.key] = {
-                'Name': curStatProp.key,
-                'type': 'Text',
-                'title' : curStatProp.key,
-                'editable' : curEditable,
-                'editorClass' : 'form-control' ,
-                'fieldClass' : ModuleForm.GetClassFromSize(2),
+                    resultat[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,str(ModuleForm.GetClassFromSize(CurModuleForm.FieldSizeEdit)))
 
-                }
+                if CurModuleForm.FormRender > 2 :
+                    curEditable = True
+                    resultat[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,str(ModuleForm.GetClassFromSize(CurModuleForm.FieldSizeEdit)))
+            # else:
+            #     resultat[curStatProp.key] = {
+            #     'Name': curStatProp.key,
+            #     'type': 'Text',
+            #     'title' : curStatProp.key,
+            #     'editable' : curEditable,
+            #     'editorClass' : 'form-control' ,
+            #     'fieldClass' : ModuleForm.GetClassFromSize(2),
+
+            #     }
 
 
         return resultat
@@ -259,6 +263,7 @@ class ObjectWithDynProp:
             'fieldsets' : ObjType.GetFieldSets(FrontModule,schema)
             }
 
+        ''' IF ID is send from front --> get data of this object in order to display value into form which will be sent'''
         if self.ID :
             data =   self.GetFlatObject()
             resultat['data'] = data

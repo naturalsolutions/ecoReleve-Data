@@ -60,16 +60,16 @@ class ObjectTypeWithDynProp:
                     curEditable = False
                 
                 SchemaDTO[curValue['Name']] = CurModuleForm.GetDTOFromConf(curEditable,ModuleForm.GetClassFromSize(CurModuleForm.FieldSizeEdit))
-            else:
-                SchemaDTO[curValue['Name']] = {
-                'Name': curValue['Name'],
-                'type':DynPropType[str(curValue['TypeProp']).lower()],
-                'title' : curValue['Name'],
-                'editable' : curEditable,
-                'editorClass' : 'form-control' ,
-                'fieldClass' : ModuleForm.GetClassFromSize(2),
+            # else:
+            #     SchemaDTO[curValue['Name']] = {
+            #     'Name': curValue['Name'],
+            #     'type':DynPropType[str(curValue['TypeProp']).lower()],
+            #     'title' : curValue['Name'],
+            #     'editable' : curEditable,
+            #     'editorClass' : 'form-control' ,
+            #     'fieldClass' : ModuleForm.GetClassFromSize(2),
 
-                }
+            #     }
            
     def GetDynPropNames(self):
         curQuery = 'select D.Name from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
@@ -94,16 +94,16 @@ class ObjectTypeWithDynProp:
        
         fields = []
         other = []
-        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).all()
-        Legends = sorted ([(obj.Legend,obj.FormOrder)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
+        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).order_by(ModuleForm.FormOrder).all()
+        Legends = [(obj.Legend,obj.FormOrder) for obj in Fields if obj.FormOrder is not None and obj.FormRender > 0]
 
         Legends1= [obj[0] for obj in Legends] 
         Legends = sorted(set(Legends1), key = Legends1.index)
         
-
-        resultat = list(Legends)
-        Legends.append('Other')
+        resultat = list()
+        # Legends.append('Other')
         for curProp in Schema:
+            ''' retrieve field by schema key'''
             CurModuleForm = list(filter(lambda x : x.Name == curProp,Fields))
             if (len(CurModuleForm)> 0 ):
                 CurModuleForm = CurModuleForm[0]
@@ -111,14 +111,14 @@ class ObjectTypeWithDynProp:
                 try :
                     resultat[curIndex]['fields'].insert(CurModuleForm.FormOrder,CurModuleForm.Name)
                 except :
-                    resultat[curIndex] = {'fields' : [CurModuleForm.Name] , 'legend' : Legends[curIndex] }
-            else:
-                other.append(curProp)
-
-        resultat.append({'fields':[],'legend':'Other'})
-        for i in other :
-            curIndex = Legends.index('Other')
-            resultat[curIndex]['fields'].append(i)
+                    resultat.append({'fields' : [CurModuleForm.Name] , 'legend' : Legends[curIndex] })
+            # else:
+            #     other.append(curProp)
+        print (resultat)
+        # resultat.append({'fields':[],'legend':'Other'})
+        # for i in other :
+        #     curIndex = Legends.index('Other')
+        #     resultat[curIndex]['fields'].append(i)
         return resultat
 
 

@@ -86,7 +86,7 @@ def getForms(request) :
     newSta = Station(FK_StationType = typeSta)
     newSta.init_on_load()
     schema = newSta.GetDTOWithSchema(Conf,'edit')
-    del schema['schema']['creationDate']
+    # del schema['schema']['creationDate']
     transaction.commit()
     return schema
 
