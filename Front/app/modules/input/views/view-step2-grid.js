@@ -84,12 +84,13 @@ define([
 
 			this.grid = new NsGrid({
 				pageSize: 20,
-				pagingServerSide: false,
+				pagingServerSide: true,
 				com: this.com,
 				//columns: columns,
 				url: config.coreUrl+'stations/',
 				urlParams : this.urlParams,
-				rowClicked : true
+				rowClicked : true,
+				totalElement : 'stations-count'
 			});
 		},
 
@@ -97,6 +98,8 @@ define([
 		onShow: function() { 
 			var _this= this;
 			this.$el.find('#stationsGridContainer').html(_this.grid.displayGrid());
+			this.$el.find('#stationsGridContainer').after(_this.grid.displayPaginator());
+			console.log(_this.grid.displayPaginator());
 		},
 
 		setStation: function(e) {

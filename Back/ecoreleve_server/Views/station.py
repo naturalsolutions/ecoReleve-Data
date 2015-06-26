@@ -4,7 +4,8 @@ from ..Models import (
     Station,
     StationType,
     Observation,
-    FieldActivity_ProtocoleType
+    FieldActivity_ProtocoleType,
+    Station_FieldWorker
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModule
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -17,7 +18,6 @@ import numpy as np
 from sqlalchemy import select, and_,cast, DATE,func
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
-
 
 
 
@@ -43,7 +43,7 @@ prefix = 'stations'
 def actionOnStations(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
-    'count' : count,
+    'count' : count_,
     'forms' : getForms,
     '0' : getForms,
     'getFields': getFields,
@@ -52,16 +52,26 @@ def actionOnStations(request):
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
 
-def count (request) :
+def count_ (request = None,listObj = None) :
 #   ## TODO count stations
 
     print('*****************  STATION COUNT***********************')
-    #nb = DBSession.query(func.count(Station.ID))
-    nb = DBSession.query(Station).count()
-    print(nb)
-    return nb
 
-    return
+    if request is not None : 
+        data = request.params
+        if 'criteria' in data: 
+            data['criteria'] = json.loads(data['criteria'])
+            if data['criteria'] != {} :
+                searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+
+        listObj = ListObjectWithDynProp(Station)
+        count = listObj.count(searchInfo = searchInfo)
+    else : 
+        count = listObj.count()
+
+    return count 
+
+
 def getFilters (request):
 
     ModuleType = 'StationGrid'
@@ -163,9 +173,7 @@ def insertStation(request):
         print('_______INsert ROW *******')
         return insertOneNewStation(request)
     else :
-        print (data['data'])
         print('_______INsert LIST')
-
         transaction.commit()
         return insertListNewStations(request)
 
@@ -175,13 +183,10 @@ def insertOneNewStation (request) :
     for items , value in request.json_body.items() :
         if value != "" :
             data[items] = value
-    print('------------------------------')
-    print (data)
     newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid)
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
-    print(newSta.__dict__)
     DBSession.add(newSta)
     DBSession.flush()
     # transaction.commit()
@@ -267,18 +272,17 @@ def searchStation(request):
 
     data = request.params.mixed()
     searchInfo = {}
-    print(type(data))
-    
-    
-    print(data)
+
     searchInfo['criteria'] = []
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
-
-
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
-            print(searchInfo['criteria'])
+
+    searchInfo['order_by'] = json.loads(data['order_by'])
+    searchInfo['offset'] = json.loads(data['offset'])
+    searchInfo['per_page'] = json.loads(data['per_page'])
+
 
     if 'lastImported' in data :
 
@@ -290,15 +294,15 @@ def searchStation(request):
         'Operator' : '=',
         'Value' : request.authenticated_userid
         },
-        {'Query':'Observation',
-        'Column': 'FK_ProtocoleType',
-        'Operator' : 'not exists',
-        'Value': select([Observation]).where(Observation.FK_Station == Station.ID) # keep only stations without Observations
-        },
+        # {'Query':'Observation',
+        # 'Column': 'FK_ProtocoleType',
+        # 'Operator' : 'not exists',
+        # 'Value': select([Observation]).where(Observation.FK_Station == Station.ID) # keep only stations without Observations
+        # },
         # {'Query':'Station',
         # 'Column': 'None',
         # 'Operator' : 'not exists',
-        # 'Value': select([o]).where(cast(o.creationDate,DATE) >= cast(Station.creationDate,DATE)) # keep only the last importation day
+        # 'Value': select([o]).where(cast(o.creationDate,DATE) > cast(Station.creationDate,DATE)) # keep only the last importation day
         # },
         {'Column' : 'FK_StationType',
         'Operator' : '=',
@@ -308,12 +312,43 @@ def searchStation(request):
 
         searchInfo['criteria'].extend(criteria)
 
-    listObj = ListObjectWithDynProp(Station)
-    response = listObj.GetFlatList(searchInfo)
-    print(len(response))
+
+    ModuleType = 'StationGrid'
+
+    moduleFront  = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleType).one()
+    # criteria = [
+    #     {'Column' : 'StationDate',
+    #     'Operator' : '>=',
+    #     'Value' : '12/12/2012 00:00:00.000'
+    #     },
+    #     {'Column' : 'FieldWorker1',
+    #     'Operator' : '=',
+    #     'Value' : 1 }
+    #     ]
+    # searchInfo['criteria'].extend(criteria)
+    # searchInfo['order_by'] = ['StationDate:desc']
+    # searchInfo['per_page'] = 25
+    # searchInfo['offset'] = 
+
+    start = datetime.now()
+    listObj = ListObjectWithDynProp(Station,moduleFront)
+    dataResult = listObj.GetFlatDataList(searchInfo)
+    stop = datetime.now()
+
+    print ('______ TIME to get DATA : ')
+    print (stop-start)
+
+    start = datetime.now()
+    countResult = count_(listObj =listObj)
+    print ('______ TIME to get Count : ')
+    stop = datetime.now()
+    print (stop-start)
+
+    result = [{'total_entries':countResult}]
+    result.append(dataResult)
     transaction.commit()
-    print (response)
-    return response
+
+    return result
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def GetProtocolsofStation (request) :
@@ -339,7 +374,6 @@ def GetProtocolsofStation (request) :
     try :
         if 'FormName' in request.params : 
             print (' ********************** Forms in params ==> DATA + FORMS ****************** ')
-            print(request.params)
             ModuleName = 'ObservationForm'
 
             listObs = list(DBSession.query(Observation).filter(Observation.FK_Station == sta_id))
@@ -348,9 +382,6 @@ def GetProtocolsofStation (request) :
             Conf = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleName ).first()
 
             ### TODO : if protocols exists, append the new protocol form at the after : 2 loops, no choice
-
-
-
             if listObs or listType:
                 # max_iter = max(len(listObs),len(listType))
                 listProto = {}
