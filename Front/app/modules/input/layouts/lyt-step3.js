@@ -16,7 +16,8 @@ define([
 
 	'../views/view-step3-station',
 
-	'translater'
+	'translater',
+	'i18n',
 
 ], function($, _, Backbone, Marionette, Radio, config, Swiper,
 	Swal, simplePagination,
@@ -31,12 +32,11 @@ define([
 		/*===================================================
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
-
 		regions: {
 			rgStation: '#rgStation',
 			rgProtos : '#rgProtos'
 		},
-
+				name : 'test',
 		ui: {
 			accordion : '#accordion',
 			protoList : '#protoList'
@@ -271,7 +271,12 @@ define([
 			this.translater = Translater.getTranslater();
 			*/
 		},
+		initialize : function(){
 
+			this.translater = Translater.getTranslater();
+			var stepLabel = this.translater.getValueFromKey('input.stepper.step3inputLabel');
+			this.name = stepLabel;
+		},
 
 		createProtoPatern: function(obsList, name, first, objectType){
 			var type = '_'+objectType+'_';

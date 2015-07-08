@@ -1,5 +1,5 @@
 from ecoreleve_server.Models import Base,DynPropNames,DBSession
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,or_
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
@@ -47,29 +47,38 @@ class ObjectTypeWithDynProp:
 
         Values = self.ObjContext.execute(curQuery).fetchall()
         Editable = (DisplayMode.lower()  == 'edit')
-        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).all()
-        
-        for curValue in Values : 
-            curEditable = Editable
-            CurModuleForm = list(filter(lambda x : x.Name == curValue['Name'], Fields))
-            if (len(CurModuleForm)> 0 ):
-                # Conf définie dans FrontModule                
-                CurModuleForm = CurModuleForm[0]
-                # TODO : Gestion champ read ONly
-                if (CurModuleForm.FormRender & 2) == 0:
-                    curEditable = False
-                
-                SchemaDTO[curValue['Name']] = CurModuleForm.GetDTOFromConf(curEditable,ModuleForm.GetClassFromSize(CurModuleForm.FieldSizeEdit))
-            else:
-                SchemaDTO[curValue['Name']] = {
-                'Name': curValue['Name'],
-                'type':DynPropType[str(curValue['TypeProp']).lower()],
-                'title' : curValue['Name'],
-                'editable' : curEditable,
-                'editorClass' : 'form-control' ,
-                'fieldClass' : ModuleForm.GetClassFromSize(2),
+        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).filter(or_(ModuleForm.TypeObj == self.ID, ModuleForm.TypeObj == None)).all()
+        print(Fields)
 
-                }
+
+        for CurModuleForm in Fields : 
+            curEditable = Editable
+            print(CurModuleForm.Name)
+            #CurModuleForm = list(filter(lambda x : x.Name == curValue['Name'], Fields))
+
+            #if (len(CurModuleForm)> 0 ):
+                
+                # Conf définie dans FrontModule                
+            #CurModuleForm = CurModuleForm[0]
+                # TODO : Gestion champ read ONly
+            #print(CurModuleForm)
+            curSize = CurModuleForm.FieldSizeDisplay
+            if curEditable:
+                curSize = CurModuleForm.FieldSizeEdit
+            if (CurModuleForm.FormRender & 2) == 0:
+                curEditable = False
+            SchemaDTO[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,ModuleForm.GetClassFromSize(curSize))
+            # else:
+            #     print('Standard')
+            #     SchemaDTO[curValue['Name']] = {
+            #     'Name': curValue['Name'],
+            #     'type':DynPropType[str(curValue['TypeProp']).lower()],
+            #     'title' : curValue['Name'],
+            #     'editable' : curEditable,
+            #     'editorClass' : 'form-control' ,
+            #     'fieldClass' : ModuleForm.GetClassFromSize(2),
+
+            #     }
            
     def GetDynPropNames(self):
         curQuery = 'select D.Name from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
@@ -91,34 +100,37 @@ class ObjectTypeWithDynProp:
         return Values
 
     def GetFieldSets(self,FrontModule,Schema) :
-       
+        
         fields = []
         other = []
-        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).all()
-        Legends = sorted ([(obj.Legend,obj.FormOrder)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
+        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).filter(or_(ModuleForm.TypeObj == self.ID, ModuleForm.TypeObj == None)).all()
+        print(Fields)
+        Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
+        Legend2s = sorted ([(obj.Legend)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
+        print(Legends)
 
-        Legends1= [obj[0] for obj in Legends] 
-        Legends = sorted(set(Legends1), key = Legends1.index)
+        Unique_Legends = list()
+        print(Unique_Legends)
+        # Get distinct Fieldset in correct order
+        for x in Legends:
+            print(x)
+            print(x[0])
+            if x[0] not in Unique_Legends:
+                Unique_Legends.append(x[0])
+
+        print('********************************************************* Getfieldsset ')
+        print(Unique_Legends)
         
+        resultat = []
+        for curLegend in Unique_Legends:
+            curFieldSet = {'fields' :[],'legend' : curLegend}
+            resultat.append(curFieldSet)
+        print(Legends)
 
-        resultat = list(Legends)
-        Legends.append('Other')
-        for curProp in Schema:
-            CurModuleForm = list(filter(lambda x : x.Name == curProp,Fields))
-            if (len(CurModuleForm)> 0 ):
-                CurModuleForm = CurModuleForm[0]
-                curIndex = Legends.index(CurModuleForm.Legend)
-                try :
-                    resultat[curIndex]['fields'].insert(CurModuleForm.FormOrder,CurModuleForm.Name)
-                except :
-                    resultat[curIndex] = {'fields' : [CurModuleForm.Name] , 'legend' : Legends[curIndex] }
-            else:
-                other.append(curProp)
-
-        resultat.append({'fields':[],'legend':'Other'})
-        for i in other :
-            curIndex = Legends.index('Other')
-            resultat[curIndex]['fields'].append(i)
+        for curProp in Legends:
+            print(curProp)
+            curIndex = Unique_Legends.index(curProp[0])
+            resultat[curIndex]['fields'].append(curProp[2])
         return resultat
 
 

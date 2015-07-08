@@ -5,7 +5,8 @@ define([
 	'marionette',
 	'backbone_forms',
 	'requirejs-text!./Templates/NsFormsModule.html',
-], function ($, _, Backbone, Marionette, BackboneForm, tpl, Swal) {
+	'./NsFormsCustomFields'
+], function ($, _, Backbone, Marionette, BackboneForm, tpl) {
 	return Backbone.View.extend({
 		BBForm: null,
 		modelurl: null,

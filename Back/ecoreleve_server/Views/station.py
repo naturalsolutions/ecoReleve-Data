@@ -347,11 +347,17 @@ def searchStation(request):
     stop = datetime.now()
     print (stop-start)
 
-    result = [{'total_entries':countResult}]
-    result.append(dataResult)
-    transaction.commit()
-
-    return result
+    
+    if 'geo' in data: 
+        geoJson=[]
+        for row in dataResult:
+            geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+        return {'type':'FeatureCollection', 'features':geoJson}
+    else :
+        result = [{'total_entries':countResult}]
+        result.append(dataResult)
+        transaction.commit()
+        return result
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def GetProtocolsofStation (request) :
