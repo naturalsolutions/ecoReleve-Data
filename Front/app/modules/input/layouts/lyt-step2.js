@@ -59,6 +59,7 @@ define([
 
 		loadStationView: function(type){
 			var _this = this; 
+			var displayMap = true;
 			if(type <= 3){
 				this.model.set('station', 0);
 				var stationForm = new StationView({
@@ -67,9 +68,12 @@ define([
 				});
 				this.leftRegion.show(stationForm);
 				// add btn 'add user'
-				var btnView = new BtnView({filterView : stationForm });
-				console.log(btnView.render().$el);
-				$('#StaFormButton').append(btnView.$el);
+				var btnView = new BtnView({filterView : stationForm});
+				$('#StaFormButton').append(btnView.render().$el);
+				// if station type is without coordinates, mask geolocation btn
+				if(parseInt(type) == 2) {
+					$('#geolocation-btn').addClass('masqued');
+				}
 			}else{
 
 				var urlParams;
@@ -78,11 +82,11 @@ define([
 						urlParams = [{'lastImported':true}];
 						break;
 					case 'old':
+						// no map for old stations
+						displayMap = false;
 						break;
 					case 'monitored':
 						urlParams = [{'monitored':true}];
-
-
 						break;
 					default: 
 						break;
@@ -98,7 +102,8 @@ define([
 				var gridMapView = new GridMapView({
 					type: type,
 					parent: this,
-					urlParams : urlParams
+					urlParams : urlParams,
+					displayMap : displayMap
 				});
 				this.rightRegion.show(gridMapView);
 			}

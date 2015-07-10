@@ -29,8 +29,6 @@ define([
 			var _this = this;
 			this.com = options.parent.com;
 
-			console.log(this.parent);
-
 			if ( options.urlParams) {
 				this.urlParams = options.urlParams; 
 			}
@@ -39,8 +37,6 @@ define([
 			var myCell = Backgrid.NumberCell.extend({
 				decimals: 5
 			});
-
-			console.log(this.urlParams);
 
 			this.grid = new NsGrid({
 				pageSize: 20,
@@ -61,15 +57,21 @@ define([
 			this.channel='modules';
 			this.radio = Radio.channel(this.channel);
 			this.radio.comply(this.channel+':map:update', this.updateGeoJson, this);
+			this.dispMap = options.displayMap || false;
 		},
 
 		onShow: function() {
 			var _this= this;
 			this.$el.find('#stationsGridContainer').html(_this.grid.displayGrid());
 			this.$el.find('#stationsGridPaginator').html(_this.grid.displayPaginator());
-			// TODO url selon type de stations
-			var url  = config.coreUrl+ 'stations/?criteria=%7B%7D&lastImported=true&=true&geo=true&offset=0&order_by=%5B%5D&per_page=20';
-			this.initGeoJson(url);
+			// Display map
+			if(this.dispMap){
+				var url  = config.coreUrl+ 'stations/?criteria=%7B%7D&lastImported=true&=true&geo=true&offset=0&order_by=%5B%5D&per_page=20';
+				this.initGeoJson(url);
+			} else {
+				// mask btn to switch between grid and map
+				$('.functions').addClass('masqued');
+			}
 		},
 
 		rowClicked: function(row) {
@@ -120,39 +122,41 @@ define([
 			this.map.init();
 		},
 		updateGeoJson: function(args){
-			var url  = config.coreUrl+ 'stations/?lastImported=true&geo=true&offset=0&order_by=%5B%5D&per_page=20';
-			$('#header-loader').removeClass('hidden');
-			this.xhr;
+			if(this.dispMap){
+				var url  = config.coreUrl+ 'stations/?lastImported=true&geo=true&offset=0&order_by=%5B%5D&per_page=20';
+				$('#header-loader').removeClass('hidden');
+				this.xhr;
 
-			if(this.xhr && this.xhr.readyState != 4){
-				this.xhr.abort();
-			}
-			console.log(args);
-			var filters = args.filters;
-			var criteria = [];
-			for (var i=0; i< filters.length; i++){
-				var filter = filters[i];
-				var fl = {};
-				fl.Column = filters[i].Column;
-				fl.Operator = filters[i].Operator;
-				fl.Value = filters[i].Value;
-				criteria.push(fl);
-			}
-			//criteria:[{"Column":"Region","Operator":"Is","Value":"Maatarka"},{"Column":"Place","Operator":"Is","Value":"Rjam Cheick"}]
-			url += '&criteria=' + JSON.stringify(criteria);
+				if(this.xhr && this.xhr.readyState != 4){
+					this.xhr.abort();
+				}
+				console.log(args);
+				var filters = args.filters;
+				var criteria = [];
+				for (var i=0; i< filters.length; i++){
+					var filter = filters[i];
+					var fl = {};
+					fl.Column = filters[i].Column;
+					fl.Operator = filters[i].Operator;
+					fl.Value = filters[i].Value;
+					criteria.push(fl);
+				}
+				//criteria:[{"Column":"Region","Operator":"Is","Value":"Maatarka"},{"Column":"Place","Operator":"Is","Value":"Rjam Cheick"}]
+				url += '&criteria=' + JSON.stringify(criteria);
 
-			this.xhr=$.ajax({
-				url: url,
-				contentType:'application/json',
-				type:'GET',
-				context: this,
-			}).done(function(datas){
-				this.map.updateLayers(datas);
-				$('#header-loader').addClass('hidden');
-			}).fail(function(msg){
-				$('#header-loader').addClass('hidden');
-				console.warn(msg);
-			});
+				this.xhr=$.ajax({
+					url: url,
+					contentType:'application/json',
+					type:'GET',
+					context: this,
+				}).done(function(datas){
+					this.map.updateLayers(datas);
+					$('#header-loader').addClass('hidden');
+				}).fail(function(msg){
+					$('#header-loader').addClass('hidden');
+					console.warn(msg);
+				});
+			}
 		}
 	});
 });
