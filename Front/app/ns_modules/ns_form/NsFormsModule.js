@@ -8,7 +8,8 @@ define([
 	'config',
 	'autocompTree',
 	'fancytree',
-	'./NsFormsCustomFields'
+	'./NsFormsCustomFields',
+	'i18n',
 ], function ($, _, Backbone, Marionette, BackboneForm,Radio, config, AutocompTree 
 ){
 	return Marionette.ItemView.extend({
@@ -77,6 +78,7 @@ define([
 			}
 			this.objecttype = options.objecttype;
 			this.displaybuttons();
+			this.$el.i18n();
 			if (options.model) {
 				this.model = options.model;
 				this.BBForm = new BackboneForm({ model: this.model });

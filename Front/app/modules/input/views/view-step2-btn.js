@@ -2,7 +2,8 @@ define([
 	'jquery',
 	'underscore',
 	'backbone',
-	'marionette'
+	'marionette',
+	'i18n'
 ], function($, _, Backbone, Marionette){
 	'use strict';
 	return Marionette.ItemView.extend({

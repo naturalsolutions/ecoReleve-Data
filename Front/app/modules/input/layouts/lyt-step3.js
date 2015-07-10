@@ -266,10 +266,10 @@ define([
 					$('#'+this.type).find('.badge').html(this.nbObs);
 				},
 			});
-			/*
+		
 			this.$el.i18n();
 			this.translater = Translater.getTranslater();
-			*/
+			
 		},
 		initialize : function(){
 

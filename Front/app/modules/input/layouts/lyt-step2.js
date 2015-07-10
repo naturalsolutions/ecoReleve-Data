@@ -67,9 +67,10 @@ define([
 					parent: this
 				});
 				this.leftRegion.show(stationForm);
-				// add btn 'add user'
+				// add btn 'add user', 'geolocation'
 				var btnView = new BtnView({filterView : stationForm});
-				$('#StaFormButton').append(btnView.render().$el);
+				btnView.render().$el.i18n();
+				$('#StaFormButton').append(btnView.$el);
 				// if station type is without coordinates, mask geolocation btn
 				if(parseInt(type) == 2) {
 					$('#geolocation-btn').addClass('masqued');
