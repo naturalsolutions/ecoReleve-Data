@@ -33,32 +33,25 @@ define(['marionette', 'config',
 			this.rgHeader=this.options.app.rootView.rgHeader;
 			this.rgFooter=this.options.app.rootView.rgFooter;
 		},
-
 		home: function() {
 			Backbone.history.navigate('');
 			this.rgMain.show(new LytHome());
 		},
-
 		input: function(){
 			this.rgMain.show(new LytInput());
 		},
-
 		export: function(){
 			this.rgMain.show(new LytExport());
 		},
 		obs: function(options){
 			this.rgMain.show(new LytObs({id:options}));
 		},
-
 		sta: function(options){
 			this.rgMain.show(new LytSta({id:options}));
 		},
-
-
 		import: function(){
 			this.rgMain.show(new LytImport());
 		},
-
 		stations: function(){
 			this.rgMain.show(new LytStations());
 		},

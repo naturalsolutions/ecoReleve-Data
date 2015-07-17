@@ -24,14 +24,10 @@ define(['jquery', 'marionette', 'backbone', 'config', './base/login/lyt-login', 
 				context: this,
 				url: config.coreUrl + 'security/has_access'
 			}).done( function() {
-				$('body').addClass('app');
 				this.insertHeader();
 				callback.apply(this, args);
 			}).fail( function(msg) {
-				$('body').removeClass('app');
-				this.options.controller.rgHeader.empty();
-				this.options.controller.rgMain.show(new LytLogin());
-				Backbone.history.navigate('login', {trigger: true});
+				document.location.href="http://127.0.0.1/NsPortal/Front"; 
 			});
 		},
 

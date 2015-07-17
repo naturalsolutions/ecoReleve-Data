@@ -69,6 +69,8 @@ function(Marionette, Backbone, sha1, config, $ui) {
 		login: function(elt) {
 			elt.preventDefault();
 			elt.stopPropagation();
+
+
 			var user = this.collection.findWhere({fullname: $('#username').val()});
 			var url = config.coreUrl + 'security/login';
 			var self = this;
@@ -92,8 +94,7 @@ function(Marionette, Backbone, sha1, config, $ui) {
 					this.fail('#pwd-group', 'Invalid password');
 					this.shake();
 				});
-			}
-			else {
+			} else {
 				this.fail('#login-group', 'Invalid username');
 				this.shake();
 			}
