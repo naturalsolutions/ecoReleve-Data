@@ -12,6 +12,8 @@ define(['marionette', 'config',
 	'./Demo/lyt-Obs',
 	'./Demo/lyt-Sta',
 
+	'./modules/newStation/lyt-entry-new-station',
+
 ],function( Marionette, config, 
 	LytHome,
 
@@ -22,7 +24,11 @@ define(['marionette', 'config',
 	LytStations,
 
 	LytObs,
-	LytSta
+	LytSta,
+
+	LytNewStation
+
+
 
 ){
 	'use strict';
@@ -56,5 +62,15 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytStations());
 		},
 
+
+
+		newStation: function(){
+			this.rgMain.show(new LytNewStation());
+		},
+		/*
+		newStation: function(){
+			this.mainRegion.show(new LytNewStation());
+		},
+*/
 	});
 });

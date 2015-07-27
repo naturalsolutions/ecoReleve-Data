@@ -2,29 +2,30 @@ require.config({
 	baseUrl: 'app',
 	paths : {
 		
-		'tmp'					: './tmp',
-		
-		'app'					: 'app',
-		'config'				: 'config',
-		'router'				: 'router',
-		'controller'			: 'controller',
-		'models'				: './models',
-		'collections'			: './collections',
-		'templates'				: '../build/templates',
-		'lyt-rootview'			: './base/rootview/lyt-rootview',
-		'transition-region'		: './base/transition-region/transition-region',
-		'google': './vendors/google-maps-loader',
-		'translater'            : 'translater', 
+
+		'tmp'				: './tmp',
+
+		'app'				: 'app',
+		'config'			: 'config',
+		'router'			: 'router',
+		'controller'		: 'controller',
+		'models'			: './models',
+		'collections'		: './collections',
+		'templates'			: '../build/templates',
+		'lyt-rootview'		: './base/rootview/lyt-rootview',
+		'transition-region'	: './base/transition-region/transition-region',
+		'googleLoaer'			: 				'./vendors/google-maps-loader',
+		'translater'		: 'translater', 
 		
 		
 		/*==========  NS modules  ==========*/
-		'ns_modules'			: 'ns_modules',
-		'ns_filter'				: 'ns_modules/ns_filter',
-		'ns_form'				: 'ns_modules/ns_form',
-		'ns_grid'				: 'ns_modules/ns_grid',
-		'ns_map'				: 'ns_modules/ns_map',
-		'ns_stepper'			: 'ns_modules/ns_stepper',
-
+		'ns_modules'	: 'ns_modules',
+		'ns_filter'		: 'ns_modules/ns_filter',
+		'ns_form'		: 'ns_modules/ns_form',
+		'ns_grid'		: 'ns_modules/ns_grid',
+		'ns_map'		: 'ns_modules/ns_map',
+		'ns_stepper'	: 'ns_modules/ns_stepper',
+		
 		'autocompTree' : 'vendors/jquery.autocompTree',
 
 		/*==========  Bower  ==========*/
@@ -121,7 +122,7 @@ require.config({
 			exports : 'leaflet_cluster'
 		},
 		leaflet_google : {
-			deps:['L', 'google'],
+			deps:['L'],
 			exports : 'leaflet_google'
 		},
 		leaflet : {

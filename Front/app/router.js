@@ -16,6 +16,7 @@ define(['jquery', 'marionette', 'backbone', 'config', './base/login/lyt-login', 
 			'export(/)' : 'export',
 			'import(/)' : 'import',
 			'stations(/)' : 'stations',
+			'newStation(/)': 'newStation',
 			'*route(/:page)': 'home',
 		},
 

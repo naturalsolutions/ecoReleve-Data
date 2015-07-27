@@ -1,3 +1,11 @@
+
+/**
+	TODO:
+	- fitBounds
+	- find a way to automaticly destroy the map with the related view
+	----> replace the prototype by a marionnette view?
+**/
+
 define([
 	'jquery',
 	'underscore',
@@ -5,10 +13,11 @@ define([
 	'marionette',
 	'L',
 	'leaflet_cluster',
+	'googleLoaer',
 	//'text!./tpl-legend.html',
 	'leaflet_google',
 
-], function($, _, Backbone , Marionette, L, cluster //tpl_legend
+], function($, _, Backbone , Marionette, L, cluster, GoogleMapsLoader //tpl_legend
 		) {
 
 	'use strict';  
@@ -24,7 +33,6 @@ define([
 			// Precrement the instance count in order to generate the
 			// next value instance ID.
 			return( ++instanceCount );
-
 	};
 
 
@@ -51,13 +59,14 @@ define([
 		this.legend = options.legend || this.legend;
 		this.selection = options.selection || this.selection;
 
-
 		this.dict={}; //list of markers
 		this.selectedMarkers = {}; // list of selected markers
 
 		this.geoJsonLayers = [];
 		this.initIcons();
 		L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images';
+
+		this.init();
 	}
 
 	Map.prototype = {
@@ -164,57 +173,61 @@ define([
 					this.fire('MapObjectInitialized', { mapObject: map });
 				},
 			});
-
 			var googleLayer = new CustomGMap('HYBRID', {unloadInvisibleTiles: true,
 				updateWhenIdle: true,
 				reuseTiles: true
 			});
-
 			this.map.addLayer(googleLayer);
 		},
 
 		initMap: function(){
+			var _this = this;
 
+			//leaflet map
+			this.map = new L.Map(this.elem, {
+				center: this.center ,
+				zoom: this.zoom || 4,
+				minZoom: 2,
+				inertia: false,
+				zoomAnimation: true,
+				keyboard: false, //fix scroll window
+				attributionControl: false,
+			});
 
-				this.map = new L.Map(this.elem, {
-					center: this.center ,
-					zoom: this.zoom || 4,
-					minZoom: 2,
-					inertia: false,
-					zoomAnimation: true,
-					keyboard: false, //fix scroll window
-					attributionControl: false,
-				});
-
-
-
-
-
-				/*
-				var markerArray = [];
-				var geoJsonLayer = this.geoJsonLayers[0];
-				if(geoJsonLayer){
-					for(var index in geoJsonLayer._layers) {
-							var lat = geoJsonLayer._layers[index]._latlng.lat;
-							var lng = geoJsonLayer._layers[index]._latlng.lng;
-							markerArray.push(L.marker([lat, lng]));
-					}
+			/**
+			*
+			* fitBounds
+			* center the map on;
+			**/
+			
+			/*
+			var markerArray = [];
+			var geoJsonLayer = this.geoJsonLayers[0];
+			if(geoJsonLayer){
+				for(var index in geoJsonLayer._layers) {
+						var lat = geoJsonLayer._layers[index]._latlng.lat;
+						var lng = geoJsonLayer._layers[index]._latlng.lng;
+						markerArray.push(L.marker([lat, lng]));
 				}
-				if (markerArray.length >1){
-					var group = L.featureGroup(markerArray);
-					this.map.fitBounds(group.getBounds());
-				}*/
+			}
+			if (markerArray.length >1){
+				var group = L.featureGroup(markerArray);
+				this.map.fitBounds(group.getBounds());
+			}*/
 
+			GoogleMapsLoader.done(function(GoogleMaps){
+				_this.google();
+			}).fail(function(){
+				console.error("ERROR: Google maps library failed to load");
+			});
 
-				this.google();
+			if(this.legend){
+				this.addCtrl(tpl_legend);
+			}
 
-				if(this.legend){
-					this.addCtrl(tpl_legend);
-				}
-
-				if(this.markersLayer){
-					this.addMarkersLayer2Map();
-				}
+			if(this.markersLayer){
+				this.addMarkersLayer2Map();
+			}
 		},
 
 		addMarkersLayer2Map: function(){
@@ -234,7 +247,6 @@ define([
 			}
 
 			this.map.addLayer(this.markersLayer);
-
 
 			if(this.area){
 				this.addArea();
@@ -287,7 +299,6 @@ define([
 			.fail(function(msg) {
 					console.error( msg );
 			});
-
 		},
 
 
@@ -376,11 +387,8 @@ define([
 					console.warn('latlng null');
 				}
 			}
-
 			this.geoJsonLayers.push(markerList);
-
 		},
-
 
 
 		getClusterIcon: function(cluster, contains, nbContains){
