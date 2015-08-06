@@ -23,25 +23,26 @@ define([
 	'translater',
 
 	'../views/view-step2-filter',
-	'../views/view-step2-grid',
-
+	'../views/view-step2-grid-map',
+	'../views/view-step2-btn',
+	'i18n',
 ], function($, _, Backbone, Marionette, config, Swal, dateTimePicker, Radio,
 	Step, Com,
 	StationView, Grid, 
 	MonitoredSites, Position, Station, Translater,
-	FilterView, GridView
+	FilterView, GridMapView, BtnView
 ){
 
 	'use strict';
 	return Step.extend({
 		className: 'ns-full-height',
-
 		regions: {
 			leftRegion : '#inputStLeft',
 			rightRegion : '#inputStRight'
 		},
 
 		template: 'app/modules/input/templates/tpl-step2.html',
+		name : 'test',
 
 		onShow: function(){
 			this.translater = Translater.getTranslater();
@@ -50,14 +51,30 @@ define([
 			this.loadStationView(stationType);
 		},
 
+		initialize : function(){
+			this.translater = Translater.getTranslater();
+			var stepLabel = this.translater.getValueFromKey('input.stepper.step2inputLabel');
+			this.name = stepLabel;
+		},
+
 		loadStationView: function(type){
 			var _this = this; 
+			var displayMap = true;
 			if(type <= 3){
+				this.model.set('station', 0);
 				var stationForm = new StationView({
 					type: type,
 					parent: this
 				});
 				this.leftRegion.show(stationForm);
+				// add btn 'add user', 'geolocation'
+				var btnView = new BtnView({filterView : stationForm});
+				btnView.render().$el.i18n();
+				$('#StaFormButton').append(btnView.$el);
+				// if station type is without coordinates, mask geolocation btn
+				if(parseInt(type) == 2) {
+					$('#geolocation-btn').addClass('masqued');
+				}
 			}else{
 
 				var urlParams;
@@ -66,11 +83,11 @@ define([
 						urlParams = [{'lastImported':true}];
 						break;
 					case 'old':
+						// no map for old stations
+						displayMap = false;
 						break;
 					case 'monitored':
 						urlParams = [{'monitored':true}];
-
-
 						break;
 					default: 
 						break;
@@ -83,18 +100,15 @@ define([
 				});
 				this.leftRegion.show(firlterView);
 
-				var gridView = new GridView({
+				var gridMapView = new GridMapView({
 					type: type,
 					parent: this,
-					urlParams : urlParams
+					urlParams : urlParams,
+					displayMap : displayMap
 				});
-				this.rightRegion.show(gridView);
+				this.rightRegion.show(gridMapView);
 			}
-		},
-
-
-
-
+		}
 
 	});
 });

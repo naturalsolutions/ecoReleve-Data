@@ -6,7 +6,8 @@ define([
 	'backbone.paginator',
 	'backgrid.paginator',
 	'ns_grid/model-col-generator',
-	'moment'
+	'moment',
+	'floatThead'
 	//'backgridSelect_all',
 ], function ($, _, Backbone, Radio, PageColl, Paginator, colGene, moment) {
 	'use strict';
@@ -260,6 +261,15 @@ define([
 				}
 
 			}
+
+			
+			var $table = this.grid.$el;
+			$table.floatThead({
+			    scrollContainer: function($table){
+			        return $table.closest('.wrapper');
+			    }
+			});
+
 		},
 
 		update: function (args) {

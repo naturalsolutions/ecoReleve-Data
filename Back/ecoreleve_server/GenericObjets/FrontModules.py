@@ -63,6 +63,12 @@ class ModuleForm(Base):
             'validators': [],
             'options': []
             }
+        if self.Required == 1 :
+            if self.InputType=="Select":
+                dto['validators'].append("requiredSelect")
+            else:
+                dto['validators'].append("required")
+            dto['title'] = dto['title'] + '*'
         if self.InputType == 'Select' and self.Options != None : 
             result = DBSession.execute(text(self.Options)).fetchall()
 
@@ -72,8 +78,7 @@ class ModuleForm(Base):
                     temp[key]= row[key]
                 dto['options'].append(temp)
             dto['options'] = sorted(dto['options'], key=lambda k: k['label'])
-        if self.Required == 1 :
-            dto['validators'].append("required")
+            # TODO changer le validateur pour select required (valeur <>-1)
         return dto
 
 

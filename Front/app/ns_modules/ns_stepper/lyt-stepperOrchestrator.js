@@ -55,7 +55,7 @@ define([
 
 			for(var i=0; i < this.stepsProto.length; i++){
 				this.steps[i] = new this.stepsProto[i];
-				this.steps[i].name = 'a';
+				//this.steps[i].name = 'a';
 				this.steps[i].model = this.model;
 				this.steps[i].parent = this;
 			}

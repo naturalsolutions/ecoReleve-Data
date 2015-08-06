@@ -57,7 +57,8 @@ define([
 				//filters: filtersList,
 				url: config.coreUrl + 'stations/',
 				com: this.com,
-				filterContainer: 'filters'
+				filterContainer: 'filters',
+				channel: 'modules',
 			});
 		},
 

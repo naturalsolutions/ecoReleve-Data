@@ -53,6 +53,7 @@ require.config({
 		'fancytree'				: '../bower_components/fancytree/dist/jquery.fancytree-all.min',
 
 		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
+		'floatThead'			: '../bower_components/floatThead/dist/jquery.floatThead-slim', 
 
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
@@ -153,6 +154,10 @@ require.config({
 			deps: ['jquery'],
 			exports : '$'
 		},
+		floatThead : {
+			deps: ['backgrid'],
+			exports :  'FloatThead'
+		}
 
 	},
 });
