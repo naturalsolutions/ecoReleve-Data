@@ -15,9 +15,10 @@ from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE
+from sqlalchemy import select, and_,cast, DATE,func
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
+
 
 
 prefix = 'stations'
@@ -36,7 +37,9 @@ prefix = 'stations'
 #     # can search/filter
 #     return
 
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET' , permission = NO_PERMISSION_REQUIRED)
+
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+
 def actionOnStations(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -51,6 +54,9 @@ def actionOnStations(request):
 
 def count_ (request = None,listObj = None) :
 #   ## TODO count stations
+
+    print('*****************  STATION COUNT***********************')
+
     if request is not None : 
         data = request.params
         if 'criteria' in data: 
@@ -75,6 +81,7 @@ def getFilters (request):
         filters[str(i)] = filtersList[i]
     transaction.commit()
     return filters
+
 
 def getForms(request) :
 
@@ -341,17 +348,24 @@ def searchStation(request):
     print ('______ TIME to get DATA : ')
     print (stop-start)
 
-    # start = datetime.now()
-    # countResult = count_(listObj =listObj)
-    # print ('______ TIME to get Count : ')
-    # stop = datetime.now()
-    # print (stop-start)
-    countResult = 1252
-    result = [{'total_entries':countResult}]
-    result.append(dataResult)
-    transaction.commit()
+    start = datetime.now()
+    countResult = count_(listObj =listObj)
+    print ('______ TIME to get Count : ')
+    stop = datetime.now()
+    print (stop-start)
 
-    return result
+    
+    if 'geo' in data: 
+        geoJson=[]
+        for row in dataResult:
+            geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+        return {'type':'FeatureCollection', 'features':geoJson}
+    else :
+        result = [{'total_entries':countResult}]
+        result.append(dataResult)
+        transaction.commit()
+        return result
+
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def GetProtocolsofStation (request) :

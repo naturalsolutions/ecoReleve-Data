@@ -5,7 +5,9 @@ define([
 	'marionette',
 	'backbone_forms',
 	'requirejs-text!./Templates/NsFormsModule.html',
-], function ($, _, Backbone, Marionette, BackboneForm, tpl, Swal) {
+	'./NsFormsCustomFields',
+	'i18n',
+], function ($, _, Backbone, Marionette, BackboneForm, tpl) {
 	return Backbone.View.extend({
 		BBForm: null,
 		modelurl: null,
@@ -124,9 +126,11 @@ define([
 
 			this.buttonRegion.forEach(function (entry) {
 				$('#' + entry).html(_this.template);
+				$('#' + entry).i18n();
 			});
 
 			this.displaybuttons();
+
 
 			this.bindEvents();
 			this.afterShow();
@@ -153,9 +157,11 @@ define([
 
 				$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit'+name).removeClass('hidden');
 			}
+
 		},
 
 		afterShow: function(){
+			//this.$el.i18n();
 		},
 
 

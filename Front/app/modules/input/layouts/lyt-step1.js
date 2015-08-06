@@ -5,8 +5,10 @@ define([
 	'marionette',
 
 	'ns_stepper/lyt-step',
-	'i18n'
-], function($, _, Backbone, Marionette, Step) {
+	'translater',
+	'i18n',
+
+], function($, _, Backbone, Marionette, Step,Translater) {
 
 	'use strict';
 
@@ -27,6 +29,11 @@ define([
 			this.model.set('start_stationtype' , 1);
 			this.$el.i18n();
 		},
+		initialize : function(){
+			this.translater = Translater.getTranslater();
+			var step1Label = this.translater.getValueFromKey('input.stepper.step1inputLabel');
+			this.name = step1Label;
+		}
 
 	});
 });

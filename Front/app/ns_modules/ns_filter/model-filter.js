@@ -5,13 +5,11 @@ define([
 	'backbone_forms',
 	'requirejs-text!./Templates/tpl-filters.html',
 	'requirejs-text!./Templates/tpl-CheckBoxes.html',
-
-
+	'radio',
 	'moment',
-
 	'vendors/backboneForm-editors'
 
-], function ($, _, Backbone, BbForms, tpl, tplcheck, moment) {
+], function ($, _, Backbone, BbForms, tpl, tplcheck, Radio, moment) {
 	'use strict';
 	return Backbone.View.extend({
 
@@ -52,6 +50,8 @@ define([
 				// Otherwise initialized from AJAX call
 				this.getFilters();
 			}
+			this.channel= options.channel;
+			this.radio=Radio.channel(this.channel);
 		},
 
 
@@ -298,6 +298,7 @@ define([
 			}else{
 				this.interaction('filter', filters);
 			}
+			this.radio.command(this.channel+':map:update', { filters : filters });
 		},
 
 

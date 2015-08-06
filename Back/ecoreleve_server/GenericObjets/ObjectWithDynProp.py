@@ -97,7 +97,7 @@ class ObjectWithDynProp:
                 'label' : curPropName,
                 'type' : 'Text'
                 }
-                defaultFilters.append(filter_)
+                # defaultFilters.append(filter_)
 
         filters.extend(defaultFilters)
         return filters
@@ -227,9 +227,21 @@ class ObjectWithDynProp:
             if (len(CurModuleForm)> 0 ):
                 # Conf définie dans FrontModule
                 CurModuleForm = CurModuleForm[0]
-                if CurModuleForm.FormRender > 0:
+                curSize = CurModuleForm.FieldSizeDisplay
+                if curEditable:
+                    curSize = CurModuleForm.FieldSizeEdit
+                if (CurModuleForm.FormRender & 2) == 0:
                     curEditable = False
-                    resultat[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,str(ModuleForm.GetClassFromSize(CurModuleForm.FieldSizeEdit)))
+                resultat[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,str(ModuleForm.GetClassFromSize(curSize)))
+            else:
+                resultat[curStatProp.key] = {
+                'Name': curStatProp.key,
+                'type': 'Text',
+                'title' : curStatProp.key,
+                'editable' : curEditable,
+                'editorClass' : 'form-control' ,
+                'fieldClass' : ModuleForm.GetClassFromSize(2),
+                }
 
                 if CurModuleForm.FormRender > 2 :
                     curEditable = True
