@@ -13,6 +13,7 @@ define(['marionette', 'config',
 	'./Demo/lyt-Sta',
 
 	'./modules/newStation/lyt-entry-new-station',
+	'./modules/editStations/lyt-entry-edit-stations',
 
 ],function( Marionette, config, 
 	LytHome,
@@ -26,18 +27,16 @@ define(['marionette', 'config',
 	LytObs,
 	LytSta,
 
-	LytNewStation
-
-
-
+	LytNewStation,
+	LytEditStations
 ){
 	'use strict';
 	return Marionette.Object.extend({
 
 		initialize: function(){
-			this.rgMain=this.options.app.rootView.rgMain;
-			this.rgHeader=this.options.app.rootView.rgHeader;
-			this.rgFooter=this.options.app.rootView.rgFooter;
+			this.rgMain=window.app.rootView.rgMain;
+			this.rgHeader=window.app.rootView.rgHeader;
+			this.rgFooter=window.app.rootView.rgFooter;
 		},
 		home: function() {
 			Backbone.history.navigate('');
@@ -67,10 +66,9 @@ define(['marionette', 'config',
 		newStation: function(){
 			this.rgMain.show(new LytNewStation());
 		},
-		/*
-		newStation: function(){
-			this.mainRegion.show(new LytNewStation());
+
+		editStations: function(){
+			this.rgMain.show(new LytEditStations());
 		},
-*/
 	});
 });

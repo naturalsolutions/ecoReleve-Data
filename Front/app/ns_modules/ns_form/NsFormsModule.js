@@ -21,6 +21,7 @@ define([
 		formRegion: null,
 		isNew: null,
 		id: null,
+		async: true,
 		template: 'app/ns_modules/ns_form/NsFormsModule.html',
 		regions: {
 			nsFormButtonRegion: '#NsFormButton'
@@ -55,6 +56,7 @@ define([
 			this.buttonRegion = options.buttonRegion;
 			this.formRegion = options.formRegion;
 			this.stationId = parseInt(options.stationId);
+			this.async = options.async || this.async;
 			if (options.id) {
 				this.id = options.id;
 				this.isNew = false;
@@ -250,9 +252,9 @@ define([
 		butClickSave: function (e) {
 			//e.preventDefault();
 			// TODO gérer l'appel AJAX
-			var errors = this.BBForm.commit();         
+			var errors = this.BBForm.commit();
 			var changedAttr = this.BBForm.model.changed;
-			if(!errors){     
+			if(!errors){
 				//this.model.set('id', null);
 				
 				var staId = this.model.get('FK_TSta_ID');
@@ -269,6 +271,7 @@ define([
 				var self = this;
 				this.model.save([],{
 				 dataType:"text",
+				 async: this.async,
 				 success:function(model, response) {
 					self.displayMode = 'display';
 					self.displaybuttons();

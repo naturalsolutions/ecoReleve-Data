@@ -13,9 +13,7 @@ define([
 ], function($, _, Backbone,  Marionette, config, moment,
 	Station, NsGrid
 ){
-
 	'use strict';
-
 	return Marionette.ItemView.extend({
 		template: 'app/modules/input/templates/tpl-step2-grid.html',
 		className: 'ns-full-height col-xs-12',

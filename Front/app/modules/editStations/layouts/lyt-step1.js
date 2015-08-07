@@ -12,10 +12,12 @@ define([
 
 	'ns_form/NSFormsModuleGit',
 
+	'ns_map/ns_map',
+
 	'i18n'
 
 ], function($, _, Backbone, Marionette, Radio,
-	moment, datetime, Swal, config, NsForm
+	moment, datetime, Swal, config, NsForm, NsMap
 ){
 
 	'use strict';
@@ -66,45 +68,13 @@ define([
 		onDestroy: function(){
 		},
 
-
-
-		initModel: function(myTpl){
-			this.activeProtcolsObj = []; 
-			this.protosToRemove = [];
-		},
-
 		onShow: function(){
 			var _this = this;
-			// var stationType = this.model.get('start_stationtype');
-			// this.stationId = this.model.get('station');
-			
-
+			this.stationId = this.options.model.get('ID');
 			var stationType = 1;
-			this.stationId = 1;
 
 
-			this.nsForm = new NsForm({
-				name: 'StaForm',
-				modelurl: config.coreUrl+'stations/',
-				buttonRegion: ['stationFormBtns'],
-				formRegion: 'stationForm',
-				displayMode: 'display',
-				objecttype: stationType,
-				id: this.stationId,
-				reloadAfterSave : true,
-			});
-
-			this.nsForm.savingSuccess = function(){
-				_this.parent.protos.fetch({reset: true});
-			};
-
-			
-			/*this.rgStation.show(new ViewStationDetail({
-				stationId: this.stationId,
-				stationType: stationType,
-				parent: this
-			}));*/
-
+			//ADD THE STATION
 			
 			var ProtoColl = Backbone.Collection.extend({
 				url: config.coreUrl+'stations/'+this.stationId+'/protocols',

@@ -1,3 +1,11 @@
+/**
+
+	TODO:
+	- header steps
+	----> mini orchestrator?
+
+**/
+
 define([
 	'jquery',
 	'underscore',
@@ -20,13 +28,6 @@ define([
 			this.steps = [Step0, Step1];
 		},
 
-		testAdd: function(){
-			this.addStep(Step0, 2);
-		},
-
-		testRemove: function(){
-			this.removeStep(2);
-		}
 
 
 

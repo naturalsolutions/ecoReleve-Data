@@ -37,6 +37,13 @@ a{
 .ns-mid-height{
 	height: 50%;
 }
+@media (max-width: @screen-md-min) {
+	.full-height{
+		height: auto;
+	}
+}
+
+
 
 .col-border {
 	border-right: 1px solid @gray-lighter;
@@ -97,4 +104,8 @@ li.list-group-item{
 
 .btn[disabled]{
 	pointer-events: auto;
+}
+
+.pull-left{
+	float: left;
 }

@@ -1,5 +1,5 @@
-define(['marionette', 'transition-region'],
-function(Marionette, TransitionRegion) {
+define(['marionette', 'transition-region', './base/header/lyt-header'],
+function(Marionette, TransitionRegion, LytHeader) {
 	'use strict';
 
 	return Marionette.LayoutView.extend({
@@ -13,6 +13,10 @@ function(Marionette, TransitionRegion) {
 				el: 'main'
 			}),
 			rgFooter: 'footer'
+		},
+
+		onRender: function(){
+			this.rgHeader.show(new LytHeader);
 		},
 	});
 });

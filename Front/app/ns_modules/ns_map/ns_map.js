@@ -49,46 +49,26 @@ define([
 		this.geoJson=options.geoJson;
 
 		this.elem = options.element || 'map';
-
-		this.zoom = options.zoom || this.zoom;
-		this.disableClustring = options.disableClustring || this.disableClustring;
-		this.bbox = options.bbox || this.bbox;
-		this.area = options.area || this.area;
-		this.cluster = options.cluster || this.cluster;
-		this.popup = options.popup || this.popup;
-		this.legend = options.legend || this.legend;
-		this.selection = options.selection || this.selection;
+		this.zoom = options.zoom || 10;
+		this.disableClustring = options.disableClustring || 18;
+		this.bbox = options.bbox || false;
+		this.area = options.area || false;
+		this.cluster = options.cluster || false;
+		this.popup = options.popup || false;
+		this.legend = options.legend || false;
+		this.selection = options.selection || false;
 
 		this.dict={}; //list of markers
 		this.selectedMarkers = {}; // list of selected markers
-
 		this.geoJsonLayers = [];
-		this.initIcons();
-		L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images';
 
 		this.init();
 	}
 
 	Map.prototype = {
 
-		selection: false,
-		bbox : false,
-		area: false,
-		legend : false,
-		popup: false,
-		zoom: 10,
-		fitBounds: false,
-		geoJsonLayers: [],
-		disableClustring : 18,
-
-		onBeforeDestroy: function(){
-			this.map.remove();
-			console.info('detroy map');
-		},
-
 		destroy: function(){
 			this.map.remove();
-			console.info('detroy map');
 		},
 
 		action: function(action, params){
@@ -129,6 +109,13 @@ define([
 		},
 
 		init: function(){
+			//set defaults icons styles
+			L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images';
+			this.focusedIcon = new L.DivIcon({className		: 'custom-marker focus'});
+			this.selectedIcon = new L.DivIcon({className	: 'custom-marker selected'});
+			this.icon = new L.DivIcon({className			: 'custom-marker'});
+
+
 			if(this.url){
 				this.requestGeoJson(this.url);
 			}else{
@@ -138,52 +125,7 @@ define([
 					this.initLayer(this.geoJson);
 				}
 			}
-			this.initMap();
-		},
 
-		google: function(){
-			var CustomGMap = L.Google.extend({
-				_initMapObject: function() {
-					if (!this._ready) return;
-					this._google_center = new google.maps.LatLng(0, 0);
-					var map = new google.maps.Map(this._container, {
-						center: this._google_center,
-						zoom: 0,
-						tilt: 0,
-						mapTypeId: google.maps.MapTypeId[this._type],
-						disableDefaultUI: true,
-						keyboardShortcuts: false,
-						draggable: false,
-						scaleControl: true,
-						disableDoubleClickZoom: true,
-						scrollwheel: false,
-						streetViewControl: false,
-						styles: this.options.mapOptions.styles,
-						backgroundColor: this.options.mapOptions.backgroundColor
-					});
-
-					var _this = this;
-					this._reposition = google.maps.event.addListenerOnce(map, 'center_changed',
-						function() { _this.onReposition(); });
-					this._google = map;
-
-					google.maps.event.addListenerOnce(map, 'idle',
-						function() { _this._checkZoomLevels(); });
-					//Reporting that map-object was initialized.
-					this.fire('MapObjectInitialized', { mapObject: map });
-				},
-			});
-			var googleLayer = new CustomGMap('HYBRID', {unloadInvisibleTiles: true,
-				updateWhenIdle: true,
-				reuseTiles: true
-			});
-			this.map.addLayer(googleLayer);
-		},
-
-		initMap: function(){
-			var _this = this;
-
-			//leaflet map
 			this.map = new L.Map(this.elem, {
 				center: this.center ,
 				zoom: this.zoom || 4,
@@ -193,44 +135,88 @@ define([
 				keyboard: false, //fix scroll window
 				attributionControl: false,
 			});
-
-			/**
-			*
-			* fitBounds
-			* center the map on;
-			**/
-			
-			/*
-			var markerArray = [];
-			var geoJsonLayer = this.geoJsonLayers[0];
-			if(geoJsonLayer){
-				for(var index in geoJsonLayer._layers) {
-						var lat = geoJsonLayer._layers[index]._latlng.lat;
-						var lng = geoJsonLayer._layers[index]._latlng.lng;
-						markerArray.push(L.marker([lat, lng]));
-				}
-			}
-			if (markerArray.length >1){
-				var group = L.featureGroup(markerArray);
-				this.map.fitBounds(group.getBounds());
-			}*/
-
-			GoogleMapsLoader.done(function(GoogleMaps){
-				_this.google();
-			}).fail(function(){
-				console.error("ERROR: Google maps library failed to load");
-			});
+			this.google();
 
 			if(this.legend){
 				this.addCtrl(tpl_legend);
 			}
-
 			if(this.markersLayer){
-				this.addMarkersLayer2Map();
+				this.addMarkersLayer();
 			}
 		},
 
-		addMarkersLayer2Map: function(){
+		google: function(){
+			var _this = this;
+			GoogleMapsLoader.done(function(){
+				var CustomGMap = L.Google.extend({
+					_initMapObject: function() {
+						if (!this._ready) return;
+						this._google_center = new google.maps.LatLng(0, 0);
+						var map = new google.maps.Map(this._container, {
+							center: this._google_center,
+							zoom: 0,
+							tilt: 0,
+							mapTypeId: google.maps.MapTypeId[this._type],
+							disableDefaultUI: true,
+							keyboardShortcuts: false,
+							draggable: false,
+							scaleControl: true,
+							disableDoubleClickZoom: true,
+							scrollwheel: false,
+							streetViewControl: false,
+							styles: this.options.mapOptions.styles,
+							backgroundColor: this.options.mapOptions.backgroundColor
+						});
+
+						var _that = this;
+						this._reposition = google.maps.event.addListenerOnce(map, 'center_changed',
+							function() { _that.onReposition(); });
+						this._google = map;
+
+						google.maps.event.addListenerOnce(map, 'idle',
+							function() { _that._checkZoomLevels(); });
+						//Reporting that map-object was initialized.
+						this.fire('MapObjectInitialized', { mapObject: map });
+					},
+				});
+
+				_this.googleLayer = new CustomGMap('HYBRID', {unloadInvisibleTiles: true,
+					updateWhenIdle: true,
+					reuseTiles: true
+				});
+				_this.map.addLayer(_this.googleLayer);
+			}).fail(function(){
+				console.error("ERROR: Google maps library failed to load");
+			});
+		},
+
+		initClusters: function(geoJson){
+			var firstLvl= true;
+			this.firstLvl= [];
+			var ctx= this;
+			var CustomMarkerClusterGroup = L.MarkerClusterGroup.extend({
+				_defaultIconCreateFunction: function (cluster, contains) {
+					//push on firstLvl
+					if(firstLvl){
+						ctx.firstLvl.push(cluster);
+					}
+					if(ctx.selection){
+						return ctx.getClusterIcon(cluster, false, 0);
+					}else{
+						return ctx.getClusterIcon(cluster);
+					}
+
+				},
+			});
+			this.markersLayer = new CustomMarkerClusterGroup({
+				disableClusteringAtZoom : this.disableClustring, //2km
+				maxClusterRadius: 100,
+				polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
+			});
+			this.setGeoJsonLayer(geoJson);
+		},
+
+		addMarkersLayer: function(){
 			if(this.geoJsonLayers.length !== 0){
 				for (var i = 0; i < this.geoJsonLayers.length; i++) {
 					this.markersLayer.addLayers(this.geoJsonLayers[i]);
@@ -301,13 +287,6 @@ define([
 			});
 		},
 
-
-		initIcons: function(){
-			this.focusedIcon = new L.DivIcon({className: 'custom-marker focus'});
-			this.selectedIcon = new L.DivIcon({className: 'custom-marker selected'});
-			this.icon = new L.DivIcon({className: 'custom-marker'});
-		},
-
 		changeIcon: function(m){
 			if (m.checked) {
 				m.setIcon(this.selectedIcon);
@@ -317,7 +296,6 @@ define([
 		},
 
 		setCenter: function(geoJson){
-			//this.center = new L.LatLng(33.046081, -3.995497);return true;
 			if(!geoJson){
 				this.center = new L.LatLng(0,0);
 			}else{
@@ -347,7 +325,6 @@ define([
 
 			var features = geoJson.features;
 			var feature, latlng;
-
 
 			for (var j = 0; j < features.length; j++) {
 				feature = features[j];
@@ -426,40 +403,7 @@ define([
 		},
 
 
-		initClusters: function(geoJson){
-			var firstLvl= true;
-			this.firstLvl= [];
-			var ctx= this;
-			var CustomMarkerClusterGroup = L.MarkerClusterGroup.extend({
-				_defaultIconCreateFunction: function (cluster, contains) {
-					//push on firstLvl
-					if(firstLvl){
-						ctx.firstLvl.push(cluster);
-					}
-					if(ctx.selection){
-						return ctx.getClusterIcon(cluster, false, 0);
-					}else{
-						return ctx.getClusterIcon(cluster);
-					}
 
-				},
-			});
-
-			this.markersLayer = new CustomMarkerClusterGroup({
-				disableClusteringAtZoom : this.disableClustring, //2km
-				maxClusterRadius: 100,
-				polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
-			});
-
-
-
-
-
-			this.setGeoJsonLayer(geoJson);
-
-			//return [this.geoJsonLayers, this.markersLayer];
-
-		},
 
 		/*==========  updateClusterParents :: display selection inner cluster from childs to parents ==========*/
 		updateClusterParents: function(m, parents){
@@ -816,7 +760,7 @@ define([
 			}
 			this.geoJsonLayers = [];
 			this.initClusters(geoJson);
-			this.addMarkersLayer2Map();
+			this.addMarkersLayer();
 
 			if(this.bbox){
 				this.addBBox(this.markersLayer);

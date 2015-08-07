@@ -28,6 +28,8 @@ define([
 			'change input:radio' : 'datachanged_radio',
 			'change input:file' : 'datachanged_file',
 			'change select' : 'datachanged_select',
+
+			
 			'click #step-nav li' : 'changeStep',
 		},
 
