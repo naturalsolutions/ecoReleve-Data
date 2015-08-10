@@ -26,8 +26,11 @@
 		"reset" : "Reset",
 		"edit" :"Edit",
 		"add" : "Add",
-		"addObserver" : "Add a field worker",
-		"removeObserver" : "Remove an observer"
+		"save" : "Save",
+		"delete" : "Delete",
+		"addObserver" : "Add an observer",
+		"removeObserver" : "Remove an observer",
+		"geolocation" : "Get current position"
 
 	},
 	"shared" : {
@@ -76,7 +79,6 @@
 		"step1ExistStLabel" : "from existing stations",
 		"step1ExistSitesLabel" :"from monitored sites",
 		"newStLocation" : "location",
-		"geolocation" : "Geolocation",
 		"newStLocationRegion" : "region*",
 		"newStLocationAccuracy" :"accuracy(m)*",
 		"newStName" : "station name*",
@@ -87,7 +89,8 @@
 		"allStFilterName" :"Name",
 		"stationNavigationAlert" : "You don't have next or prev station for filtred data",
 		"stationNavigationTitle" : "Updationg station",
-		"importStMsg" : "There is not stored imported waypoints, please use import module to do that."
+		"importStMsg" : "There is not stored imported waypoints, please use import module to do that.",
+		"labelAddNewProto" :"Add a new protocol"
 	},
 	"import" : {
 		"stepper" : {

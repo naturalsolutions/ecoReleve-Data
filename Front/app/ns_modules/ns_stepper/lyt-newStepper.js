@@ -24,7 +24,7 @@ define([
 		===================================================*/
 
 		template: 'app/ns_modules/ns_stepper/tpl-newStepper.html',
-		className: 'ns-full-height animated',
+		className: 'full-height animated',
 
 		regions: {
 			stepContent : '#step-content',

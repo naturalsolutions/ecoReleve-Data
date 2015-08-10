@@ -65,8 +65,8 @@ def main(global_config, **settings):
     config.add_renderer('pdf', PDFrenderer)
     config.add_renderer('gpx', GPXRenderer)
 
-    includeme(config)
-    config.set_root_factory(SecurityRoot)
+    #includeme(config)
+    #config.set_root_factory(SecurityRoot)
 
     # Set the default permission level to 'read'
     config.set_default_permission('read')

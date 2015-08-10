@@ -81,9 +81,6 @@ define([
 		},
 
 		onRender: function(){
-			var step1Label = this.translater.getValueFromKey('input.stepper.step1inputLabel'),
-			step2Label = this.translater.getValueFromKey('input.stepper.step2inputLabel'),
-			step3Label = this.translater.getValueFromKey('input.stepper.step3inputLabel');
 
 			this.steps=[];
 			this.steps[0]= Step1;
@@ -94,6 +91,7 @@ define([
 				model: this.model,
 				steps: this.steps
 			});
+			console.log(this.stepper);
 
 			this.stepperRegion.show( this.stepper );
 			this.$el.i18n();

@@ -3,7 +3,6 @@ define([
 	'underscore',
 	'backbone',
 	'marionette',
-	'radio',
 
 	'moment',
 	'dateTimePicker',
@@ -16,7 +15,7 @@ define([
 
 	'i18n'
 
-], function($, _, Backbone, Marionette, Radio,
+], function($, _, Backbone, Marionette,
 	moment, datetime, Swal, config, NsForm, NsMap
 ){
 

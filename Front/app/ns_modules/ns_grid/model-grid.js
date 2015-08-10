@@ -6,7 +6,8 @@ define([
 	'backbone.paginator',
 	'backgrid.paginator',
 	'ns_grid/model-col-generator',
-	'moment'
+	'moment',
+	'floatThead'
 	//'backgridSelect_all',
 ], function ($, _, Backbone, Radio, PageColl, Paginator, colGene, moment) {
 	'use strict';
@@ -202,7 +203,7 @@ define([
 
 			this.collection = new PageCollection();
 			
-			this.listenTo(this.collection, "reset", this.affectTotalRecords);
+			//this.listenTo(this.collection, "reset", this.affectTotalRecords);
 		},
 
 		updateMap: function (params) {
@@ -260,6 +261,15 @@ define([
 				}
 
 			}
+
+			
+			var $table = this.grid.$el;
+			$table.floatThead({
+			    scrollContainer: function($table){
+			        return $table.closest('.wrapper');
+			    }
+			});
+
 		},
 
 		update: function (args) {
@@ -283,14 +293,14 @@ define([
 				}
 				else {
 					var filteredList = this.grid.collection.where(this.filterCriteria);
-					this.grid.collection.fetch({ reset: true, data: { 'criteria': this.filterCriteria }, success: function () { _this.collectionFetched(options); } });
+					this.grid.collection.fetch({ reset: true, data: { 'criteria': this.filterCriteria }, success: function () { /*_this.collectionFetched(options);*/ } });
 				}
 
 			}
 			
 			else {
 
-				this.grid.collection.fetch({ reset: true, success: function () { _this.collectionFetched(options); } });
+				this.grid.collection.fetch({ reset: true, success: function () { /*_this.collectionFetched(options);*/ } });
 			}
 		},
 		displayGrid: function () {
