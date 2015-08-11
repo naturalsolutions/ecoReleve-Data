@@ -39,7 +39,7 @@ define([
 			this.parseOneTpl(tpl);
 		},
 
-
+		/*
 		animateIn: function(options) {
 			this.$el.css({'position' : 'relative'});
 			switch(options){
@@ -94,7 +94,7 @@ define([
 					);
 					break;
 			}
-		},
+		},*/
 
 
 		parseOneTpl: function(tpl){// Initialisation du model à partir du template

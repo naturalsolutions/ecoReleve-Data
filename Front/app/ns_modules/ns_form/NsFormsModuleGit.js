@@ -21,8 +21,52 @@ define([
 		template: tpl,
 		redirectAfterPost: "",
 
+		extendsBBForm: function(){
+			Backbone.Form.validators.errMessages.required = '';
+			Backbone.Form.Editor.prototype.initialize = function(options){
+				var options = options || {};
+
+				//Set initial value
+				if (options.model) {
+				  if (!options.key) throw new Error("Missing option: 'key'");
+
+				  this.model = options.model;
+
+				  this.value = this.model.get(options.key);
+				}
+				else if (options.value !== undefined) {
+				  this.value = options.value;
+				}
+
+				if (this.value === undefined) this.value = this.defaultValue;
+
+				//Store important data
+				_.extend(this, _.pick(options, 'key', 'form'));
+
+				var schema = this.schema = options.schema || {};
+
+				this.validators = options.validators || schema.validators;
+
+				//Main attributes
+				this.$el.attr('id', this.id);
+				this.$el.attr('name', this.getName());
+				if (schema.editorClass) this.$el.addClass(schema.editorClass);
+				if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);
+
+				if(options.schema.validators){
+				  this.$el.addClass('required');
+				}
+			};
+		},
+
 		initialize: function (options) {
+			this.extendsBBForm();
+
+			var jqxhr;
 			this.modelurl = options.modelurl;
+
+
+
 
 			this.name = options.name;
 			this.buttonRegion = options.buttonRegion;
@@ -75,26 +119,22 @@ define([
 				// allow to redirect after creation (post) using the id of created object
 				this.redirectAfterPost = options.redirectAfterPost;
 			}
-
 		},
 
 
 
-		initModel: function () {
-			//initialize model from AJAX call
+		initModel: function (){
+			
 			var _this = this;
 
 			if(!this.model){
 				this.model = new Backbone.Model();
 			}
 
-			var url = this.modelurl
+			var url = this.modelurl +'/'+ this.id;
 
-			url += '/'+this.id;
-
-
-
-			$.ajax({
+			//initialize model from AJAX call
+			this.jqxhr = $.ajax({
 				url: url,
 				context: this,
 				type: 'GET',
@@ -117,6 +157,7 @@ define([
 				}
 			});
 		},
+
 		showForm: function () {
 			this.BBForm.render();
 			// Call extendable function before the show call
@@ -142,7 +183,6 @@ define([
 		displaybuttons: function () {
 			var name = this.name;
 
-
 			if(this.displayMode == 'edit'){
 				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel'+name).removeClass('hidden');
 				$('#'+this.buttonRegion[0]).find('.NsFormModuleSave'+name).removeClass('hidden');
@@ -167,6 +207,11 @@ define([
 
 		butClickSave: function (e) {
 			var errors = this.BBForm.commit();
+			var jqhrx;
+
+			this.model.on('sync', function(){
+				console.log('request');
+			});
 
 			if(!errors){
 					if (this.model.attributes["id"] == 0) {
@@ -175,11 +220,9 @@ define([
 				}
 				var _this = this;
 				this.onSavingModel();
-
-				console.log(this.model);
 				if (this.model.id == 0) {
 					// New Record
-					this.model.save(null, {
+					jqhrx = this.model.save(null, {
 						success: function (model, response) {
 							// Getting ID of created record, from the model (has beeen affected during model.save in the response)
 							_this.savingSuccess(model, response);
@@ -204,17 +247,19 @@ define([
 									_this.reloadAfterSave();
 								}
 							}
+							return true;
 						},
 						error: function (response) {
 							_this.savingError(response);
+							return false;
 						}
 
 					});
 				}
 				else {
-					// UAfter update of existing record
+					// After update of existing record
 					this.model.id = this.model.get('id');
-					this.model.save(null, {
+					var jqxhr = this.model.save(null, {
 						success: function (model, response) {
 							_this.savingSuccess(model, response);
 							if (_this.reloadAfterSave) {
@@ -225,10 +270,15 @@ define([
 							_this.savingError(response);
 						}
 					});
+					
 				}
+			}else{
+				return false;
 			}
 			this.afterSavingModel();
+			return jqxhr;
 		},
+
 		butClickEdit: function (e) {
 			this.displayMode = 'edit';
 			this.initModel();
@@ -330,6 +380,7 @@ define([
 
 			$('.NsFormModuleEdit' + name).off('click', this.onEditEvt);
 			$('.NsFormModuleCancel' + name).off('click', this.onCancelEvt);
+
 			$('.NsFormModuleSave' + name).off('click', this.onSaveEvt);
 			$('.NsFormModuleClear' + name).off('click', this.onClearEvt);
 			$('.NsFormModuleDelete' + name).off('click', this.onDeleteEvt);
