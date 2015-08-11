@@ -15,7 +15,7 @@ define([
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
 		template: 'app/ns_modules/ns_stepper/tpl-stepperOrchestrator.html',
-		className : 'ns-full-height orchestrator',
+		className : 'full-height orchestrator animated',
 
 		events: {
 			'click #infos' : 'infos',
@@ -28,7 +28,9 @@ define([
 			'change input:radio' : 'datachanged_radio',
 			'change input:file' : 'datachanged_file',
 			'change select' : 'datachanged_select',
-			'click #step-nav li' : 'changeStep',
+
+			
+			'click #stepNav li' : 'changeStep',
 		},
 
 		regions: {
@@ -81,8 +83,8 @@ define([
 			for (var i = 0; i < this.steps.length; i++) {
 				var id = this.steps[i].name;
 				// delete space
-				id = id.replace(/ /g,"");
-				this.$el.find('#step-nav').append('<li class="step-item" id="'+ id +'"  disabled=disabled><span class="badge">'+(i+1)+'</span><span class="hidden-xs">'+this.steps[i].name+'</span><span class="chevron"></span></li>');
+				//id = id.replace(/ /g,"");
+				this.$el.find('#stepNav').append('<li class="step-item" id="'+ id +'"  disabled=disabled><span class="badge">'+(i+1)+'</span><span class="hidden-xs">'+this.steps[i].name+'</span><span class="chevron"></span></li>');
 			};
 		},
 
@@ -229,18 +231,18 @@ define([
 			var id = this.steps[this.currentStep].name;
 			var idCompleteStep ;
 			// delete space
-			id = id.replace(/ /g,"");
-			this.$el.find('#step-nav li.step-item.active').removeClass('active');
-			this.$el.find('#step-nav li#'+ id).addClass('active');
+			//id = id.replace(/ /g,"");
+			this.$el.find('#stepNav li.step-item.active').removeClass('active');
+			this.$el.find('#stepNav li#'+ id).addClass('active');
 			for (var i = 0; i < this.currentStep; i++) {
 				idCompleteStep = this.steps[i].name;
-				idCompleteStep = idCompleteStep.replace(/ /g,"");
-				this.$el.find('#step-nav li#'+idCompleteStep).addClass('complete');
+				//idCompleteStep = idCompleteStep.replace(/ /g,"");
+				this.$el.find('#stepNav li#'+idCompleteStep).addClass('complete');
 			};
 			for (var i = this.currentStep; i < this.steps.length; i++) {
 				idCompleteStep = this.steps[i].name;
-				idCompleteStep = idCompleteStep.replace(/ /g,"");
-				this.$el.find('#step-nav li#'+idCompleteStep).removeClass('complete');
+				//idCompleteStep = idCompleteStep.replace(/ /g,"");
+				this.$el.find('#stepNav li#'+idCompleteStep).removeClass('complete');
 			};
 		},
 

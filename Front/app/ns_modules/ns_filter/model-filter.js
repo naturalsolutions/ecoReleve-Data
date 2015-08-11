@@ -50,8 +50,8 @@ define([
 				// Otherwise initialized from AJAX call
 				this.getFilters();
 			}
-			this.channel= options.channel;
-			this.radio=Radio.channel(this.channel);
+			//this.channel= options.channel;
+			//this.radio=Radio.channel(this.channel);
 		},
 
 
@@ -298,7 +298,7 @@ define([
 			}else{
 				this.interaction('filter', filters);
 			}
-			this.radio.command(this.channel+':map:update', { filters : filters });
+			//this.radio.command(this.channel+':map:update', { filters : filters });
 		},
 
 

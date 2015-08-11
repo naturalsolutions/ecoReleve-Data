@@ -26,6 +26,12 @@ from ecoreleve_server.GenericObjets import *
 from ecoreleve_server.Views import add_routes
 from ecoreleve_server.Views.station import searchStation
 
+
+from ecoreleve_server.pyramid_jwtauth import (
+    JWTAuthenticationPolicy,
+    includeme
+    )
+
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects.
     """
@@ -59,18 +65,8 @@ def main(global_config, **settings):
     config.add_renderer('pdf', PDFrenderer)
     config.add_renderer('gpx', GPXRenderer)
 
-    # Set up authentication and authorization
-    authn_policy = AuthTktAuthenticationPolicy(
-            settings['auth.secret'],
-            cookie_name='ecoReleve-Core',   
-            callback=role_loader,
-            hashalg='sha',
-            max_age=86400)
-    authz_policy = ACLAuthorizationPolicy()
-
-    config.set_authentication_policy(authn_policy)
-    config.set_authorization_policy(authz_policy)
-    config.set_root_factory(SecurityRoot)
+    #includeme(config)
+    #config.set_root_factory(SecurityRoot)
 
     # Set the default permission level to 'read'
     config.set_default_permission('read')

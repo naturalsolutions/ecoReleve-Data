@@ -1,5 +1,5 @@
-define(['marionette','i18n'],
-function(Marionette) {
+define(['marionette', 'ns_map/ns_map', 'i18n'],
+function(Marionette, NsMap) {
 	'use strict';
 
 	return Marionette.LayoutView.extend({
@@ -37,6 +37,7 @@ function(Marionette) {
 
 		onShow : function(options) {
 			this.$el.i18n();
+
 		}
 	});
 });

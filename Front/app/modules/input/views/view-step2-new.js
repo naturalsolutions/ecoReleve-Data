@@ -37,7 +37,7 @@ define([
 			'focusout input[name="Date_"]':'checkDate',
 			'change input[name="LAT"]' : 'getCoordinates',
 			'change input[name="LON"]' : 'getCoordinates',
-			'click #getPosition' : 'getCurrentPosition',
+			'click #getCurrentPosition' : 'getCurrentPosition',
 			'focusout input[name="Date_"]':'checkDate',
 		},
 

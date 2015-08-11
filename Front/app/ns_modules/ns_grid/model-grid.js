@@ -203,7 +203,7 @@ define([
 
 			this.collection = new PageCollection();
 			
-			this.listenTo(this.collection, "reset", this.affectTotalRecords);
+			//this.listenTo(this.collection, "reset", this.affectTotalRecords);
 		},
 
 		updateMap: function (params) {
@@ -293,14 +293,14 @@ define([
 				}
 				else {
 					var filteredList = this.grid.collection.where(this.filterCriteria);
-					this.grid.collection.fetch({ reset: true, data: { 'criteria': this.filterCriteria }, success: function () { _this.collectionFetched(options); } });
+					this.grid.collection.fetch({ reset: true, data: { 'criteria': this.filterCriteria }, success: function () { /*_this.collectionFetched(options);*/ } });
 				}
 
 			}
 			
 			else {
 
-				this.grid.collection.fetch({ reset: true, success: function () { _this.collectionFetched(options); } });
+				this.grid.collection.fetch({ reset: true, success: function () { /*_this.collectionFetched(options);*/ } });
 			}
 		},
 		displayGrid: function () {
