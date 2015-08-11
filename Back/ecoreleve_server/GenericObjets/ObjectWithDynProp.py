@@ -186,6 +186,8 @@ class ObjectWithDynProp:
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id'):
+                print (curProp)
+                print(DTOObject[curProp])
                 self.SetProperty(curProp,DTOObject[curProp])
 
     def GetFlatObject(self):
@@ -230,9 +232,18 @@ class ObjectWithDynProp:
                 curSize = CurModuleForm.FieldSizeDisplay
                 if curEditable:
                     curSize = CurModuleForm.FieldSizeEdit
+
                 if (CurModuleForm.FormRender & 2) == 0:
                     curEditable = False
+
+                if CurModuleForm.FormRender > 2 :
+                    curEditable = True
+
+                print(CurModuleForm.Name)
+                print(curSize)
+
                 resultat[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,str(ModuleForm.GetClassFromSize(curSize)))
+                
             else:
                 resultat[curStatProp.key] = {
                 'Name': curStatProp.key,
@@ -243,10 +254,7 @@ class ObjectWithDynProp:
                 'fieldClass' : ModuleForm.GetClassFromSize(2),
                 }
 
-                if CurModuleForm.FormRender > 2 :
-                    curEditable = True
-                    resultat[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,str(ModuleForm.GetClassFromSize(CurModuleForm.FieldSizeEdit)))
-            # else:
+               # else:
             #     resultat[curStatProp.key] = {
             #     'Name': curStatProp.key,
             #     'type': 'Text',

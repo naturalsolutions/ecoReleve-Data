@@ -37,7 +37,7 @@ require.config({
 		'backbone.wreqr'		: '../bower_components/backbone.wreqr/lib/backbone.wreqr',
 		'radio'					: '../bower_components/backbone.radio/build/backbone.radio',
 		'bootstrap'				: '../bower_components/bootstrap/dist/js/bootstrap',
-		'sha1'					: '../bower_components/sha1/bin/sha1',
+		'sha1'					: '../bower_components/sha1/sha1',
 		'sweetAlert'			:'../bower_components/sweetalert/lib/sweet-alert.min',
 		'moment'				: '../bower_components/moment/min/moment.min',
 		'dateTimePicker'		: '../bower_components/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker',
