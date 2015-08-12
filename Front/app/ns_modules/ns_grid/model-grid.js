@@ -32,7 +32,7 @@ define([
 				this.com.addModule(this);
 			}
 
-
+			this.onceFetched = options.onceFetched;
 
 			if (options.rowClicked) {
 				var clickFunction = options.rowClicked.clickFunction
@@ -137,7 +137,9 @@ define([
 					var tmp = this.column.attributes.name;
 					if (!Object.keys(sortCriteria).length > 0)
 						collection.sortCriteria[tmp] = 'asc';
-					collection.fetch({ reset: true });
+					collection.fetch({ reset: true, success: function(){
+						console.log('');
+					} });
 				},
 			});
 			for (var i = 0; i < this.columns.length; i++) {
@@ -195,7 +197,9 @@ define([
 						
 					}
 					ctx.init = true;
-
+					options.success = function(){
+						ctx.onceFetched();
+					},
 					PageColl.prototype.fetch.call(this, options);
 				}
 				
@@ -252,7 +256,7 @@ define([
 		},
 
 		collectionFetched: function (options) {
-			
+			console.log('ok');
 			this.affectTotalRecords();
 			if (options.init && !jQuery.isEmptyObject(this.sortCriteria)) {
 
@@ -265,9 +269,9 @@ define([
 			
 			var $table = this.grid.$el;
 			$table.floatThead({
-			    scrollContainer: function($table){
-			        return $table.closest('.wrapper');
-			    }
+			scrollContainer: function($table){
+				return $table.closest('.wrapper');
+			}
 			});
 
 		},
@@ -285,6 +289,7 @@ define([
 			}
 		},
 		fetchCollection: function (options) {
+
 			var _this = this;
 			if (this.filterCriteria != null) {
 				if (!this.url){
@@ -293,14 +298,16 @@ define([
 				}
 				else {
 					var filteredList = this.grid.collection.where(this.filterCriteria);
-					this.grid.collection.fetch({ reset: true, data: { 'criteria': this.filterCriteria }, success: function () { /*_this.collectionFetched(options);*/ } });
+					this.grid.collection.fetch({ reset: true, data: { 'criteria': this.filterCriteria }, success: function () {
+					 /*_this.collectionFetched(options);*/ } });
 				}
 
 			}
 			
 			else {
 
-				this.grid.collection.fetch({ reset: true, success: function () { /*_this.collectionFetched(options);*/ } });
+				this.grid.collection.fetch({ reset: true, success: function () { 
+				/*_this.collectionFetched(options);*/ } });
 			}
 		},
 		displayGrid: function () {
@@ -379,10 +386,6 @@ define([
 					break;
 			}
 		},
-
-
-
-
 
 		interaction: function (action, id) {
 			if (this.com) {

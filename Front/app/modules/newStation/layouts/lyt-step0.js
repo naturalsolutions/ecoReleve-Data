@@ -33,13 +33,18 @@ define([
 			'click #getCurrentPosition' : 'getCurrentPosition',
 		},
 
-		name : 'step0',
+		name : 'Station creation',
+
 
 		initialize: function(){
 		},
 
 		check: function(){
-			return this.nsForm.BBForm.commit();
+			if(this.nsForm.BBForm.commit()){
+				return false;
+			}else{
+				return true;
+			}
 		},
 
 		validate: function(){
@@ -47,9 +52,6 @@ define([
 			return this.nsForm.butClickSave();
 		},
 
-		setJqxhr: function(jqxhr){
-			this.jqxhr = jqxhr;
-		},
 
 		onShow : function(){
 			this.nsForm = new NsForm({
@@ -67,7 +69,7 @@ define([
 				zoom : 2,
 				element: 'map',
 			});
-			this.setJqxhr(this.nsForm.jqxhr);
+			this.rdy = this.nsForm.jqxhr;
 		},
 
 		onDestroy: function(){

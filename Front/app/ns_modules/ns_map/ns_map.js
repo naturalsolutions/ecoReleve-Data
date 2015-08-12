@@ -223,12 +223,12 @@ define([
 					for (var j = 0; j < this.geoJsonLayers[i].length; j++) {
 						delete this.geoJsonLayers[i][j];
 					};
-					this.geoJsonLayers[i].length = 0;
+/*					this.geoJsonLayers[i].length = 0;
 					this.geoJsonLayers[i] = [];
 					delete this.geoJsonLayers[i];
 					this.geoJsonLayers.length = 0;
 					this.geoJsonLayers = [];
-					delete this.geoJsonLayers;
+					delete this.geoJsonLayers;*/
 				}
 			}
 

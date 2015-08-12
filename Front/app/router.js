@@ -1,9 +1,4 @@
-/**
 
-	TODO:
-	- set login as marionette.application
-
-**/
 define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 	function($, Marionette, Backbone, config){
 
@@ -20,6 +15,10 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 
 			'newStation(/)': 'newStation',
 			'editStations(/)': 'editStations',
+			'importFile(/)': 'importFile',
+
+			'station(/):id': 'station',
+
 			'*route(/:page)': 'home',
 		},
 
@@ -30,7 +29,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			}).done( function() {
 				callback.apply(this, args);
 			}).fail( function(msg) {
-				document.location.href="http://127.0.0.1/NsPortal/Front"; 
+				document.location.href='http://127.0.0.1/NsPortal/Front'; 
 			});
 		},
 

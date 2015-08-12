@@ -1,10 +1,3 @@
-/**
-
-	TODO:
-	- toStep
-	- global model to children?
-
-**/
 
 define([
 	'jquery',
@@ -82,9 +75,7 @@ define([
 			this.translater = Translater.getTranslater();
 			this.currentStepIndex = 0;
 			this.models = [];
-
 			this.initSteps();
-			//this.initModels();
 		},
 
 		onDestroy: function(){
@@ -109,50 +100,55 @@ define([
 		cleanStepModel : function(){
 		},
 
+		beforeNext: function(){
+		},
+		beforePrev: function(){
+		},
+
 		prev: function(){
 			//no check assumed
 			//clear stored datas for the past steps
+			this.beforePrev(this.currentStepIndex);
+
 			this.cleanStepModel();
 			this.currentStepIndex--;
-			this.navigate();
+			if(this.currentStepIndex == -1){
+				this.quit();
+				return;
+			}else{
+				this.displayStep(this.currentStepIndex);
+			}
 		},
 		next: function(){
 			//check if the current step validates
 			var _this = this;
-			var temp = this.currentStep.validate();
-			//temp can be a boolean or a jqxhr
-			if(temp){
-				if(/*temp.readyState*/ false){ //2change
-					temp.done(function() {
-						//stores the required infos for the next step;
-						_this.models[_this.currentStepIndex] = _this.currentStep.model;
-						_this.currentStepIndex++;
-						_this.navigate();
-					});
-				}else{
-					_this.models[_this.currentStepIndex] = _this.currentStep.model;
+			var x = this.currentStep.validate();
 
-					_this.currentStepIndex++;
-					_this.navigate();
-
-				}
+			if(x){
+				this.beforeNext(x, _this.currentStepIndex);
+				$.when( x ).then( this.increment.bind(this) );
 			}else{
 				console.warn('verify the current step requirements');
 			}
-
 		},
 
-		navigate: function(){
-			if(this.currentStepIndex == -1){
-				this.quit();
-				return;
-			}
-			if(this.currentStepIndex == this.steps.length){
+		increment: function(){
+			//stores datas
+			this.models[this.currentStepIndex] = this.currentStep.model;
+			//then increments
+			this.currentStepIndex++;
+			if(this.currentStepIndex >= this.steps.length){
 				this.finished();
 				return;
+			}else if(this.currentStepIndex > this.steps.length){
+				this.currentStepIndex = this.steps.length;
+				return;
+			}else{
+				this.displayStep(this.currentStepIndex);
 			}
-			this.displayStep(this.currentStepIndex);
-			this.updateStepNav();
+		},
+
+		errors: function(){
 		},
 
 		//display a step by index
@@ -162,31 +158,25 @@ define([
 			if(this.currentStep){
 				this.unbindRequiredFields();
 			}
-
 			//get the options stored from the previous step;
 			if(index > 0){
 				var model = this.models[index - 1];
 			}
-
 			//display the step
 			this.currentStep = new this.steps[index]({model : model});
 			this.stepContent.show(this.currentStep);
 
-			//check if we have to wait to parse the template
-			if(this.currentStep.jqxhr){
-				this.currentStep.jqxhr.done(function(){
-					_this.bindRequiredFields();
-				});
+			if(this.currentStep.lastStep){
+				this.ui.btnNext.html('<span class="ctrl" data-i18n="stepper.btnNext"></span><i class="icon small reneco reneco-validate white action-picto"></i>');
 			}else{
-				this.bindRequiredFields();
+				this.ui.btnNext.html('<span class="ctrl" data-i18n="stepper.btnNext">Next</span><i class="icon small reneco reneco-rightarrow white action-picto"></i>');
 			}
-		},
 
-/*		initModels : function(){
-			for (var i = 0; i < this.steps.length ; i++) {
-				this.models[i] = new Backbone.Model();
-			};
-		},*/
+			this.updateStepNav();
+			//check if we have to wait to parse the template (bind evts)
+
+			$.when( this.currentStep.rdy ).then( this.bindRequiredFields.bind(this));
+		},
 
 		displayStepNav: function(){
 			//dipslay the list of step headers
@@ -215,9 +205,9 @@ define([
 		},
 
 		checkNextBtn: function(){
-			var errors = this.currentStep.check();
-			if(!errors){
-				this.enableNextBtn();
+			var x = this.currentStep.check();
+			if( x ){
+				$.when( x ).then( this.enableNextBtn.bind(this), this.disableNextBtn.bind(this) );
 			}else{
 				this.disableNextBtn();
 			}
@@ -229,7 +219,7 @@ define([
 				this.checkNextBtn(e);
 			}, this);
 			var required = this.$el.find('.required').each(function(){
-				$(this).on('keyup', _this.onEditEvt);
+				$(this).on('change', _this.onEditEvt);
 			});
 			if(!required.length){
 				//if no .required found, enable nextBtn
@@ -254,20 +244,25 @@ define([
 
 		finished: function(){
 			console.log('finished');
-		}
-,
+		},
+
 		quit: function(){
 			Backbone.history.navigate('', {trigger: true});
 		},
 
 		addStep: function(Step, index) {
-			console.log('test');
 			if(index < this.currentIndex){
 				this.currentIndex ++;
 			}
 			this.steps.splice(index, 0, Step);
 			name = Step.prototype.name;
 			this.ui.stepNav.children(':eq('+(index - 1)+')').after('<li><span class="badge">'+ (index+1) +'</span>'+ name +'<span class="chevron"></span></li>');
+		},
+
+		addSteps: function(steps, index){
+			for (var i = 0; i < steps.length; i++) {
+				this.addStep(steps[i], index+i);
+			}
 		},
 
 		removeStep: function(index){
@@ -285,6 +280,13 @@ define([
 			}
 
 			return step;
+		},
+
+		removeSteps: function(index){
+			//the tab is spliced so the index doesn't change ;)
+			for (var i = index; index < this.steps.length; i++) {
+				this.removeStep(index);
+			}
 		},
 
 

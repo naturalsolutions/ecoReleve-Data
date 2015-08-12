@@ -26,7 +26,11 @@ define([
 			'click button#submit' : 'filter',
 		},
 
-		name: 'step0',
+		ui: {
+			'stationId': '#stationId',
+		},
+
+		name: 'Sation selection',
 
 
 		onDestroy: function(){
@@ -36,6 +40,16 @@ define([
 		validate: function(){
 			this.model = this.currentRow.model;
 			return true;
+		},
+
+		/*==========  2 DO : Set the first station id  ==========*/
+		
+		check: function(){
+			if(this.currentRow){
+				return true;
+			}else{
+				return false;
+			}
 		},
 
 		initialize: function(options){
@@ -59,7 +73,12 @@ define([
 				url: config.coreUrl+'stations/',
 				urlParams : this.urlParams,
 				rowClicked : true,
-				totalElement : 'stations-count'
+				totalElement : 'stations-count',
+				onceFetched: function(){
+					var row = this.grid.body.rows[0];
+					_this.currentRow = row;
+					row.$el.addClass('active');
+				},
 			});
 
 			this.grid.rowClicked = function(row){
@@ -69,11 +88,7 @@ define([
 				_this.rowDbClicked(row);
 			};
 
-			this.filters = new NSFilter({
-				url: config.coreUrl + 'stations/',
-				com: this.com,
-				filterContainer: 'filters'
-			});
+
 		},
 
 		onShow : function(){
@@ -83,14 +98,22 @@ define([
 
 		displayGrid: function(){
 			var _this= this;
-			this.$el.find('#stationsGridContainer').html(_this.grid.displayGrid());
-			this.$el.find('#stationsGridPaginator').html(_this.grid.displayPaginator());
+			//could be in the module
+			this.$el.find('#grid').html(_this.grid.displayGrid());
+			this.$el.find('#paginator').html(_this.grid.displayPaginator());
+
+
 		},
 
 		displayFilters: function(){
+			this.filters = new NSFilter({
+				url: config.coreUrl + 'stations/',
+				com: this.com,
+				filterContainer: 'filters'
+			});
 		},
 
-		rowClicked: function(row) {
+		rowClicked: function(row){
 			//set station id
 			if(this.currentRow){
 				this.currentRow.$el.removeClass('active');
