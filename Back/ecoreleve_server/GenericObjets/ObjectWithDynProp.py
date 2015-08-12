@@ -140,7 +140,17 @@ class ObjectWithDynProp:
 
     def SetProperty(self,nameProp,valeur) :
         if hasattr(self,nameProp):
-            setattr(self,nameProp,valeur)
+            curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
+            if 'Date' in curTypeAttr :
+                print('\n\n Date detected *************************')
+                try : 
+                    val = nameProp.strftime('%d/%m/%Y %H:%M:%S')
+                except :
+                    val = nameProp.strftime('%d/%m/%Y')
+                    
+                setattr(self,val,valeur)
+            else :
+                setattr(self,nameProp,valeur)
         else:
             if (nameProp in self.GetType().DynPropNames):
                 if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):
@@ -181,35 +191,47 @@ class ObjectWithDynProp:
         return row[Cle[row['TypeProp']]]
 
     def UpdateFromJson(self,DTOObject):
-        print('UpdateFromJson')
+        # print('UpdateFromJson')
 
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id'):
-                print (curProp)
-                print(DTOObject[curProp])
+                # print (curProp)
+                # print(DTOObject[curProp])
                 self.SetProperty(curProp,DTOObject[curProp])
 
     def GetFlatObject(self):
         resultat = {}
 
-        max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow))
-        for i in range(max_iter) :
-            # Get static Properties #
-            try :
-                curStatProp = list(self.__table__.columns)[i]
-                resultat[curStatProp.key] = self.GetProperty(curStatProp.key)
-            except :
-                pass
-            # Get dynamic Properties #
-            try :
-                curDynPropName = list(self.PropDynValuesOfNow)[i]
-                resultat[curDynPropName] = self.GetProperty(curDynPropName)
-            except Exception as e :
-                pass
+        if self.ID is not None : 
+            max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow))
+            for i in range(max_iter) :
+                # Get static Properties #
+                try :
+                    curStatProp = list(self.__table__.columns)[i]
+                    resultat[curStatProp.key] = self.GetProperty(curStatProp.key)
+                except :
+                    pass
+                # Get dynamic Properties #
+                try :
+                    curDynPropName = list(self.PropDynValuesOfNow)[i]
+                    resultat[curDynPropName] = self.GetProperty(curDynPropName)
+                except Exception as e :
+                    pass
+        else : 
+            max_iter = len( self.__table__.columns)
+            for i in range(max_iter) :
+                # Get static Properties #
+                try :
+                    curStatProp = list(self.__table__.columns)[i]
+                    curVal = self.GetProperty(curStatProp.key)
+                    if curVal is not None :
+                        resultat[curStatProp.key] = self.GetProperty(curStatProp.key)
+                except :
+                    pass
 
         # Add TypeName in JSON
-        resultat['TypeName'] = self.GetType().Name
+        # resultat['TypeName'] = self.GetType().Name
 
         # TODO: manage foreign key
         #for curFK in self.__table__.foreign_keys:
@@ -239,20 +261,20 @@ class ObjectWithDynProp:
                 if CurModuleForm.FormRender > 2 :
                     curEditable = True
 
-                print(CurModuleForm.Name)
-                print(curSize)
+                # print(CurModuleForm.Name)
+                # print(curSize)
 
                 resultat[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,str(ModuleForm.GetClassFromSize(curSize)))
                 
-            else:
-                resultat[curStatProp.key] = {
-                'Name': curStatProp.key,
-                'type': 'Text',
-                'title' : curStatProp.key,
-                'editable' : curEditable,
-                'editorClass' : 'form-control' ,
-                'fieldClass' : ModuleForm.GetClassFromSize(2),
-                }
+            # else:
+            #     resultat[curStatProp.key] = {
+            #     'Name': curStatProp.key,
+            #     'type': 'Text',
+            #     'title' : curStatProp.key,
+            #     'editable' : curEditable,
+            #     'editorClass' : 'form-control' ,
+            #     'fieldClass' : ModuleForm.GetClassFromSize(2),
+            #     }
 
                # else:
             #     resultat[curStatProp.key] = {
@@ -289,6 +311,8 @@ class ObjectWithDynProp:
             resultat['data'] = data
             resultat['data']['id'] = self.ID
         else :
-            resultat['data'] = {'id':0}
+            data = self.GetFlatObject()
+            resultat['data'] = data
+            resultat['data']['id'] = 0
         return resultat
 

@@ -18,7 +18,7 @@ import numpy as np
 from sqlalchemy import select, and_,cast, DATE,func
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
-
+from traceback import print_exc
 
 
 prefix = 'stations'
@@ -28,13 +28,6 @@ prefix = 'stations'
 # def updateListStations(request):
 #     # TODO 
 #     # update a list of stations 
-#     return
-
-# @view_config(route_name= prefix, renderer='json', request_method = 'GET')
-# def getListStations(request):
-#     # TODO 
-#     # return list of stations 
-#     # can search/filter
 #     return
 
 
@@ -286,11 +279,9 @@ def searchStation(request):
     # print (Station.__table__.foreign_keys)
 
 
-    for obj in Station.__table__.foreign_keys :
-        if 'Type' not in obj.column.table.name : 
-            print (obj.parent.name)
-
-
+    # for obj in Station.__table__.foreign_keys :
+    #     if 'Type' not in obj.column.table.name : 
+    #         print (obj.parent.name)
 
     if 'lastImported' in data :
 
@@ -397,7 +388,6 @@ def GetProtocolsofStation (request) :
             listType =list(DBSession.query(FieldActivity_ProtocoleType
                 ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
             Conf = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleName ).first()
-
             ### TODO : if protocols exists, append the new protocol form at the after : 2 loops, no choice
             if listObs or listType:
                 # max_iter = max(len(listObs),len(listType))
@@ -414,14 +404,11 @@ def GetProtocolsofStation (request) :
                         try :
                             listProto[typeID]['obs'].append(obs.GetDTOWithSchema(Conf,DisplayMode))
                         except :
-                            
-
                             listObsWithSchema = []
                             listObsWithSchema.append(obs.GetDTOWithSchema(Conf,DisplayMode))
                             listProto[typeID] = {'Name': typeName,'obs':listObsWithSchema}
                             pass
-                    except : 
-                      
+                    except Exception as e :
                         pass
 
                 for i in range(len(listType)) :
@@ -447,9 +434,8 @@ def GetProtocolsofStation (request) :
                                 pass
 
                     except :
-                        
-                        pass
 
+                        pass
             globalListProto = [{'ID':objID, 'Name':listProto[objID]['Name'],'obs':listProto[objID]['obs'] } for objID in listProto.keys()]
 
             response = globalListProto
@@ -469,7 +455,7 @@ def insertNewProtocol (request) :
     data['FK_Station'] = request.matchdict['id']
 
     newProto = Observation(FK_ProtocoleType = data['FK_ProtocoleType'])
-    newProto.ProtocoleType = DBSession.query(ProtocoleType).filter(ProtocoleType.ID==data['FK_ProtocoleType']).first()
+    # newProto.ProtocoleType = DBSession.query(ProtocoleType).filter(ProtocoleType.ID==data['FK_ProtocoleType']).first()
     newProto.init_on_load()
     newProto.UpdateFromJson(data)
     DBSession.add(newProto)
@@ -519,7 +505,7 @@ def getObservation(request):
             except : 
                 DisplayMode = 'display'
 
-            Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='Observation' ).first()
+            Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='ObservationForm' ).first()
             response = curObs.GetDTOWithSchema(Conf,DisplayMode)
         else : 
             response  = curObs.GetFlatObject()
@@ -549,13 +535,14 @@ def countObs (request) :
 def getObsForms(request) :
 
     typeObs = request.params['ObjectType']
+    sta_id = request.matchdict['id']
     print('***************** GET FORMS ***********************')
-    ModuleName = 'Observation'
+    ModuleName = 'ObservationForm'
     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
-    newObs = Observation(FK_ProtocoleType = typeObs)
+    newObs = Observation(FK_ProtocoleType = typeObs, FK_Station = sta_id)
     newObs.init_on_load()
     schema = newObs.GetDTOWithSchema(Conf,'edit')
-    del schema['schema']['creationDate']
+    # del schema['schema']['creationDate']
     transaction.commit()
     return schema
 
