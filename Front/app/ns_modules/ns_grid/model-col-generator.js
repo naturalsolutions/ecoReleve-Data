@@ -20,7 +20,7 @@ define([
         initialize: function(options){
             this.checkedColl=options.checkedColl;
             this.getHeaderCell();
-
+            var self = this;
 
             if(options.paginable){
                 Backgrid.Column.prototype.defaults.headerCell = this.hc;
@@ -29,9 +29,21 @@ define([
            
                 this.columns= new Backgrid.Columns();
                 this.columns.url=options.url;
-                this.columns.fetch({reset: true, data: {'checked' : this.checkedColl}});
+                this.columns.fetch({reset: true, data: {'checked' : this.checkedColl}, success : function (data){
+                    //console.log(data);
+                    self.buildColumn();
+                }});
 
 
+        },
+
+        buildColumn : function () {
+            console.log('in Build Col');
+            for (var i=0; i < this.columns.length ; i++) {
+
+                console.log(this.columns[i]);
+                console.log(this.columns[i].get('cell'));
+            }
         },
 
         checkedColl: function(){

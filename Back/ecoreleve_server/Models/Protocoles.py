@@ -48,8 +48,6 @@ class Observation(Base,ObjectWithDynProp):
 
     def GetType(self):
         if self.ProtocoleType != None :
-            print ('___________GET TYPE ________') 
-            print (self.ProtocoleType.ID)
             return self.ProtocoleType
         else :
             return DBSession.query(ProtocoleType).get(self.FK_ProtocoleType)

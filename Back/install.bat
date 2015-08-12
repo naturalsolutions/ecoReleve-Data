@@ -7,5 +7,9 @@ conda install reportlab
 conda install scikit-learn
 conda install sqlalchemy
 conda install zope.interface
+conda install pywin32
+conda install pycrypto
+pip install jwt
+pip install pyramid_jwtauth
 
-python setup.py install
+python setup.py develop

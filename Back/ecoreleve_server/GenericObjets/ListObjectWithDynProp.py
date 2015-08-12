@@ -63,9 +63,18 @@ class ListObjectWithDynProp():
 
                 selectable.append(v.c['Value'+curDynProp['TypeProp']].label(curDynProp['Name']))
                 i+=1
+            # if objConf.QueryName is not None : 
+            #     return
+
 
         self.selectable = selectable
         return joinTable
+    def AddJoinFields (self,selectable,joinTable):
+
+        for obj in self.ObjWithDynProp.__table__.foreign_keys :
+            if 'Type' not in obj.column.table.name : 
+                return
+
 
     def GetDynPropList (self) : 
 
@@ -127,7 +136,7 @@ class ListObjectWithDynProp():
             fullQueryJoin = self.WhereInJoinTable(fullQueryJoin,obj)
             countQuery = self.WhereInJoinTable(countQuery,obj)
 
-        print(countQuery)
+        # print(countQuery)
         self.countQuery = countQuery 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
 
@@ -157,7 +166,7 @@ class ListObjectWithDynProp():
         query = self.countQuery
 
         count = DBSession.execute(query).scalar()
-        print(count)
+        # print(count)
         return count
 
     def OderByAndLimit (self, query, searchInfo) :
@@ -172,7 +181,7 @@ class ListObjectWithDynProp():
                 if curDynProp is not None :
                     viewAlias = self.vAliasList['v'+curDynProp['Name']]
                     trueCol = viewAlias.c['Value'+curDynProp['TypeProp']]
-                    print (trueCol)
+                    # print (trueCol)
 
                 else :
                     trueCol = curProp
