@@ -1,3 +1,8 @@
+from pyramid.httpexceptions import default_exceptionresponse_view, HTTPFound
+from pyramid.interfaces import IRoutesMapper
+
+def notfound(request):
+    return HTTPNotFound('Not found, bro.')
 
 ### test if the match url is integer
 def integers(*segment_names):
@@ -45,9 +50,8 @@ def add_routes(config):
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
 
 
-    config.add_route('stations/id/protocols', 'ecoReleve-Core/stations/{id}/protocols',custom_predicates = (integers('id'),))
+    config.add_route('stations/id/protocols', 'ecoReleve-Core/stations/{id}/protocols/',custom_predicates = (integers('id'),))
     # config.add_route('stations/id/protocols', 'ecoReleve-Core/stations/{id}/protocols/',custom_predicates = (integers('id'),))
-
 
 
     config.add_route('stations/id/protocols/obs_id', 'ecoReleve-Core/stations/{id}/protocols/{obs_id}',custom_predicates = (integers('id', 'obs_id'),))
@@ -78,7 +82,7 @@ def add_routes(config):
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
     config.add_route('sensors', 'ecoReleve-Sensor/{type}')
     config.add_route('sensors/id', 'ecoReleve-Sensor/{type}/{id}')
-
+    config.add_notfound_view(notfound, append_slash=True)
 
 
 

@@ -19,6 +19,7 @@ from sqlalchemy import select, and_,cast, DATE,func
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
+from sqlalchemy_utils import *
 
 
 prefix = 'stations'
@@ -266,6 +267,10 @@ def searchStation(request):
 
     data = request.params.mixed()
     searchInfo = {}
+    fk = get_referencing_foreign_keys(Station)
+    for obj in fk : 
+        print (obj.constraint.table)
+        print (type(obj.constraint.referred_table))
 
     searchInfo['criteria'] = []
     if 'criteria' in data: 
@@ -385,6 +390,7 @@ def GetProtocolsofStation (request) :
             ModuleName = 'ObservationForm'
 
             listObs = list(DBSession.query(Observation).filter(Observation.FK_Station == sta_id))
+            print(listObs)
             listType =list(DBSession.query(FieldActivity_ProtocoleType
                 ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
             Conf = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleName ).first()
@@ -401,6 +407,9 @@ def GetProtocolsofStation (request) :
                         typeName = obs.GetType().Name
                         typeID = obs.GetType().ID
                         obs.LoadNowValues()
+                        print(obs.ID)
+                        print(obs.PropDynValuesOfNow)
+                        print('\n')
                         try :
                             listProto[typeID]['obs'].append(obs.GetDTOWithSchema(Conf,DisplayMode))
                         except :
@@ -409,6 +418,7 @@ def GetProtocolsofStation (request) :
                             listProto[typeID] = {'Name': typeName,'obs':listObsWithSchema}
                             pass
                     except Exception as e :
+                        print('exception!!!')
                         pass
 
                 for i in range(len(listType)) :
@@ -434,12 +444,13 @@ def GetProtocolsofStation (request) :
                                 pass
 
                     except :
-
+                        print_exc()
                         pass
             globalListProto = [{'ID':objID, 'Name':listProto[objID]['Name'],'obs':listProto[objID]['obs'] } for objID in listProto.keys()]
 
             response = globalListProto
     except Exception as e :
+        print_exc()
         print (e)
         pass
     transaction.commit()
@@ -460,7 +471,7 @@ def insertNewProtocol (request) :
     newProto.UpdateFromJson(data)
     DBSession.add(newProto)
     DBSession.flush()
-    transaction.commit()
+    # transaction.commit()
     return {'id': newProto.ID}
 
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'PUT')

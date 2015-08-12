@@ -51,29 +51,34 @@ class Station(Base,ObjectWithDynProp):
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
     FK_Place = Column(Integer)
     
-    FieldWorkers = relationship('Station_FieldWorker', backref='Station',cascade="all, delete-orphan")
+    Station_FieldWorkers = relationship('Station_FieldWorker', backref='Station',cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON', name='_unique_constraint_lat_lon_date'),)
 
+
     @hybrid_property
-    def FieldWorkersNames (self):
-        if self.FieldWorkers:
+    def FieldWorkers(self):
+        if self.Station_FieldWorkers:
             fws_name = {}
             fw_string = 'FieldWorker'
             for i in range(len(self.FieldWorkers)) :
-                fws_name[fw_string+str(i+1)] = self.FieldWorkers[i].FieldWorkerName
+                fws_name[fw_string+str(i+1)] = self.Station_FieldWorkers[i].FieldWorkerID
             return fws_name
         else:
             return None
-    @FieldWorkersNames.setter
-    def FieldWorkersNames(self, values):
-        if not self.FieldWorkers:
+
+    @FieldWorkers.setter
+    def FieldWorkers(self, values):
+        if not self.Station_FieldWorkers:
             fws=[]
             for val in values : 
-                fws.append(Station_FieldWorker( FK_FieldWorker = val, FK_Station=self.ID))
-        # else:
-        #     self.FieldWorkers = self.accounts[0]
-            self.FieldWorkers = fws
-    
+                fws.append(Station_FieldWorker( FK_FieldWorker = int(val), FK_Station=self.ID))
+            self.Station_FieldWorkers = fws
+
+    @FieldWorkers.expression
+    def FieldWorkers(cls):
+        return Station_FieldWorker.id
+
+
     @orm.reconstructor
     def init_on_load(self):
         ObjectWithDynProp.__init__(self,DBSession)
@@ -96,6 +101,11 @@ class Station(Base,ObjectWithDynProp):
             return self.StationType
         else :
             return DBSession.query(StationType).get(self.FK_StationType)
+
+    def UpdateFromJson(self,DTOObject):
+        super().UpdateFromJson(self,DTOObject)
+        if 'FieldWorkers' in DTOObject :
+            self.FieldWorkers = DTOObject['FieldWorkers']
 
 
 class StationDynProp(Base):
@@ -125,7 +135,7 @@ class StationDynPropValue(Base):
 class StationType(Base,ObjectTypeWithDynProp):
 
     @orm.reconstructor
-    def init_on_load(self):        
+    def init_on_load(self):
         ObjectTypeWithDynProp.__init__(self,DBSession)
 
     __tablename__ = 'StationType'
@@ -161,6 +171,13 @@ class Station_FieldWorker (Base) :
     def FieldWorkerName (self):
         if self.FieldWorker:
             return self.FieldWorker.Login
+        else:
+            return None
+
+    @hybrid_property
+    def FieldWorkerID (self):
+        if self.FieldWorker:
+            return self.FieldWorker.id
         else:
             return None
 
