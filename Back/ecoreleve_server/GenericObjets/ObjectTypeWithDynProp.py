@@ -48,12 +48,12 @@ class ObjectTypeWithDynProp:
         Values = self.ObjContext.execute(curQuery).fetchall()
         Editable = (DisplayMode.lower()  == 'edit')
         Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).filter(or_(ModuleForm.TypeObj == self.ID, ModuleForm.TypeObj == None)).all()
-        print(Fields)
+        # print(Fields)
 
 
         for CurModuleForm in Fields : 
             curEditable = Editable
-            print(CurModuleForm.Name)
+            # print(CurModuleForm.Name)
             #CurModuleForm = list(filter(lambda x : x.Name == curValue['Name'], Fields))
 
             #if (len(CurModuleForm)> 0 ):
@@ -61,6 +61,7 @@ class ObjectTypeWithDynProp:
                 # Conf définie dans FrontModule                
             #CurModuleForm = CurModuleForm[0]
                 # TODO : Gestion champ read ONly
+
             #print(CurModuleForm)
             curSize = CurModuleForm.FieldSizeDisplay
             if curEditable:
@@ -104,33 +105,34 @@ class ObjectTypeWithDynProp:
         fields = []
         other = []
         Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).filter(or_(ModuleForm.TypeObj == self.ID, ModuleForm.TypeObj == None)).all()
-        print(Fields)
+        # print(Fields)
         Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
         Legend2s = sorted ([(obj.Legend)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
-        print(Legends)
+        # print(Legends)
 
         Unique_Legends = list()
-        print(Unique_Legends)
+        # print(Unique_Legends)
         # Get distinct Fieldset in correct order
         for x in Legends:
-            print(x)
-            print(x[0])
+            # print(x)
+            # print(x[0])
             if x[0] not in Unique_Legends:
                 Unique_Legends.append(x[0])
 
-        print('********************************************************* Getfieldsset ')
-        print(Unique_Legends)
+        # print('********************************************************* Getfieldsset ')
+        # print(Unique_Legends)
         
         resultat = []
         for curLegend in Unique_Legends:
             curFieldSet = {'fields' :[],'legend' : curLegend}
             resultat.append(curFieldSet)
-        print(Legends)
+        # print(Legends)
 
         for curProp in Legends:
-            print(curProp)
+            # print(curProp)
             curIndex = Unique_Legends.index(curProp[0])
             resultat[curIndex]['fields'].append(curProp[2])
+
         return resultat
 
 

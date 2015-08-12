@@ -35,7 +35,7 @@ from ecoreleve_server.pyramid_jwtauth import (
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects.
     """
-    return str(obj)
+    return obj.strftime ('%d/%m/%Y %H:%M:%S')
     
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects.
