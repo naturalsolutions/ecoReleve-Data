@@ -14,6 +14,12 @@ define(['marionette', 'config',
 
 	'./modules/newStation/lyt-entry-new-station',
 	'./modules/editStations/lyt-entry-edit-stations',
+	'./modules/newStation/layouts/lyt-step1',
+	
+	'./modules/importFile/lyt-entry-importFile',
+	
+
+
 
 ],function( Marionette, config, 
 	LytHome,
@@ -28,7 +34,11 @@ define(['marionette', 'config',
 	LytSta,
 
 	LytNewStation,
-	LytEditStations
+	LytEditStations,
+	LytStationManager,
+
+	LytImportFile
+
 ){
 	'use strict';
 	return Marionette.Object.extend({
@@ -70,5 +80,16 @@ define(['marionette', 'config',
 		editStations: function(){
 			this.rgMain.show(new LytEditStations());
 		},
+
+		importFile: function(){
+			this.rgMain.show(new LytImportFile());
+		},
+
+		station: function(options){
+			this.rgMain.show(new LytStationManager({id: options}));
+		},
+
+
+
 	});
 });

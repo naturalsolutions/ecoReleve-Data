@@ -26,7 +26,7 @@ define([
 
 		template: 'app/modules/newStation/templates/tpl-step1.html',
 
-		name : 'step1',
+		name : 'Protocol managing',
 
 		regions: {
 			rgStation: '#rgStation',
@@ -44,7 +44,11 @@ define([
 
 
 		initialize: function(options){
-
+			if(options.id){
+				this.stationId = options.id;
+			}else{
+				this.stationId = options.model.get('ID');
+			}
 		},
 
 		check: function(){
@@ -52,10 +56,6 @@ define([
 		},
 
 		validate: function(){
-
-		},
-
-		setJqxhr: function(jqxhr){
 
 		},
 
@@ -80,7 +80,6 @@ define([
 			
 
 			var stationType = 1;
-			this.stationId = 1;
 
 
 			this.nsForm = new NsForm({

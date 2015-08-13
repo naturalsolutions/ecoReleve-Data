@@ -27,7 +27,7 @@ define([
 
 		template: 'app/modules/newStation/templates/tpl-step1.html',
 
-		name : 'step1',
+		name : 'Protocol managing',
 
 		regions: {
 			rgStation: '#rgStation',
@@ -45,7 +45,11 @@ define([
 
 
 		initialize: function(options){
-
+			if(options.id){
+				this.stationId = options.id;
+			}else{
+				this.stationId = options.model.get('ID');
+			}
 		},
 
 		check: function(){
@@ -56,20 +60,12 @@ define([
 
 		},
 
-		setJqxhr: function(jqxhr){
-
-		},
-
-		getStepOptions: function(){
-
-		},
 
 		onDestroy: function(){
 		},
 
 		onShow: function(){
 			var _this = this;
-			this.stationId = this.options.model.get('ID');
 			var stationType = 1;
 
 
@@ -219,10 +215,7 @@ define([
 						hrefTextPrefix: '',
 						onPageClick: function(pageNumber){
 							_this.current.addClass('hidden');
-
-
 							_this.current = $('#'+_this.type).find(_this.indexPageList[pageNumber-1]);
-
 							_this.current.removeClass('hidden');
 						},
 					});
