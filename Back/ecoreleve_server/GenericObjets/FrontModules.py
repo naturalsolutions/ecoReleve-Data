@@ -9,40 +9,41 @@ def isRenderable (int_Render) :
         return int(int_Render) > 0 
 
 def isEditable (int_Render) :
-    return int(int_Render) > 2
+    edit = int(int_Render) > 2
+    return edit
 
 
-class FrontModule(Base):
-    __tablename__ = 'FrontModule'
+class FrontModules(Base):
+    __tablename__ = 'FrontModules'
     ID =  Column(Integer,Sequence('FrontModule__id_seq'), primary_key=True)
     Name = Column(Unicode(250))
     TypeModule = Column(Unicode(250))
     Comments = Column(String)
 
-    ModuleForms = relationship('ModuleForm',lazy='dynamic',back_populates='FrontModule')
-    ModuleGrids = relationship('ModuleGrid',lazy='dynamic',back_populates='FrontModule')
+    ModuleForms = relationship('ModuleForms',lazy='dynamic',back_populates='FrontModules')
+    ModuleGrids = relationship('ModuleGrids',lazy='dynamic',back_populates='FrontModules')
 
-class ModuleForm(Base):
-    __tablename__ = 'ModuleForm'
+class ModuleForms(Base):
+    __tablename__ = 'ModuleForms'
     ID = Column(Integer,Sequence('ModuleForm__id_seq'), primary_key=True)
-    FK_FrontModule = Column(Integer, ForeignKey('FrontModule.ID'))
+    Module_ID = Column(Integer, ForeignKey('FrontModules.ID'))
     TypeObj = Column(Unicode(250))
     Name = Column(Unicode(250))
-    LabelFr = Column(Unicode(250))
+    Label = Column(Unicode(250))
     Required = Column(Integer)
     FieldSizeEdit = Column(Integer)
     FieldSizeDisplay = Column(Integer)
     InputType = Column(Unicode(100))
     editorClass = Column(Unicode(100))
     displayClass = Column(Unicode(150))
-    fieldClass = Column(Unicode(100))
+    EditClass = Column(Unicode(100))
     FormRender = Column(Integer)
     FormOrder = Column(Integer)
     Legend = Column(Unicode(500))
     Options = Column (String)
     Validators = Column(String)
 
-    FrontModule = relationship("FrontModule", back_populates="ModuleForms")
+    FrontModules = relationship("FrontModules", back_populates="ModuleForms")
 
         
     @staticmethod
@@ -56,10 +57,9 @@ class ModuleForm(Base):
         dto = {
             'Name': self.Name,
             'type': self.InputType,
-            'title' : self.LabelFr,
+            'title' : self.Label,
             'editable' : IsEditable,
             'editorClass' : str(self.editorClass) ,
-            'fieldClass' : str(self.fieldClass) + ' ' + CssClass,
             'validators': [],
             'options': []
             }
@@ -79,15 +79,20 @@ class ModuleForm(Base):
                 dto['options'].append(temp)
             dto['options'] = sorted(dto['options'], key=lambda k: k['label'])
             # TODO changer le validateur pour select required (valeur <>-1)
+        if isEditable :
+            dto['fieldClass'] = str(self.EditClass) + ' ' + CssClass
+        else :
+            dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
+
         return dto
 
 
-class ModuleGrid (Base) :
-    __tablename__ = 'ModuleGrid'
+class ModuleGrids (Base) :
+    __tablename__ = 'ModuleGrids'
 
     ID = Column(Integer,Sequence('ModuleGrid__id_seq'), primary_key=True)
-    FK_FrontModule = Column(Integer, ForeignKey('FrontModule.ID'))
-    FK_TypeObj =  Column(Integer)
+    Module_ID = Column(Integer, ForeignKey('FrontModules.ID'))
+    TypeObj =  Column(Integer)
     Name = Column(String)
     Label = Column(String)
     GridRender = Column(Integer)
@@ -104,11 +109,18 @@ class ModuleGrid (Base) :
     FilterType = Column (String)
     FilterClass = Column (String)
 
-    FrontModule = relationship("FrontModule", back_populates="ModuleGrids")
+    FrontModules = relationship("FrontModules", back_populates="ModuleGrids")
     
+    def FKName (self):
+
+        if self.QueryName is None : 
+            return self.Name 
+        else : 
+            return self.QueryName
+
     def GenerateColumn (self):
         column = {
-        'name' : self.Name,
+        'name' :self.FKName(),
         'label' : self.Label,
         'renderable': isRenderable(self.GridRender),
         'editable': isEditable(self.GridRender),

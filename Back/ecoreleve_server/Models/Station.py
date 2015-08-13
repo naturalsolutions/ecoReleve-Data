@@ -22,7 +22,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
-from ..GenericObjets.FrontModules import FrontModule,ModuleGrid
+from ..GenericObjets.FrontModules import FrontModules,ModuleGrids
 from ecoreleve_server.Models import FieldActivity
 from datetime import datetime
 from collections import OrderedDict

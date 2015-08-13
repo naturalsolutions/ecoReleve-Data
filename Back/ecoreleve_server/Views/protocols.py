@@ -6,7 +6,7 @@ from ..Models import (
     FieldActivity_ProtocoleType,
     fieldActivity
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModule
+from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 import transaction
 import json
 from datetime import datetime
@@ -50,7 +50,7 @@ def getForms(request) :
     typeProto = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
     ModuleName = 'ObsForm'
-    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newProto = Observation(FK_ProtocoleType = typeProto)
 
     # newProto.init_on_load()
@@ -124,7 +124,7 @@ def getProtocol (request):
             DisplayMode = request.params['DisplayMode']
         except : 
             DisplayMode = 'display'
-        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='ObsForm' ).first()
+        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='ObsForm' ).first()
         curProt.LoadNowValues()
         response = curProt.GetDTOWithSchema(Conf,DisplayMode)
     else : 

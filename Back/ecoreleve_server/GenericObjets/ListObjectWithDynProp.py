@@ -7,7 +7,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship, aliased
 from collections import OrderedDict
 from datetime import datetime
-from .FrontModules import FrontModule,ModuleGrid
+from .FrontModules import FrontModules,ModuleGrids
 import transaction
 from ecoreleve_server.utils import Eval
 import pandas as pd
@@ -36,20 +36,34 @@ class ListObjectWithDynProp():
 
     def GetAllPropNameInConf(self) :
 
-        DynPropsDisplay = list(filter(lambda x : x.IsSearchable == True or x.GridRender > 2  , self.Conf))
+        DynPropsDisplay = list(filter(lambda x : x.IsSearchable == True or x.GridRender >= 2  , self.Conf))
         return DynPropsDisplay
 
     def GetJoinTable (self) :
         ''' build join table to filter and retrieve all data type (Static and Dynamic) '''
         joinTable = self.ObjWithDynProp
         view = self.GetDynPropValueView()
-        selectable = [self.ObjWithDynProp]
+        selectable = [self.ObjWithDynProp.ID]
         i = 1
+        objTable = self.ObjWithDynProp.__table__
+
+        #  get all foreign keys
+        fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
+
         for objConf in self.GetAllPropNameInConf() :
 
             curDynProp = self.GetDynProp(objConf.Name)
 
-            if curDynProp != None:
+            if objConf.Name in fk_list and objConf.QueryName is not None:
+                print('--------- ITS A FK --------------')
+                print(fk_list[objConf.Name].column.table)
+                tableRef = fk_list[objConf.Name].column.table
+                nameRef = fk_list[objConf.Name].column.name
+                joinTable = outerjoin (joinTable,tableRef,objTable.c[objConf.Name] == tableRef.c[nameRef])
+                selectable.append(tableRef.c[objConf.QueryName])
+
+
+            elif curDynProp != None:
 
                 v = view.alias('v'+curDynProp['Name'])
 
@@ -63,8 +77,8 @@ class ListObjectWithDynProp():
 
                 selectable.append(v.c['Value'+curDynProp['TypeProp']].label(curDynProp['Name']))
                 i+=1
-            # if objConf.QueryName is not None : 
-            #     return
+            else :
+                selectable.append(objTable.c[objConf.Name])
 
 
         self.selectable = selectable

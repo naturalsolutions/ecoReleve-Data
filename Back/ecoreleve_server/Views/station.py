@@ -7,7 +7,7 @@ from ..Models import (
     FieldActivity_ProtocoleType,
     Station_FieldWorker
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModule
+from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
 import transaction
 import json
@@ -19,7 +19,7 @@ from sqlalchemy import select, and_,cast, DATE,func
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
-from sqlalchemy_utils import *
+
 
 
 prefix = 'stations'
@@ -82,7 +82,7 @@ def getForms(request) :
     typeSta = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
     ModuleName = 'StationForm'
-    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newSta = Station(FK_StationType = typeSta)
     newSta.init_on_load()
     schema = newSta.GetDTOWithSchema(Conf,'edit')
@@ -131,7 +131,7 @@ def getStation(request):
         except : 
             DisplayMode = 'display'
 
-        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='StationForm' ).first()
+        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='StationForm' ).first()
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
     else : 
         response  = curSta.GetFlatObject()
@@ -267,10 +267,6 @@ def searchStation(request):
 
     data = request.params.mixed()
     searchInfo = {}
-    fk = get_referencing_foreign_keys(Station)
-    for obj in fk : 
-        print (obj.constraint.table)
-        print (type(obj.constraint.referred_table))
 
     searchInfo['criteria'] = []
     if 'criteria' in data: 
@@ -281,12 +277,6 @@ def searchStation(request):
     searchInfo['order_by'] = json.loads(data['order_by'])
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
-    # print (Station.__table__.foreign_keys)
-
-
-    # for obj in Station.__table__.foreign_keys :
-    #     if 'Type' not in obj.column.table.name : 
-    #         print (obj.parent.name)
 
     if 'lastImported' in data :
 
@@ -321,7 +311,7 @@ def searchStation(request):
 
     ModuleType = 'StationGrid'
 
-    moduleFront  = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleType).one()
+    moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     # criteria = [
     #     {'Column' : 'StationDate',
     #     'Operator' : '>=',
@@ -363,6 +353,7 @@ def searchStation(request):
         return result
 
 
+@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def GetProtocolsofStation (request) :
 
@@ -393,7 +384,7 @@ def GetProtocolsofStation (request) :
             print(listObs)
             listType =list(DBSession.query(FieldActivity_ProtocoleType
                 ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
-            Conf = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleName ).first()
+            Conf = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleName ).first()
             ### TODO : if protocols exists, append the new protocol form at the after : 2 loops, no choice
             if listObs or listType:
                 # max_iter = max(len(listObs),len(listType))
@@ -407,9 +398,6 @@ def GetProtocolsofStation (request) :
                         typeName = obs.GetType().Name
                         typeID = obs.GetType().ID
                         obs.LoadNowValues()
-                        print(obs.ID)
-                        print(obs.PropDynValuesOfNow)
-                        print('\n')
                         try :
                             listProto[typeID]['obs'].append(obs.GetDTOWithSchema(Conf,DisplayMode))
                         except :
@@ -456,6 +444,7 @@ def GetProtocolsofStation (request) :
     transaction.commit()
     return response
 
+@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'POST', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST')
 def insertNewProtocol (request) :
 
@@ -516,7 +505,7 @@ def getObservation(request):
             except : 
                 DisplayMode = 'display'
 
-            Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='ObservationForm' ).first()
+            Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='ObservationForm' ).first()
             response = curObs.GetDTOWithSchema(Conf,DisplayMode)
         else : 
             response  = curObs.GetFlatObject()
@@ -549,7 +538,7 @@ def getObsForms(request) :
     sta_id = request.matchdict['id']
     print('***************** GET FORMS ***********************')
     ModuleName = 'ObservationForm'
-    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newObs = Observation(FK_ProtocoleType = typeObs, FK_Station = sta_id)
     newObs.init_on_load()
     schema = newObs.GetDTOWithSchema(Conf,'edit')
