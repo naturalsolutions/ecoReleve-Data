@@ -79,6 +79,8 @@ class ModuleForm(Base):
                 dto['options'].append(temp)
             dto['options'] = sorted(dto['options'], key=lambda k: k['label'])
             # TODO changer le validateur pour select required (valeur <>-1)
+        if self.InputType == 'AutocompTreeEditor' and self.Options is not None :
+            dto['options'] = {"startId":self.Options,"wsUrl":"http://192.168.1.199/ThesaurusCore","lng":"fr"}
         return dto
 
 

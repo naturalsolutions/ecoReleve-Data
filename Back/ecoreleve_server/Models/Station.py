@@ -102,10 +102,10 @@ class Station(Base,ObjectWithDynProp):
         else :
             return DBSession.query(StationType).get(self.FK_StationType)
 
-    def UpdateFromJson(self,DTOObject):
-        super().UpdateFromJson(self,DTOObject)
-        if 'FieldWorkers' in DTOObject :
-            self.FieldWorkers = DTOObject['FieldWorkers']
+    # def UpdateFromJson(self,DTOObject):
+    #     super().UpdateFromJson(self,DTOObject)
+    #     if 'FieldWorkers' in DTOObject :
+    #         self.FieldWorkers = DTOObject['FieldWorkers']
 
 
 class StationDynProp(Base):

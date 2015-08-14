@@ -47,7 +47,7 @@ define([
 			if(options.id){
 				this.stationId = options.id;
 			}else{
-				this.stationId = options.model.get('ID');
+				this.stationId = options.model.get('id');
 			}
 		},
 
