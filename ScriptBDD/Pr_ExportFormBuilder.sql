@@ -1,17 +1,20 @@
-CREATE PROCEDURE [dbo].[pr_ExportFormBuilder]
+ALTER PROCEDURE [dbo].[pr_ExportFormBuilder](
+@LastExport DATETIME
+)
 AS
 BEGIN
 
 
-DELETE FormBuilderFormsInfos WHERE exists(select * from formbuilder.dbo.Form fo where FormBuilderFormsInfos.FBID = fo.pk_Form)
+DELETE FormBuilderInputProperty 
+DELETE FormBuilderInputInfos 
+DELETE FormBuilderFormsInfos 
 
-DELETE FormBuilderInputInfos WHERE exists(select * from formbuilder.dbo.Input fi where FormBuilderInputInfos.FBID = fi.pk_Input)
 
-DELETE FormBuilderInputProperty WHERE exists(select * from formbuilder.dbo.[InputProperty] IP where FormBuilderInputProperty.FBID = IP.pk_InputProperty)    
+
 
       
- INSERT INTO [NewModelERD].[dbo].[FormBuilderFormsInfos]
-           ([FBID]
+ INSERT INTO [FormBuilderFormsInfos]
+           (ID
            ,[name]
            ,[labelFr]
            ,[labelEn]
@@ -19,7 +22,8 @@ DELETE FormBuilderInputProperty WHERE exists(select * from formbuilder.dbo.[Inpu
            ,[modificationDate]
            ,[curStatus]
            ,[descriptionFr]
-           ,[descriptionEn])
+           ,[descriptionEn]
+           ,ObjectType)
  
  SELECT   pk_form
            ,[name]
@@ -30,27 +34,14 @@ DELETE FormBuilderInputProperty WHERE exists(select * from formbuilder.dbo.[Inpu
            ,[curStatus]
            ,[descriptionFr]
            ,[descriptionEn]
- FROM formbuilder.dbo.Form fo where not exists(select * from [FormBuilderFormsInfos] fbf where fbf.FBID = fo.pk_Form)
- 
+           ,'Procotole'
+ FROM formbuilder.dbo.Form fo WHERE (fo.modificationDate IS NULL and fo.creationDate > @LastExport) OR (fo.modificationDate IS NOT NULL and fo.modificationDate > @LastExport)
+ -- TODO ajouter le nom de l'application
 
 
 
-INSERT INTO [NewModelERD].[dbo].[FormBuilderInputInfos]
-           ([FBID]
-           ,[fk_form]
-           ,[name]
-           ,[labelFr]
-           ,[labelEn]
-           ,[required]
-           ,[readonly]
-           ,[fieldSize]
-           ,[endOfLine]
-           ,[startDate]
-           ,[curStatus]
-           ,[type]
-           ,[editorClass]
-           ,[fieldClass]) 
-SELECT pk_Input
+INSERT INTO [FormBuilderInputInfos]
+           (ID
            ,[fk_form]
            ,[name]
            ,[labelFr]
@@ -64,24 +55,46 @@ SELECT pk_Input
            ,[type]
            ,[editorClass]
            ,[fieldClass]
-           FROM formbuilder.dbo.Input I where not exists(select * from [FormBuilderInputInfos] fbi where fbi.FBID = I.pk_Input)
+           ,[linkedFieldTable]
+           ,[linkedFieldIdentifyingColumn]
+           ,[linkedField]
+           ,[formIdentifyingColumn]
+           ,[order])
+SELECT pk_Input
+           ,I.[fk_form]
+           ,I.[name]
+           ,I.[labelFr]
+           ,I.[labelEn]
+           ,I.[required]
+           ,I.[readonly]
+           ,I.[fieldSize]
+           ,I.[endOfLine]
+           ,I.[startDate]
+           ,I.[curStatus]
+           ,I.[type]
+           ,I.[editorClass]
+           ,I.[fieldClass]
+           ,I.[linkedFieldTable]
+           ,I.[linkedFieldIdentifyingColumn]
+           ,I.[linkedField]
+           ,I.[formIdentifyingColumn]
+           ,I.[order]
+           FROM formbuilder.dbo.Input I WHERE i.fk_form in (select ID from [FormBuilderFormsInfos])
 
-INSERT INTO [NewModelERD].[dbo].FormBuilderInputProperty
-( 
-FBID ,
-fk_input,
-name,
-value ,
-creationDate,
-valueType
- )
+INSERT INTO [FormBuilderInputProperty]
+           ([ID]
+           ,[fk_Input]
+           ,[name]
+           ,[value]
+           ,[creationDate]
+           ,[valueType])
  SELECT [pk_InputProperty]
       ,[fk_Input]
-      ,[name]
-      ,[value]
-      ,[creationDate]
-      ,[valueType]
-  FROM [formbuilder].[dbo].[InputProperty] IP where not exists(select * from FormBuilderInputProperty fbip where fbip.FBID = IP.pk_InputProperty)
+      ,IP.[name]
+      ,IP.[value]
+      ,IP.[creationDate]
+      ,IP.[valueType]
+  FROM [formbuilder].[dbo].[InputProperty] IP WHERE fk_Input in (select ID FROM [FormBuilderInputInfos])
  
 
 END
