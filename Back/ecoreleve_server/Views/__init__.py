@@ -44,19 +44,12 @@ def add_routes(config):
     config.add_route('locality', 'ecoReleve-Core/locality')
     config.add_route('stations', 'ecoReleve-Core/stations/') 
     config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
-
-
-
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
 
-
+    ##### Stations/Protocols #####
     config.add_route('stations/id/protocols', 'ecoReleve-Core/stations/{id}/protocols',custom_predicates = (integers('id'),))
     config.add_route('stations/id/protocols/', 'ecoReleve-Core/stations/{id}/protocols/',custom_predicates = (integers('id'),))
-
-
     config.add_route('stations/id/protocols/obs_id', 'ecoReleve-Core/stations/{id}/protocols/{obs_id}',custom_predicates = (integers('id', 'obs_id'),))
-
-
     config.add_route('stations/id/protocols/action', 'ecoReleve-Core/stations/{id}/protocols/{action}')
 
     ##### Protocols #####

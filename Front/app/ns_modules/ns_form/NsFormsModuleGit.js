@@ -72,7 +72,7 @@ define([
 			this.name = options.name;
 			this.buttonRegion = options.buttonRegion;
 			this.formRegion = options.formRegion;
-			if (options.reloadAfterSave != null) { this.reloadAfterSave = options.reloadAfterSave };
+			this.reloadAfterSave = options.reloadAfterSave || this.reloadAfterSave;
 			// The template need formname as vrairable, to make it work if several NSForms in the same page
 			// With adding formname, there will be no name conflit on Button class
 			var variables = { formname: this.name };

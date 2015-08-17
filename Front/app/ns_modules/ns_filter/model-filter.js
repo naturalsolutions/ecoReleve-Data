@@ -7,7 +7,8 @@ define([
 	'requirejs-text!./Templates/tpl-CheckBoxes.html',
 	'radio',
 	'moment',
-	'vendors/backboneForm-editors'
+	'vendors/backboneForm-editors',
+	'vendors/backboneForm-editors-autoCompTree',
 
 ], function ($, _, Backbone, BbForms, tpl, tplcheck, Radio, moment) {
 	'use strict';

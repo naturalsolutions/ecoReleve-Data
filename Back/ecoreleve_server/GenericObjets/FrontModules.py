@@ -76,9 +76,10 @@ class ModuleForms(Base):
         else :
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
 
+            # TODO changer le validateur pour select required (valeur <>-1)
+
         if self.InputType in self.func_type_context :
             self.func_type_context[self.InputType](self)
-
         return self.dto
 
     def InputSelect (self) :
@@ -112,9 +113,14 @@ class ModuleForms(Base):
             'subschema' : subschema
             }
 
+    def InputThesaurus(self) :
+        if self.Options is not None :
+            self.dto['options'] = {"startId":self.Options,"wsUrl":"http://192.168.1.199/ThesaurusCore","lng":"fr"}
+
     func_type_context = {
         'Select': InputSelect,
-        'ListOfNestedModel' : InputLNM
+        'ListOfNestedModel' : InputLNM,
+        'AutocompTreeEditor' : InputThesaurus
         }
 
 

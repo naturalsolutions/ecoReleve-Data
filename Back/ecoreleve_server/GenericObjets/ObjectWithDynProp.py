@@ -150,7 +150,6 @@ class ObjectWithDynProp:
                     NouvelleValeur = self.GetNewValue(nameProp)
                     NouvelleValeur.StartDate = datetime.today()
                     setattr(NouvelleValeur,Cle[self.GetDynProps(nameProp).TypeProp],valeur)
-
                     self.PropDynValuesOfNow[nameProp] = valeur
                     self.GetDynPropValues().append(NouvelleValeur)
                 else:

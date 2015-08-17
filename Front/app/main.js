@@ -139,6 +139,7 @@ require.config({
 			exports : 'SimplePagination'
 		},
 		fancytree :  {
+			deps:['jqueryui'],
 			exports : 'Fancytree'
 		},
 		autocompTree : {

@@ -21,16 +21,12 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
 
 
-
 prefix = 'stations'
-
-
 # @view_config(route_name= prefix, renderer='json', request_method = 'PUT')
 # def updateListStations(request):
 #     # TODO 
 #     # update a list of stations 
 #     return
-
 
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 
@@ -47,10 +43,8 @@ def actionOnStations(request):
     return dictActionFunc[actionName](request)
 
 def count_ (request = None,listObj = None) :
-#   ## TODO count stations
 
     print('*****************  STATION COUNT***********************')
-
     if request is not None : 
         data = request.params
         if 'criteria' in data: 
@@ -62,9 +56,7 @@ def count_ (request = None,listObj = None) :
         count = listObj.count(searchInfo = searchInfo)
     else : 
         count = listObj.count()
-
     return count 
-
 
 def getFilters (request):
 
@@ -76,7 +68,6 @@ def getFilters (request):
     transaction.commit()
     return filters
 
-
 def getForms(request) :
 
     typeSta = request.params['ObjectType']
@@ -86,32 +77,12 @@ def getForms(request) :
     newSta = Station(FK_StationType = typeSta)
     newSta.init_on_load()
     schema = newSta.GetDTOWithSchema(Conf,'edit')
-    # schema['data']['FieldWorkers'] = [{'FieldWorker':1},{'FieldWorker':2}]
-    # # del schema['schema']['creationDate']
     transaction.commit()
     return schema
 
 def getFields(request) :
-### TODO return fields Station
-    
-    ### GET example #####
-    
-    # sta = DBSession.query(Station).get(1)
-    # fieldworkers = sta.StationDynPropValues
-    # print(fieldworkers)
-    # 
-    #### INSERT example #####
-    # sta = Station(FK_StationType = 1 , StationDate='12/12/2015 00:00:00' , fieldActivityId = 1)
-    # sta.FieldWorkersNames = [1,2,6,1,1,1,1,1]
-    # DBSession.add(sta)
-    # transaction.commit()
-    # 
-    # # #### DELETE  example #####
-    # curSta = DBSession.query(Station).get(2484)
-    # DBSession.delete(curSta)
-    # transaction.commit()
-    ModuleType = 'StationGrid'
-    
+
+    ModuleType = 'StationGrid'    
     cols = Station().GetGridFields(ModuleType)
     transaction.commit()
     return cols
@@ -179,43 +150,36 @@ def insertOneNewStation (request) :
     for items , value in request.json_body.items() :
         if value != "" :
             data[items] = value
-    # data = {
-    # 'ELE': 1,
-    # 'FK_StationType': "1",
-    # 'FieldWorkers': [1,2,6],
-    # 'LAT': 1,
-    # 'LON': 1,
-    # 'Name': "sasasas",
-    # 'StationDate': "10/01/2019 00:00:00",
-    # 'fieldActivityId': "4",
-    # 'precision': 1
-    # }
+
     newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid)
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
+    print (newSta.__dict__)
     DBSession.add(newSta)
     DBSession.flush()
     # transaction.commit()
     return {'id': newSta.ID}
 
 def insertListNewStations(request):
-    DTO = request.json_body
+
+    data = request.json_body
     data_to_insert = []
     format_dt = '%Y-%m-%d %H:%M:%S'
     format_dtBis = '%Y-%d-%m %H:%M:%S'
     dateNow = datetime.now()
 
     ##### Rename field and convert date #####
-    for row in DTO :
+    #TODO
+    for row in data :
         newRow = {}
         newRow['LAT'] = row['latitude']
         newRow['LON'] = row['longitude']
         newRow['Name'] = row['name']
         newRow['fieldActivityId'] = 1
-        newRow['precision'] = row['Precision']
+        newRow['precision'] = 10 #row['Precision']
         newRow['creationDate'] = dateNow
-        newRow['creator'] = request.authenticated_userid
+        newRow['creator'] = 1 #request.authenticated_userid
         newRow['FK_StationType']=4
         newRow['id'] = row['id']
 
@@ -251,7 +215,6 @@ def insertListNewStations(request):
         result_to_check = pd.DataFrame(data=result_to_check, columns = Station.__table__.columns.keys())
         result_to_check['LAT'] = result_to_check['LAT'].astype(float)
         result_to_check['LON'] = result_to_check['LON'].astype(float)
-
         merge_check = pd.merge(DF_to_check,result_to_check , on =['LAT','LON','StationDate'])
 
         ##### Get only non existing data to insert #####
@@ -266,10 +229,9 @@ def insertListNewStations(request):
         res = DBSession.execute(stmt).fetchall()
         result = list(map(lambda y: {'FK_Station' : y[0], }, res))
 
-
     ###### Insert FieldWorkers
-        if not DTO[0]['FieldWorkers'] == None or "" :
-            list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK': b  },result)),DTO[0]['FieldWorkers'] ))
+        if not data[0]['FieldWorkers'] == None or "" :
+            list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK': b  },result)),data[0]['FieldWorkers'] ))
             list_ = list(itertools.chain.from_iterable(list_))
 
             stmt = Station_FieldWorker.__table__.insert().values(list_)
@@ -277,7 +239,7 @@ def insertListNewStations(request):
     else : 
         result = []
 
-    response = {'exist': len(DTO)-len(data_to_insert), 'new': len(data_to_insert)}
+    response = {'exist': len(data)-len(data_to_insert), 'new': len(data_to_insert)}
     transaction.commit()
     return response 
 
@@ -298,7 +260,6 @@ def searchStation(request):
     searchInfo['per_page'] = json.loads(data['per_page'])
 
     if 'lastImported' in data :
-
         o = aliased(Station)
         print('-*********************** LAST IMPORTED !!!!!!!!! ******')
         obs = aliased(Observation)
@@ -307,13 +268,11 @@ def searchStation(request):
         'Operator' : '=',
         'Value' : request.authenticated_userid
         },
-
         # {'Query':'Observation',
         # 'Column': 'FK_ProtocoleType',
         # 'Operator' : 'not exists',
         # 'Value': select([Observation]).where(Observation.FK_Station == Station.ID) # keep only stations without Observations
         # },
-
         # {'Query':'Station',
         # 'Column': 'None',
         # 'Operator' : 'not exists',
@@ -327,9 +286,7 @@ def searchStation(request):
 
         searchInfo['criteria'].extend(criteria)
 
-
     ModuleType = 'StationGrid'
-
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     # criteria = [
     #     {'Column' : 'StationDate',
@@ -359,7 +316,6 @@ def searchStation(request):
     stop = datetime.now()
     print (stop-start)
 
-    
     if 'geo' in data: 
         geoJson=[]
         for row in dataResult:
@@ -449,12 +405,10 @@ def GetProtocolsofStation (request) :
                                 listSchema.append(virginForm)
                                 listProto[virginTypeID] = {'Name': viginTypeName,'obs':listSchema}
                                 pass
-
                     except :
                         print_exc()
                         pass
             globalListProto = [{'ID':objID, 'Name':listProto[objID]['Name'],'obs':listProto[objID]['obs'] } for objID in listProto.keys()]
-
             response = globalListProto
     except Exception as e :
         print_exc()
@@ -463,8 +417,8 @@ def GetProtocolsofStation (request) :
     transaction.commit()
     return response
 
-@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'POST', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST')
+@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'POST')
 def insertNewProtocol (request) :
 
     data = {}
@@ -504,6 +458,7 @@ def deleteObservation(request):
     DBSession.delete(curObs)
     transaction.commit()
     return {}
+
 
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getObservation(request):

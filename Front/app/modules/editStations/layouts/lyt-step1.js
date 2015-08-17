@@ -68,8 +68,23 @@ define([
 			var _this = this;
 			var stationType = 1;
 
+			this.nsForm = new NsForm({
+				name: 'StaForm',
+				modelurl: config.coreUrl+'stations/',
+				buttonRegion: ['stationFormBtns'],
+				formRegion: 'stationForm',
+				displayMode: 'display',
+				objecttype: stationType,
+				id: this.stationId,
+				reloadAfterSave : true,
+			});
 
+			this.nsForm.savingSuccess = function(){
+				_this.parent.protos.fetch({reset: true});
+			};
 			//ADD THE STATION
+
+
 			
 			var ProtoColl = Backbone.Collection.extend({
 				url: config.coreUrl+'stations/'+this.stationId+'/protocols',

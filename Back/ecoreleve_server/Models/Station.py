@@ -106,7 +106,7 @@ class Station(Base,ObjectWithDynProp):
     def GetDTOWithSchema(self,FrontModules,DisplayMode):
         resultat = super().GetDTOWithSchema(FrontModules,DisplayMode)
         resultat['data']['FieldWorkers'] = self.FieldWorkers
-
+        return resultat
 
 
 class StationDynProp(Base):

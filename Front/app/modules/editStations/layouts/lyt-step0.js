@@ -32,9 +32,9 @@ define([
 
 		name: 'Sation selection',
 
+		
 
 		onDestroy: function(){
-			
 		},
 
 		validate: function(){
@@ -59,13 +59,10 @@ define([
 
 		initGrid: function(){
 			var _this = this;
-
 			this.urlParams = 'params';
-
 			var myCell = Backgrid.NumberCell.extend({
 				decimals: 5
 			});
-
 			this.grid = new NSGrid({
 				pageSize: 20,
 				pagingServerSide: true,
@@ -75,20 +72,30 @@ define([
 				rowClicked : true,
 				totalElement : 'stations-count',
 				onceFetched: function(){
-					var row = this.grid.body.rows[0];
-					_this.currentRow = row;
-					row.$el.addClass('active');
+					var rows = this.grid.body.rows;
+					if(_this.currentRow){
+						for (var i = 0; i < rows.length; i++) {
+							if(rows[i].model.attributes.ID == _this.currentRow.model.attributes.ID){
+								_this.currentRow = rows[i];
+								rows[i].$el.addClass('active');
+								return rows[i];
+							}
+						}
+					}else{
+						var row = this.grid.body.rows[0];
+						if(row){
+							_this.currentRow = row;
+							row.$el.addClass('active');
+						}
+					}
 				},
 			});
-
 			this.grid.rowClicked = function(row){
 				_this.rowClicked(row);
 			};
 			this.grid.rowDbClicked = function(row){
 				_this.rowDbClicked(row);
 			};
-
-
 		},
 
 		onShow : function(){
@@ -101,8 +108,6 @@ define([
 			//could be in the module
 			this.$el.find('#grid').html(_this.grid.displayGrid());
 			this.$el.find('#paginator').html(_this.grid.displayPaginator());
-
-
 		},
 
 		displayFilters: function(){
