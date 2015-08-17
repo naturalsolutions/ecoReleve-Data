@@ -20,8 +20,7 @@ class ObjectWithDynProp:
     def __init__(self,ObjContext):
         self.ObjContext = DBSession
         self.PropDynValuesOfNow = {}
-        #if self.ID != None :
-        #   self.LoadNowValues()
+
     def GetAllProp (self) :
         try :
             type_ = self.GetType()
@@ -36,9 +35,7 @@ class ObjectWithDynProp:
 
         statProps = [{'name': statProp.key, 'type': statProp.type} for statProp in self.__table__.columns ]
         dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp}for dynProp in result]
-
         statProps.extend(dynProps)
-
         return statProps
 
     def GetFrontModulesID (self,ModuleType) :
@@ -52,7 +49,6 @@ class ObjectWithDynProp:
             gridFields = DBSession.query(ModuleGrids
             ).filter(and_(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType),
                 or_(ModuleGrids.FK_TypeObj == typeID ,ModuleGrids.FK_TypeObj ==None ))).all()
-
         except:
             gridFields = DBSession.query(ModuleGrids).filter(
                 ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType) ).all()
@@ -65,7 +61,6 @@ class ObjectWithDynProp:
             gridField = list(filter(lambda x : x.Name == curPropName,gridFields))
             if len(gridField)>0 :
                 cols.append(gridField[0].GenerateColumn())
-
         return cols
 
     def GetFilters (self,ModuleType) :
@@ -97,8 +92,6 @@ class ObjectWithDynProp:
                 'label' : curPropName,
                 'type' : 'Text'
                 }
-                # defaultFilters.append(filter_)
-
         filters.extend(defaultFilters)
         return filters
 
@@ -106,7 +99,6 @@ class ObjectWithDynProp:
         raise Exception("GetType not implemented in children")
 
     def GetDynPropValuesTable(self):
-
         return self.__tablename__ + 'DynPropValue'
 
     def GetDynPropValuesTableID(self):
@@ -116,7 +108,6 @@ class ObjectWithDynProp:
         return 'ID'
 
     def GetDynPropTable(self):
-
         return self.__tablename__ + 'DynProp'
 
     def GetDynPropFKName(self):
@@ -132,7 +123,6 @@ class ObjectWithDynProp:
         return self.ID
 
     def GetProperty(self,nameProp) :
-
         try :
             return getattr(self,nameProp)
         except :
@@ -228,13 +218,8 @@ class ObjectWithDynProp:
                         resultat[curStatProp.key] = self.GetProperty(curStatProp.key)
                 except :
                     pass
-
         # Add TypeName in JSON
         # resultat['TypeName'] = self.GetType().Name
-
-        # TODO: manage foreign key
-        #for curFK in self.__table__.foreign_keys:
-        #   print(dir(curFK))
         return resultat
 
     def GetSchemaFromStaticProps(self,FrontModules,DisplayMode):
@@ -260,33 +245,7 @@ class ObjectWithDynProp:
                 if CurModuleForms.FormRender > 2 :
                     curEditable = True
 
-                # print(CurModuleForms.Name)
-                # print(curSize)
-
                 resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)))
-                
-            # else:
-            #     resultat[curStatProp.key] = {
-            #     'Name': curStatProp.key,
-            #     'type': 'Text',
-            #     'title' : curStatProp.key,
-            #     'editable' : curEditable,
-            #     'editorClass' : 'form-control' ,
-            #     'fieldClass' : ModuleForms.GetClassFromSize(2),
-            #     }
-
-               # else:
-            #     resultat[curStatProp.key] = {
-            #     'Name': curStatProp.key,
-            #     'type': 'Text',
-            #     'title' : curStatProp.key,
-            #     'editable' : curEditable,
-            #     'editorClass' : 'form-control' ,
-            #     'fieldClass' : ModuleForms.GetClassFromSize(2),
-
-            #     }
-
-
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):

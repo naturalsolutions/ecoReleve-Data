@@ -52,6 +52,23 @@ class Observation(Base,ObjectWithDynProp):
         else :
             return DBSession.query(ProtocoleType).get(self.FK_ProtocoleType)
 
+    def UpdateFromJson(self,DTOObject):
+        super().UpdateFromJson(DTOObject)
+        listOfSubProtocols = []
+        for curProp in DTOObject:
+            if isinstance(curProp,list) :
+                listOfSubProtocols = DTOObject['curProp']
+        if len(listOfSubProtocols) !=0 :
+            listObs = []
+            self.complexObsID = []
+            for curData in listOfSubProtocols :
+                subObs = Observation(FK_ProtocoleType = curData['FK_ProtocoleType'])
+                subObs.init_on_load()
+                subObs.UpdateFromJson(data)
+                listObs.append(subObs)
+            DBSession.add_all(listObs)
+
+
 
 
 class ObservationDynPropValue(Base):

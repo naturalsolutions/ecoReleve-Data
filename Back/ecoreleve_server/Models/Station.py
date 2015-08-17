@@ -58,13 +58,13 @@ class Station(Base,ObjectWithDynProp):
     @hybrid_property
     def FieldWorkers(self):
         if self.Station_FieldWorkers:
-            fws_name = {}
+            fws = []
             fw_string = 'FieldWorker'
             for i in range(len(self.FieldWorkers)) :
-                fws_name[fw_string+str(i+1)] = self.Station_FieldWorkers[i].FieldWorkerID
-            return fws_name
+                fws.append({'FieldWorker':self.Station_FieldWorkers[i].FieldWorkerID})
+            return fws
         else:
-            return None
+            return []
 
     @FieldWorkers.setter
     def FieldWorkers(self, values):
@@ -72,7 +72,6 @@ class Station(Base,ObjectWithDynProp):
             fws=[]
             print(values)
             for item in values:
-
                 fws.append(Station_FieldWorker( FK_FieldWorker = int(item['FieldWorker']), FK_Station=self.ID))
             self.Station_FieldWorkers = fws
 
@@ -104,41 +103,10 @@ class Station(Base,ObjectWithDynProp):
         else :
             return DBSession.query(StationType).get(self.FK_StationType)
 
-    # def GetDTOWithSchema(self,FrontModules,DisplayMode):
-    #     resultat = super().GetDTOWithSchema(FrontModules,DisplayMode)
-    #     resultat['schema']['FieldWorkers'] = {
-    #     "name":"FieldWorkers",
-    #     "title":null,
-    #     "type":"ListOfNestedModel",
-    #     "editorAttrs":null,
-    #     "editorClass":"listOfChildSample col-md-11",
-    #     "options":null,
-    #     "editable":null,
-    #     "order":0,
-    #     "fieldClass":null,
-    #     "columnSize":0,
-    #     "itemType":null,
-    #     "subschema":{
-    #                                 # "TypeObj":{"name":"TypeObj",
-    #                                 # "title":"Fieldworker*",
-    #                                 # "type":"Select",
-    #                                 # "editorAttrs":null,
-    #                                 # "editorClass":"form-control ",
-    #                                 # "options":[{"label":"Bird Sample",
-    #                                 # "val":"7"}],
-    #                                 # "editable":null,
-    #                                 # "order":0,
-    #                                 # "fieldClass":null,
-    #                                 # "columnSize":0,
-    #                                 # "itemType":null,
-    #                                 # "subschema":null,
-    #                                 # "model":null,
-    #                                 # "validators":null}
-    #     },
+    def GetDTOWithSchema(self,FrontModules,DisplayMode):
+        resultat = super().GetDTOWithSchema(FrontModules,DisplayMode)
+        resultat['data']['FieldWorkers'] = self.FieldWorkers
 
-    #     "model":null,
-    #     "validators":null
-    #     }
 
 
 class StationDynProp(Base):
