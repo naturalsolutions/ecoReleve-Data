@@ -1,5 +1,5 @@
 from ecoreleve_server.Models import Base,DBSession
-from sqlalchemy import Column, DateTime, Float,Boolean, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_,text
+from sqlalchemy import Column, DateTime, Float,Boolean, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_,text,select
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 
@@ -45,16 +45,13 @@ class ModuleForms(Base):
 
     FrontModules = relationship("FrontModules", back_populates="ModuleForms")
 
-        
     @staticmethod
     def GetClassFromSize(FieldSize):
         return FieldSizeToClass[FieldSize]
 
-
-   
     def GetDTOFromConf(self,IsEditable,CssClass):
 
-        dto = {
+        self.dto = {
             'Name': self.Name,
             'type': self.InputType,
             'title' : self.Label,
@@ -63,28 +60,62 @@ class ModuleForms(Base):
             'validators': [],
             'options': []
             }
+        self.CssClass = CssClass
+        self.IsEditable = IsEditable
+
         if self.Required == 1 :
             if self.InputType=="Select":
-                dto['validators'].append("requiredSelect")
+                self.dto['validators'].append("requiredSelect")
             else:
-                dto['validators'].append("required")
-            dto['title'] = dto['title'] + '*'
-        if self.InputType == 'Select' and self.Options != None : 
-            result = DBSession.execute(text(self.Options)).fetchall()
+                self.dto['validators'].append("required")
+            self.dto['title'] = self.dto['title'] + '*'
 
+            # TODO changer le validateur pour select required (valeur <>-1)
+        if isEditable :
+            self.dto['fieldClass'] = str(self.EditClass) + ' ' + CssClass
+        else :
+            self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
+
+        if self.InputType in self.func_type_context :
+            self.func_type_context[self.InputType](self)
+
+        return self.dto
+
+    def InputSelect (self) :
+        
+        if self.Options != None :
+            result = DBSession.execute(text(self.Options)).fetchall()
             for row in result :
                 temp = {}
                 for key in row.keys() : 
                     temp[key]= row[key]
-                dto['options'].append(temp)
-            dto['options'] = sorted(dto['options'], key=lambda k: k['label'])
-            # TODO changer le validateur pour select required (valeur <>-1)
-        if isEditable :
-            dto['fieldClass'] = str(self.EditClass) + ' ' + CssClass
-        else :
-            dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
+                self.dto['options'].append(temp)
+            self.dto['options'] = sorted(self.dto['options'], key=lambda k: k['label'])
 
-        return dto
+    def InputLNM(self) :
+        if self.Options != None :
+            result = DBSession.query(ModuleForms).filter(and_(ModuleForms.TypeObj == self.Options , ModuleForms.Module_ID == self.Module_ID)).all()
+            subTypeObj = result[0].Name
+            subschema = {}
+            for conf in result :
+                subschema[conf.Name] = conf.GetDTOFromConf(self.IsEditable,self.CssClass)
+
+            self.dto = {
+            'Name': self.Name,
+            'type': self.InputType,
+            'title' : None,
+            'editable' : None,
+            'editorClass' : str(self.editorClass) ,
+            'validators': [],
+            'options': [],
+            'fieldClass': None,
+            'subschema' : subschema
+            }
+
+    func_type_context = {
+        'Select': InputSelect,
+        'ListOfNestedModel' : InputLNM
+        }
 
 
 class ModuleGrids (Base) :

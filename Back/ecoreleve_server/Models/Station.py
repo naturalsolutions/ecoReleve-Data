@@ -70,8 +70,10 @@ class Station(Base,ObjectWithDynProp):
     def FieldWorkers(self, values):
         if not self.Station_FieldWorkers:
             fws=[]
-            for val in values : 
-                fws.append(Station_FieldWorker( FK_FieldWorker = int(val), FK_Station=self.ID))
+            print(values)
+            for item in values:
+
+                fws.append(Station_FieldWorker( FK_FieldWorker = int(item['FieldWorker']), FK_Station=self.ID))
             self.Station_FieldWorkers = fws
 
     @FieldWorkers.expression
@@ -102,10 +104,41 @@ class Station(Base,ObjectWithDynProp):
         else :
             return DBSession.query(StationType).get(self.FK_StationType)
 
-    def UpdateFromJson(self,DTOObject):
-        super().UpdateFromJson(self,DTOObject)
-        if 'FieldWorkers' in DTOObject :
-            self.FieldWorkers = DTOObject['FieldWorkers']
+    # def GetDTOWithSchema(self,FrontModules,DisplayMode):
+    #     resultat = super().GetDTOWithSchema(FrontModules,DisplayMode)
+    #     resultat['schema']['FieldWorkers'] = {
+    #     "name":"FieldWorkers",
+    #     "title":null,
+    #     "type":"ListOfNestedModel",
+    #     "editorAttrs":null,
+    #     "editorClass":"listOfChildSample col-md-11",
+    #     "options":null,
+    #     "editable":null,
+    #     "order":0,
+    #     "fieldClass":null,
+    #     "columnSize":0,
+    #     "itemType":null,
+    #     "subschema":{
+    #                                 # "TypeObj":{"name":"TypeObj",
+    #                                 # "title":"Fieldworker*",
+    #                                 # "type":"Select",
+    #                                 # "editorAttrs":null,
+    #                                 # "editorClass":"form-control ",
+    #                                 # "options":[{"label":"Bird Sample",
+    #                                 # "val":"7"}],
+    #                                 # "editable":null,
+    #                                 # "order":0,
+    #                                 # "fieldClass":null,
+    #                                 # "columnSize":0,
+    #                                 # "itemType":null,
+    #                                 # "subschema":null,
+    #                                 # "model":null,
+    #                                 # "validators":null}
+    #     },
+
+    #     "model":null,
+    #     "validators":null
+    #     }
 
 
 class StationDynProp(Base):

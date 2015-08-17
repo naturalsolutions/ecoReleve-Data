@@ -10,7 +10,7 @@ from ..Models import (
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
 import transaction
-import json
+import json, itertools
 from datetime import datetime
 import datetime as dt
 import pandas as pd
@@ -163,8 +163,8 @@ def updateStation(request):
 @view_config(route_name= prefix, renderer='json', request_method = 'POST')
 def insertStation(request):
 
-    data = request.POST.mixed()
-    if 'data' not in data :
+    data = request.json_body
+    if not isinstance(data,list):
         print('_______INsert ROW *******')
         return insertOneNewStation(request)
     else :
@@ -178,6 +178,17 @@ def insertOneNewStation (request) :
     for items , value in request.json_body.items() :
         if value != "" :
             data[items] = value
+    # data = {
+    # 'ELE': 1,
+    # 'FK_StationType': "1",
+    # 'FieldWorkers': [1,2,6],
+    # 'LAT': 1,
+    # 'LON': 1,
+    # 'Name': "sasasas",
+    # 'StationDate': "10/01/2019 00:00:00",
+    # 'fieldActivityId': "4",
+    # 'precision': 1
+    # }
     newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid)
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
@@ -188,9 +199,7 @@ def insertOneNewStation (request) :
     return {'id': newSta.ID}
 
 def insertListNewStations(request):
-    data = request.POST.mixed()
-    data = data['data']
-    DTO = json.loads(data)
+    DTO = request.json_body
     data_to_insert = []
     format_dt = '%Y-%m-%d %H:%M:%S'
     format_dtBis = '%Y-%d-%m %H:%M:%S'
@@ -254,7 +263,16 @@ def insertListNewStations(request):
     if len(data_to_insert) != 0 :
         stmt = Station.__table__.insert(returning=[Station.ID]).values(data_to_insert)
         res = DBSession.execute(stmt).fetchall()
-        result = list(map(lambda y: y[0], res))
+        result = list(map(lambda y: {'FK_Station' : y[0], }, res))
+
+
+    ###### Insert FieldWorkers
+        if not DTO[0]['FieldWorkers'] == None or "" :
+            list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK': b  },result)),DTO[0]['FieldWorkers'] ))
+            list_ = list(itertools.chain.from_iterable(list_))
+
+            stmt = Station_FieldWorker.__table__.insert().values(list_)
+            DBSession.execute(stmt)
     else : 
         result = []
 

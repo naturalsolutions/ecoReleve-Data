@@ -140,17 +140,18 @@ class ObjectWithDynProp:
 
     def SetProperty(self,nameProp,valeur) :
         if hasattr(self,nameProp):
-            curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
-            if 'Date' in curTypeAttr :
-                print('\n\n Date detected *************************')
-                try : 
-                    val = nameProp.strftime('%d/%m/%Y %H:%M:%S')
-                except :
-                    val = nameProp.strftime('%d/%m/%Y')
-
-                setattr(self,val,valeur)
-            else :
-                setattr(self,nameProp,valeur)
+            try :
+                curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
+                if 'Date' in curTypeAttr :
+                    print('\n\n Date detected *************************')
+                    try : 
+                        valeur = nameProp.strftime('%d/%m/%Y %H:%M:%S')
+                    except :
+                        valeur = nameProp.strftime('%d/%m/%Y')
+            except :
+                print(nameProp+' is not a column')
+                pass 
+            setattr(self,nameProp,valeur)
         else:
             if (nameProp in self.GetType().DynPropNames):
                 if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):
@@ -162,7 +163,6 @@ class ObjectWithDynProp:
 
                     self.PropDynValuesOfNow[nameProp] = valeur
                     self.GetDynPropValues().append(NouvelleValeur)
-
                 else:
                     print('valeur non modifiée pour ' + nameProp)
                     return
@@ -305,13 +305,11 @@ class ObjectWithDynProp:
             }
 
         ''' IF ID is send from front --> get data of this object in order to display value into form which will be sent'''
+        data =   self.GetFlatObject()
+        resultat['data'] = data
         if self.ID :
-            data =   self.GetFlatObject()
-            resultat['data'] = data
             resultat['data']['id'] = self.ID
         else :
-            data = self.GetFlatObject()
-            resultat['data'] = data
             resultat['data']['id'] = 0
         return resultat
 

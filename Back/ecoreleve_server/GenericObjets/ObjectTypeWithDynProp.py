@@ -47,13 +47,14 @@ class ObjectTypeWithDynProp:
 
         Values = self.ObjContext.execute(curQuery).fetchall()
         Editable = (DisplayMode.lower()  == 'edit')
-        Fields = self.ObjContext.query(ModuleForms).filter(ModuleForms.Module_ID == FrontModules.ID).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)).all()
+        Fields = self.ObjContext.query(ModuleForms
+            ).filter(ModuleForms.Module_ID == FrontModules.ID
+            ).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)).all()
         # print(Fields)
-
 
         for CurModuleForms in Fields : 
             curEditable = Editable
-            # print(CurModuleForms.Name)
+            print(CurModuleForms.Name)
             #CurModuleForms = list(filter(lambda x : x.Name == curValue['Name'], Fields))
 
             #if (len(CurModuleForms)> 0 ):
@@ -61,7 +62,7 @@ class ObjectTypeWithDynProp:
                 # Conf définie dans FrontModules                
             #CurModuleForms = CurModuleForms[0]
                 # TODO : Gestion champ read ONly
-
+                
             #print(CurModuleForms)
             curSize = CurModuleForms.FieldSizeDisplay
             if curEditable:
