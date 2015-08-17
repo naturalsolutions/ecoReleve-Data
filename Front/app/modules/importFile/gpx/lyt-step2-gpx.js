@@ -30,6 +30,7 @@ define([
 			'grid': '#grid'
 		},
 
+
 		//temp
 		events: {
 			'click .backgrid tbody tr': 'focus',

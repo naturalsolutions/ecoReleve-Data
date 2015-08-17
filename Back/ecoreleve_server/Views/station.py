@@ -163,8 +163,9 @@ def updateStation(request):
 @view_config(route_name= prefix, renderer='json', request_method = 'POST')
 def insertStation(request):
 
-    data = request.POST.mixed()
-    if 'data' not in data :
+    data = request.json_body
+    
+    if not isinstance(data, list) :
         print('_______INsert ROW *******')
         return insertOneNewStation(request)
     else :
@@ -175,37 +176,44 @@ def insertStation(request):
 def insertOneNewStation (request) :
 
     data = {}
+    print("\n\n\n\n")
+
     for items , value in request.json_body.items() :
         if value != "" :
             data[items] = value
     newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid)
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
+
+    print("\n\n\n\n")
+    print(data)
+
     newSta.UpdateFromJson(data)
+    print (newSta.__dict__)
+
     DBSession.add(newSta)
     DBSession.flush()
     # transaction.commit()
     return {'id': newSta.ID}
 
 def insertListNewStations(request):
-    data = request.POST.mixed()
-    data = data['data']
-    DTO = json.loads(data)
+    data = request.json_body
     data_to_insert = []
     format_dt = '%Y-%m-%d %H:%M:%S'
     format_dtBis = '%Y-%d-%m %H:%M:%S'
     dateNow = datetime.now()
 
     ##### Rename field and convert date #####
-    for row in DTO :
+    #TODO
+    for row in data :
         newRow = {}
         newRow['LAT'] = row['latitude']
         newRow['LON'] = row['longitude']
         newRow['Name'] = row['name']
         newRow['fieldActivityId'] = 1
-        newRow['precision'] = row['Precision']
+        newRow['precision'] = 10 #row['Precision']
         newRow['creationDate'] = dateNow
-        newRow['creator'] = request.authenticated_userid
+        newRow['creator'] = 1 #request.authenticated_userid
         newRow['FK_StationType']=4
         newRow['id'] = row['id']
 
@@ -258,7 +266,7 @@ def insertListNewStations(request):
     else : 
         result = []
 
-    response = {'exist': len(DTO)-len(data_to_insert), 'new': len(data_to_insert)}
+    response = {'exist': len(data)-len(data_to_insert), 'new': len(data_to_insert)}
     transaction.commit()
     return response 
 
@@ -364,6 +372,7 @@ def searchStation(request):
 
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def GetProtocolsofStation (request) :
 
     sta_id = request.matchdict['id']
@@ -457,6 +466,7 @@ def GetProtocolsofStation (request) :
     return response
 
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST')
+@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'POST')
 def insertNewProtocol (request) :
 
     data = {}
@@ -496,6 +506,7 @@ def deleteObservation(request):
     DBSession.delete(curObs)
     transaction.commit()
     return {}
+
 
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getObservation(request):

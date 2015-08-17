@@ -148,7 +148,7 @@ class ObjectWithDynProp:
                 except :
                     val = nameProp.strftime('%d/%m/%Y')
 
-                setattr(self,val,valeur)
+                setattr(self,nameProp,val)
             else :
                 setattr(self,nameProp,valeur)
         else:

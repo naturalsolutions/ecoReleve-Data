@@ -149,7 +149,6 @@ define([
 
 		initCollectionFromServer: function () {
 			if (this.pagingServerSide) {
-
 				this.initCollectionPaginable();
 			} else if (this.pageSize) {
 				this.initCollectionPaginableClient();
@@ -158,7 +157,6 @@ define([
 				this.initCollectionNotPaginable();
 			}
 		},
-
 
 		initCollectionPaginable: function () {
 			var ctx = this;

@@ -18,7 +18,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'importFile(/)': 'importFile',
 
 			'station(/):id': 'station',
-
 			'*route(/:page)': 'home',
 		},
 
