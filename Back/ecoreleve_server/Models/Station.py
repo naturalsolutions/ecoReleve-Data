@@ -59,8 +59,7 @@ class Station(Base,ObjectWithDynProp):
     def FieldWorkers(self):
         if self.Station_FieldWorkers:
             fws = []
-            fw_string = 'FieldWorker'
-            for i in range(len(self.FieldWorkers)) :
+            for i in range(len(self.Station_FieldWorkers)) :
                 fws.append({'FieldWorker':self.Station_FieldWorkers[i].FieldWorkerID})
             return fws
         else:

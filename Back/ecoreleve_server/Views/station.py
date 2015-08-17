@@ -159,7 +159,7 @@ def insertOneNewStation (request) :
     DBSession.add(newSta)
     DBSession.flush()
     # transaction.commit()
-    return {'id': newSta.ID}
+    return {'ID': newSta.ID}
 
 def insertListNewStations(request):
 
