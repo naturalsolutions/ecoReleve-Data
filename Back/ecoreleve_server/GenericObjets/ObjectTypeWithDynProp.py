@@ -4,7 +4,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
 from datetime import datetime
-from .FrontModules import FrontModule,ModuleForm
+from .FrontModules import FrontModules,ModuleForms
 
 
 DynPropType = {'string':'Text','float':'Text','date':'Date','integer':'Text','int':'Text'}
@@ -40,35 +40,36 @@ class ObjectTypeWithDynProp:
         else :
             return 'FK_' + self.__tablename__.replace('Type','') + 'DynProp'        
 
-    def AddDynamicPropInSchemaDTO(self,SchemaDTO,FrontModule,DisplayMode):
+    def AddDynamicPropInSchemaDTO(self,SchemaDTO,FrontModules,DisplayMode):
         curQuery = 'select * from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
         if self.ID :
             curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
 
         Values = self.ObjContext.execute(curQuery).fetchall()
         Editable = (DisplayMode.lower()  == 'edit')
-        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).filter(or_(ModuleForm.TypeObj == self.ID, ModuleForm.TypeObj == None)).all()
+        Fields = self.ObjContext.query(ModuleForms
+            ).filter(ModuleForms.Module_ID == FrontModules.ID
+            ).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)).all()
         # print(Fields)
 
-
-        for CurModuleForm in Fields : 
+        for CurModuleForms in Fields : 
             curEditable = Editable
-            # print(CurModuleForm.Name)
-            #CurModuleForm = list(filter(lambda x : x.Name == curValue['Name'], Fields))
+            print(CurModuleForms.Name)
+            #CurModuleForms = list(filter(lambda x : x.Name == curValue['Name'], Fields))
 
-            #if (len(CurModuleForm)> 0 ):
+            #if (len(CurModuleForms)> 0 ):
                 
-                # Conf définie dans FrontModule                
-            #CurModuleForm = CurModuleForm[0]
+                # Conf définie dans FrontModules                
+            #CurModuleForms = CurModuleForms[0]
                 # TODO : Gestion champ read ONly
-
-            #print(CurModuleForm)
-            curSize = CurModuleForm.FieldSizeDisplay
+                
+            #print(CurModuleForms)
+            curSize = CurModuleForms.FieldSizeDisplay
             if curEditable:
-                curSize = CurModuleForm.FieldSizeEdit
-            if (CurModuleForm.FormRender & 2) == 0:
+                curSize = CurModuleForms.FieldSizeEdit
+            if (CurModuleForms.FormRender & 2) == 0:
                 curEditable = False
-            SchemaDTO[CurModuleForm.Name] = CurModuleForm.GetDTOFromConf(curEditable,ModuleForm.GetClassFromSize(curSize))
+            SchemaDTO[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,ModuleForms.GetClassFromSize(curSize))
             # else:
             #     print('Standard')
             #     SchemaDTO[curValue['Name']] = {
@@ -77,7 +78,7 @@ class ObjectTypeWithDynProp:
             #     'title' : curValue['Name'],
             #     'editable' : curEditable,
             #     'editorClass' : 'form-control' ,
-            #     'fieldClass' : ModuleForm.GetClassFromSize(2),
+            #     'fieldClass' : ModuleForms.GetClassFromSize(2),
 
             #     }
            
@@ -100,11 +101,11 @@ class ObjectTypeWithDynProp:
 
         return Values
 
-    def GetFieldSets(self,FrontModule,Schema) :
+    def GetFieldSets(self,FrontModules,Schema) :
         
         fields = []
         other = []
-        Fields = self.ObjContext.query(ModuleForm).filter(ModuleForm.FK_FrontModule == FrontModule.ID).filter(or_(ModuleForm.TypeObj == self.ID, ModuleForm.TypeObj == None)).all()
+        Fields = self.ObjContext.query(ModuleForms).filter(ModuleForms.Module_ID == FrontModules.ID).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)).all()
         # print(Fields)
         Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
         Legend2s = sorted ([(obj.Legend)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])

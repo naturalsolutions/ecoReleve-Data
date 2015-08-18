@@ -10,7 +10,8 @@ define([
 	'fancytree',
 	'./NsFormsCustomFields',
 	'i18n',
-], function ($, _, Backbone, Marionette, BackboneForm,Radio, config, AutocompTree 
+	'ListOfNestedModel',
+], function ($, _, Backbone, Marionette, BackboneForm,Radio, config, AutocompTree ,ListOfNestedModel
 ){
 	return Marionette.ItemView.extend({
 		BBForm: null,
