@@ -3,16 +3,17 @@ from ..Models import (
     DBSession,
     Observation,
     ProtocoleType,
-    FieldActivity_ProtocoleType
+    FieldActivity_ProtocoleType,
+    fieldActivity
     )
-from ecoreleve_server.GenericObjets.FrontModules import (FrontModule,ModuleField)
+from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 import transaction
 import json
 from datetime import datetime
 from sqlalchemy import func,select,and_, or_, join
 from pyramid.security import NO_PERMISSION_REQUIRED
 from collections import OrderedDict
-
+from .station import insertNewProtocol
 
 
 
@@ -22,6 +23,11 @@ def updateListProtocols(request):
     # TODO 
     # update a list of protocols 
     return
+
+@view_config(route_name= prefix, renderer='json', request_method = 'POST')
+def insertProtocols(request):
+
+    return insertNewProtocol (request)
 
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnProtocols(request):
@@ -43,10 +49,10 @@ def getForms(request) :
 
     typeProto = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
-    print (typeProto)
     ModuleName = 'ObsForm'
-    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newProto = Observation(FK_ProtocoleType = typeProto)
+
     # newProto.init_on_load()
 
     schema = newProto.GetDTOWithSchema(Conf,'edit')
@@ -96,7 +102,6 @@ def getListofProtocolTypes (request):
 
     result = DBSession.execute(query).fetchall()
     print('********* protocoles types ******************')
-    print (type(result[0]))
     res = []
     for row in result:
         elem = {}
@@ -104,7 +109,6 @@ def getListofProtocolTypes (request):
         elem['Name'] = row['Name']
         res.append(elem)
     res = sorted(res, key=lambda k: k['Name']) 
-    #print ((res)[0])
     return res
 
 @view_config(route_name= prefix + '/id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
@@ -113,7 +117,6 @@ def getProtocol (request):
     curProt = DBSession.query(Observation).get(id)
 
     curProt.LoadNowValues()
-    print (curProt.PropDynValuesOfNow) 
     # if Form value exists in request --> return data with schema else return only data
     if 'FormName' in request.params :
         ModuleName = request.params['FormName']
@@ -121,11 +124,19 @@ def getProtocol (request):
             DisplayMode = request.params['DisplayMode']
         except : 
             DisplayMode = 'display'
-        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='ObsForm' ).first()
+        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='ObsForm' ).first()
         curProt.LoadNowValues()
         response = curProt.GetDTOWithSchema(Conf,DisplayMode)
     else : 
         response  = curProt.GetFlatObject()
     return response
 
+@view_config(route_name= 'fieldActivity', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+def getFieldActivityList (request) :
 
+    query = select([fieldActivity.ID.label('value'), fieldActivity.Name.label('label')])
+    result = DBSession.execute(query).fetchall()
+    res = []
+    for row in result :
+        res.append({'label':row['label'], 'value': row['value']})
+    return sorted(res , key = lambda x : x['label'])

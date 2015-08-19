@@ -1,16 +1,19 @@
 ﻿<script type="text/template" id="test"> 
-<div id="NsFormButton">
-     <button class="NsFormModuleCancel<%=formname%>">
-        Cancel 
-    </button>
-    <button class="NsFormModuleSave<%=formname%>">
-        Save 
-    </button>
-        <button class="NsFormModuleEdit<%=formname%>">
-        Edit
-    </button>
-        <button class="NsFormModuleClear<%=formname%>">
-        Clear 
-    </button>
-</div>
-   </script>
+	<div id="NsFormButton">
+		<button class="NsFormModuleCancel<%=formname%>" data-i18n="button.reset">
+			Cancel
+		</button>
+		<button class="NsFormModuleSave<%=formname%>" data-i18n="button.save">
+			Save
+		</button>
+		<button class="NsFormModuleEdit<%=formname%>" data-i18n="button.edit">
+			Edit
+		</button>
+		<button class="NsFormModuleClear<%=formname%>" data-i18n="button.clear">
+			Clear
+		</button>		
+		<button class="NsFormModuleDelete<%=formname%> pull-right" data-i18n="button.delete">
+			Delete
+		</button>
+	</div>
+</script>

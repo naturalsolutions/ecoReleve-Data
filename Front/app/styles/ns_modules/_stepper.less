@@ -1,3 +1,169 @@
+
+@warningText:             #c09853;
+@warningBackground:       #fcf8e3;
+
+@errorText:               #b94a48;
+@errorBackground:         #f2dede;
+
+@successText:             #468847;
+@successBackground:       #dff0d8;
+
+@infoText:                #3a87ad;
+@infoBackground:          #d9edf7;
+
+/**
+TODO:
+	- step nav
+	- get wizard variables (colors and borders + chevron )
+	- set colors inside _theme.less
+
+**/
+
+
+#btnPrev{
+	left: -100px;
+}
+#btnNext{
+	right: -100px;
+}
+
+.wizard {
+
+	.clearfix;
+	border-radius: 3px;
+	box-shadow: 0px 3px 10px 0px rgba(75, 75, 75, 0.5);
+	background-color: #fff;
+	position: relative;
+	width: calc(~"100% - 350px");
+	margin: auto;
+	overflow: hidden;
+}
+
+.stepper{
+	height: 100%;
+	padding: 10px 0px;
+	.wizard{
+		height: 100%;
+		overflow:  hidden;
+		border: none;
+	}
+	.actions{
+		button.btn-custom{
+			position: fixed;
+			height: 100%;
+			width: 150px;
+			bottom: 0;
+			overflow: hidden;
+			transition: background .3s;
+			background: rgba(92,184,92,0.3);
+			color: white;
+			border: none;
+			padding: 0px;
+			vertical-align: middle;
+			border-radius: 3px;
+			text-transform: uppercase;
+			&:not([disabled]){
+				background: rgba(68,157,68,0.6);
+			}
+			&:not([disabled]):hover{
+				background: rgba(68,157,68,0.7);
+				color: white!important;
+			}
+			&:not([disabled]):focus{
+				background: rgba(68,157,68,0.7);
+				color: white!important;
+			}
+			&.btn-next{
+				right: 0;
+				i{
+					float: right!important;
+				}
+				&.finished{
+					span.ctrl{
+						padding: 10px;
+					}
+				}
+			}
+
+			@fz: 25px;
+			i.action-picto{
+				line-height: inherit;
+				font-size: inherit!important;
+				background: rgba(0,0,0,0.2);
+				padding: 10px 15px;
+				margin:0px!important;
+				display: block;
+				float: left;
+				font-size: @fz!important;
+			}
+			span.ctrl{
+				margin: 0px!important;
+				vertical-align: 2px;
+				display: block;
+				float: left;
+				padding: 10px 15px;
+				font-size: @fz!important;
+			}
+
+		}
+
+
+	}
+	.steps{
+		margin-left: 0px!important;
+		height: 46px;
+		width: 100%!important;
+		overflow: hidden;
+		.chevron{
+
+		}
+	}
+	.step-content{
+		z-index: 1000;
+		height: calc(~"100% - 46px");
+		overflow: auto;
+		.step-pane{
+			position: relative;
+			overflow: auto;
+			height: 100%;
+		}
+	}
+	
+}	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #btnPrev{
 	left: -100px;
 }
@@ -61,17 +227,16 @@ div.fuelux{
 			vertical-align: middle;
 			border-radius: 3px;
 			text-transform: uppercase;
-			&:hover{
-				background: rgba(68,157,68,0.5);
+			&:not([disabled]){
+				background: rgba(68,157,68,0.6);
+			}
+			&:not([disabled]):hover{
+				background: rgba(68,157,68,0.7);
 				color: white!important;
 			}
-			&:focus{
-				background: rgba(68,157,68,0.5);
+			&:not([disabled]):focus{
+				background: rgba(68,157,68,0.7);
 				color: white!important;
-			}
-			&:disabled {
-				//disalbe + cursor doesn't work;
-				cursor: not-allowed!important;
 			}
 			&.btn-next{
 				right: 0;
@@ -84,7 +249,6 @@ div.fuelux{
 					}
 				}
 			}
-
 
 			@fz: 25px;
 			i.action-picto{
@@ -107,6 +271,7 @@ div.fuelux{
 			}
 
 		}
+
 
 	}
 	.steps{
@@ -456,7 +621,7 @@ div.fuelux{
 	
 	//border: 1px solid @navbarBorder;
 	border-radius: @baseBorderRadius;
-	box-shadow: 5px -5px 20px -0px rgba(75,75,75, 0.5);
+	box-shadow: 0px 3px 10px 0px rgba(75, 75, 75, 0.5);
 	background-color: @tableBackgroundAccent;
 	position: relative;
 	width: calc(~"100% - 350px");
@@ -605,4 +770,109 @@ div.fuelux{
 
 .export-layout .step-pane {
 	display: none;
+}*/
+
+ul.step-nav {
+	list-style: none outside none;
+	padding: 0;
+	margin: 0;
+	height: 46px;
+
+	&.previous-disabled {
+		li {
+			&.complete {
+				cursor: default;
+
+				&:hover {
+					background: #f3f4f5;
+					color: @successText;
+					cursor: default;
+
+					.chevron:before {
+						border-left-color: #f3f4f5;
+					}
+				}
+			}
+		}
+	}
+
+	li {
+		float: left;
+		margin: 0;
+		padding: 0 20px 0 30px;
+		height: 46px;
+		line-height: 46px;
+		position: relative;
+		background: #ededed;
+		font-size: 16px;
+		cursor: not-allowed;
+
+		.chevron {
+			border: 24px solid transparent;
+			//border-left: 14px solid @navbarBorder;
+			border-right: 0;
+			display: block;
+			position: absolute;
+			right: -14px;
+			top: 0;
+			z-index: 1;
+		}
+
+		.chevron:before {
+			border: 24px solid transparent;
+			border-left: 14px solid #ededed;
+			border-right: 0;
+			content: "";
+			display: block;
+			position: absolute;
+			right: 1px;
+			top: -24px;
+		}
+
+		&.complete {
+			background: #f3f4f5;
+			color: @successText;
+
+			&:hover {
+				background: #e7eff8;
+				cursor: pointer;
+
+				.chevron:before {
+					border-left: 14px solid #e7eff8;
+				}
+			}
+
+			.chevron:before {
+				border-left: 14px solid #f3f4f5;
+			}
+
+			.badge {
+				background-color: @successText;
+			}
+
+		}
+		&.active {
+			background: #f1f6fc;
+			color: @infoText;
+			cursor: default;
+
+			.chevron:before {
+				border-left: 14px solid #f1f6fc;
+			}
+
+			.badge {
+				background-color: @infoText;
+			}
+		}
+
+		.badge {
+			margin-right: 8px;
+		}
+
+	}
+
+	li:first-child {
+		border-radius: 4px 0 0 4px;
+		padding-left: 20px;
+	}
 }

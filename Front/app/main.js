@@ -2,33 +2,35 @@ require.config({
 	baseUrl: 'app',
 	paths : {
 		
-		'tmp'					: './tmp',
-		
-		'app'					: 'app',
-		'config'				: 'config',
-		'router'				: 'router',
-		'controller'			: 'controller',
-		'models'				: './models',
-		'collections'			: './collections',
-		'templates'				: '../build/templates',
-		'lyt-rootview'			: './base/rootview/lyt-rootview',
-		'transition-region'		: './base/transition-region/transition-region',
-		'google': './vendors/google-maps-loader',
-		'translater'            : 'translater', 
+
+		'tmp'				: './tmp',
+
+		'app'				: 'app',
+		'config'			: 'config',
+		'router'			: 'router',
+		'controller'		: 'controller',
+		'models'			: './models',
+		'collections'		: './collections',
+		'templates'			: '../build/templates',
+		'lyt-rootview'		: './base/rootview/lyt-rootview',
+		'transition-region'	: './base/transition-region/transition-region',
+		'googleLoaer'			: 				'./vendors/google-maps-loader',
+		'translater'		: 'translater', 
 		
 		
 		/*==========  NS modules  ==========*/
-		'ns_modules'			: 'ns_modules',
-		'ns_filter'				: 'ns_modules/ns_filter',
-		'ns_form'				: 'ns_modules/ns_form',
-		'ns_grid'				: 'ns_modules/ns_grid',
-		'ns_map'				: 'ns_modules/ns_map',
-		'ns_stepper'			: 'ns_modules/ns_stepper',
-
+		'ns_modules'	: 'ns_modules',
+		'ns_filter'		: 'ns_modules/ns_filter',
+		'ns_form'		: 'ns_modules/ns_form',
+		'ns_grid'		: 'ns_modules/ns_grid',
+		'ns_map'		: 'ns_modules/ns_map',
+		'ns_stepper'	: 'ns_modules/ns_stepper',
+		
 		'autocompTree' : 'vendors/jquery.autocompTree',
+		'ListOfNestedModel' : 'vendors/ListOfNestedModel/ListOfNestedModel',
 
 		/*==========  Bower  ==========*/
-		'jquery'				: '../bower_components/jquery/jquery.min',
+		'jquery'				: '../bower_components/jquery/jquery',
 		'jqueryui'				: '../bower_components/jqueryui/jquery-ui.min',
 		'underscore'			: '../bower_components/underscore/underscore',
 		'backbone'				: '../bower_components/backbone/backbone',
@@ -37,27 +39,32 @@ require.config({
 		'backbone.wreqr'		: '../bower_components/backbone.wreqr/lib/backbone.wreqr',
 		'radio'					: '../bower_components/backbone.radio/build/backbone.radio',
 		'bootstrap'				: '../bower_components/bootstrap/dist/js/bootstrap',
-		'sha1'					: '../bower_components/sha1/bin/sha1',
+		'sha1'					: '../bower_components/sha1/sha1',
 		'sweetAlert'			:'../bower_components/sweetalert/lib/sweet-alert.min',
 		'moment'				: '../bower_components/moment/min/moment.min',
 		'dateTimePicker'		: '../bower_components/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker',
 		'backbone_forms'		: '../bower_components/backbone-forms/distribution.amd/backbone-forms',
+		'backbone.list'			: '../bower_components/backbone-forms/distribution/editors/list',
 		'backbone.paginator'	: '../bower_components/backbone.paginator/lib/backbone.paginator.min',
 		'requirejs-text'		: '../bower_components/requirejs-text/text',
-		'L'						: '../bower_components/leaflet/dist/leaflet',
+		'L'						: '../bower_components/leaflet/dist/leaflet-src',
 		'leaflet_cluster'		: '../bower_components/leaflet.markercluster/dist/leaflet.markercluster',
 		'leaflet_google'		: '../bower_components/leaflet-plugins/layer/tile/Google',
 		'swiper'				: '../bower_components/swiper/dist/js/swiper',
 		'dropzone'				: '../bower_components/dropzone/dist/dropzone',
 		'i18n'					: '../bower_components/i18n/i18next',
 		'fancytree'				: '../bower_components/fancytree/dist/jquery.fancytree-all.min',
+
+		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
+		'floatThead'			: '../bower_components/floatThead/dist/jquery.floatThead-slim', 
+
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
 		'backgrid.paginator'	: 'vendors/backgrid-paginator',
 		'backgridSelect_all'	:'vendors/backgrid-select-all',
 
-		'simplePagination'		: '../bower_components/simplePagination.js/jquery.simplePagination',
-		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
+		'simplePagination'		: 'vendors/jquery.simplePagination',
+
 	},
 
 
@@ -118,7 +125,7 @@ require.config({
 			exports : 'leaflet_cluster'
 		},
 		leaflet_google : {
-			deps:['L', 'google'],
+			deps:['L'],
 			exports : 'leaflet_google'
 		},
 		leaflet : {
@@ -132,6 +139,7 @@ require.config({
 			exports : 'SimplePagination'
 		},
 		fancytree :  {
+			deps:['jqueryui'],
 			exports : 'Fancytree'
 		},
 		autocompTree : {
@@ -150,6 +158,17 @@ require.config({
 			deps: ['jquery'],
 			exports : '$'
 		},
+		floatThead : {
+			deps: ['backgrid'],
+			exports :  'FloatThead'
+		},
+		ListOfNestedModel: {
+            deps: [
+            'backbone',
+             'backgrid',
+             'backbone_forms'
+            ]
+        },
 
 	},
 });

@@ -1,5 +1,8 @@
+from pyramid.httpexceptions import default_exceptionresponse_view, HTTPNotFound
+from pyramid.interfaces import IRoutesMapper
 
-
+def notfound(request):
+    return HTTPNotFound('Not found')
 
 ### test if the match url is integer
 def integers(*segment_names):
@@ -18,12 +21,15 @@ def integers(*segment_names):
     return predicate
 
 def add_routes(config):
+
     config.add_route('weekData', 'ecoReleve-Sensor/weekData')
-    
+
     ##### Security routes #####
     config.add_route('security/login', 'ecoReleve-Core/security/login')
     config.add_route('security/logout', 'ecoReleve-Core/security/logout')
     config.add_route('security/has_access', 'ecoReleve-Core/security/has_access')
+
+
 
     ##### User #####
     config.add_route('core/user', 'ecoReleve-Core/user')
@@ -39,8 +45,12 @@ def add_routes(config):
     config.add_route('stations', 'ecoReleve-Core/stations/') 
     config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
+
+    ##### Stations/Protocols #####
     config.add_route('stations/id/protocols', 'ecoReleve-Core/stations/{id}/protocols',custom_predicates = (integers('id'),))
-    config.add_route('stations/id/protocols/obs_id', 'ecoReleve-Core/stations/{id}/protocols/{obs_id}',custom_predicates = (integers('id'),))
+    config.add_route('stations/id/protocols/', 'ecoReleve-Core/stations/{id}/protocols/',custom_predicates = (integers('id'),))
+    config.add_route('stations/id/protocols/obs_id', 'ecoReleve-Core/stations/{id}/protocols/{obs_id}',custom_predicates = (integers('id', 'obs_id'),))
+    config.add_route('stations/id/protocols/action', 'ecoReleve-Core/stations/{id}/protocols/{action}')
 
     ##### Protocols #####
     # config.add_route('protocols', 'ecoReleve-Core/protocols')
@@ -54,6 +64,9 @@ def add_routes(config):
      ##### Protocols types #####
     config.add_route('protocolTypes', 'ecoReleve-Core/protocolTypes')
 
+    ##### FieldActivity ##### 
+    config.add_route('fieldActivity', 'ecoReleve-Core/fieldActivity')
+    
 
     ##### Sensors datas (Argos + GSM + RFID) #####
     config.add_route('sensors/datas', 'ecoReleve-Sensor/{type}/datas')
@@ -62,6 +75,9 @@ def add_routes(config):
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
     config.add_route('sensors', 'ecoReleve-Sensor/{type}')
     config.add_route('sensors/id', 'ecoReleve-Sensor/{type}/{id}')
+    # config.add_notfound_view(notfound, append_slash=True)
+
+
 
 
 

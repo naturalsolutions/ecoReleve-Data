@@ -10,10 +10,9 @@ define([
 	'./individual-list',
 
 	'./lyt-step1',
-
 	'./lyt-step2',
-
 	'./lyt-step3',
+	
 	'translater'
 
 ], function($, _, Backbone, Marionette, Swal,
@@ -41,61 +40,20 @@ define([
 			'click button.filterCancel' :'filterCancel',
 			'click .closeStepper' : 'closeStepper'
 		},
+
 		initialize: function(){
 			this.model = new Backbone.Model();
 			this.translater = Translater.getTranslater();
-			/*
-			this.radio = Radio.channel('individual');
-			this.radio.comply('filterMask', this.filterMask, this);
-			*/
-		},
-
-		onRender: function(){
-			var step1Label = this.translater.getValueFromKey('input.stepper.step1inputLabel'),
-			step2Label = this.translater.getValueFromKey('input.stepper.step2inputLabel'),
-			step3Label = this.translater.getValueFromKey('input.stepper.step3inputLabel');
-
-			var FirstStep = new Step1({
-				model: this.model,
-				name: step1Label,
-				tpl: 'app/modules/input/templates/tpl-step1.html'
-			});
-
-			var SecondStep = new Step2({
-				model: this.model,
-				name: step2Label,
-				tpl: 'app/modules/input/templates/tpl-step2.html'
-			});
-
-			
-			var ThirdStep = new Step3({
-				model: this.model,
-				name: step3Label,
-				tpl: 'app/modules/input/templates/tpl-step3.html',
-			});
-
-			this.steps=[];
-			this.steps[0]= FirstStep;
-			this.steps[1]= SecondStep;
-			this.steps[2]= ThirdStep;
-
-			this.stepper = new StepperOrchestrator({
-				model: this.model,
-				steps: this.steps
-			});
-
-			this.stepperRegion.show( this.stepper );
-			this.$el.i18n();
 		},
 
 		animateIn: function() {
 			this.$el.find('#btnPrev').animate(
 				{ left : '0'},
-				1000
+				500 
 			);
 			this.$el.find('#btnNext').animate(
 				{ right : '0' },
-				1000
+				500
 			);
 			this.$el.find('#wizard').addClass('slideInDown');
 			
@@ -108,11 +66,11 @@ define([
 		animateOut: function() {
 			this.$el.find('#btnPrev').animate(
 				{ left : '-100%'},
-				1000
+				500
 			);
 			this.$el.find('#btnNext').animate(
 				{ right : '-100%' },
-				1000
+				500
 			);
 			this.$el.find('#wizard').addClass('zoomOutDown');
 			this.$el.animate(
@@ -122,40 +80,26 @@ define([
 			);
 		},
 
+		onRender: function(){
+
+			this.steps=[];
+			this.steps[0]= Step1;
+			this.steps[1]= Step2;
+			this.steps[2]= Step3;
+
+			this.stepper = new StepperOrchestrator({
+				model: this.model,
+				steps: this.steps
+			});
+			console.log(this.stepper);
+
+			this.stepperRegion.show( this.stepper );
+			this.$el.i18n();
+		},
+
 
 		onShow : function(){
 
-			// add indiv window container
-			$('#stepper-header span').html('Manual entry');
-			
-			$('#stepper').append('<div id="indivFilter" class="stepper-modal"></div>');
-
-		},
-		filterIndivShow : function(e){
-
-			$(e.target).parent().parent().parent().find('input').addClass('target');
-			var modal = new IndivFilter();
-			// navigate to the modal by simulating a click
-			var element = '<a class="btn" data-toggle="modal" data-target="#myModal" id="indivIdModal">-</a>';
-			$('body').append(element);
-			this.indivFilterRegion.show(modal);
-			$('#indivIdModal').click();
-
-		},
-		filterMask : function(){
-
-			var inputIndivId = $('input.pickerInput');
-			$(inputIndivId).removeClass('target');
-			this.indivFilterRegion.reset();
-			$('#indivIdModal').remove();
-			$('div.modal-backdrop.fade.in').remove();
-
-		},
-		filterCancel : function(){
-			
-			$('input.pickerInput').val('');
-			this.filterMask();
-			
 		},
 
 	});

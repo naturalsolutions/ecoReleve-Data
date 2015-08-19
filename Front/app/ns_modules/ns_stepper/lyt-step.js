@@ -24,6 +24,7 @@ define([
 		*/
 
 		elemIndex:0,
+		ajax: true,
 
 		onDestroy: function(){
 
@@ -31,92 +32,112 @@ define([
 
 		initialize: function(options){
 			this.name=options.name;
-			this.template=options.tpl;
-
+			//this.template=options.tpl;
 			this.model=options.model; //global model
-			this.stepAttributes=[]; //all attributes per step
-			this.initModel();
-
 		},
-		initModel: function(){
-			this.parseOneTpl(this.template);
+		initModel: function(tpl){
+			this.parseOneTpl(tpl);
 		},
 
-
-		animateIn: function() {
-			this.$el.animate(
-				{ left: 0 },
-				ANIMATION_DURATION,
-				_.bind(this.trigger, this, 'animateIn')
-			);
+		/*
+		animateIn: function(options) {
+			this.$el.css({'position' : 'relative'});
+			switch(options){
+				case 'next':
+					this.$el.css({'left' : '100%'});
+					this.$el.animate(
+						{ left: '0px'},
+						200,
+						_.bind(this.trigger, this, 'animateIn')
+					);
+					break;
+				case 'prev':
+					this.$el.css({'left' : '-100%'});
+					this.$el.animate(
+						{ left: '0px'},
+						200,
+						_.bind(this.trigger, this, 'animateIn')
+					);
+					break;
+				default:
+					this.$el.animate(
+						{ left: '0px'},
+						0,
+						_.bind(this.trigger, this, 'animateIn')
+					);
+					break;
+			}
 		},
 
-		animateOut: function() {
-			this.$el.animate(
-				{ left: -500 },
-				ANIMATION_DURATION,
-				_.bind(this.trigger, this, 'animateOut')
-			);
-		},
+		animateOut: function(options) {
+			this.$el.css({'position' : 'relative'});
+			switch(options){
+				case 'next':
+					this.$el.animate(
+						{ left: '-100%' },
+						400,
+						_.bind(this.trigger, this, 'animateOut')
+					);
+					break;
+				case 'prev':
+					this.$el.animate(
+						{ left: '100%' },
+						400,
+						_.bind(this.trigger, this, 'animateOut')
+					);
+					break;
+				default:
+					this.$el.animate(
+						{ left: '0px'},
+						0,
+						_.bind(this.trigger, this, 'animateOut')
+					);
+					break;
+			}
+		},*/
 
 
-		parseOneTpl: function(myTpl){// Initialisation du model à partir du template
-
-			var tpl= $.parseHTML(myTpl);
-
-			var ctx = this;
+		parseOneTpl: function(tpl){// Initialisation du model à partir du template
+			var _this = this;
 			var elemIndex = 0;
+
 			$(tpl).find('input:not(:checkbox,:radio)').each(function(){
-
-				var name= ctx.name+'_' + this.name;
-
+				var name= _this.name+'_' + this.name;
 				var rq = $(this).hasClass('required');
 				var obj={name : name, required : rq, };
-				var val ;
-				if ($(this).attr('value'))
-				{
-					val = $(this).attr('value');
-				}
-				else {val = null;}
-				ctx.stepAttributes.push(obj);
-				//var val=ctx.model.get(obj.name); //get val
-				ctx.model.set(name, val);
+				var val = $(this).val();
+				_this.stepAttributes.push(obj);
+				//var val=_this.model.get(obj.name); //get val
+				_this.model.set(name, val);
 			});
 			$(tpl).find('select').each(function(){
 
-				var name= ctx.name+'_' + this.name;
-				//$(this).attr('StepperModelName', name);
+				var name= _this.name+'_' + this.name;
 
-				
 				var obj={name : name};
 
-				ctx.stepAttributes.push(obj);
-				//var val=ctx.model.get(obj.name);
-				ctx.model.set(name, $(this).find(':selected').val());
+				_this.stepAttributes.push(obj);
+				_this.model.set(name, $(this).find(':selected').val());
 			});
 			//add radio & checkbox
 			var radioCreated = [] ;
 			$(tpl).find('input:radio').each(function(){
-			//$(myTpl).find('input:radio').each(function(){
-				var name= ctx.name+'_' + this.name;
-				
+				var name= _this.name+'_' + this.name;
 				
 				if (radioCreated.indexOf(this.name)==-1){
 					radioCreated.push(this.name);
 					
 					var obj={name : name};
-					ctx.stepAttributes.push(obj);
+					_this.stepAttributes.push(obj);
 					var val=null;
 					elemIndex++;
-					ctx.model.set(obj.name, val);
+					_this.model.set(obj.name, val);
 					
 					}
 				if ($(this).attr('checked')){
 						val = $(this).attr('value') ;
-						ctx.model.set(obj.name, val);
-   
+						_this.model.set(obj.name, val);
 					}
-			 
 			});
 		},
 
@@ -124,43 +145,35 @@ define([
 		},
 
 		onRender: function(){
-			//this.view1=new View1();
-			//this.main.show(this.view1, {preventDestroy: true});
-			//this.parseOneTpl(this.template);
 			this.feedTpl();
+			this.stepAttributes=[]; //all attributes per step
+			//this.initModel();
 		},
 
 		feedTpl: function(){
 
-			var ctx=this;
+			var _this=this;
 
 			this.$el.find('input:not(:checkbox,:radio,:submit)').each(function(){
-				var id = ctx.name + '_' + $(this).attr('name');
-				//for (var i = 0; i < ctx.stepAttributes.length; i++) {
-				//    if(id==ctx.stepAttributes[i].name)
-						$(this).attr('value', ctx.model.get(id));                        
-				//};
+				var id = _this.name + '_' + $(this).attr('name');
+				$(this).attr('value', _this.model.get(id));
 			});
-
 			this.$el.find('input:checkbox').each(function(){
-				var id = ctx.name + '_' + $(this).attr('name');
-				var tmp=ctx.model.get(id);
+				var id = _this.name + '_' + $(this).attr('name');
+				var tmp=_this.model.get(id);
 				if(tmp){ $(this).attr('checked', 'checked') }
 			});
 			this.$el.find('input:radio').each(function(){
-				var id = ctx.name + '_' + $(this).attr('name');
-				var tmp=ctx.model.get(id);
+				var id = _this.name + '_' + $(this).attr('name');
+				var tmp=_this.model.get(id);
 				if($(this).val() == tmp){ $(this).attr('checked', 'checked') }
 			});
 			this.$el.find('select').each(function(){
-				var id = ctx.name + '_' + $(this).attr('name');
-				var val=ctx.model.get(id);  
+				var id = _this.name + '_' + $(this).attr('name');
+				var val=_this.model.get(id);  
 				if(val)
 					$(this).val(val);
 			});
-
-
-
 		},
 
 
@@ -168,16 +181,13 @@ define([
 
 		/* Default behavior, set value to "" to all input elements */
 		reset: function(){
-			//this.initModel() ;
-			//this.render();
 			this.displayErrors();
-
 		},
 		
 		/* Default behavior, no check, nextEnable will do the job */
 		nextOK: function(){
-			var ajax=true;
-			if(ajax && this.validate()){
+			this.trigger('ns_modules__step_nextOk');
+			if(this.ajax && this.validate()){
 				return true;
 			}else{
 				return false;
@@ -208,7 +218,7 @@ define([
 		},
 		
 		datachanged_text: function(e){
-			var target= $(e.target);            
+			var target= $(e.target);
 			var val=target.val();
 			this.model.set(this.name + '_' + target.attr('name')  , val);
 		},

@@ -19,16 +19,14 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
-from ..GenericObjets.FrontModules import FrontModule,ModuleField
+from ..GenericObjets.FrontModules import FrontModules,ModuleForms
 from datetime import datetime
-
-
 
 class Observation(Base,ObjectWithDynProp):
     __tablename__ = 'Observation'
     ID =  Column(Integer,Sequence('Observation__id_seq'), primary_key=True)
     FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
-    ObservationDynPropValues = relationship('ObservationDynPropValue',backref='Observation',cascade="all, delete-orphan")
+    ObservationDynPropValues = relationship('ObservationDynPropValue',backref='Observation')
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
     creationDate = Column(DateTime,default = func.now())
     @orm.reconstructor
@@ -53,6 +51,24 @@ class Observation(Base,ObjectWithDynProp):
             return self.ProtocoleType
         else :
             return DBSession.query(ProtocoleType).get(self.FK_ProtocoleType)
+
+    def UpdateFromJson(self,DTOObject):
+        super().UpdateFromJson(DTOObject)
+        listOfSubProtocols = []
+        for curProp in DTOObject:
+            if isinstance(curProp,list) :
+                listOfSubProtocols = DTOObject['curProp']
+        if len(listOfSubProtocols) !=0 :
+            listObs = []
+            self.complexObsID = []
+            for curData in listOfSubProtocols :
+                subObs = Observation(FK_ProtocoleType = curData['FK_ProtocoleType'])
+                subObs.init_on_load()
+                subObs.UpdateFromJson(data)
+                listObs.append(subObs)
+            DBSession.add_all(listObs)
+
+
 
 
 class ObservationDynPropValue(Base):

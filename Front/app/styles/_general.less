@@ -1,27 +1,19 @@
 
 html, body{
 	height: 100%;
-	overflow: hidden;
+	//overflow: hidden;
 	font-family: 'Exo 2', sans-serif;
 }
 
-body.app{
+body{
 	background: url(./img/bg-home.jpg) center center no-repeat;
 	background-position: center;
 	background-attachment: fixed;
 	background-size: cover;
-	main{
-		padding-top: 50px;
-	}
-	header{
-		display: block;
-	}
 }
 main{
 	height: 100%;
-}
-header{
-	display: none;
+	padding-top: 50px;
 }
 
 .container{
@@ -38,13 +30,20 @@ a{
 .no-padding, .ns-no-padding{
 	padding: 0px;
 }
-.full-height, .ns-full-height, {
+.full-height, .ns-full-height{
 	overflow: auto;
 	height: 100%;
 }
 .ns-mid-height{
 	height: 50%;
 }
+@media (max-width: @screen-md-min) {
+	.full-height{
+		height: auto;
+	}
+}
+
+
 
 .col-border {
 	border-right: 1px solid @gray-lighter;
@@ -100,4 +99,17 @@ li.list-group-item{
 .animated {
 	-webkit-animation-duration: .6s;
 	animation-duration: .6s;
+}
+
+
+.btn[disabled]{
+	pointer-events: auto;
+}
+
+.pull-left{
+	float: left;
+}
+
+.bg-white{
+	background: white;
 }

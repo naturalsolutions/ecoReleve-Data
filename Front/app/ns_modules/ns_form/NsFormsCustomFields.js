@@ -210,5 +210,25 @@ define([
 		  if (value > options.value) return err;
 		};
 	};
+
+	  validators.requiredSelect = function(options) {
+	    options = _.extend({
+	      type: 'required',
+	      message: this.errMessages.required
+	    }, options);
+	     
+	    return function required(value) {
+	      options.value = value;
+	      
+	      var err = {
+	        type: options.type,
+	        message: _.isFunction(options.message) ? options.message(options) : options.message
+	      };
+	      
+	      if (value === null || value === undefined || value === false || value === '' || value === '-1') return err;
+	    };
+	  };
+
+	
 	return Backbone;
 });

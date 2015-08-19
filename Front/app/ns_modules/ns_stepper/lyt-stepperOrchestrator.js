@@ -15,7 +15,7 @@ define([
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
 		template: 'app/ns_modules/ns_stepper/tpl-stepperOrchestrator.html',
-		className : 'ns-full-height orchestrator',
+		className : 'full-height orchestrator animated',
 
 		events: {
 			'click #infos' : 'infos',
@@ -28,16 +28,18 @@ define([
 			'change input:radio' : 'datachanged_radio',
 			'change input:file' : 'datachanged_file',
 			'change select' : 'datachanged_select',
-			'click #step-nav li' : 'changeStep',
-			//'click .finished': 'finish'
+
+			
+			'click #stepNav li' : 'changeStep',
 		},
 
 		regions: {
 			StepManager: '#StepManager',
-			/*step_content: new Marionette.TransitionRegion({
-				el: '#step-content'
-			}),*/
-			step_content: '#step-content',
+			step_content: {
+				regionClass: Marionette.TransitionRegion,
+				selector: '#step-content'
+			},
+			//step_content: '#step-content',
 			actions: '#actions',
 		},
 
@@ -48,17 +50,21 @@ define([
 		},
 
 		initialize: function(options){
-
-			this.steps=options.steps;
-			var current;
-			for(var i=0; i < this.steps.length; i++){
-				current=this.steps[i];
-				current.parent = this;
-			}
 			this.model=options.model;
-			this.listenTo(this.model,'change', this.modelChanged);
-			this.keyboard();
+
+			this.stepsProto=options.steps;
+			this.steps= [];
+
+			for(var i=0; i < this.stepsProto.length; i++){
+				this.steps[i] = new this.stepsProto[i];
+				//this.steps[i].name = 'a';
+				this.steps[i].model = this.model;
+				this.steps[i].parent = this;
+			}
 			
+			this.listenTo(this.model,'change', this.modelChanged);
+
+			this.first = true;
 		},
 
 
@@ -66,6 +72,7 @@ define([
 			this.initNavSteps();
 			this.toStep(0);
 			this.$el.i18n();
+			this.first = false;
 		},
 
 		onRender: function(){
@@ -76,8 +83,8 @@ define([
 			for (var i = 0; i < this.steps.length; i++) {
 				var id = this.steps[i].name;
 				// delete space
-				id = id.replace(/ /g,"");
-				this.$el.find('#step-nav').append('<li class="step-item" id="'+ id +'"  disabled=disabled><span class="badge">'+(i+1)+'</span><span class="hidden-xs">'+this.steps[i].name+'</span><span class="chevron"></span></li>');
+				//id = id.replace(/ /g,"");
+				this.$el.find('#stepNav').append('<li class="step-item" id="'+ id +'"  disabled=disabled><span class="badge">'+(i+1)+'</span><span class="hidden-xs">'+this.steps[i].name+'</span><span class="chevron"></span></li>');
 			};
 		},
 
@@ -101,18 +108,14 @@ define([
 						if(e.ctrlKey)
 						ctx.prevStep();
 					break;
-
 					case 38: // up
 					break;
-
 					case 39: // right
 						if(e.ctrlKey)
 						ctx.nextStep();
 					break;
-
 					case 40: // down
 					break;
-
 					default: return; // exit this handler for other keys
 				}
 				//e.preventDefault(); // prevent the default action (scroll / move caret)
@@ -122,6 +125,8 @@ define([
 		/*==========  Next / Prev  ==========*/
 
 		nextStep: function(){
+			this.from = 'next';
+			this.lastOne= this.currentStep;
 			if(this.steps[this.currentStep].nextOK()) {
 				if (this.currentStep >= this.steps.length-1) {
 				this.finish();
@@ -130,11 +135,26 @@ define([
 					this.currentStep++;
 					this.toStep(this.currentStep);
 				}
-				
+			}
+			//for ajaxcall 
+			this.disableNext();
+
+		},
+
+		nextStepWithoutCheck: function(){
+			this.from = 'next';
+			if (this.currentStep >= this.steps.length-1) {
+				this.finish();
+			} else {
+				this.currentStep++;
+				this.toStep(this.currentStep);
 			}
 		},
 
 		prevStep: function(){
+			this.from = 'prev';
+			if(this.currentStep == 0) Backbone.history.navigate('', {trigger: true});
+			this.lastOne= this.currentStep;
 			this.currentStep === 0 ? this.currentStep : this.currentStep--;
 			this.toStep(this.currentStep);
 		},
@@ -145,13 +165,29 @@ define([
 			var nextBtnLabel = translater.getValueFromKey('stepper.btnNext');
 			var finishBtnLabel = translater.getValueFromKey('stepper.btnFinish');
 			this.currentStep = numstep;
-			this.step_content.show( this.steps[this.currentStep], {preventDestroy: true} );
+
+
+			var tmpStep = this.steps[this.currentStep];
+
+			this.currentStepLast = this.currentStep;
+
+			this.step_content.show( this.steps[this.currentStep], this.from);
+
+
+
+			if(!this.first){
+				this.steps[this.lastOne] = new this.stepsProto[this.lastOne];
+				this.steps[this.lastOne].name = 'a';
+				this.steps[this.lastOne].model = this.model;
+				this.steps[this.lastOne].parent = this;
+			}else{
+				this.lastOne= 0;
+			}
 			this.check();
 			this.styleNav();
 
 
 			if (this.currentStep==this.steps.length-1){
-
 				//this.$el.find('#btnNext').attr( 'disabled', 'disabled');
 				this.$el.find('#btnNext').addClass('finished').find( 'span'
 					).html(finishBtnLabel).parent().find('.icon').removeClass('rightarrow').addClass('validate');
@@ -164,28 +200,30 @@ define([
 		},
 
 		check: function(){
-
 			if(this.steps[this.currentStep].validate()) {
-				this.$el.find('#btnNext').removeAttr('disabled').show();                
+				this.$el.find('#btnNext').prop("disabled", false);
 			}
 			else{
-				/*this.$el.find('#btnNext').attr( 'disabled', 'disabled' );*/
-				this.$el.find('#btnNext').hide();
+				this.$el.find('#btnNext').prop("disabled", true);
 			}
+		},
+
+		disableNext: function(){
+			this.$el.find('#btnNext').prop("disabled", true);
 		},
 
 
 		/*==========  Style Nav Steps  ==========*/
 		displayPrev: function() {
-			if (this.currentStep==0){
-				/* this.$el.find('#btnPrev').attr( 'disabled', 'disabled');*/
+			/*
+			if(this.currentStep==0){
+				//this.$el.find('#btnPrev').attr( 'disabled', 'disabled');
 				this.$el.find('#btnPrev').hide();
- 
 			}
-			else {
-				/*  this.$el.find('#btnPrev').removeAttr('disabled'); */
-				this.$el.find('#btnPrev').show();
-			}
+			else{
+				//this.$el.find('#btnPrev').removeAttr('disabled'); 
+			}*/
+			this.$el.find('#btnPrev').show();
 
 		},
 
@@ -193,26 +231,26 @@ define([
 			var id = this.steps[this.currentStep].name;
 			var idCompleteStep ;
 			// delete space
-			id = id.replace(/ /g,"");
-			this.$el.find('#step-nav li.step-item.active').removeClass('active');
-			this.$el.find('#step-nav li#'+ id).addClass('active');
+			//id = id.replace(/ /g,"");
+			this.$el.find('#stepNav li.step-item.active').removeClass('active');
+			this.$el.find('#stepNav li#'+ id).addClass('active');
 			for (var i = 0; i < this.currentStep; i++) {
 				idCompleteStep = this.steps[i].name;
-				idCompleteStep = idCompleteStep.replace(/ /g,"");
-				this.$el.find('#step-nav li#'+idCompleteStep).addClass('complete');
+				//idCompleteStep = idCompleteStep.replace(/ /g,"");
+				this.$el.find('#stepNav li#'+idCompleteStep).addClass('complete');
 			};
 			for (var i = this.currentStep; i < this.steps.length; i++) {
 				idCompleteStep = this.steps[i].name;
-				idCompleteStep = idCompleteStep.replace(/ /g,"");
-				this.$el.find('#step-nav li#'+idCompleteStep).removeClass('complete');
+				//idCompleteStep = idCompleteStep.replace(/ /g,"");
+				this.$el.find('#stepNav li#'+idCompleteStep).removeClass('complete');
 			};
 		},
 
 
 		GetStepByName: function(StepName){
-			   for (var i=0; i < this.steps.length; i++){
+			for (var i=0; i < this.steps.length; i++){
 				if (this.steps[i].name == StepName ) return this.steps[i].Name ;
-			}  
+			}
 			return null;
 		},
 
@@ -282,8 +320,14 @@ define([
 
 		finish: function() {
 			this.alert_end();
-		}
+		},
 
+
+		onDestroy: function(){
+			for (var i = this.steps.length - 1; i >= 0; i--) {
+				this.steps[i].destroy();
+			};
+		},
 	});
 
 });

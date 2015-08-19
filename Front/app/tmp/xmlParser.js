@@ -1,22 +1,20 @@
 define([
 	'backbone',
 	'moment',
-	'collections/waypoints',
 ], function(
-	Backbone, moment, Waypoints
+	Backbone, moment
 ){
 	'use strict';
 	return {
 		gpxParser: function(xml) {
 			try {
-					var Waypoint =  Backbone.Model.extend();
-					var waypointList = new Waypoints();
+					var waypointList = new Backbone.Collection();
 					var errors = [];
 					// id waypoint
 					var id = 0;  // used to get number of valid waypoint
 					var nbWaypoints = 0; // used to get number of  waypoints in gpx file
 					$(xml).find('wpt').each(function() {
-						var waypoint = new Waypoint();
+						var waypoint = new Backbone.Model();
 						var lat = $(this).attr('lat');
 						var lon = $(this).attr('lon');
 						// convert lat & long to number and round to 5 decimals

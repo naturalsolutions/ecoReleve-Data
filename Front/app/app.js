@@ -10,15 +10,25 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 	};
 
 	app = new Marionette.Application();
-
 	app.on('start', function() {
 		app.rootView = new Lyt_rootview();
 		app.rootView.render();
-		app.controller = new Controller({app : app});
-		app.router = new Router({controller: app.controller, app: app});
-		
+		app.controller = new Controller();
+		app.router = new Router({controller: app.controller});
 		Backbone.history.start();
 	});
 
+	$( document ).ajaxStart(function(e) {
+		$('#header-loader').removeClass('hidden');
+	});
+	$( document ).ajaxStop(function() {
+		$('#header-loader').addClass('hidden');
+	});
+	$( document ).ajaxError(function() {
+		console.error('Error from the server');
+		$('#header-loader').addClass('hidden');
+	});
+
+	window.app = app;
 	return app;
 });

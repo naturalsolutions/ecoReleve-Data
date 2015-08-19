@@ -44,7 +44,6 @@ function(_, Marionette) {
 		},
 
 		show: function(view, options) {
-
 			// If animating out, set the animateInQueue.
 			// This new view will be what is transitioned in
 			if (this._animatingOut) {
@@ -72,14 +71,14 @@ function(_, Marionette) {
 			// Otherwise, simply continue.
 			if (animateOut && !concurrent) {
 				this.listenToOnce(currentView, 'animateOut', _.bind(this._onTransitionOut, this));
-				currentView.animateOut();
+				currentView.animateOut(options);
 				// Return this for backwards compat
 				return this;
 			}
 
 			// Otherwise, execute both transitions at the same time
 			else if (animateOut && concurrent) {
-				currentView.animateOut();
+				currentView.animateOut(options);
 				return this._onTransitionOut();
 			}
 
@@ -91,7 +90,6 @@ function(_, Marionette) {
 		// This is most of the original show function.
 		_onTransitionOut: function() {
 			this.triggerMethod('animateOut', this.currentView);
-
 			var view = this._inQueueView;
 			var options = this._inQueueOptions;
 			this._clearInQueue();
@@ -173,7 +171,7 @@ function(_, Marionette) {
 			// If there's an animateIn method, then call it and wait for it to complete
 			if (animatingIn) {
 				this.listenToOnce(view, 'animateIn', _.bind(this._onTransitionIn, this, showOptions));
-				view.animateIn();
+				view.animateIn(options);
 				return this;
 			}
 
@@ -219,7 +217,7 @@ function(_, Marionette) {
 			// immediately destroy it
 			if (_.isFunction(view.animateOut) && animate) {
 				this.listenToOnce(this.currentView, 'animateOut', _.bind(this._destroyView, this));
-				this.currentView.animateOut();
+				this.currentView.animateOut(options);
 			} else {
 				this._destroyView();
 			}

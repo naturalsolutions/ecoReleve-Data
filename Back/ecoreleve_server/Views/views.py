@@ -17,7 +17,7 @@ from ecoreleve_server.Models import (
     Station
     )
 
-from ecoreleve_server.GenericObjets.FrontModules import (FrontModule,ModuleField)
+from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 
 
 @view_config(route_name='observation/id', renderer='json', request_method = 'GET')
@@ -26,7 +26,7 @@ def getObservation(request):
     ModuleName = request.params['FormName']
     curObs = DBSession.query(Observation).get(id)
     print(curObs)
-    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName and FrontModule.TypeObj == curObs.FK_ProtocoleType).first()
+    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName and FrontModules.TypeObj == curObs.FK_ProtocoleType).first()
     DisplayMode = request.params['DisplayMode']
     print(Conf)
     return curObs.GetDTOWithSchema(Conf,DisplayMode)
@@ -50,7 +50,7 @@ def setObservation(request):
 #     id = request.matchdict['id']
 #     ModuleName = request.params['FormName']
 #     curSta = DBSession.query(Station).get(id)
-#     Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+#     Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
 #     DisplayMode = request.params['DisplayMode']
 #     print(curSta)
 #     return curSta.GetDTOWithSchema(Conf,DisplayMode)

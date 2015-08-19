@@ -17,11 +17,12 @@ from sqlalchemy import (Column,
  insert,
  select,
  UniqueConstraint)
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
-from ..GenericObjets.FrontModules import FrontModule,ModuleField
+from ..GenericObjets.FrontModules import FrontModules,ModuleGrids
 from ecoreleve_server.Models import FieldActivity
 from datetime import datetime
 from collections import OrderedDict
@@ -32,6 +33,7 @@ import json
 class Station(Base,ObjectWithDynProp):
 
     __tablename__ = 'Station'
+    
 
     ID = Column(Integer,Sequence('Stations__id_seq'), primary_key=True)
     StationDate =  Column(DateTime, index=True, nullable=False)
@@ -47,10 +49,36 @@ class Station(Base,ObjectWithDynProp):
     StationDynPropValues = relationship('StationDynPropValue',backref='Station',cascade="all, delete-orphan")
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
-
+    FK_Place = Column(Integer)
+    
+    Station_FieldWorkers = relationship('Station_FieldWorker', backref='Station',cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON', name='_unique_constraint_lat_lon_date'),)
 
-    
+
+    @hybrid_property
+    def FieldWorkers(self):
+        if self.Station_FieldWorkers:
+            fws = []
+            for i in range(len(self.Station_FieldWorkers)) :
+                fws.append({'FieldWorker':self.Station_FieldWorkers[i].FieldWorkerID})
+            return fws
+        else:
+            return []
+
+    @FieldWorkers.setter
+    def FieldWorkers(self, values):
+        if not self.Station_FieldWorkers:
+            fws=[]
+            print(values)
+            for item in values:
+                fws.append(Station_FieldWorker( FK_FieldWorker = int(item['FieldWorker']), FK_Station=self.ID))
+            self.Station_FieldWorkers = fws
+
+    @FieldWorkers.expression
+    def FieldWorkers(cls):
+        return Station_FieldWorker.id
+
+
     @orm.reconstructor
     def init_on_load(self):
         ObjectWithDynProp.__init__(self,DBSession)
@@ -73,6 +101,11 @@ class Station(Base,ObjectWithDynProp):
             return self.StationType
         else :
             return DBSession.query(StationType).get(self.FK_StationType)
+
+    def GetDTOWithSchema(self,FrontModules,DisplayMode):
+        resultat = super().GetDTOWithSchema(FrontModules,DisplayMode)
+        resultat['data']['FieldWorkers'] = self.FieldWorkers
+        return resultat
 
 
 class StationDynProp(Base):
@@ -102,7 +135,7 @@ class StationDynPropValue(Base):
 class StationType(Base,ObjectTypeWithDynProp):
 
     @orm.reconstructor
-    def init_on_load(self):        
+    def init_on_load(self):
         ObjectTypeWithDynProp.__init__(self,DBSession)
 
     __tablename__ = 'StationType'
@@ -122,6 +155,31 @@ class StationType_StationDynProp(Base):
     Required = Column(Integer,nullable=False)
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
     FK_StationDynProp = Column(Integer, ForeignKey('StationDynProp.ID'))
+
+
+class Station_FieldWorker (Base) :
+
+    __tablename__ = 'Station_FieldWorker'
+
+    ID = Column(Integer,Sequence('Station_FieldWorker__id_seq'), primary_key=True)
+    FK_Station = Column(Integer,ForeignKey('Station.ID'))
+    FK_FieldWorker = Column(Integer,ForeignKey('User.ID'))
+
+    FieldWorker = relationship('User')
+
+    @hybrid_property
+    def FieldWorkerName (self):
+        if self.FieldWorker:
+            return self.FieldWorker.Login
+        else:
+            return None
+
+    @hybrid_property
+    def FieldWorkerID (self):
+        if self.FieldWorker:
+            return self.FieldWorker.id
+        else:
+            return None
 
 
 

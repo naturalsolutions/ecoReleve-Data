@@ -7,9 +7,33 @@
 			</a>
 		</div>
 		<ul class="nav navbar-nav navbar-right">
+			<li id="header-loader" class="hidden">
+				<a>
+					<svg width="50" height="10">
+						<rect x="0" y="0" rx="3" ry="3" width="10" height="10">
+							<animate attributeName="width" values="0;10;10;10;0" dur="1000ms" repeatCount="indefinite"></animate>
+							<animate attributeName="height" values="0;10;10;10;0" dur="1000ms" repeatCount="indefinite"></animate>
+							<animate attributeName="x" values="5;0;0;0;5" dur="1000ms" repeatCount="indefinite"></animate>
+							<animate attributeName="y" values="5;0;0;0;5" dur="1000ms" repeatCount="indefinite"></animate>
+						</rect>
+						<rect x="15" y="0" rx="3" ry="3" width="10" height="10">
+							<animate attributeName="width" values="0;10;10;10;0" begin="200ms" dur="1000ms" repeatCount="indefinite"></animate>
+							<animate attributeName="height" values="0;10;10;10;0" begin="200ms" dur="1000ms" repeatCount="indefinite"></animate>
+							<animate attributeName="x" values="20;15;15;15;20" begin="200ms" dur="1000ms" repeatCount="indefinite"></animate>
+							<animate attributeName="y" values="5;0;0;0;5" begin="200ms" dur="1000ms" repeatCount="indefinite"></animate>
+						</rect>
+						<rect x="30.6084" y="0.608427" rx="3" ry="3" width="8.78315" height="8.78315">
+						<animate attributeName="width" values="0;10;10;10;0" begin="400ms" dur="1000ms" repeatCount="indefinite"></animate>
+						<animate attributeName="height" values="0;10;10;10;0" begin="400ms" dur="1000ms" repeatCount="indefinite"></animate>
+						<animate attributeName="x" values="35;30;30;30;35" begin="400ms" dur="1000ms" repeatCount="indefinite"></animate>
+						<animate attributeName="y" values="5;0;0;0;5" begin="400ms" dur="1000ms" repeatCount="indefinite"></animate>
+						</rect>
+					</svg>
+				</a>
+			</li>
 			<li>
 				<a href="#">
-					<i class="reneco-user"></i>&nbsp;
+					<i class="reneco reneco-user"></i>&nbsp;
 					user
 				</a>
 			</li>

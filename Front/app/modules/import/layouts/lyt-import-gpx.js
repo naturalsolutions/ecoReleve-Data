@@ -11,6 +11,8 @@ define([
 	'../_gpx/layouts/lyt-stepOrchestrator',
 	'../_gpx/layouts/lyt-step2',
 
+
+
 	'../_gpx/layouts/lyt-step3',
 	'../_gpx/layouts/lyt-step4',
 
@@ -101,11 +103,7 @@ define([
 
 		init_GSM_stepper : function() {
 			var stepLabel = this.translater.getValueFromKey('import.stepper.step1GPXLabel');
-			var SecondStep = new GSM_Step2({
-				model : this.model,
-				name : stepLabel,
-				tpl : 'app/modules/import/_gsm/templates/tpl-step1.html',
-			});
+			var SecondStep = GSM_Step2;
 
 			this.GSM_steps=[];
 			this.GSM_steps[0]= SecondStep;
@@ -117,18 +115,8 @@ define([
 
 		init_RFID_stepper : function() {
 			var stepLabel = this.translater.getValueFromKey('import.stepper.step1GPXLabel');
-			var SecondStep = new RFID_Step2({
-				model: this.model,
-				name: 'RFID-decoder',
-				tpl: 'app/modules/import/_rfid/templates/tpl-step1.html',
-			});
-
-			var ThirdStep = new RFID_Step3({
-				model: this.model,
-				name: stepLabel,
-				tpl: 'app/modules/import/_rfid/templates/tpl-step2.html',
-
-			});
+			var SecondStep = RFID_Step2;
+			var ThirdStep = RFID_Step3;
 
 			this.RFID_steps=[];
 			this.RFID_steps[0]= SecondStep;
@@ -147,25 +135,12 @@ define([
 			step2Label = this.translater.getValueFromKey('import.stepper.step2GPXLabel'),
 			step3Label = this.translater.getValueFromKey('import.stepper.step3GPXLabel');
 			
-			var SecondStep = new GPX_Step2({
-				model: this.model,
-				name: step1Label,
-				tpl: 'app/modules/import/_gpx/templates/tpl-step2.html',
+			var SecondStep = GPX_Step2;
 
-			});
-
-			var ThirdStep = new GPX_Step3({
-				model: this.model,
-				name: step2Label,
-				tpl: 'app/modules/import/_gpx/templates/tpl-step3.html',
-			});
+			var ThirdStep = GPX_Step3;
 
 			
-			var FourthStep = new GPX_Step4({
-				model: this.model,
-				name: step3Label,
-				tpl: 'app/modules/import/_gpx/templates/tpl-step4.html',
-			});
+			var FourthStep = GPX_Step4;
 
 			this.GPX_steps=[];
 			this.GPX_steps[0]= SecondStep;

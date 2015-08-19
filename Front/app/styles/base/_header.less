@@ -8,13 +8,13 @@ header{
 	overflow: hidden;
 	font-weight: 400; 
 	a#logout{
-		
+		cursor: pointer;
 	}
 	nav.navbar{
 		margin: 0px;
 		border: none;
 	}
-	.nav > li > a, a{
+	.nav > li > a{
 		color: white;
 		&:focus, &:hover{
 			background: @header-hover;
@@ -23,5 +23,12 @@ header{
 	}
 	.navbar-brand{
 		
+	}
+	#header-loader{
+		svg{
+			rect {
+				fill: white;
+			}
+		}
 	}
 }

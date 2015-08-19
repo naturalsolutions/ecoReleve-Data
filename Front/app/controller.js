@@ -12,6 +12,15 @@ define(['marionette', 'config',
 	'./Demo/lyt-Obs',
 	'./Demo/lyt-Sta',
 
+	'./modules/newStation/lyt-entry-new-station',
+	'./modules/editStations/lyt-entry-edit-stations',
+	'./modules/newStation/layouts/lyt-step1',
+	
+	'./modules/importFile/lyt-entry-importFile',
+	
+
+
+
 ],function( Marionette, config, 
 	LytHome,
 
@@ -22,46 +31,65 @@ define(['marionette', 'config',
 	LytStations,
 
 	LytObs,
-	LytSta
+	LytSta,
+
+	LytNewStation,
+	LytEditStations,
+	LytStationManager,
+
+	LytImportFile
 
 ){
 	'use strict';
 	return Marionette.Object.extend({
 
 		initialize: function(){
-			this.rgMain=this.options.app.rootView.rgMain;
-			this.rgHeader=this.options.app.rootView.rgHeader;
-			this.rgFooter=this.options.app.rootView.rgFooter;
+			this.rgMain=window.app.rootView.rgMain;
+			this.rgHeader=window.app.rootView.rgHeader;
+			this.rgFooter=window.app.rootView.rgFooter;
 		},
-
 		home: function() {
 			Backbone.history.navigate('');
 			this.rgMain.show(new LytHome());
 		},
-
 		input: function(){
 			this.rgMain.show(new LytInput());
 		},
-
 		export: function(){
 			this.rgMain.show(new LytExport());
 		},
 		obs: function(options){
 			this.rgMain.show(new LytObs({id:options}));
 		},
-
 		sta: function(options){
 			this.rgMain.show(new LytSta({id:options}));
 		},
-
-
 		import: function(){
 			this.rgMain.show(new LytImport());
 		},
-
 		stations: function(){
 			this.rgMain.show(new LytStations());
 		},
+
+
+
+		newStation: function(){
+			this.rgMain.show(new LytNewStation());
+		},
+
+		editStations: function(){
+			this.rgMain.show(new LytEditStations());
+		},
+
+		importFile: function(){
+			this.rgMain.show(new LytImportFile());
+		},
+
+		station: function(options){
+			this.rgMain.show(new LytStationManager({id: options}));
+		},
+
+
 
 	});
 });

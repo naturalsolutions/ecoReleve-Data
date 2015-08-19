@@ -22,8 +22,11 @@
 		"reset" : "Annuler",
 		"edit" :"Editer",
 		"add" : "Ajouter",
+		"save" : "Enregistrer",
+		"delete" : "Supprimer",
 		"addObserver" : "Ajouter un observateur",
-		"removeObserver" : "Enlever un observateur"
+		"removeObserver" : "Enlever un observateur",
+		"geolocation" : "Position courante"
 	},
 	"shared" : {
 		"fieldworker" : "Observateur",
@@ -71,7 +74,6 @@
 		"step1ExistStLabel" : "stations existantes",
 		"step1ExistSitesLabel" :"sites suivis",
 		"newStLocation" : "position",
-		"geolocation" : "position courante",
 		"newStLocationRegion" : "région*",
 		"newStLocationAccuracy" :"précision(m)*",
 		"newStName" : "nom de station*",
@@ -82,7 +84,8 @@
 		"allStFilterName" :"Nom",
 		"stationNavigationAlert" : "Pas de station suivante ou précédente pour les données filtrés",
 		"stationNavigationTitle" : "Mise à jour de station",
-		"importStMsg" : "Pas de stations importées."
+		"importStMsg" : "Pas de stations importées.",
+		"labelAddNewProto" :"Ajouter un protocole"
 	},
 	"import" : {
 		"stepper" : {
@@ -104,7 +107,7 @@
 		"waypoint" : " point",
 		"waypointsError" : "Aucun point n'est sélectionné",
 		"waypointsErrorMsg" : "Merci de sélectionner au moins un point à importer.",
-		"globalFieldActivity" : "Activité globale",
+		"globalFieldActivity" : "Sélectionnez une activité globale (optionnel)",
 		"ImportingDataAlert" : "Import de données",
 		"loadingDataAlert" : "Erreur de transfert",
 		"importingDataWarning" : "Les points sélectionnés sont déjà importés",
