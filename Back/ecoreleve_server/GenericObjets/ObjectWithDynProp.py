@@ -8,6 +8,7 @@ from .FrontModules import FrontModules,ModuleForms, ModuleGrids
 import transaction
 from operator import itemgetter
 from collections import OrderedDict
+from traceback import print_exc
 
 
 Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}
@@ -179,16 +180,12 @@ class ObjectWithDynProp:
         return row[Cle[row['TypeProp']]]
 
     def UpdateFromJson(self,DTOObject):
-        # print('UpdateFromJson')
-
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id'):
-                # print (curProp)
-                # print(DTOObject[curProp])
                 self.SetProperty(curProp,DTOObject[curProp])
 
-    def GetFlatObject(self):
+    def GetFlatObject(self,schema=None):
         resultat = {}
 
         if self.ID is not None : 
@@ -263,7 +260,7 @@ class ObjectWithDynProp:
             }
 
         ''' IF ID is send from front --> get data of this object in order to display value into form which will be sent'''
-        data =   self.GetFlatObject()
+        data = self.GetFlatObject(schema)
         resultat['data'] = data
         if self.ID :
             resultat['data']['id'] = self.ID

@@ -55,13 +55,10 @@ class ListObjectWithDynProp():
             curDynProp = self.GetDynProp(objConf.Name)
 
             if objConf.Name in fk_list and objConf.QueryName is not None:
-                print('--------- ITS A FK --------------')
-                print(fk_list[objConf.Name].column.table)
                 tableRef = fk_list[objConf.Name].column.table
                 nameRef = fk_list[objConf.Name].column.name
                 joinTable = outerjoin (joinTable,tableRef,objTable.c[objConf.Name] == tableRef.c[nameRef])
                 selectable.append(tableRef.c[objConf.QueryName])
-
 
             elif curDynProp != None:
 
