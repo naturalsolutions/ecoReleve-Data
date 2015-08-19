@@ -6,8 +6,4 @@ define({
 	siteName: '',
 	dateLabel: 'jj/mm/aaaa hh:mm:ss',
 	dateFormats: ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm:ss'],
-	mapDefault: {
-		zoom: 12,
-		center: [33,-4]
-	}
 });

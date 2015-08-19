@@ -34,6 +34,7 @@ define([
 		},
 
 		initialize: function(){
+
 			this.radio = Radio.channel('route');
 			this.datas={};
 			this.form;

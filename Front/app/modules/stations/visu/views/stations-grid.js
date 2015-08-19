@@ -74,7 +74,7 @@ define([
 			this.grid= new NSGrid({
 				columns: this.cols,
 				channel: 'modules',
-				url: config.coreUrl + 'station/',
+				url: config.coreUrl + 'stations/',
 				pageSize : 24,
 				pagingServerSide : true,
 			});

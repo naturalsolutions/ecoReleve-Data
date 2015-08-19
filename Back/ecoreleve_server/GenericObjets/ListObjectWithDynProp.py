@@ -88,7 +88,7 @@ class ListObjectWithDynProp():
 
     def GetDynProp (self,dynPropName) : 
 
-        curDynProp = self.DynPropList[self.DynPropList['Name']==dynPropName]
+        curDynProp = self.DynPropList[self.DynPropList['Name'] == dynPropName]
         curDynProp = curDynProp.to_dict(orient = 'records')
 
         if curDynProp != [] :
@@ -116,7 +116,7 @@ class ListObjectWithDynProp():
             #### Perform the'where' in dyn props ####
             query = query.where(
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['TypeProp']],criteriaObj['Operator'],criteriaObj['Value'])
-                )
+            )
 
         return query
 

@@ -35,7 +35,7 @@ class ObjectWithDynProp:
             result = DBSession.execute(select([dynPropTable])).fetchall()
 
         statProps = [{'name': statProp.key, 'type': statProp.type} for statProp in self.__table__.columns ]
-        dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp}for dynProp in result]
+        dynProps = [{'name': dynProp.Name,'type': dynProp.TypeProp}for dynProp in result]
 
         statProps.extend(dynProps)
 

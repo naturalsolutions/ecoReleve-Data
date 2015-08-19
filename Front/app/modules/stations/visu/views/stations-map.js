@@ -34,7 +34,6 @@ define([
 				popup: true,
 			});
 			var ctx = this;
-			this.map.init();
 			this.map.initErrorWarning('<i>There is too much datas to display on the map. <br /> Please be more specific in your filters.</i>');
 
 		},
