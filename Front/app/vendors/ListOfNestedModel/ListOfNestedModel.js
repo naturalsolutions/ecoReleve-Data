@@ -35,7 +35,6 @@
             }),
 
             options = options || {};
-
             options.schema.validators = [];
             options.schema.itemType = 'InlineNestedModel';
             var editors = Form.editors;
@@ -97,13 +96,18 @@
             if (this.modalForm) {
                 this.value = this.modalForm.getValue();
             }
+            console.log('GET VVAlue');
+            var data = this.modalForm.data;
+           for ( var key in this.value){
+                data[key] = this.value[key];
+            }
+            console.log(data);
             return this.value;
         },
 
         render: function () {
             var self = this,
                 ModalForm = this.form.constructor;
-
             var form = this.modalForm = new ModalForm({
                 schema: this.nestedSchema,
                 data: this.value
