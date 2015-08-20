@@ -73,7 +73,8 @@
         initialize: function (options) {
             options = options || {};
 
-           
+            this.defaultValue =  options.schema.defaultValue;
+            options.schema.validators = [];
             options.list.validators = options.list.validators || []; // FIXME: Doesn't work when validators is undefined...
             options.list.validators.push({ type: 'subforms', field: options.list });
             options.list.hasNestedForm = true; // Disable field-level error handling because it is already handled in subform (see Field.setError())
@@ -87,30 +88,46 @@
             this.template = options.template || this.constructor.template;
             
             var schema = this.schema;
+            console.log(schema)
+
             if (!schema.model) throw new Error('Missing required option "schema.model"');
             var nestedSchema = schema.model.prototype.schema;
             this.nestedSchema = (_.isFunction(nestedSchema)) ? nestedSchema() : nestedSchema;
         },
 
         getValue: function () {
-            if (this.modalForm) {
+/*            if (this.modalForm) {
                 this.value = this.modalForm.getValue();
             }
-            console.log('GET VVAlue');
-            var data = this.modalForm.data;
-           for ( var key in this.value){
-                data[key] = this.value[key];
+            console.log('GET VAlue');
+            console.log(this.value);
+            return this.value;*/
+
+            /*TODO default model data for new nested Model */
+            if (this.modalForm) {
+                var curValue = this.modalForm.getValue();
+                console.log('GET VVAlue');
+                var data = this.modalForm.data;
+                if (data == null) {
+                    this.value = this.modalForm.getValue();
+                }
+                else {
+                    for ( var key in curValue){
+                        data[key] = curValue[key];
+                    }
+                    this.value = data;
+                }
             }
-            console.log(data);
             return this.value;
         },
 
         render: function () {
             var self = this,
                 ModalForm = this.form.constructor;
+
             var form = this.modalForm = new ModalForm({
                 schema: this.nestedSchema,
-                data: this.value
+                data: this.value || this.defaultValue
             });
 
             var el = form.render().el;

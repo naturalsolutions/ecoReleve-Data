@@ -134,14 +134,13 @@ class ObjectWithDynProp:
             try :
                 curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
                 if 'Date' in curTypeAttr :
-                    print('\n\n Date detected *************************')
                     try : 
                         valeur = nameProp.strftime('%d/%m/%Y %H:%M:%S')
                     except :
                         valeur = nameProp.strftime('%d/%m/%Y')
             except :
                 print(nameProp+' is not a column')
-                pass 
+                pass
             setattr(self,nameProp,valeur)
         else:
             if (nameProp in self.GetType().DynPropNames):

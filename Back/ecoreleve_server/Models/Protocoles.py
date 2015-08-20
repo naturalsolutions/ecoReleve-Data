@@ -35,7 +35,7 @@ class Observation(Base,ObjectWithDynProp):
     Parent_Observation = Column(Integer,ForeignKey('Observation.ID'))
 
     Observation_children = relationship("Observation", cascade="all, delete-orphan")
-
+    DynPropValues = relationship("ObservationDynPropValue", cascade="all, delete-orphan")
 
     @orm.reconstructor
     def init_on_load(self):
@@ -70,38 +70,29 @@ class Observation(Base,ObjectWithDynProp):
 
     @Observation_childrens.setter
     def Observation_childrens(self,listOfSubProtocols):
-        print('\n\n CHILD SETTER -----------------------')
         listObs = []
         if len(listOfSubProtocols) !=0 :
             listObs = []
-            print('SUB Protocol TRY To SAVE')
+            toDelete = []
             for curData in listOfSubProtocols :
-                print(curData)
-                subObs = Observation(FK_ProtocoleType = curData['FK_ProtocoleType']
-                    ,Parent_Observation=self.ID)  #,FK_Station=self.FK_Station)
-                subObs.init_on_load()
-                subObs.UpdateFromJson(curData)
-                listObs.append(subObs)
+                if 'ID' in curData :
+                    subObs = list(filter(lambda x : x.ID==curData['ID'],self.Observation_children))[0]
+                else :
+                    subObs = Observation(FK_ProtocoleType = curData['FK_ProtocoleType']
+                        ,Parent_Observation=self.ID,FK_Station=self.FK_Station)
+                    subObs.init_on_load()
+                if subObs is not None:
+                    subObs.UpdateFromJson(curData)
+                    listObs.append(subObs)
+            # self.deleteSubObs(listObs)
         self.Observation_children = listObs
 
-    # def UpdateFromJson(self,DTOObject):
-    #     super().UpdateFromJson(DTOObject)
-    #     listOfSubProtocols = []
-    #     for curProp in DTOObject:
-    #         if isinstance(curProp,list) :
-    #             print('\n\n\n ************************* \n')
-
-    #             print('Complex PROTOCOL detected')
-    #             listOfSubProtocols = DTOObject['curProp']
-    #     if len(listOfSubProtocols) !=0 :
-    #         listObs = []
-    #         print('SUB Protocol TRY To SAVE')
-    #         for curData in listOfSubProtocols :
-    #             subObs = Observation(FK_ProtocoleType = DTOObject['sub_ProtocoleType'], FK_Observation=self.ID,FK_Station=DTOObject['FK_Station'])
-    #             subObs.init_on_load()
-    #             subObs.UpdateFromJson(data)
-    #             listObs.append(subObs)
-    #         self.Observation_children = listObs
+    ###### Don't need that ORM do the job #####
+    # def deleteSubObs(self,listObs):
+    #     print('------- DELETE SUBOBS')
+    #     objToDel = list(set(listObs).symmetric_difference(self.Observation_children))
+    #     for obj in objToDel:
+    #         DBSession.delete(obj)
 
     def GetFlatObject(self,schema=None):
         result = super().GetFlatObject()
@@ -109,22 +100,13 @@ class Observation(Base,ObjectWithDynProp):
         typeName = 'children'
         sub_ProtocoleType = None
         if self.Observation_childrens != []:
-            print ('CHILDREN !!!!!!!!!!')
+            print ('CHILDREN !!!!!!!!!!') ### Append flatdata to list of data for existing subProto 
             typeName = self.Observation_childrens[0].GetType().Name
             for subObs in self.Observation_childrens:
                 subObs.LoadNowValues()
+                sub_ProtocoleType = subObs.GetType().ID
                 subObsList.append(subObs.GetFlatObject())
-        elif schema is not None:
-            for item,value in schema.items() :
-                if 'subTypeObj' in value:
-                    typeName = value['Name'] 
-                    print('\n\n ********************  SUB schema')
-                    sub_ProtocoleType = value['subTypeObj']
-                    subObsList.append({'id':0, 'FK_ProtocoleType':value['subTypeObj']})
-
         result[typeName] = subObsList
-        if sub_ProtocoleType is not None:
-            result['sub_ProtocoleType'] = sub_ProtocoleType
         return result
 
 
@@ -140,7 +122,6 @@ class ObservationDynPropValue(Base):
     ValueFloat =  Column(Float)
     FK_ObservationDynProp = Column(Integer, ForeignKey('ObservationDynProp.ID'))
     FK_Observation = Column(Integer, ForeignKey('Observation.ID'))
-
 
 class ObservationDynProp(Base):
 

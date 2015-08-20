@@ -121,23 +121,17 @@ def insertNewProtocol (request) :
             data[items] = value
 
     data['FK_Station'] = request.matchdict['id']
-    print('\n\n*********************** SET Observation *****************\n')
-
     newProto = Observation(FK_ProtocoleType = data['FK_ProtocoleType'],FK_Station=data['FK_Station'])
     newProto.ProtocoleType = DBSession.query(ProtocoleType).filter(ProtocoleType.ID==data['FK_ProtocoleType']).first()
     listOfSubProtocols = []
     for items , value in data.items():
         if isinstance(value,list):
-            print('\n\n\n ************************* \n')
-            print('Complex PROTOCOL detected')
             listOfSubProtocols = value
 
-    print(data)
     if listOfSubProtocols !=[] and 'sub_ProtocoleType' in data:
         for obj in listOfSubProtocols:
             obj['FK_ProtocoleType']=data['sub_ProtocoleType']
         data['Observation_childrens'] = listOfSubProtocols
-        
 
     newProto.init_on_load()
     newProto.UpdateFromJson(data)
@@ -154,18 +148,15 @@ def updateObservation(request):
     id_obs = request.matchdict['obs_id']
     curObs = DBSession.query(Observation).get(id_obs)
     curObs.LoadNowValues()
-    # newProto.ProtocoleType = DBSession.query(ProtocoleType).filter(ProtocoleType.ID==data['FK_ProtocoleType']).first()
     listOfSubProtocols = []
-    for curProp in data:
-        if isinstance(curProp,list) :
+    subObsList = []
+    for  items , value in data.items():
+        if isinstance(value,list):
             print('\n\n\n ************************* \n')
-            print('Complex PROTOCOL detected')
-            listOfSubProtocols = DTOObject[curProp]
+            print('Complex PROTOCOL detected For UPDATE')
+            listOfSubProtocols = value
 
-    if listOfSubProtocols !=[] and 'sub_ProtocoleType' in data:
-        for obj in listOfSubProtocols:
-            obj['FK_ProtocoleType']=data['sub_ProtocoleType']
-        data['Observation_childrens'] = listOfSubProtocols
+    data['Observation_childrens'] = listOfSubProtocols
     curObs.UpdateFromJson(data)
     transaction.commit()
     return {}
