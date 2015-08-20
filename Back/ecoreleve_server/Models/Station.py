@@ -22,7 +22,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
-from ..GenericObjets.FrontModules import FrontModule,ModuleGrid
+from ..GenericObjets.FrontModules import FrontModules,ModuleGrids
 from ecoreleve_server.Models import FieldActivity
 from datetime import datetime
 from collections import OrderedDict
@@ -58,20 +58,20 @@ class Station(Base,ObjectWithDynProp):
     @hybrid_property
     def FieldWorkers(self):
         if self.Station_FieldWorkers:
-            fws_name = {}
-            fw_string = 'FieldWorker'
-            for i in range(len(self.FieldWorkers)) :
-                fws_name[fw_string+str(i+1)] = self.Station_FieldWorkers[i].FieldWorkerID
-            return fws_name
+            fws = []
+            for i in range(len(self.Station_FieldWorkers)) :
+                fws.append({'FieldWorker':self.Station_FieldWorkers[i].FieldWorkerID})
+            return fws
         else:
-            return None
+            return []
 
     @FieldWorkers.setter
     def FieldWorkers(self, values):
         if not self.Station_FieldWorkers:
             fws=[]
-            for val in values : 
-                fws.append(Station_FieldWorker( FK_FieldWorker = int(val), FK_Station=self.ID))
+            print(values)
+            for item in values:
+                fws.append(Station_FieldWorker( FK_FieldWorker = int(item['FieldWorker']), FK_Station=self.ID))
             self.Station_FieldWorkers = fws
 
     @FieldWorkers.expression
@@ -102,10 +102,10 @@ class Station(Base,ObjectWithDynProp):
         else :
             return DBSession.query(StationType).get(self.FK_StationType)
 
-    # def UpdateFromJson(self,DTOObject):
-    #     super().UpdateFromJson(self,DTOObject)
-    #     if 'FieldWorkers' in DTOObject :
-    #         self.FieldWorkers = DTOObject['FieldWorkers']
+    def GetDTOWithSchema(self,FrontModules,DisplayMode):
+        resultat = super().GetDTOWithSchema(FrontModules,DisplayMode)
+        resultat['data']['FieldWorkers'] = self.FieldWorkers
+        return resultat
 
 
 class StationDynProp(Base):

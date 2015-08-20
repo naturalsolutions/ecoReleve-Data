@@ -9,28 +9,28 @@ define([
 	'backbone_forms',
 	'ns_filter/model-filter',
 
-	'../views/stations-grid',
-	'../views/stations-map',
+	'ns_grid/model-grid',
+	'ns_map/ns_map',
+	'ns_modules/ns_com',
+
 
 ], function(
 	$, _, Backbone, Marionette, config, Radio,
-	BbForms, NSFilter,
-	ViewGrid, ViewMap
+	BbForms, NsFilter, NsGrid, NsMap, Com
 
 ){
 
 	return Marionette.LayoutView.extend({
-		className: 'full-height monitored-sites',
-		template: 'app/modules/stations/templates/tpl-stations.html',
+		className: 'full-height white',
+		template: 'app/modules/stations/visu/templates/tpl-stations.html',
 
 		events: {
 			'click button#update' : 'update',
-			'click button#display-grid' : 'displayGrid',
-			'click button#display-map' : 'displayMap',
+			'click button#displayPanelGrid' : 'displayPanelGrid',
+			'click button#displayPanelMap' : 'displayPanelMap',
 			'click button#reset' : 'reset',
 			'click button#add' : 'add',
 			'click button#deploy' : 'deploy',
-			//'click tbody > tr': 'detail',
 		},
 
 		initialize: function(){
@@ -39,6 +39,8 @@ define([
 			this.datas={};
 			this.form;
 			this.datas;
+			this.com = new Com();
+
 
 			this.filtersList={
 				nbFieldWorker: 'DECIMAL(9, 5)',
@@ -52,35 +54,22 @@ define([
 		},
 		onShow: function(){
 			$('#main-region').addClass('full-height');
-			this.mapView= new ViewMap();
-			this.gridView= new ViewGrid();
-			this.filters = new NSFilter({
-				filters: this.filtersList,
-				channel: 'modules',
-				url: config.coreUrl + 'station/',
-			});
-
-
-			
+			this.displayGrid();
+			this.displayFilters();
+			this.displayMap();
 		},
 
-		displayGrid: function(){
+		displayPanelGrid: function(){
 			$('.pannel-map').removeClass('active');
 			$('.pannel-grid').addClass('active');
 		},
 
-		displayMap: function(){
+		displayPanelMap: function(){
 			$('.pannel-grid').removeClass('active');
 			$('.pannel-map').addClass('active');
 		},
 
-		onDestroy: function() {
-			//$('body').removeClass('');
-		},
 
-		onRender: function(){
-
-		},
 
 		infos: function(){
 			this.offset = this.gridView.getGrid().getPaginatorOffSet();
@@ -91,7 +80,42 @@ define([
 			this.filters.update();
 		},
 
-/*        today: function(){
+		displayMap: function(){
+			this.map = new NsMap({
+				url: config.coreUrl + 'stations/?geo=true',
+				cluster: true,
+				com: this.com,
+				zoom: 3,
+				element : 'map',
+				popup: true,
+			});
+			//this.map.initErrorWarning('<i>There is too much datas to display on the map. <br /> Please be more specific in your filters.</i>');
+		},
+
+		displayGrid: function(){
+			
+			this.grid= new NsGrid({
+				com: this.com,
+				channel: 'modules',
+				url: config.coreUrl + 'stations/',
+				pageSize : 24,
+				pagingServerSide : true,
+			});
+			
+			$('#grid').html(this.grid.displayGrid());
+			$('#paginator').append(this.grid.displayPaginator());
+		},
+
+		displayFilters: function(){
+			this.filters = new NsFilter({
+				url: config.coreUrl + 'stations/',
+				com: this.com,
+				name: 'StationVisu',
+				filterContainer: 'filters'
+			});
+		},
+
+		today: function(){
 			var filters=[];
 			var today = new Date();
 			today.setHours(00);
@@ -103,11 +127,9 @@ define([
 			today.setSeconds(59);
 			filters.push({"Column":"end_date","Operator":"<","Value": today});
 
-
 			this.grid.update(filters);
 			this.mapView.update(filters);
-
-		},*/
+		},
 
 		reset: function(){
 			this.filters.reset();
@@ -115,7 +137,7 @@ define([
 
 
 		add: function(){
-			this.radio.command('site:add');
+			//this.radio.command('site:add');
 		},
 		deploy: function(){
 
@@ -126,7 +148,7 @@ define([
 			var row = $(evt.currentTarget);
 			var id = $(row).find(':first-child').text()
 
-			Radio.channel('route').command('site:detail', id);
+			//Radio.channel('route').command('site:detail', id);
 		}
 
 	});

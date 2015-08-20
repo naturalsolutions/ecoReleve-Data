@@ -7,10 +7,10 @@ from ..Models import (
     FieldActivity_ProtocoleType,
     Station_FieldWorker
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModule
+from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
 import transaction
-import json
+import json, itertools
 from datetime import datetime
 import datetime as dt
 import pandas as pd
@@ -19,18 +19,14 @@ from sqlalchemy import select, and_,cast, DATE,func
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
-from sqlalchemy_utils import *
 
 
 prefix = 'stations'
-
-
 # @view_config(route_name= prefix, renderer='json', request_method = 'PUT')
 # def updateListStations(request):
 #     # TODO 
 #     # update a list of stations 
 #     return
-
 
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 
@@ -47,10 +43,8 @@ def actionOnStations(request):
     return dictActionFunc[actionName](request)
 
 def count_ (request = None,listObj = None) :
-#   ## TODO count stations
 
     print('*****************  STATION COUNT***********************')
-
     if request is not None : 
         data = request.params
         if 'criteria' in data: 
@@ -62,55 +56,36 @@ def count_ (request = None,listObj = None) :
         count = listObj.count(searchInfo = searchInfo)
     else : 
         count = listObj.count()
-
     return count 
-
 
 def getFilters (request):
 
     ModuleType = 'StationGrid'
-    filtersList = Station().GetFilters(ModuleType)
+    moduleName = request.params.get('FilterName',None)
+    print('*******************moduleName********')
+    print(moduleName)
+    filtersList = Station().GetFilters(moduleName)
     filters = {}
     for i in range(len(filtersList)) :
         filters[str(i)] = filtersList[i]
     transaction.commit()
     return filters
 
-
 def getForms(request) :
 
     typeSta = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
     ModuleName = 'StationForm'
-    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newSta = Station(FK_StationType = typeSta)
     newSta.init_on_load()
     schema = newSta.GetDTOWithSchema(Conf,'edit')
-    # del schema['schema']['creationDate']
     transaction.commit()
     return schema
 
 def getFields(request) :
-### TODO return fields Station
-    
-    ### GET example #####
-    
-    # sta = DBSession.query(Station).get(1)
-    # fieldworkers = sta.StationDynPropValues
-    # print(fieldworkers)
-    # 
-    #### INSERT example #####
-    # sta = Station(FK_StationType = 1 , StationDate='12/12/2015 00:00:00' , fieldActivityId = 1)
-    # sta.FieldWorkersNames = [1,2,6,1,1,1,1,1]
-    # DBSession.add(sta)
-    # transaction.commit()
-    # 
-    # # #### DELETE  example #####
-    # curSta = DBSession.query(Station).get(2484)
-    # DBSession.delete(curSta)
-    # transaction.commit()
-    ModuleType = 'StationGrid'
-    
+
+    ModuleType = 'StationGrid'    
     cols = Station().GetGridFields(ModuleType)
     transaction.commit()
     return cols
@@ -131,7 +106,7 @@ def getStation(request):
         except : 
             DisplayMode = 'display'
 
-        Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='StationForm' ).first()
+        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='StationForm' ).first()
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
     else : 
         response  = curSta.GetFlatObject()
@@ -164,8 +139,7 @@ def updateStation(request):
 def insertStation(request):
 
     data = request.json_body
-    
-    if not isinstance(data, list) :
+    if not isinstance(data,list):
         print('_______INsert ROW *******')
         return insertOneNewStation(request)
     else :
@@ -176,27 +150,22 @@ def insertStation(request):
 def insertOneNewStation (request) :
 
     data = {}
-    print("\n\n\n\n")
-
     for items , value in request.json_body.items() :
         if value != "" :
             data[items] = value
+
     newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid)
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
-
-    print("\n\n\n\n")
-    print(data)
-
     newSta.UpdateFromJson(data)
     print (newSta.__dict__)
-
     DBSession.add(newSta)
     DBSession.flush()
     # transaction.commit()
-    return {'id': newSta.ID}
+    return {'ID': newSta.ID}
 
 def insertListNewStations(request):
+
     data = request.json_body
     data_to_insert = []
     format_dt = '%Y-%m-%d %H:%M:%S'
@@ -249,7 +218,6 @@ def insertListNewStations(request):
         result_to_check = pd.DataFrame(data=result_to_check, columns = Station.__table__.columns.keys())
         result_to_check['LAT'] = result_to_check['LAT'].astype(float)
         result_to_check['LON'] = result_to_check['LON'].astype(float)
-
         merge_check = pd.merge(DF_to_check,result_to_check , on =['LAT','LON','StationDate'])
 
         ##### Get only non existing data to insert #####
@@ -262,7 +230,15 @@ def insertListNewStations(request):
     if len(data_to_insert) != 0 :
         stmt = Station.__table__.insert(returning=[Station.ID]).values(data_to_insert)
         res = DBSession.execute(stmt).fetchall()
-        result = list(map(lambda y: y[0], res))
+        result = list(map(lambda y: {'FK_Station' : y[0], }, res))
+
+    ###### Insert FieldWorkers
+        if not data[0]['FieldWorkers'] == None or "" :
+            list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK': b  },result)),data[0]['FieldWorkers'] ))
+            list_ = list(itertools.chain.from_iterable(list_))
+
+            stmt = Station_FieldWorker.__table__.insert().values(list_)
+            DBSession.execute(stmt)
     else : 
         result = []
 
@@ -275,10 +251,6 @@ def searchStation(request):
 
     data = request.params.mixed()
     searchInfo = {}
-    fk = get_referencing_foreign_keys(Station)
-    for obj in fk : 
-        print (obj.constraint.table)
-        print (type(obj.constraint.referred_table))
 
     searchInfo['criteria'] = []
     if 'criteria' in data: 
@@ -286,18 +258,14 @@ def searchStation(request):
         if data['criteria'] != {} :
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
 
-    searchInfo['order_by'] = json.loads(data['order_by'])
-    searchInfo['offset'] = json.loads(data['offset'])
-    searchInfo['per_page'] = json.loads(data['per_page'])
-    # print (Station.__table__.foreign_keys)
-
-
-    # for obj in Station.__table__.foreign_keys :
-    #     if 'Type' not in obj.column.table.name : 
-    #         print (obj.parent.name)
+    if not 'geo' in data:
+        searchInfo['order_by'] = json.loads(data['order_by'])
+        searchInfo['offset'] = json.loads(data['offset'])
+        searchInfo['per_page'] = json.loads(data['per_page'])
+    else :
+        searchInfo['order_by'] = []
 
     if 'lastImported' in data :
-
         o = aliased(Station)
         print('-*********************** LAST IMPORTED !!!!!!!!! ******')
         obs = aliased(Observation)
@@ -306,13 +274,11 @@ def searchStation(request):
         'Operator' : '=',
         'Value' : request.authenticated_userid
         },
-
         # {'Query':'Observation',
         # 'Column': 'FK_ProtocoleType',
         # 'Operator' : 'not exists',
         # 'Value': select([Observation]).where(Observation.FK_Station == Station.ID) # keep only stations without Observations
         # },
-
         # {'Query':'Station',
         # 'Column': 'None',
         # 'Operator' : 'not exists',
@@ -326,10 +292,8 @@ def searchStation(request):
 
         searchInfo['criteria'].extend(criteria)
 
-
-    ModuleType = 'StationGrid'
-
-    moduleFront  = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleType).one()
+    ModuleType = 'StationVisu'
+    moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     # criteria = [
     #     {'Column' : 'StationDate',
     #     'Operator' : '>=',
@@ -358,11 +322,11 @@ def searchStation(request):
     stop = datetime.now()
     print (stop-start)
 
-    
     if 'geo' in data: 
+        print('****************** GEOJSON !!!!--------------')
         geoJson=[]
         for row in dataResult:
-            geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+            geoJson.append({'type':'Feature', 'properties':{'name':row['Name'], 'date':row['StationDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
         return {'type':'FeatureCollection', 'features':geoJson}
     else :
         result = [{'total_entries':countResult}]
@@ -371,8 +335,8 @@ def searchStation(request):
         return result
 
 
-@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def GetProtocolsofStation (request) :
 
     sta_id = request.matchdict['id']
@@ -402,7 +366,7 @@ def GetProtocolsofStation (request) :
             print(listObs)
             listType =list(DBSession.query(FieldActivity_ProtocoleType
                 ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
-            Conf = DBSession.query(FrontModule).filter(FrontModule.Name == ModuleName ).first()
+            Conf = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleName ).first()
             ### TODO : if protocols exists, append the new protocol form at the after : 2 loops, no choice
             if listObs or listType:
                 # max_iter = max(len(listObs),len(listType))
@@ -416,9 +380,6 @@ def GetProtocolsofStation (request) :
                         typeName = obs.GetType().Name
                         typeID = obs.GetType().ID
                         obs.LoadNowValues()
-                        print(obs.ID)
-                        print(obs.PropDynValuesOfNow)
-                        print('\n')
                         try :
                             listProto[typeID]['obs'].append(obs.GetDTOWithSchema(Conf,DisplayMode))
                         except :
@@ -451,12 +412,10 @@ def GetProtocolsofStation (request) :
                                 listSchema.append(virginForm)
                                 listProto[virginTypeID] = {'Name': viginTypeName,'obs':listSchema}
                                 pass
-
                     except :
                         print_exc()
                         pass
             globalListProto = [{'ID':objID, 'Name':listProto[objID]['Name'],'obs':listProto[objID]['obs'] } for objID in listProto.keys()]
-
             response = globalListProto
     except Exception as e :
         print_exc()
@@ -527,7 +486,7 @@ def getObservation(request):
             except : 
                 DisplayMode = 'display'
 
-            Conf = DBSession.query(FrontModule).filter(FrontModule.Name=='ObservationForm' ).first()
+            Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='ObservationForm' ).first()
             response = curObs.GetDTOWithSchema(Conf,DisplayMode)
         else : 
             response  = curObs.GetFlatObject()
@@ -560,7 +519,7 @@ def getObsForms(request) :
     sta_id = request.matchdict['id']
     print('***************** GET FORMS ***********************')
     ModuleName = 'ObservationForm'
-    Conf = DBSession.query(FrontModule).filter(FrontModule.Name==ModuleName ).first()
+    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newObs = Observation(FK_ProtocoleType = typeObs, FK_Station = sta_id)
     newObs.init_on_load()
     schema = newObs.GetDTOWithSchema(Conf,'edit')

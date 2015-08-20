@@ -7,11 +7,13 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship, aliased
 from collections import OrderedDict
 from datetime import datetime
-from .FrontModules import FrontModule,ModuleGrid
+from .FrontModules import FrontModules,ModuleGrids
 import transaction
 from ecoreleve_server.utils import Eval
 import pandas as pd
 import json
+from traceback import print_exc
+
 
 eval_ = Eval()
 
@@ -36,21 +38,32 @@ class ListObjectWithDynProp():
 
     def GetAllPropNameInConf(self) :
 
-        DynPropsDisplay = list(filter(lambda x : x.IsSearchable == True or x.GridRender > 2  , self.Conf))
+        DynPropsDisplay = list(filter(lambda x : x.IsSearchable == True or x.GridRender >= 2  , self.Conf))
         return DynPropsDisplay
 
     def GetJoinTable (self) :
         ''' build join table to filter and retrieve all data type (Static and Dynamic) '''
         joinTable = self.ObjWithDynProp
         view = self.GetDynPropValueView()
-        selectable = [self.ObjWithDynProp]
+        selectable = [self.ObjWithDynProp.ID]
         i = 1
+        objTable = self.ObjWithDynProp.__table__
+
+        #  get all foreign keys
+        fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
+
         for objConf in self.GetAllPropNameInConf() :
 
             curDynProp = self.GetDynProp(objConf.Name)
+            if objConf.Name in fk_list and objConf.QueryName is not None:
+                tableRef = fk_list[objConf.Name].column.table
+                nameRef = fk_list[objConf.Name].column.name
+                joinTable = outerjoin (joinTable,tableRef,objTable.c[objConf.Name] == tableRef.c[nameRef])
+                selectable.append(tableRef.c[objConf.QueryName])
 
-            if curDynProp != None:
 
+            elif curDynProp != None and objConf.Name in self.ObjWithDynProp().GetAllProp():
+                print(curDynProp)
                 v = view.alias('v'+curDynProp['Name'])
 
                 self.vAliasList['v'+curDynProp['Name']] = v
@@ -63,10 +76,23 @@ class ListObjectWithDynProp():
 
                 selectable.append(v.c['Value'+curDynProp['TypeProp']].label(curDynProp['Name']))
                 i+=1
-            # if objConf.QueryName is not None : 
-            #     return
+            elif objConf.QueryName is not None :
+                try : 
+                    print('JOIN OUTER OBJ GO')
+                    print(objConf.QueryName)
+                    print(type(objConf.QueryName))
+                    jsonQuery =json.loads(objConf.QueryName)
+                    tableRef = Base.metadata.tables[jsonQuery['table']]
+                    joinTable = outerjoin (joinTable,tableRef,objTable.c[jsonQuery['tableJoin']] == tableRef.c[jsonQuery['joinON']])
+                    self.jsonQuery = jsonQuery
+                    print('JOIN OUTER OBJ ===> OK')
 
+                except :
+                    print_exc()
+                    pass
 
+            else :
+                selectable.append(objTable.c[objConf.Name])
         self.selectable = selectable
         return joinTable
     def AddJoinFields (self,selectable,joinTable):
@@ -109,7 +135,7 @@ class ListObjectWithDynProp():
             query = query.where(
                 eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
                 )
-        else : 
+        elif curProp in self.ObjWithDynProp().GetAllProp() : 
             curDynProp = self.GetDynProp(curProp)
             viewAlias = self.vAliasList['v'+curDynProp['Name']]
 
@@ -117,6 +143,13 @@ class ListObjectWithDynProp():
             query = query.where(
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['TypeProp']],criteriaObj['Operator'],criteriaObj['Value'])
             )
+        elif self.jsonQuery and curProp ==self.jsonQuery['where'] :
+            tableRef = tableRef = Base.metadata.tables[self.jsonQuery['table']]
+            query = query.where(
+                eval_.eval_binary_expr(tableRef.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
+            )
+    
+
 
         return query
 
