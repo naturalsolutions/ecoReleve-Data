@@ -196,6 +196,7 @@ define([
 					}
 					ctx.init = true;
 					options.success = function(){
+						if(ctx.onceFetched)
 						ctx.onceFetched();
 					},
 					PageColl.prototype.fetch.call(this, options);
@@ -208,7 +209,7 @@ define([
 			//this.listenTo(this.collection, "reset", this.affectTotalRecords);
 		},
 
-		updateMap: function (params) {
+		updateMap: function (params){
 		},
 
 		initCollectionPaginableClient: function () {

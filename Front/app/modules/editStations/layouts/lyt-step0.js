@@ -114,6 +114,7 @@ define([
 			this.filters = new NSFilter({
 				url: config.coreUrl + 'stations/',
 				com: this.com,
+				name:'StationGrid',
 				filterContainer: 'filters'
 			});
 		},

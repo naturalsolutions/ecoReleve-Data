@@ -34,7 +34,9 @@ class ObjectWithDynProp:
             result = DBSession.execute(select([dynPropTable])).fetchall()
 
         statProps = [{'name': statProp.key, 'type': statProp.type} for statProp in self.__table__.columns ]
+
         dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp}for dynProp in result]
+
         statProps.extend(dynProps)
         return statProps
 
@@ -78,21 +80,31 @@ class ObjectWithDynProp:
             filterFields = DBSession.query(ModuleGrids).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()
 
 
-        for curProp in self.GetAllProp():
-            curPropName = curProp['name']
-            filterField = list(filter(lambda x : x.Name == curPropName
-                and x.IsSearchable == 1 ,filterFields))
+        # for curProp in self.GetAllProp():
+        #     curPropName = curProp['name']
+        #     filterField = list(filter(lambda x : x.Name == curPropName
+        #         and x.IsSearchable == 1 ,filterFields))
+
+        #     if len(filterField)>0 :
+        #         filters.append(filterField[0].GenerateFilter())
+
+            # elif len(list(filter(lambda x : x.Name == curPropName, filterFields))) == 0:
+            #     filter_ = {
+            #     'name' : curPropName,
+            #     'label' : curPropName,
+            #     'type' : 'Text'
+            #     }
+        for curConf in filterFields:
+            curConfName = curConf.Name
+            filterField = list(filter(lambda x : x['name'] == curConfName
+                and curConf.IsSearchable == 1 ,self.GetAllProp()))
 
             if len(filterField)>0 :
-                filters.append(filterField[0].GenerateFilter())
+                filters.append(curConf.GenerateFilter())
+            elif curConf.QueryName is not None:
+                filters.append(curConf.GenerateFilter())
 
-            elif len(list(filter(lambda x : x.Name == curPropName, filterFields))) == 0:
-                filter_ = {
-                'name' : curPropName,
-                'label' : curPropName,
-                'type' : 'Text'
-                }
-        filters.extend(defaultFilters)
+
         return filters
 
     def GetType(self):

@@ -13,7 +13,7 @@ define([
 	'marionette',
 	'ns_stepper/lyt-newStepper',
 	'./layouts/lyt-step0',
-	'./layouts/lyt-step1'
+	'modules/newStation/layouts/lyt-step1'
 ], function($, _, Backbone, Marionette, NewStepper, Step0, Step1
 ){
 
