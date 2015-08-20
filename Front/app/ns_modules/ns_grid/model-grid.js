@@ -196,7 +196,9 @@ define([
 					}
 					ctx.init = true;
 					options.success = function(){
-						ctx.onceFetched();
+						if(ctx.onceFetched){
+							ctx.onceFetched();
+						}
 					},
 					PageColl.prototype.fetch.call(this, options);
 				}

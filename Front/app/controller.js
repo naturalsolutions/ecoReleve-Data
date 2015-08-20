@@ -17,6 +17,7 @@ define(['marionette', 'config',
 	'./modules/newStation/layouts/lyt-step1',
 	
 	'./modules/importFile/lyt-entry-importFile',
+	'./modules/individual/layouts/lyt-individual',
 	
 
 
@@ -37,7 +38,8 @@ define(['marionette', 'config',
 	LytEditStations,
 	LytStationManager,
 
-	LytImportFile
+	LytImportFile,
+	LytIndividual
 
 ){
 	'use strict';
@@ -88,6 +90,9 @@ define(['marionette', 'config',
 		station: function(options){
 			this.rgMain.show(new LytStationManager({id: options}));
 		},
+		individual : function(){
+			this.rgMain.show(new LytIndividual());
+		}
 
 
 

@@ -21,7 +21,7 @@ requires = [
     'webtest'
     ]
 
-setup(name='ecoReleve_Server',
+setup(name='ecoreleve_server',
       version='0.0',
       description='ecoReleve_Server',
       long_description=README + '\n\n' + CHANGES,

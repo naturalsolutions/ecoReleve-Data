@@ -53,7 +53,8 @@ class ListObjectWithDynProp():
         for objConf in self.GetAllPropNameInConf() :
 
             curDynProp = self.GetDynProp(objConf.Name)
-
+            print('********DynProp')
+            print(curDynProp)
             if objConf.Name in fk_list and objConf.QueryName is not None:
                 print('--------- ITS A FK --------------')
                 print(fk_list[objConf.Name].column.table)
@@ -68,7 +69,7 @@ class ListObjectWithDynProp():
                 v = view.alias('v'+curDynProp['Name'])
 
                 self.vAliasList['v'+curDynProp['Name']] = v
-
+                print('\n\n ***** View Created on DynProp : '+curDynProp['Name'])
                 joinTable = outerjoin(
                     joinTable,v
                     , and_(self.ObjWithDynProp.ID == v.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] 
@@ -101,7 +102,8 @@ class ListObjectWithDynProp():
         return df
 
     def GetDynProp (self,dynPropName) : 
-
+        # print('\n ------- DynProp LISt')
+        # print(self.DynPropList)
         curDynProp = self.DynPropList[self.DynPropList['Name']==dynPropName]
         curDynProp = curDynProp.to_dict(orient = 'records')
 
@@ -165,7 +167,10 @@ class ListObjectWithDynProp():
         data = []
         for row in result :
             row = OrderedDict(row)
-            row['StationDate']= row['StationDate'].strftime('%d/%m/%Y %H:%M:%S')
+            print('************************ row *********************')
+            print(row)
+            if 'StationDate' in row.keys():
+                row['StationDate']= row['StationDate'].strftime('%d/%m/%Y %H:%M:%S')
             data.append(row)
         return data
 
