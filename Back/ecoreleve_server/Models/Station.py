@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession
+from ecoreleve_server.Models import Base,DBSession,FieldActivity
 from sqlalchemy import (Column,
  DateTime,
  Float,
@@ -23,17 +23,18 @@ from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from ..GenericObjets.FrontModules import FrontModules,ModuleGrids
-from ecoreleve_server.Models import FieldActivity
+from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
 from datetime import datetime
 from collections import OrderedDict
 import pandas as pd 
 import numpy as np 
 import json
 
+
+#--------------------------------------------------------------------------
 class Station(Base,ObjectWithDynProp):
 
     __tablename__ = 'Station'
-    
 
     ID = Column(Integer,Sequence('Stations__id_seq'), primary_key=True)
     StationDate =  Column(DateTime, index=True, nullable=False)
@@ -59,30 +60,32 @@ class Station(Base,ObjectWithDynProp):
     def FieldWorkers(self):
         if self.Station_FieldWorkers:
             fws = []
-            for i in range(len(self.Station_FieldWorkers)) :
-                fws.append({'FieldWorker':self.Station_FieldWorkers[i].FieldWorkerID})
+            for curFW in self.Station_FieldWorkers:
+                fws.append({'FieldWorker':curFW.FK_FieldWorker,'ID':curFW.ID })
             return fws
         else:
             return []
 
     @FieldWorkers.setter
     def FieldWorkers(self, values):
-        if not self.Station_FieldWorkers:
             fws=[]
-            print(values)
-            for item in values:
-                fws.append(Station_FieldWorker( FK_FieldWorker = int(item['FieldWorker']), FK_Station=self.ID))
+            if len(values) !=0 :
+                for item in values:
+                    if 'ID' in item:
+                        curFW = list(filter(lambda x : x.ID==item['ID'],self.Station_FieldWorkers))[0]
+                        curFW.FK_FieldWorker = int(item['FieldWorker'])
+                    else:
+                        curFW = Station_FieldWorker( FK_FieldWorker = int(item['FieldWorker']), FK_Station=self.ID)
+                    fws.append(curFW)
             self.Station_FieldWorkers = fws
 
     @FieldWorkers.expression
     def FieldWorkers(cls):
         return Station_FieldWorker.id
 
-
     @orm.reconstructor
     def init_on_load(self):
         ObjectWithDynProp.__init__(self,DBSession)
-        
         
     def GetNewValue(self,nameProp):
         ReturnedValue = StationDynPropValue()
@@ -108,6 +111,7 @@ class Station(Base,ObjectWithDynProp):
         return resultat
 
 
+#--------------------------------------------------------------------------
 class StationDynProp(Base):
 
     __tablename__ = 'StationDynProp'
@@ -118,6 +122,8 @@ class StationDynProp(Base):
     StationType_StationDynProps = relationship('StationType_StationDynProp',backref='StationDynProp')
     StationDynPropValues = relationship('StationDynPropValue',backref='StationDynProp')
 
+
+#--------------------------------------------------------------------------
 class StationDynPropValue(Base):
 
     __tablename__ = 'StationDynPropValue'
@@ -132,6 +138,8 @@ class StationDynPropValue(Base):
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
     # station = relationship('Station',cascade="all, delete-orphan", single_parent = True)
 
+
+#--------------------------------------------------------------------------
 class StationType(Base,ObjectTypeWithDynProp):
 
     @orm.reconstructor
@@ -147,6 +155,7 @@ class StationType(Base,ObjectTypeWithDynProp):
     Stations = relationship('Station',backref='StationType')
 
 
+#--------------------------------------------------------------------------
 class StationType_StationDynProp(Base):
 
     __tablename__ = 'StationType_StationDynProp'
@@ -157,6 +166,7 @@ class StationType_StationDynProp(Base):
     FK_StationDynProp = Column(Integer, ForeignKey('StationDynProp.ID'))
 
 
+#--------------------------------------------------------------------------
 class Station_FieldWorker (Base) :
 
     __tablename__ = 'Station_FieldWorker'
@@ -180,6 +190,3 @@ class Station_FieldWorker (Base) :
             return self.FieldWorker.id
         else:
             return None
-
-
-

@@ -179,7 +179,7 @@ class ModuleGrids (Base) :
         return column
 
     def GenerateFilter (self) :
-
+        print('Filter : '+str(self.Name))
         filter_ = {
             'name' : self.Name,
             'type' : self.FilterType,

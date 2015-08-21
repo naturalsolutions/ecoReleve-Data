@@ -25,6 +25,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
 
 
+#--------------------------------------------------------------------------
 class Observation(Base,ObjectWithDynProp):
     __tablename__ = 'Observation'
     ID =  Column(Integer,Sequence('Observation__id_seq'), primary_key=True)
@@ -72,8 +73,6 @@ class Observation(Base,ObjectWithDynProp):
     def Observation_childrens(self,listOfSubProtocols):
         listObs = []
         if len(listOfSubProtocols) !=0 :
-            listObs = []
-            toDelete = []
             for curData in listOfSubProtocols :
                 if 'ID' in curData :
                     subObs = list(filter(lambda x : x.ID==curData['ID'],self.Observation_children))[0]
@@ -110,6 +109,7 @@ class Observation(Base,ObjectWithDynProp):
         return result
 
 
+#--------------------------------------------------------------------------
 class ObservationDynPropValue(Base):
 
     __tablename__ = 'ObservationDynPropValue'
@@ -123,6 +123,8 @@ class ObservationDynPropValue(Base):
     FK_ObservationDynProp = Column(Integer, ForeignKey('ObservationDynProp.ID'))
     FK_Observation = Column(Integer, ForeignKey('Observation.ID'))
 
+
+#--------------------------------------------------------------------------
 class ObservationDynProp(Base):
 
     __tablename__ = 'ObservationDynProp'
@@ -134,6 +136,7 @@ class ObservationDynProp(Base):
     ObservationDynPropValues = relationship('ObservationDynPropValue',backref='ObservationDynProp')
 
 
+#--------------------------------------------------------------------------
 class ProtocoleType(Base,ObjectTypeWithDynProp):
 
     @orm.reconstructor
@@ -149,6 +152,7 @@ class ProtocoleType(Base,ObjectTypeWithDynProp):
     Observations = relationship('Observation',backref='ProtocoleType')
 
 
+#--------------------------------------------------------------------------
 class ProtocoleType_ObservationDynProp(Base):
 
     __tablename__ = 'ProtocoleType_ObservationDynProp'

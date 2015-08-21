@@ -5,7 +5,8 @@ from ..Models import (
     StationType,
     Observation,
     FieldActivity_ProtocoleType,
-    Station_FieldWorker
+    Station_FieldWorker,
+    StationList
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -61,7 +62,10 @@ def count_ (request = None,listObj = None) :
 def getFilters (request):
 
     ModuleType = 'StationGrid'
-    filtersList = Station().GetFilters(ModuleType)
+    moduleName = request.params.get('FilterName',None)
+    print('*******************moduleName********')
+    print(moduleName)
+    filtersList = Station().GetFilters(moduleName)
     filters = {}
     for i in range(len(filtersList)) :
         filters[str(i)] = filtersList[i]
@@ -82,7 +86,7 @@ def getForms(request) :
 
 def getFields(request) :
 
-    ModuleType = 'StationGrid'    
+    ModuleType = 'StationVisu'
     cols = Station().GetGridFields(ModuleType)
     transaction.commit()
     return cols
@@ -248,16 +252,18 @@ def searchStation(request):
 
     data = request.params.mixed()
     searchInfo = {}
-
     searchInfo['criteria'] = []
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
 
-    searchInfo['order_by'] = json.loads(data['order_by'])
-    searchInfo['offset'] = json.loads(data['offset'])
-    searchInfo['per_page'] = json.loads(data['per_page'])
+    if not 'geo' in data:
+        searchInfo['order_by'] = json.loads(data['order_by'])
+        searchInfo['offset'] = json.loads(data['offset'])
+        searchInfo['per_page'] = json.loads(data['per_page'])
+    else :
+        searchInfo['order_by'] = []
 
     if 'lastImported' in data :
         o = aliased(Station)
@@ -283,10 +289,8 @@ def searchStation(request):
         'Value' : 4 # => TypeID of GPX station
         },
         ]
-
         searchInfo['criteria'].extend(criteria)
-
-    ModuleType = 'StationGrid'
+    ModuleType = 'StationVisu'
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     # criteria = [
     #     {'Column' : 'StationDate',
@@ -303,7 +307,7 @@ def searchStation(request):
     # searchInfo['offset'] = 
 
     start = datetime.now()
-    listObj = ListObjectWithDynProp(Station,moduleFront)
+    listObj = StationList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
     stop = datetime.now()
 
@@ -317,9 +321,10 @@ def searchStation(request):
     print (stop-start)
 
     if 'geo' in data: 
+        print('****************** GEOJSON !!!!--------------')
         geoJson=[]
         for row in dataResult:
-            geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+            geoJson.append({'type':'Feature', 'properties':{'name':row['Name'], 'date':row['StationDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
         return {'type':'FeatureCollection', 'features':geoJson}
     else :
         result = [{'total_entries':countResult}]
