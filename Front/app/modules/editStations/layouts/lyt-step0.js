@@ -67,6 +67,7 @@ define([
 				pageSize: 20,
 				pagingServerSide: true,
 				com: this.com,
+				name : 'StationGrid',
 				url: config.coreUrl+'stations/',
 				urlParams : this.urlParams,
 				rowClicked : true,

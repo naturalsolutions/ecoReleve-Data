@@ -8,6 +8,7 @@ from .FrontModules import FrontModules,ModuleForms, ModuleGrids
 import transaction
 from operator import itemgetter
 from collections import OrderedDict
+from traceback import print_exc
 
 
 Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}
@@ -58,11 +59,18 @@ class ObjectWithDynProp:
         gridFields.sort(key=lambda x: str(x.GridOrder))
         cols = []
 
-        for curProp in self.GetAllProp():
-            curPropName = curProp['name']
-            gridField = list(filter(lambda x : x.Name == curPropName,gridFields))
+        for curConf in gridFields:
+            curConfName = curConf.Name
+            gridField = list(filter(lambda x : x['name'] == curConfName,self.GetAllProp()))
             if len(gridField)>0 :
-                cols.append(gridField[0].GenerateColumn())
+                cols.append(curConf.GenerateColumn())
+            elif curConf.QueryName is not None:
+                cols.append(curConf.GenerateColumn())
+        # for curProp in self.GetAllProp():
+        #     curPropName = curProp['name']
+        #     gridField = list(filter(lambda x : x.Name == curPropName,gridFields))
+        #     if len(gridField)>0 :
+        #         cols.append(gridField[0].GenerateColumn())
         return cols
 
     def GetFilters (self,ModuleType) :
@@ -145,14 +153,13 @@ class ObjectWithDynProp:
             try :
                 curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
                 if 'Date' in curTypeAttr :
-                    print('\n\n Date detected *************************')
                     try : 
                         valeur = nameProp.strftime('%d/%m/%Y %H:%M:%S')
                     except :
                         valeur = nameProp.strftime('%d/%m/%Y')
             except :
                 print(nameProp+' is not a column')
-                pass 
+                pass
             setattr(self,nameProp,valeur)
         else:
             if (nameProp in self.GetType().DynPropNames):
@@ -191,16 +198,12 @@ class ObjectWithDynProp:
         return row[Cle[row['TypeProp']]]
 
     def UpdateFromJson(self,DTOObject):
-        # print('UpdateFromJson')
-
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id'):
-                # print (curProp)
-                # print(DTOObject[curProp])
                 self.SetProperty(curProp,DTOObject[curProp])
 
-    def GetFlatObject(self):
+    def GetFlatObject(self,schema=None):
         resultat = {}
 
         if self.ID is not None : 
@@ -275,7 +278,7 @@ class ObjectWithDynProp:
             }
 
         ''' IF ID is send from front --> get data of this object in order to display value into form which will be sent'''
-        data =   self.GetFlatObject()
+        data = self.GetFlatObject(schema)
         resultat['data'] = data
         if self.ID :
             resultat['data']['id'] = self.ID

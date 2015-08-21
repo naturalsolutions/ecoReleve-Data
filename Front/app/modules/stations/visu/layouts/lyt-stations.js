@@ -100,6 +100,7 @@ define([
 				url: config.coreUrl + 'stations/',
 				pageSize : 24,
 				pagingServerSide : true,
+				name:'StationVisu'
 			});
 			
 			$('#grid').html(this.grid.displayGrid());

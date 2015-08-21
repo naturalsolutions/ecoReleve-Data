@@ -85,7 +85,7 @@ define([
 		displayStation: function(stationId){
 
 			var stationType = 1;
-
+			var _this = this;
 			this.nsForm = new NsForm({
 				name: 'StaForm',
 				modelurl: config.coreUrl+'stations/',
