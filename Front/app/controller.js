@@ -18,6 +18,7 @@ define(['marionette', 'config',
 	
 	'./modules/importFile/lyt-entry-importFile',
 	'./modules/individual/layouts/lyt-individual',
+	'./modules/individual/layouts/lyt-indiv-details',
 	
 
 
@@ -39,7 +40,8 @@ define(['marionette', 'config',
 	LytStationManager,
 
 	LytImportFile,
-	LytIndividual
+	LytIndividual,
+	LytIndivDetails
 
 ){
 	'use strict';
@@ -73,8 +75,6 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytStations());
 		},
 
-
-
 		newStation: function(){
 			this.rgMain.show(new LytNewStation());
 		},
@@ -92,7 +92,10 @@ define(['marionette', 'config',
 		},
 		individual : function(){
 			this.rgMain.show(new LytIndividual());
-		}
+		},
+		indiv : function(options){
+			this.rgMain.show(new LytIndivDetails({id: options}));
+		},
 
 
 
