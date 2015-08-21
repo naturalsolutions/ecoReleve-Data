@@ -22,6 +22,7 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 		$('#header-loader').removeClass('hidden');
 	});
 	$( document ).ajaxStop(function() {
+		console.log('test');
 		$('#header-loader').addClass('hidden');
 	});
 	$( document ).ajaxError(function() {

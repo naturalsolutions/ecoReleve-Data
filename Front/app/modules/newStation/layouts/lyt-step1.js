@@ -40,15 +40,19 @@ define([
 
 		events : {
 			'click #addProto' : 'addProto',
+			'click #prevStation' : 'prevStation',
+			'click #nextStation' : 'nextStation'
 		},
 
 
 		initialize: function(options){
+			console.log(options);
 			if(options.id){
 				this.stationId = options.id;
 			}else{
-				this.stationId = options.model.get('id');
+				this.stationId = options.model.get('ID');
 			}
+			console.log(this.stationId);
 		},
 
 		check: function(){
@@ -67,6 +71,39 @@ define([
 		},
 
 
+		prevStation: function(e){
+			this.stationId--;
+			this.displayStation(this.stationId);
+		},
+
+		nextStation: function(e){
+			this.stationId++;
+			this.displayStation(this.stationId);
+		},
+
+
+		displayStation: function(stationId){
+
+			var stationType = 1;
+			var _this = this;
+			this.nsForm = new NsForm({
+				name: 'StaForm',
+				modelurl: config.coreUrl+'stations/',
+				buttonRegion: ['stationFormBtns'],
+				formRegion: 'stationForm',
+				displayMode: 'display',
+				objecttype: stationType,
+				id: stationId,
+				reloadAfterSave : true,
+			});
+
+			this.nsForm.savingSuccess = function(){
+				_this.parent.protos.fetch({reset: true});
+			};
+
+		},
+
+
 
 		initModel: function(myTpl){
 			this.activeProtcolsObj = []; 
@@ -75,35 +112,7 @@ define([
 
 		onShow: function(){
 			var _this = this;
-			// var stationType = this.model.get('start_stationtype');
-			// this.stationId = this.model.get('station');
-			
-
-			var stationType = 1;
-
-
-			this.nsForm = new NsForm({
-				name: 'StaForm',
-				modelurl: config.coreUrl+'stations/',
-				buttonRegion: ['stationFormBtns'],
-				formRegion: 'stationForm',
-				displayMode: 'display',
-				objecttype: stationType,
-				id: this.stationId,
-				reloadAfterSave : true,
-			});
-
-			this.nsForm.savingSuccess = function(){
-				_this.parent.protos.fetch({reset: true});
-			};
-
-			
-			/*this.rgStation.show(new ViewStationDetail({
-				stationId: this.stationId,
-				stationType: stationType,
-				parent: this
-			}));*/
-
+			this.displayStation(this.stationId);
 			
 			var ProtoColl = Backbone.Collection.extend({
 				url: config.coreUrl+'stations/'+this.stationId+'/protocols',
@@ -347,7 +356,6 @@ define([
 
 			var proto =this.protocols[name];
 
-
 			if(proto){
 				proto.nbObs++;
 				proto.addObs(0, proto.nbObs, objectType);
@@ -375,7 +383,6 @@ define([
 		},
 
 		sweetAlert : function(title,type,message){
-
 			Swal({
 				title: title,
 				text: message,

@@ -7,7 +7,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 
 		appRoutes: {
 			'observations/:id': 'obs',
-			'stations(/:id)': 'sta',
 			'input(/)' : 'input',
 			'export(/)' : 'export',
 			'import(/)' : 'import',

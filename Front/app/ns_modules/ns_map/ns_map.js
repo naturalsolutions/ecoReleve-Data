@@ -92,6 +92,7 @@ define([
 					this.selectAll();
 					break;
 				case 'filter':
+					console.log(params);
 					this.filter(params);
 					break;
 				default:
@@ -125,6 +126,8 @@ define([
 					this.initLayer(this.geoJson);
 				}
 			}
+
+			this.setCenter();
 
 			this.map = new L.Map(this.elem, {
 				center: this.center ,
@@ -265,6 +268,7 @@ define([
 
 
 		requestGeoJson: function(url){
+			var _this = this;
 			var criterias = {
 					page: 1,
 					per_page: 20,
@@ -273,13 +277,13 @@ define([
 					order_by: '[]',
 			};
 
-			var ctx = this;
 			var jqxhr = $.getJSON( url, function(criterias){
 			}).done(function(geoJson) {
-					if (ctx.cluster){
-						ctx.initClusters(geoJson);
+					if (_this.cluster){
+						_this.initClusters(geoJson);
+						_this.addMarkersLayer();
 					}else{
-						ctx.initLayer(geoJson);
+						_this.initLayer(geoJson);
 					}
 			})
 			.fail(function(msg) {
@@ -712,9 +716,26 @@ define([
 
 		//apply filters on the map from a collection
 		filter: function(param){
-			var geoJson, coll;
-			coll = _.clone(param);
-			//if(coll instanceof Backbone.Collection){
+			//TODO : refact
+			var _this = this;
+			if(this.url){
+				$.ajax({
+					url: this.url,
+					data: {
+						'criteria': JSON.stringify( param)
+					},
+				}).done(function(geoJson) {
+					if (_this.cluster){
+						_this.updateLayers(geoJson);
+					}else{
+						_this.initLayer(geoJson);
+					}
+				});
+				return;
+			}
+			var geoJson;
+
+			var coll = _.clone(param);
 			geoJson = this.coll2GeoJson(coll);
 			coll = param;
 				if(coll.length){
@@ -759,8 +780,10 @@ define([
 				this.map.removeLayer(this.markersLayer);
 			}
 			this.geoJsonLayers = [];
-			this.initClusters(geoJson);
-			this.addMarkersLayer();
+			if(geoJson.features.length){
+				this.initClusters(geoJson);
+				this.addMarkersLayer();
+			}
 
 			if(this.bbox){
 				this.addBBox(this.markersLayer);

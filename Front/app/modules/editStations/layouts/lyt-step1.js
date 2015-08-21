@@ -45,6 +45,7 @@ define([
 
 
 		initialize: function(options){
+			alert('');
 			if(options.id){
 				this.stationId = options.id;
 			}else{

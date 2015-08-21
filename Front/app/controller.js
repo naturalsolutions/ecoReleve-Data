@@ -7,7 +7,7 @@ define(['marionette', 'config',
 
 	'./modules/import/layouts/lyt-import-gpx',
 	'./modules/input/layouts/lyt-input',
-	'./modules/stations/layouts/lyt-stations',
+	'./modules/stations/visu/layouts/lyt-stations',
 
 	'./Demo/lyt-Obs',
 	'./Demo/lyt-Sta',
@@ -20,8 +20,6 @@ define(['marionette', 'config',
 	'./modules/individual/layouts/lyt-individual',
 	'./modules/individual/layouts/lyt-indiv-details',
 	
-
-
 
 ],function( Marionette, config, 
 	LytHome,
@@ -66,7 +64,7 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytObs({id:options}));
 		},
 		sta: function(options){
-			this.rgMain.show(new LytSta({id:options}));
+			this.rgMain.show(new LytStations({id:options}));
 		},
 		import: function(){
 			this.rgMain.show(new LytImport());

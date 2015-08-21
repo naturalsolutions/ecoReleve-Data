@@ -51,10 +51,9 @@ class ObjectTypeWithDynProp:
             ).filter(ModuleForms.Module_ID == FrontModules.ID
             ).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)).all()
         # print(Fields)
-
+        print('\n\n ----- AddDynamicPropInSchemaDTO for TypeObj: ' + str(self.ID))
         for CurModuleForms in Fields : 
             curEditable = Editable
-            print(CurModuleForms.Name)
             #CurModuleForms = list(filter(lambda x : x.Name == curValue['Name'], Fields))
 
             #if (len(CurModuleForms)> 0 ):

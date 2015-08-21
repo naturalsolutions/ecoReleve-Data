@@ -61,9 +61,9 @@ define([
 			this.forms = [];
 			var jqxhr = $.ajax({
 				url: _this.url,
-				data: JSON.stringify({
-					FilterName: _this.name
-				}),
+				data: {
+					'FilterName': _this.name
+				},
 				contentType: 'application/json',
 				type: 'GET',
 				context: this,
