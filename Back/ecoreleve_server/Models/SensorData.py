@@ -74,3 +74,19 @@
 #     __tablename__ = 'Equip_Sensor'
     
 #     ID = Column(Integer,Sequence('Equip_Sensor__id_seq'), primary_key=True)
+#     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
+    # FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
+    # FK_Site = Column(Integer, ForeignKey('MonitoredSite.ID'))
+    # StartDate = Column(DateTime)
+
+
+# class Individual_Location(Base):
+#      __tablename__ = 'Individual_Location'
+
+#     ID = Column(Integer,Sequence('Individual_Location__id_seq'), primary_key=True)
+#     LAT = Column(Numeric(9,5))
+#     LON = Column(Numeric(9,5))
+#     Date = Column(DateTime)
+#     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
+#     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
+

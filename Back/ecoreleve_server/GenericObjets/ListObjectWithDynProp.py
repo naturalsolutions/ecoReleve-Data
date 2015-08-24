@@ -40,14 +40,14 @@ class ListObjectWithDynProp():
         return DynPropsDisplay
 
     def GetJoinTable (self) :
-        ''' build join table to filter and retrieve all data type (Static and Dynamic) '''
+        ''' build join table and select statement over all dynamic properties and foreign keys in filter query'''
         joinTable = self.ObjWithDynProp
         view = self.GetDynPropValueView()
         selectable = [self.ObjWithDynProp.ID]
         i = 1
         objTable = self.ObjWithDynProp.__table__
 
-        #  get all foreign keys
+        ##### get all foreign keys #####
         self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
 
         for objConf in self.GetAllPropNameInConf() :
@@ -74,12 +74,13 @@ class ListObjectWithDynProp():
         self.selectable = selectable
         return joinTable
 
-    def AddJoinFields (self,selectable,joinTable):
-        for obj in self.ObjWithDynProp.__table__.foreign_keys :
-            if 'Type' not in obj.column.table.name : 
-                return
+    # def AddJoinFields (self,selectable,joinTable):
+    #     for obj in self.ObjWithDynProp.__table__.foreign_keys :
+    #         if 'Type' not in obj.column.table.name : 
+    #             return
 
-    def GetDynPropList (self) : 
+    def GetDynPropList (self) :
+    ''' Retrieve all dynamic properties of object ''' 
         DynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
         query = select([DynPropTable]) #.where(DynPropTable.c['Name'] == dynPropName)
         result  = DBSession.execute(query).fetchall()
@@ -87,6 +88,7 @@ class ListObjectWithDynProp():
         return df
 
     def GetDynProp (self,dynPropName) : 
+    ''' Get dyn Prop with its name '''
         curDynProp = self.DynPropList[self.DynPropList['Name'] == dynPropName]
         curDynProp = curDynProp.to_dict(orient = 'records')
 
@@ -99,6 +101,7 @@ class ListObjectWithDynProp():
             return None
 
     def WhereInJoinTable (self,query,criteriaObj) :
+    ''' Apply where clause over filter criteria '''
         curProp = criteriaObj['Column']
         if hasattr(self.ObjWithDynProp,curProp) :
             query = query.where(
@@ -120,7 +123,7 @@ class ListObjectWithDynProp():
         return query
 
     def GetFullQuery(self,searchInfo=None) :
-        # dictOrder = {'asc':1,'desc':0}
+    ''' return the full query to execute '''
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
             print('********** NO Criteria ***************')
