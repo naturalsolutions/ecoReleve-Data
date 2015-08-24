@@ -12,8 +12,10 @@ define([
 	'backbone',
 	'marionette',
 	'ns_stepper/lyt-newStepper',
-	'./layouts/lyt-step0',
-	'modules/newStation/layouts/lyt-step1'
+
+	
+	'modules/stations/edit/lyt-station-edit',
+	'modules/stations/manager/lyt-station-manager'
 ], function($, _, Backbone, Marionette, NewStepper, Step0, Step1
 ){
 
@@ -27,9 +29,6 @@ define([
 		initSteps: function(){
 			this.steps = [Step0, Step1];
 		},
-
-
-
 
 	});
 });

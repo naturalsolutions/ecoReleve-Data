@@ -3,6 +3,7 @@ define([
 	'underscore',
 	'backbone',
 	'marionette',
+	'radio',
 
 	'moment',
 	'dateTimePicker',
@@ -11,12 +12,10 @@ define([
 
 	'ns_form/NSFormsModuleGit',
 
-	'ns_map/ns_map',
-
 	'i18n'
 
-], function($, _, Backbone, Marionette,
-	moment, datetime, Swal, config, NsForm, NsMap
+], function($, _, Backbone, Marionette, Radio,
+	moment, datetime, Swal, config, NsForm
 ){
 
 	'use strict';
@@ -25,7 +24,7 @@ define([
 
 		className: 'full-height', 
 
-		template: 'app/modules/newStation/templates/tpl-step1.html',
+		template: 'app/modules/stations/manager/templates/tpl-station-manager.html',
 
 		name : 'Protocol managing',
 
@@ -41,11 +40,12 @@ define([
 
 		events : {
 			'click #addProto' : 'addProto',
+			'click #prevStation' : 'prevStation',
+			'click #nextStation' : 'nextStation'
 		},
 
 
 		initialize: function(options){
-			alert('');
 			if(options.id){
 				this.stationId = options.id;
 			}else{
@@ -61,12 +61,27 @@ define([
 
 		},
 
+		getStepOptions: function(){
+
+		},
 
 		onDestroy: function(){
 		},
 
-		onShow: function(){
-			var _this = this;
+
+		prevStation: function(e){
+			this.stationId--;
+			this.displayStation(this.stationId);
+		},
+
+		nextStation: function(e){
+			this.stationId++;
+			this.displayStation(this.stationId);
+		},
+
+
+		displayStation: function(stationId){
+
 			var stationType = 1;
 
 			this.nsForm = new NsForm({
@@ -76,16 +91,26 @@ define([
 				formRegion: 'stationForm',
 				displayMode: 'display',
 				objecttype: stationType,
-				id: this.stationId,
+				id: stationId,
 				reloadAfterSave : true,
 			});
 
 			this.nsForm.savingSuccess = function(){
 				_this.parent.protos.fetch({reset: true});
 			};
-			//ADD THE STATION
+
+		},
 
 
+
+		initModel: function(myTpl){
+			this.activeProtcolsObj = []; 
+			this.protosToRemove = [];
+		},
+
+		onShow: function(){
+			var _this = this;
+			this.displayStation(this.stationId);
 			
 			var ProtoColl = Backbone.Collection.extend({
 				url: config.coreUrl+'stations/'+this.stationId+'/protocols',
@@ -231,7 +256,10 @@ define([
 						hrefTextPrefix: '',
 						onPageClick: function(pageNumber){
 							_this.current.addClass('hidden');
+
+
 							_this.current = $('#'+_this.type).find(_this.indexPageList[pageNumber-1]);
+
 							_this.current.removeClass('hidden');
 						},
 					});
@@ -326,7 +354,6 @@ define([
 
 			var proto =this.protocols[name];
 
-
 			if(proto){
 				proto.nbObs++;
 				proto.addObs(0, proto.nbObs, objectType);
@@ -354,7 +381,6 @@ define([
 		},
 
 		sweetAlert : function(title,type,message){
-
 			Swal({
 				title: title,
 				text: message,

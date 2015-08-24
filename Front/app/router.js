@@ -6,17 +6,14 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 	return Marionette.AppRouter.extend({
 
 		appRoutes: {
-			'observations/:id': 'obs',
-			'input(/)' : 'input',
 			'export(/)' : 'export',
-			'import(/)' : 'import',
-			'stations(/)' : 'stations',
-
-			'newStation(/)': 'newStation',
-			'editStations(/)': 'editStations',
 			'importFile(/)': 'importFile',
 
+			'stations(/)' : 'stations',
+			'newStation(/)': 'newStation',
+			'editStations(/)': 'editStations',
 			'station(/):id': 'station',
+			
 			'*route(/:page)': 'home',
 		},
 

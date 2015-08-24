@@ -4,8 +4,8 @@ define([
 	'backbone',
 	'marionette',
 	'ns_stepper/lyt-newStepper',
-	'./layouts/lyt-step0',
-	'./layouts/lyt-step1'
+	'./lyt-station-new',
+	'modules/stations/manager/lyt-station-manager'
 ], function($, _, Backbone, Marionette, NewStepper, Step0, Step1
 ){
 
