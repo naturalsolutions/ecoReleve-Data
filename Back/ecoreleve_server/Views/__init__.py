@@ -77,6 +77,11 @@ def add_routes(config):
     config.add_route('sensors/id', 'ecoReleve-Sensor/{type}/{id}')
     # config.add_notfound_view(notfound, append_slash=True)
 
+     ##### Individuals #####
+    config.add_route('individuals', 'ecoReleve-Core/individuals/') 
+    config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
+    config.add_route('individuals/action', 'ecoReleve-Core/individuals/{action}') 
+
 
 
 

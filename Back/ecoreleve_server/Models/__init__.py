@@ -23,4 +23,6 @@ from .User import User
 from .Station import * 
 from .Region import * 
 from .FieldActivity import *
+from .Individual import *
 from .List import *
+
