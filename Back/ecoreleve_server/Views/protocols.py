@@ -48,7 +48,7 @@ def GetProtocolsofStation (request) :
             print (' ********************** Forms in params ==> DATA + FORMS ****************** ')
             ModuleName = 'ObservationForm'
 
-            listObs = list(DBSession.query(Observation).filter(Observation.FK_Station == sta_id))
+            listObs = list(DBSession.query(Observation).filter(and_(Observation.FK_Station == sta_id,Observation.Parent_Observation == None)))
             listType =list(DBSession.query(FieldActivity_ProtocoleType
                 ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
             Conf = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleName ).first()
