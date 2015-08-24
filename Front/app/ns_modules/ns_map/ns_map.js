@@ -300,7 +300,7 @@ define([
 		},
 
 		setCenter: function(geoJson){
-			if(!geoJson){
+			if(!geoJson || (geoJson.features.length == 0) ){
 				this.center = new L.LatLng(0,0);
 			}else{
 				this.center = new L.LatLng(
