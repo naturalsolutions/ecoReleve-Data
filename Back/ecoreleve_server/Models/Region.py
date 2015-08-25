@@ -6,7 +6,14 @@ from sqlalchemy.orm import relationship
 
 class Region(Base):
 
-	__tablename__ = 'Region'
-	ID =  Column(Integer,Sequence('Region__id_seq'), primary_key=True)
-	Country = Column(String)
-	Region = Column(String)
+    __tablename__ = 'Region'
+    ID =  Column(Integer,Sequence('Region__id_seq'), primary_key=True)
+    Country = Column(String)
+    Region = Column(String)
+
+# class Place(Base):
+
+#     __tablename__ = 'Place'
+#     ID =  Column(Integer,Sequence('Place__id_seq'), primary_key=True)
+#     Place = Column(String)
+#     FK_Region = Column(Integer,ForeignKey('Region.ID'))

@@ -21,10 +21,10 @@ from traceback import print_exc
 prefixProt = 'protocols'
 prefix = 'stations'
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def GetProtocolsofStation (request) :
-
     sta_id = request.matchdict['id']
     data = {}
     searchInfo = {}
@@ -42,7 +42,6 @@ def GetProtocolsofStation (request) :
             response = listObs.GetFlatList()
     except : 
         pass
-
     try :
         if 'FormName' in request.params : 
             print (' ********************** Forms in params ==> DATA + FORMS ****************** ')
@@ -56,9 +55,7 @@ def GetProtocolsofStation (request) :
             if listObs or listType:
                 # max_iter = max(len(listObs),len(listType))
                 listProto = {}
-
                 for i in range(len(listObs)) :
-
                     try : 
                         DisplayMode = 'display'
                         obs = listObs[i]
@@ -91,7 +88,6 @@ def GetProtocolsofStation (request) :
                                 virginForm['data']['FK_ProtocoleType'] = virginTypeID
                                 listProto[virginTypeID]['obs'].append(virginForm)
                         except :
-
                             if virginTypeID not in listProto :
                                 listSchema = []
                                 virginForm = virginObs.GetDTOWithSchema(Conf,DisplayMode)
@@ -111,10 +107,10 @@ def GetProtocolsofStation (request) :
     transaction.commit()
     return response
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST')
 @view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'POST')
 def insertNewProtocol (request) :
-
     data = {}
     for items , value in request.json_body.items() :
         if value != "" and value != []:
@@ -140,9 +136,9 @@ def insertNewProtocol (request) :
     # transaction.commit()
     return {'id': newProto.ID}
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'PUT')
 def updateObservation(request):
-
     print('*********************** UPDATE Observation *****************')
     data = request.json_body
     id_obs = request.matchdict['obs_id']
@@ -155,32 +151,27 @@ def updateObservation(request):
             print('\n\n\n ************************* \n')
             print('Complex PROTOCOL detected For UPDATE')
             listOfSubProtocols = value
-
     data['Observation_childrens'] = listOfSubProtocols
     curObs.UpdateFromJson(data)
     transaction.commit()
     return {}
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'DELETE')
 def deleteObservation(request):
-
     print('*********************** DELETE Observation *****************')
-
     id_obs = request.matchdict['obs_id']
     curObs = DBSession.query(Observation).get(id_obs)
     DBSession.delete(curObs)
     transaction.commit()
     return {}
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getObservation(request):
-
     print('*********************** GET Observation *****************')
-    
     id_obs = request.matchdict['obs_id']
     id_sta = request.matchdict['id']
-    
     try :
         curObs = DBSession.query(Observation).filter(and_(Observation.ID ==id_obs, Observation.FK_Station == id_sta )).one()
         curObs.LoadNowValues()
@@ -196,13 +187,13 @@ def getObservation(request):
             response = curObs.GetDTOWithSchema(Conf,DisplayMode)
         else : 
             response  = curObs.GetFlatObject()
-
     except Exception as e :
         print(e)
         response = {}
     transaction.commit()
     return response
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnObs(request):
     print ('\n*********************** Action **********************\n')
@@ -219,7 +210,6 @@ def countObs (request) :
 #   ## TODO count stations
     return
 
-
 def getObsForms(request) :
     typeObs = request.params['ObjectType']
     sta_id = request.matchdict['id']
@@ -233,24 +223,23 @@ def getObsForms(request) :
     transaction.commit()
     return schema
 
-
 def getObsFields(request) :
 #     ## TODO return fields Station
     return
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefixProt, renderer='json', request_method = 'PUT')
 def updateListProtocols(request):
     # TODO 
     # update a list of protocols 
     return
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefixProt, renderer='json', request_method = 'POST')
 def insertProtocols(request):
     return insertNewProtocol (request)
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefixProt+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnProtocols(request):
     print ('\n*********************** Action **********************\n')
@@ -263,13 +252,13 @@ def actionOnProtocols(request):
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefixProt, renderer='json', request_method = 'GET')
 def getListofProtocol (request):
     print(request.params)
-    return 
+    return
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefixProt + '/id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getProtocol (request):
     id = request.matchdict['id']
@@ -289,7 +278,7 @@ def getProtocol (request):
         response  = curProt.GetFlatObject()
     return response
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= 'fieldActivity', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getFieldActivityList (request) :
     query = select([fieldActivity.ID.label('value'), fieldActivity.Name.label('label')])
@@ -299,7 +288,7 @@ def getFieldActivityList (request) :
         res.append({'label':row['label'], 'value': row['value']})
     return sorted(res , key = lambda x : x['label'])
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= 'protocolTypes', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getListofProtocolTypes (request):
     if 'FieldActivityID' in request.params :
