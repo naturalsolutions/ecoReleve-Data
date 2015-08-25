@@ -24,6 +24,7 @@ define([
 		},
 
 		ui: {
+			wizard : '#wizard',
 			stepNav : '#stepNav',
 			btnNext : '#btnNext',
 			btnPrev :'#btnPrev',
@@ -38,16 +39,9 @@ define([
 		},
 
 		animateIn: function() {
-			this.$el.find('#btnPrev').animate(
-				{ left : '0'},
-				500 
-			);
-			this.$el.find('#btnNext').animate(
-				{ right : '0' },
-				500
-			);
-			this.$el.find('#wizard').addClass('slideInDown');
-			
+			this.ui.wizard.addClass('slideInDown');
+			this.ui.btnPrev.animate({left : '0'}, 500);
+			this.ui.btnNext.animate({right : '0'}, 500);
 			this.$el.animate(
 				{ opacity: 1 },
 				500,
@@ -55,18 +49,12 @@ define([
 			);
 		},
 		animateOut: function(){
-			this.$el.find('#btnPrev').animate(
-				{ left : '-100%'},
-				500
-			);
-			this.$el.find('#btnNext').animate(
-				{ right : '-100%' },
-				500
-			);
-			this.$el.find('#wizard').addClass('zoomOutDown');
+			this.ui.wizard.addClass('zoomOutDown');
+			this.ui.btnPrev.animate({left : '-100%'}, 500);
+			this.ui.btnNext.animate({right : '-100%'}, 500);
 			this.$el.animate(
 				{ opacity : 0 },
-				500,
+				200,
 				_.bind(this.trigger, this, 'animateOut')
 			);
 		},

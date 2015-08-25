@@ -5,17 +5,10 @@ define(['marionette', 'config',
 	/*==========  modules  ==========*/
 	'./modules/export/layouts/export-layout',
 
-	'./modules/import/layouts/lyt-import-gpx',
-	'./modules/input/layouts/lyt-input',
-	'./modules/stations/visu/layouts/lyt-stations',
+	'./modules/stations/visu/lyt-stations',
+	'./modules/stations/edit/lyt-station-stepper-edit',
+	'./modules/stations/new/lyt-station-stepper-new',
 
-	'./Demo/lyt-Obs',
-	'./Demo/lyt-Sta',
-
-	'./modules/newStation/lyt-entry-new-station',
-	'./modules/editStations/lyt-entry-edit-stations',
-	'./modules/newStation/layouts/lyt-step1',
-	
 	'./modules/importFile/lyt-entry-importFile',
 	'./modules/individual/layouts/lyt-individual',
 	'./modules/individual/layouts/lyt-indiv-details',
@@ -26,16 +19,10 @@ define(['marionette', 'config',
 
 	/*==========  modules  ==========*/
 	LytExport,
-	LytImport,
-	LytInput,
-	LytStations,
 
-	LytObs,
-	LytSta,
-
-	LytNewStation,
-	LytEditStations,
-	LytStationManager,
+	LytStationVisu,
+	LytStationStepperEdit,
+	LytStationStepperNew,
 
 	LytImportFile,
 	LytIndividual,
@@ -50,52 +37,39 @@ define(['marionette', 'config',
 			this.rgHeader=window.app.rootView.rgHeader;
 			this.rgFooter=window.app.rootView.rgFooter;
 		},
+
+
 		home: function() {
 			Backbone.history.navigate('');
 			this.rgMain.show(new LytHome());
 		},
-		input: function(){
-			this.rgMain.show(new LytInput());
-		},
 		export: function(){
 			this.rgMain.show(new LytExport());
 		},
-		obs: function(options){
-			this.rgMain.show(new LytObs({id:options}));
-		},
-		sta: function(options){
-			this.rgMain.show(new LytStations({id:options}));
-		},
-		import: function(){
-			this.rgMain.show(new LytImport());
-		},
-		stations: function(){
-			this.rgMain.show(new LytStations());
-		},
-
-		newStation: function(){
-			this.rgMain.show(new LytNewStation());
-		},
-
-		editStations: function(){
-			this.rgMain.show(new LytEditStations());
-		},
-
 		importFile: function(){
 			this.rgMain.show(new LytImportFile());
 		},
 
-		station: function(options){
-			this.rgMain.show(new LytStationManager({id: options}));
+		stations: function(){
+			this.rgMain.show(new LytStationVisu());
 		},
+
+		newStation: function(){
+			this.rgMain.show(new LytStationStepperNew());
+		},
+		editStations: function(){
+			this.rgMain.show(new LytStationStepperEdit());
+		},
+
+		station: function(options){
+		},
+		
 		individual : function(){
 			this.rgMain.show(new LytIndividual());
 		},
 		indiv : function(options){
 			this.rgMain.show(new LytIndivDetails({id: options}));
 		},
-
-
 
 	});
 });
