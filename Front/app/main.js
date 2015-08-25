@@ -27,7 +27,7 @@ require.config({
 		'ns_stepper'	: 'ns_modules/ns_stepper',
 		
 		'autocompTree' : 'vendors/jquery.autocompTree',
-		'ListOfNestedModel' : 'vendors/ListOfNestedModel/ListOfNestedModel',
+		'listOfNestedModel' : 'vendors/ListOfNestedModel/ListOfNestedModel',
 
 		/*==========  Bower  ==========*/
 		'jquery'				: '../bower_components/jquery/jquery',
@@ -43,8 +43,22 @@ require.config({
 		'sweetAlert'			:'../bower_components/sweetalert/lib/sweet-alert.min',
 		'moment'				: '../bower_components/moment/min/moment.min',
 		'dateTimePicker'		: '../bower_components/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker',
-		'backbone_forms'		: '../bower_components/backbone-forms/distribution.amd/backbone-forms',
-		'backbone.list'			: '../bower_components/backbone-forms/distribution/editors/list',
+
+
+
+
+
+
+		'backbone_forms'		: '../bower_components/backbone-forms/distribution.amd/backbone-forms',		
+
+		'backbone.list'			: '../bower_components/backbone-forms/distribution.amd/editors/list',
+
+
+
+
+
+
+
 		'backbone.paginator'	: '../bower_components/backbone.paginator/lib/backbone.paginator.min',
 		'requirejs-text'		: '../bower_components/requirejs-text/text',
 		'L'						: '../bower_components/leaflet/dist/leaflet-src',
@@ -162,13 +176,6 @@ require.config({
 			deps: ['backgrid'],
 			exports :  'FloatThead'
 		},
-		ListOfNestedModel: {
-            deps: [
-            'backbone',
-             'backgrid',
-             'backbone_forms'
-            ]
-        },
 
 	},
 });

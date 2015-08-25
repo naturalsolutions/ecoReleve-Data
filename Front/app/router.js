@@ -7,7 +7,12 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 
 		appRoutes: {
 			'export(/)' : 'export',
+
 			'importFile(/)': 'importFile',
+
+			'individual(/)' : 'individual',
+			'individuals(/)' : 'individual',
+			'individual(/):id' : 'indiv',
 
 			'stations(/)' : 'stations',
 			'newStation(/)': 'newStation',

@@ -96,7 +96,8 @@ class ModuleForms(Base):
     def InputLNM(self) :
         if self.Options != None :
             result = DBSession.query(ModuleForms).filter(and_(ModuleForms.TypeObj == self.Options , ModuleForms.Module_ID == self.Module_ID)).all()
-            subTypeObj = result[0].Name
+            subNameObj = result[0].Name
+            
             subschema = {}
             for conf in result :
                 subschema[conf.Name] = conf.GetDTOFromConf(self.IsEditable,self.CssClass)
@@ -112,6 +113,13 @@ class ModuleForms(Base):
             'fieldClass': None,
             'subschema' : subschema
             }
+
+            try :
+                subTypeObj = int(self.Options)
+                self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
+            except : 
+                pass
+
 
     def InputThesaurus(self) :
         if self.Options is not None :

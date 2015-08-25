@@ -10,6 +10,8 @@ define(['marionette', 'config',
 	'./modules/stations/new/lyt-station-stepper-new',
 
 	'./modules/importFile/lyt-entry-importFile',
+	'./modules/individual/layouts/lyt-individual',
+	'./modules/individual/layouts/lyt-indiv-details',
 	
 
 ],function( Marionette, config, 
@@ -22,7 +24,9 @@ define(['marionette', 'config',
 	LytStationStepperEdit,
 	LytStationStepperNew,
 
-	LytImportFile
+	LytImportFile,
+	LytIndividual,
+	LytIndivDetails
 
 ){
 	'use strict';
@@ -46,10 +50,10 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytImportFile());
 		},
 
-
 		stations: function(){
 			this.rgMain.show(new LytStationVisu());
 		},
+
 		newStation: function(){
 			this.rgMain.show(new LytStationStepperNew());
 		},
@@ -58,10 +62,14 @@ define(['marionette', 'config',
 		},
 
 		station: function(options){
-			
 		},
-
-
+		
+		individual : function(){
+			this.rgMain.show(new LytIndividual());
+		},
+		indiv : function(options){
+			this.rgMain.show(new LytIndivDetails({id: options}));
+		},
 
 	});
 });

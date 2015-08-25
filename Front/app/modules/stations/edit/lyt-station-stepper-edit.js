@@ -12,10 +12,10 @@ define([
 	'backbone',
 	'marionette',
 	'ns_stepper/lyt-newStepper',
-
 	
 	'modules/stations/edit/lyt-station-edit',
 	'modules/stations/manager/lyt-station-manager'
+	
 ], function($, _, Backbone, Marionette, NewStepper, Step0, Step1
 ){
 
