@@ -22,13 +22,13 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 		$('#header-loader').removeClass('hidden');
 	});
 	$( document ).ajaxStop(function() {
-		console.log('test');
 		$('#header-loader').addClass('hidden');
 	});
 	$( document ).ajaxError(function() {
 		console.error('Error from the server');
 		$('#header-loader').addClass('hidden');
 	});
+
 
 	window.app = app;
 	return app;

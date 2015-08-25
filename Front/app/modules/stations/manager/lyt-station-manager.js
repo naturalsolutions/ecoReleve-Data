@@ -24,7 +24,7 @@ define([
 
 		className: 'full-height', 
 
-		template: 'app/modules/newStation/templates/tpl-step1.html',
+		template: 'app/modules/stations/manager/templates/tpl-station-manager.html',
 
 		name : 'Protocol managing',
 
@@ -46,13 +46,11 @@ define([
 
 
 		initialize: function(options){
-			console.log(options);
 			if(options.id){
 				this.stationId = options.id;
 			}else{
 				this.stationId = options.model.get('ID');
 			}
-			console.log(this.stationId);
 		},
 
 		check: function(){

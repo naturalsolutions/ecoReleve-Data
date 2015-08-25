@@ -26,9 +26,9 @@ define([
 
 		className: 'full-height', 
 
-		template: 'app/modules/newStation/templates/tpl-step0.html',
+		template: 'app/modules/stations/new/templates/tpl-station-new.html',
 		events : {
-			'focusout input[name="Date_"]':'checkDate',
+			'focusout input[name="Dat e_"]':'checkDate',
 			'keyup input[name="LAT"], input[name="LON"]' : 'getLatLng',
 			'click #getCurrentPosition' : 'getCurrentPosition',
 		},
@@ -87,14 +87,14 @@ define([
 				});
 			} else {
 				Swal({
-						title: 'The browser dont support geolocalization API',
-						text: '',
-						type: 'error',
-						showCancelButton: false,
-						confirmButtonColor: 'rgb(147, 14, 14)',
-						confirmButtonText: 'OK',
-						closeOnConfirm: true,
-				 });
+					title: 'The browser dont support geolocalization API',
+					text: '',
+					type: 'error',
+					showCancelButton: false,
+					confirmButtonColor: 'rgb(147, 14, 14)',
+					confirmButtonText: 'OK',
+					closeOnConfirm: true,
+				});
 			}
 		},
 
