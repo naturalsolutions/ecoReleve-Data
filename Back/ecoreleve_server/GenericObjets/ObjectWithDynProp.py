@@ -14,7 +14,7 @@ from traceback import print_exc
 Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}
 
 class ObjectWithDynProp:
-
+    ''' Class to extend for mapped object with dynamic properties '''
     ObjContext = DBSession
     PropDynValuesOfNow = {}
 
@@ -23,21 +23,20 @@ class ObjectWithDynProp:
         self.PropDynValuesOfNow = {}
 
     def GetAllProp (self) :
+        ''' Get all object properties (dynamic and static) '''
         try :
+            #### IF typeObj is setted retrieve only dynamic props of this type ####
             type_ = self.GetType()
         except :
+            #### ELSE retrieve all dyn props ####
             type_ = None
         dynPropTable = Base.metadata.tables[self.GetDynPropTable()]
-
         if type_ :
             result = type_.GetDynProps()
         else :
             result = DBSession.execute(select([dynPropTable])).fetchall()
-
         statProps = [{'name': statProp.key, 'type': statProp.type} for statProp in self.__table__.columns ]
-
         dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp}for dynProp in result]
-
         statProps.extend(dynProps)
         return statProps
 
@@ -47,6 +46,8 @@ class ObjectWithDynProp:
         return self.FrontModules.ID
 
     def GetGridFields (self,ModuleType):
+        ''' Function to call : return Name and Type of Grid fields to display in front end 
+        according to configuration in table ModuleGrids'''
         try:
             typeID = self.GetType().ID
             gridFields = DBSession.query(ModuleGrids
@@ -58,7 +59,7 @@ class ObjectWithDynProp:
 
         gridFields.sort(key=lambda x: str(x.GridOrder))
         cols = []
-
+        #### return only fileds existing in conf ####
         for curConf in gridFields:
             curConfName = curConf.Name
             gridField = list(filter(lambda x : x['name'] == curConfName,self.GetAllProp()))
@@ -74,7 +75,8 @@ class ObjectWithDynProp:
         return cols
 
     def GetFilters (self,ModuleType) :
-
+        ''' Function to call : return Name and Type of Filters to display in front end 
+        according to configuration in table ModuleGrids'''
         filters = []
         defaultFilters = []
         try:
@@ -87,7 +89,16 @@ class ObjectWithDynProp:
         except :
             filterFields = DBSession.query(ModuleGrids).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()
 
+        for curConf in filterFields:
+            curConfName = curConf.Name
+            filterField = list(filter(lambda x : x['name'] == curConfName
+                and curConf.IsSearchable == 1 ,self.GetAllProp()))
 
+            if len(filterField)>0 :
+                filters.append(curConf.GenerateFilter())
+            elif curConf.QueryName is not None:
+                filters.append(curConf.GenerateFilter())
+        #### OLD VERSION ####
         # for curProp in self.GetAllProp():
         #     curPropName = curProp['name']
         #     filterField = list(filter(lambda x : x.Name == curPropName
@@ -102,17 +113,6 @@ class ObjectWithDynProp:
             #     'label' : curPropName,
             #     'type' : 'Text'
             #     }
-        for curConf in filterFields:
-            curConfName = curConf.Name
-            filterField = list(filter(lambda x : x['name'] == curConfName
-                and curConf.IsSearchable == 1 ,self.GetAllProp()))
-
-            if len(filterField)>0 :
-                filters.append(curConf.GenerateFilter())
-            elif curConf.QueryName is not None:
-                filters.append(curConf.GenerateFilter())
-
-
         return filters
 
     def GetType(self):
@@ -149,6 +149,7 @@ class ObjectWithDynProp:
             return self.PropDynValuesOfNow[nameProp]
 
     def SetProperty(self,nameProp,valeur) :
+        ''' Set object properties (static and dynamic) '''
         if hasattr(self,nameProp):
             try :
                 curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
@@ -164,7 +165,7 @@ class ObjectWithDynProp:
         else:
             if (nameProp in self.GetType().DynPropNames):
                 if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):
-                    # on affecte si il y a une valeur et si elle est différente de la valeur existante
+                    #### IF no value or different existing value, new value is affected ####
                     print('valeur modifiée pour ' + nameProp)
                     NouvelleValeur = self.GetNewValue(nameProp)
                     NouvelleValeur.StartDate = datetime.today()
@@ -198,24 +199,25 @@ class ObjectWithDynProp:
         return row[Cle[row['TypeProp']]]
 
     def UpdateFromJson(self,DTOObject):
+        ''' Function to call : update properties of new or existing object with JSON/dict of value'''
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id'):
                 self.SetProperty(curProp,DTOObject[curProp])
 
     def GetFlatObject(self,schema=None):
+        ''' return flat object with static properties and last existing value of dyn props '''
         resultat = {}
-
         if self.ID is not None : 
             max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow))
             for i in range(max_iter) :
-                # Get static Properties #
+                #### Get static Properties ####
                 try :
                     curStatProp = list(self.__table__.columns)[i]
                     resultat[curStatProp.key] = self.GetProperty(curStatProp.key)
                 except :
                     pass
-                # Get dynamic Properties #
+                #### Get dynamic Properties ####
                 try :
                     curDynPropName = list(self.PropDynValuesOfNow)[i]
                     resultat[curDynPropName] = self.GetProperty(curDynPropName)
@@ -224,7 +226,7 @@ class ObjectWithDynProp:
         else : 
             max_iter = len( self.__table__.columns)
             for i in range(max_iter) :
-                # Get static Properties #
+                #### Get static Properties ####
                 try :
                     curStatProp = list(self.__table__.columns)[i]
                     curVal = self.GetProperty(curStatProp.key)
@@ -237,6 +239,7 @@ class ObjectWithDynProp:
         return resultat
 
     def GetSchemaFromStaticProps(self,FrontModules,DisplayMode):
+        ''' return schema of static props to feed front end form '''
         Editable = (DisplayMode.lower()  == 'edit')
         resultat = {}
         type_ = self.GetType().ID
@@ -244,7 +247,6 @@ class ObjectWithDynProp:
         curEditable = Editable
 
         for curStatProp in self.__table__.columns:
-
             CurModuleForms = list(filter(lambda x : x.Name == curStatProp.key and (x.TypeObj== str(type_) or x.TypeObj == None) , Fields))
             if (len(CurModuleForms)> 0 ):
                 # Conf définie dans FrontModules
@@ -263,7 +265,7 @@ class ObjectWithDynProp:
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):
-
+        ''' Function to call: return full schema according to configuration (table :ModuleForms) '''
         schema = self.GetSchemaFromStaticProps(FrontModules,DisplayMode)
         ObjType = self.GetType()
         ObjType.AddDynamicPropInSchemaDTO(schema,FrontModules,DisplayMode)
@@ -277,7 +279,7 @@ class ObjectWithDynProp:
             'fieldsets' : ObjType.GetFieldSets(FrontModules,schema)
             }
 
-        ''' IF ID is send from front --> get data of this object in order to display value into form which will be sent'''
+        #### IF ID is send from front --> get data of this object in order to display value into form which will be sent ####
         data = self.GetFlatObject(schema)
         resultat['data'] = data
         if self.ID :

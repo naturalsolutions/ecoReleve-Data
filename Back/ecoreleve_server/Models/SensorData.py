@@ -22,6 +22,7 @@
 
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 # class SensorDataType (Base,ObjectTypeWithDynProp) :
 
 #     __tablename__ = 'SensorDataType'
@@ -29,6 +30,7 @@
 #     Name = Column (String)
 #     Status = Column(Integer)
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 # class SensorData (Base,ObjectTypeWithDynProp) :
 
 #     __tablename__ = 'SensorData'
@@ -36,6 +38,7 @@
 #     Name = Column (String)
 #     creationDate = Column (DateTime,nullable=False)
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 # class SensorDataDynProp (Base) :
 
 #     __tablename__ = 'SensorDataDynProp'
@@ -44,6 +47,7 @@
 #     TypeProp = Column(String,nullable=False)
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 # class SensorDataDynPropValue(Base):
 
 #     __tablename__ = 'SensorDataDynPropValue'
@@ -59,6 +63,7 @@
 
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 # class SensorDataType_SensorDataDynProp(Base):
 
 #     __tablename__ = 'SensorDataType_SensorDataDynProp'
@@ -69,8 +74,14 @@
 #     FK_SensorDataDynProp = Column(Integer, ForeignKey('SensorDataDynProp.ID'))
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 # class Equip_Sensor (Base) :
 
 #     __tablename__ = 'Equip_Sensor'
-    
+
 #     ID = Column(Integer,Sequence('Equip_Sensor__id_seq'), primary_key=True)
+#     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
+    # FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
+    # FK_Site = Column(Integer, ForeignKey('MonitoredSite.ID'))
+    # StartDate = Column(DateTime)
+

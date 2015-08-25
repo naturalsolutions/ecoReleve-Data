@@ -20,6 +20,7 @@
 # from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 
 
+# #------------------------------------------------------------------------------------------------------------------------- #
 # class File (Base,ObjectWithDynProp) :
 
 #     __tablename__ = 'File'
@@ -32,6 +33,7 @@
 
 #     relationship('File_Type')
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 # class File_Type (Base) :
 
 #     __tablename__ = 'File_Type'
@@ -42,6 +44,8 @@
 
 #     relationship('File')
 
+
+# ------------------------------------------------------------------------------------------------------------------------- #
 # class ImportFile_Conf (Base) :
 
 #     __tablename__ = 'ImportFile_Conf'
@@ -56,6 +60,7 @@
 #     Regles = Column (String)
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 # class FileContent (Base) :
 
 #     __tablename__ = 'FileContent'

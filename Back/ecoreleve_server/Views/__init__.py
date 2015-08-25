@@ -24,21 +24,23 @@ def add_routes(config):
 
     config.add_route('weekData', 'ecoReleve-Sensor/weekData')
 
+    # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Security routes #####
     config.add_route('security/login', 'ecoReleve-Core/security/login')
     config.add_route('security/logout', 'ecoReleve-Core/security/logout')
     config.add_route('security/has_access', 'ecoReleve-Core/security/has_access')
 
-
-
+    # ------------------------------------------------------------------------------------------------------------------------- #
     ##### User #####
     config.add_route('core/user', 'ecoReleve-Core/user')
     config.add_route('core/currentUser', 'ecoReleve-Core/currentUser')
 
+    # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Monitored sites #####
     config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites')
     config.add_route('monitoredSites/id', 'ecoReleve-Core/monitoredSites/{id}')
 
+    # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Stations #####
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
@@ -46,38 +48,42 @@ def add_routes(config):
     config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
 
+    # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Stations/Protocols #####
     config.add_route('stations/id/protocols', 'ecoReleve-Core/stations/{id}/protocols',custom_predicates = (integers('id'),))
     config.add_route('stations/id/protocols/', 'ecoReleve-Core/stations/{id}/protocols/',custom_predicates = (integers('id'),))
     config.add_route('stations/id/protocols/obs_id', 'ecoReleve-Core/stations/{id}/protocols/{obs_id}',custom_predicates = (integers('id', 'obs_id'),))
     config.add_route('stations/id/protocols/action', 'ecoReleve-Core/stations/{id}/protocols/{action}')
 
+    # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Protocols #####
     # config.add_route('protocols', 'ecoReleve-Core/protocols')
     config.add_route('protocols', 'ecoReleve-Core/protocols/')
     config.add_route('protocols/id', 'ecoReleve-Core/protocols/{id}',custom_predicates = (integers('id'),)) 
     config.add_route('protocols/action', 'ecoReleve-Core/protocols/{action}') 
 
-    config.add_route('observation/id', 'ecoReleve-Core/observations/{id}')
-    config.add_route('observation', 'ecoReleve-Core/observations')
-
-     ##### Protocols types #####
+    # ------------------------------------------------------------------------------------------------------------------------- #
+    ##### Protocols types #####
     config.add_route('protocolTypes', 'ecoReleve-Core/protocolTypes')
 
+    # ------------------------------------------------------------------------------------------------------------------------- #
     ##### FieldActivity ##### 
     config.add_route('fieldActivity', 'ecoReleve-Core/fieldActivity')
     
 
+    # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Sensors datas (Argos + GSM + RFID) #####
     config.add_route('sensors/datas', 'ecoReleve-Sensor/{type}/datas')
     config.add_route('sensors/id/datas', 'ecoReleve-Sensor/{type}/{id}/datas')
 
+    # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
     config.add_route('sensors', 'ecoReleve-Sensor/{type}')
     config.add_route('sensors/id', 'ecoReleve-Sensor/{type}/{id}')
     # config.add_notfound_view(notfound, append_slash=True)
 
-     ##### Individuals #####
+    # ------------------------------------------------------------------------------------------------------------------------- #
+    ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/') 
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
     config.add_route('individuals/action', 'ecoReleve-Core/individuals/{action}') 

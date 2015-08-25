@@ -19,11 +19,9 @@ from traceback import print_exc
 
 
 prefix = 'individuals'
-# @view_config(route_name= prefix, renderer='json', request_method = 'PUT')
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-
 def actionOnIndividuals(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -37,7 +35,6 @@ def actionOnIndividuals(request):
     return dictActionFunc[actionName](request)
 
 def count_ (request = None,listObj = None) :
-
     print('*****************  INDIVIDUAL COUNT***********************')
     if request is not None : 
         data = request.params
@@ -53,7 +50,6 @@ def count_ (request = None,listObj = None) :
     return count 
 
 def getFilters (request):
-
     ModuleType = 'IndivFilter'
     filtersList = Individual().GetFilters(ModuleType)
     filters = {}
@@ -63,7 +59,6 @@ def getFilters (request):
     return filters
 
 def getForms(request) :
-
     typeIndiv = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
     ModuleName = 'IndivForm'
@@ -75,15 +70,14 @@ def getForms(request) :
     return schema
 
 def getFields(request) :
-
     ModuleType = 'IndivFilter'
     cols = Individual().GetGridFields(ModuleType)
     transaction.commit()
     return cols
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getIndiv(request):
-
     print('***************** GET INDIVIDUAL ***********************')
     id = request.matchdict['id']
     curIndiv = DBSession.query(Individual).get(id)
@@ -105,18 +99,18 @@ def getIndiv(request):
     return response
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
 def deleteIndiv(request):
     id_ = request.matchdict['id']
     curIndiv = DBSession.query(Individual).get(id_)
     DBSession.delete(curIndiv)
     transaction.commit()
-
     return True
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateIndiv(request):
-
     print('*********************** UPDATE Individual *****************')
     data = request.json_body
     id = request.matchdict['id']
@@ -126,9 +120,9 @@ def updateIndiv(request):
     transaction.commit()
     return {}
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'POST')
 def insertIndiv(request):
-
     data = request.json_body
     if not isinstance(data,list):
         print('_______INsert ROW *******')
@@ -138,8 +132,8 @@ def insertIndiv(request):
         #transaction.commit()
         #return insertListNewIndivs(request)
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewIndiv (request) :
-
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
@@ -155,14 +149,11 @@ def insertOneNewIndiv (request) :
     # transaction.commit()
     return {'ID': newIndiv.ID}
 
-
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchIndiv(request):
-
     data = request.params.mixed()
     searchInfo = {}
-
     searchInfo['criteria'] = []
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])
@@ -173,25 +164,20 @@ def searchIndiv(request):
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
 
-
     ModuleType = 'IndivFilter'
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
-
 
     start = datetime.now()
     listObj = ListObjectWithDynProp(Individual,moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
     stop = datetime.now()
-
     print ('______ TIME to get DATA : ')
     print (stop-start)
-
     start = datetime.now()
     countResult = count_(listObj =listObj)
     print ('______ TIME to get Count : ')
     stop = datetime.now()
     print (stop-start)
-
     if 'geo' in data: 
         geoJson=[]
         for row in dataResult:

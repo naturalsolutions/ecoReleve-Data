@@ -20,7 +20,7 @@ from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 class IndividualType (Base,ObjectTypeWithDynProp) :
 
     __tablename__ = 'IndividualType'
@@ -29,6 +29,7 @@ class IndividualType (Base,ObjectTypeWithDynProp) :
     Status = Column(Integer)
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 class Individual (Base,ObjectWithDynProp) :
 
     __tablename__ = 'Individual'
@@ -40,34 +41,8 @@ class Individual (Base,ObjectWithDynProp) :
     Birth_date = Column(DateTime,nullable=False)
     Death_date = Column(DateTime)
 
-    ########################## dyn prop
-    #Transmitter_Shape 
-    #Transmitter_Model 
-    #Transmitter_Frequency 
-    #Transmitter_Serial_Number 
-    #Release_Ring_Position 
-    #Release_Ring_Color 
-    #Release_Ring_Code 
-    #Breeding_Ring_Position  
-    # Breeding_Ring_Color
-    # Breeding_Ring_Code
-    # Chip_Code
-    # Mark_Color_1
-    # Mark_Position_1
-    # Mark_Color_2
-    # Mark_Position_2
-    # PTT
-    # PTT_manufacturer
-    # PTT_model
-    # Origin
-    # Species
-    # Comments
-    # Mark_code_1
-    # Mark_code_2
-    # Individual_Status
-    # Monitoring_Status
-    # Survey_type
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 class IndividualDynProp (Base) :
 
     __tablename__ = 'IndividualDynProp'
@@ -76,6 +51,7 @@ class IndividualDynProp (Base) :
     TypeProp = Column(String,nullable=False)
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 class IndividualDynPropValue(Base):
 
     __tablename__ = 'IndividualDynPropValue'
@@ -90,6 +66,7 @@ class IndividualDynPropValue(Base):
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 class IndividualType_IndividualDynProp(Base):
 
     __tablename__ = 'IndividualType_IndividualDynProp'
@@ -98,3 +75,15 @@ class IndividualType_IndividualDynProp(Base):
     Required = Column(Integer,nullable=False)
     FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
     FK_IndividualDynProp = Column(Integer, ForeignKey('IndividualDynProp.ID'))
+
+
+# ------------------------------------------------------------------------------------------------------------------------- #
+# class Individual_Location(Base):
+#      __tablename__ = 'Individual_Location'
+
+#     ID = Column(Integer,Sequence('Individual_Location__id_seq'), primary_key=True)
+#     LAT = Column(Numeric(9,5))
+#     LON = Column(Numeric(9,5))
+#     Date = Column(DateTime)
+#     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
+#     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))

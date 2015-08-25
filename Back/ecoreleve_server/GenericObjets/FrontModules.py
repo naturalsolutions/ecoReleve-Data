@@ -13,6 +13,7 @@ def isEditable (int_Render) :
     return edit
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 class FrontModules(Base):
     __tablename__ = 'FrontModules'
     ID =  Column(Integer,Sequence('FrontModule__id_seq'), primary_key=True)
@@ -23,6 +24,7 @@ class FrontModules(Base):
     ModuleForms = relationship('ModuleForms',lazy='dynamic',back_populates='FrontModules')
     ModuleGrids = relationship('ModuleGrids',lazy='dynamic',back_populates='FrontModules')
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 class ModuleForms(Base):
     __tablename__ = 'ModuleForms'
     ID = Column(Integer,Sequence('ModuleForm__id_seq'), primary_key=True)
@@ -50,7 +52,7 @@ class ModuleForms(Base):
         return FieldSizeToClass[FieldSize]
 
     def GetDTOFromConf(self,IsEditable,CssClass):
-
+        ''' return input field to build form '''
         self.dto = {
             'Name': self.Name,
             'type': self.InputType,
@@ -83,7 +85,6 @@ class ModuleForms(Base):
         return self.dto
 
     def InputSelect (self) :
-        
         if self.Options != None :
             result = DBSession.execute(text(self.Options)).fetchall()
             for row in result :
@@ -94,14 +95,13 @@ class ModuleForms(Base):
             self.dto['options'] = sorted(self.dto['options'], key=lambda k: k['label'])
 
     def InputLNM(self) :
+        ''' build ListOfNestedModel input type : used for complex protocols and Fieldworkers in station form '''
         if self.Options != None :
             result = DBSession.query(ModuleForms).filter(and_(ModuleForms.TypeObj == self.Options , ModuleForms.Module_ID == self.Module_ID)).all()
             subNameObj = result[0].Name
-            
             subschema = {}
             for conf in result :
                 subschema[conf.Name] = conf.GetDTOFromConf(self.IsEditable,self.CssClass)
-
             self.dto = {
             'Name': self.Name,
             'type': self.InputType,
@@ -113,15 +113,14 @@ class ModuleForms(Base):
             'fieldClass': None,
             'subschema' : subschema
             }
-
             try :
                 subTypeObj = int(self.Options)
                 self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
             except : 
                 pass
 
-
     def InputThesaurus(self) :
+        # TODO : thesaurus url in development.ini
         if self.Options is not None :
             self.dto['options'] = {"startId":self.Options,"wsUrl":"http://192.168.1.199/ThesaurusCore","lng":"fr"}
 
@@ -132,6 +131,7 @@ class ModuleForms(Base):
         }
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 class ModuleGrids (Base) :
     __tablename__ = 'ModuleGrids'
 
@@ -155,15 +155,16 @@ class ModuleGrids (Base) :
     FilterClass = Column (String)
 
     FrontModules = relationship("FrontModules", back_populates="ModuleGrids")
-    
-    def FKName (self):
 
+
+    def FKName (self):
         if self.QueryName is None : 
             return self.Name 
         else : 
             return self.QueryName
 
     def GenerateColumn (self):
+        ''' return grid field to build Grid '''
         column = {
         'name' :self.FKName(),
         'label' : self.Label,
@@ -175,11 +176,10 @@ class ModuleGrids (Base) :
         if self.CellType == 'select' and 'SELECT' in self.Options :
              result = DBSession.execute(text(self.Options)).fetchall()
              column['optionValues'] = [[row['label'],row['val']] for row in result]
-
         return column
 
     def GenerateFilter (self) :
-        print('Filter : '+str(self.Name))
+        ''' return filter field to build Filter '''
         filter_ = {
             'name' : self.Name,
             'type' : self.FilterType,

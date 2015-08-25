@@ -26,25 +26,21 @@ from ecoreleve_server.GenericObjets import *
 from ecoreleve_server.Views import add_routes
 from ecoreleve_server.Views.station import searchStation
 
-
 from ecoreleve_server.pyramid_jwtauth import (
     JWTAuthenticationPolicy,
     includeme
     )
 
 def datetime_adapter(obj, request):
-    """Json adapter for datetime objects.
-    """
+    """Json adapter for datetime objects."""
     return obj.strftime ('%d/%m/%Y %H:%M:%S')
     
 def decimal_adapter(obj, request):
-    """Json adapter for Decimal objects.
-    """
+    """Json adapter for Decimal objects."""
     return float(obj)
 
 def main(global_config, **settings):
-    """ This function returns a Pyramid WSGI application.
-    """
+    """ This function initialze DB conection and returns a Pyramid WSGI application. """
     settings['sqlalchemy.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.url'])
     engine = engine_from_config(settings, 'sqlalchemy.')
     dbConfig['url'] = settings['sqlalchemy.url']
@@ -60,7 +56,7 @@ def main(global_config, **settings):
     json_renderer.add_adapter(Decimal, decimal_adapter)
     config.add_renderer('json', json_renderer)
 
-    # Add renderer for CSV files.
+    # Add renderer for CSV, PDF,GPX files.
     config.add_renderer('csv', CSVRenderer)
     config.add_renderer('pdf', PDFrenderer)
     config.add_renderer('gpx', GPXRenderer)

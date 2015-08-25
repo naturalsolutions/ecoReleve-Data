@@ -5,8 +5,8 @@ define([
 	'marionette',
 	'backbone_forms',
 	'requirejs-text!./Templates/NsFormsModule.html',
-	'listOfNestedModel',
-	'./NsFormsCustomFields',
+	'ListOfNestedModel',
+	//'./NsFormsCustomFields',
 	'i18n',
 ], function ($, _, Backbone, Marionette, BackboneForm, tpl,ListOfNestedModel) {
 	return Backbone.View.extend({
