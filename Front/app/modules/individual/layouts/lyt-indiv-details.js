@@ -10,9 +10,10 @@ define([
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_map/ns_map',
+	'ns_form/NSFormsModuleGit',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid,NsMap// NsForm
+	Com, NsGrid,NsMap, NsForm
 ){
 
 	'use strict';
@@ -35,9 +36,10 @@ define([
 			'paginator' :'#paginator'
 		},
 
-		initialize: function(){
+		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
+			this.indivId = options.id;
 		},
 
 		onRender: function(){
@@ -46,7 +48,7 @@ define([
 		},
 
 		onShow : function(){
-			//this.displayForm();
+			this.displayForm();
 			this.displayGrid();
 			this.displayMap();
 		},
@@ -86,7 +88,7 @@ define([
 
 		displayMap: function(){
 
-			var url  = config.coreUrl+ 'stations/?criteria=%7B%7D&lastImported=true&=true&geo=true&offset=0&order_by=%5B%5D&per_page=20';
+			var url  = config.coreUrl+ 'individuals/?criteria=%7B%7D&=true&geo=true&offset=0&order_by=%5B%5D&per_page=20';
 			$.ajax({
 				url: url,
 				contentType:'application/json',
@@ -96,6 +98,20 @@ define([
 				this.initMap(datas);
 			}).fail(function(msg){
 				console.error(msg);
+			});
+		},
+		displayForm : function(){
+			var id = this.indivId;
+			this.nsform = new NsForm({
+				name: 'IndivForm',
+				modelurl: config.coreUrl+'individuals',
+				buttonRegion: [],
+				formRegion: 'form',
+				displayMode: 'display',
+				objecttype: this.type,
+				id: id,
+				reloadAfterSave : false,
+				parent: this.parent
 			});
 		}
 

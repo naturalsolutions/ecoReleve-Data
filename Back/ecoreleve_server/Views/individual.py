@@ -92,12 +92,16 @@ def getIndiv(request):
     # if Form value exists in request --> return data with schema else return only data
     if 'FormName' in request.params :
         ModuleName = request.params['FormName']
+        print('****************form name******************')
+        print(ModuleName)
         try :
             DisplayMode = request.params['DisplayMode']
+            print('****************DisplayMode******************')
+            print(DisplayMode)
         except : 
             DisplayMode = 'display'
 
-        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='IndivForm' ).first()
+        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='IndivForm').first()
         response = curIndiv.GetDTOWithSchema(Conf,DisplayMode)
     else : 
         response  = curIndiv.GetFlatObject()
@@ -196,12 +200,12 @@ def searchIndiv(request):
         geoJson=[]
         for row in dataResult:
             geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
-        return {'type':'FeatureCollection', 'features':geoJson}
+        result = {'type':'FeatureCollection', 'features':geoJson}
     else :
         result = [{'total_entries':countResult}]
         result.append(dataResult)
-        transaction.commit()
-        return result
+    transaction.commit()
+    return result
 
 
 
