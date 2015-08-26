@@ -10,7 +10,7 @@ from .FrontModules import FrontModules,ModuleForms
 DynPropType = {'string':'Text','float':'Text','date':'Date','integer':'Text','int':'Text'}
 
 class ObjectTypeWithDynProp:
-
+    ''' Class to extend for mapped object type with dynamic props'''
 
     def __init__(self,ObjContext):
         self.ObjContext = DBSession
@@ -41,6 +41,7 @@ class ObjectTypeWithDynProp:
             return 'FK_' + self.__tablename__.replace('Type','') + 'DynProp'        
 
     def AddDynamicPropInSchemaDTO(self,SchemaDTO,FrontModules,DisplayMode):
+        ''' return schema of dynamic props according to object type and configuration in table : FrontModules > ModuleForms '''
         curQuery = 'select * from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
         if self.ID :
             curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
@@ -50,43 +51,27 @@ class ObjectTypeWithDynProp:
         Fields = self.ObjContext.query(ModuleForms
             ).filter(ModuleForms.Module_ID == FrontModules.ID
             ).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)).all()
-        # print(Fields)
-        print('\n\n ----- AddDynamicPropInSchemaDTO for TypeObj: ' + str(self.ID))
+
         for CurModuleForms in Fields : 
             curEditable = Editable
             #CurModuleForms = list(filter(lambda x : x.Name == curValue['Name'], Fields))
-
             #if (len(CurModuleForms)> 0 ):
-                
-                # Conf définie dans FrontModules                
+                # Conf définie dans FrontModules
             #CurModuleForms = CurModuleForms[0]
+
                 # TODO : Gestion champ read ONly
-                
-            #print(CurModuleForms)
             curSize = CurModuleForms.FieldSizeDisplay
             if curEditable:
                 curSize = CurModuleForms.FieldSizeEdit
             if (CurModuleForms.FormRender & 2) == 0:
                 curEditable = False
             SchemaDTO[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,ModuleForms.GetClassFromSize(curSize))
-            # else:
-            #     print('Standard')
-            #     SchemaDTO[curValue['Name']] = {
-            #     'Name': curValue['Name'],
-            #     'type':DynPropType[str(curValue['TypeProp']).lower()],
-            #     'title' : curValue['Name'],
-            #     'editable' : curEditable,
-            #     'editorClass' : 'form-control' ,
-            #     'fieldClass' : ModuleForms.GetClassFromSize(2),
 
-            #     }
-           
     def GetDynPropNames(self):
         curQuery = 'select D.Name from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
         Values = self.ObjContext.execute(curQuery).fetchall()
-
         resultat = {}
         for curValue in Values : 
            resultat[curValue['Name']] = curValue
@@ -101,35 +86,23 @@ class ObjectTypeWithDynProp:
         return Values
 
     def GetFieldSets(self,FrontModules,Schema) :
-        
+        ''' return ordered FiledSet according to configuration '''
         fields = []
         other = []
         Fields = self.ObjContext.query(ModuleForms).filter(ModuleForms.Module_ID == FrontModules.ID).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)).all()
-        # print(Fields)
         Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
         Legend2s = sorted ([(obj.Legend)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
-        # print(Legends)
-
         Unique_Legends = list()
-        # print(Unique_Legends)
         # Get distinct Fieldset in correct order
         for x in Legends:
-            # print(x)
-            # print(x[0])
             if x[0] not in Unique_Legends:
                 Unique_Legends.append(x[0])
-
-        # print('********************************************************* Getfieldsset ')
-        # print(Unique_Legends)
-        
         resultat = []
         for curLegend in Unique_Legends:
             curFieldSet = {'fields' :[],'legend' : curLegend}
             resultat.append(curFieldSet)
-        # print(Legends)
 
         for curProp in Legends:
-            # print(curProp)
             curIndex = Unique_Legends.index(curProp[0])
             resultat[curIndex]['fields'].append(curProp[2])
 

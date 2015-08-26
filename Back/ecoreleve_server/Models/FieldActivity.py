@@ -20,7 +20,7 @@ from sqlalchemy import (Column,
  UniqueConstraint)
 
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 class fieldActivity(Base):
 
     __tablename__ = 'fieldActivity'
@@ -29,7 +29,7 @@ class fieldActivity(Base):
     Name = Column(Unicode(250),nullable=False)
 
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 class FieldActivity_ProtocoleType (Base) :
     __tablename__ = 'FieldActivity_ProtocoleType'
 

@@ -6,7 +6,7 @@ define([
 	'backbone_forms',
 	'requirejs-text!./Templates/NsFormsModule.html',
 	'ListOfNestedModel',
-	'./NsFormsCustomFields',
+	//'./NsFormsCustomFields',
 	'i18n',
 ], function ($, _, Backbone, Marionette, BackboneForm, tpl,ListOfNestedModel) {
 	return Backbone.View.extend({

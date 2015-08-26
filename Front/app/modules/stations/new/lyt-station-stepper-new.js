@@ -1,19 +1,11 @@
-/**
-
-	TODO:
-	- header steps
-	----> mini orchestrator?
-
-**/
-
 define([
 	'jquery',
 	'underscore',
 	'backbone',
 	'marionette',
 	'ns_stepper/lyt-newStepper',
-	'./layouts/lyt-step0',
-	'modules/newStation/layouts/lyt-step1'
+	'./lyt-station-new',
+	'modules/stations/manager/lyt-station-manager'
 ], function($, _, Backbone, Marionette, NewStepper, Step0, Step1
 ){
 
@@ -28,6 +20,13 @@ define([
 			this.steps = [Step0, Step1];
 		},
 
+		testAdd: function(){
+			this.addStep(Step0, 2);
+		},
+
+		testRemove: function(){
+			this.removeStep(2);
+		}
 
 
 

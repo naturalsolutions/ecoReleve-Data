@@ -9,7 +9,6 @@ define([
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
 
-
 	'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, config, Com, NSGrid, NSFilter
@@ -21,13 +20,14 @@ define([
 
 		className: 'full-height', 
 
-		template: 'app/modules/editStations/templates/tpl-step0.html',
+		template: 'app/modules/stations/edit/templates/tpl-station-edit.html',
 		events: {
 			'click button#submit' : 'filter',
 		},
 
 		ui: {
 			'stationId': '#stationId',
+			'totalEntries': '#totalEntries'
 		},
 
 		name: 'Sation selection',
@@ -73,6 +73,7 @@ define([
 				rowClicked : true,
 				totalElement : 'stations-count',
 				onceFetched: function(){
+					_this.totalEntries(this.grid);
 					var rows = this.grid.body.rows;
 					if(_this.currentRow){
 						for (var i = 0; i < rows.length; i++) {
@@ -97,6 +98,11 @@ define([
 			this.grid.rowDbClicked = function(row){
 				_this.rowDbClicked(row);
 			};
+		},
+
+		totalEntries: function(grid){
+			this.total = grid.collection.state.totalRecords;
+			this.ui.totalEntries.html(this.total);
 		},
 
 		onShow : function(){

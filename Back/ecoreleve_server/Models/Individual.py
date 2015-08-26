@@ -20,54 +20,46 @@ from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 
 
-
-class IndividualType (Base,ObjectTypeWithDynProp) :
-
-    __tablename__ = 'IndividualType'
-    ID = Column (Integer,Sequence('IndividualType__id_seq'), primary_key = True)
-    Name = Column (String)
-    Status = Column(Integer)
-
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 class Individual (Base,ObjectWithDynProp) :
 
     __tablename__ = 'Individual'
     ID = Column (Integer,Sequence('Individual__id_seq'), primary_key = True)
     Name = Column (String)
     creationDate = Column (DateTime,nullable=False)
+    Species = Column (String)
     Age = Column(String)
     Sex = Column(String)
-    Birth_date = Column(DateTime,nullable=False)
+    Birth_date = Column(DateTime)
     Death_date = Column(DateTime)
+    FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
 
-    ########################## dyn prop
-    #Transmitter_Shape 
-    #Transmitter_Model 
-    #Transmitter_Frequency 
-    #Transmitter_Serial_Number 
-    #Release_Ring_Position 
-    #Release_Ring_Color 
-    #Release_Ring_Code 
-    #Breeding_Ring_Position  
-    # Breeding_Ring_Color
-    # Breeding_Ring_Code
-    # Chip_Code
-    # Mark_Color_1
-    # Mark_Position_1
-    # Mark_Color_2
-    # Mark_Position_2
-    # PTT
-    # PTT_manufacturer
-    # PTT_model
-    # Origin
-    # Species
-    # Comments
-    # Mark_code_1
-    # Mark_code_2
-    # Individual_Status
-    # Monitoring_Status
-    # Survey_type
+    IndividualDynPropValues = relationship('IndividualDynPropValue',backref='Individual',cascade="all, delete-orphan")
 
+    @orm.reconstructor
+    def init_on_load(self):
+        ''' init_on_load is called on the fetch of object '''
+        ObjectWithDynProp.__init__(self,DBSession)
+        
+    def GetNewValue(self,nameProp):
+        ReturnedValue = IndividualDynPropValue()
+        ReturnedValue.IndividualDynProp = DBSession.query(IndividualDynProp).filter(IndividualDynProp.Name==nameProp).first()
+        return ReturnedValue
+
+    def GetDynPropValues(self):
+        return self.IndividualDynPropValues
+
+    def GetDynProps(self,nameProp):
+        print(nameProp)
+        return  DBSession.query(IndividualDynProp).filter(IndividualDynProp.Name==nameProp).one()
+
+    def GetType(self):
+        if self.IndividualType != None :
+            return self.IndividualType
+        else :
+            return DBSession.query(IndividualType).get(self.FK_IndividualType)
+
+# ------------------------------------------------------------------------------------------------------------------------- #
 class IndividualDynProp (Base) :
 
     __tablename__ = 'IndividualDynProp'
@@ -75,7 +67,11 @@ class IndividualDynProp (Base) :
     Name = Column (String,nullable=False)
     TypeProp = Column(String,nullable=False)
 
+    IndividualType_IndividualDynProps = relationship('IndividualType_IndividualDynProp',backref='IndividualDynProp')
+    IndividualDynPropValues = relationship('IndividualDynPropValue',backref='IndividualDynProp')
 
+
+# ------------------------------------------------------------------------------------------------------------------------- #
 class IndividualDynPropValue(Base):
 
     __tablename__ = 'IndividualDynPropValue'
@@ -89,7 +85,22 @@ class IndividualDynPropValue(Base):
     FK_IndividualDynProp = Column(Integer, ForeignKey('IndividualDynProp.ID'))
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
 
+# ------------------------------------------------------------------------------------------------------------------------- #
+class IndividualType (Base,ObjectTypeWithDynProp) :
 
+    __tablename__ = 'IndividualType'
+    ID = Column (Integer,Sequence('IndividualType__id_seq'), primary_key = True)
+    Name = Column (String)
+    Status = Column(Integer)
+
+    IndividualType_IndividualDynProp = relationship('IndividualType_IndividualDynProp',backref='IndividualType')
+    Individuals = relationship('Individual',backref='IndividualType')
+
+    @orm.reconstructor
+    def init_on_load(self):
+        ObjectTypeWithDynProp.__init__(self,DBSession)
+
+# ------------------------------------------------------------------------------------------------------------------------- #
 class IndividualType_IndividualDynProp(Base):
 
     __tablename__ = 'IndividualType_IndividualDynProp'
@@ -98,3 +109,15 @@ class IndividualType_IndividualDynProp(Base):
     Required = Column(Integer,nullable=False)
     FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
     FK_IndividualDynProp = Column(Integer, ForeignKey('IndividualDynProp.ID'))
+
+
+# ------------------------------------------------------------------------------------------------------------------------- #
+# class Individual_Location(Base):
+#      __tablename__ = 'Individual_Location'
+
+#     ID = Column(Integer,Sequence('Individual_Location__id_seq'), primary_key=True)
+#     LAT = Column(Numeric(9,5))
+#     LON = Column(Numeric(9,5))
+#     Date = Column(DateTime)
+#     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
+#     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))

@@ -40,6 +40,7 @@ define([
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
 			this.indivId = options.id;
+
 		},
 
 		onRender: function(){
@@ -54,15 +55,32 @@ define([
 		},
 
 		displayGrid: function(){
-			var _this = this;
+			var cols = [{
+                name: 'Name',
+                label: 'Name',
+                editable: false,
+                cell : 'string'
+            }, {
+                name: 'value',
+                label: 'Value',
+                editable: false,
+                cell: 'string'
+            }, {
+                name: 'StartDate',
+                label: 'Start Date',
+                editable: false,
+                cell: 'string',
+            }, ];
 			this.grid = new NsGrid({
 				pageSize: 20,
-				pagingServerSide: true,
-				com: this.com,
-				url: config.coreUrl+'individuals/',
+				columns : cols,
+				pagingServerSide: false,
+				//com: this.com,
+				url: config.coreUrl+'individuals/' + this.indivId  + '/history',
 				urlParams : this.urlParams,
 				rowClicked : true,
-				totalElement : 'indiv-count'
+				//totalElement : 'indiv-count',
+				//name : 'IndivHistory'
 			});
 
 			// this.grid.rowClicked = function(row){
@@ -88,7 +106,7 @@ define([
 
 		displayMap: function(){
 
-			var url  = config.coreUrl+ 'individuals/?criteria=%7B%7D&=true&geo=true&offset=0&order_by=%5B%5D&per_page=20';
+			var url  = config.coreUrl+ 'individuals/' + this.indivId  + '?geo=true';
 			$.ajax({
 				url: url,
 				contentType:'application/json',

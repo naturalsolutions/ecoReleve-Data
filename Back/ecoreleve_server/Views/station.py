@@ -23,14 +23,10 @@ from traceback import print_exc
 
 
 prefix = 'stations'
-# @view_config(route_name= prefix, renderer='json', request_method = 'PUT')
-# def updateListStations(request):
-#     # TODO 
-#     # update a list of stations 
-#     return
 
+
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-
 def actionOnStations(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -44,8 +40,6 @@ def actionOnStations(request):
     return dictActionFunc[actionName](request)
 
 def count_ (request = None,listObj = None) :
-
-    print('*****************  STATION COUNT***********************')
     if request is not None : 
         data = request.params
         if 'criteria' in data: 
@@ -60,11 +54,8 @@ def count_ (request = None,listObj = None) :
     return count 
 
 def getFilters (request):
-
     ModuleType = 'StationGrid'
     moduleName = request.params.get('FilterName',None)
-    print('*******************moduleName********')
-    print(moduleName)
     filtersList = Station().GetFilters(moduleName)
     filters = {}
     for i in range(len(filtersList)) :
@@ -73,7 +64,6 @@ def getFilters (request):
     return filters
 
 def getForms(request) :
-
     typeSta = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
     ModuleName = 'StationForm'
@@ -85,15 +75,14 @@ def getForms(request) :
     return schema
 
 def getFields(request) :
-
     ModuleType = 'StationVisu'
     cols = Station().GetGridFields(ModuleType)
     transaction.commit()
     return cols
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getStation(request):
-
     print('***************** GET STATION ***********************')
     id = request.matchdict['id']
     curSta = DBSession.query(Station).get(id)
@@ -114,19 +103,18 @@ def getStation(request):
     transaction.commit()
     return response
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
 def deleteStation(request):
     id_ = request.matchdict['id']
     curSta = DBSession.query(Station).get(id_)
     DBSession.delete(curSta)
     transaction.commit()
-
     return True
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateStation(request):
-
     print('*********************** UPDATE Station *****************')
     data = request.json_body
     id = request.matchdict['id']
@@ -136,9 +124,9 @@ def updateStation(request):
     transaction.commit()
     return {}
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'POST')
 def insertStation(request):
-
     data = request.json_body
     if not isinstance(data,list):
         print('_______INsert ROW *******')
@@ -149,7 +137,6 @@ def insertStation(request):
         return insertListNewStations(request)
 
 def insertOneNewStation (request) :
-
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
@@ -166,7 +153,6 @@ def insertOneNewStation (request) :
     return {'ID': newSta.ID}
 
 def insertListNewStations(request):
-
     data = request.json_body
     data_to_insert = []
     format_dt = '%Y-%m-%d %H:%M:%S'
@@ -233,7 +219,7 @@ def insertListNewStations(request):
         res = DBSession.execute(stmt).fetchall()
         result = list(map(lambda y: {'FK_Station' : y[0], }, res))
 
-    ###### Insert FieldWorkers
+    ###### Insert FieldWorkers ######
         if not data[0]['FieldWorkers'] == None or "" :
             list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK': b  },result)),data[0]['FieldWorkers'] ))
             list_ = list(itertools.chain.from_iterable(list_))
@@ -247,9 +233,10 @@ def insertListNewStations(request):
     transaction.commit()
     return response 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchStation(request):
-
+    ''' return data according to filter parameter, if "geo" is in request return geojson format '''
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = []
@@ -265,6 +252,7 @@ def searchStation(request):
     else :
         searchInfo['order_by'] = []
 
+    #### add filter parameters to retrieve last stations imported : last day of station created by user and without linked observation ####
     if 'lastImported' in data :
         o = aliased(Station)
         print('-*********************** LAST IMPORTED !!!!!!!!! ******')
@@ -292,20 +280,6 @@ def searchStation(request):
         searchInfo['criteria'].extend(criteria)
     ModuleType = 'StationVisu'
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
-    # criteria = [
-    #     {'Column' : 'StationDate',
-    #     'Operator' : '>=',
-    #     'Value' : '12/12/2012 00:00:00.000'
-    #     },
-    #     {'Column' : 'FieldWorker1',
-    #     'Operator' : '=',
-    #     'Value' : 1 }
-    #     ]
-    # searchInfo['criteria'].extend(criteria)
-    # searchInfo['order_by'] = ['StationDate:desc']
-    # searchInfo['per_page'] = 25
-    # searchInfo['offset'] = 
-
     start = datetime.now()
     listObj = StationList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
@@ -313,7 +287,6 @@ def searchStation(request):
 
     print ('______ TIME to get DATA : ')
     print (stop-start)
-
     start = datetime.now()
     countResult = count_(listObj =listObj)
     print ('______ TIME to get Count : ')
