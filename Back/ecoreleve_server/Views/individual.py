@@ -2,7 +2,9 @@ from pyramid.view import view_config
 from ..Models import (
     DBSession,
     Individual,
-    IndividualType
+    IndividualType,
+    IndividualDynPropValue,
+    IndividualDynProp
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -12,16 +14,18 @@ from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE,func
+from sqlalchemy import select, and_,cast, DATE,func,desc,join
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
+from collections import OrderedDict
 
 
 prefix = 'individuals'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnIndividuals(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -70,7 +74,10 @@ def getForms(request) :
     return schema
 
 def getFields(request) :
-    ModuleType = 'IndivFilter'
+
+    ModuleType = request.params['name']
+    if ModuleType == 'default' :
+        ModuleType = 'IndivFilter'
     cols = Individual().GetGridFields(ModuleType)
     transaction.commit()
     return cols
@@ -90,14 +97,51 @@ def getIndiv(request):
             DisplayMode = request.params['DisplayMode']
         except : 
             DisplayMode = 'display'
-
-        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='IndivForm' ).first()
+        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='IndivForm').first()
         response = curIndiv.GetDTOWithSchema(Conf,DisplayMode)
-    else : 
-        response  = curIndiv.GetFlatObject()
+    elif 'geo' in request.params :
+        geoJson=[]
+        result = {'type':'FeatureCollection', 'features':geoJson}
+        response = result
+    #if 'geo' in request.params :
+        #geoJson=[]
+    #     stmt = select([Individual_Location]).where(Individual_Location.FK_Individual == id)
+    #     dataResult = DBSession.execute(stmt).fetchall()
+        # for row in dataResult:
+        #     geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+        #result = {'type':'FeatureCollection', 'features':geoJson}
+        #response = result
+    #else : 
+        #response  = curIndiv.GetFlatObject()
+
     transaction.commit()
     return response
 
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+def getIndivHistory(request):
+
+    #128145
+    id = request.matchdict['id']
+    tableJoin = join(IndividualDynPropValue,IndividualDynProp
+        ,IndividualDynPropValue.FK_IndividualDynProp == IndividualDynProp.ID)
+    query = select([IndividualDynPropValue,IndividualDynProp.Name]).select_from(tableJoin).where(
+        IndividualDynPropValue.FK_Individual == id
+        ).order_by(desc(IndividualDynPropValue.StartDate))
+    result = DBSession.execute(query).fetchall()
+    response = []
+    for row in result:
+        curRow = OrderedDict(row)
+        dictRow = {}
+        for key in curRow :
+            if curRow[key] is not None :
+                if 'Value' in key :
+                    dictRow['value'] = curRow[key] 
+                elif 'FK' not in key :
+                    dictRow[key] = curRow[key]
+        response.append(dictRow)
+
+    return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
@@ -178,16 +222,11 @@ def searchIndiv(request):
     print ('______ TIME to get Count : ')
     stop = datetime.now()
     print (stop-start)
-    if 'geo' in data: 
-        geoJson=[]
-        for row in dataResult:
-            geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
-        return {'type':'FeatureCollection', 'features':geoJson}
-    else :
-        result = [{'total_entries':countResult}]
-        result.append(dataResult)
-        transaction.commit()
-        return result
+
+    result = [{'total_entries':countResult}]
+    result.append(dataResult)
+    transaction.commit()
+    return result
 
 
 
