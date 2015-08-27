@@ -79,7 +79,7 @@ class IndividualType_IndividualDynProp(Base):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 # class Individual_Location(Base):
-#      __tablename__ = 'Individual_Location'
+#     __tablename__ = 'Individual_Location'
 
 #     ID = Column(Integer,Sequence('Individual_Location__id_seq'), primary_key=True)
 #     LAT = Column(Numeric(9,5))
