@@ -38,12 +38,15 @@ define([
 			var options = this.options;
 			var schema = this.schema;
 
+			if(options.schema.validators){
+				var required = options.schema.validators[0];
+			}
 
 			var $el = $($.trim(this.template({
 				value : options.model.get(this.options.key),
 				editorClass : schema.editorClass,
-
-				disabled : (options.schema.editable='undefined') ? '' : 'disabled'
+				required: required,
+				editable : (options.schema.editable) ? '' : 'disabled'
 			})));
 			this.setElement($el);
 
@@ -59,6 +62,6 @@ define([
 		},
 		}, {
 		// STATICS
-			template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><span class="input-group-addon"><span class="glyphicon-calendar glyphicon"></span></span><input id="c24_Date_" name="Date_" class="<%= editorClass %>" type="text" placeholder="jj/mm/aaaa hh:mm:ss" data-date-format="DD/MM/YYYY HH:mm:ss" value="<%= value %>" <%= disabled %> ></div>', null, Form.templateSettings)
+			template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><span class="input-group-addon"><span class="glyphicon-calendar glyphicon"></span></span><input id="c24_Date_" name="Date_" class="<%= editorClass %> <%= required %>" type="text" placeholder="jj/mm/aaaa hh:mm:ss" data-date-format="DD/MM/YYYY HH:mm:ss" value="<%= value %>" <%= editable %> ></div>', null, Form.templateSettings)
 	});
 });

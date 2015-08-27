@@ -19,7 +19,7 @@
 	"button" : {
 		"search" : "Rechercher",
 		"clear" : "Nettoyer",
-		"reset" : "Annuler",
+		"cancel" : "Annuler",
 		"edit" :"Editer",
 		"add" : "Ajouter",
 		"save" : "Enregistrer",

@@ -88,7 +88,6 @@ define([
             this.template = options.template || this.constructor.template;
             
             var schema = this.schema;
-            console.log(schema)
 
             if (!schema.model) throw new Error('Missing required option "schema.model"');
             var nestedSchema = schema.model.prototype.schema;
@@ -99,14 +98,11 @@ define([
 /*            if (this.modalForm) {
                 this.value = this.modalForm.getValue();
             }
-            console.log('GET VAlue');
-            console.log(this.value);
             return this.value;*/
 
             /*TODO default model data for new nested Model */
             if (this.modalForm) {
                 var curValue = this.modalForm.getValue();
-                console.log('GET VVAlue');
                 var data = this.modalForm.data;
                 if (data == null) {
                     this.value = this.modalForm.getValue();
