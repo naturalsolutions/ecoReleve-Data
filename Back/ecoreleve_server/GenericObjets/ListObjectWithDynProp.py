@@ -18,8 +18,7 @@ from traceback import print_exc
 eval_ = Eval()
 
 class ListObjectWithDynProp():
-
-
+    ''' This class is used to filter Object with dyn props over all properties '''
     def __init__(self,ObjWithDynProp, frontModule):
         self.ObjContext = DBSession
         self.ListPropDynValuesOfNow = {}
@@ -30,30 +29,31 @@ class ListObjectWithDynProp():
         self.vAliasList = {}
         self.joinTable = None
 
-
     def GetDynPropValueView (self): 
+        ''' WARNING !!! : in order to use this class you have to build View over last DATE of dynamic properties '''
         table = Base.metadata.tables[self.ObjWithDynProp.__tablename__+'DynPropValuesNow']
         return table
 
     def GetAllPropNameInConf(self) :
+        ''' Get configured properties to display '''
         DynPropsDisplay = list(filter(lambda x : x.IsSearchable == True or x.GridRender >= 2  , self.Conf))
         return DynPropsDisplay
 
     def GetJoinTable (self) :
-        ''' build join table to filter and retrieve all data type (Static and Dynamic) '''
+        ''' build join table and select statement over all dynamic properties and foreign keys in filter query'''
         joinTable = self.ObjWithDynProp
         view = self.GetDynPropValueView()
         selectable = [self.ObjWithDynProp.ID]
         i = 1
         objTable = self.ObjWithDynProp.__table__
 
-        #  get all foreign keys
+        ##### get all foreign keys #####
         self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
 
         for objConf in self.GetAllPropNameInConf() :
-
             curDynProp = self.GetDynProp(objConf.Name)
-
+            # print('********* curDynProp ')
+            # print(curDynProp)
             if objConf.Name in self.fk_list and objConf.QueryName is not None:
                 tableRef = self.fk_list[objConf.Name].column.table
                 nameRef = self.fk_list[objConf.Name].column.name
@@ -61,7 +61,7 @@ class ListObjectWithDynProp():
                 joinTable = outerjoin (joinTable,tableRef,objTable.c[objConf.Name] == tableRef.c[nameRef])
                 selectable.append(tableRef.c[objConf.QueryName])
 
-            elif curDynProp != None and objConf.Name in self.ObjWithDynProp().GetAllProp():
+            elif curDynProp != None: #and objConf.Name in self.ObjWithDynProp().GetAllProp():
                 v = view.alias('v'+curDynProp['Name'])
                 self.vAliasList['v'+curDynProp['Name']] = v
 
@@ -77,12 +77,8 @@ class ListObjectWithDynProp():
         self.selectable = selectable
         return joinTable
 
-    def AddJoinFields (self,selectable,joinTable):
-        for obj in self.ObjWithDynProp.__table__.foreign_keys :
-            if 'Type' not in obj.column.table.name : 
-                return
-
-    def GetDynPropList (self) : 
+    def GetDynPropList (self) :
+        ''' Retrieve all dynamic properties of object ''' 
         DynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
         query = select([DynPropTable]) #.where(DynPropTable.c['Name'] == dynPropName)
         result  = DBSession.execute(query).fetchall()
@@ -90,9 +86,8 @@ class ListObjectWithDynProp():
         return df
 
     def GetDynProp (self,dynPropName) : 
-
+        ''' Get dyn Prop with its name '''
         curDynProp = self.DynPropList[self.DynPropList['Name'] == dynPropName]
-
         curDynProp = curDynProp.to_dict(orient = 'records')
 
         if curDynProp != [] :
@@ -104,6 +99,7 @@ class ListObjectWithDynProp():
             return None
 
     def WhereInJoinTable (self,query,criteriaObj) :
+        ''' Apply where clause over filter criteria '''
         curProp = criteriaObj['Column']
         if hasattr(self.ObjWithDynProp,curProp) :
             query = query.where(
@@ -125,7 +121,7 @@ class ListObjectWithDynProp():
         return query
 
     def GetFullQuery(self,searchInfo=None) :
-        # dictOrder = {'asc':1,'desc':0}
+        ''' return the full query to execute '''
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
             print('********** NO Criteria ***************')
@@ -138,22 +134,21 @@ class ListObjectWithDynProp():
             countQuery = self.WhereInJoinTable(countQuery,obj)
         self.countQuery = countQuery 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
+        print(fullQueryJoinOrdered)
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self,searchInfo=None) :
+        ''' Main function to call : return filtered (paged) ordered flat data list according to filter parameters'''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
         result = DBSession.execute(fullQueryJoinOrdered).fetchall()
         data = []
         for row in result :
             row = OrderedDict(row)
-            print('************************ row *********************')
-            print(row)
-            if 'StationDate' in row.keys():
-                row['StationDate']= row['StationDate'].strftime('%d/%m/%Y %H:%M:%S')
             data.append(row)
         return data
 
     def count(self,searchInfo = None) :
+        ''' Main function to call : return count according to filter parameters'''
         if self.countQuery is None :
             if searchInfo is None :
                 return 'error'
@@ -163,6 +158,7 @@ class ListObjectWithDynProp():
         return count
 
     def OderByAndLimit (self, query, searchInfo) :
+        ''' Apply "order by" and limit according to filter parameters '''
         if len(searchInfo['order_by']) > 0 : 
             for obj in searchInfo['order_by']:
                 order_by_clause = []

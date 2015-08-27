@@ -2,7 +2,9 @@ from pyramid.view import view_config
 from ..Models import (
     DBSession,
     Individual,
-    IndividualType
+    IndividualType,
+    IndividualDynPropValue,
+    IndividualDynProp
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -12,18 +14,18 @@ from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE,func
+from sqlalchemy import select, and_,cast, DATE,func,desc,join
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
+from collections import OrderedDict
 
 
 prefix = 'individuals'
-# @view_config(route_name= prefix, renderer='json', request_method = 'PUT')
 
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-
+@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnIndividuals(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -37,7 +39,6 @@ def actionOnIndividuals(request):
     return dictActionFunc[actionName](request)
 
 def count_ (request = None,listObj = None) :
-
     print('*****************  INDIVIDUAL COUNT***********************')
     if request is not None : 
         data = request.params
@@ -53,7 +54,6 @@ def count_ (request = None,listObj = None) :
     return count 
 
 def getFilters (request):
-
     ModuleType = 'IndivFilter'
     filtersList = Individual().GetFilters(ModuleType)
     filters = {}
@@ -63,7 +63,6 @@ def getFilters (request):
     return filters
 
 def getForms(request) :
-
     typeIndiv = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
     ModuleName = 'IndivForm'
@@ -76,14 +75,16 @@ def getForms(request) :
 
 def getFields(request) :
 
-    ModuleType = 'IndivFilter'
+    ModuleType = request.params['name']
+    if ModuleType == 'default' :
+        ModuleType = 'IndivFilter'
     cols = Individual().GetGridFields(ModuleType)
     transaction.commit()
     return cols
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getIndiv(request):
-
     print('***************** GET INDIVIDUAL ***********************')
     id = request.matchdict['id']
     curIndiv = DBSession.query(Individual).get(id)
@@ -96,27 +97,64 @@ def getIndiv(request):
             DisplayMode = request.params['DisplayMode']
         except : 
             DisplayMode = 'display'
-
-        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='IndivForm' ).first()
+        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='IndivForm').first()
         response = curIndiv.GetDTOWithSchema(Conf,DisplayMode)
-    else : 
-        response  = curIndiv.GetFlatObject()
+    elif 'geo' in request.params :
+        geoJson=[]
+        result = {'type':'FeatureCollection', 'features':geoJson}
+        response = result
+    #if 'geo' in request.params :
+        #geoJson=[]
+    #     stmt = select([Individual_Location]).where(Individual_Location.FK_Individual == id)
+    #     dataResult = DBSession.execute(stmt).fetchall()
+        # for row in dataResult:
+        #     geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+        #result = {'type':'FeatureCollection', 'features':geoJson}
+        #response = result
+    #else : 
+        #response  = curIndiv.GetFlatObject()
+
     transaction.commit()
     return response
 
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+def getIndivHistory(request):
 
+    #128145
+    id = request.matchdict['id']
+    tableJoin = join(IndividualDynPropValue,IndividualDynProp
+        ,IndividualDynPropValue.FK_IndividualDynProp == IndividualDynProp.ID)
+    query = select([IndividualDynPropValue,IndividualDynProp.Name]).select_from(tableJoin).where(
+        IndividualDynPropValue.FK_Individual == id
+        ).order_by(desc(IndividualDynPropValue.StartDate))
+    result = DBSession.execute(query).fetchall()
+    response = []
+    for row in result:
+        curRow = OrderedDict(row)
+        dictRow = {}
+        for key in curRow :
+            if curRow[key] is not None :
+                if 'Value' in key :
+                    dictRow['value'] = curRow[key] 
+                elif 'FK' not in key :
+                    dictRow[key] = curRow[key]
+        response.append(dictRow)
+
+    return response
+
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
 def deleteIndiv(request):
     id_ = request.matchdict['id']
     curIndiv = DBSession.query(Individual).get(id_)
     DBSession.delete(curIndiv)
     transaction.commit()
-
     return True
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateIndiv(request):
-
     print('*********************** UPDATE Individual *****************')
     data = request.json_body
     id = request.matchdict['id']
@@ -126,9 +164,9 @@ def updateIndiv(request):
     transaction.commit()
     return {}
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'POST')
 def insertIndiv(request):
-
     data = request.json_body
     if not isinstance(data,list):
         print('_______INsert ROW *******')
@@ -138,8 +176,8 @@ def insertIndiv(request):
         #transaction.commit()
         #return insertListNewIndivs(request)
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewIndiv (request) :
-
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
@@ -155,14 +193,11 @@ def insertOneNewIndiv (request) :
     # transaction.commit()
     return {'ID': newIndiv.ID}
 
-
-
+# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchIndiv(request):
-
     data = request.params.mixed()
     searchInfo = {}
-
     searchInfo['criteria'] = []
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])
@@ -173,35 +208,25 @@ def searchIndiv(request):
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
 
-
     ModuleType = 'IndivFilter'
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
-
 
     start = datetime.now()
     listObj = ListObjectWithDynProp(Individual,moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
     stop = datetime.now()
-
     print ('______ TIME to get DATA : ')
     print (stop-start)
-
     start = datetime.now()
     countResult = count_(listObj =listObj)
     print ('______ TIME to get Count : ')
     stop = datetime.now()
     print (stop-start)
 
-    if 'geo' in data: 
-        geoJson=[]
-        for row in dataResult:
-            geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
-        return {'type':'FeatureCollection', 'features':geoJson}
-    else :
-        result = [{'total_entries':countResult}]
-        result.append(dataResult)
-        transaction.commit()
-        return result
+    result = [{'total_entries':countResult}]
+    result.append(dataResult)
+    transaction.commit()
+    return result
 
 
 

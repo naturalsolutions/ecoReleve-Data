@@ -50,12 +50,12 @@ class Station(Base,ObjectWithDynProp):
     StationDynPropValues = relationship('StationDynPropValue',backref='Station',cascade="all, delete-orphan")
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
-    FK_Place = Column(Integer)
-    
+    Place = Column(String)
+
     Station_FieldWorkers = relationship('Station_FieldWorker', backref='Station',cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON', name='_unique_constraint_lat_lon_date'),)
 
-
+    ''' hybrid property on relationship '''
     @hybrid_property
     def FieldWorkers(self):
         if self.Station_FieldWorkers:
@@ -66,6 +66,7 @@ class Station(Base,ObjectWithDynProp):
         else:
             return []
 
+    ''' Configure a setter for this hybrid property '''
     @FieldWorkers.setter
     def FieldWorkers(self, values):
             fws=[]
@@ -85,6 +86,7 @@ class Station(Base,ObjectWithDynProp):
 
     @orm.reconstructor
     def init_on_load(self):
+        ''' init_on_load is called on the fetch of object '''
         ObjectWithDynProp.__init__(self,DBSession)
         
     def GetNewValue(self,nameProp):
@@ -106,6 +108,7 @@ class Station(Base,ObjectWithDynProp):
             return DBSession.query(StationType).get(self.FK_StationType)
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):
+        ''' Override this super method to add fieldworker '''
         resultat = super().GetDTOWithSchema(FrontModules,DisplayMode)
         resultat['data']['FieldWorkers'] = self.FieldWorkers
         return resultat

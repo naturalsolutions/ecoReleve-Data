@@ -21,14 +21,12 @@ eval_ = Eval()
 
 #--------------------------------------------------------------------------
 class StationList(ListObjectWithDynProp):
-
+    ''' this class extend ListObjectWithDynProp, it's used to filter stations '''
     def __init__(self,frontModule) :
         super().__init__(Station,frontModule)
 
-    # def GetJoinTable (self) :
-    #     joinTable = super().GetJoinTable()
-
     def WhereInJoinTable (self,query,criteriaObj) :
+        ''' Override parent function to include management of Observation/Protocols and fieldWorkers '''
         query = super().WhereInJoinTable(query,criteriaObj)
         curProp = criteriaObj['Column']
         if curProp == 'FK_ProtocoleType':
@@ -44,10 +42,10 @@ class StationList(ListObjectWithDynProp):
                 and_(Station.ID== Station_FieldWorker.FK_Station
                     ,eval_.eval_binary_expr(Station_FieldWorker.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])))
             query = query.where(exists(subSelect))
-
         return query
 
     def GetFlatDataList(self,searchInfo=None) :
+        ''' Override parent function to include management of Observation/Protocols and fieldWorkers '''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
         result = DBSession.execute(fullQueryJoinOrdered).fetchall()
 
@@ -56,10 +54,7 @@ class StationList(ListObjectWithDynProp):
         query = select(
             [Station_FieldWorker.FK_Station,User.Login]).select_from(joinTable).where(
             Station_FieldWorker.FK_Station.in_(listID))
-
         FieldWorkers = DBSession.execute(query).fetchall()
-        # print(FieldWorkers)
-        # list_ = list(map( lambda b : ,FieldWorkers))
         list_ = {}
         for x,y in FieldWorkers :
             list_.setdefault(x,[]).append(y)
@@ -70,9 +65,5 @@ class StationList(ListObjectWithDynProp):
                 row['FieldWorkers'] = list_[row['ID']]
             except:
                 pass
-            row['StationDate']= row['StationDate'].strftime('%d/%m/%Y %H:%M:%S')
             data.append(row)
         return data
-
-    def addFieldworkers (self):
-        return
