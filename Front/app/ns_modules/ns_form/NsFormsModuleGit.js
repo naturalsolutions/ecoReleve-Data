@@ -54,7 +54,8 @@ define([
 				if (schema.editorClass) this.$el.addClass(schema.editorClass);
 				if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);
 
-				if(options.schema.validators){
+				if(options.schema.validators && options.schema.validators[0] == "required"){
+
 				  this.$el.addClass('required');
 				}
 
@@ -183,7 +184,6 @@ define([
 
 		displaybuttons: function () {
 			var name = this.name;
-			console.log(this.model);
 			if(this.displayMode == 'edit'){
 				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel').removeClass('hidden');
 				$('#'+this.buttonRegion[0]).find('.NsFormModuleSave').removeClass('hidden');

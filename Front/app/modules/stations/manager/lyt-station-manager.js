@@ -23,7 +23,7 @@ define([
 
 	return Marionette.LayoutView.extend({
 
-		className: 'full-height white', 
+		className: 'full-height white',
 
 		template: 'app/modules/stations/manager/templates/tpl-station-manager.html',
 
@@ -52,6 +52,10 @@ define([
 				this.stationId = options.id;
 			}else{
 				this.stationId = options.model.get('ID');
+					if(window.app.temp){
+						var coll = window.app.temp.collection;
+						this.stationIndex = coll.indexOf(options.model);
+					}
 			}
 		},
 
@@ -60,7 +64,7 @@ define([
 		},
 
 		validate: function(){
-
+			return true;
 		},
 
 		getStepOptions: function(){
@@ -68,21 +72,34 @@ define([
 		},
 
 		onDestroy: function(){
+
 		},
 
 
 		prevStation: function(e){
-			this.stationId--;
-			this.displayStation(this.stationId);
+			if(window.app.temp){
+				var coll = window.app.temp;
+				if(this.stationIndex != 0)
+					this.stationIndex--;
+				this.stationId = coll.collection.models[this.stationIndex].get('ID');
+				this.onShow();
+			}
 		},
 
 		nextStation: function(e){
-			this.stationId++;
-			this.displayStation(this.stationId);
+			if(window.app.temp){
+				var coll = window.app.temp;
+				if(this.stationIndex <= coll.collection.models.length)
+					this.stationIndex++;
+				this.stationId = coll.collection.models[this.stationIndex].get('ID');
+				this.onShow();
+			}
 		},
 
 
 		displayStation: function(stationId){
+
+
 			var stationType = 1;
 			var _this = this;
 			this.nsForm = new NsForm({
@@ -112,7 +129,7 @@ define([
 		onShow: function(){
 			var _this = this;
 			this.displayStation(this.stationId);
-			
+
 			var ProtoColl = Backbone.Collection.extend({
 				url: config.coreUrl+'stations/'+this.stationId+'/protocols',
 				fetch: function(options) {
@@ -160,6 +177,7 @@ define([
 					this.obsList = options.obsList;
 					this.type = options.type;
 					this.stationId = options.stationId;
+
 
 					this.nbObs = this.obsList.length;
 
@@ -213,6 +231,7 @@ define([
 
 
 						if(obs.data.id != 0){
+							this.state = 'saved';
 							mode = 'display';
 						}
 
@@ -275,7 +294,6 @@ define([
 				},
 
 				deleteProto: function(i, form){
-
 					var jqxhr = $.ajax({
 						url: config.coreUrl+'stations/'+this.stationId+'/protocols/'+form.model.get('ID'),
 						method: 'DELETE',
@@ -286,7 +304,6 @@ define([
 					}).fail(function(resp) {
 						console.log(resp);
 					});
-
 
 					if(this.indexPageList.length>1){
 						var index= this.indexPageList.indexOf('#page'+this.type+i);
@@ -360,7 +377,6 @@ define([
 
 		addObs: function(e){
 			var objectType = $(e.target).attr('value');
-			console.log(objectType);
 			this.addProto(objectType);
 		},
 

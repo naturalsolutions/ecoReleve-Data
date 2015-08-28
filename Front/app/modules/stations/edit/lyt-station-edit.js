@@ -73,6 +73,8 @@ define([
 				rowClicked : true,
 				totalElement : 'stations-count',
 				onceFetched: function(){
+					window.app.temp = this;
+
 					_this.totalEntries(this.grid);
 					var rows = this.grid.body.rows;
 					if(_this.currentRow){
@@ -108,6 +110,7 @@ define([
 		onShow : function(){
 			this.displayGrid();
 			this.displayFilters();
+			window.app.filter = this.filters.model;
 		},
 
 		displayGrid: function(){

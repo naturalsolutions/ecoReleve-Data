@@ -1,6 +1,8 @@
 form{
-	.required{
-		border-bottom: 1px solid orange;
+	input, select, textarea{
+		&.required{
+			border-bottom: 1px solid orange;
+		}
 	}
 	.error{
 		border-left: 1px dashed red;
@@ -9,5 +11,13 @@ form{
 		border: 1px solid transparent!important;
 		background: transparent!important;
 		box-shadow: none!important;
+	}
+	.nested-model{
+		ul label{
+			//display: none;
+		}
+		.form-control{
+			height: auto;
+		}
 	}
 }
