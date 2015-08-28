@@ -28,7 +28,7 @@ define([
 			'change input[type="file"]' : 'importFile',
 			'change select[name="fieldActivity"]' : 'setFieldActivity',
 			'click #resetFieldActivity' : 'resetFieldActivity',
-			'click .bbf-add' : 'setUsers',
+			'click button[data-action="add"]' : 'setUsers',
 			'change select[name="FieldWorker"]' : 'checkUsers'
 		},
 
@@ -52,7 +52,7 @@ define([
 			this.displayForm();
 			// fieldactivity
 			this.loadCollection (config.coreUrl + 'fieldActivity', 'select[name="fieldActivity"]');
-			$('button.bbf-add').attr('disabled','disabled');
+			$('button[data-action="add"]').attr('disabled','disabled');
 		},
 
 		importFile: function(e){
@@ -71,7 +71,7 @@ define([
 				reader.onload = function(e, fileName){
 					var xml = e.target.result;
 					var fieldAfield = $('select[name="fieldActivity"]');
-					var userBtn = $('button.bbf-add');
+					var userBtn = $('button[data-action="add"]');
 					// get waypoints collection
 
 					var importResulr =  XmlParser.gpxParser(xml);
