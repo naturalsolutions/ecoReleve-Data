@@ -54,9 +54,11 @@ define([
 				if (schema.editorClass) this.$el.addClass(schema.editorClass);
 				if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);
 
-				if(options.schema.validators){
+				if(options.schema.validators && options.schema.validators[0] == "required"){
+
 				  this.$el.addClass('required');
 				}
+
 			};
 		},
 
@@ -125,7 +127,6 @@ define([
 
 
 		initModel: function (){
-			
 			var _this = this;
 
 			if(!this.model){
@@ -183,20 +184,22 @@ define([
 
 		displaybuttons: function () {
 			var name = this.name;
-
 			if(this.displayMode == 'edit'){
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel'+name).removeClass('hidden');
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleSave'+name).removeClass('hidden');
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleClear'+name).removeClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel').removeClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleSave').removeClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleClear').removeClass('hidden');
 
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit'+name).addClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit').addClass('hidden');
 				$('#'+this.buttonRegion[0]).find('#' + this.formRegion).find('input:enabled:first').focus();
 			}else{
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel'+name).addClass('hidden');
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleSave'+name).addClass('hidden');
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleClear'+name).addClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel').addClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleSave').addClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleClear').addClass('hidden');
 
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit'+name).removeClass('hidden');
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit').removeClass('hidden');
+			}
+			if(!this.model.attributes.id){
+				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel').addClass('hidden');
 			}
 
 		},
@@ -241,11 +244,12 @@ define([
 									// otpherwise redirect
 									window.location.href = TargetUrl;
 								}
+
 							}
 							else {
 								// If no redirect after creation
 								if (_this.reloadAfterSave) {
-									_this.reloadAfterSave();
+									_this.reloadingAfterSave();
 								}
 							}
 							return true;
@@ -278,6 +282,10 @@ define([
 			}
 			this.afterSavingModel();
 			return jqxhr;
+		},
+
+		reloadAfterSave: function(){
+
 		},
 
 		butClickEdit: function (e) {
@@ -343,35 +351,35 @@ define([
 				this.butClickEdit();
 			}, this);
 
-			$('.NsFormModuleEdit' + name).on('click', this.onEditEvt);
+			$('#'+this.buttonRegion[0] + ' .NsFormModuleEdit').on('click', this.onEditEvt);
 
 			/*==========  Cancel  ==========*/
 			this.onCancelEvt = $.proxy(function(){
 				this.butClickCancel();
 			}, this);
 
-			$('.NsFormModuleCancel' + name).on('click', this.onCancelEvt);
+			$('#'+this.buttonRegion[0] + ' .NsFormModuleCancel').on('click', this.onCancelEvt);
 
 			/*==========  save  ==========*/
 			this.onSaveEvt = $.proxy(function(){
 				this.butClickSave();
 			}, this);
 
-			$('.NsFormModuleSave' + name).on('click', this.onSaveEvt);
+			$('#'+this.buttonRegion[0] + ' .NsFormModuleSave').on('click', this.onSaveEvt);
 
 			/*==========  Clear  ==========*/
 			this.onClearEvt = $.proxy(function(){
 				this.butClickClear();
 			}, this);
 
-			$('.NsFormModuleClear' + name).on('click', this.onClearEvt);
+			$('#'+this.buttonRegion[0] + ' .NsFormModuleClear').on('click', this.onClearEvt);
 
 			/*==========  Delete  ==========*/
 			this.onDeleteEvt = $.proxy(function(){
 				this.butClickDelete();
 			}, this);
 
-			$('.NsFormModuleDelete' + name).on('click', this.onDeleteEvt);
+			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').on('click', this.onDeleteEvt);
 		},
 
 
@@ -379,12 +387,11 @@ define([
 			var _this = this;
 			var name = this.name;
 
-			$('.NsFormModuleEdit' + name).off('click', this.onEditEvt);
-			$('.NsFormModuleCancel' + name).off('click', this.onCancelEvt);
-
-			$('.NsFormModuleSave' + name).off('click', this.onSaveEvt);
-			$('.NsFormModuleClear' + name).off('click', this.onClearEvt);
-			$('.NsFormModuleDelete' + name).off('click', this.onDeleteEvt);
+			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').off('click', this.onEditEvt);
+			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').off('click', this.onCancelEvt);
+			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').off('click', this.onSaveEvt);
+			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').off('click', this.onClearEvt);
+			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').off('click', this.onDeleteEvt);
 		},
 
 		destroy: function(){

@@ -1,9 +1,18 @@
 
-<div id=""	class="bg-white scroll-auto col-xs-12 col-md-3 col-border ns-full-height">
+<div id=""	class="white scroll-auto col-xs-12 col-md-3 full-height">
 	<br>
+	<legend>Add a new observation</legend>
+	<div class="row">
+		<div class="col-md-10">
+			<select name="" id="protoList" class="form-control"></select>
+		</div>
+		<button id="addProto" class="btn btn-success">+</button>
+	</div>
+	<br><br>
+	<legend>Change station</legend>
 	<div id="rgStation">
 		<div class="clearfix">
-			<button id="prevStation" class="btn btn-success pull-left">Prev</button>
+			<button id="prevStation" class="btn btn-success pull-left">Previous</button>
 			<button id="nextStation" class="btn btn-success pull-right">Next</button>
 		</div>
 		<br><br>
@@ -12,16 +21,10 @@
 		<div id="stationFormBtns"></div>
 	</div>
 	<br>
-	<legend>Add a new protocol</legend>
-	<div class="col-md-10">
-		<select name="" id="protoList" class="form-control"></select>
-	</div>
-	<button id="addProto" class="add">+</button>
-	<br><br>
 </div>
 
 
-<div id="rgProtos" class="col-xs-12 col-md-9 ns-full-height">
+<div id="rgProtos" class="col-xs-12 col-md-9 ns-full-height dark">
 	<br>
 	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true"></div>
 </div>
