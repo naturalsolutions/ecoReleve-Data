@@ -26,8 +26,9 @@ require.config({
 		'ns_map'		: 'ns_modules/ns_map',
 		'ns_stepper'	: 'ns_modules/ns_stepper',
 		
-		'autocompTree' : 'vendors/jquery.autocompTree',
-		'ListOfNestedModel' : 'vendors/ListOfNestedModel/ListOfNestedModel',
+		'autocompTree' 			: 'vendors/jquery.autocompTree',
+		'ListOfNestedModel' 	: 'vendors/ListOfNestedModel/ListOfNestedModel',
+		'AutocompleteEditor'	: 'vendors/AutocompleteEditor',
 
 		/*==========  Bower  ==========*/
 		'jquery'				: '../bower_components/jquery/jquery',

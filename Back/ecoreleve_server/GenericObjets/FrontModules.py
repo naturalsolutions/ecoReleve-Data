@@ -2,6 +2,7 @@ from ecoreleve_server.Models import Base,DBSession
 from sqlalchemy import Column, DateTime, Float,Boolean, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_,text,select
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
+import json
 
 FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
 
@@ -124,10 +125,22 @@ class ModuleForms(Base):
         if self.Options is not None :
             self.dto['options'] = {"startId":self.Options,"wsUrl":"http://192.168.1.199/ThesaurusCore","lng":"fr"}
 
+    def InputAutocomplete(self):
+        if self.Options is not None :
+            print(json.loads(self.Options))
+            option = json.loads(self.Options)
+            result = DBSession.execute(text(option['source'])).fetchall()
+            print (result)
+            self.dto['options']= {'source':[]}
+            for row in result:
+                self.dto['options']['source'].append(row[0])
+
+
     func_type_context = {
         'Select': InputSelect,
         'ListOfNestedModel' : InputLNM,
-        'AutocompTreeEditor' : InputThesaurus
+        'AutocompTreeEditor' : InputThesaurus,
+        'AutocompleteEditor': InputAutocomplete
         }
 
 
