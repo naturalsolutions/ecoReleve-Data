@@ -50,6 +50,7 @@ define([
 							waypoint.set("time", time);
 							waypoint.set("fieldActivity", '');
 							waypoint.set("import", false);
+							waypoint.set("FieldWorkers", []);
 							waypointList.add(waypoint);
 						} 
 						else {
