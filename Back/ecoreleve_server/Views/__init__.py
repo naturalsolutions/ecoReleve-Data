@@ -86,6 +86,8 @@ def add_routes(config):
     ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/') 
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
+    config.add_route('individuals/id/history', 'ecoReleve-Core/individuals/{id}/history',custom_predicates = (integers('id'),))
+    config.add_route('individuals/id/history/action', 'ecoReleve-Core/individuals/{id}/history/{action}',custom_predicates = (integers('id'),))
     config.add_route('individuals/action', 'ecoReleve-Core/individuals/{action}') 
 
 

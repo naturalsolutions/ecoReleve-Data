@@ -8,6 +8,7 @@ define(['marionette', 'config',
 	'./modules/stations/visu/lyt-stations',
 	'./modules/stations/edit/lyt-station-stepper-edit',
 	'./modules/stations/new/lyt-station-stepper-new',
+	'./modules/stations/manager/lyt-station-manager',
 
 	'./modules/importFile/lyt-entry-importFile',
 	'./modules/individual/layouts/lyt-individual',
@@ -23,6 +24,7 @@ define(['marionette', 'config',
 	LytStationVisu,
 	LytStationStepperEdit,
 	LytStationStepperNew,
+	LytStationEdit,
 
 	LytImportFile,
 	LytIndividual,
@@ -61,14 +63,15 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytStationStepperEdit());
 		},
 
-		station: function(options){
+		station: function(option){
+			this.rgMain.show(new LytStationEdit({id: option}));
 		},
 		
 		individual : function(){
 			this.rgMain.show(new LytIndividual());
 		},
-		indiv : function(options){
-			this.rgMain.show(new LytIndivDetails({id: options}));
+		indiv : function(option){
+			this.rgMain.show(new LytIndivDetails({id: option}));
 		},
 
 	});

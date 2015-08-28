@@ -9,20 +9,21 @@ define([
 	'dateTimePicker',
 	'sweetAlert',
 	'config',
+	'simplePagination',
 
 	'ns_form/NSFormsModuleGit',
 
 	'i18n'
 
 ], function($, _, Backbone, Marionette, Radio,
-	moment, datetime, Swal, config, NsForm
+	moment, datetime, Swal, config, simplePagination, NsForm
 ){
 
 	'use strict';
 
 	return Marionette.LayoutView.extend({
 
-		className: 'full-height', 
+		className: 'full-height white',
 
 		template: 'app/modules/stations/manager/templates/tpl-station-manager.html',
 
@@ -39,7 +40,8 @@ define([
 		},
 
 		events : {
-			'click #addProto' : 'addProto',
+			'click #addProto' : 'addProtoFromList',
+			'click #addObs' : 'addObs',
 			'click #prevStation' : 'prevStation',
 			'click #nextStation' : 'nextStation'
 		},
@@ -50,6 +52,10 @@ define([
 				this.stationId = options.id;
 			}else{
 				this.stationId = options.model.get('ID');
+					if(window.app.temp){
+						var coll = window.app.temp.collection;
+						this.stationIndex = coll.indexOf(options.model);
+					}
 			}
 		},
 
@@ -58,7 +64,7 @@ define([
 		},
 
 		validate: function(){
-
+			return true;
 		},
 
 		getStepOptions: function(){
@@ -66,21 +72,33 @@ define([
 		},
 
 		onDestroy: function(){
+
 		},
 
 
 		prevStation: function(e){
-			this.stationId--;
-			this.displayStation(this.stationId);
+			if(window.app.temp){
+				var coll = window.app.temp;
+				if(this.stationIndex != 0)
+					this.stationIndex--;
+				this.stationId = coll.collection.models[this.stationIndex].get('ID');
+				this.onShow();
+			}
 		},
 
 		nextStation: function(e){
-			this.stationId++;
-			this.displayStation(this.stationId);
+			if(window.app.temp){
+				var coll = window.app.temp;
+				if(this.stationIndex <= coll.collection.models.length)
+					this.stationIndex++;
+				this.stationId = coll.collection.models[this.stationIndex].get('ID');
+				this.onShow();
+			}
 		},
 
 
 		displayStation: function(stationId){
+
 
 			var stationType = 1;
 			var _this = this;
@@ -96,7 +114,7 @@ define([
 			});
 
 			this.nsForm.savingSuccess = function(){
-				_this.parent.protos.fetch({reset: true});
+				_this.protos.fetch({reset: true});
 			};
 
 		},
@@ -111,7 +129,7 @@ define([
 		onShow: function(){
 			var _this = this;
 			this.displayStation(this.stationId);
-			
+
 			var ProtoColl = Backbone.Collection.extend({
 				url: config.coreUrl+'stations/'+this.stationId+'/protocols',
 				fetch: function(options) {
@@ -138,7 +156,6 @@ define([
 						obsList = model.get('obs');
 						name = model.get('Name');
 						objectType = model.get('ID');
-						console.log()
 						this.createProtoPatern(obsList, name, first, objectType);
 						first=false;
 					}, _this);
@@ -149,9 +166,7 @@ define([
 			this.protos.fetch();
 
 			this.protoList4Add();
-
 			this.protocols = {};
-			
 			this.Proto = Backbone.Model.extend({
 				template : false,
 
@@ -162,6 +177,7 @@ define([
 					this.obsList = options.obsList;
 					this.type = options.type;
 					this.stationId = options.stationId;
+
 
 					this.nbObs = this.obsList.length;
 
@@ -192,7 +208,7 @@ define([
 					var classes;
 					(index==0)? classes="" : classes = "hidden";
 
-					$('#'+this.type+'Collapse > .panel-body').append('<div id="page'+key+'" class="'+classes+'"> <div id="'+key+'"></div><div id="stationFormBtns'+key+'"></div></div>');
+					$('#'+this.type+'Collapse > .panel-body').append('<div id="page'+key+'" class="'+classes+'"><div id="'+key+'"></div><div id="stationFormBtns'+key+'"></div></div>');
 
 					var NSForm = NsForm.extend({
 						afterDelete: function(){
@@ -201,16 +217,21 @@ define([
 					});
 
 
+					//if obs != 0??
 					if(obs != 0){
 						var Md = Backbone.Model.extend({
 							schema : obs.schema,
 							fieldsets: obs.fieldsets,
-							urlRoot : config.coreUrl+'stations/'+this.stationId+'/protocols/'
+							urlRoot : config.coreUrl + 'stations/' + this.stationId + '/protocols/'
 						});
+
 						var model = new Md(obs.data);
 
 						var mode = 'edit';
-						if(obs.data.id!=0){
+
+
+						if(obs.data.id != 0){
+							this.state = 'saved';
 							mode = 'display';
 						}
 
@@ -250,23 +271,29 @@ define([
 
 					this.current = $('#'+this.type).find(this.indexPageList[0]);
 
+
 					$('#'+this.type+'Pagination').pagination({
 						items: this.nbObs,
 						cssStyle: 'light-theme',
 						hrefTextPrefix: '',
 						onPageClick: function(pageNumber){
 							_this.current.addClass('hidden');
-
-
 							_this.current = $('#'+_this.type).find(_this.indexPageList[pageNumber-1]);
-
 							_this.current.removeClass('hidden');
 						},
 					});
+
+					//add status of the obs
+					for (var i = 0; i < this.obsList.length; i++) {
+							if(this.obsList[i].data.ID){
+								var protoType = this.obsList[i].data.FK_ProtocoleType;
+
+								$('#_'+ protoType + '_Pagination ul li:nth-child('+ (i+2) +')').addClass('bg-success');
+							}
+					};
 				},
 
 				deleteProto: function(i, form){
-
 					var jqxhr = $.ajax({
 						url: config.coreUrl+'stations/'+this.stationId+'/protocols/'+form.model.get('ID'),
 						method: 'DELETE',
@@ -277,7 +304,6 @@ define([
 					}).fail(function(resp) {
 						console.log(resp);
 					});
-
 
 					if(this.indexPageList.length>1){
 						var index= this.indexPageList.indexOf('#page'+this.type+i);
@@ -330,7 +356,8 @@ define([
 					type : type,
 					nbObs: nbObs,
 					collapseBody : collapseBody,
-					collapseTitle : collapseTitle
+					collapseTitle : collapseTitle,
+					objectType: objectType
 			});
 
 			this.ui.accordion.append(tpl);
@@ -343,16 +370,25 @@ define([
 				stationId: this.stationId
 			});
 
-			this.protocols[name] = protocol;
+			this.protocols[objectType] = protocol;
 			return protocol;
 		},
 
 
-		addProto: function(){
-			var name = this.ui.protoList.find(":selected").text();
-			var objectType = this.ui.protoList.val();
+		addObs: function(e){
+			var objectType = $(e.target).attr('value');
+			this.addProto(objectType);
+		},
 
-			var proto =this.protocols[name];
+		addProtoFromList: function(){
+			var name = this.ui.protoList.find(':selected').text();
+			var objectType = this.ui.protoList.val();
+			this.addProto(objectType, name);
+		},
+
+		addProto: function(objectType, name){
+
+			var proto =this.protocols[objectType];
 
 			if(proto){
 				proto.nbObs++;

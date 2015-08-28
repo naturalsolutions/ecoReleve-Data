@@ -40,23 +40,16 @@ define([
 
 			this.forms = [];
 
-
-			this.forms = [];
-
 			// If filters are given we use them
 			if (options.filters) {
 				this.initFilters(options.filters);
-			}
-			else {
+			} else {
 				// Otherwise initialized from AJAX call
 				this.getFilters();
 			}
-			//this.channel= options.channel;
-			//this.radio=Radio.channel(this.channel);
 		},
 
-
-		getFilters: function () {
+		getFilters: function() {
 			var _this = this;
 			this.forms = [];
 			var jqxhr = $.ajax({
@@ -72,16 +65,10 @@ define([
 				this.datas = data;
 			}).fail(function (msg) {
 			});
-
-
-
-
-
 		},
 
 		initFilters: function (data) {
 			var form;
-
 			for (var key in data) {
 				form = this.initFilter(data[key]);
 				$('#' + this.filterContainer).append(form.el);
@@ -91,15 +78,12 @@ define([
 					});
 				}
 				$('#' + this.filterContainer + " input[type='checkbox']").on('click', this.clickedCheck);
-
 				$('#' + this.filterContainer + ' #dateTimePicker').each(function () {
 					$(this).datetimepicker();
 				});
-
 				this.forms.push(form);
 			};
 		},
-
 
 		initFilter: function (dataRow) {
 			var form;
@@ -110,10 +94,7 @@ define([
 			var template = tpl;
 
 			if (fieldName == 'Status') classe = 'hidden';
-
-
 			var options = this.getValueOptions(dataRow);
-
 			if (type == 'Select' || type == 'Checkboxes') {
 				editorClass += ' list-inline ';
 				options = dataRow['options'];
@@ -147,7 +128,6 @@ define([
 				Operator: schm['Operator'].options[0]
 			};
 
-
 			var md = Backbone.Model.extend({
 				schema: schm,
 				defaults: {
@@ -155,7 +135,6 @@ define([
 					ColumnType: type,
 				}
 			});
-
 
 			var mod = new md();
 
@@ -168,12 +147,6 @@ define([
 
 			return form;
 		},
-
-
-		changeInput: function (options) {
-		},
-
-
 
 
 		clickedCheck: function (e) {
@@ -193,13 +166,7 @@ define([
 					$(this).prop('checked', IsChecked);
 				});
 			}
-
 		},
-
-		displayFilter: function () {
-
-		},
-
 
 		getValueOptions: function (DataRow) {
 			var valueOptions;
@@ -218,8 +185,6 @@ define([
 					break;
 			}
 		},
-
-
 
 		getOpOptions: function (type) {
 			var operatorsOptions;
@@ -243,11 +208,6 @@ define([
 			}
 		},
 
-
-
-
-
-
 		getFieldType: function (type) {
 			var typeField;
 			switch (type) {
@@ -269,37 +229,25 @@ define([
 			}
 		},
 
-
-
-
-
 		update: function () {
 			var filters = [];
 			var currentForm, value;
 			for (var i = 0; i < this.forms.length; i++) {
 				currentForm = this.forms[i];
 				if (!currentForm.validate() && currentForm.getValue().Value) {
-
 					value = currentForm.getValue();
-
 					filters.push(value);
-
-
-
 					currentForm.$el.find('input.filter').addClass('active');
 				} else {
 					currentForm.$el.find('input.filter').removeClass('active')
-
 				};
 			};
-
 			
 			if (this.clientSide) {
 				this.clientFilter(filters);
 			}else{
 				this.interaction('filter', filters);
 			}
-			//this.radio.command(this.channel+':map:update', { filters : filters });
 		},
 
 

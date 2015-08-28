@@ -290,7 +290,7 @@
 				}
 				$link = $('<span class="current">' + (options.text) + '</span>');
 			} else {
-				$link = $('<a href="' + o.hrefTextPrefix + (pageIndex + 1) + o.hrefTextSuffix + '" class="page-link" onclick="return false;">' + (options.text) + '</a>');
+				$link = $('<span href="' + o.hrefTextPrefix + (pageIndex + 1) + o.hrefTextSuffix + '" class="page-link"">' + (options.text) + '</span>');
 				$link.click(function(event){
 					return methods._selectPage.call(self, pageIndex, event);
 				});

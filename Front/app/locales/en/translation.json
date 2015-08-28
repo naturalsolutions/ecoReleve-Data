@@ -23,7 +23,7 @@
 	"button" : {
 		"search" : "Search",
 		"clear" : "Clear",
-		"reset" : "Reset",
+		"cancel" : "Cancel",
 		"edit" :"Edit",
 		"add" : "Add",
 		"save" : "Save",

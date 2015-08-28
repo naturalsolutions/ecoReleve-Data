@@ -52,7 +52,8 @@ class ListObjectWithDynProp():
 
         for objConf in self.GetAllPropNameInConf() :
             curDynProp = self.GetDynProp(objConf.Name)
-
+            # print('********* curDynProp ')
+            # print(curDynProp)
             if objConf.Name in self.fk_list and objConf.QueryName is not None:
                 tableRef = self.fk_list[objConf.Name].column.table
                 nameRef = self.fk_list[objConf.Name].column.name
@@ -60,7 +61,7 @@ class ListObjectWithDynProp():
                 joinTable = outerjoin (joinTable,tableRef,objTable.c[objConf.Name] == tableRef.c[nameRef])
                 selectable.append(tableRef.c[objConf.QueryName])
 
-            elif curDynProp != None and objConf.Name in self.ObjWithDynProp().GetAllProp():
+            elif curDynProp != None: #and objConf.Name in self.ObjWithDynProp().GetAllProp():
                 v = view.alias('v'+curDynProp['Name'])
                 self.vAliasList['v'+curDynProp['Name']] = v
 
@@ -133,6 +134,7 @@ class ListObjectWithDynProp():
             countQuery = self.WhereInJoinTable(countQuery,obj)
         self.countQuery = countQuery 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
+        print(fullQueryJoinOrdered)
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self,searchInfo=None) :
