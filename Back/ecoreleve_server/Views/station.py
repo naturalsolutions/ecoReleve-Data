@@ -260,24 +260,21 @@ def searchStation(request):
         criteria = [
         {'Column' : 'creator',
         'Operator' : '=',
-        'Value' : request.authenticated_userid
+        'Value' : 1
         },
-        # {'Query':'Observation',
-        # 'Column': 'FK_ProtocoleType',
-        # 'Operator' : 'not exists',
-        # 'Value': select([Observation]).where(Observation.FK_Station == Station.ID) # keep only stations without Observations
-        # },
-        # {'Query':'Station',
-        # 'Column': 'None',
-        # 'Operator' : 'not exists',
-        # 'Value': select([o]).where(cast(o.creationDate,DATE) > cast(Station.creationDate,DATE)) # keep only the last importation day
-        # },
+        {
+        'Column': 'LastImported',
+        'Operator' : '=',
+        'Value' : True
+        },
         {'Column' : 'FK_StationType',
         'Operator' : '=',
         'Value' : 4 # => TypeID of GPX station
         },
         ]
         searchInfo['criteria'].extend(criteria)
+
+    
     ModuleType = 'StationVisu'
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     start = datetime.now()
