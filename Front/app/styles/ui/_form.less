@@ -1,17 +1,61 @@
 form{
+
+	fieldset{
+		border: 1px solid #e5e5e5;
+		padding: 15px;
+		margin-top: 10px;
+		&>div{
+			margin-bottom: 10px;
+		}
+	}
+	legend{
+		padding: 0px 10px;
+		margin: 10px 0px;
+		border: none;
+	}
+	label{
+		margin: 0px;
+		font-weight: 300;
+	}
+	textarea.form-control{
+		height: 34px;
+		&:disabled{
+			resize: none;
+		}
+	}
+
 	input, select, textarea{
+		font-weight: 600;
 		&.required{
-			border-bottom: 1px solid orange;
+			//border-bottom: 1px solid orange;
 		}
 	}
 	.error{
-		border-left: 1px dashed red;
+		select, input, textarea{
+			border-left: 5px solid @error;
+		}
 	}
+
+	
+
 	.form-control:disabled{
-		border: 1px solid transparent!important;
-		background: transparent!important;
-		box-shadow: none!important;
+		border: 1px solid transparent;
+		background: transparent;
+		box-shadow: none;
+		padding-left: 0px;
 	}
+	select:disabled {
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		text-indent: 1px;
+		text-overflow: '';
+	}
+
+	.form-control[disabled], fieldset[disabled] .form-control{
+		cursor: auto;
+	}
+
+
 	.nested-model{
 		ul label{
 			//display: none;
@@ -20,4 +64,5 @@ form{
 			height: auto;
 		}
 	}
+	
 }

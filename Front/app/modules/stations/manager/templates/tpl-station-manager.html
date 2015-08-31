@@ -1,21 +1,16 @@
 
 <div id=""	class="white scroll-auto col-xs-12 col-md-3 full-height">
 	<br>
-	<legend>Add a new observation</legend>
-	<div class="row">
-		<div class="col-md-10">
-			<select name="" id="protoList" class="form-control"></select>
-		</div>
-		<button id="addProto" class="btn btn-success">+</button>
-	</div>
-	<br><br>
 	<legend>Change station</legend>
 	<div id="rgStation">
 		<div class="clearfix">
-			<button id="prevStation" class="btn btn-success pull-left">Previous</button>
-			<button id="nextStation" class="btn btn-success pull-right">Next</button>
+			<button id="prevStation" class="btn btn-success pull-left">
+				<span class="reneco reneco-leftarrow"></span>
+			</button>
+			<button id="nextStation" class="btn btn-success pull-right">
+				<span class="reneco reneco-rightarrow"></span>
+			</button>
 		</div>
-		<br><br>
 		<div id="stationForm"></div>
 		<br>
 		<div id="stationFormBtns"></div>
@@ -24,7 +19,17 @@
 </div>
 
 
-<div id="rgProtos" class="col-xs-12 col-md-9 ns-full-height dark">
+<div id="rgProtos" class="col-xs-12 col-md-9 full-height">
+	<br>
+	<div class="clearfix">
+		<div class="col-xs-6 no-padding">
+			<select name="" id="protoList" class="form-control"></select>
+		</div>
+			<button id="addProto" class="btn btn-success pull-left">+</button>
+		<div class="pull-right">
+			<legend>Total observation : <span id="total">0</span></legend>
+		</div>
+	</div>
 	<br>
 	<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true"></div>
 </div>

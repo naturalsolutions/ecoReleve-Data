@@ -1,19 +1,38 @@
-﻿<script type="text/template" id="test">
-	<div id="NsFormButton" style="margin-top:10%;">
-		<button class="NsFormModuleCancel btn btn-default" data-i18n="button.cancel">
-			Cancel
+<script type="text/template" id="test">
+	<br>
+	<div id="NsFormButton">
+	
+
+		<button class="NsFormModuleDelete btn btn-danger">
+			<span data-i18n="button.delete"></span>
+			&nbsp;
+			<span class="reneco reneco-trash"></span>
 		</button>
-		<button class="NsFormModuleSave btn btn-success" data-i18n="button.save">
-			Save
+		
+		
+		
+		<button class="NsFormModuleClear btn btn-default" >
+			<span data-i18n="button.clear">Clear</span>
 		</button>
-		<button class="NsFormModuleEdit btn btn-default" data-i18n="button.edit">
-			Edit
-		</button>
-		<button class="NsFormModuleClear btn btn-default" data-i18n="button.clear">
-			Clear
-		</button>
-		<button class="NsFormModuleDelete pull-right btn btn-danger" data-i18n="button.delete">
-			Delete
-		</button>
+		
+
+		<div class="pull-right">
+			<button class="NsFormModuleEdit btn btn-default" >
+				<span class="reneco reneco-edit"></span>
+				&nbsp;
+				<span data-i18n="button.edit">Edit</span>
+			</button>
+			<button class="NsFormModuleCancel btn btn-default">
+				<span data-i18n="button.cancel">Cancel</span>
+			</button>
+			<button class="NsFormModuleSave btn btn-success" >
+				<span class="reneco reneco-write"></span>
+				&nbsp;
+				<span data-i18n="button.save">Save</span>
+			</button>
+		</div>
+
+
+
 	</div>
 </script>

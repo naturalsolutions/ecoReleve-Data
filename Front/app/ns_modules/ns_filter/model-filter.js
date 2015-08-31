@@ -7,7 +7,7 @@ define([
 	'requirejs-text!./Templates/tpl-CheckBoxes.html',
 	'radio',
 	'moment',
-	'vendors/backboneForm-editors',
+	'vendors/backboneForm-editor-dateTimePicker',
 	'vendors/backboneForm-editors-autoCompTree',
 
 ], function ($, _, Backbone, BbForms, tpl, tplcheck, Radio, moment) {
@@ -78,9 +78,7 @@ define([
 					});
 				}
 				$('#' + this.filterContainer + " input[type='checkbox']").on('click', this.clickedCheck);
-				$('#' + this.filterContainer + ' #dateTimePicker').each(function () {
-					$(this).datetimepicker();
-				});
+
 				this.forms.push(form);
 			};
 		},

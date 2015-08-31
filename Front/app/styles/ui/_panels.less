@@ -27,7 +27,7 @@
 .panel{
 	border-radius: 5px;
 	overflow: hidden;
-	border: none;
+	//border: none;
 
 }
 
@@ -37,25 +37,22 @@
 	padding: 0px;
 	.btn-prevent-collapse{
 		position: absolute;
-		right: 60px;
+		right: 50px;
 		bottom: 10px;
-		border-radius: 50%;
-		padding: 5px;
-		font-size: 1.5em;
 		line-height: 1em;
 	}
 	.panel-title{
 		a{
-			background: rgba(0,0,0,0.1);
-			transition: .2s all;
+			//background: #dff0d8;
+			//transition: .2s all;
+			padding: 15px;
+			display: block;
 			&:hover{
-				background: rgba(0,0,0,0.3);
+				background: #dff0d8;
 			}
 			&:not(.collapsed){
-				background: rgba(0,0,0,0.3);
+				background: #dff0d8;
 			}
-			padding: 20px;
-			display: block;
 			i.glyphicon{
 				float: right;
 				&:after { content: "\e114"; }

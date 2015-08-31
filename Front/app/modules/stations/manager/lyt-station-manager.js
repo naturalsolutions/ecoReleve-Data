@@ -36,7 +36,8 @@ define([
 
 		ui: {
 			accordion : '#accordion',
-			protoList : '#protoList'
+			protoList : '#protoList',
+			total: '#total'
 		},
 
 		events : {
@@ -46,6 +47,7 @@ define([
 			'click #nextStation' : 'nextStation'
 		},
 
+		total : 0,
 
 		initialize: function(options){
 			if(options.id){
@@ -60,7 +62,6 @@ define([
 		},
 
 		check: function(){
-
 		},
 
 		validate: function(){
@@ -68,11 +69,9 @@ define([
 		},
 
 		getStepOptions: function(){
-
 		},
 
 		onDestroy: function(){
-
 		},
 
 
@@ -99,7 +98,6 @@ define([
 
 		displayStation: function(stationId){
 
-
 			var stationType = 1;
 			var _this = this;
 			this.nsForm = new NsForm({
@@ -113,10 +111,9 @@ define([
 				reloadAfterSave : true,
 			});
 
-			this.nsForm.savingSuccess = function(){
-				_this.protos.fetch({reset: true});
+			this.nsForm.BeforeShow = function(){
+				_this.displayProtos();
 			};
-
 		},
 
 
@@ -126,10 +123,9 @@ define([
 			this.protosToRemove = [];
 		},
 
-		onShow: function(){
+		displayProtos: function(){
 			var _this = this;
-			this.displayStation(this.stationId);
-
+			var _that = this;
 			var ProtoColl = Backbone.Collection.extend({
 				url: config.coreUrl+'stations/'+this.stationId+'/protocols',
 				fetch: function(options) {
@@ -152,6 +148,7 @@ define([
 					var name;
 					var first = true;
 					var objectType;
+					_that.total = 0;
 					_.each(protos.models,function( model ){
 						obsList = model.get('obs');
 						name = model.get('Name');
@@ -163,7 +160,7 @@ define([
 			})
 
 			this.protos = new ProtoColl();
-			this.protos.fetch();
+			this.protos.fetch({reset: true});
 
 			this.protoList4Add();
 			this.protocols = {};
@@ -261,6 +258,7 @@ define([
 
 						$('#'+this.type+'Pagination').pagination('updateItems', this.nbObs);
 					}
+					_that.total++;
 					this.updateNbObs();
 				},
 
@@ -305,6 +303,9 @@ define([
 						console.log(resp);
 					});
 
+					_that.total--;
+
+
 					if(this.indexPageList.length>1){
 						var index= this.indexPageList.indexOf('#page'+this.type+i);
 
@@ -335,9 +336,16 @@ define([
 				},
 
 				updateNbObs: function(){
+					_that.ui.total.html(_that.total);
 					$('#'+this.type).find('.badge').html(this.nbObs);
 				},
 			});
+		},
+
+		onShow: function(){
+			var _this = this;
+			this.displayStation(this.stationId);
+
 			/*
 			this.$el.i18n();
 			this.translater = Translater.getTranslater();
@@ -388,7 +396,7 @@ define([
 
 		addProto: function(objectType, name){
 
-			var proto =this.protocols[objectType];
+			var proto = this.protocols[objectType];
 
 			if(proto){
 				proto.nbObs++;
