@@ -25,6 +25,8 @@ require.config({
 		'ns_grid'		: 'ns_modules/ns_grid',
 		'ns_map'		: 'ns_modules/ns_map',
 		'ns_stepper'	: 'ns_modules/ns_stepper',
+		'FileUploadEditor': 'ns_modules/ns-bbforms-editors/FileUploadEditor/backboneForm-editors-fileUpload',
+
 		
 		'autocompTree' : 'vendors/jquery.autocompTree',
 		'ListOfNestedModel' : 'vendors/ListOfNestedModel/ListOfNestedModel',
@@ -178,7 +180,13 @@ require.config({
              'backbone_forms'
             ]
         },
-
+         FileUploadEditor: {
+            deps: [
+             'backbone',
+             'backbone_forms'
+            ],
+            exports: 'FileUploadEditor' 
+        }
 	},
 });
 

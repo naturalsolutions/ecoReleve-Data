@@ -4,17 +4,15 @@ define([
 	'backbone',
 	'marionette',
 	'config',
-
-
 	'ns_modules/ns_com',
 	'ns_filter/model-filter',
 	'ns_map/ns_map',
 	'ns_grid/model-grid',
-
+	'sweetAlert',
 	'i18n'
 
 ], function($, _, Backbone, Marionette, config,
-	Com, NsFilter, NsMap, NsGrid
+	Com, NsFilter, NsMap, NsGrid,Swal
 ){
 
 	'use strict';
@@ -132,20 +130,21 @@ define([
 			});
 
 
-			var html = Marionette.Renderer.render('app/modules/import/_gpx/templates/options-list.html');
-			var optionsList = $.parseHTML(html);
-
-
-
-			var option=[];
-			for (var i = 0; i < optionsList.length; i++) {
-				option[0]=$(optionsList[i]).attr('value');
-				option[1]=$(optionsList[i]).attr('value');
-				optionsList[i] = option;
-				option=[];
-			};
-
-			var columns = [
+			/*var html = Marionette.Renderer.render('app/modules/import/_gpx/templates/options-list.html');
+			var optionsList = $.parseHTML(html);*/
+			var optionsList;
+			this.loadCollection(config.coreUrl + 'fieldActivity', function(data){
+				optionsList = $.parseHTML(data);
+				var option=[];
+				for (var i = 0; i < optionsList.length; i++) {
+					option[0]=$(optionsList[i]).text();
+					option[1]=$(optionsList[i]).attr('value');
+					optionsList[i] = option;
+					option=[];
+				};
+				console.log('************optionsList*************');
+				console.log(optionsList);
+				var columns = [
 
 				{
 					name: 'id',
@@ -191,19 +190,24 @@ define([
 			];
 
 
-			this.grid = new NsGrid({
-				pageSize: this.PageSize,
+			_this.grid = new NsGrid({
+				pageSize: _this.PageSize,
 				pagingServerSide: false,
-				com: this.com,
+				com: _this.com,
 				columns: columns,
-				collection: this.collection
+				collection: _this.collection
 			});
 
 
 
 
 			//should be in the module
-			this.ui.grid.html(this.grid.displayGrid());
+			_this.ui.grid.html(_this.grid.displayGrid());
+			});
+
+			
+
+			
 		},
 
 
@@ -256,9 +260,24 @@ define([
 			coll = new Backbone.Collection(coll.where({import : true}));
 			coll.url = config.coreUrl + 'stations/';
 			Backbone.sync('create', coll, {
-				success: function(){
+				success: function(data){
 					_this.deferred.resolve();
 					console.log('success');
+					console.log(data);
+					var inserted = data.new;
+					var exisits = data.exist;
+					Swal({
+						title: 'Stations import',
+						text: 'inserted stations :' + inserted + ', exisiting stations:' + exisits,
+						type: 'success',
+						showCancelButton: false,
+						confirmButtonColor: 'rgb(147, 14, 14)',
+						confirmButtonText: 'OK',
+						closeOnConfirm: true,
+					},
+					function(isConfirm){   
+						Backbone.history.navigate('home', {trigger: true})
+					});
 				},
 				error: function(){
 					console.log('error');
@@ -267,6 +286,23 @@ define([
 
 			return this.deferred;
 		},
+		loadCollection : function(url, callback){
+			var collection =  new Backbone.Collection();
+			collection.url = url;
+			collection.fetch({
+				success : function (data) {
+					var elems = '<option value=""></option>';
+					//could be a collectionView
+					for (var i in data.models ) {
+						var current = data.models[i];
+						var value = current.get('value') || current.get('PK_id');
+						var label = current.get('label') || current.get('fullname');
+						elems += '<option value ='+ value +'>'+ label +'</option>';
+					}
+					callback(elems);
+				}
+			});
+		}
 
 
 		//check the code for rowClicked
