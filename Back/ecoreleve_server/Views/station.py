@@ -8,7 +8,7 @@ from ..Models import (
     Station_FieldWorker,
     StationList
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModules
+from ecoreleve_server.GenericObjets.FrontModules import FrontModules, ModuleForms
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
 import transaction
 import json, itertools
@@ -20,6 +20,7 @@ from sqlalchemy import select, and_,cast, DATE,func
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
+
 
 
 prefix = 'stations'
@@ -215,15 +216,20 @@ def insertListNewStations(request):
 
     ##### Build block insert statement and returning ID of new created stations #####
     if len(data_to_insert) != 0 :
+        print('********* insertion plusieurs stations **********')
         stmt = Station.__table__.insert(returning=[Station.ID]).values(data_to_insert)
         res = DBSession.execute(stmt).fetchall()
-        result = list(map(lambda y: {'FK_Station' : y[0], }, res))
+        print('********* station list**********')
+        result =list(map(lambda y:  y[0], res))
+        #result = list(map(lambda y: {'FK_Station' : y[0], }, res))
+
 
     ###### Insert FieldWorkers ######
+        print('**********fieldworkers************')
+        print(data[0])
         if not data[0]['FieldWorkers'] == None or "" :
-            list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK': b  },result)),data[0]['FieldWorkers'] ))
+            list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK_FieldWorker': b  },result)),data[0]['FieldWorkers'] ))
             list_ = list(itertools.chain.from_iterable(list_))
-
             stmt = Station_FieldWorker.__table__.insert().values(list_)
             DBSession.execute(stmt)
     else : 
@@ -301,3 +307,26 @@ def searchStation(request):
         result.append(dataResult)
         transaction.commit()
         return result
+
+        # ------------------------------------------------------------------------------------------------------------------------- #
+# @view_config(route_name= prefix+'/fileImport', renderer='json', request_method = 'GET')
+# def getForm(request):
+#     ModuleName = 'ImportGpxFileForm'
+#     Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
+#     Fields = DBSession.query(ModuleForms).filter(ModuleForms.Module_ID == Conf.ID).order_by(ModuleForms.FormOrder).all()
+
+#     data = []
+#     for row in Fields:
+#         field = {}
+#         field['name'] = row.Name
+#         field['label'] = row.Label
+#         field['cell'] = row.InputType
+#         field['renderable'] = True
+#         data.append(field)
+#         print('************ module id ***************')
+#         print(field)
+#     print(data)
+#     transaction.commit()
+#     return data
+
+
