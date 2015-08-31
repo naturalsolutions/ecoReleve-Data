@@ -45,6 +45,7 @@ def add_routes(config):
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
     config.add_route('stations', 'ecoReleve-Core/stations/') 
+    #config.add_route('stations/fileImport', 'ecoReleve-Core/stations/fileImport/{id}') 
     config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
 
