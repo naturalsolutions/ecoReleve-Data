@@ -21,22 +21,18 @@
 
 
 
-# class SensorType (Base,ObjectTypeWithDynProp) :
-
-#     __tablename__ = 'SensorType'
-#     ID = Column (Integer,Sequence('SensorType__id_seq'), primary_key = True)
-#     Name = Column (String)
-#     Status = Column(Integer)
-
-
+# # ------------------------------------------------------------------------------------------------------------------------- #
 # class Sensor (Base,ObjectWithDynProp) :
 
 #     __tablename__ = 'Sensor'
 #     ID = Column (Integer,Sequence('Sensor__id_seq'), primary_key = True)
 #     Name = Column (String)
+#     Model = Column(String)
+#     Compagny = Column(String)
 #     creationDate = Column (DateTime,nullable=False)
 
 
+# # ------------------------------------------------------------------------------------------------------------------------- #
 # class SensorDynProp (Base) :
 
 #     __tablename__ = 'SensorDynProp'
@@ -45,6 +41,7 @@
 #     TypeProp = Column(String,nullable=False)
 
 
+# # ------------------------------------------------------------------------------------------------------------------------- #
 # class SensorDynPropValue(Base):
 
 #     __tablename__ = 'SensorDynPropValue'
@@ -59,6 +56,7 @@
 #     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
 
 
+# # ------------------------------------------------------------------------------------------------------------------------- #
 # class SensorType_SensorDynProp(Base):
 
 #     __tablename__ = 'SensorType_SensorDynProp'
@@ -67,3 +65,12 @@
 #     Required = Column(Integer,nullable=False)
 #     FK_SensorType = Column(Integer, ForeignKey('SensorType.ID'))
 #     FK_SensorDynProp = Column(Integer, ForeignKey('SensorDynProp.ID'))
+
+
+# # ------------------------------------------------------------------------------------------------------------------------- #
+# class SensorType (Base,ObjectTypeWithDynProp) :
+
+#     __tablename__ = 'SensorType'
+#     ID = Column (Integer,Sequence('SensorType__id_seq'), primary_key = True)
+#     Name = Column (String)
+#     Status = Column(Integer)

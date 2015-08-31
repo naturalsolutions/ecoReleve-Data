@@ -28,8 +28,9 @@ require.config({
 		'FileUploadEditor': 'ns_modules/ns-bbforms-editors/FileUploadEditor/backboneForm-editors-fileUpload',
 
 		
-		'autocompTree' : 'vendors/jquery.autocompTree',
-		'ListOfNestedModel' : 'vendors/ListOfNestedModel/ListOfNestedModel',
+		'autocompTree' 			: 'vendors/jquery.autocompTree',
+		'ListOfNestedModel' 	: 'vendors/ListOfNestedModel/ListOfNestedModel',
+		'AutocompleteEditor'	: 'vendors/AutocompleteEditor',
 
 		/*==========  Bower  ==========*/
 		'jquery'				: '../bower_components/jquery/jquery',

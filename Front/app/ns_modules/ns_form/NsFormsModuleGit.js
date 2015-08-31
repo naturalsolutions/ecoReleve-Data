@@ -6,9 +6,10 @@ define([
 	'backbone_forms',
 	'requirejs-text!./Templates/NsFormsModule.html',
 	'ListOfNestedModel',
+	'AutocompleteEditor',
 	//'./NsFormsCustomFields',
 	'i18n',
-], function ($, _, Backbone, Marionette, BackboneForm, tpl,ListOfNestedModel) {
+], function ($, _, Backbone, Marionette, BackboneForm, tpl,ListOfNestedModel,AutocompleteEditor) {
 	return Backbone.View.extend({
 		BBForm: null,
 		modelurl: null,
