@@ -359,7 +359,7 @@ define([
 			var collapseBody = ''; var collapseTitle = 'collapsed';
 			if(first){collapseBody='in'; collapseTitle = '';}
 
-			var tpl = JST['app/modules/input/templates/tpl-accordion.html']({
+			var tpl = JST['app/modules/stations/manager/templates/tpl-accordion.html']({
 					name : name,
 					type : type,
 					nbObs: nbObs,
@@ -438,3 +438,7 @@ define([
 
 	});
 });
+
+
+
+

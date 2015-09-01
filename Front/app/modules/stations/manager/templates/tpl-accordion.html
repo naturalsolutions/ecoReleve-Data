@@ -1,16 +1,23 @@
 <div class="panel panel-default" id="<%= type %>">
+
+
 	<div class="panel-heading" role="tab">
 		<h4 class="panel-title" style="position: relative">
 		<a data-toggle="collapse" data-parent="#accordion" href="#<%= type %>Collapse" aria-expanded="true" aria-controls="<%= type %>Collapse" class="<%= collapseTitle %>" >
 			<span><%= name %></span><span class="badge pull-right"><%= nbObs %></span>
 		</a>
-		<button id="addObs" class="reneco reneco-add btn-prevent-collapse" value="<%= objectType%>"></button>
+		<button id="addObs" class="btn btn-sm btn-prevent-collapse btn-success" value="<%= objectType%>"><span class="reneco reneco-add"></span></button>
 		</h4>
 	</div>
+
+
+
 	<div id="<%= type %>Collapse" class="panel-collapse collapse <%= collapseBody %>" role="tabpanel" aria-labelledby="<%= type %>">
 		<div class="panel-body">
 			<div id="<%= type %>Pagination"></div>
 			<div id="<%= type %>Obs"></div>
 		</div>
 	</div>
+
+
 </div>

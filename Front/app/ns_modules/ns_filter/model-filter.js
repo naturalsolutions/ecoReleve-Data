@@ -8,7 +8,7 @@ define([
 	'radio',
 	'moment',
 	'vendors/backboneForm-editor-dateTimePicker',
-	'vendors/backboneForm-editors-autoCompTree',
+	'vendors/backboneForm-editor-autoCompTree',
 
 ], function ($, _, Backbone, BbForms, tpl, tplcheck, Radio, moment) {
 	'use strict';
@@ -146,7 +146,6 @@ define([
 			return form;
 		},
 
-
 		clickedCheck: function (e) {
 			// Keep the new check value
 			var IsChecked = e.target.checked;
@@ -248,9 +247,6 @@ define([
 			}
 		},
 
-
-
-
 		reset: function () {
 			$('#' + this.filterContainer).empty();
 			if (this.clientSide) {
@@ -262,11 +258,7 @@ define([
 			}
 		},
 
-
-		///////////////////////// FILTRE CLIENT //////////////////////////////
-
 		clientFilter: function (filters) {
-
 			var tmp = this.com.getMotherColl();
 			var mod = [];
 			var filter;
@@ -287,7 +279,6 @@ define([
 							col = filter['Column'];
 							op = filter['Operator'];
 							val = filter['Value'];
-
 
 							objVal = obj.attributes[col];
 							var isDate = moment(objVal,'YYYY-MM-DD hh:mm:ss').isValid();  
