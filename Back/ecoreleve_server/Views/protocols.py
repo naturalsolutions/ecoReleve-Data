@@ -120,14 +120,17 @@ def insertNewProtocol (request) :
     newProto = Observation(FK_ProtocoleType = data['FK_ProtocoleType'],FK_Station=data['FK_Station'])
     newProto.ProtocoleType = DBSession.query(ProtocoleType).filter(ProtocoleType.ID==data['FK_ProtocoleType']).first()
     listOfSubProtocols = []
-    for items , value in data.items():
-        if isinstance(value,list):
+    for items , value in data.items() :
+        if isinstance(value,list) and items != 'children':
+            print('\n\n\n ************************* \n')
+            print('Complex PROTOCOL detected For UPDATE')
             listOfSubProtocols = value
+            print(listOfSubProtocols)
 
-    if listOfSubProtocols !=[] and 'sub_ProtocoleType' in data:
-        for obj in listOfSubProtocols:
-            obj['FK_ProtocoleType']=data['sub_ProtocoleType']
-        data['Observation_childrens'] = listOfSubProtocols
+    # if listOfSubProtocols !=[] and 'sub_ProtocoleType' in data:
+    #     for obj in listOfSubProtocols:
+    #         obj['FK_ProtocoleType']=data['sub_ProtocoleType']
+    data['Observation_childrens'] = listOfSubProtocols
 
     newProto.init_on_load()
     newProto.UpdateFromJson(data)
@@ -146,11 +149,13 @@ def updateObservation(request):
     curObs.LoadNowValues()
     listOfSubProtocols = []
     subObsList = []
+    print(data)
     for  items , value in data.items():
-        if isinstance(value,list):
+        if isinstance(value,list) and items != 'children':
             print('\n\n\n ************************* \n')
             print('Complex PROTOCOL detected For UPDATE')
             listOfSubProtocols = value
+            print(listOfSubProtocols)
     data['Observation_childrens'] = listOfSubProtocols
     curObs.UpdateFromJson(data)
     transaction.commit()

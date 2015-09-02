@@ -29,8 +29,9 @@ require.config({
 		'IndivPicker'	: 'ns_modules/ns-bbforms-editors/IndividualPicker/backboneForm-editors-individualPicker',
 
 		
-		'autocompTree' : 'vendors/jquery.autocompTree',
-		'ListOfNestedModel' : 'vendors/ListOfNestedModel/ListOfNestedModel',
+		'autocompTree' 			: 'vendors/jquery.autocompTree',
+		'ListOfNestedModel' 	: 'vendors/ListOfNestedModel/ListOfNestedModel',
+		'AutocompleteEditor'	: 'vendors/AutocompleteEditor',
 
 		/*==========  Bower  ==========*/
 		'jquery'				: '../bower_components/jquery/jquery',
