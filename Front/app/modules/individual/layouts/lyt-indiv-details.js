@@ -27,20 +27,24 @@ define([
 		className: 'full-height animated white',
 
 		events : {
+			'click #hideIndivDetails' : 'hideDetail',
+			'click #showIndivDetails'  : 'showDetail'
 		},
 
 		ui: {
 			'grid': '#grid',
 			'form': '#form',
 			'map': '#map',
-			'paginator' :'#paginator'
+			'paginator' :'#paginator',
+			'details' : '#indivLeft',
+			'mapContainer' : '#indivRight',
+			'showHideCtr' :'#showIndivDetails'
 		},
 
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
 			this.indivId = options.id;
-
 		},
 
 		onRender: function(){
@@ -52,6 +56,7 @@ define([
 			this.displayForm();
 			this.displayGrid();
 			this.displayMap();
+			$(this.ui.showHideCtr).html('<span class="glyphicon glyphicon-chevron-right big"></span><span class="ID rotate">ID : '+this.indivId+'</span>');
 		},
 
 		displayGrid: function(){
@@ -101,9 +106,7 @@ define([
 				popup: true,
 				cluster: true
 			});
-			//this.map.init();
 		},
-
 		displayMap: function(){
 
 			var url  = config.coreUrl+ 'individuals/' + this.indivId  + '?geo=true';
@@ -131,7 +134,35 @@ define([
 				reloadAfterSave : false,
 				parent: this.parent
 			});
-		}
+		},
+		hideDetail: function() {  
+            $(this.ui.details).animate({
+                marginLeft: '-60%',
+                }, 500, function() {
+            });
+            this.updateSize('hide');
+        },
+        showDetail: function() {
+                $(this.ui.details).animate({
+                    marginLeft: '0',
+                    }, 500, function() {
+                });
+            this.updateSize('show');
+        },
+        updateSize: function(type) {
+            //$(window).trigger('resize');
+            this.map.resize();
 
+            if(type === 'hide'){
+                $(this.ui.showHideCtr).removeClass('masqued');
+                $(this.ui.mapContainer).removeClass('col-md-7');
+                $(this.ui.mapContainer).addClass('col-md-12');
+            } else {
+                $(this.ui.showHideCtr).addClass('masqued');
+                $(this.ui.mapContainer).removeClass('col-md-12');
+                $(this.ui.mapContainer).addClass('col-md-7');
+            }
+            $(window).trigger('resize');
+        },
 	});
 });

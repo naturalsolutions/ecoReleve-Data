@@ -26,6 +26,7 @@ require.config({
 		'ns_map'		: 'ns_modules/ns_map',
 		'ns_stepper'	: 'ns_modules/ns_stepper',
 		'FileUploadEditor': 'ns_modules/ns-bbforms-editors/FileUploadEditor/backboneForm-editors-fileUpload',
+		'IndivPicker'	: 'ns_modules/ns-bbforms-editors/IndividualPicker/backboneForm-editors-individualPicker',
 
 		
 		'autocompTree' : 'vendors/jquery.autocompTree',
