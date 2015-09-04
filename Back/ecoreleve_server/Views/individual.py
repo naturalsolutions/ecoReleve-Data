@@ -51,6 +51,8 @@ def count_ (request = None,listObj = None) :
         count = listObj.count(searchInfo = searchInfo)
     else : 
         count = listObj.count()
+
+    print(count)
     return count 
 
 def getFilters (request):
@@ -197,6 +199,8 @@ def insertOneNewIndiv (request) :
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchIndiv(request):
     data = request.params.mixed()
+    print('*********data*************')
+    print(data)
     searchInfo = {}
     searchInfo['criteria'] = []
     if 'criteria' in data: 
@@ -210,10 +214,12 @@ def searchIndiv(request):
 
     ModuleType = 'IndivFilter'
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
-
+    print('**criteria********' )
+    print(searchInfo['criteria'] )
     start = datetime.now()
     listObj = ListObjectWithDynProp(Individual,moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
+
     stop = datetime.now()
     print ('______ TIME to get DATA : ')
     print (stop-start)
