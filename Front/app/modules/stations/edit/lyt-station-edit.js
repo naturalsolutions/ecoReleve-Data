@@ -32,8 +32,6 @@ define([
 
 		name: 'Sation selection',
 
-		
-
 		onDestroy: function(){
 		},
 

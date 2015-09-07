@@ -21,8 +21,8 @@
 				currentPage: 0,
 				hrefTextPrefix: '#page-',
 				hrefTextSuffix: '',
-				prevText: 'Prev',
-				nextText: 'Next',
+				prevText: '<span class="reneco reneco-leftarrow"></span>',
+				nextText: '<span class="reneco reneco-rightarrow"></span>',
 				ellipseText: '&hellip;',
 				cssStyle: 'light-theme',
 				labelMap: [],
@@ -49,6 +49,10 @@
 				o.currentPage = !o.invertPageOrder ? 0 : o.pages - 1;
 			o.halfDisplayed = o.displayedPages / 2;
 
+			if(o.pages == 1){
+				self.addClass('hidden');
+			}
+
 			this.each(function() {
 				self.addClass(o.cssStyle + ' simple-pagination').data('pagination', o);
 				methods._draw.call(self);
@@ -60,6 +64,7 @@
 		},
 
 		selectPage: function(page) {
+
 			methods._selectPage.call(this, page - 1);
 			return this;
 		},
@@ -267,7 +272,14 @@
 		},
 
 		_appendItem: function(pageIndex, opts) {
+
 			var self = this, options, $link, o = self.data('pagination'), $linkWrapper = $('<li></li>'), $ul = self.find('ul');
+
+			if(o.pages == 1){
+				self.addClass('hidden');
+			}else{
+				self.removeClass('hidden');
+			}
 
 			pageIndex = pageIndex < 0 ? 0 : (pageIndex < o.pages ? pageIndex : o.pages - 1);
 
@@ -288,9 +300,9 @@
 				} else {
 					$linkWrapper.addClass('active');
 				}
-				$link = $('<span class="current">' + (options.text) + '</span>');
+				$link = $('<span class="current btn btn-default">' + (options.text) + '</span>');
 			} else {
-				$link = $('<span href="' + o.hrefTextPrefix + (pageIndex + 1) + o.hrefTextSuffix + '" class="page-link"">' + (options.text) + '</span>');
+				$link = $('<span href="' + o.hrefTextPrefix + (pageIndex + 1) + o.hrefTextSuffix + '" class="page-link btn btn-default">' + (options.text) + '</span>');
 				$link.click(function(event){
 					return methods._selectPage.call(self, pageIndex, event);
 				});

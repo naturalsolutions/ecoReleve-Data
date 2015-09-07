@@ -1,4 +1,4 @@
-﻿define([
+define([
  'underscore',
  'jquery',
  'backbone',
@@ -29,7 +29,6 @@
         },
         
           getValue: function() {
-           
            return this.$el.find('#' + this.id ).val() ;
           },
 
@@ -37,9 +36,8 @@
 
             
             var $el = _.template(
-                this.template, { id: this.id,value:this.options.model.get(this.options.schema.name) }
-            );
-            console.log($el);
+                this.template, { id: this.id,value:this.options.model.get(this.options.schema.name) 
+}            );
             this.setElement($el);
             var _this = this;
             _(function () {

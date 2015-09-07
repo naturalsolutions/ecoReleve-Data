@@ -46,7 +46,8 @@ define([
 				value : options.model.get(this.options.key),
 				editorClass : schema.editorClass,
 				required: required,
-				editable : (options.schema.editable) ? '' : 'disabled'
+				editable : (options.schema.editable != false) ? '' : 'disabled',
+				hidden : (options.schema.editable != false) ? '' : 'hidden',
 			})));
 			this.setElement($el);
 
@@ -62,6 +63,6 @@ define([
 		},
 		}, {
 		// STATICS
-			template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><span class="input-group-addon"><span class="glyphicon-calendar glyphicon"></span></span><input id="c24_Date_" name="Date_" class="<%= editorClass %> <%= required %>" type="text" placeholder="jj/mm/aaaa hh:mm:ss" data-date-format="DD/MM/YYYY HH:mm:ss" value="<%= value %>" <%= editable %> ></div>', null, Form.templateSettings)
+			template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><span class="input-group-addon <%= hidden %>"><span class="glyphicon-calendar glyphicon"></span></span><input id="c24_Date_" name="Date_" class="<%= editorClass %> <%= required %>" type="text" placeholder="jj/mm/aaaa hh:mm:ss" data-date-format="DD/MM/YYYY HH:mm:ss" value="<%= value %>" <%= editable %> ></div>', null, Form.templateSettings)
 	});
 });
