@@ -198,7 +198,7 @@ define([
 					options.success = function(){
 
 						if(ctx.onceFetched){
-							ctx.onceFetched();
+							ctx.onceFetched(params);
 						}
 
 					},

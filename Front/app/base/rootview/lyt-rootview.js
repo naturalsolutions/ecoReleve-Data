@@ -5,7 +5,7 @@ function(Marionette, TransitionRegion, LytHeader) {
 	return Marionette.LayoutView.extend({
 		el: 'body',
 		template: 'app/base/rootview/tpl-rootview.html',
-		className: 'ns-full-height',
+		className: 'full-height',
 
 		regions: {
 			rgHeader: 'header',

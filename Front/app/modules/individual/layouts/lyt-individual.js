@@ -12,8 +12,10 @@ define([
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
 
+	'./lyt-indiv-details'
+
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter 
+	Com, NsGrid, NsFilter, LytIndivDetail
 ){
 
 	'use strict';
@@ -24,21 +26,28 @@ define([
 		===================================================*/
 
 		template: 'app/modules/individual/templates/tpl-individual.html',
-		className: 'full-height animated white',
+		className: 'full-height animated white rel',
 
 		events : {
 			'click #btnFilter' : 'filter',
+			'click #back' : 'hideDetails'
 		},
 
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
 			'filter': '#filter',
+			'detail': '#detail',
 		},
 
-		initialize: function(){
+		regions: {
+			detail : '#detail'
+		},
+
+		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
+
 		},
 
 		onRender: function(){
@@ -48,8 +57,12 @@ define([
 
 
 		onShow : function(){
-			this.displayGrid();
 			this.displayFilter();
+			this.displayGrid(); 
+			if(this.options.id){
+				this.detail.show(new LytIndivDetail({id : this.options.id}));
+				this.ui.detail.removeClass('hidden');
+			}
 		},
 
 		displayGrid: function(){
@@ -61,7 +74,42 @@ define([
 				url: config.coreUrl+'individuals/',
 				urlParams : this.urlParams,
 				rowClicked : true,
-				totalElement : 'indiv-count'
+				totalElement : 'indiv-count',
+				onceFetched: function(params){
+					var listPro = {};
+					var idList  = [];
+					this.collection.each(function(model){
+						idList.push(model.get('ID'));
+					});
+					idList.sort();
+					listPro.idList = idList;
+					listPro.minId = idList[0];
+					listPro.maxId = idList [(idList.length - 1)];
+					listPro.state = this.collection.state;
+					listPro.criteria = $.parseJSON(params.criteria);
+					window.app.listProperties = listPro ;
+
+					//console.log(idList);
+					/*window.app.temp = this;
+
+					_this.totalEntries(this.grid);
+					var rows = this.grid.body.rows;
+					if(_this.currentRow){
+						for (var i = 0; i < rows.length; i++) {
+							if(rows[i].model.attributes.ID == _this.currentRow.model.attributes.ID){
+								_this.currentRow = rows[i];
+								rows[i].$el.addClass('active');
+								return rows[i];
+							}
+						}
+					}else{
+						var row = this.grid.body.rows[0];
+						if(row){
+							_this.currentRow = row;
+							row.$el.addClass('active');
+						}
+					}*/
+				}
 			});
 
 			this.grid.rowClicked = function(row){
@@ -88,11 +136,17 @@ define([
 
 		rowClicked: function(row){
 			var id = row.model.get('ID');
-			Backbone.history.navigate('individual/'+id, {trigger: true})
+			this.detail.show(new LytIndivDetail({id : id}));
+			this.ui.detail.removeClass('hidden');
+
+			Backbone.history.navigate('individual/'+id, {trigger: false})
 		},
 
 		rowDbClicked: function(row){
 
 		},
+		hideDetails : function(){
+			this.ui.detail.addClass('hidden');
+		}
 	});
 });

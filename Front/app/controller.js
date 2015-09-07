@@ -67,8 +67,8 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytStationEdit({id: option}));
 		},
 		
-		individual : function(){
-			this.rgMain.show(new LytIndividual());
+		individual : function(option){
+			this.rgMain.show(new LytIndividual({id : option}));
 		},
 		indiv : function(option){
 			this.rgMain.show(new LytIndivDetails({id: option}));
