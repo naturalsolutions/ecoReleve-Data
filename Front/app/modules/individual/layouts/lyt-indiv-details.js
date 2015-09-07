@@ -124,7 +124,7 @@ define([
 				name: 'IndivForm',
 				modelurl: config.coreUrl+'individuals',
 				buttonRegion: [],
-				formRegion: 'form',
+				formRegion: this.ui.form,
 				displayMode: 'display',
 				objecttype: this.type,
 				id: id,

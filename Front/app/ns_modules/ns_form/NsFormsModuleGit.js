@@ -14,7 +14,7 @@ define([
 		BBForm: null,
 		modelurl: null,
 		Name: null,
-		objecttype: null,
+		objectType: null,
 		displayMode: null,
 		buttonRegion: null,
 		formRegion: null,
@@ -64,7 +64,7 @@ define([
 		},
 
 		initialize: function (options) {
-			this.extendsBBForm();
+			//this.extendsBBForm();
 
 			var jqxhr;
 			this.modelurl = options.modelurl;
@@ -96,30 +96,36 @@ define([
 				this.id = 0;
 			}
 
-			if (options.displayMode) {
+
+			if(options.displayMode){
 				this.displayMode = options.displayMode;
 			}
+
+
+
+			if (options.objectType) {
+				this.objectType = options.objectType;
+			}
 			else {
-				this.displayMode = 'edit';
+				this.objectType = null;
 			}
-			if (options.objecttype) {
-				this.objecttype = options.objecttype;
-			}
-			else {
-				this.objecttype = null;
-			}
-			this.objecttype = options.objecttype;
+			this.objectType = options.objectType;
 
 			if (options.model) {
 				this.model = options.model;
-				this.BBForm = new BackboneForm({ model: this.model, fieldsets: this.model.fieldsets});
+				this.BBForm = new BackboneForm({ 
+					model: this.model,
+					data: this.model.data,
+					fieldsets: this.model.fieldsets,
+					schema: this.model.schema
+				});
 				this.showForm();
 			}
 			else {
 				this.initModel();
 			}
 
-			if (options.redirectAfterPost) {
+			if (options.redirectAfterPost){
 				// allow to redirect after creation (post) using the id of created object
 				this.redirectAfterPost = options.redirectAfterPost;
 			}
@@ -134,14 +140,27 @@ define([
 				this.model = new Backbone.Model();
 			}
 
-			var url = this.modelurl +'/'+ this.id;
+			if(this.model.attributes.id){
+				id = this.model.attributes.id;
+			}else{
+				id = 0;
+			}
+
+			var url = this.modelurl + '/' + id;
+
+
+			this.name='_' + this.objectType + '_';
 
 			//initialize model from AJAX call
 			this.jqxhr = $.ajax({
 				url: url,
 				context: this,
 				type: 'GET',
-				data: { FormName: this.name, ObjectType: this.objecttype, DisplayMode: this.displayMode },
+				data: {
+					FormName: this.name,
+					ObjectType: this.objectType,
+					DisplayMode: this.displayMode
+				},
 				dataType: 'json',
 				success: function (resp) {
 					_this.model.schema = resp.schema;
@@ -154,59 +173,67 @@ define([
 					_this.model.urlRoot = this.modelurl;
 					_this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
 					_this.showForm();
+					_this.updateState(this.displayMode);
 				},
 				error: function (data) {
-					//alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objecttype);
+					console.warn('request error');
+					//alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objectType);
 				}
 			});
 		},
 
-		showForm: function () {
+		showForm: function (){
 			this.BBForm.render();
 			// Call extendable function before the show call
 			this.BeforeShow();
 			var _this = this;
-			$('#' + this.formRegion).html(this.BBForm.el);
+
+			this.formRegion.html(this.BBForm.el);
+
 
 			this.buttonRegion.forEach(function (entry) {
-				$('#' + entry).html(_this.template);
-				$('#' + entry).i18n();
+				_this.buttonRegion[0].html(_this.template);
+				_this.buttonRegion[0].i18n();
 			});
 
-			this.displaybuttons();
-
-
-			this.bindEvents();
+			if(this.buttonRegion[0]){
+				this.displaybuttons();
+				this.bindEvents();
+			}
 			this.afterShow();
+
 		},
 
+		updateState: function(state){
 
+		},
 
 
 		displaybuttons: function () {
 			var name = this.name;
 			if(this.displayMode == 'edit'){
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel').removeClass('hidden');
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleSave').removeClass('hidden');
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleClear').removeClass('hidden');
-
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit').addClass('hidden');
-				$('#'+this.buttonRegion[0]).find('#' + this.formRegion).find('input:enabled:first').focus();
+				this.buttonRegion[0].find('.NsFormModuleCancel').removeClass('hidden');
+				this.buttonRegion[0].find('.NsFormModuleSave').removeClass('hidden');
+				this.buttonRegion[0].find('.NsFormModuleClear').removeClass('hidden');
+				this.buttonRegion[0].find('.NsFormModuleEdit').addClass('hidden');
+				this.formRegion.find('input:enabled:first').focus();
 			}else{
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel').addClass('hidden');
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleSave').addClass('hidden');
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleClear').addClass('hidden');
+				this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
+				this.buttonRegion[0].find('.NsFormModuleSave').addClass('hidden');
+				this.buttonRegion[0].find('.NsFormModuleClear').addClass('hidden');
 
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleEdit').removeClass('hidden');
+				this.buttonRegion[0].find('.NsFormModuleEdit').removeClass('hidden');
 			}
+
+			//need a fix
 			if(!this.model.attributes.id){
-				$('#'+this.buttonRegion[0]).find('.NsFormModuleCancel').addClass('hidden');
+				this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
 			}
 
 		},
 
 		afterShow: function(){
-			//this.$el.i18n();
+
 		},
 
 
@@ -215,7 +242,6 @@ define([
 			var jqhrx;
 
 			this.model.on('sync', function(){
-				console.log('request');
 			});
 
 			if(!errors){
@@ -253,6 +279,7 @@ define([
 									_this.reloadingAfterSave();
 								}
 							}
+							_this.afterSaveSuccess();
 							return true;
 						},
 						error: function (response) {
@@ -271,6 +298,7 @@ define([
 							if (_this.reloadAfterSave) {
 								_this.reloadingAfterSave();
 							}
+							_this.afterSaveSuccess();
 						},
 						error: function (response) {
 							_this.savingError(response);
@@ -285,6 +313,10 @@ define([
 			return jqxhr;
 		},
 
+		afterSaveSuccess: function(){
+
+		},
+
 		reloadAfterSave: function(){
 
 		},
@@ -292,11 +324,13 @@ define([
 		butClickEdit: function (e) {
 			this.displayMode = 'edit';
 			this.initModel();
+			if(this.buttonRegion[0])
 			this.displaybuttons();
 		},
 		butClickCancel: function (e) {
 			this.displayMode = 'display';
 			this.initModel();
+			if(this.buttonRegion[0])
 			this.displaybuttons();
 		},
 		butClickClear: function (e) {
@@ -308,7 +342,7 @@ define([
 		},
 
 		butClickDelete: function(){
-			this.afterDelete(); 
+			this.afterDelete();
 		},
 
 
@@ -322,6 +356,7 @@ define([
 			// reaload created record from AJAX Call
 			this.initModel();
 			this.showForm();
+			if(this.buttonRegion[0])
 			this.displaybuttons();
 		},
 
@@ -348,39 +383,39 @@ define([
 			var name = this.name;
 
 			/*==========  Edit  ==========*/
-			this.onEditEvt = $.proxy(function(){
+			this.onEditEvt = $.proxy(function(e){
 				this.butClickEdit();
 			}, this);
 
-			$('#'+this.buttonRegion[0] + ' .NsFormModuleEdit').on('click', this.onEditEvt);
+			this.buttonRegion[0].find('.NsFormModuleEdit').on('click', this.onEditEvt);
 
 			/*==========  Cancel  ==========*/
-			this.onCancelEvt = $.proxy(function(){
+			this.onCancelEvt = $.proxy(function(e){
 				this.butClickCancel();
 			}, this);
 
-			$('#'+this.buttonRegion[0] + ' .NsFormModuleCancel').on('click', this.onCancelEvt);
+			this.buttonRegion[0].find('.NsFormModuleCancel').on('click', this.onCancelEvt);
 
 			/*==========  save  ==========*/
 			this.onSaveEvt = $.proxy(function(){
 				this.butClickSave();
 			}, this);
 
-			$('#'+this.buttonRegion[0] + ' .NsFormModuleSave').on('click', this.onSaveEvt);
+			this.buttonRegion[0].find('.NsFormModuleSave').on('click', this.onSaveEvt);
 
 			/*==========  Clear  ==========*/
 			this.onClearEvt = $.proxy(function(){
 				this.butClickClear();
 			}, this);
 
-			$('#'+this.buttonRegion[0] + ' .NsFormModuleClear').on('click', this.onClearEvt);
+			this.buttonRegion[0].find('.NsFormModuleClear').on('click', this.onClearEvt);
 
 			/*==========  Delete  ==========*/
 			this.onDeleteEvt = $.proxy(function(){
 				this.butClickDelete();
 			}, this);
 
-			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').on('click', this.onDeleteEvt);
+			this.buttonRegion[0].find('.NsFormModuleDelete').on('click', this.onDeleteEvt);
 		},
 
 
@@ -388,14 +423,15 @@ define([
 			var _this = this;
 			var name = this.name;
 
-			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').off('click', this.onEditEvt);
-			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').off('click', this.onCancelEvt);
-			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').off('click', this.onSaveEvt);
-			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').off('click', this.onClearEvt);
-			$('#'+this.buttonRegion[0] + ' .NsFormModuleDelete').off('click', this.onDeleteEvt);
+			this.buttonRegion[0].find('.NsFormModuleDelete').off('click', this.onEditEvt);
+			this.buttonRegion[0].find('.NsFormModuleDelete').off('click', this.onCancelEvt);
+			this.buttonRegion[0].find('.NsFormModuleDelete').off('click', this.onSaveEvt);
+			this.buttonRegion[0].find('.NsFormModuleDelete').off('click', this.onClearEvt);
+			this.buttonRegion[0].find('.NsFormModuleDelete').off('click', this.onDeleteEvt);
 		},
 
 		destroy: function(){
+			if(this.buttonRegion[0])
 			this.unbind();
 		}
 	});

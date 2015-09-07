@@ -5,8 +5,8 @@ define([
 	'marionette',
 	'radio',
 
-	'moment',
-	'dateTimePicker',
+	'./lyt-protocol',
+
 	'sweetAlert',
 	'config',
 	'simplePagination',
@@ -15,8 +15,8 @@ define([
 
 	'i18n'
 
-], function($, _, Backbone, Marionette, Radio,
-	moment, datetime, Swal, config, simplePagination, NsForm
+], function($, _, Backbone, Marionette, Radio, LytProto,
+	Swal, config, simplePagination, NsForm
 ){
 
 	'use strict';
@@ -35,14 +35,15 @@ define([
 		},
 
 		ui: {
-			accordion : '#accordion',
+			accordionContainer : '#accordionContainer',
 			protoList : '#protoList',
-			total: '#total'
+			total: '#total',
+			formStation: '#stationForm',
+			formStationBtns: '#stationFormBtns',
 		},
 
 		events : {
 			'click #addProto' : 'addProtoFromList',
-			'click #addObs' : 'addObs',
 			'click #prevStation' : 'prevStation',
 			'click #nextStation' : 'nextStation'
 		},
@@ -74,6 +75,13 @@ define([
 		onDestroy: function(){
 		},
 
+		onShow: function(){
+			var _this = this;
+			this.displayStation(this.stationId);
+			this.feedProtoList();
+			//this.$el.i18n();
+			//this.translater = Translater.getTranslater();
+		},
 
 		prevStation: function(e){
 			if(window.app.temp){
@@ -95,18 +103,17 @@ define([
 			}
 		},
 
-
 		displayStation: function(stationId){
-
+			this.total = 0;
 			var stationType = 1;
 			var _this = this;
 			this.nsForm = new NsForm({
 				name: 'StaForm',
 				modelurl: config.coreUrl+'stations/',
-				buttonRegion: ['stationFormBtns'],
-				formRegion: 'stationForm',
+				formRegion: this.ui.formStation,
+				buttonRegion: [this.ui.formStationBtns],
 				displayMode: 'display',
-				objecttype: stationType,
+				objectType: stationType,
 				id: stationId,
 				reloadAfterSave : true,
 			});
@@ -116,301 +123,95 @@ define([
 			};
 		},
 
-
-
-		initModel: function(myTpl){
-			this.activeProtcolsObj = []; 
-			this.protosToRemove = [];
-		},
-
 		displayProtos: function(){
 			var _this = this;
-			var _that = this;
 			var ProtoColl = Backbone.Collection.extend({
 				url: config.coreUrl+'stations/'+this.stationId+'/protocols',
 				fetch: function(options) {
-					var that = this; 
 					if(!options){
 						var options= {};
 					}
-					_this.ui.accordion.empty();
 					options.data = {
-						FormName: 'ObsForm',
+						FormName : 'ObsForm',
 						DisplayMode : 'edit'
 					};
 					options.success = function(protos){
-						that.fetchSuccess(protos);
+
 					};
 					return Backbone.Collection.prototype.fetch.call(this, options);
 				},
-				fetchSuccess: function(protos){
-					var obsList = [];
-					var name;
-					var first = true;
-					var objectType;
-					_that.total = 0;
-					_.each(protos.models,function( model ){
-						obsList = model.get('obs');
-						name = model.get('Name');
-						objectType = model.get('ID');
-						this.createProtoPatern(obsList, name, first, objectType);
-						first=false;
-					}, _this);
+
+			});
+
+			this.protoColl = new ProtoColl();
+			this.protoColl.fetch({reset: true});
+
+			var ProtoCollView = Backbone.Marionette.CollectionView.extend({
+				childView : LytProto,
+				childViewOptions : {
+					stationId:	this.stationId
 				},
-			})
-
-			this.protos = new ProtoColl();
-			this.protos.fetch({reset: true});
-
-			this.protoList4Add();
-			this.protocols = {};
-			this.Proto = Backbone.Model.extend({
-				template : false,
-
-				initialize: function(options){
-					this.parent = options.parent;
-					this.first = options.first;
-					this.name = options.name;
-					this.obsList = options.obsList;
-					this.type = options.type;
-					this.stationId = options.stationId;
-
-
-					this.nbObs = this.obsList.length;
-
-					this.model = new Backbone.Model({
-						name : this.name,
-						type : this.type,
-						nbObs: this.nbObs,
-						collapseBody : this.collapseBody,
-						collapseTitle : this.collapseTitle
-					});
-					this.indexPageList = [];
-					this.initProto();
-				},
-
-				initProto: function(){
-					for (var i = 0; i < this.nbObs; i++) {
-						this.addObs(this.obsList[i], i);
-					}
-					this.paginateObs();
-				},
-
-				addObs: function(obs, index, objectType){
+				id : 'accordion',
+				onRender: function(){
 					var _this = this;
-
-					var key = this.type+index;
-					this.indexPageList.push('#page'+key);
-
-					var classes;
-					(index==0)? classes="" : classes = "hidden";
-
-					$('#'+this.type+'Collapse > .panel-body').append('<div id="page'+key+'" class="'+classes+'"><div id="'+key+'"></div><div id="stationFormBtns'+key+'"></div></div>');
-
-					var NSForm = NsForm.extend({
-						afterDelete: function(){
-							_this.deleteProto(index, this);
-						},
+					this.$el.on('show.bs.collapse', function () {
+						_this.$el.find('.in').collapse('hide');
 					});
-
-
-					//if obs != 0??
-					if(obs != 0){
-						var Md = Backbone.Model.extend({
-							schema : obs.schema,
-							fieldsets: obs.fieldsets,
-							urlRoot : config.coreUrl + 'stations/' + this.stationId + '/protocols/'
-						});
-
-						var model = new Md(obs.data);
-
-						var mode = 'edit';
-
-
-						if(obs.data.id != 0){
-							this.state = 'saved';
-							mode = 'display';
-						}
-
-						var nsform = new NSForm({
-							name: this.type,
-							unique : index,
-							model: model,
-							id : model.get('id'),
-							modelurl : config.coreUrl+'stations/'+this.stationId+'/protocols',
-							buttonRegion: ['stationFormBtns'+key],
-							formRegion: key,
-							displayMode: mode,
-							reloadAfterSave : true,
-						});
-					}else{
-						var nsform = new NSForm({
-							name: this.type,
-							unique : index,
-							id : 0,
-							modelurl : config.coreUrl+'stations/'+this.stationId+'/protocols',
-							buttonRegion: ['stationFormBtns'+key],
-							formRegion: key,
-							displayMode: 'edit',
-							reloadAfterSave : true,
-							objecttype: objectType
-						});
-
-						$('#'+this.type+'Pagination').pagination('updateItems', this.nbObs);
-					}
-					_that.total++;
-					this.updateNbObs();
-				},
-
-				
-
-				paginateObs: function(){
-					var _this = this;
-
-					this.current = $('#'+this.type).find(this.indexPageList[0]);
-
-
-					$('#'+this.type+'Pagination').pagination({
-						items: this.nbObs,
-						cssStyle: 'light-theme',
-						hrefTextPrefix: '',
-						onPageClick: function(pageNumber){
-							_this.current.addClass('hidden');
-							_this.current = $('#'+_this.type).find(_this.indexPageList[pageNumber-1]);
-							_this.current.removeClass('hidden');
-						},
-					});
-
-					//add status of the obs
-					for (var i = 0; i < this.obsList.length; i++) {
-							if(this.obsList[i].data.ID){
-								var protoType = this.obsList[i].data.FK_ProtocoleType;
-
-								$('#_'+ protoType + '_Pagination ul li:nth-child('+ (i+2) +')').addClass('bg-success');
-							}
-					};
-				},
-
-				deleteProto: function(i, form){
-					var jqxhr = $.ajax({
-						url: config.coreUrl+'stations/'+this.stationId+'/protocols/'+form.model.get('ID'),
-						method: 'DELETE',
-						context: this,
-						contentType:'application/json'
-					}).done(function(resp) {
-						console.log('deleted');
-					}).fail(function(resp) {
-						console.log(resp);
-					});
-
-					_that.total--;
-
-
-					if(this.indexPageList.length>1){
-						var index= this.indexPageList.indexOf('#page'+this.type+i);
-
-						$('#'+this.type).find(this.indexPageList[index]).remove();
-						
-						this.indexPageList.splice(index, 1);
-
-						/*
-						if(index !=0){
-							this.current = $('#'+this.type).find(this.indexPageList[index-1]);
-						}else{
-							this.current = $('#'+this.type).find(this.indexPageList[index]);
-						}*/
-
-						this.current = $('#'+this.type).find(this.indexPageList[0]);
-
-						this.current.removeClass('hidden');
-						this.nbObs--;
-
-						$('#'+this.type).find('#'+this.type+'Pagination').pagination('updateItems', this.nbObs);
-						$('#'+this.type).find('#'+this.type+'Pagination').pagination('selectPage', 1);
-						this.updateNbObs();
-					}else{
-						$('#'+this.type).remove();
-
-						delete this.parent.protocols[this.name];
-					}
-				},
-
-				updateNbObs: function(){
-					_that.ui.total.html(_that.total);
-					$('#'+this.type).find('.badge').html(this.nbObs);
 				},
 			});
+
+			this.protoCollView = new ProtoCollView({ collection: this.protoColl });
+			this.protoCollView.render();
+			this.ui.accordionContainer.html(this.protoCollView.el);
+
+			this.bindProtosEvts();
 		},
 
-		onShow: function(){
-			var _this = this;
-			this.displayStation(this.stationId);
+		bindProtosEvts: function(){
+			this.listenTo(this.protoCollView.collection, 'destroy', this.onProtoDestroy);
+			this.listenTo(this.protoCollView.collection, 'add', this.onProtoAdd);
+			this.listenTo(this.protoCollView.collection, 'change', this.onProtoChange);
+		},
 
+		onProtoChange: function(mod){
 			/*
-			this.$el.i18n();
-			this.translater = Translater.getTranslater();
-			*/
-		},
+			if(mod._previousAttributes.total){
+				//up on a proto
+				var prev = mod._previousAttributes.total;
+				this.total -= prev;
+				if(Number.isInteger(mod.get('total'))){
+					console.log('test');
 
-
-		createProtoPatern: function(obsList, name, first, objectType){
-			var type = '_'+objectType+'_';
-			var nbObs = obsList.length; 
-			var collapseBody = ''; var collapseTitle = 'collapsed';
-			if(first){collapseBody='in'; collapseTitle = '';}
-
-			var tpl = JST['app/modules/stations/manager/templates/tpl-accordion.html']({
-					name : name,
-					type : type,
-					nbObs: nbObs,
-					collapseBody : collapseBody,
-					collapseTitle : collapseTitle,
-					objectType: objectType
-			});
-
-			this.ui.accordion.append(tpl);
-			var protocol = new this.Proto({
-				parent: this,
-				first: first,
-				name : name,
-				type : type,
-				obsList : obsList,
-				stationId: this.stationId
-			});
-
-			this.protocols[objectType] = protocol;
-			return protocol;
-		},
-
-
-		addObs: function(e){
-			var objectType = $(e.target).attr('value');
-			this.addProto(objectType);
-		},
-
-		addProtoFromList: function(){
-			var name = this.ui.protoList.find(':selected').text();
-			var objectType = this.ui.protoList.val();
-			this.addProto(objectType, name);
-		},
-
-		addProto: function(objectType, name){
-
-			var proto = this.protocols[objectType];
-
-			if(proto){
-				proto.nbObs++;
-				proto.addObs(0, proto.nbObs, objectType);
+					this.total += (prev+1)
+				}else{
+					console.log('test');
+					this.total += (prev-1);
+				}
 			}else{
-				proto = this.createProtoPatern([], name, false, objectType);
-				proto.nbObs++;
-				proto.addObs(0, 0, objectType);
-				proto.current = $('#'+proto.type).find(proto.indexPageList[0]);
+				//new proto
+				this.total += mod.get('total');
 			}
+			this.ui.total.html(this.total);*/
+			this.total = 0; 
+			for (var i = 0; i < this.protoCollView.collection.models.length; i++) {
+				this.total += this.protoCollView.collection.models[i].get('obs').length;
+			};
+			this.ui.total.html(this.total);
+		},
+		
+		onProtoDestroy: function(){
+			console.log('destroy');
+		},
+		
+		onProtoAdd: function(mod){
+			this.total = 0; 
+			for (var i = 0; i < this.protoCollView.collection.models.length; i++) {
+				this.total += this.protoCollView.collection.models[i].get('obs').length;
+			};
+			this.ui.total.html(this.total);
 		},
 
-
-		protoList4Add: function(){
+		feedProtoList: function(){
 			var _this = this;
 			this.protoSelectList = new Backbone.Collection();
 			this.protoSelectList.fetch({
@@ -418,27 +219,63 @@ define([
 				reset: true,
 				success: function(){
 					_.each(_this.protoSelectList.models,function( model ){
-						_this.ui.protoList.append(new Option(model.get('Name'), model.get('ID')));
+						_this.ui.protoList.append(new Option(model.get('Name'),model.get('ID')));
 					},this);
 				},
 			});
 		},
 
-		sweetAlert : function(title,type,message){
-			Swal({
-				title: title,
-				text: message,
-				type: type,
-				showCancelButton: false,
-				confirmButtonColor: 'rgb(147, 14, 14)',
-				confirmButtonText: "OK",
-				closeOnConfirm: true,
+		addProtoFromList: function(){
+			var name = this.ui.protoList.find(':selected').text();
+			var objectType = parseInt(this.ui.protoList.val());
+
+			var md = this.protoCollView.collection.findWhere({'ID' : objectType});
+			if(md){
+				var cid = md.cid;
+				var viewId = this.protoCollView.children._indexByModel[cid];
+				var view = this.protoCollView.children._views[viewId];
+				view.addObs();
+			}else{
+				//append a new proto
+				this.addProtoType(name, objectType);
+			}
+		},
+
+
+		addProtoType: function(name, objectType){
+			var _this = this;
+
+			var proto = new Backbone.Model();
+
+			this.jqxhr = $.ajax({
+				url: config.coreUrl+'stations/'+this.stationId+'/protocols/0',
+				context: this,
+				type: 'GET',
+				data: {
+					FormName: '_' + objectType + '_',
+					ObjectType: objectType,
+					DisplayMode: 'edit'
+				},
+				dataType: 'json',
+				success: function (resp) {
+					proto.set({Name : name});
+					proto.set({ID : objectType});
+					proto.set({show : true});
+					proto.set({obs : {
+						data : resp.data,
+						fieldsets : resp.fieldsets,
+						schema : resp.schema
+					}});
+					_this.protoCollView.collection.push(proto);
+				},
+				error: function (msg) {
+					console.warn('request new proto error');
+				}
 			});
-		}
+		},
 
 	});
 });
-
 
 
 

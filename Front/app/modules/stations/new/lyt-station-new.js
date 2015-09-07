@@ -35,6 +35,10 @@ define([
 
 		name : 'Station creation',
 
+		ui: {
+			'staForm' : '#staForm'
+		},
+
 
 		initialize: function(){
 		},
@@ -58,9 +62,9 @@ define([
 				name: 'StaForm',
 				modelurl: config.coreUrl+'stations/',
 				buttonRegion: [],
-				formRegion: 'StaForm',
+				formRegion: this.ui.staForm,
 				displayMode: 'edit',
-				objecttype: 1,
+				objectType: 1,
 				id: 0,
 				reloadAfterSave : false,
 			});
@@ -74,7 +78,7 @@ define([
 
 		onDestroy: function(){
 			this.map.destroy();
-			this.nsForm.unbind();
+			this.nsForm.destroy();
 		},
 
 		getCurrentPosition : function(){
