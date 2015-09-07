@@ -1,0 +1,37 @@
+
+<div>
+
+	<div class="input-group  picker">
+		<input class="form-control" name="indivpicker" type="text">
+		<span class="input-group-addon picker"><span class="glyphicon-plus"></span></span> 
+	</div>
+
+	<div class="modal fade full-modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	    <div class="modal-dialog modal-lg">
+	      <div class="modal-content">
+	        <div class="modal-header">
+	          <!--<button type="button" class="close filterClose blackFont" data-dismiss="modal" aria-hidden="true">X</button>-->
+	          <h4 class="modal-title">Identify individual</h4>
+	        </div>
+	        <div class="modal-body">
+	            	<div id="indivLeft"  class="col-xs-5">
+						<div id="filter"></div>
+						<button class="btn btn-success pull-right" id="btnFilter">Filter</button>
+					</div>
+					<div id="indivRight" class=" pannels-container col-xs-7 no-padding full-height">
+						<br>
+						<div id="paginator" class="paginator dark"></div>
+						<div id="grid" class="dark"></div>
+					</div>
+	        </div>
+	        <div class="modal-footer">
+	          <button type="button" class="btn btn-default filterCancel" data-dismiss="modal">cancel</button>
+	          <!--<button type="button" class="btn btn-primary filterClose">finish</button>-->
+	        </div>
+	      </div>
+	    </div>
+	</div>
+	<a class="btn" data-toggle="modal" data-target="#myModal" id="indivIdModal"></a>
+
+</div>
+

@@ -11,8 +11,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'importFile(/)': 'importFile',
 
 			'individual(/)' : 'individual',
-			'individuals(/)' : 'individual',
-			'individual(/):id' : 'indiv',
+			'individual(/):id' : 'individual',
 
 			'stations(/)' : 'stations',
 			'newStation(/)': 'newStation',

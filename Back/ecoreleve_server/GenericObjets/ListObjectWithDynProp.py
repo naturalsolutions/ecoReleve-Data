@@ -101,18 +101,36 @@ class ListObjectWithDynProp():
     def WhereInJoinTable (self,query,criteriaObj) :
         ''' Apply where clause over filter criteria '''
         curProp = criteriaObj['Column']
+        print(self.ObjWithDynProp().GetAllProp())
         if hasattr(self.ObjWithDynProp,curProp) :
+            print('static')
+
+            # static column criteria
             query = query.where(
                 eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
                 )
-        elif curProp in self.ObjWithDynProp().GetAllProp() : 
-            curDynProp = self.GetDynProp(curProp)
-            viewAlias = self.vAliasList['v'+curDynProp['Name']]
+        else:
+            #try :
+                #fore
+            curDynProp = None
+            for x in self.ObjWithDynProp().GetAllProp():
+                print(x)
+                if x['name'] == curProp:
+                    curDynProp = x
+            if curDynProp == None:
+                    print('Prop dyn inconnue')
+                    # Gerer l'exception
+            else :
+                print('dynamic')
+                viewAlias = self.vAliasList['v'+curDynProp['name']]
 
-            #### Perform the'where' in dyn props ####
-            query = query.where(
-                eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['TypeProp']],criteriaObj['Operator'],criteriaObj['Value'])
-            )
+                      #### Perform the'where' in dyn props ####
+                query = query.where(
+                eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
+                print(query)
+                #print(eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
+            #except:
+
         # elif self.jsonQuery and curProp ==self.jsonQuery['where'] :
         #     tableRef = tableRef = Base.metadata.tables[self.jsonQuery['table']]
         #     query = query.where(

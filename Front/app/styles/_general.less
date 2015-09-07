@@ -31,6 +31,17 @@ main{
 
 }
 
+.rel{
+	position: relative;
+}
+
+
+.detail{
+	position: absolute;
+	width: 100%;
+	top: 0;
+}
+
 ul.unstyled{
 	padding: 0px;
 	margin: 0px;
@@ -62,6 +73,7 @@ a{
 .ns-mid-height{
 	height: 50%;
 }
+
 .displayInput {
     padding-left: 0;
     padding-top: 0;
@@ -70,7 +82,9 @@ a{
     box-shadow: none;
     /*color: #f3f3f3;*/
 }
-
+.backgrid tr:hover {
+    background-color: grey;
+}
 @media (max-width: @screen-md-min) {
 	.full-height{
 		height: auto;
@@ -144,3 +158,43 @@ li.list-group-item{
 .bg-white{
 	background: white;
 }
+
+@media (min-width: 992px){
+	.modal-lg {
+    	width: 1200px;
+	}
+}
+#indivRight {
+	overflow-x: auto;
+}
+#showIndivDetails {
+    padding: 25px 10px;
+    cursor: pointer;
+    text-align: center;
+    position: fixed;
+    width: 50px;
+    z-index: 100000;
+    background: #1a1a1a;
+    height: 100%;
+    transition: opacity .2s ease;
+    opacity: 1;
+    color: #A3A1A1;
+}
+.rotate {
+    display: block;
+    position: absolute;
+    margin: 0;
+    padding: 30px 0px;
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
+#hideIndivDetails {
+    float: right;
+}
+#hideIndivDetails:hover {
+    cursor: pointer;
+}
+
