@@ -43,8 +43,12 @@ define([
 		},
 
 		initialize: function(options){
+
+
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
+			
+
 			this.indivId = parseInt(options.id);
 		},
 
@@ -53,6 +57,7 @@ define([
 		},
 
 		onShow : function(){
+			console.log('passed');
 			this.displayForm(this.indivId);
 			this.displayGrid(this.indivId);
 			this.displayMap();

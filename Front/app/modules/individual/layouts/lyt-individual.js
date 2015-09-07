@@ -12,8 +12,10 @@ define([
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
 
+	'./lyt-indiv-details'
+
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter 
+	Com, NsGrid, NsFilter, LytIndivDetail
 ){
 
 	'use strict';
@@ -24,21 +26,28 @@ define([
 		===================================================*/
 
 		template: 'app/modules/individual/templates/tpl-individual.html',
-		className: 'full-height animated white',
+		className: 'full-height animated white rel',
 
 		events : {
 			'click #btnFilter' : 'filter',
+			'click #back' : 'hideDetails'
 		},
 
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
 			'filter': '#filter',
+			'detail': '#detail',
 		},
 
-		initialize: function(){
+		regions: {
+			detail : '#detail'
+		},
+
+		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
+
 		},
 
 		onRender: function(){
@@ -50,6 +59,10 @@ define([
 		onShow : function(){
 			this.displayFilter();
 			this.displayGrid(); 
+			if(this.options.id){
+				this.detail.show(new LytIndivDetail({id : this.options.id}));
+				this.ui.detail.removeClass('hidden');
+			}
 		},
 
 		displayGrid: function(){
@@ -123,11 +136,17 @@ define([
 
 		rowClicked: function(row){
 			var id = row.model.get('ID');
-			Backbone.history.navigate('individual/'+id, {trigger: true})
+			this.detail.show(new LytIndivDetail({id : id}));
+			this.ui.detail.removeClass('hidden');
+
+			Backbone.history.navigate('individual/'+id, {trigger: false})
 		},
 
 		rowDbClicked: function(row){
 
 		},
+		hideDetails : function(){
+			this.ui.detail.addClass('hidden');
+		}
 	});
 });
