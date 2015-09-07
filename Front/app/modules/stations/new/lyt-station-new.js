@@ -31,6 +31,7 @@ define([
 			'focusout input[name="Dat e_"]':'checkDate',
 			'keyup input[name="LAT"], input[name="LON"]' : 'getLatLng',
 			'click #getCurrentPosition' : 'getCurrentPosition',
+			'click .tab-link' : 'displayTab'
 		},
 
 		name : 'Station creation',
@@ -54,7 +55,7 @@ define([
 
 
 		onShow : function(){
-			this.nsForm = new NsForm({
+			/*this.nsForm = new NsForm({
 				name: 'StaForm',
 				modelurl: config.coreUrl+'stations/',
 				buttonRegion: [],
@@ -64,6 +65,13 @@ define([
 				id: 0,
 				reloadAfterSave : false,
 			});
+			this.map = new NsMap({
+				popup: true,
+				zoom : 2,
+				element: 'map',
+			});
+			this.rdy = this.nsForm.jqxhr;*/
+			this.refrechView('#stWithCoords');
 			this.map = new NsMap({
 				popup: true,
 				zoom : 2,
@@ -112,6 +120,40 @@ define([
 				this.map.addMarker(null, lat, lon);
 			}
 		},
-
+		displayTab : function(e){
+			e.preventDefault();
+			var ele = $(e.target);
+			var tabLink = $(ele).attr('href');
+			$('.tab-ele').removeClass('active');
+			$(ele).parent().addClass('active');
+			$(tabLink).addClass('active in');
+			this.refrechView(tabLink);
+		},
+		refrechView : function(stationType){
+			var stTypeId;
+			var formContainer='StaFormCoords';
+			switch(stationType){
+				case '#stWithCoords':
+					stTypeId = 1;
+					formContainer ='StaFormCoords';
+					break;
+				case '#stWithoutCoords':
+					stTypeId = 3;
+					formContainer ='StaForm';
+					break;	
+				default:
+					break;
+			}
+			this.nsForm = new NsForm({
+				name: 'StaForm',
+				modelurl: config.coreUrl+'stations/',
+				buttonRegion: [],
+				formRegion: formContainer,
+				displayMode: 'edit',
+				objecttype: stTypeId,
+				id: 0,
+				reloadAfterSave : false,
+			});
+		}
 	});
 });
