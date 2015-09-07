@@ -105,11 +105,12 @@ define([
 
 		displayStation: function(stationId){
 			this.total = 0;
+			console.log(stationId);
 			var stationType = 1;
 			var _this = this;
 			this.nsForm = new NsForm({
 				name: 'StaForm',
-				modelurl: config.coreUrl+'stations/',
+				modelurl: config.coreUrl+'stations',
 				formRegion: this.ui.formStation,
 				buttonRegion: [this.ui.formStationBtns],
 				displayMode: 'display',

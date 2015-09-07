@@ -140,14 +140,15 @@ define([
 				this.model = new Backbone.Model();
 			}
 
-			if(this.model.attributes.id){
+			if(this.model.attributes.id ){
 				id = this.model.attributes.id;
 			}else{
-				id = 0;
+				id = this.id;
 			}
 
 			var url = this.modelurl + '/' + id;
 
+			console.log(this.modelurl);
 
 			this.name='_' + this.objectType + '_';
 
@@ -420,6 +421,7 @@ define([
 
 
 		unbind: function(){
+
 			var _this = this;
 			var name = this.name;
 
@@ -431,8 +433,9 @@ define([
 		},
 
 		destroy: function(){
-			if(this.buttonRegion[0])
-			this.unbind();
+			if(this.buttonRegion[0]){
+				this.unbind();
+			}
 		}
 	});
 
