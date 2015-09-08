@@ -75,6 +75,9 @@ require.config({
 
 		'simplePagination'		: 'vendors/jquery.simplePagination',
 
+
+		'bbDate': 'vendors/backboneForm-editors',
+		'bbAutoComp': 'vendors/backboneForm-editors-autoCompTree'
 	},
 
 

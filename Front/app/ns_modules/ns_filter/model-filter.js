@@ -7,8 +7,8 @@ define([
 	'requirejs-text!./Templates/tpl-CheckBoxes.html',
 	'radio',
 	'moment',
-	'vendors/backboneForm-editors',
-	'vendors/backboneForm-editors-autoCompTree',
+	'vendors/backboneForm-editor-dateTimePicker',
+	'vendors/backboneForm-editor-autoCompTree',
 
 ], function ($, _, Backbone, BbForms, tpl, tplcheck, Radio, moment) {
 	'use strict';
@@ -78,9 +78,7 @@ define([
 					});
 				}
 				$('#' + this.filterContainer + " input[type='checkbox']").on('click', this.clickedCheck);
-				$('#' + this.filterContainer + ' #dateTimePicker').each(function () {
-					$(this).datetimepicker();
-				});
+
 				this.forms.push(form);
 			};
 		},
@@ -147,7 +145,6 @@ define([
 
 			return form;
 		},
-
 
 		clickedCheck: function (e) {
 			// Keep the new check value
@@ -250,9 +247,6 @@ define([
 			}
 		},
 
-
-
-
 		reset: function () {
 			$('#' + this.filterContainer).empty();
 			if (this.clientSide) {
@@ -264,11 +258,7 @@ define([
 			}
 		},
 
-
-		///////////////////////// FILTRE CLIENT //////////////////////////////
-
 		clientFilter: function (filters) {
-
 			var tmp = this.com.getMotherColl();
 			var mod = [];
 			var filter;
@@ -289,7 +279,6 @@ define([
 							col = filter['Column'];
 							op = filter['Operator'];
 							val = filter['Value'];
-
 
 							objVal = obj.attributes[col];
 							var isDate = moment(objVal,'YYYY-MM-DD hh:mm:ss').isValid();  

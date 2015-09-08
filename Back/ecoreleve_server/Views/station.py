@@ -66,7 +66,6 @@ def getFilters (request):
 
 def getForms(request) :
     typeSta = request.params['ObjectType']
-    print('***************** GET FORMS ***********************')
     ModuleName = 'StationForm'
     Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newSta = Station(FK_StationType = typeSta)

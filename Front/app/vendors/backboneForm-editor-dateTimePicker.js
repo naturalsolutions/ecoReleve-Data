@@ -41,12 +41,14 @@ define([
 			if(options.schema.validators){
 				var required = options.schema.validators[0];
 			}
+			console.log(options.schema.editable);
 
 			var $el = $($.trim(this.template({
 				value : options.model.get(this.options.key),
 				editorClass : schema.editorClass,
 				required: required,
-				editable : (options.schema.editable) ? '' : 'disabled'
+				editable : (options.schema.editable == true) ? '' : 'disabled',
+				hidden : (options.schema.editable == true) ? '' : 'hidden',
 			})));
 			this.setElement($el);
 
@@ -62,6 +64,6 @@ define([
 		},
 		}, {
 		// STATICS
-			template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><span class="input-group-addon"><span class="glyphicon-calendar glyphicon"></span></span><input id="c24_Date_" name="Date_" class="<%= editorClass %> <%= required %>" type="text" placeholder="jj/mm/aaaa hh:mm:ss" data-date-format="DD/MM/YYYY HH:mm:ss" value="<%= value %>" <%= editable %> ></div>', null, Form.templateSettings)
+			template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><span class="input-group-addon <%= hidden %>"><span class="glyphicon-calendar glyphicon"></span></span><input id="c24_Date_" name="Date_" class="<%= editorClass %> <%= required %>" type="text" placeholder="jj/mm/aaaa hh:mm:ss" data-date-format="DD/MM/YYYY HH:mm:ss" value="<%= value %>" <%= editable %> ></div>', null, Form.templateSettings)
 	});
 });

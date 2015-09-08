@@ -36,8 +36,14 @@ define([
 
 		name : 'Station creation',
 
+		ui: {
+			'staForm' : '#staForm',
+			'StaFormCoords' : '#staFormCoords'
+		},
 
-		initialize: function(){
+
+		initialize: function(options){
+			this.parent = options.parent;
 		},
 
 		check: function(){
@@ -59,9 +65,9 @@ define([
 				name: 'StaForm',
 				modelurl: config.coreUrl+'stations/',
 				buttonRegion: [],
-				formRegion: 'StaForm',
+				formRegion: this.ui.staForm,
 				displayMode: 'edit',
-				objecttype: 1,
+				objectType: 1,
 				id: 0,
 				reloadAfterSave : false,
 			});
@@ -77,12 +83,12 @@ define([
 				zoom : 2,
 				element: 'map',
 			});
-			this.rdy = this.nsForm.jqxhr;
+			//this.rdy = this.nsForm.jqxhr;
 		},
 
 		onDestroy: function(){
 			this.map.destroy();
-			this.nsForm.unbind();
+			this.nsForm.destroy();
 		},
 
 		getCurrentPosition : function(){
@@ -131,18 +137,28 @@ define([
 		},
 		refrechView : function(stationType){
 			var stTypeId;
-			var formContainer='StaFormCoords';
+			var _this = this;
+			var formContainer= this.ui.StaFormCoords;
 			switch(stationType){
 				case '#stWithCoords':
 					stTypeId = 1;
-					formContainer ='StaFormCoords';
+					formContainer =this.ui.StaFormCoords;
+					$(this.ui.staForm).empty();
 					break;
 				case '#stWithoutCoords':
 					stTypeId = 3;
-					formContainer ='StaForm';
+					formContainer =this.ui.staForm;
+					$(this.ui.StaFormCoords).empty();
 					break;	
 				default:
 					break;
+			}
+			if(this.nsForm){
+				this.nsForm.destroy();
+				console.log('*********** parent stepper***********');
+				//console.log(this.parent);
+				this.parent.unbindRequiredFields();
+				this.parent.disableNextBtn();
 			}
 			this.nsForm = new NsForm({
 				name: 'StaForm',
@@ -150,10 +166,17 @@ define([
 				buttonRegion: [],
 				formRegion: formContainer,
 				displayMode: 'edit',
-				objecttype: stTypeId,
+				objectType: stTypeId,
 				id: 0,
 				reloadAfterSave : false,
+				afterShow: function(){
+					console.log('********affichage form************');
+					_this.parent.bindRequiredFields();
+				}
 			});
+			
+			this.rdy = this.nsForm.jqxhr;
+
 		}
 	});
 });

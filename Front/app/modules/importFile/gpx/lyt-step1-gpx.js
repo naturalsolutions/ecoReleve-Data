@@ -167,7 +167,7 @@ define([
 				//modelurl: config.coreUrl+'stations/fileImport',
 				model : model,
 				buttonRegion: [],
-				formRegion: 'form',
+				formRegion: this.ui.form,
 				//displayMode: 'display',
 				reloadAfterSave : false,
 				//parent: this.parent

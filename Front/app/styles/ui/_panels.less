@@ -1,8 +1,7 @@
-//Tmp
 
 .pannels-container{
 	background: #2d2d30;
-	overflow: hidden;  
+	overflow: hidden;
 	height: 100%;
 	.pannel{
 		position: absolute;
@@ -21,14 +20,13 @@
 }
 
 
-.panel-group .panel + .panel{
+.panel-group .panel{
 	margin-top: 10px;
 }
 .panel{
 	border-radius: 5px;
-	overflow: hidden;
-	border: none;
-
+	//overflow: hidden;
+	//border: none;
 }
 
 .panel-heading{
@@ -37,25 +35,21 @@
 	padding: 0px;
 	.btn-prevent-collapse{
 		position: absolute;
-		right: 60px;
-		bottom: 10px;
-		border-radius: 50%;
-		padding: 5px;
-		font-size: 1.5em;
-		line-height: 1em;
+		right: 50px;
+		bottom: 9px;
 	}
 	.panel-title{
 		a{
-			background: rgba(0,0,0,0.1);
-			transition: .2s all;
+			//background: #dff0d8;
+			//transition: .2s all;
+			padding: 15px;
+			display: block;
 			&:hover{
-				background: rgba(0,0,0,0.3);
+				background: #dff0d8;
 			}
 			&:not(.collapsed){
-				background: rgba(0,0,0,0.3);
+				background: #dff0d8;
 			}
-			padding: 20px;
-			display: block;
 			i.glyphicon{
 				float: right;
 				&:after { content: "\e114"; }
