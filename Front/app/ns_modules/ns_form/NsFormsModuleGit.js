@@ -64,7 +64,7 @@ define([
 		},
 
 		initialize: function (options) {
-			//this.extendsBBForm();
+			this.extendsBBForm();
 
 			var jqxhr;
 			this.modelurl = options.modelurl;
@@ -129,6 +129,7 @@ define([
 				// allow to redirect after creation (post) using the id of created object
 				this.redirectAfterPost = options.redirectAfterPost;
 			}
+			this.afterShow = options.afterShow;
 		},
 
 
@@ -175,6 +176,7 @@ define([
 					_this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
 					_this.showForm();
 					_this.updateState(this.displayMode);
+					console.log(resp.schema);
 				},
 				error: function (data) {
 					console.warn('request error');
@@ -201,7 +203,10 @@ define([
 				this.displaybuttons();
 				this.bindEvents();
 			}
-			this.afterShow();
+			if (this.afterShow) {
+				this.afterShow();
+			}
+			
 
 		},
 
@@ -233,9 +238,9 @@ define([
 
 		},
 
-		afterShow: function(){
+		/*afterShow: function(){
 
-		},
+		},*/
 
 
 		butClickSave: function (e) {

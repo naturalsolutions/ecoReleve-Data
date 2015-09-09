@@ -41,13 +41,14 @@ define([
 			if(options.schema.validators){
 				var required = options.schema.validators[0];
 			}
+			console.log(options.schema.editable);
 
 			var $el = $($.trim(this.template({
 				value : options.model.get(this.options.key),
 				editorClass : schema.editorClass,
 				required: required,
-				editable : (options.schema.editable != false) ? '' : 'disabled',
-				hidden : (options.schema.editable != false) ? '' : 'hidden',
+				editable : (options.schema.editable == true) ? '' : 'disabled',
+				hidden : (options.schema.editable == true) ? '' : 'hidden',
 			})));
 			this.setElement($el);
 

@@ -39,7 +39,8 @@ define([
 			'paginator' :'#paginator',
 			'details' : '#indivLeft',
 			'mapContainer' : '#indivRight',
-			'showHideCtr' :'#showIndivDetails'
+			'showHideCtr' :'#showIndivDetails',
+			'formBtns' : '#formBtns'
 		},
 
 		initialize: function(options){
@@ -132,8 +133,9 @@ define([
 				modelurl: config.coreUrl+'individuals',
 				buttonRegion: [],
 				formRegion: this.ui.form,
+				buttonRegion: [this.ui.formBtns],
 				displayMode: 'display',
-				objecttype: this.type,
+				objectType: this.type,
 				id: id,
 				reloadAfterSave : false,
 				parent: this.parent

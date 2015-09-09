@@ -23,6 +23,7 @@ define([
 		template: 'app/modules/stations/edit/templates/tpl-station-edit.html',
 		events: {
 			'click button#submit' : 'filter',
+			'click .tab-link' : 'displayTab'
 		},
 
 		ui: {
@@ -52,12 +53,13 @@ define([
 
 		initialize: function(options){
 			this.com = new Com();
-			this.initGrid();
+			var url = config.coreUrl+'stations/';
+			this.initGrid(url);
 		},
 
-		initGrid: function(){
+		initGrid: function(url,params){
 			var _this = this;
-			this.urlParams = 'params';
+			this.urlParams = params ||{};
 			var myCell = Backgrid.NumberCell.extend({
 				decimals: 5
 			});
@@ -66,7 +68,7 @@ define([
 				pagingServerSide: true,
 				com: this.com,
 				name : 'StationGrid',
-				url: config.coreUrl+'stations/',
+				url: url,
 				urlParams : this.urlParams,
 				rowClicked : true,
 				totalElement : 'stations-count',
@@ -143,6 +145,20 @@ define([
 		filter: function(){
 			this.filters.update();
 		},
-		
+		displayTab : function(e){
+			e.preventDefault();
+			var ele = $(e.target);
+			var tabLink = $(ele).attr('href');
+			$('.tab-ele').removeClass('active');
+			$(ele).parent().addClass('active');
+			$(tabLink).addClass('active in');
+			var url =config.coreUrl+'stations/';
+			var params = {};
+			if(tabLink !='#allSt'){
+				params = {'lastImported' : true};
+			}
+			this.initGrid(url, params);
+			this.displayGrid();
+		},
 	});
 });

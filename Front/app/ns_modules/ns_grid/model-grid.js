@@ -82,15 +82,21 @@ define([
 				this.columns = this.colGene.columns;
 			}
 			if (options.urlParams) {
+					this.url+= '?';
+					for(var index in options.urlParams) { 
+					    var attr = options.urlParams[index]; 
+					    this.url+= '&' + index + "=" + attr;
+					}
 
-				for (var i = 0 ; i<options.urlParams.length; i++) {
+				/*for (var i = 0 ; i<options.urlParams.length; i++) {
 
 					if (i==0) { this.url+='?';
 					}
 					
 					var key = Object.keys(options.urlParams[i]);
 					this.url+= key +'='+options.urlParams[i][key]+'&';
-				}
+				}*/
+
 			}
 			if (options.collection) {
 				this.collection = options.collection;

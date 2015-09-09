@@ -72,7 +72,7 @@ define([
 
 		//dedicated to be overloaded
 		initSteps: function(){
-
+			
 		},
 
 		onRender: function(){

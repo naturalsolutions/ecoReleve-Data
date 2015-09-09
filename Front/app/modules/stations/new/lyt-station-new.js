@@ -31,16 +31,19 @@ define([
 			'focusout input[name="Dat e_"]':'checkDate',
 			'keyup input[name="LAT"], input[name="LON"]' : 'getLatLng',
 			'click #getCurrentPosition' : 'getCurrentPosition',
+			'click .tab-link' : 'displayTab'
 		},
 
 		name : 'Station creation',
 
 		ui: {
-			'staForm' : '#staForm'
+			'staForm' : '#staForm',
+			'StaFormCoords' : '#staFormCoords'
 		},
 
 
-		initialize: function(){
+		initialize: function(options){
+			this.parent = options.parent;
 		},
 
 		check: function(){
@@ -58,7 +61,7 @@ define([
 
 
 		onShow : function(){
-			this.nsForm = new NsForm({
+			/*this.nsForm = new NsForm({
 				name: 'StaForm',
 				modelurl: config.coreUrl+'stations/',
 				buttonRegion: [],
@@ -73,7 +76,14 @@ define([
 				zoom : 2,
 				element: 'map',
 			});
-			this.rdy = this.nsForm.jqxhr;
+			this.rdy = this.nsForm.jqxhr;*/
+			this.refrechView('#stWithCoords');
+			this.map = new NsMap({
+				popup: true,
+				zoom : 2,
+				element: 'map',
+			});
+			//this.rdy = this.nsForm.jqxhr;
 		},
 
 		onDestroy: function(){
@@ -116,6 +126,57 @@ define([
 				this.map.addMarker(null, lat, lon);
 			}
 		},
+		displayTab : function(e){
+			e.preventDefault();
+			var ele = $(e.target);
+			var tabLink = $(ele).attr('href');
+			$('.tab-ele').removeClass('active');
+			$(ele).parent().addClass('active');
+			$(tabLink).addClass('active in');
+			this.refrechView(tabLink);
+		},
+		refrechView : function(stationType){
+			var stTypeId;
+			var _this = this;
+			var formContainer= this.ui.StaFormCoords;
+			switch(stationType){
+				case '#stWithCoords':
+					stTypeId = 1;
+					formContainer =this.ui.StaFormCoords;
+					$(this.ui.staForm).empty();
+					break;
+				case '#stWithoutCoords':
+					stTypeId = 3;
+					formContainer =this.ui.staForm;
+					$(this.ui.StaFormCoords).empty();
+					break;	
+				default:
+					break;
+			}
+			if(this.nsForm){
+				this.nsForm.destroy();
+				console.log('*********** parent stepper***********');
+				//console.log(this.parent);
+				this.parent.unbindRequiredFields();
+				this.parent.disableNextBtn();
+			}
+			this.nsForm = new NsForm({
+				name: 'StaForm',
+				modelurl: config.coreUrl+'stations/',
+				buttonRegion: [],
+				formRegion: formContainer,
+				displayMode: 'edit',
+				objectType: stTypeId,
+				id: 0,
+				reloadAfterSave : false,
+				afterShow: function(){
+					console.log('********affichage form************');
+					_this.parent.bindRequiredFields();
+				}
+			});
+			
+			this.rdy = this.nsForm.jqxhr;
 
+		}
 	});
 });

@@ -1,16 +1,33 @@
 
 <div id="indivLeft"  class="col-xs-12 col-md-5 col-border ns-full-height">
 	<br>
-	<span id="back"> <span id="prev" class="glyphicon glyphicon-arrow-left"></span> Back </span>
+	<!--<span id="back"> <span id="prev" class="glyphicon glyphicon-arrow-left"></span> Back </span>-->
+	<button class=" btn btn-default" id="back">
+				<span class="reneco reneco-back"></span>
+				&nbsp;
+				<span data-i18n="button.back">Back</span>
+	</button>
+	<span id="hideIndivDetails" class="glyphicon pointer big glyphicon-chevron-left"></span>
+	<br>
 	<br>
 	<div>
-		<span id="prev" class="glyphicon pointer big glyphicon-chevron-left"></span>
+		<!--<span id="prev" class="glyphicon pointer big glyphicon-chevron-left"></span>
 		<span>  Change individual  </span>
-		<span id="next" class="glyphicon pointer big glyphicon-chevron-right"></span>
+		<span id="next" class="glyphicon pointer big glyphicon-chevron-right"></span>-->
+		<button id="prev" class="btn btn-success pull-left">
+				<span class="reneco reneco-leftarrow"></span>
+			</button>
+		<span>&nbsp;Change individual</span>
+		<button id="next" class="btn btn-success pull-right">
+				<span class="reneco reneco-rightarrow"></span>
+			</button>
+	<br/>
+	<br/>
 	</div>
 
-	<span id="hideIndivDetails" class="glyphicon pointer big glyphicon-chevron-left"></span>
+	
 	<div id="form"></div>
+	<div id="formBtns"></div>
 	<br/>
 	<div id="grid"></div>
 	<div id="paginator"></div>
