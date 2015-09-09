@@ -50,6 +50,8 @@ ul.pagination{
 	li{
 		dipslay: inline-block;
 		button{
+			position: relative;
+			transition: all 1s ease;
 			&.edit{
 			}
 			&.display{
@@ -61,7 +63,7 @@ ul.pagination{
 
 		&.current{
 			button{
-				border: 1px solid #d43f3a;
+				top: -5px;
 			}
 		}
 	}

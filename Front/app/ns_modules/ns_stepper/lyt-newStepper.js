@@ -151,7 +151,7 @@ define([
 				var model = this.models[index - 1];
 			}
 			//display the step
-			this.currentStep = new this.steps[index]({model : model});
+			this.currentStep = new this.steps[index]({model : model, parent : this});
 			this.stepContent.show(this.currentStep);
 
 			if(this.currentStep.lastStep){
