@@ -70,7 +70,7 @@ define([
 			};
 
 
-			//weird I kbow...
+			//weird I know...
 			nsform.afterDelete = function(){
 				//_this.sweetAlert('warning', 'warning', 'warning');
 				var jqxhr = $.ajax({
@@ -80,11 +80,10 @@ define([
 				}).done(function(resp) {
 					_this.deleteObs();
 				}).fail(function(resp) {
-					console.log(_this.model);
 					if(_this.model.get('id') == 0){
 						_this.deleteObs();
 					}else{
-						console.log('delete fail');
+						console.warn('delete fail');
 					}
 				});
 			};
@@ -103,7 +102,7 @@ define([
 		},
 
 		onDestroy: function(){
-			console.log('destroyObs View');
+			console.info('destroyObs View');
 		},
 
 		sweetAlert : function(title, type, message, callback){
