@@ -215,7 +215,7 @@ def searchIndiv(request):
     ModuleType = 'IndivFilter'
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     print('**criteria********' )
-    print(searchInfo['criteria'] )
+    print(searchInfo['criteria'])
     start = datetime.now()
     listObj = ListObjectWithDynProp(Individual,moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
@@ -224,7 +224,7 @@ def searchIndiv(request):
     print ('______ TIME to get DATA : ')
     print (stop-start)
     start = datetime.now()
-    countResult = count_(listObj =listObj)
+    countResult = listObj.count(searchInfo)
     print ('______ TIME to get Count : ')
     stop = datetime.now()
     print (stop-start)

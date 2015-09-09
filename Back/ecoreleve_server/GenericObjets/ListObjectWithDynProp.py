@@ -39,7 +39,7 @@ class ListObjectWithDynProp():
         DynPropsDisplay = list(filter(lambda x : x.IsSearchable == True or x.GridRender >= 2  , self.Conf))
         return DynPropsDisplay
 
-    def GetJoinTable (self) :
+    def GetJoinTable (self,searchInfo) :
         ''' build join table and select statement over all dynamic properties and foreign keys in filter query'''
         joinTable = self.ObjWithDynProp
         view = self.GetDynPropValueView()
@@ -143,16 +143,15 @@ class ListObjectWithDynProp():
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
             print('********** NO Criteria ***************')
-        joinTable = self.GetJoinTable()
+        joinTable = self.GetJoinTable(searchInfo)
         fullQueryJoin = select(self.selectable).select_from(joinTable)
-        countQuery = select([func.count('ID')]).select_from(joinTable)
+        # countQuery = select([func.count('*')]).select_from(joinTable)
 
         for obj in searchInfo['criteria'] :
             fullQueryJoin = self.WhereInJoinTable(fullQueryJoin,obj)
-            countQuery = self.WhereInJoinTable(countQuery,obj)
-        self.countQuery = countQuery 
+            # countQuery = self.WhereInJoinTable(countQuery,obj)
+        # self.countQuery = countQuery 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
-        print(fullQueryJoinOrdered)
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self,searchInfo=None) :
@@ -167,13 +166,34 @@ class ListObjectWithDynProp():
 
     def count(self,searchInfo = None) :
         ''' Main function to call : return count according to filter parameters'''
-        if self.countQuery is None :
-            if searchInfo is None :
-                return 'error'
-            self.GetFullQuery(searchInfo)
-        query = self.countQuery
+        if searchInfo is None:
+            criteria = None
+        else:
+            criteria = searchInfo['criteria'] 
+        query = self.countQuery(criteria)
         count = DBSession.execute(query).scalar()
         return count
+
+    def countQuery(self,criteria = None):
+        fullQuery = select([func.count(self.ObjWithDynProp.ID)])
+        filterOnDynProp = False
+        existQuery = select([self.GetDynPropValueView()])
+        if criteria is not None:
+            for obj in criteria:
+                curDynProp = self.GetDynProp(obj['Column'])
+                if hasattr(self.ObjWithDynProp,obj['Column']):
+                    fullQuery = fullQuery.where(
+                        eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
+                    )
+                elif curDynProp != None:
+                    filterOnDynProp = True
+                    existQuery = existQuery.where(
+                        and_(
+                        self.GetDynPropValueView().c['Name'] == obj['Column'],
+                        eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],obj['Operator'],obj['Value'] )))
+            if filterOnDynProp:
+                fullQuery = fullQuery.where(exists(existQuery))
+        return fullQuery
 
     def OderByAndLimit (self, query, searchInfo) :
         ''' Apply "order by" and limit according to filter parameters '''
