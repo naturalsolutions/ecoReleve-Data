@@ -290,7 +290,7 @@ def searchStation(request):
     print ('______ TIME to get DATA : ')
     print (stop-start)
     start = datetime.now()
-    countResult = count_(listObj =listObj)
+    countResult = listObj.count(searchInfo)
     print ('______ TIME to get Count : ')
     stop = datetime.now()
     print (stop-start)
