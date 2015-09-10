@@ -181,6 +181,7 @@ class ListObjectWithDynProp():
         if criteria is not None:
             for obj in criteria:
                 curDynProp = self.GetDynProp(obj['Column'])
+                print(curDynProp)
                 if hasattr(self.ObjWithDynProp,obj['Column']):
                     fullQuery = fullQuery.where(
                         eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
@@ -191,8 +192,11 @@ class ListObjectWithDynProp():
                         and_(
                         self.GetDynPropValueView().c['Name'] == obj['Column'],
                         eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],obj['Operator'],obj['Value'] )))
-            if filterOnDynProp:
-                fullQuery = fullQuery.where(exists(existQuery))
+
+            if filterOnDynProp == True:
+                fullQuery = fullQuery.where(exists(
+                    existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView().c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])))
+        print (fullQuery)
         return fullQuery
 
     def OderByAndLimit (self, query, searchInfo) :
