@@ -110,7 +110,10 @@ class Station(Base,ObjectWithDynProp):
     def GetDTOWithSchema(self,FrontModules,DisplayMode):
         ''' Override this super method to add fieldworker '''
         resultat = super().GetDTOWithSchema(FrontModules,DisplayMode)
-        resultat['data']['FieldWorkers'] = self.FieldWorkers
+        if self.ID :
+            resultat['data']['FieldWorkers'] = self.FieldWorkers
+        else:
+            resultat['data']['FieldWorkers'] = [{'id' : 0}]
         return resultat
 
 
