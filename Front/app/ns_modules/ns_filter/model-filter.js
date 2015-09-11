@@ -9,6 +9,7 @@ define([
 	'moment',
 	'vendors/backboneForm-editor-dateTimePicker',
 	'vendors/backboneForm-editor-autoCompTree',
+	'vendors/backboneForm-editor-Number',
 
 ], function ($, _, Backbone, BbForms, tpl, tplcheck, Radio, moment) {
 	'use strict';
