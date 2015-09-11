@@ -7,6 +7,12 @@
 }
 
 table.backgrid{
+	thead{
+		background: #ccc;
+		tr:hover{
+			background: #ccc;
+		}
+	}
 	th{
 		background: transparent;
 		text-transform: uppercase;
@@ -16,6 +22,9 @@ table.backgrid{
 		&.active{
 			background: #dff0d8;
 		}
+		&:hover{
+			background: #ddd;
+		}
 	}
 	td{
 		padding: 8px 5px;
@@ -23,10 +32,6 @@ table.backgrid{
 	a{
 		color: inherit;
 	}
-}
-
-.backgrid tr:hover {
-	background-color: #ddd;
 }
 
 .backgrid-paginator{
