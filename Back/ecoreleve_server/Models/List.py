@@ -77,3 +77,11 @@ class StationList(ListObjectWithDynProp):
                 pass
             data.append(row)
         return data
+
+    def countQuery(self,criteria = None):
+        query = super().countQuery(criteria)
+        for obj in criteria :
+            if obj['Column'] in ['FK_ProtocoleType','FK_FieldWorker','LastImported']:
+                query = self.WhereInJoinTable(query,obj)
+        return query
+
