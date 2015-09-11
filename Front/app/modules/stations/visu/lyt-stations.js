@@ -31,8 +31,8 @@ define([
 			'click button#reset' : 'reset',
 			'click button#add' : 'add',
 			'click button#deploy' : 'deploy',
+			'click button#clear' : 'clearFilter'
 		},
-
 		ui : {
 			'grid' : '#grid',
 			'paginator' : '#paginator',
@@ -40,16 +40,14 @@ define([
 			'mapPanel' : '#mapPanel',
 			'btnGridPanel' : 'button#activeGridPanel',
 			'btnMapPanel' : 'button#activeMapPanel',
+			'totalEntries': '#totalEntries',
 		},
-
 		initialize: function(){
-
 			this.radio = Radio.channel('route');
 			this.datas={};
 			this.form;
 			this.datas;
 			this.com = new Com();
-
 
 			this.filtersList={
 				nbFieldWorker: 'DECIMAL(9, 5)',
@@ -82,9 +80,9 @@ define([
 			this.ui.btnGridPanel.removeClass('active');
 			this.ui.btnMapPanel.addClass('active');
 		},
-
-
-
+		clearFilter : function(){
+			this.filters.reset();
+		},
 		infos: function(){
 			this.offset = this.gridView.getGrid().getPaginatorOffSet();
 			this.limit = this.gridView.getGrid().getPageSize();
@@ -107,14 +105,17 @@ define([
 		},
 
 		displayGrid: function(){
-			
+			var _this = this;
 			this.grid= new NsGrid({
 				com: this.com,
 				channel: 'modules',
 				url: config.coreUrl + 'stations/',
 				pageSize : 24,
 				pagingServerSide : true,
-				name:'StationVisu'
+				name:'StationVisu',
+				onceFetched: function(){
+					_this.totalEntries(this.grid);
+				}
 			});
 			
 			this.ui.grid.html(this.grid.displayGrid());
@@ -164,7 +165,11 @@ define([
 			var id = $(row).find(':first-child').text()
 
 			//Radio.channel('route').command('site:detail', id);
-		}
+		},
+		totalEntries: function(grid){
+			this.total = grid.collection.state.totalRecords;
+			this.ui.totalEntries.html(this.total);
+		},
 
 	});
 });

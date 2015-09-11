@@ -165,6 +165,7 @@ define([
 		},
 
 		initCollectionPaginable: function () {
+			var _this = this;
 			var ctx = this;
 			var PageCollection = PageColl.extend({
 				sortCriteria: ctx.sortCriteria,
@@ -196,18 +197,21 @@ define([
 						'order_by': this.queryParams.order_by.call(this),
 						'criteria': this.queryParams.criteria.call(this),
 					};
+
+
+
 					if (ctx.init) {
 						ctx.updateMap(params);
 						
 					}
 					ctx.init = true;
 					options.success = function(){
-
+						
 						if(ctx.onceFetched){
 							ctx.onceFetched(params);
 						}
 
-					},
+					};
 					PageColl.prototype.fetch.call(this, options);
 				}
 				
@@ -285,19 +289,18 @@ define([
 		},
 
 		update: function (args) {
+			console.log(args);
 			if (this.pageSize) {
 				this.grid.collection.state.currentPage = 1;
 				this.grid.collection.searchCriteria = args.filters;
 				this.fetchCollection({ init: false });
-
 			}
 			else {
 				this.filterCriteria = JSON.stringify(args.filters);
 				this.fetchCollection({ init: false });
 			}
 		},
-		fetchCollection: function (options) {
-
+		fetchCollection: function (callbock) {
 			var _this = this;
 			if (this.filterCriteria != null) {
 				if (!this.url){
@@ -306,8 +309,17 @@ define([
 				}
 				else {
 					var filteredList = this.grid.collection.where(this.filterCriteria);
+					if(_this.lastImported){
+						console.log('********' +_this.lastImported );
+						console.log(this.collection.queryParams);
+						this.collection.queryParams.lastImported = _this.lastImported;
+					} else {
+						delete this.collection.queryParams['lastImported'];
+					}
+					console.log(this.filterCriteria);
 					this.grid.collection.fetch({ reset: true, data: { 'criteria': this.filterCriteria }, success: function () {
-					 /*_this.collectionFetched(options);*/ } });
+
+					} });
 				}
 
 			}
@@ -321,7 +333,9 @@ define([
 		displayGrid: function () {
 			return this.grid.render().el;
 		},
-
+		getGridView : function(){
+			return this.grid.render();
+		},
 
 		displayPaginator: function () {
 			this.paginator = new Backgrid.Extension.Paginator({
@@ -460,8 +474,14 @@ define([
 				// Server Grid Management
 				this.update({ filters: args });
 			}
+		},
+		lastImportedUpdate : function(lastImported, callback){
+			if (lastImported) {
+				this.lastImported = true;
+			}else{
+				this.lastImported = false;
+			}
+			this.fetchCollection(callback);
 		}
-
-
 	});
 });

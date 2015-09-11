@@ -4,8 +4,9 @@
 	<legend>Filters</legend>
 	<div id="filters" class="clearfix"></div>
 	<div class="container-fluid clearfix">
-		<button id="update" class="small btn btn-labeled btn-success pull-right">
-			Filter &nbsp;
+
+		<button id="clear" class="btn btn-default pull-left">Clear</button>
+		<button id="update" class="btn btn-success pull-right">Filter&nbsp;
 			<span class="reneco reneco-search"></span>
 		</button>
 	</div>
@@ -29,9 +30,13 @@
 </div>
 	<div id="gridPanel" class="col-xs-12 pannel full-height scroll-auto active">
 		<br><legend>Stations</legend>
+
+		<legend class="text-right">Total stations : <span id="totalEntries"></span></legend>
 		<div id="grid" class=""></div>
 		<br>
 		<div id="paginator" class="paginator"></div>
+
+
 		<br>
 	</div>
 	<div id="mapPanel" class="col-xs-12 full-height no-padding pannel ">

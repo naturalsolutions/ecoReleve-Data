@@ -156,7 +156,6 @@ define([
             this.updateSize('show');
         },
         updateSize: function(type) {
-            //$(window).trigger('resize');
             this.map.resize();
 
             if(type === 'hide'){
@@ -168,7 +167,6 @@ define([
                 $(this.ui.mapContainer).removeClass('col-md-12');
                 $(this.ui.mapContainer).addClass('col-md-7');
             }
-            $(window).trigger('resize');
         },
         navigatePrev : function() {
         	var selectedList  = window.app.listProperties;
