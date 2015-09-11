@@ -119,6 +119,7 @@ TODO:
 		}
 	}
 	.step-content{
+
 		z-index: 1000;
 		height: calc(~"100% - 46px");
 		overflow: auto;
@@ -136,10 +137,117 @@ TODO:
 
 
 
+.stepper-header{
+	background: #ccc;
+	overflow: hidden;
+}
 
 
 
+ul.step-nav {
+	list-style: none outside none;
+	padding: 0;
+	margin: 0;
+	height: 46px;
 
+	&.previous-disabled {
+		li {
+			&.complete {
+				cursor: default;
+
+				&:hover {
+					background: #f3f4f5;
+					color: @successText;
+					cursor: default;
+
+					.chevron:before {
+						border-left-color: #f3f4f5;
+					}
+				}
+			}
+		}
+	}
+
+	li {
+		float: left;
+		margin: 0;
+		padding: 0 20px 0 30px;
+		height: 46px;
+		line-height: 46px;
+		position: relative;
+		background: #ededed;
+		font-size: 16px;
+		cursor: not-allowed;
+
+		.chevron {
+			border: 24px solid transparent;
+			//border-left: 14px solid @navbarBorder;
+			border-right: 0;
+			display: block;
+			position: absolute;
+			right: -14px;
+			top: 0;
+			z-index: 1;
+		}
+
+		.chevron:before {
+			border: 24px solid transparent;
+			border-left: 14px solid #ededed;
+			border-right: 0;
+			content: "";
+			display: block;
+			position: absolute;
+			right: 1px;
+			top: -24px;
+		}
+
+		&.complete {
+			background: #f3f4f5;
+			color: @successText;
+
+			&:hover {
+				background: #e7eff8;
+				cursor: pointer;
+
+				.chevron:before {
+					border-left: 14px solid #e7eff8;
+				}
+			}
+
+			.chevron:before {
+				border-left: 14px solid #f3f4f5;
+			}
+
+			.badge {
+				background-color: @successText;
+			}
+
+		}
+		&.active {
+			background: #f1f6fc;
+			color: @infoText;
+			cursor: default;
+
+			.chevron:before {
+				border-left: 14px solid #f1f6fc;
+			}
+
+			.badge {
+				background-color: @infoText;
+			}
+		}
+
+		.badge {
+			margin-right: 8px;
+		}
+
+	}
+
+	li:first-child {
+		border-radius: 4px 0 0 4px;
+		padding-left: 20px;
+	}
+}
 
 
 
@@ -772,107 +880,3 @@ div.fuelux{
 	display: none;
 }*/
 
-ul.step-nav {
-	list-style: none outside none;
-	padding: 0;
-	margin: 0;
-	height: 46px;
-
-	&.previous-disabled {
-		li {
-			&.complete {
-				cursor: default;
-
-				&:hover {
-					background: #f3f4f5;
-					color: @successText;
-					cursor: default;
-
-					.chevron:before {
-						border-left-color: #f3f4f5;
-					}
-				}
-			}
-		}
-	}
-
-	li {
-		float: left;
-		margin: 0;
-		padding: 0 20px 0 30px;
-		height: 46px;
-		line-height: 46px;
-		position: relative;
-		background: #ededed;
-		font-size: 16px;
-		cursor: not-allowed;
-
-		.chevron {
-			border: 24px solid transparent;
-			//border-left: 14px solid @navbarBorder;
-			border-right: 0;
-			display: block;
-			position: absolute;
-			right: -14px;
-			top: 0;
-			z-index: 1;
-		}
-
-		.chevron:before {
-			border: 24px solid transparent;
-			border-left: 14px solid #ededed;
-			border-right: 0;
-			content: "";
-			display: block;
-			position: absolute;
-			right: 1px;
-			top: -24px;
-		}
-
-		&.complete {
-			background: #f3f4f5;
-			color: @successText;
-
-			&:hover {
-				background: #e7eff8;
-				cursor: pointer;
-
-				.chevron:before {
-					border-left: 14px solid #e7eff8;
-				}
-			}
-
-			.chevron:before {
-				border-left: 14px solid #f3f4f5;
-			}
-
-			.badge {
-				background-color: @successText;
-			}
-
-		}
-		&.active {
-			background: #f1f6fc;
-			color: @infoText;
-			cursor: default;
-
-			.chevron:before {
-				border-left: 14px solid #f1f6fc;
-			}
-
-			.badge {
-				background-color: @infoText;
-			}
-		}
-
-		.badge {
-			margin-right: 8px;
-		}
-
-	}
-
-	li:first-child {
-		border-radius: 4px 0 0 4px;
-		padding-left: 20px;
-	}
-}
