@@ -68,7 +68,7 @@ class ModuleForms(Base):
 
         if self.Required == 1 :
             if self.InputType=="Select":
-                self.dto['validators'].append("requiredSelect")
+                self.dto['validators'].append("required")
             else:
                 self.dto['validators'].append("required")
             self.dto['title'] = self.dto['title'] + '*'

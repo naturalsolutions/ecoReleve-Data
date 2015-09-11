@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[pr_ExportFormBuilder](
+ALTER PROCEDURE [dbo].[pr_ExportFormBuilder](
 @LastExport DATETIME
 )
 AS
@@ -88,8 +88,8 @@ SELECT pk_Input
            ,I.[order]
 		   ,F.legend
            FROM FormBuilder.dbo.Input I
-		   LEFT JOIN [FormBuilder-new].dbo.Fieldset F ON I.linkedFieldset = F.refid
-		   WHERE i.fk_form in (select ID from [FormBuilderFormsInfos]) and F.pk_Fieldset in (select * from toto)
+		   LEFT JOIN FormBuilder.dbo.Fieldset F ON I.linkedFieldset = F.refid and F.pk_Fieldset in (select * from toto)
+		   WHERE i.fk_form in (select ID from [FormBuilderFormsInfos]) 
 
 INSERT INTO [FormBuilderInputProperty]
            ([ID]
