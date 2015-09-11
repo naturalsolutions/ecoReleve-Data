@@ -1,3 +1,5 @@
+
+
 DELETE FROM [FormBuilderType_DynPropType]
 
 INSERT INTO [FormBuilderType_DynPropType]
@@ -120,12 +122,55 @@ INSERT INTO [FormBuilderType_DynPropType]
            ,[BBEditor]
            ,IsEXISTS)
      VALUES
-           ('ThesaurusPicker-DDL '
+           ('ThesaurusPicker-DDL'
            ,NULL
            ,NULL
            ,'String'
            ,'AutocompTreeEditor'
-           ,1)  
+           ,1)
 
-           
-                         
+
+INSERT INTO [FormBuilderType_DynPropType]
+           ([FBType]
+           ,[FBInputPropertyName]
+           ,[FBInputPropertyValue]
+           ,[DynPropType]
+           ,[BBEditor]
+           ,IsEXISTS)
+     VALUES
+           ('Date'
+           ,NULL
+           ,NULL
+           ,'Date'
+           ,'DateTimePicker'
+           ,1)
+
+INSERT INTO [FormBuilderType_DynPropType]
+           ([FBType]
+           ,[FBInputPropertyName]
+           ,[FBInputPropertyValue]
+           ,[DynPropType]
+           ,[BBEditor]
+           ,IsEXISTS)
+     VALUES
+           ('Autocomplete'
+           ,NULL
+           ,NULL
+           ,'String'
+           ,'AutocompleteEditor'
+           ,1)           
+
+INSERT INTO [FormBuilderType_DynPropType]
+           ([FBType]
+           ,[FBInputPropertyName]
+           ,[FBInputPropertyValue]
+           ,[DynPropType]
+           ,[BBEditor]
+           ,IsEXISTS)
+     VALUES
+           ('Thesaurus'
+           ,NULL
+           ,NULL
+           ,'String'
+           ,'AutocompTreeEditor'
+           ,1)           

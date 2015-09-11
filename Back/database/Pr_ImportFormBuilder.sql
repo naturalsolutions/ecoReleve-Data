@@ -62,7 +62,7 @@ FROM ProtocoleType PT JOIN FormBuilderFormsInfos FI ON REPLACE(PT.OriginalId,'Fo
 DELETE [ProtocoleType_ObservationDynProp]
 DBCC CHECKIDENT ([ProtocoleType_ObservationDynProp], RESEED, 0)
 -- INSERTION DES NOUVELLES DYNPROP/TYPE
-INSERT INTO [NewModelERD].[dbo].[ProtocoleType_ObservationDynProp]
+INSERT INTO [ProtocoleType_ObservationDynProp]
            ([Required]
            ,[FK_ProtocoleType]
            ,[FK_ObservationDynProp])         
@@ -73,9 +73,9 @@ where not exists (select * from [ProtocoleType_ObservationDynProp] ODN where ODN
 
 
 UPDATE FF
-SET InternalID = PT.ID
+SET internalID = PT.ID
 FROM FormBuilderFormsInfos FF JOIN ProtocoleType PT on  REPLACE(PT.OriginalId,'FormBuilder-','') = FF.ID 
 
-[Pr_FormBuilderUpdateConf] 1,'Protocole'
+EXEC [Pr_FormBuilderUpdateConf] @ObjectType = 'Protocole',@id_frontmodule=1
  
 END

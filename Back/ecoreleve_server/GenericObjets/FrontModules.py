@@ -83,10 +83,11 @@ class ModuleForms(Base):
 
         if self.InputType in self.func_type_context :
             self.func_type_context[self.InputType](self)
+        print (self.dto)
         return self.dto
 
     def InputSelect (self) :
-        if self.Options != None :
+        if self.Options is not None and self.Options != '' :
             result = DBSession.execute(text(self.Options)).fetchall()
             for row in result :
                 temp = {}
@@ -122,15 +123,13 @@ class ModuleForms(Base):
 
     def InputThesaurus(self) :
         # TODO : thesaurus url in development.ini
-        if self.Options is not None :
+        if self.Options is not None and self.Options != '' :
             self.dto['options'] = {"startId":self.Options,"wsUrl":"http://192.168.1.199/ThesaurusCore","lng":"fr"}
 
     def InputAutocomplete(self):
-        if self.Options is not None :
-            print(json.loads(self.Options))
+        if self.Options is not None and self.Options != '':
             option = json.loads(self.Options)
             result = DBSession.execute(text(option['source'])).fetchall()
-            print (result)
             self.dto['options']= {'source':[]}
             for row in result:
                 self.dto['options']['source'].append(row[0])
