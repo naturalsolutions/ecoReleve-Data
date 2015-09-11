@@ -26,11 +26,20 @@ define([
 
 		events: {
 			'click button#update' : 'update',
-			'click button#displayPanelGrid' : 'displayPanelGrid',
-			'click button#displayPanelMap' : 'displayPanelMap',
+			'click button#activeGridPanel' : 'activeGridPanel',
+			'click button#activeMapPanel' : 'activeMapPanel',
 			'click button#reset' : 'reset',
 			'click button#add' : 'add',
 			'click button#deploy' : 'deploy',
+		},
+
+		ui : {
+			'grid' : '#grid',
+			'paginator' : '#paginator',
+			'gridPanel' : '#gridPanel',
+			'mapPanel' : '#mapPanel',
+			'btnGridPanel' : 'button#activeGridPanel',
+			'btnMapPanel' : 'button#activeMapPanel',
 		},
 
 		initialize: function(){
@@ -53,20 +62,25 @@ define([
 			};
 		},
 		onShow: function(){
-			$('#main-region').addClass('full-height');
 			this.displayGrid();
 			this.displayFilters();
 			this.displayMap();
 		},
 
-		displayPanelGrid: function(){
-			$('.pannel-map').removeClass('active');
-			$('.pannel-grid').addClass('active');
+		activeGridPanel: function(e){
+			this.ui.mapPanel.removeClass('active');
+			this.ui.gridPanel.addClass('active');
+
+			this.ui.btnMapPanel.removeClass('active');
+			this.ui.btnGridPanel.addClass('active');
 		},
 
-		displayPanelMap: function(){
-			$('.pannel-grid').removeClass('active');
-			$('.pannel-map').addClass('active');
+		activeMapPanel: function(e){
+			this.ui.gridPanel.removeClass('active');
+			this.ui.mapPanel.addClass('active');
+
+			this.ui.btnGridPanel.removeClass('active');
+			this.ui.btnMapPanel.addClass('active');
 		},
 
 
@@ -103,8 +117,8 @@ define([
 				name:'StationVisu'
 			});
 			
-			$('#grid').html(this.grid.displayGrid());
-			$('#paginator').append(this.grid.displayPaginator());
+			this.ui.grid.html(this.grid.displayGrid());
+			this.ui.paginator.append(this.grid.displayPaginator());
 		},
 
 		displayFilters: function(){

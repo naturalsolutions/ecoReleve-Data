@@ -41,7 +41,6 @@ define([
 			if(options.schema.validators){
 				var required = options.schema.validators[0];
 			}
-			console.log(options.schema);
 
 			var $el = $($.trim(this.template({
 				value : options.model.get(this.options.key),

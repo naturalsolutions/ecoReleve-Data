@@ -5,7 +5,7 @@
 	<div id="filters" class="clearfix"></div>
 	<div class="container-fluid clearfix">
 		<button id="update" class="small btn btn-labeled btn-success pull-right">
-			FILTER &nbsp;
+			Filter &nbsp;
 			<span class="reneco reneco-search"></span>
 		</button>
 	</div>
@@ -16,29 +16,25 @@
 			<div class="functions clearfix">
 
 	<span class="pull-right">
-		<button id="displayPanelMap" class="small btn btn-labeled btn-success">
-			 Map
-			<span class="btn-label">
-				<i class="icon reneco map"></i>
+		<button id="activeGridPanel" class="small btn btn-labeled btn-success active ">
+			<span class="reneco reneco-sites"></span>
+			&nbsp;Grid
 			</span>
 		</button>
-
-		<button id="displayPanelGrid" class="small btn btn-labeled btn-success">
-			 Grid
-			<span class="btn-label">
-				<i class="icon reneco sites"></i>
-			</span>
+		<button id="activeMapPanel" class="small btn btn-labeled btn-success">
+			<span class="reneco reneco-map"></span>
+			&nbsp;Map
 		</button>
 	</span>
 </div>
-	<div class="col-xs-12 pannel pannel-grid full-height scroll-auto active">
+	<div id="gridPanel" class="col-xs-12 pannel full-height scroll-auto active">
 		<br><legend>Stations</legend>
 		<div id="grid" class=""></div>
 		<br>
 		<div id="paginator" class="paginator"></div>
 		<br>
 	</div>
-	<div class="col-xs-12 full-height no-padding pannel pannel-map ">
+	<div id="mapPanel" class="col-xs-12 full-height no-padding pannel ">
 		<div id="map" style="height: 100%"></div>
 	</div>
 </div>
