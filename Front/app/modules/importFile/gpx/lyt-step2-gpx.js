@@ -25,7 +25,9 @@ define([
 		name : 'Datas Selection',
 
 		ui: {
-			'grid': '#grid'
+			'grid': '#grid',
+			'filters' : '#filters'
+
 		},
 
 
@@ -36,7 +38,8 @@ define([
 			'click table.backgrid td.editor' : 'cellToEdit',
 			'click table.backgrid td.select-row-cell input[type=checkbox]' : 'checkSelect',
 			'click table.backgrid th input' : 'checkSelectAll',
-			'click button#filter': 'filter'
+			'click button#filter': 'filter',
+			'click button#clear' : 'clearFilter'
 		},
 
 		initialize: function(options){
@@ -50,9 +53,12 @@ define([
 		},
 
 		onShow : function(){
-			this.displayMap();
 			this.displayGrid();
 			this.displayFilters();
+			$(this.ui.filters).find('input').each(function(){
+				$(this).val('');
+			});
+			this.displayMap();
 		},
 
 		displayMap: function(){
@@ -241,7 +247,12 @@ define([
 		filter: function(){
 			this.filters.update();
 		},
-
+		clearFilter : function(){
+			$(this.ui.filters).find('input').each(function(){
+				$(this).val('');
+			});
+			this.filters.update();
+		},
 		/*-----  End of Should be in the module  ------*/
 
 		onDestroy: function(){

@@ -32,7 +32,9 @@ define([
 			'click button#add' : 'add',
 			'click button#deploy' : 'deploy',
 		},
-
+		ui: {
+			'totalEntries': '#totalEntries',
+		},
 		initialize: function(){
 
 			this.radio = Radio.channel('route');
@@ -93,14 +95,17 @@ define([
 		},
 
 		displayGrid: function(){
-			
+			var _this = this;
 			this.grid= new NsGrid({
 				com: this.com,
 				channel: 'modules',
 				url: config.coreUrl + 'stations/',
 				pageSize : 24,
 				pagingServerSide : true,
-				name:'StationVisu'
+				name:'StationVisu',
+				onceFetched: function(){
+					_this.totalEntries(this.grid);
+				}
 			});
 			
 			$('#grid').html(this.grid.displayGrid());
@@ -150,7 +155,11 @@ define([
 			var id = $(row).find(':first-child').text()
 
 			//Radio.channel('route').command('site:detail', id);
-		}
+		},
+		totalEntries: function(grid){
+			this.total = grid.collection.state.totalRecords;
+			this.ui.totalEntries.html(this.total);
+		},
 
 	});
 });

@@ -29,7 +29,7 @@ define([
 			this.clientSide = options.clientSide;
 			this.name = options.name || '';
 			this.com = options.com;
-
+			this.typeObj = options.typeObj;
 			this.url = options.url;
 
 			this.datas = {};
@@ -55,7 +55,8 @@ define([
 			var jqxhr = $.ajax({
 				url: _this.url,
 				data: {
-					'FilterName': _this.name
+					'FilterName': _this.name,
+					'typeObj' : _this.typeObj,
 				},
 				contentType: 'application/json',
 				type: 'GET',

@@ -31,7 +31,8 @@ define([
 			'focusout input[name="Dat e_"]':'checkDate',
 			'keyup input[name="LAT"], input[name="LON"]' : 'getLatLng',
 			'click #getCurrentPosition' : 'getCurrentPosition',
-			'click .tab-link' : 'displayTab'
+			'click .tab-link' : 'displayTab',
+			'change select[name="FieldWorker"]' : 'checkUsers'
 		},
 
 		name : 'Station creation',
@@ -177,6 +178,32 @@ define([
 			
 			this.rdy = this.nsForm.jqxhr;
 
+		},
+		checkUsers : function(e){
+			var usersFields = $('select[name="FieldWorker"]');
+			var selectedUser = $(e.target).val();
+			var exists = 0;
+			$('select[name="FieldWorker"]').each(function() {
+				var user = $(this).val();
+				if (user == selectedUser){
+					exists += 1;
+				}
+			});
+			if(exists > 1){
+				Swal({
+				title: 'Fieldworker name error',
+				text: 'Already selected ! ',
+				type: 'error',
+				showCancelButton: false,
+				confirmButtonColor: 'rgb(147, 14, 14)',
+				confirmButtonText: 'OK',
+				closeOnConfirm: true,
+				},
+				function(isConfirm){   
+					$(e.target).val('');
+				});
+				
+			} 
 		}
 	});
 });

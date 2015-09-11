@@ -38,6 +38,7 @@ define([
 			'paginator': '#paginator',
 			'filter': '#filter',
 			'detail': '#detail',
+			'totalEntries': '#totalEntries',
 		},
 
 		regions: {
@@ -88,6 +89,7 @@ define([
 					listPro.state = this.collection.state;
 					listPro.criteria = $.parseJSON(params.criteria);
 					window.app.listProperties = listPro ;
+					_this.totalEntries(this.grid);
 
 					//console.log(idList);
 					/*window.app.temp = this;
@@ -147,6 +149,10 @@ define([
 		},
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
-		}
+		},
+		totalEntries: function(grid){
+			this.total = grid.collection.state.totalRecords;
+			this.ui.totalEntries.html(this.total);
+		},
 	});
 });
