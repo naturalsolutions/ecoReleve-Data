@@ -60,6 +60,7 @@ define([
 			this.com = new Com();
 			var url = config.coreUrl+'stations/';
 			this.initGrid(url);
+			this.parent = options.parent;
 		},
 
 		initGrid: function(url,params){
@@ -152,6 +153,7 @@ define([
 
 		rowDbClicked : function(row){
 			this.rowClicked(row);
+			this.parent.next();
 		},
 
 		filter: function(e){

@@ -42,6 +42,7 @@ define([
 
 			// If filters are given we use them
 			if (options.filters) {
+				this.filters = options.filters;
 				this.initFilters(options.filters);
 			} else {
 				// Otherwise initialized from AJAX call
@@ -257,6 +258,7 @@ define([
 				// Otherwise initialized from AJAX call
 				this.getFilters();
 			}
+			this.update();
 		},
 
 		clientFilter: function (filters) {

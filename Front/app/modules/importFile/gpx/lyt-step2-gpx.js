@@ -94,6 +94,7 @@ define([
 				bbox: true,
 				selection : true,
 				element: 'map',
+				center: [-4.094, 33.006]
 			});
 		},
 
@@ -225,6 +226,10 @@ define([
 		checkSelect: function (e) {
 			var id = $(e.target).parent().parent().find('td').html();
 			this.grid.interaction('selection', id);
+			console.log('selected');
+			if($(e.target).is(':checked')){
+				this.focus(e);
+			}
 		},
 
 		checkSelectAll: function (e) {
@@ -237,21 +242,21 @@ define([
 		},
 
 		focus: function (e) {
+			var tr, id;
 			if ($(e.target).is('td')) {
-				var tr = $(e.target).parent();
-				var id = tr.find('td').first().text();
-				this.grid.interaction('focus', id);
+				tr = $(e.target).parent();
+			} else if ($(e.target).parent().is('td')){
+				tr = $(e.target).parent().parent();
 			}
+			id = tr.find('td').first().text();
+			this.grid.interaction('focus', id);
 		},
 
 		filter: function(){
 			this.filters.update();
 		},
 		clearFilter : function(){
-			$(this.ui.filters).find('input').each(function(){
-				$(this).val('');
-			});
-			this.filters.update();
+			this.filters.reset();
 		},
 		/*-----  End of Should be in the module  ------*/
 
@@ -261,8 +266,6 @@ define([
 		check: function(){
 
 		},
-
-
 		validate: function(){
 			var _this = this;
 			//seturl 4 mother coll

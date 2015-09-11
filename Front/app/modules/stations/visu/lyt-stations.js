@@ -31,6 +31,7 @@ define([
 			'click button#reset' : 'reset',
 			'click button#add' : 'add',
 			'click button#deploy' : 'deploy',
+			'click button#clear' : 'clearFilter'
 		},
 		ui: {
 			'totalEntries': '#totalEntries',
@@ -70,9 +71,9 @@ define([
 			$('.pannel-grid').removeClass('active');
 			$('.pannel-map').addClass('active');
 		},
-
-
-
+		clearFilter : function(){
+			this.filters.reset();
+		},
 		infos: function(){
 			this.offset = this.gridView.getGrid().getPaginatorOffSet();
 			this.limit = this.gridView.getGrid().getPageSize();

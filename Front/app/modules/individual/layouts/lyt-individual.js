@@ -30,7 +30,8 @@ define([
 
 		events : {
 			'click #btnFilter' : 'filter',
-			'click #back' : 'hideDetails'
+			'click #back' : 'hideDetails',
+			'click button#clear' : 'clearFilter'
 		},
 
 		ui: {
@@ -135,7 +136,9 @@ define([
 		filter: function(){
 			this.filters.update();
 		},
-
+		clearFilter : function(){
+			this.filters.reset();
+		},
 		rowClicked: function(row){
 			var id = row.model.get('ID');
 			this.detail.show(new LytIndivDetail({id : id}));

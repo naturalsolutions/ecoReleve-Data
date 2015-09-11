@@ -156,7 +156,6 @@ define([
 			}
 			if(this.nsForm){
 				this.nsForm.destroy();
-				console.log('*********** parent stepper***********');
 				//console.log(this.parent);
 				this.parent.unbindRequiredFields();
 				this.parent.disableNextBtn();
@@ -171,7 +170,6 @@ define([
 				id: 0,
 				reloadAfterSave : false,
 				afterShow: function(){
-					console.log('********affichage form************');
 					_this.parent.bindRequiredFields();
 				}
 			});
