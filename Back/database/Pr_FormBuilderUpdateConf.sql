@@ -62,13 +62,13 @@ LEFT JOIN FormBuilderType_DynPropType FBD ON FBD.[FBType] = FI.type
 				[FBInputPropertyName] IS NULL 
 				OR (FBD.IsEXISTS =1 AND EXISTS (	SELECT * FROM FormBuilderInputProperty FIP
 						Where FIP.fk_input = Fi.ID 
-						--AND FIP.value = FBD.[FBInputPropertyValue] 
+						AND FIP.value = FBD.[FBInputPropertyValue] 
 						AND FIP.name = FBD.[FBInputPropertyName]  
 						)
 					)
 				OR (FBD.IsEXISTS =0 AND NOT EXISTS (	SELECT * FROM FormBuilderInputProperty FIP
 						Where FIP.fk_input = Fi.ID 
-						--AND FIP.value = FBD.[FBInputPropertyValue] 
+						AND FIP.value = FBD.[FBInputPropertyValue] 
 						AND FIP.name = FBD.[FBInputPropertyName]  
 						)
 					)
