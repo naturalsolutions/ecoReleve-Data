@@ -176,7 +176,7 @@ define([
 		rowClicked: function(row){
 			var id = row.model.get('ID');
 			this.grid.interaction('popup', id);
-		}
+		},
 
 		totalEntries: function(grid){
 			this.total = grid.collection.state.totalRecords;

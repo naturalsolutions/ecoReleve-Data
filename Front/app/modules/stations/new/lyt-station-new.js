@@ -99,8 +99,8 @@ define([
 						var lat = parseFloat((position.coords.latitude).toFixed(5));
 						var lon = parseFloat((position.coords.longitude).toFixed(5));
 						_this.updateMarkerPos(lat, lon);
-						_this.$el.find('input[name="LAT"]').val(lat);
-						_this.$el.find('input[name="LON"]').val(lon);
+						_this.$el.find('input[name="LAT"]').val(lat).change();
+						_this.$el.find('input[name="LON"]').val(lon).change();
 				});
 			} else {
 				Swal({
