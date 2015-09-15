@@ -113,10 +113,16 @@ define([
 				pageSize : 24,
 				pagingServerSide : true,
 				name:'StationVisu',
+				rowClicked : true,
 				onceFetched: function(){
 					_this.totalEntries(this.grid);
 				}
+
 			});
+
+			this.grid.rowClicked = function(row){
+				_this.rowClicked(row);
+			};
 			
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.append(this.grid.displayPaginator());
@@ -152,7 +158,7 @@ define([
 		},
 
 
-		add: function(){
+		add: function(){	
 			//this.radio.command('site:add');
 		},
 		deploy: function(){
@@ -166,6 +172,12 @@ define([
 
 			//Radio.channel('route').command('site:detail', id);
 		},
+
+		rowClicked: function(row){
+			var id = row.model.get('ID');
+			this.grid.interaction('popup', id);
+		}
+
 		totalEntries: function(grid){
 			this.total = grid.collection.state.totalRecords;
 			this.ui.totalEntries.html(this.total);
