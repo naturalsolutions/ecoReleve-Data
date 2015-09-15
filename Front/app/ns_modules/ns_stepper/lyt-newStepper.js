@@ -204,6 +204,7 @@ define([
 		bindRequiredFields: function(){
 			var _this = this;
 			this.onEditEvt = $.proxy(function(e){
+				console.log('plouf');
 				this.checkNextBtn(e);
 			}, this);
 			var required = this.$el.find('.required').each(function(){

@@ -70,7 +70,7 @@ define([
 		displayGrid: function(){
 			var _this = this;
 			this.grid = new NsGrid({
-				pageSize: 20,
+				pageSize: 13,
 				pagingServerSide: true,
 				com: this.com,
 				url: config.coreUrl+'individuals/',
