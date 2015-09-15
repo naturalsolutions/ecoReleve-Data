@@ -57,22 +57,27 @@ define([
 		},
 
 		importFile: function(e){
+
 			var _this = this;
 			var file = e.target.files[0];
 			var reader = new FileReader();
 			var fileName = file.name;
 			var tab = fileName.split('.');
 			var fileType = tab[1].toUpperCase();
+			var fieldAfield = $('select[name="fieldActivity"]');
+			var userBtn = $('button[data-action="add"]');
 			
 			if (fileType != 'GPX') {
 				this.swalError('error file type');
 				this.model.set('data_FileName', '');
 				this.errors = true;
+				$(fieldAfield).attr('disabled', 'disabled');	
+				$(userBtn).attr('disabled', 'disabled');	
+				$('#importGpxMsg').removeClass('hidden');
 			} else {
 				reader.onload = function(e, fileName){
 					var xml = e.target.result;
-					var fieldAfield = $('select[name="fieldActivity"]');
-					var userBtn = $('button[data-action="add"]');
+					
 					// get waypoints collection
 
 					var importResulr =  XmlParser.gpxParser(xml);

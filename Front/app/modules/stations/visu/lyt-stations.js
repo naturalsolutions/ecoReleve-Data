@@ -31,8 +31,8 @@ define([
 			'click button#reset' : 'reset',
 			'click button#add' : 'add',
 			'click button#deploy' : 'deploy',
+			'click button#clear' : 'clearFilter'
 		},
-
 		ui : {
 			'grid' : '#grid',
 			'paginator' : '#paginator',
@@ -40,16 +40,14 @@ define([
 			'mapPanel' : '#mapPanel',
 			'btnGridPanel' : 'button#activeGridPanel',
 			'btnMapPanel' : 'button#activeMapPanel',
+			'totalEntries': '#totalEntries',
 		},
-
 		initialize: function(){
-
 			this.radio = Radio.channel('route');
 			this.datas={};
 			this.form;
 			this.datas;
 			this.com = new Com();
-
 
 			this.filtersList={
 				nbFieldWorker: 'DECIMAL(9, 5)',
@@ -82,9 +80,9 @@ define([
 			this.ui.btnGridPanel.removeClass('active');
 			this.ui.btnMapPanel.addClass('active');
 		},
-
-
-
+		clearFilter : function(){
+			this.filters.reset();
+		},
 		infos: function(){
 			this.offset = this.gridView.getGrid().getPaginatorOffSet();
 			this.limit = this.gridView.getGrid().getPageSize();
@@ -116,6 +114,10 @@ define([
 				pagingServerSide : true,
 				name:'StationVisu',
 				rowClicked : true,
+				onceFetched: function(){
+					_this.totalEntries(this.grid);
+				}
+
 			});
 
 			this.grid.rowClicked = function(row){
@@ -175,6 +177,11 @@ define([
 			var id = row.model.get('ID');
 			this.grid.interaction('popup', id);
 		}
+
+		totalEntries: function(grid){
+			this.total = grid.collection.state.totalRecords;
+			this.ui.totalEntries.html(this.total);
+		},
 
 	});
 });

@@ -28,7 +28,12 @@ define([
 
 		ui: {
 			'stationId': '#stationId',
-			'totalEntries': '#totalEntries'
+			'totalEntries': '#totalEntries',
+			'filters' : '#filters'
+		},
+		regions: {
+			gridRegion: '#grid',
+			paginatorRegion : '#paginator'
 		},
 
 		name: 'Sation selection',
@@ -55,6 +60,7 @@ define([
 			this.com = new Com();
 			var url = config.coreUrl+'stations/';
 			this.initGrid(url);
+			this.parent = options.parent;
 		},
 
 		initGrid: function(url,params){
@@ -63,6 +69,9 @@ define([
 			var myCell = Backgrid.NumberCell.extend({
 				decimals: 5
 			});
+			if(this.grid){
+
+			}
 			this.grid = new NSGrid({
 				pageSize: 20,
 				pagingServerSide: true,
@@ -116,15 +125,19 @@ define([
 		displayGrid: function(){
 			var _this= this;
 			//could be in the module
-			this.$el.find('#grid').html(_this.grid.displayGrid());
+			/*this.$el.find('#grid').html(_this.grid.displayGrid());*/
+			
+
+			this.gridRegion.show(this.grid.getGridView());
 			this.$el.find('#paginator').html(_this.grid.displayPaginator());
 		},
 
-		displayFilters: function(){
+		displayFilters: function(typeObj){
 			this.filters = new NSFilter({
 				url: config.coreUrl + 'stations/',
 				com: this.com,
 				name:'StationGrid',
+				typeObj: typeObj,
 				filterContainer: 'filters'
 			});
 		},
@@ -140,25 +153,45 @@ define([
 
 		rowDbClicked : function(row){
 			this.rowClicked(row);
+			this.parent.next();
 		},
 
-		filter: function(){
+		filter: function(e){
 			this.filters.update();
 		},
+
 		displayTab : function(e){
-			e.preventDefault();
-			var ele = $(e.target);
-			var tabLink = $(ele).attr('href');
+			var _this =this;
+			var type = $(e.target).attr('title');
 			$('.tab-ele').removeClass('active');
-			$(ele).parent().addClass('active');
-			$(tabLink).addClass('active in');
+			var typeObj;
+			$(e.target).parent().addClass('active');
+
 			var url =config.coreUrl+'stations/';
-			var params = {};
-			if(tabLink !='#allSt'){
-				params = {'lastImported' : true};
+			var params = null;
+
+			if( type == 'allSt' ){
+				type = false;
+				typeObj=1;
+			}else{
+				type = true;
+				typeObj= 2;
 			}
-			this.initGrid(url, params);
-			this.displayGrid();
+			//this.initGrid(url, params);
+			// this.grid.fetchCollection(url, params);
+			$('#filters').empty();
+
+			_this.displayFilters(typeObj);
+			console.log(this.com);
+			var callback = function(){
+				_this.filter();
+			};
+			console.log('**********com');
+			console.log(this.com);
+			
+			this.grid.lastImportedUpdate(type, callback);
+			
+
 		},
 	});
 });

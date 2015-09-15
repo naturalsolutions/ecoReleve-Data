@@ -25,7 +25,9 @@ define([
 		name : 'Datas Selection',
 
 		ui: {
-			'grid': '#grid'
+			'grid': '#grid',
+			'filters' : '#filters'
+
 		},
 
 
@@ -36,7 +38,8 @@ define([
 			'click table.backgrid td.editor' : 'cellToEdit',
 			'click table.backgrid td.select-row-cell input[type=checkbox]' : 'checkSelect',
 			'click table.backgrid th input' : 'checkSelectAll',
-			'click button#filter': 'filter'
+			'click button#filter': 'filter',
+			'click button#clear' : 'clearFilter'
 		},
 
 		initialize: function(options){
@@ -50,9 +53,12 @@ define([
 		},
 
 		onShow : function(){
-			this.displayMap();
 			this.displayGrid();
 			this.displayFilters();
+			$(this.ui.filters).find('input').each(function(){
+				$(this).val('');
+			});
+			this.displayMap();
 		},
 
 		displayMap: function(){
@@ -88,6 +94,7 @@ define([
 				bbox: true,
 				selection : true,
 				element: 'map',
+				center: [-4.094, 33.006]
 			});
 		},
 
@@ -219,6 +226,10 @@ define([
 		checkSelect: function (e) {
 			var id = $(e.target).parent().parent().find('td').html();
 			this.grid.interaction('selection', id);
+			console.log('selected');
+			if($(e.target).is(':checked')){
+				this.focus(e);
+			}
 		},
 
 		checkSelectAll: function (e) {
@@ -231,17 +242,22 @@ define([
 		},
 
 		focus: function (e) {
+			var tr, id;
 			if ($(e.target).is('td')) {
-				var tr = $(e.target).parent();
-				var id = tr.find('td').first().text();
-				this.grid.interaction('focus', id);
+				tr = $(e.target).parent();
+			} else if ($(e.target).parent().is('td')){
+				tr = $(e.target).parent().parent();
 			}
+			id = tr.find('td').first().text();
+			this.grid.interaction('focus', id);
 		},
 
 		filter: function(){
 			this.filters.update();
 		},
-
+		clearFilter : function(){
+			this.filters.reset();
+		},
 		/*-----  End of Should be in the module  ------*/
 
 		onDestroy: function(){
@@ -250,8 +266,6 @@ define([
 		check: function(){
 
 		},
-
-
 		validate: function(){
 			var _this = this;
 			//seturl 4 mother coll

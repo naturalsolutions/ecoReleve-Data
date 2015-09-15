@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[Pr_FormBuilderUpdateConf]
+CREATE PROCEDURE [dbo].[Pr_FormBuilderUpdateConf]
 (
 @ObjectType varchar(255),
 @id_frontmodule BIGINT
@@ -18,7 +18,7 @@ and TypeObj IS NOT NULL
 -- TODO: s'appuyer sur syscolumns à patir de la table Observation pour enelver les propriétés statiques. FAIT !
 -- Faire un not exists
 
-INSERT INTO [NewModelERD].[dbo].[ModuleForms]
+INSERT INTO [ModuleForms]
            ([module_id]
            ,[TypeObj]
            ,[Name]
@@ -35,28 +35,45 @@ INSERT INTO [NewModelERD].[dbo].[ModuleForms]
            ,[Validators]
            ,[displayClass]
            ,[EditClass]
-           ,[Status])
+           ,[Status]
+		   )
 
+SELECT  @id_frontmodule,
+FF.internalID,
+FI.name,
+FI.labelFr,
+FI.required,
+FI.fieldSizeEdit,
+FI.fieldSizeDisplay
+,CASE WHEN FBD.BBEditor IS NOT NULL THEN FBD.BBEditor ELSE FI.type END
+,'form-control'
+,2
+,FI.[order],
+FI.linkedFieldset,
+IP.value,
+NULL,
+Fi.fieldClassDisplay,
+FI.fieldClassEdit,
+FI.curStatus
 
-SELECT  @id_frontmodule,FF.internalID,FI.name,FI.labelFr,FI.required,CASE WHEN FI.fieldSize= 'Etroit' THEN 0 ELSE 1 END,CASE WHEN FI.fieldSize= 'Etroit' THEN 0 ELSE 1 END,CASE WHEN FBD.BBEditor IS NOT NULL THEN FBD.BBEditor ELSE FI.type END
-,FI.editorClass,6,FI.[order],'bezin',NULL,NULL,Fi.fieldClass,FI.fieldClass,FI.curStatus
 FROM FormBuilderInputInfos FI JOIN FormBuilderFormsInfos FF ON FI.fk_form = FF.ID
-LEFT JOIN [FormBuilderType_DynPropType] FBD ON FBD.[FBType] = FI.type 
+LEFT JOIN FormBuilderType_DynPropType FBD ON FBD.[FBType] = FI.type 
 			AND (
 				[FBInputPropertyName] IS NULL 
 				OR (FBD.IsEXISTS =1 AND EXISTS (	SELECT * FROM FormBuilderInputProperty FIP
 						Where FIP.fk_input = Fi.ID 
-						--AND FIP.value = FBD.[FBInputPropertyValue] 
+						AND FIP.value = FBD.[FBInputPropertyValue] 
 						AND FIP.name = FBD.[FBInputPropertyName]  
 						)
 					)
 				OR (FBD.IsEXISTS =0 AND NOT EXISTS (	SELECT * FROM FormBuilderInputProperty FIP
 						Where FIP.fk_input = Fi.ID 
-						--AND FIP.value = FBD.[FBInputPropertyValue] 
+						AND FIP.value = FBD.[FBInputPropertyValue] 
 						AND FIP.name = FBD.[FBInputPropertyName]  
 						)
 					)
 				)
+LEFT JOIN FormBuilderInputProperty IP ON FI.ID =IP.fk_input AND IP.name = 'webServiceURL'
 WHERE FF.ObjectType = @ObjectType
 --@id_frontmodule,OD.Name,FI.[LabelFr],FI.[Required],FI.[FieldSize],
 --CASE 

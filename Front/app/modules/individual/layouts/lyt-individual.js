@@ -30,7 +30,8 @@ define([
 
 		events : {
 			'click #btnFilter' : 'filter',
-			'click #back' : 'hideDetails'
+			'click #back' : 'hideDetails',
+			'click button#clear' : 'clearFilter'
 		},
 
 		ui: {
@@ -38,6 +39,7 @@ define([
 			'paginator': '#paginator',
 			'filter': '#filter',
 			'detail': '#detail',
+			'totalEntries': '#totalEntries',
 		},
 
 		regions: {
@@ -68,7 +70,7 @@ define([
 		displayGrid: function(){
 			var _this = this;
 			this.grid = new NsGrid({
-				pageSize: 20,
+				pageSize: 13,
 				pagingServerSide: true,
 				com: this.com,
 				url: config.coreUrl+'individuals/',
@@ -88,6 +90,7 @@ define([
 					listPro.state = this.collection.state;
 					listPro.criteria = $.parseJSON(params.criteria);
 					window.app.listProperties = listPro ;
+					_this.totalEntries(this.grid);
 
 					//console.log(idList);
 					/*window.app.temp = this;
@@ -133,7 +136,9 @@ define([
 		filter: function(){
 			this.filters.update();
 		},
-
+		clearFilter : function(){
+			this.filters.reset();
+		},
 		rowClicked: function(row){
 			var id = row.model.get('ID');
 			this.detail.show(new LytIndivDetail({id : id}));
@@ -147,6 +152,10 @@ define([
 		},
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
-		}
+		},
+		totalEntries: function(grid){
+			this.total = grid.collection.state.totalRecords;
+			this.ui.totalEntries.html(this.total);
+		},
 	});
 });

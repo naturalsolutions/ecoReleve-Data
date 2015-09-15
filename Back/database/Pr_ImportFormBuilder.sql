@@ -33,6 +33,9 @@ FROM ProtocoleType PT JOIN FormBuilderFormsInfos FI ON REPLACE(PT.OriginalId,'Fo
 	--[Name] [nvarchar](250) NOT NULL,
 	--[TypeProp] [nvarchar](250) NOT NULL
  --)
+ DELETE [ProtocoleType_ObservationDynProp]
+ DBCC CHECKIDENT ([ProtocoleType_ObservationDynProp], RESEED, 0)
+-- DELETE [ObservationDynProp]
  -- INSERTION DES NOUVELLES DYN PROP
  INSERT INTO dbo.ObservationDynProp  (Name,TypeProp)
  --OUTPUT INSERTED.ID,INSERTED.NAME,INSERTED.TypeProp INTO @NewDynProp 
@@ -43,26 +46,25 @@ FROM ProtocoleType PT JOIN FormBuilderFormsInfos FI ON REPLACE(PT.OriginalId,'Fo
 				[FBInputPropertyName] IS NULL 
 				OR (FBD.IsEXISTS =1 AND EXISTS (	SELECT * FROM FormBuilderInputProperty FIP
 						Where FIP.fk_input = Fi.ID 
-						--AND FIP.value = FBD.[FBInputPropertyValue] 
+						AND FIP.value = FBD.[FBInputPropertyValue] 
 						AND FIP.name = FBD.[FBInputPropertyName]  
 						)
 					)
 				OR (FBD.IsEXISTS =0 AND NOT EXISTS (	SELECT * FROM FormBuilderInputProperty FIP
 						Where FIP.fk_input = Fi.ID 
-						--AND FIP.value = FBD.[FBInputPropertyValue] 
+						AND FIP.value = FBD.[FBInputPropertyValue] 
 						AND FIP.name = FBD.[FBInputPropertyName]  
 						)
 					)
 				)
  WHERE EXISTS (SELECT * FROM ProtocoleType PT WHERE REPLACE(PT.OriginalId,'FormBuilder-','') = FI.fk_form)  
-
+ AND NOT EXISTS (SELECT * FROM ObservationDynProp ODP WHERE ODP.Name = FI.name)
 
 
 --Suppression des liens ProtocoleType_ObservationDynProp
-DELETE [ProtocoleType_ObservationDynProp]
-DBCC CHECKIDENT ([ProtocoleType_ObservationDynProp], RESEED, 0)
+
 -- INSERTION DES NOUVELLES DYNPROP/TYPE
-INSERT INTO [NewModelERD].[dbo].[ProtocoleType_ObservationDynProp]
+INSERT INTO [ProtocoleType_ObservationDynProp]
            ([Required]
            ,[FK_ProtocoleType]
            ,[FK_ObservationDynProp])         
@@ -73,9 +75,9 @@ where not exists (select * from [ProtocoleType_ObservationDynProp] ODN where ODN
 
 
 UPDATE FF
-SET InternalID = PT.ID
+SET internalID = PT.ID
 FROM FormBuilderFormsInfos FF JOIN ProtocoleType PT on  REPLACE(PT.OriginalId,'FormBuilder-','') = FF.ID 
 
-[Pr_FormBuilderUpdateConf] 1,'Protocole'
+EXEC [Pr_FormBuilderUpdateConf] @ObjectType = 'Protocole',@id_frontmodule=1
  
 END
