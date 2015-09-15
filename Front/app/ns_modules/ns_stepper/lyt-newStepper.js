@@ -206,11 +206,11 @@ define([
 
 			//test with _this as context
 			this.onEditEvt = $.proxy(function(e){
-				console.log('plouf');
 				this.checkNextBtn(e);
 			}, this);
 			var required = this.$el.find('.required').each(function(){
 				$(this).on('change', _this.onEditEvt);
+				$(this).parent().parent().on('dp.change', _this.onEditEvt);
 			});
 			if(!required.length){
 				//if no .required found, enable nextBtn
