@@ -107,15 +107,20 @@ define([
 		},
 
 		displayGrid: function(){
-			
+			var _this = this;
 			this.grid= new NsGrid({
 				com: this.com,
 				channel: 'modules',
 				url: config.coreUrl + 'stations/',
 				pageSize : 24,
 				pagingServerSide : true,
-				name:'StationVisu'
+				name:'StationVisu',
+				rowClicked : true,
 			});
+
+			this.grid.rowClicked = function(row){
+				_this.rowClicked(row);
+			};
 			
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.append(this.grid.displayPaginator());
@@ -151,7 +156,7 @@ define([
 		},
 
 
-		add: function(){
+		add: function(){	
 			//this.radio.command('site:add');
 		},
 		deploy: function(){
@@ -164,6 +169,11 @@ define([
 			var id = $(row).find(':first-child').text()
 
 			//Radio.channel('route').command('site:detail', id);
+		},
+
+		rowClicked: function(row){
+			var id = row.model.get('ID');
+			this.grid.interaction('popup', id);
 		}
 
 	});

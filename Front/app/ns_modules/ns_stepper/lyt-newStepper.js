@@ -202,6 +202,8 @@ define([
 		},
 
 		bindRequiredFields: function(){
+			this.enableNextBtn();
+			/*
 			var _this = this;
 			this.onEditEvt = $.proxy(function(e){
 				this.checkNextBtn(e);
@@ -210,9 +212,9 @@ define([
 				$(this).on('change', _this.onEditEvt);
 			});
 			if(!required.length){
-				//if no .required found, enable nextBtn
 				this.enableNextBtn();
-			}
+				//if no .required found, enable nextBtn
+			}*/
 			
 		},
 
