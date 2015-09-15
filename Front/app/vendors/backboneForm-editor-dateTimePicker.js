@@ -13,6 +13,7 @@ define([
 		previousValue: '',
 
 		events: {
+			'change' : 'forceChangeEvt',
 			'hide': "hasChanged"
 		},
 
@@ -32,6 +33,10 @@ define([
 		getValue: function() {
 			var date= new Date;
 			return this.el.children['Date_'].value
+		},
+
+		forceChangeEvt: function(e){
+			this.$el.change();
 		},
 
 		render: function(){
@@ -58,6 +63,8 @@ define([
 				var value = this.options.model.get(this.options.key);
 				$el.find('input').val(value);
 			}
+
+			//$el.find('input').val(value);
 
 			return this;
 		},
