@@ -203,6 +203,8 @@ define([
 
 		bindRequiredFields: function(){
 			var _this = this;
+
+			//test with _this as context
 			this.onEditEvt = $.proxy(function(e){
 				console.log('plouf');
 				this.checkNextBtn(e);
