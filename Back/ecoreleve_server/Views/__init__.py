@@ -74,15 +74,19 @@ def add_routes(config):
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Sensors datas (Argos + GSM + RFID) #####
+    
     config.add_route('sensors/datas', 'ecoReleve-Sensor/{type}/datas')
     config.add_route('sensors/id/datas', 'ecoReleve-Sensor/{type}/{id}/datas')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
-    config.add_route('sensors', 'ecoReleve-Sensor/{type}')
+    config.add_route('sensors', 'ecoReleve-Core/sensors/') 
+    config.add_route('sensors/action', 'ecoReleve-Core/sensors/{action}') 
+    #config.add_route('sensors', 'ecoReleve-Sensor/{type}')
     config.add_route('sensors/id', 'ecoReleve-Sensor/{type}/{id}')
-    # config.add_notfound_view(notfound, append_slash=True)
 
+    # config.add_notfound_view(notfound, append_slash=True)
+    
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/') 
