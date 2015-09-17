@@ -26,9 +26,10 @@ class Sensor (Base,ObjectWithDynProp) :
 
     __tablename__ = 'Sensor'
     ID = Column (Integer,Sequence('Sensor__id_seq'), primary_key = True)
-    Name = Column (String)
+    UnicName = Column (String)
     Model = Column(String)
     Compagny = Column(String)
+    SerialNumber = Column(String)
     creationDate = Column (DateTime,nullable=False)
 
     FK_SensorType = Column(Integer, ForeignKey('SensorType.ID'))
