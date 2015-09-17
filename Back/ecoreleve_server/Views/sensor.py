@@ -35,7 +35,8 @@ def actionOnSensors(request):
     'getFields': getFields,
     'getFilters': getFilters,
     'getModels' : getSensorModels,
-    'getCompany' : getCompany
+    'getCompany' : getCompany,
+    'getSerialNumber' : getSerialNumber
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -88,21 +89,23 @@ def getFields(request) :
 
 def getSensorModels(request):
     sensorType = request.params['sensorType']
-    print(sensorType)
     query = select([distinct(Sensor.Model)]).where(Sensor.FK_SensorType == sensorType)
-    result = DBSession.execute(query).fetchall()
-    response = []
-    for row in result:
-        curRow = OrderedDict(row)
-        dictRow = {}
-        for key in curRow :
-            if curRow[key] is not None :
-                response.append(curRow[key])
+    response = getData(query)
     return response
 
 def getCompany (request):
     sensorType = request.params['sensorType']
     query = select([distinct(Sensor.Compagny)]).where(Sensor.FK_SensorType == sensorType)
+    response = getData(query)
+    return response
+
+def getSerialNumber (request):
+    sensorType = request.params['sensorType']
+    query = select([distinct(Sensor.SerialNumber)]).where(Sensor.FK_SensorType == sensorType)
+    response = getData(query)
+    return response
+
+def getData(query):
     result = DBSession.execute(query).fetchall()
     response = []
     for row in result:
