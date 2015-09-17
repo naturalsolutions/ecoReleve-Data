@@ -249,7 +249,35 @@ def searchSensor(request):
     transaction.commit()
     return result
 
+@view_config(route_name=prefix + '/export', renderer='csv', request_method='POST', permission = NO_PERMISSION_REQUIRED)
+def sensors_export(request):
+    print('**************************** export ********')
+    query = select(Sensor.__table__.c)
+    criteria = request.json_body.get('criteria', {})
+    searchInfo = []
+    if criteria != {}:
+        for elem in criteria:
+            if elem['Value'] != str(-1):
+                searchInfo.append(elem)
+    print(searchInfo)
+    if searchInfo !=[]:
+        for ele in searchInfo :
+            if (ele['Operator'] == 'Is'):
+                query = query.where(Sensor.__table__.c[ele['Column']] == ele['Value'])
+            else:
+                query = query.where(Sensor.__table__.c[ele['Column']] != ele['Value'])
 
+    # Run query
+    data = DBSession.execute(query).fetchall()
+    header = [col.name for col in Sensor.__table__.c]
+    rows = [[val for val in row] for row in data]
+    
+    filename = 'object_search_export.csv'
+    request.response.content_disposition = 'attachment;filename=' + filename
+    return {
+         'header': header,
+         'rows': rows,
+    }
 
 
 

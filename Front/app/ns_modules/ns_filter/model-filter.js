@@ -50,6 +50,7 @@ define([
 				// Otherwise initialized from AJAX call
 				this.getFilters();
 			}
+			this.criterias = {};
 		},
 
 		getFilters: function() {
@@ -246,7 +247,7 @@ define([
 					currentForm.$el.find('input.filter').removeClass('active')
 				};
 			};
-			
+			this.criterias = filters;
 			if (this.clientSide) {
 				this.clientFilter(filters);
 			}else{

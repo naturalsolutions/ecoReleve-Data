@@ -31,7 +31,8 @@ define([
 			'click #btnFilter' : 'filter',
 			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
-			'change select.FK_SensorType' : 'updateModels'
+			'change select.FK_SensorType' : 'updateModels',
+			'click #btn-export' : 'exportGrid'
 		},
 
 		ui: {
@@ -148,6 +149,7 @@ define([
 				}
 			);
 			this.updateCompany(selectedType);
+			this.updateSerialNumber(selectedType);
 		},
 		updateCompany : function(selectedType){
 			var companyField = $('select.Compagny');
@@ -160,12 +162,39 @@ define([
 				}
 			);
 		},
+		updateSerialNumber : function(selectedType){
+			var serialNbField = $('select.SerialNumber');
+			var url  = config.coreUrl + 'sensors/getSerialNumber?sensorType=' + selectedType;
+			$.ajax({
+				url: url,
+				context: this,
+				}).done(function(data) {
+					this.updateField(data,serialNbField);
+				}
+			);
+		},
 		updateField : function(data, elem){
 			var content = '<option></option>';
 			for (var i=0;i<data.length;i++){
-					content += '<option>'+ data[i] +'</option>';
+				content += '<option>'+ data[i] +'</option>';
 			}
 			$(elem).html(content);
-		}
+		},
+		exportGrid: function() {
+            $.ajax({
+                url: config.coreUrl + 'sensors/export',
+                data: JSON.stringify({criteria:this.filters.criterias}),
+                contentType:'application/json',
+                type:'POST'
+            }).done(function(data) {
+                var url = URL.createObjectURL(new Blob([data], {'type':'text/csv'}));
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = 'sensors_export.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        },
 	});
 });

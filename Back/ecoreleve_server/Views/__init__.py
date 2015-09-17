@@ -77,7 +77,7 @@ def add_routes(config):
     
     config.add_route('sensors/datas', 'ecoReleve-Sensor/{type}/datas')
     config.add_route('sensors/id/datas', 'ecoReleve-Sensor/{type}/{id}/datas')
-
+    config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
     config.add_route('sensors', 'ecoReleve-Core/sensors/') 
