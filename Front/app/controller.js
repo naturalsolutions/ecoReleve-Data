@@ -13,6 +13,7 @@ define(['marionette', 'config',
 	'./modules/importFile/lyt-entry-importFile',
 	'./modules/individual/layouts/lyt-individual',
 	'./modules/individual/layouts/lyt-indiv-details',
+	'./modules/sensor/layouts/lyt-sensor',
 	
 
 ],function( Marionette, config, 
@@ -28,8 +29,8 @@ define(['marionette', 'config',
 
 	LytImportFile,
 	LytIndividual,
-	LytIndivDetails
-
+	LytIndivDetails,
+	LytSensor
 ){
 	'use strict';
 	return Marionette.Object.extend({
@@ -71,7 +72,10 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytIndividual({id : option}));
 		},
 		indiv : function(option){
-			this.rgMain.show(new LytIndivDetails({id: option}));
+			this.rgMain.show(new LytIndividual({id: option}));
+		},
+		sensor : function(option){
+			this.rgMain.show(new LytSensor({id: option}));
 		},
 
 	});

@@ -17,7 +17,8 @@ define([
 
 
 		events: {
-			"click input": 'clickedCheck'
+			"click input": "clickedCheck",
+			//"keypress input:not(:checkbox,:radio)" : "updateQuery",
 		},
 
 		/*=====================================
@@ -49,6 +50,7 @@ define([
 				// Otherwise initialized from AJAX call
 				this.getFilters();
 			}
+			this.criterias = {};
 		},
 
 		getFilters: function() {
@@ -81,6 +83,7 @@ define([
 					});
 				}
 				$('#' + this.filterContainer + " input[type='checkbox']").on('click', this.clickedCheck);
+				$('#' + this.filterContainer + " form").on('keypress',  $.proxy(this.updateQuery, this));
 
 				this.forms.push(form);
 			};
@@ -107,6 +110,8 @@ define([
 					options.splice(0, 0, { label: ' ', val: -1 });
 				}
 			}
+
+			editorClass += ' ' + fieldName;
 
 			var schm = {
 				Column: { name: 'Column', type: 'Hidden', title: dataRow['label'], value: fieldName },
@@ -242,7 +247,7 @@ define([
 					currentForm.$el.find('input.filter').removeClass('active')
 				};
 			};
-			
+			this.criterias = filters;
 			if (this.clientSide) {
 				this.clientFilter(filters);
 			}else{
@@ -423,6 +428,15 @@ define([
 			// Rien à faire
 			return;
 		},
+		updateQuery : function(e){
+			console.log(this);
+			if (e.keyCode === 13) {
+				e.preventDefault();
+				this.update();
+				return false;
+   			}
+   			
+		}
 
 	});
 });
