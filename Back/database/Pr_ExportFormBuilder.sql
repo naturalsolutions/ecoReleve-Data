@@ -89,7 +89,7 @@ SELECT pk_Input
 		   ,F.legend
            FROM FormBuilder.dbo.Input I
 		   LEFT JOIN FormBuilder.dbo.Fieldset F ON I.linkedFieldset = F.refid and F.pk_Fieldset in (select * from toto)
-		   WHERE i.fk_form in (select ID from [FormBuilderFormsInfos]) 
+		   WHERE i.fk_form in (select ID from [FormBuilderFormsInfos]) AND I.[curStatus] = 1 
 
 INSERT INTO [FormBuilderInputProperty]
            ([ID]

@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession
+from ecoreleve_server.Models import Base,DBSession, dbConfig
 from sqlalchemy import Column, DateTime, Float,Boolean, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_,text,select
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
@@ -122,9 +122,10 @@ class ModuleForms(Base):
                 pass
 
     def InputThesaurus(self) :
-        # TODO : thesaurus url in development.ini
+
         if self.Options is not None and self.Options != '' :
-            self.dto['options'] = {"startId":self.Options,"wsUrl":"http://192.168.1.199/ThesaurusCore","lng":"fr"}
+            self.dto['options'] = {'startId': self.Options, 'wsUrl':dbConfig['wsThesaurus']['wsUrl'], 'lng':dbConfig['wsThesaurus']['lng']}
+            self.dto['options']['startId'] = self.Options
 
     def InputAutocomplete(self):
         if self.Options is not None and self.Options != '':
