@@ -20,7 +20,8 @@ from ecoreleve_server.Models import (
     Base,
     dbConfig,
     Station,
-    Observation
+    Observation,
+    Sensor
     )
 from ecoreleve_server.GenericObjets import *
 from ecoreleve_server.Views import add_routes

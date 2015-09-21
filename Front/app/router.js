@@ -17,8 +17,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'newStation(/)': 'newStation',
 			'editStations(/)': 'editStations',
 			'station(/):id': 'station',
-			
+			'sensor(/)' : 'sensor',
 			'*route(/:page)': 'home',
+
 		},
 
 		execute: function(callback, args){
