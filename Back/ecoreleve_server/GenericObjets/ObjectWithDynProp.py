@@ -88,7 +88,6 @@ class ObjectWithDynProp:
                     )).all()
         except :
             filterFields = DBSession.query(ModuleGrids).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()
-
         for curConf in filterFields:
             curConfName = curConf.Name
             filterField = list(filter(lambda x : x['name'] == curConfName
