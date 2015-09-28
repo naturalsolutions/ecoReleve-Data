@@ -4,7 +4,10 @@ from ..Models import (
     Individual,
     IndividualType,
     IndividualDynPropValue,
-    IndividualDynProp
+    IndividualDynProp,
+    Individual_Location,
+    Sensor,
+    SensorType
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -101,20 +104,18 @@ def getIndiv(request):
             DisplayMode = 'display'
         Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='IndivForm').first()
         response = curIndiv.GetDTOWithSchema(Conf,DisplayMode)
-    elif 'geo' in request.params :
+
+    if 'geo' in request.params :
         geoJson=[]
+        joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)
+        stmt = select([Individual_Location,Sensor.UnicName]).select_from(joinTable).where(Individual_Location.FK_Individual == id)
+        dataResult = DBSession.execute(stmt).fetchall()
+        for row in dataResult:
+            geoJson.append({'type':'Feature', 'properties':{'type':row['type_'], 'sensor':row['UnicName']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
-    #if 'geo' in request.params :
-        #geoJson=[]
-    #     stmt = select([Individual_Location]).where(Individual_Location.FK_Individual == id)
-    #     dataResult = DBSession.execute(stmt).fetchall()
-        # for row in dataResult:
-        #     geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
-        #result = {'type':'FeatureCollection', 'features':geoJson}
-        #response = result
-    #else : 
-        #response  = curIndiv.GetFlatObject()
+    else : 
+        response  = curIndiv.GetFlatObject()
 
     transaction.commit()
     return response
