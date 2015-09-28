@@ -83,7 +83,6 @@ class ModuleForms(Base):
 
         if self.InputType in self.func_type_context :
             self.func_type_context[self.InputType](self)
-        print (self.dto)
         return self.dto
 
     def InputSelect (self) :
