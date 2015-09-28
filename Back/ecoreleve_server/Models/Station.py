@@ -46,7 +46,7 @@ class Station(Base,ObjectWithDynProp):
     fieldActivityId = Column(Integer, ForeignKey('fieldActivity.ID'),nullable=True)
     creator = Column( Integer)
     creationDate = Column(DateTime, default=func.now())
-    Observations = relationship('Observation',backref='Station',cascade="all, delete-orphan")
+    Observations = relationship('Observation', back_populates = 'Station',cascade="all, delete-orphan")
     StationDynPropValues = relationship('StationDynPropValue',backref='Station',cascade="all, delete-orphan")
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
