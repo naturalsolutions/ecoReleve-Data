@@ -5,7 +5,8 @@ from ..Models import (
     ProtocoleType,
     FieldActivity_ProtocoleType,
     fieldActivity,
-    Station
+    Station,
+    ErrorAvailable
     )
 from ..GenericObjets.FrontModules import FrontModules
 import transaction
@@ -117,7 +118,8 @@ def insertNewProtocol (request) :
             data[items] = value
 
     data['FK_Station'] = request.matchdict['id']
-    newProto = Observation(FK_ProtocoleType = data['FK_ProtocoleType'],FK_Station=data['FK_Station'])
+    sta = DBSession.query(Station).get(request.matchdict['id'])
+    newProto = Observation(FK_ProtocoleType = data['FK_ProtocoleType'])    #,FK_Station=data['FK_Station'])
     newProto.ProtocoleType = DBSession.query(ProtocoleType).filter(ProtocoleType.ID==data['FK_ProtocoleType']).first()
     listOfSubProtocols = []
     for items , value in data.items() :
@@ -125,7 +127,6 @@ def insertNewProtocol (request) :
             print('\n\n\n ************************* \n')
             print('Complex PROTOCOL detected For UPDATE')
             listOfSubProtocols = value
-            print(listOfSubProtocols)
 
     # if listOfSubProtocols !=[] and 'sub_ProtocoleType' in data:
     #     for obj in listOfSubProtocols:
@@ -134,10 +135,20 @@ def insertNewProtocol (request) :
 
     newProto.init_on_load()
     newProto.UpdateFromJson(data)
-    DBSession.add(newProto)
-    DBSession.flush()
+    try : 
+        newProto.Station = sta
+        DBSession.add(newProto)
+        DBSession.flush()
+        message = {'id': newProto.ID}
+    except ErrorAvailable as e :
+        print ('\n\n\n\n ECXPXPCPSPSDPSDPSDd')
+        print(e.value)
+        transaction.abort()
+        request.response.status_code = 510
+        message = e.value
+
     # transaction.commit()
-    return {'id': newProto.ID}
+    return message
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'PUT')
@@ -149,17 +160,26 @@ def updateObservation(request):
     curObs.LoadNowValues()
     listOfSubProtocols = []
     subObsList = []
-    print(data)
+    message = 'ok'
     for  items , value in data.items():
         if isinstance(value,list) and items != 'children':
             print('\n\n\n ************************* \n')
             print('Complex PROTOCOL detected For UPDATE')
             listOfSubProtocols = value
-            print(listOfSubProtocols)
+
     data['Observation_childrens'] = listOfSubProtocols
     curObs.UpdateFromJson(data)
-    transaction.commit()
-    return {}
+    try : 
+        if curObs.Equipment is not None : 
+            curObs.Station = curObs.Station
+    except ErrorAvailable as e :
+        print ('\n\n\n\n ECXPXPCPSPSDPSDPSDd')
+        print(e.value)
+        # DBSession.rollback()
+        request.response.status_code = 510
+        message = e.value
+    # transaction.commit()
+    return message
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'DELETE')
