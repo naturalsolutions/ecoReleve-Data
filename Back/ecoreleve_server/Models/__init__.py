@@ -26,5 +26,6 @@ from .FieldActivity import *
 from .Individual import *
 from .List import *
 from .Sensor import *
+from .MonitoredSite import *
 from .Equipment import *
 

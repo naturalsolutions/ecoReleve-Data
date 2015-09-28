@@ -10,7 +10,7 @@ function(Marionette, NsMap) {
 
 		animateIn: function() {
 			this.$el.addClass('zoomInDown');
-
+			
 			this.$el.animate(
 				{ opacity: 1 },
 				200,

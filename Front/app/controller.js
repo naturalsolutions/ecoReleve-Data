@@ -15,6 +15,8 @@ define(['marionette', 'config',
 	'./modules/individual/layouts/lyt-indiv-details',
 	'./modules/sensor/layouts/lyt-sensor',
 	
+	'./modules/monitoredSite/layouts/lyt-ms',
+	
 
 ],function( Marionette, config, 
 	LytHome,
@@ -30,7 +32,10 @@ define(['marionette', 'config',
 	LytImportFile,
 	LytIndividual,
 	LytIndivDetails,
-	LytSensor
+	LytSensor,
+	LytMonitoredSite
+
+
 ){
 	'use strict';
 	return Marionette.Object.extend({
@@ -77,6 +82,10 @@ define(['marionette', 'config',
 		sensor : function(option){
 			this.rgMain.show(new LytSensor({id: option}));
 		},
+
+		monitoredSite: function(option){
+			this.rgMain.show(new LytMonitoredSite({id: option}));
+		}
 
 	});
 });

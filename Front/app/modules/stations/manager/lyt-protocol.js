@@ -35,6 +35,7 @@ define([
 			'click #addObs' : 'addObs'
 		},
 
+
 		index: 0,
 
 		initialize: function(options){

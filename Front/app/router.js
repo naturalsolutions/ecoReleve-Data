@@ -18,6 +18,10 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'editStations(/)': 'editStations',
 			'station(/):id': 'station',
 			'sensor(/)' : 'sensor',
+
+
+			'monitoredSite(/)' : 'monitoredSite',
+			'monitoredSite(/):id' : 'monitoredSite',
 			'*route(/:page)': 'home',
 
 		},
