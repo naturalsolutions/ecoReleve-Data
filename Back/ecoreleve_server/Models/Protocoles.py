@@ -1,4 +1,4 @@
-from ..Models import Base,DBSession,Station
+from ..Models import Base,DBSession,Station,Individual,Sensor
 from sqlalchemy import (
     Column,
      DateTime,
@@ -14,7 +14,8 @@ from sqlalchemy import (
      Sequence,
     orm,
     and_,
-    func)
+    func,
+    event)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
@@ -23,7 +24,6 @@ from ..GenericObjets.FrontModules import FrontModules,ModuleForms
 from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
-
 
 #--------------------------------------------------------------------------
 class Observation(Base,ObjectWithDynProp):
@@ -38,6 +38,8 @@ class Observation(Base,ObjectWithDynProp):
 
     Observation_children = relationship("Observation", cascade="all, delete-orphan")
     DynPropValues = relationship("ObservationDynPropValue", cascade="all, delete-orphan")
+    Equipment = relationship("Equipment", backref = 'Observation',cascade = "all, delete-orphan", uselist=False)
+    Station = relationship("Station", back_populates = 'Observations')
 
     @orm.reconstructor
     def init_on_load(self):
@@ -62,8 +64,6 @@ class Observation(Base,ObjectWithDynProp):
 
     @hybrid_property
     def Observation_childrens(self):
-        # print('@hybrid_property')
-        # print(self.Observation_children)
         if self.Observation_children:
             return self.Observation_children
         else:
