@@ -83,7 +83,7 @@ define([
 					this.selectMultiple(params);
 					break;
 				case 'popup':
-					//this.popup(params);
+					this.popup(params);
 					break;
 				case 'resetAll':
 					this.resetAll();
@@ -281,7 +281,10 @@ define([
 			}).done(function(geoJson) {
 					if (_this.cluster){
 						_this.initClusters(geoJson);
-						_this.addMarkersLayer();
+						setTimeout(function(){
+							_this.addMarkersLayer();
+						}, 500);
+						
 					}else{
 						_this.initLayer(geoJson);
 					}
@@ -307,6 +310,7 @@ define([
 					geoJson.features[0].geometry.coordinates[1],
 					geoJson.features[0].geometry.coordinates[0]
 				);
+				this.center = new L.LatLng(0,0);
 			}
 		},
 
