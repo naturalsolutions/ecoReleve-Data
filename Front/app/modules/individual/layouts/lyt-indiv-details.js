@@ -30,13 +30,16 @@ define([
 			'click #hideIndivDetails' : 'hideDetail',
 			'click #showIndivDetails'  : 'showDetail',
 			'click #prev' : 'navigatePrev',
-			'click #next' : 'navigateNext'
+			'click #next' : 'navigateNext',
+			'click .tab-link' : 'displayTab',
 		},
 		ui: {
 			'grid': '#grid',
+			'gridEquipment': '#gridEquipment',
 			'form': '#form',
 			'map': '#map',
 			'paginator' :'#paginator',
+			'paginatorEquipment' :'#paginatorEquipment',
 			'details' : '#indivLeft',
 			'mapContainer' : '#indivRight',
 			'showHideCtr' :'#showIndivDetails',
@@ -59,6 +62,7 @@ define([
 
 		onShow : function(){
 			console.log('passed');
+			
 			this.displayForm(this.indivId);
 			this.displayGrid(this.indivId);
 			this.displayMap();
@@ -93,15 +97,49 @@ define([
 				//totalElement : 'indiv-count',
 				//name : 'IndivHistory'
 			});
-
+			var colsEquip = [{
+                name: 'StartDate',
+                label: 'Start Date',
+                editable: false,
+                cell : 'string'
+            }, {
+                name: 'Type',
+                label: 'Type',
+                editable: false,
+                cell: 'string'
+            },{
+                name: 'UnicName',
+                label: 'Platform',
+                editable: false,
+                cell: 'string'
+            }, {
+                name: 'Deploy',
+                label: 'Status',
+                editable: false,
+                cell: 'string',
+            }, ];
+			this.gridEquip = new NsGrid({
+				pageSize: 20,
+				columns : colsEquip,
+				pagingServerSide: false,
+				//com: this.com,
+				url: config.coreUrl+'individuals/' + id  + '/equipment',
+				urlParams : this.urlParams,
+				rowClicked : true,
+				//totalElement : 'indiv-count',
+				//name : 'IndivHistory'
+			});
 			// this.grid.rowClicked = function(row){
 			// 	_this.rowClicked(row);
 			// };
 			// this.grid.rowDbClicked = function(row){
 			// 	_this.rowDbClicked(row);
 			// };
+
 			this.ui.grid.html(this.grid.displayGrid());
+			this.ui.gridEquipment.html(this.gridEquip.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
+			this.ui.paginatorEquipment.html(this.gridEquip.displayPaginator());
 		},
 
 		initMap: function(geoJson){
@@ -126,6 +164,16 @@ define([
 			}).fail(function(msg){
 				console.error(msg);
 			});
+		},
+		displayTab : function(e){
+			e.preventDefault();
+			var ele = $(e.target);
+			var tabLink = $(ele).attr('href');
+			var tabUnLink = $('li.active.tab-ele a').attr('href');
+			$('li.active.tab-ele').removeClass('active');
+			$(ele).parent().addClass('active');
+			$(tabLink).addClass('in active');
+			$(tabUnLink).removeClass('active in');
 		},
 		displayForm : function(id){
 			this.nsform = new NsForm({

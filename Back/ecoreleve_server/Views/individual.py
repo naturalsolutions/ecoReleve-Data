@@ -7,7 +7,8 @@ from ..Models import (
     IndividualDynProp,
     Individual_Location,
     Sensor,
-    SensorType
+    SensorType,
+    Equipment
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -29,6 +30,7 @@ prefix = 'individuals'
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnIndividuals(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -88,7 +90,7 @@ def getFields(request) :
     return cols
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
 def getIndiv(request):
     print('***************** GET INDIVIDUAL ***********************')
     id = request.matchdict['id']
@@ -121,7 +123,7 @@ def getIndiv(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET')
 def getIndivHistory(request):
 
     #128145
@@ -143,6 +145,27 @@ def getIndivHistory(request):
                 elif 'FK' not in key :
                     dictRow[key] = curRow[key]
         response.append(dictRow)
+
+    return response
+
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/id/equipment', renderer='json', request_method = 'GET')
+def getIndivEquipment(request):
+
+    id_indiv = request.matchdict['id']
+    joinTable = join(Equipment,Sensor, Equipment.FK_Sensor == Sensor.ID
+        ).join(SensorType,Sensor.FK_SensorType == SensorType.ID)
+    query = select([Equipment.StartDate,SensorType.Name.label('Type'),Sensor.UnicName,Equipment.Deploy]).select_from(joinTable
+        ).where(Equipment.FK_Individual == id_indiv).order_by(desc(Equipment.StartDate))
+    result = DBSession.execute(query).fetchall()
+    response = []
+    for row in result:
+        curRow = OrderedDict(row)
+        if curRow['Deploy'] == 1 : 
+            curRow['Deploy'] = 'Deploy'
+        else : 
+            curRow['Deploy'] = 'Remove'
+        response.append(curRow)
 
     return response
 
