@@ -144,7 +144,7 @@ define([
 			this.detail.show(new LytMsDetail({id : id}));
 			this.ui.detail.removeClass('hidden');
 
-			Backbone.history.navigate('individual/'+id, {trigger: false})
+			Backbone.history.navigate('monitoredSite/'+id, {trigger: false})
 		},
 
 		rowDbClicked: function(row){

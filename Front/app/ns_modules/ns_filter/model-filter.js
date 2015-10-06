@@ -8,6 +8,7 @@ define([
 	'radio',
 	'moment',
 	'vendors/backboneForm-editor-dateTimePicker',
+	'vendors/backboneForm-editor-timePicker',
 	'vendors/backboneForm-editor-autoCompTree',
 	'vendors/backboneForm-editor-Number',
 	'MonitoredSitePicker'
@@ -240,7 +241,10 @@ define([
 			var currentForm, value;
 			for (var i = 0; i < this.forms.length; i++) {
 				currentForm = this.forms[i];
-				if (!currentForm.validate() && currentForm.getValue().Value) {
+
+				var type = typeof currentForm.getValue().Value;
+
+				if (!currentForm.validate() && (currentForm.getValue().Value || type == 'number')) {
 					value = currentForm.getValue();
 					filters.push(value);
 					currentForm.$el.find('input.filter').addClass('active');
@@ -249,6 +253,7 @@ define([
 				};
 			};
 			this.criterias = filters;
+
 			if (this.clientSide) {
 				this.clientFilter(filters);
 			}else{

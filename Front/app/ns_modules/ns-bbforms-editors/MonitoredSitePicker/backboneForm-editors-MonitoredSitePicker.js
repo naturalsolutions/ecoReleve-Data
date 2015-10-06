@@ -31,7 +31,7 @@ define([
 			var template =  _.template(Tpl);
 			this.$el.html(template);
 			this.com = new Com();
-			this._input = this.$el.find('input[name="indivpicker"]')[0];
+			this._input = this.$el.find('input[name="monitoredSitePicker"]')[0];
 			this.displayGrid();
 			this.displayFilter();
 			this.translater = Translater.getTranslater();
