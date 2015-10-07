@@ -11,7 +11,7 @@ define([
 	'vendors/backboneForm-editor-timePicker',
 	'vendors/backboneForm-editor-autoCompTree',
 	'vendors/backboneForm-editor-Number',
-	'MonitoredSitePicker'
+	
 
 ], function ($, _, Backbone, BbForms, tpl, tplcheck, Radio, moment) {
 	'use strict';

@@ -13,7 +13,7 @@ define([
 	'requirejs-text!ns_modules/ns-bbforms-editors/MonitoredSitePicker/tpl-monitoredSite.html',
 ], function(
 	$, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, Form, Tpl
+	Com, NsGrid, NsFilter, Form, tpl
 ){
 	'use strict';
 	return Form.editors.MonitoredSitePicker = Form.editors.Base.extend({
@@ -28,7 +28,7 @@ define([
 
 		initialize: function(options) {
 			Form.editors.Base.prototype.initialize.call(this, options);
-			var template =  _.template(Tpl);
+			var template =  _.template(tpl);
 			this.$el.html(template);
 			this.com = new Com();
 			this._input = this.$el.find('input[name="monitoredSitePicker"]')[0];
@@ -43,7 +43,7 @@ define([
 				pageSize: 20,
 				pagingServerSide: true,
 				com: this.com,
-				url: config.coreUrl+'monitored/',
+				url: config.coreUrl+'monitoredSite/',
 				urlParams : this.urlParams,
 				rowClicked : true,
 			});
@@ -65,7 +65,7 @@ define([
 
 		displayFilter: function(){
 			this.filters = new NsFilter({
-				url: config.coreUrl + 'monitored/',
+				url: config.coreUrl + 'monitoredSite/',
 				com: this.com,
 				filterContainer: 'filter',
 			});
@@ -84,7 +84,7 @@ define([
 			this.rowClicked(row);
 		},
 		getValue: function() {
-			return  $(this._input).val();
+			return  $(this._input).val().change();
 		},
 		setValue: function(value) {
 			$(this._input).val(value);
