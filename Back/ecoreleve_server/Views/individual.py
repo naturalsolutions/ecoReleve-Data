@@ -104,6 +104,7 @@ def getIndiv(request):
             DisplayMode = request.params['DisplayMode']
         except : 
             DisplayMode = 'display'
+        
         Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='IndivForm').first()
         response = curIndiv.GetDTOWithSchema(Conf,DisplayMode)
 
@@ -116,8 +117,8 @@ def getIndiv(request):
             geoJson.append({'type':'Feature', 'properties':{'type':row['type_'], 'sensor':row['UnicName']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
-    else : 
-        response  = curIndiv.GetFlatObject()
+    # else : 
+    #     response  = curIndiv.GetFlatObject()
 
     transaction.commit()
     return response
