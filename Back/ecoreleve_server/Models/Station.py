@@ -49,7 +49,12 @@ class Station(Base,ObjectWithDynProp):
     Observations = relationship('Observation', back_populates = 'Station',cascade="all, delete-orphan")
     StationDynPropValues = relationship('StationDynPropValue',backref='Station',cascade="all, delete-orphan")
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
+
+
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
+    FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'), nullable=True)
+
+    
     Place = Column(String)
 
     Station_FieldWorkers = relationship('Station_FieldWorker', backref='Station',cascade="all, delete-orphan")

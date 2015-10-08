@@ -39,7 +39,6 @@ define([
 
 		ui: {
 			'staForm' : '#staForm',
-			'StaFormCoords' : '#staFormCoords'
 		},
 
 
@@ -62,29 +61,12 @@ define([
 
 
 		onShow : function(){
-			/*this.nsForm = new NsForm({
-				name: 'StaForm',
-				modelurl: config.coreUrl+'stations/',
-				buttonRegion: [],
-				formRegion: this.ui.staForm,
-				displayMode: 'edit',
-				objectType: 1,
-				id: 0,
-				reloadAfterSave : false,
-			});
-			this.map = new NsMap({
-				popup: true,
-				zoom : 2,
-				element: 'map',
-			});
-			this.rdy = this.nsForm.jqxhr;*/
 			this.refrechView('#stWithCoords');
 			this.map = new NsMap({
 				popup: true,
 				zoom : 2,
 				element: 'map',
 			});
-			//this.rdy = this.nsForm.jqxhr;
 		},
 
 		onDestroy: function(){
@@ -127,56 +109,7 @@ define([
 				this.map.addMarker(null, lat, lon);
 			}
 		},
-		displayTab : function(e){
-			e.preventDefault();
-			var ele = $(e.target);
-			var tabLink = $(ele).attr('href');
-			$('.tab-ele').removeClass('active');
-			$(ele).parent().addClass('active');
-			$(tabLink).addClass('active in');
-			this.refrechView(tabLink);
-		},
-		refrechView : function(stationType){
-			var stTypeId;
-			var _this = this;
-			var formContainer= this.ui.StaFormCoords;
-			switch(stationType){
-				case '#stWithCoords':
-					stTypeId = 1;
-					formContainer =this.ui.StaFormCoords;
-					$(this.ui.staForm).empty();
-					break;
-				case '#stWithoutCoords':
-					stTypeId = 3;
-					formContainer =this.ui.staForm;
-					$(this.ui.StaFormCoords).empty();
-					break;	
-				default:
-					break;
-			}
-			if(this.nsForm){
-				this.nsForm.destroy();
-				//console.log(this.parent);
-				this.parent.unbindRequiredFields();
-				this.parent.disableNextBtn();
-			}
-			this.nsForm = new NsForm({
-				name: 'StaForm',
-				modelurl: config.coreUrl+'stations/',
-				buttonRegion: [],
-				formRegion: formContainer,
-				displayMode: 'edit',
-				objectType: stTypeId,
-				id: 0,
-				reloadAfterSave : false,
-				afterShow: function(){
-					_this.parent.bindRequiredFields();
-				}
-			});
-			
-			this.rdy = this.nsForm.jqxhr;
 
-		},
 		checkUsers : function(e){
 			var usersFields = $('select[name="FieldWorker"]');
 			var selectedUser = $(e.target).val();
@@ -197,11 +130,63 @@ define([
 				confirmButtonText: 'OK',
 				closeOnConfirm: true,
 				},
-				function(isConfirm){   
+				function(isConfirm){
 					$(e.target).val('');
 				});
-				
-			} 
-		}
+			}
+		},
+
+		displayTab : function(e){
+			e.preventDefault();
+			var ele = $(e.target);
+			var tabLink = $(ele).attr('href');
+			$('.tab-ele').removeClass('active');
+			$(ele).parent().addClass('active');
+			$(tabLink).addClass('active in');
+			this.refrechView(tabLink);
+		},
+
+		refrechView : function(stationType){
+			console.log(stationType);
+			var stTypeId;
+			var _this = this;
+			switch(stationType){
+				case '#stWithCoords':
+					stTypeId = 1;
+					break;
+				case '#stWithoutCoords':
+					stTypeId = 3;
+					break;
+				case '#stFromMS':
+					stTypeId = 4;
+				default:
+					break;
+			}
+
+			if(this.nsForm){
+				this.nsForm.destroy();
+				this.parent.unbindRequiredFields();
+				this.parent.disableNextBtn();
+			}
+			
+			this.ui.staForm.empty();
+
+			this.nsForm = new NsForm({
+				name: 'StaForm',
+				modelurl: config.coreUrl+'stations/',
+				buttonRegion: [],
+				formRegion: this.ui.staForm,
+				displayMode: 'edit',
+				objectType: stTypeId,
+				id: 0,
+				reloadAfterSave : false,
+				afterShow: function(){
+					_this.parent.bindRequiredFields();
+				}
+			});
+			
+			this.rdy = this.nsForm.jqxhr;
+		},
+
 	});
 });

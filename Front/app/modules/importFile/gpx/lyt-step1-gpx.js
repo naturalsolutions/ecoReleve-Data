@@ -12,7 +12,7 @@ define([
 	'models/gpxForm',
 	'FileUploadEditor',
 	'i18n',
-	'IndivPicker',
+
 
 ], function($, _, Backbone, Marionette, config, Swal, XmlParser,NsForm , GpxForm, FileEditor
 ){

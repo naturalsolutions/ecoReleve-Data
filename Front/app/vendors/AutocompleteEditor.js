@@ -4,13 +4,11 @@ define([
  'backbone',
  'backbone_forms',
  'jqueryui',
- // 'requirejs-text!./AutocompleteEditorTemplate.html',
 ], function (
- _, $, Backbone, Form, config,Template
+ _, $, Backbone, Form, config
 ) {
     'use strict';
     return Form.editors.AutocompleteEditor = Form.editors.Base.extend({
-
 
         previousValue: '',
 
@@ -42,8 +40,6 @@ define([
             var _this = this;
             _(function () {
                 var optionsJquery = _this.autocompleteSource;
-                // Adding here specific code
-                //optionsJquery = { source: ["bezin","bzezzzz","beziiiii"], minLength: 3 }
                 _this.$el.find('#' + _this.id).autocomplete(optionsJquery);
                 _this.$el.find('#' + _this.id).addClass(_this.options.schema.editorClass) ;
             }).defer();
@@ -52,6 +48,4 @@ define([
         },
 
     });
-
-
 });

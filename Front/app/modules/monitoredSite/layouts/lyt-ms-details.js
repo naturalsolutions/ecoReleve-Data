@@ -27,7 +27,7 @@ define([
 		className: 'full-height animated white',
 
 		events : {
-			'click #hideIndivDetails' : 'hideDetail',
+			'click #hideDetails' : 'hideDetail',
 			'click #showDetails'  : 'showDetail',
 			'click #prev' : 'navigatePrev',
 			'click #next' : 'navigateNext'
@@ -50,7 +50,7 @@ define([
 			this.com = new Com();
 			
 
-			this.indivId = parseInt(options.id);
+			this.monitoredSiteId = parseInt(options.id);
 		},
 
 		onRender: function(){
@@ -59,10 +59,10 @@ define([
 
 		onShow : function(){
 			console.log('passed');
-			this.displayForm(this.indivId);
-			this.displayGrid(this.indivId);
+			this.displayForm(this.monitoredSiteId);
+			this.displayGrid(this.monitoredSiteId);
 			this.displayMap();
-			$(this.ui.showHideCtr).html('<span class="glyphicon glyphicon-chevron-right big"></span><span class="ID rotate">ID : '+this.indivId+'</span>');
+			$(this.ui.showHideCtr).html('<span class="glyphicon glyphicon-chevron-right big"></span><span class="ID rotate">ID : '+this.monitoredSiteId+'</span>');
 		},
 
 		displayGrid: function(id){
@@ -108,7 +108,7 @@ define([
 		},
 		displayMap: function(){
 
-			var url  = config.coreUrl+ 'monitoredSite/' + this.indivId  + '?geo=true';
+			var url  = config.coreUrl+ 'monitoredSite/' + this.monitoredSiteId  + '?geo=true';
 			$.ajax({
 				url: url,
 				contentType:'application/json',
@@ -163,9 +163,9 @@ define([
 		},
 		navigatePrev : function() {
 			var selectedList  = window.app.listProperties;
-			if (this.indivId > selectedList.minId){
+			if (this.monitoredSiteId > selectedList.minId){
 				//get index of current element id in list of selected elements ids
-				var index = selectedList.idList.indexOf(this.indivId);
+				var index = selectedList.idList.indexOf(this.monitoredSiteId);
 				var prevId = selectedList.idList[(index-1)];
 				this.updateView(prevId);
 			}
@@ -175,9 +175,9 @@ define([
 		},
 		navigateNext : function() {
 			var selectedList  = window.app.listProperties;
-			if (this.indivId < selectedList.maxId){
+			if (this.monitoredSiteId < selectedList.maxId){
 				//get index of current element id in list of selected elements ids
-				var index = selectedList.idList.indexOf(this.indivId);
+				var index = selectedList.idList.indexOf(this.monitoredSiteId);
 				var nextId = selectedList.idList[(index+1)];
 				this.updateView(nextId);
 			}
@@ -236,15 +236,6 @@ define([
 					_this.updateLocalData(data,nav,currentPage);
 				},
 				error: function(data){
-				   /* Swal({
-						title: "Change individual",
-						text: 'Error to navigate to another individual.',
-						type: 'error',
-						showCancelButton: false,
-						confirmButtonColor: 'rgb(147, 14, 14)',
-						confirmButtonText: "OK",
-						closeOnConfirm: true
-					});*/
 				}
 			});
 		},
@@ -270,10 +261,10 @@ define([
 			storedList.maxId = idList[(idList.length) - 1];
 		},
 		updateView : function(id){
-			Backbone.history.navigate('individual/'+id);
+			Backbone.history.navigate('monitoredSite/'+id);
 			this.displayForm(id);
 			this.displayGrid(id);
-			this.indivId = id;
+			this.monitoredSiteId = id;
 			// update id displayed
 			$('span.ID').text('ID : '+id);
 		}
