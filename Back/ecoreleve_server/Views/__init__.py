@@ -71,22 +71,21 @@ def add_routes(config):
     ##### FieldActivity ##### 
     config.add_route('fieldActivity', 'ecoReleve-Core/fieldActivity')
     
-
-    # ------------------------------------------------------------------------------------------------------------------------- #
-    ##### Sensors datas (Argos + GSM + RFID) #####
+    # -----------------------------##### Sensors datas (Argos + GSM + RFID) #####----------------------------------------------------- #
     
-    config.add_route('sensors/datas', 'ecoReleve-Sensor/{type}/datas')
-    config.add_route('sensors/id/datas', 'ecoReleve-Sensor/{type}/{id}/datas')
-    config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
+    config.add_route('sensors/uncheckedDatas', 'ecoReleve-Core/sensors/{type}/uncheckedDatas')
+    config.add_route('sensors/uncheckedDatas/id_indiv', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}',custom_predicates = (integers('id_indiv'),))
+    # config.add_route('sensors/uncheckedDatas/action', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{action}')
+
+    # config.add_route('sensors/id/datas', 'ecoReleve-Sensor/{type}/{id}/datas')
+
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
     config.add_route('sensors', 'ecoReleve-Core/sensors/') 
+    config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
+    config.add_route('sensors/id', 'ecoReleve-Core/sensors/{id}',custom_predicates = (integers('id'),))
     config.add_route('sensors/action', 'ecoReleve-Core/sensors/{action}') 
-    #config.add_route('sensors', 'ecoReleve-Sensor/{type}')
-    config.add_route('sensors/id', 'ecoReleve-Sensor/{type}/{id}')
 
-    # config.add_notfound_view(notfound, append_slash=True)
-    
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/') 
