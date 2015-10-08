@@ -130,6 +130,8 @@ def checkUnequip(fk_sensor,equipDate,fk_indiv=None):
 @event.listens_for(Observation.Station, 'set')
 def receive_set(target, value, oldvalue, initiator):
 
+    print('****************event ********************')
+    print(target.Station)
     typeName = target.GetType().Name
     deploy = True
 
@@ -141,6 +143,8 @@ def receive_set(target, value, oldvalue, initiator):
             fk_sensor = None
         try : 
             fk_indiv = target.GetProperty('FK_Individual')
+            print('**********************************************************FK_Individual')
+            print(fk_indiv)
         except :
             fk_indiv = None
         try : 

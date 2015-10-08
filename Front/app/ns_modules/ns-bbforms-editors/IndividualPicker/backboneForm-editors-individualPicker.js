@@ -17,7 +17,7 @@ define([
 	Com, NsGrid, NsFilter, Form, Tpl
 ){
 	'use strict';
-	return Form.editors.IndividualPickerEditor = Form.editors.Base.extend({
+	return Form.editors.IndividualPicker = Form.editors.Base.extend({
 		previousValue: '',
 
 
