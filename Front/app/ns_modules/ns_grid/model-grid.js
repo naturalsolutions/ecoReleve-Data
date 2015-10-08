@@ -144,7 +144,6 @@ define([
 					if (!Object.keys(sortCriteria).length > 0)
 						collection.sortCriteria[tmp] = 'asc';
 					collection.fetch({ reset: true, success: function(){
-						console.log('');
 					} });
 				},
 			});
@@ -268,7 +267,6 @@ define([
 		},
 
 		collectionFetched: function (options) {
-			console.log('ok');
 			this.affectTotalRecords();
 			if (options.init && !jQuery.isEmptyObject(this.sortCriteria)) {
 
@@ -289,7 +287,6 @@ define([
 		},
 
 		update: function (args) {
-			console.log(args);
 			if (this.pageSize) {
 				this.grid.collection.state.currentPage = 1;
 				this.grid.collection.searchCriteria = args.filters;
@@ -310,13 +307,10 @@ define([
 				else {
 					var filteredList = this.grid.collection.where(this.filterCriteria);
 					if(_this.lastImported){
-						console.log('********' +_this.lastImported );
-						console.log(this.collection.queryParams);
 						this.collection.queryParams.lastImported = _this.lastImported;
 					} else {
 						delete this.collection.queryParams['lastImported'];
 					}
-					console.log(this.filterCriteria);
 					this.grid.collection.fetch({ reset: true, data: { 'criteria': this.filterCriteria }, success: function () {
 
 					} });
