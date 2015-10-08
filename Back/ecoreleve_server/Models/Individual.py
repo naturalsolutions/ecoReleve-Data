@@ -25,16 +25,15 @@ class Individual (Base,ObjectWithDynProp) :
 
     __tablename__ = 'Individual'
     ID = Column (Integer,Sequence('Individual__id_seq'), primary_key = True)
-    Name = Column (String)
     creationDate = Column (DateTime,nullable=False)
     Species = Column (String)
     Age = Column(String)
-    Sex = Column(String)
     Birth_date = Column(DateTime)
     Death_date = Column(DateTime)
     FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
 
     IndividualDynPropValues = relationship('IndividualDynPropValue',backref='Individual',cascade="all, delete-orphan")
+    Locations = relationship('Individual_Location')
 
     @orm.reconstructor
     def init_on_load(self):
@@ -112,12 +111,18 @@ class IndividualType_IndividualDynProp(Base):
 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-# class Individual_Location(Base):
-#     __tablename__ = 'Individual_Location'
+class Individual_Location(Base):
+    __tablename__ = 'Individual_Location'
 
-#     ID = Column(Integer,Sequence('Individual_Location__id_seq'), primary_key=True)
-#     LAT = Column(Numeric(9,5))
-#     LON = Column(Numeric(9,5))
-#     Date = Column(DateTime)
-#     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
-#     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
+    ID = Column(Integer,Sequence('Individual_Location__id_seq'), primary_key=True)
+    LAT = Column(Numeric(9,5))
+    LON = Column(Numeric(9,5))
+    ELE = Column(Integer)
+    Date = Column(DateTime)
+    Precision = Column(Integer)
+    FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
+    FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
+    creator =  Column(Integer)
+    creationDate = Column(DateTime)
+    type_ = Column(String)
+    OriginalData_ID = Column(String)

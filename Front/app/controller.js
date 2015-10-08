@@ -16,25 +16,25 @@ define(['marionette', 'config',
 	'./modules/sensor/layouts/lyt-sensor',
 	
 	'./modules/monitoredSite/layouts/lyt-ms',
-	
+	'./modules/validate/lyt-sensorValidate',
+	'./modules/validate/lyt-sensorValidateDetail',
 
 ],function( Marionette, config, 
 	LytHome,
 
 	/*==========  modules  ==========*/
 	LytExport,
-
 	LytStationVisu,
 	LytStationStepperEdit,
 	LytStationStepperNew,
 	LytStationEdit,
-
 	LytImportFile,
 	LytIndividual,
 	LytIndivDetails,
 	LytSensor,
-	LytMonitoredSite
-
+	LytMonitoredSite,
+	LytSensorValidate,
+	LytSensorValidateDetail
 
 ){
 	'use strict';
@@ -85,7 +85,19 @@ define(['marionette', 'config',
 
 		monitoredSite: function(option){
 			this.rgMain.show(new LytMonitoredSite({id: option}));
-		}
+		},
+
+		validate: function(option){
+			var options='argos';
+			this.rgMain.show(new LytSensorValidate({type : options}));
+			
+		},
+		validateDetail: function(option){
+			console.log(option)
+			var type_ = 'argos';
+			this.rgMain.show(new LytSensorValidateDetail({id : option, type :type_}));
+
+		},
 
 	});
 });
