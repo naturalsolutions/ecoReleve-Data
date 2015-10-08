@@ -10,13 +10,13 @@ define([
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
 	'backbone_forms',
-	'requirejs-text!ns_modules/ns-bbforms-editors/IndividualPicker/tpl-individual.html',
+	'requirejs-text!ns_modules/ns-bbforms-editors/MonitoredSitePicker/tpl-monitoredSite.html',
 ], function(
 	$, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, Form, Tpl
+	Com, NsGrid, NsFilter, Form, tpl
 ){
 	'use strict';
-	return Form.editors.IndividualPickerEditor = Form.editors.Base.extend({
+	return Form.editors.MonitoredSitePicker = Form.editors.Base.extend({
 		previousValue: '',
 
 		className: 'full-height animated white',
@@ -28,10 +28,10 @@ define([
 
 		initialize: function(options) {
 			Form.editors.Base.prototype.initialize.call(this, options);
-			var template =  _.template(Tpl);
+			var template =  _.template(tpl);
 			this.$el.html(template);
 			this.com = new Com();
-			this._input = this.$el.find('input[name="indivpicker"]')[0];
+			this._input = this.$el.find('input[name="monitoredSitePicker"]')[0];
 			this.displayGrid();
 			this.displayFilter();
 			this.translater = Translater.getTranslater();
@@ -43,7 +43,7 @@ define([
 				pageSize: 20,
 				pagingServerSide: true,
 				com: this.com,
-				url: config.coreUrl+'individuals/',
+				url: config.coreUrl+'monitoredSite/',
 				urlParams : this.urlParams,
 				rowClicked : true,
 			});
@@ -61,9 +61,11 @@ define([
 			$(paginatorCont).html(this.grid.displayPaginator());
 		},
 
+
+
 		displayFilter: function(){
 			this.filters = new NsFilter({
-				url: config.coreUrl + 'individuals/',
+				url: config.coreUrl + 'monitoredSite/',
 				com: this.com,
 				filterContainer: 'filter',
 			});
@@ -82,10 +84,10 @@ define([
 			this.rowClicked(row);
 		},
 		getValue: function() {
-			return  $(this._input).val();
+			return  $(this._input).val().change();
 		},
 		setValue: function(value) {
-			$(this._input).val(value).change();
+			$(this._input).val(value);
 			this.hidePicker();
 		},
 		showPicker : function(){

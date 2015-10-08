@@ -1,4 +1,10 @@
-define(['marionette', 'lyt-rootview', 'router', 'controller'],
+define(['marionette', 'lyt-rootview', 'router', 'controller', 
+
+	//circular dependencies, I don't konw where to put it for the moment
+	'IndivPicker',
+	'MonitoredSitePicker',
+	'SensorPicker'
+	],
 function(Marionette, Lyt_rootview, Router, Controller) {
 
 
