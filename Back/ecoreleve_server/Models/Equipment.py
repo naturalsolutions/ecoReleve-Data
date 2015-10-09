@@ -32,12 +32,10 @@ class Equipment(Base):
     ID = Column(Integer,Sequence('Equipment__id_seq'), primary_key=True)
     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
-    # FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'))
+    FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'))
     FK_Observation = Column(Integer, ForeignKey('Observation.ID'))
     StartDate = Column(DateTime,default = func.now())
     Deploy = Column(Boolean)
-
-
 
 def checkSensor(fk_sensor,equipDate):
     e1 = aliased(Equipment)
