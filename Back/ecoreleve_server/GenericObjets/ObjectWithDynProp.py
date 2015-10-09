@@ -67,6 +67,9 @@ class ObjectWithDynProp:
                 cols.append(curConf.GenerateColumn())
             elif curConf.QueryName is not None:
                 cols.append(curConf.GenerateColumn())
+            elif curConf.Name == 'StartDate':
+                cols.append(curConf.GenerateColumn())
+
         # for curProp in self.GetAllProp():
         #     curPropName = curProp['name']
         #     gridField = list(filter(lambda x : x.Name == curPropName,gridFields))
