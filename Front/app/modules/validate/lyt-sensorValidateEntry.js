@@ -30,7 +30,6 @@ define([
 		ui: {
 			'grid': '#grid',
 			'totalEntries': '#totalEntries',
-			'frequency': 'select#frequency',
 		},
 
 		initialize: function(options){
@@ -45,7 +44,6 @@ define([
 
 		onShow : function(){
 			this.displayGrid();
-			this.frequency = this.ui.frequency.val();
 		},
 
 		setFrequency: function(e){
@@ -53,6 +51,7 @@ define([
 		},
 
 		displayGrid: function(){
+
 			var cols = [{
 				name: 'FK_Individual',
 				label: 'Individual ID',
@@ -100,7 +99,7 @@ define([
 			this.grid = new NsGrid({
 				pagingServerSide: false,
 				columns : cols,
-				pageSize: 100,
+				pageSize: 20,
 				com: this.com,
 				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
 				urlParams : this.urlParams,
@@ -111,42 +110,27 @@ define([
 			this.grid.rowClicked = function(row){
 				_this.rowClicked(row);
 			};
-
 			this.ui.grid.html(this.grid.displayGrid());
 		},
 
-		rowClicked: function(args){
-			var row = args.row;
-			var evt = args.evt;
-
+		rowClicked: function(row){
 			var id = row.model.get('FK_Individual');
-			var ptt = row.model.get('FK_ptt');
 
-			if(!$(evt.target).is('input')){
-				Backbone.history.navigate('validate/' + this.type_ + '/' + id, {trigger: true});
-			}
+			Backbone.history.navigate('validate/'+this.type_+'/'+id, {trigger: true});
 		},
 
 		autoValidate: function(){
-			var params = {
-				'frequency': this.frequency,
-				'toValidate': []
-			};
-			var tmp = {};
+			var tmp = [];
 			_.each(this.grid.grid.getSelectedModels(), function(model){
-				params.toValidate.push({
-					'FK_Individual': model.get('FK_Individual'),
-					'FK_ptt': model.get('FK_ptt')
-				});
+				tmp.push(model.get('FK_Individual'));
 			});
 
-			var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
-			$.ajax({
-				url: url,
-				method: 'POST',
-				data : JSON.stringify(params)
-			});
-		}
+			//ajax
+			/*$.ajax({
+				url: config.coreUrl + '/',
+				data : { 'toValidate' : tmp, 'frequency' : this.frequency },
+			});*/
+		},
 
 	});
 });

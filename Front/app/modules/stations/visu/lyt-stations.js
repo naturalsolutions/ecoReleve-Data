@@ -162,14 +162,12 @@ define([
 			//this.radio.command('site:add');
 		},
 		deploy: function(){
-
 			this.radio.command('site:deploy',{back_module:'site'});
 		},
 
 		detail: function(evt) {
 			var row = $(evt.currentTarget);
 			var id = $(row).find(':first-child').text()
-
 			//Radio.channel('route').command('site:detail', id);
 		},
 

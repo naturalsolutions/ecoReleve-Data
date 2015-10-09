@@ -42,10 +42,10 @@ define([
 						'dblclick' : 'onDbClick'
 					},
 					onClick: function (e) {
-						_this.interaction('rowClicked', this);
+						_this.interaction('rowClicked', {row: this, evt: e});
 					},
 					onDbClick: function(e){
-						_this.interaction('rowDbClicked', this);
+						_this.interaction('rowDbClicked', {row: this, evt: e});
 					}
 				});
 			}
