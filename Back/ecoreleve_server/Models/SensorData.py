@@ -128,40 +128,18 @@ class ArgosEngineering(Base):
         {'schema': sensor_schema}
     )
 
-class Rfid(Base):
-    __tablename__ = 'T_rfid'
-    ID = Column(Integer, Sequence('seq_rfid_pk_id'),primary_key=True)
-    creator = Column(Integer,ForeignKey('User.ID'))
-    FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'), nullable=False)
-    chip_code = Column(String, nullable=False)
-    date_ = Column(DateTime, nullable=False)
-    creation_date = Column(DateTime, server_default=func.now())
-    validated = Column('validated',Boolean, server_default='0')
-    checked = Column('checked',Boolean, server_default='0')
-    __table_args__ = (
-        Index('idx_Trfid_chipcode_date', chip_code, date_),
-        UniqueConstraint(FK_Sensor, chip_code, date_),
-        {'schema': sensor_schema}
-    )
-
-
-
-# class ArgosData_With_EquipIndiv (Base) : 
-#     __table__ = Table ('VArgosData_With_EquipIndiv', Base.metadata,
-#         Column('FK_Individual',Integer)
-#         ,Column('FK_Sensor',Integer)
-#         ,Column('StartDate',DateTime)
-#         ,Column('EndDate',DateTime)
-#         ,Column('lat',Numeric(9,5))
-#         ,Column('lon',Numeric(9,5))
-#         ,Column('ele',Integer)
-#         ,Column('checked',BIT)
-#         ,Column('imported',BIT)
-#         ,Column('date',DateTime)
-#         ,Column('course',Integer)
-#         ,Column('speed',Integer)
-#         ,Column('validated',BIT)
-#         ,Column('PK_id',Integer)
-#         ,Column('type',String)
-#         ,extend_existing=True
-#         )
+# class Rfid(Base):
+#     __tablename__ = 'T_rfid'
+#     ID = Column(Integer, Sequence('seq_rfid_pk_id'),primary_key=True)
+#     creator = Column(Integer,ForeignKey('User.ID'))
+#     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'), nullable=False)
+#     chip_code = Column(String, nullable=False)
+#     date_ = Column(DateTime, nullable=False)
+#     creation_date = Column(DateTime, server_default=func.now())
+#     validated = Column('validated',Boolean, server_default='0')
+#     checked = Column('checked',Boolean, server_default='0')
+#     __table_args__ = (
+#         Index('idx_Trfid_chipcode_date', chip_code, date_),
+#         UniqueConstraint(FK_Sensor, chip_code, date_),
+#         {'schema': sensor_schema}
+#     )

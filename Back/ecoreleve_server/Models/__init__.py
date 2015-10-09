@@ -28,4 +28,6 @@ from .List import *
 from .Sensor import *
 from .MonitoredSite import *
 from .Equipment import *
+from .SensorData import *
+
 
