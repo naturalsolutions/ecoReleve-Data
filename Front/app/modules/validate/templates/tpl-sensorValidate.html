@@ -3,26 +3,26 @@
 
 	<div id="indivRight" class=" pannels-container col-md-12 full-height dark">
 		<br>
-		<div class="clearfix">
-			<div class="col-xs-4">
-				Sampling frequency (mn) : 
-				<select id="frequency" class="form-control pull-left">
-					<option value="all">all</option>
-					<option value="10">10</option>
-					<option value="15">15</option>
-					<option value="30">30</option>
-					<option value="60">60</option>
-					<option value="120">120</option>
-				</select>
-			</div>
+			<legend class="clearfix">
+				<label class="pull-left" for="frequency">Sampling frequency (mn) : </label>
+				<div class="col-xs-3">
+					<select id="frequency" class="form-control">
+						<option value="all">all</option>
+						<option value="10">10</option>
+						<option value="15">15</option>
+						<option value="30">30</option>
+						<option value="60">60</option>
+						<option value="120">120</option>
+					</select>
+				</div>
 
-			<div class="col-xs-8">
-				<legend class="text-right pull-right">
-					Validate total: <span id="totalEntries"></span>
-					<button id="autoValidate" class="btn btn-success pull-right">Validate</button>
-				</legend>
-			</div>
-		</div>
+				<button id="autoValidate" class="btn btn-success pull-right">
+					Validate
+				</button>
+				<span class="pull-right col-xs-3 text-right">Validate total: 
+					<span id="totalEntries"></span>
+				</span>
+			</legend>
 		<br>
 
 		<div id="grid" class=""></div>

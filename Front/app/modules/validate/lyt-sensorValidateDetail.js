@@ -37,8 +37,9 @@ define([
 
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
-			this.ind_id = parseInt(options.id);
-			this.type_ = options.type;
+			this.type = options.type;
+			this.indId = parseInt(options.indId);
+			this.sensorId = parseInt(options.sensorId);
 			this.com = new Com();
 		},
 
@@ -47,9 +48,9 @@ define([
 		},
 
 		onShow : function(){
-			this.displayForm(this.ind_id);
 			this.displayGrid();
-			this.displayMap();
+			//this.displayMap();
+			//this.displayForm();
 		},
 
 		setFrequency: function(e){
@@ -113,53 +114,43 @@ define([
 				rowClicked : false,
 				totalElement : 'totalEntries',
 			});
-/*
+			
+			/*
 			this.grid.rowClicked = function(row){
 				_this.rowClicked(row);
 			};
 			this.grid.rowDbClicked = function(row){
 				_this.rowDbClicked(row);
 			};*/
+
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
 
 		},
 
-		initMap: function(geoJson){
-			this.map = new NsMap({
-				geoJson: geoJson,
-				zoom: 4,
-				element : 'map',
-				popup: true,
-				cluster: true
-			});
-		},
-
 		displayMap: function(){
 			var url  = config.coreUrl+ 'sensors/uncheckedDatas'+this.type_+'/'+this.ind_id+'?geo=true';
-			console.log(url);
-			$.ajax({
+			this.map = new NsMap({
 				url: url,
-				contentType:'application/json',
-				type:'GET',
-				context: this,
-			}).done(function(datas){
-				this.initMap(datas);
-			}).fail(function(msg){
-				console.error(msg);
+				selection: true,
+				cluster: true,
+				com: this.com,
+				zoom: 3,
+				element : 'map',
 			});
 		},
 
-		displayForm : function(id){
+		displayForm : function(){
+			var url = config.coreUrl + '';
 			this.nsform = new NsForm({
 				name: 'IndivForm',
-				modelurl: config.coreUrl+'individual',
+				modelurl: url,
 				buttonRegion: [],
 				formRegion: this.ui.form,
 				buttonRegion: [this.ui.formBtns],
 				displayMode: 'display',
 				objectType: 1,
-				id: id,
+				id: this.idInd,
 				reloadAfterSave : false,
 				parent: this.parent
 			});

@@ -51,7 +51,6 @@ define([
 		},
 
 		displayGrid: function(){
-
 			var cols = [{
 				name: 'FK_Individual',
 				label: 'Individual ID',
@@ -105,9 +104,6 @@ define([
 			this.grid.rowClicked = function(row){
 				_this.rowClicked(row);
 			};
-			/*this.grid.rowDbClicked = function(row){
-				_this.rowDbClicked(row);
-			};*/
 			this.ui.grid.html(this.grid.displayGrid());
 		},
 
@@ -117,9 +113,7 @@ define([
 		},
 
 		autoValidate: function(){
-			console.log(this.grid);
 			var tmp = [];
-
 			_.each(this.grid.grid.getSelectedModels(), function(model){
 				tmp.push(model.get('FK_Individual'));
 			});
@@ -129,12 +123,7 @@ define([
 				url: config.coreUrl + '/',
 				data : { 'toValidate' : tmp, 'frequency' : this.frequency },
 			});*/
-
 		},
-
-
-
-
 
 	});
 });
