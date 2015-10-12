@@ -14,18 +14,20 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'individual(/):id' : 'individual',
 
 			'stations(/)' : 'stations',
+			'station(/):id': 'station',
 			'newStation(/)': 'newStation',
 			'editStations(/)': 'editStations',
-			'station(/):id': 'station',
-			'sensor(/)' : 'sensor',
 
+			'sensor(/)' : 'sensor',
 
 			'monitoredSite(/)' : 'monitoredSite',
 			'monitoredSite(/):id' : 'monitoredSite',
-			'validate/:type/:id':'validateDetail',
-			'validate(/)':'validate',
-			'*route(/:page)': 'home',
 
+			'validate/:type/:id(/)':'validateDetail',
+			'validate(/)':'validate',
+
+
+			'*route(/:page)': 'home',
 		},
 
 		execute: function(callback, args){

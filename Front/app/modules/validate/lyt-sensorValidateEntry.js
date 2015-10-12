@@ -9,9 +9,8 @@ define([
 	'config',
 	'ns_grid/model-grid',
 	'ns_modules/ns_com',
-	'ns_map/ns_map',
-	'ns_form/NSFormsModuleGit',
-], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com, NsMap, NsForm){
+
+], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com){
 
 	'use strict';
 
@@ -30,16 +29,12 @@ define([
 
 		ui: {
 			'grid': '#grid',
-			'paginator': '#paginator',
 			'totalEntries': '#totalEntries',
-			'map':'#map'
 		},
 
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
-			this.type = options.type;
-			this.indId = parseInt(options.indId);
-			this.sensorId = parseInt(options.sensorId);
+			this.type_ = options.type;
 			this.com = new Com();
 		},
 
@@ -49,8 +44,6 @@ define([
 
 		onShow : function(){
 			this.displayGrid();
-			//this.displayMap();
-			//this.displayForm();
 		},
 
 		setFrequency: function(e){
@@ -60,39 +53,38 @@ define([
 		displayGrid: function(){
 
 			var cols = [{
-				name: 'PK_id',
-				label: 'ID',
+				name: 'FK_Individual',
+				label: 'Individual ID',
 				editable: false,
-				renderable: false,
+				cell : 'string'
+			},{
+				name: 'FK_ptt',
+				label: 'Unique',
+				editable: false,
 				cell : 'string'
 			}, {
-				name: 'date',
-				label: 'Date',
+				name: 'nb',
+				label: 'NB',
 				editable: false,
 				cell: 'string'
 			}, {
-				name: 'lat',
-				label: 'LAT',
+				name: 'StartDate',
+				label: 'Start equipment',
 				editable: false,
 				cell: 'string',
 			}, {
-				name: 'lon',
-				label: 'LON',
+				name: 'EndDate',
+				label: 'End equipment',
 				editable: false,
 				cell: 'string',
 			}, {
-				name: 'ele',
-				label: 'ELE',
-				editable: false,
-				cell: 'string',
-			},{
-				name: 'speed',
-				label: 'SPEED',
+				name: 'min_date',
+				label: 'Data from',
 				editable: false,
 				cell: 'string',
 			}, {
-				name: 'type',
-				label: 'TYPE',
+				name: 'min_date',
+				label: 'Data To',
 				editable: false,
 				cell: 'string',
 			}, {
@@ -107,57 +99,38 @@ define([
 			this.grid = new NsGrid({
 				pagingServerSide: false,
 				columns : cols,
-				com: this.com,
 				pageSize: 20,
-				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas/'+this.ind_id,
+				com: this.com,
+				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
 				urlParams : this.urlParams,
-				rowClicked : false,
+				rowClicked : true,
 				totalElement : 'totalEntries',
 			});
-			
-			/*
+
 			this.grid.rowClicked = function(row){
 				_this.rowClicked(row);
 			};
-			this.grid.rowDbClicked = function(row){
-				_this.rowDbClicked(row);
-			};*/
-
 			this.ui.grid.html(this.grid.displayGrid());
-			this.ui.paginator.html(this.grid.displayPaginator());
-
 		},
 
-		displayMap: function(){
-			var url  = config.coreUrl+ 'sensors/uncheckedDatas'+this.type_+'/'+this.ind_id+'?geo=true';
-			this.map = new NsMap({
-				url: url,
-				selection: true,
-				cluster: true,
-				com: this.com,
-				zoom: 3,
-				element : 'map',
+		rowClicked: function(row){
+			var id = row.model.get('FK_Individual');
+
+			Backbone.history.navigate('validate/'+this.type_+'/'+id, {trigger: true});
+		},
+
+		autoValidate: function(){
+			var tmp = [];
+			_.each(this.grid.grid.getSelectedModels(), function(model){
+				tmp.push(model.get('FK_Individual'));
 			});
+
+			//ajax
+			/*$.ajax({
+				url: config.coreUrl + '/',
+				data : { 'toValidate' : tmp, 'frequency' : this.frequency },
+			});*/
 		},
-
-		displayForm : function(){
-			var url = config.coreUrl + '';
-			this.nsform = new NsForm({
-				name: 'IndivForm',
-				modelurl: url,
-				buttonRegion: [],
-				formRegion: this.ui.form,
-				buttonRegion: [this.ui.formBtns],
-				displayMode: 'display',
-				objectType: 1,
-				id: this.idInd,
-				reloadAfterSave : false,
-				parent: this.parent
-			});
-		},
-
-
-
 
 	});
 });
