@@ -145,9 +145,14 @@ def auto_validation(request):
     type_ = request.matchdict['type']
 
     print ('\n*************** AUTO VALIDATE *************** \n')
-    param = request.json_body
+    param = request.params.mixed()
+
+
+
     freq = param['frequency']
     listToValidate = param['toValidate']
+
+
 
     if freq == 'all' :
         freq = 1

@@ -20,133 +20,15 @@ define([
 		===================================================*/
 
 		template: 'app/modules/validate/templates/tpl-sensorValidate.html',
-		className: 'full-height animated white',
-
-		events : {
-			'click button#autoValidate' : 'autoValidate',
-			'change select#frequency' : 'setFrequency'
-		},
-
-		ui: {
-			'grid': '#grid',
-			'totalEntries': '#totalEntries',
-			'frequency': 'select#frequency',
-		},
+		className: 'full-height animated',
 
 		initialize: function(options){
-			this.translater = Translater.getTranslater();
-			this.type_ = options.type;
-			this.com = new Com();
 		},
 
 		onRender: function(){
 			this.$el.i18n();
 		},
 
-		onShow : function(){
-			this.displayGrid();
-			this.frequency = this.ui.frequency.val();
-		},
-
-		setFrequency: function(e){
-			this.frequency = $(e.target).val();
-		},
-
-		displayGrid: function(){
-			var cols = [{
-				name: 'FK_Individual',
-				label: 'Individual ID',
-				editable: false,
-				cell : 'string'
-			},{
-				name: 'FK_ptt',
-				label: 'Unique',
-				editable: false,
-				cell : 'string'
-			}, {
-				name: 'nb',
-				label: 'NB',
-				editable: false,
-				cell: 'string'
-			}, {
-				name: 'StartDate',
-				label: 'Start equipment',
-				editable: false,
-				cell: 'string',
-			}, {
-				name: 'EndDate',
-				label: 'End equipment',
-				editable: false,
-				cell: 'string',
-			}, {
-				name: 'min_date',
-				label: 'Data from',
-				editable: false,
-				cell: 'string',
-			}, {
-				name: 'min_date',
-				label: 'Data To',
-				editable: false,
-				cell: 'string',
-			}, {
-				editable: true,
-				name: 'import',
-				label: 'IMPORT',
-				cell: 'select-row',
-				headerCell: 'select-all'
-			}];
-
-			var _this = this;
-			this.grid = new NsGrid({
-				pagingServerSide: false,
-				columns : cols,
-				pageSize: 100,
-				com: this.com,
-				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
-				urlParams : this.urlParams,
-				rowClicked : true,
-				totalElement : 'totalEntries',
-			});
-
-			this.grid.rowClicked = function(row){
-				_this.rowClicked(row);
-			};
-
-			this.ui.grid.html(this.grid.displayGrid());
-		},
-
-		rowClicked: function(args){
-			var row = args.row;
-			var evt = args.evt;
-
-			var id = row.model.get('FK_Individual');
-			var ptt = row.model.get('FK_ptt');
-
-			if(!$(evt.target).is('input')){
-				Backbone.history.navigate('validate/' + this.type_ + '/' + id, {trigger: true});
-			}
-		},
-
-		autoValidate: function(){
-			var params = {
-				'frequency': this.frequency,
-				'toValidate': []
-			};
-			var tmp = {};
-			_.each(this.grid.grid.getSelectedModels(), function(model){
-				params.toValidate.push({
-					'FK_Individual': model.get('FK_Individual'),
-					'FK_ptt': model.get('FK_ptt')
-				});
-			});
-
-			var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
-			$.ajax({
-				url: url,
-				method: 'POST',
-				data : JSON.stringify(params)
-			});
-		}
 
 	});
 });

@@ -20,7 +20,7 @@ define([
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
 
-		template: 'app/modules/validate/templates/tpl-sensorValidate.html',
+		template: 'app/modules/validate/templates/tpl-sensorValidateDetail.html',
 		className: 'full-height animated white',
 
 		events : {
@@ -41,6 +41,8 @@ define([
 			this.indId = parseInt(options.indId);
 			this.sensorId = parseInt(options.sensorId);
 			this.com = new Com();
+			console.log(this.indId);
+			console.log(this.sensorId);
 		},
 
 		onRender: function(){
@@ -58,7 +60,6 @@ define([
 		},
 
 		displayGrid: function(){
-
 			var cols = [{
 				name: 'PK_id',
 				label: 'ID',
@@ -96,25 +97,26 @@ define([
 				editable: false,
 				cell: 'string',
 			}, {
-				editable: true,
 				name: 'import',
 				label: 'IMPORT',
+				editable: true,
 				cell: 'select-row',
 				headerCell: 'select-all'
 			}];
 
-			var _this = this;
+			var url = config.coreUrl + 'sensors/' + this.type
+			+ '/uncheckedDatas/' + this.indId + '/' + this.sensorId;
 			this.grid = new NsGrid({
 				pagingServerSide: false,
 				columns : cols,
 				com: this.com,
 				pageSize: 20,
-				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas/'+this.ind_id,
+				url: url,
 				urlParams : this.urlParams,
 				rowClicked : false,
 				totalElement : 'totalEntries',
 			});
-			
+
 			/*
 			this.grid.rowClicked = function(row){
 				_this.rowClicked(row);
@@ -122,14 +124,13 @@ define([
 			this.grid.rowDbClicked = function(row){
 				_this.rowDbClicked(row);
 			};*/
-
+			
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
-
 		},
 
 		displayMap: function(){
-			var url  = config.coreUrl+ 'sensors/uncheckedDatas'+this.type_+'/'+this.ind_id+'?geo=true';
+			var url  = config.coreUrl+ 'sensors/uncheckedDatas'+this.type_ + '/' + this.indId+'?geo=true';
 			this.map = new NsMap({
 				url: url,
 				selection: true,
@@ -155,9 +156,6 @@ define([
 				parent: this.parent
 			});
 		},
-
-
-
 
 	});
 });
