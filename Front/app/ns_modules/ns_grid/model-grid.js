@@ -42,10 +42,10 @@ define([
 						'dblclick' : 'onDbClick'
 					},
 					onClick: function (e) {
-						_this.interaction('rowClicked', this);
+						_this.interaction('rowClicked', {row: this, evt: e});
 					},
 					onDbClick: function(e){
-						_this.interaction('rowDbClicked', this);
+						_this.interaction('rowDbClicked', {row: this, evt: e});
 					}
 				});
 			}
@@ -212,6 +212,7 @@ define([
 
 					};
 					PageColl.prototype.fetch.call(this, options);
+
 				}
 				
 			});
@@ -311,9 +312,15 @@ define([
 					} else {
 						delete this.collection.queryParams['lastImported'];
 					}
-					this.grid.collection.fetch({ reset: true, data: { 'criteria': this.filterCriteria }, success: function () {
-
-					} });
+					this.grid.collection.fetch({
+						reset: true, 
+						data: { 'criteria': this.filterCriteria }, 
+						success: function () {
+							if(_this.totalElement){
+								_this.affectTotalRecords();
+							}
+						}
+					});
 				}
 
 			}
@@ -342,8 +349,13 @@ define([
 		},
 
 		affectTotalRecords: function () {
+			console.log(this.grid);
 			if (this.totalElement != null) {
-				$('#' + this.totalElement).html(this.paginator.collection.state.totalRecords);
+				if(this.paginator){
+					$('#' + this.totalElement).html(this.paginator.collection.state.totalRecords);
+				}else{
+					$('#' + this.totalElement).html(this.grid.collection.length);
+				}
 			}
 			
 		},

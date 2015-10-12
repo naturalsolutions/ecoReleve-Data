@@ -51,9 +51,11 @@ define(['marionette', 'config',
 			Backbone.history.navigate('');
 			this.rgMain.show(new LytHome());
 		},
+		
 		export: function(){
 			this.rgMain.show(new LytExport());
 		},
+
 		importFile: function(){
 			this.rgMain.show(new LytImportFile());
 		},
@@ -65,38 +67,43 @@ define(['marionette', 'config',
 		newStation: function(){
 			this.rgMain.show(new LytStationStepperNew());
 		},
+
 		editStations: function(){
 			this.rgMain.show(new LytStationStepperEdit());
 		},
 
-		station: function(option){
-			this.rgMain.show(new LytStationEdit({id: option}));
-		},
-		
-		individual : function(option){
-			this.rgMain.show(new LytIndividual({id : option}));
-		},
-		indiv : function(option){
-			this.rgMain.show(new LytIndividual({id: option}));
-		},
-		sensor : function(option){
-			this.rgMain.show(new LytSensor({id: option}));
+		station: function(id){
+			this.rgMain.show(new LytStationEdit({id: id}));
 		},
 
-		monitoredSite: function(option){
-			this.rgMain.show(new LytMonitoredSite({id: option}));
+		individual : function(id){
+			this.rgMain.show(new LytIndividual({id : id}));
 		},
 
-		validate: function(option){
+		indiv : function(id){
+			this.rgMain.show(new LytIndividual({id: id}));
+		},
+
+		sensor : function(id){
+			this.rgMain.show(new LytSensor({id: id}));
+		},
+
+		monitoredSite: function(id){
+			this.rgMain.show(new LytMonitoredSite({id: id}));
+		},
+
+		validate: function(type){
 			var options='argos';
 			this.rgMain.show(new LytSensorValidate({type : options}));
-			
 		},
-		validateDetail: function(option){
-			console.log(option)
-			var type_ = 'argos';
-			this.rgMain.show(new LytSensorValidateDetail({id : option, type :type_}));
 
+		validateDetail: function(type, indId, sensorId){
+			var type_ = 'argos';
+			this.rgMain.show(new LytSensorValidateDetail({
+				type : type,
+				indId : indId,
+				sensorId : sensorId
+			}));
 		},
 
 	});
