@@ -89,7 +89,9 @@ class ObjectTypeWithDynProp:
         ''' return ordered FiledSet according to configuration '''
         fields = []
         resultat = []
-        Fields = self.ObjContext.query(ModuleForms).filter(ModuleForms.Module_ID == FrontModules.ID).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)).all()
+        Fields = self.ObjContext.query(ModuleForms
+            ).filter(ModuleForms.Module_ID == FrontModules.ID
+            ).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)).all()
    
         Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
         # Legend2s = sorted ([(obj.Legend)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])

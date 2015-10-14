@@ -19,7 +19,7 @@ eval_ = Eval()
 
 class ListObjectWithDynProp():
     ''' This class is used to filter Object with dyn props over all properties '''
-    def __init__(self,ObjWithDynProp, frontModule, history = False):
+    def __init__(self,ObjWithDynProp, frontModule, history = False, View = None):
         self.ObjContext = DBSession
         self.ListPropDynValuesOfNow = {}
         self.ObjWithDynProp = ObjWithDynProp
@@ -27,7 +27,7 @@ class ListObjectWithDynProp():
         self.frontModule = frontModule
         self.Conf = frontModule.ModuleGrids
         self.vAliasList = {}
-        self.joinTable = None
+        self.optionView = View
 
         self.history = history
 
@@ -53,7 +53,6 @@ class ListObjectWithDynProp():
         joinTable = self.ObjWithDynProp
         view = self.GetDynPropValueView()
         selectable = [self.ObjWithDynProp.ID]
-        i = 1
         objTable = self.ObjWithDynProp.__table__
         self.firstStartDate = None
 
@@ -94,7 +93,12 @@ class ListObjectWithDynProp():
                         )
                     selectable.append(v.c['Value'+curDynProp['TypeProp']].label(curDynProp['Name']))
 
-                i+=1
+            elif self.optionView is not None and objConf.Name in self.optionView.c:
+                if self.optionView.name not in self.vAliasList:
+                    joinTable = outerjoin(joinTable,self.optionView, self.ObjWithDynProp.ID == self.optionView.c['FK_'+self.ObjWithDynProp.__tablename__])
+                    self.vAliasList[self.optionView.name] = self.optionView
+                selectable.append(self.optionView.c[objConf.Name])
+
             elif hasattr(self.ObjWithDynProp,objConf.Name):
                 selectable.append(objTable.c[objConf.Name])
         self.selectable = selectable
@@ -133,14 +137,17 @@ class ListObjectWithDynProp():
         curProp = criteriaObj['Column']
  
         if hasattr(self.ObjWithDynProp,curProp) :
-
             # static column criteria
             query = query.where(
                 eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
                 )
+
+        elif self.optionView is not None and curProp in self.optionView.c:
+            query = query.where(
+                eval_.eval_binary_expr(self.optionView.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
+                )
         else:
             #try :
-                #fore
             curDynProp = None
             for x in self.ObjWithDynProp().GetAllProp():
                 if x['name'] == curProp:
@@ -150,18 +157,10 @@ class ListObjectWithDynProp():
                     # Gerer l'exception
             else :
                 viewAlias = self.vAliasList['v'+curDynProp['name']]
-
                       #### Perform the'where' in dyn props ####
                 query = query.where(
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
-                #print(eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
-            #except:
 
-        # elif self.jsonQuery and curProp ==self.jsonQuery['where'] :
-        #     tableRef = tableRef = Base.metadata.tables[self.jsonQuery['table']]
-        #     query = query.where(
-        #         eval_.eval_binary_expr(tableRef.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
-        #     )
         return query
 
     def GetFullQuery(self,searchInfo=None) :
@@ -245,6 +244,9 @@ class ListObjectWithDynProp():
 
                 elif hasattr(self.ObjWithDynProp,curProp):
                     trueCol = curProp
+
+                elif self.optionView is not None and curProp in self.optionView.c:
+                    trueCol = self.optionView.c[curProp]
 
                 elif (self.history and curProp == 'StartDate'):
                     viewAlias = self.vAliasList[self.firstStartDate]
