@@ -149,7 +149,6 @@ define([
 
 			var url = this.modelurl + '/' + id;
 
-			console.log(this.modelurl);
 
 			this.name='_' + this.objectType + '_';
 
@@ -176,7 +175,6 @@ define([
 					_this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
 					_this.showForm();
 					_this.updateState(this.displayMode);
-					console.log(resp.schema);
 				},
 				error: function (data) {
 					console.warn('request error');
@@ -193,19 +191,22 @@ define([
 
 			this.formRegion.html(this.BBForm.el);
 
-
-			this.buttonRegion.forEach(function (entry) {
-				_this.buttonRegion[0].html(_this.template);
-				_this.buttonRegion[0].i18n();
-			});
-
 			if(this.buttonRegion[0]){
-				this.displaybuttons();
-				this.bindEvents();
+				this.buttonRegion.forEach(function (entry) {
+					_this.buttonRegion[0].html(_this.template);
+					_this.buttonRegion[0].i18n();
+				});
+
+				if(this.buttonRegion[0]){
+					this.displaybuttons();
+					this.bindEvents();
+				}
 			}
+
 			if (this.afterShow) {
 				this.afterShow();
 			}
+
 			
 
 		},

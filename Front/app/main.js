@@ -1,7 +1,7 @@
 require.config({ 
 	baseUrl: 'app',
 	paths : {
-		
+
 
 		'tmp'				: './tmp',
 

@@ -17,6 +17,7 @@ define(['marionette', 'config',
 	
 	'./modules/monitoredSite/layouts/lyt-ms',
 	'./modules/validate/lyt-sensorValidate',
+	'./modules/validate/lyt-sensorValidateType',
 	'./modules/validate/lyt-sensorValidateDetail',
 
 ],function( Marionette, config, 
@@ -34,10 +35,12 @@ define(['marionette', 'config',
 	LytSensor,
 	LytMonitoredSite,
 	LytSensorValidate,
+	LytSensorValidateType,
 	LytSensorValidateDetail
 
 ){
 	'use strict';
+
 	return Marionette.Object.extend({
 
 		initialize: function(){
@@ -92,13 +95,17 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytMonitoredSite({id: id}));
 		},
 
-		validate: function(type){
-			var options='argos';
-			this.rgMain.show(new LytSensorValidate({type : options}));
+		validate: function(){
+			this.rgMain.show(new LytSensorValidate());
+		},
+
+		validateType: function(type){
+			this.rgMain.show(new LytSensorValidateType({
+				type : type
+			}));
 		},
 
 		validateDetail: function(type, indId, sensorId){
-			var type_ = 'argos';
 			this.rgMain.show(new LytSensorValidateDetail({
 				type : type,
 				indId : indId,

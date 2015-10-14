@@ -23,9 +23,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'monitoredSite(/)' : 'monitoredSite',
 			'monitoredSite(/):id' : 'monitoredSite',
 
-			'validate/:type/:id(/)':'validateDetail',
+			'validate/:type/:indId/:sensorId(/)':'validateDetail',
+			'validate/:type(/)':'validateType',
 			'validate(/)':'validate',
-
 
 			'*route(/:page)': 'home',
 		},

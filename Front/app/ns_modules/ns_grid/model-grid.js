@@ -349,7 +349,6 @@ define([
 		},
 
 		affectTotalRecords: function () {
-			console.log(this.grid);
 			if (this.totalElement != null) {
 				if(this.paginator){
 					$('#' + this.totalElement).html(this.paginator.collection.state.totalRecords);
@@ -419,7 +418,7 @@ define([
 			if (this.com) {
 				this.com.action(action, id);
 			} else {
-				this.action(action, id);
+				//this.action(action, id);
 			}
 		},
 
