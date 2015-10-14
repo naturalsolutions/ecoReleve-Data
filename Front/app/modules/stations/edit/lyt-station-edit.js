@@ -103,11 +103,11 @@ define([
 					}
 				},
 			});
-			this.grid.rowClicked = function(row){
-				_this.rowClicked(row);
+			this.grid.rowClicked = function(args){
+				_this.rowClicked(args.row);
 			};
-			this.grid.rowDbClicked = function(row){
-				_this.rowDbClicked(row);
+			this.grid.rowDbClicked = function(args){
+				_this.rowDbClicked(args.row);
 			};
 		},
 
@@ -126,8 +126,6 @@ define([
 			var _this= this;
 			//could be in the module
 			/*this.$el.find('#grid').html(_this.grid.displayGrid());*/
-			
-
 			this.gridRegion.show(this.grid.getGridView());
 			this.$el.find('#paginator').html(_this.grid.displayPaginator());
 		},

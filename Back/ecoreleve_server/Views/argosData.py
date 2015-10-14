@@ -19,7 +19,7 @@ import subprocess , psutil
 from pyramid.security import NO_PERMISSION_REQUIRED
 from datetime import datetime
 from ..Models import Base, dbConfig, DBSession,ArgosGps
-
+from traceback import print_exc
 
 
 route_prefix = 'sensors/'
@@ -69,10 +69,11 @@ def type_unchecked_list(request):
     return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name=route_prefix+'uncheckedDatas/ptt/id_indiv',renderer='json',request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt',renderer='json',request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def details_unchecked_indiv(request):
     type_= request.matchdict['type']
     id_indiv = request.matchdict['id_indiv']
+    ptt = request.matchdict['id_ptt']
 
     if type_ == 'argos' :
         unchecked = ArgosDatasWithIndiv
@@ -80,7 +81,7 @@ def details_unchecked_indiv(request):
         unchecked = GsmDatasWithIndiv
 
     if 'geo' in request.params :
-        queryGeo = select([unchecked.c['type'],unchecked.c['lat'],unchecked.c['lon'],unchecked.c['date']]
+        queryGeo = select([unchecked.c['PK_id'],unchecked.c['type'],unchecked.c['lat'],unchecked.c['lon'],unchecked.c['date']]
             ).where(and_(unchecked.c['FK_ptt']== ptt
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv)))
             
@@ -88,15 +89,17 @@ def details_unchecked_indiv(request):
 
         geoJson = []
         for row in dataGeo:
-            geoJson.append({'type':'Feature', 'properties':{'type':row['type'], 'date':row['date']}
+            geoJson.append({'type':'Feature', 'id': row['PK_id'], 'properties':{'type':row['type'], 'date':row['date']}
                 , 'geometry':{'type':'Point', 'coordinates':[row['lon'],row['lat']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
     else : 
         query = select([unchecked]
             ).where(and_(unchecked.c['FK_ptt']== ptt
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv)))
-
+        print(ptt)
+        print(id_indiv)
         data = DBSession.execute(query).fetchall()
+        #print(query)
         dataResult = [dict(row) for row in data]
         result = [{'total_entries':len(dataResult)}]
         result.append(dataResult)
@@ -105,13 +108,17 @@ def details_unchecked_indiv(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 
-@view_config(route_name = route_prefix+'uncheckedDatas/ptt/id_indiv', renderer = 'json' , request_method = 'POST' )
+@view_config(route_name = route_prefix+'uncheckedDatas/id_indiv/ptt', renderer = 'json' , request_method = 'POST' )
 def manual_validate(request) :
 
-    ptt = request.matchdict['id_ptt']
-    data = request.json_body.get('data')
-    ind_id = asInt(request.matchdict['id_ind'])
+    ptt = asInt(request.matchdict['id_ptt'])
+    ind_id = asInt(request.matchdict['id_indiv'])
     type_ = request.matchdict['type']
+    user = request.authenticated_userid
+    user = 1
+
+    data = request.params['data']
+    print(ptt, ind_id, type_, data)
 
     procStockDict = {
     'argos': '[sp_validate_Argos_GPS]',
@@ -121,14 +128,14 @@ def manual_validate(request) :
     try : 
         if isinstance( ind_id, int ): 
             xml_to_insert = data_to_XML(data)
-            # validate unchecked ARGOS_ARGOS or ARGOS_GPS data from xml data PK_id.         
+            # validate unchecked ARGOS_ARGOS or ARGOS_GPS data from xml data PK_id.
             start = time.time()
             # push xml data to insert into stored procedure in order ==> create stations and protocols if not exist
             stmt = text(""" DECLARE @nb_insert int , @exist int, @error int;
                 exec """+ dbConfig['data_schema'] + """."""+procStockDict[type_]+""" :id_list, :ind_id , :user , :ptt, @nb_insert OUTPUT, @exist OUTPUT , @error OUTPUT;
                     SELECT @nb_insert, @exist, @error; """
                 ).bindparams(bindparam('id_list', xml_to_insert),bindparam('ind_id', ind_id),bindparam('ptt', ptt)
-                ,bindparam('user', request.authenticated_userid))
+                ,bindparam('user', user))
             nb_insert, exist , error = DBSession.execute(stmt).fetchone()
             transaction.commit()
 
@@ -137,6 +144,7 @@ def manual_validate(request) :
         else : 
             return error_response(None)
     except  Exception as err :
+        print_exc()
         return error_response(err)
 
 @view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST' )
@@ -150,23 +158,17 @@ def auto_validation(request):
 
 
     freq = param['frequency']
-    listToValidate = param['toValidate']
-
+    listToValidate = json.loads(param['toValidate'])
 
 
     if freq == 'all' :
         freq = 1
 
-    if ind_id == 'null' : 
-        ind_id = None
-    else :
-        ind_id = int(ind_id)
-
     Total_nb_insert = 0
     Total_exist = 0
     Total_error = 0
 
-    for row in listToValidate :
+    for row in listToValidate : 
         ind_id = row['FK_Individual']
         ptt = row['FK_ptt']
         
@@ -183,7 +185,7 @@ def auto_validation(request):
     return { 'inserted' : Total_nb_insert, 'existing' : Total_exist, 'errors' : Total_error}
 
 
-def auto_validate_stored_proc(ind_id,user,type_,freq):
+def auto_validate_stored_proc(ptt, ind_id,user,type_,freq):
     procStockDict = {
     'argos': '[sp_auto_validate_Argos_GPS]',
     'gsm': '[sp_auto_validate_GSM]'

@@ -122,6 +122,7 @@ define([
 			var id = row.model.get('FK_Individual');
 			var ptt = row.model.get('FK_ptt');
 
+
 			if(!$(evt.target).is('input')){
 				Backbone.history.navigate('validate/' + this.type_ + '/' + id + '/' + ptt, {trigger: true});
 			}

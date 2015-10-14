@@ -418,7 +418,7 @@ define([
 			if (this.com) {
 				this.com.action(action, id);
 			} else {
-				this.action(action, id);
+				//this.action(action, id);
 			}
 		},
 
