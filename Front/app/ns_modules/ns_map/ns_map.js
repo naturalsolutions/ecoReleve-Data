@@ -284,9 +284,10 @@ define([
 						setTimeout(function(){
 							_this.addMarkersLayer();
 						}, 500);
-						
+						_this.geoJson = geoJson;
 					}else{
 						_this.initLayer(geoJson);
+						_this.geoJson = geoJson;
 					}
 			})
 			.fail(function(msg) {

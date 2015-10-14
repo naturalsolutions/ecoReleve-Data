@@ -1,0 +1,47 @@
+
+
+<div class="full-height col-sm-6">
+	<div class="banner">
+		<br>
+		<button id="back" class="btn btn-success">
+			<i class="reneco reneco-back"></i>
+			Back
+		</button>
+	</div>
+	<br>
+
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active"><a href="#individual" aria-controls="individual" role="tab" data-toggle="tab">Individual details</a></li>
+			<li role="presentation"><a href="#sensor" aria-controls="sensor" role="tab" data-toggle="tab">Sensor details</a></li>
+		</ul>
+
+		<!-- Tab panes -->
+		<div class="tab-content">
+			<div role="tabpanel" class="tab-pane active" id="individual">
+				<div id="indForm"></div>
+			</div>
+			<div role="tabpanel" class="tab-pane" id="sensor">
+				<div id="sensorForm"></div>
+			</div>
+		</div>
+
+	
+	<br>
+	<div class="clearfix">
+		<button id="validate" class="btn btn-success pull-right">Validate</button>
+		<div class="col-xs-4 pull-right">
+			<select name="" id="frequency" class="form-control pull-left">
+				<option value="none" disabled selected>Select a frequency</option>
+				<option value="360">Every 6H</option>
+				<option value="30">Every 30min</option>
+				<option value="15">Every 15min</option>
+			</select>
+		</div>
+			
+	</div>
+	<br>
+	<div id="grid"></div>
+</div>
+<div class="full-height col-sm-6 no-padding">
+	<div id="map"></div>
+</div>

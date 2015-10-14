@@ -48,6 +48,7 @@ def main(global_config, **settings):
     dbConfig['wsThesaurus'] = {}
     dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
     dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
+    dbConfig['data_schema'] = settings['data_schema']
 
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
