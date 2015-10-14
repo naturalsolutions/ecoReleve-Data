@@ -19,38 +19,36 @@ BEGIN
 		print 'Individu insertion'
 		-- Insertion des nouveaux sujets
 		INSERT INTO [NewModelERD].[dbo].[Individual]
-			   ([ID]
-			   ,[Name]
-			   ,[creationDate]
+			   (
+			   [creationDate]
 			   ,[Age]
-			   ,[Sex]
 			   ,[Birth_date]
 			   ,[Death_date]
-			   ,[Old_ID]
 			   ,[FK_IndividualType]
 			   ,[Species]
-			   ,Original_ID)
-			   OUTPUT inserted.ID into @TInsetedId
-		SELECT 30000000+M.objectID ,'',Getdate(),'',S.PropValue,CONVERT(smallDATETIME,BD.PropValue,120) ,NULL,NULL,1,E.PropValue,M.objectID
+			   ,Original_ID
+			   ,Caisse_ID)
+			  OUTPUT inserted.ID into @TInsetedId
+		SELECT Getdate(),NULL,CONVERT(DATETIME,BD.PropValue,120) ,NULL,1,E.PropValue,'TRACK_'+CONVERT(VARCHAR,M.objectID),NULL
 		FROM  TMessageReceived M 
-		JOIN  TMessageReceivedDetail S ON M.pk_MessageReceived=S.fk_MessageReceived and S.PropName = 'TInd_Sexe'
+	--	JOIN  TMessageReceivedDetail S ON M.pk_MessageReceived=S.fk_MessageReceived and S.PropName = 'TInd_Sexe'
 		JOIN  TMessageReceivedDetail BD ON M.pk_MessageReceived=BD.fk_MessageReceived and BD.PropName = 'TInd_DateNaissance'
 		JOIN  TMessageReceivedDetail E ON M.pk_MessageReceived=E.fk_MessageReceived and E.PropName = 'TInd_Espece'
 		WHERE Importdate IS NULL AND M.ObjectType ='Individu' AND m.Provenance = 'TRACK'
-		AND NOT EXISTS (SELECT * FROM [Individual] S WHERE [FK_IndividualType] =1 and S.[Old_ID] = m.ObjectId)
+		AND NOT EXISTS (SELECT * FROM [Individual] S WHERE [FK_IndividualType] =1 and S.Original_ID = 'TRACK_'+CONVERT(VARCHAR,m.ObjectId))
 		
 
 		print 'Inserting DYnPropValues'
 		-- INserttion  des propriétées dynamiques 
 		INSERT INTO [IndividualDynPropValue]
-			   (ID,[StartDate]
+			   ([StartDate]
 			   ,[ValueInt]
 			   ,[ValueString]
 			   ,[ValueDate]
 			   ,[ValueFloat]
 			   ,FK_Individual
 			   ,FK_IndividualDynProp)
-		SELECT 2000000+ row_number() over(order by m.pk_MessageReceived), GETDATE()
+		SELECT GETDATE()
 		,CASE WHEN DP.TypeProp = 'entier' THEN CONVERT(int,D.PropValue) ELSE NULL END
 		,CASE WHEN DP.TypeProp = 'string' THEN D.PropValue ELSE NULL END
 		,CASE WHEN DP.TypeProp = 'date' THEN CONVERT(DATETIME,D.PropValue,120) ELSE NULL END
@@ -58,7 +56,7 @@ BEGIN
 		,I.ID
 		,DP.ID
 		FROM 	TMessageReceived M 
-		JOIN Individual I on I.Original_Id = M.ObjectId
+		JOIN Individual I on I.Original_Id = 'TRACK_'+CONVERT(VARCHAR,m.ObjectId)
 		JOIN  TMessageReceivedDetail D ON M.pk_MessageReceived=D.fk_MessageReceived
 		JOIN TMessageDynPropvsTrack CDP ON CDP.TrackName = D.PropName
 		JOIN IndividualDynProp DP ON CDP.ERDName = DP.Name

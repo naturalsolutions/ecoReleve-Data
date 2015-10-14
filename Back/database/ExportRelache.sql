@@ -9,7 +9,7 @@ and TInd_DateSortie > GETDATE()-200
 */
 
 insert into @InList
-select I.TInd_PK_ID from TIndividus I
+select I.TInd_PK_ID from [NARC_TRACK_MACQ].dbo.TIndividus I
 WHERE I.TInd_StatusSortie = 'Relâché'
 and TInd_DateSortie > GETDATE()-180
 
