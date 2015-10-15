@@ -151,13 +151,18 @@ define([
 			}).done(function(resp) {
 				this.swal(resp);
 				this.displayGrid();
+			}).fail(function() {
+				this.swal(resp);
 			});
 		},
 
 
 		swal: function(opt){
+			console.log(opt);
+
+
 			Swal({
-				title: title,
+				title: opt,
 				text: 'error',
 				type: 'error',
 				showCancelButton: false,
@@ -166,7 +171,6 @@ define([
 				closeOnConfirm: true,
 			},
 			function(isConfirm){
-				$('form')[0].reset();
 			});
 		},
 
