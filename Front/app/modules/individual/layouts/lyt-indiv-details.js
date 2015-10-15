@@ -61,8 +61,6 @@ define([
 		},
 
 		onShow : function(){
-			console.log('passed');
-			
 			this.displayForm(this.indivId);
 			this.displayGrid(this.indivId);
 			this.displayMap();

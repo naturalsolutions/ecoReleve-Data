@@ -20,7 +20,7 @@ define([
 		===================================================*/
 
 		template: 'app/modules/validate/templates/tpl-sensorValidateType.html',
-		className: 'full-height animated white',
+		className: 'full-height animated',
 
 		events : {
 			'click button#autoValidate' : 'autoValidate',
@@ -146,9 +146,35 @@ define([
 			$.ajax({
 				url: url,
 				method: 'POST',
-				data : params
+				data : params,
+				context: this
+			}).done(function(resp) {
+				this.swal(resp);
+				this.displayGrid();
+			}).fail(function() {
+				this.swal(resp);
 			});
-		}
+		},
+
+
+		swal: function(opt){
+			console.log(opt);
+
+
+			Swal({
+				title: opt,
+				text: 'error',
+				type: 'error',
+				showCancelButton: false,
+				confirmButtonColor: 'rgb(147, 14, 14)',
+				confirmButtonText: 'OK',
+				closeOnConfirm: true,
+			},
+			function(isConfirm){
+			});
+		},
+
+
 
 	});
 });
