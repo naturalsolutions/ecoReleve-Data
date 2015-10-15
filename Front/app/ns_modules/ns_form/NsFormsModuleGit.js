@@ -130,6 +130,9 @@ define([
 				this.redirectAfterPost = options.redirectAfterPost;
 			}
 			this.afterShow = options.afterShow;
+			if (options.afterSaveSuccess){
+				this.afterSaveSuccess = options.afterSaveSuccess ;
+			}
 		},
 
 

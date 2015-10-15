@@ -32,6 +32,7 @@ class Individual (Base,ObjectWithDynProp) :
     Sex = Column(String)
     Birth_date = Column(DateTime)
     Death_date = Column(DateTime)
+    Original_ID = Column(String)
     FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
 
     IndividualDynPropValues = relationship('IndividualDynPropValue',backref='Individual',cascade="all, delete-orphan")

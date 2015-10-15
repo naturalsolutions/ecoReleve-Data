@@ -7,15 +7,15 @@ define([
 	'sweetAlert',
 	'translater',
 	'config',
-
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
-
-	'./lyt-indiv-details'
+	'./lyt-indiv-details',
+	'./lyt-new-individual',
+	'ns_modules/ns_toolbar/lyt-toolbar'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, LytIndivDetail
+	Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv,Toolbar
 ){
 
 	'use strict';
@@ -31,7 +31,8 @@ define([
 		events : {
 			'click #btnFilter' : 'filter',
 			'click #back' : 'hideDetails',
-			'click button#clear' : 'clearFilter'
+			'click button#clear' : 'clearFilter',
+			//'click #createNew' : 'showModal'
 		},
 
 		ui: {
@@ -43,7 +44,8 @@ define([
 		},
 
 		regions: {
-			detail : '#detail'
+			detail : '#detail',
+			toolbar : '#toolbar'
 		},
 
 		initialize: function(options){
@@ -59,6 +61,11 @@ define([
 
 
 		onShow : function(){
+			// to integrate the toolbar, create a layout for the content of the modal windows
+			// Be carreful, we provide LytNewIndiv and not his instance (new) !!!
+			var toolbar = new Toolbar({content : LytNewIndiv, modalTitle : 'New individual' });
+			this.toolbar.show(toolbar);
+
 			this.displayFilter();
 			this.displayGrid(); 
 			if(this.options.id){
@@ -157,5 +164,8 @@ define([
 			this.total = grid.collection.state.totalRecords;
 			this.ui.totalEntries.html(this.total);
 		},
+		/*showModal : function(){
+			this.newIndiv.show(new LytNewIndiv({rg : this.newIndiv}));
+		}*/
 	});
 });

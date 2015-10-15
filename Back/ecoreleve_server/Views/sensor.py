@@ -19,6 +19,7 @@ from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
 from collections import OrderedDict
+from datetime import datetime
 
 
 prefix = 'sensors'
@@ -190,8 +191,9 @@ def updateSensor(request):
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix, renderer='json', request_method = 'POST')
+@view_config(route_name= prefix + '/insert', renderer='json', request_method = 'POST')
 def insertSensor(request):
+    print('_______INsertion____________________')
     data = request.json_body
     if not isinstance(data,list):
         print('_______INsert ROW *******')
@@ -208,8 +210,16 @@ def insertOneNewSensor (request) :
         if value != "" :
             data[items] = value
 
-    newSensor = Sensor(FK_SensorType = data['FK_SensorType'], creator = request.authenticated_userid)
-    newSensor.SensorType = DBSession.query(SensorType).filter(SensorType.ID==data['FK_SensorType']).first()
+    print('______________ sensor type__________________')
+    print(data['FK_SensorType'])
+    #newSensor = Sensor(FK_SensorType = data['FK_SensorType'], creator = request.authenticated_userid)
+    sensorType = int(data['FK_SensorType'])
+    print('-----------------------------------------------data')
+    print(data)
+    newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now() )
+
+
+    newSensor.SensorType = DBSession.query(SensorType).filter(SensorType.ID== sensorType).first()
     newSensor.init_on_load()
     newSensor.UpdateFromJson(data)
     print (newSensor.__dict__)

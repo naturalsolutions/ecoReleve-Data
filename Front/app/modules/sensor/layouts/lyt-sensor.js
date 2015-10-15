@@ -10,11 +10,11 @@ define([
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
-
-	//'./lyt-indiv-details' 
+	'./lyt-new-sensor', 
+	'./modal-region',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter//, LytIndivDetail
+	Com, NsGrid, NsFilter, NewSensor,Modal
 ){
 
 	'use strict';
@@ -32,7 +32,8 @@ define([
 			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
 			'change select.FK_SensorType' : 'updateModels',
-			'click #btn-export' : 'exportGrid'
+			'click #btn-export' : 'exportGrid',
+			'click #createNew' : 'showModal'
 		},
 
 		ui: {
@@ -44,7 +45,8 @@ define([
 		},
 
 		regions: {
-			detail : '#detail'
+			detail : '#detail',
+			newSensor : Modal
 		},
 
 		initialize: function(options){
@@ -196,5 +198,8 @@ define([
                 document.body.removeChild(link);
             });
         },
+    showModal : function(){
+			this.newSensor.show(new NewSensor({rg : this.newSensor}));
+		}
 	});
 });
