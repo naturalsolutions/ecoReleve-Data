@@ -146,9 +146,31 @@ define([
 			$.ajax({
 				url: url,
 				method: 'POST',
-				data : params
+				data : params,
+				context: this
+			}).done(function(resp) {
+				this.swal(resp);
+				this.displayGrid();
 			});
-		}
+		},
+
+
+		swal: function(opt){
+			Swal({
+				title: title,
+				text: 'error',
+				type: 'error',
+				showCancelButton: false,
+				confirmButtonColor: 'rgb(147, 14, 14)',
+				confirmButtonText: 'OK',
+				closeOnConfirm: true,
+			},
+			function(isConfirm){
+				$('form')[0].reset();
+			});
+		},
+
+
 
 	});
 });
