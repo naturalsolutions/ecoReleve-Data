@@ -24,7 +24,8 @@ define([
 
 		events : {
 			'click button#autoValidate' : 'autoValidate',
-			'change select#frequency' : 'setFrequency'
+			'change select#frequency' : 'setFrequency',
+			'click button#back' : 'back',
 		},
 
 		ui: {
@@ -37,6 +38,10 @@ define([
 			this.translater = Translater.getTranslater();
 			this.type_ = options.type;
 			this.com = new Com();
+		},
+
+		back: function(){
+			Backbone.history.history.back();
 		},
 
 		onRender: function(){
@@ -124,6 +129,8 @@ define([
 
 
 			if(!$(evt.target).is('input')){
+				if(id == null) id = 'none';
+
 				Backbone.history.navigate('validate/' + this.type_ + '/' + id + '/' + ptt, {trigger: true});
 			}
 		},
@@ -158,23 +165,28 @@ define([
 
 
 		swal: function(opt){
-			console.log(opt);
-
-
+			if(opt.errors){
+				opt.title = 'An error occured';
+				opt.type = 'error';
+				opt.color = 'rgb(147, 14, 14)';
+			}else{
+				opt.title = 'Success';
+				opt.type = 'success';
+				opt.color = 'green';
+			}
 			Swal({
-				title: opt,
-				text: 'error',
-				type: 'error',
+				title: opt.title,
+				text: 'existing: ' + opt.existing + ', inserted: ' + opt.inserted + ', errors:' + opt.errors,
+				type: opt.type,
 				showCancelButton: false,
-				confirmButtonColor: 'rgb(147, 14, 14)',
+				confirmButtonColor: opt.color,
 				confirmButtonText: 'OK',
 				closeOnConfirm: true,
 			},
 			function(isConfirm){
+
 			});
 		},
-
-
 
 	});
 });

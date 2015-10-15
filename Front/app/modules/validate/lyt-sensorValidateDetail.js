@@ -46,7 +46,7 @@ define([
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.type = options.type;
-			this.indId = parseInt(options.indId);
+			this.indId = options.indId;
 			this.sensorId = parseInt(options.sensorId);
 			this.com = new Com();
 		},
@@ -56,10 +56,18 @@ define([
 		},
 
 		onShow : function(){
+			if(this.indId == 'none'){
+				this.swal({ title : 'No individual attached'}, 'warning');
+			}else{
+				this.displayIndForm();
+			}
 			this.displayGrid();
 			this.displayMap();
-			this.displayIndForm();
-			//this.displaySensorForm();
+			this.displaySensorForm();
+		},
+
+		back: function(){
+			Backbone.history.history.back();
 		},
 
 		setFrequency: function(e){
@@ -315,12 +323,56 @@ define([
 				url: url,
 				method: 'POST',
 				data : { data : JSON.stringify(params) }
+			}).done(function(resp) {
+				if(reps.errors){
+					reps.title = 'An error occured';
+					reps.type = 'error';
+				}else{
+					reps.title = 'Success';
+					reps.type = 'success';
+				}
+
+				resp.text = 'existing: ' + opt.existing + ', inserted: ' + opt.inserted + ', errors:' + opt.errors;
+
+				this.swal(resp, resp.type);
+				this.displayGrid();
+			}).fail(function() {
+				this.swal(resp, 'error');
 			});
 		},
 
-		back: function(){
-			Backbone.history.history.back();
-		}
+
+
+		swal: function(opt, type){
+			var btnColor;
+			switch(type){
+				case 'success':
+					btnColor = 'green';
+					break;
+				case 'error':
+					btnColor = 'rgb(147, 14, 14)';
+					break;
+				case 'warning':
+					btnColor = 'orange';
+					break;
+				default:
+					return;
+					break;
+			}
+			
+			Swal({
+				title: opt.title || 'error',
+				text: opt.text || '',
+				type: type,
+				showCancelButton: false,
+				confirmButtonColor: btnColor,
+				confirmButtonText: 'OK',
+				closeOnConfirm: true,
+			},
+			function(isConfirm){
+
+			});
+		},
 
 	});
 });
