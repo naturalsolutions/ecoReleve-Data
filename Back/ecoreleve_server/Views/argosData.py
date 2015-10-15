@@ -2,7 +2,7 @@ from array import array
 
 from pyramid.view import view_config
 from pyramid.response import Response
-from sqlalchemy import func, desc, select, union, union_all, and_, bindparam, update, or_, literal_column, join, text, update, Table
+from sqlalchemy import func, desc, select, union, union_all, and_, bindparam, update, or_, literal_column, join, text, update, Table,distinct
 import json
 from pyramid.httpexceptions import HTTPBadRequest
 from ..utils.data_toXML import data_to_XML
@@ -39,7 +39,9 @@ def error_response (err) :
     return response
 
 ArgosDatasWithIndiv = Table('VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
-GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv', Base.metadata, autoload=True)
+GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv', Base.metadata, autoload=True) 
+DataRfidWithSite = Table('VRfidData_With_equipSite', Base.metadata, autoload=True) 
+
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 # List all PTTs having unchecked locations, with individual id and number of locations.
@@ -50,11 +52,12 @@ def type_unchecked_list(request):
         unchecked = ArgosDatasWithIndiv
     elif type_ == 'gsm' :
         unchecked = GsmDatasWithIndiv
+    elif type_ == 'rfid':
+        return unchecked_rfid(request)
 
     selectStmt = select([unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate'],
             func.count().label('nb'), func.max(unchecked.c['date']).label('max_date'),
             func.min(unchecked.c['date']).label('min_date')])
-    selectCount = select([func.count()])
 
     queryStmt = selectStmt.where(unchecked.c['checked'] == 0
             ).group_by(unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate']
@@ -63,7 +66,19 @@ def type_unchecked_list(request):
     dataResult = [dict(row) for row in data]
     result = [{'total_entries':len(dataResult)}]
     result.append(dataResult)
-    print (result)
+    return result
+
+def unchecked_rfid(request):
+    unchecked = DataRfidWithSite
+    queryStmt = select([unchecked.c['UnicName'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],
+            func.count(distinct('chip_code')).label('nb_indiv'),func.count('chip_code').label('total_scan'), func.max(unchecked.c['date_']).label('max_date'),
+            func.min(unchecked.c['date_']).label('min_date')]
+            ).where(unchecked.c['checked']==0
+            ).group_by(unchecked.c['UnicName'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],unchecked.c['creation_date'])
+    data = DBSession.execute(queryStmt).fetchall()
+    dataResult = [dict(row) for row in data]
+    result = [{'total_entries':len(dataResult)}]
+    result.append(dataResult)
     return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -149,7 +164,8 @@ def auto_validation(request):
     param = request.params.mixed()
     freq = param['frequency']
     listToValidate = json.loads(param['toValidate'])
-
+    user = request.authenticated_userid
+    user = 1 
     if freq == 'all' :
         freq = 1
 
@@ -157,23 +173,35 @@ def auto_validation(request):
     Total_exist = 0
     Total_error = 0
 
-    for row in listToValidate : 
-        ind_id = row['FK_Individual']
-        ptt = row['FK_ptt']
-        
-        if ind_id == 'null' : 
-            ind_id = None
-        else :
-            ind_id = int(ind_id)
+    if type_ == 'rfid':
+        for row in listToValidate : 
+            equipID = row['equipID']
+            sensor = row['FK_Sensor']
+            if equipID == 'null' : 
+                equipID = None
+            else :
+                equipID = int(equipID)
+            nb_insert, exist, error = auto_validate_rfid(equipID,sensor,freq,user)
+            Total_exist += exist
+            Total_nb_insert += nb_insert
+            Total_error += error
+    else:
+        for row in listToValidate : 
+            ind_id = row['FK_Individual']
+            ptt = row['FK_ptt']
 
-        nb_insert, exist, error = auto_validate_stored_proc(ptt,ind_id,request.authenticated_userid, type_,freq)
-        Total_exist += exist
-        Total_nb_insert += nb_insert
-        Total_error += error
+            if ind_id == 'null' : 
+                ind_id = None
+            else :
+                ind_id = int(ind_id)
+            nb_insert, exist, error = auto_validate_stored_procGSM_Argos(ptt,ind_id,1, type_,freq)
+            Total_exist += exist
+            Total_nb_insert += nb_insert
+            Total_error += error
 
     return { 'inserted' : Total_nb_insert, 'existing' : Total_exist, 'errors' : Total_error}
 
-def auto_validate_stored_proc(ptt, ind_id,user,type_,freq):
+def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq):
     procStockDict = {
     'argos': '[sp_auto_validate_Argos_GPS]',
     'gsm': '[sp_auto_validate_GSM]'
@@ -195,5 +223,19 @@ def auto_validate_stored_proc(ptt, ind_id,user,type_,freq):
         ).bindparams(bindparam('ind_id', ind_id),bindparam('user', user),bindparam('freq', freq),bindparam('ptt', ptt))
         nb_insert, exist , error= DBSession.execute(stmt).fetchone()
     transaction.commit()
+
+    return nb_insert, exist , error
+
+def auto_validate_proc_stocRfid(equipID,sensor,freq,user):
+    if equipID is None : 
+        stmt = update(DataRfidWithSite).where(and_(DataRfidWithSite.c['FK_Sensor'] == sensor, DataRfidWithSite.c['equipID'] == equipID)).values(checked =1)
+        DBSession.execute(stmt)
+        nb_insert = exist = error = 0
+    else :
+        stmt = text(""" DECLARE @nb_insert int , @exist int , @error int;
+            exec """+ dbConfig['data_schema'] + """.[sp_validate_rfid]  :equipID,:freq :user , @nb_insert OUTPUT, @exist OUTPUT, @error OUTPUT;
+            SELECT @nb_insert, @exist, @error; """
+            ).bindparams(bindparam('equipID', equipID),bindparam('user', user),bindparam('freq', freq))
+        nb_insert, exist , error= DBSession.execute(stmt).fetchone()
 
     return nb_insert, exist , error
