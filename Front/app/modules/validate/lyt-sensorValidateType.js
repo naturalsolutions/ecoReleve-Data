@@ -49,6 +49,229 @@ define([
 		},
 
 		onShow : function(){
+
+			this.ui.frequency.find('option[value="all"]').prop('selected', true);
+
+			switch(this.type_){
+				case 'rfid':
+					this.ui.frequency.find('option[value="60"]').prop('selected', true);
+					this.cols = [
+						{
+							name: 'UnicName',
+							label: 'UnicName ID',
+							editable: false,
+							cell : 'string'
+
+						},{
+							name: 'FK_Sensor',
+							label: 'FK_Sensor',
+							editable: false,
+							renderable: false,
+							cell : 'string'
+
+						},{
+							name: 'equipID',
+							label: 'equipID',
+							editable: false,
+							renderable: false,
+							cell : 'string'
+						}, {
+							name: 'site_name',
+							label: 'site_name',
+							editable: false,
+							cell: 'string'
+						}, {
+							name: 'site_type',
+							label: 'site_type',
+							editable: false,
+							cell: 'string',
+						}, {
+							name: 'StartDate',
+							label: 'StartDate',
+							editable: false,
+							cell: 'string',
+						}, {
+							name: 'EndDate',
+							label: 'EndDate',
+							editable: false,
+							cell: 'string',
+						}, {
+							name: 'nb_indiv',
+							label: 'nb_indiv',
+							editable: false,
+							cell: 'string',
+						},{
+							name: 'total_scan',
+							label: 'total_scan',
+							editable: false,
+							cell: 'string',
+						},{
+							name: 'max_date',
+							label: 'max_date',
+							editable: false,
+							cell: 'string',
+						},{
+							name: 'min_date',
+							label: 'min_date',
+							editable: false,
+							cell: 'string',
+						}, {
+							editable: true,
+							name: 'import',
+							label: 'IMPORT',
+							cell: 'select-row',
+							headerCell: 'select-all'
+						}
+					];
+					break;
+				case 'gsm':
+					this.ui.frequency.find('option[value="60"]').prop('selected', true);
+					this.cols = [
+						{
+							name: 'FK_Individual',
+							label: 'Individual ID',
+							editable: false,
+							cell : 'string'
+						},{
+							name: 'FK_ptt',
+							label: 'Unique',
+							editable: false,
+							cell : 'string'
+						}, {
+							name: 'nb',
+							label: 'NB',
+							editable: false,
+							cell: 'string'
+						}, {
+							name: 'StartDate',
+							label: 'Start equipment',
+							editable: false,
+							cell: 'string',
+						}, {
+							name: 'EndDate',
+							label: 'End equipment',
+							editable: false,
+							cell: 'string',
+						}, {
+							name: 'min_date',
+							label: 'Data from',
+							editable: false,
+							cell: 'string',
+						}, {
+							name: 'min_date',
+							label: 'Data To',
+							editable: false,
+							cell: 'string',
+						}, {
+							editable: true,
+							name: 'import',
+							label: 'IMPORT',
+							cell: 'select-row',
+							headerCell: 'select-all'
+						}
+					];
+					break;
+				case 'argos':
+					this.ui.frequency.find('option[value="all"]').prop('selected', true);
+					this.cols = [
+						{
+							name: 'FK_Individual',
+							label: 'Individual ID',
+							editable: false,
+							cell : 'string'
+						},{
+							name: 'FK_ptt',
+							label: 'Unique',
+							editable: false,
+							cell : 'string'
+						}, {
+							name: 'nb',
+							label: 'NB',
+							editable: false,
+							cell: 'string'
+						}, {
+							name: 'StartDate',
+							label: 'Start equipment',
+							editable: false,
+							cell: 'string',
+						}, {
+							name: 'EndDate',
+							label: 'End equipment',
+							editable: false,
+							cell: 'string',
+						}, {
+							name: 'min_date',
+							label: 'Data from',
+							editable: false,
+							cell: 'string',
+						}, {
+							name: 'min_date',
+							label: 'Data To',
+							editable: false,
+							cell: 'string',
+						}, {
+							editable: true,
+							name: 'import',
+							label: 'IMPORT',
+							cell: 'select-row',
+							headerCell: 'select-all'
+						}
+					];
+					break;
+				default:
+					
+					break;
+			}
+
+			if(this.type_ == 'rfid'){
+				
+			}else{
+				this.cols = [
+					{
+						name: 'FK_Individual',
+						label: 'Individual ID',
+						editable: false,
+						cell : 'string'
+					},{
+						name: 'FK_ptt',
+						label: 'Unique',
+						editable: false,
+						cell : 'string'
+					}, {
+						name: 'nb',
+						label: 'NB',
+						editable: false,
+						cell: 'string'
+					}, {
+						name: 'StartDate',
+						label: 'Start equipment',
+						editable: false,
+						cell: 'string',
+					}, {
+						name: 'EndDate',
+						label: 'End equipment',
+						editable: false,
+						cell: 'string',
+					}, {
+						name: 'min_date',
+						label: 'Data from',
+						editable: false,
+						cell: 'string',
+					}, {
+						name: 'min_date',
+						label: 'Data To',
+						editable: false,
+						cell: 'string',
+					}, {
+						editable: true,
+						name: 'import',
+						label: 'IMPORT',
+						cell: 'select-row',
+						headerCell: 'select-all'
+					}
+				];
+			}
+
 			this.displayGrid();
 			this.frequency = this.ui.frequency.val();
 		},
@@ -58,53 +281,10 @@ define([
 		},
 
 		displayGrid: function(){
-			var cols = [{
-				name: 'FK_Individual',
-				label: 'Individual ID',
-				editable: false,
-				cell : 'string'
-			},{
-				name: 'FK_ptt',
-				label: 'Unique',
-				editable: false,
-				cell : 'string'
-			}, {
-				name: 'nb',
-				label: 'NB',
-				editable: false,
-				cell: 'string'
-			}, {
-				name: 'StartDate',
-				label: 'Start equipment',
-				editable: false,
-				cell: 'string',
-			}, {
-				name: 'EndDate',
-				label: 'End equipment',
-				editable: false,
-				cell: 'string',
-			}, {
-				name: 'min_date',
-				label: 'Data from',
-				editable: false,
-				cell: 'string',
-			}, {
-				name: 'min_date',
-				label: 'Data To',
-				editable: false,
-				cell: 'string',
-			}, {
-				editable: true,
-				name: 'import',
-				label: 'IMPORT',
-				cell: 'select-row',
-				headerCell: 'select-all'
-			}];
-
 			var _this = this;
 			this.grid = new NsGrid({
 				pagingServerSide: false,
-				columns : cols,
+				columns : this.cols,
 				pageSize: 100,
 				com: this.com,
 				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
@@ -114,7 +294,8 @@ define([
 			});
 
 			this.grid.rowClicked = function(row){
-				_this.rowClicked(row);
+				if(_this.type_ != 'rfid')
+					_this.rowClicked(row);
 			};
 
 			this.ui.grid.html(this.grid.displayGrid());
@@ -141,12 +322,22 @@ define([
 				'toValidate': []
 			};
 			var tmp = {};
-			_.each(this.grid.grid.getSelectedModels(), function(model){
-				params.toValidate.push({
-					'FK_Individual': model.get('FK_Individual'),
-					'FK_ptt': model.get('FK_ptt')
+
+			if(this.type_ == 'rfid'){
+				_.each(this.grid.grid.getSelectedModels(), function(model){
+					params.toValidate.push({
+						'equipID': model.get('equipID'),
+						'FK_Sensor': model.get('FK_Sensor')
+					});
 				});
-			});
+			}else{
+				_.each(this.grid.grid.getSelectedModels(), function(model){
+					params.toValidate.push({
+						'FK_Individual': model.get('FK_Individual'),
+						'FK_ptt': model.get('FK_ptt')
+					});
+				});
+			}
 
 			params.toValidate = JSON.stringify(params.toValidate);
 			var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
@@ -156,30 +347,39 @@ define([
 				data : params,
 				context: this
 			}).done(function(resp) {
-				this.swal(resp);
+				this.swal(resp, 'success');
 				this.displayGrid();
-			}).fail(function() {
-				this.swal(resp);
+			}).fail(function(resp) {
+				this.swal(resp, 'error');
 			});
 		},
 
 
-		swal: function(opt){
-			if(opt.errors){
-				opt.title = 'An error occured';
-				opt.type = 'error';
-				opt.color = 'rgb(147, 14, 14)';
-			}else{
-				opt.title = 'Success';
-				opt.type = 'success';
-				opt.color = 'green';
+		swal: function(opt, type){
+			var btnColor;
+			switch(type){
+				case 'success':
+					btnColor = 'green';
+					break;
+				case 'error':
+					btnColor = 'rgb(147, 14, 14)';
+					break;
+				case 'warning':
+					btnColor = 'orange';
+					break;
+				default:
+					return;
+					break;
 			}
+
+			console.log(opt);
+			
 			Swal({
-				title: opt.title,
-				text: 'existing: ' + opt.existing + ', inserted: ' + opt.inserted + ', errors:' + opt.errors,
-				type: opt.type,
+				title: opt.title || 'error',
+				text: opt.text || '',
+				type: type,
 				showCancelButton: false,
-				confirmButtonColor: opt.color,
+				confirmButtonColor: btnColor,
 				confirmButtonText: 'OK',
 				closeOnConfirm: true,
 			},
