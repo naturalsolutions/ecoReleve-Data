@@ -30,6 +30,7 @@ define([
 
 		ui: {
 			'grid': '#grid',
+			'paginator': '#paginator',
 			'totalEntries': '#totalEntries',
 			'frequency': 'select#frequency',
 		},
@@ -285,7 +286,7 @@ define([
 			this.grid = new NsGrid({
 				pagingServerSide: false,
 				columns : this.cols,
-				pageSize: 100,
+				pageSize: 20,
 				com: this.com,
 				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
 				urlParams : this.urlParams,
@@ -299,6 +300,7 @@ define([
 			};
 
 			this.ui.grid.html(this.grid.displayGrid());
+			this.ui.paginator.html(this.grid.displayPaginator());
 		},
 
 		rowClicked: function(args){
