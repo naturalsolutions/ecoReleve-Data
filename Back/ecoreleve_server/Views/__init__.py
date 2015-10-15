@@ -36,11 +36,6 @@ def add_routes(config):
     config.add_route('core/currentUser', 'ecoReleve-Core/currentUser')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
-    ##### Monitored sites #####
-    config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites')
-    config.add_route('monitoredSites/id', 'ecoReleve-Core/monitoredSites/{id}')
-
-    # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Stations #####
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
@@ -97,8 +92,10 @@ def add_routes(config):
     ##### MonitoredSite #####
     config.add_route('monitoredSite', 'ecoReleve-Core/monitoredSite/') 
     config.add_route('monitoredSite/id', 'ecoReleve-Core/monitoredSite/{id}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/history', 'ecoReleve-Core/monitoredSite/{id}/history',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/history', 'ecoReleve-Core/monitoredSite/{id}/history/',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/equipment', 'ecoReleve-Core/monitoredSite/{id}/equipment',custom_predicates = (integers('id'),))
     config.add_route('monitoredSite/id/history/action', 'ecoReleve-Core/monitoredSite/{id}/history/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/equipment/action', 'ecoReleve-Core/monitoredSite/{id}/equipment/{action}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSite/action', 'ecoReleve-Core/monitoredSite/{action}') 
 
 

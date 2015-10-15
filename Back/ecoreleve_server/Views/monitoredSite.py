@@ -1,10 +1,16 @@
 from pyramid.view import view_config
 from ..Models import (
     DBSession,
+    Station,
     MonitoredSite,
     MonitoredSiteType,
     MonitoredSiteDynPropValue,
-    MonitoredSiteDynProp
+    MonitoredSiteDynProp,
+    MonitoredSitePosition,
+    Equipment,
+    Sensor,
+    SensorType,
+    Base
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -26,6 +32,7 @@ prefix = 'monitoredSite'
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnMonitoredSite(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -101,20 +108,6 @@ def getMonitoredSite(request):
             DisplayMode = 'display'
         Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='MonitoredSiteForm').first()
         response = curMonitoredSite.GetDTOWithSchema(Conf,DisplayMode)
-    elif 'geo' in request.params :
-        geoJson=[]
-        result = {'type':'FeatureCollection', 'features':geoJson}
-        response = result
-    #if 'geo' in request.params :
-        #geoJson=[]
-    #     stmt = select([MonitoredSite_Location]).where(MonitoredSite_Location.FK_MonitoredSite == id)
-    #     dataResult = DBSession.execute(stmt).fetchall()
-        # for row in dataResult:
-        #     geoJson.append({'type':'Feature', 'properties':{'name':row['Name']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
-        #result = {'type':'FeatureCollection', 'features':geoJson}
-        #response = result
-    #else : 
-        #response  = curMonitoredSite.GetFlatObject()
 
     transaction.commit()
     return response
@@ -122,29 +115,58 @@ def getMonitoredSite(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getMonitoredSiteHistory(request):
-
-    #128145
+    print('**HISTOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOORY********' )
     id = request.matchdict['id']
-    tableJoin = join(MonitoredSiteDynPropValue,MonitoredSiteDynProp
-        ,MonitoredSiteDynPropValue.FK_MonitoredSiteDynProp == MonitoredSiteDynProp.ID)
-    query = select([MonitoredSiteDynPropValue,MonitoredSiteDynProp.Name]).select_from(tableJoin).where(
-        MonitoredSiteDynPropValue.FK_MonitoredSite == id
-        ).order_by(desc(MonitoredSiteDynPropValue.StartDate))
+    data = request.params.mixed()
+    searchInfo = {}
+    searchInfo['criteria'] = [{'Column': 'ID', 'Operator':'Is', 'Value':int(id)}]
+
+    try:
+        searchInfo['order_by'] = json.loads(data['order_by'])
+    except:
+        searchInfo['order_by'] = []
+    # searchInfo['offset'] = json.loads(data['offset'])
+    # searchInfo['per_page'] = json.loads(data['per_page'])
+
+    ModuleType = 'MonitoredSiteGridHistory'
+    moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+    view = Base.metadata.tables['MonitoredSitePosition']
+    listObj = ListObjectWithDynProp(MonitoredSite,moduleFront,View=view)
+    dataResult = listObj.GetFlatDataList(searchInfo)
+
+    if 'geo' in request.params :
+        geoJson=[]
+        for row in dataResult:
+            geoJson.append({'type':'Feature', 'properties':{'Date':row['StartDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+        result = {'type':'FeatureCollection', 'features':geoJson}
+    else : 
+        countResult = listObj.count(searchInfo)
+        result = [{'total_entries':countResult}]
+        result.append(dataResult)
+
+    transaction.commit()
+    return result
+
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/id/equipment', renderer='json', request_method = 'GET')
+def getMonitoredSiteEquipment(request):
+
+    id_site = request.matchdict['id']
+    joinTable = join(Equipment,Sensor, Equipment.FK_Sensor == Sensor.ID
+        ).join(SensorType,Sensor.FK_SensorType == SensorType.ID)
+    query = select([Equipment.StartDate,SensorType.Name.label('Type'),Sensor.UnicName,Equipment.Deploy]).select_from(joinTable
+        ).where(Equipment.FK_MonitoredSite == id_site).order_by(desc(Equipment.StartDate))
     result = DBSession.execute(query).fetchall()
     response = []
     for row in result:
         curRow = OrderedDict(row)
-        dictRow = {}
-        for key in curRow :
-            if curRow[key] is not None :
-                if 'Value' in key :
-                    dictRow['value'] = curRow[key] 
-                elif 'FK' not in key :
-                    dictRow[key] = curRow[key]
-        response.append(dictRow)
+        if curRow['Deploy'] == 1 : 
+            curRow['Deploy'] = 'Deploy'
+        else : 
+            curRow['Deploy'] = 'Remove'
+        response.append(curRow)
 
     return response
-
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
 def deleteMonitoredSite(request):
@@ -175,8 +197,6 @@ def insertMonitoredSite(request):
         return insertOneNewMonitoredSite(request)
     else :
         print('_______INsert LIST')
-        #transaction.commit()
-        #return insertListNewMonitoredSites(request)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewMonitoredSite (request) :
@@ -189,7 +209,6 @@ def insertOneNewMonitoredSite (request) :
     newMonitoredSite.MonitoredSiteType = DBSession.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
     newMonitoredSite.init_on_load()
     newMonitoredSite.UpdateFromJson(data)
-    print (newMonitoredSite.__dict__)
     DBSession.add(newMonitoredSite)
     DBSession.flush()
     # transaction.commit()
@@ -200,7 +219,6 @@ def insertOneNewMonitoredSite (request) :
 def searchMonitoredSite(request):
     data = request.params.mixed()
     print('*********data*************')
-    print(data)
     searchInfo = {}
     searchInfo['criteria'] = []
     if 'criteria' in data: 
@@ -217,7 +235,7 @@ def searchMonitoredSite(request):
     print('**criteria********' )
     print(searchInfo['criteria'])
     start = datetime.now()
-    listObj = ListObjectWithDynProp(MonitoredSite,moduleFront)
+    listObj = ListObjectWithDynProp(MonitoredSite,moduleFront,View=Base.metadata.tables['MonitoredSitePositionsNow'])
     dataResult = listObj.GetFlatDataList(searchInfo)
 
     stop = datetime.now()

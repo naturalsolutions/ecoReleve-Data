@@ -46,7 +46,6 @@ GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv', Base.metadata, autoload=Tr
 @view_config(route_name=route_prefix+'uncheckedDatas',renderer='json', permission = NO_PERMISSION_REQUIRED)
 def type_unchecked_list(request):
     type_= request.matchdict['type']
-
     if type_ == 'argos' :
         unchecked = ArgosDatasWithIndiv
     elif type_ == 'gsm' :
@@ -61,7 +60,6 @@ def type_unchecked_list(request):
             ).group_by(unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate']
             ).order_by(unchecked.c['FK_Individual'].desc())
     data = DBSession.execute(queryStmt).fetchall()
-
     dataResult = [dict(row) for row in data]
     result = [{'total_entries':len(dataResult)}]
     result.append(dataResult)
@@ -86,7 +84,6 @@ def details_unchecked_indiv(request):
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv)))
             
         dataGeo = DBSession.execute(queryGeo).fetchall()
-
         geoJson = []
         for row in dataGeo:
             geoJson.append({'type':'Feature', 'id': row['PK_id'], 'properties':{'type':row['type'], 'date':row['date']}
@@ -116,9 +113,7 @@ def manual_validate(request) :
     type_ = request.matchdict['type']
     user = request.authenticated_userid
     user = 1
-
-    data = request.params['data']
-    print(ptt, ind_id, type_, data)
+    data = json.loads(request.params['data'])
 
     procStockDict = {
     'argos': '[sp_validate_Argos_GPS]',
@@ -149,17 +144,11 @@ def manual_validate(request) :
 
 @view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST' )
 def auto_validation(request):
-
     type_ = request.matchdict['type']
-
     print ('\n*************** AUTO VALIDATE *************** \n')
     param = request.params.mixed()
-
-
-
     freq = param['frequency']
     listToValidate = json.loads(param['toValidate'])
-
 
     if freq == 'all' :
         freq = 1
@@ -184,7 +173,6 @@ def auto_validation(request):
 
     return { 'inserted' : Total_nb_insert, 'existing' : Total_exist, 'errors' : Total_error}
 
-
 def auto_validate_stored_proc(ptt, ind_id,user,type_,freq):
     procStockDict = {
     'argos': '[sp_auto_validate_Argos_GPS]',
@@ -205,9 +193,7 @@ def auto_validate_stored_proc(ptt, ind_id,user,type_,freq):
         exec """+ dbConfig['data_schema'] + """."""+procStockDict[type_]+""" :ptt , :ind_id , :user ,:freq , @nb_insert OUTPUT, @exist OUTPUT, @error OUTPUT;
         SELECT @nb_insert, @exist, @error; """
         ).bindparams(bindparam('ind_id', ind_id),bindparam('user', user),bindparam('freq', freq),bindparam('ptt', ptt))
-
         nb_insert, exist , error= DBSession.execute(stmt).fetchone()
-
     transaction.commit()
 
     return nb_insert, exist , error

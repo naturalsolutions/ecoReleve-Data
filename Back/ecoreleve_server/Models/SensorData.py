@@ -128,18 +128,19 @@ class ArgosEngineering(Base):
         {'schema': sensor_schema}
     )
 
-# class Rfid(Base):
-#     __tablename__ = 'T_rfid'
-#     ID = Column(Integer, Sequence('seq_rfid_pk_id'),primary_key=True)
-#     creator = Column(Integer,ForeignKey('User.ID'))
-#     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'), nullable=False)
-#     chip_code = Column(String, nullable=False)
-#     date_ = Column(DateTime, nullable=False)
-#     creation_date = Column(DateTime, server_default=func.now())
-#     validated = Column('validated',Boolean, server_default='0')
-#     checked = Column('checked',Boolean, server_default='0')
-#     __table_args__ = (
-#         Index('idx_Trfid_chipcode_date', chip_code, date_),
-#         UniqueConstraint(FK_Sensor, chip_code, date_),
-#         {'schema': sensor_schema}
-#     )
+class Rfid(Base):
+    __tablename__ = 'T_rfid'
+    ID = Column(Integer, Sequence('seq_rfid_pk_id'),primary_key=True)
+    creator = Column(Integer)
+    FK_Sensor = Column(Integer, nullable=False)
+    chip_code = Column(String(15), nullable=False)
+    date_ = Column(DateTime, nullable=False)
+    creation_date = Column(DateTime, server_default=func.now())
+    validated = Column('validated',Boolean, server_default='0')
+    checked = Column('checked',Boolean, server_default='0')
+    frequency = Column(Integer)
+    __table_args__ = (
+        Index('idx_Trfid_chipcode_date', chip_code, date_),
+        UniqueConstraint(FK_Sensor, chip_code, date_),
+        {'schema': sensor_schema}
+    )

@@ -30,13 +30,19 @@ define([
 			'click #hideDetails' : 'hideDetail',
 			'click #showDetails'  : 'showDetail',
 			'click #prev' : 'navigatePrev',
-			'click #next' : 'navigateNext'
+			'click #next' : 'navigateNext',
+			'click .tab-link' : 'displayTab',
+
 		},
 		ui: {
 			'grid': '#grid',
+			'gridEquipment': '#gridEquipment',
+
 			'form': '#form',
 			'map': '#map',
 			'paginator' :'#paginator',
+			'paginatorEquipment' :'#paginatorEquipment',
+
 			'details' : '#infos',
 			'mapContainer' : '#mapContainer',
 			'showHideCtr' :'#showDetails',
@@ -66,35 +72,57 @@ define([
 		},
 
 		displayGrid: function(id){
-			var cols = [{
-				name: 'Name',
-				label: 'Name',
-				editable: false,
-				cell : 'string'
-			}, {
-				name: 'value',
-				label: 'Value',
-				editable: false,
-				cell: 'string'
-			}, {
-				name: 'StartDate',
-				label: 'Start Date',
-				editable: false,
-				cell: 'string',
-			}, ];
+
 			this.grid = new NsGrid({
-				pageSize: 20,
-				columns : cols,
-				pagingServerSide: false,
+				pageSize: 10,
+				/*columns : cols,*/
+				pagingServerSide: true,
 				//com: this.com,
-				url: config.coreUrl+'monitoredSite/' + id  + '/history',
+				name:'MonitoredSiteGridHistory',
+				url: config.coreUrl+'monitoredSite/' + id  + '/history/',
 				urlParams : this.urlParams,
 				rowClicked : true,
+			});
 
+			var colsEquip = [{
+                name: 'StartDate',
+                label: 'Start Date',
+                editable: false,
+                cell : 'string'
+            }, {
+                name: 'Type',
+                label: 'Type',
+                editable: false,
+                cell: 'string'
+            },{
+                name: 'UnicName',
+                label: 'Platform',
+                editable: false,
+                cell: 'string'
+            }, {
+                name: 'Deploy',
+                label: 'Status',
+                editable: false,
+                cell: 'string',
+            }, ];
+			this.gridEquip = new NsGrid({
+				pageSize: 20,
+				columns : colsEquip,
+				pagingServerSide: false,
+				//com: this.com,
+				url: config.coreUrl+'monitoredSite/' + id  + '/equipment',
+				urlParams : this.urlParams,
+				rowClicked : true,
+				//totalElement : 'indiv-count',
+				//name : 'IndivHistory'
 			});
 
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
+			this.ui.gridEquipment.html(this.gridEquip.displayGrid());
+			this.ui.paginatorEquipment.html(this.gridEquip.displayPaginator());
+
+
 		},
 
 		initMap: function(geoJson){
@@ -108,7 +136,7 @@ define([
 		},
 		displayMap: function(){
 
-			var url  = config.coreUrl+ 'monitoredSite/' + this.monitoredSiteId  + '?geo=true';
+			var url  = config.coreUrl+ 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true';
 			$.ajax({
 				url: url,
 				contentType:'application/json',
@@ -134,6 +162,18 @@ define([
 				parent: this.parent
 			});
 		},
+
+		displayTab : function(e){
+			e.preventDefault();
+			var ele = $(e.target);
+			var tabLink = $(ele).attr('href');
+			var tabUnLink = $('li.active.tab-ele a').attr('href');
+			$('li.active.tab-ele').removeClass('active');
+			$(ele).parent().addClass('active');
+			$(tabLink).addClass('in active');
+			$(tabUnLink).removeClass('active in');
+		},
+
 		hideDetail: function() {  
 			$(this.ui.details).animate({
 				marginLeft: '-60%',
