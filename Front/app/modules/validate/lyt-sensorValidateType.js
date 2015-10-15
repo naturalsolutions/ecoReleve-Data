@@ -20,7 +20,7 @@ define([
 		===================================================*/
 
 		template: 'app/modules/validate/templates/tpl-sensorValidateType.html',
-		className: 'full-height animated white',
+		className: 'full-height animated',
 
 		events : {
 			'click button#autoValidate' : 'autoValidate',
