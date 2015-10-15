@@ -58,8 +58,6 @@ def count_ (request = None,listObj = None) :
         count = listObj.count(searchInfo = searchInfo)
     else : 
         count = listObj.count()
-
-    print(count)
     return count 
 
 def getFilters (request):
