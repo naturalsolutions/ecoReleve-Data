@@ -246,6 +246,8 @@ def searchStation(request):
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = []
+    user = request.authenticated_userid
+    user = 1 
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
@@ -260,13 +262,11 @@ def searchStation(request):
 
     #### add filter parameters to retrieve last stations imported : last day of station created by user and without linked observation ####
     if 'lastImported' in data :
-        o = aliased(Station)
         print('-*********************** LAST IMPORTED !!!!!!!!! ******')
-        obs = aliased(Observation)
         criteria = [
         {'Column' : 'creator',
         'Operator' : '=',
-        'Value' : 1
+        'Value' : user
         },
         {
         'Column': 'LastImported',
