@@ -184,9 +184,7 @@ define([
 			var callback = function(){
 				_this.filter();
 			};
-			console.log('**********com');
-			console.log(this.com);
-			
+
 			this.grid.lastImportedUpdate(type, callback);
 			
 

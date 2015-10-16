@@ -125,7 +125,7 @@ define([
 			this.grid.rowClicked = function(args){
 				_this.rowClicked(args.row);
 			};
-			this.grid.rowDbClicked = function(row){
+			this.grid.rowDbClicked = function(args){
 				_this.rowDbClicked(args.row);
 			};
 			this.ui.grid.html(this.grid.displayGrid());
@@ -137,7 +137,7 @@ define([
 				url: config.coreUrl + 'individuals/',
 				com: this.com,
 				filterContainer: 'filter',
-			});
+			});	
 		},
 
 		filter: function(){

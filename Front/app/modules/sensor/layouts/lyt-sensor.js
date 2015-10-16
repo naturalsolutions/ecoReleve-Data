@@ -15,6 +15,7 @@ define([
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
 	Com, NsGrid, NsFilter, NewSensor,Modal
+
 ){
 
 	'use strict';
@@ -120,8 +121,8 @@ define([
 		clearFilter : function(){
 			this.filters.reset();
 		},
-		rowClicked: function(row){
-			var id = row.model.get('ID');
+		rowClicked: function(args){
+			var id = args.row.model.get('ID');
 			//this.detail.show(new LytIndivDetail({id : id}));
 			//this.ui.detail.removeClass('hidden');
 
@@ -201,5 +202,6 @@ define([
     showModal : function(){
 			this.newSensor.show(new NewSensor({rg : this.newSensor}));
 		}
+
 	});
 });
