@@ -1,17 +1,21 @@
 
-<div class="clearfix full-height ">
-	<div id="indivRight" class="col-md-12 full-height dark">
+<div id="rgRFID" class="clearfix full-height">
+	<div class="col-md-12 full-height dark">
 		<br>
 			<legend class="clearfix">
-				<label class="pull-left" for="frequency">Sampling frequency (mn) : </label>
+				<button id="back" class="btn btn-success pull-left col-">
+					<i class="reneco reneco-back"></i>
+					Back
+				</button>
 				<div class="col-xs-3">
 					<select id="frequency" class="form-control">
+						<option value="none" disabled selected>Select a frequency</option>
 						<option value="all">all</option>
-						<option value="10">10</option>
-						<option value="15">15</option>
-						<option value="30">30</option>
-						<option value="60">60</option>
-						<option value="120">120</option>
+						<option value="10">10 min</option>
+						<option value="15">15 min</option>
+						<option value="30">30 min</option>
+						<option value="60">60 min</option>
+						<option value="120">120 min</option>
 					</select>
 				</div>
 
@@ -22,6 +26,7 @@
 					<span id="totalEntries"></span>
 				</span>
 			</legend>
+			<div id="paginator"></div>
 		<br>
 		<div id="grid"></div>
 	</div>

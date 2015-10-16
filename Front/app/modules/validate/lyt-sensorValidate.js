@@ -20,7 +20,7 @@ define([
 		===================================================*/
 
 		template: 'app/modules/validate/templates/tpl-sensorValidate.html',
-		className: 'full-height animated white',
+		className: 'full-height animated layer',
 
 		initialize: function(options){
 		},

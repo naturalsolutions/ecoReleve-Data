@@ -115,11 +115,11 @@ define([
 				}
 			});
 
-			this.grid.rowClicked = function(row){
-				_this.rowClicked(row);
+			this.grid.rowClicked = function(args){
+				_this.rowClicked(args.row);
 			};
-			this.grid.rowDbClicked = function(row){
-				_this.rowDbClicked(row);
+			this.grid.rowDbClicked = function(args){
+				_this.rowDbClicked(args.row);
 			};
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
@@ -130,7 +130,7 @@ define([
 				url: config.coreUrl + 'individuals/',
 				com: this.com,
 				filterContainer: 'filter',
-			});
+			});	
 		},
 
 		filter: function(){
