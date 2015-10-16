@@ -16,28 +16,31 @@ define(['marionette', 'config',
 	'./modules/sensor/layouts/lyt-sensor',
 	
 	'./modules/monitoredSite/layouts/lyt-ms',
-	
+	'./modules/validate/lyt-sensorValidate',
+	'./modules/validate/lyt-sensorValidateType',
+	'./modules/validate/lyt-sensorValidateDetail',
 
 ],function( Marionette, config, 
 	LytHome,
 
 	/*==========  modules  ==========*/
 	LytExport,
-
 	LytStationVisu,
 	LytStationStepperEdit,
 	LytStationStepperNew,
 	LytStationEdit,
-
 	LytImportFile,
 	LytIndividual,
 	LytIndivDetails,
 	LytSensor,
-	LytMonitoredSite
-
+	LytMonitoredSite,
+	LytSensorValidate,
+	LytSensorValidateType,
+	LytSensorValidateDetail
 
 ){
 	'use strict';
+
 	return Marionette.Object.extend({
 
 		initialize: function(){
@@ -51,9 +54,11 @@ define(['marionette', 'config',
 			Backbone.history.navigate('');
 			this.rgMain.show(new LytHome());
 		},
+		
 		export: function(){
 			this.rgMain.show(new LytExport());
 		},
+
 		importFile: function(){
 			this.rgMain.show(new LytImportFile());
 		},
@@ -65,27 +70,48 @@ define(['marionette', 'config',
 		newStation: function(){
 			this.rgMain.show(new LytStationStepperNew());
 		},
+
 		editStations: function(){
 			this.rgMain.show(new LytStationStepperEdit());
 		},
 
-		station: function(option){
-			this.rgMain.show(new LytStationEdit({id: option}));
-		},
-		
-		individual : function(option){
-			this.rgMain.show(new LytIndividual({id : option}));
-		},
-		indiv : function(option){
-			this.rgMain.show(new LytIndividual({id: option}));
-		},
-		sensor : function(option){
-			this.rgMain.show(new LytSensor({id: option}));
+		station: function(id){
+			this.rgMain.show(new LytStationEdit({id: id}));
 		},
 
-		monitoredSite: function(option){
-			this.rgMain.show(new LytMonitoredSite({id: option}));
-		}
+		individual : function(id){
+			this.rgMain.show(new LytIndividual({id : id}));
+		},
+
+		indiv : function(id){
+			this.rgMain.show(new LytIndividual({id: id}));
+		},
+
+		sensor : function(id){
+			this.rgMain.show(new LytSensor({id: id}));
+		},
+
+		monitoredSite: function(id){
+			this.rgMain.show(new LytMonitoredSite({id: id}));
+		},
+
+		validate: function(){
+			this.rgMain.show(new LytSensorValidate());
+		},
+
+		validateType: function(type){
+			this.rgMain.show(new LytSensorValidateType({
+				type : type
+			}));
+		},
+
+		validateDetail: function(type, indId, sensorId){
+			this.rgMain.show(new LytSensorValidateDetail({
+				type : type,
+				indId : indId,
+				sensorId : sensorId
+			}));
+		},
 
 	});
 });

@@ -19,7 +19,7 @@ eval_ = Eval()
 
 class ListObjectWithDynProp():
     ''' This class is used to filter Object with dyn props over all properties '''
-    def __init__(self,ObjWithDynProp, frontModule):
+    def __init__(self,ObjWithDynProp, frontModule, history = False, View = None):
         self.ObjContext = DBSession
         self.ListPropDynValuesOfNow = {}
         self.ObjWithDynProp = ObjWithDynProp
@@ -27,11 +27,20 @@ class ListObjectWithDynProp():
         self.frontModule = frontModule
         self.Conf = frontModule.ModuleGrids
         self.vAliasList = {}
-        self.joinTable = None
+        self.optionView = View
+
+        self.history = history
 
     def GetDynPropValueView (self): 
         ''' WARNING !!! : in order to use this class you have to build View over last DATE of dynamic properties '''
         table = Base.metadata.tables[self.ObjWithDynProp.__tablename__+'DynPropValuesNow']
+        if self.history: 
+            dynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
+            valueTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropValuesTable()]
+            joinTable = join(valueTable,dynPropTable
+                ,valueTable.c[self.ObjWithDynProp().GetDynPropFKName()] == dynPropTable.c['ID'])
+            table = select([valueTable,dynPropTable.c['Name'].label('Name'),dynPropTable.c['TypeProp'].label('TypeProp')]
+                ).select_from(joinTable)
         return table
 
     def GetAllPropNameInConf(self) :
@@ -44,8 +53,8 @@ class ListObjectWithDynProp():
         joinTable = self.ObjWithDynProp
         view = self.GetDynPropValueView()
         selectable = [self.ObjWithDynProp.ID]
-        i = 1
         objTable = self.ObjWithDynProp.__table__
+        self.firstStartDate = None
 
         ##### get all foreign keys #####
         self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
@@ -65,13 +74,31 @@ class ListObjectWithDynProp():
                 v = view.alias('v'+curDynProp['Name'])
                 self.vAliasList['v'+curDynProp['Name']] = v
 
-                joinTable = outerjoin(
-                    joinTable,v
-                    , and_(self.ObjWithDynProp.ID == v.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] 
-                        , v.c[self.ObjWithDynProp().GetDynPropFKName()] == curDynProp['ID']) 
-                    )
-                selectable.append(v.c['Value'+curDynProp['TypeProp']].label(curDynProp['Name']))
-                i+=1
+                if self.history is False or self.firstStartDate is None :
+                    joinTable = outerjoin(
+                        joinTable,v
+                        , and_(self.ObjWithDynProp.ID == v.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] 
+                            , v.c[self.ObjWithDynProp().GetDynPropFKName()] == curDynProp['ID']) 
+                        )
+                    selectable.append(v.c['Value'+curDynProp['TypeProp']].label(curDynProp['Name']))
+                    if self.history :
+                        selectable.append(v.c['StartDate'])
+                        self.firstStartDate = 'v'+curDynProp['Name']
+                else:
+                    tmpV = self.vAliasList[self.firstStartDate] 
+                    joinTable = outerjoin(
+                        joinTable,v
+                        , and_(v.c['StartDate'] == tmpV.c['StartDate'],and_(self.ObjWithDynProp.ID == v.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] 
+                            , v.c[self.ObjWithDynProp().GetDynPropFKName()] == curDynProp['ID']))
+                        )
+                    selectable.append(v.c['Value'+curDynProp['TypeProp']].label(curDynProp['Name']))
+
+            elif self.optionView is not None and objConf.Name in self.optionView.c:
+                if self.optionView.name not in self.vAliasList:
+                    joinTable = outerjoin(joinTable,self.optionView, self.ObjWithDynProp.ID == self.optionView.c['FK_'+self.ObjWithDynProp.__tablename__])
+                    self.vAliasList[self.optionView.name] = self.optionView
+                selectable.append(self.optionView.c[objConf.Name])
+
             elif hasattr(self.ObjWithDynProp,objConf.Name):
                 selectable.append(objTable.c[objConf.Name])
         self.selectable = selectable
@@ -82,22 +109,25 @@ class ListObjectWithDynProp():
         DynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
         query = select([DynPropTable]) #.where(DynPropTable.c['Name'] == dynPropName)
         result  = DBSession.execute(query).fetchall()
-        if result is []:
+
+        if result == []:
             df = None
-        else:
+        else :
+
             df = pd.DataFrame(result, columns = DynPropTable.columns.keys())
         return df
 
     def GetDynProp (self,dynPropName) : 
         ''' Get dyn Prop with its name '''
-        
-        if self.DynPropList is None :
-           return None
-        else : 
+
+
+        if self.DynPropList is not None :
             curDynProp = self.DynPropList[self.DynPropList['Name'] == dynPropName]
             curDynProp = curDynProp.to_dict(orient = 'records')
-
-        if curDynProp != [] :
+        else :
+            curDynProp = None
+            
+        if curDynProp != [] and curDynProp is not None:
             curDynProp = curDynProp[0]
             if curDynProp['TypeProp'] == 'Integer':
                 curDynProp['TypeProp'] = 'Int'
@@ -108,41 +138,32 @@ class ListObjectWithDynProp():
     def WhereInJoinTable (self,query,criteriaObj) :
         ''' Apply where clause over filter criteria '''
         curProp = criteriaObj['Column']
-        print(self.ObjWithDynProp().GetAllProp())
+ 
         if hasattr(self.ObjWithDynProp,curProp) :
-            print('static')
-
             # static column criteria
             query = query.where(
                 eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
                 )
+
+        elif self.optionView is not None and curProp in self.optionView.c:
+            query = query.where(
+                eval_.eval_binary_expr(self.optionView.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
+                )
         else:
             #try :
-                #fore
             curDynProp = None
             for x in self.ObjWithDynProp().GetAllProp():
-                print(x)
                 if x['name'] == curProp:
                     curDynProp = x
             if curDynProp == None:
-                    print('Prop dyn inconnue')
+                print('Prop dyn inconnue')
                     # Gerer l'exception
             else :
-                print('dynamic')
                 viewAlias = self.vAliasList['v'+curDynProp['name']]
-
                       #### Perform the'where' in dyn props ####
                 query = query.where(
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
-                print(query)
-                #print(eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
-            #except:
 
-        # elif self.jsonQuery and curProp ==self.jsonQuery['where'] :
-        #     tableRef = tableRef = Base.metadata.tables[self.jsonQuery['table']]
-        #     query = query.where(
-        #         eval_.eval_binary_expr(tableRef.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
-        #     )
         return query
 
     def GetFullQuery(self,searchInfo=None) :
@@ -159,6 +180,7 @@ class ListObjectWithDynProp():
             # countQuery = self.WhereInJoinTable(countQuery,obj)
         # self.countQuery = countQuery 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
+
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self,searchInfo=None) :
@@ -188,7 +210,7 @@ class ListObjectWithDynProp():
         if criteria is not None:
             for obj in criteria:
                 curDynProp = self.GetDynProp(obj['Column'])
-                print(curDynProp)
+              
                 if hasattr(self.ObjWithDynProp,obj['Column']):
                     fullQuery = fullQuery.where(
                         eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
@@ -203,7 +225,6 @@ class ListObjectWithDynProp():
             if filterOnDynProp == True:
                 fullQuery = fullQuery.where(exists(
                     existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView().c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])))
-        print (fullQuery)
         return fullQuery
 
     def OderByAndLimit (self, query, searchInfo) :
@@ -213,12 +234,11 @@ class ListObjectWithDynProp():
                 order_by_clause = []
                 curProp, order = obj.split(':')
                 curDynProp = self.GetDynProp(curProp)
-                print('curProp')
-                print(curProp)
+
                 if curDynProp is not None :
                     viewAlias = self.vAliasList['v'+curDynProp['Name']]
                     trueCol = viewAlias.c['Value'+curDynProp['TypeProp']]
-                    # print (trueCol)
+
                 elif 'FK_'+curProp in self.fk_list:
                     print('\n **---** ORDER BY ON FK !')
                     tableRef = self.fk_list['FK_'+curProp].column.table
@@ -227,6 +247,13 @@ class ListObjectWithDynProp():
 
                 elif hasattr(self.ObjWithDynProp,curProp):
                     trueCol = curProp
+
+                elif self.optionView is not None and curProp in self.optionView.c:
+                    trueCol = self.optionView.c[curProp]
+
+                elif (self.history and curProp == 'StartDate'):
+                    viewAlias = self.vAliasList[self.firstStartDate]
+                    trueCol = viewAlias.c['StartDate']
 
                 if order == 'asc':
                     try : 

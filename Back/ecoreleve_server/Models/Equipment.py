@@ -32,12 +32,10 @@ class Equipment(Base):
     ID = Column(Integer,Sequence('Equipment__id_seq'), primary_key=True)
     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
-    # FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'))
+    FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'))
     FK_Observation = Column(Integer, ForeignKey('Observation.ID'))
     StartDate = Column(DateTime,default = func.now())
     Deploy = Column(Boolean)
-
-
 
 def checkSensor(fk_sensor,equipDate):
     e1 = aliased(Equipment)
@@ -84,9 +82,9 @@ def checkEquip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
 
 def existingEquipment (fk_sensor,equipDate,fk_indiv=None):
     e1 = aliased(Equipment)
-    subQuery = select([e1]).where(and_(e1.FK_Individual == Equipment.FK_Individual,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate))).where(e1.FK_Sensor == Equipment.FK_Sensor)
+    subQuery = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor,and_(e1.FK_Individual == Equipment.FK_Individual,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate))))
 
-    query = select([Equipment]).where(and_(~exists(subQuery),and_(Equipment.StartDate<=equipDate,and_(Equipment.Deploy == 1,Equipment.FK_Individual == fk_indiv)))).where(Equipment.FK_Sensor == fk_sensor)
+    query = select([Equipment]).where(and_(~exists(subQuery),and_(Equipment.StartDate<=equipDate,and_(Equipment.Deploy == 1,and_(Equipment.FK_Sensor == fk_sensor,Equipment.FK_Individual == fk_indiv)))))
     fullQuery = select([True]).where(exists(query))
 
     return DBSession.execute(fullQuery).scalar()
@@ -94,20 +92,19 @@ def existingEquipment (fk_sensor,equipDate,fk_indiv=None):
 def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None):
     e1 = aliased(Equipment)
     e2 = aliased(Equipment)
-    subQueryExists = select([e1]).where(and_(e1.FK_Individual == Equipment.FK_Individual,and_(e1.StartDate>Equipment.StartDate,e1.StartDate>=equipDate))).where(e1.FK_Sensor == Equipment.FK_Sensor)
+    subQueryExists = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor,and_(e1.FK_Individual == Equipment.FK_Individual,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate))))
 
+    query = select([Equipment]).where(and_(~exists(subQueryExists),and_(Equipment.StartDate<=equipDate,and_(Equipment.Deploy == 1,and_(Equipment.FK_Sensor == fk_sensor,Equipment.FK_Individual == fk_indiv)))))
 
-    query = select([Equipment]).where(and_(~exists(subQueryExists),and_(Equipment.StartDate<=equipDate,and_(Equipment.Deploy == 1,Equipment.FK_Individual == fk_indiv)))).where(Equipment.FK_Sensor == fk_sensor)
-
-    subQueryUnequip = select([e2]).where(and_(e2.FK_Individual == Equipment.FK_Individual,and_(e2.StartDate>Equipment.StartDate,e2.StartDate<=equipDate))).where(e2.FK_Sensor == Equipment.FK_Sensor).where(e2.Deploy == 0)
+    subQueryUnequip = select([e2]).where(and_(e2.FK_Individual == Equipment.FK_Individual,and_(e2.StartDate>Equipment.StartDate,and_(e2.FK_Sensor == Equipment.FK_Sensor,and_(e2.Deploy == 0,e2.StartDate<=equipDate)))))
 
     query = query.where(~exists(subQueryUnequip))
     fullQuery = select([True]).where(~exists(query))
-    # print(fullQuery)
+    print(fullQuery)
     return DBSession.execute(fullQuery).scalar()
 
 
-def checkUnequip(fk_sensor,equipDate,fk_indiv=None):
+def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     existing = existingEquipment(fk_sensor,equipDate,fk_indiv=fk_indiv)
     unequip = alreadyUnequip (fk_sensor,equipDate,fk_indiv=fk_indiv)
 
@@ -141,7 +138,7 @@ def receive_set(target, value, oldvalue, initiator):
             fk_sensor = target.GetProperty('FK_Sensor') 
         except :
             fk_sensor = None
-        try : 
+        try :
             fk_indiv = target.GetProperty('FK_Individual')
             print('**********************************************************FK_Individual')
             print(fk_indiv)

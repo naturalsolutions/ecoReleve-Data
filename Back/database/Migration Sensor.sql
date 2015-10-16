@@ -16,6 +16,7 @@ Status)
 VALUES ('VHF',4)
 
 
+-------------- INSERT  sensor Argos and GSM -------------------------------------------------------------------
 INSERT INTO [NewModelERD].[dbo].Sensor(
 	[UnicName]
       ,[Model]
@@ -38,3 +39,25 @@ CASE WHEN [id41@TCaracThes_Model_Precision] like '%solar%' THEN  1
 [Trx_Sat_Obj_PK]  
 FROM [ecoReleve_DataNew].[dbo].[TViewTrx_Sat]
 where [id41@TCaracThes_Model_Precision] not like '%RI%'
+
+-------------- INSERT  RFID -------------------------------------------------------------------
+
+INSERT INTO [NewModelERD].[dbo].Sensor(
+	[UnicName]
+      ,[Model]
+      ,[Compagny]
+      ,[SerialNumber]
+      ,[creationDate]
+      ,[FK_SensorType]
+      ,[OldID]
+)
+
+SELECT 
+      [identifier]
+	  ,model
+      ,[manufacturer]
+      ,[serial_number]
+	  ,[creation_date]
+	  , 3
+	, PK_id
+  FROM [ECWP_ecoReleveData].[dbo].[T_Object]
