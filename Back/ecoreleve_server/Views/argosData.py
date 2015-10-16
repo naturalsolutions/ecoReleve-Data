@@ -86,6 +86,9 @@ def unchecked_rfid(request):
 def details_unchecked_indiv(request):
     type_= request.matchdict['type']
     id_indiv = request.matchdict['id_indiv']
+
+    if(id_indiv == 'none'):
+        id_indiv = None
     ptt = request.matchdict['id_ptt']
 
     if type_ == 'argos' :
@@ -181,7 +184,7 @@ def auto_validation(request):
                 equipID = None
             else :
                 equipID = int(equipID)
-            nb_insert, exist, error = auto_validate_rfid(equipID,sensor,freq,user)
+            nb_insert, exist, error = auto_validate_proc_stocRfid(equipID,sensor,freq,user)
             Total_exist += exist
             Total_nb_insert += nb_insert
             Total_error += error
@@ -233,7 +236,7 @@ def auto_validate_proc_stocRfid(equipID,sensor,freq,user):
         nb_insert = exist = error = 0
     else :
         stmt = text(""" DECLARE @nb_insert int , @exist int , @error int;
-            exec """+ dbConfig['data_schema'] + """.[sp_validate_rfid]  :equipID,:freq :user , @nb_insert OUTPUT, @exist OUTPUT, @error OUTPUT;
+            exec """+ dbConfig['data_schema'] + """.[sp_validate_rfid]  :equipID,:freq, :user , @nb_insert OUTPUT, @exist OUTPUT, @error OUTPUT;
             SELECT @nb_insert, @exist, @error; """
             ).bindparams(bindparam('equipID', equipID),bindparam('user', user),bindparam('freq', freq))
         nb_insert, exist , error= DBSession.execute(stmt).fetchone()

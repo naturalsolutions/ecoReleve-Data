@@ -11,10 +11,8 @@ define([
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
 
-	//'./lyt-indiv-details' 
-
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter//, LytIndivDetail
+	Com, NsGrid, NsFilter
 ){
 
 	'use strict';
@@ -118,8 +116,8 @@ define([
 		clearFilter : function(){
 			this.filters.reset();
 		},
-		rowClicked: function(row){
-			var id = row.model.get('ID');
+		rowClicked: function(args){
+			var id = args.row.model.get('ID');
 			//this.detail.show(new LytIndivDetail({id : id}));
 			//this.ui.detail.removeClass('hidden');
 
@@ -181,20 +179,20 @@ define([
 			$(elem).html(content);
 		},
 		exportGrid: function() {
-            $.ajax({
-                url: config.coreUrl + 'sensors/export',
-                data: JSON.stringify({criteria:this.filters.criterias}),
-                contentType:'application/json',
-                type:'POST'
-            }).done(function(data) {
-                var url = URL.createObjectURL(new Blob([data], {'type':'text/csv'}));
-                var link = document.createElement('a');
-                link.href = url;
-                link.download = 'sensors_export.csv';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
-        },
+						$.ajax({
+								url: config.coreUrl + 'sensors/export',
+								data: JSON.stringify({criteria:this.filters.criterias}),
+								contentType:'application/json',
+								type:'POST'
+						}).done(function(data) {
+								var url = URL.createObjectURL(new Blob([data], {'type':'text/csv'}));
+								var link = document.createElement('a');
+								link.href = url;
+								link.download = 'sensors_export.csv';
+								document.body.appendChild(link);
+								link.click();
+								document.body.removeChild(link);
+						});
+				},
 	});
 });
