@@ -27,6 +27,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'validate/:type(/)':'validateType',
 			'validate(/)':'validate',
 
+			'release(/)':'release',
+
+
 			'*route(/:page)': 'home',
 		},
 

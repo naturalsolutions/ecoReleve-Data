@@ -19,6 +19,7 @@ define(['marionette', 'config',
 	'./modules/validate/lyt-sensorValidate',
 	'./modules/validate/lyt-sensorValidateType',
 	'./modules/validate/lyt-sensorValidateDetail',
+	'./modules/release/layouts/lyt-releaseStation',
 
 ],function( Marionette, config, 
 	LytHome,
@@ -36,7 +37,9 @@ define(['marionette', 'config',
 	LytMonitoredSite,
 	LytSensorValidate,
 	LytSensorValidateType,
-	LytSensorValidateDetail
+	LytSensorValidateDetail,
+
+	LytReleaseStation
 
 ){
 	'use strict';
@@ -111,6 +114,10 @@ define(['marionette', 'config',
 				indId : indId,
 				sensorId : sensorId
 			}));
+		},
+
+		release: function(){
+			this.rgMain.show(new LytReleaseStation());
 		},
 
 	});
