@@ -10,9 +10,12 @@ define([
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
+	'./lyt-new-sensor', 
+	'./modal-region',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter
+	Com, NsGrid, NsFilter, NewSensor,Modal
+
 ){
 
 	'use strict';
@@ -30,7 +33,8 @@ define([
 			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
 			'change select.FK_SensorType' : 'updateModels',
-			'click #btn-export' : 'exportGrid'
+			'click #btn-export' : 'exportGrid',
+			'click #createNew' : 'showModal'
 		},
 
 		ui: {
@@ -42,7 +46,8 @@ define([
 		},
 
 		regions: {
-			detail : '#detail'
+			detail : '#detail',
+			newSensor : Modal
 		},
 
 		initialize: function(options){
@@ -179,20 +184,24 @@ define([
 			$(elem).html(content);
 		},
 		exportGrid: function() {
-						$.ajax({
-								url: config.coreUrl + 'sensors/export',
-								data: JSON.stringify({criteria:this.filters.criterias}),
-								contentType:'application/json',
-								type:'POST'
-						}).done(function(data) {
-								var url = URL.createObjectURL(new Blob([data], {'type':'text/csv'}));
-								var link = document.createElement('a');
-								link.href = url;
-								link.download = 'sensors_export.csv';
-								document.body.appendChild(link);
-								link.click();
-								document.body.removeChild(link);
-						});
-				},
+            $.ajax({
+                url: config.coreUrl + 'sensors/export',
+                data: JSON.stringify({criteria:this.filters.criterias}),
+                contentType:'application/json',
+                type:'POST'
+            }).done(function(data) {
+                var url = URL.createObjectURL(new Blob([data], {'type':'text/csv'}));
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = 'sensors_export.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        },
+    showModal : function(){
+			this.newSensor.show(new NewSensor({rg : this.newSensor}));
+		}
+
 	});
 });

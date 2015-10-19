@@ -30,6 +30,7 @@ class Individual (Base,ObjectWithDynProp) :
     Age = Column(String)
     Birth_date = Column(DateTime)
     Death_date = Column(DateTime)
+    Original_ID = Column(String)
     FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
     Original_ID = Column(String(100))
     Caisse_ID = Column(String(50))
