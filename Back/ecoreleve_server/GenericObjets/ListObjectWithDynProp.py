@@ -109,14 +109,17 @@ class ListObjectWithDynProp():
         DynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
         query = select([DynPropTable]) #.where(DynPropTable.c['Name'] == dynPropName)
         result  = DBSession.execute(query).fetchall()
+
         if result == []:
             df = None
         else :
+
             df = pd.DataFrame(result, columns = DynPropTable.columns.keys())
         return df
 
     def GetDynProp (self,dynPropName) : 
         ''' Get dyn Prop with its name '''
+
 
         if self.DynPropList is not None :
             curDynProp = self.DynPropList[self.DynPropList['Name'] == dynPropName]

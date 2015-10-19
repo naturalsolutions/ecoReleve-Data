@@ -73,14 +73,18 @@ def add_routes(config):
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
+    
     config.add_route('sensors', 'ecoReleve-Core/sensors/') 
+    config.add_route('sensors/insert', 'ecoReleve-Core/sensors') 
     config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
     config.add_route('sensors/id', 'ecoReleve-Core/sensors/{id}',custom_predicates = (integers('id'),))
     config.add_route('sensors/action', 'ecoReleve-Core/sensors/{action}')
 
+
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/') 
+    config.add_route('individuals/insert', 'ecoReleve-Core/individuals')
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/history', 'ecoReleve-Core/individuals/{id}/history',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/equipment', 'ecoReleve-Core/individuals/{id}/equipment',custom_predicates = (integers('id'),))
