@@ -1,7 +1,7 @@
 
 
 <div class="full-height col-sm-6">
-	<div class="banner">
+	<div class="toolbar clearfix">
 		<br>
 
 		<button id="back" class="btn btn-success pull-left">
@@ -9,13 +9,15 @@
 			Back
 		</button>
 
+		<div class="pull-right">
 		<button id="prevDataSet" class="btn btn-success pull-left">
 				<span class="reneco reneco-leftarrow"></span>
 		</button>
-		<span class="text-center info">Change Datas</span>
-		<button id="nextDataSet" class="btn btn-success pull-right">
+		<span class="btn text-center switcher pull-left">Change Dataset : <span id="dataSetIndex"></span>/<span id="dataSetTotal"></span></span>
+		<button id="nextDataSet" class="btn btn-success pull-left">
 				<span class="reneco reneco-rightarrow"></span>
 		</button>
+		</div>
 
 	</div>
 	<br>

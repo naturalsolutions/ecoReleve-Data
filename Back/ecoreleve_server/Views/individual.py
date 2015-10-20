@@ -192,7 +192,7 @@ def updateIndiv(request):
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix, renderer='json', request_method = 'POST')
+@view_config(route_name= prefix  + '/insert', renderer='json', request_method = 'POST')
 def insertIndiv(request):
     data = request.json_body
     if not isinstance(data,list):
@@ -210,12 +210,20 @@ def insertOneNewIndiv (request) :
         if value != "" :
             data[items] = value
 
-    newIndiv = Individual(FK_IndividualType = data['FK_IndividualType'], creator = request.authenticated_userid)
-    newIndiv.IndividualType = DBSession.query(IndividualType).filter(IndividualType.ID==data['FK_IndividualType']).first()
+    #newIndiv = Individual(FK_IndividualType = data['FK_IndividualType'], creator = request.authenticated_userid)
+    indivType = int(data['FK_IndividualType'])
+    print(data)
+    newIndiv = Individual(FK_IndividualType = indivType , creationDate = datetime.now(),Original_ID = '0')
+    newIndiv.IndividualType = DBSession.query(IndividualType).filter(IndividualType.ID==indivType).first()
+    print('-----pass 1')
     newIndiv.init_on_load()
+    print('-----pass 2')
+
     newIndiv.UpdateFromJson(data)
     print (newIndiv.__dict__)
     DBSession.add(newIndiv)
+    print('-----pass 3')
+
     DBSession.flush()
     # transaction.commit()
     return {'ID': newIndiv.ID}

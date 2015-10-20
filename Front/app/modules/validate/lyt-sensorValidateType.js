@@ -42,7 +42,7 @@ define([
 		},
 
 		back: function(){
-			Backbone.history.history.back();
+			Backbone.history.navigate('validate', {trigger: true});
 		},
 
 		onRender: function(){
@@ -218,57 +218,10 @@ define([
 					];
 					break;
 				default:
-					
+					console.warn('type error');
 					break;
 			}
-			if(this.type_ == 'rfid'){
-				
-			}else{
-				this.cols = [
-					{
-						name: 'FK_Individual',
-						label: 'Individual ID',
-						editable: false,
-						cell : 'string'
-					},{
-						name: 'FK_ptt',
-						label: 'Unique',
-						editable: false,
-						cell : 'string'
-					}, {
-						name: 'nb',
-						label: 'NB',
-						editable: false,
-						cell: 'string'
-					}, {
-						name: 'StartDate',
-						label: 'Start equipment',
-						editable: false,
-						cell: 'string',
-					}, {
-						name: 'EndDate',
-						label: 'End equipment',
-						editable: false,
-						cell: 'string',
-					}, {
-						name: 'min_date',
-						label: 'Data from',
-						editable: false,
-						cell: 'string',
-					}, {
-						name: 'min_date',
-						label: 'Data To',
-						editable: false,
-						cell: 'string',
-					}, {
-						editable: true,
-						name: 'import',
-						label: 'IMPORT',
-						cell: 'select-row',
-						headerCell: 'select-all'
-					}
-				];
-			}
+
 			this.displayGrid();
 			this.frequency = this.ui.frequency.val();
 		},
@@ -285,12 +238,8 @@ define([
 				pageSize: 20,
 				com: this.com,
 				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
-				urlParams : this.urlParams,
 				rowClicked : true,
 				totalElement : 'totalEntries',
-				onceFetched: function(){
-					window.app.temp = this;
-				}
 			});
 
 			this.grid.rowClicked = function(row){

@@ -33,6 +33,9 @@ define([
 			}
 
 			this.onceFetched = options.onceFetched;
+			if(options.customClientSide){
+				this.customClientSide = options.customClientSide;
+			}
 
 			if (options.rowClicked) {
 				var clickFunction = options.rowClicked.clickFunction
@@ -225,6 +228,8 @@ define([
 		},
 
 		initCollectionPaginableClient: function () {
+
+
 			var _this = this;
 			var PageCollection = PageColl.extend({
 				url: this.url,
@@ -237,7 +242,8 @@ define([
 					criteria: function () {
 						return JSON.stringify(this.searchCriteria);
 					},
-					succes: function(){
+					//wrong
+					success: function(){
 						if(_this.onceFetched)
 						_this.onceFetched();
 					},
@@ -323,22 +329,24 @@ define([
 						success: function () {
 							if(_this.totalElement){
 								_this.affectTotalRecords();
+
 							}
+							//mj 20/10/2015
+							_this.customClientSide();
 						}
 					});
 				}
-
 			}
 			
 			else {
-
 				this.grid.collection.fetch({ reset: true });
 			}
 		},
 
-		plouf: function(){
-			console.log('passed');
+		customClientSide: function(){
+
 		},
+
 
 		displayGrid: function () {
 			return this.grid.render().el;
@@ -365,7 +373,6 @@ define([
 					$('#' + this.totalElement).html(this.grid.collection.length);
 				}
 			}
-			
 		},
 
 		setTotal: function () {

@@ -1,3 +1,16 @@
+USE [NewModelERD]
+GO
+
+/****** Object:  StoredProcedure [dbo].[pr_ExportFormBuilder]    Script Date: 09/10/2015 12:06:42 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
 ALTER PROCEDURE [dbo].[pr_ExportFormBuilder](
 @LastExport DATETIME
 )
@@ -33,7 +46,7 @@ DELETE FormBuilderFormsInfos
            ,[descriptionEn]
            ,'Protocole'
  FROM FormBuilder.dbo.Form fo 
- WHERE (fo.modificationDate IS NULL and fo.creationDate > @LastExport) OR (fo.modificationDate IS NOT NULL and fo.modificationDate > @LastExport);
+ ;
  -- TODO ajouter le nom de l'application
 
 with toto (ID) as (
@@ -58,13 +71,13 @@ INSERT INTO [FormBuilderInputInfos]
       ,[editorClass]
       ,[fieldClassEdit]
       ,[fieldClassDisplay]
-	  ,[linkedFieldTable]
+    ,[linkedFieldTable]
       ,[linkedFieldIdentifyingColumn]
       ,[linkedField]
       ,[formIdentifyingColumn]
-	  ,[order]
-      ,linkedFieldset
-	  )
+    ,[order]
+      /*,linkedFieldset*/
+    )
 SELECT pk_Input
            ,I.[fk_form]
            ,I.[name]
@@ -77,7 +90,7 @@ SELECT pk_Input
            ,I.[endOfLine]
            ,I.[startDate]
            ,I.[curStatus]
-           ,I.[type]
+           ,CASE WHEN ip.value IS NOT NULL AND ip.value LIKE 'hh:mm' THEN 'TimePicker' ELSE I.[type] END
            ,I.[editorClass]
            ,I.[fieldClassEdit]
            ,I.[fieldClassDisplay]
@@ -86,10 +99,11 @@ SELECT pk_Input
            ,I.[linkedField]
            ,I.[formIdentifyingColumn]
            ,I.[order]
-		   ,F.legend
+       /*,F.legend*/
            FROM FormBuilder.dbo.Input I
-		   LEFT JOIN FormBuilder.dbo.Fieldset F ON I.linkedFieldset = F.refid and F.pk_Fieldset in (select * from toto)
-		   WHERE i.fk_form in (select ID from [FormBuilderFormsInfos]) AND I.[curStatus] = 1 
+       LEFT JOIN FormBuilder.dbo.InputProperty ip ON I.pk_Input = ip.fk_Input AND I.type = 'Date' AND ip.name = 'format'
+       /*LEFT JOIN FormBuilder.dbo.Fieldset F ON I.linkedFieldset = F.refid and F.pk_Fieldset in (select * from toto)*/
+       WHERE i.fk_form in (select ID from [FormBuilderFormsInfos]) AND I.[curStatus] = 1 
 
 INSERT INTO [FormBuilderInputProperty]
            ([ID]
@@ -106,5 +120,9 @@ INSERT INTO [FormBuilderInputProperty]
       ,IP.[valueType]
   FROM FormBuilder.[dbo].[InputProperty] IP WHERE fk_Input in (select ID FROM [FormBuilderInputInfos])
  
-
+ EXEC dbo.[pr_ImportFormBuilder] 
 END
+
+GO
+
+
