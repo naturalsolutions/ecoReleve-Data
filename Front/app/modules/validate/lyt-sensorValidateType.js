@@ -54,6 +54,8 @@ define([
 			switch(this.type_){
 				case 'rfid':
 					this.ui.frequency.find('option[value="60"]').prop('selected', true);
+
+
 					this.cols = [
 						{
 							name: 'UnicName',
@@ -130,7 +132,15 @@ define([
 							name: 'FK_Individual',
 							label: 'Individual ID',
 							editable: false,
-							cell : 'string'
+							cell : 'string',
+							formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+								fromRaw: function (rawValue, model) {
+										if (rawValue==null) {
+											rawValue='WARNING ==> No Individual attached !';
+										}
+									 return rawValue;
+								  }
+							}),
 						},{
 							name: 'FK_ptt',
 							label: 'Unique',
@@ -177,7 +187,15 @@ define([
 							name: 'FK_Individual',
 							label: 'Individual ID',
 							editable: false,
-							cell : 'string'
+							cell : 'string',
+							formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+								fromRaw: function (rawValue, model) {
+										if (rawValue==null) {
+											rawValue='<span class="bull-warn">&#x25cf;</span> No Individual attached !';
+										}
+									return rawValue;
+								}
+							}),
 						},{
 							name: 'FK_ptt',
 							label: 'Unique',
@@ -240,6 +258,7 @@ define([
 				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
 				rowClicked : true,
 				totalElement : 'totalEntries',
+
 			});
 
 			this.grid.rowClicked = function(row){
