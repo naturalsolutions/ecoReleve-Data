@@ -32,7 +32,6 @@ define([
 			'click #btnFilter' : 'filter',
 			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
-			//'click #createNew' : 'showModal'
 		},
 
 		ui: {
@@ -52,10 +51,13 @@ define([
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
 
+			if(window.app.temp){
+				var coll = window.app.temp.collection;
+				this.stationIndex = coll.indexOf(options.model);
+			}
 		},
 
 		onRender: function(){
-
 			this.$el.i18n();
 		},
 
@@ -63,6 +65,7 @@ define([
 		onShow : function(){
 			// to integrate the toolbar, create a layout for the content of the modal windows
 			// Be carreful, we provide LytNewIndiv and not his instance (new) !!!
+
 			var toolbar = new Toolbar({content : LytNewIndiv, modalTitle : 'New individual' });
 			this.toolbar.show(toolbar);
 
@@ -151,7 +154,7 @@ define([
 			this.detail.show(new LytIndivDetail({id : id}));
 			this.ui.detail.removeClass('hidden');
 
-			Backbone.history.navigate('individual/'+id, {trigger: false})
+			Backbone.history.navigate('individual/'+id, {trigger: false});
 		},
 
 		rowDbClicked: function(row){

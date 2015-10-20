@@ -879,7 +879,7 @@ var Cell = Backgrid.Cell = Backbone.View.extend({
   render: function () {
     this.$el.empty();
     var model = this.model;
-    this.$el.text(this.formatter.fromRaw(model.get(this.column.get("name")), model));
+    this.$el.html(this.formatter.fromRaw(model.get(this.column.get("name")), model));
     this.delegateEvents();
     return this;
   },

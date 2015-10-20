@@ -33,6 +33,9 @@ define([
 			}
 
 			this.onceFetched = options.onceFetched;
+			if(options.customClientSide){
+				this.customClientSide = options.customClientSide;
+			}
 
 			if (options.rowClicked) {
 				var clickFunction = options.rowClicked.clickFunction
@@ -205,7 +208,6 @@ define([
 					}
 					ctx.init = true;
 					options.success = function(){
-						
 						if(ctx.onceFetched){
 							ctx.onceFetched(params);
 						}
@@ -227,6 +229,8 @@ define([
 
 		initCollectionPaginableClient: function () {
 			var ctx = this;
+			var _this = this;
+
 			var PageCollection = PageColl.extend({
 				url: this.url,
 				mode: 'client',
@@ -238,6 +242,12 @@ define([
 					criteria: function () {
 						return JSON.stringify(this.searchCriteria);
 					},
+					//wrong
+					success: function(){
+						if(_this.onceFetched)
+						_this.onceFetched();
+					},
+
 				},
 				fetch: function (options) {
 					ctx.fetchingCollection(options);
@@ -330,19 +340,25 @@ define([
 						success: function () {
 							if(_this.totalElement){
 								_this.affectTotalRecords();
+
 							}
+							//mj 20/10/2015
+							_this.customClientSide();
 						}
 					});
 				}
-
 			}
 			
 			else {
-
-				this.grid.collection.fetch({ reset: true, success: function () { 
-				/*_this.collectionFetched(options);*/ } });
+				this.grid.collection.fetch({ reset: true });
 			}
 		},
+
+		customClientSide: function(){
+
+		},
+
+
 		displayGrid: function () {
 			return this.grid.render().el;
 		},
@@ -368,7 +384,6 @@ define([
 					$('#' + this.totalElement).html(this.grid.collection.length);
 				}
 			}
-			
 		},
 
 		setTotal: function () {

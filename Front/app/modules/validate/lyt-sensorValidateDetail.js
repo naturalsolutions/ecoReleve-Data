@@ -31,7 +31,10 @@ define([
 			'click table.backgrid th input' : 'checkSelectAll',
 			'click button#validate' : 'validate',
 			'click button#back' : 'back',
-			'change select#frequency' : 'updateFrequency'
+			'change select#frequency' : 'updateFrequency',
+
+			'click #prevDataSet' : 'prevDataSet',
+			'click #nextDataSet' : 'nextDataSet'
 		},
 
 		ui: {
@@ -41,24 +44,98 @@ define([
 			'map':'#map',
 			'indForm': '#indForm',
 			'sensorForm': '#sensorForm',
+
+			'dataSetIndex': '#dataSetIndex',
+			'dataSetTotal': '#dataSetTotal',
 		},
 
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.type = options.type;
+
 			this.indId = options.indId;
 			this.sensorId = parseInt(options.sensorId);
+
 			this.com = new Com();
+			this.model = new Backbone.Model();
+
+			this.initGrid();
+		},
+
+
+		initGrid: function(){
+			var _this = this;
+			this.globalGrid = new NsGrid({
+				pagingServerSide: false,
+				columns : [],
+				pageSize: 20,
+				url: config.coreUrl+'sensors/'+this.type+'/uncheckedDatas',
+				totalElement : 'totalEntries',
+				customClientSide: function(){
+					_this.initNavBar(this.collection.fullCollection);
+					//risky : the DOM could be not yet loaded
+					_this.ui.dataSetTotal.html(_this.coll.size());
+					_this.ui.dataSetIndex.html(_this.dataSetIndex+1);
+				},
+			});
 		},
 
 		onRender: function(){
 			this.$el.i18n();
 		},
 
+		initNavBar: function(coll){
+			var md = coll.findWhere({
+				'FK_ptt' : this.sensorId
+			});
+
+			this.dataSetIndex = coll.indexOf(md);
+			this.coll = coll;
+		},
+
+		nextDataSet: function(){
+			if(this.coll){
+				if(this.dataSetIndex < this.coll.size()-1){
+					this.dataSetIndex++;
+				}else{
+					this.dataSetIndex = 0;
+				}
+				this.displayDataSet(this.dataSetIndex);
+			}
+		},
+
+		prevDataSet: function(){
+			if(this.coll){
+				if(this.dataSetIndex != 0){
+					this.dataSetIndex--;
+				}else{
+					this.dataSetIndex = this.coll.size()-1;
+				}
+				this.displayDataSet(this.dataSetIndex);
+			}
+		},
+
+		displayDataSet: function(dataSetIndex){
+			this.ui.dataSetTotal.html(this.coll.size());
+			this.ui.dataSetIndex.html(this.dataSetIndex+1);
+
+			var md = this.coll.at(dataSetIndex);
+			this.sensorId = md.get('FK_ptt');
+			this.indId = md.get('FK_Individual');
+			this.com = new Com();
+			this.map.destroy();
+			this.ui.map.html('');
+			this.onShow();
+			Backbone.history.navigate('validate/' + this.type + '/' + this.indId + '/' + this.sensorId, {trigger: false});
+		},
+
 		onShow : function(){
+
+			if(this.indId == 'null' || !this.indId) this.indId = 'none';
 			if(this.indId == 'none'){
 				this.swal({ title : 'No individual attached'}, 'warning');
 			}else{
+				this.indId
 				this.displayIndForm();
 			}
 			this.displayGrid();
@@ -67,7 +144,7 @@ define([
 		},
 
 		back: function(){
-			Backbone.history.history.back();
+			Backbone.history.navigate('validate/' + this.type, {trigger: true});
 		},
 
 		setFrequency: function(e){
@@ -136,10 +213,10 @@ define([
 							if (rawValue=='arg') {
 								rawValue='Argos';
 							}
-							else {
+							else{
 								rawValue = 'GPS'
 							}
-						 return rawValue;
+						return rawValue;
 					}
 				}),
 				cell: 'string'
@@ -190,14 +267,12 @@ define([
 				};
 			};
 
-			
 			this.grid.rowClicked = function(row){
 				_this.rowClicked(row);
 			};
 			this.grid.rowDbClicked = function(row){
 				_this.rowDbClicked(row);
 			};
-
 
 			this.grid.clearAll = function () {
 				var coll = new Backbone.Collection();
@@ -208,11 +283,9 @@ define([
 
 				var collection = this.grid.collection;
 				collection.each(function (model) {
-
 					model.trigger("backgrid:select", model, false);
 				});
 			},
-
 
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
@@ -273,7 +346,6 @@ define([
 			});
 		},
 
-
 		roundDate : function (date, duration) { 
 			return moment(Math.floor((+date)/(+duration)) * (+duration));
 		},
@@ -283,8 +355,6 @@ define([
 			var _this = this;
 			var origin = this.grid.grid.collection.fullCollection.clone();
 			frequency = parseInt(frequency);
-
-
 			if (frequency !='all'){
 				var col0 = origin.at(0);
 				var date = new moment(col0.get('date'));
@@ -292,17 +362,14 @@ define([
 					var curr = new moment(model.get('date'));
 					return _this.roundDate( curr, moment.duration(frequency, 'minutes') );
 				});
-
 				var ids =[];
 				var i =0;
-
 				for (var rangeDate in groups) {
 					var tmp = groups[rangeDate][0].get('PK_id');
 					ids.push(tmp);
 				}
 					this.grid.interaction('selectionMultiple', ids);
 				} else {
-
 				}
 		},
 
@@ -313,37 +380,53 @@ define([
 		},
 
 		validate: function(){
+			var _this = this;
 			var url = config.coreUrl + 'sensors/' + this.type
 			+ '/uncheckedDatas/' + this.indId + '/' + this.sensorId;
 			var mds = this.grid.grid.getSelectedModels();
+			if(!mds.length){
+				return;
+			}
+
 			var col = new Backbone.Collection(mds);
 			var params = col.pluck('PK_id');
-
 			$.ajax({
 				url: url,
 				method: 'POST',
-				data : { data : JSON.stringify(params) }
+				data : { data : JSON.stringify(params) },
+				context: this,
 			}).done(function(resp) {
-				if(reps.errors){
-					reps.title = 'An error occured';
-					reps.type = 'error';
+				if(resp.errors){
+					resp.title = 'An error occured';
+					resp.type = 'error';
 				}else{
-					reps.title = 'Success';
-					reps.type = 'success';
+					resp.title = 'Success';
+					resp.type = 'success';
+					
 				}
+				resp.text = 'existing: ' + resp.existing + ', inserted: ' + resp.inserted + ', errors:' + resp.errors;
 
-				resp.text = 'existing: ' + opt.existing + ', inserted: ' + opt.inserted + ', errors:' + opt.errors;
+				//remove the model from the coll once this one is validated
+				var md = this.coll.at(this.dataSetIndex);
+				this.coll.remove(md);
+				
+				this.dataSetIndex--;
 
-				this.swal(resp, resp.type);
-				this.displayGrid();
-			}).fail(function() {
+				var callback = function(){
+					//prevent successive event handler
+					setTimeout(function(){
+						_this.nextDataSet();
+					}, 500);
+				};
+				this.swal(resp, resp.type, callback);
+
+
+			}).fail(function(resp) {
 				this.swal(resp, 'error');
 			});
 		},
 
-
-
-		swal: function(opt, type){
+		swal: function(opt, type, callback){
 			var btnColor;
 			switch(type){
 				case 'success':
@@ -370,7 +453,10 @@ define([
 				closeOnConfirm: true,
 			},
 			function(isConfirm){
-
+				//could be better
+				if(callback){
+					callback();
+				}
 			});
 		},
 

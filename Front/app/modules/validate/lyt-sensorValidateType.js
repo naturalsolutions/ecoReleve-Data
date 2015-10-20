@@ -42,7 +42,7 @@ define([
 		},
 
 		back: function(){
-			Backbone.history.history.back();
+			Backbone.history.navigate('validate', {trigger: true});
 		},
 
 		onRender: function(){
@@ -50,12 +50,12 @@ define([
 		},
 
 		onShow : function(){
-
 			this.ui.frequency.find('option[value="all"]').prop('selected', true);
-
 			switch(this.type_){
 				case 'rfid':
 					this.ui.frequency.find('option[value="60"]').prop('selected', true);
+
+
 					this.cols = [
 						{
 							name: 'UnicName',
@@ -132,7 +132,15 @@ define([
 							name: 'FK_Individual',
 							label: 'Individual ID',
 							editable: false,
-							cell : 'string'
+							cell : 'string',
+							formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+								fromRaw: function (rawValue, model) {
+										if (rawValue==null) {
+											rawValue='WARNING ==> No Individual attached !';
+										}
+									 return rawValue;
+								  }
+							}),
 						},{
 							name: 'FK_ptt',
 							label: 'Unique',
@@ -179,7 +187,15 @@ define([
 							name: 'FK_Individual',
 							label: 'Individual ID',
 							editable: false,
-							cell : 'string'
+							cell : 'string',
+							formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+								fromRaw: function (rawValue, model) {
+										if (rawValue==null) {
+											rawValue='<span class="bull-warn">&#x25cf;</span> No Individual attached !';
+										}
+									return rawValue;
+								}
+							}),
 						},{
 							name: 'FK_ptt',
 							label: 'Unique',
@@ -220,57 +236,8 @@ define([
 					];
 					break;
 				default:
-					
+					console.warn('type error');
 					break;
-			}
-
-			if(this.type_ == 'rfid'){
-				
-			}else{
-				this.cols = [
-					{
-						name: 'FK_Individual',
-						label: 'Individual ID',
-						editable: false,
-						cell : 'string'
-					},{
-						name: 'FK_ptt',
-						label: 'Unique',
-						editable: false,
-						cell : 'string'
-					}, {
-						name: 'nb',
-						label: 'NB',
-						editable: false,
-						cell: 'string'
-					}, {
-						name: 'StartDate',
-						label: 'Start equipment',
-						editable: false,
-						cell: 'string',
-					}, {
-						name: 'EndDate',
-						label: 'End equipment',
-						editable: false,
-						cell: 'string',
-					}, {
-						name: 'min_date',
-						label: 'Data from',
-						editable: false,
-						cell: 'string',
-					}, {
-						name: 'min_date',
-						label: 'Data To',
-						editable: false,
-						cell: 'string',
-					}, {
-						editable: true,
-						name: 'import',
-						label: 'IMPORT',
-						cell: 'select-row',
-						headerCell: 'select-all'
-					}
-				];
 			}
 
 			this.displayGrid();
@@ -289,9 +256,9 @@ define([
 				pageSize: 20,
 				com: this.com,
 				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
-				urlParams : this.urlParams,
 				rowClicked : true,
 				totalElement : 'totalEntries',
+
 			});
 
 			this.grid.rowClicked = function(row){
@@ -312,8 +279,6 @@ define([
 
 
 			if(!$(evt.target).is('input')){
-				if(id == null) id = 'none';
-
 				Backbone.history.navigate('validate/' + this.type_ + '/' + id + '/' + ptt, {trigger: true});
 			}
 		},
@@ -356,7 +321,6 @@ define([
 			});
 		},
 
-
 		swal: function(opt, type){
 			var btnColor;
 			switch(type){
@@ -374,8 +338,6 @@ define([
 					break;
 			}
 
-			console.log(opt);
-			
 			Swal({
 				title: opt.title || 'error',
 				text: opt.text || '',
@@ -386,7 +348,6 @@ define([
 				closeOnConfirm: true,
 			},
 			function(isConfirm){
-
 			});
 		},
 

@@ -86,10 +86,6 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytIndividual({id : id}));
 		},
 
-		indiv : function(id){
-			this.rgMain.show(new LytIndividual({id: id}));
-		},
-
 		sensor : function(id){
 			this.rgMain.show(new LytSensor({id: id}));
 		},

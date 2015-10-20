@@ -171,8 +171,8 @@ define([
 			//Radio.channel('route').command('site:detail', id);
 		},
 
-		rowClicked: function(row){
-			var id = row.model.get('ID');
+		rowClicked: function(args){
+			var id = args.row.model.get('ID');
 			this.grid.interaction('popup', id);
 		},
 
