@@ -50,9 +50,7 @@ define([
 		},
 
 		onShow : function(){
-
 			this.ui.frequency.find('option[value="all"]').prop('selected', true);
-
 			switch(this.type_){
 				case 'rfid':
 					this.ui.frequency.find('option[value="60"]').prop('selected', true);
@@ -223,7 +221,6 @@ define([
 					
 					break;
 			}
-
 			if(this.type_ == 'rfid'){
 				
 			}else{
@@ -272,7 +269,6 @@ define([
 					}
 				];
 			}
-
 			this.displayGrid();
 			this.frequency = this.ui.frequency.val();
 		},
@@ -292,6 +288,9 @@ define([
 				urlParams : this.urlParams,
 				rowClicked : true,
 				totalElement : 'totalEntries',
+				onceFetched: function(){
+					window.app.temp = this;
+				}
 			});
 
 			this.grid.rowClicked = function(row){
@@ -312,8 +311,6 @@ define([
 
 
 			if(!$(evt.target).is('input')){
-				if(id == null) id = 'none';
-
 				Backbone.history.navigate('validate/' + this.type_ + '/' + id + '/' + ptt, {trigger: true});
 			}
 		},
@@ -356,7 +353,6 @@ define([
 			});
 		},
 
-
 		swal: function(opt, type){
 			var btnColor;
 			switch(type){
@@ -374,8 +370,6 @@ define([
 					break;
 			}
 
-			console.log(opt);
-			
 			Swal({
 				title: opt.title || 'error',
 				text: opt.text || '',
@@ -386,7 +380,6 @@ define([
 				closeOnConfirm: true,
 			},
 			function(isConfirm){
-
 			});
 		},
 

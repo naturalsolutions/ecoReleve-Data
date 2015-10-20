@@ -31,7 +31,11 @@ define([
 		events : {
 			'click #btnFilter' : 'filter',
 			'click #back' : 'hideDetails',
-			'click button#clear' : 'clearFilter'
+			'click button#clear' : 'clearFilter',
+
+
+			'click #prevDatas' : 'prevDatas',
+			'click #nextDatas' : 'nextDatas'
 		},
 
 		ui: {
@@ -46,9 +50,35 @@ define([
 			detail : '#detail'
 		},
 
+		prevDatas: function(){
+			if(window.app.temp){
+				var coll = window.app.temp;
+				if(this.stationIndex <= coll.collection.models.length)
+					this.stationIndex++;
+				this.stationId = coll.collection.models[this.stationIndex].get('ID');
+				this.onShow();
+			}
+		},
+
+		nextDatas: function(){
+			if(window.app.temp){
+				var coll = window.app.temp;
+				if(this.stationIndex != 0)
+					this.stationIndex--;
+				this.stationId = coll.collection.models[this.stationIndex].get('ID');
+				this.onShow();
+			}
+		},
+
+
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
+
+			if(window.app.temp){
+				var coll = window.app.temp.collection;
+				this.stationIndex = coll.indexOf(options.model);
+			}
 
 		},
 

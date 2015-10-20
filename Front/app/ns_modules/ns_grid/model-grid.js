@@ -205,7 +205,6 @@ define([
 					}
 					ctx.init = true;
 					options.success = function(){
-						
 						if(ctx.onceFetched){
 							ctx.onceFetched(params);
 						}
@@ -226,6 +225,7 @@ define([
 		},
 
 		initCollectionPaginableClient: function () {
+			var _this = this;
 			var PageCollection = PageColl.extend({
 				url: this.url,
 				mode: 'client',
@@ -237,6 +237,11 @@ define([
 					criteria: function () {
 						return JSON.stringify(this.searchCriteria);
 					},
+					succes: function(){
+						if(_this.onceFetched)
+						_this.onceFetched();
+					},
+
 				},
 			});
 
@@ -327,10 +332,14 @@ define([
 			
 			else {
 
-				this.grid.collection.fetch({ reset: true, success: function () { 
-				/*_this.collectionFetched(options);*/ } });
+				this.grid.collection.fetch({ reset: true });
 			}
 		},
+
+		plouf: function(){
+			console.log('passed');
+		},
+
 		displayGrid: function () {
 			return this.grid.render().el;
 		},

@@ -31,7 +31,10 @@ define([
 			'click table.backgrid th input' : 'checkSelectAll',
 			'click button#validate' : 'validate',
 			'click button#back' : 'back',
-			'change select#frequency' : 'updateFrequency'
+			'change select#frequency' : 'updateFrequency',
+
+			'click #prevDataSet' : 'prevDataSet',
+			'click #nextDataSet' : 'nextDataSet'
 		},
 
 		ui: {
@@ -41,6 +44,8 @@ define([
 			'map':'#map',
 			'indForm': '#indForm',
 			'sensorForm': '#sensorForm',
+
+			'average': '#average'
 		},
 
 		initialize: function(options){
@@ -49,13 +54,50 @@ define([
 			this.indId = options.indId;
 			this.sensorId = parseInt(options.sensorId);
 			this.com = new Com();
+			this.model = new Backbone.Model();
 		},
 
 		onRender: function(){
 			this.$el.i18n();
 		},
 
+		switcher: function(){
+			if(window.app.temp){
+				var coll = window.app.temp.collection;
+				this.dataSet = coll.indexOf(options.model);
+				this.ui.average.html(this.dataSet);
+			}
+		},
+
+		nextDataSet: function(){
+			if(window.app.temp){
+				var coll = window.app.temp;
+				if(this.dataSet <= coll.collection.models.length)
+					this.dataSet++;
+				var md = coll.collection.models[this.dataSet];
+				/*
+					this.indId = md.get('');
+					this.sensorId = md.get('');
+					this.onShow();
+				*/
+			}
+
+		},
+
+		prevDataSet: function(){
+			if(window.app.temp){
+				var coll = window.app.temp;
+				if(this.dataSet != 0)
+					this.dataSet--;
+				this.stationId = coll.collection.models[this.dataSet].get('ID');
+				this.onShow();
+			}
+		},
+
 		onShow : function(){
+			this.switcher();
+
+			if(this.indId == null || !this.indId) this.indId = 'none';
 			if(this.indId == 'none'){
 				this.swal({ title : 'No individual attached'}, 'warning');
 			}else{
@@ -136,10 +178,10 @@ define([
 							if (rawValue=='arg') {
 								rawValue='Argos';
 							}
-							else {
+							else{
 								rawValue = 'GPS'
 							}
-						 return rawValue;
+						return rawValue;
 					}
 				}),
 				cell: 'string'
@@ -190,14 +232,12 @@ define([
 				};
 			};
 
-			
 			this.grid.rowClicked = function(row){
 				_this.rowClicked(row);
 			};
 			this.grid.rowDbClicked = function(row){
 				_this.rowDbClicked(row);
 			};
-
 
 			this.grid.clearAll = function () {
 				var coll = new Backbone.Collection();
@@ -208,11 +248,9 @@ define([
 
 				var collection = this.grid.collection;
 				collection.each(function (model) {
-
 					model.trigger("backgrid:select", model, false);
 				});
 			},
-
 
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
@@ -273,7 +311,6 @@ define([
 			});
 		},
 
-
 		roundDate : function (date, duration) { 
 			return moment(Math.floor((+date)/(+duration)) * (+duration));
 		},
@@ -283,8 +320,6 @@ define([
 			var _this = this;
 			var origin = this.grid.grid.collection.fullCollection.clone();
 			frequency = parseInt(frequency);
-
-
 			if (frequency !='all'){
 				var col0 = origin.at(0);
 				var date = new moment(col0.get('date'));
@@ -292,17 +327,14 @@ define([
 					var curr = new moment(model.get('date'));
 					return _this.roundDate( curr, moment.duration(frequency, 'minutes') );
 				});
-
 				var ids =[];
 				var i =0;
-
 				for (var rangeDate in groups) {
 					var tmp = groups[rangeDate][0].get('PK_id');
 					ids.push(tmp);
 				}
 					this.grid.interaction('selectionMultiple', ids);
 				} else {
-
 				}
 		},
 
@@ -318,7 +350,6 @@ define([
 			var mds = this.grid.grid.getSelectedModels();
 			var col = new Backbone.Collection(mds);
 			var params = col.pluck('PK_id');
-
 			$.ajax({
 				url: url,
 				method: 'POST',
@@ -331,17 +362,13 @@ define([
 					reps.title = 'Success';
 					reps.type = 'success';
 				}
-
 				resp.text = 'existing: ' + opt.existing + ', inserted: ' + opt.inserted + ', errors:' + opt.errors;
-
 				this.swal(resp, resp.type);
 				this.displayGrid();
-			}).fail(function() {
+			}).fail(function(resp) {
 				this.swal(resp, 'error');
 			});
 		},
-
-
 
 		swal: function(opt, type){
 			var btnColor;
