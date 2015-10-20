@@ -106,7 +106,8 @@ def add_routes(config):
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Release #####
     config.add_route('release', 'ecoReleve-Core/release/')
-    config.add_route('release/individuals', 'ecoReleve-Core/release/individuals')
+    config.add_route('release/individuals', 'ecoReleve-Core/release/individuals/')
+    config.add_route('release/individuals/action', 'ecoReleve-Core/release/individuals/{action}')
     config.add_route('release/action', 'ecoReleve-Core/release/{action}')
 
 

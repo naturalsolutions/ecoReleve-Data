@@ -27,7 +27,17 @@ from collections import Counter
 
 prefix = 'release/'
 
-@view_config(route_name= prefix+'action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'individuals/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+def actionOnStations(request):
+    print ('\n*********************** Action **********************\n')
+    dictActionFunc = {
+    # 'count' : count_,
+    'getFields': getFields,
+    'getFilters': getFilters
+    }
+    actionName = request.matchdict['action']
+    return dictActionFunc[actionName](request)
+
 def getFilters (request):
     ModuleType = 'IndivReleaseGrid'
     filtersList = Individual().GetFilters(ModuleType)
@@ -43,6 +53,14 @@ def getFields(request) :
     if ModuleType == 'default' :
         ModuleType = 'IndivReleaseGrid'
     cols = Individual().GetGridFields(ModuleType)
+    cols.append({
+        'name' :'import',
+        'label' : 'import',
+        'renderable': True,
+        'editable': True,
+        'cell' : 'select-row',
+        'headerCell': 'select-all'
+        })
     transaction.commit()
     return cols
 
@@ -62,9 +80,6 @@ def searchIndiv(request):
         searchInfo['order_by'] = json.loads(data['order_by'])
     except:
         searchInfo['order_by'] = ['ID:desc']
-    # searchInfo['offset'] = json.loads(data['offset'])
-    # searchInfo['per_page'] = json.loads(data['per_page'])
-
     criteria = [
     {
     'Column': 'LastImported',
@@ -79,7 +94,6 @@ def searchIndiv(request):
     dataResult = listObj.GetFlatDataList(searchInfo)
 
     countResult = listObj.count(searchInfo)
-
     result = [{'total_entries':countResult}]
     result.append(dataResult)
     transaction.commit()

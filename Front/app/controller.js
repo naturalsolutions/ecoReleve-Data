@@ -19,7 +19,7 @@ define(['marionette', 'config',
 	'./modules/validate/lyt-sensorValidate',
 	'./modules/validate/lyt-sensorValidateType',
 	'./modules/validate/lyt-sensorValidateDetail',
-	'./modules/release/layouts/lyt-releaseStation',
+	'./modules/release/layouts/lyt-release-station',
 
 ],function( Marionette, config, 
 	LytHome,

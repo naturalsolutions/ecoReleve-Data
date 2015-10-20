@@ -10,9 +10,9 @@ define([
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
-
+	'ns_modules/ns_toolbar/lyt-toolbar'
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter
+	Com, NsGrid, NsFilter,Toolbar
 ){
 
 	'use strict';
@@ -22,73 +22,57 @@ define([
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
 
-		template: 'app/modules/release/templates/tpl-release-station.html',
+		template: 'app/modules/release/templates/tpl-release-individual.html',
 		className: 'full-height animated white rel',
 
 		events : {
 			'click #btnFilter' : 'filter',
 			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
-			'change select.FK_SensorType' : 'updateModels',
-			'click #btn-export' : 'exportGrid'
+			//'click #createNew' : 'showModal'
 		},
 
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
-			'filter': '#filter',
+			'filters': '#filters',
 			'detail': '#detail',
 			'totalEntries': '#totalEntries',
 		},
 
 		regions: {
-			detail : '#detail'
+			detail : '#detail',
+			toolbar : '#toolbar'
 		},
 
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
+			this.station = options.station;
 
 		},
 
 		onRender: function(){
-
 			this.$el.i18n();
 		},
 
 		onShow : function(){
 			this.displayFilter();
 			this.displayGrid(); 
-			/*if(this.options.id){
-				this.detail.show(new LytSensorDetail({id : this.options.id}));
-				this.ui.detail.removeClass('hidden');
-			}*/
 		},
 
 		displayGrid: function(){
 			var _this = this;
 			this.grid = new NsGrid({
 				pageSize: 13,
-				pagingServerSide: true,
+				pagingServerSide: false,
 				com: this.com,
-				name : 'StationGrid',
-				url: config.coreUrl+'stations/',
+				url: config.coreUrl+'release/individuals/',
 				urlParams : this.urlParams,
-				rowClicked : true,
-				totalElement : 'stations-count',
+				rowClicked : false,
+				totalElement : 'totalEntries',
 				onceFetched: function(params){
-					var listPro = {};
-					var idList  = [];
-					this.collection.each(function(model){
-						idList.push(model.get('ID'));
-					});
-					idList.sort();
-					listPro.idList = idList;
-					listPro.minId = idList[0];
-					listPro.maxId = idList [(idList.length - 1)];
-					listPro.state = this.collection.state;
-					listPro.criteria = $.parseJSON(params.criteria);
-					window.app.listProperties = listPro ;
+					console.log('fetched')
 					_this.totalEntries(this.grid);
 				}
 			});
@@ -97,7 +81,7 @@ define([
 				_this.rowClicked(args.row);
 			};
 			this.grid.rowDbClicked = function(args){
-				_this.rowDbClicked(args.row);
+				/*_this.rowDbClicked(args.row);*/
 			};
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
@@ -105,34 +89,36 @@ define([
 
 		displayFilter: function(){
 			this.filters = new NsFilter({
-				url: config.coreUrl + 'stations/',
+				url: config.coreUrl + 'release/individuals/',
 				com: this.com,
-				name:'StationGrid',
-				filterContainer: 'filter',
+				filterContainer: 'filters',
 			});
 		},
 
 		filter: function(){
 			this.filters.update();
 		},
+
 		clearFilter : function(){
 			this.filters.reset();
 		},
-		rowClicked: function(args){
-			var id = args.model.get('ID');
-			console.log(id)
-			//this.detail.show(new LytIndivDetail({id : id}));
-			//this.ui.detail.removeClass('hidden');
-			//Backbone.history.navigate('sensor/'+id, {trigger: false})
+
+		rowClicked: function(row){
 		},
 
+		rowDbClicked: function(row){
+
+		},
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
 		},
 		totalEntries: function(grid){
 			this.total = grid.collection.state.totalRecords;
+			console.log(this.total)
 			this.ui.totalEntries.html(this.total);
 		},
-
+		/*showModal : function(){
+			this.newIndiv.show(new LytNewIndiv({rg : this.newIndiv}));
+		}*/
 	});
 });
