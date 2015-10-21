@@ -55,7 +55,7 @@ def type_unchecked_list(request):
     elif type_ == 'rfid':
         return unchecked_rfid(request)
 
-    selectStmt = select([unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate'],
+    selectStmt = select([unchecked.c['FK_Individual'], unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate'],
             func.count().label('nb'), func.max(unchecked.c['date']).label('max_date'),
             func.min(unchecked.c['date']).label('min_date')])
 
