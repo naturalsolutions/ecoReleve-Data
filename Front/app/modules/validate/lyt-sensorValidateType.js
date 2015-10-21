@@ -10,7 +10,9 @@ define([
 	'ns_grid/model-grid',
 	'ns_modules/ns_com',
 
-], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com){
+	'./lyt-sensorValidateDetail'
+
+], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com, LytSensorValidateDetail){
 
 	'use strict';
 
@@ -20,12 +22,13 @@ define([
 		===================================================*/
 
 		template: 'app/modules/validate/templates/tpl-sensorValidateType.html',
-		className: 'full-height animated',
+		className: 'full-height animated rel',
 
 		events : {
 			'click button#autoValidate' : 'autoValidate',
 			'change select#frequency' : 'setFrequency',
 			'click button#back' : 'back',
+			'click button#hideDetail' : 'hideDetail',
 		},
 
 		ui: {
@@ -33,6 +36,11 @@ define([
 			'paginator': '#paginator',
 			'totalEntries': '#totalEntries',
 			'frequency': 'select#frequency',
+			'detail': '#detail',
+		},
+
+		regions: {
+			'rgDetail' : '#detail'
 		},
 
 		initialize: function(options){
@@ -45,6 +53,10 @@ define([
 			Backbone.history.navigate('validate', {trigger: true});
 		},
 
+		hideDetail: function(){
+			this.ui.detail.addClass('hidden');
+		},
+
 		onRender: function(){
 			this.$el.i18n();
 		},
@@ -55,21 +67,18 @@ define([
 				case 'rfid':
 					this.ui.frequency.find('option[value="60"]').prop('selected', true);
 
-
 					this.cols = [
 						{
 							name: 'UnicName',
 							label: 'UnicName ID',
 							editable: false,
 							cell : 'string'
-
 						},{
 							name: 'FK_Sensor',
 							label: 'FK_Sensor',
 							editable: false,
 							renderable: false,
 							cell : 'string'
-
 						},{
 							name: 'equipID',
 							label: 'equipID',
@@ -136,7 +145,7 @@ define([
 							formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
 								fromRaw: function (rawValue, model) {
 										if (rawValue==null) {
-											rawValue='WARNING ==> No Individual attached !';
+											rawValue='<span class="bull-warn">&#x25cf;</span> No Individual attached !';
 										}
 									 return rawValue;
 								  }
@@ -246,6 +255,7 @@ define([
 
 		setFrequency: function(e){
 			this.frequency = $(e.target).val();
+
 		},
 
 		displayGrid: function(){
@@ -258,7 +268,6 @@ define([
 				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
 				rowClicked : true,
 				totalElement : 'totalEntries',
-
 			});
 
 			this.grid.rowClicked = function(row){
@@ -274,12 +283,26 @@ define([
 			var row = args.row;
 			var evt = args.evt;
 
-			var id = row.model.get('FK_Individual');
-			var ptt = row.model.get('FK_ptt');
+			var indId = row.model.get('FK_Individual');
+			var sensorId = row.model.get('FK_ptt');
 
 
 			if(!$(evt.target).is('input')){
-				Backbone.history.navigate('validate/' + this.type_ + '/' + id + '/' + ptt, {trigger: true});
+
+				this.rgDetail.show(new LytSensorValidateDetail({
+					type : this.type_,
+					indId : indId,
+					sensorId : sensorId,
+					frequency: this.frequency,
+					parentGrid: this.grid.collection.fullCollection
+				}));
+
+				this.ui.detail.removeClass('hidden');
+				/*var url = 'validate/' + this.type_ + '/' + indId + '/' + sensorId;
+				if(this.frequency && this.frequency != 'all'){
+					url += '/' + this.frequency;
+				}
+				Backbone.history.navigate(url, {trigger: false});*/
 			}
 		},
 
@@ -289,6 +312,9 @@ define([
 				'toValidate': []
 			};
 			var tmp = {};
+			if(!this.grid.grid.getSelectedModels().length){
+				return;
+			}
 
 			if(this.type_ == 'rfid'){
 				_.each(this.grid.grid.getSelectedModels(), function(model){
@@ -314,6 +340,8 @@ define([
 				data : params,
 				context: this
 			}).done(function(resp) {
+				console.log(resp);
+				resp.title='Succes';
 				this.swal(resp, 'success');
 				this.displayGrid();
 			}).fail(function(resp) {

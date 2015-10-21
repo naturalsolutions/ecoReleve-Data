@@ -104,13 +104,14 @@ define(['marionette', 'config',
 			}));
 		},
 
-		validateDetail: function(type, indId, sensorId){
+/*		validateDetail: function(type, indId, sensorId, frequency){
 			this.rgMain.show(new LytSensorValidateDetail({
 				type : type,
 				indId : indId,
-				sensorId : sensorId
+				sensorId : sensorId,
+				frequency: frequency
 			}));
-		},
+		},*/
 
 		release: function(){
 			this.rgMain.show(new LytReleaseStation());

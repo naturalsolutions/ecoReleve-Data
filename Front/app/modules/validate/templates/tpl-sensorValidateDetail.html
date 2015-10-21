@@ -4,7 +4,7 @@
 	<div class="toolbar clearfix">
 		<br>
 
-		<button id="back" class="btn btn-success pull-left">
+		<button id="hideDetail" class="btn btn-success pull-left">
 			<i class="reneco reneco-back"></i>
 			Back
 		</button>
@@ -42,10 +42,13 @@
 		<button id="validate" class="btn btn-success pull-right">Validate</button>
 		<div class="col-xs-4 pull-right">
 			<select name="" id="frequency" class="form-control pull-left">
-				<option value="none" disabled selected>Select a frequency</option>
-				<option value="360">Every 6H</option>
-				<option value="30">Every 30min</option>
-				<option value="15">Every 15min</option>
+			<option value="none" disabled>Select a frequency</option>
+			<option value="10">10 min</option>
+			<option value="15">15 min</option>
+			<option value="30" selected>30 min</option>
+			<option value="60">60 min</option>
+			<option value="120">120 min</option>
+
 			</select>
 		</div>
 			

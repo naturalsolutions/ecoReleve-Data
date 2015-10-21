@@ -125,8 +125,13 @@ define([
 				}else{
 					this.initLayer(this.geoJson);
 				}
+				this.ready();
 			}
 
+
+		},
+
+		ready: function(){
 			this.setCenter();
 
 			this.map = new L.Map(this.elem, {
@@ -277,20 +282,26 @@ define([
 					order_by: '[]',
 			};
 
-			var jqxhr = $.getJSON( url, function(criterias){
+			this.deffered = $.ajax({
+				url: url,
+				contentType:'application/json',
+				type:'GET',
 			}).done(function(geoJson) {
 					if (_this.cluster){
 						_this.initClusters(geoJson);
-						setTimeout(function(){
-							_this.addMarkersLayer();
-						}, 500);
 						_this.geoJson = geoJson;
+						
+						_this.ready();
+						/*setTimeout(function(){
+							_this.addMarkersLayer();
+						}, 1000);*/
 					}else{
+						/*
 						_this.initLayer(geoJson);
 						_this.geoJson = geoJson;
+						*/
 					}
-			})
-			.fail(function(msg) {
+			}).fail(function(msg) {
 					console.error( msg );
 			});
 		},
