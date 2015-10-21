@@ -29,13 +29,13 @@ define([
 			'click #btnFilter' : 'filter',
 			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
-			//'click #createNew' : 'showModal'
+			'click #release' : 'release'
 		},
 
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
-			'filters': '#filters',
+			'filters': '#indiv_filters',
 			'detail': '#detail',
 			'totalEntries': '#totalEntries',
 		},
@@ -77,12 +77,6 @@ define([
 				}
 			});
 
-			this.grid.rowClicked = function(args){
-				_this.rowClicked(args.row);
-			};
-			this.grid.rowDbClicked = function(args){
-				/*_this.rowDbClicked(args.row);*/
-			};
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
 		},
@@ -91,7 +85,7 @@ define([
 			this.filters = new NsFilter({
 				url: config.coreUrl + 'release/individuals/',
 				com: this.com,
-				filterContainer: 'filters',
+				filterContainer: 'indiv_filters',
 			});
 		},
 
@@ -103,12 +97,6 @@ define([
 			this.filters.reset();
 		},
 
-		rowClicked: function(row){
-		},
-
-		rowDbClicked: function(row){
-
-		},
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
 		},
@@ -117,8 +105,21 @@ define([
 			console.log(this.total)
 			this.ui.totalEntries.html(this.total);
 		},
-		/*showModal : function(){
-			this.newIndiv.show(new LytNewIndiv({rg : this.newIndiv}));
-		}*/
+		release:function(){
+			var mds = this.grid.grid.getSelectedModels();
+			if(!mds.length){
+				return;
+			}
+			var _this = this;
+			var col = new Backbone.Collection(mds);
+			console.log(col);
+			console.log(this.station.get('ID'))
+			$.ajax({
+				url: config.coreUrl + 'release/individuals/',
+				method: 'POST',
+				data : { IndividualList : JSON.stringify(col),StationID:this.station.get('ID'),releaseMethod: _this.releaseMethod },
+				context: this,
+			});
+		}
 	});
 });

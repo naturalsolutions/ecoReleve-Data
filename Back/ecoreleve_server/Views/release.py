@@ -104,12 +104,13 @@ def searchIndiv(request):
 def releasePost(request):
 
     data = request.params.mixed()
-    sta_id = data['StationID']
-    curStation = DBSession.query(Station).get(sta_id)
+    sta_id = int(data['StationID'])
     indivList = json.loads(data['IndividualList'])
-
-    data['taxon'] = data['IndividualList'][0]['taxon']
-
+    curStation = DBSession.query(Station).get(sta_id)
+    # releaseMethod = data['releaseMethod']
+    releaseMethod = None
+    taxon = indivList[0]['Species']
+    print(indivList)
     class protocolList :
 
         def __init__(self,typeID):
@@ -126,12 +127,12 @@ def releasePost(request):
             self.list_.append(obs)
 
     protoTypes = pd.DataFrame(DBSession.execute(select([ProtocoleType])).fetchall(), columns = ProtocoleType.__table__.columns.keys())
-    vertebrateGrpID = protoTypes.loc[protoTypes['Name'] == 'Vertebrate group','ID'].values[0]
-    vertebrateIndID = protoTypes.loc[protoTypes['Name'] == 'Vertebrate individual','ID'].values[0]
-    biometryID = protoTypes.loc[protoTypes['Name'] == 'Bird Biometry','ID'].values[0]
-    releaseGrpID = protoTypes.loc[protoTypes['Name'] == 'Release Group','ID'].values[0]
-    releaseIndID = protoTypes.loc[protoTypes['Name'] == 'Release Individual','ID'].values[0]
-    equipmentIndID = protoTypes.loc[protoTypes['Name'] == 'Individual equipment','ID'].values[0]
+    vertebrateGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate group','ID'].values[0])
+    vertebrateIndID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate individual','ID'].values[0])
+    biometryID = int(protoTypes.loc[protoTypes['Name'] == 'Bird Biometry','ID'].values[0])
+    releaseGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Release Group','ID'].values[0])
+    releaseIndID = int(protoTypes.loc[protoTypes['Name'] == 'Release Individual','ID'].values[0])
+    equipmentIndID = int(protoTypes.loc[protoTypes['Name'] == 'Individual equipment','ID'].values[0])
 
     vertebrateGrp = Observation(FK_ProtocoleType=vertebrateGrpID)
     releaseGrp = Observation(FK_ProtocoleType=releaseGrpID)
@@ -142,13 +143,15 @@ def releasePost(request):
     equipmentIndList = protocolList(equipmentIndID)
 
     binaryDict = {
-    9: 'Nb_Adult_Indeterminate',
-    10: 'Nb_Adult_Male',
-    12: 'Nb_Adult_Female',
-    17: 'Nb_Juvenile_Indeterminate',
-    18: 'Nb_Juvenile_Male',
-    20: 'Nb_Juvenile_Female',
-    33: 'Nb_Indeterminate'
+    9: 'nb_adult_indeterminate',
+    10: 'nb_adult_male',
+    12: 'nb_adult_female',
+    17: 'nb_juvenile_indeterminate',
+    18: 'nb_juvenile_male',
+    20: 'nb_juvenile_female',
+    33: 'nb_indeterminate',
+    36: 'nb_indeterminate',
+    34: 'nb_indeterminate'
     }
 
     def MoF_AoJ(obj):
@@ -157,20 +160,20 @@ def releasePost(request):
         curAge = None
         binP = 0
 
-        if obj['Sex'].lower() == 'male':
+        if obj['Sex'] is not None and obj['Sex'].lower() == 'male':
             curSex = 'male'
             binP += 2
-        elif obj['Sex'].lower() == 'female':
+        elif obj['Sex'] is not None and obj['Sex'].lower() == 'female':
             curSex = 'female'
             binP += 4
         else : 
             curSex == 'Indeterminate'
             binP += 1
 
-        if obj['Age'].lower() == 'Adult':
+        if obj['Age'] is not None and obj['Age'].lower() == 'Adult':
             curAge = 'Adult'
             binP += 8
-        elif obj['Age'].lower() == 'juvenile':
+        elif obj['Age'] is not None and obj['Age'].lower() == 'juvenile':
             curAge = 'Juvenile'
             binP += 16
         else : 
@@ -204,23 +207,30 @@ def releasePost(request):
         releaseIndList.add(curReleaseInd)
 
         # here add info for Individual Equipment protocol
-        if isinstance(indiv['FK_Sensor'], int):
-            curEquipmentInd = equipmentIndList.new()
-            curEquipmentInd.UpdateFromJson(indiv)
-            equipmentIndList.add(curEquipmentInd)
+        # if isinstance(indiv['FK_Sensor'], int):
+        #     curEquipmentInd = equipmentIndList.new()
+        #     curEquipmentInd.UpdateFromJson(indiv)
+        #     equipmentIndList.add(curEquipmentInd)
 
+    
     dictVertGrp = dict(Counter(binList))
+    dictVertGrp['taxon'] = taxon
+    print(dictVertGrp)
     vertebrateGrp.UpdateFromJson(dictVertGrp)
-    releaseGrp.UpdateFromJson(data)
+    releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod})
 
     vertebrateGrp.Observation_children.extend(vertebrateIndList.getList())
     releaseGrp.Observation_children.extend(releaseIndList.getList())
 
+    listObs = []
+    listObs.append(vertebrateGrp)
+    listObs.append(releaseGrp)
+    listObs.extend(biometryList.getList())
     # finally append all Protocols to Station
-    curStation.Observations.append(vertebrateGrp)
-    curStation.Observations.append(releaseGrp)
-    curStation.Observations.extend(biometryList.getList())
+    print(listObs)
+    # curStation.Observations
 
-    transaction.commit()
+    # transaction.commit()
 
-    return {'release':len(releaseIndList.getList())}
+    return {}
+    # return {'release':len(releaseIndList.getList())}

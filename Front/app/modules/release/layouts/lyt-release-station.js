@@ -30,16 +30,15 @@ define([
 
 		events : {
 			'click #btnFilter' : 'filter',
-			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
-			'change select.FK_SensorType' : 'updateModels',
+			'click .tab-link' : 'displayTab',
 			'click #useStation' : 'useStation'
 		},
 
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
-			'filter': '#filter',
+			'filter': '#filters',
 			'detail': '#detail',
 			'totalEntries': '#totalEntries',
 			'toolbar' : '#toolbar'
@@ -54,6 +53,7 @@ define([
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
 
+			this.initGrid();
 		},
 
 		onRender: function(){
@@ -62,15 +62,17 @@ define([
 		},
 
 		onShow : function(){
-			this.displayFilter();
+/*			this.displayFilters();*/
 			this.displayGrid();
-			/*if(this.options.id){
-				this.detail.show(new LytSensorDetail({id : this.options.id}));
-				this.ui.detail.removeClass('hidden');
-			}*/
+			this.displayFilters(4);
+			console.log(this.com);
+			var callback = function(){
+				_this.filter();
+			};
+			this.grid.lastImportedUpdate(true, callback);
 		},
 
-		displayGrid: function(){
+		initGrid:function(){
 			var _this = this;
 			this.grid = new NsGrid({
 				pageSize: 13,
@@ -85,23 +87,26 @@ define([
 					_this.totalEntries(this.grid);
 				}
 			});
-
 			this.grid.rowClicked = function(args){
 				_this.rowClicked(args.row);
 			};
 			this.grid.rowDbClicked = function(args){
 				_this.rowDbClicked(args.row);
 			};
+		},
+
+		displayGrid: function(){
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
 		},
 
-		displayFilter: function(){
+		displayFilters: function(typeObj){
 			this.filters = new NsFilter({
 				url: config.coreUrl + 'stations/',
 				com: this.com,
 				name:'StationGrid',
-				filterContainer: 'filter',
+				typeObj: typeObj,
+				filterContainer: 'filters',
 			});
 		},
 
@@ -127,6 +132,7 @@ define([
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
 		},
+
 		totalEntries: function(grid){
 			this.total = grid.collection.state.totalRecords;
 			this.ui.totalEntries.html(this.total);
@@ -135,6 +141,34 @@ define([
 		useStation:function(){
 			this.detail.show(new LytReleaseIndiv({station:this.currentRow.model}));
 			this.ui.detail.removeClass('hidden');
+		},
+
+		displayTab : function(e){
+			var _this =this;
+			var type = $(e.target).attr('title');
+			$('.tab-ele').removeClass('active');
+			var typeObj;
+			$(e.target).parent().addClass('active');
+
+			var url =config.coreUrl+'stations/';
+			var params = null;
+
+			if( type == 'allSt' ){
+				type = false;
+				typeObj=1;
+			}else{
+				type = true;
+				typeObj= 4;
+			}
+			/*$('#filters').empty();*/
+			/*this.grid.filterCriteria = {};*/
+			/*this.com.components = [];*/
+			/*_this.displayFilters(typeObj);*/
+			var callback = function(){
+				_this.filter();
+			};
+			this.grid.lastImportedUpdate(type, callback);
+
 		}
 
 	});
