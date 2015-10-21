@@ -200,8 +200,6 @@ define([
 						'criteria': this.queryParams.criteria.call(this),
 					};
 
-
-
 					if (ctx.init) {
 						ctx.updateMap(params);
 						
@@ -247,6 +245,7 @@ define([
 						if(_this.onceFetched)
 						_this.onceFetched();
 					},
+
 
 				},
 			});
@@ -307,6 +306,7 @@ define([
 			else {
 				this.filterCriteria = JSON.stringify(args.filters);
 				this.fetchCollection({ init: false });
+
 			}
 		},
 		fetchCollection: function (callbock) {
@@ -323,7 +323,7 @@ define([
 					} else {
 						delete this.collection.queryParams['lastImported'];
 					}
-					this.grid.collection.fetch({
+					this.deffered = this.grid.collection.fetch({
 						reset: true, 
 						data: { 'criteria': this.filterCriteria }, 
 						success: function () {

@@ -30,7 +30,6 @@ define([
 			'click table.backgrid td.select-row-cell input[type=checkbox]' : 'checkSelect',
 			'click table.backgrid th input' : 'checkSelectAll',
 			'click button#validate' : 'validate',
-			'click button#back' : 'back',
 			'change select#frequency' : 'updateFrequency',
 
 			'click #prevDataSet' : 'prevDataSet',
@@ -44,6 +43,7 @@ define([
 			'map':'#map',
 			'indForm': '#indForm',
 			'sensorForm': '#sensorForm',
+			'frequency': 'select#frequency',
 
 			'dataSetIndex': '#dataSetIndex',
 			'dataSetTotal': '#dataSetTotal',
@@ -55,29 +55,14 @@ define([
 
 			this.indId = options.indId;
 			this.sensorId = parseInt(options.sensorId);
+			this.parentGrid = options.parentGrid;
 
 			this.com = new Com();
 			this.model = new Backbone.Model();
 
-			this.initGrid();
-		},
+			this.initNavBar(this.parentGrid);
 
-
-		initGrid: function(){
-			var _this = this;
-			this.globalGrid = new NsGrid({
-				pagingServerSide: false,
-				columns : [],
-				pageSize: 20,
-				url: config.coreUrl+'sensors/'+this.type+'/uncheckedDatas',
-				totalElement : 'totalEntries',
-				customClientSide: function(){
-					_this.initNavBar(this.collection.fullCollection);
-					//risky : the DOM could be not yet loaded
-					_this.ui.dataSetTotal.html(_this.coll.size());
-					_this.ui.dataSetIndex.html(_this.dataSetIndex+1);
-				},
-			});
+			this.frequency = options.frequency;
 		},
 
 		onRender: function(){
@@ -130,26 +115,41 @@ define([
 		},
 
 		onShow : function(){
+			var _this = this;
+			this.ui.dataSetTotal.html(this.coll.size());
+			this.ui.dataSetIndex.html(this.dataSetIndex+1);
 
 			if(this.indId == 'null' || !this.indId) this.indId = 'none';
 			if(this.indId == 'none'){
 				this.swal({ title : 'No individual attached'}, 'warning');
+				this.ui.indForm.html('<br />&nbsp;&nbsp;&nbsp;<span class="bull-warn">●</span>No individual is attached');
 			}else{
-				this.indId
-				this.displayIndForm();
+				//this.displayIndForm();
 			}
 			this.displayGrid();
 			this.displayMap();
-			this.displaySensorForm();
+			//this.displaySensorForm();
+
+
+			$.when( this.map.deffered, this.grid.deffered ).done( function() {
+				_this.initFrequency();
+			});
 		},
 
-		back: function(){
-			Backbone.history.navigate('validate/' + this.type, {trigger: true});
+
+		//initialize the frequency
+		initFrequency: function(){
+			console.log(this.frequency);
+			if(this.frequency && this.frequency != 'all'){
+				this.ui.frequency.find('option[value="' + this.frequency + '"]').prop('selected', true);
+			}else{
+				this.frequency = this.ui.frequency.val();
+			}
+
+			this.perHour(this.frequency);
+
 		},
 
-		setFrequency: function(e){
-			this.frequency = $(e.target).val();
-		},
 
 		displayGrid: function(){
 			var myCell = Backgrid.NumberCell.extend({
@@ -291,7 +291,6 @@ define([
 			this.ui.paginator.html(this.grid.displayPaginator());
 		},
 
-
 		//should be in the grid module
 		checkSelect: function (e) {
 			var id = $(e.target).parent().parent().find('td').html();
@@ -346,7 +345,7 @@ define([
 			});
 		},
 
-		roundDate : function (date, duration) { 
+		roundDate : function (date, duration) {
 			return moment(Math.floor((+date)/(+duration)) * (+duration));
 		},
 
@@ -355,6 +354,7 @@ define([
 			var _this = this;
 			var origin = this.grid.grid.collection.fullCollection.clone();
 			frequency = parseInt(frequency);
+
 			if (frequency !='all'){
 				var col0 = origin.at(0);
 				var date = new moment(col0.get('date'));
@@ -370,6 +370,7 @@ define([
 				}
 					this.grid.interaction('selectionMultiple', ids);
 				} else {
+
 				}
 		},
 
@@ -444,7 +445,7 @@ define([
 			}
 			
 			Swal({
-				title: opt.title || 'error',
+				title: opt.title || opt.responseText || 'error',
 				text: opt.text || '',
 				type: type,
 				showCancelButton: false,
