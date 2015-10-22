@@ -11,7 +11,7 @@ define([
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
 	'SensorPicker',
-	'requirejs-text!modules/release/templates/tpl-sensor-picker.html'
+	'requirejs-text!modules/release/templates/tpl-sensor-picker.html',
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
@@ -42,6 +42,7 @@ define([
 			'filters': '#indiv_filters',
 			'detail': '#detail',
 			'totalEntries': '#totalEntries',
+			'nbSelected': '#nbSelected'
 		},
 
 		regions: {
@@ -97,7 +98,7 @@ define([
 
 			var _this = this;
 			this.grid = new myGrid({
-				pageSize: 1000,
+				pageSize: 1400,
 				pagingServerSide: false,
 				com: this.com,
 				url: config.coreUrl+'release/individuals/',
@@ -114,6 +115,10 @@ define([
 			this.grid.rowDbClicked = function(args){
 				_this.rowDbClicked(args.row);
 			};
+
+			this.grid.collection.on('backgrid:selected', function(model, selected) { 
+				_this.updateSelectedRow();
+			});
 		},
 
 		displayGrid: function(){
@@ -136,6 +141,19 @@ define([
 			}
 			row.$el.addClass('active');
 			this.currentRow = row;
+		},
+
+		rowDbClicked:function(row){
+			this.currentRow = row;
+			var curModel = row.model;
+			curModel.trigger("backgrid:select", curModel, true);
+
+		},
+		updateSelectedRow:function(){
+			var mds = this.grid.grid.getSelectedModels();
+			var nbSelected = mds.length;
+			console.log(nbSelected);
+			this.$el.find(this.ui.nbSelected).html(nbSelected);
 		},
 
 		filter: function(){
