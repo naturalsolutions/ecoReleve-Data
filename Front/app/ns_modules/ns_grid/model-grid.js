@@ -33,6 +33,9 @@ define([
 			}
 
 			this.onceFetched = options.onceFetched;
+			if(options.customClientSide){
+				this.customClientSide = options.customClientSide;
+			}
 
 			if (options.rowClicked) {
 				var clickFunction = options.rowClicked.clickFunction
@@ -197,15 +200,12 @@ define([
 						'criteria': this.queryParams.criteria.call(this),
 					};
 
-
-
 					if (ctx.init) {
 						ctx.updateMap(params);
 						
 					}
 					ctx.init = true;
 					options.success = function(){
-						
 						if(ctx.onceFetched){
 							ctx.onceFetched(params);
 						}
@@ -226,6 +226,9 @@ define([
 		},
 
 		initCollectionPaginableClient: function () {
+			var ctx = this;
+			var _this = this;
+
 			var PageCollection = PageColl.extend({
 				url: this.url,
 				mode: 'client',
@@ -237,9 +240,27 @@ define([
 					criteria: function () {
 						return JSON.stringify(this.searchCriteria);
 					},
-				},
-			});
+					//wrong
+					success: function(){
+						if(_this.onceFetched)
+						_this.onceFetched();
+					},
 
+
+				},
+				fetch: function (options) {
+					ctx.fetchingCollection(options);
+					var params = {
+						'criteria': this.queryParams.criteria.call(this),
+					};
+					options.success = function(){
+						if(ctx.onceFetched){
+							ctx.onceFetched(params);
+						}
+					};
+					PageColl.prototype.fetch.call(this, options);
+				}
+			});
 			this.collection = new PageCollection();
 		},
 
@@ -296,6 +317,7 @@ define([
 			else {
 				this.filterCriteria = JSON.stringify(args.filters);
 				this.fetchCollection({ init: false });
+
 			}
 		},
 		fetchCollection: function (callbock) {
@@ -312,25 +334,31 @@ define([
 					} else {
 						delete this.collection.queryParams['lastImported'];
 					}
-					this.grid.collection.fetch({
+					this.deffered = this.grid.collection.fetch({
 						reset: true, 
 						data: { 'criteria': this.filterCriteria }, 
 						success: function () {
 							if(_this.totalElement){
 								_this.affectTotalRecords();
+
 							}
+							//mj 20/10/2015
+							_this.customClientSide();
 						}
 					});
 				}
-
 			}
 			
 			else {
-
-				this.grid.collection.fetch({ reset: true, success: function () { 
-				/*_this.collectionFetched(options);*/ } });
+				this.grid.collection.fetch({ reset: true });
 			}
 		},
+
+		customClientSide: function(){
+
+		},
+
+
 		displayGrid: function () {
 			return this.grid.render().el;
 		},
@@ -356,7 +384,6 @@ define([
 					$('#' + this.totalElement).html(this.grid.collection.length);
 				}
 			}
-			
 		},
 
 		setTotal: function () {

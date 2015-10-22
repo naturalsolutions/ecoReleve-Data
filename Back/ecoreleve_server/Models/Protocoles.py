@@ -34,7 +34,8 @@ class Observation(Base,ObjectWithDynProp):
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
     creationDate = Column(DateTime,default = func.now())
     Parent_Observation = Column(Integer,ForeignKey('Observation.ID'))
-    Fk_Indiv = Column(Integer,ForeignKey('Individual.ID'))
+
+    FK_Individual = Column(Integer,ForeignKey('Individual.ID'))
 
     Observation_children = relationship("Observation", cascade="all, delete-orphan")
     DynPropValues = relationship("ObservationDynPropValue", cascade="all, delete-orphan")

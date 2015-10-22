@@ -19,6 +19,7 @@ define(['marionette', 'config',
 	'./modules/validate/lyt-sensorValidate',
 	'./modules/validate/lyt-sensorValidateType',
 	'./modules/validate/lyt-sensorValidateDetail',
+	'./modules/release/layouts/lyt-release-station',
 
 ],function( Marionette, config, 
 	LytHome,
@@ -36,7 +37,9 @@ define(['marionette', 'config',
 	LytMonitoredSite,
 	LytSensorValidate,
 	LytSensorValidateType,
-	LytSensorValidateDetail
+	LytSensorValidateDetail,
+
+	LytReleaseStation
 
 ){
 	'use strict';
@@ -83,10 +86,6 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytIndividual({id : id}));
 		},
 
-		indiv : function(id){
-			this.rgMain.show(new LytIndividual({id: id}));
-		},
-
 		sensor : function(id){
 			this.rgMain.show(new LytSensor({id: id}));
 		},
@@ -105,12 +104,17 @@ define(['marionette', 'config',
 			}));
 		},
 
-		validateDetail: function(type, indId, sensorId){
+/*		validateDetail: function(type, indId, sensorId, frequency){
 			this.rgMain.show(new LytSensorValidateDetail({
 				type : type,
 				indId : indId,
-				sensorId : sensorId
+				sensorId : sensorId,
+				frequency: frequency
 			}));
+		},*/
+
+		release: function(){
+			this.rgMain.show(new LytReleaseStation());
 		},
 
 	});

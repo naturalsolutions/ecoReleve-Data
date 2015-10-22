@@ -10,7 +10,9 @@ define([
 	'ns_grid/model-grid',
 	'ns_modules/ns_com',
 
-], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com){
+	'./lyt-sensorValidateDetail'
+
+], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com, LytSensorValidateDetail){
 
 	'use strict';
 
@@ -20,12 +22,13 @@ define([
 		===================================================*/
 
 		template: 'app/modules/validate/templates/tpl-sensorValidateType.html',
-		className: 'full-height animated',
+		className: 'full-height animated rel',
 
 		events : {
 			'click button#autoValidate' : 'autoValidate',
 			'change select#frequency' : 'setFrequency',
 			'click button#back' : 'back',
+			'click button#hideDetail' : 'hideDetail',
 		},
 
 		ui: {
@@ -33,6 +36,11 @@ define([
 			'paginator': '#paginator',
 			'totalEntries': '#totalEntries',
 			'frequency': 'select#frequency',
+			'detail': '#detail',
+		},
+
+		regions: {
+			'rgDetail' : '#detail'
 		},
 
 		initialize: function(options){
@@ -42,7 +50,11 @@ define([
 		},
 
 		back: function(){
-			Backbone.history.history.back();
+			Backbone.history.navigate('validate', {trigger: true});
+		},
+
+		hideDetail: function(){
+			this.ui.detail.addClass('hidden');
 		},
 
 		onRender: function(){
@@ -50,26 +62,23 @@ define([
 		},
 
 		onShow : function(){
-
 			this.ui.frequency.find('option[value="all"]').prop('selected', true);
-
 			switch(this.type_){
 				case 'rfid':
 					this.ui.frequency.find('option[value="60"]').prop('selected', true);
+
 					this.cols = [
 						{
 							name: 'UnicName',
 							label: 'UnicName ID',
 							editable: false,
 							cell : 'string'
-
 						},{
 							name: 'FK_Sensor',
 							label: 'FK_Sensor',
 							editable: false,
 							renderable: false,
 							cell : 'string'
-
 						},{
 							name: 'equipID',
 							label: 'equipID',
@@ -132,7 +141,15 @@ define([
 							name: 'FK_Individual',
 							label: 'Individual ID',
 							editable: false,
-							cell : 'string'
+							cell : 'string',
+							formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+								fromRaw: function (rawValue, model) {
+										if (rawValue==null) {
+											rawValue='<span class="bull-warn">&#x25cf;</span> No Individual attached !';
+										}
+									 return rawValue;
+								  }
+							}),
 						},{
 							name: 'FK_ptt',
 							label: 'Unique',
@@ -179,7 +196,15 @@ define([
 							name: 'FK_Individual',
 							label: 'Individual ID',
 							editable: false,
-							cell : 'string'
+							cell : 'string',
+							formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+								fromRaw: function (rawValue, model) {
+										if (rawValue==null) {
+											rawValue='<span class="bull-warn">&#x25cf;</span> No Individual attached !';
+										}
+									return rawValue;
+								}
+							}),
 						},{
 							name: 'FK_ptt',
 							label: 'Unique',
@@ -220,57 +245,8 @@ define([
 					];
 					break;
 				default:
-					
+					console.warn('type error');
 					break;
-			}
-
-			if(this.type_ == 'rfid'){
-				
-			}else{
-				this.cols = [
-					{
-						name: 'FK_Individual',
-						label: 'Individual ID',
-						editable: false,
-						cell : 'string'
-					},{
-						name: 'FK_ptt',
-						label: 'Unique',
-						editable: false,
-						cell : 'string'
-					}, {
-						name: 'nb',
-						label: 'NB',
-						editable: false,
-						cell: 'string'
-					}, {
-						name: 'StartDate',
-						label: 'Start equipment',
-						editable: false,
-						cell: 'string',
-					}, {
-						name: 'EndDate',
-						label: 'End equipment',
-						editable: false,
-						cell: 'string',
-					}, {
-						name: 'min_date',
-						label: 'Data from',
-						editable: false,
-						cell: 'string',
-					}, {
-						name: 'min_date',
-						label: 'Data To',
-						editable: false,
-						cell: 'string',
-					}, {
-						editable: true,
-						name: 'import',
-						label: 'IMPORT',
-						cell: 'select-row',
-						headerCell: 'select-all'
-					}
-				];
 			}
 
 			this.displayGrid();
@@ -279,6 +255,7 @@ define([
 
 		setFrequency: function(e){
 			this.frequency = $(e.target).val();
+
 		},
 
 		displayGrid: function(){
@@ -289,7 +266,6 @@ define([
 				pageSize: 20,
 				com: this.com,
 				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
-				urlParams : this.urlParams,
 				rowClicked : true,
 				totalElement : 'totalEntries',
 			});
@@ -307,14 +283,26 @@ define([
 			var row = args.row;
 			var evt = args.evt;
 
-			var id = row.model.get('FK_Individual');
-			var ptt = row.model.get('FK_ptt');
+			var indId = row.model.get('FK_Individual');
+			var sensorId = row.model.get('FK_ptt');
 
 
 			if(!$(evt.target).is('input')){
-				if(id == null) id = 'none';
 
-				Backbone.history.navigate('validate/' + this.type_ + '/' + id + '/' + ptt, {trigger: true});
+				this.rgDetail.show(new LytSensorValidateDetail({
+					type : this.type_,
+					indId : indId,
+					sensorId : sensorId,
+					frequency: this.frequency,
+					parentGrid: this.grid.collection.fullCollection
+				}));
+
+				this.ui.detail.removeClass('hidden');
+				/*var url = 'validate/' + this.type_ + '/' + indId + '/' + sensorId;
+				if(this.frequency && this.frequency != 'all'){
+					url += '/' + this.frequency;
+				}
+				Backbone.history.navigate(url, {trigger: false});*/
 			}
 		},
 
@@ -324,6 +312,9 @@ define([
 				'toValidate': []
 			};
 			var tmp = {};
+			if(!this.grid.grid.getSelectedModels().length){
+				return;
+			}
 
 			if(this.type_ == 'rfid'){
 				_.each(this.grid.grid.getSelectedModels(), function(model){
@@ -349,13 +340,14 @@ define([
 				data : params,
 				context: this
 			}).done(function(resp) {
+				console.log(resp);
+				resp.title='Succes';
 				this.swal(resp, 'success');
 				this.displayGrid();
 			}).fail(function(resp) {
 				this.swal(resp, 'error');
 			});
 		},
-
 
 		swal: function(opt, type){
 			var btnColor;
@@ -374,8 +366,6 @@ define([
 					break;
 			}
 
-			console.log(opt);
-			
 			Swal({
 				title: opt.title || 'error',
 				text: opt.text || '',
@@ -386,7 +376,6 @@ define([
 				closeOnConfirm: true,
 			},
 			function(isConfirm){
-
 			});
 		},
 

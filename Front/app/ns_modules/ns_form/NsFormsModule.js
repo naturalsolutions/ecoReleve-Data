@@ -28,6 +28,7 @@ define([
 		regions: {
 			nsFormButtonRegion: '#NsFormButton'
 		},
+
 		initialize: function (options) {
 			//TODO Gestion Fields/Get à partir de la même url  
 
@@ -90,6 +91,7 @@ define([
 				this.initModel();
 			}
 		},
+
 		initModel: function (mode) {
 			//Initialisation du model et sema depuis l'url
 			var dipsMode = 'display';
@@ -161,6 +163,7 @@ define([
 				}));
 			}*/
 		},
+
 		showForm: function () {
 			this.BBForm = new this.BackboneFormsModel({ model: this.model });
 			this.BBForm.render();
@@ -193,6 +196,7 @@ define([
 			});*/
 			$('input.timeInput').attr('placeholder' ,'hh:mm');
 		},
+
 		createAutocompTree : function(e){
 			//var startId = $(e.target).attr('startId');
 			var elementsList = $('.autocompTree');
@@ -219,7 +223,6 @@ define([
 			}
 		},
 
-
 		/*
 		gethtml: function () {
 			this.BBForm = new BackboneForm({ model: this.model });
@@ -228,13 +231,12 @@ define([
 			//this.displaybuttons();
 			return formContent;
 		},
-
 		getbuttonhtml: function () {
 			this.displaybuttons();
 			return this.template;
 		},
-
 		*/
+
 		displaybuttons: function () {
 			if (this.displayMode == 'edit') {
 				$('#' + this.buttonRegion).find('#NsFormModuleSave').attr('style', 'display:');
@@ -245,13 +247,15 @@ define([
 				$('#' + this.buttonRegion).find('#NsFormModuleSave').attr('style', 'display:none');
 				$('#' + this.buttonRegion).find('#NsFormModuleClear').attr('style', 'display:none');
 				$('#' + this.buttonRegion).find('#NsFormModuleEdit').attr('style', 'display:');
-			} 
-		   // $('#' + this.buttonRegion).on('click #NsFormModuleSave', this.butClickSave);
+			}
+			// $('#' + this.buttonRegion).on('click #NsFormModuleSave', this.butClickSave);
+
 			$('#NsFormModuleSave').click($.proxy(this.butClickSave, this));
 			$('#NsFormModuleEdit').click($.proxy(this.butClickEdit, this));
 			$('#NsFormModuleClear').click($.proxy(this.butClickClear, this));
-		   
+		
 		},
+
 		butClickSave: function (e) {
 			//e.preventDefault();
 			// TODO gérer l'appel AJAX
@@ -299,6 +303,7 @@ define([
 			}
 			return false;
 		},
+
 		butClickEdit: function (e) {
 			e.preventDefault();
 			this.displayMode = 'edit';

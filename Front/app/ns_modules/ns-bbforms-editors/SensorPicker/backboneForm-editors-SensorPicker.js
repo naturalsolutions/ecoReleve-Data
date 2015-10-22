@@ -23,7 +23,7 @@ define([
 		events: {
 			'click span.picker': 'showPicker',
 			'click #btnFilter' : 'filter',
-			'click .cancel' : 'hidePicker',
+			'click #cancel' : 'hidePicker',
 		},
 
 		initialize: function(options) {
@@ -48,11 +48,11 @@ define([
 				rowClicked : true,
 			});
 
-			this.grid.rowClicked = function(row){
-				_this.rowClicked(row);
+			this.grid.rowClicked = function(args){
+				_this.rowClicked(args.row);
 			};
-			this.grid.rowDbClicked = function(row){
-				_this.rowDbClicked(row);
+			this.grid.rowDbClicked = function(args){
+				_this.rowDbClicked(args.row);
 			};
 			
 			var gridCont = this.$el.find('#grid')[0];

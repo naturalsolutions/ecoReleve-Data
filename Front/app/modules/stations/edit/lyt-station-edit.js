@@ -173,7 +173,7 @@ define([
 				typeObj=1;
 			}else{
 				type = true;
-				typeObj= 2;
+				typeObj= 4;
 			}
 			//this.initGrid(url, params);
 			// this.grid.fetchCollection(url, params);

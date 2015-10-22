@@ -153,12 +153,15 @@ define([
 			switch(stationType){
 				case '#stWithCoords':
 					stTypeId = 1;
+					$('#getCurrentPosition').removeClass('hidden');
 					break;
 				case '#stWithoutCoords':
 					stTypeId = 3;
+					$('#getCurrentPosition').addClass('hidden');
 					break;
 				case '#stFromMS':
 					stTypeId = 4;
+					$('#getCurrentPosition').removeClass('hidden');
 				default:
 					break;
 			}
@@ -187,6 +190,5 @@ define([
 			
 			this.rdy = this.nsForm.jqxhr;
 		},
-
 	});
 });
