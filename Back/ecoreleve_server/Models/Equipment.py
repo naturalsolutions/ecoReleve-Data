@@ -130,10 +130,11 @@ def receive_set(target, value, oldvalue, initiator):
     print('****************event ********************')
     print(target.Station)
     typeName = target.GetType().Name
-    deploy = True
+    
 
-    if 'equip' in typeName.lower():
+    if 'equipment' in typeName.lower():
         equipDate = target.Station.StationDate
+        deploy = target.GetProperty('Deploy')
         try :
             fk_sensor = target.GetProperty('FK_Sensor') 
         except :
@@ -148,14 +149,9 @@ def receive_set(target, value, oldvalue, initiator):
             fk_site = target.GetProperty('FK_MonitoredSite')
         except :
             fk_site = None
-        if 'unequip' in typeName.lower():
-            deploy = False
-            availability = checkUnequip(fk_sensor,equipDate,fk_indiv=fk_indiv)
-        else :
-            availability = checkEquip(fk_sensor,equipDate,fk_indiv=fk_indiv)
 
         if isinstance(availability,bool):
-            curEquip = Equipment(Observation= target, FK_Sensor = fk_sensor, StartDate = equipDate,FK_Individual = fk_indiv, Deploy = deploy)    #, FK_MonitoredSite = fk_site)
+            curEquip = Equipment(Observation= target, FK_Sensor = fk_sensor, StartDate = equipDate,FK_Individual = fk_indiv,  FK_MonitoredSite = fk_site, Deploy = deploy)    #, FK_MonitoredSite = fk_site)
             target.Equipment = curEquip
         else : 
             raise(ErrorAvailable(availability))

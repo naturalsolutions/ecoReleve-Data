@@ -28,7 +28,6 @@ class ListObjectWithDynProp():
         self.Conf = frontModule.ModuleGrids
         self.vAliasList = {}
         self.optionView = View
-
         self.history = history
 
     def GetDynPropValueView (self): 
@@ -60,9 +59,8 @@ class ListObjectWithDynProp():
         self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
 
         for objConf in self.GetAllPropNameInConf() :
+            print(objConf.Name)
             curDynProp = self.GetDynProp(objConf.Name)
-            # print('********* curDynProp ')
-            # print(curDynProp)
             if objConf.Name in self.fk_list and objConf.QueryName is not None:
                 tableRef = self.fk_list[objConf.Name].column.table
                 nameRef = self.fk_list[objConf.Name].column.name
@@ -156,6 +154,7 @@ class ListObjectWithDynProp():
                 if x['name'] == curProp:
                     curDynProp = x
             if curDynProp == None:
+                print(curProp)
                 print('Prop dyn inconnue')
                     # Gerer l'exception
             else :
