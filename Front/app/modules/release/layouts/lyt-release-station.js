@@ -32,9 +32,11 @@ define([
 			'click #btnFilter' : 'filter',
 			'click button#clear' : 'clearFilter',
 			'click .tab-link' : 'displayTab',
-			'click #useStation' : 'useStation'
-		},
+			'click #useStation' : 'useStation',
+			'click #back' : 'hideDetails',
 
+		},
+		
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
@@ -126,7 +128,7 @@ define([
 
 		rowDbClicked : function(row){
 			this.rowClicked(row);
-			this.parent.next();
+			this.useStation();
 		},
 
 		hideDetails : function(){
@@ -135,7 +137,7 @@ define([
 
 		totalEntries: function(grid){
 			this.total = grid.collection.state.totalRecords;
-			this.ui.totalEntries.html(this.total);
+			$(this.ui.totalEntries).html(this.total);
 		},
 
 		useStation:function(){
@@ -146,9 +148,9 @@ define([
 		displayTab : function(e){
 			var _this =this;
 			var type = $(e.target).attr('title');
-			$('.tab-ele').removeClass('active');
+			$('.tab-ele').removeClass('activeTab');
 			var typeObj;
-			$(e.target).parent().addClass('active');
+			$(e.target).parent().addClass('activeTab');
 
 			var url =config.coreUrl+'stations/';
 			var params = null;
