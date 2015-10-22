@@ -54,6 +54,20 @@ def getFields(request) :
         ModuleType = 'IndivReleaseGrid'
     cols = Individual().GetGridFields(ModuleType)
     cols.append({
+        'name': 'unicSensorName',
+        'label': '| Sensor',
+        'editable': False,
+        'renderable': True,
+        'cell' : 'string'
+        })
+    cols.append({
+        'name': 'FK_Sensor',
+        'label': '| FK_Sensor',
+        'editable': False,
+        'renderable': False,
+        'cell' : 'string'
+        })
+    cols.append({
         'name' :'import',
         'label' : 'import',
         'renderable': True,
@@ -61,6 +75,7 @@ def getFields(request) :
         'cell' : 'select-row',
         'headerCell': 'select-all'
         })
+    
     transaction.commit()
     return cols
 
@@ -88,7 +103,7 @@ def searchIndiv(request):
     }]
     searchInfo['criteria'].extend(criteria)
 
-    ModuleType = 'IndivFilter'
+    ModuleType = 'IndivReleaseGrid'
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     listObj = IndividualList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
@@ -106,25 +121,27 @@ def releasePost(request):
     data = request.params.mixed()
     sta_id = int(data['StationID'])
     indivList = json.loads(data['IndividualList'])
-    curStation = DBSession.query(Station).get(sta_id)
     # releaseMethod = data['releaseMethod']
     releaseMethod = None
     taxon = indivList[0]['Species']
     print(indivList)
-    class protocolList :
+    # class protocolList :
 
-        def __init__(self,typeID):
-            self.typeID = typeID
-            self.list_ = []
+    #     def __init__(self,typeID):
+    #         self.typeID = typeID
+    #         self.list_ = []
 
-        def new(self):
-            return Observation(FK_ProtocoleType=self.typeID)
+    #     def new(self):
+    #         return Observation(FK_ProtocoleType=self.typeID)
 
-        def getList(self):
-            return self.list_
+    #     def getList(self):
+    #         return self.list_
 
-        def add(self,obs):
-            self.list_.append(obs)
+    #     def add(self,obs):
+    #         self.list_.append(obs)
+
+    def getnewObs(typeID):
+        return Observation(FK_ProtocoleType=typeID)
 
     protoTypes = pd.DataFrame(DBSession.execute(select([ProtocoleType])).fetchall(), columns = ProtocoleType.__table__.columns.keys())
     vertebrateGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate group','ID'].values[0])
@@ -134,13 +151,15 @@ def releasePost(request):
     releaseIndID = int(protoTypes.loc[protoTypes['Name'] == 'Release Individual','ID'].values[0])
     equipmentIndID = int(protoTypes.loc[protoTypes['Name'] == 'Individual equipment','ID'].values[0])
 
-    vertebrateGrp = Observation(FK_ProtocoleType=vertebrateGrpID)
-    releaseGrp = Observation(FK_ProtocoleType=releaseGrpID)
+    # vertebrateIndList = protocolList(vertebrateIndID)
+    # biometryList = protocolList(biometryID)
+    # releaseIndList = protocolList(releaseIndID)
+    # equipmentIndList = protocolList(equipmentIndID)
 
-    vertebrateIndList = protocolList(vertebrateIndID)
-    biometryList = protocolList(biometryID)
-    releaseIndList = protocolList(releaseIndID)
-    equipmentIndList = protocolList(equipmentIndID)
+    vertebrateIndList = []
+    biometryList = []
+    releaseIndList = []
+    equipmentIndList = []
 
     binaryDict = {
     9: 'nb_adult_indeterminate',
@@ -188,49 +207,81 @@ def releasePost(request):
         curIndiv.LoadNowValues()
         curIndiv.UpdateFromJson(indiv)
 
-        indiv['FK_Individual'] = indiv['ID']
-        indiv['FK_Station'] = curStation.ID
-
         binList.append(MoF_AoJ(indiv))
+        for k in indiv.keys():
+            v = indiv.pop(k)
+            k = k.lower()
+            indiv[k] = v
+        
+        print(indiv)
+        indiv['FK_Individual'] = indiv['id']
+        indiv['FK_Station'] = sta_id
+        indiv['taxon'] = indiv['species']
+        indiv['weight'] = indiv['poids']
+        
         # here add info for Vetebrate individual protocol
-        curVertebrateInd = vertebrateIndList.new()
+        print('\n\n########### Vetebrate individual protocol')
+        curVertebrateInd = getnewObs(vertebrateIndID)
         curVertebrateInd.UpdateFromJson(indiv)
+        vertebrateIndList.append(curVertebrateInd)
+        print('FK_Individual : '+str(curVertebrateInd.FK_Individual))
+        print(curVertebrateInd.PropDynValuesOfNow)
 
         # here add info for Bird Biometry protocol
-        curBiometry = biometryList.new()
+        print('\n\n########### Bird Biometry protocol')
+        curBiometry = getnewObs(biometryID)
         curBiometry.UpdateFromJson(indiv)
-        biometryList.add(curBiometry)
+        print('FK_Individual : '+str(curVertebrateInd.FK_Individual))
+        print(curBiometry.PropDynValuesOfNow)
+        biometryList.append(curBiometry)
 
         # here add info for Release Individual protocol
-        curReleaseInd = releaseIndList.new()
+        print('\n\n########### Release Individual protocol')
+        curReleaseInd = getnewObs(releaseIndID)
         curReleaseInd.UpdateFromJson(indiv)
-        releaseIndList.add(curReleaseInd)
+        releaseIndList.append(curReleaseInd)
+        print('FK_Individual : '+str(curVertebrateInd.FK_Individual))
+        print(curReleaseInd.PropDynValuesOfNow)
 
+        print(indiv)
         # here add info for Individual Equipment protocol
-        # if isinstance(indiv['FK_Sensor'], int):
-        #     curEquipmentInd = equipmentIndList.new()
-        #     curEquipmentInd.UpdateFromJson(indiv)
-        #     equipmentIndList.add(curEquipmentInd)
+        try:
+                indiv['FK_Sensor'] = int(indiv['FK_Sensor'])
+                indiv['Deploy'] = True
+                curEquipmentInd = getnewObs(equipmentIndID)
+                curEquipmentInd.UpdateFromJson(indiv)
+                equipmentIndList.append(curEquipmentInd)
+        except Exception as e:
+            print_exc()
+            pass
 
-    
+    vertebrateGrp = Observation(FK_ProtocoleType=vertebrateGrpID)
+    releaseGrp = Observation(FK_ProtocoleType=releaseGrpID)
+
     dictVertGrp = dict(Counter(binList))
     dictVertGrp['taxon'] = taxon
-    print(dictVertGrp)
+    print('\n\n########### Vetebrate Group protocol')
     vertebrateGrp.UpdateFromJson(dictVertGrp)
+    print(vertebrateGrp.PropDynValuesOfNow)
+    
     releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod})
-
-    vertebrateGrp.Observation_children.extend(vertebrateIndList.getList())
-    releaseGrp.Observation_children.extend(releaseIndList.getList())
+    print('\n\n########### Release Group protocol')
+    print(releaseGrp.PropDynValuesOfNow)
+    vertebrateGrp.Observation_children.extend(vertebrateIndList)
+    releaseGrp.Observation_children.extend(releaseIndList)
 
     listObs = []
     listObs.append(vertebrateGrp)
     listObs.append(releaseGrp)
-    listObs.extend(biometryList.getList())
+    listObs.extend(biometryList)
+    listObs.extend(equipmentIndList)
+    # print(biometryList.getList())
     # finally append all Protocols to Station
-    print(listObs)
-    # curStation.Observations
+    print(equipmentIndList)
+    # curStation = DBSession.query(Station).get(sta_id)
+    # curStation.Observations.extend(listObs)
 
-    # transaction.commit()
+    transaction.commit()
 
     return {}
     # return {'release':len(releaseIndList.getList())}

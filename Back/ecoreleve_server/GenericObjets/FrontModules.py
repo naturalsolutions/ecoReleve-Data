@@ -179,7 +179,7 @@ class ModuleGrids (Base) :
         ''' return grid field to build Grid '''
         column = {
         'name' :self.FKName(),
-        'label' : self.Label,
+        'label' : '| '+self.Label,
         'renderable': isRenderable(self.GridRender),
         'editable': isEditable(self.GridRender),
         'cell' : self.CellType,
