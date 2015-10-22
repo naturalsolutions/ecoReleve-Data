@@ -12,10 +12,11 @@ define([
 	'ns_filter/model-filter',
 	'./lyt-indiv-details',
 	'./lyt-new-individual',
-	'ns_modules/ns_toolbar/lyt-toolbar'
+	'ns_modules/ns_toolbar/lyt-toolbar',
+	'./view-indivDetails'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv,Toolbar
+	Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv,Toolbar,IndivDetails
 ){
 
 	'use strict';
@@ -63,7 +64,8 @@ define([
 		onShow : function(){
 			// to integrate the toolbar, create a layout for the content of the modal windows
 			// Be carreful, we provide LytNewIndiv and not his instance (new) !!!
-			var toolbar = new Toolbar({content : LytNewIndiv, modalTitle : 'New individual' });
+			var itemsNewIndiv = [{ "label": "Individual", "val": 1 },{ "label": "Group", "val": 2 }];
+			var toolbar = new Toolbar({content : LytNewIndiv, modalTitle : 'New individual', detailsView : IndivDetails, items : itemsNewIndiv });
 			this.toolbar.show(toolbar);
 
 			this.displayFilter();
