@@ -10,9 +10,12 @@ define([
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
-	'ns_modules/ns_toolbar/lyt-toolbar'
+	'SensorPicker',
+	'requirejs-text!modules/release/templates/tpl-sensor-picker.html'
+
+
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter,Toolbar
+	Com, NsGrid, NsFilter, SensorPicker,tplSensorPicker
 ){
 
 	'use strict';
@@ -29,7 +32,8 @@ define([
 			'click #btnFilter' : 'filter',
 			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
-			'click #release' : 'release'
+			'click #release' : 'release',
+			'click #addSensor' : 'addSensor',
 		},
 
 		ui: {
@@ -41,15 +45,41 @@ define([
 		},
 
 		regions: {
-			detail : '#detail',
-			toolbar : '#toolbar'
+			modal : '#modal',
 		},
 
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
 			this.station = options.station;
+			var _this = this;
+			var mySensorPicker = SensorPicker.extend({
+				initialize: function(options) {
+					var template =  _.template(tplSensorPicker);
+					this.$el.html(template);
+					this.com = new Com();
+					this.displayGrid();
+					this.displayFilter();
+					this.translater = Translater.getTranslater();
+				},
+				rowClicked: function(row){
+					var id = row.model.get('ID');
+					var unicName = row.model.get('UnicName');
+					_this.currentRow.model.set({unicSensorName:unicName});
+					this.setValue(id);
+				},
+				getValue: function() {
+				},
+				setValue: function(value) {
+					_this.currentRow.model.set({FK_Sensor:value});
+					console.log(_this.currentRow.model);
+					this.hidePicker();
+				},
+			});
+			this.sensorPicker = new mySensorPicker();
+			this.sensorPicker.render();
 
+			this.initGrid();
 		},
 
 		onRender: function(){
@@ -61,24 +91,35 @@ define([
 			this.displayGrid(); 
 		},
 
-		displayGrid: function(){
+		initGrid:function(){
+			var myGrid = NsGrid.extend({
+			});
+
 			var _this = this;
-			this.grid = new NsGrid({
-				pageSize: 13,
+			this.grid = new myGrid({
+				pageSize: 1000,
 				pagingServerSide: false,
 				com: this.com,
 				url: config.coreUrl+'release/individuals/',
 				urlParams : this.urlParams,
-				rowClicked : false,
+				rowClicked : true,
 				totalElement : 'totalEntries',
 				onceFetched: function(params){
-					console.log('fetched')
 					_this.totalEntries(this.grid);
 				}
 			});
+			this.grid.rowClicked = function(args){
+				_this.rowClicked(args.row);
+			};
+			this.grid.rowDbClicked = function(args){
+				_this.rowDbClicked(args.row);
+			};
+		},
 
+		displayGrid: function(){
+			
 			this.ui.grid.html(this.grid.displayGrid());
-			this.ui.paginator.html(this.grid.displayPaginator());
+/*			this.ui.paginator.html(this.grid.displayPaginator());*/
 		},
 
 		displayFilter: function(){
@@ -89,6 +130,14 @@ define([
 			});
 		},
 
+		rowClicked: function(row){
+			if(this.currentRow){
+				this.currentRow.$el.removeClass('active');
+			}
+			row.$el.addClass('active');
+			this.currentRow = row;
+		},
+
 		filter: function(){
 			this.filters.update();
 		},
@@ -97,13 +146,11 @@ define([
 			this.filters.reset();
 		},
 
-		hideDetails : function(){
-			this.ui.detail.addClass('hidden');
-		},
 		totalEntries: function(grid){
 			this.total = grid.collection.state.totalRecords;
 			console.log(this.total)
-			this.ui.totalEntries.html(this.total);
+			console.log(this.ui.totalEntries)
+			$(this.ui.totalEntries).html(this.total);
 		},
 		release:function(){
 			var mds = this.grid.grid.getSelectedModels();
@@ -120,6 +167,15 @@ define([
 				data : { IndividualList : JSON.stringify(col),StationID:this.station.get('ID'),releaseMethod: _this.releaseMethod },
 				context: this,
 			});
+		},
+
+		addSensor:function(){
+			this.modal.show(this.sensorPicker);
+			this.sensorPicker.showPicker();
+		},
+
+		hidePicker:function(){
+			this.sensorPicker.hidePicker();
 		}
 	});
 });
