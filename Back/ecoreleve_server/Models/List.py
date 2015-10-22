@@ -13,12 +13,14 @@ from ..Models import (
     Observation,
     Station,
     Station_FieldWorker,
-    User
+    User,
+    Individual,
+    Base
     )
 from ecoreleve_server.utils import Eval
 import pandas as pd 
 from collections import OrderedDict
-
+from datetime import datetime
 
 eval_ = Eval()
 
@@ -85,3 +87,30 @@ class StationList(ListObjectWithDynProp):
                 query = self.WhereInJoinTable(query,obj)
         return query
 
+
+#--------------------------------------------------------------------------
+class IndividualList(ListObjectWithDynProp):
+
+    def __init__(self,frontModule) :
+        super().__init__(Individual,frontModule)
+
+    def WhereInJoinTable (self,query,criteriaObj) :
+        query = super().WhereInJoinTable(query,criteriaObj)
+        curProp = criteriaObj['Column']
+        if curProp == 'LastImported':
+            st = aliased(Individual)
+            subSelect = select([Observation]).where(Observation.FK_Individual == Individual.ID)
+            subSelect2 = select([cast(func.max(st.creationDate),DATE)]).where(st.Original_ID.like('TRACK_%'))
+            query = query.where(and_(~exists(subSelect)
+                ,and_(~exists(subSelect)
+                    ,and_(Individual.Original_ID.like('TRACK_%'),Individual.creationDate >= subSelect2)
+                    )
+                ))
+        return query
+
+    def countQuery(self,criteria = None):
+        query = super().countQuery(criteria)
+        for obj in criteria :
+            if obj['Column'] in ['LastImported']:
+                query = self.WhereInJoinTable(query,obj)
+        return query

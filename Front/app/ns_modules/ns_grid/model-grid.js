@@ -226,9 +226,9 @@ define([
 		},
 
 		initCollectionPaginableClient: function () {
-
-
+			var ctx = this;
 			var _this = this;
+
 			var PageCollection = PageColl.extend({
 				url: this.url,
 				mode: 'client',
@@ -248,8 +248,19 @@ define([
 
 
 				},
+				fetch: function (options) {
+					ctx.fetchingCollection(options);
+					var params = {
+						'criteria': this.queryParams.criteria.call(this),
+					};
+					options.success = function(){
+						if(ctx.onceFetched){
+							ctx.onceFetched(params);
+						}
+					};
+					PageColl.prototype.fetch.call(this, options);
+				}
 			});
-
 			this.collection = new PageCollection();
 		},
 

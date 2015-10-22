@@ -32,6 +32,8 @@ class Individual (Base,ObjectWithDynProp) :
     Death_date = Column(DateTime)
     Original_ID = Column(String)
     FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
+    Original_ID = Column(String(100))
+    Caisse_ID = Column(String(50))
 
     IndividualDynPropValues = relationship('IndividualDynPropValue',backref='Individual',cascade="all, delete-orphan")
     Locations = relationship('Individual_Location')
