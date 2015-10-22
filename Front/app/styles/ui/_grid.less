@@ -7,6 +7,7 @@
 }
 
 table.backgrid{
+
 	thead{
 		background: #ccc;
 		tr:hover{
@@ -20,7 +21,7 @@ table.backgrid{
 	tr{
 		cursor: pointer;
 		&.active{
-			background: #dff0d8;
+			background: #C7C7C7;
 		}
 		&:hover{
 			background: #ddd;
@@ -43,6 +44,33 @@ table.backgrid{
 	}
 }
 
+
+.full-border{
+	table.backgrid{
+		td{
+			border: 1px solid #B1B1B1 ;
+		}
+		tr{
+			&.active{
+				td{
+					border: 1px solid white ;
+				}
+			}
+		}
+	}
+}
+
+.enhanced-grid{
+	table.backgrid{
+		th{
+			padding: 10px 0px !important;
+		}
+
+		thead{
+			background: transparent;
+		}
+	}
+}
 /* .dark table.backgrid{
 	color: #C0C0C0;
 	th a{
@@ -56,3 +84,46 @@ table.backgrid{
 	color: black;
 }
 
+.grid-padding{
+	padding-left:15px;
+	padding-right: 15px;
+}
+
+.select-row-cell {
+	border: transparent !important;
+	padding-left: 10px !important;
+}
+
+.select-all-header-cell input[type="Checkbox"] {
+	transform: scale(1.5);
+    padding-left: 10px;
+    margin-left: 10px;
+}
+
+.fit-grid{
+	    height: calc(~"100% - 180px");
+    	overflow: auto;
+}
+
+#grid.ns-fit{
+	position: relative;
+    height: 100%;
+}
+
+.ns-actions {
+    border-bottom: 1px solid;
+    margin-bottom: 10px;
+    padding: 15px 0px;
+
+    legend{ 
+		margin:0;
+    }
+    button{
+    	height:30px;
+    	margin-right:10px;
+    }
+}
+
+.activeTab{
+    	border-bottom: 5px solid grey;
+    	}
