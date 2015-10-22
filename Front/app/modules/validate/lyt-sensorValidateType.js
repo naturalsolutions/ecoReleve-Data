@@ -281,9 +281,9 @@ define([
 				totalElement : 'totalEntries',
 			});
 
-			this.grid.rowClicked = function(row){
+			this.grid.rowClicked = function(args){
 				if(_this.type_ != 'rfid')
-					_this.rowClicked(row);
+					_this.rowClicked(args);
 			};
 
 			this.ui.grid.html(this.grid.displayGrid());
@@ -291,6 +291,7 @@ define([
 		},
 
 		rowClicked: function(args){
+			var _this = this;
 			var row = args.row;
 			var evt = args.evt;
 
@@ -299,7 +300,7 @@ define([
 			var sensorId = row.model.get('FK_Sensor');
 
 			if(!$(evt.target).is('input')){
-				this.rgDetail.show(new LytSensorValidateDetail({
+				_this.rgDetail.show(new LytSensorValidateDetail({
 					type : this.type_,
 					indId : indId,
 					pttId : pttId,
@@ -309,11 +310,6 @@ define([
 				}));
 
 				this.ui.detail.removeClass('hidden');
-				/*var url = 'validate/' + this.type_ + '/' + indId + '/' + pttId;
-				if(this.frequency && this.frequency != 'all'){
-					url += '/' + this.frequency;
-				}
-				Backbone.history.navigate(url, {trigger: false});*/
 			}
 		},
 
@@ -351,7 +347,6 @@ define([
 				data : params,
 				context: this
 			}).done(function(resp) {
-				console.log(resp);
 				resp.title='Succes';
 				this.swal(resp, 'success');
 				this.displayGrid();

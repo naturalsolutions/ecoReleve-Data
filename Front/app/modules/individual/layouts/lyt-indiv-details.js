@@ -63,7 +63,6 @@ define([
 		},
 
 		navigateNext: function(){
-			console.log(this.parentColl);
 			//this.parentColl.getPage(2);
 			if(this.coll){
 				if(this.modelIndex < this.coll.size()-1){
@@ -76,7 +75,6 @@ define([
 					}else{
 						tmp = 0;
 					}
-					console.log(tmp);
 					this.parentColl.getPage(tmp);
 					/*
 					this.listenToOnce(this.parentColl, 'change', function(){
@@ -234,7 +232,6 @@ define([
 			this.nsform = new NsForm({
 				name: 'IndivForm',
 				modelurl: config.coreUrl+'individuals',
-				buttonRegion: [],
 				formRegion: this.ui.form,
 				buttonRegion: [this.ui.formBtns],
 				displayMode: 'display',
@@ -358,7 +355,6 @@ define([
 				});
 		},
 		updateLocalData :function(data,nav,currentPage){
-			//console.log(data);
 			var storedList = window.app.listProperties;
 			//get list of ids for the new page elements
 			var idList = [];

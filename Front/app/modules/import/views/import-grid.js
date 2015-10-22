@@ -127,7 +127,6 @@ define([
 		},
 
 		focus: function (e) {
-			console.log(e);
 			if ($(e.target).is('td')) {
 				var tr = $(e.target).parent();
 				var id = tr.find('td').first().text();

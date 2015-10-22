@@ -76,7 +76,6 @@ define([
 				this.ui.detail.removeClass('hidden');
 			}
 
-			console.log(this.grid.paginator);
 
 		},
 
@@ -105,7 +104,6 @@ define([
 					window.app.listProperties = listPro ;
 					_this.totalEntries(this.grid);
 
-					//console.log(idList);
 					/*window.app.temp = this;
 
 					_this.totalEntries(this.grid);

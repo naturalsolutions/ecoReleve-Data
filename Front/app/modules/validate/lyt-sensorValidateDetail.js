@@ -20,22 +20,20 @@ define([
 		/*===================================================
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
-
 		template: 'app/modules/validate/templates/tpl-sensorValidateDetail.html',
+		
 		className: 'full-height animated white',
-
-		events : {
+		
+		events: {
 			'click button#autoValidate' : 'autoValidate',
-			'change select#frequency' : 'setFrequency',
 			'click table.backgrid td.select-row-cell input[type=checkbox]' : 'checkSelect',
 			'click table.backgrid th input' : 'checkSelectAll',
 			'click button#validate' : 'validate',
-			'change select#frequency' : 'updateFrequency',
-
 			'click #prevDataSet' : 'prevDataSet',
-			'click #nextDataSet' : 'nextDataSet'
+			'click #nextDataSet' : 'nextDataSet',
+			'change select#frequency' : 'updateFrequency' // <= bug ie
 		},
-
+		
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
@@ -48,7 +46,8 @@ define([
 			'dataSetIndex': '#dataSetIndex',
 			'dataSetTotal': '#dataSetTotal',
 		},
-
+		
+		
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.type = options.type;
@@ -111,7 +110,6 @@ define([
 			this.map.destroy();
 			this.ui.map.html('');
 			this.onShow();
-			Backbone.history.navigate('validate/' + this.type + '/' + this.indId + '/' + this.pttId, {trigger: false});
 		},
 
 		onShow : function(){
@@ -132,7 +130,9 @@ define([
 
 
 			$.when( this.map.deffered, this.grid.deffered ).done( function() {
-				_this.initFrequency();
+				setTimeout(function(){
+					_this.initFrequency();
+				},100)
 			});
 		},
 
@@ -140,11 +140,11 @@ define([
 		//initialize the frequency
 		initFrequency: function(){
 			if(this.frequency && this.frequency != 'all'){
-				console.log(this.frequency);
 				this.ui.frequency.find('option[value="' + this.frequency + '"]').prop('selected', true);
 			}else{
 				this.frequency = this.ui.frequency.val();
 			}
+
 
 			this.perHour(this.frequency);
 
@@ -234,7 +234,7 @@ define([
 				pagingServerSide: false,
 				columns : cols,
 				com: this.com,
-				pageSize: 20,
+				pageSize: 1000,
 				url: url,
 				urlParams : this.urlParams,
 				rowClicked : false,
@@ -261,9 +261,10 @@ define([
 			this.grid.selectMultiple = function (ids) {
 				var model_ids = ids, self = this, mod;
 				for (var i = 0; i < model_ids.length; i++) {
+
 					mod = this.grid.collection.findWhere({ PK_id: model_ids[i] });
-					mod.set('import', true);
 					mod.trigger("backgrid:select", mod, true);
+					mod.set('import', true);
 				};
 			};
 
@@ -357,6 +358,7 @@ define([
 
 			if (frequency !='all'){
 				var col0 = origin.at(0);
+
 				var date = new moment(col0.get('date'));
 				var groups = origin.groupBy(function(model){
 					var curr = new moment(model.get('date'));
@@ -460,6 +462,6 @@ define([
 				}
 			});
 		},
-
+	
 	});
 });

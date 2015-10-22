@@ -105,7 +105,6 @@ define([
 
 		displayStation: function(stationId){
 			this.total = 0;
-			console.log(stationId);
 			var stationType = 1;
 			var _this = this;
 			this.nsForm = new NsForm({
@@ -181,11 +180,9 @@ define([
 				var prev = mod._previousAttributes.total;
 				this.total -= prev;
 				if(Number.isInteger(mod.get('total'))){
-					console.log('test');
 
 					this.total += (prev+1)
 				}else{
-					console.log('test');
 					this.total += (prev-1);
 				}
 			}else{
@@ -201,7 +198,6 @@ define([
 		},
 		
 		onProtoDestroy: function(){
-			console.log('destroy');
 		},
 		
 		onProtoAdd: function(mod){

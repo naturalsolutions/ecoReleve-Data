@@ -24,12 +24,9 @@ define([
 		},
 
 		initialize: function(options) {
-			console.log('options',options);
 			Form.editors.Base.prototype.initialize.call(this, options);
 			this.template = options.template || this.constructor.template;
 			this.options = options;
-			console.log('this',this);
-			console.log('options',options);
 			//Passer ça en template
 			this._input = $('<input type="hidden" name="'+this.options.key+'" />');
 			this._uploadInput = $('<input type="file" multiple="multiple" id="'+this.id+'"/>');
@@ -99,7 +96,6 @@ define([
 					this._removeBtn.show();
 				}
 			}
-			console.log(this.options);
 		},
 		removeFile: function(eventType){
 			//Tester la valeur de l'id
