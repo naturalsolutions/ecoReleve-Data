@@ -137,6 +137,7 @@ define([
 				case 'gsm':
 					this.ui.frequency.find('option[value="60"]').prop('selected', true);
 					this.cols = [
+
 						{
 							name: 'FK_Individual',
 							label: 'Individual ID',
@@ -150,6 +151,11 @@ define([
 									 return rawValue;
 								  }
 							}),
+						},{
+							name: 'FK_Sensor',
+							label: 'FK_Sensor',
+							editable: false,
+							cell : 'string'
 						},{
 							name: 'FK_ptt',
 							label: 'Unique',
@@ -206,6 +212,12 @@ define([
 								}
 							}),
 						},{
+							name: 'FK_Sensor',
+							label: 'Sensor',
+							editable: false,
+							renderable: false,
+							cell : 'string'
+						},{
 							name: 'FK_ptt',
 							label: 'Unique',
 							editable: false,
@@ -255,7 +267,6 @@ define([
 
 		setFrequency: function(e){
 			this.frequency = $(e.target).val();
-
 		},
 
 		displayGrid: function(){
@@ -284,21 +295,21 @@ define([
 			var evt = args.evt;
 
 			var indId = row.model.get('FK_Individual');
-			var sensorId = row.model.get('FK_ptt');
-
+			var pttId = row.model.get('FK_ptt');
+			var sensorId = row.model.get('FK_Sensor');
 
 			if(!$(evt.target).is('input')){
-
 				this.rgDetail.show(new LytSensorValidateDetail({
 					type : this.type_,
 					indId : indId,
-					sensorId : sensorId,
+					pttId : pttId,
+					sensorId: sensorId,
 					frequency: this.frequency,
 					parentGrid: this.grid.collection.fullCollection
 				}));
 
 				this.ui.detail.removeClass('hidden');
-				/*var url = 'validate/' + this.type_ + '/' + indId + '/' + sensorId;
+				/*var url = 'validate/' + this.type_ + '/' + indId + '/' + pttId;
 				if(this.frequency && this.frequency != 'all'){
 					url += '/' + this.frequency;
 				}

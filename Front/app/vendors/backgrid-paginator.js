@@ -178,6 +178,7 @@
       }
 
       this.delegateEvents();
+      
       return this;
     },
 
@@ -405,7 +406,6 @@
       }
 
       this.el.appendChild(ul);
-
       return this;
     }
 
