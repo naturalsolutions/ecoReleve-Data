@@ -56,7 +56,6 @@ define([
 				dataToPush.push(model.toJSON());
 			});
 			// send filtred collection to the server
-			console.log(filteredCollection);
 			var url=config.coreUrl + 'stations/';
 			var result = false; 
 			$.ajax({
@@ -68,7 +67,6 @@ define([
 				dataType : 'json',
 				async: false,
 				success: function(resp){
-					console.log(resp);
 					var typeAlert = 'success';
 					var storedCollection = new Waypoints();
 					storedCollection.fetch();

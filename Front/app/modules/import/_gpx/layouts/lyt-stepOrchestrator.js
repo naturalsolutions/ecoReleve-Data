@@ -10,7 +10,6 @@ define([
 
 		initialize :function () {
 			StepperOrchestrator.prototype.initialize.apply(this, arguments);
-			console.log('init GPX stepper');
 
 		},
 		onShow: function(){

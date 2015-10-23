@@ -108,7 +108,6 @@ function(_, Marionette) {
 			// we are only changing the view if there is a view to change to begin with
 			var isChangingView = !!this.currentView;
 
-			// console.log(view.animateIn);
 
 			// The region is only animating if there's an animateIn method on the new view
 			var animatingIn = _.isFunction(view.animateIn);

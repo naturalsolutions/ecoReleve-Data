@@ -435,7 +435,6 @@ define([
 			return;
 		},
 		updateQuery : function(e){
-			console.log(this);
 			if (e.keyCode === 13) {
 				e.preventDefault();
 				this.update();

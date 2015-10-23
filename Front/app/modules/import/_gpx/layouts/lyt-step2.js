@@ -37,7 +37,6 @@ define([
 		initialize :function () {
 			var self = this ;
 			Step.prototype.initialize.apply(self, arguments);
-			console.log('init GPX stepp 1 ');
 			this.collection =  new Backbone.Collection();
 			
 
@@ -46,7 +45,6 @@ define([
 			this.collection.fetch({ 
 				success : function (data) {
 					/*_.each(data, function (FA) {
-						console.log(FA);
 					})*/
 				for (var i in data.models ) {
 					var current = data.models[i];

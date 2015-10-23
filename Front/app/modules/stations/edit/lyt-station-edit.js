@@ -180,7 +180,6 @@ define([
 			$('#filters').empty();
 
 			_this.displayFilters(typeObj);
-			console.log(this.com);
 			var callback = function(){
 				_this.filter();
 			};

@@ -47,25 +47,78 @@ define([
 		},
 
 		initialize: function(options){
-
-
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
-			
 
-			this.indivId = parseInt(options.id);
+			this.model = options.model;
+
+			this.parentColl = options.parentColl;
+			
+			this.initNavBar(options.parentColl);
 		},
+
+		initNavBar: function(coll){
+			this.modelIndex = coll.indexOf(this.model);
+			this.coll = coll;
+		},
+
+		navigateNext: function(){
+			//this.parentColl.getPage(2);
+			if(this.coll){
+				if(this.modelIndex < this.coll.size()-1){
+					this.modelIndex++;
+				}else{
+					this.modelIndex = 0;
+					if(this.parentColl.state.currentPage != this.parentColl.state.lastPage){
+						var tmp = this.parentColl.state.currentPage;
+						tmp++;
+					}else{
+						tmp = 0;
+					}
+					this.parentColl.getPage(tmp);
+					/*
+					this.listenToOnce(this.parentColl, 'change', function(){
+					})
+					*/
+
+				}
+				this.reloadView(this.modelIndex);
+			}
+		},
+
+		navigatePrev: function(){
+			if(this.coll){
+				if(this.modelIndex != 0){
+					this.modelIndex--;
+				}else{
+					this.modelIndex = this.coll.size()-1;
+				}
+				this.reloadView(this.modelIndex);
+			}
+		},
+
+		reloadView: function(modelIndex){
+			this.model = this.coll.at(modelIndex);
+			this.map.destroy();
+			this.ui.map.html('');
+			this.onShow();
+		},
+
 
 		onRender: function(){
 			this.$el.i18n();
 		},
 
 		onShow : function(){
+			this.indivId = parseInt(this.model.get('ID'));
 			this.displayForm(this.indivId);
 			this.displayGrid(this.indivId);
 			this.displayMap();
 			$(this.ui.showHideCtr).html('<span class="glyphicon glyphicon-chevron-right big"></span><span class="ID rotate">ID : '+this.indivId+'</span>');
+
+
 		},
+
 
 		displayGrid: function(id){
 			var cols = [{
@@ -179,7 +232,6 @@ define([
 			this.nsform = new NsForm({
 				name: 'IndivForm',
 				modelurl: config.coreUrl+'individuals',
-				buttonRegion: [],
 				formRegion: this.ui.form,
 				buttonRegion: [this.ui.formBtns],
 				displayMode: 'display',
@@ -217,6 +269,9 @@ define([
 				}
 		},
 
+
+
+		/*
 
 		navigatePrev : function() {
 			var selectedList  = window.app.listProperties;
@@ -295,20 +350,11 @@ define([
 							_this.updateLocalData(data,nav,currentPage);
 						},
 						error: function(data){
-							 /* Swal({
-										title: "Change individual",
-										text: 'Error to navigate to another individual.',
-										type: 'error',
-										showCancelButton: false,
-										confirmButtonColor: 'rgb(147, 14, 14)',
-										confirmButtonText: "OK",
-										closeOnConfirm: true
-								});*/
+
 						}
 				});
 		},
 		updateLocalData :function(data,nav,currentPage){
-			//console.log(data);
 			var storedList = window.app.listProperties;
 			//get list of ids for the new page elements
 			var idList = [];
@@ -337,5 +383,7 @@ define([
 			// update id displayed
 			$('span.ID').text('ID : '+id);
 		}
+		*/
+
 	});
 });

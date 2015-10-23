@@ -67,7 +67,6 @@ define([
 /*			this.displayFilters();*/
 			this.displayGrid();
 			this.displayFilters(4);
-			console.log(this.com);
 			var callback = function(){
 				_this.filter();
 			};
