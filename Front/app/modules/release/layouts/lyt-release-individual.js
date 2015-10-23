@@ -12,7 +12,7 @@ define([
 	'ns_filter/model-filter',
 	'SensorPicker',
 	'requirejs-text!modules/release/templates/tpl-sensor-picker.html',
-
+	'tooltipster-list',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
 	Com, NsGrid, NsFilter, SensorPicker,tplSensorPicker
@@ -32,7 +32,7 @@ define([
 			'click #btnFilter' : 'filter',
 			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
-			'click #release' : 'release',
+			'click #release' : 'toolTipShow',
 			'click #addSensor' : 'addSensor',
 		},
 
@@ -53,6 +53,8 @@ define([
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
 			this.station = options.station;
+			this.releaseMethod = null;
+
 			var _this = this;
 			var mySensorPicker = SensorPicker.extend({
 				initialize: function(options) {
@@ -89,6 +91,7 @@ define([
 		onShow : function(){
 			this.displayFilter();
 			this.displayGrid(); 
+			Backbone.history.navigate('release/individuals',{trigger:false});
 		},
 
 		initGrid:function(){
@@ -190,16 +193,11 @@ define([
 				resp.text = 'release: ' + resp.release;
 
 				//remove the model from the coll once this one is validated
-				
-
 				var callback = function(){
-					//prevent successive event handler
-					/*setTimeout(function(){
-						_this.nextDataSet();
-					}, 500);*/
+					Backbone.history.navigate('release', {trigger: true});
+					//$('#back').click();
 				};
 				this.swal(resp, resp.type, callback);
-
 
 			}).fail(function(resp) {
 				this.swal(resp, 'error');
@@ -236,17 +234,38 @@ define([
 				title: opt.title || opt.responseText || 'error',
 				text: opt.text || '',
 				type: type,
-				showCancelButton: false,
+				showCancelButton: true,
 				confirmButtonColor: btnColor,
-				confirmButtonText: 'OK',
+				confirmButtonText: 'New Release',
+				cancelButtonColor: 'grey',
+				cancelButtonText: 'Return to Home',
 				closeOnConfirm: true,
 			},
 			function(isConfirm){
 				//could be better
-				if(callback){
+				if(isConfirm && callback){
 					callback();
+				}else{
+					Backbone.history.navigate('*', {trigger: true});
 				}
 			});
+		},
+
+		toolTipShow:function(e){
+			var _this = this;
+			$(e.target).tooltipList({
+
+                position: 'top',
+                //  pass avalaible options
+                availableOptions: [{'label':'direct release','val':1},{'label':'direct release grid 5x5','val':2},],
+                //  li click event
+                liClickEvent: $.proxy(function (liClickValue, origin, tooltip) {
+                console.log(liClickValue);
+                _this.releaseMethod = liClickValue;
+                _this.release();
+                //console.log(origin);
+                }, this),
+            });
 		}
 	});
 });

@@ -146,7 +146,7 @@ define([
 
 		displayTab : function(e){
 			var _this =this;
-			var type = $(e.target).attr('title');
+			var type = $(e.target).attr('name');
 			$('.tab-ele').removeClass('activeTab');
 			var typeObj;
 			$(e.target).parent().addClass('activeTab');
