@@ -184,6 +184,31 @@ define([
 				method: 'POST',
 				data : { IndividualList : JSON.stringify(col),StationID:this.station.get('ID'),releaseMethod: _this.releaseMethod },
 				context: this,
+			}).done(function(resp) {
+				if(resp.errors){
+					resp.title = 'An error occured';
+					resp.type = 'error';
+				}else{
+					resp.title = 'Success';
+					resp.type = 'success';
+					
+				}
+				resp.text = 'release: ' + resp.release;
+
+				//remove the model from the coll once this one is validated
+				
+
+				var callback = function(){
+					//prevent successive event handler
+					/*setTimeout(function(){
+						_this.nextDataSet();
+					}, 500);*/
+				};
+				this.swal(resp, resp.type, callback);
+
+
+			}).fail(function(resp) {
+				this.swal(resp, 'error');
 			});
 		},
 
@@ -194,6 +219,40 @@ define([
 
 		hidePicker:function(){
 			this.sensorPicker.hidePicker();
+		},
+
+		swal: function(opt, type, callback){
+			var btnColor;
+			switch(type){
+				case 'success':
+					btnColor = 'green';
+					break;
+				case 'error':
+					btnColor = 'rgb(147, 14, 14)';
+					break;
+				case 'warning':
+					btnColor = 'orange';
+					break;
+				default:
+					return;
+					break;
+			}
+			
+			Swal({
+				title: opt.title || opt.responseText || 'error',
+				text: opt.text || '',
+				type: type,
+				showCancelButton: false,
+				confirmButtonColor: btnColor,
+				confirmButtonText: 'OK',
+				closeOnConfirm: true,
+			},
+			function(isConfirm){
+				//could be better
+				if(callback){
+					callback();
+				}
+			});
 		}
 	});
 });
