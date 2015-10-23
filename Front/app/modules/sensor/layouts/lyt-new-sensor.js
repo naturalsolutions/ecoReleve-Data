@@ -7,11 +7,10 @@ define([
 	'sweetAlert',
 	'translater',
 	'config',
-
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
-	'./view-newSensorData'
+	'./view-newSensorData',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
 	Com, NsGrid, NsFilter, SensorDetails
@@ -24,7 +23,7 @@ define([
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
 
-		template: 'app/modules/sensor/templates/tpl-modal.html',
+		template: 'app/modules/sensor/templates/tpl-newSensorDetails.html',
 		className: 'full-height animated white rel',
 
 		events : {
@@ -37,7 +36,7 @@ define([
 		},
 
 		regions: {
-			"details" : "#sensorDetails"
+			"details" : "#elemDetails"
 		},
 
 		initialize: function(options){

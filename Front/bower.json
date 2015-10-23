@@ -29,6 +29,8 @@
     "i18n": "https://github.com/jamuhl/i18next.git",
     "fancytree": "~2.9.0",
     "reneco-fonts": "*",
-    "floatThead" : "*"
+    "floatThead" : "*",
+	"tooltipster": "~3.3.0",
+ 	"tooltipster-list": "https://github.com/amiceli/tooltipster-list.git"
   }
 }
