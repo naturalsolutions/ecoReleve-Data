@@ -147,7 +147,6 @@ define([
 		},
 
 		refrechView : function(stationType){
-			console.log(stationType);
 			var stTypeId;
 			var _this = this;
 			switch(stationType){

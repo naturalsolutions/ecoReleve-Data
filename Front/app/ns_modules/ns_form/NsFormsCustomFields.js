@@ -85,7 +85,6 @@ define([
 		if( event.charCode != undefined ) {
 		  newVal = newVal + String.fromCharCode(event.charCode);
 		}
-		console.log('regex number');
 		var numeric = /^-?[0-9]*\.?[0-9]*?$/.test(newVal);
 
 		if (numeric) {

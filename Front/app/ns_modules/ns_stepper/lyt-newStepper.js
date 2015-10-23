@@ -234,7 +234,6 @@ define([
 		},
 
 		finished: function(){
-			console.log('finished');
 		},
 
 		quit: function(){

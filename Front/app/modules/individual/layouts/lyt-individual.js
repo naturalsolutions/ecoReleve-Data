@@ -75,6 +75,8 @@ define([
 				this.detail.show(new LytIndivDetail({id : this.options.id}));
 				this.ui.detail.removeClass('hidden');
 			}
+
+
 		},
 
 		displayGrid: function(){
@@ -102,7 +104,6 @@ define([
 					window.app.listProperties = listPro ;
 					_this.totalEntries(this.grid);
 
-					//console.log(idList);
 					/*window.app.temp = this;
 
 					_this.totalEntries(this.grid);
@@ -150,11 +151,14 @@ define([
 			this.filters.reset();
 		},
 		rowClicked: function(row){
-			var id = row.model.get('ID');
-			this.detail.show(new LytIndivDetail({id : id}));
+			//var id = row.model.get('ID');
+			this.detail.show(new LytIndivDetail({
+				model : row.model,
+				parentColl : this.grid.grid.collection
+			}));
 			this.ui.detail.removeClass('hidden');
 
-			Backbone.history.navigate('individual/'+id, {trigger: false});
+			//Backbone.history.navigate('individual/'+id, {trigger: false});
 		},
 
 		rowDbClicked: function(row){
