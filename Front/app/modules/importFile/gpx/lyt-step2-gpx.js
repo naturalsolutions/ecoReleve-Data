@@ -49,9 +49,6 @@ define([
 			this.deferred = $.Deferred();
 		},
 
-		check: function(){
-		},
-
 		onShow : function(){
 			this.displayGrid();
 			this.displayFilters();
@@ -149,8 +146,6 @@ define([
 					optionsList[i] = option;
 					option=[];
 				};
-				console.log('************optionsList*************');
-				console.log(optionsList);
 				var columns = [
 
 				{
@@ -226,7 +221,6 @@ define([
 		checkSelect: function (e) {
 			var id = $(e.target).parent().parent().find('td').html();
 			this.grid.interaction('selection', id);
-			console.log('selected');
 			if($(e.target).is(':checked')){
 				this.focus(e);
 			}
@@ -276,8 +270,6 @@ define([
 			Backbone.sync('create', coll, {
 				success: function(data){
 					_this.deferred.resolve();
-					console.log('success');
-					console.log(data);
 					var inserted = data.new;
 					var exisits = data.exist;
 					Swal({
@@ -294,7 +286,6 @@ define([
 					});
 				},
 				error: function(){
-					console.log('error');
 				},
 			});
 

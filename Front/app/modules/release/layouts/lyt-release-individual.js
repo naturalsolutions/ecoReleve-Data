@@ -73,7 +73,6 @@ define([
 				},
 				setValue: function(value) {
 					_this.currentRow.model.set({FK_Sensor:value});
-					console.log(_this.currentRow.model);
 					this.hidePicker();
 				},
 			});
@@ -152,7 +151,6 @@ define([
 		updateSelectedRow:function(){
 			var mds = this.grid.grid.getSelectedModels();
 			var nbSelected = mds.length;
-			console.log(nbSelected);
 			this.$el.find(this.ui.nbSelected).html(nbSelected);
 		},
 
@@ -166,8 +164,6 @@ define([
 
 		totalEntries: function(grid){
 			this.total = grid.collection.state.totalRecords;
-			console.log(this.total)
-			console.log(this.ui.totalEntries)
 			$(this.ui.totalEntries).html(this.total);
 		},
 		release:function(){
@@ -177,8 +173,6 @@ define([
 			}
 			var _this = this;
 			var col = new Backbone.Collection(mds);
-			console.log(col);
-			console.log(this.station.get('ID'))
 			$.ajax({
 				url: config.coreUrl + 'release/individuals/',
 				method: 'POST',

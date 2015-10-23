@@ -79,6 +79,7 @@ def add_routes(config):
     config.add_route('sensors/insert', 'ecoReleve-Core/sensors') 
     config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
     config.add_route('sensors/id', 'ecoReleve-Core/sensors/{id}',custom_predicates = (integers('id'),))
+    config.add_route('sensors/id/history', 'ecoReleve-Core/sensors/{id}/history',custom_predicates = (integers('id'),))
     config.add_route('sensors/action', 'ecoReleve-Core/sensors/{action}')
 
 

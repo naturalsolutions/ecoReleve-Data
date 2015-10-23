@@ -20,22 +20,20 @@ define([
 		/*===================================================
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
-
 		template: 'app/modules/validate/templates/tpl-sensorValidateDetail.html',
+		
 		className: 'full-height animated white',
-
-		events : {
+		
+		events: {
 			'click button#autoValidate' : 'autoValidate',
-			'change select#frequency' : 'setFrequency',
 			'click table.backgrid td.select-row-cell input[type=checkbox]' : 'checkSelect',
 			'click table.backgrid th input' : 'checkSelectAll',
 			'click button#validate' : 'validate',
-			'change select#frequency' : 'updateFrequency',
-
 			'click #prevDataSet' : 'prevDataSet',
-			'click #nextDataSet' : 'nextDataSet'
+			'click #nextDataSet' : 'nextDataSet',
+			'change select#frequency' : 'updateFrequency' // <= bug ie
 		},
-
+		
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
@@ -48,19 +46,20 @@ define([
 			'dataSetIndex': '#dataSetIndex',
 			'dataSetTotal': '#dataSetTotal',
 		},
-
+		
+		
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.type = options.type;
 
 			this.indId = options.indId;
+			this.pttId = parseInt(options.pttId);
 			this.sensorId = parseInt(options.sensorId);
-			this.parentGrid = options.parentGrid;
 
 			this.com = new Com();
 			this.model = new Backbone.Model();
 
-			this.initNavBar(this.parentGrid);
+			this.initNavBar(options.parentGrid);
 
 			this.frequency = options.frequency;
 		},
@@ -71,7 +70,7 @@ define([
 
 		initNavBar: function(coll){
 			var md = coll.findWhere({
-				'FK_ptt' : this.sensorId
+				'FK_ptt' : this.pttId
 			});
 
 			this.dataSetIndex = coll.indexOf(md);
@@ -105,13 +104,12 @@ define([
 			this.ui.dataSetIndex.html(this.dataSetIndex+1);
 
 			var md = this.coll.at(dataSetIndex);
-			this.sensorId = md.get('FK_ptt');
+			this.pttId = md.get('FK_ptt');
 			this.indId = md.get('FK_Individual');
 			this.com = new Com();
 			this.map.destroy();
 			this.ui.map.html('');
 			this.onShow();
-			Backbone.history.navigate('validate/' + this.type + '/' + this.indId + '/' + this.sensorId, {trigger: false});
 		},
 
 		onShow : function(){
@@ -122,29 +120,31 @@ define([
 			if(this.indId == 'null' || !this.indId) this.indId = 'none';
 			if(this.indId == 'none'){
 				this.swal({ title : 'No individual attached'}, 'warning');
-				this.ui.indForm.html('<br />&nbsp;&nbsp;&nbsp;<span class="bull-warn">●</span>No individual is attached');
+				this.ui.indForm.html('<span class="bull-warn">●</span>No individual is attached');
 			}else{
-				//this.displayIndForm();
+				this.displayIndForm();
 			}
 			this.displayGrid();
 			this.displayMap();
-			//this.displaySensorForm();
+			this.displaySensorForm();
 
 
 			$.when( this.map.deffered, this.grid.deffered ).done( function() {
-				_this.initFrequency();
+				setTimeout(function(){
+					_this.initFrequency();
+				},100)
 			});
 		},
 
 
 		//initialize the frequency
 		initFrequency: function(){
-			console.log(this.frequency);
 			if(this.frequency && this.frequency != 'all'){
 				this.ui.frequency.find('option[value="' + this.frequency + '"]').prop('selected', true);
 			}else{
 				this.frequency = this.ui.frequency.val();
 			}
+
 
 			this.perHour(this.frequency);
 
@@ -229,12 +229,12 @@ define([
 			}];
 
 			var url = config.coreUrl + 'sensors/' + this.type
-			+ '/uncheckedDatas/' + this.indId + '/' + this.sensorId;
+			+ '/uncheckedDatas/' + this.indId + '/' + this.pttId;
 			this.grid = new NsGrid({
 				pagingServerSide: false,
 				columns : cols,
 				com: this.com,
-				pageSize: 20,
+				pageSize: 1000,
 				url: url,
 				urlParams : this.urlParams,
 				rowClicked : false,
@@ -261,9 +261,10 @@ define([
 			this.grid.selectMultiple = function (ids) {
 				var model_ids = ids, self = this, mod;
 				for (var i = 0; i < model_ids.length; i++) {
+
 					mod = this.grid.collection.findWhere({ PK_id: model_ids[i] });
-					mod.set('import', true);
 					mod.trigger("backgrid:select", mod, true);
+					mod.set('import', true);
 				};
 			};
 
@@ -309,7 +310,7 @@ define([
 
 		displayMap: function(){
 			var url = config.coreUrl + 'sensors/' + this.type
-			+ '/uncheckedDatas/' + this.indId + '/' + this.sensorId + '?geo=true';
+			+ '/uncheckedDatas/' + this.indId + '/' + this.pttId + '?geo=true';
 			this.map = new NsMap({
 				url: url,
 				selection: true,
@@ -357,6 +358,7 @@ define([
 
 			if (frequency !='all'){
 				var col0 = origin.at(0);
+
 				var date = new moment(col0.get('date'));
 				var groups = origin.groupBy(function(model){
 					var curr = new moment(model.get('date'));
@@ -383,7 +385,7 @@ define([
 		validate: function(){
 			var _this = this;
 			var url = config.coreUrl + 'sensors/' + this.type
-			+ '/uncheckedDatas/' + this.indId + '/' + this.sensorId;
+			+ '/uncheckedDatas/' + this.indId + '/' + this.pttId;
 			var mds = this.grid.grid.getSelectedModels();
 			if(!mds.length){
 				return;
@@ -460,6 +462,6 @@ define([
 				}
 			});
 		},
-
+	
 	});
 });

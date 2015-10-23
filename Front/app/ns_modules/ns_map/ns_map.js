@@ -92,7 +92,6 @@ define([
 					this.selectAll();
 					break;
 				case 'filter':
-					console.log(params);
 					this.filter(params);
 					break;
 				default:

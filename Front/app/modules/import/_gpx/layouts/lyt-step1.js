@@ -19,7 +19,6 @@ define([
 		},
 		initialize :function () {
 			Step.prototype.initialize.apply(this, arguments);
-			console.log('init GPX stepp 1 ');
 
 		},
 		onShow: function(){

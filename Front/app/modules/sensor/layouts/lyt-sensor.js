@@ -11,10 +11,12 @@ define([
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
 	'./lyt-new-sensor', 
-	'./modal-region',
+	'ns_modules/ns_toolbar/lyt-toolbar',
+	'./view-newSensorData',
+	'./lyt-sensor-details'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, NewSensor,Modal
+	Com, NsGrid, NsFilter, LytNewSensor,Toolbar, NewSensorDetails, SensorDetails
 
 ){
 
@@ -34,7 +36,7 @@ define([
 			'click button#clear' : 'clearFilter',
 			'change select.FK_SensorType' : 'updateModels',
 			'click #btn-export' : 'exportGrid',
-			'click #createNew' : 'showModal'
+			//'click #createNew' : 'showModal'
 		},
 
 		ui: {
@@ -47,7 +49,7 @@ define([
 
 		regions: {
 			detail : '#detail',
-			newSensor : Modal
+			toolbar : '#toolbar'
 		},
 
 		initialize: function(options){
@@ -62,6 +64,9 @@ define([
 		},
 
 		onShow : function(){
+			
+			this.addToolbar();
+
 			this.displayFilter();
 			this.displayGrid(); 
 			if(this.options.id){
@@ -123,10 +128,10 @@ define([
 		},
 		rowClicked: function(args){
 			var id = args.row.model.get('ID');
-			//this.detail.show(new LytIndivDetail({id : id}));
-			//this.ui.detail.removeClass('hidden');
-
-			//Backbone.history.navigate('sensor/'+id, {trigger: false})
+			console.log(id);
+			this.detail.show(new SensorDetails({id : id}));
+			this.ui.detail.removeClass('hidden');
+			Backbone.history.navigate('sensor/'+id, {trigger: false})
 		},
 
 		rowDbClicked: function(row){
@@ -134,6 +139,7 @@ define([
 		},
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
+			Backbone.history.navigate('sensor');
 		},
 		totalEntries: function(grid){
 			this.total = grid.collection.state.totalRecords;
@@ -184,24 +190,37 @@ define([
 			$(elem).html(content);
 		},
 		exportGrid: function() {
-            $.ajax({
-                url: config.coreUrl + 'sensors/export',
-                data: JSON.stringify({criteria:this.filters.criterias}),
-                contentType:'application/json',
-                type:'POST'
-            }).done(function(data) {
-                var url = URL.createObjectURL(new Blob([data], {'type':'text/csv'}));
-                var link = document.createElement('a');
-                link.href = url;
-                link.download = 'sensors_export.csv';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
-        },
-    showModal : function(){
-			this.newSensor.show(new NewSensor({rg : this.newSensor}));
-		}
+      $.ajax({
+          url: config.coreUrl + 'sensors/export',
+          data: JSON.stringify({criteria:this.filters.criterias}),
+          contentType:'application/json',
+          type:'POST'
+      }).done(function(data) {
+          var url = URL.createObjectURL(new Blob([data], {'type':'text/csv'}));
+          var link = document.createElement('a');
+          link.href = url;
+          link.download = 'sensors_export.csv';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      });
+    },
+    addToolbar : function(){
+    	var self = this;
+    	$.ajax({
+        url: config.coreUrl + 'sensors/getSensorType',
+        contentType:'application/json',
+        type:'GET'
+      }).done(function(data) {
+					var toolbar = new Toolbar({content : LytNewSensor, modalTitle : 'New Sensor', detailsView : NewSensorDetails, items : data });
+					self.toolbar.show(toolbar);
+      });
+
+
+    }
+    /*showModal : function(){
+			//this.newSensor.show(new NewSensor({rg : this.newSensor}));
+		}*/
 
 	});
 });

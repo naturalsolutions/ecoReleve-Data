@@ -12,10 +12,11 @@ define([
 	'ns_filter/model-filter',
 	'./lyt-indiv-details',
 	'./lyt-new-individual',
-	'ns_modules/ns_toolbar/lyt-toolbar'
+	'ns_modules/ns_toolbar/lyt-toolbar',
+	'./view-indivDetails'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv,Toolbar
+	Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv,Toolbar,IndivDetails
 ){
 
 	'use strict';
@@ -66,7 +67,9 @@ define([
 			// to integrate the toolbar, create a layout for the content of the modal windows
 			// Be carreful, we provide LytNewIndiv and not his instance (new) !!!
 
-			var toolbar = new Toolbar({content : LytNewIndiv, modalTitle : 'New individual' });
+			var itemsNewIndiv = [{ "label": "Individual", "val": 1 },{ "label": "Group", "val": 2 }];
+			var toolbar = new Toolbar({content : LytNewIndiv, modalTitle : 'New individual', detailsView : IndivDetails, items : itemsNewIndiv });
+
 			this.toolbar.show(toolbar);
 
 			this.displayFilter();
@@ -75,6 +78,8 @@ define([
 				this.detail.show(new LytIndivDetail({id : this.options.id}));
 				this.ui.detail.removeClass('hidden');
 			}
+
+
 		},
 
 		displayGrid: function(){
@@ -102,7 +107,6 @@ define([
 					window.app.listProperties = listPro ;
 					_this.totalEntries(this.grid);
 
-					//console.log(idList);
 					/*window.app.temp = this;
 
 					_this.totalEntries(this.grid);
@@ -150,11 +154,14 @@ define([
 			this.filters.reset();
 		},
 		rowClicked: function(row){
-			var id = row.model.get('ID');
-			this.detail.show(new LytIndivDetail({id : id}));
+			//var id = row.model.get('ID');
+			this.detail.show(new LytIndivDetail({
+				model : row.model,
+				parentColl : this.grid.grid.collection
+			}));
 			this.ui.detail.removeClass('hidden');
 
-			Backbone.history.navigate('individual/'+id, {trigger: false});
+			//Backbone.history.navigate('individual/'+id, {trigger: false});
 		},
 
 		rowDbClicked: function(row){

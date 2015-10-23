@@ -64,7 +64,6 @@ define([
 		},
 
 		onShow : function(){
-			console.log('passed');
 			this.displayForm(this.monitoredSiteId);
 			this.displayGrid(this.monitoredSiteId);
 			this.displayMap();
@@ -85,26 +84,26 @@ define([
 			});
 
 			var colsEquip = [{
-                name: 'StartDate',
-                label: 'Start Date',
-                editable: false,
-                cell : 'string'
-            }, {
-                name: 'Type',
-                label: 'Type',
-                editable: false,
-                cell: 'string'
-            },{
-                name: 'UnicName',
-                label: 'Platform',
-                editable: false,
-                cell: 'string'
-            }, {
-                name: 'Deploy',
-                label: 'Status',
-                editable: false,
-                cell: 'string',
-            }, ];
+								name: 'StartDate',
+								label: 'Start Date',
+								editable: false,
+								cell : 'string'
+						}, {
+								name: 'Type',
+								label: 'Type',
+								editable: false,
+								cell: 'string'
+						},{
+								name: 'UnicName',
+								label: 'Platform',
+								editable: false,
+								cell: 'string'
+						}, {
+								name: 'Deploy',
+								label: 'Status',
+								editable: false,
+								cell: 'string',
+						}, ];
 			this.gridEquip = new NsGrid({
 				pageSize: 20,
 				columns : colsEquip,
@@ -152,7 +151,6 @@ define([
 			this.nsform = new NsForm({
 				name: 'IndivForm',
 				modelurl: config.coreUrl+'monitoredSite',
-				buttonRegion: [],
 				formRegion: this.ui.form,
 				buttonRegion: [this.ui.formBtns],
 				displayMode: 'display',
@@ -225,7 +223,7 @@ define([
 				this.updateIndivColl('next');
 			}
 		},
-	   updateIndivColl : function(nav){
+		 updateIndivColl : function(nav){
 			var _this = this;
 			//  call ajax to update data (next/ prev page on pagination)
 			// get url params to make ajax call
@@ -280,7 +278,6 @@ define([
 			});
 		},
 		updateLocalData :function(data,nav,currentPage){
-			//console.log(data);
 			var storedList = window.app.listProperties;
 			//get list of ids for the new page elements
 			var idList = [];
