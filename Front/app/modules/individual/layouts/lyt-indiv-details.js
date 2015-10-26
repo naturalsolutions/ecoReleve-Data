@@ -11,17 +11,15 @@ define([
 	'ns_grid/model-grid',
 	'ns_map/ns_map',
 	'ns_form/NSFormsModuleGit',
+	'ns_navbar/ns_navbar',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid,NsMap, NsForm
+	Com, NsGrid,NsMap, NsForm, Navbar
 ){
 
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-		/*===================================================
-		=            Layout Stepper Orchestrator            =
-		===================================================*/
 
 		template: 'app/modules/individual/templates/tpl-indiv-details.html',
 		className: 'full-height animated white',
@@ -29,8 +27,6 @@ define([
 		events : {
 			'click #hideIndivDetails' : 'hideDetail',
 			'click #showIndivDetails'  : 'showDetail',
-			'click #prev' : 'navigatePrev',
-			'click #next' : 'navigateNext',
 			'click .tab-link' : 'displayTab',
 		},
 		ui: {
@@ -46,79 +42,45 @@ define([
 			'formBtns' : '#formBtns'
 		},
 
+		regions: {
+			'rgNavbar': '#navbar'
+		},
+
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
 
 			this.model = options.model;
 
-			this.parentColl = options.parentColl;
-			
-			this.initNavBar(options.parentColl);
+			this.navbar = new Navbar({
+				parent: this,
+				globalGrid: options.globalGrid,
+				model: options.model,
+			});
 		},
 
-		initNavBar: function(coll){
-			this.modelIndex = coll.indexOf(this.model);
-			this.coll = coll;
-		},
-
-		navigateNext: function(){
-			//this.parentColl.getPage(2);
-			if(this.coll){
-				if(this.modelIndex < this.coll.size()-1){
-					this.modelIndex++;
-				}else{
-					this.modelIndex = 0;
-					if(this.parentColl.state.currentPage != this.parentColl.state.lastPage){
-						var tmp = this.parentColl.state.currentPage;
-						tmp++;
-					}else{
-						tmp = 0;
-					}
-					this.parentColl.getPage(tmp);
-					/*
-					this.listenToOnce(this.parentColl, 'change', function(){
-					})
-					*/
-
-				}
-				this.reloadView(this.modelIndex);
-			}
-		},
-
-		navigatePrev: function(){
-			if(this.coll){
-				if(this.modelIndex != 0){
-					this.modelIndex--;
-				}else{
-					this.modelIndex = this.coll.size()-1;
-				}
-				this.reloadView(this.modelIndex);
-			}
-		},
-
-		reloadView: function(modelIndex){
-			this.model = this.coll.at(modelIndex);
+		reloadFromNavbar: function(model){
 			this.map.destroy();
 			this.ui.map.html('');
-			this.onShow();
+			this.display(model);
 		},
-
 
 		onRender: function(){
 			this.$el.i18n();
 		},
 
 		onShow : function(){
+			this.rgNavbar.show(this.navbar);
+			this.display(this.model);
+		},
+
+		display: function(model){
+			this.model = model;
 			this.indivId = parseInt(this.model.get('ID'));
 			this.displayForm(this.indivId);
 			this.displayGrid(this.indivId);
 			this.displayMap();
-			$(this.ui.showHideCtr).html('<span class="glyphicon glyphicon-chevron-right big"></span><span class="ID rotate">ID : '+this.indivId+'</span>');
-
-
 		},
-
 
 		displayGrid: function(id){
 			var cols = [{
@@ -141,12 +103,9 @@ define([
 				pageSize: 20,
 				columns : cols,
 				pagingServerSide: false,
-				//com: this.com,
 				url: config.coreUrl+'individuals/' + id  + '/history',
 				urlParams : this.urlParams,
 				rowClicked : true,
-				//totalElement : 'indiv-count',
-				//name : 'IndivHistory'
 			});
 			var colsEquip = [{
 					name: 'StartDate',
@@ -173,19 +132,10 @@ define([
 				pageSize: 20,
 				columns : colsEquip,
 				pagingServerSide: false,
-				//com: this.com,
 				url: config.coreUrl+'individuals/' + id  + '/equipment',
 				urlParams : this.urlParams,
 				rowClicked : true,
-				//totalElement : 'indiv-count',
-				//name : 'IndivHistory'
 			});
-			// this.grid.rowClicked = function(row){
-			// 	_this.rowClicked(row);
-			// };
-			// this.grid.rowDbClicked = function(row){
-			// 	_this.rowDbClicked(row);
-			// };
 
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.gridEquipment.html(this.gridEquip.displayGrid());
@@ -268,122 +218,6 @@ define([
 					$(this.ui.mapContainer).addClass('col-md-7');
 				}
 		},
-
-
-
-		/*
-
-		navigatePrev : function() {
-			var selectedList  = window.app.listProperties;
-			if (this.indivId > selectedList.minId){
-				//get index of current element id in list of selected elements ids
-				var index = selectedList.idList.indexOf(this.indivId);
-				var prevId = selectedList.idList[(index-1)];
-		this.updateView(prevId);
-			}
-			else {
-				this.updateIndivColl('prev');
-			}
-		},
-		navigateNext : function() {
-			var selectedList  = window.app.listProperties;
-			if (this.indivId < selectedList.maxId){
-				//get index of current element id in list of selected elements ids
-				var index = selectedList.idList.indexOf(this.indivId);
-				var nextId = selectedList.idList[(index+1)];
-				this.updateView(nextId);
-			}
-			else {
-				this.updateIndivColl('next');
-			}
-		},
-
-
-		updateIndivColl : function(nav){
-			var _this = this;
-			//  call ajax to update data (next/ prev page on pagination)
-			// get url params to make ajax call
-			var storedList = window.app.listProperties;
-			var  nbPages  = storedList.state.totalPages;
-			var currentPage = storedList.state.currentPage;
-			var criteria = storedList.criteria;
-
-			switch(nav){
-				case 'next':
-					if(currentPage < nbPages){
-				currentPage +=1;
-					} else {
-				currentPage =1;
-					}
-					break;
-				case 'prev':
-					if(currentPage > 1){
-				currentPage -=1;
-					} else {
-				currentPage =nbPages;
-					}
-					break;
-
-				default:
-					break;
-			}
-			
-			var order_by = [];
-			var per_page = 20;
-			var offset = (currentPage-1) * per_page;
-
-			
-			var data = {
-				offset:offset,
-				per_page: per_page,
-				order_by: JSON.stringify(order_by),
-				criteria : JSON.stringify(criteria)
-			};
-			var url =  config.coreUrl+'individuals/'; //?offset=' + offset  + '&per_page=' + per_page  + '&order_by=%5B%5D';//+ '&order_by=' + order_by 
-			$.ajax({
-						url:url,
-						context:this,
-						type:'GET',
-						dataType:'json',
-						data : (data),
-						success: function(data){
-							_this.updateLocalData(data,nav,currentPage);
-						},
-						error: function(data){
-
-						}
-				});
-		},
-		updateLocalData :function(data,nav,currentPage){
-			var storedList = window.app.listProperties;
-			//get list of ids for the new page elements
-			var idList = [];
-			data[1].forEach(function(ele) {
-				idList.push(ele.ID);
-			});
-			idList.sort();
-			var newId ;
-			if(nav=='next'){
-				newId = idList[0];
-			} else {
-				newId = idList[(idList.length) - 1];
-			}
-			this.updateView(newId);
-			storedList.state.currentPage = currentPage;	
-			storedList.idList = idList;
-			storedList.minId = idList[0];
-			storedList.maxId = idList[(idList.length) - 1];
-		},
-		
-		updateView : function(id){
-			Backbone.history.navigate('individual/'+id);
-			this.displayForm(id);
-			this.displayGrid(id);
-			this.indivId = id;
-			// update id displayed
-			$('span.ID').text('ID : '+id);
-		}
-		*/
 
 	});
 });

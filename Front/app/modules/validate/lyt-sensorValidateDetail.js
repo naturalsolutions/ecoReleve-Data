@@ -11,15 +11,15 @@ define([
 	'ns_modules/ns_com',
 	'ns_map/ns_map',
 	'ns_form/NSFormsModuleGit',
-	'moment'
-], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com, NsMap, NsForm, moment){
+	'moment',
+	'ns_navbar/ns_navbar'
+
+], function($, _, Backbone, Marionette, Swal, Translater,
+ config, NsGrid, Com, NsMap, NsForm, moment, Navbar){
 
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-		/*===================================================
-		=            Layout Stepper Orchestrator            =
-		===================================================*/
 		template: 'app/modules/validate/templates/tpl-sensorValidateDetail.html',
 		
 		className: 'full-height animated white',
@@ -29,11 +29,9 @@ define([
 			'click table.backgrid td.select-row-cell input[type=checkbox]' : 'checkSelect',
 			'click table.backgrid th input' : 'checkSelectAll',
 			'click button#validate' : 'validate',
-			'click #prevDataSet' : 'prevDataSet',
-			'click #nextDataSet' : 'nextDataSet',
-			'change select#frequency' : 'updateFrequency' // <= bug ie
+			'change select#frequency' : 'updateFrequency'
 		},
-		
+
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
@@ -47,76 +45,54 @@ define([
 			'dataSetTotal': '#dataSetTotal',
 		},
 		
+		regions: {
+			'rgNavbar': '#navbar'
+		},
 		
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.type = options.type;
 
-			this.indId = options.indId;
-			this.pttId = parseInt(options.pttId);
-			this.sensorId = parseInt(options.sensorId);
 
 			this.com = new Com();
-			this.model = new Backbone.Model();
+			this.model = options.model;
 
-			this.initNavBar(options.parentGrid);
+			this.indId = this.model.get('FK_Individual');
+			this.pttId = this.model.get('FK_ptt');
+			this.sensorId = this.model.get('FK_Sensor');
 
 			this.frequency = options.frequency;
+
+
+
+			this.navbar = new Navbar({
+				parent: this,
+				globalGrid: options.globalGrid,
+				model: this.model,
+			});
 		},
 
 		onRender: function(){
 			this.$el.i18n();
 		},
 
-		initNavBar: function(coll){
-			var md = coll.findWhere({
-				'FK_ptt' : this.pttId
-			});
-
-			this.dataSetIndex = coll.indexOf(md);
-			this.coll = coll;
-		},
-
-		nextDataSet: function(){
-			if(this.coll){
-				if(this.dataSetIndex < this.coll.size()-1){
-					this.dataSetIndex++;
-				}else{
-					this.dataSetIndex = 0;
-				}
-				this.displayDataSet(this.dataSetIndex);
-			}
-		},
-
-		prevDataSet: function(){
-			if(this.coll){
-				if(this.dataSetIndex != 0){
-					this.dataSetIndex--;
-				}else{
-					this.dataSetIndex = this.coll.size()-1;
-				}
-				this.displayDataSet(this.dataSetIndex);
-			}
-		},
-
-		displayDataSet: function(dataSetIndex){
-			this.ui.dataSetTotal.html(this.coll.size());
-			this.ui.dataSetIndex.html(this.dataSetIndex+1);
-
-			var md = this.coll.at(dataSetIndex);
-			this.pttId = md.get('FK_ptt');
-			this.indId = md.get('FK_Individual');
+		reloadFromNavbar: function(model){
+			this.model = model;
+			this.pttId = model.get('FK_ptt');
+			this.indId = model.get('FK_Individual');
 			this.com = new Com();
 			this.map.destroy();
 			this.ui.map.html('');
-			this.onShow();
+			this.display();
 		},
 
 		onShow : function(){
-			var _this = this;
-			this.ui.dataSetTotal.html(this.coll.size());
-			this.ui.dataSetIndex.html(this.dataSetIndex+1);
+			this.rgNavbar.show(this.navbar);
+			this.display();
+		},
 
+		display: function(){
+			var _this = this;
 			if(this.indId == 'null' || !this.indId) this.indId = 'none';
 			if(this.indId == 'none'){
 				this.swal({ title : 'No individual attached'}, 'warning');
@@ -127,7 +103,6 @@ define([
 			this.displayGrid();
 			this.displayMap();
 			this.displaySensorForm();
-
 
 			$.when( this.map.deffered, this.grid.deffered ).done( function() {
 				setTimeout(function(){

@@ -15,9 +15,6 @@ define([
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-		/*===================================================
-		=            Layout Stepper Orchestrator            =
-		===================================================*/
 
 		template: 'app/modules/validate/templates/tpl-sensorValidate.html',
 		className: 'full-height animated layer',

@@ -21,9 +21,6 @@ define([
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-		/*===================================================
-		=            Layout Stepper Orchestrator            =
-		===================================================*/
 
 		template: 'app/modules/individual/templates/tpl-individual.html',
 		className: 'full-height animated white rel',
@@ -75,55 +72,18 @@ define([
 				this.detail.show(new LytIndivDetail({id : this.options.id}));
 				this.ui.detail.removeClass('hidden');
 			}
-
-
 		},
 
 		displayGrid: function(){
 			var _this = this;
 			this.grid = new NsGrid({
-				pageSize: 13,
+				pageSize: 20,
 				pagingServerSide: true,
 				com: this.com,
 				url: config.coreUrl+'individuals/',
 				urlParams : this.urlParams,
 				rowClicked : true,
-				totalElement : 'indiv-count',
-				onceFetched: function(params){
-					var listPro = {};
-					var idList  = [];
-					this.collection.each(function(model){
-						idList.push(model.get('ID'));
-					});
-					idList.sort();
-					listPro.idList = idList;
-					listPro.minId = idList[0];
-					listPro.maxId = idList [(idList.length - 1)];
-					listPro.state = this.collection.state;
-					listPro.criteria = $.parseJSON(params.criteria);
-					window.app.listProperties = listPro ;
-					_this.totalEntries(this.grid);
-
-					/*window.app.temp = this;
-
-					_this.totalEntries(this.grid);
-					var rows = this.grid.body.rows;
-					if(_this.currentRow){
-						for (var i = 0; i < rows.length; i++) {
-							if(rows[i].model.attributes.ID == _this.currentRow.model.attributes.ID){
-								_this.currentRow = rows[i];
-								rows[i].$el.addClass('active');
-								return rows[i];
-							}
-						}
-					}else{
-						var row = this.grid.body.rows[0];
-						if(row){
-							_this.currentRow = row;
-							row.$el.addClass('active');
-						}
-					}*/
-				}
+				totalElement : 'totalEntries',
 			});
 
 			this.grid.rowClicked = function(args){
@@ -136,12 +96,25 @@ define([
 			this.ui.paginator.html(this.grid.displayPaginator());
 		},
 
+		rowClicked: function(row){
+			this.detail.show(new LytIndivDetail({
+				model : row.model,
+				globalGrid : this.grid
+			}));
+			this.grid.currentRow = row;
+			this.grid.upRowStyle();
+			this.ui.detail.removeClass('hidden');
+		},
+
+		rowDbClicked: function(row){
+		},
+
 		displayFilter: function(){
 			this.filters = new NsFilter({
 				url: config.coreUrl + 'individuals/',
 				com: this.com,
 				filterContainer: 'filter',
-			});	
+			});
 		},
 
 		filter: function(){
@@ -150,20 +123,6 @@ define([
 		clearFilter : function(){
 			this.filters.reset();
 		},
-		rowClicked: function(row){
-			//var id = row.model.get('ID');
-			this.detail.show(new LytIndivDetail({
-				model : row.model,
-				parentColl : this.grid.grid.collection
-			}));
-			this.ui.detail.removeClass('hidden');
-
-			//Backbone.history.navigate('individual/'+id, {trigger: false});
-		},
-
-		rowDbClicked: function(row){
-
-		},
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
 		},
@@ -171,8 +130,5 @@ define([
 			this.total = grid.collection.state.totalRecords;
 			this.ui.totalEntries.html(this.total);
 		},
-		/*showModal : function(){
-			this.newIndiv.show(new LytNewIndiv({rg : this.newIndiv}));
-		}*/
 	});
 });
