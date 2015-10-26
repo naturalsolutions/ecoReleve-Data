@@ -13,9 +13,8 @@
 				<legend><span class="reneco reneco-search circle dark"></span>&nbsp;&nbsp;Search</legend>
 			</div>
 		</div>
-		<div id="indiv_filters" class="grid-padding"></div>
-
-		<div class="ns-filter">
+		<div id="indiv_filters" class="grid-padding fit-filter"></div>
+		<div class="ns-filter-action">
 			<button id="clear" class="btn pull-left">CLEAR ALL</button>
 			<button id="btnFilter" class="btn btn-success pull-right">FILTER&nbsp;
 				<span class="reneco reneco-search"></span>
@@ -28,7 +27,7 @@
 			<legend class="text-right"><span id="nbSelected">0</span>&nbsp;selected&nbsp;/&nbsp;<span id="totalEntries"></span>&nbsp;individuals to be released</legend>
 			<!-- <div class="bot-border dark"></div> -->
 		</div>
-		<div id="grid" class="enhanced-grid full-border grid-padding fit-grid"></div>
+		<div id="grid" class="enhanced-grid full-border grid-padding fit-filter"></div>
 		<div id="paginator" class="paginator "></div>
 		<div class="ns-footer">
 				<div class="col-md-12">
@@ -36,12 +35,13 @@
 						<span >RELEASE&nbsp;&nbsp;</span>
 						<span class="icon reneco reneco-to_release" data-position="top"></span>
 					</button>
-					<div class="tooltipster-arrow-top tooltipster-arrow" style="left:109px;"><span class="tooltipster-arrow-border" style="margin-bottom: -3px; border-color: rgb(0, 0, 0);;"></span><span style="border-color:rgb(76, 76, 76);"></span></div>
+					<div class="tooltipster-arrow-top tooltipster-arrow" style="left:109px;"><span class="tooltipster-arrow-border" style="margin-bottom: -3px; border-color: rgb(0, 0, 0);;"></span><span style="border-color:rgb(76, 76, 76);"></span>
 					</div>
 					<button class="btn btn-success pull-right" id='addSensor'>
 						<span >ADD SENSOR&nbsp;&nbsp;</span>
 						<span class="icon reneco reneco-satellite" data-position="top"></span>
 					</button>
+				</div>		
 				</div>
 			</div>
 		</div>

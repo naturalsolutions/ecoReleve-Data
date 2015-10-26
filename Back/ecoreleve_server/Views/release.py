@@ -39,7 +39,7 @@ def actionOnStations(request):
     return dictActionFunc[actionName](request)
 
 def getFilters (request):
-    ModuleType = 'IndivFilter'
+    ModuleType = 'IndivReleaseGrid'
     filtersList = Individual().GetFilters(ModuleType)
     filters = {}
     for i in range(len(filtersList)) :
@@ -51,8 +51,8 @@ def getFields(request) :
 
     ModuleType = request.params['name']
     if ModuleType == 'default' :
-        ModuleType = 'IndivFilter'
-    cols = Individual().GetGridFields('IndivFilter')
+        ModuleType = 'IndivReleaseGrid'
+    cols = Individual().GetGridFields('IndivReleaseGrid')
     cols.append({
         'name': 'unicSensorName',
         'label': '| Sensor',
@@ -103,7 +103,7 @@ def searchIndiv(request):
     }]
     searchInfo['criteria'].extend(criteria)
 
-    ModuleType = 'IndivFilter'
+    ModuleType = 'IndivReleaseGrid'
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     listObj = IndividualList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
@@ -297,3 +297,4 @@ def releasePost(request):
     transaction.commit()
 
     return {'release':len(releaseIndList)}
+    return {'release':0}

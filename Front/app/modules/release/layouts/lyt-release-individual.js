@@ -194,7 +194,7 @@ define([
 
 				//remove the model from the coll once this one is validated
 				var callback = function(){
-					Backbone.history.navigate('release', {trigger: true});
+					Backbone.history.navigate('station/'+_this.station.get('ID'), {trigger: true});
 					//$('#back').click();
 				};
 				this.swal(resp, resp.type, callback);
@@ -236,9 +236,9 @@ define([
 				type: type,
 				showCancelButton: true,
 				confirmButtonColor: btnColor,
-				confirmButtonText: 'New Release',
+				confirmButtonText: 'See Station',
 				cancelButtonColor: 'grey',
-				cancelButtonText: 'Return to Home',
+				cancelButtonText: 'New Release',
 				closeOnConfirm: true,
 			},
 			function(isConfirm){
@@ -246,7 +246,7 @@ define([
 				if(isConfirm && callback){
 					callback();
 				}else{
-					Backbone.history.navigate('*', {trigger: true});
+					Backbone.history.navigate('release', {trigger: true});
 				}
 			});
 		},
