@@ -82,7 +82,9 @@ require.config({
 
 
 		'bbDate': 'vendors/backboneForm-editors',
-		'bbAutoComp': 'vendors/backboneForm-editors-autoCompTree'
+		'bbAutoComp': 'vendors/backboneForm-editors-autoCompTree',
+		'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
+    'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
 	},
 
 
@@ -193,7 +195,20 @@ require.config({
              'backbone_forms'
             ],
             exports: 'FileUploadEditor' 
-        }
+        },
+        tooltipster: {
+            deps: [
+                'jquery'
+            ],
+            exports: '$'
+        },
+        'tooltipster-list': {
+            deps: [
+                'jquery',
+                'tooltipster'
+            ],
+            exports: '$'
+        },
 	},
 });
 

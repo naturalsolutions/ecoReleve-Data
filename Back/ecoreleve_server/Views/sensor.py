@@ -4,7 +4,8 @@ from ..Models import (
     Sensor,
     SensorType,
     SensorDynPropValue,
-    SensorDynProp
+    SensorDynProp,
+    Equipment
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -37,7 +38,8 @@ def actionOnSensors(request):
     'getFilters': getFilters,
     'getModels' : getSensorModels,
     'getCompany' : getCompany,
-    'getSerialNumber' : getSerialNumber
+    'getSerialNumber' : getSerialNumber,
+    'getSensorType' : getSensorType
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -117,6 +119,20 @@ def getData(query):
                 response.append(curRow[key])
     return response
 
+def getSensorType(request):
+
+    query = select([SensorType.ID, SensorType.Name])
+    result = DBSession.execute(query).fetchall()
+    response = []
+    for row in result:
+        ele = {}
+        ele['label'] = row[1]
+        ele['val'] = row[0]
+        response.append(ele)
+
+    return response
+
+
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getSensor(request):
@@ -144,30 +160,26 @@ def getSensor(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 
-# @view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
-# def getIndivHistory(request):
-
-#     #128145
-#     id = request.matchdict['id']
-#     tableJoin = join(IndividualDynPropValue,IndividualDynProp
-#         ,IndividualDynPropValue.FK_IndividualDynProp == IndividualDynProp.ID)
-#     query = select([IndividualDynPropValue,IndividualDynProp.Name]).select_from(tableJoin).where(
-#         IndividualDynPropValue.FK_Individual == id
-#         ).order_by(desc(IndividualDynPropValue.StartDate))
-#     result = DBSession.execute(query).fetchall()
-#     response = []
-#     for row in result:
-#         curRow = OrderedDict(row)
-#         dictRow = {}
-#         for key in curRow :
-#             if curRow[key] is not None :
-#                 if 'Value' in key :
-#                     dictRow['value'] = curRow[key] 
-#                 elif 'FK' not in key :
-#                     dictRow[key] = curRow[key]
-#         response.append(dictRow)
-
-#     return response
+@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+def getSensorHistory(request):
+    
+    id = request.matchdict['id']
+    query = select([Equipment.ID, Equipment.FK_Individual, Equipment.FK_MonitoredSite, Equipment.StartDate, Equipment.Deploy]).where(Equipment.ID == id)
+    result = DBSession.execute(query).fetchall()
+    response = []
+    for row in result:
+        print(row)
+        deploy = row[4]
+        status = 'deployed'
+        if deploy == 0:
+            status = 'removed'
+        ele = {}
+        ele['individual_id'] = row[1]
+        ele['site_id'] = row[2]
+        ele['start_date'] = row[3]
+        ele['status'] = status
+        response.append(ele)
+    return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
@@ -214,10 +226,7 @@ def insertOneNewSensor (request) :
     print(data['FK_SensorType'])
     #newSensor = Sensor(FK_SensorType = data['FK_SensorType'], creator = request.authenticated_userid)
     sensorType = int(data['FK_SensorType'])
-    print('-----------------------------------------------data')
-    print(data)
     newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now() )
-
 
     newSensor.SensorType = DBSession.query(SensorType).filter(SensorType.ID== sensorType).first()
     newSensor.init_on_load()

@@ -24,7 +24,7 @@ define([
 				'click #btnCreate' : 'saveForm'
 			},
 		  initialize: function(options){
-		    this.type = options.type,
+		    this.type = parseInt(options.type),
 		    this.parent = options.parent;
 		  },
 		  onShow : function(){

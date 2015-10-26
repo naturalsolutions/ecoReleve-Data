@@ -10,9 +10,9 @@ define([
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
-	'./view-indivDetails'
+	//'./view-indivDetails'
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter,IndivDetails
+	Com, NsGrid, NsFilter//,IndivDetails
 ){
 
 	'use strict';
@@ -42,6 +42,7 @@ define([
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
 			this.rg = options.rg;
+			//this.detailsView = options.detailsView;
 		},
 
 		onRender: function(){
@@ -49,6 +50,7 @@ define([
 		},
 
 		onShow : function(){
+			//this.details.show(this.detailsView({type : 1, parent : this}));
 		},
 
 		filter: function(){
