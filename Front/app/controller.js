@@ -5,10 +5,8 @@ define(['marionette', 'config',
 	/*==========  modules  ==========*/
 	'./modules/export/layouts/export-layout',
 
-	'./modules/stations/visu/lyt-stations',
-	'./modules/stations/edit/lyt-station-stepper-edit',
-	'./modules/stations/new/lyt-station-stepper-new',
-	'./modules/stations/manager/lyt-station-manager',
+	'./modules/stations/layouts/lyt-stations',
+	'./modules/stations/layouts/lyt-station-new',
 
 	'./modules/importFile/lyt-entry-importFile',
 	'./modules/individual/layouts/lyt-individual',
@@ -26,10 +24,10 @@ define(['marionette', 'config',
 
 	/*==========  modules  ==========*/
 	LytExport,
-	LytStationVisu,
-	LytStationStepperEdit,
-	LytStationStepperNew,
-	LytStationEdit,
+
+	LytStations,
+	LytStationsNew,
+
 	LytImportFile,
 	LytIndividual,
 	LytIndivDetails,
@@ -52,7 +50,6 @@ define(['marionette', 'config',
 			this.rgFooter=window.app.rootView.rgFooter;
 		},
 
-
 		home: function() {
 			Backbone.history.navigate('');
 			this.rgMain.show(new LytHome());
@@ -66,20 +63,12 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytImportFile());
 		},
 
-		stations: function(){
-			this.rgMain.show(new LytStationVisu());
+		stations: function(id){
+			this.rgMain.show(new LytStations({id : id}));
 		},
 
 		newStation: function(){
-			this.rgMain.show(new LytStationStepperNew());
-		},
-
-		editStations: function(){
-			this.rgMain.show(new LytStationStepperEdit());
-		},
-
-		station: function(id){
-			this.rgMain.show(new LytStationEdit({id: id}));
+			this.rgMain.show(new LytStationsNew());
 		},
 
 		individual : function(id){
@@ -103,15 +92,6 @@ define(['marionette', 'config',
 				type : type
 			}));
 		},
-
-/*		validateDetail: function(type, indId, sensorId, frequency){
-			this.rgMain.show(new LytSensorValidateDetail({
-				type : type,
-				indId : indId,
-				sensorId : sensorId,
-				frequency: frequency
-			}));
-		},*/
 
 		release: function(){
 			this.rgMain.show(new LytReleaseStation());

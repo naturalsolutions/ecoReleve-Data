@@ -13,7 +13,7 @@ function(Marionette, config) {
 	'use strict';
 	return Marionette.LayoutView.extend({
 		template: 'app/ns_modules/ns_navbar/tpl-navbar.html',
-		className: 'navbar',
+		className: '',
 
 		events: {
 			'click #prev' : 'navigatePrev',
@@ -44,13 +44,7 @@ function(Marionette, config) {
 			//var pageSize = state.pageSize;
 			var pageSize = this.grid.pageSize;
 
-			console.log('indexInColl = ' + indexInColl);
-			console.log('pageSize = ' + pageSize);
-			console.log('currentPage = ' + currentPage);
-
 			this.recordIndexNbr = pageSize * currentPage + indexInColl;
-
-			console.log('recordIndex = '+ this.recordIndexNbr);
 
 			this.totalRecords = state.totalRecords;
 		},
@@ -72,32 +66,28 @@ function(Marionette, config) {
 				//noNeed 2 fetch
 				this.modelIndex++;
 				this.upClientSide();
-
 			}else{
 				//need 2 fetch first
 				this.modelIndex = 0;
 				if(this.coll.state.currentPage != this.coll.state.lastPage){
 					var tmp = this.coll.state.currentPage;
 					tmp++;
-
 				}else{
 					//last page
 					tmp = 0;
 				}
-
 				if(this.pagingServerSide){
-				/*===================================
-				=            Server Side            =
-				===================================*/
-				
+					/*===================================
+					=            Server Side            =
+					===================================*/
 					this.upRowServerSide('next');
-					if(tmp == this.coll.state.lastPage){
+
+					if(tmp == 0){
 						this.coll.setPageSize(this.grid.grid.collection.state.pageSize, {first: true});
 					}else{
 						this.coll.getPage(tmp);
 					}
-				/*=====  End of Server Side  ======*/
-
+					/*=====  End of Server Side  ======*/
 				}else{
 					/*===================================
 					=            Client Side            =
@@ -107,15 +97,10 @@ function(Marionette, config) {
 					}else{
 						this.coll.setPageSize(this.grid.grid.collection.state.pageSize, {first: true});
 					}
-
 					this.upRowClientSide('next');
-
 					/*=====  End of Client Side  ======*/
-					
-
 				}
 			}
-
 		},
 
 		navigatePrev: function(){

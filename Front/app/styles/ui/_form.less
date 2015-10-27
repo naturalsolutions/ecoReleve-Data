@@ -3,6 +3,7 @@ fieldset{
 	border: 1px solid #e5e5e5;
 	padding: 15px;
 	margin-top: 10px;
+	width: 100%;
 	&>div{
 		margin-bottom: 10px;
 	}
@@ -91,7 +92,38 @@ select:disabled {
 	border-top: 0px;
 }
 
-.nav > li > a:hover, .nav > li > a:focus{
-	background: transparent;
+
+.nav-tabs{
+	li{
+		a{
+			cursor: pointer;
+			color:#3A3939;
+			background: transparent;
+			border: 0px;
+			border-bottom: 2px solid #ddd;
+			&:hover, &:visited{
+				cursor: pointer;
+				color:#3A3939;
+				background: transparent;
+				border: 0px;
+				border-bottom: 2px solid #ddd;
+			}
+		}
+		&.active{
+			a{
+				cursor: pointer;
+				border: 0px;
+				border-bottom: 2px solid #3A3939;
+				&:hover, &:focus{
+					cursor: pointer;
+					border: 0px;
+					border-bottom: 2px solid #3A3939;
+					background: transparent;
+				}
+			}
+		}
+	}
 }
+
+
 

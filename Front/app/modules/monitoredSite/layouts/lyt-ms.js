@@ -28,11 +28,6 @@ define([
 		template: 'app/modules/monitoredSite/templates/tpl-ms.html',
 		className: 'full-height animated white rel',
 
-		events : {
-			'click #btnFilter' : 'filter',
-			'click #back' : 'hideDetails',
-			'click button#clear' : 'clearFilter'
-		},
 
 		ui: {
 			'grid': '#grid',
@@ -40,6 +35,12 @@ define([
 			'filter': '#filter',
 			'detail': '#detail',
 			'totalEntries': '#totalEntries',
+		},
+
+		events : {
+			'click #btnFilter' : 'filter',
+			'click #back' : 'hideDetails',
+			'click button#clear' : 'clearFilter'
 		},
 
 		regions: {
