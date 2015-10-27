@@ -119,7 +119,7 @@ class ObservationDynPropValue(Base):
     ID = Column(Integer,Sequence('ObservationDynPropValue__id_seq'), primary_key=True)
     StartDate =  Column(DateTime,nullable=False)
     ValueInt =  Column(Integer)
-    ValueString =  Column(String)
+    ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
     ValueFloat =  Column(Float)
     FK_ObservationDynProp = Column(Integer, ForeignKey('ObservationDynProp.ID'))

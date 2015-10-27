@@ -26,14 +26,14 @@ class Individual (Base,ObjectWithDynProp) :
     __tablename__ = 'Individual'
     ID = Column (Integer,Sequence('Individual__id_seq'), primary_key = True)
     creationDate = Column (DateTime,nullable=False)
-    Species = Column (String)
-    Age = Column(String)
+    Species = Column (String(250))
+    Age = Column(String(250))
+    UnicIdentifier = Column(String(250))
     Birth_date = Column(DateTime)
     Death_date = Column(DateTime)
-    Original_ID = Column(String)
+    Original_ID = Column(String(250))
     FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
-    Original_ID = Column(String(100))
-    Caisse_ID = Column(String(50))
+    Caisse_ID = Column(String(10))
 
     IndividualDynPropValues = relationship('IndividualDynPropValue',backref='Individual',cascade="all, delete-orphan")
     Locations = relationship('Individual_Location')
@@ -66,8 +66,8 @@ class IndividualDynProp (Base) :
 
     __tablename__ = 'IndividualDynProp'
     ID = Column (Integer,Sequence('IndividualDynProp__id_seq'), primary_key = True)
-    Name = Column (String,nullable=False)
-    TypeProp = Column(String,nullable=False)
+    Name = Column (String(250),nullable=False)
+    TypeProp = Column(String(100),nullable=False)
 
     IndividualType_IndividualDynProps = relationship('IndividualType_IndividualDynProp',backref='IndividualDynProp')
     IndividualDynPropValues = relationship('IndividualDynPropValue',backref='IndividualDynProp')
@@ -81,7 +81,7 @@ class IndividualDynPropValue(Base):
     ID = Column(Integer,Sequence('IndividualDynPropValue__id_seq'), primary_key=True)
     StartDate =  Column(DateTime,nullable=False)
     ValueInt =  Column(Integer)
-    ValueString =  Column(String)
+    ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
     ValueFloat =  Column(Float)
     FK_IndividualDynProp = Column(Integer, ForeignKey('IndividualDynProp.ID'))
@@ -92,7 +92,7 @@ class IndividualType (Base,ObjectTypeWithDynProp) :
 
     __tablename__ = 'IndividualType'
     ID = Column (Integer,Sequence('IndividualType__id_seq'), primary_key = True)
-    Name = Column (String)
+    Name = Column (String(250))
     Status = Column(Integer)
 
     IndividualType_IndividualDynProp = relationship('IndividualType_IndividualDynProp',backref='IndividualType')
@@ -127,5 +127,5 @@ class Individual_Location(Base):
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
     creator =  Column(Integer)
     creationDate = Column(DateTime)
-    type_ = Column(String)
-    OriginalData_ID = Column(String)
+    type_ = Column(String(10))
+    OriginalData_ID = Column(String(25))

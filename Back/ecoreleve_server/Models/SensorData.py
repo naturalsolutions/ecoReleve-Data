@@ -108,7 +108,7 @@ class ArgosEngineering(Base):
     fk_ptt = Column('FK_ptt', Integer, nullable = False)
     pttDate = Column('pttDate', DateTime, nullable = False)
     txDate = Column('txDate', DateTime, nullable = False)
-    satId = Column(String)
+    satId = Column(String(250))
     txCount = Column(Integer)
     temp = Column(Float)
     batt = Column(Float)
