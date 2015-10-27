@@ -12,7 +12,6 @@ define([
 	'ns_filter/model-filter',
 	'SensorPicker',
 	'requirejs-text!modules/release/templates/tpl-sensor-picker.html',
-	'tooltipster-list',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
 	Com, NsGrid, NsFilter, SensorPicker,tplSensorPicker
@@ -266,6 +265,7 @@ define([
                 //console.log(origin);
                 }, this),
             });
+            $(e.target).tooltipster('show');
 		}
 	});
 });
