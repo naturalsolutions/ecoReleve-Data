@@ -37,7 +37,7 @@ CASE WHEN [id41@TCaracThes_Model_Precision] like '%solar%' THEN  1
 		2
 	END,
 [Trx_Sat_Obj_PK]  
-FROM [ecoReleve_DataNew].[dbo].[TViewTrx_Sat]
+FROM [ECWP-eReleveData].[dbo].[TViewTrx_Sat]
 where [id41@TCaracThes_Model_Precision] not like '%RI%'
 
 -------------- INSERT  RFID -------------------------------------------------------------------
@@ -60,4 +60,4 @@ SELECT
 	  ,[creation_date]
 	  , 3
 	, PK_id
-  FROM [ECWP_ecoReleveData].[dbo].[T_Object]
+  FROM [ECWP-eReleveData].[dbo].[T_Object]

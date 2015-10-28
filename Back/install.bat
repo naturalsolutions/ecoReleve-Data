@@ -13,3 +13,9 @@ pip install jwt
 pip install pyramid_jwtauth
 
 python setup.py develop
+
+cd ../Front
+npm install
+bower install
+grunt dev
+

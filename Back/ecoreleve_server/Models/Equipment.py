@@ -25,6 +25,7 @@ from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
 import pyramid.httpexceptions as exc
+import transaction
 
 class Equipment(Base):
     __tablename__ = 'Equipment'
@@ -83,7 +84,6 @@ def checkEquip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
 def existingEquipment (fk_sensor,equipDate,fk_indiv=None):
     e1 = aliased(Equipment)
     subQuery = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor,and_(e1.FK_Individual == Equipment.FK_Individual,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate))))
-
     query = select([Equipment]).where(and_(~exists(subQuery),and_(Equipment.StartDate<=equipDate,and_(Equipment.Deploy == 1,and_(Equipment.FK_Sensor == fk_sensor,Equipment.FK_Individual == fk_indiv)))))
     fullQuery = select([True]).where(exists(query))
 
@@ -100,7 +100,6 @@ def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None):
 
     query = query.where(~exists(subQueryUnequip))
     fullQuery = select([True]).where(~exists(query))
-    print(fullQuery)
     return DBSession.execute(fullQuery).scalar()
 
 
@@ -127,22 +126,16 @@ def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
 @event.listens_for(Observation.Station, 'set')
 def receive_set(target, value, oldvalue, initiator):
 
-    print('****************event ********************')
-    print(target.Station)
     typeName = target.GetType().Name
-    
 
     if 'equipment' in typeName.lower():
         equipDate = target.Station.StationDate
-        deploy = target.GetProperty('Deploy')
         try :
-            fk_sensor = target.GetProperty('FK_Sensor') 
+            fk_sensor = target.GetProperty('sensor_id') 
         except :
             fk_sensor = None
         try :
             fk_indiv = target.GetProperty('FK_Individual')
-            print('**********************************************************FK_Individual')
-            print(fk_indiv)
         except :
             fk_indiv = None
         try : 
@@ -150,15 +143,22 @@ def receive_set(target, value, oldvalue, initiator):
         except :
             fk_site = None
 
-        if isinstance(availability,bool):
+        deploy = target.GetProperty('deploy')
+        if deploy:
+            availability = checkEquip(fk_sensor=fk_sensor,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
+        else:
+            availability = checkUnequip(fk_sensor=fk_sensor,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
+
+        if availability:
             curEquip = Equipment(Observation= target, FK_Sensor = fk_sensor, StartDate = equipDate,FK_Individual = fk_indiv,  FK_MonitoredSite = fk_site, Deploy = deploy)    #, FK_MonitoredSite = fk_site)
             target.Equipment = curEquip
+            print('INDIV EQUIP GOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOD')
         else : 
             raise(ErrorAvailable(availability))
 
 class ErrorAvailable(Exception):
      def __init__(self, value):
          self.value = value
-         print
+         print("PTT Not available")
      def __str__(self):
         return repr(self.value)

@@ -21,8 +21,10 @@ import datetime as dt
 import pandas as pd
 import numpy as np
 from sqlalchemy import select, and_,cast, DATE,func,desc,join
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
+from pyramid.response import Response
 from traceback import print_exc
 from collections import OrderedDict
 
@@ -178,13 +180,25 @@ def deleteMonitoredSite(request):
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateMonitoredSite(request):
     print('*********************** UPDATE MonitoredSite *****************')
-    data = request.json_body
-    id = request.matchdict['id']
-    curMonitoredSite = DBSession.query(MonitoredSite).get(id)
-    curMonitoredSite.LoadNowValues()
-    curMonitoredSite.UpdateFromJson(data)
-    transaction.commit()
-    return {}
+    try:
+        data = request.json_body
+        id = request.matchdict['id']
+        curMonitoredSite = DBSession.query(MonitoredSite).get(id)
+    
+        curMonitoredSite.LoadNowValues()
+        curMonitoredSite.UpdateFromJson(data)
+        transaction.commit()
+        response = {}
+
+    except Exception as e:
+        print('\n\n\n *****IntegrityError errrroorr') 
+        transaction.abort()
+        response = request.response
+        response.status_code = 510
+        response.text = "IntegrityError"
+
+    return response
+    
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'POST')
