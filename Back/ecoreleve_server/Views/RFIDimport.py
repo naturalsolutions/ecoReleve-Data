@@ -79,7 +79,7 @@ def uploadFileRFID(request):
         Rfids, chip_codes = set(), set()
         if (isHead):
             j=1
-        #parsing data
+        ########## Parsing data
         allDate = []
         while j < len(data):
             i = 0

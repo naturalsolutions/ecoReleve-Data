@@ -38,9 +38,9 @@ def error_response (err) :
     response.status_int = 500
     return response
 
-# ArgosDatasWithIndiv = Table('VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
-# GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv', Base.metadata, autoload=True) 
-# DataRfidWithSite = Table('VRfidData_With_equipSite', Base.metadata, autoload=True) 
+ArgosDatasWithIndiv = Table('VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
+GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv', Base.metadata, autoload=True) 
+DataRfidWithSite = Table('VRfidData_With_equipSite', Base.metadata, autoload=True) 
 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -111,9 +111,7 @@ def details_unchecked_indiv(request):
     else : 
         query = select([unchecked]
             ).where(and_(unchecked.c['FK_ptt']== ptt
-                ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv)))
-        print(ptt)
-        print(id_indiv)
+                ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv))).order_by(desc(unchecked.c['date']))
         data = DBSession.execute(query).fetchall()
         #print(query)
         dataResult = [dict(row) for row in data]
