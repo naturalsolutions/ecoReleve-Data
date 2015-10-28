@@ -16,6 +16,8 @@ define([
 	'./gsm/lyt-step1-gsm',
 	'./gsm/lyt-step2-gsm',
 
+	'./gsm/lyt-step1-gsm',
+
 ], function($, _, Backbone, Marionette, NewStepper, Step0,
 	Step1GPX,
 	Step2GPX,
@@ -24,7 +26,9 @@ define([
 	Step2RFID,
 
 	Step1GSM,
-	Step2GSM
+	Step2GSM,
+
+	Step1ARGOS
 ){
 
 	'use strict';
@@ -61,7 +65,10 @@ define([
 						var gsmSteps = [ Step1GSM ];
 						this.addSteps(gsmSteps, 1);
 						break;
-					case 'csv':
+					case 'argos':
+						var argosSteps = [ Step1ARGOS ];
+						this.addSteps(argosSteps, 1);
+
 						//this.addSteps();
 						break;
 					default:
