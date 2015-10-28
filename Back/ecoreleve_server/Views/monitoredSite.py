@@ -154,7 +154,7 @@ def getMonitoredSiteEquipment(request):
     id_site = request.matchdict['id']
     joinTable = join(Equipment,Sensor, Equipment.FK_Sensor == Sensor.ID
         ).join(SensorType,Sensor.FK_SensorType == SensorType.ID)
-    query = select([Equipment.StartDate,SensorType.Name.label('Type'),Sensor.UnicName,Equipment.Deploy]).select_from(joinTable
+    query = select([Equipment.StartDate,SensorType.Name.label('Type'),Sensor.UnicIdentifier,Equipment.Deploy]).select_from(joinTable
         ).where(Equipment.FK_MonitoredSite == id_site).order_by(desc(Equipment.StartDate))
     result = DBSession.execute(query).fetchall()
     response = []

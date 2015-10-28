@@ -111,10 +111,10 @@ def getIndiv(request):
     if 'geo' in request.params :
         geoJson=[]
         joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)
-        stmt = select([Individual_Location,Sensor.UnicName]).select_from(joinTable).where(Individual_Location.FK_Individual == id)
+        stmt = select([Individual_Location,Sensor.UnicIdentifier]).select_from(joinTable).where(Individual_Location.FK_Individual == id)
         dataResult = DBSession.execute(stmt).fetchall()
         for row in dataResult:
-            geoJson.append({'type':'Feature', 'properties':{'type':row['type_'], 'sensor':row['UnicName']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+            geoJson.append({'type':'Feature', 'properties':{'type':row['type_'], 'sensor':row['UnicIdentifier']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
     # else : 
@@ -156,7 +156,7 @@ def getIndivEquipment(request):
     id_indiv = request.matchdict['id']
     joinTable = join(Equipment,Sensor, Equipment.FK_Sensor == Sensor.ID
         ).join(SensorType,Sensor.FK_SensorType == SensorType.ID)
-    query = select([Equipment.StartDate,SensorType.Name.label('Type'),Sensor.UnicName,Equipment.Deploy]).select_from(joinTable
+    query = select([Equipment.StartDate,SensorType.Name.label('Type'),Sensor.UnicIdentifier,Equipment.Deploy]).select_from(joinTable
         ).where(Equipment.FK_Individual == id_indiv).order_by(desc(Equipment.StartDate))
     result = DBSession.execute(query).fetchall()
     response = []
