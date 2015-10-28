@@ -12,11 +12,12 @@ define([
 	'ns_filter/model-filter',
 	'./lyt-indiv-details',
 	'./lyt-new-individual',
-	'ns_modules/ns_toolbar/lyt-toolbar',
+
+
 	'./view-indivDetails'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv,Toolbar,IndivDetails
+	Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv, IndivDetails
 ){
 
 	'use strict';
@@ -24,7 +25,7 @@ define([
 	return Marionette.LayoutView.extend({
 
 		template: 'app/modules/individual/templates/tpl-individual.html',
-		className: 'full-height animated white rel',
+		className: 'full-height animated white rel clearfix',
 
 		events : {
 			'click #btnFilter' : 'filter',
@@ -37,12 +38,10 @@ define([
 			'paginator': '#paginator',
 			'filter': '#filter',
 			'detail': '#detail',
-			'totalEntries': '#totalEntries',
 		},
 
 		regions: {
 			detail : '#detail',
-			toolbar : '#toolbar'
 		},
 
 		initialize: function(options){
@@ -61,13 +60,8 @@ define([
 
 
 		onShow : function(){
-			// to integrate the toolbar, create a layout for the content of the modal windows
 			// Be carreful, we provide LytNewIndiv and not his instance (new) !!!
-
 			var itemsNewIndiv = [{ "label": "Individual", "val": 1 },{ "label": "Group", "val": 2 }];
-			var toolbar = new Toolbar({content : LytNewIndiv, modalTitle : 'New individual', detailsView : IndivDetails, items : itemsNewIndiv });
-
-			this.toolbar.show(toolbar);
 
 			this.displayFilter();
 			this.displayGrid(); 
@@ -128,10 +122,6 @@ define([
 		},
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
-		},
-		totalEntries: function(grid){
-			this.total = grid.collection.state.totalRecords;
-			this.ui.totalEntries.html(this.total);
 		},
 	});
 });

@@ -34,7 +34,6 @@ define([
 			'paginator': '#paginator',
 			'filter': '#filter',
 			'detail': '#detail',
-			'totalEntries': '#totalEntries',
 		},
 
 		events : {
@@ -120,10 +119,6 @@ define([
 		},
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
-		},
-		totalEntries: function(grid){
-			this.total = grid.collection.state.totalRecords;
-			this.ui.totalEntries.html(this.total);
 		},
 	});
 });

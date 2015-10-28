@@ -26,8 +26,6 @@ define([
 
 		template: 'app/modules/stations/templates/tpl-stations.html',
 
-
-		
 		events: {
 			'click button#submit' : 'filter',
 			'click .tab-link' : 'displayTab',
@@ -38,7 +36,6 @@ define([
 
 		ui: {
 			'stationId': '#stationId',
-			'totalEntries': '#totalEntries',
 			'filters' : '#filters',
 			'detail': '#detail',
 			'gridPanel' : '#gridPanel',
@@ -52,8 +49,6 @@ define([
 			paginatorRegion : '#paginator',
 			detail : '#detail'
 		},
-
-
 
 		initialize: function(options){
 
@@ -106,7 +101,7 @@ define([
 				url: url,
 				urlParams : this.urlParams,
 				rowClicked : true,
-				totalElement : 'stations-count',
+				totalElement : 'totalEntries',
 			});
 			this.grid.rowClicked = function(args){
 				_this.rowClicked(args.row);
@@ -116,10 +111,6 @@ define([
 			};
 		},
 
-		totalEntries: function(grid){
-			this.total = grid.collection.state.totalRecords;
-			this.ui.totalEntries.html(this.total);
-		},
 
 		onShow : function(){
 			this.displayGrid();
