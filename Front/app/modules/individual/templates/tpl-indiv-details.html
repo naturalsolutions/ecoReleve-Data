@@ -2,30 +2,18 @@
 <div id="indivLeft"  class="col-xs-12 col-md-5 ns-full-height">
 	<br>
 	<!--<span id="back"> <span id="prev" class="glyphicon glyphicon-arrow-left"></span> Back </span>-->
-	<button class=" btn btn-default" id="back">
-				<span class="reneco reneco-back"></span>
-				&nbsp;
-				<span data-i18n="button.back">Back</span>
-	</button>
-	<span id="hideIndivDetails" class="glyphicon pointer big glyphicon-chevron-left"></span>
-	<br>
-	<br>
-	<div>
-		<!--<span id="prev" class="glyphicon pointer big glyphicon-chevron-left"></span>
-		<span>  Change individual  </span>
-		<span id="next" class="glyphicon pointer big glyphicon-chevron-right"></span>-->
-		<div class="quick-nav">
-			<button id="prev" class="btn btn-success pull-left">
-					<span class="reneco reneco-leftarrow"></span>
-			</button>
-			<span class="text-center info">Change individual</span>
-			<button id="next" class="btn btn-success pull-right">
-					<span class="reneco reneco-rightarrow"></span>
-			</button>
-		</div>
-	<br/>
-	<br/>
+	<div class="clearfix">
+		<button class=" btn btn-success " id="back">
+					<span class="reneco reneco-back"></span>
+					&nbsp;
+					<span data-i18n="button.back">Back</span>
+		</button>
+
+		<div id="navbar" class="pull-right"></div>
 	</div>
+
+<!-- 	<span id="hideIndivDetails" class="glyphicon pointer big glyphicon-chevron-left"></span> -->
+	<br>
 
 	
 	<div id="form"></div>
@@ -33,15 +21,15 @@
 	<br/>
 	<div id = "ongletGrid">
 		<ul class="nav nav-tabs">
-		  <li class="active tab-ele"><a href="#Indiv_history" class= "tab-link">History</a>
-		  </li>
-		  <li class="tab-ele"><a href="#Indiv_equipment" class= "tab-link">Equipment</a>
-		  </li>
+			<li class="active tab-ele"><a href="#Indiv_history" class= "tab-link">History</a>
+			</li>
+			<li class="tab-ele"><a href="#Indiv_equipment" class= "tab-link">Equipment</a>
+			</li>
 		</ul>
 	</div>
 		<div class="tab-content">
 		<div id="Indiv_history" class="tab-pane fade in active">
-			  	<div id="grid"></div>
+					<div id="grid"></div>
 				<div id="paginator"></div>
 		</div>
 		<div id="Indiv_equipment" class="tab-pane fade">

@@ -18,7 +18,7 @@ define([
 ){
 	'use strict';
 	return Marionette.LayoutView.extend({
-		template: 'app/modules/stations/manager/templates/tpl-protocol.html',
+		template: 'app/modules/stations/templates/tpl-protocol.html',
 		className: 'panel panel-default',
 
 		ui: {

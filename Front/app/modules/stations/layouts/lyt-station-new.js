@@ -24,39 +24,27 @@ define([
 
 	return Marionette.LayoutView.extend({
 
-		className: 'full-height', 
+		className: 'full-height white',
 
-		template: 'app/modules/stations/new/templates/tpl-station-new.html',
+		template: 'app/modules/stations/templates/tpl-station-new.html',
 		events : {
 			'focusout input[name="Dat e_"]':'checkDate',
 			'keyup input[name="LAT"], input[name="LON"]' : 'getLatLng',
 			'click #getCurrentPosition' : 'getCurrentPosition',
 			'click .tab-link' : 'displayTab',
-			'change select[name="FieldWorker"]' : 'checkUsers'
+			'change select[name="FieldWorker"]' : 'checkUsers',
+			'click button#save' : 'save'
 		},
 
 		name : 'Station creation',
 
 		ui: {
 			'staForm' : '#staForm',
+			'saveBtn' : 'button#save'
 		},
 
 
 		initialize: function(options){
-			this.parent = options.parent;
-		},
-
-		check: function(){
-			if(this.nsForm.BBForm.commit()){
-				return false;
-			}else{
-				return true;
-			}
-		},
-
-		validate: function(){
-			this.model = this.nsForm.model;
-			return this.nsForm.butClickSave();
 		},
 
 
@@ -167,8 +155,6 @@ define([
 
 			if(this.nsForm){
 				this.nsForm.destroy();
-				this.parent.unbindRequiredFields();
-				this.parent.disableNextBtn();
 			}
 			
 			this.ui.staForm.empty();
@@ -181,13 +167,23 @@ define([
 				displayMode: 'edit',
 				objectType: stTypeId,
 				id: 0,
-				reloadAfterSave : false,
-				afterShow: function(){
-					_this.parent.bindRequiredFields();
-				}
 			});
+
+			this.nsForm.savingSuccess =  function(model, resp){
+				_this.afterSave(model, resp);
+			}
 			
 			this.rdy = this.nsForm.jqxhr;
 		},
+
+		afterSave: function(model, resp){
+			var id = model.get('ID');
+			Backbone.history.navigate('#stations/' + id, {trigger: true});
+		},
+
+		save: function(){
+			this.nsForm.butClickSave();
+		},
+
 	});
 });
