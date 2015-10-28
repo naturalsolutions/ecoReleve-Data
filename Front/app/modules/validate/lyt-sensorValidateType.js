@@ -66,8 +66,8 @@ define([
 
 					this.cols = [
 						{
-							name: 'UnicName',
-							label: 'UnicName ID',
+							name: 'UnicIdentifier',
+							label: 'Unic Identifier',
 							editable: false,
 							cell : 'string'
 						},{
@@ -155,7 +155,7 @@ define([
 							cell : 'string'
 						},{
 							name: 'FK_ptt',
-							label: 'Unique',
+							label: 'Unic Identifier',
 							editable: false,
 							cell : 'string'
 						}, {
@@ -216,7 +216,7 @@ define([
 							cell : 'string'
 						},{
 							name: 'FK_ptt',
-							label: 'Unique',
+							label: 'Unic Identifier',
 							editable: false,
 							cell : 'string'
 						}, {

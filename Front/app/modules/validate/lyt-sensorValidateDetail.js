@@ -53,7 +53,6 @@ define([
 			this.translater = Translater.getTranslater();
 			this.type = options.type;
 
-
 			this.com = new Com();
 			this.model = options.model;
 
@@ -62,8 +61,6 @@ define([
 			this.sensorId = this.model.get('FK_Sensor');
 
 			this.frequency = options.frequency;
-
-
 
 			this.navbar = new Navbar({
 				parent: this,
@@ -111,22 +108,22 @@ define([
 			});
 		},
 
+		clone: function(){
+			this.origin	= this.grid.collection.fullCollection.clone();
+		},
 
 		//initialize the frequency
 		initFrequency: function(){
-			if(this.frequency && this.frequency != 'all'){
+			if(this.frequency){
 				this.ui.frequency.find('option[value="' + this.frequency + '"]').prop('selected', true);
 			}else{
 				this.frequency = this.ui.frequency.val();
 			}
-
-
 			this.perHour(this.frequency);
-
 		},
 
-
 		displayGrid: function(){
+			var _this = this;
 			var myCell = Backgrid.NumberCell.extend({
 				decimals: 5,
 				orderSeparator: ' ',
@@ -179,14 +176,14 @@ define([
 					}
 				}),
 			},{
-				name: 'type_',
+				name: 'type',
 				label: 'Type',
 				renderable : this.showTypeCol,
 				editable: false,
 				formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
 					fromRaw: function (rawValue, model) {
 							if (rawValue=='arg') {
-								rawValue='Argos';
+								rawValue ='Argos';
 							}
 							else{
 								rawValue = 'GPS'
@@ -209,7 +206,7 @@ define([
 				pagingServerSide: false,
 				columns : cols,
 				com: this.com,
-				pageSize: 1000,
+				pageSize: 2000,
 				url: url,
 				urlParams : this.urlParams,
 				rowClicked : false,
@@ -232,7 +229,9 @@ define([
 					mod.trigger("backgrid:select", mod, true);
 				}
 			};
-
+			this.grid.onceFetched = function(){
+				_this.clone();
+			};
 			this.grid.selectMultiple = function (ids) {
 				var model_ids = ids, self = this, mod;
 				for (var i = 0; i < model_ids.length; i++) {
@@ -328,27 +327,29 @@ define([
 		perHour: function(frequency) {
 			this.grid.interaction('resetAll');
 			var _this = this;
-			var origin = this.grid.grid.collection.fullCollection.clone();
-			frequency = parseInt(frequency);
 
 			if (frequency !='all'){
-				var col0 = origin.at(0);
+				frequency = parseInt(frequency);
+				var col0 = this.origin.at(0);
 
-				var date = new moment(col0.get('date'));
-				var groups = origin.groupBy(function(model){
-					var curr = new moment(model.get('date'));
+				var date = new moment(col0.get('date'),'DD/MM/YYYY HH:mm:ss');
+				var groups = this.origin.groupBy(function(model){
+					var curr = new moment(model.get('date'),'DD/MM/YYYY HH:mm:ss');
 					return _this.roundDate( curr, moment.duration(frequency, 'minutes') );
 				});
 				var ids =[];
 				var i =0;
 				for (var rangeDate in groups) {
-					var tmp = groups[rangeDate][0].get('PK_id');
+					var curLength = groups[rangeDate].length;
+					var tmp = groups[rangeDate][curLength-1].get('PK_id');
 					ids.push(tmp);
 				}
 					this.grid.interaction('selectionMultiple', ids);
-				} else {
-
-				}
+			} else {
+				console.log('frequency select all')
+				var ids = this.grid.collection.pluck('PK_id');
+				this.grid.interaction('selectionMultiple', ids);
+			}
 		},
 
 		updateFrequency: function(e){
