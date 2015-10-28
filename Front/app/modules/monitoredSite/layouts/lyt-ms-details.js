@@ -28,8 +28,8 @@ define([
 			'click #hideDetails' : 'hideDetail',
 			'click #showDetails'  : 'showDetail',
 			'click .tab-link' : 'displayTab',
-
 		},
+
 		ui: {
 			'grid': '#grid',
 			'gridEquipment': '#gridEquipment',
@@ -44,7 +44,6 @@ define([
 			'showHideCtr' :'#showDetails',
 			'formBtns' : '#formBtns'
 		},
-
 
 		regions: {
 			'rgNavbar': '#navbar'
@@ -85,7 +84,6 @@ define([
 			this.displayForm(this.monitoredSiteId);
 			this.displayGrid(this.monitoredSiteId);
 			this.displayMap();
-			// $(this.ui.showHideCtr).html('<span class="glyphicon glyphicon-chevron-right big"></span><span class="ID rotate">ID : '+this.monitoredSiteId+'</span>');
 		},
 
 		displayGrid: function(id){

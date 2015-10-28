@@ -10,8 +10,12 @@ define([
 	'ns_grid/model-grid',
 	'ns_map/ns_map',
 	'ns_form/NSFormsModuleGit',
+	'ns_navbar/ns_navbar',
 
-], function($, _, Backbone, Marionette, Swal, Translater, config, Com, NsGrid,NsMap, NsForm){
+], function($, _, Backbone, Marionette, Swal, Translater, config, 
+	Com, NsGrid, NsMap, NsForm,
+	Navbar
+){
 
 	'use strict';
 
@@ -37,10 +41,29 @@ define([
 			'showHideCtr' :'#showSensorDetails',
 			'formBtns' : '#formBtns'
 		},
+
+		regions: {
+			'rgNavbar': '#navbar'
+		},
+
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
-			this.sensorId = parseInt(options.id);
+			
+			this.model = options.model;
+			this.navbar = new Navbar({
+				parent: this,
+				globalGrid: options.globalGrid,
+				model: options.model,
+			});
+
+		},
+
+
+		reloadFromNavbar: function(model){
+			this.map.destroy();
+			this.ui.map.html('');
+			this.display(model);
 		},
 
 		onRender: function(){
@@ -48,11 +71,18 @@ define([
 		},
 
 		onShow : function(){
-			this.displayForm(this.sensorId);
-			this.displayMap();
-			$(this.ui.showHideCtr).html('<span class="glyphicon glyphicon-chevron-right big"></span><span class="ID rotate">ID : '+this.sensorId+'</span>');
-			this.displayGrid(this.sensorId);
+			this.rgNavbar.show(this.navbar);
+			this.display(this.model);
 		},
+
+		display: function(model){
+			this.model = model;
+			this.monitoredSiteId = this.model.get('ID');
+			this.displayForm(this.monitoredSiteId);
+			this.displayGrid(this.monitoredSiteId);
+			this.displayMap();
+		},
+
 		initMap: function(geoJson){
 			this.map = new NsMap({
 				geoJson: geoJson,
