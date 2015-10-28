@@ -18,7 +18,6 @@ from sqlalchemy.orm import query
 def uploadFilesGSM(request):
     #Import unchecked GSM data.
     response = 'Success'
-
     # detect if is a row file retrieve directly from mail 
     ptt_pattern = re.compile('[0]*(?P<platform>[0-9]+)g')
     eng_pattern = re.compile('[0]*(?P<platform>[0-9]+)e')
@@ -128,15 +127,11 @@ def insert_GPS(platform, csv_data) :
     ##### Build block insert statement and returning ID of new created stations #####
     if len(data_to_insert) != 0 :
         # stmt = Gsm.__table__.insert().values(data_to_insert)
-        print("--------------------------------\n\n")
-        print(data_to_insert)
         # result = DBSession.execute(stmt)
         data_to_insert.to_sql(Gsm.__table__.name, DBSession.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'] )
-        print('INSERTED')
-        result = list(map(lambda y: y[0], res))
+        # result = list(map(lambda y: y[0], res))
     # else : 
     #     result = []
-    # 
     return res
 
 # ------------------------------------------------------------------------------------------------------------------------- #
