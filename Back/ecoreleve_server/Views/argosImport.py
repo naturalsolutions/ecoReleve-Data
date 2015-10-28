@@ -18,12 +18,15 @@ from time import sleep
 import subprocess , psutil
 from pyramid.security import NO_PERMISSION_REQUIRED
 from datetime import datetime
+import ecoreleve_server
+from ..Models import ArgosGps,ArgosEngineering,DBSession, dbConfig
+import itertools
 
 
 def uploadFileArgos(request) :
     import getpass
     username =  getpass.getuser()
-    workDir = os.path.dirname(os.path.dirname(os.path.abspath(ecorelevesensor.__file__)))
+    workDir = os.path.dirname(os.path.dirname(os.path.abspath(ecoreleve_server.__file__)))
     tmp_path = os.path.join(workDir, "ecoReleve_import")
     import_path = os.path.join(tmp_path, "uploaded_file")
 
@@ -56,7 +59,7 @@ def uploadFileArgos(request) :
 def parseDSFileAndInsert(full_filename):
     import getpass
     username =  getpass.getuser()
-    workDir = os.path.dirname(os.path.dirname(os.path.abspath(ecorelevesensor.__file__)))
+    workDir = os.path.dirname(os.path.dirname(os.path.abspath(ecoreleve_server.__file__)))
     con_file = os.path.join(workDir,'init.txt')
     MTI_path = os.path.join(workDir,'MTIwinGPS.exe')
     out_path = os.path.join(workDir,"ecoReleve_import","Argos",os.path.splitext(os.path.basename(full_filename))[0])
@@ -177,8 +180,8 @@ def checkExistingEng(EngData) :
 def checkExistingGPS (GPSData) :
     GPSData['datetime'] = GPSData.apply(lambda row: np.datetime64(row['Date/Time']).astype(datetime), axis=1)
     GPSData['id'] = range(GPSData.shape[0])
-    maxDateGPS = GPSData['datetime'].max(axis=1)
-    minDateGPS = GPSData['datetime'].min(axis=1)
+    maxDateGPS = GPSData['datetime'].max()
+    minDateGPS = GPSData['datetime'].min()
     GPSData['Latitude(N)'] = np.round(GPSData['Latitude(N)'],decimals = 3)
     GPSData['Longitude(E)'] = np.round(GPSData['Longitude(E)'],decimals = 3)
 

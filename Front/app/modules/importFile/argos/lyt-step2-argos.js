@@ -14,7 +14,7 @@ define([
 	return Marionette.LayoutView.extend({
 
 		className: 'full-height', 
-		template: 'app/modules/importFile/gsm/templates/tpl-step2-argos.html',
+		template: 'app/modules/importFile/argos/templates/tpl-step2-argos.html',
 
 		name : 'step2 Argos',
 

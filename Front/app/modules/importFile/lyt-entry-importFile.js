@@ -16,7 +16,7 @@ define([
 	'./gsm/lyt-step1-gsm',
 	'./gsm/lyt-step2-gsm',
 
-	'./gsm/lyt-step1-gsm',
+	'./argos/lyt-step1-argos',
 
 ], function($, _, Backbone, Marionette, NewStepper, Step0,
 	Step1GPX,
