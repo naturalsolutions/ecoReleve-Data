@@ -38,7 +38,7 @@ class Station(Base,ObjectWithDynProp):
 
     ID = Column(Integer,Sequence('Stations__id_seq'), primary_key=True)
     StationDate =  Column(DateTime, index=True, nullable=False)
-    Name = Column( String)
+    Name = Column( String(250))
     LAT = Column(Numeric(9,5))
     LON = Column(Numeric(9,5))
     ELE = Column(Integer)
@@ -55,7 +55,7 @@ class Station(Base,ObjectWithDynProp):
     FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'), nullable=True)
 
     
-    Place = Column(String)
+    Place = Column(String(250))
 
     Station_FieldWorkers = relationship('Station_FieldWorker', backref='Station',cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON', name='_unique_constraint_lat_lon_date'),)
@@ -142,7 +142,7 @@ class StationDynPropValue(Base):
     ID = Column(Integer,Sequence('StationDynPropValue__id_seq'), primary_key=True)
     StartDate =  Column(DateTime,nullable=False)
     ValueInt =  Column(Integer)
-    ValueString =  Column(String)
+    ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
     ValueFloat =  Column(Float)
     FK_StationDynProp = Column(Integer, ForeignKey('StationDynProp.ID'))

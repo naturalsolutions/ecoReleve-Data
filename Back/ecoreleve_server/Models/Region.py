@@ -8,8 +8,8 @@ class Region(Base):
 
     __tablename__ = 'Region'
     ID =  Column(Integer,Sequence('Region__id_seq'), primary_key=True)
-    Country = Column(String)
-    Region = Column(String)
+    Country = Column(String(250))
+    Region = Column(String(250))
 
 # class Place(Base):
 

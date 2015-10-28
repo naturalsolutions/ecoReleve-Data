@@ -26,10 +26,10 @@ class Sensor (Base,ObjectWithDynProp) :
 
     __tablename__ = 'Sensor'
     ID = Column (Integer,Sequence('Sensor__id_seq'), primary_key = True)
-    UnicName = Column (String)
-    Model = Column(String)
-    Compagny = Column(String)
-    SerialNumber = Column(String)
+    UnicIdentifier = Column (String(250))
+    Model = Column(String(250))
+    Compagny = Column(String(250))
+    SerialNumber = Column(String(250))
     creationDate = Column (DateTime,nullable=False)
 
     FK_SensorType = Column(Integer, ForeignKey('SensorType.ID'))
@@ -64,8 +64,8 @@ class SensorDynProp (Base) :
 
     __tablename__ = 'SensorDynProp'
     ID = Column (Integer,Sequence('SensorDynProp__id_seq'), primary_key = True)
-    Name = Column (String,nullable=False)
-    TypeProp = Column(String,nullable=False)
+    Name = Column (String(250),nullable=False)
+    TypeProp = Column(String(250),nullable=False)
 
     SensorType_SensorDynProps = relationship('SensorType_SensorDynProp',backref='SensorDynProp')
     SensorDynPropValues = relationship('SensorDynPropValue',backref='SensorDynProp')
@@ -78,7 +78,7 @@ class SensorDynPropValue(Base):
     ID = Column(Integer,Sequence('SensorDynPropValue__id_seq'), primary_key=True)
     StartDate =  Column(DateTime,nullable=False)
     ValueInt =  Column(Integer)
-    ValueString =  Column(String)
+    ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
     ValueFloat =  Column(Float)
     FK_SensorDynProp = Column(Integer, ForeignKey('SensorDynProp.ID'))
@@ -102,7 +102,7 @@ class SensorType (Base,ObjectTypeWithDynProp) :
 
     __tablename__ = 'SensorType'
     ID = Column (Integer,Sequence('SensorType__id_seq'), primary_key = True)
-    Name = Column (String)
+    Name = Column (String(250))
     Status = Column(Integer)
 
     SensorType_SensorDynProp = relationship('SensorType_SensorDynProp',backref='SensorType')

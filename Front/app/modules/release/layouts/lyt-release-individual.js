@@ -13,7 +13,6 @@ define([
 	'SensorPicker',
 	'requirejs-text!modules/release/templates/tpl-sensor-picker.html',
 
-
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
 	Com, NsGrid, NsFilter, SensorPicker,tplSensorPicker
 ){
@@ -32,7 +31,7 @@ define([
 			'click #btnFilter' : 'filter',
 			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
-			'click #release' : 'release',
+			'click #release' : 'toolTipShow',
 			'click #addSensor' : 'addSensor',
 		},
 
@@ -53,6 +52,8 @@ define([
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
 			this.station = options.station;
+			this.releaseMethod = null;
+
 			var _this = this;
 			var mySensorPicker = SensorPicker.extend({
 				initialize: function(options) {
@@ -89,6 +90,7 @@ define([
 		onShow : function(){
 			this.displayFilter();
 			this.displayGrid(); 
+			Backbone.history.navigate('release/individuals',{trigger:false});
 		},
 
 		initGrid:function(){
@@ -178,6 +180,26 @@ define([
 				method: 'POST',
 				data : { IndividualList : JSON.stringify(col),StationID:this.station.get('ID'),releaseMethod: _this.releaseMethod },
 				context: this,
+			}).done(function(resp) {
+				if(resp.errors){
+					resp.title = 'An error occured';
+					resp.type = 'error';
+				}else{
+					resp.title = 'Success';
+					resp.type = 'success';
+					
+				}
+				resp.text = 'release: ' + resp.release;
+
+				//remove the model from the coll once this one is validated
+				var callback = function(){
+					Backbone.history.navigate('station/'+_this.station.get('ID'), {trigger: true});
+					//$('#back').click();
+				};
+				this.swal(resp, resp.type, callback);
+
+			}).fail(function(resp) {
+				this.swal(resp, 'error');
 			});
 		},
 
@@ -188,6 +210,62 @@ define([
 
 		hidePicker:function(){
 			this.sensorPicker.hidePicker();
+		},
+
+		swal: function(opt, type, callback){
+			var btnColor;
+			switch(type){
+				case 'success':
+					btnColor = 'green';
+					break;
+				case 'error':
+					btnColor = 'rgb(147, 14, 14)';
+					break;
+				case 'warning':
+					btnColor = 'orange';
+					break;
+				default:
+					return;
+					break;
+			}
+			
+			Swal({
+				title: opt.title || opt.responseText || 'error',
+				text: opt.text || '',
+				type: type,
+				showCancelButton: true,
+				confirmButtonColor: btnColor,
+				confirmButtonText: 'See Station',
+				cancelButtonColor: 'grey',
+				cancelButtonText: 'New Release',
+				closeOnConfirm: true,
+			},
+			function(isConfirm){
+				//could be better
+				if(isConfirm && callback){
+					callback();
+				}else{
+					Backbone.history.navigate('release', {trigger: true});
+				}
+			});
+		},
+
+		toolTipShow:function(e){
+			var _this = this;
+			$(e.target).tooltipList({
+
+                position: 'top',
+                //  pass avalaible options
+                availableOptions: [{'label':'direct release','val':1},{'label':'direct release grid 5x5','val':2},],
+                //  li click event
+                liClickEvent: $.proxy(function (liClickValue, origin, tooltip) {
+                console.log(liClickValue);
+                _this.releaseMethod = liClickValue;
+                _this.release();
+                //console.log(origin);
+                }, this),
+            });
+            $(e.target).tooltipster('show');
 		}
 	});
 });

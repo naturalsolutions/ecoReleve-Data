@@ -33,7 +33,7 @@ class MonitoredSitePosition(Base):
     ELE = Column(Integer)
     Precision = Column(Integer)
     StartDate = Column(DateTime)
-    Comments = Column(String)
+    Comments = Column(String(250))
     FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'))
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -41,8 +41,8 @@ class MonitoredSite (Base,ObjectWithDynProp) :
 
     __tablename__ = 'MonitoredSite'
     ID = Column (Integer,Sequence('MonitoredSite__id_seq'), primary_key = True)
-    Name = Column (String, nullable=False)
-    Category = Column(String, nullable=False)
+    Name = Column (String(250), nullable=False)
+    Category = Column(String(250), nullable=False)
     Creator = Column(Integer, nullable=False)
     Active = Column(BIT, nullable=False)
     creationDate = Column(DateTime,nullable=False)
@@ -141,7 +141,7 @@ class MonitoredSite (Base,ObjectWithDynProp) :
                     curDynPropName = list(self.PropDynValuesOfNow)[i]
                     resultat[curDynPropName] = self.GetProperty(curDynPropName)
                 except Exception as e :
-                    print_exc()
+                    # print_exc()
                     pass
         else : 
             max_iter = len( self.__table__.columns)
@@ -185,8 +185,8 @@ class MonitoredSiteDynProp (Base) :
 
     __tablename__ = 'MonitoredSiteDynProp'
     ID = Column (Integer,Sequence('MonitoredSiteDynProp__id_seq'), primary_key = True)
-    Name = Column (String,nullable=False)
-    TypeProp = Column(String,nullable=False)
+    Name = Column (String(250),nullable=False)
+    TypeProp = Column(String(100),nullable=False)
 
     MonitoredSiteType_MonitoredSiteDynProps = relationship('MonitoredSiteType_MonitoredSiteDynProp',backref='MonitoredSiteDynProp')
     MonitoredSiteDynPropValues = relationship('MonitoredSiteDynPropValue',backref='MonitoredSiteDynProp')
@@ -199,7 +199,7 @@ class MonitoredSiteDynPropValue(Base):
     ID = Column(Integer,Sequence('MonitoredSiteDynPropValue__id_seq'), primary_key=True)
     StartDate =  Column(DateTime,nullable=False)
     ValueInt =  Column(Integer)
-    ValueString =  Column(String)
+    ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
     ValueFloat =  Column(Float)
     FK_MonitoredSiteDynProp = Column(Integer, ForeignKey('MonitoredSiteDynProp.ID'))
@@ -223,7 +223,7 @@ class MonitoredSiteType (Base,ObjectTypeWithDynProp) :
 
     __tablename__ = 'MonitoredSiteType'
     ID = Column (Integer,Sequence('MonitoredSiteType__id_seq'), primary_key = True)
-    Name = Column (String)
+    Name = Column (String(250))
     Status = Column(Integer)
 
     MonitoredSiteType_MonitoredSiteDynProp = relationship('MonitoredSiteType_MonitoredSiteDynProp',backref='MonitoredSiteType')

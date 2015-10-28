@@ -25,7 +25,6 @@ def uploadFileArgos(request) :
     import getpass
     username =  getpass.getuser()
     print ('*********************** UPLOAD ARGOS **************************')
-    import getpass
     username =  getpass.getuser()
     workDir = os.path.dirname(os.path.dirname(os.path.abspath(ecoreleve_server.__file__)))
     tmp_path = os.path.join(workDir, "ecoReleve_import")

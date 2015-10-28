@@ -13,7 +13,6 @@ def integers(*segment_names):
                 print (segment_names)
                 match[segment_name] = int(match[segment_name])
                 if int(match[segment_name]) == 0 :
-                    print(' ****** ACTIONS FORMS ******')
                     return False
             except (TypeError, ValueError):
                 return False
@@ -68,7 +67,7 @@ def add_routes(config):
     
     # -----------------------------##### Sensors datas (Argos + GSM + RFID) #####----------------------------------------------------- #
     
-    config.add_route('sensors/import', 'ecoReleve-Core/sensors/{type}/')
+    config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
     config.add_route('sensors/uncheckedDatas', 'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
 
