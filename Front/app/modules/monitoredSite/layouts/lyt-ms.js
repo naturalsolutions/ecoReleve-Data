@@ -12,7 +12,10 @@ define([
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
 
-	'./lyt-ms-details'
+
+	'./lyt-ms-details',
+
+
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
 	Com, NsGrid, NsFilter, LytMsDetail
@@ -21,18 +24,10 @@ define([
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-		/*===================================================
-		=            Layout Stepper Orchestrator            =
-		===================================================*/
 
 		template: 'app/modules/monitoredSite/templates/tpl-ms.html',
 		className: 'full-height animated white rel',
 
-		events : {
-			'click #btnFilter' : 'filter',
-			'click #back' : 'hideDetails',
-			'click button#clear' : 'clearFilter'
-		},
 
 		ui: {
 			'grid': '#grid',
@@ -40,6 +35,12 @@ define([
 			'filter': '#filter',
 			'detail': '#detail',
 			'totalEntries': '#totalEntries',
+		},
+
+		events : {
+			'click #btnFilter' : 'filter',
+			'click #back' : 'hideDetails',
+			'click button#clear' : 'clearFilter'
 		},
 
 		regions: {
@@ -70,48 +71,13 @@ define([
 		displayGrid: function(){
 			var _this = this;
 			this.grid = new NsGrid({
-				pageSize: 13,
+				pageSize: 20,
 				pagingServerSide: true,
 				com: this.com,
 				url: config.coreUrl+'monitoredSite/',
 				urlParams : this.urlParams,
 				rowClicked : true,
-				totalElement : 'monitoredSite-count',
-				onceFetched: function(params){
-					var listPro = {};
-					var idList  = [];
-					this.collection.each(function(model){
-						idList.push(model.get('ID'));
-					});
-					idList.sort();
-					listPro.idList = idList;
-					listPro.minId = idList[0];
-					listPro.maxId = idList [(idList.length - 1)];
-					listPro.state = this.collection.state;
-					listPro.criteria = $.parseJSON(params.criteria);
-					window.app.listProperties = listPro ;
-					_this.totalEntries(this.grid);
-
-					/*window.app.temp = this;
-
-					_this.totalEntries(this.grid);
-					var rows = this.grid.body.rows;
-					if(_this.currentRow){
-						for (var i = 0; i < rows.length; i++) {
-							if(rows[i].model.attributes.ID == _this.currentRow.model.attributes.ID){
-								_this.currentRow = rows[i];
-								rows[i].$el.addClass('active');
-								return rows[i];
-							}
-						}
-					}else{
-						var row = this.grid.body.rows[0];
-						if(row){
-							_this.currentRow = row;
-							row.$el.addClass('active');
-						}
-					}*/
-				}
+				totalElement : 'totalEntries',
 			});
 
 			this.grid.rowClicked = function(args){
@@ -122,6 +88,20 @@ define([
 			};
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
+		},
+
+		rowClicked: function(row){
+			this.detail.show(new LytMsDetail({
+				model : row.model,
+				globalGrid: this.grid
+			}));
+			this.ui.detail.removeClass('hidden');
+			this.grid.currentRow = row;
+			this.grid.upRowStyle();
+			//Backbone.history.navigate('monitoredSite/'+id, {trigger: false})
+		},
+		rowDbClicked: function(row){
+
 		},
 
 		displayFilter: function(){
@@ -137,17 +117,6 @@ define([
 		},
 		clearFilter : function(){
 			this.filters.reset();
-		},
-		rowClicked: function(row){
-			var id = row.model.get('ID');
-			this.detail.show(new LytMsDetail({id : id}));
-			this.ui.detail.removeClass('hidden');
-
-			Backbone.history.navigate('monitoredSite/'+id, {trigger: false})
-		},
-
-		rowDbClicked: function(row){
-
 		},
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');

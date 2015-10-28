@@ -8,70 +8,96 @@ define([
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
+	'ns_map/ns_map',
+
+	'./lyt-station-detail',
 
 	'i18n'
 
-], function($, _, Backbone, Marionette, Swal, config, Com, NSGrid, NSFilter
+], function($, _, Backbone, Marionette, Swal, config, Com, NSGrid, NSFilter, NsMap,
+	LytStationsEdit
 ){
 
 	'use strict';
 
 	return Marionette.LayoutView.extend({
 
-		className: 'full-height', 
+		className: 'full-height white rel', 
 
-		template: 'app/modules/stations/edit/templates/tpl-station-edit.html',
+		template: 'app/modules/stations/templates/tpl-stations.html',
+
+
+		
 		events: {
 			'click button#submit' : 'filter',
-			'click .tab-link' : 'displayTab'
+			'click .tab-link' : 'displayTab',
+			'click #back' : 'hideDetails',
+			'click button#activeGridPanel' : 'activeGridPanel',
+			'click button#activeMapPanel' : 'activeMapPanel',
 		},
 
 		ui: {
 			'stationId': '#stationId',
 			'totalEntries': '#totalEntries',
-			'filters' : '#filters'
+			'filters' : '#filters',
+			'detail': '#detail',
+			'gridPanel' : '#gridPanel',
+			'mapPanel' : '#mapPanel',
+			'btnGridPanel' : 'button#activeGridPanel',
+			'btnMapPanel' : 'button#activeMapPanel',
 		},
+
 		regions: {
 			gridRegion: '#grid',
-			paginatorRegion : '#paginator'
+			paginatorRegion : '#paginator',
+			detail : '#detail'
 		},
 
-		name: 'Sation selection',
 
-		onDestroy: function(){
-		},
-
-		validate: function(){
-			this.model = this.currentRow.model;
-			return true;
-		},
-
-		/*==========  2 DO : Set the first station id  ==========*/
-		
-		check: function(){
-			if(this.currentRow){
-				return true;
-			}else{
-				return false;
-			}
-		},
 
 		initialize: function(options){
+
+			if(options.id){
+				this.stationId = options.id;
+			}
+
 			this.com = new Com();
 			var url = config.coreUrl+'stations/';
 			this.initGrid(url);
-			this.parent = options.parent;
+		},
+
+		activeGridPanel: function(e){
+			this.ui.mapPanel.removeClass('active');
+			this.ui.gridPanel.addClass('active');
+
+			this.ui.btnMapPanel.removeClass('active');
+			this.ui.btnGridPanel.addClass('active');
+		},
+
+		activeMapPanel: function(e){
+			this.ui.gridPanel.removeClass('active');
+			this.ui.mapPanel.addClass('active');
+
+			this.ui.btnGridPanel.removeClass('active');
+			this.ui.btnMapPanel.addClass('active');
+		},
+
+		displayMap: function(){
+			this.map = new NsMap({
+				url: config.coreUrl + 'stations/?geo=true',
+				cluster: true,
+				//com: this.com,
+				zoom: 3,
+				element : 'map',
+				popup: true,
+			});
+			//this.map.initErrorWarning('<i>There is too much datas to display on the map. <br /> Please be more specific in your filters.</i>');
 		},
 
 		initGrid: function(url,params){
 			var _this = this;
 			this.urlParams = params ||{};
-			var myCell = Backgrid.NumberCell.extend({
-				decimals: 5
-			});
-			if(this.grid){
 
-			}
 			this.grid = new NSGrid({
 				pageSize: 20,
 				pagingServerSide: true,
@@ -81,27 +107,6 @@ define([
 				urlParams : this.urlParams,
 				rowClicked : true,
 				totalElement : 'stations-count',
-				onceFetched: function(){
-					window.app.temp = this;
-
-					_this.totalEntries(this.grid);
-					var rows = this.grid.body.rows;
-					if(_this.currentRow){
-						for (var i = 0; i < rows.length; i++) {
-							if(rows[i].model.attributes.ID == _this.currentRow.model.attributes.ID){
-								_this.currentRow = rows[i];
-								rows[i].$el.addClass('active');
-								return rows[i];
-							}
-						}
-					}else{
-						var row = this.grid.body.rows[0];
-						if(row){
-							_this.currentRow = row;
-							row.$el.addClass('active');
-						}
-					}
-				},
 			});
 			this.grid.rowClicked = function(args){
 				_this.rowClicked(args.row);
@@ -119,13 +124,18 @@ define([
 		onShow : function(){
 			this.displayGrid();
 			this.displayFilters();
-			window.app.filter = this.filters.model;
+			this.displayMap();
+
+			if(this.stationId){
+				this.detail.show(new LytStationsEdit({
+					stationId: this.stationId
+				}));
+				this.ui.detail.removeClass('hidden');
+			}
 		},
 
 		displayGrid: function(){
 			var _this= this;
-			//could be in the module
-			/*this.$el.find('#grid').html(_this.grid.displayGrid());*/
 			this.gridRegion.show(this.grid.getGridView());
 			this.$el.find('#paginator').html(_this.grid.displayPaginator());
 		},
@@ -140,18 +150,27 @@ define([
 			});
 		},
 
+
+
 		rowClicked: function(row){
-			//set station id
-			if(this.currentRow){
-				this.currentRow.$el.removeClass('active');
-			}
-			row.$el.addClass('active');
-			this.currentRow = row;
+			this.detail.show(new LytStationsEdit({
+				model : row.model,
+				globalGrid: this.grid
+			}));
+			var id = row.model.get('ID');
+			Backbone.history.navigate('#stations/' + id, {trigger: false});
+			this.ui.detail.removeClass('hidden');
+			this.grid.currentRow = row;
+			this.grid.upRowStyle();
 		},
 
 		rowDbClicked : function(row){
 			this.rowClicked(row);
-			this.parent.next();
+		},
+
+		hideDetails : function(){
+			Backbone.history.navigate('#stations/', {trigger: false});
+			this.ui.detail.addClass('hidden');
 		},
 
 		filter: function(e){
@@ -175,18 +194,14 @@ define([
 				type = true;
 				typeObj= 4;
 			}
-			//this.initGrid(url, params);
-			// this.grid.fetchCollection(url, params);
+
 			$('#filters').empty();
 
 			_this.displayFilters(typeObj);
 			var callback = function(){
 				_this.filter();
 			};
-
 			this.grid.lastImportedUpdate(type, callback);
-			
-
 		},
 	});
 });

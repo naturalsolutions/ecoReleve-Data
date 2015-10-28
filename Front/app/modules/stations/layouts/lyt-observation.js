@@ -20,7 +20,7 @@ define([
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-		template: 'app/modules/stations/manager/templates/tpl-observation.html',
+		template: 'app/modules/stations/templates/tpl-observation.html',
 
 		ui: {
 			'stationForm' : '#stationForm',

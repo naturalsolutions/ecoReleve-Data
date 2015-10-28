@@ -5,15 +5,17 @@
 
 **/
 
-
-define(['marionette', 'config'],
-function(Marionette, config) {
+define(['marionette', 'config', './lyt-breadCrumb'],
+function(Marionette, config, Breadcrumb) {
 	'use strict';
 	return Marionette.LayoutView.extend({
 		template: 'app/base/header/tpl-header.html',
 		className: 'header',
 		events: {
 			'click #logout' : 'logout',
+		},
+		regions: {
+			'breadcrumb': '#breadcrumb'
 		},
 
 		logout: function(){
@@ -26,7 +28,7 @@ function(Marionette, config) {
 		},
 
 		onShow: function(){
-			
+			this.breadcrumb.show(new Breadcrumb());
 		},
 	});
 });

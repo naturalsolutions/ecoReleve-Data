@@ -18,8 +18,27 @@ main{
 .white{
 	background: white;
 }
+
+.black{
+	background: black;
+}
+
 .color-white{
 	color: white;
+}
+
+.outer-left{
+	position: relative;
+	left: -100%;
+}
+
+.outer-right{
+	position: relative;
+	right: -100%;
+}
+
+.oh{
+	overflow: hidden;
 }
 
 .btn-circle{
@@ -65,6 +84,9 @@ a{
 		text-decoration: none;
 		color: inherit;
 	}
+	&.whitev:visited{
+		color: white;
+	}
 }
 
 .no-padding, .ns-no-padding{
@@ -84,9 +106,10 @@ span.bull-warn{
 	font-size: 1.3em;
 }
 
-.tab-content.all-stations {
+//???
+/* .tab-content.all-stations {
 	height: 0;
-}
+} */
 
 @media (max-width: @screen-md-min) {
 	.full-height{

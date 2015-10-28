@@ -14,9 +14,8 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'individual(/):id' : 'individual',
 
 			'stations(/)' : 'stations',
-			'station(/):id': 'station',
-			'newStation(/)': 'newStation',
-			'editStations(/)': 'editStations',
+			'stations/new(/)': 'newStation',
+			'stations(/):id': 'stations',
 
 			'sensor(/)' : 'sensor',
 

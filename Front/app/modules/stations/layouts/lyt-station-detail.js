@@ -12,11 +12,11 @@ define([
 	'simplePagination',
 
 	'ns_form/NSFormsModuleGit',
-
+	'ns_navbar/ns_navbar',
 	'i18n'
 
 ], function($, _, Backbone, Marionette, Radio, LytProto,
-	Swal, config, simplePagination, NsForm
+	Swal, config, simplePagination, NsForm, Navbar
 ){
 
 	'use strict';
@@ -25,13 +25,14 @@ define([
 
 		className: 'full-height white',
 
-		template: 'app/modules/stations/manager/templates/tpl-station-manager.html',
+		template: 'app/modules/stations/templates/tpl-station-detail.html',
 
 		name : 'Protocol managing',
 
 		regions: {
-			rgStation: '#rgStation',
-			rgProtos : '#rgProtos'
+			'rgStation': '#rgStation',
+			'rgProtos' : '#rgProtos',
+			'rgNavbar': '#navbar'
 		},
 
 		ui: {
@@ -44,21 +45,20 @@ define([
 
 		events : {
 			'click #addProto' : 'addProtoFromList',
-			'click #prevStation' : 'prevStation',
-			'click #nextStation' : 'nextStation'
 		},
 
 		total : 0,
 
 		initialize: function(options){
-			if(options.id){
-				this.stationId = options.id;
+			if(options.stationId){
+				this.stationId = options.stationId
 			}else{
-				this.stationId = options.model.get('ID');
-					if(window.app.temp){
-						var coll = window.app.temp.collection;
-						this.stationIndex = coll.indexOf(options.model);
-					}
+				this.model = options.model;
+				this.navbar = new Navbar({
+					parent: this,
+					globalGrid: options.globalGrid,
+					model: options.model,
+				});
 			}
 		},
 
@@ -76,32 +76,30 @@ define([
 		},
 
 		onShow: function(){
-			var _this = this;
-			this.displayStation(this.stationId);
-			this.feedProtoList();
+			if(this.stationId){
+				this.displayStation(this.stationId);
+				this.feedProtoList();
+			}else{
+				this.rgNavbar.show(this.navbar);
+				this.display(this.model);
+
+			}
 			//this.$el.i18n();
 			//this.translater = Translater.getTranslater();
 		},
 
-		prevStation: function(e){
-			if(window.app.temp){
-				var coll = window.app.temp;
-				if(this.stationIndex != 0)
-					this.stationIndex--;
-				this.stationId = coll.collection.models[this.stationIndex].get('ID');
-				this.onShow();
-			}
+		reloadFromNavbar: function(model){
+			this.display(model);
 		},
 
-		nextStation: function(e){
-			if(window.app.temp){
-				var coll = window.app.temp;
-				if(this.stationIndex <= coll.collection.models.length)
-					this.stationIndex++;
-				this.stationId = coll.collection.models[this.stationIndex].get('ID');
-				this.onShow();
-			}
+		display: function(model){
+			this.model = model;
+			this.stationId = this.model.get('ID');
+			this.displayStation(this.stationId);
+			this.feedProtoList();
 		},
+
+
 
 		displayStation: function(stationId){
 			this.total = 0;
