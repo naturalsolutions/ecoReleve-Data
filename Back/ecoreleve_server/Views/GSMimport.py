@@ -1,7 +1,7 @@
 from pyramid.response import Response
 from pyramid.view import view_config
 from sqlalchemy import desc, select, func,text, insert, join, Integer, cast, and_, Float, or_,bindparam, update, outerjoin
-from ..Models import Gsm, GsmEngineering, DBSession, Base
+from ..Models import Gsm, GsmEngineering, DBSession, Base , dbConfig
 from ..utils.distance import haversine
 from ..utils.data_toXML import data_to_XML
 from traceback import print_exc
@@ -12,6 +12,8 @@ import datetime, time
 import transaction
 import json
 from sqlalchemy.orm import query
+import itertools
+
 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -128,6 +130,9 @@ def insert_GPS(platform, csv_data) :
     if len(data_to_insert) != 0 :
         # stmt = Gsm.__table__.insert().values(data_to_insert)
         # result = DBSession.execute(stmt)
+        data_to_insert.loc[:,('checked')]=list(itertools.repeat(0,len(data_to_insert.index)))
+        data_to_insert.loc[:,('imported')]=list(itertools.repeat(0,len(data_to_insert.index)))
+        data_to_insert.loc[:,('validated')]=list(itertools.repeat(0,len(data_to_insert.index)))
         data_to_insert.to_sql(Gsm.__table__.name, DBSession.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'] )
         # result = list(map(lambda y: y[0], res))
     # else : 
@@ -195,7 +200,6 @@ def insert_ENG(platform, csv_data):
         else : 
             res = {'new Engineering data inserted' : 0}
     data_to_insert[GsmEngineering.file_date.name] = datetime.datetime.now()
-    print (data_to_insert.columns)
     # Write into the database
     data_to_insert.to_sql(GsmEngineering.__table__.name, DBSession.get_bind(), if_exists='append',schema = dbConfig['sensor_schema'])
     return res

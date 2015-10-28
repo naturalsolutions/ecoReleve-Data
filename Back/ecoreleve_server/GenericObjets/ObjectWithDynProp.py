@@ -270,6 +270,7 @@ class ObjectWithDynProp:
                     curEditable = True
 
                 resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)))
+                
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):
@@ -294,5 +295,15 @@ class ObjectWithDynProp:
             resultat['data']['id'] = self.ID
         else :
             resultat['data']['id'] = 0
+            # add default values for each field in data if exists
+            #for attr in schema:
+            for key, value in schema.items():
+                #print (key)
+                #print (value['defaultValue'])
+                if value['defaultValue'] is not None:
+                    print (key)
+                    print (value['defaultValue'])
+                    resultat['data'][key] = value['defaultValue']
+                #print (attr.defaultValue)
         return resultat
 

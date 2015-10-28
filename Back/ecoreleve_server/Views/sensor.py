@@ -5,7 +5,9 @@ from ..Models import (
     SensorType,
     SensorDynPropValue,
     SensorDynProp,
-    Equipment
+    Equipment,
+    Individual,
+    MonitoredSite
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -15,7 +17,7 @@ from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE,func,desc,join, distinct
+from sqlalchemy import select, and_,cast, DATE,func,desc,join, distinct,outerjoin
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
@@ -39,7 +41,8 @@ def actionOnSensors(request):
     'getModels' : getSensorModels,
     'getCompany' : getCompany,
     'getSerialNumber' : getSerialNumber,
-    'getSensorType' : getSensorType
+    'getSensorType' : getSensorType,
+    'getUnicIdentifier' : getUnicIdentifier
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -108,6 +111,12 @@ def getSerialNumber (request):
     response = getData(query)
     return response
 
+def getUnicIdentifier (request):
+    sensorType = request.params['sensorType']
+    query = select([Sensor.UnicIdentifier.label('label'),Sensor.ID.label('val')]).where(Sensor.FK_SensorType == sensorType)
+    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    return response
+
 def getData(query):
     result = DBSession.execute(query).fetchall()
     response = []
@@ -162,23 +171,13 @@ def getSensor(request):
 
 @view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getSensorHistory(request):
-    
+    print('sensor history******************')
     id = request.matchdict['id']
-    query = select([Equipment.ID, Equipment.FK_Individual, Equipment.FK_MonitoredSite, Equipment.StartDate, Equipment.Deploy]).where(Equipment.ID == id)
-    result = DBSession.execute(query).fetchall()
-    response = []
-    for row in result:
-        print(row)
-        deploy = row[4]
-        status = 'deployed'
-        if deploy == 0:
-            status = 'removed'
-        ele = {}
-        ele['individual_id'] = row[1]
-        ele['site_id'] = row[2]
-        ele['start_date'] = row[3]
-        ele['status'] = status
-        response.append(ele)
+    joinTable = outerjoin(Equipment,Individual,Equipment.FK_Individual==Individual.ID).outerjoin(MonitoredSite,Equipment.FK_MonitoredSite==MonitoredSite.ID)
+    query = select([Equipment.ID, Individual.UnicIdentifier, MonitoredSite.Name, Equipment.StartDate, Equipment.Deploy]
+        ).select_from(joinTable).where(Equipment.FK_Sensor == id)
+    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    # response = list(map(lambda row['Deploy'] : 'Deployed' if row['Deploy'] else 'Removed' , response))
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
