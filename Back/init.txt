@@ -1,0 +1,5 @@
+-eng
+-title
+-out
+c:\users\ktalbi\documents\github\ecoreleve-data\back\ecoReleve_import\Argos\CD-ROM_5419_1_01_2_DB_DS2
+c:\users\ktalbi\documents\github\ecoreleve-data\back\ecoReleve_import\uploaded_file\CD-ROM_5419_1_01_2_DB_DS2.txt

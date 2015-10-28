@@ -36,7 +36,7 @@ define([
 				var previewTemplate = previewNode.parentNode.innerHTML;
 				previewNode.parentNode.removeChild(previewNode);
 				var myDropzone = new Dropzone(this.el, {
-					url: config.coreUrl + 'dataGsm/upload', // Set the url
+					url: config.coreUrl + 'sensors/gsm/datas', // Set the url
 					thumbnailWidth: 80,
 					thumbnailHeight: 80,
 					parallelUploads: 8,
