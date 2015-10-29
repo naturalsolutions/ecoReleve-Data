@@ -3,8 +3,8 @@ define(['marionette', 'config',
 	'./base/home/lyt-home',
 
 	/*==========  modules  ==========*/
-	'./modules/export/layouts/export-layout',
-
+/*	'./modules/export/layouts/export-layout',
+*/
 	'./modules/stations/layouts/lyt-stations',
 	'./modules/stations/layouts/lyt-station-new',
 
@@ -25,8 +25,8 @@ define(['marionette', 'config',
 	LytHome,
 
 	/*==========  modules  ==========*/
-	LytExport,
-
+/*	LytExport,
+*/
 	LytStations,
 	LytStationsNew,
 
@@ -60,10 +60,6 @@ define(['marionette', 'config',
 		home: function() {
 			Backbone.history.navigate('');
 			this.rgMain.show(new LytHome());
-		},
-		
-		export: function(){
-			this.rgMain.show(new LytExport());
 		},
 
 		importFile: function(){
@@ -106,6 +102,10 @@ define(['marionette', 'config',
 
 		release: function(){
 			this.rgMain.show(new LytReleaseStation());
+		},
+		
+		export: function(){
+			//this.rgMain.show(new LytExport());
 		},
 
 	});
