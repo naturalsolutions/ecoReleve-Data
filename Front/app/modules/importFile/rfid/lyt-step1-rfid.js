@@ -25,6 +25,9 @@ define([
 		template: 'app/modules/importFile/rfid/templates/tpl-step1-rfid.html',
 
 		name : 'RFID decoder selection',
+		events: {
+			'change #rfidId' : 'updateGrid',
+		},
 
 		initialize: function(){
 		},
@@ -33,7 +36,43 @@ define([
 		},
 
 		onShow : function(){
-			var columns = [{
+
+			//this.parseOneTpl(this.template);
+			var obj={name : this.name + '_RFID_identifer',required : true};
+			this.stepAttributes = [obj] ;
+
+			var content ='';
+			var self = this;
+			$.ajax({
+				context: this,
+				url: config.coreUrl + 'sensors/getUnicIdentifier',
+				data: {sensorType : 3},
+			}).done( function(data) {
+				var len = data.length;
+				self.SensorID = data[0]['val'];
+				for (var i = 0; i < len; i++) {
+					var label = data[i]['label'];
+					var val = data[i]['val'];
+					content += '<option value="' + val +'">'+ label +'</option>';
+				}
+				$('select[name="RFID_identifer"]').append(content);
+				//this.feedTpl() ;
+			})
+			.fail( function() {
+				alert("error loading items, please check connexion to webservice");
+			});
+
+		},
+
+		onDestroy: function(){
+		},
+
+
+		validate: function(){
+
+		},
+		updateGrid : function(){
+						var columns = [{
 				name: 'PK_obj',
 				label: 'ID',
 				editable: false,
@@ -70,42 +109,14 @@ define([
 			}];
 			this.grid= new NsGrid({
 				columns: columns,
-				url: config.coreUrl + 'rfid/pose/',
+				url: config.coreUrl + 'sensors/'+this.SensorID+'/history',
 				pageSize : 20,
 				pagingServerSide : false,
 			});
-			//this.parseOneTpl(this.template);
-			var obj={name : this.name + '_RFID_identifer',required : true};
-			this.stepAttributes = [obj] ;
-
-			var content ='';
-			$.ajax({
-				context: this,
-				url: config.coreUrl + 'rfid',
-			}).done( function(data) {
-				var len = data.length;
-				for (var i = 0; i < len; i++) {
-					var label = data[i].identifier;
-					content += '<option value="' + label +'">'+ label +'</option>';
-				}
-				$('select[name="RFID_identifer"]').append(content);
-				this.feedTpl() ;
-			})
-			.fail( function() {
-				alert("error loading items, please check connexion to webservice");
-			});
-
 			this.$el.find('#grid').html(this.grid.displayGrid());
-			this.$el.find('#paginator').prepend(this.grid.displayPaginator());
-		},
+			this.$el.find('#paginator').html('').prepend(this.grid.displayPaginator());
+		}
 
-		onDestroy: function(){
-		},
-
-
-		validate: function(){
-
-		},
 
 
 	});
