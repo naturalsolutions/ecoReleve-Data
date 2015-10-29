@@ -57,8 +57,7 @@ define([
 			}
 
 			this.com = new Com();
-			var url = config.coreUrl+'stations/';
-			this.initGrid(url);
+			
 		},
 
 		activeGridPanel: function(e){
@@ -91,6 +90,7 @@ define([
 
 		initGrid: function(url,params){
 			var _this = this;
+			var url = config.coreUrl+'stations/';
 			this.urlParams = params ||{};
 
 			this.grid = new NSGrid({
@@ -113,6 +113,7 @@ define([
 
 
 		onShow : function(){
+			this.initGrid();
 			this.displayGrid();
 			this.displayFilters();
 			this.displayMap();

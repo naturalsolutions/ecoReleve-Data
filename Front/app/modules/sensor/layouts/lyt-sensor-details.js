@@ -11,6 +11,7 @@ define([
 	'ns_map/ns_map',
 	'ns_form/NSFormsModuleGit',
 	'ns_navbar/ns_navbar',
+	'tooltipster-list',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config, 
 	Com, NsGrid, NsMap, NsForm,
@@ -77,9 +78,9 @@ define([
 
 		display: function(model){
 			this.model = model;
-			this.monitoredSiteId = this.model.get('ID');
-			this.displayForm(this.monitoredSiteId);
-			this.displayGrid(this.monitoredSiteId);
+			this.sensorId = this.model.get('ID');
+			this.displayForm(this.sensorId);
+			this.displayGrid(this.sensorId);
 			this.displayMap();
 		},
 

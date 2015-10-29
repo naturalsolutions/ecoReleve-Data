@@ -214,6 +214,7 @@ define([
 						}
 						if(true){
 							_this.upRowServerSide();
+							_this.upRowStyle();
 						}
 
 					};
