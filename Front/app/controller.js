@@ -3,8 +3,7 @@ define(['marionette', 'config',
 	'./base/home/lyt-home',
 
 	/*==========  modules  ==========*/
-/*	'./modules/export/layouts/export-layout',
-*/
+
 	'./modules/stations/layouts/lyt-stations',
 	'./modules/stations/layouts/lyt-station-new',
 
@@ -21,12 +20,13 @@ define(['marionette', 'config',
 	'./modules/validate/lyt-sensorValidateDetail',
 	'./modules/release/layouts/lyt-release-station',
 
+	'./modules/export/lyt-export-stepper',
+
 ],function( Marionette, config, 
 	LytHome,
 
 	/*==========  modules  ==========*/
-/*	LytExport,
-*/
+
 	LytStations,
 	LytStationsNew,
 
@@ -37,14 +37,14 @@ define(['marionette', 'config',
 	LytSensor,
 	LytSensorNew,
 
-
-
 	LytMonitoredSite,
 	LytSensorValidate,
 	LytSensorValidateType,
 	LytSensorValidateDetail,
 
-	LytReleaseStation
+	LytReleaseStation,
+
+	LytExport
 
 ){
 	'use strict';
@@ -105,7 +105,7 @@ define(['marionette', 'config',
 		},
 		
 		export: function(){
-			//this.rgMain.show(new LytExport());
+			this.rgMain.show(new LytExport());
 		},
 
 	});

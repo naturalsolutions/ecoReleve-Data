@@ -29,7 +29,7 @@ define([
 			'click table.backgrid td.select-row-cell input[type=checkbox]' : 'checkSelect',
 			'click table.backgrid th input' : 'checkSelectAll',
 			'click button#validate' : 'validate',
-			'change select#frequency' : 'updateFrequency'
+			'change select#frequency' : 'updateFrequency',
 		},
 
 		ui: {
@@ -67,6 +67,8 @@ define([
 				globalGrid: options.globalGrid,
 				model: this.model,
 			});
+
+			this.globalGrid = options.globalGrid;
 		},
 
 		onRender: function(){
@@ -108,9 +110,7 @@ define([
 			});
 		},
 
-		clone: function(){
-			this.origin	= this.grid.collection.fullCollection.clone();
-		},
+
 
 		//initialize the frequency
 		initFrequency: function(){
@@ -209,7 +209,7 @@ define([
 				pageSize: 2000,
 				url: url,
 				urlParams : this.urlParams,
-				rowClicked : false,
+				rowClicked : true,
 				totalElement : 'totalEntries',
 			});
 
@@ -242,11 +242,11 @@ define([
 				};
 			};
 
-			this.grid.rowClicked = function(row){
-				_this.rowClicked(row);
+			this.grid.rowClicked = function(args){
+				_this.rowClicked(args);
 			};
-			this.grid.rowDbClicked = function(row){
-				_this.rowDbClicked(row);
+			this.grid.rowDbClicked = function(args){
+				_this.rowDbClicked(args);
 			};
 
 			this.grid.clearAll = function () {
@@ -264,6 +264,12 @@ define([
 
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
+		},
+
+		rowClicked: function(args){
+			var row = args.row;
+			var id = row.model.get('PK_id');
+			this.grid.interaction('focus', id);
 		},
 
 		//should be in the grid module
@@ -324,6 +330,11 @@ define([
 			return moment(Math.floor((+date)/(+duration)) * (+duration));
 		},
 
+
+		clone: function(){
+			this.origin	= this.grid.collection.fullCollection.clone();
+		},
+
 		perHour: function(frequency) {
 			this.grid.interaction('resetAll');
 			var _this = this;
@@ -358,6 +369,7 @@ define([
 			this.perHour(frequency);
 		},
 
+
 		validate: function(){
 			var _this = this;
 			var url = config.coreUrl + 'sensors/' + this.type
@@ -366,7 +378,6 @@ define([
 			if(!mds.length){
 				return;
 			}
-
 			var col = new Backbone.Collection(mds);
 			var params = col.pluck('PK_id');
 			$.ajax({
@@ -381,25 +392,14 @@ define([
 				}else{
 					resp.title = 'Success';
 					resp.type = 'success';
-					
 				}
-				resp.text = 'existing: ' + resp.existing + ', inserted: ' + resp.inserted + ', errors:' + resp.errors;
-
-				//remove the model from the coll once this one is validated
-				var md = this.coll.at(this.dataSetIndex);
-				this.coll.remove(md);
-				
-				this.dataSetIndex--;
-
 				var callback = function(){
-					//prevent successive event handler
-					setTimeout(function(){
-						_this.nextDataSet();
-					}, 500);
+					_this.navbar.navigateNext();
+					//loose the focus due to re-fetch
+					_this.globalGrid.fetchCollection();
 				};
+				resp.text = 'existing: ' + resp.existing + ', inserted: ' + resp.inserted + ', errors:' + resp.errors;
 				this.swal(resp, resp.type, callback);
-
-
 			}).fail(function(resp) {
 				this.swal(resp, 'error');
 			});
