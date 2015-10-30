@@ -127,6 +127,7 @@ define([
 			this.currentStepIndex++;
 			if(this.currentStepIndex >= this.steps.length){
 				this.finished();
+				this.currentStepIndex = this.steps.length-1;
 				return;
 			}else if(this.currentStepIndex > this.steps.length){
 				this.currentStepIndex = this.steps.length;
@@ -141,6 +142,7 @@ define([
 
 		//display a step by index
 		displayStep: function(index){
+
 			var _this = this;
 			this.disableNextBtn();
 			if(this.currentStep){
@@ -150,6 +152,8 @@ define([
 			if(index > 0){
 				var model = this.models[index - 1];
 			}
+
+
 			//display the step
 			this.currentStep = new this.steps[index]({model : model, parent : this});
 			this.stepContent.show(this.currentStep);

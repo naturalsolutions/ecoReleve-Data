@@ -114,7 +114,21 @@ def details_unchecked_indiv(request):
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv))).order_by(desc(unchecked.c['date']))
         data = DBSession.execute(query).fetchall()
         #print(query)
-        dataResult = [dict(row) for row in data]
+
+        df = pd.DataFrame.from_records(data, columns=data[0].keys(), coerce_float=True)
+        X1 = df.iloc[:-1][['lat', 'lon']].values
+        X2 = df.iloc[1:][['lat', 'lon']].values
+        df['dist'] = np.append(haversine(X1, X2), 0).round(3)
+        # Compute the speed
+        df['speed'] = (df['dist'] / ((df['date'] - df['date'].shift(-1)).fillna(1) / np.timedelta64(1, 'h'))).round(3)
+        df['date'] = df['date'].apply(lambda row: np.datetime64(row).astype(datetime)) 
+        # Fill NaN
+        df.fillna(value={'ele':-999}, inplace=True)
+        df.fillna(value={'speed':0}, inplace=True)
+        df.replace(to_replace = {'speed': np.inf}, value = {'speed':9999}, inplace = True)
+
+        # dataResult = [dict(row) for row in data]
+        dataResult = df.to_dict('records')
         result = [{'total_entries':len(dataResult)}]
         result.append(dataResult)
 

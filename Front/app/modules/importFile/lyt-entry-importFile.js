@@ -6,7 +6,6 @@ define([
 	'ns_stepper/lyt-newStepper',
 	'./lyt-step0',
 
-
 	'./gpx/lyt-step1-gpx',
 	'./gpx/lyt-step2-gpx',
 
@@ -38,6 +37,7 @@ define([
 		=            Layout Stepper Orchestrator            =
 		===================================================*/
 		//dedicated to be overloaded
+
 		initSteps: function(){
 			this.steps = [Step0];
 		},
@@ -68,7 +68,6 @@ define([
 					case 'argos':
 						var argosSteps = [ Step1ARGOS ];
 						this.addSteps(argosSteps, 1);
-
 						//this.addSteps();
 						break;
 					default:
