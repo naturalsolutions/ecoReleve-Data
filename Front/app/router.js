@@ -11,16 +11,17 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'importFile(/)': 'importFile',
 
 			'individual(/)' : 'individual',
-			'individual(/):id' : 'individual',
+			'individual(/):id(/)' : 'individual',
 
 			'stations(/)' : 'stations',
 			'stations/new(/)': 'newStation',
-			'stations(/):id': 'stations',
+			'stations(/):id(/)': 'stations',
 
+			'sensor/new(/):id(/)' : 'newSensor',
 			'sensor(/)' : 'sensor',
 
 			'monitoredSite(/)' : 'monitoredSite',
-			'monitoredSite(/):id' : 'monitoredSite',
+			'monitoredSite(/):id(/)' : 'monitoredSite',
 
 			'validate/:type(/)':'validateType',
 			'validate(/)':'validate',
