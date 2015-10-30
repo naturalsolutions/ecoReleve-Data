@@ -149,16 +149,21 @@ define([
 
 				myDropzone.on('queuecomplete', function(file) {
 					if(!this.errors){
-						Swal(
-							{
-								title: "Well done",
-								text: 'File(s) have been correctly imported',
-								type: 'success',
-								showCancelButton: false,
-								confirmButtonText: "OK",
-								closeOnConfirm: true,
+						Swal({   title: "Well done",   
+							text: 'File(s) have been correctly imported',   
+							type:  'success',   
+							showCancelButton: true,   
+							confirmButtonColor: "#DD6B55",   
+							confirmButtonText: "Validate GSM",   
+							cancelButtonText: "New import",   
+							closeOnConfirm: true,   
+							closeOnCancel: true }, 
+							function(isConfirm){   if (isConfirm) {     
+									Backbone.history.navigate('validate/gsm',{ trigger:true});
+									} 
 							}
 						);
+						
 					}else{
 						Swal(
 							{
