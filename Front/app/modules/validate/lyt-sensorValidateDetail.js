@@ -11,15 +11,15 @@ define([
 	'ns_modules/ns_com',
 	'ns_map/ns_map',
 	'ns_form/NSFormsModuleGit',
-	'moment'
-], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com, NsMap, NsForm, moment){
+	'moment',
+	'ns_navbar/ns_navbar'
+
+], function($, _, Backbone, Marionette, Swal, Translater,
+ config, NsGrid, Com, NsMap, NsForm, moment, Navbar){
 
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-		/*===================================================
-		=            Layout Stepper Orchestrator            =
-		===================================================*/
 		template: 'app/modules/validate/templates/tpl-sensorValidateDetail.html',
 		
 		className: 'full-height animated white',
@@ -29,11 +29,9 @@ define([
 			'click table.backgrid td.select-row-cell input[type=checkbox]' : 'checkSelect',
 			'click table.backgrid th input' : 'checkSelectAll',
 			'click button#validate' : 'validate',
-			'click #prevDataSet' : 'prevDataSet',
-			'click #nextDataSet' : 'nextDataSet',
-			'change select#frequency' : 'updateFrequency' // <= bug ie
+			'change select#frequency' : 'updateFrequency'
 		},
-		
+
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
@@ -47,76 +45,51 @@ define([
 			'dataSetTotal': '#dataSetTotal',
 		},
 		
+		regions: {
+			'rgNavbar': '#navbar'
+		},
 		
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.type = options.type;
 
-			this.indId = options.indId;
-			this.pttId = parseInt(options.pttId);
-			this.sensorId = parseInt(options.sensorId);
-
 			this.com = new Com();
-			this.model = new Backbone.Model();
+			this.model = options.model;
 
-			this.initNavBar(options.parentGrid);
+			this.indId = this.model.get('FK_Individual');
+			this.pttId = this.model.get('FK_ptt');
+			this.sensorId = this.model.get('FK_Sensor');
 
 			this.frequency = options.frequency;
+
+			this.navbar = new Navbar({
+				parent: this,
+				globalGrid: options.globalGrid,
+				model: this.model,
+			});
 		},
 
 		onRender: function(){
 			this.$el.i18n();
 		},
 
-		initNavBar: function(coll){
-			var md = coll.findWhere({
-				'FK_ptt' : this.pttId
-			});
-
-			this.dataSetIndex = coll.indexOf(md);
-			this.coll = coll;
-		},
-
-		nextDataSet: function(){
-			if(this.coll){
-				if(this.dataSetIndex < this.coll.size()-1){
-					this.dataSetIndex++;
-				}else{
-					this.dataSetIndex = 0;
-				}
-				this.displayDataSet(this.dataSetIndex);
-			}
-		},
-
-		prevDataSet: function(){
-			if(this.coll){
-				if(this.dataSetIndex != 0){
-					this.dataSetIndex--;
-				}else{
-					this.dataSetIndex = this.coll.size()-1;
-				}
-				this.displayDataSet(this.dataSetIndex);
-			}
-		},
-
-		displayDataSet: function(dataSetIndex){
-			this.ui.dataSetTotal.html(this.coll.size());
-			this.ui.dataSetIndex.html(this.dataSetIndex+1);
-
-			var md = this.coll.at(dataSetIndex);
-			this.pttId = md.get('FK_ptt');
-			this.indId = md.get('FK_Individual');
+		reloadFromNavbar: function(model){
+			this.model = model;
+			this.pttId = model.get('FK_ptt');
+			this.indId = model.get('FK_Individual');
 			this.com = new Com();
 			this.map.destroy();
 			this.ui.map.html('');
-			this.onShow();
+			this.display();
 		},
 
 		onShow : function(){
-			var _this = this;
-			this.ui.dataSetTotal.html(this.coll.size());
-			this.ui.dataSetIndex.html(this.dataSetIndex+1);
+			this.rgNavbar.show(this.navbar);
+			this.display();
+		},
 
+		display: function(){
+			var _this = this;
 			if(this.indId == 'null' || !this.indId) this.indId = 'none';
 			if(this.indId == 'none'){
 				this.swal({ title : 'No individual attached'}, 'warning');
@@ -128,7 +101,6 @@ define([
 			this.displayMap();
 			this.displaySensorForm();
 
-
 			$.when( this.map.deffered, this.grid.deffered ).done( function() {
 				setTimeout(function(){
 					_this.initFrequency();
@@ -136,22 +108,22 @@ define([
 			});
 		},
 
+		clone: function(){
+			this.origin	= this.grid.collection.fullCollection.clone();
+		},
 
 		//initialize the frequency
 		initFrequency: function(){
-			if(this.frequency && this.frequency != 'all'){
+			if(this.frequency){
 				this.ui.frequency.find('option[value="' + this.frequency + '"]').prop('selected', true);
 			}else{
 				this.frequency = this.ui.frequency.val();
 			}
-
-
 			this.perHour(this.frequency);
-
 		},
 
-
 		displayGrid: function(){
+			var _this = this;
 			var myCell = Backgrid.NumberCell.extend({
 				decimals: 5,
 				orderSeparator: ' ',
@@ -204,14 +176,14 @@ define([
 					}
 				}),
 			},{
-				name: 'type_',
+				name: 'type',
 				label: 'Type',
 				renderable : this.showTypeCol,
 				editable: false,
 				formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
 					fromRaw: function (rawValue, model) {
 							if (rawValue=='arg') {
-								rawValue='Argos';
+								rawValue ='Argos';
 							}
 							else{
 								rawValue = 'GPS'
@@ -234,7 +206,7 @@ define([
 				pagingServerSide: false,
 				columns : cols,
 				com: this.com,
-				pageSize: 1000,
+				pageSize: 2000,
 				url: url,
 				urlParams : this.urlParams,
 				rowClicked : false,
@@ -257,7 +229,9 @@ define([
 					mod.trigger("backgrid:select", mod, true);
 				}
 			};
-
+			this.grid.onceFetched = function(){
+				_this.clone();
+			};
 			this.grid.selectMultiple = function (ids) {
 				var model_ids = ids, self = this, mod;
 				for (var i = 0; i < model_ids.length; i++) {
@@ -353,27 +327,29 @@ define([
 		perHour: function(frequency) {
 			this.grid.interaction('resetAll');
 			var _this = this;
-			var origin = this.grid.grid.collection.fullCollection.clone();
-			frequency = parseInt(frequency);
 
 			if (frequency !='all'){
-				var col0 = origin.at(0);
+				frequency = parseInt(frequency);
+				var col0 = this.origin.at(0);
 
-				var date = new moment(col0.get('date'));
-				var groups = origin.groupBy(function(model){
-					var curr = new moment(model.get('date'));
+				var date = new moment(col0.get('date'),'DD/MM/YYYY HH:mm:ss');
+				var groups = this.origin.groupBy(function(model){
+					var curr = new moment(model.get('date'),'DD/MM/YYYY HH:mm:ss');
 					return _this.roundDate( curr, moment.duration(frequency, 'minutes') );
 				});
 				var ids =[];
 				var i =0;
 				for (var rangeDate in groups) {
-					var tmp = groups[rangeDate][0].get('PK_id');
+					var curLength = groups[rangeDate].length;
+					var tmp = groups[rangeDate][curLength-1].get('PK_id');
 					ids.push(tmp);
 				}
 					this.grid.interaction('selectionMultiple', ids);
-				} else {
-
-				}
+			} else {
+				console.log('frequency select all')
+				var ids = this.grid.collection.pluck('PK_id');
+				this.grid.interaction('selectionMultiple', ids);
+			}
 		},
 
 		updateFrequency: function(e){

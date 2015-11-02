@@ -11,12 +11,11 @@ define([
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
 	'./lyt-new-sensor', 
-	'ns_modules/ns_toolbar/lyt-toolbar',
 	'./view-newSensorData',
 	'./lyt-sensor-details'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, LytNewSensor,Toolbar, NewSensorDetails, SensorDetails
+	Com, NsGrid, NsFilter, LytNewSensor, NewSensorDetails, SensorDetails
 
 ){
 
@@ -44,12 +43,10 @@ define([
 			'paginator': '#paginator',
 			'filter': '#filter',
 			'detail': '#detail',
-			'totalEntries': '#totalEntries',
 		},
 
 		regions: {
 			detail : '#detail',
-			toolbar : '#toolbar'
 		},
 
 		initialize: function(options){
@@ -65,7 +62,6 @@ define([
 
 		onShow : function(){
 			
-			this.addToolbar();
 
 			this.displayFilter();
 			this.displayGrid(); 
@@ -84,7 +80,7 @@ define([
 				url: config.coreUrl+'sensors/',
 				urlParams : this.urlParams,
 				rowClicked : true,
-				totalElement : 'sensor-count',
+				totalElement : 'totalEntries',
 				onceFetched: function(params){
 					var listPro = {};
 					var idList  = [];
@@ -98,15 +94,14 @@ define([
 					listPro.state = this.collection.state;
 					listPro.criteria = $.parseJSON(params.criteria);
 					window.app.listProperties = listPro ;
-					_this.totalEntries(this.grid);
 				}
 			});
 
-			this.grid.rowClicked = function(row){
-				_this.rowClicked(row);
+			this.grid.rowClicked = function(args){
+				_this.rowClicked(args.row);
 			};
-			this.grid.rowDbClicked = function(row){
-				_this.rowDbClicked(row);
+			this.grid.rowDbClicked = function(args){
+				_this.rowDbClicked(args.row);
 			};
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
@@ -126,25 +121,27 @@ define([
 		clearFilter : function(){
 			this.filters.reset();
 		},
-		rowClicked: function(args){
-			var id = args.row.model.get('ID');
-			console.log(id);
-			this.detail.show(new SensorDetails({id : id}));
+		rowClicked: function(row){
+			this.detail.show(new SensorDetails({
+				model : row.model,
+				globalGrid: this.grid
+			}));
 			this.ui.detail.removeClass('hidden');
-			Backbone.history.navigate('sensor/'+id, {trigger: false})
+			this.grid.currentRow = row;
+			this.grid.upRowStyle();
+			//Backbone.history.navigate('sensor/'+id, {trigger: false})
 		},
 
 		rowDbClicked: function(row){
-
 		},
+
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
 			Backbone.history.navigate('sensor');
 		},
-		totalEntries: function(grid){
-			this.total = grid.collection.state.totalRecords;
-			this.ui.totalEntries.html(this.total);
-		},
+
+
+
 		updateModels : function(e){
 			// get list of models for selected sensor type
 			var selectedType = $(e.target).val();
@@ -205,22 +202,7 @@ define([
           document.body.removeChild(link);
       });
     },
-    addToolbar : function(){
-    	var self = this;
-    	$.ajax({
-        url: config.coreUrl + 'sensors/getSensorType',
-        contentType:'application/json',
-        type:'GET'
-      }).done(function(data) {
-					var toolbar = new Toolbar({content : LytNewSensor, modalTitle : 'New Sensor', detailsView : NewSensorDetails, items : data });
-					self.toolbar.show(toolbar);
-      });
 
-
-    }
-    /*showModal : function(){
-			//this.newSensor.show(new NewSensor({rg : this.newSensor}));
-		}*/
 
 	});
 });

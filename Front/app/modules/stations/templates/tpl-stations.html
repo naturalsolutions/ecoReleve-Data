@@ -1,0 +1,73 @@
+
+<div id="leftZone"  class="col-xs-12 col-md-4 no-padding ns-full-height">
+	<div class="toolbar top">
+		<legend class="inherit">Filters</legend>
+		<div class="ctrls pull-right">
+		<button id="activeGridPanel" class="small btn btn-labeled btn-success active ">
+			<span class="reneco reneco-sites"></span>
+			&nbsp;Grid
+		</button>
+		<button id="activeMapPanel" class="small btn btn-labeled btn-success">
+			<span class="reneco reneco-map"></span>
+			&nbsp;Map
+		</button>
+		</div>
+	</div>
+
+	<div class="crop2">
+		<br>
+		<ul class="nav nav-tabs clearfix">
+			 <li class="active tab-ele"><a class="tab-link" title="allSt">All stations</a></li>
+			 <li class="tab-ele"><a class="tab-link" title="impSt">Imported stations</a></li>
+		</ul>
+		<div class="tab-content all-stations clearfix">
+			<div id="allSt" class="tab-pane fade in active tab-ele">
+			</div>
+			<div id="impSt">
+
+			</div>
+		</div>
+		<br>
+		<div id="filters"></div>
+	</div>
+
+	<div class="toolbar bottom">
+		<button id="submit" class="btn btn-success pull-right">
+			Filter&nbsp;
+			<span class="reneco reneco-search"></span>
+		</button>
+	</div>
+	</div>
+
+<div id="rightZone" class=" no-padding col-md-8 ns-full-height dark">
+
+	<div class="toolbar top">
+		<legend class="text-right">Stations total : <span id="totalEntries"></span></legend>
+	</div>
+
+	<div class="crop2 crop-paginator">
+		<div class="pannels-container">
+			<div id="gridPanel" class="col-xs-12 pannel full-height scroll-auto active">
+				<br>
+				<div id="grid" class="backgrid-container grid-list"></div>
+				<br>
+			</div>
+			<div id="mapPanel" class="col-xs-12 full-height no-padding pannel">
+				<div id="map" style="height: 100%"></div>
+			</div>
+		</div>
+	</div>
+	<div id="paginator" class="paginator"></div>
+
+	<div class="toolbar bottom">
+		<a href="#stations/new" id="newStation" class="pull-right btn btn-default btn-success whitev">
+			<i class="reneco reneco-entrykey "></i>&nbsp;
+			New station
+		</a>
+	</div>
+
+</div>
+
+
+
+<div id="detail" class="hidden detail full-height"></div>

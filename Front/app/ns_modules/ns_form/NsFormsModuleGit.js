@@ -7,7 +7,7 @@ define([
 	'requirejs-text!./Templates/NsFormsModule.html',
 	'ListOfNestedModel',
 	'AutocompleteEditor',
-	//'./NsFormsCustomFields',
+	'./NsFormsCustomFields',
 	'i18n',
 ], function ($, _, Backbone, Marionette, BackboneForm, tpl,ListOfNestedModel,AutocompleteEditor) {
 	return Backbone.View.extend({
@@ -19,7 +19,7 @@ define([
 		buttonRegion: null,
 		formRegion: null,
 		id: null,
-		reloadAfterSave: true,
+		reloadAfterSave: false,
 		template: tpl,
 		redirectAfterPost: "",
 
@@ -251,8 +251,6 @@ define([
 			var errors = this.BBForm.commit();
 			var jqhrx;
 
-			this.model.on('sync', function(){
-			});
 
 			if(!errors){
 					if (this.model.attributes["id"] == 0) {
@@ -327,9 +325,6 @@ define([
 
 		},
 
-		reloadAfterSave: function(){
-
-		},
 
 		butClickEdit: function (e) {
 			this.displayMode = 'edit';
@@ -381,6 +376,7 @@ define([
 		},
 
 		savingSuccess: function (model, response) {
+			console.log('plouf');
 			// To be extended, called after save on model if success
 		},
 		savingError: function (response) {

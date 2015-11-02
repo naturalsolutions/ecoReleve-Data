@@ -33,4 +33,4 @@ def uploadFile(request):
     'rfid':uploadFileRFID
     }
 
-    return dictFuncImport[type_](request)
+    return dictFuncImport[type_](request) 

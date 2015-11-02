@@ -38,9 +38,9 @@ def error_response (err) :
     response.status_int = 500
     return response
 
-# ArgosDatasWithIndiv = Table('VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
-# GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv', Base.metadata, autoload=True) 
-# DataRfidWithSite = Table('VRfidData_With_equipSite', Base.metadata, autoload=True) 
+ArgosDatasWithIndiv = Table('VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
+GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv', Base.metadata, autoload=True) 
+DataRfidWithSite = Table('VRfidData_With_equipSite', Base.metadata, autoload=True) 
 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -71,11 +71,11 @@ def type_unchecked_list(request):
 
 def unchecked_rfid(request):
     unchecked = DataRfidWithSite
-    queryStmt = select([unchecked.c['UnicName'],unchecked.c['FK_Sensor'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],
+    queryStmt = select([unchecked.c['UnciIdentifier'],unchecked.c['FK_Sensor'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],
             func.count(distinct('chip_code')).label('nb_indiv'),func.count('chip_code').label('total_scan'), func.max(unchecked.c['date_']).label('max_date'),
             func.min(unchecked.c['date_']).label('min_date')]
             ).where(unchecked.c['checked']==0
-            ).group_by(unchecked.c['UnicName'],unchecked.c['FK_Sensor'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],unchecked.c['creation_date'])
+            ).group_by(unchecked.c['UnciIdentifier'],unchecked.c['FK_Sensor'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],unchecked.c['creation_date'])
     data = DBSession.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
     result = [{'total_entries':len(dataResult)}]
@@ -111,12 +111,24 @@ def details_unchecked_indiv(request):
     else : 
         query = select([unchecked]
             ).where(and_(unchecked.c['FK_ptt']== ptt
-                ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv)))
-        print(ptt)
-        print(id_indiv)
+                ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv))).order_by(desc(unchecked.c['date']))
         data = DBSession.execute(query).fetchall()
         #print(query)
-        dataResult = [dict(row) for row in data]
+
+        df = pd.DataFrame.from_records(data, columns=data[0].keys(), coerce_float=True)
+        X1 = df.iloc[:-1][['lat', 'lon']].values
+        X2 = df.iloc[1:][['lat', 'lon']].values
+        df['dist'] = np.append(haversine(X1, X2), 0).round(3)
+        # Compute the speed
+        df['speed'] = (df['dist'] / ((df['date'] - df['date'].shift(-1)).fillna(1) / np.timedelta64(1, 'h'))).round(3)
+        df['date'] = df['date'].apply(lambda row: np.datetime64(row).astype(datetime)) 
+        # Fill NaN
+        df.fillna(value={'ele':-999}, inplace=True)
+        df.fillna(value={'speed':0}, inplace=True)
+        df.replace(to_replace = {'speed': np.inf}, value = {'speed':9999}, inplace = True)
+
+        # dataResult = [dict(row) for row in data]
+        dataResult = df.to_dict('records')
         result = [{'total_entries':len(dataResult)}]
         result.append(dataResult)
 

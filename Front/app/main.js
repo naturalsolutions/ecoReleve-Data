@@ -25,6 +25,7 @@ require.config({
 		'ns_grid'		: 'ns_modules/ns_grid',
 		'ns_map'		: 'ns_modules/ns_map',
 		'ns_stepper'	: 'ns_modules/ns_stepper',
+		'ns_navbar'	: 'ns_modules/ns_navbar',
 		'FileUploadEditor': 'ns_modules/ns-bbforms-editors/FileUploadEditor/backboneForm-editors-fileUpload',
 
 		//circular dependencies

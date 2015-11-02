@@ -1,85 +1,49 @@
+@toolbarHeight : 66px;
+@paginatorHeight: 45px;
+
 .toolbar{
+  height: @toolbarHeight;
+  padding: 15px;
+  &.bottom{
+    border-top: 1px solid #ddd;
+  }
+  &.top{
+    border-bottom: 1px solid #ddd;
+  }
+  & legend{
+    display: inline-block;
+    margin: 0px;
+    padding-top: 2px;
+  }
 }
 
-
-
-.tooltipster-content {
-    width: 250px;
-    background-color: #E1E1E1!important;
-
+.paginator{
+  padding-top: 3px;
+  border-top: 1px dashed #ddd;
+  height: @paginatorHeight;
 }
 
-    .tooltipster-content input {
-        color: black;
-        margin: 8px 5% !important;
-        width: 80%;
-    }
-
-.tooltipList ul li:nth-child(odd) {
-    //background-color: inherit!important;
-    background-color: #F3F3F3!important;
+.crop1{
+  position: relative;
+  height: ~"calc(100% - @{toolbarHeight})";
+  padding: 0px 15px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  &.crop-paginator{
+    @crop: @toolbarHeight + @paginatorHeight;
+    height: ~"calc(100% - @{crop})";
+  }
 }
 
-.tooltipList ul li:hover {
-    background-color: #CACACA!important;
-}
-
-
-
-.tooltipster-content li {
-    padding-top: 10px!important;
-    padding-left: 10px!important;
-    height: auto!important;
-    vertical-align: middle;
-    overflow: hidden;
-    position: relative;
-}
-
-    .tooltipster-content li:after {
-        left: 260px !important;
-        position: absolute !important;
-        transition: left 0.2s ease-in;
-    }
-
-    .tooltipster-content li:hover:after {
-        left: 220px !important;
-        position: absolute !important;
-    }
-.tooltipList {
-	border: 2px solid #B1B1B1 !important;
-    .tooltipster-content {
-        padding: 0;
-    }
-    input {
-        margin: 8px;
-    }
-    ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        li {
-            height: 30px;
-            line-height: 30px;
-            padding-left: 10px;
-            padding-top: 3px;
-            padding-bottom: 3px;
-            font-size : 17px;
-            color:#333333;
-            &:nth-child(odd) {
-                background-color : #F3F3F3;
-            }
-            &:nth-child(odd) {
-                background-color : #FFFFFF;
-            }
-            &:after {
-                content : "+";
-                font-size : 20px;
-                position: relative;
-                left: 67%;
-            }
-            &:hover {
-                cursor: pointer;
-            }
-        }
-    }
+.crop2{
+  position: relative;
+  @crop: @toolbarHeight*2;
+  height: ~"calc(100% - @{crop})";
+  padding: 0px 15px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  &.crop-paginator{
+    @crop : @toolbarHeight*2 + @paginatorHeight;
+    height: ~"calc(100% - @{crop})";
+  }
 }

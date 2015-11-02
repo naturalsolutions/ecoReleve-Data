@@ -17,9 +17,6 @@ define([
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-		/*===================================================
-		=            Layout Stepper Orchestrator            =
-		===================================================*/
 
 		template: 'app/modules/validate/templates/tpl-sensorValidateType.html',
 		className: 'full-height animated rel',
@@ -69,8 +66,8 @@ define([
 
 					this.cols = [
 						{
-							name: 'UnicName',
-							label: 'UnicName ID',
+							name: 'UnicIdentifier',
+							label: 'Unic Identifier',
 							editable: false,
 							cell : 'string'
 						},{
@@ -158,7 +155,7 @@ define([
 							cell : 'string'
 						},{
 							name: 'FK_ptt',
-							label: 'Unique',
+							label: 'Unic Identifier',
 							editable: false,
 							cell : 'string'
 						}, {
@@ -219,7 +216,7 @@ define([
 							cell : 'string'
 						},{
 							name: 'FK_ptt',
-							label: 'Unique',
+							label: 'Unic Identifier',
 							editable: false,
 							cell : 'string'
 						}, {
@@ -279,6 +276,7 @@ define([
 				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
 				rowClicked : true,
 				totalElement : 'totalEntries',
+				idCell: 'FK_Sensor'
 			});
 
 			this.grid.rowClicked = function(args){
@@ -291,23 +289,20 @@ define([
 		},
 
 		rowClicked: function(args){
-			var _this = this;
 			var row = args.row;
 			var evt = args.evt;
 
-			var indId = row.model.get('FK_Individual');
-			var pttId = row.model.get('FK_ptt');
-			var sensorId = row.model.get('FK_Sensor');
 
 			if(!$(evt.target).is('input')){
-				_this.rgDetail.show(new LytSensorValidateDetail({
+				this.rgDetail.show(new LytSensorValidateDetail({
 					type : this.type_,
-					indId : indId,
-					pttId : pttId,
-					sensorId: sensorId,
 					frequency: this.frequency,
-					parentGrid: this.grid.collection.fullCollection
+					parentGrid: this.grid.collection.fullCollection,
+					model : row.model,
+					globalGrid : this.grid
 				}));
+				this.grid.currentRow = row;
+				this.grid.upRowStyle();
 
 				this.ui.detail.removeClass('hidden');
 			}

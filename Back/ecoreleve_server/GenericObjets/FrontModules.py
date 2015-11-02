@@ -45,6 +45,7 @@ class ModuleForms(Base):
     Legend = Column(Unicode(500))
     Options = Column (String)
     Validators = Column(String)
+    DefaultValue = Column(String)
 
     FrontModules = relationship("FrontModules", back_populates="ModuleForms")
 
@@ -61,10 +62,14 @@ class ModuleForms(Base):
             'editable' : IsEditable,
             'editorClass' : str(self.editorClass) ,
             'validators': [],
-            'options': []
+            'options': [],
+            'defaultValue' : None
             }
         self.CssClass = CssClass
         self.IsEditable = IsEditable
+        validators = self.Validators
+        if validators is not None:
+            self.dto['validators'] = json.loads(validators)
 
         if self.Required == 1 :
             if self.InputType=="Select":
@@ -83,6 +88,11 @@ class ModuleForms(Base):
 
         if self.InputType in self.func_type_context :
             self.func_type_context[self.InputType](self)
+        # default value
+        default  = self.DefaultValue
+        if default is not None:
+            self.dto['defaultValue'] = default
+
         return self.dto
 
     def InputSelect (self) :

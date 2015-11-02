@@ -79,7 +79,7 @@ def uploadFileRFID(request):
         Rfids, chip_codes = set(), set()
         if (isHead):
             j=1
-        #parsing data
+        ########## Parsing data
         allDate = []
         while j < len(data):
             i = 0
@@ -101,7 +101,6 @@ def uploadFileRFID(request):
                         try :
                             dt = datetime.strptime(dt, format_dt)
                         except Exception as e:
-
                             dt = datetime.strptime(dt, format_dtBis)
                         allDate.append(dt)
 
@@ -109,29 +108,29 @@ def uploadFileRFID(request):
                 Rfids.add((creator, idModule, code, dt))
                 chip_codes.add(code)
             j=j+1
-
         ## check if Date corresponds with pose remove module ##
-        table = Base.metadata.tables['RFID_MonitoredSite']
-        q_check_date = select([func.count('*')]).where(
-            and_(table.c['begin_date'] < allDate[0], or_(table.c['end_date'] >= allDate[-1],table.c['end_date'] == None))
-            ).where(table.c['identifier'] == module)
-        check = DBSession.execute(q_check_date).scalar() 
-        if check == 0 :
-            request.response.status_code = 510
-            message = "Dates of this uploded file (first date : "+str(allDate[0])+" , last date : "+str(allDate[-1])+") don't correspond with the deploy/remove dates of the selected module"
-            return message
+        # table = Base.metadata.tables['RFID_MonitoredSite']
+        # q_check_date = select([func.count('*')]).where(
+        #     and_(table.c['begin_date'] < allDate[0], or_(table.c['end_date'] >= allDate[-1],table.c['end_date'] == None))
+        #     ).where(table.c['identifier'] == module)
+        # check = DBSession.execute(q_check_date).scalar() 
+        # if check == 0 :
+        #     request.response.status_code = 510
+        #     message = "Dates of this uploded file (first date : "+str(allDate[0])+" , last date : "+str(allDate[-1])+") don't correspond with the deploy/remove dates of the selected module"
+        #     return message
 
-        Rfids = [{RFID.creator.name: crea, RFID.obj.name: idMod, RFID.checked.name: '0',
-                RFID.chip_code.name: c, RFID.date.name: d, RFID.creation_date.name: now} for crea, idMod, c, d  in Rfids]
+        Rfids = [{Rfid.creator.name: crea, Rfid.FK_Sensor.name: idMod, Rfid.checked.name: '0',
+                Rfid.chip_code.name: c, Rfid.date_.name: d, Rfid.creation_date.name: now} for crea, idMod, c, d  in Rfids]
         # Insert data.
-        DBSession.execute(insert(RFID), Rfids)
-        message = str(len(Rfids)) +' rows inserted.'
+        DBSession.execute(insert(Rfid), Rfids)
+        message = {'inserted':len(Rfids)}
+        return message
         # Check if there are unknown chip codes.
-        query = select([Individual.chip_code]).where(Individual.chip_code.in_(chip_codes))
-        known_chips = set([row[0] for row in DBSession.execute(query).fetchall()])
-        unknown_chips = chip_codes.difference(known_chips)
-        if len(unknown_chips) > 0:
-            message += '\n\nWarning : chip codes ' + str(unknown_chips) + ' are unknown.'
+        # query = select([Individual.chip_code]).where(Individual.chip_code.in_(chip_codes))
+        # known_chips = set([row[0] for row in DBSession.execute(query).fetchall()])
+        # unknown_chips = chip_codes.difference(known_chips)
+        # if len(unknown_chips) > 0:
+        #     message += '\n\nWarning : chip codes ' + str(unknown_chips) + ' are unknown.'
     except IntegrityError as e:
         request.response.status_code = 500
         message = 'Data already exist.'

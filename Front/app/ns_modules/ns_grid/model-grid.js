@@ -24,9 +24,13 @@ define([
 		totalElement: null,
 		filterCriteria: {},
 		RowType: null,
+		follow: false,
 
 		initialize: function (options) {
 			var _this = this;
+
+			this.idCell = options.idCell || 'ID';
+
 			if (options.com) {
 				this.com = options.com;
 				this.com.addModule(this);
@@ -168,9 +172,8 @@ define([
 
 		initCollectionPaginable: function () {
 			var _this = this;
-			var ctx = this;
 			var PageCollection = PageColl.extend({
-				sortCriteria: ctx.sortCriteria,
+				sortCriteria: _this.sortCriteria,
 				url: this.url,
 				mode: 'server',
 				state: {
@@ -191,7 +194,7 @@ define([
 					},
 				},
 				fetch: function (options) {
-					ctx.fetchingCollection(options);
+					_this.fetchingCollection(options);
 					var params = {
 						'page': this.state.currentPage,
 						'per_page': this.state.pageSize,
@@ -200,30 +203,47 @@ define([
 						'criteria': this.queryParams.criteria.call(this),
 					};
 
-					if (ctx.init) {
-						ctx.updateMap(params);
-						
+					/*if (_this.init) {
+						_this.updateMap(params);
 					}
-					ctx.init = true;
+					_this.init = true;*/
 					options.success = function(){
-						if(ctx.onceFetched){
-							ctx.onceFetched(params);
+						_this.affectTotalRecords();
+						if(_this.onceFetched){
+							_this.onceFetched(params);
+						}
+						if(true){
+							_this.upRowServerSide();
 						}
 
 					};
 					PageColl.prototype.fetch.call(this, options);
-
 				}
-				
 			});
 
 			this.collection = new PageCollection();
-			
-			//this.listenTo(this.collection, "reset", this.affectTotalRecords);
 		},
 
-		updateMap: function (params){
+
+		upRowServerSide: function(){
 		},
+
+		upRowStyle: function(){
+			var row = this.currentRow;
+			var _this = this;
+			var rows = this.grid.body.rows;
+			if(row){
+				for (var i = 0; i < rows.length; i++) {
+					if(rows[i].model.get(this.idCell) == _this.currentRow.model.get(this.idCell)){
+						_this.currentRow = rows[i];
+						rows[i].$el.addClass('active');
+					}else{
+						rows[i].$el.removeClass('active');
+					}
+				}
+			}
+		},
+
 
 		initCollectionPaginableClient: function () {
 			var ctx = this;
@@ -240,13 +260,6 @@ define([
 					criteria: function () {
 						return JSON.stringify(this.searchCriteria);
 					},
-					//wrong
-					success: function(){
-						if(_this.onceFetched)
-						_this.onceFetched();
-					},
-
-
 				},
 				fetch: function (options) {
 					ctx.fetchingCollection(options);
