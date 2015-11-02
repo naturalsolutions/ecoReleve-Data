@@ -1,5 +1,3 @@
-USE [NewModelERD]
-GO
 
 /****** Object:  View [dbo].[VArgosData_With_EquipIndiv]    Script Date: 12/10/2015 17:53:50 ******/
 SET ANSI_NULLS ON
@@ -11,7 +9,7 @@ CREATE view [dbo].[V_dataRFID_as_file]
 as 
 with toto as 
 ( SELECT 
-	  s.UnicName
+	  s.UnicIdentifier
 	  ,rfid.[creator] as creator
       ,rfid.[checked] as checked
 	, count (distinct chip_code) as nb_chip_code
@@ -37,7 +35,7 @@ with toto as
   ON s.ID = t.FK_Sensor AND rfid.date_ >= t.StartDate AND (rfid.[date_] < t.EndDate OR t.EndDate IS NULL)
  LEFT join [dbo].[MonitoredSite] m on m.ID=t.FK_MonitoredSite
 
-  group by s.Unicname, rfid.[creator] ,rfid.[checked],rfid.creation_date,m.Name,m.[Category], t.StartDate,t.EndDate ,rfid.checked
+  group by s.UnicIdentifier, rfid.[creator] ,rfid.[checked],rfid.creation_date,m.Name,m.[Category], t.StartDate,t.EndDate ,rfid.checked
 
 )
 

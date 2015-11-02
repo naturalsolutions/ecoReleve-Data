@@ -1,5 +1,4 @@
-USE [NewModelERD]
-GO
+
 
 /****** Object:  View [dbo].[VArgosData_With_EquipIndiv]    Script Date: 05/10/2015 17:20:16 ******/
 SET ANSI_NULLS ON
