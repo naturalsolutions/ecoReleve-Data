@@ -6,12 +6,8 @@ define([
 	'sweetAlert',
 	'backgrid',
 	'config',
-
 	'ns_stepper/lyt-step',
 	'ns_grid/model-grid',
-
-
-
 	'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, Backgrid, config,
@@ -28,7 +24,10 @@ define([
 		events: {
 			'change #rfidId' : 'updateGrid',
 		},
-
+		ui : {
+			'grid': '#grid',
+			'paginator': '#paginator',
+		},
 		initialize: function(){
 		},
 
@@ -61,6 +60,7 @@ define([
 			.fail( function() {
 				alert("error loading items, please check connexion to webservice");
 			});
+			this.initGrid();
 
 		},
 
@@ -71,9 +71,16 @@ define([
 		validate: function(){
 
 		},
-		updateGrid : function(){
-						var columns = [{
-				name: 'PK_obj',
+		updateGrid : function(e){
+			var id = $(e.target).val();
+			this.grid.collection.url = config.coreUrl + 'sensors/'+ id +'/history';
+			this.grid.fetchCollection();
+
+		},
+		initGrid : function(){
+			var _this = this;
+			var columns = [{
+				name: 'ID',
 				label: 'ID',
 				editable: false,
 				renderable : false,
@@ -81,19 +88,14 @@ define([
 					orderSeparator: ''
 				}),
 			},{
-				name: 'identifier',
+				name: 'UnicIdentifier',
 				label: 'Identifier',
 				editable: false,
 				cell: 'string',
 				
 			},{
-				name: 'begin_date',
-				label: 'Begin date',
-				editable: false,
-				cell: 'String',
-			},{
-				name: 'end_date',
-				label: 'End date',
+				name: 'StartDate',
+				label: 'Start date',
 				editable: false,
 				cell: 'String',
 			},{
@@ -102,22 +104,29 @@ define([
 				editable: false,
 				cell: 'string',
 			},{
-				name: 'name_Type',
-				label: 'Site Type',
+				name: 'Deploy',
+				label: 'Deploy',
 				editable: false,
 				cell: 'string',
 			}];
 			this.grid= new NsGrid({
 				columns: columns,
-				url: config.coreUrl + 'sensors/'+this.SensorID+'/history',
+				url: config.coreUrl + 'sensors/'+ 752 +'/history',
 				pageSize : 20,
 				pagingServerSide : false,
+				rowClicked : true,
 			});
-			this.$el.find('#grid').html(this.grid.displayGrid());
-			this.$el.find('#paginator').html('').prepend(this.grid.displayPaginator());
+			this.grid.rowClicked = function(args){
+					_this.rowClicked(args.row);
+			};
+			this.grid.rowDbClicked = function(args){
+				_this.rowClicked(args.row);
+			};
+			this.ui.grid.html(this.grid.displayGrid());
+			this.ui.paginator.html(this.grid.displayPaginator());
+		},
+		rowClicked : function(row){
+			console.log(row.model.get('ID'));
 		}
-
-
-
 	});
 });
