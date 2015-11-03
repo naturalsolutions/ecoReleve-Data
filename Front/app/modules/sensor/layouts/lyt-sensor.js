@@ -10,21 +10,16 @@ define([
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
-	'./lyt-new-sensor', 
-	'./view-newSensorData',
-	'./lyt-sensor-details'
+	'./lyt-sensor-details',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, LytNewSensor, NewSensorDetails, SensorDetails
+	Com, NsGrid, NsFilter, SensorDetails
 
 ){
 
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-		/*===================================================
-		=            Layout Stepper Orchestrator            =
-		===================================================*/
 
 		template: 'app/modules/sensor/templates/tpl-sensor.html',
 		className: 'full-height animated white rel',
@@ -35,7 +30,7 @@ define([
 			'click button#clear' : 'clearFilter',
 			'change select.FK_SensorType' : 'updateModels',
 			'click #btn-export' : 'exportGrid',
-			//'click #createNew' : 'showModal'
+			'click button#btnNew' : 'newSensor'
 		},
 
 		ui: {
@@ -43,6 +38,7 @@ define([
 			'paginator': '#paginator',
 			'filter': '#filter',
 			'detail': '#detail',
+			'btnNew': '#btnNew'
 		},
 
 		regions: {
@@ -52,7 +48,6 @@ define([
 		initialize: function(options){
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
-
 		},
 
 		onRender: function(){
@@ -61,14 +56,13 @@ define([
 		},
 
 		onShow : function(){
-			
-
 			this.displayFilter();
 			this.displayGrid(); 
 			if(this.options.id){
 				this.detail.show(new LytSensorDetail({id : this.options.id}));
 				this.ui.detail.removeClass('hidden');
 			}
+
 		},
 
 		displayGrid: function(){
@@ -107,6 +101,28 @@ define([
 			this.ui.paginator.html(this.grid.displayPaginator());
 		},
 
+		newSensor: function(e){
+			this.ui.btnNew.tooltipList({
+					availableOptions : [{
+							label : 'Argos',
+							val : 'argos'
+					}, {
+							label : 'GSM',
+							val : 'gsm'
+					},{
+						label : 'RFID',
+						val : 'rfid'
+					},{
+						label : 'VHF',
+						val : 'vhf'
+					}],
+					liClickEvent : function(liClickValue) {
+							Backbone.history.navigate('#sensor/new/' + liClickValue, {trigger: true});
+					},
+					position: 'top'
+			});
+		},
+
 		displayFilter: function(){
 			this.filters = new NsFilter({
 				url: config.coreUrl + 'sensors/',
@@ -137,8 +153,22 @@ define([
 
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
-			Backbone.history.navigate('sensor');
 		},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -186,22 +216,26 @@ define([
 			}
 			$(elem).html(content);
 		},
+
+
+
+
 		exportGrid: function() {
-      $.ajax({
-          url: config.coreUrl + 'sensors/export',
-          data: JSON.stringify({criteria:this.filters.criterias}),
-          contentType:'application/json',
-          type:'POST'
-      }).done(function(data) {
-          var url = URL.createObjectURL(new Blob([data], {'type':'text/csv'}));
-          var link = document.createElement('a');
-          link.href = url;
-          link.download = 'sensors_export.csv';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-      });
-    },
+			$.ajax({
+					url: config.coreUrl + 'sensors/export',
+					data: JSON.stringify({criteria:this.filters.criterias}),
+					contentType:'application/json',
+					type:'POST'
+			}).done(function(data) {
+					var url = URL.createObjectURL(new Blob([data], {'type':'text/csv'}));
+					var link = document.createElement('a');
+					link.href = url;
+					link.download = 'sensors_export.csv';
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+			});
+		},
 
 
 	});
