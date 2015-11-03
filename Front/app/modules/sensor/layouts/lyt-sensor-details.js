@@ -59,8 +59,6 @@ define([
 			});
 
 		},
-
-
 		reloadFromNavbar: function(model){
 			this.map.destroy();
 			this.ui.map.html('');
@@ -249,26 +247,25 @@ define([
 		},
 		displayGrid: function(id){
 			var cols = [{
-                name: 'individual_id',
+                name: 'FK_Individual',
                 label: 'Individual id',
                 editable: false,
                 cell : 'string'
             }, 
             {
-                name: 'site_id',
+                name: 'FK_MonitoredSite',
                 label: 'Monitored site id',
                 editable: false,
                 cell : 'string'
             }, 
             {
-                name: 'start_date',
+                name: 'StartDate',
                 label: 'Start date',
                 editable: false,
                 cell: 'string'
-            }
-						, 
+            }, 
             {
-                name: 'status',
+                name: 'Deploy',
                 label: 'status',
                 editable: false,
                 cell: 'string'

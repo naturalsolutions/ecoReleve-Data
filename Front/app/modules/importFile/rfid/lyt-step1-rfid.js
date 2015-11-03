@@ -28,7 +28,8 @@ define([
 			'grid': '#grid',
 			'paginator': '#paginator',
 		},
-		initialize: function(){
+		initialize: function(options){
+			this.model = new Backbone.Model();
 		},
 
 		check: function(){
@@ -48,20 +49,19 @@ define([
 				data: {sensorType : 3},
 			}).done( function(data) {
 				var len = data.length;
-				self.SensorID = data[0]['val'];
+				var firstId = data[0]['val'];
 				for (var i = 0; i < len; i++) {
 					var label = data[i]['label'];
 					var val = data[i]['val'];
 					content += '<option value="' + val +'">'+ label +'</option>';
 				}
 				$('select[name="RFID_identifer"]').append(content);
+				this.initGrid(firstId);
 				//this.feedTpl() ;
 			})
 			.fail( function() {
 				alert("error loading items, please check connexion to webservice");
 			});
-			this.initGrid();
-
 		},
 
 		onDestroy: function(){
@@ -77,7 +77,7 @@ define([
 			this.grid.fetchCollection();
 
 		},
-		initGrid : function(){
+		initGrid : function(id){
 			var _this = this;
 			var columns = [{
 				name: 'ID',
@@ -111,7 +111,7 @@ define([
 			}];
 			this.grid= new NsGrid({
 				columns: columns,
-				url: config.coreUrl + 'sensors/'+ 752 +'/history',
+				url: config.coreUrl + 'sensors/'+ id +'/history',
 				pageSize : 20,
 				pagingServerSide : false,
 				rowClicked : true,
@@ -127,6 +127,13 @@ define([
 		},
 		rowClicked : function(row){
 			console.log(row.model.get('ID'));
+			this.model.set('sensorId',row.model.get('ID') )
+			//this.validate();
+			$('#btnNext').removeAttr('disabled');
+			//this.nextOK();
+		},
+		validate : function(){
+			return this.model;
 		}
 	});
 });
