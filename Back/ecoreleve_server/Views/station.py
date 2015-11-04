@@ -308,25 +308,13 @@ def searchStation(request):
         transaction.commit()
         return result
 
-        # ------------------------------------------------------------------------------------------------------------------------- #
-# @view_config(route_name= prefix+'/fileImport', renderer='json', request_method = 'GET')
-# def getForm(request):
-#     ModuleName = 'ImportGpxFileForm'
-#     Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
-#     Fields = DBSession.query(ModuleForms).filter(ModuleForms.Module_ID == Conf.ID).order_by(ModuleForms.FormOrder).all()
+# ------------------------------------------------------------------------------------------------------------------------- #
 
-#     data = []
-#     for row in Fields:
-#         field = {}
-#         field['name'] = row.Name
-#         field['label'] = row.Label
-#         field['cell'] = row.InputType
-#         field['renderable'] = True
-#         data.append(field)
-#         print('************ module id ***************')
-#         print(field)
-#     print(data)
-#     transaction.commit()
-#     return data
+def linkToMonitoredSite(request):
+    curSta = DBSession.query(Station).get(request.matchdict['id'])
+    idSite = request.params['idSite']
+    curSta.FK_MonitoredSite = idSite
+    transaction.commit()
+    return {}
 
 
