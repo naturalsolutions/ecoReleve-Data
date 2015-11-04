@@ -11,6 +11,7 @@ define([
 	'ns_map/ns_map',
 	'ns_form/NSFormsModuleGit',
 	'ns_navbar/ns_navbar',
+	'tooltipster-list',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config, 
 	Com, NsGrid, NsMap, NsForm,
@@ -58,8 +59,6 @@ define([
 			});
 
 		},
-
-
 		reloadFromNavbar: function(model){
 			this.map.destroy();
 			this.ui.map.html('');
@@ -77,9 +76,9 @@ define([
 
 		display: function(model){
 			this.model = model;
-			this.monitoredSiteId = this.model.get('ID');
-			this.displayForm(this.monitoredSiteId);
-			this.displayGrid(this.monitoredSiteId);
+			this.sensorId = this.model.get('ID');
+			this.displayForm(this.sensorId);
+			this.displayGrid(this.sensorId);
 			this.displayMap();
 		},
 
@@ -248,26 +247,25 @@ define([
 		},
 		displayGrid: function(id){
 			var cols = [{
-                name: 'individual_id',
+                name: 'FK_Individual',
                 label: 'Individual id',
                 editable: false,
                 cell : 'string'
             }, 
             {
-                name: 'site_id',
+                name: 'FK_MonitoredSite',
                 label: 'Monitored site id',
                 editable: false,
                 cell : 'string'
             }, 
             {
-                name: 'start_date',
+                name: 'StartDate',
                 label: 'Start date',
                 editable: false,
                 cell: 'string'
-            }
-						, 
+            }, 
             {
-                name: 'status',
+                name: 'Deploy',
                 label: 'status',
                 editable: false,
                 cell: 'string'

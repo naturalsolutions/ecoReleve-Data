@@ -127,7 +127,6 @@ function(Marionette, config) {
 
 					this.coll.getPage(tmp);
 					this.upRowClientSide('prev');
-
 				}
 			}
 		},

@@ -20,6 +20,7 @@ def uploadFileRFID(request):
     field_label = []
     isHead = False
     now=datetime.now()
+    print('call ajax import')
     try:
         creator = request.authenticated_userid
         content = request.POST['data']

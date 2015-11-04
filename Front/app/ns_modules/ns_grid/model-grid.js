@@ -214,6 +214,7 @@ define([
 						}
 						if(true){
 							_this.upRowServerSide();
+							_this.upRowStyle();
 						}
 
 					};
@@ -269,6 +270,9 @@ define([
 					options.success = function(){
 						if(ctx.onceFetched){
 							ctx.onceFetched(params);
+						}
+						if(_this.totalElement){
+							_this.affectTotalRecords();
 						}
 					};
 					PageColl.prototype.fetch.call(this, options);
@@ -347,6 +351,8 @@ define([
 					} else {
 						delete this.collection.queryParams['lastImported'];
 					}
+
+
 					this.deffered = this.grid.collection.fetch({
 						reset: true, 
 						data: { 'criteria': this.filterCriteria }, 
@@ -458,11 +464,12 @@ define([
 			if (this.com) {
 				this.com.action(action, id);
 			} else {
-				//this.action(action, id);
+				this.action(action, id);
 			}
 		},
 
 		rowClicked: function(params){
+			console.log('cliqued');
 		},
 
 		rowDbClicked: function(params){

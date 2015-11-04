@@ -3,7 +3,6 @@ define(['marionette', 'config',
 	'./base/home/lyt-home',
 
 	/*==========  modules  ==========*/
-	'./modules/export/layouts/export-layout',
 
 	'./modules/stations/layouts/lyt-stations',
 	'./modules/stations/layouts/lyt-station-new',
@@ -11,7 +10,9 @@ define(['marionette', 'config',
 	'./modules/importFile/lyt-entry-importFile',
 	'./modules/individual/layouts/lyt-individual',
 	'./modules/individual/layouts/lyt-indiv-details',
+
 	'./modules/sensor/layouts/lyt-sensor',
+	'./modules/sensor/layouts/lyt-sensor-new',
 	
 	'./modules/monitoredSite/layouts/lyt-ms',
 	'./modules/validate/lyt-sensorValidate',
@@ -19,11 +20,12 @@ define(['marionette', 'config',
 	'./modules/validate/lyt-sensorValidateDetail',
 	'./modules/release/layouts/lyt-release-station',
 
+	'./modules/export/lyt-export-stepper',
+
 ],function( Marionette, config, 
 	LytHome,
 
 	/*==========  modules  ==========*/
-	LytExport,
 
 	LytStations,
 	LytStationsNew,
@@ -31,13 +33,18 @@ define(['marionette', 'config',
 	LytImportFile,
 	LytIndividual,
 	LytIndivDetails,
+	
 	LytSensor,
+	LytSensorNew,
+
 	LytMonitoredSite,
 	LytSensorValidate,
 	LytSensorValidateType,
 	LytSensorValidateDetail,
 
-	LytReleaseStation
+	LytReleaseStation,
+
+	LytExport
 
 ){
 	'use strict';
@@ -53,10 +60,6 @@ define(['marionette', 'config',
 		home: function() {
 			Backbone.history.navigate('');
 			this.rgMain.show(new LytHome());
-		},
-		
-		export: function(){
-			this.rgMain.show(new LytExport());
 		},
 
 		importFile: function(){
@@ -79,6 +82,10 @@ define(['marionette', 'config',
 			this.rgMain.show(new LytSensor({id: id}));
 		},
 
+		newSensor: function(type){
+			this.rgMain.show(new LytSensorNew({type : type}));
+		},
+
 		monitoredSite: function(id){
 			this.rgMain.show(new LytMonitoredSite({id: id}));
 		},
@@ -95,6 +102,10 @@ define(['marionette', 'config',
 
 		release: function(){
 			this.rgMain.show(new LytReleaseStation());
+		},
+		
+		export: function(){
+			this.rgMain.show(new LytExport());
 		},
 
 	});

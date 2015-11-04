@@ -8,11 +8,8 @@ define([
 	'moment',
 	'sweetAlert',
 	'config',
-
 	'ns_form/NSFormsModuleGit',
-
-	'i18n'
-
+	'i18n',
 ], function($, _, Backbone, Marionette, Radio,
 	moment, Swal, config, NsForm
 ){
