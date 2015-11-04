@@ -10,11 +10,10 @@ define([
 	'config',
 
 	'ns_form/NSFormsModuleGit',
-
+	'bootstrap',
 	'i18n'
 
-], function($, _, Backbone, Marionette, Radio, LytObs,
-	config, NsForm
+], function($, _, Backbone, Marionette, Radio, LytObs, config, NsForm, bootstrap
 ){
 	'use strict';
 	return Marionette.LayoutView.extend({

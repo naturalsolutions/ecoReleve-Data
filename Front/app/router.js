@@ -12,6 +12,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 
 			'individual(/)' : 'individual',
 			'individual(/):id(/)' : 'individual',
+			'individual/new(/):id(/)': 'newIndividual',
 
 			'stations(/)' : 'stations',
 			'stations/new(/)': 'newStation',

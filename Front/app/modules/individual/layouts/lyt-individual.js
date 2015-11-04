@@ -31,6 +31,7 @@ define([
 			'click #btnFilter' : 'filter',
 			'click #back' : 'hideDetails',
 			'click button#clear' : 'clearFilter',
+			'click button#createNew' : 'newIndividual'
 		},
 
 		ui: {
@@ -38,6 +39,7 @@ define([
 			'paginator': '#paginator',
 			'filter': '#filter',
 			'detail': '#detail',
+			'btnNew' : '#createNew'
 		},
 
 		regions: {
@@ -123,5 +125,24 @@ define([
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
 		},
+		newIndividual : function(){
+			// TODO  implementation of group creation front/end
+			this.ui.btnNew.tooltipList({
+					availableOptions : [{
+							label : 'Individual',
+							val : 'individual'
+					}/*, {
+							label : 'Group',
+							val : 'group'
+					}*/
+					],
+					liClickEvent : function(liClickValue) {
+							Backbone.history.navigate('#individual/new/' + liClickValue, {trigger: true});
+					},
+					position: 'top'
+			});
+
+
+		}
 	});
 });

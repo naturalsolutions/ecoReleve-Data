@@ -9,6 +9,7 @@ define(['marionette', 'config',
 
 	'./modules/importFile/lyt-entry-importFile',
 	'./modules/individual/layouts/lyt-individual',
+	'./modules/individual/layouts/lyt-new-individual',
 	'./modules/individual/layouts/lyt-indiv-details',
 
 	'./modules/sensor/layouts/lyt-sensor',
@@ -32,6 +33,7 @@ define(['marionette', 'config',
 
 	LytImportFile,
 	LytIndividual,
+	LytIndividualNew,
 	LytIndivDetails,
 	
 	LytSensor,
@@ -76,6 +78,10 @@ define(['marionette', 'config',
 
 		individual : function(id){
 			this.rgMain.show(new LytIndividual({id : id}));
+		},
+
+		newIndividual : function(type){
+			this.rgMain.show(new LytIndividualNew({type : type}));
 		},
 
 		sensor : function(id){
