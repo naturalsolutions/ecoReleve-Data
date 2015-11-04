@@ -16,6 +16,7 @@ define(['marionette', 'config',
 	'./modules/sensor/layouts/lyt-sensor-new',
 	
 	'./modules/monitoredSite/layouts/lyt-ms',
+	'./modules/monitoredSite/layouts/lyt-new-site',
 	'./modules/validate/lyt-sensorValidate',
 	'./modules/validate/lyt-sensorValidateType',
 	'./modules/validate/lyt-sensorValidateDetail',
@@ -40,6 +41,7 @@ define(['marionette', 'config',
 	LytSensorNew,
 
 	LytMonitoredSite,
+	LytMonitoredNew,
 	LytSensorValidate,
 	LytSensorValidateType,
 	LytSensorValidateDetail,
@@ -94,6 +96,9 @@ define(['marionette', 'config',
 
 		monitoredSite: function(id){
 			this.rgMain.show(new LytMonitoredSite({id: id}));
+		},
+		newMonitoredSite : function(type){
+			this.rgMain.show(new LytMonitoredNew());
 		},
 
 		validate: function(){

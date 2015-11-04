@@ -22,6 +22,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'sensor(/)' : 'sensor',
 
 			'monitoredSite(/)' : 'monitoredSite',
+			'monitoredSite/new(/)' : 'newMonitoredSite',
 			'monitoredSite(/):id(/)' : 'monitoredSite',
 
 			'validate/:type(/)':'validateType',

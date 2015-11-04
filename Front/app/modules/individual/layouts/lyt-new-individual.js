@@ -1,9 +1,3 @@
-/*1 Argos
-2 GSM
-3 RFID
-4 VHF
-*/
-
 define([
 	'jquery',
 	'underscore',
@@ -14,8 +8,9 @@ define([
 	'config',
 	'ns_modules/ns_com',
 	'ns_form/NSFormsModuleGit',
+	'sweetAlert',
 
-], function($, _, Backbone, Marionette, Swal, Translater, config, Com,  NsForm){
+], function($, _, Backbone, Marionette, Swal, Translater, config, Com,  NsForm,swal){
 
 	'use strict';
 		return Marionette.ItemView.extend({
@@ -29,7 +24,7 @@ define([
 			},
 			events : {
 				'click button.back' : 'removeThis',
-				'click #btnCreate' : 'saveForm'
+				'click #btnCreate' : 'save'
 			},
 
 			initialize: function(options){
@@ -65,10 +60,44 @@ define([
 				id: 0,
 				reloadAfterSave : false,
 				afterSaveSuccess : function(){
-					console.log('plouf');
+					var type = 'individual'
+					if(self.type != 1 ){
+						type = 'group' ;
+					}
+					swal({
+                title: "Succes",
+                text: "creating new " + type,
+                type: 'success',
+                showCancelButton: true,
+                confirmButtonColor: 'green',
+                confirmButtonText: "create another " + type,
+                cancelButtonText: "cancel",
+                closeOnConfirm: true,
+              },
+              function(isConfirm){
+                  if (!isConfirm) {
+                     Backbone.history.navigate('individual',{ trigger:true});
+                  }
+              }
+          );
+				},
+				savingError : function(response){
+					Swal({
+								title: "Error",
+								text: 'creating a new ' + type,
+								type: 'error',
+								showCancelButton: false,
+								confirmButtonColor: 'rgb(147, 14, 14)',
+								confirmButtonText: "OK",
+								closeOnConfirm: true,
+							}
+					);
 				}
 			});
 		},
+		save: function(){
+			this.nsForm.butClickSave();
+		}
 
 	});
 });
