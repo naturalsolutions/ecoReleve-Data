@@ -6,7 +6,6 @@ define([
 	'radio',
 
 	'./lyt-observation',
-
 	'config',
 
 	'ns_form/NSFormsModuleGit',

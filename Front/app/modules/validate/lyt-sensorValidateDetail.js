@@ -393,6 +393,7 @@ define([
 					resp.title = 'Success';
 					resp.type = 'success';
 				}
+				
 				var callback = function(){
 					_this.navbar.navigateNext();
 					//loose the focus due to re-fetch
