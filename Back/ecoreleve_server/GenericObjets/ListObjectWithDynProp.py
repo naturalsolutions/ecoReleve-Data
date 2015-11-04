@@ -59,7 +59,7 @@ class ListObjectWithDynProp():
         self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
 
         for objConf in self.GetAllPropNameInConf() :
-            print(objConf.Name)
+            # print(objConf.Name)
             curDynProp = self.GetDynProp(objConf.Name)
             if objConf.Name in self.fk_list and objConf.QueryName is not None:
                 tableRef = self.fk_list[objConf.Name].column.table
@@ -154,7 +154,7 @@ class ListObjectWithDynProp():
                 if x['name'] == curProp:
                     curDynProp = x
             if curDynProp == None:
-                print(curProp)
+                # print(curProp)
                 print('Prop dyn inconnue')
                     # Gerer l'exception
             else :
@@ -239,7 +239,7 @@ class ListObjectWithDynProp():
                     trueCol = viewAlias.c['Value'+curDynProp['TypeProp']]
 
                 elif 'FK_'+curProp in self.fk_list:
-                    print('\n **---** ORDER BY ON FK !')
+                    # print('\n **---** ORDER BY ON FK !')
                     tableRef = self.fk_list['FK_'+curProp].column.table
                     nameRef = self.fk_list['FK_'+curProp].column.name
                     trueCol = tableRef.c[curProp]
@@ -270,7 +270,7 @@ class ListObjectWithDynProp():
 
         else :
             query = query.order_by(self.ObjWithDynProp.__table__.c['ID'].asc())
-
+            
             # Define the limit and offset if exist
         if 'per_page' in searchInfo :
             limit = int(searchInfo['per_page'])

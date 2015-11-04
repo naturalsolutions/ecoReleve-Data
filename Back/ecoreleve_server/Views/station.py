@@ -71,7 +71,7 @@ def getForms(request) :
     newSta = Station(FK_StationType = typeSta)
     newSta.init_on_load()
     schema = newSta.GetDTOWithSchema(Conf,'edit')
-    print(schema)
+    # print(schema)
     transaction.commit()
     return schema
 
@@ -147,7 +147,7 @@ def insertOneNewStation (request) :
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
-    print (newSta.__dict__)
+    # print (newSta.__dict__)
     DBSession.add(newSta)
     DBSession.flush()
     # transaction.commit()
@@ -216,17 +216,17 @@ def insertListNewStations(request):
 
     ##### Build block insert statement and returning ID of new created stations #####
     if len(data_to_insert) != 0 :
-        print('********* insertion plusieurs stations **********')
+        # print('********* insertion plusieurs stations **********')
         stmt = Station.__table__.insert(returning=[Station.ID]).values(data_to_insert)
         res = DBSession.execute(stmt).fetchall()
-        print('********* station list**********')
+        # print('********* station list**********')
         result =list(map(lambda y:  y[0], res))
         #result = list(map(lambda y: {'FK_Station' : y[0], }, res))
 
 
     ###### Insert FieldWorkers ######
         print('**********fieldworkers************')
-        print(data[0])
+        # print(data[0])
         if not data[0]['FieldWorkers'] == None or "" :
             list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK_FieldWorker': b  },result)),data[0]['FieldWorkers'] ))
             list_ = list(itertools.chain.from_iterable(list_))
@@ -254,11 +254,28 @@ def searchStation(request):
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
 
     if not 'geo' in data:
+        ModuleType = 'StationVisu'
         searchInfo['order_by'] = json.loads(data['order_by'])
         searchInfo['offset'] = json.loads(data['offset'])
         searchInfo['per_page'] = json.loads(data['per_page'])
+        getFW = True
     else :
         searchInfo['order_by'] = []
+        ModuleType = 'StationGeo'
+        getFW = False
+        criteria = [
+        {'Column' : 'LAT',
+        'Operator' : 'Is not',
+        'Value' : None
+        },
+        {
+        'Column': 'LON',
+        'Operator' : 'Is not',
+        'Value' : None
+        }]
+        searchInfo['criteria'].extend(criteria)
+        # searchInfo['offset'] = 0
+        searchInfo['per_page'] = 25
 
     #### add filter parameters to retrieve last stations imported : last day of station created by user and without linked observation ####
     if 'lastImported' in data :
@@ -281,17 +298,22 @@ def searchStation(request):
         searchInfo['criteria'].extend(criteria)
 
     
-    ModuleType = 'StationVisu'
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     start = datetime.now()
     listObj = StationList(moduleFront)
-    dataResult = listObj.GetFlatDataList(searchInfo)
+    try:
+        dataResult = listObj.GetFlatDataList(searchInfo,getFW)
+    except Exception as e : 
+        template = "An exception of type {0} occured. Arguments:\n{1!r}"
+        message = template.format(type(e).__name__, e.args)
+        print (message)
+        dataResult = []
     stop = datetime.now()
 
     print ('______ TIME to get DATA : ')
     print (stop-start)
     start = datetime.now()
-    countResult = listObj.count(searchInfo)
+    
     print ('______ TIME to get Count : ')
     stop = datetime.now()
     print (stop-start)
@@ -303,6 +325,7 @@ def searchStation(request):
             geoJson.append({'type':'Feature', 'properties':{'name':row['Name'], 'date':row['StationDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
         return {'type':'FeatureCollection', 'features':geoJson}
     else :
+        countResult = listObj.count(searchInfo)
         result = [{'total_entries':countResult}]
         result.append(dataResult)
         transaction.commit()
