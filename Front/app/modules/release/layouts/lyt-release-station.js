@@ -76,7 +76,7 @@ define([
 		initGrid:function(){
 			var _this = this;
 			this.grid = new NsGrid({
-				pageSize: 13,
+				pageSize: 20,
 				pagingServerSide: true,
 				com: this.com,
 				name : 'StationGrid',

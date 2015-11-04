@@ -1,48 +1,52 @@
 
 <div class="clearfix full-height ">
 	<div id="releaseStationLeft"  class="col-xs-3 full-height ns-no-padding white">
-		<div class="ns-actions col-xs-12">
+		<div class="toolbar top">
 			<legend><span class="reneco reneco-search circle dark"></span>&nbsp;&nbsp;Search</legend>
-			</div>
-		<ul class="nav nav-tabs grid-padding">
-			 <li class="tab-ele"><a class="tab-link" name="allSt">All stations</a></li>
-			 <li class="tab-ele activeTab"><a id="tab-impSt" class="tab-link"  name="impSt">Imported stations</a></li>
-		</ul>
-		<div class="tab-content all-stations">
-			<div id="allSt" class="tab-pane fade in active tab-ele">
-
-			</div>
-			<div id="impSt">
-
-			</div>
 		</div>
-		<br>
-		<div id="filters" class="grid-padding fit-filter with-tab"></div>
-		<div class="ns-filter-action">
-			<button id="clear" class="btn pull-left">CLEAR ALL</button>
-			<button id="btnFilter" class="btn btn-success pull-right">FILTER&nbsp;
+
+		<div class="crop2">
+			<ul class="nav nav-tabs grid-padding">
+				 <li class="tab-ele"><a class="tab-link" name="allSt">All stations</a></li>
+				 <li class="tab-ele activeTab"><a id="tab-impSt" class="tab-link"  name="impSt">Imported stations</a></li>
+			</ul>
+			<div class="tab-content all-stations">
+				<div id="allSt" class="tab-pane fade in active tab-ele"></div>
+				<div id="impSt"></div>
+			</div>
+			<br>
+			<div id="filters" class=""></div>
+		</div>
+
+		<div class="toolbar bottom">
+			<button id="clear" class="btn pull-left">Clear</button>
+			<button id="btnFilter" class="btn btn-success pull-right">Filter&nbsp;
 				<span class="reneco reneco-search"></span>
 			</button>
 		</div>
 	</div>
 
 	<div id="releaseStationRight" class=" pannels-container col-xs-9 full-height dark ns-no-padding">
-		<div class="ns-actions col-xs-12">
+
+		<div class="toolbar top">
 			<legend class="text-right">Total Stations : <span id="totalEntries"></span></legend>
 		</div>
-		<div id="grid" class="enhanced-grid grid-padding fit-grid"></div>
+
+		<div class="crop2 crop-paginator">
+			<br>
+			<div id="grid"></div>
+		</div>
 		<div id="paginator" class="paginator "></div>
 
-		<div id="toolbar"  class="toolbar">
-			<div class=" ns-footer">
-				<div class="col-md-12">
-					<button class="btn btn-success pull-right" id='useStation'>
-						<span >USE TO RELEASE&nbsp;&nbsp;</span>
-						<span class="icon reneco reneco-to_release" data-position="top"></span>
-					</button>
-				</div>
+		<div id="toolbar" class="toolbar bottom">
+			<div class="col-md-12">
+				<button class="btn btn-success pull-right" id='useStation'>
+					<span >Use to release&nbsp;&nbsp;</span>
+					<span class="icon reneco reneco-to_release"></span>
+				</button>
 			</div>
 		</div>
+
 	</div>
 </div>
 

@@ -31,7 +31,6 @@ define([
 		ui: {
 			'grid': '#grid',
 			'paginator': '#paginator',
-			'totalEntries': '#totalEntries',
 			'frequency': 'select#frequency',
 			'detail': '#detail',
 		},
@@ -275,7 +274,7 @@ define([
 				com: this.com,
 				url: config.coreUrl+'sensors/'+this.type_+'/uncheckedDatas',
 				rowClicked : true,
-				totalElement : 'totalEntries',
+				totalElement : 'totalEntriesType',
 				idCell: 'FK_Sensor'
 			});
 
