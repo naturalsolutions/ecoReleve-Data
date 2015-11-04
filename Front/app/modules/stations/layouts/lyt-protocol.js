@@ -6,11 +6,11 @@ define([
 	'radio',
 
 	'./lyt-observation',
-
 	'config',
 
 	'ns_form/NSFormsModuleGit',
 
+	'bootstrap',
 	'i18n'
 
 ], function($, _, Backbone, Marionette, Radio, LytObs,
