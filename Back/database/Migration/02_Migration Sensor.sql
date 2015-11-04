@@ -1,21 +1,30 @@
-INSERT INTO SensorType (
-Name,
-Status)
-VALUES ('Argos',4)
+SET IDENTITY_INSERT SensorType ON 
 
 INSERT INTO SensorType (
+ID,
 Name,
 Status)
-VALUES ('GSM',4)
-INSERT INTO SensorType (
-Name,
-Status)
-VALUES ('RFID',4)
-INSERT INTO SensorType (
-Name,
-Status)
-VALUES ('VHF',4)
+VALUES (1,'Argos',4)
 
+INSERT INTO SensorType (
+ID,
+Name,
+Status)
+VALUES (2,'GSM',4)
+
+INSERT INTO SensorType (
+ID,
+Name,
+Status)
+VALUES (3,'RFID',4)
+
+INSERT INTO SensorType (
+ID,
+Name,
+Status)
+VALUES (4,'VHF',4)
+
+SET IDENTITY_INSERT SensorType OFF
 
 -------------- INSERT  sensor Argos and GSM -------------------------------------------------------------------
 INSERT INTO Sensor(
