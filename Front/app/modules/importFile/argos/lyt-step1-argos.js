@@ -157,16 +157,21 @@ define([
 
 
 						if(!this.errors){
-								Swal(
-										{
-											title: "Well done",
-											text: 'File(s) have been correctly imported',
-											type: 'success',
-											showCancelButton: false,
-											confirmButtonText: "OK",
-											closeOnConfirm: true,
-										}
-								);    
+
+								Swal({   title: "Well done",   
+									text: 'File(s) have been correctly imported',   
+									type:  'success',   
+									showCancelButton: true,   
+									confirmButtonColor: "#DD6B55",   
+									confirmButtonText: "Validate Argos",   
+									cancelButtonText: "New import",   
+									closeOnConfirm: true,   
+									closeOnCancel: true }, 
+									function(isConfirm){   if (isConfirm) {     
+											Backbone.history.navigate('validate/argos',{ trigger:true});
+											} 
+									}
+								);
 						}else{
 								Swal(
 										{

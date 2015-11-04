@@ -9,7 +9,7 @@ define([
 	'moment',
 	'vendors/backboneForm-editor-dateTimePicker',
 	'vendors/backboneForm-editor-timePicker',
-	'vendors/backboneForm-editor-autoCompTree',
+	//'vendors/backboneForm-editor-autoCompTree',
 	'vendors/backboneForm-editor-Number',
 	
 

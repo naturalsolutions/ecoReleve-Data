@@ -34,9 +34,9 @@ require.config({
 		'SensorPicker'	: 'ns_modules/ns-bbforms-editors/SensorPicker/backboneForm-editors-SensorPicker',
 
 		
-		'autocompTree' 			: 'vendors/jquery.autocompTree',
+		
 		'ListOfNestedModel' 	: 'vendors/ListOfNestedModel/ListOfNestedModel',
-		'AutocompleteEditor'	: 'vendors/AutocompleteEditor',
+		'AutocompleteEditor'	: '../externalModules/NaturalJS-BackBone-Forms-Editors/Autocomplete/AutocompleteEditor',
 
 		/*==========  Bower  ==========*/
 		'jquery'				: '../bower_components/jquery/jquery',
@@ -82,7 +82,8 @@ require.config({
 
 
 		'bbDate': 'vendors/backboneForm-editors',
-		'bbAutoComp': 'vendors/backboneForm-editors-autoCompTree',
+		'bbAutoComp': '../externalModules/NaturalJS-BackBone-Forms-Editors/ThesaurusEditor/backboneForm-editors-autocompTree',
+		'autocompTree' : '../externalModules/NaturalJS-BackBone-Forms-Editors/ThesaurusEditor/AutoCompletTree/jquery.autocompTree',
 		'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
     'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
 	},
@@ -159,13 +160,14 @@ require.config({
 			exports : 'SimplePagination'
 		},
 		fancytree :  {
-			deps:['jqueryui'],
+			deps:['jquery','jqueryui'],
 			exports : 'Fancytree'
 		},
 		autocompTree : {
 			deps:['fancytree'],
-			exports : 'AutocompTree'
+			exports : 'autocompTree'
 		},
+
 		fuelux:{
 			deps:['jquery','bootstrap'],
 			exports: 'Fuelux'

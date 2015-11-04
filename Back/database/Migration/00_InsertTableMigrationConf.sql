@@ -1,17 +1,12 @@
-SET IDENTITY_INSERT [MigrationConfigurationProtocoleList] ON 
-GO
 INSERT INTO [dbo].[MigrationConfigurationProtocoleList]
-           (ID,
+           (
 		   [ProtocoleName]
            ,[TableName])
-
-	VALUES
-           (1
-		   ,'Chiroptera capture'
-           ,'TProtocol_Chiroptera_capture')
-
-GO
-SET IDENTITY_INSERT [MigrationConfigurationProtocoleList] OFF 
+SELECT t.Name
+      ,'TProtocol_'+[Relation]
+	--
+  FROM [ECWP-eReleveData].[dbo].[TProtocole] p 
+  JOIN ProtocoleType t on replace(p.Relation,'_',' ') like t.Name  
 /*
 INSERT INTO [dbo].[MigrationConfigurationProtocoleContent]
            ([fk_ConfigurationProtocole]
