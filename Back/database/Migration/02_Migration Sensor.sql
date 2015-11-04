@@ -1,30 +1,40 @@
-INSERT INTO [NewModelERD].[dbo].SensorType (
-Name,
-Status)
-VALUES ('Argos',4)
-INSERT INTO [NewModelERD].[dbo].SensorType (
-Name,
-Status)
-VALUES ('GSM',4)
-INSERT INTO [NewModelERD].[dbo].SensorType (
-Name,
-Status)
-VALUES ('RFID',4)
-INSERT INTO [NewModelERD].[dbo].SensorType (
-Name,
-Status)
-VALUES ('VHF',4)
+SET IDENTITY_INSERT SensorType ON 
 
+INSERT INTO SensorType (
+ID,
+Name,
+Status)
+VALUES (1,'Argos',4)
+
+INSERT INTO SensorType (
+ID,
+Name,
+Status)
+VALUES (2,'GSM',4)
+
+INSERT INTO SensorType (
+ID,
+Name,
+Status)
+VALUES (3,'RFID',4)
+
+INSERT INTO SensorType (
+ID,
+Name,
+Status)
+VALUES (4,'VHF',4)
+
+SET IDENTITY_INSERT SensorType OFF
 
 -------------- INSERT  sensor Argos and GSM -------------------------------------------------------------------
-INSERT INTO [NewModelERD].[dbo].Sensor(
-	[UnicName]
+INSERT INTO Sensor(
+	UnicIdentifier
       ,[Model]
       ,[Compagny]
       ,[SerialNumber]
       ,[creationDate]
       ,[FK_SensorType]
-      ,[OldID]
+      ,Original_ID
 )
 SELECT  
 [id19@TCarac_PTT],
@@ -42,14 +52,14 @@ where [id41@TCaracThes_Model_Precision] not like '%RI%'
 
 -------------- INSERT  RFID -------------------------------------------------------------------
 
-INSERT INTO [NewModelERD].[dbo].Sensor(
-	[UnicName]
+INSERT INTO Sensor(
+	UnicIdentifier
       ,[Model]
       ,[Compagny]
       ,[SerialNumber]
       ,[creationDate]
       ,[FK_SensorType]
-      ,[OldID]
+      ,Original_ID
 )
 
 SELECT 

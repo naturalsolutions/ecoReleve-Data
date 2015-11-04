@@ -1,5 +1,4 @@
-USE [NARC_TRACK_MACQ]
-GO
+
 
 /****** Object:  StoredProcedure [dbo].[MessageSendDataToDest]    Script Date: 12/10/2015 16:29:56 ******/
 SET ANSI_NULLS ON

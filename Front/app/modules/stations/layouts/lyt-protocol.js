@@ -4,11 +4,8 @@ define([
 	'backbone',
 	'marionette',
 	'radio',
-
 	'./lyt-observation',
-
 	'config',
-
 	'ns_form/NSFormsModuleGit',
 	'bootstrap',
 	'i18n'
