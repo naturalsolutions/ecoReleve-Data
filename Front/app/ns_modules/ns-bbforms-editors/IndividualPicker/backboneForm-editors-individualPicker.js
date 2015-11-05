@@ -37,8 +37,6 @@ define([
 			
 			this.model = new Backbone.Model();
 
-			console.log(options);
-
 			this.model.set('pickerType', this.pickerType);
 
 
@@ -58,11 +56,9 @@ define([
 			this.displayGrid();
 			this.displayFilter();
 			this.translater = Translater.getTranslater();
-			console.log(this._input);
 		},
 
 		displayGrid: function(){
-			console.log($(this._input).val());
 			var _this = this;
 			this.grid = new NsGrid({
 				pageSize: 20,
