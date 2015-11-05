@@ -16,21 +16,23 @@ BEGIN
 
 
 	SELECT @ProtocoleName = Name from [NewModelERD].dbo.ProtocoleType where id=@ProtocoleType
-	print @ProtocoleName
+	print 'Export ' + @ProtocoleName
 
 	---------------------- CREATION DE LA TABLE CIBLE
 
 	-- Ges Static Prop
-	select * into TmpObsExport 
+	select O.* into TmpObsExport 
 	from [NewModelERD].dbo.Observation O
 	where O.FK_ProtocoleType = @ProtocoleType
+	
+	exec pr_ExportObservationDynPropValueNow
 	
 	
 	DECLARE @Req NVARCHAR(MAX)
 	DECLARE @ReqFrom NVARCHAR(MAX)
 	DECLARE @ReqSet NVARCHAR(MAX)
-
-
+	SET @Req = ' CREATE UNIQUE CLUSTERED INDEX PK_TProtocole'  +  replace(@ProtocoleName,' ','_') + ' ON TmpObsExport (ID)' 
+	exec ( @req)
 	IF EXISTS (select * from [NewModelERD].dbo.ObservationDynProp D JOIN [NewModelERD].dbo.ProtocoleType_ObservationDynProp C ON C.FK_ProtocoleType = @ProtocoleType and c.FK_ObservationDynProp =D.ID )
 	BEGIN
 		-- ALTER WITH DYN PROPS
@@ -40,7 +42,6 @@ BEGIN
 		from [NewModelERD].dbo.ObservationDynProp D JOIN [NewModelERD].dbo.ProtocoleType_ObservationDynProp C ON C.FK_ProtocoleType = @ProtocoleType and c.FK_ObservationDynProp =D.ID
 
 		SET @Req = replace(@Req,'ADD@,','ADD ')
-		print @Req
 		exec ( @req)
 	
 
@@ -51,14 +52,25 @@ BEGIN
 			SET @ReqSet = 'SET@'
 			SET @ReqFrom =''
 
-			SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')																						
+
+			SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=(select Value' +  replace(P.TypeProp,'Integer','Int') + ' FROM   TObservationDynPropValueNow  where fk_observationdynprop=' + convert(varchar(10),P.ID) + ' and fk_observation = EI.ID)'
+			--SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')
 			from [NewModelERD].dbo.ObservationDynProp P JOIN [NewModelERD].dbo.ProtocoleType_ObservationDynProp C ON C.FK_ProtocoleType = @ProtocoleType and c.FK_ObservationDynProp =P.ID 
 
 
 			SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
-			print @ReqFrom
+			SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpObsExport EI '
 
-			SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpObsExport EI JOIN (SELECT VN.FK_Observation ' + @ReqFrom + ' FROM   [NewModelERD].dbo.ObservationDynPropValuesNow VN GROUP BY VN.FK_Observation) V ON EI.ID = V.FK_Observation '
+
+
+			--SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')																						
+			--from [NewModelERD].dbo.ObservationDynProp P JOIN [NewModelERD].dbo.ProtocoleType_ObservationDynProp C ON C.FK_ProtocoleType = @ProtocoleType and c.FK_ObservationDynProp =P.ID 
+
+
+			--SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
+			--print @ReqFrom
+
+			--SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpObsExport EI JOIN (SELECT VN.FK_Observation ' + @ReqFrom + ' FROM   [NewModelERD].dbo.ObservationDynPropValuesNow VN GROUP BY VN.FK_Observation) V ON EI.ID = V.FK_Observation '
 
 			--SET @Req = 'SELECT * FROM TmpIndivExport EI JOIN (SELECT VN.FK_Individual ' + @ReqFrom + ' FROM   [NewModelERD].dbo.IndividualDynPropValuesNow VN GROUP BY VN.FK_Individual) V ON EI.ID = V.FK_Individual '
 
@@ -67,7 +79,7 @@ BEGIN
 			exec ( @req)
 		END	
 	END
-	SET @Req = ' IF object_id(''TProtocole'  +  replace(@ProtocoleName,' ','_') + ''') IS NOT NULL DROP TABLE  TProtocole'  +  replace(@ProtocoleName,' ','_')
+	SET @Req = ' IF object_id(''TProtocol_'  +  replace(@ProtocoleName,' ','_') + ''') IS NOT NULL DROP TABLE  TProtocole'  +  replace(@ProtocoleName,' ','_')
 	exec ( @req)
 	SET @Req = ' sp_rename ''TmpObsExport'' ,TProtocole'  +  replace(@ProtocoleName,' ','_')
 

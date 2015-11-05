@@ -14,7 +14,7 @@ BEGIN
 	BEGIN
 		SELECT TOP 1 @ProtocoleType=ID FROM #ProtList
 		print @ProtocoleType
-		execute pr_ExportAllProtocole @ProtocoleType
+		execute pr_ExportOneProtocole @ProtocoleType
 		DELETE FROM #ProtList WHERE ID=@ProtocoleType
 	END
 
