@@ -133,7 +133,7 @@ define([
 			this.filters = new NsFilter({
 				url: config.coreUrl + 'release/individuals/',
 				com: this.com,
-				filterContainer: 'indiv_filters',
+				filterContainer: this.ui.filters,
 			});
 		},
 

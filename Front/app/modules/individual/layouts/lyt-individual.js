@@ -112,7 +112,7 @@ define([
 			this.filters = new NsFilter({
 				url: config.coreUrl + 'individuals/',
 				com: this.com,
-				filterContainer: 'filter',
+				filterContainer: this.ui.filter,
 			});
 		},
 

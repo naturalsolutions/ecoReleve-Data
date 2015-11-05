@@ -107,7 +107,7 @@ define([
 				com: this.com,
 				name:'StationGrid',
 				typeObj: typeObj,
-				filterContainer: 'filters',
+				filterContainer: this.ui.filter,
 			});
 		},
 
