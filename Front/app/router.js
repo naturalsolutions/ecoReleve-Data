@@ -12,6 +12,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 
 			'individual(/)' : 'individual',
 			'individual(/):id(/)' : 'individual',
+			'individual/new(/):id(/)': 'newIndividual',
 
 			'stations(/)' : 'stations',
 			'stations/new(/)': 'newStation',
@@ -21,6 +22,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'sensor(/)' : 'sensor',
 
 			'monitoredSite(/)' : 'monitoredSite',
+			'monitoredSite/new(/)' : 'newMonitoredSite',
 			'monitoredSite(/):id(/)' : 'monitoredSite',
 
 			'validate/:type(/)':'validateType',

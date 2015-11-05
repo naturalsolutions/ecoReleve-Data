@@ -167,6 +167,11 @@ define([
 				displayMode: 'edit',
 				objectType: stTypeId,
 				id: 0,
+				afterShow : function(){
+					$("#dateTimePicker").on("dp.change", function (e) {
+            $('#dateTimePicker').data("DateTimePicker").maxDate(e.date);
+        });
+				}
 			});
 
 			this.nsForm.savingSuccess =  function(model, resp){

@@ -201,7 +201,7 @@ def updateMonitoredSite(request):
     
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix, renderer='json', request_method = 'POST')
+@view_config(route_name= prefix+'/', renderer='json', request_method = 'POST')
 def insertMonitoredSite(request):
     data = request.json_body
     if not isinstance(data,list):
@@ -217,7 +217,7 @@ def insertOneNewMonitoredSite (request) :
         if value != "" :
             data[items] = value
 
-    newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], creator = request.authenticated_userid)
+    newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid )
     newMonitoredSite.MonitoredSiteType = DBSession.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
     newMonitoredSite.init_on_load()
     newMonitoredSite.UpdateFromJson(data)
