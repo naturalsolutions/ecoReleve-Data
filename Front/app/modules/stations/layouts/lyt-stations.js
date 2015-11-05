@@ -80,7 +80,7 @@ define([
 			this.map = new NsMap({
 				url: config.coreUrl + 'stations/?geo=true',
 				cluster: true,
-				//com: this.com,
+				com: this.com,
 				zoom: 3,
 				element : 'map',
 				popup: true,
