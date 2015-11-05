@@ -154,24 +154,6 @@ define([
 		hideDetails : function(){
 			this.ui.detail.addClass('hidden');
 		},
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		updateModels : function(e){
 			// get list of models for selected sensor type
 			var selectedType = $(e.target).val();
@@ -216,9 +198,6 @@ define([
 			}
 			$(elem).html(content);
 		},
-
-
-
 
 		exportGrid: function() {
 			$.ajax({

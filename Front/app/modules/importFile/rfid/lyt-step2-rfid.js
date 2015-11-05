@@ -5,7 +5,7 @@ define([
 	'marionette',
 	'config',
 	'sweetAlert',
-	'i18n'
+	'i18n',
 
 ], function($, _, Backbone, Marionette,config,swal
 ){
@@ -49,9 +49,29 @@ define([
 
                 var reader = new FileReader();
                 var file = $('#input-file').get(0).files[0] || null;
-                var url = config.coreUrl + 'sensors/rfid/datas';
-                var data = new FormData();
-                var self = this;
+
+                var ext = file.name.split('.');
+				if (ext[ext.length-1] != "txt") {
+						swal(
+							{
+								title: "Wrong file type",
+								text: 'The file should be a text file (.txt)',
+								type: 'error',
+								showCancelButton: false,
+								confirmButtonColor: 'rgb(147, 14, 14)',
+								confirmButtonText: "OK",
+
+								closeOnConfirm: true,
+							}
+						);
+						return false;
+				} else {
+					var url = config.coreUrl + 'sensors/rfid/datas';
+	                var data = new FormData();
+	                var self = this;
+
+				}
+
 
                 reader.onprogress = function(data) {
                     if (data.lengthComputable) {

@@ -23,6 +23,7 @@ define([
 			events : {
 				'click button.back' : 'removeThis',
 				'click #btnCreate' : 'save',
+				'click #btnCancel' : 'cancel'
 
 			},
 			onShow : function(){
@@ -52,7 +53,7 @@ define([
               },
               function(isConfirm){
                   if (!isConfirm) {
-                     Backbone.history.navigate('monitoredSite',{ trigger:true});
+                     self.cancel();
                   }
               }
           );
@@ -73,6 +74,9 @@ define([
 		},
 		save: function(){
 			this.nsForm.butClickSave();
+		},
+		cancel : function(){
+			Backbone.history.navigate('monitoredSite',{ trigger:true});
 		}
 	});
 });
