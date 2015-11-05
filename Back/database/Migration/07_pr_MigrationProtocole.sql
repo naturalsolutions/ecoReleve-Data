@@ -71,7 +71,7 @@ BEGIN
 			   ,Original_ID)
 			   OUTPUT inserted.ID, inserted.original_id,inserted.creationDate into #InsertedObs
 		select DISTINCT @Id_Prot_Type,
-		s.id,S.StationDate,NULL,NULL, V.fk_protocole
+		s.id,S.StationDate,NULL,i.ID, V.fk_protocole
 		from #ProtValeur V 
 		--JOIN ObservationDynProp O on V.ValName = o.Name 
 		JOIN Station S on V.FK_Station = S.ID
