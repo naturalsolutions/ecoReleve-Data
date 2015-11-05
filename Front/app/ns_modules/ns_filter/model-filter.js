@@ -29,7 +29,6 @@ define([
 
 		initialize: function (options) {
 			this.filterContainer = options.filterContainer
-
 			this.clientSide = options.clientSide;
 			this.name = options.name || '';
 			this.com = options.com;
@@ -78,14 +77,14 @@ define([
 			var form;
 			for (var key in data) {
 				form = this.initFilter(data[key]);
-				$('#' + this.filterContainer).append(form.el);
+				this.filterContainer.append(form.el);
 				if (data[key].type == 'Checkboxes') {
-					$('#' + this.filterContainer).find("input[type='checkbox']").each(function () {
+					this.filterContainer.find('input[type="checkbox"]').each(function () {
 						$(this).prop('checked', true);
 					});
 				}
-				$('#' + this.filterContainer + " input[type='checkbox']").on('click', this.clickedCheck);
-				$('#' + this.filterContainer + " form").on('keypress',  $.proxy(this.updateQuery, this));
+				this.filterContainer.find('input[type="checkbox"]').on('click', this.clickedCheck);
+				this.filterContainer.find('form').on('keypress',  $.proxy(this.updateQuery, this));
 
 				this.forms.push(form);
 			};
@@ -262,7 +261,7 @@ define([
 		},
 
 		reset: function () {
-			$('#' + this.filterContainer).empty();
+			this.filterContainer.empty();
 			if (this.clientSide) {
 				this.initFilters(this.filters);
 			}

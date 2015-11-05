@@ -119,6 +119,18 @@ define([
 			this.nsForm.BeforeShow = function(){
 				_this.displayProtos();
 			};
+
+			this.nsForm.afterDelete = function(){
+				var jqxhr = $.ajax({
+					url: config.coreUrl+'stations/'+_this.stationId,
+					method: 'DELETE',
+					contentType:'application/json'
+				}).done(function(resp) {
+					Backbone.history.navigate('#stations', {trigger: true});
+				}).fail(function(resp) {
+
+				});
+			};
 		},
 
 		displayProtos: function(){

@@ -123,7 +123,7 @@ define([
 				filters: this.filtersList,
 				com: this.com,
 				clientSide: true,
-				filterContainer: 'filters'
+				filterContainer: this.ui.filters
 			});
 		},
 
