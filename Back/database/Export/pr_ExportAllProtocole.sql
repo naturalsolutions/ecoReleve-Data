@@ -1,3 +1,4 @@
+
 IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'pr_ExportAllProtocole ')
 	DROP PROCEDURE pr_ExportAllProtocole 
 GO
@@ -14,11 +15,10 @@ BEGIN
 	BEGIN
 		SELECT TOP 1 @ProtocoleType=ID FROM #ProtList
 		print @ProtocoleType
-		execute pr_ExportAllProtocole @ProtocoleType
+		execute pr_ExportOneProtocole @ProtocoleType
 		DELETE FROM #ProtList WHERE ID=@ProtocoleType
 	END
 
 END
-
 
 

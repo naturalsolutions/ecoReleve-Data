@@ -75,6 +75,8 @@ define([
 			var id = $(e.target).val();
 			this.grid.collection.url = config.coreUrl + 'sensors/'+ id +'/history';
 			this.grid.fetchCollection();
+			this.model.set('sensorId', id )
+			$('#btnNext').removeAttr('disabled');
 
 		},
 		initGrid : function(id){
@@ -117,19 +119,19 @@ define([
 				rowClicked : true,
 			});
 			this.grid.rowClicked = function(args){
-					_this.rowClicked(args.row);
+					//_this.rowClicked(args.row);
 			};
 			this.grid.rowDbClicked = function(args){
-				_this.rowClicked(args.row);
+				//_this.rowClicked(args.row);
 			};
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
 		},
 		rowClicked : function(row){
-			console.log(row.model.get('ID'));
-			this.model.set('sensorId',row.model.get('ID') )
+			//console.log(row.model.get('ID'));
+			//this.model.set('sensorId',row.model.get('ID') )
 			//this.validate();
-			$('#btnNext').removeAttr('disabled');
+			//$('#btnNext').removeAttr('disabled');
 			//this.nextOK();
 		},
 		validate : function(){

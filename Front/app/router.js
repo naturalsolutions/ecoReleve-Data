@@ -12,6 +12,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 
 			'individual(/)' : 'individual',
 			'individual(/):id(/)' : 'individual',
+			'individual/new(/):id(/)': 'newIndividual',
 
 			'stations(/)' : 'stations',
 			'stations/new(/)': 'newStation',
@@ -21,6 +22,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'sensor(/)' : 'sensor',
 
 			'monitoredSite(/)' : 'monitoredSite',
+			'monitoredSite/new(/)' : 'newMonitoredSite',
 			'monitoredSite(/):id(/)' : 'monitoredSite',
 
 			'validate/:type(/)':'validateType',
@@ -39,7 +41,12 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			}).done( function() {
 				callback.apply(this, args);
 			}).fail( function(msg) {
-				document.location.href='http://127.0.0.1/NsPortal/Front'; 
+				console.log(msg) ;
+				if (msg.status === 403) {
+					document.location.href='http://127.0.0.1/NsPortal/Front'; 
+                }
+				
+				//
 			});
 		},
 

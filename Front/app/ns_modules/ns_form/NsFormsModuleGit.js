@@ -135,6 +135,9 @@ define([
 			if (options.afterSaveSuccess){
 				this.afterSaveSuccess = options.afterSaveSuccess ;
 			}
+			if(options.savingError) {
+				this.savingError =options.savingError;
+			}
 		},
 
 

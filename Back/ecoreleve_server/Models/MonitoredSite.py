@@ -44,8 +44,8 @@ class MonitoredSite (Base,ObjectWithDynProp) :
     Name = Column (String(250), nullable=False)
     Category = Column(String(250), nullable=False)
     Creator = Column(Integer, nullable=False)
-    Active = Column(BIT, nullable=False)
-    creationDate = Column(DateTime,nullable=False)
+    Active = Column(BIT, nullable=False, default = 1)
+    creationDate = Column(DateTime,nullable=False, default = func.now())
 
     FK_MonitoredSiteType = Column(Integer, ForeignKey('MonitoredSiteType.ID'))
 
@@ -168,8 +168,6 @@ class MonitoredSite (Base,ObjectWithDynProp) :
             else :
                 setattr(self.newPosition,nameProp,valeur)
             if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)) and valeur != "" : 
-                print('valeur modifiée pour ' + nameProp + '  = '+str(valeur))
-                print(str(self.PropDynValuesOfNow[nameProp]))
                 self.positionChanged = True
 
     def UpdateFromJson(self,DTOObject):
