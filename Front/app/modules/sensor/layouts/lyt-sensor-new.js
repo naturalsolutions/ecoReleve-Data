@@ -28,7 +28,8 @@ define([
 			},
 			events : {
 				'click button.back' : 'removeThis',
-				'click #btnCreate' : 'save'
+				'click #btnCreate' : 'save',
+				'click #btnCancel' : 'cancel'
 			},
 
 			initialize: function(options){
@@ -82,7 +83,7 @@ define([
               },
               function(isConfirm){
                   if (!isConfirm) {
-                     Backbone.history.navigate('sensor',{ trigger:true});
+                     self.cancel();
                   }
               }
           );
@@ -103,6 +104,9 @@ define([
 		},
 		save: function(){
 			this.nsForm.butClickSave();
+		},
+		cancel : function(){
+			Backbone.history.navigate('sensor',{ trigger:true});
 		}
 	});
 });

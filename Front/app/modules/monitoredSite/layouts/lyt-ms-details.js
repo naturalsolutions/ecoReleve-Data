@@ -25,7 +25,7 @@ define([
 		className: 'full-height animated white',
 
 		events : {
-			'click #hideDetails' : 'hideDetail',
+			'click #hideDetails' : 'hideDetail', 
 			'click #showDetails'  : 'showDetail',
 			'click .tab-link' : 'displayTab',
 		},
@@ -167,7 +167,12 @@ define([
 				objectType: this.type,
 				id: id,
 				reloadAfterSave : false,
-				parent: this.parent
+				parent: this.parent,
+				afterShow : function(){
+					$("#dateTimePicker").on("dp.change", function (e) {
+            $('#dateTimePicker').data("DateTimePicker").maxDate(e.date);
+       		 });
+				}
 			});
 		},
 
