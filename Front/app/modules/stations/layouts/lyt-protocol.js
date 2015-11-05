@@ -9,7 +9,6 @@ define([
 	'config',
 
 	'ns_form/NSFormsModuleGit',
-
 	'bootstrap',
 	'i18n'
 
