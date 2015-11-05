@@ -71,11 +71,11 @@ def type_unchecked_list(request):
 
 def unchecked_rfid(request):
     unchecked = DataRfidWithSite
-    queryStmt = select([unchecked.c['UnciIdentifier'],unchecked.c['FK_Sensor'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],
+    queryStmt = select([unchecked.c['UnicIdentifier'],unchecked.c['FK_Sensor'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],
             func.count(distinct('chip_code')).label('nb_indiv'),func.count('chip_code').label('total_scan'), func.max(unchecked.c['date_']).label('max_date'),
             func.min(unchecked.c['date_']).label('min_date')]
             ).where(unchecked.c['checked']==0
-            ).group_by(unchecked.c['UnciIdentifier'],unchecked.c['FK_Sensor'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],unchecked.c['creation_date'])
+            ).group_by(unchecked.c['UnicIdentifier'],unchecked.c['FK_Sensor'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],unchecked.c['creation_date'])
     data = DBSession.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
     result = [{'total_entries':len(dataResult)}]
@@ -126,7 +126,7 @@ def details_unchecked_indiv(request):
         df.fillna(value={'ele':-999}, inplace=True)
         df.fillna(value={'speed':0}, inplace=True)
         df.replace(to_replace = {'speed': np.inf}, value = {'speed':9999}, inplace = True)
-
+        df.fillna(value=0,inplace=True)
         # dataResult = [dict(row) for row in data]
         dataResult = df.to_dict('records')
         result = [{'total_entries':len(dataResult)}]

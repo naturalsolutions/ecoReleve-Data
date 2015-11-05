@@ -41,7 +41,12 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			}).done( function() {
 				callback.apply(this, args);
 			}).fail( function(msg) {
-				document.location.href='http://127.0.0.1/NsPortal/Front'; 
+				console.log(msg) ;
+				if (msg.status === 403) {
+					document.location.href='http://127.0.0.1/NsPortal/Front'; 
+                }
+				
+				//
 			});
 		},
 

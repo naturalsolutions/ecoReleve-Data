@@ -66,7 +66,7 @@ define([
 				},
 				rowClicked: function(row){
 					var id = row.model.get('ID');
-					var unicName = row.model.get('UnicName');
+					var unicName = row.model.get('UnicIdentifier');
 					_this.currentRow.model.set({unicSensorName:unicName});
 					this.setValue(id);
 				},
@@ -74,6 +74,7 @@ define([
 				},
 				setValue: function(value) {
 					_this.currentRow.model.set({FK_Sensor:value});
+					console.log(_this.currentRow.model)
 					this.hidePicker();
 				},
 			});
