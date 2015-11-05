@@ -121,24 +121,11 @@ def releasePost(request):
     data = request.params.mixed()
     sta_id = int(data['StationID'])
     indivList = json.loads(data['IndividualList'])
-    # releaseMethod = data['releaseMethod']
+    releaseMethod = data['releaseMethod']
     releaseMethod = None
     taxon = indivList[0]['Species']
     curStation = DBSession.query(Station).get(sta_id)
-    # class protocolList :
 
-    #     def __init__(self,typeID):
-    #         self.typeID = typeID
-    #         self.list_ = []
-
-    #     def new(self):
-    #         return Observation(FK_ProtocoleType=self.typeID)
-
-    #     def getList(self):
-    #         return self.list_
-
-    #     def add(self,obs):
-    #         self.list_.append(obs)
 
     def getnewObs(typeID):
         return Observation(FK_ProtocoleType=typeID)
@@ -150,11 +137,6 @@ def releasePost(request):
     releaseGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Release Group','ID'].values[0])
     releaseIndID = int(protoTypes.loc[protoTypes['Name'] == 'Release Individual','ID'].values[0])
     equipmentIndID = int(protoTypes.loc[protoTypes['Name'] == 'Individual equipment','ID'].values[0])
-
-    # vertebrateIndList = protocolList(vertebrateIndID)
-    # biometryList = protocolList(biometryID)
-    # releaseIndList = protocolList(releaseIndID)
-    # equipmentIndList = protocolList(equipmentIndID)
 
     vertebrateIndList = []
     biometryList = []
@@ -285,14 +267,12 @@ def releasePost(request):
     listObs.append(vertebrateGrp)
     listObs.append(releaseGrp)
     listObs.extend(biometryList)
-    # listObs.extend(equipmentIndList)
+    listObs.extend(equipmentIndList)
 
-    # finally append all Protocols to Station
-    
+    # finally append all Protocols to Station 
     curStation.Observations.extend(listObs)
     transaction.commit()
 
-    
     DBSession.add_all(equipmentIndList)
     transaction.commit()
 

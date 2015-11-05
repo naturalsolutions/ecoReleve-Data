@@ -1,7 +1,7 @@
 Create View [dbo].[VGSMData_With_EquipIndiv] as (
 
 
-SELECT t.FK_Individual,s.ID as FK_Sensor,t.StartDate,t.EndDate,
+SELECT a.PK_id,t.FK_Individual,s.ID as FK_Sensor,t.StartDate,t.EndDate,
 	a.DateTime as date,
 	a.Latitude_N as lat, 
 	a.Longitude_E as lon,
@@ -27,5 +27,7 @@ SELECT t.FK_Individual,s.ID as FK_Sensor,t.StartDate,t.EndDate,
 	ON e.FK_Individual = e1.FK_Individual AND e.FK_Sensor =  e1.FK_Sensor AND e.StartDate < e1.StartDate AND e.ID != e1.ID AND e.Deploy != e1.Deploy
 	WHERE  e.Deploy = 1) t 
   ON s.ID = t.FK_Sensor AND a.DateTime >= t.StartDate AND (a.DateTime < t.EndDate OR t.EndDate IS NULL)
-   WHERE a.Longitude_E IS NOT NULL AND a.Latitude_N IS NOT NULL
+   WHERE a.Longitude_E IS NOT NULL AND a.Latitude_N IS NOT NULL AND (a.HDOP >= 6 
+	OR a.VDOP BETWEEN 1 AND 10 
+	OR a.SatelliteCount >=5 )
   )
