@@ -56,7 +56,7 @@ class ModuleForms(Base):
     def GetDTOFromConf(self,IsEditable,CssClass):
         ''' return input field to build form '''
         self.dto = {
-            'Name': self.Name,
+            'name': self.Name,
             'type': self.InputType,
             'title' : self.Label,
             'editable' : IsEditable,
