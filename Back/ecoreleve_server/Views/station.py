@@ -275,7 +275,6 @@ def searchStation(request):
         }]
         searchInfo['criteria'].extend(criteria)
         # searchInfo['offset'] = 0
-        searchInfo['per_page'] = 25
 
     #### add filter parameters to retrieve last stations imported : last day of station created by user and without linked observation ####
     if 'lastImported' in data :
@@ -304,12 +303,14 @@ def searchStation(request):
 
     if 'geo' in data: 
         geoJson=[]
-        if countResult > 5000 : 
+        exceed = True
+        if countResult < 50000 : 
+            exceed = False
             dataResult = listObj.GetFlatDataList(searchInfo,getFW)
             print('****************** GEOJSON !!!!--------------')
             for row in dataResult:
                 geoJson.append({'type':'Feature', 'properties':{'name':row['Name'], 'date':row['StationDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
-        return {'type':'FeatureCollection', 'features':geoJson}
+        return {'type':'FeatureCollection', 'features':geoJson, 'exceed': exceed}
     else :
         dataResult = listObj.GetFlatDataList(searchInfo,getFW)
         result = [{'total_entries':countResult}]
