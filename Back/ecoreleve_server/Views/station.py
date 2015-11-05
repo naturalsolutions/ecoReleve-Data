@@ -261,7 +261,7 @@ def searchStation(request):
         getFW = True
     else :
         searchInfo['order_by'] = []
-        ModuleType = 'StationGeo'
+        ModuleType = 'StationVisu'
         getFW = False
         criteria = [
         {'Column' : 'LAT',
@@ -297,35 +297,21 @@ def searchStation(request):
         ]
         searchInfo['criteria'].extend(criteria)
 
-    
     moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     start = datetime.now()
     listObj = StationList(moduleFront)
-    try:
-        dataResult = listObj.GetFlatDataList(searchInfo,getFW)
-    except Exception as e : 
-        template = "An exception of type {0} occured. Arguments:\n{1!r}"
-        message = template.format(type(e).__name__, e.args)
-        print (message)
-        dataResult = []
-    stop = datetime.now()
-
-    print ('______ TIME to get DATA : ')
-    print (stop-start)
-    start = datetime.now()
-    
-    print ('______ TIME to get Count : ')
-    stop = datetime.now()
-    print (stop-start)
+    countResult = listObj.count(searchInfo)
 
     if 'geo' in data: 
-        print('****************** GEOJSON !!!!--------------')
         geoJson=[]
-        for row in dataResult:
-            geoJson.append({'type':'Feature', 'properties':{'name':row['Name'], 'date':row['StationDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+        if countResult > 5000 : 
+            dataResult = listObj.GetFlatDataList(searchInfo,getFW)
+            print('****************** GEOJSON !!!!--------------')
+            for row in dataResult:
+                geoJson.append({'type':'Feature', 'properties':{'name':row['Name'], 'date':row['StationDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
         return {'type':'FeatureCollection', 'features':geoJson}
     else :
-        countResult = listObj.count(searchInfo)
+        dataResult = listObj.GetFlatDataList(searchInfo,getFW)
         result = [{'total_entries':countResult}]
         result.append(dataResult)
         transaction.commit()
