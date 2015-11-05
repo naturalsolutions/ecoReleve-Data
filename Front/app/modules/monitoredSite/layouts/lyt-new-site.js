@@ -1,9 +1,3 @@
-/*1 Argos
-2 GSM
-3 RFID
-4 VHF
-*/
-
 define([
 	'jquery',
 	'underscore',
@@ -15,11 +9,11 @@ define([
 	'ns_modules/ns_com',
 	'ns_form/NSFormsModuleGit',
 	'sweetAlert',
-], function($, _, Backbone, Marionette, Swal, Translater, config, Com,  NsForm, swal){
+], function($, _, Backbone, Marionette, Swal, Translater, config, Com,  NsForm,swal){
 
 	'use strict';
 		return Marionette.ItemView.extend({
-			template: 'app/modules/sensor/templates/tpl-sensor-new.html',
+			template: 'app/modules/monitoredSite/templates/tpl-site-new.html',
 			className: 'white full-height',
 
 			ui : {
@@ -28,61 +22,37 @@ define([
 			},
 			events : {
 				'click button.back' : 'removeThis',
-				'click #btnCreate' : 'save'
-			},
+				'click #btnCreate' : 'save',
 
-			initialize: function(options){
-				this.model = new Backbone.Model();
-				this.model.set('type', options.type);
-				switch(options.type){
-					case 'argos':
-						this.type = 1;
-						break;
-					case 'gsm':
-						this.type = 2;
-						break;
-					case 'rfid':
-						this.type = 3;
-						break;
-					case 'vhf':
-						this.type = 4;
-						break;
-					default:
-						Backbone.history.navigate('#', {trigger : true});
-						break;
-				}
 			},
-
 			onShow : function(){
-				if(this.type)
-				this.displayForm(this.type);
+				this.displayForm();
 			},
-
 			displayForm : function(type){
 				var self = this;
 				this.nsForm = new NsForm({
-				name: 'SensorForm',
-				modelurl: config.coreUrl+'sensors',
+				name: 'MonitoredSiteForm',
+				modelurl: config.coreUrl+'monitoredSite',
 				buttonRegion: [],
 				formRegion: this.ui.form,
 				displayMode: 'edit',
-				objectType: this.type,
+				objectType: 1,
 				id: 0,
 				reloadAfterSave : false,
 				afterSaveSuccess : function(){
 					swal({
                 title: "Succes",
-                text: "creating new sensor",
+                text: "creating new site",
                 type: 'success',
                 showCancelButton: true,
                 confirmButtonColor: 'green',
-                confirmButtonText: "create another sensor",
+                confirmButtonText: "create another site",
                 cancelButtonText: "cancel",
                 closeOnConfirm: true,
               },
               function(isConfirm){
                   if (!isConfirm) {
-                     Backbone.history.navigate('sensor',{ trigger:true});
+                     Backbone.history.navigate('monitoredSite',{ trigger:true});
                   }
               }
           );
@@ -90,7 +60,7 @@ define([
 				savingError : function(response){
 					Swal({
 								title: "Error",
-								text: 'in creating a new sensor',
+								text: 'creating a new monitored site',
 								type: 'error',
 								showCancelButton: false,
 								confirmButtonColor: 'rgb(147, 14, 14)',

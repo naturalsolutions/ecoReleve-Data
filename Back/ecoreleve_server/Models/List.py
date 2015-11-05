@@ -48,36 +48,43 @@ class StationList(ListObjectWithDynProp):
                     ,eval_.eval_binary_expr(Station_FieldWorker.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])))
             query = query.where(exists(subSelect))
 
+
         if curProp == 'LastImported':
             st = aliased(Station)
             subSelect = select([Observation]).where(Observation.FK_Station == Station.ID)
             subSelect2 = select([st]).where(cast(st.creationDate,DATE) > cast(Station.creationDate,DATE))
             query = query.where(and_(~exists(subSelect),~exists(subSelect2)))
-
+        print(query)
         return query
 
-    def GetFlatDataList(self,searchInfo=None) :
+    def GetFlatDataList(self,searchInfo=None,getFieldWorkers=True) :
         ''' Override parent function to include management of Observation/Protocols and fieldWorkers '''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
         result = DBSession.execute(fullQueryJoinOrdered).fetchall()
-
-        listID = list(map(lambda x: x['ID'],result))
-        joinTable = join(Station_FieldWorker,User,Station_FieldWorker.FK_FieldWorker==User.id)
-        query = select(
-            [Station_FieldWorker.FK_Station,User.Login]).select_from(joinTable).where(
-            Station_FieldWorker.FK_Station.in_(listID))
-        FieldWorkers = DBSession.execute(query).fetchall()
-        list_ = {}
-        for x,y in FieldWorkers :
-            list_.setdefault(x,[]).append(y)
         data = []
-        for row in result :
-            row = OrderedDict(row)
-            try :
-                row['FieldWorkers'] = list_[row['ID']]
-            except:
-                pass
-            data.append(row)
+
+        if getFieldWorkers:
+            listID = list(map(lambda x: x['ID'],result))
+            joinTable = join(Station_FieldWorker,User,Station_FieldWorker.FK_FieldWorker==User.id)
+            query = select(
+                [Station_FieldWorker.FK_Station,User.Login]).select_from(joinTable).where(
+                Station_FieldWorker.FK_Station.in_(listID))
+            FieldWorkers = DBSession.execute(query).fetchall()
+        
+            list_ = {}
+            for x,y in FieldWorkers :
+                list_.setdefault(x,[]).append(y)
+            for row in result :
+                row = OrderedDict(row)
+                try :
+                    row['FieldWorkers'] = list_[row['ID']]
+                except:
+                    pass
+                data.append(row)
+        else:
+            for row in result :
+                row = OrderedDict(row)
+                data.append(row)
         return data
 
     def countQuery(self,criteria = None):
