@@ -32,7 +32,6 @@ function(Marionette, config) {
 			this.coll = this.grid.grid.collection;
 			this.modelIndex = this.coll.indexOf(this.model);
 			this.pagingServerSide = this.grid.pagingServerSide;
-
 		},
 
 		setRecordIndex: function(){

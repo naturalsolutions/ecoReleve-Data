@@ -1,6 +1,9 @@
-<div class="input-group  picker">
-	<input class="form-control" name="monitoredSitePicker" type="text">
-	<span class="input-group-addon picker"><span class="glyphicon-plus"></span></span> 
+<div class="input-group picker">
+	<input <%= disabled %> class="form-control" name="<%= pickerType %>" type="text">
+	<span class="input-group-btn picker">
+		<button type="button" class="btn <%= visu %> glyphicon-plus">
+		</button>
+	</span> 
 </div>
 
 
@@ -10,9 +13,10 @@
 			<div class="modal-content full-height clearfix">
 				<div class="col-xs-5 full-height no-padding">
 					<div class="toolbar top">
-						<legend class="inherit">Identify individual</legend>
+						<legend class="inherit">Identify <%= pickerType %></legend>
 					</div>
 					<div class="crop2">
+						<br>
 						<div id="filter"></div>
 					</div>
 					<div class="toolbar bottom">
@@ -21,8 +25,6 @@
 							</button>
 					</div>
 				</div>
-			
-
 
 				<div class="col-xs-7 full-height no-padding dark">
 					<div class="toolbar top">

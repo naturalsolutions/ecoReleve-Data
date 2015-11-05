@@ -30,6 +30,7 @@ define([
 		},
 
 		getValue: function() {
+			console.log('test');
 			var date= new Date;
 			return this.el.children['Date_'].value
 		},

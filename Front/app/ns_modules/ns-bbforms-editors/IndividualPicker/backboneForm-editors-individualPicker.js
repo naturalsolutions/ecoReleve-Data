@@ -17,7 +17,6 @@ define([
 ){
 	'use strict';
 	return Form.editors.IndividualPicker = Form.editors.Base.extend({
-		previousValue: '',
 
 		className: 'full-height animated white',
 		events: {
@@ -26,24 +25,50 @@ define([
 			'click .cancel' : 'hidePicker',
 		},
 
+		ui: {
+			'filters': '#filter'
+		},
+
+		pickerType: 'individual',
+		url : config.coreUrl+'individuals/',
+
 		initialize: function(options) {
-			Form.editors.Base.prototype.initialize.call(this, options);
-			var template =  _.template(Tpl);
+			//Form.editors.Base.prototype.initialize.call(this, options);
+			
+			this.model = new Backbone.Model();
+
+			console.log(options);
+
+			this.model.set('pickerType', this.pickerType);
+
+
+
+			if(options.schema.editable){
+				this.model.set('disabled', '');
+				this.model.set('visu', '');
+			}else{
+				this.model.set('disabled', 'disabled');
+				this.model.set('visu', 'hidden');
+			}
+
+			var template =  _.template(Tpl, this.model.attributes);
 			this.$el.html(template);
 			this.com = new Com();
-			this._input = this.$el.find('input[name="indivpicker"]')[0];
+			this._input = this.$el.find('input[name="' + this.pickerType + '"]')[0];
 			this.displayGrid();
 			this.displayFilter();
 			this.translater = Translater.getTranslater();
+			console.log(this._input);
 		},
 
 		displayGrid: function(){
+			console.log($(this._input).val());
 			var _this = this;
 			this.grid = new NsGrid({
 				pageSize: 20,
 				pagingServerSide: true,
 				com: this.com,
-				url: config.coreUrl+'individuals/',
+				url: this.url,
 				urlParams : this.urlParams,
 				rowClicked : true,
 			});
@@ -63,9 +88,9 @@ define([
 
 		displayFilter: function(){
 			this.filters = new NsFilter({
-				url: config.coreUrl + 'individuals/',
+				url: this.url,
 				com: this.com,
-				filterContainer: 'filter',
+				filterContainer: this.$el.find('#filter'),
 			});
 		},
 		filter: function(e){

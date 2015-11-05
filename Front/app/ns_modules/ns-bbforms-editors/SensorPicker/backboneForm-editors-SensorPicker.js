@@ -65,7 +65,7 @@ define([
 			this.filters = new NsFilter({
 				url: config.coreUrl + 'sensors/',
 				com: this.com,
-				filterContainer: 'filter',
+				filterContainer: this.$el.find('#filter'),
 			});
 		},
 		filter: function(e){
