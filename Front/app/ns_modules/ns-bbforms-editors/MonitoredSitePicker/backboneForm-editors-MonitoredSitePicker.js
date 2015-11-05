@@ -39,6 +39,13 @@ define([
 
 			this.model.set('pickerType', this.pickerType);
 
+			var value = options.model.get(options.schema.name);
+			console.log(value);
+			if(value){
+				this.model.set('value', value);
+			}else{
+				this.model.set('value', '');
+			}
 
 
 			if(options.schema.editable){
