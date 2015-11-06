@@ -6,8 +6,6 @@ import transaction
 
 route_prefix = 'security/'
 
-route_prefix = 'security/'
-
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(
     route_name=route_prefix+'login',
