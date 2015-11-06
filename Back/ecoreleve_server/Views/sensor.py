@@ -175,9 +175,17 @@ def getSensorHistory(request):
     id = request.matchdict['id']
     joinTable = outerjoin(Equipment,Individual,Equipment.FK_Individual==Individual.ID).outerjoin(MonitoredSite,Equipment.FK_MonitoredSite==MonitoredSite.ID)
     query = select([Equipment.ID, Individual.UnicIdentifier, MonitoredSite.Name, Equipment.StartDate, Equipment.Deploy,Equipment.FK_MonitoredSite,Equipment.FK_Individual]
-        ).select_from(joinTable).where(Equipment.FK_Sensor == id)
-    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
-    # response = list(map(lambda row['Deploy'] : 'Deployed' if row['Deploy'] else 'Removed' , response))
+        ).select_from(joinTable).where(Equipment.FK_Sensor == id).order_by(desc(Equipment.StartDate))
+    result = DBSession.execute(query).fetchall()
+    response = []
+    for row in result:
+        curRow = OrderedDict(row)
+        if curRow['Deploy'] == 1 : 
+            curRow['Deploy'] = 'Deployed'
+        else : 
+            curRow['Deploy'] = 'Removed'
+        response.append(curRow)
+
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
