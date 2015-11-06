@@ -18,10 +18,13 @@ define([
 
 		name : 'Step one name',
 
-		initialize: function(){
+		initialize: function(options){
+			this.coll = new Backbone.Collection();
+			console.log(options);
 		},
 
 		onShow : function(){
+
 		},
 
 

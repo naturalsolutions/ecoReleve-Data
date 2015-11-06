@@ -20,9 +20,6 @@ define([
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-		/*===================================================
-		=            Layout Stepper Orchestrator            =
-		===================================================*/
 
 		template: 'app/modules/release/templates/tpl-release-individual.html',
 		className: 'full-height animated white rel',
@@ -68,7 +65,7 @@ define([
 					console.log(row);
 					var id = row.model.get('ID');
 
-					
+
 					var unicName = row.model.get('UnicIdentifier');
 					_this.currentRow.model.set({unicSensorName:unicName});
 					this.setValue(id);
@@ -258,18 +255,18 @@ define([
 			var _this = this;
 			$(e.target).tooltipList({
 
-                position: 'top',
-                //  pass avalaible options
-                availableOptions: [{'label':'direct release','val':1},{'label':'direct release grid 5x5','val':2},],
-                //  li click event
-                liClickEvent: $.proxy(function (liClickValue, origin, tooltip) {
-                console.log(liClickValue);
-                _this.releaseMethod = liClickValue;
-                _this.release();
-                //console.log(origin);
-                }, this),
-            });
-            $(e.target).tooltipster('show');
+								position: 'top',
+								//  pass avalaible options
+								availableOptions: [{'label':'direct release','val':1},{'label':'direct release grid 5x5','val':2},],
+								//  li click event
+								liClickEvent: $.proxy(function (liClickValue, origin, tooltip) {
+								console.log(liClickValue);
+								_this.releaseMethod = liClickValue;
+								_this.release();
+								//console.log(origin);
+								}, this),
+						});
+						$(e.target).tooltipster('show');
 		}
 	});
 });
