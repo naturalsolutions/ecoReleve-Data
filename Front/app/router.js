@@ -42,8 +42,8 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 				callback.apply(this, args);
 			}).fail( function(msg) {
 				console.log(msg) ;
-				if (msg.status === 403) {
-					document.location.href='http://127.0.0.1/NsPortal/Front'; 
+				if (msg.status === 502 or msg.status === 403) {
+					document.location.href=config.portalUrl; 
                 }
 				
 				//
