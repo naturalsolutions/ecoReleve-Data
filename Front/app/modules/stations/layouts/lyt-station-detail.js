@@ -121,6 +121,8 @@ define([
             $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
            });
 				}
+
+
 			});
 
 			this.nsForm.BeforeShow = function(){

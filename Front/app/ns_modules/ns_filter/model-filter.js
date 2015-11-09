@@ -52,6 +52,9 @@ define([
 				this.getFilters();
 			}
 			this.criterias = {};
+			if (options.filterLoaded){
+				this.filterLoaded = options.filterLoaded ;
+			}
 		},
 
 		getFilters: function() {
@@ -87,6 +90,7 @@ define([
 				this.filterContainer.find('form').on('keypress',  $.proxy(this.updateQuery, this));
 
 				this.forms.push(form);
+				this.filterLoaded();
 			};
 		},
 
@@ -154,7 +158,11 @@ define([
 
 			return form;
 		},
+		filterLoaded : function(){
 
+
+		}
+		,
 		clickedCheck: function (e) {
 			// Keep the new check value
 			var IsChecked = e.target.checked;
