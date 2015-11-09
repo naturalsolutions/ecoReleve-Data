@@ -32,9 +32,9 @@ require.config({
 		'IndivPicker'	: 'ns_modules/ns-bbforms-editors/IndividualPicker/backboneForm-editors-individualPicker',
 		'MonitoredSitePicker'	: 'ns_modules/ns-bbforms-editors/MonitoredSitePicker/backboneForm-editors-monitoredSitePicker',
 		'SensorPicker'	: 'ns_modules/ns-bbforms-editors/SensorPicker/backboneForm-editors-SensorPicker',
+		'LatitudeEditor' : 'ns_modules/ns-bbforms-editors/Coordinates/LatitudeEditor',
+		'LongitudeEditor' : 'ns_modules/ns-bbforms-editors/Coordinates/LongitudeEditor',
 
-		
-		
 		'ListOfNestedModel' 	: 'vendors/ListOfNestedModel/ListOfNestedModel',
 		'AutocompleteEditor'	: '../externalModules/NaturalJS-BackBone-Forms-Editors/Autocomplete/AutocompleteEditor',
 

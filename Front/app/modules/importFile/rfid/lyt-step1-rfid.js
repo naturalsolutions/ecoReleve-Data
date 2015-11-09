@@ -128,6 +128,11 @@ define([
 			this.ui.paginator.html(this.grid.displayPaginator());
 		},
 		rowClicked : function(row){
+			if(this.currentRow){
+				this.currentRow.$el.removeClass('active');
+			}
+			row.$el.addClass('active');
+			this.currentRow = row;
 			//console.log(row.model.get('ID'));
 			//this.model.set('sensorId',row.model.get('ID') )
 			//this.validate();

@@ -229,6 +229,12 @@ define([
 				case "Checkboxes":
 					return typeField = "Checkboxes";
 					break;
+				case "LatitudeEditor":
+					return typeField = "LatitudeEditor";
+					break;	
+				case "LongitudeEditor":
+					return typeField = "LongitudeEditor";
+					break;	
 				default:
 					return typeField = "Number";
 					break;
