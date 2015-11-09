@@ -83,42 +83,42 @@ define([
 							cell : 'string'
 						}, {
 							name: 'site_name',
-							label: 'site_name',
+							label: 'site name',
 							editable: false,
 							cell: 'string'
 						}, {
 							name: 'site_type',
-							label: 'site_type',
+							label: 'site type',
 							editable: false,
 							cell: 'string',
 						}, {
 							name: 'StartDate',
-							label: 'StartDate',
+							label: 'Start Date',
 							editable: false,
 							cell: 'string',
 						}, {
 							name: 'EndDate',
-							label: 'EndDate',
+							label: 'End Date',
 							editable: false,
 							cell: 'string',
 						}, {
-							name: 'nb_indiv',
-							label: 'nb_indiv',
+							name: 'nb_chip_code',
+							label: 'nb indiv',
 							editable: false,
 							cell: 'string',
 						},{
 							name: 'total_scan',
-							label: 'total_scan',
+							label: 'total scan',
 							editable: false,
 							cell: 'string',
 						},{
-							name: 'max_date',
-							label: 'max_date',
+							name: 'first_scan',
+							label: 'first scan',
 							editable: false,
 							cell: 'string',
 						},{
-							name: 'min_date',
-							label: 'min_date',
+							name: 'last_scan',
+							label: 'last scan',
 							editable: false,
 							cell: 'string',
 						}, {

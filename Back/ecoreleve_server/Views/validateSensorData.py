@@ -41,6 +41,7 @@ def error_response (err) :
 ArgosDatasWithIndiv = Table('VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
 GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv', Base.metadata, autoload=True) 
 DataRfidWithSite = Table('VRfidData_With_equipSite', Base.metadata, autoload=True) 
+DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True) 
 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -70,12 +71,8 @@ def type_unchecked_list(request):
     return result
 
 def unchecked_rfid(request):
-    unchecked = DataRfidWithSite
-    queryStmt = select([unchecked.c['UnicIdentifier'],unchecked.c['FK_Sensor'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],
-            func.count(distinct('chip_code')).label('nb_indiv'),func.count('chip_code').label('total_scan'), func.max(unchecked.c['date_']).label('max_date'),
-            func.min(unchecked.c['date_']).label('min_date')]
-            ).where(unchecked.c['checked']==0
-            ).group_by(unchecked.c['UnicIdentifier'],unchecked.c['FK_Sensor'],unchecked.c['equipID'],unchecked.c['site_name'],unchecked.c['site_type'], unchecked.c['StartDate'], unchecked.c['EndDate'],unchecked.c['creation_date'])
+    unchecked = DataRfidasFile
+    queryStmt = select(unchecked.c)
     data = DBSession.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
     result = [{'total_entries':len(dataResult)}]
@@ -193,7 +190,7 @@ def auto_validation(request):
         for row in listToValidate : 
             equipID = row['equipID']
             sensor = row['FK_Sensor']
-            if equipID == 'null' : 
+            if equipID == 'null' or equipID is None: 
                 equipID = None
             else :
                 equipID = int(equipID)
@@ -243,6 +240,7 @@ def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq):
     return nb_insert, exist , error
 
 def auto_validate_proc_stocRfid(equipID,sensor,freq,user):
+    print(freq)
     if equipID is None : 
         stmt = update(DataRfidWithSite).where(and_(DataRfidWithSite.c['FK_Sensor'] == sensor, DataRfidWithSite.c['equipID'] == equipID)).values(checked =1)
         DBSession.execute(stmt)
