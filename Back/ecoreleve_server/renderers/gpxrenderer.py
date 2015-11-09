@@ -29,7 +29,9 @@ class GPXRenderer(object):
 					lon = str(item)
 				elif key == "DATE":
 					date = str(item)
-				elif key == "Site_name":
+				elif key == "SiteName":
+					sitename = str(item)
+				elif key == "StationName":
 					sitename = str(item)
 			gpx = gpx + "\n<wpt lat='"+lat+"' lon='"+lon+"'>\n<ele></ele>\n<time>"+date+"</time>\n<desc></desc>\n<name>"+sitename+"</name>\n<sym>Flag, Blue</sym>\n</wpt>\n";
 		gpx = gpx + "</gpx>"

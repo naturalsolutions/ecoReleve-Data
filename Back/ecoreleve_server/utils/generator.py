@@ -61,10 +61,12 @@ class Generator :
     def where_(self,query,col,operator,value):
         return query.where(eval_.eval_binary_expr(self.table.c[col], operator, value))
 
-    def getFullQuery(self,criteria={},count=False):
+    def getFullQuery(self,criteria={},count=False, columnsList = None):
         if count:
             query = select([func.count()]).select_from(self.table)
-        else :
+        elif columnsList is not None :
+            query = select(columnsList)
+        else:
             query = select(self.table.c)
         for obj in criteria:
             if obj['Value'] != None and obj['Value']!='':
@@ -75,10 +77,10 @@ class Generator :
                 query=self.where_(query,Col, obj['Operator'], obj['Value'])
         return query
 
-    def search(self,criteria={},offset=None,per_page=None, order_by=None) :
+    def search(self,criteria={},offset=None,per_page=None, order_by=None, columnsList = None) :
         result=[]
         total=None
-        query = self.getFullQuery(criteria)
+        query = self.getFullQuery(criteria,columnsList=columnsList)
         if offset!=None:
             query, total=self.get_page(query,offset,per_page, order_by)
 
@@ -142,9 +144,9 @@ class Generator :
                 #         properties[col.replace('_',' ')] = row[col]
                 geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point', 'coordinates':[row[lon],row[lat]]}})
             transaction.commit()
-            return {'type':'FeatureCollection', 'features': geoJson, 'exceed': False}
+            return {'type':'FeatureCollection', 'features': geoJson, 'exceed': False, 'total':countResult}
         else :
-            return {'type':'FeatureCollection', 'features': [],'exceed': True}
+            return {'type':'FeatureCollection', 'features': [],'exceed': True, 'total':countResult}
 
     def case(self, row, arg) :
         if( arg in row ) :

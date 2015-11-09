@@ -6,7 +6,7 @@ import numpy as np
 from ..Models import dbConfig, DBSession, Base
 from pyramid.security import NO_PERMISSION_REQUIRED
 from ..utils.generator import Generator
-
+from ..renderers import *
 
 route_prefix = 'export/'
 
@@ -37,7 +37,7 @@ def actionList(request):
     dictActionFunc = {
     'getFields': getFields,
     'getFilters': getFilters,
-    'count': count_
+    'count': count_,
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -83,3 +83,58 @@ def search(request):
         result = gene.search(criteria,offset=0,per_page=15,order_by=[])
 
     return result
+
+
+def views_filter_export(request):
+    try:
+        function_export= { 'csv': export_csv, 'pdf': export_pdf, 'gpx': export_gpx }
+        criteria = request.json_body.get('criteria', {})
+        viewId = request.matchdict['id']
+        views = Base.metadata.tables['Views']
+        viewName = DBSession.execute(select(views.c['viewName'])).scalar()
+
+        table = Base.metadata.tables[viewName]
+        type_export= criteria['type_export']
+        #columns selection
+        columns=criteria['columns']
+        coll=[]
+
+        if type_export != 'gpx' :
+            for col in columns:
+                coll.append(table.c[col])
+        else :
+            coll = [table.c['LAT'],table.c['LON']]
+            if 'StationName' in table.c:
+                coll.append(table.c['StationName'])
+            if 'StationDate' in table.c:
+                coll.append(table.c['StationDate'])
+            if 'SiteName' in table.c:
+                coll.append(table.c['StationName'])
+
+        gene = Generator(viewName)
+        query = gene.getFullQuery(criteria,columnsList=coll)
+        rows = DBSession.execute(query).fetchall()
+
+        filename = viewName+'.'+type_export
+        request.response.content_disposition = 'attachment;filename=' + filename
+        value={'header': columns, 'rows': rows}
+
+        io_export=function_export[type_export](value,request,viewName)
+        return Response(io_export)
+
+    except: raise
+
+def export_csv (value,request,name_vue) :
+    csvRender=CSVRenderer()
+    csv=csvRender(value,{'request':request})
+    return csv
+
+def export_pdf (value,request,name_vue):
+    pdfRender=PDFrenderer()
+    pdf=pdfRender(value,name_vue,request)
+    return pdf
+
+def export_gpx (value,request,name_vue):
+    gpxRender=GPXRenderer()
+    gpx=gpxRender(value,request)
+    return gpx
