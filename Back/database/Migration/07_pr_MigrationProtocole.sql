@@ -28,13 +28,23 @@ BEGIN
 
 		select  @TableName
 
-		select @Req = @Req + 'union all ' + + char(13) + ' select ''' + O.Name + ''',convert(varchar(1000),P.[' + S_C.name + '])  ' 
-		FROM ObservationDynProp O 
-		LEFT JOIN MigrationConfigurationProtocoleList PL on PL.ProtocoleName = @ProtocoleName
-		LEFT JOIN [dbo].[MigrationConfigurationProtocoleContent] PC ON PC.[fk_ConfigurationProtocole] = PL.ID and o.Name = PC.[ColumnName]
-		JOIN [ECWP-eReleveData].dbo.sysobjects S_O on s_o.name =@TableName --AND s_o.type != NULL
-		JOIN [ECWP-eReleveData].dbo.syscolumns S_C on o.Name = isnull(PC.[ColumnName],S_C.name) and S_C.id = S_o.id
+		--select @Req = @Req + 'union all ' + + char(13) + ' select ''' + O.Name + ''',convert(varchar(1000),P.[' + S_C.name + '])  ' 
+		--FROM ObservationDynProp O 
+		--LEFT JOIN MigrationConfigurationProtocoleList PL on PL.ProtocoleName = @ProtocoleName
+		--LEFT JOIN [dbo].[MigrationConfigurationProtocoleContent] PC ON PC.[fk_ConfigurationProtocole] = PL.ID and o.Name = PC.[ColumnName]
+		--JOIN [ECWP-eReleveData].dbo.sysobjects S_O on s_o.name =@TableName --AND s_o.type != NULL
+		--JOIN [ECWP-eReleveData].dbo.syscolumns S_C on o.Name = isnull(PC.[ColumnName],S_C.name) and S_C.id = S_o.id
 	
+
+		SELECT @Req = @Req + 'union all ' + + char(13) + ' select ''' + O.Name + ''',convert(varchar(1000),P.[' + S_C.name + '])  ' 
+		FROM ObservationDynProp O JOIN ProtocoleType_ObservationDynProp PTO ON PTO.FK_ObservationDynProp = O.ID  JOIN ProtocoleType PT on PTO.FK_ProtocoleType = PT.ID AND PT.Name = @ProtocoleName
+		LEFT JOIN MigrationConfigurationProtocoleList PL on PL.ProtocoleName = @ProtocoleName
+		LEFT JOIN [dbo].[MigrationConfigurationProtocoleContent] PC ON PC.[fk_ConfigurationProtocole] = PL.ID and o.Name = PC.TargetColumnName
+		JOIN [ECWP-eReleveData].dbo.sysobjects S_O on s_o.name =@TableName --AND s_o.type != NULL
+		JOIN [ECWP-eReleveData].dbo.syscolumns S_C on isnull(PC.[ColumnName],o.Name) = S_C.name and S_C.id = S_o.id
+
+
+
 
 		SET @Req = replace(@Req,'@Debutunion all','');
 		select @Req;
@@ -71,7 +81,7 @@ BEGIN
 			   ,Original_ID)
 			   OUTPUT inserted.ID, inserted.original_id,inserted.creationDate into #InsertedObs
 		select DISTINCT @Id_Prot_Type,
-		s.id,S.StationDate,NULL,NULL, V.fk_protocole
+		s.id,S.StationDate,NULL,i.ID, V.fk_protocole
 		from #ProtValeur V 
 		--JOIN ObservationDynProp O on V.ValName = o.Name 
 		JOIN Station S on V.FK_Station = S.ID

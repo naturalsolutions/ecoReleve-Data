@@ -111,11 +111,10 @@ def add_routes(config):
     config.add_route('release/individuals/action', 'ecoReleve-Core/release/individuals/{action}')
     config.add_route('release/action', 'ecoReleve-Core/release/{action}')
 
-
-
-
-
-
-
-
-
+    # ------------------------------------------------------------------------------------------------------------------------- #
+    ##### Export #####
+    config.add_route('export', 'ecoReleve-Core/export/')
+    config.add_route('export/themes', 'ecoReleve-Core/export/themes')
+    config.add_route('export/views', 'ecoReleve-Core/export/themes/{id}/views')
+    config.add_route('export/views/search', 'ecoReleve-Core/export/views')
+    config.add_route('export/views/action', 'ecoReleve-Core/export/views/{action}')

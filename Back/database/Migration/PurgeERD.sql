@@ -2,8 +2,9 @@ delete from IndividualDynPropValue
 delete from SensorDynPropValue
 delete from StationDynPropValue
 delete from MonitoredSiteDynPropValue
-delete from ObservationDynPropValue
 
+
+truncate TABLE ObservationDynPropValue
 
 delete from Observation
 delete from Individual_Location
