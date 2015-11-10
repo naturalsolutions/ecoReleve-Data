@@ -45,6 +45,8 @@ define([
 			this.com.addModule(this);
 		}
 
+		this.totalElt=options.totalElt || false;
+
 		this.url=options.url;
 		this.geoJson=options.geoJson;
 
@@ -115,6 +117,18 @@ define([
 			this.selectedIcon = new L.DivIcon({className	: 'custom-marker selected'});
 			this.icon = new L.DivIcon({className			: 'custom-marker'});
 
+			this.setCenter();
+
+			this.map = new L.Map(this.elem, {
+				center: this.center ,
+				zoom: this.zoom || 4,
+				minZoom: 2,
+				inertia: false,
+				zoomAnimation: true,
+				keyboard: false, //fix scroll window
+				attributionControl: false,
+			});
+			this.google();
 
 			if(this.url){
 				this.requestGeoJson(this.url);
@@ -131,18 +145,7 @@ define([
 		},
 
 		ready: function(){
-			this.setCenter();
-
-			this.map = new L.Map(this.elem, {
-				center: this.center ,
-				zoom: this.zoom || 4,
-				minZoom: 2,
-				inertia: false,
-				zoomAnimation: true,
-				keyboard: false, //fix scroll window
-				attributionControl: false,
-			});
-			this.google();
+			this.setTotal(this.geoJson);
 
 			if(this.legend){
 				this.addCtrl(tpl_legend);
@@ -212,7 +215,6 @@ define([
 					}else{
 						return ctx.getClusterIcon(cluster);
 					}
-
 				},
 			});
 			this.markersLayer = new CustomMarkerClusterGroup({
@@ -731,6 +733,7 @@ define([
 
 		//apply filters on the map from a collection
 		filter: function(param){
+
 			//TODO : refact
 			var _this = this;
 			if(this.url){
@@ -782,7 +785,15 @@ define([
 			$('.map-error .msg').html(msg);
 		},
 
+		setTotal: function(geoJson){
+			this.total = 	geoJson.features.length;
+			if(this.totalElt){
+				this.totalElt.html(this.total);
+			}
+		},
+
 		updateLayers: function(geoJson){
+			
 			if(geoJson == false){
 				this.errorWarning('<i>There is too much datas to display on the map. <br /> Please be more specific in your filters.</i>');
 				if(this.markersLayer){
@@ -803,6 +814,8 @@ define([
 			if(this.bbox){
 				this.addBBox(this.markersLayer);
 			}
+
+			this.setTotal(geoJson);
 		},
 
 

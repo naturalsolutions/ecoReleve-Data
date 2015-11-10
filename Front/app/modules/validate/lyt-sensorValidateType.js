@@ -9,15 +9,13 @@ define([
 	'config',
 	'ns_grid/model-grid',
 	'ns_modules/ns_com',
-
 	'./lyt-sensorValidateDetail'
-
 ], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com, LytSensorValidateDetail){
 
 	'use strict';
 
 	return Marionette.LayoutView.extend({
-
+		
 		template: 'app/modules/validate/templates/tpl-sensorValidateType.html',
 		className: 'full-height animated rel',
 

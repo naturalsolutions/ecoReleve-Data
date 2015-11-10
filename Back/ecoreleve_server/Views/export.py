@@ -20,7 +20,7 @@ def getListThemeEtude(request):
     return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name=route_prefix+'views', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=route_prefix+'themes/id/views', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
 def getListViews(request):
     theme_id = int(request.matchdict['id'])
 
@@ -32,7 +32,7 @@ def getListViews(request):
 
     return result
 
-@view_config(route_name=route_prefix+'views/action', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=route_prefix+'views/id/action', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
 def actionList(request):
     dictActionFunc = {
     'getFields': getFields,
@@ -43,14 +43,16 @@ def actionList(request):
     return dictActionFunc[actionName](request)
 
 def getFields(request):
-    viewName = request.params['view']
+    viewId = request.matchdict['id']
+    table = Base.metadata.tables['Views']
+    viewName = DBSession.execute(select(['View_Name']).select_from(table).where(table.c['ID']==viewId)).scalar()
     gene = Generator(viewName)
-
     return 
 
 def getFilters(request):
-    viewName = request.params['view']
-
+    viewId = request.matchdict['id']
+    table = Base.metadata.tables['Views']
+    viewName = DBSession.execute(select(['View_Name']).select_from(table).where(table.c['ID']==viewId)).scalar()
     gene = Generator(viewName)
     return gene.get_filters()
 
@@ -60,22 +62,27 @@ def count_(request):
         criteria = json.loads(data['criteria'])
     else : 
         criteria = {}
-    viewName = data['viewName']
+
+    table = Base.metadata.tables['Views']
+    viewName = DBSession.execute(select(['View_Name']).select_from(table).where(table.c['ID']==viewId)).scalar()
     gene = Generator(viewName)
     count = gene.count_(criteria)
     return count
 
-@view_config(route_name=route_prefix+'views/search', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=route_prefix+'views/id', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
 def search(request):
-    # viewName = request.params['view']
-    
+
+    viewId = request.matchdict['id']
+    table = Base.metadata.tables['Views']
+    viewName = DBSession.execute(select(['View_Name']).select_from(table).where(table.c['ID']==viewId)).scalar()
+
     data = request.params.mixed()
     if 'criteria' in data: 
         criteria = json.loads(data['criteria'])
     else : 
         criteria = {}
-    # viewName = data['viewName']
-    viewName = 'V_Qry_Released_FirstStation'
+    print(data)
+    print(criteria)
     gene = Generator(viewName)
     if 'geo' in request.params:
         result = gene.get_geoJSON(criteria)

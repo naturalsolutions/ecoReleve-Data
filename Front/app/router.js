@@ -41,10 +41,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			}).done( function() {
 				callback.apply(this, args);
 			}).fail( function(msg) {
-				console.log(msg) ;
-				if (msg.status === 502 or msg.status === 403) {
-					document.location.href=config.portalUrl; 
-                }
+				if (msg.status === 502 || msg.status === 403) {
+					document.location.href=config.portalUrl;
+				}
 				
 				//
 			});

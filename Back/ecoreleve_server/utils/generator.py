@@ -20,6 +20,13 @@ class Generator :
             'DATETIME':'date',
             'BIT':'boolean'
             }
+        self.dictFilter = {
+            'VARCHAR':'Text',
+            'NVARCHAR':'Text',
+            'INTEGER':'Number',
+            'DECIMAL':'Number',
+            'DATETIME':'DateTimePicker',
+        }
         self.table=Base.metadata.tables[table]
         self.cols=[]
 
@@ -50,12 +57,12 @@ class Generator :
             name_c = str(column.name)
             try : 
                 type_c = str(column.type)
-                print(type_c)
-                print(type(type_c))
             except: pass
-            if re.compile('VARCHAR').search(type_c):
-                   type_c = 'string'
-            data.append({'name':name_c, 'type':type_c})
+            if type_c in self.dictFilter :
+                type_c = self.dictFilter[type_c]
+            else : 
+                type_c = 'string'
+            data.append({'name':name_c, 'type':type_c , 'title':name_c })
         return data
 
     def where_(self,query,col,operator,value):

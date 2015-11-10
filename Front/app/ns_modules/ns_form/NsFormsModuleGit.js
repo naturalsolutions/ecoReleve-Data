@@ -354,8 +354,6 @@ define([
 		},
 
 		butClickDelete: function(){
-
-
 			var _this = this;
 			var opts = {
 				title : 'Are you sure?',

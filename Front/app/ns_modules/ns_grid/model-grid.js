@@ -89,11 +89,13 @@ define([
 				this.columns = this.colGene.columns;
 			}
 			if (options.urlParams) {
+					/*
 					this.url+= '?';
 					for(var index in options.urlParams) { 
 					    var attr = options.urlParams[index]; 
 					    this.url+= '&' + index + "=" + attr;
-					}
+					}*/
+					this.searchCriteria = options.urlParams;
 
 				/*for (var i = 0 ; i<options.urlParams.length; i++) {
 
@@ -183,7 +185,7 @@ define([
 					offset: function () { return (this.state.currentPage - 1) * this.state.pageSize; },
 					criteria: function () {
 
-						return JSON.stringify(this.searchCriteria);
+						return JSON.stringify(_this.searchCriteria);
 					},
 					order_by: function () {
 						var criteria = [];
