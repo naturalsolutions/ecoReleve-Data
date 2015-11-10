@@ -228,6 +228,8 @@ define([
 		},
 
 		feedProtoList: function(){
+			// init protolist
+			this.ui.protoList.append('<option value="" disabled selected>Add a protocol</option>');
 			var _this = this;
 			this.protoSelectList = new Backbone.Collection();
 			this.protoSelectList.fetch({
