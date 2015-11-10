@@ -10,7 +10,9 @@ define([
 	'./NsFormsCustomFields',
 	'i18n',
 	'fancytree',
-	'bbAutoComp'
+	'bbAutoComp',
+	'LatitudeEditor',
+	'LongitudeEditor',
 ], function ($, _, Backbone, Marionette, BackboneForm, tpl,ListOfNestedModel,AutocompleteEditor) {
 	return Backbone.View.extend({
 		BBForm: null,

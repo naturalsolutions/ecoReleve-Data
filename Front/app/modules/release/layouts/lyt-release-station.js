@@ -55,7 +55,7 @@ define([
 			this.translater = Translater.getTranslater();
 			this.com = new Com();
 
-			this.initGrid();
+			
 		},
 
 		onRender: function(){
@@ -65,12 +65,8 @@ define([
 
 		onShow : function(){
 /*			this.displayFilters();*/
-			this.displayGrid();
+			this.initGrid();
 			this.displayFilters(4);
-			var callback = function(){
-				_this.filter();
-			};
-			this.grid.lastImportedUpdate(true, callback);
 		},
 
 		initGrid:function(){
@@ -94,11 +90,16 @@ define([
 			this.grid.rowDbClicked = function(args){
 				_this.rowDbClicked(args.row);
 			};
+			this.displayGrid();
 		},
 
 		displayGrid: function(){
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
+			var callback = function(){
+				_this.filter();
+			};
+			this.grid.lastImportedUpdate(false, callback);
 		},
 
 		displayFilters: function(typeObj){
@@ -108,6 +109,12 @@ define([
 				name:'StationGrid',
 				typeObj: typeObj,
 				filterContainer: this.ui.filter,
+				filterLoaded : function(){
+					$(".StationDate").attr('placeholder','DD/MM/YYYY'); 
+					$("#dateTimePicker").on("dp.change", function (e) {
+            $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
+           });
+				}
 			});
 		},
 
