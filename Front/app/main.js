@@ -72,7 +72,7 @@ require.config({
 
 		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
 		'floatThead'			: '../bower_components/floatThead/dist/jquery.floatThead-slim', 
-
+		'chart'					: '../bower_components/chartjs/Chart', 
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
 		'backgrid.paginator'	: 'vendors/backgrid-paginator',
@@ -85,7 +85,7 @@ require.config({
 		'bbAutoComp': '../externalModules/NaturalJS-BackBone-Forms-Editors/ThesaurusEditor/backboneForm-editors-autocompTree',
 		'autocompTree' : '../externalModules/NaturalJS-BackBone-Forms-Editors/ThesaurusEditor/AutoCompletTree/jquery.autocompTree',
 		'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
-    'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
+		'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
 	},
 
 
