@@ -1,11 +1,22 @@
-define(['marionette', 'ns_map/ns_map', 'i18n'],
-function(Marionette, NsMap) {
+define(['marionette',
+	'ns_map/ns_map',
+	'./views/curveGraph',
+	'./views/donutGraph',
+	'./views/info',
+	'i18n'
+	],
+function(Marionette, NsMap, CurveGraphView,DonutGraphView, InfoView) {
 	'use strict';
 
 	return Marionette.LayoutView.extend({
 		template: 'app/base/home/tpl/tpl-home.html',
 		className: 'home-page ns-full-height animated',
 		events: {
+		},
+		regions: {
+			graph : '#graph',
+			info : '#info',
+			donuts : '#donuts',
 		},
 
 		animateIn: function() {
@@ -31,6 +42,9 @@ function(Marionette, NsMap) {
 
 
 		onShow : function(options) {
+			this.info.show(new InfoView());
+			this.graph.show(new CurveGraphView());
+			this.donuts.show(new DonutGraphView());
 			this.$el.i18n();
 		}
 	});
