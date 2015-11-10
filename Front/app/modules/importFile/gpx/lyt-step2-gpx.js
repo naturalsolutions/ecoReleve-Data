@@ -105,12 +105,12 @@ define([
 				},
 				2 : {
 					name : 'latitude',
-					type : 'Number',
+					type : 'LatitudeEditor',
 					label : 'Latitude'
 				},
 				3 : {
 					name : 'longitude',
-					type : 'Number',
+					type : 'LongitudeEditor',
 					label : 'Longitude'
 				},
 				4 : {

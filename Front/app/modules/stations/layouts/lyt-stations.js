@@ -138,7 +138,13 @@ define([
 				com: this.com,
 				name:'StationGrid',
 				typeObj: typeObj,
-				filterContainer: this.ui.filters
+				filterContainer: this.ui.filters,
+				filterLoaded : function(){
+					$(".StationDate").attr('placeholder','DD/MM/YYYY'); 
+					$("#dateTimePicker").on("dp.change", function (e) {
+            $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
+           });
+				}
 			});
 		},
 
