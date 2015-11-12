@@ -147,23 +147,41 @@ def uncheckedDatas_graph(request):
 @view_config(route_name = 'individual_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
 def individual_graph(request):
         # Initialize Json object
-        result = OrderedDict()
+    result = OrderedDict()
 
-        # Calculate the bounds
-        today = datetime.date.today()
-        begin_date = datetime.date(day=1, month=today.month, year=today.year-1)
-        end_date = datetime.date(day=1, month=today.month, year=today.year)
-        # Query
-        query = select([
-                func.count(Individual.ID).label('nb'),
-                func.year(Individual.creationDate).label('year'),
-                func.month(Individual.creationDate).label('month')]
-                ).where(and_(Individual.creationDate >= begin_date, Individual.creationDate < end_date)
-                ).group_by(func.year(Individual.creationDate), func.month(Individual.creationDate)
-        )
-        data = DBSession.execute(query).fetchall()
-        for nb, y, m in sorted(data, key=operator.itemgetter(1,2)):
-                d = datetime.date(day=1, month=m, year=y).strftime('%b')
-                result[' '.join([d, str(y)])] = nb
+    # Calculate the bounds
+    today = datetime.date.today()
+    begin_date = datetime.date(day=1, month=today.month, year=today.year-1)
+    end_date = datetime.date(day=1, month=today.month, year=today.year)
+    # Query
+    query = select([
+            func.count(Individual.ID).label('nb'),
+            func.year(Individual.creationDate).label('year'),
+            func.month(Individual.creationDate).label('month')]
+            ).where(and_(Individual.creationDate >= begin_date, Individual.creationDate < end_date)
+            ).group_by(func.year(Individual.creationDate), func.month(Individual.creationDate)
+    )
+    data = DBSession.execute(query).fetchall()
+    for nb, y, m in sorted(data, key=operator.itemgetter(1,2)):
+            d = datetime.date(day=1, month=m, year=y).strftime('%b')
+            result[' '.join([d, str(y)])] = nb
 
-        return result
+    return result
+
+@view_config(route_name = 'individual_monitored', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
+def individual_monitored(request):
+        # Initialize Json object
+    result = OrderedDict()
+    table = Base.metadata.tables['IndividualDynPropValuesNow']
+    # Query
+    query = select([
+        func.count(table.c['ID']).label('nb'),table.c['ValueString'].label('label')
+        ]).select_from(table
+        ).where(table.c['FK_IndividualDynProp'] == 37
+        ).group_by(table.c['ValueString'])
+
+    data = []
+    for row in DBSession.execute(query).fetchall():
+        curRow = OrderedDict(row)
+        data.append({'value':curRow['nb'],'label':curRow['label']})
+    return data
