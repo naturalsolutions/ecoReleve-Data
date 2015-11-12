@@ -3,9 +3,12 @@ define(['marionette',
 	'./views/curveGraph',
 	'./views/donutGraph',
 	'./views/info',
+	'config',
+	'requirejs-text!base/home/tpl/tpl-dounutGraph.html',
+	'requirejs-text!base/home/tpl/tpl-dounutGraph2.html',
 	'i18n'
 	],
-function(Marionette, NsMap, CurveGraphView,DonutGraphView, InfoView) {
+function(Marionette, NsMap, CurveGraphView,DonutGraphView, InfoView,config, TplGraph1, TplGraph2) {
 	'use strict';
 
 	return Marionette.LayoutView.extend({
@@ -16,7 +19,10 @@ function(Marionette, NsMap, CurveGraphView,DonutGraphView, InfoView) {
 		regions: {
 			graph : '#graph',
 			info : '#info',
-			donuts : '#donuts',
+		},
+
+		ui: {
+			'donuts':'#donuts'
 		},
 
 		animateIn: function() {
@@ -40,11 +46,39 @@ function(Marionette, NsMap, CurveGraphView,DonutGraphView, InfoView) {
 			);
 		},
 
+		initStats:function(){
+			var collGraphObj = [{
+				url : config.coreUrl + 'individuals/location/graph',
+				ele : '#validate',
+				title : 'validate',
+				stored : false,
+				template : 'app/base/home/tpl/tpl-dounutGraph.html'
+			},{
+				url : config.coreUrl + 'sensor/uncheckedDatas/graph',
+				ele : '#locations',
+				title : 'location',
+				stored : false,
+				template : 'app/base/home/tpl/tpl-dounutGraph2.html'
+			}];
+			var collGraph = new Backbone.Collection(collGraphObj);
+			var GraphViews = Backbone.Marionette.CollectionView.extend({
+				childView: DonutGraphView,
+			});
+
+			this.donutGraphs = new GraphViews ({collection : collGraph});
+			this.curveGraph = new CurveGraphView();
+			this.infoStat = new InfoView();
+		},
+
+		onRender: function(){
+			this.initStats();
+			this.donutGraphs.render();
+		},
 
 		onShow : function(options) {
-			this.info.show(new InfoView());
-			this.graph.show(new CurveGraphView());
-			this.donuts.show(new DonutGraphView());
+			this.info.show(this.infoStat);
+			this.ui.donuts.html(this.donutGraphs.el);
+			this.graph.show(this.curveGraph);
 			this.$el.i18n();
 		}
 	});
