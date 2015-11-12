@@ -45,14 +45,18 @@ def actionOnIndividuals(request):
 
 def count_ (request = None,listObj = None) :
     print('*****************  INDIVIDUAL COUNT***********************')
+    ModuleType = 'IndivFilter'
+    moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     if request is not None : 
         data = request.params
         if 'criteria' in data: 
             data['criteria'] = json.loads(data['criteria'])
             if data['criteria'] != {} :
                 searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
-
-        listObj = ListObjectWithDynProp(Individual)
+        else : 
+            searchInfo = {'criteria':None}
+        
+        listObj = ListObjectWithDynProp(Individual,moduleFront)
         count = listObj.count(searchInfo = searchInfo)
     else : 
         count = listObj.count()

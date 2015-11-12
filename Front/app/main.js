@@ -32,9 +32,9 @@ require.config({
 		'IndivPicker'	: 'ns_modules/ns-bbforms-editors/IndividualPicker/backboneForm-editors-individualPicker',
 		'MonitoredSitePicker'	: 'ns_modules/ns-bbforms-editors/MonitoredSitePicker/backboneForm-editors-monitoredSitePicker',
 		'SensorPicker'	: 'ns_modules/ns-bbforms-editors/SensorPicker/backboneForm-editors-SensorPicker',
+		'LatitudeEditor' : 'ns_modules/ns-bbforms-editors/Coordinates/LatitudeEditor',
+		'LongitudeEditor' : 'ns_modules/ns-bbforms-editors/Coordinates/LongitudeEditor',
 
-		
-		
 		'ListOfNestedModel' 	: 'vendors/ListOfNestedModel/ListOfNestedModel',
 		'AutocompleteEditor'	: '../externalModules/NaturalJS-BackBone-Forms-Editors/Autocomplete/AutocompleteEditor',
 
@@ -72,7 +72,7 @@ require.config({
 
 		'fuelux'				: '../bower_components/fuelux/dist/js/fuelux',
 		'floatThead'			: '../bower_components/floatThead/dist/jquery.floatThead-slim', 
-
+		'chart'					: '../bower_components/chartjs/Chart', 
 		//waiting for a new release (amd friendly)
 		'backgrid'				: 'vendors/backgrid',
 		'backgrid.paginator'	: 'vendors/backgrid-paginator',
@@ -85,7 +85,7 @@ require.config({
 		'bbAutoComp': '../externalModules/NaturalJS-BackBone-Forms-Editors/ThesaurusEditor/backboneForm-editors-autocompTree',
 		'autocompTree' : '../externalModules/NaturalJS-BackBone-Forms-Editors/ThesaurusEditor/AutoCompletTree/jquery.autocompTree',
 		'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
-    'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
+		'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
 	},
 
 

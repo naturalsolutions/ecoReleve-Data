@@ -21,7 +21,12 @@ def integers(*segment_names):
 
 def add_routes(config):
 
-    config.add_route('weekData', 'ecoReleve-Sensor/weekData')
+    config.add_route('weekData', 'ecoReleve-Core/weekData')
+    config.add_route('location_graph', 'ecoReleve-Core/individuals/location/graph')
+    config.add_route('station_graph', 'ecoReleve-Core/stations/graph')
+    config.add_route('individual_graph', 'ecoReleve-Core/individuals/graph')
+    config.add_route('uncheckedDatas_graph', 'ecoReleve-Core/sensor/uncheckedDatas/graph')
+
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Security routes #####

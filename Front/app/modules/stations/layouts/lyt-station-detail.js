@@ -114,6 +114,15 @@ define([
 				objectType: stationType,
 				id: stationId,
 				reloadAfterSave : true,
+				afterShow : function(){
+					$(".datetime").attr('placeholder','DD/MM/YYYY'); 
+
+					$("#dateTimePicker").on("dp.change", function (e) {
+            $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
+           });
+				}
+
+
 			});
 
 			this.nsForm.BeforeShow = function(){
@@ -219,6 +228,8 @@ define([
 		},
 
 		feedProtoList: function(){
+			// init protolist
+			this.ui.protoList.append('<option value="" disabled selected>Add a protocol</option>');
 			var _this = this;
 			this.protoSelectList = new Backbone.Collection();
 			this.protoSelectList.fetch({

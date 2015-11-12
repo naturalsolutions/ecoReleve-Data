@@ -31,6 +31,7 @@
     "reneco-fonts": "*",
     "floatThead" : "*",
 	"tooltipster": "~3.3.0",
- 	"tooltipster-list": "https://github.com/amiceli/tooltipster-list.git"
+ 	"tooltipster-list": "https://github.com/amiceli/tooltipster-list.git",
+    "chartjs": "~1.0.2"
   }
 }

@@ -36,9 +36,7 @@ define([
 			this.sensorId = options.model.attributes.sensorId;
 		},
 
-		onShow : function(){
-			//this.reset();
-		},
+
 		clearFile : function(){
 			$('#input-file').val("");
 		},
