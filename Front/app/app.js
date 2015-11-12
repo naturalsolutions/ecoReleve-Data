@@ -24,16 +24,19 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 		Backbone.history.start();
 	});
 
-	$( document ).ajaxStart(function(e) {
+	$( window ).ajaxStart(function(e) {
 		$('#header-loader').removeClass('hidden');
 	});
-	$( document ).ajaxStop(function() {
+	$( window ).ajaxStop(function() {
 		$('#header-loader').addClass('hidden');
 	});
-	$( document ).ajaxError(function() {
-		console.error('Error from the server');
+	$( window ).ajaxError(function() {
 		$('#header-loader').addClass('hidden');
 	});
+
+	window.onerror = function(){
+		$('#header-loader').addClass('hidden');
+	};
 
 
 	window.app = app;

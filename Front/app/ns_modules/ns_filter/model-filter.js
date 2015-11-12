@@ -43,14 +43,18 @@ define([
 
 			this.forms = [];
 
-			// If filters are given we use them
-			if (options.filters) {
-				this.filters = options.filters;
-				this.initFilters(options.filters);
-			} else {
-				// Otherwise initialized from AJAX call
-				this.getFilters();
+			if(!options.custom){
+				if (options.filters) {
+					this.filters = options.filters;
+					this.initFilters(options.filters);
+				} else {
+					// Otherwise initialized from AJAX call
+					this.getFilters();
+				}
 			}
+
+			// If filters are given we use them
+
 			this.criterias = {};
 			if (options.filterLoaded){
 				this.filterLoaded = options.filterLoaded ;
@@ -81,6 +85,8 @@ define([
 			for (var key in data) {
 				form = this.initFilter(data[key]);
 				this.filterContainer.append(form.el);
+
+
 				if (data[key].type == 'Checkboxes') {
 					this.filterContainer.find('input[type="checkbox"]').each(function () {
 						$(this).prop('checked', true);
@@ -91,6 +97,26 @@ define([
 
 				this.forms.push(form);
 				this.filterLoaded();
+			};
+		},
+
+		addFilter: function(data){
+			var form;
+			for (var key in data) {
+				form = this.initFilter(data[key]);
+				this.filterContainer.append(form.el);
+
+				$(form.el).find('select').focus();
+				if (data[key].type == 'Checkboxes') {
+					this.filterContainer.find('input[type="checkbox"]').each(function () {
+						$(this).prop('checked', true);
+					});
+				}
+				this.filterContainer.find('input[type="checkbox"]').on('click', this.clickedCheck);
+				this.filterContainer.find('form').on('keypress',  $.proxy(this.updateQuery, this));
+
+
+				this.forms.push(form);
 			};
 		},
 
@@ -272,6 +298,7 @@ define([
 			}else{
 				this.interaction('filter', filters);
 			}
+			return filters;
 		},
 
 		reset: function () {
@@ -453,7 +480,6 @@ define([
 				this.update();
 				return false;
    			}
-   			
 		}
 
 	});

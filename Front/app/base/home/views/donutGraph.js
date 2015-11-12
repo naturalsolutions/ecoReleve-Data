@@ -50,11 +50,10 @@ define([
 
         drawGraph: function(data) {
             var canvas = this.$el.find(this.ele);
-
-           // var canvasValid = this.$el.find('#validate');
-            var colors = ["#F7464A","#46BFBD","#FFCC00","#33CC33"];
-            var highlights = ["#FF5A5E","#5AD3D1","#FFFF66","#66FF66"];
             var sum = 0 ;
+            var colors = ["rgba(0,0,0,0.5)","rgba(0,0,0,0.4)","rgba(0,0,0,0.3)","rgba(0,0,0,0.2)"];
+            var highlights = ["rgba(0,0,0,0.1)","rgba(0,0,0,0.1)","rgba(0,0,0,0.1)","rgba(0,0,0,0.1)"];
+
             for (var i = 0; i < data.length; i++) {
                 data[i]['color'] = colors[i];
                 data[i]['highlight'] = highlights[i];
