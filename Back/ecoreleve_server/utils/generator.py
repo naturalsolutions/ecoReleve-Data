@@ -20,26 +20,51 @@ class Generator :
             'DATETIME':'date',
             'BIT':'boolean'
             }
+        self.dictFilter = {
+            'VARCHAR':'Text',
+            'NVARCHAR':'Text',
+            'INTEGER':'Number',
+            'DECIMAL':'Number',
+            'DATETIME':'DateTimePicker',
+        }
         self.table=Base.metadata.tables[table]
         self.cols=[]
 
     def get_col(self,columnsList=False, checked=False):
         ###### model of columnsList #####
         final=[]
-        for col in columnsList:
-            field_name=col
-            field_label=col
-            field_type=str(self.table.c[field_name].type).split('(')[0]
-            if field_type in self.dictCell:
-                cell_type=self.dictCell[field_type]
-            else:
-                cell_type='string'
-            final.append({'name':field_name,
-                'label':field_label,
-                'cell':cell_type,
-                'renderable':True,
-                'editable':False})
-            self.cols.append({'name':field_name,'type_grid':cell_type})
+        if columnsList :
+            for col in columnsList:
+                field_name=col
+                field_label=col
+                field_type=str(self.table.c[field_name].type).split('(')[0]
+                if field_type in self.dictCell:
+                    cell_type=self.dictCell[field_type]
+                else:
+                    cell_type='string'
+                final.append({'name':field_name,
+                    'label':field_label,
+                    'cell':cell_type,
+                    'renderable':True,
+                    'editable':False})
+                # self.cols.append({'name':field_name,'type_grid':cell_type})
+        else : 
+            for col in self.table.c:
+                field_name=col.name
+                field_label=col.name
+                
+                field_type=self.table.c[col.name].type
+                if field_type in self.dictCell:
+                    cell_type=self.dictCell[field_type]
+                else:
+                    cell_type='string'
+                final.append({'name':field_name,
+                    'label':field_label,
+                    'cell':cell_type,
+                    'renderable':False,
+                    'editable':False})
+                self.cols.append({'name':field_name,'type_grid':cell_type})
+
         if(checked):
             final.append({'name': 'import','label': 'Import', 'cell': 'select-row', 'headerCell' : 'select-all'})
         return final
@@ -50,12 +75,12 @@ class Generator :
             name_c = str(column.name)
             try : 
                 type_c = str(column.type)
-                print(type_c)
-                print(type(type_c))
             except: pass
-            if re.compile('VARCHAR').search(type_c):
-                   type_c = 'string'
-            data.append({'name':name_c, 'type':type_c})
+            if type_c in self.dictFilter :
+                type_c = self.dictFilter[type_c]
+            else : 
+                type_c = 'string'
+            data.append({'name':name_c, 'type':type_c , 'title':name_c })
         return data
 
     def where_(self,query,col,operator,value):

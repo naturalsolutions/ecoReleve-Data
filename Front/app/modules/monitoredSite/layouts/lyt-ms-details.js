@@ -127,6 +127,8 @@ define([
 				rowClicked : true,
 			});
 
+
+
 			this.ui.grid.html(this.grid.displayGrid());
 			this.ui.paginator.html(this.grid.displayPaginator());
 			this.ui.gridEquipment.html(this.gridEquip.displayGrid());
@@ -174,6 +176,18 @@ define([
        		 });
 				}
 			});
+
+			this.nsform.afterDelete = function(){
+				var jqxhr = $.ajax({
+					url: config.coreUrl+'monitoredSite/'+ id,
+					method: 'DELETE',
+					contentType:'application/json'
+				}).done(function(resp) {
+					//temp fix
+					Backbone.history.loadUrl(Backbone.history.fragment);
+				}).fail(function(resp) {
+				});
+			};
 		},
 
 		displayTab : function(e){

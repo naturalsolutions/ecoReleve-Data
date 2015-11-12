@@ -14,10 +14,9 @@ define([
 	'L',
 	'leaflet_cluster',
 	'googleLoaer',
-	//'text!./tpl-legend.html',
 	'leaflet_google',
 
-], function($, _, Backbone , Marionette, L, cluster, GoogleMapsLoader //tpl_legend
+], function($, _, Backbone , Marionette, L, cluster, GoogleMapsLoader
 		) {
 
 	'use strict';  
@@ -44,6 +43,8 @@ define([
 			this.com = options.com;
 			this.com.addModule(this);
 		}
+
+		this.totalElt=options.totalElt || false;
 
 		this.url=options.url;
 		this.geoJson=options.geoJson;
@@ -115,6 +116,18 @@ define([
 			this.selectedIcon = new L.DivIcon({className	: 'custom-marker selected'});
 			this.icon = new L.DivIcon({className			: 'custom-marker'});
 
+			this.setCenter();
+
+			this.map = new L.Map(this.elem, {
+				center: this.center ,
+				zoom: this.zoom || 4,
+				minZoom: 2,
+				inertia: false,
+				zoomAnimation: true,
+				keyboard: false, //fix scroll window
+				attributionControl: false,
+			});
+			this.google();
 
 			if(this.url){
 				this.requestGeoJson(this.url);
@@ -131,18 +144,7 @@ define([
 		},
 
 		ready: function(){
-			this.setCenter();
-
-			this.map = new L.Map(this.elem, {
-				center: this.center ,
-				zoom: this.zoom || 4,
-				minZoom: 2,
-				inertia: false,
-				zoomAnimation: true,
-				keyboard: false, //fix scroll window
-				attributionControl: false,
-			});
-			this.google();
+			this.setTotal(this.geoJson);
 
 			if(this.legend){
 				this.addCtrl(tpl_legend);
@@ -150,6 +152,9 @@ define([
 			if(this.markersLayer){
 				this.addMarkersLayer();
 			}
+
+			this.initErrorLayer();
+			this.displayError(this.geoJson);
 		},
 
 		google: function(){
@@ -212,7 +217,6 @@ define([
 					}else{
 						return ctx.getClusterIcon(cluster);
 					}
-
 				},
 			});
 			this.markersLayer = new CustomMarkerClusterGroup({
@@ -731,6 +735,7 @@ define([
 
 		//apply filters on the map from a collection
 		filter: function(param){
+
 			//TODO : refact
 			var _this = this;
 			if(this.url){
@@ -773,24 +778,49 @@ define([
 			}*/
 		},
 
-		initErrorWarning: function(msg){
-			$('#'+this.elem).before('<div class="map-error"><div class="msg col-sm-8">'+msg+'</div></div>');
+
+		setTotal: function(geoJson){
+			if(this.totalElt){
+			
+			this.total = 	geoJson.total;
+
+			function numberWithCommas(x) {
+					x = x.toString();
+					var pattern = /(-?\d+)(\d{3})/;
+					while (pattern.test(x))
+							x = x.replace(pattern, "$1 $2");
+					return x;
+			}
+
+			this.total = numberWithCommas(this.total);
+
+
+				this.totalElt.html(this.total);
+			}
 		},
 
-		errorWarning: function(msg){
-			$('.map-error').fadeIn();
-			$('.map-error .msg').html(msg);
+		initErrorLayer: function(){
+			$('#'+this.elem).append('<div id="errorLayer" class="errorLayer hidden"><legend><span class="glyphicon glyphicon-warning-sign"></span> Too much datas to display on the map, please affinate your query</legend></div>');
+			this.errorElt = $('#'+this.elem + ' #errorLayer');
 		},
+
+		displayError: function(geoJson){
+			this.errorElt.addClass('hidden');
+			if(geoJson.exceed)
+				this.errorElt.removeClass('hidden');
+		},
+
+
 
 		updateLayers: function(geoJson){
+			this.displayError(geoJson);
 			if(geoJson == false){
-				this.errorWarning('<i>There is too much datas to display on the map. <br /> Please be more specific in your filters.</i>');
 				if(this.markersLayer){
 					this.map.removeLayer(this.markersLayer);
 				}
 				return false;
 			}
-			$('.map-error').fadeOut('slow');
+
 			if(this.markersLayer){
 				this.map.removeLayer(this.markersLayer);
 			}
@@ -803,6 +833,8 @@ define([
 			if(this.bbox){
 				this.addBBox(this.markersLayer);
 			}
+
+			this.setTotal(geoJson);
 		},
 
 
