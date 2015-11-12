@@ -44,11 +44,15 @@ define([
 		},
 
 		getViews: function(e){
+
+
 			var _this = this;
+
 
 			this.ui.themes.find('.active').removeClass('active');
 			$(e.target).addClass('active');
 			
+			this.ui.requirement.val('').change();
 
 			this.viewColl = new Backbone.Collection();
 			var id = $(e.target).val();
@@ -69,7 +73,7 @@ define([
 			this.ui.views.find('.active').removeClass('active');
 			$(e.target).addClass('active');
 			var id = $(e.target).val();
-			this.ui.requirement.attr('value', id).change();
+			this.ui.requirement.val(id).change();
 
 			this.model.set('viewId', id);
 
@@ -80,7 +84,11 @@ define([
 		},
 
 		check: function(){
-			return true;
+			if(this.ui.requirement.val()){
+				return true;
+			}else{
+				return false;
+			}
 		},
 
 	});

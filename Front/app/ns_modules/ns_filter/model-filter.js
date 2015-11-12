@@ -44,7 +44,6 @@ define([
 			this.forms = [];
 
 			if(!options.custom){
-				console.log('passed');
 				if (options.filters) {
 					this.filters = options.filters;
 					this.initFilters(options.filters);
@@ -55,7 +54,7 @@ define([
 			}
 
 			// If filters are given we use them
-			
+
 			this.criterias = {};
 		},
 
@@ -83,6 +82,8 @@ define([
 			for (var key in data) {
 				form = this.initFilter(data[key]);
 				this.filterContainer.append(form.el);
+
+
 				if (data[key].type == 'Checkboxes') {
 					this.filterContainer.find('input[type="checkbox"]').each(function () {
 						$(this).prop('checked', true);
@@ -100,6 +101,8 @@ define([
 			for (var key in data) {
 				form = this.initFilter(data[key]);
 				this.filterContainer.append(form.el);
+
+				$(form.el).find('select').focus();
 				if (data[key].type == 'Checkboxes') {
 					this.filterContainer.find('input[type="checkbox"]').each(function () {
 						$(this).prop('checked', true);
@@ -107,6 +110,7 @@ define([
 				}
 				this.filterContainer.find('input[type="checkbox"]').on('click', this.clickedCheck);
 				this.filterContainer.find('form').on('keypress',  $.proxy(this.updateQuery, this));
+
 
 				this.forms.push(form);
 			};

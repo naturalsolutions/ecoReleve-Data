@@ -118,5 +118,7 @@ def add_routes(config):
     config.add_route('export/themes/id/views', 'ecoReleve-Core/export/themes/{id}/views')
     config.add_route('export/views/id', 'ecoReleve-Core/export/views/{id}/') #geo, datas
     config.add_route('export/views/id/action', 'ecoReleve-Core/export/views/{id}/{action}') #filtres, cols, count
+    config.add_route('export/views/getFile', 'ecoReleve-Core/export/views/getFile') #getFile
+
 
 

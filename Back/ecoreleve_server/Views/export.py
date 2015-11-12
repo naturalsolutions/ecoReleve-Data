@@ -6,7 +6,8 @@ import numpy as np
 from ..Models import dbConfig, DBSession, Base
 from pyramid.security import NO_PERMISSION_REQUIRED
 from ..utils.generator import Generator
-
+from ..renderers import *
+from pyramid.response import Response
 
 route_prefix = 'export/'
 
@@ -37,7 +38,7 @@ def actionList(request):
     dictActionFunc = {
     'getFields': getFields,
     'getFilters': getFilters,
-    'count': count_
+    'count': count_,
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -47,7 +48,7 @@ def getFields(request):
     table = Base.metadata.tables['Views']
     viewName = DBSession.execute(select(['View_Name']).select_from(table).where(table.c['ID']==viewId)).scalar()
     gene = Generator(viewName)
-    return 
+    return gene.get_col()
 
 def getFilters(request):
     viewId = request.matchdict['id']
@@ -87,6 +88,68 @@ def search(request):
     if 'geo' in request.params:
         result = gene.get_geoJSON(criteria)
     else :
-        result = gene.search(criteria,offset=0,per_page=15,order_by=[])
+        result = gene.search(criteria,offset=0,per_page=20,order_by=[])
 
     return result
+
+
+
+@view_config(route_name=route_prefix+'views/getFile', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
+def views_filter_export(request):
+    try:
+
+        function_export= { 'csv': export_csv, 'pdf': export_pdf, 'gpx': export_gpx }
+        criteria = json.loads(request.params.mixed()['criteria'])
+
+        print(criteria)
+        viewId = criteria['viewId']
+        
+        views = Base.metadata.tables['Views']
+        viewName = DBSession.execute(select([views.c['View_Name']])).scalar()
+
+        table = Base.metadata.tables[viewName]
+        fileType= criteria['fileType']
+        #columns selection
+        columns=criteria['columns']
+        coll=[]
+
+        if fileType != 'gpx' :
+            for col in columns:
+                coll.append(table.c[col])
+        else :
+            coll = [table.c['LAT'],table.c['LON']]
+            if 'StationName' in table.c:
+                coll.append(table.c['StationName'])
+            if 'StationDate' in table.c:
+                coll.append(table.c['StationDate'])
+            if 'SiteName' in table.c:
+                coll.append(table.c['StationName'])
+
+        gene = Generator(viewName)
+        query = gene.getFullQuery(criteria['filters'],columnsList=coll)
+        rows = DBSession.execute(query).fetchall()
+
+        filename = viewName+'.'+fileType
+        request.response.content_disposition = 'attachment;filename=' + filename
+        value={'header': columns, 'rows': rows}
+
+        io_export=function_export[fileType](value,request,viewName)
+        return Response(io_export)
+
+    except: raise
+
+def export_csv (value,request,name_vue) :
+    csvRender=CSVRenderer()
+    csv=csvRender(value,{'request':request})
+    return csv
+
+def export_pdf (value,request,name_vue):
+    pdfRender=PDFrenderer()
+    pdf=pdfRender(value,name_vue,request)
+    return pdf
+
+def export_gpx (value,request,name_vue):
+    gpxRender=GPXRenderer()
+    gpx=gpxRender(value,request)
+    return gpx
+

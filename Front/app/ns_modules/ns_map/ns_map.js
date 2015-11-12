@@ -14,10 +14,9 @@ define([
 	'L',
 	'leaflet_cluster',
 	'googleLoaer',
-	//'text!./tpl-legend.html',
 	'leaflet_google',
 
-], function($, _, Backbone , Marionette, L, cluster, GoogleMapsLoader //tpl_legend
+], function($, _, Backbone , Marionette, L, cluster, GoogleMapsLoader
 		) {
 
 	'use strict';  
@@ -153,6 +152,9 @@ define([
 			if(this.markersLayer){
 				this.addMarkersLayer();
 			}
+
+			this.initErrorLayer();
+			this.displayError(this.geoJson);
 		},
 
 		google: function(){
@@ -776,32 +778,49 @@ define([
 			}*/
 		},
 
-		initErrorWarning: function(msg){
-			$('#'+this.elem).before('<div class="map-error"><div class="msg col-sm-8">'+msg+'</div></div>');
-		},
-
-		errorWarning: function(msg){
-			$('.map-error').fadeIn();
-			$('.map-error .msg').html(msg);
-		},
 
 		setTotal: function(geoJson){
-			this.total = 	geoJson.features.length;
 			if(this.totalElt){
+			
+			this.total = 	geoJson.total;
+
+			function numberWithCommas(x) {
+					x = x.toString();
+					var pattern = /(-?\d+)(\d{3})/;
+					while (pattern.test(x))
+							x = x.replace(pattern, "$1 $2");
+					return x;
+			}
+
+			this.total = numberWithCommas(this.total);
+
+
 				this.totalElt.html(this.total);
 			}
 		},
 
+		initErrorLayer: function(){
+			$('#'+this.elem).append('<div id="errorLayer" class="errorLayer hidden"><legend><span class="glyphicon glyphicon-warning-sign"></span> Too much datas to display on the map, please affinate your query</legend></div>');
+			this.errorElt = $('#'+this.elem + ' #errorLayer');
+		},
+
+		displayError: function(geoJson){
+			this.errorElt.addClass('hidden');
+			if(geoJson.exceed)
+				this.errorElt.removeClass('hidden');
+		},
+
+
+
 		updateLayers: function(geoJson){
-			
+			this.displayError(geoJson);
 			if(geoJson == false){
-				this.errorWarning('<i>There is too much datas to display on the map. <br /> Please be more specific in your filters.</i>');
 				if(this.markersLayer){
 					this.map.removeLayer(this.markersLayer);
 				}
 				return false;
 			}
-			$('.map-error').fadeOut('slow');
+
 			if(this.markersLayer){
 				this.map.removeLayer(this.markersLayer);
 			}

@@ -1,13 +1,28 @@
-<div class="col-xs-4 full-height">
-
+<div class="col-xs-4 full-height no-padding">
+  <div class="toolbar top">
+    <legend>Choose your columns</legend>
+  </div>
+  <div class="crop2">
+    <br>
+    <div id="columns"></div>
+    <input type="text" id="requirement" class="hidden required">
+  </div>
+  <div class="toolbar bottom">
+    <div class="pull-right">
+      <button class="btn" id="none">Unselect All</button>
+      <button class="btn" id="all">Select All</button>
+    </div>
+  </div>
 </div>
 
 <div class="col-xs-8 full-height no-padding dark">
   <div class="toolbar top">
-    <legend class="inherit pull-right">Total : <span id="total"></span></legend>
+    <legend class="">
+      <span class="pull-left">Preview (20 rows)</span>
+      <span class="pull-right">Total : <span id="total"></span></span>
+    </legend>
   </div>
-  <div class="crop1">
-    <br>
-    <div id="grid"></div>
+    <div class="crop1">
+    <div id="grid" class="grid-auto"></div>
   </div>
 </div>

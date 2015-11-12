@@ -87,6 +87,7 @@ define([
 			} else {
 				this.colGene = new colGene({ url: this.url + 'getFields?name=' + this.name, paginable: this.pagingServerSide, checkedColl: options.checkedColl });
 				this.columns = this.colGene.columns;
+				
 			}
 			if (options.urlParams) {
 					/*
@@ -96,6 +97,7 @@ define([
 					    this.url+= '&' + index + "=" + attr;
 					}*/
 					this.searchCriteria = options.urlParams;
+					console.log(this.searchCriteria);
 
 				/*for (var i = 0 ; i<options.urlParams.length; i++) {
 
@@ -184,8 +186,13 @@ define([
 				queryParams: {
 					offset: function () { return (this.state.currentPage - 1) * this.state.pageSize; },
 					criteria: function () {
-
-						return JSON.stringify(_this.searchCriteria);
+						//incomplete
+						if(_this.searchCriteria){
+							return JSON.stringify(_this.searchCriteria);
+						}
+						else{
+							return JSON.stringify(this.searchCriteria);
+						}
 					},
 					order_by: function () {
 						var criteria = [];
@@ -309,6 +316,7 @@ define([
 
 		collectionFetched: function (options) {
 			this.affectTotalRecords();
+
 			if (options.init && !jQuery.isEmptyObject(this.sortCriteria)) {
 
 				for (var key in this.sortCriteria) {
@@ -399,8 +407,8 @@ define([
 
 		affectTotalRecords: function () {
 			if (this.totalElement != null) {
-				if(this.paginator){
-					$('#' + this.totalElement).html(this.paginator.collection.state.totalRecords);
+				if(this.paginator || this.pagingServerSide){
+					$('#' + this.totalElement).html(this.grid.collection.state.totalRecords);
 				}else{
 					$('#' + this.totalElement).html(this.grid.collection.length);
 				}

@@ -44,8 +44,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 				if (msg.status === 502 || msg.status === 403) {
 					document.location.href=config.portalUrl;
 				}
-				
-				//
 			});
 		},
 

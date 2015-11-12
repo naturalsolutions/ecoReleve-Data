@@ -84,7 +84,7 @@ define([
 			var jqxhr = $.ajax({
 					url: viewUrl,
 					context: this,
-					dataType: "json"
+					dataType: 'json'
 			}).done(function(data){
 					var fieldsList = [];
 					var exportFieldsList =[];
@@ -113,6 +113,8 @@ define([
 		filter: function(){
 			this.model.set('filters', this.filters.update());
 		},
+
+
 
 		validate: function(){
 			return this.model;
