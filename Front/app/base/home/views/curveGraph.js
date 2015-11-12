@@ -10,7 +10,6 @@ define([
         template: 'app/base/home/tpl/tpl-graph.html',
 
         onShow: function() {
-            console.log('render graph')
             this.initChart();
         },
         initChart: function(){
@@ -26,7 +25,6 @@ define([
                 var gData = JSON.parse(dataGraph);
                 _this.drawGraph(gData);
             } else {
-                console.log('fetch URL ')
                 var url = config.coreUrl + "stations/graph";
                 $.ajax({
                     context: this,
@@ -49,7 +47,11 @@ define([
             var canvas = this.$el.find('canvas');
             var labels = [];
             var lineData = [];
+
+
             var colors = ["#F38630", "#E0E4CC", "#69D2E7", "#3F9F3F", "#A4A81E", "#F0F70C", "#0CF7C4", "#92D6C7", "#2385b8", "#E0C8DD", "#F38630", "#E0E4CC"];
+
+
             var i = 0;
             for (var key in data) {
                 var dataObj = {};

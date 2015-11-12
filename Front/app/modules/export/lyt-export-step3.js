@@ -30,7 +30,7 @@ define([
 		initialize: function(options){
 			this.model = options.model;
 			this.cols = [];
-
+			this.model.set('columns', this.cols);
 		},
 
 		onShow: function(){

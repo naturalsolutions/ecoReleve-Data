@@ -25,12 +25,14 @@ define([
 			'click #views>li': 'enableNext',
 		},
 
-
 		initialize: function(options){
 			this.model = new Backbone.Model();
 			this.themeColl = new Backbone.Collection();
 			this.themeColl.url = config.coreUrl+'export/themes';
 			this.defered = this.themeColl.fetch();
+
+			this.model.set('viewId', '');
+			this.model.set('viewName', '');
 		},
 
 		onShow : function(){
@@ -44,10 +46,7 @@ define([
 		},
 
 		getViews: function(e){
-
-
 			var _this = this;
-
 
 			this.ui.themes.find('.active').removeClass('active');
 			$(e.target).addClass('active');
@@ -68,15 +67,15 @@ define([
 			});
 		},
 
-
 		enableNext: function(e){
 			this.ui.views.find('.active').removeClass('active');
 			$(e.target).addClass('active');
-			var id = $(e.target).val();
-			this.ui.requirement.val(id).change();
+			var viewId = $(e.target).val();
+			var viewName = $(e.target).html();
+			this.ui.requirement.val(viewId).change();
 
-			this.model.set('viewId', id);
-
+			this.model.set('viewId', viewId);
+			this.model.set('viewName', viewName);
 		},
 
 		validate: function(){

@@ -38,7 +38,7 @@ define([
 
 
 		clearFile : function(){
-			$('#input-file').val("");
+			$('#input-file').val('');
 		},
 		importFile: function(event) {
 			this.clear();

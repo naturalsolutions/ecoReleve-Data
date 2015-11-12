@@ -8,7 +8,6 @@ define([
 	'ns_map/ns_map',
 	'config',
 	'i18n'
-
 ], function($, _, Backbone, Marionette, Com, NsFilter, NsMap, config
 ){
 
@@ -35,11 +34,10 @@ define([
 		initialize: function(options){
 			this.com = new Com();
 			this.viewId = options.model.get('viewId');
-
+			this.model.set('filters', []);
 		},
 
 		onShow : function(){
-			//this.displayMap();
 			this.getFieldsListForSelectedView();
 			this.displayMap();
 			this.displayFilters();
@@ -77,7 +75,6 @@ define([
 			});
 		},
 
-
 		getFieldsListForSelectedView : function() {
 			var _this = this;
 			var viewUrl = config.coreUrl + 'export/views/' + this.viewId + '/getFilters';
@@ -113,8 +110,6 @@ define([
 		filter: function(){
 			this.model.set('filters', this.filters.update());
 		},
-
-
 
 		validate: function(){
 			return this.model;

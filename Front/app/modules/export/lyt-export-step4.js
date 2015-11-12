@@ -5,8 +5,10 @@ define([
 	'marionette',
 	'config',
 	'ns_grid/model-grid',
+	'sweetAlert',
+	'moment',
 	'i18n'
-], function($, _, Backbone, Marionette, config, NsGrid
+], function($, _, Backbone, Marionette, config, NsGrid, Swal, Moment
 ){
 	'use strict';
 	return Marionette.LayoutView.extend({
@@ -14,7 +16,6 @@ define([
 		template: 'app/modules/export/templates/tpl-export-step4.html',
 
 		name : 'File type',
-
 
 		ui:  {
 			'pdfTile' : '#pdfTile',
@@ -28,12 +29,16 @@ define([
 		},
 
 		initialize: function(options){
-			console.log(options.model);
+			var _this = this;
 			this.model = options.model;
+			this.parent = options.parent;
+
+			this.options.parent.finished = function(){
+				_this.getFile();
+			}
 		},
 
 		onShow: function(){
-
 			this.$el.find('.exp-file:first input').prop('checked', true).change();
 			this.$el.find('.exp-file:first').addClass('active');
 		},
@@ -44,11 +49,8 @@ define([
 			});
 
 			$(e.target).parent().addClass('active');
-
 			this.model.set('fileType', $(e.target).val());
 		},
-
-
 
 		test: function(){
 			var model = this.model;
@@ -63,10 +65,25 @@ define([
 			return true;
 		},
 
-
+		swal: function(opts){
+			Swal({
+				title: opts.title || opts.responseText || 'error',
+				text: opts.text || '',
+				type: opts.type,
+				showCancelButton: opts.showCancelButton,
+				confirmButtonColor: opts.confirmButtonColor,
+				confirmButtonText: opts.confirmButtonText,
+				closeOnConfirm: opts.closeOnConfirm || true,
+			},
+			function(isConfirm){
+				//could be better
+				if(opts.callback){
+					opts.callback();
+				}
+			});
+		},
 
 		getFile: function() {
-			console.log(this.model);
 			var _this = this;
 			this.datas = {
 					fileType: this.model.get('fileType'),
@@ -75,46 +92,49 @@ define([
 					columns: this.model.get('columns'),
 			};
 
-			console.log(this.model.get('viewId'));
-
-			console.log(this.datas);
-
 			var route = config.coreUrl + 'export/views/getFile';
 
 			$.ajax({
-					url: route,
-					data: {criteria: JSON.stringify(this.datas)},
-					contentType:'application/json',
-					type:'GET',
-					context: this,
-
-/*					xhrFields: {
+				url: route,
+				data: {criteria: JSON.stringify(this.datas)},
+				contentType:'application/json',
+				type:'GET',
+				context: this,
+				/*
+				xhrFields: {
 					onprogress: function (e) {
-							if (e.lengthComputable) {
-									var progress = Math.floor( e.loaded / e.total * 100 ) + '%';
-									console.info(progress);
-									$('#progress > div').html(progress);
-									$('#progress > div').width(progress);
-									}
+						if (e.lengthComputable) {
+								var progress = Math.floor( e.loaded / e.total * 100 ) + '%';
+								$('#progress > div').html(progress);
+								$('#progress > div').width(progress);
 							}
-					},*/
-
-
+						}
+					},
+					*/
 			}).done(function(data){
 				var url = URL.createObjectURL(new Blob([data], {'type':'application/'+this.model.get('fileType')}));
 				var link = document.createElement('a');
 				link.href = url;
-				link.download = this.model.get('viewId') + '_exports.' + this.model.get('fileType');
+				link.download = this.model.get('viewName') + '_' + new Moment().format('DD_MM_YY') + '.' + this.model.get('fileType');
 				document.body.appendChild(link);
 				link.click();
 				document.body.removeChild(link);
+				var _this = this;
+				var opts = {
+					title : 'Success!',
+					text: 'Would you like to do an other export?',
+					type: 'success',
+					confirmButtonText: 'Yes',
+					callback : function(){
+						_this.parent.displayStep(0);
+					}
+				};
+
+				this.swal(opts);
 			}).fail(function(msg){
 
 			});
 		},
-
-
-
 
 	});
 });
