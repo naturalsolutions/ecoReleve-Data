@@ -59,13 +59,13 @@ function(Marionette, NsMap, CurveGraphView,DonutGraphView, InfoView,config, TplG
 				title : 'location',
 				stored : false,
 				template : 'app/base/home/tpl/tpl-dounutGraph2.html'
-			},{
+			}/*,{
 				url : config.coreUrl + 'stats/individuals/monitored/graph',
 				ele : '#monitored',
 				title : 'monitored',
 				stored : false,
 				template : 'app/base/home/tpl/tpl-dounutGraph3.html'
-			}];
+			}*/];
 			var collGraph = new Backbone.Collection(collGraphObj);
 			var GraphViews = Backbone.Marionette.CollectionView.extend({
 				childView: DonutGraphView,
