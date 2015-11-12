@@ -7,83 +7,59 @@ define([
 ], function($, Chart, config, Marionette, moment) {
     'use strict';
     return Marionette.ItemView.extend( {
-        template: 'app/base/home/tpl/tpl-dounutGraph.html',
+        //template: 'app/base/home/tpl/tpl-dounutGraph.html',
 
-        onShow: function() {
+        initialize:function(options) {
+            var model = options.model;
+            this.url = model.get('url'); //config.coreUrl + 'individuals/location/graph';
+            this.storageName = 'ecoreleveChartDonuts' + model.get('title');
+            this.storedData = model.get('stored');
+            this.ele = model.get('ele');
+            this.template = model.get('template');
+        },
+        onRender: function() {
             console.log('render DINUTgraph')
-            this.drawGraph();
+            this.initGraph();
         },
 
-        drawGraph: function() {
-            var canvasLoc = this.$el.find('#locations');
-            var canvasValid = this.$el.find('#validate');
-            //caching graph data for a day
-            var dataGraph = localStorage.getItem("ecoreleveChart");
-            // get current day and compare it with stored day
+        initGraph: function(){
+            var _this = this;
+            var dataGraph = localStorage.getItem(this.storageName);
             var d = (new Date() + '').split(' ');
-            // ["Mon", "Feb", "1", "2014"....
             var day = d[2];
-            var storedDay = localStorage.getItem("ecoreleveChartDay");
-       /*     if (dataGraph && (day == storedDay)) {
+            var storedDay = localStorage.getItem(this.storageName + 'Day');
+            if (this.storedData && dataGraph && (day == storedDay)) {
                 var gData = JSON.parse(dataGraph);
-                this.chart = new Chart(canvas[0].getContext("2d")).Line(gData, {scaleShowLabels: false, scaleFontColor: "transparent"});
-            } else {*/
-                var url = config.coreUrl + "individuals/location/graph";
+            } else {
                 $.ajax({
                     context: this,
-                    url: url,
+                    url: _this.url,
                     dataType: "json"
                 }).done( function(data) {
-                    var colors = ["#F7464A","#46BFBD","#FFCC00","#33CC33"];
-                    var highlights = ["#FF5A5E","#5AD3D1","#FFFF66","#66FF66"];
-                    var legend = "<div id='graphLegend' style='text-align: left;'><b>stations number per month</b><br/>";
-                    
-                    for (var i = 0; i < data.length; i++) {
-                        data[i]['color'] = colors[i];
-                        data[i]['highlight'] = highlights[i];
-                    }
-
-   /*                 var strData = JSON.stringify(gData);
-                    // store data in localstorage
-                    localStorage.setItem("ecoreleveChart", strData);
-                    // store month in localstrorage to update data every month
+                    var strData = JSON.stringify(gData);
+                    localStorage.setItem(_this.storageName, strData);
                     var d = (new Date() + '').split(' ');
-                    // ["Mon", "Feb", "1", "2014"....
                     var day_ = d[2];
-                    localStorage.setItem("ecoreleveChartDay", day_);*/
-                    this.chart = new Chart(canvasLoc[0].getContext('2d')).Doughnut(data);
+                    localStorage.setItem(_this.storageName + 'Day', day_);
+                    _this.drawGraph(data);
                 }).fail( function(msg) {
                     console.error(msg);
                 });
+            }
+        },
 
-                var url = config.coreUrl + "sensor/uncheckedDatas/graph";
-                $.ajax({
-                    context: this,
-                    url: url,
-                    dataType: "json"
-                }).done( function(data) {
-                    var colors = ["#F7464A","#46BFBD","#FFCC00","#33CC33"];
-                    var highlights = ["#FF5A5E","#5AD3D1","#FFFF66","#66FF66"];
-                    var legend = "<div id='graphLegend' style='text-align: left;'><b>stations number per month</b><br/>";
-                    
-                    for (var i = 0; i < data.length; i++) {
-                        data[i]['color'] = colors[i];
-                        data[i]['highlight'] = highlights[i];
-                    }
+        drawGraph: function(data) {
+            var canvas = this.$el.find(this.ele);
+            console.log(canvas);
+           // var canvasValid = this.$el.find('#validate');
+            var colors = ["#F7464A","#46BFBD","#FFCC00","#33CC33"];
+            var highlights = ["#FF5A5E","#5AD3D1","#FFFF66","#66FF66"];
 
-   /*                 var strData = JSON.stringify(gData);
-                    // store data in localstorage
-                    localStorage.setItem("ecoreleveChart", strData);
-                    // store month in localstrorage to update data every month
-                    var d = (new Date() + '').split(' ');
-                    // ["Mon", "Feb", "1", "2014"....
-                    var day_ = d[2];
-                    localStorage.setItem("ecoreleveChartDay", day_);*/
-                    this.chart = new Chart(canvasValid[0].getContext('2d')).Doughnut(data);
-                }).fail( function(msg) {
-                    console.error(msg);
-                });
-            //}
+            for (var i = 0; i < data.length; i++) {
+                data[i]['color'] = colors[i];
+                data[i]['highlight'] = highlights[i];
+            }
+            this.chart = new Chart(canvas[0].getContext('2d')).Doughnut(data);
         },
 
         onDestroy: function() {
