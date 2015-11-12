@@ -806,8 +806,10 @@ define([
 
 		displayError: function(geoJson){
 			this.errorElt.addClass('hidden');
-			if(geoJson.exceed)
-				this.errorElt.removeClass('hidden');
+			if(geoJson){
+				if(geoJson.exceed)
+					this.errorElt.removeClass('hidden');
+			}
 		},
 
 
