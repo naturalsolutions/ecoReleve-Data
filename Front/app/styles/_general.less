@@ -218,21 +218,92 @@ textarea {
 }
 
 
+/* CSS 2 PIER 
+*
+*  A mettre dans les bons fichiers CSS
+*
+Bouton*/
+/* .panel-heading .btn-prevent-collapse {
+	padding: 25px 20px 3px 12px;
+}
+.btn-success{
+	position: relative;
+    padding: 6px 40px 6px 12px;
+}
+div#stationForm button.btn-success{
+	padding: 23px 20px 6px 12px;
+}
+.btn-success .reneco {
+    position: absolute;
+    height: 100%;
+    left: auto;
+    right: 0;
+    border-radius: 0;
+    border-top-right-radius: inherit;
+    border-bottom-right-radius: inherit;
+    box-shadow: 1px 0 0 0 transparent inset;
+    width: 2.57142857em;
+    background-color: rgba(0,0,0,.05);
+    top: 0;
+    line-height: 30px;
+} */
+/* Formulaires
+dans les stations enlever les class "list-inline" des select */
+.list-inline {    
+    margin-left: 0px;
+}
+/* fin */
+legend{
+	width: auto;
+}
+.form-control:focus {
+    border-color: #2ecc40;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(46, 204, 64, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(46, 204, 64, 0.6);
+}
+.form-control {
+	padding: 0;
+    text-indent: 12px;
+	background-color: #F7F7F7 !important;
+}
+/* Import */
+.icon-five {
+	font-size: 10em;
+}
+button#addProto{
+	padding: 6px 36px 26px 0px;
+}
+/* Release */
+select{
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
+select option, select option:focus, select option:hover{	
+	background:none;
+}
+/* Tile */
+.tile p .reneco { 
+	margin-top: 29px;
+}
+/* Thesaurus */
+span.fancytree-title {
+	font-family: 'Exo 2', sans-serif;
+	padding: 4px 3px;
+}
+span.fancytree-title:hover {
+	background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;
+	-webkit-background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;	
+}
+ul.fancytree-container{
+	border:0;
+}
+div.fancytreeview{
+	position: absolute;
+	border: 1px solid rgba(46, 204, 64, 0.6) !important;
+}
+/* 
+Dans detail station, bloc "Detailled Infos", en mode edit : 
+ - Ajouter une class sur une div contenant le bloc qui change de statut pour indiquer le mode "edit" sinon ce n'est pas possible de différencier les styles
+ - Pour avoir la croix à côté de la liste déroulante, il faut change le template de listeoFnestedModel comme sur ecollection. Avoir le bouton "x" dans un col-md-2 et le select dans col-md-10
+ */
+/* FIN PIER */
