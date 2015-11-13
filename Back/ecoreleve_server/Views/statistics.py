@@ -20,6 +20,7 @@ from ..Models import DBSession, Base
 from ..Models import ArgosGps, Gsm, Individual_Location, Station, Sensor, SensorType, Individual, Rfid
 from pyramid.security import NO_PERMISSION_REQUIRED
 from operator import itemgetter
+import transaction
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 # Data imported from the CLS WS during the last week.
@@ -68,7 +69,7 @@ def weekData(request):
                     data['GSM'][i] = nb
             except: pass
     transaction.commit()
-    
+
     return data
 
 # ------------------------------------------------------------------------------------------------------------------------- #
