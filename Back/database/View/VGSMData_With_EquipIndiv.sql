@@ -1,7 +1,18 @@
-Create View [dbo].[VGSMData_With_EquipIndiv] as (
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
 
 
-SELECT a.PK_id,t.FK_Individual,s.ID as FK_Sensor,t.StartDate,t.EndDate,
+
+CREATE View [dbo].[VGSMData_With_EquipIndiv] as (
+
+
+
+
+SELECT t.FK_Individual,s.ID as FK_Sensor,t.StartDate,t.EndDate,
 	a.DateTime as date,
 	a.Latitude_N as lat, 
 	a.Longitude_E as lon,
@@ -16,7 +27,8 @@ SELECT a.PK_id,t.FK_Individual,s.ID as FK_Sensor,t.StartDate,t.EndDate,
 	a.file_date,
 	a.checked,
 	a.imported,
-	a.validated
+	a.validated,
+	a.PK_id
 
   FROM [ecoReleve_Sensor].[dbo].[Tgsm] a
   JOIN NewModelERD.dbo.Sensor s ON CONVERT(VARCHAR,a.platform_) = s.UnicIdentifier 
@@ -31,3 +43,13 @@ SELECT a.PK_id,t.FK_Individual,s.ID as FK_Sensor,t.StartDate,t.EndDate,
 	OR a.VDOP BETWEEN 1 AND 10 
 	OR a.SatelliteCount >=5 )
   )
+
+
+
+
+
+
+
+GO
+
+

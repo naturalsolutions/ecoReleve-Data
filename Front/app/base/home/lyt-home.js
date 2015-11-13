@@ -48,18 +48,24 @@ function(Marionette, NsMap, CurveGraphView,DonutGraphView, InfoView,config, TplG
 
 		initStats:function(){
 			var collGraphObj = [{
-				url : config.coreUrl + 'individuals/location/graph',
+				url : config.coreUrl + 'sensor/uncheckedDatas/graph',
 				ele : '#validate',
-				title : 'validate',
+				title : 'pending',
 				stored : false,
 				template : 'app/base/home/tpl/tpl-dounutGraph.html'
 			},{
-				url : config.coreUrl + 'sensor/uncheckedDatas/graph',
+				url : config.coreUrl + 'individuals/location/graph',
 				ele : '#locations',
 				title : 'location',
 				stored : false,
 				template : 'app/base/home/tpl/tpl-dounutGraph2.html'
-			}];
+			}/*,{
+				url : config.coreUrl + 'stats/individuals/monitored/graph',
+				ele : '#monitored',
+				title : 'monitored',
+				stored : false,
+				template : 'app/base/home/tpl/tpl-dounutGraph3.html'
+			}*/];
 			var collGraph = new Backbone.Collection(collGraphObj);
 			var GraphViews = Backbone.Marionette.CollectionView.extend({
 				childView: DonutGraphView,
