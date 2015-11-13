@@ -25,79 +25,81 @@ from operator import itemgetter
 # Data imported from the CLS WS during the last week.
 @view_config(route_name='weekData', renderer='json',permission = NO_PERMISSION_REQUIRED)
 def weekData(request):
-        """Return an array of location number per day within the last seven days."""
-        today = datetime.date.today()
-        # Initialize Json object
-        data = {
-                'label':[str(today - datetime.timedelta(days = i)) for i in range(1,8)],
-                'Argos': [0] * 7,
-                'GPS': [0] * 7,
-                'GSM': [0] * 7
-        }
+    """Return an array of location number per day within the last seven days."""
+    today = datetime.date.today()
+    # Initialize Json object
+    data = {
+            'label':[str(today - datetime.timedelta(days = i)) for i in range(1,8)],
+            'Argos': [0] * 7,
+            'GPS': [0] * 7,
+            'GSM': [0] * 7
+    }
 
-        # Argos data
-        argos_query = select(
-                [cast(ArgosGps.date, Date).label('date'), func.count(ArgosGps.pk_id).label('nb')]
-                ).where(and_(ArgosGps.date >= today - datetime.timedelta(days = 7),ArgosGps.type_ == 'arg')
-                ).group_by(cast(ArgosGps.date, Date)
-        )
-        for date, nb in DBSession.execute(argos_query).fetchall():
-                try:
-                        i = data['label'].index(str(date))
-                        data['Argos'][i] = nb
-                except: pass
+    # Argos data
+    argos_query = select(
+            [cast(ArgosGps.date, Date).label('date'), func.count(ArgosGps.pk_id).label('nb')]
+            ).where(and_(ArgosGps.date >= today - datetime.timedelta(days = 7),ArgosGps.type_ == 'arg')
+            ).group_by(cast(ArgosGps.date, Date)
+    )
+    for date, nb in DBSession.execute(argos_query).fetchall():
+            try:
+                    i = data['label'].index(str(date))
+                    data['Argos'][i] = nb
+            except: pass
 
-        # GPS data
-        gps_query = select(
-                [cast(ArgosGps.date, Date).label('date'), func.count(ArgosGps.pk_id).label('nb')]
-                ).where(and_(ArgosGps.date >= today - datetime.timedelta(days = 7),ArgosGps.type_ == 'gps')
-                ).group_by(cast(ArgosGps.date, Date))
-        for date, nb in DBSession.execute(gps_query).fetchall():
-                try:
-                        i = data['label'].index(str(date))
-                        data['GPS'][i] = nb
-                except: pass
+    # GPS data
+    gps_query = select(
+            [cast(ArgosGps.date, Date).label('date'), func.count(ArgosGps.pk_id).label('nb')]
+            ).where(and_(ArgosGps.date >= today - datetime.timedelta(days = 7),ArgosGps.type_ == 'gps')
+            ).group_by(cast(ArgosGps.date, Date))
+    for date, nb in DBSession.execute(gps_query).fetchall():
+            try:
+                    i = data['label'].index(str(date))
+                    data['GPS'][i] = nb
+            except: pass
 
-        gsm_query = select(
-                [cast(Gsm.date, Date).label('date'), func.count(Gsm.pk_id).label('nb')]
-                ).where(Gsm.date >= today - datetime.timedelta(days = 7)
-                ).group_by(cast(Gsm.date, Date))
-        for date, nb in DBSession.execute(gsm_query).fetchall():
-                try:
-                        i = data['label'].index(str(date))
-                        data['GSM'][i] = nb
-                except: pass
-
-        return data
+    gsm_query = select(
+            [cast(Gsm.date, Date).label('date'), func.count(Gsm.pk_id).label('nb')]
+            ).where(Gsm.date >= today - datetime.timedelta(days = 7)
+            ).group_by(cast(Gsm.date, Date))
+    for date, nb in DBSession.execute(gsm_query).fetchall():
+            try:
+                    i = data['label'].index(str(date))
+                    data['GSM'][i] = nb
+            except: pass
+    transaction.commit()
+    
+    return data
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name = 'station_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
 def station_graph(request):
         # Initialize Json object
-        result = OrderedDict()
+    result = OrderedDict()
 
-        # Calculate the bounds
-        today = datetime.date.today()
-        begin_date = datetime.date(day=1, month=today.month, year=today.year-1)
-        end_date = datetime.date(day=1, month=today.month, year=today.year)
-        # Query
-        query = select([
-                func.count(Station.ID).label('nb'),
-                func.year(Station.StationDate).label('year'),
-                func.month(Station.StationDate).label('month')]
-                ).where(and_(Station.StationDate >= begin_date, Station.StationDate < end_date)
-                ).group_by(func.year(Station.StationDate), func.month(Station.StationDate)
-        )
-        """
-                Execute query and sort result by year, month
-                (faster than an order_by clause in this case)
-        """
-        data = DBSession.execute(query).fetchall()
-        for nb, y, m in sorted(data, key=operator.itemgetter(1,2)):
-                d = datetime.date(day=1, month=m, year=y).strftime('%b')
-                result[' '.join([d, str(y)])] = nb
+    # Calculate the bounds
+    today = datetime.date.today()
+    begin_date = datetime.date(day=1, month=today.month, year=today.year-1)
+    end_date = datetime.date(day=1, month=today.month, year=today.year)
+    # Query
+    query = select([
+            func.count(Station.ID).label('nb'),
+            func.year(Station.StationDate).label('year'),
+            func.month(Station.StationDate).label('month')]
+            ).where(and_(Station.StationDate >= begin_date, Station.StationDate < end_date)
+            ).group_by(func.year(Station.StationDate), func.month(Station.StationDate)
+    )
+    """
+            Execute query and sort result by year, month
+            (faster than an order_by clause in this case)
+    """
+    data = DBSession.execute(query).fetchall()
+    for nb, y, m in sorted(data, key=operator.itemgetter(1,2)):
+            d = datetime.date(day=1, month=m, year=y).strftime('%b')
+            result[' '.join([d, str(y)])] = nb
+    transaction.commit()
 
-        return result
+    return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name = 'location_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
@@ -112,6 +114,7 @@ def location_graph(request):
         curRow = OrderedDict(row)
         data.append({'value':curRow['nb'],'label':curRow['type_'].upper()})
     data.sort(key = itemgetter('label'))
+    transaction.commit()
     return data
 
 @view_config(route_name = 'uncheckedDatas_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
@@ -141,6 +144,8 @@ def uncheckedDatas_graph(request):
         curRow = OrderedDict(row)
         data.append({'value':curRow['nb'],'label':'RFID'})
     data.sort(key = itemgetter('label'))
+    transaction.commit()
+
     return data
 
 
@@ -165,6 +170,7 @@ def individual_graph(request):
     for nb, y, m in sorted(data, key=operator.itemgetter(1,2)):
             d = datetime.date(day=1, month=m, year=y).strftime('%b')
             result[' '.join([d, str(y)])] = nb
+    transaction.commit()
 
     return result
 
@@ -184,4 +190,6 @@ def individual_monitored(request):
     for row in DBSession.execute(query).fetchall():
         curRow = OrderedDict(row)
         data.append({'value':curRow['nb'],'label':curRow['label']})
+    transaction.commit()
+
     return data
