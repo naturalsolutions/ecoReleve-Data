@@ -54,6 +54,8 @@ define([
 			// fieldactivity
 			this.loadCollection (config.coreUrl + 'fieldActivity', 'select[name="fieldActivity"]');
 			$('button[data-action="add"]').attr('disabled','disabled');
+			$('.fieldactivity').addClass('hidden');
+			$('.fieldworkers').addClass('hidden');
 		},
 
 		importFile: function(e){
@@ -93,6 +95,8 @@ define([
 						$(fieldAfield).removeAttr('disabled');	
 						$(userBtn).removeAttr('disabled');	
 						$('#importGpxMsg').addClass('hidden');
+						$('.fieldactivity').removeClass('hidden');
+						$('.fieldworkers').removeClass('hidden');
 
 						if(errosList.length > 0){
 							for(var i=0; i< errosList.length; i++){
@@ -108,6 +112,8 @@ define([
 						_this.errors = true;
 						$(fieldAfield).attr('disabled','disabled');	
 						$(userBtn).attr('disabled','disabled');	
+						$('.fieldactivity').addClass('hidden');
+						$('.fieldworkers').addClass('hidden');
 					}
 				};
 			}
@@ -131,6 +137,8 @@ define([
 			function(isConfirm){   
 
 				$('form')[0].reset();
+				$('.fieldactivity').addClass('hidden');
+				$('.fieldworkers').addClass('hidden');
 
 			});
 		},
@@ -174,7 +182,6 @@ define([
 				formRegion: this.ui.form,
 				//displayMode: 'display',
 				reloadAfterSave : false,
-				//parent: this.parent
 			});
 		},
 		loadCollection : function(url, element){
