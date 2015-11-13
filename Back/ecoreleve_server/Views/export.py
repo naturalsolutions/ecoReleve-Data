@@ -46,14 +46,14 @@ def actionList(request):
 def getFields(request):
     viewId = request.matchdict['id']
     table = Base.metadata.tables['Views']
-    viewName = DBSession.execute(select(['View_Name']).select_from(table).where(table.c['ID']==viewId)).scalar()
+    viewName = DBSession.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
     gene = Generator(viewName)
     return gene.get_col()
 
 def getFilters(request):
     viewId = request.matchdict['id']
     table = Base.metadata.tables['Views']
-    viewName = DBSession.execute(select(['View_Name']).select_from(table).where(table.c['ID']==viewId)).scalar()
+    viewName = DBSession.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
     gene = Generator(viewName)
     return gene.get_filters()
 
@@ -65,7 +65,7 @@ def count_(request):
         criteria = {}
 
     table = Base.metadata.tables['Views']
-    viewName = DBSession.execute(select(['View_Name']).select_from(table).where(table.c['ID']==viewId)).scalar()
+    viewName = DBSession.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
     gene = Generator(viewName)
     count = gene.count_(criteria)
     return count
@@ -75,7 +75,7 @@ def search(request):
 
     viewId = request.matchdict['id']
     table = Base.metadata.tables['Views']
-    viewName = DBSession.execute(select(['View_Name']).select_from(table).where(table.c['ID']==viewId)).scalar()
+    viewName = DBSession.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
 
     data = request.params.mixed()
     if 'criteria' in data: 
@@ -105,7 +105,7 @@ def views_filter_export(request):
         viewId = criteria['viewId']
         
         views = Base.metadata.tables['Views']
-        viewName = DBSession.execute(select([views.c['View_Name']])).scalar()
+        viewName = DBSession.execute(select([views.c['Relation']])).scalar()
 
         table = Base.metadata.tables[viewName]
         fileType= criteria['fileType']
