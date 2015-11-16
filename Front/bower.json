@@ -28,7 +28,7 @@
     "requirejs-text": "~2.0.14",
     "i18n": "https://github.com/jamuhl/i18next.git",
     "fancytree": "~2.9.0",
-    "reneco-fonts": "*",
+    "reneco-fonts": "https://github.com/NaturalSolutions/RenecoFonts.git",
     "floatThead" : "*",
 	"tooltipster": "~3.3.0",
  	"tooltipster-list": "https://github.com/amiceli/tooltipster-list.git",
