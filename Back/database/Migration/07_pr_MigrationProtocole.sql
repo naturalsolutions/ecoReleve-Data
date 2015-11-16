@@ -26,8 +26,6 @@ BEGIN
 
 		SET @Req = '@Debut'
 
-		select  @TableName
-
 		--select @Req = @Req + 'union all ' + + char(13) + ' select ''' + O.Name + ''',convert(varchar(1000),P.[' + S_C.name + '])  ' 
 		--FROM ObservationDynProp O 
 		--LEFT JOIN MigrationConfigurationProtocoleList PL on PL.ProtocoleName = @ProtocoleName
@@ -42,28 +40,25 @@ BEGIN
 		LEFT JOIN [dbo].[MigrationConfigurationProtocoleContent] PC ON PC.[fk_ConfigurationProtocole] = PL.ID and o.Name = PC.TargetColumnName
 		JOIN [ECWP-eReleveData].dbo.sysobjects S_O on s_o.name =@TableName --AND s_o.type != NULL
 		JOIN [ECWP-eReleveData].dbo.syscolumns S_C on isnull(PC.[ColumnName],o.Name) = S_C.name and S_C.id = S_o.id
-
-
-
-
 		SET @Req = replace(@Req,'@Debutunion all','');
-		select @Req;
+		
 
 		IF object_id('tempdb..#ProtValeur') IS NOT NULL
 			DROP TABLE #ProtValeur
-		CREATE TABLE #ProtValeur (FK_Station int,fk_protocole int,ValName VARCHAR(250),Valeur VARCHAR(1000),FK_Indiv INT)
-	
+		CREATE TABLE #ProtValeur (FK_Station int,fk_protocole int,ValName VARCHAR(250),Valeur VARCHAR(1000),FK_Indiv INT,comments varchar(255))
+		
 		SELECT @colIndID =  count(*)
 		FROM [ECWP-eReleveData].dbo.sysobjects S_O 
 		JOIN [ECWP-eReleveData].dbo.syscolumns S_C on S_C.id = S_o.id
 		WHERE s_o.name =@TableName and UPPER(s_c.Name) = 'FK_TIND_ID'
 	
-		SET @Req = ' select S2.ID ,P.pk , ValName,Valeur ,' + CASE WHEN  @colIndID >0 THEN ' P.FK_TInd_ID '  ELSE 'NULL' END+ '  from [ECWP-eReleveData].dbo.' + @TableName + ' P JOIN  [ECWP-eReleveData].dbo.TStations S ON  P.FK_TSta_ID = S.TSta_PK_ID JOIN Station S2 ON s2.Original_ID =''eReleve_''+ CONVERT(VARCHAR,+S.TSta_PK_ID)    cross apply ( ' + @Req + ') c (ValName,Valeur)'
+		SET @Req = ' select S2.ID ,P.pk ,ValName,Valeur ,' + CASE WHEN  @colIndID >0 THEN ' P.FK_TInd_ID '  ELSE 'NULL' END+ ', p.comments  from [ECWP-eReleveData].dbo.' + @TableName + ' P JOIN  [ECWP-eReleveData].dbo.TStations S ON  P.FK_TSta_ID = S.TSta_PK_ID JOIN Station S2 ON s2.Original_ID =''eReleve_''+ CONVERT(VARCHAR,+S.TSta_PK_ID)    cross apply(' + @Req + ') c (ValName,Valeur)'
+		
 		select @Req;
-	
+		
 		insert into #ProtValeur
 		execute(@Req)
-
+		
 		CREATE INDEX IX_ProtValeur_Station on #ProtValeur(FK_Station)
 		--CREATE INDEX IX_ProtValeur_ValName on #ProtValeur(ValName)
 
@@ -78,10 +73,11 @@ BEGIN
 			   ,[creationDate]
 			   ,[Parent_Observation]
 			   ,[FK_Individual]
-			   ,Original_ID)
+			   ,Original_ID
+			   ,comments)
 			   OUTPUT inserted.ID, inserted.original_id,inserted.creationDate into #InsertedObs
 		select DISTINCT @Id_Prot_Type,
-		s.id,S.StationDate,NULL,i.ID, V.fk_protocole
+		s.id,S.StationDate,NULL,i.ID, V.fk_protocole,v.comments
 		from #ProtValeur V 
 		--JOIN ObservationDynProp O on V.ValName = o.Name 
 		JOIN Station S on V.FK_Station = S.ID
@@ -97,7 +93,8 @@ BEGIN
 			   ,[ValueDate]
 			   ,[ValueFloat]
 			   ,[FK_ObservationDynProp]
-			   ,[FK_Observation])
+			   ,[FK_Observation]
+			   )
 
 		select OI.creationDate 
 		,CASE WHEN o.TypeProp ='Integer' THEN V.Valeur ELSE NULL END
