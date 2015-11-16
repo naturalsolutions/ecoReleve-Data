@@ -84,6 +84,8 @@ define([
               function(isConfirm){
                   if (!isConfirm) {
                      self.cancel();
+                  } else {
+                  	self.nsForm.butClickClear();
                   }
               }
           );

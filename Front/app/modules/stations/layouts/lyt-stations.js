@@ -42,6 +42,7 @@ define([
 			'mapPanel' : '#mapPanel',
 			'btnGridPanel' : 'button#activeGridPanel',
 			'btnMapPanel' : 'button#activeMapPanel',
+			'paginator' : '#paginator'
 		},
 
 		regions: {
@@ -63,6 +64,7 @@ define([
 		activeGridPanel: function(e){
 			this.ui.mapPanel.removeClass('active');
 			this.ui.gridPanel.addClass('active');
+			this.ui.paginator.removeClass('hidden');
 
 			this.ui.btnMapPanel.removeClass('active');
 			this.ui.btnGridPanel.addClass('active');
@@ -71,6 +73,7 @@ define([
 		activeMapPanel: function(e){
 			this.ui.gridPanel.removeClass('active');
 			this.ui.mapPanel.addClass('active');
+			this.ui.paginator.addClass('hidden');
 
 			this.ui.btnGridPanel.removeClass('active');
 			this.ui.btnMapPanel.addClass('active');
