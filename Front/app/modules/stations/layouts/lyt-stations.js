@@ -53,13 +53,10 @@ define([
 		},
 
 		initialize: function(options){
-
 			if(options.id){
 				this.stationId = options.id;
 			}
-
 			this.com = new Com();
-			
 		},
 
 		activeGridPanel: function(e){
