@@ -161,15 +161,15 @@ class ObjectWithDynProp:
         if hasattr(self,nameProp):
             try :
                 curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
-                if 'Date' in curTypeAttr :
-                    try : 
-                        valeur = nameProp.strftime('%d/%m/%Y %H:%M:%S')
+                if 'date' in curTypeAttr.lower() :
+                    try :
+                        valeur = datetime.strptime(valeur.strip(),'%d/%m/%Y%H:%M:%S')
                     except :
-                        valeur = nameProp.strftime('%d/%m/%Y')
+                        valeur = datetime.strptime(valeur.strip(),'%d/%m/%Y')
+                setattr(self,nameProp,valeur)
             except :
                 print(nameProp+' is not a column')
                 pass
-            setattr(self,nameProp,valeur)
         else:
             if (nameProp in self.GetType().DynPropNames):
                 if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):

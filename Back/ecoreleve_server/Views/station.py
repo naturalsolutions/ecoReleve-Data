@@ -6,7 +6,8 @@ from ..Models import (
     Observation,
     FieldActivity_ProtocoleType,
     Station_FieldWorker,
-    StationList
+    StationList,
+    MonitoredSitePosition
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules, ModuleForms
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -119,6 +120,8 @@ def updateStation(request):
     print('*********************** UPDATE Station *****************')
     data = request.json_body
     id = request.matchdict['id']
+    if 'creationDate' in data:
+        del data['creationDate']
     curSta = DBSession.query(Station).get(id)
     curSta.LoadNowValues()
     curSta.UpdateFromJson(data)
@@ -248,6 +251,7 @@ def searchStation(request):
     searchInfo['criteria'] = []
     user = request.authenticated_userid
     user = 1 
+
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
@@ -322,8 +326,12 @@ def searchStation(request):
 
 def linkToMonitoredSite(request):
     curSta = DBSession.query(Station).get(request.matchdict['id'])
-    idSite = request.params['idSite']
+    data = request.json_body
+    idSite = data['siteId']
     curSta.FK_MonitoredSite = idSite
+    if data['updateSite'] : 
+        newSitePos = MonitoredSitePosition(StartDate=curSta.StationDate, LAT=curSta.LAT, LON=curSta.LON, ELE=curSta.ELE, Precision=curSta.precision, FK_MonitoredSite=idSite)
+        DBSession.add(newSitePos)
     transaction.commit()
     return {}
 
