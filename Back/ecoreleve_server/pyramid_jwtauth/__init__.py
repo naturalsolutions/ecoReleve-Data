@@ -214,7 +214,8 @@ class JWTAuthenticationPolicy(object):
             userid = claims['iss']
             return userid
         except: 
-            self.challenge(request)
+            return
+            #self.challenge(request)
 
 
     def authenticated_userid(self, request):

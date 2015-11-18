@@ -19,7 +19,7 @@ class SecurityRoot(object):
         (Allow, Authenticated, 'read'),
         (Allow, 'user', 'edit'),
         (Allow, 'admin', ALL_PERMISSIONS),
-        ALL_PERMISSIONS
+        DENY_ALL
     ]
     
     def __init__(self, request):

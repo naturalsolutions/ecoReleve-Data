@@ -27,6 +27,5 @@ def logout(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=route_prefix+'has_access')
 def has_access(request):
-    print('has_accesssssss')
     transaction.commit()
     return request.response
