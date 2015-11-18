@@ -5,20 +5,34 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 	'use strict';
 	return Marionette.AppRouter.extend({
 
+		initialize: function(opt){
+			this.collection = new Backbone.Collection([
+				{ label : 'Manual import', href : 'importFile', icon : 'reneco-import'},
+				{ label : 'New', href : 'stations/new', icon : 'reneco-entrykey'},
+				{ label : 'Release', href : 'release', icon : 'reneco-to_release'},
+				{ label : 'Validate', href : 'validate', icon : 'reneco-validate'},
+				{ label : 'Stations', href : 'stations', icon : 'reneco-stations'},
+				{ label : 'Individuals', href : 'individual', icon : 'reneco-individuals'},
+				{ label : 'Sensors', href : 'sensor', icon : 'reneco-sensors'},
+				{ label : 'Monitored Sites', href : 'monitoredSite', icon : 'reneco-sensors'},
+				{ label : 'Export', href : 'export', icon : 'reneco-export'},
+			]);
+		},	
+
 		appRoutes: {
 			'export(/)' : 'export',
 
 			'importFile(/)': 'importFile',
 
 			'individual(/)' : 'individual',
+			'individual/new(/)': 'newIndividual',
 			'individual(/):id(/)' : 'individual',
-			'individual/new(/):id(/)': 'newIndividual',
 
 			'stations(/)' : 'stations',
 			'stations/new(/)': 'newStation',
 			'stations(/):id(/)': 'stations',
 
-			'sensor/new(/):id(/)' : 'newSensor',
+			'sensor/new(/)' : 'newSensor',
 			'sensor(/)' : 'sensor',
 
 			'monitoredSite(/)' : 'monitoredSite',
@@ -29,7 +43,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 			'validate(/)':'validate',
 
 			'release(/)':'release',
-
 
 			'*route(/:page)': 'home',
 		},
@@ -45,6 +58,31 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 					document.location.href=config.portalUrl;
 				}
 			});
+		},
+
+		onRoute: function(url, patern, params){
+			patern = patern.replace(/\(/g, '');
+			patern = patern.replace(/\)/g, '');
+			patern = patern.replace(/\:/g, '');
+			patern = patern.split('/');
+
+			if(patern[0] == '*route'){
+				$('#arial').html('');
+			}else{
+
+
+				var md = this.collection.findWhere({href : patern[0]});
+				console.log(md);
+				$('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
+
+
+
+				if(patern[1] && patern[1] != 'id' && patern[1] != 'type'){
+					$('#arialSub').html('<a href="#' + patern[0] + '/' + patern[1] + '">| &nbsp;' + patern[1] + '</a>');
+				}else{
+					$('#arialSub').html('');
+				}
+			}
 		},
 
 	});

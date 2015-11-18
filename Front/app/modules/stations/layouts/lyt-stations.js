@@ -64,7 +64,7 @@ define([
 		activeGridPanel: function(e){
 			this.ui.mapPanel.removeClass('active');
 			this.ui.gridPanel.addClass('active');
-			this.ui.paginator.removeClass('hidden');
+			// this.ui.paginator.removeClass('hidden');
 
 			this.ui.btnMapPanel.removeClass('active');
 			this.ui.btnGridPanel.addClass('active');
@@ -73,7 +73,7 @@ define([
 		activeMapPanel: function(e){
 			this.ui.gridPanel.removeClass('active');
 			this.ui.mapPanel.addClass('active');
-			this.ui.paginator.addClass('hidden');
+			//this.ui.paginator.addClass('hidden');
 
 			this.ui.btnGridPanel.removeClass('active');
 			this.ui.btnMapPanel.addClass('active');
@@ -91,10 +91,9 @@ define([
 			//this.map.initErrorWarning('<i>There is too much datas to display on the map. <br /> Please be more specific in your filters.</i>');
 		},
 
-		initGrid: function(url,params){
+		initGrid: function(url){
 			var _this = this;
 			var url = config.coreUrl+'stations/';
-			this.urlParams = params ||{};
 
 			this.grid = new NSGrid({
 				pageSize: 20,
@@ -102,7 +101,6 @@ define([
 				com: this.com,
 				name : 'StationGrid',
 				url: url,
-				urlParams : this.urlParams,
 				rowClicked : true,
 				totalElement : 'totalEntries',
 			});
@@ -143,10 +141,11 @@ define([
 				typeObj: typeObj,
 				filterContainer: this.ui.filters,
 				filterLoaded : function(){
+					/*
 					$(".StationDate").attr('placeholder','DD/MM/YYYY'); 
 					$("#dateTimePicker").on("dp.change", function (e) {
-            $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
-           });
+					$('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
+					});*/
 				}
 			});
 		},

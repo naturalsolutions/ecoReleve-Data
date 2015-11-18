@@ -1,11 +1,4 @@
 
-/**
-	TODO:
-	- fitBounds
-	- find a way to automaticly destroy the map with the related view
-	----> replace the prototype by a marionnette view?
-**/
-
 define([
 	'jquery',
 	'underscore',
@@ -19,57 +12,13 @@ define([
 ], function($, _, Backbone , Marionette, L, cluster, GoogleMapsLoader
 		) {
 
-	'use strict';  
-	// I am the internal, static counter for the number of Coms
-	// that have been created in the system. This is used to
-	// power the unique identifier of each instance.
-	var instanceCount = 0;
+	'use strict';
+	return Marionette.LayoutView.extend({
+		template: 'app/ns_modules/ns_map/tpl-ns-map.html',
+		className: 'mapView full-height',
 
-
-	// I get the next instance ID.
-	var getNewInstanceID = function(){
-
-			// Precrement the instance count in order to generate the
-			// next value instance ID.
-			return( ++instanceCount );
-	};
-
-
-	function Map(options){
-		// Store the private instance id.
-		this._instanceID = getNewInstanceID();
-		//check if there is a communicator
-		if(options.com){
-			this.com = options.com;
-			this.com.addModule(this);
-		}
-
-		this.totalElt=options.totalElt || false;
-
-		this.url=options.url;
-		this.geoJson=options.geoJson;
-
-		this.elem = options.element || 'map';
-		this.zoom = options.zoom || 10;
-		this.disableClustring = options.disableClustring || 18;
-		this.bbox = options.bbox || false;
-		this.area = options.area || false;
-		this.cluster = options.cluster || false;
-		this.popup = options.popup || false;
-		this.legend = options.legend || false;
-		this.selection = options.selection || false;
-
-		this.dict={}; //list of markers
-		this.selectedMarkers = {}; // list of selected markers
-		this.geoJsonLayers = [];
-
-		this.init();
-	}
-
-	Map.prototype = {
-
-		destroy: function(){
-			this.map.remove();
+		ui: {
+			'map' : '#map'
 		},
 
 		action: function(action, params){
@@ -109,16 +58,51 @@ define([
 			}
 		},
 
-		init: function(){
+		initialize: function(options){
+			if(options.com){
+				this.com = options.com;
+				this.com.addModule(this);
+			}
+
+			this.totalElt=options.totalElt || false;
+
+			this.url=options.url;
+			this.geoJson=options.geoJson;
+
+			this.zoom = options.zoom || 10;
+			this.disableClustring = options.disableClustring || 18;
+			this.bbox = options.bbox || false;
+			this.area = options.area || false;
+			this.cluster = options.cluster || false;
+			this.popup = options.popup || false;
+			this.legend = options.legend || false;
+			this.selection = options.selection || false;
+
+			this.dict={}; //list of markers
+			this.selectedMarkers = {}; // list of selected markers
+			this.geoJsonLayers = [];
+
+		},
+
+		onDestroy: function(){
+			this.map.remove();
+			console.info('map removed');
+		},
+
+
+
+		onShow: function(){
 			//set defaults icons styles
 			L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images';
-			this.focusedIcon = new L.DivIcon({className		: 'custom-marker focus'});
-			this.selectedIcon = new L.DivIcon({className	: 'custom-marker selected'});
-			this.icon = new L.DivIcon({className			: 'custom-marker'});
+			this.focusedIcon = new L.DivIcon({className: 'custom-marker focus'});
+			this.selectedIcon = new L.DivIcon({className: 'custom-marker selected'});
+			this.icon = new L.DivIcon({className: 'custom-marker'});
+
 
 			this.setCenter();
 
-			this.map = new L.Map(this.elem, {
+
+			this.map = new L.Map(this.ui.map, {
 				center: this.center ,
 				zoom: this.zoom || 4,
 				minZoom: 2,
@@ -127,8 +111,10 @@ define([
 				keyboard: false, //fix scroll window
 				attributionControl: false,
 			});
+			/*
 			this.google();
 
+			/*
 			if(this.url){
 				this.requestGeoJson(this.url);
 			}else{
@@ -138,7 +124,7 @@ define([
 					this.initLayer(this.geoJson);
 				}
 				this.ready();
-			}
+			}*/
 		},
 
 		ready: function(){
@@ -151,8 +137,11 @@ define([
 				this.addMarkersLayer();
 			}
 
+
+			/*
 			this.initErrorLayer();
 			this.displayError(this.geoJson);
+			*/
 		},
 
 		google: function(){
@@ -323,6 +312,7 @@ define([
 					geoJson.features[0].geometry.coordinates[1],
 					geoJson.features[0].geometry.coordinates[0]
 				);
+				this.center = new L.LatLng(30,0);
 			}
 		},
 
@@ -735,7 +725,6 @@ define([
 			return;
 		},
 
-		//apply filters on the map from a collection
 
 		//param can be filters or directly a collection
 		filter: function(param){
@@ -786,8 +775,6 @@ define([
 			}
 		},
 
-
-
 		updateLayers: function(geoJson){
 			this.displayError(geoJson);
 
@@ -812,6 +799,6 @@ define([
 			}
 			this.setTotal(geoJson);
 		},
-	}
-	return( Map );
+
+	});
 });
