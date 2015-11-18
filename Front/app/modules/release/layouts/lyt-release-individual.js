@@ -194,7 +194,7 @@ define([
 
 				//remove the model from the coll once this one is validated
 				var callback = function(){
-					Backbone.history.navigate('station/'+_this.station.get('ID'), {trigger: true});
+					Backbone.history.navigate('stations/'+_this.station.get('ID'), {trigger: true});
 					//$('#back').click();
 				};
 				this.swal(resp, resp.type, callback);

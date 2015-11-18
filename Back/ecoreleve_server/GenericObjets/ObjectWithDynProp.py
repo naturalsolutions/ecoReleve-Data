@@ -160,14 +160,16 @@ class ObjectWithDynProp:
         ''' Set object properties (static and dynamic) '''
         if hasattr(self,nameProp):
             try :
-                curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
-                if 'date' in curTypeAttr.lower() :
-                    try :
-                        valeur = datetime.strptime(valeur.strip(),'%d/%m/%Y%H:%M:%S')
-                    except :
-                        valeur = datetime.strptime(valeur.strip(),'%d/%m/%Y')
+                if nameProp in self.__table__.c:
+                    curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
+                    if 'date' in curTypeAttr.lower() :
+                        try :
+                            valeur = datetime.strptime(valeur.strip(),'%d/%m/%Y%H:%M:%S')
+                        except :
+                            valeur = datetime.strptime(valeur.strip(),'%d/%m/%Y')
                 setattr(self,nameProp,valeur)
             except :
+                print_exc()
                 print(nameProp+' is not a column')
                 pass
         else:
