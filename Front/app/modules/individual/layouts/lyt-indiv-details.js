@@ -1,4 +1,3 @@
-//radio
 define([
 	'jquery',
 	'underscore',
@@ -14,7 +13,7 @@ define([
 	'ns_navbar/ns_navbar',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid,NsMap, NsForm, Navbar
+	Com, NsGrid, NsMap, NsForm, Navbar
 ){
 
 	'use strict';
@@ -60,9 +59,9 @@ define([
 		},
 
 		reloadFromNavbar: function(model){
-			this.map.destroy();
-			this.ui.map.html('');
 			this.display(model);
+			this.map.url = config.coreUrl+ 'individuals/' + this.indivId  + '?geo=true';
+			this.map.updateFromServ();
 		},
 
 		onRender: function(){
@@ -70,8 +69,12 @@ define([
 		},
 
 		onShow : function(){
+			var _this = this;
 			this.rgNavbar.show(this.navbar);
 			this.display(this.model);
+			setTimeout(function(){
+				_this.displayMap();
+			},0);
 		},
 
 		display: function(model){
@@ -79,7 +82,6 @@ define([
 			this.indivId = parseInt(this.model.get('ID'));
 			this.displayForm(this.indivId);
 			this.displayGrid(this.indivId);
-			this.displayMap();
 		},
 
 		displayGrid: function(id){
@@ -143,27 +145,15 @@ define([
 			this.ui.paginatorEquipment.html(this.gridEquip.displayPaginator());
 		},
 
-		initMap: function(geoJson){
-			this.map = new NsMap({
-				geoJson: geoJson,
-				zoom: 4,
-				element : 'map',
-				popup: true,
-				cluster: true
-			});
-		},
 
 		displayMap: function(){
-			var url  = config.coreUrl+ 'individuals/' + this.indivId  + '?geo=true';
-			$.ajax({
-				url: url,
-				contentType:'application/json',
-				type:'GET',
-				context: this,
-			}).done(function(datas){
-				this.initMap(datas);
-			}).fail(function(msg){
-				console.error(msg);
+			this.map = new NsMap({
+				url: config.coreUrl+ 'individuals/' + this.indivId  + '?geo=true',
+				cluster: true,
+				com: this.com,
+				zoom: 3,
+				element : 'map',
+				popup: true,
 			});
 		},
 
@@ -185,9 +175,8 @@ define([
 				formRegion: this.ui.form,
 				buttonRegion: [this.ui.formBtns],
 				displayMode: 'display',
-				objectType: this.type,
 				id: id,
-				reloadAfterSave : false,
+				reloadAfterSave : true,
 				parent: this.parent
 			});
 		},

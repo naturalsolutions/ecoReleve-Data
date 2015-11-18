@@ -25,7 +25,7 @@ define([
 	return Marionette.LayoutView.extend({
 
 		template: 'app/modules/individual/templates/tpl-individual.html',
-		className: 'full-height animated white rel clearfix',
+		className: 'full-height animated white rel',
 
 		events : {
 			'click #btnFilter' : 'filter',

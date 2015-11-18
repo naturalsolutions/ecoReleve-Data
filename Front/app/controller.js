@@ -61,6 +61,7 @@ define(['marionette', 'config',
 			this.rgFooter=window.app.rootView.rgFooter;
 		},
 
+
 		home: function() {
 			Backbone.history.navigate('');
 			this.rgMain.show(new LytHome());

@@ -21,6 +21,7 @@
   padding-top: 3px;
   border-top: 1px dashed #ddd;
   height: @paginatorHeight;
+  overflow: hidden;
 }
 
 .crop1{
@@ -48,6 +49,14 @@
   }
 }
 
+.grid-crop{
+  @crop : @paginatorHeight;
+  height: ~"calc(100% - @{crop})";
+  overflow-x: hidden;
+  overflow-y: auto;
+    padding: 15px;
+}
+
 .tooltipster-content  ul  li {
   height: 2em;
   padding: 0;
@@ -62,3 +71,4 @@
 .tooltipster-content ul li:active {
   background-color: rgb(200, 200, 200);
 }
+

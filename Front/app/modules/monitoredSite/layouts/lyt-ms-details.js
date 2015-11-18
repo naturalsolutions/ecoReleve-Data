@@ -64,9 +64,9 @@ define([
 		},
 
 		reloadFromNavbar: function(model){
-			this.map.destroy();
-			this.ui.map.html('');
 			this.display(model);
+			this.map.url = config.coreUrl+ 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true';
+			this.map.updateFromServ();
 		},
 
 		onRender: function(){
@@ -74,8 +74,12 @@ define([
 		},
 
 		onShow : function(){
+			var _this = this;
 			this.rgNavbar.show(this.navbar);
 			this.display(this.model);
+			setTimeout(function(){
+				_this.displayMap();
+			},0);
 		},
 
 		display: function(model){
@@ -83,7 +87,6 @@ define([
 			this.monitoredSiteId = this.model.get('ID');
 			this.displayForm(this.monitoredSiteId);
 			this.displayGrid(this.monitoredSiteId);
-			this.displayMap();
 		},
 
 		displayGrid: function(id){
@@ -95,6 +98,7 @@ define([
 				url: config.coreUrl+'monitoredSite/' + id  + '/history/',
 				urlParams : this.urlParams,
 				rowClicked : true,
+
 			});
 
 			var colsEquip = [{
@@ -135,27 +139,13 @@ define([
 			this.ui.paginatorEquipment.html(this.gridEquip.displayPaginator());
 		},
 
-		initMap: function(geoJson){
+		displayMap: function(geoJson){
 			this.map = new NsMap({
-				geoJson: geoJson,
+				url: config.coreUrl+ 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true',
 				zoom: 4,
 				element : 'map',
 				popup: true,
 				cluster: true
-			});
-		},
-
-		displayMap: function(){
-			var url  = config.coreUrl+ 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true';
-			$.ajax({
-				url: url,
-				contentType:'application/json',
-				type:'GET',
-				context: this,
-			}).done(function(datas){
-				this.initMap(datas);
-			}).fail(function(msg){
-				console.error(msg);
 			});
 		},
 
@@ -168,7 +158,7 @@ define([
 				displayMode: 'display',
 				objectType: this.type,
 				id: id,
-				reloadAfterSave : false,
+				reloadAfterSave : true,
 				parent: this.parent,
 				afterShow : function(){
 					$("#dateTimePicker").on("dp.change", function (e) {

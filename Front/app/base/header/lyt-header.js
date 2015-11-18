@@ -28,7 +28,7 @@ function(Marionette, config, Breadcrumb) {
 		},
 
 		onShow: function(){
-			//this.breadcrumb.show(new Breadcrumb());
+			this.breadcrumb.show(new Breadcrumb());
 		},
 	});
 });

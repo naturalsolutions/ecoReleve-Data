@@ -18,7 +18,6 @@ define([
             this.template = model.get('template');
         },
         onRender: function() {
-            console.log('render DINUTgraph')
             this.initGraph();
         },
 
@@ -62,7 +61,6 @@ define([
             if (sum == 0){
                 data = [{'label': 'No data', 'value':1e-10 , 'color' : 'rgba(255,255,255,0.5)'}]
             }
-            console.log(data)
             this.chart = new Chart(canvas[0].getContext('2d')).Doughnut(data);
         },
 
