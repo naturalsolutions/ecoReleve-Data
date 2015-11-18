@@ -48,13 +48,12 @@ class StationList(ListObjectWithDynProp):
                     ,eval_.eval_binary_expr(Station_FieldWorker.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])))
             query = query.where(exists(subSelect))
 
-
         if curProp == 'LastImported':
             st = aliased(Station)
             subSelect = select([Observation]).where(Observation.FK_Station == Station.ID)
             subSelect2 = select([st]).where(cast(st.creationDate,DATE) > cast(Station.creationDate,DATE))
             query = query.where(and_(~exists(subSelect),~exists(subSelect2)))
-        print(query)
+
         return query
 
     def GetFlatDataList(self,searchInfo=None,getFieldWorkers=True) :
