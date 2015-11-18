@@ -49,6 +49,7 @@ define([
 		this.url=options.url;
 		this.geoJson=options.geoJson;
 
+
 		this.elem = options.element || 'map';
 		this.zoom = options.zoom || 10;
 		this.disableClustring = options.disableClustring || 18;
@@ -62,6 +63,8 @@ define([
 		this.dict={}; //list of markers
 		this.selectedMarkers = {}; // list of selected markers
 		this.geoJsonLayers = [];
+
+		this.lastImported = false;
 
 		this.init();
 	}
@@ -720,11 +723,24 @@ define([
 
 		updateFromServ: function(param){
 			var _this = this;
+			if(param)
+				this.searchCriteria = param;
+			//station last imported?
+				console.log(this.lastImported);
+			if(this.lastImported){
+				var data = {
+					'criteria': JSON.stringify(this.searchCriteria),
+					'lastImported' : this.lastImported,
+				};
+			}else{
+				var data = {
+					'criteria': JSON.stringify(this.searchCriteria),
+				};
+			}
+
 			$.ajax({
 				url: this.url,
-				data: {
-					'criteria': JSON.stringify(param)
-				},
+				data: data,
 			}).done(function(geoJson) {
 				if (_this.cluster){
 					_this.updateLayers(geoJson);
@@ -735,10 +751,17 @@ define([
 			return;
 		},
 
+
+		lastImportedUpdate: function(lastImported){
+			this.lastImported = lastImported;
+			this.updateFromServ();
+		},
 		//apply filters on the map from a collection
 
 		//param can be filters or directly a collection
 		filter: function(param){
+
+
 			//TODO : refact
 			var _this = this;
 			if(this.url){
@@ -786,11 +809,8 @@ define([
 			}
 		},
 
-
-
 		updateLayers: function(geoJson){
 			this.displayError(geoJson);
-
 			//?
 			if(geoJson == false){
 				if(this.markersLayer){
