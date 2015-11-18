@@ -82,7 +82,7 @@ define([
 			}else{
 				this.rgNavbar.show(this.navbar);
 				this.display(this.model);
-
+				this.feedProtoList();
 			}
 			//this.$el.i18n();
 			//this.translater = Translater.getTranslater();
@@ -96,7 +96,6 @@ define([
 			this.model = model;
 			this.stationId = this.model.get('ID');
 			this.displayStation(this.stationId);
-			this.feedProtoList();
 		},
 
 
