@@ -247,29 +247,29 @@ define([
 		},
 		displayGrid: function(id){
 			var cols = [{
-                name: 'FK_Individual',
-                label: 'Individual id',
-                editable: false,
-                cell : 'string'
-            }, 
-            {
-                name: 'FK_MonitoredSite',
-                label: 'Monitored site id',
-                editable: false,
-                cell : 'string'
-            }, 
-            {
-                name: 'StartDate',
-                label: 'Start date',
-                editable: false,
-                cell: 'string'
-            }, 
-            {
-                name: 'Deploy',
-                label: 'status',
-                editable: false,
-                cell: 'string'
-            }
+            name: 'FK_Individual',
+            label: 'Individual id',
+            editable: false,
+            cell : 'string'
+        },
+        {
+            name: 'FK_MonitoredSite',
+            label: 'Monitored site id',
+            editable: false,
+            cell : 'string'
+        },
+        {
+            name: 'StartDate',
+            label: 'Start date',
+            editable: false,
+            cell: 'string'
+        },
+        {
+            name: 'Deploy',
+            label: 'status',
+            editable: false,
+            cell: 'string'
+        }
       ];
 			this.grid = new NsGrid({
 				pageSize: 20,

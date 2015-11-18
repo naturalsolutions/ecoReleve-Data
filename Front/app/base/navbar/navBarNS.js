@@ -1,4 +1,4 @@
-﻿define([
+define([
     'jquery',
     'underscore',
     'backbone',
@@ -11,7 +11,6 @@
         initialize: function (options) {
             this.opt = options;
             this.template = options.template;
-            console.log(this.template);
         },
         SetPage: function (curPage) {
             this.curPage = curPage;
@@ -23,9 +22,6 @@
                 this.$el.find('.nav-bar-' + pageList[i]).attr('style', 'display:visible');
             }
             this.$el.find('.nav-bar-' + pageList[pageList.length - 1] + ' a' ).addClass('disabledlink');
-
-            
         },
-
     });
 });

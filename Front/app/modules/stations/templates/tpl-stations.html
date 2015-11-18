@@ -45,19 +45,19 @@
 		<legend class="text-right">Stations total : <span id="totalEntries"></span></legend>
 	</div>
 
-	<div class="crop2 crop-paginator">
+	<div class="crop2">
 		<div class="pannels-container">
-			<div id="gridPanel" class="col-xs-12 pannel full-height scroll-auto active">
-				<br>
-				<div id="grid" class="backgrid-container grid-list"></div>
-				<br>
+			<div id="gridPanel" class="col-xs-12 no-padding pannel full-height scroll-auto active">
+				<div class="grid-crop">
+					<div id="grid" class="backgrid-container grid-list"></div>
+				</div>
+				<div id="paginator" class="paginator"></div>
 			</div>
 			<div id="mapPanel" class="col-xs-12 full-height no-padding pannel">
 				<div id="map" style="height: 100%"></div>
 			</div>
 		</div>
 	</div>
-	<div id="paginator" class="paginator"></div>
 
 	<div class="toolbar bottom">
 		<a href="#stations/new" id="newStation" class="pull-right btn btn-default btn-success whitev">

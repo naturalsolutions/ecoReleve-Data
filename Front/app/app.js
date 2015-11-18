@@ -1,8 +1,7 @@
-define(['marionette', 'lyt-rootview', 'router', 'controller', 
-
+define(['marionette', 'lyt-rootview', 'router', 'controller',
 	//circular dependencies, I don't konw where to put it for the moment
-	'IndivPicker',
 	'MonitoredSitePicker',
+	'IndivPicker',
 	'SensorPicker'
 	],
 function(Marionette, Lyt_rootview, Router, Controller) {
@@ -18,9 +17,9 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 	app = new Marionette.Application();
 	app.on('start', function() {
 		app.rootView = new Lyt_rootview();
-		app.rootView.render();
 		app.controller = new Controller();
 		app.router = new Router({controller: app.controller});
+		app.rootView.render();
 		Backbone.history.start();
 	});
 
@@ -37,7 +36,6 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 	window.onerror = function(){
 		$('#header-loader').addClass('hidden');
 	};
-
 
 	window.app = app;
 	return app;
