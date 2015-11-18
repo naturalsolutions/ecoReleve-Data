@@ -185,7 +185,6 @@ define([
 					},
 				},
 				fetch: function (options) {
-					_this.fetchingCollection(options);
 					var params = {
 						'page': this.state.currentPage,
 						'per_page': this.state.pageSize,
@@ -246,7 +245,6 @@ define([
 					},
 				},
 				fetch: function (options) {
-					ctx.fetchingCollection(options);
 					var params = {
 						'criteria': this.queryParams.criteria.call(this),
 					};
@@ -286,7 +284,7 @@ define([
 			}
 		},
 
-		fetchCollection: function (callbock) {
+		fetchCollection: function () {
 			var _this = this;
 
 
@@ -297,12 +295,13 @@ define([
 				}
 				else {
 				//?? ->
-					var filteredList = this.grid.collection.where(this.filterCriteria);
 					if(_this.lastImported){
 						this.collection.queryParams.lastImported = _this.lastImported;
 					} else {
 						delete this.collection.queryParams['lastImported'];
 					}
+
+					console.log(this.collection.queryParam);
 
 					this.deffered = this.grid.collection.fetch({
 						reset: true, 
@@ -393,11 +392,6 @@ define([
 			})
 		},
 
-		fetchingCollection: function (options) {
-			// to be extended
-			
-		},
-
 		Collection: function (options) {
 			// to be extended
 			
@@ -486,13 +480,9 @@ define([
 			};
 		},
 
-		lastImportedUpdate : function(lastImported, callback){
-			if (lastImported) {
-				this.lastImported = true;
-			}else{
-				this.lastImported = false;
-			}
-			this.fetchCollection(callback);
+		lastImportedUpdate : function(lastImported){
+			this.lastImported = lastImported;
+			this.fetchCollection();
 		},
 
 		upRowServerSide: function(){

@@ -167,11 +167,11 @@ define([
 				displayMode: 'edit',
 				objectType: stTypeId,
 				id: 0,
-				afterShow : function(){
-					$(".datetime").attr('placeholder','DD/MM/YYYY');
+				afterShow: function(){
+					/*$(".datetime").attr('placeholder','DD/MM/YYYY');
 					$("#dateTimePicker").on("dp.change", function (e) {
             $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
-           });
+           });*/
 				}
 			});
 

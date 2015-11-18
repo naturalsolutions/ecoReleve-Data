@@ -34,7 +34,6 @@ define([
 			'click .tab-link' : 'displayTab',
 			'click #useStation' : 'useStation',
 			'click #back' : 'hideDetails',
-
 		},
 		
 		ui: {
@@ -64,7 +63,6 @@ define([
 		},
 
 		onShow : function(){
-/*			this.displayFilters();*/
 			this.initGrid();
 			this.displayFilters(4);
 		},
@@ -109,12 +107,6 @@ define([
 				name:'StationGrid',
 				typeObj: typeObj,
 				filterContainer: this.ui.filter,
-				filterLoaded : function(){
-					$(".StationDate").attr('placeholder','DD/MM/YYYY'); 
-					$("#dateTimePicker").on("dp.change", function (e) {
-            $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
-           });
-				}
 			});
 		},
 
@@ -153,30 +145,16 @@ define([
 
 		displayTab : function(e){
 			var _this =this;
-			var type = $(e.target).attr('name');
 			$('.tab-ele').removeClass('activeTab');
-			var typeObj;
 			$(e.target).parent().addClass('activeTab');
-
-			var url =config.coreUrl+'stations/';
-			var params = null;
-
+			var type = $(e.target).attr('name');
 			if( type == 'allSt' ){
 				type = false;
-				typeObj=1;
 			}else{
 				type = true;
-				typeObj= 4;
 			}
-			/*$('#filters').empty();*/
-			/*this.grid.filterCriteria = {};*/
-			/*this.com.components = [];*/
-			/*_this.displayFilters(typeObj);*/
-			var callback = function(){
-				_this.filter();
-			};
-			this.grid.lastImportedUpdate(type, callback);
 
+			this.grid.lastImportedUpdate(type);
 		}
 
 	});

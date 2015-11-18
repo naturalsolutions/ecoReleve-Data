@@ -14,7 +14,7 @@ define([
 
 	'i18n'
 
-], function($, _, Backbone, Marionette, Swal, config, Com, NSGrid, NSFilter, NsMap,
+], function($, _, Backbone, Marionette, Swal, config, Com, NSGrid, NsFilter, NsMap,
 	LytStationsEdit
 ){
 
@@ -32,6 +32,7 @@ define([
 			'click #back' : 'hideDetails',
 			'click button#activeGridPanel' : 'activeGridPanel',
 			'click button#activeMapPanel' : 'activeMapPanel',
+			'click button#clear' : 'clearFilter',
 		},
 
 		ui: {
@@ -88,7 +89,20 @@ define([
 				element : 'map',
 				popup: true,
 			});
-			//this.map.initErrorWarning('<i>There is too much datas to display on the map. <br /> Please be more specific in your filters.</i>');
+		},
+
+		onShow : function(){
+			this.initGrid();
+			this.displayGrid();
+			this.displayFilters(4);
+			this.displayMap();
+
+			if(this.stationId){
+				this.detail.show(new LytStationsEdit({
+					stationId: this.stationId
+				}));
+				this.ui.detail.removeClass('hidden');
+			}
 		},
 
 		initGrid: function(url){
@@ -112,21 +126,6 @@ define([
 			};
 		},
 
-
-		onShow : function(){
-			this.initGrid();
-			this.displayGrid();
-			this.displayFilters();
-			this.displayMap();
-
-			if(this.stationId){
-				this.detail.show(new LytStationsEdit({
-					stationId: this.stationId
-				}));
-				this.ui.detail.removeClass('hidden');
-			}
-		},
-
 		displayGrid: function(){
 			var _this= this;
 			this.gridRegion.show(this.grid.getGridView());
@@ -134,23 +133,14 @@ define([
 		},
 
 		displayFilters: function(typeObj){
-			this.filters = new NSFilter({
+			this.filters = new NsFilter({
 				url: config.coreUrl + 'stations/',
 				com: this.com,
 				name:'StationGrid',
 				typeObj: typeObj,
 				filterContainer: this.ui.filters,
-				filterLoaded : function(){
-					/*
-					$(".StationDate").attr('placeholder','DD/MM/YYYY'); 
-					$("#dateTimePicker").on("dp.change", function (e) {
-					$('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
-					});*/
-				}
 			});
 		},
-
-
 
 		rowClicked: function(row){
 			this.detail.show(new LytStationsEdit({
@@ -177,31 +167,24 @@ define([
 			this.filters.update();
 		},
 
+		clearFilter : function(){
+			this.filters.reset();
+		},
+
 		displayTab : function(e){
 			var _this =this;
-			var type = $(e.target).attr('title');
-			$('.tab-ele').removeClass('active');
-			var typeObj;
-			$(e.target).parent().addClass('active');
+			var type = $(e.target).attr('name');
 
-			var url =config.coreUrl+'stations/';
-			var params = null;
+			$('.tab-ele').removeClass('activeTab');
+			$(e.target).parent().addClass('activeTab');
 
 			if( type == 'allSt' ){
 				type = false;
-				typeObj=1;
 			}else{
 				type = true;
-				typeObj= 4;
 			}
-
-			$('#filters').empty();
-
-			_this.displayFilters(typeObj);
-			var callback = function(){
-				_this.filter();
-			};
-			this.grid.lastImportedUpdate(type, callback);
-		},
+			this.grid.lastImportedUpdate(type);
+			this.map.lastImportedUpdate(type);
+		}
 	});
 });
