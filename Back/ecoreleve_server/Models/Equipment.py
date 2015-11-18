@@ -128,7 +128,7 @@ def receive_set(target, value, oldvalue, initiator):
 
     typeName = target.GetType().Name
 
-    if 'equipment' in typeName.lower():
+    if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
         equipDate = target.Station.StationDate
         try :
             fk_sensor = target.GetProperty('sensor_id') 
