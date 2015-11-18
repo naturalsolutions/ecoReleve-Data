@@ -23,7 +23,7 @@ function(Marionette, config, Breadcrumb) {
 				context: this,
 				url: config.coreUrl + 'security/logout'
 			}).done( function() {
-				
+				document.location.href=config.portalUrl;
 			});
 		},
 
