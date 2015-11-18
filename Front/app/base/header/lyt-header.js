@@ -18,6 +18,10 @@ function(Marionette, config, Breadcrumb) {
 			'breadcrumb': '#breadcrumb'
 		},
 
+		ui: {
+			'userName': '#userName'
+		},
+
 		logout: function(){
 			$.ajax({
 				context: this,
@@ -28,7 +32,15 @@ function(Marionette, config, Breadcrumb) {
 		},
 
 		onShow: function(){
+			var _this = this;
 			this.breadcrumb.show(new Breadcrumb());
+			window.app.user = new Backbone.Model();
+      window.app.user.url = config.coreUrl + 'currentUser';
+      window.app.user.fetch({
+        success: function() {
+        	_this.ui.userName.html(window.app.user.get('fullname'));
+        }
+      });
 		},
 	});
 });
