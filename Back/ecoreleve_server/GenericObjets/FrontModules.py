@@ -175,7 +175,7 @@ class ModuleGrids (Base) :
     FilterRender = Column (Integer)
     FilterType = Column (String)
     FilterClass = Column (String)
-
+    Status = Column(Integer)
     FrontModules = relationship("FrontModules", back_populates="ModuleGrids")
 
 

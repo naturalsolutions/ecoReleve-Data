@@ -15,7 +15,10 @@ from ..Models import (
     Station_FieldWorker,
     User,
     Individual,
-    Base
+    Base,
+    Equipment,
+    Sensor,
+    SensorDynPropValue
     )
 from ecoreleve_server.utils import Eval
 import pandas as pd 
@@ -116,7 +119,53 @@ class IndividualList(ListObjectWithDynProp):
 
     def countQuery(self,criteria = None):
         query = super().countQuery(criteria)
+        if len(list(filter(lambda x:'frequency'==x['Column'], criteria)))>0:
+            print('IN COUNT FREQUENCY')
+            query = self.whereInEquipementVHF(query,criteria)
         for obj in criteria :
             if obj['Column'] in ['LastImported']:
                 query = self.WhereInJoinTable(query,obj)
         return query
+
+    def GetFullQuery(self,searchInfo=None) :
+        ''' return the full query to execute '''
+        print('IN INDIV LIST ')
+        if searchInfo is None or 'criteria' not in searchInfo:
+            searchInfo['criteria'] = []
+            print('********** NO Criteria ***************')
+        joinTable = self.GetJoinTable(searchInfo)
+        fullQueryJoin = select(self.selectable).select_from(joinTable)
+
+        if len(list(filter(lambda x:'frequency'==x['Column'], searchInfo['criteria'])))>0:
+            print('FREQUENCY ')
+            fullQueryJoin = self.whereInEquipementVHF(fullQueryJoin,searchInfo['criteria'])
+
+        for obj in searchInfo['criteria'] :
+            fullQueryJoin = self.WhereInJoinTable(fullQueryJoin,obj)
+
+        fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
+        return fullQueryJoinOrdered
+
+    def whereInEquipementVHF(self,fullQueryJoin,criteria):
+        print('in whereInEquipementVHF')
+        freq = list(filter(lambda x:'frequency'==x['Column'], criteria))[0]['Value']
+        e2 = aliased(Equipment)
+        vs = Base.metadata.tables['SensorDynPropValuesNow']
+        joinTableExist = join(Equipment,Sensor,Equipment.FK_Sensor==Sensor.ID)
+        joinTableExist = join(joinTableExist,vs,vs.c['FK_Sensor']==Sensor.ID)
+
+        queryExist = select([e2]).where(
+            and_(Equipment.FK_Individual==e2.FK_Individual
+                ,and_(e2.StartDate>Equipment.StartDate,e2.StartDate<func.now())))
+
+        fullQueryExist = select([Equipment.FK_Individual]).select_from(joinTableExist)
+        fullQueryExist = fullQueryExist.where(and_(~exists(queryExist)
+            ,and_(vs.c['FK_SensorDynProp']==9,and_(Sensor.FK_SensorType==4,and_(Equipment.Deploy==1,
+                and_(Equipment.StartDate<func.now(),Equipment.FK_Individual==Individual.ID))))))
+
+        fullQueryExist = fullQueryExist.where(vs.c['ValueInt']==freq)
+        fullQueryJoin = fullQueryJoin.where(Individual.ID.in_(fullQueryExist))
+
+        return fullQueryJoin
+
+
