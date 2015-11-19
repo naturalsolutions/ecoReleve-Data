@@ -330,49 +330,54 @@ define([
         });
       }
 
-      params.toValidate = JSON.stringify(params.toValidate);
-      var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
-      $.ajax({
-        url: url,
-        method: 'POST',
-        data: params,
-        context: this
-      }).done(function(resp) {
-        resp.title = 'Succes';
-        this.swal(resp, 'success');
-        this.displayGrid();
-      }).fail(function(resp) {
-        this.swal(resp, 'error');
-      });
-    },
+			params.toValidate = JSON.stringify(params.toValidate);
+			var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
+			$.ajax({
+				url: url,
+				method: 'POST',
+				data : params,
+				context: this
+			}).done(function(resp) {
+				var msg = new Object();
+				msg.title='Succes';
+				msg.resp = resp;
+				this.swal(msg, 'success');
+				this.displayGrid();
+			}).fail(function(resp) {
+				var msg = new Object();
+				msg.title='Succes';
+				msg.resp = resp;
+				this.swal(msg, 'error');
+			});
+		},
 
-    swal: function(opt, type) {
-      var btnColor;
-      switch (type){
-        case 'success':
-          btnColor = 'green';
-          break;
-        case 'error':
-          btnColor = 'rgb(147, 14, 14)';
-          break;
-        case 'warning':
-          btnColor = 'orange';
-          break;
-        default:
-          return;
-          break;
-      }
-
-      Swal({
-        title: opt.title || 'error',
-        text: opt.text || '',
-        type: type,
-        showCancelButton: false,
-        confirmButtonColor: btnColor,
-        confirmButtonText: 'OK',
-        closeOnConfirm: true,
-      },
-			function(isConfirm) {
+		swal: function(opt, type){
+			var btnColor;
+			switch(type){
+				case 'success':
+					btnColor = 'green';
+					break;
+				case 'error':
+					btnColor = 'rgb(147, 14, 14)';
+					break;
+				case 'warning':
+					btnColor = 'orange';
+					break;
+				default:
+					return;
+					break;
+			}
+			Swal({
+				title: opt.title || 'error',
+				text: JSON.stringify(opt.resp)|| '',
+				type: type,
+				timer: 100,
+				showCancelButton: false,
+				confirmButtonColor: btnColor,
+				confirmButtonText: 'OK',
+				closeOnConfirm: true,
+			},
+			function(isConfirm){
 			});
     },
 

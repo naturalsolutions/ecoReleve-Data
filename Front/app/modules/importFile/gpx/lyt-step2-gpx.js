@@ -262,12 +262,12 @@ define([
             text: 'inserted stations :' + inserted + ', exisiting stations:' + exisits,
             type: 'success',
             showCancelButton: false,
-            confirmButtonColor: 'rgb(147, 14, 14)',
+            confirmButtonColor: 'green',
             confirmButtonText: 'OK',
             closeOnConfirm: true,
           },
 					function(isConfirm) {
-  Backbone.history.navigate('home', {trigger: true})
+              Backbone.history.navigate('home', {trigger: true})
 					});
         },
         error: function() {
