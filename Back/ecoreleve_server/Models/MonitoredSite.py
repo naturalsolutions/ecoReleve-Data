@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession,ModuleForms
+from ..Models import Base,DBSession,ModuleForms
 from sqlalchemy import (Column,
  DateTime,
  Float,

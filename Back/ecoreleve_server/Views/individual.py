@@ -11,8 +11,8 @@ from ..Models import (
     Equipment,
     IndividualList
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModules
-from ecoreleve_server.GenericObjets import ListObjectWithDynProp
+from ..GenericObjets.FrontModules import FrontModules
+from ..GenericObjets import ListObjectWithDynProp
 import transaction
 import json, itertools
 from datetime import datetime

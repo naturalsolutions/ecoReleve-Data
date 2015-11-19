@@ -9,8 +9,8 @@ from ..Models import (
     StationList,
     MonitoredSitePosition
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModules, ModuleForms
-from ecoreleve_server.GenericObjets import ListObjectWithDynProp
+from ..GenericObjets.FrontModules import FrontModules, ModuleForms
+from ..GenericObjets import ListObjectWithDynProp
 import transaction
 import json, itertools
 from datetime import datetime
@@ -146,7 +146,7 @@ def insertOneNewStation (request) :
         if value != "" :
             data[items] = value
 
-    newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid)
+    newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid['iss'])
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
@@ -173,7 +173,7 @@ def insertListNewStations(request):
         newRow['fieldActivityId'] = 1
         newRow['precision'] = 10 #row['Precision']
         newRow['creationDate'] = dateNow
-        newRow['creator'] = 1 #request.authenticated_userid
+        newRow['creator'] = 1 #request.authenticated_userid['iss']
         newRow['FK_StationType']=4
         newRow['id'] = row['id']
 
@@ -249,7 +249,7 @@ def searchStation(request):
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = []
-    user = request.authenticated_userid
+    user = request.authenticated_userid['iss']
     user = 1 
 
     if 'criteria' in data: 
