@@ -13,7 +13,7 @@ BEGIN
 
 
 	select * into TmpIndivExport 
-	from [NewModelERD].dbo.individual
+	from [EcoReleve_ECWP].dbo.individual
 
 	--select * from TmpIndivExport
 	DECLARE @Req NVARCHAR(MAX)
@@ -22,7 +22,7 @@ BEGIN
 
 	SET @Req = ' ALTER TABLE TmpIndivExport ADD@'
 
-	select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  from [NewModelERD].dbo.IndividualDynProp D
+	select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  from [EcoReleve_ECWP].dbo.IndividualDynProp D
 
 	SET @Req = replace(@Req,'ADD@,','ADD ')
 
@@ -36,11 +36,11 @@ BEGIN
 	SET @ReqFrom =''
 
 	SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')																						
-	from [NewModelERD].dbo.IndividualDynProp P
+	from [EcoReleve_ECWP].dbo.IndividualDynProp P
 
 	SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
 
-	SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpIndivExport EI JOIN (SELECT VN.FK_Individual ' + @ReqFrom + ' FROM   [NewModelERD].dbo.IndividualDynPropValuesNow VN GROUP BY VN.FK_Individual) V ON EI.ID = V.FK_Individual '
+	SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpIndivExport EI JOIN (SELECT VN.FK_Individual ' + @ReqFrom + ' FROM   [EcoReleve_ECWP].dbo.IndividualDynPropValuesNow VN GROUP BY VN.FK_Individual) V ON EI.ID = V.FK_Individual '
 	exec ( @req)
 
 
