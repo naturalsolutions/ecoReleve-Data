@@ -80,7 +80,7 @@ class ModuleForms(Base):
             self.dto['title'] = self.dto['title'] + '*'
 
             # TODO changer le validateur pour select required (valeur <>-1)
-        if isEditable :
+        if self.IsEditable :
             self.dto['fieldClass'] = str(self.EditClass) + ' ' + CssClass
         else :
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
