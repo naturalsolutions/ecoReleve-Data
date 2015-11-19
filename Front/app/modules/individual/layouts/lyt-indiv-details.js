@@ -1,19 +1,18 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'config',
-	'ns_modules/ns_com',
-	'ns_grid/model-grid',
-	'ns_map/ns_map',
-	'ns_form/NSFormsModuleGit',
-	'ns_navbar/ns_navbar',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'config',
+  'ns_grid/model-grid',
+  'ns_map/ns_map',
+  'ns_form/NSFormsModuleGit',
+  'ns_navbar/ns_navbar',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsMap, NsForm, Navbar
+ NsGrid, NsMap, NsForm, Navbar
 ) {
 
   'use strict';
@@ -46,22 +45,24 @@ define([
     },
 
     initialize: function(options) {
-      this.translater = Translater.getTranslater();
-      this.com = new Com();
-
-      this.model = options.model;
-
-      this.navbar = new Navbar({
-        parent: this,
-        globalGrid: options.globalGrid,
-        model: options.model,
-      });
+      if (options.indivId) {
+        this.indivId = options.indivId;
+      }else {
+        this.translater = Translater.getTranslater();
+        this.model = options.model;
+        this.navbar = new Navbar({
+          parent: this,
+          globalGrid: options.globalGrid,
+          model: options.model,
+        });
+      }
     },
 
     reloadFromNavbar: function(model) {
       this.display(model);
       this.map.url = config.coreUrl + 'individuals/' + this.indivId  + '?geo=true';
       this.map.updateFromServ();
+      Backbone.history.navigate('#individual/' + this.indivId, {trigger: false});
     },
 
     onRender: function() {
@@ -70,11 +71,19 @@ define([
 
     onShow: function() {
       var _this = this;
-      this.rgNavbar.show(this.navbar);
-      this.display(this.model);
-      setTimeout(function() {
-        _this.displayMap();
-      },0);
+      if (this.indivId) {
+        this.displayForm(this.indivId);
+        this.displayGrid(this.indivId);
+        setTimeout(function() {
+          _this.displayMap();
+        },0);
+      }else {
+        this.rgNavbar.show(this.navbar);
+        this.display(this.model);
+        setTimeout(function() {
+          _this.displayMap();
+        },0);
+      }
     },
 
     display: function(model) {
@@ -149,7 +158,6 @@ define([
       this.map = new NsMap({
         url: config.coreUrl + 'individuals/' + this.indivId  + '?geo=true',
         cluster: true,
-        com: this.com,
         zoom: 3,
         element: 'map',
         popup: true,
@@ -183,7 +191,7 @@ define([
       $(this.ui.details).animate({
         marginLeft: '-60%',
       }, 500, function() {
-			});
+      });
       this.updateSize('hide');
     },
 
@@ -191,7 +199,7 @@ define([
       $(this.ui.details).animate({
         marginLeft: '0',
       }, 500, function() {
-			});
+      });
       this.updateSize('show');
     },
     updateSize: function(type) {
