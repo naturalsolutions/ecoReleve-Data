@@ -339,11 +339,16 @@ define([
 				data : params,
 				context: this
 			}).done(function(resp) {
-				resp.title='Succes';
-				this.swal(resp, 'success');
+				var msg = new Object();
+				msg.title='Succes';
+				msg.resp = resp;
+				this.swal(msg, 'success');
 				this.displayGrid();
 			}).fail(function(resp) {
-				this.swal(resp, 'error');
+				var msg = new Object();
+				msg.title='Succes';
+				msg.resp = resp;
+				this.swal(msg, 'error');
 			});
 		},
 
@@ -363,11 +368,11 @@ define([
 					return;
 					break;
 			}
-
 			Swal({
 				title: opt.title || 'error',
-				text: opt.text || '',
+				text: JSON.stringify(opt.resp)|| '',
 				type: type,
+				timer: 100,
 				showCancelButton: false,
 				confirmButtonColor: btnColor,
 				confirmButtonText: 'OK',
