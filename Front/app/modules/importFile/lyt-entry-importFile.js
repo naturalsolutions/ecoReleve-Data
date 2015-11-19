@@ -28,62 +28,62 @@ define([
 	Step2GSM,
 
 	Step1ARGOS
-){
+) {
 
-	'use strict';
+  'use strict';
 
-	return NewStepper.extend({
-		/*===================================================
-		=            Layout Stepper Orchestrator            =
-		===================================================*/
-		//dedicated to be overloaded
+  return NewStepper.extend({
+    /*===================================================
+    		=            Layout Stepper Orchestrator            =
+    		===================================================*/
+    //dedicated to be overloaded
 
-		initSteps: function(){
-			this.steps = [Step0];
-		},
+    initSteps: function() {
+      this.steps = [Step0];
+    },
 
-		testAdd: function(){
-			this.addStep(Step0, 2);
-		},
+    testAdd: function() {
+      this.addStep(Step0, 2);
+    },
 
-		testRemove: function(){
-			this.removeStep(2);
-		},
+    testRemove: function() {
+      this.removeStep(2);
+    },
 
-		beforeNext: function(type, index){
-			if(index == 0){
-				switch(type){
-					case 'gpx':
-						var gpxSteps = [ Step1GPX, Step2GPX ];
-						this.addSteps(gpxSteps, 1);
-						break;
-					case 'rfid':
-						var rfidSteps = [ Step1RFID, Step2RFID ];
-						this.addSteps(rfidSteps, 1);
-						break;
-					case 'gsm':
-						var gsmSteps = [ Step1GSM ];
-						this.addSteps(gsmSteps, 1);
-						break;
-					case 'argos':
-						var argosSteps = [ Step1ARGOS ];
-						this.addSteps(argosSteps, 1);
-						//this.addSteps();
-						break;
-					default:
-						//not in step0
-						return false;
-						break;
-				}
-			}
-		},
+    beforeNext: function(type, index) {
+      if (index == 0) {
+        switch (type){
+          case 'gpx':
+            var gpxSteps = [Step1GPX, Step2GPX];
+            this.addSteps(gpxSteps, 1);
+            break;
+          case 'rfid':
+            var rfidSteps = [Step1RFID, Step2RFID];
+            this.addSteps(rfidSteps, 1);
+            break;
+          case 'gsm':
+            var gsmSteps = [Step1GSM];
+            this.addSteps(gsmSteps, 1);
+            break;
+          case 'argos':
+            var argosSteps = [Step1ARGOS];
+            this.addSteps(argosSteps, 1);
+            //this.addSteps();
+            break;
+          default:
+            //not in step0
+            return false;
+            break;
+        }
+      }
+    },
 
-		beforePrev: function(index){
-			if((index-1) == 0){
-				this.removeSteps(1);
-			}
-			
-		},
+    beforePrev: function(index) {
+      if ((index - 1) == 0) {
+        this.removeSteps(1);
+      }
 
-	});
+    },
+
+  });
 });
