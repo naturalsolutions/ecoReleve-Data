@@ -3,7 +3,7 @@ Created on Mon Aug 25 13:00:16 2014
 @author: Natural Solutions (Thomas)
 """
 
-from ecoreleve_server.Models import DBSession , User
+from ..Models import DBSession , User
 import transaction 
 
 from pyramid.security import (

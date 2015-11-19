@@ -9,7 +9,7 @@ from sqlalchemy import (
  )
 
 from sqlalchemy.ext.hybrid import hybrid_property
-from ecoreleve_server.Models import Base, dbConfig
+from ..Models import Base, dbConfig
 
 db_dialect = dbConfig['dialect']
 

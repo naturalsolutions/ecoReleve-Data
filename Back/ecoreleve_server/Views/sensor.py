@@ -9,8 +9,8 @@ from ..Models import (
     Individual,
     MonitoredSite
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModules
-from ecoreleve_server.GenericObjets import ListObjectWithDynProp
+from ..GenericObjets.FrontModules import FrontModules
+from ..GenericObjets import ListObjectWithDynProp
 import transaction
 import json, itertools
 from datetime import datetime
@@ -233,7 +233,7 @@ def insertOneNewSensor (request) :
     print(data['FK_SensorType'])
     #newSensor = Sensor(FK_SensorType = data['FK_SensorType'], creator = request.authenticated_userid)
     sensorType = int(data['FK_SensorType'])
-    newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now() )
+    newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now())
 
     newSensor.SensorType = DBSession.query(SensorType).filter(SensorType.ID== sensorType).first()
     newSensor.init_on_load()

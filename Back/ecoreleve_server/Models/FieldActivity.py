@@ -1,5 +1,5 @@
 
-from ecoreleve_server.Models import Base,DBSession
+from ..Models import Base,DBSession
 from sqlalchemy import (Column,
  DateTime,
  Float,
