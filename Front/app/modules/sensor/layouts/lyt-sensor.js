@@ -13,7 +13,7 @@ define([
 	'./lyt-sensor-details',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, SensorDetails
+	Com, NsGrid, NsFilter, LytSensorDetails
 
 ) {
 
@@ -45,7 +45,12 @@ define([
       detail: '#detail',
     },
 
+    urlRoot: '#sensor/',
+
     initialize: function(options) {
+      if (options.id) {
+        this.sensorId = options.id;
+      }
       this.translater = Translater.getTranslater();
       this.com = new Com();
     },
@@ -58,8 +63,8 @@ define([
     onShow: function() {
       this.displayFilter();
       this.displayGrid();
-      if (this.options.id) {
-        this.detail.show(new LytSensorDetail({id: this.options.id}));
+      if (this.sensorId) {
+        this.detail.show(new LytSensorDetails({id: this.sensorId}));
         this.ui.detail.removeClass('hidden');
       }
 
@@ -117,7 +122,7 @@ define([
           val: 'vhf'
         }],
         liClickEvent: function(liClickValue) {
-          Backbone.history.navigate('#sensor/new/' + liClickValue, {trigger: true});
+          Backbone.history.navigate(this.urlRoot + 'new/' + liClickValue, {trigger: true});
         },
         position: 'top'
       });
@@ -138,20 +143,21 @@ define([
       this.filters.reset();
     },
     rowClicked: function(row) {
-      this.detail.show(new SensorDetails({
+      this.detail.show(new LytSensorDetails({
         model: row.model,
         globalGrid: this.grid
       }));
       this.ui.detail.removeClass('hidden');
       this.grid.currentRow = row;
       this.grid.upRowStyle();
-      //Backbone.history.navigate('sensor/'+id, {trigger: false})
+      Backbone.history.navigate(this.urlRoot + id, {trigger: false})
     },
 
     rowDbClicked: function(row) {
 		},
 
     hideDetails: function() {
+      Backbone.history.navigate(this.urlRoot, {trigger: false});
       this.ui.detail.addClass('hidden');
     },
     updateModels: function(e) {

@@ -1,20 +1,19 @@
 //radio
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'config',
-	'ns_modules/ns_com',
-	'ns_grid/model-grid',
-	'ns_map/ns_map',
-	'ns_form/NSFormsModuleGit',
-	'ns_navbar/ns_navbar',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'config',
+  'ns_grid/model-grid',
+  'ns_map/ns_map',
+  'ns_form/NSFormsModuleGit',
+  'ns_navbar/ns_navbar',
 
-], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsMap, NsForm, Navbar
+], function($, _, Backbone, Marionette, Swal, Translater,
+ config, NsGrid, NsMap, NsForm, Navbar
 ) {
 
   'use strict';
@@ -50,16 +49,17 @@ define([
     },
 
     initialize: function(options) {
-
-      this.translater = Translater.getTranslater();
-      this.com = new Com();
-
-      this.model = options.model;
-      this.navbar = new Navbar({
-        parent: this,
-        globalGrid: options.globalGrid,
-        model: options.model,
-      });
+      if (options.id) {
+        this.monitoredSiteId = options.id;
+      }else {
+        this.translater = Translater.getTranslater();
+        this.model = options.model;
+        this.navbar = new Navbar({
+          parent: this,
+          globalGrid: options.globalGrid,
+          model: options.model,
+        });
+      }
 
     },
 
@@ -67,6 +67,7 @@ define([
       this.display(model);
       this.map.url = config.coreUrl + 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true';
       this.map.updateFromServ();
+      Backbone.history.navigate('#monitoredSite/' + this.monitoredSiteId, {trigger: false});
     },
 
     onRender: function() {
@@ -75,11 +76,19 @@ define([
 
     onShow: function() {
       var _this = this;
-      this.rgNavbar.show(this.navbar);
-      this.display(this.model);
-      setTimeout(function() {
-        _this.displayMap();
-      },0);
+      if(this.monitoredSiteId){
+        this.displayForm(this.monitoredSiteId);
+        this.displayGrid(this.monitoredSiteId);
+        setTimeout(function() {
+          _this.displayMap();
+        },0);
+      }else{
+        this.rgNavbar.show(this.navbar);
+        this.display(this.model);
+        setTimeout(function() {
+          _this.displayMap();
+        },0);
+      }
     },
 
     display: function(model) {
@@ -174,7 +183,7 @@ define([
           //temp fix
           Backbone.history.loadUrl(Backbone.history.fragment);
         }).fail(function(resp) {
-				});
+        });
       };
     },
 
@@ -189,33 +198,5 @@ define([
       $(tabUnLink).removeClass('active in');
     },
 
-    hideDetail: function() {
-      $(this.ui.details).animate({
-        marginLeft: '-60%',
-      }, 500, function() {
-			});
-      this.updateSize('hide');
-    },
-
-    showDetail: function() {
-      $(this.ui.details).animate({
-        marginLeft: '0',
-      }, 500, function() {
-				});
-      this.updateSize('show');
-    },
-
-    updateSize: function(type) {
-      this.map.resize();
-      if (type === 'hide') {
-        $(this.ui.showHideCtr).removeClass('masqued');
-        $(this.ui.mapContainer).removeClass('col-md-7');
-        $(this.ui.mapContainer).addClass('col-md-12');
-      } else {
-        $(this.ui.showHideCtr).addClass('masqued');
-        $(this.ui.mapContainer).removeClass('col-md-12');
-        $(this.ui.mapContainer).addClass('col-md-7');
-      }
-    },
   });
 });

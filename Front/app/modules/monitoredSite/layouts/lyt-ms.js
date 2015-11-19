@@ -1,21 +1,21 @@
 //radio
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'config',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'config',
 
-	'ns_modules/ns_com',
-	'ns_grid/model-grid',
-	'ns_filter/model-filter',
+  'ns_modules/ns_com',
+  'ns_grid/model-grid',
+  'ns_filter/model-filter',
 
-	'./lyt-ms-details',
+  './lyt-ms-details',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, LytMsDetail
+  Com, NsGrid, NsFilter, LytMsDetail
 ) {
 
   'use strict';
@@ -92,7 +92,8 @@ define([
       this.ui.detail.removeClass('hidden');
       this.grid.currentRow = row;
       this.grid.upRowStyle();
-      //Backbone.history.navigate('monitoredSite/'+id, {trigger: false})
+      var id = row.model.get('ID');
+      Backbone.history.navigate('monitoredSite/' + id, {trigger: false});
     },
     rowDbClicked: function(row) {
 
@@ -114,6 +115,8 @@ define([
     },
     hideDetails: function() {
       this.ui.detail.addClass('hidden');
+      Backbone.history.navigate('#monitoredSite/', {trigger: false});
+
     },
   });
 });
