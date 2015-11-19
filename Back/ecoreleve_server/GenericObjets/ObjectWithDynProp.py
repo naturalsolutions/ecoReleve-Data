@@ -161,12 +161,13 @@ class ObjectWithDynProp:
         if hasattr(self,nameProp):
             try :
                 if nameProp in self.__table__.c:
+
                     curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
                     if 'date' in curTypeAttr.lower() :
                         try :
-                            valeur = datetime.strptime(valeur.strip(),'%d/%m/%Y%H:%M:%S')
+                            valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y%H:%M:%S')
                         except :
-                            valeur = datetime.strptime(valeur.strip(),'%d/%m/%Y')
+                            valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y')
                 setattr(self,nameProp,valeur)
             except :
                 print_exc()
