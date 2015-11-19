@@ -13,7 +13,7 @@ define([
 
   'use strict';
   return Marionette.ItemView.extend({
-    template: 'app/modules/monitoredSite/templates/tpl-site-new.html',
+    template: 'app/modules/monitoredSite/templates/tpl-ms-new.html',
     className: 'white full-height',
 
     ui: {

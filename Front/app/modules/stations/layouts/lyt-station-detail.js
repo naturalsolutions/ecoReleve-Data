@@ -1,22 +1,22 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'radio',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'radio',
 
-	'./lyt-protocol',
+  './lyt-protocol',
 
-	'sweetAlert',
-	'config',
-	'simplePagination',
+  'sweetAlert',
+  'config',
+  'simplePagination',
 
-	'ns_form/NSFormsModuleGit',
-	'ns_navbar/ns_navbar',
-	'i18n'
+  'ns_form/NSFormsModuleGit',
+  'ns_navbar/ns_navbar',
+  'i18n'
 
 ], function($, _, Backbone, Marionette, Radio, LytProto,
-	Swal, config, simplePagination, NsForm, Navbar
+  Swal, config, simplePagination, NsForm, Navbar
 ) {
 
   'use strict';
@@ -51,7 +51,7 @@ define([
 
     initialize: function(options) {
       if (options.stationId) {
-        this.stationId = options.stationId
+        this.stationId = options.stationId;
       }else {
         this.model = options.model;
         this.navbar = new Navbar({
@@ -63,17 +63,17 @@ define([
     },
 
     check: function() {
-		},
+    },
 
     validate: function() {
       return true;
     },
 
     getStepOptions: function() {
-		},
+    },
 
     onDestroy: function() {
-		},
+    },
 
     onShow: function() {
       if (this.stationId) {
@@ -90,6 +90,7 @@ define([
 
     reloadFromNavbar: function(model) {
       this.display(model);
+      Backbone.history.navigate('#stations/' + this.stationId, {trigger: false});
     },
 
     display: function(model) {
@@ -118,7 +119,6 @@ define([
             $('#dateTimePicker').data('DateTimePicker').format('DD/MM/YYYY').maxDate(e.date);
           });
         }
-
       });
 
       this.nsForm.BeforeShow = function() {
@@ -164,7 +164,7 @@ define([
       var ProtoCollView = Backbone.Marionette.CollectionView.extend({
         childView: LytProto,
         childViewOptions: {
-          stationId:	this.stationId
+          stationId:  this.stationId
         },
         id: 'accordion',
         onRender: function() {
@@ -190,21 +190,21 @@ define([
 
     onProtoChange: function(mod) {
       /*
-      			if(mod._previousAttributes.total){
-      				//up on a proto
-      				var prev = mod._previousAttributes.total;
-      				this.total -= prev;
-      				if(Number.isInteger(mod.get('total'))){
+            if(mod._previousAttributes.total){
+              //up on a proto
+              var prev = mod._previousAttributes.total;
+              this.total -= prev;
+              if(Number.isInteger(mod.get('total'))){
 
-      					this.total += (prev+1)
-      				}else{
-      					this.total += (prev-1);
-      				}
-      			}else{
-      				//new proto
-      				this.total += mod.get('total');
-      			}
-      			this.ui.total.html(this.total);*/
+                this.total += (prev+1)
+              }else{
+                this.total += (prev-1);
+              }
+            }else{
+              //new proto
+              this.total += mod.get('total');
+            }
+            this.ui.total.html(this.total);*/
       this.total = 0;
       for (var i = 0; i < this.protoCollView.collection.models.length; i++) {
         this.total += this.protoCollView.collection.models[i].get('obs').length;
@@ -213,7 +213,7 @@ define([
     },
 
     onProtoDestroy: function() {
-		},
+    },
 
     onProtoAdd: function(mod) {
       this.total = 0;

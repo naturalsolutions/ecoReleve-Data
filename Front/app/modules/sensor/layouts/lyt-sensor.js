@@ -45,6 +45,8 @@ define([
       detail: '#detail',
     },
 
+    urlRoot: '#sensor/',
+
     initialize: function(options) {
       this.translater = Translater.getTranslater();
       this.com = new Com();
@@ -117,7 +119,7 @@ define([
           val: 'vhf'
         }],
         liClickEvent: function(liClickValue) {
-          Backbone.history.navigate('#sensor/new/' + liClickValue, {trigger: true});
+          Backbone.history.navigate(this.urlRoot + 'new/' + liClickValue, {trigger: true});
         },
         position: 'top'
       });
@@ -145,13 +147,14 @@ define([
       this.ui.detail.removeClass('hidden');
       this.grid.currentRow = row;
       this.grid.upRowStyle();
-      //Backbone.history.navigate('sensor/'+id, {trigger: false})
+      Backbone.history.navigate(this.urlRoot + id, {trigger: false})
     },
 
     rowDbClicked: function(row) {
 		},
 
     hideDetails: function() {
+      Backbone.history.navigate(this.urlRoot, {trigger: false});
       this.ui.detail.addClass('hidden');
     },
     updateModels: function(e) {

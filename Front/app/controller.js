@@ -8,6 +8,7 @@ define(['marionette', 'config',
 	'./modules/stations/layouts/lyt-station-new',
 
 	'./modules/importFile/lyt-entry-importFile',
+
 	'./modules/individual/layouts/lyt-individual',
 	'./modules/individual/layouts/lyt-new-individual',
 	'./modules/individual/layouts/lyt-indiv-details',
@@ -16,7 +17,9 @@ define(['marionette', 'config',
 	'./modules/sensor/layouts/lyt-sensor-new',
 
 	'./modules/monitoredSite/layouts/lyt-ms',
-	'./modules/monitoredSite/layouts/lyt-new-site',
+	'./modules/monitoredSite/layouts/lyt-ms-new',
+
+
 	'./modules/validate/lyt-sensorValidate',
 	'./modules/validate/lyt-sensorValidateType',
 	'./modules/validate/lyt-sensorValidateDetail',

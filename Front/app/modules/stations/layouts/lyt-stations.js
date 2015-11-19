@@ -1,21 +1,22 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'config',
-	'ns_modules/ns_com',
-	'ns_grid/model-grid',
-	'ns_filter/model-filter',
-	'ns_map/ns_map',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'config',
+  'ns_modules/ns_com',
+  'ns_grid/model-grid',
+  'ns_filter/model-filter',
+  'ns_map/ns_map',
 
-	'./lyt-station-detail',
+  './lyt-station-detail',
 
-	'i18n'
+  'i18n'
 
-], function($, _, Backbone, Marionette, Swal, config, Com, NSGrid, NsFilter, NsMap,
-	LytStationsEdit
+], function($, _, Backbone, Marionette, Swal,
+  config, Com, NSGrid, NsFilter, NsMap,
+  LytStationsEdit
 ) {
 
   'use strict';

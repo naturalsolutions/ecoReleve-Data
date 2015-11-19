@@ -1,22 +1,21 @@
-//radio
-define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'config',
-	'ns_modules/ns_com',
-	'ns_grid/model-grid',
-	'ns_filter/model-filter',
-	'./lyt-indiv-details',
-	'./lyt-new-individual',
 
-	'./view-indivDetails'
+define([
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'config',
+  'ns_modules/ns_com',
+  'ns_grid/model-grid',
+  'ns_filter/model-filter',
+  './lyt-indiv-details',
+  './lyt-new-individual',
+  'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv, IndivDetails
+  Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv
 ) {
 
   'use strict';
@@ -46,13 +45,11 @@ define([
     },
 
     initialize: function(options) {
-      this.translater = Translater.getTranslater();
-      this.com = new Com();
-
-      if (window.app.temp) {
-        var coll = window.app.temp.collection;
-        this.stationIndex = coll.indexOf(options.model);
+      if (options.id) {
+        this.indivId = options.id;
       }
+      this.com = new Com();
+      this.translater = Translater.getTranslater();
     },
 
     onRender: function() {
@@ -60,13 +57,10 @@ define([
     },
 
     onShow: function() {
-      // Be carreful, we provide LytNewIndiv and not his instance (new) !!!
-      var itemsNewIndiv = [{'label': 'Individual', 'val': 1},{'label': 'Group', 'val': 2}];
-
       this.displayFilter();
       this.displayGrid();
-      if (this.options.id) {
-        this.detail.show(new LytIndivDetail({id: this.options.id}));
+      if (this.indivId) {
+        this.detail.show(new LytIndivDetail({indivId: this.indivId}));
         this.ui.detail.removeClass('hidden');
       }
     },
@@ -98,13 +92,15 @@ define([
         model: row.model,
         globalGrid: this.grid
       }));
+      var id = row.model.get('ID');
+      Backbone.history.navigate('#individual/' + id, {trigger: false});
       this.grid.currentRow = row;
       this.grid.upRowStyle();
       this.ui.detail.removeClass('hidden');
     },
 
     rowDbClicked: function(row) {
-		},
+    },
 
     displayFilter: function() {
       this.filters = new NsFilter({
@@ -121,6 +117,7 @@ define([
       this.filters.reset();
     },
     hideDetails: function() {
+      Backbone.history.navigate('#individual/', {trigger: false});
       this.ui.detail.addClass('hidden');
     },
     newIndividual: function() {
@@ -130,9 +127,9 @@ define([
           label: 'Individual',
           val: 'individual'
         }/*, {
-							label : 'Group',
-							val : 'group'
-					}*/
+              label : 'Group',
+              val : 'group'
+          }*/
         ],
         liClickEvent: function(liClickValue) {
           Backbone.history.navigate('#individual/new/' + liClickValue, {trigger: true});
