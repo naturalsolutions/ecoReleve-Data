@@ -1,240 +1,233 @@
 define(['underscore', 'marionette'],
 function(_, Marionette) {
-	'use strict';
-	return Marionette.TransitionRegion = Marionette.Region.extend({
-		transitionInCss: {
-		},
+  'use strict';
+  return Marionette.TransitionRegion = Marionette.Region.extend({
+    transitionInCss: {
+    },
 
-		concurrentTransition: false,
+    concurrentTransition: false,
 
-		// This is queue manager code that doesn't belong in regions.
-		// maybe when this transition region is in Marionette,
-		// you will be some sort of mixin for a region.
-		setQueue: function(view, options) {
-			this._queuedView = view;
-			this._queueOptions = options;
-		},
+    // This is queue manager code that doesn't belong in regions.
+    // maybe when this transition region is in Marionette,
+    // you will be some sort of mixin for a region.
+    setQueue: function(view, options) {
+      this._queuedView = view;
+      this._queueOptions = options;
+    },
 
-		setInQueue: function(view, options) {
-			this._inQueueView = view;
-			this._inQueueOptions = options;
-		},
+    setInQueue: function(view, options) {
+      this._inQueueView = view;
+      this._inQueueOptions = options;
+    },
 
-		_clearInQueue: function() {
-			delete this._inQueueView;
-			delete this._inQueueOptions;
-		},
+    _clearInQueue: function() {
+      delete this._inQueueView;
+      delete this._inQueueOptions;
+    },
 
-		checkQueue: function() {
-			if (this._queued) { return false; }
+    checkQueue: function() {
+      if (this._queued) { return false; }
 
-			this._queued = true;
-			this.once('animateIn', _.bind(this.showQueue, this));
-		},
+      this._queued = true;
+      this.once('animateIn', _.bind(this.showQueue, this));
+    },
 
-		showQueue: function() {
-			this.show(this._queuedView, this._queuedOptions);
-			this._queued = false;
-			this.clearQueue();
-		},
+    showQueue: function() {
+      this.show(this._queuedView, this._queuedOptions);
+      this._queued = false;
+      this.clearQueue();
+    },
 
-		clearQueue: function() {
-			delete this._queuedView;
-			delete this._queuedOptions;
-		},
+    clearQueue: function() {
+      delete this._queuedView;
+      delete this._queuedOptions;
+    },
 
-		show: function(view, options) {
-			// If animating out, set the animateInQueue.
-			// This new view will be what is transitioned in
-			if (this._animatingOut) {
-				this.setInQueue(view, options);
-				return this;
-			}
+    show: function(view, options) {
+      // If animating out, set the animateInQueue.
+      // This new view will be what is transitioned in
+      if (this._animatingOut) {
+        this.setInQueue(view, options);
+        return this;
+      } else if (this._animatingIn) {
+        this.setQueue(view, options);
+        this.checkQueue();
+        return this;
+      }
 
-			else if (this._animatingIn) {
-				this.setQueue(view, options);
-				this.checkQueue();
-				return this;
-			}
+      this.setInQueue(view, options);
+      this._animatingOut = true;
 
-			this.setInQueue(view, options);
-			this._animatingOut = true;
+      this._ensureElement();
 
-			this._ensureElement();
+      var currentView = this.currentView;
+      this._oldView = this.currentView;
+      var animateOut = currentView && _.isFunction(this.currentView.animateOut);
+      var concurrent = this.getOption('concurrentTransition');
 
-			var currentView = this.currentView;
-			this._oldView = this.currentView;
-			var animateOut = currentView && _.isFunction(this.currentView.animateOut);
-			var concurrent = this.getOption('concurrentTransition');
+      // If the view has an animate out function, then wait for it to conclude and then continue.
+      // Otherwise, simply continue.
+      if (animateOut && !concurrent) {
+        this.listenToOnce(currentView, 'animateOut', _.bind(this._onTransitionOut, this));
+        currentView.animateOut(options);
+        // Return this for backwards compat
+        return this;
+      }
 
-			// If the view has an animate out function, then wait for it to conclude and then continue.
-			// Otherwise, simply continue.
-			if (animateOut && !concurrent) {
-				this.listenToOnce(currentView, 'animateOut', _.bind(this._onTransitionOut, this));
-				currentView.animateOut(options);
-				// Return this for backwards compat
-				return this;
-			}
+      // Otherwise, execute both transitions at the same time
+      else if (animateOut && concurrent) {
+        currentView.animateOut(options);
+        return this._onTransitionOut();
+      } else {
+        return this._onTransitionOut();
+      }
+    },
 
-			// Otherwise, execute both transitions at the same time
-			else if (animateOut && concurrent) {
-				currentView.animateOut(options);
-				return this._onTransitionOut();
-			}
+    // This is most of the original show function.
+    _onTransitionOut: function() {
+      this.triggerMethod('animateOut', this.currentView);
+      var view = this._inQueueView;
+      var options = this._inQueueOptions;
+      this._clearInQueue();
 
-			else {
-				return this._onTransitionOut();
-			}
-		},
+      // This is the last time to update what view is about to be shown.
+      // At this point, any subsequent shows will cause a brand new animation phase
+      // to commence.
+      this._animatingOut = false;
+      this._animatingIn = true;
 
-		// This is most of the original show function.
-		_onTransitionOut: function() {
-			this.triggerMethod('animateOut', this.currentView);
-			var view = this._inQueueView;
-			var options = this._inQueueOptions;
-			this._clearInQueue();
-			
-			// This is the last time to update what view is about to be shown.
-			// At this point, any subsequent shows will cause a brand new animation phase
-			// to commence.
-			this._animatingOut = false;
-			this._animatingIn = true;
+      var showOptions = options || {};
+      var isDifferentView = view !== this.currentView;
+      var preventDestroy =  !!showOptions.preventDestroy;
+      var forceShow = !!showOptions.forceShow;
 
-			var showOptions = options || {};
-			var isDifferentView = view !== this.currentView;
-			var preventDestroy =  !!showOptions.preventDestroy;
-			var forceShow = !!showOptions.forceShow;
+      // we are only changing the view if there is a view to change to begin with
+      var isChangingView = !!this.currentView;
 
-			// we are only changing the view if there is a view to change to begin with
-			var isChangingView = !!this.currentView;
+      // The region is only animating if there's an animateIn method on the new view
+      var animatingIn = _.isFunction(view.animateIn);
 
+      // only destroy the view if we don't want to preventDestroy and the view is different
+      var _shouldDestroyView = !preventDestroy && isDifferentView && !this.getOption('concurrentTransition');
 
-			// The region is only animating if there's an animateIn method on the new view
-			var animatingIn = _.isFunction(view.animateIn);
+      // Destroy the old view
+      if (_shouldDestroyView) {
+        this.empty({animate: false});
+      }
 
-			// only destroy the view if we don't want to preventDestroy and the view is different
-			var _shouldDestroyView = !preventDestroy && isDifferentView && !this.getOption('concurrentTransition');
+      // show the view if the view is different or if you want to re-show the view
+      var _shouldShowView = isDifferentView || forceShow;
 
-			// Destroy the old view
-			if (_shouldDestroyView) {
-				this.empty({animate:false});
-			}
+      // Cut things short if we're not showing the view
+      if (!_shouldShowView) {
+        return this;
+      }
 
-			// show the view if the view is different or if you want to re-show the view
-			var _shouldShowView = isDifferentView || forceShow;
+      // Render the new view, then hide its $el
+      view.render();
 
-			// Cut things short if we're not showing the view
-			if (!_shouldShowView) {
-				return this;
-			}
+      if (isChangingView) {
+        this.triggerMethod('before:swap', view);
+      }
 
-			// Render the new view, then hide its $el
-			view.render();
+      // before:show triggerMethods
+      this.triggerMethod('before:show', view);
+      if (_.isFunction(view.triggerMethod)) {
+        view.triggerMethod('before:show');
+      } else {
+        this.triggerMethod.call(view, 'before:show');
+      }
 
-			if (isChangingView) {
-				this.triggerMethod('before:swap', view);
-			}
+      // Only hide the view if we want to animate it
+      if (animatingIn) {
+        var transitionInCss = view.transitionInCss || this.transitionInCss;
+        view.$el.css(transitionInCss);
+      }
 
-			// before:show triggerMethods
-			this.triggerMethod("before:show", view);
-			if (_.isFunction(view.triggerMethod)) {
-				view.triggerMethod("before:show");
-			} else {
-				this.triggerMethod.call(view, "before:show");
-			}
+      // Attach or append the HTML, depending on whether we
+      // want to concurrently animate or not
+      if (!this.getOption('concurrentTransition')) {
+        this.attachHtml(view);
+      } else {
+        this.appendHtml(view);
+      }
 
-			// Only hide the view if we want to animate it
-			if (animatingIn) {
-				var transitionInCss = view.transitionInCss || this.transitionInCss;
-				view.$el.css(transitionInCss);
-			}
+      this.currentView = view;
 
-			// Attach or append the HTML, depending on whether we
-			// want to concurrently animate or not
-			if (!this.getOption('concurrentTransition')) {
-				this.attachHtml(view);
-			} else {
-				this.appendHtml(view);
-			}
+      // show triggerMethods
+      this.triggerMethod('show', view);
+      if (_.isFunction(view.triggerMethod)) {
+        view.triggerMethod('show');
+      } else {
+        this.triggerMethod.call(view, 'show');
+      }
 
-			this.currentView = view;
+      // If there's an animateIn method, then call it and wait for it to complete
+      if (animatingIn) {
+        this.listenToOnce(view, 'animateIn', _.bind(this._onTransitionIn, this, showOptions));
+        view.animateIn(options);
+        return this;
+      }
 
-			// show triggerMethods
-			this.triggerMethod("show", view);
-			if (_.isFunction(view.triggerMethod)) {
-				view.triggerMethod("show");
-			} else {
-				this.triggerMethod.call(view, "show");
-			}
+      // Otherwise, continue on
+      else {
+        return this._onTransitionIn(showOptions);
+      }
+    },
 
-			// If there's an animateIn method, then call it and wait for it to complete
-			if (animatingIn) {
-				this.listenToOnce(view, 'animateIn', _.bind(this._onTransitionIn, this, showOptions));
-				view.animateIn(options);
-				return this;
-			}
+    // Append the new child
+    appendHtml: function(view) {
+      this.el.appendChild(view.el);
+    },
 
-			// Otherwise, continue on
-			else {
-				return this._onTransitionIn(showOptions);
-			}
-		},
+    // After it's shown, then we triggerMethod 'animateIn'
+    _onTransitionIn: function(options) {
+      var preventDestroy =  options.preventDestroy;
 
-		// Append the new child
-		appendHtml: function(view) {
-			this.el.appendChild(view.el);
-		},
+      var oldView = this._oldView;
+      // // Destroy the old view
+      if (!preventDestroy && oldView && !oldView.isDestroyed) {
+        if (oldView.destroy) { oldView.destroy(); } else if (oldView.remove) { oldView.remove(); }
+      }
 
-		// After it's shown, then we triggerMethod 'animateIn'
-		_onTransitionIn: function(options) {
-			var preventDestroy =  options.preventDestroy;
+      delete this._oldView;
+      this._animatingIn = false;
+      this.triggerMethod('animateIn', this.currentView);
+      return this;
+    },
 
-			var oldView = this._oldView;
-			// // Destroy the old view
-			if (!preventDestroy && oldView && !oldView.isDestroyed) {
-				if (oldView.destroy) { oldView.destroy(); }
-				else if (oldView.remove) { oldView.remove(); }
-			}
+    // Empty the region, animating the view out first if it needs to be
+    empty: function(options) {
+      options = options || {};
 
-			delete this._oldView;
-			this._animatingIn = false;
-			this.triggerMethod('animateIn', this.currentView);
-			return this;
-		},
+      var view = this.currentView;
+      if (!view || view.isDestroyed) { return; }
 
-		// Empty the region, animating the view out first if it needs to be
-		empty: function(options) {
-			options = options || {};
+      // Animate by default
+      var animate = options.animate === undefined ? true : options.animate;
 
-			var view = this.currentView;
-			if (!view || view.isDestroyed){ return; }
+      // Animate the view before destroying it if a function exists. Otherwise,
+      // immediately destroy it
+      if (_.isFunction(view.animateOut) && animate) {
+        this.listenToOnce(this.currentView, 'animateOut', _.bind(this._destroyView, this));
+        this.currentView.animateOut(options);
+      } else {
+        this._destroyView();
+      }
+    },
 
-			// Animate by default
-			var animate = options.animate === undefined ? true : options.animate;
+    _destroyView: function() {
+      var view = this.currentView;
+      if (!view || view.isDestroyed) { return; }
 
-			// Animate the view before destroying it if a function exists. Otherwise,
-			// immediately destroy it
-			if (_.isFunction(view.animateOut) && animate) {
-				this.listenToOnce(this.currentView, 'animateOut', _.bind(this._destroyView, this));
-				this.currentView.animateOut(options);
-			} else {
-				this._destroyView();
-			}
-		},
+      this.triggerMethod('before:empty', view);
 
-		_destroyView: function() {
-			var view = this.currentView;
-			if (!view || view.isDestroyed){ return; }
+      // call 'destroy' or 'remove', depending on which is found
+      if (view.destroy) { view.destroy(); } else if (view.remove) { view.remove(); }
 
-			this.triggerMethod('before:empty', view);
+      this.triggerMethod('empty', view);
 
-			// call 'destroy' or 'remove', depending on which is found
-			if (view.destroy) { view.destroy(); }
-			else if (view.remove) { view.remove(); }
-
-			this.triggerMethod('empty', view);
-
-			delete this.currentView;
-		},
-		});
+      delete this.currentView;
+    },
+  });
 });

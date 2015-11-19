@@ -301,7 +301,6 @@ define([
 						delete this.collection.queryParams['lastImported'];
 					}
 
-					console.log(this.collection.queryParam);
 
 					this.deffered = this.grid.collection.fetch({
 						reset: true, 
