@@ -38,7 +38,7 @@ def weekData(request):
 
     # Argos data
     argos_query = select(
-            [cast(ArgosGps.date, Date).label('date'), func.count(ArgosGps.pk_id).label('nb')]
+            [cast(ArgosGps.date, Date).label('date'), func.count('*').label('nb')]
             ).where(and_(ArgosGps.date >= today - datetime.timedelta(days = 7),ArgosGps.type_ == 'arg')
             ).group_by(cast(ArgosGps.date, Date)
     )
@@ -50,7 +50,7 @@ def weekData(request):
 
     # GPS data
     gps_query = select(
-            [cast(ArgosGps.date, Date).label('date'), func.count(ArgosGps.pk_id).label('nb')]
+            [cast(ArgosGps.date, Date).label('date'), func.count('*').label('nb')]
             ).where(and_(ArgosGps.date >= today - datetime.timedelta(days = 7),ArgosGps.type_ == 'gps')
             ).group_by(cast(ArgosGps.date, Date))
     for date, nb in DBSession.execute(gps_query).fetchall():
@@ -108,7 +108,7 @@ def location_graph(request):
 
     joinTable = join(Individual_Location,Sensor, Individual_Location.FK_Sensor == Sensor.ID)
     data = []
-    query= select([Individual_Location.type_,func.count(Individual_Location.ID).label('nb')]
+    query= select([Individual_Location.type_,func.count('*').label('nb')]
         ).group_by(Individual_Location.type_)
 
     for row in DBSession.execute(query).fetchall() :
@@ -121,12 +121,12 @@ def location_graph(request):
 @view_config(route_name = 'uncheckedDatas_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
 def uncheckedDatas_graph(request):
 
-    queryArgos= select([ArgosGps.type_.label('type_'),func.count(ArgosGps.pk_id).label('nb')]).where(ArgosGps.checked == 0
+    queryArgos= select([ArgosGps.type_.label('type_'),func.count('*').label('nb')]).where(ArgosGps.checked == 0
         ).group_by(ArgosGps.type_)
 
-    queryGSM= select([func.count(Gsm.pk_id).label('nb')]).where(Gsm.checked == 0)
+    queryGSM= select([func.count('*').label('nb')]).where(Gsm.checked == 0)
 
-    queryRFID = select([func.count(Rfid.ID).label('nb')]
+    queryRFID = select([func.count('*').label('nb')]
         ).where(Rfid.checked == 0)
 
     data = []
@@ -161,7 +161,7 @@ def individual_graph(request):
     end_date = datetime.date(day=1, month=today.month, year=today.year)
     # Query
     query = select([
-            func.count(Individual.ID).label('nb'),
+            func.count('*').label('nb'),
             func.year(Individual.creationDate).label('year'),
             func.month(Individual.creationDate).label('month')]
             ).where(and_(Individual.creationDate >= begin_date, Individual.creationDate < end_date)
@@ -182,7 +182,7 @@ def individual_monitored(request):
     table = Base.metadata.tables['IndividualDynPropValuesNow']
     # Query
     query = select([
-        func.count(table.c['ID']).label('nb'),table.c['ValueString'].label('label')
+        func.count('*').label('nb'),table.c['ValueString'].label('label')
         ]).select_from(table
         ).where(table.c['FK_IndividualDynProp'] == 37
         ).group_by(table.c['ValueString'])
