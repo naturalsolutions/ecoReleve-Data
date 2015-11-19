@@ -13,7 +13,7 @@ define([
 	'./lyt-sensor-details',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, SensorDetails
+	Com, NsGrid, NsFilter, LytSensorDetails
 
 ) {
 
@@ -48,6 +48,9 @@ define([
     urlRoot: '#sensor/',
 
     initialize: function(options) {
+      if (options.id) {
+        this.sensorId = options.id;
+      }
       this.translater = Translater.getTranslater();
       this.com = new Com();
     },
@@ -60,8 +63,8 @@ define([
     onShow: function() {
       this.displayFilter();
       this.displayGrid();
-      if (this.options.id) {
-        this.detail.show(new LytSensorDetail({id: this.options.id}));
+      if (this.sensorId) {
+        this.detail.show(new LytSensorDetails({id: this.sensorId}));
         this.ui.detail.removeClass('hidden');
       }
 
@@ -140,7 +143,7 @@ define([
       this.filters.reset();
     },
     rowClicked: function(row) {
-      this.detail.show(new SensorDetails({
+      this.detail.show(new LytSensorDetails({
         model: row.model,
         globalGrid: this.grid
       }));

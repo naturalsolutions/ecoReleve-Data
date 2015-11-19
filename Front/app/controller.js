@@ -19,7 +19,6 @@ define(['marionette', 'config',
 	'./modules/monitoredSite/layouts/lyt-ms',
 	'./modules/monitoredSite/layouts/lyt-ms-new',
 
-
 	'./modules/validate/lyt-sensorValidate',
 	'./modules/validate/lyt-sensorValidateType',
 	'./modules/validate/lyt-sensorValidateDetail',

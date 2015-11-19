@@ -6,7 +6,6 @@ define([
   'sweetAlert',
   'translater',
   'config',
-  'ns_modules/ns_com',
   'ns_grid/model-grid',
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
@@ -14,7 +13,7 @@ define([
   'tooltipster-list',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsMap, NsForm,
+ NsGrid, NsMap, NsForm,
   Navbar
 ) {
 
@@ -50,8 +49,8 @@ define([
     urlRoot: '#sensor/',
 
     initialize: function(options) {
-      if (options.sensorId) {
-        this.sensorId = options.sensorId;
+      if (options.id) {
+        this.sensorId = options.id;
       }else {
         this.translater = Translater.getTranslater();
         this.model = options.model;
