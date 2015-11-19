@@ -60,18 +60,15 @@ define([
         var colLine = '<div class="checkbox"><label><input class="col-chk" type="checkbox" value="' + model.get('name') + '">' + model.get('name') + '</label></div>';
         _this.ui.columns.append(colLine);
       });
-
     },
 
     updateGrid: function(e) {
       var model = this.columns.findWhere({'name': $(e.target).val()});
-
       if ($(e.target).is(':checked')) {
         model.set('renderable', true);
       }else {
         model.set('renderable', false);
       }
-
       this.verififyCols();
     },
 

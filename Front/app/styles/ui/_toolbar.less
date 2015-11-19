@@ -28,8 +28,10 @@
   position: relative;
   height: ~"calc(100% - @{toolbarHeight})";
   padding: 0px 15px;
-  overflow-x: hidden;
   overflow-y: auto;
+  &.overflowXH{
+    overflow-x: hidden;
+  }
   &.crop-paginator{
     @crop: @toolbarHeight + @paginatorHeight + 1;
     height: ~"calc(100% - @{crop})";
@@ -41,8 +43,10 @@
   @crop: @toolbarHeight*2;
   height: ~"calc(100% - @{crop})";
   padding: 0px 15px;
-  // overflow-x: hidden;
   overflow-y: auto;
+  &.overflowXH{
+    overflow-x: hidden;
+  }
   &.crop-paginator{
     @crop : @toolbarHeight*2 + @paginatorHeight;
     height: ~"calc(100% - @{crop})";

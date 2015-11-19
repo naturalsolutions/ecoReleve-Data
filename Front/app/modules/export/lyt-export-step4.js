@@ -100,17 +100,6 @@ define([
         contentType: 'application/json',
         type: 'GET',
         context: this,
-        /*
-        				xhrFields: {
-        					onprogress: function (e) {
-        						if (e.lengthComputable) {
-        								var progress = Math.floor( e.loaded / e.total * 100 ) + '%';
-        								$('#progress > div').html(progress);
-        								$('#progress > div').width(progress);
-        							}
-        						}
-        					},
-        					*/
       }).done(function(data) {
         var url = URL.createObjectURL(new Blob([data], {'type': 'application/' + this.model.get('fileType')}));
         var link = document.createElement('a');
@@ -126,7 +115,7 @@ define([
           type: 'success',
           confirmButtonText: 'Yes',
           callback: function() {
-            _this.parent.displayStep(0);
+            //_this.parent.displayStep(0);
           }
         };
 

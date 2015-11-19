@@ -726,7 +726,6 @@ define([
 			if(param)
 				this.searchCriteria = param;
 			//station last imported?
-				console.log(this.lastImported);
 			if(this.lastImported){
 				var data = {
 					'criteria': JSON.stringify(this.searchCriteria),
