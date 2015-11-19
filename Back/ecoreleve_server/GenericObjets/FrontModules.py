@@ -1,8 +1,9 @@
-from ecoreleve_server.Models import Base,DBSession, dbConfig
+from ..Models import Base,DBSession, dbConfig
 from sqlalchemy import Column, DateTime, Float,Boolean, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_,text,select
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 import json
+from pyramid import threadlocal
 
 FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
 
@@ -79,7 +80,7 @@ class ModuleForms(Base):
             self.dto['title'] = self.dto['title'] + '*'
 
             # TODO changer le validateur pour select required (valeur <>-1)
-        if isEditable :
+        if self.IsEditable :
             self.dto['fieldClass'] = str(self.EditClass) + ' ' + CssClass
         else :
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
@@ -133,7 +134,10 @@ class ModuleForms(Base):
     def InputThesaurus(self) :
 
         if self.Options is not None and self.Options != '' :
-            self.dto['options'] = {'startId': self.Options, 'wsUrl':dbConfig['wsThesaurus']['wsUrl'], 'lng':dbConfig['wsThesaurus']['lng']}
+            self.dto['options'] = {'startId': self.Options
+            , 'wsUrl':dbConfig['wsThesaurus']['wsUrl']
+            , 'lng':threadlocal.get_current_request().authenticated_userid['userlanguage']
+            ,'displayValueName': 'valueTranslated'}
             self.dto['options']['startId'] = self.Options
 
     def InputAutocomplete(self):

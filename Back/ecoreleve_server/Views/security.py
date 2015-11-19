@@ -1,11 +1,14 @@
 from pyramid.httpexceptions import HTTPUnauthorized
 from pyramid.security import remember, forget, NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
-from ecoreleve_server.Models import DBSession, User
+from ..Models import DBSession, User
 import transaction
-
+from ..pyramid_jwtauth import (
+    JWTAuthenticationPolicy,
+    includeme
+    )
 route_prefix = 'security/'
-
+import jwt
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(
     route_name=route_prefix+'login',

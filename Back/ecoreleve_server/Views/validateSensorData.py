@@ -139,7 +139,7 @@ def manual_validate(request) :
     ptt = asInt(request.matchdict['id_ptt'])
     ind_id = asInt(request.matchdict['id_indiv'])
     type_ = request.matchdict['type']
-    user = request.authenticated_userid
+    user = request.authenticated_userid['iss']
     user = 1
     data = json.loads(request.params['data'])
 
@@ -177,7 +177,7 @@ def auto_validation(request):
     param = request.params.mixed()
     freq = param['frequency']
     listToValidate = json.loads(param['toValidate'])
-    user = request.authenticated_userid
+    user = request.authenticated_userid['iss']
     user = 1 
     if freq == 'all' :
         freq = 1

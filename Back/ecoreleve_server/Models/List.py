@@ -20,7 +20,7 @@ from ..Models import (
     Sensor,
     SensorDynPropValue
     )
-from ecoreleve_server.utils import Eval
+from ..utils import Eval
 import pandas as pd 
 from collections import OrderedDict
 from datetime import datetime
