@@ -51,9 +51,6 @@ define([
     onShow: function() {
       this.displayGrid();
       this.displayFilters();
-      $(this.ui.filters).find('input').each(function() {
-        $(this).val('');
-      });
       this.displayMap();
     },
 
