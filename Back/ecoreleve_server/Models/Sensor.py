@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession
+from ..Models import Base,DBSession
 from sqlalchemy import (Column,
  DateTime,
  Float,
@@ -80,7 +80,7 @@ class SensorDynPropValue(Base):
     ValueInt =  Column(Integer)
     ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
-    ValueFloat =  Column(Float)
+    ValueFloat =  Column(Numeric(12,5))
     FK_SensorDynProp = Column(Integer, ForeignKey('SensorDynProp.ID'))
     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
 

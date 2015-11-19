@@ -21,7 +21,13 @@ def integers(*segment_names):
 
 def add_routes(config):
 
-    config.add_route('weekData', 'ecoReleve-Sensor/weekData')
+    config.add_route('weekData', 'ecoReleve-Core/weekData')
+    config.add_route('location_graph', 'ecoReleve-Core/individuals/location/graph')
+    config.add_route('station_graph', 'ecoReleve-Core/stations/graph')
+    config.add_route('individual_graph', 'ecoReleve-Core/stats/individuals/graph')
+    config.add_route('individual_monitored', 'ecoReleve-Core/stats/individuals/monitored/graph')
+    config.add_route('uncheckedDatas_graph', 'ecoReleve-Core/sensor/uncheckedDatas/graph')
+
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Security routes #####
@@ -115,6 +121,10 @@ def add_routes(config):
     ##### Export #####
     config.add_route('export', 'ecoReleve-Core/export/')
     config.add_route('export/themes', 'ecoReleve-Core/export/themes')
-    config.add_route('export/views', 'ecoReleve-Core/export/themes/{id}/views')
-    config.add_route('export/views/search', 'ecoReleve-Core/export/views')
-    config.add_route('export/views/action', 'ecoReleve-Core/export/views/{action}')
+    config.add_route('export/themes/id/views', 'ecoReleve-Core/export/themes/{id}/views')
+    config.add_route('export/views/id', 'ecoReleve-Core/export/views/{id}/') #geo, datas
+    config.add_route('export/views/id/action', 'ecoReleve-Core/export/views/{id}/{action}') #filtres, cols, count
+    config.add_route('export/views/getFile', 'ecoReleve-Core/export/views/getFile') #getFile
+
+
+

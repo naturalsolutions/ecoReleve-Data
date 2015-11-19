@@ -22,7 +22,7 @@ def uploadFileRFID(request):
     now=datetime.now()
     print('call ajax import')
     try:
-        creator = request.authenticated_userid
+        creator = request.authenticated_userid['iss']
         content = request.POST['data']
         idModule = request.POST['FK_Sensor']
      

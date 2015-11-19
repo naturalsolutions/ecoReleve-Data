@@ -9,8 +9,8 @@ from ..Models import (
     Equipment,
     IndividualList
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModules
-from ecoreleve_server.GenericObjets import ListObjectWithDynProp
+from ..GenericObjets.FrontModules import FrontModules
+from ..GenericObjets import ListObjectWithDynProp
 import transaction
 import json, itertools
 from datetime import datetime
@@ -238,12 +238,13 @@ def releasePost(request):
         # here add info for Individual Equipment protocol
 
         try:
-                indiv['sensor_id'] = int(indiv['fk_sensor'])
-                indiv['deploy'] = True
-                curEquipmentInd = getnewObs(equipmentIndID)
-                curEquipmentInd.UpdateFromJson(indiv)
-                curEquipmentInd.Station = curStation
-                equipmentIndList.append(curEquipmentInd)
+            indiv['id_taxon'] = indiv['id']
+            indiv['sensor_id'] = int(indiv['fk_sensor'])
+            indiv['deploy'] = True
+            curEquipmentInd = getnewObs(equipmentIndID)
+            curEquipmentInd.UpdateFromJson(indiv)
+            curEquipmentInd.Station = curStation
+            equipmentIndList.append(curEquipmentInd)
         except Exception as e:
             print_exc()
             continue

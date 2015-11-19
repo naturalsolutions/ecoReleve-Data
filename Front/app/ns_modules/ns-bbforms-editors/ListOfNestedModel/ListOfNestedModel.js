@@ -28,7 +28,7 @@ define([
     editors.ListOfNestedModel = Form.editors.List.extend({
 
         initialize: function (options) {
-
+        	console.log('passed');
             options.schema.model = Backbone.Model.extend({
                 schema:
                     options.schema.subschema
@@ -74,7 +74,7 @@ define([
         initialize: function (options) {
             options = options || {};
 
-           
+           	console.log('passed');
             options.list.validators = options.list.validators || []; // FIXME: Doesn't work when validators is undefined...
             options.list.validators.push({ type: 'subforms', field: options.list });
             options.list.hasNestedForm = true; // Disable field-level error handling because it is already handled in subform (see Field.setError())

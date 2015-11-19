@@ -76,7 +76,6 @@ define([
     editors.ListOfNestedModel = Form.editors.List.extend({
 
         initialize: function (options) {
-
             options.schema.model = Backbone.Model.extend({
                 schema:
                     options.schema.subschema

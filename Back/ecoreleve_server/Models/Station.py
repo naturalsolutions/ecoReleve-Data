@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession,FieldActivity
+from ..Models import Base,DBSession,FieldActivity
 from sqlalchemy import (Column,
  DateTime,
  Float,
@@ -49,6 +49,7 @@ class Station(Base,ObjectWithDynProp):
     Observations = relationship('Observation', back_populates = 'Station',cascade="all, delete-orphan")
     StationDynPropValues = relationship('StationDynPropValue',backref='Station',cascade="all, delete-orphan")
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
+    Comments = Column(String(250))
 
 
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
@@ -144,7 +145,7 @@ class StationDynPropValue(Base):
     ValueInt =  Column(Integer)
     ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
-    ValueFloat =  Column(Float)
+    ValueFloat =  Column(Numeric(12,5))
     FK_StationDynProp = Column(Integer, ForeignKey('StationDynProp.ID'))
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
     # station = relationship('Station',cascade="all, delete-orphan", single_parent = True)

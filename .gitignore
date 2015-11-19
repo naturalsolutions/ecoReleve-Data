@@ -21,3 +21,4 @@ Front/app/styles/*.css.map
 
 npm-debug.log
 web.config
+**/init.text
