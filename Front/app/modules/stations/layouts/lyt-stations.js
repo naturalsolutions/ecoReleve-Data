@@ -145,7 +145,7 @@ define([
 				filterLoaded : function(){
 					$(".StationDate").attr('placeholder','DD/MM/YYYY'); 
 					$("#dateTimePicker").on("dp.change", function (e) {
-            $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
+            $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
            });
 				}
 			});
