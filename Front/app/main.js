@@ -13,7 +13,7 @@ require.config({
     'templates': '../build/templates',
     'lyt-rootview': './base/rootview/lyt-rootview',
     'transition-region': './base/transition-region/transition-region',
-    'googleLoaer': 				'./vendors/google-maps-loader',
+    'googleLoaer': './vendors/google-maps-loader',
     'translater': 'translater',
 
     /*==========  NS modules  ==========*/
@@ -210,7 +210,8 @@ require.config({
   },
 });
 
-require(['app', 'templates','translater'], function(app, templates, Translater) {
+require(['app', 'templates','translater'],
+function(app, templates, Translater) {
   app.start();
   this.translater = Translater.getTranslater();
 });

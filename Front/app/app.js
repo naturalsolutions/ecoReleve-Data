@@ -4,9 +4,10 @@ define(['marionette', 'lyt-rootview', 'router', 'controller',
 	'IndivPicker',
 	'SensorPicker'
 	],
-function(Marionette, Lyt_rootview, Router, Controller) {
+function(Marionette, LytRootView, Router, Controller) {
 
-  var app = {}, JST = window.JST = window.JST || {};
+  var app = {};
+  var JST = window.JST = window.JST || {};
 
   Backbone.Marionette.Renderer.render = function(template, data) {
     if (!JST[template]) throw 'Template \'' + template + '\' not found!';
@@ -15,7 +16,7 @@ function(Marionette, Lyt_rootview, Router, Controller) {
 
   app = new Marionette.Application();
   app.on('start', function() {
-    app.rootView = new Lyt_rootview();
+    app.rootView = new LytRootView();
     app.controller = new Controller();
     app.router = new Router({controller: app.controller});
     app.rootView.render();

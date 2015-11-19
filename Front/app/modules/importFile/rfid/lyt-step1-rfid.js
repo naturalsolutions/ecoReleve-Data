@@ -60,7 +60,7 @@ define([
         //this.feedTpl() ;
       })
 			.fail(function() {
-  alert('error loading items, please check connexion to webservice');
+        alert('error loading items, please check connexion to webservice');
 			});
     },
 

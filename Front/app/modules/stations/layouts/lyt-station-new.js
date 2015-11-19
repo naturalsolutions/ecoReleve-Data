@@ -29,7 +29,7 @@ define([
     template: 'app/modules/stations/templates/tpl-station-new.html',
     events: {
       'focusout input[name="Dat e_"]': 'checkDate',
-      'keyup input[name="LAT"], input[name="LON"]': 'getLatLng',
+      'change input[name="LAT"], input[name="LON"]': 'getLatLng',
       'click #getCurrentPosition': 'getCurrentPosition',
       'click .tab-link': 'displayTab',
       'change select[name="FieldWorker"]': 'checkUsers',
@@ -44,7 +44,7 @@ define([
     },
 
     initialize: function(options) {
-		},
+    },
 
     onShow: function() {
       this.refrechView('#stWithCoords');
@@ -117,7 +117,7 @@ define([
           closeOnConfirm: true,
         },
 				function(isConfirm) {
-  $(e.target).val('');
+  				$(e.target).val('');
 				});
       }
     },
@@ -166,18 +166,34 @@ define([
         objectType: stTypeId,
         id: 0,
         afterShow: function() {
-          /*$(".datetime").attr('placeholder','DD/MM/YYYY');
-          					$("#dateTimePicker").on("dp.change", function (e) {
-                      $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(e.date);
-                     });*/
+          _this.$el.find('[name="monitored site"]').on('change', function() {
+            var msId = $(this).val();
+            _this.getCoordFromMs(msId);
+          });
         }
       });
 
       this.nsForm.savingSuccess =  function(model, resp) {
         _this.afterSave(model, resp);
-      }
+      };
 
       this.rdy = this.nsForm.jqxhr;
+    },
+
+    getCoordFromMs: function(msId) {
+      var _this = this;
+      var url = config.coreUrl + 'monitoredSite/' + msId  + '/history/?geo=true';
+
+      $.ajax({
+        context: this,
+        url: url,
+      }).done(function(data) {
+        var coords = data.features[0].geometry.coordinates;
+        _this.$el.find('input[name="LAT"]').val(coords[1]).change();
+        _this.$el.find('input[name="LON"]').val(coords[0]).change();
+      }).fail(function() {
+        console.error('an error occured');
+      });
     },
 
     afterSave: function(model, resp) {

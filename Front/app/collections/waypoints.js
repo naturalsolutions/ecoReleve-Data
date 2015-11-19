@@ -1,5 +1,5 @@
 define([
-	'backbone',
+  'backbone',
 ], function(Backbone) {
   'use strict';
   return Backbone.Collection.extend({
@@ -18,5 +18,4 @@ define([
       while (this.length > 0);
     }
   });
-
-	});
+});

@@ -71,7 +71,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       }else {
 
         var md = this.collection.findWhere({href: patern[0]});
-        console.log(md);
         $('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
 
         if (patern[1] && patern[1] != 'id' && patern[1] != 'type') {
