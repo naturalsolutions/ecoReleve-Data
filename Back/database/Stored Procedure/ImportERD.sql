@@ -18,7 +18,7 @@ BEGIN
 		------------------------- GESTION DES SUJETS -------------------------
 		print 'Individu insertion'
 		-- Insertion des nouveaux sujets
-		INSERT INTO [NewModelERD].[dbo].[Individual]
+		INSERT INTO [Individual]
 			   (
 			   [creationDate]
 			   ,[Age]

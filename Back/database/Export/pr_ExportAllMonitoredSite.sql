@@ -13,17 +13,17 @@ BEGIN
 
 
 	select * into TmpMonitoredSiteExport 
-	from [NewModelERD].dbo.MonitoredSite
+	from [EcoReleve_ECWP].dbo.MonitoredSite
 
 	--select * from TmpIndivExport
 	DECLARE @Req NVARCHAR(MAX)
 	DECLARE @ReqFrom NVARCHAR(MAX)
 	DECLARE @ReqSet NVARCHAR(MAX)
-	IF EXISTS (SELECT * from [NewModelERD].dbo.MonitoredSiteDynProp)
+	IF EXISTS (SELECT * from [EcoReleve_ECWP].dbo.MonitoredSiteDynProp)
 	BEGIN
 		SET @Req = ' ALTER TABLE TmpMonitoredSiteExport ADD@'
 
-		select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  from [NewModelERD].dbo.MonitoredSiteDynProp D
+		select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  from [EcoReleve_ECWP].dbo.MonitoredSiteDynProp D
 
 		SET @Req = replace(@Req,'ADD@,','ADD ')
 
@@ -37,11 +37,11 @@ BEGIN
 		SET @ReqFrom =''
 
 		SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')																						
-		from [NewModelERD].dbo.MonitoredSiteDynProp P
+		from [EcoReleve_ECWP].dbo.MonitoredSiteDynProp P
 
 		SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
 
-		SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpMonitoredSiteExport EI JOIN (SELECT VN.FK_MonitoredSite ' + @ReqFrom + ' FROM   [NewModelERD].dbo.MonitoredSiteDynPropValuesNow VN GROUP BY VN.FK_MonitoredSite) V ON EI.ID = V.FK_MonitoredSite '
+		SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpMonitoredSiteExport EI JOIN (SELECT VN.FK_MonitoredSite ' + @ReqFrom + ' FROM   [EcoReleve_ECWP].dbo.MonitoredSiteDynPropValuesNow VN GROUP BY VN.FK_MonitoredSite) V ON EI.ID = V.FK_MonitoredSite '
 		exec ( @req)
 	END
 

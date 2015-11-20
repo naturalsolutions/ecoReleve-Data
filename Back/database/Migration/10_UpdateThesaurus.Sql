@@ -91,7 +91,7 @@ order by th.ValueString
 
 select distinct th.ValueString,T.TTop_Name,th.StartNodeId,p.Name DYnPropName,TC.TTop_PK_ID TOPConceptID,tc.TTop_Name TopConceptName, PT.Name Protocole, TCW.TTop_Name MauvaisTTOpConcept
 from #TermeThesaurus Th 
-JOIN ObservationDynPropValue V on V.ValueString = th.ValueString -- and v.FK_ObservationDynProp = th.FK_ObservationDynProp
+JOIN ObservationDynPropValue V on V.ValueString = th.ValueString  and v.FK_ObservationDynProp = th.FK_ObservationDynProp
 JOIN ObservationDynProp P on Th.FK_ObservationDynProp = p.ID 
 JOIN THESAURUS.dbo.TTopic T on th.ValueString = T.TTop_Name 
 JOIN THESAURUS.dbo.TTopic TC on TC.TTop_Name = T.TTop_Type
@@ -100,6 +100,7 @@ JOIN ProtocoleType PT on PT.ID = o.FK_ProtocoleType
 LEFT JOIN THESAURUS.dbo.TTopic TCW on TCW.TTop_PK_ID = Th.StartNodeId
 where FullPath =''
 order by Pt.Name, DYnPropName,th.ValueString
+
 
 
 
