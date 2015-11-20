@@ -14,10 +14,9 @@ define([
 	'L',
 	'leaflet_cluster',
 	'googleLoaer',
-	//'text!./tpl-legend.html',
 	'leaflet_google',
 
-], function($, _, Backbone , Marionette, L, cluster, GoogleMapsLoader //tpl_legend
+], function($, _, Backbone , Marionette, L, cluster, GoogleMapsLoader
 		) {
 
 	'use strict';  
@@ -45,8 +44,11 @@ define([
 			this.com.addModule(this);
 		}
 
+		this.totalElt=options.totalElt || false;
+
 		this.url=options.url;
 		this.geoJson=options.geoJson;
+
 
 		this.elem = options.element || 'map';
 		this.zoom = options.zoom || 10;
@@ -61,6 +63,8 @@ define([
 		this.dict={}; //list of markers
 		this.selectedMarkers = {}; // list of selected markers
 		this.geoJsonLayers = [];
+
+		this.lastImported = false;
 
 		this.init();
 	}
@@ -115,22 +119,6 @@ define([
 			this.selectedIcon = new L.DivIcon({className	: 'custom-marker selected'});
 			this.icon = new L.DivIcon({className			: 'custom-marker'});
 
-
-			if(this.url){
-				this.requestGeoJson(this.url);
-			}else{
-				if (this.cluster){
-					this.initClusters(this.geoJson);
-				}else{
-					this.initLayer(this.geoJson);
-				}
-				this.ready();
-			}
-
-
-		},
-
-		ready: function(){
 			this.setCenter();
 
 			this.map = new L.Map(this.elem, {
@@ -144,12 +132,30 @@ define([
 			});
 			this.google();
 
+			if(this.url){
+				this.requestGeoJson(this.url);
+			}else{
+				if (this.cluster){
+					this.initClusters(this.geoJson);
+				}else{
+					this.initLayer(this.geoJson);
+				}
+				this.ready();
+			}
+		},
+
+		ready: function(){
+			this.setTotal(this.geoJson);
+
 			if(this.legend){
 				this.addCtrl(tpl_legend);
 			}
 			if(this.markersLayer){
 				this.addMarkersLayer();
 			}
+
+			this.initErrorLayer();
+			this.displayError(this.geoJson);
 		},
 
 		google: function(){
@@ -212,7 +218,6 @@ define([
 					}else{
 						return ctx.getClusterIcon(cluster);
 					}
-
 				},
 			});
 			this.markersLayer = new CustomMarkerClusterGroup({
@@ -315,13 +320,12 @@ define([
 
 		setCenter: function(geoJson){
 			if(!geoJson || (geoJson.features.length == 0) ){
-				this.center = new L.LatLng(0,0);
+				this.center = new L.LatLng(30,0);
 			}else{
 				this.center = new L.LatLng(
 					geoJson.features[0].geometry.coordinates[1],
 					geoJson.features[0].geometry.coordinates[0]
 				);
-				this.center = new L.LatLng(0,0);
 			}
 		},
 
@@ -418,11 +422,7 @@ define([
 				className: classe,
 				iconSize: new L.Point(size, size)
 			});
-
 		},
-
-
-
 
 		/*==========  updateClusterParents :: display selection inner cluster from childs to parents ==========*/
 		updateClusterParents: function(m, parents){
@@ -571,7 +571,6 @@ define([
 			});
 		},
 
-
 		selectOne: function(id){
 			if(this.selection){
 			var marker;
@@ -591,9 +590,6 @@ define([
 			if(!this.selectedMarkers[id])
 				this.selectedMarkers[id] = marker;
 		},
-
-
-
 
 		//from child to parent
 		selectMultiple: function(ids){
@@ -633,8 +629,6 @@ define([
 		},
 
 		/*==========  resetMarkers :: reset a list of markers  ==========*/
-
-
 		addMarker: function(m, lat, lng, popup, icon){
 			if(m){
 				m.addTo(this.map);
@@ -671,7 +665,6 @@ define([
 			}
 		},
 
-
 		resetAll: function(){
 			this.updateLayers(this.geoJson);
 		},
@@ -693,7 +686,6 @@ define([
 			}
 
 			this.topParent = firstProp;
-
 
 			this.updateAllClusters(firstProp, true);
 		},
@@ -729,27 +721,54 @@ define([
 				return features;
 		},
 
+		updateFromServ: function(param){
+			var _this = this;
+			if(param)
+				this.searchCriteria = param;
+			//station last imported?
+				console.log(this.lastImported);
+			if(this.lastImported){
+				var data = {
+					'criteria': JSON.stringify(this.searchCriteria),
+					'lastImported' : this.lastImported,
+				};
+			}else{
+				var data = {
+					'criteria': JSON.stringify(this.searchCriteria),
+				};
+			}
+
+			$.ajax({
+				url: this.url,
+				data: data,
+			}).done(function(geoJson) {
+				if (_this.cluster){
+					_this.updateLayers(geoJson);
+				}else{
+					_this.initLayer(geoJson);
+				}
+			});
+			return;
+		},
+
+
+		lastImportedUpdate: function(lastImported){
+			this.lastImported = lastImported;
+			this.updateFromServ();
+		},
 		//apply filters on the map from a collection
+
+		//param can be filters or directly a collection
 		filter: function(param){
+
+
 			//TODO : refact
 			var _this = this;
 			if(this.url){
-				$.ajax({
-					url: this.url,
-					data: {
-						'criteria': JSON.stringify( param)
-					},
-				}).done(function(geoJson) {
-					if (_this.cluster){
-						_this.updateLayers(geoJson);
-					}else{
-						_this.initLayer(geoJson);
-					}
-				});
+				this.updateFromServ(param);
 				return;
-			}
+			}else{
 			var geoJson;
-
 			var coll = _.clone(param);
 			geoJson = this.coll2GeoJson(coll);
 			coll = param;
@@ -767,30 +786,39 @@ define([
 				}
 				//todo : amelioration
 				this.selectMultiple(checkedMarkers);
-			/*
-			}else{
-				this.updateLayers(geoJson);
-			}*/
+			}
 		},
 
-		initErrorWarning: function(msg){
-			$('#'+this.elem).before('<div class="map-error"><div class="msg col-sm-8">'+msg+'</div></div>');
+		setTotal: function(geoJson){
+			if(this.totalElt){
+				this.total = 	geoJson.total;
+				this.totalElt.html(this.total);
+			}
 		},
 
-		errorWarning: function(msg){
-			$('.map-error').fadeIn();
-			$('.map-error .msg').html(msg);
+		initErrorLayer: function(){
+			$('#'+this.elem).append('<div id="errorLayer" class="errorLayer hidden"><legend><span class="glyphicon glyphicon-warning-sign"></span> Too much datas to display on the map, please affinate your query</legend></div>');
+			this.errorElt = $('#'+this.elem + ' #errorLayer');
+		},
+
+		displayError: function(geoJson){
+			this.errorElt.addClass('hidden');
+			if(geoJson){
+				if(geoJson.exceed)
+					this.errorElt.removeClass('hidden');
+			}
 		},
 
 		updateLayers: function(geoJson){
+			this.displayError(geoJson);
+			//?
 			if(geoJson == false){
-				this.errorWarning('<i>There is too much datas to display on the map. <br /> Please be more specific in your filters.</i>');
 				if(this.markersLayer){
 					this.map.removeLayer(this.markersLayer);
 				}
 				return false;
 			}
-			$('.map-error').fadeOut('slow');
+
 			if(this.markersLayer){
 				this.map.removeLayer(this.markersLayer);
 			}
@@ -799,13 +827,11 @@ define([
 				this.initClusters(geoJson);
 				this.addMarkersLayer();
 			}
-
 			if(this.bbox){
 				this.addBBox(this.markersLayer);
 			}
+			this.setTotal(geoJson);
 		},
-
-
 	}
 	return( Map );
 });

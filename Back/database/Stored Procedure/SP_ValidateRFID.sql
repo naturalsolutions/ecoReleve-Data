@@ -7,13 +7,14 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-alter PROCEDURE [dbo].[sp_validate_rfid]
+CREATE PROCEDURE [dbo].[sp_validate_rfid]
 	@IdEquip int,
 	@freq int,
 	@user int,
 	@nb_insert int OUTPUT,
-	@error int OUTPUT,
-	@exist int OUTPUT
+	@exist int OUTPUT,
+	@error int OUTPUT 
+
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -70,11 +71,13 @@ BEGIN
 	UPDATE d SET FK_ind = iv.FK_Individual
 	FROM @data_to_insert d
 	JOIN IndividualDynPropValue iv
-		ON d.chip_code = iv.ValueString AND iv.FK_IndividualDynProp = 7 AND iv.StartDate <= d.date_
+		ON d.chip_code = iv.ValueString AND iv.FK_IndividualDynProp = 27 AND iv.StartDate <= d.date_
 	WHERE NOT EXISTS (
 			SELECT * FROM IndividualDynPropValue iv2 
 			WHERE iv.FK_Individual = iv2.FK_IndividualDynProp AND iv.FK_IndividualDynProp = iv2.FK_IndividualDynProp 
 			AND iv2.StartDate > iv.StartDate AND iv2.StartDate <= d.date_)
+
+	delete from @data_to_insert where FK_ind is null 
 
 	insert into @data_duplicate
 	SELECT d.PK_id
@@ -89,9 +92,10 @@ BEGIN
 
 
 	-- Update inserted data.
-	UPDATE VRfidData_With_equipSite SET validated = 1 , frequency= @freq
-	WHERE VRfidData_With_equipSite.ID IN (SELECT PK_id FROM @data_to_insert);
-	UPDATE VRfidData_With_equipSite SET checked = 1	
+	UPDATE t SET validated = 1 , frequency= @freq
+	from ecoReleve_Sensor.dbo.T_rfid t
+	WHERE t.ID IN (SELECT PK_id FROM @data_to_insert);
+	UPDATE VRfidData_With_equipSite SET checked = 1	Where equipID = @IdEquip
 
 
 	
@@ -106,6 +110,11 @@ END
 
 
 
+
+
+
 GO
+
+
 
 

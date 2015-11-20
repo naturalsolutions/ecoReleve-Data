@@ -8,10 +8,11 @@ from ..Models import (
     Individual_Location,
     Sensor,
     SensorType,
-    Equipment
+    Equipment,
+    IndividualList
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModules
-from ecoreleve_server.GenericObjets import ListObjectWithDynProp
+from ..GenericObjets.FrontModules import FrontModules
+from ..GenericObjets import ListObjectWithDynProp
 import transaction
 import json, itertools
 from datetime import datetime
@@ -45,14 +46,18 @@ def actionOnIndividuals(request):
 
 def count_ (request = None,listObj = None) :
     print('*****************  INDIVIDUAL COUNT***********************')
+    ModuleType = 'IndivFilter'
+    moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     if request is not None : 
         data = request.params
         if 'criteria' in data: 
             data['criteria'] = json.loads(data['criteria'])
             if data['criteria'] != {} :
                 searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
-
-        listObj = ListObjectWithDynProp(Individual)
+        else : 
+            searchInfo = {'criteria':None}
+        
+        listObj = ListObjectWithDynProp(Individual,moduleFront)
         count = listObj.count(searchInfo = searchInfo)
     else : 
         count = listObj.count()
@@ -245,7 +250,7 @@ def searchIndiv(request):
     print('**criteria********' )
     print(searchInfo['criteria'])
     start = datetime.now()
-    listObj = ListObjectWithDynProp(Individual,moduleFront)
+    listObj = IndividualList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
 
     stop = datetime.now()
@@ -261,6 +266,15 @@ def searchIndiv(request):
     result.append(dataResult)
     transaction.commit()
     return result
+
+
+def getIndivEquipmentAtDate(request):
+
+    data = request.json_body
+
+
+
+
 
 
 

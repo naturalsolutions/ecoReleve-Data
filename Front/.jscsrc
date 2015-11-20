@@ -1,0 +1,5 @@
+{
+    "preset": "google",
+    "excludeFiles": ["node_modules/**", "bower_components/**", "app/vendors/**", "app/ns_modules/**", "base/transition-region/**", "externalModules/**", ".grunt/**", "build/**"],
+    "requireCurlyBraces": null
+}

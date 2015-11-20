@@ -17,7 +17,8 @@ FROM
 	,CASE WHEN L.Date > S.StationDate THEN L.LON ELSE S.LON END  LON
 	,CASE WHEN L.Date > S.StationDate THEN L.ELE ELSE S.ELE END  ELE
 	,CASE WHEN L.Date > S.StationDate THEN NULL ELSE L.fk_station END  fk_station 
-	,CASE WHEN L.Date > S.StationDate THEN L.ID ELSE NULL END  fk_individualLocation 
+	,CASE WHEN L.Date > S.StationDate THEN L.ID ELSE NULL END  fk_individualLocation
+	,CASE WHEN L.Date > S.StationDate THEN L.type_ ELSE PT.Name END  Source
 	from (
 		select distinct LS.*,Os.ID fk_station,os.FK_ProtocoleType 
 		from TIndividualLastLocationSensor LS
@@ -31,7 +32,7 @@ FROM
 		union all
 		select LS.*,NULL fk_station , NULL FK_ProtocoleType from TIndividualLastLocationSensor LS
 		where not exists (select * from [EcoReleve_ECWP].dbo.Observation o where o.FK_Individual = LS.FK_Individual  and o.FK_ProtocoleType not in (select id from [EcoReleve_ECWP].dbo.ProtocoleType where name  in ('Nest description'))	 )
-	) L LEFT JOIN TStation S on S.ID = L.fk_station
+	) L LEFT JOIN TStation S on S.ID = L.fk_station LEFT JOIN [EcoReleve_ECWP].dbo.ProtocoleType PT on l.FK_ProtocoleType = PT.ID
 ) S LEFT JOIN VIndividuEquipementHisto E ON  e.StartDate <= S.LocalisationDate  and E.fk_individual = s.FK_Individual and e.Deploy =1 
 											and not exists (select * 
 															from VIndividuEquipementHisto E2 

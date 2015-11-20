@@ -22,4 +22,10 @@ SET NOCOUNT on
 
 	print ' export FirstStation '
 	exec pr_ExportFirstStation
+
+	print 'export LastLocationSensor'
+	exec pr_ExportIndividualLastLocationSensor
+
+	print ' export Last LocationAllSource '
+	exec pr_ExportIndividualLastLocationAllSource
 END

@@ -58,19 +58,29 @@ def checkIndiv(equipDate,fk_indiv):
     sensorEquip = DBSession.execute(fullQuery).scalar()
     return sensorEquip
 
+def checkSite(equipDate,fk_indiv):
+    e1 = aliased(Equipment)
+    subQuery = select([e1]).where(and_(e1.FK_Individual == Equipment.FK_Individual,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<equipDate)))
+
+    query = select([Equipment]).where(and_(~exists(subQuery),and_(Equipment.StartDate<equipDate,and_(Equipment.Deploy == 1,Equipment.FK_Individual == fk_indiv))))
+    fullQuery = select([True]).where(~exists(query))
+
+    sensorEquip = DBSession.execute(fullQuery).scalar()
+    return sensorEquip
+
 def checkEquip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     if fk_indiv is not None:
-        availableIndiv = checkIndiv(equipDate,fk_indiv)
+        availableToEquip = checkIndiv(equipDate,fk_indiv)
     else:
-        print('check Site')
+        availableToEquip = checkSite(equipDate,fk_indiv)
 
     availableSensor = checkSensor(fk_sensor,equipDate)
 
-    if availableIndiv and availableSensor:
+    if availableToEquip and availableSensor:
         return True
     else :
         availability = {}
-        if availableIndiv is None:
+        if availableToEquip is None:
             availability['indiv'] = False
             if availableSensor is None:
                 availability['sensor'] = False
@@ -128,7 +138,7 @@ def receive_set(target, value, oldvalue, initiator):
 
     typeName = target.GetType().Name
 
-    if 'equipment' in typeName.lower():
+    if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
         equipDate = target.Station.StationDate
         try :
             fk_sensor = target.GetProperty('sensor_id') 

@@ -4,14 +4,17 @@ define([
 	'backbone',
 	'marionette',
 	'backbone_forms',
+	'sweetAlert',
 	'requirejs-text!./Templates/NsFormsModule.html',
 	'ListOfNestedModel',
 	'AutocompleteEditor',
+	'sweetAlert',
 	'./NsFormsCustomFields',
-	'i18n',
 	'fancytree',
-	'bbAutoComp'
-], function ($, _, Backbone, Marionette, BackboneForm, tpl,ListOfNestedModel,AutocompleteEditor) {
+	'bbAutoComp',
+	'LatitudeEditor',
+	'LongitudeEditor',
+], function ($, _, Backbone, Marionette, BackboneForm, Swal, tpl,ListOfNestedModel,AutocompleteEditor) {
 	return Backbone.View.extend({
 		BBForm: null,
 		modelurl: null,
@@ -352,7 +355,19 @@ define([
 		},
 
 		butClickDelete: function(){
-			this.afterDelete();
+			var _this = this;
+			var opts = {
+				title : 'Are you sure?',
+				showCancelButton: true,
+				type: 'warning',
+				confirmButtonText: 'Yes, delete it!',
+				confirmButtonColor: '#DD6B55',
+				callback : function(){
+					_this.afterDelete();
+				}
+			};
+
+			this.swal(opts);
 		},
 
 
@@ -446,7 +461,26 @@ define([
 			if(this.buttonRegion[0]){
 				this.unbind();
 			}
-		}
+		},
+
+
+		swal: function(opts){
+			Swal({
+				title: opts.title || opts.responseText || 'error',
+				text: opts.text || '',
+				type: opts.type,
+				showCancelButton: opts.showCancelButton,
+				confirmButtonColor: opts.confirmButtonColor,
+				confirmButtonText: opts.confirmButtonText,
+				closeOnConfirm: opts.closeOnConfirm || true,
+			},
+			function(isConfirm){
+				//could be better
+				if(opts.callback){
+					opts.callback();
+				}
+			});
+		},
 	});
 
 });

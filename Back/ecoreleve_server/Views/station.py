@@ -6,10 +6,11 @@ from ..Models import (
     Observation,
     FieldActivity_ProtocoleType,
     Station_FieldWorker,
-    StationList
+    StationList,
+    MonitoredSitePosition
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModules, ModuleForms
-from ecoreleve_server.GenericObjets import ListObjectWithDynProp
+from ..GenericObjets.FrontModules import FrontModules, ModuleForms
+from ..GenericObjets import ListObjectWithDynProp
 import transaction
 import json, itertools
 from datetime import datetime
@@ -119,6 +120,8 @@ def updateStation(request):
     print('*********************** UPDATE Station *****************')
     data = request.json_body
     id = request.matchdict['id']
+    if 'creationDate' in data:
+        del data['creationDate']
     curSta = DBSession.query(Station).get(id)
     curSta.LoadNowValues()
     curSta.UpdateFromJson(data)
@@ -143,7 +146,7 @@ def insertOneNewStation (request) :
         if value != "" :
             data[items] = value
 
-    newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid)
+    newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid['iss'])
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
@@ -170,7 +173,7 @@ def insertListNewStations(request):
         newRow['fieldActivityId'] = 1
         newRow['precision'] = 10 #row['Precision']
         newRow['creationDate'] = dateNow
-        newRow['creator'] = 1 #request.authenticated_userid
+        newRow['creator'] = 1 #request.authenticated_userid['iss']
         newRow['FK_StationType']=4
         newRow['id'] = row['id']
 
@@ -246,8 +249,9 @@ def searchStation(request):
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = []
-    user = request.authenticated_userid
+    user = request.authenticated_userid['iss']
     user = 1 
+
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
@@ -322,8 +326,12 @@ def searchStation(request):
 
 def linkToMonitoredSite(request):
     curSta = DBSession.query(Station).get(request.matchdict['id'])
-    idSite = request.params['idSite']
+    data = request.json_body
+    idSite = data['siteId']
     curSta.FK_MonitoredSite = idSite
+    if data['updateSite'] : 
+        newSitePos = MonitoredSitePosition(StartDate=curSta.StationDate, LAT=curSta.LAT, LON=curSta.LON, ELE=curSta.ELE, Precision=curSta.precision, FK_MonitoredSite=idSite)
+        DBSession.add(newSitePos)
     transaction.commit()
     return {}
 

@@ -39,7 +39,13 @@ define([
 
 			this.model.set('pickerType', this.pickerType);
 
-			var value = options.model.get(options.schema.name);
+			var value;
+			if(options.model){
+				value = options.model.get(options.schema.name);
+			}else{
+				value = options.value;
+			}
+
 			if(value){
 				this.model.set('value', value);
 			}else{

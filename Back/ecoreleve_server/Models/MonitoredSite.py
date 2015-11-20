@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession,ModuleForms
+from ..Models import Base,DBSession,ModuleForms
 from sqlalchemy import (Column,
  DateTime,
  Float,
@@ -199,7 +199,7 @@ class MonitoredSiteDynPropValue(Base):
     ValueInt =  Column(Integer)
     ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
-    ValueFloat =  Column(Float)
+    ValueFloat =  Column(Numeric(12,5))
     FK_MonitoredSiteDynProp = Column(Integer, ForeignKey('MonitoredSiteDynProp.ID'))
     FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'))
 

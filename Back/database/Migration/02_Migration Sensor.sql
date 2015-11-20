@@ -1,5 +1,6 @@
 
 
+
 -------------- INSERT  sensor Argos and GSM -------------------------------------------------------------------
 INSERT INTO Sensor(
 	UnicIdentifier

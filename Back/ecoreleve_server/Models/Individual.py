@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession
+from ..Models import Base,DBSession
 from sqlalchemy import (Column,
  DateTime,
  Float,
@@ -83,7 +83,7 @@ class IndividualDynPropValue(Base):
     ValueInt =  Column(Integer)
     ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
-    ValueFloat =  Column(Float)
+    ValueFloat =  Column(Numeric(12,5))
     FK_IndividualDynProp = Column(Integer, ForeignKey('IndividualDynProp.ID'))
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
 
@@ -128,4 +128,4 @@ class Individual_Location(Base):
     creator =  Column(Integer)
     creationDate = Column(DateTime)
     type_ = Column(String(10))
-    OriginalData_ID = Column(String(25))
+    # Original_ID = Column(String(25))

@@ -20,26 +20,51 @@ class Generator :
             'DATETIME':'date',
             'BIT':'boolean'
             }
+        self.dictFilter = {
+            'VARCHAR':'Text',
+            'NVARCHAR':'Text',
+            'INTEGER':'Number',
+            'DECIMAL':'Number',
+            'DATETIME':'DateTimePicker',
+        }
         self.table=Base.metadata.tables[table]
         self.cols=[]
 
     def get_col(self,columnsList=False, checked=False):
         ###### model of columnsList #####
         final=[]
-        for col in columnsList:
-            field_name=col
-            field_label=col
-            field_type=str(self.table.c[field_name].type).split('(')[0]
-            if field_type in self.dictCell:
-                cell_type=self.dictCell[field_type]
-            else:
-                cell_type='string'
-            final.append({'name':field_name,
-                'label':field_label,
-                'cell':cell_type,
-                'renderable':True,
-                'editable':False})
-            self.cols.append({'name':field_name,'type_grid':cell_type})
+        if columnsList :
+            for col in columnsList:
+                field_name=col
+                field_label=col
+                field_type=str(self.table.c[field_name].type).split('(')[0]
+                if field_type in self.dictCell:
+                    cell_type=self.dictCell[field_type]
+                else:
+                    cell_type='string'
+                final.append({'name':field_name,
+                    'label':field_label,
+                    'cell':cell_type,
+                    'renderable':True,
+                    'editable':False})
+                # self.cols.append({'name':field_name,'type_grid':cell_type})
+        else : 
+            for col in self.table.c:
+                field_name=col.name
+                field_label=col.name
+                
+                field_type=self.table.c[col.name].type
+                if field_type in self.dictCell:
+                    cell_type=self.dictCell[field_type]
+                else:
+                    cell_type='string'
+                final.append({'name':field_name,
+                    'label':field_label,
+                    'cell':cell_type,
+                    'renderable':False,
+                    'editable':False})
+                self.cols.append({'name':field_name,'type_grid':cell_type})
+
         if(checked):
             final.append({'name': 'import','label': 'Import', 'cell': 'select-row', 'headerCell' : 'select-all'})
         return final
@@ -50,21 +75,23 @@ class Generator :
             name_c = str(column.name)
             try : 
                 type_c = str(column.type)
-                print(type_c)
-                print(type(type_c))
             except: pass
-            if re.compile('VARCHAR').search(type_c):
-                   type_c = 'string'
-            data.append({'name':name_c, 'type':type_c})
+            if type_c in self.dictFilter :
+                type_c = self.dictFilter[type_c]
+            else : 
+                type_c = 'string'
+            data.append({'name':name_c, 'type':type_c , 'title':name_c })
         return data
 
     def where_(self,query,col,operator,value):
         return query.where(eval_.eval_binary_expr(self.table.c[col], operator, value))
 
-    def getFullQuery(self,criteria={},count=False):
+    def getFullQuery(self,criteria={},count=False, columnsList = None):
         if count:
             query = select([func.count()]).select_from(self.table)
-        else :
+        elif columnsList is not None :
+            query = select(columnsList)
+        else:
             query = select(self.table.c)
         for obj in criteria:
             if obj['Value'] != None and obj['Value']!='':
@@ -75,10 +102,10 @@ class Generator :
                 query=self.where_(query,Col, obj['Operator'], obj['Value'])
         return query
 
-    def search(self,criteria={},offset=None,per_page=None, order_by=None) :
+    def search(self,criteria={},offset=None,per_page=None, order_by=None, columnsList = None) :
         result=[]
         total=None
-        query = self.getFullQuery(criteria)
+        query = self.getFullQuery(criteria,columnsList=columnsList)
         if offset!=None:
             query, total=self.get_page(query,offset,per_page, order_by)
 
@@ -142,9 +169,9 @@ class Generator :
                 #         properties[col.replace('_',' ')] = row[col]
                 geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point', 'coordinates':[row[lon],row[lat]]}})
             transaction.commit()
-            return {'type':'FeatureCollection', 'features': geoJson, 'exceed': False}
+            return {'type':'FeatureCollection', 'features': geoJson, 'exceed': False, 'total':countResult}
         else :
-            return {'type':'FeatureCollection', 'features': [],'exceed': True}
+            return {'type':'FeatureCollection', 'features': [],'exceed': True, 'total':countResult}
 
     def case(self, row, arg) :
         if( arg in row ) :
