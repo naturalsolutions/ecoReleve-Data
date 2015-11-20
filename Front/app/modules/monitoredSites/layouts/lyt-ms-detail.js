@@ -159,6 +159,7 @@ define([
     },
 
     displayForm: function(id) {
+      var _this = this;
       this.nsform = new NsForm({
         name: 'IndivForm',
         modelurl: config.coreUrl + 'monitoredSite',
@@ -182,8 +183,7 @@ define([
           method: 'DELETE',
           contentType: 'application/json'
         }).done(function(resp) {
-          //temp fix
-          Backbone.history.loadUrl(Backbone.history.fragment);
+          Backbone.history.navigate(_this.rootUrl, {trigger : true});
         }).fail(function(resp) {
         });
       };

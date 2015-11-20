@@ -169,8 +169,10 @@ define([
         id: 'accordion',
         onRender: function() {
           var _this = this;
-          this.$el.on('show.bs.collapse', function() {
-            _this.$el.find('.in').collapse('hide');
+          this.$el.on('show.bs.collapse', function(e) {
+            if(!$(e.target).is('li')){
+              _this.$el.find('.in').collapse('hide');
+            }
           });
         },
       });

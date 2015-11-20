@@ -1,70 +1,72 @@
 define([
-	'jquery',
-	'backbone',
-	'backbone_forms',
+  'jquery',
+  'backbone',
+  'backbone_forms',
 
 ], function(
-	$, Backbone, Form
+  $, Backbone, Form
 ){
-	'use strict';
-	return Form.editors.TimePicker = Form.editors.Base.extend({
+  'use strict';
+  return Form.editors.TimePicker = Form.editors.Base.extend({
 
 
-		previousValue: '',
+    previousValue: '',
 
-		events: {
-			'hide': "hasChanged"
-		},
+    events: {
+      'hide': "hasChanged"
+    },
 
-		hasChanged: function(currentValue) {
-			if (currentValue !== this.previousValue){
-				this.previousValue = currentValue;
-				this.trigger('change', this);
-			}
-		},
+    hasChanged: function(currentValue) {
+      if (currentValue !== this.previousValue){
+        this.previousValue = currentValue;
+        this.trigger('change', this);
+      }
+    },
 
-		initialize: function(options) {
-			Form.editors.Base.prototype.initialize.call(this, options);
-			this.template = options.template || this.constructor.template;
-			this.options = options;
-		},
+    initialize: function(options) {
+      Form.editors.Base.prototype.initialize.call(this, options);
+      this.template = options.template || this.constructor.template;
+      this.options = options;
+    },
 
-		getValue: function() {
-			var date= new Date;
-			return this.el.children['Date_'].value
-		},
+    getValue: function() {
+      var date= new Date;
+      return this.el.children['Date_'].value
+    },
 
-		render: function(){
-			var options = this.options;
-			var schema = this.schema;
+    render: function(){
+      var options = this.options;
+      var schema = this.schema;
+      var value;
+      var required;
 
-			if(options.schema.validators){
-				var required = options.schema.validators[0];
-			}
+      if (options.schema.validators) {
+        required = options.schema.validators[0];
+      }
+      if (options.model) {
+        value = options.model.get(this.options.key);
+      }else{
+        value = '';
+      }
 
-			var $el = $($.trim(this.template({
-				value : options.model.get(this.options.key),
-				editorClass : schema.editorClass,
-				required: required,
-				editable : (options.schema.editable != false) ? '' : 'disabled',
-				hidden : (options.schema.editable != false) ? '' : 'hidden',
-			})));
-			this.setElement($el);
+      var $el = $($.trim(this.template({
+        value : value,
+        editorClass : schema.editorClass,
+        required: required,
+        editable : (options.schema.editable != false) ? '' : 'disabled',
+        hidden : (options.schema.editable != false) ? '' : 'hidden',
+      })));
+      this.setElement($el);
 
-			$($el[0]).datetimepicker({
-				format: 'LT'
-			});
+      $($el[0]).datetimepicker({
+        format: 'LT'
+      });
 
-			//tmp solution ? datetimepicker remove the value
-			if(this.options){
-				var value = this.options.model.get(this.options.key);
-				$el.find('input').val(value);
-			}
 
-			return this;
-		},
-		}, {
-		// STATICS
-			template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><input id="c24_Date_" name="Date_" class="<%= editorClass %> <%= required %>" type="text" placeholder="hh:mm:ss" data-date-format="HH:mm:ss" value="<%= value %>" <%= editable %> ><span class="input-group-addon <%= hidden %>"><span class="glyphicon-time glyphicon"></span></span></div>', null, Form.templateSettings)
-	});
+      return this;
+    },
+    }, {
+    // STATICS
+      template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><input id="c24_Date_" name="Date_" class="<%= editorClass %> <%= required %>" type="text" placeholder="hh:mm:ss" data-date-format="HH:mm:ss" value="<%= value %>" <%= editable %> ><span class="input-group-addon <%= hidden %>"><span class="glyphicon-time glyphicon"></span></span></div>', null, Form.templateSettings)
+  });
 });

@@ -178,6 +178,7 @@ define([
     },
 
     displayForm: function(id) {
+      var _this = this;
       this.nsform = new NsForm({
         name: 'IndivForm',
         modelurl: config.coreUrl + 'individuals',
@@ -188,6 +189,16 @@ define([
         reloadAfterSave: true,
         parent: this.parent
       });
+      this.nsform.afterDelete = function() {
+        var jqxhr = $.ajax({
+          url: config.coreUrl + 'individuals/' + id,
+          method: 'DELETE',
+          contentType: 'application/json'
+        }).done(function(resp) {
+          Backbone.history.navigate(_this.rootUrl, {trigger : true});
+        }).fail(function(resp) {
+        });
+      };
     },
     hideDetail: function() {
       $(this.ui.details).animate({

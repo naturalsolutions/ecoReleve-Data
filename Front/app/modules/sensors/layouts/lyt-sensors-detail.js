@@ -117,11 +117,21 @@ define([
         displayMode: 'display',
         objectType: this.type,
         id: id,
-        reloadAfterSave: false,
+        reloadAfterSave: true,
         parent: this.parent
       });
-    },
 
+      this.nsform.afterDelete = function() {
+        var jqxhr = $.ajax({
+          url: config.coreUrl + 'sensors/' + id,
+          method: 'DELETE',
+          contentType: 'application/json'
+        }).done(function(resp) {
+          Backbone.history.navigate(_this.rootUrl, {trigger : true});
+        }).fail(function(resp) {
+        });
+      };
+    },
 
     displayGrid: function(id) {
       var cols = [{
