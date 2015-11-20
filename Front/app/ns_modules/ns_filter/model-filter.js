@@ -230,7 +230,7 @@ define([
 			var operatorsOptions;
 			switch (type) {
 				case "Text":
-					return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' }];
+					return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' },, { label: 'In', val: 'In' }];
 					break;
 				case "DATETIME":
 					return operatorsOptions = ['<', '>', '=', '<>', '<=', '>='];

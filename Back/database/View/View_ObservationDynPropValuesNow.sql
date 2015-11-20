@@ -14,6 +14,7 @@ SELECT dyn_val.*,dyn.Name as Name,dyn.TypeProp FROM
 	 where not exists (select * from  ObservationDynPropValue  V2 
          where V2.FK_ObservationDynProp  =  dyn_val.FK_ObservationDynProp  and V2.FK_Observation = dyn_val.FK_Observation
         AND V2.startdate > dyn_val.startdate and V2.startdate <= GETDATE())
+	 		and dyn_val.Startdate <= GETDATE()
 
 
 
