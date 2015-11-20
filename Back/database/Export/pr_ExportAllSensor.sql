@@ -13,17 +13,17 @@ BEGIN
 
 
 	select * into TmpSensorExport 
-	from [NewModelERD].dbo.Sensor
+	from [EcoReleve_ECWP].dbo.Sensor
 
 	--select * from TmpIndivExport
 	DECLARE @Req NVARCHAR(MAX)
 	DECLARE @ReqFrom NVARCHAR(MAX)
 	DECLARE @ReqSet NVARCHAR(MAX)
-	IF EXISTS (SELECT * from [NewModelERD].dbo.SensorDynProp)
+	IF EXISTS (SELECT * from [EcoReleve_ECWP].dbo.SensorDynProp)
 	BEGIN
 		SET @Req = ' ALTER TABLE TmpSensorExport ADD@'
 
-		select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  from [NewModelERD].dbo.SensorDynProp D
+		select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  from [EcoReleve_ECWP].dbo.SensorDynProp D
 
 		SET @Req = replace(@Req,'ADD@,','ADD ')
 
@@ -37,11 +37,11 @@ BEGIN
 		SET @ReqFrom =''
 
 		SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')																						
-		from [NewModelERD].dbo.SensorDynProp P
+		from [EcoReleve_ECWP].dbo.SensorDynProp P
 
 		SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
 
-		SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpSensorExport EI JOIN (SELECT VN.FK_Sensor ' + @ReqFrom + ' FROM   [NewModelERD].dbo.SensorDynPropValuesNow VN GROUP BY VN.FK_Sensor) V ON EI.ID = V.FK_Sensor '
+		SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpSensorExport EI JOIN (SELECT VN.FK_Sensor ' + @ReqFrom + ' FROM   [EcoReleve_ECWP].dbo.SensorDynPropValuesNow VN GROUP BY VN.FK_Sensor) V ON EI.ID = V.FK_Sensor '
 		exec ( @req)
 	END
 

@@ -1,30 +1,5 @@
-SET IDENTITY_INSERT SensorType ON 
 
-INSERT INTO SensorType (
-ID,
-Name,
-Status)
-VALUES (1,'Argos',4)
 
-INSERT INTO SensorType (
-ID,
-Name,
-Status)
-VALUES (2,'GSM',4)
-
-INSERT INTO SensorType (
-ID,
-Name,
-Status)
-VALUES (3,'RFID',4)
-
-INSERT INTO SensorType (
-ID,
-Name,
-Status)
-VALUES (4,'VHF',4)
-
-SET IDENTITY_INSERT SensorType OFF
 
 -------------- INSERT  sensor Argos and GSM -------------------------------------------------------------------
 INSERT INTO Sensor(
@@ -125,9 +100,9 @@ SELECT v.begin_date,
 	NULL,
 	NULL,
 	NULL,
-	9,
+	p.ID,
 	s.ID
-FROM [ECWP-eReleveData].[dbo].[TObj_Carac_value] v
+FROM [ECWP-eReleveData].[dbo].[TObj_Carac_value] v JOIN SensorDynProp P on p.Name = 'Frequency'
 JOIN Sensor s ON s.Original_ID = 'VHF_'+CONVERT(VARCHAR,v.fk_object)
 where v.Fk_carac = 5 
 
@@ -146,8 +121,8 @@ SELECT v.begin_date,
 	v.value_precision,
 	NULL,
 	NULL,
-	3,
+	p.ID,
 	s.ID
-FROM [ECWP-eReleveData].[dbo].[TObj_Carac_value] v
+FROM [ECWP-eReleveData].[dbo].[TObj_Carac_value] v JOIN SensorDynProp P on p.Name = 'Status'
 JOIN Sensor s ON s.Original_ID = 'VHF_'+CONVERT(VARCHAR,v.fk_object)
 where v.Fk_carac = 1

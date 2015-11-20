@@ -38,7 +38,7 @@ BEGIN
            ,[FK_Observation]
            ,[Name]
            ,[TypeProp])
-		SELECT * FROM [NewModelERD].dbo.ObservationDynPropValuesNow WITH(NOLOCK)
+		SELECT * FROM [EcoReleve_ECWP].dbo.ObservationDynPropValuesNow WITH(NOLOCK)
 		
 		CREATE CLUSTERED INDEX [IX_TObservationDynPropValue_Fk_Observation_autres] ON [dbo].TObservationDynPropValueNow
 				(
