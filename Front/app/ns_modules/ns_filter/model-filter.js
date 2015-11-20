@@ -209,6 +209,7 @@ define([
 		},
 
 		getValueOptions: function (DataRow) {
+
 			var valueOptions;
 			switch (DataRow['type']) {
 				case "Select": case 'Checkboxes':
@@ -227,6 +228,7 @@ define([
 		},
 
 		getOpOptions: function (type) {
+			console.log(type);
 			var operatorsOptions;
 			switch (type) {
 				case "Text":
@@ -326,6 +328,7 @@ define([
 			if (filters.length) {
 				var coll = _.clone(tmp);
 				_.filter(coll.models, function (obj) {
+
 					pass = true;
 
 					for (var i = filters.length - 1; i >= 0; i--) {
@@ -336,7 +339,11 @@ define([
 							val = filter['Value'];
 
 							objVal = obj.attributes[col];
-							var isDate = moment(objVal,'YYYY-MM-DD hh:mm:ss').isValid();  
+
+							console.log(objVal);
+
+							var isDate = moment(objVal).isValid();
+
 							if (isDate) {
 								pass = ctx.testDate(val, op, objVal);
 							} else {
@@ -418,45 +425,59 @@ define([
 			return true;
 		},
 
-		testDate: function (val, op, objVal) {
-			var dateA = moment(val);
-			var dateB = moment(objVal);
+		testDate: function (filterVal, op, colVal) {
+			var filterDate = moment(filterVal, 'DD/MM/YYYY HH:mm:ss');
+			var colDate = moment(colVal);
+
+
+			console.log(filterDate);
+			console.log(colDate);
+
+			
+/*			filterDate = filterDate.format('YYYY-MM-DD hh:mm:ss');
+			colDate = colDate.format('YYYY-MM-DD hh:mm:ss');*/
+/*
+			console.log(val);
+			console.log(collVal);
+			console.log(filterDate);
+			console.log(colDate);
+
+*/
 			switch (op.toLowerCase()) {
 				case '=':
-					if (!(dateB.isSame(dateA))) {
+					if (!(colDate.isSame(filterDate))) {
 						return false;
 					};
 					break;
 				case '<>':
-					if (dateB.isSame(dateA)) {
+					if (colDate.isSame(filterDate)) {
 						return false;
 					};
 					break;
 				case '>':
-					if ((dateA.isAfter(dateB))) {
+					if ((filterDate.isAfter(colDate))) {
 						return false;
 					};
 					break;
 				case '<':
-					if ((dateA.isBefore(dateB))) {
+					if ((filterDate.isBefore(colDate))) {
 						return false;
 					};
 					break;
 					//todo : verify those 2
 				case '>=':
-					if ((dateA.isAfter(dateB)) || (dateB.isSame(dateA))) {
+					if ((filterDate.isAfter(colDate)) || (colDate.isSame(filterDate))) {
 						return false;
 					};
 					break;
 				case '<=':
-					if ((dateA.isBefore(dateB)) || (dateB.isSame(dateA))) {
+					if ((filterDate.isBefore(colDate)) || (colDate.isSame(filterDate))) {
 						return false;
 					};
 					break;
 				default:
 					return false;
 					break;
-
 			};
 			return true;
 
