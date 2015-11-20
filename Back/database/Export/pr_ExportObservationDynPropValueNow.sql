@@ -6,7 +6,7 @@ CREATE PROCEDURE pr_ExportObservationDynPropValueNow
 	
 AS
 BEGIN
-	IF NOT EXISTS (SELECT * FROM TImportInfo I WHERE I.ImportInfoName = 'ExportObservationDynPropValueNow' and convert(datetime,I.ImportInfoValue,121) > getdate()-0.1)
+	IF NOT EXISTS (SELECT * FROM TImportInfo I WHERE I.ImportInfoName = 'ExportObservationDynPropValueNow' and convert(datetime,I.ImportInfoValue,121) > getdate()-0.01)
 	BEGIN
 		IF EXISTS (select * from sysobjects where name='TObservationDynPropValueNow' and type='U')
 			DROP TABLE TObservationDynPropValueNow
