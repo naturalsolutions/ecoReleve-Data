@@ -25,7 +25,6 @@ define([
 
     events: {
       'change input': 'changeValue',
-      'click #test': 'test'
     },
 
     initialize: function(options) {
@@ -39,12 +38,12 @@ define([
     },
 
     onShow: function() {
-      this.$el.find('.exp-file:first input').prop('checked', true).change();
-      this.$el.find('.exp-file:first').addClass('active');
+      this.$el.find('.tile-inside:first input').prop('checked', true).change();
+      this.$el.find('.tile-inside:first').addClass('active');
     },
 
     changeValue: function(e) {
-      this.$el.find('label.exp-file').each(function() {
+      this.$el.find('label.tile-inside').each(function() {
         $(this).removeClass('active');
       });
 
@@ -52,10 +51,6 @@ define([
       this.model.set('fileType', $(e.target).val());
     },
 
-    test: function() {
-      var model = this.model;
-      this.getFile();
-    },
 
     validate: function() {
       return this.model;

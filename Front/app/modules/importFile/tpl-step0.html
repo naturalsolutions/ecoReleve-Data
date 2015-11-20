@@ -3,67 +3,37 @@
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span data-i18n="import.gpxHelp">GPX, or GPS eXchange Format is an XML schema designed as a common GPS data format. It can be used to describe waypoints, tracks, and routes.</span></p>
 </div>
 
-	<div class="grouped fields clearfix tile-inside-container">
+	<div class="clearfix text-center">
+		
 
-		<div class="new tile-inside smile" title="GPX, or GPS eXchange Format is an XML schema designed as a common GPS data format. It can be used to describe waypoints, tracks, and routes.">
-			<div id="radio-tile" class="manual-tile-import">
-				<div class="center">
-					<i class="icon-five reneco reneco-gpx_format "></i>
-				
-				</div>
-					<div class="radio">
-					<label>
-					GPX <br>
-					<input type="radio" name="filetype" value="gpx" checked>
-					
-					</label>
-				</div>
-			</div>
-		</div>
 
-		<div class="new tile-inside smile">
-			<div id="radio-tile" class="manual-tile-import" >
-				<div class="center">
-					<i class="icon-five reneco reneco-rfid_format "></i>
-				
-				</div>
-				<div class="radio">
-					<label>
-					RFID<br>
-					<input type="radio" name="filetype" value="rfid">
-					
-					</label>
-				</div>
-			</div>
-		</div>
+		<label for="gpx" class="tile-inside text-center">
+				<i class="icon-five reneco reneco-gpx_format "></i>
+				<br>
+				<span>GPX file</span><br>
+				<input name="file" id="gpx" type="radio" value="gpx">
+		</label>
+		
+		<label for="rfid" class="tile-inside text-center">
+				<i class="icon-five reneco reneco-rfid_format"></i><br>
+				<br>
+				<span>RFID file</span><br>
+				<input name="file" id="rfid" type="radio" value="rfid">
+		</label>
+		
+		<label for="gsm" class="tile-inside text-center">
+				<i class="icon-five reneco reneco-gsm_format"></i><br>
+				<br>
+				<span>GSM files</span><br>
+				<input name="file" id="gsm" type="radio" value="gsm">
+		</label>
 
-		<div class="new tile-inside smile">
-			<div id="radio-tile" class="manual-tile-import" >
-				<div class="center">
-					<i class="icon-five reneco reneco-gsm_format "></i>
-				</div>
-				<div class="radio">
-					<label>
-					GSM <br>
-					<input type="radio" name="filetype" value="gsm">
-					</label>
-				</div>
-			</div>
-		</div>
-
-		<div class="new tile-inside smile">
-			<div id="radio-tile" class="manual-tile-import">
-				<div class="center">
-					<i class="icon-five reneco reneco-argos_format "></i>
-				</div>
-				<div class="radio">
-					<label>
-					ARGOS <br>
-					<input type="radio" name="filetype" value="argos" >
-					</label>
-				</div>
-			</div>
-		</div>
+		<label for="argos" class="tile-inside text-center">
+				<i class="icon-five reneco reneco-argos_format"></i><br>
+				<br>
+				<span>Argos files</span><br>
+				<input name="file" id="argos" type="radio" value="argos">
+		</label>
 
 	</div>
 
