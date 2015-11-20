@@ -17,7 +17,7 @@ define([
     template: 'app/modules/importFile/tpl-step0.html',
 
     events: {
-      'click .tile-inside': 'selectTile',
+      'change input': 'changeValue',
     },
 
     name: 'File type selection',
@@ -26,14 +26,20 @@ define([
 		},
 
     onShow: function() {
+      this.$el.find('.tile-inside:first input').prop('checked', true).change();
+      this.$el.find('.tile-inside:first').addClass('active');
 		},
 
     validate: function() {
+      console.log(this.$el.find('.tile-inside input[type="radio"]:checked').val());
       return this.$el.find('.tile-inside input[type="radio"]:checked').val();
     },
 
-    selectTile: function(e) {
-      $(e.currentTarget).find('input').prop('checked', true);
+    changeValue: function(e) {
+      this.$el.find('label.tile-inside').each(function() {
+        $(this).removeClass('active');
+      });
+      $(e.target).parent().addClass('active');
     },
   });
 });
