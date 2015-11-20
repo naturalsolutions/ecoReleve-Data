@@ -13,17 +13,17 @@ BEGIN
 
 
 	select * into TmpStationExport 
-	from [NewModelERD].dbo.Station
+	from [EcoReleve_ECWP].dbo.Station
 
 	--select * from TmpIndivExport
 	DECLARE @Req NVARCHAR(MAX)
 	DECLARE @ReqFrom NVARCHAR(MAX)
 	DECLARE @ReqSet NVARCHAR(MAX)
-	IF EXISTS (SELECT * from [NewModelERD].dbo.StationDynProp)
+	IF EXISTS (SELECT * from [EcoReleve_ECWP].dbo.StationDynProp)
 	BEGIN
 		SET @Req = ' ALTER TABLE TmpStationExport ADD@'
 
-		select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  from [NewModelERD].dbo.StationDynProp D
+		select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  from [EcoReleve_ECWP].dbo.StationDynProp D
 
 		SET @Req = replace(@Req,'ADD@,','ADD ')
 
@@ -37,11 +37,11 @@ BEGIN
 		SET @ReqFrom =''
 
 		SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')																						
-		from [NewModelERD].dbo.StationDynProp P
+		from [EcoReleve_ECWP].dbo.StationDynProp P
 
 		SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
 
-		SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpStationExport EI JOIN (SELECT VN.FK_Station ' + @ReqFrom + ' FROM   [NewModelERD].dbo.StationDynPropValuesNow VN GROUP BY VN.FK_Station) V ON EI.ID = V.FK_Station '
+		SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpStationExport EI JOIN (SELECT VN.FK_Station ' + @ReqFrom + ' FROM   [EcoReleve_ECWP].dbo.StationDynPropValuesNow VN GROUP BY VN.FK_Station) V ON EI.ID = V.FK_Station '
 		exec ( @req)
 	END
 
