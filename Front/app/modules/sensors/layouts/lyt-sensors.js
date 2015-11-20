@@ -10,7 +10,7 @@ define([
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
 	'ns_filter/model-filter',
-	'./lyt-sensor-details',
+	'./lyt-sensors-detail',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
 	Com, NsGrid, NsFilter, LytSensorDetails
@@ -21,7 +21,7 @@ define([
 
   return Marionette.LayoutView.extend({
 
-    template: 'app/modules/sensor/templates/tpl-sensor.html',
+    template: 'app/modules/sensors/templates/tpl-sensors.html',
     className: 'full-height animated white rel',
 
     events: {
@@ -45,7 +45,7 @@ define([
       detail: '#detail',
     },
 
-    urlRoot: '#sensor/',
+    rootUrl: '#sensors/',
 
     initialize: function(options) {
       if (options.id) {
@@ -107,6 +107,7 @@ define([
     },
 
     newSensor: function(e) {
+      var _this = this;
       this.ui.btnNew.tooltipList({
         availableOptions: [{
           label: 'Argos',
@@ -122,7 +123,9 @@ define([
           val: 'vhf'
         }],
         liClickEvent: function(liClickValue) {
-          Backbone.history.navigate(this.urlRoot + 'new/' + liClickValue, {trigger: true});
+          var url = _this.rootUrl + 'new/' + liClickValue;
+          console.log(url);
+          Backbone.history.navigate(url, {trigger: true});
         },
         position: 'top'
       });
@@ -150,14 +153,14 @@ define([
       this.ui.detail.removeClass('hidden');
       this.grid.currentRow = row;
       this.grid.upRowStyle();
-      Backbone.history.navigate(this.urlRoot + id, {trigger: false})
+      Backbone.history.navigate(this.rootUrl + id, {trigger: false})
     },
 
     rowDbClicked: function(row) {
 		},
 
     hideDetails: function() {
-      Backbone.history.navigate(this.urlRoot, {trigger: false});
+      Backbone.history.navigate(this.rootUrl, {trigger: false});
       this.ui.detail.addClass('hidden');
     },
     updateModels: function(e) {

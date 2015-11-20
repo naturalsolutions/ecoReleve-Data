@@ -1,4 +1,4 @@
-
+//radio
 define([
   'jquery',
   'underscore',
@@ -7,60 +7,59 @@ define([
   'sweetAlert',
   'translater',
   'config',
+
   'ns_modules/ns_com',
   'ns_grid/model-grid',
   'ns_filter/model-filter',
-  './lyt-indiv-details',
-  './lyt-new-individual',
-  'i18n'
+
+  './lyt-ms-detail',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv
+  Com, NsGrid, NsFilter, LytMsDetail
 ) {
 
   'use strict';
 
   return Marionette.LayoutView.extend({
 
-    template: 'app/modules/individual/templates/tpl-individual.html',
+    template: 'app/modules/monitoredSites/templates/tpl-ms.html',
     className: 'full-height animated white rel',
-
-    events: {
-      'click #btnFilter': 'filter',
-      'click #back': 'hideDetails',
-      'click button#clear': 'clearFilter',
-      'click button#createNew': 'newIndividual'
-    },
 
     ui: {
       'grid': '#grid',
       'paginator': '#paginator',
       'filter': '#filter',
       'detail': '#detail',
-      'btnNew': '#createNew'
+    },
+
+    events: {
+      'click #btnFilter': 'filter',
+      'click #back': 'hideDetails',
+      'click button#clear': 'clearFilter'
     },
 
     regions: {
-      detail: '#detail',
+      detail: '#detail'
     },
 
+    rootUrl : '#monitoredSites',
+
     initialize: function(options) {
-      if (options.id) {
-        this.indivId = options.id;
-      }
-      this.com = new Com();
       this.translater = Translater.getTranslater();
+      this.com = new Com();
+
     },
 
     onRender: function() {
+
       this.$el.i18n();
     },
 
     onShow: function() {
       this.displayFilter();
       this.displayGrid();
-      if (this.indivId) {
-        this.detail.show(new LytIndivDetail({indivId: this.indivId}));
+      if (this.options.id) {
+        this.detail.show(new LytMsDetail({id: this.options.id}));
         this.ui.detail.removeClass('hidden');
       }
     },
@@ -71,7 +70,7 @@ define([
         pageSize: 20,
         pagingServerSide: true,
         com: this.com,
-        url: config.coreUrl + 'individuals/',
+        url: config.coreUrl + 'monitoredSite/',
         urlParams: this.urlParams,
         rowClicked: true,
         totalElement: 'totalEntries',
@@ -88,23 +87,23 @@ define([
     },
 
     rowClicked: function(row) {
-      this.detail.show(new LytIndivDetail({
+      this.detail.show(new LytMsDetail({
         model: row.model,
         globalGrid: this.grid
       }));
-      var id = row.model.get('ID');
-      Backbone.history.navigate('#individual/' + id, {trigger: false});
+      this.ui.detail.removeClass('hidden');
       this.grid.currentRow = row;
       this.grid.upRowStyle();
-      this.ui.detail.removeClass('hidden');
+      var id = row.model.get('ID');
+      Backbone.history.navigate('monitoredSite/' + id, {trigger: false});
     },
-
     rowDbClicked: function(row) {
+
     },
 
     displayFilter: function() {
       this.filters = new NsFilter({
-        url: config.coreUrl + 'individuals/',
+        url: config.coreUrl + 'monitoredSite/',
         com: this.com,
         filterContainer: this.ui.filter,
       });
@@ -117,26 +116,9 @@ define([
       this.filters.reset();
     },
     hideDetails: function() {
-      Backbone.history.navigate('#individual/', {trigger: false});
       this.ui.detail.addClass('hidden');
-    },
-    newIndividual: function() {
-      // TODO  implementation of group creation front/end
-      this.ui.btnNew.tooltipList({
-        availableOptions: [{
-          label: 'Individual',
-          val: 'individual'
-        }/*, {
-              label : 'Group',
-              val : 'group'
-          }*/
-        ],
-        liClickEvent: function(liClickValue) {
-          Backbone.history.navigate('#individual/new/' + liClickValue, {trigger: true});
-        },
-        position: 'top'
-      });
+      Backbone.history.navigate(this.rootUrl, {trigger: false});
 
-    }
+    },
   });
 });

@@ -20,7 +20,7 @@ define([
   'use strict';
 
   return Marionette.LayoutView.extend({
-    template: 'app/modules/sensor/templates/tpl-sensor-details.html',
+    template: 'app/modules/sensors/templates/tpl-sensors-detail.html',
     className: 'full-height animated white',
     events: {
       'click #hideSensorDetails': 'hideDetail',
@@ -46,7 +46,7 @@ define([
       'rgNavbar': '#navbar'
     },
 
-    urlRoot: '#sensor/',
+    rootUrl: '#sensors/',
 
     initialize: function(options) {
       if (options.id) {
@@ -66,7 +66,7 @@ define([
       this.display(model);
       this.map.url = config.coreUrl + 'sensors/' + this.sensorId  + '?geo=true';
       this.map.updateFromServ();
-      Backbone.history.navigate(this.urlRoot + this.sensorId, {trigger: false});
+      Backbone.history.navigate(this.rootUrl + this.sensorId, {trigger: false});
     },
 
     onRender: function() {

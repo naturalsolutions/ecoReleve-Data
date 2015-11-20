@@ -20,7 +20,7 @@ define([
 
   return Marionette.LayoutView.extend({
 
-    template: 'app/modules/monitoredSite/templates/tpl-ms-details.html',
+    template: 'app/modules/monitoredSites/templates/tpl-ms-detail.html',
     className: 'full-height animated white',
 
     events: {
@@ -48,6 +48,8 @@ define([
       'rgNavbar': '#navbar'
     },
 
+    rootUrl: '#monitoredSites/',
+
     initialize: function(options) {
       if (options.id) {
         this.monitoredSiteId = options.id;
@@ -67,7 +69,7 @@ define([
       this.display(model);
       this.map.url = config.coreUrl + 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true';
       this.map.updateFromServ();
-      Backbone.history.navigate('#monitoredSite/' + this.monitoredSiteId, {trigger: false});
+      Backbone.history.navigate(this.rootUrl + this.monitoredSiteId, {trigger: false});
     },
 
     onRender: function() {

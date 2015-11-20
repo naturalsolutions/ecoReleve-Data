@@ -12,9 +12,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       {label: 'Release', href: 'release', icon: 'reneco-to_release'},
       {label: 'Validate', href: 'validate', icon: 'reneco-validate'},
       {label: 'Stations', href: 'stations', icon: 'reneco-stations'},
-      {label: 'Individuals', href: 'individual', icon: 'reneco-individuals'},
-      {label: 'Sensors', href: 'sensor', icon: 'reneco-sensors'},
-      {label: 'Monitored Sites', href: 'monitoredSite', icon: 'reneco-sensors'},
+      {label: 'Individuals', href: 'individuals', icon: 'reneco-individuals'},
+      {label: 'Sensors', href: 'sensors', icon: 'reneco-sensors'},
+      {label: 'Monitored Sites', href: 'monitoredSites', icon: 'reneco-sensors'},
       {label: 'Export', href: 'export', icon: 'reneco-export'},
       ]);
     },
@@ -24,21 +24,21 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 
       'importFile(/)': 'importFile',
 
-      'individual(/)': 'individual',
-      'individual/new(/)': 'newIndividual',
-      'individual(/):id(/)': 'individual',
+      'individuals/new(/)': 'newIndividual',
+      'individuals/:id(/)': 'individuals',
+      'individuals(/)': 'individuals',
 
-      'stations(/)': 'stations',
       'stations/new(/)': 'newStation',
-      'stations(/):id(/)': 'stations',
+      'stations/:id(/)': 'stations',
+      'stations(/)': 'stations',
 
-      'sensor/new(/)': 'newSensor',
-      'sensor(/)': 'sensor',
-      'sensor(/):id(/)': 'sensor',
+      'sensors/new/:type(/)': 'newSensor',
+      'sensors/:id(/)': 'sensors',
+      'sensors(/)': 'sensors',
 
-      'monitoredSite(/)': 'monitoredSite',
-      'monitoredSite/new(/)': 'newMonitoredSite',
-      'monitoredSite(/):id(/)': 'monitoredSite',
+      'monitoredSites/new(/)': 'newMonitoredSite',
+      'monitoredSites/:id(/)': 'monitoredSites',
+      'monitoredSites(/)': 'monitoredSites',
 
       'validate/:type(/)': 'validateType',
       'validate(/)': 'validate',
@@ -69,6 +69,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 
       if (patern[0] == '*route') {
         $('#arial').html('');
+        $('#arialSub').html('');
       }else {
 
         var md = this.collection.findWhere({href: patern[0]});
