@@ -19,7 +19,7 @@ define([
 
   'use strict';
   return Marionette.ItemView.extend({
-    template: 'app/modules/sensor/templates/tpl-sensor-new.html',
+    template: 'app/modules/sensors/templates/tpl-sensors-new.html',
     className: 'white full-height',
 
     ui: {
@@ -32,7 +32,10 @@ define([
       'click #btnCancel': 'cancel'
     },
 
+    rootUrl: '#sensors/',
+
     initialize: function(options) {
+      console.log(options.type);
       this.model = new Backbone.Model();
       this.model.set('type', options.type);
       switch (options.type){
@@ -108,7 +111,7 @@ define([
       this.nsForm.butClickSave();
     },
     cancel: function() {
-      Backbone.history.navigate('sensor',{trigger: true});
+      Backbone.history.navigate(this.rootUrl,{trigger: true});
     }
   });
 });

@@ -19,7 +19,7 @@ define([
 
   return Marionette.LayoutView.extend({
 
-    template: 'app/modules/individual/templates/tpl-indiv-details.html',
+    template: 'app/modules/individuals/templates/tpl-individuals-detail.html',
     className: 'full-height animated white',
 
     events: {
@@ -44,6 +44,8 @@ define([
       'rgNavbar': '#navbar'
     },
 
+    rootUrl : '#individuals/',
+
     initialize: function(options) {
       if (options.indivId) {
         this.indivId = options.indivId;
@@ -62,7 +64,7 @@ define([
       this.display(model);
       this.map.url = config.coreUrl + 'individuals/' + this.indivId  + '?geo=true';
       this.map.updateFromServ();
-      Backbone.history.navigate('#individual/' + this.indivId, {trigger: false});
+      Backbone.history.navigate(this.rootUrl + this.indivId, {trigger: false});
     },
 
     onRender: function() {

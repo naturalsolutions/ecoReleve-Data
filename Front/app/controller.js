@@ -1,56 +1,58 @@
 define(['marionette', 'config',
 
-	'./base/home/lyt-home',
+  './base/home/lyt-home',
 
-	/*==========  modules  ==========*/
+  /*==========  modules  ==========*/
 
-	'./modules/stations/layouts/lyt-stations',
-	'./modules/stations/layouts/lyt-station-new',
+  './modules/stations/layouts/lyt-stations',
+  './modules/stations/layouts/lyt-station-new',
 
-	'./modules/importFile/lyt-entry-importFile',
+  './modules/importFile/lyt-entry-importFile',
 
-	'./modules/individual/layouts/lyt-individual',
-	'./modules/individual/layouts/lyt-new-individual',
-	'./modules/individual/layouts/lyt-indiv-details',
+  './modules/individuals/layouts/lyt-individuals',
+  './modules/individuals/layouts/lyt-individuals-new',
+  './modules/individuals/layouts/lyt-individuals-detail',
 
-	'./modules/sensor/layouts/lyt-sensor',
-	'./modules/sensor/layouts/lyt-sensor-new',
+  './modules/sensors/layouts/lyt-sensors',
+  './modules/sensors/layouts/lyt-sensors-new',
 
-	'./modules/monitoredSite/layouts/lyt-ms',
-	'./modules/monitoredSite/layouts/lyt-ms-new',
+  './modules/monitoredSites/layouts/lyt-ms',
+  './modules/monitoredSites/layouts/lyt-ms-new',
 
-	'./modules/validate/lyt-sensorValidate',
-	'./modules/validate/lyt-sensorValidateType',
-	'./modules/validate/lyt-sensorValidateDetail',
-	'./modules/release/layouts/lyt-release-station',
+  './modules/validate/lyt-sensorValidate',
+  './modules/validate/lyt-sensorValidateType',
+  './modules/validate/lyt-sensorValidateDetail',
+  './modules/release/layouts/lyt-release-station',
 
-	'./modules/export/lyt-export-stepper',
+  './modules/export/lyt-export-stepper',
 
 ],function(Marionette, config,
-	LytHome,
+  LytHome,
 
-	/*==========  modules  ==========*/
+  /*==========  modules  ==========*/
 
-	LytStations,
-	LytStationsNew,
+  LytStations,
+  LytStationsNew,
 
-	LytImportFile,
-	LytIndividual,
-	LytIndividualNew,
-	LytIndivDetails,
+  LytImportFile,
 
-	LytSensor,
-	LytSensorNew,
+  LytIndividuals,
+  LytIndividualsNew,
+  LytIndivDetails,
 
-	LytMonitoredSite,
-	LytMonitoredNew,
-	LytSensorValidate,
-	LytSensorValidateType,
-	LytSensorValidateDetail,
+  LytSensors,
+  LytSensorsNew,
 
-	LytReleaseStation,
+  LytMonitoredSites,
+  LytMonitoredSitesNew,
 
-	LytExport
+  LytSensorValidate,
+  LytSensorValidateType,
+  LytSensorValidateDetail,
+
+  LytReleaseStation,
+
+  LytExport
 
 ) {
   'use strict';
@@ -75,38 +77,36 @@ define(['marionette', 'config',
     stations: function(id) {
       this.rgMain.show(new LytStations({id: id}));
     },
-
     newStation: function() {
       this.rgMain.show(new LytStationsNew());
     },
 
-    individual: function(id) {
-      this.rgMain.show(new LytIndividual({id: id}));
+    individuals: function(id) {
+      this.rgMain.show(new LytIndividuals({id: id}));
     },
-
     newIndividual: function(type) {
-      this.rgMain.show(new LytIndividualNew({type: type}));
+      console.log('plouf');
+      this.rgMain.show(new LytIndividualsNew({type: type}));
     },
 
-    sensor: function(id) {
-      this.rgMain.show(new LytSensor({id: id}));
+    sensors: function(id) {
+      this.rgMain.show(new LytSensors({id: id}));
     },
-
     newSensor: function(type) {
-      this.rgMain.show(new LytSensorNew({type: type}));
+      console.log(type);
+      this.rgMain.show(new LytSensorsNew({type: type}));
     },
 
-    monitoredSite: function(id) {
-      this.rgMain.show(new LytMonitoredSite({id: id}));
+    monitoredSites: function(id) {
+      this.rgMain.show(new LytMonitoredSites({id: id}));
     },
     newMonitoredSite: function(type) {
-      this.rgMain.show(new LytMonitoredNew());
+      this.rgMain.show(new LytMonitoredSitesNew());
     },
 
     validate: function() {
       this.rgMain.show(new LytSensorValidate());
     },
-
     validateType: function(type) {
       this.rgMain.show(new LytSensorValidateType({
         type: type
