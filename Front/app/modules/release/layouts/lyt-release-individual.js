@@ -1,20 +1,19 @@
 //radio
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'config',
-	'ns_modules/ns_com',
-	'ns_grid/model-grid',
-	'ns_filter/model-filter',
-	'SensorPicker',
-	'requirejs-text!modules/release/templates/tpl-sensor-picker.html',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'config',
+  'ns_modules/ns_com',
+  'ns_grid/model-grid',
+  'ns_filter/model-filter',
+  'SensorPicker',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, SensorPicker, tplSensorPicker
+  Com, NsGrid, NsFilter, SensorPicker
 ) {
 
   'use strict';
@@ -52,32 +51,23 @@ define([
       this.releaseMethod = null;
 
       var _this = this;
-      var mySensorPicker = SensorPicker.extend({
-        initialize: function(options) {
-          var template =  _.template(tplSensorPicker);
-          this.$el.html(template);
-          this.com = new Com();
-          this.displayGrid();
-          this.displayFilter();
-          this.translater = Translater.getTranslater();
-        },
+      var MySensorPicker = SensorPicker.extend({
         rowClicked: function(row) {
           console.log(row);
           var id = row.model.get('ID');
-
           var unicName = row.model.get('UnicIdentifier');
           _this.currentRow.model.set({unicSensorName: unicName});
           this.setValue(id);
         },
         getValue: function() {
-				},
+        },
         setValue: function(value) {
           _this.currentRow.model.set({FK_Sensor: value});
           console.log(_this.currentRow.model)
           this.hidePicker();
         },
       });
-      this.sensorPicker = new mySensorPicker();
+      this.sensorPicker = new MySensorPicker();
       this.sensorPicker.render();
 
       this.initGrid();
@@ -125,7 +115,7 @@ define([
     displayGrid: function() {
 
       this.ui.grid.html(this.grid.displayGrid());
-      /*			this.ui.paginator.html(this.grid.displayPaginator());*/
+      /*      this.ui.paginator.html(this.grid.displayPaginator());*/
     },
 
     displayFilter: function() {
@@ -240,14 +230,14 @@ define([
         cancelButtonText: 'New Release',
         closeOnConfirm: true,
       },
-			function(isConfirm) {
+      function(isConfirm) {
   //could be better
   if (isConfirm && callback) {
     callback();
   }else {
     Backbone.history.navigate('release', {trigger: true});
   }
-			});
+      });
     },
 
     toolTipShow: function(e) {
