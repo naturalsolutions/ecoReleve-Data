@@ -76,19 +76,6 @@ WHERE ValueString IS NOT NULL and NOT EXISTS (Select *
 
 -------------------- MAUVAIS NOEUD DE DEPART 
 
- 
--- Mauvais noeud de départ
-select * from #TermeThesaurus T 
-WHERE NOT EXISTS (select * from THESAURUS.dbo.TTopic Th where Th.TTop_PK_ID = T.StartNodeId)
-and FullPath =''
-
--- correspondance pour mauvais noeud de départ
-select th.ValueString,T.TTop_Name,th.StartNodeId,p.Name,TC.TTop_PK_ID,tc.TTop_Name 
-from #TermeThesaurus Th JOIN ObservationDynProp P on Th.FK_ObservationDynProp = p.ID 
-JOIN THESAURUS.dbo.TTopic T on th.ValueString = T.TTop_Name JOIN THESAURUS.dbo.TTopic TC on TC.TTop_Name = T.TTop_Type
-where FullPath =''
-order by th.ValueString
-
 select distinct th.ValueString,T.TTop_Name,th.StartNodeId,p.Name DYnPropName,TC.TTop_PK_ID TOPConceptID,tc.TTop_Name TopConceptName, PT.Name Protocole, TCW.TTop_Name MauvaisTTOpConcept
 from #TermeThesaurus Th 
 JOIN ObservationDynPropValue V on V.ValueString = th.ValueString  and v.FK_ObservationDynProp = th.FK_ObservationDynProp
@@ -128,7 +115,7 @@ UPDATE V
  OUTPUT inserted.ID into UPDATEDThesaurus
  -- select TOP 10 *
 from [dbo].[ObservationDynPropValue] V 
-JOIN  #TermeThesaurus T on v.FK_ObservationDynProp = V.FK_ObservationDynProp and T.ValueString = V.ValueString and T.FullPath <> ''
+JOIN  #TermeThesaurus T on v.FK_ObservationDynProp = T.FK_ObservationDynProp and T.ValueString = V.ValueString and T.FullPath <> ''
 	AND V.ID not in (select fk_observationdynpropvalue from UPDATEDThesaurus OT )
 
 
