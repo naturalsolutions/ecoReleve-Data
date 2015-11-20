@@ -170,11 +170,11 @@ def insertListNewStations(request):
         newRow['LAT'] = row['latitude']
         newRow['LON'] = row['longitude']
         newRow['Name'] = row['name']
-        newRow['fieldActivityId'] = 1
+        newRow['fieldActivityId'] = row['fieldActivity']
         newRow['precision'] = 10 #row['Precision']
         newRow['creationDate'] = dateNow
         newRow['creator'] = 1 #request.authenticated_userid['iss']
-        newRow['FK_StationType']=4
+        newRow['FK_StationType']= 4
         newRow['id'] = row['id']
 
         try :
