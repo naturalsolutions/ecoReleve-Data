@@ -1,4 +1,4 @@
-//radio
+
 define([
   'jquery',
   'underscore',
@@ -7,57 +7,62 @@ define([
   'sweetAlert',
   'translater',
   'config',
-
   'ns_modules/ns_com',
   'ns_grid/model-grid',
   'ns_filter/model-filter',
-
-  './lyt-ms-details',
+  './lyt-individuals-detail',
+  './lyt-individuals-new',
+  'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsFilter, LytMsDetail
+  Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv
 ) {
 
   'use strict';
 
   return Marionette.LayoutView.extend({
 
-    template: 'app/modules/monitoredSite/templates/tpl-ms.html',
+    template: 'app/modules/individuals/templates/tpl-individuals.html',
     className: 'full-height animated white rel',
+
+    events: {
+      'click #btnFilter': 'filter',
+      'click #back': 'hideDetails',
+      'click button#clear': 'clearFilter',
+      'click button#createNew': 'newIndividual'
+    },
 
     ui: {
       'grid': '#grid',
       'paginator': '#paginator',
       'filter': '#filter',
       'detail': '#detail',
-    },
-
-    events: {
-      'click #btnFilter': 'filter',
-      'click #back': 'hideDetails',
-      'click button#clear': 'clearFilter'
+      'btnNew': '#createNew'
     },
 
     regions: {
-      detail: '#detail'
+      detail: '#detail',
     },
 
-    initialize: function(options) {
-      this.translater = Translater.getTranslater();
-      this.com = new Com();
+    rootUrl: '#individuals/',
 
+    initialize: function(options) {
+      if (options.id) {
+        this.indivId = options.id;
+      }
+      this.com = new Com();
+      this.translater = Translater.getTranslater();
     },
 
     onRender: function() {
-
       this.$el.i18n();
     },
 
     onShow: function() {
       this.displayFilter();
       this.displayGrid();
-      if (this.options.id) {
-        this.detail.show(new LytMsDetail({id: this.options.id}));
+      if (this.indivId) {
+        this.detail.show(new LytIndivDetail({indivId: this.indivId}));
         this.ui.detail.removeClass('hidden');
       }
     },
@@ -68,7 +73,7 @@ define([
         pageSize: 20,
         pagingServerSide: true,
         com: this.com,
-        url: config.coreUrl + 'monitoredSite/',
+        url: config.coreUrl + 'individuals/',
         urlParams: this.urlParams,
         rowClicked: true,
         totalElement: 'totalEntries',
@@ -85,23 +90,23 @@ define([
     },
 
     rowClicked: function(row) {
-      this.detail.show(new LytMsDetail({
+      this.detail.show(new LytIndivDetail({
         model: row.model,
         globalGrid: this.grid
       }));
-      this.ui.detail.removeClass('hidden');
+      var id = row.model.get('ID');
+      Backbone.history.navigate(this.rootUrl + id, {trigger: false});
       this.grid.currentRow = row;
       this.grid.upRowStyle();
-      var id = row.model.get('ID');
-      Backbone.history.navigate('monitoredSite/' + id, {trigger: false});
+      this.ui.detail.removeClass('hidden');
     },
-    rowDbClicked: function(row) {
 
+    rowDbClicked: function(row) {
     },
 
     displayFilter: function() {
       this.filters = new NsFilter({
-        url: config.coreUrl + 'monitoredSite/',
+        url: config.coreUrl + 'individuals/',
         com: this.com,
         filterContainer: this.ui.filter,
       });
@@ -114,9 +119,25 @@ define([
       this.filters.reset();
     },
     hideDetails: function() {
+      Backbone.history.navigate(this.rootUrl, {trigger: false});
       this.ui.detail.addClass('hidden');
-      Backbone.history.navigate('#monitoredSite/', {trigger: false});
-
     },
+
+    newIndividual: function() {
+      Backbone.history.navigate(this.rootUrl + 'new/', {trigger: true});
+      /*
+      // TODO  implementation of group creation front/end
+      this.ui.btnNew.tooltipList({
+        availableOptions: [{
+          label: 'Individual',
+          val: 'individual'
+        }
+        ],
+        liClickEvent: function(liClickValue) {
+          Backbone.history.navigate(this.rootUrl + 'new/' + liClickValue, {trigger: true});
+        },
+        position: 'top'
+      });*/
+    }
   });
 });

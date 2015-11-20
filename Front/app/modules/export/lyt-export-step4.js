@@ -1,13 +1,13 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'config',
-	'ns_grid/model-grid',
-	'sweetAlert',
-	'moment',
-	'i18n'
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'config',
+  'ns_grid/model-grid',
+  'sweetAlert',
+  'moment',
+  'i18n'
 ], function($, _, Backbone, Marionette, config, NsGrid, Swal, Moment
 ) {
   'use strict';
@@ -34,7 +34,7 @@ define([
 
       this.options.parent.finished = function() {
         _this.getFile();
-      }
+      };
     },
 
     onShow: function() {
@@ -50,7 +50,6 @@ define([
       $(e.target).parent().addClass('active');
       this.model.set('fileType', $(e.target).val());
     },
-
 
     validate: function() {
       return this.model;
@@ -70,12 +69,12 @@ define([
         confirmButtonText: opts.confirmButtonText,
         closeOnConfirm: opts.closeOnConfirm || true,
       },
-			function(isConfirm) {
-  //could be better
-  if (opts.callback) {
-    opts.callback();
-  }
-			});
+      function(isConfirm) {
+        //could be better
+        if (opts.callback) {
+          opts.callback();
+        }
+      });
     },
 
     getFile: function() {
