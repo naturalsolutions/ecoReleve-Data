@@ -95,7 +95,7 @@ define([
       this.grid.currentRow = row;
       this.grid.upRowStyle();
       var id = row.model.get('ID');
-      Backbone.history.navigate('monitoredSite/' + id, {trigger: false});
+      Backbone.history.navigate(this.rootUrl + id, {trigger: false});
     },
     rowDbClicked: function(row) {
 
