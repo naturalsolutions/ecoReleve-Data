@@ -42,7 +42,7 @@ define([
       detail: '#detail'
     },
 
-    rootUrl : '#monitoredSites',
+    rootUrl : '#monitoredSites/',
 
     initialize: function(options) {
       this.translater = Translater.getTranslater();
