@@ -40,6 +40,7 @@ def actionOnIndividuals(request):
     '0' : getForms,
     'getFields': getFields,
     'getFilters': getFilters,
+    'getType': getIndividualType
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -86,13 +87,17 @@ def getForms(request) :
     return schema
 
 def getFields(request) :
-
     ModuleType = request.params['name']
     if ModuleType == 'default' :
         ModuleType = 'IndivFilter'
     cols = Individual().GetGridFields(ModuleType)
     transaction.commit()
     return cols
+
+def getIndividualType(request):
+    query = select([IndividualType.ID.label('val'), IndividualType.Name.label('label')])
+    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
