@@ -67,7 +67,7 @@ define([
 
     reloadFromNavbar: function(model) {
       this.display(model);
-      this.map.url = config.coreUrl + 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true';
+      this.map.url = config.coreUrl + 'monitoredSites/' + this.monitoredSiteId  + '/history/?geo=true';
       this.map.updateFromServ();
       Backbone.history.navigate(this.rootUrl + this.monitoredSiteId, {trigger: false});
     },
@@ -106,7 +106,7 @@ define([
         pageSize: 10,
         pagingServerSide: true,
         name: 'MonitoredSiteGridHistory',
-        url: config.coreUrl + 'monitoredSite/' + id  + '/history/',
+        url: config.coreUrl + 'monitoredSites/' + id  + '/history/',
         urlParams: this.urlParams,
         rowClicked: true,
 
@@ -137,7 +137,7 @@ define([
         pageSize: 20,
         columns: colsEquip,
         pagingServerSide: false,
-        url: config.coreUrl + 'monitoredSite/' + id  + '/equipment',
+        url: config.coreUrl + 'monitoredSites/' + id  + '/equipment',
         urlParams: this.urlParams,
         rowClicked: true,
       });
@@ -150,7 +150,7 @@ define([
 
     displayMap: function(geoJson) {
       this.map = new NsMap({
-        url: config.coreUrl + 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true',
+        url: config.coreUrl + 'monitoredSites/' + this.monitoredSiteId  + '/history/?geo=true',
         zoom: 4,
         element: 'map',
         popup: true,
@@ -162,7 +162,7 @@ define([
       var _this = this;
       this.nsform = new NsForm({
         name: 'IndivForm',
-        modelurl: config.coreUrl + 'monitoredSite',
+        modelurl: config.coreUrl + 'monitoredSites',
         formRegion: this.ui.form,
         buttonRegion: [this.ui.formBtns],
         displayMode: 'display',
@@ -179,7 +179,7 @@ define([
 
       this.nsform.afterDelete = function() {
         var jqxhr = $.ajax({
-          url: config.coreUrl + 'monitoredSite/' + id,
+          url: config.coreUrl + 'monitoredSites/' + id,
           method: 'DELETE',
           contentType: 'application/json'
         }).done(function(resp) {

@@ -36,7 +36,7 @@ define([
       var self = this;
       this.nsForm = new NsForm({
         name: 'MonitoredSiteForm',
-        modelurl: config.coreUrl + 'monitoredSite',
+        modelurl: config.coreUrl + 'monitoredSites',
         buttonRegion: [],
         formRegion: this.ui.form,
         displayMode: 'edit',
