@@ -227,7 +227,6 @@ define([
     },
 
     getOpOptions: function (type) {
-      console.log(type);
       var operatorsOptions;
       switch (type) {
         case "Text":
