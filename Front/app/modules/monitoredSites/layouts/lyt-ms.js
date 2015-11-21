@@ -70,7 +70,7 @@ define([
         pageSize: 20,
         pagingServerSide: true,
         com: this.com,
-        url: config.coreUrl + 'monitoredSite/',
+        url: config.coreUrl + 'monitoredSites/',
         urlParams: this.urlParams,
         rowClicked: true,
         totalElement: 'totalEntries',
@@ -103,7 +103,7 @@ define([
 
     displayFilter: function() {
       this.filters = new NsFilter({
-        url: config.coreUrl + 'monitoredSite/',
+        url: config.coreUrl + 'monitoredSites/',
         com: this.com,
         filterContainer: this.ui.filter,
       });

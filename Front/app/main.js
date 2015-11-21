@@ -27,9 +27,8 @@ require.config({
     'FileUploadEditor': 'ns_modules/ns-bbforms-editors/FileUploadEditor/backboneForm-editors-fileUpload',
 
     //circular dependencies
-    'IndivPicker': 'ns_modules/ns-bbforms-editors/IndividualPicker/backboneForm-editors-individualPicker',
-    'MonitoredSitePicker': 'ns_modules/ns-bbforms-editors/MonitoredSitePicker/backboneForm-editors-monitoredSitePicker',
-    'SensorPicker': 'ns_modules/ns-bbforms-editors/SensorPicker/backboneForm-editors-SensorPicker',
+    
+    'objectPicker': 'ns_modules/ns-bbforms-editors/objectPicker/objectPicker',
     'LatitudeEditor': 'ns_modules/ns-bbforms-editors/Coordinates/LatitudeEditor',
     'LongitudeEditor': 'ns_modules/ns-bbforms-editors/Coordinates/LongitudeEditor',
 
