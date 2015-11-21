@@ -51,6 +51,8 @@ define([
       this.releaseMethod = null;
 
       var _this = this;
+
+      //todo: fix
       var MySensorPicker = ObjectPicker.extend({
         rowClicked: function(row) {
           var id = row.model.get('ID');
@@ -61,6 +63,7 @@ define([
         getValue: function() {
         },
         setValue: function(value) {
+          _this.currentRow.model.set({unicSensorName: value});
           _this.currentRow.model.set({FK_Sensor: value});
           this.hidePicker();
         },

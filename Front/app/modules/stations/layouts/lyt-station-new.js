@@ -1,23 +1,23 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'radio',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'radio',
 
-	'moment',
-	'dateTimePicker',
-	'sweetAlert',
-	'config',
+  'moment',
+  'dateTimePicker',
+  'sweetAlert',
+  'config',
 
-	'ns_form/NSFormsModuleGit',
+  'ns_form/NSFormsModuleGit',
 
-	'ns_map/ns_map',
+  'ns_map/ns_map',
 
-	'i18n'
+  'i18n'
 
 ], function($, _, Backbone, Marionette, Radio,
-	moment, datetime, Swal, config, NsForm, NsMap
+  moment, datetime, Swal, config, NsForm, NsMap
 ) {
 
   'use strict';
@@ -81,7 +81,6 @@ define([
           closeOnConfirm: true,
         });
       }
-
     },
 
     getLatLng: function() {
@@ -116,9 +115,9 @@ define([
           confirmButtonText: 'OK',
           closeOnConfirm: true,
         },
-				function(isConfirm) {
-  				$(e.target).val('');
-				});
+        function(isConfirm) {
+          $(e.target).val('');
+        });
       }
     },
 
@@ -163,7 +162,7 @@ define([
         objectType: stTypeId,
         id: 0,
         afterShow: function() {
-          _this.$el.find('[name="monitored site"]').on('change', function() {
+          _this.$el.find('[name="FK_MonitoredSite"]').on('change', function() {
             var msId = $(this).val();
             _this.getCoordFromMs(msId);
           });
@@ -179,7 +178,7 @@ define([
 
     getCoordFromMs: function(msId) {
       var _this = this;
-      var url = config.coreUrl + 'monitoredSite/' + msId  + '/history/?geo=true';
+      var url = config.coreUrl + 'monitoredSites/' + msId  + '/history/?geo=true';
 
       $.ajax({
         context: this,

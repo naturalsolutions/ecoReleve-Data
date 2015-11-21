@@ -222,7 +222,7 @@ def insertOneNewMonitoredSite (request) :
         if value != "" :
             data[items] = value
 
-    newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid )
+    newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid['iss'] )
     newMonitoredSite.MonitoredSiteType = DBSession.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
     newMonitoredSite.init_on_load()
     newMonitoredSite.UpdateFromJson(data)
