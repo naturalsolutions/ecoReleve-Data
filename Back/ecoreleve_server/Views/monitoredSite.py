@@ -43,6 +43,7 @@ def actionOnMonitoredSite(request):
     '0' : getForms,
     'getFields': getFields,
     'getFilters': getFilters,
+    'getType':getMonitoredSiteType
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -83,13 +84,17 @@ def getForms(request) :
     return schema
 
 def getFields(request) :
-
     ModuleType = request.params['name']
     if ModuleType == 'default' :
         ModuleType = 'MonitoredSiteGrid'
     cols = MonitoredSite().GetGridFields(ModuleType)
     transaction.commit()
     return cols
+
+def getMonitoredSiteType(request):
+    query = select([MonitoredSiteType.ID.label('val'), MonitoredSiteType.Name.label('label')])
+    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)

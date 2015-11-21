@@ -41,7 +41,7 @@ def actionOnSensors(request):
     'getModels' : getSensorModels,
     'getCompany' : getCompany,
     'getSerialNumber' : getSerialNumber,
-    'getSensorType' : getSensorType,
+    'getType' : getSensorType,
     'getUnicIdentifier' : getUnicIdentifier
     }
     actionName = request.matchdict['action']
@@ -97,24 +97,28 @@ def getSensorModels(request):
     sensorType = request.params['sensorType']
     query = select([distinct(Sensor.Model)]).where(Sensor.FK_SensorType == sensorType)
     response = getData(query)
+    transaction.commit()
     return response
 
 def getCompany (request):
     sensorType = request.params['sensorType']
     query = select([distinct(Sensor.Compagny)]).where(Sensor.FK_SensorType == sensorType)
     response = getData(query)
+    transaction.commit()
     return response
 
 def getSerialNumber (request):
     sensorType = request.params['sensorType']
     query = select([distinct(Sensor.SerialNumber)]).where(Sensor.FK_SensorType == sensorType)
     response = getData(query)
+    transaction.commit()
     return response
 
 def getUnicIdentifier (request):
     sensorType = request.params['sensorType']
     query = select([Sensor.UnicIdentifier.label('label'),Sensor.ID.label('val')]).where(Sensor.FK_SensorType == sensorType)
     response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    transaction.commit()
     return response
 
 def getData(query):
@@ -126,19 +130,13 @@ def getData(query):
         for key in curRow :
             if curRow[key] is not None :
                 response.append(curRow[key])
+                transaction.commit()
     return response
 
 def getSensorType(request):
-
-    query = select([SensorType.ID, SensorType.Name])
-    result = DBSession.execute(query).fetchall()
-    response = []
-    for row in result:
-        ele = {}
-        ele['label'] = row[1]
-        ele['val'] = row[0]
-        response.append(ele)
-
+    query = select([SensorType.ID.label('val'), SensorType.Name.label('label')])
+    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    transaction.commit()
     return response
 
 
