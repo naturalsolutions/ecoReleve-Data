@@ -29,13 +29,13 @@ BEGIN
 			   ,Original_ID
 			   ,Caisse_ID)
 			  OUTPUT inserted.ID into @TInsetedId
-		SELECT Getdate(),NULL,CONVERT(DATETIME,BD.PropValue,120) ,NULL,1,E.PropValue,'TRACK_'+CONVERT(VARCHAR,M.objectID),NULL
+		SELECT distinct Getdate(),NULL,CONVERT(DATETIME,BD.PropValue,120) ,NULL,1,E.PropValue,m.Provenance +'_'+CONVERT(VARCHAR,M.objectID),NULL
 		FROM  TMessageReceived M 
 	--	JOIN  TMessageReceivedDetail S ON M.pk_MessageReceived=S.fk_MessageReceived and S.PropName = 'TInd_Sexe'
 		JOIN  TMessageReceivedDetail BD ON M.pk_MessageReceived=BD.fk_MessageReceived and BD.PropName = 'TInd_DateNaissance'
 		JOIN  TMessageReceivedDetail E ON M.pk_MessageReceived=E.fk_MessageReceived and E.PropName = 'TInd_Espece'
-		WHERE Importdate IS NULL AND M.ObjectType ='Individu' AND m.Provenance = 'TRACK'
-		AND NOT EXISTS (SELECT * FROM [Individual] S WHERE [FK_IndividualType] =1 and S.Original_ID = 'TRACK_'+CONVERT(VARCHAR,m.ObjectId))
+		WHERE Importdate IS NULL AND M.ObjectType ='Individu' AND m.Provenance LIKE 'TRACK_ECWP%'
+		AND NOT EXISTS (SELECT * FROM [Individual] S WHERE [FK_IndividualType] =1 and S.Original_ID = m.Provenance +'_' +CONVERT(VARCHAR,m.ObjectId))
 		
 
 		print 'Inserting DYnPropValues'
@@ -48,7 +48,7 @@ BEGIN
 			   ,[ValueFloat]
 			   ,FK_Individual
 			   ,FK_IndividualDynProp)
-		SELECT GETDATE()
+		SELECT distinct  GETDATE()
 		,CASE WHEN DP.TypeProp = 'entier' THEN CONVERT(int,D.PropValue) ELSE NULL END
 		,CASE WHEN DP.TypeProp = 'string' THEN D.PropValue ELSE NULL END
 		,CASE WHEN DP.TypeProp = 'date' THEN CONVERT(DATETIME,D.PropValue,120) ELSE NULL END
@@ -56,17 +56,21 @@ BEGIN
 		,I.ID
 		,DP.ID
 		FROM 	TMessageReceived M 
-		JOIN Individual I on I.Original_Id = 'TRACK_'+CONVERT(VARCHAR,m.ObjectId)
+		JOIN Individual I on I.Original_Id = M.Provenance+'_' + CONVERT(VARCHAR,m.ObjectId)
 		JOIN  TMessageReceivedDetail D ON M.pk_MessageReceived=D.fk_MessageReceived
 		JOIN TMessageDynPropvsTrack CDP ON CDP.TrackName = D.PropName
 		JOIN IndividualDynProp DP ON CDP.ERDName = DP.Name
-		WHERE Importdate IS NULL AND M.ObjectType ='individu' AND m.Provenance = 'TRACK'
+		WHERE Importdate IS NULL AND M.ObjectType ='individu' AND m.Provenance LIKE 'TRACK_ECWP%'
 		AND i.ID in (select ID FROM @TInsetedId)
 		
+
+		-- TODO TRADUCTION DES VALEURS THESAURALES
+
+
 		UPDATE TMessageReceived
 		SET ImportDate=GETDATE()
 		WHERE ObjectType ='Individu'
-		AND ImportDate IS NULL AND Provenance = 'TRACK'
+		AND ImportDate IS NULL AND Provenance LIKE 'TRACK_ECWP%'
 		
 		commit tran
 	END TRY

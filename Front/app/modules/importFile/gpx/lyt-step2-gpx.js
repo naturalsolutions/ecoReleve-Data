@@ -98,7 +98,7 @@ define([
           type: 'Text',
           label: 'Name'
         },
-        2: {
+/*        2: {
           name: 'latitude',
           type: 'LatitudeEditor',
           label: 'Latitude'
@@ -107,7 +107,7 @@ define([
           name: 'longitude',
           type: 'LongitudeEditor',
           label: 'Longitude'
-        },
+        },*/
         4: {
           name: 'waypointTime',
           type: 'DateTimePicker',

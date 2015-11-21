@@ -1,15 +1,15 @@
 //radio
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'config',
-	'ns_grid/model-grid',
-	'ns_modules/ns_com',
-	'./lyt-sensorValidateDetail'
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'config',
+  'ns_grid/model-grid',
+  'ns_modules/ns_com',
+  './lyt-sensorValidateDetail'
 ], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com, LytSensorValidateDetail) {
 
   'use strict';
@@ -62,193 +62,192 @@ define([
           this.ui.frequency.find('option[value="60"]').prop('selected', true);
 
           this.cols = [
-						{
-  name: 'UnicIdentifier',
-  label: 'Unic Identifier',
-  editable: false,
-  cell: 'string'
-						},{
-  name: 'FK_Sensor',
-  label: 'FK_Sensor',
-  editable: false,
-  renderable: false,
-  cell: 'string'
-						},{
-  name: 'equipID',
-  label: 'equipID',
-  editable: false,
-  renderable: false,
-  cell: 'string'
-						}, {
-  name: 'site_name',
-  label: 'site name',
-  editable: false,
-  cell: 'string'
-						}, {
-  name: 'site_type',
-  label: 'site type',
-  editable: false,
-  cell: 'string',
-						}, {
-  name: 'StartDate',
-  label: 'Start Date',
-  editable: false,
-  cell: 'string',
-						}, {
-  name: 'EndDate',
-  label: 'End Date',
-  editable: false,
-  cell: 'string',
-						}, {
-  name: 'nb_chip_code',
-  label: 'nb indiv',
-  editable: false,
-  cell: 'string',
-						},{
-  name: 'total_scan',
-  label: 'total scan',
-  editable: false,
-  cell: 'string',
-						},{
-  name: 'first_scan',
-  label: 'first scan',
-  editable: false,
-  cell: 'string',
-						},{
-  name: 'last_scan',
-  label: 'last scan',
-  editable: false,
-  cell: 'string',
-						}, {
-  editable: true,
-  name: 'import',
-  label: 'IMPORT',
-  cell: 'select-row',
-  headerCell: 'select-all'
-						}
-					];
+            {
+              name: 'UnicIdentifier',
+              label: 'Unic Identifier',
+              editable: false,
+              cell: 'string'
+            },{
+              name: 'FK_Sensor',
+              label: 'FK_Sensor',
+              editable: false,
+              renderable: false,
+              cell: 'string'
+            },{
+              name: 'equipID',
+              label: 'equipID',
+              editable: false,
+              renderable: false,
+              cell: 'string'
+            }, {
+              name: 'site_name',
+              label: 'site name',
+              editable: false,
+              cell: 'string'
+            }, {
+              name: 'site_type',
+              label: 'site type',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'StartDate',
+              label: 'Start Date',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'EndDate',
+              label: 'End Date',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'nb_chip_code',
+              label: 'nb indiv',
+              editable: false,
+              cell: 'string',
+            },{
+              name: 'total_scan',
+              label: 'total scan',
+              editable: false,
+              cell: 'string',
+            },{
+              name: 'first_scan',
+              label: 'first scan',
+              editable: false,
+              cell: 'string',
+            },{
+              name: 'last_scan',
+              label: 'last scan',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'import',
+              editable: true,
+              label: 'IMPORT',
+              cell: 'select-row',
+              headerCell: 'select-all'
+            }
+          ];
           break;
         case 'gsm':
           this.ui.frequency.find('option[value="60"]').prop('selected', true);
           this.cols = [
-
-						{
-  name: 'FK_Individual',
-  label: 'Individual ID',
-  editable: false,
-  cell: 'string',
-  formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
-    fromRaw: function(rawValue, model) {
-      if (rawValue == null) {
-        rawValue = '<span class="bull-warn">&#x25cf;</span> No Individual attached !';
-      }
-      return rawValue;
-    }
-  }),
-						},{
-  name: 'FK_Sensor',
-  label: 'FK_Sensor',
-  editable: false,
-  cell: 'string'
-						},{
-  name: 'FK_ptt',
-  label: 'Unic Identifier',
-  editable: false,
-  cell: 'string'
-						}, {
-  name: 'nb',
-  label: 'NB',
-  editable: false,
-  cell: 'string'
-						}, {
-  name: 'StartDate',
-  label: 'Start equipment',
-  editable: false,
-  cell: 'string',
-						}, {
-  name: 'EndDate',
-  label: 'End equipment',
-  editable: false,
-  cell: 'string',
-						}, {
-  name: 'min_date',
-  label: 'Data from',
-  editable: false,
-  cell: 'string',
-						}, {
-  name: 'min_date',
-  label: 'Data To',
-  editable: false,
-  cell: 'string',
-						}, {
-  editable: true,
-  name: 'import',
-  label: 'IMPORT',
-  cell: 'select-row',
-  headerCell: 'select-all'
-						}
-					];
+            {
+              name: 'FK_Individual',
+              label: 'Individual ID',
+              editable: false,
+              cell: 'string',
+              formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+                fromRaw: function(rawValue, model) {
+                  if (rawValue == null) {
+                    rawValue = '<span class="bull-warn">&#x25cf;</span> No Individual attached !';
+                  }
+                  return rawValue;
+                }
+            }),
+            },{
+              name: 'FK_Sensor',
+              label: 'FK_Sensor',
+              editable: false,
+              cell: 'string'
+            },{
+              name: 'FK_ptt',
+              label: 'Unic Identifier',
+              editable: false,
+              cell: 'string'
+            }, {
+              name: 'nb',
+              label: 'NB',
+              editable: false,
+              cell: 'string'
+            }, {
+              name: 'StartDate',
+              label: 'Start equipment',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'EndDate',
+              label: 'End equipment',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'min_date',
+              label: 'Data from',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'min_date',
+              label: 'Data To',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'import',
+              editable: true,
+              label: 'IMPORT',
+              cell: 'select-row',
+              headerCell: 'select-all'
+            }
+          ];
           break;
         case 'argos':
           this.ui.frequency.find('option[value="all"]').prop('selected', true);
           this.cols = [
-						{
-  name: 'FK_Individual',
-  label: 'Individual ID',
-  editable: false,
-  cell: 'string',
-  formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
-    fromRaw: function(rawValue, model) {
-      if (rawValue == null) {
-        rawValue = '<span class="bull-warn">&#x25cf;</span> No Individual attached !';
-      }
-      return rawValue;
-    }
-  }),
-						},{
-  name: 'FK_Sensor',
-  label: 'Sensor',
-  editable: false,
-  renderable: false,
-  cell: 'string'
-						},{
-  name: 'FK_ptt',
-  label: 'Unic Identifier',
-  editable: false,
-  cell: 'string'
-						}, {
-  name: 'nb',
-  label: 'NB',
-  editable: false,
-  cell: 'string'
-						}, {
-  name: 'StartDate',
-  label: 'Start equipment',
-  editable: false,
-  cell: 'string',
-						}, {
-  name: 'EndDate',
-  label: 'End equipment',
-  editable: false,
-  cell: 'string',
-						}, {
-  name: 'min_date',
-  label: 'Data from',
-  editable: false,
-  cell: 'string',
-						}, {
-  name: 'min_date',
-  label: 'Data To',
-  editable: false,
-  cell: 'string',
-						}, {
-  editable: true,
-  name: 'import',
-  label: 'IMPORT',
-  cell: 'select-row',
-  headerCell: 'select-all'
-						}
-					];
+            {
+              name: 'FK_Individual',
+              label: 'Individual ID',
+              editable: false,
+              cell: 'string',
+              formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+                fromRaw: function(rawValue, model) {
+                  if (rawValue == null) {
+                    rawValue = '<span class="bull-warn">&#x25cf;</span> No Individual attached !';
+                  }
+                  return rawValue;
+                }
+              }),
+            },{
+              name: 'FK_Sensor',
+              label: 'Sensor',
+              editable: false,
+              renderable: false,
+              cell: 'string'
+            },{
+              name: 'FK_ptt',
+              label: 'Unic Identifier',
+              editable: false,
+              cell: 'string'
+            }, {
+              name: 'nb',
+              label: 'NB',
+              editable: false,
+              cell: 'string'
+            }, {
+              name: 'StartDate',
+              label: 'Start equipment',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'EndDate',
+              label: 'End equipment',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'min_date',
+              label: 'Data from',
+              editable: false,
+              cell: 'string',
+            }, {
+              name: 'min_date',
+              label: 'Data To',
+              editable: false,
+              cell: 'string',
+            }, {
+              editable: true,
+              name: 'import',
+              label: 'IMPORT',
+              cell: 'select-row',
+              headerCell: 'select-all'
+            }
+          ];
           break;
         default:
           console.warn('type error');
@@ -330,55 +329,55 @@ define([
         });
       }
 
-			params.toValidate = JSON.stringify(params.toValidate);
-			var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
-			$.ajax({
-				url: url,
-				method: 'POST',
-				data : params,
-				context: this
-			}).done(function(resp) {
-				var msg = new Object();
-				msg.title='Succes';
-				msg.resp = resp;
-				this.swal(msg, 'success');
-				this.displayGrid();
-			}).fail(function(resp) {
-				var msg = new Object();
-				msg.title='Succes';
-				msg.resp = resp;
-				this.swal(msg, 'error');
-			});
-		},
+      params.toValidate = JSON.stringify(params.toValidate);
+      var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
+      $.ajax({
+        url: url,
+        method: 'POST',
+        data : params,
+        context: this
+      }).done(function(resp) {
+        var msg = new Object();
+        msg.title='Succes';
+        msg.resp = resp;
+        this.swal(msg, 'success');
+        this.displayGrid();
+      }).fail(function(resp) {
+        var msg = new Object();
+        msg.title='Succes';
+        msg.resp = resp;
+        this.swal(msg, 'error');
+      });
+    },
 
-		swal: function(opt, type){
-			var btnColor;
-			switch(type){
-				case 'success':
-					btnColor = 'green';
-					break;
-				case 'error':
-					btnColor = 'rgb(147, 14, 14)';
-					break;
-				case 'warning':
-					btnColor = 'orange';
-					break;
-				default:
-					return;
-					break;
-			}
-			Swal({
-				title: opt.title || 'error',
-				text: JSON.stringify(opt.resp)|| '',
-				type: type,
-				timer: 100,
-				showCancelButton: false,
-				confirmButtonColor: btnColor,
-				confirmButtonText: 'OK',
-				closeOnConfirm: true,
-			},
-			function(isConfirm){
-			});
+    swal: function(opt, type){
+      var btnColor;
+      switch(type){
+        case 'success':
+          btnColor = 'green';
+          break;
+        case 'error':
+          btnColor = 'rgb(147, 14, 14)';
+          break;
+        case 'warning':
+          btnColor = 'orange';
+          break;
+        default:
+          return;
+          break;
+      }
+      Swal({
+        title: opt.title || 'error',
+        text: JSON.stringify(opt.resp)|| '',
+        type: type,
+        timer: 100,
+        showCancelButton: false,
+        confirmButtonColor: btnColor,
+        confirmButtonText: 'OK',
+        closeOnConfirm: true,
+      },
+      function(isConfirm){
+      });
     },
 
   });

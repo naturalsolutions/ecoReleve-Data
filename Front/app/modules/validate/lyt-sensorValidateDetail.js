@@ -43,6 +43,9 @@ define([
 
       'dataSetIndex': '#dataSetIndex',
       'dataSetTotal': '#dataSetTotal',
+
+      'totalS' : '#totalS',
+      'total' : '#total',
     },
 
     regions: {
@@ -86,9 +89,18 @@ define([
     },
 
     onShow: function() {
+      var _this = this;
       this.rgNavbar.show(this.navbar);
       this.display();
+      this.com.onAction = function(){
+        // _this.setTotal();
+      };
     },
+
+    setTotal: function(){
+      this.ui.totalS.html(this.grid.grid.getSelectedModels().length);
+      this.ui.total.html(this.grid.grid.collection.length);
+    }, 
 
     display: function() {
       var _this = this;
@@ -100,14 +112,17 @@ define([
         this.displayIndForm();
       }
       this.displayGrid();
-      this.displayMap();
-      this.displaySensorForm();
 
-      $.when(this.map.deffered, this.grid.deffered).done(function() {
-        setTimeout(function() {
-          _this.initFrequency();
-        },100)
-      });
+      //todo, bug on big cluster coll defered
+      setTimeout(function(){
+        _this.displayMap();
+        $.when(_this.map.deffered, _this.grid.deffered).done(function() {
+          setTimeout(function() {
+            _this.initFrequency();
+          },100);
+        });
+      }, 0);
+      this.displaySensorForm();
     },
 
     //initialize the frequency
@@ -293,7 +308,7 @@ define([
         selection: true,
         cluster: true,
         com: this.com,
-        zoom: 3,
+        zoom: 7,
         element: 'map',
         bbox: true
       });

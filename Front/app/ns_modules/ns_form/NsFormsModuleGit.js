@@ -389,7 +389,6 @@ define([
     },
 
     savingSuccess: function (model, response) {
-      console.log('plouf');
       // To be extended, called after save on model if success
     },
     savingError: function (response) {
@@ -469,7 +468,7 @@ define([
       },
       function(isConfirm){
         //could be better
-        if(opts.callback){
+        if(opts.callback && isConfirm){
           opts.callback();
         }
       });
