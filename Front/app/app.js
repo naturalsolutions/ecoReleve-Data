@@ -1,8 +1,6 @@
 define(['marionette', 'lyt-rootview', 'router', 'controller',
 	//circular dependencies, I don't konw where to put it for the moment
-	'MonitoredSitePicker',
-	'IndivPicker',
-	'SensorPicker'
+  'objectPicker'
 	],
 function(Marionette, LytRootView, Router, Controller) {
 

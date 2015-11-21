@@ -10,10 +10,10 @@ define([
   'ns_modules/ns_com',
   'ns_grid/model-grid',
   'ns_filter/model-filter',
-  'SensorPicker',
+  'objectPicker',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsFilter, SensorPicker
+  Com, NsGrid, NsFilter, ObjectPicker
 ) {
 
   'use strict';
@@ -51,9 +51,8 @@ define([
       this.releaseMethod = null;
 
       var _this = this;
-      var MySensorPicker = SensorPicker.extend({
+      var MySensorPicker = ObjectPicker.extend({
         rowClicked: function(row) {
-          console.log(row);
           var id = row.model.get('ID');
           var unicName = row.model.get('UnicIdentifier');
           _this.currentRow.model.set({unicSensorName: unicName});
@@ -63,11 +62,15 @@ define([
         },
         setValue: function(value) {
           _this.currentRow.model.set({FK_Sensor: value});
-          console.log(_this.currentRow.model)
           this.hidePicker();
         },
       });
-      this.sensorPicker = new MySensorPicker();
+      this.sensorPicker = new MySensorPicker({
+        key : 'FK_Sensor',
+        schema: {
+          title : 'sensors',
+        }
+      });
       this.sensorPicker.render();
 
       this.initGrid();

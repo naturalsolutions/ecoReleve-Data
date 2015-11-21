@@ -10,13 +10,13 @@ define([
   'ns_grid/model-grid',
   'ns_filter/model-filter',
   'backbone_forms',
-  'requirejs-text!ns_modules/ns-bbforms-editors/IndividualPicker/tpl-individual.html',
+  'requirejs-text!ns_modules/ns-bbforms-editors/objectPicker/tpl-objectPicker.html',
 ], function(
   $, _, Backbone, Marionette, Swal, Translater, config,
   Com, NsGrid, NsFilter, Form, Tpl
 ){
   'use strict';
-  return Form.editors.SensorPicker = Form.editors.Base.extend({
+  return Form.editors.ObjectPicker = Form.editors.Base.extend({
 
     className: 'full-height animated white',
     events: {
@@ -29,16 +29,18 @@ define([
       'filters': '#filter'
     },
 
-    pickerType: 'sensor',
-    url : config.coreUrl+'sensors/',
-
     initialize: function(options) {
-      //Form.editors.Base.prototype.initialize.call(this, options);
-      
+      //get the foreign key 2
+      var key = options.key;
+      key = key.split('FK_')[1];
+      key = key.charAt(0).toLowerCase() + key.slice(1) + 's/';
+      this. url = config.coreUrl + key;
+
+      this.pickerType = options.schema.title;
+
       this.model = new Backbone.Model();
 
       this.model.set('pickerType', this.pickerType);
-
 
       var value;
       if(options){
@@ -61,10 +63,6 @@ define([
           this.model.set('disabled', 'disabled');
           this.model.set('visu', 'hidden');
         }
-      }else{
-        this.model.set('disabled', '');
-        this.model.set('visu', '');
-        this.model.set('value', '');
       }
 
       var template =  _.template(Tpl, this.model.attributes);
@@ -83,7 +81,6 @@ define([
         pagingServerSide: true,
         com: this.com,
         url: this.url,
-        urlParams : this.urlParams,
         rowClicked : true,
       });
 
