@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base, DBSession
+from ..Models import Base, DBSession
 from sqlalchemy import (Column, DateTime, Float,
  ForeignKey, Index, Integer, Numeric,
   String, Text, Unicode, Sequence, select,and_,or_, exists,func, join, outerjoin)
@@ -9,7 +9,7 @@ from collections import OrderedDict
 from datetime import datetime
 from .FrontModules import FrontModules,ModuleGrids
 import transaction
-from ecoreleve_server.utils import Eval
+from ..utils import Eval
 import pandas as pd
 import json
 from traceback import print_exc
