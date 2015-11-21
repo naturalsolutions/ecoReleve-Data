@@ -9,11 +9,10 @@
 
 <div class="modal-outer" id="modal-outer">
   <div class="full-height modal" id="myModal">
-
       <div class="modal-content full-height clearfix">
         <div class="col-xs-5 full-height no-padding">
           <div class="toolbar top">
-            <legend class="inherit">Identify <%= pickerType %></legend>
+            <legend class="inherit">Identify <%= pickerTitle %></legend>
           </div>
           <div class="crop2">
             <br>
@@ -28,7 +27,7 @@
 
         <div class="col-xs-7 full-height no-padding dark">
           <div class="toolbar top">
-            <button type="button" class="btn btn-default pull-right cancel">
+            <button type="button" class="btn btn pull-right cancel">
               Cancel
             </button>
           </div>
@@ -38,11 +37,14 @@
           </div>
           <div id="paginator" class="paginator"></div>
           <div class="toolbar bottom">
-            <button type="button" class="btn btn-default pull-right cancel">
-              Cancel
+            <button id="new" type="button" class="btn btn-success pull-right">
+              Create new&nbsp;
+              <span class="reneco reneco-entrykey"></span>
             </button>
           </div>
         </div>
+        <div id="creation" class="pos-abs hidden full-height col-xs-12 no-padding"></div>
+
       </div>
 
 

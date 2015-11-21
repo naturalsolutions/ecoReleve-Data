@@ -10,10 +10,11 @@ define([
   'ns_grid/model-grid',
   'ns_filter/model-filter',
   'backbone_forms',
-  'requirejs-text!ns_modules/ns-bbforms-editors/objectPicker/tpl-objectPicker.html'
+  'requirejs-text!ns_modules/ns-bbforms-editors/objectPicker/tpl-objectPicker.html',
+  'objects/layouts/lyt-objects-new'
 ], function(
   $, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsFilter, Form, Tpl
+  Com, NsGrid, NsFilter, Form, Tpl, LytObjectsNew
 ) {
   'use strict';
   return Form.editors.ObjectPicker = Form.editors.Base.extend({
@@ -23,10 +24,7 @@ define([
       'click span.picker': 'showPicker',
       'click #btnFilter': 'filter',
       'click .cancel': 'hidePicker',
-    },
-
-    ui: {
-      'filters': '#filter'
+      'click button#new': 'onClickNew',
     },
 
     initialize: function(options) {
@@ -36,13 +34,15 @@ define([
       var key = options.key;
 
       key = key.split('FK_')[1];
-      key = key.charAt(0).toLowerCase() + key.slice(1) + 's/';
-      this.url = config.coreUrl + key;
+
+      //todo : refact
+      this.ojectName = key.charAt(0).toLowerCase() + key.slice(1) + 's';
+      this.url = config.coreUrl + this.ojectName + '/';
 
       this.model = new Backbone.Model();
 
-      this.pickerType = options.schema.title;
-      this.model.set('pickerType', this.pickerType);
+      this.pickerTitle = options.schema.title;
+      this.model.set('pickerTitle', this.pickerTitle);
       this.model.set('key', options.key);
 
       var value;
@@ -68,42 +68,60 @@ define([
         }
       }
 
-
-
-
       var template =  _.template(Tpl, this.model.attributes);
       this.$el.html(template);
-      
 
       this.afterTpl();
-
-
     },
 
-    afterTpl: function(){
+    afterTpl: function() {
       this._input = this.$el.find('input[name="' + this.key + '"]')[0];
+      this.$el.find('#new').addClass('hidden');
+      this.getTypes();
       this.displayGrid();
       this.displayFilter();
-      this.getTypes();
       this.translater = Translater.getTranslater();
     },
 
     getTypes: function() {
-      console.log('passed');
       $.ajax({
-        url: this.url + 'getTypes',
+        url: this.url + 'getType',
         method: 'GET',
         contentType: 'application/json',
         context: this,
       }).done(function(data) {
-        _this.tooltipList(data);
+        this.tooltipListData = data;
+        this.$el.find('#new').removeClass('hidden');
       }).fail(function(resp) {
-
+        console.error(this.url + 'getType');
       });
     },
 
-    tooltipList: function(obj){
-      console.log(obj);
+    onClickNew: function(e) {
+      var _this = this;
+      this.$el.find('#new').tooltipList({
+        availableOptions: this.tooltipListData,
+        liClickEvent: function(value, parent, elem) {
+          //var val = $(elem)[0].textContent.replace(/\s/g, '');
+          var val = value;
+          //todo
+          var params = {
+            picker: _this,
+            type: val,
+            ojectName: _this.ojectName
+          };
+          _this.displayCreateNewLyt(params);
+        },
+        position: 'top'
+      });
+    },
+
+    displayCreateNewLyt: function(params) {
+      this.lytObjNew = new LytObjectsNew(params);
+      var tmp = this.lytObjNew.render();
+      this.$el.find('#creation').html(this.lytObjNew.el);
+      this.lytObjNew.onShow();
+      this.$el.find('#creation').removeClass('hidden');
     },
 
     displayGrid: function() {
@@ -156,10 +174,11 @@ define([
       $(this._input).val(value).change();
       this.hidePicker();
     },
-    showPicker : function() {
+    showPicker: function() {
+      this.displayGrid();
       this.$el.find('#modal-outer').fadeIn('fast');
     },
-    hidePicker : function() {
+    hidePicker: function() {
       this.$el.find('#modal-outer').fadeOut('fast');
     }
   }

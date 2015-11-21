@@ -11,6 +11,7 @@ require.config({
     'models': './models',
     'collections': './collections',
     'templates': '../build/templates',
+    'objects' : './modules/objects',
     'lyt-rootview': './base/rootview/lyt-rootview',
     'transition-region': './base/transition-region/transition-region',
     'googleLoaer': './vendors/google-maps-loader',

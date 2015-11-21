@@ -81,7 +81,6 @@ define([
           closeOnConfirm: true,
         });
       }
-
     },
 
     getLatLng: function() {
