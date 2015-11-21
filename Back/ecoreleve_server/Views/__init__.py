@@ -101,14 +101,14 @@ def add_routes(config):
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### MonitoredSite #####
-    config.add_route('monitoredSite', 'ecoReleve-Core/monitoredSite/') 
-    config.add_route('monitoredSite/', 'ecoReleve-Core/monitoredSite') 
-    config.add_route('monitoredSite/id', 'ecoReleve-Core/monitoredSite/{id}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/history', 'ecoReleve-Core/monitoredSite/{id}/history/',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/equipment', 'ecoReleve-Core/monitoredSite/{id}/equipment',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/history/action', 'ecoReleve-Core/monitoredSite/{id}/history/{action}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/equipment/action', 'ecoReleve-Core/monitoredSite/{id}/equipment/{action}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/action', 'ecoReleve-Core/monitoredSite/{action}') 
+    config.add_route('monitoredSite', 'ecoReleve-Core/monitoredSites/') 
+    config.add_route('monitoredSite/', 'ecoReleve-Core/monitoredSites') 
+    config.add_route('monitoredSite/id', 'ecoReleve-Core/monitoredSites/{id}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/history', 'ecoReleve-Core/monitoredSites/{id}/history/',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/equipment', 'ecoReleve-Core/monitoredSites/{id}/equipment',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/history/action', 'ecoReleve-Core/monitoredSites/{id}/history/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/action', 'ecoReleve-Core/monitoredSites/{action}') 
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Release #####

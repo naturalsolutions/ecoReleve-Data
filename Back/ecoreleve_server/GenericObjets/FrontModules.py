@@ -223,4 +223,6 @@ class ModuleGrids (Base) :
         if self.FilterType == 'Select' and self.Options != None : 
             result = DBSession.execute(text(self.Options)).fetchall()
             filter_['options'] = [{'label':row['label'],'val':row['val']} for row in result]
+        if self.FilterType == 'Checkboxes' :
+            filter_['options'] = [{'label':'True','val':1},{'label':'False','val':0}]
         return filter_
