@@ -144,9 +144,6 @@ define([
           stTypeId = 3;
           $('#getCurrentPosition').addClass('hidden');
           break;
-        case '#stFromMS':
-          stTypeId = 5;
-          $('#getCurrentPosition').removeClass('hidden');
         default:
           break;
       }
