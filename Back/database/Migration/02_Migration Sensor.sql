@@ -86,43 +86,57 @@ SELECT DISTINCT CASE
   where v1.Fk_carac = 5 
   --order by v4.value
  
- INSERT INTO SensorDynPropValue (
-		StartDate,
-		ValueInt,
-		ValueString,
-		ValueDate,
-		ValueFloat,
-		FK_SensorDynProp,
-		FK_Sensor
-		)
-SELECT v.begin_date,
-	v.value,
-	NULL,
-	NULL,
-	NULL,
-	p.ID,
-	s.ID
-FROM [ECWP-eReleveData].[dbo].[TObj_Carac_value] v JOIN SensorDynProp P on p.Name = 'Frequency'
-JOIN Sensor s ON s.Original_ID = 'VHF_'+CONVERT(VARCHAR,v.fk_object)
-where v.Fk_carac = 5 
+
+WITH toto as (
+SELECT 
+	cv.begin_date as StartDate,
+	dp.TypeProp,
+	s.ID as SensorID,
+	dp.Name as dynPropName,
+	dp.ID as dynPopID,
+	typ.name, 
+	CASE 
+	WHEN th.TTop_FullPath is NOT NULL THEN th.TTop_FullPath
+	WHEN cv.value_precision is not null then  cv.value_precision 
+	ELSe cv.value
+	END as Value,
+	th.TTop_FullPath as fullPath,
+	s.Original_ID 
+
+  FROM [ECWP-eReleveData_old].[dbo].[TObj_Carac_value] cv
+  JOIN [ECWP-eReleveData_old].[dbo].[TObj_Carac_type] typ 
+		ON cv.Fk_carac = typ.Carac_type_Pk 
+  JOIN dbo.SensorDynProp dp 
+		ON 'TCaracThes_'+dp.Name = typ.name 
+		or 'TCarac_'+dp.Name = typ.name 
+		or dp.Name = typ.name 
+		or 'Thes_'+dp.Name = typ.name 
+		or 'Thes_txt_'+dp.Name = typ.name
+		or 'TCaracThes_txt_'+dp.Name = typ.name
+  JOIN dbo.Sensor s on cv.fk_object = s.Original_ID
+  LEFT join THESAURUS.dbo.TTopic th 
+		ON th.TTop_PK_ID> 204082 
+		and typ.name != 'Comments' 
+		and (typ.name like '%Thes_%' or typ.name like '%TCaracThes_Txt%') 
+		and th.TTop_NameEn = cv.value_precision
+  where [object_type] in ('Trx_Radio','Trx_Sat' ) )
 
 
- INSERT INTO SensorDynPropValue (
-		StartDate,
-		ValueInt,
-		ValueString,
-		ValueDate,
-		ValueFloat,
-		FK_SensorDynProp,
-		FK_Sensor
-		)
-SELECT v.begin_date,
-	NULL,
-	v.value_precision,
-	NULL,
-	NULL,
-	p.ID,
-	s.ID
-FROM [ECWP-eReleveData].[dbo].[TObj_Carac_value] v JOIN SensorDynProp P on p.Name = 'Status'
-JOIN Sensor s ON s.Original_ID = 'VHF_'+CONVERT(VARCHAR,v.fk_object)
-where v.Fk_carac = 1
+INSERT INTO [dbo].[SensorDynPropValue]
+	([StartDate]
+      ,[ValueInt]
+      ,[ValueString]
+      ,[ValueDate]
+      ,[ValueFloat]
+      ,[FK_SensorDynProp]
+      ,[FK_Sensor]
+)
+SELECT 
+	toto.StartDate,
+	CASE WHEN toto.TypeProp = 'Integer' THEN toto.value else NULL end as ValueInt,
+	CASE WHEN toto.TypeProp = 'String' THEN toto.value else NULL end as ValueString,
+	CASE WHEN toto.TypeProp = 'Date' THEN toto.value else NULL end as ValueDate,
+	CASE WHEN toto.TypeProp = 'Float' THEN toto.value else NULL end as ValueFloat,
+	toto.dynPopID,
+	toto.SensorID
+FROM toto
