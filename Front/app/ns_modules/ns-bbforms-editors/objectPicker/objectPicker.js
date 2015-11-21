@@ -167,17 +167,22 @@ define([
     rowDbClicked: function(row) {
       this.rowClicked(row);
     },
+
     getValue: function() {
       return $(this._input).val();
     },
+
     setValue: function(value) {
       $(this._input).val(value).change();
+      this.$el.find('#creation').addClass('hidden');
       this.hidePicker();
     },
+
     showPicker: function() {
       this.displayGrid();
       this.$el.find('#modal-outer').fadeIn('fast');
     },
+
     hidePicker: function() {
       this.$el.find('#modal-outer').fadeOut('fast');
     }
