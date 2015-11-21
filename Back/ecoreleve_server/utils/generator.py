@@ -79,7 +79,7 @@ class Generator :
             if type_c in self.dictFilter :
                 type_c = self.dictFilter[type_c]
             else : 
-                type_c = 'string'
+                type_c = 'Text'
             data.append({'name':name_c, 'type':type_c , 'title':name_c })
         return data
 

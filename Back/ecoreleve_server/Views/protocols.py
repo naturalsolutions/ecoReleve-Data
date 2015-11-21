@@ -278,10 +278,10 @@ def actionOnProtocols(request):
     return dictActionFunc[actionName](request)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefixProt, renderer='json', request_method = 'GET')
-def getListofProtocol (request):
-    print(request.params)
-    return
+# @view_config(route_name= prefixProt, renderer='json', request_method = 'GET')
+# def getListofProtocol (request):
+#     print(request.params)
+#     return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefixProt + '/id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
