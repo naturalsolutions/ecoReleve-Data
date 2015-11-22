@@ -25,6 +25,7 @@ class Generator :
             'NVARCHAR':'Text',
             'INTEGER':'Number',
             'DECIMAL':'Number',
+            'NUMERIC':'Number',
             'DATETIME':'DateTimePicker',
         }
         self.table=Base.metadata.tables[table]
@@ -74,7 +75,7 @@ class Generator :
         for column in self.table.c:
             name_c = str(column.name)
             try : 
-                type_c = str(column.type)
+                type_c = str(column.type).split('(')[0]
             except: pass
             if type_c in self.dictFilter :
                 type_c = self.dictFilter[type_c]

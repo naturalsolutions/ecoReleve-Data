@@ -43,24 +43,23 @@ define([
       }
 
       var obj;
+      var value;
+      if (options.model) {
+        value = options.model.get(this.options.key);
+      } else {
+        value = '';
+      }
+
       if (options) {
         obj = {
-          value : options.model.get(this.options.key),
+          value : value,
           editorClass : schema.editorClass,
           required: required,
           editable : (options.schema.editable != false) ? '' : 'disabled',
           hidden : (options.schema.editable != false) ? '' : 'hidden',
         }
       } else {
-      	/*
-      	obj = {
-      	  value : '',
-      	  editorClass : ,
-      	  required: required,
-      	  editable : (options.schema.editable != false) ? '' : 'disabled',
-      	  hidden : (options.schema.editable != false) ? '' : 'hidden',
-      	}*/
-      	return;
+        
       }
 
 
@@ -71,10 +70,11 @@ define([
       $($el[0]).datetimepicker();
 
       //tmp solution ? datetimepicker remove the value
+      /*
       if (this.options) {
         var value = this.options.model.get(this.options.key);
         $el.find('input').val(value);
-      }
+      }*/
 
       return this;
     },
