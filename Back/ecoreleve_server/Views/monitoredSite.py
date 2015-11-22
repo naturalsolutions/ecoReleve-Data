@@ -142,7 +142,7 @@ def getMonitoredSiteHistory(request):
     if 'geo' in request.params :
         geoJson=[]
         for row in dataResult:
-            geoJson.append({'type':'Feature', 'properties':{'Date':row['StartDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+            geoJson.append({'type':'Feature', 'properties':{'Date':row['StartDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
     else : 
         countResult = listObj.count(searchInfo)

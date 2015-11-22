@@ -19,11 +19,13 @@ from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE,func,desc,join
+from sqlalchemy import select, and_,cast, DATE,func,desc,join,asc
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
 from collections import OrderedDict
+from ..utils.distance import haversine
+
 
 
 prefix = 'individuals'
@@ -121,12 +123,39 @@ def getIndiv(request):
     if 'geo' in request.params :
         geoJson=[]
         joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)
-        stmt = select([Individual_Location,Sensor.UnicIdentifier]).select_from(joinTable).where(Individual_Location.FK_Individual == id)
+        stmt = select([Individual_Location,Sensor.UnicIdentifier]).select_from(joinTable
+            ).where(Individual_Location.FK_Individual == id)
         dataResult = DBSession.execute(stmt).fetchall()
+
         for row in dataResult:
-            geoJson.append({'type':'Feature', 'properties':{'type':row['type_'], 'sensor':row['UnicIdentifier']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+            geoJson.append({'type':'Feature', 'properties':{'type':row['type_']
+                , 'sensor':row['UnicIdentifier'],'date':row['Date']}
+                , 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
+
+    # if 'geoDynamic' in request.params :
+    #     geoJson=[]
+    #     joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)
+    #     stmt = select([Individual_Location,Sensor.UnicIdentifier]).select_from(joinTable
+    #         ).where(Individual_Location.FK_Individual == id
+    #         ).where(Individual_Location.type_ == 'GSM').order_by(asc(Individual_Location.Date))
+    #     dataResult = DBSession.execute(stmt).fetchall()
+        
+    #     df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
+    #     X1 = df.iloc[:-1][['LAT', 'LON']].values
+    #     X2 = df.iloc[1:][['LAT', 'LON']].values
+    #     df['dist'] = np.append(haversine(X1, X2), 0).round(3)
+    #     # Compute the speed
+    #     df['speed'] = (df['dist'] / ((df['Date'] - df['Date'].shift(-1)).fillna(1) / np.timedelta64(1, 'h'))).round(3)
+    #     df['Date'] = df['Date'].apply(lambda row: np.datetime64(row).astype(datetime)) 
+
+    #     for i in range(df.shape[0]):
+    #         geoJson.append({'type':'Feature', 'properties':{'type':df.loc[i,'type_']
+    #             , 'sensor':df.loc[i,'UnicIdentifier'],'speed':df.loc[i,'speed'],'date':df.loc[i,'Date']}
+    #             , 'geometry':{'type':'Point', 'coordinates':[df.loc[i,'LAT'],df.loc[i,'LON']]}})
+    #     result = {'type':'FeatureCollection', 'features':geoJson}
+    #     response = result
     # else : 
     #     response  = curIndiv.GetFlatObject()
 

@@ -103,14 +103,13 @@ def details_unchecked_indiv(request):
         geoJson = []
         for row in dataGeo:
             geoJson.append({'type':'Feature', 'id': row['PK_id'], 'properties':{'type':row['type'], 'date':row['date']}
-                , 'geometry':{'type':'Point', 'coordinates':[row['lon'],row['lat']]}})
+                , 'geometry':{'type':'Point', 'coordinates':[row['lat'],row['lon']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
     else : 
         query = select([unchecked]
             ).where(and_(unchecked.c['FK_ptt']== ptt
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv))).order_by(desc(unchecked.c['date']))
         data = DBSession.execute(query).fetchall()
-        #print(query)
 
         df = pd.DataFrame.from_records(data, columns=data[0].keys(), coerce_float=True)
         X1 = df.iloc[:-1][['lat', 'lon']].values
