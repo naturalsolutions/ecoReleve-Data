@@ -11,7 +11,7 @@ from collections import OrderedDict
 from traceback import print_exc
 
 
-Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}
+Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt','float':'ValueFloat'}
 
 class ObjectWithDynProp:
     ''' Class to extend for mapped object with dynamic properties '''
@@ -177,6 +177,15 @@ class ObjectWithDynProp:
             if (nameProp in self.GetType().DynPropNames):
                 if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):
                     #### IF no value or different existing value, new value is affected ####
+                    if 'date' in self.GetDynProps(nameProp).TypeProp.lower():
+                        try :
+                            valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y%H:%M:%S')
+                        except :
+                            try : 
+                                valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y')
+                            except : 
+                                valeur = datetime.strptime(valeur.replace(' ',''),'%H:%M:%S')
+                                
                     print('valeur modifiée pour ' + nameProp)
                     NouvelleValeur = self.GetNewValue(nameProp)
                     NouvelleValeur.StartDate = datetime.today()
@@ -213,7 +222,7 @@ class ObjectWithDynProp:
         ''' Function to call : update properties of new or existing object with JSON/dict of value'''
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
-            if (curProp.lower() != 'id'):
+            if (curProp.lower() != 'id' and DTOObject[curProp] != '' and DTOObject[curProp] != '-1' ):
                 self.SetProperty(curProp,DTOObject[curProp])
 
     def GetFlatObject(self,schema=None):

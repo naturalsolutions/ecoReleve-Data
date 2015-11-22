@@ -11,7 +11,8 @@ define([
   'vendors/backboneForm-editor-timePicker',
   //'vendors/backboneForm-editor-autoCompTree',
   'vendors/backboneForm-editor-Number',
-
+  'AutocompleteEditor',
+  'bbAutoComp'
 ], function ($, _, Backbone, BbForms, tpl, tplcheck, Radio, moment) {
 
   'use strict';
@@ -129,14 +130,14 @@ define([
 
       if (fieldName == 'Status') classe = 'hidden';
       var options = this.getValueOptions(dataRow);
-      if (type == 'Select' || type == 'Checkboxes') {
+      if (type == 'Select' || type == 'Checkboxes' || type == 'AutocompTreeEditor') {
         editorClass += ' list-inline ';
         options = dataRow['options'];
         if (type == 'Checkboxes') {
           options.splice(0, 0, { label: 'All', val: -1, checked: true });
           template = tplcheck;
         }
-        else {
+        if (type == 'Select'){
           options.splice(0, 0, { label: ' ', val: -1 });
         }
       }
@@ -149,15 +150,17 @@ define([
         Operator: {
           type: 'Select', title: dataRow['label'], options: this.getOpOptions(type), editorClass: 'form-control ' + classe,
         },
-        
         Value: {
           type: this.getFieldType(type),
           title: dataRow['label'],
           editorClass: editorClass,
-          options: this.getValueOptions(dataRow)
+          options: this.getValueOptions(dataRow),
+          validators:[]
         }
       }
 
+
+      
       var Formdata = {
         ColumnType: type,
         Column: fieldName,
@@ -211,7 +214,13 @@ define([
 
       var valueOptions;
       switch (DataRow['type']) {
-        case "Select": case 'Checkboxes':
+        case "Select": case 'Checkboxes':  
+          return DataRow['options']
+          break;
+        case 'AutocompTreeEditor':
+          return DataRow['options']
+          break;
+        case 'AutocompleteEditor':
           return DataRow['options']
           break;
         case "DATETIME":
@@ -232,12 +241,17 @@ define([
         case "Text":
         return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' },, { label: 'In', val: 'In' }];
           break;
+        case "AutocompleteEditor":
+        return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' },, { label: 'In', val: 'In' }];
+          break;
         case "DATETIME":
           return operatorsOptions = ['<', '>', '=', '<>', '<=', '>='];
           break;
-        case "Select":
+        case "Select" :
           return operatorsOptions = ['Is', 'Is not'];
           break;
+        case "AutocompTreeEditor" :
+          return operatorsOptions = ['Is', 'Is not'];
         case "Checkboxes":
           return operatorsOptions = ['Checked'];
           break;
@@ -259,6 +273,12 @@ define([
           break;
         case "Select":
           return typeField = "Select";
+          break;
+        case "AutocompleteEditor":
+          return typeField = "AutocompleteEditor";
+          break;
+        case "AutocompTreeEditor":
+          return typeField = "AutocompTreeEditor";
           break;
         case "Checkboxes":
           return typeField = "Checkboxes";
