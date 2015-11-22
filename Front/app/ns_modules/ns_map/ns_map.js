@@ -6,6 +6,15 @@
   ----> replace the prototype by a marionnette view?
 **/
 
+
+/*
+  Offset Draft!
+  // Calculate the offset
+  var offset = this.map.getSize().x*0.15;
+  // Then move the map
+  //this.map.panBy(new L.Point(-offset, 0), {animate: false});
+*/
+
 define([
   'config',
   'jquery',
@@ -46,11 +55,10 @@ define([
       this.com.addModule(this);
     }
 
-    this.totalElt=options.totalElt || false;
+    this.totalElt = options.totalElt || false;
 
-    this.url=options.url;
-    this.geoJson=options.geoJson;
-
+    this.url = options.url;
+    this.geoJson = options.geoJson;
 
     this.elem = options.element || 'map';
     this.zoom = config.mapZoom;
@@ -62,7 +70,7 @@ define([
     this.legend = options.legend || false;
     this.selection = options.selection || false;
 
-    this.dict={}; //list of markers
+    this.dict = {}; //list of markers
     this.selectedMarkers = {}; // list of selected markers
     this.geoJsonLayers = [];
 
@@ -302,9 +310,6 @@ define([
       this.map.addControl(new MyControl());
     },
 
-
-
-
     requestGeoJson: function(url){
       var _this = this;
       var criterias = {
@@ -352,14 +357,14 @@ define([
         this.center = new L.LatLng(30,0);
       }else{
         this.center = new L.LatLng(
-          geoJson.features[0].geometry.coordinates[1],
-          geoJson.features[0].geometry.coordinates[0]
+          geoJson.features[0].geometry.coordinates[0],
+          geoJson.features[0].geometry.coordinates[1]
         );
       }
       if(this.map){
 
         //todo : 2 optimize, leafleft center function bugs
-        this.map.panTo(this.center);
+        this.map.panTo(this.center, {animate: false});
       }
     },
 
@@ -386,7 +391,7 @@ define([
       for (var j = 0; j < features.length; j++) {
         feature = features[j];
         if(feature.geometry.coordinates[1] != null && feature.geometry.coordinates[0] != null){
-          latlng = L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+          latlng = L.latLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]);
           i++;
           var infos = '';
           if(!feature.id)
@@ -652,7 +657,7 @@ define([
       marker.setIcon(this.focusedIcon);
 
       var center = marker.getLatLng();
-      this.map.panTo(center);
+      this.map.panTo(center, {animate: false});
       var ctx = this;
 
       if(zoom){
@@ -682,7 +687,8 @@ define([
       }
       this.lastMarker = m;
       var center = m.getLatLng();
-      this.map.panTo(center);
+      this.map.panTo(center, {animate: false});
+
       return m;
     },
 
