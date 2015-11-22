@@ -34,7 +34,8 @@ require.config({
     'LongitudeEditor': 'ns_modules/ns-bbforms-editors/Coordinates/LongitudeEditor',
 
     'ListOfNestedModel': 'vendors/ListOfNestedModel/ListOfNestedModel',
-    'AutocompleteEditor': '../externalModules/NaturalJS-BackBone-Forms-Editors/Autocomplete/AutocompleteEditor',
+    'AutocompleteEditorOrignal': '../externalModules/NaturalJS-BackBone-Forms-Editors/Autocomplete/AutocompleteEditor',
+    'AutocompleteEditor': './vendors/AutocompleteEditor',
 
     /*==========  Bower  ==========*/
     'jquery': '../bower_components/jquery/jquery',
