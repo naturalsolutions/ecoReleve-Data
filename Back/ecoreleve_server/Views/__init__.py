@@ -91,6 +91,7 @@ def add_routes(config):
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/') 
+    config.add_route('individuals/autocomplete', 'ecoReleve-Core/individuals/autocomplete/{prop}') 
     config.add_route('individuals/insert', 'ecoReleve-Core/individuals')
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/history', 'ecoReleve-Core/individuals/{id}/history',custom_predicates = (integers('id'),))

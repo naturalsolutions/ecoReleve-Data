@@ -370,7 +370,7 @@ define([
         title: opt.title || 'error',
         text: JSON.stringify(opt.resp)|| '',
         type: type,
-        timer: 100,
+        timer: 2000,
         showCancelButton: false,
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
