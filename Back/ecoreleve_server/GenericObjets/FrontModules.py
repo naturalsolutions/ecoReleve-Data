@@ -225,4 +225,22 @@ class ModuleGrids (Base) :
             filter_['options'] = [{'label':row['label'],'val':row['val']} for row in result]
         if self.FilterType == 'Checkboxes' :
             filter_['options'] = [{'label':'True','val':1},{'label':'False','val':0}]
+
+        if self.FilterType=='AutocompTreeEditor' and self.Options is not None and self.Options != '' :
+            filter_['options'] = {'startId': self.Options
+            , 'wsUrl':dbConfig['wsThesaurus']['wsUrl']
+            , 'lng':threadlocal.get_current_request().authenticated_userid['userlanguage']
+            ,'displayValueName': 'valueTranslated'}
+            filter_['options']['startId'] = self.Options
+
+        if self.FilterType=='AutocompleteEditor' and  self.Options is not None and self.Options != '':
+            option = json.loads(self.Options)
+            filter_['options']= {'source':[]}
+            if 'SELECT' in option['source']:
+                result = DBSession.execute(text(option['source'])).fetchall()
+                for row in result:
+                    filter_['options']['source'].append(row[0])
+            else : 
+                filter_['options'] = {'source': option['source'],'minLength' :option['minLength']}
+
         return filter_

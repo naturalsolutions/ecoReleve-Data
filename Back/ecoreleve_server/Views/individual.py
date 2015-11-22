@@ -9,7 +9,8 @@ from ..Models import (
     Sensor,
     SensorType,
     Equipment,
-    IndividualList
+    IndividualList,
+    Base
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -100,6 +101,21 @@ def getIndividualType(request):
     query = select([IndividualType.ID.label('val'), IndividualType.Name.label('label')])
     response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
     return response
+
+
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/autocomplete', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
+def autocomplete (request):
+    criteria = request.params['term']
+    prop = request.matchdict['prop']
+
+    table = Base.metadata.tables['IndividualDynPropValuesNow']
+    query = select([table.c['ValueString'].label('label'),table.c['ValueString'].label('value')]
+        ).where(table.c['FK_IndividualDynProp']== prop)
+    query = query.where(table.c['ValueString'].like('%'+criteria+'%')).order_by(asc(table.c['ValueString']))
+
+    return [dict(row) for row in DBSession.execute(query).fetchall()]
+
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
