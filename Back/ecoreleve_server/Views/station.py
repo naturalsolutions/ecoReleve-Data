@@ -100,8 +100,10 @@ def getStation(request):
 
         Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='StationForm' ).first()
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
+        response['data']['fieldActivityId'] = str(response['data']['fieldActivityId'])
     else : 
         response  = curSta.GetFlatObject()
+
     transaction.commit()
     return response
 

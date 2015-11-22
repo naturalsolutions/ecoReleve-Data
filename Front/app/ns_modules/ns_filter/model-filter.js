@@ -5,7 +5,7 @@ define([
   'backbone_forms',
   'requirejs-text!./Templates/tpl-filters.html',
   'requirejs-text!./Templates/tpl-CheckBoxes.html',
-  'radio',
+  'requirejs-text!./Templates/tpl-filters-added.html',
   'moment',
   'vendors/backboneForm-editor-dateTimePicker',
   'vendors/backboneForm-editor-timePicker',
@@ -13,21 +13,21 @@ define([
   'vendors/backboneForm-editor-Number',
   'AutocompleteEditor',
   'bbAutoComp'
-], function ($, _, Backbone, BbForms, tpl, tplcheck, Radio, moment) {
+], function ($, _, Backbone, BbForms, tpl, tplcheck, tplAdded, moment) {
 
   'use strict';
   return Backbone.View.extend({
 
     events: {
       'click input': 'clickedCheck',
-      //"keypress input:not(:checkbox,:radio)" : "updateQuery",
+      'click removeFilter': 'removeFilter'
     },
 
     /*=====================================
     =            Filter Module            =
     =====================================*/
 
-    initialize: function (options) {
+    initialize: function(options) {
       this.filterContainer = options.filterContainer;
       this.clientSide = options.clientSide;
       this.name = options.name || '';
@@ -86,15 +86,11 @@ define([
         form = this.initFilter(data[key]);
         this.filterContainer.append(form.el);
 
-
         if (data[key].type == 'Checkboxes') {
-          this.filterContainer.find('input[type="checkbox"]').each(function () {
+          this.filterContainer.find('input[type="checkbox"]').each(function() {
             $(this).prop('checked', true);
           });
         }
-        this.filterContainer.find('input[type="checkbox"]').on('click', this.clickedCheck);
-        this.filterContainer.find('form').on('keypress',  $.proxy(this.updateQuery, this));
-
         this.forms.push(form);
         this.filterLoaded();
       };
@@ -103,30 +99,32 @@ define([
     addFilter: function(data){
       var form;
       for (var key in data) {
-        form = this.initFilter(data[key]);
+        form = this.initFilter(data[key], true);
         this.filterContainer.append(form.el);
 
         $(form.el).find('select').focus();
         if (data[key].type == 'Checkboxes') {
-          this.filterContainer.find('input[type="checkbox"]').each(function () {
+          this.filterContainer.find('input[type="checkbox"]').each(function() {
             $(this).prop('checked', true);
           });
         }
-        this.filterContainer.find('input[type="checkbox"]').on('click', this.clickedCheck);
-        this.filterContainer.find('form').on('keypress',  $.proxy(this.updateQuery, this));
-
 
         this.forms.push(form);
       };
     },
 
-    initFilter: function (dataRow) {
+    removeFilter: function(){
+      
+    },
+
+    initFilter: function (dataRow, added) {
       var form;
       var fieldName = dataRow['name'];
       var classe = '';
       var editorClass = 'form-control filter';
       var type = dataRow['type'];
       var template = tpl;
+      var template = (added) ? tplAdded : tpl;
 
       if (fieldName == 'Status') classe = 'hidden';
       var options = this.getValueOptions(dataRow);
@@ -155,27 +153,23 @@ define([
           title: dataRow['label'],
           editorClass: editorClass,
           options: this.getValueOptions(dataRow),
-          validators:[]
+          validators: []
         }
-      }
-
-
-      
+      };
       var Formdata = {
         ColumnType: type,
         Column: fieldName,
         Operator: schm['Operator'].options[0]
       };
 
-      var md = Backbone.Model.extend({
+      var Model = Backbone.Model.extend({
         schema: schm,
         defaults: {
           Column: fieldName,
           ColumnType: type,
         }
       });
-
-      var mod = new md();
+      var mod = new Model();
 
       form = new BbForms({
         template: _.template(template),
@@ -187,7 +181,6 @@ define([
       return form;
     },
     filterLoaded : function(){
-
 
     }
     ,
