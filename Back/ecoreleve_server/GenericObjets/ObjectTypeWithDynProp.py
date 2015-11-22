@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DynPropNames,DBSession
+from ..Models import Base,DynPropNames,DBSession
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,or_
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship

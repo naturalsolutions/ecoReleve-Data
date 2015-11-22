@@ -313,7 +313,9 @@ def searchStation(request):
             dataResult = listObj.GetFlatDataList(searchInfo,getFW)
             print('****************** GEOJSON !!!!--------------')
             for row in dataResult:
-                geoJson.append({'type':'Feature', 'properties':{'name':row['Name'], 'date':row['StationDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+                geoJson.append({'type':'Feature', 'properties':{'name':row['Name']
+                    , 'date':row['StationDate']}
+                    , 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         return {'type':'FeatureCollection', 'features':geoJson, 'exceed': exceed}
     else :
         dataResult = listObj.GetFlatDataList(searchInfo,getFW)
