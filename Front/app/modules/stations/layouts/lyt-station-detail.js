@@ -112,18 +112,17 @@ define([
         objectType: stationType,
         id: stationId,
         reloadAfterSave: true,
-        afterShow: function() {
-          $('.datetime').attr('placeholder','DD/MM/YYYY');
-
-          $('#dateTimePicker').on('dp.change', function(e) {
-            $('#dateTimePicker').data('DateTimePicker').format('DD/MM/YYYY').maxDate(e.date);
-          });
-        }
       });
 
-      this.nsForm.BeforeShow = function() {
+      console.log(this.nsForm.model);
+
+      this.nsForm.model.on('change:fieldActivityId', function(){
+        console.log('passed');
+
         _this.displayProtos();
-      };
+      });
+
+      _this.displayProtos();
 
       this.nsForm.afterDelete = function() {
         var jqxhr = $.ajax({
