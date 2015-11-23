@@ -6,9 +6,22 @@ define([
 
   return Backbone.Model.extend({
     schema: {
-      file:    {type: 'FileUploadEditor', title: 'File', editorClass: 'form-control',validators: ['required'],options: {extensions: null}},
-      //test : { type : 'IndividualPickerEditor', title : 'test indiv picker' },
-      fieldActivity:   {type: 'Select' , title: 'Global field activity', editorClass: 'form-control', options: [],editorAttrs: {'disabled': 'disabled'}, fieldClass: 'fieldactivity'},
+      file: {
+        type: 'FileUploadEditor',
+        title: 'File',
+        editorClass: 'form-control',
+        validators: ['required'],
+        options: {extensions: null}
+      },
+      fieldActivity: {
+        type: 'Select' ,
+        title: 'Global field activity',
+        editorClass: 'form-control',
+        options: [],
+        editorAttrs: {'disabled': 'disabled'},
+        fieldClass: 'fieldactivity',
+        validators: ['required']
+      },
       FieldWorkers: {
         'subschema': {
           'FieldWorker': {

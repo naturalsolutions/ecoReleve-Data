@@ -37,18 +37,22 @@ define([
 		},
 
 		getValue: function() {
-			var fileName = this._input.val()
+			var fileName = this._input.val();
 			return fileName ? JSON.stringify(fileName) : "";
 		},
 
 		setValue: function(value) {
+				if(value == 'file'){
+					console.log($(this.el).find('input[type=hidden]'));
+					$(this.el).find('input[type=hidden]').val(value);
+					return;
+				}
 			var str, files = value;
 			if (_(value).isObject()) {
 				str = JSON.stringify(value);
 			} else {
 				files = value ? JSON.parse(value) : [];
 			}
-			this._input.val(str);
 		},
 
 		render: function(){
@@ -81,10 +85,14 @@ define([
 				url: fileUrl,
 				processData: false,
 				contentType: false,
-				data : fd
+				data : fd,
+				context: this,
+			}).done(function(data){
+
 			})
 		},
 		testFile: function(eventType){
+			console.log('plouf');
 			var re = new RegExp(/.[a-zA-Z]+$/);
 			var ext = $(this._uploadInput)[0].files[0].name.toLowerCase().match(re);
 			if(this.options.schema.options.extensions){
@@ -96,6 +104,7 @@ define([
 					this._removeBtn.show();
 				}
 			}
+			this.setValue('file');
 		},
 		removeFile: function(eventType){
 			//Tester la valeur de l'id

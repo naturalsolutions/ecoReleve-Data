@@ -1,7 +1,14 @@
 define(['marionette', 'lyt-rootview', 'router', 'controller',
-	//circular dependencies, I don't konw where to put it for the moment
-  'objectPicker'
-	],
+  //circular dependencies, I don't konw where to put it 4 the moment
+  'ns_modules/ns_bbfe/bbfe-number',
+  'ns_modules/ns_bbfe/bbfe-timePicker',
+  'ns_modules/ns_bbfe/bbfe-dateTimePicker',
+  'ns_modules/ns_bbfe/bbfe-autocomplete',
+  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
+  'ns_modules/ns_bbfe/bbfe-listOfNestedModel/bbfe-listOfNestedModel',
+  'ns_modules/ns_bbfe/bbfe-autocompTree',
+  'ns_modules/ns_bbfe/bbfe-fileUpload',
+  ],
 function(Marionette, LytRootView, Router, Controller) {
 
   var app = {};

@@ -10,7 +10,7 @@ define([
   'ns_grid/model-grid',
   'ns_filter/model-filter',
   'backbone_forms',
-  'requirejs-text!ns_modules/ns-bbforms-editors/objectPicker/tpl-objectPicker.html',
+  'requirejs-text!./tpl-bbfe-objectPicker.html',
   'objects/layouts/lyt-objects-new'
 ], function(
   $, _, Backbone, Marionette, Swal, Translater, config,
@@ -35,7 +35,6 @@ define([
 
       key = key.split('FK_')[1];
 
-      console.log(options);
 
       //todo : refact
       this.ojectName = key.charAt(0).toLowerCase() + key.slice(1) + 's';

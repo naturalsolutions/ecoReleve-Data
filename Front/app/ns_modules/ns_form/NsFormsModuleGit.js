@@ -6,15 +6,8 @@ define([
   'backbone_forms',
   'sweetAlert',
   'requirejs-text!./Templates/NsFormsModule.html',
-  'ListOfNestedModel',
-  'AutocompleteEditor',
-  'sweetAlert',
-  './NsFormsCustomFields',
   'fancytree',
-  'bbAutoComp',
-  'LatitudeEditor',
-  'LongitudeEditor',
-], function ($, _, Backbone, Marionette, BackboneForm, Swal, tpl,ListOfNestedModel,AutocompleteEditor) {
+], function ($, _, Backbone, Marionette, BackboneForm, Swal, tpl) {
   return Backbone.View.extend({
     BBForm: null,
     modelurl: null,

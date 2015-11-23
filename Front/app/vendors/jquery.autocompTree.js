@@ -96,6 +96,9 @@
 					$me.val(parametres.inputValue);
 
 					//Initialisation de l'arbre
+					//console.log($('#treeView' + $me.attr("id")));
+					//console.log(parametres.webservices);
+					//console.log(dataToSend);
 					$('#treeView' + $me.attr("id")).fancytree({
 						debugLevel: 0,
 						extensions: ["filter"],
@@ -149,6 +152,7 @@
 						activate: function (event, data) {
 							var tree = $("#treeView" + $me.attr("id")).fancytree('getTree');
 							if (parametres.display.isDisplayDifferent) {
+								console.log(data.node.data);
 								$me.val(data.node.data[parametres.display.displayValueName]);
 								$('[name=' + $me.attr('name') + parametres.display.suffixeId + ']').val(data.node.data[parametres.display.storedValueName]);
 								$("#treeView" + $me.attr("id")).css('display', 'none');
@@ -156,6 +160,7 @@
 								//On désactive le pseudo blur afin qu'il ne s'éxécute plus si l'arbre a disparu et que le vrai focus n'est plus l'input
 								//$(document).undelegate();
 							} else {
+								console.log(data.node.data[parametres.display.displayValueName]);
 								$me.val(data.node.data[parametres.display.displayValueName]);
 								$("#treeView" + $me.attr("id")).css('display', 'none');
 								tree.activateKey(false);
@@ -174,13 +179,13 @@
 
 
 					$me.focus(function () {
+						console.log('focus');
 
 						$("div[id^=treeView]").each(function () {
 							$(this).css('display', 'none');
 						});
 						var treeContainer = $("#treeView" + $me.attr("id"));
-						treeContainer.css('display', 'block').css('width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
-						treeContainer.css({top: $(this).outerHeight() + 20 });
+						treeContainer.css('display', 'block');
 						//Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
 						$(document).delegate("body", "click", function (event) {                            
 							if (!$(event.target).is("#" + $me.attr("id") + ",span[class^=fancytree], div[id^=treeView], ul")) {
@@ -269,6 +274,7 @@
 				var tree = $("#treeView" + _self.attr('id')).fancytree('getTree');
 				if (source) {
 					//Possibilité de modifier la source de l'arbre
+					console.log(source);
 				}
 				tree.reload();
 				return tree;
