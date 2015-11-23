@@ -46,8 +46,13 @@ define([
       if (options.model) {
         value = options.model.get(this.options.key);
       }else{
-        value = '';
+            if (options.value){
+              value = options.value;
+            }else {
+              value = '';
+            }
       }
+  
 
       var $el = $($.trim(this.template({
         value : value,
@@ -61,7 +66,6 @@ define([
       $($el[0]).datetimepicker({
         format: 'LT'
       });
-
 
       return this;
     },
