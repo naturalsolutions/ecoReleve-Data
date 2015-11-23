@@ -232,10 +232,10 @@ define([
       var operatorsOptions;
       switch (type) {
         case "Text":
-        return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' },, { label: 'In', val: 'In' }];
+        return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' },{ label: 'In', val: 'In' }];
           break;
         case "AutocompleteEditor":
-        return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' },, { label: 'In', val: 'In' }];
+        return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' },{ label: 'In', val: 'In' }];
           break;
         case "DATETIME":
           return operatorsOptions = ['<', '>', '=', '<>', '<=', '>='];
@@ -244,7 +244,7 @@ define([
           return operatorsOptions = ['Is', 'Is not'];
           break;
         case "AutocompTreeEditor" :
-          return operatorsOptions = ['Is', 'Is not'];
+          return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' }];
         case "Checkboxes":
           return operatorsOptions = ['Checked'];
           break;
