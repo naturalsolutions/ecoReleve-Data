@@ -434,7 +434,6 @@ define([
 		},
 
 		rowClicked: function(params){
-			console.log('cliqued');
 		},
 
 		rowDbClicked: function(params){

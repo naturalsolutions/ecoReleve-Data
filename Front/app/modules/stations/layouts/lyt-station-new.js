@@ -184,7 +184,6 @@ define([
         context: this,
         url: url,
       }).done(function(data) {
-        console.log(data);
         var coords = data.features[0].geometry.coordinates;
         _this.$el.find('input[name="LAT"]').val(coords[0]).change();
         _this.$el.find('input[name="LON"]').val(coords[1]).change();
