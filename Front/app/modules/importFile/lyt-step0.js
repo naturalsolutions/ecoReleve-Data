@@ -31,6 +31,7 @@ define([
 		},
 
     validate: function() {
+      console.log(this.$el.find('.tile-inside input[type="radio"]:checked').val());
       return this.$el.find('.tile-inside input[type="radio"]:checked').val();
     },
 

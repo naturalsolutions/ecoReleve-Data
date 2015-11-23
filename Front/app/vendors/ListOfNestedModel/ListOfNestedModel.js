@@ -5,9 +5,10 @@ define([
   'marionette',
   'backbone_forms',
   'backbone.list',
-  'requirejs-text!./tpl-bbfe-listOfNestedModel.html',
+  'requirejs-text!vendors/ListOfNestedModel/Templates/ListOfNestedModel.html',
 
-  ], function ($, _, Backbone, Marionette, BackboneForm, List, tpl) {
+  ], function ($, _, Backbone, Marionette, BackboneForm, List,tpl) {
+
 
     var Form = Backbone.Form,
             editors = Form.editors;

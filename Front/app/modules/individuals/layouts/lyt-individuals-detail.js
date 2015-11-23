@@ -187,11 +187,9 @@ define([
         displayMode: 'display',
         id: id,
         reloadAfterSave: true,
-        parent: this.parent,
-        displayDelete: false,
+        parent: this.parent
       });
       this.nsform.afterDelete = function() {
-        /*
         var jqxhr = $.ajax({
           url: config.coreUrl + 'individuals/' + id,
           method: 'DELETE',
@@ -199,7 +197,7 @@ define([
         }).done(function(resp) {
           Backbone.history.navigate(_this.rootUrl, {trigger : true});
         }).fail(function(resp) {
-        });*/
+        });
       };
     },
     hideDetail: function() {

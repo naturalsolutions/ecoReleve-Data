@@ -1,19 +1,19 @@
 //waypoints?
 
 define([
-  'jquery',
-  'underscore',
-  'backbone',
-  'marionette',
-  'config',
-  'sweetAlert',
-  'vendors/XmlParser',
-  'ns_form/NSFormsModuleGit',
-  'models/gpxForm',
-  'i18n',
+	'jquery',
+	'underscore',
+	'backbone',
+	'marionette',
+	'config',
+	'sweetAlert',
+	'tmp/XmlParser',
+	'ns_form/NSFormsModuleGit',
+	'models/gpxForm',
+	'FileUploadEditor',
+	'i18n',
 
-], function($, _, Backbone, Marionette, config, Swal,
- XmlParser, NsForm, GpxForm
+], function($, _, Backbone, Marionette, config, Swal, XmlParser, NsForm, GpxForm, FileEditor
 ) {
 
   'use strict';
@@ -133,11 +133,13 @@ define([
         confirmButtonText: 'OK',
         closeOnConfirm: true,
       },
-      function(isConfirm) {
-        $('form')[0].reset();
-        $('.fieldactivity').addClass('hidden');
-        $('.fieldworkers').addClass('hidden');
-      });
+			function(isConfirm) {
+
+  $('form')[0].reset();
+  $('.fieldactivity').addClass('hidden');
+  $('.fieldworkers').addClass('hidden');
+
+			});
     },
 
     setFieldActivity: function(e) {
@@ -148,23 +150,25 @@ define([
       });
     },
     onDestroy: function() {
-    },
+		},
 
     isRdyAccess: function() {
 
     },
 
+    isRdyNext: function() {
+      return this.deferred;
+    },
+
     validate: function() {
+      //defered here
+      //change the status of the deferred
+      //then return the deferred
       return this.wayPointList;
     },
 
     check: function() {
-      var error = this.nsform.BBForm.commit();
-      if(error){
-        return false;
-      }else{
-        return true;
-      }
+      return this.deferred;
     },
     displayForm: function() {
       var model = new GpxForm();
@@ -237,9 +241,9 @@ define([
           confirmButtonText: 'OK',
           closeOnConfirm: true,
         },
-        function(isConfirm) {
-          $(e.target).val('');
-        });
+				function(isConfirm) {
+  $(e.target).val('');
+				});
 
       } else {
         this.updateUsers(e);

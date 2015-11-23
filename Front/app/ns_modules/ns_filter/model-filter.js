@@ -3,12 +3,17 @@ define([
   'underscore',
   'backbone',
   'backbone_forms',
-  'moment',
   'requirejs-text!./Templates/tpl-filters.html',
   'requirejs-text!./Templates/tpl-CheckBoxes.html',
   'requirejs-text!./Templates/tpl-filters-added.html',
-], function ($, _, Backbone, BbForms, moment,
- tpl, tplcheck, tplAdded) {
+  'moment',
+  'vendors/backboneForm-editor-dateTimePicker',
+  'vendors/backboneForm-editor-timePicker',
+  //'vendors/backboneForm-editor-autoCompTree',
+  'vendors/backboneForm-editor-Number',
+  'AutocompleteEditor',
+  'bbAutoComp'
+], function ($, _, Backbone, BbForms, tpl, tplcheck, tplAdded, moment) {
 
   'use strict';
   return Backbone.View.extend({
