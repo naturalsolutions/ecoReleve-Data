@@ -9,13 +9,14 @@ define([
 
   'sweetAlert',
   'config',
+  'simplePagination',
 
   'ns_form/NSFormsModuleGit',
   'ns_navbar/ns_navbar',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Radio, LytProto,
-  Swal, config, NsForm, Navbar
+  Swal, config, simplePagination, NsForm, Navbar
 ) {
 
   'use strict';
@@ -113,7 +114,10 @@ define([
         reloadAfterSave: true,
       });
 
+      console.log(this.nsForm.model);
+
       this.nsForm.model.on('change:fieldActivityId', function(){
+        console.log('passed');
 
         _this.displayProtos();
       });

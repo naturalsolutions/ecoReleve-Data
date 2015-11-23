@@ -23,7 +23,7 @@ define([
 
     //the action on the finished
     finished: function() {
-      console.info('finished');
+      console.log('finished');
     },
 
   });
