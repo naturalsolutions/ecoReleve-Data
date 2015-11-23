@@ -8,7 +8,8 @@ from ..Models import (
     Equipment,
     Individual,
     MonitoredSite,
-    Base
+    Base,
+    SensorList
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -280,7 +281,7 @@ def searchSensor(request):
     print('**criteria********' )
     print(searchInfo['criteria'])
 
-    listObj = ListObjectWithDynProp(Sensor,moduleFront)
+    listObj = SensorList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
 
     countResult = listObj.count(searchInfo)
