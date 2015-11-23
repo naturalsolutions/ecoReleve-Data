@@ -255,10 +255,8 @@ define([
         availableOptions: [{'label': 'direct release','val': 1},{'label': 'direct release grid 5x5','val': 2},],
         //  li click event
         liClickEvent: $.proxy(function(liClickValue, origin, tooltip) {
-          console.log(liClickValue);
           _this.releaseMethod = liClickValue;
           _this.release();
-          //console.log(origin);
         }, this),
       });
       $(e.target).tooltipster('show');

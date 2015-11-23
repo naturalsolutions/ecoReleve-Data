@@ -368,7 +368,6 @@ define([
         }
         this.grid.interaction('selectionMultiple', ids);
       } else {
-        console.log('frequency select all')
         var ids = this.grid.collection.pluck('PK_id');
         this.grid.interaction('selectionMultiple', ids);
       }

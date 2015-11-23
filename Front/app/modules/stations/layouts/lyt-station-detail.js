@@ -113,8 +113,6 @@ define([
         reloadAfterSave: true,
       });
 
-        console.log('passed');
-
       this.nsForm.model.on('change:fieldActivityId', function(){
 
         _this.displayProtos();

@@ -43,7 +43,6 @@ define([
 
 		setValue: function(value) {
 				if(value == 'file'){
-					console.log($(this.el).find('input[type=hidden]'));
 					$(this.el).find('input[type=hidden]').val(value);
 					return;
 				}
@@ -92,7 +91,6 @@ define([
 			})
 		},
 		testFile: function(eventType){
-			console.log('plouf');
 			var re = new RegExp(/.[a-zA-Z]+$/);
 			var ext = $(this._uploadInput)[0].files[0].name.toLowerCase().match(re);
 			if(this.options.schema.options.extensions){
