@@ -82,6 +82,24 @@ def getFields(request) :
     transaction.commit()
     return cols
 
+
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/autocomplete', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
+def autocomplete (request):
+    criteria = request.params['term']
+    prop = request.matchdict['prop']
+    if isinstance(prop,int):
+        table = Base.metadata.tables['MontoredSiteDynPropValuesNow']
+        query = select([table.c['ValueString'].label('label'),table.c['ValueString'].label('value')]
+            ).where(table.c['FK_MontoredSiteDynProp']== prop)
+        query = query.where(table.c['ValueString'].like('%'+criteria+'%')).order_by(asc(table.c['ValueString']))
+    else: 
+        table = Base.metadata.tables['MontoredSite']
+        query = select([table.c[prop].label('value'),table.c[prop].label('label')])
+        query = query.where(table.c[prop].like('%'+criteria+'%'))
+
+    return [dict(row) for row in DBSession.execute(query).fetchall()]
+
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getStation(request):
@@ -175,7 +193,7 @@ def insertListNewStations(request):
         newRow['fieldActivityId'] = row['fieldActivity']
         newRow['precision'] = 10 #row['Precision']
         newRow['creationDate'] = dateNow
-        newRow['creator'] = 1 #request.authenticated_userid['iss']
+        newRow['creator'] = request.authenticated_userid['iss']
         newRow['FK_StationType']= 4
         newRow['id'] = row['id']
 
