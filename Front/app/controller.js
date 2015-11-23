@@ -85,7 +85,6 @@ define(['marionette', 'config',
       this.rgMain.show(new LytIndividuals({id: id}));
     },
     newIndividual: function(type) {
-      console.log('plouf');
       this.rgMain.show(new LytIndividualsNew({type: type}));
     },
 
@@ -93,7 +92,6 @@ define(['marionette', 'config',
       this.rgMain.show(new LytSensors({id: id}));
     },
     newSensor: function(type) {
-      console.log(type);
       this.rgMain.show(new LytSensorsNew({type: type}));
     },
 

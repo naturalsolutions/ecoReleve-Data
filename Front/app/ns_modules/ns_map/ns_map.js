@@ -109,7 +109,7 @@ define([
           this.filter(params);
           break;
         default:
-          console.error('verify the action name');
+          console.info('no action linked');
           break;
       }
     },
