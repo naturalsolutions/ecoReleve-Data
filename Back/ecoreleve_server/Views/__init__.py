@@ -44,7 +44,8 @@ def add_routes(config):
     ##### Stations #####
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
-    config.add_route('stations', 'ecoReleve-Core/stations/') 
+    config.add_route('stations', 'ecoReleve-Core/stations/')
+    config.add_route('stations/autocomplete', 'ecoReleve-Core/stations/autocomplete/{prop}') 
     #config.add_route('stations/fileImport', 'ecoReleve-Core/stations/fileImport/{id}') 
     config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
@@ -81,6 +82,7 @@ def add_routes(config):
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
     
     config.add_route('sensors', 'ecoReleve-Core/sensors/') 
+    config.add_route('sensors/autocomplete', 'ecoReleve-Core/sensors/autocomplete/{prop}') 
     config.add_route('sensors/insert', 'ecoReleve-Core/sensors') 
     config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
     config.add_route('sensors/id', 'ecoReleve-Core/sensors/{id}',custom_predicates = (integers('id'),))
@@ -103,6 +105,7 @@ def add_routes(config):
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### MonitoredSite #####
     config.add_route('monitoredSite', 'ecoReleve-Core/monitoredSites/') 
+    config.add_route('monitoredSite/autocomplete', 'ecoReleve-Core/monitoredSites/autocomplete/{prop}') 
     config.add_route('monitoredSite/', 'ecoReleve-Core/monitoredSites') 
     config.add_route('monitoredSite/id', 'ecoReleve-Core/monitoredSites/{id}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSite/id/history', 'ecoReleve-Core/monitoredSites/{id}/history/',custom_predicates = (integers('id'),))

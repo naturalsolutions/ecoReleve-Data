@@ -79,7 +79,7 @@ require.config({
 
     'simplePagination': 'vendors/jquery.simplePagination',
 
-    'bbDate': 'vendors/backboneForm-editors',
+/*    'bbDate': 'vendors/backboneForm-editors',*/
     'bbAutoComp': '../externalModules/NaturalJS-BackBone-Forms-Editors/ThesaurusEditor/backboneForm-editors-autocompTree',
     'autocompTree': '../externalModules/NaturalJS-BackBone-Forms-Editors/ThesaurusEditor/AutoCompletTree/jquery.autocompTree',
     'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
