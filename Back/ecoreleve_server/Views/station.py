@@ -252,7 +252,6 @@ def searchStation(request):
     searchInfo = {}
     searchInfo['criteria'] = []
     user = request.authenticated_userid['iss']
-    user = 1 
 
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])
