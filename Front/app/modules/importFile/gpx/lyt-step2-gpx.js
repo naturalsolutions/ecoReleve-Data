@@ -69,7 +69,7 @@ define([
           'id': attr.id,
           'geometry': {
             'type': 'Point',
-            'coordinates': [attr.longitude, attr.latitude],
+            'coordinates': [attr.latitude, attr.longitude],
           },
           'properties': {
             'date': '2014-10-23 12:39:29'

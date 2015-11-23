@@ -132,11 +132,6 @@ define([
       }
       row.$el.addClass('active');
       this.currentRow = row;
-      //console.log(row.model.get('ID'));
-      //this.model.set('sensorId',row.model.get('ID') )
-      //this.validate();
-      //$('#btnNext').removeAttr('disabled');
-      //this.nextOK();
     },
     validate: function() {
       return this.model;

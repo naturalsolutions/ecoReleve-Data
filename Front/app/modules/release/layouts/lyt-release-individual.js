@@ -10,7 +10,7 @@ define([
   'ns_modules/ns_com',
   'ns_grid/model-grid',
   'ns_filter/model-filter',
-  'objectPicker',
+  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
   Com, NsGrid, NsFilter, ObjectPicker
@@ -269,7 +269,7 @@ define([
         availableOptions: _this.releaseMethodList,
         liClickEvent:function(liClickValue) {
           _this.release(liClickValue);
-        }, 
+        }
       });
       this.ui.release.tooltipster('show');
     }
