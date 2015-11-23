@@ -168,7 +168,7 @@ class Generator :
                 # if cols_for_properties != None :
                 #     for col in cols_for_properties :
                 #         properties[col.replace('_',' ')] = row[col]
-                geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point', 'coordinates':[row[lon],row[lat]]}})
+                geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point', 'coordinates':[row[lat],row[lon]]}})
             transaction.commit()
             return {'type':'FeatureCollection', 'features': geoJson, 'exceed': False, 'total':countResult}
         else :
