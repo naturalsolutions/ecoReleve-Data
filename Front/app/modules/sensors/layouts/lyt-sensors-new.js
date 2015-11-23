@@ -35,7 +35,6 @@ define([
     rootUrl: '#sensors/',
 
     initialize: function(options) {
-      console.log(options.type);
       this.model = new Backbone.Model();
       this.model.set('type', options.type);
       switch (options.type){

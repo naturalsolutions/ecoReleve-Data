@@ -66,8 +66,7 @@ define([
 										
 										
  
-                console.log(liClickValue);
-                //console.log(origin);
+                
                 }, this),
             });
             //// Use tooltipList plugin
