@@ -20,7 +20,6 @@ define([
 
     events: {
       'click input': 'clickedCheck',
-      'click removeFilter': 'removeFilter'
     },
 
     /*=====================================
@@ -96,9 +95,12 @@ define([
       };
     },
 
-    addFilter: function(data){
+    addFilter: function(data) {
+      var _this = this;
       var form;
+      var index = 0;
       for (var key in data) {
+        index++;
         form = this.initFilter(data[key], true);
         this.filterContainer.append(form.el);
 
@@ -109,12 +111,17 @@ define([
           });
         }
 
+        form.$el.find('button#removeFilter').on('click', function() {
+          _this.filterContainer.find(form.el).remove();
+          var i = _this.forms.indexOf(form);
+          if (i > -1) {
+              _this.forms.splice(i, 1);
+          }
+          return;
+        });
+
         this.forms.push(form);
       };
-    },
-
-    removeFilter: function(){
-      
     },
 
     initFilter: function (dataRow, added) {
