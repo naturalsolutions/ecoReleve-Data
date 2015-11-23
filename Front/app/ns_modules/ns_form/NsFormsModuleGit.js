@@ -27,6 +27,7 @@ define([
     reloadAfterSave: false,
     template: tpl,
     redirectAfterPost: '',
+    displayDelete: true,
 
     extendsBBForm: function(){
       Backbone.Form.validators.errMessages.required = '';
@@ -75,6 +76,12 @@ define([
       this.name = options.name;
       this.buttonRegion = options.buttonRegion;
       this.formRegion = options.formRegion;
+
+
+      if(options.displayDelete != undefined){
+        this.displayDelete = options.displayDelete;
+      }
+
       this.reloadAfterSave = options.reloadAfterSave || this.reloadAfterSave;
       // The template need formname as vrairable, to make it work if several NSForms in the same page
       // With adding formname, there will be no name conflit on Button class
@@ -422,11 +429,15 @@ define([
       this.buttonRegion[0].find('.NsFormModuleClear').on('click', this.onClearEvt);
 
       /*==========  Delete  ==========*/
-      this.onDeleteEvt = $.proxy(function(){
-        this.butClickDelete();
-      }, this);
+      if(this.displayDelete){
+        this.onDeleteEvt = $.proxy(function(){
+          this.butClickDelete();
+        }, this);
 
-      this.buttonRegion[0].find('.NsFormModuleDelete').on('click', this.onDeleteEvt);
+        this.buttonRegion[0].find('.NsFormModuleDelete').on('click', this.onDeleteEvt);
+      }else{
+        this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
+      }
     },
 
 

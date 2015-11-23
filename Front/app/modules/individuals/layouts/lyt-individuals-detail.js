@@ -188,7 +188,7 @@ define([
         id: id,
         reloadAfterSave: true,
         parent: this.parent,
-        deleteBtn: false,
+        displayDelete: false,
       });
       this.nsform.afterDelete = function() {
         /*
