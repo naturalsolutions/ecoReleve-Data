@@ -7,6 +7,7 @@ define([
   'sweetAlert',
   'requirejs-text!./Templates/NsFormsModule.html',
   'fancytree',
+  './NsFormsCustomFields',
 ], function ($, _, Backbone, Marionette, BackboneForm, Swal, tpl) {
   return Backbone.View.extend({
     BBForm: null,
