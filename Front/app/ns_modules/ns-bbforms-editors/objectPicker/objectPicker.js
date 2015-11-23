@@ -10,7 +10,7 @@ define([
   'ns_grid/model-grid',
   'ns_filter/model-filter',
   'backbone_forms',
-  'requirejs-text!./tpl-bbfe-objectPicker.html',
+  'requirejs-text!ns_modules/ns-bbforms-editors/objectPicker/tpl-objectPicker.html',
   'objects/layouts/lyt-objects-new'
 ], function(
   $, _, Backbone, Marionette, Swal, Translater, config,
@@ -34,7 +34,6 @@ define([
       var key = options.key;
 
       key = key.split('FK_')[1];
-
 
       //todo : refact
       this.ojectName = key.charAt(0).toLowerCase() + key.slice(1) + 's';
@@ -68,14 +67,6 @@ define([
           this.model.set('visu', 'hidden');
         }
       }
-
-      var required;
-      if(options.schema.validators){
-          required = options.schema.validators[0];
-      }else{
-        required = '';
-      }
-      this.model.set('required', required);
 
       var template =  _.template(Tpl, this.model.attributes);
       this.$el.html(template);

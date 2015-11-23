@@ -10,7 +10,7 @@ define([
   'ns_modules/ns_com',
   'ns_grid/model-grid',
   'ns_filter/model-filter',
-  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
+  'objectPicker',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
   Com, NsGrid, NsFilter, ObjectPicker
@@ -255,8 +255,10 @@ define([
         availableOptions: [{'label': 'direct release','val': 1},{'label': 'direct release grid 5x5','val': 2},],
         //  li click event
         liClickEvent: $.proxy(function(liClickValue, origin, tooltip) {
+          console.log(liClickValue);
           _this.releaseMethod = liClickValue;
           _this.release();
+          //console.log(origin);
         }, this),
       });
       $(e.target).tooltipster('show');

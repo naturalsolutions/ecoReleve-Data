@@ -6,8 +6,15 @@ define([
   'backbone_forms',
   'sweetAlert',
   'requirejs-text!./Templates/NsFormsModule.html',
+  'ListOfNestedModel',
+  'AutocompleteEditor',
+  'sweetAlert',
+  './NsFormsCustomFields',
   'fancytree',
-], function ($, _, Backbone, Marionette, BackboneForm, Swal, tpl) {
+  'bbAutoComp',
+  'LatitudeEditor',
+  'LongitudeEditor',
+], function ($, _, Backbone, Marionette, BackboneForm, Swal, tpl,ListOfNestedModel,AutocompleteEditor) {
   return Backbone.View.extend({
     BBForm: null,
     modelurl: null,
@@ -20,7 +27,6 @@ define([
     reloadAfterSave: false,
     template: tpl,
     redirectAfterPost: '',
-    displayDelete: true,
 
     extendsBBForm: function(){
       Backbone.Form.validators.errMessages.required = '';
@@ -54,6 +60,7 @@ define([
         if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);
 
         if(options.schema.validators && options.schema.validators[0] == "required"){
+
           this.$el.addClass('required');
         }
 
@@ -66,15 +73,12 @@ define([
       var jqxhr;
       this.modelurl = options.modelurl;
 
+
+
+
       this.name = options.name;
       this.buttonRegion = options.buttonRegion;
       this.formRegion = options.formRegion;
-
-
-      if(options.displayDelete != undefined){
-        this.displayDelete = options.displayDelete;
-      }
-
       this.reloadAfterSave = options.reloadAfterSave || this.reloadAfterSave;
       // The template need formname as vrairable, to make it work if several NSForms in the same page
       // With adding formname, there will be no name conflit on Button class
@@ -88,6 +92,7 @@ define([
         this.template = _.template($(tpl).html(), variables);
       }
 
+
       if (options.id && !isNaN(options.id)) {
         this.id = options.id;
       }
@@ -95,9 +100,12 @@ define([
         this.id = 0;
       }
 
+
       if(options.displayMode){
         this.displayMode = options.displayMode;
       }
+
+
 
       if (options.objectType) {
         this.objectType = options.objectType;
@@ -241,7 +249,6 @@ define([
 
 
     butClickSave: function (e) {
-      var _this = this;
       var errors = this.BBForm.commit();
       var jqhrx;
 
@@ -251,6 +258,7 @@ define([
             // To force post when model.save()
           this.model.attributes["id"] = null;
         }
+        var _this = this;
         this.onSavingModel();
         if (this.model.id == 0) {
           // New Record
@@ -308,7 +316,6 @@ define([
           
         }
       }else{
-        _this.BBForm.$el.find('.error:first').find('input').focus();
         return false;
       }
       this.afterSavingModel();
@@ -422,15 +429,11 @@ define([
       this.buttonRegion[0].find('.NsFormModuleClear').on('click', this.onClearEvt);
 
       /*==========  Delete  ==========*/
-      if(this.displayDelete){
-        this.onDeleteEvt = $.proxy(function(){
-          this.butClickDelete();
-        }, this);
+      this.onDeleteEvt = $.proxy(function(){
+        this.butClickDelete();
+      }, this);
 
-        this.buttonRegion[0].find('.NsFormModuleDelete').on('click', this.onDeleteEvt);
-      }else{
-        this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
-      }
+      this.buttonRegion[0].find('.NsFormModuleDelete').on('click', this.onDeleteEvt);
     },
 
 

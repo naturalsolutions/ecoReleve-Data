@@ -37,21 +37,18 @@ define([
 		},
 
 		getValue: function() {
-			var fileName = this._input.val();
+			var fileName = this._input.val()
 			return fileName ? JSON.stringify(fileName) : "";
 		},
 
 		setValue: function(value) {
-				if(value == 'file'){
-					$(this.el).find('input[type=hidden]').val(value);
-					return;
-				}
 			var str, files = value;
 			if (_(value).isObject()) {
 				str = JSON.stringify(value);
 			} else {
 				files = value ? JSON.parse(value) : [];
 			}
+			this._input.val(str);
 		},
 
 		render: function(){
@@ -84,10 +81,7 @@ define([
 				url: fileUrl,
 				processData: false,
 				contentType: false,
-				data : fd,
-				context: this,
-			}).done(function(data){
-
+				data : fd
 			})
 		},
 		testFile: function(eventType){
@@ -102,7 +96,6 @@ define([
 					this._removeBtn.show();
 				}
 			}
-			this.setValue('file');
 		},
 		removeFile: function(eventType){
 			//Tester la valeur de l'id

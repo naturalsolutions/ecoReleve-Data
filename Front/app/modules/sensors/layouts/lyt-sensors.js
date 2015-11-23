@@ -124,6 +124,7 @@ define([
         }],
         liClickEvent: function(liClickValue) {
           var url = _this.rootUrl + 'new/' + liClickValue;
+          console.log(url);
           Backbone.history.navigate(url, {trigger: true});
         },
         position: 'top'

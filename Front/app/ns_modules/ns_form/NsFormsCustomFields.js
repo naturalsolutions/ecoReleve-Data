@@ -166,6 +166,7 @@ define([
 		return validators.regexp(options);
 	};
 	validators.min = function(options) {
+		console.log(options.value);
 
 		if (options.value != 0 && !options.value) throw new Error('Missing required "value" options for "min" validator');
 
