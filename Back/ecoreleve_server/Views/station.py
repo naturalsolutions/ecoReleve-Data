@@ -7,7 +7,8 @@ from ..Models import (
     FieldActivity_ProtocoleType,
     Station_FieldWorker,
     StationList,
-    MonitoredSitePosition
+    MonitoredSitePosition,
+    Base
     )
 from ..GenericObjets.FrontModules import FrontModules, ModuleForms
 from ..GenericObjets import ListObjectWithDynProp
@@ -89,12 +90,12 @@ def autocomplete (request):
     criteria = request.params['term']
     prop = request.matchdict['prop']
     if isinstance(prop,int):
-        table = Base.metadata.tables['MontoredSiteDynPropValuesNow']
+        table = Base.metadata.tables['StationDynPropValuesNow']
         query = select([table.c['ValueString'].label('label'),table.c['ValueString'].label('value')]
-            ).where(table.c['FK_MontoredSiteDynProp']== prop)
+            ).where(table.c['FK_StationDynProp']== prop)
         query = query.where(table.c['ValueString'].like('%'+criteria+'%')).order_by(asc(table.c['ValueString']))
     else: 
-        table = Base.metadata.tables['MontoredSite']
+        table = Base.metadata.tables['Station']
         query = select([table.c[prop].label('value'),table.c[prop].label('label')])
         query = query.where(table.c[prop].like('%'+criteria+'%'))
 
