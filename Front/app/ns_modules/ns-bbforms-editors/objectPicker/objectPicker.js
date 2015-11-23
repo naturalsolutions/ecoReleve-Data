@@ -35,6 +35,8 @@ define([
 
       key = key.split('FK_')[1];
 
+      console.log(options);
+
       //todo : refact
       this.ojectName = key.charAt(0).toLowerCase() + key.slice(1) + 's';
       this.url = config.coreUrl + this.ojectName + '/';
@@ -67,6 +69,14 @@ define([
           this.model.set('visu', 'hidden');
         }
       }
+
+      var required;
+      if(options.schema.validators){
+          required = options.schema.validators[0];
+      }else{
+        required = '';
+      }
+      this.model.set('required', required);
 
       var template =  _.template(Tpl, this.model.attributes);
       this.$el.html(template);

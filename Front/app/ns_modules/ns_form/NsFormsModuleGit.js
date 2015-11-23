@@ -60,7 +60,6 @@ define([
         if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);
 
         if(options.schema.validators && options.schema.validators[0] == "required"){
-
           this.$el.addClass('required');
         }
 
@@ -72,9 +71,6 @@ define([
 
       var jqxhr;
       this.modelurl = options.modelurl;
-
-
-
 
       this.name = options.name;
       this.buttonRegion = options.buttonRegion;
@@ -92,7 +88,6 @@ define([
         this.template = _.template($(tpl).html(), variables);
       }
 
-
       if (options.id && !isNaN(options.id)) {
         this.id = options.id;
       }
@@ -100,12 +95,9 @@ define([
         this.id = 0;
       }
 
-
       if(options.displayMode){
         this.displayMode = options.displayMode;
       }
-
-
 
       if (options.objectType) {
         this.objectType = options.objectType;
@@ -249,6 +241,7 @@ define([
 
 
     butClickSave: function (e) {
+      var _this = this;
       var errors = this.BBForm.commit();
       var jqhrx;
 
@@ -258,7 +251,6 @@ define([
             // To force post when model.save()
           this.model.attributes["id"] = null;
         }
-        var _this = this;
         this.onSavingModel();
         if (this.model.id == 0) {
           // New Record
@@ -316,6 +308,7 @@ define([
           
         }
       }else{
+        _this.BBForm.$el.find('.error:first').find('input').focus();
         return false;
       }
       this.afterSavingModel();
