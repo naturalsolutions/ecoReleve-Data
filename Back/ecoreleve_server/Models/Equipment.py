@@ -147,7 +147,7 @@ def receive_set(target, value, oldvalue, initiator):
     if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
         equipDate = target.Station.StationDate
         try :
-            fk_sensor = target.GetProperty('sensor_id') 
+            fk_sensor = target.GetProperty('FK_Sensor') 
         except :
             fk_sensor = None
         try :
@@ -155,7 +155,7 @@ def receive_set(target, value, oldvalue, initiator):
         except :
             fk_indiv = None
         try : 
-            fk_site = target.GetProperty('site_id')
+            fk_site = target.GetProperty('FK_MonitoredSite')
         except :
             fk_site = None
 

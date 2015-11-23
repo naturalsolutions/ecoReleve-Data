@@ -6,7 +6,6 @@ from collections import OrderedDict
 from datetime import datetime
 from .FrontModules import FrontModules,ModuleForms
 
-
 DynPropType = {'string':'Text','float':'Text','date':'Date','integer':'Text','int':'Text'}
 
 class ObjectTypeWithDynProp:
@@ -67,6 +66,7 @@ class ObjectTypeWithDynProp:
                 curEditable = False
             SchemaDTO[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,ModuleForms.GetClassFromSize(curSize))
 
+
     def GetDynPropNames(self):
         curQuery = 'select D.Name from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
@@ -82,7 +82,6 @@ class ObjectTypeWithDynProp:
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
         Values = self.ObjContext.execute(curQuery).fetchall()
-
         return Values
 
     def GetFieldSets(self,FrontModules,Schema) :
@@ -108,7 +107,6 @@ class ObjectTypeWithDynProp:
         for curProp in Legends:
             curIndex = Unique_Legends.index(curProp[0])
             resultat[curIndex]['fields'].append(curProp[2])
-
         return resultat
 
 

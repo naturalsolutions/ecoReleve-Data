@@ -37,7 +37,8 @@ define([
       'filters': '#indiv_filters',
       'detail': '#detail',
       'totalEntries': '#totalEntries',
-      'nbSelected': '#nbSelected'
+      'nbSelected': '#nbSelected',
+      'release':'#release'
     },
 
     regions: {
@@ -48,7 +49,9 @@ define([
       this.translater = Translater.getTranslater();
       this.com = new Com();
       this.station = options.station;
-      this.releaseMethod = null;
+      this.releaseMethodList = [];
+      console.log('init indiv release')
+      this.getReleaseMethod();
 
       var _this = this;
 
@@ -124,6 +127,16 @@ define([
       /*      this.ui.paginator.html(this.grid.displayPaginator());*/
     },
 
+    getReleaseMethod: function(){
+      console.log('get RELASSEFEgf')
+      var _this = this;
+      $.ajax({
+        url:config.coreUrl+'release/individuals/getReleaseMethod'
+      }).done(function(data){
+        _this.releaseMethodList=data;
+      });
+    },
+
     displayFilter: function() {
       this.filters = new NsFilter({
         url: config.coreUrl + 'release/individuals/',
@@ -164,7 +177,7 @@ define([
       this.total = grid.collection.state.totalRecords;
       $(this.ui.totalEntries).html(this.total);
     },
-    release: function() {
+    release: function(releaseMethod) {
       var mds = this.grid.grid.getSelectedModels();
       if (!mds.length) {
         return;
@@ -174,7 +187,9 @@ define([
       $.ajax({
         url: config.coreUrl + 'release/individuals/',
         method: 'POST',
-        data: {IndividualList: JSON.stringify(col),StationID: this.station.get('ID'),releaseMethod: _this.releaseMethod},
+        data: {IndividualList: JSON.stringify(col),
+          StationID: this.station.get('ID'),
+          releaseMethod:releaseMethod},
         context: this,
       }).done(function(resp) {
         if (resp.errors) {
@@ -248,20 +263,15 @@ define([
 
     toolTipShow: function(e) {
       var _this = this;
-      $(e.target).tooltipList({
-
+      this.ui.release.tooltipList({
         position: 'top',
         //  pass avalaible options
-        availableOptions: [{'label': 'direct release','val': 1},{'label': 'direct release grid 5x5','val': 2},],
-        //  li click event
-        liClickEvent: $.proxy(function(liClickValue, origin, tooltip) {
-          console.log(liClickValue);
-          _this.releaseMethod = liClickValue;
-          _this.release();
-          //console.log(origin);
-        }, this),
+        availableOptions: _this.releaseMethodList,
+        liClickEvent:function(liClickValue) {
+          _this.release(liClickValue);
+        }, 
       });
-      $(e.target).tooltipster('show');
+      this.ui.release.tooltipster('show');
     }
   });
 });

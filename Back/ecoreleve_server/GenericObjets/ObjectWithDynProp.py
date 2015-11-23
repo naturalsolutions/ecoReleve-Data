@@ -24,7 +24,6 @@ class ObjectWithDynProp:
         self.PropDynValuesOfNow = {}
         self.GetAllProp()
 
-
     def GetAllProp (self) :
         ''' Get all object properties (dynamic and static) '''
         if self.allProp is None:
@@ -44,7 +43,6 @@ class ObjectWithDynProp:
             statProps.extend(dynProps)
             self.allProp = statProps
         return self.allProp
-
 
     def GetFrontModulesID (self,ModuleType) :
         if not hasattr(self,'FrontModules') :
@@ -96,7 +94,8 @@ class ObjectWithDynProp:
                     , or_( ModuleGrids.TypeObj == typeID,ModuleGrids.TypeObj == None)
                     )).all()
         except :
-            filterFields = DBSession.query(ModuleGrids).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()
+            filterFields = DBSession.query(ModuleGrids
+                ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()
         for curConf in filterFields:
             curConfName = curConf.Name
             filterField = list(filter(lambda x : x['name'] == curConfName
@@ -175,6 +174,12 @@ class ObjectWithDynProp:
                 pass
         else:
             if (nameProp in self.GetType().DynPropNames):
+                if nameProp =='taxon':
+                    print('TRy INSET taxon :')
+                    print(valeur)
+                    print(self.PropDynValuesOfNow)
+                    print('\n\n\n\nDYN PROP oF Obj ')
+                    print(self.GetType().DynPropNames)
                 if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):
                     #### IF no value or different existing value, new value is affected ####
                     if 'date' in self.GetDynProps(nameProp).TypeProp.lower():
@@ -263,7 +268,8 @@ class ObjectWithDynProp:
         Editable = (DisplayMode.lower()  == 'edit')
         resultat = {}
         type_ = self.GetType().ID
-        Fields = self.ObjContext.query(ModuleForms).filter(ModuleForms.Module_ID == FrontModules.ID).order_by(ModuleForms.FormOrder).all()
+        Fields = self.ObjContext.query(ModuleForms
+            ).filter(ModuleForms.Module_ID == FrontModules.ID).order_by(ModuleForms.FormOrder).all()
         curEditable = Editable
 
         for curStatProp in self.__table__.columns:
@@ -282,7 +288,6 @@ class ObjectWithDynProp:
                     curEditable = True
 
                 resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)))
-                
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):

@@ -5,6 +5,7 @@ from sqlalchemy import (and_,
  exists,
  join,
  cast,
+ not_,
  DATE)
 from sqlalchemy.orm import aliased
 from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
@@ -169,3 +170,32 @@ class IndividualList(ListObjectWithDynProp):
         return fullQueryJoin
 
 
+#--------------------------------------------------------------------------
+class SensorList(ListObjectWithDynProp):
+
+    def __init__(self,frontModule) :
+        super().__init__(Sensor,frontModule)
+
+    def WhereInJoinTable (self,query,criteriaObj) :
+        query = super().WhereInJoinTable(query,criteriaObj)
+        curProp = criteriaObj['Column']
+        if 'available' in curProp.lower():
+            s2 = aliased(Sensor)
+            e = aliased(Equipment)
+            e2 = aliased(Equipment)
+
+            subQueryEquip = select([e2]).where(
+                and_(e.FK_Sensor==e2.FK_Sensor,
+                    and_(e.StartDate<e2.StartDate,e2.StartDate<=criteriaObj['Value'])))
+
+            querySensor = select([e]).where(
+                and_(e.StartDate<=criteriaObj['Value'],
+                    and_(e.Deploy==0,
+                        and_(Sensor.ID==e.FK_Sensor,not_(exists(subQueryEquip)))
+                        )
+                    ))
+            if criteriaObj['Operator'].lower() == 'is':
+                query = query.where(exists(querySensor))
+            else:
+                query = query.where(not_(exists(querySensor)))
+        return query

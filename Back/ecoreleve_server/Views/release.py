@@ -17,7 +17,7 @@ from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE,func,desc,join
+from sqlalchemy import select, and_,cast, DATE,func,desc,join, text
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
@@ -33,7 +33,8 @@ def actionOnStations(request):
     dictActionFunc = {
     # 'count' : count_,
     'getFields': getFields,
-    'getFilters': getFilters
+    'getFilters': getFilters,
+    'getReleaseMethod':getReleaseMethod
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -79,11 +80,18 @@ def getFields(request) :
     transaction.commit()
     return cols
 
+def getReleaseMethod(request):
+    query = text("""SELECT TTop_FullPath as val, TTop_Name as label"""
+        +""" FROM THESAURUS.dbo.TTopic th 
+        JOIN [ModuleForms] f on th.TTop_ParentID = f.Options
+        where Name = 'release_method' """)
+    result = DBSession.execute(query).fetchall()
+    return [dict(row) for row in result]
+
 @view_config(route_name= prefix+'individuals', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchIndiv(request):
     data = request.params.mixed()
     print('*********data*************')
-    print(data)
     searchInfo = {}
     searchInfo['criteria'] = []
     if 'criteria' in data: 
@@ -119,13 +127,15 @@ def searchIndiv(request):
 def releasePost(request):
 
     data = request.params.mixed()
+    print(data)
     sta_id = int(data['StationID'])
     indivList = json.loads(data['IndividualList'])
     releaseMethod = data['releaseMethod']
-    releaseMethod = None
     taxon = indivList[0]['Species']
     curStation = DBSession.query(Station).get(sta_id)
 
+    taxons = dict(Counter(indiv['Species'] for indiv in indivList))
+    print (taxons)
 
     def getnewObs(typeID):
         return Observation(FK_ProtocoleType=typeID)
@@ -194,11 +204,9 @@ def releasePost(request):
             v = indiv.pop(k)
             k = k.lower()
             indiv[k] = v
-        
-        print(indiv)
+
         indiv['FK_Individual'] = indiv['id']
         indiv['FK_Station'] = sta_id
-
         try : 
             indiv['taxon'] = indiv['species']
         except: 
@@ -238,8 +246,7 @@ def releasePost(request):
         # here add info for Individual Equipment protocol
 
         try:
-            indiv['id_taxon'] = indiv['id']
-            indiv['sensor_id'] = int(indiv['fk_sensor'])
+            indiv['FK_Sensor'] = int(indiv['fk_sensor'])
             indiv['deploy'] = True
             curEquipmentInd = getnewObs(equipmentIndID)
             curEquipmentInd.UpdateFromJson(indiv)
@@ -249,30 +256,35 @@ def releasePost(request):
             print_exc()
             continue
 
-    vertebrateGrp = Observation(FK_ProtocoleType=vertebrateGrpID)
-    releaseGrp = Observation(FK_ProtocoleType=releaseGrpID)
+    vertebrateGrp = Observation(FK_ProtocoleType=vertebrateGrpID, FK_Station =sta_id )
 
     dictVertGrp = dict(Counter(binList))
     dictVertGrp['taxon'] = taxon
-    # print('\n\n########### Vetebrate Group protocol')
+
     vertebrateGrp.UpdateFromJson(dictVertGrp)
-    # print(vertebrateGrp.PropDynValuesOfNow)
-    
-    releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod})
-    # print('\n\n########### Release Group protocol')
-    # print(releaseGrp.PropDynValuesOfNow)
     vertebrateGrp.Observation_children.extend(vertebrateIndList)
+    DBSession.add(vertebrateGrp)
+
+    releaseGrp = Observation(FK_ProtocoleType=releaseGrpID, FK_Station =sta_id)
+    releaseGrp.PropDynValuesOfNow={}
+    releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod})
     releaseGrp.Observation_children.extend(releaseIndList)
 
-    listObs = []
-    listObs.append(vertebrateGrp)
-    listObs.append(releaseGrp)
-    listObs.extend(biometryList)
-    listObs.extend(equipmentIndList)
+    # print('\n\n########### Release Group protocol')
+    # print(releaseGrp.PropDynValuesOfNow)
 
-    # finally append all Protocols to Station 
-    curStation.Observations.extend(listObs)
-    transaction.commit()
+    DBSession.add(releaseGrp)
+    DBSession.add_all(biometryList)
+
+    # listObs = []
+    # listObs.append(vertebrateGrp)
+    # listObs.append(releaseGrp)
+    # listObs.extend(biometryList)
+    # listObs.extend(equipmentIndList)
+
+    # # finally append all Protocols to Station 
+    # curStation.Observations.extend(listObs)
+    # transaction.commit()
 
     DBSession.add_all(equipmentIndList)
     transaction.commit()
