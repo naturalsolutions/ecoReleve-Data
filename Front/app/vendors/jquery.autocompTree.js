@@ -96,6 +96,9 @@
 					$me.val(parametres.inputValue);
 
 					//Initialisation de l'arbre
+					//console.log($('#treeView' + $me.attr("id")));
+					//console.log(parametres.webservices);
+					//console.log(dataToSend);
 					$('#treeView' + $me.attr("id")).fancytree({
 						debugLevel: 0,
 						extensions: ["filter"],
@@ -118,6 +121,7 @@
 						},
 						//Permet si l'arbre et en mode filter d'afficher les enfants des termes filtrés -> submatch
 						renderNode: function (event, data) {
+							console.log('render');
 
 							var node = data.node;
 							if (data.tree.options.hideExpand.isHide) {
@@ -182,7 +186,8 @@
 							$(this).css('display', 'none');
 						});
 						var treeContainer = $("#treeView" + $me.attr("id"));
-						treeContainer.css('display', 'block');
+						treeContainer.css('display', 'block').css('width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
+						treeContainer.css({top: $(this).outerHeight() + 20 });
 						//Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
 						$(document).delegate("body", "click", function (event) {                            
 							if (!$(event.target).is("#" + $me.attr("id") + ",span[class^=fancytree], div[id^=treeView], ul")) {
