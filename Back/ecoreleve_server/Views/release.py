@@ -125,7 +125,6 @@ def searchIndiv(request):
 
 @view_config(route_name= prefix+'individuals', renderer='json', request_method = 'POST', permission = NO_PERMISSION_REQUIRED)
 def releasePost(request):
-
     data = request.params.mixed()
     print(data)
     sta_id = int(data['StationID'])
@@ -136,7 +135,6 @@ def releasePost(request):
 
     taxons = dict(Counter(indiv['Species'] for indiv in indivList))
     print (taxons)
-
     def getnewObs(typeID):
         return Observation(FK_ProtocoleType=typeID)
 
@@ -170,7 +168,6 @@ def releasePost(request):
         curSex = None
         curAge = None
         binP = 0
-
         if obj['Sex'] is not None and obj['Sex'].lower() == 'male':
             curSex = 'male'
             binP += 2
@@ -193,7 +190,6 @@ def releasePost(request):
         return binaryDict[binP]
 
     binList = []
-
     for indiv in indivList: 
         curIndiv = DBSession.query(Individual).get(indiv['ID'])
         curIndiv.LoadNowValues()
@@ -217,37 +213,21 @@ def releasePost(request):
         except: 
             indiv['weight'] = indiv['Poids']
             pass
-        
-        # here add info for Vetebrate individual protocol
-        # print('\n\n########### Vetebrate individual protocol')
+
         curVertebrateInd = getnewObs(vertebrateIndID)
         curVertebrateInd.UpdateFromJson(indiv)
         vertebrateIndList.append(curVertebrateInd)
-        # print('FK_Individual : '+str(curVertebrateInd.FK_Individual))
-        # print(curVertebrateInd.PropDynValuesOfNow)
 
-        # here add info for Bird Biometry protocol
-        # print('\n\n########### Bird Biometry protocol')
         curBiometry = getnewObs(biometryID)
         curBiometry.UpdateFromJson(indiv)
-        # print('FK_Individual : '+str(curVertebrateInd.FK_Individual))
-        # print(curBiometry.PropDynValuesOfNow)
         biometryList.append(curBiometry)
 
-        # here add info for Release Individual protocol
-        # print('\n\n########### Release Individual protocol')
         curReleaseInd = getnewObs(releaseIndID)
         curReleaseInd.UpdateFromJson(indiv)
         releaseIndList.append(curReleaseInd)
-        # print('FK_Individual : '+str(curVertebrateInd.FK_Individual))
-        # print(curReleaseInd.PropDynValuesOfNow)
-
-        # print('\n\n########### Individual equipment protocol')
-        # here add info for Individual Equipment protocol
 
         try:
             indiv['FK_Sensor'] = int(indiv['fk_sensor'])
-            indiv['deploy'] = True
             curEquipmentInd = getnewObs(equipmentIndID)
             curEquipmentInd.UpdateFromJson(indiv)
             curEquipmentInd.Station = curStation
@@ -257,7 +237,6 @@ def releasePost(request):
             continue
 
     vertebrateGrp = Observation(FK_ProtocoleType=vertebrateGrpID, FK_Station =sta_id )
-
     dictVertGrp = dict(Counter(binList))
     dictVertGrp['taxon'] = taxon
 
@@ -270,24 +249,9 @@ def releasePost(request):
     releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod})
     releaseGrp.Observation_children.extend(releaseIndList)
 
-    # print('\n\n########### Release Group protocol')
-    # print(releaseGrp.PropDynValuesOfNow)
-
     DBSession.add(releaseGrp)
     DBSession.add_all(biometryList)
-
-    # listObs = []
-    # listObs.append(vertebrateGrp)
-    # listObs.append(releaseGrp)
-    # listObs.extend(biometryList)
-    # listObs.extend(equipmentIndList)
-
-    # # finally append all Protocols to Station 
-    # curStation.Observations.extend(listObs)
-    # transaction.commit()
-
     DBSession.add_all(equipmentIndList)
     transaction.commit()
 
     return {'release':len(releaseIndList)}
-    return {'release':0}

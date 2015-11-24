@@ -141,47 +141,46 @@ define([
           option = [];
         };
         var columns = [
-
 				{
-  name: 'id',
-  label: 'ID',
-  editable: false,
-  renderable: false,
-  cell: 'integer'
-				},
-				{
-  editable: true,
-  name: 'import',
-  label: 'Import',
-  cell: 'select-row',
-  headerCell: 'select-all'
-				},{
-  name: 'name',
-  label: 'Name',
-  editable: false,
-  cell: 'string'
-				}, {
-  name: 'waypointTime',
-  label: 'Date',
-  editable: false,
-  cell: Backgrid.DatetimeCell
-				}, {
-  editable: false,
-  name: 'latitude',
-  label: 'LAT',
-  cell: myCell
-				}, {
-  editable: false,
-  name: 'longitude',
-  label: 'LON',
-  cell: myCell
-				},{
-  editable: true,
-  name: 'fieldActivity',
-  label: 'Field Activity',
-  cell: Backgrid.SelectCell.extend({
-    optionValues: optionsList
-  })
+          name: 'id',
+          label: 'ID',
+          editable: false,
+          renderable: false,
+          cell: 'integer'
+        				},
+        				{
+          editable: true,
+          name: 'import',
+          label: 'Import',
+          cell: 'select-row',
+          headerCell: 'select-all'
+        				},{
+          name: 'name',
+          label: 'Name',
+          editable: false,
+          cell: 'string'
+        				}, {
+          name: 'waypointTime',
+          label: 'Date',
+          editable: false,
+          cell: Backgrid.DatetimeCell
+        				}, {
+          editable: false,
+          name: 'latitude',
+          label: 'LAT',
+          cell: myCell
+        				}, {
+          editable: false,
+          name: 'longitude',
+          label: 'LON',
+          cell: myCell
+        				},{
+          editable: true,
+          name: 'fieldActivity',
+          label: 'Field Activity',
+          cell: Backgrid.SelectCell.extend({
+            optionValues: optionsList
+          })
 				},
 			];
 

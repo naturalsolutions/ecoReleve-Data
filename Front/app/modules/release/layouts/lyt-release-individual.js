@@ -24,7 +24,7 @@ define([
     className: 'full-height animated white rel',
 
     events: {
-      'click #btnFilter': 'filter',
+      'click #btnFilterRel': 'filter',
       'click #back': 'hideDetails',
       'click button#clear': 'clearFilter',
       'click #release': 'toolTipShow',
@@ -98,8 +98,8 @@ define([
 
       var _this = this;
       this.grid = new myGrid({
-        pageSize: 1400,
-        pagingServerSide: false,
+        pageSize: 500,
+        pagingServerSide: true,
         com: this.com,
         url: config.coreUrl + 'release/individuals/',
         urlParams: this.urlParams,
