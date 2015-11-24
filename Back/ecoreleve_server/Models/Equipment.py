@@ -144,10 +144,15 @@ def receive_set(target, value, oldvalue, initiator):
 
     typeName = target.GetType().Name
 
+    if 'unequip' in typeName.lower():
+        deploy = 0
+    else :
+        deploy  = 1 
+
     if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
         equipDate = target.Station.StationDate
         try :
-            fk_sensor = target.GetProperty('sensor_id') 
+            fk_sensor = target.GetProperty('FK_Sensor') 
         except :
             fk_sensor = None
         try :
@@ -155,18 +160,21 @@ def receive_set(target, value, oldvalue, initiator):
         except :
             fk_indiv = None
         try : 
-            fk_site = target.GetProperty('site_id')
+            fk_site = target.GetProperty('FK_MonitoredSite')
         except :
             fk_site = None
 
-        deploy = target.GetProperty('deploy')
-        if deploy is True :
-            availability = checkEquip(fk_sensor=fk_sensor,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
+        if deploy == 1 :
+            availability = checkEquip(fk_sensor=fk_sensor
+                ,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
         else:
-            availability = checkUnequip(fk_sensor=fk_sensor,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
+            availability = checkUnequip(fk_sensor=fk_sensor
+                ,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
 
         if availability is True:
-            curEquip = Equipment(Observation= target, FK_Sensor = fk_sensor, StartDate = equipDate,FK_Individual = fk_indiv,  FK_MonitoredSite = fk_site, Deploy = deploy)    #, FK_MonitoredSite = fk_site)
+            curEquip = Equipment(Observation= target, FK_Sensor = fk_sensor
+            , StartDate = equipDate,FK_Individual = fk_indiv, FK_MonitoredSite = fk_site
+            , Deploy = deploy)
             target.Equipment = curEquip
             print('INDIV EQUIP GOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOD')
         else : 
