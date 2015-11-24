@@ -183,7 +183,13 @@ class SensorList(ListObjectWithDynProp):
             print('IN SENSOR AVAILABLE ********************************')
             print(curProp)
             print(criteriaObj['Value'])
-            date = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
+            try:
+                try : 
+                    date = datetime.strptime(criteriaObj['Value'],'%d/%m/%Y% H:%M:%S')
+                except:
+                    date = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
+            except:
+                pass
             # criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'],'%d/%m/%Y')
             s2 = aliased(Sensor)
             e = aliased(Equipment)
@@ -208,7 +214,7 @@ class SensorList(ListObjectWithDynProp):
     def countQuery(self,criteria = None):
         query = super().countQuery(criteria)
         for obj in criteria :
-            if obj['Column'] in ['is available']:
+            if 'available' in obj['Column']:
                 query = self.WhereInJoinTable(query,obj)
         return query
 

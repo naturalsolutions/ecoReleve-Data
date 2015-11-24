@@ -142,10 +142,10 @@ class ListObjectWithDynProp():
             curTypeAttr = str(self.ObjWithDynProp.__table__.c[curProp].type).split('(')[0]
             if 'date' in curTypeAttr.lower() :
                 try :
-                    criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].strip(),'%d/%m/%Y%H:%M:%S')
+                    criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
                 except :
                     try:
-                        criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'],'%d/%m/%Y')
+                        criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y')
                     except: pass
 
             filterCriteria = eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
@@ -170,6 +170,13 @@ class ListObjectWithDynProp():
                     # Gerer l'exception
             else :
                 viewAlias = self.vAliasList['v'+curDynProp['name']]
+                if 'date' in curDynProp['type'].lower() :
+                    try :
+                        criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
+                    except :
+                        try:
+                            criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y')
+                        except: pass
                       #### Perform the'where' in dyn props ####
                 query = query.where(
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
