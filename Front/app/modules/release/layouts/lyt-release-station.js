@@ -1,27 +1,27 @@
 //radio
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'config',
-	'ns_modules/ns_com',
-	'ns_grid/model-grid',
-	'ns_filter/model-filter',
-	'modules/release/layouts/lyt-release-individual',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'config',
+  'ns_modules/ns_com',
+  'ns_grid/model-grid',
+  'ns_filter/model-filter',
+  'modules/release/layouts/lyt-release-individual',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, LytReleaseIndiv
+  Com, NsGrid, NsFilter, LytReleaseIndiv
 ) {
 
   'use strict';
 
   return Marionette.LayoutView.extend({
     /*===================================================
-    		=            Layout Stepper Orchestrator            =
-    		===================================================*/
+        =            Layout Stepper Orchestrator            =
+        ===================================================*/
 
     template: 'app/modules/release/templates/tpl-release-station.html',
     className: 'full-height animated white rel',
@@ -51,7 +51,7 @@ define([
     initialize: function(options) {
       this.translater = Translater.getTranslater();
       this.com = new Com();
-
+      this.stationId = options.id;
     },
 
     onRender: function() {
@@ -60,6 +60,17 @@ define([
     },
 
     onShow: function() {
+      var _this = this;
+      if(this.stationId){
+        var model = new Backbone.Model();
+        model.url = config.coreUrl + 'stations/' + this.stationId;
+        model.fetch({
+          success: function(md){
+            _this.detail.show(new LytReleaseIndiv({station: md}));
+            _this.ui.detail.removeClass('hidden');
+          },
+        });
+      }
       this.initGrid();
       this.displayFilters(4);
     },
@@ -127,6 +138,7 @@ define([
     },
 
     hideDetails: function() {
+      Backbone.history.navigate('#release', {trigger: false});
       this.ui.detail.addClass('hidden');
     },
 
@@ -152,7 +164,7 @@ define([
       }
 
       this.grid.lastImportedUpdate(type);
-    }
+    },
 
   });
 });

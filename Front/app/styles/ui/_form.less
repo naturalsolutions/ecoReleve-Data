@@ -43,7 +43,8 @@ input, select, textarea{
 	}
 }
 .error{
-	select, input, textarea{
+	//works only for required classes
+	select.required, input.required, textarea.required{
 		border-left: 5px solid @error;
 	}
 }
@@ -98,13 +99,14 @@ select:disabled {
 		margin: 0px;
 		border: none;
 		&>div{
-			margin-bottom: 0px;
+			//margin-bottom: 0px; ?why?
 		}
 	}
 }
 
 
 .nav-tabs{
+	border: none;
 	li{
 		a{
 			cursor: pointer;

@@ -37,13 +37,11 @@ define([
                     retour = {
                             type: options.type,
                             message: 'Not-Valid Value'
-                            }; 
-                    
+                            };
                 }
             });
             /*
             $.when(defered).done(function() {
-                                  
             });*/
             return retour ;
         };
@@ -67,6 +65,7 @@ define([
         },
 
         initialize: function (options) {
+            this.options = options;
             this.FirstRender = true ;
             this.languages = {
                 'fr':'',
@@ -101,10 +100,14 @@ define([
         },
 
         render: function () {
+            var _this = this;
 
             var $el = $(this.template);
             this.setElement($el);
-            var _this = this;
+
+            if(this.options.schema.validators && this.options.schema.validators[0] == "required"){
+              this.$el.find('input').addClass('required');
+            }
             _(function () {
                 _this.$el.find('#' + _this.id).autocompTree({
                     wsUrl: _this.wsUrl + '/ThesaurusREADServices.svc/json',
@@ -163,17 +166,14 @@ define([
                 });
                 if (_this.FirstRender) {
                     _this.$el.find('#' + _this.id).blur(function(options) {
-                        console.log('BLUR',options) ;
                         
                         
                         setTimeout (function(options) {
                                     var value = _this.$el.find('#' + _this.id ).val() ;
-                                    console.log(' ************* BLUR VALUE ', value) ;
                                     _this.onEditValidation(value) ;
                                     },150) ;
                     });
                     
-                    console.log(_this.$el.find('#treeView' + _this.id) ) ;
                     /*
                     _this.$el.find('#treeView' + _this.id).hide(function(options) {
                         var value = $('#' + _this.id).text() ;
@@ -184,6 +184,9 @@ define([
                 }
                 _this.FirstRender = false ;
             }).defer();
+
+    
+
             return this;
         },
         onEditValidation: function (value) {
