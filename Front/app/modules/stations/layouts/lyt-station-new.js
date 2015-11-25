@@ -44,6 +44,7 @@ define([
     },
 
     initialize: function(options) {
+      this.from = options.from;
     },
 
     onShow: function() {
@@ -162,6 +163,9 @@ define([
         objectType: stTypeId,
         id: 0,
         afterShow: function() {
+          if(_this.from == 'release'){
+            _this.$el.find('[name="fieldActivityId"]').val('1').change();
+          }
           _this.$el.find('[name="FK_MonitoredSite"]').on('change', function() {
             var msId = $(this).val();
             _this.getCoordFromMs(msId);
@@ -194,7 +198,12 @@ define([
 
     afterSave: function(model, resp) {
       var id = model.get('ID');
-      Backbone.history.navigate('#stations/' + id, {trigger: true});
+      if(this.from == 'release'){
+        Backbone.history.navigate('#release/' + id, {trigger: true});
+        return;
+      }else{
+        Backbone.history.navigate('#stations/' + id, {trigger: true});
+      }
     },
 
     save: function() {

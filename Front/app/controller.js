@@ -77,8 +77,8 @@ define(['marionette', 'config',
     stations: function(id) {
       this.rgMain.show(new LytStations({id: id}));
     },
-    newStation: function() {
-      this.rgMain.show(new LytStationsNew());
+    newStation: function(from) {
+      this.rgMain.show(new LytStationsNew({from: from}));
     },
 
     individuals: function(id) {
@@ -111,8 +111,10 @@ define(['marionette', 'config',
       }));
     },
 
-    release: function() {
-      this.rgMain.show(new LytReleaseStation());
+    release: function(id) {
+      console.log(id);
+      // (id of the station..)
+      this.rgMain.show(new LytReleaseStation({id : id}));
     },
 
     export: function() {

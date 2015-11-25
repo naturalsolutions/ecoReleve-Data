@@ -1,6 +1,6 @@
 
 define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
-	function($, Marionette, Backbone, config) {
+  function($, Marionette, Backbone, config) {
 
   'use strict';
   return Marionette.AppRouter.extend({
@@ -28,6 +28,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       'individuals/:id(/)': 'individuals',
       'individuals(/)': 'individuals',
 
+      'stations/new/:from(/)': 'newStation',
       'stations/new(/)': 'newStation',
       'stations/:id(/)': 'stations',
       'stations(/)': 'stations',
@@ -43,6 +44,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       'validate/:type(/)': 'validateType',
       'validate(/)': 'validate',
 
+      'release/:id(/)': 'release',
       'release(/)': 'release',
 
       '*route(/:page)': 'home',
@@ -71,10 +73,8 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
         $('#arial').html('');
         $('#arialSub').html('');
       }else {
-
         var md = this.collection.findWhere({href: patern[0]});
         $('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
-
         if (patern[1] && patern[1] != 'id' && patern[1] != 'type') {
           $('#arialSub').html('<a href="#' + patern[0] + '/' + patern[1] + '">| &nbsp;' + patern[1] + '</a>');
         }else {

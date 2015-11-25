@@ -309,7 +309,8 @@ define([
           
         }
       }else{
-        _this.BBForm.$el.find('.error:first').find('input').focus();
+        console.log(errors);
+        _this.BBForm.$el.find('.error:first').find('input,select').focus();
         return false;
       }
       this.afterSavingModel();

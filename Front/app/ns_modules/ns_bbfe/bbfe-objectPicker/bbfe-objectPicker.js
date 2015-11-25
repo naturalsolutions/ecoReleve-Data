@@ -19,22 +19,23 @@ define([
   'use strict';
   return Form.editors.ObjectPicker = Form.editors.Base.extend({
 
-    className: 'full-height animated white',
+    className: '',
     events: {
       'click span.picker': 'showPicker',
-      'click #btnFilter': 'filter',
+      'click #btnFilterPicker': 'filter',
       'click .cancel': 'hidePicker',
       'click button#new': 'onClickNew',
     },
 
     initialize: function(options) {
+      options.schema.editorClass='';
+      Form.editors.Text.prototype.initialize.call(this, options);
       this.com = new Com();
       //get the foreign key 2
       this.key = options.key;
       var key = options.key;
 
       key = key.split('FK_')[1];
-
 
       //todo : refact
       this.ojectName = key.charAt(0).toLowerCase() + key.slice(1) + 's';
@@ -77,6 +78,7 @@ define([
       }
       this.model.set('required', required);
 
+      //dirty
       var template =  _.template(Tpl, this.model.attributes);
       this.$el.html(template);
 
