@@ -35,13 +35,16 @@ define([
           },
 
         render: function () {
+            var _this = this;
 
             
             var $el = _.template(
                 this.template, { id: this.id,value: this.options.model.get(this.options.schema.name) 
 }            );
             this.setElement($el);
-            var _this = this;
+            if(this.options.schema.validators && this.options.schema.validators[0] == "required"){
+              this.$el.find('input').addClass('required');
+            }
             _(function () {
                 var optionsJquery = _this.autocompleteSource;
                 _this.$el.find('#' + _this.id).autocomplete(optionsJquery);
@@ -50,6 +53,8 @@ define([
                     _this.$el.find('#' + _this.id).prop('disabled', true);
                 }
             }).defer();
+            console.log(this.$el);
+            
 
             return this;
         },

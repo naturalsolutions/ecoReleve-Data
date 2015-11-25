@@ -31,7 +31,7 @@ define([
 
     getValue: function() {
       var date= new Date;
-      return this.el.children['Date_'].value
+      return this.el.children['Date_'].value;
     },
 
     render: function() {

@@ -19,7 +19,7 @@ define([
   'use strict';
   return Form.editors.ObjectPicker = Form.editors.Base.extend({
 
-    className: 'full-height animated white',
+    className: '',
     events: {
       'click span.picker': 'showPicker',
       'click #btnFilterPicker': 'filter',
