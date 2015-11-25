@@ -46,6 +46,9 @@ define([
                 var optionsJquery = _this.autocompleteSource;
                 _this.$el.find('#' + _this.id).autocomplete(optionsJquery);
                 _this.$el.find('#' + _this.id).addClass(_this.options.schema.editorClass) ;
+               if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
+                    _this.$el.find('#' + _this.id).prop('disabled', true);
+                }
             }).defer();
 
             return this;
