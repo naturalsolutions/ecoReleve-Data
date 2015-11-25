@@ -47,9 +47,12 @@ define([
     initialize: function(options) {
       this.translater = Translater.getTranslater();
       this.com = new Com();
-      this.station = options.station;
-      this.releaseMethod = null;
 
+      this.station = options.station;
+      this.model = options.station;
+      console.log(this.model);
+
+      this.releaseMethod = null;
 
       var _this = this;
 
@@ -87,7 +90,7 @@ define([
     onShow: function() {
       this.displayFilter();
       this.displayGrid();
-      Backbone.history.navigate('release/individuals',{trigger: false});
+      //Backbone.history.navigate('release/individuals',{trigger: false});
     },
 
     initGrid: function() {

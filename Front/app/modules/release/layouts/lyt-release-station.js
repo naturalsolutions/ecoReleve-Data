@@ -32,7 +32,6 @@ define([
       'click .tab-link': 'displayTab',
       'click #useStation': 'useStation',
       'click #back': 'hideDetails',
-      'click #newStation': 'newStation',
     },
 
     ui: {
@@ -52,7 +51,7 @@ define([
     initialize: function(options) {
       this.translater = Translater.getTranslater();
       this.com = new Com();
-
+      this.stationId = options.id;
     },
 
     onRender: function() {
@@ -61,6 +60,17 @@ define([
     },
 
     onShow: function() {
+      var _this = this;
+      if(this.stationId){
+        var model = new Backbone.Model();
+        model.url = config.coreUrl + 'stations/' + this.stationId;
+        model.fetch({
+          success: function(md){
+            _this.detail.show(new LytReleaseIndiv({station: md}));
+            _this.ui.detail.removeClass('hidden');
+          },
+        });
+      }
       this.initGrid();
       this.displayFilters(4);
     },
@@ -128,6 +138,7 @@ define([
     },
 
     hideDetails: function() {
+      Backbone.history.navigate('#release', {trigger: false});
       this.ui.detail.addClass('hidden');
     },
 
@@ -153,10 +164,6 @@ define([
       }
 
       this.grid.lastImportedUpdate(type);
-    },
-
-    newStation: function(){
-      Backbone.history.navigate('#stations/new', {trigger: true});
     },
 
   });
