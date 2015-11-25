@@ -50,7 +50,6 @@ define([
 
       this.station = options.station;
       this.model = options.station;
-      console.log(this.model);
 
       this.releaseMethod = null;
 
