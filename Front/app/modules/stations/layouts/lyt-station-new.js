@@ -44,6 +44,7 @@ define([
     },
 
     initialize: function(options) {
+      this.from = options.from;
     },
 
     onShow: function() {
@@ -194,7 +195,12 @@ define([
 
     afterSave: function(model, resp) {
       var id = model.get('ID');
-      Backbone.history.navigate('#stations/' + id, {trigger: true});
+      if(this.from == 'release'){
+        Backbone.history.navigate('#release', {trigger: true});
+        return;
+      }else{
+        Backbone.history.navigate('#stations/' + id, {trigger: true});
+      }
     },
 
     save: function() {

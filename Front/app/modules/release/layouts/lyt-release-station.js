@@ -1,27 +1,27 @@
 //radio
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'config',
-	'ns_modules/ns_com',
-	'ns_grid/model-grid',
-	'ns_filter/model-filter',
-	'modules/release/layouts/lyt-release-individual',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'config',
+  'ns_modules/ns_com',
+  'ns_grid/model-grid',
+  'ns_filter/model-filter',
+  'modules/release/layouts/lyt-release-individual',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, LytReleaseIndiv
+  Com, NsGrid, NsFilter, LytReleaseIndiv
 ) {
 
   'use strict';
 
   return Marionette.LayoutView.extend({
     /*===================================================
-    		=            Layout Stepper Orchestrator            =
-    		===================================================*/
+        =            Layout Stepper Orchestrator            =
+        ===================================================*/
 
     template: 'app/modules/release/templates/tpl-release-station.html',
     className: 'full-height animated white rel',
@@ -32,6 +32,7 @@ define([
       'click .tab-link': 'displayTab',
       'click #useStation': 'useStation',
       'click #back': 'hideDetails',
+      'click #newStation': 'newStation',
     },
 
     ui: {
@@ -152,7 +153,11 @@ define([
       }
 
       this.grid.lastImportedUpdate(type);
-    }
+    },
+
+    newStation: function(){
+      Backbone.history.navigate('#stations/new', {trigger: true});
+    },
 
   });
 });

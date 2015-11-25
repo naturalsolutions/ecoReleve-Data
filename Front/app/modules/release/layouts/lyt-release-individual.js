@@ -22,24 +22,23 @@ define([
 
     template: 'app/modules/release/templates/tpl-release-individual.html',
     className: 'full-height animated white rel',
-
-    events: {
-      'click #btnFilterRel': 'filter',
-      'click #back': 'hideDetails',
-      'click button#clear': 'clearFilter',
-      'click #release': 'toolTipShow',
-      'click #addSensor': 'addSensor',
-    },
-
     ui: {
       'grid': '#grid',
       'paginator': '#paginator',
       'filters': '#indiv_filters',
       'detail': '#detail',
       'totalEntries': '#totalEntries',
-      'nbSelected': '#nbSelected',
-      'release':'#release'
+      'nbSelected': '#nbSelected'
     },
+
+    events: {
+      'click #btnFilter': 'filter',
+      'click #back': 'hideDetails',
+      'click button#clear': 'clearFilter',
+      'click #release': 'toolTipShow',
+      'click #addSensor': 'addSensor',
+    },
+
 
     regions: {
       modal: '#modal',
@@ -49,9 +48,8 @@ define([
       this.translater = Translater.getTranslater();
       this.com = new Com();
       this.station = options.station;
-      this.releaseMethodList = [];
-      console.log('init indiv release')
-      this.getReleaseMethod();
+      this.releaseMethod = null;
+
 
       var _this = this;
 
@@ -98,9 +96,9 @@ define([
 
       var _this = this;
       this.grid = new myGrid({
-        pageSize: 500,
-        pagingServerSide: true,
-        com: this.com,
+        pageSize: 1400,
+        pagingServerSide: false,
+        //com: this.com,
         url: config.coreUrl + 'release/individuals/',
         urlParams: this.urlParams,
         rowClicked: true,
@@ -127,20 +125,10 @@ define([
       /*      this.ui.paginator.html(this.grid.displayPaginator());*/
     },
 
-    getReleaseMethod: function(){
-      console.log('get RELASSEFEgf')
-      var _this = this;
-      $.ajax({
-        url:config.coreUrl+'release/individuals/getReleaseMethod'
-      }).done(function(data){
-        _this.releaseMethodList=data;
-      });
-    },
-
     displayFilter: function() {
       this.filters = new NsFilter({
         url: config.coreUrl + 'release/individuals/',
-        com: this.com,
+        //com: this.com,
         filterContainer: this.ui.filters,
       });
     },
@@ -166,6 +154,7 @@ define([
     },
 
     filter: function() {
+      console.log('passed');
       this.filters.update();
     },
 
@@ -177,7 +166,7 @@ define([
       this.total = grid.collection.state.totalRecords;
       $(this.ui.totalEntries).html(this.total);
     },
-    release: function(releaseMethod) {
+    release: function() {
       var mds = this.grid.grid.getSelectedModels();
       if (!mds.length) {
         return;
@@ -187,9 +176,7 @@ define([
       $.ajax({
         url: config.coreUrl + 'release/individuals/',
         method: 'POST',
-        data: {IndividualList: JSON.stringify(col),
-          StationID: this.station.get('ID'),
-          releaseMethod:releaseMethod},
+        data: {IndividualList: JSON.stringify(col),StationID: this.station.get('ID'),releaseMethod: _this.releaseMethod},
         context: this,
       }).done(function(resp) {
         if (resp.errors) {
@@ -253,25 +240,28 @@ define([
       },
       function(isConfirm) {
   //could be better
-  if (isConfirm && callback) {
-    callback();
-  }else {
-    Backbone.history.navigate('release', {trigger: true});
-  }
+        if (isConfirm && callback) {
+          callback();
+        }else {
+          Backbone.history.navigate('release', {trigger: true});
+        }
       });
     },
 
     toolTipShow: function(e) {
       var _this = this;
-      this.ui.release.tooltipList({
+      $(e.target).tooltipList({
+
         position: 'top',
         //  pass avalaible options
-        availableOptions: _this.releaseMethodList,
-        liClickEvent:function(liClickValue) {
-          _this.release(liClickValue);
-        }
+        availableOptions: [{'label': 'direct release','val': 1},{'label': 'direct release grid 5x5','val': 2},],
+        //  li click event
+        liClickEvent: $.proxy(function(liClickValue, origin, tooltip) {
+          _this.releaseMethod = liClickValue;
+          _this.release();
+        }, this),
       });
-      this.ui.release.tooltipster('show');
+      $(e.target).tooltipster('show');
     }
   });
 });

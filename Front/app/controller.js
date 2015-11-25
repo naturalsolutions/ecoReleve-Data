@@ -77,8 +77,8 @@ define(['marionette', 'config',
     stations: function(id) {
       this.rgMain.show(new LytStations({id: id}));
     },
-    newStation: function() {
-      this.rgMain.show(new LytStationsNew());
+    newStation: function(from) {
+      this.rgMain.show(new LytStationsNew({from: from}));
     },
 
     individuals: function(id) {
