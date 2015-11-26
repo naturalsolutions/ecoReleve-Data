@@ -111,7 +111,10 @@ def location_graph(request):
 
     for row in DBSession.execute(query).fetchall() :
         curRow = OrderedDict(row)
-        data.append({'value':curRow['nb'],'label':curRow['type_'].upper()})
+        lab = curRow['type_'].upper()
+        if lab == 'ARG':
+            lab = 'ARGOS'
+        data.append({'value':curRow['nb'],'label':lab})
     data.sort(key = itemgetter('label'))
     transaction.commit()
     return data
