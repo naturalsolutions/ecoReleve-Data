@@ -11,11 +11,8 @@ define([
   'i18n'
 
 ], function($, _, Backbone, Marionette, config, Swal, Dropzone
-<<<<<<< HEAD
-) {
-=======
+
   ) {
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 
   'use strict';
 
@@ -31,11 +28,8 @@ define([
     },
 
     check: function() {
-<<<<<<< HEAD
-		},
-=======
+
     },
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 
     onShow: function() {
       // Initialize a drop zone for import
@@ -59,19 +53,6 @@ define([
         var ext = file.name.split('.');
         if (ext[ext.length - 1] != 'txt') {
           Swal(
-<<<<<<< HEAD
-							{
-  title: 'Wrong file type',
-  text: 'The file should be a text file (.txt)',
-  type: 'error',
-  showCancelButton: false,
-  confirmButtonColor: 'rgb(147, 14, 14)',
-  confirmButtonText: 'OK',
-
-  closeOnConfirm: true,
-							}
-						);
-=======
           {
             title: 'Wrong file type',
             text: 'The file should be a text file (.txt)',
@@ -83,7 +64,6 @@ define([
             closeOnConfirm: true,
           }
           );
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
           return false;
         }
         if (this.files.length) {
@@ -91,21 +71,6 @@ define([
           for (_i = 0, _len = this.files.length; _i < _len; _i++) {
             if (this.files[_i].name === file.name && this.files[_i].size === file.size) {
               Swal(
-<<<<<<< HEAD
-									{
-  title: 'Warning Duplicate Files',
-  text: this.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
-  type: 'warning',
-  showCancelButton: false,
-  confirmButtonColor: 'rgb(218, 146, 15)',
-
-  confirmButtonText: 'OK',
-
-  closeOnConfirm: true,
-
-									}
-								);
-=======
               {
                 title: 'Warning Duplicate Files',
                 text: this.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
@@ -119,7 +84,6 @@ define([
 
               }
               );
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
               return false;
             }
           }
@@ -185,34 +149,6 @@ define([
       myDropzone.on('queuecomplete', function(file) {
         if (!this.errors) {
           Swal({title: 'Well done',
-<<<<<<< HEAD
-							text: 'File(s) have been correctly imported',
-							type:  'success',
-							showCancelButton: true,
-							confirmButtonColor: '#DD6B55',
-							confirmButtonText: 'Validate GSM',
-							cancelButtonText: 'New import',
-							closeOnConfirm: true,
-							closeOnCancel: true},
-							function(isConfirm) {   if (isConfirm) {
-  Backbone.history.navigate('validate/gsm',{trigger: true});
-									}
-							}
-						);
-
-        }else {
-          Swal(
-							{
-  title: 'An error occured',
-  text: 'Please verify your file',
-  type: 'error',
-  showCancelButton: false,
-  confirmButtonText: 'OK',
-  confirmButtonColor: 'rgb(147, 14, 14)',
-  closeOnConfirm: true,
-							}
-						);
-=======
             text: 'File(s) have been correctly imported',
             type:  'success',
             showCancelButton: true,
@@ -238,7 +174,6 @@ define([
             closeOnConfirm: true,
           }
           );
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
         }
         this.errors = false;
       });
@@ -252,16 +187,7 @@ define([
       document.querySelector('#actions .cancel').onclick = function() {
         myDropzone.removeAllFiles(true);
       };
-<<<<<<< HEAD
 
-    },
-
-    onDestroy: function() {
-		},
-
-    validate: function() {
-		},
-=======
     },
 
     onDestroy: function() {
@@ -269,7 +195,6 @@ define([
 
     validate: function() {
     },
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 
   });
 });

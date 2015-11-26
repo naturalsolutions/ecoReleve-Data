@@ -9,12 +9,9 @@ from ..Models import (
     Sensor,
     SensorType,
     Equipment,
-<<<<<<< HEAD
-    IndividualList
-=======
     IndividualList,
     Base
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
+
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp

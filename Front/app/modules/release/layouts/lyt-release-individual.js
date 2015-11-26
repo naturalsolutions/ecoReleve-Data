@@ -13,11 +13,8 @@ define([
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-<<<<<<< HEAD
-	Com, NsGrid, NsFilter, SensorPicker, tplSensorPicker
-=======
+
   Com, NsGrid, NsFilter, ObjectPicker
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 ) {
 
   'use strict';
@@ -26,8 +23,6 @@ define([
 
     template: 'app/modules/release/templates/tpl-release-individual.html',
     className: 'full-height animated white rel',
-<<<<<<< HEAD
-=======
     ui: {
       'grid': '#grid',
       'paginator': '#paginator',
@@ -36,7 +31,6 @@ define([
       'totalEntries': '#totalEntries',
       'nbSelected': '#nbSelected'
     },
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 
     events: {
       'click #btnFilter': 'filter',
@@ -46,18 +40,6 @@ define([
       'click #addSensor': 'addSensor',
     },
 
-<<<<<<< HEAD
-    ui: {
-      'grid': '#grid',
-      'paginator': '#paginator',
-      'filters': '#indiv_filters',
-      'detail': '#detail',
-      'totalEntries': '#totalEntries',
-      'nbSelected': '#nbSelected'
-    },
-=======
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
-
     regions: {
       modal: '#modal',
     },
@@ -65,25 +47,6 @@ define([
     initialize: function(options) {
       this.translater = Translater.getTranslater();
       this.com = new Com();
-<<<<<<< HEAD
-      this.station = options.station;
-      this.releaseMethod = null;
-
-      var _this = this;
-      var mySensorPicker = SensorPicker.extend({
-        initialize: function(options) {
-          var template =  _.template(tplSensorPicker);
-          this.$el.html(template);
-          this.com = new Com();
-          this.displayGrid();
-          this.displayFilter();
-          this.translater = Translater.getTranslater();
-        },
-        rowClicked: function(row) {
-          console.log(row);
-          var id = row.model.get('ID');
-
-=======
 
       this.station = options.station;
       this.model = options.station;
@@ -96,22 +59,11 @@ define([
       var MySensorPicker = ObjectPicker.extend({
         rowClicked: function(row) {
           var id = row.model.get('ID');
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
           var unicName = row.model.get('UnicIdentifier');
           _this.currentRow.model.set({unicSensorName: unicName});
           this.setValue(id);
         },
         getValue: function() {
-<<<<<<< HEAD
-				},
-        setValue: function(value) {
-          _this.currentRow.model.set({FK_Sensor: value});
-          console.log(_this.currentRow.model)
-          this.hidePicker();
-        },
-      });
-      this.sensorPicker = new mySensorPicker();
-=======
         },
         setValue: function(value) {
           _this.currentRow.model.set({unicSensorName: value});
@@ -125,7 +77,7 @@ define([
           title : 'sensors',
         }
       });
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
+
       this.sensorPicker.render();
 
       this.initGrid();
@@ -138,11 +90,6 @@ define([
     onShow: function() {
       this.displayFilter();
       this.displayGrid();
-<<<<<<< HEAD
-      Backbone.history.navigate('release/individuals',{trigger: false});
-=======
-      //Backbone.history.navigate('release/individuals',{trigger: false});
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     },
 
     initGrid: function() {
@@ -153,11 +100,6 @@ define([
       this.grid = new myGrid({
         pageSize: 1400,
         pagingServerSide: false,
-<<<<<<< HEAD
-        com: this.com,
-=======
-        //com: this.com,
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
         url: config.coreUrl + 'release/individuals/',
         urlParams: this.urlParams,
         rowClicked: true,
@@ -181,21 +123,11 @@ define([
     displayGrid: function() {
 
       this.ui.grid.html(this.grid.displayGrid());
-<<<<<<< HEAD
-      /*			this.ui.paginator.html(this.grid.displayPaginator());*/
-=======
-      /*      this.ui.paginator.html(this.grid.displayPaginator());*/
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     },
 
     displayFilter: function() {
       this.filters = new NsFilter({
         url: config.coreUrl + 'release/individuals/',
-<<<<<<< HEAD
-        com: this.com,
-=======
-        //com: this.com,
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
         filterContainer: this.ui.filters,
       });
     },
@@ -221,10 +153,6 @@ define([
     },
 
     filter: function() {
-<<<<<<< HEAD
-=======
-      console.log('passed');
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
       this.filters.update();
     },
 
@@ -308,16 +236,6 @@ define([
         cancelButtonText: 'New Release',
         closeOnConfirm: true,
       },
-<<<<<<< HEAD
-			function(isConfirm) {
-  //could be better
-  if (isConfirm && callback) {
-    callback();
-  }else {
-    Backbone.history.navigate('release', {trigger: true});
-  }
-			});
-=======
       function(isConfirm) {
   //could be better
         if (isConfirm && callback) {
@@ -326,7 +244,6 @@ define([
           Backbone.history.navigate('release', {trigger: true});
         }
       });
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     },
 
     toolTipShow: function(e) {
@@ -338,15 +255,9 @@ define([
         availableOptions: [{'label': 'direct release','val': 1},{'label': 'direct release grid 5x5','val': 2},],
         //  li click event
         liClickEvent: $.proxy(function(liClickValue, origin, tooltip) {
-<<<<<<< HEAD
-          console.log(liClickValue);
+
           _this.releaseMethod = liClickValue;
           _this.release();
-          //console.log(origin);
-=======
-          _this.releaseMethod = liClickValue;
-          _this.release();
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
         }, this),
       });
       $(e.target).tooltipster('show');

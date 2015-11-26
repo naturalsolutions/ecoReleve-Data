@@ -163,12 +163,7 @@ class ObjectWithDynProp:
 
                     curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
                     if 'date' in curTypeAttr.lower() :
-<<<<<<< HEAD
-                        try :
-                            valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y%H:%M:%S')
-                        except :
-                            valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y')
-=======
+
                         print('**********************DATE IN TYPE')
                         try:
                             valeur = datetime.strptime(valeur,'%d/%m/%Y %H:%M:%S')
@@ -179,7 +174,6 @@ class ObjectWithDynProp:
                         except:
                             print_exc()
                             pass
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
                 setattr(self,nameProp,valeur)
             except :
                 print_exc()

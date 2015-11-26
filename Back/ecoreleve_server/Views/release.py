@@ -227,13 +227,8 @@ def releasePost(request):
         releaseIndList.append(curReleaseInd)
 
         try:
-<<<<<<< HEAD
-            indiv['id_taxon'] = indiv['id']
-            indiv['sensor_id'] = int(indiv['fk_sensor'])
-            indiv['deploy'] = True
-=======
+
             indiv['FK_Sensor'] = int(indiv['fk_sensor'])
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
             curEquipmentInd = getnewObs(equipmentIndID)
             curEquipmentInd.UpdateFromJson(indiv)
             curEquipmentInd.Station = curStation

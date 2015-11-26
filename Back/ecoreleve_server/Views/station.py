@@ -7,12 +7,9 @@ from ..Models import (
     FieldActivity_ProtocoleType,
     Station_FieldWorker,
     StationList,
-<<<<<<< HEAD
-    MonitoredSitePosition
-=======
     MonitoredSitePosition,
     Base
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
+
     )
 from ..GenericObjets.FrontModules import FrontModules, ModuleForms
 from ..GenericObjets import ListObjectWithDynProp
@@ -274,12 +271,8 @@ def searchStation(request):
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = []
-<<<<<<< HEAD
-    user = request.authenticated_userid
-    user = 1 
-=======
     user = request.authenticated_userid['iss']
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
+
 
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])

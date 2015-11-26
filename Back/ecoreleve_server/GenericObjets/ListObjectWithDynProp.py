@@ -142,16 +142,6 @@ class ListObjectWithDynProp():
             curTypeAttr = str(self.ObjWithDynProp.__table__.c[curProp].type).split('(')[0]
             if 'date' in curTypeAttr.lower() :
                 try :
-<<<<<<< HEAD
-                    criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].strip(),'%d/%m/%Y%H:%M:%S')
-                except :
-                    try:
-                        criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'],'%d/%m/%Y')
-                    except: pass
-            query = query.where(
-                eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
-                )
-=======
                     criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
                 except :
                     try:
@@ -163,7 +153,6 @@ class ListObjectWithDynProp():
                 query = query.where(
                     filterCriteria
                     )
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 
         elif self.optionView is not None and curProp in self.optionView.c:
             query = query.where(
@@ -243,17 +232,11 @@ class ListObjectWithDynProp():
                             obj['Value'] = datetime.strptime(obj['Value'].strip(),'%d/%m/%Y%H:%M:%S')
                         except :
                             obj['Value'] = datetime.strptime(obj['Value'],'%d/%m/%Y')
-<<<<<<< HEAD
-
-                    fullQuery = fullQuery.where(
-                        eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
-                    )
-=======
                     filterCriteria = eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
                     if filterCriteria is not None :
                         fullQuery = fullQuery.where(filterCriteria)
 
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
+
                 elif curDynProp != None:
                     filterOnDynProp = True
                     filterCriteria = eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],obj['Operator'],obj['Value'] )

@@ -170,8 +170,6 @@ class IndividualList(ListObjectWithDynProp):
         return fullQueryJoin
 
 
-<<<<<<< HEAD
-=======
 #--------------------------------------------------------------------------
 class SensorList(ListObjectWithDynProp):
 
@@ -224,4 +222,4 @@ class SensorList(ListObjectWithDynProp):
         query = super().GetFullQuery(searchInfo)
         print(query)
         return query
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
+

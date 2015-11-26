@@ -23,11 +23,7 @@ define([
 
     //the action on the finished
     finished: function() {
-<<<<<<< HEAD
-      console.log('finished');
-=======
       console.info('finished');
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     },
 
   });

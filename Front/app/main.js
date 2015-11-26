@@ -11,10 +11,7 @@ require.config({
     'models': './models',
     'collections': './collections',
     'templates': '../build/templates',
-<<<<<<< HEAD
-=======
     'objects' : './modules/objects',
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     'lyt-rootview': './base/rootview/lyt-rootview',
     'transition-region': './base/transition-region/transition-region',
     'googleLoaer': './vendors/google-maps-loader',
@@ -28,20 +25,6 @@ require.config({
     'ns_map': 'ns_modules/ns_map',
     'ns_stepper': 'ns_modules/ns_stepper',
     'ns_navbar': 'ns_modules/ns_navbar',
-<<<<<<< HEAD
-    'FileUploadEditor': 'ns_modules/ns-bbforms-editors/FileUploadEditor/backboneForm-editors-fileUpload',
-
-    //circular dependencies
-    'IndivPicker': 'ns_modules/ns-bbforms-editors/IndividualPicker/backboneForm-editors-individualPicker',
-    'MonitoredSitePicker': 'ns_modules/ns-bbforms-editors/MonitoredSitePicker/backboneForm-editors-monitoredSitePicker',
-    'SensorPicker': 'ns_modules/ns-bbforms-editors/SensorPicker/backboneForm-editors-SensorPicker',
-    'LatitudeEditor': 'ns_modules/ns-bbforms-editors/Coordinates/LatitudeEditor',
-    'LongitudeEditor': 'ns_modules/ns-bbforms-editors/Coordinates/LongitudeEditor',
-
-    'ListOfNestedModel': 'vendors/ListOfNestedModel/ListOfNestedModel',
-    'AutocompleteEditor': '../externalModules/NaturalJS-BackBone-Forms-Editors/Autocomplete/AutocompleteEditor',
-=======
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 
     /*==========  Bower  ==========*/
     'jquery': '../bower_components/jquery/jquery',
@@ -57,34 +40,14 @@ require.config({
     'sweetAlert': '../bower_components/sweetalert/lib/sweet-alert.min',
     'moment': '../bower_components/moment/min/moment.min',
     'dateTimePicker': '../bower_components/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker',
-<<<<<<< HEAD
-
-    'backbone_forms': '../bower_components/backbone-forms/distribution.amd/backbone-forms',
-    'backbone.list': '../bower_components/backbone-forms/distribution/editors/list',
-    /*
-    		'backbone_forms'		: '../bower_components/backbone-forms/distribution.amd/backbone-forms',
-    		'backbone.list'			: '../bower_components/backbone-forms/distribution.amd/editors/list',
-*/
-
-=======
     'backbone_forms': '../bower_components/backbone-forms/distribution.amd/backbone-forms',
     'backbone.list'     : '../bower_components/backbone-forms/distribution.amd/editors/list',
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     'backbone.paginator': '../bower_components/backbone.paginator/lib/backbone.paginator.min',
     'requirejs-text': '../bower_components/requirejs-text/text',
     'L': '../bower_components/leaflet/dist/leaflet-src',
     'leaflet_cluster': '../bower_components/leaflet.markercluster/dist/leaflet.markercluster',
     'leaflet_google': '../bower_components/leaflet-plugins/layer/tile/Google',
-<<<<<<< HEAD
-    'swiper': '../bower_components/swiper/dist/js/swiper',
-    'dropzone': '../bower_components/dropzone/dist/dropzone',
-    'i18n': '../bower_components/i18n/i18next',
-    'fancytree': '../bower_components/fancytree/dist/jquery.fancytree-all.min',
 
-    'fuelux': '../bower_components/fuelux/dist/js/fuelux',
-    'floatThead': '../bower_components/floatThead/dist/jquery.floatThead-slim',
-    'chart': '../bower_components/chartjs/Chart',
-=======
     'dropzone': '../bower_components/dropzone/dist/dropzone',
     'i18n': '../bower_components/i18n/i18next',
     'fancytree': '../bower_components/fancytree/dist/jquery.fancytree-all.min',
@@ -98,24 +61,11 @@ require.config({
     'swiper': '../bower_components/swiper/dist/js/swiper',
 
     /*==========  Vendors  ==========*/
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     //waiting for a new release (amd friendly)
     'backgrid': 'vendors/backgrid',
     'backgrid.paginator': 'vendors/backgrid-paginator',
     'backgridSelect_all': 'vendors/backgrid-select-all',
-<<<<<<< HEAD
-
-    'simplePagination': 'vendors/jquery.simplePagination',
-
-    'bbDate': 'vendors/backboneForm-editors',
-    'bbAutoComp': '../externalModules/NaturalJS-BackBone-Forms-Editors/ThesaurusEditor/backboneForm-editors-autocompTree',
-    'autocompTree': '../externalModules/NaturalJS-BackBone-Forms-Editors/ThesaurusEditor/AutoCompletTree/jquery.autocompTree',
-    'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
-    'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
-=======
     'autocompTree': './vendors/jquery.autocompTree',
-
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
   },
 
   shim: {
@@ -184,13 +134,6 @@ require.config({
     swiper: {
       exports: 'Swiper'
     },
-<<<<<<< HEAD
-    simplePagination: {
-      deps: ['jquery'],
-      exports: 'SimplePagination'
-    },
-=======
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     fancytree:  {
       deps: ['jquery','jqueryui'],
       exports: 'Fancytree'
@@ -199,10 +142,6 @@ require.config({
       deps: ['fancytree'],
       exports: 'autocompTree'
     },
-<<<<<<< HEAD
-
-=======
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     fuelux: {
       deps: ['jquery','bootstrap'],
       exports: 'Fuelux'
@@ -219,23 +158,6 @@ require.config({
       deps: ['backgrid'],
       exports:  'FloatThead'
     },
-<<<<<<< HEAD
-    ListOfNestedModel: {
-      deps: [
-      'backbone',
-       'backgrid',
-       'backbone_forms'
-      ]
-    },
-    FileUploadEditor: {
-      deps: [
-       'backbone',
-       'backbone_forms'
-      ],
-      exports: 'FileUploadEditor'
-    },
-=======
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     tooltipster: {
       deps: [
           'jquery'

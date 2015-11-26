@@ -144,14 +144,11 @@ def receive_set(target, value, oldvalue, initiator):
 
     typeName = target.GetType().Name
 
-<<<<<<< HEAD
-=======
     if 'unequip' in typeName.lower():
         deploy = 0
     else :
         deploy  = 1 
 
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
         equipDate = target.Station.StationDate
         try :

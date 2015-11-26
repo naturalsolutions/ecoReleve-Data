@@ -9,45 +9,6 @@ define(['marionette', 'config',
 
   './modules/importFile/lyt-entry-importFile',
 
-<<<<<<< HEAD
-	'./modules/sensor/layouts/lyt-sensor',
-	'./modules/sensor/layouts/lyt-sensor-new',
-
-	'./modules/monitoredSite/layouts/lyt-ms',
-	'./modules/monitoredSite/layouts/lyt-new-site',
-	'./modules/validate/lyt-sensorValidate',
-	'./modules/validate/lyt-sensorValidateType',
-	'./modules/validate/lyt-sensorValidateDetail',
-	'./modules/release/layouts/lyt-release-station',
-
-	'./modules/export/lyt-export-stepper',
-
-],function(Marionette, config,
-	LytHome,
-
-	/*==========  modules  ==========*/
-
-	LytStations,
-	LytStationsNew,
-
-	LytImportFile,
-	LytIndividual,
-	LytIndividualNew,
-	LytIndivDetails,
-
-	LytSensor,
-	LytSensorNew,
-
-	LytMonitoredSite,
-	LytMonitoredNew,
-	LytSensorValidate,
-	LytSensorValidateType,
-	LytSensorValidateDetail,
-
-	LytReleaseStation,
-
-	LytExport
-=======
   './modules/individuals/layouts/lyt-individuals',
   './modules/individuals/layouts/lyt-individuals-new',
   './modules/individuals/layouts/lyt-individuals-detail',
@@ -92,7 +53,7 @@ define(['marionette', 'config',
   LytReleaseStation,
 
   LytExport
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
+
 
 ) {
   'use strict';
@@ -117,34 +78,6 @@ define(['marionette', 'config',
     stations: function(id) {
       this.rgMain.show(new LytStations({id: id}));
     },
-<<<<<<< HEAD
-
-    newStation: function() {
-      this.rgMain.show(new LytStationsNew());
-    },
-
-    individual: function(id) {
-      this.rgMain.show(new LytIndividual({id: id}));
-    },
-
-    newIndividual: function(type) {
-      this.rgMain.show(new LytIndividualNew({type: type}));
-    },
-
-    sensor: function(id) {
-      this.rgMain.show(new LytSensor({id: id}));
-    },
-
-    newSensor: function(type) {
-      this.rgMain.show(new LytSensorNew({type: type}));
-    },
-
-    monitoredSite: function(id) {
-      this.rgMain.show(new LytMonitoredSite({id: id}));
-    },
-    newMonitoredSite: function(type) {
-      this.rgMain.show(new LytMonitoredNew());
-=======
     newStation: function(from) {
       this.rgMain.show(new LytStationsNew({from: from}));
     },
@@ -168,31 +101,23 @@ define(['marionette', 'config',
     },
     newMonitoredSite: function(type) {
       this.rgMain.show(new LytMonitoredSitesNew());
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
+
     },
 
     validate: function() {
       this.rgMain.show(new LytSensorValidate());
     },
-<<<<<<< HEAD
-
-=======
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     validateType: function(type) {
       this.rgMain.show(new LytSensorValidateType({
         type: type
       }));
     },
 
-<<<<<<< HEAD
-    release: function() {
-      this.rgMain.show(new LytReleaseStation());
-=======
     release: function(id) {
       console.log(id);
       // (id of the station..)
       this.rgMain.show(new LytReleaseStation({id : id}));
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
+
     },
 
     export: function() {
