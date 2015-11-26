@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from decimal import Decimal
 import transaction
 from urllib.parse import quote_plus
@@ -34,7 +34,17 @@ from .pyramid_jwtauth import (
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects."""
-    return obj.strftime ('%d/%m/%Y %H:%M:%S')
+    try: 
+        return obj.strftime ('%d/%m/%Y %H:%M:%S')
+    except :
+        return obj.strftime ('%d/%m/%Y')
+
+def time_adapter(obj, request):
+    """Json adapter for datetime objects."""
+    try:
+        return obj.strftime('%H:%M')
+    except:
+        return obj.strftime('%H:%M:%S')
     
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
@@ -58,8 +68,10 @@ def main(global_config, **settings):
     config = Configurator(settings=settings)
     # Add renderer for datetime objects
     json_renderer = JSON()
-    json_renderer.add_adapter(datetime, datetime_adapter)
+    json_renderer.add_adapter(datetime.datetime, datetime_adapter)
+    json_renderer.add_adapter(datetime.date, datetime_adapter)
     json_renderer.add_adapter(Decimal, decimal_adapter)
+    json_renderer.add_adapter(datetime.time, time_adapter)
     config.add_renderer('json', json_renderer)
 
     # Add renderer for CSV, PDF,GPX files.

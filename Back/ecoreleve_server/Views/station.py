@@ -83,24 +83,6 @@ def getFields(request) :
     transaction.commit()
     return cols
 
-
-# ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/autocomplete', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
-def autocomplete (request):
-    criteria = request.params['term']
-    prop = request.matchdict['prop']
-    if isinstance(prop,int):
-        table = Base.metadata.tables['StationDynPropValuesNow']
-        query = select([table.c['ValueString'].label('label'),table.c['ValueString'].label('value')]
-            ).where(table.c['FK_StationDynProp']== prop)
-        query = query.where(table.c['ValueString'].like('%'+criteria+'%')).order_by(asc(table.c['ValueString']))
-    else: 
-        table = Base.metadata.tables['Station']
-        query = select([table.c[prop].label('value'),table.c[prop].label('label')])
-        query = query.where(table.c[prop].like('%'+criteria+'%'))
-
-    return [dict(row) for row in DBSession.execute(query).fetchall()]
-
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getStation(request):
