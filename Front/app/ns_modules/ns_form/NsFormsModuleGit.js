@@ -50,6 +50,7 @@ define([
 
         //Main attributes
         this.$el.attr('id', this.id);
+        //bug with same name
         this.$el.attr('name', this.getName());
         if (schema.editorClass) this.$el.addClass(schema.editorClass);
         if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);

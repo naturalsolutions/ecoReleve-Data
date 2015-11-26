@@ -32,7 +32,7 @@ define([
     },
 
     events: {
-      'click #btnFilter': 'filter',
+      'click #btnFilterRel': 'filter',
       'click #back': 'hideDetails',
       'click button#clear': 'clearFilter',
       'click #release': 'toolTipShow',
@@ -87,6 +87,7 @@ define([
     },
 
     onShow: function() {
+
       this.displayFilter();
       this.displayGrid();
       //Backbone.history.navigate('release/individuals',{trigger: false});
@@ -100,7 +101,7 @@ define([
       this.grid = new myGrid({
         pageSize: 1400,
         pagingServerSide: false,
-        //com: this.com,
+        com: this.com,
         url: config.coreUrl + 'release/individuals/',
         urlParams: this.urlParams,
         rowClicked: true,
@@ -130,7 +131,7 @@ define([
     displayFilter: function() {
       this.filters = new NsFilter({
         url: config.coreUrl + 'release/individuals/',
-        //com: this.com,
+        com: this.com,
         filterContainer: this.ui.filters,
       });
     },
@@ -156,6 +157,7 @@ define([
     },
 
     filter: function() {
+
       console.log('passed');
       this.filters.update();
     },

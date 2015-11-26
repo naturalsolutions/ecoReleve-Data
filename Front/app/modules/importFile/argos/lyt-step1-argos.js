@@ -20,7 +20,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/argos/templates/tpl-step1-argos.html',
 
-    name: 'Upload Arogs Files',
+    name: 'Upload Argos Files',
 
     initialize: function() {
 
