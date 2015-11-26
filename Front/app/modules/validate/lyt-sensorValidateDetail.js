@@ -43,6 +43,12 @@ define([
 
       'dataSetIndex': '#dataSetIndex',
       'dataSetTotal': '#dataSetTotal',
+<<<<<<< HEAD
+=======
+
+      'totalS' : '#totalS',
+      'total' : '#total',
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     },
 
     regions: {
@@ -86,10 +92,26 @@ define([
     },
 
     onShow: function() {
+<<<<<<< HEAD
       this.rgNavbar.show(this.navbar);
       this.display();
     },
 
+=======
+      var _this = this;
+      this.rgNavbar.show(this.navbar);
+      this.display();
+      this.com.onAction = function(){
+        // _this.setTotal();
+      };
+    },
+
+    setTotal: function(){
+      this.ui.totalS.html(this.grid.grid.getSelectedModels().length);
+      this.ui.total.html(this.grid.grid.collection.length);
+    }, 
+
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     display: function() {
       var _this = this;
       if (this.indId == 'null' || !this.indId) this.indId = 'none';
@@ -100,6 +122,7 @@ define([
         this.displayIndForm();
       }
       this.displayGrid();
+<<<<<<< HEAD
       this.displayMap();
       this.displaySensorForm();
 
@@ -108,6 +131,19 @@ define([
           _this.initFrequency();
         },100)
       });
+=======
+
+      //todo, bug on big cluster coll defered
+      setTimeout(function(){
+        _this.displayMap();
+        $.when(_this.map.deffered, _this.grid.deffered).done(function() {
+          setTimeout(function() {
+            _this.initFrequency();
+          },100);
+        });
+      }, 0);
+      this.displaySensorForm();
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     },
 
     //initialize the frequency
@@ -293,7 +329,11 @@ define([
         selection: true,
         cluster: true,
         com: this.com,
+<<<<<<< HEAD
         zoom: 3,
+=======
+        zoom: 7,
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
         element: 'map',
         bbox: true
       });
@@ -353,7 +393,10 @@ define([
         }
         this.grid.interaction('selectionMultiple', ids);
       } else {
+<<<<<<< HEAD
         console.log('frequency select all')
+=======
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
         var ids = this.grid.collection.pluck('PK_id');
         this.grid.interaction('selectionMultiple', ids);
       }

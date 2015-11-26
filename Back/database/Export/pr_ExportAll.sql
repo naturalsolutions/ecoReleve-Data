@@ -16,4 +16,16 @@ SET NOCOUNT on
 	exec pr_ExportAllSensor
 	print ' export Observations '
 	exec pr_ExportAllProtocole
+
+	print ' export AfterCreateIndex '
+	exec pr_ExportAfterCreateIndex
+
+	print ' export FirstStation '
+	exec pr_ExportFirstStation
+
+	print 'export LastLocationSensor'
+	exec pr_ExportIndividualLastLocationSensor
+
+	print ' export Last LocationAllSource '
+	exec pr_ExportIndividualLastLocationAllSource
 END

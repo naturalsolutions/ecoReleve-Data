@@ -40,46 +40,62 @@ class Equipment(Base):
 
 def checkSensor(fk_sensor,equipDate):
     e1 = aliased(Equipment)
-    subQuery = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate)))
+    subQuery = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor
+        ,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate)))
 
-    query = select([Equipment]).where(and_(~exists(subQuery),and_(Equipment.StartDate<equipDate,and_(Equipment.Deploy == 1,Equipment.FK_Sensor == fk_sensor))))
+    query = select([Equipment]).where(and_(~exists(subQuery)
+        ,and_(Equipment.StartDate<equipDate
+            ,and_(Equipment.Deploy == 1,Equipment.FK_Sensor == fk_sensor))))
     fullQuery = select([True]).where(~exists(query))
-
     sensorEquip = DBSession.execute(fullQuery).scalar()
     return sensorEquip
 
 def checkIndiv(equipDate,fk_indiv):
-    e1 = aliased(Equipment)
-    subQuery = select([e1]).where(and_(e1.FK_Individual == Equipment.FK_Individual,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<equipDate)))
+    # e1 = aliased(Equipment)
+    # subQuery = select([e1]).where(and_(e1.FK_Individual == Equipment.FK_Individual
+    #     ,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<equipDate)))
 
-    query = select([Equipment]).where(and_(~exists(subQuery),and_(Equipment.StartDate<equipDate,and_(Equipment.Deploy == 1,Equipment.FK_Individual == fk_indiv))))
-    fullQuery = select([True]).where(~exists(query))
+    # query = select([Equipment]).where(and_(~exists(subQuery),and_(Equipment.StartDate<equipDate,and_(Equipment.Deploy == 1,Equipment.FK_Individual == fk_indiv))))
+    # fullQuery = select([True]).where(~exists(query))
 
-    sensorEquip = DBSession.execute(fullQuery).scalar()
+    # sensorEquip = DBSession.execute(fullQuery).scalar()
+    sensorEquip = True
     return sensorEquip
+
+# def checkSite(equipDate,fk_indiv):
+#     e1 = aliased(Equipment)
+#     subQuery = select([e1]).where(and_(e1.FK_MonitoredSite == Equipment.FK_MonitoredSite
+#         ,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<equipDate)))
+
+#     query = select([Equipment]).where(and_(~exists(subQuery),and_(Equipment.StartDate<equipDate,and_(Equipment.Deploy == 1,Equipment.FK_Individual == fk_indiv))))
+#     fullQuery = select([True]).where(~exists(query))
+
+#     sensorEquip = DBSession.execute(fullQuery).scalar()
+#     return sensorEquip
 
 def checkEquip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     if fk_indiv is not None:
-        availableIndiv = checkIndiv(equipDate,fk_indiv)
+        availableToEquip = checkIndiv(equipDate,fk_indiv)
     else:
-        print('check Site')
+        availableToEquip = True
 
     availableSensor = checkSensor(fk_sensor,equipDate)
 
-    if availableIndiv and availableSensor:
+    if availableToEquip is True and availableSensor is True:
         return True
     else :
         availability = {}
-        if availableIndiv is None:
+        if availableToEquip is None :
             availability['indiv'] = False
             if availableSensor is None:
                 availability['sensor'] = False
             else :
                 availability['sensor'] = True
         else:
-            availability['indiv'] = True
+            if fk_indiv is not None:
+                availability['indiv'] = True
             availability['sensor'] = False
-    return availability
+        return availability
 
 def existingEquipment (fk_sensor,equipDate,fk_indiv=None):
     e1 = aliased(Equipment)
@@ -128,10 +144,18 @@ def receive_set(target, value, oldvalue, initiator):
 
     typeName = target.GetType().Name
 
+<<<<<<< HEAD
+=======
+    if 'unequip' in typeName.lower():
+        deploy = 0
+    else :
+        deploy  = 1 
+
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
         equipDate = target.Station.StationDate
         try :
-            fk_sensor = target.GetProperty('sensor_id') 
+            fk_sensor = target.GetProperty('FK_Sensor') 
         except :
             fk_sensor = None
         try :
@@ -143,14 +167,17 @@ def receive_set(target, value, oldvalue, initiator):
         except :
             fk_site = None
 
-        deploy = target.GetProperty('deploy')
-        if deploy:
-            availability = checkEquip(fk_sensor=fk_sensor,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
+        if deploy == 1 :
+            availability = checkEquip(fk_sensor=fk_sensor
+                ,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
         else:
-            availability = checkUnequip(fk_sensor=fk_sensor,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
+            availability = checkUnequip(fk_sensor=fk_sensor
+                ,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
 
-        if availability:
-            curEquip = Equipment(Observation= target, FK_Sensor = fk_sensor, StartDate = equipDate,FK_Individual = fk_indiv,  FK_MonitoredSite = fk_site, Deploy = deploy)    #, FK_MonitoredSite = fk_site)
+        if availability is True:
+            curEquip = Equipment(Observation= target, FK_Sensor = fk_sensor
+            , StartDate = equipDate,FK_Individual = fk_indiv, FK_MonitoredSite = fk_site
+            , Deploy = deploy)
             target.Equipment = curEquip
             print('INDIV EQUIP GOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOD')
         else : 

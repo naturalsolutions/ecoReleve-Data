@@ -25,6 +25,7 @@ class Generator :
             'NVARCHAR':'Text',
             'INTEGER':'Number',
             'DECIMAL':'Number',
+            'NUMERIC':'Number',
             'DATETIME':'DateTimePicker',
         }
         self.table=Base.metadata.tables[table]
@@ -74,12 +75,12 @@ class Generator :
         for column in self.table.c:
             name_c = str(column.name)
             try : 
-                type_c = str(column.type)
+                type_c = str(column.type).split('(')[0]
             except: pass
             if type_c in self.dictFilter :
                 type_c = self.dictFilter[type_c]
             else : 
-                type_c = 'string'
+                type_c = 'Text'
             data.append({'name':name_c, 'type':type_c , 'title':name_c })
         return data
 
@@ -167,7 +168,7 @@ class Generator :
                 # if cols_for_properties != None :
                 #     for col in cols_for_properties :
                 #         properties[col.replace('_',' ')] = row[col]
-                geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point', 'coordinates':[row[lon],row[lat]]}})
+                geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point', 'coordinates':[row[lat],row[lon]]}})
             transaction.commit()
             return {'type':'FeatureCollection', 'features': geoJson, 'exceed': False, 'total':countResult}
         else :

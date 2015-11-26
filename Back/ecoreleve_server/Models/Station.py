@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession,FieldActivity
+from ..Models import Base,DBSession,FieldActivity
 from sqlalchemy import (Column,
  DateTime,
  Float,

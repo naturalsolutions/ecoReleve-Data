@@ -1,9 +1,23 @@
 define(['marionette', 'lyt-rootview', 'router', 'controller',
+<<<<<<< HEAD
 	//circular dependencies, I don't konw where to put it for the moment
 	'MonitoredSitePicker',
 	'IndivPicker',
 	'SensorPicker'
 	],
+=======
+  //circular dependencies, I don't konw where to put it 4 the moment
+  'ns_modules/ns_bbfe/bbfe-number',
+  'ns_modules/ns_bbfe/bbfe-timePicker',
+  'ns_modules/ns_bbfe/bbfe-dateTimePicker',
+  'ns_modules/ns_bbfe/bbfe-autocomplete',
+  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
+  'ns_modules/ns_bbfe/bbfe-listOfNestedModel/bbfe-listOfNestedModel',
+  'ns_modules/ns_bbfe/bbfe-autocompTree',
+  'ns_modules/ns_bbfe/bbfe-fileUpload',
+  'ns_modules/ns_bbfe/bbfe-select',
+  ],
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 function(Marionette, LytRootView, Router, Controller) {
 
   var app = {};

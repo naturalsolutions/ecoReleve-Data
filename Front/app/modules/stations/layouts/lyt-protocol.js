@@ -29,6 +29,11 @@ define([
       'click #pagination li#prevObs': 'prevObs',
       'click #pagination li#nextObs': 'nextObs',
       'click #addObs': 'addObs'
+<<<<<<< HEAD
+=======
+
+      
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     },
 
     index: 0,

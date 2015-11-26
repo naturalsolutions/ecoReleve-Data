@@ -190,139 +190,29 @@
 }
 
 
-.tile-inside{
-	display: inline-block;
-	min-height: 300px;
-	width: 250px;
-	background: rgba(0,0,0,0.7);
-	border-radius: 3px;
-	vertical-align: top;
-	color: white;
-	margin: 2%;
-	padding: 10px;
-	cursor: pointer;
-	&.smile{
-		min-height: 250px;
-		width: 200px;
-	}
-	.radio{
-		text-align: left;
-	}
-	&:hover{
-		background: rgba(0,0,0,0.9);
-	}
-}
 
 .echapment{
 	height: 100%;
 	overflow: auto;
 }
 
-
-.manual-tle{
-	padding: 20px;
-	margin: 20px 50px;
-	color: white;
-	min-height: 300px;
-	min-width: 200px;
-	transition: .3s all;
-	&:hover{
-		background: rgba(0,0,0,0.7)
-	}
-	i:not(.huge){
-		font-size: 25px;
-	}
-
-}
-
-
-
-.tile-inside-container{
-	text-align: center;
-	.tile-inside{
-		display: inline-block;
-		min-height: 300px;
-		width: 250px;
-		background: @gray;
-		border-radius: 3px;
-		vertical-align: top;
-		color: white;
-		margin: 2%;
-		padding: 10px;
-		cursor: pointer;
-		&.smile{
-			min-height: 250px;
-			width: 200px;
-		}
-		.radio{
-			text-align: left;
-		}
-		&:hover{
-			background: @gray-dark;
-		}
-		.picto{
-			padding: 20px;
-			i{
-				font-size: 1.5em;
-			}
-			i:first-child{
-				font-size: 3.5em;
-			}
-		}
-	}
-}
-
-
-.manual-tile-import{
-	text-align: center;
-	color: white;
-	height: 250px;
-	transition: .3s all;
-	position: relative;
-	.radio{
-		position: absolute;
-		bottom: 20px;
-		right: 0;
-		left: 0;
-		text-align: center!important;
-		label{
-			padding: 0px;
-		}
-		input{
-			position: relative;
-			margin: 0px;
-			margin-top: 10px;
-
-		}
-	}
-	&.disable{
-		opacity: .6;
-		&:hover{
-			//background: rgba(0,0,0,0.7);
-			cursor: not-allowed;
-		}
-	}
-}
-
-
-//export
-
-.exp-file{
+.tile-inside{
 	cursor: pointer;
 	display: inline-block;
+	vertical-align: top;
 	background: #ffffff;
-	border: 1px solid #dedede;
-	color: #cacaca!important; 
+	border: 1px solid rgba(51, 51, 51, 0.3);
+	color: rgba(51, 51, 51, 0.6)!important; 
 	border-radius: 5px;
 	padding: 20px;
-	margin: 20px 50px;
+	margin: 15px;
 	color: white;
-	min-height: 300px;
 	transition: .1s all;
 	width: 200px;
+	min-height: 300px;
 	position: relative;
 	&.active{
-		background: #39b34a;
+		background: @header-bg;
 		color: white!important;
 	}
 	label{
@@ -335,31 +225,15 @@
 		position: absolute;
 		bottom: 20px;
 	}
+	&.not-radio{
+		&:hover{
+			background: @header-bg;
+			color: white!important;
+		}
+	}
+
 }
 
-// new individual
-.newIndivTile {
-	text-align: center;
-	color: grey;
-	height: 250px;
-	position: relative;
-	
-	width: 200px;
-	padding: 1em;
-	margin: 1em;
-	display: inline-block;
-	border-color: grey;
-	border-style: solid;
-	border-width: thin;
-}
-.newIndivTile:hover {
-	cursor: pointer;
-	background-color: #2ecc40;
-	color : white;
-}
-.newIndivTile.disable {
-	opacity: .6;
-}
 .modal-header {
 	background-color: #2ecc40;
 	color : white;

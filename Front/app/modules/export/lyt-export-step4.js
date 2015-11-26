@@ -1,13 +1,13 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'config',
-	'ns_grid/model-grid',
-	'sweetAlert',
-	'moment',
-	'i18n'
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'config',
+  'ns_grid/model-grid',
+  'sweetAlert',
+  'moment',
+  'i18n'
 ], function($, _, Backbone, Marionette, config, NsGrid, Swal, Moment
 ) {
   'use strict';
@@ -25,7 +25,10 @@ define([
 
     events: {
       'change input': 'changeValue',
+<<<<<<< HEAD
       'click #test': 'test'
+=======
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     },
 
     initialize: function(options) {
@@ -35,6 +38,7 @@ define([
 
       this.options.parent.finished = function() {
         _this.getFile();
+<<<<<<< HEAD
       }
     },
 
@@ -45,6 +49,18 @@ define([
 
     changeValue: function(e) {
       this.$el.find('label.exp-file').each(function() {
+=======
+      };
+    },
+
+    onShow: function() {
+      this.$el.find('.tile-inside:first input').prop('checked', true).change();
+      this.$el.find('.tile-inside:first').addClass('active');
+    },
+
+    changeValue: function(e) {
+      this.$el.find('label.tile-inside').each(function() {
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
         $(this).removeClass('active');
       });
 
@@ -52,11 +68,14 @@ define([
       this.model.set('fileType', $(e.target).val());
     },
 
+<<<<<<< HEAD
     test: function() {
       var model = this.model;
       this.getFile();
     },
 
+=======
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     validate: function() {
       return this.model;
     },
@@ -75,12 +94,21 @@ define([
         confirmButtonText: opts.confirmButtonText,
         closeOnConfirm: opts.closeOnConfirm || true,
       },
+<<<<<<< HEAD
 			function(isConfirm) {
   //could be better
   if (opts.callback) {
     opts.callback();
   }
 			});
+=======
+      function(isConfirm) {
+        //could be better
+        if (opts.callback) {
+          opts.callback();
+        }
+      });
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     },
 
     getFile: function() {
@@ -100,6 +128,7 @@ define([
         contentType: 'application/json',
         type: 'GET',
         context: this,
+<<<<<<< HEAD
         /*
         				xhrFields: {
         					onprogress: function (e) {
@@ -111,6 +140,8 @@ define([
         						}
         					},
         					*/
+=======
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
       }).done(function(data) {
         var url = URL.createObjectURL(new Blob([data], {'type': 'application/' + this.model.get('fileType')}));
         var link = document.createElement('a');
@@ -126,7 +157,11 @@ define([
           type: 'success',
           confirmButtonText: 'Yes',
           callback: function() {
+<<<<<<< HEAD
             _this.parent.displayStep(0);
+=======
+            //_this.parent.displayStep(0);
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
           }
         };
 

@@ -12,15 +12,15 @@ from ..Models import (
     SensorType,
     Base
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModules
-from ecoreleve_server.GenericObjets import ListObjectWithDynProp
+from ..GenericObjets.FrontModules import FrontModules
+from ..GenericObjets import ListObjectWithDynProp
 import transaction
 import json, itertools
 from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE,func,desc,join
+from sqlalchemy import select, and_,cast, DATE,func,desc,join,asc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
@@ -43,6 +43,7 @@ def actionOnMonitoredSite(request):
     '0' : getForms,
     'getFields': getFields,
     'getFilters': getFilters,
+    'getType':getMonitoredSiteType
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -83,13 +84,34 @@ def getForms(request) :
     return schema
 
 def getFields(request) :
-
     ModuleType = request.params['name']
     if ModuleType == 'default' :
         ModuleType = 'MonitoredSiteGrid'
     cols = MonitoredSite().GetGridFields(ModuleType)
     transaction.commit()
     return cols
+
+def getMonitoredSiteType(request):
+    query = select([MonitoredSiteType.ID.label('val'), MonitoredSiteType.Name.label('label')])
+    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    return response
+
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/autocomplete', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
+def autocomplete (request):
+    criteria = request.params['term']
+    prop = request.matchdict['prop']
+    if isinstance(prop,int):
+        table = Base.metadata.tables['MontoredSiteDynPropValuesNow']
+        query = select([table.c['ValueString'].label('label'),table.c['ValueString'].label('value')]
+            ).where(table.c['FK_MontoredSiteDynProp']== prop)
+        query = query.where(table.c['ValueString'].like('%'+criteria+'%')).order_by(asc(table.c['ValueString']))
+    else: 
+        table = Base.metadata.tables['MontoredSite']
+        query = select([table.c[prop].label('value'),table.c[prop].label('label')])
+        query = query.where(table.c[prop].like('%'+criteria+'%'))
+
+    return [dict(row) for row in DBSession.execute(query).fetchall()]
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
@@ -137,7 +159,7 @@ def getMonitoredSiteHistory(request):
     if 'geo' in request.params :
         geoJson=[]
         for row in dataResult:
-            geoJson.append({'type':'Feature', 'properties':{'Date':row['StartDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+            geoJson.append({'type':'Feature', 'properties':{'Date':row['StartDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
     else : 
         countResult = listObj.count(searchInfo)
@@ -217,7 +239,7 @@ def insertOneNewMonitoredSite (request) :
         if value != "" :
             data[items] = value
 
-    newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid )
+    newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid['iss'] )
     newMonitoredSite.MonitoredSiteType = DBSession.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
     newMonitoredSite.init_on_load()
     newMonitoredSite.UpdateFromJson(data)

@@ -1,53 +1,44 @@
 
 canvas{
-	margin:0 !important;
-	opacity: 0.9;
-	transition: .5s opacity ease;
-	position: relative;
-	left: -20px;
-	&:hover{
-		opacity: 1;
-	}
+  margin:0 !important;
+  opacity: 0.9;
+  transition: .5s opacity ease;
+  position: relative;
+  left: -20px;
+  &:hover{
+    opacity: 1;
+  }
 }
 h2{
-	font-size: 30px;
+  font-size: 30px;
 }
 
 .tiles-left{
 
 }
 .tiles-right{
-	
+  
 }
-
+  
 @media screen and (min-width: @screen-sm) and (max-width: 1199px){
-	.home-page{
-
-		.container{
-			width: 750px!important;
-		}		
-		div.wrapper{
-			width: 515px;
-			margin: 0 auto;
-		}
-		.tile{
-			&.first{
-				margin-left: 15px;
-			} 
-			&.last{
-				margin-left: 15px;
-			}
-		}
-	}
-}
-
-
-@media screen and (max-width: @screen-sm){
-	.home-page{
-
-		.wrapper{
-			width: 100%;
-		}
-
-	}
+  .home-page{
+    .mid-height{
+      height: auto;
+    }
+    .container{
+      width: 750px!important;
+    }   
+    div.wrapper{
+      width: 515px;
+      margin: 0 auto;
+    }
+    .tile{
+      &.first{
+        margin-left: 15px;
+      } 
+      &.last{
+        margin-left: 15px;
+      }
+    }
+  }
 }

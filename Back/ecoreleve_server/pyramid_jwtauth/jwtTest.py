@@ -24,7 +24,7 @@ from pyramid.util import DottedNameResolver
 import jwt
 
 from .utils import parse_authz_header, normalize_request_object
-from ecoreleve_server.pyramid_jwtauth.JWTAuthTktCookieHelper import JWTAuthTktCookieHelper
+from ..pyramid_jwtauth.JWTAuthTktCookieHelper import JWTAuthTktCookieHelper
 
 
 def parse_authz_header(request, *default):

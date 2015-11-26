@@ -5,6 +5,7 @@ from sqlalchemy import (and_,
  exists,
  join,
  cast,
+ not_,
  DATE)
 from sqlalchemy.orm import aliased
 from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
@@ -20,7 +21,7 @@ from ..Models import (
     Sensor,
     SensorDynPropValue
     )
-from ecoreleve_server.utils import Eval
+from ..utils import Eval
 import pandas as pd 
 from collections import OrderedDict
 from datetime import datetime
@@ -169,3 +170,58 @@ class IndividualList(ListObjectWithDynProp):
         return fullQueryJoin
 
 
+<<<<<<< HEAD
+=======
+#--------------------------------------------------------------------------
+class SensorList(ListObjectWithDynProp):
+
+    def __init__(self,frontModule) :
+        super().__init__(Sensor,frontModule)
+
+    def WhereInJoinTable (self,query,criteriaObj) :
+        query = super().WhereInJoinTable(query,criteriaObj)
+        curProp = criteriaObj['Column']
+        if 'available' in curProp.lower():
+            print('IN SENSOR AVAILABLE ********************************')
+            print(curProp)
+            print(criteriaObj['Value'])
+            try:
+                try : 
+                    date = datetime.strptime(criteriaObj['Value'],'%d/%m/%Y% H:%M:%S')
+                except:
+                    date = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
+            except:
+                pass
+            # criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'],'%d/%m/%Y')
+            s2 = aliased(Sensor)
+            e = aliased(Equipment)
+            e2 = aliased(Equipment)
+
+            subQueryEquip = select([e2]).where(
+                and_(e.FK_Sensor==e2.FK_Sensor,
+                    and_(e.StartDate<e2.StartDate,e2.StartDate<=date)))
+
+            querySensor = select([e]).where(
+                and_(e.StartDate<=date,
+                    and_(e.Deploy==0,
+                        and_(Sensor.ID==e.FK_Sensor,not_(exists(subQueryEquip)))
+                        )
+                    ))
+            if criteriaObj['Operator'].lower() != 'is not':
+                query = query.where(exists(querySensor))
+            else:
+                query = query.where(not_(exists(querySensor)))
+        return query
+
+    def countQuery(self,criteria = None):
+        query = super().countQuery(criteria)
+        for obj in criteria :
+            if 'available' in obj['Column']:
+                query = self.WhereInJoinTable(query,obj)
+        return query
+
+    def GetFullQuery(self,searchInfo=None) :
+        query = super().GetFullQuery(searchInfo)
+        print(query)
+        return query
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca

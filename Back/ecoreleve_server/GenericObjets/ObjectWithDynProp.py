@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession
+from ..Models import Base,DBSession
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,select, and_, or_,distinct
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
@@ -11,7 +11,7 @@ from collections import OrderedDict
 from traceback import print_exc
 
 
-Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}
+Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt','float':'ValueFloat'}
 
 class ObjectWithDynProp:
     ''' Class to extend for mapped object with dynamic properties '''
@@ -23,7 +23,6 @@ class ObjectWithDynProp:
         self.ObjContext = DBSession
         self.PropDynValuesOfNow = {}
         self.GetAllProp()
-
 
     def GetAllProp (self) :
         ''' Get all object properties (dynamic and static) '''
@@ -44,7 +43,6 @@ class ObjectWithDynProp:
             statProps.extend(dynProps)
             self.allProp = statProps
         return self.allProp
-
 
     def GetFrontModulesID (self,ModuleType) :
         if not hasattr(self,'FrontModules') :
@@ -96,7 +94,8 @@ class ObjectWithDynProp:
                     , or_( ModuleGrids.TypeObj == typeID,ModuleGrids.TypeObj == None)
                     )).all()
         except :
-            filterFields = DBSession.query(ModuleGrids).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()
+            filterFields = DBSession.query(ModuleGrids
+                ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()
         for curConf in filterFields:
             curConfName = curConf.Name
             filterField = list(filter(lambda x : x['name'] == curConfName
@@ -164,10 +163,23 @@ class ObjectWithDynProp:
 
                     curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
                     if 'date' in curTypeAttr.lower() :
+<<<<<<< HEAD
                         try :
                             valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y%H:%M:%S')
                         except :
                             valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y')
+=======
+                        print('**********************DATE IN TYPE')
+                        try:
+                            valeur = datetime.strptime(valeur,'%d/%m/%Y %H:%M:%S')
+                            try :
+                                valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y%H:%M:%S')
+                            except :
+                                valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y')
+                        except:
+                            print_exc()
+                            pass
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
                 setattr(self,nameProp,valeur)
             except :
                 print_exc()
@@ -175,8 +187,23 @@ class ObjectWithDynProp:
                 pass
         else:
             if (nameProp in self.GetType().DynPropNames):
+                if nameProp =='taxon':
+                    print('TRy INSET taxon :')
+                    print(valeur)
+                    print(self.PropDynValuesOfNow)
+                    print('\n\n\n\nDYN PROP oF Obj ')
+                    print(self.GetType().DynPropNames)
                 if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):
                     #### IF no value or different existing value, new value is affected ####
+                    if 'date' in self.GetDynProps(nameProp).TypeProp.lower():
+                        try :
+                            valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y%H:%M:%S')
+                        except :
+                            try : 
+                                valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y')
+                            except : 
+                                valeur = datetime.strptime(valeur.replace(' ',''),'%H:%M:%S')
+                                
                     print('valeur modifiée pour ' + nameProp)
                     NouvelleValeur = self.GetNewValue(nameProp)
                     NouvelleValeur.StartDate = datetime.today()
@@ -213,7 +240,7 @@ class ObjectWithDynProp:
         ''' Function to call : update properties of new or existing object with JSON/dict of value'''
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
-            if (curProp.lower() != 'id'):
+            if (curProp.lower() != 'id' and DTOObject[curProp] != '' and DTOObject[curProp] != '-1' ):
                 self.SetProperty(curProp,DTOObject[curProp])
 
     def GetFlatObject(self,schema=None):
@@ -254,7 +281,8 @@ class ObjectWithDynProp:
         Editable = (DisplayMode.lower()  == 'edit')
         resultat = {}
         type_ = self.GetType().ID
-        Fields = self.ObjContext.query(ModuleForms).filter(ModuleForms.Module_ID == FrontModules.ID).order_by(ModuleForms.FormOrder).all()
+        Fields = self.ObjContext.query(ModuleForms
+            ).filter(ModuleForms.Module_ID == FrontModules.ID).order_by(ModuleForms.FormOrder).all()
         curEditable = Editable
 
         for curStatProp in self.__table__.columns:
@@ -273,7 +301,6 @@ class ObjectWithDynProp:
                     curEditable = True
 
                 resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)))
-                
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):

@@ -8,13 +8,13 @@ AS
 BEGIN
 
 	DECLARE @ProtocoleType INT
-	Select ID into #ProtList from [NewModelERD].dbo.ProtocoleType
+	Select ID into #ProtList from [EcoReleve_ECWP].dbo.ProtocoleType
 	--where ID not in (208)
 
 	WHILE EXISTS (select * from #ProtList) 
 	BEGIN
 		SELECT TOP 1 @ProtocoleType=ID FROM #ProtList
-		print @ProtocoleType
+		--print @ProtocoleType
 		execute pr_ExportOneProtocole @ProtocoleType
 		DELETE FROM #ProtList WHERE ID=@ProtocoleType
 	END

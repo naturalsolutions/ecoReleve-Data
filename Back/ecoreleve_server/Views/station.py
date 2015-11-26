@@ -7,10 +7,15 @@ from ..Models import (
     FieldActivity_ProtocoleType,
     Station_FieldWorker,
     StationList,
+<<<<<<< HEAD
     MonitoredSitePosition
+=======
+    MonitoredSitePosition,
+    Base
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModules, ModuleForms
-from ecoreleve_server.GenericObjets import ListObjectWithDynProp
+from ..GenericObjets.FrontModules import FrontModules, ModuleForms
+from ..GenericObjets import ListObjectWithDynProp
 import transaction
 import json, itertools
 from datetime import datetime
@@ -82,6 +87,24 @@ def getFields(request) :
     transaction.commit()
     return cols
 
+
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/autocomplete', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
+def autocomplete (request):
+    criteria = request.params['term']
+    prop = request.matchdict['prop']
+    if isinstance(prop,int):
+        table = Base.metadata.tables['StationDynPropValuesNow']
+        query = select([table.c['ValueString'].label('label'),table.c['ValueString'].label('value')]
+            ).where(table.c['FK_StationDynProp']== prop)
+        query = query.where(table.c['ValueString'].like('%'+criteria+'%')).order_by(asc(table.c['ValueString']))
+    else: 
+        table = Base.metadata.tables['Station']
+        query = select([table.c[prop].label('value'),table.c[prop].label('label')])
+        query = query.where(table.c[prop].like('%'+criteria+'%'))
+
+    return [dict(row) for row in DBSession.execute(query).fetchall()]
+
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getStation(request):
@@ -100,8 +123,10 @@ def getStation(request):
 
         Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='StationForm' ).first()
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
+        response['data']['fieldActivityId'] = str(response['data']['fieldActivityId'])
     else : 
         response  = curSta.GetFlatObject()
+
     transaction.commit()
     return response
 
@@ -146,7 +171,7 @@ def insertOneNewStation (request) :
         if value != "" :
             data[items] = value
 
-    newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid)
+    newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid['iss'])
     newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
@@ -170,11 +195,11 @@ def insertListNewStations(request):
         newRow['LAT'] = row['latitude']
         newRow['LON'] = row['longitude']
         newRow['Name'] = row['name']
-        newRow['fieldActivityId'] = 1
+        newRow['fieldActivityId'] = row['fieldActivity']
         newRow['precision'] = 10 #row['Precision']
         newRow['creationDate'] = dateNow
-        newRow['creator'] = 1 #request.authenticated_userid
-        newRow['FK_StationType']=4
+        newRow['creator'] = request.authenticated_userid['iss']
+        newRow['FK_StationType']= 4
         newRow['id'] = row['id']
 
         try :
@@ -249,8 +274,12 @@ def searchStation(request):
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = []
+<<<<<<< HEAD
     user = request.authenticated_userid
     user = 1 
+=======
+    user = request.authenticated_userid['iss']
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])
@@ -313,7 +342,9 @@ def searchStation(request):
             dataResult = listObj.GetFlatDataList(searchInfo,getFW)
             print('****************** GEOJSON !!!!--------------')
             for row in dataResult:
-                geoJson.append({'type':'Feature', 'properties':{'name':row['Name'], 'date':row['StationDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LON'],row['LAT']]}})
+                geoJson.append({'type':'Feature', 'properties':{'name':row['Name']
+                    , 'date':row['StationDate']}
+                    , 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         return {'type':'FeatureCollection', 'features':geoJson, 'exceed': exceed}
     else :
         dataResult = listObj.GetFlatDataList(searchInfo,getFW)

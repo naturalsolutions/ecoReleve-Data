@@ -1,14 +1,22 @@
 
 fieldset{
 	border: 1px solid #e5e5e5;
-	padding: 15px;
-	margin-top: 10px;
+	padding: 15px 0px;
+	margin-top: 0px;
 	width: 100%;
 	&>div{
 		margin-bottom: 10px;
 	}
+	legend{
+		margin: 0px 5px;
+		padding: 10px 10px;
+	}
+	label{
+		display: block;
+	}
 }
 legend{
+	width: auto;
 	padding: 0px 10px;
 	margin: 10px 0px;
 	border: none;
@@ -31,23 +39,31 @@ textarea.form-control{
 input, select, textarea{
 	font-weight: 600;
 	&.required{
-		//border-bottom: 1px solid orange;
+		border-bottom: 1px solid rgba(255, 165, 0, 0.5);
 	}
 }
 .error{
-	select, input, textarea{
+	//works only for required classes
+	select.required, input.required, textarea.required{
 		border-left: 5px solid @error;
 	}
 }
 
-
-
 .form-control:disabled{
 	border: 1px solid transparent;
-	background: transparent;
 	box-shadow: none;
-	padding-left: 0px;
+	//background: transparent;
+	//padding-left: 0px;
 }
+
+input.form-control[type=number]:disabled::-webkit-inner-spin-button, 
+input.form-control[type=number]:disabled::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0; 
+}
+
 select:disabled {
 	-webkit-appearance: none;
 	-moz-appearance: none;
@@ -55,10 +71,27 @@ select:disabled {
 	text-overflow: '';
 }
 
-.form-control[disabled], fieldset[disabled] .form-control{
-	cursor: auto;
+.form-control{
+	padding: 5px 10px;
+	font-weight: 600;
 }
 
+.form-control[type="checkbox"]{
+	box-shadow: none;
+	height: 25px;
+	width: 25px;
+	cursor: pointer;
+}
+.form-control[disabled], fieldset[disabled] .form-control{
+	cursor: auto;
+	background: rgba(150,150,150,0.1);
+
+
+}
+
+.input-group .form-control {
+	z-index: inherit;
+}
 
 .nested-model{
 	ul fieldset{
@@ -66,35 +99,14 @@ select:disabled {
 		margin: 0px;
 		border: none;
 		&>div{
-			margin-bottom: 0px;
+			//margin-bottom: 0px; ?why?
 		}
 	}
 }
 
 
-.input-group .form-control {
-	z-index: inherit;
-}
-
-
-.form-control[type="checkbox"]{
-	box-shadow: none;
-}
-
-/* .nav-tabs > li > a{
-	background-color: #eeeeee;
-	border-color: #eeeeee #eeeeee #dddddd;
-}
-
-.tab-pane{
-	border: 1px solid #dddddd;
-	padding: 15px;
-	border-radius: 0 0 4px 4px;
-	border-top: 0px;
-}
-*/
-
 .nav-tabs{
+	border: none;
 	li{
 		a{
 			cursor: pointer;
@@ -126,7 +138,12 @@ select:disabled {
 	}
 }
 
+.ui-autocomplete{
 
-
-
-
+	position: absolute;
+    top: 0;
+    left: 0;
+    cursor: default;
+    max-height: 350px;
+    overflow-y: auto;
+}

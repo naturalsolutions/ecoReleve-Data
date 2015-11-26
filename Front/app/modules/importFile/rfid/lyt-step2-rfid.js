@@ -1,4 +1,5 @@
 define([
+<<<<<<< HEAD
 	'jquery',
 	'underscore',
 	'backbone',
@@ -6,6 +7,15 @@ define([
 	'config',
 	'sweetAlert',
 	'i18n',
+=======
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'config',
+  'sweetAlert',
+  'i18n',
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 
 ], function($, _, Backbone, Marionette, config, swal
 ) {
@@ -50,7 +60,11 @@ define([
         var ext = file.name.split('.');
         if (ext[ext.length - 1] != 'txt') {
           swal(
+<<<<<<< HEAD
 							{
+=======
+              {
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
   title: 'Wrong file type',
   text: 'The file should be a text file (.txt)',
   type: 'error',
@@ -59,8 +73,13 @@ define([
   confirmButtonText: 'OK',
 
   closeOnConfirm: true,
+<<<<<<< HEAD
 							}
 						);
+=======
+              }
+            );
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
           return false;
         } else {
           var url = config.coreUrl + 'sensors/rfid/datas';
@@ -91,7 +110,11 @@ define([
 
             self.ui.progressBar.css({'background-color': 'green'})
             swal(
+<<<<<<< HEAD
 							{
+=======
+              {
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
   title: 'Succes',
   text: 'importing RFID file',
   type: 'success',
@@ -101,16 +124,26 @@ define([
   cancelButtonText: 'Go to Validate',
   closeOnConfirm: true,
 
+<<<<<<< HEAD
 							},
 							function(isConfirm) {
+=======
+              },
+              function(isConfirm) {
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
   self.ui.progress.hide();
   if (isConfirm) {
     Backbone.history.navigate('importFile',{trigger: true});
   } else {
     Backbone.history.navigate('validate/rfid',{trigger: true});
   }
+<<<<<<< HEAD
 							}
 						);
+=======
+              }
+            );
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 
           }).fail(function(data) {
             $('#btnNext').attr('disabled');
@@ -130,6 +163,7 @@ define([
               data.responseText = 'An error occured, please contact an admninstrator';
             }
             swal(
+<<<<<<< HEAD
 							{
   title: title,
   text: data.responseText,
@@ -143,6 +177,20 @@ define([
   console.log('plouf');
 							}
 						);
+=======
+              {
+                title: title,
+                text: data.responseText,
+                type: type,
+                showCancelButton: false,
+                confirmButtonColor: color,
+                confirmButtonText: 'OK',
+                closeOnConfirm: true,
+              },
+              function(isConfirm) {
+              }
+            );
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
           });
         };
 

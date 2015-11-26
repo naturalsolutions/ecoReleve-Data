@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base, DBSession
+from ..Models import Base, DBSession
 from sqlalchemy import (Column, DateTime, Float,
  ForeignKey, Index, Integer, Numeric,
   String, Text, Unicode, Sequence, select,and_,or_, exists,func, join, outerjoin)
@@ -9,7 +9,7 @@ from collections import OrderedDict
 from datetime import datetime
 from .FrontModules import FrontModules,ModuleGrids
 import transaction
-from ecoreleve_server.utils import Eval
+from ..utils import Eval
 import pandas as pd
 import json
 from traceback import print_exc
@@ -142,6 +142,7 @@ class ListObjectWithDynProp():
             curTypeAttr = str(self.ObjWithDynProp.__table__.c[curProp].type).split('(')[0]
             if 'date' in curTypeAttr.lower() :
                 try :
+<<<<<<< HEAD
                     criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].strip(),'%d/%m/%Y%H:%M:%S')
                 except :
                     try:
@@ -150,6 +151,19 @@ class ListObjectWithDynProp():
             query = query.where(
                 eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
                 )
+=======
+                    criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
+                except :
+                    try:
+                        criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y')
+                    except: pass
+
+            filterCriteria = eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
+            if filterCriteria is not None :
+                query = query.where(
+                    filterCriteria
+                    )
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 
         elif self.optionView is not None and curProp in self.optionView.c:
             query = query.where(
@@ -167,6 +181,13 @@ class ListObjectWithDynProp():
                     # Gerer l'exception
             else :
                 viewAlias = self.vAliasList['v'+curDynProp['name']]
+                if 'date' in curDynProp['type'].lower() :
+                    try :
+                        criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
+                    except :
+                        try:
+                            criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y')
+                        except: pass
                       #### Perform the'where' in dyn props ####
                 query = query.where(
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
@@ -222,16 +243,26 @@ class ListObjectWithDynProp():
                             obj['Value'] = datetime.strptime(obj['Value'].strip(),'%d/%m/%Y%H:%M:%S')
                         except :
                             obj['Value'] = datetime.strptime(obj['Value'],'%d/%m/%Y')
+<<<<<<< HEAD
 
                     fullQuery = fullQuery.where(
                         eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
                     )
+=======
+                    filterCriteria = eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
+                    if filterCriteria is not None :
+                        fullQuery = fullQuery.where(filterCriteria)
+
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
                 elif curDynProp != None:
                     filterOnDynProp = True
-                    existQuery = existQuery.where(
-                        and_(
-                        self.GetDynPropValueView().c['Name'] == obj['Column'],
-                        eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],obj['Operator'],obj['Value'] )))
+                    filterCriteria = eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],obj['Operator'],obj['Value'] )
+                    if filterCriteria is not None :
+                        existQuery = existQuery.where(
+                            and_(
+                            self.GetDynPropValueView().c['Name'] == obj['Column'],
+                            filterCriteria
+                            ))
 
             if filterOnDynProp == True:
                 fullQuery = fullQuery.where(exists(

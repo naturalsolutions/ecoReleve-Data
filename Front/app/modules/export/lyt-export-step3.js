@@ -60,18 +60,27 @@ define([
         var colLine = '<div class="checkbox"><label><input class="col-chk" type="checkbox" value="' + model.get('name') + '">' + model.get('name') + '</label></div>';
         _this.ui.columns.append(colLine);
       });
+<<<<<<< HEAD
 
+=======
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
     },
 
     updateGrid: function(e) {
       var model = this.columns.findWhere({'name': $(e.target).val()});
+<<<<<<< HEAD
 
+=======
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
       if ($(e.target).is(':checked')) {
         model.set('renderable', true);
       }else {
         model.set('renderable', false);
       }
+<<<<<<< HEAD
 
+=======
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
       this.verififyCols();
     },
 

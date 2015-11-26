@@ -46,8 +46,18 @@ DECLARE @Reqwhere VARCHAR(4000)
 
 		SET @Req = @ReqSelect + ' FROM  ' + @TableName + ' EP JOIN TSTation S on EP.fk_station = S.ID JOIN [ECWP-eReleveData].[dbo].' + @TableName + ' SP on SP.pk = EP.original_id WHERE (' + @Reqwhere + ')'
 
-		select ' Comparaison Protocole ' + @TableName
-		print @Req
+		--select ' Comparaison Protocole ' + @TableName
+
+		SET @Req = 'select ''' + @TableName + ''' ProtocoleTable,S.Nbsource,T.NBTarget FROM  (SELECT count(*) nbSource from [ECWP-eReleveData].[dbo].' + @TableName + ' P JOIN [ECWP-eReleveData].[dbo].TStations S  ON P.FK_TSta_ID = S.TSta_PK_ID where (s.FieldActivity_ID <> 27 or s.FieldActivity_ID IS NULL) ) S JOIN  (select count(*) NbTarget from ' + @TableName + ') T ON S.Nbsource <> T.NbTarget '
+		print @req
 		exec (@Req )
+
+
+
+		--print @Req
+		--exec (@Req )
+
+
+
 		DELETE FROM  #ProtList where name = @TableName
 	END

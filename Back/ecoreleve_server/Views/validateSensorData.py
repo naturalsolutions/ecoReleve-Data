@@ -103,14 +103,13 @@ def details_unchecked_indiv(request):
         geoJson = []
         for row in dataGeo:
             geoJson.append({'type':'Feature', 'id': row['PK_id'], 'properties':{'type':row['type'], 'date':row['date']}
-                , 'geometry':{'type':'Point', 'coordinates':[row['lon'],row['lat']]}})
+                , 'geometry':{'type':'Point', 'coordinates':[row['lat'],row['lon']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
     else : 
         query = select([unchecked]
             ).where(and_(unchecked.c['FK_ptt']== ptt
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv))).order_by(desc(unchecked.c['date']))
         data = DBSession.execute(query).fetchall()
-        #print(query)
 
         df = pd.DataFrame.from_records(data, columns=data[0].keys(), coerce_float=True)
         X1 = df.iloc[:-1][['lat', 'lon']].values
@@ -139,7 +138,7 @@ def manual_validate(request) :
     ptt = asInt(request.matchdict['id_ptt'])
     ind_id = asInt(request.matchdict['id_indiv'])
     type_ = request.matchdict['type']
-    user = request.authenticated_userid
+    user = request.authenticated_userid['iss']
     user = 1
     data = json.loads(request.params['data'])
 
@@ -177,7 +176,7 @@ def auto_validation(request):
     param = request.params.mixed()
     freq = param['frequency']
     listToValidate = json.loads(param['toValidate'])
-    user = request.authenticated_userid
+    user = request.authenticated_userid['iss']
     user = 1 
     if freq == 'all' :
         freq = 1

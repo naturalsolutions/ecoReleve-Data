@@ -44,7 +44,8 @@ def add_routes(config):
     ##### Stations #####
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
-    config.add_route('stations', 'ecoReleve-Core/stations/') 
+    config.add_route('stations', 'ecoReleve-Core/stations/')
+    config.add_route('stations/autocomplete', 'ecoReleve-Core/stations/autocomplete/{prop}') 
     #config.add_route('stations/fileImport', 'ecoReleve-Core/stations/fileImport/{id}') 
     config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
@@ -81,6 +82,7 @@ def add_routes(config):
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
     
     config.add_route('sensors', 'ecoReleve-Core/sensors/') 
+    config.add_route('sensors/autocomplete', 'ecoReleve-Core/sensors/autocomplete/{prop}') 
     config.add_route('sensors/insert', 'ecoReleve-Core/sensors') 
     config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
     config.add_route('sensors/id', 'ecoReleve-Core/sensors/{id}',custom_predicates = (integers('id'),))
@@ -91,6 +93,7 @@ def add_routes(config):
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/') 
+    config.add_route('individuals/autocomplete', 'ecoReleve-Core/individuals/autocomplete/{prop}') 
     config.add_route('individuals/insert', 'ecoReleve-Core/individuals')
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/history', 'ecoReleve-Core/individuals/{id}/history',custom_predicates = (integers('id'),))
@@ -101,14 +104,15 @@ def add_routes(config):
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### MonitoredSite #####
-    config.add_route('monitoredSite', 'ecoReleve-Core/monitoredSite/') 
-    config.add_route('monitoredSite/', 'ecoReleve-Core/monitoredSite') 
-    config.add_route('monitoredSite/id', 'ecoReleve-Core/monitoredSite/{id}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/history', 'ecoReleve-Core/monitoredSite/{id}/history/',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/equipment', 'ecoReleve-Core/monitoredSite/{id}/equipment',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/history/action', 'ecoReleve-Core/monitoredSite/{id}/history/{action}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/equipment/action', 'ecoReleve-Core/monitoredSite/{id}/equipment/{action}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/action', 'ecoReleve-Core/monitoredSite/{action}') 
+    config.add_route('monitoredSite', 'ecoReleve-Core/monitoredSites/') 
+    config.add_route('monitoredSite/autocomplete', 'ecoReleve-Core/monitoredSites/autocomplete/{prop}') 
+    config.add_route('monitoredSite/', 'ecoReleve-Core/monitoredSites') 
+    config.add_route('monitoredSite/id', 'ecoReleve-Core/monitoredSites/{id}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/history', 'ecoReleve-Core/monitoredSites/{id}/history/',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/equipment', 'ecoReleve-Core/monitoredSites/{id}/equipment',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/history/action', 'ecoReleve-Core/monitoredSites/{id}/history/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSite/action', 'ecoReleve-Core/monitoredSites/{action}') 
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Release #####

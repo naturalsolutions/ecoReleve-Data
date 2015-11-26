@@ -1,5 +1,6 @@
 
 <div class="col-xs-4 full-height no-padding">
+<<<<<<< HEAD
 	<div class="toolbar top">
 		<legend class="inherit"><span class="reneco reneco-search circle dark"></span>&nbsp;&nbsp;Search</legend>
 		<button class="btn pull-right" id="back">
@@ -20,10 +21,33 @@
 			<span class="reneco reneco-search"></span>
 		</button>
 	</div>
+=======
+  <div class="toolbar top">
+    <legend class="inherit">Filter</legend>
+    <button class="btn pull-right" id="back">
+        <span class="reneco reneco-back"></span>
+        &nbsp;
+        <span data-i18n="button.back">Back</span>
+    </button>
+  </div>
+
+  <div class="crop2">
+    <br>
+    <div id="indiv_filters"></div>
+  </div>
+
+  <div class="toolbar bottom">
+    <button id="clear" class="btn pull-left">Clear</button>
+    <button id="btnFilterRel" class="btn btn-success pull-right">Filter&nbsp;
+      <span class="reneco reneco-search"></span>
+    </button>
+  </div>
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 </div>
 
 <div class=" pannels-container col-xs-8 full-height dark ns-no-padding">
 
+<<<<<<< HEAD
 	<div class="toolbar top">
 		<legend class="text-right"><span id="nbSelected">0</span>&nbsp;selected&nbsp;/&nbsp;<span id="totalEntries"></span>&nbsp;individuals to be released</legend>
 		<!-- <div class="bot-border dark"></div> -->
@@ -46,6 +70,34 @@
 			<span class="icon reneco reneco-satellite" data-position="top"></span>
 		</button>
 	</div>
+=======
+  <div class="toolbar top">
+    <legend class="inherit pull-left">Station: <%= Name %> | Date: <%= StationDate %></legend>
+    <legend class="inherit pull-right">
+      <span id="nbSelected">0</span>&nbsp;selected&nbsp;/&nbsp;
+      <span id="totalEntries"></span>&nbsp;individuals to release
+    </legend>
+    <!-- <div class="bot-border dark"></div> -->
+  </div>
+  
+  <div class="crop2">
+    <br>
+    <div id="grid" class="full-border"></div>
+  </div>
+
+  <!-- <div id="paginator" class="paginator "></div> -->
+
+  <div class="toolbar bottom">
+    <button class="btn btn-success pull-right" id='release'>
+      <span >Release&nbsp;&nbsp;</span>
+      <span class="icon reneco reneco-to_release" data-position="top"></span>
+    </button>
+    <button class="btn btn-success pull-right" id='addSensor'>
+      <span >Add Sensor&nbsp;&nbsp;</span>
+      <span class="icon reneco reneco-satellite" data-position="top"></span>
+    </button>
+  </div>
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 </div>
 
 <div id="modal" class=""></div>

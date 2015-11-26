@@ -7,17 +7,19 @@ from ..Models import (
     SensorDynProp,
     Equipment,
     Individual,
-    MonitoredSite
+    MonitoredSite,
+    Base,
+    SensorList
     )
-from ecoreleve_server.GenericObjets.FrontModules import FrontModules
-from ecoreleve_server.GenericObjets import ListObjectWithDynProp
+from ..GenericObjets.FrontModules import FrontModules
+from ..GenericObjets import ListObjectWithDynProp
 import transaction
 import json, itertools
 from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE,func,desc,join, distinct,outerjoin
+from sqlalchemy import select, and_,cast, DATE,func,desc,join, distinct,outerjoin,asc
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
@@ -41,7 +43,7 @@ def actionOnSensors(request):
     'getModels' : getSensorModels,
     'getCompany' : getCompany,
     'getSerialNumber' : getSerialNumber,
-    'getSensorType' : getSensorType,
+    'getType' : getSensorType,
     'getUnicIdentifier' : getUnicIdentifier
     }
     actionName = request.matchdict['action']
@@ -97,24 +99,28 @@ def getSensorModels(request):
     sensorType = request.params['sensorType']
     query = select([distinct(Sensor.Model)]).where(Sensor.FK_SensorType == sensorType)
     response = getData(query)
+    transaction.commit()
     return response
 
 def getCompany (request):
     sensorType = request.params['sensorType']
     query = select([distinct(Sensor.Compagny)]).where(Sensor.FK_SensorType == sensorType)
     response = getData(query)
+    transaction.commit()
     return response
 
 def getSerialNumber (request):
     sensorType = request.params['sensorType']
     query = select([distinct(Sensor.SerialNumber)]).where(Sensor.FK_SensorType == sensorType)
     response = getData(query)
+    transaction.commit()
     return response
 
 def getUnicIdentifier (request):
     sensorType = request.params['sensorType']
     query = select([Sensor.UnicIdentifier.label('label'),Sensor.ID.label('val')]).where(Sensor.FK_SensorType == sensorType)
     response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    transaction.commit()
     return response
 
 def getData(query):
@@ -126,21 +132,30 @@ def getData(query):
         for key in curRow :
             if curRow[key] is not None :
                 response.append(curRow[key])
+                transaction.commit()
     return response
 
 def getSensorType(request):
-
-    query = select([SensorType.ID, SensorType.Name])
-    result = DBSession.execute(query).fetchall()
-    response = []
-    for row in result:
-        ele = {}
-        ele['label'] = row[1]
-        ele['val'] = row[0]
-        response.append(ele)
-
+    query = select([SensorType.ID.label('val'), SensorType.Name.label('label')])
+    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    transaction.commit()
     return response
 
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/autocomplete', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
+def autocomplete (request):
+    criteria = request.params['term']
+    prop = request.matchdict['prop']
+    if isinstance(prop,int):
+        table = Base.metadata.tables['SensorDynPropValuesNow']
+        query = select([table.c['ValueString'].label('label'),table.c['ValueString'].label('value')]
+            ).where(table.c['FK_SensorDynProp']== prop)
+        query = query.where(table.c['ValueString'].like('%'+criteria+'%')).order_by(asc(table.c['ValueString']))
+    else: 
+        table = Base.metadata.tables['Sensor']
+        query = select([table.c[prop].label('value'),table.c[prop].label('label')])
+        query = query.where(table.c[prop].like('%'+criteria+'%'))
+    return [dict(row) for row in DBSession.execute(query).fetchall()]
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
@@ -233,7 +248,7 @@ def insertOneNewSensor (request) :
     print(data['FK_SensorType'])
     #newSensor = Sensor(FK_SensorType = data['FK_SensorType'], creator = request.authenticated_userid)
     sensorType = int(data['FK_SensorType'])
-    newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now() )
+    newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now())
 
     newSensor.SensorType = DBSession.query(SensorType).filter(SensorType.ID== sensorType).first()
     newSensor.init_on_load()
@@ -266,7 +281,7 @@ def searchSensor(request):
     print('**criteria********' )
     print(searchInfo['criteria'])
 
-    listObj = ListObjectWithDynProp(Sensor,moduleFront)
+    listObj = SensorList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
 
     countResult = listObj.count(searchInfo)

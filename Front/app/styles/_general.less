@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 .dropdown-menu{
   z-index: 1000000000000000000000000000000;
@@ -7,6 +8,8 @@
 }
 
 
+=======
+>>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 html, body{
 	height: 100%;
 	//overflow: hidden;
@@ -22,6 +25,7 @@ body{
 main{
 	height: 100%;
 	padding-top: 50px;
+  background: rgba(255,255,255,0.4);
 }
 .white{
 	background: white;
@@ -56,10 +60,6 @@ main{
 	color: white;
 	margin: 0px 15px;
 
-}
-
-.layer{
-	background: rgba(255,255,255, 0.7);
 }
 
 .rel{
@@ -99,8 +99,11 @@ a{
 
 .no-padding, .ns-no-padding{
 	padding: 0px!important;
-
 }
+.no-padding-left{
+  padding-left: 0px!important;
+}
+
 .full-height, .ns-full-height{
 	overflow: auto;
 	height: 100%;
@@ -126,7 +129,9 @@ span.bull-warn{
 	}
 } */
 
-
+.pos-abs{
+  position: absolute;
+}
 
 
 .col-border {
@@ -266,14 +271,15 @@ div.form-control{
 /* Thesaurus */
 span.fancytree-title {
 	font-family: 'Exo 2', sans-serif;
-	padding: 4px 3px;
 }
 span.fancytree-title:hover {
 	background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;
 	-webkit-background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;	
 }
 ul.fancytree-container{
+  z-index: 1;
 	border:0;
+  max-height: 500px;
 }
 div.fancytreeview{
 	position: absolute;
