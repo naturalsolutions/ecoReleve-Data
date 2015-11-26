@@ -107,6 +107,17 @@ define([
         editable: false,
         cell: 'String',
       },{
+        name: 'EndDate',
+        label: 'End Date',
+        editable: false,
+        cell: 'String',
+      },{
+        name: 'FK_MonitoredSite',
+        label: 'FK_MonitoredSite',
+        editable: false,
+        renderable:false,
+        cell: 'string',
+      },{
         name: 'Name',
         label: 'Site Name',
         editable: false,
@@ -115,6 +126,7 @@ define([
         name: 'Deploy',
         label: 'Deploy',
         editable: false,
+        renderable:false,
         cell: 'string',
       }];
       this.grid = new NsGrid({
