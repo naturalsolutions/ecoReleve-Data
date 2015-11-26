@@ -6,11 +6,6 @@ header{
 	width: 100%;
 	max-height: 50px;
 	font-weight: 400; 
-
-
-	overflow: hidden;
-
-
 	a#logout{
 		cursor: pointer;
 	}
@@ -36,6 +31,25 @@ header{
 		svg{
 			rect {
 				fill: white;
+			}
+		}
+	}
+
+	.dropdown.open{
+		&>a{
+			background: @header-bg;
+			&:hover, &:focus{
+				background: @header-hover;
+			}
+		}
+		ul.dropdown-menu{
+			background: @header-bg;
+			border: none;
+			& a{
+				color: white;
+				&:hover, &:focus{
+					background: @header-hover;
+				}
 			}
 		}
 	}

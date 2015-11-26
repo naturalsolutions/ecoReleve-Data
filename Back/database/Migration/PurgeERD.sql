@@ -3,7 +3,6 @@ delete from SensorDynPropValue
 delete from StationDynPropValue
 delete from MonitoredSiteDynPropValue
 
-
 truncate TABLE ObservationDynPropValue
 
 delete from Observation

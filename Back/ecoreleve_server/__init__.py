@@ -43,7 +43,7 @@ def decimal_adapter(obj, request):
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
     settings['sqlalchemy.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.url'])
-    engine = engine_from_config(settings, 'sqlalchemy.')
+    engine = engine_from_config(settings, 'sqlalchemy.', legacy_schema_aliasing=True)
     dbConfig['url'] = settings['sqlalchemy.url']
     dbConfig['wsThesaurus'] = {}
     dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
@@ -67,8 +67,8 @@ def main(global_config, **settings):
     config.add_renderer('pdf', PDFrenderer)
     config.add_renderer('gpx', GPXRenderer)
 
-    # includeme(config)
-    # config.set_root_factory(SecurityRoot)
+    includeme(config)
+    config.set_root_factory(SecurityRoot)
 
     # Set the default permission level to 'read'
     config.set_default_permission('read')

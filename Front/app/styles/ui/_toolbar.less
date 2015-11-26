@@ -21,6 +21,7 @@
   padding-top: 3px;
   border-top: 1px dashed #ddd;
   height: @paginatorHeight;
+  overflow: hidden;
 }
 
 .crop1{
@@ -30,7 +31,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   &.crop-paginator{
-    @crop: @toolbarHeight + @paginatorHeight;
+    @crop: @toolbarHeight + @paginatorHeight + 1;
     height: ~"calc(100% - @{crop})";
   }
 }
@@ -40,12 +41,20 @@
   @crop: @toolbarHeight*2;
   height: ~"calc(100% - @{crop})";
   padding: 0px 15px;
-  overflow-x: hidden;
+  // overflow-x: hidden;
   overflow-y: auto;
   &.crop-paginator{
     @crop : @toolbarHeight*2 + @paginatorHeight;
     height: ~"calc(100% - @{crop})";
   }
+}
+
+.grid-crop{
+  @crop : @paginatorHeight;
+  height: ~"calc(100% - @{crop})";
+  overflow-x: hidden;
+  overflow-y: auto;
+    padding: 15px;
 }
 
 .tooltipster-content  ul  li {
@@ -62,3 +71,4 @@
 .tooltipster-content ul li:active {
   background-color: rgb(200, 200, 200);
 }
+

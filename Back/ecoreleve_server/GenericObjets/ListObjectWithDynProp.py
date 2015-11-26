@@ -139,6 +139,14 @@ class ListObjectWithDynProp():
  
         if hasattr(self.ObjWithDynProp,curProp) :
             # static column criteria
+            curTypeAttr = str(self.ObjWithDynProp.__table__.c[curProp].type).split('(')[0]
+            if 'date' in curTypeAttr.lower() :
+                try :
+                    criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].strip(),'%d/%m/%Y%H:%M:%S')
+                except :
+                    try:
+                        criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'],'%d/%m/%Y')
+                    except: pass
             query = query.where(
                 eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
                 )
@@ -162,7 +170,6 @@ class ListObjectWithDynProp():
                       #### Perform the'where' in dyn props ####
                 query = query.where(
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
-
         return query
 
     def GetFullQuery(self,searchInfo=None) :
@@ -179,7 +186,6 @@ class ListObjectWithDynProp():
             # countQuery = self.WhereInJoinTable(countQuery,obj)
         # self.countQuery = countQuery 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
-
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self,searchInfo=None) :
@@ -209,8 +215,14 @@ class ListObjectWithDynProp():
         if criteria is not None:
             for obj in criteria:
                 curDynProp = self.GetDynProp(obj['Column'])
-              
                 if hasattr(self.ObjWithDynProp,obj['Column']):
+                    curTypeAttr = str(self.ObjWithDynProp.__table__.c[obj['Column']].type).split('(')[0]
+                    if 'date' in curTypeAttr.lower() :
+                        try :
+                            obj['Value'] = datetime.strptime(obj['Value'].strip(),'%d/%m/%Y%H:%M:%S')
+                        except :
+                            obj['Value'] = datetime.strptime(obj['Value'],'%d/%m/%Y')
+
                     fullQuery = fullQuery.where(
                         eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
                     )

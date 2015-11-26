@@ -8,7 +8,8 @@ from ..Models import (
     Individual_Location,
     Sensor,
     SensorType,
-    Equipment
+    Equipment,
+    IndividualList
     )
 from ecoreleve_server.GenericObjets.FrontModules import FrontModules
 from ecoreleve_server.GenericObjets import ListObjectWithDynProp
@@ -249,7 +250,7 @@ def searchIndiv(request):
     print('**criteria********' )
     print(searchInfo['criteria'])
     start = datetime.now()
-    listObj = ListObjectWithDynProp(Individual,moduleFront)
+    listObj = IndividualList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
 
     stop = datetime.now()
@@ -265,6 +266,15 @@ def searchIndiv(request):
     result.append(dataResult)
     transaction.commit()
     return result
+
+
+def getIndivEquipmentAtDate(request):
+
+    data = request.json_body
+
+
+
+
 
 
 

@@ -15,219 +15,207 @@ define([
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
 	Com, NsGrid, NsMap, NsForm, Navbar
-){
+) {
 
-	'use strict';
+  'use strict';
 
-	return Marionette.LayoutView.extend({
+  return Marionette.LayoutView.extend({
 
-		template: 'app/modules/monitoredSite/templates/tpl-ms-details.html',
-		className: 'full-height animated white',
+    template: 'app/modules/monitoredSite/templates/tpl-ms-details.html',
+    className: 'full-height animated white',
 
-		events : {
-			'click #hideDetails' : 'hideDetail', 
-			'click #showDetails'  : 'showDetail',
-			'click .tab-link' : 'displayTab',
-		},
+    events: {
+      'click #hideDetails': 'hideDetail',
+      'click #showDetails': 'showDetail',
+      'click .tab-link': 'displayTab',
+    },
 
-		ui: {
-			'grid': '#grid',
-			'gridEquipment': '#gridEquipment',
+    ui: {
+      'grid': '#grid',
+      'gridEquipment': '#gridEquipment',
 
-			'form': '#form',
-			'map': '#map',
-			'paginator' :'#paginator',
-			'paginatorEquipment' :'#paginatorEquipment',
+      'form': '#form',
+      'map': '#map',
+      'paginator': '#paginator',
+      'paginatorEquipment': '#paginatorEquipment',
 
-			'details' : '#infos',
-			'mapContainer' : '#mapContainer',
-			'showHideCtr' :'#showDetails',
-			'formBtns' : '#formBtns'
-		},
+      'details': '#infos',
+      'mapContainer': '#mapContainer',
+      'showHideCtr': '#showDetails',
+      'formBtns': '#formBtns'
+    },
 
-		regions: {
-			'rgNavbar': '#navbar'
-		},
+    regions: {
+      'rgNavbar': '#navbar'
+    },
 
-		initialize: function(options){
+    initialize: function(options) {
 
-			this.translater = Translater.getTranslater();
-			this.com = new Com();
-			
-			this.model = options.model;
-			this.navbar = new Navbar({
-				parent: this,
-				globalGrid: options.globalGrid,
-				model: options.model,
-			});
-			
-		},
+      this.translater = Translater.getTranslater();
+      this.com = new Com();
 
-		reloadFromNavbar: function(model){
-			this.map.destroy();
-			this.ui.map.html('');
-			this.display(model);
-		},
+      this.model = options.model;
+      this.navbar = new Navbar({
+        parent: this,
+        globalGrid: options.globalGrid,
+        model: options.model,
+      });
 
-		onRender: function(){
-			this.$el.i18n();
-		},
+    },
 
-		onShow : function(){
-			this.rgNavbar.show(this.navbar);
-			this.display(this.model);
-		},
+    reloadFromNavbar: function(model) {
+      this.display(model);
+      this.map.url = config.coreUrl + 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true';
+      this.map.updateFromServ();
+    },
 
-		display: function(model){
-			this.model = model;
-			this.monitoredSiteId = this.model.get('ID');
-			this.displayForm(this.monitoredSiteId);
-			this.displayGrid(this.monitoredSiteId);
-			this.displayMap();
-		},
+    onRender: function() {
+      this.$el.i18n();
+    },
 
-		displayGrid: function(id){
+    onShow: function() {
+      var _this = this;
+      this.rgNavbar.show(this.navbar);
+      this.display(this.model);
+      setTimeout(function() {
+        _this.displayMap();
+      },0);
+    },
 
-			this.grid = new NsGrid({
-				pageSize: 10,
-				pagingServerSide: true,
-				name:'MonitoredSiteGridHistory',
-				url: config.coreUrl+'monitoredSite/' + id  + '/history/',
-				urlParams : this.urlParams,
-				rowClicked : true,
-			});
+    display: function(model) {
+      this.model = model;
+      this.monitoredSiteId = this.model.get('ID');
+      this.displayForm(this.monitoredSiteId);
+      this.displayGrid(this.monitoredSiteId);
+    },
 
-			var colsEquip = [{
-								name: 'StartDate',
-								label: 'Start Date',
-								editable: false,
-								cell : 'string'
-						}, {
-								name: 'Type',
-								label: 'Type',
-								editable: false,
-								cell: 'string'
-						},{
-								name: 'UnicName',
-								label: 'Platform',
-								editable: false,
-								cell: 'string'
-						}, {
-								name: 'Deploy',
-								label: 'Status',
-								editable: false,
-								cell: 'string',
-						}, ];
-			this.gridEquip = new NsGrid({
-				pageSize: 20,
-				columns : colsEquip,
-				pagingServerSide: false,
-				url: config.coreUrl+'monitoredSite/' + id  + '/equipment',
-				urlParams : this.urlParams,
-				rowClicked : true,
-			});
+    displayGrid: function(id) {
 
+      this.grid = new NsGrid({
+        pageSize: 10,
+        pagingServerSide: true,
+        name: 'MonitoredSiteGridHistory',
+        url: config.coreUrl + 'monitoredSite/' + id  + '/history/',
+        urlParams: this.urlParams,
+        rowClicked: true,
 
+      });
 
-			this.ui.grid.html(this.grid.displayGrid());
-			this.ui.paginator.html(this.grid.displayPaginator());
-			this.ui.gridEquipment.html(this.gridEquip.displayGrid());
-			this.ui.paginatorEquipment.html(this.gridEquip.displayPaginator());
-		},
+      var colsEquip = [{
+        name: 'StartDate',
+        label: 'Start Date',
+        editable: false,
+        cell: 'string'
+      }, {
+        name: 'Type',
+        label: 'Type',
+        editable: false,
+        cell: 'string'
+      },{
+        name: 'UnicName',
+        label: 'Platform',
+        editable: false,
+        cell: 'string'
+      }, {
+        name: 'Deploy',
+        label: 'Status',
+        editable: false,
+        cell: 'string',
+      },];
+      this.gridEquip = new NsGrid({
+        pageSize: 20,
+        columns: colsEquip,
+        pagingServerSide: false,
+        url: config.coreUrl + 'monitoredSite/' + id  + '/equipment',
+        urlParams: this.urlParams,
+        rowClicked: true,
+      });
 
-		initMap: function(geoJson){
-			this.map = new NsMap({
-				geoJson: geoJson,
-				zoom: 4,
-				element : 'map',
-				popup: true,
-				cluster: true
-			});
-		},
+      this.ui.grid.html(this.grid.displayGrid());
+      this.ui.paginator.html(this.grid.displayPaginator());
+      this.ui.gridEquipment.html(this.gridEquip.displayGrid());
+      this.ui.paginatorEquipment.html(this.gridEquip.displayPaginator());
+    },
 
-		displayMap: function(){
-			var url  = config.coreUrl+ 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true';
-			$.ajax({
-				url: url,
-				contentType:'application/json',
-				type:'GET',
-				context: this,
-			}).done(function(datas){
-				this.initMap(datas);
-			}).fail(function(msg){
-				console.error(msg);
-			});
-		},
+    displayMap: function(geoJson) {
+      this.map = new NsMap({
+        url: config.coreUrl + 'monitoredSite/' + this.monitoredSiteId  + '/history/?geo=true',
+        zoom: 4,
+        element: 'map',
+        popup: true,
+        cluster: true
+      });
+    },
 
-		displayForm : function(id){
-			this.nsform = new NsForm({
-				name: 'IndivForm',
-				modelurl: config.coreUrl+'monitoredSite',
-				formRegion: this.ui.form,
-				buttonRegion: [this.ui.formBtns],
-				displayMode: 'display',
-				objectType: this.type,
-				id: id,
-				reloadAfterSave : false,
-				parent: this.parent,
-				afterShow : function(){
-					$("#dateTimePicker").on("dp.change", function (e) {
-            $('#dateTimePicker').data("DateTimePicker").maxDate(e.date);
-       		 });
-				}
-			});
+    displayForm: function(id) {
+      this.nsform = new NsForm({
+        name: 'IndivForm',
+        modelurl: config.coreUrl + 'monitoredSite',
+        formRegion: this.ui.form,
+        buttonRegion: [this.ui.formBtns],
+        displayMode: 'display',
+        objectType: this.type,
+        id: id,
+        reloadAfterSave: true,
+        parent: this.parent,
+        afterShow: function() {
+          $('#dateTimePicker').on('dp.change', function(e) {
+            $('#dateTimePicker').data('DateTimePicker').maxDate(e.date);
+          });
+        }
+      });
 
-			this.nsform.afterDelete = function(){
-				var jqxhr = $.ajax({
-					url: config.coreUrl+'monitoredSite/'+ id,
-					method: 'DELETE',
-					contentType:'application/json'
-				}).done(function(resp) {
-					//temp fix
-					Backbone.history.loadUrl(Backbone.history.fragment);
-				}).fail(function(resp) {
+      this.nsform.afterDelete = function() {
+        var jqxhr = $.ajax({
+          url: config.coreUrl + 'monitoredSite/' + id,
+          method: 'DELETE',
+          contentType: 'application/json'
+        }).done(function(resp) {
+          //temp fix
+          Backbone.history.loadUrl(Backbone.history.fragment);
+        }).fail(function(resp) {
 				});
-			};
-		},
+      };
+    },
 
-		displayTab : function(e){
-			e.preventDefault();
-			var ele = $(e.target);
-			var tabLink = $(ele).attr('href');
-			var tabUnLink = $('li.active.tab-ele a').attr('href');
-			$('li.active.tab-ele').removeClass('active');
-			$(ele).parent().addClass('active');
-			$(tabLink).addClass('in active');
-			$(tabUnLink).removeClass('active in');
-		},
+    displayTab: function(e) {
+      e.preventDefault();
+      var ele = $(e.target);
+      var tabLink = $(ele).attr('href');
+      var tabUnLink = $('li.active.tab-ele a').attr('href');
+      $('li.active.tab-ele').removeClass('active');
+      $(ele).parent().addClass('active');
+      $(tabLink).addClass('in active');
+      $(tabUnLink).removeClass('active in');
+    },
 
-		hideDetail: function() {  
-			$(this.ui.details).animate({
-				marginLeft: '-60%',
-				}, 500, function() {
+    hideDetail: function() {
+      $(this.ui.details).animate({
+        marginLeft: '-60%',
+      }, 500, function() {
 			});
-			this.updateSize('hide');
-		},
+      this.updateSize('hide');
+    },
 
-		showDetail: function() {
-				$(this.ui.details).animate({
-					marginLeft: '0',
-					}, 500, function() {
+    showDetail: function() {
+      $(this.ui.details).animate({
+        marginLeft: '0',
+      }, 500, function() {
 				});
-			this.updateSize('show');
-		},
+      this.updateSize('show');
+    },
 
-		updateSize: function(type) {
-			this.map.resize();
-			if(type === 'hide'){
-				$(this.ui.showHideCtr).removeClass('masqued');
-				$(this.ui.mapContainer).removeClass('col-md-7');
-				$(this.ui.mapContainer).addClass('col-md-12');
-			} else {
-				$(this.ui.showHideCtr).addClass('masqued');
-				$(this.ui.mapContainer).removeClass('col-md-12');
-				$(this.ui.mapContainer).addClass('col-md-7');
-			}
-		},
-	});
+    updateSize: function(type) {
+      this.map.resize();
+      if (type === 'hide') {
+        $(this.ui.showHideCtr).removeClass('masqued');
+        $(this.ui.mapContainer).removeClass('col-md-7');
+        $(this.ui.mapContainer).addClass('col-md-12');
+      } else {
+        $(this.ui.showHideCtr).addClass('masqued');
+        $(this.ui.mapContainer).removeClass('col-md-12');
+        $(this.ui.mapContainer).addClass('col-md-7');
+      }
+    },
+  });
 });
