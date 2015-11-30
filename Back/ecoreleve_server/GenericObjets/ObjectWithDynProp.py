@@ -26,6 +26,7 @@ from operator import itemgetter
 from collections import OrderedDict
 from traceback import print_exc
 from pyramid import threadlocal
+from ..utils.datetime import parse
 
 
 Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt','float':'ValueFloat'}
@@ -179,16 +180,7 @@ class ObjectWithDynProp:
 
                     curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
                     if 'date' in curTypeAttr.lower() :
-                        print('**********************DATE IN TYPE')
-                        try:
-                            valeur = datetime.strptime(valeur,'%d/%m/%Y %H:%M:%S')
-                            try :
-                                valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y%H:%M:%S')
-                            except :
-                                valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y')
-                        except:
-                            print_exc()
-                            pass
+                        valeur = parse(valeur.replace(' ',''))
                 setattr(self,nameProp,valeur)
             except :
                 print_exc()
@@ -205,14 +197,7 @@ class ObjectWithDynProp:
                 if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):
                     #### IF no value or different existing value, new value is affected ####
                     if 'date' in self.GetDynProps(nameProp).TypeProp.lower():
-                        try :
-                            valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y%H:%M:%S')
-                        except :
-                            try : 
-                                valeur = datetime.strptime(valeur.replace(' ',''),'%d/%m/%Y')
-                            except : 
-                                valeur = datetime.strptime(valeur.replace(' ',''),'%H:%M:%S')
-                                
+                        valeur = parse(valeur.replace(' ',''))
                     print('valeur modifiée pour ' + nameProp)
                     NouvelleValeur = self.GetNewValue(nameProp)
                     NouvelleValeur.StartDate = datetime.today()

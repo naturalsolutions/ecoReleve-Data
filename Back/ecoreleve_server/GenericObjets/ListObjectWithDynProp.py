@@ -14,7 +14,7 @@ import pandas as pd
 import json
 from traceback import print_exc
 from pyramid import threadlocal
-
+from ..utils.datetime import parse
 
 eval_ = Eval()
 
@@ -22,6 +22,13 @@ class ListObjectWithDynProp():
     ''' This class is used to filter Object with dyn props over all properties '''
     def __init__(self,ObjWithDynProp, frontModule, history = False, View = None):
         self.ObjContext = threadlocal.get_current_request().dbsession
+        session = threadlocal.get_current_request().dbsession
+        print("\n\nObjContext : ")
+        print(self.ObjContext)
+        print("session : ")
+        print(session)
+        print(ObjWithDynProp)
+
         self.ListPropDynValuesOfNow = {}
         self.ObjWithDynProp = ObjWithDynProp
         self.DynPropList = self.GetDynPropList()
@@ -137,17 +144,12 @@ class ListObjectWithDynProp():
     def WhereInJoinTable (self,query,criteriaObj) :
         ''' Apply where clause over filter criteria '''
         curProp = criteriaObj['Column']
- 
         if hasattr(self.ObjWithDynProp,curProp) :
             # static column criteria
             curTypeAttr = str(self.ObjWithDynProp.__table__.c[curProp].type).split('(')[0]
             if 'date' in curTypeAttr.lower() :
-                try :
-                    criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
-                except :
-                    try:
-                        criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y')
-                    except: pass
+                val = criteriaObj['Value']
+                val = parse(val.replace(' ',''))
 
             filterCriteria = eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
             if filterCriteria is not None :
@@ -172,12 +174,7 @@ class ListObjectWithDynProp():
             else :
                 viewAlias = self.vAliasList['v'+curDynProp['name']]
                 if 'date' in curDynProp['type'].lower() :
-                    try :
-                        criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
-                    except :
-                        try:
-                            criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y')
-                        except: pass
+                    criteriaObj['Value'] = parse(criteriaObj['Value'].replace(' ',''))
                       #### Perform the'where' in dyn props ####
                 query = query.where(
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
@@ -229,16 +226,18 @@ class ListObjectWithDynProp():
                 if hasattr(self.ObjWithDynProp,obj['Column']):
                     curTypeAttr = str(self.ObjWithDynProp.__table__.c[obj['Column']].type).split('(')[0]
                     if 'date' in curTypeAttr.lower() :
-                        try :
-                            obj['Value'] = datetime.strptime(obj['Value'].strip(),'%d/%m/%Y%H:%M:%S')
-                        except :
-                            obj['Value'] = datetime.strptime(obj['Value'],'%d/%m/%Y')
+                        obj['Value'] = parse(obj['Value'].replace(' ',''))
+
                     filterCriteria = eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
                     if filterCriteria is not None :
                         fullQuery = fullQuery.where(filterCriteria)
 
                 elif curDynProp != None:
                     filterOnDynProp = True
+
+                    if 'date' in curDynProp['type'].lower() :
+                        criteriaObj['Value'] = parse(criteriaObj['Value'].replace(' ',''))
+
                     filterCriteria = eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],obj['Operator'],obj['Value'] )
                     if filterCriteria is not None :
                         existQuery = existQuery.where(
