@@ -48,8 +48,7 @@ def getFilters (request):
     transaction.commit()
     return filters
 
-def getFields(request) :
-
+def getFields(request):
     ModuleType = request.params['name']
     if ModuleType == 'default' :
         ModuleType = 'IndivReleaseGrid'
@@ -81,15 +80,19 @@ def getFields(request) :
     return cols
 
 def getReleaseMethod(request):
+    session = request.dbsession
+
     query = text("""SELECT TTop_FullPath as val, TTop_Name as label"""
         +""" FROM THESAURUS.dbo.TTopic th 
         JOIN [ModuleForms] f on th.TTop_ParentID = f.Options
         where Name = 'release_method' """)
-    result = DBSession.execute(query).fetchall()
+    result = session.execute(query).fetchall()
     return [dict(row) for row in result]
 
 @view_config(route_name= prefix+'individuals', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchIndiv(request):
+    session = request.dbsession
+
     data = request.params.mixed()
     print('*********data*************')
     searchInfo = {}
@@ -112,7 +115,7 @@ def searchIndiv(request):
     searchInfo['criteria'].extend(criteria)
 
     ModuleType = 'IndivReleaseGrid'
-    moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     listObj = IndividualList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
 
@@ -125,20 +128,22 @@ def searchIndiv(request):
 
 @view_config(route_name= prefix+'individuals', renderer='json', request_method = 'POST', permission = NO_PERMISSION_REQUIRED)
 def releasePost(request):
+    session = request.dbsession
+
     data = request.params.mixed()
     print(data)
     sta_id = int(data['StationID'])
     indivList = json.loads(data['IndividualList'])
     releaseMethod = data['releaseMethod']
     taxon = indivList[0]['Species']
-    curStation = DBSession.query(Station).get(sta_id)
+    curStation = session.query(Station).get(sta_id)
 
     taxons = dict(Counter(indiv['Species'] for indiv in indivList))
     print (taxons)
     def getnewObs(typeID):
         return Observation(FK_ProtocoleType=typeID)
 
-    protoTypes = pd.DataFrame(DBSession.execute(select([ProtocoleType])).fetchall(), columns = ProtocoleType.__table__.columns.keys())
+    protoTypes = pd.DataFrame(session.execute(select([ProtocoleType])).fetchall(), columns = ProtocoleType.__table__.columns.keys())
     vertebrateGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate group','ID'].values[0])
     vertebrateIndID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate individual','ID'].values[0])
     biometryID = int(protoTypes.loc[protoTypes['Name'] == 'Bird Biometry','ID'].values[0])
@@ -191,7 +196,7 @@ def releasePost(request):
 
     binList = []
     for indiv in indivList: 
-        curIndiv = DBSession.query(Individual).get(indiv['ID'])
+        curIndiv = session.query(Individual).get(indiv['ID'])
         curIndiv.LoadNowValues()
         curIndiv.UpdateFromJson(indiv)
 
@@ -242,16 +247,16 @@ def releasePost(request):
 
     vertebrateGrp.UpdateFromJson(dictVertGrp)
     vertebrateGrp.Observation_children.extend(vertebrateIndList)
-    DBSession.add(vertebrateGrp)
+    session.add(vertebrateGrp)
 
     releaseGrp = Observation(FK_ProtocoleType=releaseGrpID, FK_Station =sta_id)
     releaseGrp.PropDynValuesOfNow={}
     releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod})
     releaseGrp.Observation_children.extend(releaseIndList)
 
-    DBSession.add(releaseGrp)
-    DBSession.add_all(biometryList)
-    DBSession.add_all(equipmentIndList)
+    session.add(releaseGrp)
+    session.add_all(biometryList)
+    session.add_all(equipmentIndList)
     transaction.commit()
 
     return {'release':len(releaseIndList)}

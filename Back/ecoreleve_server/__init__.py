@@ -67,6 +67,7 @@ def main(global_config, **settings):
 
     config = Configurator(settings=settings)
     # Add renderer for datetime objects
+    config.include('pyramid_tm')
     json_renderer = JSON()
     json_renderer.add_adapter(datetime.datetime, datetime_adapter)
     json_renderer.add_adapter(datetime.date, datetime_adapter)
@@ -84,7 +85,7 @@ def main(global_config, **settings):
 
     # Set the default permission level to 'read'
     config.set_default_permission('read')
-    config.include('pyramid_tm')
+    config.add_request_method(callable=lambda request:DBSession(),name='dbsession',property=True )
     add_routes(config)
     config.scan()
     return config.make_wsgi_app()

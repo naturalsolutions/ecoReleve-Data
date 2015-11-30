@@ -1,5 +1,21 @@
 from ..Models import Base,DBSession
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,select, and_, or_,distinct
+from sqlalchemy import (Column
+    , DateTime
+    , Float
+    , ForeignKey
+    , Index
+    , Integer
+    , Numeric
+    , String
+    , Text
+    , Unicode
+    , text
+    ,Sequence
+    ,select
+    , and_
+    , or_
+    ,distinct
+    ,asc)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
@@ -9,18 +25,18 @@ import transaction
 from operator import itemgetter
 from collections import OrderedDict
 from traceback import print_exc
+from pyramid import threadlocal
 
 
 Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt','float':'ValueFloat'}
 
 class ObjectWithDynProp:
     ''' Class to extend for mapped object with dynamic properties '''
-    ObjContext = DBSession
     PropDynValuesOfNow = {}
     allProp = None
-    
-    def __init__(self,ObjContext):
-        self.ObjContext = DBSession
+
+    def __init__(self,ObjContext=None):
+        self.ObjContext = threadlocal.get_current_request().dbsession
         self.PropDynValuesOfNow = {}
         self.GetAllProp()
 
@@ -37,7 +53,7 @@ class ObjectWithDynProp:
             if type_ :
                 result = type_.GetDynProps()
             else :
-                result = DBSession.execute(select([dynPropTable])).fetchall()
+                result = self.ObjContext.execute(select([dynPropTable])).fetchall()
             statProps = [{'name': statProp.key, 'type': statProp.type} for statProp in self.__table__.columns ]
             dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp}for dynProp in result]
             statProps.extend(dynProps)
@@ -46,7 +62,7 @@ class ObjectWithDynProp:
 
     def GetFrontModulesID (self,ModuleType) :
         if not hasattr(self,'FrontModules') :
-            self.FrontModules = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleType).one()
+            self.FrontModules = self.ObjContext.query(FrontModules).filter(FrontModules.Name==ModuleType).one()
         return self.FrontModules.ID
 
     def GetGridFields (self,ModuleType):
@@ -54,11 +70,11 @@ class ObjectWithDynProp:
         according to configuration in table ModuleGrids'''
         try:
             typeID = self.GetType().ID
-            gridFields = DBSession.query(ModuleGrids
+            gridFields = self.ObjContext.query(ModuleGrids
             ).filter(and_(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType),
                 or_(ModuleGrids.FK_TypeObj == typeID ,ModuleGrids.FK_TypeObj ==None ))).all()
         except:
-            gridFields = DBSession.query(ModuleGrids).filter(
+            gridFields = self.ObjContext.query(ModuleGrids).filter(
                 ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType) ).all()
 
         gridFields.sort(key=lambda x: str(x.GridOrder))
@@ -88,14 +104,14 @@ class ObjectWithDynProp:
         defaultFilters = []
         try:
             typeID = self.GetType().ID
-            filterFields = DBSession.query(ModuleGrids).filter(
+            filterFields = self.ObjContext.query(ModuleGrids).filter(
                 and_(
                     ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
                     , or_( ModuleGrids.TypeObj == typeID,ModuleGrids.TypeObj == None)
                     )).all()
         except :
-            filterFields = DBSession.query(ModuleGrids
-                ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()
+            filterFields = self.ObjContext.query(ModuleGrids
+                ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()  #.order_by(asc(ModuleGrids.FilterOrder)).all()
         for curConf in filterFields:
             curConfName = curConf.Name
             filterField = list(filter(lambda x : x['name'] == curConfName

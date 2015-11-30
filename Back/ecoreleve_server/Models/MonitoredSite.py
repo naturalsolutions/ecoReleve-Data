@@ -52,14 +52,18 @@ class MonitoredSite (Base,ObjectWithDynProp) :
     MonitoredSitePositions = relationship('MonitoredSitePosition',backref='MonitoredSite',cascade="all, delete-orphan")
     MonitoredSiteDynPropValues = relationship('MonitoredSiteDynPropValue',backref='MonitoredSite',cascade="all, delete-orphan")
 
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        ObjectWithDynProp.__init__(self)
+
     @orm.reconstructor
     def init_on_load(self):
         ''' init_on_load is called on the fetch of object '''
-        ObjectWithDynProp.__init__(self,DBSession)
+        ObjectWithDynProp.__init__(self)
 
     def GetNewValue(self,nameProp):
         ReturnedValue = MonitoredSiteDynPropValue()
-        ReturnedValue.MonitoredSiteDynProp = DBSession.query(MonitoredSiteDynProp).filter(MonitoredSiteDynProp.Name==nameProp).first()
+        ReturnedValue.MonitoredSiteDynProp = self.ObjContext.query(MonitoredSiteDynProp).filter(MonitoredSiteDynProp.Name==nameProp).first()
         return ReturnedValue
 
     def GetDynPropValues(self):
@@ -67,13 +71,13 @@ class MonitoredSite (Base,ObjectWithDynProp) :
 
     def GetDynProps(self,nameProp):
         print(nameProp)
-        return  DBSession.query(MonitoredSiteDynProp).filter(MonitoredSiteDynProp.Name==nameProp).one()
+        return  self.ObjContext.query(MonitoredSiteDynProp).filter(MonitoredSiteDynProp.Name==nameProp).one()
 
     def GetType(self):
         if self.MonitoredSiteType != None :
             return self.MonitoredSiteType
         else :
-            return DBSession.query(MonitoredSiteType).get(self.FK_MonitoredSiteType)
+            return self.ObjContext.query(MonitoredSiteType).get(self.FK_MonitoredSiteType)
 
     def GetAllProp(self):
         props = super(MonitoredSite,self).GetAllProp()
@@ -84,7 +88,7 @@ class MonitoredSite (Base,ObjectWithDynProp) :
         query = select([MonitoredSitePosition]
             ).where(and_(MonitoredSitePosition.FK_MonitoredSite == self.ID,MonitoredSitePosition.StartDate <= date_)
             ).order_by(desc(MonitoredSitePosition.StartDate)).limit(1)
-        curPos = dict(DBSession.execute(query).fetchone())
+        curPos = dict(self.ObjContext.execute(query).fetchone())
         return curPos
 
     def LoadNowValues(self):

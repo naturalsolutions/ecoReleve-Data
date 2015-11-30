@@ -13,6 +13,7 @@ from ..utils import Eval
 import pandas as pd
 import json
 from traceback import print_exc
+from pyramid import threadlocal
 
 
 eval_ = Eval()
@@ -20,7 +21,7 @@ eval_ = Eval()
 class ListObjectWithDynProp():
     ''' This class is used to filter Object with dyn props over all properties '''
     def __init__(self,ObjWithDynProp, frontModule, history = False, View = None):
-        self.ObjContext = DBSession
+        self.ObjContext = threadlocal.get_current_request().dbsession
         self.ListPropDynValuesOfNow = {}
         self.ObjWithDynProp = ObjWithDynProp
         self.DynPropList = self.GetDynPropList()
@@ -106,7 +107,7 @@ class ListObjectWithDynProp():
         ''' Retrieve all dynamic properties of object ''' 
         DynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
         query = select([DynPropTable]) #.where(DynPropTable.c['Name'] == dynPropName)
-        result  = DBSession.execute(query).fetchall()
+        result  = self.ObjContext.execute(query).fetchall()
 
         if result == []:
             df = None
@@ -201,7 +202,7 @@ class ListObjectWithDynProp():
     def GetFlatDataList(self,searchInfo=None) :
         ''' Main function to call : return filtered (paged) ordered flat data list according to filter parameters'''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
-        result = DBSession.execute(fullQueryJoinOrdered).fetchall()
+        result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
         data = []
         for row in result :
             row = OrderedDict(row)
@@ -215,7 +216,7 @@ class ListObjectWithDynProp():
         else:
             criteria = searchInfo['criteria'] 
         query = self.countQuery(criteria)
-        count = DBSession.execute(query).scalar()
+        count = self.ObjContext.execute(query).scalar()
         return count
 
     def countQuery(self,criteria = None):

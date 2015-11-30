@@ -23,6 +23,7 @@ def asInt(str):
 @view_config(route_name= 'autocomplete', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
 def autocomplete (request):
     objName = dictObj[request.matchdict['obj']]
+    session = request.dbsession
     criteria = request.params['term']
     prop = asInt(request.matchdict['prop'])
 
@@ -36,4 +37,4 @@ def autocomplete (request):
         query = select([table.c[prop].label('value'),table.c[prop].label('label')])
         query = query.where(table.c[prop].like('%'+criteria+'%')).order_by(asc(table.c[prop]))
 
-    return [dict(row) for row in DBSession.execute(query).fetchall()]
+    return [dict(row) for row in session.execute(query).fetchall()]
