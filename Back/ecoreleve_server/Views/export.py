@@ -14,22 +14,25 @@ route_prefix = 'export/'
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=route_prefix+'themes', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
 def getListThemeEtude(request):
+    session = request.dbsession
     th = Base.metadata.tables['ThemeEtude']
     query = select([th.c['ID'],th.c['Caption']])
-    result = [dict(row) for row in DBSession.execute(query).fetchall()]
+    result = [dict(row) for row in session.execute(query).fetchall()]
 
     return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=route_prefix+'themes/id/views', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
 def getListViews(request):
+    session = request.dbsession
+
     theme_id = int(request.matchdict['id'])
 
     vi = Base.metadata.tables['Views']
     t_v = Base.metadata.tables['Theme_View']
     joinTable = join(vi,t_v,vi.c['ID'] == t_v.c['FK_View'])
     query = select(vi.c).select_from(joinTable).where(t_v.c['FK_Theme'] == theme_id)
-    result = [dict(row) for row in DBSession.execute(query).fetchall()]
+    result = [dict(row) for row in session.execute(query).fetchall()]
 
     return result
 
@@ -44,20 +47,26 @@ def actionList(request):
     return dictActionFunc[actionName](request)
 
 def getFields(request):
+    session = request.dbsession
+
     viewId = request.matchdict['id']
     table = Base.metadata.tables['Views']
-    viewName = DBSession.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
+    viewName = session.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
     gene = Generator(viewName)
     return gene.get_col()
 
 def getFilters(request):
+    session = request.dbsession
+
     viewId = request.matchdict['id']
     table = Base.metadata.tables['Views']
-    viewName = DBSession.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
+    viewName = session.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
     gene = Generator(viewName)
     return gene.get_filters()
 
 def count_(request):
+    session = request.dbsession
+
     data = request.params.mixed()
     if 'criteria' in data: 
         criteria = json.loads(data['criteria'])
@@ -65,17 +74,19 @@ def count_(request):
         criteria = {}
 
     table = Base.metadata.tables['Views']
-    viewName = DBSession.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
+    viewName = session.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
     gene = Generator(viewName)
     count = gene.count_(criteria)
     return count
 
 @view_config(route_name=route_prefix+'views/id', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
 def search(request):
+    session = request.dbsession
+
 
     viewId = request.matchdict['id']
     table = Base.metadata.tables['Views']
-    viewName = DBSession.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
+    viewName = session.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
 
     data = request.params.mixed()
     if 'criteria' in data: 
@@ -96,6 +107,8 @@ def search(request):
 
 @view_config(route_name=route_prefix+'views/getFile', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
 def views_filter_export(request):
+    session = request.dbsession
+    
     try:
 
         function_export= { 'csv': export_csv, 'pdf': export_pdf, 'gpx': export_gpx }
@@ -105,7 +118,7 @@ def views_filter_export(request):
         viewId = criteria['viewId']
         
         views = Base.metadata.tables['Views']
-        viewName = DBSession.execute(select([views.c['Relation']])).scalar()
+        viewName = session.execute(select([views.c['Relation']])).scalar()
 
         table = Base.metadata.tables[viewName]
         fileType= criteria['fileType']
@@ -127,7 +140,7 @@ def views_filter_export(request):
 
         gene = Generator(viewName)
         query = gene.getFullQuery(criteria['filters'],columnsList=coll)
-        rows = DBSession.execute(query).fetchall()
+        rows = session.execute(query).fetchall()
 
         filename = viewName+'.'+fileType
         request.response.content_disposition = 'attachment;filename=' + filename

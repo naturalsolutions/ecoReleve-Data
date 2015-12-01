@@ -1,6 +1,5 @@
 from pyramid.view import view_config
 from ..Models import (
-    DBSession,
     Observation,
     ProtocoleType,
     FieldActivity_ProtocoleType,
@@ -17,8 +16,6 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from collections import OrderedDict
 from traceback import print_exc
 
-
-
 prefixProt = 'protocols'
 prefix = 'stations'
 
@@ -26,12 +23,14 @@ prefix = 'stations'
 @view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def GetProtocolsofStation (request) :
+    session = request.dbsession
+
     sta_id = request.matchdict['id']
     data = {}
     searchInfo = {}
     criteria = [{'Column': 'FK_Station', 'Operator':'=','Value':sta_id}]
     response = []
-    curSta = DBSession.query(Station).get(sta_id)
+    curSta = session.query(Station).get(sta_id)
     try : 
         if 'criteria' in request.params or request.params == {} :
             print (' ********************** criteria params ==> Search ****************** ')
@@ -39,7 +38,7 @@ def GetProtocolsofStation (request) :
             searchInfo = data
             searchInfo['criteria'] = []
             searchInfo['criteria'].extend(criteria)
-            listObs = ListObjectWithDynProp(DBSession,Observation,searchInfo)
+            listObs = ListObjectWithDynProp(session,Observation,searchInfo)
             response = listObs.GetFlatList()
     except : 
         pass
@@ -48,10 +47,10 @@ def GetProtocolsofStation (request) :
             print (' ********************** Forms in params ==> DATA + FORMS ****************** ')
             ModuleName = 'ObservationForm'
 
-            listObs = list(DBSession.query(Observation).filter(and_(Observation.FK_Station == sta_id,Observation.Parent_Observation == None)))
-            listType =list(DBSession.query(FieldActivity_ProtocoleType
+            listObs = list(session.query(Observation).filter(and_(Observation.FK_Station == sta_id,Observation.Parent_Observation == None)))
+            listType =list(session.query(FieldActivity_ProtocoleType
                 ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
-            Conf = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleName ).first()
+            Conf = session.query(FrontModules).filter(FrontModules.Name == ModuleName ).first()
             ### TODO : if protocols exists, append the new protocol form at the after : 2 loops, no choice
             if listObs or listType:
                 # max_iter = max(len(listObs),len(listType))
@@ -112,15 +111,17 @@ def GetProtocolsofStation (request) :
 @view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST')
 @view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'POST')
 def insertNewProtocol (request) :
+    session = request.dbsession
+
     data = {}
     for items , value in request.json_body.items() :
         if value != "" and value != []:
             data[items] = value
 
     data['FK_Station'] = request.matchdict['id']
-    sta = DBSession.query(Station).get(request.matchdict['id'])
+    sta = session.query(Station).get(request.matchdict['id'])
     newProto = Observation(FK_ProtocoleType = data['FK_ProtocoleType'])    #,FK_Station=data['FK_Station'])
-    newProto.ProtocoleType = DBSession.query(ProtocoleType).filter(ProtocoleType.ID==data['FK_ProtocoleType']).first()
+    newProto.ProtocoleType = session.query(ProtocoleType).filter(ProtocoleType.ID==data['FK_ProtocoleType']).first()
     listOfSubProtocols = []
     for items , value in data.items() :
         if isinstance(value,list) and items != 'children':
@@ -137,8 +138,8 @@ def insertNewProtocol (request) :
     newProto.UpdateFromJson(data)
     try : 
         newProto.Station = sta
-        DBSession.add(newProto)
-        DBSession.flush()
+        session.add(newProto)
+        session.flush()
         message = {'id': newProto.ID}
     except ErrorAvailable as e :
         print ('\n\n\n\n ECXPXPCPSPSDPSDPSDd')
@@ -153,10 +154,12 @@ def insertNewProtocol (request) :
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'PUT')
 def updateObservation(request):
+    session = request.dbsession
+
     print('*********************** UPDATE Observation *****************')
     data = request.json_body
     id_obs = request.matchdict['obs_id']
-    curObs = DBSession.query(Observation).get(id_obs)
+    curObs = session.query(Observation).get(id_obs)
     curObs.LoadNowValues()
     listOfSubProtocols = []
     subObsList = []
@@ -175,7 +178,7 @@ def updateObservation(request):
     except ErrorAvailable as e :
         print ('\n\n\n\n ECXPXPCPSPSDPSDPSDd')
         print(e.value)
-        # DBSession.rollback()
+        # session.rollback()
         request.response.status_code = 510
         message = e.value
     # transaction.commit()
@@ -184,21 +187,25 @@ def updateObservation(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'DELETE')
 def deleteObservation(request):
+    session = request.dbsession
+
     print('*********************** DELETE Observation *****************')
     id_obs = request.matchdict['obs_id']
-    curObs = DBSession.query(Observation).get(id_obs)
-    DBSession.delete(curObs)
+    curObs = session.query(Observation).get(id_obs)
+    session.delete(curObs)
     transaction.commit()
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getObservation(request):
+    session = request.dbsession
+
     print('*********************** GET Observation *****************')
     id_obs = request.matchdict['obs_id']
     id_sta = request.matchdict['id']
     try :
-        curObs = DBSession.query(Observation).filter(and_(Observation.ID ==id_obs, Observation.FK_Station == id_sta )).one()
+        curObs = session.query(Observation).filter(and_(Observation.ID ==id_obs, Observation.FK_Station == id_sta )).one()
         curObs.LoadNowValues()
         # if Form value exists in request --> return data with schema else return only data
         if 'FormName' in request.params :
@@ -208,7 +215,7 @@ def getObservation(request):
             except : 
                 DisplayMode = 'display'
 
-            Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='ObservationForm' ).first()
+            Conf = session.query(FrontModules).filter(FrontModules.Name=='ObservationForm' ).first()
             response = curObs.GetDTOWithSchema(Conf,DisplayMode)
         else : 
             response  = curObs.GetFlatObject()
@@ -221,6 +228,8 @@ def getObservation(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnObs(request):
+    session = request.dbsession
+
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     'count' : countObs,
@@ -232,15 +241,19 @@ def actionOnObs(request):
     return dictActionFunc[actionName](request)
 
 def countObs (request) :
+    session = request.dbsession
+
 #   ## TODO count stations
     return
 
 def getObsForms(request) :
+    session = request.dbsession
+
     typeObs = request.params['ObjectType']
     sta_id = request.matchdict['id']
     print('***************** GET FORMS ***********************')
     ModuleName = 'ObservationForm'
-    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
+    Conf = session.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newObs = Observation(FK_ProtocoleType = typeObs, FK_Station = sta_id)
     newObs.init_on_load()
     schema = newObs.GetDTOWithSchema(Conf,'edit')
@@ -249,12 +262,16 @@ def getObsForms(request) :
     return schema
 
 def getObsFields(request) :
+    session = request.dbsession
+
 #     ## TODO return fields Station
     return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefixProt, renderer='json', request_method = 'PUT')
 def updateListProtocols(request):
+    session = request.dbsession
+
     # TODO 
     # update a list of protocols 
     return
@@ -262,6 +279,8 @@ def updateListProtocols(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefixProt, renderer='json', request_method = 'POST')
 def insertProtocols(request):
+    session = request.dbsession
+
     return insertNewProtocol (request)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -286,8 +305,10 @@ def actionOnProtocols(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefixProt + '/id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getProtocol (request):
+    session = request.dbsession
+
     id = request.matchdict['id']
-    curProt = DBSession.query(Observation).get(id)
+    curProt = session.query(Observation).get(id)
     curProt.LoadNowValues()
     # if Form value exists in request --> return data with schema else return only data
     if 'FormName' in request.params :
@@ -296,7 +317,7 @@ def getProtocol (request):
             DisplayMode = request.params['DisplayMode']
         except : 
             DisplayMode = 'display'
-        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='ObservationForm' ).first()
+        Conf = session.query(FrontModules).filter(FrontModules.Name=='ObservationForm' ).first()
         curProt.LoadNowValues()
         response = curProt.GetDTOWithSchema(Conf,DisplayMode)
     else : 
@@ -306,8 +327,10 @@ def getProtocol (request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= 'fieldActivity', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getFieldActivityList (request) :
+    session = request.dbsession
+
     query = select([fieldActivity.ID.label('value'), fieldActivity.Name.label('label')])
-    result = DBSession.execute(query).fetchall()
+    result = session.execute(query).fetchall()
     res = []
     for row in result :
         res.append({'label':row['label'], 'value': row['value']})
@@ -316,6 +339,8 @@ def getFieldActivityList (request) :
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= 'protocolTypes', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getListofProtocolTypes (request):
+    session = request.dbsession
+
     if 'FieldActivityID' in request.params :
         fieldActivityID = request.params['FieldActivityID']
         join_table = join(ProtocoleType,FieldActivity_ProtocoleType,ProtocoleType.ID == FieldActivity_ProtocoleType.FK_ProtocoleType )
@@ -324,7 +349,7 @@ def getListofProtocolTypes (request):
             ).select_from(join_table)
     else : 
         query = select([ProtocoleType.ID, ProtocoleType.Name]).where(ProtocoleType.Status == 4)
-    result = DBSession.execute(query).fetchall()
+    result = session.execute(query).fetchall()
     print('********* protocoles types ******************')
     res = []
     for row in result:

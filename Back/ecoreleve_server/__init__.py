@@ -21,7 +21,8 @@ from .Models import (
     dbConfig,
     Station,
     Observation,
-    Sensor
+    Sensor,
+    setup_post_request
     )
 from .GenericObjets import *
 from .Views import add_routes
@@ -31,6 +32,7 @@ from .pyramid_jwtauth import (
     JWTAuthenticationPolicy,
     includeme
     )
+from pyramid.events import NewRequest
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects."""
@@ -67,6 +69,7 @@ def main(global_config, **settings):
 
     config = Configurator(settings=settings)
     # Add renderer for datetime objects
+    config.include('pyramid_tm')
     json_renderer = JSON()
     json_renderer.add_adapter(datetime.datetime, datetime_adapter)
     json_renderer.add_adapter(datetime.date, datetime_adapter)
@@ -84,7 +87,8 @@ def main(global_config, **settings):
 
     # Set the default permission level to 'read'
     config.set_default_permission('read')
-    config.include('pyramid_tm')
+    config.add_request_method(callable=lambda request:DBSession(),name='dbsession',property=True )
+    config.add_subscriber(setup_post_request,NewRequest)
     add_routes(config)
     config.scan()
     return config.make_wsgi_app()

@@ -1,6 +1,5 @@
 from pyramid.view import view_config
 from ..Models import (
-    DBSession,
     Sensor,
     SensorType,
     SensorDynPropValue,
@@ -49,7 +48,9 @@ def actionOnSensors(request):
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
 
-def count_ (request = None,listObj = None) :
+def count_ (request = None,listObj = None):
+    session = request.dbsession
+
     print('*****************  Sensor COUNT***********************')
     if request is not None : 
         data = request.params
@@ -76,10 +77,12 @@ def getFilters (request):
     return filters
 
 def getForms(request) :
+    session = request.dbsession
+
     typeSensor = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
     ModuleName = 'SensorForm'
-    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
+    Conf = session.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newSensor = Sensor(FK_SensorType = typeSensor)
     newSensor.init_on_load()
     schema = newSensor.GetDTOWithSchema(Conf,'edit')
@@ -87,6 +90,7 @@ def getForms(request) :
     return schema
 
 def getFields(request) :
+    session = request.dbsession
 
     ModuleType = request.params['name']
     if ModuleType == 'default' :
@@ -96,35 +100,43 @@ def getFields(request) :
     return cols
 
 def getSensorModels(request):
+    session = request.dbsession
+
     sensorType = request.params['sensorType']
     query = select([distinct(Sensor.Model)]).where(Sensor.FK_SensorType == sensorType)
-    response = getData(query)
+    response = getData(query,session)
     transaction.commit()
     return response
 
 def getCompany (request):
+    session = request.dbsession
+
     sensorType = request.params['sensorType']
     query = select([distinct(Sensor.Compagny)]).where(Sensor.FK_SensorType == sensorType)
-    response = getData(query)
+    response = getData(query,session)
     transaction.commit()
     return response
 
 def getSerialNumber (request):
+    session = request.dbsession
+
     sensorType = request.params['sensorType']
     query = select([distinct(Sensor.SerialNumber)]).where(Sensor.FK_SensorType == sensorType)
-    response = getData(query)
+    response = getData(query,session)
     transaction.commit()
     return response
 
 def getUnicIdentifier (request):
+    session = request.dbsession
+
     sensorType = request.params['sensorType']
     query = select([Sensor.UnicIdentifier.label('label'),Sensor.ID.label('val')]).where(Sensor.FK_SensorType == sensorType)
-    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    response = [ OrderedDict(row) for row in session.execute(query).fetchall()]
     transaction.commit()
     return response
 
-def getData(query):
-    result = DBSession.execute(query).fetchall()
+def getData(query,session):
+    result = session.execute(query).fetchall()
     response = []
     for row in result:
         curRow = OrderedDict(row)
@@ -136,17 +148,21 @@ def getData(query):
     return response
 
 def getSensorType(request):
+    session = request.dbsession
+
     query = select([SensorType.ID.label('val'), SensorType.Name.label('label')])
-    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    response = [ OrderedDict(row) for row in session.execute(query).fetchall()]
     transaction.commit()
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getSensor(request):
+    session = request.dbsession
+
     print('***************** GET Sensor ***********************')
     id = request.matchdict['id']
-    curSensor = DBSession.query(Sensor).get(id)
+    curSensor = session.query(Sensor).get(id)
     curSensor.LoadNowValues()
 
     # if Form value exists in request --> return data with schema else return only data
@@ -156,7 +172,7 @@ def getSensor(request):
             DisplayMode = request.params['DisplayMode']
         except : 
             DisplayMode = 'display'
-        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='SensorForm').first()
+        Conf = session.query(FrontModules).filter(FrontModules.Name=='SensorForm').first()
         response = curSensor.GetDTOWithSchema(Conf,DisplayMode)
     elif 'geo' in request.params :
         geoJson=[]
@@ -170,12 +186,14 @@ def getSensor(request):
 
 @view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getSensorHistory(request):
+    session = request.dbsession
+
     print('sensor history******************')
     id = request.matchdict['id']
     joinTable = outerjoin(Equipment,Individual,Equipment.FK_Individual==Individual.ID).outerjoin(MonitoredSite,Equipment.FK_MonitoredSite==MonitoredSite.ID)
     query = select([Equipment.ID, Individual.UnicIdentifier, MonitoredSite.Name, Equipment.StartDate, Equipment.Deploy,Equipment.FK_MonitoredSite,Equipment.FK_Individual]
         ).select_from(joinTable).where(Equipment.FK_Sensor == id).order_by(desc(Equipment.StartDate))
-    result = DBSession.execute(query).fetchall()
+    result = session.execute(query).fetchall()
     response = []
     for row in result:
         curRow = OrderedDict(row)
@@ -190,19 +208,23 @@ def getSensorHistory(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
 def deleteSensor(request):
+    session = request.dbsession
+
     id_ = request.matchdict['id']
-    curSensor = DBSession.query(Sensor).get(id_)
-    DBSession.delete(Sensor)
+    curSensor = session.query(Sensor).get(id_)
+    session.delete(Sensor)
     transaction.commit()
     return True
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateSensor(request):
+    session = request.dbsession
+
     print('*********************** UPDATE Sensor *****************')
     data = request.json_body
     id = request.matchdict['id']
-    curSensor = DBSession.query(Sensor).get(id)
+    curSensor = session.query(Sensor).get(id)
     curSensor.LoadNowValues()
     curSensor.UpdateFromJson(data)
     transaction.commit()
@@ -223,6 +245,8 @@ def insertSensor(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewSensor (request) :
+    session = request.dbsession
+
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
@@ -234,18 +258,20 @@ def insertOneNewSensor (request) :
     sensorType = int(data['FK_SensorType'])
     newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now())
 
-    newSensor.SensorType = DBSession.query(SensorType).filter(SensorType.ID== sensorType).first()
+    newSensor.SensorType = session.query(SensorType).filter(SensorType.ID== sensorType).first()
     newSensor.init_on_load()
     newSensor.UpdateFromJson(data)
     print (newSensor.__dict__)
-    DBSession.add(newSensor)
-    DBSession.flush()
+    session.add(newSensor)
+    session.flush()
     # transaction.commit()
     return {'ID': newSensor.ID}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchSensor(request):
+    session = request.dbsession
+
     data = request.params.mixed()
     print('*********data*************')
     print(data)
@@ -261,7 +287,7 @@ def searchSensor(request):
     searchInfo['per_page'] = json.loads(data['per_page'])
 
     ModuleType = 'SensorFilter'
-    moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     print('**criteria********' )
     print(searchInfo['criteria'])
 
@@ -276,6 +302,8 @@ def searchSensor(request):
 
 @view_config(route_name=prefix + '/export', renderer='csv', request_method='POST', permission = NO_PERMISSION_REQUIRED)
 def sensors_export(request):
+    session = request.dbsession
+
     print('**************************** export ********')
     query = select(Sensor.__table__.c)
     criteria = request.json_body.get('criteria', {})
@@ -293,7 +321,7 @@ def sensors_export(request):
                 query = query.where(Sensor.__table__.c[ele['Column']] != ele['Value'])
 
     # Run query
-    data = DBSession.execute(query).fetchall()
+    data = session.execute(query).fetchall()
     header = [col.name for col in Sensor.__table__.c]
     rows = [[val for val in row] for row in data]
     

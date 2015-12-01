@@ -63,7 +63,7 @@ class StationList(ListObjectWithDynProp):
     def GetFlatDataList(self,searchInfo=None,getFieldWorkers=True) :
         ''' Override parent function to include management of Observation/Protocols and fieldWorkers '''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
-        result = DBSession.execute(fullQueryJoinOrdered).fetchall()
+        result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
         data = []
 
         if getFieldWorkers:
@@ -72,7 +72,7 @@ class StationList(ListObjectWithDynProp):
             query = select(
                 [Station_FieldWorker.FK_Station,User.Login]).select_from(joinTable).where(
                 Station_FieldWorker.FK_Station.in_(listID))
-            FieldWorkers = DBSession.execute(query).fetchall()
+            FieldWorkers = self.ObjContext.execute(query).fetchall()
         
             list_ = {}
             for x,y in FieldWorkers :
