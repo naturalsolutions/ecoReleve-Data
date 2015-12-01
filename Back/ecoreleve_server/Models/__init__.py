@@ -23,6 +23,12 @@ DynPropNames = {
     }
 }
 
+def remove_session(request):
+    DBSession.remove()
+
+def setup_post_request(event):
+    event.request.add_finished_callback(remove_session)
+
 from .Protocoles import *
 from .User import User
 from .Station import * 

@@ -4,6 +4,7 @@ import json,transaction
 from ..Models import Base, DBSession
 from collections import OrderedDict
 from .eval import Eval
+from .datetime import parse
 import re
 
 
@@ -97,9 +98,12 @@ class Generator :
         for obj in criteria:
             if obj['Value'] != None and obj['Value']!='':
                 try:
-                    Col=dictio[key]
-                except: 
                     Col=obj['Column']
+                    typeCol = str(self.table.c[Col].type).split('(')[0]
+                    if 'date' in typeCol.lower() : 
+                        obj['Value'] = parse(obj['Value'].replace(' ',''))
+                except: 
+                    Col=dictio[key]
                 query=self.where_(query,Col, obj['Operator'], obj['Value'])
         return query
 

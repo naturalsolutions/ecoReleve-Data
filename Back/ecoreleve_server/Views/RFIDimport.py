@@ -15,6 +15,8 @@ from collections import OrderedDict
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 def uploadFileRFID(request):
+    session = request.dbsession
+    
     data = []
     message = ""
     field_label = []
@@ -123,7 +125,7 @@ def uploadFileRFID(request):
         Rfids = [{Rfid.creator.name: crea, Rfid.FK_Sensor.name: idMod, Rfid.checked.name: '0',
                 Rfid.chip_code.name: c, Rfid.date_.name: d, Rfid.creation_date.name: now} for crea, idMod, c, d  in Rfids]
         # Insert data.
-        DBSession.execute(insert(Rfid), Rfids)
+        session.execute(insert(Rfid), Rfids)
         message = {'inserted':len(Rfids)}
         return message
         # Check if there are unknown chip codes.

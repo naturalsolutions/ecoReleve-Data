@@ -9,7 +9,7 @@ from ..utils.data_toXML import data_to_XML
 import pandas as pd
 import numpy as np
 import transaction, time, signal
-
+import getpass
 from ..utils.distance import haversine
 import win32con, win32gui, win32ui, win32service, os, time, re
 from win32 import win32api
@@ -20,10 +20,11 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from datetime import datetime
 from ..Models import ArgosGps,ArgosEngineering,DBSession, dbConfig
 import itertools
-
+from pyramid import threadlocal
 
 def uploadFileArgos(request) :
-    import getpass
+    session = request.dbsession
+
     username =  getpass.getuser()
     workDir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     tmp_path = os.path.join(workDir, "ecoReleve_import")
@@ -51,12 +52,11 @@ def uploadFileArgos(request) :
     os.rename(temp_file_path, full_filename)
 
     if 'DIAG' in filename :
-        return parseDIAGFileAndInsert(full_filename)
+        return parseDIAGFileAndInsert(full_filename,session)
     elif 'DS' in filename :
-        return parseDSFileAndInsert(full_filename)
+        return parseDSFileAndInsert(full_filename,session)
 
-def parseDSFileAndInsert(full_filename):
-    import getpass
+def parseDSFileAndInsert(full_filename,session):
     username =  getpass.getuser()
     workDir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     con_file = os.path.join(workDir,'init.txt')
@@ -133,27 +133,27 @@ def parseDSFileAndInsert(full_filename):
                 EngData = tempEng
 
     if EngData is not None : 
-        EngToInsert = checkExistingEng(EngData)
+        EngToInsert = checkExistingEng(EngData,session)
         # dataEng_to_insert = json.loads(EngToInsert.to_json(orient='records',date_format='iso'))
         if EngToInsert.shape[0] != 0 :
             # stmt = ArgosEngineering.__table__.insert()#.values(dataGPS_to_insert[0:2])
             # res = DBSession.execute(stmt,dataEng_to_insert)
-            EngToInsert.to_sql(ArgosEngineering.__table__.name, DBSession.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'],index=False )
+            EngToInsert.to_sql(ArgosEngineering.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'],index=False )
 
     if GPSData is not None :
         GPSData = GPSData.replace(["neg alt"],[-999])
-        DFToInsert = checkExistingGPS(GPSData)
+        DFToInsert = checkExistingGPS(GPSData,session)
         # dataGPS_to_insert = json.loads(DFToInsert.to_json(orient='records',date_format='iso'))
         if DFToInsert.shape[0] != 0 :
             # stmt = ArgosGps.__table__.insert()#.values(dataGPS_to_insert[0:2])
             # res = DBSession.execute(stmt,dataGPS_to_insert)
-            DFToInsert.to_sql(ArgosGps.__table__.name, DBSession.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'], index=False)
+            DFToInsert.to_sql(ArgosGps.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'], index=False)
             nb_gps_data = DFToInsert.shape[0]
     os.remove(full_filename)
     shutil.rmtree(out_path)
     return nb_gps_data
 
-def checkExistingEng(EngData) :
+def checkExistingEng(EngData,session) :
     EngData['id'] = range(EngData.shape[0])
     EngData = EngData.dropna()
     try :
@@ -162,7 +162,7 @@ def checkExistingEng(EngData) :
         minDate =  EngData['pttDate'].min()
         queryEng = select([ArgosEngineering.fk_ptt, ArgosEngineering.pttDate, ArgosEngineering.txDate])
         queryEng = queryEng.where(and_(ArgosEngineering.pttDate >= minDate , ArgosEngineering.pttDate <= maxDate))
-        data = DBSession.execute(queryEng).fetchall()
+        data = session.execute(queryEng).fetchall()
 
         EngRecords = pd.DataFrame.from_records(data
             ,columns=[ArgosEngineering.fk_ptt.name, ArgosEngineering.pttDate.name, ArgosEngineering.txDate.name])
@@ -176,7 +176,7 @@ def checkExistingEng(EngData) :
         DFToInsert = pd.DataFrame()
     return DFToInsert
 
-def checkExistingGPS (GPSData) :
+def checkExistingGPS (GPSData,session) :
     GPSData['datetime'] = GPSData.apply(lambda row: np.datetime64(row['Date/Time']).astype(datetime), axis=1)
     GPSData['id'] = range(GPSData.shape[0])
     maxDateGPS = GPSData['datetime'].max()
@@ -186,7 +186,7 @@ def checkExistingGPS (GPSData) :
 
     queryGPS = select([ArgosGps.pk_id, ArgosGps.date, ArgosGps.lat, ArgosGps.lon, ArgosGps.ptt]).where(ArgosGps.type_ == 'gps')
     queryGPS = queryGPS.where(and_(ArgosGps.date >= minDateGPS , ArgosGps.date <= maxDateGPS))
-    data = DBSession.execute(queryGPS).fetchall()
+    data = session.execute(queryGPS).fetchall()
 
     GPSrecords = pd.DataFrame.from_records(data
         ,columns=[ArgosGps.pk_id.name, ArgosGps.date.name, ArgosGps.lat.name, ArgosGps.lon.name, ArgosGps.ptt.name]
@@ -209,7 +209,7 @@ def checkExistingGPS (GPSData) :
 
     return DFToInsert
 
-def parseDIAGFileAndInsert(full_filename):
+def parseDIAGFileAndInsert(full_filename,session):
     with open(full_filename,'r') as f:
         content = f.read()
         content = re.sub('\s+Prog+\s\d{5}',"",content)
@@ -268,7 +268,7 @@ def parseDIAGFileAndInsert(full_filename):
 
     df = pd.DataFrame.from_dict(ListOfdictParams)
     df = df.dropna(subset=['date'])
-    DFToInsert = checkExistingArgos(df)
+    DFToInsert = checkExistingArgos(df,session)
     DFToInsert.loc[:,('type')]=list(itertools.repeat('arg',len(DFToInsert.index)))
     DFToInsert.loc[:,('checked')]=list(itertools.repeat(0,len(DFToInsert.index)))
     DFToInsert.loc[:,('imported')]=list(itertools.repeat(0,len(DFToInsert.index)))
@@ -278,11 +278,11 @@ def parseDIAGFileAndInsert(full_filename):
     if DFToInsert.shape[0] != 0 :
         # stmt = ArgosGps.__table__.insert()#.values(data_to_insert[0:2])
         # res = DBSession.execute(stmt,data_to_insert)
-        DFToInsert.to_sql(ArgosGps.__table__.name, DBSession.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'],index=False)
+        DFToInsert.to_sql(ArgosGps.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'],index=False)
     os.remove(full_filename)
     return DFToInsert.shape[0]
 
-def checkExistingArgos (dfToCheck) :
+def checkExistingArgos (dfToCheck,session) :
     dfToCheck['id'] = range(dfToCheck.shape[0])
     dfToCheck.loc[:,('lat')] = dfToCheck['lat1'].astype(float)
     dfToCheck.loc[:,('lon')] = dfToCheck['lon1'].astype(float)
@@ -291,7 +291,7 @@ def checkExistingArgos (dfToCheck) :
 
     queryArgos = select([ArgosGps.pk_id, ArgosGps.date, ArgosGps.lat, ArgosGps.lon, ArgosGps.ptt]).where(ArgosGps.type_ == 'arg')
     queryArgos = queryArgos.where(and_(ArgosGps.date >= minDate , ArgosGps.date <= maxDate))
-    data = DBSession.execute(queryArgos).fetchall()
+    data = session.execute(queryArgos).fetchall()
 
     ArgosRecords = pd.DataFrame.from_records(data
         ,columns=[ArgosGps.pk_id.name, ArgosGps.date.name, ArgosGps.lat.name, ArgosGps.lon.name, ArgosGps.ptt.name]
