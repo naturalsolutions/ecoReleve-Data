@@ -2,7 +2,7 @@ define([
     'underscore',
     'jquery',
     'backbone',
-    'backbone_forms',
+    'backbone-forms',
     'config',
     'jqueryui',
 ], function(_, $, Backbone, Form, config

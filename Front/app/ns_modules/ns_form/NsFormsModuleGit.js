@@ -3,7 +3,7 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'backbone_forms',
+  'backbone-forms',
   'sweetAlert',
   'requirejs-text!./Templates/NsFormsModule.html',
   'fancytree',

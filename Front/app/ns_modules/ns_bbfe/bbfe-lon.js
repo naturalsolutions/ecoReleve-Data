@@ -2,7 +2,7 @@ define([
  'underscore',
  'jquery',
  'backbone',
- 'backbone_forms',
+ 'backbone-forms',
 ], function (
  _, $, Backbone, Form) {
     'use strict';

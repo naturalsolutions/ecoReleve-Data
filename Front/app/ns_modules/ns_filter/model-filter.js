@@ -2,7 +2,7 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  'backbone_forms',
+  'backbone-forms',
   'moment',
   'requirejs-text!./Templates/tpl-filters.html',
   'requirejs-text!./Templates/tpl-CheckBoxes.html',

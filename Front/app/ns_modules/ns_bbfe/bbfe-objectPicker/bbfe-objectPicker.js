@@ -9,7 +9,7 @@ define([
   'ns_modules/ns_com',
   'ns_grid/model-grid',
   'ns_filter/model-filter',
-  'backbone_forms',
+  'backbone-forms',
   'requirejs-text!./tpl-bbfe-objectPicker.html',
   'objects/layouts/lyt-objects-new'
 ], function(
