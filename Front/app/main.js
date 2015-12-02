@@ -28,7 +28,7 @@ require.config({
 
     /*==========  Bower  ==========*/
     'jquery': '../bower_components/jquery/jquery',
-    'jqueryui': '../bower_components/jqueryui/jquery-ui.min',
+    'jqueryui': '../bower_components/jqueryui/jquery-ui',
     'underscore': '../bower_components/underscore/underscore',
     'backbone': '../bower_components/backbone/backbone',
     'marionette': '../bower_components/marionette/lib/core/backbone.marionette',
@@ -55,9 +55,6 @@ require.config({
     'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
     'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
 
-    //2remove
-    'fuelux': '../bower_components/fuelux/dist/js/fuelux',
-    'swiper': '../bower_components/swiper/dist/js/swiper',
 
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
@@ -73,7 +70,7 @@ require.config({
       exports: '$'
     },
     jqueryui: {
-      exports: 'ui'
+      exports: '$.ui'
     },
     underscore: {
       exports: '_'
@@ -131,10 +128,7 @@ require.config({
     leaflet: {
       exports: 'L'
     },
-    swiper: {
-      exports: 'Swiper'
-    },
-    fancytree:  {
+    fancytree: {
       deps: ['jquery','jqueryui'],
       exports: 'Fancytree'
     },
@@ -142,17 +136,13 @@ require.config({
       deps: ['fancytree'],
       exports: 'autocompTree'
     },
-    fuelux: {
-      deps: ['jquery','bootstrap'],
-      exports: 'Fuelux'
-    },
     dropzone: {
       deps: ['jquery'],
       exports: 'Dropzone'
     },
     i18n: {
       deps: ['jquery'],
-      exports: '$'
+      exports: 'i18n'
     },
     floatThead: {
       deps: ['backgrid'],
@@ -162,14 +152,14 @@ require.config({
       deps: [
           'jquery'
       ],
-      exports: '$'
+      exports: 'ToolStiper'
     },
     'tooltipster-list': {
       deps: [
           'jquery',
           'tooltipster'
       ],
-      exports: '$'
+      exports: 'TooltipList'
     },
   },
 });

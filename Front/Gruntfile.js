@@ -61,14 +61,15 @@
      requirejs: {
        compile: {
          options: {
-           findNestedDependencies: false,
-           baseUrl: 'app',
-           mainConfigFile: 'app/main.js',
-           include: 'main',
-           //name: '../bower_components/almond/almond',
-           name: '../bower_components/requirejs/require',
-           out: 'build/prod.js',
-           optimize: 'none',
+            generateSourceMaps: true,
+            findNestedDependencies: false,
+            baseUrl: 'app',
+            mainConfigFile: 'app/main.js',
+            include: 'main',
+            //name: '../bower_components/almond/almond',
+            name: '../bower_components/requirejs/require',
+            out: 'build/prod.js',
+            optimize: 'none',
 
            done: function(done, output) {
              var duplicates = require('rjs-build-analysis').duplicates(output);
