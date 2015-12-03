@@ -68,8 +68,8 @@
             name: '../bower_components/requirejs/require',
             out: 'build/prod.js',
             preserveLicenseComments: true,
-            optimize: 'none',
-            generateSourceMaps: true,
+            optimize: 'uglify',
+            generateSourceMaps: false,
            done: function(done, output) {
              var duplicates = require('rjs-build-analysis').duplicates(output);
              if (duplicates.length > 0) {
