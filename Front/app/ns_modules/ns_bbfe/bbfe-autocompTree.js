@@ -3,7 +3,7 @@ define([
     'jquery',
     'jqueryui',
     'backbone',
-    'backbone_forms',
+    'backbone-forms',
     'autocompTree',
 ], function (
     _, $, $ui, Backbone, Form, autocompTree

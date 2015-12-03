@@ -1,7 +1,7 @@
 define([
 	'jquery',
 	'backbone',
-	'backbone_forms',
+	'backbone-forms',
 ], function(
 	$, Backbone, Form
 ){

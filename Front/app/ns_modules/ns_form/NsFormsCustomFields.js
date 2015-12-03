@@ -1,7 +1,6 @@
 define([
 	'jquery',
 	'backbone',
-	'backbone_forms',
 	'dateTimePicker',
 	'moment'
 ], function ($,Backbone,bbforms,dateTimePicker,moment){

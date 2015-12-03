@@ -3,7 +3,7 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'backbone_forms',
+  'backbone-forms',
   'backbone.list',
   'requirejs-text!./tpl-bbfe-listOfNestedModel.html',
 
