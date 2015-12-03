@@ -89,6 +89,7 @@ define([
     },
 
     onShow: function() {
+
       this.displayFilter();
       this.displayGrid();
       //Backbone.history.navigate('release/individuals',{trigger: false});
@@ -167,6 +168,7 @@ define([
     },
 
     filter: function() {
+
       console.log('passed');
       this.filters.update();
     },

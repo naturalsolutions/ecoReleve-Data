@@ -1,17 +1,17 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'backgrid',
-	'config',
-	'ns_stepper/lyt-step',
-	'ns_grid/model-grid',
-	'i18n'
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'backgrid',
+  'config',
+  'ns_stepper/lyt-step',
+  'ns_grid/model-grid',
+  'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, Backgrid, config,
-	Step, NsGrid
+  Step, NsGrid
 ) {
 
   'use strict';
@@ -25,18 +25,24 @@ define([
       'change #rfidId': 'updateGrid',
     },
     ui: {
+      'rfidId': '#rfidId',
       'grid': '#grid',
       'paginator': '#paginator',
+      'requirement': '#requirement'
     },
     initialize: function(options) {
       this.model = new Backbone.Model();
     },
 
     check: function() {
-		},
+      if (this.ui.requirement.val()) {
+        return true;
+      } else {
+        return false;
+      }
+    },
 
     onShow: function() {
-
       //this.parseOneTpl(this.template);
       var obj = {name: this.name + '_RFID_identifer',required: true};
       this.stepAttributes = [obj] ;
@@ -57,26 +63,28 @@ define([
         }
         $('select[name="RFID_identifer"]').append(content);
         this.initGrid(firstId);
-        //this.feedTpl() ;
       })
-			.fail(function() {
-        alert('error loading items, please check connexion to webservice');
-			});
+      .fail(function() {
+      });
     },
 
     onDestroy: function() {
-		},
-
-    validate: function() {
-
     },
-    updateGrid: function(e) {
-      var id = $(e.target).val();
-      this.grid.collection.url = config.coreUrl + 'sensors/' + id + '/history';
-      this.grid.fetchCollection();
-      this.model.set('sensorId', id)
-      $('#btnNext').removeAttr('disabled');
 
+    updateGrid: function(e) {
+      this.ui.requirement.val('').change();
+      var id = $(e.target).val();
+      if(id){
+        this.ui.grid.removeClass('hidden');
+        this.ui.paginator.removeClass('hidden');
+        this.grid.collection.url = config.coreUrl + 'sensors/' + id + '/history';
+        this.grid.fetchCollection();
+      }else{
+        this.ui.grid.addClass('hidden');
+        this.ui.paginator.addClass('hidden');
+      }
+
+      this.model.set('sensorId', id);
     },
     initGrid: function(id) {
       var _this = this;
@@ -93,12 +101,22 @@ define([
         label: 'Identifier',
         editable: false,
         cell: 'string',
-
       },{
         name: 'StartDate',
         label: 'Start date',
         editable: false,
         cell: 'String',
+      },{
+        name: 'EndDate',
+        label: 'End Date',
+        editable: false,
+        cell: 'String',
+      },{
+        name: 'FK_MonitoredSite',
+        label: 'FK_MonitoredSite',
+        editable: false,
+        renderable:false,
+        cell: 'string',
       },{
         name: 'Name',
         label: 'Site Name',
@@ -108,6 +126,7 @@ define([
         name: 'Deploy',
         label: 'Deploy',
         editable: false,
+        renderable:false,
         cell: 'string',
       }];
       this.grid = new NsGrid({
@@ -118,10 +137,10 @@ define([
         rowClicked: true,
       });
       this.grid.rowClicked = function(args) {
-        //_this.rowClicked(args.row);
+        _this.rowClicked(args.row);
       };
       this.grid.rowDbClicked = function(args) {
-        //_this.rowClicked(args.row);
+        _this.rowClicked(args.row);
       };
       this.ui.grid.html(this.grid.displayGrid());
       this.ui.paginator.html(this.grid.displayPaginator());
@@ -132,6 +151,8 @@ define([
       }
       row.$el.addClass('active');
       this.currentRow = row;
+      this.model.set('row', row);
+      this.ui.requirement.val('check').change();
     },
     validate: function() {
       return this.model;
