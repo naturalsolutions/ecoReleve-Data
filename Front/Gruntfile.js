@@ -67,7 +67,7 @@
             include: 'main',
             name: '../bower_components/requirejs/require',
             out: 'build/prod.js',
-            preserveLicenseComments: false,
+            preserveLicenseComments: true,
             optimize: 'none',
             generateSourceMaps: true,
            done: function(done, output) {
