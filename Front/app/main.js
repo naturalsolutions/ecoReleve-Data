@@ -49,7 +49,6 @@ require.config({
     'leaflet_google': '../bower_components/leaflet-plugins/layer/tile/Google',
     'dropzone': '../bower_components/dropzone/dist/dropzone',
     'i18n': '../bower_components/i18n/i18next',
-    'fancytree': '../bower_components/fancytree/dist/jquery.fancytree-all.min',
     'floatThead': '../bower_components/floatThead/dist/jquery.floatThead-slim',
     'chart': '../bower_components/chartjs/Chart',
     'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
@@ -58,6 +57,9 @@ require.config({
 
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
+
+    //'fancytree': '../bower_components/fancytree/dist/jquery.fancytree-all.min',
+    'fancytree': 'vendors/jquery.fancytree-all.min',
     'backgrid': 'vendors/backgrid',
     'backgrid.paginator': 'vendors/backgrid-paginator',
     'backgridSelect_all': 'vendors/backgrid-select-all',
@@ -129,6 +131,7 @@ require.config({
       exports: 'L'
     },
     fancytree: {
+      //useless?
       deps: ['jquery','jqueryui'],
       exports: 'Fancytree'
     },
