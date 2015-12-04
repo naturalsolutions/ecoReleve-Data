@@ -8,7 +8,6 @@ from ..Models import (
     ErrorAvailable
     )
 from ..GenericObjets.FrontModules import FrontModules
-import transaction
 import json
 from datetime import datetime
 from sqlalchemy import func,select,and_, or_, join
@@ -104,7 +103,6 @@ def GetProtocolsofStation (request) :
         print_exc()
         print (e)
         pass
-    transaction.commit()
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -112,7 +110,6 @@ def GetProtocolsofStation (request) :
 @view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'POST')
 def insertNewProtocol (request) :
     session = request.dbsession
-
     data = {}
     for items , value in request.json_body.items() :
         if value != "" and value != []:
@@ -133,7 +130,6 @@ def insertNewProtocol (request) :
     #     for obj in listOfSubProtocols:
     #         obj['FK_ProtocoleType']=data['sub_ProtocoleType']
     data['Observation_childrens'] = listOfSubProtocols
-
     newProto.init_on_load()
     newProto.UpdateFromJson(data)
     try : 
@@ -144,19 +140,16 @@ def insertNewProtocol (request) :
     except ErrorAvailable as e :
         print ('\n\n\n\n ECXPXPCPSPSDPSDPSDd')
         print(e.value)
-        transaction.abort()
+        session.rollback()
         request.response.status_code = 510
         message = e.value
 
-    # transaction.commit()
     return message
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'PUT')
 def updateObservation(request):
     session = request.dbsession
-
-    print('*********************** UPDATE Observation *****************')
     data = request.json_body
     id_obs = request.matchdict['obs_id']
     curObs = session.query(Observation).get(id_obs)
@@ -164,10 +157,9 @@ def updateObservation(request):
     listOfSubProtocols = []
     subObsList = []
     message = 'ok'
+
     for  items , value in data.items():
         if isinstance(value,list) and items != 'children':
-            print('\n\n\n ************************* \n')
-            print('Complex PROTOCOL detected For UPDATE')
             listOfSubProtocols = value
 
     data['Observation_childrens'] = listOfSubProtocols
@@ -178,22 +170,19 @@ def updateObservation(request):
     except ErrorAvailable as e :
         print ('\n\n\n\n ECXPXPCPSPSDPSDPSDd')
         print(e.value)
-        # session.rollback()
+        session.rollback()
         request.response.status_code = 510
         message = e.value
-    # transaction.commit()
     return message
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'DELETE')
 def deleteObservation(request):
     session = request.dbsession
-
-    print('*********************** DELETE Observation *****************')
     id_obs = request.matchdict['obs_id']
     curObs = session.query(Observation).get(id_obs)
     session.delete(curObs)
-    transaction.commit()
+
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -201,7 +190,6 @@ def deleteObservation(request):
 def getObservation(request):
     session = request.dbsession
 
-    print('*********************** GET Observation *****************')
     id_obs = request.matchdict['obs_id']
     id_sta = request.matchdict['id']
     try :
@@ -222,7 +210,7 @@ def getObservation(request):
     except Exception as e :
         print(e)
         response = {}
-    transaction.commit()
+
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -230,7 +218,6 @@ def getObservation(request):
 def actionOnObs(request):
     session = request.dbsession
 
-    print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     'count' : countObs,
     'forms' : getObsForms,
@@ -251,19 +238,16 @@ def getObsForms(request) :
 
     typeObs = request.params['ObjectType']
     sta_id = request.matchdict['id']
-    print('***************** GET FORMS ***********************')
     ModuleName = 'ObservationForm'
     Conf = session.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newObs = Observation(FK_ProtocoleType = typeObs, FK_Station = sta_id)
     newObs.init_on_load()
     schema = newObs.GetDTOWithSchema(Conf,'edit')
-    # del schema['schema']['creationDate']
-    transaction.commit()
+
     return schema
 
 def getObsFields(request) :
     session = request.dbsession
-
 #     ## TODO return fields Station
     return
 
@@ -271,7 +255,6 @@ def getObsFields(request) :
 @view_config(route_name= prefixProt, renderer='json', request_method = 'PUT')
 def updateListProtocols(request):
     session = request.dbsession
-
     # TODO 
     # update a list of protocols 
     return
@@ -280,7 +263,6 @@ def updateListProtocols(request):
 @view_config(route_name= prefixProt, renderer='json', request_method = 'POST')
 def insertProtocols(request):
     session = request.dbsession
-
     return insertNewProtocol (request)
 
 # ------------------------------------------------------------------------------------------------------------------------- #

@@ -22,7 +22,8 @@ from .Models import (
     Station,
     Observation,
     Sensor,
-    setup_post_request
+    setup_post_request,
+    db
     )
 from .GenericObjets import *
 from .Views import add_routes
@@ -33,6 +34,7 @@ from .pyramid_jwtauth import (
     includeme
     )
 from pyramid.events import NewRequest
+from sqlalchemy.orm import sessionmaker
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects."""
@@ -62,14 +64,21 @@ def main(global_config, **settings):
     dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
     dbConfig['data_schema'] = settings['data_schema']
 
-    DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
     Base.metadata.reflect(views=True, extend_existing=False)
 
     config = Configurator(settings=settings)
-    # Add renderer for datetime objects
     config.include('pyramid_tm')
+
+    config.registry.dbmaker = sessionmaker(bind=engine)
+    config.add_request_method(db, name='dbsession', reify=True)
+
+    # DBSession.configure(bind=engine)
+    # config.add_request_method(callable=lambda request:DBSession(),name='dbsession',property=True )
+    # config.add_subscriber(setup_post_request,NewRequest)
+
+    # Add renderer for JSON objects
     json_renderer = JSON()
     json_renderer.add_adapter(datetime.datetime, datetime_adapter)
     json_renderer.add_adapter(datetime.date, datetime_adapter)
@@ -87,8 +96,6 @@ def main(global_config, **settings):
 
     # Set the default permission level to 'read'
     config.set_default_permission('read')
-    config.add_request_method(callable=lambda request:DBSession(),name='dbsession',property=True )
-    config.add_subscriber(setup_post_request,NewRequest)
     add_routes(config)
     config.scan()
     return config.make_wsgi_app()

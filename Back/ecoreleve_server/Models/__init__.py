@@ -2,13 +2,15 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 import configparser
-
+from sqlalchemy import event
 
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
 print(AppConfig['app:main']['sensor_schema'])
 ### Create a database session : one for the whole application
-DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+#DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+
+DBSession = None
 Base = declarative_base()
 dbConfig = {
     'dialect': 'mssql',
@@ -23,7 +25,23 @@ DynPropNames = {
     }
 }
 
+
+def db(request):
+    maker = request.registry.dbmaker
+    session = maker()
+
+    def cleanup(request):
+        if request.exception is not None:
+            session.rollback()
+        else:
+            session.commit()
+        session.close()
+    request.add_finished_callback(cleanup)
+
+    return session
+
 def remove_session(request):
+    request.dbsession.close()
     DBSession.remove()
 
 def setup_post_request(event):

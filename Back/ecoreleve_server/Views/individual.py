@@ -76,7 +76,6 @@ def getFilters (request):
     filters = {}
     for i in range(len(filtersList)) :
         filters[str(i)] = filtersList[i]
-    transaction.commit()
     return filters
 
 def getForms(request) :
@@ -89,7 +88,6 @@ def getForms(request) :
     newIndiv = Individual(FK_IndividualType = typeIndiv)
     newIndiv.init_on_load()
     schema = newIndiv.GetDTOWithSchema(Conf,'edit')
-    transaction.commit()
     return schema
 
 def getFields(request) :
@@ -99,7 +97,6 @@ def getFields(request) :
     if ModuleType == 'default' :
         ModuleType = 'IndivFilter'
     cols = Individual().GetGridFields(ModuleType)
-    transaction.commit()
     return cols
 
 def getIndividualType(request):
@@ -126,7 +123,6 @@ def getIndiv(request):
             DisplayMode = request.params['DisplayMode']
         except : 
             DisplayMode = 'display'
-        
         Conf = session.query(FrontModules).filter(FrontModules.Name=='IndivForm').first()
         response = curIndiv.GetDTOWithSchema(Conf,DisplayMode)
 
@@ -168,23 +164,20 @@ def getIndiv(request):
     #     response = result
     # else : 
     #     response  = curIndiv.GetFlatObject()
-
-    transaction.commit()
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET')
 def getIndivHistory(request):
     session = request.dbsession
-
-
-    #128145
     id = request.matchdict['id']
+
     tableJoin = join(IndividualDynPropValue,IndividualDynProp
         ,IndividualDynPropValue.FK_IndividualDynProp == IndividualDynProp.ID)
     query = select([IndividualDynPropValue,IndividualDynProp.Name]).select_from(tableJoin).where(
         IndividualDynPropValue.FK_Individual == id
         ).order_by(desc(IndividualDynPropValue.StartDate))
+
     result = session.execute(query).fetchall()
     response = []
     for row in result:
@@ -204,14 +197,8 @@ def getIndivHistory(request):
 @view_config(route_name= prefix+'/id/equipment', renderer='json', request_method = 'GET')
 def getIndivEquipment(request):
     session = request.dbsession
-
-
     id_indiv = request.matchdict['id']
-    # joinTable = join(Equipment,Sensor, Equipment.FK_Sensor == Sensor.ID
-    #     ).join(SensorType,Sensor.FK_SensorType == SensorType.ID)
-    # query = select([Equipment.StartDate,SensorType.Name.label('Type'),Sensor.UnicIdentifier,Equipment.Deploy]).select_from(joinTable
-    #     ).where(Equipment.FK_Individual == id_indiv).order_by(desc(Equipment.StartDate))*
-    
+
     joinTable = join(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
     query = select([table.c['StartDate'],table.c['EndDate'],Sensor.UnicIdentifier,table.c['FK_Individual']]
         ).select_from(joinTable
@@ -230,25 +217,23 @@ def getIndivEquipment(request):
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
 def deleteIndiv(request):
     session = request.dbsession
-
     id_ = request.matchdict['id']
     curIndiv = session.query(Individual).get(id_)
     session.delete(curIndiv)
-    transaction.commit()
+
     return True
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateIndiv(request):
     session = request.dbsession
-
     print('*********************** UPDATE Individual *****************')
     data = request.json_body
     id = request.matchdict['id']
     curIndiv = session.query(Individual).get(id)
     curIndiv.LoadNowValues()
     curIndiv.UpdateFromJson(data)
-    transaction.commit()
+
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -274,9 +259,7 @@ def insertOneNewIndiv (request) :
         if value != "" :
             data[items] = value
 
-    #newIndiv = Individual(FK_IndividualType = data['FK_IndividualType'], creator = request.authenticated_userid)
     indivType = int(data['FK_IndividualType'])
-    print(data)
     newIndiv = Individual(FK_IndividualType = indivType , creationDate = datetime.now(),Original_ID = '0')
     newIndiv.IndividualType = session.query(IndividualType).filter(IndividualType.ID==indivType).first()
     newIndiv.init_on_load()
@@ -284,17 +267,15 @@ def insertOneNewIndiv (request) :
     print (newIndiv.__dict__)
     session.add(newIndiv)
     session.flush()
-    # transaction.commit()
+
     return {'ID': newIndiv.ID}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchIndiv(request):
     session = request.dbsession
-
     data = request.params.mixed()
-    print('*********data*************')
-    print(data)
+
     searchInfo = {}
     searchInfo['criteria'] = []
     if 'criteria' in data: 
@@ -308,31 +289,17 @@ def searchIndiv(request):
 
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
-    print('**criteria********' )
-    print(searchInfo['criteria'])
-    start = datetime.now()
+
     listObj = IndividualList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
-
-    stop = datetime.now()
-    print ('______ TIME to get DATA : ')
-    print (stop-start)
-    start = datetime.now()
     countResult = listObj.count(searchInfo)
-    print ('______ TIME to get Count : ')
-    stop = datetime.now()
-    print (stop-start)
 
     result = [{'total_entries':countResult}]
     result.append(dataResult)
-    transaction.commit()
     return result
-
 
 def getIndivEquipmentAtDate(request):
     session = request.dbsession
-
-
     data = request.json_body
 
 
