@@ -30,7 +30,6 @@ prefix = 'stations'
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnStations(request):
-    print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     'count' : count_,
     'forms' : getForms,
@@ -224,8 +223,6 @@ def insertListNewStations(request):
         result =list(map(lambda y:  y[0], res))
 
     ###### Insert FieldWorkers ######
-        print('**********fieldworkers************')
-        # print(data[0])
         if not data[0]['FieldWorkers'] == None or "" :
             list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK_FieldWorker': b  },result)),data[0]['FieldWorkers'] ))
             list_ = list(itertools.chain.from_iterable(list_))
@@ -277,7 +274,6 @@ def searchStation(request):
 
     #### add filter parameters to retrieve last stations imported : last day of station created by user and without linked observation ####
     if 'lastImported' in data :
-        print('-*********************** LAST IMPORTED !!!!!!!!! ******')
         criteria = [
         {'Column' : 'creator',
         'Operator' : '=',
@@ -306,7 +302,6 @@ def searchStation(request):
         if countResult < 50000 : 
             exceed = False
             dataResult = listObj.GetFlatDataList(searchInfo,getFW)
-            print('****************** GEOJSON !!!!--------------')
             for row in dataResult:
                 geoJson.append({'type':'Feature', 'properties':{'name':row['Name']
                     , 'date':row['StationDate']}

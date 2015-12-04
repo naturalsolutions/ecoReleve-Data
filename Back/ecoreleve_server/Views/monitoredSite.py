@@ -84,7 +84,6 @@ def getForms(request) :
 
 def getFields(request) :
     session = request.dbsession
-
     ModuleType = request.params['name']
     if ModuleType == 'default' :
         ModuleType = 'MonitoredSiteGrid'

@@ -29,7 +29,6 @@ prefix = 'release/'
 
 @view_config(route_name= prefix+'individuals/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnStations(request):
-    print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     # 'count' : count_,
     'getFields': getFields,
@@ -90,9 +89,8 @@ def getReleaseMethod(request):
 @view_config(route_name= prefix+'individuals', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchIndiv(request):
     session = request.dbsession
-
     data = request.params.mixed()
-    print('*********data*************')
+
     searchInfo = {}
     searchInfo['criteria'] = []
     if 'criteria' in data: 

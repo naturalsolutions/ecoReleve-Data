@@ -23,11 +23,6 @@ class ListObjectWithDynProp():
     def __init__(self,ObjWithDynProp, frontModule, history = False, View = None):
         self.ObjContext = threadlocal.get_current_request().dbsession
         session = threadlocal.get_current_request().dbsession
-        print("\n\nObjContext : ")
-        print(self.ObjContext)
-        print("session : ")
-        print(session)
-        print(ObjWithDynProp)
 
         self.ListPropDynValuesOfNow = {}
         self.ObjWithDynProp = ObjWithDynProp

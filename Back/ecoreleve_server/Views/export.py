@@ -82,8 +82,6 @@ def count_(request):
 @view_config(route_name=route_prefix+'views/id', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
 def search(request):
     session = request.dbsession
-
-
     viewId = request.matchdict['id']
     table = Base.metadata.tables['Views']
     viewName = session.execute(select(['Relation']).select_from(table).where(table.c['ID']==viewId)).scalar()
@@ -93,8 +91,7 @@ def search(request):
         criteria = json.loads(data['criteria'])
     else : 
         criteria = {}
-    print(data)
-    print(criteria)
+
     gene = Generator(viewName)
     if 'geo' in request.params:
         result = gene.get_geoJSON(criteria)
@@ -108,15 +105,10 @@ def search(request):
 @view_config(route_name=route_prefix+'views/getFile', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
 def views_filter_export(request):
     session = request.dbsession
-    
     try:
-
         function_export= { 'csv': export_csv, 'pdf': export_pdf, 'gpx': export_gpx }
         criteria = json.loads(request.params.mixed()['criteria'])
-
-        print(criteria)
         viewId = criteria['viewId']
-        
         views = Base.metadata.tables['Views']
         viewName = session.execute(select([views.c['Relation']])).scalar()
 

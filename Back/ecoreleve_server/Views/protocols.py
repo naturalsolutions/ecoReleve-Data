@@ -32,8 +32,6 @@ def GetProtocolsofStation (request) :
     curSta = session.query(Station).get(sta_id)
     try : 
         if 'criteria' in request.params or request.params == {} :
-            print (' ********************** criteria params ==> Search ****************** ')
-            
             searchInfo = data
             searchInfo['criteria'] = []
             searchInfo['criteria'].extend(criteria)
@@ -43,9 +41,7 @@ def GetProtocolsofStation (request) :
         pass
     try :
         if 'FormName' in request.params : 
-            print (' ********************** Forms in params ==> DATA + FORMS ****************** ')
             ModuleName = 'ObservationForm'
-
             listObs = list(session.query(Observation).filter(and_(Observation.FK_Station == sta_id,Observation.Parent_Observation == None)))
             listType =list(session.query(FieldActivity_ProtocoleType
                 ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
@@ -122,10 +118,7 @@ def insertNewProtocol (request) :
     listOfSubProtocols = []
     for items , value in data.items() :
         if isinstance(value,list) and items != 'children':
-            print('\n\n\n ************************* \n')
-            print('Complex PROTOCOL detected For UPDATE')
             listOfSubProtocols = value
-
     # if listOfSubProtocols !=[] and 'sub_ProtocoleType' in data:
     #     for obj in listOfSubProtocols:
     #         obj['FK_ProtocoleType']=data['sub_ProtocoleType']
@@ -138,8 +131,6 @@ def insertNewProtocol (request) :
         session.flush()
         message = {'id': newProto.ID}
     except ErrorAvailable as e :
-        print ('\n\n\n\n ECXPXPCPSPSDPSDPSDd')
-        print(e.value)
         session.rollback()
         request.response.status_code = 510
         message = e.value
@@ -168,8 +159,6 @@ def updateObservation(request):
         if curObs.Equipment is not None : 
             curObs.Station = curObs.Station
     except ErrorAvailable as e :
-        print ('\n\n\n\n ECXPXPCPSPSDPSDPSDd')
-        print(e.value)
         session.rollback()
         request.response.status_code = 510
         message = e.value
@@ -229,13 +218,11 @@ def actionOnObs(request):
 
 def countObs (request) :
     session = request.dbsession
-
 #   ## TODO count stations
     return
 
 def getObsForms(request) :
     session = request.dbsession
-
     typeObs = request.params['ObjectType']
     sta_id = request.matchdict['id']
     ModuleName = 'ObservationForm'
@@ -268,7 +255,6 @@ def insertProtocols(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefixProt+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnProtocols(request):
-    print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     'count' : count,
     'forms' : getForms,
@@ -322,7 +308,6 @@ def getFieldActivityList (request) :
 @view_config(route_name= 'protocolTypes', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def getListofProtocolTypes (request):
     session = request.dbsession
-
     if 'FieldActivityID' in request.params :
         fieldActivityID = request.params['FieldActivityID']
         join_table = join(ProtocoleType,FieldActivity_ProtocoleType,ProtocoleType.ID == FieldActivity_ProtocoleType.FK_ProtocoleType )
@@ -332,7 +317,7 @@ def getListofProtocolTypes (request):
     else : 
         query = select([ProtocoleType.ID, ProtocoleType.Name]).where(ProtocoleType.Status == 4)
     result = session.execute(query).fetchall()
-    print('********* protocoles types ******************')
+
     res = []
     for row in result:
         elem = {}

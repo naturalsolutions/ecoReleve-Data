@@ -31,7 +31,6 @@ prefix = 'sensors'
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 #@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnSensors(request):
-    print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     'count' : count_,
     'forms' : getForms,
@@ -223,7 +222,6 @@ def updateSensor(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix + '/insert', renderer='json', request_method = 'POST')
 def insertSensor(request):
-    print('_______INsertion____________________')
     data = request.json_body
     if not isinstance(data,list):
         return insertOneNewSensor(request)

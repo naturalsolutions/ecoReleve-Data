@@ -33,7 +33,6 @@ prefix = 'individuals'
 @view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnIndividuals(request):
-    print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     'count' : count_,
     'forms' : getForms,
@@ -47,8 +46,6 @@ def actionOnIndividuals(request):
 
 def count_ (request = None,listObj = None) :
     session = request.dbsession
-
-    print('*****************  INDIVIDUAL COUNT***********************')
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     if request is not None : 
@@ -59,13 +56,10 @@ def count_ (request = None,listObj = None) :
                 searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
         else : 
             searchInfo = {'criteria':None}
-        
         listObj = ListObjectWithDynProp(Individual,moduleFront)
         count = listObj.count(searchInfo = searchInfo)
     else : 
         count = listObj.count()
-
-    print(count)
     return count 
 
 def getFilters (request):
@@ -80,9 +74,7 @@ def getFilters (request):
 
 def getForms(request) :
     session = request.dbsession
-
     typeIndiv = request.params['ObjectType']
-    print('***************** GET FORMS ***********************')
     ModuleName = 'IndivForm'
     Conf = session.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newIndiv = Individual(FK_IndividualType = typeIndiv)
@@ -110,8 +102,6 @@ def getIndividualType(request):
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
 def getIndiv(request):
     session = request.dbsession
-
-    print('***************** GET INDIVIDUAL ***********************')
     id = request.matchdict['id']
     curIndiv = session.query(Individual).get(id)
     curIndiv.LoadNowValues()
@@ -227,23 +217,19 @@ def deleteIndiv(request):
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateIndiv(request):
     session = request.dbsession
-    print('*********************** UPDATE Individual *****************')
     data = request.json_body
     id = request.matchdict['id']
     curIndiv = session.query(Individual).get(id)
     curIndiv.LoadNowValues()
     curIndiv.UpdateFromJson(data)
-
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix  + '/insert', renderer='json', request_method = 'POST')
 def insertIndiv(request):
     session = request.dbsession
-
     data = request.json_body
     if not isinstance(data,list):
-        print('_______INsert ROW *******')
         return insertOneNewIndiv(request)
     else :
         print('_______INsert LIST')
@@ -253,7 +239,6 @@ def insertIndiv(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewIndiv (request) :
     session = request.dbsession
-
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
@@ -264,7 +249,6 @@ def insertOneNewIndiv (request) :
     newIndiv.IndividualType = session.query(IndividualType).filter(IndividualType.ID==indivType).first()
     newIndiv.init_on_load()
     newIndiv.UpdateFromJson(data)
-    print (newIndiv.__dict__)
     session.add(newIndiv)
     session.flush()
 

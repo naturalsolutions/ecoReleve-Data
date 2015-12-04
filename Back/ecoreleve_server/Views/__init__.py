@@ -10,7 +10,6 @@ def integers(*segment_names):
         match = info['match']
         for segment_name in segment_names:
             try:
-                print (segment_names)
                 match[segment_name] = int(match[segment_name])
                 if int(match[segment_name]) == 0 :
                     return False

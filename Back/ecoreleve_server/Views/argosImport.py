@@ -186,7 +186,6 @@ def checkExistingEng(EngData,session) :
         EngData['txDate'] = EngData.apply(lambda row: np.datetime64(row['txDate']).astype(datetime), axis=1)
         maxDate =  EngData['txDate'].max()
         minDate =  EngData['txDate'].min()
-        print(EngData)
 
         queryEng = select([ArgosEngineering.fk_ptt, ArgosEngineering.txDate])
         queryEng = queryEng.where(and_(ArgosEngineering.txDate >= minDate , ArgosEngineering.txDate <= maxDate))
@@ -270,7 +269,6 @@ def parseDIAGFileAndInsert(full_filename,session):
         for i in range(len(splitParameters)) :
             if re.search('[?]+([a-zA-Z]+)?',splitParameters[i]) :
                 splitParameters[i] = re.sub('[?]+([a-zA-Z]{1,2})?',"NaN",splitParameters[i])
-                print(splitParameters[i])
             if re.search('[0-9]',splitParameters[i]):
                 splitParameters[i] = re.sub('[a-zA-DF-MO-RT-VX-Z]'," ",splitParameters[i])
             if colsInBlock[i] == 'date' :
