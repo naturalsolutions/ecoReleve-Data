@@ -120,8 +120,6 @@ class ListObjectWithDynProp():
 
     def GetDynProp (self,dynPropName) : 
         ''' Get dyn Prop with its name '''
-
-
         if self.DynPropList is not None :
             curDynProp = self.DynPropList[self.DynPropList['Name'] == dynPropName]
             curDynProp = curDynProp.to_dict(orient = 'records')
@@ -229,8 +227,8 @@ class ListObjectWithDynProp():
 
                 elif curDynProp != None:
                     filterOnDynProp = True
-
-                    if 'date' in curDynProp['type'].lower() :
+                    print(curDynProp)
+                    if 'date' in curDynProp['TypeProp'].lower() :
                         criteriaObj['Value'] = parse(criteriaObj['Value'].replace(' ',''))
 
                     filterCriteria = eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],obj['Operator'],obj['Value'] )

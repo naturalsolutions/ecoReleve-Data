@@ -189,6 +189,7 @@ def getIndivEquipment(request):
     session = request.dbsession
     id_indiv = request.matchdict['id']
 
+    table = Base.metadata.tables['IndividualEquipment']
     joinTable = join(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
     query = select([table.c['StartDate'],table.c['EndDate'],Sensor.UnicIdentifier,table.c['FK_Individual']]
         ).select_from(joinTable
