@@ -207,18 +207,21 @@ def getIndivEquipment(request):
 
 
     id_indiv = request.matchdict['id']
-    joinTable = join(Equipment,Sensor, Equipment.FK_Sensor == Sensor.ID
-        ).join(SensorType,Sensor.FK_SensorType == SensorType.ID)
-    query = select([Equipment.StartDate,SensorType.Name.label('Type'),Sensor.UnicIdentifier,Equipment.Deploy]).select_from(joinTable
-        ).where(Equipment.FK_Individual == id_indiv).order_by(desc(Equipment.StartDate))
+    # joinTable = join(Equipment,Sensor, Equipment.FK_Sensor == Sensor.ID
+    #     ).join(SensorType,Sensor.FK_SensorType == SensorType.ID)
+    # query = select([Equipment.StartDate,SensorType.Name.label('Type'),Sensor.UnicIdentifier,Equipment.Deploy]).select_from(joinTable
+    #     ).where(Equipment.FK_Individual == id_indiv).order_by(desc(Equipment.StartDate))*
+    
+    joinTable = join(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
+    query = select([table.c['StartDate'],table.c['EndDate'],Sensor.UnicIdentifier,table.c['FK_Individual']]
+        ).select_from(joinTable
+        ).where(table.c['FK_Individual'] == id_indiv
+        ).order_by(desc(table.c['StartDate']))
+
     result = session.execute(query).fetchall()
     response = []
     for row in result:
         curRow = OrderedDict(row)
-        if curRow['Deploy'] == 1 : 
-            curRow['Deploy'] = 'Deploy'
-        else : 
-            curRow['Deploy'] = 'Remove'
         response.append(curRow)
 
     return response

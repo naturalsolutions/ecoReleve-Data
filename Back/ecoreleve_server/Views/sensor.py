@@ -190,17 +190,35 @@ def getSensorHistory(request):
 
     print('sensor history******************')
     id = request.matchdict['id']
-    joinTable = outerjoin(Equipment,Individual,Equipment.FK_Individual==Individual.ID).outerjoin(MonitoredSite,Equipment.FK_MonitoredSite==MonitoredSite.ID)
-    query = select([Equipment.ID, Individual.UnicIdentifier, MonitoredSite.Name, Equipment.StartDate, Equipment.Deploy,Equipment.FK_MonitoredSite,Equipment.FK_Individual]
-        ).select_from(joinTable).where(Equipment.FK_Sensor == id).order_by(desc(Equipment.StartDate))
+    # joinTable = outerjoin(Equipment,Individual,Equipment.FK_Individual==Individual.ID).outerjoin(MonitoredSite,Equipment.FK_MonitoredSite==MonitoredSite.ID)
+    # query = select([Equipment.ID, Individual.UnicIdentifier, MonitoredSite.Name, Equipment.StartDate, Equipment.Deploy,Equipment.FK_MonitoredSite,Equipment.FK_Individual]
+    #     ).select_from(joinTable).where(Equipment.FK_Sensor == id).order_by(desc(Equipment.StartDate))
+    
+    curSensor = session.query(Sensor).get(id)
+    curSensorType = curSensor.GetType().Name
+    print(curSensorType)
+
+    if ('RFID' in curSensorType.upper()) :
+        table = Base.metadata.tables['MonitoredSiteEquipment']
+        joinTable = join(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
+        joinTable = join(joinTable,MonitoredSite, table.c['FK_MonitoredSite'] == MonitoredSite.ID)
+        query = select([table.c['StartDate'],table.c['EndDate'],Sensor.UnicIdentifier,MonitoredSite.Name]).select_from(joinTable
+            ).where(table.c['FK_Sensor'] == id
+            ).order_by(desc(table.c['StartDate']))
+
+    elif (curSensorType.lower() in ['gsm','satellite']):
+        table = Base.metadata.tables['IndividualEquipment']
+        joinTable = join(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
+        query = select([table.c['StartDate'],table.c['EndDate'],table.c['FK_Individual'],Sensor.UnicIdentifier]).select_from(joinTable
+            ).where(table.c['FK_Sensor'] == id
+            ).order_by(desc(table.c['StartDate']))
+    else :
+        return 'bad request'
+
     result = session.execute(query).fetchall()
     response = []
     for row in result:
         curRow = OrderedDict(row)
-        if curRow['Deploy'] == 1 : 
-            curRow['Deploy'] = 'Deployed'
-        else : 
-            curRow['Deploy'] = 'Removed'
         response.append(curRow)
 
     return response

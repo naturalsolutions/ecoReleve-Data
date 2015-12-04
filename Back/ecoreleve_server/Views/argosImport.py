@@ -157,7 +157,6 @@ def parseDSFileAndInsert(full_filename,session):
             EngToInsert.to_sql(ArgosEngineering.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'],index=False )
 
     if EngDataBis is not None :
-        print('INNNN BIIIIIIIIIIS') 
         EngBisToInsert = checkExistingEng(EngDataBis,session)
         nb_existingEng += EngDataBis.shape[0]
         if EngBisToInsert.shape[0] != 0 :
