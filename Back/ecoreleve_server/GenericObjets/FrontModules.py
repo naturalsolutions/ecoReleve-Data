@@ -69,17 +69,27 @@ class ModuleForms(Base):
     def GetClassFromSize(FieldSize):
         return FieldSizeToClass[FieldSize]
 
-    def GetDTOFromConf(self,IsEditable,CssClass):
+    def GetDTOFromConf(self,IsEditable,CssClass,DisplayMode):
         ''' return input field to build form '''
+        if DisplayMode.lower() == 'edit':
+            print('FORM EDIT MODE')
+            inputType = self.InputType
+            self.fullPath = False
+        else :
+            inputType = 'Text'
+            self.fullPath = True
+        self.DisplayMode = DisplayMode
+
         self.dto = {
             'name': self.Name,
-            'type': self.InputType,
+            'type': inputType,
             'title' : self.Label,
             'editable' : IsEditable,
             'editorClass' : str(self.editorClass) ,
             'validators': [],
             'options': [],
-            'defaultValue' : None
+            'defaultValue' : None,
+            'fullPath':self.fullPath
             }
         self.CssClass = CssClass
         self.IsEditable = IsEditable
@@ -101,7 +111,6 @@ class ModuleForms(Base):
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
 
             # TODO changer le validateur pour select required (valeur <>-1)
-
         if self.InputType in self.func_type_context :
             self.func_type_context[self.InputType](self)
         # default value
@@ -128,7 +137,7 @@ class ModuleForms(Base):
             subNameObj = result[0].Name
             subschema = {}
             for conf in result :
-                subschema[conf.Name] = conf.GetDTOFromConf(self.IsEditable,self.CssClass)
+                subschema[conf.Name] = conf.GetDTOFromConf(self.IsEditable,self.CssClass,self.DisplayMode)
             self.dto = {
             'Name': self.Name,
             'type': self.InputType,
@@ -138,7 +147,8 @@ class ModuleForms(Base):
             'validators': [],
             'options': [],
             'fieldClass': None,
-            'subschema' : subschema
+            'subschema' : subschema,
+            'fullPath':self.fullPath
             }
             try :
                 subTypeObj = int(self.Options)
@@ -147,7 +157,6 @@ class ModuleForms(Base):
                 pass
 
     def InputThesaurus(self) :
-
         if self.Options is not None and self.Options != '' :
             self.dto['options'] = {'startId': self.Options
             , 'wsUrl':dbConfig['wsThesaurus']['wsUrl']
