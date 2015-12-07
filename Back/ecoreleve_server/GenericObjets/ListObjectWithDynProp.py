@@ -22,7 +22,7 @@ class ListObjectWithDynProp():
     ''' This class is used to filter Object with dyn props over all properties '''
     def __init__(self,ObjWithDynProp, frontModule, history = False, View = None):
         self.ObjContext = threadlocal.get_current_request().dbsession
-        session = threadlocal.get_current_request().dbsession
+        self.sessionmaker = threadlocal.get_current_registry().dbmaker
 
         self.ListPropDynValuesOfNow = {}
         self.ObjWithDynProp = ObjWithDynProp
@@ -109,7 +109,7 @@ class ListObjectWithDynProp():
         ''' Retrieve all dynamic properties of object ''' 
         DynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
         query = select([DynPropTable]) #.where(DynPropTable.c['Name'] == dynPropName)
-        result  = self.ObjContext.execute(query).fetchall()
+        result  = self.sessionmaker().execute(query).fetchall()
 
         if result == []:
             df = None
@@ -194,10 +194,25 @@ class ListObjectWithDynProp():
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
         result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
         data = []
+
+        listWithThes = list(filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType,self.Conf))
+        listWithThes = list(map(lambda x: x.Name,listWithThes))
+
         for row in result :
-            row = OrderedDict(row)
+            row = dict(map(lambda k : self.splitFullPath(k,listWithThes), row.items()))
             data.append(row)
         return data
+
+    def splitFullPath(self,key,listWithThes) :
+        name,val= key
+        try :
+            if name in listWithThes:
+                newVal = val.split('>')[-1]
+            else :
+                newVal = val
+        except : 
+            newVal = val
+        return (name,newVal)
 
     def count(self,searchInfo = None) :
         ''' Main function to call : return count according to filter parameters'''
@@ -206,7 +221,7 @@ class ListObjectWithDynProp():
         else:
             criteria = searchInfo['criteria'] 
         query = self.countQuery(criteria)
-        count = self.ObjContext.execute(query).scalar()
+        count = self.sessionmaker().execute(query).scalar()
         return count
 
     def countQuery(self,criteria = None):
