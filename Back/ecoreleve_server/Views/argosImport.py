@@ -319,8 +319,10 @@ def checkExistingArgos (dfToCheck,session) :
     ArgosRecords = pd.DataFrame.from_records(data
         ,columns=[ArgosGps.pk_id.name, ArgosGps.date.name, ArgosGps.lat.name, ArgosGps.lon.name, ArgosGps.ptt.name]
         , coerce_float=True )
+
     ArgosRecords.loc[:,('lat')] = np.round(ArgosRecords['lat'], decimals=3)
     ArgosRecords.loc[:,('lon')] = np.round(ArgosRecords['lon'], decimals=3)
+    print(ArgosRecords['lat'])
     merge = pd.merge(dfToCheck,ArgosRecords, left_on = ['date','lat','lon','FK_ptt'], right_on = ['date','lat','lon','FK_ptt'])
     DFToInsert = dfToCheck[~dfToCheck['id'].isin(merge['id'])]
 
