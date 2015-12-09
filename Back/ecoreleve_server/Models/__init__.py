@@ -3,6 +3,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 import configparser
 from sqlalchemy import event
+from sqlalchemy.exc import TimeoutError
+
+
 
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
@@ -25,6 +28,9 @@ DynPropNames = {
     }
 }
 
+def cache_callback(request,session):
+            if isinstance(request.exception,TimeoutError):
+                session.get_bind().dispose()
 
 def db(request):
     maker = request.registry.dbmaker
@@ -33,19 +39,21 @@ def db(request):
     def cleanup(request):
         if request.exception is not None:
             session.rollback()
+            cache_callback(request,session)
         else:
             session.commit()
         session.close()
-    request.add_finished_callback(cleanup)
+        maker.remove()
 
+    request.add_finished_callback(cleanup)
     return session
 
-def remove_session(request):
-    request.dbsession.close()
-    DBSession.remove()
+# def remove_session(request):
+#     request.dbsession.close()
+#     DBSession.remove()
 
-def setup_post_request(event):
-    event.request.add_finished_callback(remove_session)
+# def setup_post_request(event):
+#     event.request.add_finished_callback(remove_session)
 
 from .Protocoles import *
 from .User import User

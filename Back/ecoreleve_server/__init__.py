@@ -16,25 +16,21 @@ from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
 from .Models import (
-    DBSession,
     Base,
     dbConfig,
     Station,
     Observation,
     Sensor,
-    setup_post_request,
     db
     )
-from .GenericObjets import *
 from .Views import add_routes
-from .Views.station import searchStation
 
 from .pyramid_jwtauth import (
     JWTAuthenticationPolicy,
     includeme
     )
 from pyramid.events import NewRequest
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker,scoped_session
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects."""
@@ -71,7 +67,7 @@ def main(global_config, **settings):
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
 
-    config.registry.dbmaker = sessionmaker(bind=engine)
+    config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
     config.add_request_method(db, name='dbsession', reify=True)
 
     # DBSession.configure(bind=engine)
