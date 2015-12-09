@@ -72,9 +72,9 @@ class ObjectTypeWithDynProp:
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
         Values = self.ObjContext.execute(curQuery).fetchall()
-        resultat = {}
+        resultat = []
         for curValue in Values : 
-           resultat[curValue['Name']] = curValue
+           resultat.append(curValue['Name'].lower())
         return resultat
 
     def GetDynProps(self):
