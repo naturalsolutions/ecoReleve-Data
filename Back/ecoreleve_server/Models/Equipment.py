@@ -26,6 +26,8 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
 import pyramid.httpexceptions as exc
 import transaction
+from pyramid import threadlocal
+
 
 class Equipment(Base):
     __tablename__ = 'Equipment'
@@ -38,20 +40,25 @@ class Equipment(Base):
     StartDate = Column(DateTime,default = func.now())
     Deploy = Column(Boolean)
 
-    def __init__(self,**kwargs):
-        super().__init__(**kwargs)
-        ObjectWithDynProp.__init__(self)
+    # def __init__(self,**kwargs):
+    #     super().__init__(**kwargs)
+    #     ObjectWithDynProp.__init__(self)
 
 def checkSensor(fk_sensor,equipDate):
+    session = threadlocal.get_current_registry().dbmaker()
+    # session = threadlocal.get_current_request().dbsession
+
     e1 = aliased(Equipment)
     subQuery = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor
         ,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate)))
 
     query = select([Equipment]).where(and_(~exists(subQuery)
-        ,and_(Equipment.StartDate<equipDate
-            ,and_(Equipment.Deploy == 1,Equipment.FK_Sensor == fk_sensor))))
-    fullQuery = select([True]).where(~exists(query))
-    sensorEquip = DBSession().execute(fullQuery).scalar()
+        ,and_(Equipment.StartDate<=equipDate
+            ,and_(Equipment.Deploy == 0,Equipment.FK_Sensor == fk_sensor))))
+
+    fullQuery = select([True]).where(exists(query))
+    sensorEquip = session.execute(fullQuery).scalar()
+    # session.close()
     return sensorEquip
 
 def checkIndiv(equipDate,fk_indiv):
@@ -102,14 +109,20 @@ def checkEquip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
         return availability
 
 def existingEquipment (fk_sensor,equipDate,fk_indiv=None):
+    session = threadlocal.get_current_registry().dbmaker()
+    # session = threadlocal.get_current_request().dbsession
     e1 = aliased(Equipment)
     subQuery = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor,and_(e1.FK_Individual == Equipment.FK_Individual,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate))))
     query = select([Equipment]).where(and_(~exists(subQuery),and_(Equipment.StartDate<=equipDate,and_(Equipment.Deploy == 1,and_(Equipment.FK_Sensor == fk_sensor,Equipment.FK_Individual == fk_indiv)))))
     fullQuery = select([True]).where(exists(query))
 
-    return DBSession().execute(fullQuery).scalar()
+    result = session.execute(fullQuery).scalar()
+    # session.close()
+    return result
 
 def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None):
+    session = threadlocal.get_current_request().dbsession
+
     e1 = aliased(Equipment)
     e2 = aliased(Equipment)
     subQueryExists = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor,and_(e1.FK_Individual == Equipment.FK_Individual,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate))))
@@ -120,7 +133,10 @@ def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None):
 
     query = query.where(~exists(subQueryUnequip))
     fullQuery = select([True]).where(~exists(query))
-    return DBSession().execute(fullQuery).scalar()
+
+    result = session.execute(fullQuery).scalar()
+    # session.close()
+    return result
 
 
 def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
@@ -144,10 +160,8 @@ def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     return availability
 
 @event.listens_for(Observation.Station, 'set')
-def receive_set(target, value, oldvalue, initiator):
-
+def set_equipment(target, value=None, oldvalue=None, initiator=None):
     typeName = target.GetType().Name
-
     if 'unequip' in typeName.lower():
         deploy = 0
     else :
@@ -176,11 +190,10 @@ def receive_set(target, value, oldvalue, initiator):
                 ,equipDate=equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
 
         if availability is True:
-            curEquip = Equipment(Observation= target, FK_Sensor = fk_sensor
+            curEquip = Equipment(FK_Sensor = fk_sensor
             , StartDate = equipDate,FK_Individual = fk_indiv, FK_MonitoredSite = fk_site
             , Deploy = deploy)
             target.Equipment = curEquip
-            print('INDIV EQUIP GOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOD')
         else : 
             raise(ErrorAvailable(availability))
 
