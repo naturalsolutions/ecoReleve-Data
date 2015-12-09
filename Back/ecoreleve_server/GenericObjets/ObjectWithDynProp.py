@@ -115,10 +115,10 @@ class ObjectWithDynProp:
                 and_(
                     ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
                     , or_( ModuleGrids.TypeObj == typeID,ModuleGrids.TypeObj == None)
-                    )).all()
+                    )).order_by(asc(ModuleGrids.FilterOrder)).all()
         except :
             filterFields = self.ObjContext.query(ModuleGrids
-                ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()  #.order_by(asc(ModuleGrids.FilterOrder)).all()
+                ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).order_by(asc(ModuleGrids.FilterOrder)).all()  #.order_by(asc(ModuleGrids.FilterOrder)).all()
         for curConf in filterFields:
             curConfName = curConf.Name
             filterField = list(filter(lambda x : x['name'] == curConfName
