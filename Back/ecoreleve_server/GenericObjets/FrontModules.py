@@ -72,12 +72,14 @@ class ModuleForms(Base):
     def GetDTOFromConf(self,IsEditable,CssClass,DisplayMode):
         ''' return input field to build form '''
         if DisplayMode.lower() == 'edit':
-            print('FORM EDIT MODE')
             inputType = self.InputType
             self.fullPath = False
         else :
-            inputType = 'Text'
-            self.fullPath = True
+            inputType = self.InputType
+            self.fullPath = False
+            if self.InputType in ['AutocompTreeEditor','DateTimePicker','ObjectPicker','TimePicker']:
+                inputType = 'Text'
+                self.fullPath = True
         self.DisplayMode = DisplayMode
 
         self.dto = {
