@@ -4,6 +4,7 @@ import json,transaction
 from ..Models import Base, DBSession
 from collections import OrderedDict
 from .eval import Eval
+from .datetime import parse
 import re
 
 
@@ -97,9 +98,12 @@ class Generator :
         for obj in criteria:
             if obj['Value'] != None and obj['Value']!='':
                 try:
-                    Col=dictio[key]
-                except: 
                     Col=obj['Column']
+                    typeCol = str(self.table.c[Col].type).split('(')[0]
+                    if 'date' in typeCol.lower() : 
+                        obj['Value'] = parse(obj['Value'].replace(' ',''))
+                except: 
+                    Col=dictio[key]
                 query=self.where_(query,Col, obj['Operator'], obj['Value'])
         return query
 
@@ -153,26 +157,33 @@ class Generator :
         result=[]
         total=None
         countResult = self.count_(criteria)
-        if(countResult <= 50000):
-            query = self.getFullQuery(criteria)
-            try :
-                data=DBSession.execute(query.where(self.table.c['LAT'] != None)).fetchall()
-            except :
-                data=DBSession.execute(query.where(self.table.c['lat'] != None)).fetchall()
-            tmp = data[0]
-            lat = self.case(tmp, 'LAT')
-            lon = self.case(tmp, 'LON')
-            geoJson=[]
-            for row in data:
-                properties = {}
-                # if cols_for_properties != None :
-                #     for col in cols_for_properties :
-                #         properties[col.replace('_',' ')] = row[col]
-                geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point', 'coordinates':[row[lat],row[lon]]}})
-            transaction.commit()
-            return {'type':'FeatureCollection', 'features': geoJson, 'exceed': False, 'total':countResult}
+
+        if 'lat' in self.table.c or 'LAT'in self.table.c:
+            if(countResult <= 50000):
+                query = self.getFullQuery(criteria)
+                try :
+                    data=DBSession.execute(query.where(self.table.c['LAT'] != None)).fetchall()
+                except :
+                    try:
+                        data=DBSession.execute(query.where(self.table.c['lat'] != None)).fetchall()
+                    except:
+                        pass
+
+                tmp = data[0]
+                lat = self.case(tmp, 'LAT')
+                lon = self.case(tmp, 'LON')
+                geoJson=[]
+                for row in data:
+                    properties = {}
+                    # if cols_for_properties != None :
+                    #     for col in cols_for_properties :
+                    #         properties[col.replace('_',' ')] = row[col]
+                    geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point', 'coordinates':[row[lat],row[lon]]}})
+                transaction.commit()
+                return {'type':'FeatureCollection', 'features': geoJson, 'exceed': False, 'total':countResult}
         else :
             return {'type':'FeatureCollection', 'features': [],'exceed': True, 'total':countResult}
+                
 
     def case(self, row, arg) :
         if( arg in row ) :

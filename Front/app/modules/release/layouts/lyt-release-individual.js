@@ -29,11 +29,12 @@ define([
       'filters': '#indiv_filters',
       'detail': '#detail',
       'totalEntries': '#totalEntries',
-      'nbSelected': '#nbSelected'
+      'nbSelected': '#nbSelected',
+      'release':'#release'
     },
 
     events: {
-      'click #btnFilter': 'filter',
+      'click #btnFilterRel': 'filter',
       'click #back': 'hideDetails',
       'click button#clear': 'clearFilter',
       'click #release': 'toolTipShow',
@@ -52,9 +53,10 @@ define([
       this.model = options.station;
 
       this.releaseMethod = null;
-
+      this.getReleaseMethod();
       var _this = this;
 
+      
       //todo: fix
       var MySensorPicker = ObjectPicker.extend({
         rowClicked: function(row) {
@@ -92,6 +94,15 @@ define([
       this.displayGrid();
     },
 
+    getReleaseMethod: function(){
+      var _this = this;
+      $.ajax({
+        url:config.coreUrl+'release/individuals/getReleaseMethod'
+      }).done(function(data){
+        _this.releaseMethodList=data;
+      });
+    },
+
     initGrid: function() {
       var myGrid = NsGrid.extend({
       });
@@ -100,6 +111,7 @@ define([
       this.grid = new myGrid({
         pageSize: 1400,
         pagingServerSide: false,
+        com: this.com,
         url: config.coreUrl + 'release/individuals/',
         urlParams: this.urlParams,
         rowClicked: true,
@@ -128,6 +140,7 @@ define([
     displayFilter: function() {
       this.filters = new NsFilter({
         url: config.coreUrl + 'release/individuals/',
+        com: this.com,
         filterContainer: this.ui.filters,
       });
     },
@@ -164,7 +177,9 @@ define([
       this.total = grid.collection.state.totalRecords;
       $(this.ui.totalEntries).html(this.total);
     },
-    release: function() {
+
+
+    release: function(releaseMethod) {
       var mds = this.grid.grid.getSelectedModels();
       if (!mds.length) {
         return;
@@ -174,7 +189,7 @@ define([
       $.ajax({
         url: config.coreUrl + 'release/individuals/',
         method: 'POST',
-        data: {IndividualList: JSON.stringify(col),StationID: this.station.get('ID'),releaseMethod: _this.releaseMethod},
+        data: {IndividualList: JSON.stringify(col),StationID: this.station.get('ID'),releaseMethod: releaseMethod},
         context: this,
       }).done(function(resp) {
         if (resp.errors) {
@@ -248,19 +263,15 @@ define([
 
     toolTipShow: function(e) {
       var _this = this;
-      $(e.target).tooltipList({
-
+      this.ui.release.tooltipList({
         position: 'top',
         //  pass avalaible options
-        availableOptions: [{'label': 'direct release','val': 1},{'label': 'direct release grid 5x5','val': 2},],
-        //  li click event
-        liClickEvent: $.proxy(function(liClickValue, origin, tooltip) {
-
-          _this.releaseMethod = liClickValue;
-          _this.release();
-        }, this),
+        availableOptions: _this.releaseMethodList,
+        liClickEvent:function(liClickValue) {
+          _this.release(liClickValue);
+        }, 
       });
-      $(e.target).tooltipster('show');
+      this.ui.release.tooltipster('show');
     }
   });
 });

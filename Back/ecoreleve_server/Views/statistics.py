@@ -16,7 +16,7 @@ import datetime, operator
 import re, csv
 import json
 import numpy
-from ..Models import DBSession, Base
+from ..Models import Base,DBSession
 from ..Models import ArgosGps, Gsm, Individual_Location, Station, Sensor, SensorType, Individual, Rfid
 from pyramid.security import NO_PERMISSION_REQUIRED
 from operator import itemgetter
@@ -26,6 +26,8 @@ import transaction
 # Data imported from the CLS WS during the last week.
 @view_config(route_name='weekData', renderer='json',permission = NO_PERMISSION_REQUIRED)
 def weekData(request):
+    session = request.dbsession
+
     """Return an array of location number per day within the last seven days."""
     today = datetime.date.today()
     # Initialize Json object
@@ -42,7 +44,7 @@ def weekData(request):
             ).where(and_(ArgosGps.date >= today - datetime.timedelta(days = 7),ArgosGps.type_ == 'arg')
             ).group_by(cast(ArgosGps.date, Date)
     )
-    for date, nb in DBSession.execute(argos_query).fetchall():
+    for date, nb in session.execute(argos_query).fetchall():
             try:
                     i = data['label'].index(str(date))
                     data['Argos'][i] = nb
@@ -53,7 +55,7 @@ def weekData(request):
             [cast(ArgosGps.date, Date).label('date'), func.count('*').label('nb')]
             ).where(and_(ArgosGps.date >= today - datetime.timedelta(days = 7),ArgosGps.type_ == 'gps')
             ).group_by(cast(ArgosGps.date, Date))
-    for date, nb in DBSession.execute(gps_query).fetchall():
+    for date, nb in session.execute(gps_query).fetchall():
             try:
                     i = data['label'].index(str(date))
                     data['GPS'][i] = nb
@@ -63,7 +65,7 @@ def weekData(request):
             [cast(Gsm.date, Date).label('date'), func.count(Gsm.pk_id).label('nb')]
             ).where(Gsm.date >= today - datetime.timedelta(days = 7)
             ).group_by(cast(Gsm.date, Date))
-    for date, nb in DBSession.execute(gsm_query).fetchall():
+    for date, nb in session.execute(gsm_query).fetchall():
             try:
                     i = data['label'].index(str(date))
                     data['GSM'][i] = nb
@@ -74,6 +76,8 @@ def weekData(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name = 'station_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
 def station_graph(request):
+    session = request.dbsession
+
         # Initialize Json object
     result = OrderedDict()
 
@@ -93,7 +97,7 @@ def station_graph(request):
             Execute query and sort result by year, month
             (faster than an order_by clause in this case)
     """
-    data = DBSession.execute(query).fetchall()
+    data = session.execute(query).fetchall()
     for nb, y, m in sorted(data, key=operator.itemgetter(1,2)):
             d = datetime.date(day=1, month=m, year=y).strftime('%b')
             result[' '.join([d, str(y)])] = nb
@@ -103,21 +107,28 @@ def station_graph(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name = 'location_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
 def location_graph(request):
+    session = request.dbsession
+
 
     joinTable = join(Individual_Location,Sensor, Individual_Location.FK_Sensor == Sensor.ID)
     data = []
     query= select([Individual_Location.type_,func.count('*').label('nb')]
         ).group_by(Individual_Location.type_)
 
-    for row in DBSession.execute(query).fetchall() :
+    for row in session.execute(query).fetchall() :
         curRow = OrderedDict(row)
-        data.append({'value':curRow['nb'],'label':curRow['type_'].upper()})
+        lab = curRow['type_'].upper()
+        if lab == 'ARG':
+            lab = 'ARGOS'
+        data.append({'value':curRow['nb'],'label':lab})
     data.sort(key = itemgetter('label'))
     transaction.commit()
     return data
 
 @view_config(route_name = 'uncheckedDatas_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
 def uncheckedDatas_graph(request):
+    session = request.dbsession
+
 
     queryArgos= select([ArgosGps.type_.label('type_'),func.count('*').label('nb')]).where(ArgosGps.checked == 0
         ).group_by(ArgosGps.type_)
@@ -128,7 +139,7 @@ def uncheckedDatas_graph(request):
         ).where(Rfid.checked == 0)
 
     data = []
-    for row in DBSession.execute(queryArgos).fetchall() :
+    for row in session.execute(queryArgos).fetchall() :
         curRow = OrderedDict(row)
         lab = curRow['type_'].upper()
         if lab == 'ARG':
@@ -136,12 +147,12 @@ def uncheckedDatas_graph(request):
         data.append({'value':curRow['nb'],'label':lab})
     transaction.commit()
 
-    for row in DBSession.execute(queryGSM).fetchall() :
+    for row in session.execute(queryGSM).fetchall() :
         curRow = OrderedDict(row)
         data.append({'value':curRow['nb'],'label':'GSM'})
     transaction.commit()
 
-    for row in DBSession.execute(queryRFID).fetchall() :
+    for row in session.execute(queryRFID).fetchall() :
         curRow = OrderedDict(row)
         data.append({'value':curRow['nb'],'label':'RFID'})
     data.sort(key = itemgetter('label'))
@@ -151,6 +162,8 @@ def uncheckedDatas_graph(request):
 
 @view_config(route_name = 'individual_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
 def individual_graph(request):
+    session = request.dbsession
+
         # Initialize Json object
     result = OrderedDict()
 
@@ -166,7 +179,7 @@ def individual_graph(request):
             ).where(and_(Individual.creationDate >= begin_date, Individual.creationDate < end_date)
             ).group_by(func.year(Individual.creationDate), func.month(Individual.creationDate)
     )
-    data = DBSession.execute(query).fetchall()
+    data = session.execute(query).fetchall()
     for nb, y, m in sorted(data, key=operator.itemgetter(1,2)):
             d = datetime.date(day=1, month=m, year=y).strftime('%b')
             result[' '.join([d, str(y)])] = nb
@@ -175,6 +188,8 @@ def individual_graph(request):
 
 @view_config(route_name = 'individual_monitored', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
 def individual_monitored(request):
+    session = request.dbsession
+
         # Initialize Json object
     result = OrderedDict()
     table = Base.metadata.tables['IndividualDynPropValuesNow']
@@ -186,7 +201,7 @@ def individual_monitored(request):
         ).group_by(table.c['ValueString'])
 
     data = []
-    for row in DBSession.execute(query).fetchall():
+    for row in session.execute(query).fetchall():
         curRow = OrderedDict(row)
         data.append({'value':curRow['nb'],'label':curRow['label']})
     transaction.commit()

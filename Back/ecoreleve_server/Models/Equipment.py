@@ -38,6 +38,10 @@ class Equipment(Base):
     StartDate = Column(DateTime,default = func.now())
     Deploy = Column(Boolean)
 
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        ObjectWithDynProp.__init__(self)
+
 def checkSensor(fk_sensor,equipDate):
     e1 = aliased(Equipment)
     subQuery = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor
@@ -47,7 +51,7 @@ def checkSensor(fk_sensor,equipDate):
         ,and_(Equipment.StartDate<equipDate
             ,and_(Equipment.Deploy == 1,Equipment.FK_Sensor == fk_sensor))))
     fullQuery = select([True]).where(~exists(query))
-    sensorEquip = DBSession.execute(fullQuery).scalar()
+    sensorEquip = DBSession().execute(fullQuery).scalar()
     return sensorEquip
 
 def checkIndiv(equipDate,fk_indiv):
@@ -103,7 +107,7 @@ def existingEquipment (fk_sensor,equipDate,fk_indiv=None):
     query = select([Equipment]).where(and_(~exists(subQuery),and_(Equipment.StartDate<=equipDate,and_(Equipment.Deploy == 1,and_(Equipment.FK_Sensor == fk_sensor,Equipment.FK_Individual == fk_indiv)))))
     fullQuery = select([True]).where(exists(query))
 
-    return DBSession.execute(fullQuery).scalar()
+    return DBSession().execute(fullQuery).scalar()
 
 def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None):
     e1 = aliased(Equipment)
@@ -116,7 +120,7 @@ def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None):
 
     query = query.where(~exists(subQueryUnequip))
     fullQuery = select([True]).where(~exists(query))
-    return DBSession.execute(fullQuery).scalar()
+    return DBSession().execute(fullQuery).scalar()
 
 
 def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):

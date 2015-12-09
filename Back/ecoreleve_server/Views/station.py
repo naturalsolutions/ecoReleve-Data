@@ -1,6 +1,5 @@
 from pyramid.view import view_config
 from ..Models import (
-    DBSession,
     Station,
     StationType,
     Observation,
@@ -43,7 +42,7 @@ def actionOnStations(request):
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
 
-def count_ (request = None,listObj = None) :
+def count_ (request = None,listObj = None):
     if request is not None : 
         data = request.params
         if 'criteria' in data: 
@@ -68,9 +67,11 @@ def getFilters (request):
     return filters
 
 def getForms(request) :
+    session = request.dbsession
+
     typeSta = request.params['ObjectType']
     ModuleName = 'StationForm'
-    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
+    Conf = session.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newSta = Station(FK_StationType = typeSta)
     newSta.init_on_load()
     schema = newSta.GetDTOWithSchema(Conf,'edit')
@@ -84,30 +85,14 @@ def getFields(request) :
     transaction.commit()
     return cols
 
-
-# ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/autocomplete', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
-def autocomplete (request):
-    criteria = request.params['term']
-    prop = request.matchdict['prop']
-    if isinstance(prop,int):
-        table = Base.metadata.tables['StationDynPropValuesNow']
-        query = select([table.c['ValueString'].label('label'),table.c['ValueString'].label('value')]
-            ).where(table.c['FK_StationDynProp']== prop)
-        query = query.where(table.c['ValueString'].like('%'+criteria+'%')).order_by(asc(table.c['ValueString']))
-    else: 
-        table = Base.metadata.tables['Station']
-        query = select([table.c[prop].label('value'),table.c[prop].label('label')])
-        query = query.where(table.c[prop].like('%'+criteria+'%'))
-
-    return [dict(row) for row in DBSession.execute(query).fetchall()]
-
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getStation(request):
+    session = request.dbsession
+
     print('***************** GET STATION ***********************')
     id = request.matchdict['id']
-    curSta = DBSession.query(Station).get(id)
+    curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
 
     # if Form value exists in request --> return data with schema else return only data
@@ -118,7 +103,7 @@ def getStation(request):
         except : 
             DisplayMode = 'display'
 
-        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='StationForm' ).first()
+        Conf = session.query(FrontModules).filter(FrontModules.Name=='StationForm' ).first()
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
         response['data']['fieldActivityId'] = str(response['data']['fieldActivityId'])
     else : 
@@ -130,21 +115,25 @@ def getStation(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
 def deleteStation(request):
+    session = request.dbsession
+
     id_ = request.matchdict['id']
-    curSta = DBSession.query(Station).get(id_)
-    DBSession.delete(curSta)
+    curSta = session.query(Station).get(id_)
+    session.delete(curSta)
     transaction.commit()
     return True
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateStation(request):
+    session = request.dbsession
+
     print('*********************** UPDATE Station *****************')
     data = request.json_body
     id = request.matchdict['id']
     if 'creationDate' in data:
         del data['creationDate']
-    curSta = DBSession.query(Station).get(id)
+    curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
     curSta.UpdateFromJson(data)
     transaction.commit()
@@ -163,22 +152,26 @@ def insertStation(request):
         return insertListNewStations(request)
 
 def insertOneNewStation (request) :
+    session = request.dbsession
+
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
             data[items] = value
 
     newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid['iss'])
-    newSta.StationType = DBSession.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
+    newSta.StationType = session.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
     # print (newSta.__dict__)
-    DBSession.add(newSta)
-    DBSession.flush()
+    session.add(newSta)
+    session.flush()
     # transaction.commit()
     return {'ID': newSta.ID}
 
 def insertListNewStations(request):
+    session = request.dbsession
+
     data = request.json_body
     data_to_insert = []
     format_dt = '%Y-%m-%d %H:%M:%S'
@@ -224,7 +217,7 @@ def insertListNewStations(request):
             Station.StationDate.between(minDate,maxDate),
             Station.LAT.between(minLat,maxLat)
             ))
-    result_to_check = DBSession.execute(query).fetchall()
+    result_to_check = session.execute(query).fetchall()
 
     if result_to_check :
         ##### IF potential duplicated stations, load them into pandas DataFrame then join data to insert on LAT,LON,DATE #####
@@ -243,7 +236,7 @@ def insertListNewStations(request):
     if len(data_to_insert) != 0 :
         # print('********* insertion plusieurs stations **********')
         stmt = Station.__table__.insert(returning=[Station.ID]).values(data_to_insert)
-        res = DBSession.execute(stmt).fetchall()
+        res = session.execute(stmt).fetchall()
         # print('********* station list**********')
         result =list(map(lambda y:  y[0], res))
         #result = list(map(lambda y: {'FK_Station' : y[0], }, res))
@@ -256,7 +249,7 @@ def insertListNewStations(request):
             list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK_FieldWorker': b  },result)),data[0]['FieldWorkers'] ))
             list_ = list(itertools.chain.from_iterable(list_))
             stmt = Station_FieldWorker.__table__.insert().values(list_)
-            DBSession.execute(stmt)
+            session.execute(stmt)
     else : 
         result = []
 
@@ -267,6 +260,8 @@ def insertListNewStations(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchStation(request):
+    session = request.dbsession
+
     ''' return data according to filter parameter, if "geo" is in request return geojson format '''
     data = request.params.mixed()
     searchInfo = {}
@@ -322,7 +317,7 @@ def searchStation(request):
         ]
         searchInfo['criteria'].extend(criteria)
 
-    moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     start = datetime.now()
     listObj = StationList(moduleFront)
     countResult = listObj.count(searchInfo)
@@ -349,13 +344,15 @@ def searchStation(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 
 def linkToMonitoredSite(request):
-    curSta = DBSession.query(Station).get(request.matchdict['id'])
+    session = request.dbsession
+
+    curSta = session.query(Station).get(request.matchdict['id'])
     data = request.json_body
     idSite = data['siteId']
     curSta.FK_MonitoredSite = idSite
     if data['updateSite'] : 
         newSitePos = MonitoredSitePosition(StartDate=curSta.StationDate, LAT=curSta.LAT, LON=curSta.LON, ELE=curSta.ELE, Precision=curSta.precision, FK_MonitoredSite=idSite)
-        DBSession.add(newSitePos)
+        session.add(newSitePos)
     transaction.commit()
     return {}
 

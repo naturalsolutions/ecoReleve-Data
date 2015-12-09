@@ -5,14 +5,15 @@ from sqlalchemy.orm import relationship
 from collections import OrderedDict
 from datetime import datetime
 from .FrontModules import FrontModules,ModuleForms
+from pyramid import threadlocal
 
 DynPropType = {'string':'Text','float':'Text','date':'Date','integer':'Text','int':'Text'}
 
 class ObjectTypeWithDynProp:
     ''' Class to extend for mapped object type with dynamic props'''
 
-    def __init__(self,ObjContext):
-        self.ObjContext = DBSession
+    def __init__(self,ObjContext=None):
+        self.ObjContext = threadlocal.get_current_request().dbsession
         self.DynPropNames = self.GetDynPropNames()
 
     def GetDynPropContextTable(self):

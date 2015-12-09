@@ -1,4 +1,4 @@
-from ..Models import Base,DBSession, dbConfig
+from ..Models import Base, dbConfig
 from sqlalchemy import Column, DateTime, Float,Boolean, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_,text,select
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
@@ -26,6 +26,14 @@ class FrontModules(Base):
     ModuleForms = relationship('ModuleForms',lazy='dynamic',back_populates='FrontModules')
     ModuleGrids = relationship('ModuleGrids',lazy='dynamic',back_populates='FrontModules')
 
+    def __init__(self):
+        self.session = threadlocal.get_current_request().dbsession
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self.__init__()
+
+
 # ------------------------------------------------------------------------------------------------------------------------- #
 class ModuleForms(Base):
     __tablename__ = 'ModuleForms'
@@ -49,6 +57,13 @@ class ModuleForms(Base):
     DefaultValue = Column(String)
 
     FrontModules = relationship("FrontModules", back_populates="ModuleForms")
+
+    def __init__(self):
+        self.session = threadlocal.get_current_request().dbsession
+    
+    @orm.reconstructor
+    def init_on_load(self):
+        self.__init__()
 
     @staticmethod
     def GetClassFromSize(FieldSize):
@@ -98,7 +113,7 @@ class ModuleForms(Base):
 
     def InputSelect (self) :
         if self.Options is not None and self.Options != '' :
-            result = DBSession.execute(text(self.Options)).fetchall()
+            result = self.session.execute(text(self.Options)).fetchall()
             for row in result :
                 temp = {}
                 for key in row.keys() : 
@@ -109,7 +124,7 @@ class ModuleForms(Base):
     def InputLNM(self) :
         ''' build ListOfNestedModel input type : used for complex protocols and Fieldworkers in station form '''
         if self.Options != None :
-            result = DBSession.query(ModuleForms).filter(and_(ModuleForms.TypeObj == self.Options , ModuleForms.Module_ID == self.Module_ID)).all()
+            result = self.session.query(ModuleForms).filter(and_(ModuleForms.TypeObj == self.Options , ModuleForms.Module_ID == self.Module_ID)).all()
             subNameObj = result[0].Name
             subschema = {}
             for conf in result :
@@ -119,7 +134,7 @@ class ModuleForms(Base):
             'type': self.InputType,
             'title' : None,
             'editable' : None,
-            'editorClass' : str(self.editorClass) ,
+            'editorClass' : str(self.editorClass),
             'validators': [],
             'options': [],
             'fieldClass': None,
@@ -143,10 +158,12 @@ class ModuleForms(Base):
     def InputAutocomplete(self):
         if self.Options is not None and self.Options != '':
             option = json.loads(self.Options)
-            result = DBSession.execute(text(option['source'])).fetchall()
-            self.dto['options']= {'source':[]}
-            for row in result:
-                self.dto['options']['source'].append(row[0])
+        if 'SELECT' in option['source']:
+                result = self.session.execute(text(option['source'])).fetchall()
+                for row in result:
+                    self.dto['options']['source'].append(row[0])
+        else : 
+            self.dto['options'] = {'source': option['source'],'minLength' :option['minLength']}
 
 
     func_type_context = {
@@ -183,6 +200,13 @@ class ModuleGrids (Base) :
     FrontModules = relationship("FrontModules", back_populates="ModuleGrids")
 
 
+    def __init__(self):
+        self.session = threadlocal.get_current_request().dbsession
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self.__init__()
+
     def FKName (self):
         if self.QueryName is None : 
             return self.Name 
@@ -200,7 +224,7 @@ class ModuleGrids (Base) :
         }
 
         if self.CellType == 'select' and 'SELECT' in self.Options :
-             result = DBSession.execute(text(self.Options)).fetchall()
+             result = self.session.execute(text(self.Options)).fetchall()
              column['optionValues'] = [[row['label'],row['val']] for row in result]
         return column
 
@@ -221,7 +245,7 @@ class ModuleGrids (Base) :
             filter_['fieldClass'] = FieldSizeToClass[self.FilterSize],
 
         if self.FilterType == 'Select' and self.Options != None : 
-            result = DBSession.execute(text(self.Options)).fetchall()
+            result = self.session.execute(text(self.Options)).fetchall()
             filter_['options'] = [{'label':row['label'],'val':row['val']} for row in result]
         if self.FilterType == 'Checkboxes' :
             filter_['options'] = [{'label':'True','val':1},{'label':'False','val':0}]
@@ -237,7 +261,7 @@ class ModuleGrids (Base) :
             option = json.loads(self.Options)
             filter_['options']= {'source':[]}
             if 'SELECT' in option['source']:
-                result = DBSession.execute(text(option['source'])).fetchall()
+                result = self.session.execute(text(option['source'])).fetchall()
                 for row in result:
                     filter_['options']['source'].append(row[0])
             else : 

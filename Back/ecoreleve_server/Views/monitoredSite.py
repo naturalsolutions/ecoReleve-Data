@@ -1,6 +1,5 @@
 from pyramid.view import view_config
 from ..Models import (
-    DBSession,
     Station,
     MonitoredSite,
     MonitoredSiteType,
@@ -49,6 +48,8 @@ def actionOnMonitoredSite(request):
     return dictActionFunc[actionName](request)
 
 def count_ (request = None,listObj = None) :
+    session = request.dbsession
+
     print('*****************  MonitoredSite COUNT***********************')
     if request is not None : 
         data = request.params
@@ -64,6 +65,8 @@ def count_ (request = None,listObj = None) :
     return count 
 
 def getFilters (request):
+    session = request.dbsession
+
     ModuleType = 'MonitoredSiteGrid'
     filtersList = MonitoredSite().GetFilters(ModuleType)
     filters = {}
@@ -73,10 +76,12 @@ def getFilters (request):
     return filters
 
 def getForms(request) :
+    session = request.dbsession
+
     typeMonitoredSite = request.params['ObjectType']
     print('***************** GET FORMS ***********************')
     ModuleName = 'MonitoredSiteForm'
-    Conf = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
+    Conf = session.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = typeMonitoredSite)
     newMonitoredSite.init_on_load()
     schema = newMonitoredSite.GetDTOWithSchema(Conf,'edit')
@@ -84,6 +89,8 @@ def getForms(request) :
     return schema
 
 def getFields(request) :
+    session = request.dbsession
+
     ModuleType = request.params['name']
     if ModuleType == 'default' :
         ModuleType = 'MonitoredSiteGrid'
@@ -92,33 +99,20 @@ def getFields(request) :
     return cols
 
 def getMonitoredSiteType(request):
+    session = request.dbsession
+
     query = select([MonitoredSiteType.ID.label('val'), MonitoredSiteType.Name.label('label')])
-    response = [ OrderedDict(row) for row in DBSession.execute(query).fetchall()]
+    response = [ OrderedDict(row) for row in session.execute(query).fetchall()]
     return response
-
-# ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/autocomplete', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
-def autocomplete (request):
-    criteria = request.params['term']
-    prop = request.matchdict['prop']
-    if isinstance(prop,int):
-        table = Base.metadata.tables['MontoredSiteDynPropValuesNow']
-        query = select([table.c['ValueString'].label('label'),table.c['ValueString'].label('value')]
-            ).where(table.c['FK_MontoredSiteDynProp']== prop)
-        query = query.where(table.c['ValueString'].like('%'+criteria+'%')).order_by(asc(table.c['ValueString']))
-    else: 
-        table = Base.metadata.tables['MontoredSite']
-        query = select([table.c[prop].label('value'),table.c[prop].label('label')])
-        query = query.where(table.c[prop].like('%'+criteria+'%'))
-
-    return [dict(row) for row in DBSession.execute(query).fetchall()]
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getMonitoredSite(request):
+    session = request.dbsession
+
     print('***************** GET MonitoredSite ***********************')
     id = request.matchdict['id']
-    curMonitoredSite = DBSession.query(MonitoredSite).get(id)
+    curMonitoredSite = session.query(MonitoredSite).get(id)
     curMonitoredSite.LoadNowValues()
 
     # if Form value exists in request --> return data with schema else return only data
@@ -128,7 +122,7 @@ def getMonitoredSite(request):
             DisplayMode = request.params['DisplayMode']
         except : 
             DisplayMode = 'display'
-        Conf = DBSession.query(FrontModules).filter(FrontModules.Name=='MonitoredSiteForm').first()
+        Conf = session.query(FrontModules).filter(FrontModules.Name=='MonitoredSiteForm').first()
         response = curMonitoredSite.GetDTOWithSchema(Conf,DisplayMode)
 
     transaction.commit()
@@ -137,6 +131,8 @@ def getMonitoredSite(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getMonitoredSiteHistory(request):
+    session = request.dbsession
+
     print('**HISTOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOORY********' )
     id = request.matchdict['id']
     data = request.params.mixed()
@@ -151,7 +147,7 @@ def getMonitoredSiteHistory(request):
     # searchInfo['per_page'] = json.loads(data['per_page'])
 
     ModuleType = 'MonitoredSiteGridHistory'
-    moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     view = Base.metadata.tables['MonitoredSitePosition']
     listObj = ListObjectWithDynProp(MonitoredSite,moduleFront,View=view)
     dataResult = listObj.GetFlatDataList(searchInfo)
@@ -172,13 +168,15 @@ def getMonitoredSiteHistory(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id/equipment', renderer='json', request_method = 'GET')
 def getMonitoredSiteEquipment(request):
+    session = request.dbsession
+
 
     id_site = request.matchdict['id']
     joinTable = join(Equipment,Sensor, Equipment.FK_Sensor == Sensor.ID
         ).join(SensorType,Sensor.FK_SensorType == SensorType.ID)
     query = select([Equipment.StartDate,SensorType.Name.label('Type'),Sensor.UnicIdentifier,Equipment.Deploy]).select_from(joinTable
         ).where(Equipment.FK_MonitoredSite == id_site).order_by(desc(Equipment.StartDate))
-    result = DBSession.execute(query).fetchall()
+    result = session.execute(query).fetchall()
     response = []
     for row in result:
         curRow = OrderedDict(row)
@@ -192,20 +190,24 @@ def getMonitoredSiteEquipment(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
 def deleteMonitoredSite(request):
+    session = request.dbsession
+
     id_ = request.matchdict['id']
-    curMonitoredSite = DBSession.query(MonitoredSite).get(id_)
-    DBSession.delete(curMonitoredSite)
+    curMonitoredSite = session.query(MonitoredSite).get(id_)
+    session.delete(curMonitoredSite)
     transaction.commit()
     return True
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateMonitoredSite(request):
+    session = request.dbsession
+
     print('*********************** UPDATE MonitoredSite *****************')
     try:
         data = request.json_body
         id = request.matchdict['id']
-        curMonitoredSite = DBSession.query(MonitoredSite).get(id)
+        curMonitoredSite = session.query(MonitoredSite).get(id)
     
         curMonitoredSite.LoadNowValues()
         curMonitoredSite.UpdateFromJson(data)
@@ -234,23 +236,27 @@ def insertMonitoredSite(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewMonitoredSite (request) :
+    session = request.dbsession
+
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
             data[items] = value
 
     newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid['iss'] )
-    newMonitoredSite.MonitoredSiteType = DBSession.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
+    newMonitoredSite.MonitoredSiteType = session.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
     newMonitoredSite.init_on_load()
     newMonitoredSite.UpdateFromJson(data)
-    DBSession.add(newMonitoredSite)
-    DBSession.flush()
+    session.add(newMonitoredSite)
+    session.flush()
     # transaction.commit()
     return {'ID': newMonitoredSite.ID}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchMonitoredSite(request):
+    session = request.dbsession
+
     data = request.params.mixed()
     print('*********data*************')
     searchInfo = {}
@@ -265,7 +271,7 @@ def searchMonitoredSite(request):
     searchInfo['per_page'] = json.loads(data['per_page'])
 
     ModuleType = 'MonitoredSiteGrid'
-    moduleFront  = DBSession.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     print('**criteria********' )
     print(searchInfo['criteria'])
     start = datetime.now()

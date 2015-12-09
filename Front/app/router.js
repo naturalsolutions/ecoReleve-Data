@@ -53,9 +53,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       '*route(/:page)': 'home',
     },
 
-
-    /*execute: function(callback, args) {
-=======
     execute: function(callback, args) {
       $.ajax({
         context: this,
@@ -68,7 +65,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
         }
       });
 
-    },*/
+    },
 
 
     onRoute: function(url, patern, params) {
