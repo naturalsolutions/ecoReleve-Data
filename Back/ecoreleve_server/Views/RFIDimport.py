@@ -16,13 +16,11 @@ from collections import OrderedDict
 # ------------------------------------------------------------------------------------------------------------------------- #
 def uploadFileRFID(request):
     session = request.dbsession
-    
     data = []
     message = ""
     field_label = []
     isHead = False
     now=datetime.now()
-    print('call ajax import')
     try:
         creator = request.authenticated_userid['iss']
         content = request.POST['data']
@@ -138,7 +136,6 @@ def uploadFileRFID(request):
         request.response.status_code = 500
         message = 'Data already exist.'
     except Exception as e:
-        print(e)
         request.response.status_code = 520
         message = 'Error'
     return message

@@ -288,13 +288,13 @@ class ObjectWithDynProp:
                 if curEditable:
                     curSize = CurModuleForms.FieldSizeEdit
 
-                if (CurModuleForms.FormRender & 2) == 0:
+                if (CurModuleForms.FormRender <= 2) == 0:
                     curEditable = False
 
                 if CurModuleForms.FormRender > 2 :
                     curEditable = True
 
-                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)))
+                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)),DisplayMode)
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):
@@ -317,17 +317,21 @@ class ObjectWithDynProp:
         resultat['data'] = data
         if self.ID :
             resultat['data']['id'] = self.ID
+            for key, value in schema.items():
+                if (DisplayMode.lower() != 'edit' and schema[key]['fullPath'] is True):
+                    try : 
+                        resultat['data'][key] = self.splitFullPath(resultat['data'][key])
+                    except : pass
         else :
             resultat['data']['id'] = 0
             # add default values for each field in data if exists
             #for attr in schema:
             for key, value in schema.items():
-                #print (key)
-                #print (value['defaultValue'])
                 if value['defaultValue'] is not None:
-                    print (key)
-                    print (value['defaultValue'])
                     resultat['data'][key] = value['defaultValue']
-                #print (attr.defaultValue)
         return resultat
+
+    def splitFullPath(self,value):
+        splitValue = value.split('>')[-1]
+        return splitValue
 

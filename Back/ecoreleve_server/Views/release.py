@@ -29,7 +29,6 @@ prefix = 'release/'
 
 @view_config(route_name= prefix+'individuals/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnStations(request):
-    print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     # 'count' : count_,
     'getFields': getFields,
@@ -75,8 +74,6 @@ def getFields(request):
         'cell' : 'select-row',
         'headerCell': 'select-all'
         })
-    
-    transaction.commit()
     return cols
 
 def getReleaseMethod(request):
@@ -92,9 +89,8 @@ def getReleaseMethod(request):
 @view_config(route_name= prefix+'individuals', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def searchIndiv(request):
     session = request.dbsession
-
     data = request.params.mixed()
-    print('*********data*************')
+
     searchInfo = {}
     searchInfo['criteria'] = []
     if 'criteria' in data: 
@@ -122,16 +118,14 @@ def searchIndiv(request):
     countResult = listObj.count(searchInfo)
     result = [{'total_entries':countResult}]
     result.append(dataResult)
-    transaction.commit()
+
     return result
 
 
 @view_config(route_name= prefix+'individuals', renderer='json', request_method = 'POST', permission = NO_PERMISSION_REQUIRED)
 def releasePost(request):
     session = request.dbsession
-
     data = request.params.mixed()
-    print(data)
     sta_id = int(data['StationID'])
     indivList = json.loads(data['IndividualList'])
     releaseMethod = data['releaseMethod']
@@ -139,7 +133,6 @@ def releasePost(request):
     curStation = session.query(Station).get(sta_id)
 
     taxons = dict(Counter(indiv['Species'] for indiv in indivList))
-    print (taxons)
     def getnewObs(typeID):
         return Observation(FK_ProtocoleType=typeID)
 
@@ -257,6 +250,5 @@ def releasePost(request):
     session.add(releaseGrp)
     session.add_all(biometryList)
     session.add_all(equipmentIndList)
-    transaction.commit()
 
     return {'release':len(releaseIndList)}
