@@ -65,7 +65,7 @@ class ObjectWithDynProp:
     def GetPropWithName(self,nameProp):
         if self.allProp is None:
             self.GetAllProp()
-        return find(lambda x: x['name'] == nameProp,self.allProp)
+        return find(lambda x: x['name'].lower() == nameProp.lower(),self.allProp)
 
     def GetFrontModulesID (self,ModuleType) :
         if not hasattr(self,'FrontModules') :
@@ -193,10 +193,12 @@ class ObjectWithDynProp:
                 print(nameProp+' is not a column')
                 pass
         else:
-            if (nameProp in self.GetType().DynPropNames):
+            if (nameProp.lower() in self.GetType().DynPropNames):
                 if (nameProp not in self.PropDynValuesOfNow #and parseValue(valeur)!= None
                     ) or (isEqual(self.PropDynValuesOfNow[nameProp],valeur) is False):
                     #### IF no value or different existing value, new value is affected ####
+                    print(nameProp)
+                    print('\n\n')
                     if 'date' in self.GetPropWithName(nameProp)['type'].lower():
                         valeur = parse(valeur.replace(' ',''))
 
