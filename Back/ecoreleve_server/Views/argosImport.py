@@ -64,6 +64,11 @@ def parseDSFileAndInsert(full_filename,session):
     MTI_path = os.path.join(workDir,'MTIwinGPS.exe')
     out_path = os.path.join(workDir,"ecoReleve_import","Argos",os.path.splitext(os.path.basename(full_filename))[0])
 
+    try:
+        os.system('taskkill /f /im MTIwinGPS.exe')
+    except:
+        pass
+
     EngData = None
     GPSData = None
     EngDataBis = None
@@ -100,12 +105,16 @@ def parseDSFileAndInsert(full_filename,session):
 
     pid = proc.pid
     cc['pid'] = pid
-    parent = psutil.Process(pid)
+    # parent = psutil.Process(pid)
+    # try:
+    #     for child in parent.children(recursive=True):  # or parent.children() for recursive=False
+    #         child.kill()
+    #     parent.kill()
+    # except: pass
     try:
-        for child in parent.children(recursive=True):  # or parent.children() for recursive=False
-            child.kill()
-        parent.kill()
-    except: pass
+        os.system('taskkill /f /im MTIwinGPS.exe')
+    except:
+        pass
 
     for filename in filenames:
         fullname = os.path.splitext(os.path.basename(filename))[0]
