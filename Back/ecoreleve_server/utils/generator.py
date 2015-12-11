@@ -6,6 +6,7 @@ from collections import OrderedDict
 from .eval import Eval
 from .datetime import parse
 import re
+from pyramid import threadlocal
 
 
 eval_ = Eval()
@@ -13,6 +14,7 @@ eval_ = Eval()
 class Generator :
 
     def __init__(self,table):
+        self.sessionMaker = threadlocal.get_current_registry().dbmaker()
         self.dictCell={
             'VARCHAR':'string',
             'NVARCHAR':'string',
@@ -114,7 +116,7 @@ class Generator :
         if offset!=None:
             query, total=self.get_page(query,offset,per_page, order_by)
 
-        data = DBSession.execute(query).fetchall()
+        data = self.sessionMaker.execute(query).fetchall()
         if(total or total == 0):
             result = [{'total_entries':total}]
             result.append([OrderedDict(row) for row in data])
@@ -126,11 +128,11 @@ class Generator :
     def count_(self,criteria={}):
         query = self.getFullQuery(criteria,count=True)
         print(query)
-        countResult = DBSession.execute(query).scalar()
+        countResult = self.sessionMaker.execute(query).scalar()
         return countResult
 
     def get_page(self,query,offset,limit,order_by):
-        total = DBSession.execute(select([func.count()]).select_from(query.alias())).scalar()
+        total = self.sessionMaker.execute(select([func.count()]).select_from(query.alias())).scalar()
         order_by_clause = []
         for obj in order_by:
             column, order = obj.split(':')
@@ -162,10 +164,10 @@ class Generator :
             if(countResult <= 50000):
                 query = self.getFullQuery(criteria)
                 try :
-                    data=DBSession.execute(query.where(self.table.c['LAT'] != None)).fetchall()
+                    data=self.sessionMaker.execute(query.where(self.table.c['LAT'] != None)).fetchall()
                 except :
                     try:
-                        data=DBSession.execute(query.where(self.table.c['lat'] != None)).fetchall()
+                        data=self.sessionMaker.execute(query.where(self.table.c['lat'] != None)).fetchall()
                     except:
                         pass
 
