@@ -47,6 +47,13 @@ class StationList(ListObjectWithDynProp):
                     ,eval_.eval_binary_expr(Observation.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])))
             query = query.where(exists(subSelect))
 
+        if curProp == 'FK_Individual':
+            subSelect = select([Observation]
+                ).where(
+                and_(Station.ID== Observation.FK_Station
+                    ,eval_.eval_binary_expr(Observation.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])))
+            query = query.where(exists(subSelect))
+
         if curProp == 'FK_FieldWorker':
             subSelect = select([Station_FieldWorker]
                 ).where(
@@ -95,7 +102,7 @@ class StationList(ListObjectWithDynProp):
     def countQuery(self,criteria = None):
         query = super().countQuery(criteria)
         for obj in criteria :
-            if obj['Column'] in ['FK_ProtocoleType','FK_FieldWorker','LastImported']:
+            if obj['Column'] in ['FK_ProtocoleType','FK_FieldWorker','LastImported','FK_Individual']:
                 query = self.WhereInJoinTable(query,obj)
         return query
 

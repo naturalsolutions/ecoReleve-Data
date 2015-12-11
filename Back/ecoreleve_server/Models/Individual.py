@@ -28,7 +28,7 @@ class Individual (Base,ObjectWithDynProp) :
     creationDate = Column (DateTime,nullable=False)
     Species = Column (String(250))
     Age = Column(String(250))
-    UnicIdentifier = Column(String(250))
+    # UnicIdentifier = Column(String(250))
     Birth_date = Column(DateTime)
     Death_date = Column(DateTime)
     Original_ID = Column(String(250))
