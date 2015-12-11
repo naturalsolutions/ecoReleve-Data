@@ -112,12 +112,13 @@ class IndividualList(ListObjectWithDynProp):
         if curProp == 'LastImported':
             st = aliased(Individual)
             subSelect = select([Observation]).where(Observation.FK_Individual == Individual.ID)
-            subSelect2 = select([cast(func.max(st.creationDate),DATE)]).where(st.Original_ID.like('TRACK_%'))
-            query = query.where(and_(~exists(subSelect)
-                ,and_(~exists(subSelect)
-                    ,and_(Individual.Original_ID.like('TRACK_%'),Individual.creationDate >= subSelect2)
-                    )
-                ))
+            # subSelect2 = select([cast(func.max(st.creationDate),DATE)]).where(st.Original_ID.like('TRACK_%'))
+            # query = query.where(and_(~exists(subSelect)
+            #     # ,and_(~exists(subSelect)
+            #         # ,and_(Individual.Original_ID.like('TRACK_%'),Individual.creationDate >= subSelect2)
+            #         # )
+            #     )
+            query = query.where(and_(~exists(subSelect),Individual.Original_ID.like('TRACK_%')))
         return query
 
     def countQuery(self,criteria = None):
