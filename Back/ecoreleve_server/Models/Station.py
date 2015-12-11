@@ -29,6 +29,8 @@ from collections import OrderedDict
 import pandas as pd 
 import numpy as np 
 import json
+from traceback import print_exc
+from pyramid import threadlocal
 
 
 #--------------------------------------------------------------------------
@@ -102,7 +104,10 @@ class Station(Base,ObjectWithDynProp):
         
     def GetNewValue(self,nameProp):
         ReturnedValue = StationDynPropValue()
-        ReturnedValue.StationDynProp = self.ObjContext.query(StationDynProp).filter(StationDynProp.Name==nameProp).first()
+        try:
+            ReturnedValue.FK_StationDynProp = self.ObjContext.execute(select([StationDynProp.ID]).where(StationDynProp.Name==nameProp)).scalar()
+        except:
+            print_exc()
         return ReturnedValue
 
     def GetDynPropValues(self):

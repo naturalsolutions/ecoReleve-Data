@@ -195,7 +195,6 @@ class ObjectWithDynProp:
                             pass
                 setattr(self,nameProp,valeur)
             except :
-                print(nameProp+' is not a column')
                 pass
         else:
             if (nameProp.lower() in self.GetType().DynPropNames):
@@ -203,8 +202,10 @@ class ObjectWithDynProp:
                     ) or (isEqual(self.PropDynValuesOfNow[nameProp],valeur) is False):
                     #### IF no value or different existing value, new value is affected ####
                     if 'date' in self.GetPropWithName(nameProp)['type'].lower():
-                        valeur = parse(valeur.replace(' ',''))
-
+                        try:
+                            valeur = parse(valeur.replace(' ',''))
+                        except:
+                            pass
                     NouvelleValeur = self.GetNewValue(nameProp)
                     NouvelleValeur.StartDate = datetime.today()
                     setattr(NouvelleValeur,Cle[self.GetPropWithName(nameProp)['type']],valeur)
