@@ -237,7 +237,8 @@ def releasePost(request):
     vertebrateGrp = Observation(FK_ProtocoleType=vertebrateGrpID, FK_Station =sta_id )
     dictVertGrp = dict(Counter(binList))
     dictVertGrp['taxon'] = taxon
-
+    dictVertGrp['nb_total'] = len(releaseIndList)
+    
     vertebrateGrp.UpdateFromJson(dictVertGrp)
     vertebrateGrp.Observation_children.extend(vertebrateIndList)
     session.add(vertebrateGrp)
