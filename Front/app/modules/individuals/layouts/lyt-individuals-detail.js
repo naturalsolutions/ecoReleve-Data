@@ -125,22 +125,22 @@ define([
         label: 'Start Date',
         editable: false,
         cell: 'string'
+      },{
+        name: 'EndDate',
+        label: 'End Date',
+        editable: false,
+        cell: 'string'
       }, {
         name: 'Type',
         label: 'Type',
         editable: false,
         cell: 'string'
       },{
-        name: 'UnicName',
-        label: 'Platform',
+        name: 'UnicIdentifier',
+        label: 'Identifier',
         editable: false,
         cell: 'string'
-      }, {
-        name: 'Deploy',
-        label: 'Status',
-        editable: false,
-        cell: 'string',
-      },];
+      }];
       this.gridEquip = new NsGrid({
         pageSize: 20,
         columns: colsEquip,
