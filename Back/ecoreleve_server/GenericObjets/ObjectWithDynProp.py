@@ -187,7 +187,10 @@ class ObjectWithDynProp:
                 if nameProp in self.__table__.c:
                     curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
                     if 'date' in curTypeAttr.lower() :
-                        valeur = parse(valeur.replace(' ',''))
+                        try:
+                            valeur = parse(valeur.replace(' ',''))
+                        except:
+                            pass
                 setattr(self,nameProp,valeur)
             except :
                 print(nameProp+' is not a column')
@@ -197,8 +200,6 @@ class ObjectWithDynProp:
                 if (nameProp not in self.PropDynValuesOfNow #and parseValue(valeur)!= None
                     ) or (isEqual(self.PropDynValuesOfNow[nameProp],valeur) is False):
                     #### IF no value or different existing value, new value is affected ####
-                    print(nameProp)
-                    print('\n\n')
                     if 'date' in self.GetPropWithName(nameProp)['type'].lower():
                         valeur = parse(valeur.replace(' ',''))
 
