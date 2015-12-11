@@ -86,7 +86,7 @@ class ObjectWithDynProp:
                 ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
                 ).order_by(asc(ModuleGrids.GridOrder)).all()
 
-        # gridFields.sort(key=lambda x: str(x.GridOrder))
+        gridFields.sort(key=lambda x: str(x.GridOrder))
         cols = []
         #### return only fileds existing in conf ####
         for curConf in gridFields:
@@ -121,6 +121,8 @@ class ObjectWithDynProp:
         except :
             filterFields = self.ObjContext.query(ModuleGrids
                 ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).order_by(asc(ModuleGrids.FilterOrder)).all()  #.order_by(asc(ModuleGrids.FilterOrder)).all()
+
+        filterFields.sort(key=lambda x: str(x.FilterOrder))
         for curConf in filterFields:
             curConfName = curConf.Name
             filterField = list(filter(lambda x : x['name'] == curConfName
