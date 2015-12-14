@@ -303,9 +303,9 @@ class ObjectWithDynProp:
         ObjType = self.GetType()
         ObjType.AddDynamicPropInSchemaDTO(schema,FrontModules,DisplayMode)
 
-        if (DisplayMode.lower() != 'edit'):
-            for curName in schema:
-                schema[curName]['editorAttrs'] = { 'disabled' : True }
+        # if (DisplayMode.lower() != 'edit'):
+        #     for curName in schema:
+        #         schema[curName]['editorAttrs'] = { 'disabled' : True }
 
         resultat = {
             'schema':schema,

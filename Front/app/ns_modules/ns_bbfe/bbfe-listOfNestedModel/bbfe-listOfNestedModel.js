@@ -7,8 +7,94 @@ define([
   'backbone.list',
   'requirejs-text!./tpl-bbfe-listOfNestedModel.html',
 
-  ], function ($, _, Backbone, Marionette, BackboneForm, List, tpl) {
+  ], function ($, _, Backbone, Marionette, Form, List, tpl) {
 
+    'use strict';
+    return Form.editors.ListOfNestedModel = Form.editors.Base.extend({
+        className: 'nested',
+        events: {
+            'click #addFormBtn' : 'addFormBtn',
+        },
+        initialize: function(options) {
+            options.schema.validators.push('required');
+            Form.editors.Base.prototype.initialize.call(this, options);
+            this.template = options.template || this.constructor.template;
+            console.log('options: ', options);
+            this.options = options;
+            this.forms = [];
+        },
+
+        //removeForm
+        deleteForm: function() {
+
+        },
+
+        addFormBtn: function(e) {
+            var model = new Backbone.Model();
+            model.schema = this.options.schema.subschema;
+            this.addForm(model);
+        },
+
+        addForm: function(model){
+            var form = new Backbone.Form({
+                model: model,
+                fieldsets: model.fieldsets,
+                schema: model.schema
+            }).render();
+            this.forms.push(form);
+            this.$el.find('#formContainer').append(form.el);
+        },
+
+        render: function() {
+            //Backbone.View.prototype.initialize.call(this, options);
+            var $el = $($.trim(this.template({})));
+            this.setElement($el);
+            //init forms
+            var model = new Backbone.Model();
+            model.schema = this.options.schema.subschema;
+            var key = this.options.key;
+            var data = this.options.model.attributes[key];
+            if (data) {
+                if (data.length) {
+                    for (var i = 0; i < data.length; i++) {
+                        model.attributes = data[i];
+                        this.addForm(model);
+                    };
+                }
+            }
+            return this;
+        },
+
+        getValue: function() {
+            var errors = false;
+            for (var i = 0; i < this.forms.length; i++) {
+                if (this.forms[i].commit()) {
+                    errors = true;
+                }
+            };
+            if (errors) {
+                return false;
+            } else {
+                var tmp = [];
+                for (var i = 0; i < this.forms.length; i++) {
+                    tmp[i] = this.forms[i].getValue();
+                    tmp[i]['FK_ProtocoleType'] = 214;
+                };
+                return tmp;
+            }
+        },
+        }, {
+          //STATICS
+          template: _.template('\
+            <div class="required">\
+            <button type="button" id="addFormBtn" class="btn pull-right">+</button>\
+            <div id="formContainer">\
+            </div>\
+            </div>\
+            ', null, Form.templateSettings),
+      });
+
+    /*
     var Form = Backbone.Form,
             editors = Form.editors;
 
@@ -26,33 +112,37 @@ define([
 
     Form.editors.List.Item = Form.editors.List.Item.extend({
 
-    	render: function() {
-    		var hidden = '';
-    		if(this.schema.editorAttrs && this.schema.editorAttrs.disabled){
-    			hidden = 'hidden';
-    		}
+        render: function() {
+            alert('33')
+            var hidden = '';
+            if(this.schema.editorAttrs && this.schema.editorAttrs.disabled){
+                hidden = 'hidden';
+            }
 
-    	  this.editor = new this.Editor({
-    	    key: this.key,
-    	    schema: this.schema,
-    	    value: this.value,
-    	    list: this.list,
-    	    item: this,
-    	    form: this.form
-    	  }).render();
 
-    	  //Create main element
-    	  var $el = $($.trim(this.template({
-    	  	hidden : hidden
-    	  })));
+        
+          this.editor = new this.Editor({
+            key: this.key,
+            schema: this.schema,
+            value: this.value,
+            list: this.list,
+            item: this,
+            form: this.form
+          }).render();
+          
+          //Create main element
+          
+          var $el = $($.trim(this.template({
+            hidden : hidden
+          })));
 
-    	  $el.find('[data-editor]').append(this.editor.el);
+          $el.find('[data-editor]').append(this.editor.el);
 
-    	  //Replace the entire element so there isn't a wrapper tag
-    	  this.setElement($el);
-    	    
-    	  return this;
-    	},
+          //Replace the entire element so there isn't a wrapper tag
+          this.setElement($el);
+            
+          return this;
+        },
 
     }, {
       //STATICS
@@ -60,7 +150,7 @@ define([
         <div class="col-md-12 clearfix">\
           <span data-editor class="clearfix"></span>\
           <div class="col-xs-12 clearfix">\
-	      <button type="button" data-action="remove" class="btn btn-xs btn-danger <%= hidden %>"><span class="reneco reneco-close"></span></button>\
+          <button type="button" data-action="remove" class="btn btn-xs btn-danger <%= hidden %>"><span class="reneco reneco-close"></span></button>\
           </div>\
           <br />\
         </div>\
@@ -72,9 +162,11 @@ define([
 
 
 
-    editors.ListOfNestedModel = Form.editors.List.extend({
+    editors.ListOfNestedModel = Form.editors.Number.extend({
 
         initialize: function (options) {
+            
+            console.log('passed');
             options.schema.model = Backbone.Model.extend({
                 schema:
                     options.schema.subschema
@@ -96,7 +188,7 @@ define([
 
             if (!schema) throw new Error("Missing required option 'schema'");
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled) {
-            	this.tplDatas.hidden = 'hidden';
+                this.tplDatas.hidden = 'hidden';
             }
             
             this.tplDatas.label = this.schema.Name;
@@ -117,37 +209,18 @@ define([
             })();
 
             this.items = [];
+            
         },
 
         render: function() {
-          var self = this,
-              value = this.value || [];
-
+        
           //Create main element
-          var $el = $($.trim(this.template(this.tplDatas)));
-
-          //Store a reference to the list (item container)
-          this.$list = $el.is('[data-items]') ? $el : $el.find('[data-items]');
-
-          //Add existing items
-          if (value.length) {
-            _.each(value, function(itemValue) {
-              self.addItem(itemValue);
-            });
-          }
-
-          //If no existing items create an empty one, unless the editor specifies otherwise
-          else {
-            if (!this.Editor.isAsync) this.addItem();
-          }
+          var $el = $($.trim(this.template()));
 
           this.setElement($el);
-          this.$el.attr('id', this.id);
-          this.$el.attr('name', this.key);
-                
-          if (this.hasFocus) this.trigger('blur', this);
           
           return this;
+          
         },
 
     });
@@ -180,12 +253,11 @@ define([
         },
 
         getValue: function () {
-/*            if (this.modalForm) {
+            if (this.modalForm) {
                 this.value = this.modalForm.getValue();
             }
-            return this.value;*/
+            return this.value;
 
-            /*TODO default model data for new nested Model */
             if (this.modalForm) {
                 var curValue = this.modalForm.getValue();
                 var data = this.modalForm.data;
@@ -209,7 +281,7 @@ define([
 
             var obj = this.nestedSchema;
             for (var key in obj) {
-            	obj[key].editorAttrs = this.schema.editorAttrs
+                obj[key].editorAttrs = this.schema.editorAttrs
             }
 
 
@@ -230,5 +302,9 @@ define([
 
             return this;
         }
-    });
+    });*/
+
+
+
+
 });

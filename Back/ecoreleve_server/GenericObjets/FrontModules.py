@@ -4,6 +4,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 import json
 from pyramid import threadlocal
+from traceback import print_exc
 
 FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
 
@@ -69,20 +70,23 @@ class ModuleForms(Base):
     def GetClassFromSize(FieldSize):
         return FieldSizeToClass[FieldSize]
 
-    def GetDTOFromConf(self,IsEditable,CssClass):
+    def GetDTOFromConf(self,Editable,CssClass):
         ''' return input field to build form '''
+        print('EDITABLE *-*******************')
+        print(Editable)
         self.dto = {
             'name': self.Name,
             'type': self.InputType,
             'title' : self.Label,
-            'editable' : IsEditable,
+            'editable' : isEditable(self.FormRender),
             'editorClass' : str(self.editorClass) ,
             'validators': [],
             'options': [],
-            'defaultValue' : None
+            'defaultValue' : None,
+            'editorAttrs' : {'disabled': Editable}
             }
         self.CssClass = CssClass
-        self.IsEditable = IsEditable
+        self.Editable = Editable
         validators = self.Validators
         if validators is not None:
             self.dto['validators'] = json.loads(validators)
@@ -95,7 +99,7 @@ class ModuleForms(Base):
             self.dto['title'] = self.dto['title'] + '*'
 
             # TODO changer le validateur pour select required (valeur <>-1)
-        if self.IsEditable :
+        if self.Editable :
             self.dto['fieldClass'] = str(self.EditClass) + ' ' + CssClass
         else :
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
@@ -128,23 +132,27 @@ class ModuleForms(Base):
             subNameObj = result[0].Name
             subschema = {}
             for conf in result :
-                subschema[conf.Name] = conf.GetDTOFromConf(self.IsEditable,self.CssClass)
-            self.dto = {
-            'Name': self.Name,
-            'type': self.InputType,
-            'title' : None,
-            'editable' : None,
-            'editorClass' : str(self.editorClass),
-            'validators': [],
-            'options': [],
-            'fieldClass': None,
-            'subschema' : subschema
-            }
+                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable,self.CssClass)
+            
             try :
-                subTypeObj = int(self.Options)
-                self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
+                # subTypeObj = int(self.Options)
+                subschema['FK_ProtocoleType'] = {
+                'Name': 'FK_ProtocoleType',
+                'type': 'Number',
+                'title' : 'FK_ProtocoleType',
+                'editable' : False,
+                'renderable':False,
+                'editorClass' : str(self.editorClass),
+                'validators': [],
+                'options': [],
+                'fieldClass': 'hidden'}
+
             except : 
+                print_exc()
                 pass
+
+            finally :
+                self.dto['subschema'] = subschema
 
     def InputThesaurus(self) :
 

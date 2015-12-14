@@ -53,7 +53,6 @@ define([
                     _this.$el.find('#' + _this.id).prop('disabled', true);
                 }
             }).defer();
-            console.log(this.$el);
             
 
             return this;
