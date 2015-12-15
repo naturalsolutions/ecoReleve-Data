@@ -10,7 +10,6 @@ def integers(*segment_names):
         match = info['match']
         for segment_name in segment_names:
             try:
-                print (segment_names)
                 match[segment_name] = int(match[segment_name])
                 if int(match[segment_name]) == 0 :
                     return False
@@ -40,6 +39,7 @@ def add_routes(config):
     config.add_route('core/user', 'ecoReleve-Core/user')
     config.add_route('core/currentUser', 'ecoReleve-Core/currentUser')
     config.add_route('autocomplete', 'ecoReleve-Core/autocomplete/{obj}/{prop}')
+    config.add_route('autocomplete/ID', 'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
 
 
     # ------------------------------------------------------------------------------------------------------------------------- #

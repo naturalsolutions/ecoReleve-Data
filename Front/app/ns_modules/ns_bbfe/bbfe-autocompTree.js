@@ -194,7 +194,7 @@ define([
             console.log('Validation on edit ',value,'finvalue') ;
             console.log(value) ;
             if (value == null || value == '')  {
-                $('#divAutoComp_' + _this.id).removeClass('error') ;
+                $('#divAutoComp_' + _this.id).find('input').removeClass('error') ;
                 return ;
             }
             console.log('Validation on edit Value pas vide ') ;
@@ -215,11 +215,11 @@ define([
                     contentType: "application/json; charset=utf-8",
                     success: function (data) {
                         console.log('***************************validation OK*******************')
-                        $('#divAutoComp_' + _this.id).removeClass('error') ;
+                        $('#divAutoComp_' + _this.id).find('input').removeClass('error') ;
                     },
                     error: function (data) {
                         console.log('***************************erreur de validation*******************')
-                        $('#divAutoComp_' + _this.id).addClass('error') ;
+                        $('#divAutoComp_' + _this.id).find('input').addClass('error') ;
                     }
                 });
         },

@@ -88,7 +88,8 @@ define([
           data.append('data', e.target.result);
           //data.append('module', self.model.get(self.parent.steps[self.parent.currentStep-1].name+'_RFID_identifer'));
           data.append('FK_Sensor',self.sensorId);
-          data.append('params', _this.row.model.attributes);
+          data.append('StartDate', _this.row.model.get('StartDate'));
+          data.append('EndDate', _this.row.model.get('EndDate'));
 
           console.log(data);
 
@@ -138,7 +139,7 @@ define([
               var color = 'rgb(147, 14, 14)';
 
             }
-            if (data.responseText.length > 100) {
+            if (data.responseText.length > 250) {
               data.responseText = 'An error occured, please contact an admninstrator';
             }
             swal(

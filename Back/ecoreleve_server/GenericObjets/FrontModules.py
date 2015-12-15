@@ -70,20 +70,40 @@ class ModuleForms(Base):
     def GetClassFromSize(FieldSize):
         return FieldSizeToClass[FieldSize]
 
-    def GetDTOFromConf(self,Editable,CssClass):
+    def GetDTOFromConf(self,Editable,CssClass,DisplayMode):
         ''' return input field to build form '''
-        print('EDITABLE *-*******************')
-        print(Editable)
+
+        if DisplayMode.lower() == 'edit':
+            inputType = self.InputType
+            isDisabled = False
+            self.fullPath = False
+        else :
+            inputType = self.InputType
+            self.fullPath = True
+            isDisabled = True
+
+            if self.InputType in ['AutocompTreeEditor','DateTimePicker','ObjectPicker','TimePicker']:
+                inputType = 'Text'
+                self.fullPath = True
+        self.DisplayMode = DisplayMode
+
+        #if self.InputType in ['AutocompleteEditor', 'ListOfNestedModel']:
+        # if self.InputType == 'ListOfNestedModel' :
+        #     inputType = 'ListOfNestedModel'
+        # else: 
+        #     inputType = 'Text'
         self.dto = {
             'name': self.Name,
-            'type': self.InputType,
+            'type': inputType,
             'title' : self.Label,
-            'editable' : isEditable(self.FormRender),
+            'editable' : Editable,
             'editorClass' : str(self.editorClass) ,
             'validators': [],
             'options': [],
             'defaultValue' : None,
-            'editorAttrs' : {'disabled': Editable}
+            'editorAttrs' : {'disabled': isDisabled},
+            'fullPath':self.fullPath
+
             }
         self.CssClass = CssClass
         self.Editable = Editable
@@ -105,7 +125,6 @@ class ModuleForms(Base):
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
 
             # TODO changer le validateur pour select required (valeur <>-1)
-
         if self.InputType in self.func_type_context :
             self.func_type_context[self.InputType](self)
         # default value
@@ -132,8 +151,8 @@ class ModuleForms(Base):
             subNameObj = result[0].Name
             subschema = {}
             for conf in result :
-                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable,self.CssClass)
-            
+                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable,self.CssClass,self.DisplayMode)
+
             try :
                 # subTypeObj = int(self.Options)
                 subschema['FK_ProtocoleType'] = {
@@ -154,8 +173,13 @@ class ModuleForms(Base):
             finally :
                 self.dto['subschema'] = subschema
 
-    def InputThesaurus(self) :
+            try :
+                subTypeObj = int(self.Options)
+                self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
+            except : 
+                pass
 
+    def InputThesaurus(self) :
         if self.Options is not None and self.Options != '' :
             self.dto['options'] = {'startId': self.Options
             , 'wsUrl':dbConfig['wsThesaurus']['wsUrl']
@@ -238,9 +262,10 @@ class ModuleGrids (Base) :
 
     def GenerateFilter (self) :
         ''' return filter field to build Filter '''
+
         filter_ = {
             'name' : self.Name,
-            'type' : self.FilterType,
+            'type' : 'Text',
             'label' : self.Label,
             'editable' : isEditable(int(self.FilterRender)),
             # 'editorClass' : str(self.FilterClass) ,

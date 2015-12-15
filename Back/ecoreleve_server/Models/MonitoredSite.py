@@ -125,7 +125,7 @@ class MonitoredSite (Base,ObjectWithDynProp) :
                 if CurModuleForms.FormRender > 2 :
                     curEditable = True
 
-                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)))
+                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)),DisplayMode)
         return resultat
 
     def GetFlatObject(self,schema=None):

@@ -83,6 +83,7 @@ class Observation(Base,ObjectWithDynProp):
             for curData in listOfSubProtocols :
                 if 'ID' in curData :
                     subObs = list(filter(lambda x : x.ID==curData['ID'],self.Observation_children))[0]
+                    subObs.LoadNowValues()
                 else :
                     subObs = Observation(FK_ProtocoleType = curData['FK_ProtocoleType']
                         ,Parent_Observation=self.ID,FK_Station=self.FK_Station)

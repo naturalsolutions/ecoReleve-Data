@@ -20,7 +20,6 @@ import itertools
 def uploadFilesGSM(request):
     #Import unchecked GSM data.
     session = request.dbsession
-
     response = 'Success'
     # detect if is a row file retrieve directly from mail 
     ptt_pattern = re.compile('[0]*(?P<platform>[0-9]+)g')
@@ -72,7 +71,6 @@ def get_ALL_gps_toInsert(file_obj,session) :
         platform_df = csv_data[['GSM_ID']]
         platform_df = platform_df.groupby('GSM_ID')['GSM_ID'].agg(['count'])
         platform_list = platform_df.index.get_values().tolist()
-        print('Parse File')
         #go to insert data in the database
         return insert_GPS(platform_list, csv_data,session)
 
@@ -99,7 +97,6 @@ def get_gps_toInsert(file_obj,session) :
 # ------------------------------------------------------------------------------------------------------------------------- #
 def insert_GPS(platform, csv_data,session) :
     if (type(platform) is list) :
-        print ('is list GSM')
         query = select([Gsm.date]).where(Gsm.platform_.in_(platform))
     elif (type(platform) is int) :
         query = select([Gsm.date]).where(Gsm.platform_ == platform) 

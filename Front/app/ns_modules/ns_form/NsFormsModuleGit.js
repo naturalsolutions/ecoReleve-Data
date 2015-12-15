@@ -310,7 +310,7 @@ define([
           
         }
       }else{
-        _this.BBForm.$el.find('.error:first').find('input.required,select.required').focus();
+        _this.BBForm.$el.find('.error:first').trigger('focus');
         return false;
       }
       this.afterSavingModel();
