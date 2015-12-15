@@ -4,6 +4,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 import json
 from pyramid import threadlocal
+from traceback import print_exc
 
 FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
 
@@ -69,32 +70,43 @@ class ModuleForms(Base):
     def GetClassFromSize(FieldSize):
         return FieldSizeToClass[FieldSize]
 
-    def GetDTOFromConf(self,IsEditable,CssClass,DisplayMode):
+    def GetDTOFromConf(self,Editable,CssClass,DisplayMode):
         ''' return input field to build form '''
+
         if DisplayMode.lower() == 'edit':
             inputType = self.InputType
+            isDisabled = False
             self.fullPath = False
         else :
             inputType = self.InputType
-            self.fullPath = False
+            self.fullPath = True
+            isDisabled = True
+
             if self.InputType in ['AutocompTreeEditor','DateTimePicker','ObjectPicker','TimePicker']:
                 inputType = 'Text'
                 self.fullPath = True
         self.DisplayMode = DisplayMode
 
+        #if self.InputType in ['AutocompleteEditor', 'ListOfNestedModel']:
+        # if self.InputType == 'ListOfNestedModel' :
+        #     inputType = 'ListOfNestedModel'
+        # else: 
+        #     inputType = 'Text'
         self.dto = {
             'name': self.Name,
             'type': inputType,
             'title' : self.Label,
-            'editable' : IsEditable,
+            'editable' : Editable,
             'editorClass' : str(self.editorClass) ,
             'validators': [],
             'options': [],
             'defaultValue' : None,
+            'editorAttrs' : {'disabled': isDisabled},
             'fullPath':self.fullPath
+
             }
         self.CssClass = CssClass
-        self.IsEditable = IsEditable
+        self.Editable = Editable
         validators = self.Validators
         if validators is not None:
             self.dto['validators'] = json.loads(validators)
@@ -107,7 +119,7 @@ class ModuleForms(Base):
             self.dto['title'] = self.dto['title'] + '*'
 
             # TODO changer le validateur pour select required (valeur <>-1)
-        if self.IsEditable :
+        if self.Editable :
             self.dto['fieldClass'] = str(self.EditClass) + ' ' + CssClass
         else :
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
@@ -139,19 +151,28 @@ class ModuleForms(Base):
             subNameObj = result[0].Name
             subschema = {}
             for conf in result :
-                subschema[conf.Name] = conf.GetDTOFromConf(self.IsEditable,self.CssClass,self.DisplayMode)
-            self.dto = {
-            'Name': self.Name,
-            'type': self.InputType,
-            'title' : None,
-            'editable' : None,
-            'editorClass' : str(self.editorClass),
-            'validators': [],
-            'options': [],
-            'fieldClass': None,
-            'subschema' : subschema,
-            'fullPath':self.fullPath
-            }
+                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable,self.CssClass,self.DisplayMode)
+
+            try :
+                # subTypeObj = int(self.Options)
+                subschema['FK_ProtocoleType'] = {
+                'Name': 'FK_ProtocoleType',
+                'type': 'Number',
+                'title' : 'FK_ProtocoleType',
+                'editable' : False,
+                'renderable':False,
+                'editorClass' : str(self.editorClass),
+                'validators': [],
+                'options': [],
+                'fieldClass': 'hidden'}
+
+            except : 
+                print_exc()
+                pass
+
+            finally :
+                self.dto['subschema'] = subschema
+
             try :
                 subTypeObj = int(self.Options)
                 self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
@@ -241,9 +262,10 @@ class ModuleGrids (Base) :
 
     def GenerateFilter (self) :
         ''' return filter field to build Filter '''
+
         filter_ = {
             'name' : self.Name,
-            'type' : self.FilterType,
+            'type' : 'Text',
             'label' : self.Label,
             'editable' : isEditable(int(self.FilterRender)),
             # 'editorClass' : str(self.FilterClass) ,
