@@ -4,18 +4,24 @@ define([
   'backbone',
   'marionette',
   'backbone-forms',
-  'requirejs-text!./tpl-bbfe-listOfNestedModel.html',
 
   ], function ($, _, Backbone, Marionette, Form, List, tpl) {
 
     'use strict';
     return Form.editors.ListOfNestedModel = Form.editors.Base.extend({
         events: {
-            'click #addFormBtn' : 'addFormBtn',
+            'click #addFormBtn' : 'addEmptyForm',
         },
         initialize: function(options) {
-            options.schema.validators.push('required');
+            if (options.schema.validators.length) {
+                this.defaultRequired = true;
+            } else {
+                options.schema.validators.push('required');
+                this.defaultRequired = false;
+            }
+
             Form.editors.Base.prototype.initialize.call(this, options);
+
             this.template = options.template || this.constructor.template;
             this.options = options;
             this.options.schema.fieldClass = 'col-xs-12';
@@ -36,16 +42,17 @@ define([
 
         },
 
-        addFormBtn: function(e) {
+        addEmptyForm: function() {
             var model = new Backbone.Model();
             model.schema = this.options.schema.subschema;
 
             //bug on the FK proto Type
-            
 
-            if(this.defaultValue){
+/*            if(this.defaultValue){
                 model.attributes['FK_ProtocoleType'] = this.defaultValue;
             }
+*/
+
             this.addForm(model);
         },
 
@@ -59,19 +66,21 @@ define([
 
             this.forms.push(form);
 
-            form.$el.find('fieldset').append('\
-                <div class="' + this.hidden + ' col-xs-12 control">\
-                    <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
-                </div>\
-            ');
-            form.$el.find('button#remove').on('click', function() {
-              _this.$el.find('#formContainer').find(form.el).remove();
-              var i = _this.forms.indexOf(form);
-              if (i > -1) {
-                  _this.forms.splice(i, 1);
-              }
-              return;
-            });
+            if(!this.defaultRequired){
+                form.$el.find('fieldset').append('\
+                    <div class="' + this.hidden + ' col-xs-12 control">\
+                        <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
+                    </div>\
+                ');
+                form.$el.find('button#remove').on('click', function() {
+                  _this.$el.find('#formContainer').find(form.el).remove();
+                  var i = _this.forms.indexOf(form);
+                  if (i > -1) {
+                      _this.forms.splice(i, 1);
+                  }
+                  return;
+                });
+            }
 
 
             this.$el.find('#formContainer').append(form.el);
@@ -88,12 +97,19 @@ define([
             model.schema = this.options.schema.subschema;
             var key = this.options.key;
             var data = this.options.model.attributes[key];
+
             if (data) {
                 if (data.length) {
                     for (var i = 0; i < data.length; i++) {
                         model.attributes = data[i];
                         this.addForm(model);
+                        this.defaultRequired = false;
                     };
+                }
+            } else {
+                if(this.defaultRequired){
+                    this.addEmptyForm();
+                    this.defaultRequired = false;
                 }
             }
 
@@ -112,7 +128,19 @@ define([
             } else {
                 var values = [];
                 for (var i = 0; i < this.forms.length; i++) {
-                    values[i] = this.forms[i].getValue();
+                    var tmp = this.forms[i].getValue();
+                    var empty = true;
+                    for (var key in tmp) {
+                        if(tmp[key]){
+                            empty = false;
+                        }
+                    }
+                    if(!empty){
+                        if (this.defaultValue) {
+                            tmp['FK_ProtocoleType'] = this.defaultValue;
+                        }
+                        values[i] = tmp;
+                    }
                 };
                 return values;
             }
