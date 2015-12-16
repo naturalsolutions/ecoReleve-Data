@@ -104,7 +104,7 @@ define([
         document.body.removeChild(link);
         var _this = this;
         var opts = {
-          title: 'Success!',
+          title: 'Export succeeded!',
           text: 'Would you like to do an other export?',
           type: 'success',
           confirmButtonText: 'Ok',

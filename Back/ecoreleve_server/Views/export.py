@@ -128,12 +128,12 @@ def views_filter_export(request):
             
             if 'stationname' in splittedColumnLower:
                 coll.append(table.c[splittedColumnLower['stationname']].label('SiteName'))
-            if 'name' in splittedColumnLower:
+            elif 'name' in splittedColumnLower:
                 coll.append(table.c[splittedColumnLower['name']].label('SiteName'))
+            elif 'sitename' in splittedColumnLower:
+                coll.append(table.c[splittedColumnLower['sitename']].label('SiteName'))
             if 'stationdate' in splittedColumnLower:
                 coll.append(table.c[splittedColumnLower['stationdate']].label('Date'))
-            if 'sitename' in splittedColumnLower:
-                coll.append(table.c[splittedColumnLower['sitename']].label('SiteName'))
 
         gene = Generator(viewName,session)
         query = gene.getFullQuery(criteria['filters'],columnsList=coll)
