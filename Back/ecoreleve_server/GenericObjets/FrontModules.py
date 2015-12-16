@@ -153,25 +153,25 @@ class ModuleForms(Base):
             for conf in result :
                 subschema[conf.Name] = conf.GetDTOFromConf(self.Editable,self.CssClass,self.DisplayMode)
 
-            try :
-                # subTypeObj = int(self.Options)
-                subschema['FK_ProtocoleType'] = {
-                'Name': 'FK_ProtocoleType',
-                'type': 'Number',
-                'title' : 'FK_ProtocoleType',
-                'editable' : False,
-                'renderable':False,
-                'editorClass' : str(self.editorClass),
-                'validators': [],
-                'options': [],
-                'fieldClass': 'hidden'}
+            # try :
+            #     # subTypeObj = int(self.Options)
+            #     subschema['FK_ProtocoleType'] = {
+            #     'Name': 'FK_ProtocoleType',
+            #     'type': 'Number',
+            #     'title' : 'FK_ProtocoleType',
+            #     'editable' : False,
+            #     'renderable':False,
+            #     'editorClass' : str(self.editorClass),
+            #     'validators': [],
+            #     'options': [],
+            #     'fieldClass': 'hidden'}
 
-            except : 
-                print_exc()
-                pass
+            # except : 
+            #     print_exc()
+            #     pass
 
-            finally :
-                self.dto['subschema'] = subschema
+            # finally :
+            self.dto['subschema'] = subschema
 
             try :
                 subTypeObj = int(self.Options)
