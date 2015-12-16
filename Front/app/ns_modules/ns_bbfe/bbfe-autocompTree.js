@@ -12,6 +12,7 @@ define([
 
     Backbone.Form.validators.Thesaurus = function (options) {
         return function Thesaurus(value) {
+            /*
             if (value == '') return ;
             //console.log('***************************************validateurThesaurus',options,value);
 
@@ -40,10 +41,9 @@ define([
                             };
                 }
             });
-            /*
-            $.when(defered).done(function() {
-            });*/
+
             return retour ;
+            */
         };
     };
 
@@ -71,11 +71,13 @@ define([
                 'fr':'',
                 'en':'En'
             };
-            this.validators = options.schema.validators || [] ;
+            //this.validators = options.schema.validators || [] ;
+
+            this.termError = false;
             
             Form.editors.Base.prototype.initialize.call(this, options);
             this.template = options.template || this.constructor.template;
-            this.id = options.id;
+            this.id = options.id + options.form.cid;
             var editorAttrs = "";
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled) {
                 editorAttrs += 'disabled="disabled"';
@@ -95,8 +97,11 @@ define([
         },
 
         getValue: function () {
-            var date = new Date
+            if(this.termError){
+                return false;
+            }
             return this.$el.find('#' + this.id + '_value').val();
+
         },
 
         render: function () {
@@ -121,20 +126,6 @@ define([
                     },
                     inputValue: _this.value,
                     startId: _this.startId,
-                    /*
-                    onInputBlur : function (options) {
-                        var value = $('#' + _this.id).val() ;
-                        console.log(' ************ validation sur click *****************',value,_this,_this.id);
-                        _this.onEditValidation(value) ;
-                    },
-                    */
-                    onItemClick:function (options) {
-                        /*var value = $('#' + _this.id).val() ;
-                        console.log(' ************ validation sur click *****************',value,_this,_this.id);
-                        _this.onEditValidation(value) ;*/
-                        //console.log(' ************ validation sur click *****************',_this,_this.id);
-                        //$('#divAutoComp_' + _this.id).removeClass('error') ;
-                    }
                 });
                 
                 
@@ -174,13 +165,6 @@ define([
                                     },150) ;
                     });
                     
-                    /*
-                    _this.$el.find('#treeView' + _this.id).hide(function(options) {
-                        var value = $('#' + _this.id).text() ;
-                        console.log(' ************ validation sur click *****************',value);
-                        _this.onEditValidation(value) ;
-                    }) ;
-                    */
                 }
                 _this.FirstRender = false ;
             }).defer();
@@ -191,13 +175,12 @@ define([
         },
         onEditValidation: function (value) {
             var _this = this ;
-            console.log('Validation on edit ',value,'finvalue') ;
-            console.log(value) ;
+            console.info('Validation on edit ',value,'finvalue') ;
             if (value == null || value == '')  {
-                $('#divAutoComp_' + _this.id).removeClass('error') ;
+                $('#divAutoComp_' + _this.id).find('input').removeClass('error') ;
                 return ;
             }
-            console.log('Validation on edit Value pas vide ') ;
+            console.info('Validation on edit Value pas vide ') ;
             
                 var TypeField = "FullPath";
                 if (value && value.indexOf(">") == -1) {
@@ -214,12 +197,14 @@ define([
                     //async:false,
                     contentType: "application/json; charset=utf-8",
                     success: function (data) {
-                        console.log('***************************validation OK*******************')
-                        $('#divAutoComp_' + _this.id).removeClass('error') ;
+                        _this.termError = false;
+                        console.info('***************************validation OK*******************')
+                        $('#divAutoComp_' + _this.id).find('input').removeClass('error') ;
                     },
                     error: function (data) {
-                        console.log('***************************erreur de validation*******************')
-                        $('#divAutoComp_' + _this.id).addClass('error') ;
+                        _this.termError = true;
+                        console.info('***************************erreur de validation*******************')
+                        $('#divAutoComp_' + _this.id).find('input').addClass('error') ;
                     }
                 });
         },

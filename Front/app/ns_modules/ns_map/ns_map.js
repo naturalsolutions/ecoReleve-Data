@@ -660,6 +660,8 @@ define([
       this.map.panTo(center, {animate: false});
       var ctx = this;
 
+      zoom = this.disableClustring;
+
       if(zoom){
         setTimeout(function(){
           ctx.map.setZoom(zoom);

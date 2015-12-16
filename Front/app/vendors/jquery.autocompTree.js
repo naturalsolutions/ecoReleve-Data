@@ -174,7 +174,6 @@
 
 
 					$me.focus(function () {
-
 						$("div[id^=treeView]").each(function () {
 							$(this).css('display', 'none');
 						});
