@@ -82,7 +82,7 @@ class ModuleForms(Base):
             self.fullPath = True
             isDisabled = True
 
-            if self.InputType in ['AutocompTreeEditor','DateTimePicker','ObjectPicker','TimePicker']:
+            if self.InputType in ['AutocompTreeEditor']:
                 inputType = 'Text'
                 self.fullPath = True
         self.DisplayMode = DisplayMode
@@ -116,7 +116,7 @@ class ModuleForms(Base):
                 self.dto['validators'].append("required")
             else:
                 self.dto['validators'].append("required")
-            self.dto['title'] = self.dto['title'] + '*'
+            self.dto['title'] = self.dto['title'] + ' *'
 
             # TODO changer le validateur pour select required (valeur <>-1)
         if self.Editable :
@@ -265,7 +265,7 @@ class ModuleGrids (Base) :
 
         filter_ = {
             'name' : self.Name,
-            'type' : 'Text',
+            'type' : self.FilterType,
             'label' : self.Label,
             'editable' : isEditable(int(self.FilterRender)),
             # 'editorClass' : str(self.FilterClass) ,

@@ -72,7 +72,7 @@ define([
       function(isConfirm) {
         //could be better
         if (opts.callback) {
-          opts.callback();
+          opts.callback(isConfirm);
         }
       });
     },
@@ -107,8 +107,12 @@ define([
           title: 'Success!',
           text: 'Would you like to do an other export?',
           type: 'success',
-          confirmButtonText: 'Yes',
-          callback: function() {
+          confirmButtonText: 'Ok',
+          cancelButtonText: 'Go back home',
+          showCancelButton:true,
+          callback: function(isConfirm) {
+            if (!isConfirm){
+            	Backbone.history.navigate('home',{trigger: true}); }
             //_this.parent.displayStep(0);
           }
         };

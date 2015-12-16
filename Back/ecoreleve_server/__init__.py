@@ -17,6 +17,7 @@ from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
 from .Models import (
     Base,
+    BaseExport,
     dbConfig,
     Station,
     Observation,
@@ -52,9 +53,14 @@ def decimal_adapter(obj, request):
 
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
-    settings['sqlalchemy.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.url'])
-    engine = engine_from_config(settings, 'sqlalchemy.', legacy_schema_aliasing=True)
-    dbConfig['url'] = settings['sqlalchemy.url']
+
+    settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.Export.url'])
+    engineExport = engine_from_config(settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
+
+    settings['sqlalchemy.default.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.default.url'])
+    engine = engine_from_config(settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
+
+    dbConfig['url'] = settings['sqlalchemy.default.url']
     dbConfig['wsThesaurus'] = {}
     dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
     dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
@@ -62,17 +68,19 @@ def main(global_config, **settings):
 
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
-    Base.metadata.reflect(views=True, extend_existing=False)
+    Base.metadata.reflect(views=True, extend_existing=False) 
+
+    BaseExport.metadata.bind = engineExport
+    BaseExport.metadata.create_all(engineExport)
+    BaseExport.metadata.reflect(views=True, extend_existing=False)
 
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
 
+    binds = {"default": engine, "Export": engineExport}
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
+    config.registry.dbmakerExport = scoped_session(sessionmaker(bind=engineExport))
     config.add_request_method(db, name='dbsession', reify=True)
-
-    # DBSession.configure(bind=engine)
-    # config.add_request_method(callable=lambda request:DBSession(),name='dbsession',property=True )
-    # config.add_subscriber(setup_post_request,NewRequest)
 
     # Add renderer for JSON objects
     json_renderer = JSON()
