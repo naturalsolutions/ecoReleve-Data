@@ -153,6 +153,27 @@ class ModuleForms(Base):
             for conf in result :
                 subschema[conf.Name] = conf.GetDTOFromConf(self.Editable,self.CssClass,self.DisplayMode)
 
+            fields = []
+            resultat = []
+            Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in result if obj.FormOrder is not None], key = lambda x : x[1])
+            # Legend2s = sorted ([(obj.Legend)for obj in result if obj.FormOrder is not None ], key = lambda x : x[1])
+            withOutLegends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in result if obj.FormOrder is not None and obj.Legend is None ], key = lambda x : x[1])
+
+            Unique_Legends = list()
+            # Get distinct Fieldset in correct order
+            for x in Legends:
+                if x[0] not in Unique_Legends:
+                    Unique_Legends.append(x[0])
+            
+            for curLegend in Unique_Legends:
+                curFieldSet = {'fields' :[],'legend' : curLegend}
+                resultat.append(curFieldSet)
+
+            for curProp in Legends:
+                curIndex = Unique_Legends.index(curProp[0])
+                resultat[curIndex]['fields'].append(curProp[2])
+
+            self.dto['fieldsets'] = resultat
             # try :
             #     # subTypeObj = int(self.Options)
             #     subschema['FK_ProtocoleType'] = {

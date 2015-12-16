@@ -45,7 +45,7 @@ define([
         addEmptyForm: function() {
             var model = new Backbone.Model();
             model.schema = this.options.schema.subschema;
-
+            model.fieldsets = this.options.schema.fieldsets;
             //bug on the FK proto Type
 
 /*            if(this.defaultValue){
@@ -95,6 +95,7 @@ define([
             //init forms
             var model = new Backbone.Model();
             model.schema = this.options.schema.subschema;
+            model.fieldsets = this.options.schema.fieldsets;
             var key = this.options.key;
             var data = this.options.model.attributes[key];
 
