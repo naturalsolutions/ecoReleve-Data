@@ -39,6 +39,7 @@ def add_routes(config):
     config.add_route('core/user', 'ecoReleve-Core/user')
     config.add_route('core/currentUser', 'ecoReleve-Core/currentUser')
     config.add_route('autocomplete', 'ecoReleve-Core/autocomplete/{obj}/{prop}')
+    config.add_route('autocomplete/ID', 'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
 
 
     # ------------------------------------------------------------------------------------------------------------------------- #

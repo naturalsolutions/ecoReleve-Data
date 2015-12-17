@@ -86,7 +86,7 @@ class ObjectWithDynProp:
                 ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
                 ).order_by(asc(ModuleGrids.GridOrder)).all()
 
-        # gridFields.sort(key=lambda x: str(x.GridOrder))
+        gridFields.sort(key=lambda x: str(x.GridOrder))
         cols = []
         #### return only fileds existing in conf ####
         for curConf in gridFields:
@@ -121,6 +121,8 @@ class ObjectWithDynProp:
         except :
             filterFields = self.ObjContext.query(ModuleGrids
                 ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).order_by(asc(ModuleGrids.FilterOrder)).all()  #.order_by(asc(ModuleGrids.FilterOrder)).all()
+
+        filterFields.sort(key=lambda x: str(x.FilterOrder))
         for curConf in filterFields:
             curConfName = curConf.Name
             filterField = list(filter(lambda x : x['name'] == curConfName
@@ -187,21 +189,23 @@ class ObjectWithDynProp:
                 if nameProp in self.__table__.c:
                     curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
                     if 'date' in curTypeAttr.lower() :
-                        valeur = parse(valeur.replace(' ',''))
+                        try:
+                            valeur = parse(valeur.replace(' ',''))
+                        except:
+                            pass
                 setattr(self,nameProp,valeur)
             except :
-                print(nameProp+' is not a column')
                 pass
         else:
             if (nameProp.lower() in self.GetType().DynPropNames):
                 if (nameProp not in self.PropDynValuesOfNow #and parseValue(valeur)!= None
                     ) or (isEqual(self.PropDynValuesOfNow[nameProp],valeur) is False):
                     #### IF no value or different existing value, new value is affected ####
-                    print(nameProp)
-                    print('\n\n')
                     if 'date' in self.GetPropWithName(nameProp)['type'].lower():
-                        valeur = parse(valeur.replace(' ',''))
-
+                        try:
+                            valeur = parse(valeur.replace(' ',''))
+                        except:
+                            pass
                     NouvelleValeur = self.GetNewValue(nameProp)
                     NouvelleValeur.StartDate = datetime.today()
                     setattr(NouvelleValeur,Cle[self.GetPropWithName(nameProp)['type']],valeur)
@@ -310,9 +314,9 @@ class ObjectWithDynProp:
         ObjType = self.GetType()
         ObjType.AddDynamicPropInSchemaDTO(schema,FrontModules,DisplayMode)
 
-        if (DisplayMode.lower() != 'edit'):
-            for curName in schema:
-                schema[curName]['editorAttrs'] = { 'disabled' : True }
+        # if (DisplayMode.lower() != 'edit'):
+        #     for curName in schema:
+        #         schema[curName]['editorAttrs'] = { 'disabled' : True }
 
         resultat = {
             'schema':schema,

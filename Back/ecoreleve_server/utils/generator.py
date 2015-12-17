@@ -1,18 +1,22 @@
 import operator, transaction
 from sqlalchemy import *
 import json,transaction
-from ..Models import Base, DBSession
+from ..Models import BaseExport, DBSession,Base
 from collections import OrderedDict
 from .eval import Eval
 from .datetime import parse
 import re
+from pyramid import threadlocal
+from traceback import print_exc
+from datetime import datetime
 
 
 eval_ = Eval()
 
 class Generator :
 
-    def __init__(self,table):
+    def __init__(self,table,sessionMaker):
+        self.sessionMaker = sessionMaker
         self.dictCell={
             'VARCHAR':'string',
             'NVARCHAR':'string',
@@ -29,8 +33,10 @@ class Generator :
             'NUMERIC':'Number',
             'DATETIME':'DateTimePicker',
         }
-        self.table=Base.metadata.tables[table]
+        self.table=BaseExport.metadata.tables[table]
         self.cols=[]
+        self.columnLower = {c.name.lower():c.name for c in self.table.c}
+        self.splittedColumnLower = {c.name.lower().replace('_',''):c.name for c in self.table.c}
 
     def get_col(self,columnsList=False, checked=False):
         ###### model of columnsList #####
@@ -42,6 +48,7 @@ class Generator :
                 field_type=str(self.table.c[field_name].type).split('(')[0]
                 if field_type in self.dictCell:
                     cell_type=self.dictCell[field_type]
+                    cell_type = 'string'
                 else:
                     cell_type='string'
                 final.append({'name':field_name,
@@ -58,6 +65,8 @@ class Generator :
                 field_type=self.table.c[col.name].type
                 if field_type in self.dictCell:
                     cell_type=self.dictCell[field_type]
+                    cell_type='string'
+                    
                 else:
                     cell_type='string'
                 final.append({'name':field_name,
@@ -75,9 +84,11 @@ class Generator :
         data = []
         for column in self.table.c:
             name_c = str(column.name)
-            try : 
+            try :
                 type_c = str(column.type).split('(')[0]
-            except: pass
+            except: 
+                type_c = None
+                pass
             if type_c in self.dictFilter :
                 type_c = self.dictFilter[type_c]
             else : 
@@ -100,10 +111,13 @@ class Generator :
                 try:
                     Col=obj['Column']
                     typeCol = str(self.table.c[Col].type).split('(')[0]
-                    if 'date' in typeCol.lower() : 
-                        obj['Value'] = parse(obj['Value'].replace(' ',''))
-                except: 
-                    Col=dictio[key]
+                    if 'date' in typeCol.lower() and isinstance(obj['Value'],str):
+                        try :
+                            obj['Value'] = parse(obj['Value'].replace(' ',''))
+                        except: pass
+                except:
+                    print_exc()
+                    # Col=dictio[key]
                 query=self.where_(query,Col, obj['Operator'], obj['Value'])
         return query
 
@@ -114,7 +128,7 @@ class Generator :
         if offset!=None:
             query, total=self.get_page(query,offset,per_page, order_by)
 
-        data = DBSession.execute(query).fetchall()
+        data = self.sessionMaker.execute(query).fetchall()
         if(total or total == 0):
             result = [{'total_entries':total}]
             result.append([OrderedDict(row) for row in data])
@@ -125,12 +139,11 @@ class Generator :
 
     def count_(self,criteria={}):
         query = self.getFullQuery(criteria,count=True)
-        print(query)
-        countResult = DBSession.execute(query).scalar()
+        countResult = self.sessionMaker.execute(query).scalar()
         return countResult
 
     def get_page(self,query,offset,limit,order_by):
-        total = DBSession.execute(select([func.count()]).select_from(query.alias())).scalar()
+        total = self.sessionMaker.execute(select([func.count()]).select_from(query.alias())).scalar()
         order_by_clause = []
         for obj in order_by:
             column, order = obj.split(':')
@@ -158,37 +171,29 @@ class Generator :
         total=None
         countResult = self.count_(criteria)
 
-        if 'lat' in self.table.c or 'LAT'in self.table.c:
-            if(countResult <= 50000):
+        exceed = None
+        geoJson=[]
+        if 'lat' in self.columnLower:
+            if countResult <= 100000 :
+                exceed = False
                 query = self.getFullQuery(criteria)
                 try :
-                    data=DBSession.execute(query.where(self.table.c['LAT'] != None)).fetchall()
+                    data=self.sessionMaker.execute(query.where(self.table.c[self.columnLower['lat']] != None)).fetchall()
                 except :
-                    try:
-                        data=DBSession.execute(query.where(self.table.c['lat'] != None)).fetchall()
-                    except:
-                        pass
-
-                tmp = data[0]
-                lat = self.case(tmp, 'LAT')
-                lon = self.case(tmp, 'LON')
-                geoJson=[]
+                    print_exc()
                 for row in data:
                     properties = {}
                     # if cols_for_properties != None :
                     #     for col in cols_for_properties :
                     #         properties[col.replace('_',' ')] = row[col]
-                    geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point', 'coordinates':[row[lat],row[lon]]}})
-                transaction.commit()
-                return {'type':'FeatureCollection', 'features': geoJson, 'exceed': False, 'total':countResult}
-        else :
-            return {'type':'FeatureCollection', 'features': [],'exceed': True, 'total':countResult}
-                
+                    geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point'
+                        , 'coordinates':[row[self.columnLower['lat']],row[self.columnLower['lon']]]}})
+            else :
+                exceed = True
+        return {'type':'FeatureCollection', 'features': geoJson,'exceed': exceed, 'total':countResult}
 
     def case(self, row, arg) :
         if( arg in row ) :
             return arg
         else :
             return arg.lower()
-
-

@@ -140,6 +140,7 @@ select:disabled {
     cursor: default;
     max-height: 350px;
     overflow-y: auto;
+    z-index: 100000;
 }
 
 
@@ -152,9 +153,9 @@ select:disabled {
 
 .error{
 	//works only for required classes
-	select.required, input.required, textarea.required{
+	//select.required, input.required, textarea.required{
 		border-left: 5px solid @error;
-	}
+	//}
 }
 .list-inline {
     margin-left: 0px;
@@ -175,6 +176,17 @@ select:disabled {
 			color: white;
 			border: 1px solid #dddddd;
 
+		}
+	}
+}
+
+
+.nested{
+	fieldset{
+		margin-top: 20px;
+		background: rgba(100, 100, 100, 0.1);
+		.control{
+			margin: 0px;
 		}
 	}
 }

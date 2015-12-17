@@ -15,6 +15,7 @@ print(AppConfig['app:main']['sensor_schema'])
 
 DBSession = None
 Base = declarative_base()
+BaseExport = declarative_base()
 dbConfig = {
     'dialect': 'mssql',
     'sensor_schema': AppConfig['app:main']['sensor_schema'] 
@@ -33,8 +34,12 @@ def cache_callback(request,session):
                 session.get_bind().dispose()
 
 def db(request):
-    maker = request.registry.dbmaker
-    session = maker()
+    makerDefault = request.registry.dbmaker
+    makerExport = request.registry.dbmakerExport
+    session = makerDefault()
+    
+    if 'ecoReleve-Core/export/' in request.url:
+        session = makerExport()
 
     def cleanup(request):
         if request.exception is not None:
@@ -43,7 +48,7 @@ def db(request):
         else:
             session.commit()
         session.close()
-        maker.remove()
+        makerDefault.remove()
 
     request.add_finished_callback(cleanup)
     return session

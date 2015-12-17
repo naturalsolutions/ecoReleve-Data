@@ -152,6 +152,11 @@ def uncheckedDatas_graph(request):
         curRow = OrderedDict(row)
         data.append({'value':curRow['nb'],'label':'RFID'})
     data.sort(key = itemgetter('label'))
+
+    session1.close()
+    session2.close()
+    session3.close()
+
     return data
 
 @view_config(route_name = 'individual_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
