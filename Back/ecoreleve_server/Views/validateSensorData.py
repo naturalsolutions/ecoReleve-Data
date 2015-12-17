@@ -243,7 +243,6 @@ def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq,session):
         SELECT @nb_insert, @exist, @error; """
         ).bindparams(bindparam('ind_id', ind_id),bindparam('user', user),bindparam('freq', freq),bindparam('ptt', ptt))
         nb_insert, exist , error= session.execute(stmt).fetchone()
-    transaction.commit()
 
     return nb_insert, exist , error
 

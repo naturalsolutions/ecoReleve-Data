@@ -1,7 +1,7 @@
 define([
   'jquery',
   'backbone',
-  'backbone_forms',
+  'backbone-forms',
 
 ], function(
   $, Backbone, Form
@@ -30,8 +30,8 @@ define([
     },
 
     getValue: function() {
-      var date= new Date;
-      return this.el.children['Date_'].value
+      var val = this.$el.find('input:first').val();
+      return val;
     },
 
     render: function(){
@@ -40,19 +40,19 @@ define([
       var value;
       var required;
 
+
       if (options.schema.validators) {
         required = options.schema.validators[0];
       }
       if (options.model) {
         value = options.model.get(this.options.key);
-      }else{
-            if (options.value){
+      }else {
+            if (options.value) {
               value = options.value;
             }else {
               value = '';
             }
       }
-  
 
       var $el = $($.trim(this.template({
         value : value,

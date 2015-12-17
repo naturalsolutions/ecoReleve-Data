@@ -25,6 +25,8 @@ from ..utils import Eval
 import pandas as pd 
 from collections import OrderedDict
 from datetime import datetime
+from ..utils.datetime import parse
+
 
 eval_ = Eval()
 
@@ -121,7 +123,6 @@ class IndividualList(ListObjectWithDynProp):
     def countQuery(self,criteria = None):
         query = super().countQuery(criteria)
         if len(list(filter(lambda x:'frequency'==x['Column'], criteria)))>0:
-            print('IN COUNT FREQUENCY')
             query = self.whereInEquipementVHF(query,criteria)
         for obj in criteria :
             if obj['Column'] in ['LastImported']:
@@ -130,15 +131,13 @@ class IndividualList(ListObjectWithDynProp):
 
     def GetFullQuery(self,searchInfo=None) :
         ''' return the full query to execute '''
-        print('IN INDIV LIST ')
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
-            print('********** NO Criteria ***************')
+
         joinTable = self.GetJoinTable(searchInfo)
         fullQueryJoin = select(self.selectable).select_from(joinTable)
 
         if len(list(filter(lambda x:'frequency'==x['Column'], searchInfo['criteria'])))>0:
-            print('FREQUENCY ')
             fullQueryJoin = self.whereInEquipementVHF(fullQueryJoin,searchInfo['criteria'])
 
         for obj in searchInfo['criteria'] :
@@ -148,7 +147,6 @@ class IndividualList(ListObjectWithDynProp):
         return fullQueryJoinOrdered
 
     def whereInEquipementVHF(self,fullQueryJoin,criteria):
-        print('in whereInEquipementVHF')
         freq = list(filter(lambda x:'frequency'==x['Column'], criteria))[0]['Value']
         e2 = aliased(Equipment)
         vs = Base.metadata.tables['SensorDynPropValuesNow']
@@ -180,17 +178,11 @@ class SensorList(ListObjectWithDynProp):
         query = super().WhereInJoinTable(query,criteriaObj)
         curProp = criteriaObj['Column']
         if 'available' in curProp.lower():
-            print('IN SENSOR AVAILABLE ********************************')
-            print(curProp)
-            print(criteriaObj['Value'])
+            date = criteriaObj['Value']
             try:
-                try : 
-                    date = datetime.strptime(criteriaObj['Value'],'%d/%m/%Y% H:%M:%S')
-                except:
-                    date = datetime.strptime(criteriaObj['Value'].replace(' ',''),'%d/%m/%Y%H:%M:%S')
+                date = parse(date.replace(' ',''))
             except:
                 pass
-            # criteriaObj['Value'] = datetime.strptime(criteriaObj['Value'],'%d/%m/%Y')
             s2 = aliased(Sensor)
             e = aliased(Equipment)
             e2 = aliased(Equipment)
@@ -218,8 +210,7 @@ class SensorList(ListObjectWithDynProp):
                 query = self.WhereInJoinTable(query,obj)
         return query
 
-    def GetFullQuery(self,searchInfo=None) :
-        query = super().GetFullQuery(searchInfo)
-        print(query)
-        return query
+    # def GetFullQuery(self,searchInfo=None) :
+    #     query = super().GetFullQuery(searchInfo)
+    #     return query
 

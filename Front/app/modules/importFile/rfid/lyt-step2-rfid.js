@@ -35,12 +35,20 @@ define([
 
     initialize: function(options) {
       this.sensorId = options.model.attributes.sensorId;
+      console.log(this.options.model.get('row'));
+      this.row = this.options.model.get('row');
     },
 
     clearFile: function() {
       $('#input-file').val('');
     },
+
+    validate: function(){
+
+    },
+
     importFile: function(event) {
+      var _this = this;
       this.clear();
       var module = this.ui.modInput.val();
       if (module !== '') {
@@ -54,14 +62,14 @@ define([
 
               {
 
-  title: 'Wrong file type',
-  text: 'The file should be a text file (.txt)',
-  type: 'error',
-  showCancelButton: false,
-  confirmButtonColor: 'rgb(147, 14, 14)',
-  confirmButtonText: 'OK',
+                title: 'Wrong file type',
+                text: 'The file should be a text file (.txt)',
+                type: 'error',
+                showCancelButton: false,
+                confirmButtonColor: 'rgb(147, 14, 14)',
+                confirmButtonText: 'OK',
 
-  closeOnConfirm: true,
+                closeOnConfirm: true,
 
               }
             );
@@ -85,6 +93,11 @@ define([
           data.append('data', e.target.result);
           //data.append('module', self.model.get(self.parent.steps[self.parent.currentStep-1].name+'_RFID_identifer'));
           data.append('FK_Sensor',self.sensorId);
+          data.append('StartDate', _this.row.model.get('StartDate'));
+          data.append('EndDate', _this.row.model.get('EndDate'));
+
+          console.log(data);
+
           $.ajax({
             type: 'POST',
             url: url,
@@ -98,25 +111,24 @@ define([
             swal(
 
               {
-
-  title: 'Succes',
-  text: 'importing RFID file',
-  type: 'success',
-  showCancelButton: true,
-  confirmButtonColor: 'green',
-  confirmButtonText: 'Import new RFID',
-  cancelButtonText: 'Go to Validate',
-  closeOnConfirm: true,
+                title: 'Succes',
+                text: 'importing RFID file',
+                type: 'success',
+                showCancelButton: true,
+                confirmButtonColor: 'green',
+                confirmButtonText: 'Import new RFID',
+                cancelButtonText: 'Go to Validate',
+                closeOnConfirm: true,
 
               },
               function(isConfirm) {
+                self.ui.progress.hide();
+                if (isConfirm) {
+                  Backbone.history.navigate('importFile',{trigger: true});
+                } else {
+                  Backbone.history.navigate('validate/rfid',{trigger: true});
+                }
 
-  self.ui.progress.hide();
-  if (isConfirm) {
-    Backbone.history.navigate('importFile',{trigger: true});
-  } else {
-    Backbone.history.navigate('validate/rfid',{trigger: true});
-  }
               }
             );
 
@@ -135,7 +147,7 @@ define([
               var color = 'rgb(147, 14, 14)';
 
             }
-            if (data.responseText.length > 100) {
+            if (data.responseText.length > 250) {
               data.responseText = 'An error occured, please contact an admninstrator';
             }
             swal(

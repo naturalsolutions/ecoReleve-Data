@@ -28,7 +28,7 @@ require.config({
 
     /*==========  Bower  ==========*/
     'jquery': '../bower_components/jquery/jquery',
-    'jqueryui': '../bower_components/jqueryui/jquery-ui.min',
+    'jqueryui': '../bower_components/jqueryui/jquery-ui',
     'underscore': '../bower_components/underscore/underscore',
     'backbone': '../bower_components/backbone/backbone',
     'marionette': '../bower_components/marionette/lib/core/backbone.marionette',
@@ -40,7 +40,7 @@ require.config({
     'sweetAlert': '../bower_components/sweetalert/lib/sweet-alert.min',
     'moment': '../bower_components/moment/min/moment.min',
     'dateTimePicker': '../bower_components/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker',
-    'backbone_forms': '../bower_components/backbone-forms/distribution.amd/backbone-forms',
+    'backbone-forms': '../bower_components/backbone-forms/distribution.amd/backbone-forms',
     'backbone.list'     : '../bower_components/backbone-forms/distribution.amd/editors/list',
     'backbone.paginator': '../bower_components/backbone.paginator/lib/backbone.paginator.min',
     'requirejs-text': '../bower_components/requirejs-text/text',
@@ -50,18 +50,17 @@ require.config({
 
     'dropzone': '../bower_components/dropzone/dist/dropzone',
     'i18n': '../bower_components/i18n/i18next',
-    'fancytree': '../bower_components/fancytree/dist/jquery.fancytree-all.min',
     'floatThead': '../bower_components/floatThead/dist/jquery.floatThead-slim',
     'chart': '../bower_components/chartjs/Chart',
     'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
     'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
 
-    //2remove
-    'fuelux': '../bower_components/fuelux/dist/js/fuelux',
-    'swiper': '../bower_components/swiper/dist/js/swiper',
 
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
+
+    //'fancytree': '../bower_components/fancytree/dist/jquery.fancytree-all.min',
+    'fancytree': 'vendors/jquery.fancytree-all.min',
     'backgrid': 'vendors/backgrid',
     'backgrid.paginator': 'vendors/backgrid-paginator',
     'backgridSelect_all': 'vendors/backgrid-select-all',
@@ -73,7 +72,7 @@ require.config({
       exports: '$'
     },
     jqueryui: {
-      exports: 'ui'
+      exports: '$.ui'
     },
     underscore: {
       exports: '_'
@@ -131,10 +130,8 @@ require.config({
     leaflet: {
       exports: 'L'
     },
-    swiper: {
-      exports: 'Swiper'
-    },
-    fancytree:  {
+    fancytree: {
+      //useless?
       deps: ['jquery','jqueryui'],
       exports: 'Fancytree'
     },
@@ -142,17 +139,13 @@ require.config({
       deps: ['fancytree'],
       exports: 'autocompTree'
     },
-    fuelux: {
-      deps: ['jquery','bootstrap'],
-      exports: 'Fuelux'
-    },
     dropzone: {
       deps: ['jquery'],
       exports: 'Dropzone'
     },
     i18n: {
       deps: ['jquery'],
-      exports: '$'
+      exports: 'i18n'
     },
     floatThead: {
       deps: ['backgrid'],
@@ -162,14 +155,14 @@ require.config({
       deps: [
           'jquery'
       ],
-      exports: '$'
+      exports: 'ToolStiper'
     },
     'tooltipster-list': {
       deps: [
           'jquery',
           'tooltipster'
       ],
-      exports: '$'
+      exports: 'TooltipList'
     },
   },
 });

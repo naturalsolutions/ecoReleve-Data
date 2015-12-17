@@ -31,7 +31,6 @@ prefix = 'stations'
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnStations(request):
-    print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     'count' : count_,
     'forms' : getForms,
@@ -63,34 +62,30 @@ def getFilters (request):
     filters = {}
     for i in range(len(filtersList)) :
         filters[str(i)] = filtersList[i]
-    transaction.commit()
+
     return filters
 
 def getForms(request) :
     session = request.dbsession
-
     typeSta = request.params['ObjectType']
     ModuleName = 'StationForm'
     Conf = session.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newSta = Station(FK_StationType = typeSta)
     newSta.init_on_load()
     schema = newSta.GetDTOWithSchema(Conf,'edit')
-    # print(schema)
-    transaction.commit()
+
     return schema
 
 def getFields(request) :
     ModuleType = 'StationVisu'
     cols = Station().GetGridFields(ModuleType)
-    transaction.commit()
+
     return cols
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
 def getStation(request):
     session = request.dbsession
-
-    print('***************** GET STATION ***********************')
     id = request.matchdict['id']
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
@@ -109,26 +104,22 @@ def getStation(request):
     else : 
         response  = curSta.GetFlatObject()
 
-    transaction.commit()
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
 def deleteStation(request):
     session = request.dbsession
-
     id_ = request.matchdict['id']
     curSta = session.query(Station).get(id_)
     session.delete(curSta)
-    transaction.commit()
+
     return True
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
 def updateStation(request):
     session = request.dbsession
-
-    print('*********************** UPDATE Station *****************')
     data = request.json_body
     id = request.matchdict['id']
     if 'creationDate' in data:
@@ -136,7 +127,7 @@ def updateStation(request):
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
     curSta.UpdateFromJson(data)
-    transaction.commit()
+
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -144,16 +135,12 @@ def updateStation(request):
 def insertStation(request):
     data = request.json_body
     if not isinstance(data,list):
-        print('_______INsert ROW *******')
         return insertOneNewStation(request)
     else :
-        print('_______INsert LIST')
-        transaction.commit()
         return insertListNewStations(request)
 
 def insertOneNewStation (request) :
     session = request.dbsession
-
     data = {}
     for items , value in request.json_body.items() :
         if value != "" :
@@ -163,15 +150,13 @@ def insertOneNewStation (request) :
     newSta.StationType = session.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
-    # print (newSta.__dict__)
     session.add(newSta)
     session.flush()
-    # transaction.commit()
+
     return {'ID': newSta.ID}
 
 def insertListNewStations(request):
     session = request.dbsession
-
     data = request.json_body
     data_to_insert = []
     format_dt = '%Y-%m-%d %H:%M:%S'
@@ -234,17 +219,11 @@ def insertListNewStations(request):
 
     ##### Build block insert statement and returning ID of new created stations #####
     if len(data_to_insert) != 0 :
-        # print('********* insertion plusieurs stations **********')
         stmt = Station.__table__.insert(returning=[Station.ID]).values(data_to_insert)
         res = session.execute(stmt).fetchall()
-        # print('********* station list**********')
         result =list(map(lambda y:  y[0], res))
-        #result = list(map(lambda y: {'FK_Station' : y[0], }, res))
-
 
     ###### Insert FieldWorkers ######
-        print('**********fieldworkers************')
-        # print(data[0])
         if not data[0]['FieldWorkers'] == None or "" :
             list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK_FieldWorker': b  },result)),data[0]['FieldWorkers'] ))
             list_ = list(itertools.chain.from_iterable(list_))
@@ -252,9 +231,7 @@ def insertListNewStations(request):
             session.execute(stmt)
     else : 
         result = []
-
     response = {'exist': len(data)-len(data_to_insert), 'new': len(data_to_insert)}
-    transaction.commit()
     return response 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -299,7 +276,6 @@ def searchStation(request):
 
     #### add filter parameters to retrieve last stations imported : last day of station created by user and without linked observation ####
     if 'lastImported' in data :
-        print('-*********************** LAST IMPORTED !!!!!!!!! ******')
         criteria = [
         {'Column' : 'creator',
         'Operator' : '=',
@@ -328,7 +304,6 @@ def searchStation(request):
         if countResult < 50000 : 
             exceed = False
             dataResult = listObj.GetFlatDataList(searchInfo,getFW)
-            print('****************** GEOJSON !!!!--------------')
             for row in dataResult:
                 geoJson.append({'type':'Feature', 'properties':{'name':row['Name']
                     , 'date':row['StationDate']}
@@ -338,14 +313,12 @@ def searchStation(request):
         dataResult = listObj.GetFlatDataList(searchInfo,getFW)
         result = [{'total_entries':countResult}]
         result.append(dataResult)
-        transaction.commit()
         return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 
 def linkToMonitoredSite(request):
     session = request.dbsession
-
     curSta = session.query(Station).get(request.matchdict['id'])
     data = request.json_body
     idSite = data['siteId']
@@ -353,7 +326,6 @@ def linkToMonitoredSite(request):
     if data['updateSite'] : 
         newSitePos = MonitoredSitePosition(StartDate=curSta.StationDate, LAT=curSta.LAT, LON=curSta.LON, ELE=curSta.ELE, Precision=curSta.precision, FK_MonitoredSite=idSite)
         session.add(newSitePos)
-    transaction.commit()
     return {}
 
 

@@ -90,6 +90,7 @@ define([
     },
 
     onShow: function() {
+
       this.displayFilter();
       this.displayGrid();
     },
@@ -166,6 +167,7 @@ define([
     },
 
     filter: function() {
+
       this.filters.update();
     },
 

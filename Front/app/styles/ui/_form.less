@@ -42,12 +42,6 @@ input, select, textarea{
 		border-bottom: 1px solid rgba(255, 165, 0, 0.5);
 	}
 }
-.error{
-	//works only for required classes
-	select.required, input.required, textarea.required{
-		border-left: 5px solid @error;
-	}
-}
 
 .form-control:disabled{
 	border: 1px solid transparent;
@@ -78,7 +72,7 @@ select:disabled {
 
 .form-control[type="checkbox"]{
 	box-shadow: none;
-	height: 25px;
+	height: 34px;
 	width: 25px;
 	cursor: pointer;
 }
@@ -146,4 +140,41 @@ select:disabled {
     cursor: default;
     max-height: 350px;
     overflow-y: auto;
+}
+
+
+
+
+
+
+
+
+
+.error{
+	//works only for required classes
+	select.required, input.required, textarea.required{
+		border-left: 5px solid @error;
+	}
+}
+.list-inline {
+    margin-left: 0px;
+}
+
+.list-group-item{
+	&:hover{
+		background: rgba(68, 157, 68, 1);
+		color: white;
+		border: 1px solid #dddddd;
+	}
+	&.active{
+		color: white;
+		background: rgba(68, 157, 68, 1);
+		border: 1px solid #dddddd;
+		&:hover{
+			background: rgba(68, 157, 68, 1);
+			color: white;
+			border: 1px solid #dddddd;
+
+		}
+	}
 }

@@ -65,17 +65,16 @@ class ObjectTypeWithDynProp:
                 curSize = CurModuleForms.FieldSizeEdit
             if (CurModuleForms.FormRender & 2) == 0:
                 curEditable = False
-            SchemaDTO[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,ModuleForms.GetClassFromSize(curSize))
-
+            SchemaDTO[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,ModuleForms.GetClassFromSize(curSize),DisplayMode)
 
     def GetDynPropNames(self):
         curQuery = 'select D.Name from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
         Values = self.ObjContext.execute(curQuery).fetchall()
-        resultat = {}
+        resultat = []
         for curValue in Values : 
-           resultat[curValue['Name']] = curValue
+           resultat.append(curValue['Name'].lower())
         return resultat
 
     def GetDynProps(self):

@@ -93,7 +93,7 @@ define([
       var _this = this;
       this.rgNavbar.show(this.navbar);
       this.display();
-      this.com.onAction = function(){
+      this.com.onAction = function() {
         // _this.setTotal();
       };
     },

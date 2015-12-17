@@ -1,22 +1,15 @@
 
-<div class="container-fluid full-height">
-	<br>
-	<div class="row">
-		<div class="col-sm-6 form-group" id="group-mod">
-			<label for="input-mod" class="control-label medium" >
-				Select a RFID decoder unit :
-			</label>
-			<br>
-			<div >
+<input type="input" id="requirement" class="required hidden">
+<div class="full-height">
+	<div class="toolbar top">
 				<select name="RFID_identifer" id="rfidId" valule="" class="form-control required" placeholder="Identifier">
-					<option></option>
+					<option value="" disabled="" selected="">Select a RFID decoder</option>
 				</select>
-			</div>
-			<span id="help-mod" class="help-block"></span>
-		</div>
-
 	</div>
-		<div id="paginator"></div>
-		<div id="grid"></div>
-	<div class="modal fade full-modal" id="rfid-Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"></div>
+		<div class="crop1 crop-paginator">
+			<br>
+			<span>Please select a row</span>
+			<div id="grid" class="hidden"></div>
+		</div>
+		<div id="paginator" class="paginator hidden"></div>
 </div>

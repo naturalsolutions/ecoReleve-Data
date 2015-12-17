@@ -61,24 +61,22 @@
      requirejs: {
        compile: {
          options: {
-           findNestedDependencies: false,
-           baseUrl: 'app',
-           mainConfigFile: 'app/main.js',
-           include: 'main',
-           //name: '../bower_components/almond/almond',
-           name: '../bower_components/requirejs/require',
-           out: 'build/prod.js',
-           optimize: 'none',
-
+            findNestedDependencies: false,
+            baseUrl: 'app',
+            mainConfigFile: 'app/main.js',
+            include: 'main',
+            name: '../bower_components/requirejs/require',
+            out: 'build/prod.js',
+            preserveLicenseComments: true,
+            optimize: 'uglify',
+            generateSourceMaps: false,
            done: function(done, output) {
              var duplicates = require('rjs-build-analysis').duplicates(output);
-
              if (duplicates.length > 0) {
                grunt.log.subhead('Duplicates found in requirejs build:');
                grunt.log.warn(duplicates);
                done(new Error('r.js built duplicate modules, please check the excludes option.'));
              }
-
              done();
            }
          }
@@ -134,6 +132,17 @@
        },
      },
 
+     cachebreaker: {
+         prod: {
+             options: {
+                 match: ['build/prod.js'],
+             },
+             files: {
+                 src: ['index.html']
+             }
+         },
+     },
+
    });
 
    /*==========  Loaded Tasks  ==========*/
@@ -154,6 +163,8 @@
 
    grunt.loadNpmTasks('grunt-file-blocks');
 
+   grunt.loadNpmTasks('grunt-cache-breaker');
+
    /*==========  Regitred Tasks  ==========*/
 
    grunt.registerTask('build', [
@@ -167,5 +178,5 @@
 
    grunt.registerTask('dev', ['build', 'fileblocks:develop']);
 
-   grunt.registerTask('release', ['build', 'fileblocks:prod']);
+   grunt.registerTask('release', ['build', 'fileblocks:prod', 'cachebreaker:prod']);
  };
