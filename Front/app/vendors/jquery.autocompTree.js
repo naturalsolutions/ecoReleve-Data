@@ -122,6 +122,8 @@
             //Permet si l'arbre et en mode filter d'afficher les enfants des termes filtrés -> submatch
             renderNode: function (event, data) {
 
+
+
               var node = data.node;
               if (data.tree.options.hideExpand.isHide) {
                 data.tree.options.hideExpand.nbExpand--;
