@@ -46,12 +46,6 @@ define([
             var model = new Backbone.Model();
             model.schema = this.options.schema.subschema;
             model.fieldsets = this.options.schema.fieldsets;
-            //bug on the FK proto Type
-
-/*            if(this.defaultValue){
-                model.attributes['FK_ProtocoleType'] = this.defaultValue;
-            }
-*/
 
             this.addForm(model);
         },
