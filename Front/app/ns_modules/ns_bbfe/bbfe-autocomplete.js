@@ -26,12 +26,15 @@ define([
                     options.schema.options.source = config.coreUrl + options.schema.options.source;
                 }
                 this.autocompleteSource = options.schema.options;
+                
             }
             this.options = options;
         },
         
           getValue: function() {
-           return this.$el.find('#' + this.id ).val() ;
+            console.log(this.$el.find('#' + this.id ).attr('data_value'));
+           return this.$el.find('#' + this.id ).attr('data_value') ;
+
           },
 
         render: function () {
@@ -47,6 +50,12 @@ define([
             }
             _(function () {
                 var optionsJquery = _this.autocompleteSource;
+                optionsJquery.select = function(event,ui){
+                    console.log(ui.item.label);
+                    event.preventDefault();
+                    _this.$el.find('#' + _this.id ).attr('data_value',ui.item.value);
+                    _this.$el.find('#' + _this.id ).val(ui.item.label);
+                };
                 _this.$el.find('#' + _this.id).autocomplete(optionsJquery);
                 _this.$el.find('#' + _this.id).addClass(_this.options.schema.editorClass) ;
                 if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
