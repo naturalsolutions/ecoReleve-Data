@@ -47,15 +47,6 @@ BEGIN
 			DROP TABLE #ProtValeur
 		CREATE TABLE #ProtValeur (FK_Station int,fk_protocole int,ValName VARCHAR(250),Valeur VARCHAR(1000),FK_Indiv INT,comments varchar(255))
 		
-<<<<<<< HEAD:Back/database/Migration/07_pr_MigrationProtocole.sql
-		SELECT @colIndID =  count(*)
-		FROM [ECWP-eReleveData].dbo.sysobjects S_O 
-		JOIN [ECWP-eReleveData].dbo.syscolumns S_C on S_C.id = S_o.id
-		WHERE s_o.name =@TableName and UPPER(s_c.Name) = 'FK_TIND_ID'
-	
-		SET @Req = ' select S2.ID ,P.pk ,ValName,Valeur ,' + CASE WHEN  @colIndID >0 THEN ' P.FK_TInd_ID '  ELSE 'NULL' END+ ', p.comments  from [ECWP-eReleveData].dbo.' + @TableName + ' P JOIN  [ECWP-eReleveData].dbo.TStations S ON  P.FK_TSta_ID = S.TSta_PK_ID JOIN Station S2 ON s2.Original_ID =''eReleve_''+ CONVERT(VARCHAR,+S.TSta_PK_ID)    cross apply(' + @Req + ') c (ValName,Valeur)'
-		
-=======
 		
 
 		SELECT @colIndID = count(*)
@@ -66,7 +57,6 @@ BEGIN
 		SET @Req = ' select S2.ID ,P.pk ,ValName,Valeur ,' + CASE WHEN  @colIndID >0  THEN ' P.FK_TIND_ID' ELSE 'NULL' END+ ', p.comments  from [ECWP-eReleveData].dbo.' + @TableName + ' P JOIN  [ECWP-eReleveData].dbo.TStations S ON  P.FK_TSta_ID = S.TSta_PK_ID JOIN Station S2 ON s2.Original_ID =''eReleve_''+ CONVERT(VARCHAR,+S.TSta_PK_ID)    cross apply(' + @Req + ') c (ValName,Valeur)'
 		SET @req = replace(@req,'cross apply(@debut)','cross apply(Select ''none'' ,NULL)')
 		select @ProtocoleName;
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca:Back/database/Migration/00_pr_MigrationProtocole.sql
 		select @Req;
 		
 		insert into #ProtValeur

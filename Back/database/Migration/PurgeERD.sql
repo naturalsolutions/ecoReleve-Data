@@ -10,12 +10,9 @@ dbcc  CHECKIDENT (StationDynPropValue,reseed,0)
 delete from MonitoredSiteDynPropValue
 dbcc  CHECKIDENT (MonitoredSiteDynPropValue,reseed,0)
 
-<<<<<<< HEAD
-=======
 delete from Equipment
 dbcc  CHECKIDENT (Equipment,reseed,0)
 
->>>>>>> c736a1259dfed9e43e5cf39f2f5799e74964caca
 truncate TABLE ObservationDynPropValue
 dbcc  CHECKIDENT (ObservationDynPropValue,reseed,0)
 
