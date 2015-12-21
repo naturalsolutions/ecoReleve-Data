@@ -65,10 +65,10 @@ def parseDSFileAndInsert(full_filename,session):
     MTI_path = os.path.join(workDir,'MTIwinGPS.exe')
     out_path = os.path.join(workDir,"ecoReleve_import","Argos",os.path.splitext(os.path.basename(full_filename))[0])
 
-    try:
-        os.system('taskkill /f /im MTIwinGPS.exe')
-    except:
-        pass
+    # try:
+    #     os.system('taskkill /f /im MTIwinGPS.exe')
+    # except:
+    #     pass
 
     EngData = None
     GPSData = None
