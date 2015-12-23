@@ -1,4 +1,5 @@
 define([
+
   'jquery',
   'underscore',
   'backbone',
@@ -58,7 +59,9 @@ define([
         var ext = file.name.split('.');
         if (ext[ext.length - 1] != 'txt') {
           swal(
+
               {
+
                 title: 'Wrong file type',
                 text: 'The file should be a text file (.txt)',
                 type: 'error',
@@ -67,8 +70,10 @@ define([
                 confirmButtonText: 'OK',
 
                 closeOnConfirm: true,
+
               }
             );
+
           return false;
         } else {
           var url = config.coreUrl + 'sensors/rfid/datas';
@@ -104,6 +109,7 @@ define([
 
             self.ui.progressBar.css({'background-color': 'green'})
             swal(
+
               {
                 title: 'Succes',
                 text: 'importing RFID file',
@@ -122,8 +128,10 @@ define([
                 } else {
                   Backbone.history.navigate('validate/rfid',{trigger: true});
                 }
+
               }
             );
+
 
           }).fail(function(data) {
             $('#btnNext').attr('disabled');
@@ -143,6 +151,7 @@ define([
               data.responseText = 'An error occured, please contact an admninstrator';
             }
             swal(
+
               {
                 title: title,
                 text: data.responseText,

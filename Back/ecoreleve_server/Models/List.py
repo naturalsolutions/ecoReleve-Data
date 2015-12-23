@@ -221,3 +221,4 @@ class SensorList(ListObjectWithDynProp):
     # def GetFullQuery(self,searchInfo=None) :
     #     query = super().GetFullQuery(searchInfo)
     #     return query
+

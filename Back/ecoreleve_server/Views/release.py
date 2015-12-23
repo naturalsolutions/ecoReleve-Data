@@ -225,6 +225,7 @@ def releasePost(request):
         releaseIndList.append(curReleaseInd)
 
         try:
+
             indiv['FK_Sensor'] = int(indiv['fk_sensor'])
             curEquipmentInd = getnewObs(equipmentIndID)
             curEquipmentInd.UpdateFromJson(indiv)

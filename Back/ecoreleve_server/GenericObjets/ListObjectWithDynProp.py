@@ -248,6 +248,7 @@ class ListObjectWithDynProp():
                     if filterCriteria is not None :
                         fullQuery = fullQuery.where(filterCriteria)
 
+
                 elif curDynProp != None:
                     filterOnDynProp = True
                     if 'date' in curDynProp['TypeProp'].lower() :

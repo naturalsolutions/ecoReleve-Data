@@ -10,6 +10,7 @@ from ..Models import (
     Equipment,
     IndividualList,
     Base
+
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp

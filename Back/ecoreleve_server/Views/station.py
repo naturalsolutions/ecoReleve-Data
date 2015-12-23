@@ -8,6 +8,7 @@ from ..Models import (
     StationList,
     MonitoredSitePosition,
     Base
+
     )
 from ..GenericObjets.FrontModules import FrontModules, ModuleForms
 from ..GenericObjets import ListObjectWithDynProp
@@ -243,6 +244,7 @@ def searchStation(request):
     searchInfo = {}
     searchInfo['criteria'] = []
     user = request.authenticated_userid['iss']
+
 
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])

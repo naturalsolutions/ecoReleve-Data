@@ -17,6 +17,7 @@ define([
     template: 'app/modules/importFile/tpl-step0.html',
 
     events: {
+
       'change input': 'changeValue',
     },
 

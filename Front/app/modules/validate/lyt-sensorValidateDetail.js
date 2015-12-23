@@ -89,6 +89,7 @@ define([
     },
 
     onShow: function() {
+
       var _this = this;
       this.rgNavbar.show(this.navbar);
       this.display();

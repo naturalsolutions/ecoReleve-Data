@@ -30,7 +30,6 @@ define([
       'click #pagination li#nextObs': 'nextObs',
       'click #addObs': 'addObs'
 
-      
     },
 
     index: 0,

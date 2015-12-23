@@ -54,6 +54,7 @@ define(['marionette', 'config',
 
   LytExport
 
+
 ) {
   'use strict';
 
@@ -100,6 +101,7 @@ define(['marionette', 'config',
     },
     newMonitoredSite: function(type) {
       this.rgMain.show(new LytMonitoredSitesNew());
+
     },
 
     validate: function() {
@@ -115,6 +117,7 @@ define(['marionette', 'config',
       console.log(id);
       // (id of the station..)
       this.rgMain.show(new LytReleaseStation({id : id}));
+
     },
 
     export: function() {

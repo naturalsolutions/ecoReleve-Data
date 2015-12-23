@@ -1,6 +1,7 @@
 
 define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
-  function($, Marionette, Backbone, config) {
+
+	function($, Marionette, Backbone, config) {
 
   'use strict';
   return Marionette.AppRouter.extend({
@@ -24,6 +25,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
 
       'importFile(/)': 'importFile',
 
+
       'individuals/new(/)': 'newIndividual',
       'individuals/:id(/)': 'individuals',
       'individuals(/)': 'individuals',
@@ -44,6 +46,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       'validate/:type(/)': 'validateType',
       'validate(/)': 'validate',
 
+
       'release/:id(/)': 'release',
       'release(/)': 'release',
 
@@ -61,7 +64,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
           document.location.href = config.portalUrl;
         }
       });
+
     },
+
 
     onRoute: function(url, patern, params) {
       patern = patern.replace(/\(/g, '');

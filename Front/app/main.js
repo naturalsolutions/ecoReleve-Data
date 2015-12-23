@@ -46,6 +46,7 @@ require.config({
     'L': '../bower_components/leaflet/dist/leaflet-src',
     'leaflet_cluster': '../bower_components/leaflet.markercluster/dist/leaflet.markercluster',
     'leaflet_google': '../bower_components/leaflet-plugins/layer/tile/Google',
+
     'dropzone': '../bower_components/dropzone/dist/dropzone',
     'i18n': '../bower_components/i18n/i18next',
     'floatThead': '../bower_components/floatThead/dist/jquery.floatThead-slim',
@@ -65,7 +66,6 @@ require.config({
     'backgrid.paginator': 'vendors/backgrid-paginator',
     'backgridSelect_all': 'vendors/backgrid-select-all',
     'autocompTree': './vendors/jquery.autocompTree',
-
   },
 
   shim: {

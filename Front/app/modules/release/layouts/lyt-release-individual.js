@@ -13,6 +13,7 @@ define([
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
+
   Com, NsGrid, NsFilter, ObjectPicker
 ) {
 
@@ -39,7 +40,6 @@ define([
       'click #release': 'toolTipShow',
       'click #addSensor': 'addSensor',
     },
-
 
     regions: {
       modal: '#modal',
@@ -79,6 +79,7 @@ define([
           title : 'sensors',
         }
       });
+
       this.sensorPicker.render();
 
       this.initGrid();
@@ -92,7 +93,6 @@ define([
 
       this.displayFilter();
       this.displayGrid();
-      //Backbone.history.navigate('release/individuals',{trigger: false});
     },
 
     getReleaseMethod: function(){
@@ -136,7 +136,6 @@ define([
     displayGrid: function() {
 
       this.ui.grid.html(this.grid.displayGrid());
-      /*      this.ui.paginator.html(this.grid.displayPaginator());*/
     },
 
     displayFilter: function() {
@@ -169,7 +168,6 @@ define([
 
     filter: function() {
 
-      console.log('passed');
       this.filters.update();
     },
 

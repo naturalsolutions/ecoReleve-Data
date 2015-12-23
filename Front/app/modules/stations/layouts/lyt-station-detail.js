@@ -15,6 +15,7 @@ define([
   'i18n'
 
 ], function($, _, Backbone, Marionette, Radio, LytProto,
+
   Swal, config, NsForm, Navbar
 ) {
 
@@ -285,5 +286,6 @@ define([
     },
 
   });
+
 });
 

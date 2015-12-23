@@ -216,6 +216,7 @@ class JWTAuthenticationPolicy(object):
         except: 
             return
             #self.challenge(request)
+
     def get_userInfo(self, request):
         try :
             token = request.cookies.get("ecoReleve-Core")
