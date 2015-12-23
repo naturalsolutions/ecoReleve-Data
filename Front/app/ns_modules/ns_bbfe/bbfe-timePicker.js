@@ -45,7 +45,17 @@ define([
         required = options.schema.validators[0];
       }
       if (options.model) {
-        value = options.model.get(this.options.key);
+        //value = options.model.get(this.options.key);
+        var val = options.model.get(this.options.key);
+        if (val){
+          var tab = val.split(" ");
+          if (tab.length > 1){
+            value = tab[1];
+          } else {
+            value = val;
+          }
+        }
+        
       }else {
             if (options.value) {
               value = options.value;

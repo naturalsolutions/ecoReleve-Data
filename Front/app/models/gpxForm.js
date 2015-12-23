@@ -27,18 +27,18 @@ define([
           'FieldWorker': {
             'title': 'FieldWorker',
             'editable': true,
-            'validators': [],
-            'options': {"source": "autocomplete/users/Login", "minLength":3},
+            'validators': ['required'],
+            'options': {"source": "autocomplete/users/Login/ID", "minLength":3},
             'editorClass':
             'form-control',
             'Name': 'FieldWorker',
             'type': 'AutocompleteEditor',
-            'fieldClass': 'None col-md-6'
+            'fieldClass': 'col-md-6'
           }
         },
         title : "Field Workers *",
         'editable': null,
-        'validators': [],
+        'validators': ['required'],
         'options': [],
         'editorClass': 'listOfChildSample,col-md-11',
         'Name': 'FieldWorkers',
