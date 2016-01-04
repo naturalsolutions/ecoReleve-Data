@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from decimal import Decimal
 import transaction
 from urllib.parse import quote_plus
@@ -11,30 +11,41 @@ from pyramid.renderers import JSON
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from ecoreleve_server.controllers.security import SecurityRoot, role_loader
-from ecoreleve_server.renderers.csvrenderer import CSVRenderer
-from ecoreleve_server.renderers.pdfrenderer import PDFrenderer
-from ecoreleve_server.renderers.gpxrenderer import GPXRenderer
-from ecoreleve_server.Models import (
-    DBSession,
+from .controllers.security import SecurityRoot, role_loader
+from .renderers.csvrenderer import CSVRenderer
+from .renderers.pdfrenderer import PDFrenderer
+from .renderers.gpxrenderer import GPXRenderer
+from .Models import (
     Base,
+    BaseExport,
     dbConfig,
     Station,
     Observation,
-    Sensor
+    Sensor,
+    db
     )
-from ecoreleve_server.GenericObjets import *
-from ecoreleve_server.Views import add_routes
-from ecoreleve_server.Views.station import searchStation
+from .Views import add_routes
 
-from ecoreleve_server.pyramid_jwtauth import (
+from .pyramid_jwtauth import (
     JWTAuthenticationPolicy,
     includeme
     )
+from pyramid.events import NewRequest
+from sqlalchemy.orm import sessionmaker,scoped_session
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects."""
-    return obj.strftime ('%d/%m/%Y %H:%M:%S')
+    try: 
+        return obj.strftime ('%d/%m/%Y %H:%M:%S')
+    except :
+        return obj.strftime ('%d/%m/%Y')
+
+def time_adapter(obj, request):
+    """Json adapter for datetime objects."""
+    try:
+        return obj.strftime('%H:%M')
+    except:
+        return obj.strftime('%H:%M:%S')
     
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
@@ -42,24 +53,41 @@ def decimal_adapter(obj, request):
 
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
-    settings['sqlalchemy.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.url'])
-    engine = engine_from_config(settings, 'sqlalchemy.')
-    dbConfig['url'] = settings['sqlalchemy.url']
+
+    settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.Export.url'])
+    engineExport = engine_from_config(settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
+
+    settings['sqlalchemy.default.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.default.url'])
+    engine = engine_from_config(settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
+
+    dbConfig['url'] = settings['sqlalchemy.default.url']
     dbConfig['wsThesaurus'] = {}
     dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
     dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
     dbConfig['data_schema'] = settings['data_schema']
 
-    DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
-    Base.metadata.reflect(views=True, extend_existing=False)
+    Base.metadata.reflect(views=True, extend_existing=False) 
+
+    BaseExport.metadata.bind = engineExport
+    BaseExport.metadata.create_all(engineExport)
+    BaseExport.metadata.reflect(views=True, extend_existing=False)
 
     config = Configurator(settings=settings)
-    # Add renderer for datetime objects
+    config.include('pyramid_tm')
+
+    binds = {"default": engine, "Export": engineExport}
+    config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
+    config.registry.dbmakerExport = scoped_session(sessionmaker(bind=engineExport))
+    config.add_request_method(db, name='dbsession', reify=True)
+
+    # Add renderer for JSON objects
     json_renderer = JSON()
-    json_renderer.add_adapter(datetime, datetime_adapter)
+    json_renderer.add_adapter(datetime.datetime, datetime_adapter)
+    json_renderer.add_adapter(datetime.date, datetime_adapter)
     json_renderer.add_adapter(Decimal, decimal_adapter)
+    json_renderer.add_adapter(datetime.time, time_adapter)
     config.add_renderer('json', json_renderer)
 
     # Add renderer for CSV, PDF,GPX files.
@@ -67,12 +95,11 @@ def main(global_config, **settings):
     config.add_renderer('pdf', PDFrenderer)
     config.add_renderer('gpx', GPXRenderer)
 
-    # includeme(config)
-    # config.set_root_factory(SecurityRoot)
+    includeme(config)
+    config.set_root_factory(SecurityRoot)
 
     # Set the default permission level to 'read'
     config.set_default_permission('read')
-    config.include('pyramid_tm')
     add_routes(config)
     config.scan()
     return config.make_wsgi_app()

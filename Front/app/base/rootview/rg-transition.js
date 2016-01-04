@@ -1,7 +1,6 @@
 define(['marionette'],
 function(Marionette) {
-	'use strict';
-	
+  'use strict';
 
-	//todo : copy the lib code here
+  //todo : copy the lib code here
 });

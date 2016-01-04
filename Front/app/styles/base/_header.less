@@ -6,14 +6,13 @@ header{
 	width: 100%;
 	max-height: 50px;
 	font-weight: 400; 
-
-
-	overflow: hidden;
-
-
 	a#logout{
 		cursor: pointer;
 	}
+	a{
+		transition: all .1s;
+	}
+
 	nav.navbar{
 		margin: 0px;
 		border: none;
@@ -39,4 +38,43 @@ header{
 			}
 		}
 	}
+
+	.dropdown.open{
+		&>a{
+			background: @header-bg;
+			&:hover, &:focus{
+				background: @header-hover;
+			}
+		}
+		ul.dropdown-menu{
+			background: @header-bg;
+			border: none;
+			& a{
+				color: white;
+				&:hover, &:focus{
+					background: @header-hover;
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 768px){
+	header{
+		.navbar-nav{
+			float: left;
+			margin: 0;
+		}
+		.navbar-nav > li > a {
+		    padding-top: 15px;
+		    padding-bottom: 15px;
+		}
+		.navbar-nav > li {
+		    float: left;
+		}
+		.navbar-right {
+		    float: right !important;
+		    margin-right: -15px;
+		}
+}
 }

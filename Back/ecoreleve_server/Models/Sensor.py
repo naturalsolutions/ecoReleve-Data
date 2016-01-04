@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession
+from ..Models import Base,DBSession
 from sqlalchemy import (Column,
  DateTime,
  Float,
@@ -36,14 +36,18 @@ class Sensor (Base,ObjectWithDynProp) :
 
     SensorDynPropValues = relationship('SensorDynPropValue',backref='Sensor',cascade="all, delete-orphan")
 
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        ObjectWithDynProp.__init__(self)
+
     @orm.reconstructor
     def init_on_load(self):
         ''' init_on_load is called on the fetch of object '''
-        ObjectWithDynProp.__init__(self,DBSession)
+        ObjectWithDynProp.__init__(self)
         
     def GetNewValue(self,nameProp):
         ReturnedValue = SensorDynPropValue()
-        ReturnedValue.SensorDynProp = DBSession.query(SensorDynProp).filter(SensorDynProp.Name==nameProp).first()
+        ReturnedValue.SensorDynProp = self.ObjContext.query(SensorDynProp).filter(SensorDynProp.Name==nameProp).first()
         return ReturnedValue
 
     def GetDynPropValues(self):
@@ -51,13 +55,13 @@ class Sensor (Base,ObjectWithDynProp) :
 
     def GetDynProps(self,nameProp):
         print(nameProp)
-        return  DBSession.query(SensorDynProp).filter(SensorDynProp.Name==nameProp).one()
+        return  self.ObjContext.query(SensorDynProp).filter(SensorDynProp.Name==nameProp).one()
 
     def GetType(self):
         if self.SensorType != None :
             return self.SensorType
         else :
-            return DBSession.query(SensorType).get(self.FK_SensorType)
+            return self.ObjContext.query(SensorType).get(self.FK_SensorType)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 class SensorDynProp (Base) :
@@ -80,7 +84,7 @@ class SensorDynPropValue(Base):
     ValueInt =  Column(Integer)
     ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
-    ValueFloat =  Column(Float)
+    ValueFloat =  Column(Numeric(12,5))
     FK_SensorDynProp = Column(Integer, ForeignKey('SensorDynProp.ID'))
     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
 
@@ -110,5 +114,5 @@ class SensorType (Base,ObjectTypeWithDynProp) :
 
     @orm.reconstructor
     def init_on_load(self):
-        ObjectTypeWithDynProp.__init__(self,DBSession)
+        ObjectTypeWithDynProp.__init__(self)
 

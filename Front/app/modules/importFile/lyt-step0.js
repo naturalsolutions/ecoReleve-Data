@@ -7,33 +7,38 @@ define([
 	'i18n'
 
 ], function($, _, Backbone, Marionette
-){
+) {
 
-	'use strict';
+  'use strict';
 
-	return Marionette.LayoutView.extend({
+  return Marionette.LayoutView.extend({
 
-		className: 'full-height', 
-		template: 'app/modules/importFile/tpl-step0.html',
+    className: 'full-height',
+    template: 'app/modules/importFile/tpl-step0.html',
 
-		events: {
-			'click .tile-inside': 'selectTile',
+    events: {
+      'change input': 'changeValue',
+    },
+
+    name: 'File type selection',
+
+    initialize: function() {
 		},
 
-		name : 'File type selection',
-
-		initialize: function(){
+    onShow: function() {
+      this.$el.find('.tile-inside:first input').prop('checked', true).change();
+      this.$el.find('.tile-inside:first').addClass('active');
 		},
 
-		onShow : function(){
-		},
+    validate: function() {
+      return this.$el.find('.tile-inside input[type="radio"]:checked').val();
+    },
 
-		validate: function(){
-			return this.$el.find('.tile-inside input[type="radio"]:checked').val();
-		},
-
-		selectTile: function(e){
-			$(e.currentTarget).find('input').prop('checked', true);
-		},
-	});
+    changeValue: function(e) {
+      this.$el.find('label.tile-inside').each(function() {
+        $(this).removeClass('active');
+      });
+      $(e.target).parent().addClass('active');
+    },
+  });
 });

@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession,FieldActivity
+from ..Models import Base,DBSession,FieldActivity
 from sqlalchemy import (Column,
  DateTime,
  Float,
@@ -29,6 +29,8 @@ from collections import OrderedDict
 import pandas as pd 
 import numpy as np 
 import json
+from traceback import print_exc
+from pyramid import threadlocal
 
 
 #--------------------------------------------------------------------------
@@ -49,6 +51,7 @@ class Station(Base,ObjectWithDynProp):
     Observations = relationship('Observation', back_populates = 'Station',cascade="all, delete-orphan")
     StationDynPropValues = relationship('StationDynPropValue',backref='Station',cascade="all, delete-orphan")
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
+    Comments = Column(String(250))
 
 
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
@@ -59,6 +62,11 @@ class Station(Base,ObjectWithDynProp):
 
     Station_FieldWorkers = relationship('Station_FieldWorker', backref='Station',cascade="all, delete-orphan")
     __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON', name='_unique_constraint_lat_lon_date'),)
+
+
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        ObjectWithDynProp.__init__(self)
 
     ''' hybrid property on relationship '''
     @hybrid_property
@@ -92,11 +100,14 @@ class Station(Base,ObjectWithDynProp):
     @orm.reconstructor
     def init_on_load(self):
         ''' init_on_load is called on the fetch of object '''
-        ObjectWithDynProp.__init__(self,DBSession)
+        ObjectWithDynProp.__init__(self)
         
     def GetNewValue(self,nameProp):
         ReturnedValue = StationDynPropValue()
-        ReturnedValue.StationDynProp = DBSession.query(StationDynProp).filter(StationDynProp.Name==nameProp).first()
+        try:
+            ReturnedValue.FK_StationDynProp = self.ObjContext.execute(select([StationDynProp.ID]).where(StationDynProp.Name==nameProp)).scalar()
+        except:
+            print_exc()
         return ReturnedValue
 
     def GetDynPropValues(self):
@@ -104,13 +115,13 @@ class Station(Base,ObjectWithDynProp):
 
     def GetDynProps(self,nameProp):
         print(nameProp)
-        return  DBSession.query(StationDynProp).filter(StationDynProp.Name==nameProp).one()
+        return  self.ObjContext.query(StationDynProp).filter(StationDynProp.Name==nameProp).one()
 
     def GetType(self):
         if self.StationType != None :
             return self.StationType
         else :
-            return DBSession.query(StationType).get(self.FK_StationType)
+            return self.ObjContext.query(StationType).get(self.FK_StationType)
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):
         ''' Override this super method to add fieldworker '''
@@ -144,7 +155,7 @@ class StationDynPropValue(Base):
     ValueInt =  Column(Integer)
     ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
-    ValueFloat =  Column(Float)
+    ValueFloat =  Column(Numeric(12,5))
     FK_StationDynProp = Column(Integer, ForeignKey('StationDynProp.ID'))
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
     # station = relationship('Station',cascade="all, delete-orphan", single_parent = True)
@@ -155,7 +166,7 @@ class StationType(Base,ObjectTypeWithDynProp):
 
     @orm.reconstructor
     def init_on_load(self):
-        ObjectTypeWithDynProp.__init__(self,DBSession)
+        ObjectTypeWithDynProp.__init__(self)
 
     __tablename__ = 'StationType'
 

@@ -1,19 +1,19 @@
-from ecoreleve_server.Models import Base,DynPropNames,DBSession
+from ..Models import Base,DynPropNames,DBSession
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,or_
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
 from datetime import datetime
 from .FrontModules import FrontModules,ModuleForms
-
+from pyramid import threadlocal
 
 DynPropType = {'string':'Text','float':'Text','date':'Date','integer':'Text','int':'Text'}
 
 class ObjectTypeWithDynProp:
     ''' Class to extend for mapped object type with dynamic props'''
 
-    def __init__(self,ObjContext):
-        self.ObjContext = DBSession
+    def __init__(self,ObjContext=None):
+        self.ObjContext = threadlocal.get_current_request().dbsession
         self.DynPropNames = self.GetDynPropNames()
 
     def GetDynPropContextTable(self):
@@ -65,16 +65,16 @@ class ObjectTypeWithDynProp:
                 curSize = CurModuleForms.FieldSizeEdit
             if (CurModuleForms.FormRender & 2) == 0:
                 curEditable = False
-            SchemaDTO[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,ModuleForms.GetClassFromSize(curSize))
+            SchemaDTO[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,ModuleForms.GetClassFromSize(curSize),DisplayMode)
 
     def GetDynPropNames(self):
         curQuery = 'select D.Name from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
         Values = self.ObjContext.execute(curQuery).fetchall()
-        resultat = {}
+        resultat = []
         for curValue in Values : 
-           resultat[curValue['Name']] = curValue
+           resultat.append(curValue['Name'].lower())
         return resultat
 
     def GetDynProps(self):
@@ -82,7 +82,6 @@ class ObjectTypeWithDynProp:
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
         Values = self.ObjContext.execute(curQuery).fetchall()
-
         return Values
 
     def GetFieldSets(self,FrontModules,Schema) :
@@ -93,8 +92,9 @@ class ObjectTypeWithDynProp:
             ).filter(ModuleForms.Module_ID == FrontModules.ID
             ).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)).all()
    
-        Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
+        Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in Fields if obj.FormOrder is not None], key = lambda x : x[1])
         # Legend2s = sorted ([(obj.Legend)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
+
         Unique_Legends = list()
         # Get distinct Fieldset in correct order
         for x in Legends:
@@ -108,6 +108,12 @@ class ObjectTypeWithDynProp:
         for curProp in Legends:
             curIndex = Unique_Legends.index(curProp[0])
             resultat[curIndex]['fields'].append(curProp[2])
+
+        # list_of_subschema = list(filter(lambda x : 'subschema' in Schema[x] ,Schema))
+        # if len(list_of_subschema) >0 :
+        #     for subName in list_of_subschema :
+        #         print(subName)
+        #         Schema[subName]['fieldsets'] = self.GetFieldSets(FrontModules,Schema[subName]['subschema'])
 
         return resultat
 

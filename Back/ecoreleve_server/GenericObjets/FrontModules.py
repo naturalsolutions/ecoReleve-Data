@@ -1,8 +1,10 @@
-from ecoreleve_server.Models import Base,DBSession, dbConfig
+from ..Models import Base, dbConfig
 from sqlalchemy import Column, DateTime, Float,Boolean, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,orm,and_,text,select
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 import json
+from pyramid import threadlocal
+from traceback import print_exc
 
 FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
 
@@ -24,6 +26,14 @@ class FrontModules(Base):
 
     ModuleForms = relationship('ModuleForms',lazy='dynamic',back_populates='FrontModules')
     ModuleGrids = relationship('ModuleGrids',lazy='dynamic',back_populates='FrontModules')
+
+    def __init__(self):
+        self.session = threadlocal.get_current_request().dbsession
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self.__init__()
+
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 class ModuleForms(Base):
@@ -49,24 +59,54 @@ class ModuleForms(Base):
 
     FrontModules = relationship("FrontModules", back_populates="ModuleForms")
 
+    def __init__(self):
+        self.session = threadlocal.get_current_request().dbsession
+    
+    @orm.reconstructor
+    def init_on_load(self):
+        self.__init__()
+
     @staticmethod
     def GetClassFromSize(FieldSize):
         return FieldSizeToClass[FieldSize]
 
-    def GetDTOFromConf(self,IsEditable,CssClass):
+    def GetDTOFromConf(self,Editable,CssClass,DisplayMode):
         ''' return input field to build form '''
+
+        if DisplayMode.lower() == 'edit':
+            inputType = self.InputType
+            isDisabled = False
+            self.fullPath = False
+        else :
+            inputType = self.InputType
+            self.fullPath = True
+            isDisabled = True
+
+            if self.InputType in ['AutocompTreeEditor']:
+                inputType = 'Text'
+                self.fullPath = True
+        self.DisplayMode = DisplayMode
+
+        #if self.InputType in ['AutocompleteEditor', 'ListOfNestedModel']:
+        # if self.InputType == 'ListOfNestedModel' :
+        #     inputType = 'ListOfNestedModel'
+        # else: 
+        #     inputType = 'Text'
         self.dto = {
             'name': self.Name,
-            'type': self.InputType,
+            'type': inputType,
             'title' : self.Label,
-            'editable' : IsEditable,
+            'editable' : Editable,
             'editorClass' : str(self.editorClass) ,
             'validators': [],
             'options': [],
-            'defaultValue' : None
+            'defaultValue' : None,
+            'editorAttrs' : {'disabled': isDisabled},
+            'fullPath':self.fullPath
+
             }
         self.CssClass = CssClass
-        self.IsEditable = IsEditable
+        self.Editable = Editable
         validators = self.Validators
         if validators is not None:
             self.dto['validators'] = json.loads(validators)
@@ -76,16 +116,15 @@ class ModuleForms(Base):
                 self.dto['validators'].append("required")
             else:
                 self.dto['validators'].append("required")
-            self.dto['title'] = self.dto['title'] + '*'
+            self.dto['title'] = self.dto['title'] + ' *'
 
             # TODO changer le validateur pour select required (valeur <>-1)
-        if isEditable :
+        if self.Editable :
             self.dto['fieldClass'] = str(self.EditClass) + ' ' + CssClass
         else :
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
 
             # TODO changer le validateur pour select required (valeur <>-1)
-
         if self.InputType in self.func_type_context :
             self.func_type_context[self.InputType](self)
         # default value
@@ -97,7 +136,7 @@ class ModuleForms(Base):
 
     def InputSelect (self) :
         if self.Options is not None and self.Options != '' :
-            result = DBSession.execute(text(self.Options)).fetchall()
+            result = self.session.execute(text(self.Options)).fetchall()
             for row in result :
                 temp = {}
                 for key in row.keys() : 
@@ -108,22 +147,53 @@ class ModuleForms(Base):
     def InputLNM(self) :
         ''' build ListOfNestedModel input type : used for complex protocols and Fieldworkers in station form '''
         if self.Options != None :
-            result = DBSession.query(ModuleForms).filter(and_(ModuleForms.TypeObj == self.Options , ModuleForms.Module_ID == self.Module_ID)).all()
+            result = self.session.query(ModuleForms).filter(and_(ModuleForms.TypeObj == self.Options , ModuleForms.Module_ID == self.Module_ID)).all()
             subNameObj = result[0].Name
             subschema = {}
             for conf in result :
-                subschema[conf.Name] = conf.GetDTOFromConf(self.IsEditable,self.CssClass)
-            self.dto = {
-            'Name': self.Name,
-            'type': self.InputType,
-            'title' : None,
-            'editable' : None,
-            'editorClass' : str(self.editorClass) ,
-            'validators': [],
-            'options': [],
-            'fieldClass': None,
-            'subschema' : subschema
-            }
+                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable,self.CssClass,self.DisplayMode)
+
+            fields = []
+            resultat = []
+            Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in result if obj.FormOrder is not None], key = lambda x : x[1])
+            # Legend2s = sorted ([(obj.Legend)for obj in result if obj.FormOrder is not None ], key = lambda x : x[1])
+            withOutLegends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in result if obj.FormOrder is not None and obj.Legend is None ], key = lambda x : x[1])
+
+            Unique_Legends = list()
+            # Get distinct Fieldset in correct order
+            for x in Legends:
+                if x[0] not in Unique_Legends:
+                    Unique_Legends.append(x[0])
+            
+            for curLegend in Unique_Legends:
+                curFieldSet = {'fields' :[],'legend' : curLegend}
+                resultat.append(curFieldSet)
+
+            for curProp in Legends:
+                curIndex = Unique_Legends.index(curProp[0])
+                resultat[curIndex]['fields'].append(curProp[2])
+
+            self.dto['fieldsets'] = resultat
+            # try :
+            #     # subTypeObj = int(self.Options)
+            #     subschema['FK_ProtocoleType'] = {
+            #     'Name': 'FK_ProtocoleType',
+            #     'type': 'Number',
+            #     'title' : 'FK_ProtocoleType',
+            #     'editable' : False,
+            #     'renderable':False,
+            #     'editorClass' : str(self.editorClass),
+            #     'validators': [],
+            #     'options': [],
+            #     'fieldClass': 'hidden'}
+
+            # except : 
+            #     print_exc()
+            #     pass
+
+            # finally :
+            self.dto['subschema'] = subschema
+
             try :
                 subTypeObj = int(self.Options)
                 self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
@@ -131,18 +201,22 @@ class ModuleForms(Base):
                 pass
 
     def InputThesaurus(self) :
-
         if self.Options is not None and self.Options != '' :
-            self.dto['options'] = {'startId': self.Options, 'wsUrl':dbConfig['wsThesaurus']['wsUrl'], 'lng':dbConfig['wsThesaurus']['lng']}
+            self.dto['options'] = {'startId': self.Options
+            , 'wsUrl':dbConfig['wsThesaurus']['wsUrl']
+            , 'lng':threadlocal.get_current_request().authenticated_userid['userlanguage']
+            ,'displayValueName': 'valueTranslated'}
             self.dto['options']['startId'] = self.Options
 
     def InputAutocomplete(self):
         if self.Options is not None and self.Options != '':
             option = json.loads(self.Options)
-            result = DBSession.execute(text(option['source'])).fetchall()
-            self.dto['options']= {'source':[]}
-            for row in result:
-                self.dto['options']['source'].append(row[0])
+        if 'SELECT' in option['source']:
+                result = self.session.execute(text(option['source'])).fetchall()
+                for row in result:
+                    self.dto['options']['source'].append(row[0])
+        else : 
+            self.dto['options'] = {'source': option['source'],'minLength' :option['minLength']}
 
 
     func_type_context = {
@@ -175,9 +249,16 @@ class ModuleGrids (Base) :
     FilterRender = Column (Integer)
     FilterType = Column (String)
     FilterClass = Column (String)
-
+    Status = Column(Integer)
     FrontModules = relationship("FrontModules", back_populates="ModuleGrids")
 
+
+    def __init__(self):
+        self.session = threadlocal.get_current_request().dbsession
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self.__init__()
 
     def FKName (self):
         if self.QueryName is None : 
@@ -196,12 +277,13 @@ class ModuleGrids (Base) :
         }
 
         if self.CellType == 'select' and 'SELECT' in self.Options :
-             result = DBSession.execute(text(self.Options)).fetchall()
+             result = self.session.execute(text(self.Options)).fetchall()
              column['optionValues'] = [[row['label'],row['val']] for row in result]
         return column
 
     def GenerateFilter (self) :
         ''' return filter field to build Filter '''
+
         filter_ = {
             'name' : self.Name,
             'type' : self.FilterType,
@@ -217,6 +299,26 @@ class ModuleGrids (Base) :
             filter_['fieldClass'] = FieldSizeToClass[self.FilterSize],
 
         if self.FilterType == 'Select' and self.Options != None : 
-            result = DBSession.execute(text(self.Options)).fetchall()
+            result = self.session.execute(text(self.Options)).fetchall()
             filter_['options'] = [{'label':row['label'],'val':row['val']} for row in result]
+        if self.FilterType == 'Checkboxes' :
+            filter_['options'] = [{'label':'True','val':1},{'label':'False','val':0}]
+
+        if self.FilterType=='AutocompTreeEditor' and self.Options is not None and self.Options != '' :
+            filter_['options'] = {'startId': self.Options
+            , 'wsUrl':dbConfig['wsThesaurus']['wsUrl']
+            , 'lng':threadlocal.get_current_request().authenticated_userid['userlanguage']
+            ,'displayValueName': 'valueTranslated'}
+            filter_['options']['startId'] = self.Options
+
+        if self.FilterType=='AutocompleteEditor' and  self.Options is not None and self.Options != '':
+            option = json.loads(self.Options)
+            filter_['options']= {'source':[]}
+            if 'SELECT' in option['source']:
+                result = self.session.execute(text(option['source'])).fetchall()
+                for row in result:
+                    filter_['options']['source'].append(row[0])
+            else : 
+                filter_['options'] = {'source': option['source'],'minLength' :option['minLength']}
+
         return filter_

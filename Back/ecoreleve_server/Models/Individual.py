@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base,DBSession
+from ..Models import Base,DBSession
 from sqlalchemy import (Column,
  DateTime,
  Float,
@@ -28,24 +28,29 @@ class Individual (Base,ObjectWithDynProp) :
     creationDate = Column (DateTime,nullable=False)
     Species = Column (String(250))
     Age = Column(String(250))
-    UnicIdentifier = Column(String(250))
+    # UnicIdentifier = Column(String(250))
     Birth_date = Column(DateTime)
     Death_date = Column(DateTime)
     Original_ID = Column(String(250))
     FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
-    Caisse_ID = Column(String(10))
+    # Caisse_ID = Column(String(10))
 
     IndividualDynPropValues = relationship('IndividualDynPropValue',backref='Individual',cascade="all, delete-orphan")
     Locations = relationship('Individual_Location')
 
+
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        ObjectWithDynProp.__init__(self)
+
     @orm.reconstructor
     def init_on_load(self):
         ''' init_on_load is called on the fetch of object '''
-        ObjectWithDynProp.__init__(self,DBSession)
+        ObjectWithDynProp.__init__(self)
         
     def GetNewValue(self,nameProp):
         ReturnedValue = IndividualDynPropValue()
-        ReturnedValue.IndividualDynProp = DBSession.query(IndividualDynProp).filter(IndividualDynProp.Name==nameProp).first()
+        ReturnedValue.IndividualDynProp = self.ObjContext.query(IndividualDynProp).filter(IndividualDynProp.Name==nameProp).first()
         return ReturnedValue
 
     def GetDynPropValues(self):
@@ -53,13 +58,13 @@ class Individual (Base,ObjectWithDynProp) :
 
     def GetDynProps(self,nameProp):
         print(nameProp)
-        return  DBSession.query(IndividualDynProp).filter(IndividualDynProp.Name==nameProp).one()
+        return  self.ObjContext.query(IndividualDynProp).filter(IndividualDynProp.Name==nameProp).one()
 
     def GetType(self):
         if self.IndividualType != None :
             return self.IndividualType
         else :
-            return DBSession.query(IndividualType).get(self.FK_IndividualType)
+            return self.ObjContext.query(IndividualType).get(self.FK_IndividualType)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 class IndividualDynProp (Base) :
@@ -83,7 +88,7 @@ class IndividualDynPropValue(Base):
     ValueInt =  Column(Integer)
     ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
-    ValueFloat =  Column(Float)
+    ValueFloat =  Column(Numeric(12,5))
     FK_IndividualDynProp = Column(Integer, ForeignKey('IndividualDynProp.ID'))
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
 
@@ -100,7 +105,7 @@ class IndividualType (Base,ObjectTypeWithDynProp) :
 
     @orm.reconstructor
     def init_on_load(self):
-        ObjectTypeWithDynProp.__init__(self,DBSession)
+        ObjectTypeWithDynProp.__init__(self)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 class IndividualType_IndividualDynProp(Base):
@@ -128,4 +133,4 @@ class Individual_Location(Base):
     creator =  Column(Integer)
     creationDate = Column(DateTime)
     type_ = Column(String(10))
-    OriginalData_ID = Column(String(25))
+    # Original_ID = Column(String(25))

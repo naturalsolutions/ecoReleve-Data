@@ -11,21 +11,20 @@ define([
 
 ], function($, _, Backbone, Marionette, NewStepper,
 	Step1, Step2, Step3, Step4
-){
+) {
 
-	'use strict';
+  'use strict';
 
-	return NewStepper.extend({
+  return NewStepper.extend({
 
-		initSteps: function(){
-			this.steps = [Step1, Step2, Step3, Step4];
-		},
+    initSteps: function() {
+      this.steps = [Step1, Step2, Step3, Step4];
+    },
 
+    //the action on the finished
+    finished: function() {
+      console.info('finished');
+    },
 
-		//the action on the finished
-		finished: function(){
-			console.log('finished');
-		},
-
-	});
+  });
 });

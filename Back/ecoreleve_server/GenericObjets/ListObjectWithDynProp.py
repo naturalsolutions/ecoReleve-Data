@@ -1,4 +1,4 @@
-from ecoreleve_server.Models import Base, DBSession
+from ..Models import Base, DBSession
 from sqlalchemy import (Column, DateTime, Float,
  ForeignKey, Index, Integer, Numeric,
   String, Text, Unicode, Sequence, select,and_,or_, exists,func, join, outerjoin)
@@ -9,18 +9,21 @@ from collections import OrderedDict
 from datetime import datetime
 from .FrontModules import FrontModules,ModuleGrids
 import transaction
-from ecoreleve_server.utils import Eval
+from ..utils import Eval
 import pandas as pd
 import json
 from traceback import print_exc
-
+from pyramid import threadlocal
+from ..utils.datetime import parse
 
 eval_ = Eval()
 
 class ListObjectWithDynProp():
     ''' This class is used to filter Object with dyn props over all properties '''
     def __init__(self,ObjWithDynProp, frontModule, history = False, View = None):
-        self.ObjContext = DBSession
+        self.ObjContext = threadlocal.get_current_request().dbsession
+        self.sessionmaker = threadlocal.get_current_registry().dbmaker
+
         self.ListPropDynValuesOfNow = {}
         self.ObjWithDynProp = ObjWithDynProp
         self.DynPropList = self.GetDynPropList()
@@ -106,7 +109,7 @@ class ListObjectWithDynProp():
         ''' Retrieve all dynamic properties of object ''' 
         DynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
         query = select([DynPropTable]) #.where(DynPropTable.c['Name'] == dynPropName)
-        result  = DBSession.execute(query).fetchall()
+        result  = self.sessionmaker().execute(query).fetchall()
 
         if result == []:
             df = None
@@ -117,8 +120,6 @@ class ListObjectWithDynProp():
 
     def GetDynProp (self,dynPropName) : 
         ''' Get dyn Prop with its name '''
-
-
         if self.DynPropList is not None :
             curDynProp = self.DynPropList[self.DynPropList['Name'] == dynPropName]
             curDynProp = curDynProp.to_dict(orient = 'records')
@@ -136,12 +137,21 @@ class ListObjectWithDynProp():
     def WhereInJoinTable (self,query,criteriaObj) :
         ''' Apply where clause over filter criteria '''
         curProp = criteriaObj['Column']
- 
         if hasattr(self.ObjWithDynProp,curProp) :
             # static column criteria
-            query = query.where(
-                eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
-                )
+            curTypeAttr = str(self.ObjWithDynProp.__table__.c[curProp].type).split('(')[0]
+            if 'date' in curTypeAttr.lower() :
+                try:
+                    val = criteriaObj['Value'].replace(' ','')
+                    val = parse(val)
+                except:
+                    pass
+
+            filterCriteria = eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
+            if filterCriteria is not None :
+                query = query.where(
+                    filterCriteria
+                    )
 
         elif self.optionView is not None and curProp in self.optionView.c:
             query = query.where(
@@ -159,10 +169,14 @@ class ListObjectWithDynProp():
                     # Gerer l'exception
             else :
                 viewAlias = self.vAliasList['v'+curDynProp['name']]
+                if 'date' in curDynProp['type'].lower() :
+                    try:
+                        criteriaObj['Value'] = parse(criteriaObj['Value'].replace(' ',''))
+                    except:
+                        pass
                       #### Perform the'where' in dyn props ####
                 query = query.where(
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['type']],criteriaObj['Operator'],criteriaObj['Value']))
-
         return query
 
     def GetFullQuery(self,searchInfo=None) :
@@ -179,18 +193,32 @@ class ListObjectWithDynProp():
             # countQuery = self.WhereInJoinTable(countQuery,obj)
         # self.countQuery = countQuery 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
-
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self,searchInfo=None) :
         ''' Main function to call : return filtered (paged) ordered flat data list according to filter parameters'''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
-        result = DBSession.execute(fullQueryJoinOrdered).fetchall()
+        result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
         data = []
+
+        listWithThes = list(filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType,self.Conf))
+        listWithThes = list(map(lambda x: x.Name,listWithThes))
+
         for row in result :
-            row = OrderedDict(row)
+            row = dict(map(lambda k : self.splitFullPath(k,listWithThes), row.items()))
             data.append(row)
         return data
+
+    def splitFullPath(self,key,listWithThes) :
+        name,val= key
+        try :
+            if name in listWithThes:
+                newVal = val.split('>')[-1]
+            else :
+                newVal = val
+        except : 
+            newVal = val
+        return (name,newVal)
 
     def count(self,searchInfo = None) :
         ''' Main function to call : return count according to filter parameters'''
@@ -199,7 +227,7 @@ class ListObjectWithDynProp():
         else:
             criteria = searchInfo['criteria'] 
         query = self.countQuery(criteria)
-        count = DBSession.execute(query).scalar()
+        count = self.sessionmaker().execute(query).scalar()
         return count
 
     def countQuery(self,criteria = None):
@@ -209,17 +237,31 @@ class ListObjectWithDynProp():
         if criteria is not None:
             for obj in criteria:
                 curDynProp = self.GetDynProp(obj['Column'])
-              
                 if hasattr(self.ObjWithDynProp,obj['Column']):
-                    fullQuery = fullQuery.where(
-                        eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
-                    )
+                    curTypeAttr = str(self.ObjWithDynProp.__table__.c[obj['Column']].type).split('(')[0]
+                    if 'date' in curTypeAttr.lower() :
+                        try:
+                            obj['Value'] = parse(obj['Value'].replace(' ',''))
+                        except: pass
+
+                    filterCriteria = eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
+                    if filterCriteria is not None :
+                        fullQuery = fullQuery.where(filterCriteria)
+
                 elif curDynProp != None:
                     filterOnDynProp = True
-                    existQuery = existQuery.where(
-                        and_(
-                        self.GetDynPropValueView().c['Name'] == obj['Column'],
-                        eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],obj['Operator'],obj['Value'] )))
+                    if 'date' in curDynProp['TypeProp'].lower() :
+                        try:
+                            obj['Value'] = parse(obj['Value'].replace(' ',''))
+                        except: pass
+
+                    filterCriteria = eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],obj['Operator'],obj['Value'] )
+                    if filterCriteria is not None :
+                        existQuery = existQuery.where(
+                            and_(
+                            self.GetDynPropValueView().c['Name'] == obj['Column'],
+                            filterCriteria
+                            ))
 
             if filterOnDynProp == True:
                 fullQuery = fullQuery.where(exists(

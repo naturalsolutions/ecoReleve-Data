@@ -48,6 +48,8 @@ DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True)
 # List all PTTs having unchecked locations, with individual id and number of locations.
 @view_config(route_name=route_prefix+'uncheckedDatas',renderer='json', permission = NO_PERMISSION_REQUIRED)
 def type_unchecked_list(request):
+    session = request.dbsession
+
     type_= request.matchdict['type']
     if type_ == 'argos' :
         unchecked = ArgosDatasWithIndiv
@@ -64,16 +66,18 @@ def type_unchecked_list(request):
     queryStmt = selectStmt.where(unchecked.c['checked'] == 0
             ).group_by(unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate'], unchecked.c['FK_Sensor'],
             ).order_by(unchecked.c['FK_Individual'].desc())
-    data = DBSession.execute(queryStmt).fetchall()
+    data = session.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
     result = [{'total_entries':len(dataResult)}]
     result.append(dataResult)
     return result
 
 def unchecked_rfid(request):
+    session = request.dbsession
+
     unchecked = DataRfidasFile
     queryStmt = select(unchecked.c)
-    data = DBSession.execute(queryStmt).fetchall()
+    data = DBSession().execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
     result = [{'total_entries':len(dataResult)}]
     result.append(dataResult)
@@ -82,6 +86,8 @@ def unchecked_rfid(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt',renderer='json',request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def details_unchecked_indiv(request):
+    session = request.dbsession
+
     type_= request.matchdict['type']
     id_indiv = request.matchdict['id_indiv']
 
@@ -99,18 +105,17 @@ def details_unchecked_indiv(request):
             ).where(and_(unchecked.c['FK_ptt']== ptt
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv)))
             
-        dataGeo = DBSession.execute(queryGeo).fetchall()
+        dataGeo = session.execute(queryGeo).fetchall()
         geoJson = []
         for row in dataGeo:
             geoJson.append({'type':'Feature', 'id': row['PK_id'], 'properties':{'type':row['type'], 'date':row['date']}
-                , 'geometry':{'type':'Point', 'coordinates':[row['lon'],row['lat']]}})
+                , 'geometry':{'type':'Point', 'coordinates':[row['lat'],row['lon']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
     else : 
         query = select([unchecked]
             ).where(and_(unchecked.c['FK_ptt']== ptt
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv))).order_by(desc(unchecked.c['date']))
-        data = DBSession.execute(query).fetchall()
-        #print(query)
+        data = session.execute(query).fetchall()
 
         df = pd.DataFrame.from_records(data, columns=data[0].keys(), coerce_float=True)
         X1 = df.iloc[:-1][['lat', 'lon']].values
@@ -135,11 +140,12 @@ def details_unchecked_indiv(request):
 
 @view_config(route_name = route_prefix+'uncheckedDatas/id_indiv/ptt', renderer = 'json' , request_method = 'POST' )
 def manual_validate(request) :
+    session = request.dbsession
 
     ptt = asInt(request.matchdict['id_ptt'])
     ind_id = asInt(request.matchdict['id_indiv'])
     type_ = request.matchdict['type']
-    user = request.authenticated_userid
+    user = request.authenticated_userid['iss']
     user = 1
     data = json.loads(request.params['data'])
 
@@ -159,7 +165,7 @@ def manual_validate(request) :
                     SELECT @nb_insert, @exist, @error; """
                 ).bindparams(bindparam('id_list', xml_to_insert),bindparam('ind_id', ind_id),bindparam('ptt', ptt)
                 ,bindparam('user', user))
-            nb_insert, exist , error = DBSession.execute(stmt).fetchone()
+            nb_insert, exist , error = session.execute(stmt).fetchone()
             transaction.commit()
 
             stop = time.time()
@@ -172,12 +178,14 @@ def manual_validate(request) :
 
 @view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST' )
 def auto_validation(request):
+    session = request.dbsession
+
     type_ = request.matchdict['type']
     print ('\n*************** AUTO VALIDATE *************** \n')
     param = request.params.mixed()
     freq = param['frequency']
     listToValidate = json.loads(param['toValidate'])
-    user = request.authenticated_userid
+    user = request.authenticated_userid['iss']
     user = 1 
     if freq == 'all' :
         freq = 1
@@ -194,7 +202,7 @@ def auto_validation(request):
                 equipID = None
             else :
                 equipID = int(equipID)
-            nb_insert, exist, error = auto_validate_proc_stocRfid(equipID,sensor,freq,user)
+            nb_insert, exist, error = auto_validate_proc_stocRfid(equipID,sensor,freq,user,session)
             Total_exist += exist
             Total_nb_insert += nb_insert
             Total_error += error
@@ -207,14 +215,14 @@ def auto_validation(request):
                 ind_id = None
             else :
                 ind_id = int(ind_id)
-            nb_insert, exist, error = auto_validate_stored_procGSM_Argos(ptt,ind_id,1, type_,freq)
+            nb_insert, exist, error = auto_validate_stored_procGSM_Argos(ptt,ind_id,1, type_,freq,session)
             Total_exist += exist
             Total_nb_insert += nb_insert
             Total_error += error
 
     return { 'inserted' : Total_nb_insert, 'existing' : Total_exist, 'errors' : Total_error}
 
-def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq):
+def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq,session):
     procStockDict = {
     'argos': '[sp_auto_validate_Argos_GPS]',
     'gsm': '[sp_auto_validate_GSM]'
@@ -227,29 +235,28 @@ def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq):
 
     if ind_id is None:
         stmt = update(table).where(and_(table.c['FK_Individual'] == None, table.c['FK_ptt'] == ptt)).values(checked =1)
-        DBSession.execute(stmt)
+        session.execute(stmt)
         nb_insert = exist = error = 0
     else:
         stmt = text(""" DECLARE @nb_insert int , @exist int , @error int;
         exec """+ dbConfig['data_schema'] + """."""+procStockDict[type_]+""" :ptt , :ind_id , :user ,:freq , @nb_insert OUTPUT, @exist OUTPUT, @error OUTPUT;
         SELECT @nb_insert, @exist, @error; """
         ).bindparams(bindparam('ind_id', ind_id),bindparam('user', user),bindparam('freq', freq),bindparam('ptt', ptt))
-        nb_insert, exist , error= DBSession.execute(stmt).fetchone()
-    transaction.commit()
+        nb_insert, exist , error= session.execute(stmt).fetchone()
 
     return nb_insert, exist , error
 
-def auto_validate_proc_stocRfid(equipID,sensor,freq,user):
+def auto_validate_proc_stocRfid(equipID,sensor,freq,user,session):
     print(freq)
     if equipID is None : 
         stmt = update(DataRfidWithSite).where(and_(DataRfidWithSite.c['FK_Sensor'] == sensor, DataRfidWithSite.c['equipID'] == equipID)).values(checked =1)
-        DBSession.execute(stmt)
+        session.execute(stmt)
         nb_insert = exist = error = 0
     else :
         stmt = text(""" DECLARE @nb_insert int , @exist int , @error int;
             exec """+ dbConfig['data_schema'] + """.[sp_validate_rfid]  :equipID,:freq, :user , @nb_insert OUTPUT, @exist OUTPUT, @error OUTPUT;
             SELECT @nb_insert, @exist, @error; """
             ).bindparams(bindparam('equipID', equipID),bindparam('user', user),bindparam('freq', freq))
-        nb_insert, exist , error= DBSession.execute(stmt).fetchone()
+        nb_insert, exist , error= session.execute(stmt).fetchone()
 
     return nb_insert, exist , error

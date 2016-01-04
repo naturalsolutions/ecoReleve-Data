@@ -13,7 +13,6 @@ define([
 	'use strict';
 	return Backbone.Model.extend({
 
-
 		/*===================================
 		=            Grid module            =
 		===================================*/
@@ -28,21 +27,26 @@ define([
 
 		initialize: function (options) {
 			var _this = this;
-
-			this.idCell = options.idCell || 'ID';
-
 			if (options.com) {
 				this.com = options.com;
 				this.com.addModule(this);
 			}
 
-			this.onceFetched = options.onceFetched;
-			if(options.customClientSide){
-				this.customClientSide = options.customClientSide;
-			}
+			//basic options
+			this.url = options.url;
+			this.pagingServerSide = options.pagingServerSide;
+			this.pageSize = options.pageSize;
 
+			//extra options
+			this.totalElement = options.totalElement || false;
+			this.searchCriteria = options.urlParams || false; //default filters criterias
+			this.sortCriteria = options.sortCriteria || {}; //default sort criterias //usefull?
+			this.idCell = options.idCell || 'ID'; //set the specific ID column cell
+			
+
+			//callback && functions
+			this.onceFetched = options.onceFetched;
 			if (options.rowClicked) {
-				var clickFunction = options.rowClicked.clickFunction
 				this.RowType = Backgrid.Row.extend({
 					events: {
 						'click': 'onClick',
@@ -56,59 +60,33 @@ define([
 					}
 				});
 			}
-
 			else {
 				if (options.row) {
 					this.RowType = options.row;
 				} else {
 					this.RowType = Backgrid.Row;
 				}
-
 			}
 
 
 
-			this.sortCriteria = options.sortCriteria || {};
-			this.name = options.name || 'default';
-
-			if (options.totalElement) {
-				this.totalElement = options.totalElement;
-			}
-
-			this.url = options.url;
 
 			
-			this.pageSize = options.pageSize;
 
 
-			this.pagingServerSide = options.pagingServerSide;
+			this.name = options.name || 'default';
+
+			//should be in init function?
 			if (options.columns) {
 				this.columns = options.columns;
 			} else {
 				this.colGene = new colGene({ url: this.url + 'getFields?name=' + this.name, paginable: this.pagingServerSide, checkedColl: options.checkedColl });
 				this.columns = this.colGene.columns;
-				
 			}
-			if (options.urlParams) {
-					/*
-					this.url+= '?';
-					for(var index in options.urlParams) { 
-					    var attr = options.urlParams[index]; 
-					    this.url+= '&' + index + "=" + attr;
-					}*/
-					this.searchCriteria = options.urlParams;
-					console.log(this.searchCriteria);
 
-				/*for (var i = 0 ; i<options.urlParams.length; i++) {
 
-					if (i==0) { this.url+='?';
-					}
-					
-					var key = Object.keys(options.urlParams[i]);
-					this.url+= key +'='+options.urlParams[i][key]+'&';
-				}*/
 
-			}
+			//well..
 			if (options.collection) {
 				this.collection = options.collection;
 				this.coll = true;
@@ -122,6 +100,10 @@ define([
 			if (options.filterCriteria) {
 				this.filterCriteria = options.filterCriteria;
 			}
+
+
+
+
 			this.initGrid();
 			this.eventHandler();
 		},
@@ -165,7 +147,7 @@ define([
 
 		initCollectionFromServer: function () {
 			if (this.pagingServerSide) {
-				this.initCollectionPaginable();
+				this.initCollectionPaginableServer();
 			} else if (this.pageSize) {
 				this.initCollectionPaginableClient();
 			}
@@ -174,7 +156,7 @@ define([
 			}
 		},
 
-		initCollectionPaginable: function () {
+		initCollectionPaginableServer: function () {
 			var _this = this;
 			var PageCollection = PageColl.extend({
 				sortCriteria: _this.sortCriteria,
@@ -203,7 +185,6 @@ define([
 					},
 				},
 				fetch: function (options) {
-					_this.fetchingCollection(options);
 					var params = {
 						'page': this.state.currentPage,
 						'per_page': this.state.pageSize,
@@ -211,11 +192,6 @@ define([
 						'order_by': this.queryParams.order_by.call(this),
 						'criteria': this.queryParams.criteria.call(this),
 					};
-
-					/*if (_this.init) {
-						_this.updateMap(params);
-					}
-					_this.init = true;*/
 					options.success = function(){
 						_this.affectTotalRecords();
 						if(_this.onceFetched){
@@ -234,9 +210,6 @@ define([
 			this.collection = new PageCollection();
 		},
 
-
-		upRowServerSide: function(){
-		},
 
 		upRowStyle: function(){
 			var row = this.currentRow;
@@ -272,7 +245,6 @@ define([
 					},
 				},
 				fetch: function (options) {
-					ctx.fetchingCollection(options);
 					var params = {
 						'criteria': this.queryParams.criteria.call(this),
 					};
@@ -299,63 +271,30 @@ define([
 
 
 		initGrid: function () {
-			var tmp = JSON.stringify({ criteria: null });
-
 			this.grid = new Backgrid.Grid({
 				row: this.RowType,
 				columns: this.columns,
 				collection: this.collection
 			});
+
+			//if no collection is furnished : fetch
 			if (!this.coll) {
-				this.collection.searchCriteria = this.filterCriteria;
+				this.collection.searchCriteria = {};
 				this.fetchCollection({ init: true });
 			}
-			
-			//this.collection.on('change', this.collectionFetched);
 		},
 
-		collectionFetched: function (options) {
-			this.affectTotalRecords();
-
-			if (options.init && !jQuery.isEmptyObject(this.sortCriteria)) {
-
-				for (var key in this.sortCriteria) {
-					$('th.' + key).addClass(this.sortCriteria[key]);
-				}
-
-			}
-
-			
-			var $table = this.grid.$el;
-			$table.floatThead({
-			scrollContainer: function($table){
-				return $table.closest('.wrapper');
-			}
-			});
-
-		},
-
-		update: function (args) {
-			if (this.pageSize) {
-				this.grid.collection.state.currentPage = 1;
-				this.grid.collection.searchCriteria = args.filters;
-				this.fetchCollection({ init: false });
-			}
-			else {
-				this.filterCriteria = JSON.stringify(args.filters);
-				this.fetchCollection({ init: false });
-
-			}
-		},
-		fetchCollection: function (callbock) {
+		fetchCollection: function () {
 			var _this = this;
+
+
 			if (this.filterCriteria != null) {
+
+				//<- ??
 				if (!this.url){
-					// filtering client side collection
-					//this.clientFilter(this.filterCriteria);
 				}
 				else {
-					var filteredList = this.grid.collection.where(this.filterCriteria);
+				//?? ->
 					if(_this.lastImported){
 						this.collection.queryParams.lastImported = _this.lastImported;
 					} else {
@@ -369,22 +308,42 @@ define([
 						success: function () {
 							if(_this.totalElement){
 								_this.affectTotalRecords();
-
 							}
-							//mj 20/10/2015
-							_this.customClientSide();
 						}
 					});
 				}
 			}
 			
 			else {
-				this.grid.collection.fetch({ reset: true });
+				this.deffered = this.grid.collection.fetch({ reset: true });
 			}
 		},
 
-		customClientSide: function(){
 
+		update: function (args) {
+			if (this.pageSize) {
+				this.grid.collection.state.currentPage = 1;
+				this.grid.collection.searchCriteria = args.filters;
+				this.fetchCollection({ init: false });
+			}
+			else {
+				this.filterCriteria = JSON.stringify(args.filters);
+				this.fetchCollection({ init: false });
+
+			}
+		},
+
+		filter: function (args) {
+			if (this.coll) {
+				// Client side filter
+				this.grid.collection = args;
+				this.grid.body.collection = args;
+				this.grid.body.refresh();
+			}
+			else {
+				// Server side filter
+				this.update({ filters: args });
+			}
 		},
 
 
@@ -432,15 +391,11 @@ define([
 			})
 		},
 
-		fetchingCollection: function (options) {
-			// to be extended
-			
-		},
-
 		Collection: function (options) {
 			// to be extended
 			
 		},
+
 
 		action: function (action, params) {
 			switch (action) {
@@ -465,7 +420,7 @@ define([
 				case 'rowDbClicked':
 					this.rowDbClicked(params);
 				default:
-					console.warn('verify the action name');
+					console.info('verify the action name');
 					break;
 			}
 		},
@@ -479,7 +434,6 @@ define([
 		},
 
 		rowClicked: function(params){
-			console.log('cliqued');
 		},
 
 		rowDbClicked: function(params){
@@ -497,6 +451,7 @@ define([
 			//to do : iterrate only on checked elements list of (imports == true)
 		},
 
+		//selection
 		selectOne: function (id) {
 			var model_id = id;
 			var coll = new Backbone.Collection();
@@ -513,7 +468,6 @@ define([
 				mod.trigger("backgrid:select", mod, true);
 			}
 		},
-
 		selectMultiple: function (ids) {
 			var model_ids = ids, self = this, mod;
 
@@ -524,26 +478,12 @@ define([
 			};
 		},
 
-
-		filter: function (args) {
-			if (this.coll) {
-				// Client Grid Management
-				this.grid.collection = args;
-				this.grid.body.collection = args;
-				this.grid.body.refresh();
-			}
-			else {
-				// Server Grid Management
-				this.update({ filters: args });
-			}
+		lastImportedUpdate : function(lastImported){
+			this.lastImported = lastImported;
+			this.fetchCollection();
 		},
-		lastImportedUpdate : function(lastImported, callback){
-			if (lastImported) {
-				this.lastImported = true;
-			}else{
-				this.lastImported = false;
-			}
-			this.fetchCollection(callback);
-		}
+
+		upRowServerSide: function(){
+		},
 	});
 });

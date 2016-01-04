@@ -34,7 +34,7 @@ class Observation(Base,ObjectWithDynProp):
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
     creationDate = Column(DateTime,default = func.now())
     Parent_Observation = Column(Integer,ForeignKey('Observation.ID'))
-
+    Comments = Column(String(250))
     FK_Individual = Column(Integer,ForeignKey('Individual.ID'))
 
     Observation_children = relationship("Observation", cascade="all, delete-orphan")
@@ -42,26 +42,31 @@ class Observation(Base,ObjectWithDynProp):
     Equipment = relationship("Equipment", backref = 'Observation',cascade = "all, delete-orphan", uselist=False)
     Station = relationship("Station", back_populates = 'Observations')
 
+
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        ObjectWithDynProp.__init__(self)
+
     @orm.reconstructor
     def init_on_load(self):
-        ObjectWithDynProp.__init__(self,DBSession)
+        ObjectWithDynProp.__init__(self)
 
     def GetNewValue(self,nameProp):
         ReturnedValue = ObservationDynPropValue()
-        ReturnedValue.ObservationDynProp = DBSession.query(ObservationDynProp).filter(ObservationDynProp.Name==nameProp).first()
+        ReturnedValue.ObservationDynProp = self.ObjContext.query(ObservationDynProp).filter(ObservationDynProp.Name==nameProp).first()
         return ReturnedValue
 
     def GetDynPropValues(self):
         return self.ObservationDynPropValues
 
     def GetDynProps(self,nameProp):
-        return  DBSession.query(ObservationDynProp).filter(ObservationDynProp.Name==nameProp).one()
+        return  self.ObjContext.query(ObservationDynProp).filter(ObservationDynProp.Name==nameProp).one()
 
     def GetType(self):
         if self.ProtocoleType != None :
             return self.ProtocoleType
         else :
-            return DBSession.query(ProtocoleType).get(self.FK_ProtocoleType)
+            return self.ObjContext.query(ProtocoleType).get(self.FK_ProtocoleType)
 
     @hybrid_property
     def Observation_childrens(self):
@@ -78,6 +83,7 @@ class Observation(Base,ObjectWithDynProp):
             for curData in listOfSubProtocols :
                 if 'ID' in curData :
                     subObs = list(filter(lambda x : x.ID==curData['ID'],self.Observation_children))[0]
+                    subObs.LoadNowValues()
                 else :
                     subObs = Observation(FK_ProtocoleType = curData['FK_ProtocoleType']
                         ,Parent_Observation=self.ID,FK_Station=self.FK_Station)
@@ -93,7 +99,7 @@ class Observation(Base,ObjectWithDynProp):
     #     print('------- DELETE SUBOBS')
     #     objToDel = list(set(listObs).symmetric_difference(self.Observation_children))
     #     for obj in objToDel:
-    #         DBSession.delete(obj)
+    #         self.ObjContext.delete(obj)
 
     def GetFlatObject(self,schema=None):
         result = super().GetFlatObject()
@@ -121,7 +127,7 @@ class ObservationDynPropValue(Base):
     ValueInt =  Column(Integer)
     ValueString =  Column(String(250))
     ValueDate =  Column(DateTime)
-    ValueFloat =  Column(Float)
+    ValueFloat =  Column(Numeric(12,5))
     FK_ObservationDynProp = Column(Integer, ForeignKey('ObservationDynProp.ID'))
     FK_Observation = Column(Integer, ForeignKey('Observation.ID'))
 
@@ -143,7 +149,7 @@ class ProtocoleType(Base,ObjectTypeWithDynProp):
 
     @orm.reconstructor
     def init_on_load(self):        
-        ObjectTypeWithDynProp.__init__(self,DBSession)
+        ObjectTypeWithDynProp.__init__(self)
 
     __tablename__ = 'ProtocoleType'
 

@@ -1,5 +1,21 @@
-from ecoreleve_server.Models import Base,DBSession
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, Unicode, text,Sequence,select, and_, or_,distinct
+from ..Models import Base,DBSession
+from sqlalchemy import (Column
+    , DateTime
+    , Float
+    , ForeignKey
+    , Index
+    , Integer
+    , Numeric
+    , String
+    , Text
+    , Unicode
+    , text
+    ,Sequence
+    ,select
+    , and_
+    , or_
+    ,distinct
+    ,asc)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
@@ -9,21 +25,22 @@ import transaction
 from operator import itemgetter
 from collections import OrderedDict
 from traceback import print_exc
+from pyramid import threadlocal
+from ..utils.datetime import parse
+from ..utils.parseValue import parseValue,find,isEqual
 
 
-Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt'}
+Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt','float':'ValueFloat'}
 
 class ObjectWithDynProp:
     ''' Class to extend for mapped object with dynamic properties '''
-    ObjContext = DBSession
     PropDynValuesOfNow = {}
     allProp = None
-    
-    def __init__(self,ObjContext):
-        self.ObjContext = DBSession
+
+    def __init__(self,ObjContext=None):
+        self.ObjContext = threadlocal.get_current_request().dbsession
         self.PropDynValuesOfNow = {}
         self.GetAllProp()
-
 
     def GetAllProp (self) :
         ''' Get all object properties (dynamic and static) '''
@@ -38,17 +55,21 @@ class ObjectWithDynProp:
             if type_ :
                 result = type_.GetDynProps()
             else :
-                result = DBSession.execute(select([dynPropTable])).fetchall()
+                result = self.ObjContext.execute(select([dynPropTable])).fetchall()
             statProps = [{'name': statProp.key, 'type': statProp.type} for statProp in self.__table__.columns ]
             dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp}for dynProp in result]
             statProps.extend(dynProps)
             self.allProp = statProps
         return self.allProp
 
+    def GetPropWithName(self,nameProp):
+        if self.allProp is None:
+            self.GetAllProp()
+        return find(lambda x: x['name'].lower() == nameProp.lower(),self.allProp)
 
     def GetFrontModulesID (self,ModuleType) :
         if not hasattr(self,'FrontModules') :
-            self.FrontModules = DBSession.query(FrontModules).filter(FrontModules.Name==ModuleType).one()
+            self.FrontModules = self.ObjContext.query(FrontModules).filter(FrontModules.Name==ModuleType).one()
         return self.FrontModules.ID
 
     def GetGridFields (self,ModuleType):
@@ -56,12 +77,14 @@ class ObjectWithDynProp:
         according to configuration in table ModuleGrids'''
         try:
             typeID = self.GetType().ID
-            gridFields = DBSession.query(ModuleGrids
+            gridFields = self.ObjContext.query(ModuleGrids
             ).filter(and_(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType),
-                or_(ModuleGrids.FK_TypeObj == typeID ,ModuleGrids.FK_TypeObj ==None ))).all()
+                or_(ModuleGrids.FK_TypeObj == typeID ,ModuleGrids.FK_TypeObj ==None ))
+            ).order_by(asc(ModuleGrids.GridOrder)).all()
         except:
-            gridFields = DBSession.query(ModuleGrids).filter(
-                ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType) ).all()
+            gridFields = self.ObjContext.query(ModuleGrids).filter(
+                ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
+                ).order_by(asc(ModuleGrids.GridOrder)).all()
 
         gridFields.sort(key=lambda x: str(x.GridOrder))
         cols = []
@@ -90,13 +113,16 @@ class ObjectWithDynProp:
         defaultFilters = []
         try:
             typeID = self.GetType().ID
-            filterFields = DBSession.query(ModuleGrids).filter(
+            filterFields = self.ObjContext.query(ModuleGrids).filter(
                 and_(
                     ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
                     , or_( ModuleGrids.TypeObj == typeID,ModuleGrids.TypeObj == None)
-                    )).all()
+                    )).order_by(asc(ModuleGrids.FilterOrder)).all()
         except :
-            filterFields = DBSession.query(ModuleGrids).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).all()
+            filterFields = self.ObjContext.query(ModuleGrids
+                ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).order_by(asc(ModuleGrids.FilterOrder)).all()  #.order_by(asc(ModuleGrids.FilterOrder)).all()
+
+        filterFields.sort(key=lambda x: str(x.FilterOrder))
         for curConf in filterFields:
             curConfName = curConf.Name
             filterField = list(filter(lambda x : x['name'] == curConfName
@@ -160,31 +186,38 @@ class ObjectWithDynProp:
         ''' Set object properties (static and dynamic) '''
         if hasattr(self,nameProp):
             try :
-                curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
-                if 'Date' in curTypeAttr :
-                    try : 
-                        valeur = nameProp.strftime('%d/%m/%Y %H:%M:%S')
-                    except :
-                        valeur = nameProp.strftime('%d/%m/%Y')
+                if nameProp in self.__table__.c:
+                    curTypeAttr = str(self.__table__.c[nameProp].type).split('(')[0]
+                    if 'date' in curTypeAttr.lower() :
+                        try:
+                            valeur = parse(valeur.replace(' ',''))
+                        except:
+                            pass
+                setattr(self,nameProp,valeur)
             except :
-                print(nameProp+' is not a column')
                 pass
-            setattr(self,nameProp,valeur)
         else:
-            if (nameProp in self.GetType().DynPropNames):
-                if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)):
+            if (nameProp.lower() in self.GetType().DynPropNames):
+                if (nameProp not in self.PropDynValuesOfNow #and parseValue(valeur)!= None
+                    ) or (isEqual(self.PropDynValuesOfNow[nameProp],valeur) is False):
                     #### IF no value or different existing value, new value is affected ####
-                    print('valeur modifiée pour ' + nameProp)
+                    if 'date' in self.GetPropWithName(nameProp)['type'].lower():
+                        try:
+                            valeur = parse(valeur.replace(' ',''))
+                        except:
+                            pass
                     NouvelleValeur = self.GetNewValue(nameProp)
                     NouvelleValeur.StartDate = datetime.today()
-                    setattr(NouvelleValeur,Cle[self.GetDynProps(nameProp).TypeProp],valeur)
+                    setattr(NouvelleValeur,Cle[self.GetPropWithName(nameProp)['type']],valeur)
                     self.PropDynValuesOfNow[nameProp] = valeur
                     self.GetDynPropValues().append(NouvelleValeur)
                 else:
-                    print('valeur non modifiée pour ' + nameProp)
+                    # print('valeur non modifiée pour ' + nameProp)
                     return
+
             else :
                 print('propriété inconnue ' + nameProp)
+                return
                 # si la propriété dynamique existe déjà et que la valeur à affectée est identique à la valeur existente
                 # => alors on insére pas d'historique car pas de chanegement
 
@@ -210,7 +243,9 @@ class ObjectWithDynProp:
         ''' Function to call : update properties of new or existing object with JSON/dict of value'''
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
-            if (curProp.lower() != 'id'):
+            if (curProp.lower() != 'id' and DTOObject[curProp] != '-1' ):
+                if DTOObject[curProp] == '':
+                    DTOObject[curProp] = None
                 self.SetProperty(curProp,DTOObject[curProp])
 
     def GetFlatObject(self,schema=None):
@@ -251,7 +286,8 @@ class ObjectWithDynProp:
         Editable = (DisplayMode.lower()  == 'edit')
         resultat = {}
         type_ = self.GetType().ID
-        Fields = self.ObjContext.query(ModuleForms).filter(ModuleForms.Module_ID == FrontModules.ID).order_by(ModuleForms.FormOrder).all()
+        Fields = self.ObjContext.query(ModuleForms
+            ).filter(ModuleForms.Module_ID == FrontModules.ID).order_by(ModuleForms.FormOrder).all()
         curEditable = Editable
 
         for curStatProp in self.__table__.columns:
@@ -263,14 +299,13 @@ class ObjectWithDynProp:
                 if curEditable:
                     curSize = CurModuleForms.FieldSizeEdit
 
-                if (CurModuleForms.FormRender & 2) == 0:
+                if (CurModuleForms.FormRender <= 2) == 0:
                     curEditable = False
 
                 if CurModuleForms.FormRender > 2 :
                     curEditable = True
 
-                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)))
-                
+                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)),DisplayMode)
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):
@@ -279,9 +314,9 @@ class ObjectWithDynProp:
         ObjType = self.GetType()
         ObjType.AddDynamicPropInSchemaDTO(schema,FrontModules,DisplayMode)
 
-        if (DisplayMode.lower() != 'edit'):
-            for curName in schema:
-                schema[curName]['editorAttrs'] = { 'disabled' : True }
+        # if (DisplayMode.lower() != 'edit'):
+        #     for curName in schema:
+        #         schema[curName]['editorAttrs'] = { 'disabled' : True }
 
         resultat = {
             'schema':schema,
@@ -293,17 +328,21 @@ class ObjectWithDynProp:
         resultat['data'] = data
         if self.ID :
             resultat['data']['id'] = self.ID
+            for key, value in schema.items():
+                if (DisplayMode.lower() != 'edit' and schema[key]['fullPath'] is True):
+                    try : 
+                        resultat['data'][key] = self.splitFullPath(resultat['data'][key])
+                    except : pass
         else :
             resultat['data']['id'] = 0
             # add default values for each field in data if exists
             #for attr in schema:
             for key, value in schema.items():
-                #print (key)
-                #print (value['defaultValue'])
                 if value['defaultValue'] is not None:
-                    print (key)
-                    print (value['defaultValue'])
                     resultat['data'][key] = value['defaultValue']
-                #print (attr.defaultValue)
         return resultat
+
+    def splitFullPath(self,value):
+        splitValue = value.split('>')[-1]
+        return splitValue
 

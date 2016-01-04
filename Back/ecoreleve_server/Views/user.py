@@ -1,7 +1,7 @@
 from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
 from sqlalchemy import select
-from ecoreleve_server.Models import DBSession, User
+from ..Models import DBSession, User
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(
@@ -12,11 +12,12 @@ from ecoreleve_server.Models import DBSession, User
 def users(request):
     """Return the list of all the users with their ids.
     """
+    session = request.dbsession
     query = select([
         User.id.label('PK_id'),
         User.Login.label('fullname')
     ]).order_by(User.Lastname, User.Firstname)
-    return [dict(row) for row in DBSession.execute(query).fetchall()]
+    return [dict(row) for row in session.execute(query).fetchall()]
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(
@@ -26,8 +27,10 @@ def users(request):
 def current_user(request):
     """Return the list of all the users with their ids.
     """
+    session = request.dbsession
+
     query = select([
         User.id.label('PK_id'),
         User.Login.label('fullname')
-    ]).where(User.id == request.authenticated_userid)
-    return dict(DBSession.execute(query).fetchone())
+    ]).where(User.id == request.authenticated_userid['iss'])
+    return dict(session.execute(query).fetchone())

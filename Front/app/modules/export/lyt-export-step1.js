@@ -6,89 +6,89 @@ define([
 	'config',
 	'i18n'
 ], function($, _, Backbone, Marionette, config
-){
-	'use strict';
-	return Marionette.LayoutView.extend({
-		className: 'full-height', 
-		template: 'app/modules/export/templates/tpl-export-step1.html',
+) {
+  'use strict';
+  return Marionette.LayoutView.extend({
+    className: 'full-height',
+    template: 'app/modules/export/templates/tpl-export-step1.html',
 
-		name : ' Choose the view to export',
+    name: ' Choose the view to export',
 
-		ui: {
-			'themes' : '#themes',
-			'views' : '#views',
-			'requirement': '#requirement'
-		},
+    ui: {
+      'themes': '#themes',
+      'views': '#views',
+      'requirement': '#requirement'
+    },
 
-		events: {
-			'click #themes>li': 'getViews',
-			'click #views>li': 'enableNext',
-		},
+    events: {
+      'click #themes>li': 'getViews',
+      'click #views>li': 'enableNext',
+    },
 
-		initialize: function(options){
-			this.model = new Backbone.Model();
-			this.themeColl = new Backbone.Collection();
-			this.themeColl.url = config.coreUrl+'export/themes';
-			this.defered = this.themeColl.fetch();
+    initialize: function(options) {
+      this.model = new Backbone.Model();
+      this.themeColl = new Backbone.Collection();
+      this.themeColl.url = config.coreUrl + 'export/themes';
+      this.defered = this.themeColl.fetch();
 
-			this.model.set('viewId', '');
-			this.model.set('viewName', '');
-		},
+      this.model.set('viewId', '');
+      this.model.set('viewName', '');
+    },
 
-		onShow : function(){
-			var _this = this;
-			$.when( this.defered ).done(function() {
-				_this.themeColl.each(function(model, index){
-					var line = $('<li class="list-group-item" value="' + model.get('ID') + '">' + model.get('Caption') + '</li>');
-					_this.ui.themes.append(line);
-				});
-			});
-		},
+    onShow: function() {
+      var _this = this;
+      $.when(this.defered).done(function() {
+        _this.themeColl.each(function(model, index) {
+          var line = $('<li class="list-group-item" value="' + model.get('ID') + '">' + model.get('Caption') + '</li>');
+          _this.ui.themes.append(line);
+        });
+      });
+    },
 
-		getViews: function(e){
-			var _this = this;
+    getViews: function(e) {
+      var _this = this;
 
-			this.ui.themes.find('.active').removeClass('active');
-			$(e.target).addClass('active');
-			
-			this.ui.requirement.val('').change();
+      this.ui.themes.find('.active').removeClass('active');
+      $(e.target).addClass('active');
 
-			this.viewColl = new Backbone.Collection();
-			var id = $(e.target).val();
-			this.viewColl.url = config.coreUrl+'export/themes/' + id + '/views';
-			var defered = this.viewColl.fetch();
+      this.ui.requirement.val('').change();
 
-			_this.ui.views.empty();
-			$.when( defered ).done(function(){
-				_this.viewColl.each(function(model, index){
-					var line = $('<li class="list-group-item" value="' + model.get('ID') + '">' + model.get('Caption') + '</li>');
-					_this.ui.views.append(line);
-				});
-			});
-		},
+      this.viewColl = new Backbone.Collection();
+      var id = $(e.target).val();
+      this.viewColl.url = config.coreUrl + 'export/themes/' + id + '/views';
+      var defered = this.viewColl.fetch();
 
-		enableNext: function(e){
-			this.ui.views.find('.active').removeClass('active');
-			$(e.target).addClass('active');
-			var viewId = $(e.target).val();
-			var viewName = $(e.target).html();
-			this.ui.requirement.val(viewId).change();
+      _this.ui.views.empty();
+      $.when(defered).done(function() {
+        _this.viewColl.each(function(model, index) {
+          var line = $('<li class="list-group-item" value="' + model.get('ID') + '">' + model.get('Caption') + '</li>');
+          _this.ui.views.append(line);
+        });
+      });
+    },
 
-			this.model.set('viewId', viewId);
-			this.model.set('viewName', viewName);
-		},
+    enableNext: function(e) {
+      this.ui.views.find('.active').removeClass('active');
+      $(e.target).addClass('active');
+      var viewId = $(e.target).val();
+      var viewName = $(e.target).html();
+      this.ui.requirement.val(viewId).change();
 
-		validate: function(){
-			return this.model;
-		},
+      this.model.set('viewId', viewId);
+      this.model.set('viewName', viewName);
+    },
 
-		check: function(){
-			if(this.ui.requirement.val()){
-				return true;
-			}else{
-				return false;
-			}
-		},
+    validate: function() {
+      return this.model;
+    },
 
-	});
+    check: function() {
+      if (this.ui.requirement.val()) {
+        return true;
+      }else {
+        return false;
+      }
+    },
+
+  });
 });

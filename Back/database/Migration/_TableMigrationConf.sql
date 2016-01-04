@@ -20,3 +20,7 @@ CREATE TABLE MigrationConfigurationProtocoleContent(
 	),
 	CONSTRAINT fk_MigrationConfigurationProtocoleContent_ConfigurationProtocole FOREIGN KEY (fk_ConfigurationProtocole) REFERENCES MigrationConfigurationProtocoleList(ID)
 )
+
+CREATE UNIQUE INDEX IX_UQ_MigrationConfigurationProtocoleContent_ColumnName ON MigrationConfigurationProtocoleContent([ColumnName],fk_ConfigurationProtocole)
+
+CREATE UNIQUE INDEX IX_UQ_MigrationConfigurationProtocoleList_TableName ON MigrationConfigurationProtocoleList([TableName])

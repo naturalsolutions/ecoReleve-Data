@@ -14,24 +14,25 @@
     "sweetalert": "~0.5.0",
     "backbone.paginator": "~2.0.2",
     "backgrid-select-all": "~0.3.5",
-    "swiper": "~3.0.6",
     "moment": "~2.10.2",
     "backbone-forms": "https://github.com/powmedia/backbone-forms.git#~0.14.0",
     "eonasdan-bootstrap-datetimepicker": "~4.7.14",
     "backgrid-paginator": "~0.3.5",
     "backgrid": "https://github.com/wyuenho/backgrid.git#~0.3.5",
     "backbone.radio": "~0.9.0",
-    "simplePagination.js": "https://github.com/flaviusmatis/simplePagination.js.git",
-    "fuelux": "~3.7.0",
     "dropzone": "~4.0.1",
     "jquery": "~2.1.4",
     "requirejs-text": "~2.0.14",
     "i18n": "https://github.com/jamuhl/i18next.git",
     "fancytree": "~2.9.0",
-    "reneco-fonts": "https://github.com/NaturalSolutions/RenecoFonts.git",
-    "floatThead" : "*",
-	"tooltipster": "~3.3.0",
- 	"tooltipster-list": "https://github.com/amiceli/tooltipster-list.git",
-    "chartjs": "~1.0.2"
+    "floatThead": "*",
+    "tooltipster": "~3.3.0",
+    "tooltipster-list": "https://github.com/amiceli/tooltipster-list.git",
+    "chartjs": "~1.0.2",
+    "reneco-fonts": "*"
+  },
+  "resolutions": {
+    "jquery": "~1.10.2",
+    "underscore": "~1.5.2"
   }
 }

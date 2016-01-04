@@ -1,272 +1,281 @@
 //radio
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'config',
-	'ns_modules/ns_com',
-	'ns_grid/model-grid',
-	'ns_filter/model-filter',
-	'SensorPicker',
-	'requirejs-text!modules/release/templates/tpl-sensor-picker.html',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'config',
+  'ns_modules/ns_com',
+  'ns_grid/model-grid',
+  'ns_filter/model-filter',
+  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-	Com, NsGrid, NsFilter, SensorPicker,tplSensorPicker
-){
+  Com, NsGrid, NsFilter, ObjectPicker
+) {
 
-	'use strict';
+  'use strict';
 
-	return Marionette.LayoutView.extend({
+  return Marionette.LayoutView.extend({
 
-		template: 'app/modules/release/templates/tpl-release-individual.html',
-		className: 'full-height animated white rel',
+    template: 'app/modules/release/templates/tpl-release-individual.html',
+    className: 'full-height animated white rel',
+    ui: {
+      'grid': '#grid',
+      'paginator': '#paginator',
+      'filters': '#indiv_filters',
+      'detail': '#detail',
+      'totalEntries': '#totalEntries',
+      'nbSelected': '#nbSelected',
+      'release':'#release'
+    },
 
-		events : {
-			'click #btnFilter' : 'filter',
-			'click #back' : 'hideDetails',
-			'click button#clear' : 'clearFilter',
-			'click #release' : 'toolTipShow',
-			'click #addSensor' : 'addSensor',
-		},
-
-		ui: {
-			'grid': '#grid',
-			'paginator': '#paginator',
-			'filters': '#indiv_filters',
-			'detail': '#detail',
-			'totalEntries': '#totalEntries',
-			'nbSelected': '#nbSelected'
-		},
-
-		regions: {
-			modal : '#modal',
-		},
-
-		initialize: function(options){
-			this.translater = Translater.getTranslater();
-			this.com = new Com();
-			this.station = options.station;
-			this.releaseMethod = null;
-
-			var _this = this;
-			var mySensorPicker = SensorPicker.extend({
-				initialize: function(options) {
-					var template =  _.template(tplSensorPicker);
-					this.$el.html(template);
-					this.com = new Com();
-					this.displayGrid();
-					this.displayFilter();
-					this.translater = Translater.getTranslater();
-				},
-				rowClicked: function(row){
-					console.log(row);
-					var id = row.model.get('ID');
+    events: {
+      'click #btnFilterRel': 'filter',
+      'click #back': 'hideDetails',
+      'click button#clear': 'clearFilter',
+      'click #release': 'toolTipShow',
+      'click #addSensor': 'addSensor',
+    },
 
 
-					var unicName = row.model.get('UnicIdentifier');
-					_this.currentRow.model.set({unicSensorName:unicName});
-					this.setValue(id);
-				},
-				getValue: function() {
-				},
-				setValue: function(value) {
-					_this.currentRow.model.set({FK_Sensor:value});
-					console.log(_this.currentRow.model)
-					this.hidePicker();
-				},
-			});
-			this.sensorPicker = new mySensorPicker();
-			this.sensorPicker.render();
+    regions: {
+      modal: '#modal',
+    },
 
-			this.initGrid();
-		},
+    initialize: function(options) {
+      this.translater = Translater.getTranslater();
+      this.com = new Com();
 
-		onRender: function(){
-			this.$el.i18n();
-		},
+      this.station = options.station;
+      this.model = options.station;
 
-		onShow : function(){
-			this.displayFilter();
-			this.displayGrid(); 
-			Backbone.history.navigate('release/individuals',{trigger:false});
-		},
+      this.releaseMethod = null;
+      this.getReleaseMethod();
+      var _this = this;
 
-		initGrid:function(){
-			var myGrid = NsGrid.extend({
-			});
+      
+      //todo: fix
+      var MySensorPicker = ObjectPicker.extend({
+        rowClicked: function(row) {
+          var id = row.model.get('ID');
+          var unicName = row.model.get('UnicIdentifier');
+          _this.currentRow.model.set({unicSensorName: unicName});
+          this.setValue(id);
+        },
+        getValue: function() {
+        },
+        setValue: function(value) {
+          _this.currentRow.model.set({unicSensorName: value});
+          _this.currentRow.model.set({FK_Sensor: value});
+          this.hidePicker();
+        },
+      });
+      this.sensorPicker = new MySensorPicker({
+        key : 'FK_Sensor',
+        schema: {
+          title : 'sensors',
+        }
+      });
+      this.sensorPicker.render();
 
-			var _this = this;
-			this.grid = new myGrid({
-				pageSize: 1400,
-				pagingServerSide: false,
-				com: this.com,
-				url: config.coreUrl+'release/individuals/',
-				urlParams : this.urlParams,
-				rowClicked : true,
-				totalElement : 'totalEntries',
-				onceFetched: function(params){
-					_this.totalEntries(this.grid);
-				}
-			});
-			this.grid.rowClicked = function(args){
-				_this.rowClicked(args.row);
-			};
-			this.grid.rowDbClicked = function(args){
-				_this.rowDbClicked(args.row);
-			};
+      this.initGrid();
+    },
 
-			this.grid.collection.on('backgrid:selected', function(model, selected) { 
-				_this.updateSelectedRow();
-			});
-		},
+    onRender: function() {
+      this.$el.i18n();
+    },
 
-		displayGrid: function(){
-			
-			this.ui.grid.html(this.grid.displayGrid());
-/*			this.ui.paginator.html(this.grid.displayPaginator());*/
-		},
+    onShow: function() {
 
-		displayFilter: function(){
-			this.filters = new NsFilter({
-				url: config.coreUrl + 'release/individuals/',
-				com: this.com,
-				filterContainer: this.ui.filters,
-			});
-		},
+      this.displayFilter();
+      this.displayGrid();
+      //Backbone.history.navigate('release/individuals',{trigger: false});
+    },
 
-		rowClicked: function(row){
-			if(this.currentRow){
-				this.currentRow.$el.removeClass('active');
-			}
-			row.$el.addClass('active');
-			this.currentRow = row;
-		},
+    getReleaseMethod: function(){
+      var _this = this;
+      $.ajax({
+        url:config.coreUrl+'release/individuals/getReleaseMethod'
+      }).done(function(data){
+        _this.releaseMethodList=data;
+      });
+    },
 
-		rowDbClicked:function(row){
-			this.currentRow = row;
-			var curModel = row.model;
-			curModel.trigger("backgrid:select", curModel, true);
+    initGrid: function() {
+      var myGrid = NsGrid.extend({
+      });
 
-		},
-		updateSelectedRow:function(){
-			var mds = this.grid.grid.getSelectedModels();
-			var nbSelected = mds.length;
-			this.$el.find(this.ui.nbSelected).html(nbSelected);
-		},
+      var _this = this;
+      this.grid = new myGrid({
+        pageSize: 1400,
+        pagingServerSide: false,
+        com: this.com,
+        url: config.coreUrl + 'release/individuals/',
+        urlParams: this.urlParams,
+        rowClicked: true,
+        totalElement: 'totalEntries',
+        onceFetched: function(params) {
+          _this.totalEntries(this.grid);
+        }
+      });
+      this.grid.rowClicked = function(args) {
+        _this.rowClicked(args.row);
+      };
+      this.grid.rowDbClicked = function(args) {
+        _this.rowDbClicked(args.row);
+      };
 
-		filter: function(){
-			this.filters.update();
-		},
+      this.grid.collection.on('backgrid:selected', function(model, selected) {
+        _this.updateSelectedRow();
+      });
+    },
 
-		clearFilter : function(){
-			this.filters.reset();
-		},
+    displayGrid: function() {
 
-		totalEntries: function(grid){
-			this.total = grid.collection.state.totalRecords;
-			$(this.ui.totalEntries).html(this.total);
-		},
-		release:function(){
-			var mds = this.grid.grid.getSelectedModels();
-			if(!mds.length){
-				return;
-			}
-			var _this = this;
-			var col = new Backbone.Collection(mds);
-			$.ajax({
-				url: config.coreUrl + 'release/individuals/',
-				method: 'POST',
-				data : { IndividualList : JSON.stringify(col),StationID:this.station.get('ID'),releaseMethod: _this.releaseMethod },
-				context: this,
-			}).done(function(resp) {
-				if(resp.errors){
-					resp.title = 'An error occured';
-					resp.type = 'error';
-				}else{
-					resp.title = 'Success';
-					resp.type = 'success';
-					
-				}
-				resp.text = 'release: ' + resp.release;
+      this.ui.grid.html(this.grid.displayGrid());
+      /*      this.ui.paginator.html(this.grid.displayPaginator());*/
+    },
 
-				//remove the model from the coll once this one is validated
-				var callback = function(){
-					Backbone.history.navigate('station/'+_this.station.get('ID'), {trigger: true});
-					//$('#back').click();
-				};
-				this.swal(resp, resp.type, callback);
+    displayFilter: function() {
+      this.filters = new NsFilter({
+        url: config.coreUrl + 'release/individuals/',
+        com: this.com,
+        filterContainer: this.ui.filters,
+      });
+    },
 
-			}).fail(function(resp) {
-				this.swal(resp, 'error');
-			});
-		},
+    rowClicked: function(row) {
+      if (this.currentRow) {
+        this.currentRow.$el.removeClass('active');
+      }
+      row.$el.addClass('active');
+      this.currentRow = row;
+    },
 
-		addSensor:function(){
-			this.modal.show(this.sensorPicker);
-			this.sensorPicker.showPicker();
-		},
+    rowDbClicked: function(row) {
+      this.currentRow = row;
+      var curModel = row.model;
+      curModel.trigger('backgrid:select', curModel, true);
 
-		hidePicker:function(){
-			this.sensorPicker.hidePicker();
-		},
+    },
+    updateSelectedRow: function() {
+      var mds = this.grid.grid.getSelectedModels();
+      var nbSelected = mds.length;
+      this.$el.find(this.ui.nbSelected).html(nbSelected);
+    },
 
-		swal: function(opt, type, callback){
-			var btnColor;
-			switch(type){
-				case 'success':
-					btnColor = 'green';
-					break;
-				case 'error':
-					btnColor = 'rgb(147, 14, 14)';
-					break;
-				case 'warning':
-					btnColor = 'orange';
-					break;
-				default:
-					return;
-					break;
-			}
-			
-			Swal({
-				title: opt.title || opt.responseText || 'error',
-				text: opt.text || '',
-				type: type,
-				showCancelButton: true,
-				confirmButtonColor: btnColor,
-				confirmButtonText: 'See Station',
-				cancelButtonColor: 'grey',
-				cancelButtonText: 'New Release',
-				closeOnConfirm: true,
-			},
-			function(isConfirm){
-				//could be better
-				if(isConfirm && callback){
-					callback();
-				}else{
-					Backbone.history.navigate('release', {trigger: true});
-				}
-			});
-		},
+    filter: function() {
 
-		toolTipShow:function(e){
-			var _this = this;
-			$(e.target).tooltipList({
+      console.log('passed');
+      this.filters.update();
+    },
 
-								position: 'top',
-								//  pass avalaible options
-								availableOptions: [{'label':'direct release','val':1},{'label':'direct release grid 5x5','val':2},],
-								//  li click event
-								liClickEvent: $.proxy(function (liClickValue, origin, tooltip) {
-								console.log(liClickValue);
-								_this.releaseMethod = liClickValue;
-								_this.release();
-								//console.log(origin);
-								}, this),
-						});
-						$(e.target).tooltipster('show');
-		}
-	});
+    clearFilter: function() {
+      this.filters.reset();
+    },
+
+    totalEntries: function(grid) {
+      this.total = grid.collection.state.totalRecords;
+      $(this.ui.totalEntries).html(this.total);
+    },
+
+
+    release: function(releaseMethod) {
+      var mds = this.grid.grid.getSelectedModels();
+      if (!mds.length) {
+        return;
+      }
+      var _this = this;
+      var col = new Backbone.Collection(mds);
+      $.ajax({
+        url: config.coreUrl + 'release/individuals/',
+        method: 'POST',
+        data: {IndividualList: JSON.stringify(col),StationID: this.station.get('ID'),releaseMethod: releaseMethod},
+        context: this,
+      }).done(function(resp) {
+        if (resp.errors) {
+          resp.title = 'An error occured';
+          resp.type = 'error';
+        }else {
+          resp.title = 'Success';
+          resp.type = 'success';
+
+        }
+        resp.text = 'release: ' + resp.release;
+
+        //remove the model from the coll once this one is validated
+        var callback = function() {
+          Backbone.history.navigate('stations/' + _this.station.get('ID'), {trigger: true});
+          //$('#back').click();
+        };
+        this.swal(resp, resp.type, callback);
+
+      }).fail(function(resp) {
+        this.swal(resp, 'error');
+      });
+    },
+
+    addSensor: function() {
+      this.modal.show(this.sensorPicker);
+      this.sensorPicker.showPicker();
+    },
+
+    hidePicker: function() {
+      this.sensorPicker.hidePicker();
+    },
+
+    swal: function(opt, type, callback) {
+      var btnColor;
+      switch (type){
+        case 'success':
+          btnColor = 'green';
+          break;
+        case 'error':
+          btnColor = 'rgb(147, 14, 14)';
+          break;
+        case 'warning':
+          btnColor = 'orange';
+          break;
+        default:
+          return;
+          break;
+      }
+
+      Swal({
+        title: opt.title || opt.responseText || 'error',
+        text: opt.text || '',
+        type: type,
+        showCancelButton: true,
+        confirmButtonColor: btnColor,
+        confirmButtonText: 'See Station',
+        cancelButtonColor: 'grey',
+        cancelButtonText: 'New Release',
+        closeOnConfirm: true,
+      },
+      function(isConfirm) {
+  //could be better
+        if (isConfirm && callback) {
+          callback();
+        }else {
+          Backbone.history.navigate('release', {trigger: true});
+        }
+      });
+    },
+
+    toolTipShow: function(e) {
+      var _this = this;
+      this.ui.release.tooltipList({
+        position: 'top',
+        //  pass avalaible options
+        availableOptions: _this.releaseMethodList,
+        liClickEvent:function(liClickValue) {
+          _this.release(liClickValue);
+        }, 
+      });
+      this.ui.release.tooltipster('show');
+    }
+  });
 });

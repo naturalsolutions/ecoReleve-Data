@@ -1,9 +1,5 @@
-
-
-<div class="full-height col-sm-6">
-	<div class="toolbar clearfix">
-		<br>
-
+<div class="full-height col-sm-6 no-padding">
+	<div class="toolbar top clearfix">
 		<button id="hideDetail" class="btn pull-left">
 			<i class="reneco reneco-back"></i>
 			Back
@@ -14,8 +10,10 @@
 		</div>
 
 	</div>
-	<br>
 
+
+	<div class="crop2">
+		<br>
 		<ul class="nav nav-tabs" role="tablist">
 			<li role="presentation" class="active"><a href="#individual" aria-controls="individual" role="tab" data-toggle="tab">Individual details</a></li>
 			<li role="presentation"><a href="#sensor" aria-controls="sensor" role="tab" data-toggle="tab">Sensor details</a></li>
@@ -30,11 +28,14 @@
 				<div id="sensorForm"></div>
 			</div>
 		</div>
+		<div id="grid"></div>
+	</div>
 
-	<br>
-	<div class="clearfix">
-		<button id="validate" class="btn btn-success pull-right">Validate</button>
-		<span class="pull-left">Sampling frequency : </span>
+
+	<div class="clearfix toolbar bottom">
+		
+		
+		<legend class="inherit">Sampling rate : </legend>
 		
 		<div class="col-xs-4">
 			<select name="" id="frequency" class="form-control pull-left">
@@ -47,11 +48,14 @@
 
 			</select>
 		</div>
+		<button id="validate" class="btn btn-success pull-right">Validate</button>
+
+		<!-- <legend class="inherit pull-right">Selected : <span id="totalS"></span><span id="total">/</span></legend> -->
 			
 	</div>
-	<br>
-	<div id="grid"></div>
 </div>
+
+
 <div class="full-height col-sm-6 no-padding">
 	<div id="map"></div>
 </div>

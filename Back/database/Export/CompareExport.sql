@@ -29,20 +29,35 @@ DECLARE @Reqwhere VARCHAR(4000)
 		SET @ReqSelect = ' SELECT S.original_id, SP.FK_TSta_ID,EP.id,ep.original_id,SP.pk ' 
 		SET @Reqwhere  = ' convert(int,replace(S.original_id,''eReleve_'','''')) <> SP.FK_TSta_ID '
 
-		select @ReqSelect = @ReqSelect + ',EP.' + c.name + ',SP.' +  c.name ,
+		select @ReqSelect = @ReqSelect + ',EP.' + C.name + ',SP.' +  c2.name ,
 		@Reqwhere = @Reqwhere + 
-			CASE WHEN C2.xtype =62 THEN ' OR abs(EP.' + c.name + ' - SP.' +   c.name +') > 0.01 '
-			ELSE ' OR EP.' + c.name + ' <> SP.' +   c.name
+			CASE WHEN C2.xtype =62 THEN ' OR abs(EP.' + c.name + ' - SP.' +   c2.name +') > 0.01 '
+			ELSE ' OR EP.' + c.name + ' <> SP.' +   c2.name
 			END
-		from sysobjects o JOIN syscolumns c ON C.id=o.id
-		JOIN [ECWP-eReleveData].[dbo].sysobjects o2 ON o2.name = @TableName  JOIN [ECWP-eReleveData].[dbo].syscolumns c2 ON C2.id=o2.id and C2.name = c.name
+		from sysobjects o 
+		JOIN syscolumns c ON C.id=o.id
+		JOIN NewModelERD.dbo.MigrationConfigurationProtocoleList PL on PL.TableName = o.name
+		--LEFT JOIN NewModelERD.dbo.MigrationConfigurationProtocoleContent PC on PC.fk_ConfigurationProtocole =PL.ID and PC.TargetColumnName = C.name
+		JOIN [ECWP-eReleveData].[dbo].sysobjects o2 ON o2.name = @TableName  
+		JOIN [ECWP-eReleveData].[dbo].syscolumns c2 ON C2.id=o2.id and C.name = c2.name --and isnull(PC.ColumnName, C.name) = c2.name 
 		where o.name = @TableName
 		and c.name not in ('ID','original_id','fk_station','fk_individual','creationdate','FK_ProtocoleType','comments','timestamp')
 
+
 		SET @Req = @ReqSelect + ' FROM  ' + @TableName + ' EP JOIN TSTation S on EP.fk_station = S.ID JOIN [ECWP-eReleveData].[dbo].' + @TableName + ' SP on SP.pk = EP.original_id WHERE (' + @Reqwhere + ')'
 
-		select ' Comparaison Protocole ' + @TableName
-		print @Req
+		--select ' Comparaison Protocole ' + @TableName
+
+		SET @Req = 'select ''' + @TableName + ''' ProtocoleTable,S.Nbsource,T.NBTarget FROM  (SELECT count(*) nbSource from [ECWP-eReleveData].[dbo].' + @TableName + ' P JOIN [ECWP-eReleveData].[dbo].TStations S  ON P.FK_TSta_ID = S.TSta_PK_ID where (s.FieldActivity_ID <> 27 or s.FieldActivity_ID IS NULL) ) S JOIN  (select count(*) NbTarget from ' + @TableName + ') T ON S.Nbsource <> T.NbTarget '
+		print @req
 		exec (@Req )
+
+
+
+		--print @Req
+		--exec (@Req )
+
+
+
 		DELETE FROM  #ProtList where name = @TableName
 	END

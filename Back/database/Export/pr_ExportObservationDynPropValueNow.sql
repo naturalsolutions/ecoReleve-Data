@@ -6,7 +6,7 @@ CREATE PROCEDURE pr_ExportObservationDynPropValueNow
 	
 AS
 BEGIN
-	IF NOT EXISTS (SELECT * FROM TImportInfo I WHERE I.ImportInfoName = 'ExportObservationDynPropValueNow' and convert(datetime,I.ImportInfoValue,121) > getdate()-0.1)
+	IF NOT EXISTS (SELECT * FROM TImportInfo I WHERE I.ImportInfoName = 'ExportObservationDynPropValueNow' and convert(datetime,I.ImportInfoValue,121) > getdate()-0.01)
 	BEGIN
 		IF EXISTS (select * from sysobjects where name='TObservationDynPropValueNow' and type='U')
 			DROP TABLE TObservationDynPropValueNow
@@ -38,7 +38,7 @@ BEGIN
            ,[FK_Observation]
            ,[Name]
            ,[TypeProp])
-		SELECT * FROM [NewModelERD].dbo.ObservationDynPropValuesNow WITH(NOLOCK)
+		SELECT * FROM [EcoReleve_ECWP].dbo.ObservationDynPropValuesNow WITH(NOLOCK)
 		
 		CREATE CLUSTERED INDEX [IX_TObservationDynPropValue_Fk_Observation_autres] ON [dbo].TObservationDynPropValueNow
 				(

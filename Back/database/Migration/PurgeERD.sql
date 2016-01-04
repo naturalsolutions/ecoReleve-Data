@@ -1,22 +1,47 @@
 delete from IndividualDynPropValue
-delete from SensorDynPropValue
-delete from StationDynPropValue
-delete from MonitoredSiteDynPropValue
+dbcc  CHECKIDENT (IndividualDynPropValue,reseed,0)
 
+delete from SensorDynPropValue
+dbcc  CHECKIDENT (SensorDynPropValue,reseed,0)
+
+delete from StationDynPropValue
+dbcc  CHECKIDENT (StationDynPropValue,reseed,0)
+
+delete from MonitoredSiteDynPropValue
+dbcc  CHECKIDENT (MonitoredSiteDynPropValue,reseed,0)
+
+delete from Equipment
+dbcc  CHECKIDENT (Equipment,reseed,0)
 
 truncate TABLE ObservationDynPropValue
+dbcc  CHECKIDENT (ObservationDynPropValue,reseed,0)
 
 delete from Observation
-delete from Individual_Location
-delete from Equipment
-delete from Station_FieldWorker
-delete from Station
-delete from Individual
-delete from Sensor
-delete from MonitoredSitePosition
-delete from MonitoredSite
-delete from IndividualType_IndividualDynProp
-delete from IndividualDynProp
+dbcc  CHECKIDENT (Observation,reseed,0)
 
-delete from SensorType
-delete from MonitoredSiteType
+truncate table Individual_Location
+dbcc  CHECKIDENT (Individual_Location,reseed,0)
+
+delete from Station_FieldWorker
+dbcc  CHECKIDENT (Station_FieldWorker,reseed,0)
+
+delete from Station
+dbcc  CHECKIDENT (Station,reseed,0)
+
+delete from Individual
+dbcc  CHECKIDENT (Individual,reseed,0)
+
+delete from Sensor
+dbcc  CHECKIDENT (Sensor,reseed,0)
+
+delete from MonitoredSitePosition
+dbcc  CHECKIDENT (MonitoredSitePosition,reseed,0)
+
+delete from MonitoredSite
+dbcc  CHECKIDENT (MonitoredSite,reseed,0)
+
+delete from Equipment
+dbcc  CHECKIDENT (Equipment,reseed,0)
+
+
+

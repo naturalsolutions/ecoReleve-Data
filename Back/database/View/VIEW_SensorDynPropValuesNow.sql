@@ -5,6 +5,7 @@ SELECT dyn_val.*,dyn.Name as Name,dyn.TypeProp FROM
 	 where not exists (select * from  SensorDynPropValue  V2 
          where V2.FK_SensorDynProp  =  dyn_val.FK_SensorDynProp  and V2.FK_Sensor = dyn_val.FK_Sensor
         AND V2.startdate > dyn_val.startdate and V2.startdate <= GETDATE())
+	 		and dyn_val.Startdate <= GETDATE()
 
 
 

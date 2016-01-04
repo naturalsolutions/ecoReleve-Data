@@ -11,20 +11,28 @@ from ..Models import (
     dbConfig
 )
 from collections import OrderedDict
+from traceback import print_exc
+from ..utils.datetime import parse
+import pandas as pd
+import numpy as np 
+from pyramid import threadlocal
 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 def uploadFileRFID(request):
+    session = request.dbsession
     data = []
     message = ""
     field_label = []
     isHead = False
     now=datetime.now()
-    print('call ajax import')
     try:
-        creator = request.authenticated_userid
+        creator = request.authenticated_userid['iss']
         content = request.POST['data']
         idModule = request.POST['FK_Sensor']
+        startEquip = parse(request.POST['StartDate'])
+        endEquip = parse(request.POST['EndDate'])
+        creator = request.authenticated_userid['iss']
      
         if re.compile('\r\n').search(content):
             data = content.split('\r\n')
@@ -73,11 +81,14 @@ def uploadFileRFID(request):
                 else:
                     field_label = ["no","Type","Code","date","time"]
 
+        # datas = pd.DataFrame(columns = ['FK_Sensor','date_','chip_code','creator','creation_date','validated','checked'])
         j=0
         code = ""
         date = ""
         dt = ""
         Rfids, chip_codes = set(), set()
+        list_RFID = []
+
         if (isHead):
             j=1
         ########## Parsing data
@@ -95,7 +106,6 @@ def uploadFileRFID(request):
                         time = re.sub('\s','',line[i])
                         format_dt = '%d/%m/%Y %H:%M:%S'
                         if re.search('PM|AM',time):
-
                             format_dt = '%m/%d/%Y %I:%M:%S%p'
                             format_dtBis='%d/%m/%Y %I:%M:%S%p'
                         dt = date+' '+time
@@ -104,28 +114,30 @@ def uploadFileRFID(request):
                         except Exception as e:
                             dt = datetime.strptime(dt, format_dtBis)
                         allDate.append(dt)
-
                     i=i+1
-                Rfids.add((creator, idModule, code, dt))
-                chip_codes.add(code)
+                # Rfids.add((creator, idModule, code, dt))
+                # chip_codes.add(code)
+                row = {'id_':j,'FK_Sensor':idModule,'date_':dt,'chip_code':code,'creator':creator,'creation_date':now,'validated':0,'checked':0}
+                list_RFID.append(row)
             j=j+1
-        ## check if Date corresponds with pose remove module ##
-        # table = Base.metadata.tables['RFID_MonitoredSite']
-        # q_check_date = select([func.count('*')]).where(
-        #     and_(table.c['begin_date'] < allDate[0], or_(table.c['end_date'] >= allDate[-1],table.c['end_date'] == None))
-        #     ).where(table.c['identifier'] == module)
-        # check = DBSession.execute(q_check_date).scalar() 
-        # if check == 0 :
-        #     request.response.status_code = 510
-        #     message = "Dates of this uploded file (first date : "+str(allDate[0])+" , last date : "+str(allDate[-1])+") don't correspond with the deploy/remove dates of the selected module"
-        #     return message
+        data_to_check = pd.DataFrame.from_records(list_RFID,columns = ['id_','FK_Sensor','date_','chip_code','creator','creation_date','validated','checked'])
 
-        Rfids = [{Rfid.creator.name: crea, Rfid.FK_Sensor.name: idMod, Rfid.checked.name: '0',
-                Rfid.chip_code.name: c, Rfid.date_.name: d, Rfid.creation_date.name: now} for crea, idMod, c, d  in Rfids]
-        # Insert data.
-        DBSession.execute(insert(Rfid), Rfids)
-        message = {'inserted':len(Rfids)}
-        return message
+        ## check if Date corresponds with pose remove module ##
+        if allDate[0]>=startEquip and (endEquip is None or allDate[-1]<= endEquip):
+            # data_to_insert = checkDuplicatedRFID(data_to_check,allDate[0],allDate[-1])
+            # Rfids = [{Rfid.creator.name: crea, Rfid.FK_Sensor.name: idMod, Rfid.checked.name: '0',
+            # Rfid.chip_code.name: c, Rfid.date_.name: d, Rfid.creation_date.name: now} for crea, idMod, c, d  in Rfids]
+            # # Insert data.
+            # session.execute(insert(Rfid), Rfids)
+            data_to_check = data_to_check.drop(['id_'],1)
+            data_to_check.to_sql(Rfid.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'], index=False)
+
+            message = 'inserted rows : '+str(len(Rfids))
+            return message
+        else :
+            request.response.status_code = 510
+            message = "File dates (first date : "+str(allDate[0])+" , last date : "+str(allDate[-1])+") don't correspond with the deploy/remove dates of the selected module"
+            return message
         # Check if there are unknown chip codes.
         # query = select([Individual.chip_code]).where(Individual.chip_code.in_(chip_codes))
         # known_chips = set([row[0] for row in DBSession.execute(query).fetchall()])
@@ -136,7 +148,30 @@ def uploadFileRFID(request):
         request.response.status_code = 500
         message = 'Data already exist.'
     except Exception as e:
-        print(e)
+        print_exc()
         request.response.status_code = 520
         message = 'Error'
     return message
+
+def checkDuplicatedRFID(data_to_check,startEquip,endEquip):
+    session1 = threadlocal.get_current_registry().dbmaker()
+    query = select([Rfid]).where(and_(Rfid.date_>=startEquip,Rfid.date_<=endEquip))
+    result = session1.execute(query).fetchall()
+
+    existingData = pd.DataFrame.from_records(result,
+     columns = ['ID','FK_Sensor','date_','chip_code','creator','creation_date','validated','checked','frequency'])
+    existingData.rename(columns={'ID':'$ID','FK_Sensor':'$FK_Sensor','date_':'$date_','chip_code':'$chip_code','creator':'$creator','creation_date':'$creation_date','validated':'$validated','checked':'$checked','frequency':'$frequency'}, inplace=True)
+    # existingData['$FK_Sensor'] = existingData['$FK_Sensor'].astype(int)
+    # data_to_check['FK_Sensor'] = data_to_check['FK_Sensor'].astype(int)
+
+    # existingData['chip_code'] = existingData['chip_code'].astype(str)
+    # data_to_check['chip_code'] = data_to_check['chip_code'].astype(str)
+
+    existingData['$date_'] =  pd.to_datetime(existingData['$date_'])
+    data_to_check['date_'] =  pd.to_datetime(data_to_check['date_'])
+    merge = data_to_check.merge(existingData, left_on = ['FK_Sensor'], right_on = ['$FK_Sensor'])
+
+    DFToInsert = data_to_check[~data_to_check['id_'].isin(merge['id_'])]
+    session1.close()
+    return DFToInsert
+

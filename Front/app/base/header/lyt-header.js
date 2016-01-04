@@ -1,34 +1,40 @@
-/**
-
-	TODO:
-	- header class hide : see router.js & app.js
-
-**/
 
 define(['marionette', 'config', './lyt-breadCrumb'],
 function(Marionette, config, Breadcrumb) {
-	'use strict';
-	return Marionette.LayoutView.extend({
-		template: 'app/base/header/tpl-header.html',
-		className: 'header',
-		events: {
-			'click #logout' : 'logout',
-		},
-		regions: {
-			'breadcrumb': '#breadcrumb'
-		},
+  'use strict';
+  return Marionette.LayoutView.extend({
+    template: 'app/base/header/tpl-header.html',
+    className: 'header',
+    events: {
+      'click #logout': 'logout',
+    },
+    regions: {
+      'breadcrumb': '#breadcrumb'
+    },
 
-		logout: function(){
-			$.ajax({
-				context: this,
-				url: config.coreUrl + 'security/logout'
-			}).done( function() {
-				
-			});
-		},
+    ui: {
+      'userName': '#userName'
+    },
 
-		onShow: function(){
-			//this.breadcrumb.show(new Breadcrumb());
-		},
-	});
+    logout: function() {
+      $.ajax({
+        context: this,
+        url: config.coreUrl + 'security/logout'
+      }).done(function() {
+        document.location.href = config.portalUrl;
+      });
+    },
+
+    onShow: function() {
+      var _this = this;
+      this.breadcrumb.show(new Breadcrumb());
+      window.app.user = new Backbone.Model();
+      window.app.user.url = config.coreUrl + 'currentUser';
+      window.app.user.fetch({
+        success: function() {
+          _this.ui.userName.html(window.app.user.get('fullname'));
+        }
+      });
+    },
+  });
 });

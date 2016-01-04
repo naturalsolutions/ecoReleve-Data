@@ -1,14 +1,22 @@
 
 fieldset{
 	border: 1px solid #e5e5e5;
-	padding: 15px;
-	margin-top: 10px;
+	padding: 15px 0px;
+	margin-top: 0px;
 	width: 100%;
 	&>div{
 		margin-bottom: 10px;
 	}
+	legend{
+		margin: 0px 5px;
+		padding: 10px 10px;
+	}
+	label{
+		display: block;
+	}
 }
 legend{
+	width: auto;
 	padding: 0px 10px;
 	margin: 10px 0px;
 	border: none;
@@ -31,23 +39,25 @@ textarea.form-control{
 input, select, textarea{
 	font-weight: 600;
 	&.required{
-		//border-bottom: 1px solid orange;
+		border-bottom: 1px solid rgba(255, 165, 0, 0.5);
 	}
 }
-.error{
-	select, input, textarea{
-		border-left: 5px solid @error;
-	}
-}
-
-
 
 .form-control:disabled{
 	border: 1px solid transparent;
-	background: transparent;
 	box-shadow: none;
-	padding-left: 0px;
+	//background: transparent;
+	//padding-left: 0px;
 }
+
+input.form-control[type=number]:disabled::-webkit-inner-spin-button, 
+input.form-control[type=number]:disabled::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0; 
+}
+
 select:disabled {
 	-webkit-appearance: none;
 	-moz-appearance: none;
@@ -55,10 +65,27 @@ select:disabled {
 	text-overflow: '';
 }
 
-.form-control[disabled], fieldset[disabled] .form-control{
-	cursor: auto;
+.form-control{
+	padding: 5px 10px;
+	font-weight: 600;
 }
 
+.form-control[type="checkbox"]{
+	box-shadow: none;
+	height: 34px;
+	width: 25px;
+	cursor: pointer;
+}
+.form-control[disabled], fieldset[disabled] .form-control{
+	cursor: auto;
+	background: rgba(150,150,150,0.1);
+
+
+}
+
+.input-group .form-control {
+	z-index: inherit;
+}
 
 .nested-model{
 	ul fieldset{
@@ -66,38 +93,14 @@ select:disabled {
 		margin: 0px;
 		border: none;
 		&>div{
-			margin-bottom: 0px;
+			//margin-bottom: 0px; ?why?
 		}
 	}
-	.form-control{
-		height: auto;
-	}
 }
 
-
-.input-group .form-control {
-	z-index: inherit;
-}
-
-
-.form-control[type="checkbox"]{
-	box-shadow: none;
-}
-
-/* .nav-tabs > li > a{
-	background-color: #eeeeee;
-	border-color: #eeeeee #eeeeee #dddddd;
-}
-
-.tab-pane{
-	border: 1px solid #dddddd;
-	padding: 15px;
-	border-radius: 0 0 4px 4px;
-	border-top: 0px;
-}
-*/
 
 .nav-tabs{
+	border: none;
 	li{
 		a{
 			cursor: pointer;
@@ -129,7 +132,126 @@ select:disabled {
 	}
 }
 
+.ui-autocomplete{
+
+	position: absolute;
+    top: 0;
+    left: 0;
+    cursor: default;
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 100000;
+}
 
 
 
 
+
+
+
+
+
+.error{
+	//works only for required classes
+	//select.required, input.required, textarea.required{
+		border-left: 5px solid @error;
+	//}
+}
+.list-inline {
+    margin-left: 0px;
+}
+
+.list-group-item{
+	&:hover{
+		background: rgba(68, 157, 68, 1);
+		color: white;
+		border: 1px solid #dddddd;
+	}
+	&.active{
+		color: white;
+		background: rgba(68, 157, 68, 1);
+		border: 1px solid #dddddd;
+		&:hover{
+			background: rgba(68, 157, 68, 1);
+			color: white;
+			border: 1px solid #dddddd;
+
+		}
+	}
+}
+
+
+.nested{
+	fieldset{
+		margin-top: 20px;
+		background: rgba(100, 100, 100, 0.1);
+		.control{
+			margin: 0px;
+		}
+	}
+}
+
+
+/* CSS 2 PIER 
+*
+*  A mettre dans les bons fichiers CSS
+*
+Bouton*/
+/* .panel-heading .btn-prevent-collapse {
+	padding: 25px 20px 3px 12px;
+}
+.btn-success{
+	position: relative;
+    padding: 6px 40px 6px 12px;
+}
+div#stationForm button.btn-success{
+	padding: 23px 20px 6px 12px;
+}
+.btn-success .reneco {
+    position: absolute;
+    height: 100%;
+    left: auto;
+    right: 0;
+    border-radius: 0;
+    border-top-right-radius: inherit;
+    border-bottom-right-radius: inherit;
+    box-shadow: 1px 0 0 0 transparent inset;
+    width: 2.57142857em;
+    background-color: rgba(0,0,0,.05);
+    top: 0;
+    line-height: 30px;
+} */
+/* Formulaires
+dans les stations enlever les class "list-inline" des select */
+
+
+div.form-control{
+  height: auto;
+}
+
+/* Thesaurus */
+span.fancytree-title {
+	font-family: 'Exo 2', sans-serif;
+}
+span.fancytree-title:hover {
+	background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;
+	-webkit-background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;	
+}
+ul.fancytree-container{
+  z-index: 1;
+	border:0;
+  max-height: 500px;
+
+}
+div.fancytreeview{
+	//input-group : diplsay table cell
+  top: 34px!important;
+	position: absolute;
+	border: 1px solid rgba(46, 204, 64, 0.6) !important;
+}
+/* 
+Dans detail station, bloc "Detailled Infos", en mode edit : 
+ - Ajouter une class sur une div contenant le bloc qui change de statut pour indiquer le mode "edit" sinon ce n'est pas possible de différencier les styles
+ - Pour avoir la croix à côté de la liste déroulante, il faut change le template de listeoFnestedModel comme sur ecollection. Avoir le bouton "x" dans un col-md-2 et le select dans col-md-10
+ */
+/* FIN PIER */
