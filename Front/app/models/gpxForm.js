@@ -27,23 +27,25 @@ define([
           'FieldWorker': {
             'title': 'FieldWorker',
             'editable': true,
-            'validators': [],
-            'options': [],
+            'validators': ['required'],
+            'options': {"source": "autocomplete/users/Login/ID", "minLength":3},
             'editorClass':
             'form-control',
             'Name': 'FieldWorker',
-            'type': 'Select',
-            'fieldClass': 'None col-md-6'
+            'type': 'AutocompleteEditor',
+            'fieldClass': 'col-md-6'
           }
         },
-        'title': null,
+        title : "Field Workers *",
         'editable': null,
-        'validators': [],
+        'validators': ['required'],
         'options': [],
         'editorClass': 'listOfChildSample,col-md-11',
         'Name': 'FieldWorkers',
         'type': 'ListOfNestedModel',
-        'fieldClass': 'fieldworkers'
+        'fieldClass': 'fieldworkers',
+        "editorAttrs": {"disabled": false},
+        "defaultValue" : {"FK_ProtocoleType" : 1000}
       }
     }
   });
