@@ -12,8 +12,10 @@ define([
   'models/gpxForm',
   'i18n',
 
+
 ], function($, _, Backbone, Marionette, config, Swal,
  XmlParser, NsForm, GpxForm
+
 ) {
 
   'use strict';
@@ -54,7 +56,8 @@ define([
       this.loadCollection(config.coreUrl + 'fieldActivity', 'select[name="fieldActivity"]');
       $('button[data-action="add"]').attr('disabled','disabled');
       $('.fieldactivity').addClass('hidden');
-      $('.fieldworkers').addClass('hidden');
+      this.fieldworkers = $('label[for*="FieldWorkers"]').parent();
+      $(this.fieldworkers).addClass('hidden');
     },
 
     importFile: function(e) {
@@ -95,7 +98,7 @@ define([
             $(userBtn).removeAttr('disabled');
             $('#importGpxMsg').addClass('hidden');
             $('.fieldactivity').removeClass('hidden');
-            $('.fieldworkers').removeClass('hidden');
+            $(_this.fieldworkers).removeClass('hidden');
 
             if (errosList.length > 0) {
               for (var i = 0; i < errosList.length; i++) {
@@ -112,7 +115,7 @@ define([
             $(fieldAfield).attr('disabled','disabled');
             $(userBtn).attr('disabled','disabled');
             $('.fieldactivity').addClass('hidden');
-            $('.fieldworkers').addClass('hidden');
+            $(_this.fieldworkers).addClass('hidden');
           }
         };
       }
@@ -124,6 +127,7 @@ define([
     },
 
     swalError: function(title) {
+      var _this = this;
       Swal({
         title: title,
         text: 'error',
@@ -136,7 +140,7 @@ define([
       function(isConfirm) {
         $('form')[0].reset();
         $('.fieldactivity').addClass('hidden');
-        $('.fieldworkers').addClass('hidden');
+        $(_this.fieldworkers).addClass('hidden');
       });
     },
 
@@ -176,6 +180,7 @@ define([
         formRegion: this.ui.form,
         //displayMode: 'display',
         reloadAfterSave: false,
+        disabled : false,
       });
     },
     loadCollection: function(url, element) {
@@ -240,6 +245,7 @@ define([
         function(isConfirm) {
           $(e.target).val('');
         });
+
 
       } else {
         this.updateUsers(e);
