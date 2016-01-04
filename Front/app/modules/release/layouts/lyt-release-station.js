@@ -13,6 +13,7 @@ define([
   'modules/release/layouts/lyt-release-individual',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
+
   Com, NsGrid, NsFilter, LytReleaseIndiv
 ) {
 

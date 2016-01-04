@@ -15,6 +15,7 @@ define([
   'i18n'
 
 ], function($, _, Backbone, Marionette, Radio, LytProto,
+
   Swal, config, NsForm, Navbar
 ) {
 
@@ -111,6 +112,13 @@ define([
         objectType: stationType,
         id: stationId,
         reloadAfterSave: true,
+        afterShow : function(){
+          $(".datetime").attr('placeholder','DD/MM/YYYY'); 
+
+          $("#dateTimePicker").on("dp.change", function (e) {
+            $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
+           });
+        }
       });
 
       this.nsForm.model.on('change:fieldActivityId', function(){
