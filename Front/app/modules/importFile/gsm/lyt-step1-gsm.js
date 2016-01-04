@@ -11,6 +11,7 @@ define([
   'i18n'
 
 ], function($, _, Backbone, Marionette, config, Swal, Dropzone
+
   ) {
 
   'use strict';
@@ -27,9 +28,11 @@ define([
     },
 
     check: function() {
+
     },
 
     onShow: function() {
+      var _this = this;
       // Initialize a drop zone for import
       var previewNode = document.querySelector('#template');
       previewNode.id = '';
@@ -45,6 +48,7 @@ define([
         previewsContainer: '#previews', // Define the container to display the previews
         clickable: '.fileinput-button', // Define the element that should be used as click trigger to select files.
       });
+      this.totalReturned = new Backbone.Collection();
       //overwrite addFile function to avoid duplicate files
       myDropzone.addFile = function(file) {
 
@@ -140,14 +144,19 @@ define([
         $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-danger');
       });
 
-      myDropzone.on('success', function(file) {
+      myDropzone.on('success', function(file,resp) {
         $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-success');
+        var inserted = resp[1]['new GPS data inserted'];
+        _this.totalReturned.add({inserted: inserted});
       });
 
       myDropzone.on('queuecomplete', function(file) {
+        var totalInserted = _this.totalReturned.reduce(function(memo, value) { return memo + value.get("inserted") }, 0);
         if (!this.errors) {
           Swal({title: 'Well done',
-            text: 'File(s) have been correctly imported',
+            text: 'File(s) have been correctly imported\n' 
+                          + '\t inserted : ' + totalInserted
+                          ,
             type:  'success',
             showCancelButton: true,
             confirmButtonText: 'Validate GSM',
@@ -185,6 +194,7 @@ define([
       document.querySelector('#actions .cancel').onclick = function() {
         myDropzone.removeAllFiles(true);
       };
+
     },
 
     onDestroy: function() {

@@ -30,6 +30,7 @@ define([
 		},
 
     onShow: function() {
+      var _this = this;
       // Initialize a drop zone for import
       var previewNode = document.querySelector('#template');
       previewNode.id = '';
@@ -115,6 +116,8 @@ define([
         })(this));
       };
 
+      this.totalReturned = new Backbone.Collection();
+
       myDropzone.on('addedfile', function(file) {
         // Hookup the start button
         file.previewElement.querySelector('.start').onclick = function() { myDropzone.enqueueFile(file); };
@@ -145,17 +148,21 @@ define([
 
       });
 
-      myDropzone.on('success', function(file) {
+      myDropzone.on('success', function(file,resp) {
         $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-success');
+        _this.totalReturned.add(resp);
       });
 
       myDropzone.on('queuecomplete', function(file) {
+          var totalInserted = _this.totalReturned.reduce(function(memo, value) { return memo + value.get("inserted") }, 0);
+          var totalExisting = _this.totalReturned.reduce(function(memo, value) { return memo + value.get("existing") }, 0);
 
         if (!this.errors) {
 
           Swal({title: 'Well done',
-									text: 'File(s) have been correctly imported',
-									type:  'success',
+									text: 'File(s) have been correctly imported\n' 
+                          + '\t inserted : ' + totalInserted + '\n\t existing : ' + totalExisting
+                          ,
 									showCancelButton: true,
 									confirmButtonColor: '#DD6B55',
 									confirmButtonText: 'Validate Argos',
@@ -181,6 +188,7 @@ define([
 								);
         }
         this.errors = false;
+        _this.totalReturned.reset();
 
       });
 
