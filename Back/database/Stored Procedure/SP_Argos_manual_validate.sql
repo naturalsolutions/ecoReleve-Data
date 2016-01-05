@@ -1,5 +1,7 @@
+USE [EcoReleve_ECWP]
+GO
 
-/****** Object:  StoredProcedure [dbo].[sp_validate_Argos_GPS]    Script Date: 14/10/2015 17:50:01 ******/
+/****** Object:  StoredProcedure [dbo].[sp_validate_Argos_GPS]    Script Date: 18/12/2015 15:48:16 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -7,7 +9,10 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE PROCEDURE [dbo].[sp_validate_Argos_GPS]
+
+
+
+ALTER PROCEDURE [dbo].[sp_validate_Argos_GPS]
 	@listID xml,
 	@ind int,
 	@user int,
@@ -56,7 +61,7 @@ select * from [dbo].[XML_int] (@listID)
 -- check duplicate location before insert data in @data_without_duplicate
 insert into  @data_duplicate  
 select d.data_id, s.ID
-from @data_to_insert d join Individual_Location s on d.lat=s.LAT and d.lon = s.LON and d.date_ = s.DATE and s.FK_Individual = d.FK_ind
+from @data_to_insert d join Individual_Location s on round(d.lat,3)=round(s.LAT,3) and round(d.lon,3) = round(s.LON,3) and d.date_ = s.DATE and s.FK_Individual = d.FK_ind
 
 
 -- insert data creating new Location

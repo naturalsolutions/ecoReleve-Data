@@ -122,9 +122,11 @@ class ObjectWithDynProp:
             filterFields = self.ObjContext.query(ModuleGrids
                 ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).order_by(asc(ModuleGrids.FilterOrder)).all()  #.order_by(asc(ModuleGrids.FilterOrder)).all()
 
-        filterFields.sort(key=lambda x: str(x.FilterOrder))
+
+        # filterFields.sort(key=lambda x: str(x.FilterOrder))
         for curConf in filterFields:
             curConfName = curConf.Name
+            print(curConfName)
             filterField = list(filter(lambda x : x['name'] == curConfName
                 and curConf.IsSearchable == 1 ,self.GetAllProp()))
 
