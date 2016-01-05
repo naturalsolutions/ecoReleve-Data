@@ -6,6 +6,7 @@ from sqlalchemy import (and_,
  join,
  cast,
  not_,
+ or_,
  DATE)
 from sqlalchemy.orm import aliased
 from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
@@ -126,6 +127,18 @@ class IndividualList(ListObjectWithDynProp):
             #         # )
             #     )
             query = query.where(and_(~exists(subSelect),Individual.Original_ID.like('TRACK_%')))
+
+
+        if curProp == 'FK_Sensor':
+            table = Base.metadata.tables['IndividualEquipment']
+            subSelect = select([table.c['FK_Individual']]
+                ).where(
+                and_(Individual.ID== table.c['FK_Individual']
+                    ,and_(eval_.eval_binary_expr(table.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
+                        ,or_(table.c['EndDate'] >= func.now(),table.c['EndDate'] == None))
+                        ))
+            query = query.where(exists(subSelect))
+
         return query
 
     def countQuery(self,criteria = None):

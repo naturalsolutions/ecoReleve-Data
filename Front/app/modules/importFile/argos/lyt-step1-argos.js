@@ -49,7 +49,7 @@ define([
       myDropzone.addFile = function(file) {
 
         var ext = file.name.split('.');
-        if (ext[ext.length - 1] != 'txt') {
+        if (ext[ext.length - 1].toLowerCase() != 'txt') {
           Swal(
 							{
   title: 'Wrong file type',
