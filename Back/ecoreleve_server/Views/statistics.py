@@ -116,9 +116,14 @@ def location_graph(request):
     for row in session.execute(query).fetchall() :
         curRow = OrderedDict(row)
         lab = curRow['type_'].upper()
-        if lab == 'ARG':
-            lab = 'ARGOS'
-        data.append({'value':curRow['nb'],'label':lab})
+        if 'ARG' in lab:
+            try :
+                nbArg = nbArg + curRow['nb']
+            except:
+                nbArg = curRow['nb']
+        else :
+            data.append({'value':curRow['nb'],'label':lab})
+    data.append({'value':nbArg,'label':'ARGOS'})
     data.sort(key = itemgetter('label'))
     return data
 
