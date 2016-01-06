@@ -20,12 +20,26 @@ define([
         initialize: function (options) {
             Form.editors.Base.prototype.initialize.call(this, options);
             this.template = options.template || this.template;
+            // clone options.schema to avoid modifying source object (pointer)
+            this.autocompleteSource = JSON.parse(JSON.stringify(options.schema.options));
+            var url = options.schema.options.source;
+            var _this = this;
             if (options.schema.options) {
                 if (typeof options.schema.options.source === 'string'){
 
-                    options.schema.options.source = config.coreUrl + options.schema.options.source;
+                   this.autocompleteSource.source = config.coreUrl + url;
                 }
-                this.autocompleteSource = options.schema.options;
+                //var optionsJquery = _this.autocompleteSource;
+                this.autocompleteSource.select = function(event,ui){
+                    event.preventDefault();
+                    _this.$el.find('#' + _this.id ).attr('data_value',ui.item.value);
+                    _this.$el.find('#' + _this.id ).val(ui.item.label);
+                };
+
+                this.autocompleteSource.focus = function(event,ui){
+                    event.preventDefault();
+                    _this.$el.find('#' + _this.id ).val(ui.item.label);
+                };
                 
             }
             this.options = options;
@@ -47,18 +61,8 @@ define([
               this.$el.find('input').addClass('required');
             }
             _(function () {
-                var optionsJquery = _this.autocompleteSource;
-                optionsJquery.select = function(event,ui){
-                    event.preventDefault();
-                    _this.$el.find('#' + _this.id ).attr('data_value',ui.item.value);
-                    _this.$el.find('#' + _this.id ).val(ui.item.label);
-                };
-
-                optionsJquery.focus = function(event,ui){
-                    event.preventDefault();
-                    _this.$el.find('#' + _this.id ).val(ui.item.label);
-                };
-                _this.$el.find('#' + _this.id).autocomplete(optionsJquery);
+                
+                _this.$el.find('#' + _this.id).autocomplete(_this.autocompleteSource);
                 _this.$el.find('#' + _this.id).addClass(_this.options.schema.editorClass) ;
                 if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
                     _this.$el.find('#' + _this.id).prop('disabled', true);
