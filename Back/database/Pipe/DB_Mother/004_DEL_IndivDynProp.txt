@@ -1,0 +1,20 @@
+/* DELETE DynProp Individual_Status */
+
+DELETE 
+FROM IndividualDynPropValue 
+WHERE FK_IndividualDynProp = (SELECT ID 
+								FROM IndividualDynProp where Name = 'Individual_Status')
+GO
+
+DELETE IndividualType_IndividualDynProp WHERE FK_IndividualDynProp = (SELECT ID 
+								FROM IndividualDynProp where Name = 'Individual_Status')
+
+GO 
+
+DELETE IndividualDynProp where Name = 'Individual_Status'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('4_DEL_IndivDynProp',GETDATE(),(SELECT db_name()))
+
+
+GO
