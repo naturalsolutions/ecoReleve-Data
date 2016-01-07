@@ -1,0 +1,45 @@
+INSERT INTO [dbo].[ModuleGrids]
+           ([Module_ID]
+           ,[TypeObj]
+           ,[Name]
+           ,[Label]
+           ,[GridRender]
+           ,[GridSize]
+           ,[CellType]
+           ,[GridOrder]
+           ,[QueryName]
+           ,[Options]
+           ,[FilterOrder]
+           ,[FilterSize]
+           ,[FilterClass]
+           ,[IsSearchable]
+           ,[FilterDefaultValue]
+           ,[FilterRender]
+           ,[FilterType]
+           ,[Status])
+     VALUES (3,
+NULL,
+'FK_Individual',
+'Individual ID' ,
+NULL,
+NULL,
+NULL,
+0,
+'FK_Individual',
+NULL,
+70,
+2,
+NULL,
+1,
+NULL,
+4,
+'Text',
+NULL
+			)
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('5_Insert_CONF_FilterIndiv',GETDATE(),(SELECT db_name()))
+
+
+GO
