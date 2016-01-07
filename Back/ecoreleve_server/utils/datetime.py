@@ -11,6 +11,5 @@ def parse(s):
             d = datetime.strptime(s, format)
             break
         except ValueError:
-            print('ererererererer DATETIMEMMEMEM')
             pass
     return d

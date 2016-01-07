@@ -26,7 +26,6 @@ def find(f, seq):
 def isNumeric(val):
     try:
         val = float(val)
-        print(val)
         return True
     except:
         return False

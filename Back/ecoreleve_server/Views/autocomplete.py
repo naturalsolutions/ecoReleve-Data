@@ -41,7 +41,6 @@ def autocomplete (request):
     else: 
         if NameValReturn is None:
             NameValReturn = prop
-        print(NameValReturn)
         table = Base.metadata.tables[objName]
         query = select([table.c[NameValReturn].label('value'),table.c[prop].label('label')]).distinct(table.c[prop])
         query = query.where(table.c[prop].like('%'+criteria+'%')).order_by(asc(table.c[prop]))

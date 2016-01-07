@@ -70,7 +70,6 @@ class MonitoredSite (Base,ObjectWithDynProp) :
         return self.MonitoredSiteDynPropValues
 
     def GetDynProps(self,nameProp):
-        print(nameProp)
         return  self.ObjContext.query(MonitoredSiteDynProp).filter(MonitoredSiteDynProp.Name==nameProp).one()
 
     def GetType(self):
@@ -94,7 +93,6 @@ class MonitoredSite (Base,ObjectWithDynProp) :
     def LoadNowValues(self):
         super(MonitoredSite,self).LoadNowValues()
         lastPos = self.GetLastPositionWithDate(func.now())
-        print(lastPos)
         if lastPos is not None :
             for key in lastPos:
                 self.PropDynValuesOfNow[key] = lastPos[key]

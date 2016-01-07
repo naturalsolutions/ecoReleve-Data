@@ -57,7 +57,6 @@ class Individual (Base,ObjectWithDynProp) :
         return self.IndividualDynPropValues
 
     def GetDynProps(self,nameProp):
-        print(nameProp)
         return  self.ObjContext.query(IndividualDynProp).filter(IndividualDynProp.Name==nameProp).one()
 
     def GetType(self):
