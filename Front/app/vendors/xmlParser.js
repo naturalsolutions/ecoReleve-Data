@@ -51,6 +51,7 @@ define([
             waypoint.set('fieldActivity', '');
             waypoint.set('import', false);
             waypoint.set('FieldWorkers', []);
+            waypoint.set('precision', 10);
             waypointList.add(waypoint);
           } else {
             errors.push(waypointName);
