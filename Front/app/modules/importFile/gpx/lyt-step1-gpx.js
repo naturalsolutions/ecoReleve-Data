@@ -31,12 +31,10 @@ define([
       'change select[name="fieldActivity"]': 'setFieldActivity',
       'click #resetFieldActivity': 'resetFieldActivity',
       'click button[data-action="add"]': 'setUsers',
-      'change select[name="FieldWorker"]': 'checkUsers'
     },
 
     ui: {
       'fielActivity': '#fielActivity',
-      //'selectFieldActivity' : '#selectFieldActivity',
       'selectFieldActivity': '#c14_fieldActivity',
       'fileInput': 'input#fileInput',
       'form': '#form',
@@ -164,9 +162,13 @@ define([
 
     check: function() {
       var error = this.nsform.BBForm.commit();
+
+      console.log(error);
       if(error){
         return false;
       }else{
+        var fieldworkers = this.nsform.BBForm.model.get('FieldWorkers');
+        this.setFieldWorkers(fieldworkers);
         return true;
       }
     },
@@ -200,68 +202,15 @@ define([
         }
       });
     },
-    setUsers: function() {
-      var url = config.coreUrl + 'user';
-      var collection =  new Backbone.Collection();
-      collection.url = url;
-      var elem = '<option></option>';
-      collection.fetch({
-        success: function(data) {
-          var options = [];
-          for (var i in data.models) {
-            var current = data.models[i];
-            var value =  current.get('PK_id');
-            var label =  current.get('fullname');
-            elem += '<option value =' + value + '>' + label + '</option>';
-          }
-          $('select[name="FieldWorker"]').each(function() {
-            if ($(this).text() == '') {
-              $(this).append(elem);
-            }
-          });
-        }
+    setFieldWorkers : function(tab){
+       var list = [];
+       for (var i=0;i<tab.length;i++){
+        list.push(parseInt(tab[i].FieldWorker));
+       }
+       this.wayPointList.each(function(model) {
+        model.set('FieldWorkers', list);
       });
-    },
-    checkUsers: function(e) {
-      var usersFields = $('select[name="FieldWorker"]');
-      var selectedUser = $(e.target).val();
-      var exists = 0;
-      $('select[name="FieldWorker"]').each(function() {
-        var user = $(this).val();
-        if (user == selectedUser) {
-          exists += 1;
-        }
-      });
-      if (exists > 1) {
-        Swal({
-          title: 'Fieldworker name error',
-          text: 'Already selected ! ',
-          type: 'error',
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
-        },
-        function(isConfirm) {
-          $(e.target).val('');
-        });
-
-
-      } else {
-        this.updateUsers(e);
-      }
-    },
-    updateUsers: function(e) {
-      var users = [];
-      $('select[name="FieldWorker"]').each(function() {
-        var user = parseInt($(this).val());
-        if (user) {
-          users.push(user);
-        }
-      });
-      this.wayPointList.each(function(model) {
-        model.set('FieldWorkers', users);
-      });
-    },
+       
+    }
   });
 });

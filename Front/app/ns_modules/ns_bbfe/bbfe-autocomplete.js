@@ -32,7 +32,7 @@ define([
                 //var optionsJquery = _this.autocompleteSource;
                 this.autocompleteSource.select = function(event,ui){
                     event.preventDefault();
-                    _this.$el.find('#' + _this.id ).attr('data_value',ui.item.value);
+                    _this.$el.find('#' + _this.id ).attr('data_value',ui.item.value).change();
                     _this.$el.find('#' + _this.id ).val(ui.item.label);
                 };
 
