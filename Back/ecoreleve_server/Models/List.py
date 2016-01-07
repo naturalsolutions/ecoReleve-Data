@@ -127,7 +127,7 @@ class IndividualList(ListObjectWithDynProp):
         #     (StatusTable.c['Status'] == None, literal_column("'inconnu'"))
         #     ],
         #     else_=StatusTable.c['Status'])
-        self.selectable.append(StatusTable.c['Status'])
+        self.selectable.append(StatusTable.c['Status_'].label('Status_'))
         return joinTable
 
     def WhereInJoinTable (self,query,criteriaObj) :
@@ -156,7 +156,7 @@ class IndividualList(ListObjectWithDynProp):
 
         if curProp == 'Status_':
             StatusTable = Base.metadata.tables['IndividualStatus']
-            query = query.where(eval_.eval_binary_expr(StatusTable.c['Status'],criteriaObj['Operator'],criteriaObj['Value']))
+            query = query.where(eval_.eval_binary_expr(StatusTable.c['Status_'],criteriaObj['Operator'],criteriaObj['Value']))
 
         return query
 
@@ -172,7 +172,7 @@ class IndividualList(ListObjectWithDynProp):
                 StatusTable = Base.metadata.tables['IndividualStatus']
                 existsQueryStatus = select([StatusTable.c['FK_Individual']]
                     ).where(and_(Individual.ID == StatusTable.c['FK_Individual']
-                    ,eval_.eval_binary_expr(StatusTable.c['Status'],obj['Operator'],obj['Value'])))
+                    ,eval_.eval_binary_expr(StatusTable.c['Status_'],obj['Operator'],obj['Value'])))
                 query = query.where(exists(existsQueryStatus))
 
             if obj['Column'] == 'frequency':
@@ -217,6 +217,7 @@ class IndividualList(ListObjectWithDynProp):
         fullQueryJoin = fullQueryJoin.where(Individual.ID.in_(fullQueryExist))
 
         return fullQueryJoin
+
 
 
 #--------------------------------------------------------------------------
