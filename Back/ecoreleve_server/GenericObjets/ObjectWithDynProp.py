@@ -246,7 +246,7 @@ class ObjectWithDynProp:
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id' and DTOObject[curProp] != '-1' ):
-                if DTOObject[curProp] == '':
+                if isinstance(DTOObject[curProp],str) and len(DTOObject[curProp].split())==0:
                     DTOObject[curProp] = None
                 self.SetProperty(curProp,DTOObject[curProp])
 

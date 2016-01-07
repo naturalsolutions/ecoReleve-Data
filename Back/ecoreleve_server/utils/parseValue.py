@@ -26,12 +26,13 @@ def find(f, seq):
 def isNumeric(val):
     try:
         val = float(val)
+        print(val)
         return True
     except:
         return False
 
 def isEqual(val1,val2):
-    if isNumeric(val1) is True:
+    if isNumeric(val2) is True:
         return float(val1)==float(val2)
     else :
         return parseValue(val1) == parseValue(val2)
