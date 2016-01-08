@@ -64,9 +64,13 @@ def count_ (request = None,listObj = None) :
 
 def getFilters (request):
     session = request.dbsession
+    if 'objType' in request.params :
+        objType = request.params['objType']
+    else : 
+        objType = 1
 
     ModuleType = 'IndivFilter'
-    filtersList = Individual().GetFilters(ModuleType)
+    filtersList = Individual(FK_IndividualType = objType).GetFilters(ModuleType)
     filters = {}
     for i in range(len(filtersList)) :
         filters[str(i)] = filtersList[i]
@@ -85,10 +89,15 @@ def getForms(request) :
 def getFields(request) :
     session = request.dbsession
 
+    if 'objType' in request.params :
+        objType = request.params['objType']
+    else : 
+        objType = 1
+
     ModuleType = request.params['name']
     if ModuleType == 'default' :
         ModuleType = 'IndivFilter'
-    cols = Individual().GetGridFields(ModuleType)
+    cols = Individual(FK_IndividualType = objType).GetGridFields(ModuleType)
     return cols
 
 def getIndividualType(request):
@@ -125,7 +134,7 @@ def getIndiv(request):
 
         for row in dataResult:
             geoJson.append({'type':'Feature', 'properties':{'type':row['type_']
-                , 'sensor':row['UnicIdentifier'],'date':row['Date']}
+                , 'sensor':row['UnicIdentifier'],'date':row['Date'],'ID':row['ID']}
                 , 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
