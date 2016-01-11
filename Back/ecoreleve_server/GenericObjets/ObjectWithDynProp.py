@@ -79,7 +79,7 @@ class ObjectWithDynProp:
             typeID = self.GetType().ID
             gridFields = self.ObjContext.query(ModuleGrids
             ).filter(and_(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType),
-                or_(ModuleGrids.FK_TypeObj == typeID ,ModuleGrids.FK_TypeObj ==None ))
+                or_(ModuleGrids.TypeObj == typeID ,ModuleGrids.TypeObj ==None ))
             ).order_by(asc(ModuleGrids.GridOrder)).all()
         except:
             gridFields = self.ObjContext.query(ModuleGrids).filter(
