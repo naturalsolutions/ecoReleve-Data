@@ -122,7 +122,8 @@ class ObjectWithDynProp:
             filterFields = self.ObjContext.query(ModuleGrids
                 ).filter(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)).order_by(asc(ModuleGrids.FilterOrder)).all()  #.order_by(asc(ModuleGrids.FilterOrder)).all()
 
-        filterFields.sort(key=lambda x: str(x.FilterOrder))
+
+        # filterFields.sort(key=lambda x: str(x.FilterOrder))
         for curConf in filterFields:
             curConfName = curConf.Name
             filterField = list(filter(lambda x : x['name'] == curConfName
@@ -244,7 +245,7 @@ class ObjectWithDynProp:
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id' and DTOObject[curProp] != '-1' ):
-                if DTOObject[curProp] == '':
+                if isinstance(DTOObject[curProp],str) and len(DTOObject[curProp].split())==0:
                     DTOObject[curProp] = None
                 self.SetProperty(curProp,DTOObject[curProp])
 

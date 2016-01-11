@@ -107,7 +107,7 @@ class Observation(Base,ObjectWithDynProp):
         typeName = 'children'
         sub_ProtocoleType = None
         if self.Observation_childrens != []:
-            print ('CHILDREN !!!!!!!!!!') ### Append flatdata to list of data for existing subProto 
+            # print ('CHILDREN !!!!!!!!!!') ### Append flatdata to list of data for existing subProto 
             typeName = self.Observation_childrens[0].GetType().Name
             for subObs in self.Observation_childrens:
                 subObs.LoadNowValues()

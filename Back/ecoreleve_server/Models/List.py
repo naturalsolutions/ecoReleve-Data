@@ -6,7 +6,11 @@ from sqlalchemy import (and_,
  join,
  cast,
  not_,
- DATE)
+ or_,
+ DATE,
+ case,
+ literal_column,
+ outerjoin)
 from sqlalchemy.orm import aliased
 from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
 from ..Models import (
@@ -113,6 +117,19 @@ class IndividualList(ListObjectWithDynProp):
     def __init__(self,frontModule) :
         super().__init__(Individual,frontModule)
 
+    def GetJoinTable (self,searchInfo) :
+        StatusTable = Base.metadata.tables['IndividualStatus']
+        joinTable = super().GetJoinTable(searchInfo)
+        
+        joinTable = outerjoin(joinTable,StatusTable,StatusTable.c['FK_Individual'] == Individual.ID)
+
+        # selectCase = case ([
+        #     (StatusTable.c['Status'] == None, literal_column("'inconnu'"))
+        #     ],
+        #     else_=StatusTable.c['Status'])
+        self.selectable.append(StatusTable.c['Status_'].label('Status_'))
+        return joinTable
+
     def WhereInJoinTable (self,query,criteriaObj) :
         query = super().WhereInJoinTable(query,criteriaObj)
         curProp = criteriaObj['Column']
@@ -126,15 +143,41 @@ class IndividualList(ListObjectWithDynProp):
             #         # )
             #     )
             query = query.where(and_(~exists(subSelect),Individual.Original_ID.like('TRACK_%')))
+
+        if curProp == 'FK_Sensor':
+            table = Base.metadata.tables['IndividualEquipment']
+            subSelect = select([table.c['FK_Individual']]
+                ).where(
+                and_(Individual.ID== table.c['FK_Individual']
+                    ,and_(eval_.eval_binary_expr(table.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])
+                        ,or_(table.c['EndDate'] >= func.now(),table.c['EndDate'] == None))
+                        ))
+            query = query.where(exists(subSelect))
+
+        if curProp == 'Status_':
+            StatusTable = Base.metadata.tables['IndividualStatus']
+            query = query.where(eval_.eval_binary_expr(StatusTable.c['Status_'],criteriaObj['Operator'],criteriaObj['Value']))
+
         return query
 
     def countQuery(self,criteria = None):
         query = super().countQuery(criteria)
-        if len(list(filter(lambda x:'frequency'==x['Column'], criteria)))>0:
-            query = self.whereInEquipementVHF(query,criteria)
+        # if len(list(filter(lambda x:'frequency'==x['Column'], criteria)))>0:
+        #     query = self.whereInEquipementVHF(query,criteria)
         for obj in criteria :
             if obj['Column'] in ['LastImported']:
                 query = self.WhereInJoinTable(query,obj)
+
+            if obj['Column'] == 'Status_':
+                StatusTable = Base.metadata.tables['IndividualStatus']
+                existsQueryStatus = select([StatusTable.c['FK_Individual']]
+                    ).where(and_(Individual.ID == StatusTable.c['FK_Individual']
+                    ,eval_.eval_binary_expr(StatusTable.c['Status_'],obj['Operator'],obj['Value'])))
+                query = query.where(exists(existsQueryStatus))
+
+            if obj['Column'] == 'frequency':
+                query = self.whereInEquipementVHF(query,criteria)
+
         return query
 
     def GetFullQuery(self,searchInfo=None) :
@@ -174,6 +217,7 @@ class IndividualList(ListObjectWithDynProp):
         fullQueryJoin = fullQueryJoin.where(Individual.ID.in_(fullQueryExist))
 
         return fullQueryJoin
+
 
 
 #--------------------------------------------------------------------------

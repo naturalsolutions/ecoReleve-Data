@@ -9,6 +9,7 @@ from sqlalchemy import (
         select,
         join,
         and_,
+        or_,
         insert,
         bindparam
         )
@@ -115,9 +116,14 @@ def location_graph(request):
     for row in session.execute(query).fetchall() :
         curRow = OrderedDict(row)
         lab = curRow['type_'].upper()
-        if lab == 'ARG':
-            lab = 'ARGOS'
-        data.append({'value':curRow['nb'],'label':lab})
+        if 'ARG' in lab:
+            try :
+                nbArg = nbArg + curRow['nb']
+            except:
+                nbArg = curRow['nb']
+        else :
+            data.append({'value':curRow['nb'],'label':lab})
+    data.append({'value':nbArg,'label':'ARGOS'})
     data.sort(key = itemgetter('label'))
     return data
 
@@ -125,9 +131,15 @@ def location_graph(request):
 def uncheckedDatas_graph(request):
     session = request.dbsession
 
-    queryArgos= select([ArgosGps.type_.label('type_'),func.count('*').label('nb')]).where(ArgosGps.checked == 0
-        ).group_by(ArgosGps.type_)
-    queryGSM= select([func.count('*').label('nb')]).where(Gsm.checked == 0)
+    viewArgos = Base.metadata.tables['VArgosData_With_EquipIndiv']
+    queryArgos= select([viewArgos.c['type'].label('type'),func.count('*').label('nb')]
+        ).where(viewArgos.c['checked'] == 0
+        ).group_by(viewArgos.c['type'])
+
+    viewGSM = Base.metadata.tables['VGSMData_With_EquipIndiv']
+    queryGSM= select([func.count('*').label('nb')]
+        ).where(viewGSM.c['checked'] == 0)
+
     queryRFID = select([func.count('*').label('nb')]
         ).where(Rfid.checked == 0)
     data = []
@@ -139,7 +151,7 @@ def uncheckedDatas_graph(request):
     argosData = session1.execute(queryArgos).fetchall()
     for row in argosData:
         curRow = OrderedDict(row)
-        lab = curRow['type_'].upper()
+        lab = curRow['type'].upper()
         if lab == 'ARG':
             lab = 'ARGOS'
         data.append({'value':curRow['nb'],'label':lab})

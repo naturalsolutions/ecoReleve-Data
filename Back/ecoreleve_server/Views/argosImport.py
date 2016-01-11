@@ -48,6 +48,7 @@ def uploadFileArgos(request) :
     if os.path.exists(temp_file_path) :
         os.remove(temp_file_path)
 
+    # Save File
     input_file.seek(0)
     with open(temp_file_path, 'wb') as output_file :
         shutil.copyfileobj(input_file, output_file)
@@ -66,10 +67,10 @@ def parseDSFileAndInsert(full_filename,session):
     MTI_path = os.path.join(workDir,'MTIwinGPS.exe')
     out_path = os.path.join(workDir,"ecoReleve_import","Argos",os.path.splitext(os.path.basename(full_filename))[0])
 
-    try:
-        os.system('taskkill /f /im MTIwinGPS.exe')
-    except:
-        pass
+    # try:
+    #     os.system('taskkill /f /im MTIwinGPS.exe')
+    # except:
+    #     pass
 
     EngData = None
     GPSData = None
@@ -86,6 +87,7 @@ def parseDSFileAndInsert(full_filename,session):
     except : 
         pass
 
+    # Config init.txt for MTI-PArser
     cc = {'full_filename':full_filename}
     cc['out'] = out_path
     cc['ini'] = con_file
@@ -93,6 +95,7 @@ def parseDSFileAndInsert(full_filename,session):
     with open(con_file,'w') as f: 
         print('-eng\n-title\n-out\n'+out_path+'\n'+full_filename, file=f)
 
+    # execute MTI-Parser
     args = [MTI_path]
     proc = subprocess.Popen([args[0]])
     hwnd = 0
@@ -105,19 +108,24 @@ def parseDSFileAndInsert(full_filename,session):
     filenames = [os.path.join(out_path,fn) for fn in next(os.walk(out_path))[2]]
     win32api.SendMessage(hwnd, win32con.WM_CLOSE, 0,0);
 
+
+    #kill process Mti-Parser
     pid = proc.pid
     cc['pid'] = pid
-    # parent = psutil.Process(pid)
-    # try:
-    #     for child in parent.children(recursive=True):  # or parent.children() for recursive=False
-    #         child.kill()
-    #     parent.kill()
-    # except: pass
+    parent = psutil.Process(pid)
     try:
-        os.system('taskkill /f /im MTIwinGPS.exe')
-    except:
-        pass
+        for child in parent.children(recursive=True):  # or parent.children() for recursive=False
+            child.kill()
+        parent.kill()
+    except: pass
 
+    # WARNING if another client execute this process this function kill all active process 
+    # try:
+    #     os.system('taskkill /f /im MTIwinGPS.exe')
+    # except:
+    #     pass
+
+    # process output files
     for filename in filenames:
         fullname = os.path.splitext(os.path.basename(filename))[0]
         ptt = int(fullname[0:len(fullname)-1])
@@ -165,6 +173,8 @@ def parseDSFileAndInsert(full_filename,session):
         EngToInsert = checkExistingEng(EngData,session)
         nb_existingEng += EngData.shape[0]
         if EngToInsert.shape[0] != 0 :
+            #Insert non existing data into DB
+            nb_eng += EngToInsert.shape[0]
             EngToInsert.to_sql(ArgosEngineering.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'],index=False )
 
     if EngDataBis is not None :
@@ -172,6 +182,7 @@ def parseDSFileAndInsert(full_filename,session):
         nb_existingEng += EngDataBis.shape[0]
         if EngBisToInsert.shape[0] != 0 :
             nb_eng += EngBisToInsert.shape[0]
+            #Insert non existing data into DB
             EngBisToInsert.to_sql(ArgosEngineering.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'],index=False )
 
     if GPSData is not None :
@@ -180,6 +191,7 @@ def parseDSFileAndInsert(full_filename,session):
         nb_gps_data = DFToInsert.shape[0]
         nb_existingGPS = GPSData.shape[0] - DFToInsert.shape[0]
         if DFToInsert.shape[0] != 0 :
+            #Insert non existing data into DB
             DFToInsert.to_sql(ArgosGps.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'], index=False)
 
     os.remove(full_filename)
@@ -198,16 +210,23 @@ def checkExistingEng(EngData,session) :
         maxDate =  EngData['txDate'].max()
         minDate =  EngData['txDate'].min()
 
+        # Retrieve data from Database for test existing
         queryEng = select([ArgosEngineering.fk_ptt, ArgosEngineering.txDate])
         queryEng = queryEng.where(and_(ArgosEngineering.txDate >= minDate , ArgosEngineering.txDate <= maxDate))
         data = session.execute(queryEng).fetchall()
 
+        # Load DB data into a pandas DataFrame
         EngRecords = pd.DataFrame.from_records(data
             ,columns=[ArgosEngineering.fk_ptt.name, ArgosEngineering.txDate.name])
-        merge = pd.merge(EngData,EngRecords, left_on = ['txDate','ptt'], right_on = ['txDate','FK_ptt'])
-        DFToInsert = EngData[~EngData['id'].isin(merge['id'])]
-        DFToInsert['FK_ptt'] = DFToInsert['ptt']
 
+        # apply a merge/join beetween dataframes with data from Files and data from DB
+        merge = pd.merge(EngData,EngRecords, left_on = ['txDate','ptt'], right_on = ['txDate','FK_ptt'])
+
+        # Extract non existing data
+        DFToInsert = EngData[~EngData['id'].isin(merge['id'])]
+
+        # rename column 
+        DFToInsert['FK_ptt'] = DFToInsert['ptt']
         DFToInsert = DFToInsert.drop(['id','ptt'],1)
     except:
         print_exc()
@@ -219,22 +238,29 @@ def checkExistingGPS (GPSData,session) :
     GPSData['id'] = range(GPSData.shape[0])
     maxDateGPS = GPSData['datetime'].max()
     minDateGPS = GPSData['datetime'].min()
+
+    # round lat/lon decimal 3 for data from Files
     GPSData['Latitude(N)'] = np.round(GPSData['Latitude(N)'],decimals = 3)
     GPSData['Longitude(E)'] = np.round(GPSData['Longitude(E)'],decimals = 3)
 
+    # Retrieve exisintg data from DB
     queryGPS = select([ArgosGps.pk_id, ArgosGps.date, ArgosGps.lat, ArgosGps.lon, ArgosGps.ptt]).where(ArgosGps.type_ == 'gps')
     queryGPS = queryGPS.where(and_(ArgosGps.date >= minDateGPS , ArgosGps.date <= maxDateGPS))
     data = session.execute(queryGPS).fetchall()
 
+    # Load data from DB into dataframe
     GPSrecords = pd.DataFrame.from_records(data
         ,columns=[ArgosGps.pk_id.name, ArgosGps.date.name, ArgosGps.lat.name, ArgosGps.lon.name, ArgosGps.ptt.name]
         , coerce_float=True )
 
+    # round lat/lon decimal 3 for data from DB
     GPSrecords['lat'] = np.round(GPSrecords['lat'].astype(float),decimals = 3)
     GPSrecords['lon'] = np.round(GPSrecords['lon'].astype(float),decimals = 3)
 
+    # apply a merge/join beetween dataframes with data from Files and data from DB
     merge = pd.merge(GPSData,GPSrecords, left_on = ['datetime','Latitude(N)','Longitude(E)','ptt'], right_on = ['date','lat','lon','FK_ptt'])
     DFToInsert = GPSData[~GPSData['id'].isin(merge['id'])]
+
 
     DFToInsert = DFToInsert.drop(['id','datetime'],1)
     DFToInsert.columns = ['date','lat','lon','speed','course','ele','FK_ptt']
@@ -248,6 +274,8 @@ def checkExistingGPS (GPSData,session) :
     return DFToInsert
 
 def parseDIAGFileAndInsert(full_filename,session):
+
+    # PArse DIAG File with Regex
     with open(full_filename,'r') as f:
         content = f.read()
         content = re.sub('\s+Prog+\s\d{5}',"",content)
@@ -303,6 +331,7 @@ def parseDIAGFileAndInsert(full_filename,session):
                         curDict[colsInBlock[i]] = splitParameters[i]
         ListOfdictParams.append(curDict)
 
+    # Load parsed value into DataFrame
     df = pd.DataFrame.from_dict(ListOfdictParams)
     df = df.dropna(subset=['date'])
     DFToInsert = checkExistingArgos(df,session)
@@ -323,17 +352,21 @@ def checkExistingArgos (dfToCheck,session) :
     maxDate = dfToCheck['date'].max()
     minDate = dfToCheck['date'].min()
 
+    dfToCheck['lat'] = np.round(dfToCheck['lat'],decimals = 3)
+    dfToCheck['lon'] = np.round(dfToCheck['lon'],decimals = 3)
+    # Retrieve data from DB
     queryArgos = select([ArgosGps.pk_id, ArgosGps.date, ArgosGps.lat, ArgosGps.lon, ArgosGps.ptt]).where(ArgosGps.type_ == 'arg')
     queryArgos = queryArgos.where(and_(ArgosGps.date >= minDate , ArgosGps.date <= maxDate))
     data = session.execute(queryArgos).fetchall()
 
+    # load data from Db into DF 
     ArgosRecords = pd.DataFrame.from_records(data
         ,columns=[ArgosGps.pk_id.name, ArgosGps.date.name, ArgosGps.lat.name, ArgosGps.lon.name, ArgosGps.ptt.name]
         , coerce_float=True )
 
     ArgosRecords.loc[:,('lat')] = np.round(ArgosRecords['lat'], decimals=3)
     ArgosRecords.loc[:,('lon')] = np.round(ArgosRecords['lon'], decimals=3)
-    print(ArgosRecords['lat'])
+
     merge = pd.merge(dfToCheck,ArgosRecords, left_on = ['date','lat','lon','FK_ptt'], right_on = ['date','lat','lon','FK_ptt'])
     DFToInsert = dfToCheck[~dfToCheck['id'].isin(merge['id'])]
 

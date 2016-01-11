@@ -1,0 +1,68 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER PROCEDURE [dbo].[pr_ExportAllIndividu] 
+AS
+BEGIN
+
+
+	IF object_id('TmpIndivExport') IS NOT NULL
+			DROP TABLE TmpIndivExport
+
+
+
+	select * into TmpIndivExport 
+	from [EcoReleve_ECWP].dbo.individual
+
+	--select * from TmpIndivExport
+	DECLARE @Req NVARCHAR(MAX)
+	DECLARE @ReqFrom NVARCHAR(MAX)
+	DECLARE @ReqSet NVARCHAR(MAX)
+
+	SET @Req = ' ALTER TABLE TmpIndivExport ADD@'
+
+	select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  
+	from [EcoReleve_ECWP].dbo.IndividualDynProp D
+
+	SET @Req = replace(@Req,'ADD@,','ADD ')
+
+	--print @req
+
+	exec ( @req)
+
+	--select * from TmpIndivExport
+
+	SET @ReqSet = 'SET@'
+	SET @ReqFrom =''
+
+	SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')																						
+	from [EcoReleve_ECWP].dbo.IndividualDynProp P
+
+	SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
+
+	SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpIndivExport EI JOIN (SELECT VN.FK_Individual ' + @ReqFrom + ' FROM   [EcoReleve_ECWP].dbo.IndividualDynPropValuesNow VN GROUP BY VN.FK_Individual) V ON EI.ID = V.FK_Individual '
+	print @req
+	exec ( @req)
+
+	ALTER TABLE TmpIndivExport ADD Status_ varchar(250)
+
+	Update e SET Status_=s.Status_
+	FROM TmpIndivExport e
+	JOIN [EcoReleve_ECWP].dbo.IndividualStatus s ON e.ID = s.FK_Individual
+
+
+	IF object_id('TIndividu') IS NOT NULL DROP TABLE  TIndividu
+	
+	exec sp_rename 'TmpIndivExport','TIndividu'
+END
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('2_Alter_SP_ExportAllIndiv',GETDATE(),(SELECT db_name()))
+
+
+GO
