@@ -97,9 +97,11 @@ def add_routes(config):
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/history', 'ecoReleve-Core/individuals/{id}/history',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/equipment', 'ecoReleve-Core/individuals/{id}/equipment',custom_predicates = (integers('id'),))
+    config.add_route('individuals/id/location', 'ecoReleve-Core/individuals/{id}/location',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/history/action', 'ecoReleve-Core/individuals/{id}/history/{action}',custom_predicates = (integers('id'),))
+    config.add_route('individuals/id/location/action', 'ecoReleve-Core/individuals/{id}/location/{action}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/equipment/action', 'ecoReleve-Core/individuals/{id}/equipment/{action}',custom_predicates = (integers('id'),))
-    config.add_route('individuals/action', 'ecoReleve-Core/individuals/{action}') 
+    config.add_route('individuals/action', 'ecoReleve-Core/individuals/{action}')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### MonitoredSite #####

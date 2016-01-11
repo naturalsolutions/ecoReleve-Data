@@ -23,13 +23,15 @@ from ..Models import (
     Base,
     Equipment,
     Sensor,
-    SensorDynPropValue
+    SensorDynPropValue,
+    Individual_Location
     )
 from ..utils import Eval
 import pandas as pd 
 from collections import OrderedDict
 from datetime import datetime
 from ..utils.datetime import parse
+from ..utils.generator import Generator
 
 
 eval_ = Eval()
@@ -218,7 +220,17 @@ class IndividualList(ListObjectWithDynProp):
 
         return fullQueryJoin
 
+#--------------------------------------------------------------------------
+class IndivLocationList(Generator):
 
+    def __init__(self,table,SessionMaker,id_=None):
+        joinTable= join(Individual_Location, Sensor
+            , Individual_Location.FK_Sensor == Sensor.ID)
+
+        # Use select statment as ORM Table 
+        IndivLoc = select([Individual_Location,Sensor.UnicIdentifier]
+            ).select_from(joinTable).where(Individual_Location.FK_Individual == id_).cte()
+        super().__init__(IndivLoc,SessionMaker)
 
 #--------------------------------------------------------------------------
 class SensorList(ListObjectWithDynProp):

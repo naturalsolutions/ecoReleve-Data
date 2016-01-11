@@ -132,4 +132,3 @@ class Individual_Location(Base):
     creator =  Column(Integer)
     creationDate = Column(DateTime)
     type_ = Column(String(10))
-    # Original_ID = Column(String(25))
