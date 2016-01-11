@@ -1,16 +1,11 @@
-
-	<div class="panel-heading" role="tab">
-		<h4 class="panel-title" style="position: relative">
-		<a data-toggle="collapse" data-parent="#accordion" href="#collapse<%= ID %>">
-			<span><%= Name %></span><span id="total" class="badge pull-right"><%= total %></span>
-		</a>
-		<button id="addObs" class="btn btn-sm btn-prevent-collapse btn-success" value=""><span class="reneco reneco-add"></span></button>
-		</h4>
-	</div>
-
-	<div id="collapse<%= ID %>" class="panel-collapse collapse">
-		<div class="panel-body">
-			<ul id="pagination" class="pagination"></ul>
-			<div id="observations"></div>
-		</div>
-	</div>
+  <div class="protocol white full-height">
+    <div class="toolbar top">
+      <legend class="pull-left">
+      Protocol : <%= Name %>
+      </legend>
+      <ul id="pagination" class="pagination hidden pull-right"></ul>
+    </div>
+    <div class="crop1 no-padding">
+      <div id="observations" class="full-height"></div>
+    </div>
+  </div>
