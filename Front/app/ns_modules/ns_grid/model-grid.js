@@ -239,7 +239,7 @@ define([
 					pageSize: this.pageSize
 				},
 				queryParams: {
-					order: function () { },
+/*					order: function () { },*/
 					criteria: function () {
 						return JSON.stringify(this.searchCriteria);
 					},
