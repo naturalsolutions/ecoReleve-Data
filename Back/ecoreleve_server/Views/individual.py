@@ -370,6 +370,19 @@ def getIndivLocation(request):
     return result
 
 
+@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'DELETE',permission=NO_PERMISSION_REQUIRED)
+def delIndivLocationList(request):
+    session = request.dbsession
+    IdList = request.params['IDs']
+    session.query(Individual_Location).filter(Individual_Location.ID.in_(IdList)).delete(synchronize_session=False)
+
+
+@view_config(route_name= prefix+'/id/location/id_loc', renderer='json', request_method = 'GET',permission=NO_PERMISSION_REQUIRED)
+def delIndivLocation(request):
+    session = request.dbsession
+    Id = request.matchdict['id_loc']
+    session.query(Individual_Location).filter(Individual_Location.ID == Id).delete(synchronize_session=False)
+
 
 
 
