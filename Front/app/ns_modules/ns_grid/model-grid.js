@@ -239,7 +239,7 @@ define([
 					pageSize: this.pageSize
 				},
 				queryParams: {
-/*					order: function () { },*/
+					order: function () { }, /// Sort bug when collection is fetched from server ===> need a Com 
 					criteria: function () {
 						return JSON.stringify(this.searchCriteria);
 					},

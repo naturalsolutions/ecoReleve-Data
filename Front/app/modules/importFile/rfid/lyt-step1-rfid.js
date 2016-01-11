@@ -8,10 +8,11 @@ define([
   'config',
   'ns_stepper/lyt-step',
   'ns_grid/model-grid',
+  'ns_modules/ns_com',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, Backgrid, config,
-  Step, NsGrid
+  Step, NsGrid, Com
 ) {
 
   'use strict';
@@ -32,6 +33,7 @@ define([
     },
     initialize: function(options) {
       this.model = new Backbone.Model();
+      this.com = new Com();
     },
 
     check: function() {
@@ -135,6 +137,7 @@ define([
         pageSize: 20,
         pagingServerSide: false,
         rowClicked: true,
+        com: _this.com,
       });
       this.grid.rowClicked = function(args) {
         _this.rowClicked(args.row);
