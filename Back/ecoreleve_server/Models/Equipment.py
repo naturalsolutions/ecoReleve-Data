@@ -27,6 +27,7 @@ from sqlalchemy.orm import relationship, backref
 import pyramid.httpexceptions as exc
 import transaction
 from pyramid import threadlocal
+from traceback import print_exc
 
 
 class Equipment(Base):
@@ -178,8 +179,9 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
         except :
             fk_indiv = None
         try : 
-            fk_site = target.GetProperty('FK_MonitoredSite')
+            fk_site = target.Station.GetProperty('FK_MonitoredSite')
         except :
+            print_exc()
             fk_site = None
 
         if deploy == 1 :
