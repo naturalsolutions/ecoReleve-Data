@@ -1,0 +1,33 @@
+
+
+INSERT INTO [dbo].[ModuleGrids]
+           ([Module_ID]
+           ,[TypeObj]
+           ,[Name]
+           ,[Label]
+           ,[GridRender]
+           ,[GridSize]
+           ,[CellType]
+           ,[GridOrder]
+           ,[QueryName]
+           ,[Options]
+           ,[FilterOrder]
+           ,[FilterSize]
+           ,[FilterClass]
+           ,[IsSearchable]
+           ,[FilterDefaultValue]
+           ,[FilterRender]
+           ,[FilterType]
+           ,[Status])
+     VALUES
+           (8,1,'FK_Sensor','currently equiped with',0,0,'string',NULL,'FK_Sensor',NULL,40,2,NULL,1,NULL,4,'Text',NULL)
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('7_ADD_Conf',GETDATE(),(SELECT db_name()))
+
+
+GO
