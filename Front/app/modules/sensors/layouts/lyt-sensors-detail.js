@@ -10,11 +10,12 @@ define([
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
   'ns_navbar/ns_navbar',
+  'ns_modules/ns_com',
   'tooltipster-list',
 
+
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
- NsGrid, NsMap, NsForm,
-  Navbar
+ NsGrid, NsMap, NsForm, Navbar, Com
 ) {
 
   'use strict';
@@ -134,30 +135,41 @@ define([
     },
 
     displayGrid: function(id) {
+      var _this = this;
       var cols = [{
         name: 'FK_Individual',
         label: 'Individual id',
         editable: false,
-        cell: 'string'
+        cell: 'string',
+        headerCell : null
       },
         {
           name: 'FK_MonitoredSite',
           label: 'Monitored site id',
           editable: false,
-          cell: 'string'
+          cell: 'string',
+          headerCell : null
         },
         {
-          name: 'StartDate',
-          label: 'Start date',
-          editable: false,
-          cell: 'string'
-        },
-        {
-          name: 'Deploy',
-          label: 'status',
-          editable: false,
-          cell: 'string'
-        }
+        name: 'StartDate',
+        label: 'Start date',
+        editable: false,
+        cell : Backgrid.Extension.MomentCell.extend({
+          modelInUnixTimestamp: true,
+          displayFormat: "DD/MM/YYYY HH:mm:ss"
+        }),
+        headerCell : null
+      },
+      {
+        name: 'EndDate',
+        label: 'End Date',
+        editable: false,
+        cell : Backgrid.Extension.MomentCell.extend({
+          modelInUnixTimestamp: true,
+          displayFormat: "DD/MM/YYYY HH:mm:ss"
+        }),
+        headerCell : null
+      }
       ];
       this.grid = new NsGrid({
         pageSize: 20,

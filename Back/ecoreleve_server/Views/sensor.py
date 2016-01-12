@@ -193,6 +193,8 @@ def getSensorHistory(request):
     response = []
     for row in result:
         curRow = OrderedDict(row)
+        curRow['StartDate'] = curRow['StartDate'].timestamp()
+        curRow['EndDate'] = curRow['EndDate'].timestamp() if curRow['EndDate'] is not None else None
         response.append(curRow)
 
     return response

@@ -7,7 +7,8 @@ define([
 	'backgrid.paginator',
 	'ns_grid/model-col-generator',
 	'moment',
-	'floatThead'
+	'floatThead',
+	'backgrid-moment-cell'
 	//'backgridSelect_all',
 ], function ($, _, Backbone, Radio, PageColl, Paginator, colGene, moment) {
 	'use strict';
@@ -231,7 +232,8 @@ define([
 		initCollectionPaginableClient: function () {
 			var ctx = this;
 			var _this = this;
-
+			/* WARNING ! : you have to declare headerCell: null in columns collection */
+			/* TODO fix setting hedearCell */
 			var PageCollection = PageColl.extend({
 				url: this.url,
 				mode: 'client',
@@ -239,7 +241,7 @@ define([
 					pageSize: this.pageSize
 				},
 				queryParams: {
-					order: function () { }, /// Sort bug when collection is fetched from server ===> need a Com 
+					order: function () { },
 					criteria: function () {
 						return JSON.stringify(this.searchCriteria);
 					},
