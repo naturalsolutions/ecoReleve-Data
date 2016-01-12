@@ -1,0 +1,15 @@
+
+UPDATE e SET FK_MonitoredSite = s.FK_MonitoredSite
+
+  FROM [EcoReleve_ECWP].[dbo].[Equipment] e  
+  JOIN Observation o on o.ID = e.FK_Observation
+  JOIN ProtocoleType t on t.ID = o.FK_ProtocoleType and t.Name like '%site%'
+  JOIN Station s on s.ID = o.FK_Station
+  WHERE e.FK_MonitoredSite IS NULL
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('8_Update_EquipmentSite',GETDATE(),(SELECT db_name()))
+
+
+GO
