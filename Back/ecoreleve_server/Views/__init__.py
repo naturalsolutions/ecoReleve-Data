@@ -97,10 +97,10 @@ def add_routes(config):
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/history', 'ecoReleve-Core/individuals/{id}/history',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/equipment', 'ecoReleve-Core/individuals/{id}/equipment',custom_predicates = (integers('id'),))
-    config.add_route('individuals/id/location', 'ecoReleve-Core/individuals/{id}/location',custom_predicates = (integers('id'),))
-    config.add_route('individuals/id/location/id_loc', 'ecoReleve-Core/individuals/{id}/location/{id_loc}',custom_predicates = (integers('id','id_loc'),))
+    config.add_route('individuals/id/location', 'ecoReleve-Core/individuals/{id}/locations',custom_predicates = (integers('id'),))
+    config.add_route('individuals/id/location/id_loc', 'ecoReleve-Core/individuals/{id}/locations/{id_loc}',custom_predicates = (integers('id','id_loc'),))
     config.add_route('individuals/id/history/action', 'ecoReleve-Core/individuals/{id}/history/{action}',custom_predicates = (integers('id'),))
-    config.add_route('individuals/id/location/action', 'ecoReleve-Core/individuals/{id}/location/{action}',custom_predicates = (integers('id'),))
+    config.add_route('individuals/id/location/action', 'ecoReleve-Core/individuals/{id}/locations/{action}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/equipment/action', 'ecoReleve-Core/individuals/{id}/equipment/{action}',custom_predicates = (integers('id'),))
     config.add_route('individuals/action', 'ecoReleve-Core/individuals/{action}')
 
