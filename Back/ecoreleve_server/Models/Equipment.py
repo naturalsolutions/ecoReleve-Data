@@ -170,19 +170,27 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
 
     if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
         equipDate = target.Station.StationDate
-        try :
-            fk_sensor = target.GetProperty('FK_Sensor') 
-        except :
-            fk_sensor = None
-        try :
+        fk_sensor = target.GetProperty('FK_Sensor') 
+        if 'individual' in typeName.lower():
             fk_indiv = target.GetProperty('FK_Individual')
-        except :
-            fk_indiv = None
-        try : 
-            fk_site = target.Station.GetProperty('FK_MonitoredSite')
-        except :
-            print_exc()
             fk_site = None
+        elif 'site' in typeName.lower():
+            fk_site = target.Station.GetProperty('FK_MonitoredSite')
+            fk_indiv = None
+
+        # try :
+        #     fk_sensor = target.GetProperty('FK_Sensor') 
+        # # except :
+        #     fk_sensor = None
+        # try :
+        #     fk_indiv = target.GetProperty('FK_Individual')
+        # except :
+        #     fk_indiv = None
+        # try :
+        #     if 
+        #     fk_site = target.Station.GetProperty('FK_MonitoredSite')
+        # except :
+        #     fk_site = None
 
         if deploy == 1 :
             availability = checkEquip(fk_sensor=fk_sensor
