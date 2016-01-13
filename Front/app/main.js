@@ -67,7 +67,12 @@ require.config({
     'autocompTree': './vendors/jquery.autocompTree',
 
   },
-
+  map: {
+      '*': {
+        'backbone_forms' : 'backbone-forms'
+      }
+  },
+  
   shim: {
     jquery: {
       exports: '$'

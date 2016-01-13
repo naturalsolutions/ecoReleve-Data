@@ -288,11 +288,18 @@ class ModuleGrids (Base) :
             'name' : self.Name,
             'type' : self.FilterType,
             'label' : self.Label,
+            'title' : self.Label,
             'editable' : isEditable(int(self.FilterRender)),
             # 'editorClass' : str(self.FilterClass) ,
             'validators': [],
-            'options': [],
+            'options': [] ,
             }
+
+        try :
+            filter_['options'] = json.loads(self.Options)
+        except :
+            filter_['options'] = self.Options
+
         if (self.FilterClass) : 
             filter_['fieldClass'] = self.FilterClass+ ' ' + FieldSizeToClass[self.FilterSize] 
         else :  
@@ -320,5 +327,5 @@ class ModuleGrids (Base) :
                     filter_['options']['source'].append(row[0])
             else : 
                 filter_['options'] = {'source': option['source'],'minLength' :option['minLength']}
-
+        print(filter_)
         return filter_

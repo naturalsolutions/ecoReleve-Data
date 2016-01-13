@@ -4,7 +4,7 @@ define([
 	'backbone',
 	'marionette',
 	'ns_modules/ns_com',
-	'ns_filter/model-filter',
+	'ns_filter/model-filter_module',
 	'ns_map/ns_map',
 	'config',
 	'i18n'

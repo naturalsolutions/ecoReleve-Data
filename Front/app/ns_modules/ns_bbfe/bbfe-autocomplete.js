@@ -40,14 +40,26 @@ define([
                     event.preventDefault();
                     _this.$el.find('#' + _this.id ).val(ui.item.label);
                 };
-                
+
+                this.autocompleteSource.change = function(event,ui){
+                    event.preventDefault();
+                    _this.$el.find('#' + _this.id ).attr('data_value',null).change();
+                    _this.$el.find('#' + _this.id ).val();
+                };
             }
             this.options = options;
         },
         
           getValue: function() {
 /*            console.log(this.$el.find('#' + this.id ).attr('data_value'));*/
-           return this.$el.find('#' + this.id ).attr('data_value') ;
+            var value = null;
+            if (this.$el.find('#' + this.id ).attr('data_value')) {
+                value = this.$el.find('#' + this.id ).attr('data_value');
+            }
+            else {
+                value = this.$el.find('#' + this.id ).val();
+            }
+           return value;
 
           },
 
