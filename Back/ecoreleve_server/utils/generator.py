@@ -33,7 +33,14 @@ class Generator :
             'NUMERIC':'Number',
             'DATETIME':'DateTimePicker',
         }
-        self.table=BaseExport.metadata.tables[table]
+        try : 
+            self.table=BaseExport.metadata.tables[table]
+        except :
+            try :
+                self.table=Base.metadata.tables[table]
+            except:
+                self.table = table
+
         self.cols=[]
         self.columnLower = {c.name.lower():c.name for c in self.table.c}
         self.splittedColumnLower = {c.name.lower().replace('_',''):c.name for c in self.table.c}
@@ -166,7 +173,7 @@ class Generator :
             query = query.offset(offset)
         return query, total
     
-    def get_geoJSON(self,criteria={}) :
+    def get_geoJSON(self,criteria={},geoJson_properties = None) :
         result=[]
         total=None
         countResult = self.count_(criteria)
@@ -183,9 +190,9 @@ class Generator :
                     print_exc()
                 for row in data:
                     properties = {}
-                    # if cols_for_properties != None :
-                    #     for col in cols_for_properties :
-                    #         properties[col.replace('_',' ')] = row[col]
+                    if geoJson_properties != None :
+                        for col in geoJson_properties :
+                            properties[col.replace('_',' ')] = row[col]
                     geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point'
                         , 'coordinates':[row[self.columnLower['lat']],row[self.columnLower['lon']]]}})
             else :
