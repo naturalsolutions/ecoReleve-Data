@@ -2,7 +2,7 @@ from ..Models import Base, DBSession
 from sqlalchemy import (Column, DateTime, Float,
  ForeignKey, Index, Integer, Numeric,
   String, Text, Unicode, Sequence, select,and_,or_, exists,func, join, outerjoin)
-from sqlalchemy.sql import text
+from sqlalchemy.sql import text,elements
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship, aliased
 from collections import OrderedDict
@@ -295,6 +295,12 @@ class ListObjectWithDynProp():
                 elif (self.history and curProp == 'StartDate'):
                     viewAlias = self.vAliasList[self.firstStartDate]
                     trueCol = viewAlias.c['StartDate']
+
+                else:
+                    matching_element_list = list(filter(lambda x : isinstance(x,elements.Label)
+                        and x._element.name == curProp,self.selectable))
+                    if len(matching_element_list)>0 :
+                        trueCol = matching_element_list[0]._element
 
                 if order == 'asc':
                     try : 

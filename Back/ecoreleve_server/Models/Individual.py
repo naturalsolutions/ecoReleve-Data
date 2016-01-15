@@ -57,7 +57,6 @@ class Individual (Base,ObjectWithDynProp) :
         return self.IndividualDynPropValues
 
     def GetDynProps(self,nameProp):
-        print(nameProp)
         return  self.ObjContext.query(IndividualDynProp).filter(IndividualDynProp.Name==nameProp).one()
 
     def GetType(self):
@@ -133,4 +132,3 @@ class Individual_Location(Base):
     creator =  Column(Integer)
     creationDate = Column(DateTime)
     type_ = Column(String(10))
-    # Original_ID = Column(String(25))

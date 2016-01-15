@@ -9,7 +9,8 @@ from ..Models import (
     SensorType,
     Equipment,
     IndividualList,
-    Base
+    Base,
+    IndivLocationList
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -25,6 +26,7 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
 from collections import OrderedDict
 from ..utils.distance import haversine
+from ..utils.generator import Generator
 
 prefix = 'individuals'
 
@@ -64,9 +66,13 @@ def count_ (request = None,listObj = None) :
 
 def getFilters (request):
     session = request.dbsession
+    if 'objType' in request.params :
+        objType = request.params['objType']
+    else : 
+        objType = 1
 
     ModuleType = 'IndivFilter'
-    filtersList = Individual().GetFilters(ModuleType)
+    filtersList = Individual(FK_IndividualType = objType).GetFilters(ModuleType)
     filters = {}
     for i in range(len(filtersList)) :
         filters[str(i)] = filtersList[i]
@@ -85,10 +91,15 @@ def getForms(request) :
 def getFields(request) :
     session = request.dbsession
 
+    if 'objType' in request.params :
+        objType = request.params['objType']
+    else : 
+        objType = 1
+
     ModuleType = request.params['name']
     if ModuleType == 'default' :
         ModuleType = 'IndivFilter'
-    cols = Individual().GetGridFields(ModuleType)
+    cols = Individual(FK_IndividualType = objType).GetGridFields(ModuleType)
     return cols
 
 def getIndividualType(request):
@@ -125,7 +136,7 @@ def getIndiv(request):
 
         for row in dataResult:
             geoJson.append({'type':'Feature', 'properties':{'type':row['type_']
-                , 'sensor':row['UnicIdentifier'],'date':row['Date']}
+                , 'sensor':row['UnicIdentifier'],'date':row['Date'],'ID':row['ID']}
                 , 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
@@ -284,10 +295,93 @@ def searchIndiv(request):
     result.append(dataResult)
     return result
 
-def getIndivEquipmentAtDate(request):
-    session = request.dbsession
-    data = request.json_body
 
+@view_config(route_name= prefix+'/id/location/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+def actionOnIndividualsLoc(request):
+    dictActionFunc = {
+    'getFields': getFieldsLoc,
+    'getFilters': getFiltersLoc,
+    }
+    actionName = request.matchdict['action']
+    return dictActionFunc[actionName](request)
+
+def getFieldsLoc(request) :
+    session = request.dbsession
+
+    gene = IndivLocationList('Individual_Location',session,None)
+    return gene.get_col()
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'GET',permission=NO_PERMISSION_REQUIRED)
+def getIndivLocation(request):
+
+    id_ = request.matchdict['id']
+    session = request.dbsession
+    gene = IndivLocationList('Individual_Location',session,id_)
+    response = None
+
+    data = request.params.mixed()
+    if 'criteria' in data: 
+        criteria = json.loads(data['criteria'])
+    else : 
+        criteria = {}
+    
+    if 'per_page' in data:
+        offset = json.loads(data['offset'])
+        per_page = json.loads(data['per_page'])
+        order_by = json.loads(data['order_by'])
+    else :
+        offset=0
+        per_page=20
+        order_by=[]
+
+    if 'geo' in request.params :
+        result = gene.get_geoJSON(criteria,['ID','UnicIdentifier','Date','type_'])
+    else:
+        result = gene.search(criteria,offset=offset,per_page=per_page,order_by=order_by)
+
+
+    # ************ POC Indiv location PLayer  **************** 
+
+    # if 'geoDynamic' in request.params :
+    #     geoJson=[]
+    #     joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)
+    #     stmt = select([Ind ividual_Location,Sensor.UnicIdentifier]).select_from(joinTable
+    #         ).where(Individual_Location.FK_Individual == id
+    #         ).where(Individual_Location.type_ == 'GSM').order_by(asc(Individual_Location.Date))
+    #     dataResult = session.execute(stmt).fetchall()
+        
+    #     df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
+    #     X1 = df.iloc[:-1][['LAT', 'LON']].values
+    #     X2 = df.iloc[1:][['LAT', 'LON']].values
+    #     df['dist'] = np.append(haversine(X1, X2), 0).round(3)
+    #     # Compute the speed
+    #     df['speed'] = (df['dist'] / ((df['Date'] - df['Date'].shift(-1)).fillna(1) / np.timedelta64(1, 'h'))).round(3)
+    #     df['Date'] = df['Date'].apply(lambda row: np.datetime64(row).astype(datetime)) 
+
+    #     for i in range(df.shape[0]):
+    #         geoJson.append({'type':'Feature', 'properties':{'type':df.loc[i,'type_']
+    #             , 'sensor':df.loc[i,'UnicIdentifier'],'speed':df.loc[i,'speed'],'date':df.loc[i,'Date']}
+    #             , 'geometry':{'type':'Point', 'coordinates':[df.loc[i,'LAT'],df.loc[i,'LON']]}})
+    #     result = {'type':'FeatureCollection', 'features':geoJson}
+    #     response = result
+    # else : 
+    #     response  = curIndiv.GetFlatObject()
+
+    return result
+
+
+@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'DELETE',permission=NO_PERMISSION_REQUIRED)
+def delIndivLocationList(request):
+    session = request.dbsession
+    IdList = request.params['IDs']
+    session.query(Individual_Location).filter(Individual_Location.ID.in_(IdList)).delete(synchronize_session=False)
+
+
+@view_config(route_name= prefix+'/id/location/id_loc', renderer='json', request_method = 'GET',permission=NO_PERMISSION_REQUIRED)
+def delIndivLocation(request):
+    session = request.dbsession
+    Id = request.matchdict['id_loc']
+    session.query(Individual_Location).filter(Individual_Location.ID == Id).delete(synchronize_session=False)
 
 
 

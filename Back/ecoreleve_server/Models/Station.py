@@ -114,7 +114,6 @@ class Station(Base,ObjectWithDynProp):
         return self.StationDynPropValues
 
     def GetDynProps(self,nameProp):
-        print(nameProp)
         return  self.ObjContext.query(StationDynProp).filter(StationDynProp.Name==nameProp).one()
 
     def GetType(self):

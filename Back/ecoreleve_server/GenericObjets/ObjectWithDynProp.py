@@ -79,7 +79,7 @@ class ObjectWithDynProp:
             typeID = self.GetType().ID
             gridFields = self.ObjContext.query(ModuleGrids
             ).filter(and_(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType),
-                or_(ModuleGrids.FK_TypeObj == typeID ,ModuleGrids.FK_TypeObj ==None ))
+                or_(ModuleGrids.TypeObj == typeID ,ModuleGrids.TypeObj ==None ))
             ).order_by(asc(ModuleGrids.GridOrder)).all()
         except:
             gridFields = self.ObjContext.query(ModuleGrids).filter(
@@ -126,7 +126,6 @@ class ObjectWithDynProp:
         # filterFields.sort(key=lambda x: str(x.FilterOrder))
         for curConf in filterFields:
             curConfName = curConf.Name
-            print(curConfName)
             filterField = list(filter(lambda x : x['name'] == curConfName
                 and curConf.IsSearchable == 1 ,self.GetAllProp()))
 
@@ -246,7 +245,7 @@ class ObjectWithDynProp:
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id' and DTOObject[curProp] != '-1' ):
-                if DTOObject[curProp] == '':
+                if isinstance(DTOObject[curProp],str) and len(DTOObject[curProp].split())==0:
                     DTOObject[curProp] = None
                 self.SetProperty(curProp,DTOObject[curProp])
 

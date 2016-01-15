@@ -181,7 +181,7 @@ def auto_validation(request):
     session = request.dbsession
 
     type_ = request.matchdict['type']
-    print ('\n*************** AUTO VALIDATE *************** \n')
+    # print ('\n*************** AUTO VALIDATE *************** \n')
     param = request.params.mixed()
     freq = param['frequency']
     listToValidate = json.loads(param['toValidate'])
@@ -247,7 +247,6 @@ def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq,session):
     return nb_insert, exist , error
 
 def auto_validate_proc_stocRfid(equipID,sensor,freq,user,session):
-    print(freq)
     if equipID is None : 
         stmt = update(DataRfidWithSite).where(and_(DataRfidWithSite.c['FK_Sensor'] == sensor, DataRfidWithSite.c['equipID'] == equipID)).values(checked =1)
         session.execute(stmt)
