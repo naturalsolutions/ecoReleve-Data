@@ -96,7 +96,8 @@ define([
         1: {
           name: 'name',
           type: 'Text',
-          label: 'Name'
+          label: 'Name',
+          title: 'Name',
         },
 /*        2: {
           name: 'latitude',
@@ -111,7 +112,8 @@ define([
         4: {
           name: 'waypointTime',
           type: 'DateTimePicker',
-          label: 'Date'
+          label: 'Date',
+          title: 'Date',
         }
       };
       this.filters = new NsFilter({

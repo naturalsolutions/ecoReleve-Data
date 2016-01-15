@@ -56,7 +56,7 @@ define([
       var filter = [{
         editable: true,
         fieldClass: [''],
-        label: filterLabel,
+        title: filterLabel,
         name: filterName,
         options: [],
         type: type,
