@@ -8,10 +8,11 @@ define([
   'config',
   'ns_stepper/lyt-step',
   'ns_grid/model-grid',
+  'ns_modules/ns_com',
   'i18n'
 
-], function($, _, Backbone, Marionette, Swal, Backgrid, config,
-  Step, NsGrid
+], function($, _, Backbone, Marionette, Swal, Backgrid, config, 
+  Step, NsGrid, Com
 ) {
 
   'use strict';
@@ -32,6 +33,8 @@ define([
     },
     initialize: function(options) {
       this.model = new Backbone.Model();
+      this.com = new Com();
+      console.log(Backgrid.Extension)
     },
 
     check: function() {
@@ -96,6 +99,7 @@ define([
         cell: Backgrid.IntegerCell.extend({
           orderSeparator: ''
         }),
+        headerCell : null
       },{
         name: 'UnicIdentifier',
         label: 'Identifier',
@@ -105,18 +109,28 @@ define([
         name: 'StartDate',
         label: 'Start date',
         editable: false,
-        cell: 'String',
-      },{
+        cell : Backgrid.Extension.MomentCell.extend({
+          modelInUnixTimestamp: true,
+          displayFormat: "DD/MM/YYYY HH:mm:ss"
+        }),
+        headerCell : null
+      },
+      {
         name: 'EndDate',
         label: 'End Date',
         editable: false,
-        cell: 'String',
+        cell : Backgrid.Extension.MomentCell.extend({
+          modelInUnixTimestamp: true,
+          displayFormat: "DD/MM/YYYY HH:mm:ss"
+        }),
+        headerCell : null
       },{
         name: 'FK_MonitoredSite',
         label: 'FK_MonitoredSite',
         editable: false,
         renderable:false,
         cell: 'string',
+        headerCell : null
       },{
         name: 'Name',
         label: 'Site Name',
@@ -128,6 +142,7 @@ define([
         editable: false,
         renderable:false,
         cell: 'string',
+        headerCell : null
       }];
       this.grid = new NsGrid({
         columns: columns,
@@ -135,13 +150,15 @@ define([
         pageSize: 20,
         pagingServerSide: false,
         rowClicked: true,
-      });
+        //com: _this.com,
+      }); 
       this.grid.rowClicked = function(args) {
         _this.rowClicked(args.row);
       };
       this.grid.rowDbClicked = function(args) {
         _this.rowClicked(args.row);
       };
+      console.log(this.grid.columns)
       this.ui.grid.html(this.grid.displayGrid());
       this.ui.paginator.html(this.grid.displayPaginator());
     },

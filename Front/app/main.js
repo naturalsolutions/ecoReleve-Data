@@ -66,6 +66,7 @@ require.config({
     'backgridSelect_all': 'vendors/backgrid-select-all',
     'autocompTree': './vendors/jquery.autocompTree',
 
+    'backgrid-moment-cell':'./vendors/backgrid-moment-cell',
   },
   map: {
       '*': {
@@ -124,6 +125,9 @@ require.config({
     },
     backgridSelect_all: {
       exports: 'BackgridSelect_all'
+    },
+    'backgrid-moment-cell': {
+      deps: ['moment','backgrid'],
     },
     leaflet_cluster: {
       deps: ['L'],

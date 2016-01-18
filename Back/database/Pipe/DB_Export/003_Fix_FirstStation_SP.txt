@@ -1,0 +1,59 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER PROCEDURE [dbo].[pr_ExportFirstStation] 
+AS
+BEGIN
+
+	IF OBJECT_ID('TmpTIndividualFirstStation') IS NOT NULL
+		DROP TABLE TmpTIndividualFirstStation
+
+	SELECT	i.ID FK_Individual
+			, CASE WHEN sc.ID is null or s.StationDate < sc.StationDate THEN s.ID 
+				WHEN  s.ID is null or sc.StationDate < s.StationDate THEN sc.ID END FirstStation_ID
+			, e.FK_Sensor FK_Sensor_FirstStation
+			, R.ID Protocol_Release_Individual_ID, S.ID Release_Individual_Station_ID
+			, c.ID Protocol_Capture_Individual_ID, sc.ID Capture_Individual_Station_ID
+	INTO TmpTIndividualFirstStation
+	FROM TIndividu I 
+	LEFT JOIN [dbo].[TProtocol_Release_Individual] R 
+		ON r.FK_Individual = i.ID 
+	LEFT JOIN TStation S 
+		ON r.FK_Station = S.ID
+	LEFT JOIN [dbo].[TProtocol_Capture_individual] C 
+		ON C.FK_Individual = i.ID 
+	LEFT JOIN TStation SC 
+		ON C.FK_Station = Sc.ID
+	LEFT JOIN VIndividuEquipementHisto E 
+		ON  e.StartDate <= ISNULL(s.stationdate,sc.stationdate)  AND E.fk_individual = i.id AND e.Deploy =1 
+		AND NOT EXISTS (SELECT * FROM VIndividuEquipementHisto E2 WHERE E2.FK_Individual = e.FK_Individual AND e2.StartDate > e.StartDate)
+	WHERE NOT EXISTS 
+			(SELECT * 
+			 FROM [TProtocol_Release_Individual] R2 
+			 JOIN TStation S2 ON s2.id = R2.fk_station 
+			 WHERE S2.StationDate < s.StationDate AND r.id <> r2.id	AND R2.FK_Individual = i.id )
+	AND NOT EXISTS (SELECT * FROM [TProtocol_Capture_individual] C2 
+					JOIN TStation SC2 ON sC2.id = C2.fk_station 
+					WHERE SC2.StationDate < sc.StationDate AND c.id <> c2.id AND c2.FK_Individual = i.id)
+
+		IF object_id ('TIndividualFirstStation') IS NOT NULL 
+			DROP TABLE  TIndividualFirstStation
+	
+		EXEC sp_rename 'TmpTIndividualFirstStation','TIndividualFirstStation'
+
+END
+
+
+GO
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('3_Fix_FirstStation_SP',GETDATE(),(SELECT db_name()))
+
+
+GO
