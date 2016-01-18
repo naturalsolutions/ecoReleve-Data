@@ -96,17 +96,17 @@ def checkEquip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     if availableToEquip is True and availableSensor is True:
         return True
     else :
-        availability = {}
+        availability = {'Sensor_ID':fk_sensor, 'Individual_ID':fk_indiv, 'MonitoredSite_ID':fk_site}
         if availableToEquip is None :
             availability['indiv'] = False
             if availableSensor is None:
-                availability['sensor'] = False
+                availability['sensor_available'] = False
             else :
-                availability['sensor'] = True
+                availability['sensor_available'] = True
         else:
             if fk_indiv is not None:
-                availability['indiv'] = True
-            availability['sensor'] = False
+                availability['indiv_available'] = True
+            availability['sensor_available'] = False
         return availability
 
 def existingEquipment (fk_sensor,equipDate,fk_indiv=None):
@@ -121,16 +121,28 @@ def existingEquipment (fk_sensor,equipDate,fk_indiv=None):
     # session.close()
     return result
 
-def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None):
+def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     session = threadlocal.get_current_request().dbsession
+    objToUnequip = None
+
+    if fk_indiv is None:
+        objToUnequip = 'FK_MonitoredSite'
+    else:
+        objToUnequip = 'FK_Individual'
 
     e1 = aliased(Equipment)
     e2 = aliased(Equipment)
-    subQueryExists = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor,and_(e1.FK_Individual == Equipment.FK_Individual,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate))))
+    subQueryExists = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor
+        ,and_(e1.c[objToUnequip] == Equipment.c[objToUnequip]
+            ,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate))))
 
-    query = select([Equipment]).where(and_(~exists(subQueryExists),and_(Equipment.StartDate<=equipDate,and_(Equipment.Deploy == 1,and_(Equipment.FK_Sensor == fk_sensor,Equipment.FK_Individual == fk_indiv)))))
+    query = select([Equipment]).where(and_(~exists(subQueryExists)
+        ,and_(Equipment.StartDate<=equipDate,and_(Equipment.Deploy == 1
+            ,and_(Equipment.FK_Sensor == fk_sensor,Equipment.c[objToUnequip] == fk_indiv)))))
 
-    subQueryUnequip = select([e2]).where(and_(e2.FK_Individual == Equipment.FK_Individual,and_(e2.StartDate>Equipment.StartDate,and_(e2.FK_Sensor == Equipment.FK_Sensor,and_(e2.Deploy == 0,e2.StartDate<=equipDate)))))
+    subQueryUnequip = select([e2]).where(and_(e2.c[objToUnequip] == Equipment.c[objToUnequip]
+        ,and_(e2.StartDate>Equipment.StartDate
+            ,and_(e2.FK_Sensor == Equipment.FK_Sensor,and_(e2.Deploy == 0,e2.StartDate<=equipDate)))))
 
     query = query.where(~exists(subQueryUnequip))
     fullQuery = select([True]).where(~exists(query))
@@ -142,12 +154,12 @@ def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None):
 
 def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     existing = existingEquipment(fk_sensor,equipDate,fk_indiv=fk_indiv)
-    unequip = alreadyUnequip (fk_sensor,equipDate,fk_indiv=fk_indiv)
+    unequip = alreadyUnequip (fk_sensor,equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
 
     if existing and unequip is None:
         availability = True
     else :
-        availability = {}
+        availability = {'Sensor_ID':fk_sensor, 'Individual_ID':fk_indiv, 'MonitoredSite_ID':fk_site}
         if existing is None:
             availability['existing equipment'] = False
             if existing:
@@ -177,20 +189,6 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
         elif 'site' in typeName.lower():
             fk_site = target.Station.GetProperty('FK_MonitoredSite')
             fk_indiv = None
-
-        # try :
-        #     fk_sensor = target.GetProperty('FK_Sensor') 
-        # # except :
-        #     fk_sensor = None
-        # try :
-        #     fk_indiv = target.GetProperty('FK_Individual')
-        # except :
-        #     fk_indiv = None
-        # try :
-        #     if 
-        #     fk_site = target.Station.GetProperty('FK_MonitoredSite')
-        # except :
-        #     fk_site = None
 
         if deploy == 1 :
             availability = checkEquip(fk_sensor=fk_sensor
