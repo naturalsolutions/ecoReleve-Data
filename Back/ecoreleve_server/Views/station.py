@@ -28,7 +28,7 @@ prefix = 'stations'
 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET')
 def actionOnStations(request):
     dictActionFunc = {
     'count' : count_,
@@ -82,7 +82,7 @@ def getFields(request) :
     return cols
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
 def getStation(request):
     session = request.dbsession
     id = request.matchdict['id']
@@ -106,7 +106,7 @@ def getStation(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE')
 def deleteStation(request):
     session = request.dbsession
     id_ = request.matchdict['id']
@@ -235,7 +235,7 @@ def insertListNewStations(request):
     return response 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix, renderer='json', request_method = 'GET')
 def searchStation(request):
     session = request.dbsession
 

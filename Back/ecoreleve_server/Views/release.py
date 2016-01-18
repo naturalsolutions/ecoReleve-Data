@@ -27,7 +27,7 @@ from collections import Counter
 
 prefix = 'release/'
 
-@view_config(route_name= prefix+'individuals/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'individuals/action', renderer='json', request_method = 'GET')
 def actionOnStations(request):
     dictActionFunc = {
     # 'count' : count_,
@@ -86,7 +86,7 @@ def getReleaseMethod(request):
     result = session.execute(query).fetchall()
     return [dict(row) for row in result]
 
-@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'GET')
 def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
@@ -122,7 +122,7 @@ def searchIndiv(request):
     return result
 
 
-@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'POST', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'POST')
 def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()

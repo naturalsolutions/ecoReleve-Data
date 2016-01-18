@@ -28,8 +28,8 @@ from datetime import datetime
 prefix = 'sensors'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-#@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET')
+#@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET')
 def actionOnSensors(request):
     dictActionFunc = {
     'count' : count_,
@@ -140,7 +140,7 @@ def getSensorType(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
 def getSensor(request):
     session = request.dbsession
     id = request.matchdict['id']
@@ -165,7 +165,7 @@ def getSensor(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 
-@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET')
 def getSensorHistory(request):
     session = request.dbsession
     id = request.matchdict['id']
@@ -200,7 +200,7 @@ def getSensorHistory(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE')
 def deleteSensor(request):
     session = request.dbsession
     id_ = request.matchdict['id']
@@ -252,7 +252,7 @@ def insertOneNewSensor (request) :
     return {'ID': newSensor.ID}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix, renderer='json', request_method = 'GET')
 def searchSensor(request):
     session = request.dbsession
     data = request.params.mixed()
@@ -279,7 +279,7 @@ def searchSensor(request):
 
     return result
 
-@view_config(route_name=prefix + '/export', renderer='csv', request_method='POST', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=prefix + '/export', renderer='csv', request_method='POST')
 def sensors_export(request):
     session = request.dbsession
     query = select(Sensor.__table__.c)

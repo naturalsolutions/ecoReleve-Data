@@ -20,8 +20,8 @@ def asInt(str):
     try : return int(str)
     except : return str
 
-@view_config(route_name= 'autocomplete', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
-@view_config(route_name= 'autocomplete/ID', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED )
+@view_config(route_name= 'autocomplete', renderer='json', request_method = 'GET')
+@view_config(route_name= 'autocomplete/ID', renderer='json', request_method = 'GET')
 def autocomplete (request):
     objName = dictObj[request.matchdict['obj']]
     session = request.dbsession
