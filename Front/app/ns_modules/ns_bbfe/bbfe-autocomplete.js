@@ -39,7 +39,13 @@ define([
                 };
                 this.autocompleteSource.change = function(event,ui){
                     event.preventDefault();
-                    _this.$el.find('#' + _this.id ).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
+                    console.log(ui.item);
+                    if (ui.item) {
+                        _this.$el.find('#' + _this.id ).attr('data_value',ui.item.value).change();
+                        _this.$el.find('#' + _this.id ).val(ui.item.label);
+                    } else {
+                        _this.$el.find('#' + _this.id ).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
+                    }
                 };
             }
             this.options = options;
