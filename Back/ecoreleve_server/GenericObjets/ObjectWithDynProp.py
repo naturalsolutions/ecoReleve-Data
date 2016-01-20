@@ -86,7 +86,7 @@ class ObjectWithDynProp:
                 ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
                 ).order_by(asc(ModuleGrids.GridOrder)).all()
 
-        gridFields.sort(key=lambda x: str(x.GridOrder))
+        # gridFields.sort(key=lambda x: str(x.GridOrder))
         cols = []
         #### return only fileds existing in conf ####
         for curConf in gridFields:

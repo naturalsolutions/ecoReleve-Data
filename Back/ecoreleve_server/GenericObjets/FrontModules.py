@@ -243,10 +243,10 @@ class ModuleGrids (Base) :
         self.__init__()
 
     def FKName (self):
-        if self.QueryName is None : 
-            return self.Name 
+        if self.QueryName not in [None,'Forced'] : 
+            return self.Name+'_'+self.QueryName
         else : 
-            return self.QueryName
+            return self.Name 
 
     def GenerateColumn (self):
         ''' return grid field to build Grid '''

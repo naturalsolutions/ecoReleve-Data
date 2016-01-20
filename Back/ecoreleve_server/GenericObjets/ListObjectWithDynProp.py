@@ -15,6 +15,7 @@ import json
 from traceback import print_exc
 from pyramid import threadlocal
 from ..utils.datetime import parse
+from ..utils.parseValue import isNumeric
 
 eval_ = Eval()
 
@@ -50,6 +51,19 @@ class ListObjectWithDynProp():
         DynPropsDisplay = list(filter(lambda x : x.IsSearchable == True or x.GridRender >= 2  , self.Conf))
         return DynPropsDisplay
 
+    # def GetAllFilterableFK(self):
+    #     self.searchInFK = {}
+    #     AllFilterable = list(filter(lambda x : x.IsSearchable == True , self.Conf))
+
+    #     for objConf in self.GetAllPropNameInConf() :
+    #         # print(objConf.Name)
+    #         curDynProp = self.GetDynProp(objConf.Name)
+    #         if objConf.Name in self.fk_list and objConf.QueryName is not None:
+    #             tableRef = self.fk_list[objConf.Name].column.table
+    #             nameRef = self.fk_list[objConf.Name].column.name
+    #             self.searchInFK[objConf.Name] = {'nameProp':objConf.QueryName,'table': tableRef, 'nameFK':nameRef}
+    #     return
+
     def GetJoinTable (self,searchInfo) :
         ''' build join table and select statement over all dynamic properties and foreign keys in filter query'''
         joinTable = self.ObjWithDynProp
@@ -61,15 +75,17 @@ class ListObjectWithDynProp():
         ##### get all foreign keys #####
         self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
 
+        self.searchInFK = {}
         for objConf in self.GetAllPropNameInConf() :
-            # print(objConf.Name)
             curDynProp = self.GetDynProp(objConf.Name)
-            if objConf.Name in self.fk_list and objConf.QueryName is not None:
+            if objConf.Name in self.fk_list and objConf.QueryName is not None and objConf.QueryName != 'Forced':
                 tableRef = self.fk_list[objConf.Name].column.table
                 nameRef = self.fk_list[objConf.Name].column.name
+                self.searchInFK[objConf.Name] = {'nameProp':objConf.QueryName,'table': tableRef, 'nameFK':nameRef}
 
                 joinTable = outerjoin (joinTable,tableRef,objTable.c[objConf.Name] == tableRef.c[nameRef])
-                selectable.append(tableRef.c[objConf.QueryName])
+                selectable.append(tableRef.c[objConf.QueryName].label(objConf.Name+'_'+objConf.QueryName))
+                print( 'join table FK : '+objConf.Name)
 
             elif curDynProp != None: #and objConf.Name in self.ObjWithDynProp().GetAllProp():
                 v = view.alias('v'+curDynProp['Name'])
@@ -137,7 +153,15 @@ class ListObjectWithDynProp():
     def WhereInJoinTable (self,query,criteriaObj) :
         ''' Apply where clause over filter criteria '''
         curProp = criteriaObj['Column']
-        if hasattr(self.ObjWithDynProp,curProp) :
+        if curProp in self.fk_list and curProp in self.searchInFK:
+            print('search IN FK lié : '+curProp)
+            # print(self.searchInFK)
+            # print(self.searchInFK[curProp]['nameProp'])
+            query = query.where(
+                eval_.eval_binary_expr(self.searchInFK[curProp]['table'].c[self.searchInFK[curProp]['nameProp']]
+                    ,criteriaObj['Operator'],criteriaObj['Value'])
+                )
+        elif hasattr(self.ObjWithDynProp,curProp):
             # static column criteria
             curTypeAttr = str(self.ObjWithDynProp.__table__.c[curProp].type).split('(')[0]
             if 'date' in curTypeAttr.lower() :
@@ -234,10 +258,30 @@ class ListObjectWithDynProp():
         fullQuery = select([func.count(self.ObjWithDynProp.ID)])
         filterOnDynProp = False
         existQuery = select([self.GetDynPropValueView()])
+        self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
+
         if criteria is not None:
             for obj in criteria:
                 curDynProp = self.GetDynProp(obj['Column'])
-                if hasattr(self.ObjWithDynProp,obj['Column']):
+                confObj = list(filter(lambda x: x.Name == obj['Column'] ,self.GetAllPropNameInConf()))
+                if len(confObj)> 0 :
+                    objConf = confObj[0]
+                else : 
+                    objConf = None
+
+                if obj['Column'] in self.fk_list and objConf is not None and objConf.QueryName not in [None,'Forced']:
+                        if objConf.QueryName is not None and objConf.QueryName is not 'Forced':
+                            tableRef = self.fk_list[obj['Column']].column.table
+                            nameRef = self.fk_list[obj['Column']].column.name
+
+                            existsQueryFK = select(tableRef.c
+                                ).where(and_(
+                                    eval_.eval_binary_expr(tableRef.c[objConf.QueryName],obj['Operator'],obj['Value']),
+                                    self.ObjWithDynProp.__table__.c[obj['Column']] == tableRef.c[nameRef]
+                                    ))
+                            fullQuery = fullQuery.where(exists(existsQueryFK))
+
+                elif hasattr(self.ObjWithDynProp,obj['Column']):
                     curTypeAttr = str(self.ObjWithDynProp.__table__.c[obj['Column']].type).split('(')[0]
                     if 'date' in curTypeAttr.lower() :
                         try:
