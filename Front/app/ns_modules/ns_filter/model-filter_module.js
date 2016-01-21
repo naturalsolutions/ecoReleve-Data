@@ -12,13 +12,13 @@
             // Export global even in AMD case in case this script is loaded with
             // others that may still expect a global Backbone.
             var Retour = factory(root, exports, $, _, Backbone, BbForms, moment);
-            console.log(Retour);
+
             return Retour;
         });
 
         // Next for Node.js or CommonJS. jQuery may not be needed as a module.
     } else if (typeof exports !== 'undefined') {
-        console.log('common JS');
+
         var $ = require('jquery');
         var _ = require('underscore');
         var Backbone = require('backbone');
@@ -44,7 +44,7 @@
 }(this, function (root, NsFilter, $, _, Backbone, BbForms, moment) {
 
     var tpl = '<form class="filter form-horizontal filter-form-<%=fieldname%>">'
-        +'<div   class="filterdiv" >'
+        + '<div   class="filterdiv" >'
     + '<br><span data-editors="Column"></span>'
         + '<span class="col-xs-3"><b><%= filterName %>&nbsp:</b></span>'
        + '<span data-editors="ColumnType"></span>'
@@ -70,6 +70,22 @@
     + '<div class="clear"></div>'
     + '</form>'
     + '<div class="clear"></div>'
+
+    var tplinterval =
+   '<form class="filter form-horizontal filter-form-<%=fieldname%>" style="position:relative">'
+   + '<br><div   style="margin-bottom: 30px;">'
+       + '<span data-editors="Column"></span>'
+       + '<span class="col-xs-3"><b><%= filterName %>&nbsp:</b></span>'
+       + '<span data-editors="ColumnType"></span>'
+       + '<span class="hidden col-xs-4" data-editors="Operator"></span>'
+       + '<span class="col-xs-3">From</span><span class="col-xs-6 filterinterval" data-editors="From"></span>'
+       + '<span class="col-xs-3"></span>'
+       + '<span class="col-xs-3">To</span><span class="col-xs-6 filterinterval" data-editors="To"></span>'
+   + '</div>'
+   + '<div class="clear"></div>'
+   + '</form>'
+   + '<div class="clear"></div>'
+
 
     var tplAdded = '<div class="filter clearfix">'
       + '<div class="clearfix">'
@@ -112,7 +128,7 @@
         filterContainer: null,
         channel: null,
         clientSide: null,
-        filterFromAJAX:true,
+        filterFromAJAX: true,
         name: null,
         com: null,
         url: null,
@@ -138,15 +154,14 @@
             this.url = options.url + 'getFilters';
             this.forms = [];
             if (options.filtersValues) {
-                this.filtersValues = options.filtersValues;
+                this.filtersValues = this.getValuesAsDic(options.filtersValues);
             }
             // If filters are given we use them
             if (!options.custom) {
                 if (options.filters) {
                     this.filters = options.filters;
-                    this.filterFromAJAX = false ;
-                    if (options.filtersValues) this.initFilters(options.filtersValues);
-                    else this.initFilters(options.filters);
+                    this.filterFromAJAX = false;
+                    this.initFilters(this.filters);
                 }
                 else {
                     // Otherwise initialized from AJAX call
@@ -168,6 +183,30 @@
                 return this.filterContainer;
             }
 
+        },
+        getValuesAsDic: function (filterArray) {
+
+            var filterValues = {};
+
+            for (var i = 0 ; i < filterArray.length; i++) {
+                curFiltre = filterValues[filterArray[i].Column];
+                if (curFiltre == null) {
+                    curFiltre = {}
+                    curFiltre.operatorValue = filterArray[i].Operator;
+                }
+                else {
+                    curFiltre.operatorValue = 'between';
+                }
+                curFiltre.value = filterArray[i].Value;
+                if (filterArray[i].Operator == '>=') {
+                    curFiltre.From = filterArray[i].Value;
+                }
+                if (filterArray[i].Operator == '<=') {
+                    curFiltre.To = filterArray[i].Value;
+                }
+                filterValues[filterArray[i].Column] = curFiltre;
+            }
+            return filterValues;
         },
         getFilters: function () {
             var _this = this;
@@ -199,7 +238,7 @@
             for (var key in data) {
                 form = this.initFilter(data[key]);
                 this.getContainer().append(form.el);
-                console.log('FilterContrainer',this.getContainer());
+
                 if (data[key].type == 'Checkboxes') {
                     if (!this.filtersValues || !this.filtersValues[data[key].name]) {
                         this.getContainer().find("input[type='checkbox']").each(function () {
@@ -208,10 +247,11 @@
                     }
                 }
                 this.getContainer().find("input[type='checkbox']").on('click', this.clickedCheck);
-
+                /*
                 this.getContainer().find("#dateTimePicker").each(function () {
+                    console.log('THGIS', this);
                     $(this).datetimepicker();
-                });
+                });*/
 
                 this.forms.push(form);
                 this.filterLoaded();
@@ -228,7 +268,6 @@
                             // pas de saisie
                         }
                         else {
-                            console.log('Filtre non vide :' + this.forms[i].model.get('Column'));
                             $('.filter-form-' + this.forms[i].model.get('Column') + ' .filter').addClass(this.ToggleFilter.classBefore);
                             var toggleInfo = {
                                 columnName: this.forms[i].model.get('Column'),
@@ -280,12 +319,19 @@
         initFilter: function (dataRow, added) {
             var form;
             var type = dataRow['type'];
-            var fieldName = dataRow['name'];
+            
             var template = tpl;
             var template = (added) ? tplAdded : tpl;
             var options = this.getValueOptions(dataRow);
+            var isInterval = false;
+            var operators = null;
+            if (dataRow.options) {
+                var operators = dataRow.options.operators;
+                if (dataRow.options.isInterval) {
+                    isInterval = true;
+                }
+            }
 
-            if (dataRow.options) var operators = dataRow.options.operators;
             var editorClass = (dataRow['editorClass'] || '') + ' form-control filter';
 
             if (type == 'Select' || type == 'Checkboxes' || type == 'AutocompTreeEditor') {
@@ -302,8 +348,30 @@
                 }
             }
 
-            editorClass += ' ' + fieldName;
+            editorClass += ' ' + dataRow['name'];
+            if (isInterval) {
+               
+                form = this.getBBFormFromInterval(dataRow, editorClass, type,tplinterval);
+            }
+            else {
+                
+                form = this.getBBFormFromFilter(dataRow, editorClass, type, operators,template);
+            }
 
+
+
+            
+            /*
+            form.$el.find(".dateTimePicker").each(function () {
+                console.log('THGIS', this);
+                $(this).datetimepicker();
+            });*/
+            //console.log(form.model);
+            return form;
+        },
+        getBBFormFromFilter: function (dataRow, editorClass, type, operators,template) {
+            
+            var fieldName = dataRow['name'];
             var schm = {
                 Column: { name: 'Column', type: 'Hidden', title: dataRow['label'], value: fieldName },
                 ColumnType: { name: 'ColumnType', title: '', type: 'Hidden', value: type },
@@ -322,17 +390,22 @@
             }
 
             var valeur = null;
-            var operatorValue = schm['Operator'].options[0].val;
+
             if (this.filtersValues && this.filtersValues[fieldName]) {
                 valeur = this.filtersValues[fieldName].value;
                 operatorValue = this.filtersValues[fieldName].operatorValue;
+            }
+            else {
+                operatorValue = schm.Operator.options[0];
             }
 
             var Formdata = {
                 ColumnType: type,
                 Column: fieldName,
-                Operator: schm['Operator'].options[0]
+                Operator: operatorValue
             };
+
+            var operatorValue = schm['Operator'].options[0].val;
 
             var md = Backbone.Model.extend({
                 schema: schm,
@@ -344,20 +417,95 @@
                     Value: valeur
                 }
             });
+            var mod = new md();
+            //console.log(mod);
+            //mod.set('Value',valeur);
+            var form = new BbForms({
+                template: _.template(template),
+                model: mod,
+                data: Formdata,
+                templateData: { filterName: dataRow['title'], ColumnType: type, fieldname: fieldName }
+            }).render();
+            return form;
+
+        },
+        getBBFormFromInterval: function (dataRow, editorClass,type,template) {
+            
+            var fieldName = dataRow['name'];
+            
+            var schm = {
+                Column: { name: 'Column', type: 'Hidden', title: dataRow['label'], value: fieldName },
+                ColumnType: { name: 'ColumnType', title: '', type: 'Hidden', value: type },
+                Operator: {
+                    //type: 'Select', title: dataRow['label'], options: operators || this.getOpOptions(type), editorClass: 'form-control ',//+ classe,
+                    type: 'Select', title: dataRow['label'], options: [{ label: 'beetwenn', val: 'between' }], editorClass: 'form-control ',//+ classe,
+                },
+                From: {
+                    name: 'From',
+                    type: type,
+                    title: dataRow['label'],
+                    editorClass: editorClass,
+                    options: this.getValueOptions(dataRow),
+                    validators: []
+                },
+                To: {
+                    name: 'To',
+                    type: type,
+                    title: dataRow['label'],
+                    editorClass: editorClass,
+                    options: this.getValueOptions(dataRow),
+                    validators: []
+                },
+                Value: {
+                    type: type,
+                    title: dataRow['label'],
+                    editorClass: 'Text',
+                    options: this.getValueOptions(dataRow),
+                    validators: []
+                }
+            }
+            var ValeurFrom = '', ValeurTo = '';
+            var valeur = null;
+            if (this.filtersValues && this.filtersValues[fieldName]) {
+                ValeurFrom = this.filtersValues[fieldName].From || '';
+                ValeurTo = this.filtersValues[fieldName].To;
+
+            }
+            var Formdata = {
+                ColumnType: type,
+                Column: fieldName,
+                Operator: schm['Operator'].options[0]
+            };
+
+
+            var operatorValue = schm['Operator'].options[0].val;
+
+            var md = Backbone.Model.extend({
+                schema: schm,
+                defaults: {
+                    Column: fieldName,
+                    ColumnType: type,
+                    // For FireFox, select first option
+                    Operator: operatorValue,
+                    Value: valeur,
+                    From: ValeurFrom,
+                    To: ValeurTo
+                }
+            });
 
             var mod = new md();
+            //console.log(mod);
             //mod.set('Value',valeur);
-            form = new BbForms({
+            var form = new BbForms({
                 template: _.template(template),
                 model: mod,
                 data: Formdata,
                 templateData: { filterName: dataRow['title'], ColumnType: type, fieldname: fieldName }
             }).render();
 
-            //console.log(form.model);
             return form;
-        },
 
+        },
         changeInput: function (options) {
         },
 
@@ -431,68 +579,51 @@
                     break;
             }
         },
-        /*
-        getFieldType: function (type) {
-            var typeField;
-            switch (type) {
-                case "Text":
-                    return typeField = "Text";
-                    break;
-                case "DateTimePicker":
-                    return typeField = "DateTimePicker";
-                    break;
-                case "Select":
-                    return typeField = "Select";
-                    break;
-                case "AutocompleteEditor":
-                    return typeField = "AutocompleteEditor";
-                    break;
-                case "AutocompTreeEditor":
-                    return typeField = "AutocompTreeEditor";
-                    break;
-                case "Checkboxes":
-                    return typeField = "Checkboxes";
-                    break;
-                case "LatitudeEditor":
-                    return typeField = "LatitudeEditor";
-                    break;
-                case "LongitudeEditor":
-                    return typeField = "LongitudeEditor";
-                    break;
-                default:
-                    return typeField = "Number";
-                    break;
-            }
-        },
-        */
+
         update: function () {
             this.criterias = [];
             var currentForm, value;
             for (var i = 0; i < this.forms.length; i++) {
                 currentForm = this.forms[i];
-                var type = typeof currentForm.getValue().Value;
+                //var type = typeof currentForm.getValue().Value;
                 var Validation = currentForm.validate();
-                //console.log('*********** Validation**********',Validation) ;
-                //if (!Validation && (currentForm.getValue().Value == '0' && currentForm.getValue().Value != null) ) {
-                if (!currentForm.validate() && (currentForm.getValue().Value)) {
+                //console.log(Validation);
+                currentForm.$el.find('input.filter').removeClass('active')
+                if (!currentForm.validate()) {
                     value = currentForm.getValue();
-                    this.criterias.push(value);
-                    //console.log('Add value ', value, this.filters);
-                    currentForm.$el.find('input.filter').addClass('active');
-                } else {
-                    currentForm.$el.find('input.filter').removeClass('active')
-                };
-            };
-            //this.criterias = this.filters;
-            //console.log( this.filters);
-            //console.log('fILTERS ***********************', this.filters);
-            /*            this.interaction('filter', this.filters)
-                        if (this.clientSide) {
-                            this.clientFilter(this.filters)
-                        }*/
+
+                    if (value.Operator == 'between') {
+                        var ValueFrom = { Operator: '>=', ColumnType: value.ColumnType, Column: value.Column, Value: null };
+                        var ValueTo = { Operator: '<=', ColumnType: value.ColumnType, Column: value.Column, Value: null };
+                        if (value.From) {
+                            ValueFrom.Value = value.From;
+                            this.criterias.push(ValueFrom);
+                            currentForm.$el.find('input.filter').addClass('active');
+                        }
+
+                        if (value.To) {
+                            ValueTo.Value = value.To;
+                            this.criterias.push(ValueTo);
+                            currentForm.$el.find('input.filter').addClass('active');
+                        }
+
+                    }
+                    else {
+                        if (value.Value) {
+                            this.criterias.push(value);
+                            currentForm.$el.find('input.filter').addClass('active');
+                        }
+                    }
+                    // TODO Gestion interval
+
+
+
+                }
+            }
             if (this.clientSide != null) {
                 this.clientFilter(this.criterias);
             } else {
+                this.filters = this.criterias;
                 this.interaction('filter', this.criterias);
             }
             return this.criterias;
@@ -506,7 +637,7 @@
             }
             else {
                 if (this.filterFromAJAX) {
-               // Otherwise initialized from AJAX call
+                    // Otherwise initialized from AJAX call
                     this.getFilters();
                 }
                 else {
