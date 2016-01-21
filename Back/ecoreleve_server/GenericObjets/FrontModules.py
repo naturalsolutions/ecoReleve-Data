@@ -327,5 +327,5 @@ class ModuleGrids (Base) :
                     filter_['options']['source'].append(row[0])
             else : 
                 filter_['options'] = {'source': option['source'],'minLength' :option['minLength']}
-        print(filter_)
+
         return filter_
