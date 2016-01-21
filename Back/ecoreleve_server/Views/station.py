@@ -86,9 +86,12 @@ def getFields(request) :
 def getStation(request):
     session = request.dbsession
     id = request.matchdict['id']
+    user = request.authenticated_userid['iss']
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
 
+    if int(curSta.creator) != int(user) :
+        return None
     # if Form value exists in request --> return data with schema else return only data
     if 'FormName' in request.params :
         ModuleName = request.params['FormName']
@@ -256,6 +259,11 @@ def searchStation(request):
         searchInfo['offset'] = json.loads(data['offset'])
         searchInfo['per_page'] = json.loads(data['per_page'])
         getFW = True
+        searchInfo['criteria'].append(
+            {'Column' : 'creator',
+            'Operator' : '=',
+            'Value' : user
+            })
     else :
         searchInfo['order_by'] = []
         ModuleType = 'StationGrid'
