@@ -76,7 +76,7 @@ def getForms(request) :
     return schema
 
 def getFields(request) :
-    ModuleType = 'StationVisu'
+    ModuleType = 'StationGrid'
     cols = Station().GetGridFields(ModuleType)
 
     return cols
@@ -86,9 +86,12 @@ def getFields(request) :
 def getStation(request):
     session = request.dbsession
     id = request.matchdict['id']
+    user = request.authenticated_userid['iss']
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
 
+    if int(curSta.creator) != int(user) :
+        return None
     # if Form value exists in request --> return data with schema else return only data
     if 'FormName' in request.params :
         ModuleName = request.params['FormName']
@@ -251,14 +254,19 @@ def searchStation(request):
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
 
     if not 'geo' in data:
-        ModuleType = 'StationVisu'
+        ModuleType = 'StationGrid'
         searchInfo['order_by'] = json.loads(data['order_by'])
         searchInfo['offset'] = json.loads(data['offset'])
         searchInfo['per_page'] = json.loads(data['per_page'])
         getFW = True
+        searchInfo['criteria'].append(
+            {'Column' : 'creator',
+            'Operator' : '=',
+            'Value' : user
+            })
     else :
         searchInfo['order_by'] = []
-        ModuleType = 'StationVisu'
+        ModuleType = 'StationGrid'
         getFW = False
         criteria = [
         {'Column' : 'LAT',
