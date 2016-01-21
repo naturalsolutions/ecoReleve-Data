@@ -72,6 +72,9 @@ define([
         objectType: this.type,
         id: 0,
         reloadAfterSave: false,
+         afterShow: function() {
+
+        },
         afterSaveSuccess: function() {
           swal({
                 title: 'Succes',
@@ -111,6 +114,6 @@ define([
     },
     cancel: function() {
       Backbone.history.navigate(this.rootUrl,{trigger: true});
-    }
+    },
   });
 });
