@@ -29,9 +29,9 @@ from collections import OrderedDict
 prefix = 'monitoredSite'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-@view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET')
 def actionOnMonitoredSite(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -98,7 +98,7 @@ def getMonitoredSiteType(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
 def getMonitoredSite(request):
     session = request.dbsession
 
@@ -119,7 +119,7 @@ def getMonitoredSite(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET')
 def getMonitoredSiteHistory(request):
     session = request.dbsession
 
@@ -173,7 +173,7 @@ def getMonitoredSiteEquipment(request):
 
     return response
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE')
 def deleteMonitoredSite(request):
     session = request.dbsession
     id_ = request.matchdict['id']
@@ -229,7 +229,7 @@ def insertOneNewMonitoredSite (request) :
     return {'ID': newMonitoredSite.ID}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix, renderer='json', request_method = 'GET')
 def searchMonitoredSite(request):
     session = request.dbsession
     data = request.params.mixed()

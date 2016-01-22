@@ -28,7 +28,7 @@ from pyramid import threadlocal
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 # Data imported from the CLS WS during the last week.
-@view_config(route_name='weekData', renderer='json',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name='weekData', renderer='json')
 def weekData(request):
     session = request.dbsession
 
@@ -78,7 +78,7 @@ def weekData(request):
     return data
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name = 'station_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name = 'station_graph', renderer = 'json')
 def station_graph(request):
     session = request.dbsession
     result = OrderedDict()
@@ -105,7 +105,7 @@ def station_graph(request):
     return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name = 'location_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name = 'location_graph', renderer = 'json')
 def location_graph(request):
     session = request.dbsession
     joinTable = join(Individual_Location,Sensor, Individual_Location.FK_Sensor == Sensor.ID)
@@ -127,7 +127,7 @@ def location_graph(request):
     data.sort(key = itemgetter('label'))
     return data
 
-@view_config(route_name = 'uncheckedDatas_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name = 'uncheckedDatas_graph', renderer = 'json')
 def uncheckedDatas_graph(request):
     session = request.dbsession
 
@@ -171,7 +171,7 @@ def uncheckedDatas_graph(request):
 
     return data
 
-@view_config(route_name = 'individual_graph', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name = 'individual_graph', renderer = 'json')
 def individual_graph(request):
     session = request.dbsession
         # Initialize Json object
@@ -194,7 +194,7 @@ def individual_graph(request):
             result[' '.join([d, str(y)])] = nb
     return result
 
-@view_config(route_name = 'individual_monitored', renderer = 'json',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name = 'individual_monitored', renderer = 'json')
 def individual_monitored(request):
     session = request.dbsession
         # Initialize Json object
