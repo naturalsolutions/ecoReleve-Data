@@ -35,10 +35,10 @@ def cache_callback(request,session):
 
 def db(request):
     makerDefault = request.registry.dbmaker
-    makerExport = request.registry.dbmakerExport
     session = makerDefault()
     
     if 'ecoReleve-Core/export/' in request.url:
+        makerExport = request.registry.dbmakerExport
         session = makerExport()
 
     def cleanup(request):
