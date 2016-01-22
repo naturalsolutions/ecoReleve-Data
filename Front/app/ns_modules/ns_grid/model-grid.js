@@ -7,7 +7,8 @@ define([
   'backgrid.paginator',
   'ns_grid/model-col-generator',
   'moment',
-  'floatThead'
+  'floatThead',
+  'backgrid-moment-cell'
   //'backgridSelect_all',
 ], function ($, _, Backbone, Radio, PageColl, Paginator, colGene, moment) {
   'use strict';
@@ -68,6 +69,12 @@ define([
         }
       }
 
+
+
+
+      
+
+
       this.name = options.name || 'default';
 
       //should be in init function?
@@ -77,6 +84,8 @@ define([
         this.colGene = new colGene({ url: this.url + 'getFields?name=' + this.name, paginable: this.pagingServerSide, checkedColl: options.checkedColl });
         this.columns = this.colGene.columns;
       }
+
+
 
       //well..
       if (options.collection) {
@@ -92,6 +101,9 @@ define([
       if (options.filterCriteria) {
         this.filterCriteria = options.filterCriteria;
       }
+
+
+
 
       this.initGrid();
       this.eventHandler();
@@ -174,7 +186,6 @@ define([
           },
         },
         fetch: function (options) {
-
           var params = {
             'page': this.state.currentPage,
             'per_page': this.state.pageSize,
@@ -182,7 +193,7 @@ define([
             'order_by': this.queryParams.order_by.call(this),
             'criteria': this.queryParams.criteria.call(this),
           };
-          options.success = function () {
+          options.success = function(){
             _this.affectTotalRecords();
             if(_this.onceFetched){
               _this.onceFetched(params);
@@ -200,7 +211,8 @@ define([
       this.collection = new PageCollection();
     },
 
-    upRowStyle: function () {
+
+    upRowStyle: function(){
       var row = this.currentRow;
       var _this = this;
       var rows = this.grid.body.rows;
@@ -216,10 +228,12 @@ define([
       }
     },
 
+
     initCollectionPaginableClient: function () {
       var ctx = this;
       var _this = this;
-
+      /* WARNING ! : you have to declare headerCell: null in columns collection */
+      /* TODO fix setting hedearCell */
       var PageCollection = PageColl.extend({
         url: this.url,
         mode: 'client',
@@ -307,6 +321,7 @@ define([
       }
     },
 
+
     update: function (args) {
       if (this.pageSize) {
         this.grid.collection.state.currentPage = 1;
@@ -332,6 +347,7 @@ define([
         this.update({ filters: args });
       }
     },
+
 
     displayGrid: function () {
       return this.grid.render().el;
@@ -382,6 +398,7 @@ define([
       
     },
 
+
     action: function (action, params) {
       switch (action) {
         case 'focus':
@@ -418,10 +435,10 @@ define([
       }
     },
 
-    rowClicked: function (params) {
+    rowClicked: function(params){
     },
 
-    rowDbClicked: function (params) {
+    rowDbClicked: function(params){
     },
 
     hilight: function () {
@@ -463,12 +480,12 @@ define([
       };
     },
 
-    lastImportedUpdate : function (lastImported) {
+    lastImportedUpdate : function(lastImported){
       this.lastImported = lastImported;
       this.fetchCollection();
     },
 
-    upRowServerSide: function () {
+    upRowServerSide: function(){
     },
   });
 });
