@@ -572,7 +572,7 @@
                     break;
                 case "DateTimePickerEditor":
                     //return operatorsOptions = [{ label: '<', val: '<' }, { label: '>', val: '>' }, { label: '=', val: '=' }, { label: '<>', val: '<>' }, { label: '<=', val: '<=' }, { label: '>=', val: '>=' }];
-                    return operatorsOptions = ['<', '>', '=', '<>', '<=', '>='];
+                    return operatorsOptions = ['=', '<', '>', '<>', '<=', '>='];
                     break;
                 case "Select":
                     return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }];
@@ -582,7 +582,7 @@
                     break;
                     break;
                 default:
-                    return operatorsOptions = ['<', '>', '=', '<>', '<=', '>=', 'IN'];
+                    return operatorsOptions = ['=', '<', '>', '<>', '<=', '>=', 'IN'];
                     break;
             }
         },
