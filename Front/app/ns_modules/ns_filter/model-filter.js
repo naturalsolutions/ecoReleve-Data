@@ -137,7 +137,7 @@ define([
       var template = tpl;
       var template = (added) ? tplAdded : tpl;
 
-      if (fieldName == 'Status') classe = 'hidden';
+      //if (fieldName == 'Status') classe = 'hidden';
       var options = this.getValueOptions(dataRow);
       if (type == 'Select' || type == 'Checkboxes' || type == 'AutocompTreeEditor') {
         editorClass += ' list-inline ';
