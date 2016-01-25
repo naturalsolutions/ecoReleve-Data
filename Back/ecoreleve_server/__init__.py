@@ -70,18 +70,25 @@ def main(global_config, **settings):
     Base.metadata.create_all(engine)
     Base.metadata.reflect(views=True, extend_existing=False) 
 
-    BaseExport.metadata.bind = engineExport
-    BaseExport.metadata.create_all(engineExport)
-    BaseExport.metadata.reflect(views=True, extend_existing=False)
 
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
 
     binds = {"default": engine, "Export": engineExport}
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
-    config.registry.dbmakerExport = scoped_session(sessionmaker(bind=engineExport))
     config.add_request_method(db, name='dbsession', reify=True)
 
+    if 'loadExportDB' in settings and not settings['loadExportDB'] :
+        BaseExport.metadata.bind = engineExport
+        BaseExport.metadata.create_all(engineExport)
+        BaseExport.metadata.reflect(views=True, extend_existing=False)
+        config.registry.dbmakerExport = scoped_session(sessionmaker(bind=engineExport))
+    else:
+        print('''
+            /!\================================/!\ 
+            WARNING : 
+            Export DataBase NOT loaded, Export Functionality will not working
+            /!\================================/!\ \n''')
     # Add renderer for JSON objects
     json_renderer = JSON()
     json_renderer.add_adapter(datetime.datetime, datetime_adapter)
