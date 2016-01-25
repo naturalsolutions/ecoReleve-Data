@@ -29,45 +29,37 @@ define([
 
                    this.autocompleteSource.source = config.coreUrl + url;
                 }
-                //var optionsJquery = _this.autocompleteSource;
                 this.autocompleteSource.select = function(event,ui){
                     event.preventDefault();
                     _this.$el.find('#' + _this.id ).attr('data_value',ui.item.value).change();
                     _this.$el.find('#' + _this.id ).val(ui.item.label);
                 };
-
                 this.autocompleteSource.focus = function(event,ui){
                     event.preventDefault();
-                    _this.$el.find('#' + _this.id ).val(ui.item.label);
                 };
 
                 this.autocompleteSource.change = function(event,ui){
                     event.preventDefault();
-                    _this.$el.find('#' + _this.id ).attr('data_value',null).change();
-                    _this.$el.find('#' + _this.id ).val();
+                    if (ui.item) {
+                        _this.$el.find('#' + _this.id ).attr('data_value',ui.item.value).change();
+                        _this.$el.find('#' + _this.id ).val(ui.item.label);
+                    } else {
+                        _this.$el.find('#' + _this.id ).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
+                    }
                 };
             }
             this.options = options;
         },
         
           getValue: function() {
-/*            console.log(this.$el.find('#' + this.id ).attr('data_value'));*/
-            var value = null;
-            if (this.$el.find('#' + this.id ).attr('data_value')) {
-                value = this.$el.find('#' + this.id ).attr('data_value');
-            }
-            else {
-                value = this.$el.find('#' + this.id ).val();
-            }
-           return value;
-
+           return this.$el.find('#' + this.id ).attr('data_value') ;
           },
 
         render: function () {
             var _this = this;
             var $el = _.template(
                 this.template, { id: this.id,value: this.options.model.get(this.options.schema.name) 
-}            );
+            });
             this.setElement($el);
             if(this.options.schema.validators && this.options.schema.validators[0] == "required"){
               this.$el.find('input').addClass('required');
@@ -80,10 +72,7 @@ define([
                     _this.$el.find('#' + _this.id).prop('disabled', true);
                 }
             }).defer();
-            
-
             return this;
         },
-
     });
 });

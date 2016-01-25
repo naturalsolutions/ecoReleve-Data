@@ -95,7 +95,7 @@ class StationList(ListObjectWithDynProp):
             for row in result :
                 row = OrderedDict(row)
                 try :
-                    row['FieldWorkers'] = list_[row['ID']]
+                    row['FK_FieldWorker_FieldWorkers'] = list_[row['ID']]
                 except:
                     pass
                 data.append(row)

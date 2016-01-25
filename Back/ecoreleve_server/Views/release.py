@@ -7,7 +7,8 @@ from ..Models import (
     ProtocoleType,
     Sensor,
     Equipment,
-    IndividualList
+    IndividualList,
+    ErrorAvailable
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -27,7 +28,7 @@ from collections import Counter
 
 prefix = 'release/'
 
-@view_config(route_name= prefix+'individuals/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'individuals/action', renderer='json', request_method = 'GET')
 def actionOnStations(request):
     dictActionFunc = {
     # 'count' : count_,
@@ -86,7 +87,7 @@ def getReleaseMethod(request):
     result = session.execute(query).fetchall()
     return [dict(row) for row in result]
 
-@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'GET')
 def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
@@ -122,7 +123,7 @@ def searchIndiv(request):
     return result
 
 
-@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'POST', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'POST')
 def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()
@@ -187,69 +188,90 @@ def releasePost(request):
             binP += 32
         return binaryDict[binP]
 
-    binList = []
-    for indiv in indivList: 
-        curIndiv = session.query(Individual).get(indiv['ID'])
-        curIndiv.LoadNowValues()
-        curIndiv.UpdateFromJson(indiv)
+    try:
+        errorEquipment = None
+        binList = []
+        for indiv in indivList: 
+            curIndiv = session.query(Individual).get(indiv['ID'])
+            curIndiv.LoadNowValues()
+            curIndiv.UpdateFromJson(indiv)
 
-        binList.append(MoF_AoJ(indiv))
-        for k in indiv.keys():
-            v = indiv.pop(k)
-            k = k.lower()
-            indiv[k] = v
+            binList.append(MoF_AoJ(indiv))
+            for k in indiv.keys():
+                v = indiv.pop(k)
+                k = k.lower()
+                indiv[k] = v
 
-        indiv['FK_Individual'] = indiv['id']
-        indiv['FK_Station'] = sta_id
-        try : 
-            indiv['taxon'] = indiv['species']
-        except: 
-            indiv['taxon'] = indiv['Species']
-            pass
-        try:
-            indiv['weight'] = indiv['poids']
-        except: 
-            indiv['weight'] = indiv['Poids']
-            pass
+            indiv['FK_Individual'] = indiv['id']
+            indiv['FK_Station'] = sta_id
+            try : 
+                indiv['taxon'] = indiv['species']
+            except: 
+                indiv['taxon'] = indiv['Species']
+                pass
+            try:
+                indiv['weight'] = indiv['poids']
+            except: 
+                indiv['weight'] = indiv['Poids']
+                pass
 
-        curVertebrateInd = getnewObs(vertebrateIndID)
-        curVertebrateInd.UpdateFromJson(indiv)
-        vertebrateIndList.append(curVertebrateInd)
+            curVertebrateInd = getnewObs(vertebrateIndID)
+            curVertebrateInd.UpdateFromJson(indiv)
+            vertebrateIndList.append(curVertebrateInd)
 
-        curBiometry = getnewObs(biometryID)
-        curBiometry.UpdateFromJson(indiv)
-        biometryList.append(curBiometry)
+            curBiometry = getnewObs(biometryID)
+            curBiometry.UpdateFromJson(indiv)
+            biometryList.append(curBiometry)
 
-        curReleaseInd = getnewObs(releaseIndID)
-        curReleaseInd.UpdateFromJson(indiv)
-        releaseIndList.append(curReleaseInd)
+            curReleaseInd = getnewObs(releaseIndID)
+            curReleaseInd.UpdateFromJson(indiv)
+            releaseIndList.append(curReleaseInd)
 
-        try:
-            indiv['FK_Sensor'] = int(indiv['fk_sensor'])
-            curEquipmentInd = getnewObs(equipmentIndID)
-            curEquipmentInd.UpdateFromJson(indiv)
-            curEquipmentInd.Station = curStation
-            equipmentIndList.append(curEquipmentInd)
-        except Exception as e:
-            print_exc()
-            continue
+            try:
+                indiv['FK_Sensor'] = int(indiv['fk_sensor'])
+                curEquipmentInd = getnewObs(equipmentIndID)
+                curEquipmentInd.UpdateFromJson(indiv)
+                curEquipmentInd.Station = curStation
+                equipmentIndList.append(curEquipmentInd)
+            except Exception as e:
+                if e.__class__.__name__ == 'ErrorAvailable':
+                    sensor_available = 'is' if e.value['sensor_available'] else 'is not'
+                    tpl = 'SensorID {0} {1} available for equipment'.format(indiv['FK_Sensor'],sensor_available)
+                    if errorEquipment is None:
+                        errorEquipment = tpl
+                    else:
+                        errorEquipment += ',   '+tpl
+                pass
 
-    vertebrateGrp = Observation(FK_ProtocoleType=vertebrateGrpID, FK_Station =sta_id )
-    dictVertGrp = dict(Counter(binList))
-    dictVertGrp['taxon'] = taxon
-    dictVertGrp['nb_total'] = len(releaseIndList)
-    
-    vertebrateGrp.UpdateFromJson(dictVertGrp)
-    vertebrateGrp.Observation_children.extend(vertebrateIndList)
-    session.add(vertebrateGrp)
+        vertebrateGrp = Observation(FK_ProtocoleType=vertebrateGrpID, FK_Station =sta_id )
+        dictVertGrp = dict(Counter(binList))
+        dictVertGrp['taxon'] = taxon
+        dictVertGrp['nb_total'] = len(releaseIndList)
+        
+        vertebrateGrp.UpdateFromJson(dictVertGrp)
+        vertebrateGrp.Observation_children.extend(vertebrateIndList)
 
-    releaseGrp = Observation(FK_ProtocoleType=releaseGrpID, FK_Station =sta_id)
-    releaseGrp.PropDynValuesOfNow={}
-    releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod})
-    releaseGrp.Observation_children.extend(releaseIndList)
+        releaseGrp = Observation(FK_ProtocoleType=releaseGrpID, FK_Station =sta_id)
+        releaseGrp.PropDynValuesOfNow={}
+        releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod})
+        releaseGrp.Observation_children.extend(releaseIndList)
 
-    session.add(releaseGrp)
-    session.add_all(biometryList)
-    session.add_all(equipmentIndList)
 
-    return {'release':len(releaseIndList)}
+        if errorEquipment is not None:
+            session.rollback()
+            request.response.status_code = 510
+            message = errorEquipment
+
+        else: 
+            session.add(vertebrateGrp)
+            session.add(releaseGrp)
+            session.add_all(biometryList)
+            session.add_all(equipmentIndList)
+
+            message = {'release':len(releaseIndList)}
+
+    except Exception as e :
+        session.rollback()
+        message = e.value
+
+    return message

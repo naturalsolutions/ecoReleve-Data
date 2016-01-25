@@ -19,8 +19,8 @@ prefixProt = 'protocols'
 prefix = 'stations'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET')
 def GetProtocolsofStation (request) :
     session = request.dbsession
 
@@ -175,7 +175,7 @@ def deleteObservation(request):
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET')
 def getObservation(request):
     session = request.dbsession
 
@@ -203,7 +203,7 @@ def getObservation(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/protocols/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/protocols/action', renderer='json', request_method = 'GET')
 def actionOnObs(request):
     session = request.dbsession
 
@@ -253,7 +253,7 @@ def insertProtocols(request):
     return insertNewProtocol (request)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefixProt+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefixProt+'/action', renderer='json', request_method = 'GET')
 def actionOnProtocols(request):
     dictActionFunc = {
     'count' : count,
@@ -271,7 +271,7 @@ def actionOnProtocols(request):
 #     return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefixProt + '/id', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefixProt + '/id', renderer='json', request_method = 'GET')
 def getProtocol (request):
     session = request.dbsession
 
@@ -293,7 +293,7 @@ def getProtocol (request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= 'fieldActivity', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= 'fieldActivity', renderer='json', request_method = 'GET')
 def getFieldActivityList (request) :
     session = request.dbsession
 
@@ -305,7 +305,7 @@ def getFieldActivityList (request) :
     return sorted(res , key = lambda x : x['label'])
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= 'protocolTypes', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= 'protocolTypes', renderer='json', request_method = 'GET')
 def getListofProtocolTypes (request):
     session = request.dbsession
     if 'FieldActivityID' in request.params :

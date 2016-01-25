@@ -24,7 +24,7 @@ from .RFIDimport import uploadFileRFID
 route_prefix = 'sensors/'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST')
 def uploadFile(request):
     type_= request.matchdict['type']
     dictFuncImport={

@@ -70,31 +70,35 @@ class ModuleForms(Base):
     def GetClassFromSize(FieldSize):
         return FieldSizeToClass[FieldSize]
 
-    def GetDTOFromConf(self,Editable,CssClass,DisplayMode):
+    def GetDTOFromConf(self,Editable):
         ''' return input field to build form '''
 
-        if DisplayMode.lower() == 'edit':
-            inputType = self.InputType
-            isDisabled = False
+        self.Editable = Editable
+        curEditable = self.Editable
+        curInputType = self.InputType
+
+        if self.Editable:
+            if self.FormRender < 2:
+                curEditable = False
+                isDisabled = True
+            else :
+                isDisabled = False
             self.fullPath = False
+            curSize = self.FieldSizeEdit
         else :
-            inputType = self.InputType
+            curSize = self.FieldSizeDisplay
             self.fullPath = True
             isDisabled = True
 
             if self.InputType in ['AutocompTreeEditor']:
-                inputType = 'Text'
+                curInputType = 'Text'
                 self.fullPath = True
-        self.DisplayMode = DisplayMode
 
-        #if self.InputType in ['AutocompleteEditor', 'ListOfNestedModel']:
-        # if self.InputType == 'ListOfNestedModel' :
-        #     inputType = 'ListOfNestedModel'
-        # else: 
-        #     inputType = 'Text'
+        CssClass = FieldSizeToClass[curSize]
+
         self.dto = {
             'name': self.Name,
-            'type': inputType,
+            'type': curInputType,
             'title' : self.Label,
             'editable' : Editable,
             'editorClass' : str(self.editorClass) ,
@@ -103,13 +107,10 @@ class ModuleForms(Base):
             'defaultValue' : None,
             'editorAttrs' : {'disabled': isDisabled},
             'fullPath':self.fullPath
-
             }
-        self.CssClass = CssClass
-        self.Editable = Editable
-        validators = self.Validators
-        if validators is not None:
-            self.dto['validators'] = json.loads(validators)
+
+        if self.Validators is not None:
+            self.dto['validators'] = json.loads(self.Validators)
 
         if self.Required == 1 :
             if self.InputType=="Select":
@@ -151,7 +152,7 @@ class ModuleForms(Base):
             subNameObj = result[0].Name
             subschema = {}
             for conf in result :
-                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable,self.CssClass,self.DisplayMode)
+                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable)
 
             fields = []
             resultat = []
@@ -174,24 +175,6 @@ class ModuleForms(Base):
                 resultat[curIndex]['fields'].append(curProp[2])
 
             self.dto['fieldsets'] = resultat
-            # try :
-            #     # subTypeObj = int(self.Options)
-            #     subschema['FK_ProtocoleType'] = {
-            #     'Name': 'FK_ProtocoleType',
-            #     'type': 'Number',
-            #     'title' : 'FK_ProtocoleType',
-            #     'editable' : False,
-            #     'renderable':False,
-            #     'editorClass' : str(self.editorClass),
-            #     'validators': [],
-            #     'options': [],
-            #     'fieldClass': 'hidden'}
-
-            # except : 
-            #     print_exc()
-            #     pass
-
-            # finally :
             self.dto['subschema'] = subschema
 
             try :
@@ -217,7 +200,6 @@ class ModuleForms(Base):
                     self.dto['options']['source'].append(row[0])
         else : 
             self.dto['options'] = {'source': option['source'],'minLength' :option['minLength']}
-
 
     func_type_context = {
         'Select': InputSelect,
@@ -261,10 +243,10 @@ class ModuleGrids (Base) :
         self.__init__()
 
     def FKName (self):
-        if self.QueryName is None : 
-            return self.Name 
+        if self.QueryName not in [None,'Forced'] : 
+            return self.Name+'_'+self.QueryName
         else : 
-            return self.QueryName
+            return self.Name 
 
     def GenerateColumn (self):
         ''' return grid field to build Grid '''

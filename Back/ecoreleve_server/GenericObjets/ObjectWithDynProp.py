@@ -86,7 +86,7 @@ class ObjectWithDynProp:
                 ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
                 ).order_by(asc(ModuleGrids.GridOrder)).all()
 
-        gridFields.sort(key=lambda x: str(x.GridOrder))
+        # gridFields.sort(key=lambda x: str(x.GridOrder))
         cols = []
         #### return only fileds existing in conf ####
         for curConf in gridFields:
@@ -288,25 +288,14 @@ class ObjectWithDynProp:
         resultat = {}
         type_ = self.GetType().ID
         Fields = self.ObjContext.query(ModuleForms
-            ).filter(ModuleForms.Module_ID == FrontModules.ID).order_by(ModuleForms.FormOrder).all()
-        curEditable = Editable
+            ).filter(and_(ModuleForms.Module_ID == FrontModules.ID),ModuleForms.FormRender>0).order_by(ModuleForms.FormOrder).all()
 
         for curStatProp in self.__table__.columns:
-            CurModuleForms = list(filter(lambda x : x.Name == curStatProp.key and (x.TypeObj== str(type_) or x.TypeObj == None) , Fields))
+            CurModuleForms = list(filter(lambda x : x.Name == curStatProp.key and x.FormRender>0 and (x.TypeObj== str(type_) or x.TypeObj == None) , Fields))
             if (len(CurModuleForms)> 0 ):
                 # Conf définie dans FrontModules
                 CurModuleForms = CurModuleForms[0]
-                curSize = CurModuleForms.FieldSizeDisplay
-                if curEditable:
-                    curSize = CurModuleForms.FieldSizeEdit
-
-                if (CurModuleForms.FormRender <= 2) == 0:
-                    curEditable = False
-
-                if CurModuleForms.FormRender > 2 :
-                    curEditable = True
-
-                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)),DisplayMode)
+                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(Editable)
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):
@@ -314,10 +303,6 @@ class ObjectWithDynProp:
         schema = self.GetSchemaFromStaticProps(FrontModules,DisplayMode)
         ObjType = self.GetType()
         ObjType.AddDynamicPropInSchemaDTO(schema,FrontModules,DisplayMode)
-
-        # if (DisplayMode.lower() != 'edit'):
-        #     for curName in schema:
-        #         schema[curName]['editorAttrs'] = { 'disabled' : True }
 
         resultat = {
             'schema':schema,
@@ -341,6 +326,7 @@ class ObjectWithDynProp:
             for key, value in schema.items():
                 if value['defaultValue'] is not None:
                     resultat['data'][key] = value['defaultValue']
+
         return resultat
 
     def splitFullPath(self,value):
