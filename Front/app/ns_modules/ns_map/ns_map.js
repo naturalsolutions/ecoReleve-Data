@@ -109,7 +109,6 @@ define([
           this.filter(params);
           break;
         default:
-          console.info('no action linked');
           break;
       }
     },
@@ -394,8 +393,12 @@ define([
           latlng = L.latLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]);
           i++;
           var infos = '';
-          if(!feature.id)
-          feature.id = i;
+          if (!feature.id) {
+            feature.id = i;
+            if (feature.properties.ID) {
+              feature.id = feature.properties.ID;
+            }
+          }
           if(feature.checked){
             marker = L.marker(latlng, {icon: ctx.focusedIcon});
           }else{
@@ -648,6 +651,7 @@ define([
 
     /*==========  focusMarker :: focus & zoom on a point  ==========*/
     focus: function(id, zoom){
+      id = parseInt(id);
       var marker = this.dict[id];
 
       if(this.lastFocused && this.lastFocused != marker){
@@ -801,8 +805,6 @@ define([
 
     //param can be filters or directly a collection
     filter: function(param){
-
-
       //TODO : refact
       var _this = this;
       if(this.url){

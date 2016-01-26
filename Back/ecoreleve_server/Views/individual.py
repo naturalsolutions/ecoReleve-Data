@@ -311,7 +311,7 @@ def getFieldsLoc(request) :
     gene = IndivLocationList('Individual_Location',session,None)
     return gene.get_col()
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'GET',permission=NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'GET')
 def getIndivLocation(request):
 
     id_ = request.matchdict['id']
@@ -330,9 +330,9 @@ def getIndivLocation(request):
         per_page = json.loads(data['per_page'])
         order_by = json.loads(data['order_by'])
     else :
-        offset=0
-        per_page=20
-        order_by=[]
+        offset= None 
+        per_page= None
+        order_by= None
 
     if 'geo' in request.params :
         result = gene.get_geoJSON(criteria,['ID','UnicIdentifier','Date','type_'])
@@ -370,14 +370,17 @@ def getIndivLocation(request):
     return result
 
 
-@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'DELETE',permission=NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'PUT')
 def delIndivLocationList(request):
     session = request.dbsession
-    IdList = request.params['IDs']
+
+    IdList = json.loads(request.params['IDs'])
+
+    print(IdList)
     session.query(Individual_Location).filter(Individual_Location.ID.in_(IdList)).delete(synchronize_session=False)
 
 
-@view_config(route_name= prefix+'/id/location/id_loc', renderer='json', request_method = 'GET',permission=NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/location/id_loc', renderer='json', request_method = 'GET')
 def delIndivLocation(request):
     session = request.dbsession
     Id = request.matchdict['id_loc']
