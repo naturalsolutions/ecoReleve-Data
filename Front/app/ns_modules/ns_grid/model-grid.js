@@ -76,7 +76,11 @@ define([
       if (options.columns) {
         this.columns = options.columns;
       } else {
-        this.colGene = new colGene({ url: this.url + 'getFields?name=' + this.name, paginable: this.pagingServerSide, checkedColl: options.checkedColl });
+        this.colGene = new colGene({ 
+          url: this.url + 'getFields?name=' + this.name,
+          paginable: this.pagingServerSide,
+          checkedColl: options.checkedColl 
+        });
         this.columns = this.colGene.columns;
       }
 
@@ -88,9 +92,11 @@ define([
       else {
         this.initCollectionFromServer();
       }
-      if (!this.pagingServerSide) {
-        Backgrid.Column.prototype.defaults.headerCell = undefined;
-      }
+
+      this.setHeaderCell();
+
+
+
       if (options.filterCriteria) {
         this.filterCriteria = options.filterCriteria;
       }
@@ -99,41 +105,44 @@ define([
       this.eventHandler();
     },
 
-    setHeaderCell: function () {
-/*      var hc = Backgrid.HeaderCell.extend({
-        onClick: function (e) {
-          e.preventDefault();
+    setHeaderCell: function() {
+      if (!this.pagingServerSide) {
+        Backgrid.Column.prototype.defaults.headerCell = undefined;
+      } else {
+          Backgrid.Column.prototype.defaults.headerCell = Backgrid.HeaderCell.extend({
+            onClick: function (e) {
+              e.preventDefault();
+              var column = this.column;
+              var collection = this.collection;
+              var sortCriteria = (collection.sortCriteria && typeof collection.sortCriteria.id === 'undefined') ? collection.sortCriteria : {};
 
-          var that = this;
-          var column = this.column;
-          var collection = this.collection;
-          var sortCriteria = (collection.sortCriteria && typeof collection.sortCriteria.id === 'undefined') ? collection.sortCriteria : {};
-          switch (column.get('direction')) {
-            case null:
-              column.set('direction', 'ascending');
-              sortCriteria[column.get('name')] = 'asc';
-              break;
-            case 'ascending':
-              column.set('direction', 'descending');
-              sortCriteria[column.get('name')] = 'desc';
-              break;
-            case 'descending':
-              column.set('direction', null);
-              delete sortCriteria[column.get('name')];
-              break;
-            default:
-              break;
-          }
-          var tmp = this.column.attributes.name;
-          if (!Object.keys(sortCriteria).length > 0)
-            collection.sortCriteria[tmp] = 'asc';
-          collection.fetch({ reset: true, success: function(){
-          } });
-        },
-      });
-      for (var i = 0; i < this.columns.length; i++) {
-        this.columns[i].headerCell = hc;
-      };*/
+              switch(column.get('direction')){
+                case null:
+                  column.set('direction', 'ascending');
+                  sortCriteria[column.get('name')] = 'asc';
+                  break;
+                case 'ascending':
+                  column.set('direction', 'descending');
+                  sortCriteria[column.get('name')] = 'desc';
+                  break;
+                case 'descending':
+                  column.set('direction', null);
+                  delete sortCriteria[column.get('name')];
+                  break;
+                default:
+                  break;
+              }
+              
+              var tmp= this.column.attributes.name;
+
+              if(!Object.keys(sortCriteria).length > 0)
+                collection.sortCriteria[tmp] = 'asc';
+              
+              collection.sortCriteria = sortCriteria;
+              collection.fetch({reset: true});
+            },
+          });
+        }
     },
 
     initCollectionFromServer: function () {
