@@ -112,6 +112,12 @@ class ModuleForms(Base):
         if self.Validators is not None:
             self.dto['validators'] = json.loads(self.Validators)
 
+        if self.Options is not None:
+            try:
+                self.dto['options'] = json.loads(self.Options)
+            except:
+                pass
+
         if self.Required == 1 :
             if self.InputType=="Select":
                 self.dto['validators'].append("required")
@@ -205,7 +211,7 @@ class ModuleForms(Base):
         'Select': InputSelect,
         'ListOfNestedModel' : InputLNM,
         'AutocompTreeEditor' : InputThesaurus,
-        'AutocompleteEditor': InputAutocomplete
+        'AutocompleteEditor': InputAutocomplete,
         }
 
 
