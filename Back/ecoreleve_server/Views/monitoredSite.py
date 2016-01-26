@@ -26,7 +26,7 @@ from pyramid.response import Response
 from traceback import print_exc
 from collections import OrderedDict
 
-prefix = 'monitoredSite'
+prefix = 'monitoredSites'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET')
