@@ -18,6 +18,7 @@ define([
 
   return Marionette.LayoutView.extend({
     template: 'app/modules/stations/templates/tpl-observation.html',
+    className: 'full-height hidden',
 
     ui: {
       'stationForm': '#stationForm',
@@ -26,7 +27,7 @@ define([
 
     initialize: function(options) {
       this.stationId = options.stationId;
-      this.objectType = this.model.attributes.FK_ProtocoleType;
+      this.objectType = this.model.get('FK_ProtocoleType');
     },
 
     renderObs: function() {
