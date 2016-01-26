@@ -29,7 +29,7 @@ define([
 
     events: {
       'click button#submit': 'filter',
-      'click .tab-link': 'displayTab',
+      'click #stationType a.tab-link': 'displayTab',
       'click #back': 'hideDetails',
       'click button#activeGridPanel': 'activeGridPanel',
       'click button#activeMapPanel': 'activeMapPanel',
@@ -170,7 +170,6 @@ define([
     },
 
     displayTab: function(e) {
-      var _this = this;
       var type = $(e.target).attr('name');
 
       $('.tab-ele').removeClass('activeTab');
