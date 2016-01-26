@@ -1,0 +1,116 @@
+/***********--------- Update GRID/FILTER ------------*************/
+UPDATE ModuleGrids SET GridRender = 0 WHERE GridRender is NULL 
+
+----------- Refact Conf Station GRID
+DELETE ModuleGrids WHERE module_id = 3 
+GO
+
+INSERT INTO ModuleGrids ( Module_ID, TypeObj, Name, Label, GridRender, GridSize, CellType, GridOrder, QueryName, Options, FilterOrder, FilterSize, FilterClass, IsSearchable, FilterDefaultValue, FilterRender, FilterType, 
+                         Status)
+VALUES (3,NULL,'FK_ProtocoleType','Protocole Name',0,1,'string',0,'Forced','SELECT [ID] as val,[Name] as label FROM [ProtocoleType] order by name' ,60,2,NULL,1,NULL,4,'Select',NULL),
+
+(3,NULL,'FK_Individual','Individual ID' ,0,1,'string',0,'Forced',NULL,70,2,NULL,1,NULL,4,'Text',NULL),
+
+(3,NULL,'ID','ID',2,1,'integer',1,NULL,NULL,10,2,NULL,1,NULL,4,'Text',NULL),
+
+(3,NULL,'StationDate','Date',2,1,'string',10,NULL,'{"isInterval":1}',30,2,NULL,1,NULL,4,'DateTimePicker',NULL),
+
+(3,NULL,'Name','Station',2,1,'string',5,NULL,'{"source": "autocomplete/stations/Name", "minLength":3}',20,2,NULL,1,NULL,4,'AutocompleteEditor',NULL),
+
+(3,NULL,'LAT','Latitude',2,1,'string',30,NULL,NULL,100,2,NULL,1,NULL,4,'Number',NULL),
+
+(3,NULL,'LON','Longitude',2,1,'string',40,NULL,NULL,110,2,NULL,1,NULL,4,'Number',NULL),
+
+(3,NULL,'fieldActivityId','Field Activity',2,1,'string',50,NULL,'SELECT [Name] as label , ID as val FROM  [fieldActivity]',40,2,NULL,1,NULL,4,'Select',NULL),
+
+(3,NULL,'FK_Region','Region',2,1,'string',60,'Region',
+'SELECT [Region]  as val,[Region] as label 
+FROM  [Region] r 
+where EXISTS (Select * From Station s where s.FK_Region = r.ID)' ,50,2,NULL,1,NULL,4,'Select',NULL),
+
+(3,NULL,'FK_MonitoredSite','Monitored Site',0,1,'string',70,'Name','{"source": "autocomplete/monitoredSites/Name", "minLength":3}',25,2,NULL,1,NULL,4,'AutocompleteEditor',NULL),
+
+(3,NULL,'Place','Place',0,1,'string',65,NULL,'{"source": "autocomplete/stations/Place", "minLength":3}',45,2,NULL,1,NULL,4,'AutocompleteEditor',NULL),
+
+(3,NULL,'FK_FieldWorker','FieldWorkers',2,1,'string',120,'FieldWorkers','{"source": "autocomplete/users/Login/ID", "minLength":3}',35,2,NULL,1,NULL,4,'AutocompleteEditor',NULL),
+
+(3,NULL,'ELE','Elevation',0,1,'number',0,NULL,NULL,120,2,NULL,1,NULL,4,'Number',NULL)
+
+GO
+
+
+----------- Refact Conf Sensor GRID
+
+UPDATE ModuleGrids SET Label ='Identifier'
+WHERE Name = 'UnicIdentifier' and Module_ID = 14
+
+UPDATE ModuleGrids SET Options ='
+SELECT Distinct Name as label, Name as val FROM SensorType'
+WHERE Name = 'FK_SensorType' and Module_ID = 14
+
+
+UPDATE ModuleGrids SET IsSearchable = 1 , FilterOrder = 20
+WHERE Name = 'Status' and Module_ID = 14
+
+
+INSERT INTO ModuleGrids ( Module_ID, TypeObj, Name, Label, GridRender, GridSize, CellType, GridOrder, QueryName, Options, FilterOrder, FilterSize, FilterClass, IsSearchable, FilterDefaultValue, FilterRender, FilterType, 
+                         Status)
+
+Values (14,NULL,'Transmitter_Frequency','Frequency',0,0,'number',20,NULL,NULL,4,1,NULL,1,NULL,4,'Number',NULL)
+GO
+
+
+----------- Refact Filter order in Conf Individual GRID
+DELETE ModuleGrids WHERE Name = 'Age' and Module_ID = 8
+
+UPDATE  ModuleGrids SET FilterOrder = 10
+WHERE Name = 'ID' and Module_ID = 8  and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 20,GridOrder = 100,GridRender = 1
+,QueryName = 'Forced', Label= 'Current Sensor Identifier'
+, Options = '{"source": "autocomplete/sensors/UnicIdentifier", "minLength":3}', FilterType = 'AutocompleteEditor'
+WHERE Name = 'FK_Sensor' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 30 ,FilterType = 'Text',GridOrder = 110,GridRender = 0
+WHERE Name = 'frequency' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 30,GridOrder = 40
+WHERE Name = 'Chip_Code' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 40,GridRender = 1, GridOrder = 50
+WHERE Name = 'Breeding_Ring_Code' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 50,GridOrder = 60,GridRender = 1
+WHERE Name = 'Release_Ring_Code' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 60
+WHERE Name = 'Mark_code_1' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 70
+WHERE Name = 'Mark_code_2' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 80,GridOrder = 140,GridRender = 1
+WHERE Name = 'Survey_type' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 90,GridOrder = 130,GridRender = 1
+WHERE Name = 'Monitoring_Status' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 100,GridOrder = 160,GridRender = 1, QueryName = 'Forced'
+WHERE Name = 'Status_' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 110,GridOrder = 20,GridRender = 1
+WHERE Name = 'Species' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 120,GridOrder = 150,GridRender = 1
+WHERE Name = 'Origin' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+UPDATE  ModuleGrids SET FilterOrder = 130,GridOrder = 30,GridRender = 1
+WHERE Name = 'Sex' and Module_ID = 8 and (TypeObj = 1 or TypeObj is NULL)
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('9_Update_Conf_Grid',GETDATE(),(SELECT db_name()))
+
+
+GO
