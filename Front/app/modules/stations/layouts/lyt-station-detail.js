@@ -12,13 +12,11 @@ define([
 
   'ns_form/NSFormsModuleGit',
   'ns_navbar/ns_navbar',
-
-  './cov-editor',
-
   'i18n'
 
 ], function($, _, Backbone, Marionette, Radio, LytProto,
-  Swal, config, NsForm, Navbar, ProtoCompView
+
+  Swal, config, NsForm, Navbar
 ) {
 
   'use strict';
@@ -38,10 +36,15 @@ define([
     },
 
     ui: {
-      protoEditor: '#protoEditor',
+      accordionContainer: '#accordionContainer',
+      protoList: '#protoList',
       total: '#total',
       formStation: '#stationForm',
       formStationBtns: '#stationFormBtns',
+    },
+
+    events: {
+      'click #addProto': 'addProtoFromList',
     },
 
     total: 0,
@@ -59,17 +62,27 @@ define([
       }
     },
 
+    check: function() {
+    },
+
+    validate: function() {
+      return true;
+    },
+
+    getStepOptions: function() {
+    },
+
     onDestroy: function() {
     },
 
     onShow: function() {
       if (this.stationId) {
         this.displayStation(this.stationId);
-        //this.feedProtoList();
+        this.feedProtoList();
       }else {
         this.rgNavbar.show(this.navbar);
         this.display(this.model);
-        //this.feedProtoList();
+        this.feedProtoList();
       }
       //this.$el.i18n();
       //this.translater = Translater.getTranslater();
@@ -100,12 +113,21 @@ define([
         id: stationId,
         reloadAfterSave: true,
         afterShow : function(){
-          $(".datetime").attr('placeholder','DD/MM/YYYY');
+          $(".datetime").attr('placeholder','DD/MM/YYYY'); 
+
           $("#dateTimePicker").on("dp.change", function (e) {
             $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
            });
         }
       });
+
+      this.nsForm.model.on('change:fieldActivityId', function(){
+
+        _this.displayProtos();
+      });
+
+      _this.displayProtos();
+
       this.nsForm.afterDelete = function() {
         var jqxhr = $.ajax({
           url: config.coreUrl + 'stations/' + _this.stationId,
@@ -114,24 +136,57 @@ define([
         }).done(function(resp) {
           Backbone.history.navigate('#stations', {trigger: true});
         }).fail(function(resp) {
+
         });
       };
-
-      this.nsForm.model.on('change:fieldActivityId', function() {
-        _this.displayProtos();
-      });
-      //then display protocols
-      _this.displayProtos();
     },
 
     displayProtos: function() {
-      this.protoCollView = new ProtoCompView({stationId: this.stationId});
+      var _this = this;
+      var ProtoColl = Backbone.Collection.extend({
+        url: config.coreUrl + 'stations/' + this.stationId + '/protocols',
+        fetch: function(options) {
+          if (!options) {
+            var options = {};
+          }
+          options.data = {
+            FormName: 'ObsForm',
+            DisplayMode: 'edit'
+          };
+          options.success = function(protos) {
+
+          };
+          return Backbone.Collection.prototype.fetch.call(this, options);
+        },
+
+      });
+
+      this.protoColl = new ProtoColl();
+      this.protoColl.fetch({reset: true});
+
+      var ProtoCollView = Backbone.Marionette.CollectionView.extend({
+        childView: LytProto,
+        childViewOptions: {
+          stationId:  this.stationId
+        },
+        id: 'accordion',
+        onRender: function() {
+          var _this = this;
+          this.$el.on('show.bs.collapse', function(e) {
+            if(!$(e.target).is('li')){
+              _this.$el.find('.in').collapse('hide');
+            }
+          });
+        },
+      });
+
+      this.protoCollView = new ProtoCollView({collection: this.protoColl});
       this.protoCollView.render();
-      this.ui.protoEditor.html(this.protoCollView.el);
+      this.ui.accordionContainer.html(this.protoCollView.el);
+
+      this.bindProtosEvts();
     },
 
-
-/*
     bindProtosEvts: function() {
       this.listenTo(this.protoCollView.collection, 'destroy', this.onProtoDestroy);
       this.listenTo(this.protoCollView.collection, 'add', this.onProtoAdd);
@@ -139,6 +194,22 @@ define([
     },
 
     onProtoChange: function(mod) {
+      /*
+            if(mod._previousAttributes.total){
+              //up on a proto
+              var prev = mod._previousAttributes.total;
+              this.total -= prev;
+              if(Number.isInteger(mod.get('total'))){
+
+                this.total += (prev+1)
+              }else{
+                this.total += (prev-1);
+              }
+            }else{
+              //new proto
+              this.total += mod.get('total');
+            }
+            this.ui.total.html(this.total);*/
       this.total = 0;
       for (var i = 0; i < this.protoCollView.collection.models.length; i++) {
         this.total += this.protoCollView.collection.models[i].get('obs').length;
@@ -157,6 +228,22 @@ define([
       this.ui.total.html(this.total);
     },
 
+    feedProtoList: function() {
+      // init protolist
+      this.ui.protoList.append('<option value="" disabled selected>Add a protocol</option>');
+      var _this = this;
+      this.protoSelectList = new Backbone.Collection();
+      this.protoSelectList.fetch({
+        url: config.coreUrl + '/protocolTypes',
+        reset: true,
+        success: function() {
+          _.each(_this.protoSelectList.models,function(model) {
+            _this.ui.protoList.append(new Option(model.get('Name'),model.get('ID')));
+          },this);
+        },
+      });
+    },
+
     addProtoFromList: function() {
       var name = this.ui.protoList.find(':selected').text();
       var objectType = parseInt(this.ui.protoList.val());
@@ -167,13 +254,13 @@ define([
         var viewId = this.protoCollView.children._indexByModel[cid];
         var view = this.protoCollView.children._views[viewId];
         view.addObs();
-      } else {
+      }else {
         //append a new proto
-        this.addNewProtoType(name, objectType);
+        this.addProtoType(name, objectType);
       }
     },
 
-    addNewProtoType: function(name, objectType) {
+    addProtoType: function(name, objectType) {
       var _this = this;
 
       var proto = new Backbone.Model();
@@ -198,40 +285,12 @@ define([
             schema: resp.schema
           }});
           _this.protoCollView.collection.push(proto);
-          _this.updateMenuBar();
         },
         error: function(msg) {
           console.warn('request new proto error');
         }
       });
     },
-
-    updateMenuBar: function() {
-      var _this = this;
-      var tpl = '';
-      this.protoCollView.collection.each(function(model) {
-        var name = model.get('Name');
-        var total = model.get('total');
-        var id = model.get('ID');
-
-        var tmp = '\
-          <li class="list-group-item" value="' + id + 'proto">\
-            <span>' + name + '</span><span id="total" class="badge pull-right">' + total + '</span>\
-            <button value="' + id + 'proto" id="addObs" class="btn btn-sm btn-prevent-collapse btn-success" value=""><span class="reneco reneco-add"></span></button>\
-          </li>';
-
-        tpl += tmp;
-      });
-      _this.ui.protoListContainer.html(tpl);
-    },
-
-    displayProto: function(e) {
-      var value = $(e.currentTarget).val();
-      this.ui.protoFormsContainer.find('div.protocol').each(function() {
-        $(this).addClass('hidden');
-      });
-      this.ui.protoFormsContainer.find('div#' + value + 'proto').removeClass('hidden');
-    }*/
 
   });
 });

@@ -15,7 +15,7 @@ define([
   'use strict';
   return Marionette.LayoutView.extend({
     template: 'app/modules/stations/templates/tpl-protocol.html',
-    className: 'full-height hidden',
+    className: 'panel panel-default',
 
     ui: {
       'pagination': '#pagination',
@@ -29,15 +29,24 @@ define([
       'click #pagination li#prevObs': 'prevObs',
       'click #pagination li#nextObs': 'nextObs',
       'click #addObs': 'addObs'
-    },
 
-    modelEvents: {
-      'change:current': 'changeVisibility',
+      
     },
 
     index: 0,
 
     initialize: function(options) {
+
+      //should be replace by the proto.default obs schema
+      /*
+      			var obsModel = Backbone.Model.extend({
+      			});
+      			var ObsColl = Backbone.Collection.extend({
+      				model: obsModel,
+      			});*/
+
+      //this.model.attributes.total = this.model.get('obs').length;
+      this.show = this.model.get('show');
 
       this.model.attributes.obs = new Backbone.Collection(this.model.get('obs'));
       this.model.set({total: this.model.get('obs').length});
@@ -48,14 +57,6 @@ define([
       this.bindModelEvts();
     },
 
-    changeVisibility: function() {
-      if (this.model.get('current')) {
-        this.$el.removeClass('hidden');
-      } else {
-        this.$el.addClass('hidden');
-      }
-    },
-
     initObs: function() {
       var ObsCollView = Backbone.Marionette.CollectionView.extend({
         childView: LytObs,
@@ -63,10 +64,7 @@ define([
           stationId: this.stationId,
         }
       });
-      this.obsCollView = new ObsCollView({
-        collection: this.model.get('obs'), 
-        className: 'full-height'
-      });
+      this.obsCollView = new ObsCollView({collection: this.model.get('obs')});
       this.obsCollView.render();
     },
 
@@ -81,6 +79,9 @@ define([
       this.paginateObs();
       //display the first obs
       this.displayObs(0);
+      if (this.show) {
+        this.uncollapse();
+      }
     },
 
     addObs: function(e) {
@@ -105,7 +106,9 @@ define([
           patern.attributes.data = resp.data;
           patern.attributes.fieldsets = resp.fieldsets;
           patern.attributes.schema = resp.schema;
+
           _this.model.get('obs').push(patern);
+
         },
         error: function(msg) {
           console.warn('request error');
@@ -116,16 +119,13 @@ define([
     //could be better
     paginateObs: function() {
       this.ui.pagination.html('');
-      if (this.model.get('obs').length > 1) {
-        this.ui.pagination.removeClass('hidden');
+      if (this.model.get('obs').length != 1) {
         this.ui.pagination.append('<li id="prevObs"><button class="btn btn-default prev"><span class="reneco reneco-leftarrow"></span></button></li>');
         for (var i = 0; i < this.model.get('obs').length; i++) {
           var state = this.model.get('obs').models[i].get('state');
           this.ui.pagination.append('<li class="page"><button class="btn btn-default ' + state + '">' + (i + 1) + '</button></li>');
         }
         this.ui.pagination.append('<li id="nextObs"><button class="btn btn-default next"><span class="reneco reneco-rightarrow"></span></button></li>');
-      } else {
-        this.ui.pagination.addClass('hidden');
       }
     },
 
@@ -133,9 +133,9 @@ define([
       //display the obs at the good position
       this.ui.obs.find('div.obs').each(function(i) {
         if (i == index) {
-          $(this).parent().removeClass('hidden');
+          $(this).removeClass('hidden');
         }else {
-          $(this).parent().addClass('hidden');
+          $(this).addClass('hidden');
         }
       });
 
@@ -176,7 +176,7 @@ define([
 
       //display the new mod/view
       this.displayObs(this.index);
-      this.model.set('current', true);
+      this.uncollapse();
     },
 
     onObsDestroy: function(mod) {
@@ -204,5 +204,10 @@ define([
       this.paginateObs();
     },
 
+    uncollapse: function() {
+      this.$el.find('.panel-collapse').collapse('show');
+    },
+
   });
 });
+			//check if it's the last one
