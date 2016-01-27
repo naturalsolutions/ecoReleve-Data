@@ -150,12 +150,15 @@ define([
                   return rawValue;
                 }
             }),
-            },{
+            },
+            {
               name: 'FK_Sensor',
               label: 'FK_Sensor',
               editable: false,
-              cell: 'string'
-            }, {
+              cell: 'string',
+              renderable: false
+            }, 
+            {
               name: 'nb',
               label: 'NB',
               editable: false,
