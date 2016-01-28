@@ -24,7 +24,8 @@ define([
       'click span.picker': 'showPicker',
       'click #btnFilterPicker': 'filter',
       'click .cancel': 'hidePicker',
-      'click button#new': 'onClickNew',
+      'click button#saveFromCriterias': 'saveFromCriteras',
+      'click button#createNew': 'createNew',
       'click #indivTypeTabs a.tab-link' : 'indivTypeTabs',
     },
 
@@ -81,7 +82,8 @@ define([
       this._input = this.$el.find('input[name="' + this.key + '"]')[0];
       this._modal = this.$el.find('#modalPicker');
       this._creationContainer = this.$el.find('div#creationContainer');
-      this._btnNew = this.$el.find('button#newObj');
+      this._btnNew = this.$el.find('button#createNew');
+      this._btnSaveFromCriterias = this.$el.find('button#saveFromCriterias');
       this._indivTypeTabs = this.$el.find('ul#indivTypeTabs');
 
       this.translater = Translater.getTranslater();
@@ -91,24 +93,9 @@ define([
       if (this.firstShow) {
         this.displayGrid();
         this.displayFilter();
-        this.getTypes();
         this.firstShow = false;
       }
       this._modal.fadeIn('fast');
-    },
-
-    getTypes: function() {
-      $.ajax({
-        url: this.url + 'getType',
-        method: 'GET',
-        contentType: 'application/json',
-        context: this,
-      }).done(function(data) {
-        this.tooltipListData = data;
-        this._btnNew.removeClass('hidden');
-      }).fail(function(resp) {
-
-      });
     },
 
     displayGrid: function() {
@@ -147,6 +134,7 @@ define([
     filter: function(e) {
       e.preventDefault();
       this.filters.update();
+      console.log(this.filters);
     },
 
     rowClicked: function(row) {
@@ -172,23 +160,26 @@ define([
       this._modal.fadeOut('fast');
     },
 
-    onClickNew: function(e) {
-      var _this = this;
-      this._btnNew.tooltipList({
-        availableOptions: this.tooltipListData,
-        liClickEvent: function(value, parent, elem) {
-          //var val = $(elem)[0].textContent.replace(/\s/g, '');
-          var val = value;
-          //todo
-          var params = {
-            picker: _this,
-            type: val,
-            ojectName: _this.ojectName
-          };
-          _this.displayCreateNewLyt(params);
-        },
-        position: 'top'
-      });
+    saveFromCriteras: function(e) {
+      var data = this.filters.getCriteriasForForm();
+
+      var params = {
+        picker: this,
+        type: 2,
+        ojectName: 'individuals',
+        data: data
+      };
+      this.displayCreateNewLyt(params);
+    },
+
+    createNew: function(e) {
+      var params = {
+        picker: this,
+        type: 1,
+        ojectName: 'individuals',
+        data: data
+      };
+      this.displayCreateNewLyt(params);
     },
 
     displayCreateNewLyt: function(params) {
@@ -206,8 +197,12 @@ define([
 
       if (type == 'standard') {
         this.typeObj = 1;
-      }else {
+        this._btnNew.removeClass('hidden');
+        this._btnSaveFromCriterias.addClass('hidden');
+      } else {
         this.typeObj = 2;
+        this._btnNew.addClass('hidden');
+        this._btnSaveFromCriterias.removeClass('hidden');
       }
 
       this.com = new Com();
