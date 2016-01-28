@@ -1,0 +1,11 @@
+UPDATE [EcoReleve_ECWP].[dbo].[ModuleForms]
+SET Label ='Distance from observer'
+WHERE Label like 'Distance from obs%';
+
+UPDATE [EcoReleve_ECWP].[dbo].[ModuleForms]
+SET Label ='Fieldworkers'
+WHERE Label like  'field%orke%';
+
+UPDATE [EcoReleve_ECWP].[dbo].[ModuleForms]
+SET Label ='Nb fieldworkers'
+WHERE Label like  'nb field%orke%';

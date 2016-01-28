@@ -16,7 +16,7 @@ route_prefix = 'export/'
 def getListThemeEtude(request):
     session = request.dbsession
     th = BaseExport.metadata.tables['ThemeEtude']
-    query = select([th.c['ID'],th.c['Caption']])
+    query = select([th.c['ID'],th.c['Caption']]).order_by(th.c['Caption'].asc())
     result = [dict(row) for row in session.execute(query).fetchall()]
 
     return result
