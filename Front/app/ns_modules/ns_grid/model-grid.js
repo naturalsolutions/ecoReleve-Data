@@ -7,9 +7,10 @@ define([
   'backgrid.paginator',
   'ns_grid/model-col-generator',
   'moment',
+  'backgrid-moment-cell',
   'floatThead'
   //'backgridSelect_all',
-], function ($, _, Backbone, Radio, PageColl, Paginator, colGene, moment) {
+], function ($, _, Backbone, Radio, PageColl, Paginator, colGene, moment,MomentCell) {
   'use strict';
   return Backbone.Model.extend({
 
