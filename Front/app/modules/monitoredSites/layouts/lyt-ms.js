@@ -10,8 +10,8 @@ define([
 
   'ns_modules/ns_com',
   'ns_grid/model-grid',
-  'ns_filter/model-filter',
-
+  //'ns_filter/model-filter_module',
+  'ns_filter_bower',
   './lyt-ms-detail',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,

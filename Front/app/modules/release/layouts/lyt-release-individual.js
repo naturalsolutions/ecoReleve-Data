@@ -9,7 +9,8 @@ define([
   'config',
   'ns_modules/ns_com',
   'ns_grid/model-grid',
-  'ns_filter/model-filter',
+  //'ns_filter/model-filter_module',
+  'ns_filter_bower',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
