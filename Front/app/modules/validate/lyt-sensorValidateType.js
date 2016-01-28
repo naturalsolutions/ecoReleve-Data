@@ -197,7 +197,7 @@ define([
           this.cols = [
             {
               name: 'FK_ptt',
-              label: 'Unic Identifier',
+              label: 'Sensor Identifier',
               editable: false,
               cell: 'string'
             },
