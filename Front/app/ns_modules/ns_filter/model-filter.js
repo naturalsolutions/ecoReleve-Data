@@ -137,7 +137,7 @@ define([
       var template = tpl;
       var template = (added) ? tplAdded : tpl;
 
-      if (fieldName == 'Status') classe = 'hidden';
+      //if (fieldName == 'Status') classe = 'hidden';
       var options = this.getValueOptions(dataRow);
       if (type == 'Select' || type == 'Checkboxes' || type == 'AutocompTreeEditor') {
         editorClass += ' list-inline ';
@@ -249,7 +249,7 @@ define([
         return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' },{ label: 'In', val: 'In' }];
           break;
         case "DATETIME":
-          return operatorsOptions = ['<', '>', '=', '<>', '<=', '>='];
+          return operatorsOptions = ['=', '<', '>', '<>', '<=', '>='];
           break;
         case "Select" :
           return operatorsOptions = ['Is', 'Is not'];
@@ -261,7 +261,7 @@ define([
           break;
           break;
         default:
-          return operatorsOptions = ['<', '>', '=', '<>', '<=', '>='];
+          return operatorsOptions = ['=','<', '>', '<>', '<=', '>='];
           break;
       }
     },

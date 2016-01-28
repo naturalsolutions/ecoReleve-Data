@@ -28,6 +28,7 @@ from traceback import print_exc
 from pyramid import threadlocal
 from ..utils.datetime import parse
 from ..utils.parseValue import parseValue,find,isEqual
+from sqlalchemy_utils import get_hybrid_properties
 
 
 Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt','float':'ValueFloat'}
@@ -80,13 +81,13 @@ class ObjectWithDynProp:
             gridFields = self.ObjContext.query(ModuleGrids
             ).filter(and_(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType),
                 or_(ModuleGrids.TypeObj == typeID ,ModuleGrids.TypeObj ==None ))
-            ).order_by(asc(ModuleGrids.GridOrder)).all()
+            ).filter(ModuleGrids.GridRender>0).order_by(asc(ModuleGrids.GridOrder)).all()
         except:
             gridFields = self.ObjContext.query(ModuleGrids).filter(
                 ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
-                ).order_by(asc(ModuleGrids.GridOrder)).all()
+                ).filter(ModuleGrids.GridRender>0).order_by(asc(ModuleGrids.GridOrder)).all()
 
-        # gridFields.sort(key=lambda x: str(x.GridOrder))
+        # gridFields.sort(key=lambda x: x.GridOrder)
         cols = []
         #### return only fileds existing in conf ####
         for curConf in gridFields:
@@ -252,8 +253,9 @@ class ObjectWithDynProp:
     def GetFlatObject(self,schema=None):
         ''' return flat object with static properties and last existing value of dyn props '''
         resultat = {}
+        hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
         if self.ID is not None : 
-            max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow))
+            max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow),len(hybrid_properties))
             for i in range(max_iter) :
                 #### Get static Properties ####
                 try :
@@ -267,6 +269,12 @@ class ObjectWithDynProp:
                     resultat[curDynPropName] = self.GetProperty(curDynPropName)
                 except Exception as e :
                     pass
+                try :
+                    PropName = hybrid_properties[i]
+                    resultat[PropName] = self.GetProperty(PropName)
+                except Exception as e :
+                    pass
+
         else : 
             max_iter = len( self.__table__.columns)
             for i in range(max_iter) :
