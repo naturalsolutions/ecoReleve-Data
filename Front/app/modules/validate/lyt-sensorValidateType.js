@@ -132,6 +132,12 @@ define([
           this.ui.frequency.find('option[value="60"]').prop('selected', true);
           this.cols = [
             {
+              name: 'FK_ptt',
+              label: 'Unic Identifier',
+              editable: false,
+              cell: 'string'
+            },
+            {
               name: 'FK_Individual',
               label: 'Individual ID',
               editable: false,
@@ -144,17 +150,15 @@ define([
                   return rawValue;
                 }
             }),
-            },{
+            },
+            {
               name: 'FK_Sensor',
               label: 'FK_Sensor',
               editable: false,
-              cell: 'string'
-            },{
-              name: 'FK_ptt',
-              label: 'Unic Identifier',
-              editable: false,
-              cell: 'string'
-            }, {
+              cell: 'string',
+              renderable: false
+            }, 
+            {
               name: 'nb',
               label: 'NB',
               editable: false,
@@ -192,6 +196,12 @@ define([
           this.ui.frequency.find('option[value="all"]').prop('selected', true);
           this.cols = [
             {
+              name: 'FK_ptt',
+              label: 'Unic Identifier',
+              editable: false,
+              cell: 'string'
+            },
+            {
               name: 'FK_Individual',
               label: 'Individual ID',
               editable: false,
@@ -209,11 +219,6 @@ define([
               label: 'Sensor',
               editable: false,
               renderable: false,
-              cell: 'string'
-            },{
-              name: 'FK_ptt',
-              label: 'Unic Identifier',
-              editable: false,
               cell: 'string'
             }, {
               name: 'nb',

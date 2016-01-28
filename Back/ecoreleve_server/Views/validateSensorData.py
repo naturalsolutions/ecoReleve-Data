@@ -65,7 +65,7 @@ def type_unchecked_list(request):
 
     queryStmt = selectStmt.where(unchecked.c['checked'] == 0
             ).group_by(unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate'], unchecked.c['FK_Sensor'],
-            ).order_by(unchecked.c['FK_Individual'].desc())
+            ).order_by(unchecked.c['FK_ptt'].asc())
     data = session.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
     result = [{'total_entries':len(dataResult)}]
