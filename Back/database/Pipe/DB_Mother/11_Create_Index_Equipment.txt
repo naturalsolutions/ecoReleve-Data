@@ -1,0 +1,15 @@
+CREATE NONCLUSTERED INDEX [IX_Equipment_FK_Sensor_StartDate] ON [dbo].[Equipment]
+(
+	[FK_Sensor] ASC,
+	[Deploy] ASC,
+	[StartDate] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+GO
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('11_Create_Index_Equipment',GETDATE(),(SELECT db_name()))
+
+
+GO
