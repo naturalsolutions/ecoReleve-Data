@@ -1,0 +1,10 @@
+Update ModuleGrids set Options ='SELECT [Name] as label ,  [Name] as val FROM  [fieldActivity] order by Name'
+where Module_ID = 3 and Name = 'fieldActivityId'
+
+Go
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('12_FixBug Filter_on_FieldActivity',GETDATE(),(SELECT db_name()))
+
+
+GO

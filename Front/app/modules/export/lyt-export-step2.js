@@ -4,7 +4,8 @@ define([
 	'backbone',
 	'marionette',
 	'ns_modules/ns_com',
-	'ns_filter/model-filter',
+	//'ns_filter/model-filter_module',
+  'ns_filter_bower',
 	'ns_map/ns_map',
 	'config',
 	'i18n'
@@ -56,7 +57,7 @@ define([
       var filter = [{
         editable: true,
         fieldClass: [''],
-        label: filterLabel,
+        title: filterLabel,
         name: filterName,
         options: [],
         type: type,

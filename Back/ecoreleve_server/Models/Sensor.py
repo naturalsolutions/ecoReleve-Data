@@ -54,7 +54,6 @@ class Sensor (Base,ObjectWithDynProp) :
         return self.SensorDynPropValues
 
     def GetDynProps(self,nameProp):
-        print(nameProp)
         return  self.ObjContext.query(SensorDynProp).filter(SensorDynProp.Name==nameProp).one()
 
     def GetType(self):
