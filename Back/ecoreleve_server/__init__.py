@@ -78,7 +78,7 @@ def main(global_config, **settings):
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
     config.add_request_method(db, name='dbsession', reify=True)
 
-    if 'loadExportDB' in settings and not settings['loadExportDB'] :
+    if 'loadExportDB' in settings and settings['loadExportDB'] == 'False' :
         print('''
             /!\================================/!\ 
             WARNING : 

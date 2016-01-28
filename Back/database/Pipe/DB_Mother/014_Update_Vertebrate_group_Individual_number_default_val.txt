@@ -13,5 +13,7 @@ OR Name like 'nb_indeterminate'
 
 
 
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('14_Update_Vertebrate_group_Individual_number_default_val',GETDATE(),(SELECT db_name()))
 
 
+GO

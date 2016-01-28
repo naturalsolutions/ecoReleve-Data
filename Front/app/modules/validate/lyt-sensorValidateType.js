@@ -241,7 +241,7 @@ define([
               editable: false,
               cell: 'string',
             }, {
-              name: 'min_date',
+              name: 'max_date',
               label: 'Data To',
               editable: false,
               cell: 'string',
