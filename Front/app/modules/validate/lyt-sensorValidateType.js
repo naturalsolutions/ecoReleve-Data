@@ -179,7 +179,7 @@ define([
               editable: false,
               cell: 'string',
             }, {
-              name: 'min_date',
+              name: 'max_date',
               label: 'Data To',
               editable: false,
               cell: 'string',
@@ -197,7 +197,7 @@ define([
           this.cols = [
             {
               name: 'FK_ptt',
-              label: 'Unic Identifier',
+              label: 'Sensor Identifier',
               editable: false,
               cell: 'string'
             },
@@ -241,7 +241,7 @@ define([
               editable: false,
               cell: 'string',
             }, {
-              name: 'min_date',
+              name: 'max_date',
               label: 'Data To',
               editable: false,
               cell: 'string',

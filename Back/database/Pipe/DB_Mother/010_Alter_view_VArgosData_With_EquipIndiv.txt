@@ -1,0 +1,20 @@
+
+ALTER View [dbo].[VArgosData_With_EquipIndiv] as (
+
+
+
+SELECT t.ID, t.FK_Individual,s.ID as FK_Sensor,t.StartDate,t.EndDate,a.*
+  FROM [ecoReleve_Sensor].[dbo].[T_argosgps] a
+  JOIN dbo.Sensor s ON CONVERT(VARCHAR(250),a.FK_ptt) = s.UnicIdentifier
+  LEFT JOIN IndividualEquipment t
+  ON s.ID = t.FK_Sensor AND a.date >= t.StartDate AND (a.[date] < t.EndDate OR t.EndDate IS NULL)
+  WHERE a.lon IS NOT NULL AND a.lat IS NOT NULL
+
+  )
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('10_Alter_view_VArgosData_With_EquipIndiv',GETDATE(),(SELECT db_name()))
+
+
+GO
