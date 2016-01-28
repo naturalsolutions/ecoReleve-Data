@@ -1,0 +1,17 @@
+UPDATE [EcoReleve_ECWP].[dbo].[ModuleForms]
+SET DefaultValue = 0
+WHERE Name like 'nb_adult_male'
+OR Name like 'nb_adult_female'
+OR Name like 'nb_adult_indeterminate'
+OR Name like 'nb_juvenile_male' 
+OR Name like 'nb_juvenile_female'
+OR Name like 'nb_juvenile_indeterminate'
+OR Name like 'nb_newBorn_male'
+OR Name like  'nb_newBorn_female'
+OR Name like 'nb_newBorn_indeterminate'
+OR Name like 'nb_indeterminate'
+
+
+
+
+

@@ -94,7 +94,8 @@ class ModuleForms(Base):
                 curInputType = 'Text'
                 self.fullPath = True
 
-        CssClass = FieldSizeToClass[curSize]
+        # CssClass = FieldSizeToClass[curSize]
+        CssClass = 'col-md-'+str(curSize)
 
         self.dto = {
             'name': self.Name,

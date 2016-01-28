@@ -1,0 +1,81 @@
+
+/***********--------- Update Forms------------*************/
+INSERT INTO ModuleForms 
+(module_id,TypeObj,Name,Label,Required,FieldSizeEdit,FieldSizeDisplay,InputType,editorClass,FormRender,FormOrder,Legend)
+VALUES(2,1,'precision','Précision',0,0,0,'Number','form-control',2,35,'Location Infos')
+
+------ SET bootstrap col size --------
+UPDATE ModuleForms SET FieldSizeDisplay = 3
+where FieldSizeDisplay=0
+
+UPDATE ModuleForms SET FieldSizeDisplay = 6
+where FieldSizeDisplay=1
+
+UPDATE ModuleForms SET FieldSizeDisplay = 12
+where FieldSizeDisplay=2
+
+UPDATE ModuleForms SET FieldSizeEdit = 3
+where FieldSizeEdit=0
+
+UPDATE ModuleForms SET FieldSizeEdit = 6
+where FieldSizeEdit=1
+
+UPDATE ModuleForms SET FieldSizeEdit = 12
+where FieldSizeEdit=2
+
+----- Refact Indiv Form -----
+UPDATE ModuleForms Set Legend = 'Tag'
+WHERE Legend = 'Marks' and module_id = 9 
+
+INSERT INTO ModuleForms ([module_id],[TypeObj],[Name],[Label]
+      ,[Required],[FieldSizeEdit],[FieldSizeDisplay],[InputType]
+      ,[editorClass],[FormRender],[FormOrder],[Legend],[Options])
+VALUES (
+9,NULL,'Chip_Code','Chip Code',
+0,6,6,'Text',
+'form-control displayInput',2,20,'General Infos',NULL
+)
+
+UPDATE ModuleForms SET FieldSizeDisplay = 8
+WHERE Name = 'Species' and module_id = 9 
+
+UPDATE ModuleForms SET FieldSizeDisplay = 4
+WHERE Name = 'Sex' and module_id = 9 
+
+UPDATE ModuleForms SET FieldSizeDisplay = 4
+WHERE Name = 'Origin'  and module_id = 9 
+
+UPDATE ModuleForms SET FieldSizeDisplay = 4
+WHERE Name = 'Age'  and module_id = 9 
+
+UPDATE ModuleForms SET FieldSizeDisplay = 6
+WHERE Name = 'Birth_date'  and module_id = 9 
+
+UPDATE ModuleForms SET FieldSizeDisplay = 6
+WHERE Name = 'Death_date'  and module_id = 9 
+
+UPDATE ModuleForms SET FieldSizeDisplay = 4, Name = 'Status_'
+WHERE Name = 'Individual_Status'  and module_id = 9 
+
+UPDATE ModuleForms SET FieldSizeDisplay = 4
+WHERE Name = 'Monitoring_Status'  and module_id = 9 
+
+UPDATE ModuleForms SET FieldSizeDisplay = 4
+WHERE Name = 'Survey_type'  and module_id = 9 
+GO
+
+
+----- Refact Indiv death Protocol Form -----
+
+Update ModuleForms SET FieldSizeDisplay=12,FieldSizeEdit = 12
+Where module_id = 1 AND TypeObj = 215
+
+
+GO 
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('10_Update_Conf_Forms',GETDATE(),(SELECT db_name()))
+
+
+GO

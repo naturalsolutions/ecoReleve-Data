@@ -13,8 +13,11 @@ from sqlalchemy import (Column,
  Sequence,
  orm,
  and_,
- func)
+ func,
+ Table)
 from sqlalchemy.dialects.mssql.base import BIT
+from sqlalchemy.ext.hybrid import hybrid_property
+
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
@@ -38,6 +41,12 @@ class Individual (Base,ObjectWithDynProp) :
     IndividualDynPropValues = relationship('IndividualDynPropValue',backref='Individual',cascade="all, delete-orphan")
     Locations = relationship('Individual_Location')
 
+    _Status_ = relationship('IndividualStatus',uselist=False, backref="Individual")
+
+
+    @hybrid_property
+    def Status_(self):
+        return self._Status_.Status_
 
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
@@ -132,3 +141,16 @@ class Individual_Location(Base):
     creator =  Column(Integer)
     creationDate = Column(DateTime)
     type_ = Column(String(10))
+
+class IndividualStatus(Base):
+    __table__ =  Table('IndividualStatus', Base.metadata,
+        Column('FK_Individual', Integer, ForeignKey('Individual.ID'),primary_key= True),
+        Column('Status_', String)
+        )
+    FK_Individual = __table__.c['FK_Individual']
+    Status_ = __table__.c['Status_']
+
+    # __mapper_args__ = {
+    #     'polymorphic_on':Status_,
+    #     'polymorphic_identity':'object'
+    # }
