@@ -53,6 +53,8 @@ require.config({
     'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
     'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
 
+    'ns_filter_bower': '../bower_components/NaturalJS_Filter/model-filter',
+
 
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
@@ -68,7 +70,12 @@ require.config({
 
     'backgrid-moment-cell':'./vendors/backgrid-moment-cell',
   },
-
+  map: {
+      '*': {
+        'backbone_forms' : 'backbone-forms'
+      }
+  },
+  
   shim: {
     jquery: {
       exports: '$'

@@ -78,17 +78,17 @@ def main(global_config, **settings):
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
     config.add_request_method(db, name='dbsession', reify=True)
 
-    if 'loadExportDB' in settings and not settings['loadExportDB'] :
-        BaseExport.metadata.bind = engineExport
-        BaseExport.metadata.create_all(engineExport)
-        BaseExport.metadata.reflect(views=True, extend_existing=False)
-        config.registry.dbmakerExport = scoped_session(sessionmaker(bind=engineExport))
-    else:
+    if 'loadExportDB' in settings and settings['loadExportDB'] == 'False' :
         print('''
             /!\================================/!\ 
             WARNING : 
             Export DataBase NOT loaded, Export Functionality will not working
             /!\================================/!\ \n''')
+    else:
+        BaseExport.metadata.bind = engineExport
+        BaseExport.metadata.create_all(engineExport)
+        BaseExport.metadata.reflect(views=True, extend_existing=False)
+        config.registry.dbmakerExport = scoped_session(sessionmaker(bind=engineExport))
     # Add renderer for JSON objects
     json_renderer = JSON()
     json_renderer.add_adapter(datetime.datetime, datetime_adapter)

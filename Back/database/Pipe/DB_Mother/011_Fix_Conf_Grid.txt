@@ -1,0 +1,13 @@
+update ModuleGrids SET GridRender = 2 
+where Name = 'FK_MonitoredSite' and Module_ID = 3 
+
+update ModuleGrids SET QueryName = 'Name'
+where Name = 'fieldActivityId' and Module_ID = 3 
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('11_Fix_Conf_Grid',GETDATE(),(SELECT db_name()))
+
+
+GO

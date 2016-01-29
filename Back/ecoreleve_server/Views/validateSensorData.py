@@ -65,7 +65,7 @@ def type_unchecked_list(request):
 
     queryStmt = selectStmt.where(unchecked.c['checked'] == 0
             ).group_by(unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate'], unchecked.c['FK_Sensor'],
-            ).order_by(unchecked.c['FK_Individual'].desc())
+            ).order_by(unchecked.c['FK_ptt'].asc())
     data = session.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
     result = [{'total_entries':len(dataResult)}]
@@ -211,10 +211,11 @@ def auto_validation(request):
             ind_id = row['FK_Individual']
             ptt = row['FK_ptt']
 
-            if ind_id == 'null' : 
-                ind_id = None
-            else :
+            try :
                 ind_id = int(ind_id)
+            except TypeError:
+                ind_id = None
+
             nb_insert, exist, error = auto_validate_stored_procGSM_Argos(ptt,ind_id,1, type_,freq,session)
             Total_exist += exist
             Total_nb_insert += nb_insert
@@ -234,7 +235,9 @@ def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq,session):
         table = GsmDatasWithIndiv
 
     if ind_id is None:
-        stmt = update(table).where(and_(table.c['FK_Individual'] == None, table.c['FK_ptt'] == ptt)).values(checked =1)
+        stmt = update(table).where(and_(table.c['FK_Individual'] == None, table.c['FK_ptt'] == ptt)
+            ).where(table.c['checked'] == 0).values(checked =1)
+ 
         session.execute(stmt)
         nb_insert = exist = error = 0
     else:

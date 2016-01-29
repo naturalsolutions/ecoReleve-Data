@@ -8,7 +8,7 @@ define([
   'config',
   'ns_modules/ns_com',
   'ns_grid/model-grid',
-  'ns_filter/model-filter',
+  'ns_filter_bower',
   'backbone-forms',
   'requirejs-text!./tpl-bbfe-nonIdPicker.html',
   'objects/layouts/lyt-objects-new'
@@ -123,6 +123,8 @@ define([
     },
 
     displayFilter: function() {
+      this.$el.find('#filter').html('');
+
       this.filters = new NsFilter({
         url: this.url,
         com: this.com,
@@ -134,7 +136,6 @@ define([
     filter: function(e) {
       e.preventDefault();
       this.filters.update();
-      console.log(this.filters);
     },
 
     rowClicked: function(row) {
@@ -161,7 +162,13 @@ define([
     },
 
     saveFromCriteras: function(e) {
-      var data = this.filters.getCriteriasForForm();
+      this.filters.update();
+      var data = {};
+      for (var i = 0; i < this.filters.criterias.length; i++) {
+        data[this.filters.criterias[i]['Column']] = this.filters.criterias[i]['Value'];
+      };
+
+
 
       var params = {
         picker: this,
@@ -172,12 +179,12 @@ define([
       this.displayCreateNewLyt(params);
     },
 
+
     createNew: function(e) {
       var params = {
         picker: this,
         type: 1,
         ojectName: 'individuals',
-        data: data
       };
       this.displayCreateNewLyt(params);
     },

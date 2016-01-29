@@ -7,10 +7,10 @@ define([
   'backgrid.paginator',
   'ns_grid/model-col-generator',
   'moment',
-  'floatThead',
-  'backgrid-moment-cell'
+  'backgrid-moment-cell',
+  'floatThead'
   //'backgridSelect_all',
-], function ($, _, Backbone, Radio, PageColl, Paginator, ColGene, moment) {
+], function ($, _, Backbone, Radio, PageColl, Paginator, ColGene, moment, MomentCell) {
   'use strict';
   return Backbone.Model.extend({
 
@@ -32,6 +32,8 @@ define([
         this.com = options.com;
         this.com.addModule(this);
       }
+
+      this.idName = options.idName;
 
       //basic options
       this.url = options.url;
@@ -71,6 +73,7 @@ define([
 
       this.typeObj = options.typeObj || false;
 
+
       this.name = options.name || 'default';
 
       //should be in init function?
@@ -99,55 +102,59 @@ define([
       else {
         this.initCollectionFromServer();
       }
-      if (this.pagingServerSide) {//&& options.columns) {
-        this.setHeaderCell();
-      }
+
+      this.setHeaderCell();
+
+
+
       if (options.filterCriteria) {
         this.filterCriteria = options.filterCriteria;
       }
-
-
 
 
       this.initGrid();
       this.eventHandler();
     },
 
-    setHeaderCell: function () {
-      var hc = Backgrid.HeaderCell.extend({
-        onClick: function (e) {
-          e.preventDefault();
-          
-          var that = this;
-          var column = this.column;
-          var collection = this.collection;
-          var sortCriteria = (collection.sortCriteria && typeof collection.sortCriteria.id === 'undefined') ? collection.sortCriteria : {};
-          switch (column.get('direction')) {
-            case null:
-              column.set('direction', 'ascending');
-              sortCriteria[column.get('name')] = 'asc';
-              break;
-            case 'ascending':
-              column.set('direction', 'descending');
-              sortCriteria[column.get('name')] = 'desc';
-              break;
-            case 'descending':
-              column.set('direction', null);
-              delete sortCriteria[column.get('name')];
-              break;
-            default:
-              break;
-          }
-          var tmp = this.column.attributes.name;
-          if (!Object.keys(sortCriteria).length > 0)
-            collection.sortCriteria[tmp] = 'asc';
-          collection.fetch({ reset: true, success: function(){
-          } });
-        },
-      });
-      for (var i = 0; i < this.columns.length; i++) {
-        this.columns[i].headerCell = hc;
-      };
+
+    setHeaderCell: function() {
+      if (!this.pagingServerSide) {
+        Backgrid.Column.prototype.defaults.headerCell = undefined;
+      } else {
+          Backgrid.Column.prototype.defaults.headerCell = Backgrid.HeaderCell.extend({
+            onClick: function (e) {
+              e.preventDefault();
+              var column = this.column;
+              var collection = this.collection;
+              var sortCriteria = (collection.sortCriteria && typeof collection.sortCriteria.id === 'undefined') ? collection.sortCriteria : {};
+
+              switch(column.get('direction')){
+                case null:
+                  column.set('direction', 'ascending');
+                  sortCriteria[column.get('name')] = 'asc';
+                  break;
+                case 'ascending':
+                  column.set('direction', 'descending');
+                  sortCriteria[column.get('name')] = 'desc';
+                  break;
+                case 'descending':
+                  column.set('direction', null);
+                  delete sortCriteria[column.get('name')];
+                  break;
+                default:
+                  break;
+              }
+              
+              var tmp= this.column.attributes.name;
+
+              if(!Object.keys(sortCriteria).length > 0)
+                collection.sortCriteria[tmp] = 'asc';
+              
+              collection.sortCriteria = sortCriteria;
+              collection.fetch({reset: true});
+            },
+          });
+        }
     },
 
     initCollectionFromServer: function () {
@@ -174,11 +181,10 @@ define([
           offset: function () { return (this.state.currentPage - 1) * this.state.pageSize; },
           criteria: function () {
             //incomplete
-
-            if(_this.searchCriteria){
+            if (_this.searchCriteria) {
               return JSON.stringify(_this.searchCriteria);
-            }
-            else{
+            } else {
+
               return JSON.stringify(this.searchCriteria);
             }
           },
@@ -186,6 +192,7 @@ define([
             var criteria = [];
             for (var crit in this.sortCriteria) {
               criteria.push(crit + '=' + this.sortCriteria[crit]);
+
             }
             return JSON.stringify(criteria);
           },
@@ -199,11 +206,13 @@ define([
             'criteria': this.queryParams.criteria.call(this),
           };
 
+
           if (_this.typeObj) {
             options.data.typeObj = _this.typeObj;
           }
 
           options.success = function(){
+
             _this.affectTotalRecords();
             if(_this.onceFetched){
               _this.onceFetched(params);
@@ -222,7 +231,8 @@ define([
     },
 
 
-    upRowStyle: function(){
+    upRowStyle: function () {
+
       var row = this.currentRow;
       var _this = this;
       var rows = this.grid.body.rows;
@@ -239,11 +249,13 @@ define([
     },
 
 
+
     initCollectionPaginableClient: function () {
       var ctx = this;
       var _this = this;
       /* WARNING ! : you have to declare headerCell: null in columns collection */
       /* TODO fix setting hedearCell */
+
       var PageCollection = PageColl.extend({
         url: this.url,
         mode: 'client',
@@ -358,7 +370,6 @@ define([
       }
     },
 
-
     displayGrid: function () {
       return this.grid.render().el;
     },
@@ -408,7 +419,6 @@ define([
       
     },
 
-
     action: function (action, params) {
       switch (action) {
         case 'focus':
@@ -432,7 +442,6 @@ define([
         case 'rowDbClicked':
           this.rowDbClicked(params);
         default:
-          console.info('verify the action name');
           break;
       }
     },
@@ -463,14 +472,32 @@ define([
       //to do : iterrate only on checked elements list of (imports == true)
     },
 
-    //selection
+
     selectOne: function (id) {
-      var model_id = id;
       var coll = new Backbone.Collection();
       coll.reset(this.grid.collection.models);
+      var param = {};
+      id = parseInt(id);
+      if (this.idName) {
+        param[this.idName] = id;
+      } else {
+        param['id'] = id;
+      }
 
-      model_id = parseInt(model_id);
-      var mod = coll.findWhere({ id: model_id });
+      var mod;
+
+      if (this.grid.collection.fullCollection){
+        mod = this.grid.collection.fullCollection.findWhere(param);
+        var index = this.grid.collection.fullCollection.indexOf(mod);
+        index = Math.floor(index/this.pageSize)+1;
+        if (index > 0 && this.grid.collection.state.currentPage != index){
+          this.grid.collection.getPage(index);
+        }
+        
+      } else {
+        mod = this.grid.collection.findWhere(param);
+      }
+
 
       if (mod.get('import')) {
         mod.set('import', false);
@@ -480,22 +507,32 @@ define([
         mod.trigger("backgrid:select", mod, true);
       }
     },
-    selectMultiple: function (ids) {
-      var model_ids = ids, self = this, mod;
 
-      for (var i = 0; i < model_ids.length; i++) {
-        mod = this.grid.collection.findWhere({ id: model_ids[i] });
+    selectMultiple: function (idList) {
+      var mod;
+
+      for (var i = 0; i < idList.length; i++) {
+        var param = {};
+        if (this.idName) {
+          param[this.idName] = idList[i];
+        } else {
+          param['id'] = idList[i];
+        }
+        mod = this.grid.collection.findWhere(param);
+
         mod.set('import', true);
         mod.trigger("backgrid:select", mod, true);
       };
     },
 
-    lastImportedUpdate : function(lastImported){
+
+    lastImportedUpdate : function (lastImported) {
       this.lastImported = lastImported;
       this.fetchCollection();
     },
 
-    upRowServerSide: function(){
+
+    upRowServerSide: function () {
     },
   });
 });

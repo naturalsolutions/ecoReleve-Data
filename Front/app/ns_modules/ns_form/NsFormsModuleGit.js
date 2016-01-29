@@ -190,7 +190,6 @@ define([
           var settings = $.extend({}, _this.data, resp.data);
           _this.model.attributes = settings;
 
-          console.log(settings);
 
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
           _this.showForm();
@@ -211,7 +210,6 @@ define([
       if(display=='table'){
         el = this.getHtmlTable(el);
       }
-      //console.log(this.BBForm.el);
       // Call extendable function before the show call
       this.BeforeShow();
       var _this = this;

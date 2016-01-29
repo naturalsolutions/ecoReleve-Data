@@ -37,6 +37,7 @@ define([
                 this.autocompleteSource.focus = function(event,ui){
                     event.preventDefault();
                 };
+
                 this.autocompleteSource.change = function(event,ui){
                     event.preventDefault();
                     if (ui.item) {
