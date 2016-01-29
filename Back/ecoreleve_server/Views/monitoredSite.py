@@ -195,7 +195,7 @@ def updateMonitoredSite(request):
 
     except Exception as e:
         print('\n\n\n *****IntegrityError errrroorr') 
-        transaction.abort()
+        session.rollback()
         response = request.response
         response.status_code = 510
         response.text = "IntegrityError"
