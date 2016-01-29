@@ -136,6 +136,11 @@ class ListObjectWithDynProp():
 
     def GetDynProp (self,dynPropName) : 
         ''' Get dyn Prop with its name '''
+        dictType = {
+        'Integer' : 'Int',
+        'Time' : 'Date',
+        'Date Only' : 'Date'
+        }
         if self.DynPropList is not None :
             curDynProp = self.DynPropList[self.DynPropList['Name'] == dynPropName]
             curDynProp = curDynProp.to_dict(orient = 'records')
@@ -144,8 +149,8 @@ class ListObjectWithDynProp():
             
         if curDynProp != [] and curDynProp is not None:
             curDynProp = curDynProp[0]
-            if curDynProp['TypeProp'] == 'Integer':
-                curDynProp['TypeProp'] = 'Int'
+            if curDynProp['TypeProp'] in dictType :
+                curDynProp['TypeProp'] = dictType[curDynProp['TypeProp']]
             return curDynProp
         else : 
             return None

@@ -31,7 +31,13 @@ from ..utils.parseValue import parseValue,find,isEqual
 from sqlalchemy_utils import get_hybrid_properties
 
 
-Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt','float':'ValueFloat'}
+Cle = {'String':'ValueString',
+'Float':'ValueFloat',
+'Date':'ValueDate',
+'Integer':'ValueInt',
+'float':'ValueFloat',
+'Time': 'ValueDate',
+'Date Only':'ValueDate'}
 
 class ObjectWithDynProp:
     ''' Class to extend for mapped object with dynamic properties '''

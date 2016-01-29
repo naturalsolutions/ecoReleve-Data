@@ -14,7 +14,8 @@ from sqlalchemy import (Column,
  orm,
  and_,
  func,
- Table)
+ Table,
+ Date)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -32,8 +33,8 @@ class Individual (Base,ObjectWithDynProp) :
     Species = Column (String(250))
     Age = Column(String(250))
     # UnicIdentifier = Column(String(250))
-    Birth_date = Column(DateTime)
-    Death_date = Column(DateTime)
+    Birth_date = Column(Date)
+    Death_date = Column(Date)
     Original_ID = Column(String(250))
     FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
     # Caisse_ID = Column(String(10))

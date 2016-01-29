@@ -40,6 +40,13 @@ def datetime_adapter(obj, request):
     except :
         return obj.strftime ('%d/%m/%Y')
 
+def date_adapter(obj, request):
+    """Json adapter for datetime objects."""
+    try: 
+        return obj.strftime ('%d/%m/%Y')
+    except :
+        return obj
+
 def time_adapter(obj, request):
     """Json adapter for datetime objects."""
     try:
@@ -92,9 +99,10 @@ def main(global_config, **settings):
     # Add renderer for JSON objects
     json_renderer = JSON()
     json_renderer.add_adapter(datetime.datetime, datetime_adapter)
-    json_renderer.add_adapter(datetime.date, datetime_adapter)
+    # json_renderer.add_adapter(datetime.date, datetime_adapter)
     json_renderer.add_adapter(Decimal, decimal_adapter)
     json_renderer.add_adapter(datetime.time, time_adapter)
+    json_renderer.add_adapter(datetime.date, date_adapter)
     config.add_renderer('json', json_renderer)
 
     # Add renderer for CSV, PDF,GPX files.
