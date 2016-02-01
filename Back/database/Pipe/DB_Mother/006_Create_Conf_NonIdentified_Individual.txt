@@ -22,7 +22,8 @@ INSERT INTO dbo.IndividualDynProp (
 VALUES 
 ('Transmitter_Shape',
  'String'),
- ('Transmitter_Model','String')
+ ('Transmitter_Model','String'),
+ ('Transmitter_Frequency','Integer')
 GO
 
 
@@ -30,10 +31,12 @@ GO
 DECLARE @typeID int ;
 DECLARE @shapeID int ;
 DECLARE @modelID int;
+DECLARE @freq int;
 
 SELECT @typeID = (SELECT ID FROM IndividualType WHERE Name = 'Non Identified')
-SELECT @shapeID = (SELECT ID FROM IndividualDynProp WHERE Name = 'Transmitter_Model')
+SELECT @shapeID = (SELECT ID FROM IndividualDynProp WHERE Name = 'Transmitter_Shape')
 SELECT @modelID = (SELECT ID FROM IndividualDynProp WHERE Name = 'Transmitter_Model')
+SELECT @freq = (SELECT ID FROM IndividualDynProp WHERE Name = 'Transmitter_Frequency')
 
 INSERT INTO dbo.IndividualType_IndividualDynProp(FK_IndividualDynProp,FK_IndividualType,Required)
 VALUES 
@@ -47,7 +50,8 @@ VALUES
 (11,@typeID,1),
 (19,@typeID,1),
 (@shapeID,@typeID,1),
-(@modelID,@typeID,1)
+(@modelID,@typeID,1),
+(@freq,@typeID,1)
 
 GO
 
@@ -67,9 +71,11 @@ WHERE NOT EXISTS (SELECT *
 UPDATE g SET TypeObj = 1
 FROM ModuleGrids g
 WHERE Name in (SELECT Name FROM IdDynPropStandardIndiv 
-					) OR Name in ('frequency','FK_Sensor','Status_')
+					) OR Name in ('frequency','FK_Sensor','Status_','ID')
 AND Module_ID = 8 
 GO
+
+delete  [ModuleGrids] where Module_ID = 8 and TypeObj = 2 
 
 INSERT INTO [dbo].[ModuleGrids]
            ([Module_ID]
@@ -101,7 +107,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,60
            ,NULL
            ,204114
-           ,100
+           ,140
            ,2
            ,NULL
            ,1
@@ -120,13 +126,32 @@ INSERT INTO [dbo].[ModuleGrids]
            ,70
            ,NULL
            ,204113
-           ,110
+           ,150
            ,2
            ,NULL
            ,1
            ,NULL
            ,4
            ,'AutocompTreeEditor'
+           ,NULL),
+
+		   (8
+           ,2
+           ,'Transmitter_Frequency'
+           ,'Transmitter Frequency'
+           ,2
+           ,1
+           ,'integer'
+           ,71
+           ,NULL
+           ,204113
+           ,160
+           ,2
+           ,NULL
+           ,1
+           ,NULL
+           ,4
+           ,'Number'
            ,NULL),
 
 		   (8
@@ -139,7 +164,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,80
            ,NULL
            ,204107
-           ,120
+           ,170
            ,2
            ,NULL
            ,1
@@ -159,7 +184,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,100
            ,NULL
            ,204107
-           ,140
+           ,175
            ,2
            ,NULL
            ,1
@@ -178,7 +203,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,85
            ,NULL
            ,204108
-           ,125
+           ,180
            ,2
            ,NULL
            ,1
@@ -197,7 +222,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,105
            ,NULL
            ,204108
-           ,145
+           ,185
            ,2
            ,NULL
            ,1
@@ -216,7 +241,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,130
            ,NULL
            ,204107
-           ,170
+           ,190
            ,2
            ,NULL
            ,1
@@ -235,7 +260,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,140
            ,NULL
            ,204107
-           ,180
+           ,200
            ,2
            ,NULL
            ,1
@@ -254,7 +279,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,135
            ,NULL
            ,204108
-           ,175
+           ,205
            ,2
            ,NULL
            ,1
@@ -273,7 +298,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,145
            ,NULL
            ,204108
-           ,185
+           ,210
            ,2
            ,NULL
            ,1
