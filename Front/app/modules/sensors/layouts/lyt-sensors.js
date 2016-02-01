@@ -29,7 +29,7 @@ define([
       'click #btnFilter': 'filter',
       'click #back': 'hideDetails',
       'click button#clear': 'clearFilter',
-      'change select.FK_SensorType': 'updateModels',
+     /* 'change select.FK_SensorType': 'updateModels',*/
       'click #btn-export': 'exportGrid',
       'click button#btnNew': 'newSensor'
     },
@@ -163,7 +163,7 @@ define([
       Backbone.history.navigate(this.rootUrl, {trigger: false});
       this.ui.detail.addClass('hidden');
     },
-    updateModels: function(e) {
+/*    updateModels: function(e) {
       // get list of models for selected sensor type
       var selectedType = $(e.target).val();
       var modelField = $('select.Model');
@@ -206,7 +206,7 @@ define([
         content += '<option>' + data[i] + '</option>';
       }
       $(elem).html(content);
-    },
+    },*/
 
     exportGrid: function() {
       $.ajax({
