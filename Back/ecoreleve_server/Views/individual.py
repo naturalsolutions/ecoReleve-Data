@@ -284,6 +284,16 @@ def searchIndiv(request):
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
 
+    if 'typeObj' in request.params:
+        searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':request.params['typeObj']})
+    else:
+        searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':1})
+
+    if 'typeObj' in request.params:
+        searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':request.params['typeObj']})
+    else:
+        searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':1})
+
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 

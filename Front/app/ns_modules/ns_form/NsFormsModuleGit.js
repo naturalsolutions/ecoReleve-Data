@@ -139,11 +139,13 @@ define([
         this.afterSaveSuccess = options.afterSaveSuccess ;
       }
       if(options.savingError) {
-        this.savingError =options.savingError;
+        this.savingError = options.savingError;
       }
 
+      this.data = options.data || {};
+
       $(this.BBForm).on( "click", function() {
-        alert();
+
       });
     },
 
@@ -177,13 +179,18 @@ define([
         dataType: 'json',
         success: function (resp) {
           _this.model.schema = resp.schema;
-          _this.model.attributes = resp.data;
+          
           if (resp.fieldsets) {
             // if fieldset present in response, we get it
             _this.model.fieldsets = resp.fieldsets;
           }
           // give the url to model to manage save
           _this.model.urlRoot = this.modelurl;
+
+          var settings = $.extend({}, _this.data, resp.data);
+          _this.model.attributes = settings;
+
+
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
           _this.showForm();
           _this.updateState(this.displayMode);
@@ -203,7 +210,6 @@ define([
       if(display=='table'){
         el = this.getHtmlTable(el);
       }
-      //console.log(this.BBForm.el);
       // Call extendable function before the show call
       this.BeforeShow();
       var _this = this;

@@ -1,0 +1,60 @@
+<div class="input-group picker">
+  <input <%= disabled %> class="form-control <%= required %>" name="<%= key %>" type="number" value="<%= value %>">
+  <span class="input-group-btn picker">
+    <button type="button" class="btn <%= visu %> glyphicon-plus">
+    </button>
+  </span> 
+</div>
+
+<div class="modal-outer" id="modalPicker">
+  <div class="full-height modal" id="myModal">
+    <div class="modal-content full-height clearfix">
+      <div class="col-xs-5 full-height no-padding">
+        <div class="toolbar top">
+          <legend class="inherit">Identify <%= title %></legend>
+        </div>
+        <div class="crop2">
+          <br>
+          <ul id="indivTypeTabs" class="nav nav-tabs">
+               <li class="tab-ele activeTab"><a id="standardTab" class="tab-link" name="standard">Standard</a></li>
+               <li class="tab-ele"><a id="nonIdentifiedTab" class="tab-link" name="">Non Identified</a></li>
+            </ul>
+          <br>
+          <div id="filter"></div>
+        </div>
+        <div class="toolbar bottom">
+          <button type="button" class="btn btn-success pull-right" id="btnFilterPicker">
+            Search&nbsp;<span class="reneco reneco-search"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="col-xs-7 full-height no-padding dark">
+        <div class="toolbar top">
+          <button type="button" class="btn btn pull-right cancel">
+            Cancel
+          </button>
+        </div>
+        <div class="crop2 crop-paginator">
+          <br>
+          <div id="grid" class=""></div>
+        </div>
+
+        
+        <div id="paginator" class="paginator"></div>
+        <div class="toolbar bottom">
+          <button id="createNew" type="button" class="btn btn-success pull-right">
+            New&nbsp;
+            <span class="reneco reneco-entrykey"></span>
+          </button>
+          <button id="saveFromCriterias" type="button" class="hidden btn btn-success pull-right">
+            Save From Criterias&nbsp;
+            <span class="reneco reneco-entrykey"></span>
+          </button>
+
+        </div>
+      </div>
+      <div id="creationContainer" class="pos-abs hidden full-height col-xs-12 no-padding"></div>
+    </div>
+  </div>
+</div>

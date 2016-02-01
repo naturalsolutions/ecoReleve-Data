@@ -296,14 +296,16 @@ class ObjectWithDynProp:
         resultat = {}
         type_ = self.GetType().ID
         Fields = self.ObjContext.query(ModuleForms
-            ).filter(and_(ModuleForms.Module_ID == FrontModules.ID),ModuleForms.FormRender>0).order_by(ModuleForms.FormOrder).all()
+            ).filter(and_(ModuleForms.Module_ID == FrontModules.ID),ModuleForms.FormRender>0
+            ).filter(or_(ModuleForms.TypeObj == type_,ModuleForms.TypeObj == None)).order_by(ModuleForms.FormOrder).all()
 
-        for curStatProp in self.__table__.columns:
-            CurModuleForms = list(filter(lambda x : x.Name == curStatProp.key and x.FormRender>0 and (x.TypeObj== str(type_) or x.TypeObj == None) , Fields))
+        for curStatProp in Fields:####self.__table__.columns:
+            CurModuleForms = list(filter(lambda x : curStatProp.Name == x.key, self.__table__.columns))
             if (len(CurModuleForms)> 0 ):
                 # Conf définie dans FrontModules
-                CurModuleForms = CurModuleForms[0]
-                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(Editable)
+                # CurModuleForms = CurModuleForms[0]
+                # CurModuleForms = CurModuleForms[0]
+                resultat[curStatProp.Name] = curStatProp.GetDTOFromConf(Editable)
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):

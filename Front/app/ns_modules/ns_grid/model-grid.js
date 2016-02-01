@@ -10,7 +10,7 @@ define([
   'backgrid-moment-cell',
   'floatThead'
   //'backgridSelect_all',
-], function ($, _, Backbone, Radio, PageColl, Paginator, colGene, moment,MomentCell) {
+], function ($, _, Backbone, Radio, PageColl, Paginator, ColGene, moment, MomentCell) {
   'use strict';
   return Backbone.Model.extend({
 
@@ -71,16 +71,25 @@ define([
         }
       }
 
+      this.typeObj = options.typeObj || false;
+
+
       this.name = options.name || 'default';
 
       //should be in init function?
       if (options.columns) {
         this.columns = options.columns;
       } else {
-        this.colGene = new colGene({ 
-          url: this.url + 'getFields?name=' + this.name,
+        var url;
+        if (this.typeObj) {
+          url = this.url + 'getFields?name=' + this.name + '&typeObj=' + this.typeObj;
+        } else {
+          url = this.url + 'getFields?name=' + this.name;
+        }
+        this.colGene = new ColGene({
+          url: url,
           paginable: this.pagingServerSide,
-          checkedColl: options.checkedColl 
+          checkedColl: options.checkedColl,
         });
         this.columns = this.colGene.columns;
       }
@@ -102,9 +111,11 @@ define([
         this.filterCriteria = options.filterCriteria;
       }
 
+
       this.initGrid();
       this.eventHandler();
     },
+
 
     setHeaderCell: function() {
       if (!this.pagingServerSide) {
@@ -173,13 +184,15 @@ define([
             if (_this.searchCriteria) {
               return JSON.stringify(_this.searchCriteria);
             } else {
+
               return JSON.stringify(this.searchCriteria);
             }
           },
           order_by: function () {
             var criteria = [];
             for (var crit in this.sortCriteria) {
-              criteria.push(crit + ':' + this.sortCriteria[crit]);
+              criteria.push(crit + '=' + this.sortCriteria[crit]);
+
             }
             return JSON.stringify(criteria);
           },
@@ -192,7 +205,14 @@ define([
             'order_by': this.queryParams.order_by.call(this),
             'criteria': this.queryParams.criteria.call(this),
           };
-          options.success = function () {
+
+
+          if (_this.typeObj) {
+            options.data.typeObj = _this.typeObj;
+          }
+
+          options.success = function(){
+
             _this.affectTotalRecords();
             if(_this.onceFetched){
               _this.onceFetched(params);
@@ -210,7 +230,9 @@ define([
       this.collection = new PageCollection();
     },
 
+
     upRowStyle: function () {
+
       var row = this.currentRow;
       var _this = this;
       var rows = this.grid.body.rows;
@@ -226,9 +248,13 @@ define([
       }
     },
 
+
+
     initCollectionPaginableClient: function () {
       var ctx = this;
       var _this = this;
+      /* WARNING ! : you have to declare headerCell: null in columns collection */
+      /* TODO fix setting hedearCell */
 
       var PageCollection = PageColl.extend({
         url: this.url,
@@ -299,6 +325,7 @@ define([
             delete this.collection.queryParams['lastImported'];
           }
 
+
           this.deffered = this.grid.collection.fetch({
             reset: true, 
             data: { 'criteria': this.filterCriteria }, 
@@ -315,6 +342,7 @@ define([
         this.deffered = this.grid.collection.fetch({ reset: true });
       }
     },
+
 
     update: function (args) {
       if (this.pageSize) {
@@ -426,10 +454,10 @@ define([
       }
     },
 
-    rowClicked: function (params) {
+    rowClicked: function(params){
     },
 
-    rowDbClicked: function (params) {
+    rowDbClicked: function(params){
     },
 
     hilight: function () {
@@ -443,7 +471,6 @@ define([
       };
       //to do : iterrate only on checked elements list of (imports == true)
     },
-
 
 
     selectOne: function (id) {
@@ -470,7 +497,7 @@ define([
       } else {
         mod = this.grid.collection.findWhere(param);
       }
-      
+
 
       if (mod.get('import')) {
         mod.set('import', false);
@@ -480,6 +507,7 @@ define([
         mod.trigger("backgrid:select", mod, true);
       }
     },
+
     selectMultiple: function (idList) {
       var mod;
 
@@ -497,10 +525,12 @@ define([
       };
     },
 
+
     lastImportedUpdate : function (lastImported) {
       this.lastImported = lastImported;
       this.fetchCollection();
     },
+
 
     upRowServerSide: function () {
     },

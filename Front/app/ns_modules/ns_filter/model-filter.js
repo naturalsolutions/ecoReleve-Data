@@ -37,7 +37,7 @@ define([
 
       this.forms = [];
 
-      if(!options.custom){
+      if (!options.custom) {
         if (options.filters) {
           this.filters = options.filters;
           this.initFilters(options.filters);
@@ -77,8 +77,10 @@ define([
     initFilters: function (data) {
       var form;
       var _this = this;
+      this.filterContainer.html('');
       for (var key in data) {
         form = this.initFilter(data[key]);
+
         this.filterContainer.append(form.el);
 
         if (data[key].type == 'Checkboxes') {
@@ -87,7 +89,6 @@ define([
           });
         }
 
-        
         this.forms.push(form);
         this.filterLoaded();
       };
@@ -250,11 +251,7 @@ define([
         return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Contains', val: 'Contains' },{ label: 'In', val: 'In' }];
           break;
         case "DATETIME":
-<<<<<<< HEAD
-          return operatorsOptions = ['=','<', '>', '<>', '<=', '>='];
-=======
           return operatorsOptions = ['=', '<', '>', '<>', '<=', '>='];
->>>>>>> 47f0035bfd07f1196efd112f530a7261a76b8ef7
           break;
         case "Select" :
           return operatorsOptions = ['Is', 'Is not'];
@@ -304,8 +301,17 @@ define([
       }
     },
 
-    update: function () {
-      var filters = [];
+    getCriteriasForForm: function() {
+      this.setCriterias();
+      var data = {};
+      for (var i = 0; i < this.criterias.length; i++) {
+        data[this.criterias[i]['Column']] = this.criterias[i]['Value'];
+      };
+      return data;
+    },
+
+    setCriterias: function(){
+      this.criterias = [];
       var currentForm, value;
       for (var i = 0; i < this.forms.length; i++) {
         currentForm = this.forms[i];
@@ -314,20 +320,23 @@ define([
 
         if (!currentForm.validate() && (currentForm.getValue().Value || type == 'number')) {
           value = currentForm.getValue();
-          filters.push(value);
+          this.criterias.push(value);
           currentForm.$el.find('input.filter').addClass('active');
         } else {
           currentForm.$el.find('input.filter').removeClass('active')
         };
       };
-      this.criterias = filters;
+      return this.criterias;
+    },
 
+    update: function () {
+      this.setCriterias();
       if (this.clientSide) {
-        this.clientFilter(filters);
+        this.clientFilter(this.criterias);
       }else{
-        this.interaction('filter', filters);
+        this.interaction('filter', this.criterias);
       }
-      return filters;
+      return this.criterias;
     },
 
     reset: function () {

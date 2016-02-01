@@ -5,15 +5,18 @@ define(['marionette', 'lyt-rootview', 'router', 'controller',
   'ns_modules/ns_bbfe/bbfe-dateTimePicker',
   'ns_modules/ns_bbfe/bbfe-autocomplete',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
+  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-nonIdPicker',
   'ns_modules/ns_bbfe/bbfe-listOfNestedModel/bbfe-listOfNestedModel',
   'ns_modules/ns_bbfe/bbfe-autocompTree',
   'ns_modules/ns_bbfe/bbfe-fileUpload',
   'ns_modules/ns_bbfe/bbfe-select'
   ],
-function(Marionette, LytRootView, Router, Controller) {
+function( Marionette, LytRootView, Router, Controller) {
 
   var app = {};
   var JST = window.JST = window.JST || {};
+
+
 
   Backbone.Marionette.Renderer.render = function(template, data) {
     if (!JST[template]) throw 'Template \'' + template + '\' not found!';

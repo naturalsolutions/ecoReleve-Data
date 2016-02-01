@@ -37,6 +37,7 @@ define([
       }
       this.model.set('ojectName', this.ojectName);
       this.picker = options.picker;
+      this.data = options.data;
     },
 
     onShow: function() {
@@ -45,8 +46,10 @@ define([
 
     displayForm: function(type) {
       var _this = this;
+
       this.nsForm = new NsForm({
         name: 'name',
+        data: this.data,
         modelurl: config.coreUrl + this.ojectName,
         buttonRegion: [],
         formRegion: this.ui.form,
@@ -88,7 +91,7 @@ define([
             }
         );
         this.picker.setValue(resp.ID);
-        this.picker.$el.find('#creation').addClass('hidden');
+        this.picker.$el.find('#creationContainer').addClass('hidden');
         this.picker.hidePicker();
       } else {
         //redirect
@@ -100,7 +103,7 @@ define([
     },
     cancel: function() {
       if(this.picker){
-        this.picker.$el.find('#creation').addClass('hidden');
+        this.picker.$el.find('#creationContainer').addClass('hidden');
       }
       //Backbone.history.navigate({trigger: true});
 
