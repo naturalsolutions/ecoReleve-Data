@@ -245,10 +245,12 @@ class IndivLocationList(Generator):
     def __init__(self,table,SessionMaker,id_=None):
         joinTable= join(Individual_Location, Sensor
             , Individual_Location.FK_Sensor == Sensor.ID)
-
+        regionTable = Base.metadata.tables['Region']
+        joinTable = outerjoin(joinTable,regionTable,Individual_Location.FK_Region == regionTable.c['ID'])
         # Use select statment as ORM Table 
-        IndivLoc = select([Individual_Location,Sensor.UnicIdentifier]
+        IndivLoc = select([Individual_Location,Individual_Location.date_timestamp,Sensor.UnicIdentifier,regionTable.c['Region']]
             ).select_from(joinTable).where(Individual_Location.FK_Individual == id_).cte()
+
         super().__init__(IndivLoc,SessionMaker)
 
 #--------------------------------------------------------------------------

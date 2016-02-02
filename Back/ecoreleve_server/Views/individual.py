@@ -57,7 +57,8 @@ def count_ (request = None,listObj = None) :
             if data['criteria'] != {} :
                 searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
         else : 
-            searchInfo = {'criteria':None}
+            searchInfo = {'criteria':[]}
+        searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':1})
         listObj = ListObjectWithDynProp(Individual,moduleFront)
         count = listObj.count(searchInfo = searchInfo)
     else : 
@@ -66,8 +67,8 @@ def count_ (request = None,listObj = None) :
 
 def getFilters (request):
     session = request.dbsession
-    if 'objType' in request.params :
-        objType = request.params['objType']
+    if 'typeObj' in request.params :
+        objType = request.params['typeObj']
     else : 
         objType = 1
 
@@ -91,8 +92,8 @@ def getForms(request) :
 def getFields(request) :
     session = request.dbsession
 
-    if 'objType' in request.params :
-        objType = request.params['objType']
+    if 'typeObj' in request.params :
+        objType = request.params['typeObj']
     else : 
         objType = 1
 
@@ -283,11 +284,6 @@ def searchIndiv(request):
     searchInfo['order_by'] = json.loads(data['order_by'])
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
-
-    if 'typeObj' in request.params:
-        searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':request.params['typeObj']})
-    else:
-        searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':1})
 
     if 'typeObj' in request.params:
         searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':request.params['typeObj']})
