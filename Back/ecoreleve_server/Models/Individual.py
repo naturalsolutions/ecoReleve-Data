@@ -14,14 +14,16 @@ from sqlalchemy import (Column,
  orm,
  and_,
  func,
- Table)
+ Table,
+ TIMESTAMP,
+ cast)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
-
+from ..Models import IntegerDateTime
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 class Individual (Base,ObjectWithDynProp) :
@@ -138,9 +140,20 @@ class Individual_Location(Base):
     Precision = Column(Integer)
     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
+    FK_Region = Column(Integer, ForeignKey('Region.ID'))
     creator =  Column(Integer)
     creationDate = Column(DateTime)
     type_ = Column(String(10))
+
+
+    @hybrid_property
+    def date_timestamp(self):
+        return self.Date.timestamp()
+
+    @date_timestamp.expression
+    def date_timestamp(cls):
+        return cast(cls.Date,IntegerDateTime).label('timestamp')
+
 
 class IndividualStatus(Base):
     __table__ =  Table('IndividualStatus', Base.metadata,
@@ -154,3 +167,4 @@ class IndividualStatus(Base):
     #     'polymorphic_on':Status_,
     #     'polymorphic_identity':'object'
     # }
+

@@ -176,6 +176,20 @@ define([
         editable: false,
         renderable: false,
         cell: 'string'
+      },/*{
+        name: 'Date',
+        label: 'date',
+        editable: false,
+        cell: 'string'
+      },*/{
+        name: 'timestamp',
+        label: 'date',
+        editable: false,
+        cell : Backgrid.Extension.MomentCell.extend({
+          modelInUnixTimestamp: true,
+          displayFormat: "DD/MM/YYYY HH:mm:ss",
+          displayInUTC: false
+        })
       },{
         name: 'LAT',
         label: 'latitude',
@@ -187,8 +201,8 @@ define([
         editable: false,
         cell: 'string'
       },{
-        name: 'Date',
-        label: 'date',
+        name: 'Region',
+        label: 'Region',
         editable: false,
         cell: 'string'
       },{
