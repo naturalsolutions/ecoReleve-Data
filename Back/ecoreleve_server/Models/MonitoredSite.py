@@ -113,17 +113,7 @@ class MonitoredSite (Base,ObjectWithDynProp) :
             if (len(CurModuleForms)> 0 ):
                 # Conf définie dans FrontModules
                 CurModuleForms = CurModuleForms[0]
-                curSize = CurModuleForms.FieldSizeDisplay
-                if curEditable:
-                    curSize = CurModuleForms.FieldSizeEdit
-
-                if (CurModuleForms.FormRender & 2) == 0:
-                    curEditable = False
-
-                if CurModuleForms.FormRender > 2 :
-                    curEditable = True
-
-                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(curEditable,str(ModuleForms.GetClassFromSize(curSize)),DisplayMode)
+                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(Editable)
         return resultat
 
     def GetFlatObject(self,schema=None):
