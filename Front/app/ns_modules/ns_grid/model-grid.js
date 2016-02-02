@@ -207,7 +207,7 @@ define([
           };
 
 
-          if (_this.typeObj) {
+          if (_this.typeObj && options.data) {
             options.data.typeObj = _this.typeObj;
           }
 
