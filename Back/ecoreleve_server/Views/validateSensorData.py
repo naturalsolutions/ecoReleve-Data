@@ -77,7 +77,7 @@ def unchecked_rfid(request):
 
     unchecked = DataRfidasFile
     queryStmt = select(unchecked.c)
-    data = DBSession().execute(queryStmt).fetchall()
+    data = session.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
     result = [{'total_entries':len(dataResult)}]
     result.append(dataResult)

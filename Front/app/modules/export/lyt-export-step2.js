@@ -53,13 +53,14 @@ define([
       var filterName = option.val();
       var filterLabel = option.text();
       var type = option.attr('type');
+      var options = this.fieldsList[filterName].options;
 
       var filter = [{
         editable: true,
         fieldClass: [''],
         title: filterLabel,
         name: filterName,
-        options: [],
+        options:options,
         type: type,
         validators: []
       }];
@@ -69,7 +70,33 @@ define([
     },
 
     displayFilters: function() {
-      this.filters = new NsFilter({
+      var myFilter = NsFilter.extend({
+        getValueOptions: function (DataRow) {
+            var valueOptions;
+            switch (DataRow['type']) {
+                case "Select": case 'Checkboxes':
+                    return DataRow['options']
+                    break;
+                case 'AutocompTreeEditor':
+                    return DataRow['options']
+                    break;
+                case 'AutocompleteEditor':
+                    return DataRow['options']
+                    break;
+                case "DATETIME":
+                    return valueOptions = [{
+                        dateFormat: 'd/m/yyyy',
+                        defaultValue: new Date().getDate() + "/" + (new Date().getMonth() + 1) + "/" + new Date().getFullYear()
+                    }];
+                    break;
+                default:
+                    return valueOptions = DataRow['options'];
+                    break;
+            }
+        },
+      });
+
+      this.filters = new myFilter({
         com: this.com,
         filterContainer: this.ui.filters,
         custom: true,
@@ -84,13 +111,14 @@ define([
         context: this,
         dataType: 'json'
       }).done(function(data) {
-        var fieldsList = [];
+        this.fieldsList = {};
         var exportFieldsList = [];
         _this.ui.filtersList.append('<option value="choose">Add a filter</option>');
         for (var i = 0; i < data.length; i++) {
           var optionItem = '<option type=\'' + data[i].type + '\'>' + data[i].name + '</option>';
           _this.ui.filtersList.append(optionItem);
           exportFieldsList.push(data[i].name);
+          this.fieldsList[data[i].name] = data[i];
         }
         $('#filter-btn').removeClass('masqued');
       }).fail(function(msg) {

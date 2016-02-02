@@ -1,4 +1,4 @@
-update ModuleGrids SET GridRender = 2 
+update ModuleGrids SET GridRender = 2, QueryName = 'Name'
 where Name = 'FK_MonitoredSite' and Module_ID = 3 
 
 update ModuleGrids SET QueryName = 'Name'

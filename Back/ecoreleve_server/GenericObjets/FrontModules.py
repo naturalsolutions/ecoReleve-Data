@@ -68,7 +68,7 @@ class ModuleForms(Base):
 
     @staticmethod
     def GetClassFromSize(FieldSize):
-        return FieldSizeToClass[FieldSize]
+        return 'col-md-'+str(FieldSize)
 
     def GetDTOFromConf(self,Editable):
         ''' return input field to build form '''
@@ -104,11 +104,16 @@ class ModuleForms(Base):
             'editable' : Editable,
             'editorClass' : str(self.editorClass) ,
             'validators': [],
-            'options': [],
+            'options': None,
             'defaultValue' : None,
             'editorAttrs' : {'disabled': isDisabled},
             'fullPath':self.fullPath
             }
+
+        try : 
+            self.dto['options'] = json.loads(self.Options)
+        except:
+            self.dto['options'] = self.Options
 
         if self.Validators is not None:
             self.dto['validators'] = json.loads(self.Validators)
@@ -144,6 +149,7 @@ class ModuleForms(Base):
 
     def InputSelect (self) :
         if self.Options is not None and self.Options != '' :
+            self.dto['options'] = []
             result = self.session.execute(text(self.Options)).fetchall()
             for row in result :
                 temp = {}

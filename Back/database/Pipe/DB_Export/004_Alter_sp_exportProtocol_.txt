@@ -1,0 +1,120 @@
+---- manage time, date only types
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+ALTER PROCEDURE [dbo].[pr_ExportOneProtocole] 
+	(
+	@ProtocoleType INT
+	)
+AS
+BEGIN
+	IF object_id('TmpObsExport') IS NOT NULL
+			DROP TABLE TmpObsExport
+
+
+	DECLARE @ProtocoleName VARCHAR(255)
+
+
+	SELECT @ProtocoleName = Name from [EcoReleve_ECWP].dbo.ProtocoleType where id=@ProtocoleType
+	print 'Export ' + @ProtocoleName
+
+	---------------------- CREATION DE LA TABLE CIBLE
+
+	-- Ges Static Prop
+	select O.* into TmpObsExport 
+	from [EcoReleve_ECWP].dbo.Observation O
+	where O.FK_ProtocoleType = @ProtocoleType
+	
+	exec pr_ExportObservationDynPropValueNow
+	
+	
+	DECLARE @Req NVARCHAR(MAX)
+	DECLARE @ReqFrom NVARCHAR(MAX)
+	DECLARE @ReqSet NVARCHAR(MAX)
+	SET @Req = ' CREATE UNIQUE CLUSTERED INDEX PK_TProtocol'  +  replace(@ProtocoleName,' ','_') + ' ON TmpObsExport (ID)' 
+	exec ( @req)
+	IF EXISTS (select * from [EcoReleve_ECWP].dbo.ObservationDynProp D JOIN [EcoReleve_ECWP].dbo.ProtocoleType_ObservationDynProp C ON C.FK_ProtocoleType = @ProtocoleType and c.FK_ObservationDynProp =D.ID )
+	BEGIN
+		-- ALTER WITH DYN PROPS
+		SET @Req = ' ALTER TABLE TmpObsExport ADD@'
+
+		select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' 
+		+  (select CASE WHEN d.typeProp = 'Integer' THEN 'INT'
+			WHEN d.typeProp = 'string' THEN 'varchar(255)'
+			WHEN d.typeProp = 'date' THEN 'datetime'
+			WHEN d.typeProp = 'Date Only' THEN 'date'
+			WHEN d.typeProp = 'Float' THEN 'decimal (12,5)'
+			WHEN d.typeProp = 'Time' THEN 'time'
+			ELSE d.typeProp END)--replace(replace(replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)'),'date','datetime'),'Date Only','date')  
+		from [EcoReleve_ECWP].dbo.ObservationDynProp D JOIN [EcoReleve_ECWP].dbo.ProtocoleType_ObservationDynProp C ON C.FK_ProtocoleType = @ProtocoleType and c.FK_ObservationDynProp =D.ID
+
+		SET @Req = replace(@Req,'ADD@,','ADD ')
+		--print @Req
+		exec ( @req)
+	
+
+		IF EXISTS(SELECT * from TmpObsExport)
+		BEGIN
+			-- UPDATE DATA FROM DYN PROP
+
+			SET @ReqSet = 'SET@'
+			SET @ReqFrom =''
+
+
+			SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=(select Value' +  
+			(select CASE WHEN P.typeProp = 'Integer' THEN 'int'
+			WHEN P.typeProp = 'Date Only' THEN 'Date'
+			WHEN P.typeProp = 'Time' THEN 'Date'
+			ELSE P.typeProp END)
+			
+			+ ' FROM   TObservationDynPropValueNow  where fk_observationdynprop=' + convert(varchar(10),P.ID) + ' and fk_observation = EI.ID)'
+			--SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')
+			from [EcoReleve_ECWP].dbo.ObservationDynProp P JOIN [EcoReleve_ECWP].dbo.ProtocoleType_ObservationDynProp C ON C.FK_ProtocoleType = @ProtocoleType and c.FK_ObservationDynProp =P.ID 
+
+
+			SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
+			SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpObsExport EI '
+
+
+
+			--SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')																						
+			--from [EcoReleve_ECWP].dbo.ObservationDynProp P JOIN [EcoReleve_ECWP].dbo.ProtocoleType_ObservationDynProp C ON C.FK_ProtocoleType = @ProtocoleType and c.FK_ObservationDynProp =P.ID 
+
+
+			--SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
+			--print @ReqFrom
+
+			--SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpObsExport EI JOIN (SELECT VN.FK_Observation ' + @ReqFrom + ' FROM   [EcoReleve_ECWP].dbo.ObservationDynPropValuesNow VN GROUP BY VN.FK_Observation) V ON EI.ID = V.FK_Observation '
+
+			--SET @Req = 'SELECT * FROM TmpIndivExport EI JOIN (SELECT VN.FK_Individual ' + @ReqFrom + ' FROM   [EcoReleve_ECWP].dbo.IndividualDynPropValuesNow VN GROUP BY VN.FK_Individual) V ON EI.ID = V.FK_Individual '
+
+			--print @req
+
+			exec ( @req)
+		END	
+	END
+	SET @Req = ' IF object_id(''TProtocol_'  +  replace(@ProtocoleName,' ','_') + ''') IS NOT NULL DROP TABLE  TProtocol_'  +  replace(@ProtocoleName,' ','_')
+	exec ( @req)
+	SET @Req = ' sp_rename ''TmpObsExport'' ,TProtocol_'  +  replace(@ProtocoleName,' ','_')
+
+	exec ( @req)
+
+END
+
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('4_Alter_sp_exportProtocol_',GETDATE(),(SELECT db_name()))
+
+
+GO
