@@ -295,6 +295,7 @@ set Options = '{"title":"Individuals","url":"individuals", "typeObj":[{"Standard
   InputType = 'NonIdPicker', Label = 'Individual ID/Non ID'
 where TypeObj = 214 and Name = 'FK_Individual'
 
+
 UPDATE ModuleForms SET FieldSizeEdit = FieldSizeDisplay
 where module_id = 9 
 
@@ -339,6 +340,7 @@ INSERT INTO ModuleForms (
     )
 VALUES (12,NULL,'ELE','Elevation',0,3,3,'Number','form-control',2,4,'Location Infos'),
 (12,NULL,'Precision','Precision',0,3,3,'Number','form-control',2,5,'Location Infos') 
+
 
 GO
 
