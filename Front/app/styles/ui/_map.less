@@ -22,6 +22,16 @@
 	width: 100%;
 	overflow: hidden !important;
 
+	//quick & dirty
+	.leaflet-top.leaflet-left{
+		right: 0;
+		top: 0;
+		left: inherit;
+		.leaflet-control-zoom.leaflet-bar.leaflet-control{
+			margin: 30px;
+		}
+	}
+
 	.errorLayer{
 		position: absolute;
 		width: 100%;

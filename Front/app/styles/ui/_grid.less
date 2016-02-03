@@ -16,6 +16,9 @@
 	overflow: auto;
 }
 
+
+
+
 table.backgrid{
 
 	thead{
@@ -29,12 +32,17 @@ table.backgrid{
 		text-transform: uppercase;
 	}
 	tr{
+
+		transition: .05s all;
+		&:nth-child(2n){
+			background: rgba(221, 221, 221, 0.3);
+		}
 		cursor: pointer;
 		&.active{
-			background: #C7C7C7;
+			background:rgba(204, 204, 204, 0.7);
 		}
 		&:hover{
-			background: #ddd;
+			background: #ccc;
 		}
 	}
 	td{
