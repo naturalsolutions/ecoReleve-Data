@@ -106,14 +106,14 @@ def add_routes(config):
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### MonitoredSite #####
-    config.add_route('monitoredSite', 'ecoReleve-Core/monitoredSites/') 
-    config.add_route('monitoredSite/', 'ecoReleve-Core/monitoredSites') 
-    config.add_route('monitoredSite/id', 'ecoReleve-Core/monitoredSites/{id}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/history', 'ecoReleve-Core/monitoredSites/{id}/history/',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/equipment', 'ecoReleve-Core/monitoredSites/{id}/equipment',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/history/action', 'ecoReleve-Core/monitoredSites/{id}/history/{action}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/action', 'ecoReleve-Core/monitoredSites/{action}') 
+    config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites/') 
+    config.add_route('monitoredSites/', 'ecoReleve-Core/monitoredSites') 
+    config.add_route('monitoredSites/id', 'ecoReleve-Core/monitoredSites/{id}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/history', 'ecoReleve-Core/monitoredSites/{id}/history/',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/equipment', 'ecoReleve-Core/monitoredSites/{id}/equipment',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/history/action', 'ecoReleve-Core/monitoredSites/{id}/history/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/action', 'ecoReleve-Core/monitoredSites/{action}') 
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Release #####

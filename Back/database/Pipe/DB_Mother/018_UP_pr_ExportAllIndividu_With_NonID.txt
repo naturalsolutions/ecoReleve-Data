@@ -1,0 +1,136 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+ALTER PROCEDURE [dbo].[pr_ExportAllIndividu] 
+AS
+BEGIN
+
+
+	IF object_id('TmpIndivExport') IS NOT NULL
+			DROP TABLE TmpIndivExport
+
+
+	select * into TmpIndivExport 
+	from [EcoReleve_ECWP].dbo.individual
+	where FK_IndividualType = 1 
+
+	--select * from TmpIndivExport
+	DECLARE @Req NVARCHAR(MAX)
+	DECLARE @ReqFrom NVARCHAR(MAX)
+	DECLARE @ReqSet NVARCHAR(MAX)
+
+	SET @Req = ' ALTER TABLE TmpIndivExport ADD@'
+
+	select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  
+	from [EcoReleve_ECWP].dbo.IndividualDynProp D
+	JOIN [EcoReleve_ECWP].dbo.IndividualType_IndividualDynProp l ON l.FK_IndividualDynProp = D.ID
+	JOIN [EcoReleve_ECWP].dbo.IndividualType t ON t.ID = l.FK_IndividualType 
+	where t.ID = 1 
+
+	SET @Req = replace(@Req,'ADD@,','ADD ')
+
+	--print @req
+
+	exec ( @req)
+
+	--select * from TmpIndivExport
+
+	SET @ReqSet = 'SET@'
+	SET @ReqFrom =''
+
+	SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom + ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')																						
+	from [EcoReleve_ECWP].dbo.IndividualDynProp P
+	JOIN [EcoReleve_ECWP].dbo.IndividualType_IndividualDynProp l ON l.FK_IndividualDynProp = P.ID
+	JOIN [EcoReleve_ECWP].dbo.IndividualType t ON t.ID = l.FK_IndividualType 
+	where t.ID = 1 
+
+	SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
+
+	SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpIndivExport EI JOIN (SELECT VN.FK_Individual ' + @ReqFrom + ' FROM   [EcoReleve_ECWP].dbo.IndividualDynPropValuesNow VN GROUP BY VN.FK_Individual) V ON EI.ID = V.FK_Individual '
+	print @req
+	exec ( @req)
+
+	ALTER TABLE TmpIndivExport ADD Status_ varchar(250)
+
+	Update e SET Status_=s.Status_
+	FROM TmpIndivExport e
+	JOIN [EcoReleve_ECWP].dbo.IndividualStatus s ON e.ID = s.FK_Individual
+
+
+	IF object_id('TIndividu') IS NOT NULL DROP TABLE  TIndividu
+	
+	exec sp_rename 'TmpIndivExport','TIndividu'
+
+
+	---------------------------- NON ID Indiv
+
+		IF object_id('TmpIndivNON_ID_Export') IS NOT NULL
+			DROP TABLE TmpIndivNON_ID_Export
+
+	select * into TmpIndivNON_ID_Export 
+	from [EcoReleve_ECWP].dbo.individual
+	where FK_IndividualType = 2
+
+
+	SET @Req = ' ALTER TABLE TmpIndivNON_ID_Export ADD@'
+
+	select @Req = @Req + ',    ' +  replace(D.Name,' ','_') + ' ' + replace(replace(d.typeProp,'Integer','INT'),'string','varchar(255)')  
+	from [EcoReleve_ECWP].dbo.IndividualDynProp D
+	JOIN [EcoReleve_ECWP].dbo.IndividualType_IndividualDynProp l ON l.FK_IndividualDynProp = D.ID
+	JOIN [EcoReleve_ECWP].dbo.IndividualType t ON t.ID = l.FK_IndividualType 
+	where t.ID = 2
+
+	SET @Req = replace(@Req,'ADD@,','ADD ')
+
+	--print @req
+
+	exec ( @req)
+
+	--select * from TmpIndivExport
+
+	SET @ReqSet = 'SET@'
+	SET @ReqFrom =''
+
+	SELECT @ReqSet = @ReqSet + ',' + replace(P.Name,' ','_') + '=V.' + replace(P.Name,' ','_'), @ReqFrom = @ReqFrom 
+	+ ',MAX(CASE WHEN Name=''' +  replace(P.Name,' ','_') + ''' THEN Value' + replace(P.TypeProp,'Integer','Int') + ' ELSE NULL END) ' + replace(P.Name,' ','_')																						
+	from [EcoReleve_ECWP].dbo.IndividualDynProp P
+	JOIN [EcoReleve_ECWP].dbo.IndividualType_IndividualDynProp l ON l.FK_IndividualDynProp = P.ID
+	JOIN [EcoReleve_ECWP].dbo.IndividualType t ON t.ID = l.FK_IndividualType 
+	where t.ID = 2
+
+
+	SET @ReqSet = replace(@ReqSet,'SET@,','SET ')
+
+	SET @Req = 'UPDATE EI ' + @ReqSet +  ' FROM TmpIndivNON_ID_Export EI JOIN (SELECT VN.FK_Individual ' 
+	+ @ReqFrom + ' FROM   [EcoReleve_ECWP].dbo.IndividualDynPropValuesNow VN GROUP BY VN.FK_Individual) V ON EI.ID = V.FK_Individual '
+	print @req
+	exec ( @req)
+
+
+	IF object_id('TIndividu_Non_Identified') IS NOT NULL DROP TABLE  TIndividu_Non_Identified
+	
+	exec sp_rename 'TmpIndivNON_ID_Export','TIndividu_Non_Identified'
+
+END
+
+
+
+
+
+
+
+
+GO
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('18_UP_pr_ExportAllIndividu_With_NonID',GETDATE(),(SELECT db_name()))
+
+
+GO

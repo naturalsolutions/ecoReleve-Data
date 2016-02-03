@@ -26,7 +26,7 @@ from pyramid.response import Response
 from traceback import print_exc
 from collections import OrderedDict
 
-prefix = 'monitoredSite'
+prefix = 'monitoredSites'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET')
@@ -193,9 +193,9 @@ def updateMonitoredSite(request):
         curMonitoredSite.UpdateFromJson(data)
         response = {}
 
-    except Exception as e:
+    except IntegrityError as e:
         print('\n\n\n *****IntegrityError errrroorr') 
-        transaction.abort()
+        session.rollback()
         response = request.response
         response.status_code = 510
         response.text = "IntegrityError"

@@ -28,9 +28,16 @@ from traceback import print_exc
 from pyramid import threadlocal
 from ..utils.datetime import parse
 from ..utils.parseValue import parseValue,find,isEqual
+from sqlalchemy_utils import get_hybrid_properties
 
 
-Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt','float':'ValueFloat'}
+Cle = {'String':'ValueString',
+'Float':'ValueFloat',
+'Date':'ValueDate',
+'Integer':'ValueInt',
+'float':'ValueFloat',
+'Time': 'ValueDate',
+'Date Only':'ValueDate'}
 
 class ObjectWithDynProp:
     ''' Class to extend for mapped object with dynamic properties '''
@@ -80,13 +87,13 @@ class ObjectWithDynProp:
             gridFields = self.ObjContext.query(ModuleGrids
             ).filter(and_(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType),
                 or_(ModuleGrids.TypeObj == typeID ,ModuleGrids.TypeObj ==None ))
-            ).order_by(asc(ModuleGrids.GridOrder)).all()
+            ).filter(ModuleGrids.GridRender>0).order_by(asc(ModuleGrids.GridOrder)).all()
         except:
             gridFields = self.ObjContext.query(ModuleGrids).filter(
                 ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
-                ).order_by(asc(ModuleGrids.GridOrder)).all()
+                ).filter(ModuleGrids.GridRender>0).order_by(asc(ModuleGrids.GridOrder)).all()
 
-        # gridFields.sort(key=lambda x: str(x.GridOrder))
+        # gridFields.sort(key=lambda x: x.GridOrder)
         cols = []
         #### return only fileds existing in conf ####
         for curConf in gridFields:
@@ -252,8 +259,9 @@ class ObjectWithDynProp:
     def GetFlatObject(self,schema=None):
         ''' return flat object with static properties and last existing value of dyn props '''
         resultat = {}
+        hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
         if self.ID is not None : 
-            max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow))
+            max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow),len(hybrid_properties))
             for i in range(max_iter) :
                 #### Get static Properties ####
                 try :
@@ -267,6 +275,12 @@ class ObjectWithDynProp:
                     resultat[curDynPropName] = self.GetProperty(curDynPropName)
                 except Exception as e :
                     pass
+                try :
+                    PropName = hybrid_properties[i]
+                    resultat[PropName] = self.GetProperty(PropName)
+                except Exception as e :
+                    pass
+
         else : 
             max_iter = len( self.__table__.columns)
             for i in range(max_iter) :
@@ -288,14 +302,16 @@ class ObjectWithDynProp:
         resultat = {}
         type_ = self.GetType().ID
         Fields = self.ObjContext.query(ModuleForms
-            ).filter(and_(ModuleForms.Module_ID == FrontModules.ID),ModuleForms.FormRender>0).order_by(ModuleForms.FormOrder).all()
+            ).filter(and_(ModuleForms.Module_ID == FrontModules.ID),ModuleForms.FormRender>0
+            ).filter(or_(ModuleForms.TypeObj == type_,ModuleForms.TypeObj == None)).order_by(ModuleForms.FormOrder).all()
 
-        for curStatProp in self.__table__.columns:
-            CurModuleForms = list(filter(lambda x : x.Name == curStatProp.key and x.FormRender>0 and (x.TypeObj== str(type_) or x.TypeObj == None) , Fields))
+        for curStatProp in Fields:####self.__table__.columns:
+            CurModuleForms = list(filter(lambda x : curStatProp.Name == x.key, self.__table__.columns))
             if (len(CurModuleForms)> 0 ):
                 # Conf définie dans FrontModules
-                CurModuleForms = CurModuleForms[0]
-                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(Editable)
+                # CurModuleForms = CurModuleForms[0]
+                # CurModuleForms = CurModuleForms[0]
+                resultat[curStatProp.Name] = curStatProp.GetDTOFromConf(Editable)
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):

@@ -156,7 +156,8 @@ define([
         editable: false,
         cell : Backgrid.Extension.MomentCell.extend({
           modelInUnixTimestamp: true,
-          displayFormat: "DD/MM/YYYY HH:mm:ss"
+          displayFormat: "DD/MM/YYYY HH:mm:ss",
+          displayInUTC: false
         }),
         headerCell : null
       },
@@ -166,7 +167,8 @@ define([
         editable: false,
         cell : Backgrid.Extension.MomentCell.extend({
           modelInUnixTimestamp: true,
-          displayFormat: "DD/MM/YYYY HH:mm:ss"
+          displayFormat: "DD/MM/YYYY HH:mm:ss",
+          displayInUTC: false
         }),
         headerCell : null
       }

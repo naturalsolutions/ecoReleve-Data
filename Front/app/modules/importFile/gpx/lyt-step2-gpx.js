@@ -5,7 +5,8 @@ define([
 	'marionette',
 	'config',
 	'ns_modules/ns_com',
-	'ns_filter/model-filter',
+	//'ns_filter/model-filter_module',
+  'ns_filter_bower',
 	'ns_map/ns_map',
 	'ns_grid/model-grid',
 	'sweetAlert',
@@ -96,7 +97,8 @@ define([
         1: {
           name: 'name',
           type: 'Text',
-          label: 'Name'
+          label: 'Name',
+          title: 'Name',
         },
 /*        2: {
           name: 'latitude',
@@ -111,7 +113,8 @@ define([
         4: {
           name: 'waypointTime',
           type: 'DateTimePicker',
-          label: 'Date'
+          label: 'Date',
+          title: 'Date',
         }
       };
       this.filters = new NsFilter({

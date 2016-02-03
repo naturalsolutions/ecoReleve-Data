@@ -100,11 +100,11 @@ define([
                         this.addForm(model);
                         this.defaultRequired = false;
                     };
-                }
-            } else {
-                if(this.defaultRequired){
-                    this.addEmptyForm();
-                    this.defaultRequired = false;
+                } else {
+                    if(this.defaultRequired){
+                        this.addEmptyForm();
+                        this.defaultRequired = false;
+                    }
                 }
             }
 

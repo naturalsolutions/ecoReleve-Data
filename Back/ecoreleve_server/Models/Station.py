@@ -122,14 +122,14 @@ class Station(Base,ObjectWithDynProp):
         else :
             return self.ObjContext.query(StationType).get(self.FK_StationType)
 
-    def GetDTOWithSchema(self,FrontModules,DisplayMode):
-        ''' Override this super method to add fieldworker '''
-        resultat = super().GetDTOWithSchema(FrontModules,DisplayMode)
-        if self.ID :
-            resultat['data']['FieldWorkers'] = self.FieldWorkers
-        else:
-            resultat['data']['FieldWorkers'] = [{'id' : 0}]
-        return resultat
+    # def GetDTOWithSchema(self,FrontModules,DisplayMode):
+    #     ''' Override this super method to add fieldworker '''
+    #     resultat = super().GetDTOWithSchema(FrontModules,DisplayMode)
+    #     if self.ID :
+    #         resultat['data']['FieldWorkers'] = self.FieldWorkers
+    #     else:
+    #         resultat['data']['FieldWorkers'] = [{'id' : 0}]
+    #     return resultat
 
 
 #--------------------------------------------------------------------------

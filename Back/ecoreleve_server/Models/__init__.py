@@ -60,6 +60,7 @@ def db(request):
 # def setup_post_request(event):
 #     event.request.add_finished_callback(remove_session)
 
+from .CustomTypes import *
 from .Protocoles import *
 from .User import User
 from .Station import * 

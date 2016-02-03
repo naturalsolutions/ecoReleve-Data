@@ -9,7 +9,8 @@ define([
   'config',
   'ns_modules/ns_com',
   'ns_grid/model-grid',
-  'ns_filter/model-filter',
+  //'ns_filter/model-filter_module',
+  'ns_filter_bower',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
@@ -199,18 +200,19 @@ define([
         if (resp.errors) {
           resp.title = 'An error occured';
           resp.type = 'error';
+          var callback = function() {};
         }else {
           resp.title = 'Success';
           resp.type = 'success';
+          var callback = function() {
+            Backbone.history.navigate('stations/' + _this.station.get('ID'), {trigger: true});
+            //$('#back').click();
+          };
 
         }
         resp.text = 'release: ' + resp.release;
 
         //remove the model from the coll once this one is validated
-        var callback = function() {
-          Backbone.history.navigate('stations/' + _this.station.get('ID'), {trigger: true});
-          //$('#back').click();
-        };
         this.swal(resp, resp.type, callback);
 
       }).fail(function(resp) {
@@ -229,12 +231,18 @@ define([
 
     swal: function(opt, type, callback) {
       var btnColor;
+      var confirmText;
+      var showCancel;
       switch (type){
         case 'success':
           btnColor = 'green';
+          confirmText = 'See Station';
+          showCancel = true;
           break;
         case 'error':
           btnColor = 'rgb(147, 14, 14)';
+          confirmText = 'Ok';
+          showCancel = false; 
           break;
         case 'warning':
           btnColor = 'orange';
@@ -248,9 +256,9 @@ define([
         title: opt.title || opt.responseText || 'error',
         text: opt.text || '',
         type: type,
-        showCancelButton: true,
+        showCancelButton: showCancel,
         confirmButtonColor: btnColor,
-        confirmButtonText: 'See Station',
+        confirmButtonText: confirmText,
         cancelButtonColor: 'grey',
         cancelButtonText: 'New Release',
         closeOnConfirm: true,

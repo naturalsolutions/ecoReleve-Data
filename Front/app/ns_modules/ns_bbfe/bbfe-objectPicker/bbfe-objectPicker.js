@@ -8,7 +8,7 @@ define([
   'config',
   'ns_modules/ns_com',
   'ns_grid/model-grid',
-  'ns_filter/model-filter',
+  'ns_filter/model-filter_module',
   'backbone-forms',
   'requirejs-text!./tpl-bbfe-objectPicker.html',
   'objects/layouts/lyt-objects-new'
@@ -190,7 +190,8 @@ define([
     },
 
     showPicker: function() {
-      this.displayGrid();
+      //this.displayGrid();
+      this.filters.update();
       this.$el.find('#modal-outer').fadeIn('fast');
     },
 

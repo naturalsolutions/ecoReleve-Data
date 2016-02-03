@@ -30,8 +30,8 @@ def uploadFileRFID(request):
         creator = request.authenticated_userid['iss']
         content = request.POST['data']
         idModule = request.POST['FK_Sensor']
-        startEquip = parse(request.POST['StartDate'])
-        endEquip = parse(request.POST['EndDate'])
+        startEquip = request.POST['StartDate']
+        endEquip = request.POST['EndDate']
         creator = request.authenticated_userid['iss']
      
         if re.compile('\r\n').search(content):
@@ -122,9 +122,16 @@ def uploadFileRFID(request):
             j=j+1
         data_to_check = pd.DataFrame.from_records(list_RFID,columns = ['id_','FK_Sensor','date_','chip_code','creator','creation_date','validated','checked'])
 
+        maxDateEquip = datetime.fromtimestamp(int(startEquip))
+        try :
+            minDateEquip = datetime.fromtimestamp(int(endEquip))
+        except:
+            minDateEquip = None
+
         ## check if Date corresponds with pose remove module ##
-        if allDate[0]>=startEquip and (endEquip is None or allDate[-1]<= endEquip):
-            # data_to_insert = checkDuplicatedRFID(data_to_check,allDate[0],allDate[-1])
+        if min(allDate)>= maxDateEquip and (minDateEquip is None or max(allDate)<= minDateEquip):
+            
+            # data_to_insert = checkDuplicatedRFID(data_to_check,min(allDate),max(allDate))
             # Rfids = [{Rfid.creator.name: crea, Rfid.FK_Sensor.name: idMod, Rfid.checked.name: '0',
             # Rfid.chip_code.name: c, Rfid.date_.name: d, Rfid.creation_date.name: now} for crea, idMod, c, d  in Rfids]
             # # Insert data.
@@ -173,5 +180,6 @@ def checkDuplicatedRFID(data_to_check,startEquip,endEquip):
 
     DFToInsert = data_to_check[~data_to_check['id_'].isin(merge['id_'])]
     session1.close()
+    print(DFToInsert)
     return DFToInsert
 

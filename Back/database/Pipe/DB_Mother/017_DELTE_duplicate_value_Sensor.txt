@@ -1,0 +1,21 @@
+DELETE [EcoReleve_ECWP].[dbo].[SensorDynPropValue] 
+WHERE ID in 
+
+(SELECT min([ID])
+  FROM [EcoReleve_ECWP].[dbo].[SensorDynPropValue]
+  group by [StartDate]
+      ,[ValueInt]
+      ,[ValueString]
+      ,[ValueDate]
+      ,[ValueFloat]
+      ,[FK_SensorDynProp]
+      ,[FK_Sensor]
+ having count(*) > 1 )
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('17_DELTE_duplicate_value_Sensor',GETDATE(),(SELECT db_name()))
+
+
+GO

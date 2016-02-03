@@ -57,7 +57,8 @@ def count_ (request = None,listObj = None) :
             if data['criteria'] != {} :
                 searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
         else : 
-            searchInfo = {'criteria':None}
+            searchInfo = {'criteria':[]}
+        searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':1})
         listObj = ListObjectWithDynProp(Individual,moduleFront)
         count = listObj.count(searchInfo = searchInfo)
     else : 
@@ -66,8 +67,8 @@ def count_ (request = None,listObj = None) :
 
 def getFilters (request):
     session = request.dbsession
-    if 'objType' in request.params :
-        objType = request.params['objType']
+    if 'typeObj' in request.params :
+        objType = request.params['typeObj']
     else : 
         objType = 1
 
@@ -91,8 +92,8 @@ def getForms(request) :
 def getFields(request) :
     session = request.dbsession
 
-    if 'objType' in request.params :
-        objType = request.params['objType']
+    if 'typeObj' in request.params :
+        objType = request.params['typeObj']
     else : 
         objType = 1
 
@@ -284,6 +285,11 @@ def searchIndiv(request):
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
 
+    if 'typeObj' in request.params:
+        searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':request.params['typeObj']})
+    else:
+        searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':1})
+
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
@@ -311,7 +317,7 @@ def getFieldsLoc(request) :
     gene = IndivLocationList('Individual_Location',session,None)
     return gene.get_col()
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'GET',permission=NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'GET')
 def getIndivLocation(request):
 
     id_ = request.matchdict['id']
@@ -330,9 +336,9 @@ def getIndivLocation(request):
         per_page = json.loads(data['per_page'])
         order_by = json.loads(data['order_by'])
     else :
-        offset=0
-        per_page=20
-        order_by=[]
+        offset= None 
+        per_page= None
+        order_by= None
 
     if 'geo' in request.params :
         result = gene.get_geoJSON(criteria,['ID','UnicIdentifier','Date','type_'])
@@ -370,14 +376,17 @@ def getIndivLocation(request):
     return result
 
 
-@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'DELETE',permission=NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'PUT')
 def delIndivLocationList(request):
     session = request.dbsession
-    IdList = request.params['IDs']
+
+    IdList = json.loads(request.params['IDs'])
+
+    print(IdList)
     session.query(Individual_Location).filter(Individual_Location.ID.in_(IdList)).delete(synchronize_session=False)
 
 
-@view_config(route_name= prefix+'/id/location/id_loc', renderer='json', request_method = 'GET',permission=NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/location/id_loc', renderer='json', request_method = 'GET')
 def delIndivLocation(request):
     session = request.dbsession
     Id = request.matchdict['id_loc']

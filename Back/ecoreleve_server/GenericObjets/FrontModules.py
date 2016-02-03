@@ -68,7 +68,7 @@ class ModuleForms(Base):
 
     @staticmethod
     def GetClassFromSize(FieldSize):
-        return FieldSizeToClass[FieldSize]
+        return 'col-md-'+str(FieldSize)
 
     def GetDTOFromConf(self,Editable):
         ''' return input field to build form '''
@@ -94,7 +94,8 @@ class ModuleForms(Base):
                 curInputType = 'Text'
                 self.fullPath = True
 
-        CssClass = FieldSizeToClass[curSize]
+        # CssClass = FieldSizeToClass[curSize]
+        CssClass = 'col-md-'+str(curSize)
 
         self.dto = {
             'name': self.Name,
@@ -103,14 +104,25 @@ class ModuleForms(Base):
             'editable' : Editable,
             'editorClass' : str(self.editorClass) ,
             'validators': [],
-            'options': [],
+            'options': None,
             'defaultValue' : None,
             'editorAttrs' : {'disabled': isDisabled},
             'fullPath':self.fullPath
             }
 
+        try : 
+            self.dto['options'] = json.loads(self.Options)
+        except:
+            self.dto['options'] = self.Options
+
         if self.Validators is not None:
             self.dto['validators'] = json.loads(self.Validators)
+
+        if self.Options is not None:
+            try:
+                self.dto['options'] = json.loads(self.Options)
+            except:
+                pass
 
         if self.Required == 1 :
             if self.InputType=="Select":
@@ -137,6 +149,7 @@ class ModuleForms(Base):
 
     def InputSelect (self) :
         if self.Options is not None and self.Options != '' :
+            self.dto['options'] = []
             result = self.session.execute(text(self.Options)).fetchall()
             for row in result :
                 temp = {}
@@ -205,7 +218,7 @@ class ModuleForms(Base):
         'Select': InputSelect,
         'ListOfNestedModel' : InputLNM,
         'AutocompTreeEditor' : InputThesaurus,
-        'AutocompleteEditor': InputAutocomplete
+        'AutocompleteEditor': InputAutocomplete,
         }
 
 
@@ -270,11 +283,18 @@ class ModuleGrids (Base) :
             'name' : self.Name,
             'type' : self.FilterType,
             'label' : self.Label,
+            'title' : self.Label,
             'editable' : isEditable(int(self.FilterRender)),
             # 'editorClass' : str(self.FilterClass) ,
             'validators': [],
-            'options': [],
+            'options': [] ,
             }
+
+        try :
+            filter_['options'] = json.loads(self.Options)
+        except :
+            filter_['options'] = self.Options
+
         if (self.FilterClass) : 
             filter_['fieldClass'] = self.FilterClass+ ' ' + FieldSizeToClass[self.FilterSize] 
         else :  

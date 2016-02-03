@@ -180,7 +180,7 @@ def getSensorHistory(request):
             ).where(table.c['FK_Sensor'] == id
             ).order_by(desc(table.c['StartDate']))
 
-    elif (curSensorType.lower() in ['gsm','satellite']):
+    elif (curSensorType.lower() in ['gsm','satellite','vhf']):
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = join(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
         query = select([table.c['StartDate'],table.c['EndDate'],table.c['FK_Individual'],Sensor.UnicIdentifier]).select_from(joinTable
