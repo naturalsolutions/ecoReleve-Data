@@ -22,6 +22,10 @@ from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from traceback import print_exc
 from datetime import datetime
+from ..utils.parseValue import parseValue,find,isEqual
+from ..utils.datetime import parse
+
+
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 class MonitoredSitePosition(Base):
@@ -153,13 +157,13 @@ class MonitoredSite (Base,ObjectWithDynProp) :
         if hasattr(self.newPosition,nameProp):
             curTypeAttr = str(self.newPosition.__table__.c[nameProp].type).split('(')[0]
 
-            if 'Date'.upper() in curTypeAttr :
-                    valeur = datetime.strptime(valeur,'%d/%m/%Y %H:%M:%S')
+            if 'date'.lower() in curTypeAttr.lower() :
+                    valeur = parse(valeur.replace(' ',''))
                     setattr(self.newPosition,nameProp,valeur)
-                    valeur = valeur.strftime('%Y-%m-%d %H:%M:%S')
+                    # valeur = valeur.strftime('%Y-%m-%d %H:%M:%S')
             else :
                 setattr(self.newPosition,nameProp,valeur)
-            if (nameProp not in self.PropDynValuesOfNow) or (str(self.PropDynValuesOfNow[nameProp]) != str(valeur)) and valeur != "" : 
+            if (nameProp not in self.PropDynValuesOfNow) or (isEqual(self.PropDynValuesOfNow[nameProp],valeur) is False):
                 self.positionChanged = True
 
     def UpdateFromJson(self,DTOObject):

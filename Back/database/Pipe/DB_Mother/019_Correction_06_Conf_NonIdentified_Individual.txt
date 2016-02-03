@@ -295,6 +295,53 @@ set Options = '{"title":"Individuals","url":"individuals", "typeObj":[{"Standard
   InputType = 'NonIdPicker', Label = 'Individual ID/Non ID'
 where TypeObj = 214 and Name = 'FK_Individual'
 
+
+UPDATE ModuleForms SET FieldSizeEdit = FieldSizeDisplay
+where module_id = 9 
+
+UPDATE  ModuleForms SET FieldSizeEdit = 4, FieldSizeDisplay = 4  
+where module_id = 9 and (Name like 'Release%color' or Name Like 'Breeding%color' or Name Like 'Mark%color%')
+
+UPDATE  ModuleForms SET FieldSizeEdit = 3, FieldSizeDisplay = 3  
+where module_id = 9 and (Name like 'Release%code' or Name Like 'Breeding%code' or Name Like 'Mark%code%')
+
+UPDATE  ModuleForms SET FieldSizeEdit = 5, FieldSizeDisplay = 5  
+where module_id = 9 and (Name like 'Release%position' or Name Like 'Breeding%position' or Name Like 'Mark%position%')
+
+UPDATE  ModuleForms SET FormOrder = 100, Legend = NULL
+where module_id = 9 and Name = 'Comments'
+
+UPDATE  ModuleForms SET FormRender = 1 , EditClass = NULL
+where module_id = 9 and Name ='ID'
+GO
+
+UPDATE ModuleForms SET FieldSizeEdit = FieldSizeDisplay
+where module_id = 2 
+
+UPDATE ModuleForms SET FieldSizeEdit = 3 ,FieldSizeDisplay=3
+where module_id = 12 and Name In ('LAT','LON')
+
+UPDATE ModuleForms SET FormOrder = 10
+where module_id = 12 and Name = 'Comments'
+
+INSERT INTO ModuleForms (
+[module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+    )
+VALUES (12,NULL,'ELE','Elevation',0,3,3,'Number','form-control',2,4,'Location Infos'),
+(12,NULL,'Precision','Precision',0,3,3,'Number','form-control',2,5,'Location Infos') 
+
+
 GO
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('19_Correction_06_Conf_NonIdentified_Individual',GETDATE(),(SELECT db_name()))
