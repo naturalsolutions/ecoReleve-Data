@@ -23,6 +23,10 @@ where v.FK_ObservationDynProp = (SELECT ID FROM ObservationDynProp where name = 
 
 GO
 
+update f set Label = 'Code Hexadecimal'
+From ModuleForms f
+where Name = 'Hexadecimal_Code'
+
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('20_Fix_ObsDynProp_Time',GETDATE(),(SELECT db_name()))
 
