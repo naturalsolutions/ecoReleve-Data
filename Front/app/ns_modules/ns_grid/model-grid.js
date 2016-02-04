@@ -194,7 +194,7 @@ define([
           order_by: function () {
             var criteria = [];
             for (var crit in this.sortCriteria) {
-              criteria.push(crit + '=' + this.sortCriteria[crit]);
+              criteria.push(crit + ':' + this.sortCriteria[crit]);
 
             }
             return JSON.stringify(criteria);
