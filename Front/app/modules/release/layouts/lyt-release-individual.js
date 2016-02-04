@@ -39,6 +39,7 @@ define([
       'click button#clear': 'clearFilter',
       'click #release': 'toolTipShow',
       'click #addSensor': 'addSensor',
+      'click #test': 'test'
     },
 
 
@@ -168,9 +169,12 @@ define([
       this.$el.find(this.ui.nbSelected).html(nbSelected);
     },
 
-    filter: function() {
+    test: function() {
+      console.log(this.grid.grid.collection);
+      this.grid.grid.collection = new Backbone.Collection(this.grid.grid.collection.where({Sex: 'femelle'}));
+    },
 
-      console.log('passed');
+    filter: function() {
       this.filters.update();
     },
 
