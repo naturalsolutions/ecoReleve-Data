@@ -9,7 +9,7 @@ class Eval():
         try : 
             return self.get_operator_fn(op)(op1, op2)
         except (NameError,KeyError): 
-            return not_(self.get_operator_fn(op.split('not','').replace(' ',''))(op1, op2))
+            return not_(self.get_operator_fn(op.replace('not','').replace(' ',''))(op1, op2))
 
     def get_operator_fn(self,op):
         return {
