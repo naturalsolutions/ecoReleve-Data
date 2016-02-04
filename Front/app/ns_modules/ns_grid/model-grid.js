@@ -33,6 +33,9 @@ define([
         this.com.addModule(this);
       }
 
+
+      this.deferred = $.Deferred();
+
       this.idName = options.idName;
 
       //basic options
@@ -279,6 +282,7 @@ define([
             if(_this.totalElement){
               _this.affectTotalRecords();
             }
+            _this.deferred.resolve();
           };
           PageColl.prototype.fetch.call(this, options);
         }
@@ -312,10 +316,11 @@ define([
       var _this = this;
 
 
-      if (this.filterCriteria != null) {
 
+      if (this.filterCriteria != null) {
         //<- ??
         if (!this.url){
+          
         }
         else {
         //?? ->
@@ -325,8 +330,7 @@ define([
             delete this.collection.queryParams['lastImported'];
           }
 
-
-          this.deffered = this.grid.collection.fetch({
+          this.grid.collection.fetch({
             reset: true, 
             data: { 'criteria': this.filterCriteria }, 
             success: function () {
@@ -337,9 +341,8 @@ define([
           });
         }
       }
-      
       else {
-        this.deffered = this.grid.collection.fetch({ reset: true });
+        this.grid.collection.fetch({ reset: true });
       }
     },
 
@@ -422,7 +425,7 @@ define([
     action: function (action, params) {
       switch (action) {
         case 'focus':
-          this.hilight(params);
+          this.focus(params);
           break;
         case 'selection':
           this.selectOne(params);
@@ -484,31 +487,30 @@ define([
         param['id'] = id;
       }
 
-      var mod;
-
+      var model;
       if (this.grid.collection.fullCollection){
-        mod = this.grid.collection.fullCollection.findWhere(param);
-        var index = this.grid.collection.fullCollection.indexOf(mod);
+        model = this.grid.collection.fullCollection.findWhere(param);
+        var index = this.grid.collection.fullCollection.indexOf(model);
         index = Math.floor(index/this.pageSize)+1;
         if (index > 0 && this.grid.collection.state.currentPage != index){
           this.grid.collection.getPage(index);
         }
         
       } else {
-        mod = this.grid.collection.findWhere(param);
+        model = this.grid.collection.findWhere(param);
       }
 
-
-      if (mod.get('import')) {
-        mod.set('import', false);
-        mod.trigger("backgrid:select", mod, false);
+      if (model.get('import')) {
+        model.set('import', false);
+        model.trigger("backgrid:select", model, false);
       } else {
-        mod.set('import', true);
-        mod.trigger("backgrid:select", mod, true);
+        model.set('import', true);
+        model.trigger("backgrid:select", model, true);
       }
     },
 
     selectMultiple: function (idList) {
+
       var mod;
 
       for (var i = 0; i < idList.length; i++) {
@@ -523,6 +525,41 @@ define([
         mod.set('import', true);
         mod.trigger("backgrid:select", mod, true);
       };
+    },
+
+    focus: function(id){
+      var param = {};
+      id = parseInt(id);
+      if (this.idName) {
+        param[this.idName] = id;
+      } else {
+        param['id'] = id;
+      }
+
+      var model;
+      var index;
+      if (this.grid.collection.fullCollection){
+        model = this.grid.collection.fullCollection.findWhere(param);
+        index = this.grid.collection.fullCollection.indexOf(model);
+      } else {
+        model = this.grid.collection.findWhere(param);
+        index = this.grid.collection.indexOf(model);
+      }
+
+      var pageIndex;
+      if (this.grid.collection.fullCollection){
+        pageIndex = Math.floor(index/this.pageSize)+1;
+        if (pageIndex > 0 && this.grid.collection.state.currentPage != pageIndex){
+          this.grid.collection.getPage(pageIndex);
+        }
+      }
+
+      if(this.currentRow){
+        this.currentRow.$el.removeClass('active');
+      }
+      this.currentRow = this.grid.body.rows[index];
+      this.currentRow.$el.addClass('active').find('input').focus();
+
     },
 
 

@@ -242,17 +242,17 @@ define([
     initClusters: function(geoJson){
       var firstLvl= true;
       this.firstLvl= [];
-      var ctx= this;
+      var _this= this;
       var CustomMarkerClusterGroup = L.MarkerClusterGroup.extend({
         _defaultIconCreateFunction: function (cluster, contains) {
           //push on firstLvl
           if(firstLvl){
-            ctx.firstLvl.push(cluster);
+            _this.firstLvl.push(cluster);
           }
-          if(ctx.selection){
-            return ctx.getClusterIcon(cluster, false, 0);
+          if(_this.selection){
+            return _this.getClusterIcon(cluster, false, 0);
           }else{
-            return ctx.getClusterIcon(cluster);
+            return _this.getClusterIcon(cluster);
           }
         },
       });
@@ -349,6 +349,9 @@ define([
       }else{
         m.setIcon(this.icon);
       }
+      if (m == this.lastFocused) {
+        $(m._icon).addClass('focus');
+      }
     },
 
     setCenter: function(geoJson){
@@ -379,7 +382,7 @@ define([
     setGeoJsonLayer: function(geoJson){
       this.setCenter(geoJson);
       var marker, prop;
-      var ctx = this;
+      var _this = this;
       var i =0;
 
       var markerList = [];
@@ -400,14 +403,14 @@ define([
             }
           }
           if(feature.checked){
-            marker = L.marker(latlng, {icon: ctx.focusedIcon});
+            marker = L.marker(latlng, {icon: _this.focusedIcon});
           }else{
-            marker = L.marker(latlng, {icon: ctx.icon});
+            marker = L.marker(latlng, {icon: _this.icon});
           }
 
           marker.checked=false;
 
-          if(ctx.popup){
+          if(_this.popup){
             prop = feature.properties;
             for(var p in prop){
               infos +='<b>'+p+' : '+prop[p]+'</b><br />';
@@ -417,12 +420,13 @@ define([
 
           marker.feature = feature;
 
-          ctx.dict[feature.id] = marker;
+          _this.dict[feature.id] = marker;
 
           marker.on('click', function(e){
-            if(ctx.selection){
-              ctx.interaction('selection', this.feature.id);
+            if(_this.selection){
+              _this.interaction('selection', this.feature.id);
             }
+            _this.interaction('focus', this.feature.id);
           });
           markerList.push(marker);
         }else{
@@ -534,7 +538,7 @@ define([
     },
 
     addBBox: function(markers){
-      var ctx = this;
+      var _this = this;
 
       var marker, childs;
 
@@ -560,7 +564,7 @@ define([
         var bbox=[], childIds=[];
         for(var key in  markers._featureGroup._layers){
           marker =  markers._featureGroup._layers[key];
-          if (e.boxZoomBounds.contains(marker._latlng) /*&& !ctx.selectedMarkers[key]*/) {
+          if (e.boxZoomBounds.contains(marker._latlng) /*&& !_this.selectedMarkers[key]*/) {
 
               if(!marker._markers){
                 bbox.push(marker.feature.id);
@@ -568,28 +572,28 @@ define([
                 childs = marker.getAllChildMarkers();
 
                 //bad functionName
-                ctx.updateAllClusters(marker, true);
+                _this.updateAllClusters(marker, true);
 
                 for (var i = childs.length - 1; i >= 0; i--) {
                   childs[i].checked = true;
-                  ctx.selectedMarkers[childs[i].feature.id] = childs[i];
+                  _this.selectedMarkers[childs[i].feature.id] = childs[i];
                   bbox.push(childs[i].feature.id);
 
-                  ctx.changeIcon(childs[i]);
+                  _this.changeIcon(childs[i]);
                 }
                 if(marker.__parent){
-                    ctx.updateClusterParents(marker, []);
+                    _this.updateClusterParents(marker, []);
                 }
               }
           }
         }
-        ctx.interaction('selectionMultiple', bbox);
-        $(ctx).trigger('ns_bbox_end', e.boxZoomBounds);
+        _this.interaction('selectionMultiple', bbox);
+        $(_this).trigger('ns_bbox_end', e.boxZoomBounds);
       });
     },
 
     addArea: function(){
-      var ctx = this;
+      var _this = this;
 
       this.map.boxZoom.onMouseUp = function(e){
         this._finish();
@@ -609,7 +613,7 @@ define([
       };
 
       this.map.on('boxzoomend', function(e) {
-        $(ctx).trigger('ns_bbox_end', e.boxZoomBounds);
+        $(_this).trigger('ns_bbox_end', e.boxZoomBounds);
       });
     },
 
@@ -652,25 +656,20 @@ define([
     /*==========  focusMarker :: focus & zoom on a point  ==========*/
     focus: function(id, zoom){
       id = parseInt(id);
+      var _this = this;
       var marker = this.dict[id];
+      var center = marker.getLatLng();
+      var zoom = this.disableClustring;
 
-      if(this.lastFocused && this.lastFocused != marker){
-        this.changeIcon(this.lastFocused);
+      if(this.lastFocused){
+        $(this.lastFocused._icon).removeClass('focus')
       }
       this.lastFocused = marker;
-      marker.setIcon(this.focusedIcon);
 
-      var center = marker.getLatLng();
-      this.map.panTo(center, {animate: false});
-      var ctx = this;
+      $(this.lastFocused._icon).addClass('focus');
 
-      zoom = this.disableClustring;
+      _this.map.setView(center, zoom);
 
-      if(zoom){
-        setTimeout(function(){
-          ctx.map.setZoom(zoom);
-         }, 1000);
-      }
     },
 
     /*==========  resetMarkers :: reset a list of markers  ==========*/

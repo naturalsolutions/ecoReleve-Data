@@ -96,12 +96,14 @@ define([
       this.displayFilters(4);
       this.displayMap();
 
+      var view;
       if (this.stationId) {
-        this.detail.show(new LytStationsEdit({
+        this.detail.show(view = new LytStationsEdit({
           stationId: this.stationId
         }));
         this.ui.detail.removeClass('hidden');
       }
+      console.log(view);
     },
 
     initGrid: function(url) {

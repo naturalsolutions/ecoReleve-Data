@@ -9,8 +9,6 @@ define([
   'use strict';
   return Form.editors.DateTimePicker = Form.editors.Base.extend({
 
-
-    
         previousValue: '',
 
         events: {
@@ -44,7 +42,6 @@ define([
             if (this.format.toLowerCase() == 'hh:mm:ss') {
                 this.classIcon = 'glyphicon-time glyphicon';
             }
-            console.log(this.format);
         },
 
         getValue: function() {
@@ -77,8 +74,6 @@ define([
                 }
                 
               }else {
-                    console.log(this.format)
-                    console.log(options.value)
                     if (options.model) {
                       value = options.model.get(this.options.key);
                     }else {
@@ -96,7 +91,6 @@ define([
                 iconClass: _this.classIcon
             })));
             this.setElement($el);
-            //console.log('**** HIDDEN ************** ', (options.schema.editable != false) ? '' : 'hidden', options.schema.editable);
             $($el[0]).datetimepicker({
                 format : _this.format,
                 //displayFormat : _this.format
