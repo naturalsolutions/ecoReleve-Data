@@ -3,58 +3,31 @@ define([
     'jquery',
     'jqueryui',
     'backbone',
-    'backbone-forms',
+    'backbone_forms',
     'autocompTree',
 ], function (
     _, $, $ui, Backbone, Form, autocompTree
 ) {
-
-
     Backbone.Form.validators.Thesaurus = function (options) {
         return function Thesaurus(value) {
-            /*
-            if (value == '') return ;
-            //console.log('***************************************validateurThesaurus',options,value);
-
-            var TypeField = "FullPath";
-                if (value && value.indexOf(">") == -1) {
-                    TypeField = 'Name';
-                }
-            var retour ;
-
-            $.ajax({
-                url: options.wsUrl + "/ThesaurusReadServices.svc/json/getTRaductionByType",
-                timeout: 3000,
-                data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + options.startId + '" }',
-                dataType: "json",
-                type: "POST",
-                async:false,
-                contentType: "application/json; charset=utf-8",
-                success: function (data) {
-                    retour = null;
-                },
-                error: function (data) {
-                    //console.log('***************************erreur de validation*******************')
-                    retour = {
-                            type: options.type,
-                            message: 'Not-Valid Value'
-                            };
-                }
-            });
-
-            return retour ;
-            */
+            if (!options.parent.isTermError) {
+                return null;
+            }
+            var retour = {
+                type: options.type,
+                message: ''
+            };
+            return retour;
         };
     };
 
     'use strict';
     return Form.editors.AutocompTreeEditor = Form.editors.Base.extend({
 
-
         previousValue: '',
 
         events: {
-            'hide': "hasChanged"
+            'hide': 'hasChanged'
         },
 
         hasChanged: function (currentValue) {
@@ -65,23 +38,25 @@ define([
         },
 
         initialize: function (options) {
-            this.options = options;
-            this.FirstRender = true ;
+            this.FirstRender = true;
             this.languages = {
-                'fr':'',
-                'en':'En'
+                'fr': '',
+                'en': 'En'
             };
-            //this.validators = options.schema.validators || [] ;
-
-            this.termError = false;
-            
+            this.ValidationRealTime = true;
+            if (options.schema.options.ValidationRealTime == false) {
+                this.ValidationRealTime = false;
+            }
+            this.validators = options.schema.validators || [];
+            this.isTermError = false;
             Form.editors.Base.prototype.initialize.call(this, options);
             this.template = options.template || this.constructor.template;
-            this.id = options.id + options.form.cid;
+            this.id = options.id;
             var editorAttrs = "";
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled) {
                 editorAttrs += 'disabled="disabled"';
             }
+            this.editable = options.schema.editable;
             var tplValeurs = {
                 inputID: this.id,
                 editorAttrs: editorAttrs,
@@ -93,26 +68,23 @@ define([
             this.lng = options.schema.options.lng;
             this.displayValueName = options.schema.options.displayValueName || 'fullpathTranslated';
             this.storedValueName = options.schema.options.storedValueName || 'fullpath';
-            this.validators.push({ type: 'Thesaurus', startId: this.startId, wsUrl:this.wsUrl  });
+            if (this.ValidationRealTime) {
+                this.validators.push({ type: 'Thesaurus', startId: this.startId, wsUrl: this.wsUrl, parent: this });
+            }
+            this.translateOnRender = options.translateOnRender || true;
         },
 
         getValue: function () {
-            if(this.termError){
-                return false;
+            if (this.isTermError) {
+                return null;
             }
             return this.$el.find('#' + this.id + '_value').val();
-
         },
 
         render: function () {
-            var _this = this;
-
             var $el = $(this.template);
             this.setElement($el);
-
-            if(this.options.schema.validators && this.options.schema.validators[0] == "required"){
-              this.$el.find('input').addClass('required');
-            }
+            var _this = this;
             _(function () {
                 _this.$el.find('#' + _this.id).autocompTree({
                     wsUrl: _this.wsUrl + '/ThesaurusREADServices.svc/json',
@@ -127,90 +99,98 @@ define([
                     inputValue: _this.value,
                     startId: _this.startId,
                 });
-                
-                
-                var TypeField = "FullPath";
-                if (_this.value && _this.value.indexOf(">") == -1) {
-                    TypeField = 'Name';
+
+                if (_this.translateOnRender) {
+                    _this.validateAndTranslate(_this.value, true);
                 }
-                var valeur = _this.value || '';
-                $.ajax({
-                    url: _this.wsUrl + "/ThesaurusReadServices.svc/json/getTRaductionByType",
-                    timeout: 10000,
-                    data: '{ "sInfo" : "' + valeur + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '" }',
-                    dataType: "json",
-                    type: "POST",
-                    contentType: "application/json; charset=utf-8",
-                    success: function (data) {
-                        var translatedValue = data["TTop_FullPath" + _this.languages[_this.lng.toLowerCase()]];
-                        if (_this.displayValueName  == 'valueTranslated') {
+                if (_this.FirstRender) {
+                    _this.$el.find('#' + _this.id).blur(function (options) {
+                        setTimeout(function (options) {
+                            var value = _this.$el.find('#' + _this.id + '_value').val();
+                            _this.onEditValidation(value);
+                        }, 150);
+                    });
+
+                }
+                _this.FirstRender = false;
+            }).defer();
+            return this;
+        },
+
+        validateAndTranslate: function (value, isTranslated) {
+            var _this = this;
+
+            if (value == null || value == '') {
+                _this.displayErrorMsg(false);
+                return;
+            }
+            var TypeField = "FullPath";
+            if (value && value.indexOf(">") == -1) {
+                TypeField = 'Name';
+            }
+            var erreur;
+
+            $.ajax({
+                url: _this.wsUrl + "/ThesaurusReadServices.svc/json/getTRaductionByType",
+                //timeout: 3000,
+                data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '" }',
+                dataType: "json",
+                type: "POST",
+                //async:false,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $('#divAutoComp_' + _this.id).find('input').removeClass('error');
+                    _this.displayErrorMsg(false);
+
+                    var translatedValue = data["TTop_FullPath" + _this.languages[_this.lng.toLowerCase()]];
+                    if (isTranslated) {
+                        if (_this.displayValueName == 'valueTranslated') {
                             translatedValue = data["TTop_Name" + _this.languages[_this.lng.toLowerCase()]];
                         }
                         _this.$el.find('#' + _this.id).val(translatedValue);
                         _this.$el.find('#' + _this.id + '_value').val(data["TTop_FullPath"]);
-                    },
-                    error: function (data) {
-                        //_this.$el.find('#' + _this.id).val('_this.value');
-                        _this.$el.find('#' + _this.id + '_value').val(_this.value);
-                        //$('#' + _this.id + '_value').val(this.value);
                     }
-                });
-                if (_this.FirstRender) {
-                    _this.$el.find('#' + _this.id).blur(function(options) {
-                        
-                        
-                        setTimeout (function(options) {
-                                    var value = _this.$el.find('#' + _this.id ).val() ;
-                                    _this.onEditValidation(value) ;
-                                    },150) ;
-                    });
-                    
+                    _this.displayErrorMsg(false);
+                },
+                error: function (data) {
+                    $('#divAutoComp_' + _this.id).find('input').addClass('error');
+                    _this.displayErrorMsg(true);
                 }
-                _this.FirstRender = false ;
-            }).defer();
-
-    
-
-            return this;
+            });
         },
+        
         onEditValidation: function (value) {
-            var _this = this ;
-            console.info('Validation on edit ',value,'finvalue') ;
-            if (value == null || value == '')  {
-                $('#divAutoComp_' + _this.id).find('input').removeClass('error') ;
-                return ;
+            var _this = this;
+            if (!this.ValidationRealTime) {
+                this.isTermError = false;
+                return;
             }
-            console.info('Validation on edit Value pas vide ') ;
-            
-                var TypeField = "FullPath";
-                if (value && value.indexOf(">") == -1) {
-                    TypeField = 'Name';
-                }
-                var erreur ;
 
-                $.ajax({
-                    url: _this.wsUrl + "/ThesaurusReadServices.svc/json/getTRaductionByType",
-                    timeout: 3000,
-                    data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '" }',
-                    dataType: "json",
-                    type: "POST",
-                    //async:false,
-                    contentType: "application/json; charset=utf-8",
-                    success: function (data) {
-                        _this.termError = false;
-                        console.info('***************************validation OK*******************')
-                        $('#divAutoComp_' + _this.id).find('input').removeClass('error') ;
-                    },
-                    error: function (data) {
-                        _this.termError = true;
-                        console.info('***************************erreur de validation*******************')
-                        $('#divAutoComp_' + _this.id).find('input').addClass('error') ;
-                    }
-                });
+            _this.isTermError = true;
+            _this.validateAndTranslate(value, false);
+        },
+
+        displayErrorMsg: function (bool) {
+            if (this.editable) {
+                this.isTermError = bool;
+                if (this.isTermError) {
+
+                    this.termError = "Invalid term";
+                    this.$el.find('#divAutoComp_' + this.id).find('input').addClass('error');
+                    this.$el.find('#errorMsg').removeClass('hidden');
+                } else {
+                    this.termError = "";
+                    this.$el.find('#divAutoComp_' + this.id).find('input').removeClass('error');
+                    this.$el.find('#errorMsg').addClass('hidden');
+                }
+            }
         },
 
     }, {
-        template: '<div class="tmp"><input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>></div>',
+        template: '<div>\
+            <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
+            <span id="errorMsg" class="error hidden">Invalid term</span>\
+        </div>',
     });
 
 

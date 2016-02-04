@@ -312,6 +312,7 @@ class ModuleGrids (Base) :
             , 'lng':threadlocal.get_current_request().authenticated_userid['userlanguage']
             ,'displayValueName': 'valueTranslated'}
             filter_['options']['startId'] = self.Options
+            filter_['options']['ValidationRealTime'] = False
 
         if self.FilterType=='AutocompleteEditor' and  self.Options is not None and self.Options != '':
             option = json.loads(self.Options)
