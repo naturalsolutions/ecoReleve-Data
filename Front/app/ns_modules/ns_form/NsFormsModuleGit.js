@@ -331,7 +331,7 @@ define([
               }
               _this.afterSaveSuccess();
             },
-            error: function (model, response) {
+            error: function (response) {
               _this.savingError(response);
             }
           });

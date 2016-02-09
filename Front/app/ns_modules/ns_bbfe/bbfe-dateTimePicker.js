@@ -1,14 +1,16 @@
 define([
   'jquery',
   'backbone',
-  'backbone-forms',
-
+  'backbone_forms',
+ 'dateTimePicker'
 ], function(
-  $, Backbone, Form
+  $, Backbone, Form,datetimepicker
 ){
   'use strict';
-  return Form.editors.DateTimePicker = Form.editors.Base.extend({
+  return Form.editors.DateTimePickerEditor = Form.editors.Base.extend({
 
+
+    
         previousValue: '',
 
         events: {
@@ -34,14 +36,25 @@ define([
             }
             if (options.schema.options){
                 this.format = options.schema.options.format;
+                this.maxDate = options.schema.options.maxDate || false;
+                this.defaultDate = options.schema.options.defaultValue || false;
             } else {
                 this.format = "DD/MM/YYYY HH:mm:ss";
             }
+            // datetimepicker options
+            this.datetimepickerOptions = {format : this.format};
+            if (this.defaultDate) {
+                this.datetimepickerOptions.defaultDate = this.defaultDate;
+            }
+            if (this.maxDate ) {
+                this.datetimepickerOptions.maxDate = this.maxDate;
+            }
 
             this.classIcon = 'reneco-calendar reneco';
-            if (this.format.toLowerCase() == 'hh:mm:ss') {
+            if (this.format && (this.format.toLowerCase() == 'hh:mm:ss')) {
                 this.classIcon = 'glyphicon-time glyphicon';
             }
+            console.log(this.format);
         },
 
         getValue: function() {
@@ -61,7 +74,7 @@ define([
                 required = options.schema.validators[0];
             }
 
-            if (options.model && this.format.toLowerCase() == 'hh:mm:ss') {
+            if (options.model && this.format && this.format.toLowerCase() == 'hh:mm:ss') {
                 //value = options.model.get(this.options.key);
                 var val = options.model.get(this.options.key);
                 if (val){
@@ -74,6 +87,8 @@ define([
                 }
                 
               }else {
+                    console.log(this.format)
+                    console.log(options.value)
                     if (options.model) {
                       value = options.model.get(this.options.key);
                     }else {
@@ -91,10 +106,8 @@ define([
                 iconClass: _this.classIcon
             })));
             this.setElement($el);
-            $($el[0]).datetimepicker({
-                format : _this.format,
-                //displayFormat : _this.format
-            });
+            //console.log('**** HIDDEN ************** ', (options.schema.editable != false) ? '' : 'hidden', options.schema.editable);
+			$($el[0]).datetimepicker(_this.datetimepickerOptions);
 
             //tmp solution ? datetimepicker remove the value
 /*            if(this.options){
