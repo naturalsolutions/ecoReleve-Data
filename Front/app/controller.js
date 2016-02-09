@@ -112,7 +112,6 @@ define(['marionette', 'config',
     },
 
     release: function(id) {
-      console.log(id);
       // (id of the station..)
       this.rgMain.show(new LytReleaseStation({id : id}));
     },

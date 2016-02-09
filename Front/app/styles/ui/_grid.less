@@ -16,6 +16,9 @@
 	overflow: auto;
 }
 
+
+
+
 table.backgrid{
 
 	thead{
@@ -28,13 +31,26 @@ table.backgrid{
 		background: transparent;
 		text-transform: uppercase;
 	}
-	tr{
-		cursor: pointer;
-		&.active{
-			background: #C7C7C7;
+	tbody{
+		tr{
+			border-bottom: 1px solid rgb(221, 221, 221);
 		}
+		td{
+			border: 0px;
+		}
+	}
+	tr{
+
+		transition: .05s all;
+		&:nth-child(2n){
+			background: rgba(221, 221, 221, 0.3);
+		}
+		cursor: pointer;
 		&:hover{
-			background: #ddd;
+			background: #ccc;
+		}
+		&.active{
+			background:rgba(255, 165, 0, .5)!important;
 		}
 	}
 	td{
@@ -63,7 +79,7 @@ table.backgrid{
 		tr{
 			&.active{
 				td{
-					border: 1px solid white ;
+					//border: 1px solid white ;
 				}
 			}
 		}

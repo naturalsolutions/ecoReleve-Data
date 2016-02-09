@@ -1,18 +1,18 @@
 //radio
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'config',
-	'ns_grid/model-grid',
-	'ns_modules/ns_com',
-	'ns_map/ns_map',
-	'ns_form/NSFormsModuleGit',
-	'moment',
-	'ns_navbar/ns_navbar'
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'config',
+  'ns_grid/model-grid',
+  'ns_modules/ns_com',
+  'ns_map/ns_map',
+  'ns_form/NSFormsModuleGit',
+  'moment',
+  'ns_navbar/ns_navbar'
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
  config, NsGrid, Com, NsMap, NsForm, moment, Navbar) {
@@ -26,7 +26,6 @@ define([
 
     events: {
       'click button#autoValidate': 'autoValidate',
-      'click table.backgrid td.select-row-cell input[type=checkbox]': 'checkSelect',
       'click table.backgrid th input': 'checkSelectAll',
       'click button#validate': 'validate',
       'change select#frequency': 'updateFrequency',
@@ -113,13 +112,10 @@ define([
       }
       this.displayGrid();
 
-      //todo, bug on big cluster coll defered
       setTimeout(function(){
         _this.displayMap();
-        $.when(_this.map.deffered, _this.grid.deffered).done(function() {
-          setTimeout(function() {
+        $.when(_this.map.deffered, _this.grid.deferred).done(function() {
             _this.initFrequency();
-          },100);
         });
       }, 0);
       this.displaySensorForm();
@@ -213,45 +209,20 @@ define([
       }];
 
       var url = config.coreUrl + 'sensors/' + this.type      +
-			'/uncheckedDatas/' + this.indId + '/' + this.pttId;
+      '/uncheckedDatas/' + this.indId + '/' + this.pttId;
       this.grid = new NsGrid({
         pagingServerSide: false,
         columns: cols,
         com: this.com,
         pageSize: 2000,
         url: url,
-        urlParams: this.urlParams,
+        idName: 'PK_id',
         rowClicked: true,
         totalElement: 'totalEntries',
       });
 
-      this.grid.selectOne = function(id) {
-        var model_id = id;
-        var coll = new Backbone.Collection();
-        coll.reset(this.grid.collection.models);
-
-        model_id = parseInt(model_id);
-        var mod = coll.findWhere({PK_id: model_id});
-
-        if (mod.get('import')) {
-          mod.set('import', false);
-          mod.trigger('backgrid:select', mod, false);
-        } else {
-          mod.set('import', true);
-          mod.trigger('backgrid:select', mod, true);
-        }
-      };
       this.grid.onceFetched = function() {
         _this.clone();
-      };
-      this.grid.selectMultiple = function(ids) {
-        var model_ids = ids, self = this, mod;
-        for (var i = 0; i < model_ids.length; i++) {
-
-          mod = this.grid.collection.findWhere({PK_id: model_ids[i]});
-          mod.trigger('backgrid:select', mod, true);
-          mod.set('import', true);
-        };
       };
 
       this.grid.rowClicked = function(args) {
@@ -281,13 +252,23 @@ define([
     rowClicked: function(args) {
       var row = args.row;
       var id = row.model.get('PK_id');
-      this.grid.interaction('focus', id);
+
+      if ($(args.evt.target).is('input')) {
+        this.grid.interaction('selection', id);
+      } else {
+        this.grid.interaction('focus', id);
+      }
     },
 
-    //should be in the grid module
-    checkSelect: function(e) {
-      var id = $(e.target).parent().parent().find('td').html();
-      this.grid.interaction('selection', id);
+    rowDbClicked: function(args) {
+      var row = args.row;
+      var id = row.model.get('PK_id');
+      if ($(args.evt.target).is('input')) {
+        this.grid.interaction('selection', id);
+      } else {
+        this.grid.interaction('selection', id);
+        this.grid.interaction('focus', id);
+      }
     },
 
     checkSelectAll: function(e) {
@@ -302,7 +283,7 @@ define([
 
     displayMap: function() {
       var url = config.coreUrl + 'sensors/' + this.type      +
-			'/uncheckedDatas/' + this.indId + '/' + this.pttId + '?geo=true';
+      '/uncheckedDatas/' + this.indId + '/' + this.pttId + '?geo=true';
       this.map = new NsMap({
         url: url,
         selection: true,
@@ -343,7 +324,7 @@ define([
     },
 
     clone: function() {
-      this.origin	= this.grid.collection.fullCollection.clone();
+      this.origin = this.grid.collection.fullCollection.clone();
     },
 
     perHour: function(frequency) {
@@ -382,7 +363,7 @@ define([
     validate: function() {
       var _this = this;
       var url = config.coreUrl + 'sensors/' + this.type      +
-			'/uncheckedDatas/' + this.indId + '/' + this.pttId;
+      '/uncheckedDatas/' + this.indId + '/' + this.pttId;
       var mds = this.grid.grid.getSelectedModels();
       if (!mds.length) {
         return;
@@ -441,12 +422,12 @@ define([
         confirmButtonText: 'OK',
         closeOnConfirm: true,
       },
-			function(isConfirm) {
-  //could be better
-  if (callback) {
-    callback();
-  }
-			});
+      function(isConfirm) {
+        //could be better
+        if (callback) {
+          callback();
+        }
+      });
     },
 
   });
