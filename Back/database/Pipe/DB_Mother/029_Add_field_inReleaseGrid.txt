@@ -1,0 +1,20 @@
+  INSERT INTO ModuleGrids (
+  [Module_ID]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[GridRender]
+      ,[GridSize]
+      ,[CellType]
+      ,[GridOrder]
+      ,[IsSearchable])
+VALUES ( 17,1,'Comments','Comments',4,1,'string',20,0)
+
+go
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('29_Add_field_inReleaseGrid',GETDATE(),(SELECT db_name()))
+
+
+GO
