@@ -1,0 +1,34 @@
+DELETE ProtocoleType_ObservationDynProp 
+where FK_ObservationDynProp = (select ID FROM ObservationDynProp WHERE Name = 'timestamp')
+
+Update v set ValueDate = Convert(DATETIME,ValueString,108)
+--SELECT *  
+FROM ObservationDynPropValue v 
+WHERE v.FK_ObservationDynProp in (
+  SELECT d.ID  FROM ObservationDynProp d 
+  where (d.name like '%time%' or d.name like '%hour%') 
+  and TypeProp = 'String' and d.name != 'death_time')
+and ValueString is not null 
+
+UPDATE d SET TypeProp = 'Time'
+FROM  ObservationDynProp d 
+  where (d.name like '%time%' or d.name like '%hour%') 
+  and TypeProp = 'String' and d.name != 'death_time'
+
+
+Update v set ValueDate = Convert(DATETIME,ValueString,100)
+--SELECT *  
+FROM ObservationDynPropValue v 
+where v.FK_ObservationDynProp = (SELECT ID FROM ObservationDynProp where name = 'hour')
+
+GO
+
+update f set Label = 'Code Hexadecimal'
+From ModuleForms f
+where Name = 'Hexadecimal_Code'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('20_Fix_ObsDynProp_Time',GETDATE(),(SELECT db_name()))
+
+
+GO
