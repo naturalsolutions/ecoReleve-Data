@@ -163,7 +163,6 @@ def insertListNewStations(request):
     format_dtBis = '%Y-%d-%m %H:%M:%S'
     dateNow = datetime.now()
 
-    print(data[0]['FieldWorkers'])
     ##### Rename field and convert date #####
     #TODO
     for row in data :
@@ -219,7 +218,6 @@ def insertListNewStations(request):
         result_to_check['LON'] = np.round(result_to_check['LON'],decimals = 5)
 
         merge_check = pd.merge(DF_to_check,result_to_check , on =['LAT','LON','StationDate'])
-        print(merge_check)
         ##### Get only non existing data to insert #####
         DF_to_insert = DF_to_check[~DF_to_check['id'].isin(merge_check['id'])]
         DF_to_insert = DF_to_insert.drop(['id'],1)
