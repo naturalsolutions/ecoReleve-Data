@@ -8,7 +8,7 @@ define([
   'ns_modules/ns_com',
   'ns_grid/model-grid',
   //'ns_filter/model-filter',
-  'ns_filter/model-filter_module',
+  'ns_filter_bower',
   'ns_map/ns_map',
 
   './lyt-station-detail',

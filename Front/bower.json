@@ -30,7 +30,7 @@
     "tooltipster-list": "https://github.com/amiceli/tooltipster-list.git",
     "chartjs": "~1.0.2",
     "reneco-fonts": "*",
-    "NaturalJS_Filter":"1.0.1"
+    "NaturalJS_Filter":"1.0.2"
   },
   "resolutions": {
     "jquery": "~1.10.2",
