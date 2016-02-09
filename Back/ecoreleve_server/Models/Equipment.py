@@ -133,14 +133,14 @@ def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     e1 = aliased(Equipment)
     e2 = aliased(Equipment)
     subQueryExists = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor
-        ,and_(e1.c[objToUnequip] == Equipment.c[objToUnequip]
+        ,and_(e1.__table__.c[objToUnequip] == Equipment.__table__.c[objToUnequip]
             ,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate))))
 
     query = select([Equipment]).where(and_(~exists(subQueryExists)
         ,and_(Equipment.StartDate<=equipDate,and_(Equipment.Deploy == 1
-            ,and_(Equipment.FK_Sensor == fk_sensor,Equipment.c[objToUnequip] == fk_indiv)))))
+            ,and_(Equipment.FK_Sensor == fk_sensor,Equipment.__table__.c[objToUnequip] == fk_indiv)))))
 
-    subQueryUnequip = select([e2]).where(and_(e2.c[objToUnequip] == Equipment.c[objToUnequip]
+    subQueryUnequip = select([e2]).where(and_(e2.__table__.c[objToUnequip] == Equipment.__table__.c[objToUnequip]
         ,and_(e2.StartDate>Equipment.StartDate
             ,and_(e2.FK_Sensor == Equipment.FK_Sensor,and_(e2.Deploy == 0,e2.StartDate<=equipDate)))))
 
