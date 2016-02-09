@@ -21,6 +21,7 @@ from sqlalchemy import select, and_,cast, DATE,func
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
+from sqlalchemy.exc import IntegrityError
 
 
 
@@ -176,17 +177,20 @@ def insertListNewStations(request):
         newRow['creator'] = request.authenticated_userid['iss']
         newRow['FK_StationType']= 4
         newRow['id'] = row['id']
+        newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dt)
 
-        try :
-            newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dt)
-        except :
-            newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dtBis)
+        # try :
+        #     newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dt)
+        # except :
+        #     newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dtBis)
         data_to_insert.append(newRow)
 
     ##### Load date into pandas DataFrame then round LAT,LON into decimal(5) #####
     DF_to_check = pd.DataFrame(data_to_insert)
     DF_to_check['LAT'] = np.round(DF_to_check['LAT'],decimals = 5)
     DF_to_check['LON'] = np.round(DF_to_check['LON'],decimals = 5)
+    # DF_to_check['LAT'] = DF_to_check['LAT'].astype(float)
+    # DF_to_check['LON'] = DF_to_check['LON'].astype(float)
     
     ##### Get min/max Value to query potential duplicated stations #####
     maxDate = DF_to_check['StationDate'].max()
@@ -201,28 +205,53 @@ def insertListNewStations(request):
         and_(
             Station.StationDate.between(minDate,maxDate),
             Station.LAT.between(minLat,maxLat)
-            ))
-    result_to_check = session.execute(query).fetchall()
+            )).where(Station.LON.between(minLon,maxLon))
 
-    if result_to_check :
+    data_to_insert = []
+    result_to_check = pd.read_sql_query(query,session.get_bind())
+    if result_to_check.shape[0] > 0  :
         ##### IF potential duplicated stations, load them into pandas DataFrame then join data to insert on LAT,LON,DATE #####
-        result_to_check = pd.DataFrame(data=result_to_check, columns = Station.__table__.columns.keys())
-        result_to_check['LAT'] = result_to_check['LAT'].astype(float)
-        result_to_check['LON'] = result_to_check['LON'].astype(float)
+        # result_to_check = pd.DataFrame(data=result_to_check, columns = Station.__table__.columns.keys())
+        # result_to_check['LAT'] = result_to_check['LAT'].astype(float)
+        # result_to_check['LON'] = result_to_check['LON'].astype(float)
+        result_to_check['LAT'] = np.round(result_to_check['LAT'],decimals = 5)
+        result_to_check['LON'] = np.round(result_to_check['LON'],decimals = 5)
+
         merge_check = pd.merge(DF_to_check,result_to_check , on =['LAT','LON','StationDate'])
-
         ##### Get only non existing data to insert #####
-        DF_to_check = DF_to_check[~DF_to_check['id'].isin(merge_check['id'])]
+        DF_to_insert = DF_to_check[~DF_to_check['id'].isin(merge_check['id'])]
+        DF_to_insert = DF_to_insert.drop(['id'],1)
+        data_to_insert = json.loads(DF_to_insert.to_json(orient='records',date_format='iso'))
 
-    DF_to_check = DF_to_check.drop(['id'],1)
-    data_to_insert = json.loads(DF_to_check.to_json(orient='records',date_format='iso'))
-
-    ##### Build block insert statement and returning ID of new created stations #####
+    staListID = []
     if len(data_to_insert) != 0 :
-        stmt = Station.__table__.insert(returning=[Station.ID]).values(data_to_insert)
-        res = session.execute(stmt).fetchall()
-        result =list(map(lambda y:  y[0], res))
+        nbExc = 0
+        for sta in data_to_insert :
+            curSta = Station(FK_StationType = 4)
+            curSta.init_on_load()
+            curDate = datetime.strptime(sta['StationDate'],"%Y-%m-%dT%H:%M:%S.%fZ")
+            curSta.UpdateFromJson(sta)
+            curSta.StationDate = curDate
 
+            try : 
+                session.add(curSta)
+                staListID.append(curSta.ID)
+                session.flush()
+                session.commit()
+            except IntegrityError as e :
+                session.rollback()
+                nbExc += 1
+                pass
+
+    #### Build block insert statement and returning ID of new created stations #####
+    # if len(data_to_insert) != 0 :
+    #     session.add_all(staList)
+    #     session.flush()
+    #     result = [sta.ID for sta in staList]
+        # stmt = Station.__table__.insert(returning=[Station.ID]).values(data_to_insert)
+        # res = session.execute(stmt).fetchall()
+        # result =list(map(lambda y:  y[0], res))
+        result = staListID
     ###### Insert FieldWorkers ######
         if not data[0]['FieldWorkers'] == None or "" :
             list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK_FieldWorker': b  },result)),data[0]['FieldWorkers'] ))
@@ -231,8 +260,8 @@ def insertListNewStations(request):
             session.execute(stmt)
     else : 
         result = []
-    response = {'exist': len(data)-len(data_to_insert), 'new': len(data_to_insert)}
-    return response 
+    response = {'exist': len(data)-len(data_to_insert) + nbExc, 'new': len(data_to_insert) - nbExc}
+    return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET')

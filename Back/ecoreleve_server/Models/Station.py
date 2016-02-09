@@ -1,4 +1,4 @@
-from ..Models import Base,DBSession,FieldActivity
+from ..Models import Base,DBSession,FieldActivity, dbConfig
 from sqlalchemy import (Column,
  DateTime,
  Float,
@@ -16,7 +16,9 @@ from sqlalchemy import (Column,
  func,
  insert,
  select,
- UniqueConstraint)
+ bindparam,
+ UniqueConstraint,
+ event)
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
@@ -31,7 +33,8 @@ import numpy as np
 import json
 from traceback import print_exc
 from pyramid import threadlocal
-
+from sqlalchemy.orm.query import QueryContext
+from sqlalchemy import event
 
 #--------------------------------------------------------------------------
 class Station(Base,ObjectWithDynProp):
@@ -67,6 +70,7 @@ class Station(Base,ObjectWithDynProp):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
         ObjectWithDynProp.__init__(self)
+
 
     ''' hybrid property on relationship '''
     @hybrid_property
@@ -131,6 +135,13 @@ class Station(Base,ObjectWithDynProp):
     #         resultat['data']['FieldWorkers'] = [{'id' : 0}]
     #     return resultat
 
+@event.listens_for(Station, 'before_insert')
+@event.listens_for(Station, 'before_update')
+def updateRegion(mapper, connection, target):
+    stmt = text('''SELECT EcoReleve_ECWP.dbo.[fn_GetRegionFromLatLon] (:lat,:lon)
+    ''').bindparams(bindparam('lat',target.LAT),bindparam('lon',target.LON))
+    regionID = connection.execute(stmt).scalar()
+    target.FK_Region = regionID
 
 #--------------------------------------------------------------------------
 class StationDynProp(Base):

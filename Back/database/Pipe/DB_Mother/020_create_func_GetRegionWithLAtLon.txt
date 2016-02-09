@@ -1,0 +1,27 @@
+create function [dbo].[fn_GetRegionFromLatLon] 
+	-- Add the parameters for the stored procedure here
+	(@lat decimal(9,5) , @lon decimal(9,5))
+	
+	RETURNS  int 
+AS
+BEGIN
+
+	-- Transforms lat and lon to a geometry object
+	declare @point geometry;
+	declare @regionId int;
+	set @point = geometry::STPointFromText('Point(' + CONVERT(varchar, @lon) + ' ' + CONVERT(varchar, @lat) +')', 4326);
+
+    -- Select the Place the point is inside
+	 SET @regionId = (SELECT ID FROM Region WHERE min_lat <= @lat and max_lat >= @lat and min_lon <= @lon and max_lon >= @lon and  @point.STWithin(valid_geom) = 1)
+
+	 return @regionId
+END
+
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('20_create_func_GetRegionWithLAtLon',GETDATE(),(SELECT db_name()))
+
+
+GO
