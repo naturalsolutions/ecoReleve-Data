@@ -24,6 +24,8 @@ CREATE table #proto_Id_nonIdentified
 (Id_nonIdentified int, proto_ID int, protocoleType int);
 
 
+------ Insert criteria from Capture individual
+
 INSERT INTO @subProtocole (Identification_criteria)
 select DISTINCT prot.Identification_criteria
 FROM Observation o 
@@ -39,6 +41,7 @@ FROM [ECWP-eReleveData_old].[dbo].TProtocol_Capture_Individual p
 JOIN @subProtocole s ON p.Identification_criteria = s.Identification_criteria;
 
 
+------ Insert criteria from Bird Biometry
 
 INSERT INTO @subProtocole (Identification_criteria)
 select DISTINCT prot.Identification_criteria
@@ -55,6 +58,38 @@ FROM [ECWP-eReleveData_old].[dbo].TProtocol_Bird_Biometry p
 JOIN @subProtocole s ON p.Identification_criteria = s.Identification_criteria;
 
 
+------ Insert criteria from BVertebrate individual Death
+
+INSERT INTO @subProtocole (Identification_criteria)
+select DISTINCT prot.Identification_criteria
+FROM Observation o 
+JOIN [ECWP-eReleveData_old].dbo.TProtocol_Vertebrate_Individual_Death prot ON o.original_id = CONVERT(VARCHAR,prot.PK)
+--LEFT JOIN nonIDind_criteria c ON prot.Identification_criteria = c.Identification_criteria 
+WHERE o.FK_ProtocoleType = (SELECT ID FROM ProtocoleType WHERE name = 'Vertebrate individual Death')
+and prot.FK_TInd_ID is null and o.FK_Individual is null and prot.Identification_criteria is not null 
+---AND c.IndID is null ;
+
+INSERT INTO #proto_Id_nonIdentified (proto_ID,Id_nonIdentified,protocoleType)
+SELECT p.PK,s.Id_nonIdentified, (SELECT ID FROM ProtocoleType WHERE name = 'Vertebrate individual Death')
+FROM [ECWP-eReleveData_old].[dbo].TProtocol_Vertebrate_Individual_Death p
+JOIN @subProtocole s ON p.Identification_criteria = s.Identification_criteria;
+
+
+------ Insert criteria from Nest Description
+
+INSERT INTO @subProtocole (Identification_criteria)
+select DISTINCT prot.Identification_criteria
+FROM Observation o 
+JOIN [ECWP-eReleveData_old].dbo.TProtocol_Nest_Description prot ON o.original_id = CONVERT(VARCHAR,prot.PK)
+--LEFT JOIN nonIDind_criteria c ON prot.Identification_criteria = c.Identification_criteria 
+WHERE o.FK_ProtocoleType = (SELECT ID FROM ProtocoleType WHERE name = 'Nest Description')
+and prot.FK_TInd_ID is null and o.FK_Individual is null and prot.Identification_criteria is not null 
+---AND c.IndID is null ;
+
+INSERT INTO #proto_Id_nonIdentified (proto_ID,Id_nonIdentified,protocoleType)
+SELECT p.PK,s.Id_nonIdentified, (SELECT ID FROM ProtocoleType WHERE name = 'Nest Description')
+FROM [ECWP-eReleveData_old].[dbo].TProtocol_Nest_Description p
+JOIN @subProtocole s ON p.Identification_criteria = s.Identification_criteria;
 
 
 select * from #proto_Id_nonIdentified;
@@ -197,7 +232,7 @@ JOIN #proto_Id_nonIdentified l ON l.proto_ID = o.original_id and o.FK_ProtocoleT
 JOIN  EcoReleve_ECWP.dbo.Individual i ON 'NonIdentifiedBB_'+CONVERT(varchar,l.Id_nonIdentified) = i.Original_ID
 
 
---GO
+GO
 
 
 
