@@ -1,0 +1,24 @@
+  INSERT INTO ModuleGrids (
+  [Module_ID]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[GridRender]
+      ,[GridSize]
+      ,[CellType]
+      ,[GridOrder]
+      ,[IsSearchable])
+VALUES ( 17,1,'Comments','Comments',4,1,'string',20,0)
+
+go
+
+INSERT INTO ModuleForms 
+(module_id,TypeObj,Name,Label,Required,FieldSizeEdit,FieldSizeDisplay,InputType,editorClass,FormRender,FormOrder,Legend,Options,Validators,displayClass,EditClass,Status,Locked,DefaultValue)
+VALUES (2,4,'precision','Précision',0,3,3,'Number','form-control',2,35,'Location Infos',NULL,NULL,NULL,NULL,NULL,1,NULL)
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('29_Add_field_inReleaseGrid_Precision_on_Station',GETDATE(),(SELECT db_name()))
+
+
+GO

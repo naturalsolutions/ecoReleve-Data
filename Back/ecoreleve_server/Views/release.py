@@ -214,6 +214,10 @@ def releasePost(request):
             except: 
                 indiv['weight'] = indiv['Poids']
                 pass
+            try: 
+                del indiv['Comments']
+            except: 
+                pass
 
             curVertebrateInd = getnewObs(vertebrateIndID)
             curVertebrateInd.UpdateFromJson(indiv)
