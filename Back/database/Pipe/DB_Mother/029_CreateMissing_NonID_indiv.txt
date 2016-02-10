@@ -1,13 +1,14 @@
-/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+﻿/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
+IF OBJECT_ID('tempdb..#indiv_criteria ') IS NOT NULL
+	DROP TABLE #indiv_criteria 
 
-
-declare @subProtocole table (Identification_criteria varchar(500), Id_nonIdentified int  identity(1,1))
+declare @subProtocole table (Identification_criteria varchar(500), Id_nonIdentified int identity(1,1))
 
 
 IF OBJECT_ID('tempdb..#indiv_criteria ') IS NOT NULL
@@ -16,48 +17,47 @@ IF OBJECT_ID('tempdb..#indiv_criteria ') IS NOT NULL
 CREATE table #indiv_criteria 
 (Id_nonIdentified int,propName varchar(250), value varchar(250),fullpath varchar(250));
 
---IF OBJECT_ID('tempdb..#proto_Id_nonIdentified ') IS NOT NULL
---	DROP TABLE #proto_Id_nonIdentified 
+IF OBJECT_ID('tempdb..#proto_Id_nonIdentified ') IS NOT NULL
+	DROP TABLE #proto_Id_nonIdentified 
 
---CREATE table #proto_Id_nonIdentified
---(Id_nonIdentified int, proto_ID int);
+CREATE table #proto_Id_nonIdentified
+(Id_nonIdentified int, proto_ID int, protocoleType int);
 
-
-with nonIDind_criteria as (
-SELECT i.ID as IndID, prot.Identification_criteria
-FROM Individual i
-JOIN Observation o ON o.FK_Individual = i.ID AND i.FK_IndividualType = 2
-JOIN [ECWP-eReleveData_old].dbo.TProtocol_Vertebrate_Individual  prot ON CONVERT(VARCHAR,prot.PK) = o.original_id
-group by i.ID,prot.Identification_criteria
-)
 
 INSERT INTO @subProtocole (Identification_criteria)
-select prot.Identification_criteria
+select DISTINCT prot.Identification_criteria
 FROM Observation o 
 JOIN [ECWP-eReleveData_old].dbo.TProtocol_Capture_Individual prot ON o.original_id = CONVERT(VARCHAR,prot.PK)
-LEFT JOIN nonIDind_criteria c ON prot.Identification_criteria = c.Identification_criteria 
+--LEFT JOIN nonIDind_criteria c ON prot.Identification_criteria = c.Identification_criteria 
 WHERE o.FK_ProtocoleType = (SELECT ID FROM ProtocoleType WHERE name = 'Capture individual')
 and prot.FK_TInd_ID is null and o.FK_Individual is null and prot.Identification_criteria is not null 
-AND c.IndID is null ;
+--AND c.IndID is null ;
+
+INSERT INTO #proto_Id_nonIdentified (proto_ID,Id_nonIdentified,protocoleType)
+SELECT p.PK,s.Id_nonIdentified, (SELECT ID FROM ProtocoleType WHERE name = 'Capture individual')
+FROM [ECWP-eReleveData_old].[dbo].TProtocol_Capture_Individual p
+JOIN @subProtocole s ON p.Identification_criteria = s.Identification_criteria;
 
 
-with nonIDind_criteria as (
-SELECT i.ID as IndID, prot.Identification_criteria
-FROM Individual i
-JOIN Observation o ON o.FK_Individual = i.ID AND i.FK_IndividualType = 2
-JOIN [ECWP-eReleveData_old].dbo.TProtocol_Vertebrate_Individual  prot ON CONVERT(VARCHAR,prot.PK) = o.original_id
-group by i.ID,prot.Identification_criteria
-)
 
 INSERT INTO @subProtocole (Identification_criteria)
-select prot.Identification_criteria
+select DISTINCT prot.Identification_criteria
 FROM Observation o 
 JOIN [ECWP-eReleveData_old].dbo.TProtocol_Bird_Biometry prot ON o.original_id = CONVERT(VARCHAR,prot.PK)
-LEFT JOIN nonIDind_criteria c ON prot.Identification_criteria = c.Identification_criteria 
+--LEFT JOIN nonIDind_criteria c ON prot.Identification_criteria = c.Identification_criteria 
 WHERE o.FK_ProtocoleType = (SELECT ID FROM ProtocoleType WHERE name = 'Bird Biometry')
 and prot.FK_TInd_ID is null and o.FK_Individual is null and prot.Identification_criteria is not null 
-AND c.IndID is null ;
+---AND c.IndID is null ;
 
+INSERT INTO #proto_Id_nonIdentified (proto_ID,Id_nonIdentified,protocoleType)
+SELECT p.PK,s.Id_nonIdentified, (SELECT ID FROM ProtocoleType WHERE name = 'Bird Biometry')
+FROM [ECWP-eReleveData_old].[dbo].TProtocol_Bird_Biometry p
+JOIN @subProtocole s ON p.Identification_criteria = s.Identification_criteria;
+
+
+
+
+select * from #proto_Id_nonIdentified;
 
 WITH splitCriteria as (
   SELECT Id_nonIdentified,
@@ -130,7 +130,7 @@ SELECT
 	  ,ic.fullpath as species_th
       ,NULL as birthDate
       ,NULL as deathDate
-	  ,'NonIdentified2_'+CONVERT(varchar,ic.Id_nonIdentified) as Original_ID
+	  ,'NonIdentifiedBB_'+CONVERT(varchar,ic.Id_nonIdentified) as Original_ID
 	  , (SELECT ID FROM EcoReleve_ECWP.dbo.IndividualType IT where  IT.name ='Non Identified') as IndidualType
 FROM #indiv_criteria Ic
 LEFT JOIN #indiv_criteria Ic_age on ic.Id_nonIdentified = Ic_age.Id_nonIdentified AND ic_age.propName like '%age%'
@@ -155,7 +155,7 @@ INSERT INTO Individual (
 Original_ID
 )
 SELECT GETDATE(),
-'NonIdentified_'+CONVERT(varchar,Id_nonIdentified)
+'NonIdentifiedBB_'+CONVERT(varchar,Id_nonIdentified)
 FROM noSpecies ;
 
 
@@ -186,20 +186,15 @@ FROM #indiv_criteria ic
 		or	ic.propName like 'TCaracThes_txt_'+dp.Name+'%'
 		or	ic.propName like 'TCarac_'+dp.Name+'%'
 		or	ic.propName like 'TCarac_Thes_'+dp.Name+'%'
-JOIN EcoReleve_ECWP.dbo.Individual i on 'NonIdentified_'+CONVERT(VARCHAR,ic.Id_nonIdentified) = i.Original_ID
+JOIN EcoReleve_ECWP.dbo.Individual i on 'NonIdentifiedBB_'+CONVERT(VARCHAR,ic.Id_nonIdentified) = i.Original_ID
 WHERE fullpath is not NULL;
 
 
-/* UPDATE PROTOCOL vertebrate Indiv */ 
---declare @protoID int ;
---SET @protoID = (SELECT ID FROM EcoReleve_ECWP.dbo.ProtocoleType WHERE Name = 'Vertebrate individual')
-
---UPDATE o SET o.FK_Individual = i.ID
-----SELECT o.*
---FROM EcoReleve_ECWP.dbo.Observation o
---JOIN #proto_Id_nonIdentified l ON l.proto_ID = o.original_id
---JOIN  EcoReleve_ECWP.dbo.Individual i ON 'NonIdentified_'+CONVERT(varchar,l.Id_nonIdentified) = i.Original_ID
---WHERE o.FK_ProtocoleType = @protoID
+UPDATE o SET o.FK_Individual = i.ID
+--SELECT o.*,i.ID
+FROM EcoReleve_ECWP.dbo.Observation o
+JOIN #proto_Id_nonIdentified l ON l.proto_ID = o.original_id and o.FK_ProtocoleType = l.protocoleType
+JOIN  EcoReleve_ECWP.dbo.Individual i ON 'NonIdentifiedBB_'+CONVERT(varchar,l.Id_nonIdentified) = i.Original_ID
 
 
 --GO
