@@ -1,0 +1,17 @@
+UPDATE [ModuleForms]
+SET InputType ='DateTimePickerEditor'
+WHERE InputType = 'DateTimePicker';
+
+UPDATE [ModuleGrids]
+SET FilterType ='DateTimePickerEditor'
+WHERE FilterType = 'DateTimePicker';
+
+GO 
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('29_Update_DatetimePicker',GETDATE(),(SELECT db_name()))
+
+
+GO
