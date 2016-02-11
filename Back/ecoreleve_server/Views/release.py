@@ -232,15 +232,22 @@ def releasePost(request):
             releaseIndList.append(curReleaseInd)
 
             try:
-                indiv['FK_Sensor'] = int(indiv['fk_sensor'])
+                # indiv['FK_Sensor'] = int(indiv['fk_sensor'])
                 curEquipmentInd = getnewObs(equipmentIndID)
-                curEquipmentInd.UpdateFromJson(indiv)
+                equipInfo = {
+                'FK_Individual': indiv['FK_Individual'],
+                'FK_Sensor' : int(indiv['fk_sensor']),
+                'Survey_type' : 'Post-Relâcher',
+                'Monitoring_Status' : 'Suivi',
+                'Sensor_Status': 'événement de sortie provisoire de stock>mise en service'
+                }
+                curEquipmentInd.UpdateFromJson(equipInfo)
                 curEquipmentInd.Station = curStation
                 equipmentIndList.append(curEquipmentInd)
             except Exception as e:
                 if e.__class__.__name__ == 'ErrorAvailable':
                     sensor_available = 'is' if e.value['sensor_available'] else 'is not'
-                    tpl = 'SensorID {0} {1} available for equipment'.format(indiv['FK_Sensor'],sensor_available)
+                    tpl = 'SensorID {0} {1} available for equipment'.format(equipInfo['FK_Sensor'],sensor_available)
                     if errorEquipment is None:
                         errorEquipment = tpl
                     else:

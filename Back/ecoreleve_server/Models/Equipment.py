@@ -46,12 +46,9 @@ class Equipment(Base):
         curIndiv = session.query(Individual).get(self.FK_Individual)
         curSensor = session.query(Sensor).get(self.FK_Sensor)
 
-        print(kwargs)
         curSensor.UpdateFromJson(kwargs)
         curIndiv.UpdateFromJson(kwargs)
-    # def __init__(self,**kwargs):
-    #     super().__init__(**kwargs)
-    #     ObjectWithDynProp.__init__(self)
+
 
 def checkSensor(fk_sensor,equipDate):
     session = threadlocal.get_current_registry().dbmaker()
@@ -183,7 +180,7 @@ def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
 @event.listens_for(Observation.Station, 'set')
 def set_equipment(target, value=None, oldvalue=None, initiator=None):
     typeName = target.GetType().Name
-    print(target.Equipment)
+    curSta = value
     if 'unequip' in typeName.lower():
         deploy = 0
     else :
@@ -193,7 +190,11 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
         Status = target.GetProperty('Sensor_Status')
 
     if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
-        equipDate = target.Station.StationDate
+        try : 
+            equipDate = target.Station.StationDate
+        except :
+            equipDate = curSta.StationDate
+            
         fk_sensor = target.GetProperty('FK_Sensor') 
         if 'individual' in typeName.lower():
             fk_indiv = target.GetProperty('FK_Individual')
