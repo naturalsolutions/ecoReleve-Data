@@ -1,0 +1,32 @@
+/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+UPDATE m 
+SET Category = th.TTop_FullPath
+  FROM [EcoReleve_ECWP].[dbo].[MonitoredSite] m 
+	JOIN  [THESAURUS].[dbo].[TTopic] th  
+		ON m.Category = th.TTop_NameEn
+
+
+update ModuleForms SET InputType = 'AutocompTreeEditor', Options = 223070
+WHERE module_id = 12 AND Name = 'Category'
+
+
+ update ModuleGrids SET FilterType = 'AutocompTreeEditor', Options = 223070
+WHERE module_id = 13 AND Name = 'Category'
+
+
+UPDATE g set GridOrder=3
+  FROM [EcoReleve_ECWP].[dbo].[ModuleGrids] g
+  where Module_ID = 15 and Name = 'LON'
+
+  UPDATE g set GridOrder=5
+  FROM [EcoReleve_ECWP].[dbo].[ModuleGrids] g
+  where Module_ID = 15 and Name = 'Comments'
+
+GO 
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('31_MonitoredSite_Category_THES_Convert',GETDATE(),(SELECT db_name()))
+
+
+GO
