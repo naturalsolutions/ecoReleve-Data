@@ -209,8 +209,10 @@ define([
             'criteria': this.queryParams.criteria.call(this),
           };
 
-
-          if (_this.typeObj && options.data) {
+          if (_this.typeObj) {
+            if (!options.data) {
+              options.data = params
+            }
             options.data.typeObj = _this.typeObj;
           }
 

@@ -1,0 +1,25 @@
+SELECT max(ID) as id
+INTO #duplID
+FROM [EcoReleve_ECWP].[dbo].[MonitoredSite]
+group by name 
+having count(*) > 1
+
+DELETE [MonitoredSitePosition] 
+WHERE FK_MonitoredSite in (select * from #duplID)
+
+DELETE [MonitoredSite]
+WHERE ID in (select * from #duplID)
+
+
+CREATE UNIQUE NONCLUSTERED INDEX [MS_unique_Name] ON [dbo].[MonitoredSite]
+(
+	[Name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('33_Unique_Constraint_Name_Site',GETDATE(),(SELECT db_name()))
+
+
+GO

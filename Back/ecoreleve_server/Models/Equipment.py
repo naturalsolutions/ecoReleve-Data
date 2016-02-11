@@ -1,4 +1,4 @@
-from ..Models import Base,DBSession,Observation
+from ..Models import Base,DBSession,Observation,Individual,Sensor
 from sqlalchemy import (
     Column,
      DateTime,
@@ -41,9 +41,14 @@ class Equipment(Base):
     StartDate = Column(DateTime,default = func.now())
     Deploy = Column(Boolean)
 
-    # def __init__(self,**kwargs):
-    #     super().__init__(**kwargs)
-    #     ObjectWithDynProp.__init__(self)
+    def linkProperty(self,**kwargs):
+        session = threadlocal.get_current_request().dbsession
+        curIndiv = session.query(Individual).get(self.FK_Individual)
+        curSensor = session.query(Sensor).get(self.FK_Sensor)
+
+        curSensor.UpdateFromJson(kwargs)
+        curIndiv.UpdateFromJson(kwargs)
+
 
 def checkSensor(fk_sensor,equipDate):
     session = threadlocal.get_current_registry().dbmaker()
@@ -151,7 +156,6 @@ def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     # session.close()
     return result
 
-
 def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     existing = existingEquipment(fk_sensor,equipDate,fk_indiv=fk_indiv)
     unequip = alreadyUnequip (fk_sensor,equipDate,fk_indiv=fk_indiv,fk_site=fk_site)
@@ -172,16 +176,25 @@ def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
 
     return availability
 
+
 @event.listens_for(Observation.Station, 'set')
 def set_equipment(target, value=None, oldvalue=None, initiator=None):
     typeName = target.GetType().Name
+    curSta = value
     if 'unequip' in typeName.lower():
         deploy = 0
     else :
         deploy  = 1 
+        Survey_type = target.GetProperty('Survey_type')
+        Monitoring_Status = target.GetProperty('Monitoring_Status')
+        Status = target.GetProperty('Sensor_Status')
 
     if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
-        equipDate = target.Station.StationDate
+        try : 
+            equipDate = target.Station.StationDate
+        except :
+            equipDate = curSta.StationDate
+            
         fk_sensor = target.GetProperty('FK_Sensor') 
         if 'individual' in typeName.lower():
             fk_indiv = target.GetProperty('FK_Individual')
@@ -202,7 +215,11 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
             , StartDate = equipDate,FK_Individual = fk_indiv, FK_MonitoredSite = fk_site
             , Deploy = deploy)
             target.Equipment = curEquip
-        else : 
+            curEquip.linkProperty(Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
+        elif isinstance(target.Equipment,Equipment) and target.Equipment.FK_Sensor == fk_sensor:
+            target.Equipment.FK_Individual = fk_indiv
+            target.Equipment.linkProperty(Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
+        else:
             raise(ErrorAvailable(availability))
 
 class ErrorAvailable(Exception):

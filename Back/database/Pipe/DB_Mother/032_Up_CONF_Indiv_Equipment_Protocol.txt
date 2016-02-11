@@ -1,0 +1,124 @@
+USE [EcoReleve_ECWP]
+GO
+
+INSERT INTO [dbo].[ObservationDynProp]
+           ([Name]
+           ,[TypeProp])
+     VALUES
+           ('Survey_type','String'),
+           ('Monitoring_Status','String'),
+           ('Sensor_Status','String')
+GO
+
+DECLARE @survey int, @SiteStatus int, @sensStatus int , @protType int ;
+
+SET @survey = (SELECT ID FROM [ObservationDynProp] WHERE Name = 'Survey_type')
+SET @SiteStatus = (SELECT ID FROM [ObservationDynProp] WHERE Name = 'Monitoring_Status')
+SET @sensStatus = (SELECT ID FROM [ObservationDynProp] WHERE Name = 'Sensor_Status')
+SET @protType = (SELECT ID FROM ProtocoleType WHERE Name = 'Individual equipment')
+
+
+INSERT INTO [dbo].[ProtocoleType_ObservationDynProp]
+           ([Required]
+           ,[FK_ProtocoleType]
+           ,[FK_ObservationDynProp]
+           ,[Locked])
+     VALUES
+           (1,@protType,@survey,1),
+           (1,@protType,@SiteStatus,1),
+           (1,@protType,@sensStatus,1)
+
+INSERT INTO [ModuleForms] (
+	[module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]) 
+SELECT 1
+      ,@protType
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+  FROM [EcoReleve_ECWP].[dbo].[ModuleForms]
+  where module_id =9 AND  Name in ('Monitoring_Status','Survey_type')
+
+
+  INSERT INTO [ModuleForms] (
+	[module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]) 
+SELECT 1
+      ,@protType
+      ,'Sensor_Status'
+      ,'Sensor Status'
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,1
+      ,[FormOrder]
+      ,NULL
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,'événement de sortie provisoire de stock>mise en service'
+  FROM [EcoReleve_ECWP].[dbo].[ModuleForms]
+  where module_id =16 AND  Name = 'Status'
+
+  UPDATE ModuleForms SET FormOrder = 30 
+  WHERE module_id = 1 and TypeObj = @protType and Name = 'Comments'
+  GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('32_Up_CONF_Indiv_Equipment_Protocol',GETDATE(),(SELECT db_name()))
+
+
+GO

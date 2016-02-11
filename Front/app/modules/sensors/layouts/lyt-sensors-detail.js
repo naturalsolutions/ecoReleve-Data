@@ -144,8 +144,8 @@ define([
         headerCell : null
       },
         {
-          name: 'FK_MonitoredSite',
-          label: 'Monitored site id',
+          name: 'Name',
+          label: 'Monitored site',
           editable: false,
           cell: 'string',
           headerCell : null
