@@ -1,0 +1,95 @@
+
+		
+		EXEC EcoReleve_Export_ECWP.dbo.pr_ExportAllIndividu 
+
+		GO 
+
+
+		IF OBJECT_ID('tempdb..#REF ') IS NOT NULL
+				DROP TABLE #REF 
+		----------DECLARE @same_Ref table (ID_ref int , dupl_ID int)
+		IF OBJECT_ID('tempdb..#same_Ref ') IS NOT NULL
+				DROP TABLE #same_Ref 
+
+
+		SELECT min(ID) as ID_ref 
+			  ,[Species]
+			  ,[Age]
+			  ,[Birth_date]
+			  ,[Death_date]
+			  ,[FK_IndividualType]
+			  ,[Release_Ring_Position]
+			  ,[Release_Ring_Color]
+			  ,[Breeding_Ring_Position]
+			  ,[Breeding_Ring_Color]
+			  ,[Mark_Color_1]
+			  ,[Mark_Position_1]
+			  ,[Mark_Color_2]
+			  ,[Mark_Position_2]
+			  ,[Sex]
+			  ,[Transmitter_Model]
+			  --,[Transmitter_Serial_Number]
+			  --,[PTT]
+			 ,[Transmitter_Shape]
+		INTO #REF
+		FROM [EcoReleve_Export_ECWP].dbo.TIndividu_Non_Identified 
+		group by [Species]
+				  ,[Age]
+				  ,[Birth_date]
+				  ,[Death_date]
+				  ,[FK_IndividualType]
+				  ,[Release_Ring_Position]
+				  ,[Release_Ring_Color]
+				  ,[Breeding_Ring_Position]
+				  ,[Breeding_Ring_Color]
+				  ,[Mark_Color_1]
+				  ,[Mark_Position_1]
+				  ,[Mark_Color_2]
+				  ,[Mark_Position_2]
+				  ,[Sex]
+				  ,[Transmitter_Model]
+				  --,[Transmitter_Serial_Number]
+				  --,[PTT]
+				  ,[Transmitter_Shape]
+		having count(*) > 1
+
+	  SELECT ti.ID as dupl_ID, ir.ID_ref
+	  INTO #same_Ref
+	  FROM [EcoReleve_Export_ECWP].dbo.TIndividu_Non_Identified ti
+	  JOIN #REF ir ON
+			   ISNULL(ti.[Species],'') =ISNULL( ir.[Species],'')
+			  AND ISNULL(ti.[Age],'') =ISNULL( ir.[Age],'')
+			  AND ISNULL(ti.[Release_Ring_Position],'') =ISNULL( ir.[Release_Ring_Position],'')
+			  AND ISNULL(ti.[Release_Ring_Color],'') =ISNULL( ir.[Release_Ring_Color],'')
+			  AND ISNULL(ti.[Breeding_Ring_Position],'') =ISNULL( ir.[Breeding_Ring_Position],'')
+			  AND ISNULL(ti.[Breeding_Ring_Color],'') =ISNULL( ir.[Breeding_Ring_Color],'')
+			  AND ISNULL(ti.[Mark_Color_1],'') =ISNULL( ir.[Mark_Color_1],'')
+			  AND ISNULL(ti.[Mark_Position_1],'') =ISNULL( ir.[Mark_Position_1],'')
+			  AND ISNULL(ti.[Mark_Color_2],'') =ISNULL( ir.[Mark_Color_2],'')
+			  AND ISNULL(ti.[Mark_Position_2],'') =ISNULL( ir.[Mark_Position_2],'')
+			  AND ISNULL(ti.[Sex],'') =ISNULL( ir.[Sex],'')
+			  AND ISNULL(ti.[Transmitter_Model],'') =ISNULL( ir.[Transmitter_Model],'')
+			  --AND ISNULL(ti.[Transmitter_Serial_Number],'') =ISNULL( ir.[Transmitter_Serial_Number],'')
+			  --AND ISNULL(ti.[PTT],'') =ISNULL( ir.[PTT],'')
+			  AND ISNULL(ti.[Transmitter_Shape],'') =ISNULL( ir.[Transmitter_Shape],'')
+			  AND ti.ID != ir.ID_Ref
+
+	UPDATE o SET FK_Individual = r.ID_ref
+	FROM Observation o 
+	JOIN #same_Ref r ON r.dupl_ID = o.FK_Individual
+
+	DELETE IndividualDynPropValue 
+	WHERE FK_Individual in (SELECT dupl_ID FROM #same_Ref)
+
+	DELETE Individual 
+	WHERE ID in (SELECT dupl_ID FROM #same_Ref)
+
+	GO 
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('30_DEL_NonID_Indiv_Duplic',GETDATE(),(SELECT db_name()))
+
+
+GO
