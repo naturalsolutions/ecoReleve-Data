@@ -100,7 +100,7 @@ SELECT 1
       ,[FieldSizeDisplay]
       ,[InputType]
       ,[editorClass]
-      ,[FormRender]
+      ,1
       ,[FormOrder]
       ,NULL
       ,[Options]
@@ -109,7 +109,7 @@ SELECT 1
       ,[EditClass]
       ,[Status]
       ,[Locked]
-      ,[DefaultValue]
+      ,'événement de sortie provisoire de stock>mise en service'
   FROM [EcoReleve_ECWP].[dbo].[ModuleForms]
   where module_id =16 AND  Name = 'Status'
 
