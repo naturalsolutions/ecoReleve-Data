@@ -1,0 +1,124 @@
+
+--- RAZ
+	--UPDATE Observation SET fk_Individual=fk_Individual-200000
+	--UPDATE IndividualDynPropValue SET fk_Individual=fk_Individual-200000
+	--UPDATE Equipment SET fk_Individual=fk_Individual-200000
+	--UPDATE Individual_Location SET fk_Individual=fk_Individual-200000
+
+	--DELETE FROM [Individual]
+	--WHERE ID>200000
+
+
+	--select count(*) from [Individual]
+
+/* Re/Démigration des ID d'individu provenant d'eRelevé 
+*/ 	
+
+----- oulala ça a l'air compliqué !!! ---- 
+SET IDENTITY_INSERT Individual ON
+
+
+-- On insere les individu en double
+INSERT INTO [dbo].[Individual]
+           (ID
+		   ,[creationDate]
+           ,[Species]
+           ,[Age]
+           ,[Birth_date]
+           ,[Death_date]
+           ,[FK_IndividualType]
+           ,[Original_ID]
+           ,[Caisse_ID])
+    SELECT
+			ID+200000
+            ,[creationDate]
+           ,[Species]
+           ,[Age]
+           ,[Birth_date]
+           ,[Death_date]
+           ,[FK_IndividualType]
+           ,[Original_ID]
+           ,[Caisse_ID]
+		   from Individual
+
+	--select 'UPDATE ' + o.name + ' SET fk_Individual=fk_Individual+@SupplementID' +char(13) 
+	--from syscolumns c join sysobjects o on c.id =o.id and o.type='U'
+	--where c.name ='fk_Individual'
+	
+	
+	--- update de toutes les FK avec les nouveaux ID 
+	UPDATE Observation SET fk_Individual=fk_Individual+200000
+	UPDATE IndividualDynPropValue SET fk_Individual=fk_Individual+200000
+	UPDATE Equipment SET fk_Individual=fk_Individual+200000
+	UPDATE Individual_Location SET fk_Individual=fk_Individual+200000
+
+
+	--- delete  de toutes les ancien Indiv pour réinsérer les Indiv provenant d'eReleve avec le bon ID
+	DELETE FROM [Individual] WHERE ID<200000 
+
+	
+	INSERT INTO [dbo].[Individual]
+           (ID
+		   ,[creationDate]
+           ,[Species]
+           ,[Age]
+           ,[Birth_date]
+           ,[Death_date]
+           ,[FK_IndividualType]
+           ,[Original_ID]
+           ,[Caisse_ID])
+    SELECT
+			convert(int,replace(original_id,'eReleve_','')) 
+            ,[creationDate]
+           ,[Species]
+           ,[Age]
+           ,[Birth_date]
+           ,[Death_date]
+           ,[FK_IndividualType]
+           ,ID
+           ,[Caisse_ID]
+		   from Individual
+		   where ID>200000 AND original_id like 'eReleve_%'
+
+	---- Update des FK avec les ID définitifs 
+	UPDATE O 
+	SET fk_Individual= I.ID
+	--select o.*,i.ID,i.Original_ID
+	FROM Observation o
+	JOIN Individual i ON o.FK_Individual = i.Original_ID and i.ID< 200000
+
+	UPDATE o
+	SET fk_Individual= I.ID
+	--select o.*,i.ID,i.Original_ID
+	FROM IndividualDynPropValue o
+	JOIN Individual i ON o.FK_Individual = i.Original_ID and i.ID< 200000
+
+	UPDATE o 
+	SET fk_Individual= I.ID
+	--select o.*,i.ID,i.Original_ID
+	FROM Equipment o
+	JOIN Individual i ON o.FK_Individual = i.Original_ID and i.ID< 200000
+
+	UPDATE o 
+	SET fk_Individual= I.ID
+	--select o.*,i.ID,i.Original_ID
+	FROM Individual_Location o
+	JOIN Individual i ON o.FK_Individual = i.Original_ID and i.ID< 200000
+
+	-- delete des indiv dupliqué provenant d'eReleve
+	DELETE [Individual] 
+	where ID>200000 AND original_id like 'eReleve_%'
+	
+	
+	
+GO
+		-- Ayé c'est fini ! Youpi !!!
+		   SET IDENTITY_INSERT Individual OFF
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('31_Remigration_ID_Indiv',GETDATE(),(SELECT db_name()))
+
+
+GO
