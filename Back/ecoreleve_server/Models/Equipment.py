@@ -55,34 +55,34 @@ class Equipment(Base):
 def checkSensor(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     session = threadlocal.get_current_registry().dbmaker()
     # session = threadlocal.get_current_request().dbsession
-    if fk_indiv is not None :
-        table = Base.metadata.tables['IndividualEquipment']
-        fk = 'FK_Individual'
-    else :
-        table = Base.metadata.tables['MonitoredSiteEquipment']
-        fk = 'MonitoredSite'
+    # if fk_indiv is not None :
+    #     table = Base.metadata.tables['IndividualEquipment']
+    #     fk = 'FK_Individual'
+    # else :
+    #     table = Base.metadata.tables['MonitoredSiteEquipment']
+    #     fk = 'MonitoredSite'
 
-    subQuery = select(table.c
-        ).where(table.c['FK_Sensor'] == fk_sensor
-        ).where(table.c['StartDate'] < equipDate
-        ).where(or_(table.c['EndDate'] == None,table.c['EndDate'] > equipDate ))
+    # subQuery = select(table.c
+    #     ).where(table.c['FK_Sensor'] == fk_sensor
+    #     ).where(table.c['StartDate'] < equipDate
+    #     ).where(or_(table.c['EndDate'] == None,table.c['EndDate'] > equipDate ))
 
-    fullQuery = select([True]).where(~exists(subQuery))
-    sensorEquip = session.execute(fullQuery).scalar()
-    return sensorEquip
-
-    # e1 = aliased(Equipment)
-    # subQuery = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor
-    #     ,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate)))
-
-    # query = select([Equipment]).where(and_(~exists(subQuery)
-    #     ,and_(Equipment.StartDate<=equipDate
-    #         ,and_(Equipment.Deploy == 0,Equipment.FK_Sensor == fk_sensor))))
-
-    # fullQuery = select([True]).where(exists(query))
+    # fullQuery = select([True]).where(~exists(subQuery))
     # sensorEquip = session.execute(fullQuery).scalar()
-    # session.close()
     # return sensorEquip
+
+    e1 = aliased(Equipment)
+    subQuery = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor
+        ,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate)))
+
+    query = select([Equipment]).where(and_(~exists(subQuery)
+        ,and_(Equipment.StartDate<=equipDate
+            ,and_(Equipment.Deploy == 0,Equipment.FK_Sensor == fk_sensor))))
+
+    fullQuery = select([True]).where(or_(exists(query),~exists(select([Equipment]).where(Equipment.FK_Sensor==fk_sensor) ) ) ) 
+    sensorEquip = session.execute(fullQuery).scalar()
+    # session.close()
+    return sensorEquip
 
 def checkEquip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     availableToEquip = True
