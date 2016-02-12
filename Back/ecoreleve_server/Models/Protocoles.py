@@ -38,10 +38,9 @@ class Observation(Base,ObjectWithDynProp):
     FK_Individual = Column(Integer,ForeignKey('Individual.ID'))
 
     Observation_children = relationship("Observation", cascade="all, delete-orphan")
-    DynPropValues = relationship("ObservationDynPropValue", cascade="all, delete-orphan")
     Equipment = relationship("Equipment", backref = 'Observation',cascade = "all, delete-orphan", uselist=False)
     Station = relationship("Station", back_populates = 'Observations')
-
+    Individual = relationship('Individual')
 
     def __init__(self,**kwargs):
         super().__init__(**kwargs)

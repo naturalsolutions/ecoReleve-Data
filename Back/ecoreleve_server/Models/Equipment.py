@@ -41,14 +41,14 @@ class Equipment(Base):
     StartDate = Column(DateTime,default = func.now())
     Deploy = Column(Boolean)
 
-    def linkProperty(self,**kwargs):
+    def linkProperty(self,StartDate,**kwargs):
         session = threadlocal.get_current_request().dbsession
         curIndiv = session.query(Individual).get(self.FK_Individual)
         curSensor = session.query(Sensor).get(self.FK_Sensor)
         curIndiv.init_on_load()
         curSensor.init_on_load()
-        curSensor.UpdateFromJson(kwargs)
-        curIndiv.UpdateFromJson(kwargs)
+        curSensor.UpdateFromJson(kwargs,StartDate)
+        curIndiv.UpdateFromJson(kwargs,StartDate)
 
 
 def checkSensor(fk_sensor,equipDate):
@@ -221,12 +221,25 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
             , Deploy = deploy)
             target.Equipment = curEquip
             if deploy == 1:
-                curEquip.linkProperty(Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
+                curEquip.linkProperty(equipDate,Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
         elif isinstance(target.Equipment,Equipment) and target.Equipment.FK_Sensor == fk_sensor and deploy == 1 :
             target.Equipment.FK_Individual = fk_indiv
-            target.Equipment.linkProperty(Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
+            target.Equipment.linkProperty(equipDate,Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
         else:
             raise(ErrorAvailable(availability))
+
+@event.listens_for(Equipment, 'after_delete')
+def unlinkEquipement(mapper, connection, target):
+    session = threadlocal.get_current_request().dbsession
+
+    curIndiv = session.query(Individual).get(target.FK_Individual)
+    curSensor = session.query(Sensor).get(target.FK_Sensor)
+
+    dynPropToDel = curIndiv.GetDynPropWithDate(['Survey_type','Monitoring_Status'],target.StartDate)
+    dynPropToDel.append(curSensor.GetDynPropWithDate('Status',target.StartDate))
+
+    for dynprop in dynPropToDel:
+        session.delete(dynprop)
 
 class ErrorAvailable(Exception):
      def __init__(self, value):
