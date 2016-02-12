@@ -166,14 +166,14 @@ def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     else :
         availability = {'Sensor_ID':fk_sensor, 'Individual_ID':fk_indiv, 'MonitoredSite_ID':fk_site}
         if existing is None:
-            availability['existing equipment'] = False
+            availability['existing_equipment'] = False
             if existing:
-                availability['already unequip'] = True
+                availability['already_unequip'] = True
             else : 
-                availability['already unequip'] = False
+                availability['already_unequip'] = False
         else :
-            availability['existing equipment'] = True
-            availability['already unequip'] = True
+            availability['existing_equipment'] = True
+            availability['already_unequip'] = True
 
     return availability
 
