@@ -45,7 +45,8 @@ class Equipment(Base):
         session = threadlocal.get_current_request().dbsession
         curIndiv = session.query(Individual).get(self.FK_Individual)
         curSensor = session.query(Sensor).get(self.FK_Sensor)
-
+        curIndiv.init_on_load()
+        curSensor.init_on_load()
         curSensor.UpdateFromJson(kwargs)
         curIndiv.UpdateFromJson(kwargs)
 
@@ -184,10 +185,14 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
     if 'unequip' in typeName.lower():
         deploy = 0
     else :
-        deploy  = 1 
-        Survey_type = target.GetProperty('Survey_type')
-        Monitoring_Status = target.GetProperty('Monitoring_Status')
-        Status = target.GetProperty('Sensor_Status')
+        deploy  = 1
+
+        try : Survey_type = target.GetProperty('Survey_type') 
+        except : Survey_type = None
+        try : Monitoring_Status = target.GetProperty('Monitoring_Status') 
+        except : Monitoring_Status = None
+        try : Status = target.GetProperty('Sensor_Status') 
+        except : Status = None
 
     if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
         try : 
@@ -215,8 +220,9 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
             , StartDate = equipDate,FK_Individual = fk_indiv, FK_MonitoredSite = fk_site
             , Deploy = deploy)
             target.Equipment = curEquip
-            curEquip.linkProperty(Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
-        elif isinstance(target.Equipment,Equipment) and target.Equipment.FK_Sensor == fk_sensor:
+            if deploy == 1:
+                curEquip.linkProperty(Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
+        elif isinstance(target.Equipment,Equipment) and target.Equipment.FK_Sensor == fk_sensor and deploy == 1 :
             target.Equipment.FK_Individual = fk_indiv
             target.Equipment.linkProperty(Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
         else:
