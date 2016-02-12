@@ -190,7 +190,7 @@ class ObjectWithDynProp:
         except :
             return self.PropDynValuesOfNow[nameProp]
 
-    def SetProperty(self,nameProp,valeur) :
+    def SetProperty(self,nameProp,valeur,StartDate=None) :
         ''' Set object properties (static and dynamic) '''
         if hasattr(self,nameProp):
             try :
@@ -215,7 +215,11 @@ class ObjectWithDynProp:
                         except:
                             pass
                     NouvelleValeur = self.GetNewValue(nameProp)
-                    NouvelleValeur.StartDate = datetime.today()
+                    if StartDate is None:
+                        NouvelleValeur.StartDate = datetime.today()
+                    else:
+                        NouvelleValeur.StartDate = StartDate
+
                     setattr(NouvelleValeur,Cle[self.GetPropWithName(nameProp)['type']],valeur)
                     self.PropDynValuesOfNow[nameProp] = valeur
                     self.GetDynPropValues().append(NouvelleValeur)
@@ -231,6 +235,9 @@ class ObjectWithDynProp:
 
     def GetNewValue(self):
         raise Exception("GetNewValue not implemented in children")
+
+    def GetStartDate(self):
+        raise Exception("GetStartDate not implemented in children")
 
     def LoadNowValues(self):
         curQuery = 'select V.*, P.Name,P.TypeProp from ' + self.GetDynPropValuesTable() + ' V JOIN ' + self.GetDynPropTable() + ' P ON P.' + self.GetDynPropValuesTableID() + '= V.' + self.GetDynPropFKName() + ' where '
@@ -249,12 +256,17 @@ class ObjectWithDynProp:
 
     def UpdateFromJson(self,DTOObject):
         ''' Function to call : update properties of new or existing object with JSON/dict of value'''
+        try : 
+            startDate = self.GetStartDate()
+        except : 
+            startDate = None
+
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id' and DTOObject[curProp] != '-1' ):
                 if isinstance(DTOObject[curProp],str) and len(DTOObject[curProp].split())==0:
                     DTOObject[curProp] = None
-                self.SetProperty(curProp,DTOObject[curProp])
+                self.SetProperty(curProp,DTOObject[curProp],startDate)
 
     def GetFlatObject(self,schema=None):
         ''' return flat object with static properties and last existing value of dyn props '''
