@@ -63,8 +63,8 @@ class ObjectWithDynProp:
                 result = type_.GetDynProps()
             else :
                 result = self.ObjContext.execute(select([dynPropTable])).fetchall()
-            statProps = [{'name': statProp.key, 'type': statProp.type} for statProp in self.__table__.columns ]
-            dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp}for dynProp in result]
+            statProps = [{'name': statProp.key, 'type': statProp.type,'ID':None} for statProp in self.__table__.columns ]
+            dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp,'ID':dynProp.ID} for dynProp in result]
             statProps.extend(dynProps)
             self.allProp = statProps
         return self.allProp
@@ -175,6 +175,8 @@ class ObjectWithDynProp:
     def GetDynPropFKName(self):
         return 'FK_' + self.__tablename__ + 'DynProp'
 
+    def GetDynPropValueObj(self):
+        raise('GetDynPropValueObj not implemented in children')
     # def GetSelfFKName(self):
     #     return 'FK_' + self.__tablename__ + 'DynProp'  ###### ====> Not used , the same thing as GetDynPropFKName Why ??
 
@@ -190,7 +192,7 @@ class ObjectWithDynProp:
         except :
             return self.PropDynValuesOfNow[nameProp]
 
-    def SetProperty(self,nameProp,valeur,StartDate=None) :
+    def SetProperty(self,nameProp,valeur,useDate=None) :
         ''' Set object properties (static and dynamic) '''
         if hasattr(self,nameProp):
             try :
@@ -214,15 +216,19 @@ class ObjectWithDynProp:
                             valeur = parse(valeur.replace(' ',''))
                         except:
                             pass
-                    NouvelleValeur = self.GetNewValue(nameProp)
-                    if StartDate is None:
-                        NouvelleValeur.StartDate = datetime.today()
-                    else:
-                        NouvelleValeur.StartDate = StartDate
+                    oldvalue = None
+                    if useDate is not None:
+                        oldvalue = self.GetDynPropWithDate(nameProp,StartDate = useDate)
+                        if oldvalue is not None:
+                            setattr(oldvalue,Cle[self.GetPropWithName(nameProp)['type']],valeur)
 
-                    setattr(NouvelleValeur,Cle[self.GetPropWithName(nameProp)['type']],valeur)
+                    if oldvalue is None:
+                        NouvelleValeur = self.GetNewValue(nameProp)
+                        NouvelleValeur.StartDate = datetime.today() if useDate is None else useDate
+                        setattr(NouvelleValeur,Cle[self.GetPropWithName(nameProp)['type']],valeur)
+                        self.GetDynPropValues().append(NouvelleValeur)
+
                     self.PropDynValuesOfNow[nameProp] = valeur
-                    self.GetDynPropValues().append(NouvelleValeur)
                 else:
                     # print('valeur non modifiée pour ' + nameProp)
                     return
@@ -232,6 +238,15 @@ class ObjectWithDynProp:
                 return
                 # si la propriété dynamique existe déjà et que la valeur à affectée est identique à la valeur existente
                 # => alors on insére pas d'historique car pas de chanegement
+    def GetDynPropWithDate(self,dynPropName,StartDate= None):
+        startDate = StartDate if StartDate is not None else self.GetStartDate()
+        if isinstance(dynPropName,list):
+            dynPropID = [self.GetPropWithName(name)['ID'] for name in dynPropName]
+            res = list(filter(lambda x : x.StartDate == startDate and getattr(x,self.GetDynPropFKName()) in dynPropID, self.GetDynPropValues()))
+        else :
+            dynPropID = self.GetPropWithName(dynPropName)['ID']
+            res = find(lambda x : x.StartDate == startDate and getattr(x,self.GetDynPropFKName()) == dynPropID, self.GetDynPropValues())
+        return res
 
     def GetNewValue(self):
         raise Exception("GetNewValue not implemented in children")
@@ -254,12 +269,12 @@ class ObjectWithDynProp:
     def GetRealValue(self,row):
         return row[Cle[row['TypeProp']]]
 
-    def UpdateFromJson(self,DTOObject):
+    def UpdateFromJson(self,DTOObject,startDate = None):
         ''' Function to call : update properties of new or existing object with JSON/dict of value'''
-        try : 
-            startDate = self.GetStartDate()
-        except : 
-            startDate = None
+        # try : 
+        #     startDate = self.GetStartDate()
+        # except : 
+        #     startDate = None
 
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)

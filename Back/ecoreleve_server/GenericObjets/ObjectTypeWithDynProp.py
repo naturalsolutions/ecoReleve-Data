@@ -62,7 +62,7 @@ class ObjectTypeWithDynProp:
         return resultat
 
     def GetDynProps(self):
-        curQuery = 'select D.Name , D.TypeProp from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
+        curQuery = 'select D.ID, D.Name , D.TypeProp from ' + self.GetDynPropContextTable() + ' C  JOIN ' + self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + str(self.ID )
         Values = self.ObjContext.execute(curQuery).fetchall()
