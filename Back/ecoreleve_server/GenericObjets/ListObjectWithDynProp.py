@@ -303,15 +303,16 @@ class ListObjectWithDynProp():
 
                     filterCriteria = eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],obj['Operator'],obj['Value'] )
                     if filterCriteria is not None :
+                        existQuery = select([self.GetDynPropValueView()])
                         existQuery = existQuery.where(
                             and_(
                             self.GetDynPropValueView().c['Name'] == obj['Column'],
                             filterCriteria
                             ))
 
-            if filterOnDynProp == True:
-                fullQuery = fullQuery.where(exists(
-                    existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView().c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])))
+                    if filterOnDynProp == True:
+                        fullQuery = fullQuery.where(exists(
+                            existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView().c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])))
         return fullQuery
 
     def OderByAndLimit (self, query, searchInfo) :
