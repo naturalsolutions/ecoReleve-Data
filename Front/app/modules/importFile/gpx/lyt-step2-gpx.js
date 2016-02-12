@@ -112,7 +112,7 @@ define([
         },*/
         4: {
           name: 'waypointTime',
-          type: 'DateTimePicker',
+          type: 'DateTimePickerEditor',
           label: 'Date',
           title: 'Date',
         }

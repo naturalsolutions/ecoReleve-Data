@@ -224,8 +224,8 @@ def insertListNewStations(request):
         data_to_insert = json.loads(DF_to_insert.to_json(orient='records',date_format='iso'))
 
     staListID = []
+    nbExc = 0
     if len(data_to_insert) != 0 :
-        nbExc = 0
         for sta in data_to_insert :
             curSta = Station(FK_StationType = 4)
             curSta.init_on_load()
