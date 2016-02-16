@@ -2,9 +2,10 @@ define([
   'jquery',
   'backbone',
   'backbone_forms',
- 'dateTimePicker'
+ 'dateTimePicker',
+ 'moment',
 ], function(
-  $, Backbone, Form,datetimepicker
+  $, Backbone, Form,datetimepicker,moment
 ){
   'use strict';
   return Form.editors.DateTimePickerEditor = Form.editors.Base.extend({
@@ -44,10 +45,10 @@ define([
             // datetimepicker options
             this.datetimepickerOptions = {format : this.format};
             if (this.defaultDate) {
-                this.datetimepickerOptions.defaultDate = this.defaultDate;
+                this.datetimepickerOptions.defaultDate = moment(this.defaultDate,this.format);
             }
             if (this.maxDate ) {
-                this.datetimepickerOptions.maxDate = this.maxDate;
+                this.datetimepickerOptions.maxDate = moment(this.maxDate,this.format) ;   
             }
 
             this.classIcon = 'reneco-calendar reneco';
