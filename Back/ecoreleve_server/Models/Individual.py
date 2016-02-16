@@ -45,7 +45,7 @@ class Individual (Base,ObjectWithDynProp) :
     Locations = relationship('Individual_Location')
 
     _Status_ = relationship('IndividualStatus',uselist=False, backref="Individual")
-
+    Observations = relationship('Observation')
 
     @hybrid_property
     def Status_(self):
