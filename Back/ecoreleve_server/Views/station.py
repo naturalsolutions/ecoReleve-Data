@@ -191,7 +191,6 @@ def insertListNewStations(request):
     DF_to_check['LON'] = np.round(DF_to_check['LON'],decimals = 5)
     # DF_to_check['LAT'] = DF_to_check['LAT'].astype(float)
     # DF_to_check['LON'] = DF_to_check['LON'].astype(float)
-    
     ##### Get min/max Value to query potential duplicated stations #####
     maxDate = DF_to_check['StationDate'].max()
     minDate = DF_to_check['StationDate'].min()
@@ -199,7 +198,6 @@ def insertListNewStations(request):
     minLon = DF_to_check['LON'].min()
     maxLat = DF_to_check['LAT'].max()
     minLat = DF_to_check['LAT'].min()
-
     ##### Retrieve potential duplicated stations from Database #####
     query = select([Station]).where(
         and_(
@@ -222,9 +220,13 @@ def insertListNewStations(request):
         DF_to_insert = DF_to_check[~DF_to_check['id'].isin(merge_check['id'])]
         DF_to_insert = DF_to_insert.drop(['id'],1)
         data_to_insert = json.loads(DF_to_insert.to_json(orient='records',date_format='iso'))
+    else:
+        #if result_to_check is empty => insert all data
+        data_to_insert = json.loads(DF_to_check.to_json(orient='records',date_format='iso'))
 
     staListID = []
     nbExc = 0
+
     if len(data_to_insert) != 0 :
         for sta in data_to_insert :
             curSta = Station(FK_StationType = 4)

@@ -72,19 +72,10 @@ def checkSensor(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     print('***************************CHECKSENSOR***********************')
     # return sensorEquip
     curQuery = "select * from Sensor S "
-    print(curQuery)
-    print(equipDate)
     curQuery += "where not exists (select * from Equipment E "
-    print(curQuery)
-    print(equipDate)
     curQuery += "WHERE NOT EXISTS (select * from Equipment E2 where E2.FK_Sensor = E.FK_Sensor and E2.StartDate > E.StartDate and e2.StartDate < convert(datetime,'" + equipDate.strftime("%Y/%m/%d %H:%M:%S") + "',103) )"
-    print(curQuery)
-    print(fk_sensor)
-    print('curQuery')
     curQuery += "AND e.FK_Sensor =s.ID and e.Deploy = 1 and e.StartDate < convert(datetime,'" + equipDate.strftime("%Y/%m/%d %H:%M:%S") + "',103) ) AND S.ID=" + str(fk_sensor)
-    print(curQuery)
     Nb = len(session.execute(curQuery).fetchall())
-    print (Nb)
     if Nb>0:
         return True
     else:
