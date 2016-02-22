@@ -179,10 +179,6 @@ def insertListNewStations(request):
         newRow['id'] = row['id']
         newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dt)
 
-        # try :
-        #     newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dt)
-        # except :
-        #     newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dtBis)
         data_to_insert.append(newRow)
 
     ##### Load date into pandas DataFrame then round LAT,LON into decimal(5) #####
@@ -209,9 +205,6 @@ def insertListNewStations(request):
     result_to_check = pd.read_sql_query(query,session.get_bind())
     if result_to_check.shape[0] > 0  :
         ##### IF potential duplicated stations, load them into pandas DataFrame then join data to insert on LAT,LON,DATE #####
-        # result_to_check = pd.DataFrame(data=result_to_check, columns = Station.__table__.columns.keys())
-        # result_to_check['LAT'] = result_to_check['LAT'].astype(float)
-        # result_to_check['LON'] = result_to_check['LON'].astype(float)
         result_to_check['LAT'] = np.round(result_to_check['LAT'],decimals = 5)
         result_to_check['LON'] = np.round(result_to_check['LON'],decimals = 5)
 
@@ -222,6 +215,9 @@ def insertListNewStations(request):
         data_to_insert = json.loads(DF_to_insert.to_json(orient='records',date_format='iso'))
     else:
         #if result_to_check is empty => insert all data
+        data_to_insert = json.loads(DF_to_check.to_json(orient='records',date_format='iso'))
+
+    else :
         data_to_insert = json.loads(DF_to_check.to_json(orient='records',date_format='iso'))
 
     staListID = []
@@ -237,9 +233,9 @@ def insertListNewStations(request):
 
             try : 
                 session.add(curSta)
-                staListID.append(curSta.ID)
                 session.flush()
                 session.commit()
+                staListID.append(curSta.ID)
             except IntegrityError as e :
                 session.rollback()
                 nbExc += 1
@@ -254,8 +250,9 @@ def insertListNewStations(request):
         # res = session.execute(stmt).fetchall()
         # result =list(map(lambda y:  y[0], res))
         result = staListID
+
     ###### Insert FieldWorkers ######
-        if not data[0]['FieldWorkers'] == None or "" :
+        if not data[0]['FieldWorkers'] == None or not data[0]['FieldWorkers'] =="" :
             list_ = list(map( lambda b : list(map(lambda a : {'FK_Station' : a,'FK_FieldWorker': b  },result)),data[0]['FieldWorkers'] ))
             list_ = list(itertools.chain.from_iterable(list_))
             stmt = Station_FieldWorker.__table__.insert().values(list_)
