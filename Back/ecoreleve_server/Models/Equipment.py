@@ -69,29 +69,28 @@ def checkSensor(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
 
     # fullQuery = select([True]).where(~exists(subQuery))
     # sensorEquip = session.execute(fullQuery).scalar()
-    print('***************************CHECKSENSOR***********************')
-    # return sensorEquip
-    curQuery = "select * from Sensor S "
-    print(curQuery)
-    print(equipDate)
-    curQuery += "where not exists (select * from Equipment E "
-    print(curQuery)
-    print(equipDate)
-    curQuery += "WHERE NOT EXISTS (select * from Equipment E2 where E2.FK_Sensor = E.FK_Sensor and E2.StartDate > E.StartDate and e2.StartDate < convert(datetime,'" + equipDate.strftime("%Y/%m/%d %H:%M:%S") + "',103) )"
-    print(curQuery)
-    print(fk_sensor)
-    print('curQuery')
-    curQuery += "AND e.FK_Sensor =s.ID and e.Deploy = 1 and e.StartDate < convert(datetime,'" + equipDate.strftime("%Y/%m/%d %H:%M:%S") + "',103) ) AND S.ID=" + str(fk_sensor)
-    print(curQuery)
-    Nb = len(session.execute(curQuery).fetchall())
-    print (Nb)
-    if Nb>0:
-        return True
-    else:
-        return False
+    # print('***************************CHECKSENSOR***********************')
+    # # return sensorEquip
+    # curQuery = "select * from Sensor S "
+    # print(curQuery)
+    # print(equipDate)
+    # curQuery += "where not exists (select * from Equipment E "
+    # print(curQuery)
+    # print(equipDate)
+    # curQuery += "WHERE NOT EXISTS (select * from Equipment E2 where E2.FK_Sensor = E.FK_Sensor and E2.StartDate > E.StartDate and e2.StartDate < convert(datetime,'" + equipDate.strftime("%Y/%m/%d %H:%M:%S") + "',103) )"
+    # print(curQuery)
+    # print(fk_sensor)
+    # print('curQuery')
+    # curQuery += "AND e.FK_Sensor =s.ID and e.Deploy = 1 and e.StartDate < convert(datetime,'" + equipDate.strftime("%Y/%m/%d %H:%M:%S") + "',103) ) AND S.ID=" + str(fk_sensor)
+    # print(curQuery)
+    # Nb = len(session.execute(curQuery).fetchall())
+    # print (Nb)
+    # if Nb>0:
+    #     return True
+    # else:
+    #     return False 
     e1 = aliased(Equipment)
-    e2 = aliased(Sensor)
-    zeQuery = select([e2]).where(~exists())
+
     subQuery = select([e1]).where(and_(e1.FK_Sensor == Equipment.FK_Sensor
         ,and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate)))
 
