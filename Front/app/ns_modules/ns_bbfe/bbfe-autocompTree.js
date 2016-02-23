@@ -51,7 +51,7 @@ define([
             this.isTermError = false;
             Form.editors.Base.prototype.initialize.call(this, options);
             this.template = options.template || this.constructor.template;
-            this.id = options.id;
+            this.id = options.id + options.form.cid;
             var editorAttrs = "";
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled) {
                 editorAttrs += 'disabled="disabled"';
