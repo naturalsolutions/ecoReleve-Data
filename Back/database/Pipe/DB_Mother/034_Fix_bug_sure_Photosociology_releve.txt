@@ -1,0 +1,13 @@
+
+update [EcoReleve_ECWP].[dbo].[ModuleForms] SET Name = 'identity_sure'
+where Name like '%dentity_sure' 
+
+
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('34_Fix_bug_sure_photosociology_releve',GETDATE(),(SELECT db_name()))
+
+
+GO

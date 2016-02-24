@@ -33,9 +33,9 @@ class Generator :
             'INTEGER':'Number',
             'DECIMAL':'Number',
             'NUMERIC':'Number',
-            'DATETIME':'DateTimePicker',
-            'DATE':'DateTimePicker',
-            'TIME':'DateTimePicker',
+            'DATETIME':'DateTimePickerEditor',
+            'DATE':'DateTimePickerEditor',
+            'TIME':'DateTimePickerEditor',
         }
         try : 
             self.table=BaseExport.metadata.tables[table]
@@ -104,7 +104,7 @@ class Generator :
                 pass
             if db_type in self.dictFilter :
                 type_f = self.dictFilter[db_type]
-                if type_f == 'DateTimePicker':
+                if type_f == 'DateTimePickerEditor':
                     if db_type == 'TIME':
                         options ={'format':'hh:mm:ss'}
                     elif db_type == 'DATE':
