@@ -176,6 +176,7 @@ define([
 
     filter: function() {
       this.filters.update();
+      this.updateSelectedRow();
     },
 
     clearFilter: function() {
