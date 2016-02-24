@@ -118,7 +118,6 @@ define([
         url: config.coreUrl + 'release/individuals/',
         urlParams: this.urlParams,
         rowClicked: true,
-        totalElement: 'totalEntries',
         onceFetched: function(params) {
           _this.totalEntries(this.grid);
         }
@@ -165,6 +164,12 @@ define([
     },
     updateSelectedRow: function() {
       var mds = this.grid.grid.getSelectedModels();
+      for (var i = 0; i < mds.length; i++) {
+        if (mds[i] == undefined) {         
+          mds.splice(i, 1);
+          i--;
+        }
+      }
       var nbSelected = mds.length;
       this.$el.find(this.ui.nbSelected).html(nbSelected);
     },
@@ -176,7 +181,7 @@ define([
 
     filter: function() {
       this.filters.update();
-      this.updateSelectedRow();
+      this.$el.find(this.ui.nbSelected).html(0);
     },
 
     clearFilter: function() {
@@ -193,6 +198,13 @@ define([
       var mds = this.grid.grid.getSelectedModels();
       if (!mds.length) {
         return;
+      } else {
+        for (var i = 0; i < mds.length; i++) {
+          if (mds[i] == undefined) {         
+            mds.splice(i, 1);
+            i--;
+          }
+        }
       }
       var _this = this;
       var col = new Backbone.Collection(mds);
