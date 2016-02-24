@@ -187,7 +187,6 @@ def insertListNewStations(request):
     DF_to_check['LON'] = np.round(DF_to_check['LON'],decimals = 5)
     # DF_to_check['LAT'] = DF_to_check['LAT'].astype(float)
     # DF_to_check['LON'] = DF_to_check['LON'].astype(float)
-    
     ##### Get min/max Value to query potential duplicated stations #####
     maxDate = DF_to_check['StationDate'].max()
     minDate = DF_to_check['StationDate'].min()
@@ -195,7 +194,6 @@ def insertListNewStations(request):
     minLon = DF_to_check['LON'].min()
     maxLat = DF_to_check['LAT'].max()
     minLat = DF_to_check['LAT'].min()
-
     ##### Retrieve potential duplicated stations from Database #####
     query = select([Station]).where(
         and_(

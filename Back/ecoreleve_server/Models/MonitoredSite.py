@@ -152,8 +152,8 @@ class MonitoredSite (Base,ObjectWithDynProp) :
                     pass
         return resultat
 
-    def SetProperty(self,nameProp,valeur) :
-        super(MonitoredSite,self).SetProperty(nameProp,valeur)
+    def SetProperty(self,nameProp,valeur,useDate=None) :
+        super().SetProperty(nameProp,valeur)
         if hasattr(self.newPosition,nameProp):
             curTypeAttr = str(self.newPosition.__table__.c[nameProp].type).split('(')[0]
 
