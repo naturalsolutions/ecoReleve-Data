@@ -218,15 +218,19 @@ def insertOneNewMonitoredSite (request) :
     for items , value in request.json_body.items() :
         if value != "" :
             data[items] = value
+    try:        
+        newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid['iss'] )
+        newMonitoredSite.MonitoredSiteType = session.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
+        newMonitoredSite.init_on_load()
+        newMonitoredSite.UpdateFromJson(data)
+        session.add(newMonitoredSite)
+        session.flush()
 
-    newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid['iss'] )
-    newMonitoredSite.MonitoredSiteType = session.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
-    newMonitoredSite.init_on_load()
-    newMonitoredSite.UpdateFromJson(data)
-    session.add(newMonitoredSite)
-    session.flush()
-
-    return {'ID': newMonitoredSite.ID}
+        response = {'ID': newMonitoredSite.ID}
+    except Exception as e:
+        response = request.response
+        response.text = "This name is already used for another monitored site"
+    return response      
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET')
