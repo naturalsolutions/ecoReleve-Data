@@ -141,11 +141,17 @@ define([
     },
 
     displayFilter: function() {
+      var _this = this;
       this.filters = new NsFilter({
         url: config.coreUrl + 'release/individuals/',
         com: this.com,
         filterContainer: this.ui.filters,
       });
+
+      this.filters.update = function(){
+        _this.$el.find(_this.ui.nbSelected).html(0);
+        NsFilter.prototype.update.call(this);
+      };
     },
 
     rowClicked: function(row) {
@@ -181,7 +187,6 @@ define([
 
     filter: function() {
       this.filters.update();
-      this.$el.find(this.ui.nbSelected).html(0);
     },
 
     clearFilter: function() {
@@ -285,7 +290,7 @@ define([
         if (isConfirm && callback) {
           callback();
         }else {
-          Backbone.history.navigate('release', {trigger: true});
+          Backbone.history.loadUrl(Backbone.history.fragment);
         }
       });
     },
