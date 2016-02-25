@@ -61,11 +61,12 @@ define([
             this.forms.push(form);
 
             if(!this.defaultRequired){
-                form.$el.find('fieldset').append('\
-                    <div class="' + this.hidden + ' col-xs-12 control">\
-                        <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
+                var btn = '\
+                    <div class="' + this.hidden + 'control">\
+                        <button type="button" class="btn btn-warning" id="remove">-</button>\
                     </div>\
-                ');
+                ';
+                form.$el.find('fieldset').append(btn);
                 form.$el.find('button#remove').on('click', function() {
                   _this.$el.find('#formContainer').find(form.el).remove();
                   var i = _this.forms.indexOf(form);
@@ -81,7 +82,6 @@ define([
         },
 
         render: function() {
-            //Backbone.View.prototype.initialize.call(this, options);
             var $el = $($.trim(this.template({
                 hidden: this.hidden
             })));
@@ -92,6 +92,19 @@ define([
             model.fieldsets = this.options.schema.fieldsets;
             var key = this.options.key;
             var data = this.options.model.attributes[key];
+
+            var size=0;
+            for (key in model.schema) {
+               var col = model.schema[key];
+               size++;
+                this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
+            }
+            size = size*170;
+            size += 35;
+
+            console.log(size);
+            this.$el.find('#th').width(size);
+            this.$el.find('#formContainer').width(size);
 
             if (data) {
                 if (data.length) {
@@ -107,7 +120,6 @@ define([
                     }
                 }
             }
-
             return this;
         },
 
@@ -140,17 +152,15 @@ define([
                 return values;
             }
 
-
         },
         }, {
           //STATICS
           template: _.template('\
             <div class="required nested clearfix">\
-                <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
+                <button type="button" id="addFormBtn" class="<%= hidden %> btn">+</button>\
                 <div class="clear"></div>\
+                <div id="th" class="clearfix"></div>\
                 <div id="formContainer" class="clearfix"></div>\
-                <br />\
-                <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
             </div>\
             ', null, Form.templateSettings),
       });
