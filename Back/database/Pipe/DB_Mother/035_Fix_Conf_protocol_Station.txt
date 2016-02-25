@@ -1,0 +1,22 @@
+UPDATE f set Name = 'weight'
+  FROM [EcoReleve_ECWP].[dbo].[ModuleForms] f 
+  where TypeObj = 222 and name = 'Weight'
+
+UPDATE f set Name = 'picture'
+  FROM [EcoReleve_ECWP].[dbo].[ModuleForms] f 
+  where TypeObj = 225 AND Name = 'Picture'
+
+UPDATE f SET TypeObj = NULL
+FROM ModuleForms f
+WHERE module_id = 2 and Name = 'FK_Region'
+
+UPDATE  [EcoReleve_ECWP].[dbo].[ModuleForms] SET Legend = NULL
+WHERE TypeObj = 218 and module_id = 1 
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('35_Fix_Conf_protocol_Station',GETDATE(),(SELECT db_name()))
+
+
+GO
