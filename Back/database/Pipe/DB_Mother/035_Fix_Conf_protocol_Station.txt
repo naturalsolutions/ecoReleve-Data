@@ -10,6 +10,9 @@ UPDATE f SET TypeObj = NULL
 FROM ModuleForms f
 WHERE module_id = 2 and Name = 'FK_Region'
 
+UPDATE  [EcoReleve_ECWP].[dbo].[ModuleForms] SET Legend = NULL
+WHERE TypeObj = 218 and module_id = 1 
+
 GO
 
 
