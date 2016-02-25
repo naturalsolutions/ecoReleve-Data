@@ -9,6 +9,8 @@ Front/externalModules/*
 Front/app/styles/*.css
 Front/app/styles/*.css.map
 
+Back/build/*
+
 **/config.js
 
 **/*.pyc
