@@ -137,6 +137,10 @@ def uploadFileRFID(request):
             # session.execute(insert(Rfid), Rfids)
             data_to_insert = data_to_insert.drop(['id_'],1)
             data_to_insert = data_to_insert.drop_duplicates()
+
+            if data_to_insert.shape[0] == 0:
+                raise(IntegrityError)
+                
             data_to_insert.to_sql(Rfid.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'], index=False)
 
             message = 'inserted rows : '+str(len(Rfids))
