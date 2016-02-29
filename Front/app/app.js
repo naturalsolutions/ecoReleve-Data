@@ -9,7 +9,8 @@ define(['marionette', 'lyt-rootview', 'router', 'controller',
   'ns_modules/ns_bbfe/bbfe-listOfNestedModel/bbfe-listOfNestedModel',
   'ns_modules/ns_bbfe/bbfe-autocompTree',
   'ns_modules/ns_bbfe/bbfe-fileUpload',
-  'ns_modules/ns_bbfe/bbfe-select'
+  'ns_modules/ns_bbfe/bbfe-select',
+  'ns_modules/ns_bbfe/bbfe-gridForm',
   ],
 function( Marionette, LytRootView, Router, Controller) {
 

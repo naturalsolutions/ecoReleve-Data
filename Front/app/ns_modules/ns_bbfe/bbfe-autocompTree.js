@@ -177,7 +177,7 @@ define([
 
                     this.termError = "Invalid term";
                     this.$el.find('#divAutoComp_' + this.id).find('input').addClass('error');
-                    this.$el.find('#errorMsg').removeClass('hidden');
+                    //this.$el.find('#errorMsg').removeClass('hidden');
                 } else {
                     this.termError = "";
                     this.$el.find('#divAutoComp_' + this.id).find('input').removeClass('error');
