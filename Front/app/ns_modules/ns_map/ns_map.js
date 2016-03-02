@@ -755,7 +755,7 @@ define([
                 'id': attr.id,
                 'geometry': {
                     'type': 'Point',
-                    'coordinates': [attr.longitude, attr.latitude],
+                    'coordinates': [attr.latitude, attr.longitude],
                 },
                 'properties': {
                   //todo
