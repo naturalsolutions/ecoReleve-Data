@@ -130,6 +130,9 @@ class Observation(Base,ObjectWithDynProp):
         result[typeName] = subObsList
         return result
 
+@event.listens_for(Observation, 'after_delete')
+def unlinkLinkedField(mapper, connection, target):
+    target.deleteLinkedField()
 
 #--------------------------------------------------------------------------
 class ObservationDynPropValue(Base):
