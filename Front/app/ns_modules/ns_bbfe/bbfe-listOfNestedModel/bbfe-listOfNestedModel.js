@@ -35,6 +35,7 @@ define([
 
             var key = this.options.key;
             this.defaultValue = this.options.model.schema[key].defaultValue['FK_ProtocoleType'];
+            this.nbByDefault = this.options.model.schema[key]['nbByDefault'];
         },
 
         //removeForm
@@ -102,6 +103,13 @@ define([
                     };
                 } else {
                     if(this.defaultRequired){
+                        this.addEmptyForm();
+                        this.defaultRequired = false;
+                    }
+                }
+            } else{
+                if (this.nbByDefault >= 1) {
+                    for (var i = 0; i < this.nbByDefault; i++) {
                         this.addEmptyForm();
                         this.defaultRequired = false;
                     }
