@@ -67,6 +67,13 @@ class Observation(Base,ObjectWithDynProp):
         else :
             return self.ObjContext.query(ProtocoleType).get(self.FK_ProtocoleType)
 
+    def linkedFieldDate(self):
+        return self.Station.StationDate
+
+    def UpdateFromJson(self,DTOObject,startDate = None):
+        super().UpdateFromJson(DTOObject,startDate)
+        self.updateLinkedField()
+
     @hybrid_property
     def Observation_childrens(self):
         if self.Observation_children is not None or self.Observation_children != []:
