@@ -130,7 +130,7 @@ def updateStation(request):
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
     curSta.UpdateFromJson(data)
-
+    print(curSta.__dict__)
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
