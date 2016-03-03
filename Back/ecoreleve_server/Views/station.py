@@ -100,7 +100,10 @@ def getStation(request):
 
         Conf = session.query(FrontModules).filter(FrontModules.Name=='StationForm' ).first()
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
+
+        # response['schema']['FK_MonitoredSite']['editable'] = False
         response['data']['fieldActivityId'] = str(response['data']['fieldActivityId'])
+
     else : 
         response  = curSta.GetFlatObject()
 

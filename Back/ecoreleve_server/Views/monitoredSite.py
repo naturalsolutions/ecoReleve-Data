@@ -225,12 +225,16 @@ def insertOneNewMonitoredSite (request) :
         newMonitoredSite.UpdateFromJson(data)
         session.add(newMonitoredSite)
         session.flush()
-
         response = {'ID': newMonitoredSite.ID}
-    except Exception as e:
+
+    except IntegrityError as e:
+        session.rollback()
+        request.response.status_code = 520
         response = request.response
         response.text = "This name is already used for another monitored site"
-    return response      
+        pass
+
+    return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET')
