@@ -127,7 +127,7 @@ define([
 
           }).fail(function(data) {
             $('#btnNext').attr('disabled');
-            if (data.status == 500 || data.status == 510) {
+            if (data.status == 520 || data.status == 510) {
               var type = 'warning';
               var title = 'Warning !'
               self.ui.progressBar.css({'background-color': 'rgb(218, 146, 15)'})

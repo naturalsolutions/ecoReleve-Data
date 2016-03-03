@@ -62,12 +62,24 @@ define([
           );
         },
         savingError: function(response) {
+          var type;
+          var msg;
+          var color;
+          if (response.status == 520) {
+            type = 'warning';
+            msg = 'This name is already used for another monitored site';
+            color = 'rgb(218, 146, 15)';
+          } else {
+            type = 'error';
+            msg = 'an unknow error ooccured';
+            color = 'rgb(147, 14, 14)';
+          }
           Swal({
             title: 'Error',
-            text: 'creating a new monitored site',
-            type: 'error',
+            text: msg,
+            type: type,
             showCancelButton: false,
-            confirmButtonColor: 'rgb(147, 14, 14)',
+            confirmButtonColor: color,
             confirmButtonText: 'OK',
             closeOnConfirm: true,
           }
