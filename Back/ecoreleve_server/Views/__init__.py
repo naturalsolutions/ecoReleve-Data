@@ -1,5 +1,14 @@
 from pyramid.httpexceptions import default_exceptionresponse_view, HTTPNotFound
 from pyramid.interfaces import IRoutesMapper
+from pyramid.view import view_config
+from pyramid.security import NO_PERMISSION_REQUIRED
+from ..Models import sendLog
+
+@view_config(context=Exception, permission = NO_PERMISSION_REQUIRED)
+def error_view(exc, request):
+    sendLog(logLevel=5,domaine=3)
+    return exc
+
 
 def notfound(request):
     return HTTPNotFound('Not found')

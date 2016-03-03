@@ -6,7 +6,6 @@ from sqlalchemy import event
 from sqlalchemy.exc import TimeoutError
 
 
-
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
 print(AppConfig['app:main']['sensor_schema'])
@@ -72,4 +71,5 @@ from .MonitoredSite import *
 from .Equipment import *
 from .SensorData import *
 from .List import *
+from .Log import * 
 
