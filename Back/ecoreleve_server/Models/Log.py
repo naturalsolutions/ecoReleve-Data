@@ -23,19 +23,37 @@ class Log(Base):
     __table_args__ = ({'schema': 'NSLog.dbo'})
 
 
-def sendLog(**kwargs):
+def sendLog(logLevel,domaine,msg_number = 500):
     request = threadlocal.get_current_request()
     session = request.dbsession
-
     exc_type, exc_value, exc_traceback = sys.exc_info()
-    newLog = Log(LOG_LEVEL= kwargs['logLevel']
+
+    try : 
+        body = json.loads(request.body.decode("utf-8")) 
+    except : 
+        body = {}
+
+    try :
+        params = request.params.mixed()
+    except :
+        params = {}
+
+    newLog = Log(LOG_LEVEL= logLevel
         ,ORIGIN='ecoReleveData'
         ,SCOPE='Pyramid'
         ,LOGUSER=request.authenticated_userid['username']
-        ,DOMAINE = kwargs['domaine']
-        ,MESSAGE_NUMBER=500
+        ,DOMAINE = domaine
+        ,MESSAGE_NUMBER=msg_number
         ,LOG_MESSAGE=str(exc_value)
-        ,OTHERSINFOS= json.dumps({'stackTrace':traceback.format_exc()})
+        ,OTHERSINFOS= json.dumps({
+            'stackTrace': traceback.format_exc(), 
+            'request': {
+                'url': request.url,
+                'method': request.method,
+                'body': body,
+                'params' : params
+            }
+        })
         )
     session = request.dbsession
     session.add(newLog)
