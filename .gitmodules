@@ -1,0 +1,3 @@
+[submodule "Front/NaturalJS-Filter"]
+	path = Front/NaturalJS-Filter
+	url = https://github.com/romfabbro/NaturalJS-Filter.git
