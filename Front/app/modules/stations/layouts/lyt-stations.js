@@ -103,7 +103,6 @@ define([
         }));
         this.ui.detail.removeClass('hidden');
       }
-      console.log(view);
     },
 
     initGrid: function(url) {
