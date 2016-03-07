@@ -70,6 +70,9 @@ define([
            else if(response.responseJSON.existing_equipment == false ){
             _this.sweetAlert('Data saving error', 'error', 'Selected sensor is not equiped with this individual');
            }
+            else if(response.responseJSON.errorSite == true ){
+            _this.sweetAlert('Data saving error', 'error', 'No monitored site is attached');
+           }
         }
       });
 

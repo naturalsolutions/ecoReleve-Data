@@ -27,12 +27,11 @@ def uploadFileRFID(request):
     isHead = False
     now=datetime.now()
     try:
-        creator = request.authenticated_userid['iss']
+        creator = int(request.authenticated_userid['iss'])
         content = request.POST['data']
-        idModule = request.POST['FK_Sensor']
+        idModule = int(request.POST['FK_Sensor'])
         startEquip = request.POST['StartDate']
         endEquip = request.POST['EndDate']
-        creator = request.authenticated_userid['iss']
      
         if re.compile('\r\n').search(content):
             data = content.split('\r\n')
@@ -122,22 +121,27 @@ def uploadFileRFID(request):
             j=j+1
         data_to_check = pd.DataFrame.from_records(list_RFID,columns = ['id_','FK_Sensor','date_','chip_code','creator','creation_date','validated','checked'])
 
-        maxDateEquip = datetime.fromtimestamp(int(startEquip))
+        minDateEquip = datetime.fromtimestamp(int(startEquip))
         try :
-            minDateEquip = datetime.fromtimestamp(int(endEquip))
+            maxDateEquip = datetime.fromtimestamp(int(endEquip))
         except:
-            minDateEquip = None
+            maxDateEquip = None
 
         ## check if Date corresponds with pose remove module ##
-        if min(allDate)>= maxDateEquip and (minDateEquip is None or max(allDate)<= minDateEquip):
+        if min(allDate)>= minDateEquip and (maxDateEquip is None or max(allDate)<= maxDateEquip):
             
-            # data_to_insert = checkDuplicatedRFID(data_to_check,min(allDate),max(allDate))
-            # Rfids = [{Rfid.creator.name: crea, Rfid.FK_Sensor.name: idMod, Rfid.checked.name: '0',
-            # Rfid.chip_code.name: c, Rfid.date_.name: d, Rfid.creation_date.name: now} for crea, idMod, c, d  in Rfids]
+            data_to_insert = checkDuplicatedRFID(data_to_check,minDateEquip,maxDateEquip,idModule)
+            Rfids = [{Rfid.creator.name: crea, Rfid.FK_Sensor.name: idMod, Rfid.checked.name: '0',
+            Rfid.chip_code.name: c, Rfid.date_.name: d, Rfid.creation_date.name: now} for crea, idMod, c, d  in Rfids]
             # # Insert data.
             # session.execute(insert(Rfid), Rfids)
-            data_to_check = data_to_check.drop(['id_'],1)
-            data_to_check.to_sql(Rfid.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'], index=False)
+            data_to_insert = data_to_insert.drop(['id_'],1)
+            data_to_insert = data_to_insert.drop_duplicates()
+
+            if data_to_insert.shape[0] == 0:
+                raise(IntegrityError)
+                
+            data_to_insert.to_sql(Rfid.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'], index=False)
 
             message = 'inserted rows : '+str(len(Rfids))
             return message
@@ -152,17 +156,22 @@ def uploadFileRFID(request):
         # if len(unknown_chips) > 0:
         #     message += '\n\nWarning : chip codes ' + str(unknown_chips) + ' are unknown.'
     except IntegrityError as e:
-        request.response.status_code = 500
+        print_exc()
+        request.response.status_code = 520
         message = 'Data already exist.'
     except Exception as e:
         print_exc()
-        request.response.status_code = 520
+        request.response.status_code = 500
         message = 'Error'
     return message
 
-def checkDuplicatedRFID(data_to_check,startEquip,endEquip):
+def checkDuplicatedRFID(data_to_check,startEquip,endEquip,fk_sensor):
     session1 = threadlocal.get_current_registry().dbmaker()
-    query = select([Rfid]).where(and_(Rfid.date_>=startEquip,Rfid.date_<=endEquip))
+    query = select([Rfid]
+        ).where(
+        and_(Rfid.date_ >= startEquip
+            ,and_(Rfid.date_<=endEquip,Rfid.FK_Sensor == fk_sensor))
+        )
     result = session1.execute(query).fetchall()
 
     existingData = pd.DataFrame.from_records(result,
@@ -179,7 +188,7 @@ def checkDuplicatedRFID(data_to_check,startEquip,endEquip):
     merge = data_to_check.merge(existingData, left_on = ['FK_Sensor'], right_on = ['$FK_Sensor'])
 
     DFToInsert = data_to_check[~data_to_check['id_'].isin(merge['id_'])]
-    session1.close()
+    # session1.close()
     print(DFToInsert)
     return DFToInsert
 
