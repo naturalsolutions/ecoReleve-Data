@@ -189,7 +189,7 @@ define([
     }, {
         template: '<div>\
             <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
-            <span id="errorMsg" class="error hidden">Invalid term</span>\
+            <span id="errorMsg" class="hidden">Invalid term</span>\
         </div>',
     });
 

@@ -8,7 +8,7 @@ define([
   ], function ($, _, Backbone, Marionette, Form, List) {
 
     'use strict';
-    return Form.editors.gridFormEditor = Form.editors.Base.extend({
+    return Form.editors.ListOfNestedModel = Form.editors.Base.extend({
         events: {
             'click #addFormBtn' : 'addEmptyForm',
         },
@@ -116,7 +116,7 @@ define([
                         this.defaultRequired = false;
                     };
                 } else {
-                    if(this.defaultRequired){
+                    if(this.defaultRequired) {
                         this.addEmptyForm();
                         this.defaultRequired = false;
                     }
@@ -140,7 +140,7 @@ define([
                     var tmp = this.forms[i].getValue();
                     var empty = true;
                     for (var key in tmp) {
-                        if(tmp[key]){
+                        if(tmp[key]) {
                             empty = false;
                         }
                     }
@@ -153,7 +153,6 @@ define([
                 };
                 return values;
             }
-
         },
         }, {
           //STATICS
