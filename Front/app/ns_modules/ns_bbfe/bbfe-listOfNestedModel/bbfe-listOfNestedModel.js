@@ -13,6 +13,7 @@ define([
             'click #addFormBtn' : 'addEmptyForm',
         },
         initialize: function(options) {
+
             if (options.schema.validators.length) {
                 this.defaultRequired = true;
             } else {
@@ -90,36 +91,45 @@ define([
                 hidden: this.hidden
             })));
             this.setElement($el);
-            //init forms
             var model = new Backbone.Model();
             model.schema = this.options.schema.subschema;
             model.fieldsets = this.options.schema.fieldsets;
-            var key = this.options.key;
-            var data = this.options.model.attributes[key];
+
+            var data = this.options.model.attributes[this.key];
 
             if (data) {
+                //data
                 if (data.length) {
                     for (var i = 0; i < data.length; i++) {
+                        if(i >= this.nbByDefault) {
+                            this.defaultRequired = false;
+                        }
                         model.attributes = data[i];
                         this.addForm(model);
-                        this.defaultRequired = false;
-                    };
-                } else {
-                    if(this.defaultRequired){
-                        this.addEmptyForm();
-                        this.defaultRequired = false;
+
                     }
+
+                    if (data.length < this.nbByDefault) {
+                        for (var i = 0; i < data.length; i++) {
+                            this.addForm(model);
+                        }
+                    }
+                    this.defaultRequired = false;
                 }
-            } else{
+            } else {
+                //no data
                 if (this.nbByDefault >= 1) {
                     for (var i = 0; i < this.nbByDefault; i++) {
                         this.addEmptyForm();
-                        this.defaultRequired = false;
                     }
+                    this.defaultRequired = false;
                 }
             }
-
             return this;
+        },
+
+        feedRequiredEmptyForms: function() {
+
         },
 
         getValue: function() {
