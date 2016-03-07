@@ -27,27 +27,30 @@ define([
             this.options.schema.fieldClass = 'col-xs-12';
             this.forms = [];
             this.disabled = options.schema.editorAttrs.disabled;
+
             this.hidden = '';
             if(this.disabled) {
                 this.hidden = 'hidden';
             }
             this.hasNestedForm = true;
 
-            var key = this.options.key;
-            this.defaultValue = this.options.model.schema[key].defaultValue['FK_ProtocoleType'];
-            this.nbByDefault = this.options.model.schema[key]['nbByDefault'];
+            this.key = this.options.key;
+            this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
         },
-
         //removeForm
         deleteForm: function() {
 
         },
 
         addEmptyForm: function() {
-            var model = new Backbone.Model();
+            var mymodel = Backbone.Model.extend({
+                defaults : this.options.schema.subschema.defaultValues
+            });
+
+            var model = new mymodel();
+            //model.default = this.options.model.attributes[this.key];
             model.schema = this.options.schema.subschema;
             model.fieldsets = this.options.schema.fieldsets;
-
             this.addForm(model);
         },
 
@@ -139,9 +142,9 @@ define([
                         }
                     }
                     if(!empty){
-                        if (this.defaultValue) {
+                       /* if (this.defaultValue) {
                             tmp['FK_ProtocoleType'] = this.defaultValue;
-                        }
+                        }*/
                         values[i] = tmp;
                     }
                 };
