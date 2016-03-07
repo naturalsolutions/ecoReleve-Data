@@ -1,0 +1,52 @@
+
+
+  INSERT INTO ModuleForms (
+  [module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue])
+SELECT 
+      [module_id]
+      ,Options
+      ,'FK_ProtocoleType'
+      ,'FK_ProtocoleType'
+      ,0
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,'Number'
+      ,[editorClass]
+      ,0
+      ,0
+      ,NULL
+      ,NULL
+      ,[Validators]
+      ,'hide'
+      ,'hide'
+      ,[Status]
+      ,[Locked]
+      ,Options
+  FROM [EcoReleve_ECWP].[dbo].[ModuleForms]
+  where module_id = 1 and InputType = 'ListOfNestedmodel'
+
+  GO 
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('36_Conf_Add_FK_protocol_in_SubForm',GETDATE(),(SELECT db_name()))
+
+
+GO
