@@ -35,7 +35,9 @@ define([
             this.hasNestedForm = true;
 
             this.key = this.options.key;
-            //this.defaultValue = this.options.model.defaultValues[key];
+            this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
+
+
         },
         //removeForm
         deleteForm: function() {
@@ -106,6 +108,13 @@ define([
                     };
                 } else {
                     if(this.defaultRequired){
+                        this.addEmptyForm();
+                        this.defaultRequired = false;
+                    }
+                }
+            } else{
+                if (this.nbByDefault >= 1) {
+                    for (var i = 0; i < this.nbByDefault; i++) {
                         this.addEmptyForm();
                         this.defaultRequired = false;
                     }
