@@ -560,7 +560,7 @@ define([
         this.currentRow.$el.removeClass('active');
       }
       this.currentRow = this.grid.body.rows[index];
-      this.currentRow.$el.addClass('active').find('input').focus();
+      this.currentRow.$el.addClass('active');/*.find('input').focus();*/
 
     },
 

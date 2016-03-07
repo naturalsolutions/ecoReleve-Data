@@ -56,15 +56,6 @@ def checkSensor(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     session = threadlocal.get_current_registry().dbmaker()
     e2 = aliased(Equipment)
 
-    # curQuery = "select * from Sensor S "
-
-    # curQuery += "where not exists (select * from Equipment E "
-
-    # curQuery += "WHERE NOT EXISTS (select * from Equipment E2 where E2.FK_Sensor = E.FK_Sensor and E2.StartDate > E.StartDate and e2.StartDate < convert(datetime,'" + equipDate.strftime("%Y/%m/%d %H:%M:%S") + "',103) )"
-
-    # curQuery += "AND e.FK_Sensor =s.ID and e.Deploy = 1 and e.StartDate < convert(datetime,'" + equipDate.strftime("%Y/%m/%d %H:%M:%S") + "',103) ) AND S.ID=" + str(fk_sensor)
-    # print(curQuery)
-
     subQuery = select([e2]
         ).where(
         and_(e2.FK_Sensor == Equipment.FK_Sensor
@@ -129,22 +120,21 @@ def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None,fk_site=None):
 
     e1 = aliased(Equipment)
     e2 = aliased(Equipment)
+    print("site ",fk_site)
+    print("sensor ",fk_sensor)
+    print(equipDate)
 
     subQuery = select([e1]
         ).where(
         and_(e1.FK_Sensor == Equipment.FK_Sensor,
-            and_(e1.FK_Individual == Equipment.FK_Individual,
-                and_(e1.FK_MonitoredSite == Equipment.FK_MonitoredSite,
-                    and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate)
-                    )
-                )
+            and_(e1.StartDate>Equipment.StartDate,e1.StartDate<=equipDate)
             )
         )
 
-    query = select([Equipment]).where(
+    query = select([func.count(Equipment.ID)]).where(
         and_(~exists(subQuery),
             and_(Equipment.StartDate<=equipDate,
-                and_(Equipment.Deploy == 0,
+                and_(Equipment.Deploy == 1,
                     and_(Equipment.FK_Sensor == fk_sensor,
                         and_(Equipment.FK_Individual == fk_indiv,Equipment.FK_MonitoredSite == fk_site)
                         )
@@ -153,10 +143,12 @@ def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None,fk_site=None):
             )
         )
 
-    fullQuery = select([True]).where(exists(query))
+    fullQuery = query
     result = session.execute(fullQuery).scalar()
-    # session.close()
-    return result
+    if result > 0 :
+        return None
+    else :
+        return True
 
 def checkUnequip(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     existing = existingEquipment(fk_sensor,equipDate,fk_indiv=fk_indiv)
@@ -234,10 +226,8 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
 @event.listens_for(Equipment, 'after_delete')
 def unlinkEquipement(mapper, connection, target):
     session = threadlocal.get_current_request().dbsession
-    # session = threadlocal.get_current_registry().dbmaker()
     if target.FK_Individual is not None and target.Deploy == 1:
         curIndiv = session.query(Individual).get(target.FK_Individual)
-
         curSensor = session.query(Sensor).get(target.FK_Sensor)
 
         dynPropToDel = curIndiv.GetDynPropWithDate(['Survey_type','Monitoring_Status'],target.StartDate)
