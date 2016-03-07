@@ -6,7 +6,6 @@ from sqlalchemy import event
 from sqlalchemy.exc import TimeoutError
 
 
-
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
 print(AppConfig['app:main']['sensor_schema'])
@@ -59,6 +58,7 @@ def db(request):
 
 # def setup_post_request(event):
 #     event.request.add_finished_callback(remove_session)
+from ..GenericObjets.ObjectWithDynProp import LinkedTables
 
 from .CustomTypes import *
 from .Protocoles import *
@@ -73,3 +73,9 @@ from .Equipment import *
 from .SensorData import *
 from .List import *
 
+
+LinkedTables['Individual'] = Individual
+LinkedTables['Station'] = Station
+LinkedTables['Protocoles'] = Protocoles
+LinkedTables['Sensor'] = Sensor
+LinkedTables['MonitoredSite'] = MonitoredSite
