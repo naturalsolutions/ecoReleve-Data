@@ -34,9 +34,11 @@ define([
       //get the foreign key 2
       this.key = options.key;
       var key = options.key;
-
+      this.options = options;
       key = key.split('FK_')[1];
 
+      this.validators = options.schema.validators || [];
+      this.validators.push({ type: 'Thesaurus', parent: this});
       //todo : refact
       this.ojectName = key.charAt(0).toLowerCase() + key.slice(1) + 's';
       this.url = config.coreUrl + this.ojectName + '/';
@@ -99,7 +101,59 @@ define([
       var template =  _.template(Tpl, this.model.attributes);
       this.$el.html(template);
 
+      this.initAutocomplete();
       this.afterTpl();
+      this.isTermError = false;
+    },
+
+    initAutocomplete: function() {
+      var _this = this;
+      this.autocompleteSource = {};
+      this.autocompleteSource.source = config.coreUrl +'autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID'
+      this.autocompleteSource.select = function(event,ui){
+        event.preventDefault();
+        $(_this._input).attr('data_value',ui.item.value).change();
+        $(_this._input).val(ui.item.label);
+        _this.isTermError = false;
+        _this.displayErrorMsg(false);
+      };
+      this.autocompleteSource.focus = function(event,ui){
+        event.preventDefault();
+      };
+
+      this.autocompleteSource.change = function(event,ui){
+        event.preventDefault();
+        if (ui.item) {
+          _this.setValue(ui.item.value,ui.item.label);
+/*          $(_this._input).attr('data_value',ui.item.value).change();
+          $(_this._input).val(ui.item.label);*/
+          _this.isTermError = false;
+          _this.displayErrorMsg(false);
+
+        } else {
+          if (!_this.matchedValue){
+            _this.isTermError = true;
+            _this.displayErrorMsg(true);
+          }
+          //$(_this._input).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
+
+        }
+      };
+
+      this.autocompleteSource.response = function(event,ui){
+        event.preventDefault();
+        if (ui.content.length == 1){
+          var item = ui.content[0];
+          _this.setValue(item.value,item.label);
+          _this.displayErrorMsg(false);
+          _this.isTermError = false;
+          _this.matchedValue = item;
+
+        } else {
+          _this.matchedValue = undefined;
+        }
+      };
+
     },
 
     afterTpl: function() {
@@ -127,7 +181,15 @@ define([
       if (this.displayingValue){
         this.getDisplayValue(this.initValue);
       }
-
+      var _this = this;
+      _(function () {
+                
+                $(_this._input).autocomplete(_this.autocompleteSource);
+                //$(this._input).addClass(_this.options.schema.editorClass) ;
+                /*if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
+                    $(this._input).prop('disabled', true);
+                }*/
+            }).defer();
       return this;
     },
 
@@ -218,6 +280,9 @@ define([
     },
 
     getValue: function() {
+      if (this.isTermError) {
+        return null ;
+      }
       return $(this._input).attr('data_value');
     },
 
@@ -236,7 +301,23 @@ define([
 
     hidePicker: function() {
       this.$el.find('#modal-outer').fadeOut('fast');
-    }
+    },
+
+    displayErrorMsg: function (bool) {
+/*      if (this.editable) {
+        this.isTermError = bool;*/
+        if (this.isTermError) {
+
+          //this.termError = "Invalid term";
+          $(this._input).addClass('error');
+          //his.$el.find('#errorMsg').removeClass('hidden');
+        } else {
+          //this.termError = "";
+          $(this._input).removeClass('error');
+          //this.$el.find('#errorMsg').addClass('hidden');
+        }
+      //}
+    },
   }
   );
 });
