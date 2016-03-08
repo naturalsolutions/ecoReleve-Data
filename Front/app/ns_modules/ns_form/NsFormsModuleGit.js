@@ -245,12 +245,14 @@ define([
     displaybuttons: function () {
       var name = this.name;
       if(this.displayMode == 'edit'){
+        this.buttonRegion[0].find('.NsFormModuleDelete').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleSave').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleEdit').addClass('hidden');
         this.formRegion.find('input:enabled:first').focus();
       }else{
+        this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleSave').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').addClass('hidden');

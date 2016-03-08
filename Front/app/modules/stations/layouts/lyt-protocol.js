@@ -15,7 +15,7 @@ define([
   'use strict';
   return Marionette.LayoutView.extend({
     template: 'app/modules/stations/templates/tpl-protocol.html',
-    className: 'full-height hidden',
+    className: 'full-height hidden protocol full-height',
 
     ui: {
       'pagination': '#pagination',

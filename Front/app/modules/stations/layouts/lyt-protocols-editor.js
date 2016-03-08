@@ -14,7 +14,7 @@ define([
     className: 'protocol-editor full-height',
 
     ui: {
-      protoMenuContainer: 'ul#protoMenuContainer',
+      protoMenuContainer: '#protoMenuContainer',
       protoFormsContainer: 'div#protoFormsContainer',
       protoPicker: 'select#protoPicker'
 
@@ -23,7 +23,7 @@ define([
     events: {
       'click #addProto': 'addProtoFromList',
       'click button#addObs': 'addObs',
-      'click #protoMenuContainer .input-group': 'getIndex',
+      'click #protoMenuContainer .js-menu-item': 'getIndex',
     },
 
     initialize: function(options) {
@@ -41,8 +41,13 @@ define([
         success: function(data){
           _this.initMenu();
           _this.initProtos();
+          _this.displayFirst();
         },
       });
+    },
+
+    displayFirst: function(){
+      this.ui.protoMenuContainer.find('.js-menu-item:first').click();
     },
 
     initMenu: function() {
@@ -52,8 +57,9 @@ define([
           'change:total': 'updateTotal',
         },
 
+        className: 'js-menu-item noselect clearfix col-xs-12',
+
         ui: {
-          'li' : 'li.list-group-item',
           'total' : 'span#total'
         },
 
@@ -70,14 +76,18 @@ define([
 
         updateVisibility: function() {
           if (this.model.get('current')) {
-            this.ui.li.addClass('active');
+            this.$el.addClass('active');
           } else {
-            this.ui.li.removeClass('active');
+            this.$el.removeClass('active');
           }
         },
       });
 
-      this.collViewMenu = new Marionette.CollectionView({collection : this.collection, childView: LytMenuItem});
+      this.collViewMenu = new Marionette.CollectionView({
+        collection : this.collection,
+        childView: LytMenuItem,
+        className: 'coll-view'
+      });
       this.collViewMenu.render();
       this.ui.protoMenuContainer.html(this.collViewMenu.el);
     },
@@ -87,7 +97,7 @@ define([
         collection : this.collection,
         childViewOptions: { stationId: this.stationId },
         childView: LytProto,
-        className: 'full-height',
+        className: 'full-height clearfix',
       });
       this.collViewProto.render();
       this.ui.protoFormsContainer.html(this.collViewProto.el);
@@ -96,9 +106,8 @@ define([
     
     getIndex: function(e){
       var listItem = $(e.currentTarget);
-      var index = this.ui.protoMenuContainer.find('.input-group').index( listItem );
-
-
+      var index = this.ui.protoMenuContainer.find('.js-menu-item').index( listItem );
+      
       this.updateProtoStatus(index);
       //add obs
       if ($(e.target).is('button') || $(e.target).parent().is('button')) {
