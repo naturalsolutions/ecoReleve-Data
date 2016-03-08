@@ -207,12 +207,14 @@ class ModuleForms(Base):
     def InputAutocomplete(self):
         if self.Options is not None and self.Options != '':
             option = json.loads(self.Options)
-        if 'SELECT' in option['source']:
+            self.dto['options'] = option
+
+            if 'SELECT' in option['source']:
+                self.dto['options']['source']= []
                 result = self.session.execute(text(option['source'])).fetchall()
                 for row in result:
                     self.dto['options']['source'].append(row[0])
-        else : 
-            self.dto['options'] = {'source': option['source'],'minLength' :option['minLength']}
+
 
     func_type_context = {
         'Select': InputSelect,
