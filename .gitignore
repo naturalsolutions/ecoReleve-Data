@@ -4,10 +4,14 @@ Front/build/*
 **/*.css
 **/*.css.map
 
+
 Front/externalModules/*
 
 Front/app/styles/*.css
 Front/app/styles/*.css.map
+
+Front/app/styles/_perso.less
+Front/app/styles/img/perso/*
 
 Back/build/*
 

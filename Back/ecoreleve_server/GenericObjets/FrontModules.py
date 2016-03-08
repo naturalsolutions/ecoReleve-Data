@@ -189,6 +189,7 @@ class ModuleForms(Base):
 
             self.dto['fieldsets'] = resultat
             self.dto['subschema'] = subschema
+            self.dto['nbByDefault'] = self.DefaultValue
 
             # try :
             #     subTypeObj = int(self.Options)

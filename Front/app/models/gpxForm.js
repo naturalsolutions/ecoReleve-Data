@@ -45,6 +45,7 @@ define([
         'type': 'ListOfNestedModel',
         'fieldClass': 'fieldworkers',
         "editorAttrs": {"disabled": false},
+        'nbByDefault': 1,
         "defaultValue" : {"FK_ProtocoleType" : 1000}
       }
     }
