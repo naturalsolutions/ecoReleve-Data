@@ -55,10 +55,27 @@ define([
           value = options.value;
         }
 
+      if (options.schema.options && options.schema.options.usedLabel){
+        this.usedLabel = options.schema.options.usedLabel;
+        this.displayingValue = true;
+        this.initValue = value;
+      } else {
+        this.usedLabel = 'ID';
+      }
+
         if (value) {
+
           this.model.set('value', value);
+          if (this.displayingValue) {
+            this.model.set('value', '');
+            //this.model.set('initValue', initValue);
+          }
+          this.model.set('data_value', value);
+
         }else {
           this.model.set('value', '');
+          this.model.set('data_value', '');
+
         }
 
         if (options.schema.editable) {
@@ -86,12 +103,32 @@ define([
     },
 
     afterTpl: function() {
-      this._input = this.$el.find('input[name="' + this.key + '"]')[0];
+      console.log(this.$el)
+      this._input = this.$el.find('input[name="' + this.key + '" ]')[0];
       this.$el.find('#new').addClass('hidden');
       this.getTypes();
       this.displayGrid();
       this.displayFilter();
       this.translater = Translater.getTranslater();
+    },
+
+    getDisplayValue: function(val){
+      var _this = this;
+      $.ajax({
+        url : _this.url+val,
+        success : function(data){
+          _this.setValue(val,data[_this.usedLabel]);
+          
+        }
+      });
+    },
+
+    render: function(){
+      if (this.displayingValue){
+        this.getDisplayValue(this.initValue);
+      }
+
+      return this;
     },
 
     getTypes: function() {
@@ -172,7 +209,8 @@ define([
 
     rowClicked: function(row) {
       var id = row.model.get('ID');
-      this.setValue(id);
+      var displayValue = row.model.get(this.usedLabel);
+      this.setValue(id,displayValue);
     },
 
     rowDbClicked: function(row) {
@@ -180,11 +218,12 @@ define([
     },
 
     getValue: function() {
-      return $(this._input).val();
+      return $(this._input).attr('data_value');
     },
 
-    setValue: function(value) {
-      $(this._input).val(value).change();
+    setValue: function(value,displayValue) {
+      $(this._input).val(displayValue).change();;
+      $(this._input).attr('data_value',value).change();
       this.$el.find('#creation').addClass('hidden');
       this.hidePicker();
     },
