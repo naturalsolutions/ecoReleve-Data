@@ -237,21 +237,21 @@ def unlinkEquipement(mapper, connection, target):
             session.delete(dynprop)
 
 
-@event.listens_for(Station, 'after_update')
-def set_equipment(mapper, connection, target):
-    print(target.Observations)
-    print(target.value)
-    print(target._init_value)
-    session = threadlocal.get_current_request().dbsession
-    # target.FK_MonitoredSite = value
-    print(target.FK_MonitoredSite)
-    listObs = target.Observations
-    # equipObsList = list(filter(lambda x: 'site' in x.GetType().Name.lower(),listObs))
-    # print(equipObs[0].ID)
+# @event.listens_for(Station, 'after_update')
+# def set_equipment(mapper, connection, target):
+#     print(target.Observations)
+#     print(target.value)
+#     print(target._init_value)
+#     session = threadlocal.get_current_request().dbsession
+#     # target.FK_MonitoredSite = value
+#     print(target.FK_MonitoredSite)
+#     listObs = target.Observations
+#     # equipObsList = list(filter(lambda x: 'site' in x.GetType().Name.lower(),listObs))
+#     # print(equipObs[0].ID)
 
-    # if int(value) != int(oldvalue) :
-    #     for obs in equipObsList:
-    #         session.query(Equipment).filter(Equipment.FK_Observation == obs.ID).update({Equipment.FK_MonitoredSite : value})
+#     # if int(value) != int(oldvalue) :
+#     #     for obs in equipObsList:
+#     #         session.query(Equipment).filter(Equipment.FK_Observation == obs.ID).update({Equipment.FK_MonitoredSite : value})
 
 
 class ErrorAvailable(Exception):
