@@ -59,6 +59,7 @@ define([
             var editorAttrs = "";
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled) {
                 editorAttrs += 'disabled="disabled"';
+                this.disabled = true;
             }
             this.editable = options.schema.editable;
             var tplValeurs = {
@@ -90,21 +91,24 @@ define([
             var $el = $(this.template);
             this.setElement($el);
             var _this = this;
-            _(function () {
-                _this.$el.find('#' + _this.id).autocompTree({
-                    wsUrl: _this.wsUrl ,
-                    webservices: 'fastInitForCompleteTree',
-                    language: { hasLanguage: true, lng: _this.lng },
-                    display: {
-                        isDisplayDifferent: true,
-                        suffixeId: '_value',
-                        displayValueName: _this.displayValueName,
-                        storedValueName: _this.storedValueName
-                    },
-                    inputValue: _this.value,
-                    startId: _this.startId,
-                });
-
+            if (!this.disabled ){
+                _(function () {
+                    _this.$el.find('#' + _this.id).autocompTree({
+                        wsUrl: _this.wsUrl ,
+                        webservices: 'fastInitForCompleteTree',
+                        language: { hasLanguage: true, lng: _this.lng },
+                        display: {
+                            isDisplayDifferent: true,
+                            suffixeId: '_value',
+                            displayValueName: _this.displayValueName,
+                            storedValueName: _this.storedValueName
+                        },
+                        inputValue: _this.value,
+                        startId: _this.startId,
+                    });
+                }).defer();
+            }
+            
                 if (_this.translateOnRender) {
                     _this.validateAndTranslate(_this.value, true);
                 }
@@ -118,7 +122,7 @@ define([
 
                 }
                 _this.FirstRender = false;
-            }).defer();
+            
             return this;
         },
 
