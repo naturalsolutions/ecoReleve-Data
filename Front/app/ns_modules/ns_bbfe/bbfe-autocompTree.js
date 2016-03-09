@@ -43,6 +43,10 @@ define([
                 'fr': '',
                 'en': 'En'
             };
+            var iconFont = 'hide';
+            if (options.schema.iconFont) {
+                iconFont = options.schema.iconFont;
+            }
             this.ValidationRealTime = true;
             if (options.schema.options.ValidationRealTime == false) {
                 this.ValidationRealTime = false;
@@ -60,7 +64,8 @@ define([
             var tplValeurs = {
                 inputID: this.id,
                 editorAttrs: editorAttrs,
-                editorClass: options.schema.editorClass
+                editorClass: options.schema.editorClass,
+                iconFont : iconFont 
             }
             this.template = _.template(this.template, tplValeurs);
             this.startId = options.schema.options.startId;
@@ -87,7 +92,7 @@ define([
             var _this = this;
             _(function () {
                 _this.$el.find('#' + _this.id).autocompTree({
-                    wsUrl: _this.wsUrl + '/ThesaurusREADServices.svc/json',
+                    wsUrl: _this.wsUrl ,
                     webservices: 'fastInitForCompleteTree',
                     language: { hasLanguage: true, lng: _this.lng },
                     display: {
@@ -131,7 +136,7 @@ define([
             var erreur;
 
             $.ajax({
-                url: _this.wsUrl + "/ThesaurusReadServices.svc/json/getTRaductionByType",
+                url: _this.wsUrl + "/getTRaductionByType",
                 //timeout: 3000,
                 data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '" }',
                 dataType: "json",
@@ -187,9 +192,12 @@ define([
         },
 
     }, {
-        template: '<div>\
+        template: '<div id="divAutoComp_<%=inputID%>" >\
+        <div class="input-group">\
+            <span class="input-group-addon <%=iconFont%>"></span>\
             <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
-            <span id="errorMsg" class="error hidden">Invalid term</span>\
+        </div>\
+        <span id="errorMsg" class="error hidden">Invalid term</span>\
         </div>',
     });
 

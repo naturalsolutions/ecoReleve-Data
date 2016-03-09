@@ -90,9 +90,9 @@ class ModuleForms(Base):
             self.fullPath = True
             isDisabled = True
 
-            if self.InputType in ['AutocompTreeEditor']:
-                curInputType = 'Text'
-                self.fullPath = True
+            # if self.InputType in ['AutocompTreeEditor']:
+            #     curInputType = 'Text'
+            #     self.fullPath = True
 
         # CssClass = FieldSizeToClass[curSize]
         CssClass = 'col-md-'+str(curSize)
@@ -204,6 +204,7 @@ class ModuleForms(Base):
             , 'lng':threadlocal.get_current_request().authenticated_userid['userlanguage']
             ,'displayValueName': 'valueTranslated'}
             self.dto['options']['startId'] = self.Options
+            self.dto['iconFont'] = 'reneco reneco-thesaurus'
 
     def InputAutocomplete(self):
         if self.Options is not None and self.Options != '':
