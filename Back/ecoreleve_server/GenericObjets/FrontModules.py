@@ -90,9 +90,9 @@ class ModuleForms(Base):
             self.fullPath = True
             isDisabled = True
 
-            if self.InputType in ['AutocompTreeEditor']:
-                curInputType = 'Text'
-                self.fullPath = True
+            # if self.InputType in ['AutocompTreeEditor']:
+            #     curInputType = 'Text'
+            #     self.fullPath = True
 
         # CssClass = FieldSizeToClass[curSize]
         CssClass = 'col-md-'+str(curSize)
@@ -189,12 +189,13 @@ class ModuleForms(Base):
 
             self.dto['fieldsets'] = resultat
             self.dto['subschema'] = subschema
+            self.dto['nbByDefault'] = self.DefaultValue
 
-            try :
-                subTypeObj = int(self.Options)
-                self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
-            except : 
-                pass
+            # try :
+            #     subTypeObj = int(self.Options)
+            #     self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
+            # except : 
+            #     pass
 
     def InputThesaurus(self) :
         if self.Options is not None and self.Options != '' :
@@ -203,20 +204,24 @@ class ModuleForms(Base):
             , 'lng':threadlocal.get_current_request().authenticated_userid['userlanguage']
             ,'displayValueName': 'valueTranslated'}
             self.dto['options']['startId'] = self.Options
+            self.dto['iconFont'] = 'reneco reneco-thesaurus'
 
     def InputAutocomplete(self):
         if self.Options is not None and self.Options != '':
             option = json.loads(self.Options)
-        if 'SELECT' in option['source']:
+            self.dto['options'] = option
+
+            if 'SELECT' in option['source']:
+                self.dto['options']['source']= []
                 result = self.session.execute(text(option['source'])).fetchall()
                 for row in result:
                     self.dto['options']['source'].append(row[0])
-        else : 
-            self.dto['options'] = {'source': option['source'],'minLength' :option['minLength']}
+
 
     func_type_context = {
         'Select': InputSelect,
         'ListOfNestedModel' : InputLNM,
+        'gridFormEditor' : InputLNM,
         'AutocompTreeEditor' : InputThesaurus,
         'AutocompleteEditor': InputAutocomplete,
         }

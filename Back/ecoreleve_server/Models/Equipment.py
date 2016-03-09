@@ -1,4 +1,4 @@
-from ..Models import Base,DBSession,Observation,Individual,Sensor
+from ..Models import Base,DBSession,Observation,Individual,Sensor,Station
 from sqlalchemy import (
     Column,
      DateTime,
@@ -55,19 +55,6 @@ class Equipment(Base):
 def checkSensor(fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     session = threadlocal.get_current_registry().dbmaker()
     e2 = aliased(Equipment)
-
-    # curQuery = "select * from Sensor S "
-
-    # curQuery += "where not exists (select * from Equipment E "
-
-    # curQuery += "WHERE NOT EXISTS 
-                    # (select * from Equipment E2 
-                    # where E2.FK_Sensor = E.FK_Sensor 
-                    # and E2.StartDate > E.StartDate 
-                    # and e2.StartDate < convert(datetime,'" + equipDate.strftime("%Y/%m/%d %H:%M:%S") + "',103) )"
-
-    # curQuery += "AND e.FK_Sensor =s.ID and e.Deploy = 1 and e.StartDate < convert(datetime,'" + equipDate.strftime("%Y/%m/%d %H:%M:%S") + "',103) ) AND S.ID=" + str(fk_sensor)
-    # print(curQuery)
 
     subQuery = select([e2]
         ).where(
@@ -157,10 +144,7 @@ def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None,fk_site=None):
         )
 
     fullQuery = query
-    # fullQuery = select([True]).where(exists(query))
-
     result = session.execute(fullQuery).scalar()
-    # session.close()
     if result > 0 :
         return None
     else :
@@ -242,10 +226,8 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
 @event.listens_for(Equipment, 'after_delete')
 def unlinkEquipement(mapper, connection, target):
     session = threadlocal.get_current_request().dbsession
-    # session = threadlocal.get_current_registry().dbmaker()
     if target.FK_Individual is not None and target.Deploy == 1:
         curIndiv = session.query(Individual).get(target.FK_Individual)
-
         curSensor = session.query(Sensor).get(target.FK_Sensor)
 
         dynPropToDel = curIndiv.GetDynPropWithDate(['Survey_type','Monitoring_Status'],target.StartDate)
@@ -253,6 +235,24 @@ def unlinkEquipement(mapper, connection, target):
 
         for dynprop in dynPropToDel:
             session.delete(dynprop)
+
+
+# @event.listens_for(Station, 'after_update')
+# def set_equipment(mapper, connection, target):
+#     print(target.Observations)
+#     print(target.value)
+#     print(target._init_value)
+#     session = threadlocal.get_current_request().dbsession
+#     # target.FK_MonitoredSite = value
+#     print(target.FK_MonitoredSite)
+#     listObs = target.Observations
+#     # equipObsList = list(filter(lambda x: 'site' in x.GetType().Name.lower(),listObs))
+#     # print(equipObs[0].ID)
+
+#     # if int(value) != int(oldvalue) :
+#     #     for obs in equipObsList:
+#     #         session.query(Equipment).filter(Equipment.FK_Observation == obs.ID).update({Equipment.FK_MonitoredSite : value})
+
 
 class ErrorAvailable(Exception):
      def __init__(self, value):

@@ -29,7 +29,8 @@ from pyramid import threadlocal
 from ..utils.datetime import parse
 from ..utils.parseValue import parseValue,find,isEqual
 from sqlalchemy_utils import get_hybrid_properties
-
+import warnings
+from sqlalchemy import exc as sa_exc
 
 Cle = {'String':'ValueString',
 'Float':'ValueFloat',
@@ -38,6 +39,8 @@ Cle = {'String':'ValueString',
 'float':'ValueFloat',
 'Time': 'ValueDate',
 'Date Only':'ValueDate'}
+
+LinkedTables = {}
 
 class ObjectWithDynProp:
     ''' Class to extend for mapped object with dynamic properties '''
@@ -68,6 +71,16 @@ class ObjectWithDynProp:
             statProps.extend(dynProps)
             self.allProp = statProps
         return self.allProp
+
+    def getLinkedField (self):
+        curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + self.GetType().GetDynPropContextTable() 
+        #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
+        curQuery +=  ' C  JOIN ' + self.GetType().GetDynPropTable() + ' D ON C.' + self.GetType().Get_FKToDynPropTable() + '= D.ID '
+        curQuery += ' where C.' + self.GetType().GetFK_DynPropContextTable() + ' = ' + str(self.GetType().ID )
+        curQuery += ' AND C.LinkedTable is not null'
+        Values = self.ObjContext.execute(curQuery).fetchall()
+
+        return [dict(row) for row in Values]
 
     def GetPropWithName(self,nameProp):
         if self.allProp is None:
@@ -204,6 +217,7 @@ class ObjectWithDynProp:
                         except:
                             pass
                 setattr(self,nameProp,valeur)
+                self.PropDynValuesOfNow[nameProp] = valeur
             except :
                 pass
         else:
@@ -355,24 +369,84 @@ class ObjectWithDynProp:
         #### IF ID is send from front --> get data of this object in order to display value into form which will be sent ####
         data = self.GetFlatObject(schema)
         resultat['data'] = data
+        resultat['recursive_level'] = 0
+        resultat = self.getDefaultValue(resultat)
         if self.ID :
             resultat['data']['id'] = self.ID
-            for key, value in schema.items():
-                if (DisplayMode.lower() != 'edit' and schema[key]['fullPath'] is True):
-                    try : 
-                        resultat['data'][key] = self.splitFullPath(resultat['data'][key])
-                    except : pass
+            # for key, value in schema.items():
+            #     if (DisplayMode.lower() != 'edit' and 'fullPath' in schema[key] and schema[key]['fullPath'] is True):
+            #         try : 
+            #             resultat['data'][key] = self.splitFullPath(resultat['data'][key])
+            #         except : pass
         else :
-            resultat['data']['id'] = 0
             # add default values for each field in data if exists
             #for attr in schema:
-            for key, value in schema.items():
-                if value['defaultValue'] is not None:
-                    resultat['data'][key] = value['defaultValue']
+            resultat['data']['id'] = 0
+            resultat['data'].update(resultat['schema']['defaultValues'])
 
+        # resultat['schema']['defaultValues'] = defaultValues
         return resultat
+    
+    def linkedFieldDate(self):
+        return datetime.now()
+
+    def updateLinkedField(self,useDate = None):
+        if useDate is None:
+            useDate = self.linkedFieldDate()
+
+        for linkProp in self.getLinkedField() :
+            curPropName = linkProp['Name']
+            obj = LinkedTables[linkProp['LinkedTable']]
+            linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
+            try : 
+                curObj = self.ObjContext.query(obj).filter(getattr(obj,linkProp['LinkedID']) == linkedSource).one()
+                curObj.init_on_load()
+                curObj.SetProperty(linkProp['LinkedField'].replace('@Dyn:',''),self.GetProperty(curPropName),useDate)
+            except :
+                pass
+
+    def deleteLinkedField(self,useDate=None):
+        # dynPropToDel = []
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+
+            if useDate is None:
+                useDate = self.linkedFieldDate()
+
+            for linkProp in self.getLinkedField() :
+                curPropName = linkProp['Name']
+                obj = LinkedTables[linkProp['LinkedTable']]
+                linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
+
+                try:
+                    curObj = self.ObjContext.query(obj).filter(getattr(obj,linkProp['LinkedID']) == linkedSource).one()
+
+                    dynPropValueToDel = curObj.GetDynPropWithDate(linkProp['LinkedField'].replace('@Dyn:',''),useDate)
+                    if dynPropValueToDel is not None : 
+                        self.ObjContext.delete(dynPropValueToDel)
+                except :
+                    pass
 
     def splitFullPath(self,value):
         splitValue = value.split('>')[-1]
         return splitValue
+
+    def getDefaultValue(self,resultat):
+        defaultValues = {}
+        recursive_level = resultat['recursive_level']
+        for key, value in resultat['schema'].items():
+            if value['defaultValue'] is not None:
+                defaultValues[key] = value['defaultValue']
+            if 'subschema' in value:
+                temp = {'schema':value['subschema'],'defaultValues':{}, 'recursive_level':recursive_level+1}
+                subData = self.getDefaultValue(temp)
+                resultat['schema'][key]['subschema']['defaultValues'] = subData
+                # if value['defaultValue'] is None and 'required' not in value['validators'] :
+                #     del subData['id']
+        if recursive_level < 1:
+            resultat['schema']['defaultValues'] = defaultValues
+        else :
+            resultat = defaultValues
+        return resultat
+
 
