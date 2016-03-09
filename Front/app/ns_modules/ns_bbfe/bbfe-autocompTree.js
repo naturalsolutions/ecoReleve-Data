@@ -43,6 +43,10 @@ define([
                 'fr': '',
                 'en': 'En'
             };
+            var iconFont = 'hide';
+            if (options.schema.iconFont) {
+                iconFont = options.schema.iconFont;
+            }
             this.ValidationRealTime = true;
             if (options.schema.options.ValidationRealTime == false) {
                 this.ValidationRealTime = false;
@@ -55,12 +59,14 @@ define([
             var editorAttrs = "";
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled) {
                 editorAttrs += 'disabled="disabled"';
+                this.disabled = true;
             }
             this.editable = options.schema.editable;
             var tplValeurs = {
                 inputID: this.id,
                 editorAttrs: editorAttrs,
-                editorClass: options.schema.editorClass
+                editorClass: options.schema.editorClass,
+                iconFont : iconFont 
             }
             this.template = _.template(this.template, tplValeurs);
             this.startId = options.schema.options.startId;
@@ -85,21 +91,24 @@ define([
             var $el = $(this.template);
             this.setElement($el);
             var _this = this;
-            _(function () {
-                _this.$el.find('#' + _this.id).autocompTree({
-                    wsUrl: _this.wsUrl + '/ThesaurusREADServices.svc/json',
-                    webservices: 'fastInitForCompleteTree',
-                    language: { hasLanguage: true, lng: _this.lng },
-                    display: {
-                        isDisplayDifferent: true,
-                        suffixeId: '_value',
-                        displayValueName: _this.displayValueName,
-                        storedValueName: _this.storedValueName
-                    },
-                    inputValue: _this.value,
-                    startId: _this.startId,
-                });
-
+            if (!this.disabled ){
+                _(function () {
+                    _this.$el.find('#' + _this.id).autocompTree({
+                        wsUrl: _this.wsUrl ,
+                        webservices: 'fastInitForCompleteTree',
+                        language: { hasLanguage: true, lng: _this.lng },
+                        display: {
+                            isDisplayDifferent: true,
+                            suffixeId: '_value',
+                            displayValueName: _this.displayValueName,
+                            storedValueName: _this.storedValueName
+                        },
+                        inputValue: _this.value,
+                        startId: _this.startId,
+                    });
+                }).defer();
+            }
+            
                 if (_this.translateOnRender) {
                     _this.validateAndTranslate(_this.value, true);
                 }
@@ -113,7 +122,7 @@ define([
 
                 }
                 _this.FirstRender = false;
-            }).defer();
+            
             return this;
         },
 
@@ -131,7 +140,7 @@ define([
             var erreur;
 
             $.ajax({
-                url: _this.wsUrl + "/ThesaurusReadServices.svc/json/getTRaductionByType",
+                url: _this.wsUrl + "/getTRaductionByType",
                 //timeout: 3000,
                 data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '" }',
                 dataType: "json",
@@ -187,9 +196,12 @@ define([
         },
 
     }, {
-        template: '<div>\
+        template: '<div id="divAutoComp_<%=inputID%>" >\
+        <div class="input-group">\
+            <span class="input-group-addon <%=iconFont%>"></span>\
             <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
-            <span id="errorMsg" class="error hidden">Invalid term</span>\
+        </div>\
+        <span id="errorMsg" class="error hidden">Invalid term</span>\
         </div>',
     });
 

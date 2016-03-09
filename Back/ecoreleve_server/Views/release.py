@@ -135,7 +135,11 @@ def releasePost(request):
 
     taxons = dict(Counter(indiv['Species'] for indiv in indivList))
     def getnewObs(typeID):
-        return Observation(FK_ProtocoleType=typeID)
+        newObs = Observation()
+        newObs.FK_ProtocoleType=typeID
+        newObs.Station = curStation
+        newObs.__init__();
+        return newObs
 
     protoTypes = pd.DataFrame(session.execute(select([ProtocoleType])).fetchall(), columns = ProtocoleType.__table__.columns.keys())
     vertebrateGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate group','ID'].values[0])
@@ -282,7 +286,8 @@ def releasePost(request):
             message = {'release':len(releaseIndList)}
 
     except Exception as e :
+        print_exc()
         session.rollback()
-        message = e.value
+        message = str(type(e))
 
     return message
