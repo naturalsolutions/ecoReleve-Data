@@ -38,7 +38,7 @@ define([
       key = key.split('FK_')[1];
 
       this.validators = options.schema.validators || [];
-      this.validators.push({ type: 'Thesaurus', parent: this});
+      
       //todo : refact
       this.ojectName = key.charAt(0).toLowerCase() + key.slice(1) + 's';
       this.url = config.coreUrl + this.ojectName + '/';
@@ -61,6 +61,9 @@ define([
         this.usedLabel = options.schema.options.usedLabel;
         this.displayingValue = true;
         this.initValue = value;
+        this.validators.push({ type: 'Thesaurus', parent: this});
+        this.initAutocomplete();
+        this.isTermError = false;
       } else {
         this.usedLabel = 'ID';
       }
@@ -100,10 +103,8 @@ define([
       //dirty
       var template =  _.template(Tpl, this.model.attributes);
       this.$el.html(template);
-
-      this.initAutocomplete();
+      
       this.afterTpl();
-      this.isTermError = false;
     },
 
     initAutocomplete: function() {
@@ -180,16 +181,15 @@ define([
     render: function(){
       if (this.displayingValue){
         this.getDisplayValue(this.initValue);
+        var _this = this;
+        _(function () {
+            $(_this._input).autocomplete(_this.autocompleteSource);
+            //$(this._input).addClass(_this.options.schema.editorClass) ;
+            /*if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
+                $(this._input).prop('disabled', true);
+            }*/
+        }).defer();
       }
-      var _this = this;
-      _(function () {
-                
-                $(_this._input).autocomplete(_this.autocompleteSource);
-                //$(this._input).addClass(_this.options.schema.editorClass) ;
-                /*if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
-                    $(this._input).prop('disabled', true);
-                }*/
-            }).defer();
       return this;
     },
 
