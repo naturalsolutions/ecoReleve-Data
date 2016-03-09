@@ -373,11 +373,11 @@ class ObjectWithDynProp:
         resultat = self.getDefaultValue(resultat)
         if self.ID :
             resultat['data']['id'] = self.ID
-            for key, value in schema.items():
-                if (DisplayMode.lower() != 'edit' and 'fullPath' in schema[key] and schema[key]['fullPath'] is True):
-                    try : 
-                        resultat['data'][key] = self.splitFullPath(resultat['data'][key])
-                    except : pass
+            # for key, value in schema.items():
+            #     if (DisplayMode.lower() != 'edit' and 'fullPath' in schema[key] and schema[key]['fullPath'] is True):
+            #         try : 
+            #             resultat['data'][key] = self.splitFullPath(resultat['data'][key])
+            #         except : pass
         else :
             # add default values for each field in data if exists
             #for attr in schema:

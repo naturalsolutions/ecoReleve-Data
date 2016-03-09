@@ -34,3 +34,13 @@ def current_user(request):
         User.Login.label('fullname')
     ]).where(User.id == request.authenticated_userid['iss'])
     return dict(session.execute(query).fetchone())
+
+@view_config(
+    route_name='users/id',
+    renderer='json'
+)
+def getUser(request) :
+    session = request.dbsession
+    user_id = request.matchdict['id']
+    query = select([User]).where(User.id == user_id)
+    return dict(session.execute(query).fetchone())

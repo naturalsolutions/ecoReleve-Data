@@ -1,0 +1,9 @@
+UPDATE f SET Options = '{"source": "autocomplete/users/Login/ID", "minLength":3 , "value":"ID", "label":"Login", "object":"users"}'
+  FROM [EcoReleve_ECWP].[dbo].[ModuleForms] f 
+  where InputType = 'autocompleteeditor' and f.Name in ('Id_Observer','Id_Assistant')
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('37_Up_Confr_Forms_AutoComplete_Use',GETDATE(),(SELECT db_name()))
+
+
+GO

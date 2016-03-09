@@ -83,8 +83,8 @@
           var $me = $(this);
 
           //On encapsule l'input ainsi que tous les éléments dans un div afin de les contrôlés
-          $me.wrapAll('<div id="divAutoComp_' + $me.attr("id") + '" class="input-group">');
-          $me.parent().prepend('<span class="input-group-addon reneco reneco-thesaurus"></span>');
+          //$me.wrapAll('<div id="divAutoComp_' + $me.attr("id") + '" class="input-group">');
+          //$me.parent().prepend('<span class="input-group-addon reneco reneco-thesaurus"></span>');
 
           var htmlInsert = '';
           //Si isDisplayDifferent = true on crée un input hidden afin de stocker la valeur 
