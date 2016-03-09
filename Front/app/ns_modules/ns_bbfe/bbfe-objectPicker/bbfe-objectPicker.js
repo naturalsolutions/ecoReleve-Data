@@ -63,16 +63,17 @@ define([
         this.initValue = value;
         this.validators.push({ type: 'Thesaurus', parent: this});
         this.initAutocomplete();
-        this.isTermError = false;
       } else {
         this.usedLabel = 'ID';
       }
+      this.isTermError = false;
 
         if (value) {
 
           this.model.set('value', value);
           if (this.displayingValue) {
             this.model.set('value', '');
+            this.matchedValue = value;
             //this.model.set('initValue', initValue);
           }
           this.model.set('data_value', value);
@@ -273,6 +274,8 @@ define([
       var id = row.model.get('ID');
       var displayValue = row.model.get(this.usedLabel);
       this.setValue(id,displayValue);
+      this.isTermError = false;
+      this.displayErrorMsg(false);
     },
 
     rowDbClicked: function(row) {
