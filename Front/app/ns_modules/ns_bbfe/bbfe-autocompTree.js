@@ -1,3 +1,5 @@
+
+
 define([
     'underscore',
     'jquery',
@@ -8,28 +10,38 @@ define([
 ], function (
     _, $, $ui, Backbone, Form, autocompTree
 ) {
+
+   
+
     Backbone.Form.validators.Thesaurus = function (options) {
         return function Thesaurus(value) {
             if (!options.parent.isTermError) {
                 return null;
             }
+            console.log('validateur', 'value', value, 'options', options);
+            console.log(options.parent);
             var retour = {
                 type: options.type,
                 message: ''
             };
+
             return retour;
+
         };
     };
+
+
 
     'use strict';
     return Form.editors.AutocompTreeEditor = Form.editors.Base.extend({
 
+
         previousValue: '',
 
         events: {
-            'hide': 'hasChanged'
+            'hide': "hasChanged"
         },
-
+        editable:false,
         hasChanged: function (currentValue) {
             if (currentValue !== this.previousValue) {
                 this.previousValue = currentValue;
@@ -38,36 +50,44 @@ define([
         },
 
         initialize: function (options) {
+            Form.editors.Base.prototype.initialize.call(this, options);
             this.FirstRender = true;
             this.languages = {
                 'fr': '',
                 'en': 'En'
             };
-            var iconFont = 'hide';
-            if (options.schema.iconFont) {
-                iconFont = options.schema.iconFont;
-            }
+
             this.ValidationRealTime = true;
             if (options.schema.options.ValidationRealTime == false) {
                 this.ValidationRealTime = false;
             }
+
+            var iconFont = options.schema.options.iconFont || 'hidden';
+
             this.validators = options.schema.validators || [];
+
+
             this.isTermError = false;
-            Form.editors.Base.prototype.initialize.call(this, options);
+            
             this.template = options.template || this.constructor.template;
-            this.id = options.id + options.form.cid;
+            this.id = options.id;
             var editorAttrs = "";
-            if (options.schema.editorAttrs && options.schema.editorAttrs.disabled) {
-                editorAttrs += 'disabled="disabled"';
-                this.disabled = true;
+            
+            this.editable = options.schema.editable || true;
+            if (options.schema.editorAttrs && options.schema.editorAttrs.disabled)  {
+                this.editable = false;
             }
-            this.editable = options.schema.editable;
+            if (this.editable!=null && !this.editable) {
+                editorAttrs += 'disabled="disabled"';
+                this.ValidationRealTime = false;
+            }
             var tplValeurs = {
                 inputID: this.id,
                 editorAttrs: editorAttrs,
                 editorClass: options.schema.editorClass,
-                iconFont : iconFont 
+                iconFont:iconFont
             }
+
             this.template = _.template(this.template, tplValeurs);
             this.startId = options.schema.options.startId;
             this.wsUrl = options.schema.options.wsUrl;
@@ -81,6 +101,7 @@ define([
         },
 
         getValue: function () {
+
             if (this.isTermError) {
                 return null;
             }
@@ -88,13 +109,14 @@ define([
         },
 
         render: function () {
+
             var $el = $(this.template);
             this.setElement($el);
             var _this = this;
-            if (!this.disabled ){
-                _(function () {
+            _(function () {
+                if (_this.editable) {
                     _this.$el.find('#' + _this.id).autocompTree({
-                        wsUrl: _this.wsUrl ,
+                        wsUrl: _this.wsUrl,
                         webservices: 'fastInitForCompleteTree',
                         language: { hasLanguage: true, lng: _this.lng },
                         display: {
@@ -105,10 +127,17 @@ define([
                         },
                         inputValue: _this.value,
                         startId: _this.startId,
+                        onInputBlur: function (options) {
+                            var value = _this.$el.find('#' + _this.id + '_value').val();
+                            _this.onEditValidation(value);
+                        },
+
+                        onItemClick: function (options) {
+                            var value = _this.$el.find('#' + _this.id + '_value').val();
+                            _this.onEditValidation(value);
+                        }
                     });
-                }).defer();
-            }
-            
+                }
                 if (_this.translateOnRender) {
                     _this.validateAndTranslate(_this.value, true);
                 }
@@ -120,13 +149,14 @@ define([
                         }, 150);
                     });
 
+                    //console.log(_this.$el.find('#treeView' + _this.id));
                 }
                 _this.FirstRender = false;
-            
+            }).defer();
             return this;
         },
-
         validateAndTranslate: function (value, isTranslated) {
+            //console.log('validateAndTranslate', value);
             var _this = this;
 
             if (value == null || value == '') {
@@ -142,54 +172,75 @@ define([
             $.ajax({
                 url: _this.wsUrl + "/getTRaductionByType",
                 //timeout: 3000,
-                data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '" }',
+                data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '",lng:"' + _this.lng + '"  }',
                 dataType: "json",
                 type: "POST",
                 //async:false,
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
-                    $('#divAutoComp_' + _this.id).find('input').removeClass('error');
+                    $('#divAutoComp_' + _this.id).removeClass('error');
                     _this.displayErrorMsg(false);
 
-                    var translatedValue = data["TTop_FullPath" + _this.languages[_this.lng.toLowerCase()]];
+                    var translatedValue = data["TTop_FullPathTranslated"];
                     if (isTranslated) {
                         if (_this.displayValueName == 'valueTranslated') {
-                            translatedValue = data["TTop_Name" + _this.languages[_this.lng.toLowerCase()]];
+                            translatedValue = data["TTop_NameTranslated"];
                         }
-                        _this.$el.find('#' + _this.id).val(translatedValue);
+                        //_this.$el.find('#' + _this.id).val(translatedValue);
                         _this.$el.find('#' + _this.id + '_value').val(data["TTop_FullPath"]);
+                        _this.$el.find('#' + _this.id).val(translatedValue);
                     }
+
                     _this.displayErrorMsg(false);
+
+
                 },
                 error: function (data) {
-                    $('#divAutoComp_' + _this.id).find('input').addClass('error');
-                    _this.displayErrorMsg(true);
+                    _this.$el.find('#' + _this.id).val(_this.value);
+                    if (_this.editable) {
+                        $('#divAutoComp_' + _this.id).addClass('error');
+                        _this.displayErrorMsg(true);
+                    }
                 }
             });
+
+
+
         },
-        
         onEditValidation: function (value) {
             var _this = this;
             if (!this.ValidationRealTime) {
                 this.isTermError = false;
                 return;
             }
+            //console.log('Validation on edit ', value, 'finvalue');
+            //console.log(value);
+            /*if (value == null || value == '') {
+                $('#divAutoComp_' + _this.id).removeClass('error');
+                return;
+            }*/
 
             _this.isTermError = true;
-            _this.validateAndTranslate(value, false);
+            //console.log('Validation on edit Value pas vide ');
+            _this.validateAndTranslate(value, true);
+
+
         },
 
         displayErrorMsg: function (bool) {
-            if (this.editable) {
+            if (!(this.editable ==false)) {
+                //console.log('boooooool', bool);
                 this.isTermError = bool;
+                //console.log('this.$el', this.$el);
                 if (this.isTermError) {
 
+                    //console.log('Term Error');
                     this.termError = "Invalid term";
-                    this.$el.find('#divAutoComp_' + this.id).find('input').addClass('error');
+                    this.$el.find('#divAutoComp_' + this.id).addClass('error');
                     this.$el.find('#errorMsg').removeClass('hidden');
                 } else {
                     this.termError = "";
-                    this.$el.find('#divAutoComp_' + this.id).find('input').removeClass('error');
+                    this.$el.find('#divAutoComp_' + this.id).removeClass('error');
                     this.$el.find('#errorMsg').addClass('hidden');
                 }
             }
