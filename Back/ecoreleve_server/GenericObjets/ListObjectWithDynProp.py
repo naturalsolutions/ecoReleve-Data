@@ -326,7 +326,8 @@ class ListObjectWithDynProp():
 
     def countFilterOnDynProp(self,fullQuery,criteria):
         curDynProp = self.GetDynProp(criteria['Column'])
-
+        if curDynProp is None :
+            return fullQuery
 
         if 'date' in curDynProp['TypeProp'].lower() :
             try:
@@ -387,13 +388,4 @@ class ListObjectWithDynProp():
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['TypeProp']],criteria['Operator'],criteria['Value']))
         return fullQuery
 
-    def countFilterOnNull(self,fullQuery,criteria):
-        existQuery = select([self.GetDynPropValueView()])
-        existQuery = existQuery.where(
-            and_(self.GetDynPropValueView().c['Name'] == criteria['Column']
-                ,self.ObjWithDynProp.ID == self.GetDynPropValueView().c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])
-            )
-        fullQuery = fullQuery.where(~exists(existQuery))
-
-        return fullQuery
 
