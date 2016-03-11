@@ -318,6 +318,7 @@ class ModuleGrids (Base) :
             ,'displayValueName': 'valueTranslated'}
             filter_['options']['startId'] = self.Options
             filter_['options']['ValidationRealTime'] = False
+            filter_['options']['iconFont'] = 'reneco reneco-thesaurus'
 
         if self.FilterType=='AutocompleteEditor' and  self.Options is not None and self.Options != '':
             option = json.loads(self.Options)
