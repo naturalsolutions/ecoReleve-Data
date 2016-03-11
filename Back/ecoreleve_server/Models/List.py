@@ -54,11 +54,23 @@ class StationList(ListObjectWithDynProp):
             query = query.where(exists(subSelect))
 
         if curProp == 'FK_Individual':
-            subSelect = select([Observation]
-                ).where(
-                and_(Station.ID== Observation.FK_Station
-                    ,eval_.eval_binary_expr(Observation.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])))
-            query = query.where(exists(subSelect))
+
+            if criteriaObj['Operator'].lower() in ['is','is not'] and criteriaObj['Value'].lower() == 'null':
+                subSelect = select([Observation]).where(
+                    and_(Station.ID== Observation.FK_Station
+                        ,Observation.__table__.c[curProp] != None)
+                    )
+                if criteriaObj['Operator'].lower() == 'is':
+                    query = query.where(~exists(subSelect))
+                else:
+                    query = query.where(exists(subSelect))
+
+            else:
+                subSelect = select([Observation]
+                    ).where(
+                    and_(Station.ID== Observation.FK_Station
+                        ,eval_.eval_binary_expr(Observation.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])))
+                query = query.where(exists(subSelect))
 
         if curProp == 'FK_FieldWorker':
             subSelect = select([Station_FieldWorker]
