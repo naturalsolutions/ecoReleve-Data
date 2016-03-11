@@ -80,6 +80,7 @@ define([
             if (this.editable!=null && !this.editable) {
                 editorAttrs += 'disabled="disabled"';
                 this.ValidationRealTime = false;
+                iconFont += ' no-border';
             }
             var tplValeurs = {
                 inputID: this.id,
