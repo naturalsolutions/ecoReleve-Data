@@ -5,7 +5,8 @@ from ..Models import (
     FieldActivity_ProtocoleType,
     fieldActivity,
     Station,
-    ErrorAvailable
+    ErrorAvailable,
+    sendLog
     )
 from ..GenericObjets.FrontModules import FrontModules
 import json
@@ -14,6 +15,7 @@ from sqlalchemy import func,select,and_, or_, join
 from pyramid.security import NO_PERMISSION_REQUIRED
 from collections import OrderedDict
 from traceback import print_exc
+
 
 prefixProt = 'protocols'
 prefix = 'stations'
@@ -134,6 +136,7 @@ def insertNewProtocol (request) :
         session.rollback()
         request.response.status_code = 510
         message = e.value
+        sendLog(logLevel=1,domaine=3,msg_number = request.response.status_code)
 
     return message
 
