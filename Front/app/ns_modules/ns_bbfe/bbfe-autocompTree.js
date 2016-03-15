@@ -103,7 +103,7 @@ define([
         getValue: function () {
 
             if (this.isTermError) {
-                return null;
+                return this.$el.find('#' + this.id).val();
             }
             if (this.$el.find('#' + this.id + '_value') && this.editable){
                 return this.$el.find('#' + this.id + '_value').val();
@@ -165,6 +165,7 @@ define([
 
             if (value == null || value == '') {
                 _this.displayErrorMsg(false);
+                _this.$el.find('#' + _this.id ).attr('data_value','');
                 return;
             }
             var TypeField = "FullPath";

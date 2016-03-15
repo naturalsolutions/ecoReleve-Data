@@ -217,9 +217,9 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
             target.Equipment = curEquip
         #     if fk_indiv is not None :
         #         curEquip.linkProperty(equipDate,Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
-        # elif isinstance(target.Equipment,Equipment) and target.Equipment.FK_Sensor == fk_sensor and fk_indiv is not None:
-        #     target.Equipment.FK_Individual = fk_indiv
-        #     target.Equipment.linkProperty(equipDate,Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
+        elif isinstance(target.Equipment,Equipment) and target.Equipment.FK_Sensor == fk_sensor and fk_indiv is not None:
+            target.Equipment.FK_Individual = fk_indiv
+            # target.Equipment.linkProperty(equipDate,Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
         else:
             raise(ErrorAvailable(availability))
 
