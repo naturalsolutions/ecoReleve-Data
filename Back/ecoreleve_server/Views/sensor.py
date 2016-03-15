@@ -237,8 +237,7 @@ def insertOneNewSensor (request) :
     session = request.dbsession
     data = {}
     for items , value in request.json_body.items() :
-        if value != "" :
-            data[items] = value
+        data[items] = value
 
     sensorType = int(data['FK_SensorType'])
     newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now())
