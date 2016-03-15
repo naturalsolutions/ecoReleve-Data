@@ -17,7 +17,10 @@ Base = declarative_base()
 BaseExport = declarative_base()
 dbConfig = {
     'dialect': 'mssql',
-    'sensor_schema': AppConfig['app:main']['sensor_schema'] 
+    'dbLog.schema': AppConfig['app:main']['dbLog.schema'] ,
+    'dbLog.url': AppConfig['app:main']['dbLog.url'] ,
+    'sensor_schema': AppConfig['app:main']['sensor_schema'],
+    'cn.dialect': AppConfig['app:main']['cn.dialect'],
 }
 
 DynPropNames = {
