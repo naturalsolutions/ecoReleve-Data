@@ -105,7 +105,11 @@ define([
             if (this.isTermError) {
                 return null;
             }
-            return this.$el.find('#' + this.id + '_value').val();
+            if (this.$el.find('#' + this.id + '_value')){
+                return this.$el.find('#' + this.id + '_value').val();
+            } else {
+                return this.$el.find('#' + this.id).val();
+            }
         },
 
         render: function () {
