@@ -105,10 +105,10 @@ define([
             if (this.isTermError) {
                 return null;
             }
-            if (this.$el.find('#' + this.id + '_value')){
+            if (this.$el.find('#' + this.id + '_value') && this.editable){
                 return this.$el.find('#' + this.id + '_value').val();
             } else {
-                return this.$el.find('#' + this.id).val();
+                return this.$el.find('#' + this.id).attr('data_value');
             }
         },
 
@@ -192,6 +192,7 @@ define([
                         }
                         //_this.$el.find('#' + _this.id).val(translatedValue);
                         _this.$el.find('#' + _this.id + '_value').val(data["TTop_FullPath"]);
+                        _this.$el.find('#' + _this.id ).attr('data_value',value);
                         _this.$el.find('#' + _this.id).val(translatedValue);
                     }
 
