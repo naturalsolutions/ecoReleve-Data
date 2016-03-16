@@ -255,8 +255,7 @@ def insertOneNewIndiv (request) :
     session = request.dbsession
     data = {}
     for items , value in request.json_body.items() :
-        if value != "" :
-            data[items] = value
+        data[items] = value
 
     indivType = int(data['FK_IndividualType'])
     newIndiv = Individual(FK_IndividualType = indivType , creationDate = datetime.now(),Original_ID = '0')

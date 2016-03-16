@@ -68,7 +68,10 @@ class Observation(Base,ObjectWithDynProp):
             return self.ObjContext.query(ProtocoleType).get(self.FK_ProtocoleType)
 
     def linkedFieldDate(self):
-        return self.Station.StationDate
+        try :
+            return self.Station.StationDate
+        except :
+            return datetime.now()
 
     def UpdateFromJson(self,DTOObject,startDate = None):
         super().UpdateFromJson(DTOObject,startDate)

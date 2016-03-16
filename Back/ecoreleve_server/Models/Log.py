@@ -1,11 +1,14 @@
-from sqlalchemy import Column
+from sqlalchemy import Column,create_engine,text,bindparam
 from sqlalchemy.types import DateTime, Integer, String
 from sqlalchemy.sql import func
-from ..Models import Base
+from ..Models import Base,dbConfig
 import logging
 from pyramid import threadlocal
 import traceback , sys
 import json
+from urllib.parse import quote_plus
+import transaction
+
 
 class Log(Base):
     __tablename__ = 'TLOG_MESSAGES'
@@ -25,7 +28,11 @@ class Log(Base):
 
 def sendLog(logLevel,domaine,msg_number = 500):
     request = threadlocal.get_current_request()
-    session = request.dbsession
+    # session = request.dbsession
+
+    engine = create_engine(dbConfig['cn.dialect'] + quote_plus(dbConfig['dbLog.url']))
+    session = engine.connect()
+
     exc_type, exc_value, exc_traceback = sys.exc_info()
 
     try : 
@@ -38,23 +45,46 @@ def sendLog(logLevel,domaine,msg_number = 500):
     except :
         params = {}
 
-    newLog = Log(LOG_LEVEL= logLevel
-        ,ORIGIN='ecoReleveData'
-        ,SCOPE='Pyramid'
-        ,LOGUSER=request.authenticated_userid['username']
-        ,DOMAINE = domaine
-        ,MESSAGE_NUMBER=msg_number
-        ,LOG_MESSAGE=str(exc_value)
-        ,OTHERSINFOS= json.dumps({
-            'stackTrace': traceback.format_exc(), 
-            'request': {
-                'url': request.url,
-                'method': request.method,
-                'body': body,
-                'params' : params
-            }
-        })
-        )
-    session = request.dbsession
-    session.add(newLog)
-    session.commit()
+    stmt = text(""" 
+        EXEC  """+dbConfig['dbLog.schema']+ """.[PR_LOG_MESSAGE] :lvl, :origin, :scope, :user, :domain , :msg_number, :other, :log_msg;
+        """
+                ).bindparams(
+                bindparam('lvl', logLevel)
+                ,bindparam('origin', 'ecoReleveData')
+                ,bindparam('scope', 'Pyramid')
+                ,bindparam('user', request.authenticated_userid['username'])
+                ,bindparam('domain', domaine)
+                ,bindparam('msg_number', msg_number)
+                ,bindparam('other', json.dumps({
+                    'stackTrace': traceback.format_exc(), 
+                    'request': {
+                    'url': request.url,
+                    'method': request.method,
+                    'body': body,
+                    'params' : params}
+                    }) )
+                ,bindparam('log_msg', str(exc_value))
+                )
+    res = session.execute(stmt.execution_options(autocommit=True))
+    transaction.commit()
+    session.close()
+    # newLog = Log(LOG_LEVEL= logLevel
+    #     ,ORIGIN='ecoReleveData'
+    #     ,SCOPE='Pyramid'
+    #     ,LOGUSER=request.authenticated_userid['username']
+    #     ,DOMAINE = domaine
+    #     ,MESSAGE_NUMBER=msg_number
+    #     ,LOG_MESSAGE=str(exc_value)
+    #     ,OTHERSINFOS= json.dumps({
+    #         'stackTrace': traceback.format_exc(), 
+    #         'request': {
+    #             'url': request.url,
+    #             'method': request.method,
+    #             'body': body,
+    #             'params' : params
+    #         }
+    #     })
+    #     )
+    # session = request.dbsession
+    # session.add(newLog)
+    # session.commit()
