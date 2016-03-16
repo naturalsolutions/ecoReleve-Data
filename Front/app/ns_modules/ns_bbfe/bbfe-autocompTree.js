@@ -131,10 +131,10 @@ define([
                         },
                         inputValue: _this.value,
                         startId: _this.startId,
-                        onInputBlur: function (options) {
+     /*                   onInputBlur: function (options) {
                             var value = _this.$el.find('#' + _this.id + '_value').val();
                             _this.onEditValidation(value);
-                        },
+                        },*/
 
                         onItemClick: function (options) {
                             var value = _this.$el.find('#' + _this.id + '_value').val();
