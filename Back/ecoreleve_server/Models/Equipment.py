@@ -215,26 +215,26 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
             , StartDate = equipDate,FK_Individual = fk_indiv, FK_MonitoredSite = fk_site
             , Deploy = deploy)
             target.Equipment = curEquip
-            if deploy == 1 and fk_indiv is not None :
-                curEquip.linkProperty(equipDate,Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
-        elif isinstance(target.Equipment,Equipment) and target.Equipment.FK_Sensor == fk_sensor and deploy == 1 and fk_indiv is not None:
+        #     if fk_indiv is not None :
+        #         curEquip.linkProperty(equipDate,Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
+        elif isinstance(target.Equipment,Equipment) and target.Equipment.FK_Sensor == fk_sensor and fk_indiv is not None:
             target.Equipment.FK_Individual = fk_indiv
-            target.Equipment.linkProperty(equipDate,Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
+            # target.Equipment.linkProperty(equipDate,Survey_type = Survey_type ,Monitoring_Status = Monitoring_Status,Status = Status)
         else:
             raise(ErrorAvailable(availability))
 
-@event.listens_for(Equipment, 'after_delete')
-def unlinkEquipement(mapper, connection, target):
-    session = threadlocal.get_current_request().dbsession
-    if target.FK_Individual is not None and target.Deploy == 1:
-        curIndiv = session.query(Individual).get(target.FK_Individual)
-        curSensor = session.query(Sensor).get(target.FK_Sensor)
+# @event.listens_for(Equipment, 'after_delete')
+# def unlinkEquipement(mapper, connection, target):
+#     session = threadlocal.get_current_request().dbsession
+#     if target.FK_Individual is not None :
+#         curIndiv = session.query(Individual).get(target.FK_Individual)
+#         curSensor = session.query(Sensor).get(target.FK_Sensor)
 
-        dynPropToDel = curIndiv.GetDynPropWithDate(['Survey_type','Monitoring_Status'],target.StartDate)
-        dynPropToDel.append(curSensor.GetDynPropWithDate('Status',target.StartDate))
+#         dynPropToDel = curIndiv.GetDynPropWithDate(['Survey_type','Monitoring_Status'],target.StartDate)
+#         dynPropToDel.append(curSensor.GetDynPropWithDate('Status',target.StartDate))
 
-        for dynprop in dynPropToDel:
-            session.delete(dynprop)
+#         for dynprop in dynPropToDel:
+#             session.delete(dynprop)
 
 
 # @event.listens_for(Station, 'after_update')

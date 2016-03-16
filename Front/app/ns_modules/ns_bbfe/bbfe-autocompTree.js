@@ -103,9 +103,13 @@ define([
         getValue: function () {
 
             if (this.isTermError) {
-                return null;
+                return this.$el.find('#' + this.id).val();
             }
-            return this.$el.find('#' + this.id + '_value').val();
+            if (this.$el.find('#' + this.id + '_value') && this.editable){
+                return this.$el.find('#' + this.id + '_value').val();
+            } else {
+                return this.$el.find('#' + this.id).attr('data_value');
+            }
         },
 
         render: function () {
@@ -127,10 +131,10 @@ define([
                         },
                         inputValue: _this.value,
                         startId: _this.startId,
-                        onInputBlur: function (options) {
+     /*                   onInputBlur: function (options) {
                             var value = _this.$el.find('#' + _this.id + '_value').val();
                             _this.onEditValidation(value);
-                        },
+                        },*/
 
                         onItemClick: function (options) {
                             var value = _this.$el.find('#' + _this.id + '_value').val();
@@ -161,6 +165,7 @@ define([
 
             if (value == null || value == '') {
                 _this.displayErrorMsg(false);
+                _this.$el.find('#' + _this.id ).attr('data_value','');
                 return;
             }
             var TypeField = "FullPath";
@@ -188,6 +193,7 @@ define([
                         }
                         //_this.$el.find('#' + _this.id).val(translatedValue);
                         _this.$el.find('#' + _this.id + '_value').val(data["TTop_FullPath"]);
+                        _this.$el.find('#' + _this.id ).attr('data_value',value);
                         _this.$el.find('#' + _this.id).val(translatedValue);
                     }
 

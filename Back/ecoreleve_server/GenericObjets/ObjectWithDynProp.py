@@ -393,12 +393,13 @@ class ObjectWithDynProp:
     def updateLinkedField(self,useDate = None):
         if useDate is None:
             useDate = self.linkedFieldDate()
+        print('in dyn prop ')
 
         for linkProp in self.getLinkedField() :
             curPropName = linkProp['Name']
             obj = LinkedTables[linkProp['LinkedTable']]
-            linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
             try : 
+                linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
                 curObj = self.ObjContext.query(obj).filter(getattr(obj,linkProp['LinkedID']) == linkedSource).one()
                 curObj.init_on_load()
                 curObj.SetProperty(linkProp['LinkedField'].replace('@Dyn:',''),self.GetProperty(curPropName),useDate)
@@ -412,13 +413,12 @@ class ObjectWithDynProp:
 
             if useDate is None:
                 useDate = self.linkedFieldDate()
-
             for linkProp in self.getLinkedField() :
                 curPropName = linkProp['Name']
                 obj = LinkedTables[linkProp['LinkedTable']]
-                linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
 
                 try:
+                    linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
                     curObj = self.ObjContext.query(obj).filter(getattr(obj,linkProp['LinkedID']) == linkedSource).one()
 
                     dynPropValueToDel = curObj.GetDynPropWithDate(linkProp['LinkedField'].replace('@Dyn:',''),useDate)

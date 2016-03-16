@@ -216,8 +216,7 @@ def insertOneNewMonitoredSite (request) :
 
     data = {}
     for items , value in request.json_body.items() :
-        if value != "" :
-            data[items] = value
+        data[items] = value
     try:        
         newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid['iss'] )
         newMonitoredSite.MonitoredSiteType = session.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
