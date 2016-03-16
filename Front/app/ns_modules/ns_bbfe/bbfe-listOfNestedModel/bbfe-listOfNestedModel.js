@@ -37,6 +37,7 @@ define([
 
             this.key = this.options.key;
             this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
+
         },
         //removeForm
         deleteForm: function() {

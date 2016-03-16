@@ -44,9 +44,10 @@ define([
         'Name': 'FieldWorkers',
         'type': 'ListOfNestedModel',
         'fieldClass': 'fieldworkers',
-        "editorAttrs": {"disabled": false},
+        'editorAttrs': {"disabled": false},
+        'defaultValue' : {'FK_ProtocoleType' : 1000},
         'nbByDefault': 1,
-        "defaultValue" : {"FK_ProtocoleType" : 1000}
+
       }
     }
   });

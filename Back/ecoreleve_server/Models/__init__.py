@@ -72,6 +72,7 @@ from .MonitoredSite import *
 from .Equipment import *
 from .SensorData import *
 from .List import *
+from .Log import * 
 
 
 LinkedTables['Individual'] = Individual
