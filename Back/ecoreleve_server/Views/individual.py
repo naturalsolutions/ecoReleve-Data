@@ -128,7 +128,7 @@ def getIndiv(request):
         Conf = session.query(FrontModules).filter(FrontModules.Name=='IndivForm').first()
         response = curIndiv.GetDTOWithSchema(Conf,DisplayMode)
 
-    if 'geo' in request.params :
+    elif 'geo' in request.params :
         geoJson=[]
         joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)
         stmt = select([Individual_Location,Sensor.UnicIdentifier]).select_from(joinTable
