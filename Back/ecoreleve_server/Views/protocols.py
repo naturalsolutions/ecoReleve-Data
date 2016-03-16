@@ -110,12 +110,11 @@ def insertNewProtocol (request) :
     session = request.dbsession
     data = {}
     for items , value in request.json_body.items() :
-        if value != "" and value != []:
-            data[items] = value
+        data[items] = value
 
     data['FK_Station'] = request.matchdict['id']
     sta = session.query(Station).get(request.matchdict['id'])
-    newProto = Observation(FK_ProtocoleType = data['FK_ProtocoleType'])    #,FK_Station=data['FK_Station'])
+    newProto = Observation(FK_ProtocoleType = data['FK_ProtocoleType'],FK_Station=data['FK_Station'])    #,FK_Station=data['FK_Station'])
     newProto.ProtocoleType = session.query(ProtocoleType).filter(ProtocoleType.ID==data['FK_ProtocoleType']).first()
     listOfSubProtocols = []
     for items , value in data.items() :
@@ -187,6 +186,7 @@ def getObservation(request):
     try :
         curObs = session.query(Observation).filter(and_(Observation.ID ==id_obs, Observation.FK_Station == id_sta )).one()
         curObs.LoadNowValues()
+        print(curObs.PropDynValuesOfNow)
         # if Form value exists in request --> return data with schema else return only data
         if 'FormName' in request.params :
             ModuleName = request.params['FormName']
