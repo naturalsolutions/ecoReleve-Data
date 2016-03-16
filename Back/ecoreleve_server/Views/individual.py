@@ -141,7 +141,8 @@ def getIndiv(request):
                 , 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
-
+    else : 
+        response  = curIndiv.GetFlatObject()
     # if 'geoDynamic' in request.params :
     #     geoJson=[]
     #     joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)

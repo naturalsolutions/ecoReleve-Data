@@ -115,7 +115,8 @@ def getMonitoredSite(request):
             DisplayMode = 'display'
         Conf = session.query(FrontModules).filter(FrontModules.Name=='MonitoredSiteForm').first()
         response = curMonitoredSite.GetDTOWithSchema(Conf,DisplayMode)
-
+    else : 
+        response  = curMonitoredSite.GetFlatObject()
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
