@@ -160,6 +160,8 @@ def getSensor(request):
         geoJson=[]
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
+    else : 
+        response  = curSensor.GetFlatObject()
 
     return response
 
