@@ -138,7 +138,7 @@ def releasePost(request):
         newObs = Observation()
         newObs.FK_ProtocoleType=typeID
         newObs.FK_Station = sta_id
-        newObs.__init__();
+        newObs.__init__()
         return newObs
 
     protoTypes = pd.DataFrame(session.execute(select([ProtocoleType])).fetchall(), columns = ProtocoleType.__table__.columns.keys())
