@@ -137,7 +137,7 @@ def releasePost(request):
     def getnewObs(typeID):
         newObs = Observation()
         newObs.FK_ProtocoleType=typeID
-        newObs.Station = curStation
+        newObs.FK_Station = sta_id
         newObs.__init__();
         return newObs
 
@@ -236,11 +236,15 @@ def releasePost(request):
             releaseIndList.append(curReleaseInd)
 
             try:
-                # indiv['FK_Sensor'] = int(indiv['fk_sensor'])
+                try:
+                    sensor_id = int(indiv['fk_sensor'])
+                except:
+                    sensor_id = int(indiv['FK_Sensor'])
+
                 curEquipmentInd = getnewObs(equipmentIndID)
                 equipInfo = {
                 'FK_Individual': indiv['FK_Individual'],
-                'FK_Sensor' : int(indiv['fk_sensor']),
+                'FK_Sensor' : sensor_id,
                 'Survey_type' : 'Post-Relâcher',
                 'Monitoring_Status' : 'Suivi',
                 'Sensor_Status': 'événement de sortie provisoire de stock>mise en service'
