@@ -34,9 +34,11 @@ define([
       //get the foreign key 2
       this.key = options.key;
       var key = options.key;
-
+      this.options = options;
       key = key.split('FK_')[1];
 
+      this.validators = options.schema.validators || [];
+      
       //todo : refact
       this.ojectName = key.charAt(0).toLowerCase() + key.slice(1) + 's';
       this.url = config.coreUrl + this.ojectName + '/';
@@ -55,10 +57,31 @@ define([
           value = options.value;
         }
 
+      if (options.schema.options && options.schema.options.usedLabel){
+        this.usedLabel = options.schema.options.usedLabel;
+        this.displayingValue = true;
+        this.initValue = value;
+        this.validators.push({ type: 'Thesaurus', parent: this});
+        this.initAutocomplete();
+      } else {
+        this.usedLabel = 'ID';
+      }
+      this.isTermError = false;
+
         if (value) {
+
           this.model.set('value', value);
+          if (this.displayingValue) {
+            this.model.set('value', '');
+            this.matchedValue = value;
+            //this.model.set('initValue', initValue);
+          }
+          this.model.set('data_value', value);
+
         }else {
           this.model.set('value', '');
+          this.model.set('data_value', '');
+
         }
 
         if (options.schema.editable) {
@@ -81,17 +104,94 @@ define([
       //dirty
       var template =  _.template(Tpl, this.model.attributes);
       this.$el.html(template);
-
+      
       this.afterTpl();
     },
 
+    initAutocomplete: function() {
+      var _this = this;
+      this.autocompleteSource = {};
+      this.autocompleteSource.source = config.coreUrl +'autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID'
+      this.autocompleteSource.select = function(event,ui){
+        event.preventDefault();
+        $(_this._input).attr('data_value',ui.item.value).change();
+        $(_this._input).val(ui.item.label);
+        _this.isTermError = false;
+        _this.displayErrorMsg(false);
+      };
+      this.autocompleteSource.focus = function(event,ui){
+        event.preventDefault();
+      };
+
+      this.autocompleteSource.change = function(event,ui){
+        event.preventDefault();
+        if (ui.item) {
+          _this.setValue(ui.item.value,ui.item.label);
+/*          $(_this._input).attr('data_value',ui.item.value).change();
+          $(_this._input).val(ui.item.label);*/
+          _this.isTermError = false;
+          _this.displayErrorMsg(false);
+
+        } else {
+          if (!_this.matchedValue){
+            _this.isTermError = true;
+            _this.displayErrorMsg(true);
+          }
+          //$(_this._input).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
+
+        }
+      };
+
+      this.autocompleteSource.response = function(event,ui){
+        event.preventDefault();
+        if (ui.content.length == 1){
+          var item = ui.content[0];
+          _this.setValue(item.value,item.label);
+          _this.displayErrorMsg(false);
+          _this.isTermError = false;
+          _this.matchedValue = item;
+
+        } else {
+          _this.matchedValue = undefined;
+        }
+      };
+
+    },
+
     afterTpl: function() {
-      this._input = this.$el.find('input[name="' + this.key + '"]')[0];
+      console.log(this.$el)
+      this._input = this.$el.find('input[name="' + this.key + '" ]')[0];
       this.$el.find('#new').addClass('hidden');
       this.getTypes();
       this.displayGrid();
       this.displayFilter();
       this.translater = Translater.getTranslater();
+    },
+
+    getDisplayValue: function(val){
+      var _this = this;
+      $.ajax({
+        url : _this.url+val,
+        success : function(data){
+          _this.setValue(val,data[_this.usedLabel]);
+          
+        }
+      });
+    },
+
+    render: function(){
+      if (this.displayingValue){
+        this.getDisplayValue(this.initValue);
+        var _this = this;
+        _(function () {
+            $(_this._input).autocomplete(_this.autocompleteSource);
+            //$(this._input).addClass(_this.options.schema.editorClass) ;
+            /*if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
+                $(this._input).prop('disabled', true);
+            }*/
+        }).defer();
+      }
+      return this;
     },
 
     getTypes: function() {
@@ -172,7 +272,10 @@ define([
 
     rowClicked: function(row) {
       var id = row.model.get('ID');
-      this.setValue(id);
+      var displayValue = row.model.get(this.usedLabel);
+      this.setValue(id,displayValue);
+      this.isTermError = false;
+      this.displayErrorMsg(false);
     },
 
     rowDbClicked: function(row) {
@@ -180,11 +283,15 @@ define([
     },
 
     getValue: function() {
-      return $(this._input).val();
+      if (this.isTermError) {
+        return null ;
+      }
+      return $(this._input).attr('data_value');
     },
 
-    setValue: function(value) {
-      $(this._input).val(value).change();
+    setValue: function(value,displayValue) {
+      $(this._input).val(displayValue).change();;
+      $(this._input).attr('data_value',value).change();
       this.$el.find('#creation').addClass('hidden');
       this.hidePicker();
     },
@@ -197,7 +304,23 @@ define([
 
     hidePicker: function() {
       this.$el.find('#modal-outer').fadeOut('fast');
-    }
+    },
+
+    displayErrorMsg: function (bool) {
+/*      if (this.editable) {
+        this.isTermError = bool;*/
+        if (this.isTermError) {
+
+          //this.termError = "Invalid term";
+          $(this._input).addClass('error');
+          //his.$el.find('#errorMsg').removeClass('hidden');
+        } else {
+          //this.termError = "";
+          $(this._input).removeClass('error');
+          //this.$el.find('#errorMsg').addClass('hidden');
+        }
+      //}
+    },
   }
   );
 });

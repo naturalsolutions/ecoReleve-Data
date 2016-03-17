@@ -17,11 +17,15 @@ Base = declarative_base()
 BaseExport = declarative_base()
 dbConfig = {
     'dialect': 'mssql',
-    'dbLog.schema': AppConfig['app:main']['dbLog.schema'] ,
-    'dbLog.url': AppConfig['app:main']['dbLog.url'] ,
     'sensor_schema': AppConfig['app:main']['sensor_schema'],
     'cn.dialect': AppConfig['app:main']['cn.dialect'],
 }
+
+try:
+    dbConfig['dbLog.schema'] = AppConfig['app:main']['dbLog.schema']
+    dbConfig['dbLog.url'] =  AppConfig['app:main']['dbLog.url'] 
+except:
+    pass
 
 DynPropNames = {
     'ProtocoleType':{
@@ -75,7 +79,7 @@ from .MonitoredSite import *
 from .Equipment import *
 from .SensorData import *
 from .List import *
-from .Log import * 
+from .Log import sendLog 
 
 
 LinkedTables['Individual'] = Individual
