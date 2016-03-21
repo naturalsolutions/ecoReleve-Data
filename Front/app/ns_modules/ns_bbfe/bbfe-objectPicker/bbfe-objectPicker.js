@@ -65,6 +65,7 @@ define([
         this.validators.push({ type: 'Thesaurus', parent: this});
         this.initAutocomplete();
       } else {
+        this.usedLabel = 'ID';
         this.noAutocomp = true;
         this.model.set('type', 'number');
       }
