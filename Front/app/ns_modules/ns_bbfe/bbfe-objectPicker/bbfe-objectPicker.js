@@ -48,6 +48,7 @@ define([
       this.pickerTitle = options.schema.title;
       this.model.set('pickerTitle', this.pickerTitle);
       this.model.set('key', options.key);
+      this.model.set('type', 'text');
 
       var value;
       if (options) {
@@ -64,7 +65,8 @@ define([
         this.validators.push({ type: 'Thesaurus', parent: this});
         this.initAutocomplete();
       } else {
-        this.usedLabel = 'ID';
+        this.noAutocomp = true;
+        this.model.set('type', 'number');
       }
       this.isTermError = false;
 
@@ -133,9 +135,12 @@ define([
           _this.displayErrorMsg(false);
 
         } else {
-          if (!_this.matchedValue){
+          if ($(_this._input).val() != '' || !_this.matchedValue){
+            console.log($(_this._input).val());
             _this.isTermError = true;
             _this.displayErrorMsg(true);
+          } else {
+            _this.setValue('','');
           }
           //$(_this._input).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
 
@@ -159,7 +164,7 @@ define([
     },
 
     afterTpl: function() {
-      console.log(this.$el)
+
       this._input = this.$el.find('input[name="' + this.key + '" ]')[0];
       this.$el.find('#new').addClass('hidden');
       this.getTypes();
@@ -285,6 +290,9 @@ define([
     getValue: function() {
       if (this.isTermError) {
         return null ;
+      }
+      if (this.noAutocomp){
+        return $(this._input).val();
       }
       return $(this._input).attr('data_value');
     },
