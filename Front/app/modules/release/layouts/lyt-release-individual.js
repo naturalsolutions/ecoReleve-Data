@@ -238,7 +238,11 @@ define([
         this.swal(resp, resp.type, callback);
 
       }).fail(function(resp) {
-        this.swal(resp, 'error');
+        var callback = function() {
+           return true;
+            //$('#back').click();
+          };
+        this.swal(resp, 'error',callback);
       });
     },
 
