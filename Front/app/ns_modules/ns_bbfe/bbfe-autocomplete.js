@@ -15,8 +15,11 @@ define([
         events: {
             'hide': "hasChanged"
         },
-        template: '<div><input type="text" id="<%=id%>" value="<%=value%>" data_value="<%=data_value%>" initValue="<%=initValue%>"/></div>',
-        
+        template: '<div class="input-group">\
+        <span class="input-group-addon <%=iconFont%>"></span>\
+        <input type="text" id="<%=id%>" value="<%=value%>" data_value="<%=data_value%>" initValue="<%=initValue%>"/>\
+        </div>',
+
         initialize: function (options) {
             Form.editors.Base.prototype.initialize.call(this, options);
             this.template = options.template || this.template;
@@ -24,8 +27,12 @@ define([
             this.autocompleteSource = JSON.parse(JSON.stringify(options.schema.options));
             var url = options.schema.options.source;
             var _this = this;
+            this.iconFont = options.schema.options.iconFont || 'hidden';
 
-            console.log(this.model.get(this.key));
+            if (options.schema.editorAttrs && options.schema.editorAttrs.disabled) {
+                this.iconFont += ' no-border';
+            }
+
             if (options.schema.options) {
                 if (typeof options.schema.options.source === 'string'){
 
@@ -77,7 +84,7 @@ define([
                 })
             } 
             var $el = _.template(
-                this.template, { id: this.id,value: value,data_value :_this.model.get(_this.key), initValue:initValue
+                this.template, { id: this.id,value: value,data_value :_this.model.get(_this.key), initValue:initValue, 'iconFont' : _this.iconFont
             });
 
             this.setElement($el);
