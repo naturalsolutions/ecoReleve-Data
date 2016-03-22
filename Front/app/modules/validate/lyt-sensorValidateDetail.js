@@ -81,6 +81,7 @@ define([
       this.model = model;
       this.pttId = model.get('FK_ptt');
       this.indId = model.get('FK_Individual');
+      this.sensorId = this.model.get('FK_Sensor');
       this.com = new Com();
       this.map.destroy();
       this.ui.map.html('');
