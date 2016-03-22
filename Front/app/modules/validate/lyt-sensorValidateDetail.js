@@ -35,7 +35,7 @@ define([
 
     ui: {
       'grid': '#grid',
-      'paginator': '.paginator',
+      'paginator': '#paginator',
       'totalEntries': '#totalEntries',
       'map': '#map',
       'indForm': '#indForm',
