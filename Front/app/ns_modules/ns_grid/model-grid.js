@@ -530,6 +530,9 @@ define([
     },
 
     focus: function(id){
+
+      var _this = this;
+
       var param = {};
       id = parseInt(id);
       if (this.idName) {
@@ -557,10 +560,21 @@ define([
       }
 
       if(this.currentRow){
-        this.currentRow.$el.removeClass('active');
+        if(this.currentRow.$el)
+          this.currentRow.$el.removeClass('active');
       }
-      this.currentRow = this.grid.body.rows[index];
-      this.currentRow.$el.addClass('active');/*.find('input').focus();*/
+
+
+      
+      this.currentRow = this.grid.body.rows[(index-((pageIndex-1)*this.pageSize))];
+
+
+      this.currentRow.$el.addClass('active');
+
+      setTimeout(function(){ 
+      _this.currentRow.$el.find('input:first').focus();
+      }, 0);
+      // _this.currentRow.$el.find('input:first').focus();
 
     },
 

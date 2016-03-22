@@ -214,7 +214,7 @@ define([
         pagingServerSide: false,
         columns: cols,
         com: this.com,
-        pageSize: 2000,
+        pageSize: 5000,
         url: url,
         idName: 'PK_id',
         rowClicked: true,

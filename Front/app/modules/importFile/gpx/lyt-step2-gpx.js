@@ -224,6 +224,9 @@ define([
 
     focus: function(e) {
       var tr, id;
+      if($(e.target).hasClass('editable') || $(e.target).is('select')){
+        return;
+      }
       if ($(e.target).is('td')) {
         tr = $(e.target).parent();
       } else if ($(e.target).parent().is('td')) {
