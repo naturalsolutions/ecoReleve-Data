@@ -114,7 +114,8 @@ define([
     initAutocomplete: function() {
       var _this = this;
       this.autocompleteSource = {};
-      this.autocompleteSource.source = config.coreUrl +'autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID'
+      this.autocompleteSource.source = config.coreUrl +'autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID';
+      this.autocompleteSource.minLength = 3;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
         $(_this._input).attr('data_value',ui.item.value).change();
@@ -187,7 +188,9 @@ define([
 
     render: function(){
       if (this.displayingValue){
-        this.getDisplayValue(this.initValue);
+        if (this.initValue && this.initValue != null){
+          this.getDisplayValue(this.initValue);
+        }
         var _this = this;
         _(function () {
             $(_this._input).autocomplete(_this.autocompleteSource);
