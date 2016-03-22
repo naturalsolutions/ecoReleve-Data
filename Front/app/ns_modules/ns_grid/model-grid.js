@@ -469,12 +469,25 @@ define([
     },
 
     clearAll: function () {
+
       var coll = new Backbone.Collection();
       coll.reset(this.grid.collection.models);
       for (var i = coll.models.length - 1; i >= 0; i--) {
         coll.models[i].attributes.import = false;
       };
-      //to do : iterrate only on checked elements list of (imports == true)
+
+      var collection = this.grid.collection;
+      collection.each(function (model) {
+        model.trigger("backgrid:select", model, false);
+      });
+
+      if (collection.fullCollection) {
+        collection.fullCollection.each(function (model) {
+          if (!collection.get(model.cid)) {
+            model.trigger("backgrid:selected", model, false);
+          }
+        });
+      }
     },
 
 
@@ -513,7 +526,8 @@ define([
 
     selectMultiple: function (idList) {
 
-      var mod;
+      var model;
+      var coll = this.grid.collection;
 
       for (var i = 0; i < idList.length; i++) {
         var param = {};
@@ -522,11 +536,20 @@ define([
         } else {
           param['id'] = idList[i];
         }
-        mod = this.grid.collection.findWhere(param);
 
-        mod.set('import', true);
-        mod.trigger("backgrid:select", mod, true);
-      };
+        model = coll.findWhere(param);
+        if (model) {
+          model.trigger("backgrid:select", model, true);
+          model.set('import', true);
+        } else {
+          //paginated
+          if (coll.fullCollection) {
+            model = coll.fullCollection.findWhere(param);
+            model.trigger("backgrid:selected", model, true);
+            model.set('import', true);
+          }
+        }
+      }
     },
 
     focus: function(id){
@@ -564,18 +587,13 @@ define([
           this.currentRow.$el.removeClass('active');
       }
 
-
-      
       this.currentRow = this.grid.body.rows[(index-((pageIndex-1)*this.pageSize))];
-
 
       this.currentRow.$el.addClass('active');
 
       setTimeout(function(){ 
-      _this.currentRow.$el.find('input:first').focus();
+        _this.currentRow.$el.find('input:first').focus();
       }, 0);
-      // _this.currentRow.$el.find('input:first').focus();
-
     },
 
 

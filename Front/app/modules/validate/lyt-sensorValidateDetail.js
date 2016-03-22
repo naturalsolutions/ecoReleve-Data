@@ -14,6 +14,8 @@ define([
   'moment',
   'ns_navbar/ns_navbar'
 
+
+
 ], function($, _, Backbone, Marionette, Swal, Translater,
  config, NsGrid, Com, NsMap, NsForm, moment, Navbar) {
 
@@ -33,7 +35,7 @@ define([
 
     ui: {
       'grid': '#grid',
-      'paginator': '#paginator',
+      'paginator': '.paginator',
       'totalEntries': '#totalEntries',
       'map': '#map',
       'indForm': '#indForm',
@@ -45,6 +47,7 @@ define([
 
       'totalS' : '#totalS',
       'total' : '#total',
+      'paginator': '#paginator'
     },
 
     regions: {
@@ -81,7 +84,6 @@ define([
       this.model = model;
       this.pttId = model.get('FK_ptt');
       this.indId = model.get('FK_Individual');
-      this.sensorId = this.model.get('FK_Sensor');
       this.com = new Com();
       this.map.destroy();
       this.ui.map.html('');
@@ -215,7 +217,7 @@ define([
         pagingServerSide: false,
         columns: cols,
         com: this.com,
-        pageSize: 5000,
+        pageSize: 50,
         url: url,
         idName: 'PK_id',
         rowClicked: true,
@@ -232,19 +234,6 @@ define([
       this.grid.rowDbClicked = function(args) {
         _this.rowDbClicked(args);
       };
-
-      this.grid.clearAll = function() {
-        var coll = new Backbone.Collection();
-        coll.reset(this.grid.collection.models);
-        for (var i = coll.models.length - 1; i >= 0; i--) {
-          coll.models[i].attributes.import = false;
-        };
-
-        var collection = this.grid.collection;
-        collection.each(function(model) {
-          model.trigger('backgrid:select', model, false);
-        });
-      },
 
       this.ui.grid.html(this.grid.displayGrid());
       this.ui.paginator.html(this.grid.displayPaginator());
@@ -273,8 +262,8 @@ define([
     },
 
     checkSelectAll: function(e) {
-      var ids = _.pluck(this.grid.collection.models, 'PK_id');
-      var ids = this.grid.collection.pluck('PK_id');
+      var ids = _.pluck(this.grid.collection.fullCollection.models, 'PK_id');
+      var ids = this.grid.collection.fullCollection.pluck('PK_id');
       if (!$(e.target).is(':checked')) {
         this.grid.interaction('resetAll', ids);
       } else {
@@ -350,7 +339,7 @@ define([
         }
         this.grid.interaction('selectionMultiple', ids);
       } else {
-        var ids = this.grid.collection.pluck('PK_id');
+        var ids = this.grid.collection.fullCollection.pluck('PK_id');
         this.grid.interaction('selectionMultiple', ids);
       }
     },
@@ -361,11 +350,14 @@ define([
       this.perHour(frequency);
     },
 
+
     validate: function() {
       var _this = this;
       var url = config.coreUrl + 'sensors/' + this.type      +
       '/uncheckedDatas/' + this.indId + '/' + this.pttId;
       var mds = this.grid.grid.getSelectedModels();
+
+      console.log(mds.length);
       if (!mds.length) {
         return;
       }
