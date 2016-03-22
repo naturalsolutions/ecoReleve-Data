@@ -37,6 +37,12 @@ define([
       this.options = options;
       key = key.split('FK_')[1];
 
+      var dictCSS = {
+        'individuals':'reneco reneco-bustard',
+        'sensors': 'reneco reneco-emitters',
+        'monitoredSites': 'reneco reneco-site',
+      };
+
       this.validators = options.schema.validators || [];
       
       //todo : refact
@@ -46,6 +52,8 @@ define([
       this.model = new Backbone.Model();
 
       this.pickerTitle = options.schema.title;
+
+      this.model.set('iconFont',dictCSS[this.ojectName]);
       this.model.set('pickerTitle', this.pickerTitle);
       this.model.set('key', options.key);
       this.model.set('type', 'text');
@@ -93,6 +101,7 @@ define([
         }else {
           this.model.set('disabled', 'disabled');
           this.model.set('visu', 'hidden');
+          this.model.set('iconFont',dictCSS[this.ojectName]+' no-border');
         }
       }
 
