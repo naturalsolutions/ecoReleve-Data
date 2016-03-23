@@ -37,6 +37,12 @@ define([
       this.options = options;
       key = key.split('FK_')[1];
 
+      var dictCSS = {
+        'individuals':'reneco reneco-bustard',
+        'sensors': 'reneco reneco-emitters',
+        'monitoredSites': 'reneco reneco-site',
+      };
+
       this.validators = options.schema.validators || [];
       
       //todo : refact
@@ -46,8 +52,11 @@ define([
       this.model = new Backbone.Model();
 
       this.pickerTitle = options.schema.title;
+
+      this.model.set('iconFont',dictCSS[this.ojectName]);
       this.model.set('pickerTitle', this.pickerTitle);
       this.model.set('key', options.key);
+      this.model.set('type', 'text');
 
       var value;
       if (options) {
@@ -65,6 +74,8 @@ define([
         this.initAutocomplete();
       } else {
         this.usedLabel = 'ID';
+        this.noAutocomp = true;
+        this.model.set('type', 'number');
       }
       this.isTermError = false;
 
@@ -90,6 +101,7 @@ define([
         }else {
           this.model.set('disabled', 'disabled');
           this.model.set('visu', 'hidden');
+          this.model.set('iconFont',dictCSS[this.ojectName]+' no-border');
         }
       }
 
@@ -111,7 +123,8 @@ define([
     initAutocomplete: function() {
       var _this = this;
       this.autocompleteSource = {};
-      this.autocompleteSource.source = config.coreUrl +'autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID'
+      this.autocompleteSource.source = config.coreUrl +'autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID';
+      this.autocompleteSource.minLength = 3;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
         $(_this._input).attr('data_value',ui.item.value).change();
@@ -133,9 +146,12 @@ define([
           _this.displayErrorMsg(false);
 
         } else {
-          if (!_this.matchedValue){
+          if ($(_this._input).val() != '' || !_this.matchedValue){
+            console.log($(_this._input).val());
             _this.isTermError = true;
             _this.displayErrorMsg(true);
+          } else {
+            _this.setValue('','');
           }
           //$(_this._input).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
 
@@ -159,7 +175,7 @@ define([
     },
 
     afterTpl: function() {
-      console.log(this.$el)
+
       this._input = this.$el.find('input[name="' + this.key + '" ]')[0];
       this.$el.find('#new').addClass('hidden');
       this.getTypes();
@@ -181,7 +197,9 @@ define([
 
     render: function(){
       if (this.displayingValue){
-        this.getDisplayValue(this.initValue);
+        if (this.initValue && this.initValue != null){
+          this.getDisplayValue(this.initValue);
+        }
         var _this = this;
         _(function () {
             $(_this._input).autocomplete(_this.autocompleteSource);
@@ -285,6 +303,9 @@ define([
     getValue: function() {
       if (this.isTermError) {
         return null ;
+      }
+      if (this.noAutocomp){
+        return $(this._input).val();
       }
       return $(this._input).attr('data_value');
     },
