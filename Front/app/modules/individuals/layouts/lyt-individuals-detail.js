@@ -271,7 +271,6 @@ define([
         tr = $(e.target).parent().parent();
       }
       id = tr.find('td').first().text();
-      console.log(id);
       this.locationsGrid.interaction('focus', id);
     },
 
@@ -335,6 +334,7 @@ define([
 
       var mds = this.locationsGrid.grid.getSelectedModels();
 
+      console.log(mds.length);
       if (!mds.length) {
         return;
       }
@@ -354,7 +354,11 @@ define([
 
       var coll = new Backbone.Collection(mds);
 
+      console.log(mds);
+
       var params = coll.pluck('ID');
+
+      console.log(params);
 
       var url = config.coreUrl + 'individuals/' + this.indivId  + '/locations';
       $.ajax({
@@ -364,9 +368,11 @@ define([
         context: this,
       }).done(function(resp) {
         _this.map.updateFromServ();
+        var fullColl = _this.locationsGrid.grid.body.collection.fullCollection;
         for (var i = 0; i < mds.length; i++) {
-          mds[i].collection.remove(mds[i]);
+          fullColl.remove(mds[i]);
         }
+        fullColl.reset(fullColl.models);
       }).fail(function(resp) {
         this.swal(resp, 'error');
       });

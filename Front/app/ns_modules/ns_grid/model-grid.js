@@ -33,6 +33,7 @@ define([
         this.com.addModule(this);
       }
 
+      this.totalSelectedUI = options.totalSelectedUI;
 
       this.deferred = $.Deferred();
 
@@ -56,7 +57,6 @@ define([
         this.RowType = Backgrid.Row.extend({
           events: {
             'click': 'onClick',
-            'dblclick' : 'onDbClick'
           },
           onClick: function (e) {
             _this.interaction('rowClicked', {row: this, evt: e});
@@ -101,6 +101,9 @@ define([
       if (options.collection) {
         this.collection = options.collection;
         this.coll = true;
+        if(this.pageSize) {
+          this.gridClientCollPaginable();
+        }
       }
       else {
         this.initCollectionFromServer();
@@ -108,17 +111,27 @@ define([
 
       this.setHeaderCell();
 
-
-
       if (options.filterCriteria) {
         this.filterCriteria = options.filterCriteria;
       }
-
-
+      
       this.initGrid();
       this.eventHandler();
     },
 
+    initGrid: function () {
+      this.grid = new Backgrid.Grid({
+        row: this.RowType,
+        columns: this.columns,
+        collection: this.collection
+      });
+
+      //if no collection is furnished : fetch
+      if (!this.coll) {
+        this.collection.searchCriteria = {};
+        this.fetchCollection({ init: true });
+      }
+    },
 
     setHeaderCell: function() {
       if (!this.pagingServerSide) {
@@ -299,20 +312,18 @@ define([
       });
     },
 
-
-    initGrid: function () {
-      this.grid = new Backgrid.Grid({
-        row: this.RowType,
-        columns: this.columns,
-        collection: this.collection
+    gridClientCollPaginable: function(){
+      var PageCollection = PageColl.extend({
+        mode: 'client',
+        state: {
+          pageSize: this.pageSize
+        },
       });
-
-      //if no collection is furnished : fetch
-      if (!this.coll) {
-        this.collection.searchCriteria = {};
-        this.fetchCollection({ init: true });
-      }
+      this.collection = new PageCollection(this.collection.models);
     },
+
+
+
 
     fetchCollection: function () {
       var _this = this;
@@ -364,10 +375,14 @@ define([
 
     filter: function (args) {
       if (this.coll) {
-        // Client side filter
-        this.grid.collection = args;
-        this.grid.body.collection = args;
-        this.grid.body.refresh();
+        
+        if(this.pageSize){
+          this.grid.body.collection.fullCollection.reset(args.models);
+        } else {
+          this.grid.collection = args;
+          this.grid.body.collection = args;
+          this.grid.body.refresh();
+        }
       }
       else {
         // Server side filter
@@ -469,9 +484,11 @@ define([
     },
 
     clearAll: function () {
-
+      console.log('passed');
       var coll = new Backbone.Collection();
       coll.reset(this.grid.collection.models);
+
+
       for (var i = coll.models.length - 1; i >= 0; i--) {
         coll.models[i].attributes.import = false;
       };
@@ -479,15 +496,19 @@ define([
       var collection = this.grid.collection;
       collection.each(function (model) {
         model.trigger("backgrid:select", model, false);
+        model.set('import', false);
       });
 
       if (collection.fullCollection) {
         collection.fullCollection.each(function (model) {
           if (!collection.get(model.cid)) {
             model.trigger("backgrid:selected", model, false);
+            model.set('import', false);
           }
         });
       }
+
+      this.updateTotalSelected();
     },
 
 
@@ -522,7 +543,11 @@ define([
         model.set('import', true);
         model.trigger("backgrid:select", model, true);
       }
+
+      this.updateTotalSelected();
     },
+
+
 
     selectMultiple: function (idList) {
 
@@ -550,10 +575,18 @@ define([
           }
         }
       }
+
+      this.updateTotalSelected();
+    },
+
+    updateTotalSelected: function(){
+      if(this.totalSelectedUI) {
+        var mds = this.grid.getSelectedModels();
+        this.totalSelectedUI.html(mds.length);
+      }
     },
 
     focus: function(id){
-
       var _this = this;
 
       var param = {};
@@ -587,7 +620,11 @@ define([
           this.currentRow.$el.removeClass('active');
       }
 
-      this.currentRow = this.grid.body.rows[(index-((pageIndex-1)*this.pageSize))];
+      if(this.pageSize) {
+        index = index-((pageIndex-1)*this.pageSize)
+      }
+
+      this.currentRow = this.grid.body.rows[index];
 
       this.currentRow.$el.addClass('active');
 

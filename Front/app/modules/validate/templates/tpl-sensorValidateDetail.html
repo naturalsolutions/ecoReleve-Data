@@ -1,63 +1,63 @@
 <div class="full-height col-sm-6 no-padding">
-	<div class="toolbar top clearfix">
-		<button id="hideDetail" class="btn pull-left">
-			<i class="reneco reneco-back"></i>
-			Back
-		</button>
+  <div class="toolbar top clearfix">
+    <button id="hideDetail" class="btn pull-left">
+      <i class="reneco reneco-back"></i>
+      Back
+    </button>
 
-		<div class="pull-right">
-			<div id="navbar"></div>
-		</div>
+    <div class="pull-right">
+      <div id="navbar"></div>
+    </div>
 
-	</div>
-
-
-	<div class="crop2">
-		<br>
-		<ul class="nav nav-tabs" role="tablist">
-			<li role="presentation" class="active"><a href="#individual" aria-controls="individual" role="tab" data-toggle="tab">Individual details</a></li>
-			<li role="presentation"><a href="#sensor" aria-controls="sensor" role="tab" data-toggle="tab">Sensor details</a></li>
-		</ul>
-
-		<!-- Tab panes -->
-		<div class="tab-content">
-			<div role="tabpanel" class="tab-pane active" id="individual">
-				<div id="indForm"></div>
-			</div>
-			<div role="tabpanel" class="tab-pane" id="sensor">
-				<div id="sensorForm"></div>
-			</div>
-		</div>
-		<br>
-		<div id="grid"></div>
-		<div id="paginator"></div>
-	</div>
+  </div>
 
 
-	<div class="clearfix toolbar bottom">
-		
-		
-		<legend class="inherit">Sampling rate : </legend>
-		
-		<div class="col-xs-4">
-			<select name="" id="frequency" class="form-control pull-left">
-			<option value="all">All</option>
-			<option value="10">10 min</option>
-			<option value="15">15 min</option>
-			<option value="30" >30 min</option>
-			<option value="60">60 min</option>
-			<option value="120">120 min</option>
+  <div class="crop2">
+    <br>
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#individual" aria-controls="individual" role="tab" data-toggle="tab">Individual details</a></li>
+      <li role="presentation"><a href="#sensor" aria-controls="sensor" role="tab" data-toggle="tab">Sensor details</a></li>
+    </ul>
 
-			</select>
-		</div>
-		<button id="validate" class="btn btn-success pull-right">Validate</button>
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="individual">
+        <div id="indForm"></div>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="sensor">
+        <div id="sensorForm"></div>
+      </div>
+    </div>
+    <legend class="pull-right"><span id="totalSelected">0</span> selected data</legend>
+    <div id="grid"></div>
+    <div id="paginator"></div>
+  </div>
 
-		<!-- <legend class="inherit pull-right">Selected : <span id="totalS"></span><span id="total">/</span></legend> -->
-			
-	</div>
+
+  <div class="clearfix toolbar bottom">
+    
+    
+    <legend class="inherit">Sampling rate : </legend>
+    
+    <div class="col-xs-4">
+      <select name="" id="frequency" class="form-control pull-left">
+      <option value="all">All</option>
+      <option value="10">10 min</option>
+      <option value="15">15 min</option>
+      <option value="30" >30 min</option>
+      <option value="60">60 min</option>
+      <option value="120">120 min</option>
+
+      </select>
+    </div>
+    <button id="validate" class="btn btn-success pull-right">Validate</button>
+
+    <!-- <legend class="inherit pull-right">Selected : <span id="totalS"></span><span id="total">/</span></legend> -->
+      
+  </div>
 </div>
 
 
 <div class="full-height col-sm-6 no-padding">
-	<div id="map"></div>
+  <div id="map"></div>
 </div>

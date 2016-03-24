@@ -25,7 +25,6 @@ define([
             var url = options.schema.options.source;
             var _this = this;
 
-            console.log(this.model.get(this.key));
             if (options.schema.options) {
                 if (typeof options.schema.options.source === 'string'){
 
@@ -57,7 +56,6 @@ define([
         },
         
           getValue: function() {
-            console.log('getvalue',this.$el.find('#' + this.id ).attr('data_value') )
            return this.$el.find('#' + this.id ).attr('data_value') ;
           },
 

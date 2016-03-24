@@ -1,19 +1,19 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'config',
-	'ns_modules/ns_com',
-	//'ns_filter/model-filter_module',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'config',
+  'ns_modules/ns_com',
+  //'ns_filter/model-filter_module',
   'ns_filter_bower',
-	'ns_map/ns_map',
-	'ns_grid/model-grid',
-	'sweetAlert',
-	'i18n'
+  'ns_map/ns_map',
+  'ns_grid/model-grid',
+  'sweetAlert',
+  'i18n'
 
 ], function($, _, Backbone, Marionette, config,
-	Com, NsFilter, NsMap, NsGrid, Swal
+  Com, NsFilter, NsMap, NsGrid, Swal
 ) {
 
   'use strict';
@@ -27,25 +27,23 @@ define([
 
     ui: {
       'grid': '#grid',
-      'filters': '#filters'
-
+      'filters': '#filters',
+      'paginator': '#paginator',
+      'totalSelected': '#totalSelected'
     },
 
     //temp
     events: {
-      'click .backgrid tbody tr': 'focus',
       'click #btnSelectionGrid': 'clearSelectedRows',
-      'click table.backgrid td.editor': 'cellToEdit',
-      'click table.backgrid td.select-row-cell input[type=checkbox]': 'checkSelect',
       'click table.backgrid th input': 'checkSelectAll',
       'click button#filter': 'filter',
-      'click button#clear': 'clearFilter'
+      'click button#clear': 'clearFilter',
     },
 
     initialize: function(options) {
       this.com = new Com();
       this.collection = options.model.attributes.data_FileContent;
-      this.com.setMotherColl(this.collection);
+      
       this.deferred = $.Deferred();
     },
 
@@ -132,7 +130,7 @@ define([
       });
 
       /*var html = Marionette.Renderer.render('app/modules/import/_gpx/templates/options-list.html');
-      			var optionsList = $.parseHTML(html);*/
+            var optionsList = $.parseHTML(html);*/
       var optionsList;
       this.loadCollection(config.coreUrl + 'fieldActivity', function(data) {
         optionsList = $.parseHTML(data);
@@ -144,97 +142,119 @@ define([
           option = [];
         };
         var columns = [
-				{
+        {
           name: 'id',
           label: 'ID',
           editable: false,
           renderable: false,
-          cell: 'integer'
-        				},
-        				{
+          cell: 'string'
+                },
+                {
           editable: true,
           name: 'import',
           label: 'Import',
           cell: 'select-row',
           headerCell: 'select-all'
-        				},{
+                },{
           name: 'name',
           label: 'Name',
           editable: false,
           cell: 'string'
-        				}, {
+                }, {
           name: 'waypointTime',
           label: 'Date',
           editable: false,
           cell: Backgrid.DatetimeCell
-        				}, {
+                }, {
           editable: false,
           name: 'latitude',
           label: 'LAT',
           cell: myCell
-        				}, {
+                }, {
           editable: false,
           name: 'longitude',
           label: 'LON',
           cell: myCell
-        				},{
+                },{
           editable: true,
           name: 'fieldActivity',
           label: 'Field Activity',
           cell: Backgrid.SelectCell.extend({
             optionValues: optionsList
           })
-				},
-			];
+        },
+      ];
 
         _this.grid = new NsGrid({
-          pageSize: _this.PageSize,
           pagingServerSide: false,
+          pageSize: 20,
+          rowClicked: true,
           com: _this.com,
           columns: columns,
-          collection: _this.collection
+          collection: _this.collection,
+          totalSelectedUI: _this.ui.totalSelected
         });
 
         //should be in the module
         _this.ui.grid.html(_this.grid.displayGrid());
+        _this.ui.paginator.html(_this.grid.displayPaginator());
+
+        var tmp = _.clone(_this.grid.grid.collection.fullCollection);
+        _this.com.setMotherColl(tmp);
+
+        _this.grid.rowClicked = function(args) {
+            _this.rowClicked(args);
+        };
+/*        _this.grid.rowDbClicked = function(args) {
+          _this.rowDbClicked(args);
+        };*/
+
       });
 
     },
 
-    /*===============================================
-    		=            Should be in the module            =
-    		===============================================*/
+    rowClicked: function(args) {
+      var row = args.row;
+      var id = row.model.get('id');
+      var e = args.evt;
 
-    checkSelect: function(e) {
-      var id = $(e.target).parent().parent().find('td').html();
-      this.grid.interaction('selection', id);
-      if ($(e.target).is(':checked')) {
-        this.focus(e);
+      if($(e.target).hasClass('editable') || $(e.target).is('select')){
+        return;
+      }
+
+      if ($(args.evt.target).is('input')) {
+        this.grid.interaction('selection', id);
+      } else {
+        this.grid.interaction('focus', id);
       }
     },
 
+/*    rowDbClicked: function(args) {
+      var row = args.row;
+      var id = row.model.get('id');
+      var e = args.evt;
+
+      this.rowClicked(args);
+
+      if ($(args.evt.target).is('input')) {
+        this.grid.interaction('selection', id);
+      } else {
+        this.grid.interaction('selection', id);
+        this.grid.interaction('focus', id);
+      }
+      
+    },*/
+
     checkSelectAll: function(e) {
-      var ids = _.pluck(this.grid.collection.models, 'id');
+      var ids = _.pluck(this.grid.collection.fullCollection.models, 'id');
       if (!$(e.target).is(':checked')) {
+        console.log(ids);
         this.grid.interaction('resetAll', ids);
       } else {
         this.grid.interaction('selectionMultiple', ids);
       }
     },
 
-    focus: function(e) {
-      var tr, id;
-      if($(e.target).hasClass('editable') || $(e.target).is('select')){
-        return;
-      }
-      if ($(e.target).is('td')) {
-        tr = $(e.target).parent();
-      } else if ($(e.target).parent().is('td')) {
-        tr = $(e.target).parent().parent();
-      }
-      id = tr.find('td').first().text();
-      this.grid.interaction('focus', id);
-    },
 
     filter: function() {
       this.filters.update();
@@ -245,7 +265,7 @@ define([
     /*-----  End of Should be in the module  ------*/
 
     onDestroy: function() {
-		},
+    },
 
     check: function() {
 
@@ -256,6 +276,8 @@ define([
       var datas
       var coll = this.com.getMotherColl();
       coll = new Backbone.Collection(coll.where({import: true}));
+
+
       coll.url = config.coreUrl + 'stations/';
       Backbone.sync('create', coll, {
         success: function(data) {
@@ -271,12 +293,12 @@ define([
             confirmButtonText: 'OK',
             closeOnConfirm: true,
           },
-					function(isConfirm) {
+          function(isConfirm) {
               Backbone.history.navigate('home', {trigger: true})
-					});
+          });
         },
         error: function() {
-				},
+        },
       });
 
       return this.deferred;
