@@ -8,9 +8,7 @@ define([
 ], function (
     _, $, $ui, Backbone, Form, autocompTree
 ) {
-
    
-
     Backbone.Form.validators.Thesaurus = function (options) {
         return function Thesaurus(value) {
             if (!options.parent.isTermError) {
@@ -22,17 +20,12 @@ define([
                 type: options.type,
                 message: ''
             };
-
             return retour;
-
         };
     };
 
-
-
     'use strict';
     return Form.editors.AutocompTreeEditor = Form.editors.Base.extend({
-
 
         previousValue: '',
 
@@ -63,7 +56,6 @@ define([
             var iconFont = options.schema.options.iconFont || 'hidden';
 
             this.validators = options.schema.validators || [];
-
 
             this.isTermError = false;
             

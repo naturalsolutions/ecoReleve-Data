@@ -8,7 +8,7 @@ define([
   ], function ($, _, Backbone, Marionette, Form, List, tpl) {
 
     'use strict';
-    return Form.editors.ListOfNestedModel = Form.editors.Base.extend({
+    return Form.editors.GridFormEditor = Form.editors.Base.extend({
         events: {
             'click #addFormBtn' : 'addEmptyForm',
         },
@@ -109,7 +109,7 @@ define([
                if(col.fieldClass){
                 test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
                }
-               
+
                if(col.title && test) {
                 this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
                 size++;
