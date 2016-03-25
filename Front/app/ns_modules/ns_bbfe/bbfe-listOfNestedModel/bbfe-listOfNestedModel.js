@@ -92,9 +92,7 @@ define([
                 hidden: this.hidden
             })));
             this.setElement($el);
-            var model = new Backbone.Model();
-            model.schema = this.options.schema.subschema;
-            model.fieldsets = this.options.schema.fieldsets;
+            
 
             var data = this.options.model.attributes[this.key];
 
@@ -105,10 +103,13 @@ define([
                         if(i >= this.nbByDefault) {
                             this.defaultRequired = false;
                         }
+                        var model = new Backbone.Model();
+                        model.schema = this.options.schema.subschema;
+                        model.fieldsets = this.options.schema.fieldsets;
                         model.attributes = data[i];
                         this.addForm(model);
 
-                    }
+                    };
 
                     if (data.length < this.nbByDefault) {
                         for (var i = 0; i < data.length; i++) {
