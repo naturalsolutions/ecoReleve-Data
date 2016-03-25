@@ -108,6 +108,7 @@ define([
                var test = true;
                if(col.fieldClass){
                 test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
+                col.fieldClass += ' grid-field';
                }
 
                if(col.title && test) {
