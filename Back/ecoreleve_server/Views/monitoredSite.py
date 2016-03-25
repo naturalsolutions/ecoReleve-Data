@@ -115,7 +115,8 @@ def getMonitoredSite(request):
             DisplayMode = 'display'
         Conf = session.query(FrontModules).filter(FrontModules.Name=='MonitoredSiteForm').first()
         response = curMonitoredSite.GetDTOWithSchema(Conf,DisplayMode)
-
+    else : 
+        response  = curMonitoredSite.GetFlatObject()
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -216,8 +217,7 @@ def insertOneNewMonitoredSite (request) :
 
     data = {}
     for items , value in request.json_body.items() :
-        if value != "" :
-            data[items] = value
+        data[items] = value
     try:        
         newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid['iss'] )
         newMonitoredSite.MonitoredSiteType = session.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
@@ -225,12 +225,16 @@ def insertOneNewMonitoredSite (request) :
         newMonitoredSite.UpdateFromJson(data)
         session.add(newMonitoredSite)
         session.flush()
-
         response = {'ID': newMonitoredSite.ID}
-    except Exception as e:
+
+    except IntegrityError as e:
+        session.rollback()
+        request.response.status_code = 520
         response = request.response
         response.text = "This name is already used for another monitored site"
-    return response      
+        pass
+
+    return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET')

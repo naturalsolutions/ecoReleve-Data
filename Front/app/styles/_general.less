@@ -105,6 +105,17 @@ a{
 }
 .mid-height{
   height: 50%!important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: @screen-md){
+  .mid-height{
+    display: block;
+    align-items: inherit;
+    justify-content: inherit;
+  }
 }
 
 span.bull-warn{
@@ -143,7 +154,9 @@ li.list-group-item{
   }
 }
 
-
+.grey{
+  color: #A7A6A6;
+}
 
 /*==========  scroll bar design  ==========*/
 ::-webkit-scrollbar-thumb {
@@ -241,6 +254,11 @@ textarea {
 .border-right{
 	border-right: 1px solid rgb(221, 221, 221);
 }
+
+.border-right-strong{
+  border-right: 1px solid #ccc;
+}
+
 
 
 #locationsGrid th.select-all-header-cell input{

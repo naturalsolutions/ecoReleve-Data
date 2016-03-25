@@ -163,10 +163,19 @@ define([
           editable: false,
           cell: 'string'
         				}, {
-          name: 'waypointTime',
+          name: 'displayDate',
           label: 'Date',
           editable: false,
-          cell: Backgrid.DatetimeCell
+          //cell: 'string',// Backgrid.DatetimeCell
+
+          cell : Backgrid.Extension.MomentCell.extend({
+            displayFormat: "DD/MM/YYYY HH:mm",
+            //modelFormat : "DD/MM/YYYY HH:mm",
+             modelInUnixTimestamp: true,
+            displayInUTC: false
+          }),
+
+
         				}, {
           editable: false,
           name: 'latitude',

@@ -89,7 +89,6 @@ def getStation(request):
     id = request.matchdict['id']
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
-
     # if Form value exists in request --> return data with schema else return only data
     if 'FormName' in request.params :
         ModuleName = request.params['FormName']
@@ -100,7 +99,10 @@ def getStation(request):
 
         Conf = session.query(FrontModules).filter(FrontModules.Name=='StationForm' ).first()
         response = curSta.GetDTOWithSchema(Conf,DisplayMode)
+
+        # response['schema']['FK_MonitoredSite']['editable'] = False
         response['data']['fieldActivityId'] = str(response['data']['fieldActivityId'])
+
     else : 
         response  = curSta.GetFlatObject()
 
@@ -127,7 +129,7 @@ def updateStation(request):
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
     curSta.UpdateFromJson(data)
-
+    print(curSta.__dict__)
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -143,8 +145,7 @@ def insertOneNewStation (request) :
     session = request.dbsession
     data = {}
     for items , value in request.json_body.items() :
-        if value != "" :
-            data[items] = value
+        data[items] = value
 
     newSta = Station(FK_StationType = data['FK_StationType'], creator = request.authenticated_userid['iss'])
     newSta.StationType = session.query(StationType).filter(StationType.ID==data['FK_StationType']).first()

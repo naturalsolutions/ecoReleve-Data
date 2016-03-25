@@ -1,5 +1,6 @@
 <div class="input-group picker">
-  <input <%= disabled %> class="form-control <%= required %>" name="<%= key %>" type="number" value="<%= value %>">
+  <span class="input-group-addon <%=iconFont%>"></span>
+  <input <%= disabled %> class="form-control <%= required %>" name="<%= key %>" type="<%=type%>" value="<%= value %>" data_value="<%= data_value %>">
   <span class="input-group-btn picker">
     <button type="button" class="btn <%= visu %> glyphicon-plus">
     </button>

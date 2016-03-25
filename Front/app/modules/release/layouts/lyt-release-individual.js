@@ -118,7 +118,6 @@ define([
         url: config.coreUrl + 'release/individuals/',
         urlParams: this.urlParams,
         rowClicked: true,
-        totalElement: 'totalEntries',
         onceFetched: function(params) {
           _this.totalEntries(this.grid);
         }
@@ -142,11 +141,17 @@ define([
     },
 
     displayFilter: function() {
+      var _this = this;
       this.filters = new NsFilter({
         url: config.coreUrl + 'release/individuals/',
         com: this.com,
         filterContainer: this.ui.filters,
       });
+
+      this.filters.update = function(){
+        _this.$el.find(_this.ui.nbSelected).html(0);
+        NsFilter.prototype.update.call(this);
+      };
     },
 
     rowClicked: function(row) {
@@ -165,6 +170,12 @@ define([
     },
     updateSelectedRow: function() {
       var mds = this.grid.grid.getSelectedModels();
+      for (var i = 0; i < mds.length; i++) {
+        if (mds[i] == undefined) {         
+          mds.splice(i, 1);
+          i--;
+        }
+      }
       var nbSelected = mds.length;
       this.$el.find(this.ui.nbSelected).html(nbSelected);
     },
@@ -192,6 +203,13 @@ define([
       var mds = this.grid.grid.getSelectedModels();
       if (!mds.length) {
         return;
+      } else {
+        for (var i = 0; i < mds.length; i++) {
+          if (mds[i] == undefined) {         
+            mds.splice(i, 1);
+            i--;
+          }
+        }
       }
       var _this = this;
       var col = new Backbone.Collection(mds);
@@ -220,7 +238,11 @@ define([
         this.swal(resp, resp.type, callback);
 
       }).fail(function(resp) {
-        this.swal(resp, 'error');
+        var callback = function() {
+           return true;
+            //$('#back').click();
+          };
+        this.swal(resp, 'error',callback);
       });
     },
 
@@ -272,7 +294,7 @@ define([
         if (isConfirm && callback) {
           callback();
         }else {
-          Backbone.history.navigate('release', {trigger: true});
+          Backbone.history.loadUrl(Backbone.history.fragment);
         }
       });
     },

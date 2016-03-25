@@ -135,7 +135,11 @@ def releasePost(request):
 
     taxons = dict(Counter(indiv['Species'] for indiv in indivList))
     def getnewObs(typeID):
-        return Observation(FK_ProtocoleType=typeID)
+        newObs = Observation()
+        newObs.FK_ProtocoleType=typeID
+        newObs.FK_Station = sta_id
+        newObs.__init__()
+        return newObs
 
     protoTypes = pd.DataFrame(session.execute(select([ProtocoleType])).fetchall(), columns = ProtocoleType.__table__.columns.keys())
     vertebrateGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate group','ID'].values[0])
@@ -232,11 +236,15 @@ def releasePost(request):
             releaseIndList.append(curReleaseInd)
 
             try:
-                # indiv['FK_Sensor'] = int(indiv['fk_sensor'])
+                try:
+                    sensor_id = int(indiv['fk_sensor'])
+                except:
+                    sensor_id = int(indiv['FK_Sensor'])
+
                 curEquipmentInd = getnewObs(equipmentIndID)
                 equipInfo = {
                 'FK_Individual': indiv['FK_Individual'],
-                'FK_Sensor' : int(indiv['fk_sensor']),
+                'FK_Sensor' : sensor_id,
                 'Survey_type' : 'Post-Relâcher',
                 'Monitoring_Status' : 'Suivi',
                 'Sensor_Status': 'événement de sortie provisoire de stock>mise en service'
@@ -282,7 +290,8 @@ def releasePost(request):
             message = {'release':len(releaseIndList)}
 
     except Exception as e :
+        print_exc()
         session.rollback()
-        message = e.value
+        message = str(type(e))
 
     return message

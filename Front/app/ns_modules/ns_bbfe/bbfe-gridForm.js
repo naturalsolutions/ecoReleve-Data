@@ -5,7 +5,7 @@ define([
   'marionette',
   'backbone-forms',
 
-  ], function ($, _, Backbone, Marionette, Form, List) {
+  ], function ($, _, Backbone, Marionette, Form, List, tpl) {
 
     'use strict';
     return Form.editors.ListOfNestedModel = Form.editors.Base.extend({
@@ -13,6 +13,7 @@ define([
             'click #addFormBtn' : 'addEmptyForm',
         },
         initialize: function(options) {
+
             if (options.schema.validators.length) {
                 this.defaultRequired = true;
             } else {
@@ -27,26 +28,31 @@ define([
             this.options.schema.fieldClass = 'col-xs-12';
             this.forms = [];
             this.disabled = options.schema.editorAttrs.disabled;
+
             this.hidden = '';
             if(this.disabled) {
                 this.hidden = 'hidden';
             }
             this.hasNestedForm = true;
 
-            var key = this.options.key;
-            this.defaultValue = this.options.model.schema[key].defaultValue['FK_ProtocoleType'];
-        },
+            this.key = this.options.key;
+            this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
 
+        },
         //removeForm
         deleteForm: function() {
 
         },
 
         addEmptyForm: function() {
-            var model = new Backbone.Model();
+            var mymodel = Backbone.Model.extend({
+                defaults : this.options.schema.subschema.defaultValues
+            });
+
+            var model = new mymodel();
+            //model.default = this.options.model.attributes[this.key];
             model.schema = this.options.schema.subschema;
             model.fieldsets = this.options.schema.fieldsets;
-
             this.addForm(model);
         },
 
@@ -61,12 +67,11 @@ define([
             this.forms.push(form);
 
             if(!this.defaultRequired){
-                var btn = '\
-                    <div class="' + this.hidden + ' control">\
-                        <button type="button" class="btn btn-warning" id="remove">-</button>\
+                form.$el.find('fieldset').append('\
+                    <div class="' + this.hidden + ' col-xs-12 control">\
+                        <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
                     </div>\
-                ';
-                form.$el.find('fieldset').append(btn);
+                ');
                 form.$el.find('button#remove').on('click', function() {
                   _this.$el.find('#formContainer').find(form.el).remove();
                   var i = _this.forms.indexOf(form);
@@ -77,25 +82,32 @@ define([
                 });
             }
 
+
             this.$el.find('#formContainer').append(form.el);
         },
 
         render: function() {
+            //Backbone.View.prototype.initialize.call(this, options);
+            var _this = this;
+
             var $el = $($.trim(this.template({
                 hidden: this.hidden
             })));
             this.setElement($el);
-            //init forms
+            
+
+            var data = this.options.model.attributes[this.key];
+
             var model = new Backbone.Model();
             model.schema = this.options.schema.subschema;
-            model.fieldsets = this.options.schema.fieldsets;
-            var key = this.options.key;
-            var data = this.options.model.attributes[key];
+
+            console.log(model.schema);
 
             var size=0;
-            for (key in model.schema) {
+            for (var key in model.schema) {
                var col = model.schema[key];
                size++;
+               if(col.title)
                 this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
             }
             size = size*170;
@@ -109,20 +121,42 @@ define([
             this.$el.find('#formContainer').width(size);
 
             if (data) {
+                //data
                 if (data.length) {
                     for (var i = 0; i < data.length; i++) {
+                        if(i >= this.nbByDefault) {
+                            this.defaultRequired = false;
+                        }
+                        var model = new Backbone.Model();
+                        model.schema = this.options.schema.subschema;
+                        model.fieldsets = this.options.schema.fieldsets;
                         model.attributes = data[i];
                         this.addForm(model);
-                        this.defaultRequired = false;
+
                     };
-                } else {
-                    if(this.defaultRequired) {
-                        this.addEmptyForm();
-                        this.defaultRequired = false;
+
+                    if (data.length < this.nbByDefault) {
+                        for (var i = 0; i < data.length; i++) {
+                            this.addForm(model);
+                        }
                     }
+                    this.defaultRequired = false;
+                }
+            } else {
+                //no data
+                if (this.nbByDefault >= 1) {
+                    for (var i = 0; i < this.nbByDefault; i++) {
+                        this.addEmptyForm();
+                    }
+                    this.defaultRequired = false;
                 }
             }
+
             return this;
+        },
+
+        feedRequiredEmptyForms: function() {
+
         },
 
         getValue: function() {
@@ -140,33 +174,34 @@ define([
                     var tmp = this.forms[i].getValue();
                     var empty = true;
                     for (var key in tmp) {
-                        if(tmp[key]) {
+                        if(tmp[key]){
                             empty = false;
                         }
                     }
                     if(!empty){
-                        if (this.defaultValue) {
+                       /* if (this.defaultValue) {
                             tmp['FK_ProtocoleType'] = this.defaultValue;
-                        }
+                        }*/
                         values[i] = tmp;
                     }
                 };
                 return values;
             }
+
+
         },
         }, {
-          //STATICS
-          template: _.template('\
-            <div>\
-                <button type="button" id="addFormBtn" class="<%= hidden %> btn">+</button>\
-                <div class="required grid-form clearfix">\
-                    <div class="clear"></div>\
-                    <div id="th" class="clearfix"></div>\
-                    <div id="formContainer" class="clearfix"></div>\
+              //STATICS
+              template: _.template('\
+                <div>\
+                    <button type="button" id="addFormBtn" class="<%= hidden %> btn">+</button>\
+                    <div class="required grid-form clearfix">\
+                        <div class="clear"></div>\
+                        <div id="th" class="clearfix"></div>\
+                        <div id="formContainer" class="clearfix expand-grid"></div>\
+                    </div>\
+                    <button type="button" id="addFormBtn" class="<%= hidden %> btn">+</button>\
                 </div>\
-                <button type="button" id="addFormBtn" class="<%= hidden %> btn">+</button>\
-            </div>\
-            ', null, Form.templateSettings),
-      });
-
+                ', null, Form.templateSettings),
+          });
 });

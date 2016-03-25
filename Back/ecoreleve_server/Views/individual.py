@@ -128,7 +128,7 @@ def getIndiv(request):
         Conf = session.query(FrontModules).filter(FrontModules.Name=='IndivForm').first()
         response = curIndiv.GetDTOWithSchema(Conf,DisplayMode)
 
-    if 'geo' in request.params :
+    elif 'geo' in request.params :
         geoJson=[]
         joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)
         stmt = select([Individual_Location,Sensor.UnicIdentifier]).select_from(joinTable
@@ -141,7 +141,8 @@ def getIndiv(request):
                 , 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
-
+    else : 
+        response  = curIndiv.GetFlatObject()
     # if 'geoDynamic' in request.params :
     #     geoJson=[]
     #     joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)
@@ -255,8 +256,7 @@ def insertOneNewIndiv (request) :
     session = request.dbsession
     data = {}
     for items , value in request.json_body.items() :
-        if value != "" :
-            data[items] = value
+        data[items] = value
 
     indivType = int(data['FK_IndividualType'])
     newIndiv = Individual(FK_IndividualType = indivType , creationDate = datetime.now(),Original_ID = '0')

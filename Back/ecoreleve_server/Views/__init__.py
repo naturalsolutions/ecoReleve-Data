@@ -1,5 +1,14 @@
 from pyramid.httpexceptions import default_exceptionresponse_view, HTTPNotFound
 from pyramid.interfaces import IRoutesMapper
+from pyramid.view import view_config
+from pyramid.security import NO_PERMISSION_REQUIRED
+from ..Models import sendLog
+
+@view_config(context=Exception, permission = NO_PERMISSION_REQUIRED)
+def error_view(exc, request):
+    sendLog(logLevel=5,domaine=3)
+    return exc
+
 
 def notfound(request):
     return HTTPNotFound('Not found')
@@ -36,8 +45,10 @@ def add_routes(config):
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### User #####
+    config.add_route('users/id', 'ecoReleve-Core/users/{id}')
     config.add_route('core/user', 'ecoReleve-Core/user')
     config.add_route('core/currentUser', 'ecoReleve-Core/currentUser')
+    config.add_route('autocomplete/onLoad', 'ecoReleve-Core/autocomplete/{obj}/{prop}/onLoad')
     config.add_route('autocomplete', 'ecoReleve-Core/autocomplete/{obj}/{prop}')
     config.add_route('autocomplete/ID', 'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
 
