@@ -101,16 +101,21 @@ define([
             var model = new Backbone.Model();
             model.schema = this.options.schema.subschema;
 
-            console.log(model.schema);
-
             var size=0;
             for (var key in model.schema) {
                var col = model.schema[key];
-               size++;
-               if(col.title)
+               //sucks
+               var test = true;
+               if(col.fieldClass){
+                test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
+               }
+               
+               if(col.title && test) {
                 this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
+                size++;
+               }
             }
-            size = size*170;
+            size = size*150;
             size += 35;
 
             //this.$el.find('#th').prepend('<div style="width: 34px;" class="pull-left" ><span class="reneco reneco-trash"></span></div>');

@@ -1,5 +1,3 @@
-
-
 define([
     'underscore',
     'jquery',
@@ -243,9 +241,8 @@ define([
 
                     //console.log('Term Error');
                     this.termError = "Invalid term";
-                    this.$el.find('#divAutoComp_' + this.id).find('input').addClass('error');
+                    this.$el.find('#divAutoComp_' + this.id).addClass('error');
                     //this.$el.find('#errorMsg').removeClass('hidden');
-
                 } else {
                     this.termError = "";
                     this.$el.find('#divAutoComp_' + this.id).removeClass('error');
@@ -259,7 +256,8 @@ define([
         <div class="input-group">\
             <span class="input-group-addon <%=iconFont%>"></span>\
             <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
-            <span id="errorMsg" class="hidden">Invalid term</span>\
+        </div>\
+        <span id="errorMsg" class="error hidden">Invalid term</span>\
         </div>',
     });
 
