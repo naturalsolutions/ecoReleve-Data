@@ -105,6 +105,17 @@ a{
 }
 .mid-height{
   height: 50%!important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: @screen-lg){
+  .mid-height{
+    display: block;
+    align-items: inherit;
+    justify-content: inherit;
+  }
 }
 
 span.bull-warn{
