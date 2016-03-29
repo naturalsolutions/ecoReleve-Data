@@ -83,7 +83,7 @@ define([
     afterTpl: function() {
       this._input = this.$el.find('input[name="' + this.key + '"]')[0];
       this._modal = this.$el.find('#modalPicker');
-      this._creationContainer = this.$el.find('div#creationContainer');
+      this._creationContainer = this.$el.find('div#creation');
       this._btnNew = this.$el.find('button#createNew');
       this._btnSaveFromCriterias = this.$el.find('button#saveFromCriterias');
       this._indivTypeTabs = this.$el.find('ul#indivTypeTabs');
