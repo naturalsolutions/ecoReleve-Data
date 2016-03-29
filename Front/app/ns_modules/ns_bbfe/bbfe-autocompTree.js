@@ -1,5 +1,3 @@
-
-
 define([
     'underscore',
     'jquery',
@@ -10,9 +8,7 @@ define([
 ], function (
     _, $, $ui, Backbone, Form, autocompTree
 ) {
-
    
-
     Backbone.Form.validators.Thesaurus = function (options) {
         return function Thesaurus(value) {
             if (!options.parent.isTermError) {
@@ -24,17 +20,12 @@ define([
                 type: options.type,
                 message: ''
             };
-
             return retour;
-
         };
     };
 
-
-
     'use strict';
     return Form.editors.AutocompTreeEditor = Form.editors.Base.extend({
-
 
         previousValue: '',
 
@@ -65,7 +56,6 @@ define([
             var iconFont = options.schema.options.iconFont || 'hidden';
 
             this.validators = options.schema.validators || [];
-
 
             this.isTermError = false;
             
@@ -244,7 +234,7 @@ define([
                     //console.log('Term Error');
                     this.termError = "Invalid term";
                     this.$el.find('#divAutoComp_' + this.id).addClass('error');
-                    this.$el.find('#errorMsg').removeClass('hidden');
+                    //this.$el.find('#errorMsg').removeClass('hidden');
                 } else {
                     this.termError = "";
                     this.$el.find('#divAutoComp_' + this.id).removeClass('error');

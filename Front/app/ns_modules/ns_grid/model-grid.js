@@ -626,7 +626,10 @@ define([
 
       this.currentRow = this.grid.body.rows[index];
 
-      this.currentRow.$el.addClass('active');
+      this.currentRow.$el.addClass('active').find('input').focus();
+
+/*
+      this.currentRow.$el.addClass('active');*/
 
       setTimeout(function(){ 
         _this.currentRow.$el.find('input:first').focus();

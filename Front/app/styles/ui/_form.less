@@ -75,6 +75,7 @@ select:disabled {
 	height: 34px;
 	width: 25px;
 	cursor: pointer;
+	margin: 0px;
 }
 .form-control[disabled], fieldset[disabled] .form-control{
 	cursor: auto;
@@ -180,6 +181,14 @@ select:disabled {
 	}
 }
 
+.expand-grid{
+	padding-bottom: 200px;
+	background: #ddd;
+	& .fancytreeview{
+		max-height: 200px;
+	}
+}
+
 
 .nested{
 	fieldset{
@@ -241,13 +250,18 @@ ul.fancytree-container{
   z-index: 1;
 	border:0;
   max-height: 500px;
-
+  padding-right: 10px;
 }
 div.fancytreeview{
 	//input-group : diplsay table cell
   top: 34px!important;
 	position: absolute;
 	border: 1px solid rgba(46, 204, 64, 0.6) !important;
+	width: auto;
+}
+
+span.fancytree-title{
+	//margin: 0px;
 }
 /* 
 Dans detail station, bloc "Detailled Infos", en mode edit : 
@@ -256,6 +270,74 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
  */
 /* FIN PIER */
 
+
+
+.grid-form{
+	overflow: auto;
+	#formContainer{
+		display: block;
+	}
+
+
+	#formContainer>form>fieldset{
+		background: #eee;
+		border: none;
+		border-bottom: 1px solid #ddd;
+		padding: 0px;
+		margin: 0px!important;
+
+		&>div{
+			padding: 0px;
+			margin: 0px;
+		}
+
+		&:nth-child(2n){
+				background: rgba(221, 221, 221, 0.3);
+		}
+
+/*
+		input{
+			border-radius: 0px;
+			padding: 8px 5px;
+		}*/
+	}
+
+	.grid-field{
+		width: 150px;
+
+		&>label{
+			display: none!important;
+		}
+	}
+
+	.form-control[disabled] {
+		cursor: auto;
+		background: transparent;
+	}
+	.form-control{
+		border-radius: 0px;
+	}
+
+	#th{
+		background: #ccc;
+		div{
+			padding: 4px 5px!important;
+			padding-left: 0px!important;
+			font-weight: bold;
+			text-transform: uppercase;
+			padding: 0px;
+			margin: 0px;
+		}
+	}
+
+
+	.control{
+		width: auto;
+	}
+
+}
+
 .no-border{
 	border:none;
 }
+
