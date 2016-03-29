@@ -23,21 +23,37 @@ define([
           var waypointName = $(this).find('name').text();
           var waypointTime, time;
           // if tag "cmt" exisits, take date from it, else use tag "time"
-          var waypointTimeTag = moment($(this).find('cmt').text());
+          var waypointTimeTag = $(this).find('cmt').text();
+          var waypointTm  = moment(waypointTimeTag);
+          var dateStr;
           // check if date is valid, else use time tag to get date
-          if (waypointTimeTag.isValid()) {
-            waypointTime = moment(waypointTimeTag);
-
-            time = moment(waypointTimeTag).format('HH:mm:ss') ;
+          if (waypointTm.isValid()) {
+            // possible formats   // <cmt>25-FEB-16 18:02</cmt> or <cmt>04-03-16 12:04</cmt>  <cmt>2010-04-27T08:02:00Z</cmt>
+                var tm = waypointTimeTag.split('-');
+                var tab = waypointTimeTag.split(' ');
+               
+                if(tm[0].length == 4 ){
+                  //<cmt>2010-04-27T08:02:00Z</cmt>
+                  dateStr = moment(waypointTimeTag).format('DD/MM/YYYY HH:mm');
+                } else if ((tm[0].length == 2 ) && (tab.length == 2)) {
+                  // <cmt>25-FEB-16 18:02</cmt> or <cmt>04-03-16 12:04</cmt>
+                  var month = waypointTimeTag.substring(3,5);
+                  // format  : <cmt>25-FEB-16 18:02</cmt>
+                  if(month != parseInt(month, 10)) {
+                        dateStr = moment(waypointTimeTag, 'DD-MMM-YY HH:mm').format('DD/MM/YYYY HH:mm');
+                  } else {
+                      //<cmt>04-03-16 12:04</cmt>
+                      dateStr = moment(waypointTimeTag, 'DD-MM-YY HH:mm').format('DD/MM/YYYY HH:mm');
+                  }
+               } else {
+                //<cmt>2010-04-27T08:02:00Z</cmt>
+                  dateStr = moment(waypointTimeTag).format('DD/MM/YYYY HH:mm');
+               }    
           } else {
-            var dateValue = $(this).find('time').text();
-            waypointTime = moment(dateValue);
-            time = moment(dateValue).format('HH:mm:ss');
+            waypointTimeTag = $(this).find('time').text();
+            dateStr = moment(waypointTimeTag).format('DD/MM/YYYY HH:mm');
           }
-          var tm = moment(waypointTime, moment.ISO_8601);
-          var dateStr = (moment(waypointTime).format('YYYY-MM-DD'));
-          var dateTimeStr = dateStr + ' ' + time;
-          // check if data is valid
+          var timestamp =  moment(dateStr, 'DD/MM/YYYY HH:mm').unix();
           nbWaypoints += 1;
           if (lat != '' && lon != '' && dateStr != 'Invalid date' && time != ' Invalid date') {
             id += 1;
@@ -46,7 +62,8 @@ define([
             waypoint.set('name', waypointName);
             waypoint.set('latitude', latitude);
             waypoint.set('longitude', longitude);
-            waypoint.set('waypointTime', dateTimeStr);
+            waypoint.set('waypointTime', dateStr);
+            waypoint.set('displayDate', timestamp);
             waypoint.set('time', time);
             waypoint.set('fieldActivity', '');
             waypoint.set('import', false);
@@ -57,6 +74,7 @@ define([
             errors.push(waypointName);
           }
         });
+        console.log(waypointList);
         // check if all wayponits are imported
         if (id != nbWaypoints) {
           //alert("some waypoints are not imported, please check coordinates and date for each waypoint");

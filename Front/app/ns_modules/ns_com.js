@@ -3,9 +3,10 @@ define([
   'underscore',
   'backbone',
   'marionette',
+  'backbone.paginator',
 
 
-], function($, _, Backbone , Marionette) {
+], function($, _, Backbone , Marionette, PageColl) {
 
   'use strict';
   // I am the internal, static counter for the number of Coms
@@ -65,12 +66,12 @@ define([
     },
 
     updateMotherColl: function(ids){
-      for (var i = ids.length - 1; i >= 0; i--) {
+/*      for (var i = ids.length - 1; i >= 0; i--) {
         this.motherColl.where({id : ids[i]}, function(m){
           m.attributes.import = true; 
         });
         
-      };
+      };*/
     },
 
     addModule: function(m){

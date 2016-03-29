@@ -163,7 +163,6 @@ define([
     check: function() {
       var error = this.nsform.BBForm.commit();
 
-      console.log(error);
       if(error){
         return false;
       }else{

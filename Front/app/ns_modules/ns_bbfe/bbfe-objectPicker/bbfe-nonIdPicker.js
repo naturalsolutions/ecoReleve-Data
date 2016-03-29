@@ -61,9 +61,11 @@ define([
       if (options.schema.editable) {
         this.model.set('disabled', '');
         this.model.set('visu', '');
+        this.model.set('mode', '');
       }else {
         this.model.set('disabled', 'disabled');
         this.model.set('visu', 'hidden');
+        this.model.set('mode', 'no-border');
       }
 
       if (options.schema.validators) {
