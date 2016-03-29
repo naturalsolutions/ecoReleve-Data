@@ -147,11 +147,12 @@ define([
 
         } else {
           if ($(_this._input).val() != '' || !_this.matchedValue){
-            console.log($(_this._input).val());
             _this.isTermError = true;
             _this.displayErrorMsg(true);
           } else {
             _this.setValue('','');
+            _this.isTermError = false;
+            _this.displayErrorMsg(false);
           }
           //$(_this._input).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
 
@@ -311,7 +312,11 @@ define([
     },
 
     setValue: function(value,displayValue) {
-      $(this._input).val(displayValue).change();;
+      if (displayValue || displayValue == ''){
+        $(this._input).val(displayValue).change();
+      } else {
+        this.getDisplayValue(value);
+      }
       $(this._input).attr('data_value',value).change();
       this.$el.find('#creation').addClass('hidden');
       this.hidePicker();

@@ -340,7 +340,7 @@ define([
           
         }
       }else{
-        _this.BBForm.$el.find('.error:first').trigger('focus');
+        _this.BBForm.$el.find('.error:first').trigger('focus').click();
         return false;
       }
       this.afterSavingModel();
