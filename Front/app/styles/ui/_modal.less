@@ -1,9 +1,10 @@
-.modal{
-  display: block;
-  position: relative;
+.input-group-addon.picker{
+  cursor: pointer;
 }
-.modal-outer, #fade{
+
+.modal-outer{
   position: fixed;
+  display: none;
   background: rgba(0,0,0,0.5);
   top: 0px;
   bottom: 0px;
@@ -11,26 +12,13 @@
   left: 0px;
   z-index: 10000;
   padding: 100px;
-}
-.modal-outer {
-  display: none;
-}
 
-.input-group-addon.picker{
-  cursor: pointer;
-}
-.mymodal {
-    position: fixed;
-    margin: auto;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 500px;
-    height: 50%;
-  z-index: 10001;
-}
-.mymodal .modal-footer {
-  background-color: #ffffff;
-}
+  .modal{
+    display: block;
+    position: relative;
 
+    #creation,#creationContainer{
+      z-index: 10;
+    }
+  }
+}

@@ -91,7 +91,7 @@ define([
             }
         );
         this.picker.setValue(resp.ID);
-        this.picker.$el.find('#creationContainer').addClass('hidden');
+        this.picker.$el.find('#creation').addClass('hidden');
         this.picker.hidePicker();
       } else {
         //redirect
@@ -102,8 +102,10 @@ define([
       this.nsForm.butClickSave();
     },
     cancel: function() {
+      console.log(this.picker);
       if(this.picker){
-        this.picker.$el.find('#creationContainer').addClass('hidden');
+        console.log(this.picker.$el.find('#creation'));
+        this.picker.$el.find('#creation').addClass('hidden');
       }
       //Backbone.history.navigate({trigger: true});
 
