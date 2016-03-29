@@ -71,10 +71,13 @@ define([
 
     reloadFromNavbar: function(model) {
       this.display(model);
+      this.com.addModule(this.map)
+      this.map.com = this.com;
       this.map.url = config.coreUrl + 'individuals/' + this.indivId  + '?geo=true';
       this.map.updateFromServ();
       Backbone.history.navigate(this.rootUrl + this.indivId, {trigger: false});
     },
+
 
     onRender: function() {
       this.$el.i18n();
