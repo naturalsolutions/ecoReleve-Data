@@ -160,8 +160,7 @@ def insertListNewStations(request):
     session = request.dbsession
     data = request.json_body
     data_to_insert = []
-    format_dt = '%Y-%m-%d %H:%M:%S'
-    format_dtBis = '%Y-%d-%m %H:%M:%S'
+    format_dt = '%d/%m/%Y %H:%M'
     dateNow = datetime.now()
 
     ##### Rename field and convert date #####
