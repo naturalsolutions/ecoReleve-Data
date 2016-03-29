@@ -127,8 +127,10 @@ define([
       this.autocompleteSource.minLength = 3;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
-        $(_this._input).attr('data_value',ui.item.value).change();
+        $(_this._input).attr('data_value',ui.item.value);
         $(_this._input).val(ui.item.label);
+
+        _this.matchedValue = ui.item;
         _this.isTermError = false;
         _this.displayErrorMsg(false);
       };
@@ -138,25 +140,32 @@ define([
 
       this.autocompleteSource.change = function(event,ui){
         event.preventDefault();
-        if (ui.item) {
+/*        if (!ui.item){
+          if ($(_this._input).val().length < 3) {
+            _this.matchedValue = undefined;
+          }
+        }*/
+      /*  if (ui.item) {
           _this.setValue(ui.item.value,ui.item.label);
-/*          $(_this._input).attr('data_value',ui.item.value).change();
-          $(_this._input).val(ui.item.label);*/
           _this.isTermError = false;
           _this.displayErrorMsg(false);
 
-        } else {
-          if ($(_this._input).val() != '' || !_this.matchedValue){
+        } else*/ 
+        //if (!ui.item){
+          if ($(_this._input).val() != '' && !_this.matchedValue){
             _this.isTermError = true;
             _this.displayErrorMsg(true);
-          } else {
-            _this.setValue('','');
+          }
+          else {
+            if ($(_this._input).val() == ''){
+              _this.setValue('','');
+            }
             _this.isTermError = false;
             _this.displayErrorMsg(false);
           }
           //$(_this._input).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
 
-        }
+        //}
       };
 
       this.autocompleteSource.response = function(event,ui){
@@ -190,8 +199,11 @@ define([
       $.ajax({
         url : _this.url+val,
         success : function(data){
-          _this.setValue(val,data[_this.usedLabel]);
-          
+          $(_this._input).attr('data_value',val);
+          $(_this._input).val(data[_this.usedLabel]);
+          //_this.setValue(val,data[_this.usedLabel]);
+          _this.displayErrorMsg(false);
+          _this.isTermError = false;
         }
       });
     },
@@ -313,11 +325,12 @@ define([
 
     setValue: function(value,displayValue) {
       if (displayValue || displayValue == ''){
-        $(this._input).val(displayValue).change();
+        $(this._input).val(displayValue);
       } else {
         this.getDisplayValue(value);
       }
-      $(this._input).attr('data_value',value).change();
+      $(this._input).attr('data_value',value);
+      this.matchedValue = value;
       this.$el.find('#creation').addClass('hidden');
       this.hidePicker();
     },
