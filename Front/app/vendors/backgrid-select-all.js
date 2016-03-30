@@ -57,7 +57,6 @@
 			}
 
 			var column = this.column, model = this.model, $el = this.$el;
-
 			this.listenTo(column, "change:renderable", function (column, renderable) {
 				$el.toggleClass("renderable", renderable);
 			});
@@ -173,7 +172,6 @@
 			var selectedModels = this.selectedModels = {};
 			this.listenTo(collection.fullCollection || collection,
 										"backgrid:selected", function (model, selected) {
-
 				if (selected) selectedModels[model.id || model.cid] = 1;
 				else {
 					delete selectedModels[model.id || model.cid];
@@ -192,36 +190,39 @@
 			});
 
 			this.listenTo(collection, "backgrid:refresh", function () {
-				var array = Object.keys(selectedModels);
-				var checked = true;
+			  var array = Object.keys(selectedModels);
 
-				if ((collection.fullCollection || collection).length === 0) {
-					this.checkbox().prop("checked", false);
-				}
-				if (array.length === 0 || array.length < (collection.fullCollection || collection).length) {
-					checked = false;
-				} else {
-					var id;
-					for (var i = 0; i < (collection.fullCollection || collection).length; i++) {
-						id = (collection.fullCollection || collection).models[i].attributes['id'];
-						if (selectedModels[id]) {
-							checked = true;
-						} else {
-							checked = false;
-							return false;
-						}
-					}
-				}
+			  var checked = true;
 
-				this.checkbox().prop("checked", checked);
+			  if ((collection.fullCollection || collection).length === 0) {
+			    this.checkbox().prop("checked", false);
+			  }
+			  
+			  if (array.length === 0 || array.length < (collection.fullCollection || collection).length) {
+			    checked = false;
+			  } else {
+			    var id;
+			    for (var i = 0; i < (collection.fullCollection || collection).length; i++) {
+			      id = (collection.fullCollection || collection).models[i].attributes['id'];
+			      if (selectedModels[id]) {
+			        checked = true;
+			      } else {
+			        checked = false;
+			        break;
+			      }
+			    }
+			  }
 
-				for (var i = 0; i < collection.length; i++) {
-					var model = collection.at(i);
-					if (checked || selectedModels[model.id || model.cid]) {
-						model.trigger("backgrid:select", model, true);
-					}
-				}
+			  this.checkbox().prop("checked", checked);
+
+			  for (var i = 0; i < collection.length; i++) {
+			    var model = collection.at(i);
+			    if (selectedModels[model.id || model.cid]) {
+			      model.trigger("backgrid:select", model, true);
+			    }
+			  }
 			});
+
 
 			var column = this.column, $el = this.$el;
 			this.listenTo(column, "change:renderable", function (column, renderable) {
@@ -248,8 +249,6 @@
 			var checked = this.checkbox().prop("checked");
 
 			var collection = this.collection;
-
-
 			collection.each(function (model) {
 				model.trigger("backgrid:select", model, checked);
 			});
