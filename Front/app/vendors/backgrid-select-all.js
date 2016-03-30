@@ -57,6 +57,7 @@
 			}
 
 			var column = this.column, model = this.model, $el = this.$el;
+
 			this.listenTo(column, "change:renderable", function (column, renderable) {
 				$el.toggleClass("renderable", renderable);
 			});
@@ -162,6 +163,7 @@
 			 @param {Backbone.Collection} options.collection
 		*/
 		initialize: function (options) {
+			console.log('init');
 
 			this.column = options.column;
 			if (!(this.column instanceof Backgrid.Column)) {
@@ -172,6 +174,7 @@
 			var selectedModels = this.selectedModels = {};
 			this.listenTo(collection.fullCollection || collection,
 										"backgrid:selected", function (model, selected) {
+
 				if (selected) selectedModels[model.id || model.cid] = 1;
 				else {
 					delete selectedModels[model.id || model.cid];
@@ -190,16 +193,33 @@
 			});
 
 			this.listenTo(collection, "backgrid:refresh", function () {
+				var array = Object.keys(selectedModels);
+				var checked = true;
+
 				if ((collection.fullCollection || collection).length === 0) {
 					this.checkbox().prop("checked", false);
 				}
-				else {
-					var checked = this.checkbox().prop("checked");
-					for (var i = 0; i < collection.length; i++) {
-						var model = collection.at(i);
-						if (checked || selectedModels[model.id || model.cid]) {
-							model.trigger("backgrid:select", model, true);
+				if (array.length === 0 || array.length < (collection.fullCollection || collection).length) {
+					checked = false;
+				} else {
+					var id;
+					for (var i = 0; i < (collection.fullCollection || collection).length; i++) {
+						id = (collection.fullCollection || collection).models[i].attributes['id'];
+						if (selectedModels[id]) {
+							checked = true;
+						} else {
+							checked = false;
+							return false;
 						}
+					}
+				}
+
+				this.checkbox().prop("checked", checked);
+
+				for (var i = 0; i < collection.length; i++) {
+					var model = collection.at(i);
+					if (checked || selectedModels[model.id || model.cid]) {
+						model.trigger("backgrid:select", model, true);
 					}
 				}
 			});
@@ -229,6 +249,8 @@
 			var checked = this.checkbox().prop("checked");
 
 			var collection = this.collection;
+
+
 			collection.each(function (model) {
 				model.trigger("backgrid:select", model, checked);
 			});
@@ -241,7 +263,7 @@
 				});
 			}
 
-			this.collection.trigger("backgrid:select-all", this.collection, checked);
+			//this.collection.trigger("backgrid:select-all", this.collection, checked);
 		}
 
 	});
