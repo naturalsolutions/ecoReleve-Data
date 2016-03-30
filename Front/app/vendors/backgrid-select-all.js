@@ -163,7 +163,6 @@
 			 @param {Backbone.Collection} options.collection
 		*/
 		initialize: function (options) {
-			console.log('init');
 
 			this.column = options.column;
 			if (!(this.column instanceof Backgrid.Column)) {
@@ -263,7 +262,7 @@
 				});
 			}
 
-			//this.collection.trigger("backgrid:select-all", this.collection, checked);
+			this.collection.trigger("backgrid:select-all", this.collection, checked);
 		}
 
 	});
