@@ -145,11 +145,12 @@ define([
           }
           else {
             if ($(_this._input).val() == ''){
-              _this.setValue('','');
+              $(_this._input).attr('data_value','');
             }
             _this.isTermError = false;
             _this.displayErrorMsg(false);
           }
+          $(_this._input).change();
       };
 
       this.autocompleteSource.response = function(event,ui){
@@ -307,6 +308,7 @@ define([
       }
       $(this._input).attr('data_value',value);
       this.matchedValue = value;
+      $(this._input).change();
       this.$el.find('#creation').addClass('hidden');
       this.hidePicker();
     },
