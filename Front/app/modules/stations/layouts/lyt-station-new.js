@@ -183,15 +183,16 @@ define([
 
     getCoordFromMs: function(msId) {
       var _this = this;
-      var url = config.coreUrl + 'monitoredSites/' + msId  + '/history/?geo=true';
+      var url = config.coreUrl + 'monitoredSites/' + msId;
 
       $.ajax({
         context: this,
         url: url,
       }).done(function(data) {
-        var coords = data.features[0].geometry.coordinates;
-        _this.$el.find('input[name="LAT"]').val(coords[0]).change();
-        _this.$el.find('input[name="LON"]').val(coords[1]).change();
+        var lat = data['LAT'];
+        var lon = data['LON'];
+        _this.$el.find('input[name="LAT"]').val(lat).change();
+        _this.$el.find('input[name="LON"]').val(lon).change();
       }).fail(function() {
         console.error('an error occured');
       });
