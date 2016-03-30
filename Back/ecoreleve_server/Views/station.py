@@ -36,7 +36,8 @@ def actionOnStations(request):
     'forms' : getForms,
     '0' : getForms,
     'getFields': getFields,
-    'getFilters': getFilters
+    'getFilters': getFilters,
+    'updateSiteLocation':updateMonitoredSite
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -341,15 +342,17 @@ def searchStation(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 
-def linkToMonitoredSite(request):
+def updateMonitoredSite(request):
     session = request.dbsession
-    curSta = session.query(Station).get(request.matchdict['id'])
-    data = request.json_body
-    idSite = data['siteId']
-    curSta.FK_MonitoredSite = idSite
-    if data['updateSite'] : 
-        newSitePos = MonitoredSitePosition(StartDate=curSta.StationDate, LAT=curSta.LAT, LON=curSta.LON, ELE=curSta.ELE, Precision=curSta.precision, FK_MonitoredSite=idSite)
-        session.add(newSitePos)
+    data = request.params
+    print(data)
+    # curSta = session.query(Station).get(request.matchdict['id'])
+    # data = request.json_body
+    # idSite = data['siteId']
+    # curSta.FK_MonitoredSite = idSite
+    # if data['updateSite'] : 
+    #     newSitePos = MonitoredSitePosition(StartDate=curSta.StationDate, LAT=curSta.LAT, LON=curSta.LON, ELE=curSta.ELE, Precision=curSta.precision, FK_MonitoredSite=idSite)
+    #     session.add(newSitePos)
     return {}
 
 
