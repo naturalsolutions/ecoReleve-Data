@@ -116,7 +116,6 @@ define([
       //dirty
       var template =  _.template(Tpl, this.model.attributes);
       this.$el.html(template);
-      
       this.afterTpl();
     },
 
@@ -140,18 +139,6 @@ define([
 
       this.autocompleteSource.change = function(event,ui){
         event.preventDefault();
-/*        if (!ui.item){
-          if ($(_this._input).val().length < 3) {
-            _this.matchedValue = undefined;
-          }
-        }*/
-      /*  if (ui.item) {
-          _this.setValue(ui.item.value,ui.item.label);
-          _this.isTermError = false;
-          _this.displayErrorMsg(false);
-
-        } else*/ 
-        //if (!ui.item){
           if ($(_this._input).val() != '' && !_this.matchedValue){
             _this.isTermError = true;
             _this.displayErrorMsg(true);
@@ -163,9 +150,6 @@ define([
             _this.isTermError = false;
             _this.displayErrorMsg(false);
           }
-          //$(_this._input).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
-
-        //}
       };
 
       this.autocompleteSource.response = function(event,ui){
@@ -173,19 +157,15 @@ define([
         if (ui.content.length == 1){
           var item = ui.content[0];
           _this.setValue(item.value,item.label);
-          _this.displayErrorMsg(false);
-          _this.isTermError = false;
           _this.matchedValue = item;
 
         } else {
           _this.matchedValue = undefined;
         }
       };
-
     },
 
     afterTpl: function() {
-
       this._input = this.$el.find('input[name="' + this.key + '" ]')[0];
       this.$el.find('#new').addClass('hidden');
       this.getTypes();
@@ -216,10 +196,6 @@ define([
         var _this = this;
         _(function () {
             $(_this._input).autocomplete(_this.autocompleteSource);
-            //$(this._input).addClass(_this.options.schema.editorClass) ;
-            /*if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
-                $(this._input).prop('disabled', true);
-            }*/
         }).defer();
       }
       return this;
