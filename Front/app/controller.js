@@ -63,6 +63,7 @@ define(['marionette', 'config',
       this.rgMain = window.app.rootView.rgMain;
       this.rgHeader = window.app.rootView.rgHeader;
       this.rgFooter = window.app.rootView.rgFooter;
+      console.log('toto');
     },
 
     home: function() {
