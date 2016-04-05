@@ -18,7 +18,6 @@ define([
             } else {
               return '';
             }
-            
           }
         }),
     });
