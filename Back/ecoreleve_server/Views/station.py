@@ -36,7 +36,8 @@ def actionOnStations(request):
     'forms' : getForms,
     '0' : getForms,
     'getFields': getFields,
-    'getFilters': getFilters
+    'getFilters': getFilters,
+    'updateSiteLocation':updateMonitoredSite
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -341,15 +342,27 @@ def searchStation(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 
-def linkToMonitoredSite(request):
+def updateMonitoredSite(request):
     session = request.dbsession
-    curSta = session.query(Station).get(request.matchdict['id'])
-    data = request.json_body
-    idSite = data['siteId']
-    curSta.FK_MonitoredSite = idSite
-    if data['updateSite'] : 
-        newSitePos = MonitoredSitePosition(StartDate=curSta.StationDate, LAT=curSta.LAT, LON=curSta.LON, ELE=curSta.ELE, Precision=curSta.precision, FK_MonitoredSite=idSite)
+    data = request.params.mixed()
+    print(data)
+    # curSta = session.query(Station).get(request.matchdict['id'])
+    # data = request.json_body
+    # idSite = data['siteId']
+    # curSta.FK_MonitoredSite = idSite
+    if data['FK_MonitoredSite'] == '':
+        return 'Station is not monitored'
+    try :
+        newSitePos = MonitoredSitePosition(StartDate=data['StationDate']
+            , LAT=data['LAT'], LON=data['LON'], ELE=data['ELE'], Precision=data['precision'], FK_MonitoredSite=data['FK_MonitoredSite'])
         session.add(newSitePos)
-    return {}
+        session.commit()
+        return 'Monitored site position was updated'
+    except IntegrityError as e :
+        print('Integrity EROROROROROR')
+        session.rollback()
+
+        return 'This location already exists'
+
 
 

@@ -12,6 +12,7 @@ define(['marionette', 'lyt-rootview', 'router', 'controller',
   'ns_modules/ns_bbfe/bbfe-fileUpload',
   'ns_modules/ns_bbfe/bbfe-select',
   'ns_modules/ns_bbfe/bbfe-gridForm',
+  'ns_modules/ns_bbfe/bbfe-ajaxButton',
   ],
 function( Marionette, LytRootView, Router, Controller) {
 
