@@ -15,6 +15,7 @@ define(['marionette', 'lyt-rootview', 'router', 'controller',
   'ns_modules/ns_bbfe/bbfe-ajaxButton',
   'ns_modules/ns_bbfe/bbfe-lon',
   'ns_modules/ns_bbfe/bbfe-lat',
+  'ns_modules/ns_cell/bg-timestampCell',
   ],
 function( Marionette, LytRootView, Router, Controller) {
 
