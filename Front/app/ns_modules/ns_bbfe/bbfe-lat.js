@@ -9,6 +9,10 @@ define([
     return Form.editors.LatitudeEditor = Form.editors.Number.extend({
 
   defaultValue: '',
+  events:{
+    'keyup':'onKeyUp',
+    'keydown':'onKeyPress'
+  },
 
   initialize: function(options) {
     Form.editors.Number.prototype.initialize.call(this, options);
@@ -28,6 +32,13 @@ define([
    * Check value is numeric
    */
   onKeyPress: function(event) {
+    this.oldValue = this.$el.val();
+  },
+
+    /**
+   * Check value is numeric ==> onKeyUp is better
+   */
+  onKeyUp : function(e){
     var self = this,
         delayedDetermineChange = function() {
           setTimeout(function() {
@@ -35,29 +46,23 @@ define([
           }, 0);
         };
 
-    //Allow backspace
-    if (event.charCode === 0) {
-      delayedDetermineChange();
-      return;
+    var newVal = this.$el.val();
+    var numeric = /^\-?[^\-][0-9]*\.?[0-9]{0,5}$/.test(newVal);
+    console.log(numeric)
+    if (!numeric){
+      this.$el.val(this.oldValue);
     }
-
-    //Get the whole new value so that we can prevent things like double decimals points etc.
-    var newVal = this.$el.val()
-    if( event.charCode != undefined ) {
-      newVal = newVal + String.fromCharCode(event.charCode);
-    }
-
-    /*var numeric = /^-?[0-9]*\.?[0-9]*?$/.test(newVal);
-
-    if (numeric) {
-      delayedDetermineChange();
-    }
-    else {
-      event.preventDefault();
-    }*/
 
     if (newVal > 90 || newVal <-90 ){
-    	this.$el.val('');
+      if (newVal+90 <0){
+        this.$el.val(-90);
+      }
+      else{
+        this.$el.val(90);
+      }
+      this.$el.addClass('error');
+    } else {
+      this.$el.removeClass('error');
     }
   },
 

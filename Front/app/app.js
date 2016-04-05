@@ -13,6 +13,8 @@ define(['marionette', 'lyt-rootview', 'router', 'controller',
   'ns_modules/ns_bbfe/bbfe-select',
   'ns_modules/ns_bbfe/bbfe-gridForm',
   'ns_modules/ns_bbfe/bbfe-ajaxButton',
+  'ns_modules/ns_bbfe/bbfe-lon',
+  'ns_modules/ns_bbfe/bbfe-lat',
   ],
 function( Marionette, LytRootView, Router, Controller) {
 
