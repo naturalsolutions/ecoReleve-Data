@@ -49,7 +49,9 @@ define([
     var numeric = /^\-?[^\-][0-9]*\.?[0-9]{0,5}$/.test(newVal);
 
     if (!numeric){
-      this.$el.val(this.oldValue);
+      if (e.keyCode!=8 && this.oldValue!='') {
+        this.$el.val(this.oldValue);
+      }
     }
 
     if (newVal > 180 || newVal <-180 ){
