@@ -30,7 +30,8 @@ define([
       'detail': '#detail',
       'totalEntries': '#totalEntries',
       'nbSelected': '#nbSelected',
-      'release':'#release'
+      'release':'#release',
+      'nbTotal': '.js-nb-total'
     },
 
     events: {
@@ -120,6 +121,8 @@ define([
         rowClicked: true,
         onceFetched: function(params) {
           _this.totalEntries(this.grid);
+          console.log(this.grid);
+          console.log('passed');
         }
       });
       this.grid.rowClicked = function(args) {
@@ -195,7 +198,7 @@ define([
 
     totalEntries: function(grid) {
       this.total = grid.collection.state.totalRecords;
-      $(this.ui.totalEntries).html(this.total);
+      $(this.ui.nbTotal).html(this.total);
     },
 
 
