@@ -218,6 +218,14 @@ define([
 
     onClickNew: function(e) {
       var _this = this;
+      
+      var data = _this.form.getValue();
+      if (data['StationDate']) {
+        data['StartDate'] = data['StationDate'];
+        data['Name'] = '';
+      } else {
+        data = {};
+      }
       this.$el.find('#new').tooltipList({
         availableOptions: this.tooltipListData,
         liClickEvent: function(value, parent, elem) {
@@ -227,7 +235,8 @@ define([
           var params = {
             picker: _this,
             type: val,
-            ojectName: _this.ojectName
+            ojectName: _this.ojectName,
+            data: data
           };
           _this.displayCreateNewLyt(params);
         },

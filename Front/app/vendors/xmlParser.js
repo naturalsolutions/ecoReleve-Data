@@ -17,6 +17,8 @@ define([
           var waypoint = new Backbone.Model();
           var lat = $(this).attr('lat');
           var lon = $(this).attr('lon');
+          var ele = $(this).find('ele').text() || 0 ;
+          ele = parseFloat(ele);
           // convert lat & long to number and round to 5 decimals
           var latitude = parseFloat(lat);// parseFloat(lat).toFixed(5);
           var longitude = parseFloat(lon);
@@ -62,6 +64,7 @@ define([
             waypoint.set('name', waypointName);
             waypoint.set('latitude', latitude);
             waypoint.set('longitude', longitude);
+            waypoint.set('elevation', ele);
             waypoint.set('waypointTime', dateStr);
             waypoint.set('displayDate', timestamp);
             waypoint.set('time', time);

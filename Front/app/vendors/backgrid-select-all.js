@@ -190,19 +190,39 @@
 			});
 
 			this.listenTo(collection, "backgrid:refresh", function () {
-				if ((collection.fullCollection || collection).length === 0) {
-					this.checkbox().prop("checked", false);
-				}
-				else {
-					var checked = this.checkbox().prop("checked");
-					for (var i = 0; i < collection.length; i++) {
-						var model = collection.at(i);
-						if (checked || selectedModels[model.id || model.cid]) {
-							model.trigger("backgrid:select", model, true);
-						}
-					}
-				}
+			  var array = Object.keys(selectedModels);
+
+			  var checked = true;
+
+			  if ((collection.fullCollection || collection).length === 0) {
+			    this.checkbox().prop("checked", false);
+			  }
+			  
+			  if (array.length === 0 || array.length < (collection.fullCollection || collection).length) {
+			    checked = false;
+			  } else {
+			    var id;
+			    for (var i = 0; i < (collection.fullCollection || collection).length; i++) {
+			      id = (collection.fullCollection || collection).models[i].attributes['id'];
+			      if (selectedModels[id]) {
+			        checked = true;
+			      } else {
+			        checked = false;
+			        break;
+			      }
+			    }
+			  }
+
+			  this.checkbox().prop("checked", checked);
+
+			  for (var i = 0; i < collection.length; i++) {
+			    var model = collection.at(i);
+			    if (selectedModels[model.id || model.cid]) {
+			      model.trigger("backgrid:select", model, true);
+			    }
+			  }
 			});
+
 
 			var column = this.column, $el = this.$el;
 			this.listenTo(column, "change:renderable", function (column, renderable) {

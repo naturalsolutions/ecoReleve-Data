@@ -170,8 +170,6 @@ define([
         data[this.filters.criterias[i]['Column']] = this.filters.criterias[i]['Value'];
       };
 
-
-
       var params = {
         picker: this,
         type: 2,

@@ -37,7 +37,7 @@ define([
       'click #btnSelectionGrid': 'clearSelectedRows',
       'click table.backgrid th input': 'checkSelectAll',
       'click button#filter': 'filter',
-      'click button#clear': 'clearFilter',
+      //'click button#clear': 'clearFilter',
     },
 
     initialize: function(options) {
@@ -253,9 +253,8 @@ define([
     },*/
 
     checkSelectAll: function(e) {
-      var ids = _.pluck(this.grid.collection.fullCollection.models, 'id');
+    var ids = _.pluck(this.grid.collection.fullCollection.models, 'id');
       if (!$(e.target).is(':checked')) {
-        console.log(ids);
         this.grid.interaction('resetAll', ids);
       } else {
         this.grid.interaction('selectionMultiple', ids);
