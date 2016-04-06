@@ -7,18 +7,23 @@
 */
 (function (root, factory) {
 
-
-  if (typeof define === "function" && define.amd) {
-    // AMD (+ global for extensions)
-    define(["underscore", "backgrid","moment"], factory);
-  } else if (typeof exports == "object") {   // CommonJS
+  if (typeof define === 'function' && define.amd) {
+    // AMD
+    define(["underscore", "backgrid", "moment"], factory);
+  } else if (typeof exports === 'object') {
+    // CommonJS
     module.exports = factory(require("underscore"), require("backgrid"),
                              require("moment"));
+  } else {
+    // Browser globals
+    factory(root._, root.Backgrid, root.moment);
   }
-  // Browser
-  else factory(root._, root.Backgrid, root.moment);
 
 }(this, function (_, Backgrid, moment) {
+
+  "use strict";
+
+  var exports = {};
 
   /**
      MomentFormatter converts bi-directionally any datetime values in any format
@@ -31,9 +36,10 @@
      @extends Backgrid.CellFormatter
      @constructor
    */
-  var MomentFormatter = Backgrid.Extension.MomentFormatter = function (options) {
-    _.extend(this, this.defaults, options);
+  var MomentFormatter = exports.MomentFormatter = Backgrid.Extension.MomentFormatter = function (options) {
+      _.extend(this, this.defaults, options);
   };
+  var useLocale = "locale" in moment && _.isFunction(moment, "locale");
   MomentFormatter.prototype = new Backgrid.CellFormatter;
   _.extend(MomentFormatter.prototype, {
 
@@ -49,8 +55,9 @@
        @cfg {boolean} [options.modelInUTC=true] Whether the model values should
        be read/written in UTC mode or local mode.
 
-       @cfg {string} [options.modelLang=moment.lang()] The locale the model
-       values should be read/written in.
+       @cfg {string} [options.modelLang=moment.locale() moment>=2.8.0 |
+       moment.lang() moment<2.8.0] The locale the model values should be
+       read/written in.
 
        @cfg {string} [options.modelFormat=moment.defaultFormat] The format this
        moment formatter should use to read/write model values. Only meaningful if
@@ -66,8 +73,9 @@
        @cfg {boolean} [options.displayInUTC=true] Whether the display values
        should be read/written in UTC mode or local mode.
 
-       @cfg {string} [options.displayLang=moment.lang()] The locale the display
-       values should be read/written in.
+       @cfg {string} [options.displayLang=moment.locale() moment>=2.8.0 |
+       moment.lang() moment<2.8.0] The locale the display values should be
+       read/written in.
 
        @cfg {string} [options.displayFormat=moment.defaultFormat] The format
        this moment formatter should use to read/write dislay values.
@@ -76,12 +84,12 @@
       modelInUnixOffset: false,
       modelInUnixTimestamp: false,
       modelInUTC: true,
-      modelLang: moment.lang(),
+      modelLang: useLocale ? moment.locale() : moment.lang(),
       modelFormat: moment.defaultFormat,
       displayInUnixOffset: false,
       displayInUnixTimestamp: false,
       displayInUTC: true,
-      displayLang: moment.lang(),
+      displayLang: useLocale ? moment.locale() : moment.lang(),
       displayFormat: moment.defaultFormat
     },
 
@@ -105,7 +113,9 @@
 
       if (this.displayInUnixTimestamp) return m.unix();
 
-      if (this.displayLang) m.lang(this.displayLang);
+      if (this.displayLang) {
+        if (useLocale) m.locale(this.displayLang); else m.lang(this.displayLang);
+      }
 
       if (this.displayInUTC) m.utc(); else m.local();
 
@@ -133,7 +143,9 @@
 
       if (this.modelInUnixTimestamp) return m.unix();
 
-      if (this.modelLang) m.lang(this.modelLang);
+      if (this.modelLang) {
+        if (useLocale) m.locale(this.modelLang); else m.lang(this.modelLang);
+      }
 
       if (this.modelInUTC) m.utc(); else m.local();
 
@@ -149,7 +161,7 @@
      @class Backgrid.Extension.MomentCell
      @extends Backgrid.Cell
    */
-  var MomentCell = Backgrid.Extension.MomentCell = Backgrid.Cell.extend({
+  var MomentCell = exports.MomentCell = Backgrid.Extension.MomentCell = Backgrid.Cell.extend({
 
     editor: Backgrid.InputCellEditor,
 
@@ -169,10 +181,16 @@
 
       var formatterDefaults = MomentFormatter.prototype.defaults;
       var formatterDefaultKeys = _.keys(formatterDefaults);
-      var instanceAttrs = _.pick(this, formatterDefaultKeys);
+      var classAttrs = _.pick(this, formatterDefaultKeys);
       var formatterOptions = _.pick(options, formatterDefaultKeys);
 
-      _.extend(this.formatter, formatterDefaults, instanceAttrs, formatterOptions);
+      // Priority of the options for the formatter, from highest to lowerest
+      // 1. MomentCell instance options
+      // 2. MomentCell class attributes
+      // 3. MomentFormatter defaults
+
+      // this.formatter will have been instantiated now
+      _.extend(this.formatter, formatterDefaults, classAttrs, formatterOptions);
 
       this.editor = this.editor.extend({
         attributes: _.extend({}, this.editor.prototype.attributes || this.editor.attributes || {}, {
@@ -184,5 +202,7 @@
   });
 
   _.extend(MomentCell.prototype, MomentFormatter.prototype.defaults);
+
+  return exports;
 
 }));

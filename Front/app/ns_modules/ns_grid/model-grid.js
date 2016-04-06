@@ -484,7 +484,6 @@ define([
     },
 
     clearAll: function () {
-      console.log('passed');
       var coll = new Backbone.Collection();
       coll.reset(this.grid.collection.models);
 

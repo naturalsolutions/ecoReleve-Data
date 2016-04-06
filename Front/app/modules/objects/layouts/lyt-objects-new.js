@@ -37,7 +37,10 @@ define([
       }
       this.model.set('ojectName', this.ojectName);
       this.picker = options.picker;
+      console.log(this.picker);
+
       this.data = options.data;
+      console.log(this.data);
     },
 
     onShow: function() {
@@ -104,7 +107,6 @@ define([
     cancel: function() {
       console.log(this.picker);
       if(this.picker){
-        console.log(this.picker.$el.find('#creation'));
         this.picker.$el.find('#creation').addClass('hidden');
       }
       //Backbone.history.navigate({trigger: true});
