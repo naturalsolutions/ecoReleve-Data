@@ -1,0 +1,79 @@
+update f SET InputType = 'AutocompTreeEditor' , Options = 223066, TypeObj = 1
+from ModuleForms f
+where module_id = 9 and Name = 'Status_'
+
+
+update f SET Legend = 'Tag', TypeObj = 1, FieldSizeDisplay=4,FieldSizeEdit = 4, displayClass = 'solo-input6',EditClass= 'solo-input6',FormOrder=35
+from ModuleForms f
+where module_id = 9 and Name = 'Chip_Code'
+
+
+update f SET Legend = 'Tag', FieldSizeDisplay=4,FieldSizeEdit = 4, displayClass = 'solo-input8',EditClass= 'solo-input8',FormOrder=36
+from ModuleForms f
+where module_id = 9 and Name = 'Microchip'
+
+update f SET FieldSizeDisplay=6,FieldSizeEdit = 6, displayClass = 'solo-input10',EditClass= 'solo-input10'
+from ModuleForms f
+where module_id = 9 and Name = 'Species'
+
+update f SET FieldSizeDisplay=4,FieldSizeEdit = 4
+from ModuleForms f
+where module_id = 9 and Name = 'Birth_date'
+
+update f SET FieldSizeDisplay=4,FieldSizeEdit = 4,displayClass = 'solo-input8',EditClass= 'solo-input8'
+from ModuleForms f
+where module_id = 9 and Name = 'Death_date'
+
+update f SET FieldSizeDisplay=2,FieldSizeEdit = 2,displayClass = 'solo-input10',EditClass= 'solo-input10'
+from ModuleForms f
+where module_id = 9 and Name = 'ID'
+
+INSERT INTO ModuleForms (
+[module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue] ) 
+SELECT [module_id]
+      ,2
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,NULL
+      ,NULL
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+  FROM [EcoReleve_ECWP].[dbo].[ModuleForms]
+  where module_id = 9 and Name = 'Chip_Code'
+
+  GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('43_Up_Conf_Indiv',GETDATE(),(SELECT db_name()))
+
+
+GO
