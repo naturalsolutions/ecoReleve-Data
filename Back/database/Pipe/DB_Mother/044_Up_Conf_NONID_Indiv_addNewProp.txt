@@ -1,4 +1,4 @@
-/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+﻿/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
 INSERT INTO ModuleGrids (
 [Module_ID]
       ,[TypeObj]
@@ -111,7 +111,7 @@ UNION
 SELECT  9
       ,2
       ,'Transmitter_Type'
-      ,'Transmitter_Type'
+      ,'Transmitter Type'
       ,0
       ,3
       ,3
