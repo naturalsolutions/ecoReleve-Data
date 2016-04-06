@@ -169,6 +169,7 @@ def insertListNewStations(request):
         newRow = {}
         newRow['LAT'] = row['latitude']
         newRow['LON'] = row['longitude']
+        newRow['ELE'] = row['elevation']
         newRow['precision'] = row['precision']
         newRow['Name'] = row['name']
         newRow['fieldActivityId'] = row['fieldActivity']
