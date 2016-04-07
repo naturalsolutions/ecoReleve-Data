@@ -185,8 +185,10 @@ def insertListNewStations(request):
 
     ##### Load date into pandas DataFrame then round LAT,LON into decimal(5) #####
     DF_to_check = pd.DataFrame(data_to_insert)
-    DF_to_check['LAT'] = np.round(DF_to_check['LAT'],decimals = 5)
-    DF_to_check['LON'] = np.round(DF_to_check['LON'],decimals = 5)
+    DF_to_check['LAT'] = DF_to_check['LAT'].round(5)
+    DF_to_check['LON'] = DF_to_check['LON'].round(5)
+    # DF_to_check['LAT'] = np.round(DF_to_check['LAT'],decimals = 5)
+    # DF_to_check['LON'] = np.round(DF_to_check['LON'],decimals = 5)
     # DF_to_check['LAT'] = DF_to_check['LAT'].astype(float)
     # DF_to_check['LON'] = DF_to_check['LON'].astype(float)
     ##### Get min/max Value to query potential duplicated stations #####
@@ -207,8 +209,8 @@ def insertListNewStations(request):
     result_to_check = pd.read_sql_query(query,session.get_bind())
     if result_to_check.shape[0] > 0  :
         ##### IF potential duplicated stations, load them into pandas DataFrame then join data to insert on LAT,LON,DATE #####
-        result_to_check['LAT'] = np.round(result_to_check['LAT'],decimals = 5)
-        result_to_check['LON'] = np.round(result_to_check['LON'],decimals = 5)
+        result_to_check['LAT'] = result_to_check['LAT'].round(5)
+        result_to_check['LON'] = result_to_check['LON'].round(5)
 
         merge_check = pd.merge(DF_to_check,result_to_check , on =['LAT','LON','StationDate'])
         ##### Get only non existing data to insert #####
