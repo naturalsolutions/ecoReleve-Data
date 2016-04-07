@@ -306,11 +306,12 @@ def sensors_export(request):
 
     fout = io.BytesIO()
     writer = pd.ExcelWriter(fout)
-    writer2 = pd.ExcelWriter('tutu.xlsx')
     df.to_excel(writer, sheet_name='Sheet1')
     writer.save()
     file = fout.getvalue()
-    return Response(file,content_disposition= "attachment; filename=test.xlsx",content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+    dt = datetime.now().strftime('%d-%m-%Y')
+    return Response(file,content_disposition= "attachment; filename=sensor_export_"+dt+".xlsx",content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 
 
