@@ -150,6 +150,11 @@ define([
                   return rawValue;
                 }
             }),
+            },{
+              name: 'Survey_type',
+              label: 'Survey Type',
+              editable: false,
+              cell: 'string'
             },
             {
               name: 'FK_Sensor',
@@ -214,6 +219,11 @@ define([
                   return rawValue;
                 }
               }),
+            },{
+              name: 'Survey_type',
+              label: 'Survey Type',
+              editable: false,
+              cell: 'string'
             },{
               name: 'FK_Sensor',
               label: 'Sensor',

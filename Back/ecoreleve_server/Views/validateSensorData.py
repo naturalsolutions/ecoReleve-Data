@@ -58,13 +58,13 @@ def type_unchecked_list(request):
     elif type_ == 'rfid':
         return unchecked_rfid(request)
 
-    selectStmt = select([unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['FK_Sensor'], unchecked.c['StartDate'], unchecked.c['EndDate'],
+    selectStmt = select([unchecked.c['FK_Individual'],unchecked.c['Survey_type'],unchecked.c['FK_ptt'], unchecked.c['FK_Sensor'], unchecked.c['StartDate'], unchecked.c['EndDate'],
 
             func.count().label('nb'), func.max(unchecked.c['date']).label('max_date'),
             func.min(unchecked.c['date']).label('min_date')])
 
     queryStmt = selectStmt.where(unchecked.c['checked'] == 0
-            ).group_by(unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate'], unchecked.c['FK_Sensor'],
+            ).group_by(unchecked.c['FK_Individual'],unchecked.c['Survey_type'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate'], unchecked.c['FK_Sensor'],
             ).order_by(unchecked.c['FK_ptt'].asc())
     data = session.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
