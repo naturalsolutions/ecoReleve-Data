@@ -161,10 +161,10 @@ define([
                   break;
               }
               
-              var tmp= this.column.attributes.name;
+              /*var tmp= this.column.attributes.name;
 
               if(!Object.keys(sortCriteria).length > 0)
-                collection.sortCriteria[tmp] = 'asc';
+                collection.sortCriteria[tmp] = 'asc';*/
               
               collection.sortCriteria = sortCriteria;
               collection.fetch({reset: true});
