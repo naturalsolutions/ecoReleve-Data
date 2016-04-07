@@ -188,11 +188,7 @@ define([
         name: 'timestamp',
         label: 'date',
         editable: false,
-        cell : Backgrid.Extension.MomentCell.extend({
-          modelInUnixTimestamp: true,
-          displayFormat: "DD/MM/YYYY HH:mm:ss",
-          displayInUTC: false
-        })
+        cell : 'timestamp'
       },{
         name: 'LAT',
         label: 'latitude',
