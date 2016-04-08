@@ -22,6 +22,8 @@ from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
 from sqlalchemy.exc import IntegrityError
+import io
+from pyramid.response import Response ,FileResponse
 
 
 
@@ -185,8 +187,10 @@ def insertListNewStations(request):
 
     ##### Load date into pandas DataFrame then round LAT,LON into decimal(5) #####
     DF_to_check = pd.DataFrame(data_to_insert)
-    DF_to_check['LAT'] = np.round(DF_to_check['LAT'],decimals = 5)
-    DF_to_check['LON'] = np.round(DF_to_check['LON'],decimals = 5)
+    DF_to_check['LAT'] = DF_to_check['LAT'].round(5)
+    DF_to_check['LON'] = DF_to_check['LON'].round(5)
+    # DF_to_check['LAT'] = np.round(DF_to_check['LAT'],decimals = 5)
+    # DF_to_check['LON'] = np.round(DF_to_check['LON'],decimals = 5)
     # DF_to_check['LAT'] = DF_to_check['LAT'].astype(float)
     # DF_to_check['LON'] = DF_to_check['LON'].astype(float)
     ##### Get min/max Value to query potential duplicated stations #####
@@ -207,8 +211,8 @@ def insertListNewStations(request):
     result_to_check = pd.read_sql_query(query,session.get_bind())
     if result_to_check.shape[0] > 0  :
         ##### IF potential duplicated stations, load them into pandas DataFrame then join data to insert on LAT,LON,DATE #####
-        result_to_check['LAT'] = np.round(result_to_check['LAT'],decimals = 5)
-        result_to_check['LON'] = np.round(result_to_check['LON'],decimals = 5)
+        result_to_check['LAT'] = result_to_check['LAT'].round(5)
+        result_to_check['LON'] = result_to_check['LON'].round(5)
 
         merge_check = pd.merge(DF_to_check,result_to_check , on =['LAT','LON','StationDate'])
         ##### Get only non existing data to insert #####
@@ -366,4 +370,34 @@ def updateMonitoredSite(request):
         return 'This location already exists'
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
 
+@view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
+def sensors_export(request):
+    session = request.dbsession
+    data = request.params.mixed()
+    searchInfo = {}
+    searchInfo['criteria'] = []
+    if 'criteria' in data: 
+        data['criteria'] = json.loads(data['criteria'])
+        if data['criteria'] != {} :
+            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+
+    searchInfo['order_by'] = []
+
+    ModuleType = 'StationGrid'
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+
+    listObj = StationList(moduleFront)
+    dataResult = listObj.GetFlatDataList(searchInfo)
+
+    df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
+
+    fout = io.BytesIO()
+    writer = pd.ExcelWriter(fout)
+    df.to_excel(writer, sheet_name='Sheet1')
+    writer.save()
+    file = fout.getvalue()
+
+    dt = datetime.now().strftime('%d-%m-%Y')
+    return Response(file,content_disposition= "attachment; filename=stations_export_"+dt+".xlsx",content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

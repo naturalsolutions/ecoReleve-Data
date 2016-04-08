@@ -209,20 +209,21 @@ define([
     },*/
 
     exportGrid: function() {
-      $.ajax({
-        url: config.coreUrl + 'sensors/export',
-        data: JSON.stringify({criteria: this.filters.criterias}),
-        contentType: 'application/json',
-        type: 'POST'
-      }).done(function(data) {
-        var url = URL.createObjectURL(new Blob([data], {'type': 'text/csv'}));
-        var link = document.createElement('a');
-        link.href = url;
-        link.download = 'sensors_export.csv';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      });
+      var url = config.coreUrl + 'sensors/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
+      var link = document.createElement('a');
+      link.classList.add('DowloadLinka');
+      
+      //link.download = url;
+      link.href = url;
+      link.onclick = function () {
+          //this.parentElement.removeChild(this);
+          var href = $(link).attr('href');
+          window.location.href = link;
+          document.body.removeChild(link);
+      };
+     /*his.$el.append(link);*/
+     document.body.appendChild(link);
+     link.click();
     },
 
   });

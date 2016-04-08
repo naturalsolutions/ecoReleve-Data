@@ -25,6 +25,8 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.response import Response
 from traceback import print_exc
 from collections import OrderedDict
+import io
+from pyramid.response import Response ,FileResponse
 
 prefix = 'monitoredSites'
 
@@ -266,8 +268,36 @@ def searchMonitoredSite(request):
 
     return result
 
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
+def sensors_export(request):
+    session = request.dbsession
+    data = request.params.mixed()
+    searchInfo = {}
+    searchInfo['criteria'] = []
+    if 'criteria' in data: 
+        data['criteria'] = json.loads(data['criteria'])
+        if data['criteria'] != {} :
+            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
 
+    searchInfo['order_by'] = []
 
+    ModuleType = 'MonitoredSiteGrid'
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+
+    listObj = ListObjectWithDynProp(MonitoredSite,moduleFront,View=Base.metadata.tables['MonitoredSitePositionsNow'])
+    dataResult = listObj.GetFlatDataList(searchInfo)
+
+    df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
+
+    fout = io.BytesIO()
+    writer = pd.ExcelWriter(fout)
+    df.to_excel(writer, sheet_name='Sheet1')
+    writer.save()
+    file = fout.getvalue()
+
+    dt = datetime.now().strftime('%d-%m-%Y')
+    return Response(file,content_disposition= "attachment; filename=monitoredSites_export_"+dt+".xlsx",content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 
 
