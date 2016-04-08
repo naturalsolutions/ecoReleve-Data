@@ -1,0 +1,107 @@
+
+declare @dpID table (ID int, name varchar(250),oldName varchar(250)) ;
+
+INSERT INTO IndividualDynProp(Name,TypeProp)
+OUTPUT inserted.ID,inserted.Name into @dpID(ID,name)
+VALUES
+('Ring_position_1','String'),
+('Ring_position_2','String'),
+('Ring_color_1','String'),
+('Ring_color_2','String')
+
+
+SELECT *
+INTO #dpID
+FROM @dpID
+
+INSERT INTO [IndividualType_IndividualDynProp] (
+[Required]
+      ,[FK_IndividualType]
+      ,[FK_IndividualDynProp])
+SELECT 0,2,ID
+FROM @dpID
+
+DELETE l
+FROM [EcoReleve_ECWP].[dbo].[IndividualType_IndividualDynProp] l 
+JOIN IndividualDynProp dp ON dp.ID = l.FK_IndividualDynProp
+where FK_IndividualType = 2 AND dp.Name in ('Release_Ring_Position','Release_Ring_Color','Breeding_Ring_Position','Breeding_Ring_Color')
+
+------ UPDATE DynPropValue -------------
+
+UPDATE v SET FK_IndividualDynProp =  CASE WHEN dp.Name = 'Release_Ring_Position' THEN (SELECT ID FROM IndividualDynProp WHERE Name = 'Ring_position_1')
+		WHEN dp.Name = 'Breeding_Ring_Position' THEN (SELECT ID FROM IndividualDynProp WHERE Name = 'Ring_position_2')
+		WHEN dp.Name = 'Release_Ring_Color' THEN (SELECT ID FROM IndividualDynProp WHERE Name = 'Ring_color_1')
+		WHEN dp.Name = 'Breeding_Ring_Color' THEN (SELECT ID FROM IndividualDynProp WHERE Name = 'Ring_color_2')
+		END
+FROM IndividualDynPropValue v 
+JOIN Individual i ON v.FK_Individual = i.ID and i.FK_IndividualType = 2
+JOIN IndividualDynProp dp ON dp.ID = v.FK_IndividualDynProp
+WHERE dp.Name in ('Release_Ring_Position','Release_Ring_Color','Breeding_Ring_Position','Breeding_Ring_Color')
+
+
+
+
+------- update form ------------
+Update f SET TypeObj = 1 
+From ModuleForms f 
+WHERE module_id = 9 and Name in ('Release_Ring_Position','Release_Ring_Color','Breeding_Ring_Position','Breeding_Ring_Color')
+
+
+INSERT INTO ModuleForms
+SELECT [module_id]
+      ,2
+      ,CASE WHEN Name = 'Release_Ring_Position' THEN 'Ring_position_1'
+		WHEN Name = 'Breeding_Ring_Position' THEN 'Ring_position_2'
+		WHEN Name = 'Release_Ring_Color' THEN 'Ring_color_1'
+		WHEN Name = 'Breeding_Ring_Color' THEN 'Ring_color_2'
+		END
+      ,CASE WHEN Name = 'Release_Ring_Position' THEN 'Ring position 1'
+		WHEN Name = 'Breeding_Ring_Position' THEN 'Ring position 2'
+		WHEN Name = 'Release_Ring_Color' THEN 'Ring color 1'
+		WHEN Name = 'Breeding_Ring_Color' THEN 'Ring color 2'
+		END
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+From ModuleForms 
+WHERE module_id = 9 and Name in ('Release_Ring_Position','Release_Ring_Color','Breeding_Ring_Position','Breeding_Ring_Color')
+
+
+------- update grid ------------
+
+Update f SET Name = 'Ring_position_1',Label = 'Ring position 1'
+From ModuleGrids f 
+WHERE module_id = 8 and Name = 'Release_Ring_Position' and TypeObj = 2 
+
+Update f SET Name = 'Ring_position_2',Label = 'Ring position 2'
+From ModuleGrids f 
+WHERE module_id = 8 and Name = 'Breeding_Ring_Position' and TypeObj = 2 
+
+Update f SET Name = 'Ring_color_1',Label = 'Ring color 1'
+From ModuleGrids f 
+WHERE module_id = 8 and Name = 'Release_Ring_Color' and TypeObj = 2  
+
+Update f SET Name = 'Ring_color_2',Label = 'Ring color 2'
+From ModuleGrids f 
+WHERE module_id = 8 and Name = 'Breeding_Ring_Color' and TypeObj = 2 
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('45_replace_Ring_Prop_NonID_Indiv',GETDATE(),(SELECT db_name()))
+
+
+GO

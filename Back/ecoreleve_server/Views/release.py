@@ -130,9 +130,8 @@ def releasePost(request):
     sta_id = int(data['StationID'])
     indivList = json.loads(data['IndividualList'])
     releaseMethod = data['releaseMethod']
-    taxon = indivList[0]['Species']
     curStation = session.query(Station).get(sta_id)
-
+    taxon = False
     taxons = dict(Counter(indiv['Species'] for indiv in indivList))
     def getnewObs(typeID):
         newObs = Observation()
@@ -196,8 +195,18 @@ def releasePost(request):
         errorEquipment = None
         binList = []
         for indiv in indivList: 
+
             curIndiv = session.query(Individual).get(indiv['ID'])
             curIndiv.LoadNowValues()
+            if not taxon:
+                taxon = curIndiv.Species
+            try : 
+                indiv['taxon'] = curIndiv.Species
+                del indiv['species']
+            except: 
+                indiv['taxon'] = curIndiv.Species
+                del indiv['Species']
+                pass
             curIndiv.UpdateFromJson(indiv)
 
             binList.append(MoF_AoJ(indiv))
@@ -208,11 +217,6 @@ def releasePost(request):
 
             indiv['FK_Individual'] = indiv['id']
             indiv['FK_Station'] = sta_id
-            try : 
-                indiv['taxon'] = indiv['species']
-            except: 
-                indiv['taxon'] = indiv['Species']
-                pass
             try:
                 indiv['weight'] = indiv['poids']
             except: 
@@ -222,7 +226,6 @@ def releasePost(request):
                 del indiv['Comments']
             except: 
                 pass
-
             curVertebrateInd = getnewObs(vertebrateIndID)
             curVertebrateInd.UpdateFromJson(indiv)
             vertebrateIndList.append(curVertebrateInd)

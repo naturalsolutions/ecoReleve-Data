@@ -23,8 +23,10 @@ from ..Models import (
     Base,
     Equipment,
     Sensor,
+    SensorType,
     SensorDynPropValue,
-    Individual_Location
+    Individual_Location,
+    MonitoredSite
     )
 from ..utils import Eval
 import pandas as pd 
@@ -146,8 +148,12 @@ class IndividualList(ListObjectWithDynProp):
             ,and_(Individual.ID == EquipmentTable.c['FK_Individual']
                 ,or_(EquipmentTable.c['EndDate'] == None,EquipmentTable.c['EndDate'] >= func.now())))
         joinTable = outerjoin(joinTable,Sensor,Sensor.ID == EquipmentTable.c['FK_Sensor'])
+        joinTable = outerjoin(joinTable,SensorType,Sensor.FK_SensorType == SensorType.ID)
 
         self.selectable.append(Sensor.UnicIdentifier.label('FK_Sensor'))
+        self.selectable.append(SensorType.Name.label('FK_SensorType'))
+        self.selectable.append(Sensor.Model.label('FK_SensorModel'))
+
         return joinTable
 
     def WhereInJoinTable (self,query,criteriaObj) :
@@ -284,6 +290,40 @@ class SensorList(ListObjectWithDynProp):
 
     def __init__(self,frontModule) :
         super().__init__(Sensor,frontModule)
+
+    def GetJoinTable (self,searchInfo) :
+        curEquipmentTable = Base.metadata.tables['CurrentlySensorEquiped']
+        MonitoredSiteTable = Base.metadata.tables['MonitoredSite']
+        joinTable = super().GetJoinTable(searchInfo)
+
+        joinTable = outerjoin(joinTable,curEquipmentTable,curEquipmentTable.c['FK_Sensor'] == Sensor.ID)
+
+        joinTable = outerjoin(joinTable,MonitoredSite,MonitoredSiteTable.c['ID'] == curEquipmentTable.c['FK_MonitoredSite'])
+
+        self.selectable.append(MonitoredSiteTable.c['Name'].label('FK_MonitoredSiteName'))
+        self.selectable.append(curEquipmentTable.c['FK_Individual'].label('FK_Individual'))
+
+        return joinTable
+
+    # def GetJoinTable (self,searchInfo) :
+    #     indivEquipmentTable = Base.metadata.tables['IndividualEquipment']
+    #     siteEquipmentTable = Base.metadata.tables['MonitoredSiteEquipment']
+
+    #     joinTable = super().GetJoinTable(searchInfo)
+
+    #     joinTable = outerjoin(joinTable,indivEquipmentTable
+    #         ,and_(Sensor.ID == indivEquipmentTable.c['FK_Sensor']
+    #             ,or_(indivEquipmentTable.c['EndDate'] == None,indivEquipmentTable.c['EndDate'] >= func.now())))
+
+    #     joinTable = outerjoin(joinTable,siteEquipmentTable
+    #         ,and_(Sensor.ID == siteEquipmentTable.c['FK_Sensor']
+    #             ,or_(siteEquipmentTable.c['EndDate'] == None,siteEquipmentTable.c['EndDate'] >= func.now())))
+
+    #     joinTable = outerjoin(joinTable,MonitoredSite,MonitoredSite.ID == siteEquipmentTable.c['FK_MonitoredSite'])
+
+    #     self.selectable.append(MonitoredSite.Name.label('FK_MonitoredSite'))
+    #     self.selectable.append(indivEquipmentTable.c['FK_Individual'].label('FK_Individual'))
+    #     return joinTable
 
     def WhereInJoinTable (self,query,criteriaObj) :
         query = super().WhereInJoinTable(query,criteriaObj)

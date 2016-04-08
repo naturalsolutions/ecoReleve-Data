@@ -151,7 +151,7 @@ class ObjectWithDynProp:
 
             if len(filterField)>0 :
                 filters.append(curConf.GenerateFilter())
-            elif curConf.QueryName is not None:
+            elif curConf.QueryName is not None and curConf.FilterRender != 0:
                 filters.append(curConf.GenerateFilter())
         #### OLD VERSION ####
         # for curProp in self.allProp:
