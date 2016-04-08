@@ -1,0 +1,47 @@
+/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+
+Select *
+FROM ModuleForms f
+where TypeObj in (
+			SELECT [ID]
+			  FROM [EcoReleve_ECWP].[dbo].[ProtocoleType]
+			  where Name like 'Individual %equipment%'
+			  )
+and module_id = 1 
+order by TypeObj,FormOrder
+
+SELECT [ID]
+INTO #protoID
+FROM [EcoReleve_ECWP].[dbo].[ProtocoleType]
+where Name like 'Individual %equipment%'
+
+UPDATE f SET Legend = 'Individual Infos', FieldSizeDisplay = 4 , FieldSizeEdit = 4
+FROM ModuleForms f
+WHERE TypeObj in (select * from #protoID) and name = 'FK_Individual'
+
+UPDATE f SET Legend = 'Individual Infos', FormOrder = 4 , FieldSizeDisplay = 4 , FieldSizeEdit = 4,displayClass='solo-input8',EditClass = 'solo-input8'
+FROM ModuleForms f
+WHERE TypeObj in (select * from #protoID) and name = 'Survey_type'
+
+UPDATE f SET Legend = 'Individual Infos', FormOrder = 6 , FieldSizeDisplay = 4 , FieldSizeEdit = 4--,displayClass='solo-input8',EditClass = 'solo-input8'
+FROM ModuleForms f
+WHERE TypeObj in (select * from #protoID) and name = 'Monitoring_Status'
+
+
+UPDATE f SET Legend = 'Sensor Infos', FormOrder = 10  , FieldSizeDisplay = 4 ,FieldSizeEdit = 4
+FROM ModuleForms f
+WHERE TypeObj in (select * from #protoID) and name = 'FK_Sensor'
+
+UPDATE f SET Legend = 'Sensor Infos', FormOrder = 15 , FieldSizeDisplay = 4 ,FieldSizeEdit = 4
+FROM ModuleForms f
+WHERE TypeObj in (select * from #protoID) and name = 'Sensor_Status'
+
+
+go 
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('43_Up_Conf_Indiv_Equipment',GETDATE(),(SELECT db_name()))
+
+
+GO

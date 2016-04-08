@@ -289,10 +289,9 @@ class ListObjectWithDynProp():
                 elif (self.history and curProp == 'StartDate'):
                     viewAlias = self.vAliasList[self.firstStartDate]
                     trueCol = viewAlias.c['StartDate']
-
                 else:
                     matching_element_list = list(filter(lambda x : isinstance(x,elements.Label)
-                        and x._element.name == curProp,self.selectable))
+                        and (x._element.name == curProp or x.key == curProp),self.selectable))
                     if len(matching_element_list)>0 :
                         trueCol = matching_element_list[0]._element
 
