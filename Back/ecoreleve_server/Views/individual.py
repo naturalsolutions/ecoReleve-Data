@@ -27,6 +27,8 @@ from traceback import print_exc
 from collections import OrderedDict
 from ..utils.distance import haversine
 from ..utils.generator import Generator
+from pyramid import threadlocal
+
 
 prefix = 'individuals'
 
@@ -257,16 +259,50 @@ def insertOneNewIndiv (request) :
     data = {}
     for items , value in request.json_body.items() :
         data[items] = value
+    existingIndivID = None
 
     indivType = int(data['FK_IndividualType'])
     newIndiv = Individual(FK_IndividualType = indivType , creationDate = datetime.now(),Original_ID = '0')
-    newIndiv.IndividualType = session.query(IndividualType).filter(IndividualType.ID==indivType).first()
+    # newIndiv.IndividualType = session.execute(([IndividualType.ID]).where(IndividualType.ID==indivType)).fetchone()
     newIndiv.init_on_load()
     newIndiv.UpdateFromJson(data)
-    session.add(newIndiv)
-    session.flush()
 
-    return {'ID': newIndiv.ID}
+    if indivType == 2:
+        existingIndivID = checkExisting(newIndiv)
+        if existingIndivID is not None:
+            session.rollback()
+            session.close()
+            indivID = existingIndivID
+
+    if existingIndivID is None:
+        session.add(newIndiv)
+        indivID = newIndiv.ID
+        session.flush()
+
+    return {'ID': indivID}
+
+def checkExisting(indiv):
+    session = threadlocal.get_current_registry().dbmaker()
+    indivData = indiv.GetFlatObject()
+    del indivData['ID']
+    del indivData['creationDate']
+    for key in indivData:
+        if indivData[key] is None: 
+            indivData[key] = 'null'
+    
+    searchInfo = {'criteria':[{'Column':key,'Operator':'is','Value':val} for key,val in indivData.items()],'order_by':['ID:asc']}
+    # print(searchInfo['criteria'])
+    ModuleType = 'IndivFilter'
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+
+    listObj = IndividualList(moduleFront)
+    dataResult = listObj.GetFlatDataList(searchInfo)
+    if dataResult is not []:
+        existingID = dataResult[0]['ID']
+    else :
+        existingID = None
+    session.close()
+    return existingID
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)

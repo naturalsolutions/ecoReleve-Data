@@ -1,0 +1,206 @@
+﻿/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+INSERT INTO ModuleGrids (
+[Module_ID]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[GridRender]
+      ,[GridSize]
+      ,[CellType]
+      ,[GridOrder]
+      ,[QueryName]
+      ,[Options]
+      ,[FilterOrder]
+      ,[FilterSize]
+      ,[FilterClass]
+      ,[IsSearchable]
+      ,[FilterDefaultValue]
+      ,[FilterRender]
+      ,[FilterType]
+      ,[Status])
+
+SELECT [Module_ID]
+      ,2
+      ,'Microchip'
+      ,'Microchip'
+      ,[GridRender]
+      ,[GridSize]
+      ,[CellType]
+      ,[GridOrder]
+      ,[QueryName]
+      ,204112
+      ,135
+      ,[FilterSize]
+      ,[FilterClass]
+      ,[IsSearchable]
+      ,'null'
+      ,[FilterRender]
+      ,'AutocompTreeEditor'
+      ,[Status]
+  FROM [EcoReleve_ECWP].[dbo].[ModuleGrids]
+  where Name = 'Chip_Code' and TypeObj = 1 and Module_ID =8
+
+  Update g set Options = 204089
+  from ModuleGrids g 
+  where Module_ID = 8 and Name = 'Species'
+
+  Update f set TypeObj = 1
+  from ModuleForms  f
+  where Module_ID = 9 and Name = 'Chip_Code' 
+
+
+---------------------------- New Prop in  Indiv NonID --------------------------------------------
+INSERT INTO IndividualDynProp (
+		[Name]
+      ,[TypeProp])
+VALUES('Transmitter_Type','String'),
+('Transmitter_Compagny','String') ;
+
+declare @comp int SET @comp = (SELECT ID FROM IndividualDynProp where Name ='Transmitter_Compagny')
+declare @type int SET @type = (SELECT ID FROM IndividualDynProp where Name ='Transmitter_Type')
+
+INSERT INTO [IndividualType_IndividualDynProp] (
+[Required]
+      ,[FK_IndividualType]
+      ,[FK_IndividualDynProp])
+Values(0,2,@comp),(0,2,@type)
+
+---------------------------- New Prop in FORM Indiv NonID --------------------------------------------
+INSERT INTO ModuleForms (
+[module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue])
+SELECT 9
+      ,2
+      ,'Transmitter_Compagny'
+      ,'Transmitter Compagny'
+      ,0
+      ,3
+      ,3
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,75
+      ,'Sensor Infos'
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+	FROM ModuleForms 
+	WHERE module_id = 16 and Name = 'Compagny'
+UNION 
+SELECT  9
+      ,2
+      ,'Transmitter_Type'
+      ,'Transmitter Type'
+      ,0
+      ,3
+      ,3
+      ,'Select'
+      ,'form-control'
+      ,2
+      ,80
+      ,'Sensor Infos'
+      ,'SELECT Distinct Name as label, Name as val FROM SensorType'
+      ,NULL
+      ,NULL
+      ,NULL
+      ,1
+      ,NULL
+      ,NULL
+
+Update f SET FieldSizeDisplay= 3, FieldSizeEdit = 3 
+From ModuleForms f
+WHERE module_id = 9 and TypeObj = 2 and Name in ('Transmitter_Model','Transmitter_Shape')
+
+---------------------------- New Prop in GRID Indiv NonID --------------------------------------------
+
+INSERT INTO [ModuleGrids](
+[Module_ID]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[GridRender]
+      ,[GridSize]
+      ,[CellType]
+      ,[GridOrder]
+      ,[QueryName]
+      ,[Options]
+      ,[FilterOrder]
+      ,[FilterSize]
+      ,[FilterClass]
+      ,[IsSearchable]
+      ,[FilterDefaultValue]
+      ,[FilterRender]
+      ,[FilterType]
+      ,[Status] )
+SELECT 8
+      ,2
+      ,'Transmitter_Compagny'
+      ,'Transmitter Compagny'
+      ,2
+      ,[GridSize]
+      ,[CellType]
+      ,72
+      ,[QueryName]
+      ,[Options]
+      ,155
+      ,[FilterSize]
+      ,[FilterClass]
+      ,[IsSearchable]
+      ,[FilterDefaultValue]
+      ,[FilterRender]
+      ,[FilterType]
+      ,[Status]
+  FROM [EcoReleve_ECWP].[dbo].[ModuleGrids]
+  where Module_ID = 14 and Name = 'Compagny'
+  UNION
+  SELECT 8
+      ,2
+      ,'Transmitter_Type'
+      ,'Transmitter Type'
+      ,2
+      ,[GridSize]
+      ,[CellType]
+      ,74
+      ,[QueryName]
+      ,
+'SELECT Distinct Name as label, Name as val FROM SensorType UNION SELECT ''null'' as label, ''null'' as val'
+      ,160
+      ,[FilterSize]
+      ,[FilterClass]
+      ,[IsSearchable]
+      ,[FilterDefaultValue]
+      ,[FilterRender]
+      ,[FilterType]
+      ,[Status]
+  FROM [EcoReleve_ECWP].[dbo].[ModuleGrids]
+  where Module_ID = 14 and Name = 'FK_SensorType'
+
+  GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('44_Up_Conf_NONID_Indiv_addNewProp',GETDATE(),(SELECT db_name()))
+
+
+GO
