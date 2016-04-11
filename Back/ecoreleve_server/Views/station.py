@@ -131,9 +131,16 @@ def updateStation(request):
         del data['creationDate']
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
-    curSta.UpdateFromJson(data)
-    print(curSta.__dict__)
-    return {}
+    try:
+        curSta.UpdateFromJson(data)
+        session.commit()
+        msg = {}
+    except IntegrityError as e:
+        print('\n\n\n Integerity errrorrrrrrr ------------------------------')
+        session.rollback()
+        request.response.status_code = 510
+        msg = {'existingStation' : True}
+    return msg
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'POST')
@@ -154,10 +161,18 @@ def insertOneNewStation (request) :
     newSta.StationType = session.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
-    session.add(newSta)
-    session.flush()
 
-    return {'ID': newSta.ID}
+    try:
+        session.add(newSta)
+        session.flush()
+        msg = {'ID': newSta.ID}
+    except IntegrityError as e:
+        print('\n\n\n Integerity errrorrrrrrr ------------------------------')
+        session.rollback()
+        request.response.status_code = 510
+        msg = {'existingStation' : True}
+
+    return msg
 
 def insertListNewStations(request):
     session = request.dbsession
