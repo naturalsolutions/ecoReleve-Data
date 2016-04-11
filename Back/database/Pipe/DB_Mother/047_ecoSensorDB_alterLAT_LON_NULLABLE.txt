@@ -1,6 +1,6 @@
-ALTER TABLE [T_argosgps]
+ALTER TABLE ecoReleve_Sensor.dbo.[T_argosgps]
 ALTER COLUMN [lat] decimal(9,5) NULL
-ALTER TABLE [T_argosgps]
+ALTER TABLE ecoReleve_Sensor.dbo.[T_argosgps]
 ALTER COLUMN [lon] decimal(9,5) NULL
 
 go
