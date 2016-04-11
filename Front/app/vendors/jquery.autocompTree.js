@@ -62,7 +62,9 @@
       //Fonction s'éxécutant après l'initialisation de l'objet autocompTree
       onInputInitialize: '',
       //Enregistrement de l'item en elle même
-      thisItem: $(this)
+      thisItem: $(this),
+
+      timeout: 200
     };
 
     var methods = {
@@ -210,7 +212,7 @@
                 throw ('An error occured during onInputFocus -> ' + e);
               }
             }
-            }, 350);
+            }, parametres.timeout + 50);
           });
 
           //Fonction de recherche et de filtration
@@ -261,7 +263,7 @@
                         node.setExpanded(false);
                       });
                     }
-                  },300);
+                  },parametres.timeout);
           });
 
           if (parametres.display.isDisplayDifferent) {
