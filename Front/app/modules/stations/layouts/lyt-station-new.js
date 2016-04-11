@@ -124,7 +124,36 @@ define([
     },
 
     displayTab: function(e) {
+      var _this = this;
       e.preventDefault();
+      if(window.app.checkFormSaved){
+            Swal({
+                title: 'Saving form',
+                text: 'Current form is not yet saved. Would you like to continue without saving it?',
+                type: 'error',
+                showCancelButton: true,
+                confirmButtonColor: 'red',
+                confirmButtonText: 'OK',
+                cancelButtonColor: 'grey',
+                cancelButtonText: 'Cancel',
+                closeOnConfirm: true,
+              },
+              function(isConfirm) {
+                if (!isConfirm) {
+                    return false;
+                }else {
+                  window.app.checkFormSaved = false;
+                  _this.swithTab(e);
+
+                }
+            });
+
+      } else{
+        this.swithTab(e);
+      }
+      
+    },
+    swithTab : function(e){
       var ele = $(e.target);
       var tabLink = $(ele).attr('href');
       $('.tab-ele').removeClass('active');
@@ -132,7 +161,6 @@ define([
       $(tabLink).addClass('active in');
       this.refrechView(tabLink);
     },
-
     refrechView: function(stationType) {
       var stTypeId;
       var _this = this;
