@@ -167,7 +167,7 @@ define([
                 text: 'Current form is not yet saved. Would you like to continue without saving it?',
                 type: 'error',
                 showCancelButton: true,
-                confirmButtonColor: 'red',
+                confirmButtonColor: 'rgb(221, 107, 85)',
                 confirmButtonText: 'OK',
                 cancelButtonColor: 'grey',
                 cancelButtonText: 'Cancel',
@@ -186,9 +186,8 @@ define([
 
       } else{
         Backbone.history.navigate('#stations/', {trigger: false});
-      this.ui.detail.addClass('hidden');
+        this.ui.detail.addClass('hidden');
       }
-
     },
 
     filter: function(e) {
