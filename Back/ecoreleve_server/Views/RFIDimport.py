@@ -130,7 +130,7 @@ def uploadFileRFID(request):
         ## check if Date corresponds with pose remove module ##
         if min(allDate)>= minDateEquip and (maxDateEquip is None or max(allDate)<= maxDateEquip):
             
-            data_to_insert = checkDuplicatedRFID(data_to_check,minDateEquip,maxDateEquip,idModule)
+            data_to_insert = checkDuplicatedRFID(data_to_check,min(allDate),max(allDate),idModule)
             Rfids = [{Rfid.creator.name: crea, Rfid.FK_Sensor.name: idMod, Rfid.checked.name: '0',
             Rfid.chip_code.name: c, Rfid.date_.name: d, Rfid.creation_date.name: now} for crea, idMod, c, d  in Rfids]
             # # Insert data.
