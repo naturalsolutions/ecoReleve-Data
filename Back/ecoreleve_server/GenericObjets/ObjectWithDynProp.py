@@ -387,7 +387,7 @@ class ObjectWithDynProp:
             # add default values for each field in data if exists
             #for attr in schema:
             resultat['data']['id'] = 0
-            resultat['data'].update(resultat['schema']['defaultValues'])
+            # resultat['data'].update(resultat['schema']['defaultValues'])
 
         # resultat['schema']['defaultValues'] = defaultValues
         return resultat

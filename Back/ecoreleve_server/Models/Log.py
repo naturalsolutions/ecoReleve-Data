@@ -10,20 +10,20 @@ from urllib.parse import quote_plus
 import transaction
 
 
-class Log(Base):
-    __tablename__ = 'TLOG_MESSAGES'
-    ID = Column(Integer, primary_key=True) # auto incrementing
-    JCRE = Column(DateTime, nullable = False, default = func.now())
-    LOG_LEVEL = Column(Integer, nullable = False)
-    ORIGIN = Column(String(255))
-    SCOPE = Column(String(255))
-    LOGUSER = Column(String(255))
-    DOMAINE = Column(String(255))
-    MESSAGE_NUMBER = Column(Integer)
-    LOG_MESSAGE = Column(String(255))
-    OTHERSINFOS = Column(String)
+# class Log(Base):
+    # __tablename__ = 'TLOG_MESSAGES'
+    # ID = Column(Integer, primary_key=True) # auto incrementing
+    # JCRE = Column(DateTime, nullable = False, default = func.now())
+    # LOG_LEVEL = Column(Integer, nullable = False)
+    # ORIGIN = Column(String(255))
+    # SCOPE = Column(String(255))
+    # LOGUSER = Column(String(255))
+    # DOMAINE = Column(String(255))
+    # MESSAGE_NUMBER = Column(Integer)
+    # LOG_MESSAGE = Column(String(255))
+    # OTHERSINFOS = Column(String)
 
-    __table_args__ = ({'schema': 'NSLog.dbo'})
+    # __table_args__ = ({'schema': 'NSLog.dbo'})
 
 
 def sendLog(logLevel,domaine,msg_number = 500):
