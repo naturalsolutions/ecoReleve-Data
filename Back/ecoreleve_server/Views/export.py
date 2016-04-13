@@ -86,12 +86,15 @@ def search(request):
     table = BaseExport.metadata.tables['Views']
     viewName = session.execute(select([table.c['Relation']]).select_from(table).where(table.c['ID']==viewId)).scalar()
 
+    user = request.authenticated_userid['iss']
+
     data = request.params.mixed()
     if 'criteria' in data: 
         criteria = json.loads(data['criteria'])
     else : 
-        criteria = {}
+        criteria = []
 
+    criteria.append({'Column':'creator','Operator':'=','Value':user})
     gene = Generator(viewName,session)
     if 'geo' in request.params:
         result = gene.get_geoJSON(criteria)
@@ -105,12 +108,15 @@ def search(request):
 @view_config(route_name=route_prefix+'views/getFile', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
 def views_filter_export(request):
     session = request.dbsession
+    user = request.authenticated_userid['iss']
+    
     try:
         function_export= { 'csv': export_csv, 'pdf': export_pdf, 'gpx': export_gpx }
         criteria = json.loads(request.params.mixed()['criteria'])
         viewId = criteria['viewId']
         views = BaseExport.metadata.tables['Views']
         viewName = session.execute(select([views.c['Relation']]).where(views.c['ID']==viewId)).scalar()
+
 
         table = BaseExport.metadata.tables[viewName]
         fileType= criteria['fileType']
@@ -135,6 +141,7 @@ def views_filter_export(request):
             if 'stationdate' in splittedColumnLower:
                 coll.append(table.c[splittedColumnLower['stationdate']].label('Date'))
 
+        criteria['filters'].append({'Column':'creator','Operator':'=','Value':user})
         gene = Generator(viewName,session)
         query = gene.getFullQuery(criteria['filters'],columnsList=coll)
         rows = session.execute(query).fetchall()

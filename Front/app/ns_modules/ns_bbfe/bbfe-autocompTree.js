@@ -115,7 +115,7 @@ define([
             }
             _(function () {
                 _this.$el.find('#' + _this.id).autocompTree({
-                    wsUrl: _this.wsUrl + '/ThesaurusREADServices.svc/json',
+                    wsUrl: _this.wsUrl + '',
                     webservices: 'fastInitForCompleteTree',
                     language: { hasLanguage: true, lng: _this.lng },
                     display: {
@@ -135,7 +135,7 @@ define([
                 }
                 var valeur = _this.value || '';
                 $.ajax({
-                    url: _this.wsUrl + "/ThesaurusReadServices.svc/json/getTRaductionByType",
+                    url: _this.wsUrl + "/getTRaductionByType",
                     timeout: 10000,
                     data: '{ "sInfo" : "' + valeur + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '" }',
                     dataType: "json",
@@ -189,8 +189,8 @@ define([
                 var erreur ;
 
                 $.ajax({
-                    url: _this.wsUrl + "/ThesaurusReadServices.svc/json/getTRaductionByType",
-                    timeout: 3000,
+                    url: _this.wsUrl + "/getTRaductionByType",
+                    timeout: 6000,
                     data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '" }',
                     dataType: "json",
                     type: "POST",

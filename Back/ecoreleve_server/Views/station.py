@@ -277,6 +277,10 @@ def searchStation(request):
         'Column': 'LON',
         'Operator' : 'Is not',
         'Value' : None
+        },{
+        'Column' : 'creator',
+        'Operator' : '=',
+        'Value' : user
         }]
         searchInfo['criteria'].extend(criteria)
         # searchInfo['offset'] = 0
@@ -311,9 +315,11 @@ def searchStation(request):
         if countResult < 50000 : 
             exceed = False
             dataResult = listObj.GetFlatDataList(searchInfo,getFW)
+
             for row in dataResult:
+                print(row)
                 geoJson.append({'type':'Feature', 'properties':{'name':row['Name']
-                    , 'date':row['StationDate']}
+                    , 'date':row['StationDate'], 'id' : row['ID'] }
                     , 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         return {'type':'FeatureCollection', 'features':geoJson, 'exceed': exceed}
     else :

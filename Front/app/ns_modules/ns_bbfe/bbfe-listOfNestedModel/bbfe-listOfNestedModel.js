@@ -19,7 +19,7 @@ define([
                 options.schema.validators.push('required');
                 this.defaultRequired = false;
             }
-
+            this.defaultRequired = true;
             Form.editors.Base.prototype.initialize.call(this, options);
 
             this.template = options.template || this.constructor.template;
@@ -100,14 +100,13 @@ define([
                         this.addForm(model);
                         this.defaultRequired = false;
                     };
-                }
-            } else {
-                if(this.defaultRequired){
-                    this.addEmptyForm();
-                    this.defaultRequired = false;
+                } else {
+                    if(this.defaultRequired){
+                        this.addEmptyForm();
+                        this.defaultRequired = false;
                 }
             }
-
+        }
             return this;
         },
 

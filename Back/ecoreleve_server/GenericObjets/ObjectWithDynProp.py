@@ -199,9 +199,14 @@ class ObjectWithDynProp:
                 pass
         else:
             if (nameProp.lower() in self.GetType().DynPropNames):
+                print(' property name ************')
+                print(nameProp)
+                print(valeur)
                 if (nameProp not in self.PropDynValuesOfNow #and parseValue(valeur)!= None
                     ) or (isEqual(self.PropDynValuesOfNow[nameProp],valeur) is False):
                     #### IF no value or different existing value, new value is affected ####
+                    print('************************************************')
+                    print(self.GetPropWithName(nameProp)['type'])
                     if 'date' in self.GetPropWithName(nameProp)['type'].lower():
                         try:
                             valeur = parse(valeur.replace(' ',''))
