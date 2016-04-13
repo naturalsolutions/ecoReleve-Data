@@ -38,10 +38,9 @@ class Observation(Base,ObjectWithDynProp):
     FK_Individual = Column(Integer,ForeignKey('Individual.ID'))
 
     Observation_children = relationship("Observation", cascade="all, delete-orphan")
-    DynPropValues = relationship("ObservationDynPropValue", cascade="all, delete-orphan")
     Equipment = relationship("Equipment", backref = 'Observation',cascade = "all, delete-orphan", uselist=False)
     Station = relationship("Station", back_populates = 'Observations')
-
+    Individual = relationship('Individual')
 
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
@@ -68,13 +67,38 @@ class Observation(Base,ObjectWithDynProp):
         else :
             return self.ObjContext.query(ProtocoleType).get(self.FK_ProtocoleType)
 
+    def linkedFieldDate(self):
+        try :
+            return self.Station.StationDate
+        except :
+            return datetime.now()
+
+    def UpdateFromJson(self,DTOObject,startDate = None):
+        super().UpdateFromJson(DTOObject,startDate)
+        self.updateLinkedField()
+
     @hybrid_property
     def Observation_childrens(self):
-        if self.Observation_children:
-            return self.Observation_children
+        if self.Observation_children is not None or self.Observation_children != []:
+            # subObsList = []
+            # print(self.Observation_children)
+            # print(type(self.Observation_children))
+
+            # typeName = 'children'
+            # sub_ProtocoleType = None
+            # # print ('CHILDREN !!!!!!!!!!') ### Append flatdata to list of data for existing subProto 
+            # typeName = self.Observation_children[0].GetType().Name
+            # for subObs in self.Observation_children:
+            #     subObs.LoadNowValues()
+            #     sub_ProtocoleType = subObs.GetType().ID
+            #     subObsList.append(subObs.GetFlatObject())
+            # # self.__setattr__(typeName, subObsList)
+            # # print('self.GetProperty(typeName)')
+            # # print(self.GetProperty(typeName))
+            # return subObsList
+            return True
         else:
             return []
-
 
     @Observation_childrens.setter
     def Observation_childrens(self,listOfSubProtocols):
@@ -94,28 +118,24 @@ class Observation(Base,ObjectWithDynProp):
             # self.deleteSubObs(listObs)
         self.Observation_children = listObs
 
-    ###### Don't need that ORM do the job #####
-    # def deleteSubObs(self,listObs):
-    #     print('------- DELETE SUBOBS')
-    #     objToDel = list(set(listObs).symmetric_difference(self.Observation_children))
-    #     for obj in objToDel:
-    #         self.ObjContext.delete(obj)
-
     def GetFlatObject(self,schema=None):
         result = super().GetFlatObject()
         subObsList = []
         typeName = 'children'
         sub_ProtocoleType = None
-        if self.Observation_childrens != []:
+        if self.Observation_children != []:
             # print ('CHILDREN !!!!!!!!!!') ### Append flatdata to list of data for existing subProto 
-            typeName = self.Observation_childrens[0].GetType().Name
-            for subObs in self.Observation_childrens:
+            typeName = self.Observation_children[0].GetType().Name
+            for subObs in self.Observation_children:
                 subObs.LoadNowValues()
                 sub_ProtocoleType = subObs.GetType().ID
                 subObsList.append(subObs.GetFlatObject())
         result[typeName] = subObsList
         return result
 
+@event.listens_for(Observation, 'after_delete')
+def unlinkLinkedField(mapper, connection, target):
+    target.deleteLinkedField()
 
 #--------------------------------------------------------------------------
 class ObservationDynPropValue(Base):

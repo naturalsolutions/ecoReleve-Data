@@ -1,0 +1,21 @@
+
+CREATE NONCLUSTERED INDEX IX_Sta_type_lat_lon_in_ID_creationDate
+ON [dbo].[Station] ([FK_StationType],[LAT],[LON])
+INCLUDE ([ID],[creationDate])
+GO
+
+CREATE NONCLUSTERED INDEX IX_Sta_creationDate
+ON [dbo].[Station] ([creationDate])
+GO
+
+
+CREATE NONCLUSTERED INDEX IX_Obs_FK_Sta
+ON [dbo].[Observation] ([FK_Station])
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('21_Create_Index',GETDATE(),(SELECT db_name()))
+
+
+GO

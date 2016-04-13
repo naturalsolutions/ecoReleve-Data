@@ -9,7 +9,8 @@ define([
   'config',
   'ns_modules/ns_com',
   'ns_grid/model-grid',
-  'ns_filter/model-filter',
+  //'ns_filter/model-filter_module',
+  'ns_filter_bower',
   './lyt-individuals-detail',
   './lyt-individuals-new',
   'i18n'
@@ -29,7 +30,8 @@ define([
       'click #btnFilter': 'filter',
       'click #back': 'hideDetails',
       'click button#clear': 'clearFilter',
-      'click button#createNew': 'newIndividual'
+      'click button#createNew': 'newIndividual',
+      'click #btn-export': 'exportGrid'
     },
 
     ui: {
@@ -138,6 +140,24 @@ define([
         },
         position: 'top'
       });*/
+    },
+
+    exportGrid: function() {
+      var url = config.coreUrl + 'individuals/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
+      var link = document.createElement('a');
+      link.classList.add('DowloadLinka');
+      
+      //link.download = url;
+      link.href = url;
+      link.onclick = function () {
+          //this.parentElement.removeChild(this);
+          var href = $(link).attr('href');
+          window.location.href = link;
+          document.body.removeChild(link);
+      };
+     /*his.$el.append(link);*/
+     document.body.appendChild(link);
+     link.click();
     }
   });
 });

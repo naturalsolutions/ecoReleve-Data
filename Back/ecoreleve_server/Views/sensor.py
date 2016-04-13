@@ -23,6 +23,9 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
 from collections import OrderedDict
 from datetime import datetime
+import io
+from pyramid.response import Response ,FileResponse
+
 
 
 prefix = 'sensors'
@@ -160,6 +163,8 @@ def getSensor(request):
         geoJson=[]
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
+    else : 
+        response  = curSensor.GetFlatObject()
 
     return response
 
@@ -180,7 +185,7 @@ def getSensorHistory(request):
             ).where(table.c['FK_Sensor'] == id
             ).order_by(desc(table.c['StartDate']))
 
-    elif (curSensorType.lower() in ['gsm','satellite']):
+    elif (curSensorType.lower() in ['gsm','satellite','vhf']):
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = join(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
         query = select([table.c['StartDate'],table.c['EndDate'],table.c['FK_Individual'],Sensor.UnicIdentifier]).select_from(joinTable
@@ -237,8 +242,7 @@ def insertOneNewSensor (request) :
     session = request.dbsession
     data = {}
     for items , value in request.json_body.items() :
-        if value != "" :
-            data[items] = value
+        data[items] = value
 
     sensorType = int(data['FK_SensorType'])
     newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now())
@@ -279,35 +283,36 @@ def searchSensor(request):
 
     return result
 
-@view_config(route_name=prefix + '/export', renderer='csv', request_method='POST')
+@view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
 def sensors_export(request):
     session = request.dbsession
-    query = select(Sensor.__table__.c)
-    criteria = request.json_body.get('criteria', {})
-    searchInfo = []
-    if criteria != {}:
-        for elem in criteria:
-            if elem['Value'] != str(-1):
-                searchInfo.append(elem)
+    data = request.params.mixed()
+    searchInfo = {}
+    searchInfo['criteria'] = []
+    if 'criteria' in data: 
+        data['criteria'] = json.loads(data['criteria'])
+        if data['criteria'] != {} :
+            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
 
-    if searchInfo !=[]:
-        for ele in searchInfo :
-            if (ele['Operator'] == 'Is'):
-                query = query.where(Sensor.__table__.c[ele['Column']] == ele['Value'])
-            else:
-                query = query.where(Sensor.__table__.c[ele['Column']] != ele['Value'])
+    searchInfo['order_by'] = []
 
-    # Run query
-    data = session.execute(query).fetchall()
-    header = [col.name for col in Sensor.__table__.c]
-    rows = [[val for val in row] for row in data]
-    
-    filename = 'object_search_export.csv'
-    request.response.content_disposition = 'attachment;filename=' + filename
-    return {
-         'header': header,
-         'rows': rows,
-    }
+    ModuleType = 'SensorFilter'
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+
+    listObj = SensorList(moduleFront)
+    dataResult = listObj.GetFlatDataList(searchInfo)
+
+    df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
+
+    fout = io.BytesIO()
+    writer = pd.ExcelWriter(fout)
+    df.to_excel(writer, sheet_name='Sheet1')
+    writer.save()
+    file = fout.getvalue()
+
+    dt = datetime.now().strftime('%d-%m-%Y')
+    return Response(file,content_disposition= "attachment; filename=sensor_export_"+dt+".xlsx",content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
 
 
 

@@ -9,7 +9,8 @@ define([
 	'config',
 	'ns_modules/ns_com',
 	'ns_grid/model-grid',
-	'ns_filter/model-filter',
+	//'ns_filter/model-filter_module',
+  'ns_filter_bower',
 	'./lyt-sensors-detail',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
@@ -28,7 +29,7 @@ define([
       'click #btnFilter': 'filter',
       'click #back': 'hideDetails',
       'click button#clear': 'clearFilter',
-      'change select.FK_SensorType': 'updateModels',
+     /* 'change select.FK_SensorType': 'updateModels',*/
       'click #btn-export': 'exportGrid',
       'click button#btnNew': 'newSensor'
     },
@@ -162,7 +163,7 @@ define([
       Backbone.history.navigate(this.rootUrl, {trigger: false});
       this.ui.detail.addClass('hidden');
     },
-    updateModels: function(e) {
+/*    updateModels: function(e) {
       // get list of models for selected sensor type
       var selectedType = $(e.target).val();
       var modelField = $('select.Model');
@@ -205,23 +206,24 @@ define([
         content += '<option>' + data[i] + '</option>';
       }
       $(elem).html(content);
-    },
+    },*/
 
     exportGrid: function() {
-      $.ajax({
-        url: config.coreUrl + 'sensors/export',
-        data: JSON.stringify({criteria: this.filters.criterias}),
-        contentType: 'application/json',
-        type: 'POST'
-      }).done(function(data) {
-        var url = URL.createObjectURL(new Blob([data], {'type': 'text/csv'}));
-        var link = document.createElement('a');
-        link.href = url;
-        link.download = 'sensors_export.csv';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      });
+      var url = config.coreUrl + 'sensors/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
+      var link = document.createElement('a');
+      link.classList.add('DowloadLinka');
+      
+      //link.download = url;
+      link.href = url;
+      link.onclick = function () {
+          //this.parentElement.removeChild(this);
+          var href = $(link).attr('href');
+          window.location.href = link;
+          document.body.removeChild(link);
+      };
+     /*his.$el.append(link);*/
+     document.body.appendChild(link);
+     link.click();
     },
 
   });

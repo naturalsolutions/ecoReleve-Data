@@ -1,0 +1,24 @@
+
+update [ObservationDynProp] set TypeProp = 'Time'
+where Typeprop = 'Date' and (Name like '%time%' or Name like '%hour%')
+
+
+ALTER Table Individual 
+Alter Column Birth_date Date
+
+ALTER Table Individual 
+Alter Column Death_date Date
+
+update ModuleForms Set InputType = 'DateTimePicker', Options = '{"format":"HH:mm:ss"}'
+where InputType = 'TimePicker' 
+
+update ModuleForms set Options  = '{"format":"DD/MM/YYYY"}'
+where module_id = 9 and (Name = 'Birth_date' or Name = 'Death_date')
+
+go
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('15_Alter_model_DateTime_Time',GETDATE(),(SELECT db_name()))
+
+
+GO

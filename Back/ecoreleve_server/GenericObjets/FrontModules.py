@@ -68,7 +68,7 @@ class ModuleForms(Base):
 
     @staticmethod
     def GetClassFromSize(FieldSize):
-        return FieldSizeToClass[FieldSize]
+        return 'col-md-'+str(FieldSize)
 
     def GetDTOFromConf(self,Editable):
         ''' return input field to build form '''
@@ -90,11 +90,12 @@ class ModuleForms(Base):
             self.fullPath = True
             isDisabled = True
 
-            if self.InputType in ['AutocompTreeEditor']:
-                curInputType = 'Text'
-                self.fullPath = True
+            # if self.InputType in ['AutocompTreeEditor']:
+            #     curInputType = 'Text'
+            #     self.fullPath = True
 
-        CssClass = FieldSizeToClass[curSize]
+        # CssClass = FieldSizeToClass[curSize]
+        CssClass = 'col-md-'+str(curSize)
 
         self.dto = {
             'name': self.Name,
@@ -103,14 +104,25 @@ class ModuleForms(Base):
             'editable' : Editable,
             'editorClass' : str(self.editorClass) ,
             'validators': [],
-            'options': [],
+            'options': None,
             'defaultValue' : None,
             'editorAttrs' : {'disabled': isDisabled},
             'fullPath':self.fullPath
             }
 
+        try : 
+            self.dto['options'] = json.loads(self.Options)
+        except:
+            self.dto['options'] = self.Options
+
         if self.Validators is not None:
             self.dto['validators'] = json.loads(self.Validators)
+
+        if self.Options is not None:
+            try:
+                self.dto['options'] = json.loads(self.Options)
+            except:
+                pass
 
         if self.Required == 1 :
             if self.InputType=="Select":
@@ -137,6 +149,7 @@ class ModuleForms(Base):
 
     def InputSelect (self) :
         if self.Options is not None and self.Options != '' :
+            self.dto['options'] = []
             result = self.session.execute(text(self.Options)).fetchall()
             for row in result :
                 temp = {}
@@ -176,12 +189,13 @@ class ModuleForms(Base):
 
             self.dto['fieldsets'] = resultat
             self.dto['subschema'] = subschema
+            self.dto['nbByDefault'] = self.DefaultValue
 
-            try :
-                subTypeObj = int(self.Options)
-                self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
-            except : 
-                pass
+            # try :
+            #     subTypeObj = int(self.Options)
+            #     self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
+            # except : 
+            #     pass
 
     def InputThesaurus(self) :
         if self.Options is not None and self.Options != '' :
@@ -190,22 +204,28 @@ class ModuleForms(Base):
             , 'lng':threadlocal.get_current_request().authenticated_userid['userlanguage']
             ,'displayValueName': 'valueTranslated'}
             self.dto['options']['startId'] = self.Options
+            self.dto['options']['iconFont'] = 'reneco reneco-thesaurus'
 
     def InputAutocomplete(self):
         if self.Options is not None and self.Options != '':
             option = json.loads(self.Options)
-        if 'SELECT' in option['source']:
+            self.dto['options'] = option
+
+            if 'SELECT' in option['source']:
+                self.dto['options']['source']= []
                 result = self.session.execute(text(option['source'])).fetchall()
                 for row in result:
                     self.dto['options']['source'].append(row[0])
-        else : 
-            self.dto['options'] = {'source': option['source'],'minLength' :option['minLength']}
+            self.dto['options']['iconFont'] = 'reneco reneco-autocomplete'
+            
+
 
     func_type_context = {
         'Select': InputSelect,
         'ListOfNestedModel' : InputLNM,
+        'GridFormEditor' : InputLNM,
         'AutocompTreeEditor' : InputThesaurus,
-        'AutocompleteEditor': InputAutocomplete
+        'AutocompleteEditor': InputAutocomplete,
         }
 
 
@@ -270,11 +290,18 @@ class ModuleGrids (Base) :
             'name' : self.Name,
             'type' : self.FilterType,
             'label' : self.Label,
+            'title' : self.Label,
             'editable' : isEditable(int(self.FilterRender)),
             # 'editorClass' : str(self.FilterClass) ,
             'validators': [],
-            'options': [],
+            'options': [] ,
             }
+
+        try :
+            filter_['options'] = json.loads(self.Options)
+        except :
+            filter_['options'] = self.Options
+
         if (self.FilterClass) : 
             filter_['fieldClass'] = self.FilterClass+ ' ' + FieldSizeToClass[self.FilterSize] 
         else :  
@@ -292,15 +319,18 @@ class ModuleGrids (Base) :
             , 'lng':threadlocal.get_current_request().authenticated_userid['userlanguage']
             ,'displayValueName': 'valueTranslated'}
             filter_['options']['startId'] = self.Options
+            filter_['options']['ValidationRealTime'] = False
+            filter_['options']['iconFont'] = 'reneco reneco-thesaurus'
 
         if self.FilterType=='AutocompleteEditor' and  self.Options is not None and self.Options != '':
             option = json.loads(self.Options)
-            filter_['options']= {'source':[]}
             if 'SELECT' in option['source']:
+                filter_['options']= {'source':[]}
                 result = self.session.execute(text(option['source'])).fetchall()
                 for row in result:
                     filter_['options']['source'].append(row[0])
             else : 
-                filter_['options'] = {'source': option['source'],'minLength' :option['minLength']}
+                filter_['options'] = filter_['options']
+            filter_['options']['iconFont'] = 'reneco reneco-autocomplete'
 
         return filter_

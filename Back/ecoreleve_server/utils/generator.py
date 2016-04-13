@@ -22,7 +22,9 @@ class Generator :
             'NVARCHAR':'string',
             'INTEGER':'number',
             'DECIMAL':'number',
-            'DATETIME':'date',
+            'DATETIME':'string',
+            'DATE':'string',
+            'TIME':'string',
             'BIT':'boolean'
             }
         self.dictFilter = {
@@ -31,7 +33,9 @@ class Generator :
             'INTEGER':'Number',
             'DECIMAL':'Number',
             'NUMERIC':'Number',
-            'DATETIME':'DateTimePicker',
+            'DATETIME':'DateTimePickerEditor',
+            'DATE':'DateTimePickerEditor',
+            'TIME':'DateTimePickerEditor',
         }
         try : 
             self.table=BaseExport.metadata.tables[table]
@@ -89,18 +93,28 @@ class Generator :
 
     def get_filters(self):
         data = []
+        options = None
         for column in self.table.c:
             name_c = str(column.name)
+            options = None
             try :
-                type_c = str(column.type).split('(')[0]
+                db_type = str(column.type).split('(')[0]
             except: 
-                type_c = None
+                db_type = None
                 pass
-            if type_c in self.dictFilter :
-                type_c = self.dictFilter[type_c]
-            else : 
-                type_c = 'Text'
-            data.append({'name':name_c, 'type':type_c , 'title':name_c })
+            if db_type in self.dictFilter :
+                type_f = self.dictFilter[db_type]
+                if type_f == 'DateTimePickerEditor':
+                    if db_type == 'TIME':
+                        options ={'format':'hh:mm:ss'}
+                    elif db_type == 'DATE':
+                        options ={'format':'DD/MM/YYYY'}
+                    else : 
+                        options ={'format':'DD/MM/YYYY hh:mm:ss'}
+            else :
+                type_f = 'Text'
+            data.append({'name':name_c, 'type':type_f , 'title':name_c, 'options':options})
+
         return data
 
     def where_(self,query,col,operator,value):

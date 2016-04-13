@@ -109,20 +109,14 @@ define([
         name: 'StartDate',
         label: 'Start date',
         editable: false,
-        cell : Backgrid.Extension.MomentCell.extend({
-          modelInUnixTimestamp: true,
-          displayFormat: "DD/MM/YYYY HH:mm:ss"
-        }),
+        cell : 'timestamp',
         headerCell : null
       },
       {
         name: 'EndDate',
         label: 'End Date',
         editable: false,
-        cell : Backgrid.Extension.MomentCell.extend({
-          modelInUnixTimestamp: true,
-          displayFormat: "DD/MM/YYYY HH:mm:ss"
-        }),
+        cell : 'timestamp',
         headerCell : null
       },{
         name: 'FK_MonitoredSite',

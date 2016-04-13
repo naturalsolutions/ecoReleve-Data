@@ -31,7 +31,7 @@ def isNumeric(val):
         return False
 
 def isEqual(val1,val2):
-    if isNumeric(val2) is True:
+    if isNumeric(val2) and isNumeric(val1):
         return float(val1)==float(val2)
     else :
         return parseValue(val1) == parseValue(val2)

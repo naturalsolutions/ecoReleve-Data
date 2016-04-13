@@ -1,0 +1,13 @@
+update f set Options= 204121 
+  FROM [EcoReleve_ECWP].[dbo].[ModuleForms] f
+  where module_id = 16 and name = 'Status' 
+
+  update g SET  Options= 204121 
+  FROM [EcoReleve_ECWP].[dbo].ModuleGrids g
+   where module_id = 14 and name = 'Status' 
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('30_Up_Sensor_Status_Form&Grid',GETDATE(),(SELECT db_name()))
+
+
+GO

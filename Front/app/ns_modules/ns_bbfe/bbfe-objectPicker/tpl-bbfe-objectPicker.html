@@ -1,5 +1,6 @@
 <div class="input-group picker">
-  <input <%= disabled %> class="form-control <%= required %>" name="<%= key %>" type="number" value="<%= value %>">
+  <span class="input-group-addon <%=iconFont%>"></span>
+  <input <%= disabled %> class="form-control <%= required %>" name="<%= key %>" type="<%=type%>" value="<%= value %>" data_value="<%= data_value %>">
   <span class="input-group-btn picker">
     <button type="button" class="btn <%= visu %> glyphicon-plus">
     </button>
@@ -8,8 +9,7 @@
 
 
 <div class="modal-outer" id="modal-outer">
-  <div class="full-height modal" id="myModal">
-      <div class="modal-content full-height clearfix">
+      <div class="modal full-height clearfix white">
         <div class="col-xs-5 full-height no-padding">
           <div class="toolbar top">
             <legend class="inherit">Identify <%= pickerTitle %></legend>
@@ -45,5 +45,4 @@
         </div>
         <div id="creation" class="pos-abs hidden full-height col-xs-12 no-padding"></div>
       </div>
-  </div>
 </div>

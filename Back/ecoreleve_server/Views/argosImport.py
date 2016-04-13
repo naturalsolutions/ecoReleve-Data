@@ -196,7 +196,8 @@ def parseDSFileAndInsert(full_filename,session):
 
     os.remove(full_filename)
     shutil.rmtree(out_path)
-    return {'inserted gps':nb_gps_data, 'existing gps': nb_existingGPS,'inserted Engineering':nb_eng, 'existing Engineering': nb_existingEng - nb_eng }
+    return {'inserted gps':nb_gps_data, 'existing gps': nb_existingGPS,'inserted Engineering':nb_eng
+    , 'existing Engineering': nb_existingEng - nb_eng,'inserted argos':0, 'existing argos':0}
 
 def checkExistingEng(EngData,session) :
     EngData['id'] = range(EngData.shape[0])
@@ -240,8 +241,8 @@ def checkExistingGPS (GPSData,session) :
     minDateGPS = GPSData['datetime'].min()
 
     # round lat/lon decimal 3 for data from Files
-    GPSData['Latitude(N)'] = np.round(GPSData['Latitude(N)'],decimals = 3)
-    GPSData['Longitude(E)'] = np.round(GPSData['Longitude(E)'],decimals = 3)
+    GPSData['Latitude(N)'] = GPSData['Latitude(N)'].round(3)
+    GPSData['Longitude(E)'] = GPSData['Longitude(E)'].round(3)
 
     # Retrieve exisintg data from DB
     queryGPS = select([ArgosGps.pk_id, ArgosGps.date, ArgosGps.lat, ArgosGps.lon, ArgosGps.ptt]).where(ArgosGps.type_ == 'gps')
@@ -253,9 +254,9 @@ def checkExistingGPS (GPSData,session) :
         ,columns=[ArgosGps.pk_id.name, ArgosGps.date.name, ArgosGps.lat.name, ArgosGps.lon.name, ArgosGps.ptt.name]
         , coerce_float=True )
 
-    # round lat/lon decimal 3 for data from DB
-    GPSrecords['lat'] = np.round(GPSrecords['lat'].astype(float),decimals = 3)
-    GPSrecords['lon'] = np.round(GPSrecords['lon'].astype(float),decimals = 3)
+    # round_ lat/lon decimal 3 for data from DB
+    GPSrecords['lat'] = GPSrecords['lat'].round(3)
+    GPSrecords['lon'] = GPSrecords['lon'].round(3)
 
     # apply a merge/join beetween dataframes with data from Files and data from DB
     merge = pd.merge(GPSData,GPSrecords, left_on = ['datetime','Latitude(N)','Longitude(E)','ptt'], right_on = ['date','lat','lon','FK_ptt'])
@@ -343,7 +344,8 @@ def parseDIAGFileAndInsert(full_filename,session):
     if DFToInsert.shape[0] != 0 :
         DFToInsert.to_sql(ArgosGps.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'],index=False)
     os.remove(full_filename)
-    return {'inserted':DFToInsert.shape[0], 'existing':df.shape[0] - DFToInsert.shape[0]}
+    return {'inserted gps':0, 'existing gps': 0,'inserted Engineering':0, 'existing Engineering': 0
+    ,'inserted argos':DFToInsert.shape[0], 'existing argos':df.shape[0] - DFToInsert.shape[0]}
 
 def checkExistingArgos (dfToCheck,session) :
     dfToCheck['id'] = range(dfToCheck.shape[0])
@@ -352,8 +354,8 @@ def checkExistingArgos (dfToCheck,session) :
     maxDate = dfToCheck['date'].max()
     minDate = dfToCheck['date'].min()
 
-    dfToCheck['lat'] = np.round(dfToCheck['lat'],decimals = 3)
-    dfToCheck['lon'] = np.round(dfToCheck['lon'],decimals = 3)
+    dfToCheck['lat'] = dfToCheck['lat'].round(3)
+    dfToCheck['lon'] = dfToCheck['lon'].round(3)
     # Retrieve data from DB
     queryArgos = select([ArgosGps.pk_id, ArgosGps.date, ArgosGps.lat, ArgosGps.lon, ArgosGps.ptt]).where(ArgosGps.type_ == 'arg')
     queryArgos = queryArgos.where(and_(ArgosGps.date >= minDate , ArgosGps.date <= maxDate))
@@ -364,8 +366,8 @@ def checkExistingArgos (dfToCheck,session) :
         ,columns=[ArgosGps.pk_id.name, ArgosGps.date.name, ArgosGps.lat.name, ArgosGps.lon.name, ArgosGps.ptt.name]
         , coerce_float=True )
 
-    ArgosRecords.loc[:,('lat')] = np.round(ArgosRecords['lat'], decimals=3)
-    ArgosRecords.loc[:,('lon')] = np.round(ArgosRecords['lon'], decimals=3)
+    ArgosRecords.loc[:,('lat')] = ArgosRecords['lat'].round(3)
+    ArgosRecords.loc[:,('lon')] = ArgosRecords['lon'].round(3)
 
     merge = pd.merge(dfToCheck,ArgosRecords, left_on = ['date','lat','lon','FK_ptt'], right_on = ['date','lat','lon','FK_ptt'])
     DFToInsert = dfToCheck[~dfToCheck['id'].isin(merge['id'])]

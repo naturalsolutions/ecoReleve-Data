@@ -132,6 +132,12 @@ define([
           this.ui.frequency.find('option[value="60"]').prop('selected', true);
           this.cols = [
             {
+              name: 'FK_ptt',
+              label: 'Unic Identifier',
+              editable: false,
+              cell: 'string'
+            },
+            {
               name: 'FK_Individual',
               label: 'Individual ID',
               editable: false,
@@ -145,16 +151,19 @@ define([
                 }
             }),
             },{
+              name: 'Survey_type',
+              label: 'Survey Type',
+              editable: false,
+              cell: 'string'
+            },
+            {
               name: 'FK_Sensor',
               label: 'FK_Sensor',
               editable: false,
-              cell: 'string'
-            },{
-              name: 'FK_ptt',
-              label: 'Unic Identifier',
-              editable: false,
-              cell: 'string'
-            }, {
+              cell: 'string',
+              renderable: false
+            }, 
+            {
               name: 'nb',
               label: 'NB',
               editable: false,
@@ -175,7 +184,7 @@ define([
               editable: false,
               cell: 'string',
             }, {
-              name: 'min_date',
+              name: 'max_date',
               label: 'Data To',
               editable: false,
               cell: 'string',
@@ -192,6 +201,12 @@ define([
           this.ui.frequency.find('option[value="all"]').prop('selected', true);
           this.cols = [
             {
+              name: 'FK_ptt',
+              label: 'Sensor Identifier',
+              editable: false,
+              cell: 'string'
+            },
+            {
               name: 'FK_Individual',
               label: 'Individual ID',
               editable: false,
@@ -205,15 +220,15 @@ define([
                 }
               }),
             },{
+              name: 'Survey_type',
+              label: 'Survey Type',
+              editable: false,
+              cell: 'string'
+            },{
               name: 'FK_Sensor',
               label: 'Sensor',
               editable: false,
               renderable: false,
-              cell: 'string'
-            },{
-              name: 'FK_ptt',
-              label: 'Unic Identifier',
-              editable: false,
               cell: 'string'
             }, {
               name: 'nb',
@@ -236,7 +251,7 @@ define([
               editable: false,
               cell: 'string',
             }, {
-              name: 'min_date',
+              name: 'max_date',
               label: 'Data To',
               editable: false,
               cell: 'string',

@@ -1,0 +1,36 @@
+--UPDATE s SET FK_Region = dbo.fn_GetRegionFromLatLon(LAT,LON)
+--  FROM [EcoReleve_ECWP].[dbo].[Station] s
+--  where FK_Region is null
+
+--UPDATE l SET FK_Region =  dbo.fn_GetRegionFromLatLon(LAT,LON)
+--  FROM [EcoReleve_ECWP].[dbo].Individual_Location l 
+--  where FK_Region is null
+
+
+   UPDATE l SET FK_region= geo.ID
+    FROM Individual_Location l  
+	LEFT join Region geo 
+    ON l.lon >= geo.min_Lon AND l.lon <= geo.max_Lon AND l.lat >= geo.min_Lat AND l.lat <= geo.max_Lat
+	WHERE l.FK_Region is null 
+	AND geometry::STPointFromText('Point(' + CONVERT(varchar, l.lon) + ' ' 
+    + CONVERT(varchar, l.lat) +')', 4326).STWithin(geo.valid_geom)=1
+
+
+	UPDATE l SET FK_region= geo.ID
+    FROM Station l  
+	LEFT join Region geo 
+    ON l.lon >= geo.min_Lon AND l.lon <= geo.max_Lon AND l.lat >= geo.min_Lat AND l.lat <= geo.max_Lat
+	WHERE l.FK_Region is null 
+	AND geometry::STPointFromText('Point(' + CONVERT(varchar, l.lon) + ' ' 
+    + CONVERT(varchar, l.lat) +')', 4326).STWithin(geo.valid_geom)=1
+
+
+GO 
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('28_Update_Missing_Region',GETDATE(),(SELECT db_name()))
+
+
+GO

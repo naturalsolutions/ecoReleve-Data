@@ -60,7 +60,7 @@ BEGIN
 	exec sp_rename 'TmpIndivExport','TIndividu'
 END
 
-
+GO
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('2_Alter_SP_ExportAllIndiv',GETDATE(),(SELECT db_name()))
 

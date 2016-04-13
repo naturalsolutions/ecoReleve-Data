@@ -1,5 +1,14 @@
 from pyramid.httpexceptions import default_exceptionresponse_view, HTTPNotFound
 from pyramid.interfaces import IRoutesMapper
+from pyramid.view import view_config
+from pyramid.security import NO_PERMISSION_REQUIRED
+from ..Models import sendLog
+
+@view_config(context=Exception, permission = NO_PERMISSION_REQUIRED)
+def error_view(exc, request):
+    sendLog(logLevel=5,domaine=3)
+    return exc
+
 
 def notfound(request):
     return HTTPNotFound('Not found')
@@ -36,8 +45,10 @@ def add_routes(config):
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### User #####
+    config.add_route('users/id', 'ecoReleve-Core/users/{id}')
     config.add_route('core/user', 'ecoReleve-Core/user')
     config.add_route('core/currentUser', 'ecoReleve-Core/currentUser')
+    config.add_route('autocomplete/onLoad', 'ecoReleve-Core/autocomplete/{obj}/{prop}/onLoad')
     config.add_route('autocomplete', 'ecoReleve-Core/autocomplete/{obj}/{prop}')
     config.add_route('autocomplete/ID', 'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
 
@@ -47,9 +58,11 @@ def add_routes(config):
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
     config.add_route('stations', 'ecoReleve-Core/stations/')
+    config.add_route('stations/export', 'ecoReleve-Core/stations/export')
     #config.add_route('stations/fileImport', 'ecoReleve-Core/stations/fileImport/{id}') 
     config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
-    config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
+    config.add_route('stations/action', 'ecoReleve-Core/stations/{action}')
+
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Stations/Protocols #####
@@ -94,6 +107,7 @@ def add_routes(config):
     ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/') 
     config.add_route('individuals/insert', 'ecoReleve-Core/individuals')
+    config.add_route('individuals/export', 'ecoReleve-Core/individuals/export')
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/history', 'ecoReleve-Core/individuals/{id}/history',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/equipment', 'ecoReleve-Core/individuals/{id}/equipment',custom_predicates = (integers('id'),))
@@ -106,14 +120,15 @@ def add_routes(config):
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### MonitoredSite #####
-    config.add_route('monitoredSite', 'ecoReleve-Core/monitoredSites/') 
-    config.add_route('monitoredSite/', 'ecoReleve-Core/monitoredSites') 
-    config.add_route('monitoredSite/id', 'ecoReleve-Core/monitoredSites/{id}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/history', 'ecoReleve-Core/monitoredSites/{id}/history/',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/equipment', 'ecoReleve-Core/monitoredSites/{id}/equipment',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/history/action', 'ecoReleve-Core/monitoredSites/{id}/history/{action}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSite/action', 'ecoReleve-Core/monitoredSites/{action}') 
+    config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites/') 
+    config.add_route('monitoredSites/', 'ecoReleve-Core/monitoredSites') 
+    config.add_route('monitoredSites/export', 'ecoReleve-Core/monitoredSites/export') 
+    config.add_route('monitoredSites/id', 'ecoReleve-Core/monitoredSites/{id}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/history', 'ecoReleve-Core/monitoredSites/{id}/history/',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/equipment', 'ecoReleve-Core/monitoredSites/{id}/equipment',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/history/action', 'ecoReleve-Core/monitoredSites/{id}/history/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/action', 'ecoReleve-Core/monitoredSites/{action}') 
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Release #####

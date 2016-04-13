@@ -40,6 +40,13 @@ def datetime_adapter(obj, request):
     except :
         return obj.strftime ('%d/%m/%Y')
 
+def date_adapter(obj, request):
+    """Json adapter for datetime objects."""
+    try: 
+        return obj.strftime ('%d/%m/%Y')
+    except :
+        return obj
+
 def time_adapter(obj, request):
     """Json adapter for datetime objects."""
     try:
@@ -70,24 +77,32 @@ def main(global_config, **settings):
     Base.metadata.create_all(engine)
     Base.metadata.reflect(views=True, extend_existing=False) 
 
-    BaseExport.metadata.bind = engineExport
-    BaseExport.metadata.create_all(engineExport)
-    BaseExport.metadata.reflect(views=True, extend_existing=False)
 
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
 
     binds = {"default": engine, "Export": engineExport}
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
-    config.registry.dbmakerExport = scoped_session(sessionmaker(bind=engineExport))
     config.add_request_method(db, name='dbsession', reify=True)
 
+    if 'loadExportDB' in settings and settings['loadExportDB'] == 'False' :
+        print('''
+            /!\================================/!\ 
+            WARNING : 
+            Export DataBase NOT loaded, Export Functionality will not working
+            /!\================================/!\ \n''')
+    else:
+        BaseExport.metadata.bind = engineExport
+        BaseExport.metadata.create_all(engineExport)
+        BaseExport.metadata.reflect(views=True, extend_existing=False)
+        config.registry.dbmakerExport = scoped_session(sessionmaker(bind=engineExport))
     # Add renderer for JSON objects
     json_renderer = JSON()
     json_renderer.add_adapter(datetime.datetime, datetime_adapter)
-    json_renderer.add_adapter(datetime.date, datetime_adapter)
+    # json_renderer.add_adapter(datetime.date, datetime_adapter)
     json_renderer.add_adapter(Decimal, decimal_adapter)
     json_renderer.add_adapter(datetime.time, time_adapter)
+    json_renderer.add_adapter(datetime.date, date_adapter)
     config.add_renderer('json', json_renderer)
 
     # Add renderer for CSV, PDF,GPX files.

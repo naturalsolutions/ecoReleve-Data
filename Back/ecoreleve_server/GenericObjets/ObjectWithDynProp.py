@@ -28,9 +28,19 @@ from traceback import print_exc
 from pyramid import threadlocal
 from ..utils.datetime import parse
 from ..utils.parseValue import parseValue,find,isEqual
+from sqlalchemy_utils import get_hybrid_properties
+import warnings
+from sqlalchemy import exc as sa_exc
 
+Cle = {'String':'ValueString',
+'Float':'ValueFloat',
+'Date':'ValueDate',
+'Integer':'ValueInt',
+'float':'ValueFloat',
+'Time': 'ValueDate',
+'Date Only':'ValueDate'}
 
-Cle = {'String':'ValueString','Float':'ValueFloat','Date':'ValueDate','Integer':'ValueInt','float':'ValueFloat'}
+LinkedTables = {}
 
 class ObjectWithDynProp:
     ''' Class to extend for mapped object with dynamic properties '''
@@ -56,11 +66,21 @@ class ObjectWithDynProp:
                 result = type_.GetDynProps()
             else :
                 result = self.ObjContext.execute(select([dynPropTable])).fetchall()
-            statProps = [{'name': statProp.key, 'type': statProp.type} for statProp in self.__table__.columns ]
-            dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp}for dynProp in result]
+            statProps = [{'name': statProp.key, 'type': statProp.type,'ID':None} for statProp in self.__table__.columns ]
+            dynProps = [{'name':dynProp.Name,'type':dynProp.TypeProp,'ID':dynProp.ID} for dynProp in result]
             statProps.extend(dynProps)
             self.allProp = statProps
         return self.allProp
+
+    def getLinkedField (self):
+        curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + self.GetType().GetDynPropContextTable() 
+        #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
+        curQuery +=  ' C  JOIN ' + self.GetType().GetDynPropTable() + ' D ON C.' + self.GetType().Get_FKToDynPropTable() + '= D.ID '
+        curQuery += ' where C.' + self.GetType().GetFK_DynPropContextTable() + ' = ' + str(self.GetType().ID )
+        curQuery += ' AND C.LinkedTable is not null'
+        Values = self.ObjContext.execute(curQuery).fetchall()
+
+        return [dict(row) for row in Values]
 
     def GetPropWithName(self,nameProp):
         if self.allProp is None:
@@ -80,13 +100,13 @@ class ObjectWithDynProp:
             gridFields = self.ObjContext.query(ModuleGrids
             ).filter(and_(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType),
                 or_(ModuleGrids.TypeObj == typeID ,ModuleGrids.TypeObj ==None ))
-            ).order_by(asc(ModuleGrids.GridOrder)).all()
+            ).filter(ModuleGrids.GridRender>0).order_by(asc(ModuleGrids.GridOrder)).all()
         except:
             gridFields = self.ObjContext.query(ModuleGrids).filter(
                 ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
-                ).order_by(asc(ModuleGrids.GridOrder)).all()
+                ).filter(ModuleGrids.GridRender>0).order_by(asc(ModuleGrids.GridOrder)).all()
 
-        # gridFields.sort(key=lambda x: str(x.GridOrder))
+        # gridFields.sort(key=lambda x: x.GridOrder)
         cols = []
         #### return only fileds existing in conf ####
         for curConf in gridFields:
@@ -131,7 +151,7 @@ class ObjectWithDynProp:
 
             if len(filterField)>0 :
                 filters.append(curConf.GenerateFilter())
-            elif curConf.QueryName is not None:
+            elif curConf.QueryName is not None and curConf.FilterRender != 0:
                 filters.append(curConf.GenerateFilter())
         #### OLD VERSION ####
         # for curProp in self.allProp:
@@ -168,6 +188,8 @@ class ObjectWithDynProp:
     def GetDynPropFKName(self):
         return 'FK_' + self.__tablename__ + 'DynProp'
 
+    def GetDynPropValueObj(self):
+        raise('GetDynPropValueObj not implemented in children')
     # def GetSelfFKName(self):
     #     return 'FK_' + self.__tablename__ + 'DynProp'  ###### ====> Not used , the same thing as GetDynPropFKName Why ??
 
@@ -183,7 +205,7 @@ class ObjectWithDynProp:
         except :
             return self.PropDynValuesOfNow[nameProp]
 
-    def SetProperty(self,nameProp,valeur) :
+    def SetProperty(self,nameProp,valeur,useDate=None) :
         ''' Set object properties (static and dynamic) '''
         if hasattr(self,nameProp):
             try :
@@ -195,6 +217,7 @@ class ObjectWithDynProp:
                         except:
                             pass
                 setattr(self,nameProp,valeur)
+                self.PropDynValuesOfNow[nameProp] = valeur
             except :
                 pass
         else:
@@ -212,11 +235,19 @@ class ObjectWithDynProp:
                             valeur = parse(valeur.replace(' ',''))
                         except:
                             pass
-                    NouvelleValeur = self.GetNewValue(nameProp)
-                    NouvelleValeur.StartDate = datetime.today()
-                    setattr(NouvelleValeur,Cle[self.GetPropWithName(nameProp)['type']],valeur)
+                    oldvalue = None
+                    if useDate is not None:
+                        oldvalue = self.GetDynPropWithDate(nameProp,StartDate = useDate)
+                        if oldvalue is not None:
+                            setattr(oldvalue,Cle[self.GetPropWithName(nameProp)['type']],valeur)
+
+                    if oldvalue is None:
+                        NouvelleValeur = self.GetNewValue(nameProp)
+                        NouvelleValeur.StartDate = datetime.today() if useDate is None else useDate
+                        setattr(NouvelleValeur,Cle[self.GetPropWithName(nameProp)['type']],valeur)
+                        self.GetDynPropValues().append(NouvelleValeur)
+
                     self.PropDynValuesOfNow[nameProp] = valeur
-                    self.GetDynPropValues().append(NouvelleValeur)
                 else:
                     # print('valeur non modifiée pour ' + nameProp)
                     return
@@ -226,9 +257,21 @@ class ObjectWithDynProp:
                 return
                 # si la propriété dynamique existe déjà et que la valeur à affectée est identique à la valeur existente
                 # => alors on insére pas d'historique car pas de chanegement
+    def GetDynPropWithDate(self,dynPropName,StartDate= None):
+        startDate = StartDate if StartDate is not None else self.GetStartDate()
+        if isinstance(dynPropName,list):
+            dynPropID = [self.GetPropWithName(name)['ID'] for name in dynPropName]
+            res = list(filter(lambda x : x.StartDate == startDate and getattr(x,self.GetDynPropFKName()) in dynPropID, self.GetDynPropValues()))
+        else :
+            dynPropID = self.GetPropWithName(dynPropName)['ID']
+            res = find(lambda x : x.StartDate == startDate and getattr(x,self.GetDynPropFKName()) == dynPropID, self.GetDynPropValues())
+        return res
 
     def GetNewValue(self):
         raise Exception("GetNewValue not implemented in children")
+
+    def GetStartDate(self):
+        raise Exception("GetStartDate not implemented in children")
 
     def LoadNowValues(self):
         curQuery = 'select V.*, P.Name,P.TypeProp from ' + self.GetDynPropValuesTable() + ' V JOIN ' + self.GetDynPropTable() + ' P ON P.' + self.GetDynPropValuesTableID() + '= V.' + self.GetDynPropFKName() + ' where '
@@ -245,20 +288,26 @@ class ObjectWithDynProp:
     def GetRealValue(self,row):
         return row[Cle[row['TypeProp']]]
 
-    def UpdateFromJson(self,DTOObject):
+    def UpdateFromJson(self,DTOObject,startDate = None):
         ''' Function to call : update properties of new or existing object with JSON/dict of value'''
+        # try : 
+        #     startDate = self.GetStartDate()
+        # except : 
+        #     startDate = None
+
         for curProp in DTOObject:
             #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id' and DTOObject[curProp] != '-1' ):
                 if isinstance(DTOObject[curProp],str) and len(DTOObject[curProp].split())==0:
                     DTOObject[curProp] = None
-                self.SetProperty(curProp,DTOObject[curProp])
+                self.SetProperty(curProp,DTOObject[curProp],startDate)
 
     def GetFlatObject(self,schema=None):
         ''' return flat object with static properties and last existing value of dyn props '''
         resultat = {}
+        hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
         if self.ID is not None : 
-            max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow))
+            max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow),len(hybrid_properties))
             for i in range(max_iter) :
                 #### Get static Properties ####
                 try :
@@ -272,6 +321,12 @@ class ObjectWithDynProp:
                     resultat[curDynPropName] = self.GetProperty(curDynPropName)
                 except Exception as e :
                     pass
+                try :
+                    PropName = hybrid_properties[i]
+                    resultat[PropName] = self.GetProperty(PropName)
+                except Exception as e :
+                    pass
+
         else : 
             max_iter = len( self.__table__.columns)
             for i in range(max_iter) :
@@ -293,14 +348,16 @@ class ObjectWithDynProp:
         resultat = {}
         type_ = self.GetType().ID
         Fields = self.ObjContext.query(ModuleForms
-            ).filter(and_(ModuleForms.Module_ID == FrontModules.ID),ModuleForms.FormRender>0).order_by(ModuleForms.FormOrder).all()
+            ).filter(and_(ModuleForms.Module_ID == FrontModules.ID),ModuleForms.FormRender>0
+            ).filter(or_(ModuleForms.TypeObj == type_,ModuleForms.TypeObj == None)).order_by(ModuleForms.FormOrder).all()
 
-        for curStatProp in self.__table__.columns:
-            CurModuleForms = list(filter(lambda x : x.Name == curStatProp.key and x.FormRender>0 and (x.TypeObj== str(type_) or x.TypeObj == None) , Fields))
+        for curStatProp in Fields:####self.__table__.columns:
+            CurModuleForms = list(filter(lambda x : curStatProp.Name == x.key, self.__table__.columns))
             if (len(CurModuleForms)> 0 ):
                 # Conf définie dans FrontModules
-                CurModuleForms = CurModuleForms[0]
-                resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(Editable)
+                # CurModuleForms = CurModuleForms[0]
+                # CurModuleForms = CurModuleForms[0]
+                resultat[curStatProp.Name] = curStatProp.GetDTOFromConf(Editable)
         return resultat
 
     def GetDTOWithSchema(self,FrontModules,DisplayMode):
@@ -317,24 +374,84 @@ class ObjectWithDynProp:
         #### IF ID is send from front --> get data of this object in order to display value into form which will be sent ####
         data = self.GetFlatObject(schema)
         resultat['data'] = data
+        resultat['recursive_level'] = 0
+        resultat = self.getDefaultValue(resultat)
         if self.ID :
             resultat['data']['id'] = self.ID
-            for key, value in schema.items():
-                if (DisplayMode.lower() != 'edit' and schema[key]['fullPath'] is True):
-                    try : 
-                        resultat['data'][key] = self.splitFullPath(resultat['data'][key])
-                    except : pass
+            # for key, value in schema.items():
+            #     if (DisplayMode.lower() != 'edit' and 'fullPath' in schema[key] and schema[key]['fullPath'] is True):
+            #         try : 
+            #             resultat['data'][key] = self.splitFullPath(resultat['data'][key])
+            #         except : pass
         else :
-            resultat['data']['id'] = 0
             # add default values for each field in data if exists
             #for attr in schema:
-            for key, value in schema.items():
-                if value['defaultValue'] is not None:
-                    resultat['data'][key] = value['defaultValue']
+            resultat['data']['id'] = 0
+            resultat['data'].update(resultat['schema']['defaultValues'])
 
+        # resultat['schema']['defaultValues'] = defaultValues
         return resultat
+    
+    def linkedFieldDate(self):
+        return datetime.now()
+
+    def updateLinkedField(self,useDate = None):
+        if useDate is None:
+            useDate = self.linkedFieldDate()
+        print('in dyn prop ')
+
+        for linkProp in self.getLinkedField() :
+            curPropName = linkProp['Name']
+            obj = LinkedTables[linkProp['LinkedTable']]
+            try : 
+                linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
+                curObj = self.ObjContext.query(obj).filter(getattr(obj,linkProp['LinkedID']) == linkedSource).one()
+                curObj.init_on_load()
+                curObj.SetProperty(linkProp['LinkedField'].replace('@Dyn:',''),self.GetProperty(curPropName),useDate)
+            except :
+                pass
+
+    def deleteLinkedField(self,useDate=None):
+        # dynPropToDel = []
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+
+            if useDate is None:
+                useDate = self.linkedFieldDate()
+            for linkProp in self.getLinkedField() :
+                curPropName = linkProp['Name']
+                obj = LinkedTables[linkProp['LinkedTable']]
+
+                try:
+                    linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
+                    curObj = self.ObjContext.query(obj).filter(getattr(obj,linkProp['LinkedID']) == linkedSource).one()
+
+                    dynPropValueToDel = curObj.GetDynPropWithDate(linkProp['LinkedField'].replace('@Dyn:',''),useDate)
+                    if dynPropValueToDel is not None : 
+                        self.ObjContext.delete(dynPropValueToDel)
+                except :
+                    pass
 
     def splitFullPath(self,value):
         splitValue = value.split('>')[-1]
         return splitValue
+
+    def getDefaultValue(self,resultat):
+        defaultValues = {}
+        recursive_level = resultat['recursive_level']
+        for key, value in resultat['schema'].items():
+            if value['defaultValue'] is not None:
+                defaultValues[key] = value['defaultValue']
+            if 'subschema' in value:
+                temp = {'schema':value['subschema'],'defaultValues':{}, 'recursive_level':recursive_level+1}
+                subData = self.getDefaultValue(temp)
+                resultat['schema'][key]['subschema']['defaultValues'] = subData
+                # if value['defaultValue'] is None and 'required' not in value['validators'] :
+                #     del subData['id']
+        if recursive_level < 1:
+            resultat['schema']['defaultValues'] = defaultValues
+        else :
+            resultat = defaultValues
+        return resultat
+
 

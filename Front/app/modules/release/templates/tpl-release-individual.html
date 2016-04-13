@@ -17,7 +17,7 @@
   <div class="toolbar bottom">
     <button id="clear" class="btn pull-left">Clear</button>
     <button id="btnFilterRel" class="btn btn-success pull-right">Search&nbsp;
-      <span class="reneco reneco-search"></span>
+      <span class="reneco reneco-search"></span>  
     </button>
   </div>
 </div>
@@ -27,8 +27,8 @@
   <div class="toolbar top">
     <legend class="inherit pull-left">Station: <%= Name %> | Date: <%= StationDate %></legend>
     <legend class="inherit pull-right">
-      <span id="nbSelected">0</span>&nbsp;selected&nbsp;/&nbsp;
-      <span id="totalEntries"></span>&nbsp;individuals to release
+      <span id="nbSelected">0</span> indiv. selected for release /
+      <span class="js-nb-total">0</span>
     </legend>
     <!-- <div class="bot-border dark"></div> -->
   </div>
@@ -41,7 +41,8 @@
   <!-- <div id="paginator" class="paginator "></div> -->
 
   <div class="toolbar bottom">
-    <button class="btn btn-success pull-right" id='release'>
+<!--     <button id="test" class="btn hidden">test</button>
+ -->    <button class="btn btn-success pull-right" id='release'>
       <span >Release&nbsp;&nbsp;</span>
       <span class="icon reneco reneco-to_release" data-position="top"></span>
     </button>

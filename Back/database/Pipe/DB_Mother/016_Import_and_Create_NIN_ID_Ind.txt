@@ -1,0 +1,245 @@
+/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+--CREATE FUNCTION [dbo].[split]
+--(
+--    @string varchar(MAX),
+--    @delimiter CHAR(1),
+--    @pos INT
+--)
+--RETURNS varchar(255)
+--AS
+--BEGIN
+--    DECLARE @start INT, @end INT, @count INT
+--    SELECT @start = 1, @end = CHARINDEX(@delimiter, @string), @count = 1 
+--    WHILE @start < LEN(@string) + 1 BEGIN
+--        IF @end = 0 
+--            SET @end = LEN(@string) + 1 
+ 
+--        IF @count = @pos
+--            RETURN SUBSTRING(@string, @start, @end - @start)
+ 
+--        SET @start = @end + 1 
+--        SET @end = CHARINDEX(@delimiter, @string, @start)
+--        SET @count = @count + 1 
+ 
+--    END
+--    RETURN '' -- not found
+--END
+
+
+--GO
+
+---declare #indiv_criteria table (Id_nonIdentified int,propName varchar(250), value varchar(250),fullpath varchar(250))
+declare @subProtocole table (Identification_criteria varchar(500), Id_nonIdentified int  identity(1,1))
+--declare @proto_Id_nonIdentified table (Id_nonIdentified int, proto_ID int)
+
+IF OBJECT_ID('tempdb..#indiv_criteria ') IS NOT NULL
+	DROP TABLE #indiv_criteria 
+
+CREATE table #indiv_criteria 
+(Id_nonIdentified int,propName varchar(250), value varchar(250),fullpath varchar(250))
+
+IF OBJECT_ID('tempdb..#proto_Id_nonIdentified ') IS NOT NULL
+	DROP TABLE #proto_Id_nonIdentified 
+
+CREATE table #proto_Id_nonIdentified
+(Id_nonIdentified int, proto_ID int)
+
+
+INSERT INTO @subProtocole (Identification_criteria)
+SELECT Distinct
+	[Identification_criteria]
+  FROM [ECWP-eReleveData].[dbo].[TProtocol_Vertebrate_Individual]
+  where Identification_criteria is not null And Identification_type != '1/1' and Fk_TInd_ID is null 
+
+
+
+INSERT INTO #proto_Id_nonIdentified (proto_ID,Id_nonIdentified)
+SELECT p.PK,s.Id_nonIdentified
+FROM [ECWP-eReleveData].[dbo].[TProtocol_Vertebrate_Individual] p
+JOIN @subProtocole s ON p.Identification_criteria = s.Identification_criteria;
+
+
+WITH splitCriteria as (
+  SELECT Id_nonIdentified,
+     Split.a.value('.', 'VARCHAR(100)') AS singleCriteria  
+ FROM  
+ (
+     SELECT Id_nonIdentified, 
+         CAST ('<M>' + REPLACE([Identification_criteria], ';', '</M><M>') + '</M>' AS XML) AS Data  
+     FROM  @subProtocole
+ ) AS A CROSS APPLY Data.nodes ('/M') AS Split(a))
+
+
+ INSERT INTO #indiv_criteria (Id_nonIdentified,propName, value)
+ SELECT Id_nonIdentified,ecoreleve_ECWP.dbo.split(singleCriteria,',',1) as propName,ecoreleve_ECWP.dbo.split(singleCriteria,',',2) AS value 
+
+ FROM splitCriteria
+
+ 
+
+ ----- UPDATE SPECIES with Fullpath ---- 
+
+ Update ic set ic.fullpath =  isnull(th.TTop_FullPath,ic.value)
+ --Select ic.* , isnull(th.TTop_FullPath,ic.value) as fullpath_val
+ FROM #indiv_criteria ic
+ LEFT JOIN THESAURUS.dbo.TTopic th on  th.TTop_PK_ID = ic.value+204081
+		AND ( ic.propName like '%TCaracThes_%'
+		OR ic.propName like '%Thes_%' )
+ WHERE (not ic.value like '%[^0-9]%') AND ic.value not like '%value%';
+
+
+ with species as (
+ SELECT Distinct id34@TCaracThes_Species as ID_Thes,id34@TCaracThes_Species_Precision as val
+ FROM [ECWP-eReleveData].dbo.TViewIndividual)
+
+
+Update ic set ic.fullpath =  sp.val
+ --select ic.*, sp.val
+ FROM #indiv_criteria ic 
+JOIN species sp ON ic.value = sp.ID_Thes
+ WHERE ic.propName like '%species%'
+
+
+ update ic set ic.fullpath = th.TTop_FullPath
+ --select ic.*, th.TTop_FullPath
+ From #indiv_criteria ic
+ JOIN THESAURUS.dbo.TTopic th ON ic.fullpath = th.TTop_Name and th.TTop_Type = 'Vertébrés'
+ WHERE ic.propName like '%Species%'
+
+
+
+ ----- Update propName : remove id**@ and [] -----
+ UPDATE ic SET propName= ecoReleve_ECWP.dbo.split(ecoReleve_ECWP.dbo.split(propName,'@',2),']',1)
+ FROM #indiv_criteria ic
+
+
+ ---- INSERT INDIVIDUAL With species ---------------
+
+INSERT INTO Individual (
+[creationDate],
+Age,
+Species,
+Birth_date,
+Death_date,
+Original_ID,
+fk_individualType
+)
+SELECT 
+		GETDATE() as creationDate
+      ,ic_age.fullpath as age_th
+	  ,ic.fullpath as species_th
+      ,NULL as birthDate
+      ,NULL as deathDate
+	  ,'NonIdentified_'+CONVERT(varchar,ic.Id_nonIdentified) as Original_ID
+	  , (SELECT ID FROM EcoReleve_ECWP.dbo.IndividualType IT where  IT.name ='Non Identified') as IndidualType
+FROM #indiv_criteria Ic
+LEFT JOIN #indiv_criteria Ic_age on ic.Id_nonIdentified = Ic_age.Id_nonIdentified AND ic_age.propName like '%age%'
+where ic.propName like '%species%';
+
+
+
+---- INSERT Individual without species --- 
+
+WITH noSpecies as (
+SELECT distinct Id_nonIdentified
+--SELECT distinct propName
+FROM #indiv_criteria Ic2
+WHERE not exists (select * 
+				FROM #indiv_criteria ic3
+			WHERE (ic3.propName like '%species%') and ic2.Id_nonIdentified = ic3.Id_nonIdentified)
+)
+
+
+INSERT INTO Individual (
+[creationDate],
+Original_ID
+)
+SELECT GETDATE(),
+'NonIdentified_'+CONVERT(varchar,Id_nonIdentified)
+FROM noSpecies 
+
+
+/* ************ INSERT DynProp ***************** */
+
+--select * FROM #indiv_criteria WHERE propName in ('TCarac_PTT','TCarac_Transmitter_Serial_Number')
+
+--select p.propName as dynProp, t.propName
+--FROM
+--(
+--SELECT distinct 
+--	ic.propName
+--	--s.Original_ID 
+--  FROM #indiv_criteria ic
+--  JOIN EcoReleve_ECWP.dbo.IndividualDynProp dp 
+--		ON ic.propName like 'TCaracThes_'+dp.Name+'%'  --'TCaracThes_'+dp.Name+'_Precision' = ic.propName 
+--		or	ic.propName like 'Thes_'+dp.Name+'%'	----'TCarac_'+dp.Name = ic.propName 
+--		or	ic.propName like 'Thes_txt_'+dp.Name+'%'	----'TCarac_'+dp.Name = ic.propName 
+--		or	ic.propName like 'TCaracThes_txt_'+dp.Name+'%'	----'TCarac_'+dp.Name = ic.propName 
+--		or	ic.propName like 'TCaracThes_txt_'+dp.Name+'%'	----'TCarac_'+dp.Name = ic.propName 
+--		or	ic.propName like 'TCarac_'+dp.Name+'%'	----'TCarac_'+dp.Name = ic.propName 
+--		or	ic.propName like 'TCarac_Thes_'+dp.Name+'%'	----'TCarac_'+dp.Name = ic.propName 
+--) p
+--RIGHT JOIN 
+--(
+--select distinct propName
+--FROM #indiv_criteria ic3
+--WHERE (ic3.propName not like '%species%' or ic3.propName not like '%age%')
+--) t ON p.propName = t.propName
+
+
+INSERT INTO [dbo].[IndividualDynPropValue]
+	([StartDate]
+	  ,[FK_Individual]
+      ,[FK_IndividualDynProp]
+	  ,[ValueInt]
+      ,[ValueString]
+      ,[ValueDate]
+      ,[ValueFloat]
+)
+SELECT 
+	GETDATE(),
+	i.ID as IndivID,
+	dp.ID as dynPropID, 
+	CASE WHEN dp.TypeProp = 'Integer' THEN ic.fullpath else NULL end as ValueInt,
+	CASE WHEN dp.TypeProp = 'String' THEN ic.fullpath else NULL end as ValueString,
+	CASE WHEN dp.TypeProp = 'Date' THEN ic.fullpath else NULL end as ValueDate,
+	CASE WHEN dp.TypeProp = 'Float' THEN ic.fullpath else NULL end as ValueFloat
+
+FROM #indiv_criteria ic
+ JOIN EcoReleve_ECWP.dbo.IndividualDynProp dp 
+		ON ic.propName like 'TCaracThes_'+dp.Name+'%'  
+		or	ic.propName like 'Thes_'+dp.Name+'%'	
+		or	ic.propName like 'Thes_txt_'+dp.Name+'%'	
+		or	ic.propName like 'TCaracThes_txt_'+dp.Name+'%'	
+		or	ic.propName like 'TCaracThes_txt_'+dp.Name+'%'
+		or	ic.propName like 'TCarac_'+dp.Name+'%'
+		or	ic.propName like 'TCarac_Thes_'+dp.Name+'%'
+JOIN EcoReleve_ECWP.dbo.Individual i on 'NonIdentified_'+CONVERT(VARCHAR,ic.Id_nonIdentified) = i.Original_ID
+WHERE fullpath is not NULL
+
+
+/* UPDATE PROTOCOL vertebrate Indiv */ 
+declare @protoID int ;
+SET @protoID = (SELECT ID FROM EcoReleve_ECWP.dbo.ProtocoleType WHERE Name = 'Vertebrate individual')
+
+UPDATE o SET o.FK_Individual = i.ID
+--SELECT o.*
+FROM EcoReleve_ECWP.dbo.Observation o
+JOIN #proto_Id_nonIdentified l ON l.proto_ID = o.original_id
+JOIN  EcoReleve_ECWP.dbo.Individual i ON 'NonIdentified_'+CONVERT(varchar,l.Id_nonIdentified) = i.Original_ID
+WHERE o.FK_ProtocoleType = @protoID
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('16_Import_and_Create_NIN_ID_Ind',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -167,15 +167,10 @@ define([
           if(_this.from == 'release'){
             _this.$el.find('[name="fieldActivityId"]').val('1').change();
           }
-          _this.$el.find('[name="FK_MonitoredSite"]').on('change', function() {
-            var msId = $(this).val();
-            _this.getCoordFromMs(msId);
+          _this.$el.find('input[name="FK_MonitoredSite"]').on('change', function() {
+              var msId = _this.$el.find('input[name="FK_MonitoredSite"]').attr('data_value');
+              _this.getCoordFromMs(msId);
           });
-          /*$(".datetime").attr('placeholder','DD/MM/YYYY'); 
-
-          $("#dateTimePicker").on("dp.change", function (e) {
-            $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
-           });*/
         }
       });
 
@@ -183,20 +178,41 @@ define([
         _this.afterSave(model, resp);
       };
 
+      this.nsForm.savingError = function (response) {
+        var msg = 'An error occured, please contact an admninstrator';
+        var type_ = 'error';
+        var title = 'Error saving';
+        if (response.status == 510) {
+          msg = 'A station already exists with these parameters';
+          type_ = 'warning';
+          title = 'Error saving';
+        }
+
+        Swal({
+          title: title,
+          text: msg,
+          type: type_,
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        });
+      };
       this.rdy = this.nsForm.jqxhr;
     },
 
     getCoordFromMs: function(msId) {
       var _this = this;
-      var url = config.coreUrl + 'monitoredSites/' + msId  + '/history/?geo=true';
+      var url = config.coreUrl + 'monitoredSites/' + msId;
 
       $.ajax({
         context: this,
         url: url,
       }).done(function(data) {
-        var coords = data.features[0].geometry.coordinates;
-        _this.$el.find('input[name="LAT"]').val(coords[0]).change();
-        _this.$el.find('input[name="LON"]').val(coords[1]).change();
+        var lat = data['LAT'];
+        var lon = data['LON'];
+        _this.$el.find('input[name="LAT"]').val(lat).change();
+        _this.$el.find('input[name="LON"]').val(lon).change();
       }).fail(function() {
         console.error('an error occured');
       });

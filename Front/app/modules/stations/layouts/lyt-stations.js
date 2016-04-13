@@ -7,7 +7,8 @@ define([
   'config',
   'ns_modules/ns_com',
   'ns_grid/model-grid',
-  'ns_filter/model-filter',
+  //'ns_filter/model-filter',
+  'ns_filter_bower',
   'ns_map/ns_map',
 
   './lyt-station-detail',
@@ -29,11 +30,12 @@ define([
 
     events: {
       'click button#submit': 'filter',
-      'click .tab-link': 'displayTab',
+      'click #stationType a.tab-link': 'displayTab',
       'click #back': 'hideDetails',
       'click button#activeGridPanel': 'activeGridPanel',
       'click button#activeMapPanel': 'activeMapPanel',
       'click button#clear': 'clearFilter',
+      'click #btn-export': 'exportGrid'
     },
 
     ui: {
@@ -95,8 +97,9 @@ define([
       this.displayFilters(4);
       this.displayMap();
 
+      var view;
       if (this.stationId) {
-        this.detail.show(new LytStationsEdit({
+        this.detail.show(view = new LytStationsEdit({
           stationId: this.stationId
         }));
         this.ui.detail.removeClass('hidden');
@@ -170,7 +173,6 @@ define([
     },
 
     displayTab: function(e) {
-      var _this = this;
       var type = $(e.target).attr('name');
 
       $('.tab-ele').removeClass('activeTab');
@@ -183,6 +185,24 @@ define([
       }
       this.grid.lastImportedUpdate(type);
       this.map.lastImportedUpdate(type);
+    },
+
+    exportGrid: function() {
+      var url = config.coreUrl + 'stations/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
+      var link = document.createElement('a');
+      link.classList.add('DowloadLinka');
+      
+      //link.download = url;
+      link.href = url;
+      link.onclick = function () {
+          //this.parentElement.removeChild(this);
+          var href = $(link).attr('href');
+          window.location.href = link;
+          document.body.removeChild(link);
+      };
+     /*his.$el.append(link);*/
+     document.body.appendChild(link);
+     link.click();
     }
   });
 });

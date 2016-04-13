@@ -1,0 +1,16 @@
+
+UPDATE s SET fieldactivityID = fa.ID
+--Select  fa.Name , s.* 
+FROM Station s 
+JOIN [ECWP-eReleveData_old].dbo.TStations so 
+	ON s.original_id = 'eReleve_'+CONVERT(varchar(100),so.TSta_PK_ID)
+JOIN fieldActivity fa ON so.FieldActivity_Name = fa.Name
+WHERE s.fieldActivityId is NULL 
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('21_Fix_Fieldactivity_NULL',GETDATE(),(SELECT db_name()))
+
+
+GO

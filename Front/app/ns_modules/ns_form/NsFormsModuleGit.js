@@ -23,6 +23,13 @@ define([
     redirectAfterPost: '',
     displayDelete: true,
 
+    events : {
+      'keypress input' : 'evt'
+
+    },
+    evt : function(){
+      alert();
+    },
     extendsBBForm: function(){
       Backbone.Form.validators.errMessages.required = '';
       Backbone.Form.Editor.prototype.initialize = function(options){
@@ -132,8 +139,14 @@ define([
         this.afterSaveSuccess = options.afterSaveSuccess ;
       }
       if(options.savingError) {
-        this.savingError =options.savingError;
+        this.savingError = options.savingError;
       }
+
+      this.data = options.data || {};
+
+      $(this.BBForm).on( "click", function() {
+
+      });
     },
 
     initModel: function () {
@@ -166,13 +179,18 @@ define([
         dataType: 'json',
         success: function (resp) {
           _this.model.schema = resp.schema;
-          _this.model.attributes = resp.data;
+          
           if (resp.fieldsets) {
             // if fieldset present in response, we get it
             _this.model.fieldsets = resp.fieldsets;
           }
           // give the url to model to manage save
           _this.model.urlRoot = this.modelurl;
+
+          var settings = $.extend({}, _this.data, resp.data);
+          _this.model.attributes = settings;
+
+
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
           _this.showForm();
           _this.updateState(this.displayMode);
@@ -185,13 +203,23 @@ define([
     },
 
     showForm: function (){
+      var self = this;
+      var display = 'form';
       this.BBForm.render();
+      var el = this.BBForm.el;
+      if(display=='table'){
+        el = this.getHtmlTable(el);
+      }
       // Call extendable function before the show call
       this.BeforeShow();
       var _this = this;
 
-      this.formRegion.html(this.BBForm.el);
-
+      this.formRegion.html(el); //this.formRegion.html(this.BBForm.el);
+      $(this.formRegion).find('input').on("keypress", function(e) {
+        if( e.which == 13 ){
+          self.butClickSave(e);
+        }
+      });
       if(this.buttonRegion[0]){
         this.buttonRegion.forEach(function (entry) {
           _this.buttonRegion[0].html(_this.template);
@@ -217,12 +245,14 @@ define([
     displaybuttons: function () {
       var name = this.name;
       if(this.displayMode == 'edit'){
+        this.buttonRegion[0].find('.NsFormModuleDelete').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleSave').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleEdit').addClass('hidden');
         this.formRegion.find('input:enabled:first').focus();
       }else{
+        this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleSave').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').addClass('hidden');
@@ -303,14 +333,14 @@ define([
               }
               _this.afterSaveSuccess();
             },
-            error: function (response) {
+            error: function (model,response) {
               _this.savingError(response);
             }
           });
           
         }
       }else{
-        _this.BBForm.$el.find('.error:first').trigger('focus');
+        _this.BBForm.$el.find('.error:first').trigger('focus').click();
         return false;
       }
       this.afterSavingModel();
@@ -472,6 +502,26 @@ define([
         }
       });
     },
+    getHtmlTable : function(el){
+      var headtr = '<tr>';
+      var bodytr = '<tr>'; 
+      $(el).find('fieldset').each(function( i ) {
+            var j = 0 ;
+            $(this).children().each(function(){
+                // check if we have a  form field 
+                var labelElem = $(this).find('label')[0];
+                if(labelElem) {
+                  headtr += '<td>' + labelElem.textContent +'</td>';
+                  var content = $(this).children('div')[0].outerHTML;
+                   bodytr += '<td>' + content +'</td>';
+                }
+            });
+      });
+      headtr += '</tr>';
+      bodytr += '</tr>';
+      var table = '<table id="formTable"><thead>' + headtr +'</thead>  <tbody> ' + bodytr +'</tbody></table>';
+      return table;
+    }
   });
 
 });

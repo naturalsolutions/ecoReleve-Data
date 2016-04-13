@@ -9,7 +9,8 @@ define([
   'config',
   'ns_modules/ns_com',
   'ns_grid/model-grid',
-  'ns_filter/model-filter',
+  //'ns_filter/model-filter_module',
+  'ns_filter_bower',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
@@ -29,7 +30,8 @@ define([
       'detail': '#detail',
       'totalEntries': '#totalEntries',
       'nbSelected': '#nbSelected',
-      'release':'#release'
+      'release':'#release',
+      'nbTotal': '.js-nb-total'
     },
 
     events: {
@@ -38,6 +40,7 @@ define([
       'click button#clear': 'clearFilter',
       'click #release': 'toolTipShow',
       'click #addSensor': 'addSensor',
+      'click #test': 'test'
     },
 
 
@@ -116,9 +119,10 @@ define([
         url: config.coreUrl + 'release/individuals/',
         urlParams: this.urlParams,
         rowClicked: true,
-        totalElement: 'totalEntries',
         onceFetched: function(params) {
           _this.totalEntries(this.grid);
+          console.log(this.grid);
+          console.log('passed');
         }
       });
       this.grid.rowClicked = function(args) {
@@ -140,11 +144,17 @@ define([
     },
 
     displayFilter: function() {
+      var _this = this;
       this.filters = new NsFilter({
         url: config.coreUrl + 'release/individuals/',
         com: this.com,
         filterContainer: this.ui.filters,
       });
+
+      this.filters.update = function(){
+        _this.$el.find(_this.ui.nbSelected).html(0);
+        NsFilter.prototype.update.call(this);
+      };
     },
 
     rowClicked: function(row) {
@@ -163,13 +173,22 @@ define([
     },
     updateSelectedRow: function() {
       var mds = this.grid.grid.getSelectedModels();
+      for (var i = 0; i < mds.length; i++) {
+        if (mds[i] == undefined) {         
+          mds.splice(i, 1);
+          i--;
+        }
+      }
       var nbSelected = mds.length;
       this.$el.find(this.ui.nbSelected).html(nbSelected);
     },
 
-    filter: function() {
+    test: function() {
+      console.log(this.grid.grid.collection);
+      this.grid.grid.collection = new Backbone.Collection(this.grid.grid.collection.where({Sex: 'femelle'}));
+    },
 
-      console.log('passed');
+    filter: function() {
       this.filters.update();
     },
 
@@ -179,7 +198,7 @@ define([
 
     totalEntries: function(grid) {
       this.total = grid.collection.state.totalRecords;
-      $(this.ui.totalEntries).html(this.total);
+      $(this.ui.nbTotal).html(this.total);
     },
 
 
@@ -187,6 +206,13 @@ define([
       var mds = this.grid.grid.getSelectedModels();
       if (!mds.length) {
         return;
+      } else {
+        for (var i = 0; i < mds.length; i++) {
+          if (mds[i] == undefined) {         
+            mds.splice(i, 1);
+            i--;
+          }
+        }
       }
       var _this = this;
       var col = new Backbone.Collection(mds);
@@ -199,22 +225,27 @@ define([
         if (resp.errors) {
           resp.title = 'An error occured';
           resp.type = 'error';
+          var callback = function() {};
         }else {
           resp.title = 'Success';
           resp.type = 'success';
+          var callback = function() {
+            Backbone.history.navigate('stations/' + _this.station.get('ID'), {trigger: true});
+            //$('#back').click();
+          };
 
         }
         resp.text = 'release: ' + resp.release;
 
         //remove the model from the coll once this one is validated
-        var callback = function() {
-          Backbone.history.navigate('stations/' + _this.station.get('ID'), {trigger: true});
-          //$('#back').click();
-        };
         this.swal(resp, resp.type, callback);
 
       }).fail(function(resp) {
-        this.swal(resp, 'error');
+        var callback = function() {
+           return true;
+            //$('#back').click();
+          };
+        this.swal(resp, 'error',callback);
       });
     },
 
@@ -229,12 +260,18 @@ define([
 
     swal: function(opt, type, callback) {
       var btnColor;
+      var confirmText;
+      var showCancel;
       switch (type){
         case 'success':
           btnColor = 'green';
+          confirmText = 'See Station';
+          showCancel = true;
           break;
         case 'error':
           btnColor = 'rgb(147, 14, 14)';
+          confirmText = 'Ok';
+          showCancel = false; 
           break;
         case 'warning':
           btnColor = 'orange';
@@ -248,9 +285,9 @@ define([
         title: opt.title || opt.responseText || 'error',
         text: opt.text || '',
         type: type,
-        showCancelButton: true,
+        showCancelButton: showCancel,
         confirmButtonColor: btnColor,
-        confirmButtonText: 'See Station',
+        confirmButtonText: confirmText,
         cancelButtonColor: 'grey',
         cancelButtonText: 'New Release',
         closeOnConfirm: true,
@@ -260,7 +297,7 @@ define([
         if (isConfirm && callback) {
           callback();
         }else {
-          Backbone.history.navigate('release', {trigger: true});
+          Backbone.history.loadUrl(Backbone.history.fragment);
         }
       });
     },

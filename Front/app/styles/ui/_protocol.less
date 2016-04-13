@@ -1,0 +1,55 @@
+.protocol-editor{
+  &>.toolbar{
+    z-index: 10;
+  }
+  .js-menu-item{
+    padding-bottom: 15px;
+    padding-top: 15px;
+    border-bottom: 1px solid #ddd;
+    display: flex ;
+    align-items: center;
+    .flex-pull-right{
+      margin-left: auto;
+    }
+    button{
+      .reneco-add{
+        line-height: 1.5;
+      }
+    }
+    span.reneco-sheet2{
+    }
+    &.active{
+      background: #aaa;
+      color: white!important;
+    }
+    &:hover, &.active{
+
+      span.reneco-sheet2{
+        transition: .1s all ease-out;
+        font-size: 1.5em;
+      }
+      span.name{
+        transition: .1s all ease-out;
+        font-size: 1.1em;
+      }
+    }
+    
+  }
+  .protocol{
+    .toolbar.top{
+      overflow: auto;
+    }
+  }
+
+  .proto-form{
+    background: #aaa;
+    padding: 15px;
+    &>form{
+      padding: 5px;
+      background: rgb(255, 255, 255);
+      padding: 15px;
+      border: 1px solid rgb(221, 221, 221);
+      border-radius: 4px;
+    }
+  }
+}

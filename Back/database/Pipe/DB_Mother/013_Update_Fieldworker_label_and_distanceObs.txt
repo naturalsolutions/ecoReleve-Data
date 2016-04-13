@@ -1,0 +1,17 @@
+UPDATE [EcoReleve_ECWP].[dbo].[ModuleForms]
+SET Label ='Distance from observer'
+WHERE Label like 'Distance from obs%';
+
+UPDATE [EcoReleve_ECWP].[dbo].[ModuleForms]
+SET Label ='Fieldworkers'
+WHERE Label like  'field%orke%';
+
+UPDATE [EcoReleve_ECWP].[dbo].[ModuleForms]
+SET Label ='Nb fieldworkers'
+WHERE Label like  'nb field%orke%';
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('13_Update_Fieldworker_label_and_distanceObs',GETDATE(),(SELECT db_name()))
+
+
+GO

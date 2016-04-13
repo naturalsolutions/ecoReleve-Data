@@ -130,12 +130,15 @@ def releasePost(request):
     sta_id = int(data['StationID'])
     indivList = json.loads(data['IndividualList'])
     releaseMethod = data['releaseMethod']
-    taxon = indivList[0]['Species']
     curStation = session.query(Station).get(sta_id)
-
+    taxon = False
     taxons = dict(Counter(indiv['Species'] for indiv in indivList))
     def getnewObs(typeID):
-        return Observation(FK_ProtocoleType=typeID)
+        newObs = Observation()
+        newObs.FK_ProtocoleType=typeID
+        newObs.FK_Station = sta_id
+        newObs.__init__()
+        return newObs
 
     protoTypes = pd.DataFrame(session.execute(select([ProtocoleType])).fetchall(), columns = ProtocoleType.__table__.columns.keys())
     vertebrateGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate group','ID'].values[0])
@@ -192,8 +195,18 @@ def releasePost(request):
         errorEquipment = None
         binList = []
         for indiv in indivList: 
+
             curIndiv = session.query(Individual).get(indiv['ID'])
             curIndiv.LoadNowValues()
+            if not taxon:
+                taxon = curIndiv.Species
+            try : 
+                indiv['taxon'] = curIndiv.Species
+                del indiv['species']
+            except: 
+                indiv['taxon'] = curIndiv.Species
+                del indiv['Species']
+                pass
             curIndiv.UpdateFromJson(indiv)
 
             binList.append(MoF_AoJ(indiv))
@@ -204,17 +217,15 @@ def releasePost(request):
 
             indiv['FK_Individual'] = indiv['id']
             indiv['FK_Station'] = sta_id
-            try : 
-                indiv['taxon'] = indiv['species']
-            except: 
-                indiv['taxon'] = indiv['Species']
-                pass
             try:
                 indiv['weight'] = indiv['poids']
             except: 
                 indiv['weight'] = indiv['Poids']
                 pass
-
+            try: 
+                del indiv['Comments']
+            except: 
+                pass
             curVertebrateInd = getnewObs(vertebrateIndID)
             curVertebrateInd.UpdateFromJson(indiv)
             vertebrateIndList.append(curVertebrateInd)
@@ -228,15 +239,26 @@ def releasePost(request):
             releaseIndList.append(curReleaseInd)
 
             try:
-                indiv['FK_Sensor'] = int(indiv['fk_sensor'])
+                try:
+                    sensor_id = int(indiv['fk_sensor'])
+                except:
+                    sensor_id = int(indiv['FK_Sensor'])
+
                 curEquipmentInd = getnewObs(equipmentIndID)
-                curEquipmentInd.UpdateFromJson(indiv)
+                equipInfo = {
+                'FK_Individual': indiv['FK_Individual'],
+                'FK_Sensor' : sensor_id,
+                'Survey_type' : 'Post-Relâcher',
+                'Monitoring_Status' : 'Suivi',
+                'Sensor_Status': 'événement de sortie provisoire de stock>mise en service'
+                }
+                curEquipmentInd.UpdateFromJson(equipInfo)
                 curEquipmentInd.Station = curStation
                 equipmentIndList.append(curEquipmentInd)
             except Exception as e:
                 if e.__class__.__name__ == 'ErrorAvailable':
                     sensor_available = 'is' if e.value['sensor_available'] else 'is not'
-                    tpl = 'SensorID {0} {1} available for equipment'.format(indiv['FK_Sensor'],sensor_available)
+                    tpl = 'SensorID {0} {1} available for equipment'.format(equipInfo['FK_Sensor'],sensor_available)
                     if errorEquipment is None:
                         errorEquipment = tpl
                     else:
@@ -271,7 +293,8 @@ def releasePost(request):
             message = {'release':len(releaseIndList)}
 
     except Exception as e :
+        print_exc()
         session.rollback()
-        message = e.value
+        message = str(type(e))
 
     return message

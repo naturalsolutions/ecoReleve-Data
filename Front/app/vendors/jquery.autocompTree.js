@@ -83,8 +83,8 @@
           var $me = $(this);
 
           //On encapsule l'input ainsi que tous les éléments dans un div afin de les contrôlés
-          $me.wrapAll('<div id="divAutoComp_' + $me.attr("id") + '" class="input-group">');
-          $me.parent().prepend('<span class="input-group-addon reneco reneco-thesaurus"></span>');
+          //$me.wrapAll('<div id="divAutoComp_' + $me.attr("id") + '" class="input-group">');
+          //$me.parent().prepend('<span class="input-group-addon reneco reneco-thesaurus"></span>');
 
           var htmlInsert = '';
           //Si isDisplayDifferent = true on crée un input hidden afin de stocker la valeur 
@@ -179,12 +179,16 @@
 
 
           $me.focus(function () {
+            setTimeout(function(){
+
+
             $("div[id^=treeView]").each(function () {
               $(this).css('display', 'none');
             });
             var treeContainer = $("#treeView" + $me.attr("id"));
-            treeContainer.css('display', 'block').css('width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
-            treeContainer.css({top: $(this).outerHeight() + 20 });
+            treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
+            //treeContainer.css('display', 'block').css('border', 'solid 1px').css('z-index', '100');
+            treeContainer.css({top: $me.outerHeight() + 20 });
             //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
             $(document).delegate("body", "click", function (event) {                            
               if (!$(event.target).is("#" + $me.attr("id") + ",span[class^=fancytree], div[id^=treeView], ul")) {
@@ -207,8 +211,9 @@
                 throw ('An error occured during onInputFocus -> ' + e);
               }
             }
-            
+            }, 0);
           });
+
           //Fonction de recherche et de filtration
           $me.keyup(function (e) {
             var treeHtml = $("#treeView" + $me.attr("id"));

@@ -1,0 +1,141 @@
+
+------ UPDATE grid Station -----
+UPDATE g SET GridRender=2,GridOrder = 150,CellType ='integer'
+From ModuleGrids g
+WHERE Module_ID =3
+AND Name = 'ELE'
+
+UPDATE g SET GridRender=2
+From ModuleGrids g
+WHERE Module_ID =3
+AND Name = 'Place'
+
+------ UPDATE grid Indiv -----
+
+UPDATE g SET GridOrder=25
+From ModuleGrids g
+WHERE Module_ID = 8 and TypeObj = 1
+AND Name = 'Origin'
+
+UPDATE g SET GridOrder=120
+From ModuleGrids g
+WHERE Module_ID = 8 and TypeObj = 1
+AND Name = 'Survey_type'
+
+UPDATE g SET GridOrder=170,GridRender=2
+From ModuleGrids g
+WHERE Module_ID = 8 and TypeObj = 1
+AND Name = 'Mark_code_1'
+
+UPDATE g SET GridOrder=180,GridRender=2
+From ModuleGrids g
+WHERE Module_ID = 8 and TypeObj = 1
+AND Name = 'Mark_code_2'
+
+DELETE ModuleGrids WHERE Module_ID = 8 
+and Label in('Mark 1 code','Mark 2 code')
+
+INSERT INTO [ModuleGrids] (
+	[Module_ID],[TypeObj],[Name],[Label]
+    ,[GridRender],[GridSize],[CellType],[GridOrder]
+    ,[QueryName],[Options]
+	,[FilterOrder],[FilterSize],[FilterClass]
+     ,[IsSearchable],[FilterDefaultValue],[FilterRender]
+      ,[FilterType]
+      )
+VALUES (
+	8,1,'FK_SensorType','Current sensor type'
+	,2,1,'string',102,
+	'Forced',NULL
+	,150,2,NULL,
+	0,NULL,0,'Text'),
+	(
+	8,1,'FK_SensorModel','Current sensor model'
+	,2,1,'string',104,
+	'Forced',NULL
+	,150,2,NULL,
+	0,NULL,0,'AutocompTreeEditor')
+
+------ UPDATE grid Sites -----
+UPDATE g SET GridOrder=100, Name = 'StartDate', Label = 'StartDate'
+From ModuleGrids g
+WHERE Module_ID = 13
+AND Name = 'StationDate'
+
+UPDATE g SET Name = 'ELE'
+From ModuleGrids g
+WHERE Module_ID = 13
+AND Name = 'Elevation'
+
+
+------ UPDATE grid Sensors -----
+UPDATE g SET GridOrder=GridOrder*10
+From ModuleGrids g
+WHERE Module_ID = 14
+
+UPDATE g SET GridOrder=GridOrder+10
+From ModuleGrids g
+WHERE Module_ID = 14 and GridOrder >=50
+
+INSERT INTO [ModuleGrids] (
+	[Module_ID],[TypeObj],[Name],[Label]
+    ,[GridRender],[GridSize],[CellType],[GridOrder]
+    ,[QueryName],[Options]
+	,[FilterOrder],[FilterSize],[FilterClass]
+     ,[IsSearchable],[FilterDefaultValue],[FilterRender]
+      ,[FilterType]
+      )
+VALUES (
+	14,NULL,'Hexadecimal_Code','Hexadecimal code'
+	,2,1,'string',45,
+	NULL,NULL
+	,150,2,NULL,
+	0,NULL,0,'Text'),
+
+	(
+	14,NULL,'Weight','Weight'
+	,2,1,'string',55,
+	NULL,NULL
+	,150,2,NULL,
+	0,NULL,0,'Number'),
+
+	(
+	14,NULL,'Argos_DutyCycle','Duty cycle'
+	,2,1,'string',90,
+	NULL,NULL
+	,150,2,NULL,
+	0,NULL,0,'Number')
+
+UPDATE g SET GridOrder=50
+From ModuleGrids g
+WHERE Module_ID = 14 and Name = 'Status'
+
+INSERT INTO [ModuleGrids] (
+	[Module_ID],[TypeObj],[Name],[Label]
+    ,[GridRender],[GridSize],[CellType],[GridOrder]
+    ,[QueryName],[Options]
+	,[FilterOrder],[FilterSize],[FilterClass]
+     ,[IsSearchable],[FilterDefaultValue],[FilterRender]
+      ,[FilterType]
+      )
+VALUES (
+	14,NULL,'FK_Individual','Individual ID'
+	,2,1,'integer',100,
+	'Forced',NULL
+	,150,2,NULL,
+	0,NULL,0,'Number'),
+
+	(
+	14,NULL,'FK_MonitoredSiteName','Monitored site'
+	,2,1,'string',110, 
+	'Forced',NULL
+	,150,2,NULL,
+	0,NULL,0,'Text')
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('44_Up_CONF_all_Grid',GETDATE(),(SELECT db_name()))
+
+
+GO

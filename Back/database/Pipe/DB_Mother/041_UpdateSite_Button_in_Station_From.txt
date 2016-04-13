@@ -1,0 +1,19 @@
+
+INSERT INTO ModuleForms (module_id,TypeObj,Name,Label
+,Required,FieldSizeEdit,FieldSizeDisplay,InputType,editorClass
+,FormRender,FormOrder,Legend,Options,Validators,displayClass,EditClass,Status,Locked,DefaultValue)
+
+VALUES(
+2,1,'updateSite','&nbsp',0,6,6,'ajaxButtonEditor','form-control',2,31,'General Infos'
+,'{"btnText":"Update Site location", "iconFont":"reneco reneco-syncing","url":"stations/updateSiteLocation"}',NULL,NULL,'hide',NULL,NULL,NULL),
+(
+2,4,'updateSite','&nbsp',0,6,6,'ajaxButtonEditor','form-control',2,31,'General Infos'
+,'{"btnText":"Update Site location", "iconFont":"reneco reneco-syncing","url":"stations/updateSiteLocation"}',NULL,NULL,'hide',NULL,NULL,NULL)
+
+go
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('41_UpdateSite_Button_in_Station_From',GETDATE(),(SELECT db_name()))
+
+
+GO

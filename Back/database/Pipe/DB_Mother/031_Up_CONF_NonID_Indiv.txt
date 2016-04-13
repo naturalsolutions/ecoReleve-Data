@@ -1,0 +1,44 @@
+
+  UPDATE f SET InputType = 'NonIdPicker' , Label = 'Individual ID/Non ID' , Options = '{"title":"Individuals","url":"individuals", "typeObj":[{"Standard":1},{"Non Identified":2}]}'
+  FROM ModuleForms f
+  WHERE module_id = 1 and typeObj in (210,215,217,225,227) and Name = 'FK_Individual' 
+
+
+  DELETE 
+  FROM ModuleForms 
+  WHERE module_id = 9 and TypeObj = 2 AND Name = 'Transmitter_Frequency'
+
+  UPDATE  f SET TypeObj = 1 
+  FROM ModuleForms f
+  WHERE module_id = 9 and Name = 'Comments'
+
+  DELETE
+  FROM ModuleGrids 
+  WHERE Module_ID = 8 and TypeObj = 2 and Name = 'Transmitter_Frequency'
+
+  
+DELETE 
+  FROM IndividualDynPropValue 
+  WHERE FK_IndividualDynProp =  
+	  (SELECT ID
+	  FROM IndividualDynProp 
+	  WHERE Name = 'Transmitter_Frequency')
+
+DELETE 
+FROM IndividualType_IndividualDynProp
+WHERE FK_IndividualDynProp =  
+	  (SELECT ID
+	  FROM IndividualDynProp 
+	  WHERE Name = 'Transmitter_Frequency')
+
+DELETE 
+FROM IndividualDynProp 
+WHERE Name = 'Transmitter_Frequency'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('31_Up_CONF_NonID_Indiv',GETDATE(),(SELECT db_name()))
+
+
+GO

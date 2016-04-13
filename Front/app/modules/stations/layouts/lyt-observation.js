@@ -1,23 +1,24 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'radio',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'radio',
 
-	'moment',
-	'sweetAlert',
-	'config',
-	'ns_form/NSFormsModuleGit',
-	'i18n',
+  'moment',
+  'sweetAlert',
+  'config',
+  'ns_form/NSFormsModuleGit',
+  'i18n',
 ], function($, _, Backbone, Marionette, Radio,
-	moment, Swal, config, NsForm
+  moment, Swal, config, NsForm
 ) {
 
   'use strict';
 
   return Marionette.LayoutView.extend({
     template: 'app/modules/stations/templates/tpl-observation.html',
+    className: 'full-height hidden',
 
     ui: {
       'stationForm': '#stationForm',
@@ -26,7 +27,7 @@ define([
 
     initialize: function(options) {
       this.stationId = options.stationId;
-      this.objectType = this.model.attributes.FK_ProtocoleType;
+      this.objectType = this.model.get('FK_ProtocoleType');
     },
 
     renderObs: function() {
@@ -58,6 +59,22 @@ define([
         formRegion: this.ui.stationForm,
         reloadAfterSave: true,
         objectType: this.objectType,
+        savingError: function (response) {
+          console.log(response.responseJSON)
+           // individual equipment sensor is not available
+           if(response.responseJSON.sensor_available == false){
+            _this.sweetAlert('Data saving error', 'error', 'Selected sensor is not available');
+           }
+           else if(response.responseJSON.already_unequip == true ){
+            _this.sweetAlert('Data saving error', 'error', 'Selected sensor is already unequiped');
+           }
+           else if(response.responseJSON.existing_equipment == false ){
+            _this.sweetAlert('Data saving error', 'error', 'Selected sensor is not equiped with this individual');
+           }
+            else if(response.responseJSON.errorSite == true ){
+            _this.sweetAlert('Data saving error', 'error', 'No monitored site is attached');
+           }
+        }
       });
 
       nsform.updateState = function(state) {

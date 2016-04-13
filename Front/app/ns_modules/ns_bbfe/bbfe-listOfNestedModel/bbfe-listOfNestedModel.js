@@ -13,6 +13,7 @@ define([
             'click #addFormBtn' : 'addEmptyForm',
         },
         initialize: function(options) {
+
             if (options.schema.validators.length) {
                 this.defaultRequired = true;
             } else {
@@ -27,26 +28,31 @@ define([
             this.options.schema.fieldClass = 'col-xs-12';
             this.forms = [];
             this.disabled = options.schema.editorAttrs.disabled;
+
             this.hidden = '';
             if(this.disabled) {
                 this.hidden = 'hidden';
             }
             this.hasNestedForm = true;
 
-            var key = this.options.key;
-            this.defaultValue = this.options.model.schema[key].defaultValue['FK_ProtocoleType'];
-        },
+            this.key = this.options.key;
+            this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
 
+        },
         //removeForm
         deleteForm: function() {
 
         },
 
         addEmptyForm: function() {
-            var model = new Backbone.Model();
+            var mymodel = Backbone.Model.extend({
+                defaults : this.options.schema.subschema.defaultValues
+            });
+
+            var model = new mymodel();
+            //model.default = this.options.model.attributes[this.key];
             model.schema = this.options.schema.subschema;
             model.fieldsets = this.options.schema.fieldsets;
-
             this.addForm(model);
         },
 
@@ -86,28 +92,46 @@ define([
                 hidden: this.hidden
             })));
             this.setElement($el);
-            //init forms
-            var model = new Backbone.Model();
-            model.schema = this.options.schema.subschema;
-            model.fieldsets = this.options.schema.fieldsets;
-            var key = this.options.key;
-            var data = this.options.model.attributes[key];
+            
+
+            var data = this.options.model.attributes[this.key];
 
             if (data) {
+                //data
                 if (data.length) {
                     for (var i = 0; i < data.length; i++) {
+                        if(i >= this.nbByDefault) {
+                            this.defaultRequired = false;
+                        }
+                        var model = new Backbone.Model();
+                        model.schema = this.options.schema.subschema;
+                        model.fieldsets = this.options.schema.fieldsets;
                         model.attributes = data[i];
                         this.addForm(model);
-                        this.defaultRequired = false;
+
                     };
-                } else {
-                    if(this.defaultRequired){
+
+                    if (data.length < this.nbByDefault) {
+                        for (var i = 0; i < data.length; i++) {
+                            this.addForm(model);
+                        }
+                    }
+                    this.defaultRequired = false;
+                }
+            } else {
+                //no data
+                if (this.nbByDefault >= 1) {
+                    for (var i = 0; i < this.nbByDefault; i++) {
                         this.addEmptyForm();
-                        this.defaultRequired = false;
+                    }
+                    this.defaultRequired = false;
                 }
             }
-        }
             return this;
+        },
+
+        feedRequiredEmptyForms: function() {
+
         },
 
         getValue: function() {
@@ -130,9 +154,9 @@ define([
                         }
                     }
                     if(!empty){
-                        if (this.defaultValue) {
+                       /* if (this.defaultValue) {
                             tmp['FK_ProtocoleType'] = this.defaultValue;
-                        }
+                        }*/
                         values[i] = tmp;
                     }
                 };

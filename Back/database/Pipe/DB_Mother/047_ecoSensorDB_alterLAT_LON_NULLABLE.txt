@@ -1,0 +1,12 @@
+ALTER TABLE ecoReleve_Sensor.dbo.[T_argosgps]
+ALTER COLUMN [lat] decimal(9,5) NULL
+ALTER TABLE ecoReleve_Sensor.dbo.[T_argosgps]
+ALTER COLUMN [lon] decimal(9,5) NULL
+
+go
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('47_ecoSensorDB_alterLAT_LON_NULLABLE',GETDATE(),(SELECT db_name()))
+
+
+GO

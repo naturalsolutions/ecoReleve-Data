@@ -1,0 +1,90 @@
+/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+
+INSERT INTO ModuleForms ([module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue])
+SELECT [module_id]
+      ,1
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,1
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+  FROM [EcoReleve_ECWP].[dbo].[ModuleForms]
+  where module_id = 2 and Name = 'FK_Region'
+Union 
+SELECT [module_id]
+      ,4
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,1
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+  FROM [EcoReleve_ECWP].[dbo].[ModuleForms]
+  where module_id = 2 and Name = 'FK_Region'
+
+
+  UPDATE f SET TypeObj = 3 
+  FROM ModuleForms f 
+  where module_id = 2 and Name = 'FK_Region' and TypeObj is NULL
+
+
+  UPDATE f Set FieldSizeDisplay = 3, FieldSizeEdit = 3
+   FROM ModuleForms f 
+    where module_id = 2 and Name in ('LAT' ,'LON','ELE','precision')
+
+  UPDATE f Set FormOrder = 50
+   FROM ModuleForms f 
+    where module_id = 2 and Name ='Place'
+
+  UPDATE f Set FieldSizeDisplay = 6, FieldSizeEdit=6
+   FROM ModuleForms f 
+    where module_id = 2 and Name ='Name_DistanceFromObs'
+
+	GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('42_Up_Conf_Station_Form',GETDATE(),(SELECT db_name()))
+
+
+GO

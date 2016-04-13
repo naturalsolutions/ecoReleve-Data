@@ -37,6 +37,10 @@ define([
       }
       this.model.set('ojectName', this.ojectName);
       this.picker = options.picker;
+      console.log(this.picker);
+
+      this.data = options.data;
+      console.log(this.data);
     },
 
     onShow: function() {
@@ -45,8 +49,10 @@ define([
 
     displayForm: function(type) {
       var _this = this;
+
       this.nsForm = new NsForm({
         name: 'name',
+        data: this.data,
         modelurl: config.coreUrl + this.ojectName,
         buttonRegion: [],
         formRegion: this.ui.form,
@@ -99,6 +105,7 @@ define([
       this.nsForm.butClickSave();
     },
     cancel: function() {
+      console.log(this.picker);
       if(this.picker){
         this.picker.$el.find('#creation').addClass('hidden');
       }

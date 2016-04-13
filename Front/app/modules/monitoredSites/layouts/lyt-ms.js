@@ -10,8 +10,8 @@ define([
 
   'ns_modules/ns_com',
   'ns_grid/model-grid',
-  'ns_filter/model-filter',
-
+  //'ns_filter/model-filter_module',
+  'ns_filter_bower',
   './lyt-ms-detail',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
@@ -35,7 +35,8 @@ define([
     events: {
       'click #btnFilter': 'filter',
       'click #back': 'hideDetails',
-      'click button#clear': 'clearFilter'
+      'click button#clear': 'clearFilter',
+      'click #btn-export': 'exportGrid',
     },
 
     regions: {
@@ -120,5 +121,23 @@ define([
       Backbone.history.navigate(this.rootUrl, {trigger: false});
 
     },
+
+    exportGrid: function() {
+      var url = config.coreUrl + 'monitoredSites/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
+      var link = document.createElement('a');
+      link.classList.add('DowloadLinka');
+      
+      //link.download = url;
+      link.href = url;
+      link.onclick = function () {
+          //this.parentElement.removeChild(this);
+          var href = $(link).attr('href');
+          window.location.href = link;
+          document.body.removeChild(link);
+      };
+     /*his.$el.append(link);*/
+     document.body.appendChild(link);
+     link.click();
+    }
   });
 });
