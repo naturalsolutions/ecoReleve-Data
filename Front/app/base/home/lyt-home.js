@@ -6,9 +6,10 @@ define(['marionette',
 	'config',
 	'requirejs-text!base/home/tpl/tpl-dounutGraph.html',
 	'requirejs-text!base/home/tpl/tpl-dounutGraph2.html',
-	'i18n'
+  'moment',
+  'i18n',
 	],
-function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, TplGraph1, TplGraph2) {
+function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, TplGraph1, TplGraph2,Moment) {
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -22,7 +23,9 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, Tp
     },
 
     ui: {
-      'donuts': '#donuts'
+      'donuts': '#donuts',
+      'userFirst': '#userFirst',
+      'userLast': '#userLast',
     },
 
     animateIn: function() {
@@ -45,7 +48,22 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, Tp
       _.bind(this.trigger, this, 'animateOut')
       );
     },
-
+    startTime: function() {
+      
+      var locale = config.language;
+      var dateNow ;
+      if(locale == 'fr'){
+        //require(['momentLocale/fr']);
+        dateNow = new Moment().locale('fr').format('LLLL');
+      } else {
+        dateNow = new Moment().format('MMMM Do YYYY, h:mm:ss a').replace(/([rdths]{2})\s2015/,"<sup>\$1</sup> 2015");
+      }
+      var _this = this;
+      this.$el.find('#info').html(dateNow);
+      var t = setTimeout(function() {
+        _this.startTime();
+      }, 1000);
+    },
     initStats: function() {
       var collGraphObj = [{
         url: config.coreUrl + 'sensor/uncheckedDatas/graph',
@@ -66,24 +84,34 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, Tp
 				stored : false,
 				template : 'app/base/home/tpl/tpl-dounutGraph3.html'
 			}*/];
-      var collGraph = new Backbone.Collection(collGraphObj);
+/*      var collGraph = new Backbone.Collection(collGraphObj);
       var GraphViews = Backbone.Marionette.CollectionView.extend({
         childView: DonutGraphView,
-      });
+      });*/
 
-      this.donutGraphs = new GraphViews({collection: collGraph});
+      //this.donutGraphs = new GraphViews({collection: collGraph});
       this.curveGraph = new CurveGraphView();
-      this.infoStat = new InfoView();
+      //this.infoStat = new InfoView();
     },
 
     onRender: function() {
       this.initStats();
-      this.donutGraphs.render();
+     // this.donutGraphs.render();
     },
 
     onShow: function(options) {
-      this.info.show(this.infoStat);
-      this.ui.donuts.html(this.donutGraphs.el);
+      /*this.info.show(this.infoStat);
+      this.ui.donuts.html(this.donutGraphs.el);*/
+      var _this = this;
+      var user  = new Backbone.Model();
+      user.url = config.coreUrl + 'currentUser';
+      user.fetch({
+        success: function(md) {
+          _this.ui.userFirst.html(user.get('Firstname'));
+          _this.ui.userLast.html(user.get('Lastname'));
+        }
+      });
+      this.startTime();
       this.graph.show(this.curveGraph);
       this.$el.i18n();
     }

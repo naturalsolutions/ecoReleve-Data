@@ -15,17 +15,20 @@ define([
     initChart: function() {
       var _this = this;
       //caching graph data for a day
-      var dataGraph = localStorage.getItem('ecoreleveChart');
+      var dataGraph = localStorage.getItem('ecoreleveChartDemo');
       // get current day and compare it with stored day
       var d = (new Date() + '').split(' ');
       // ["Mon", "Feb", "1", "2014"....
       var day = d[2];
-      var storedDay = localStorage.getItem('ecoreleveChartDay');
-      if (dataGraph && (day == storedDay)) {
+      var storedDay = localStorage.getItem('ecoreleveChartDayDemo');
+
+      var gData = {"Jan 2015": 762, "Feb 2015": 1089, "Mar 2015": 1758, "Apr 2015": 3067, "May 2015": 2311, "Jun 2015": 944, "Jul 2015": 323, "Aug 2015": 286, "Sep 2015": 1446, "Oct 2015": 1208, "Nov 2015": 713, "Dec 2015": 22};
+      this.drawGraph(gData);
+      /*if (dataGraph && (day == storedDay)) {
         var gData = JSON.parse(dataGraph);
         _this.drawGraph(gData);
-      } else {
-        var url = config.coreUrl + 'stations/graph';
+      } else {*/
+       /* var url = config.coreUrl + 'stations/graph';
         $.ajax({
           context: this,
           url: url,
@@ -33,15 +36,16 @@ define([
         }).done(function(data) {
           var strData = JSON.stringify(data);
           // store data in localstorage
-          localStorage.setItem('ecoreleveChart', strData);
+          console.log(data)
+          localStorage.setItem('ecoreleveChartDemo', strData);
           var d = (new Date() + '').split(' ');
           var day_ = d[2];
-          localStorage.setItem('ecoreleveChartDay', day_);
+          localStorage.setItem('ecoreleveChartDayDemo', day_);
           _this.drawGraph(data);
         }).fail(function(msg) {
           console.error(msg);
-        });
-      }
+        });*/
+      //}
     },
     drawGraph: function(data) {
       var canvas = this.$el.find('canvas');

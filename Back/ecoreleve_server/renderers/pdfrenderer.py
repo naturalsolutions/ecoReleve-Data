@@ -51,15 +51,15 @@ class PDFrenderer(object):
 					cols[key] = 'Monitoring st.'
 				elif cols[key] == 'SurveyType@Station':
 					cols[key] = 'Servey type'
-			cols.append('Date')
-		else:
-			cols.append('Date de saisie')
-		cols.append('Vu')
-		cols.append('Entendu')
-		cols.append('Perdu')
-		cols.append('Mort')
-		cols.append('Repro')
-		cols.append('No check')
+		# 	cols.append('Date')
+		# else:
+		# 	cols.append('Date de saisie')
+		# cols.append('Vu')
+		# cols.append('Entendu')
+		# cols.append('Perdu')
+		# cols.append('Mort')
+		# cols.append('Repro')
+		# cols.append('No check')
 
 		data.insert(0,cols)
 		styleSheet = getSampleStyleSheet()

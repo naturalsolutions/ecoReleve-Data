@@ -110,6 +110,7 @@ define([
             this.setElement($el);
             var _this = this;
             _(function () {
+
                 if (_this.editable) {
                     _this.$el.find('#' + _this.id).autocompTree({
                         wsUrl: _this.wsUrl,

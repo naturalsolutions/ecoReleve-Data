@@ -20,7 +20,7 @@ define([
         options: [],
         editorAttrs: {'disabled': 'disabled'},
         fieldClass: 'fieldactivity',
-        validators: ['required']
+        validators: []
       },
       FieldWorkers: {
         'subschema': {

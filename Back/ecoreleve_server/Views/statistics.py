@@ -87,6 +87,8 @@ def station_graph(request):
     begin_date = datetime.date(day=1, month=today.month, year=today.year-1)
     end_date = datetime.date(day=1, month=today.month, year=today.year)
     # Query
+    print(begin_date)
+    print(end_date)
     query = select([
             func.count(Station.ID).label('nb'),
             func.year(Station.StationDate).label('year'),
@@ -99,9 +101,11 @@ def station_graph(request):
             (faster than an order_by clause in this case)
     """
     data = session.execute(query).fetchall()
+    print(data)
     for nb, y, m in sorted(data, key=operator.itemgetter(1,2)):
             d = datetime.date(day=1, month=m, year=y).strftime('%b')
             result[' '.join([d, str(y)])] = nb
+
     return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #

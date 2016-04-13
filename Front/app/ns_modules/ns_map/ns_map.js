@@ -25,7 +25,7 @@ define([
   'leaflet_cluster',
   'googleLoaer',
   'leaflet_google',
-  'config',
+
 
 ], function(config, $, _, Backbone , Marionette, L, cluster, GoogleMapsLoader
     ) {
@@ -412,9 +412,14 @@ define([
 
           if(_this.popup){
             prop = feature.properties;
-            for(var p in prop){
+            
+            infos += '<b>id : </b>' + prop.id + '<br>' + '<b>name : </b>' + prop.name + '<br>' + '<b>date : </b>' + prop.date + '<br>';
+            infos += '<br><a href="#stations/'+ prop.id +'"><button>use it</button></a>';
+            /*for(var p in prop){
               infos +='<b>'+p+' : '+prop[p]+'</b><br />';
-            }
+            }*/
+
+
             marker.bindPopup(infos);
           }
 

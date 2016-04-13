@@ -90,8 +90,13 @@ def getFields(request) :
 def getStation(request):
     session = request.dbsession
     id = request.matchdict['id']
+    user = request.authenticated_userid['iss']
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
+
+    if int(curSta.creator) != int(user) :
+        return None
+
     # if Form value exists in request --> return data with schema else return only data
     if 'FormName' in request.params :
         ModuleName = request.params['FormName']
@@ -302,6 +307,11 @@ def searchStation(request):
         searchInfo['offset'] = json.loads(data['offset'])
         searchInfo['per_page'] = json.loads(data['per_page'])
         getFW = True
+        searchInfo['criteria'].append(
+            {'Column' : 'creator',
+            'Operator' : '=',
+            'Value' : user
+            })
     else :
         searchInfo['order_by'] = []
         ModuleType = 'StationGrid'
@@ -315,6 +325,10 @@ def searchStation(request):
         'Column': 'LON',
         'Operator' : 'Is not',
         'Value' : None
+        },{
+        'Column' : 'creator',
+        'Operator' : '=',
+        'Value' : user
         }]
         searchInfo['criteria'].extend(criteria)
         # searchInfo['offset'] = 0
@@ -349,9 +363,11 @@ def searchStation(request):
         if countResult < 50000 : 
             exceed = False
             dataResult = listObj.GetFlatDataList(searchInfo,getFW)
+
             for row in dataResult:
+                print(row)
                 geoJson.append({'type':'Feature', 'properties':{'name':row['Name']
-                    , 'date':row['StationDate']}
+                    , 'date':row['StationDate'], 'id' : row['ID'] }
                     , 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         return {'type':'FeatureCollection', 'features':geoJson, 'exceed': exceed}
     else :
