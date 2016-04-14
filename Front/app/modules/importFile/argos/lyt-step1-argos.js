@@ -50,20 +50,15 @@ define([
 
         var ext = file.name.split('.');
         if (ext[ext.length - 1].toLowerCase() != 'txt') {
-          Swal(
-							{
-  title: 'Wrong file type',
-  text: 'The file should be a text file (.txt)',
-  type: 'error',
-  showCancelButton: false,
-  confirmButtonColor: 'rgb(147, 14, 14)',
-  confirmButtonText: 'OK',
-
-  closeOnConfirm: true,
-
-							}
-
-					);
+          Swal({
+              title: 'Wrong file type',
+              text: 'The file should be a text file (.txt)',
+              type: 'error',
+              showCancelButton: false,
+              confirmButtonColor: 'rgb(147, 14, 14)',
+              confirmButtonText: 'OK',
+              closeOnConfirm: true,
+          });
           return false;
         }
 
@@ -71,20 +66,15 @@ define([
           var _i, _len;
           for (_i = 0, _len = this.files.length; _i < _len; _i++) {
             if (this.files[_i].name === file.name && this.files[_i].size === file.size) {
-              Swal(
-												{
-  title: 'Warning Duplicate Files',
-  text: this.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
-  type: 'warning',
-  showCancelButton: false,
-  confirmButtonColor: 'rgb(218, 146, 15)',
-
-  confirmButtonText: 'OK',
-
-  closeOnConfirm: true,
-
-												}
-										);
+              Swal({
+                title: 'Warning Duplicate Files',
+                text: this.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
+                type: 'warning',
+                showCancelButton: false,
+                confirmButtonColor: 'rgb(218, 146, 15)',
+                confirmButtonText: 'OK',
+                closeOnConfirm: true,
+              });
               return false;
             }
           }
@@ -154,38 +144,45 @@ define([
       });
 
       myDropzone.on('queuecomplete', function(file) {
-          var totalInserted = _this.totalReturned.reduce(function(memo, value) { return memo + value.get("inserted") }, 0);
-          var totalExisting = _this.totalReturned.reduce(function(memo, value) { return memo + value.get("existing") }, 0);
+          var totalInsertedArgos = _this.totalReturned.reduce(function(memo, value) { return memo + value.get('inserted argos') }, 0);
+          var totalExistingArgos = _this.totalReturned.reduce(function(memo, value) { return memo + value.get('existing argos') }, 0);
+
+          var totalInsertedGPS = _this.totalReturned.reduce(function(memo, value) { return memo + value.get('inserted gps') }, 0);
+          var totalExistingGPS = _this.totalReturned.reduce(function(memo, value) { return memo + value.get('existing gps') }, 0);
+
+          var totalInsertedEng = _this.totalReturned.reduce(function(memo, value) { return memo + value.get('inserted Engineering') }, 0);
+          var totalExistingEng = _this.totalReturned.reduce(function(memo, value) { return memo + value.get('existing Engineering') }, 0);
+          console.log(_this.totalReturned);
 
         if (!this.errors) {
-
-          Swal({title: 'Well done',
-									text: 'File(s) have been correctly imported\n' 
-                          + '\t inserted : ' + totalInserted + '\n\t existing : ' + totalExisting
-                          ,
-									showCancelButton: true,
-									confirmButtonColor: '#DD6B55',
-									confirmButtonText: 'Validate Argos',
-									cancelButtonText: 'New import',
-									closeOnConfirm: true,
-									closeOnCancel: true},
-									function(isConfirm) {   if (isConfirm) {
-  Backbone.history.navigate('validate/argos',{trigger: true});
-											}
-									}
-								);
-        }else {
-          Swal(
-										{
-  title: 'An error occured',
-  text: 'Please verify your file',
-  type: 'error',
-  showCancelButton: false,
-  confirmButtonText: 'OK',
-  confirmButtonColor: 'rgb(147, 14, 14)',
-  closeOnConfirm: true,
-										}
-								);
+          Swal({
+            title: 'Well done',
+            text: 'File(s) have been correctly imported\n\n' 
+            + '\t inserted Argos : ' + totalInsertedArgos + '\t existing Argos : ' + totalExistingArgos+','
+            +'\n\t inserted GPS : ' + totalInsertedGPS + '\t existing GPS : ' + totalExistingGPS+','
+            +'\n\t inserted Engineering : ' + totalInsertedEng + '\t existing Engineering : ' + totalExistingEng
+            ,
+            showCancelButton: true,
+            confirmButtonColor: '#DD6B55',
+            confirmButtonText: 'Validate Argos',
+            cancelButtonText: 'New import',
+            closeOnConfirm: true,
+            closeOnCancel: true},
+            function(isConfirm) {
+              if (isConfirm) {
+              Backbone.history.navigate('validate/argos',{trigger: true});
+              }
+            });
+        } else {
+          Swal({
+            title: 'An error occured',
+            text: 'Please verify your file',
+            type: 'error',
+            showCancelButton: false,
+            confirmButtonText: 'OK',
+            confirmButtonColor: 'rgb(147, 14, 14)',
+            closeOnConfirm: true,
+          });
         }
         this.errors = false;
         _this.totalReturned.reset();
