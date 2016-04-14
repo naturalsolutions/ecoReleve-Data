@@ -24,7 +24,7 @@ from .Models import (
     Sensor,
     db
     )
-from .Views import add_routes
+from .Views import add_routes,add_cors_headers_response_callback
 
 from .pyramid_jwtauth import (
     JWTAuthenticationPolicy,
@@ -113,6 +113,8 @@ def main(global_config, **settings):
     includeme(config)
     config.set_root_factory(SecurityRoot)
 
+    config.add_subscriber(add_cors_headers_response_callback, NewRequest)
+    
     # Set the default permission level to 'read'
     config.set_default_permission('read')
     add_routes(config)
