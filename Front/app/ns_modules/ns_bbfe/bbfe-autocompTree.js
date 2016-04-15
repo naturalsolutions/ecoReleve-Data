@@ -86,6 +86,7 @@ define([
             this.startId = options.schema.options.startId;
             this.wsUrl = options.schema.options.wsUrl;
             this.lng = options.schema.options.lng;
+            this.timeout = options.schema.options.timeout;
             this.displayValueName = options.schema.options.displayValueName || 'fullpathTranslated';
             this.storedValueName = options.schema.options.storedValueName || 'fullpath';
             if (this.ValidationRealTime) {
@@ -123,6 +124,7 @@ define([
                         },
                         inputValue: _this.value,
                         startId: _this.startId,
+                        timeout: _this.timeout,
 
                         onItemClick: function (options) {
                             var value = _this.$el.find('#' + _this.id + '_value').val();
