@@ -366,15 +366,15 @@ def updateMonitoredSite(request):
     session = request.dbsession
     data = request.params.mixed()
     print(data)
-    # curSta = session.query(Station).get(request.matchdict['id'])
+    curSta = session.query(Station).get(data['id'])
     # data = request.json_body
     # idSite = data['siteId']
     # curSta.FK_MonitoredSite = idSite
     if data['FK_MonitoredSite'] == '':
         return 'Station is not monitored'
     try :
-        newSitePos = MonitoredSitePosition(StartDate=data['StationDate']
-            , LAT=data['LAT'], LON=data['LON'], ELE=data['ELE'], Precision=data['precision'], FK_MonitoredSite=data['FK_MonitoredSite'])
+        newSitePos = MonitoredSitePosition(StartDate=curSta.StationDate
+            , LAT=curSta.LAT, LON=curSta.LON, ELE=curSta.ELE, Precision=curSta.precision, FK_MonitoredSite=curSta.FK_MonitoredSite)
         session.add(newSitePos)
         session.commit()
         return 'Monitored site position was updated'

@@ -1,0 +1,12 @@
+UPDATE i SET Species = th.TTop_FullPath
+  FROM [EcoReleve_ECWP].[dbo].[Individual] i 
+   JOIN THESAURUS.dbo.TTopic th on th.TTop_Name = i.Species and th.TTop_Type = 'Vertébrés'
+  where Original_ID like 'track%' and species not like '%aves>%'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('48_Update_Species_withoutFullpath',GETDATE(),(SELECT db_name()))
+
+
+GO
