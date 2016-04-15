@@ -1,0 +1,52 @@
+UPDATE f set TypeObj = 1 
+FROm ModuleForms f
+WHERE module_id = 9 and TypeObj is null 
+	and Name in ('Release_Ring_Code','Breeding_Ring_Code','Mark_code_1','Mark_code_2','Death_date','Birth_date','Monitoring_Status','Survey_type','origin')
+
+
+INSERT INTO [dbo].[ModuleGrids]
+           ([Module_ID]
+           ,[TypeObj]
+           ,[Name]
+           ,[Label]
+           ,[GridRender]
+           ,[GridSize]
+           ,[CellType]
+           ,[GridOrder]
+           ,[QueryName]
+           ,[Options]
+           ,[FilterOrder]
+           ,[FilterSize]
+           ,[FilterClass]
+           ,[IsSearchable]
+           ,[FilterDefaultValue]
+           ,[FilterRender]
+           ,[FilterType]
+           ,[Status])
+     VALUES
+           (8
+           ,2
+           ,'Age'
+           ,'Age'
+           ,2
+           ,1
+           ,'string'
+           ,35
+           ,NULL
+           ,222957
+           ,120
+           ,2
+           ,NULL
+           ,1
+           ,NULL
+           ,4
+           ,'AutocompTreeEditor'
+           ,NULL)
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('50_Update_Conf_grid_and_form_NonID_Indiv',GETDATE(),(SELECT db_name()))
+
+
+GO
