@@ -61,6 +61,19 @@ define([
                         }
                     }
                 };
+
+                this.autocompleteSource.open =  function(event, ui) {
+                    var autocomplete = $(".ui-autocomplete");
+                    var topPosition = _this.$el.find('#' + _this.id ).offset().top;
+                    var docHeight = $(document).height();
+                    var winHeight = $(window).height();
+                        console.log('winHeight ',winHeight);
+                        console.log('docHeight ',docHeight);
+                    
+                    if (topPosition > docHeight/2) {
+                        autocomplete.position({ my : "left top", at: "left bottom",of: _this.$el.find('#' + _this.id )});
+                    }
+                };
             }
             this.options = options;
         },
