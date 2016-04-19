@@ -414,8 +414,8 @@ define([
 
           if(_this.popup){
             prop = feature.properties;
-            
-            infos += '<b>id : </b>' + prop.id + '<br>' + '<b>name : </b>' + prop.name + '<br>' + '<b>date : </b>' + prop.date + '<br>';
+
+            infos += '<b>id : </b>' + prop.ID + '<br>' + '<b>ptt : </b>' + prop.UnicIdentifier + '<br>' + '<b>date : </b>' + prop.Date + '<br>';
             infos += '<br><a href="#stations/'+ prop.id +'"><button>use it</button></a>';
             /*for(var p in prop){
               infos +='<b>'+p+' : '+prop[p]+'</b><br />';
