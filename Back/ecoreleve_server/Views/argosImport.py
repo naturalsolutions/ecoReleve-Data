@@ -93,7 +93,7 @@ def parseDSFileAndInsert(full_filename,session):
     cc['ini'] = con_file
 
     with open(con_file,'w') as f: 
-        print('-eng\n-title\n-out\n'+out_path+'\n'+full_filename, file=f)
+        print('-eng\n-a\n-title\n-out\n'+out_path+'\n'+full_filename, file=f)
 
     # execute MTI-Parser
     args = [MTI_path]
@@ -137,6 +137,18 @@ def parseDSFileAndInsert(full_filename,session):
                 GPSData = GPSData.append(tempG)
             except :
                 GPSData = tempG
+
+        if filename.endswith("a.txt"):
+            usecols = ['date','lc','lat1','lon1','lat2','lon2','nbMsg','freq','AverageTI','Satellite','MaxStrSwapped','tt']
+            tempA = pd.read_csv(filename,sep='\t',header=None , parse_dates = [0], infer_datetime_format = True, skiprows = [0])
+            tempA.columns = usecols
+            tempA['FK_ptt'] = ptt
+            print(tempA)
+            tempA = tempA.drop(['AverageTI','Satellite','MaxStrSwapped','tt'],1)
+            try:
+                argosData = argosData.append(tempG)
+            except :
+                argosData = tempA
 
         if filename.endswith("e.txt"):
             usecols= ['txDate','pttDate','satId','activity','txCount','temp','batt','fixTime','satCount','resetHours','fixDays','season','shunt','mortalityGT','seasonalGT']
@@ -193,6 +205,18 @@ def parseDSFileAndInsert(full_filename,session):
         if DFToInsert.shape[0] != 0 :
             #Insert non existing data into DB
             DFToInsert.to_sql(ArgosGps.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'], index=False)
+
+    if argosData is not None: 
+        DFToInsertArg = checkExistingArgos(argosData,session)
+        nb_gps_data = DFToInsertArg.shape[0]
+        nb_existingGPS = argosData.shape[0] - DFToInsertArg.shape[0]
+        print(DFToInsertArg)
+        DFToInsertArg.loc[:,('type')]=list(itertools.repeat('arg',len(DFToInsertArg.index)))
+        DFToInsertArg.loc[:,('checked')]=list(itertools.repeat(0,len(DFToInsertArg.index)))
+        DFToInsertArg.loc[:,('imported')]=list(itertools.repeat(0,len(DFToInsertArg.index)))
+        DFToInsertArg = DFToInsertArg.drop(['id','lat1','lat2','lon1','lon2'],1)
+        if DFToInsertArg.shape[0] != 0 :
+            DFToInsertArg.to_sql(ArgosGps.__table__.name, session.get_bind(), if_exists='append', schema = dbConfig['sensor_schema'],index=False)
 
     os.remove(full_filename)
     shutil.rmtree(out_path)
