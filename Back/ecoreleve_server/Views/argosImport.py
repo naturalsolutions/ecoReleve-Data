@@ -208,9 +208,9 @@ def parseDSFileAndInsert(full_filename,session):
 
     if argosData is not None: 
         DFToInsertArg = checkExistingArgos(argosData,session)
-        nb_gps_data = DFToInsertArg.shape[0]
-        nb_existingGPS = argosData.shape[0] - DFToInsertArg.shape[0]
-        print(DFToInsertArg)
+        nb_arg_data = DFToInsertArg.shape[0]
+        nb_existingArg = argosData.shape[0] - DFToInsertArg.shape[0]
+        
         DFToInsertArg.loc[:,('type')]=list(itertools.repeat('arg',len(DFToInsertArg.index)))
         DFToInsertArg.loc[:,('checked')]=list(itertools.repeat(0,len(DFToInsertArg.index)))
         DFToInsertArg.loc[:,('imported')]=list(itertools.repeat(0,len(DFToInsertArg.index)))
@@ -221,7 +221,7 @@ def parseDSFileAndInsert(full_filename,session):
     os.remove(full_filename)
     shutil.rmtree(out_path)
     return {'inserted gps':nb_gps_data, 'existing gps': nb_existingGPS,'inserted Engineering':nb_eng
-    , 'existing Engineering': nb_existingEng - nb_eng,'inserted argos':0, 'existing argos':0}
+    , 'existing Engineering': nb_existingEng - nb_eng,'inserted argos':nb_arg_data, 'existing argos':nb_existingArg}
 
 def checkExistingEng(EngData,session) :
     EngData['id'] = range(EngData.shape[0])

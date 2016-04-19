@@ -62,6 +62,7 @@ define([
 
     this.elem = options.element || 'map';
     this.zoom = config.mapZoom;
+    this.maxZoom = config.mapMaxZoom;
     this.disableClustring = options.disableClustring || 18;
     this.bbox = options.bbox || false;
     this.area = options.area || false;
@@ -134,6 +135,7 @@ define([
         center: this.center ,
         zoom: this.zoom,
         minZoom: 2,
+        maxZoom:this.maxZoom,
         inertia: false,
         zoomAnimation: true,
         keyboard: false, //fix scroll window
