@@ -94,19 +94,17 @@ define(['jquery', 'marionette', 'backbone', 'config','sweetAlert', 'controller']
         $('#arial').html('');
         $('#arialSub').html('');
       }else {
-        var md = this.collection.findWhere({href: patern[0]});
-        $('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
-        if (patern[1] && patern[1] != 'id' && patern[1] != 'type') {
-          $('#arialSub').html('<a href="#' + patern[0] + '/' + patern[1] + '">| &nbsp;' + patern[1] + '</a>');
-        }else {
-          $('#arialSub').html('');
-        }
+        this.setNav(patern);
       }
     },
     previous: function() {
-        var url = '#'+ this.history[this.history.length-2];
+        var href = this.history[this.history.length-2];;
+        var url = '#'+ href;
         Backbone.history.navigate(url,{trigger:false, replace: false});
         this.history.pop();
+        var patern;
+        var patern =   href.split('/');
+        this.setNav(patern);
     },
     continueNav : function(callback, args){
         $.ajax({
@@ -119,6 +117,22 @@ define(['jquery', 'marionette', 'backbone', 'config','sweetAlert', 'controller']
             document.location.href = config.portalUrl;
           }
         });
+    },
+    unique : function(list) {
+        var result = [];
+        $.each(list, function(i, e) {
+            if ($.inArray(e, result) == -1) result.push(e);
+        });
+        return result;
+    },
+    setNav : function(patern){
+        var md = this.collection.findWhere({href: patern[0]});
+        $('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
+        if (patern[1] && patern[1] != 'id' && patern[1] != 'type') {
+          $('#arialSub').html('<a href="#' + patern[0] + '/' + patern[1] + '">| &nbsp;' + patern[1] + '</a>');
+        }else {
+          $('#arialSub').html('');
+        }
     }
   });
 });
