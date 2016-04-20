@@ -9,6 +9,7 @@
 (function ($) {
   $.fn.autocompTree = function(methodOrOptions) {
     //On définit nos paramètres par défaut
+    var searchAutoComp = null;
     var _self = $(this);
     var defauts =
     {
@@ -61,13 +62,15 @@
       //Fonction s'éxécutant après l'initialisation de l'objet autocompTree
       onInputInitialize: '',
       //Enregistrement de l'item en elle même
-      thisItem: $(this)
+      thisItem: $(this),
+
+      timeout: 200
     };
 
     var methods = {
       init: function(parametres) {
         //Fusion des paramètres envoyer avec les params par defaut
-
+        
         if (parametres) {
           var parametres = $.extend(defauts, parametres);
         };
@@ -180,8 +183,6 @@
 
           $me.focus(function () {
             setTimeout(function(){
-
-
             $("div[id^=treeView]").each(function () {
               $(this).css('display', 'none');
             });
@@ -211,7 +212,7 @@
                 throw ('An error occured during onInputFocus -> ' + e);
               }
             }
-            }, 0);
+            }, parametres.timeout + 50);
           });
 
           //Fonction de recherche et de filtration
@@ -219,43 +220,50 @@
             var treeHtml = $("#treeView" + $me.attr("id"));
             var fancytree = treeHtml.fancytree("getTree");
             //Si le nombrte d'élément est < a 100 on oblige l'utilisation d'au moins trois caractère pour des raisons de performances
-            if (fancytree.count() < 100 || $me.val().length >= 3) {
-              treeHtml.find('ul.fancytree-container li').css("padding", "1px 0 0 0");
-              treeHtml.fancytree("getRootNode").visit(function (node) {
-                if (node.span) {
-                  var className = node.span.className;
-                  if (className.indexOf('fancytree-hide') != -1) {
-                    node.setExpanded(false);
-                  }
-                } else {
-                  node.setExpanded(false);
-                }
-              });
-              match = $me.val();
-              var n,
-                match = $me.val();
+              if (searchAutoComp != null) {
+                clearTimeout(searchAutoComp);
+              } 
+              searchAutoComp = setTimeout(function(){
+                    searchAutoComp = null;
+                    if (fancytree.count() < 100 || $me.val().length >= 3) {
+                      treeHtml.find('ul.fancytree-container li').css("padding", "1px 0 0 0");
+                      treeHtml.fancytree("getRootNode").visit(function (node) {
+                        if (node.span) {
+                          var className = node.span.className;
+                          if (className.indexOf('fancytree-hide') != -1) {
+                            node.setExpanded(false);
+                          }
+                        } else {
+                          node.setExpanded(false);
+                        }
+                      });
+                      match = $me.val();
+                      var n,
+                        match = $me.val();
 
-              if (e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === "") {
-                fancytree.clearFilter();
-                treeHtml.fancytree("getRootNode").visit(function (node) {
-                node.setExpanded(false);
-                });
-                return;
-              }
-              n = fancytree.filterNodes(match, false);
-              while (treeHtml.find('.fancytree-submatch:not(.fancytree-expanded)').find('.fancytree-expander').length) {
-                treeHtml.find('.fancytree-submatch:not(.fancytree-expanded)').find('.fancytree-expander').click();
-              }
-              if (treeHtml.find('.fancytree-match').length < 3 && treeHtml.find('.fancytree-match').find('.fancytree-match').length)
-                treeHtml.find('.fancytree-match').find('.fancytree-expander').click()
-              treeHtml.find('ul.fancytree-container li').css("padding", "0px 0 0 0");
-            }
-            if ($me.val().length == 0) {
-              fancytree.clearFilter();
-              treeHtml.fancytree("getRootNode").visit(function (node) {
-                node.setExpanded(false);
-              });
-            }
+                      if (e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === "") {
+                        fancytree.clearFilter();
+                        treeHtml.fancytree("getRootNode").visit(function (node) {
+                        node.setExpanded(false);
+                        });
+                        return;
+                      }
+                      n = fancytree.filterNodes(match, false);
+                      while (treeHtml.find('.fancytree-submatch:not(.fancytree-expanded)').find('.fancytree-expander').length) {
+                        treeHtml.find('.fancytree-submatch:not(.fancytree-expanded)').find('.fancytree-expander').click();
+                      }
+                      if (treeHtml.find('.fancytree-match').length < 3 && treeHtml.find('.fancytree-match').find('.fancytree-match').length)
+                        treeHtml.find('.fancytree-match').find('.fancytree-expander').click()
+                      treeHtml.find('ul.fancytree-container li').css("padding", "0px 0 0 0");
+                    }
+
+                    if ($me.val().length == 0) {
+                      fancytree.clearFilter();
+                      treeHtml.fancytree("getRootNode").visit(function (node) {
+                        node.setExpanded(false);
+                      });
+                    }
+                  },parametres.timeout);
           });
 
           if (parametres.display.isDisplayDifferent) {
@@ -274,6 +282,8 @@
         });
         return _self;
       },
+
+      
       reload: function (source) {
         var tree = $("#treeView" + _self.attr('id')).fancytree('getTree');
         if (source) {

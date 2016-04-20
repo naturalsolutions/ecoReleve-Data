@@ -123,7 +123,7 @@ define([
         name: 'StartDate',
         label: 'Start Date',
         editable: false,
-        cell: 'string',
+        cell: 'stringDate',
       },];
       this.grid = new NsGrid({
         pageSize: 20,
@@ -137,12 +137,12 @@ define([
         name: 'StartDate',
         label: 'Start Date',
         editable: false,
-        cell: 'string'
+        cell: 'stringDate'
       },{
         name: 'EndDate',
         label: 'End Date',
         editable: false,
-        cell: 'string'
+        cell: 'stringDate'
       }, {
         name: 'Type',
         label: 'Type',
@@ -179,17 +179,17 @@ define([
         editable: false,
         renderable: false,
         cell: 'string'
-      },/*{
+      },{
         name: 'Date',
         label: 'date',
         editable: false,
-        cell: 'string'
-      },*/{
+        cell: 'stringDate'
+      },/*{
         name: 'timestamp',
         label: 'date',
         editable: false,
-        cell : 'timestamp'
-      },{
+        cell : 'stringDate'
+      }*/{
         name: 'LAT',
         label: 'latitude',
         editable: false,

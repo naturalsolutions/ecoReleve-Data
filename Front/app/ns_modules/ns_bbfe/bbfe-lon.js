@@ -49,7 +49,7 @@ define([
     var numeric = /^\-?[^\-][0-9]*\.?[0-9]{0,5}$/.test(newVal);
 
     if (!numeric){
-      if (e.keyCode!=8 && this.oldValue!='') {
+      if (e.keyCode!=8 && e.keyCode != 110 && this.oldValue!='') {
         this.$el.val(this.oldValue);
       }
     }
