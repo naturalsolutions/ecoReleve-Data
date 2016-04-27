@@ -66,6 +66,7 @@ define(['marionette', 'config',
     },
 
     home: function() {
+      this.checkAjax();
       Backbone.history.navigate('');
       this.rgMain.show(new LytHome());
     },
@@ -75,9 +76,11 @@ define(['marionette', 'config',
     },
 
     stations: function(id) {
+       this.checkAjax();
       this.rgMain.show(new LytStations({id: id}));
     },
     newStation: function(from) {
+      this.checkAjax();
       this.rgMain.show(new LytStationsNew({from: from}));
     },
 
@@ -119,6 +122,17 @@ define(['marionette', 'config',
     export: function() {
       this.rgMain.show(new LytExport());
     },
+    checkAjax : function(){
+      var xhrPool = window.xhrPool;
+      console.log('new route :');
+      console.log(window.xhrPool);
+
+      for(var i=0; i<xhrPool.length; i++){
+         xhrPool[i].abort();
+      }
+       window.xhrPool = [];
+
+    }
 
   });
 });

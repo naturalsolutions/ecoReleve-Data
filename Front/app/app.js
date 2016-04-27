@@ -21,6 +21,7 @@ function( Marionette, LytRootView, Router, Controller) {
 
   var app = {};
   var JST = window.JST = window.JST || {};
+  window.xhrPool = [];
 
 
 
@@ -30,16 +31,20 @@ function( Marionette, LytRootView, Router, Controller) {
   };
 
   app = new Marionette.Application();
+
   app.on('start', function() {
     app.rootView = new LytRootView();
     app.controller = new Controller();
     app.router = new Router({controller: app.controller});
     app.rootView.render();
     Backbone.history.start();
+
+      
+
   });
 
 
-  $(window).ajaxStart(function(e) {
+  $(window).ajaxStart(function(e,xhr,opt) {
     $('#header-loader').removeClass('hidden');
   });
   $(window).ajaxStop(function() {
@@ -52,6 +57,11 @@ function( Marionette, LytRootView, Router, Controller) {
   window.onerror = function() {
     $('#header-loader').addClass('hidden');
   };
+  $(document).ajaxSend(function(e, xhr, opt){
+    console.log('appel ajax en cours');
+    window.xhrPool.push(xhr);
+  });
+
 
   window.app = app;
   return app;
