@@ -6,14 +6,16 @@ define([
   $,_, Backgrid
 ){
   'use strict';
-  return Backgrid.TimestampCell = Backgrid.StringCell.extend({
-    className: "timestamp-cell",
+  return Backgrid.StringDateCell = Backgrid.StringCell.extend({
+    className: "stringDate-cell",
 
     formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
           fromRaw: function(rawValue, model) {
             if (rawValue!=null){
-              var dd = new Date(rawValue*1000);
-              var displayDate = ("0" + dd.getDate()).slice(-2)+'/'+("0" + (dd.getMonth()+ 1)).slice(-2)+'/'+dd.getFullYear()+' '+("0" + dd.getHours()).slice(-2)+':'+("0" + dd.getMinutes()).slice(-2);
+              var hours_ = rawValue.split(' ');
+              var date_ = hours_[0].split('-');
+              var displayDate = date_[2]+'/'+date_[1]+'/'+date_[0]+' '+hours_[1];
+
               return displayDate;
             } else {
               return '';

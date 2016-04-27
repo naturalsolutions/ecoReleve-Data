@@ -196,6 +196,7 @@ def getIndivHistory(request):
                     dictRow['value'] = curRow[key] 
                 elif 'FK' not in key :
                     dictRow[key] = curRow[key]
+        dictRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
         response.append(dictRow)
 
     return response
@@ -218,6 +219,9 @@ def getIndivEquipment(request):
     response = []
     for row in result:
         curRow = OrderedDict(row)
+        curRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
+        if curRow['EndDate'] is not None :
+            curRow['EndDate'] = curRow['EndDate'].strftime('%Y-%m-%d %H:%M:%S') 
         response.append(curRow)
 
     return response
@@ -380,8 +384,11 @@ def getIndivLocation(request):
 
     if 'geo' in request.params :
         result = gene.get_geoJSON(criteria,['ID','UnicIdentifier','Date','type_'])
+
     else:
         result = gene.search(criteria,offset=offset,per_page=per_page,order_by=order_by)
+        for row in result : 
+            row['Date'] = row['Date'].strftime('%Y-%m-%d %H:%M:%S')
 
 
     # ************ POC Indiv location PLayer  **************** 
