@@ -113,6 +113,7 @@ define([
           type: 'DateTimePickerEditor',
           label: 'Date',
           title: 'Date',
+          options:{isInterval: 1}
         }
       };
       this.filters = new NsFilter({
