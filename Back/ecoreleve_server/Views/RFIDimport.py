@@ -120,10 +120,10 @@ def uploadFileRFID(request):
                 list_RFID.append(row)
             j=j+1
         data_to_check = pd.DataFrame.from_records(list_RFID,columns = ['id_','FK_Sensor','date_','chip_code','creator','creation_date','validated','checked'])
-
-        minDateEquip = datetime.fromtimestamp(int(startEquip))
+        print(startEquip)
+        minDateEquip = datetime.strptime(startEquip,'%Y-%m-%d %H:%M:%S')
         try :
-            maxDateEquip = datetime.fromtimestamp(int(endEquip))
+            maxDateEquip = datetime.strptime(endEquip,'%Y-%m-%d %H:%M:%S')
         except:
             maxDateEquip = None
 
