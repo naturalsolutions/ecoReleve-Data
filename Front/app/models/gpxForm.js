@@ -13,15 +13,6 @@ define([
         validators: ['required'],
         options: {extensions: null}
       },
-      fieldActivity: {
-        type: 'Select' ,
-        title: 'Global field activity',
-        editorClass: 'form-control',
-        options: [],
-        editorAttrs: {'disabled': 'disabled'},
-        fieldClass: 'fieldactivity',
-        validators: []
-      },
       FieldWorkers: {
         'subschema': {
           'FieldWorker': {
@@ -48,7 +39,16 @@ define([
         'defaultValue' : {'FK_ProtocoleType' : 1000},
         'nbByDefault': 1,
 
-      }
+      },
+      fieldActivity: {
+        type: 'Select' ,
+        title: 'Global field activity',
+        editorClass: 'form-control',
+        options: [],
+        editorAttrs: {'disabled': 'disabled'},
+        fieldClass: 'fieldactivity',
+        validators: []
+      },
     }
   });
 });

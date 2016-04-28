@@ -24,6 +24,7 @@ define([
       'click #addProto': 'addProtoFromList',
       'click button#addObs': 'addObs',
       'click #protoMenuContainer .js-menu-item': 'getIndex',
+      'change select#protoPicker' : 'activateBtn'
     },
 
     initialize: function(options) {
@@ -191,7 +192,10 @@ define([
           console.warn('request new proto error');
         }
       });
-    },
+    }, activateBtn : function(){
+          $('#addProto').removeAttr('disabled');
+          $('#protoPicker').removeClass('initselect');
+    }
     
 
   });
