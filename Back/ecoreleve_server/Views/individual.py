@@ -328,14 +328,16 @@ def searchIndiv(request):
     searchInfo['per_page'] = json.loads(data['per_page'])
 
     if 'typeObj' in request.params:
+        typeObj = request.params['typeObj']
         searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':request.params['typeObj']})
     else:
         searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':1})
+        typeObj = 1
 
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront)
+    listObj = IndividualList(moduleFront,typeObj = typeObj)
     dataResult = listObj.GetFlatDataList(searchInfo)
     countResult = listObj.count(searchInfo)
 
