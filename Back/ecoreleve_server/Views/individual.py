@@ -385,10 +385,10 @@ def getIndivLocation(request):
         order_by= None
 
     if 'geo' in request.params :
-        result = gene.get_geoJSON(criteria,['ID','UnicIdentifier','Date','type_'])
+        result = gene.get_geoJSON(criteria,['ID','Date','type_'])
 
     else:
-        result = gene.search(criteria,offset=offset,per_page=per_page,order_by=order_by)
+        result = gene.search(criteria,offset=offset,per_page=per_page,order_by=['StationDate:desc'])
         for row in result : 
             row['Date'] = row['Date'].strftime('%Y-%m-%d %H:%M:%S')
 
