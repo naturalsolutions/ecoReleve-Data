@@ -655,7 +655,7 @@ define([
 
     /*==========  focusMarker :: focus & zoom on a point  ==========*/
     focus: function(id, zoom){
-      if (!isNaN(parseInt(id))){
+      if (!isNaN(id)){
         id = parseInt(id);
       }
       var _this = this;
