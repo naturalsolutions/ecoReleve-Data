@@ -37,6 +37,7 @@ DynPropNames = {
 
 
 thesaurusDictTraduction = {}
+invertedThesaurusDict = {'en':{},'fr':{}}
 
 def loadThesaurusTrad(config):
     session = config.registry.dbmaker()
@@ -52,6 +53,8 @@ def loadThesaurusTrad(config):
 
     for row in results :
         thesaurusDictTraduction[row['fullPath']] = {'en':row['nameEn']}
+        invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
+        invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
     session.close()
 
 
