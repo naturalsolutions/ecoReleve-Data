@@ -11,10 +11,13 @@
       ,[GridOrder]
       ,[QueryName]
       ,[Options]
-      ,[IsSearchable])
-VALUES (17,1,'tarso_Metatarsus','Tarsus (mm)',4,1,'number',20,NULL,NULL,0),
-(17,1,'wings','Wing (mm)',4,1,'number',19,NULL,NULL,0),
-(17,1,'skull','Total skull (mm)',4,1,'number',22,NULL,NULL,0)
+      ,[IsSearchable]
+	  ,FilterOrder
+	  ,FilterRender
+	  ,FilterSize)
+VALUES (17,1,'tarso_Metatarsus','Tarsus (mm)',4,1,'number',20,'Forced',NULL,0,0,0,0),
+(17,1,'wings','Wing (mm)',4,1,'number',19,'Forced',NULL,0,0,0,0),
+(17,1,'skull','Total skull (mm)',4,1,'number',22,'Forced',NULL,0,0,0,0)
 
 
 INSERT INTO ModuleGrids
@@ -40,11 +43,5 @@ SELECT [Module_ID]
   where Module_ID = 8 and name in ('Mark_Color_2','Mark_Color_1')
 
 
+  INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('51_Add_COL_IN_release_and_Indiv',GETDATE(),(SELECT db_name()))
 
-
-
-
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('51_Add_COL_IN_release_and_Indiv',GETDATE(),(SELECT db_name()))
-
-
-GO
