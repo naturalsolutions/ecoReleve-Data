@@ -131,8 +131,8 @@ class StationList(ListObjectWithDynProp):
 #--------------------------------------------------------------------------
 class IndividualList(ListObjectWithDynProp):
 
-    def __init__(self,frontModule) :
-        super().__init__(Individual,frontModule)
+    def __init__(self,frontModule, typeObj = None) :
+        super().__init__(Individual,frontModule, typeObj = typeObj)
 
     def GetJoinTable (self,searchInfo) :
         StatusTable = Base.metadata.tables['IndividualStatus']

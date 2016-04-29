@@ -21,10 +21,11 @@ eval_ = Eval()
 
 class ListObjectWithDynProp():
     ''' This class is used to filter Object with dyn props over all properties '''
-    def __init__(self,ObjWithDynProp, frontModule, history = False, View = None):
+    def __init__(self,ObjWithDynProp, frontModule, history = False, View = None, typeObj = None):
         self.ObjContext = threadlocal.get_current_request().dbsession
         self.sessionmaker = threadlocal.get_current_registry().dbmaker
 
+        self.typeObj = typeObj
         self.ListPropDynValuesOfNow = {}
         self.ObjWithDynProp = ObjWithDynProp
         self.DynPropList = self.GetDynPropList()
@@ -48,7 +49,17 @@ class ListObjectWithDynProp():
 
     def GetAllPropNameInConf(self) :
         ''' Get configured properties to display '''
-        DynPropsDisplay = list(filter(lambda x : x.IsSearchable == True or x.GridRender >= 2  , self.Conf))
+
+        if self.typeObj : 
+            print(self.typeObj)
+            confGridType = self.ObjContext.query(ModuleGrids
+            ).filter(and_(ModuleGrids.Module_ID == self.frontModule.ID,
+                or_(ModuleGrids.TypeObj == self.typeObj ,ModuleGrids.TypeObj ==None )))
+
+            DynPropsDisplay = list(filter(lambda x : (x.IsSearchable == True or x.GridRender >= 2), confGridType))
+        else :
+            DynPropsDisplay = list(filter(lambda x : (x.IsSearchable == True or x.GridRender >= 2), self.Conf))
+
         return DynPropsDisplay
 
     # def GetAllFilterableFK(self):
@@ -78,6 +89,7 @@ class ListObjectWithDynProp():
         self.searchInFK = {}
         for objConf in self.GetAllPropNameInConf() :
             curDynProp = self.GetDynProp(objConf.Name)
+            print(curDynProp)
             if objConf.Name in self.fk_list and objConf.QueryName is not None and objConf.QueryName != 'Forced':
                 tableRef = self.fk_list[objConf.Name].column.table
                 nameRef = self.fk_list[objConf.Name].column.name
