@@ -19,6 +19,8 @@ VALUES (17,1,'tarso_Metatarsus','Tarsus (mm)',4,1,'number',20,'Forced',NULL,0,0,
 (17,1,'wings','Wing (mm)',4,1,'number',19,'Forced',NULL,0,0,0,0),
 (17,1,'skull','Total skull (mm)',4,1,'number',22,'Forced',NULL,0,0,0,0)
 
+UPDATE g SET GridOrder = 200
+FROM ModuleGrids g WHERE Module_ID = 17 and Name = 'comments'
 
 INSERT INTO ModuleGrids
 SELECT [Module_ID]
