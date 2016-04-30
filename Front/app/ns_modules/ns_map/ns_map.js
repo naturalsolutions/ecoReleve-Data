@@ -655,9 +655,6 @@ define([
 
     /*==========  focusMarker :: focus & zoom on a point  ==========*/
     focus: function(id, zoom){
-      if (!isNaN(id)){
-        id = parseInt(id);
-      }
       var _this = this;
       var marker = this.dict[id];
       var center = marker.getLatLng();

@@ -515,10 +515,7 @@ define([
       var coll = new Backbone.Collection();
       coll.reset(this.grid.collection.models);
       var param = {};
-      if (!isNaN(id)){
-        id = parseInt(id);
-      }
-    
+
       if (this.idName) {
         param[this.idName] = id;
       } else {
@@ -592,9 +589,6 @@ define([
       var _this = this;
 
       var param = {};
-      if (!isNaN(parseInt(id))){
-        id = parseInt(id);
-      }
 
       if (this.idName) {
         param[this.idName] = id;
