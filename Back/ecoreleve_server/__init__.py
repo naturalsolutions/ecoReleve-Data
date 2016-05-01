@@ -22,7 +22,8 @@ from .Models import (
     Station,
     Observation,
     Sensor,
-    db
+    db,
+    loadThesaurusTrad
     )
 from .Views import add_routes
 
@@ -113,6 +114,7 @@ def main(global_config, **settings):
     includeme(config)
     config.set_root_factory(SecurityRoot)
 
+    loadThesaurusTrad(config)
     # Set the default permission level to 'read'
     config.set_default_permission('read')
     add_routes(config)

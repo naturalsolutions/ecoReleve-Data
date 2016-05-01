@@ -1,4 +1,4 @@
-from ..Models import Base, DBSession
+from ..Models import Base, DBSession,thesaurusDictTraduction
 from sqlalchemy import (Column, DateTime, Float,
  ForeignKey, Index, Integer, Numeric,
   String, Text, Unicode, Sequence, select,and_,or_, exists,func, join, outerjoin)
@@ -214,9 +214,20 @@ class ListObjectWithDynProp():
         listWithThes = list(filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType,self.Conf))
         listWithThes = list(map(lambda x: x.Name,listWithThes))
 
-        for row in result :
-            row = dict(map(lambda k : self.splitFullPath(k,listWithThes), row.items()))
-            data.append(row)
+        # change thesaural term into laguage user
+        userLng = threadlocal.get_current_request().authenticated_userid['userlanguage']
+        if userLng.lower() != 'fr':
+            print('\n\n Change language EN\n *************************************')
+            for row in result :
+                row = dict(map(lambda k : self.tradThesaurusTerm(k,listWithThes), row.items()))
+                data.append(row)
+
+        # split fullpath if fr language
+        else :
+            for row in result :
+                row = dict(map(lambda k : self.splitFullPath(k,listWithThes), row.items()))
+                data.append(row)
+
         return data
 
     def splitFullPath(self,key,listWithThes) :
@@ -398,5 +409,16 @@ class ListObjectWithDynProp():
             fullQuery = fullQuery.where(
                 eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['TypeProp']],criteria['Operator'],criteria['Value']))
         return fullQuery
+
+    def tradThesaurusTerm(self,key,listWithThes):
+        name,val= key
+        try :
+            if name in listWithThes:
+                newVal = thesaurusDictTraduction[val]['en']
+            else :
+                newVal = val
+        except : 
+            (name,newVal) = self.splitFullPath(key,listWithThes)
+        return (name,newVal)
 
 
