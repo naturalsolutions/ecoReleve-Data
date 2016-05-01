@@ -8,7 +8,8 @@ from ..Models import (
     Sensor,
     Equipment,
     IndividualList,
-    ErrorAvailable
+    ErrorAvailable,
+    invertedThesaurusDict
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -128,11 +129,19 @@ def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()
     sta_id = int(data['StationID'])
-    indivList = json.loads(data['IndividualList'])
+    indivListFromData = json.loads(data['IndividualList'])
     releaseMethod = data['releaseMethod']
     curStation = session.query(Station).get(sta_id)
     taxon = False
-    taxons = dict(Counter(indiv['Species'] for indiv in indivList))
+    taxons = dict(Counter(indiv['Species'] for indiv in indivListFromData))
+
+    userLang = request.authenticated_userid['userlanguage']
+    # get fullPath thesaurus therm according to user language
+    indivList = []
+    for row in indivListFromData :
+        row = dict(map(lambda k : getFullpath(k,userLang), row.items()))
+        indivList.append(row)
+
     def getnewObs(typeID):
         newObs = Observation()
         newObs.FK_ProtocoleType=typeID
@@ -298,3 +307,12 @@ def releasePost(request):
         message = str(type(e))
 
     return message
+
+def getFullpath(item,lng):
+    name,val= item
+
+    try : 
+        newVal = invertedThesaurusDict[lng][val]
+    except:
+        newVal = val
+    return (name,newVal)
