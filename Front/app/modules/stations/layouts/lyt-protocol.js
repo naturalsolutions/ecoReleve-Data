@@ -40,7 +40,18 @@ define([
     initialize: function(options) {
 
       this.model.attributes.obs = new Backbone.Collection(this.model.get('obs'));
-      this.model.set({total: this.model.get('obs').length});
+      
+
+      var total = this.model.get('obs').filter(function(md){
+        if(md.attributes.data.ID) {
+          return true;
+        } else {
+          return false;
+        }
+      }).length;
+
+      this.model.set({total: total});
+
       this.objectType = this.model.get('obs').models[0].attributes.data.FK_ProtocoleType;
 
 
@@ -85,6 +96,18 @@ define([
     },
 
     addObs: function(e) {
+      var existingNewForm = this.model.get('obs').filter(function(md){
+        if(md.get('id')) {
+          return false;
+        } else {
+          return true;
+        }
+      }).length;
+
+      if ( existingNewForm ) {
+        return;
+      }
+
       //shouldn't be an ajax call
       var _this = this;
       this.name = '_' + this.objectType + '_';
@@ -200,6 +223,12 @@ define([
 
     update: function() {
       var total = this.model.get('obs').length;
+
+      total = this.model.get('obs').filter(function(md){
+        if(md.get('id'))
+        return md;
+      }).length;
+
       this.model.set({'total': total});
       this.ui.total.html(total);
       this.paginateObs();

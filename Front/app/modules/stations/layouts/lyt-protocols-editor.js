@@ -71,7 +71,7 @@ define([
         },
 
         updateTotal: function() {
-          this.ui.total.html(this.model.get('obs').length);
+          this.ui.total.html(this.model.get('total'));
         },
 
         updateVisibility: function() {
