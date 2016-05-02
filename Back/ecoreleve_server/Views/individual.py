@@ -262,6 +262,7 @@ def insertIndiv(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewIndiv (request) :
     session = request.dbsession
+    session.autoflush = False # if set True create automatically a new indiv  = not what we want 
     data = {}
     for items , value in request.json_body.items() :
         data[items] = value
@@ -282,15 +283,16 @@ def insertOneNewIndiv (request) :
 
     if existingIndivID is None:
         session.add(newIndiv)
-        indivID = newIndiv.ID
         session.flush()
+        indivID = newIndiv.ID
 
     return {'ID': indivID}
 
 def checkExisting(indiv):
+    # session = threadlocal.get_current_registry().dbmaker.session_factory()
     session = threadlocal.get_current_registry().dbmaker()
     indivData = indiv.GetFlatObject()
-    del indivData['ID']
+
     del indivData['creationDate']
     for key in indivData:
         if indivData[key] is None: 
@@ -301,13 +303,14 @@ def checkExisting(indiv):
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront,typeObj = typeObj)
+    listObj = IndividualList(moduleFront,typeObj = 2)
     dataResult = listObj.GetFlatDataList(searchInfo)
-    if dataResult is not []:
+
+    if len(dataResult)>0:
         existingID = dataResult[0]['ID']
     else :
         existingID = None
-    session.close()
+
     return existingID
 
 # ------------------------------------------------------------------------------------------------------------------------- #
