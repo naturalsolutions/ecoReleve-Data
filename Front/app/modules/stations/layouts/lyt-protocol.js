@@ -209,9 +209,8 @@ define([
     },
 
     onObsDestroy: function(mod) {
+      console.log(mod);
       if (this.model.get('obs').length == 0) {
-        //up total b4 destroy
-        this.model.set({'total': total});
         this.model.destroy();
       }else {
         this.update();

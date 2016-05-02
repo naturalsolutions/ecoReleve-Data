@@ -102,6 +102,7 @@ define([
             model.schema = this.options.schema.subschema;
 
             var size=0;
+
             for (var key in model.schema) {
                var col = model.schema[key];
                //sucks
