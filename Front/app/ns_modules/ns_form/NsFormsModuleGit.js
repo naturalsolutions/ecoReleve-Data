@@ -366,7 +366,12 @@ define([
     },
     butClickClear: function (e) {
       var formContent = this.BBForm.el;
-      $(formContent).find('input').val('');
+      var isId = $(formContent).find('input:first').attr('id').split('_')[1];
+      if(isId == 'ID' || isId == 'id'){
+        $(formContent).find('input:first').addClass('id');
+      }
+
+      $(formContent).find('input').not('.id').val('');
       $(formContent).find('select').val('');
       $(formContent).find('textarea').val('');
       $(formContent).find('input[type="checkbox"]').attr('checked', false);
