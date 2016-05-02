@@ -7,13 +7,16 @@ function(Marionette, config, Breadcrumb) {
     className: 'header',
     events: {
       'click #logout': 'logout',
+      'click #pipefy' : 'pipefyform'
     },
     regions: {
       'breadcrumb': '#breadcrumb'
     },
 
     ui: {
-      'userName': '#userName'
+      'userName': '#userName',
+      'pypefy' : '#pipefy',
+      'pypefypanel' :'div.supportpanel'
     },
 
     logout: function() {
@@ -36,5 +39,14 @@ function(Marionette, config, Breadcrumb) {
         }
       });
     },
+    pipefyform : function(e){
+      var notdisplayed = $(this.ui.pypefypanel).hasClass('hidden');
+      if(notdisplayed){
+        $(this.ui.pypefypanel).removeClass('hidden').animate({ "right": "+=560px" }, "slow" );
+
+      } else {
+        $(this.ui.pypefypanel).animate({ "right": "-=560px" }, "slow" ).addClass('hidden');
+      }
+    }
   });
 });

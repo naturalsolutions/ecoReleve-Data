@@ -325,6 +325,9 @@ define([
         url: url,
         contentType:'application/json',
         type:'GET',
+        beforeSend: function() {
+          $('.waitspinner').removeClass('hidden');
+        }
       }).done(function(geoJson) {
           if (_this.cluster){
             _this.initClusters(geoJson);
@@ -342,7 +345,9 @@ define([
           }
       }).fail(function(msg) {
           console.error( msg );
-      });
+      }).always(function() {
+          $('.waitspinner').addClass('hidden');
+       });
     },
 
     changeIcon: function(m){
@@ -793,13 +798,18 @@ define([
       $.ajax({
         url: this.url,
         data: data,
+        beforeSend: function() {
+          $('.waitspinner').removeClass('hidden');
+        }
       }).done(function(geoJson) {
         if (_this.cluster){
           _this.updateLayers(geoJson);
         }else{
           _this.initLayer(geoJson);
         }
-      });
+      }).always(function() {
+          $('.waitspinner').addClass('hidden');
+       });
       return;
     },
 
