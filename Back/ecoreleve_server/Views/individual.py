@@ -301,7 +301,7 @@ def checkExisting(indiv):
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront)
+    listObj = IndividualList(moduleFront,typeObj = typeObj)
     dataResult = listObj.GetFlatDataList(searchInfo)
     if dataResult is not []:
         existingID = dataResult[0]['ID']
