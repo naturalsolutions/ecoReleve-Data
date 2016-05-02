@@ -41,7 +41,6 @@ define([
 
       this.model.attributes.obs = new Backbone.Collection(this.model.get('obs'));
       
-
       var total = this.model.get('obs').filter(function(md){
         if(md.attributes.data.ID) {
           return true;
@@ -53,7 +52,6 @@ define([
       this.model.set({total: total});
 
       this.objectType = this.model.get('obs').models[0].attributes.data.FK_ProtocoleType;
-
 
       this.stationId = options.stationId;
       this.initObs(options.stationId);
@@ -96,20 +94,25 @@ define([
     },
 
     addObs: function(e) {
-      var existingNewForm = this.model.get('obs').filter(function(md){
+      var _this = this;
+
+      var emptyFormIndex = 0;
+      //check if there is already an empty form
+      var existingEmptyForm = this.model.get('obs').filter(function(md, i){
         if(md.get('id')) {
           return false;
         } else {
+          emptyFormIndex=i;
           return true;
         }
-      }).length;
+      });
 
-      if ( existingNewForm ) {
+      if ( existingEmptyForm.length ) {
+        this.displayObs(emptyFormIndex);
         return;
       }
 
       //shouldn't be an ajax call
-      var _this = this;
       this.name = '_' + this.objectType + '_';
 
       var patern = new Backbone.Model();
@@ -154,10 +157,12 @@ define([
     },
 
     displayObs: function(index) {
+
       //display the obs at the good position
       this.ui.obs.find('div.obs').each(function(i) {
         if (i == index) {
           $(this).parent().removeClass('hidden');
+          $(this).parent().find('input:enabled:first').focus();
         }else {
           $(this).parent().addClass('hidden');
         }
