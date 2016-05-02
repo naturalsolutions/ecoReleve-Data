@@ -7,7 +7,8 @@ function(Marionette, config, Breadcrumb) {
     className: 'header',
     events: {
       'click #logout': 'logout',
-      'click #pipefy' : 'pipefyform'
+      'click #pipefy' : 'pipefyform',
+      'click .pipefyclose' :'closeform'
     },
     regions: {
       'breadcrumb': '#breadcrumb'
@@ -45,8 +46,11 @@ function(Marionette, config, Breadcrumb) {
         $(this.ui.pypefypanel).removeClass('hidden').animate({ "right": "+=560px" }, "slow" );
 
       } else {
-        $(this.ui.pypefypanel).animate({ "right": "-=560px" }, "slow" ).addClass('hidden');
+        this.closeform();
       }
+    },
+    closeform : function(){
+      $(this.ui.pypefypanel).animate({ "right": "-=560px" }, "slow" ).addClass('hidden');
     }
   });
 });
