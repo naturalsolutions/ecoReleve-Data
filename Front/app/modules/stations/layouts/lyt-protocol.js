@@ -204,10 +204,12 @@ define([
     },
 
     onObsDestroy: function(mod) {
+      console.log(mod);
       if (this.model.get('obs').length == 0) {
         //up total b4 destroy
-        this.model.set({'total': total});
         this.model.destroy();
+        //quick fix
+        //$('#protoMenuContainer>div.coll-view>div.js-menu-item:first').click();
       }else {
         this.update();
         this.index = 0;

@@ -50,6 +50,10 @@ define([
       this.ui.protoMenuContainer.find('.js-menu-item:first').click();
     },
 
+    displayLast: function(){
+      this.ui.protoMenuContainer.find('.js-menu-item:last').click();
+    },
+
     initMenu: function() {
       var LytMenuItem = Marionette.LayoutView.extend({
         modelEvents: {
@@ -93,6 +97,7 @@ define([
     },
 
     initProtos: function() {
+      this.listenTo(this.collection, 'destroy', this.displayLast);
       this.collViewProto = new Marionette.CollectionView({
         collection : this.collection,
         childViewOptions: { stationId: this.stationId },
