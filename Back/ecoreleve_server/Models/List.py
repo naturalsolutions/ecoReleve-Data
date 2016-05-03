@@ -352,6 +352,17 @@ class SensorList(ListObjectWithDynProp):
                 query = query.where(exists(querySensor))
             else:
                 query = query.where(not_(exists(querySensor)))
+
+        if 'FK_MonitoredSiteName' == curProp :
+            MonitoredSiteTable = Base.metadata.tables['MonitoredSite']
+            val = criteriaObj['Value']
+            query = query.where(eval_.eval_binary_expr(MonitoredSiteTable.c['Name'],criteriaObj['Operator'],val))
+
+        if 'FK_Individual'== curProp :
+            curEquipmentTable = Base.metadata.tables['CurrentlySensorEquiped']
+            val = criteriaObj['Value']
+            query = query.where(eval_.eval_binary_expr(curEquipmentTable.c['FK_Individual'],criteriaObj['Operator'],val))
+
         return query
 
     def countQuery(self,criteria = None):
