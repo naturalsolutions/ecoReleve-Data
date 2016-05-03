@@ -43,6 +43,7 @@ SELECT 2
 
 GO
 
+DELETE [ModuleForms] f  WHERE Name = 'FK_StationType' and module_id= 2 
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('53_Up_Station_Form_ADD_Comment',GETDATE(),(SELECT db_name()))
 
