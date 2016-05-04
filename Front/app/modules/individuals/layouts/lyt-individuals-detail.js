@@ -370,12 +370,10 @@ define([
     },
 
     warnDeleteLocations: function() {
-
       var _this = this;
 
       var mds = this.locationsGrid.grid.getSelectedModels();
 
-      console.log(mds.length);
       if (!mds.length) {
         return;
       }
@@ -445,14 +443,14 @@ define([
         title: opt.title,
         text: opt.text || '',
         type: type,
-        showCancelButton: false,
+        showCancelButton: true,
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
         closeOnConfirm: true,
       },
       function(isConfirm) {
         //could be better
-        if (callback) {
+        if (isConfirm && callback) {
           callback();
         }
       });
