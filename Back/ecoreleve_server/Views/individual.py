@@ -10,7 +10,8 @@ from ..Models import (
     Equipment,
     IndividualList,
     Base,
-    IndivLocationList
+    IndivLocationList,
+    Station
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -264,15 +265,21 @@ def insertOneNewIndiv (request) :
     session = request.dbsession
     session.autoflush = False # if set True create automatically a new indiv  = not what we want 
     data = {}
+    startDate = None 
+
     for items , value in request.json_body.items() :
         data[items] = value
     existingIndivID = None
+
+    if 'stationID' in data:
+        curSta = session.query(Station).get(data['stationID'])
+        startDate=curSta.StationDate
 
     indivType = int(data['FK_IndividualType'])
     newIndiv = Individual(FK_IndividualType = indivType , creationDate = datetime.now(),Original_ID = '0')
     # newIndiv.IndividualType = session.execute(([IndividualType.ID]).where(IndividualType.ID==indivType)).fetchone()
     newIndiv.init_on_load()
-    newIndiv.UpdateFromJson(data)
+    newIndiv.UpdateFromJson(data,startDate=startDate)
 
     if indivType == 2:
         existingIndivID = checkExisting(newIndiv)
