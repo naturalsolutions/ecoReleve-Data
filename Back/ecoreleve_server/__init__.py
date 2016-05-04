@@ -22,7 +22,8 @@ from .Models import (
     Station,
     Observation,
     Sensor,
-    db
+    db,
+    loadThesaurusTrad
     )
 from .Views import add_routes,add_cors_headers_response_callback
 
@@ -113,8 +114,11 @@ def main(global_config, **settings):
     includeme(config)
     config.set_root_factory(SecurityRoot)
 
+
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
-    
+
+    loadThesaurusTrad(config)
+
     # Set the default permission level to 'read'
     config.set_default_permission('read')
     add_routes(config)

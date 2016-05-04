@@ -154,14 +154,14 @@ define([
         name: 'StartDate',
         label: 'Start date',
         editable: false,
-        cell : 'timestamp',
+        cell : 'stringDate',
         headerCell : null
       },
       {
         name: 'EndDate',
         label: 'End Date',
         editable: false,
-        cell : 'timestamp',
+        cell : 'stringDate',
         headerCell : null
       }
       ];

@@ -196,6 +196,7 @@ def getIndivHistory(request):
                     dictRow['value'] = curRow[key] 
                 elif 'FK' not in key :
                     dictRow[key] = curRow[key]
+        dictRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
         response.append(dictRow)
 
     return response
@@ -218,6 +219,9 @@ def getIndivEquipment(request):
     response = []
     for row in result:
         curRow = OrderedDict(row)
+        curRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
+        if curRow['EndDate'] is not None :
+            curRow['EndDate'] = curRow['EndDate'].strftime('%Y-%m-%d %H:%M:%S') 
         response.append(curRow)
 
     return response
@@ -258,6 +262,7 @@ def insertIndiv(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewIndiv (request) :
     session = request.dbsession
+    session.autoflush = False # if set True create automatically a new indiv  = not what we want 
     data = {}
     for items , value in request.json_body.items() :
         data[items] = value
@@ -278,15 +283,16 @@ def insertOneNewIndiv (request) :
 
     if existingIndivID is None:
         session.add(newIndiv)
-        indivID = newIndiv.ID
         session.flush()
+        indivID = newIndiv.ID
 
     return {'ID': indivID}
 
 def checkExisting(indiv):
+    # session = threadlocal.get_current_registry().dbmaker.session_factory()
     session = threadlocal.get_current_registry().dbmaker()
     indivData = indiv.GetFlatObject()
-    del indivData['ID']
+
     del indivData['creationDate']
     for key in indivData:
         if indivData[key] is None: 
@@ -297,13 +303,14 @@ def checkExisting(indiv):
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront)
+    listObj = IndividualList(moduleFront,typeObj = 2)
     dataResult = listObj.GetFlatDataList(searchInfo)
-    if dataResult is not []:
+
+    if len(dataResult)>0:
         existingID = dataResult[0]['ID']
     else :
         existingID = None
-    session.close()
+
     return existingID
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -324,14 +331,16 @@ def searchIndiv(request):
     searchInfo['per_page'] = json.loads(data['per_page'])
 
     if 'typeObj' in request.params:
+        typeObj = request.params['typeObj']
         searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':request.params['typeObj']})
     else:
         searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':1})
+        typeObj = 1
 
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront)
+    listObj = IndividualList(moduleFront,typeObj = typeObj)
     dataResult = listObj.GetFlatDataList(searchInfo)
     countResult = listObj.count(searchInfo)
 
@@ -380,8 +389,11 @@ def getIndivLocation(request):
 
     if 'geo' in request.params :
         result = gene.get_geoJSON(criteria,['ID','UnicIdentifier','Date','type_'])
+
     else:
         result = gene.search(criteria,offset=offset,per_page=per_page,order_by=order_by)
+        for row in result : 
+            row['Date'] = row['Date'].strftime('%Y-%m-%d %H:%M:%S')
 
 
     # ************ POC Indiv location PLayer  **************** 

@@ -1,0 +1,70 @@
+
+ALTER PROCEDURE [dbo].[pr_ExportIndividualLastLocationAllSource]
+AS
+BEGIN
+
+IF OBJECT_ID('tmpIndividualLastLocationAllSource') IS NOT NULL
+		DROP TABLE tmpIndividualLastLocationAllSource
+SELECT S.*,E.FK_Sensor INTO tmpIndividualLastLocationAllSource
+FROM
+	(
+	SELECT L.FK_Individual
+	,CASE WHEN L.Date > S.StationDate THEN L.DATE ELSE S.StationDate END  LocalisationDate
+	,CASE WHEN L.Date > S.StationDate THEN L.LAT ELSE S.LAT END  LAT
+	,CASE WHEN L.Date > S.StationDate THEN L.LON ELSE S.LON END  LON
+	,CASE WHEN L.Date > S.StationDate THEN L.ELE ELSE S.ELE END  ELE
+	,CASE WHEN L.Date > S.StationDate THEN NULL ELSE L.fk_station END  fk_station 
+	,CASE WHEN L.Date > S.StationDate THEN L.ID ELSE NULL END  fk_individualLocation
+	,CASE WHEN L.Date > S.StationDate THEN L.type_ ELSE PT.Name END  SOURCE
+	FROM (
+		SELECT DISTINCT LS.*, Os.ID fk_station, Os.FK_ProtocoleType 
+		FROM TIndividualLastLocationSensor LS
+		JOIN (SELECT S.ID,O.FK_Individual,O.FK_ProtocoleType 
+			 , ROW_NUMBER() OVER (PARTITION by FK_Individual ORDER BY FK_Individual,S.stationdate DESC) nb 
+			 FROM [EcoReleve_ECWP].dbo.Observation O 
+			 JOIN [EcoReleve_ECWP].dbo.Station S 
+				ON O.FK_Station = S.ID 
+			 WHERE O.FK_ProtocoleType NOT IN 
+					(SELECT id 
+					 FROM [EcoReleve_ECWP].dbo.ProtocoleType 
+					 WHERE name  IN ('Nest description', 'Bird Biometry'))	
+			 ) Os 
+			ON Os.fk_individual=LS.fk_individual AND Os.nb=1
+		UNION ALL
+		SELECT LS.*, NULL fk_station, NULL FK_ProtocoleType 
+		FROM TIndividualLastLocationSensor LS
+		WHERE NOT EXISTS (	SELECT * 
+							FROM [EcoReleve_ECWP].dbo.Observation o 
+							WHERE O.FK_Individual = LS.FK_Individual  
+							AND O.FK_ProtocoleType NOT IN (	SELECT id 
+															FROM [EcoReleve_ECWP].dbo.ProtocoleType 
+															WHERE name IN ('Nest description'))	 )
+	) L 
+	LEFT JOIN TStation S 
+		ON S.ID = L.fk_station 
+	LEFT JOIN [EcoReleve_ECWP].dbo.ProtocoleType PT 
+		ON l.FK_ProtocoleType = PT.ID
+) S 
+LEFT JOIN VIndividuEquipementHisto E 
+	ON  E.StartDate <= S.LocalisationDate  AND E.fk_individual = S.FK_Individual AND E.Deploy =1 
+	AND NOT EXISTS (SELECT * 
+					FROM VIndividuEquipementHisto E2 
+					WHERE E2.FK_Individual = E.FK_Individual AND E2.StartDate > E.StartDate and  E2.StartDate < S.LocalisationDate)
+
+	IF object_id('TIndividualLastLocationAllSource') IS NOT NULL 
+		DROP TABLE  TIndividualLastLocationAllSource
+	EXEC sp_rename 'tmpIndividualLastLocationAllSource','TIndividualLastLocationAllSource'
+
+END
+
+
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('6_Fix_Fk_Sensor_on_lastLocationAllSource',GETDATE(),(SELECT db_name()))
+
+
+GO

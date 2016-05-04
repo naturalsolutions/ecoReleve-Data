@@ -59,8 +59,7 @@ define([
         formRegion: this.ui.stationForm,
         reloadAfterSave: true,
         objectType: this.objectType,
-        savingError: function (response) {
-          console.log(response.responseJSON)
+        savingError: function(response) {
            // individual equipment sensor is not available
            if(response.responseJSON.sensor_available == false){
             _this.sweetAlert('Data saving error', 'error', 'Selected sensor is not available');

@@ -7,6 +7,7 @@ define([
   'use strict';
   return {
     gpxParser: function(xml) {
+      var _this = this;
       try {
         var waypointList = new Backbone.Collection();
         var errors = [];
@@ -26,10 +27,9 @@ define([
           var waypointTime, time;
           // if tag "cmt" exisits, take date from it, else use tag "time"
           var waypointTimeTag = $(this).find('cmt').text();
-          var waypointTm  = moment(waypointTimeTag);
           var dateStr;
           // check if date is valid, else use time tag to get date
-          if (waypointTm.isValid()) {
+          if (_this.isValidDate(waypointTimeTag)) {
             // possible formats   // <cmt>25-FEB-16 18:02</cmt> or <cmt>04-03-16 12:04</cmt>  <cmt>2010-04-27T08:02:00Z</cmt>
                 var tm = waypointTimeTag.split('-');
                 var tab = waypointTimeTag.split(' ');
@@ -91,6 +91,37 @@ define([
       }
     },
     protocolParser: function(xml) {
+
+    }, isValidDate : function(strDate) {
+        var isvalid = false;
+        if(moment(strDate,"DD-MM-YY HH:mm").isValid()){
+          isvalid = true;
+        }
+        if(moment(strDate,"DD-MM-YY HH:mm:ss").isValid()){
+          isvalid = true;
+        }
+         if(moment(strDate,"DD-MM-YYYY HH:mm:ss").isValid()){
+          isvalid = true;
+        }
+         if(moment(strDate,"DD-MM-YYYY HH:mm").isValid()){
+          isvalid = true;
+        }
+         if(moment(strDate,"YYYY-MM-DD HH:mm").isValid()){
+          isvalid = true;
+        }
+         if(moment(strDate,"YYYY-MM-DD HH:mm:ss").isValid()){
+          isvalid = true;
+        }
+        if(moment(strDate,"YY-MMM-DD HH:mm:ss").isValid()){
+          isvalid = true;
+        }
+        if(moment(strDate,"YY-MMM-DD HH:mm").isValid()){
+          isvalid = true;
+        }
+        if(moment(strDate).isValid()){
+          isvalid = true;
+        }
+       return isvalid;
 
     }
   };
