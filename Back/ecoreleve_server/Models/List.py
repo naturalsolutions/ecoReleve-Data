@@ -16,6 +16,7 @@ from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
 from ..Models import (
     DBSession,
     Observation,
+    ProtocoleType,
     Station,
     Station_FieldWorker,
     User,
@@ -34,6 +35,7 @@ from collections import OrderedDict
 from datetime import datetime
 from ..utils.datetime import parse
 from ..utils.generator import Generator
+from sqlalchemy.sql.expression import literal_column,literal
 
 
 eval_ = Eval()
@@ -275,14 +277,40 @@ class IndividualList(ListObjectWithDynProp):
 class IndivLocationList(Generator):
 
     def __init__(self,table,SessionMaker,id_=None):
-        joinTable= join(Individual_Location, Sensor
-            , Individual_Location.FK_Sensor == Sensor.ID)
-        regionTable = Base.metadata.tables['Region']
-        joinTable = outerjoin(joinTable,regionTable,Individual_Location.FK_Region == regionTable.c['ID'])
-        # Use select statment as ORM Table 
-        IndivLoc = select([Individual_Location,Individual_Location.date_timestamp,Sensor.UnicIdentifier,regionTable.c['Region']]
-            ).select_from(joinTable).where(Individual_Location.FK_Individual == id_).cte()
+        # joinTable= join(Individual_Location, Sensor
+        #     , Individual_Location.FK_Sensor == Sensor.ID)
+        # regionTable = Base.metadata.tables['Region']
 
+        # if table =='Individual_Location':
+        #     joinTable = outerjoin(Individual_Location,regionTable,Individual_Location.FK_Region == regionTable.c['ID'])
+        #     # Use select statment as ORM Table 
+        #     IndivLoc = select([Individual_Location,regionTable.c['Region']]
+        #         ).select_from(joinTable).where(Individual_Location.FK_Individual == id_).cte()
+
+        # if table == 'Station_geo':
+        #     joinTable = outerjoin(Station,regionTable,Station.FK_Region == regionTable.c['ID'])
+
+        #     print(select([literal("station").label('type_')]))
+        #     IndivLoc = select([Station.ID,Station.LAT,Station.StationDate.label('Date')
+        #         ,Station.LON,Station.LAT,literal("station").label('type_')
+        #         ,regionTable.c['Region'],Station.fieldActivityId]
+        #         ).select_from(joinTable).where(
+        #         exists(select([Observation]
+        #             ).where(and_(Observation.FK_Individual == id_ 
+        #                 , Observation.FK_Station == Station.ID))
+        #         )).cte()
+
+
+        # if table == 'Station':
+        #     joinTable = outerjoin(Station,regionTable,Station.FK_Region == regionTable.c['ID'])
+        #     joinTable = joinTable.join(Observation,and_(Observation.FK_Station == Station.ID, Observation.FK_Individual == id_))
+        #     joinTable = joinTable.join(ProtocoleType,ProtocoleType.ID == Observation.FK_ProtocoleType)
+
+        #     IndivLoc = select([Station,ProtocoleType.Name,literal("station").label('type_')]).select_from(joinTable)
+
+        allLocIndiv = Base.metadata.tables['allIndivLocationWithStations']
+        IndivLoc = select(allLocIndiv.c).where(allLocIndiv.c['FK_Individual'] == id_
+            ).cte()
         super().__init__(IndivLoc,SessionMaker)
 
 #--------------------------------------------------------------------------

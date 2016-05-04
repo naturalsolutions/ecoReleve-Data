@@ -177,7 +177,7 @@ define([
         name: 'ID',
         label: 'ID',
         editable: false,
-        renderable: false,
+        renderable: true,
         cell: 'string'
       },{
         name: 'Date',
@@ -200,15 +200,57 @@ define([
         editable: false,
         cell: 'string'
       },{
-        name: 'Region',
+        name: 'region',
         label: 'Region',
         editable: false,
         cell: 'string'
       },{
+        name: 'type_',
+        label: 'Type',
+        editable: false,
+        cell: 'string'
+      },{
+        name: 'fieldActivity_Name',
+        label: 'FieldActivity',
+        editable: false,
+        cell: Backgrid.StringCell.extend({
+          render: function () {
+            this.$el.empty();
+            var rawValue = this.model.get(this.column.get("name"));
+            var formattedValue = this.formatter.fromRaw(rawValue, this.model);
+            if (this.model.get('type_')=='station'){
+
+          /*    this.$el.append($('<a>', {
+                  href: 'http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID').replace('sta_',''),
+                  title: formattedValue,
+                  target: '_blank'
+              }).text(formattedValue));*/
+
+
+               this.$el.append('<a target="_blank"' 
+                +'href= "http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID').replace('sta_','')+'">\
+                  '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
+                </a>');
+              this.delegateEvents();
+            }
+            return this;
+        }
+        })
+
+      },{
           editable: true,
           name: 'import',
           label: 'Import',
-          cell: 'select-row',
+          cell: Backgrid.Extension.SelectRowCell.extend({
+            render:function(){
+              this.$el.empty().append('<input tabindex="-1" type="checkbox" />');
+              this.delegateEvents();
+              if (this.model.get('type_')== 'station'){
+                this.$el.addClass('hidden');
+              }
+              return this;
+              }
+          }),
           headerCell: 'select-all'
       }];
 
