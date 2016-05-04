@@ -667,7 +667,8 @@ define([
 
       $(this.lastFocused._icon).addClass('focus');
 
-      _this.map.setView(center, zoom);
+      _this.map.setView(center);
+      //_this.map.setView(center, zoom);
 
     },
 
