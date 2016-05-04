@@ -37,10 +37,18 @@ define([
       }
       this.model.set('ojectName', this.ojectName);
       this.picker = options.picker;
-      console.log(this.picker);
+
 
       this.data = options.data;
-      console.log(this.data);
+
+      var curURL = window.location.href.split('/');
+      var l = curURL.length-1
+      var stationID = curURL[l];
+      if (this.data){
+        this.data['stationID'] = stationID;
+      } else {
+        this.data = {'stationID':stationID};
+      }
     },
 
     onShow: function() {
