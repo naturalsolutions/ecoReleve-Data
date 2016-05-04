@@ -206,7 +206,7 @@ class Generator :
                     properties = {}
                     if geoJson_properties != None :
                         for col in geoJson_properties :
-                            properties[col.replace('_',' ')] = row[col]
+                            properties[col] = row[col]
                     geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point'
                         , 'coordinates':[row[self.columnLower['lat']],row[self.columnLower['lon']]]}})
             else :

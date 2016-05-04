@@ -1,0 +1,27 @@
+/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+
+UPDATE g set FilterORder = 210,FilterRender = 4, IsSearchable = 1 
+, FilterType = 'AutocompleteEditor',Options='{"source": "autocomplete/sensors/Hexadecimal_Code", "minLength":1}'
+  FROM [EcoReleve_ECWP].[dbo].[ModuleGrids] g 
+  where Module_ID = 14 and Name = 'Hexadecimal_Code'
+
+
+UPDATE g set FilterORder = 220,FilterRender = 4, IsSearchable = 1 
+, FilterType = 'AutocompleteEditor',Options='{"source": "autocomplete/monitoredSites/Name", "minLength":1}'
+  FROM [EcoReleve_ECWP].[dbo].[ModuleGrids] g 
+  where Module_ID = 14 and Name = 'FK_MonitoredSiteName'
+
+
+
+UPDATE g set FilterORder = 230,FilterRender = 4, IsSearchable = 1 
+, FilterType = 'Number'
+  FROM [EcoReleve_ECWP].[dbo].[ModuleGrids] g 
+  where Module_ID = 14 and Name = 'FK_Individual'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('54_Up_Filter_Conf_Sensor',GETDATE(),(SELECT db_name()))
+
+
+GO

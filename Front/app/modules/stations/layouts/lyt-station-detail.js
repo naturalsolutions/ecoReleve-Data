@@ -97,6 +97,7 @@ define([
           $("#dateTimePicker").on("dp.change", function (e) {
             $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
            });
+          _this.filedAcitivityId = this.model.get('fieldActivityId');
         }
       });
       this.nsForm.afterDelete = function() {
@@ -131,9 +132,15 @@ define([
         });
       };
 
-      this.nsForm.model.on('change:fieldActivityId', function() {
-        _this.displayProtos();
-      });
+
+
+      this.nsForm.afterSaveSuccess = function() {
+        if(this.model.get('fieldActivityId') != _this.fieldActivityId){
+          _this.displayProtos();
+          _this.fieldActivityId = this.model.get('fieldActivityId');
+        }
+      },
+
       //then display protocols
       _this.displayProtos();
     },
@@ -143,9 +150,6 @@ define([
 
       this.rgProtoEditor.show(this.lytProtoEditor);
     },
-
-
-
 
   });
 });

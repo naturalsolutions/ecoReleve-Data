@@ -222,7 +222,7 @@ define([
       var data = _this.form.getValue();
       if (data['StationDate']) {
         data['StartDate'] = data['StationDate'];
-        data['Name'] = '';
+        //data['Name'] = '';
       } else {
         data = {};
       }
