@@ -1,0 +1,41 @@
+
+Create View allIndivLocationWithStations as 
+		(SELECT convert(varchar,l.[ID]) as ID
+			  ,[LAT]
+			  ,[LON]
+			  ,[Date]
+			  ,[type_]
+			  ,r.Region as region
+			  ,l.FK_Individual as FK_Individual
+			  ,NuLL as fieldActivity_Name
+		  FROM [Individual_Location] l
+		  JOIN Region r on r.ID = l.FK_Region
+
+		UNion ALL 
+	SELECT  'sta_'+convert(varchar,o.FK_Station) as ID
+			  ,[LAT]
+			  ,[LON]
+			  ,StationDate as Date
+			  ,'station' as type_
+			  ,r.Region as region
+			  ,o.FK_Individual as FK_Individual
+			  ,fa.Name as fieldActivity_Name
+
+		FROM Station s
+		JOIN Region r on r.ID = s.FK_Region
+		JOIN fieldActivity fa on fa.ID = s.fieldActivityId
+		JOIN Observation o ON o.FK_Station = s.ID
+		group by  o.FK_Station
+			  ,[LAT]
+			  ,[LON]
+			  ,StationDate 
+			  ,r.Region
+			  ,o.FK_Individual
+			  ,fa.Name
+ )
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('52_CreateView_forAll_IndivLocation_Station',GETDATE(),(SELECT db_name()))
+
+
+GO

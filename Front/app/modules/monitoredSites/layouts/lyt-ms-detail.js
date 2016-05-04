@@ -32,11 +32,13 @@ define([
     ui: {
       'grid': '#grid',
       'gridEquipment': '#gridEquipment',
+      'stationsGrid': '#stationsGrid',
 
       'form': '#form',
       'map': '#map',
       'paginator': '#paginator',
       'paginatorEquipment': '#paginatorEquipment',
+      'paginatorStation': '#paginatorStation',
 
       'details': '#infos',
       'mapContainer': '#mapContainer',
@@ -81,6 +83,7 @@ define([
       if(this.monitoredSiteId){
         this.displayForm(this.monitoredSiteId);
         this.displayGrid(this.monitoredSiteId);
+        this.displayStationGrid(this.monitoredSiteId);
         setTimeout(function() {
           _this.displayMap();
         },0);
@@ -98,6 +101,7 @@ define([
       this.monitoredSiteId = this.model.get('ID');
       this.displayForm(this.monitoredSiteId);
       this.displayGrid(this.monitoredSiteId);
+      this.displayStationGrid(this.monitoredSiteId);
     },
 
     displayGrid: function(id) {
@@ -146,6 +150,68 @@ define([
       this.ui.paginator.html(this.grid.displayPaginator());
       this.ui.gridEquipment.html(this.gridEquip.displayGrid());
       this.ui.paginatorEquipment.html(this.gridEquip.displayPaginator());
+    },
+
+    displayStationGrid: function() {
+      var _this = this;
+      var stationsCols = [{
+        name: 'ID',
+        label: 'ID',
+        editable: false,
+        renderable: false,
+        cell: 'string'
+      },{
+        name: 'Name',
+        label: 'Name',
+        editable: false,
+        cell : 'string'
+      },{
+        name: 'StationDate',
+        label: 'date',
+        editable: false,
+        cell: 'stringDate'
+      },{
+        name: 'LAT',
+        label: 'latitude',
+        editable: false,
+        cell: 'string'
+      }, {
+        name: 'LON',
+        label: 'longitude',
+        editable: false,
+        cell: 'string'
+      },{
+        name: 'fieldActivity_Name',
+        label: 'FieldActivity',
+        editable: false,
+        cell: Backgrid.StringCell.extend({
+          render: function () {
+            this.$el.empty();
+            var rawValue = this.model.get(this.column.get("name"));
+            var formattedValue = this.formatter.fromRaw(rawValue, this.model);
+
+            this.$el.append('<a target="_blank"' 
+              +'href= "http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID')+'">\
+                '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
+              </a>');
+
+            this.delegateEvents();
+            return this;
+          }
+        })
+      }];
+
+      this.stationsGrid = new NsGrid({
+        pagingServerSide: false,
+        pageSize: 10,
+        columns: stationsCols,
+        url: config.coreUrl + 'monitoredSites/' + this.monitoredSiteId  + '/stations',
+        rowClicked: true,
+        com: this.com,
+      });
+
+      this.ui.stationsGrid.html(this.stationsGrid.displayGrid());
+      this.ui.paginatorStation.html(this.stationsGrid.displayPaginator());
     },
 
     displayMap: function(geoJson) {

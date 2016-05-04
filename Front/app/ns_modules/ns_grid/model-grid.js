@@ -515,7 +515,7 @@ define([
       var coll = new Backbone.Collection();
       coll.reset(this.grid.collection.models);
       var param = {};
-      id = parseInt(id);
+
       if (this.idName) {
         param[this.idName] = id;
       } else {
@@ -589,7 +589,7 @@ define([
       var _this = this;
 
       var param = {};
-      id = parseInt(id);
+
       if (this.idName) {
         param[this.idName] = id;
       } else {
