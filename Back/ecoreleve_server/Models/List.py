@@ -415,4 +415,21 @@ class SensorList(ListObjectWithDynProp):
                     queryExist = queryExist.where(eval_.eval_binary_expr(curEquipmentTable.c['FK_Individual'],obj['Operator'],obj['Value']))
                 query = query.where(exists(queryExist))
 
+            if obj['Column'] in ['FK_MonitoredSiteName','FK_Individual'] and obj['Operator'] in ['is null','is not null']:
+                queryExist = select(curEquipmentTable.c).select_from(joinTable
+                    ).where(Sensor.ID == curEquipmentTable.c['FK_Sensor'])
+
+                if obj['Column'] == 'FK_Individual' :
+                    queryExist = queryExist.where(and_(Sensor.ID == curEquipmentTable.c['FK_Sensor']
+                        ,curEquipmentTable.c['FK_Individual'] != None))
+
+                if obj['Column'] == 'FK_MonitoredSiteName' :
+                    queryExist = queryExist.where(and_(Sensor.ID == curEquipmentTable.c['FK_Sensor']
+                        ,curEquipmentTable.c['FK_MonitoredSite'] != None))
+                if 'not' in obj['Operator']:
+                    query = query.where(exists(queryExist))
+                else :
+                    query = query.where(not_(exists(queryExist)))
+
+
         return query
