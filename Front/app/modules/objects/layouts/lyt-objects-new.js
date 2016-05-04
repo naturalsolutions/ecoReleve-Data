@@ -41,9 +41,8 @@ define([
 
       this.data = options.data;
 
-      var curURL = window.location.href.split('/');
-      var l = curURL.length-1
-      var stationID = curURL[l];
+      var curURL = window.location.href.split('stations/')[1];
+      var stationID = curURL.split('/')[0];
       if (this.data){
         this.data['stationID'] = stationID;
       } else {
