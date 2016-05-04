@@ -395,11 +395,24 @@ class SensorList(ListObjectWithDynProp):
 
     def countQuery(self,criteria = None):
         query = super().countQuery(criteria)
+
+        curEquipmentTable = Base.metadata.tables['CurrentlySensorEquiped']
+        MonitoredSiteTable = Base.metadata.tables['MonitoredSite']
+        # joinTable = outerjoin(Sensor,curEquipmentTable,curEquipmentTable.c['FK_Sensor'] == Sensor.ID)
+        joinTable = outerjoin(curEquipmentTable,MonitoredSite,MonitoredSiteTable.c['ID'] == curEquipmentTable.c['FK_MonitoredSite'])
+
         for obj in criteria :
             if 'available' in obj['Column']:
                 query = self.WhereInJoinTable(query,obj)
-        return query
 
-    # def GetFullQuery(self,searchInfo=None) :
-    #     query = super().GetFullQuery(searchInfo)
-    #     return query
+            if obj['Column'] in ['FK_MonitoredSiteName','FK_Individual'] and obj['Operator'] not in ['is null','is not null']:
+                queryExist = select(curEquipmentTable.c).select_from(joinTable
+                    ).where(Sensor.ID == curEquipmentTable.c['FK_Sensor'])
+
+                if obj['Column'] == 'FK_MonitoredSiteName' :
+                    queryExist = queryExist.where(eval_.eval_binary_expr(MonitoredSiteTable.c['Name'],obj['Operator'],obj['Value']))
+                if obj['Column'] == 'FK_Individual' :
+                    queryExist = queryExist.where(eval_.eval_binary_expr(curEquipmentTable.c['FK_Individual'],obj['Operator'],obj['Value']))
+                query = query.where(exists(queryExist))
+
+        return query
