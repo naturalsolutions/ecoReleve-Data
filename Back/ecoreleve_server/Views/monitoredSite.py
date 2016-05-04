@@ -9,7 +9,8 @@ from ..Models import (
     Equipment,
     Sensor,
     SensorType,
-    Base
+    Base,
+    fieldActivity
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -300,4 +301,20 @@ def sensors_export(request):
     return Response(file,content_disposition= "attachment; filename=monitoredSites_export_"+dt+".xlsx",content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 
+@view_config(route_name= prefix+'/id/station', renderer='json', request_method = 'GET')
+def getStationHistory (request):
+    session = request.dbsession
+    id_site = request.matchdict['id']
+    joinTable = join(Station,fieldActivity,Station.fieldActivityId == fieldActivity.ID)
+    query = select([Station.StationDate, Station.LAT,Station.LON,Station.ID,Station.Name
+        ,fieldActivity.Name.label('fieldActivity_Name')]).select_from(joinTable).where(Station.FK_MonitoredSite == id_site)
 
+    result = session.execute(query).fetchall()
+    response = []
+    for row in result :
+        row = dict(row)
+        row['StationDate'] = row['StationDate'].strftime('%Y-%m-%d %H:%M:%S')
+        print(row)
+        response.append(row)
+
+    return response
