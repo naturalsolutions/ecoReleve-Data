@@ -66,6 +66,7 @@ function(Marionette, config) {
 				this.modelIndex++;
 				this.upClientSide();
 			}else{
+				console.log('end of page');
 				//need 2 fetch first
 				this.modelIndex = 0;
 				if(this.coll.state.currentPage != this.coll.state.lastPage){
@@ -91,10 +92,11 @@ function(Marionette, config) {
 					/*===================================
 					=            Client Side            =
 					===================================*/
-					if(tmp == this.coll.state.lastPage){
-						this.coll.getPage(tmp);
-					}else{
+
+					if(tmp == 0){
 						this.coll.setPageSize(this.grid.grid.collection.state.pageSize, {first: true});
+					}else{
+						this.coll.getPage((this.coll.state.currentPage + 1));
 					}
 					this.upRowClientSide('next');
 					/*=====  End of Client Side  ======*/
@@ -123,7 +125,6 @@ function(Marionette, config) {
 					this.coll.getPage(tmp);
 
 				}else{
-
 					this.coll.getPage(tmp);
 					this.upRowClientSide('prev');
 				}
