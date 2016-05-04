@@ -368,7 +368,7 @@ class ListObjectWithDynProp():
             # fullQuery = fullQuery.where(exists(
             #     existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView().c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])))
 
-        if curDynProp != None and criteria['Operator'].lower() in ['is','is not'] and criteria['Value'].lower() == 'null':
+        if curDynProp != None and criteria['Operator'].lower() in ['is null','is not null']:
             nullExistQuery = select([self.GetDynPropValueView()])
             nullExistQuery = nullExistQuery.where(
                 and_(self.GetDynPropValueView().c['Name'] == criteria['Column']

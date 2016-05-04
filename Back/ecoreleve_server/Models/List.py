@@ -59,7 +59,7 @@ class StationList(ListObjectWithDynProp):
 
         if curProp == 'FK_Individual':
 
-            if criteriaObj['Operator'].lower() in ['is','is not'] and criteriaObj['Value'].lower() == 'null':
+            if criteriaObj['Operator'].lower() in ['is null','is not null']:
                 subSelect = select([Observation]).where(
                     and_(Station.ID== Observation.FK_Station
                         ,Observation.__table__.c[curProp] != None)
@@ -253,7 +253,7 @@ class IndividualList(ListObjectWithDynProp):
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = outerjoin(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
 
-        if sensorObj['Operator'].lower() in ['is','is not'] and sensorObj['Value'].lower() == 'null':
+        if sensorObj['Operator'].lower() in ['is null','is not null']:
             subSelect = select([table.c['FK_Individual']]
                 ).select_from(joinTable).where(
                 and_(Individual.ID== table.c['FK_Individual']
