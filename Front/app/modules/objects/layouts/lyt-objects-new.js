@@ -37,10 +37,8 @@ define([
       }
       this.model.set('ojectName', this.ojectName);
       this.picker = options.picker;
-      console.log(this.picker);
 
       this.data = options.data;
-      console.log(this.data);
     },
 
     onShow: function() {
