@@ -51,7 +51,6 @@ class ListObjectWithDynProp():
         ''' Get configured properties to display '''
 
         if self.typeObj : 
-            print(self.typeObj)
             confGridType = self.ObjContext.query(ModuleGrids
             ).filter(and_(ModuleGrids.Module_ID == self.frontModule.ID,
                 or_(ModuleGrids.TypeObj == self.typeObj ,ModuleGrids.TypeObj ==None )))
@@ -89,7 +88,7 @@ class ListObjectWithDynProp():
         self.searchInFK = {}
         for objConf in self.GetAllPropNameInConf() :
             curDynProp = self.GetDynProp(objConf.Name)
-            print(curDynProp)
+            
             if objConf.Name in self.fk_list and objConf.QueryName is not None and objConf.QueryName != 'Forced':
                 tableRef = self.fk_list[objConf.Name].column.table
                 nameRef = self.fk_list[objConf.Name].column.name
@@ -97,7 +96,6 @@ class ListObjectWithDynProp():
 
                 joinTable = outerjoin (joinTable,tableRef,objTable.c[objConf.Name] == tableRef.c[nameRef])
                 selectable.append(tableRef.c[objConf.QueryName].label(objConf.Name+'_'+objConf.QueryName))
-                print( 'join table FK : '+objConf.Name)
 
             elif curDynProp != None: #and objConf.Name in self.ObjWithDynProp().GetAllProp():
                 v = view.alias('v'+curDynProp['Name'])
@@ -171,7 +169,6 @@ class ListObjectWithDynProp():
         ''' Apply where clause over filter criteria '''
         curProp = criteriaObj['Column']
         if curProp in self.fk_list and curProp in self.searchInFK:
-            print('search IN FK lié : '+curProp)
             query = query.where(
                 eval_.eval_binary_expr(self.searchInFK[curProp]['table'].c[self.searchInFK[curProp]['nameProp']]
                     ,criteriaObj['Operator'],criteriaObj['Value'])
@@ -217,7 +214,6 @@ class ListObjectWithDynProp():
         # change thesaural term into laguage user
         userLng = threadlocal.get_current_request().authenticated_userid['userlanguage']
         if userLng.lower() != 'fr':
-            print('\n\n Change language EN\n *************************************')
             for row in result :
                 row = dict(map(lambda k : self.tradThesaurusTerm(k,listWithThes), row.items()))
                 data.append(row)
@@ -298,7 +294,6 @@ class ListObjectWithDynProp():
                     trueCol = viewAlias.c['Value'+curDynProp['TypeProp']]
 
                 elif 'FK_'+curProp in self.fk_list:
-                    # print('\n **---** ORDER BY ON FK !')
                     tableRef = self.fk_list['FK_'+curProp].column.table
                     nameRef = self.fk_list['FK_'+curProp].column.name
                     trueCol = tableRef.c[curProp]
@@ -395,7 +390,6 @@ class ListObjectWithDynProp():
     def filterOnDynProp(self,fullQuery,criteria):
         curDynProp = self.GetDynProp(criteria['Column'])
         if curDynProp == None:
-            # print(curProp)
             print('Prop dyn inconnue')
                 # Gerer l'exception
         else :

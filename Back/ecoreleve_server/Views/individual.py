@@ -302,15 +302,15 @@ def insertOneNewIndiv (request) :
 def checkExisting(indiv):
     # session = threadlocal.get_current_registry().dbmaker.session_factory()
     session = threadlocal.get_current_registry().dbmaker()
-    indivData = indiv.GetFlatObject()
+    indivData = indiv.PropDynValuesOfNow
 
-    del indivData['creationDate']
+    # del indivData['creationDate']
     for key in indivData:
         if indivData[key] is None: 
             indivData[key] = 'null'
     
     searchInfo = {'criteria':[{'Column':key,'Operator':'is','Value':val} for key,val in indivData.items()],'order_by':['ID:asc']}
-    # print(searchInfo['criteria'])
+ 
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
@@ -442,8 +442,6 @@ def delIndivLocationList(request):
     session = request.dbsession
 
     IdList = json.loads(request.params['IDs'])
-
-    print(IdList)
     session.query(Individual_Location).filter(Individual_Location.ID.in_(IdList)).delete(synchronize_session=False)
 
 
