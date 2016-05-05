@@ -1,7 +1,7 @@
 from ..Models import Base, DBSession,thesaurusDictTraduction
 from sqlalchemy import (Column, DateTime, Float,
  ForeignKey, Index, Integer, Numeric,
-  String, Text, Unicode, Sequence, select,and_,or_, exists,func, join, outerjoin)
+  String, Text, Unicode, Sequence, select,and_,or_, exists,func, join, outerjoin,not_)
 from sqlalchemy.sql import text,elements
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship, aliased
@@ -21,7 +21,7 @@ eval_ = Eval()
 
 class ListObjectWithDynProp():
     ''' This class is used to filter Object with dyn props over all properties '''
-    def __init__(self,ObjWithDynProp, frontModule, history = False, View = None, typeObj = None):
+    def __init__(self,ObjWithDynProp, frontModule, history = False, View = None, typeObj = None, startDate = None):
         self.ObjContext = threadlocal.get_current_request().dbsession
         self.sessionmaker = threadlocal.get_current_registry().dbmaker
 
@@ -34,6 +34,7 @@ class ListObjectWithDynProp():
         self.vAliasList = {}
         self.optionView = View
         self.history = history
+        self.startDate = startDate
 
     def GetDynPropValueView (self): 
         ''' WARNING !!! : in order to use this class you have to build View over last DATE of dynamic properties '''
@@ -45,6 +46,23 @@ class ListObjectWithDynProp():
                 ,valueTable.c[self.ObjWithDynProp().GetDynPropFKName()] == dynPropTable.c['ID'])
             table = select([valueTable,dynPropTable.c['Name'].label('Name'),dynPropTable.c['TypeProp'].label('TypeProp')]
                 ).select_from(joinTable)
+
+        if self.startDate :
+            dynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
+            valueTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropValuesTable()]
+            v2 = aliased(Base.metadata.tables[self.ObjWithDynProp().GetDynPropValuesTable()])
+
+            joinTable = join(valueTable,dynPropTable
+                ,valueTable.c[self.ObjWithDynProp().GetDynPropFKName()] == dynPropTable.c['ID'])
+
+            queryExists = select(v2.c
+                        ).where(and_(v2.c[self.ObjWithDynProp().GetDynPropFKName()] == valueTable.c[self.ObjWithDynProp().GetDynPropFKName()]
+                            ,v2.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] == valueTable.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])
+                        )
+            queryExists = queryExists.where(and_(v2.c['StartDate']>valueTable.c['StartDate'],v2.c['StartDate'] <= self.startDate))
+            table = select([valueTable,dynPropTable.c['Name'].label('Name'),dynPropTable.c['TypeProp'].label('TypeProp')]
+                ).select_from(joinTable
+                ).where(and_(not_(exists(queryExists)),valueTable.c['StartDate']  <= self.startDate )).cte()
         return table
 
     def GetAllPropNameInConf(self) :
@@ -205,9 +223,11 @@ class ListObjectWithDynProp():
     def GetFlatDataList(self,searchInfo=None) :
         ''' Main function to call : return filtered (paged) ordered flat data list according to filter parameters'''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
-        result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
-        data = []
 
+        result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
+
+        print('\n\n *********************** result finished ')
+        data = []
         listWithThes = list(filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType,self.Conf))
         listWithThes = list(map(lambda x: x.Name,listWithThes))
 
@@ -244,18 +264,30 @@ class ListObjectWithDynProp():
         else:
             criteria = searchInfo['criteria'] 
         query = self.countQuery(criteria)
+
         count = self.sessionmaker().execute(query).scalar()
         return count
 
     def countQuery(self,criteria = None):
         fullQuery = select([func.count(self.ObjWithDynProp.ID)])
         filterOnDynProp = False
-        existQuery = select([self.GetDynPropValueView()])
+        if self.startDate:
+            existQuery = select([self.GetDynPropValueView().c['ID']])
+
+            searchInfo = {'criteria':criteria}
+            joinTable = self.GetJoinTable(searchInfo)
+            fullQuery = fullQuery.select_from(joinTable)
+
+            for obj in searchInfo['criteria'] :
+                fullQuery = self.WhereInJoinTable(fullQuery,obj)
+            return fullQuery
+
+        else :
+            existQuery = select([self.GetDynPropValueView()])
         self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
 
         if criteria is not None:
             for obj in criteria:
-                
                 confObj = list(filter(lambda x: x.Name == obj['Column'] ,self.GetAllPropNameInConf()))
                 if len(confObj)> 0 :
                     objConf = confObj[0]
@@ -351,7 +383,8 @@ class ListObjectWithDynProp():
                 criteria['Value'] = parse(criteria['Value'].replace(' ',''))
             except: pass
 
-        filterCriteria = eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']],criteria['Operator'],criteria['Value'] )
+        filterCriteria = eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']]
+            ,criteria['Operator'],criteria['Value'] )
         if filterCriteria is not None :
             existQuery = select([self.GetDynPropValueView()])
             existQuery = existQuery.where(
