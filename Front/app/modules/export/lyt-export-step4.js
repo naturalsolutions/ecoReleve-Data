@@ -21,6 +21,7 @@ define([
       'pdfTile': '#pdfTile',
       'csvTile': '#csvTile',
       'gpxTile': '#gpxTile',
+      'excelTile': '#excelTile',
     },
 
     events: {
@@ -86,41 +87,75 @@ define([
         columns: this.model.get('columns'),
       };
 
-      var route = config.coreUrl + 'export/views/getFile';
-
-      $.ajax({
-        url: route,
-        data: {criteria: JSON.stringify(this.datas)},
-        contentType: 'application/json',
-        type: 'GET',
-        context: this,
-      }).done(function(data) {
-        var url = URL.createObjectURL(new Blob([data], {'type': 'application/' + this.model.get('fileType')}));
+      if (this.model.get('fileType') == 'excel'){
+        var url =  config.coreUrl + 'export/views/getFile?criteria='+JSON.stringify(this.datas);
         var link = document.createElement('a');
+        link.classList.add('DowloadLinka');
+      
+        //link.download = url;
         link.href = url;
-        link.download = this.model.get('viewName') + '_' + new Moment().format('DD_MM_YY') + '.' + this.model.get('fileType');
+        link.onclick = function () {
+            //this.parentElement.removeChild(this);
+            var href = $(link).attr('href');
+            window.location.href = link;
+            document.body.removeChild(link);
+            var opts = {
+              title: 'Export succeeded!',
+              text: 'Would you like to do an other export?',
+              type: 'success',
+              confirmButtonText: 'Ok',
+              cancelButtonText: 'Go back home',
+              showCancelButton:true,
+              callback: function(isConfirm) {
+                if (!isConfirm){
+                  Backbone.history.navigate('home',{trigger: true}); }
+                //_this.parent.displayStep(0);
+              }
+            };
+
+          _this.swal(opts);
+        };
+       /*his.$el.append(link);*/
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
-        var _this = this;
-        var opts = {
-          title: 'Export succeeded!',
-          text: 'Would you like to do an other export?',
-          type: 'success',
-          confirmButtonText: 'Ok',
-          cancelButtonText: 'Go back home',
-          showCancelButton:true,
-          callback: function(isConfirm) {
-            if (!isConfirm){
-            	Backbone.history.navigate('home',{trigger: true}); }
-            //_this.parent.displayStep(0);
-          }
-        };
+      } else {
 
-        this.swal(opts);
-      }).fail(function(msg) {
+        var route = config.coreUrl + 'export/views/getFile';
+        $.ajax({
+          url: route,
+          data: {criteria: JSON.stringify(this.datas)},
+          contentType: 'application/json',
+          type: 'GET',
+          context: this,
+        }).done(function(data) {
+          var url = URL.createObjectURL(new Blob([data], {'type': 'application/' + this.model.get('fileType')}));
+          var link = document.createElement('a');
+          link.href = url;
+          link.download = this.model.get('viewName') + '_' + new Moment().format('DD_MM_YY') + '.' + this.model.get('fileType');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          var _this = this;
+          var opts = {
+            title: 'Export succeeded!',
+            text: 'Would you like to do an other export?',
+            type: 'success',
+            confirmButtonText: 'Ok',
+            cancelButtonText: 'Go back home',
+            showCancelButton:true,
+            callback: function(isConfirm) {
+              if (!isConfirm){
+              	Backbone.history.navigate('home',{trigger: true}); }
+              //_this.parent.displayStep(0);
+            }
+          };
 
-      });
+          this.swal(opts);
+        }).fail(function(msg) {
+
+        });
+      }
+
     },
 
   });
