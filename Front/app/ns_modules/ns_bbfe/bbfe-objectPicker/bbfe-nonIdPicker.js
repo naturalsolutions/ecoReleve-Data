@@ -126,15 +126,17 @@ define([
 
     displayFilter: function() {
       this.$el.find('#filter').html('');
+      var firstOperator = undefined;
+      if (this.typeObj == 2 ){
+        firstOperator = 'is null';
+      }
 
       this.filters = new NsFilter({
         url: this.url,
         com: this.com,
         typeObj: this.typeObj,
         filterContainer: this.$el.find('#filter'),
-        //filtersValues:[{"Column": "Species", "Operator": "Is not", "Value": "efefefefdfede"}]
-        //[{"Column": "ID", "Operator": "is null", "Value": ""}, {"Column": "FK_Sensor", "Operator": "is null", "Value": ""}, {"Column": "Chip_Code", "Operator": "is null", "Value": ""}, {"Column": "frequency", "Operator": "is null", "Value": ""}, {"Column": "Breeding_Ring_Code", "Operator": "is null", "Value": ""}, {"Column": "Release_Ring_Code", "Operator": "is null", "Value": ""}, {"Column": "Mark_code_1", "Operator": "is null", "Value": ""}, {"Column": "Mark_code_2", "Operator": "is null", "Value": ""}, {"Column": "Survey_type", "Operator": "is null", "Value": ""}, {"Column": "Monitoring_Status", "Operator": "is null", "Value": ""}, {"Column": "Status_", "Operator": "is null", "Value": ""}, {"Column": "Species", "Operator": "is null", "Value": ""}, {"Column": "Origin", "Operator": "is null", "Value": ""}, {"Column": "Sex", "Operator": "is null", "Value": ""}]
-      firstOperator : 'is null'
+        firstOperator : firstOperator
       });
     },
 
