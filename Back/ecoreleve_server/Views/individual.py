@@ -79,9 +79,13 @@ def getFilters (request):
 
     ModuleType = 'IndivFilter'
     filtersList = Individual(FK_IndividualType = objType).GetFilters(ModuleType)
-    filters = {}
+    filters = {'filtersValues':[]}
     for i in range(len(filtersList)) :
         filters[str(i)] = filtersList[i]
+        if objType == 1 :
+            filters['filtersValues'].append({'Column':filtersList[i]['name'],'Operator':'is null','Value':''})
+
+
     return filters
 
 def getForms(request) :
