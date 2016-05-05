@@ -8,8 +8,6 @@ class Eval():
         op = operator.lower()
         print(op)
         if op in ['is null', 'is not null']:
-            print('\n\n is null ')
-            print(op)
             op = op.replace('null','').replace(' ','')
             op2 = None
         try : 
