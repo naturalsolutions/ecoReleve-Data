@@ -77,7 +77,7 @@ BEGIN
 	
 	-- Insert only the first chip lecture per RFID, per individual, per hour.
 	INSERT INTO Individual_Location (creator, FK_Sensor, FK_Individual, type_, Date, lat, lon, creationDate,FK_Region,ELE)
-	SELECT @user, FK_Sensor, FK_ind, 'rfid', date_, lat, lon, CURRENT_TIMESTAMP,dbo.fn_GetRegionFromLatLon(lat,lon),ele
+	SELECT @user, FK_Sensor, FK_ind, 'rfid', date_, lat, lon, CURRENT_TIMESTAMP,NULL,ele
 	FROM @data_to_insert d WHERE d.PK_id NOT IN (SELECT * FROM @data_duplicate)
 
 
