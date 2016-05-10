@@ -43,8 +43,8 @@ eval_ = Eval()
 #--------------------------------------------------------------------------
 class StationList(ListObjectWithDynProp):
     ''' this class extend ListObjectWithDynProp, it's used to filter stations '''
-    def __init__(self,frontModule) :
-        super().__init__(Station,frontModule)
+    def __init__(self,frontModule, startDate = None) :
+        super().__init__(Station,frontModule, startDate)
 
     def WhereInJoinTable (self,query,criteriaObj) :
         ''' Override parent function to include management of Observation/Protocols and fieldWorkers '''
@@ -134,7 +134,6 @@ class StationList(ListObjectWithDynProp):
 class IndividualList(ListObjectWithDynProp):
 
     def __init__(self,frontModule, typeObj = None, startDate = None) :
-        startDate = datetime.strptime('10/01/2013','%d/%m/%Y')
         super().__init__(Individual,frontModule, typeObj = typeObj,startDate = startDate)
 
     def GetJoinTable (self,searchInfo) :
@@ -330,8 +329,8 @@ class IndivLocationList(Generator):
 #--------------------------------------------------------------------------
 class SensorList(ListObjectWithDynProp):
 
-    def __init__(self,frontModule) :
-        super().__init__(Sensor,frontModule)
+    def __init__(self,frontModule, startDate = None) :
+        super().__init__(Sensor,frontModule, startDate)
 
     def GetJoinTable (self,searchInfo) :
         curEquipmentTable = Base.metadata.tables['CurrentlySensorEquiped']
