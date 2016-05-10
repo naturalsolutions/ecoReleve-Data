@@ -290,37 +290,6 @@ class IndividualList(ListObjectWithDynProp):
 class IndivLocationList(Generator):
 
     def __init__(self,table,SessionMaker,id_=None):
-        # joinTable= join(Individual_Location, Sensor
-        #     , Individual_Location.FK_Sensor == Sensor.ID)
-        # regionTable = Base.metadata.tables['Region']
-
-        # if table =='Individual_Location':
-        #     joinTable = outerjoin(Individual_Location,regionTable,Individual_Location.FK_Region == regionTable.c['ID'])
-        #     # Use select statment as ORM Table 
-        #     IndivLoc = select([Individual_Location,regionTable.c['Region']]
-        #         ).select_from(joinTable).where(Individual_Location.FK_Individual == id_).cte()
-
-        # if table == 'Station_geo':
-        #     joinTable = outerjoin(Station,regionTable,Station.FK_Region == regionTable.c['ID'])
-
-        #     print(select([literal("station").label('type_')]))
-        #     IndivLoc = select([Station.ID,Station.LAT,Station.StationDate.label('Date')
-        #         ,Station.LON,Station.LAT,literal("station").label('type_')
-        #         ,regionTable.c['Region'],Station.fieldActivityId]
-        #         ).select_from(joinTable).where(
-        #         exists(select([Observation]
-        #             ).where(and_(Observation.FK_Individual == id_ 
-        #                 , Observation.FK_Station == Station.ID))
-        #         )).cte()
-
-
-        # if table == 'Station':
-        #     joinTable = outerjoin(Station,regionTable,Station.FK_Region == regionTable.c['ID'])
-        #     joinTable = joinTable.join(Observation,and_(Observation.FK_Station == Station.ID, Observation.FK_Individual == id_))
-        #     joinTable = joinTable.join(ProtocoleType,ProtocoleType.ID == Observation.FK_ProtocoleType)
-
-        #     IndivLoc = select([Station,ProtocoleType.Name,literal("station").label('type_')]).select_from(joinTable)
-
         allLocIndiv = Base.metadata.tables['allIndivLocationWithStations']
         IndivLoc = select(allLocIndiv.c).where(allLocIndiv.c['FK_Individual'] == id_
             ).cte()
@@ -345,26 +314,6 @@ class SensorList(ListObjectWithDynProp):
         self.selectable.append(curEquipmentTable.c['FK_Individual'].label('FK_Individual'))
 
         return joinTable
-
-    # def GetJoinTable (self,searchInfo) :
-    #     indivEquipmentTable = Base.metadata.tables['IndividualEquipment']
-    #     siteEquipmentTable = Base.metadata.tables['MonitoredSiteEquipment']
-
-    #     joinTable = super().GetJoinTable(searchInfo)
-
-    #     joinTable = outerjoin(joinTable,indivEquipmentTable
-    #         ,and_(Sensor.ID == indivEquipmentTable.c['FK_Sensor']
-    #             ,or_(indivEquipmentTable.c['EndDate'] == None,indivEquipmentTable.c['EndDate'] >= func.now())))
-
-    #     joinTable = outerjoin(joinTable,siteEquipmentTable
-    #         ,and_(Sensor.ID == siteEquipmentTable.c['FK_Sensor']
-    #             ,or_(siteEquipmentTable.c['EndDate'] == None,siteEquipmentTable.c['EndDate'] >= func.now())))
-
-    #     joinTable = outerjoin(joinTable,MonitoredSite,MonitoredSite.ID == siteEquipmentTable.c['FK_MonitoredSite'])
-
-    #     self.selectable.append(MonitoredSite.Name.label('FK_MonitoredSite'))
-    #     self.selectable.append(indivEquipmentTable.c['FK_Individual'].label('FK_Individual'))
-    #     return joinTable
 
     def WhereInJoinTable (self,query,criteriaObj) :
         query = super().WhereInJoinTable(query,criteriaObj)

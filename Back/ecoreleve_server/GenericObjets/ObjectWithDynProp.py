@@ -393,7 +393,6 @@ class ObjectWithDynProp:
     def updateLinkedField(self,useDate = None):
         if useDate is None:
             useDate = self.linkedFieldDate()
-        print('in dyn prop ')
 
         for linkProp in self.getLinkedField() :
             curPropName = linkProp['Name']

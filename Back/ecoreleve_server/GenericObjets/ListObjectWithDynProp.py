@@ -79,19 +79,6 @@ class ListObjectWithDynProp():
 
         return DynPropsDisplay
 
-    # def GetAllFilterableFK(self):
-    #     self.searchInFK = {}
-    #     AllFilterable = list(filter(lambda x : x.IsSearchable == True , self.Conf))
-
-    #     for objConf in self.GetAllPropNameInConf() :
-    #         # print(objConf.Name)
-    #         curDynProp = self.GetDynProp(objConf.Name)
-    #         if objConf.Name in self.fk_list and objConf.QueryName is not None:
-    #             tableRef = self.fk_list[objConf.Name].column.table
-    #             nameRef = self.fk_list[objConf.Name].column.name
-    #             self.searchInFK[objConf.Name] = {'nameProp':objConf.QueryName,'table': tableRef, 'nameFK':nameRef}
-    #     return
-
     def GetJoinTable (self,searchInfo) :
         ''' build join table and select statement over all dynamic properties and foreign keys in filter query'''
         joinTable = self.ObjWithDynProp
@@ -208,25 +195,21 @@ class ListObjectWithDynProp():
         ''' return the full query to execute '''
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
-            print('********** NO Criteria ***************')
+
         joinTable = self.GetJoinTable(searchInfo)
         fullQueryJoin = select(self.selectable).select_from(joinTable)
-        # countQuery = select([func.count('*')]).select_from(joinTable)
 
         for obj in searchInfo['criteria'] :
             fullQueryJoin = self.WhereInJoinTable(fullQueryJoin,obj)
-            # countQuery = self.WhereInJoinTable(countQuery,obj)
-        # self.countQuery = countQuery 
+
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self,searchInfo=None) :
         ''' Main function to call : return filtered (paged) ordered flat data list according to filter parameters'''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
-
         result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
 
-        print('\n\n *********************** result finished ')
         data = []
         listWithThes = list(filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType,self.Conf))
         listWithThes = list(map(lambda x: x.Name,listWithThes))

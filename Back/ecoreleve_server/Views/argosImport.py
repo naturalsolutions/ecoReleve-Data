@@ -32,7 +32,7 @@ def uploadFileArgos(request) :
     import_path = os.path.join(tmp_path, "uploaded_file")
     if not (os.path.exists(import_path)):
         os.makedirs(import_path)
-        print('folder import path created')    
+
     file_obj = request.POST['file']
     filename = request.POST['file'].filename.replace(' ','_')
     input_file = request.POST['file'].file
