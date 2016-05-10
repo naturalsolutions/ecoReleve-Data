@@ -19,7 +19,7 @@ define([
 
         template: '<div>\
         <div class="input-group">\
-            <button class="btn btn-success"><%=btnText%>&nbsp\
+            <button class="btn btn-success" <%=editable%> ><%=btnText%>&nbsp\
                 <span class="<%=iconFont%>"></span>\
             </button>\
             </div>\
@@ -27,6 +27,10 @@ define([
         initialize: function(options) {
             Form.editors.Base.prototype.initialize.call(this, options);
             this.options = options.schema.options;
+            this.editable = '';
+            if (options.schema.fieldClass.indexOf('hide') != -1 ) {
+              this.editable = 'disabled';
+            }
             var params = this.options.target_params;
             this.parentModel = options.model;
             this.dataToSend = {};
@@ -54,7 +58,6 @@ define([
               },
               function(isConfirm) {
                   if (isConfirm){
-                    console.log('resfdsqdfrefsewgfzefd')
                     _this.callback();
                   }
               });
@@ -95,8 +98,9 @@ define([
         render: function(){
             var options = this.options;
             var _this = this;
-           var $el = _.template(
-                this.template, {btnText:this.options.btnText ,iconFont:this.options.iconFont
+           
+            var $el = _.template(
+                this.template, {btnText:this.options.btnText ,iconFont:this.options.iconFont, editable: _this.editable
             });
            this.setElement($el);
             //tmp solution ? datetimepicker remove the value
