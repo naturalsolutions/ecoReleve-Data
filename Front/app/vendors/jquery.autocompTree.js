@@ -124,9 +124,6 @@
             },
             //Permet si l'arbre et en mode filter d'afficher les enfants des termes filtrés -> submatch
             renderNode: function (event, data) {
-
-
-
               var node = data.node;
               if (data.tree.options.hideExpand.isHide) {
                 data.tree.options.hideExpand.nbExpand--;
@@ -226,12 +223,14 @@
               searchAutoComp = setTimeout(function(){
                     searchAutoComp = null;
                     if (fancytree.count() < 100 || $me.val().length >= 3) {
+                      console.log('passed');
                       treeHtml.find('ul.fancytree-container li').css("padding", "1px 0 0 0");
                       treeHtml.fancytree("getRootNode").visit(function (node) {
                         if (node.span) {
                           var className = node.span.className;
                           if (className.indexOf('fancytree-hide') != -1) {
-                            node.setExpanded(false);
+                            //?
+                            //node.setExpanded(false);
                           }
                         } else {
                           node.setExpanded(false);

@@ -366,7 +366,9 @@ define([
     },
     butClickClear: function (e) {
       var formContent = this.BBForm.el;
-      $(formContent).find('input').val('');
+      $(formContent).find('input').not(':disabled').each(function(){
+        $(this).val('');
+      });
       $(formContent).find('select').val('');
       $(formContent).find('textarea').val('');
       $(formContent).find('input[type="checkbox"]').attr('checked', false);
