@@ -1,5 +1,8 @@
 <div class="input-group picker">
-  <span class="input-group-addon reneco reneco-bustard <%= mode %>"></span>
+  <span class="input-group-btn ">
+    <button type="button" id="detailsShow" class="btn reneco reneco-bustard <%= mode %>" title="See detail">
+    </button>
+  </span>
   <input <%= disabled %> class="form-control <%= required %>" name="<%= key %>" type="number" value="<%= value %>">
   <span class="input-group-btn picker">
     <button type="button" class="btn <%= visu %> glyphicon-plus">
