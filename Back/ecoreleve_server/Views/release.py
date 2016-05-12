@@ -128,6 +128,8 @@ def searchIndiv(request):
 def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()
+
+
     sta_id = int(data['StationID'])
     indivListFromData = json.loads(data['IndividualList'])
     releaseMethod = data['releaseMethod']
