@@ -129,6 +129,8 @@ def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()
 
+    if 'StationID' not in data:
+        return 
 
     sta_id = int(data['StationID'])
     indivListFromData = json.loads(data['IndividualList'])
