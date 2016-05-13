@@ -344,6 +344,9 @@ define([
         });
       }
 
+      if (params.toValidate.length == this.grid.collection.state.totalRecords) {
+        params.toValidate = 'all';
+      }
       params.toValidate = JSON.stringify(params.toValidate);
       var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
       $.ajax({
