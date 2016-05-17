@@ -1,10 +1,10 @@
 
-define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
-  function($, Marionette, Backbone, config) {
+define(['jquery', 'marionette', 'backbone', 'config','sweetAlert', 'controller'],
+  function($, Marionette, Backbone, config,Swal) {
 
   'use strict';
   return Marionette.AppRouter.extend({
-
+    history: [],
     initialize: function(opt) {
       this.collection = new Backbone.Collection([
       {label: 'Manual import', href: 'importFile', icon: 'reneco-import'},
@@ -51,16 +51,38 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
     },
 
     execute: function(callback, args) {
-      $.ajax({
-        context: this,
-        url: config.coreUrl + 'security/has_access'
-      }).done(function() {
-        callback.apply(this, args);
-      }).fail(function(msg) {
-        if (msg.status === 502 || msg.status === 403) {
-          document.location.href = config.portalUrl;
-        }
-      });
+      // get current route
+      this.history.push(Backbone.history.fragment);
+      var _this= this;
+
+      if(window.app.checkFormSaved){
+            Swal({
+                title: 'Saving form',
+                text: 'Current form is not yet saved. Would you like to continue without saving it?',
+                type: 'error',
+                showCancelButton: true,
+                type: 'warning',
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'OK',
+                cancelButtonColor: 'grey',
+                cancelButtonText: 'Cancel',
+                closeOnConfirm: true,
+              },
+              function(isConfirm) {
+          //could be better
+                if (!isConfirm) {
+                    _this.previous();
+                    return false;
+                }else {
+                  window.app.checkFormSaved = false;
+                  _this.continueNav(callback, args);
+                }
+            });
+
+      } else{
+        this.continueNav(callback, args);
+      }
+
     },
 
     onRoute: function(url, patern, params) {
@@ -73,6 +95,38 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
         $('#arial').html('');
         $('#arialSub').html('');
       }else {
+        this.setNav(patern);
+      }
+    },
+    previous: function() {
+        var href = this.history[this.history.length-2];;
+        var url = '#'+ href;
+        Backbone.history.navigate(url,{trigger:false, replace: false});
+        this.history.pop();
+        var patern;
+        var patern =   href.split('/');
+        this.setNav(patern);
+    },
+    continueNav : function(callback, args){
+        $.ajax({
+          context: this,
+          url: config.coreUrl + 'security/has_access'
+        }).done(function() {
+          callback.apply(this, args);
+        }).fail(function(msg) {
+          if (msg.status === 502 || msg.status === 403) {
+            document.location.href = config.portalUrl;
+          }
+        });
+    },
+    unique : function(list) {
+        var result = [];
+        $.each(list, function(i, e) {
+            if ($.inArray(e, result) == -1) result.push(e);
+        });
+        return result;
+    },
+    setNav : function(patern){
         var md = this.collection.findWhere({href: patern[0]});
         $('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
         if (patern[1] && patern[1] != 'id' && patern[1] != 'type') {
@@ -80,8 +134,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
         }else {
           $('#arialSub').html('');
         }
-      }
-    },
-
+    }
   });
 });

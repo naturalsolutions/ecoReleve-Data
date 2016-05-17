@@ -8,16 +8,16 @@
 
  */
 
-define(['marionette', 'config'],
-function(Marionette, config) {
+define(['marionette', 'config','sweetAlert'],
+function(Marionette, config,Swal) {
 	'use strict';
 	return Marionette.LayoutView.extend({
 		template: 'app/ns_modules/ns_navbar/tpl-navbar.html',
 		className: '',
 
 		events: {
-			'click #prev' : 'navigatePrev',
-			'click #next' : 'navigateNext',
+			'click #prev' : 'navigate',
+			'click #next' : 'navigate',
 		},
 
 		ui: {
@@ -57,7 +57,49 @@ function(Marionette, config) {
 			this.ui.recordIndex.html(this.recordIndexNbr);
 			this.ui.totalRecords.html(this.totalRecords);
 		},
+		navigate : function(e){
+			var _this= this;
+      if(window.app.checkFormSaved){
+            Swal({
+                title: 'Saving form',
+                text: 'Current form is not yet saved. Would you like to continue without saving it?',
+                type: 'error',
+                showCancelButton: true,
+                type: 'warning',
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'OK',
+                cancelButtonColor: 'grey',
+                cancelButtonText: 'Cancel',
+                closeOnConfirm: true,
+              },
+              function(isConfirm) {
+          //could be better
+                if (!isConfirm) {
+                    return false;
+                }else {
+                   window.app.checkFormSaved = false;
+                   _this.checkNavigation(e);
+                }
+            });
 
+      } else{
+        this.checkNavigation(e);
+      }
+     },
+    checkNavigation : function(e) {
+	    var elem = e.target.nodeName;
+			var id;
+			if (elem == 'BUTTON'){
+					id  = $(e.target).attr('id');
+			} else if (elem == 'SPAN'){
+					id  = $(e.target).parent().attr('id');
+			}
+			if (id =='next'){
+				this.navigateNext();
+			} else if (id =='prev'){
+				this.navigatePrev();
+			}
+		},
 		navigateNext: function(){
 			/*backgrid grid issue : https://github.com/backbone-paginator/backbone-pageable/issues/158*/
 			this.coll.size();
