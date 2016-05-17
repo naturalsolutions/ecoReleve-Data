@@ -220,16 +220,6 @@ define([
           self.butClickSave(e);
         }
       });
-      $(this.formRegion).find('input').on("change", function(e) {
-         window.app.checkFormSaved = true;
-      });
-      $(this.formRegion).find('select').on("change", function(e) {
-         window.app.checkFormSaved = true;
-      });
-      $(this.formRegion).find('textarea').on("change", function(e) {
-         window.app.checkFormSaved = true;
-      });
-
       if(this.buttonRegion[0]){
         this.buttonRegion.forEach(function (entry) {
           _this.buttonRegion[0].html(_this.template);
@@ -289,8 +279,7 @@ define([
 
 
       if(!errors){
-        window.app.checkFormSaved = false;
-        if (this.model.attributes["id"] == 0) {
+          if (this.model.attributes["id"] == 0) {
             // To force post when model.save()
           this.model.attributes["id"] = null;
         }

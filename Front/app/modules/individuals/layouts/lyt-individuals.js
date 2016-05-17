@@ -121,35 +121,8 @@ define([
       this.filters.reset();
     },
     hideDetails: function() {
-      var _this= this;
-      if(window.app.checkFormSaved){
-            Swal({
-                title: 'Saving form',
-                text: 'Current form is not yet saved. Would you like to continue without saving it?',
-                type: 'error',
-                showCancelButton: true,
-                type: 'warning',
-                confirmButtonColor: '#DD6B55',
-                confirmButtonText: 'OK',
-                cancelButtonColor: 'grey',
-                cancelButtonText: 'Cancel',
-                closeOnConfirm: true,
-              },
-              function(isConfirm) {
-          //could be better
-                if (!isConfirm) {
-                    return false;
-                }else {
-                    window.app.checkFormSaved = false;
-                    Backbone.history.navigate('#individuals/', {trigger: false});
-                    _this.ui.detail.addClass('hidden');
-                }
-            });
-
-      } else{
-        Backbone.history.navigate(this.rootUrl, {trigger: false});
-        this.ui.detail.addClass('hidden');
-      }
+      Backbone.history.navigate(this.rootUrl, {trigger: false});
+      this.ui.detail.addClass('hidden');
     },
 
     newIndividual: function() {
