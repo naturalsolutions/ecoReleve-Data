@@ -8,7 +8,8 @@ from ..Models import (
     Sensor,
     Equipment,
     IndividualList,
-    ErrorAvailable
+    ErrorAvailable,
+    invertedThesaurusDict
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -127,13 +128,24 @@ def searchIndiv(request):
 def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()
-    sta_id = int(data['StationID'])
-    indivList = json.loads(data['IndividualList'])
-    releaseMethod = data['releaseMethod']
-    taxon = indivList[0]['Species']
-    curStation = session.query(Station).get(sta_id)
 
-    taxons = dict(Counter(indiv['Species'] for indiv in indivList))
+    if 'StationID' not in data:
+        return 
+
+    sta_id = int(data['StationID'])
+    indivListFromData = json.loads(data['IndividualList'])
+    releaseMethod = data['releaseMethod']
+    curStation = session.query(Station).get(sta_id)
+    taxon = False
+    taxons = dict(Counter(indiv['Species'] for indiv in indivListFromData))
+
+    userLang = request.authenticated_userid['userlanguage']
+    # get fullPath thesaurus therm according to user language
+    indivList = []
+    for row in indivListFromData :
+        row = dict(map(lambda k : getFullpath(k,userLang), row.items()))
+        indivList.append(row)
+
     def getnewObs(typeID):
         newObs = Observation()
         newObs.FK_ProtocoleType=typeID
@@ -196,9 +208,19 @@ def releasePost(request):
         errorEquipment = None
         binList = []
         for indiv in indivList: 
+
             curIndiv = session.query(Individual).get(indiv['ID'])
             curIndiv.LoadNowValues()
-            curIndiv.UpdateFromJson(indiv)
+            if not taxon:
+                taxon = curIndiv.Species
+            try : 
+                indiv['taxon'] = curIndiv.Species
+                del indiv['species']
+            except: 
+                indiv['taxon'] = curIndiv.Species
+                del indiv['Species']
+                pass
+            curIndiv.UpdateFromJson(indiv,startDate = curStation.StationDate)
 
             binList.append(MoF_AoJ(indiv))
             for k in indiv.keys():
@@ -208,11 +230,6 @@ def releasePost(request):
 
             indiv['FK_Individual'] = indiv['id']
             indiv['FK_Station'] = sta_id
-            try : 
-                indiv['taxon'] = indiv['species']
-            except: 
-                indiv['taxon'] = indiv['Species']
-                pass
             try:
                 indiv['weight'] = indiv['poids']
             except: 
@@ -222,17 +239,16 @@ def releasePost(request):
                 del indiv['Comments']
             except: 
                 pass
-
             curVertebrateInd = getnewObs(vertebrateIndID)
-            curVertebrateInd.UpdateFromJson(indiv)
+            curVertebrateInd.UpdateFromJson(indiv,startDate = curStation.StationDate)
             vertebrateIndList.append(curVertebrateInd)
 
             curBiometry = getnewObs(biometryID)
-            curBiometry.UpdateFromJson(indiv)
+            curBiometry.UpdateFromJson(indiv,startDate = curStation.StationDate)
             biometryList.append(curBiometry)
 
             curReleaseInd = getnewObs(releaseIndID)
-            curReleaseInd.UpdateFromJson(indiv)
+            curReleaseInd.UpdateFromJson(indiv,startDate = curStation.StationDate)
             releaseIndList.append(curReleaseInd)
 
             try:
@@ -249,7 +265,7 @@ def releasePost(request):
                 'Monitoring_Status' : 'Suivi',
                 'Sensor_Status': 'événement de sortie provisoire de stock>mise en service'
                 }
-                curEquipmentInd.UpdateFromJson(equipInfo)
+                curEquipmentInd.UpdateFromJson(equipInfo,startDate = curStation.StationDate)
                 curEquipmentInd.Station = curStation
                 equipmentIndList.append(curEquipmentInd)
             except Exception as e:
@@ -295,3 +311,12 @@ def releasePost(request):
         message = str(type(e))
 
     return message
+
+def getFullpath(item,lng):
+    name,val= item
+
+    try : 
+        newVal = invertedThesaurusDict[lng][val]
+    except:
+        newVal = val
+    return (name,newVal)

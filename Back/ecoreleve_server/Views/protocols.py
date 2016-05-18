@@ -96,7 +96,7 @@ def GetProtocolsofStation (request) :
                         print_exc()
                         pass
             globalListProto = [{'ID':objID, 'Name':listProto[objID]['Name'],'obs':listProto[objID]['obs'] } for objID in listProto.keys()]
-            response = globalListProto
+            response = sorted(globalListProto, key=lambda k: k['Name'])
     except Exception as e :
         print_exc()
         print (e)

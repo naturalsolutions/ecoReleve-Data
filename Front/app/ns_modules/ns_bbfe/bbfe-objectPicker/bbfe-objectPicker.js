@@ -8,7 +8,7 @@ define([
   'config',
   'ns_modules/ns_com',
   'ns_grid/model-grid',
-  'ns_filter/model-filter_module',
+  'ns_filter_bower',
   'backbone-forms',
   'requirejs-text!./tpl-bbfe-objectPicker.html',
   'objects/layouts/lyt-objects-new'
@@ -25,6 +25,7 @@ define([
       'click #btnFilterPicker': 'filter',
       'click .cancel': 'hidePicker',
       'click button#new': 'onClickNew',
+      'click button#detailsShow': 'openDetails',
     },
 
     initialize: function(options) {
@@ -37,6 +38,12 @@ define([
       this.options = options;
       key = key.split('FK_')[1];
 
+      var dictCSS = {
+        'individuals':'reneco reneco-bustard',
+        'sensors': 'reneco reneco-emitters',
+        'monitoredSites': 'reneco reneco-site',
+      };
+
       this.validators = options.schema.validators || [];
       
       //todo : refact
@@ -46,8 +53,11 @@ define([
       this.model = new Backbone.Model();
 
       this.pickerTitle = options.schema.title;
+
+      this.model.set('iconFont',dictCSS[this.ojectName]);
       this.model.set('pickerTitle', this.pickerTitle);
       this.model.set('key', options.key);
+      this.model.set('type', 'text');
 
       var value;
       if (options) {
@@ -65,6 +75,8 @@ define([
         this.initAutocomplete();
       } else {
         this.usedLabel = 'ID';
+        this.noAutocomp = true;
+        this.model.set('type', 'number');
       }
       this.isTermError = false;
 
@@ -90,6 +102,7 @@ define([
         }else {
           this.model.set('disabled', 'disabled');
           this.model.set('visu', 'hidden');
+          this.model.set('iconFont',dictCSS[this.ojectName]+' no-border');
         }
       }
 
@@ -104,18 +117,20 @@ define([
       //dirty
       var template =  _.template(Tpl, this.model.attributes);
       this.$el.html(template);
-      
       this.afterTpl();
     },
 
     initAutocomplete: function() {
       var _this = this;
       this.autocompleteSource = {};
-      this.autocompleteSource.source = config.coreUrl +'autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID'
+      this.autocompleteSource.source = config.coreUrl +'autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID';
+      this.autocompleteSource.minLength = 3;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
-        $(_this._input).attr('data_value',ui.item.value).change();
+        $(_this._input).attr('data_value',ui.item.value);
         $(_this._input).val(ui.item.label);
+
+        _this.matchedValue = ui.item;
         _this.isTermError = false;
         _this.displayErrorMsg(false);
       };
@@ -125,21 +140,18 @@ define([
 
       this.autocompleteSource.change = function(event,ui){
         event.preventDefault();
-        if (ui.item) {
-          _this.setValue(ui.item.value,ui.item.label);
-/*          $(_this._input).attr('data_value',ui.item.value).change();
-          $(_this._input).val(ui.item.label);*/
-          _this.isTermError = false;
-          _this.displayErrorMsg(false);
-
-        } else {
-          if (!_this.matchedValue){
+          if ($(_this._input).val() != '' && !_this.matchedValue){
             _this.isTermError = true;
             _this.displayErrorMsg(true);
           }
-          //$(_this._input).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
-
-        }
+          else {
+            if ($(_this._input).val() == ''){
+              $(_this._input).attr('data_value','');
+            }
+            _this.isTermError = false;
+            _this.displayErrorMsg(false);
+          }
+          $(_this._input).change();
       };
 
       this.autocompleteSource.response = function(event,ui){
@@ -147,19 +159,15 @@ define([
         if (ui.content.length == 1){
           var item = ui.content[0];
           _this.setValue(item.value,item.label);
-          _this.displayErrorMsg(false);
-          _this.isTermError = false;
           _this.matchedValue = item;
 
         } else {
           _this.matchedValue = undefined;
         }
       };
-
     },
 
     afterTpl: function() {
-      console.log(this.$el)
       this._input = this.$el.find('input[name="' + this.key + '" ]')[0];
       this.$el.find('#new').addClass('hidden');
       this.getTypes();
@@ -173,22 +181,23 @@ define([
       $.ajax({
         url : _this.url+val,
         success : function(data){
-          _this.setValue(val,data[_this.usedLabel]);
-          
+          $(_this._input).attr('data_value',val);
+          $(_this._input).val(data[_this.usedLabel]);
+          //_this.setValue(val,data[_this.usedLabel]);
+          _this.displayErrorMsg(false);
+          _this.isTermError = false;
         }
       });
     },
 
     render: function(){
       if (this.displayingValue){
-        this.getDisplayValue(this.initValue);
+        if (this.initValue && this.initValue != null){
+          this.getDisplayValue(this.initValue);
+        }
         var _this = this;
         _(function () {
             $(_this._input).autocomplete(_this.autocompleteSource);
-            //$(this._input).addClass(_this.options.schema.editorClass) ;
-            /*if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
-                $(this._input).prop('disabled', true);
-            }*/
         }).defer();
       }
       return this;
@@ -210,6 +219,14 @@ define([
 
     onClickNew: function(e) {
       var _this = this;
+      
+      var data = _this.form.getValue();
+      if (data['StationDate']) {
+        data['StartDate'] = data['StationDate'];
+        //data['Name'] = '';
+      } else {
+        data = {};
+      }
       this.$el.find('#new').tooltipList({
         availableOptions: this.tooltipListData,
         liClickEvent: function(value, parent, elem) {
@@ -219,7 +236,8 @@ define([
           var params = {
             picker: _this,
             type: val,
-            ojectName: _this.ojectName
+            ojectName: _this.ojectName,
+            data: data
           };
           _this.displayCreateNewLyt(params);
         },
@@ -286,12 +304,21 @@ define([
       if (this.isTermError) {
         return null ;
       }
+      if (this.noAutocomp){
+        return $(this._input).val();
+      }
       return $(this._input).attr('data_value');
     },
 
     setValue: function(value,displayValue) {
-      $(this._input).val(displayValue).change();;
-      $(this._input).attr('data_value',value).change();
+      if (displayValue || displayValue == ''){
+        $(this._input).val(displayValue);
+      } else {
+        this.getDisplayValue(value);
+      }
+      $(this._input).attr('data_value',value);
+      this.matchedValue = value;
+      $(this._input).change();
       this.$el.find('#creation').addClass('hidden');
       this.hidePicker();
     },
@@ -321,6 +348,13 @@ define([
         }
       //}
     },
+
+    openDetails: function(event) {
+      console.log($(this._input).attr('data_value'))
+      var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.ojectName+'/'+ $(this._input).attr('data_value');
+      var win = window.open(url, '_blank');
+      win.focus();
+    }
   }
   );
 });

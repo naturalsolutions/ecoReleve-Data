@@ -1,5 +1,3 @@
-
-
 define([
     'underscore',
     'jquery',
@@ -10,31 +8,22 @@ define([
 ], function (
     _, $, $ui, Backbone, Form, autocompTree
 ) {
-
    
-
     Backbone.Form.validators.Thesaurus = function (options) {
         return function Thesaurus(value) {
             if (!options.parent.isTermError) {
                 return null;
             }
-            console.log('validateur', 'value', value, 'options', options);
-            console.log(options.parent);
             var retour = {
                 type: options.type,
                 message: ''
             };
-
             return retour;
-
         };
     };
 
-
-
     'use strict';
     return Form.editors.AutocompTreeEditor = Form.editors.Base.extend({
-
 
         previousValue: '',
 
@@ -66,7 +55,6 @@ define([
 
             this.validators = options.schema.validators || [];
 
-
             this.isTermError = false;
             
             this.template = options.template || this.constructor.template;
@@ -80,7 +68,13 @@ define([
             if (this.editable!=null && !this.editable) {
                 editorAttrs += 'disabled="disabled"';
                 this.ValidationRealTime = false;
+                iconFont += ' no-border';
             }
+
+            if(this.validators && this.validators[0] == 'required'){
+              options.schema.editorClass += ' required';
+            }
+
             var tplValeurs = {
                 inputID: this.id,
                 editorAttrs: editorAttrs,
@@ -92,6 +86,7 @@ define([
             this.startId = options.schema.options.startId;
             this.wsUrl = options.schema.options.wsUrl;
             this.lng = options.schema.options.lng;
+            this.timeout = options.schema.options.timeout;
             this.displayValueName = options.schema.options.displayValueName || 'fullpathTranslated';
             this.storedValueName = options.schema.options.storedValueName || 'fullpath';
             if (this.ValidationRealTime) {
@@ -101,7 +96,6 @@ define([
         },
 
         getValue: function () {
-
             if (this.isTermError) {
                 return this.$el.find('#' + this.id).val();
             }
@@ -113,7 +107,6 @@ define([
         },
 
         render: function () {
-
             var $el = $(this.template);
             this.setElement($el);
             var _this = this;
@@ -131,10 +124,7 @@ define([
                         },
                         inputValue: _this.value,
                         startId: _this.startId,
-     /*                   onInputBlur: function (options) {
-                            var value = _this.$el.find('#' + _this.id + '_value').val();
-                            _this.onEditValidation(value);
-                        },*/
+                        timeout: _this.timeout,
 
                         onItemClick: function (options) {
                             var value = _this.$el.find('#' + _this.id + '_value').val();
@@ -153,14 +143,12 @@ define([
                         }, 150);
                     });
 
-                    //console.log(_this.$el.find('#treeView' + _this.id));
                 }
                 _this.FirstRender = false;
             }).defer();
             return this;
         },
         validateAndTranslate: function (value, isTranslated) {
-            //console.log('validateAndTranslate', value);
             var _this = this;
 
             if (value == null || value == '') {
@@ -176,11 +164,9 @@ define([
 
             $.ajax({
                 url: _this.wsUrl + "/getTRaductionByType",
-                //timeout: 3000,
                 data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '",lng:"' + _this.lng + '"  }',
                 dataType: "json",
                 type: "POST",
-                //async:false,
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
                     $('#divAutoComp_' + _this.id).removeClass('error');
@@ -191,14 +177,12 @@ define([
                         if (_this.displayValueName == 'valueTranslated') {
                             translatedValue = data["TTop_NameTranslated"];
                         }
-                        //_this.$el.find('#' + _this.id).val(translatedValue);
                         _this.$el.find('#' + _this.id + '_value').val(data["TTop_FullPath"]);
                         _this.$el.find('#' + _this.id ).attr('data_value',value);
                         _this.$el.find('#' + _this.id).val(translatedValue);
                     }
 
                     _this.displayErrorMsg(false);
-
 
                 },
                 error: function (data) {
@@ -209,41 +193,28 @@ define([
                     }
                 }
             });
-
-
-
         },
+
         onEditValidation: function (value) {
             var _this = this;
             if (!this.ValidationRealTime) {
                 this.isTermError = false;
                 return;
             }
-            //console.log('Validation on edit ', value, 'finvalue');
-            //console.log(value);
-            /*if (value == null || value == '') {
-                $('#divAutoComp_' + _this.id).removeClass('error');
-                return;
-            }*/
 
             _this.isTermError = true;
-            //console.log('Validation on edit Value pas vide ');
             _this.validateAndTranslate(value, true);
 
 
         },
 
         displayErrorMsg: function (bool) {
-            if (!(this.editable ==false)) {
-                //console.log('boooooool', bool);
+            if (!(this.editable == false)) {
                 this.isTermError = bool;
-                //console.log('this.$el', this.$el);
                 if (this.isTermError) {
-
-                    //console.log('Term Error');
                     this.termError = "Invalid term";
                     this.$el.find('#divAutoComp_' + this.id).addClass('error');
-                    this.$el.find('#errorMsg').removeClass('hidden');
+                    //this.$el.find('#errorMsg').removeClass('hidden');
                 } else {
                     this.termError = "";
                     this.$el.find('#divAutoComp_' + this.id).removeClass('error');

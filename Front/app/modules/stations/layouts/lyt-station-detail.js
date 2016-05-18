@@ -97,6 +97,7 @@ define([
           $("#dateTimePicker").on("dp.change", function (e) {
             $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
            });
+          _this.filedAcitivityId = this.model.get('fieldActivityId');
         }
       });
       this.nsForm.afterDelete = function() {
@@ -110,9 +111,36 @@ define([
         });
       };
 
-      this.nsForm.model.on('change:fieldActivityId', function() {
-        _this.displayProtos();
-      });
+      this.nsForm.savingError = function (response) {
+        var msg = 'An error occured, please contact an admninstrator';
+        var type_ = 'error';
+        var title = 'Error saving';
+        if (response.status == 510) {
+          msg = 'A station already exists with these parameters';
+          type_ = 'warning';
+          title = 'Error saving';
+        }
+
+        Swal({
+          title: title,
+          text: msg,
+          type: type_,
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        });
+      };
+
+
+
+      this.nsForm.afterSaveSuccess = function() {
+        if(this.model.get('fieldActivityId') != _this.fieldActivityId){
+          _this.displayProtos();
+          _this.fieldActivityId = this.model.get('fieldActivityId');
+        }
+      },
+
       //then display protocols
       _this.displayProtos();
     },
@@ -122,9 +150,6 @@ define([
 
       this.rgProtoEditor.show(this.lytProtoEditor);
     },
-
-
-
 
   });
 });

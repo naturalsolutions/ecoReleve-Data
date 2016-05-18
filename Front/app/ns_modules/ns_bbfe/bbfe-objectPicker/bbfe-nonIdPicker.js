@@ -27,6 +27,7 @@ define([
       'click button#saveFromCriterias': 'saveFromCriteras',
       'click button#createNew': 'createNew',
       'click #indivTypeTabs a.tab-link' : 'indivTypeTabs',
+      'click button#detailsShow': 'openDetails',
     },
 
     initialize: function(options) {
@@ -61,9 +62,11 @@ define([
       if (options.schema.editable) {
         this.model.set('disabled', '');
         this.model.set('visu', '');
+        this.model.set('mode', '');
       }else {
         this.model.set('disabled', 'disabled');
         this.model.set('visu', 'hidden');
+        this.model.set('mode', 'no-border');
       }
 
       if (options.schema.validators) {
@@ -81,7 +84,7 @@ define([
     afterTpl: function() {
       this._input = this.$el.find('input[name="' + this.key + '"]')[0];
       this._modal = this.$el.find('#modalPicker');
-      this._creationContainer = this.$el.find('div#creationContainer');
+      this._creationContainer = this.$el.find('div#creation');
       this._btnNew = this.$el.find('button#createNew');
       this._btnSaveFromCriterias = this.$el.find('button#saveFromCriterias');
       this._indivTypeTabs = this.$el.find('ul#indivTypeTabs');
@@ -168,8 +171,6 @@ define([
         data[this.filters.criterias[i]['Column']] = this.filters.criterias[i]['Value'];
       };
 
-
-
       var params = {
         picker: this,
         type: 2,
@@ -215,6 +216,13 @@ define([
       this.com = new Com();
       this.displayGrid();
       this.displayFilter();
+    },
+
+       openDetails: function(event) {
+      console.log($(this._input).attr('data_value'))
+      var url = 'http://'+window.location.hostname+window.location.pathname+'#individuals/'+ $(this._input).val();
+      var win = window.open(url, '_blank');
+      win.focus();
     },
   });
 });

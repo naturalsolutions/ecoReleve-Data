@@ -35,6 +35,7 @@ define([
       'click button#activeGridPanel': 'activeGridPanel',
       'click button#activeMapPanel': 'activeMapPanel',
       'click button#clear': 'clearFilter',
+      'click #btn-export': 'exportGrid'
     },
 
     ui: {
@@ -184,6 +185,24 @@ define([
       }
       this.grid.lastImportedUpdate(type);
       this.map.lastImportedUpdate(type);
+    },
+
+    exportGrid: function() {
+      var url = config.coreUrl + 'stations/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
+      var link = document.createElement('a');
+      link.classList.add('DowloadLinka');
+      
+      //link.download = url;
+      link.href = url;
+      link.onclick = function () {
+          //this.parentElement.removeChild(this);
+          var href = $(link).attr('href');
+          window.location.href = link;
+          document.body.removeChild(link);
+      };
+     /*his.$el.append(link);*/
+     document.body.appendChild(link);
+     link.click();
     }
   });
 });

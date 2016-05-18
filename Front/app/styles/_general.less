@@ -105,6 +105,17 @@ a{
 }
 .mid-height{
   height: 50%!important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: @screen-lg){
+  .mid-height{
+    display: block;
+    align-items: inherit;
+    justify-content: inherit;
+  }
 }
 
 span.bull-warn{
@@ -224,9 +235,7 @@ li.list-group-item{
     transform: rotate(-90deg);
 }
 
-textarea {
-  resize: none;
-}
+
 
 .circle{
   border: 2px solid;

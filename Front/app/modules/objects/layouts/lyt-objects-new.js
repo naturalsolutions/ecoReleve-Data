@@ -37,7 +37,15 @@ define([
       }
       this.model.set('ojectName', this.ojectName);
       this.picker = options.picker;
+
       this.data = options.data;
+      var curURL = window.location.href.split('stations/')[1];
+      var stationID = curURL.split('/')[0];
+      if (this.data){
+        this.data['stationID'] = stationID;
+      } else {
+        this.data = {'stationID':stationID};
+      }
     },
 
     onShow: function() {
@@ -91,7 +99,7 @@ define([
             }
         );
         this.picker.setValue(resp.ID);
-        this.picker.$el.find('#creationContainer').addClass('hidden');
+        this.picker.$el.find('#creation').addClass('hidden');
         this.picker.hidePicker();
       } else {
         //redirect
@@ -102,8 +110,9 @@ define([
       this.nsForm.butClickSave();
     },
     cancel: function() {
+      console.log(this.picker);
       if(this.picker){
-        this.picker.$el.find('#creationContainer').addClass('hidden');
+        this.picker.$el.find('#creation').addClass('hidden');
       }
       //Backbone.history.navigate({trigger: true});
 

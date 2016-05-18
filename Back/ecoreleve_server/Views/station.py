@@ -22,6 +22,8 @@ from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
 from sqlalchemy.exc import IntegrityError
+import io
+from pyramid.response import Response ,FileResponse
 
 
 
@@ -36,7 +38,8 @@ def actionOnStations(request):
     'forms' : getForms,
     '0' : getForms,
     'getFields': getFields,
-    'getFilters': getFilters
+    'getFilters': getFilters,
+    'updateSiteLocation':updateMonitoredSite
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
@@ -128,9 +131,16 @@ def updateStation(request):
         del data['creationDate']
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
-    curSta.UpdateFromJson(data)
-    print(curSta.__dict__)
-    return {}
+    try:
+        curSta.UpdateFromJson(data)
+        session.commit()
+        msg = {}
+    except IntegrityError as e:
+        print('\n\n\n Integerity errrorrrrrrr ------------------------------')
+        session.rollback()
+        request.response.status_code = 510
+        msg = {'existingStation' : True}
+    return msg
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'POST')
@@ -151,17 +161,24 @@ def insertOneNewStation (request) :
     newSta.StationType = session.query(StationType).filter(StationType.ID==data['FK_StationType']).first()
     newSta.init_on_load()
     newSta.UpdateFromJson(data)
-    session.add(newSta)
-    session.flush()
 
-    return {'ID': newSta.ID}
+    try:
+        session.add(newSta)
+        session.flush()
+        msg = {'ID': newSta.ID}
+    except IntegrityError as e:
+        print('\n\n\n Integerity errrorrrrrrr ------------------------------')
+        session.rollback()
+        request.response.status_code = 510
+        msg = {'existingStation' : True}
+
+    return msg
 
 def insertListNewStations(request):
     session = request.dbsession
     data = request.json_body
     data_to_insert = []
-    format_dt = '%Y-%m-%d %H:%M:%S'
-    format_dtBis = '%Y-%d-%m %H:%M:%S'
+    format_dt = '%d/%m/%Y %H:%M'
     dateNow = datetime.now()
 
     ##### Rename field and convert date #####
@@ -170,6 +187,7 @@ def insertListNewStations(request):
         newRow = {}
         newRow['LAT'] = row['latitude']
         newRow['LON'] = row['longitude']
+        newRow['ELE'] = row['elevation']
         newRow['precision'] = row['precision']
         newRow['Name'] = row['name']
         newRow['fieldActivityId'] = row['fieldActivity']
@@ -184,8 +202,10 @@ def insertListNewStations(request):
 
     ##### Load date into pandas DataFrame then round LAT,LON into decimal(5) #####
     DF_to_check = pd.DataFrame(data_to_insert)
-    DF_to_check['LAT'] = np.round(DF_to_check['LAT'],decimals = 5)
-    DF_to_check['LON'] = np.round(DF_to_check['LON'],decimals = 5)
+    DF_to_check['LAT'] = DF_to_check['LAT'].round(5)
+    DF_to_check['LON'] = DF_to_check['LON'].round(5)
+    # DF_to_check['LAT'] = np.round(DF_to_check['LAT'],decimals = 5)
+    # DF_to_check['LON'] = np.round(DF_to_check['LON'],decimals = 5)
     # DF_to_check['LAT'] = DF_to_check['LAT'].astype(float)
     # DF_to_check['LON'] = DF_to_check['LON'].astype(float)
     ##### Get min/max Value to query potential duplicated stations #####
@@ -206,8 +226,8 @@ def insertListNewStations(request):
     result_to_check = pd.read_sql_query(query,session.get_bind())
     if result_to_check.shape[0] > 0  :
         ##### IF potential duplicated stations, load them into pandas DataFrame then join data to insert on LAT,LON,DATE #####
-        result_to_check['LAT'] = np.round(result_to_check['LAT'],decimals = 5)
-        result_to_check['LON'] = np.round(result_to_check['LON'],decimals = 5)
+        result_to_check['LAT'] = result_to_check['LAT'].round(5)
+        result_to_check['LON'] = result_to_check['LON'].round(5)
 
         merge_check = pd.merge(DF_to_check,result_to_check , on =['LAT','LON','StationDate'])
         ##### Get only non existing data to insert #####
@@ -342,15 +362,57 @@ def searchStation(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 
-def linkToMonitoredSite(request):
+def updateMonitoredSite(request):
     session = request.dbsession
-    curSta = session.query(Station).get(request.matchdict['id'])
-    data = request.json_body
-    idSite = data['siteId']
-    curSta.FK_MonitoredSite = idSite
-    if data['updateSite'] : 
-        newSitePos = MonitoredSitePosition(StartDate=curSta.StationDate, LAT=curSta.LAT, LON=curSta.LON, ELE=curSta.ELE, Precision=curSta.precision, FK_MonitoredSite=idSite)
+    data = request.params.mixed()
+    print(data)
+    curSta = session.query(Station).get(data['id'])
+    # data = request.json_body
+    # idSite = data['siteId']
+    # curSta.FK_MonitoredSite = idSite
+    if data['FK_MonitoredSite'] == '':
+        return 'Station is not monitored'
+    try :
+        newSitePos = MonitoredSitePosition(StartDate=curSta.StationDate
+            , LAT=curSta.LAT, LON=curSta.LON, ELE=curSta.ELE, Precision=curSta.precision, FK_MonitoredSite=curSta.FK_MonitoredSite)
         session.add(newSitePos)
-    return {}
+        session.commit()
+        return 'Monitored site position was updated'
+    except IntegrityError as e :
+        print('Integrity EROROROROROR')
+        session.rollback()
+
+        return 'This location already exists'
 
 
+# ------------------------------------------------------------------------------------------------------------------------- #
+
+@view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
+def sensors_export(request):
+    session = request.dbsession
+    data = request.params.mixed()
+    searchInfo = {}
+    searchInfo['criteria'] = []
+    if 'criteria' in data: 
+        data['criteria'] = json.loads(data['criteria'])
+        if data['criteria'] != {} :
+            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+
+    searchInfo['order_by'] = []
+
+    ModuleType = 'StationGrid'
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+
+    listObj = StationList(moduleFront)
+    dataResult = listObj.GetFlatDataList(searchInfo)
+
+    df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
+
+    fout = io.BytesIO()
+    writer = pd.ExcelWriter(fout)
+    df.to_excel(writer, sheet_name='Sheet1')
+    writer.save()
+    file = fout.getvalue()
+
+    dt = datetime.now().strftime('%d-%m-%Y')
+    return Response(file,content_disposition= "attachment; filename=stations_export_"+dt+".xlsx",content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

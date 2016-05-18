@@ -120,17 +120,17 @@ def uploadFileRFID(request):
                 list_RFID.append(row)
             j=j+1
         data_to_check = pd.DataFrame.from_records(list_RFID,columns = ['id_','FK_Sensor','date_','chip_code','creator','creation_date','validated','checked'])
-
-        minDateEquip = datetime.fromtimestamp(int(startEquip))
+        print(startEquip)
+        minDateEquip = datetime.strptime(startEquip,'%Y-%m-%d %H:%M:%S')
         try :
-            maxDateEquip = datetime.fromtimestamp(int(endEquip))
+            maxDateEquip = datetime.strptime(endEquip,'%Y-%m-%d %H:%M:%S')
         except:
             maxDateEquip = None
 
         ## check if Date corresponds with pose remove module ##
         if min(allDate)>= minDateEquip and (maxDateEquip is None or max(allDate)<= maxDateEquip):
             
-            data_to_insert = checkDuplicatedRFID(data_to_check,minDateEquip,maxDateEquip,idModule)
+            data_to_insert = checkDuplicatedRFID(data_to_check,min(allDate),max(allDate),idModule)
             Rfids = [{Rfid.creator.name: crea, Rfid.FK_Sensor.name: idMod, Rfid.checked.name: '0',
             Rfid.chip_code.name: c, Rfid.date_.name: d, Rfid.creation_date.name: now} for crea, idMod, c, d  in Rfids]
             # # Insert data.

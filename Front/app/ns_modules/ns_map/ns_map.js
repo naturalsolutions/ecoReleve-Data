@@ -655,7 +655,6 @@ define([
 
     /*==========  focusMarker :: focus & zoom on a point  ==========*/
     focus: function(id, zoom){
-      id = parseInt(id);
       var _this = this;
       var marker = this.dict[id];
       var center = marker.getLatLng();
@@ -668,6 +667,7 @@ define([
 
       $(this.lastFocused._icon).addClass('focus');
 
+      //_this.map.setView(center);
       _this.map.setView(center, zoom);
 
     },
@@ -711,6 +711,7 @@ define([
     },
 
     resetAll: function(){
+      console.log(this.geoJson);
       this.updateLayers(this.geoJson);
     },
 
@@ -813,6 +814,7 @@ define([
       var geoJson;
       var coll = _.clone(param);
       geoJson = this.coll2GeoJson(coll);
+      this.geoJson = geoJson;
       coll = param;
         if(coll.length){
           this.updateLayers(geoJson);
@@ -831,7 +833,7 @@ define([
       }
     },
 
-    setTotal: function(geoJson){
+    setTotal: function(geoJson) {
       if(this.totalElt){
         this.total =  geoJson.total;
         this.totalElt.html(this.total);
@@ -840,7 +842,7 @@ define([
 
 
     //todo : refact
-    initErrorLayer: function(){
+    initErrorLayer: function() {
       var elem = '<div id="errorLayer" class="errorLayer hidden"><legend><span class="glyphicon glyphicon-warning-sign"></span><span class="msg"></span></legend></div>';
       $('#'+this.elem).append(elem);
       this.errorElt = $('#'+this.elem + ' #errorLayer');
@@ -863,7 +865,7 @@ define([
       }
     },
 
-    updateLayers: function(geoJson){
+    updateLayers: function(geoJson) {
       this.displayError(geoJson);
       //?
       if(geoJson == false){

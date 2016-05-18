@@ -10,7 +10,8 @@ from ..Models import (
     Equipment,
     IndividualList,
     Base,
-    IndivLocationList
+    IndivLocationList,
+    Station
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -27,6 +28,10 @@ from traceback import print_exc
 from collections import OrderedDict
 from ..utils.distance import haversine
 from ..utils.generator import Generator
+import io
+from pyramid.response import Response ,FileResponse
+from pyramid import threadlocal
+
 
 prefix = 'individuals'
 
@@ -192,6 +197,7 @@ def getIndivHistory(request):
                     dictRow['value'] = curRow[key] 
                 elif 'FK' not in key :
                     dictRow[key] = curRow[key]
+        dictRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
         response.append(dictRow)
 
     return response
@@ -214,6 +220,9 @@ def getIndivEquipment(request):
     response = []
     for row in result:
         curRow = OrderedDict(row)
+        curRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
+        if curRow['EndDate'] is not None :
+            curRow['EndDate'] = curRow['EndDate'].strftime('%Y-%m-%d %H:%M:%S') 
         response.append(curRow)
 
     return response
@@ -254,19 +263,62 @@ def insertIndiv(request):
 # ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewIndiv (request) :
     session = request.dbsession
+    session.autoflush = False # if set True create automatically a new indiv  = not what we want 
     data = {}
+    startDate = None 
+
     for items , value in request.json_body.items() :
         data[items] = value
+    existingIndivID = None
+
+    if 'stationID' in data:
+        curSta = session.query(Station).get(data['stationID'])
+        startDate=curSta.StationDate
 
     indivType = int(data['FK_IndividualType'])
     newIndiv = Individual(FK_IndividualType = indivType , creationDate = datetime.now(),Original_ID = '0')
-    newIndiv.IndividualType = session.query(IndividualType).filter(IndividualType.ID==indivType).first()
+    # newIndiv.IndividualType = session.execute(([IndividualType.ID]).where(IndividualType.ID==indivType)).fetchone()
     newIndiv.init_on_load()
-    newIndiv.UpdateFromJson(data)
-    session.add(newIndiv)
-    session.flush()
+    newIndiv.UpdateFromJson(data,startDate=startDate)
 
-    return {'ID': newIndiv.ID}
+    if indivType == 2:
+        existingIndivID = checkExisting(newIndiv)
+        if existingIndivID is not None:
+            session.rollback()
+            session.close()
+            indivID = existingIndivID
+
+    if existingIndivID is None:
+        session.add(newIndiv)
+        session.flush()
+        indivID = newIndiv.ID
+
+    return {'ID': indivID}
+
+def checkExisting(indiv):
+    # session = threadlocal.get_current_registry().dbmaker.session_factory()
+    session = threadlocal.get_current_registry().dbmaker()
+    indivData = indiv.PropDynValuesOfNow
+
+    # del indivData['creationDate']
+    for key in indivData:
+        if indivData[key] is None: 
+            indivData[key] = 'null'
+    
+    searchInfo = {'criteria':[{'Column':key,'Operator':'is','Value':val} for key,val in indivData.items()],'order_by':['ID:asc']}
+ 
+    ModuleType = 'IndivFilter'
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+
+    listObj = IndividualList(moduleFront,typeObj = 2)
+    dataResult = listObj.GetFlatDataList(searchInfo)
+
+    if len(dataResult)>0:
+        existingID = dataResult[0]['ID']
+    else :
+        existingID = None
+
+    return existingID
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
@@ -286,14 +338,16 @@ def searchIndiv(request):
     searchInfo['per_page'] = json.loads(data['per_page'])
 
     if 'typeObj' in request.params:
+        typeObj = request.params['typeObj']
         searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':request.params['typeObj']})
     else:
         searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':1})
+        typeObj = 1
 
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront)
+    listObj = IndividualList(moduleFront,typeObj = typeObj)
     dataResult = listObj.GetFlatDataList(searchInfo)
     countResult = listObj.count(searchInfo)
 
@@ -341,9 +395,12 @@ def getIndivLocation(request):
         order_by= None
 
     if 'geo' in request.params :
-        result = gene.get_geoJSON(criteria,['ID','UnicIdentifier','Date','type_'])
+        result = gene.get_geoJSON(criteria,['ID','Date','type_'])
+
     else:
-        result = gene.search(criteria,offset=offset,per_page=per_page,order_by=order_by)
+        result = gene.search(criteria,offset=offset,per_page=per_page,order_by=['StationDate:desc'])
+        for row in result : 
+            row['Date'] = row['Date'].strftime('%Y-%m-%d %H:%M:%S')
 
 
     # ************ POC Indiv location PLayer  **************** 
@@ -381,8 +438,6 @@ def delIndivLocationList(request):
     session = request.dbsession
 
     IdList = json.loads(request.params['IDs'])
-
-    print(IdList)
     session.query(Individual_Location).filter(Individual_Location.ID.in_(IdList)).delete(synchronize_session=False)
 
 
@@ -393,6 +448,35 @@ def delIndivLocation(request):
     session.query(Individual_Location).filter(Individual_Location.ID == Id).delete(synchronize_session=False)
 
 
+@view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
+def sensors_export(request):
+    session = request.dbsession
+    data = request.params.mixed()
+    searchInfo = {}
+    searchInfo['criteria'] = []
+    if 'criteria' in data: 
+        data['criteria'] = json.loads(data['criteria'])
+        if data['criteria'] != {} :
+            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+
+    searchInfo['order_by'] = []
+
+    ModuleType = 'IndivFilter'
+    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+
+    listObj = IndividualList(moduleFront)
+    dataResult = listObj.GetFlatDataList(searchInfo)
+
+    df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
+
+    fout = io.BytesIO()
+    writer = pd.ExcelWriter(fout)
+    df.to_excel(writer, sheet_name='Sheet1')
+    writer.save()
+    file = fout.getvalue()
+
+    dt = datetime.now().strftime('%d-%m-%Y')
+    return Response(file,content_disposition= "attachment; filename=individuals_export_"+dt+".xlsx",content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 
 

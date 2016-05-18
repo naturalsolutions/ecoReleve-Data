@@ -30,7 +30,8 @@ define([
       'detail': '#detail',
       'totalEntries': '#totalEntries',
       'nbSelected': '#nbSelected',
-      'release':'#release'
+      'release':'#release',
+      'nbTotal': '.js-nb-total'
     },
 
     events: {
@@ -65,12 +66,12 @@ define([
           var id = row.model.get('ID');
           var unicName = row.model.get('UnicIdentifier');
           _this.currentRow.model.set({unicSensorName: unicName});
-          this.setValue(id);
+          this.setValue(id,unicName);
         },
         getValue: function() {
         },
-        setValue: function(value) {
-          _this.currentRow.model.set({unicSensorName: value});
+        setValue: function(value,unicName) {
+          _this.currentRow.model.set({unicSensorName: unicName});
           _this.currentRow.model.set({FK_Sensor: value});
           this.hidePicker();
         },
@@ -120,6 +121,8 @@ define([
         rowClicked: true,
         onceFetched: function(params) {
           _this.totalEntries(this.grid);
+          console.log(this.grid);
+          console.log('passed');
         }
       });
       this.grid.rowClicked = function(args) {
@@ -195,7 +198,7 @@ define([
 
     totalEntries: function(grid) {
       this.total = grid.collection.state.totalRecords;
-      $(this.ui.totalEntries).html(this.total);
+      $(this.ui.nbTotal).html(this.total);
     },
 
 

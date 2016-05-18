@@ -89,6 +89,10 @@ define([
                         defaultValue: new Date().getDate() + "/" + (new Date().getMonth() + 1) + "/" + new Date().getFullYear()
                     }];
                     break;
+                case "DateTimePickerEditor" :
+                    DataRow['options'].format =  "DD/MM/YYYY";
+                    return DataRow['options']
+                    break;
                 default:
                     return valueOptions = DataRow['options'];
                     break;

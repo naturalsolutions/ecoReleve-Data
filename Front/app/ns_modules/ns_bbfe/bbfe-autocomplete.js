@@ -15,7 +15,12 @@ define([
         events: {
             'hide': "hasChanged"
         },
-        template: '<div><input type="text" id="<%=id%>" value="<%=value%>" data_value="<%=data_value%>" initValue="<%=initValue%>"/></div>',
+        template: '<div>\
+        <div class="input-group">\
+            <span class="input-group-addon <%=iconFont%>"></span>\
+            <input type="text" id="<%=id%>" value="<%=value%>" data_value="<%=data_value%>" initValue="<%=initValue%>"/></div>\
+            </div>\
+        </div>',
         
         initialize: function (options) {
             Form.editors.Base.prototype.initialize.call(this, options);
@@ -25,7 +30,11 @@ define([
             var url = options.schema.options.source;
             var _this = this;
 
-            console.log(this.model.get(this.key));
+            this.iconFont = options.schema.options.iconFont || 'hidden';
+            if (options.schema.editorAttrs && options.schema.editorAttrs.disabled)  {
+                this.iconFont = 'hidden';
+            }
+            
             if (options.schema.options) {
                 if (typeof options.schema.options.source === 'string'){
 
@@ -57,7 +66,6 @@ define([
         },
         
           getValue: function() {
-            console.log('getvalue',this.$el.find('#' + this.id ).attr('data_value') )
            return this.$el.find('#' + this.id ).attr('data_value') ;
           },
 
@@ -77,7 +85,7 @@ define([
                 })
             } 
             var $el = _.template(
-                this.template, { id: this.id,value: value,data_value :_this.model.get(_this.key), initValue:initValue
+                this.template, { id: this.id,value: value,data_value :_this.model.get(_this.key), initValue:initValue,iconFont:_this.iconFont
             });
 
             this.setElement($el);

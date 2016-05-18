@@ -71,10 +71,13 @@ define([
 
     reloadFromNavbar: function(model) {
       this.display(model);
+      this.com.addModule(this.map)
+      this.map.com = this.com;
       this.map.url = config.coreUrl + 'individuals/' + this.indivId  + '?geo=true';
       this.map.updateFromServ();
       Backbone.history.navigate(this.rootUrl + this.indivId, {trigger: false});
     },
+
 
     onRender: function() {
       this.$el.i18n();
@@ -120,7 +123,7 @@ define([
         name: 'StartDate',
         label: 'Start Date',
         editable: false,
-        cell: 'string',
+        cell: 'stringDate',
       },];
       this.grid = new NsGrid({
         pageSize: 20,
@@ -134,12 +137,12 @@ define([
         name: 'StartDate',
         label: 'Start Date',
         editable: false,
-        cell: 'string'
+        cell: 'stringDate'
       },{
         name: 'EndDate',
         label: 'End Date',
         editable: false,
-        cell: 'string'
+        cell: 'stringDate'
       }, {
         name: 'Type',
         label: 'Type',
@@ -174,23 +177,19 @@ define([
         name: 'ID',
         label: 'ID',
         editable: false,
-        renderable: false,
+        renderable: true,
         cell: 'string'
-      },/*{
+      },{
         name: 'Date',
         label: 'date',
         editable: false,
-        cell: 'string'
-      },*/{
+        cell: 'stringDate'
+      },/*{
         name: 'timestamp',
         label: 'date',
         editable: false,
-        cell : Backgrid.Extension.MomentCell.extend({
-          modelInUnixTimestamp: true,
-          displayFormat: "DD/MM/YYYY HH:mm:ss",
-          displayInUTC: false
-        })
-      },{
+        cell : 'stringDate'
+      }*/{
         name: 'LAT',
         label: 'latitude',
         editable: false,
@@ -201,15 +200,57 @@ define([
         editable: false,
         cell: 'string'
       },{
-        name: 'Region',
+        name: 'region',
         label: 'Region',
         editable: false,
         cell: 'string'
       },{
+        name: 'type_',
+        label: 'Type',
+        editable: false,
+        cell: 'string'
+      },{
+        name: 'fieldActivity_Name',
+        label: 'FieldActivity',
+        editable: false,
+        cell: Backgrid.StringCell.extend({
+          render: function () {
+            this.$el.empty();
+            var rawValue = this.model.get(this.column.get("name"));
+            var formattedValue = this.formatter.fromRaw(rawValue, this.model);
+            if (this.model.get('type_')=='station'){
+
+          /*    this.$el.append($('<a>', {
+                  href: 'http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID').replace('sta_',''),
+                  title: formattedValue,
+                  target: '_blank'
+              }).text(formattedValue));*/
+
+
+               this.$el.append('<a target="_blank"' 
+                +'href= "http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID').replace('sta_','')+'">\
+                  '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
+                </a>');
+              this.delegateEvents();
+            }
+            return this;
+        }
+        })
+
+      },{
           editable: true,
           name: 'import',
           label: 'Import',
-          cell: 'select-row',
+          cell: Backgrid.Extension.SelectRowCell.extend({
+            render:function(){
+              this.$el.empty().append('<input tabindex="-1" type="checkbox" />');
+              this.delegateEvents();
+              if (this.model.get('type_')== 'station'){
+                this.$el.addClass('hidden');
+              }
+              return this;
+              }
+          }),
           headerCell: 'select-all'
       }];
 
@@ -271,7 +312,6 @@ define([
         tr = $(e.target).parent().parent();
       }
       id = tr.find('td').first().text();
-      console.log(id);
       this.locationsGrid.interaction('focus', id);
     },
 
@@ -330,7 +370,6 @@ define([
     },
 
     warnDeleteLocations: function() {
-
       var _this = this;
 
       var mds = this.locationsGrid.grid.getSelectedModels();
@@ -354,7 +393,11 @@ define([
 
       var coll = new Backbone.Collection(mds);
 
+      console.log(mds);
+
       var params = coll.pluck('ID');
+
+      console.log(params);
 
       var url = config.coreUrl + 'individuals/' + this.indivId  + '/locations';
       $.ajax({
@@ -364,9 +407,11 @@ define([
         context: this,
       }).done(function(resp) {
         _this.map.updateFromServ();
+        var fullColl = _this.locationsGrid.grid.body.collection.fullCollection;
         for (var i = 0; i < mds.length; i++) {
-          mds[i].collection.remove(mds[i]);
+          fullColl.remove(mds[i]);
         }
+        fullColl.reset(fullColl.models);
       }).fail(function(resp) {
         this.swal(resp, 'error');
       });
@@ -398,14 +443,14 @@ define([
         title: opt.title,
         text: opt.text || '',
         type: type,
-        showCancelButton: false,
+        showCancelButton: true,
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
         closeOnConfirm: true,
       },
       function(isConfirm) {
         //could be better
-        if (callback) {
+        if (isConfirm && callback) {
           callback();
         }
       });

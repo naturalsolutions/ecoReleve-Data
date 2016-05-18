@@ -18,7 +18,7 @@ from time import sleep
 import subprocess , psutil
 from pyramid.security import NO_PERMISSION_REQUIRED
 from datetime import datetime
-from ..Models import Base, dbConfig, DBSession,ArgosGps
+from ..Models import Base, dbConfig, DBSession,ArgosGps,graphDataDate
 from traceback import print_exc
 
 
@@ -58,13 +58,13 @@ def type_unchecked_list(request):
     elif type_ == 'rfid':
         return unchecked_rfid(request)
 
-    selectStmt = select([unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['FK_Sensor'], unchecked.c['StartDate'], unchecked.c['EndDate'],
+    selectStmt = select([unchecked.c['FK_Individual'],unchecked.c['Survey_type'],unchecked.c['FK_ptt'], unchecked.c['FK_Sensor'], unchecked.c['StartDate'], unchecked.c['EndDate'],
 
             func.count().label('nb'), func.max(unchecked.c['date']).label('max_date'),
             func.min(unchecked.c['date']).label('min_date')])
 
     queryStmt = selectStmt.where(unchecked.c['checked'] == 0
-            ).group_by(unchecked.c['FK_Individual'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate'], unchecked.c['FK_Sensor'],
+            ).group_by(unchecked.c['FK_Individual'],unchecked.c['Survey_type'],unchecked.c['FK_ptt'], unchecked.c['StartDate'], unchecked.c['EndDate'], unchecked.c['FK_Sensor'],
             ).order_by(unchecked.c['FK_ptt'].asc())
     data = session.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
@@ -140,13 +140,14 @@ def details_unchecked_indiv(request):
 
 @view_config(route_name = route_prefix+'uncheckedDatas/id_indiv/ptt', renderer = 'json' , request_method = 'POST' )
 def manual_validate(request) :
+    global graphDataDate
     session = request.dbsession
 
     ptt = asInt(request.matchdict['id_ptt'])
     ind_id = asInt(request.matchdict['id_indiv'])
     type_ = request.matchdict['type']
     user = request.authenticated_userid['iss']
-    user = 1
+
     data = json.loads(request.params['data'])
 
     procStockDict = {
@@ -169,6 +170,8 @@ def manual_validate(request) :
             transaction.commit()
 
             stop = time.time()
+            graphDataDate['pendingSensorData'] = None
+            graphDataDate['indivLocationData'] = None
             return { 'inserted' : nb_insert, 'existing' : exist, 'errors' : error}
         else : 
             return error_response(None)
@@ -179,6 +182,7 @@ def manual_validate(request) :
 @view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST' )
 def auto_validation(request):
     session = request.dbsession
+    global graphDataDate
 
     type_ = request.matchdict['type']
     # print ('\n*************** AUTO VALIDATE *************** \n')
@@ -186,7 +190,7 @@ def auto_validation(request):
     freq = param['frequency']
     listToValidate = json.loads(param['toValidate'])
     user = request.authenticated_userid['iss']
-    user = 1 
+
     if freq == 'all' :
         freq = 1
 
@@ -194,33 +198,41 @@ def auto_validation(request):
     Total_exist = 0
     Total_error = 0
 
-    if type_ == 'rfid':
-        for row in listToValidate : 
-            equipID = row['equipID']
-            sensor = row['FK_Sensor']
-            if equipID == 'null' or equipID is None: 
-                equipID = None
-            else :
-                equipID = int(equipID)
-            nb_insert, exist, error = auto_validate_proc_stocRfid(equipID,sensor,freq,user,session)
-            Total_exist += exist
-            Total_nb_insert += nb_insert
-            Total_error += error
-    else:
-        for row in listToValidate : 
-            ind_id = row['FK_Individual']
-            ptt = row['FK_ptt']
+    if listToValidate == 'all':
+        Total_nb_insert,Total_exist,Total_error = auto_validate_ALL_stored_procGSM_Argos(user,type_,freq,session)
+    else :
+        if type_ == 'rfid':
+            for row in listToValidate : 
+                equipID = row['equipID']
+                sensor = row['FK_Sensor']
+                if equipID == 'null' or equipID is None: 
+                    equipID = None
+                else :
+                    equipID = int(equipID)
+                nb_insert, exist, error = auto_validate_proc_stocRfid(equipID,sensor,freq,user,session)
+                session.commit()
+                Total_exist += exist
+                Total_nb_insert += nb_insert
+                Total_error += error
+        else:
+            for row in listToValidate : 
+                ind_id = row['FK_Individual']
+                ptt = row['FK_ptt']
 
-            try :
-                ind_id = int(ind_id)
-            except TypeError:
-                ind_id = None
+                try :
+                    ind_id = int(ind_id)
+                except TypeError:
+                    ind_id = None
 
-            nb_insert, exist, error = auto_validate_stored_procGSM_Argos(ptt,ind_id,1, type_,freq,session)
-            Total_exist += exist
-            Total_nb_insert += nb_insert
-            Total_error += error
+                nb_insert, exist, error = auto_validate_stored_procGSM_Argos(ptt,ind_id,user, type_,freq,session)
+                session.commit()
 
+                Total_exist += exist
+                Total_nb_insert += nb_insert
+                Total_error += error
+
+    graphDataDate['pendingSensorData'] = None
+    graphDataDate['indivLocationData'] = None
     return { 'inserted' : Total_nb_insert, 'existing' : Total_exist, 'errors' : Total_error}
 
 def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq,session):
@@ -262,3 +274,19 @@ def auto_validate_proc_stocRfid(equipID,sensor,freq,user,session):
         nb_insert, exist , error= session.execute(stmt).fetchone()
 
     return nb_insert, exist , error
+
+def auto_validate_ALL_stored_procGSM_Argos(user,type_,freq,session):
+    procStockDict = {
+    'argos': '[sp_auto_validate_ALL_Argos_GPS]',
+    'gsm': '[sp_auto_validate_ALL_GSM]',
+    'rfid' : '[sp_validate_ALL_rfid]'
+    }
+
+    stmt = text(""" DECLARE @nb_insert int , @exist int , @error int;
+    exec """+ dbConfig['data_schema'] + """."""+procStockDict[type_]+""" :user ,:freq , @nb_insert OUTPUT, @exist OUTPUT, @error OUTPUT;
+    SELECT @nb_insert, @exist, @error; """
+    ).bindparams(bindparam('user', user),bindparam('freq', freq))
+    nb_insert, exist , error= session.execute(stmt).fetchone()
+
+    return nb_insert, exist , error
+

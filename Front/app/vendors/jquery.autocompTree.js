@@ -9,6 +9,7 @@
 (function ($) {
   $.fn.autocompTree = function(methodOrOptions) {
     //On définit nos paramètres par défaut
+    var searchAutoComp = null;
     var _self = $(this);
     var defauts =
     {
@@ -61,13 +62,15 @@
       //Fonction s'éxécutant après l'initialisation de l'objet autocompTree
       onInputInitialize: '',
       //Enregistrement de l'item en elle même
-      thisItem: $(this)
+      thisItem: $(this),
+
+      timeout: 200
     };
 
     var methods = {
       init: function(parametres) {
         //Fusion des paramètres envoyer avec les params par defaut
-
+        
         if (parametres) {
           var parametres = $.extend(defauts, parametres);
         };
@@ -121,9 +124,6 @@
             },
             //Permet si l'arbre et en mode filter d'afficher les enfants des termes filtrés -> submatch
             renderNode: function (event, data) {
-
-
-
               var node = data.node;
               if (data.tree.options.hideExpand.isHide) {
                 data.tree.options.hideExpand.nbExpand--;
@@ -179,12 +179,14 @@
 
 
           $me.focus(function () {
+            setTimeout(function(){
             $("div[id^=treeView]").each(function () {
               $(this).css('display', 'none');
             });
             var treeContainer = $("#treeView" + $me.attr("id"));
-            treeContainer.css('display', 'block').css('width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
-            treeContainer.css({top: $(this).outerHeight() + 20 });
+            treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
+            //treeContainer.css('display', 'block').css('border', 'solid 1px').css('z-index', '100');
+            treeContainer.css({top: $me.outerHeight() + 20 });
             //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
             $(document).delegate("body", "click", function (event) {                            
               if (!$(event.target).is("#" + $me.attr("id") + ",span[class^=fancytree], div[id^=treeView], ul")) {
@@ -207,50 +209,60 @@
                 throw ('An error occured during onInputFocus -> ' + e);
               }
             }
-            
+            }, parametres.timeout + 50);
           });
+
           //Fonction de recherche et de filtration
           $me.keyup(function (e) {
             var treeHtml = $("#treeView" + $me.attr("id"));
             var fancytree = treeHtml.fancytree("getTree");
             //Si le nombrte d'élément est < a 100 on oblige l'utilisation d'au moins trois caractère pour des raisons de performances
-            if (fancytree.count() < 100 || $me.val().length >= 3) {
-              treeHtml.find('ul.fancytree-container li').css("padding", "1px 0 0 0");
-              treeHtml.fancytree("getRootNode").visit(function (node) {
-                if (node.span) {
-                  var className = node.span.className;
-                  if (className.indexOf('fancytree-hide') != -1) {
-                    node.setExpanded(false);
-                  }
-                } else {
-                  node.setExpanded(false);
-                }
-              });
-              match = $me.val();
-              var n,
-                match = $me.val();
+              if (searchAutoComp != null) {
+                clearTimeout(searchAutoComp);
+              } 
+              searchAutoComp = setTimeout(function(){
+                    searchAutoComp = null;
+                    if (fancytree.count() < 100 || $me.val().length >= 3) {
+                      console.log('passed');
+                      treeHtml.find('ul.fancytree-container li').css("padding", "1px 0 0 0");
+                      treeHtml.fancytree("getRootNode").visit(function (node) {
+                        if (node.span) {
+                          var className = node.span.className;
+                          if (className.indexOf('fancytree-hide') != -1) {
+                            //?
+                            //node.setExpanded(false);
+                          }
+                        } else {
+                          node.setExpanded(false);
+                        }
+                      });
+                      match = $me.val();
+                      var n,
+                        match = $me.val();
 
-              if (e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === "") {
-                fancytree.clearFilter();
-                treeHtml.fancytree("getRootNode").visit(function (node) {
-                node.setExpanded(false);
-                });
-                return;
-              }
-              n = fancytree.filterNodes(match, false);
-              while (treeHtml.find('.fancytree-submatch:not(.fancytree-expanded)').find('.fancytree-expander').length) {
-                treeHtml.find('.fancytree-submatch:not(.fancytree-expanded)').find('.fancytree-expander').click();
-              }
-              if (treeHtml.find('.fancytree-match').length < 3 && treeHtml.find('.fancytree-match').find('.fancytree-match').length)
-                treeHtml.find('.fancytree-match').find('.fancytree-expander').click()
-              treeHtml.find('ul.fancytree-container li').css("padding", "0px 0 0 0");
-            }
-            if ($me.val().length == 0) {
-              fancytree.clearFilter();
-              treeHtml.fancytree("getRootNode").visit(function (node) {
-                node.setExpanded(false);
-              });
-            }
+                      if (e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === "") {
+                        fancytree.clearFilter();
+                        treeHtml.fancytree("getRootNode").visit(function (node) {
+                        node.setExpanded(false);
+                        });
+                        return;
+                      }
+                      n = fancytree.filterNodes(match, false);
+                      while (treeHtml.find('.fancytree-submatch:not(.fancytree-expanded)').find('.fancytree-expander').length) {
+                        treeHtml.find('.fancytree-submatch:not(.fancytree-expanded)').find('.fancytree-expander').click();
+                      }
+                      if (treeHtml.find('.fancytree-match').length < 3 && treeHtml.find('.fancytree-match').find('.fancytree-match').length)
+                        treeHtml.find('.fancytree-match').find('.fancytree-expander').click()
+                      treeHtml.find('ul.fancytree-container li').css("padding", "0px 0 0 0");
+                    }
+
+                    if ($me.val().length == 0) {
+                      fancytree.clearFilter();
+                      treeHtml.fancytree("getRootNode").visit(function (node) {
+                        node.setExpanded(false);
+                      });
+                    }
+                  },parametres.timeout);
           });
 
           if (parametres.display.isDisplayDifferent) {
@@ -269,6 +281,8 @@
         });
         return _self;
       },
+
+      
       reload: function (source) {
         var tree = $("#treeView" + _self.attr('id')).fancytree('getTree');
         if (source) {

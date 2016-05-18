@@ -151,7 +151,7 @@ class ObjectWithDynProp:
 
             if len(filterField)>0 :
                 filters.append(curConf.GenerateFilter())
-            elif curConf.QueryName is not None:
+            elif curConf.QueryName is not None and curConf.FilterRender != 0:
                 filters.append(curConf.GenerateFilter())
         #### OLD VERSION ####
         # for curProp in self.allProp:
@@ -248,7 +248,6 @@ class ObjectWithDynProp:
                     return
 
             else :
-                print('propriété inconnue ' + nameProp)
                 return
                 # si la propriété dynamique existe déjà et que la valeur à affectée est identique à la valeur existente
                 # => alors on insére pas d'historique car pas de chanegement

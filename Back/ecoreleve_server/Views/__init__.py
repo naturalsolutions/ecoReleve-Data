@@ -4,6 +4,17 @@ from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
 from ..Models import sendLog
 
+def add_cors_headers_response_callback(event):
+    def cors_headers(request, response):
+        response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '1728000',
+        })
+    event.request.add_response_callback(cors_headers)
+
 @view_config(context=Exception, permission = NO_PERMISSION_REQUIRED)
 def error_view(exc, request):
     sendLog(logLevel=5,domaine=3)
@@ -58,9 +69,11 @@ def add_routes(config):
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
     config.add_route('stations', 'ecoReleve-Core/stations/')
+    config.add_route('stations/export', 'ecoReleve-Core/stations/export')
     #config.add_route('stations/fileImport', 'ecoReleve-Core/stations/fileImport/{id}') 
     config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
-    config.add_route('stations/action', 'ecoReleve-Core/stations/{action}') 
+    config.add_route('stations/action', 'ecoReleve-Core/stations/{action}')
+
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Stations/Protocols #####
@@ -105,6 +118,7 @@ def add_routes(config):
     ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/') 
     config.add_route('individuals/insert', 'ecoReleve-Core/individuals')
+    config.add_route('individuals/export', 'ecoReleve-Core/individuals/export')
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/history', 'ecoReleve-Core/individuals/{id}/history',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/equipment', 'ecoReleve-Core/individuals/{id}/equipment',custom_predicates = (integers('id'),))
@@ -119,10 +133,13 @@ def add_routes(config):
     ##### MonitoredSite #####
     config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites/') 
     config.add_route('monitoredSites/', 'ecoReleve-Core/monitoredSites') 
+    config.add_route('monitoredSites/export', 'ecoReleve-Core/monitoredSites/export') 
     config.add_route('monitoredSites/id', 'ecoReleve-Core/monitoredSites/{id}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/id/history', 'ecoReleve-Core/monitoredSites/{id}/history/',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/station', 'ecoReleve-Core/monitoredSites/{id}/stations',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/id/equipment', 'ecoReleve-Core/monitoredSites/{id}/equipment',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/id/history/action', 'ecoReleve-Core/monitoredSites/{id}/history/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/station/action', 'ecoReleve-Core/monitoredSites/{id}/stations/{action}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/action', 'ecoReleve-Core/monitoredSites/{action}') 
 
