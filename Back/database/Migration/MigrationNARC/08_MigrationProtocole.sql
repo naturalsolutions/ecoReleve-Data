@@ -10,6 +10,11 @@ select S.*
 		   ORDER BY S.LAT,S.LON,S.[Date]
 
 
+/* Station date vide */
+select S.*
+		   from [NARC_eReleveData].dbo.TStations S 
+		  WHERE S.DATE IS NULL
+
 
 SET IDENTITY_INSERT  [Station] ON
 
@@ -43,7 +48,7 @@ SET IDENTITY_INSERT  [Station] ON
 		   WHERe NOT EXISTS (select * from Station S2 where S2.LAT = S.LAT AND S2.LON = S.LON AND s2.LAT = S.LAT and S.[DATE] = S2.StationDate)
 		   AND (S.FieldActivity_ID != 27 or S.FieldActivity_ID IS NULL)
 		   AND NOT EXISTS (SELECT * FROM [NARC_eReleveData].dbo.TStations S2 where S.TSta_PK_ID <> s2.TSta_PK_ID and isnull(S2.LAT,-1) =isnull(S.LAT,-1) and isnull(S2.LON,-1) =isnull(S.LON,-1) and S.[DATE] = S2.[DATE] AND S2.FieldActivity_ID != 27)
-		   
+		   AND S.DATE IS NOT NULL
 	SET IDENTITY_INSERT  [Station] OFF	   
 
 ---------------------------------------DynProp Station Value -----------------------------------------------
