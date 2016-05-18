@@ -1,16 +1,16 @@
+USE [EcoReleve_Export_NARC]
+GO
 
-
-/****** Object:  StoredProcedure [dbo].[pr_GIS_AllStations_PTTBirds_With_FirstRelCapData]    Script Date: 27/04/2016 12:08:34 ******/
+/****** Object:  StoredProcedure [dbo].[pr_GIS_AllStations_PTTBirds_With_FirstRelCapData]    Script Date: 27/04/2016 08:18:39 ******/
 DROP PROCEDURE [dbo].[pr_GIS_AllStations_PTTBirds_With_FirstRelCapData]
 GO
 
-/****** Object:  StoredProcedure [dbo].[pr_GIS_AllStations_PTTBirds_With_FirstRelCapData]    Script Date: 27/04/2016 12:08:34 ******/
+/****** Object:  StoredProcedure [dbo].[pr_GIS_AllStations_PTTBirds_With_FirstRelCapData]    Script Date: 27/04/2016 08:18:39 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
-
 
 
 CREATE PROCEDURE [dbo].[pr_GIS_AllStations_PTTBirds_With_FirstRelCapData] 
@@ -92,26 +92,21 @@ BEGIN
 	JOIN TIndividualFirstStation F on F.FK_Individual = I.ID and F.FirstStation_ID IS NOT NULL
 	JOIN TStation FS ON f.FirstStation_ID = FS.ID
 	JOIN  EcoReleve_NARC.dbo.Region R ON FS.FK_Region = R.ID
-	JOIN VAllIndividualLocation L on L.FK_Individual = i.id
-	LEFT JOIN  EcoReleve_NARC.dbo.Equipment E on E.FK_Individual = I.ID and e.StartDate <= l.stationDate and e.deploy =1
-								and not exists (select * 
-											from EcoReleve_NARC.dbo.Equipment E2 
-											where E2.FK_Individual = e.FK_Individual and E2.StartDate > e.StartDate and e2.StartDate < l.stationDate and e2.FK_Sensor in (select id from TSensor where FK_SensorType in (1,2)) 
-											)
-								and FK_Sensor in (select id from TSensor where FK_SensorType in (1,2) and E.deploy =1)
-	LEFT JOIN TSensor S on S.ID = E.FK_Sensor 
 	JOIN EcoReleve_NARC.dbo.Equipment EN ON EN.FK_Individual = I.ID and EN.FK_Sensor in (select id from TSensor where FK_SensorType  in (1,2) )
 											and not exists (select * 
 											from EcoReleve_NARC.dbo.Equipment E3
 											where E3.FK_Individual = EN.FK_Individual and E3.StartDate > en.StartDate and e3.FK_Sensor in (select id from TSensor where FK_SensorType in (1,2)) 
 											)
-											and not exists (select * 
-											from EcoReleve_NARC.dbo.Equipment E4
-											where E4.FK_Individual = EN.FK_Individual and E4.StartDate = en.StartDate 
-											and E4.FK_Sensor in (select id from TSensor where FK_SensorType in (1,2) 
-											and e4.Deploy =1 and EN.deploy = 0 and E4.ID <> EN.ID) 
-											)
 	JOIN TSensor SN ON SN.ID = EN.FK_Sensor 
+	JOIN VAllIndividualLocation L on L.FK_Individual = i.id 
+	LEFT JOIN  EcoReleve_NARC.dbo.Equipment E on E.FK_Individual = I.ID and e.StartDate <= l.stationDate 
+								and not exists (select * 
+											from EcoReleve_NARC.dbo.Equipment E2 
+											where E2.FK_Individual = e.FK_Individual and E2.StartDate > e.StartDate and e2.StartDate < l.stationDate and e2.FK_Sensor in (select id from TSensor where FK_SensorType in (1,2)) 
+											)
+								and E.FK_Sensor in (select id from TSensor where FK_SensorType in (1,2))
+	LEFT JOIN TSensor S on S.ID = E.FK_Sensor 
+	
 	LEFT JOIN TStation st on F.FirstStation_ID = st.ID
 	JOIN EcoReleve_NARC.dbo.IndividualDynProp DPMS ON DPMS.Name = 'Monitoring_Status'
 	LEFT JOIN  EcoReleve_NARC.dbo.IndividualDynPropValue VMS on VMS.FK_Individual = i.ID and VMS.StartDate <= l.StationDate and VMS.FK_IndividualDynProp = DPMS.ID
@@ -130,6 +125,7 @@ BEGIN
 	LEFT JOIN #ThesaurusTraduction ThIdSt ON ThIdSt.FullPath = i.Status_  and ThIdSt.ObjectProp = 'Status_'
 	LEFT JOIN  #PIndividualDeath StiDe ON StiDe.FK_Individual = I.iD and StiDe.Nb = 1
 	WHERE L.stationDate <= isnull(StiDe.stationdate,getdate()+1)
+
 	CREATE INDEX IX_GIS_AllStations_PTTBirds_With_FirstRelCapData ON TmpGIS_AllStations_PTTBirds_With_FirstRelCapData(indID,staDate)
 
 		IF object_id('GIS_AllStations_PTTBirds_With_FirstRelCapData') IS NOT NULL 
@@ -138,7 +134,6 @@ BEGIN
 		exec sp_rename 'TmpGIS_AllStations_PTTBirds_With_FirstRelCapData','GIS_AllStations_PTTBirds_With_FirstRelCapData'
 
 END
-
 
 
 GO
