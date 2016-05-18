@@ -5,6 +5,7 @@ import configparser
 from sqlalchemy import event, select,text
 from sqlalchemy.exc import TimeoutError
 from pyramid import threadlocal
+import pandas as pd
 
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
@@ -38,6 +39,7 @@ DynPropNames = {
 
 thesaurusDictTraduction = {}
 invertedThesaurusDict = {'en':{},'fr':{}}
+userOAuthDict = {}
 
 def loadThesaurusTrad(config):
     session = config.registry.dbmaker()
@@ -57,6 +59,34 @@ def loadThesaurusTrad(config):
         invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
     session.close()
 
+def loadUserRole(config):
+    session = config.registry.dbmaker()
+    global userOAuthDict
+    query = text("""SELECT
+      [TAut_FK_TUseID] as userID
+      ,[TAut_FK_TRolID] as role
+  FROM [SECURITE].[dbo].[TAutorisations]
+  where TAut_FK_TInsID = (SELECT TOP 1 [TIns_PK_ID]
+  FROM [SECURITE].[dbo].[TInstance]
+  where TIns_Theme = 'ecoreleve')""")
+
+    results = session.execute(query).fetchall()
+    userOAuthDict = pd.DataFrame.from_records(results
+            ,columns=['user_id','role_id'])
+
+
+USERS = {'editor':'editor',
+          'viewer':'viewer',
+          'admin':'admin'}
+GROUPS = {'1':['group:viewers'],
+'3':['group:editors'],
+'4':['group:admins']}
+
+def groupfinder(userid, request):
+    if userid in USERS:
+        return GROUPS.get(4, [])
+    # for row in results:
+    #     userOAuthDict[row['userID']] = row['role']
 
 def cache_callback(request,session):
             if isinstance(request.exception,TimeoutError):

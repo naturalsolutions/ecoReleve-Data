@@ -23,13 +23,14 @@ from .Models import (
     Observation,
     Sensor,
     db,
-    loadThesaurusTrad
+    loadThesaurusTrad,
+    loadUserRole,
+    groupfinder
     )
 from .Views import add_routes
 
 from .pyramid_jwtauth import (
-    JWTAuthenticationPolicy,
-    includeme
+    JWTAuthenticationPolicy
     )
 from pyramid.events import NewRequest
 from sqlalchemy.orm import sessionmaker,scoped_session
@@ -58,6 +59,26 @@ def time_adapter(obj, request):
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
     return float(obj)
+
+def includeme(config):
+    """Install JWTAuthenticationPolicy into the provided configurator.
+
+    This function provides an easy way to install JWT Access Authentication
+    into your pyramid application.  Loads a JWTAuthenticationPolicy from the
+    deployment settings and installs it into the configurator.
+    """
+    # Hook up a default AuthorizationPolicy.
+    # ACLAuthorizationPolicy is usually what you want.
+    # If the app configures one explicitly then this will get overridden.
+    # In auto-commit mode this needs to be set before adding an authn policy.
+    authz_policy = ACLAuthorizationPolicy()
+    config.set_authorization_policy(authz_policy)
+
+    myJWTAuthenticationPolicy = JWTAuthenticationPolicy (find_groups = groupfinder )
+    # Build a JWTAuthenticationPolicy from the deployment settings.
+    settings = config.get_settings()
+    authn_policy = JWTAuthenticationPolicy.from_settings(master_secret = "test")
+    config.set_authentication_policy(authn_policy)
 
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
@@ -111,12 +132,15 @@ def main(global_config, **settings):
     config.add_renderer('pdf', PDFrenderer)
     config.add_renderer('gpx', GPXRenderer)
 
+    ## include security config from jwt __init__.py
     includeme(config)
     config.set_root_factory(SecurityRoot)
 
     loadThesaurusTrad(config)
+    loadUserRole(config)
     # Set the default permission level to 'read'
     config.set_default_permission('read')
+    print(config.__dict__)
     add_routes(config)
     config.scan()
     return config.make_wsgi_app()
