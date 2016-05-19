@@ -66,12 +66,12 @@ define([
           var id = row.model.get('ID');
           var unicName = row.model.get('UnicIdentifier');
           _this.currentRow.model.set({unicSensorName: unicName});
-          this.setValue(id);
+          this.setValue(id,unicName);
         },
         getValue: function() {
         },
-        setValue: function(value) {
-          _this.currentRow.model.set({unicSensorName: value});
+        setValue: function(value,unicName) {
+          _this.currentRow.model.set({unicSensorName: unicName});
           _this.currentRow.model.set({FK_Sensor: value});
           this.hidePicker();
         },

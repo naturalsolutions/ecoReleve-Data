@@ -1,0 +1,17 @@
+
+update f set displayClass = NULL, EditClass = NULL, FieldSizeDisplay = 4, FieldSizeEdit = 4 
+FROM ModuleForms  f
+WHERE module_id = 9 and Name = 'ID'
+
+
+update f set Required = 1 
+FROM ModuleForms  f
+WHERE module_id = 16 and Name = 'UnicIdentifier'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('55_Up_CONF_form_Sensor_Indiv',GETDATE(),(SELECT db_name()))
+
+
+GO

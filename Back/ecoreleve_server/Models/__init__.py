@@ -6,12 +6,19 @@ from sqlalchemy import event, select,text
 from sqlalchemy.exc import TimeoutError
 from pyramid import threadlocal
 import pandas as pd
+import datetime
 
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
 print(AppConfig['app:main']['sensor_schema'])
 ### Create a database session : one for the whole application
 #DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+
+pendingSensorData = []
+indivLocationData = []
+stationData = []
+graphDataDate = {'indivLocationData' : None,'pendingSensorData' : None}
+
 
 DBSession = None
 Base = declarative_base()

@@ -39,6 +39,13 @@ define([
       this.picker = options.picker;
 
       this.data = options.data;
+      var curURL = window.location.href.split('stations/')[1];
+      var stationID = curURL.split('/')[0];
+      if (this.data){
+        this.data['stationID'] = stationID;
+      } else {
+        this.data = {'stationID':stationID};
+      }
     },
 
     onShow: function() {

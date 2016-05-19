@@ -10,7 +10,8 @@ from ..Models import (
     Equipment,
     IndividualList,
     Base,
-    IndivLocationList
+    IndivLocationList,
+    Station
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -264,15 +265,21 @@ def insertOneNewIndiv (request) :
     session = request.dbsession
     session.autoflush = False # if set True create automatically a new indiv  = not what we want 
     data = {}
+    startDate = None 
+
     for items , value in request.json_body.items() :
         data[items] = value
     existingIndivID = None
+
+    if 'stationID' in data:
+        curSta = session.query(Station).get(data['stationID'])
+        startDate=curSta.StationDate
 
     indivType = int(data['FK_IndividualType'])
     newIndiv = Individual(FK_IndividualType = indivType , creationDate = datetime.now(),Original_ID = '0')
     # newIndiv.IndividualType = session.execute(([IndividualType.ID]).where(IndividualType.ID==indivType)).fetchone()
     newIndiv.init_on_load()
-    newIndiv.UpdateFromJson(data)
+    newIndiv.UpdateFromJson(data,startDate=startDate)
 
     if indivType == 2:
         existingIndivID = checkExisting(newIndiv)
@@ -291,15 +298,15 @@ def insertOneNewIndiv (request) :
 def checkExisting(indiv):
     # session = threadlocal.get_current_registry().dbmaker.session_factory()
     session = threadlocal.get_current_registry().dbmaker()
-    indivData = indiv.GetFlatObject()
+    indivData = indiv.PropDynValuesOfNow
 
-    del indivData['creationDate']
+    # del indivData['creationDate']
     for key in indivData:
         if indivData[key] is None: 
             indivData[key] = 'null'
     
     searchInfo = {'criteria':[{'Column':key,'Operator':'is','Value':val} for key,val in indivData.items()],'order_by':['ID:asc']}
-    # print(searchInfo['criteria'])
+ 
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
@@ -431,8 +438,6 @@ def delIndivLocationList(request):
     session = request.dbsession
 
     IdList = json.loads(request.params['IDs'])
-
-    print(IdList)
     session.query(Individual_Location).filter(Individual_Location.ID.in_(IdList)).delete(synchronize_session=False)
 
 
