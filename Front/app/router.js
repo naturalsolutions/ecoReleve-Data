@@ -1,4 +1,3 @@
-
 define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
   function($, Marionette, Backbone, config) {
 
@@ -57,9 +56,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       }).done(function() {
         callback.apply(this, args);
       }).fail(function(msg) {
-        if (msg.status === 502 || msg.status === 403) {
+        /*if (msg.status === 502 || msg.status === 403) {
           document.location.href = config.portalUrl;
-        }
+        }*/
       });
     },
 
