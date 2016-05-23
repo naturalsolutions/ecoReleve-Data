@@ -59,30 +59,7 @@ define([
       this.getReleaseMethod();
       var _this = this;
 
-      
-      //todo: fix
-      var MySensorPicker = ObjectPicker.extend({
-        rowClicked: function(row) {
-          var id = row.model.get('ID');
-          var unicName = row.model.get('UnicIdentifier');
-          _this.currentRow.model.set({unicSensorName: unicName});
-          this.setValue(id,unicName);
-        },
-        getValue: function() {
-        },
-        setValue: function(value,unicName) {
-          _this.currentRow.model.set({unicSensorName: unicName});
-          _this.currentRow.model.set({FK_Sensor: value});
-          this.hidePicker();
-        },
-      });
-      this.sensorPicker = new MySensorPicker({
-        key : 'FK_Sensor',
-        schema: {
-          title : 'sensors',
-        }
-      });
-      this.sensorPicker.render();
+      this.sensorPicker = null;
 
       this.initGrid();
     },
@@ -250,6 +227,31 @@ define([
     },
 
     addSensor: function() {
+      if (!this.sensorPicker) {
+            var MySensorPicker = ObjectPicker.extend({
+            rowClicked: function(row) {
+              var id = row.model.get('ID');
+              var unicName = row.model.get('UnicIdentifier');
+              _this.currentRow.model.set({unicSensorName: unicName});
+              this.setValue(id,unicName);
+            },
+            getValue: function() {
+            },
+            setValue: function(value,unicName) {
+              _this.currentRow.model.set({unicSensorName: unicName});
+              _this.currentRow.model.set({FK_Sensor: value});
+              this.hidePicker();
+            },
+          });
+          this.sensorPicker = new MySensorPicker({
+            key : 'FK_Sensor',
+            schema: {
+              title : 'sensors',
+            }
+          });
+          this.sensorPicker.render();
+
+      }
       this.modal.show(this.sensorPicker);
       this.sensorPicker.showPicker();
     },
