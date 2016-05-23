@@ -53,7 +53,7 @@ define([
       myDropzone.addFile = function(file) {
 
         var ext = file.name.split('.');
-        ext = String(ext[ext.length - 1]); // get extensions file
+        ext = String(ext[ext.length - 1]).toLowerCase(); // get extensions file
         if ( ! (ext === 'jpeg' || ext === 'jpg' ) ) {
           Swal(
           {
