@@ -103,20 +103,22 @@ define([
 
             var size=0;
 
-            for (var key in model.schema) {
-               var col = model.schema[key];
-               //sucks
-               var test = true;
-               if(col.fieldClass){
-                test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
-                col.fieldClass += ' grid-field';
-               }
+            var odrFields = this.options.schema.fieldsets[0].fields;
+            for (var i = odrFields.length - 1; i >= 0; i--) {
+                var col = model.schema[odrFields[i]];
+                //sucks
+                var test = true;
+                if(col.fieldClass){
+                 test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
+                 col.fieldClass += ' grid-field';
+                }
 
-               if(col.title && test) {
-                this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
-                size++;
-               }
+                if(col.title && test) {
+                 this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
+                 size++;
+                }
             }
+
             size = size*150;
             size += 35;
 

@@ -24,6 +24,7 @@ from ..GenericObjets.FrontModules import FrontModules,ModuleForms
 from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
+from ..utils.parseValue import isNumeric
 
 #--------------------------------------------------------------------------
 class Observation(Base,ObjectWithDynProp):
@@ -38,12 +39,13 @@ class Observation(Base,ObjectWithDynProp):
     FK_Individual = Column(Integer,ForeignKey('Individual.ID'))
 
     Observation_children = relationship("Observation", cascade="all, delete-orphan")
+    SubObservation_children = relationship("ObservationDynPropSubValue", cascade="all, delete-orphan")
     Equipment = relationship("Equipment", backref = 'Observation',cascade = "all, delete-orphan", uselist=False)
     Station = relationship("Station", back_populates = 'Observations')
     Individual = relationship('Individual')
 
     def __init__(self,**kwargs):
-        super().__init__(**kwargs)
+        Base.__init__(self,**kwargs)
         ObjectWithDynProp.__init__(self)
 
     @orm.reconstructor
@@ -73,9 +75,6 @@ class Observation(Base,ObjectWithDynProp):
         except :
             return datetime.now()
 
-    def UpdateFromJson(self,DTOObject,startDate = None):
-        super().UpdateFromJson(DTOObject,startDate)
-        self.updateLinkedField()
 
     @hybrid_property
     def Observation_childrens(self):
@@ -104,19 +103,77 @@ class Observation(Base,ObjectWithDynProp):
     def Observation_childrens(self,listOfSubProtocols):
         listObs = []
         if len(listOfSubProtocols) !=0 :
+
             for curData in listOfSubProtocols :
+                if self.GetType().Name == 'Transects' :
+                    print(self.GetType().Name)
+
+                    subDictList = []
+                    for k,v in curData.items():
+                        subDict = {}
+                        if isNumeric(k):
+                            newRow = {k:v}
+                            subDict['FieldName'] = k
+                            subDict['valeur'] = v
+                            # del curData[k]
+                            subDictList.append(subDict)
+                    curData['listOfSubObs'] = subDictList
+
                 if 'ID' in curData :
                     subObs = list(filter(lambda x : x.ID==curData['ID'],self.Observation_children))[0]
                     subObs.LoadNowValues()
+                    print(curData)
                 else :
-                    subObs = Observation(FK_ProtocoleType = curData['FK_ProtocoleType']
-                        ,Parent_Observation=self.ID,FK_Station=self.FK_Station)
+                    subObs = Observation(FK_ProtocoleType =  curData['FK_ProtocoleType'] ,Parent_Observation=self.ID,FK_Station=self.FK_Station)
                     subObs.init_on_load()
+
                 if subObs is not None:
                     subObs.UpdateFromJson(curData)
                     listObs.append(subObs)
             # self.deleteSubObs(listObs)
         self.Observation_children = listObs
+
+    @hybrid_property
+    def SubObservation_childrens(self):
+        if self.SubObservation_children is not None or self.SubObservation_children != []:
+            for row in self.SubObservation_children:
+                self.PropDynValuesOfNow[row['FieldName']] = row['ValueNumeric']
+            return 
+        else:
+            return 
+
+    @SubObservation_childrens.setter
+    def SubObservation_childrens(self,listOfSubObs):
+        listSubValues = []
+        # print(self.GetType())
+    
+        print('in SubObservation_childrens')
+        print(listOfSubObs)
+        if len(listOfSubObs)>0 :
+            for curData in listOfSubObs :
+                print('in for subVal')
+                if 'FK_Observation' in curData :
+                    subObsValue = list(filter(lambda x : x.FK_Observation==curData['FK_Observation'] and x.FieldName == curData['FieldName']
+                        ,self.SubObservation_children))[0]
+                else :
+                    print('new SubVal')
+
+                    subObsValue = ObservationDynPropSubValue(FK_Observation = self.ID)
+
+                if subObsValue is not None:
+                    subObsValue.ValueNumeric = curData['valeur']
+                    subObsValue.FieldName = curData['FieldName']
+                    listSubValues.append(subObsValue)
+            # self.deleteSubObs(listSubValues)
+        self.SubObservation_children = listSubValues
+
+    def UpdateFromJson(self,DTOObject,startDate = None):
+        ObjectWithDynProp.UpdateFromJson(self,DTOObject,startDate)
+        if 'listOfSubObs' in DTOObject :
+            print('go to subosssssss')
+            print(DTOObject['listOfSubObs'])
+            self.SubObservation_childrens(DTOObject['listOfSubObs'])
+        self.updateLinkedField()
 
     def GetFlatObject(self,schema=None):
         result = super().GetFlatObject()
@@ -179,6 +236,16 @@ class ProtocoleType(Base,ObjectTypeWithDynProp):
     ProtocoleType_ObservationDynProps = relationship('ProtocoleType_ObservationDynProp',backref='ProtocoleType')
     Observations = relationship('Observation',backref='ProtocoleType')
 
+    # def AddDynamicPropInSchemaDTO(self,SchemaDTO,FrontModules,DisplayMode) :
+    #     ObjectTypeWithDynProp.AddDynamicPropInSchemaDTO(self,SchemaDTO,FrontModules,DisplayMode)
+    #     print(self.Status)
+    #     if self.Status == 8:
+    #         print('inaddDYnpropSHEMA')
+    #         Editable = (DisplayMode.lower()  == 'edit')
+    #         Field = self.ObjContext.query(ModuleForms).filter(ModuleForms.InputType == 'GridRanged').first()
+
+    #         SchemaDTO.update(Field.GetDTOFromConf(Editable))
+
 
 #--------------------------------------------------------------------------
 class ProtocoleType_ObservationDynProp(Base):
@@ -189,4 +256,14 @@ class ProtocoleType_ObservationDynProp(Base):
     Required = Column(Integer,nullable=False)
     FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
     FK_ObservationDynProp = Column(Integer, ForeignKey('ObservationDynProp.ID'))
+
+
+class ObservationDynPropSubValue (Base):
+
+    __tablename__ = 'ObservationDynPropSubValue'
+
+    ID = Column(Integer,Sequence('ObservationDynPropSubValue__id_seq'), primary_key=True)
+    FieldName = Column(String(250))
+    ValueNumeric =  Column(Numeric(30,10))
+    FK_Observation = Column(Integer, ForeignKey('Observation.ID'))
 

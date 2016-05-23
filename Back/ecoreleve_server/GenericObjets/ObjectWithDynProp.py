@@ -434,7 +434,7 @@ class ObjectWithDynProp:
         defaultValues = {}
         recursive_level = resultat['recursive_level']
         for key, value in resultat['schema'].items():
-            if value['defaultValue'] is not None:
+            if 'defaultValue' in value and value['defaultValue'] is not None:
                 defaultValues[key] = value['defaultValue']
             if 'subschema' in value:
                 temp = {'schema':value['subschema'],'defaultValues':{}, 'recursive_level':recursive_level+1}
