@@ -1,0 +1,86 @@
+
+IF EXISTS (SELECT name FROM master.sys.databases WHERE name = N'EcoReleve_NARC')
+USE EcoReleve_NARC
+/****** Update Individual DynProp   ******/
+update v SET ValueString = 
+
+ CASE 
+	WHEN ValueString ='left leg in bottom' or ValueString = 'left leg tarsus' THEN 'patte gauche tarse'
+	WHEN ValueString = 'left leg in top' or ValueString ='left leg top'  THEN 'patte gauche tibia'
+	WHEN ValueString = 'right leg in top' THEN 'patte droite tibia'
+	WHEN ValueString = 'White with Red' THEN 'blanc avec rouge'
+	ELSE ValueString END
+
+from IndividualDynPropValue v
+join IndividualDynProp dp on dp.ID = v.FK_IndividualDynProp and dp.Name in ('Breeding_Ring_Position',
+'Mark_Position_2',
+'Mark_Position_1',
+'Mark_Position_2',
+'Mark_Position_1',
+'Mark_Color_1')
+WHERE ValueString in ('left leg in bottom',
+'left leg in top',
+'left leg tarsus',
+'left leg top',
+'right leg in top',
+'White with Red'
+)
+
+
+update v SET ValueString = 'Suivi'
+from IndividualDynPropValue v
+join IndividualDynProp dp on dp.ID = v.FK_IndividualDynProp and dp.Name = 'Monitoring_Status'
+WHERE ValueString = '1032587'
+
+
+/**** Site  ***/ 
+UPDATE m SET Category = 
+	CASE WHEN Category = 'Circular Observation point' THEN 'CO'
+	WHEN Category = 'Standardized Circular Observation Point' THEN 'SCO' 
+	ELSE Category END
+FROM MonitoredSite m 
+WHERE Category in ('Circular Observation point','Standardized Circular Observation Point')
+
+
+/**** Sensors  ***/ 
+UPDATE v SET ValueString =
+	CASE WHEN ValueString = 'come back after service' THEN 'événement d''entrée en stock>retour après service'
+	WHEN ValueString ='end of service without come back' THEN 'événement de sortie définitive de stock>fin de service sans retour'
+	WHEN ValueString = 'out of Argos program' or ValueString = 'removed of Argos programme' THEN 'événement de sortie définitive de stock>sortie de programme Argos'
+	WHEN ValueString = 'putting into service' THEN 'événement de sortie provisoire de stock>mise en service'
+	WHEN ValueString = 'usine' THEN 'événement antérieur à l''entrée en stock>commandé' 
+	ELSE ValueString END
+
+FROM SensorDynPropValue v 
+JOIN SensorDynProp dp ON v.FK_SensorDynProp = dp.ID and dp.Name = 'Status'
+WHERE ValueString in ('come back after service',
+'end of service without come back',
+'out of Argos program',
+'putting into service',
+'removed of Argos programme',
+'usine')
+
+/***** Observation ***/ 
+
+
+UPDATE v SET ValueString =
+	CASE WHEN ValueString ='capture' THEN 'Méthodes de capture>indéterminé'
+	WHEN ValueString ='asphalt or concrete surfaces' THEN 'constructions, installations industrielles et infrastructures de transport>infrastructures de transport>infrastructures goudronnées ou bétonnées'
+	WHEN ValueString = 'perched' THEN 'immobile>perché'
+	ELSE ValueString END
+
+FROM ObservationDynPropValue v 
+JOIN ObservationDynProp dp ON v.FK_ObservationDynProp = dp.ID 
+	and dp.Name in('Name_Capture_Method',
+	'habitat',
+	'posture')
+WHERE ValueString in ('capture',
+'asphalt or concrete surfaces',
+'perched')
+ 
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('62_update_Missing_thesaurus',GETDATE(),(SELECT db_name()))
+
+
+GO
