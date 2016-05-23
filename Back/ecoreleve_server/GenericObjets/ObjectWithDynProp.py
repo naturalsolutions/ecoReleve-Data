@@ -248,7 +248,6 @@ class ObjectWithDynProp:
                     return
 
             else :
-                print('propriété inconnue ' + nameProp)
                 return
                 # si la propriété dynamique existe déjà et que la valeur à affectée est identique à la valeur existente
                 # => alors on insére pas d'historique car pas de chanegement

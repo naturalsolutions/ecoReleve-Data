@@ -128,6 +128,10 @@ def searchIndiv(request):
 def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()
+
+    if 'StationID' not in data:
+        return 
+
     sta_id = int(data['StationID'])
     indivListFromData = json.loads(data['IndividualList'])
     releaseMethod = data['releaseMethod']
@@ -216,7 +220,7 @@ def releasePost(request):
                 indiv['taxon'] = curIndiv.Species
                 del indiv['Species']
                 pass
-            curIndiv.UpdateFromJson(indiv)
+            curIndiv.UpdateFromJson(indiv,startDate = curStation.StationDate)
 
             binList.append(MoF_AoJ(indiv))
             for k in indiv.keys():
@@ -236,15 +240,15 @@ def releasePost(request):
             except: 
                 pass
             curVertebrateInd = getnewObs(vertebrateIndID)
-            curVertebrateInd.UpdateFromJson(indiv)
+            curVertebrateInd.UpdateFromJson(indiv,startDate = curStation.StationDate)
             vertebrateIndList.append(curVertebrateInd)
 
             curBiometry = getnewObs(biometryID)
-            curBiometry.UpdateFromJson(indiv)
+            curBiometry.UpdateFromJson(indiv,startDate = curStation.StationDate)
             biometryList.append(curBiometry)
 
             curReleaseInd = getnewObs(releaseIndID)
-            curReleaseInd.UpdateFromJson(indiv)
+            curReleaseInd.UpdateFromJson(indiv,startDate = curStation.StationDate)
             releaseIndList.append(curReleaseInd)
 
             try:
@@ -261,7 +265,7 @@ def releasePost(request):
                 'Monitoring_Status' : 'Suivi',
                 'Sensor_Status': 'événement de sortie provisoire de stock>mise en service'
                 }
-                curEquipmentInd.UpdateFromJson(equipInfo)
+                curEquipmentInd.UpdateFromJson(equipInfo,startDate = curStation.StationDate)
                 curEquipmentInd.Station = curStation
                 equipmentIndList.append(curEquipmentInd)
             except Exception as e:

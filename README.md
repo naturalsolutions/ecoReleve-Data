@@ -119,7 +119,7 @@ Thank you!
 
 ## Demo
 
-http://92.222.217.165/ecoreleve/
+http://demo.ecoreleve.com
 
 ## Commercial Support
 
