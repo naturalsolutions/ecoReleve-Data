@@ -20,16 +20,19 @@ from datetime import datetime
 from .argosImport import uploadFileArgos
 from .GSMimport import uploadFilesGSM
 from .RFIDimport import uploadFileRFID
+from .CamTrapimport import uploadFileCamTrap
 
 route_prefix = 'sensors/'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST')
 def uploadFile(request):
+    print ("######################################################################################")
     type_= request.matchdict['type']
     dictFuncImport={
     'argos': uploadFileArgos,
     'gsm':uploadFilesGSM,
-    'rfid':uploadFileRFID
+    'rfid':uploadFileRFID,
+    'camtrap':uploadFileCamTrap
     }
-    return dictFuncImport[type_](request) 
+    return dictFuncImport[type_](request)
