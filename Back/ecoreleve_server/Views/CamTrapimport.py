@@ -22,8 +22,8 @@ from ..Models import CamTrap
 # ------------------------------------------------------------------------------------------------------------------------- #
 def uploadFileCamTrap(request):
 
-    print ( dbConfig['camTrap']['path'] )
-    pathPrefix = 'D:\camtrap\images'
+    #print ( dbConfig['camTrap']['path'] )
+    pathPrefix = dbConfig['camTrap']['path']
     session = request.dbsession
 
     response = 'success'
