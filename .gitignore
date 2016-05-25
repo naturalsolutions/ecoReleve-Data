@@ -4,6 +4,8 @@ Front/build/*
 **/*.css
 **/*.css.map
 
+Front/nsCorejs/**
+
 
 Front/externalModules/*
 

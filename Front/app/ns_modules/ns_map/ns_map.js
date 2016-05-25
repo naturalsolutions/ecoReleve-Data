@@ -62,7 +62,7 @@ define([
 
     this.elem = options.element || 'map';
     this.zoom = config.mapZoom;
-    this.disableClustring = options.disableClustring || 18;
+    this.disableClustring = options.disableClustring || 15;
     this.bbox = options.bbox || false;
     this.area = options.area || false;
     this.cluster = options.cluster || false;
@@ -667,8 +667,7 @@ define([
 
       $(this.lastFocused._icon).addClass('focus');
 
-      //_this.map.setView(center);
-      _this.map.setView(center, zoom);
+      _this.map.setView(center, this.disableClustring);
 
     },
 
