@@ -11,6 +11,9 @@ from pyramid.renderers import JSON
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
+import os,sys
+import errno
+
 from .controllers.security import SecurityRoot, role_loader
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
@@ -36,14 +39,14 @@ from sqlalchemy.orm import sessionmaker,scoped_session
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects."""
-    try: 
+    try:
         return obj.strftime ('%d/%m/%Y %H:%M:%S')
     except :
         return obj.strftime ('%d/%m/%Y')
 
 def date_adapter(obj, request):
     """Json adapter for datetime objects."""
-    try: 
+    try:
         return obj.strftime ('%d/%m/%Y')
     except :
         return obj
@@ -54,7 +57,7 @@ def time_adapter(obj, request):
         return obj.strftime('%H:%M')
     except:
         return obj.strftime('%H:%M:%S')
-    
+
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
     return float(obj)
@@ -68,15 +71,36 @@ def main(global_config, **settings):
     settings['sqlalchemy.default.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.default.url'])
     engine = engine_from_config(settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
 
+
+
     dbConfig['url'] = settings['sqlalchemy.default.url']
     dbConfig['wsThesaurus'] = {}
     dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
     dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
     dbConfig['data_schema'] = settings['data_schema']
+    dbConfig['camTrap'] = {}
+    dbConfig['camTrap']['path'] = settings['camTrap.path']
+
+    if(os.path.exists(dbConfig['camTrap']['path']) ):
+        try :
+            os.access( dbConfig['camTrap']['path'], os.W_OK)
+            print("folder : %s exist" %(dbConfig['camTrap']['path']))
+        except :
+            print("app cant write in this directory ask your admin %s" %(dbConfig['camTrap']['path']) )
+            raise
+            #declenché erreur
+    else:
+        print ("folder %s doesn't exist we gonna try to create it" %(dbConfig['camTrap']['path']))
+        try:
+            os.makedirs(dbConfig['camTrap']['path'])
+            print("folder created : %s" %(dbConfig['camTrap']['path']))
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
 
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
-    Base.metadata.reflect(views=True, extend_existing=False) 
+    Base.metadata.reflect(views=True, extend_existing=False)
 
 
     config = Configurator(settings=settings)
@@ -88,8 +112,8 @@ def main(global_config, **settings):
 
     if 'loadExportDB' in settings and settings['loadExportDB'] == 'False' :
         print('''
-            /!\================================/!\ 
-            WARNING : 
+            /!\================================/!\
+            WARNING :
             Export DataBase NOT loaded, Export Functionality will not working
             /!\================================/!\ \n''')
     else:
