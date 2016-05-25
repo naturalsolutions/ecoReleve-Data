@@ -117,24 +117,28 @@ define([
       };
 
       myDropzone.on('addedfile', function(file) {
+        console.log("addedfile");
         // Hookup the start button
         file.previewElement.querySelector('.start').onclick = function() { myDropzone.enqueueFile(file); };
       });
 
       // Update the total progress bar
       myDropzone.on('totaluploadprogress', function(progress) {
-        document.querySelector('#total-progress .progress-bar').style.width = progress + '%';
+        console.log('uploadprogress');
+        document.querySelector('#total-progress').style.width = progress + '%';
       });
 
       myDropzone.on('sending', function(file) {
+        console.log("sending");
         // Show the total progress bar when upload starts
-        document.querySelector('#total-progress').style.opacity = '1';
+        //document.querySelector('#total-progress').style.opacity = '1';
         // And disable the start button
         file.previewElement.querySelector('.start').setAttribute('disabled', 'disabled');
       });
 
       // Hide the total progress bar when nothing's uploading anymore
       myDropzone.on('queuecomplete', function(progress) {
+        console.log("queue complete on va cacher la barre d'upload");
         document.querySelector('#total-progress').style.opacity = 0;
         document.querySelector('#total-progress .progress-bar').style.width = 0;
       });
@@ -142,16 +146,17 @@ define([
       this.errors = false;
       myDropzone.on('error', function(file) {
         this.errors = true;
-        $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-danger');
+        //$(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-danger');
       });
 
       myDropzone.on('success', function(file,resp) {
         $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-success');
-        var inserted = resp[1]['new GPS data inserted'];
-        _this.totalReturned.add({inserted: inserted});
+        //var inserted = resp[1]['new photo inserted'];
+        _this.totalReturned.add({inserted: 1});
       });
 
       myDropzone.on('queuecomplete', function(file) {
+        console.log("fin on va afficher les files ok ");
         var totalInserted = _this.totalReturned.reduce(function(memo, value) { return memo + value.get("inserted") }, 0);
         if (!this.errors) {
           Swal({title: 'Well done',
