@@ -70,7 +70,7 @@ def add_routes(config):
     config.add_route('locality', 'ecoReleve-Core/locality')
     config.add_route('stations', 'ecoReleve-Core/stations/')
     config.add_route('stations/export', 'ecoReleve-Core/stations/export')
-    #config.add_route('stations/fileImport', 'ecoReleve-Core/stations/fileImport/{id}') 
+    #config.add_route('stations/fileImport', 'ecoReleve-Core/stations/fileImport/{id}')
     config.add_route('stations/id', 'ecoReleve-Core/stations/{id}',custom_predicates = (integers('id'),))
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}')
 
@@ -86,28 +86,28 @@ def add_routes(config):
     ##### Protocols #####
     # config.add_route('protocols', 'ecoReleve-Core/protocols')
     config.add_route('protocols', 'ecoReleve-Core/protocols/')
-    config.add_route('protocols/id', 'ecoReleve-Core/protocols/{id}',custom_predicates = (integers('id'),)) 
-    config.add_route('protocols/action', 'ecoReleve-Core/protocols/{action}') 
+    config.add_route('protocols/id', 'ecoReleve-Core/protocols/{id}',custom_predicates = (integers('id'),))
+    config.add_route('protocols/action', 'ecoReleve-Core/protocols/{action}')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Protocols types #####
     config.add_route('protocolTypes', 'ecoReleve-Core/protocolTypes')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
-    ##### FieldActivity ##### 
+    ##### FieldActivity #####
     config.add_route('fieldActivity', 'ecoReleve-Core/fieldActivity')
-    
+
     # -----------------------------##### Sensors datas (Argos + GSM + RFID) #####----------------------------------------------------- #
-    
+
     config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
     config.add_route('sensors/uncheckedDatas', 'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
-    
-    config.add_route('sensors', 'ecoReleve-Core/sensors/') 
-    config.add_route('sensors/insert', 'ecoReleve-Core/sensors') 
+
+    config.add_route('sensors', 'ecoReleve-Core/sensors/')
+    config.add_route('sensors/insert', 'ecoReleve-Core/sensors')
     config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
     config.add_route('sensors/id', 'ecoReleve-Core/sensors/{id}',custom_predicates = (integers('id'),))
     config.add_route('sensors/id/history', 'ecoReleve-Core/sensors/{id}/history',custom_predicates = (integers('id'),))
@@ -116,7 +116,7 @@ def add_routes(config):
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Individuals #####
-    config.add_route('individuals', 'ecoReleve-Core/individuals/') 
+    config.add_route('individuals', 'ecoReleve-Core/individuals/')
     config.add_route('individuals/insert', 'ecoReleve-Core/individuals')
     config.add_route('individuals/export', 'ecoReleve-Core/individuals/export')
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
@@ -131,9 +131,9 @@ def add_routes(config):
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### MonitoredSite #####
-    config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites/') 
-    config.add_route('monitoredSites/', 'ecoReleve-Core/monitoredSites') 
-    config.add_route('monitoredSites/export', 'ecoReleve-Core/monitoredSites/export') 
+    config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites/')
+    config.add_route('monitoredSites/', 'ecoReleve-Core/monitoredSites')
+    config.add_route('monitoredSites/export', 'ecoReleve-Core/monitoredSites/export')
     config.add_route('monitoredSites/id', 'ecoReleve-Core/monitoredSites/{id}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/id/history', 'ecoReleve-Core/monitoredSites/{id}/history/',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/id/station', 'ecoReleve-Core/monitoredSites/{id}/stations',custom_predicates = (integers('id'),))
@@ -141,7 +141,7 @@ def add_routes(config):
     config.add_route('monitoredSites/id/history/action', 'ecoReleve-Core/monitoredSites/{id}/history/{action}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/id/station/action', 'ecoReleve-Core/monitoredSites/{id}/stations/{action}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
-    config.add_route('monitoredSites/action', 'ecoReleve-Core/monitoredSites/{action}') 
+    config.add_route('monitoredSites/action', 'ecoReleve-Core/monitoredSites/{action}')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Release #####
@@ -158,6 +158,3 @@ def add_routes(config):
     config.add_route('export/views/id', 'ecoReleve-Core/export/views/{id}/') #geo, datas
     config.add_route('export/views/id/action', 'ecoReleve-Core/export/views/{id}/{action}') #filtres, cols, count
     config.add_route('export/views/getFile', 'ecoReleve-Core/export/views/getFile') #getFile
-
-
-
