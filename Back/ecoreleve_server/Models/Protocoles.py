@@ -79,22 +79,6 @@ class Observation(Base,ObjectWithDynProp):
     @hybrid_property
     def Observation_childrens(self):
         if self.Observation_children is not None or self.Observation_children != []:
-            # subObsList = []
-            # print(self.Observation_children)
-            # print(type(self.Observation_children))
-
-            # typeName = 'children'
-            # sub_ProtocoleType = None
-            # # print ('CHILDREN !!!!!!!!!!') ### Append flatdata to list of data for existing subProto 
-            # typeName = self.Observation_children[0].GetType().Name
-            # for subObs in self.Observation_children:
-            #     subObs.LoadNowValues()
-            #     sub_ProtocoleType = subObs.GetType().ID
-            #     subObsList.append(subObs.GetFlatObject())
-            # # self.__setattr__(typeName, subObsList)
-            # # print('self.GetProperty(typeName)')
-            # # print(self.GetProperty(typeName))
-            # return subObsList
             return True
         else:
             return []
@@ -105,9 +89,8 @@ class Observation(Base,ObjectWithDynProp):
         if len(listOfSubProtocols) !=0 :
 
             for curData in listOfSubProtocols :
-                if self.GetType().Name == 'Transects' :
-                    print(self.GetType().Name)
-
+                if self.GetType().Status == 8 :
+                # if self.GetType().Name == 'Transects' :
                     subDictList = []
                     for k,v in curData.items():
                         subDict = {}
@@ -122,7 +105,6 @@ class Observation(Base,ObjectWithDynProp):
                 if 'ID' in curData :
                     subObs = list(filter(lambda x : x.ID==curData['ID'],self.Observation_children))[0]
                     subObs.LoadNowValues()
-                    print(curData)
                 else :
                     subObs = Observation(FK_ProtocoleType =  curData['FK_ProtocoleType'] ,Parent_Observation=self.ID,FK_Station=self.FK_Station)
                     subObs.init_on_load()
@@ -135,29 +117,21 @@ class Observation(Base,ObjectWithDynProp):
 
     @hybrid_property
     def SubObservation_childrens(self):
+        dictToUpdate = {}
         if self.SubObservation_children is not None or self.SubObservation_children != []:
             for row in self.SubObservation_children:
-                self.PropDynValuesOfNow[row['FieldName']] = row['ValueNumeric']
-            return 
-        else:
-            return 
+                dictToUpdate[row.FieldName] = row.ValueNumeric
+        return dictToUpdate
 
     @SubObservation_childrens.setter
     def SubObservation_childrens(self,listOfSubObs):
         listSubValues = []
-        # print(self.GetType())
-    
-        print('in SubObservation_childrens')
-        print(listOfSubObs)
         if len(listOfSubObs)>0 :
             for curData in listOfSubObs :
-                print('in for subVal')
                 if 'FK_Observation' in curData :
                     subObsValue = list(filter(lambda x : x.FK_Observation==curData['FK_Observation'] and x.FieldName == curData['FieldName']
                         ,self.SubObservation_children))[0]
                 else :
-                    print('new SubVal')
-
                     subObsValue = ObservationDynPropSubValue(FK_Observation = self.ID)
 
                 if subObsValue is not None:
@@ -170,9 +144,7 @@ class Observation(Base,ObjectWithDynProp):
     def UpdateFromJson(self,DTOObject,startDate = None):
         ObjectWithDynProp.UpdateFromJson(self,DTOObject,startDate)
         if 'listOfSubObs' in DTOObject :
-            print('go to subosssssss')
-            print(DTOObject['listOfSubObs'])
-            self.SubObservation_childrens(DTOObject['listOfSubObs'])
+            self.SubObservation_childrens = DTOObject['listOfSubObs']
         self.updateLinkedField()
 
     def GetFlatObject(self,schema=None):
@@ -186,7 +158,10 @@ class Observation(Base,ObjectWithDynProp):
             for subObs in self.Observation_children:
                 subObs.LoadNowValues()
                 sub_ProtocoleType = subObs.GetType().ID
-                subObsList.append(subObs.GetFlatObject())
+                flatObs = subObs.GetFlatObject()
+                if len(subObs.SubObservation_children) > 0 :
+                    flatObs.update(subObs.SubObservation_childrens)
+                subObsList.append(flatObs)
         result[typeName] = subObsList
         return result
 
