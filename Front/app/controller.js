@@ -77,6 +77,17 @@ define(['marionette', 'config',
     stations: function(id) {
       this.rgMain.show(new LytStations({id: id}));
     },
+	observations: function(id) {
+		console.log('************** OBSERVATIONS ************************');
+		 $.ajax({
+                context: this,
+                url: config.coreUrl + 'protocols/' + id,
+            }).done(function (data) {
+				window.location.href = window.location.origin + window.location.pathname + '#stations/' + data['FK_Station'] + '?observation=' + id ;
+				console.log(data);
+			}) ;
+      //this.rgMain.show(new LytStations({id: id}));
+    },
     newStation: function(from) {
       this.rgMain.show(new LytStationsNew({from: from}));
     },
