@@ -46,7 +46,7 @@ class ArgosGps(Base):
         __table_args__ = (
             Index(
                 'idx_Targosgps_checked_with_pk_ptt_date',
-                checked, 
+                checked,
                 ptt,
                 mssql_include=[pk_id, date]
             ),
@@ -74,7 +74,7 @@ class Gsm(Base):
     HDOP = Column(Integer)
     VDOP = Column(Integer)
     validated = Column(Boolean, nullable=False, server_default='0')
-    
+
     if dialect.startswith('mssql'):
         __table_args__ = (
             Index('idx_Tgsm_checked_with_pk_ptt_date', checked, platform_,
@@ -92,11 +92,11 @@ class GsmEngineering (Base) :
     __tablename__ = 'Tengineering_gsm'
     PK_id = Column(Integer, Sequence('seq_Tengineering_gsm_id'), primary_key=True)
     platform_ = Column(Integer , nullable = False)
-    date = Column('DateTime', DateTime, nullable = False) 
+    date = Column('DateTime', DateTime, nullable = False)
     ActivityCount = Column(Integer, )
     Temperature_C = Column(Numeric)
     BatteryVoltage_V = Column(Numeric)
-    file_date = Column(DateTime) 
+    file_date = Column(DateTime)
 
     __table_args__ = (
         Index('idx_Tengineering_gsm_pttDate_ptt', date, platform_),
@@ -142,5 +142,21 @@ class Rfid(Base):
     __table_args__ = (
         Index('idx_Trfid_chipcode_date', chip_code, date_),
         UniqueConstraint(FK_Sensor, chip_code, date_),
+        {'schema': sensor_schema}
+    )
+
+class CamTrap(Base):
+    __tablename__ = 'TcameraTrap'
+    pk_id = Column(Integer, Sequence('seq_camtrap_pk_id'), primary_key = True)
+    path = Column(String(250) , nullable = False)
+    name = Column(String(250) , nullable = False)
+    extension = Column(String(250) , nullable = False)
+    checked = Column(Boolean, server_default = '0')
+    validated = Column(Boolean, server_default = '0')
+    uploaded = Column(Boolean, server_default = '0')
+    date_creation = Column(DateTime)
+    date_uploaded = Column(DateTime, server_default = func.now())
+
+    __table_args__ = (
         {'schema': sensor_schema}
     )
