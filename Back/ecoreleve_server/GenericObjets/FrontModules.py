@@ -107,7 +107,8 @@ class ModuleForms(Base):
             'options': None,
             'defaultValue' : None,
             'editorAttrs' : {'disabled': isDisabled},
-            'fullPath':self.fullPath
+            'fullPath':self.fullPath,
+            'size':curSize
             }
 
         try : 
@@ -196,8 +197,11 @@ class ModuleForms(Base):
             if gridRanged :
                 curIndex  = Unique_Legends.index(conf.Legend)
                 # resultat[curIndex]['fields'].pop(resultat[curIndex]['fields'].index(conf.Name))
-                for curPropRanged in gridRanged:
-                    resultat[curIndex]['fields'].append(curPropRanged)
+                tupleList = [ (gridRanged[obj]['order'],gridRanged[obj]['name']) for obj in gridRanged]
+                l = sorted(tupleList,key = lambda x : x[0])
+
+                for order,name in l:
+                    resultat[curIndex]['fields'].append(name)
 
             self.dto['fieldsets'] = resultat
             self.dto['subschema'] = subschema
@@ -242,10 +246,14 @@ class ModuleForms(Base):
 
 
         CssClass = 'col-md-'+str(curSize)
-
+        addClass = ''
         for i in range(options['range']):
+            if i == 0 :
+                addClass += 'firstCol'
+            else :
+                addClass = ''
             curDTO = {
-            'name': str(i),
+            'name': 'C'+str(i),
             'type': options['inputType'],
             'title' : options['prefixLabel']+str(i+1),
             'editable' : self.Editable,
@@ -255,9 +263,11 @@ class ModuleForms(Base):
             'defaultValue' : None,
             'editorAttrs' : {'disabled': isDisabled},
             'defaultValue' : None,
-            'fieldClass' : str(self.EditClass) + ' ' + CssClass,
+            'fieldClass' : str(self.EditClass) + ' ' + CssClass+ ' '+ addClass,
+            'order':i,
+            'size':curSize
             }
-            self.dto[i] = curDTO
+            self.dto['C'+str(i)] = curDTO
 
 
 

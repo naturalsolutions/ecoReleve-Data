@@ -115,12 +115,19 @@ define([
 
                 if(col.title && test) {
                  this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
-                 size++;
                 }
+
+
+                if ( col.size == null) {
+                    size += 150;
+                }
+                else {
+                    size += col.size*25;
+                }
+
             }
 
-            size = size*150;
-            size += 35;
+            //size += 35;
 
             //this.$el.find('#th').prepend('<div style="width: 34px;" class="pull-left" ><span class="reneco reneco-trash"></span></div>');
             // size += 35;

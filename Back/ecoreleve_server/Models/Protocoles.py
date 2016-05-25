@@ -94,7 +94,8 @@ class Observation(Base,ObjectWithDynProp):
                     subDictList = []
                     for k,v in curData.items():
                         subDict = {}
-                        if isNumeric(k):
+                        col = k
+                        if isNumeric(v) and 'C' in k and isNumeric(col.split('C')[1]):
                             newRow = {k:v}
                             subDict['FieldName'] = k
                             subDict['valeur'] = v
