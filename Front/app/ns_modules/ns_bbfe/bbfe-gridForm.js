@@ -127,7 +127,7 @@ define([
 
             }
 
-            //size += 35;
+            size += 185;
 
             //this.$el.find('#th').prepend('<div style="width: 34px;" class="pull-left" ><span class="reneco reneco-trash"></span></div>');
             // size += 35;
