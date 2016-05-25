@@ -11,7 +11,7 @@ define([
     getValue: function() {
       var val = this.$el.val();
       if (val == -1) {
-        return false;
+        return '';
       }else {
         return this.$el.val();
       }
