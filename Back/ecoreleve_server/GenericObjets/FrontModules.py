@@ -203,6 +203,10 @@ class ModuleForms(Base):
                 for order,name in l:
                     resultat[curIndex]['fields'].append(name)
 
+                if 'fixedCol' in subschema[resultat[curIndex]['fields'][0]]['fieldClass'] : 
+                    rr = resultat[curIndex]['fields'].pop(0)
+                    resultat[curIndex]['fields'].append(rr)
+
             self.dto['fieldsets'] = resultat
             self.dto['subschema'] = subschema
             self.dto['nbByDefault'] = self.DefaultValue
