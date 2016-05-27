@@ -112,7 +112,10 @@ FK_ObservationDynProp = (SELECT ID FROM ObservationDynProp WHERE NAme = 'taxon')
 END
 GO
 
+UPDATE ModuleForms SET Options = 204083
+WHERE TypeObj = 231 and name = 'taxon'
 
+GO
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('65_Migration_SubTransect',GETDATE(),(SELECT db_name()))
 
