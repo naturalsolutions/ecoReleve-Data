@@ -355,7 +355,6 @@ define([
       var tmp = this.com.getMotherColl();
       var mod = [];
       var filter;
-      var col, op, val;
       var result = [];
       var ctx = this;
 
@@ -366,6 +365,7 @@ define([
         _.filter(coll.models, function (obj) {
 
           pass = true;
+          var col, op, val;
 
           for (var i = filters.length - 1; i >= 0; i--) {
             if (pass) {
@@ -460,7 +460,8 @@ define([
     },
 
     testDate: function (filterVal, op, colVal) {
-      var filterDate = moment(filterVal, 'DD/MM/YYYY HH:mm:ss');
+      //var filterDate = moment(filterVal, 'DD/MM/YYYY HH:mm:ss');
+      var filterDate = moment(filterVal);
       var colDate = moment(colVal);
 
       switch (op.toLowerCase()) {

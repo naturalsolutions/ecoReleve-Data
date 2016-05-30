@@ -55,6 +55,17 @@ define([
       this.com.addModule(this);
     }
 
+    if (options.idName)  {
+      this.idName = options.idName;
+    }
+
+    if (options.lonName)  {
+      this.lonName = options.lonName;
+    }
+
+    if (options.latName)  {
+      this.latName = options.latName;
+    }
     this.totalElt = options.totalElt || false;
 
     this.url = options.url;
@@ -744,19 +755,39 @@ define([
 
     //convert a BB collection to a feature collection (geoJson)
     coll2GeoJson: function(coll){
+      var _this = this;
         var features = {
             'features': [],
             'type': 'FeatureCollection'
         };
-        var feature, attr;
+        var feature, attr,id, lat, lon;
+
         coll.each(function(m){
             attr = m.attributes;
+            if (_this.idName) {
+              id = m.get(_this.idName);
+            } else {
+            id = m.attributes.id;
+            }
+
+            if (_this.latName) {
+              lat = m.get(_this.latName);
+            } else {
+              lat = m.attributes.latitude;
+            }
+
+            if (_this.lonName) {
+              lon = m.get(_this.lonName);
+            } else {
+              lon = m.attributes.longitude;
+            }
+
             feature = {
                 'type': 'Feature',
-                'id': attr.id,
+                'id': id ,
                 'geometry': {
                     'type': 'Point',
-                    'coordinates': [attr.latitude, attr.longitude],
+                    'coordinates': [lat, lon],
                 },
                 'properties': {
                   //todo
