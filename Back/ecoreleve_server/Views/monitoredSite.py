@@ -10,7 +10,8 @@ from ..Models import (
     Sensor,
     SensorType,
     Base,
-    fieldActivity
+    fieldActivity,
+    MonitoredSiteList
     )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -260,7 +261,9 @@ def searchMonitoredSite(request):
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
     start = datetime.now()
-    listObj = ListObjectWithDynProp(MonitoredSite,moduleFront,View=Base.metadata.tables['MonitoredSitePositionsNow'])
+    # listObj = ListObjectWithDynProp(MonitoredSite,moduleFront,View=Base.metadata.tables['MonitoredSitePositionsNow'])
+    listObj = MonitoredSiteList(moduleFront)
+    
     dataResult = listObj.GetFlatDataList(searchInfo)
     countResult = listObj.count(searchInfo)
 
