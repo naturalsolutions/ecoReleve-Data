@@ -71,6 +71,8 @@ which will launch all commands in order to install this project (Front setup & B
 > npm
 > bower
 
+You have to configure the [config.js](https://github.com/NaturalSolutions/ecoReleve-Data/blob/master/Front/app/config.js.default) file 
+
 * Grunt :
  `grunt build` build the code : 
   1. compile less files to app/styles/main.css (+ map file in dev mode)
