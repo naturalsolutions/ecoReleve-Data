@@ -10,19 +10,26 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
 
 requires = [
     'pyramid',
-	'pypyodbc',
+    'pypyodbc',
     'pyramid_chameleon',
     'pyramid_debugtoolbar',
     'pyramid_tm',
-    'sqlalchemy',
+    'sqlalchemy==1.0.8',
+    'sqlalchemy-utils==0.30.11',
     'transaction',
     'zope.sqlalchemy',
     'waitress',
-    'webtest'
+    'webtest',
+    'XlsxWriter==0.8.4',
+    'pyexcel-xlsx',
+    'openpyxl===2.2.2',
+    'psutil',
+    'jwt',
+    'pyramid_jwtauth'
     ]
 
 setup(name='ecoreleve_server',
-      version='0.0',
+      version='1.0',
       description='ecoReleve_Server',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
