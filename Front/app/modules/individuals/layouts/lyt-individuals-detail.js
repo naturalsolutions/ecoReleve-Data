@@ -219,7 +219,7 @@ define([
         name: 'ID',
         label: 'ID',
         editable: false,
-        renderable: true,
+        renderable: false,
         cell: 'string'
       },{
         name: 'Date',
