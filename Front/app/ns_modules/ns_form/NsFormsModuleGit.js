@@ -263,6 +263,13 @@ define([
       }
 
 
+        $(this.formRegion).find('textarea').on("keypress", function(e) {
+            var maxlen = 250;
+            if ($(this).val().length > maxlen) {  
+              return false;
+            }  
+        });
+
       if(this.buttonRegion){
         if(this.buttonRegion[0]){
           this.buttonRegion.forEach(function (entry) {
