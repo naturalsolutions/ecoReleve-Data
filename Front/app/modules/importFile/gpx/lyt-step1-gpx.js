@@ -168,6 +168,7 @@ define([
       }else{
         var fieldworkers = this.nsform.BBForm.model.get('FieldWorkers');
         this.setFieldWorkers(fieldworkers);
+        window.app.checkFormSaved = false;
         return true;
       }
     },

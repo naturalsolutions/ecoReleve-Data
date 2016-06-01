@@ -117,11 +117,33 @@ define([
       this.filters.reset();
     },
     hideDetails: function() {
-      this.ui.detail.addClass('hidden');
-      Backbone.history.navigate(this.rootUrl, {trigger: false});
-
-    },
-
+      var _this= this;
+      if(window.app.checkFormSaved){
+      Swal({
+        title: 'Saving form',
+        text: 'Current form is not yet saved. Would you like to continue without saving it?',
+        type: 'error',
+        showCancelButton: true,
+        confirmButtonColor: 'rgb(221, 107, 85)',
+        confirmButtonText: 'OK',
+        cancelButtonColor: 'grey',
+        cancelButtonText: 'Cancel',
+        closeOnConfirm: true,
+      },
+      function(isConfirm) {
+          if (!isConfirm) {
+              return false;
+          }else {
+              window.app.checkFormSaved = false;
+              Backbone.history.navigate(_this.rootUrl, {trigger: false});
+              _this.ui.detail.addClass('hidden');
+          }
+      });
+      } else{
+        Backbone.history.navigate(this.rootUrl, {trigger: false});
+        this.ui.detail.addClass('hidden');
+       }
+     },
     exportGrid: function() {
       var url = config.coreUrl + 'monitoredSites/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
       var link = document.createElement('a');

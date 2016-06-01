@@ -220,6 +220,16 @@ define([
           self.butClickSave(e);
         }
       });
+      $(this.formRegion).find('input').on("change", function(e) {
+         window.app.checkFormSaved = true;
+      });
+      $(this.formRegion).find('select').on("change", function(e) {
+         window.app.checkFormSaved = true;
+      });
+      $(this.formRegion).find('textarea').on("change", function(e) {
+         window.app.checkFormSaved = true;
+      });
+      
       if(this.buttonRegion[0]){
         this.buttonRegion.forEach(function (entry) {
           _this.buttonRegion[0].html(_this.template);
