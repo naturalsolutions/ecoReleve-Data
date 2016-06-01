@@ -22,15 +22,17 @@ define([
     template: tpl,
     redirectAfterPost: '',
     displayDelete: true,
+    gridRow: false,
 
     events : {
       'keypress input' : 'evt'
-
     },
+
     evt : function(){
       alert();
     },
     extendsBBForm: function(){
+      var _this = this;
       Backbone.Form.validators.errMessages.required = '';
       Backbone.Form.Editor.prototype.initialize = function(options){
         var options = options || {};
@@ -67,10 +69,50 @@ define([
         }
 
       };
+
+
+    },
+
+    checkGridRowAgain: function() {
+      var _this = this;
+      Backbone.Form.Field.prototype.render = function() {
+          var schema = this.schema,
+              editor = this.editor;
+
+          //Only render the editor if Hidden
+          if (schema.type == Backbone.Form.editors.Hidden) {
+            return this.setElement(editor.render().el);
+          }
+
+          //Render field
+          var $field = $($.trim(this.template(_.result(this, 'templateData'))));
+
+          if (schema.fieldClass) $field.addClass(schema.fieldClass);
+          if (schema.fieldAttrs) $field.attr(schema.fieldAttrs);
+
+          //mjaouen
+          if (_this.gridRow) $field.addClass('grid-field');
+
+          //Render editor
+          $field.find('[data-editor]').add($field).each(function(i, el) {
+            var $container = $(el),
+                selection = $container.attr('data-editor');
+
+            if (_.isUndefined(selection)) return;
+
+            $container.append(editor.render().el);
+          });
+
+          this.setElement($field);
+
+          return this;
+      };
     },
 
     initialize: function (options) {
       this.extendsBBForm();
+      this.gridRow = options.gridRow || this.gridRow;
+      this.checkGridRowAgain();
 
       var jqxhr;
       this.modelurl = options.modelurl;
@@ -187,7 +229,8 @@ define([
           // give the url to model to manage save
           _this.model.urlRoot = this.modelurl;
 
-          var settings = $.extend({}, _this.data, resp.data);
+          var settings = $.extend({}, _this.data, resp.data); //?
+          
           _this.model.attributes = settings;
 
 
@@ -203,39 +246,46 @@ define([
     },
 
     showForm: function (){
-      var self = this;
-      var display = 'form';
+      var _this = this;
       this.BBForm.render();
-      var el = this.BBForm.el;
-      if(display=='table'){
-        el = this.getHtmlTable(el);
-      }
+      
       // Call extendable function before the show call
       this.BeforeShow();
-      var _this = this;
 
-      this.formRegion.html(el); //this.formRegion.html(this.BBForm.el);
-      $(this.formRegion).find('input').on("keypress", function(e) {
-        if( e.which == 13 ){
-          self.butClickSave(e);
-        }
-      });
-      if(this.buttonRegion[0]){
-        this.buttonRegion.forEach(function (entry) {
-          _this.buttonRegion[0].html(_this.template);
-          _this.buttonRegion[0].i18n();
+      this.formRegion.html(this.BBForm.el); //this.formRegion.html(this.BBForm.el);
+
+      if(!this.gridRow) {
+        $(this.formRegion).find('input').on("keypress", function(e) {
+          if( e.which == 13){
+            _this.butClickSave(e);
+          }
         });
-
-        if(this.buttonRegion[0]){
-          this.displaybuttons();
-          this.bindEvents();
-        }
       }
 
+
+      if(this.buttonRegion){
+        if(this.buttonRegion[0]){
+          this.buttonRegion.forEach(function (entry) {
+            _this.buttonRegion[0].html(_this.template);
+            _this.buttonRegion[0].i18n();
+          });
+          if(this.buttonRegion[0]){
+            this.displaybuttons();
+            this.bindEvents();
+          }
+        }
+
+      }
       if (this.afterShow) {
         this.afterShow();
       }
+
+      if (this.gridRow) {
+        this.finilizeToGridRow();
+      }
     },
+
+
 
     updateState: function(state){
 
@@ -270,7 +320,6 @@ define([
     /*afterShow: function(){
 
     },*/
-
 
     butClickSave: function (e) {
       var _this = this;
@@ -353,18 +402,21 @@ define([
 
 
     butClickEdit: function (e) {
+      this.checkGridRowAgain();
       this.displayMode = 'edit';
       this.initModel();
-      if(this.buttonRegion[0])
+      if(this.buttonRegion)
       this.displaybuttons();
     },
     butClickCancel: function (e) {
+      this.checkGridRowAgain();
       this.displayMode = 'display';
       this.initModel();
-      if(this.buttonRegion[0])
+      if(this.buttonRegion)
       this.displaybuttons();
     },
     butClickClear: function (e) {
+      this.checkGridRowAgain();
       var formContent = this.BBForm.el;
       $(formContent).find('input').not(':disabled').each(function(){
         $(this).val('');
@@ -383,7 +435,7 @@ define([
         confirmButtonText: 'Yes, delete it!',
         confirmButtonColor: '#DD6B55',
         callback : function(){
-          _this.afterDelete();
+          _this.afterDelete(_this.model);
         }
       };
 
@@ -400,8 +452,8 @@ define([
       this.displayMode = 'display';
       // reaload created record from AJAX Call
       this.initModel();
-      this.showForm();
-      if(this.buttonRegion[0])
+      //this.showForm();
+      if(this.buttonRegion)
       this.displaybuttons();
     },
 
@@ -504,26 +556,23 @@ define([
         }
       });
     },
-    getHtmlTable : function(el){
-      var headtr = '<tr>';
-      var bodytr = '<tr>'; 
-      $(el).find('fieldset').each(function( i ) {
-            var j = 0 ;
-            $(this).children().each(function(){
-                // check if we have a  form field 
-                var labelElem = $(this).find('label')[0];
-                if(labelElem) {
-                  headtr += '<td>' + labelElem.textContent +'</td>';
-                  var content = $(this).children('div')[0].outerHTML;
-                   bodytr += '<td>' + content +'</td>';
-                }
-            });
+
+    finilizeToGridRow: function() {
+      var _this = this;
+      /*var button = 'danger';
+      if(!this.model.get('id')){
+        button = 'warning';
+      }*/
+      this.BBForm.$el.find('fieldset').append('\
+          <div class="col-xs-12 control">\
+              <button type="button" class="js-remove btn btn-danger pull-right"><span class="reneco reneco-trash"></span></button>\
+          </div>\
+      ');
+      this.BBForm.$el.find('button.js-remove').on('click', function() {
+        _this.butClickDelete();
       });
-      headtr += '</tr>';
-      bodytr += '</tr>';
-      var table = '<table id="formTable"><thead>' + headtr +'</thead>  <tbody> ' + bodytr +'</tbody></table>';
-      return table;
-    }
+    },
+
   });
 
 });

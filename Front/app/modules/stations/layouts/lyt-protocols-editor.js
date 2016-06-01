@@ -5,9 +5,10 @@ define([
   'marionette',
   'config',
   './lyt-protocol',
+  './lyt-protocol-grid',
 
   'i18n'
-], function($, _, Backbone, Marionette, config, LytProto) {
+], function($, _, Backbone, Marionette, config, LytProto, LytProtoGrid) {
   'use strict';
   return Marionette.LayoutView.extend({
     template: 'app/modules/stations/templates/tpl-protocols-editor.html',
@@ -17,7 +18,6 @@ define([
       protoMenuContainer: '#protoMenuContainer',
       protoFormsContainer: 'div#protoFormsContainer',
       protoPicker: 'select#protoPicker'
-
     },
 
     events: {
@@ -98,12 +98,27 @@ define([
 
     initProtos: function() {
       this.listenTo(this.collection, 'destroy', this.displayLast);
-      this.collViewProto = new Marionette.CollectionView({
+
+      //this.collection.models[0].set('grid', true);
+
+      var CustomCollectionView = Marionette.CollectionView.extend({
+        getChildView: function(item) {
+          if (item.get('grid')) {
+            return LytProtoGrid;
+          }
+          else {
+            return LytProto;
+          }
+        },
+      });
+
+      this.collViewProto = new CustomCollectionView({
         collection : this.collection,
         childViewOptions: { stationId: this.stationId },
         childView: LytProto,
         className: 'full-height clearfix',
       });
+      
       this.collViewProto.render();
       this.ui.protoFormsContainer.html(this.collViewProto.el);
     },
@@ -126,7 +141,9 @@ define([
       }
 
       this.currentView = this.collViewProto.children.findByIndex(index);
-      this.currentView.model.set('current', true);
+      if(this.currentView) {
+        this.currentView.model.set('current', true);
+      }
     },
 
 

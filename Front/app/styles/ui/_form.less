@@ -274,13 +274,14 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 
 
 .grid-form{
+	background: #ddd;
 	overflow: auto;
 	#formContainer{
 		display: block;
 	}
 
 
-	#formContainer>form>fieldset{
+	#formContainer,.tbody>.form-row>form>fieldset{
 		background: #eee;
 		border: none;
 		border-bottom: 1px solid #ddd;
@@ -319,9 +320,12 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 		border-radius: 0px;
 	}
 
-	#th{
+	#th,.thead{
 		background: #ccc;
 		div{
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 			padding: 4px 5px!important;
 			padding-left: 0px!important;
 			font-weight: bold;
