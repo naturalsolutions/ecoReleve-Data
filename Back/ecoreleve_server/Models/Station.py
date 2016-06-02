@@ -138,10 +138,11 @@ class Station(Base,ObjectWithDynProp):
 @event.listens_for(Station, 'before_insert')
 @event.listens_for(Station, 'before_update')
 def updateRegion(mapper, connection, target):
-    stmt = text('''SELECT dbo.[fn_GetRegionFromLatLon] (:lat,:lon)
-    ''').bindparams(bindparam('lat',target.LAT),bindparam('lon',target.LON))
-    regionID = connection.execute(stmt).scalar()
-    target.FK_Region = regionID
+    if target.LON and target.LAT:
+        stmt = text('''SELECT dbo.[fn_GetRegionFromLatLon] (:lat,:lon)
+        ''').bindparams(bindparam('lat',target.LAT),bindparam('lon',target.LON))
+        regionID = connection.execute(stmt).scalar()
+        target.FK_Region = regionID
 
 #--------------------------------------------------------------------------
 class StationDynProp(Base):
