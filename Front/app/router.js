@@ -51,16 +51,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
     },
 
     execute: function(callback, args) {
-      $.ajax({
-        context: this,
-        url: config.coreUrl + 'security/has_access'
-      }).done(function() {
-        callback.apply(this, args);
-      }).fail(function(msg) {
-        if (msg.status === 403) {
-          document.location.href = config.portalUrl;
-        }
-      });
       // get current route
       this.history.push(Backbone.history.fragment);
       var _this= this;
