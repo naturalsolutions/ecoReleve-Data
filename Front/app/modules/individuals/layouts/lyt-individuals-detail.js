@@ -184,6 +184,7 @@ define([
     },
 
     displayLocationsFilter: function() {
+      $(this.ui.locationsfilter).empty();
       var locfiltersList = {
         1: {
           name: 'type_',
@@ -191,12 +192,15 @@ define([
           label: 'Types',
           title: 'types'
         },
-       2: {
-          name: 'fieldActivity_Name',
-          type: 'Text',
-          label: 'Fieldacivity ',
-           title: 'Fieldacivity'
-        },
+        2: {
+        type: 'Select' ,
+        title: 'Fieldacivity',
+        name: 'fieldActivity_Name',
+        editorClass: 'form-control',
+        options: [],
+        fieldClass: 'fieldactivity',
+        validators: []
+      },
         3: {
           name: 'Date',
           type: 'DateTimePickerEditor',
@@ -211,6 +215,7 @@ define([
         clientSide: true,
         filterContainer: this.ui.locationsfilter
       });
+      this.loadCollection(config.coreUrl + 'fieldActivity', 'select.fieldActivity_Name');
     },
 
     displayLocationsGrid: function() {
@@ -528,6 +533,23 @@ define([
         //could be better
         if (isConfirm && callback) {
           callback();
+        }
+      });
+    },
+    loadCollection: function(url, element) {
+      var collection =  new Backbone.Collection();
+      collection.url = url;
+      var elem = $(element);
+      elem.append('<option></option>');
+      collection.fetch({
+        success: function(data) {
+          //could be a collectionView
+          for (var i in data.models) {
+            var current = data.models[i];
+            var value = current.get('value') || current.get('PK_id');
+            var label = current.get('label') || current.get('fullname');
+            elem.append("<option value ='" + label + "'>"+ label + "</option>");
+          }
         }
       });
     },
