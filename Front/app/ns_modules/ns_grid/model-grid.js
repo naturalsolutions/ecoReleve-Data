@@ -114,6 +114,9 @@ define([
       if (options.filterCriteria) {
         this.filterCriteria = options.filterCriteria;
       }
+      if(options.affectTotalRecords){
+        this.affectTotalRecords = options.affectTotalRecords;
+      }
       
       this.initGrid();
       this.eventHandler();
