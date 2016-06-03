@@ -71,8 +71,7 @@ define([
         });
       }
       this.com = new Com();
-      
-      
+      this.nbLocations = [];
     },
 
     reloadFromNavbar: function(model) {
@@ -317,9 +316,27 @@ define([
             collection : _this.locationsColl,
             rowClicked: true,
             com: _this.com,
-            idName: 'ID'
+            idName: 'ID',
+            affectTotalRecords : function(){  
+             var nbobs;
+             if(this.paginator || this.pagingServerSide){
+             nbobs = this.grid.collection.state.totalRecords || 0;
+             }else{
+               nbobs =this.grid.collection.length || 0;
+             }
+
+             if(_this.nbLocations.length == 0) {
+                $('#totalLocations').html(nbobs);
+                _this.nbLocations[0] = nbobs;
+             } else {
+                _this.nbLocations[1] = nbobs;
+               $('#totalLocations').html( nbobs + "/" + _this.nbLocations[0]);
+             }
+           }
           });
-          console.log(_this.locationsGrid.collection);
+
+          $('#totalLocations').html(_this.locationsColl.length);
+          _this.nbLocations[0] = _this.locationsColl.length;
       
         _this.locationsGrid.rowClicked = function(args) {
           _this.rowClicked(args);
