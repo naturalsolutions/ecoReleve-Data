@@ -160,7 +160,7 @@
 	100% {border: 2px solid white;}
 }
 
-.custom-marker{
+.marker{
 	margin-left: 5px;
 	margin-top: 5px;
 	border-radius: 50%;
@@ -169,6 +169,19 @@
 	border: 2px solid white;
 	text-align: center;
 	background: rgba(51, 153, 204, 1);
+	&.marker-station{
+		background: purple;
+		border-radius: 0px;
+	}
+	&.marker-gps{
+		background: rgba(51, 153, 204, 1);
+	}
+	&.marker-argos{
+		background: orange;
+	}
+	&.marker-rfid{
+		background: rgba(51, 153, 204, 1);
+	}
 	&.selected{
 		background: rgba(255, 0, 0 ,1);
 		z-index: 1000000!important;
