@@ -152,7 +152,7 @@ class IndividualList(ListObjectWithDynProp):
 
         joinTable = outerjoin(joinTable,EquipmentTable
             ,and_(Individual.ID == EquipmentTable.c['FK_Individual']
-                ,or_(EquipmentTable.c['EndDate'] == None,EquipmentTable.c['EndDate'] >= startDate)))
+                ,or_(EquipmentTable.c['EndDate'] >= startDate,EquipmentTable.c['EndDate'] >= func.isnull(EquipmentTable.c['EndDate'],datetime.now()))))
         joinTable = outerjoin(joinTable,Sensor,Sensor.ID == EquipmentTable.c['FK_Sensor'])
         joinTable = outerjoin(joinTable,SensorType,Sensor.FK_SensorType == SensorType.ID)
 
@@ -216,6 +216,7 @@ class IndividualList(ListObjectWithDynProp):
         for obj in searchInfo['criteria'] :
             fullQueryJoin = self.WhereInJoinTable(fullQueryJoin,obj)
 
+        print(fullQueryJoin)
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
         return fullQueryJoinOrdered
 

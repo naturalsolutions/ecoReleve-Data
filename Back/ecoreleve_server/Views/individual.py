@@ -348,7 +348,7 @@ def searchIndiv(request):
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront,typeObj = typeObj,history=False,startDate=date)
+    listObj = IndividualList(moduleFront,typeObj = typeObj,history=True,startDate=None)
     dataResult = listObj.GetFlatDataList(searchInfo)
     countResult = listObj.count(searchInfo)
 
