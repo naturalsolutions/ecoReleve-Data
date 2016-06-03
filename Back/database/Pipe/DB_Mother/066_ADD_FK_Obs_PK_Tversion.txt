@@ -1,0 +1,22 @@
+
+
+ALTER TABLE Observation
+ADD FOREIGN KEY (FK_Individual)
+REFERENCES Individual(ID)
+
+
+ALTER TABLE TVersion
+   ADD TVer_PK_ID INT IDENTITY NOT NULL
+
+
+ALTER TABLE TVersion
+   ADD CONSTRAINT TVer_PK_ID
+   PRIMARY KEY(TVer_PK_ID)
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('66_ADD_FK_Obs_PK_Tversion',GETDATE(),(SELECT db_name()))
+
+
+GO
