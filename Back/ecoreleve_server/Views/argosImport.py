@@ -241,8 +241,8 @@ def checkExistingGPS (GPSData,session) :
     minDateGPS = GPSData['datetime'].min()
 
     # round lat/lon decimal 3 for data from Files
-    GPSData['Latitude(N)'] = GPSData['Latitude(N)'].round(3)
-    GPSData['Longitude(E)'] = GPSData['Longitude(E)'].round(3)
+    GPSData['lat'] = GPSData['Latitude(N)'].round(3)
+    GPSData['lon'] = GPSData['Longitude(E)'].round(3)
 
     # Retrieve exisintg data from DB
     queryGPS = select([ArgosGps.pk_id, ArgosGps.date, ArgosGps.lat, ArgosGps.lon, ArgosGps.ptt]).where(ArgosGps.type_ == 'gps')
@@ -259,11 +259,11 @@ def checkExistingGPS (GPSData,session) :
     GPSrecords['lon'] = GPSrecords['lon'].round(3)
 
     # apply a merge/join beetween dataframes with data from Files and data from DB
-    merge = pd.merge(GPSData,GPSrecords, left_on = ['datetime','Latitude(N)','Longitude(E)','ptt'], right_on = ['date','lat','lon','FK_ptt'])
+    merge = pd.merge(GPSData,GPSrecords, left_on = ['datetime','lat','lon','ptt'], right_on = ['date','lat','lon','FK_ptt'])
     DFToInsert = GPSData[~GPSData['id'].isin(merge['id'])]
 
 
-    DFToInsert = DFToInsert.drop(['id','datetime'],1)
+    DFToInsert = DFToInsert.drop(['id','datetime','lat','lon'],1)
     DFToInsert.columns = ['date','lat','lon','speed','course','ele','FK_ptt']
 
     DFToInsert = DFToInsert.replace('2D fix',np.nan )
@@ -354,8 +354,8 @@ def checkExistingArgos (dfToCheck,session) :
     maxDate = dfToCheck['date'].max()
     minDate = dfToCheck['date'].min()
 
-    dfToCheck['lat'] = dfToCheck['lat'].round(3)
-    dfToCheck['lon'] = dfToCheck['lon'].round(3)
+    dfToCheck['lat2'] = dfToCheck['lat'].round(3)
+    dfToCheck['lon2'] = dfToCheck['lon'].round(3)
     # Retrieve data from DB
     queryArgos = select([ArgosGps.pk_id, ArgosGps.date, ArgosGps.lat, ArgosGps.lon, ArgosGps.ptt]).where(ArgosGps.type_ == 'arg')
     queryArgos = queryArgos.where(and_(ArgosGps.date >= minDate , ArgosGps.date <= maxDate))
@@ -369,7 +369,10 @@ def checkExistingArgos (dfToCheck,session) :
     ArgosRecords.loc[:,('lat')] = ArgosRecords['lat'].round(3)
     ArgosRecords.loc[:,('lon')] = ArgosRecords['lon'].round(3)
 
-    merge = pd.merge(dfToCheck,ArgosRecords, left_on = ['date','lat','lon','FK_ptt'], right_on = ['date','lat','lon','FK_ptt'])
+    merge = pd.merge(dfToCheck,ArgosRecords, left_on = ['date','lat2','lon2','FK_ptt'], right_on = ['date','lat','lon','FK_ptt'])
     DFToInsert = dfToCheck[~dfToCheck['id'].isin(merge['id'])]
+
+    # print(DFToInsert.columns)
+    # DFToInsert = DFToInsert.drop(['lat2','lon2'],1)
 
     return DFToInsert
