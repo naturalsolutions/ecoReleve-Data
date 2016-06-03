@@ -326,6 +326,7 @@ def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
 
+    date = datetime.strptime('01/02/2008','%d/%m/%Y')
     searchInfo = {}
     searchInfo['criteria'] = []
     if 'criteria' in data: 
@@ -347,7 +348,7 @@ def searchIndiv(request):
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront,typeObj = typeObj)
+    listObj = IndividualList(moduleFront,typeObj = typeObj,history=False,startDate=date)
     dataResult = listObj.GetFlatDataList(searchInfo)
     countResult = listObj.count(searchInfo)
 

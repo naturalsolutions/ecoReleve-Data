@@ -133,8 +133,8 @@ class StationList(ListObjectWithDynProp):
 #--------------------------------------------------------------------------
 class IndividualList(ListObjectWithDynProp):
 
-    def __init__(self,frontModule, typeObj = None, startDate = None) :
-        super().__init__(Individual,frontModule, typeObj = typeObj,startDate = startDate)
+    def __init__(self,frontModule, typeObj = None, startDate = None,history = None,historyView = None) :
+        super().__init__(Individual,frontModule, typeObj = typeObj,startDate = startDate,history=history)
 
     def GetJoinTable (self,searchInfo) :
         startDate = datetime.now()
@@ -168,12 +168,6 @@ class IndividualList(ListObjectWithDynProp):
         if curProp == 'LastImported':
             st = aliased(Individual)
             subSelect = select([Observation]).where(Observation.FK_Individual == Individual.ID)
-            # subSelect2 = select([cast(func.max(st.creationDate),DATE)]).where(st.Original_ID.like('TRACK_%'))
-            # query = query.where(and_(~exists(subSelect)
-            #     # ,and_(~exists(subSelect)
-            #         # ,and_(Individual.Original_ID.like('TRACK_%'),Individual.creationDate >= subSelect2)
-            #         # )
-            #     )
             query = query.where(and_(~exists(subSelect),Individual.Original_ID.like('TRACK_%')))
 
         if curProp == 'FK_Sensor':
@@ -225,6 +219,46 @@ class IndividualList(ListObjectWithDynProp):
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
         return fullQueryJoinOrdered
 
+    def GetFullQueryHistory(self,searchInfo=None) :
+        if searchInfo is None or 'criteria' not in searchInfo:
+            searchInfo['criteria'] = []
+
+        joinTable = self.GetJoinTable(searchInfo)
+        fullQueryJoin = select(self.selectable).select_from(joinTable)
+
+        queryHistory = select(self.historyValuetable.c).where(self.historyValuetable.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] == self.ObjWithDynProp.ID)
+        self.excHist = False
+
+        for obj in searchInfo['criteria'] :
+            curProp = obj['Column']
+            curDynProp = self.GetDynProp(curProp)
+
+            if curProp in self.fk_list and curProp in self.searchInFK and not self.history:
+                fullQueryJoin = fullQueryJoin.where(
+                    eval_.eval_binary_expr(self.searchInFK[curProp]['table'].c[self.searchInFK[curProp]['nameProp']]
+                        ,obj['Operator'],obj['Value'])
+                    )
+
+            elif hasattr(self.ObjWithDynProp,curProp):
+                fullQueryJoin = self.filterOnStaticProp(fullQueryJoin,obj)
+
+            elif curDynProp is not None :
+                queryHistory = queryHistory.where(and_(eval_.eval_binary_expr(self.historyValuetable.c['Value'+curDynProp['TypeProp']]
+                    ,obj['Operator'],obj['Value'] ),self.historyValuetable.c['Name']==curProp))
+                self.excHist = True
+
+            if obj['Column'] == 'FK_Sensor':
+                print('WHEREin EQuipment !!!!!! ')
+                fullQueryJoin = self.whereInEquipement(fullQueryJoin,searchInfo['criteria'])
+
+        if self.excHist :
+            print('add exists histo ')
+            fullQueryJoin = fullQueryJoin.where(exists(queryHistory))
+            print(fullQueryJoin)
+        fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
+
+        return fullQueryJoinOrdered
+
     def whereInEquipementVHF(self,fullQueryJoin,criteria):
         startDate = datetime.now()
 
@@ -266,24 +300,39 @@ class IndividualList(ListObjectWithDynProp):
         if self.startDate :
             startDate = self.startDate
 
+        if self.history:
+             self.excHist = True
+
+        subSelect= select([table.c['FK_Individual']]
+            ).select_from(joinTable).where(Individual.ID== table.c['FK_Individual'])
+
         if sensorObj['Operator'].lower() in ['is','is not'] and sensorObj['Value'].lower() == 'null':
-            subSelect = select([table.c['FK_Individual']]
-                ).select_from(joinTable).where(
-                and_(Individual.ID== table.c['FK_Individual']
-                    ,or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None)
-                        ))
-            if sensorObj['Operator'].lower() == 'is':
-                fullQueryJoin = fullQueryJoin.where(~exists(subSelect))
-            else :
-                fullQueryJoin = fullQueryJoin.where(exists(subSelect))
+            # subSelect = select([table.c['FK_Individual']]
+            #     ).select_from(joinTable).where(
+            #     and_(Individual.ID== table.c['FK_Individual']
+            #         ,or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None)
+            #             ))
+
+            if not self.history : 
+                subSelect = subSelect.where(or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None))
+        else:
+            # subSelect = select([table.c['FK_Individual']]
+            #     ).select_from(joinTable).where(
+            #     and_(Individual.ID== table.c['FK_Individual']
+            #         ,and_(eval_.eval_binary_expr(Sensor.UnicIdentifier,sensorObj['Operator'],sensor)
+            #             ,or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None))
+            #             ))
+            subSelect = subSelect.where(eval_.eval_binary_expr(Sensor.UnicIdentifier,sensorObj['Operator'],sensor))
+
+            if not self.history : 
+                subSelect = subSelect.where(or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None))
+
+        if sensorObj['Operator'].lower() == 'is' and sensorObj['Value'].lower() == 'null':
+            fullQueryJoin = fullQueryJoin.where(~exists(subSelect))
         else :
-            subSelect = select([table.c['FK_Individual']]
-                ).select_from(joinTable).where(
-                and_(Individual.ID== table.c['FK_Individual']
-                    ,and_(eval_.eval_binary_expr(Sensor.UnicIdentifier,sensorObj['Operator'],sensor)
-                        ,or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None))
-                        ))
             fullQueryJoin = fullQueryJoin.where(exists(subSelect))
+
+
         return fullQueryJoin
 
 #--------------------------------------------------------------------------
