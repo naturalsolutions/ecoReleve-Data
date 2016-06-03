@@ -122,9 +122,9 @@ define([
         affectTotalRecords : function(){  
             var nbobs;
           if(this.paginator || this.pagingServerSide){
-          nbobs = this.grid.collection.state.totalRecords;
+          nbobs = this.grid.collection.state.totalRecords || 0;
           }else{
-            nbobs =this.grid.collection.length;
+            nbobs =this.grid.collection.length || 0;
           }
           if(_this.nbObs.length == 0) {
             $('#totalEntries').html(nbobs);
