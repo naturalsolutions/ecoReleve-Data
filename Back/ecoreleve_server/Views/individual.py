@@ -326,7 +326,10 @@ def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
 
-    date = datetime.strptime('01/02/2008','%d/%m/%Y')
+    # date = datetime.strptime('01/02/2008','%d/%m/%Y')
+    history = False
+    startDate = None
+
     searchInfo = {}
     searchInfo['criteria'] = []
     if 'criteria' in data: 
@@ -338,6 +341,12 @@ def searchIndiv(request):
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
 
+    if 'startDate' in searchInfo['criteria'] and searchInfo['criteria']['startDate'] != '':
+        startDate = datetime.strptime(searchInfo['criteria']['startDate'],'%d/%m/%Y %H:%M:%S')
+
+    if 'history' in searchInfo['criteria'] and startDate is None:
+        history = True
+
     if 'typeObj' in request.params:
         typeObj = request.params['typeObj']
         searchInfo['criteria'].append({'Column':'FK_IndividualType','Operator': '=', 'Value':request.params['typeObj']})
@@ -348,7 +357,7 @@ def searchIndiv(request):
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront,typeObj = typeObj,history=True,startDate=None)
+    listObj = IndividualList(moduleFront,typeObj = typeObj,history=history,startDate=startDate)
     dataResult = listObj.GetFlatDataList(searchInfo)
     countResult = listObj.count(searchInfo)
 

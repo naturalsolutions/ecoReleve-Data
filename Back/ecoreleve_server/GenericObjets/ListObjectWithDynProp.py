@@ -296,12 +296,48 @@ class ListObjectWithDynProp():
             criteria = None
         else:
             criteria = searchInfo['criteria'] 
+
+        # if self.history : 
+        #     query = self.countHistoryQuery(criteria)
+        # else :
         query = self.countQuery(criteria)
 
         count = self.sessionmaker().execute(query).scalar()
         return count
 
+    def countHistoryQuery(self,criteria = None):
+
+        fullQuery = select([func.count(self.ObjWithDynProp.ID)])
+
+        queryHistory = select(self.historyValuetable.c).where(self.historyValuetable.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] == self.ObjWithDynProp.ID)
+        self.excHist = False
+        if criteria is not None:
+            for obj in criteria:
+                curProp = obj['Column']
+                curDynProp = self.GetDynProp(curProp)
+
+                if curProp in self.fk_list and curProp in self.searchInFK and not self.history:
+                    fullQuery = fullQuery.where(
+                        eval_.eval_binary_expr(self.searchInFK[curProp]['table'].c[self.searchInFK[curProp]['nameProp']]
+                            ,obj['Operator'],obj['Value'])
+                        )
+
+                elif hasattr(self.ObjWithDynProp,curProp):
+                    fullQuery = self.filterOnStaticProp(fullQuery,obj)
+
+                elif curDynProp is not None :
+                    queryHistory = queryHistory.where(and_(eval_.eval_binary_expr(self.historyValuetable.c['Value'+curDynProp['TypeProp']]
+                        ,obj['Operator'],obj['Value'] ),self.historyValuetable.c['Name']==curProp))
+            
+            fullQuery = fullQuery.where(exists(queryHistory)) 
+
+        return fullQuery
+
     def countQuery(self,criteria = None):
+
+        if self.history:
+            return self.countHistoryQuery(criteria)
+
         fullQuery = select([func.count(self.ObjWithDynProp.ID)])
         filterOnDynProp = False
         if self.startDate:
