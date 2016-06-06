@@ -326,9 +326,9 @@ def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
 
-    # date = datetime.strptime('01/02/2008','%d/%m/%Y')
     history = False
     startDate = None
+    # startDate = datetime.strptime('01/02/2008','%d/%m/%Y')
 
     searchInfo = {}
     searchInfo['criteria'] = []
