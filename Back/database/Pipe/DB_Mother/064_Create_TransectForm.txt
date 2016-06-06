@@ -55,8 +55,33 @@ VALUES
 
 (1,@type,'Comments','Comments',0,6,6,'TextArea','form-control',2,2000,NULL,NULL,NULL,'','',1,1,NULL)
 
+
 GO
 
+INSERT INTO ModuleForms (
+[module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue] )
+VALUES
+(1,220,'SubTransect','',0,3,3,'GridFormEditor','form-control',2,200,NULL,231,NULL,NULL,NULL,1,NULL,NULL)
+
+GO 
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('64_Create_TransectForm',GETDATE(),(SELECT db_name()))
 
