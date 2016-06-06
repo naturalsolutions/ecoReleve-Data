@@ -66,46 +66,69 @@ define(['marionette', 'config',
     },
 
     home: function() {
+      this.checkAjax();
       Backbone.history.navigate('');
       this.rgMain.show(new LytHome());
     },
 
     importFile: function() {
+      this.checkAjax();
       this.rgMain.show(new LytImportFile());
     },
 
     stations: function(id) {
+      this.checkAjax();
       this.rgMain.show(new LytStations({id: id}));
     },
+	observations: function(id) {
+		console.log('************** OBSERVATIONS ************************');
+		 $.ajax({
+                context: this,
+                url: config.coreUrl + 'protocols/' + id,
+            }).done(function (data) {
+				window.location.href = window.location.origin + window.location.pathname + '#stations/' + data['FK_Station'] + '?observation=' + id ;
+				console.log(data);
+			}) ;
+      //this.rgMain.show(new LytStations({id: id}));
+    },
     newStation: function(from) {
+      this.checkAjax();
       this.rgMain.show(new LytStationsNew({from: from}));
     },
 
     individuals: function(id) {
+      this.checkAjax();
       this.rgMain.show(new LytIndividuals({id: id}));
     },
     newIndividual: function(type) {
+      this.checkAjax();
       this.rgMain.show(new LytIndividualsNew({type: type}));
     },
 
     sensors: function(id) {
+      this.checkAjax();
       this.rgMain.show(new LytSensors({id: id}));
     },
     newSensor: function(type) {
+      this.checkAjax();
       this.rgMain.show(new LytSensorsNew({type: type}));
     },
 
     monitoredSites: function(id) {
+      this.checkAjax();
       this.rgMain.show(new LytMonitoredSites({id: id}));
     },
     newMonitoredSite: function(type) {
+      this.checkAjax();
       this.rgMain.show(new LytMonitoredSitesNew());
     },
 
     validate: function() {
+      this.checkAjax();
       this.rgMain.show(new LytSensorValidate());
     },
     validateType: function(type) {
+      this.checkAjax();
       this.rgMain.show(new LytSensorValidateType({
         type: type
       }));
@@ -113,12 +136,24 @@ define(['marionette', 'config',
 
     release: function(id) {
       // (id of the station..)
+      this.checkAjax();
       this.rgMain.show(new LytReleaseStation({id : id}));
     },
 
     export: function() {
+      this.checkAjax();
       this.rgMain.show(new LytExport());
     },
+    checkAjax : function(){
+      var xhrPool = window.xhrPool;
+      console.log('new route :');
+      console.log(window.xhrPool);
+
+      for(var i=0; i<xhrPool.length; i++){
+         xhrPool[i].abort();
+      }
+       window.xhrPool = [];
+    }
 
   });
 });
