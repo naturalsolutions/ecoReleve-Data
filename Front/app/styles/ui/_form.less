@@ -183,7 +183,7 @@ select:disabled {
 }
 
 .expand-grid{
-	padding-bottom: 200px;
+	padding-bottom: 50px;
 	background: #ddd;
 	& .fancytreeview{
 		max-height: 200px;
@@ -296,6 +296,10 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 				background: rgba(221, 221, 221, 0.3);
 		}
 
+		&>.fixedCol{
+			background: #eee;
+		}
+
 /*
 		input{
 			border-radius: 0px;
@@ -360,6 +364,29 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 .solo-input10{
 	margin-right: 16.66666667%;
 }
+
+
+.fixedCol {
+	position:absolute;
+	//z-index:1000;
+
+}
+
+#th&>.fixedCol {background: #ccc;}
+
+
+.firstCol{
+	margin-left : 150px !important;
+
+}
+
+.col-md-3.grid-field{
+		width: 75px;
+ }
+.col-md-2.grid-field{
+	width: 50px;
+}
+
 #stationForm textarea {
     height: 50px;
     max-height: 50px;

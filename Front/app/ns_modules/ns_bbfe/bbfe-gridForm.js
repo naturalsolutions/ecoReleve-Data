@@ -72,6 +72,11 @@ define([
                         <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
                     </div>\
                 ');
+/*                form.$el.find('fieldset').prepend('\
+                    <div class="' + this.hidden + ' col-xs-12 control">\
+                        <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
+                    </div>\
+                ');*/
                 form.$el.find('button#remove').on('click', function() {
                   _this.$el.find('#formContainer').find(form.el).remove();
                   var i = _this.forms.indexOf(form);
@@ -103,22 +108,31 @@ define([
 
             var size=0;
 
-            for (var key in model.schema) {
-               var col = model.schema[key];
-               //sucks
-               var test = true;
-               if(col.fieldClass){
-                test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
-                col.fieldClass += ' grid-field';
-               }
+            var odrFields = this.options.schema.fieldsets[0].fields;
+            for (var i = odrFields.length - 1; i >= 0; i--) {
+                var col = model.schema[odrFields[i]];
+                //sucks
+                var test = true;
+                if(col.fieldClass){
+                 test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
+                 col.fieldClass += ' grid-field';
+                }
 
-               if(col.title && test) {
-                this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
-                size++;
-               }
+                if(col.title && test) {
+                 this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
+                }
+
+
+                if ( col.size == null) {
+                    size += 150;
+                }
+                else {
+                    size += col.size*25;
+                }
+
             }
-            size = size*150;
-            size += 35;
+
+            size += 285;
 
             //this.$el.find('#th').prepend('<div style="width: 34px;" class="pull-left" ><span class="reneco reneco-trash"></span></div>');
             // size += 35;

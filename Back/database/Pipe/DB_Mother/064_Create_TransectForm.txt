@@ -1,0 +1,64 @@
+
+
+INSERT INTO ProtocoleType 
+Values ('SubTransect',6,NULL)
+
+INSERT INTO ObservationDynProp
+VALUES ('nb_contact','Integer')
+
+DECLARE @type int SET @type = (SELECT ID FROM ProtocoleType WHERE Name = 'SubTransect')
+DECLARE @contact int SET @contact = (SELECT ID FROM ObservationDynProp WHERE Name = 'nb_contact')
+
+INSERT INTO ProtocoleType_ObservationDynProp (Required,FK_ProtocoleType,FK_ObservationDynProp)
+VALUES 
+(1,@type,@contact),
+(1,@type,(SELECT ID FROM ObservationDynProp WHERE Name = 'taxon')),
+(1,@type,(SELECT ID FROM ObservationDynProp WHERE Name = 'validator')),
+(1,@type,(SELECT ID FROM ObservationDynProp WHERE Name = 'sampled')),
+(1,@type,(SELECT ID FROM ObservationDynProp WHERE Name = 'picture')),
+(1,@type,(SELECT ID FROM ObservationDynProp WHERE Name = 'cultivated'))
+
+
+
+INSERT INTO ModuleForms (
+[module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue] )
+VALUES
+(1,@type,'taxon','Taxon',0,6,6,'AutocompTreeEditor','form-control',2,10,NULL,'204089',NULL,'fixedCol','fixedCol',1,NULL,NULL),
+(1,@type,'autoRanged','',0,3,3,'GridRanged','form-control',2,200,NULL,'{"range":200,"prefixLabel":"P","inputType":"Number"}',NULL,NULL,NULL,1,NULL,NULL),
+(1,@type,'FK_ProtocoleType','FK_ProtocoleType',0,3,3,'Number','form-control',0,3000,NULL,NULL,NULL,'hide','hide',1,NULL,231),
+
+
+(1,@type,'validator','Validator',0,6,6,'Select','form-control',2,1020,NULL,'SELECT ID as val, Login as label From [User] Union all select -1 as val, '' '' as label' ,NULL,NULL,NULL,1,1,NULL),
+(1,@type,'sampled','Sampled',0,4,4,'Checkbox','form-control',2,1025,NULL,NULL,NULL,'','',1,1,NULL),
+(1,@type,'picture','Picture',0,3,3,'Checkbox','form-control',2,1031,NULL,'',NULL,'','',1,NULL,NULL),
+
+(1,@type,'cultivated','Cultivated',0,4,4,'Checkbox','form-control',2,1035,NULL,'',NULL,'','',1,1,NULL),
+(1,@type,'nb_contact','nb contact',0,4,4,'Number','form-control',2,1040,NULL,'',NULL,'','',1,1,NULL),
+
+(1,@type,'Comments','Comments',0,6,6,'TextArea','form-control',2,2000,NULL,NULL,NULL,'','',1,1,NULL)
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('64_Create_TransectForm',GETDATE(),(SELECT db_name()))
+
+
+GO
