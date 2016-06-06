@@ -68,6 +68,8 @@ define([
     this.cluster = options.cluster || false;
     this.popup = options.popup || false;
     this.legend = options.legend || false;
+    this.legend = true;
+
     this.selection = options.selection || false;
 
     this.dict = {}; //list of markers
@@ -157,7 +159,7 @@ define([
       this.setTotal(this.geoJson);
 
       if(this.legend){
-        this.addCtrl(tpl_legend);
+        this.addLegend();
       }
       if(this.markersLayer){
         this.addMarkersLayer();
@@ -269,17 +271,38 @@ define([
       this.map._onResize();
     },
 
-    addCtrl: function(legend){
-      var MyControl = L.Control.extend({
-          options: {
-              position: 'topright'
-          },
-          onAdd: function (map) {
-              var lg = $.parseHTML(legend);
-              return lg[0];
-          }
-      });
-      this.map.addControl(new MyControl());
+    addLegend: function(){
+      var legend = L.control({position: 'bottomright'});
+
+      legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info-legend');
+        var types = ['station', 'gps', 'argos'];
+        var labels = [];
+
+        for (var i = 0; i < types.length; i++) {
+          labels.push(
+            '<div class="marker marker marker-' + types[i] +'"></div>' + '&nbsp; ' + types[i]
+          );
+        }
+
+        div.innerHTML = labels.join('<br>');
+        return div;
+      };
+
+      legend.addTo(this.map);
+
+
+      // var MyControl = L.Control.extend({
+      //     options: {
+      //         position: 'topright'
+      //     },
+      //     onAdd: function (map) {
+      //         var lg = $.parseHTML(legend);
+      //         return lg[0];
+      //     }
+      // });
+      //this.map.addControl(new MyControl());
     },
 
     requestGeoJson: function(url){
@@ -317,16 +340,26 @@ define([
     },
 
     toggleIconClass: function(m){
-      if (m.checked /*&& !$(m._icon).hasClass('station-marker')*/) {
-        $(m._icon).addClass('selected');
-      }else{
-        $(m._icon).removeClass('selected');
-      }
-      if (m == this.lastFocused) {
-        $(m._icon).addClass('focus');
-      } else {
-        $(m._icon).removeClass('focus');
-      }
+        var className = 'marker';
+
+
+
+        if (m.checked /*&& !$(m._icon).hasClass('station-marker')*/) {
+            $(m._icon).addClass('selected');
+            className += ' selected';
+        }else{
+          $(m._icon).removeClass('selected');
+        }
+        if (m == this.lastFocused) {
+            $(m._icon).addClass('focus');
+            className += ' focus';
+        } else {
+          $(m._icon).removeClass('focus');
+        }
+
+        if( !m._icon ) {
+          m.setIcon(new L.DivIcon({className  : className}));
+        }
     },
 
     setCenter: function(geoJson){
@@ -387,9 +420,6 @@ define([
               break;
             case 'gps':
               className += ' marker-gps';
-              break;
-            case 'rfid':
-              className += ' marker-rfid';
               break;
             case 'arg':
               className += ' marker-argos';
@@ -713,7 +743,7 @@ define([
     },
 
     resetAll: function(){
-      console.log(this.geoJson);
+
       this.updateLayers(this.geoJson);
     },
 
