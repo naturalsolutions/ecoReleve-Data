@@ -62,7 +62,7 @@ define([
 
     this.elem = options.element || 'map';
     this.zoom = config.mapZoom;
-    this.disableClustring = options.disableClustring || 18;
+    this.disableClustring = options.disableClustring || 15;
     this.bbox = options.bbox || false;
     this.area = options.area || false;
     this.cluster = options.cluster || false;
@@ -231,7 +231,7 @@ define([
         },
       });
       this.markersLayer = new CustomMarkerClusterGroup({
-        disableClusteringAtZoom : 15, //2km
+        disableClusteringAtZoom : this.disableClustring, //2km
         maxClusterRadius: 100,
         polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
       });
@@ -699,7 +699,7 @@ define([
 
       $(this.lastFocused._icon).addClass('focus');
 
-      this.map.setView(center);
+      this.map.setView(center, zoom);
 
     },
 
