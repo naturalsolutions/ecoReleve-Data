@@ -1,0 +1,90 @@
+
+INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType] (Name, Status)  
+  VALUES  ('Release ring management', 4);
+
+DECLARE @protid  int ;
+SET @protid = (SELECT ID FROM [EcoReleve_ECWP].[dbo].[ProtocoleType]  WHERE NAME like 'Release ring management');
+
+/** insert missed dynprop ************/
+INSERT INTO [EcoReleve_ECWP].[dbo].[ObservationDynProp] ([Name],[TypeProp])
+VALUES ('Release_ring_code','String'), ('Release_ring_color','String' ), ('Release_ring_position', 'String' )
+DECLARE @dynprop_ring_code_id int ;
+DECLARE @dynprop_ring_color_id int ;
+DECLARE @dynprop_ring_pos_id int ;
+
+/** get dynprop ids ************/
+SET @dynprop_ring_code_id = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Release_ring_code');
+SET @dynprop_ring_color_id = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Release_ring_color');
+SET @dynprop_ring_pos_id  = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Release_ring_position'); 
+
+INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
+      ,Locked,LinkedTable, LinkedField ,LinkedID, LinkSourceID)
+VALUES
+(
+  1,
+@protid,
+@dynprop_ring_code_id ,
+NULL,
+'Individual',
+'@Dyn:Release_Ring_Code',
+'ID',
+'FK_Individual'
+),
+(
+  1,
+@protid,
+@dynprop_ring_color_id ,
+NULL,
+'Individual',
+'@Dyn:Release_Ring_Color',
+'ID',
+'FK_Individual'
+),
+
+(
+  1,
+@protid,
+@dynprop_ring_pos_id ,
+NULL,
+'Individual',
+'@Dyn:Release_Ring_Position',
+'ID',
+'FK_Individual'
+)
+
+
+
+
+
+INSERT INTO  [EcoReleve_ECWP].[dbo].[ModuleForms] (
+      [module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Status] )
+
+VALUES
+(1,@protid,'FK_Individual','Individual ID',1,6,6,'ObjectPicker','form-control',2,1,NULL,'',1),
+(1,@protid,'Release_ring_code','Release ring code',0,6,6,'Text','form-control',2,2,NULL,'',1),
+(1,@protid,'Release_ring_color','Release ring color',0,6,6,'AutocompTreeEditor','form-control',2,3,NULL,204108,1),
+(1,@protid,'Release_ring_position','Release ring position',0,6,6,'AutocompTreeEditor','form-control',2,4,NULL,204107,1),
+(1,@protid,'Comments','Comments',0,12,12,'TextArea','form-control',2,5,NULL,'',1)
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('066_Add_protocol_release_ring_management',GETDATE(),(SELECT db_name()))
+
+
+GO
+
+
