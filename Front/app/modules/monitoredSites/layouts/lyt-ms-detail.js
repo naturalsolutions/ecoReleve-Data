@@ -120,12 +120,12 @@ define([
         name: 'StartDate',
         label: 'Start Date',
         editable: false,
-        cell: 'string'
+        cell: 'stringDate'
       },{
         name: 'EndDate',
         label: 'End Date',
         editable: false,
-        cell: 'string'
+        cell: 'stringDate'
       }, {
         name: 'Type',
         label: 'Type',
