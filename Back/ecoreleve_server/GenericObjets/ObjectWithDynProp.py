@@ -1,4 +1,4 @@
-from ..Models import Base,DBSession
+from ..Models import Base,DBSession,dbConfig
 from sqlalchemy import (Column
     , DateTime
     , Float
@@ -15,7 +15,8 @@ from sqlalchemy import (Column
     , and_
     , or_
     ,distinct
-    ,asc)
+    ,asc
+    ,update)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from collections import OrderedDict
@@ -31,6 +32,7 @@ from ..utils.parseValue import parseValue,find,isEqual
 from sqlalchemy_utils import get_hybrid_properties
 import warnings
 from sqlalchemy import exc as sa_exc
+from sqlalchemy.orm.attributes import set_committed_value
 
 Cle = {'String':'ValueString',
 'Float':'ValueFloat',
@@ -406,9 +408,9 @@ class ObjectWithDynProp:
 
     def deleteLinkedField(self,useDate=None):
         # dynPropToDel = []
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=sa_exc.SAWarning)
-
+        # with warnings.catch_warnings():
+        #     warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+            session = dbConfig['dbSession']()
             if useDate is None:
                 useDate = self.linkedFieldDate()
             for linkProp in self.getLinkedField() :
@@ -416,12 +418,19 @@ class ObjectWithDynProp:
                 obj = LinkedTables[linkProp['LinkedTable']]
 
                 try:
+                    linkedField = linkProp['LinkedField'].replace('@Dyn:','')
                     linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
-                    curObj = self.ObjContext.query(obj).filter(getattr(obj,linkProp['LinkedID']) == linkedSource).one()
+                    linkedObj = session.query(obj).filter(getattr(obj,linkProp['LinkedID']) == linkedSource).one()
 
-                    dynPropValueToDel = curObj.GetDynPropWithDate(linkProp['LinkedField'].replace('@Dyn:',''),useDate)
-                    if dynPropValueToDel is not None : 
-                        self.ObjContext.delete(dynPropValueToDel)
+                    if hasattr(linkedObj,linkedField):
+                        linkedObj.SetProperty(linkedField,None)
+                    else :
+                        dynPropValueToDel = linkedObj.GetDynPropWithDate(linkedField,useDate)
+                        if dynPropValueToDel is not None : 
+                            session.delete(dynPropValueToDel)
+
+                    session.commit()
+                    session.close()
                 except :
                     pass
 
