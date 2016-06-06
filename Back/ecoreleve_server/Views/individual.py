@@ -223,6 +223,8 @@ def getIndivEquipment(request):
         curRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
         if curRow['EndDate'] is not None :
             curRow['EndDate'] = curRow['EndDate'].strftime('%Y-%m-%d %H:%M:%S') 
+        else:
+            curRow['EndDate'] = ''
         response.append(curRow)
 
     return response
