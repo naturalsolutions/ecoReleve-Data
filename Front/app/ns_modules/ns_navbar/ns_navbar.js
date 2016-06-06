@@ -99,6 +99,7 @@ function(Marionette, config,Swal) {
 	  		}
  		},
 		navigateNext: function(){
+			this.checkAjax();
 			/*backgrid grid issue : https://github.com/backbone-paginator/backbone-pageable/issues/158*/
 			this.coll.size();
 			if(this.modelIndex < this.coll.size()-1){
@@ -145,6 +146,7 @@ function(Marionette, config,Swal) {
 		},
 
 		navigatePrev: function(){
+			this.checkAjax();
 			if(this.modelIndex != 0){
 				//noNeed 2 fetch
 				this.modelIndex--;
@@ -239,6 +241,17 @@ function(Marionette, config,Swal) {
 			this.updateIndexState();
 			this.parent.reloadFromNavbar(this.model);
 		},
+		checkAjax : function(){
+      var xhrPool = window.xhrPool;
+      console.log('new route :');
+      console.log(window.xhrPool);
+
+      for(var i=0; i<xhrPool.length; i++){
+         xhrPool[i].abort();
+      }
+       window.xhrPool = [];
+
+    }
 
 	});
 });
