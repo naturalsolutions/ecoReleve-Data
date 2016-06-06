@@ -297,6 +297,7 @@ define([
         url: config.coreUrl + 'individuals/' + this.indivId  + '/locations?geo=true',
         cluster: true,
         zoom: 3,
+        legend: true,
         element: 'map',
         popup: true,
         com: this.com,

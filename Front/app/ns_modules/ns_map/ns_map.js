@@ -68,7 +68,6 @@ define([
     this.cluster = options.cluster || false;
     this.popup = options.popup || false;
     this.legend = options.legend || false;
-    this.legend = true;
 
     this.selection = options.selection || false;
 
