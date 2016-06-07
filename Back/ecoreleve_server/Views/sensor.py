@@ -122,7 +122,7 @@ def getUnicIdentifier (request):
     sensorType = request.params['sensorType']
     query = select([Sensor.UnicIdentifier.label('label'),Sensor.ID.label('val')]).where(Sensor.FK_SensorType == sensorType)
 
-    if equipment :
+    if ( equipment and sensorType == "5" ) :
         existsQuery = select([Equipment]).where(Equipment.FK_Sensor==Sensor.ID)
         query = query.where(exists(existsQuery))
     response = [ OrderedDict(row) for row in session.execute(query).fetchall()]
