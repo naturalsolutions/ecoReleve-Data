@@ -21,7 +21,7 @@ function( Marionette, LytRootView, Router, Controller) {
 
   var app = {};
   var JST = window.JST = window.JST || {};
-
+  window.xhrPool = [];
 
 
   Backbone.Marionette.Renderer.render = function(template, data) {
@@ -48,7 +48,10 @@ function( Marionette, LytRootView, Router, Controller) {
   $(window).ajaxError(function() {
     $('#header-loader').addClass('hidden');
   });
-
+  $(document).ajaxSend(function(e, xhr, opt){
+    console.log('appel ajax en cours');
+    window.xhrPool.push(xhr);
+  });
   window.onerror = function() {
     $('#header-loader').addClass('hidden');
   };
