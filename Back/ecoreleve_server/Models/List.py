@@ -420,8 +420,8 @@ class SensorList(ListObjectWithDynProp):
 
 class MonitoredSiteList(ListObjectWithDynProp):
 
-    def __init__(self,frontModule, typeObj = None) :
-        super().__init__(MonitoredSite,frontModule, typeObj = typeObj)
+    def __init__(self,frontModule, typeObj = None, View = None) :
+        super().__init__(MonitoredSite,frontModule, typeObj = typeObj, View = View)
 
     def GetJoinTable (self,searchInfo) :
         EquipmentTable = Base.metadata.tables['MonitoredSiteEquipment']
