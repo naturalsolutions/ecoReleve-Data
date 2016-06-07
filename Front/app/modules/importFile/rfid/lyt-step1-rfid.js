@@ -11,7 +11,7 @@ define([
   'ns_modules/ns_com',
   'i18n'
 
-], function($, _, Backbone, Marionette, Swal, Backgrid, config, 
+], function($, _, Backbone, Marionette, Swal, Backgrid, config,
   Step, NsGrid, Com
 ) {
 
@@ -145,7 +145,7 @@ define([
         pagingServerSide: false,
         rowClicked: true,
         //com: _this.com,
-      }); 
+      });
       this.grid.rowClicked = function(args) {
         _this.rowClicked(args.row);
       };
