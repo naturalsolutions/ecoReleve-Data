@@ -27,7 +27,6 @@ route_prefix = 'sensors/'
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST')
 def uploadFile(request):
-    print ("######################################################################################")
     type_= request.matchdict['type']
     dictFuncImport={
     'argos': uploadFileArgos,
