@@ -11,6 +11,13 @@ VALUES ('Radius_prospected','Float'),('Search_conditions','String'),('Site_descr
 
 
 /** get dynprop ids ************/
+DECLARE @dynprop_sensor_id  int ;
+DECLARE @dynprop_start_time  int ;
+DECLARE @dynprop_duration  int ;
+DECLARE @dynprop_radius  int ;
+DECLARE @dynprop_search_cond  int ;
+DECLARE @dynprop_site_desc  int ;
+
 SET @dynprop_sensor_id = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'FK_Sensor');
 SET @dynprop_start_time = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'start_time');
 SET @dynprop_duration = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'observation_duration');
@@ -99,13 +106,12 @@ INSERT INTO  [EcoReleve_ECWP].[dbo].[ModuleForms] (
       ,[Status] )
 
 VALUES
-(1,@protid,'FK_Individual','Individual ID',1,6,6,'ObjectPicker','form-control',2,1,NULL,'',1),
-(1,@protid,'FK_Sensor','Related sensor',0,6,6,'ObjectPicker','form-control',2,2,NULL,'{"usedLabel":"UnicIdentifier"}',1),
-(1,@protid,'start_time','Begin time',1,6,6,'DateTimePickerEditor','form-control',2,3,NULL,{"format":"HH:mm:ss"},1),
-(1,@protid,'observation_duration','Duration',1,6,6,'DateTimePickerEditor','form-control',2,4,NULL,{"format":"HH:mm:ss"},1),
-(1,@protid,'Radius_prospected','Radius prospected',0,12,12,'Number','form-control',2,5,NULL,'',1)
-(1,@protid,'Search_conditions','Search conditions',0,12,12,'AutocompTreeEditor','form-control',2,6,NULL,2008523,1)
-(1,@protid,'Site_description','Site description',0,12,12,'TextArea','form-control',2,7,NULL,'',1)
+(1,@protid,'FK_Sensor','Related sensor',0,6,6,'ObjectPicker','form-control',2,1,NULL,'{"usedLabel":"UnicIdentifier"}',1),
+(1,@protid,'start_time','Begin time',1,6,6,'DateTimePickerEditor','form-control',2,2,NULL,{"format":"HH:mm:ss"},1),
+(1,@protid,'observation_duration','Duration',1,6,6,'DateTimePickerEditor','form-control',2,3,NULL,{"format":"HH:mm:ss"},1),
+(1,@protid,'Radius_prospected','Radius prospected',0,12,12,'Number','form-control',2,4,NULL,'',1)
+(1,@protid,'Search_conditions','Search conditions',0,12,12,'AutocompTreeEditor','form-control',2,5,NULL,2008523,1)
+(1,@protid,'Site_description','Site description',0,12,12,'TextArea','form-control',2,6,NULL,'',1)
 
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('066_Add_protocol_Transmitter_research_condition',GETDATE(),(SELECT db_name()))
