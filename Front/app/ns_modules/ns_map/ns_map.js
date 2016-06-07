@@ -420,7 +420,7 @@ define([
             case 'gps':
               className += ' marker-gps';
               break;
-            case 'arg':
+            case 'argos':
               className += ' marker-argos';
               break;
             default:
