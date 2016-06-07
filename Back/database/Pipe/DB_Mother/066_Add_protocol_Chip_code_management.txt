@@ -1,19 +1,19 @@
 
-INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType] (Name, Status)  
+INSERT INTO [ProtocoleType] (Name, Status)  
   VALUES  ('Chip code management', 4);
 
 DECLARE @protid  int ;
-SET @protid = (SELECT ID FROM [EcoReleve_ECWP].[dbo].[ProtocoleType]  WHERE NAME like 'Chip code management');
+SET @protid = (SELECT ID FROM [ProtocoleType]  WHERE NAME like 'Chip code management');
 
 /** insert missed dynprop ************/
-INSERT INTO [EcoReleve_ECWP].[dbo].[ObservationDynProp] ([Name],[TypeProp])
+INSERT INTO [ObservationDynProp] ([Name],[TypeProp])
 VALUES ('Chip_code','String')
 DECLARE @dynprop_chip_code_id int ;
 
 /** get dynprop ids ************/
-SET @dynprop_chip_code_id = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Chip_code');
+SET @dynprop_chip_code_id = (SELECT [ID] FROM [ObservationDynProp] where Name like 'Chip_code');
 
-INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
+INSERT INTO [ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
       ,Locked,LinkedTable, LinkedField ,LinkedID, LinkSourceID)
 VALUES
 (
@@ -28,7 +28,7 @@ NULL,
 )
 
 
-INSERT INTO  [EcoReleve_ECWP].[dbo].[ModuleForms] (
+INSERT INTO  [ModuleForms] (
       [module_id]
       ,[TypeObj]
       ,[Name]

@@ -1,12 +1,12 @@
 
-INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType] (Name, Status)  
+INSERT INTO  [ProtocoleType] (Name, Status)  
   VALUES  ('Transmitter research condition', 4);
 
 DECLARE @protid  int ;
-SET @protid = (SELECT ID FROM [EcoReleve_ECWP].[dbo].[ProtocoleType]  WHERE NAME like 'Transmitter research condition');
+SET @protid = (SELECT ID FROM  [ProtocoleType]  WHERE NAME like 'Transmitter research condition');
 
 /** insert missed dynprop ************/
-INSERT INTO [EcoReleve_ECWP].[dbo].[ObservationDynProp] ([Name],[TypeProp])
+INSERT INTO  [ObservationDynProp] ([Name],[TypeProp])
 VALUES ('Radius_prospected','Float'),('Search_conditions','String'),('Site_description','String')
 
 
@@ -18,14 +18,14 @@ DECLARE @dynprop_radius  int ;
 DECLARE @dynprop_search_cond  int ;
 DECLARE @dynprop_site_desc  int ;
 
-SET @dynprop_sensor_id = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'FK_Sensor');
-SET @dynprop_start_time = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'start_time');
-SET @dynprop_duration = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'observation_duration');
-SET @dynprop_radius = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Radius_prospected');
-SET @dynprop_search_cond = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Search_conditions');
-SET @dynprop_site_desc = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Site_description');
+SET @dynprop_sensor_id = (SELECT [ID] FROM  [ObservationDynProp] where Name like 'FK_Sensor');
+SET @dynprop_start_time = (SELECT [ID] FROM  [ObservationDynProp] where Name like 'start_time');
+SET @dynprop_duration = (SELECT [ID] FROM  [ObservationDynProp] where Name like 'observation_duration');
+SET @dynprop_radius = (SELECT [ID] FROM  [ObservationDynProp] where Name like 'Radius_prospected');
+SET @dynprop_search_cond = (SELECT [ID] FROM  [ObservationDynProp] where Name like 'Search_conditions');
+SET @dynprop_site_desc = (SELECT [ID] FROM  [ObservationDynProp] where Name like 'Site_description');
 
-INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
+INSERT INTO  [ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
       ,Locked,LinkedTable, LinkedField ,LinkedID, LinkSourceID)
 VALUES
 (
@@ -89,7 +89,7 @@ NULL,
 NULL
 )
 
-INSERT INTO  [EcoReleve_ECWP].[dbo].[ModuleForms] (
+INSERT INTO   [ModuleForms] (
       [module_id]
       ,[TypeObj]
       ,[Name]
@@ -107,8 +107,8 @@ INSERT INTO  [EcoReleve_ECWP].[dbo].[ModuleForms] (
 
 VALUES
 (1,@protid,'FK_Sensor','Related sensor',0,6,6,'ObjectPicker','form-control',2,1,NULL,'{"usedLabel":"UnicIdentifier"}',1),
-(1,@protid,'start_time','Begin time',1,6,6,'DateTimePickerEditor','form-control',2,2,NULL,{"format":"HH:mm:ss"},1),
-(1,@protid,'observation_duration','Duration',1,6,6,'DateTimePickerEditor','form-control',2,3,NULL,{"format":"HH:mm:ss"},1),
+(1,@protid,'start_time','Begin time',1,6,6,'DateTimePickerEditor','form-control',2,2,NULL,'{"format":"HH:mm:ss"}',1),
+(1,@protid,'observation_duration','Duration',1,6,6,'DateTimePickerEditor','form-control',2,3,NULL,'{"format":"HH:mm:ss"}',1),
 (1,@protid,'Radius_prospected','Radius prospected',0,12,12,'Number','form-control',2,4,NULL,'',1)
 (1,@protid,'Search_conditions','Search conditions',0,12,12,'AutocompTreeEditor','form-control',2,5,NULL,2008523,1)
 (1,@protid,'Site_description','Site description',0,12,12,'TextArea','form-control',2,6,NULL,'',1)

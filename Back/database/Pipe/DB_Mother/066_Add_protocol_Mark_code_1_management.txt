@@ -1,23 +1,23 @@
 
-INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType] (Name, Status)  
+INSERT INTO [ProtocoleType] (Name, Status)  
   VALUES  ('Mark code 1 management', 4);
 
 DECLARE @protid  int ;
-SET @protid = (SELECT ID FROM [EcoReleve_ECWP].[dbo].[ProtocoleType]  WHERE NAME like 'Mark code 1 management');
+SET @protid = (SELECT ID FROM [ProtocoleType]  WHERE NAME like 'Mark code 1 management');
 
 /** insert missed dynprop ************/
-INSERT INTO [EcoReleve_ECWP].[dbo].[ObservationDynProp] ([Name],[TypeProp])
+INSERT INTO [ObservationDynProp] ([Name],[TypeProp])
 VALUES ('Mark_code_1','String'), ('Mark_color_1','String' ), ('Mark_position_1', 'String' )
 DECLARE @dynprop_mark_code_id int ;
 DECLARE @dynprop_mark_color_id int ;
 DECLARE @dynprop_mark_pos_id int ;
 
 /** get dynprop ids ************/
-SET @dynprop_mark_code_id = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Mark_code_1');
-SET @dynprop_mark_color_id = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Mark_color_1');
-SET @dynprop_mark_pos_id = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Mark_position_1'); 
+SET @dynprop_mark_code_id = (SELECT [ID] FROM [ObservationDynProp] where Name like 'Mark_code_1');
+SET @dynprop_mark_color_id = (SELECT [ID] FROM [ObservationDynProp] where Name like 'Mark_color_1');
+SET @dynprop_mark_pos_id = (SELECT [ID] FROM [ObservationDynProp] where Name like 'Mark_position_1'); 
 
-INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
+INSERT INTO [ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
       ,Locked,LinkedTable, LinkedField ,LinkedID, LinkSourceID)
 VALUES
 (
@@ -56,7 +56,7 @@ NULL,
 
 
 
-INSERT INTO  [EcoReleve_ECWP].[dbo].[ModuleForms] (
+INSERT INTO  [ModuleForms] (
       [module_id]
       ,[TypeObj]
       ,[Name]

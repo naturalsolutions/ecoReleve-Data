@@ -1,16 +1,13 @@
 ﻿
-USE EcoReleve_ECWP
-
-
-INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType] (Name, Status)  
+INSERT INTO [ProtocoleType] (Name, Status)  
   VALUES  ('Sex determination', 4);
 
 DECLARE @protid  int ;
 DECLARE @dynpropid int ;
-SET @protid = (SELECT ID FROM [EcoReleve_ECWP].[dbo].[ProtocoleType]  WHERE NAME like 'Sex determination');
-SET @dynpropid = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'sex');
+SET @protid = (SELECT ID FROM [ProtocoleType]  WHERE NAME like 'Sex determination');
+SET @dynpropid = (SELECT [ID] FROM [ObservationDynProp] where Name like 'sex');
 
-INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
+INSERT INTO [ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
       ,Locked,LinkedTable, LinkedField ,LinkedID, LinkSourceID)
 VALUES
 (
@@ -24,7 +21,7 @@ NULL,
 'FK_Individual'
 )
 
-INSERT INTO  [EcoReleve_ECWP].[dbo].[ModuleForms] (
+INSERT INTO  [ModuleForms] (
       [module_id]
       ,[TypeObj]
       ,[Name]

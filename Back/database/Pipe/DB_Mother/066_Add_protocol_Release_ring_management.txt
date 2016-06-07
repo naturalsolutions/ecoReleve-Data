@@ -1,23 +1,23 @@
 
-INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType] (Name, Status)  
+INSERT INTO [ProtocoleType] (Name, Status)  
   VALUES  ('Release ring management', 4);
 
 DECLARE @protid  int ;
-SET @protid = (SELECT ID FROM [EcoReleve_ECWP].[dbo].[ProtocoleType]  WHERE NAME like 'Release ring management');
+SET @protid = (SELECT ID FROM [ProtocoleType]  WHERE NAME like 'Release ring management');
 
 /** insert missed dynprop ************/
-INSERT INTO [EcoReleve_ECWP].[dbo].[ObservationDynProp] ([Name],[TypeProp])
+INSERT INTO [ObservationDynProp] ([Name],[TypeProp])
 VALUES ('Release_ring_code','String'), ('Release_ring_color','String' ), ('Release_ring_position', 'String' )
 DECLARE @dynprop_ring_code_id int ;
 DECLARE @dynprop_ring_color_id int ;
 DECLARE @dynprop_ring_pos_id int ;
 
 /** get dynprop ids ************/
-SET @dynprop_ring_code_id = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Release_ring_code');
-SET @dynprop_ring_color_id = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Release_ring_color');
-SET @dynprop_ring_pos_id  = (SELECT [ID] FROM [EcoReleve_ECWP].[dbo].[ObservationDynProp] where Name like 'Release_ring_position'); 
+SET @dynprop_ring_code_id = (SELECT [ID] FROM [ObservationDynProp] where Name like 'Release_ring_code');
+SET @dynprop_ring_color_id = (SELECT [ID] FROM [ObservationDynProp] where Name like 'Release_ring_color');
+SET @dynprop_ring_pos_id  = (SELECT [ID] FROM [ObservationDynProp] where Name like 'Release_ring_position'); 
 
-INSERT INTO [EcoReleve_ECWP].[dbo].[ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
+INSERT INTO [ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
       ,Locked,LinkedTable, LinkedField ,LinkedID, LinkSourceID)
 VALUES
 (
@@ -56,7 +56,7 @@ NULL,
 
 
 
-INSERT INTO  [EcoReleve_ECWP].[dbo].[ModuleForms] (
+INSERT INTO  [ModuleForms] (
       [module_id]
       ,[TypeObj]
       ,[Name]
