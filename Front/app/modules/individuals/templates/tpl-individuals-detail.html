@@ -38,6 +38,10 @@
       </div>
 
       <div id="locations" class="tab-pane fade">
+        <div id="locationsFilter"></div>
+        <button id="filter" class="btn btn-success pull-right js-filter"><span class="reneco reneco-search"></span>&nbsp;Search
+        </button>
+        <br/>
         <div id="locationsGrid"></div>
         <div id="locationsPaginator"></div>
       </div>
@@ -54,9 +58,14 @@
 </div>
 
 <div id="mapContainer" class=" no-padding col-xs-12 col-md-7 ns-full-height">
-  <div id="map">
-    <div id="showDetails" class="masqued">
-      <span class="glyphicon glyphicon-chevron-right big"/>
+  <div class="toolbar top dark">
+    <legend class="pull-left">Locations : <span id="totalLocations"></span></legend>
+  </div>
+  <div class = "crop1 overflowXH full-height">
+    <div id="map" >
+      <div id="showDetails" class="masqued">
+        <span class="glyphicon glyphicon-chevron-right big"/>
+      </div>
     </div>
   </div>
 </div>

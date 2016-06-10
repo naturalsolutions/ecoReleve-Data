@@ -344,6 +344,9 @@ define([
         });
       }
 
+      if (params.toValidate.length == this.grid.collection.state.totalRecords) {
+        params.toValidate = 'all';
+      }
       params.toValidate = JSON.stringify(params.toValidate);
       var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
       $.ajax({
@@ -385,7 +388,7 @@ define([
         title: opt.title || 'error',
         text: JSON.stringify(opt.resp)|| '',
         type: type,
-        timer: 2000,
+        //timer: 2000,
         showCancelButton: false,
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',

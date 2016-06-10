@@ -27,6 +27,7 @@ define([
       'click button#saveFromCriterias': 'saveFromCriteras',
       'click button#createNew': 'createNew',
       'click #indivTypeTabs a.tab-link' : 'indivTypeTabs',
+      'click button#detailsShow': 'openDetails',
     },
 
     initialize: function(options) {
@@ -220,6 +221,13 @@ define([
       this.com = new Com();
       this.displayGrid();
       this.displayFilter();
+    },
+
+       openDetails: function(event) {
+      console.log($(this._input).attr('data_value'))
+      var url = 'http://'+window.location.hostname+window.location.pathname+'#individuals/'+ $(this._input).val();
+      var win = window.open(url, '_blank');
+      win.focus();
     },
   });
 });

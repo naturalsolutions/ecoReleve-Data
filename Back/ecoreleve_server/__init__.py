@@ -25,7 +25,7 @@ from .Models import (
     db,
     loadThesaurusTrad
     )
-from .Views import add_routes
+from .Views import add_routes,add_cors_headers_response_callback
 
 from .pyramid_jwtauth import (
     JWTAuthenticationPolicy,
@@ -84,6 +84,7 @@ def main(global_config, **settings):
 
     binds = {"default": engine, "Export": engineExport}
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
+    dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine))
     config.add_request_method(db, name='dbsession', reify=True)
 
     if 'loadExportDB' in settings and settings['loadExportDB'] == 'False' :
@@ -114,7 +115,11 @@ def main(global_config, **settings):
     includeme(config)
     config.set_root_factory(SecurityRoot)
 
+
+    config.add_subscriber(add_cors_headers_response_callback, NewRequest)
+
     loadThesaurusTrad(config)
+
     # Set the default permission level to 'read'
     config.set_default_permission('read')
     add_routes(config)
