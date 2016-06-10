@@ -1,0 +1,28 @@
+
+INSERT INTO [EcoReleve_ECWP].[dbo].[ModuleGrids]
+SELECT 13
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[GridRender]
+      ,[GridSize]
+      ,[CellType]
+      ,[GridOrder]
+      ,[QueryName]
+      ,[Options]
+      ,[FilterOrder]
+      ,[FilterSize]
+      ,[FilterClass]
+      ,[IsSearchable]
+      ,[FilterDefaultValue]
+      ,[FilterRender]
+      ,[FilterType]
+      ,[Status]
+  FROM [EcoReleve_ECWP].[dbo].[ModuleGrids]
+  where name = 'fk_sensor' and Module_ID = 8
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('67_Up_CONF_Site_ADD_SensorFilter',GETDATE(),(SELECT db_name()))
+
+
+GO
