@@ -60,6 +60,7 @@ define([
         this.stationId = options.id;
       }
       this.com = new Com();
+      this.nbObs = [];
     },
 
     activeGridPanel: function(e) {
@@ -118,6 +119,21 @@ define([
         url: url,
         rowClicked: true,
         totalElement: 'totalEntries',
+        affectTotalRecords : function(){  
+            var nbobs;
+          if(this.paginator || this.pagingServerSide){
+          nbobs = this.grid.collection.state.totalRecords || 0;
+          }else{
+            nbobs =this.grid.collection.length || 0;
+          }
+          if(_this.nbObs.length == 0) {
+            $('#totalEntries').html(nbobs);
+            _this.nbObs[0] = nbobs;
+          } else {
+            _this.nbObs[1] = nbobs;
+            $('#totalEntries').html( nbobs + "/" + _this.nbObs[0]);
+          }
+        }
       });
       this.grid.rowClicked = function(args) {
         _this.rowClicked(args.row);
