@@ -1,0 +1,90 @@
+
+INSERT INTO [ProtocoleType] (Name, Status)  
+  VALUES  ('Mark code 1 management', 4);
+
+DECLARE @protid  int ;
+SET @protid = (SELECT ID FROM [ProtocoleType]  WHERE NAME like 'Mark code 1 management');
+
+/** insert missed dynprop ************/
+INSERT INTO [ObservationDynProp] ([Name],[TypeProp])
+VALUES ('Mark_code_1','String'), ('Mark_color_1','String' ), ('Mark_position_1', 'String' )
+DECLARE @dynprop_mark_code_id int ;
+DECLARE @dynprop_mark_color_id int ;
+DECLARE @dynprop_mark_pos_id int ;
+
+/** get dynprop ids ************/
+SET @dynprop_mark_code_id = (SELECT [ID] FROM [ObservationDynProp] where Name like 'Mark_code_1');
+SET @dynprop_mark_color_id = (SELECT [ID] FROM [ObservationDynProp] where Name like 'Mark_color_1');
+SET @dynprop_mark_pos_id = (SELECT [ID] FROM [ObservationDynProp] where Name like 'Mark_position_1'); 
+
+INSERT INTO [ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
+      ,Locked,LinkedTable, LinkedField ,LinkedID, LinkSourceID)
+VALUES
+(
+  1,
+@protid,
+@dynprop_mark_code_id ,
+NULL,
+'Individual',
+'@Dyn:Mark_code_1',
+'ID',
+'FK_Individual'
+),
+(
+  1,
+@protid,
+@dynprop_mark_color_id ,
+NULL,
+'Individual',
+'@Dyn:Mark_Color_1',
+'ID',
+'FK_Individual'
+),
+
+(
+  1,
+@protid,
+@dynprop_mark_pos_id ,
+NULL,
+'Individual',
+'@Dyn:Mark_Position_1',
+'ID',
+'FK_Individual'
+)
+
+
+
+
+
+INSERT INTO  [ModuleForms] (
+      [module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Status] )
+
+VALUES
+(1,@protid,'FK_Individual','Individual ID',1,6,6,'ObjectPicker','form-control',2,1,NULL,'',1),
+(1,@protid,'Mark_code_1','Mark code 1',0,6,6,'Text','form-control',2,2,NULL,'',1),
+(1,@protid,'Mark_color_1','Mark color 1',0,6,6,'AutocompTreeEditor','form-control',2,3,NULL,204108,1),
+(1,@protid,'Mark_position_1','Mark position 1',0,6,6,'AutocompTreeEditor','form-control',2,4,NULL,204107,1),
+(1,@protid,'Comments','Comments',0,12,12,'TextArea','form-control',2,5,NULL,'',1)
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('066_Add_protocol_Mark_code_1_management',GETDATE(),(SELECT db_name()))
+
+
+GO
+
+

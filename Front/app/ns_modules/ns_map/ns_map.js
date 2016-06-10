@@ -68,6 +68,7 @@ define([
     this.cluster = options.cluster || false;
     this.popup = options.popup || false;
     this.legend = options.legend || false;
+
     this.selection = options.selection || false;
 
     this.dict = {}; //list of markers
@@ -153,38 +154,11 @@ define([
       }
     },
 
-    move: function(){
-      //draft for dynamic visualisation
-      var features = {"type": "FeatureCollection", "features": [{"geometry": {"coordinates": [33.2795, -3.90556], "type": "Point"}, "properties": {"speed": -2.81, "sensor": "136", "date": "19/04/2015 06:43:40", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.28273, -3.88909], "type": "Point"}, "properties": {"speed": -0.073, "sensor": "136", "date": "19/04/2015 07:17:14", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.28303, -3.88907], "type": "Point"}, "properties": {"speed": -0.23, "sensor": "136", "date": "19/04/2015 07:44:31", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.28294, -3.88832], "type": "Point"}, "properties": {"speed": -0.232, "sensor": "136", "date": "19/04/2015 08:02:49", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.28364, -3.88757], "type": "Point"}, "properties": {"speed": -0.422, "sensor": "136", "date": "19/04/2015 08:29:42", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.28563, -3.88761], "type": "Point"}, "properties": {"speed": -0.323, "sensor": "136", "date": "19/04/2015 09:01:07", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.28418, -3.88928], "type": "Point"}, "properties": {"speed": -0.094, "sensor": "136", "date": "19/04/2015 09:42:44", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.28399, -3.88948], "type": "Point"}, "properties": {"speed": -0.123, "sensor": "136", "date": "19/04/2015 10:00:42", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.28299, -3.88895], "type": "Point"}, "properties": {"speed": -0.488, "sensor": "136", "date": "19/04/2015 11:00:22", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27915, -3.88705], "type": "Point"}, "properties": {"speed": -0.862, "sensor": "136", "date": "19/04/2015 11:57:10", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27862, -3.88682], "type": "Point"}, "properties": {"speed": -0.642, "sensor": "136", "date": "19/04/2015 12:01:33", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27521, -3.88234], "type": "Point"}, "properties": {"speed": -0.106, "sensor": "136", "date": "19/04/2015 12:54:09", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27525, -3.88222], "type": "Point"}, "properties": {"speed": -0.177, "sensor": "136", "date": "19/04/2015 13:00:56", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27401, -3.88103], "type": "Point"}, "properties": {"speed": -0.168, "sensor": "136", "date": "19/04/2015 14:00:48", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.2741, -3.88061], "type": "Point"}, "properties": {"speed": -0.178, "sensor": "136", "date": "19/04/2015 14:15:06", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27298, -3.88113], "type": "Point"}, "properties": {"speed": -0.068, "sensor": "136", "date": "19/04/2015 15:00:18", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27236, -3.88104], "type": "Point"}, "properties": {"speed": -0.17, "sensor": "136", "date": "19/04/2015 16:01:35", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27347, -3.88219], "type": "Point"}, "properties": {"speed": -0.229, "sensor": "136", "date": "19/04/2015 16:59:09", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27333, -3.88218], "type": "Point"}, "properties": {"speed": -0.132, "sensor": "136", "date": "19/04/2015 17:03:20", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27224, -3.8818], "type": "Point"}, "properties": {"speed": -0.058, "sensor": "136", "date": "19/04/2015 18:00:34", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27228, -3.8819], "type": "Point"}, "properties": {"speed": -0.128, "sensor": "136", "date": "19/04/2015 18:10:52", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27241, -3.88066], "type": "Point"}, "properties": {"speed": -0.051, "sensor": "136", "date": "19/04/2015 19:05:17", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.2724, -3.88048], "type": "Point"}, "properties": {"speed": -0.028, "sensor": "136", "date": "19/04/2015 19:25:27", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27248, -3.88028], "type": "Point"}, "properties": {"speed": -0.012, "sensor": "136", "date": "19/04/2015 20:09:51", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.2723, -3.88024], "type": "Point"}, "properties": {"speed": -0.018, "sensor": "136", "date": "19/04/2015 21:51:22", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27246, -3.88026], "type": "Point"}, "properties": {"speed": -0.005, "sensor": "136", "date": "19/04/2015 22:52:22", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.2725, -3.88024], "type": "Point"}, "properties": {"speed": -0.006, "sensor": "136", "date": "19/04/2015 23:56:41", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27245, -3.88029], "type": "Point"}, "properties": {"speed": -0.007, "sensor": "136", "date": "20/04/2015 01:05:15", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27248, -3.88021], "type": "Point"}, "properties": {"speed": -0.006, "sensor": "136", "date": "20/04/2015 02:18:08", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27241, -3.88022], "type": "Point"}, "properties": {"speed": -0.002, "sensor": "136", "date": "20/04/2015 03:35:22", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27239, -3.88022], "type": "Point"}, "properties": {"speed": -0.038, "sensor": "136", "date": "20/04/2015 04:51:55", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27247, -3.88076], "type": "Point"}, "properties": {"speed": -0.2, "sensor": "136", "date": "20/04/2015 06:12:15", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27144, -3.88269], "type": "Point"}, "properties": {"speed": -0.019, "sensor": "136", "date": "20/04/2015 07:16:04", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27152, -3.88257], "type": "Point"}, "properties": {"speed": -0.417, "sensor": "136", "date": "20/04/2015 08:00:06", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.2723, -3.88157], "type": "Point"}, "properties": {"speed": -0.13, "sensor": "136", "date": "20/04/2015 08:18:22", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27242, -3.8806], "type": "Point"}, "properties": {"speed": -0.008, "sensor": "136", "date": "20/04/2015 09:00:13", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27242, -3.88062], "type": "Point"}, "properties": {"speed": -0.403, "sensor": "136", "date": "20/04/2015 09:15:40", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.2745, -3.87829], "type": "Point"}, "properties": {"speed": -1.167, "sensor": "136", "date": "20/04/2015 10:02:53", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27441, -3.88375], "type": "Point"}, "properties": {"speed": -0.198, "sensor": "136", "date": "20/04/2015 10:28:57", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27447, -3.88489], "type": "Point"}, "properties": {"speed": -0.201, "sensor": "136", "date": "20/04/2015 11:01:06", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27483, -3.88659], "type": "Point"}, "properties": {"speed": -0.049, "sensor": "136", "date": "20/04/2015 11:49:43", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27479, -3.88668], "type": "Point"}, "properties": {"speed": -0.154, "sensor": "136", "date": "20/04/2015 12:00:38", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27573, -3.8859], "type": "Point"}, "properties": {"speed": -1.013, "sensor": "136", "date": "20/04/2015 12:50:02", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27643, -3.88421], "type": "Point"}, "properties": {"speed": -0.391, "sensor": "136", "date": "20/04/2015 13:00:24", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27355, -3.88159], "type": "Point"}, "properties": {"speed": -0.043, "sensor": "136", "date": "20/04/2015 14:02:09", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27339, -3.88147], "type": "Point"}, "properties": {"speed": -0.025, "sensor": "136", "date": "20/04/2015 14:31:42", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27342, -3.88159], "type": "Point"}, "properties": {"speed": -0.131, "sensor": "136", "date": "20/04/2015 15:01:01", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.2722, -3.88175], "type": "Point"}, "properties": {"speed": -0.077, "sensor": "136", "date": "20/04/2015 16:03:20", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27224, -3.88219], "type": "Point"}, "properties": {"speed": -0.232, "sensor": "136", "date": "20/04/2015 16:35:08", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27292, -3.88308], "type": "Point"}, "properties": {"speed": -0.091, "sensor": "136", "date": "20/04/2015 17:04:04", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27208, -3.88284], "type": "Point"}, "properties": {"speed": -0.14, "sensor": "136", "date": "20/04/2015 18:07:05", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27282, -3.88126], "type": "Point"}, "properties": {"speed": -0.041, "sensor": "136", "date": "20/04/2015 19:19:14", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27304, -3.88106], "type": "Point"}, "properties": {"speed": -0.006, "sensor": "136", "date": "20/04/2015 20:04:38", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27303, -3.88118], "type": "Point"}, "properties": {"speed": -0.009, "sensor": "136", "date": "20/04/2015 21:54:06", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27309, -3.8811], "type": "Point"}, "properties": {"speed": -0.006, "sensor": "136", "date": "20/04/2015 22:58:42", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27307, -3.88103], "type": "Point"}, "properties": {"speed": -0.009, "sensor": "136", "date": "21/04/2015 00:07:38", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27299, -3.8811], "type": "Point"}, "properties": {"speed": -0.002, "sensor": "136", "date": "21/04/2015 01:20:08", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27302, -3.88111], "type": "Point"}, "properties": {"speed": -0.005, "sensor": "136", "date": "21/04/2015 02:37:05", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27301, -3.88117], "type": "Point"}, "properties": {"speed": -0.024, "sensor": "136", "date": "21/04/2015 03:54:23", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27303, -3.88151], "type": "Point"}, "properties": {"speed": -0.235, "sensor": "136", "date": "21/04/2015 05:15:09", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27312, -3.88446], "type": "Point"}, "properties": {"speed": -0.113, "sensor": "136", "date": "21/04/2015 06:25:06", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27377, -3.88367], "type": "Point"}, "properties": {"speed": -0.093, "sensor": "136", "date": "21/04/2015 07:19:42", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27337, -3.8842], "type": "Point"}, "properties": {"speed": -0.517, "sensor": "136", "date": "21/04/2015 08:02:08", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27732, -3.88411], "type": "Point"}, "properties": {"speed": -0.074, "sensor": "136", "date": "21/04/2015 08:53:05", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.2774, -3.8841], "type": "Point"}, "properties": {"speed": -0.106, "sensor": "136", "date": "21/04/2015 09:00:25", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27726, -3.88414], "type": "Point"}, "properties": {"speed": -0.169, "sensor": "136", "date": "21/04/2015 09:09:28", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27597, -3.88416], "type": "Point"}, "properties": {"speed": -0.211, "sensor": "136", "date": "21/04/2015 10:00:15", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27423, -3.88505], "type": "Point"}, "properties": {"speed": -0.137, "sensor": "136", "date": "21/04/2015 11:00:05", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27465, -3.88578], "type": "Point"}, "properties": {"speed": -0.152, "sensor": "136", "date": "21/04/2015 11:36:03", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27496, -3.88632], "type": "Point"}, "properties": {"speed": -0.158, "sensor": "136", "date": "21/04/2015 12:00:09", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27541, -3.88794], "type": "Point"}, "properties": {"speed": -1.232, "sensor": "136", "date": "21/04/2015 13:00:42", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27484, -3.88672], "type": "Point"}, "properties": {"speed": -0.287, "sensor": "136", "date": "21/04/2015 13:07:02", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27333, -3.88464], "type": "Point"}, "properties": {"speed": -0.14, "sensor": "136", "date": "21/04/2015 14:00:30", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27344, -3.88479], "type": "Point"}, "properties": {"speed": -0.273, "sensor": "136", "date": "21/04/2015 14:08:39", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27192, -3.88303], "type": "Point"}, "properties": {"speed": -0.041, "sensor": "136", "date": "21/04/2015 15:00:14", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27165, -3.88271], "type": "Point"}, "properties": {"speed": -0.239, "sensor": "136", "date": "21/04/2015 16:01:08", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27296, -3.88442], "type": "Point"}, "properties": {"speed": -0.039, "sensor": "136", "date": "21/04/2015 16:55:05", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27292, -3.88447], "type": "Point"}, "properties": {"speed": -0.114, "sensor": "136", "date": "21/04/2015 17:04:12", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27208, -3.88349], "type": "Point"}, "properties": {"speed": -0.117, "sensor": "136", "date": "21/04/2015 18:12:21", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27275, -3.88278], "type": "Point"}, "properties": {"speed": -0.061, "sensor": "136", "date": "21/04/2015 19:03:03", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27238, -3.88311], "type": "Point"}, "properties": {"speed": -0.032, "sensor": "136", "date": "21/04/2015 19:52:57", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27242, -3.88327], "type": "Point"}, "properties": {"speed": -0.068, "sensor": "136", "date": "21/04/2015 20:23:22", "type": "GSM"}, "type": "Feature"}, {"geometry": {"coordinates": [33.27262, -3.88251], "type": "Point"}, "properties": {"speed": -0.022, "sensor": "136", "date": "21/04/2015 21:28:28", "type": "GSM"}, "type": "Feature"}], "type": "FeatureCollection"}
-      features = features.features;
-
-      var featuresList = [];
-      var speed = [];
-
-      for (var i = features.length - 1; i >= 0; i--) {
-        featuresList.push(features[i].geometry.coordinates);
-        speed.push(features[i].properties.speed*(-1)*6000);
-      };
-
-
-
-      var marker = L.Marker.movingMarker(featuresList, speed, {autostart: true}).addTo(this.map);
-      
-      L.polyline(featuresList, {color: 'rgba(0,0,0,0.7)', weight: 1}).addTo(this.map);
-      
-      //this.map.fitBounds(featuresList);
-
-      marker.on('end', function() {
-          marker.bindPopup('end', {closeOnClick: false})
-          .openPopup();
-      });
-    },
-
     ready: function(){
       this.setTotal(this.geoJson);
 
       if(this.legend){
-        this.addCtrl(tpl_legend);
+        this.addLegend();
       }
       if(this.markersLayer){
         this.addMarkersLayer();
@@ -296,17 +270,38 @@ define([
       this.map._onResize();
     },
 
-    addCtrl: function(legend){
-      var MyControl = L.Control.extend({
-          options: {
-              position: 'topright'
-          },
-          onAdd: function (map) {
-              var lg = $.parseHTML(legend);
-              return lg[0];
-          }
-      });
-      this.map.addControl(new MyControl());
+    addLegend: function(){
+      var legend = L.control({position: 'bottomright'});
+
+      legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info-legend');
+        var types = ['station', 'gps', 'argos'];
+        var labels = [];
+
+        for (var i = 0; i < types.length; i++) {
+          labels.push(
+            '<div class="marker marker marker-' + types[i] +'"></div>' + '&nbsp; ' + types[i]
+          );
+        }
+
+        div.innerHTML = labels.join('<br>');
+        return div;
+      };
+
+      legend.addTo(this.map);
+
+
+      // var MyControl = L.Control.extend({
+      //     options: {
+      //         position: 'topright'
+      //     },
+      //     onAdd: function (map) {
+      //         var lg = $.parseHTML(legend);
+      //         return lg[0];
+      //     }
+      // });
+      //this.map.addControl(new MyControl());
     },
 
     requestGeoJson: function(url){
@@ -343,15 +338,27 @@ define([
       });
     },
 
-    changeIcon: function(m){
-      if (m.checked) {
-        m.setIcon(this.selectedIcon);
-      }else{
-        m.setIcon(this.icon);
-      }
-      if (m == this.lastFocused) {
-        $(m._icon).addClass('focus');
-      }
+    toggleIconClass: function(m){
+        var className = 'marker';
+
+
+
+        if (m.checked /*&& !$(m._icon).hasClass('station-marker')*/) {
+            $(m._icon).addClass('selected');
+            className += ' selected';
+        }else{
+          $(m._icon).removeClass('selected');
+        }
+        if (m == this.lastFocused) {
+            $(m._icon).addClass('focus');
+            className += ' focus';
+        } else {
+          $(m._icon).removeClass('focus');
+        }
+
+        if( !m._icon ) {
+          m.setIcon(new L.DivIcon({className  : className}));
+        }
     },
 
     setCenter: function(geoJson){
@@ -380,9 +387,11 @@ define([
     },
 
     setGeoJsonLayer: function(geoJson){
+      var _this = this;
       this.setCenter(geoJson);
       var marker, prop;
-      var _this = this;
+      var icon;
+      var className = '';
       var i =0;
 
       var markerList = [];
@@ -391,6 +400,7 @@ define([
       var feature, latlng;
 
       for (var j = 0; j < features.length; j++) {
+        className = 'marker';
         feature = features[j];
         if(feature.geometry.coordinates[1] != null && feature.geometry.coordinates[0] != null){
           latlng = L.latLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]);
@@ -402,13 +412,34 @@ define([
               feature.id = feature.properties.ID;
             }
           }
-          if(feature.checked){
-            marker = L.marker(latlng, {icon: _this.focusedIcon});
-          }else{
-            marker = L.marker(latlng, {icon: _this.icon});
+
+          switch(feature.properties.type_) {
+            case 'station':
+              className += ' marker-station';
+              break;
+            case 'gps':
+              className += ' marker-gps';
+              break;
+            case 'argos':
+              className += ' marker-argos';
+              break;
+            default:
           }
 
-          marker.checked=false;
+          if(feature.checked){
+            className += ' selected';
+          }else{
+            className += ' ';
+          }
+
+          icon = new L.DivIcon({className : className});
+          marker = L.marker(latlng, {icon: icon});
+
+          if(feature.checked){
+            marker.checked=true;
+          }else{
+            marker.checked=false;
+          }
 
           if(_this.popup){
             prop = feature.properties;
@@ -432,6 +463,8 @@ define([
         }else{
           console.warn('latlng null');
         }
+
+
       }
       this.geoJsonLayers.push(markerList);
     },
@@ -512,7 +545,7 @@ define([
       for (var i = childs.length - 1; i >= 0; i--) {
         childs[i].checked = true;
         this.selectedMarkers[childs[i].feature.id] = childs[i];
-        this.changeIcon(childs[i]);
+        this.toggleIconClass(childs[i]);
       }
 
       var childClusters = c._childClusters;
@@ -579,7 +612,7 @@ define([
                   _this.selectedMarkers[childs[i].feature.id] = childs[i];
                   bbox.push(childs[i].feature.id);
 
-                  _this.changeIcon(childs[i]);
+                  _this.toggleIconClass(childs[i]);
                 }
                 if(marker.__parent){
                     _this.updateClusterParents(marker, []);
@@ -627,7 +660,7 @@ define([
         }else{
           delete(this.selectedMarkers[id]);
         }
-        this.changeIcon(marker);
+        this.toggleIconClass(marker);
         this.updateClusterParents(marker, []);
       }
     },
@@ -640,23 +673,22 @@ define([
     //from child to parent
     selectMultiple: function(ids){
       if(this.selection){
-      var marker;
-      for (var i = 0; i < ids.length; i++) {
-        marker=this.dict[ids[i]];
-        marker.checked = true;
+        var marker;
+        for (var i = 0; i < ids.length; i++) {
+          marker=this.dict[ids[i]];
+          marker.checked = true;
 
-        this.avoidDoublon(ids[i], marker);
+          this.avoidDoublon(ids[i], marker);
 
-        this.changeIcon(marker);
-        this.updateClusterParents(marker, []);
-      }
+          this.toggleIconClass(marker);
+          this.updateClusterParents(marker, []);
+        }
       }
     },
 
     /*==========  focusMarker :: focus & zoom on a point  ==========*/
     focus: function(id, zoom){
-      var _this = this;
-      var marker = this.dict[id];
+      var marker = this.dict[String(id)];
       var center = marker.getLatLng();
       var zoom = this.disableClustring;
 
@@ -667,7 +699,7 @@ define([
 
       $(this.lastFocused._icon).addClass('focus');
 
-      _this.map.setView(center, this.disableClustring);
+      this.map.setView(center, zoom);
 
     },
 
@@ -710,7 +742,7 @@ define([
     },
 
     resetAll: function(){
-      console.log(this.geoJson);
+
       this.updateLayers(this.geoJson);
     },
 
