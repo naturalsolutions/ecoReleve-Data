@@ -80,6 +80,7 @@ define([
       this.map.com = this.com;
       this.map.url = config.coreUrl + 'individuals/' + this.indivId  + '/locations?geo=true';
       this.map.updateFromServ();
+      this.map.url = false;
       Backbone.history.navigate(this.rootUrl + this.indivId, {trigger: false});
     },
 
@@ -375,8 +376,9 @@ define([
     },
 
     displayMap: function() {
+
       var _this = this;
-      this.mapCollection = new Backbone.Collection();
+/*      this.mapCollection = new Backbone.Collection();
       this.mapCollection.url = config.coreUrl + 'individuals/' + this.indivId  + '/locations?geo=true';
       this.mapCollection.fetch({ data : {geo:true}}
         ).done(function(data){
@@ -384,6 +386,7 @@ define([
             //url: config.coreUrl + 'individuals/' + this.indivId  + '/locations?geo=true',
             geoJson : data,
             cluster: true,
+            legend: true,
             zoom: 3,
             element: 'map',
             popup: true,
@@ -393,11 +396,23 @@ define([
             latName: 'LAT',
             lonName: 'LON'
           });
+        });*/
 
-        
-
-        });
-
+        this.map = new NsMap({
+            url: config.coreUrl + 'individuals/' + this.indivId  + '/locations?geo=true',
+            //geoJson : data,
+            cluster: true,
+            legend: true,
+            zoom: 3,
+            element: 'map',
+            popup: true,
+            com: _this.com,
+            selection: true,
+            idName: 'ID',
+            latName: 'LAT',
+            lonName: 'LON'
+          });
+        this.map.url = false;
     },
 
     focus: function(e) {
