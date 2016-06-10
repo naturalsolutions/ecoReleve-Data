@@ -124,14 +124,42 @@ define([
     },
 
     displayTab: function(e) {
+      var _this = this;
       e.preventDefault();
-      var ele = $(e.target);
-      var tabLink = $(ele).attr('href');
-      $('.tab-ele').removeClass('active');
-      $(ele).parent().addClass('active');
-      $(tabLink).addClass('active in');
-      this.refrechView(tabLink);
-    },
+      if(window.app.checkFormSaved && window.app.formEdition){
+        Swal({
+          title: 'Saving form',
+          text: 'Current form is not yet saved. Would you like to continue without saving it?',
+          type: 'error',
+          showCancelButton: true,
+          confirmButtonColor: 'rgb(221, 107, 85)',
+          confirmButtonText: 'OK',
+          cancelButtonColor: 'grey',
+          cancelButtonText: 'Cancel',
+          closeOnConfirm: true,
+        },
+        function(isConfirm) {
+          if (!isConfirm) {
+            return false;
+        }else {
+            window.app.checkFormSaved = false;
+              _this.swithTab(e);
+        }
+           });
+
+        } else{
+         this.swithTab(e);
+       }
+       
+     },
+     swithTab : function(e){
+       var ele = $(e.target);
+       var tabLink = $(ele).attr('href');
+       $('.tab-ele').removeClass('active');
+       $(ele).parent().addClass('active');
+       $(tabLink).addClass('active in');
+       this.refrechView(tabLink);
+     },
 
     refrechView: function(stationType) {
       var stTypeId;
@@ -166,6 +194,7 @@ define([
         afterShow: function() {
           if(_this.from == 'release'){
             _this.$el.find('[name="fieldActivityId"]').val('1').change();
+            window.app.checkFormSaved = false;
           }
           _this.$el.find('input[name="FK_MonitoredSite"]').on('change', function() {
               var msId = _this.$el.find('input[name="FK_MonitoredSite"]').attr('data_value');
