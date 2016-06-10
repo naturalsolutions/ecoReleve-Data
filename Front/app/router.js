@@ -57,7 +57,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       // get current route
       this.history.push(Backbone.history.fragment);
       var _this= this;
-      if(window.app.checkFormSaved){
+      if(window.app.checkFormSaved && window.app.formEdition){
           Swal({
               title: 'Saving form',
               text: 'Current form is not yet saved. Would you like to continue without saving it?',
@@ -76,6 +76,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
               return false;
           }else {
                window.app.checkFormSaved = false;
+               window.app.formEdition = false;
               _this.continueNav(callback, args);
           }
           });

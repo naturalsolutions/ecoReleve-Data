@@ -102,6 +102,7 @@ define([
       }
       else {
         this.id = 0;
+        window.app.formEdition = true;
       }
 
       if(options.displayMode){
@@ -179,7 +180,10 @@ define([
         dataType: 'json',
         success: function (resp) {
           _this.model.schema = resp.schema;
-          
+          window.app.formEdition = false;
+          if (this.displayMode == 'edit'){
+            window.app.formEdition = true;
+          }
           if (resp.fieldsets) {
             // if fieldset present in response, we get it
             _this.model.fieldsets = resp.fieldsets;
@@ -374,12 +378,14 @@ define([
       this.initModel();
       if(this.buttonRegion[0])
       this.displaybuttons();
+
     },
     butClickCancel: function (e) {
       this.displayMode = 'display';
       this.initModel();
       if(this.buttonRegion[0])
       this.displaybuttons();
+
     },
     butClickClear: function (e) {
       var formContent = this.BBForm.el;

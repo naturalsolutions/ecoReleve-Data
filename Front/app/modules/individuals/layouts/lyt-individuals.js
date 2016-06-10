@@ -122,7 +122,7 @@ define([
     },
     hideDetails: function() {
     var _this= this;
-    if(window.app.checkFormSaved){
+    if(window.app.checkFormSaved && window.app.formEdition){
          Swal({
             title: 'Saving form',
             text: 'Current form is not yet saved. Would you like to continue without saving it?',
