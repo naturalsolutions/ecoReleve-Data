@@ -46,7 +46,7 @@ class ObjectTypeWithDynProp:
         Fields = self.ObjContext.query(ModuleForms
             ).filter(ModuleForms.Module_ID == FrontModules.ID
             ).filter(or_(ModuleForms.TypeObj == self.ID, ModuleForms.TypeObj == None)
-            ).filter(ModuleForms.FormRender > 0).all()
+            ).filter(ModuleForms.FormRender > 0).filter(ModuleForms.InputType != 'GridRanged').all()
 
         for CurModuleForms in Fields :
             SchemaDTO[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(Editable)
