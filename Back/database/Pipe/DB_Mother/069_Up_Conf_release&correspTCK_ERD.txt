@@ -1,0 +1,141 @@
+/****** update linktable Track to ERD******/
+
+
+
+INSERT INTO [TMessageDynPropvsTrack]
+
+VALUES
+  ('Bague d''élevage conservée après sortie','Breeding ring kept after release','Integer')
+ ,('code de marque 1','Mark_code_1','String')
+ ,('position de marque 1','Mark_Position_1','String')
+ ,('couleur de marque 1','Mark_Color_1','String')
+ ,('code de marque 2','Mark_code_2','String')
+ ,('position de marque 2','Mark_Position_2','String')
+ ,('couleur de marque 2','Mark_Color_2','String')
+ ,('Notes','Release_Comments','String')
+
+
+UPDATE m SET TrackName = 'Boite de transport'
+FROM [TMessageDynPropvsTrack] m
+where TrackName = 'Boitetransport'
+
+
+/*** SET new dynPRop to Release Indiv Protocol  ***/ 
+declare @idPropRing int;
+declare @idPropCom int;
+declare @idPropObs int;
+
+INSERT INTO IndividualDynProp 
+Values ('Breeding ring kept after release','Integer'),
+('Release_Comments','String')
+
+
+INSERT INTO ObservationDynProp 
+Values ('Breeding ring kept after release','Integer')
+
+SET @idPropRing = (SELECT ID FROM IndividualDynProp WHERE Name = 'Breeding ring kept after release')
+SET @idPropCom = (SELECT ID FROM IndividualDynProp WHERE Name = 'Release_Comments')
+
+SET @idPropObs = (SELECT ID FROM ObservationDynProp WHERE Name = 'Breeding ring kept after release')
+
+INSERT INTO IndividualType_IndividualDynProp
+VALUES (0,1,@idPropRing),
+(0,1,@idPropCom)
+
+
+DECLARE @proto int SET @proto = (SELECT ID FROM ProtocoleType WHERE NAme = 'Release Individual')
+INSERT INTO ProtocoleType_ObservationDynProp (Required,FK_ProtocoleType,FK_ObservationDynProp)
+VALUES (0,@proto,@idPropObs)
+
+
+
+INSERT INTO ModuleForms (
+      [module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend])
+
+
+VALUES (1,@proto,'Breeding ring kept after release','Breeding ring kept after release',0,3,3,'Checkbox','form-control',2,15,NULL)
+
+UPDATE ModuleForms SET FieldSizeDisplay = 4,FieldSizeEdit=4
+WHERE TypeObj = 217 and Name = 'FK_individual'
+
+
+UPDATE ModuleForms SET FieldSizeDisplay = 4,FieldSizeEdit=4
+WHERE TypeObj = 217 and Name = 'Comments'
+
+GO 
+
+
+/** Update Release GRID  **/
+DELETE [ModuleGrids] 
+  where Module_ID = 17 and Name IN ('tarso_Metatarsus','wings','skull') 
+
+
+UPDATE [ModuleGrids] set GridRender = 2 
+  where Module_ID = 17 and Name != 'Comments'
+
+UPDATE [ModuleGrids] set GridRender = 0
+  where Module_ID = 17 and Name = 'Age'
+
+UPDATE [ModuleGrids] set GridOrder = GridOrder*10
+  where Module_ID = 17 
+
+UPDATE [ModuleGrids] set GridOrder = 52, Label = 'Individual Comment'
+  where Module_ID = 17 and Name = 'Comments'
+
+INSERT INTO ModuleGrids (
+      [Module_ID]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[GridRender]
+      ,[GridSize]
+      ,[CellType]
+      ,[GridOrder]
+      ,[QueryName]
+      ,[Options]
+      ,[FilterOrder]
+      ,[FilterSize]
+      ,[FilterClass]
+      ,[IsSearchable]
+      ,[FilterDefaultValue]
+      ,[FilterRender]
+      ,[FilterType]
+      ,[Status] )
+VALUES (17,NULL,'Breeding ring kept after release','Breeding ring kept',2,3,'boolean',40,NULL,NULL,0,0,NULL,0,NULL,0,'Checkbox',NULL ),
+(17,NULL,'Release_Comments','Release Comment',4,3,'string',40,NULL,NULL,0,0,NULL,0,NULL,0,'Text',NULL ),
+(17,NULL,'unicSensorName','Sensor',4,3,'string',54,'Forced',NULL,0,0,NULL,0,NULL,0,'Text',NULL )
+
+
+update ModuleGrids set GridOrder = 42
+WHERE Module_ID = 17 AND Name = 'Comments'
+
+update ModuleGrids set GridOrder = 80
+WHERE Module_ID = 17 AND Name = 'Breeding ring kept after release'
+
+
+update ModuleGrids set GridOrder = 70
+WHERE Module_ID = 17 AND Name = 'Release_Ring_Code'
+
+
+update ModuleGrids set GridOrder = 90
+WHERE Module_ID = 17 AND Name = 'chip_code'
+
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('69_Up_Conf_release&correspTCK_ERD',GETDATE(),(SELECT db_name()))
+
+
+GO
