@@ -72,6 +72,8 @@ define([
 
       this.displayFilter();
       this.displayGrid();
+      console.log(this.grid.collection);
+      var _this = this;
       //Backbone.history.navigate('release/individuals',{trigger: false});
     },
 
@@ -112,14 +114,44 @@ define([
       this.grid.collection.on('backgrid:selected', function(model, selected) {
         _this.updateSelectedRow();
       });
+
+/*      this.grid.collection.on('backgrid:edit', function(model, edited) {
+
+        if (edited.get('name') == 'unicSensorName' ) {
+          _this.currentModelEdit = _.clone(model.previousAttributes());
+        }
+      });
+
+      this.grid.collection.on('backgrid:edited', function(model, edited) {
+
+        if (edited.get('name') == 'unicSensorName' ) {
+          console.log(_this.currentModelEdit['unicSensorName'])
+          console.log(model.previous('unicSensorName'))
+          if (model.get('unicSensorName') == '') {
+            model.set('FK_Sensor',null);
+          }
+
+          else {
+            if (_this.currentModelEdit['unicSensorName'] != model.get('unicSensorName')) {
+              console.log('reset old value')
+              model.set('unicSensorName',_this.currentModelEdit['unicSensorName']);
+            }
+          }
+          _this.currentModelEdit = null;
+        }
+      });*/
     },
 
     displayGrid: function() {
-
+      var _this = this;
       this.ui.grid.html(this.grid.displayGrid());
+      
       /*      this.ui.paginator.html(this.grid.displayPaginator());*/
     },
 
+    resetSensor: function(e) {
+      console.log(e)
+    },
     displayFilter: function() {
       var _this = this;
       this.filters = new NsFilter({
@@ -228,6 +260,7 @@ define([
 
     addSensor: function() {
       if (!this.sensorPicker) {
+            var _this = this;
             var MySensorPicker = ObjectPicker.extend({
             rowClicked: function(row) {
               var id = row.model.get('ID');
