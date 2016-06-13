@@ -8,6 +8,10 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from ..utils.generator import Generator
 from ..renderers import *
 from pyramid.response import Response
+import pandas as pd 
+import io
+from pyramid.response import Response ,FileResponse
+from datetime import datetime
 
 route_prefix = 'export/'
 
@@ -106,7 +110,7 @@ def search(request):
 def views_filter_export(request):
     session = request.dbsession
     try:
-        function_export= { 'csv': export_csv, 'pdf': export_pdf, 'gpx': export_gpx }
+        function_export= { 'csv': export_csv, 'pdf': export_pdf, 'gpx': export_gpx, 'excel':export_excel}
         criteria = json.loads(request.params.mixed()['criteria'])
         viewId = criteria['viewId']
         views = BaseExport.metadata.tables['Views']
@@ -150,22 +154,34 @@ def views_filter_export(request):
         value={'header': columns, 'rows': rows}
 
         io_export=function_export[fileType](value,request,viewName)
-        return Response(io_export)
+        return io_export
 
     except: raise
 
 def export_csv (value,request,name_vue) :
     csvRender=CSVRenderer()
     csv=csvRender(value,{'request':request})
-    return csv
+    return Response(csv)
 
 def export_pdf (value,request,name_vue):
     pdfRender=PDFrenderer()
     pdf=pdfRender(value,name_vue,request)
-    return pdf
+    return Response(pdf)
 
 def export_gpx (value,request,name_vue):
     gpxRender=GPXRenderer()
     gpx=gpxRender(value,request)
-    return gpx
+    return Response(gpx)
+
+def export_excel (value,request,name_vue):
+    df = pd.DataFrame(data = value['rows'], columns = value['header'])
+
+    fout = io.BytesIO()
+    writer = pd.ExcelWriter(fout)
+    df.to_excel(writer, sheet_name='Sheet1',index = False)
+    writer.save()
+    file = fout.getvalue()
+
+    dt = datetime.now().strftime('%d-%m-%Y')
+    return Response(file,content_disposition= "attachment; filename="+name_vue+"_"+dt+".xlsx",content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 

@@ -140,15 +140,46 @@ define([
         name: 'FK_Individual',
         label: 'Individual id',
         editable: false,
-        cell: 'string',
-        headerCell : null
+        headerCell : null,
+        cell: Backgrid.StringCell.extend({
+          render: function () {
+            this.$el.empty();
+            var rawValue = this.model.get(this.column.get("name"));
+            var formattedValue = this.formatter.fromRaw(rawValue, this.model);
+
+            if (this.model.get('FK_Individual')){ 
+              this.$el.append('<a target="_blank"' 
+                +'href= "http://'+window.location.hostname+window.location.pathname+'#individuals/'+this.model.get('FK_Individual')+'">\
+                  '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
+                </a>');
+              this.delegateEvents();
+            }
+            return this;
+          }
+        })
       },
         {
           name: 'Name',
           label: 'Monitored site',
           editable: false,
-          cell: 'string',
-          headerCell : null
+          headerCell : null,
+          cell: Backgrid.StringCell.extend({
+            render: function () {
+              this.$el.empty();
+              console.log(this.model)
+              var rawValue = this.model.get(this.column.get("name"));
+              var formattedValue = this.formatter.fromRaw(rawValue, this.model);
+
+              if (this.model.get('Name')){
+                this.$el.append('<a target="_blank"' 
+                  +'href= "http://'+window.location.hostname+window.location.pathname+'#monitoredSites/'+this.model.get('MonitoredSiteID')+'">\
+                    '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
+                  </a>');
+                this.delegateEvents();
+             }
+              return this;
+            }
+        })
         },
         {
         name: 'StartDate',
