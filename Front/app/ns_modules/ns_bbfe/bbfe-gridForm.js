@@ -11,6 +11,7 @@ define([
     return Form.editors.GridFormEditor = Form.editors.Base.extend({
         events: {
             'click #addFormBtn' : 'addEmptyForm',
+			'click .cloneLast' : 'cloneLast',
         },
         initialize: function(options) {
 			
@@ -59,6 +60,23 @@ define([
             model.fieldsets = this.options.schema.fieldsets;
             this.addForm(model,this.forms.length+1);
         },
+		cloneLast: function() {
+			console.log('LAST FORM MODEL BEFORE',this.forms[this.forms.length-1]) ;
+			var resultat = this.forms[this.forms.length-1].commit() ;
+			if (resultat != null) return ; // COmmit NOK, on crée pas la ligne
+			console.log('LAST FORM MODEL',resultat,this.forms[this.forms.length-1]) ;
+			
+            var mymodel = Backbone.Model.extend({
+                defaults : this.forms[this.forms.length-1].model.attributes
+            });
+
+            var model = new mymodel();
+            //model.default = this.options.model.attributes[this.key];
+            model.schema = this.options.schema.subschema;
+            model.fieldsets = this.options.schema.fieldsets;
+            this.addForm(model,this.forms.length+1);
+        },
+		
 
         addForm: function(model,index){
             var _this = this;
@@ -228,13 +246,15 @@ define([
               //STATICS
               template: _.template('\
                 <div>\
-                    <button type="button" id="addFormBtn" class="<%= hidden %> btn">+</button>\
+                    <button type="button" id="addFormBtn" class="cloneLast <%= hidden %> btn">+</button>\
+					<button type="button"  class="cloneLast <%= hidden %> btn">Clone Last</button>\
                     <div class="required grid-form clearfix">\
                         <div class="clear"></div>\
                         <div id="th" class="clearfix"></div>\
                         <div id="formContainer" class="clearfix expand-grid"></div>\
                     </div>\
                     <button type="button" id="addFormBtn" class="<%= hidden %> btn">+</button>\
+					<button type="button"  class="cloneLast <%= hidden %> btn">Clone Last</button>\
                 </div>\
                 ', null, Form.templateSettings),
           });
