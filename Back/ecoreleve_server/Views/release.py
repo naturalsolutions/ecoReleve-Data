@@ -288,7 +288,7 @@ def releasePost(request):
 
         releaseGrp = Observation(FK_ProtocoleType=releaseGrpID, FK_Station =sta_id)
         releaseGrp.PropDynValuesOfNow={}
-        releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod})
+        releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod, 'nb_individuals':len(releaseIndList)})
         releaseGrp.Observation_children.extend(releaseIndList)
 
 
