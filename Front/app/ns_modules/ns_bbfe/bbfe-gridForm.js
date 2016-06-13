@@ -72,6 +72,11 @@ define([
                         <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
                     </div>\
                 ');
+/*                form.$el.find('fieldset').prepend('\
+                    <div class="' + this.hidden + ' col-xs-12 control">\
+                        <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
+                    </div>\
+                ');*/
                 form.$el.find('button#remove').on('click', function() {
                   _this.$el.find('#formContainer').find(form.el).remove();
                   var i = _this.forms.indexOf(form);
@@ -115,12 +120,19 @@ define([
 
                 if(col.title && test) {
                  this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
-                 size++;
                 }
+
+
+                if ( col.size == null) {
+                    size += 150;
+                }
+                else {
+                    size += col.size*25;
+                }
+
             }
 
-            size = size*150;
-            size += 35;
+            size += 285;
 
             //this.$el.find('#th').prepend('<div style="width: 34px;" class="pull-left" ><span class="reneco reneco-trash"></span></div>');
             // size += 35;
