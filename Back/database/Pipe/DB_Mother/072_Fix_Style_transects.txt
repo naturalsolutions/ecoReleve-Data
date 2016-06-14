@@ -1,0 +1,21 @@
+  UPDATE f SET [displayClass] = 'firstCol-6'
+      ,[EditClass]  = 'firstCol-6'
+  FROM ModuleForms f
+  WHERE TypeObj = (select ID FROM ProtocoleType WHERE NAme = 'SubTransect') and 
+  Name = 'Validator'
+
+  
+  UPDATE f SET [FieldSizeEdit] =8
+      ,[FieldSizeDisplay]  =8
+  FROM ModuleForms f
+  WHERE TypeObj = (select ID FROM ProtocoleType WHERE NAme = 'SubTransect') and 
+  Name = 'taxon'
+
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('72_Fix_Style_transects',GETDATE(),(SELECT db_name()))
+
+
+GO
