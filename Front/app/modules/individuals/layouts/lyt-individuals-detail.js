@@ -230,13 +230,13 @@ define([
         name: 'Date',
         label: 'date',
         editable: false,
-        //cell: 'stringDate'
-        cell:Backgrid.Extension.MomentCell.extend({
+        cell: 'stringDate'
+ /*       cell:Backgrid.Extension.MomentCell.extend({
             displayFormat: "DD/MM/YYYY HH:mm",
             //modelFormat : "DD/MM/YYYY HH:mm",
              //modelInUnixTimestamp: true,
             displayInUTC: false
-          }),
+          }),*/
       },/*{
         name: 'timestamp',
         label: 'date',
