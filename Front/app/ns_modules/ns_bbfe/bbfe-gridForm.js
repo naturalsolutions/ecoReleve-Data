@@ -22,14 +22,22 @@ define([
                 this.defaultRequired = false;
             }
 
+            if (options.schema.options.nbFixedCol){
+                this.nbFixedCol = options.schema.options.nbFixedCol;
+            }
+
+            if (options.schema.options.delFirst){
+                this.delFirst = options.schema.options.delFirst;
+            }
+
             Form.editors.Base.prototype.initialize.call(this, options);
 
             this.template = options.template || this.constructor.template;
             this.options = options;
             this.options.schema.fieldClass = 'col-xs-12';
 			this.showLines = true ;
-			if (this.options.showLines != null) {
-				this.showLines = this.options.showLines ;
+			if (this.options.schema.options.showLines != null) {
+				this.showLines = this.options.schema.options.showLines ;
 			}
             this.forms = [];
             this.disabled = options.schema.editorAttrs.disabled;
@@ -89,16 +97,24 @@ define([
             this.forms.push(form);
 
             if(!this.defaultRequired){
-                form.$el.find('fieldset').append('\
-                    <div class="' + this.hidden + ' col-xs-12 control">\
-                        <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
-                    </div>\
-                ');
-/*                form.$el.find('fieldset').prepend('\
+       /*         form.$el.find('fieldset').append('\
                     <div class="' + this.hidden + ' col-xs-12 control">\
                         <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
                     </div>\
                 ');*/
+                 if (this.delFirst){
+                    var optClass = ' fixedCol';
+                    var opt2Class = ' pull-left';
+                } else {
+                    var optClass = '';
+                    var opt2Class = ' pull-right';
+                }
+
+                form.$el.find('fieldset').append('\
+                    <div id="delBtn" class="' + this.hidden +optClass+ ' col-xs-12 control grid-field" style={background: #eee;}>\
+                        <button type="button" class="btn btn-warning'+ opt2Class +'" id="remove">-</button>\
+                    </div>\
+                ');
                 form.$el.find('button#remove').on('click', function() {
                   _this.$el.find('#formContainer').find(form.el).remove();
                   var i = _this.forms.indexOf(form);
@@ -112,7 +128,12 @@ define([
 
             this.$el.find('#formContainer').append(form.el);
 			if (_this.showLines) {
-				this.$el.find('#formContainer form fieldset').last().prepend('<span class="grid-field col-md-2">' + index + '</span>');
+                if (this.delFirst && !this.disabled){
+                    var optClass = ' firstCol-2';
+                } else {
+                    var optClass = '';
+                }
+				this.$el.find('#formContainer form fieldset').last().prepend('<div  class="grid-field col-md-2'+optClass+'"><span>' + index + '</span></div>');
 			}
         },
 
@@ -132,9 +153,14 @@ define([
             model.schema = this.options.schema.subschema;
 
             var size=0;
-
+            var prevSize = 0;
             var odrFields = this.options.schema.fieldsets[0].fields;
-			
+
+            if (this.nbFixedCol){
+                var reordered = odrFields.splice(0,this.nbFixedCol);
+                odrFields = odrFields.concat(reordered.reverse());
+                this.options.schema.fieldsets[0].fields = odrFields;
+            }
             for (var i = odrFields.length - 1; i >= 0; i--) {
                 var col = model.schema[odrFields[i]];
                 //sucks
@@ -144,10 +170,23 @@ define([
                  col.fieldClass += ' grid-field';
                 }
 
+                if (this.nbFixedCol && reordered.indexOf(col.name) != -1){
+                    col.fieldClass += ' fixedCol ';
+                    if (prevSize != 0) {
+                        if (this.delFirst && !this.disabled) {
+                            col.fieldClass += ' firstCol-'+(parseInt(prevSize)+2);
+                        } else {
+                            col.fieldClass += ' firstCol-'+prevSize;
+                        }
+                    }
+                    this.options.schema.subschema[odrFields[i]].fieldClass = col.fieldClass;
+                    prevSize += col.size;
+
+                }
+
                 if(col.title && test) {
                  this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
                 }
-
 
                 if ( col.size == null) {
                     size += 150;
@@ -157,17 +196,43 @@ define([
                 }
 
             }
-			if (_this.showLines) {
-				this.$el.find('#th').prepend('<div class="grid-field col-md-2"> | line</div>') ;
-				size += 310;
-			}
-			else {
-				size += 285;
-			}
+
+
+            if (this.delFirst && !this.disabled){
+                if (this.nbFixedCol) {
+                    this.$el.find('#th div').last().addClass('firstCol-2');
+                    this.options.schema.subschema[odrFields[odrFields.length-1]].fieldClass += ' firstCol-2';
+                } else {
+                    this.$el.find('#th div').first().addClass('firstCol-2');
+                    this.options.schema.subschema[odrFields[0]].fieldClass += ' firstCol-2';
+                }
+            }
+
+            if (this.nbFixedCol) {
+                 if (this.delFirst && !this.disabled) {
+                    var nbCol = prevSize+2;
+                    this.$el.find('#th').append('<div class="fixedCol col-md-2 grid-field">&nbsp;&nbsp;</div>');
+                } else {
+                    var nbCol = prevSize;
+                }
+                this.options.schema.subschema[odrFields[0]].fieldClass += ' firstCol-'+nbCol;
+                this.$el.find('#th div').first().addClass('firstCol-'+nbCol);
+            }
+            if (_this.showLines) {
+                 if (this.delFirst && !this.disabled){
+                    var optClass = ' firstCol-2';
+                } else {
+                    var optClass = '';
+                }
+                this.$el.find('#th').prepend('<div class="grid-field col-md-2'+optClass+'"> | line</div>') ;
+                size += 310;
+            }
+            else {
+                size += 285;
+            }
 
             //this.$el.find('#th').prepend('<div style="width: 34px;" class="pull-left" ><span class="reneco reneco-trash"></span></div>');
             // size += 35;
-
 
             this.$el.find('#th').width(size);
             this.$el.find('#formContainer').width(size);
@@ -211,6 +276,9 @@ define([
 
         },
 
+        reorderTofixCol: function() {
+
+        },
         getValue: function() {
             var errors = false;
             for (var i = 0; i < this.forms.length; i++) {
