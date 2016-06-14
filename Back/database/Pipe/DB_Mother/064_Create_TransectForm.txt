@@ -41,7 +41,7 @@ INSERT INTO ModuleForms (
       ,[Locked]
       ,[DefaultValue] )
 VALUES
-(1,@type,'taxon','Taxon',0,6,6,'AutocompTreeEditor','form-control',2,10,NULL,'204089',NULL,'fixedCol','fixedCol',1,NULL,NULL),
+(1,@type,'taxon','Taxon',1,6,6,'AutocompTreeEditor','form-control',2,10,NULL,'204089',NULL,'fixedCol','fixedCol',1,NULL,NULL),
 (1,@type,'autoRanged','',0,3,3,'GridRanged','form-control',2,200,NULL,'{"range":200,"prefixLabel":"P","inputType":"Number"}',NULL,NULL,NULL,1,NULL,NULL),
 (1,@type,'FK_ProtocoleType','FK_ProtocoleType',0,3,3,'Number','form-control',0,3000,NULL,NULL,NULL,'hide','hide',1,NULL,231),
 

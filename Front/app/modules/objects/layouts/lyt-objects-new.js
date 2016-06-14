@@ -46,6 +46,15 @@ define([
       } else {
         this.data = {'stationID':stationID};
       }
+
+      if (this.data){
+        for(var i in this.data){
+          if(this.data[i] == 'null'){
+            this.data[i] = '';
+          }
+        }
+        
+      }
     },
 
     onShow: function() {

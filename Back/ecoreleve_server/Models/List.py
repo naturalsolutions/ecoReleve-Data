@@ -59,7 +59,7 @@ class StationList(ListObjectWithDynProp):
 
         if curProp == 'FK_Individual':
 
-            if criteriaObj['Operator'].lower() in ['is','is not'] and criteriaObj['Value'].lower() == 'null':
+            if criteriaObj['Operator'].lower() in ['is null','is not null']:
                 subSelect = select([Observation]).where(
                     and_(Station.ID== Observation.FK_Station
                         ,Observation.__table__.c[curProp] != None)
@@ -253,7 +253,7 @@ class IndividualList(ListObjectWithDynProp):
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = outerjoin(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
 
-        if sensorObj['Operator'].lower() in ['is','is not'] and sensorObj['Value'].lower() == 'null':
+        if sensorObj['Operator'].lower() in ['is null','is not null']:
             subSelect = select([table.c['FK_Individual']]
                 ).select_from(joinTable).where(
                 and_(Individual.ID== table.c['FK_Individual']
@@ -415,13 +415,33 @@ class SensorList(ListObjectWithDynProp):
                     queryExist = queryExist.where(eval_.eval_binary_expr(curEquipmentTable.c['FK_Individual'],obj['Operator'],obj['Value']))
                 query = query.where(exists(queryExist))
 
+
+            if obj['Column'] in ['FK_MonitoredSiteName','FK_Individual'] and obj['Operator'] in ['is null','is not null']:
+                queryExist = select(curEquipmentTable.c).select_from(joinTable
+                    ).where(Sensor.ID == curEquipmentTable.c['FK_Sensor'])
+
+                if obj['Column'] == 'FK_Individual' :
+                    queryExist = queryExist.where(and_(Sensor.ID == curEquipmentTable.c['FK_Sensor']
+                        ,curEquipmentTable.c['FK_Individual'] != None))
+
+                if obj['Column'] == 'FK_MonitoredSiteName' :
+                    queryExist = queryExist.where(and_(Sensor.ID == curEquipmentTable.c['FK_Sensor']
+                        ,curEquipmentTable.c['FK_MonitoredSite'] != None))
+                if 'not' in obj['Operator']:
+                    query = query.where(exists(queryExist))
+                else :
+                    query = query.where(not_(exists(queryExist)))
+
+
         return query
+
+
 
 
 class MonitoredSiteList(ListObjectWithDynProp):
 
-    def __init__(self,frontModule, typeObj = None) :
-        super().__init__(MonitoredSite,frontModule, typeObj = typeObj)
+    def __init__(self,frontModule, typeObj = None, View = None) :
+        super().__init__(MonitoredSite,frontModule, typeObj = typeObj, View = View)
 
     def GetJoinTable (self,searchInfo) :
         EquipmentTable = Base.metadata.tables['MonitoredSiteEquipment']

@@ -79,9 +79,13 @@ def getFilters (request):
 
     ModuleType = 'IndivFilter'
     filtersList = Individual(FK_IndividualType = objType).GetFilters(ModuleType)
-    filters = {}
+    filters = {'filtersValues':[]}
     for i in range(len(filtersList)) :
         filters[str(i)] = filtersList[i]
+        if objType == 1 :
+            filters['filtersValues'].append({'Column':filtersList[i]['name'],'Operator':'is null','Value':''})
+
+
     return filters
 
 def getForms(request) :
@@ -403,6 +407,7 @@ def getIndivLocation(request):
         result = gene.search(criteria,offset=offset,per_page=per_page,order_by=['StationDate:desc'])
         for row in result : 
             row['Date'] = row['Date'].strftime('%Y-%m-%d %H:%M:%S')
+            row['format'] = 'YYYY-MM-DD HH:mm:ss'
 
 
     # ************ POC Indiv location PLayer  **************** 
