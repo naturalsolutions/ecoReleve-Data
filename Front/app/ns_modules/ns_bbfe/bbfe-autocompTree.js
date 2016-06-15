@@ -180,6 +180,7 @@ define([
                         _this.$el.find('#' + _this.id + '_value').val(data["TTop_FullPath"]);
                         _this.$el.find('#' + _this.id ).attr('data_value',value);
                         _this.$el.find('#' + _this.id).val(translatedValue);
+                        _this.$el.find('#' + _this.id).attr('title',translatedValue);
                     }
 
                     _this.displayErrorMsg(false);
@@ -214,6 +215,7 @@ define([
                 if (this.isTermError) {
                     this.termError = "Invalid term";
                     this.$el.find('#divAutoComp_' + this.id).addClass('error');
+                    this.$el.find('#' + this.id).attr('title','Invalid term');
                     //this.$el.find('#errorMsg').removeClass('hidden');
                 } else {
                     this.termError = "";
