@@ -10,8 +10,8 @@ define([
     'use strict';
     return Form.editors.GridFormEditor = Form.editors.Base.extend({
         events: {
-            'click #addFormBtn' : 'addEmptyForm',
-			'click .cloneLast' : 'cloneLast',
+            'click .js-addFormBtn' : 'addEmptyForm',
+			'click .js-cloneLast' : 'cloneLast',
         },
         initialize: function(options) {
 			
@@ -30,6 +30,10 @@ define([
                 this.delFirst = options.schema.options.delFirst;
             }
 
+             if (!options.schema.options.cloneLast){
+                this.hiddenClone = 'hidden';
+            }
+
             Form.editors.Base.prototype.initialize.call(this, options);
 
             this.template = options.template || this.constructor.template;
@@ -45,6 +49,7 @@ define([
             this.hidden = '';
             if(this.disabled) {
                 this.hidden = 'hidden';
+                this.hiddenClone = 'hidden';
             }
             this.hasNestedForm = true;
 
@@ -133,7 +138,14 @@ define([
                 } else {
                     var optClass = '';
                 }
-				this.$el.find('#formContainer form fieldset').last().prepend('<div  class="grid-field col-md-2'+optClass+'"><span>' + index + '</span></div>');
+                /*if (!this.nbFixedCol) {
+				    this.$el.find('#formContainer form fieldset').last().prepend('<div style="height: 34px; text-align: center;" class="grid-field col-md-2'+optClass+'"><span>' + index + '</span></div>');
+                }
+                else {
+                    this.$el.find('#formContainer form fieldset').last().append('<div style="height: 34px; text-align: center;" class="grid-field fixedCol col-md-2'+optClass+'"><span>' + index + '</span></div>');
+                }*/
+                this.$el.find('#formContainer form fieldset').last().append('<div style="height: 34px; text-align: center;" class="grid-field fixedCol col-md-2'+optClass+'"><span>' + index + '</span></div>');
+
 			}
         },
 
@@ -142,7 +154,8 @@ define([
             var _this = this;
 
             var $el = $($.trim(this.template({
-                hidden: this.hidden
+                hidden: this.hidden,
+                hiddenClone : this.hiddenClone
             })));
             this.setElement($el);
             
@@ -154,6 +167,12 @@ define([
 
             var size=0;
             var prevSize = 0;
+            if (this.showLines) {
+                prevSize +=2;
+            }
+            if (this.delFirst && !this.disabled) {
+                prevSize +=2;
+            }
             var odrFields = this.options.schema.fieldsets[0].fields;
 
             if (this.nbFixedCol){
@@ -173,11 +192,13 @@ define([
                 if (this.nbFixedCol && reordered.indexOf(col.name) != -1){
                     col.fieldClass += ' fixedCol ';
                     if (prevSize != 0) {
-                        if (this.delFirst && !this.disabled) {
+                        /*if (this.delFirst && !this.disabled) {
                             col.fieldClass += ' firstCol-'+(parseInt(prevSize)+2);
                         } else {
                             col.fieldClass += ' firstCol-'+prevSize;
-                        }
+                        }*/
+                        col.fieldClass += ' firstCol-'+prevSize;
+
                     }
                     this.options.schema.subschema[odrFields[i]].fieldClass = col.fieldClass;
                     prevSize += col.size;
@@ -208,9 +229,9 @@ define([
                 }
             }
 
-            if (this.nbFixedCol) {
+            if (this.nbFixedCol || this.showLines) {
                  if (this.delFirst && !this.disabled) {
-                    var nbCol = prevSize+2;
+                    var nbCol = prevSize;
                     this.$el.find('#th').append('<div class="fixedCol col-md-2 grid-field">&nbsp;&nbsp;</div>');
                 } else {
                     var nbCol = prevSize;
@@ -218,13 +239,22 @@ define([
                 this.options.schema.subschema[odrFields[0]].fieldClass += ' firstCol-'+nbCol;
                 this.$el.find('#th div').first().addClass('firstCol-'+nbCol);
             }
+
             if (_this.showLines) {
                  if (this.delFirst && !this.disabled){
                     var optClass = ' firstCol-2';
                 } else {
                     var optClass = '';
                 }
-                this.$el.find('#th').prepend('<div class="grid-field col-md-2'+optClass+'"> | line</div>') ;
+
+                if (this.nbFixedCol || this.delFirst){
+                    this.$el.find('#th').append('<div class="grid-field fixedCol col-md-2'+optClass+'">&nbsp;|  N°</div>') ;
+                    this.options.schema.subschema[odrFields[0]].fieldClass += ' firstCol-'+nbCol;
+                    this.$el.find('#th div').first().addClass('firstCol-'+nbCol);
+                } else {
+                    this.$el.find('#th').append('<div class="grid-field fixedCol col-md-2'+optClass+'">&nbsp;|  N°</div>') ;
+
+                }
                 size += 310;
             }
             else {
@@ -314,15 +344,15 @@ define([
               //STATICS
               template: _.template('\
                 <div>\
-                    <button type="button" id="addFormBtn" class="cloneLast <%= hidden %> btn">+</button>\
-					<button type="button"  class="cloneLast <%= hidden %> btn">Clone Last</button>\
+                    <button type="button" class=" <%= hidden %> btn btn-success js-addFormBtn">+</button>\
+					<button type="button"  class="js-cloneLast <%= hiddenClone %> btn">Clone Last</button>\
                     <div class="required grid-form clearfix">\
                         <div class="clear"></div>\
                         <div id="th" class="clearfix"></div>\
                         <div id="formContainer" class="clearfix expand-grid"></div>\
                     </div>\
-                    <button type="button" id="addFormBtn" class="<%= hidden %> btn">+</button>\
-					<button type="button"  class="cloneLast <%= hidden %> btn">Clone Last</button>\
+                    <button type="button"  class="<%= hidden %> btn btn-success js-addFormBtn">+</button>\
+					<button type="button"  class="js-cloneLast <%= hiddenClone %> btn ">Clone Last</button>\
                 </div>\
                 ', null, Form.templateSettings),
           });
