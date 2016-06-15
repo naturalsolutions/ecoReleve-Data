@@ -54,7 +54,7 @@ require.config({
     'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
 
     'ns_filter_bower': '../bower_components/NaturalJS_Filter/model-filter',
-
+    'resumable': '../bower_components/resumable.js/resumable',
 
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
@@ -75,7 +75,7 @@ require.config({
         'backbone_forms' : 'backbone-forms'
       }
   },
-  
+
   shim: {
     jquery: {
       exports: '$'

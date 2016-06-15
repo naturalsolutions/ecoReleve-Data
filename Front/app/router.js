@@ -1,4 +1,3 @@
-
 define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
   function($, Marionette, Backbone, config) {
 
@@ -35,7 +34,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       'stations(/)': 'stations',
 
 	  'observations/:id(/)': 'observations',
-	  
+
       'sensors/new/:type(/)': 'newSensor',
       'sensors/:id(/)': 'sensors',
       'sensors(/)': 'sensors',

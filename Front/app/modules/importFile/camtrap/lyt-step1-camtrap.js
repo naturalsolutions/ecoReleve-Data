@@ -19,14 +19,14 @@ define([
 
   return Marionette.LayoutView.extend({
     className: 'full-height',
-    template: 'app/modules/importFile/rfid/templates/tpl-step1-rfid.html',
+    template: 'app/modules/importFile/camtrap/templates/tpl-step1-camtrap.html',
 
-    name: 'RFID decoder selection',
+    name: 'Camtrap Device selection',
     events: {
-      'change #rfidId': 'updateGrid',
+      'change #camtrapId': 'updateGrid',
     },
     ui: {
-      'rfidId': '#rfidId',
+      'camtrapId': '#camtrapId',
       'grid': '#grid',
       'paginator': '#paginator',
       'requirement': '#requirement'
@@ -47,7 +47,7 @@ define([
 
     onShow: function() {
       //this.parseOneTpl(this.template);
-      var obj = {name: this.name + '_RFID_identifer',required: true};
+      var obj = {name: this.name + '_CAMTRAP_identifer',required: true};
       this.stepAttributes = [obj] ;
 
       var content = '';
@@ -55,7 +55,7 @@ define([
       $.ajax({
         context: this,
         url: config.coreUrl + 'sensors/getUnicIdentifier',
-        data: {sensorType: 3},
+        data: {sensorType: 5},
       }).done(function(data) {
         var len = data.length;
         var firstId = data[0]['val'];
@@ -64,7 +64,7 @@ define([
           var val = data[i]['val'];
           content += '<option value="' + val + '">' + label + '</option>';
         }
-        $('select[name="RFID_identifer"]').append(content);
+        $('select[name="CAMTRAP_identifer"]').append(content);
         this.initGrid(firstId);
       })
       .fail(function() {
@@ -76,7 +76,9 @@ define([
 
     updateGrid: function(e) {
       this.ui.requirement.val('').change();
+      console.log("val change");
       var id = $(e.target).val();
+      console.log(id);
       if(id){
         this.ui.grid.removeClass('hidden');
         this.ui.paginator.removeClass('hidden');

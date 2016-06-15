@@ -17,7 +17,7 @@ from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE,func,desc,join, distinct,outerjoin,asc
+from sqlalchemy import select, and_,cast, DATE,func,desc,join, distinct,outerjoin,asc,exists
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
@@ -51,18 +51,18 @@ def actionOnSensors(request):
 
 def count_ (request = None,listObj = None):
     session = request.dbsession
-    if request is not None : 
+    if request is not None :
         data = request.params
-        if 'criteria' in data: 
+        if 'criteria' in data:
             data['criteria'] = json.loads(data['criteria'])
             if data['criteria'] != {} :
                 searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
 
         listObj = ListObjectWithDynProp(Sensor)
         count = listObj.count(searchInfo = searchInfo)
-    else : 
+    else :
         count = listObj.count()
-    return count 
+    return count
 
 def getFilters (request):
     ModuleType = 'SensorFilter'
@@ -117,9 +117,14 @@ def getSerialNumber (request):
     return response
 
 def getUnicIdentifier (request):
+    equipment = True
     session = request.dbsession
     sensorType = request.params['sensorType']
     query = select([Sensor.UnicIdentifier.label('label'),Sensor.ID.label('val')]).where(Sensor.FK_SensorType == sensorType)
+
+    if ( equipment and sensorType == "5" ) :
+        existsQuery = select([Equipment]).where(Equipment.FK_Sensor==Sensor.ID)
+        query = query.where(exists(existsQuery))
     response = [ OrderedDict(row) for row in session.execute(query).fetchall()]
 
     return response
@@ -155,7 +160,7 @@ def getSensor(request):
         ModuleName = request.params['FormName']
         try :
             DisplayMode = request.params['DisplayMode']
-        except : 
+        except :
             DisplayMode = 'display'
         Conf = session.query(FrontModules).filter(FrontModules.Name=='SensorForm').first()
         response = curSensor.GetDTOWithSchema(Conf,DisplayMode)
@@ -163,7 +168,7 @@ def getSensor(request):
         geoJson=[]
         result = {'type':'FeatureCollection', 'features':geoJson}
         response = result
-    else : 
+    else :
         response  = curSensor.GetFlatObject()
 
     return response
@@ -177,7 +182,9 @@ def getSensorHistory(request):
     curSensor = session.query(Sensor).get(id)
     curSensorType = curSensor.GetType().Name
 
-    if ('RFID' in curSensorType.upper()) :
+    print("requete avec id " + str(id))
+    if (curSensorType.upper() in ['RFID DECODER', 'CAMERA TRAP']) :
+        print(curSensorType)
         table = Base.metadata.tables['MonitoredSiteEquipment']
         joinTable = join(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable,MonitoredSite, table.c['FK_MonitoredSite'] == MonitoredSite.ID)
@@ -252,7 +259,7 @@ def insertOneNewSensor (request) :
 
     session.add(newSensor)
     session.flush()
- 
+
     return {'ID': newSensor.ID}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -262,7 +269,7 @@ def searchSensor(request):
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = []
-    if 'criteria' in data: 
+    if 'criteria' in data:
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
@@ -289,7 +296,7 @@ def sensors_export(request):
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = []
-    if 'criteria' in data: 
+    if 'criteria' in data:
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
@@ -312,8 +319,3 @@ def sensors_export(request):
 
     dt = datetime.now().strftime('%d-%m-%Y')
     return Response(file,content_disposition= "attachment; filename=sensor_export_"+dt+".xlsx",content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-
-
-
-
