@@ -160,15 +160,21 @@
 	100% {border: 2px solid white;}
 }
 
-.custom-marker{
-	margin-left: 5px;
-	margin-top: 5px;
+.marker{
 	border-radius: 50%;
-	width: 5px;
-	height: 5px;
 	border: 2px solid white;
 	text-align: center;
 	background: rgba(51, 153, 204, 1);
+	&.marker-station{
+		background: purple;
+		border-radius: 0px;
+	}
+	&.marker-gps{
+		background: rgba(51, 153, 204, 1);
+	}
+	&.marker-argos{
+		background: orange;
+	}
 	&.selected{
 		background: rgba(255, 0, 0 ,1);
 		z-index: 1000000!important;
@@ -177,6 +183,24 @@
 		z-index: 10000000!important;
 		animation: focus .7s infinite;
 	}
+}
+
+.info-legend{
+	color: black;
+	padding: 10px;
+	transition: all .5s;
+	box-shadow: 0 1px 5px rgba(0,0,0,0.5);
+	background-color: rgba(255,255,255,.9);
+	border-radius: 3px;
+	border: 1px solid #ccc;
+	line-height: 18px;
+	.marker{
+		width: 12px;
+		float: left;
+		height: 12px;
+		margin: 3px 0px;
+	}
+	
 }
 
 .map-error{
@@ -200,41 +224,5 @@
 
 
 
-.legend-ctrl{
-	color: white;
-	cursor: pointer;
-	&:hover{
-		.legend-info{
-			right: 0;
-		}
-	}
-}
 
-.legend-info{
-	position: absolute;
-	right: -200px;
-	min-width: 150px;
-	color: black;
-	padding: 15px;
-	transition: all .5s;
-	box-shadow: 0 1px 5px rgba(0,0,0,0.5);
-	background-color: rgba(255,255,255,.8);
-	border-radius: 3px;
-	border: 1px solid #ccc;
-	.custom-marker{
-		height: 12px;
-		width: 12px;
-		border: 2px solid white;
-		margin-top: 3px;
-	}
-	.marker-cluster{
-		height: 35px;
-		width: 35px;
-		background: rgba(0,0,0,0.7);
-		color: white;
-	}
-	.caption{
-		
-	}
-}
 
