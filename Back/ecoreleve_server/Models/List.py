@@ -418,6 +418,7 @@ class SensorList(ListObjectWithDynProp):
         return query
 
 
+
 class MonitoredSiteList(ListObjectWithDynProp):
 
     def __init__(self,frontModule, typeObj = None, View = None) :
@@ -483,3 +484,4 @@ class MonitoredSiteList(ListObjectWithDynProp):
                         ))
             fullQueryJoin = fullQueryJoin.where(exists(subSelect))
         return fullQueryJoin
+
