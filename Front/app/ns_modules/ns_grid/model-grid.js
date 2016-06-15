@@ -114,7 +114,9 @@ define([
       if (options.filterCriteria) {
         this.filterCriteria = options.filterCriteria;
       }
-      
+      if(options.affectTotalRecords){
+        this.affectTotalRecords = options.affectTotalRecords;
+      }      
       this.initGrid();
       this.eventHandler();
     },
@@ -383,6 +385,7 @@ define([
           this.grid.body.collection = args;
           this.grid.body.refresh();
         }
+        this.affectTotalRecords();
       }
       else {
         // Server side filter

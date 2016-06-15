@@ -20,7 +20,7 @@ from datetime import datetime
 from .argosImport import uploadFileArgos
 from .GSMimport import uploadFilesGSM
 from .RFIDimport import uploadFileRFID
-from .CamTrapimport import uploadFileCamTrap
+from .CamTrapimport import uploadFileCamTrap, uploadFileCamTrapResumable, concatChunk
 
 route_prefix = 'sensors/'
 
@@ -32,6 +32,8 @@ def uploadFile(request):
     'argos': uploadFileArgos,
     'gsm':uploadFilesGSM,
     'rfid':uploadFileRFID,
-    'camtrap':uploadFileCamTrap
+    'camtrap':uploadFileCamTrap,
+    'resumable':uploadFileCamTrapResumable,
+    'concat':concatChunk
     }
     return dictFuncImport[type_](request)

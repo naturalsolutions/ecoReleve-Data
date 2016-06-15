@@ -186,7 +186,7 @@ define([
 
                 },
                 error: function (data) {
-                    _this.$el.find('#' + _this.id).val(_this.value);
+                    _this.$el.find('#' + _this.id).val(value);
                     if (_this.editable) {
                         $('#divAutoComp_' + _this.id).addClass('error');
                         _this.displayErrorMsg(true);

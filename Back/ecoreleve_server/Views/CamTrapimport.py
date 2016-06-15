@@ -154,6 +154,65 @@ def uploadFileCamTrap(request):
     #query = text('SELECT * FROM ecoReleve_Sensor.dbo.TcameraTrap WHERE id = SCOPE_IDENTITY()')
     #results = session.execute(query)
 
-
-
     return idRetour
+
+def uploadFileCamTrapResumable(request):
+
+    reponseStatus = 200
+
+    pathPrefix = dbConfig['camTrap']['path']
+    """print("ok resumable envoie bien les requetes et on les reçoit")
+    print ("chunk number :" + str(request.POST['resumableChunkNumber']))
+    print ("chunk size : " + str(request.POST['resumableChunkSize']))
+    print ("current chunk size :" + str(request.POST['resumableCurrentChunkSize']))
+    print ("total size :" + str(request.POST['resumableTotalSize']))
+    print ("type :" + str(request.POST['resumableType']))
+    print ("identifier :"+ str(request.POST['resumableIdentifier']))
+    print ("Filename :" + str(request.POST['resumableFilename']))
+    print ("Relative path :" + str(request.POST['resumableRelativePath']))
+    print(" options :" + str(request.POST['path']))
+    print ("File :" + str(request.POST['file']))"""
+    flagCrea = False
+    pathPost = str(request.POST['path'])
+    if not os.path.exists(pathPrefix+'\\'+pathPost):
+        print("creation du dossier")
+        os.makedirs(pathPrefix+'\\'+pathPost)
+
+    """if (request.POST['resumableType'] == "image/jpeg"):
+        print(" on va post une image")
+    elif ( request.POST['resumableType'] == "application/x-zip-compressed"):
+        print(" on va post un zip")"""
+    #print("paquet recu :" + str(request.POST['resumableChunkNumber']))
+
+    uri = pathPrefix+'\\'+pathPost
+    #test si le fichier existe deja
+    if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableFilename'])):
+
+        inputFile = request.POST['file'].file
+        if( int(request.POST['resumableChunkNumber']) == 1 and int(request.POST['resumableCurrentChunkSize']) == int(request.POST['resumableTotalSize']) ):
+            print ("on a qu'un seul chunk")
+            with open(uri+'\\'+str(request.POST['resumableFilename']), 'wb') as output_file: # write in the file
+                shutil.copyfileobj(inputFile, output_file)
+        else:
+            position = int(request.POST['resumableChunkNumber']) #calculate the position of cursor
+            with open(uri+'\\'+str(request.POST['resumableFilename'])+"_"+str(position), 'wb') as output_file: # write in the file
+                shutil.copyfileobj(inputFile, output_file)
+
+            if( ((position - 1) * int(request.POST['resumableChunkSize']) + int(request.POST['resumableCurrentChunkSize'])) == int(request.POST['resumableTotalSize']) ):
+                print(" on a le dernier fichier")
+            reponseStatus = 200
+
+    request.response.status_code = 200
+    return reponseStatus
+
+def concatChunk(request):
+    reponseStatus = 200
+    pathPrefix = dbConfig['camTrap']['path']
+    pathPost = str(request.POST['path'])
+    print("on veut reconstruire le fichier" + str(request.POST['name']) + " qui se trouve dans " + str(request.POST['path']) +" en :"+str(request.POST['taille'])+" fichiers")
+    destination = open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) ,'wb')
+    for i in range( 1, int(request.POST['taille'])+1):
+        shutil.copyfileobj(open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i), 'rb'), destination)
+    destination.close()
+    request.response.status_code = 200
+    return reponseStatus
