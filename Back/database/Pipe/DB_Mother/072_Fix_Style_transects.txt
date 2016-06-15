@@ -6,6 +6,7 @@
   WHERE TypeObj = (select ID FROM ProtocoleType WHERE NAme = 'SubTransect') and 
   Name = 'taxon'
 
+UPDATE ModuleForms SET Options = '{"protocoleType":232,"nbFixedCol":1,"delFirst":1,"showLines":0}'
 WHERE typeObj = 220 and InputType = 'GridFormEditor'
 
 GO
