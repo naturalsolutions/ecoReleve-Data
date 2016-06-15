@@ -117,7 +117,7 @@ define([
 
                 form.$el.find('fieldset').append('\
                     <div id="delBtn" class="' + this.hidden +optClass+ ' col-xs-12 control grid-field" style={background: #eee;}>\
-                        <button type="button" class="btn btn-warning'+ opt2Class +'" id="remove">-</button>\
+                        <button type="button" class="btn btn-danger'+ opt2Class +'" id="remove"><span class="reneco reneco-trash"></span></button>\
                     </div>\
                 ');
                 form.$el.find('button#remove').on('click', function() {
