@@ -32,7 +32,11 @@ define([
       //console.log(this.data);
       this.path = "";
       let startDate = this.data['StartDate'].split(" ");
-      let endDate = this.data['EndDate'].split(" ");
+      let endDate = "0000-00-00"
+      if( this.data['EndDate'] != undefined ) {
+        endDate = this.data['EndDate'].split(" ");
+      }
+
       this.path = String(this.data['UnicIdentifier'])+"_"+String(startDate[0])+"_"+String(endDate[0])+"_"+String(this.data['Name']);
       /*
       http://192.168.0.78/ecoReleve-Core/sensors/resumable/datas?
