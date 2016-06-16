@@ -110,6 +110,7 @@ define([
         url: this.url,
         typeObj: this.typeObj,
         rowClicked: true,
+        ajaxType:'POST'
       });
 
       this.grid.rowClicked = function(args) {
