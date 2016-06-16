@@ -1,9 +1,7 @@
 /****** If @NARC replace ECWP-eReleveData by NARC_eReleveData  ******/
-SET ANSI_NULLS ON
-GO
 
-SET QUOTED_IDENTIFIER ON
-GO
+UPDATE Individual SET FK_IndividualType = 2
+WHERE FK_IndividualType is null and Original_ID like '%nonID%'
 
 IF OBJECT_ID('tempdb..#indiv_criteria ') IS NOT NULL
 	DROP TABLE #indiv_criteria 
@@ -118,10 +116,10 @@ delete  #indiv_criteria
  FROM #indiv_criteria ic;
 
 
- select * 
- from Observation o 
- JOIN #proto_Id_nonIdentified p on p.protocoleType = o.FK_ProtocoleType and CONVERT(varchar(10),p.proto_ID) = o.original_id
- JOIN Individual i on o.FK_Individual = i.ID and i.FK_IndividualType = 2;
+ --select * 
+ --from Observation o 
+ --JOIN #proto_Id_nonIdentified p on p.protocoleType = o.FK_ProtocoleType and CONVERT(varchar(10),p.proto_ID) = o.original_id
+ --JOIN Individual i on o.FK_Individual = i.ID and i.FK_IndividualType = 2;
 
  /****** check if non id ref exists if we add property chipcode *****/ 
 
@@ -132,7 +130,7 @@ delete  #indiv_criteria
   IF OBJECT_ID('tempdb..#indTomodif') IS NOT NULL
 	DROP TABLE #indTomodif ;
 
- select distinct 
+ select  
 		ni.[Species]
       ,ni.[Age]
       ,ni.[Mark_Color_1]
@@ -152,6 +150,8 @@ delete  #indiv_criteria
 	  ,o.ID as obsID
 	  ,i.ID as indID
 	  ,ni.creationDate
+	  ,o.FK_Station
+	  ,o.FK_ProtocoleType
 INTO #indTomodif
  FROM EcoReleve_Export_ECWP.dbo.TIndividu_Non_Identified ni
  JOIN Individual i on i.ID = ni.ID
@@ -160,8 +160,8 @@ INTO #indTomodif
  JOIN #indiv_criteria ic on ic.Id_nonIdentified = p.Id_nonIdentified
  
 
- select t1.*
- INTO #nonID_indToduplicate 
+ select t1.*,itm.indID,itm.obsID
+INTO #nonID_indToduplicate 
   FROM EcoReleve_Export_ECWP.dbo.TIndividu_Non_Identified t1
   JOIN #indTomodif itm 
 		ON ISNULL(itm.[Species],'') = ISNULL(t1.[Species],'')
@@ -183,29 +183,72 @@ INTO #indTomodif
   where t1.Microchip is not null
 
 
-  IF (SELECT COUNT(*) FROM #nonID_indToduplicate) > 0
-	  BEGIN 
-	  print 'create new indiv with this microChip and update observation with new ones';
+/***** create or retrieve new ref NonID indiv then update Observation FK_Individual  *****/ 
+	  print 'retrieve indiv with this microChip value and correspnding properties and update observation with these ones';
+
+			UPDATE o SET o.FK_Individual = itd.ID
+			FROM Observation o 
+			JOIN #nonID_indToduplicate itd ON o.ID = itd.obsID
 
 
-	  END
-  ELSE 
-	  BEGIN
-		print 'just update the microCHIP ';
+		print 'create new non ID indiv ref, duplicating all properties and add microchip Value then update Observation with these new ones';
 
 		DECLARE @idMiChip int SET @idMiChip = (SELECT ID FROM IndividualDynProp WHERE Name = 'MicroChip')
+		 IF OBJECT_ID('tempdb..#nonID_newRef') IS NOT NULL
+			DROP TABLE #nonID_newRef ;
+
+		CREATE TABLE #nonID_newRef(newIndID int,oldIndID int);
+
+
+		INSERT INTO Individual
+		OUTPUT inserted.ID,inserted.Original_ID INTO #nonID_newRef
+		SELECT i.[creationDate]
+			  ,i.[Species]
+			  ,i.[Age]
+			  ,i.[Birth_date]
+			  ,i.[Death_date]
+			  ,i.[FK_IndividualType]
+			  ,i.ID
+			  ,i.[Caisse_ID]
+		FROM Individual i 
+		WHERE exists (SELECT * FROM #indTomodif itm WHERE itm.indID = i.ID)
+		and NOT exists (SELECT * FROM #nonID_indToduplicate WHERE i.ID = indID)
+
+
+		INSERT INTO IndividualDynPropValue
+		SELECT [StartDate]
+			  ,[ValueInt]
+			  ,[ValueString]
+			  ,[ValueDate]
+			  ,[ValueFloat]
+			  ,[FK_IndividualDynProp]
+			  ,ir.newIndID
+		FROM IndividualDynPropValue iv 
+		JOIN #nonID_newRef ir ON ir.oldIndID = iv.FK_Individual
+
 
 		INSERT INTO IndividualDynPropValue (StartDate,ValueString,FK_Individual,FK_IndividualDynProp)
-		SELECT distinct creationDate,MicroChip,indID,@idMiChip
-		FROM #indTomodif
+		SELECT distinct creationDate,MicroChip,ir.newIndID,@idMiChip
+		FROM #indTomodif itm 
+		JOIN #nonID_newRef ir ON ir.oldIndID = itm.indID
 
-	  END
+		UPDATE o SET FK_Individual = ir.newIndID
+		FROM Observation o 
+		JOIN #indTomodif itm ON o.ID = itm.obsID 
+		JOIN #nonID_newRef ir ON itm.indID = ir.oldIndID
 
 GO
 
 
+/***** query to check in ecoRelve station/Observation All observations result have to refer to a nonID indiv with a MicroChip value ****/ 
+select *
+FROM Observation o 
+		JOIN #indTomodif itm ON o.ID = itm.obsID 
+		JOIN #nonID_newRef ir ON itm.indID = ir.oldIndID
+		JOIN ProtocoleType p ON p.ID = o.FK_ProtocoleType
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('74_nonID_Indiv_exctract&insert_Microchip_from_eReleve',GETDATE(),(SELECT db_name()))
 
 
 GO
+
