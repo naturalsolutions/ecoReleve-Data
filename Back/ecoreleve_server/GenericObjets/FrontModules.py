@@ -107,7 +107,8 @@ class ModuleForms(Base):
             'options': None,
             'defaultValue' : None,
             'editorAttrs' : {'disabled': isDisabled},
-            'fullPath':self.fullPath
+            'fullPath':self.fullPath,
+            'size':curSize
             }
 
         try : 
@@ -161,17 +162,23 @@ class ModuleForms(Base):
     def InputLNM(self) :
         ''' build ListOfNestedModel input type : used for complex protocols and Fieldworkers in station form '''
         if self.Options != None :
+            gridRanged = False
             result = self.session.query(ModuleForms).filter(and_(ModuleForms.TypeObj == self.Options , ModuleForms.Module_ID == self.Module_ID)).all()
             subNameObj = result[0].Name
             subschema = {}
             for conf in result :
-                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable)
+                if conf.InputType == 'GridRanged':
+                    gridRanged = conf.GetDTOFromConf(self.Editable)
+                    confGridRanged = conf
+                    subschema.update(gridRanged)
+                else :
+                    subschema[conf.Name] = conf.GetDTOFromConf(self.Editable)
 
             fields = []
             resultat = []
-            Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in result if obj.FormOrder is not None], key = lambda x : x[1])
+            Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name) for obj in result if obj.FormOrder is not None and obj.InputType != 'GridRanged'], key = lambda x : x[1])
             # Legend2s = sorted ([(obj.Legend)for obj in result if obj.FormOrder is not None ], key = lambda x : x[1])
-            withOutLegends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in result if obj.FormOrder is not None and obj.Legend is None ], key = lambda x : x[1])
+            withOutLegends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in result if obj.FormOrder is not None and obj.Legend is None and obj.InputType != 'GridRanged'], key = lambda x : x[1])
 
             Unique_Legends = list()
             # Get distinct Fieldset in correct order
@@ -186,6 +193,19 @@ class ModuleForms(Base):
             for curProp in Legends:
                 curIndex = Unique_Legends.index(curProp[0])
                 resultat[curIndex]['fields'].append(curProp[2])
+
+            if gridRanged :
+                curIndex  = Unique_Legends.index(conf.Legend)
+                # resultat[curIndex]['fields'].pop(resultat[curIndex]['fields'].index(conf.Name))
+                tupleList = [ (gridRanged[obj]['order'],gridRanged[obj]['name']) for obj in gridRanged]
+                l = sorted(tupleList,key = lambda x : x[0])
+
+                for order,name in l:
+                    resultat[curIndex]['fields'].append(name)
+
+                if 'fixedCol' in subschema[resultat[curIndex]['fields'][0]]['fieldClass'] : 
+                    rr = resultat[curIndex]['fields'].pop(0)
+                    resultat[curIndex]['fields'].append(rr)
 
             self.dto['fieldsets'] = resultat
             self.dto['subschema'] = subschema
@@ -217,7 +237,42 @@ class ModuleForms(Base):
                 for row in result:
                     self.dto['options']['source'].append(row[0])
             self.dto['options']['iconFont'] = 'reneco reneco-autocomplete'
-            
+    
+    def GridRanged (self):
+        options = json.loads(self.Options)
+        self.dto = {}
+        if self.Editable:
+            isDisabled = False
+            curSize = self.FieldSizeEdit
+        else :
+            isDisabled = True
+            curSize = self.FieldSizeDisplay
+
+
+        CssClass = 'col-md-'+str(curSize)
+        addClass = ''
+        for i in range(options['range']):
+            if i == 0 :
+                addClass += 'firstCol'
+            else :
+                addClass = ''
+            curDTO = {
+            'name': 'C'+str(i),
+            'type': options['inputType'],
+            'title' : options['prefixLabel']+str(i+1),
+            'editable' : self.Editable,
+            'editorClass' : str(self.editorClass) ,
+            'validators': [],
+            'options': None,
+            'defaultValue' : None,
+            'editorAttrs' : {'disabled': isDisabled},
+            'defaultValue' : None,
+            'fieldClass' : str(self.EditClass) + ' ' + CssClass+ ' '+ addClass,
+            'order':i,
+            'size':curSize
+            }
+            self.dto['C'+str(i)] = curDTO
+
 
 
     func_type_context = {
@@ -226,6 +281,7 @@ class ModuleForms(Base):
         'GridFormEditor' : InputLNM,
         'AutocompTreeEditor' : InputThesaurus,
         'AutocompleteEditor': InputAutocomplete,
+        'GridRanged': GridRanged,
         }
 
 

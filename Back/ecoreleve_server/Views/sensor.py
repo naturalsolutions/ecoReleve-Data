@@ -181,7 +181,7 @@ def getSensorHistory(request):
         table = Base.metadata.tables['MonitoredSiteEquipment']
         joinTable = join(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable,MonitoredSite, table.c['FK_MonitoredSite'] == MonitoredSite.ID)
-        query = select([table.c['StartDate'],table.c['EndDate'],Sensor.UnicIdentifier,MonitoredSite.Name]).select_from(joinTable
+        query = select([table.c['StartDate'],table.c['EndDate'],Sensor.UnicIdentifier,MonitoredSite.Name, MonitoredSite.ID.label('MonitoredSiteID')]).select_from(joinTable
             ).where(table.c['FK_Sensor'] == id
             ).order_by(desc(table.c['StartDate']))
 

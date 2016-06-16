@@ -105,6 +105,7 @@ def main(global_config, **settings):
 
     binds = {"default": engine, "Export": engineExport}
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
+    dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine))
     config.add_request_method(db, name='dbsession', reify=True)
 
     if 'loadExportDB' in settings and settings['loadExportDB'] == 'False' :

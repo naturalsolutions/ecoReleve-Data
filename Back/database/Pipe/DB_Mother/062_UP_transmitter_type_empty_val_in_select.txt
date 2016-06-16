@@ -1,0 +1,13 @@
+------ UPDATE Indiv transmitter type list with empty val -----
+
+update [EcoReleve_ECWP].[dbo].[ModuleForms]
+  set Options ='SELECT Distinct Name as label, Name as val FROM SensorType  Union SELECT label , value  as  val FROM (Values ('' '', ''-1'')) AS TempTableName ([label], [value])'
+where name like 'Transmitter_Type'
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('62_UP_Transmitter_type_empty_in_select',GETDATE(),(SELECT db_name()))
+
+
+GO
