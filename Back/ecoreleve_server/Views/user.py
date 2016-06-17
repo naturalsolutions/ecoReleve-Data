@@ -29,6 +29,7 @@ def current_user(request):
     """
     session = request.dbsession
 
+    print(request.authenticated_userid['iss'])
     query = select([
         User.id.label('PK_id'),
         User.Login.label('fullname')
