@@ -23,7 +23,7 @@ ALTER View [dbo].[allIndivLocationWithStations] as
 
 		FROM Station s
 		LEFT JOIN Region r on r.ID = s.FK_Region
-		JOIN fieldActivity fa on fa.ID = s.fieldActivityId
+		LEFT JOIN fieldActivity fa on fa.ID = s.fieldActivityId
 		JOIN Observation o ON o.FK_Station = s.ID
 		group by  o.FK_Station
 			  ,[LAT]
