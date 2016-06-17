@@ -50,13 +50,8 @@ userOAuthDict = {}
 
 def loadThesaurusTrad(config):
     session = config.registry.dbmaker()
-    query = text(""" SELECT 
-      [TTop_Name] as nameFr
-      ,tl.TLib_Name as nameEn
-      ,[TTop_FullPath] as fullPath FROM [THESAURUS].[dbo].[TTopic] th 
-      JOIN [THESAURUS].[dbo].TTopicLibelle tl on th.TTop_PK_ID = tl.TLib_FK_TTop_ID and TLib_FK_TLan_ID = 'en'
-      where TTop_PK_ID > 204089 
-      and TTop_Type not in ('plantes','vertébrés','Mollusques','Invertébrés')""")
+    thesTable = Base.metadata.tables['ERDThesaurusTerm']
+    query = select(thesTable.c)
 
     results = session.execute(query).fetchall()
 
