@@ -67,37 +67,32 @@ def loadThesaurusTrad(config):
     session.close()
 
 def loadUserRole(config):
-    session = config.registry.dbmaker()
     global userOAuthDict
-    query = text("""SELECT
-      [TAut_FK_TUseID] as userID
-      ,[TAut_FK_TRolID] as role
-  FROM [SECURITE].[dbo].[TAutorisations]
-  where TAut_FK_TInsID = (SELECT TOP 1 [TIns_PK_ID]
-  FROM [SECURITE].[dbo].[TInstance]
-  where TIns_Theme = 'ecoreleve')""")
+    session = config.registry.dbmaker()
+    VuserRole = Base.metadata.tables['VUser_Role']
+    query = select(VuserRole.c)
 
     results = session.execute(query).fetchall()
     userOAuthDict = pd.DataFrame.from_records(results
             ,columns=['user_id','role_id'])
 
+USERS = {2:'superUser',
+    3:'user',
+    1:'admin'}
 
-USERS = {'editor':'editor',
-          'viewer':'viewer',
-          'admin':'admin'}
-GROUPS = {'1':['group:viewers'],
-'3':['group:editors'],
-'4':['group:admins']}
+GROUPS = {'superUser':['group:superUsers'],
+    'user':['group:users'],
+    'admin':['group:admins']}
 
 def groupfinder(userid, request):
-    if userid in USERS:
-        return GROUPS.get(4, [])
-    # for row in results:
-    #     userOAuthDict[row['userID']] = row['role']
+    currentUserRoleID = userOAuthDict.loc[userOAuthDict['user_id'] == int(userid),'role_id'].values[0]
+    if currentUserRoleID in USERS:
+        currentUserRole = USERS[currentUserRoleID]
+        return GROUPS.get('superUser', [])
 
 def cache_callback(request,session):
-            if isinstance(request.exception,TimeoutError):
-                session.get_bind().dispose()
+    if isinstance(request.exception,TimeoutError):
+        session.get_bind().dispose()
 
 def db(request):
     makerDefault = request.registry.dbmaker

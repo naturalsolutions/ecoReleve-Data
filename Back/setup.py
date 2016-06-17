@@ -24,7 +24,7 @@ requires = [
     'pyexcel-xlsx',
     'openpyxl===2.2.2',
     'psutil',
-    'jwt',
+    # 'jwt',
     'pyramid_jwtauth'
     ]
 
