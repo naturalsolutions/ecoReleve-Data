@@ -1,0 +1,27 @@
+CREATE VIEW ERDThesaurusTerm as 
+ SELECT 
+      [TTop_Name] as nameFr
+      ,tl.TLib_Name as nameEn
+      ,[TTop_FullPath] as fullPath FROM [THESAURUS].[dbo].[TTopic] th 
+      JOIN [THESAURUS].[dbo].TTopicLibelle tl on th.TTop_PK_ID = tl.TLib_FK_TTop_ID and TLib_FK_TLan_ID = 'en'
+      where TTop_PK_ID > 204089 
+      and TTop_Type not in ('plantes','vertébrés','Mollusques','Invertébrés')
+GO
+
+CREATE VIEW [dbo].[VUser_Role] as 
+SELECT
+      [TAut_FK_TUseID] as userID
+      ,[TAut_FK_TRolID] as role
+  FROM [SECURITE].[dbo].[TAutorisations]
+  where TAut_FK_TInsID = (SELECT TOP 1 [TIns_PK_ID]
+  FROM [SECURITE].[dbo].[TInstance]
+  where TIns_Theme = 'ecoreleve')
+GO
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('68_CreateView_UserRole_and_Thesaurus_term',GETDATE(),(SELECT db_name()))
+
+
+GO
