@@ -88,7 +88,7 @@ def groupfinder(userid, request):
     currentUserRoleID = userOAuthDict.loc[userOAuthDict['user_id'] == int(userid),'role_id'].values[0]
     if currentUserRoleID in USERS:
         currentUserRole = USERS[currentUserRoleID]
-        return GROUPS.get('superUser', [])
+        return GROUPS.get(currentUserRole, [])
 
 def cache_callback(request,session):
     if isinstance(request.exception,TimeoutError):

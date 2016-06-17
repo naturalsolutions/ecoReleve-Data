@@ -58,6 +58,8 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
         context: this,
         url: config.coreUrl + 'security/has_access'
       }).done(function() {
+        $.xhrPool.abortAll();
+        console.log('change route');
         callback.apply(this, args);
       }).fail(function(msg) {
         if ( msg.status === 403) {

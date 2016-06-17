@@ -59,7 +59,7 @@ function(Marionette, config) {
 		},
 
 		navigateNext: function(){
-			this.checkAjax();
+			//this.checkAjax();
 			/*backgrid grid issue : https://github.com/backbone-paginator/backbone-pageable/issues/158*/
 			this.coll.size();
 			if(this.modelIndex < this.coll.size()-1){
@@ -67,6 +67,7 @@ function(Marionette, config) {
 				this.modelIndex++;
 				this.upClientSide();
 			}else{
+				/*$.xhrPool.allowAbort=false;*/
 				console.log('end of page');
 				//need 2 fetch first
 				this.modelIndex = 0;
@@ -106,13 +107,14 @@ function(Marionette, config) {
 		},
 
 		navigatePrev: function(){
-			this.checkAjax();
+			//this.checkAjax();
 			if(this.modelIndex != 0){
 				//noNeed 2 fetch
 				this.modelIndex--;
 				this.upClientSide();
 			}else{
 				//need 2 fetch first
+				$.xhrPool.allowAbort=false;
 				if(this.coll.state.currentPage > 1){
 					var tmp = this.coll.state.currentPage;
 					tmp--;
@@ -122,7 +124,6 @@ function(Marionette, config) {
 					tmp = this.coll.state.lastPage;
 				}
 				if(this.pagingServerSide){
-
 					this.upRowServerSide('prev');
 					this.coll.getPage(tmp);
 
@@ -137,15 +138,17 @@ function(Marionette, config) {
 
 
 		upRowServerSide: function(from){
+			this.checkAjax();
+			$.xhrPool.allowAbort=false;
 			var _this = this;
 			if(from == 'next'){
 				this.grid.upRowServerSide = function(){
 					this.currentRow = this.grid.body.rows[0];
 					this.upRowStyle();
-
 					_this.updateModelEtc(this.currentRow);
 					_this.modelIndex=0;
 					_this.resetGridFunction();
+					$.xhrPool.allowAbort=true;
 				}
 			}
 			if(from == 'prev'){
@@ -156,8 +159,10 @@ function(Marionette, config) {
 					_this.modelIndex=this.grid.body.rows.length-1;
 					_this.updateModelEtc(this.currentRow);
 					_this.resetGridFunction();
+					$.xhrPool.allowAbort=true;
 				}
 			}
+
 		},
 
 		updateModelEtc: function(row){
@@ -177,7 +182,7 @@ function(Marionette, config) {
 
 
 		upClientSide: function(){
-
+			this.checkAjax();
 			this.model = this.coll.at(this.modelIndex);
 
 			this.grid.currentRow = this.grid.grid.body.rows[this.modelIndex];
@@ -190,6 +195,8 @@ function(Marionette, config) {
 		},
 
 		upRowClientSide: function(from){
+			this.checkAjax();
+
 			if(from == 'next'){
 				this.modelIndex = 0;
 			}
@@ -206,16 +213,8 @@ function(Marionette, config) {
 			this.parent.reloadFromNavbar(this.model);
 		},
 		checkAjax : function(){
-      var xhrPool = window.xhrPool;
-      console.log('new route :');
-      console.log(window.xhrPool);
-
-      for(var i=0; i<xhrPool.length; i++){
-         xhrPool[i].abort();
-      }
-       window.xhrPool = [];
-
-    }
+			$.xhrPool.abortAll();
+	    }
 
 	});
 });
