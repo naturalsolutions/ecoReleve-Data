@@ -110,6 +110,7 @@ define([
         url: this.url,
         typeObj: this.typeObj,
         rowClicked: true,
+        ajaxType:'POST'
       });
 
       this.grid.rowClicked = function(args) {
@@ -127,12 +128,17 @@ define([
 
     displayFilter: function() {
       this.$el.find('#filter').html('');
+      var firstOperator = undefined;
+      if (this.typeObj == 2 ){
+        firstOperator = 'is null';
+      }
 
       this.filters = new NsFilter({
         url: this.url,
         com: this.com,
         typeObj: this.typeObj,
         filterContainer: this.$el.find('#filter'),
+        firstOperator : firstOperator
       });
     },
 
