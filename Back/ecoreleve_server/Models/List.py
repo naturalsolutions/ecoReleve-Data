@@ -283,7 +283,7 @@ class IndividualList(ListObjectWithDynProp):
             ,and_(vs.c['FK_SensorDynProp']==9,and_(Sensor.FK_SensorType==4,and_(Equipment.Deploy==1,
                 and_(Equipment.StartDate<startDate,Equipment.FK_Individual==Individual.ID))))))
 
-        if freqObj['Operator'].lower() in ['is'] and freqObj['Value'].lower() == 'null':
+        if freqObj['Operator'].lower() in ['is null'] and freqObj['Value'].lower() == 'null':
             fullQueryJoin = fullQueryJoin.where(~exists(fullQueryExist))
         else :
             fullQueryExist = fullQueryExist.where(eval_.eval_binary_expr(vs.c['ValueInt'],freqObj['Operator'],freq))
