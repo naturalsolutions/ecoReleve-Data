@@ -1,4 +1,4 @@
-/***** sp to alter in all track DB instance **/
+﻿/***** sp to alter in all track DB instance **/
 
 
 ALTER PROCEDURE [dbo].[pr_MessageExportIndividu](
@@ -62,8 +62,8 @@ BEGIN
 				   ,[Parametre])
 
 			select M.pk_MessageSend,o.TObs_Titre,
-			Case WHEN TObs_Titre='Bague d''élevage conservée après sortie' and Ch.TDCh_Valeur='yes' THEN 1 
-			WHEN TObs_Titre='Bague d''élevage conservée après sortie' and Ch.TDCh_Valeur='no' THEN 0
+			Case WHEN TObs_Titre='Bague d''élevage conservée après sortie' and Ch.TDCh_Valeur='yes' THEN '1' 
+			WHEN TObs_Titre='Bague d''élevage conservée après sortie' and Ch.TDCh_Valeur='no' THEN '0'
 			WHEN TObs_Titre='Bague d''élevage conservée après sortie' and Ch.TDCh_Valeur not in ('no','yes') THEN NULL
 			ELSE  Ch.TDCh_Valeur  END,NULL
 			--DISTINCT m.ObjectId,o.TObs_Titre,C.TDCh_Valeur,NULL,o.TObs_Titre
