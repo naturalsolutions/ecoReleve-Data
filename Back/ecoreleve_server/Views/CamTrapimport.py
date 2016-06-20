@@ -18,18 +18,35 @@ import uuid
 import shutil
 from ..Models import CamTrap
 import datetime,time,zipfile
+import exifread
 from pyramid import threadlocal
+
+def dateFromExif(imagePath):
+    theDate =""
+    image = open( imagePath ,'rb' )
+    tagsExif = exifread.process_file(image)
+    for tag in tagsExif:
+        if tag in ('Image DateTime'):
+            theDate = str(tagsExif[tag]).encode('utf8').decode(sys.stdout.encoding)
+            theDate += ".000"
+            theDate = theDate.replace(":","-",2)
+            theDate = datetime.datetime.strptime(theDate, "%Y-%m-%d %H:%M:%S.%f")
+    if( theDate == ""):
+        theDate = None
+    return theDate
 
 def unzip(zipFilePath , destFolder):
     zfile = zipfile.ZipFile(zipFilePath)
-    nameRandom = ''
+    #nameRandom = ''
     for name in zfile.namelist():
-        nameRandom = GenName()
-        print (name)
-        fd = open(os.path.join(destFolder, str(nameRandom)+".jpg"), 'wb')
+        print("unzip : " +str(name))
+        #nameRandom = GenName()
+        #print (name)
+        fd = open(os.path.join(destFolder, str(name)), 'wb')
         fd.write(zfile.read(name))
         fd.close()
-        AddPhotoOnSQL(destFolder,nameRandom,".jpg",None)
+        extType = name.split('.');
+        AddPhotoOnSQL(destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)))
     zfile.close()
     #if no error remove zip file
 
@@ -38,7 +55,7 @@ def unzip(zipFilePath , destFolder):
 
 def AddPhotoOnSQL(path , name , extension , date_creation):
     session = threadlocal.get_current_request().dbsession
-    currentPhoto = CamTrap(path = str(path),name = str(name), extension = '.jpg', date_creation = None)
+    currentPhoto = CamTrap(path = str(path),name = str(name), extension = '.jpg', date_creation = date_creation )
     session.add(currentPhoto)
     session.flush()
     return currentPhoto.pk_id
@@ -158,9 +175,6 @@ def uploadFileCamTrap(request):
 
 def uploadFileCamTrapResumable(request):
 
-    reponseStatus = 200
-
-    pathPrefix = dbConfig['camTrap']['path']
     """print("ok resumable envoie bien les requetes et on les reçoit")
     print ("chunk number :" + str(request.POST['resumableChunkNumber']))
     print ("chunk size : " + str(request.POST['resumableChunkSize']))
@@ -172,11 +186,13 @@ def uploadFileCamTrapResumable(request):
     print ("Relative path :" + str(request.POST['resumableRelativePath']))
     print(" options :" + str(request.POST['path']))
     print ("File :" + str(request.POST['file']))"""
+    reponseStatus = 200
+    print(str(request.POST['resumableType']))
+    pathPrefix = dbConfig['camTrap']['path']
     flagCrea = False
     pathPost = str(request.POST['path'])
-    if not os.path.exists(pathPrefix+'\\'+pathPost):
-        print("creation du dossier")
-        os.makedirs(pathPrefix+'\\'+pathPost)
+
+
 
     """if (request.POST['resumableType'] == "image/jpeg"):
         print(" on va post une image")
@@ -185,14 +201,20 @@ def uploadFileCamTrapResumable(request):
     #print("paquet recu :" + str(request.POST['resumableChunkNumber']))
 
     uri = pathPrefix+'\\'+pathPost
+    extType = request.POST['resumableFilename'].split('.');
+    print ("nom du fichier :" +str(request.POST['resumableFilename']) )
+    print ("type de fichier :" +str(extType[len(extType)-1]))
+    print("date str " + str())
     #test si le fichier existe deja
     if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableFilename'])):
 
         inputFile = request.POST['file'].file
         if( int(request.POST['resumableChunkNumber']) == 1 and int(request.POST['resumableCurrentChunkSize']) == int(request.POST['resumableTotalSize']) ):
-            print ("on a qu'un seul chunk")
+            #print ("on a qu'un seul chunk")
+            print( "file %s " % str(uri+'\\'+str(request.POST['resumableFilename'])))
             with open(uri+'\\'+str(request.POST['resumableFilename']), 'wb') as output_file: # write in the file
                 shutil.copyfileobj(inputFile, output_file)
+            idRetour = AddPhotoOnSQL(str(uri) , str(request.POST['resumableFilename']) , str(extType[len(extType)-1]) , dateFromExif (uri+'\\'+str(request.POST['resumableFilename'])) )
         else:
             position = int(request.POST['resumableChunkNumber']) #calculate the position of cursor
             with open(uri+'\\'+str(request.POST['resumableFilename'])+"_"+str(position), 'wb') as output_file: # write in the file
@@ -208,11 +230,29 @@ def uploadFileCamTrapResumable(request):
 def concatChunk(request):
     reponseStatus = 200
     pathPrefix = dbConfig['camTrap']['path']
-    pathPost = str(request.POST['path'])
-    print("on veut reconstruire le fichier" + str(request.POST['name']) + " qui se trouve dans " + str(request.POST['path']) +" en :"+str(request.POST['taille'])+" fichiers")
-    destination = open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) ,'wb')
-    for i in range( 1, int(request.POST['taille'])+1):
-        shutil.copyfileobj(open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i), 'rb'), destination)
-    destination.close()
+    #create folder
+    if(int(request.POST['action']) == 0 ):
+        pathPost = str(request.POST['path'])
+        if not os.path.exists(pathPrefix+'\\'+pathPost):
+            os.makedirs(pathPrefix+'\\'+pathPost)
+            request.response.status_code = 200
+    else :
+        pathPost = str(request.POST['path'])
+        debutTime = time.time()
+        print("on veut reconstruire le fichier" + str(request.POST['name']) + " qui se trouve dans " + str(request.POST['path']) +" en :"+str(request.POST['taille'])+" fichiers")
+        destination = open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) ,'wb')
+        for i in range( 1, int(request.POST['taille'])+1):
+            shutil.copyfileobj(open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i), 'rb'), destination)
+        destination.close()
+        finTime = time.time()
+        print ("durée :" +str(finTime - debutTime))
+        #file concat ok now unzip
+        debutTime = time.time()
+        print (" on commence la décompression ")
+        unzip(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) , pathPrefix+'\\'+pathPost+'\\')
+        print ("fin decompression ")
+        finTime = time.time()
+        print ("durée :" +str(finTime - debutTime))
+
     request.response.status_code = 200
     return reponseStatus

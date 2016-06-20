@@ -74,8 +74,21 @@ define([
 
 
       $('#start-upload-resumablejs').click(function(){
-        console.log("on upload");
-        r.upload();
+        //prevent multithread pb when test if folder doesn't exist and create it
+        $.ajax({
+          type: "POST",
+          url: config.coreUrl + 'sensors/concat/datas',
+          data: {
+                  path : _this.path,
+                  action : 0 // create folder
+                }
+        })
+        .done( function(response){
+          console.log(response);
+          if( response.status_code === 200 || response === 200)
+            r.upload();
+        });
+
       });
 
       $('#pause-upload-resumablejs').click(function(){
@@ -112,6 +125,7 @@ define([
       progressBar.fileAdded();
         //console.log(file);
       });
+
 
       r.on('pause', function(){
           $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-pause').addClass('glyphicon-play');
