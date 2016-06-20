@@ -16,6 +16,7 @@ define(['marionette', 'lyt-rootview', 'router', 'controller',
   'ns_modules/ns_bbfe/bbfe-lon',
   'ns_modules/ns_bbfe/bbfe-lat',
   'ns_modules/ns_cell/bg-timestampCell',
+  'ns_modules/ns_cell/autocompCell',
   ],
 function( Marionette, LytRootView, Router, Controller) {
 
