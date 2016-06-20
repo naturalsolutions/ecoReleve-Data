@@ -6,7 +6,9 @@ class Eval():
 
     def eval_binary_expr(self,op1, operator, op2):
         op = operator.lower()
-        if op in ['is', 'is not'] and isinstance(op2,str) and op2.lower() == 'null':
+        print(op)
+        if op in ['is null', 'is not null']:
+            op = op.replace('null','').replace(' ','')
             op2 = None
         try : 
             return self.get_operator_fn(op)(op1, op2)
@@ -33,8 +35,6 @@ class Eval():
             'end': self.end_with,
             'begins': self.begin_with,
             'begin': self.begin_with,
-            'is null' :self.is_null,
-            # 'is not null' :self.is_not_null,
             }[op]
 
     def _in(self,op1,op2):

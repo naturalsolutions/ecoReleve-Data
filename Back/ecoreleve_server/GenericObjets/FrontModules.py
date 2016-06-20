@@ -333,7 +333,11 @@ class ModuleGrids (Base) :
         'editable': isEditable(self.GridRender),
         'cell' : self.CellType,
         }
-
+        try :
+            options = json.loads(self.Options)
+            column['options'] = options
+        except :
+            pass
         if self.CellType == 'select' and 'SELECT' in self.Options :
              result = self.session.execute(text(self.Options)).fetchall()
              column['optionValues'] = [[row['label'],row['val']] for row in result]

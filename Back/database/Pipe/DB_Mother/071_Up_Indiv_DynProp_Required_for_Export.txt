@@ -1,0 +1,16 @@
+update [IndividualType_IndividualDynProp] SET Required = 1 
+
+
+update l SET Required = 0 
+FROM [IndividualType_IndividualDynProp] l 
+JOIN IndividualDynProp dp on dp.ID = l.FK_IndividualDynProp
+WHERE dp.Name in ('Box_ID','Date_Sortie','Poids','Breeding ring kept after release','Caisse_ID')
+
+ALTER TABLE Individual 
+DROP Column Caisse_ID
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('71_Up_Indiv_DynProp_Required_for_Export',GETDATE(),(SELECT db_name()))
+
+
+GO
