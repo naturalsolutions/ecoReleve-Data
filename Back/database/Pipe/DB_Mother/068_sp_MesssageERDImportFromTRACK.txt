@@ -1,4 +1,4 @@
-
+﻿
 
 ALTER PROCEDURE [dbo].[MessageERDImportFromTrack]
 AS
@@ -96,6 +96,7 @@ BEGIN
 			and f.Options = th.TTop_ParentID AND (v.ValueString like th.TTop_NameEn )
 		WHERE  i.Original_ID like 'track%' 
 			and i.ID in (select ID FROM @TInsetedId)
+		AND th.TTop_FullPath IS NOT NULL 
 
 
 		UPDATE i SET i.Species = th.TTop_FullPath
@@ -107,6 +108,7 @@ BEGIN
 			 AND (Species = th.TTop_Name)
 		WHERE  i.Original_ID like 'track%'
 			 and i.ID in (select ID FROM @TInsetedId)
+		AND th.TTop_FullPath IS NOT NULL 
 
 
 		UPDATE TMessageReceived
