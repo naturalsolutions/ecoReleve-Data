@@ -33,6 +33,11 @@ define([
         this.com.addModule(this);
       }
 
+      this.ajaxType = 'GET';
+      if (options.ajaxType) {
+        this.ajaxType = options.ajaxType;
+      }
+
       this.totalSelectedUI = options.totalSelectedUI;
 
       this.deferred = $.Deferred();
@@ -330,8 +335,6 @@ define([
     fetchCollection: function () {
       var _this = this;
 
-
-
       if (this.filterCriteria != null) {
         //<- ??
         if (!this.url){
@@ -347,7 +350,8 @@ define([
 
           this.grid.collection.fetch({
             reset: true, 
-            data: { 'criteria': this.filterCriteria }, 
+            data: { 'criteria': this.filterCriteria },
+            type: _this.ajaxType,
             success: function () {
               if(_this.totalElement){
                 _this.affectTotalRecords();
