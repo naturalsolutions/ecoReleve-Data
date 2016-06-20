@@ -1,0 +1,52 @@
+﻿
+INSERT INTO [ProtocoleType] (Name, Status)  
+  VALUES  ('Sex determination', 4);
+
+DECLARE @protid  int ;
+DECLARE @dynpropid int ;
+SET @protid = (SELECT ID FROM [ProtocoleType]  WHERE NAME like 'Sex determination');
+SET @dynpropid = (SELECT [ID] FROM [ObservationDynProp] where Name like 'sex');
+
+INSERT INTO [ProtocoleType_ObservationDynProp] (Required, FK_ProtocoleType, FK_ObservationDynProp
+      ,Locked,LinkedTable, LinkedField ,LinkedID, LinkSourceID)
+VALUES
+(
+  1,
+@protid,
+@dynpropid,
+NULL,
+'Individual',
+'@Dyn:Sex',
+'ID',
+'FK_Individual'
+)
+
+INSERT INTO  [ModuleForms] (
+      [module_id]
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,[Legend]
+      ,[Options]
+      ,[Status] )
+
+VALUES
+(1,@protid,'FK_Individual','Individual ID',1,6,6,'ObjectPicker','form-control',2,2,NULL,'',1),
+(1,@protid,'sex','Sex',1,6,6,'AutocompTreeEditor','form-control',2,1,NULL,222953,1),
+(1,@protid,'Comments','Comments',0,12,12,'TextArea','form-control',2,2,NULL,'',1)
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('066_Add_protocol_sex_determination',GETDATE(),(SELECT db_name()))
+
+
+GO

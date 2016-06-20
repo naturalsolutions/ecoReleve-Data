@@ -1,0 +1,44 @@
+
+DECLARE @nbProp int SET @nbProp = (select ID FROM ObservationDynProp WHERE Name  = 'nb_individuals')
+DECLARE @Proto int SET @Proto = (select ID FROM ProtocoleType WHERE Name  = 'Release Group')
+
+
+INSERT INTO ProtocoleType_ObservationDynProp (Required, FK_ObservationDynProp,FK_ProtocoleType)
+VALUES (0,@nbProp,@Proto)
+
+
+INSERT INTO ModuleForms (
+	module_id
+	,TypeObj
+	,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder])
+
+VALUES (1,@Proto,'nb_individuals','Nb Individuals',0,2,2,'Text','form-control',2,30)
+
+GO 
+
+
+
+/**** Db Correction *****/
+INSERT INTO ObservationDynPropValue (FK_ObservationDynProp,FK_Observation,ValueString,StartDate)
+
+select (SELECT ID FRom ObservationDynProp WHERE NAme = 'nb_individuals'), o.Parent_Observation, Count(*) as nb , GETDATE()
+FRom Observation o
+JOIN Observation par on O.Parent_Observation = par.ID
+WHERE o.FK_ProtocoleType = (select ID FROM ProtocoleType WHERE Name = 'Release individual')
+group by o.Parent_Observation, par.creationDate
+
+
+GO
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('69_Up_Conf_ReleaseGroup',GETDATE(),(SELECT db_name()))
+
+
+GO
