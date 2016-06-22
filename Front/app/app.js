@@ -1,4 +1,4 @@
-define(['marionette', 'lyt-rootview', 'router', 'controller',
+define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
   'ns_modules/ns_bbfe/bbfe-timePicker',
@@ -18,7 +18,7 @@ define(['marionette', 'lyt-rootview', 'router', 'controller',
   'ns_modules/ns_cell/bg-timestampCell',
   'ns_modules/ns_cell/autocompCell',
   ],
-function( Marionette, LytRootView, Router, Controller) {
+function( Marionette, LytRootView, Router, Controller,Swal) {
 
   var app = {};
   var JST = window.JST = window.JST || {};
@@ -56,6 +56,45 @@ function( Marionette, LytRootView, Router, Controller) {
   window.onerror = function() {
     $('#header-loader').addClass('hidden');
   };
+
+
+
+  window.formChange = false;
+  window.formEdition = false;
+  window.checkExitForm = function(confirmCallback,cancelCallback) {
+    if(window.formChange && window.formEdition){
+        Swal({
+            title: 'Saving form',
+            text: 'Current form is not yet saved. Would you like to continue without saving it?',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: 'rgb(221, 107, 85)',
+            confirmButtonText: 'OK',
+            cancelButtonColor: 'grey',
+            cancelButtonText: 'Cancel',
+            closeOnConfirm: true,
+        },
+        function(isConfirm) {
+           if (!isConfirm) {
+              if (cancelCallback){
+                cancelCallback();
+              }
+              return false;
+            }else {
+                if (confirmCallback){
+                  window.formChange = false;
+                  window.formEdition = false;
+                  confirmCallback();
+                }
+            }
+        });
+      } else {
+        if (confirmCallback){
+          confirmCallback();
+        }
+      }
+  };
+
 
   window.app = app;
   return app;
