@@ -1,0 +1,46 @@
+
+  
+  INSERT INTO ModuleGrids
+  select 17
+      ,[TypeObj]
+      ,[Name]
+      ,[Label]
+      ,[GridRender]
+      ,[GridSize]
+      ,[CellType]
+      ,Case when name = 'mark_code_1' then 100 ELSE 110 END
+      ,[QueryName]
+      ,[Options]
+      ,[FilterOrder]
+      ,[FilterSize]
+      ,[FilterClass]
+      ,0
+      ,[FilterDefaultValue]
+      ,[FilterRender]
+      ,[FilterType]
+      ,[Status]
+	FROM [ModuleGrids]
+	WHERE Module_ID = 8 and name like 'mark_code%'
+
+	
+
+UPDATE f SET options = '{"protocoleType":'+CONVERT(varchar(3),(SELECT ID FROM protocoleType WHERE NAME = 'Entomo_Pop_Census'))+',"nbFixedCol":1,"delFirst":1,"showLines":1}'
+	from ModuleForms f
+	where InputType = 'gridformeditor' and Name = 'Entomo_Pop_Census'
+
+UPDATE f SET FieldSizeDisplay = 10, FieldSizeEdit = 10
+	from ModuleForms f
+	where typeObj = (SELECT ID FROM protocoleType WHERE NAME = 'Entomo_Pop_Census') and Name = 'taxon'
+
+
+UPDATE f SET options = '{"protocoleType":'+CONVERT(varchar(3),(SELECT ID FROM protocoleType WHERE NAME = 'SubTransect'))+',"nbFixedCol":1,"delFirst":1,"showLines":1}'
+	from ModuleForms f
+	where InputType = 'gridformeditor' and Name = 'SubTransect'
+   
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('74_Up_releaseGRID_&_protoTransect_entomo',GETDATE(),(SELECT db_name()))
+
+
+GO
