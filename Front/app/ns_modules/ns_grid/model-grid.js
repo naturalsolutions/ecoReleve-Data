@@ -33,6 +33,11 @@ define([
         this.com.addModule(this);
       }
 
+      this.ajaxType = 'GET';
+      if (options.ajaxType) {
+        this.ajaxType = options.ajaxType;
+      }
+
       this.totalSelectedUI = options.totalSelectedUI;
 
       this.deferred = $.Deferred();
@@ -114,7 +119,9 @@ define([
       if (options.filterCriteria) {
         this.filterCriteria = options.filterCriteria;
       }
-      
+      if(options.affectTotalRecords){
+        this.affectTotalRecords = options.affectTotalRecords;
+      }      
       this.initGrid();
       this.eventHandler();
     },
@@ -328,8 +335,6 @@ define([
     fetchCollection: function () {
       var _this = this;
 
-
-
       if (this.filterCriteria != null) {
         //<- ??
         if (!this.url){
@@ -345,7 +350,8 @@ define([
 
           this.grid.collection.fetch({
             reset: true, 
-            data: { 'criteria': this.filterCriteria }, 
+            data: { 'criteria': this.filterCriteria },
+            type: _this.ajaxType,
             success: function () {
               if(_this.totalElement){
                 _this.affectTotalRecords();
@@ -383,6 +389,7 @@ define([
           this.grid.body.collection = args;
           this.grid.body.refresh();
         }
+        this.affectTotalRecords();
       }
       else {
         // Server side filter

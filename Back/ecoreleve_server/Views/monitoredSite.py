@@ -267,7 +267,7 @@ def searchMonitoredSite(request):
 
     start = datetime.now()
     # listObj = ListObjectWithDynProp(MonitoredSite,moduleFront,View=Base.metadata.tables['MonitoredSitePositionsNow'])
-    listObj = MonitoredSiteList(moduleFront)
+    listObj = MonitoredSiteList(moduleFront,View=Base.metadata.tables['MonitoredSitePositionsNow'])
     
     dataResult = listObj.GetFlatDataList(searchInfo)
     countResult = listObj.count(searchInfo)
