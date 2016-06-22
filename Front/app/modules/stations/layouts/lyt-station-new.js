@@ -126,30 +126,9 @@ define([
     displayTab: function(e) {
       var _this = this;
       e.preventDefault();
-      if(window.app.checkFormSaved && window.app.formEdition){
-        Swal({
-          title: 'Saving form',
-          text: 'Current form is not yet saved. Would you like to continue without saving it?',
-          type: 'error',
-          showCancelButton: true,
-          confirmButtonColor: 'rgb(221, 107, 85)',
-          confirmButtonText: 'OK',
-          cancelButtonColor: 'grey',
-          cancelButtonText: 'Cancel',
-          closeOnConfirm: true,
-        },
-        function(isConfirm) {
-          if (!isConfirm) {
-            return false;
-        }else {
-            window.app.checkFormSaved = false;
-              _this.swithTab(e);
-        }
-           });
-
-        } else{
-         this.swithTab(e);
-       }
+      window.checkExitForm(function(){
+        _this.swithTab(e);
+      });
        
      },
      swithTab : function(e){

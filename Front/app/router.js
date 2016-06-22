@@ -57,32 +57,11 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       // get current route
       this.history.push(Backbone.history.fragment);
       var _this= this;
-      if(window.app.checkFormSaved && window.app.formEdition){
-          Swal({
-              title: 'Saving form',
-              text: 'Current form is not yet saved. Would you like to continue without saving it?',
-              type: 'error',
-              showCancelButton: true,
-              confirmButtonColor: 'rgb(221, 107, 85)',
-              confirmButtonText: 'OK',
-              cancelButtonColor: 'grey',
-              cancelButtonText: 'Cancel',
-              closeOnConfirm: true,
-          },
-          function(isConfirm) {
-           //could be better
-          if (!isConfirm) {
-              _this.previous();
-              return false;
-          }else {
-               window.app.checkFormSaved = false;
-               window.app.formEdition = false;
-              _this.continueNav(callback, args);
-          }
-          });
-        } else{
-          this.continueNav(callback, args);
-        }
+      window.checkExitForm(function(){
+        _this.continueNav(callback, args);
+      },function(){
+        _this.previous();
+      });
     },
     onRoute: function(url, patern, params) {
       patern = patern.replace(/\(/g, '');
