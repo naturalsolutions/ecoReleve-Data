@@ -99,6 +99,17 @@ define([
                 schema: model.schema
             }).render();
 
+            form.$el.find('input').on("change", function(e) {
+                window.formChange = true;
+            });
+            form.$el.find('select').on("change", function(e) {
+                window.formChange = true;
+            });
+            form.$el.find('textarea').on("change", function(e) {
+                window.formChange = true;
+            });
+      
+
             this.forms.push(form);
 
             if(!this.defaultRequired){
