@@ -160,9 +160,12 @@ define([
 		},
 
     hideDetails: function() {
-      Backbone.history.navigate(this.rootUrl, {trigger: false});
-      this.ui.detail.addClass('hidden');
-    },
+      var _this= this;
+      window.checkExitForm(function(){
+        Backbone.history.navigate(_this.rootUrl, {trigger: false});
+        _this.ui.detail.addClass('hidden');
+      });
+     },
 /*    updateModels: function(e) {
       // get list of models for selected sensor type
       var selectedType = $(e.target).val();
