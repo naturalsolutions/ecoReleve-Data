@@ -51,10 +51,7 @@ function( Marionette, LytRootView, Router, Controller,Swal) {
   $(window).ajaxError(function() {
     $('#header-loader').addClass('hidden');
   });
-/*  $(document).ajaxSend(function(e, xhr, opt){
-    console.log('appel ajax en cours');
-    window.xhrPool.push(xhr);
-  });*/
+
   window.onerror = function() {
     $('#header-loader').addClass('hidden');
   };
@@ -95,7 +92,6 @@ function( Marionette, LytRootView, Router, Controller,Swal) {
   }
 
   $(document).ajaxError(function( event, jqxhr, settings, thrownError ) {
-    console.log(jqxhr,settings)
     if (jqxhr.status == 401){
       window.UnauthAlert();
     }
