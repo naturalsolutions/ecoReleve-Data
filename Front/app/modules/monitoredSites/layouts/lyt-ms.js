@@ -75,6 +75,8 @@ define([
         urlParams: this.urlParams,
         rowClicked: true,
         totalElement: 'totalEntries',
+        rowSelectorElement: 'rowSelectorSite',
+
       });
 
       this.grid.rowClicked = function(args) {

@@ -81,6 +81,7 @@ define([
         urlParams: this.urlParams,
         rowClicked: true,
         totalElement: 'totalEntries',
+        rowSelectorElement: 'rowSelectorSensor',
         onceFetched: function(params) {
           var listPro = {};
           var idList  = [];
