@@ -29,19 +29,20 @@ def asInt(s):
     except:
         return None
 
-def error_response (err) : 
-    if err !=None : 
+def error_response (err) :
+    if err !=None :
         msg = err.args[0] if err.args else ""
         response=Response('Problem occurs : '+str(type(err))+' = '+msg)
-    else : 
+    else :
         response=Response('No induvidual equiped')
     response.status_int = 500
     return response
 
 ArgosDatasWithIndiv = Table('VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
-GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv', Base.metadata, autoload=True) 
-DataRfidWithSite = Table('VRfidData_With_equipSite', Base.metadata, autoload=True) 
-DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True) 
+GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv', Base.metadata, autoload=True)
+DataRfidWithSite = Table('VRfidData_With_equipSite', Base.metadata, autoload=True)
+DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True)
+DataCamTrapFile = Table('V_dataCamTrap_With_equipSite', Base.metadata, autoload=True)
 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
@@ -57,6 +58,8 @@ def type_unchecked_list(request):
         unchecked = GsmDatasWithIndiv
     elif type_ == 'rfid':
         return unchecked_rfid(request)
+    elif type_ == 'camtrap':
+        return unchecked_camtrap(request)
 
     selectStmt = select([unchecked.c['FK_Individual'],unchecked.c['Survey_type'],unchecked.c['FK_ptt'], unchecked.c['FK_Sensor'], unchecked.c['StartDate'], unchecked.c['EndDate'],
 
@@ -76,6 +79,17 @@ def unchecked_rfid(request):
     session = request.dbsession
 
     unchecked = DataRfidasFile
+    queryStmt = select(unchecked.c)
+    data = session.execute(queryStmt).fetchall()
+    dataResult = [dict(row) for row in data]
+    result = [{'total_entries':len(dataResult)}]
+    result.append(dataResult)
+    return result
+
+def unchecked_camtrap(request):
+    session = request.dbsession
+
+    unchecked = DataCamTrapFile
     queryStmt = select(unchecked.c)
     data = session.execute(queryStmt).fetchall()
     dataResult = [dict(row) for row in data]
@@ -104,14 +118,14 @@ def details_unchecked_indiv(request):
         queryGeo = select([unchecked.c['PK_id'],unchecked.c['type'],unchecked.c['lat'],unchecked.c['lon'],unchecked.c['date']]
             ).where(and_(unchecked.c['FK_ptt']== ptt
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv)))
-            
+
         dataGeo = session.execute(queryGeo).fetchall()
         geoJson = []
         for row in dataGeo:
             geoJson.append({'type':'Feature', 'id': row['PK_id'], 'properties':{'type':row['type'], 'date':row['date']}
                 , 'geometry':{'type':'Point', 'coordinates':[row['lat'],row['lon']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
-    else : 
+    else :
         query = select([unchecked]
             ).where(and_(unchecked.c['FK_ptt']== ptt
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv))).order_by(desc(unchecked.c['date']))
@@ -123,7 +137,7 @@ def details_unchecked_indiv(request):
         df['dist'] = np.append(haversine(X1, X2), 0).round(3)
         # Compute the speed
         df['speed'] = (df['dist'] / ((df['date'] - df['date'].shift(-1)).fillna(1) / np.timedelta64(1, 'h'))).round(3)
-        df['date'] = df['date'].apply(lambda row: np.datetime64(row).astype(datetime)) 
+        df['date'] = df['date'].apply(lambda row: np.datetime64(row).astype(datetime))
         # Fill NaN
         df.fillna(value={'ele':-999}, inplace=True)
         df.fillna(value={'speed':0}, inplace=True)
@@ -155,8 +169,8 @@ def manual_validate(request) :
     'gsm': '[sp_validate_GSM]'
     }
 
-    try : 
-        if isinstance( ind_id, int ): 
+    try :
+        if isinstance( ind_id, int ):
             xml_to_insert = data_to_XML(data)
             # validate unchecked ARGOS_ARGOS or ARGOS_GPS data from xml data PK_id.
             start = time.time()
@@ -173,7 +187,7 @@ def manual_validate(request) :
             graphDataDate['pendingSensorData'] = None
             graphDataDate['indivLocationData'] = None
             return { 'inserted' : nb_insert, 'existing' : exist, 'errors' : error}
-        else : 
+        else :
             return error_response(None)
     except  Exception as err :
         print_exc()
@@ -202,10 +216,10 @@ def auto_validation(request):
         Total_nb_insert,Total_exist,Total_error = auto_validate_ALL_stored_procGSM_Argos(user,type_,freq,session)
     else :
         if type_ == 'rfid':
-            for row in listToValidate : 
+            for row in listToValidate :
                 equipID = row['equipID']
                 sensor = row['FK_Sensor']
-                if equipID == 'null' or equipID is None: 
+                if equipID == 'null' or equipID is None:
                     equipID = None
                 else :
                     equipID = int(equipID)
@@ -215,7 +229,7 @@ def auto_validation(request):
                 Total_nb_insert += nb_insert
                 Total_error += error
         else:
-            for row in listToValidate : 
+            for row in listToValidate :
                 ind_id = row['FK_Individual']
                 ptt = row['FK_ptt']
 
@@ -249,7 +263,7 @@ def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq,session):
     if ind_id is None:
         stmt = update(table).where(and_(table.c['FK_Individual'] == None, table.c['FK_ptt'] == ptt)
             ).where(table.c['checked'] == 0).values(checked =1)
- 
+
         session.execute(stmt)
         nb_insert = exist = error = 0
     else:
@@ -262,7 +276,7 @@ def auto_validate_stored_procGSM_Argos(ptt, ind_id,user,type_,freq,session):
     return nb_insert, exist , error
 
 def auto_validate_proc_stocRfid(equipID,sensor,freq,user,session):
-    if equipID is None : 
+    if equipID is None :
         stmt = update(DataRfidWithSite).where(and_(DataRfidWithSite.c['FK_Sensor'] == sensor, DataRfidWithSite.c['equipID'] == equipID)).values(checked =1)
         session.execute(stmt)
         nb_insert = exist = error = 0
@@ -289,4 +303,3 @@ def auto_validate_ALL_stored_procGSM_Argos(user,type_,freq,session):
     nb_insert, exist , error= session.execute(stmt).fetchone()
 
     return nb_insert, exist , error
-

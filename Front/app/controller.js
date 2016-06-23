@@ -22,6 +22,7 @@ define(['marionette', 'config',
   './modules/validate/lyt-sensorValidate',
   './modules/validate/lyt-sensorValidateType',
   './modules/validate/lyt-sensorValidateDetail',
+  './modules/validate/lyt-camTrapValidateDetail',
   './modules/release/layouts/lyt-release-station',
 
   './modules/export/lyt-export-stepper',
@@ -49,6 +50,7 @@ define(['marionette', 'config',
   LytSensorValidate,
   LytSensorValidateType,
   LytSensorValidateDetail,
+  LytCamTrapValidateDetail,
 
   LytReleaseStation,
 

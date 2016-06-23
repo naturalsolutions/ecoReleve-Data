@@ -90,6 +90,7 @@ define([
       }
 
       this.model.set('sensorId', id);
+      console.log("sensorID" +id);
     },
     initGrid: function(id) {
       var _this = this;

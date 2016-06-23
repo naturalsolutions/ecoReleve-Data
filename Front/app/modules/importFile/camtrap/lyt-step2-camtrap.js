@@ -58,12 +58,14 @@ define([
 
     onShow: function() {
       var _this = this;
+      _this.id = this.data.sensorId;
       //test resumable
       var r = new Resumable({
       target:  config.coreUrl + 'sensors/resumable/datas',
       query:
       {
-            "path": this.path
+            "path": this.path,
+            "id" : this.data.sensorId
       },
       testChunks: false
       });
@@ -135,6 +137,7 @@ define([
           console.log("file success :")
           console.log(message);
           console.log(file);
+          console.log(_this);
           /* envoie d'une requete pour reconstruire le fichier si le tableau de chunks est > 1 */
           console.log("longueur tableau chunks :"+file.chunks.length);
           if( file.chunks.length > 1 )
@@ -144,6 +147,7 @@ define([
               url: config.coreUrl + 'sensors/concat/datas',
               data: {
                       path : _this.path,
+                      id : _this.id,
                       name : file.fileName,
                       taille : file.chunks.length,
                       action : 1

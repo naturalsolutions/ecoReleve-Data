@@ -9,8 +9,9 @@ define([
   'config',
   'ns_grid/model-grid',
   'ns_modules/ns_com',
-  './lyt-sensorValidateDetail'
-], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com, LytSensorValidateDetail) {
+  './lyt-sensorValidateDetail',
+  './lyt-camTrapValidateDetail'
+], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com, LytSensorValidateDetail , LytCamTrapValidateDetail) {
 
   'use strict';
 
@@ -29,6 +30,7 @@ define([
     ui: {
       'grid': '#grid',
       'paginator': '#paginator',
+      'legend' : '#legendSample',
       'frequency': 'select#frequency',
       'detail': '#detail',
     },
@@ -162,7 +164,7 @@ define([
               editable: false,
               cell: 'string',
               renderable: false
-            }, 
+            },
             {
               name: 'nb',
               label: 'NB',
@@ -264,13 +266,64 @@ define([
             }
           ];
           break;
+          case 'camtrap':
+            //this.ui.frequency.find('option[value="60"]').prop('selected', true);
+            this.ui.frequency.addClass('hidden');
+            this.ui.legend.addClass('hidden');
+
+            this.cols = [
+              {
+                name: 'UnicIdentifier',
+                label: 'Unic Identifier',
+                editable: false,
+                cell: 'string'
+              },{
+                name: 'FK_Sensor',
+                label: 'FK_Sensor',
+                editable: false,
+                renderable: false,
+                cell: 'string'
+              },{
+                name: 'site_name',
+                label: 'site name',
+                editable: false,
+                cell: 'string'
+              }, {
+                name: 'site_type',
+                label: 'site type',
+                editable: false,
+                cell: 'string',
+              }, {
+                name: 'StartDate',
+                label: 'Start Date',
+                editable: false,
+                cell: 'string',
+              }, {
+                name: 'EndDate',
+                label: 'End Date',
+                editable: false,
+                cell: 'string',
+              }, {
+                name: 'nb_photo',
+                label: 'nb photos',
+                editable: false,
+                cell: 'string',
+              },{
+                name: 'import',
+                editable: true,
+                label: 'IMPORT',
+                cell: 'select-row',
+                headerCell: 'select-all'
+              }
+            ];
+            break;
         default:
           console.warn('type error');
           break;
       }
 
       this.displayGrid();
-      this.frequency = this.ui.frequency.val();
+      //this.frequency = this.ui.frequency.val();
     },
 
     setFrequency: function(e) {
@@ -300,21 +353,45 @@ define([
     },
 
     rowClicked: function(args) {
-      var row = args.row;
-      var evt = args.evt;
+      if( this.type_ === "camtrap") {
+        console.log("on a clique sur la row");
+        console.log(args);
+        console.log("on va lancer la vue details pour les camera trap");
+        var row = args.row;
+        var evt = args.evt;
+        
+        if (!$(evt.target).is('input')) {
+          this.rgDetail.show(new LytCamTrapValidateDetail({
+            type: this.type_,
+            frequency: this.frequency,
+            parentGrid: this.grid.collection.fullCollection,
+            model: row.model,
+            globalGrid: this.grid
+          }));
+          this.grid.currentRow = row;
+          this.grid.upRowStyle();
 
-      if (!$(evt.target).is('input')) {
-        this.rgDetail.show(new LytSensorValidateDetail({
-          type: this.type_,
-          frequency: this.frequency,
-          parentGrid: this.grid.collection.fullCollection,
-          model: row.model,
-          globalGrid: this.grid
-        }));
-        this.grid.currentRow = row;
-        this.grid.upRowStyle();
+          this.ui.detail.removeClass('hidden');
+        }
 
-        this.ui.detail.removeClass('hidden');
+      }
+      else {
+        var row = args.row;
+        var evt = args.evt;
+
+        if (!$(evt.target).is('input')) {
+          this.rgDetail.show(new LytSensorValidateDetail({
+            type: this.type_,
+            frequency: this.frequency,
+            parentGrid: this.grid.collection.fullCollection,
+            model: row.model,
+            globalGrid: this.grid
+          }));
+          this.grid.currentRow = row;
+          this.grid.upRowStyle();
+
+          this.ui.detail.removeClass('hidden');
+        }
       }
     },
 

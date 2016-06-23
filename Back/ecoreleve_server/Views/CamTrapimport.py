@@ -22,7 +22,7 @@ import exifread
 from pyramid import threadlocal
 
 def dateFromExif(imagePath):
-    theDate =""
+    theDate = None
     image = open( imagePath ,'rb' )
     tagsExif = exifread.process_file(image)
     for tag in tagsExif:
@@ -31,13 +31,12 @@ def dateFromExif(imagePath):
             theDate += ".000"
             theDate = theDate.replace(":","-",2)
             theDate = datetime.datetime.strptime(theDate, "%Y-%m-%d %H:%M:%S.%f")
-    if( theDate == ""):
-        theDate = None
     return theDate
 
-def unzip(zipFilePath , destFolder):
+def unzip(zipFilePath , destFolder , fkId):
     zfile = zipfile.ZipFile(zipFilePath)
     #nameRandom = ''
+    #TODO instancier une dataFrame pandas (plus haut), data_to_insert
     for name in zfile.namelist():
         print("unzip : " +str(name))
         #nameRandom = GenName()
@@ -46,16 +45,26 @@ def unzip(zipFilePath , destFolder):
         fd.write(zfile.read(name))
         fd.close()
         extType = name.split('.');
-        AddPhotoOnSQL(destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)))
+
+        #TODO ajouter une nouvelle ligne à la data frame contenant les meme parametre de colonne que TCameraTrap
+        # --> (destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)) , fkId)
+
+        AddPhotoOnSQL(destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)) , fkId)
     zfile.close()
+
+    #TODO à la fin de la boucle tester si l'équipment (date début, date fin) selectionné est cohérent avec les dates des photos
+     # CheckEquipAndAddPhotoOnSQL() --->
+        #if min(allDate)>= minDateEquip and (maxDateEquip is None or max(allDate)<= maxDateEquip):
+
     #if no error remove zip file
 
 
 
 
-def AddPhotoOnSQL(path , name , extension , date_creation):
+def AddPhotoOnSQL(path , name , extension , date_creation, fkId):
     session = threadlocal.get_current_request().dbsession
-    currentPhoto = CamTrap(path = str(path),name = str(name), extension = '.jpg', date_creation = date_creation )
+    print("insert into TCameraTrap values %s, %s , %s , %s , %s" % (fkId, path, name, extension, date_creation))
+    currentPhoto = CamTrap(path = str(path),name = str(name), extension = '.jpg', date_creation = date_creation , fk_sensor = fkId)
     session.add(currentPhoto)
     session.flush()
     return currentPhoto.pk_id
@@ -187,7 +196,7 @@ def uploadFileCamTrapResumable(request):
     print(" options :" + str(request.POST['path']))
     print ("File :" + str(request.POST['file']))"""
     reponseStatus = 200
-    print(str(request.POST['resumableType']))
+    #print(str(request.POST['resumableType']))
     pathPrefix = dbConfig['camTrap']['path']
     flagCrea = False
     pathPost = str(request.POST['path'])
@@ -202,9 +211,6 @@ def uploadFileCamTrapResumable(request):
 
     uri = pathPrefix+'\\'+pathPost
     extType = request.POST['resumableFilename'].split('.');
-    print ("nom du fichier :" +str(request.POST['resumableFilename']) )
-    print ("type de fichier :" +str(extType[len(extType)-1]))
-    print("date str " + str())
     #test si le fichier existe deja
     if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableFilename'])):
 
@@ -214,7 +220,7 @@ def uploadFileCamTrapResumable(request):
             print( "file %s " % str(uri+'\\'+str(request.POST['resumableFilename'])))
             with open(uri+'\\'+str(request.POST['resumableFilename']), 'wb') as output_file: # write in the file
                 shutil.copyfileobj(inputFile, output_file)
-            idRetour = AddPhotoOnSQL(str(uri) , str(request.POST['resumableFilename']) , str(extType[len(extType)-1]) , dateFromExif (uri+'\\'+str(request.POST['resumableFilename'])) )
+            idRetour = AddPhotoOnSQL(str(uri) , str(request.POST['resumableFilename']) , str(extType[len(extType)-1]) , dateFromExif (uri+'\\'+str(request.POST['resumableFilename'])) , int(request.POST['id']) )
         else:
             position = int(request.POST['resumableChunkNumber']) #calculate the position of cursor
             with open(uri+'\\'+str(request.POST['resumableFilename'])+"_"+str(position), 'wb') as output_file: # write in the file
@@ -230,6 +236,7 @@ def uploadFileCamTrapResumable(request):
 def concatChunk(request):
     reponseStatus = 200
     pathPrefix = dbConfig['camTrap']['path']
+
     #create folder
     if(int(request.POST['action']) == 0 ):
         pathPost = str(request.POST['path'])
@@ -238,6 +245,7 @@ def concatChunk(request):
             request.response.status_code = 200
     else :
         pathPost = str(request.POST['path'])
+        #print ("id "+str(request.POST['id']))
         debutTime = time.time()
         print("on veut reconstruire le fichier" + str(request.POST['name']) + " qui se trouve dans " + str(request.POST['path']) +" en :"+str(request.POST['taille'])+" fichiers")
         destination = open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) ,'wb')
@@ -246,13 +254,17 @@ def concatChunk(request):
         destination.close()
         finTime = time.time()
         print ("durée :" +str(finTime - debutTime))
-        #file concat ok now unzip
-        debutTime = time.time()
-        print (" on commence la décompression ")
-        unzip(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) , pathPrefix+'\\'+pathPost+'\\')
-        print ("fin decompression ")
-        finTime = time.time()
-        print ("durée :" +str(finTime - debutTime))
+        #file concat ok now test if zipfile and unzip
+        extType = request.POST['name'].split('.');
+        if ( extType[len(extType)-1] == 'zip'):
+            debutTime = time.time()
+            print (" on commence la décompression ")
+            unzip(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) , pathPrefix+'\\'+pathPost+'\\' , int(request.POST['id']) )
+            print ("fin decompression ")
+            finTime = time.time()
+            print ("durée :" +str(finTime - debutTime))
+
+
 
     request.response.status_code = 200
     return reponseStatus
