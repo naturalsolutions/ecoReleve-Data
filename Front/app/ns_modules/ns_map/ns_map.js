@@ -350,26 +350,20 @@ define([
     },
 
     toggleIconClass: function(m){
-        var className = 'marker';
+      var className = 'marker';
 
+      if (m.checked /*&& !$(m._icon).hasClass('station-marker')*/) {
+          $(m._icon).addClass('selected');
+          className += ' selected';
+      }
+      if (m == this.lastFocused) {
+          $(m._icon).addClass('focus');
+          className += ' focus';
+      } else {
+        $(m._icon).removeClass('focus');
+      }
 
-
-        if (m.checked /*&& !$(m._icon).hasClass('station-marker')*/) {
-            $(m._icon).addClass('selected');
-            className += ' selected';
-        }else{
-          $(m._icon).removeClass('selected');
-        }
-        if (m == this.lastFocused) {
-            $(m._icon).addClass('focus');
-            className += ' focus';
-        } else {
-          $(m._icon).removeClass('focus');
-        }
-
-        if( !m._icon ) {
-          m.setIcon(new L.DivIcon({className  : className}));
-        }
+      m.setIcon(new L.DivIcon({className  : className}));
     },
 
     setCenter: function(geoJson){
@@ -666,7 +660,7 @@ define([
       var marker;
         marker=this.dict[id];
         marker.checked=!marker.checked;
-        if(marker.checked){
+        if(marker.checkedMarkers){
           this.selectedMarkers[id]=marker;
         }else{
           delete(this.selectedMarkers[id]);
@@ -703,12 +697,14 @@ define([
       var center = marker.getLatLng();
       var zoom = this.disableClustring;
 
-      if(this.lastFocused){
+
+
+      /*if(this.lastFocused){
         $(this.lastFocused._icon).removeClass('focus')
       }
       this.lastFocused = marker;
 
-      $(this.lastFocused._icon).addClass('focus');
+      $(this.lastFocused._icon).addClass('focus');*/
 
       this.map.setView(center, zoom);
 
@@ -819,10 +815,8 @@ define([
                 'geometry': {
                     'type': 'Point',
                     'coordinates': [lat, lon],
-                },
-                'properties': {
-                  //todo
-                },
+                }
+,                'properties': m.attributes,
             };
             features.features.push(feature);
         });
@@ -868,6 +862,8 @@ define([
     //param can be filters or directly a collection
     filter: function(param){
       //TODO : refact
+
+
       var _this = this;
       if(this.url){
         this.updateFromServ(param);
@@ -888,9 +884,10 @@ define([
         for (var i = coll.models.length - 1; i >= 0; i--) {
           //todo : generic term (import)
           if(coll.models[i].attributes.import)
-            checkedMarkers.push(coll.models[i].attributes.id);
+            checkedMarkers.push((coll.models[i].attributes.id || coll.models[i].attributes.ID));
         }
         //todo : amelioration
+
         this.selectMultiple(checkedMarkers);
       }
     },
