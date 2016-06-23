@@ -102,6 +102,7 @@ define([
       }
       else {
         this.id = 0;
+        window.formEdition = true;
       }
 
       if(options.displayMode){
@@ -179,7 +180,10 @@ define([
         dataType: 'json',
         success: function (resp) {
           _this.model.schema = resp.schema;
-          
+          window.formEdition = false;
+          if (this.displayMode == 'edit'){
+            window.formEdition = true;
+          }
           if (resp.fieldsets) {
             // if fieldset present in response, we get it
             _this.model.fieldsets = resp.fieldsets;
@@ -220,6 +224,16 @@ define([
           self.butClickSave(e);
         }
       });
+      $(this.formRegion).find('input').on("change", function(e) {
+         window.formChange = true;
+      });
+      $(this.formRegion).find('select').on("change", function(e) {
+         window.formChange = true;
+      });
+      $(this.formRegion).find('textarea').on("change", function(e) {
+         window.formChange = true;
+      });
+      
       if(this.buttonRegion[0]){
         this.buttonRegion.forEach(function (entry) {
           _this.buttonRegion[0].html(_this.template);
@@ -298,7 +312,7 @@ define([
               // Getting ID of created record, from the model (has beeen affected during model.save in the response)
               _this.savingSuccess(model, response);
               _this.id = _this.model.id;
-              
+              window.formEdition = false;
               if (_this.redirectAfterPost != "") {
                 // If redirect after creation
                 var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
@@ -335,6 +349,7 @@ define([
           var jqxhr = this.model.save(null, {
             success: function (model, response) {
               _this.savingSuccess(model, response);
+              window.formEdition = false;
               if (_this.reloadAfterSave) {
                 _this.reloadingAfterSave();
               }
@@ -364,12 +379,14 @@ define([
       this.initModel();
       if(this.buttonRegion[0])
       this.displaybuttons();
+
     },
     butClickCancel: function (e) {
       this.displayMode = 'display';
       this.initModel();
       if(this.buttonRegion[0])
       this.displaybuttons();
+
     },
     butClickClear: function (e) {
       var formContent = this.BBForm.el;
