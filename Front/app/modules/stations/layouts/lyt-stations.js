@@ -118,6 +118,7 @@ define([
         url: url,
         rowClicked: true,
         totalElement: 'totalEntries',
+        rowSelectorElement: 'rowSelectorSta'
       });
       this.grid.rowClicked = function(args) {
         _this.rowClicked(args.row);
