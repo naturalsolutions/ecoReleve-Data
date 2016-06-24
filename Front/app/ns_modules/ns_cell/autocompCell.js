@@ -88,9 +88,10 @@ var AutocompleteCellEditor = Backgrid.InputCellEditor.extend({
         }
         if (e.type == "blur") {
             model.trigger("backgrid:edited", model, column, command);
+            model.trigger("backgrid:autocompEdited", model, column, command);
         }
         if (e.type == "autocompletechange" && !item) {
-
+            
             if (this.$el.val()=='') {
                 model.set(column.get("name"),null);
                 model.set(this.target,null);
