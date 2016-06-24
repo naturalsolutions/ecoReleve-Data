@@ -17,6 +17,7 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
   'ns_modules/ns_bbfe/bbfe-lat',
   'ns_modules/ns_cell/bg-timestampCell',
   'ns_modules/ns_cell/autocompCell',
+  'ns_modules/ns_cell/bg-integerCell',
   ],
 function( Marionette, LytRootView, Router, Controller,Swal) {
 
