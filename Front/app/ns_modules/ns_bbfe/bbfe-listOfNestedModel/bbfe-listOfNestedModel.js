@@ -82,8 +82,18 @@ define([
                 });
             }
 
-
             this.$el.find('#formContainer').append(form.el);
+
+            this.$el.find('#formContainer input').on("change", function(e) {
+                 window.app.checkFormSaved = true;
+            });
+            this.$el.find('#formContainer select').on("change", function(e) {
+                 window.app.checkFormSaved = true;
+            });
+            this.$el.find('#formContainer  textarea').on("change", function(e) {
+                 window.app.checkFormSaved = true;
+            });
+
         },
 
         render: function() {
