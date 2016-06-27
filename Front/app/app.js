@@ -39,6 +39,7 @@ function( Marionette, LytRootView, Router, Controller,Swal) {
     Backbone.history.start();
   });
 
+  window.thesaurus = {};
 
   $(window).ajaxStart(function(e) {
     $('#header-loader').removeClass('hidden');
