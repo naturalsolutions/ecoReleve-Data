@@ -29,7 +29,7 @@ The data entry forms are fully customizable to allow users to design their own p
 ### Requirements
 
  - [Node.js](https://nodejs.org/) (for [npm](https://www.npmjs.com/))
- - [bower](http://bower.io/) `npm install -g bower`
+ - [bower](http://bower.io/) `npm install -g bower` (run it in an console with administrator privileges)
  - [python3.4](https://www.python.org/download/releases/3.4.0/) (for Windows you can install [miniconda3.4](http://conda.pydata.org/miniconda.html))
 
 
@@ -63,6 +63,8 @@ Run the setup install :
 
 Also, you can run the [install.bat](https://github.com/NaturalSolutions/ecoReleve-Data/blob/master/Back/install.bat) file in the [Back folder](https://github.com/NaturalSolutions/ecoReleve-Data/tree/master/Back/)
 which will launch all commands in order to install this project (Front setup & Back setup).
+
+An error can occured if an other instance of pyramid WGSI run with the `pserve` command. Don't worry, it does not have any impact. 
 
 ## Technolgies && Usage
 
