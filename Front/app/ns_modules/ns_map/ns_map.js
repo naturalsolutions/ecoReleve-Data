@@ -660,7 +660,7 @@ define([
       var marker;
         marker=this.dict[id];
         marker.checked=!marker.checked;
-        if(marker.checkedMarkers){
+        if(this.checkedMarkers){
           this.selectedMarkers[id]=marker;
         }else{
           delete(this.selectedMarkers[id]);
