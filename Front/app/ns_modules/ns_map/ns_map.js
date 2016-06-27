@@ -698,13 +698,12 @@ define([
       var zoom = this.disableClustring;
 
 
-
-      /*if(this.lastFocused){
+      if(this.lastFocused){
         $(this.lastFocused._icon).removeClass('focus')
       }
       this.lastFocused = marker;
 
-      $(this.lastFocused._icon).addClass('focus');*/
+      $(this.lastFocused._icon).addClass('focus');
 
       this.map.setView(center, zoom);
 
