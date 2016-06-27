@@ -1,4 +1,4 @@
-CREATE VIEW ERDThesaurusTerm as 
+﻿CREATE VIEW ERDThesaurusTerm as 
  SELECT 
       [TTop_Name] as nameFr
       ,tl.TLib_Name as nameEn
@@ -13,9 +13,12 @@ SELECT
       [TAut_FK_TUseID] as userID
       ,[TAut_FK_TRolID] as role
   FROM [SECURITE].[dbo].[TAutorisations]
-  where TAut_FK_TInsID = (SELECT TOP 1 [TIns_PK_ID]
+  where TAut_FK_TInsID = (
+	SELECT [TIns_PK_ID]
   FROM [SECURITE].[dbo].[TInstance]
-  where TIns_Theme = 'ecoreleve')
+  where TIns_Theme = 'ecoreleve' and TIns_Database = (SELECT DB_NAME())
+	)
+
 GO
 
 
