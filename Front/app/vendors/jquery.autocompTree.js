@@ -101,7 +101,22 @@
           //Insertion de la valeur dans l'input
           $me.val(parametres.inputValue);
 
-          //Initialisation de l'arbre
+          var source;
+
+          if (!window.thesaurus[parametres.startId]) {
+            window.thesaurus[parametres.startId] =  $.ajax({
+              type: "POST",
+              url: parametres.wsUrl + "/" + parametres.webservices,
+              datatype: 'jsonp',
+              contentType: "application/json; charset=utf-8",
+              data: dataToSend,
+            });
+          } else {
+              source = window.thesaurus[parametres.startId];
+          }
+
+          $.when(source).then(function(){
+            
           $('#treeView' + $me.attr("id")).fancytree({
             debugLevel: 0,
             extensions: ["filter"],
@@ -115,13 +130,7 @@
               nbExpand: 0
             },
             //defini la source pour les elts parents
-            source: {
-              type: "POST",
-              url: parametres.wsUrl + "/" + parametres.webservices,
-              datatype: 'jsonp',
-              contentType: "application/json; charset=utf-8",
-              data: dataToSend
-            },
+            source: window.thesaurus[parametres.startId].responseJSON,
             //Permet si l'arbre et en mode filter d'afficher les enfants des termes filtrés -> submatch
             renderNode: function (event, data) {
               var node = data.node;
@@ -175,6 +184,7 @@
               }
             }
           });
+
           //Permet l'affichage du treeview au focus sur l'input
 
 
@@ -279,6 +289,8 @@
             }
           }
         });
+
+});
         return _self;
       },
 

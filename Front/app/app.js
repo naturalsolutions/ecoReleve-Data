@@ -53,6 +53,8 @@ function( Marionette, LytRootView, Router, Controller) {
     $('#header-loader').addClass('hidden');
   };
 
+  window.thesaurus = {};
+
   window.app = app;
   return app;
 });

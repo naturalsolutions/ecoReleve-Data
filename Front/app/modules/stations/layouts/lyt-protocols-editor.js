@@ -99,7 +99,7 @@ define([
     initProtos: function() {
       this.listenTo(this.collection, 'destroy', this.displayLast);
 
-      //this.collection.models[0].set('grid', true);
+      this.collection.models[0].set('grid', true);
 
       var CustomCollectionView = Marionette.CollectionView.extend({
         getChildView: function(item) {

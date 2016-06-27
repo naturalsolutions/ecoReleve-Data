@@ -10,48 +10,48 @@ define([
   'bootstrap',
   'i18n'
 
-], function($, _, Backbone, Marionette, Radio, LytObs, config, NsForm, bootstrap
-) {
-  'use strict';
-  return Marionette.LayoutView.extend({
-    template: 'app/modules/stations/templates/tpl-protocol-grid.html',
-    className: 'full-height hidden protocol full-height',
+  ], function($, _, Backbone, Marionette, Radio, LytObs, config, NsForm, bootstrap
+    ) {
+    'use strict';
+    return Marionette.LayoutView.extend({
+      template: 'app/modules/stations/templates/tpl-protocol-grid.html',
+      className: 'full-height hidden protocol full-height',
 
-    ui: {
-      'total': '#total',
-      'obs': '#observations',
-      'thead': '.js-thead',
-      'tbody': '.js-tbody',
+      ui: {
+        'total': '#total',
+        'obs': '#observations',
+        'thead': '.js-thead',
+        'tbody': '.js-tbody',
 
-      'editBtn': '.js-btn-form-grid-edit',
-      'saveBtn': '.js-btn-form-grid-save',
-      'cancelBtn': '.js-btn-form-grid-cancel',
-      'clearBtn': '.js-btn-form-grid-clear'
-    },
+        'editBtn': '.js-btn-form-grid-edit',
+        'saveBtn': '.js-btn-form-grid-save',
+        'cancelBtn': '.js-btn-form-grid-cancel',
+        'clearBtn': '.js-btn-form-grid-clear'
+      },
 
-    events: {
-      'click .js-btn-form-grid-edit': 'onEditBtnClick',
-      'click .js-btn-form-grid-save': 'onSaveBtnClick',
-      'click .js-btn-form-grid-cancel': 'onCancelBtnClick',
-      'click .js-btn-form-grid-clear': 'onClearBtnClick',
-    },
+      events: {
+        'click .js-btn-form-grid-edit': 'onEditBtnClick',
+        'click .js-btn-form-grid-save': 'onSaveBtnClick',
+        'click .js-btn-form-grid-cancel': 'onCancelBtnClick',
+        'click .js-btn-form-grid-clear': 'onClearBtnClick',
+      },
 
-    modelEvents: {
-      'change:current': 'changeVisibility',
-    },
+      modelEvents: {
+        'change:current': 'changeVisibility',
+      },
 
-    index: 0,
+      index: 0,
 
 
-    onEditBtnClick: function(){
-      for (var i = 0; i < this.forms.length; i++) {
-        this.forms[i].butClickEdit();
-      }
-      this.mode = 'edit';
-      this.toogleButtons();
-    },
+      onEditBtnClick: function(){
+        for (var i = 0; i < this.forms.length; i++) {
+          this.forms[i].butClickEdit();
+        }
+        this.mode = 'edit';
+        this.toogleButtons();
+      },
 
-    onSaveBtnClick: function(){
+      onSaveBtnClick: function(){
       //dirty
       var _this = this;
       var noErrors = true;
@@ -60,7 +60,9 @@ define([
       }
       setTimeout(function(){
         if(!noErrors) {
+
           for (var i = 0; i < _this.forms.length; i++) {
+            console.log(_this.forms[i].BBForm.getValue());
             _this.forms[i].butClickSave();
           }
           _this.mode = 'display';
@@ -85,6 +87,7 @@ define([
     },
 
     initialize: function(options) {
+
       this.model.attributes.obs = new Backbone.Collection(this.model.get('obs'));
       
       var total = this.model.get('obs').filter(function(md){
@@ -113,18 +116,18 @@ define([
 
       var size=0;
       for (var key in this.schema) {
-         var col = this.schema[key];
+       var col = this.schema[key];
          //sucks
          var test = true;
          if(col.fieldClass){
           test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
           col.fieldClass += ' grid-field';
-         }
+        }
 
-         if(col.title && test) {
+        if(col.title && test) {
           this.ui.thead.prepend('<div title="' + col.title + '" class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
           size++;
-         }
+        }
       }
       size = size*150;
       size += 36; //trash button
@@ -143,16 +146,16 @@ define([
             //     this.defaultRequired = false;
             // }
             this.addForm(obs.models[i]);
-        }
+          }
               // if (data.length < this.nbByDefault) {
               //     for (var i = 0; i < data.length; i++) {
               //         this.addForm(model);
               //     }
               // }
               // this.defaultRequired = false;
-      } else {
-        this.mode = 'edit';
-        this.addForm(obs.models[0]);
+            } else {
+              this.mode = 'edit';
+              this.addForm(obs.models[0]);
           //no obs
           // if (this.nbByDefault >= 1) {
           //     for (var i = 0; i < this.nbByDefault; i++) {
@@ -160,31 +163,31 @@ define([
           //     }
           //     this.defaultRequired = false;
           // }
-      }
+        }
 
-      this.toogleButtons();
-    },
+        this.toogleButtons();
+      },
 
-    toogleButtons: function() {
-      var name = this.name;
-      if(this.mode == 'display'){
-        this.ui.editBtn.removeClass('hidden');
-        
-        this.ui.saveBtn.addClass('hidden');
-        this.ui.cancelBtn.addClass('hidden');
-        this.ui.clearBtn.addClass('hidden');
+      toogleButtons: function() {
+        var name = this.name;
+        if(this.mode == 'display'){
+          this.ui.editBtn.removeClass('hidden');
 
-        this.$el.find('input:enabled:first').focus();
-      }else{
-        this.ui.editBtn.addClass('hidden');
+          this.ui.saveBtn.addClass('hidden');
+          this.ui.cancelBtn.addClass('hidden');
+          this.ui.clearBtn.addClass('hidden');
 
-        this.ui.saveBtn.removeClass('hidden');
-        this.ui.cancelBtn.removeClass('hidden');
-        this.ui.clearBtn.removeClass('hidden');
-      }
-    },
+          this.$el.find('input:enabled:first').focus();
+        }else{
+          this.ui.editBtn.addClass('hidden');
 
-    addForm: function(model){
+          this.ui.saveBtn.removeClass('hidden');
+          this.ui.cancelBtn.removeClass('hidden');
+          this.ui.clearBtn.removeClass('hidden');
+        }
+      },
+
+      addForm: function(model){
         var _this = this;
 
         //model is unformated yet
@@ -212,46 +215,46 @@ define([
             _this.deleteObs();
           } else {
             var jqxhr = $.ajax({
-              url: this.model.urlRoot + this.model.get('id'),
+              url: this.model.urlRoot + '/' + this.model.get('id'),
               method: 'DELETE',
               contentType: 'application/json',
               context: this
             }).done(function(resp) {
               _this.deleteObs(this);
             }).fail(function(resp) {
-                console.error(resp);
+              console.error(resp);
             });
           }
         };
         this.forms.push(form);
-    },
+      },
 
-    deleteObs: function(form) {
-      this.ui.tbody.find($(form.BBForm.el).parent()).remove();
+      deleteObs: function(form) {
+        this.ui.tbody.find($(form.BBForm.el).parent()).remove();
 
-      this.forms = _.reject(this.forms, function(f) { 
-        return f === form; 
-      });
-      form.model.destroy();
+        this.forms = _.reject(this.forms, function(f) { 
+          return f === form; 
+        });
 
-      if(this.model.get('obs')) {
-        this.model.destroy();
-      }
-    },
+        form.model.destroy();
+        if(!this.model.get('obs')) {
+          this.model.destroy();
+        }
+      },
 
-    onRender: function() {
-      this.createThead();
-      this.createTbody();
-    },
+      onRender: function() {
+        this.createThead();
+        this.createTbody();
+      },
 
-    addObs: function(e) {
-      var _this = this;
+      addObs: function(e) {
+        var _this = this;
 
-      if(this.mode == 'display') {
-        return;
-      }
+        if(this.mode == 'display') {
+          return;
+        }
 
-      var emptyFormIndex = 0;
+        var emptyFormIndex = 0;
       //check if there is already an empty form
       var existingEmptyForm = this.model.get('obs').filter(function(model, i){
         if(model.get('id')) {
@@ -312,7 +315,7 @@ define([
 
       total = this.model.get('obs').filter(function(model){
         if(model.get('id'))
-        return model;
+          return model;
       }).length;
 
       this.model.set({'total': total});
