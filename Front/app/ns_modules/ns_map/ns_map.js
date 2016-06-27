@@ -136,7 +136,6 @@ define([
     init: function(){
       //set defaults icons styles
       L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images';
-      this.focusedIcon = new L.DivIcon({className   : 'custom-marker focus'});
       this.selectedIcon = new L.DivIcon({className  : 'custom-marker selected'});
       this.icon = new L.DivIcon({className      : 'custom-marker'});
 
@@ -349,22 +348,7 @@ define([
       });
     },
 
-    toggleIconClass: function(m){
-      var className = 'marker';
 
-      if (m.checked /*&& !$(m._icon).hasClass('station-marker')*/) {
-          $(m._icon).addClass('selected');
-          className += ' selected';
-      }
-      if (m == this.lastFocused) {
-          $(m._icon).addClass('focus');
-          className += ' focus';
-      } else {
-        $(m._icon).removeClass('focus');
-      }
-
-      m.setIcon(new L.DivIcon({className  : className}));
-    },
 
     setCenter: function(geoJson){
       if(!geoJson || (geoJson.features.length == 0) ){
@@ -697,15 +681,25 @@ define([
       var center = marker.getLatLng();
       var zoom = this.disableClustring;
 
-      this.map.setView(center, zoom);
-
-      if(this.lastFocused){
-        $(this.lastFocused._icon).removeClass('focus')
+      if(this.lastFocused) {
+        $(this.lastFocused._icon).removeClass('focus');
       }
       this.lastFocused = marker;
+      this.map.setView(center, zoom);
+      this.toggleIconClass(marker);
+    },
 
-      $(this.lastFocused._icon).addClass('focus');
+    toggleIconClass: function(m){
+      var className = 'marker';
 
+      if (m.checked /*&& !$(m._icon).hasClass('station-marker')*/) {
+          $(m._icon).addClass('selected');
+          className += ' selected';
+      }
+      m.setIcon(new L.DivIcon({className  : className}));
+      if (m == this.lastFocused) {
+          $(m._icon).addClass('focus');
+      }
 
     },
 
