@@ -30,7 +30,7 @@
     "tooltipster": "3.3.0",
     "chartjs": "1.0.2",
     "reneco-fonts": "*",
-    "NaturalJS_Filter":"1.1.0"
+    "NaturalJS_Filter":"1.1.1"
   },
   "resolutions": {
     "jquery": "1.10.2",
