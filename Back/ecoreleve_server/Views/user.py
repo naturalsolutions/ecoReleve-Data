@@ -1,7 +1,8 @@
 from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
 from sqlalchemy import select
-from ..Models import DBSession, User, userOAuthDict, USERS
+from ..Models import DBSession, User, userOAuthDict, Base,USERS
+
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(
@@ -28,8 +29,18 @@ def current_user(request):
     """Return the list of all the users with their ids.
     """
     session = request.dbsession
+    userid = int(request.authenticated_userid['iss'])
 
-    currentUserRoleID = userOAuthDict.loc[userOAuthDict['user_id'] == int(request.authenticated_userid['iss']),'role_id'].values[0]
+    Tuser_role = Base.metadata.tables['VUser_Role']
+    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(userid))
+
+    dbUserRoleID = session.execute(query_check_role).scalar()
+    currentUserRoleID = userOAuthDict.loc[userOAuthDict['user_id'] == userid,'role_id'].values[0]
+
+    if (dbUserRoleID != currentUserRoleID):
+        userOAuthDict.loc[userOAuthDict['user_id'] == userid,'role_id'] = dbUserRoleID
+        currentUserRoleID = dbUserRoleID
+
     currentUserRole = USERS[currentUserRoleID]
 
     query = select([
@@ -49,7 +60,16 @@ def getUser(request) :
     session = request.dbsession
     user_id = request.matchdict['id']
 
+
+    Tuser_role = Base.metadata.tables['VUser_Role']
+    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(userid))
+
+    dbUserRoleID = session.execute(query_check_role).scalar()
     currentUserRoleID = userOAuthDict.loc[userOAuthDict['user_id'] == int(userid),'role_id'].values[0]
+
+    if (dbUserRoleID != currentUserRoleID):
+        userOAuthDict.loc[userOAuthDict['user_id'] == int(userid),'role_id'] = dbUserRoleID
+        currentUserRoleID = dbUserRoleID
     currentUserRole = USERS[currentUserRoleID]
 
     query = select([User]).where(User.id == user_id)
