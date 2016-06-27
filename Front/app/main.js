@@ -50,7 +50,6 @@ require.config({
     'i18n': '../bower_components/i18n/i18next',
     'floatThead': '../bower_components/floatThead/dist/jquery.floatThead-slim',
     'chart': '../bower_components/chartjs/Chart',
-    'tooltipster-list': '../bower_components/tooltipster-list/dist/js/tooltipList',
     'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
 
     'ns_filter_bower': '../bower_components/NaturalJS_Filter/model-filter',
@@ -67,6 +66,7 @@ require.config({
     'backgrid.paginator': 'vendors/backgrid-paginator',
     'backgridSelect_all': 'vendors/backgrid-select-all',
     'autocompTree': './vendors/jquery.autocompTree',
+    'tooltipster-list': 'vendors/tooltipList',
 
     'backgrid-moment-cell':'./vendors/backgrid-moment-cell',
   },
