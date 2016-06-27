@@ -407,6 +407,7 @@ define([
         confirmButtonText: 'Yes, delete it!',
         confirmButtonColor: '#DD6B55',
         callback : function(){
+          window.formEdition = false;
           _this.afterDelete();
         }
       };
