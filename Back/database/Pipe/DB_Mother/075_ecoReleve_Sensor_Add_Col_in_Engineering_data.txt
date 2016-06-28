@@ -1,0 +1,10 @@
+  ALTER TABLE [ecoReleve_Sensor].[dbo].[Tgps_engineering]
+  ADD Cycle int NULL
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('75_ecoReleve_Sensor_Add_Col_in_Engineering_data',GETDATE(),(SELECT db_name()))
+
+
+GO
