@@ -102,6 +102,7 @@ def add_routes(config):
     config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
     config.add_route('sensors/uncheckedDatas', 'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+    config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Sensors caracteristics(Argos + GSM + RFID) #####
@@ -142,6 +143,8 @@ def add_routes(config):
     config.add_route('monitoredSites/id/station/action', 'ecoReleve-Core/monitoredSites/{id}/stations/{action}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/action', 'ecoReleve-Core/monitoredSites/{action}')
+
+
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Release #####
