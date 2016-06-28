@@ -82,6 +82,7 @@ define([
 
       $('#pause-upload-resumablejs').click(function(){
         console.log("on pause");
+        //console.log(r);
         if (r.files.length>0) {
           if (r.isUploading()) {
             return  r.pause();
@@ -93,7 +94,7 @@ define([
       });
       $('#cancel-upload-resumablejs').click(function(){
         console.log("on cancel");
-        r.abort();
+        r.cancel();
       });
 
 
@@ -235,7 +236,19 @@ define([
     );
   });
 
+  r.on('fileProgress' , function(file){
+    //console.log(file);
+    //TODO pas opti on refresh a chaque fois
+    $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
+    $("#"+file.uniqueIdentifier+" > "+"#status").text("Uploading : "+parseInt(file._prevProgress * 100)+"%");
+
+
+  });
+
   r.on('progress' , function(file,message) {
+    /*
+    $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
+    $("#"+file.uniqueIdentifier+" > "+"#status").text("Uploading");*/
     progressBar.uploading(r.progress()*100);
     $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
   });
@@ -245,7 +258,23 @@ define([
   });
 
   r.on('cancel' , function() {
+    let textFileCancelled = "";
+    Swal(
+      {
+        title: 'Warning you have Cancelled the upload',
+        text: ' All files need to be upload again ',
+        type: 'warning',
+        showCancelButton: false,
+        confirmButtonColor: 'rgb(218, 146, 15)',
+
+        confirmButtonText: 'OK',
+
+        closeOnConfirm: true,
+
+      }
+    );
     console.log("event Cancel");
+    $("#list-files").empty();
     $('#pause-upload-resumablejs').addClass('hide');
     $('#start-upload-resumablejs').removeClass('hide');
     $('#cancel-upload-resumablejs').addClass('hide');
