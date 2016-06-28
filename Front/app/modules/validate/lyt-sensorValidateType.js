@@ -278,17 +278,23 @@ define([
                 editable: false,
                 cell: 'string'
               },{
-                name: 'FK_Sensor',
+                name: 'fk_sensor',
                 label: 'FK_Sensor',
                 editable: false,
                 renderable: false,
-                cell: 'string'
+                cell: 'integer'
               },{
                 name: 'site_name',
                 label: 'site name',
                 editable: false,
                 cell: 'string'
-              }, {
+              },{
+                name: 'FK_MonitoredSite',
+                label: 'siteID',
+                editable: false,
+                renderable: false,
+                cell: 'integer'
+              },{
                 name: 'site_type',
                 label: 'site type',
                 editable: false,
@@ -359,7 +365,7 @@ define([
         console.log("on va lancer la vue details pour les camera trap");
         var row = args.row;
         var evt = args.evt;
-        
+
         if (!$(evt.target).is('input')) {
           this.rgDetail.show(new LytCamTrapValidateDetail({
             type: this.type_,

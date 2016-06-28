@@ -20,6 +20,7 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from datetime import datetime
 from ..Models import Base, dbConfig, DBSession,ArgosGps,graphDataDate
 from traceback import print_exc
+from pyramid import threadlocal
 
 
 route_prefix = 'sensors/'
@@ -90,9 +91,11 @@ def unchecked_camtrap(request):
     session = request.dbsession
 
     unchecked = DataCamTrapFile
-    queryStmt = select(unchecked.c)
-    data = session.execute(queryStmt).fetchall()
-    dataResult = [dict(row) for row in data]
+    queryMoche = "SELECT equipID,UnicIdentifier,fk_sensor,site_name,FK_MonitoredSite,site_type,StartDate,EndDate,COUNT(DISTINCT pk_id) AS nb_photo FROM [dbo].V_dataCamTrap_With_equipSite WHERE equipID IS NOT NULL GROUP BY UnicIdentifier, site_name, site_type, StartDate, EndDate, equipID, fk_sensor, FK_MonitoredSite;"
+    #queryStmt = select(unchecked.c)
+    #data = session.execute(queryStmt).fetchall()
+    data2 = session.execute(queryMoche).fetchall()
+    dataResult = [dict(row) for row in data2]
     result = [{'total_entries':len(dataResult)}]
     result.append(dataResult)
     return result
@@ -113,6 +116,9 @@ def details_unchecked_indiv(request):
         unchecked = ArgosDatasWithIndiv
     elif type_ == 'gsm' :
         unchecked = GsmDatasWithIndiv
+    elif type_ == 'camtrap':
+        return details_unchecked_camtrap(request)
+
 
     if 'geo' in request.params :
         queryGeo = select([unchecked.c['PK_id'],unchecked.c['type'],unchecked.c['lat'],unchecked.c['lon'],unchecked.c['date']]
@@ -150,6 +156,90 @@ def details_unchecked_indiv(request):
 
     return result
 
+# ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt/id_equip',renderer='json',request_method = 'GET')
+def details_unchecked_indiv(request):
+    session = request.dbsession
+
+    type_= request.matchdict['type']
+    id_indiv = request.matchdict['id_indiv']
+    id_equip = request.matchdict['id_equip']
+
+    if(id_indiv == 'none'):
+        id_indiv = None
+    ptt = request.matchdict['id_ptt']
+
+
+    if type_ == 'argos' :
+        unchecked = ArgosDatasWithIndiv
+    elif type_ == 'gsm' :
+        unchecked = GsmDatasWithIndiv
+    elif type_ == 'camtrap':
+        return details_unchecked_camtrap(request)
+
+
+    if 'geo' in request.params :
+        queryGeo = select([unchecked.c['PK_id'],unchecked.c['type'],unchecked.c['lat'],unchecked.c['lon'],unchecked.c['date']]
+            ).where(and_(unchecked.c['FK_ptt']== ptt
+                ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv)))
+
+        dataGeo = session.execute(queryGeo).fetchall()
+        geoJson = []
+        for row in dataGeo:
+            geoJson.append({'type':'Feature', 'id': row['PK_id'], 'properties':{'type':row['type'], 'date':row['date']}
+                , 'geometry':{'type':'Point', 'coordinates':[row['lat'],row['lon']]}})
+        result = {'type':'FeatureCollection', 'features':geoJson}
+    else :
+        query = select([unchecked]
+            ).where(and_(unchecked.c['FK_ptt']== ptt
+                ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_Individual'] == id_indiv))).order_by(desc(unchecked.c['date']))
+        data = session.execute(query).fetchall()
+
+        df = pd.DataFrame.from_records(data, columns=data[0].keys(), coerce_float=True)
+        X1 = df.iloc[:-1][['lat', 'lon']].values
+        X2 = df.iloc[1:][['lat', 'lon']].values
+        df['dist'] = np.append(haversine(X1, X2), 0).round(3)
+        # Compute the speed
+        df['speed'] = (df['dist'] / ((df['date'] - df['date'].shift(-1)).fillna(1) / np.timedelta64(1, 'h'))).round(3)
+        df['date'] = df['date'].apply(lambda row: np.datetime64(row).astype(datetime))
+        # Fill NaN
+        df.fillna(value={'ele':-999}, inplace=True)
+        df.fillna(value={'speed':0}, inplace=True)
+        df.replace(to_replace = {'speed': np.inf}, value = {'speed':9999}, inplace = True)
+        df.fillna(value=0,inplace=True)
+        # dataResult = [dict(row) for row in data]
+        dataResult = df.to_dict('records')
+        result = [{'total_entries':len(dataResult)}]
+        result.append(dataResult)
+
+    return result
+
+def details_unchecked_camtrap(request):
+    session = threadlocal.get_current_request().dbsession
+    result = []
+    id_indiv = request.matchdict['id_indiv']
+    if(id_indiv == 'none'):
+        id_indiv = None
+    ptt = request.matchdict['id_ptt']
+    id_equip = request.matchdict['id_equip']
+
+    unchecked = DataCamTrapFile
+    """query = select([unchecked]
+        ).where(and_(unchecked.c['FK_sensor']== ptt
+            ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_MonitoredSite'] == id_indiv))).order_by(desc(unchecked.c['date']))"""
+
+    query = 'select PK_id,path,name from ecoReleve_Sensor.dbo.TcameraTrap where pk_id in (select pk_id from [dbo].V_dataCamTrap_With_equipSite where fk_sensor = '+str(id_indiv)+' AND FK_MonitoredSite = '+str(ptt)+' AND equipID ='+str(id_equip)+' );'
+    data = session.execute(query).fetchall()
+    results = [dict(row) for row in data]
+
+    for tmp in results:
+        varchartmp = tmp['path'].split('\\')
+        tmp['path']="imgcamtrap/"+str(varchartmp[len(varchartmp)-2])+"/"
+        tmp['name'] = tmp['name'].replace(" ","%20")
+        tmp['id'] = tmp['PK_id']
+
+    ''' todo '''
+    return results
 # ------------------------------------------------------------------------------------------------------------------------- #
 
 @view_config(route_name = route_prefix+'uncheckedDatas/id_indiv/ptt', renderer = 'json' , request_method = 'POST' )

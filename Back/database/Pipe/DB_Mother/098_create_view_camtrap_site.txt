@@ -1,27 +1,42 @@
 CREATE view [dbo].V_dataCamTrap_With_equipSite
-as 
+as
 
-SELECT  e.ID as equipID,S.UnicIdentifier
-,cam.FK_Sensor as FK_Sensor
-,m.Name as site_name
-,M.Category as site_type
-,e.StartDate as StartDate
-,e3.StartDate EndDate
-,count (distinct cam.pk_id) as nb_photo
+SELECT
+cam.pk_id,
+E.ID AS equipID,
+S.UnicIdentifier,
+cam.fk_sensor,
+M.Name AS site_name,
+M.ID AS FK_MonitoredSite,
+M.Category AS site_type,
+E.StartDate,
+E3.StartDate AS EndDate
 
-from [ecoReleve_Sensor].[dbo].[TcameraTrap] cam
-LEFT JOIN Equipment E on e.FK_Sensor = cam.FK_Sensor and e.Deploy =1 and e.StartDate < cam.[date_creation]
-					and not exists (select * 
-									from  [Equipment] e2 
-									where e2.FK_Sensor = e.FK_Sensor AND e2.StartDate > e.StartDate AND e2.StartDate < cam.[date_creation])
-LEFT JOIN MonitoredSite M on e.FK_MonitoredSite = M.id
-LEFT JOIN Sensor S on cam.FK_Sensor = S.ID
-LEFT JOIN Equipment E3 on e3.FK_Sensor = cam.FK_Sensor and e3.Deploy =0 and e3.StartDate > e.StartDate 
-							and not exists (select * 
-									from  [Equipment] e4 
-									where e4.FK_Sensor = e.FK_Sensor AND e4.StartDate < e3.StartDate and e4.StartDate > e.StartDate)
-where cam.checked = 0
-GROUP BY S.UnicIdentifier,m.Name,m.Category,e.StartDate,e3.StartDate,e.ID,cam.FK_Sensor
+FROM
+ecoReleve_Sensor.dbo.TcameraTrap AS cam
+LEFT OUTER JOIN
+dbo.Equipment AS E
+ON E.FK_Sensor = cam.fk_sensor AND E.Deploy = 1 AND E.StartDate < cam.date_creation
+AND NOT EXISTS
+(SELECT ID, FK_Sensor, FK_Individual, FK_Observation, StartDate, Deploy, FK_MonitoredSite
+FROM dbo.Equipment AS e2
+WHERE (FK_Sensor = E.FK_Sensor) AND (StartDate > E.StartDate) AND (StartDate < cam.date_creation)
+)
+LEFT OUTER JOIN
+dbo.MonitoredSite AS M
+ON E.FK_MonitoredSite = M.ID
+LEFT OUTER JOIN
+dbo.Sensor AS S
+ON cam.fk_sensor = S.ID
+LEFT OUTER JOIN
+dbo.Equipment AS E3
+ON E3.FK_Sensor = cam.fk_sensor AND E3.Deploy = 0 AND E3.StartDate > E.StartDate
+AND NOT EXISTS
+(SELECT ID, FK_Sensor, FK_Individual, FK_Observation, StartDate, Deploy, FK_MonitoredSite
+FROM dbo.Equipment AS e4
+WHERE (FK_Sensor = E.FK_Sensor) AND (StartDate < E3.StartDate) AND (StartDate > E.StartDate)
+)
+WHERE (cam.checked = 0)
 
 GO
 
