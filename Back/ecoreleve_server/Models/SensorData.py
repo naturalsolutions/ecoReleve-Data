@@ -148,13 +148,14 @@ class Rfid(Base):
 class CamTrap(Base):
     __tablename__ = 'TcameraTrap'
     pk_id = Column(Integer, Sequence('seq_camtrap_pk_id'), primary_key = True)
+    fk_sensor = Column(Integer, nullable=False)
     path = Column(String(250) , nullable = False)
     name = Column(String(250) , nullable = False)
     extension = Column(String(250) , nullable = False)
     checked = Column(Boolean, server_default = '0')
     validated = Column(Boolean, server_default = '0')
     uploaded = Column(Boolean, server_default = '0')
-    date_creation = Column(DateTime)
+    date_creation = Column(DateTime, nullable = True)
     date_uploaded = Column(DateTime, server_default = func.now())
 
     __table_args__ = (
