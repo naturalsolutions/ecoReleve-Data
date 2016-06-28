@@ -27,6 +27,7 @@ define([
       //this.sensorId = options.model.attributes.sensorId;
       //console.log(this.options.model.get('row'));
       //this.row = this.options.model.get('row').model.attributes;
+      this.buttonPause = $('#pause-upload-resumablejs');
       this.data =  this.options.model.get('row').model.attributes;
       this.data.sensorId = options.model.attributes.sensorId;
       //console.log(this.data);
@@ -72,6 +73,7 @@ define([
 
       $('#start-upload-resumablejs').click(function(){
         console.log("on upload");
+        $('#pause-upload-resumablejs').removeClass('hide');
         r.upload();
       });
 
@@ -104,9 +106,37 @@ define([
     }
       //define event
       r.on('fileAdded', function(file, event){
-      console.log("fichier ajouté :");
-      $('#list-files').append("<div>"+String(file.fileName)+"</div>");
-      progressBar.fileAdded();
+      console.log("on veut ajouter le fichier ");
+      console.log(file);
+      if (file.file.type =='image/jpeg' || file.file.type == 'application/x-zip-compressed') {
+        let template = '<div  id="name" class="col-md-6 text-center">'+
+                      String(file.fileName)+
+                      '</div>'+
+                      '<div  id="status" class="col-md-6 text-center">'+
+                      "Ready"+
+                      '</div>';
+
+        $('#list-files').append(template);
+        progressBar.fileAdded();
+      }
+      else{
+        Swal(
+          {
+            title: 'Warning file type not allowed (only jpeg and zip)',
+            text: ''+String(file.fileName)+'File type :'+String(file.file.type)+'' ,
+            type: 'warning',
+            showCancelButton: false,
+            confirmButtonColor: 'rgb(218, 146, 15)',
+
+            confirmButtonText: 'OK',
+
+            closeOnConfirm: true,
+
+          }
+        );
+        r.removeFile(file);
+      }
+
         //console.log(file);
       });
 
@@ -158,7 +188,7 @@ define([
 
       r.on('complete', function(file, message) {
         console.log("file upload complete");
-
+          $('#pause-upload-resumablejs').addClass('hide');
 
         progressBar.finish();
         Swal({title: 'Well done',
