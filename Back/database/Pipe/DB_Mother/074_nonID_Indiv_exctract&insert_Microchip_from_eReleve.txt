@@ -224,7 +224,6 @@ INTO #nonID_indToduplicate
 			  ,i.[Death_date]
 			  ,i.[FK_IndividualType]
 			  ,i.ID
-			  ,i.[Caisse_ID]
 		FROM Individual i 
 		WHERE exists (SELECT * FROM #indTomodif itm WHERE itm.indID = i.ID)
 		and NOT exists (SELECT * FROM #nonID_indToduplicate WHERE i.ID = indID)
