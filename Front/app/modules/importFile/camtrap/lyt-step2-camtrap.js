@@ -12,7 +12,7 @@ define([
 
 ], function($, _, Backbone, Marionette, config, Swal, Dropzone,Resumable
 
-  ) {
+) {
 
   'use strict';
 
@@ -58,12 +58,12 @@ define([
       var _this = this;
       //test resumable
       var r = new Resumable({
-      target:  config.coreUrl + 'sensors/resumable/datas',
-      query:
-      {
-            "path": this.path
-      },
-      testChunks: false
+        target:  config.coreUrl + 'sensors/resumable/datas',
+        query:
+        {
+          "path": this.path
+        },
+        testChunks: false
       });
 
       var nbFiles = 0;
@@ -81,15 +81,15 @@ define([
       });
 
       $('#pause-upload-resumablejs').click(function(){
-          console.log("on pause");
-          if (r.files.length>0) {
-              if (r.isUploading()) {
-                return  r.pause();
-              }
-              $('#pause-upload-resumablejs').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
-              $('#pause-upload-resumablejs > span').text(" Pause upload")
-              return r.upload();
+        console.log("on pause");
+        if (r.files.length>0) {
+          if (r.isUploading()) {
+            return  r.pause();
           }
+          $('#pause-upload-resumablejs').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
+          $('#pause-upload-resumablejs > span').text(" Pause upload")
+          return r.upload();
+        }
       });
       $('#cancel-upload-resumablejs').click(function(){
         console.log("on cancel");
@@ -102,20 +102,20 @@ define([
         this.thisEle = $(ele);
 
         this.fileAdded = function() {
-            (this.thisEle).removeClass('hide').find('.progress-bar').css('width','0%');
+          (this.thisEle).removeClass('hide').find('.progress-bar').css('width','0%');
         },
 
         this.uploading = function(progress) {
-            (this.thisEle).find('.progress-bar').attr('style', "width:"+progress+'%');
+          (this.thisEle).find('.progress-bar').attr('style', "width:"+progress+'%');
         },
 
         this.finish = function() {
-            (this.thisEle).find('.progress-bar').css('width','100%');
+          (this.thisEle).find('.progress-bar').css('width','100%');
         }
-    }
+      }
       //define event
       r.on('filesAdded', function(array) {
-      /*  console.log("bim on ajouté des fichiers et tout");
+        /*  console.log("bim on ajouté des fichiers et tout");
         console.log(array);*/
         if(_this.textSwalFilesNotAllowed != ""){
           Swal(
@@ -136,131 +136,128 @@ define([
         }
       });
       r.on('fileAdded', function(file, event){
-    console.log("on veut ajouter le fichier ");
-      console.log(file.uniqueIdentifier);
-      if (file.file.type =='image/jpeg' || file.file.type == 'application/x-zip-compressed') {
-        nbFiles+=1;
-        let template ='<div id="'+file.uniqueIdentifier+'" class="col-md-12" >'+
-                      '<div  id="name" class="col-md-6 text-center">'+
-                      String(file.fileName)+
-                      '</div>'+
-                      '<div  id="status" class="col-md-6 text-center">'+
-                      "Ready"+
-                      '</div>'+
-                      '</div>';
 
-        $('#list-files').append(template);
-        progressBar.fileAdded();
-      }
-      else{
+        if (file.file.type =='image/jpeg' || file.file.type == 'application/x-zip-compressed') {
+          nbFiles+=1;
+          let template ='<div id="'+file.uniqueIdentifier+'" class="col-md-12" >'+
+          '<div  id="name" class="col-md-6 text-center">'+
+          String(file.fileName)+
+          '</div>'+
+          '<div  id="status" class="col-md-6 text-center">'+
+          "Ready"+
+          '</div>'+
+          '</div>';
+
+          $('#list-files').append(template);
+          progressBar.fileAdded();
+        }
+        else{
           let tmp = String(file.file.type);
           if( tmp ==="")
-            tmp = "unknow"
-        _this.textSwalFilesNotAllowed+= ''+String(file.fileName)+ 'File type : '+tmp+'';
-        _this.textSwalFilesNotAllowed+='\n';
+          tmp = "unknow"
+          _this.textSwalFilesNotAllowed+= ''+String(file.fileName)+ 'File type : '+tmp+'';
+          _this.textSwalFilesNotAllowed+='\n';
 
-        r.removeFile(file);
-      }
+          r.removeFile(file);
+        }
 
         //console.log(file);
       });
 
       r.on('pause', function(){
-          $('#pause-upload-resumablejs').find('.glyphicon').removeClass('glyphicon-pause').addClass('glyphicon-play');
-          $('#pause-upload-resumablejs > span').text(" Resume upload")
+        $('#pause-upload-resumablejs').find('.glyphicon').removeClass('glyphicon-pause').addClass('glyphicon-play');
+        $('#pause-upload-resumablejs > span').text(" Resume upload")
       });
 
       r.on('fileSuccess', function(file, message){
-          $("#"+file.uniqueIdentifier+"").css("color" ,"GREEN");
-          $("#"+file.uniqueIdentifier+" > "+"#status").text("OK");
+        $("#"+file.uniqueIdentifier+"").css("color" ,"GREEN");
+        $("#"+file.uniqueIdentifier+" > "+"#status").text("OK");
 
-          //$modifStatus.getElementById('status').val("OK");
-          /* envoie d'une requete pour reconstruire le fichier si le tableau de chunks est > 1 */
-          console.log("longueur tableau chunks :"+file.chunks.length);
-          if( file.chunks.length > 1 )
-          {
-            $.ajax({
-              type: "POST",
-              url: config.coreUrl + 'sensors/concat/datas',
-              data: {
-                      path : _this.path,
-                      name : file.fileName,
-                      taille : file.chunks.length,
-                      action : 1
-                    }
-            });
-          }
-          //console.log(file);
+        //$modifStatus.getElementById('status').val("OK");
+        /* envoie d'une requete pour reconstruire le fichier si le tableau de chunks est > 1 */
+        if( file.chunks.length > 1 )
+        {
+          $.ajax({
+            type: "POST",
+            url: config.coreUrl + 'sensors/concat/datas',
+            data: {
+              path : _this.path,
+              name : file.fileName,
+              taille : file.chunks.length,
+              action : 1
+            }
+          });
+        }
+        //console.log(file);
       });
 
       r.on('fileError', function(file, message){
         $("#"+file.uniqueIdentifier+"").css("color" ,"RED");
         $("#"+file.uniqueIdentifier+" > "+"#status").text("FAILED");
         Swal(
-              {
-                title: 'Warning',
-                text: ' probleme to upload the file',
-                type: 'warning',
-                showCancelButton: false,
-                confirmButtonColor: 'rgb(218, 146, 15)',
+          {
+            title: 'Warning',
+            text: ' probleme to upload the file',
+            type: 'warning',
+            showCancelButton: false,
+            confirmButtonColor: 'rgb(218, 146, 15)',
 
-                confirmButtonText: 'OK',
+            confirmButtonText: 'OK',
 
-                closeOnConfirm: true,
+            closeOnConfirm: true,
 
-              }
-          );
-          //console.log(file);
+          }
+        );
+        //console.log(file);
       });
 
       r.on('complete', function(file, message) {
         console.log("file upload complete");
-          $('#start-upload-resumablejs').removeClass('hide');
-          $('#cancel-upload-resumablejs').addClass('hide');
-          $('#pause-upload-resumablejs').addClass('hide');
+        $('#start-upload-resumablejs').removeClass('hide');
+        $('#cancel-upload-resumablejs').addClass('hide');
+        $('#pause-upload-resumablejs').addClass('hide');
 
         progressBar.finish();
         Swal({title: 'Well done',
-          text: 'File(s) have been correctly imported\n'
-                        + '\t inserted : ' + nbFiles
-                        ,
-          type:  'success',
-          showCancelButton: true,
-          confirmButtonText: 'Validate CamTrap',
-          cancelButtonText: 'New import',
-          closeOnConfirm: true,
-          closeOnCancel: true},
-          function(isConfirm) {   if (isConfirm) {
-            Backbone.history.navigate('validate/Camtrap',{trigger: true});
-          }
+        text: 'File(s) have been correctly imported\n'
+        + '\t inserted : ' + nbFiles
+        ,
+        type:  'success',
+        showCancelButton: true,
+        confirmButtonText: 'Validate CamTrap',
+        cancelButtonText: 'New import',
+        closeOnConfirm: true,
+        closeOnCancel: true},
+        function(isConfirm) {   if (isConfirm) {
+          Backbone.history.navigate('validate/Camtrap',{trigger: true});
         }
-        );
-      });
-
-      r.on('progress' , function(file,message) {
-        console.log("on progress");
-        progressBar.uploading(r.progress()*100);
-        $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
-      });
-
-      r.on('beforeCancel' , function() {
-        console.log("event beforeCancel");
-      });
-
-      r.on('cancel' , function() {
-        console.log("event Cancel");
-        $('#pause-upload-resumablejs').addClass('hide');
-        $('#start-upload-resumablejs').removeClass('hide');
-        $('#cancel-upload-resumablejs').addClass('hide');
-      });
-
-    },
-
-    onDestroy: function() {
-    },
-
-    validate: function() {
-    },
-
+      }
+    );
   });
+
+  r.on('progress' , function(file,message) {
+    progressBar.uploading(r.progress()*100);
+    $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
+  });
+
+  r.on('beforeCancel' , function() {
+    console.log("event beforeCancel");
+  });
+
+  r.on('cancel' , function() {
+    console.log("event Cancel");
+    $('#pause-upload-resumablejs').addClass('hide');
+    $('#start-upload-resumablejs').removeClass('hide');
+    $('#cancel-upload-resumablejs').addClass('hide');
+  });
+
+},
+
+onDestroy: function() {
+},
+
+validate: function() {
+},
+
+});
 });
