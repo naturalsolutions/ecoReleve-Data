@@ -4,6 +4,7 @@ IF (EXISTS (SELECT name
 FROM master.dbo.sysdatabases 
 WHERE name = 'EcoReleve_NARC'))
 
+USE EcoReleve_NARC
 BEGIN
 
   DELETE f
@@ -106,6 +107,7 @@ WHERE typeObj = (SELECT ID From ProtocoleType WHERE Name = 'Entomo population') 
 
 END
 
+GO
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('76_NARC_ChangeID_Proto',GETDATE(),(SELECT db_name()))
 
