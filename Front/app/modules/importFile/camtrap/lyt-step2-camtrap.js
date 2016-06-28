@@ -33,7 +33,10 @@ define([
       //console.log(this.data);
       this.path = "";
       let startDate = this.data['StartDate'].split(" ");
-      let endDate = this.data['EndDate'].split(" ");
+      let endDate = "0000-00-00"
+      if( this.data['EndDate'] != undefined ) {
+        endDate = this.data['EndDate'].split(" ");
+      }
       this.path = String(this.data['UnicIdentifier'])+"_"+String(startDate[0])+"_"+String(endDate[0])+"_"+String(this.data['Name']);
       this.textSwalFilesNotAllowed = "";
       /*
@@ -56,12 +59,14 @@ define([
 
     onShow: function() {
       var _this = this;
+      _this.id = this.data.sensorId;
       //test resumable
       var r = new Resumable({
         target:  config.coreUrl + 'sensors/resumable/datas',
         query:
         {
-          "path": this.path
+          "path": this.path,
+          "id" : this.data.sensorId
         },
         testChunks: false
       });
@@ -73,12 +78,26 @@ define([
 
 
       $('#start-upload-resumablejs').click(function(){
-        console.log("on upload");
-        $('#pause-upload-resumablejs').removeClass('hide');
-        $('#start-upload-resumablejs').addClass('hide');
-        $('#cancel-upload-resumablejs').removeClass('hide');
-        r.upload();
+        //prevent multithread pb when test if folder doesn't exist and create it
+        $.ajax({
+          type: "POST",
+          url: config.coreUrl + 'sensors/concat/datas',
+          data: {
+            path : _this.path,
+            action : 0 // create folder
+          }
+        })
+        .done( function(response){
+          console.log(response);
+          if( response.status_code === 200 || response === 200){
+            $('#pause-upload-resumablejs').removeClass('hide');
+            $('#start-upload-resumablejs').addClass('hide');
+            $('#cancel-upload-resumablejs').removeClass('hide');
+            r.upload();
+          }
+        });
       });
+
 
       $('#pause-upload-resumablejs').click(function(){
         console.log("on pause");
@@ -178,12 +197,14 @@ define([
         /* envoie d'une requete pour reconstruire le fichier si le tableau de chunks est > 1 */
         if( file.chunks.length > 1 )
         {
+          console.log("upload fini fk_sensor :" +_this.data.sensorId);
           $.ajax({
             type: "POST",
             url: config.coreUrl + 'sensors/concat/datas',
             data: {
               path : _this.path,
-              name : file.fileName,
+              id : _this.data.sensorId,
+              name : file.uniqueIdentifier,
               taille : file.chunks.length,
               action : 1
             }
@@ -220,7 +241,7 @@ define([
 
         progressBar.finish();
         Swal({title: 'Well done',
-        text: 'File(s) have been correctly imported\n'
+        text: 'File(s) have been correctly Uploaded\n'
         + '\t inserted : ' + nbFiles
         ,
         type:  'success',
