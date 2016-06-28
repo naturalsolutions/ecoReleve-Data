@@ -78,6 +78,7 @@ define([
         $('#importGpxMsg').removeClass('hidden');
       } else {
         reader.onload = function(e, fileName) {
+          window.app.checkFormSaved = false;
           var xml = e.target.result;
 
           // get waypoints collection
@@ -147,6 +148,7 @@ define([
       var fieldActivity = $(e.target).val();
       this.wayPointList.each(function(model) {
         model.set('fieldActivity', fieldActivity);
+        window.app.checkFormSaved = false;
       });
     },
     onDestroy: function() {
@@ -168,6 +170,7 @@ define([
       }else{
         var fieldworkers = this.nsform.BBForm.model.get('FieldWorkers');
         this.setFieldWorkers(fieldworkers);
+        window.app.checkFormSaved = false;
         return true;
       }
     },

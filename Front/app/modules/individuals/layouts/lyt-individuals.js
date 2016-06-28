@@ -39,7 +39,8 @@ define([
       'paginator': '#paginator',
       'filter': '#filter',
       'detail': '#detail',
-      'btnNew': '#createNew'
+      'btnNew': '#createNew',
+      'rowSelect':'#rowSelector'
     },
 
     regions: {
@@ -79,6 +80,7 @@ define([
         urlParams: this.urlParams,
         rowClicked: true,
         totalElement: 'totalEntries',
+        rowSelectorElement: 'rowSelector'
       });
 
       this.grid.rowClicked = function(args) {
@@ -88,7 +90,7 @@ define([
         _this.rowDbClicked(args.row);
       };
       this.ui.grid.html(this.grid.displayGrid());
-      this.ui.paginator.html(this.grid.displayPaginator());
+      this.ui.paginator.append(this.grid.displayPaginator());
     },
 
     rowClicked: function(row) {
@@ -121,10 +123,12 @@ define([
       this.filters.reset();
     },
     hideDetails: function() {
-      Backbone.history.navigate(this.rootUrl, {trigger: false});
-      this.ui.detail.addClass('hidden');
+      var _this= this;
+      window.checkExitForm(function(){
+        Backbone.history.navigate(_this.rootUrl, {trigger: false});
+        _this.ui.detail.addClass('hidden');
+      });
     },
-
     newIndividual: function() {
       Backbone.history.navigate(this.rootUrl + 'new/', {trigger: true});
       /*
