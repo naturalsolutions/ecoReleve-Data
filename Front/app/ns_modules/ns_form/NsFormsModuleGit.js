@@ -242,8 +242,17 @@ define([
 
         $(this.formRegion).find('textarea').on("keypress", function(e) {
             var maxlen = 250;
-            if ($(this).val().length > maxlen) {  
+            if ($(this).val().length > maxlen) {
+              _this.showAlertforMaxLength();
               return false;
+            }  
+        });
+        $(this.formRegion).find('textarea').on('keyup', function (e) {
+              var maxlen = 250;
+              if ($(this).val().length > maxlen) {
+                _this.showAlertforMaxLength(); 
+                $(this).val('');
+                return false;
             }  
         });
 
@@ -257,7 +266,15 @@ define([
         this.afterShow();
       }
     },
-
+    showAlertforMaxLength : function(){
+      var opts = {
+        title : 'Max length: 255 characters !',
+        showCancelButton: false,
+        type: 'warning',
+        confirmButtonColor: '#DD6B55'
+      };
+      this.swal(opts);
+    },
     updateState: function(state){
 
     },
