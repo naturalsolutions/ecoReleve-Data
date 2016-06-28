@@ -3,14 +3,18 @@
 	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 full-height" >
 		<div class="resumable" style="padding-right: 20px; padding-bottom: 20px; padding-top: 20px;">
 			<button type="button" class="btn btn-success" aria-label="Add file" id="add-file-resumablejs">
-				<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add file
+				<span class="reneco reneco-add" aria-hidden="true"> Add file</span>
 			</button>
 			<button type="button" class="btn btn-info" aria-label="Start upload" id="start-upload-resumablejs">
-				<span class="glyphicon glyphicon-upload" aria-hidden="true"></span> Start upload
+				<span class="reneco reneco-import" aria-hidden="true"> Start upload</span>
+			</button>
+			<button type="button" class="btn btn-danger hide" aria-label="Cancel upload" id="cancel-upload-resumablejs">
+				<span class="reneco reneco-close " aria-hidden="true"> Cancel upload</span>
 			</button>
 			<button type="button" class="btn btn-warning hide" aria-label="Pause upload" id="pause-upload-resumablejs">
-				<span class="glyphicon glyphicon-pause " aria-hidden="true"></span> Pause upload
+				<span class="glyphicon glyphicon-pause " aria-hidden="true"> Pause upload</span>
 			</button>
+
 			<div class="progress hide" id="upload-progress" style=" margin-top : 20px;">
 				<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"   style="width: 0%">
 					<span class="sr-only"></span>

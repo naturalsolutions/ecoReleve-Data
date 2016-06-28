@@ -75,6 +75,8 @@ define([
       $('#start-upload-resumablejs').click(function(){
         console.log("on upload");
         $('#pause-upload-resumablejs').removeClass('hide');
+        $('#start-upload-resumablejs').addClass('hide');
+        $('#cancel-upload-resumablejs').removeClass('hide');
         r.upload();
       });
 
@@ -84,9 +86,16 @@ define([
               if (r.isUploading()) {
                 return  r.pause();
               }
+              $('#pause-upload-resumablejs').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
+              $('#pause-upload-resumablejs > span').text(" Pause upload")
               return r.upload();
           }
       });
+      $('#cancel-upload-resumablejs').click(function(){
+        console.log("on cancel");
+        r.abort();
+      });
+
 
       var progressBar = new ProgressBar($('#upload-progress'));
       function ProgressBar(ele) {
@@ -128,14 +137,16 @@ define([
       });
       r.on('fileAdded', function(file, event){
     console.log("on veut ajouter le fichier ");
-    //  console.log(file);
+      console.log(file.uniqueIdentifier);
       if (file.file.type =='image/jpeg' || file.file.type == 'application/x-zip-compressed') {
         nbFiles+=1;
-        let template = '<div  id="name" class="col-md-6 text-center">'+
+        let template ='<div id="'+file.uniqueIdentifier+'" class="col-md-12" >'+
+                      '<div  id="name" class="col-md-6 text-center">'+
                       String(file.fileName)+
                       '</div>'+
                       '<div  id="status" class="col-md-6 text-center">'+
                       "Ready"+
+                      '</div>'+
                       '</div>';
 
         $('#list-files').append(template);
@@ -155,13 +166,15 @@ define([
       });
 
       r.on('pause', function(){
-          $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-pause').addClass('glyphicon-play');
+          $('#pause-upload-resumablejs').find('.glyphicon').removeClass('glyphicon-pause').addClass('glyphicon-play');
+          $('#pause-upload-resumablejs > span').text(" Resume upload")
       });
 
       r.on('fileSuccess', function(file, message){
-          console.log("file success :")
-          console.log(message);
-          console.log(file);
+          $("#"+file.uniqueIdentifier+"").css("color" ,"GREEN");
+          $("#"+file.uniqueIdentifier+" > "+"#status").text("OK");
+
+          //$modifStatus.getElementById('status').val("OK");
           /* envoie d'une requete pour reconstruire le fichier si le tableau de chunks est > 1 */
           console.log("longueur tableau chunks :"+file.chunks.length);
           if( file.chunks.length > 1 )
@@ -181,8 +194,8 @@ define([
       });
 
       r.on('fileError', function(file, message){
-        console.log("file error :");
-        console.log(message);
+        $("#"+file.uniqueIdentifier+"").css("color" ,"RED");
+        $("#"+file.uniqueIdentifier+" > "+"#status").text("FAILED");
         Swal(
               {
                 title: 'Warning',
@@ -202,6 +215,8 @@ define([
 
       r.on('complete', function(file, message) {
         console.log("file upload complete");
+          $('#start-upload-resumablejs').removeClass('hide');
+          $('#cancel-upload-resumablejs').addClass('hide');
           $('#pause-upload-resumablejs').addClass('hide');
 
         progressBar.finish();
@@ -226,6 +241,17 @@ define([
         console.log("on progress");
         progressBar.uploading(r.progress()*100);
         $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
+      });
+
+      r.on('beforeCancel' , function() {
+        console.log("event beforeCancel");
+      });
+
+      r.on('cancel' , function() {
+        console.log("event Cancel");
+        $('#pause-upload-resumablejs').addClass('hide');
+        $('#start-upload-resumablejs').removeClass('hide');
+        $('#cancel-upload-resumablejs').addClass('hide');
       });
 
     },
