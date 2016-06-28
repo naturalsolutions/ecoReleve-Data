@@ -67,6 +67,7 @@ define([
       var nbFiles = 0;
       //get dom
       r.assignBrowse(document.getElementById('add-file-resumablejs'));
+      r.assignDrop(document.getElementById('drag-drop-zone-resumable'));
 
 
       $('#start-upload-resumablejs').click(function(){
