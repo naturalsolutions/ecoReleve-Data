@@ -35,6 +35,7 @@ define([
       let startDate = this.data['StartDate'].split(" ");
       let endDate = this.data['EndDate'].split(" ");
       this.path = String(this.data['UnicIdentifier'])+"_"+String(startDate[0])+"_"+String(endDate[0])+"_"+String(this.data['Name']);
+      this.textSwalFilesNotAllowed = "";
       /*
       http://192.168.0.78/ecoReleve-Core/sensors/resumable/datas?
       resumableChunkNumber=184
@@ -93,7 +94,6 @@ define([
 
         this.fileAdded = function() {
             (this.thisEle).removeClass('hide').find('.progress-bar').css('width','0%');
-            nbFiles+=1;
         },
 
         this.uploading = function(progress) {
@@ -105,10 +105,32 @@ define([
         }
     }
       //define event
+      r.on('filesAdded', function(array) {
+      /*  console.log("bim on ajouté des fichiers et tout");
+        console.log(array);*/
+        if(_this.textSwalFilesNotAllowed != ""){
+          Swal(
+            {
+              title: 'Warning file type not allowed (only jpeg and zip)',
+              text: _this.textSwalFilesNotAllowed ,
+              type: 'warning',
+              showCancelButton: false,
+              confirmButtonColor: 'rgb(218, 146, 15)',
+
+              confirmButtonText: 'OK',
+
+              closeOnConfirm: true,
+
+            }
+          );
+          _this.textSwalFilesNotAllowed = "";
+        }
+      });
       r.on('fileAdded', function(file, event){
-      console.log("on veut ajouter le fichier ");
-      console.log(file);
+    console.log("on veut ajouter le fichier ");
+    //  console.log(file);
       if (file.file.type =='image/jpeg' || file.file.type == 'application/x-zip-compressed') {
+        nbFiles+=1;
         let template = '<div  id="name" class="col-md-6 text-center">'+
                       String(file.fileName)+
                       '</div>'+
@@ -120,20 +142,12 @@ define([
         progressBar.fileAdded();
       }
       else{
-        Swal(
-          {
-            title: 'Warning file type not allowed (only jpeg and zip)',
-            text: ''+String(file.fileName)+'File type :'+String(file.file.type)+'' ,
-            type: 'warning',
-            showCancelButton: false,
-            confirmButtonColor: 'rgb(218, 146, 15)',
+          let tmp = String(file.file.type);
+          if( tmp ==="")
+            tmp = "unknow"
+        _this.textSwalFilesNotAllowed+= ''+String(file.fileName)+ 'File type : '+tmp+'';
+        _this.textSwalFilesNotAllowed+='\n';
 
-            confirmButtonText: 'OK',
-
-            closeOnConfirm: true,
-
-          }
-        );
         r.removeFile(file);
       }
 
