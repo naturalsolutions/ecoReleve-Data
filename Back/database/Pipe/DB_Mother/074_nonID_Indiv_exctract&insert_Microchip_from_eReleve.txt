@@ -1,7 +1,10 @@
-/****** If @NARC replace ECWP-eReleveData by NARC_eReleveData  ******/
+/****** If @NARC replace ECWP-eReleveData by NARC_eReleveData AND EcoReleve_Export_ECWP by EcoReleve_Export_NARC  ******/
 
 UPDATE Individual SET FK_IndividualType = 2
 WHERE FK_IndividualType is null and Original_ID like '%nonID%'
+
+exec EcoReleve_Export_ECWP.dbo.pr_ExportAllIndividu
+
 
 IF OBJECT_ID('tempdb..#indiv_criteria ') IS NOT NULL
 	DROP TABLE #indiv_criteria 
@@ -255,11 +258,14 @@ GO
 
 
 /***** query to check in ecoRelve station/Observation All observations result have to refer to a nonID indiv with a MicroChip value ****/ 
-select *
+
+ select o.*,p.name,prot.Identification_criteria,itm.MicroChip as MicroChip_from_new, itd.Microchip as MicroChip_from_existing
 FROM Observation o 
-		JOIN #indTomodif itm ON o.ID = itm.obsID 
-		JOIN #nonID_newRef ir ON itm.indID = ir.oldIndID
-		JOIN ProtocoleType p ON p.ID = o.FK_ProtocoleType
+  JOIN #indTomodif itm ON o.ID = itm.obsID 
+  JOIN #nonID_newRef ir ON itm.indID = ir.oldIndID
+  JOIN ProtocoleType p ON p.ID = o.FK_ProtocoleType and p.Name = 'Vertebrate individual'
+  LEFT JOIN #nonID_indToduplicate itd on itd.ID = o.FK_Individual 
+  LEFT JOIN [ECWP-eReleveData].dbo.TProtocol_Vertebrate_Individual prot ON CONVERT(varchar(10),prot.PK)= o.original_id --and prot.Identification_criteria like '%chip%'
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('74_nonID_Indiv_exctract&insert_Microchip_from_eReleve',GETDATE(),(SELECT db_name()))
 
