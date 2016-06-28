@@ -90,6 +90,21 @@ FROM [ECWP-eReleveData].[dbo].TProtocol_Nest_Description p
 JOIN @subProtocole s ON p.Identification_criteria = s.Identification_criteria;
 
 
+------ Insert criteria from BVertebrate individual
+
+INSERT INTO @subProtocole (Identification_criteria)
+select DISTINCT prot.Identification_criteria
+FROM Observation o 
+JOIN [ECWP-eReleveData].dbo.TProtocol_Vertebrate_Individual prot ON o.original_id = CONVERT(VARCHAR,prot.PK)
+--LEFT JOIN nonIDind_criteria c ON prot.Identification_criteria = c.Identification_criteria 
+WHERE o.FK_ProtocoleType = (SELECT ID FROM ProtocoleType WHERE name = 'Vertebrate individual')
+and prot.FK_TInd_ID is null and prot.Identification_criteria is not null and prot.Identification_criteria like '%Chip%'
+---AND c.IndID is null ;
+
+INSERT INTO #proto_Id_nonIdentified (proto_ID,Id_nonIdentified,protocoleType)
+SELECT p.PK,s.Id_nonIdentified, (SELECT ID FROM ProtocoleType WHERE name = 'Vertebrate individual')
+FROM [ECWP-eReleveData].[dbo].TProtocol_Vertebrate_Individual p
+JOIN @subProtocole s ON p.Identification_criteria = s.Identification_criteria;
 
 
 WITH splitCriteria as (
