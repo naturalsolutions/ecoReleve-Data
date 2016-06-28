@@ -75,6 +75,8 @@ define([
         urlParams: this.urlParams,
         rowClicked: true,
         totalElement: 'totalEntries',
+        rowSelectorElement: 'rowSelectorSite',
+
       });
 
       this.grid.rowClicked = function(args) {
@@ -117,9 +119,11 @@ define([
       this.filters.reset();
     },
     hideDetails: function() {
-      this.ui.detail.addClass('hidden');
-      Backbone.history.navigate(this.rootUrl, {trigger: false});
-
+      var _this= this;
+      window.checkExitForm(function(){
+        Backbone.history.navigate(_this.rootUrl, {trigger: false});
+        _this.ui.detail.addClass('hidden');
+      });
     },
 
     exportGrid: function() {

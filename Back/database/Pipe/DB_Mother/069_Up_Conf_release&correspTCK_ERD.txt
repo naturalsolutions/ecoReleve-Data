@@ -1,4 +1,4 @@
-/****** update linktable Track to ERD******/
+﻿/****** update linktable Track to ERD******/
 
 
 
@@ -130,6 +130,10 @@ WHERE Module_ID = 17 AND Name = 'Release_Ring_Code'
 
 update ModuleGrids set GridOrder = 90
 WHERE Module_ID = 17 AND Name = 'chip_code'
+
+update g SET GridRender = 0 
+  FROM [ModuleGrids] g
+  where Name = 'date_sortie' and module_id = 17
 
 GO
 
