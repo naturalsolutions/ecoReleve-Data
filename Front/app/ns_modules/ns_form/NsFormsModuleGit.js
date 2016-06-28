@@ -313,6 +313,7 @@ define([
               _this.savingSuccess(model, response);
               _this.id = _this.model.id;
               window.formEdition = false;
+              window.formChange = false;
               if (_this.redirectAfterPost != "") {
                 // If redirect after creation
                 var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
@@ -350,6 +351,7 @@ define([
             success: function (model, response) {
               _this.savingSuccess(model, response);
               window.formEdition = false;
+              window.formChange = false;
               if (_this.reloadAfterSave) {
                 _this.reloadingAfterSave();
               }
@@ -408,6 +410,7 @@ define([
         confirmButtonColor: '#DD6B55',
         callback : function(){
           window.formEdition = false;
+          window.formChange = false;
           _this.afterDelete();
         }
       };
