@@ -42,9 +42,12 @@ def unzip(zipFilePath , destFolder, fk_sensor):
         #print("unzip : " +str(name))
         #nameRandom = GenName()
         #print (name)
-        fd = open(os.path.join(destFolder, str(name)), 'wb')
-        fd.write(zfile.read(name))
-        fd.close()
+        if not os.path.isfile(destFolder+str(name)):
+            with open(os.path.join(destFolder, str(name)), 'wb') as fd:
+                fd.write(zfile.read(name))
+        else:
+            print("le fichier : " +str(name)+" est deja present")
+        #fd.close()
         extType = name.split('.');
         if( extType[len(extType)-1] in ['jpg', 'JPG', 'jpeg', 'JPEG'] ):
             AddPhotoOnSQL(fk_sensor,destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)))
@@ -230,7 +233,10 @@ def uploadFileCamTrapResumable(request):
     return reponseStatus
 
 def concatChunk(request):
+    flagSuppression = False
     reponseStatus = 200
+    res = {}
+    message = ""
     pathPrefix = dbConfig['camTrap']['path']
     #create folder
     if(int(request.POST['action']) == 0 ):
@@ -241,21 +247,48 @@ def concatChunk(request):
     else :
         pathPost = str(request.POST['path'])
         fk_sensor = int(request.POST['id'])
+        name = str(request.POST['file'])
         debutTime = time.time()
-        print("on veut reconstruire le fichier" + str(request.POST['name']) + " qui se trouve dans " + str(request.POST['path']) +" en :"+str(request.POST['taille'])+" fichiers")
-        destination = open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) ,'wb')
-        for i in range( 1, int(request.POST['taille'])+1):
-            shutil.copyfileobj(open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i), 'rb'), destination)
-        destination.close()
+        print("name " +str(name))
+        print("on veut reconstruire le fichier" + str(name) + " qui se trouve dans " + str(request.POST['path']) +" en :"+str(request.POST['taille'])+" fichiers")
+        #destination = open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) ,'wb')
+        if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(name)): # si le fichier n'existe pas on va le reconstruire
+            with open(pathPrefix+'\\'+pathPost+'\\'+str(name) ,'wb') as destination: #on ouvre le fichier comme destination
+                for i in range( 1, int(request.POST['taille'])+1):#on va parcourir l'ensemble des chunks
+                    if os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i)):#si le chunk est present
+                        shutil.copyfileobj(open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i), 'rb'), destination)#on le concat dans desitnation
+                    else:#si il n'est pas present
+                        flagSuppression = True
+                        message = "Chunk file number : '"+str(i)+"' missing try to reupload the file '"+str(request.POST['name'])+"'"
+                        break #break the for
+
+        else:
+            message = "File : '"+str(name)+"' is already on the server"
+        if (flagSuppression):
+            os.remove(pathPrefix+'\\'+pathPost+'\\'+str(name)) #supprime le fichier destination et on force la sortie
+        else:
+            for i in range( 1, int(request.POST['taille'])+1):#on va parcourir l'ensemble des chunks
+                os.remove(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i))
+
+
+        #destination.close()
         finTime = time.time()
         print ("durée :" +str(finTime - debutTime))
         #file concat ok now unzip
-        debutTime = time.time()
-        print (" on commence la décompression ")
-        unzip(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) , pathPrefix+'\\'+pathPost+'\\' , fk_sensor)
-        print ("fin decompression ")
-        finTime = time.time()
-        print ("durée :" +str(finTime - debutTime))
+        if(message == "" ):
+            if( request.POST['type'] == "application/x-zip-compressed" ):
+                debutTime = time.time()
+                print (" on commence la décompression ")
+                unzip(pathPrefix+'\\'+pathPost+'\\'+str(name) , pathPrefix+'\\'+pathPost+'\\' , fk_sensor)
+                print ("fin decompression ")
+                finTime = time.time()
+                print ("durée :" +str(finTime - debutTime))
+            else:
+                extType = request.POST['file'].split('.');
+
+                destfolder = pathPrefix+'\\'+pathPost+'\\'
+                AddPhotoOnSQL(fk_sensor,destfolder,name, str(extType[len(extType)-1]) , dateFromExif (destfolder+str(name)))
 
     request.response.status_code = 200
-    return reponseStatus
+    res = {'message' : message}
+    return res

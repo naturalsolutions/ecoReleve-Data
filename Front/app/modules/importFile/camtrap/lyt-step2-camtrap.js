@@ -68,7 +68,7 @@ define([
           "path": this.path,
           "id" : this.data.sensorId
         },
-        testChunks: false
+        testChunks: true
       });
 
       var nbFiles = 0;
@@ -87,14 +87,17 @@ define([
             action : 0 // create folder
           }
         })
-        .done( function(response){
-          console.log(response);
-          if( response.status_code === 200 || response === 200){
+        .done( function(response,status,jqXHR){
+          if( jqXHR.status === 200 ){
             $('#pause-upload-resumablejs').removeClass('hide');
             $('#start-upload-resumablejs').addClass('hide');
             $('#cancel-upload-resumablejs').removeClass('hide');
             r.upload();
           }
+        })
+        .fail( function( jqXHR, textStatus, errorThrown ){
+          console.log("error");
+          console.log(errorThrown);
         });
       });
 
@@ -158,6 +161,7 @@ define([
       r.on('fileAdded', function(file, event){
 
         if (file.file.type =='image/jpeg' || file.file.type == 'application/x-zip-compressed') {
+          $('#start-upload-resumablejs').removeClass('hide');
           nbFiles+=1;
           let template ='<div id="'+file.uniqueIdentifier+'" class="col-md-12" >'+
           '<div  id="name" class="col-md-6 text-center">'+
@@ -198,6 +202,8 @@ define([
         if( file.chunks.length > 1 )
         {
           console.log("upload fini fk_sensor :" +_this.data.sensorId);
+          //var deferred = $.Deferred();
+          console.log(file);
           $.ajax({
             type: "POST",
             url: config.coreUrl + 'sensors/concat/datas',
@@ -205,10 +211,22 @@ define([
               path : _this.path,
               id : _this.data.sensorId,
               name : file.uniqueIdentifier,
+              file : file.fileName,
+              type : file.file.type,
               taille : file.chunks.length,
               action : 1
             }
+          })
+          .done( function(response,status,jqXHR){
+            if( jqXHR.status === 200 ){
+              console.log("bim");
+            }
+          })
+          .fail( function( jqXHR, textStatus, errorThrown ){
+            console.log("error");
+            console.log(errorThrown);
           });
+
         }
         //console.log(file);
       });
