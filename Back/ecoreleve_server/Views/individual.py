@@ -37,6 +37,7 @@ prefix = 'individuals'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/advanced/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 def actionOnIndividuals(request):
@@ -76,8 +77,12 @@ def getFilters (request):
         objType = request.params['typeObj']
     else : 
         objType = 1
+    print(request.params)
+    if 'FilterName' in request.params and request.params['FilterName'] != '':
+        ModuleType = request.params['FilterName']
+    else:
+        ModuleType = 'IndivFilter'
 
-    ModuleType = 'IndivFilter'
     filtersList = Individual(FK_IndividualType = objType).GetFilters(ModuleType)
     filters = {}
     for i in range(len(filtersList)) :
@@ -323,12 +328,13 @@ def checkExisting(indiv):
     return existingID
 
 # ------------------------------------------------------------------------------------------------------------------------- #
+@view_config(route_name= prefix+'/advanced', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
 @view_config(route_name= prefix, renderer='json', request_method = 'POST', permission = NO_PERMISSION_REQUIRED)
 def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
-
+    print(data)
     history = False
     startDate = None
     # startDate = datetime.strptime('01/02/2008','%d/%m/%Y')
@@ -344,8 +350,13 @@ def searchIndiv(request):
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
 
-    if 'startDate' in searchInfo['criteria'] and searchInfo['criteria']['startDate'] != '':
-        startDate = datetime.strptime(searchInfo['criteria']['startDate'],'%d/%m/%Y %H:%M:%S')
+    print(searchInfo)
+    getStartDate = list(filter(lambda x: x['Column'] == 'StartDate',searchInfo['criteria']))
+    if len(getStartDate) >0 :
+        startDate = datetime.strptime(getStartDate[0]['Value'],'%d/%m/%Y %H:%M:%S')
+        print('search at date')
+    # if 'startDate' in searchInfo['criteria'] and searchInfo['criteria']['startDate'] != '':
+    #     startDate = datetime.strptime(searchInfo['criteria']['startDate'],'%d/%m/%Y %H:%M:%S')
 
     if 'history' in searchInfo['criteria'] and startDate is None:
         history = True

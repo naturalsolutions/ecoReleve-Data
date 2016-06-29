@@ -31,7 +31,8 @@ define([
       'click #back': 'hideDetails',
       'click button#clear': 'clearFilter',
       'click button#createNew': 'newIndividual',
-      'click #btn-export': 'exportGrid'
+      'click #btn-export': 'exportGrid',
+      'click #indivSearchTabs a.tab-link' : 'indivSearchTabs',
     },
 
     ui: {
@@ -55,6 +56,7 @@ define([
       }
       this.com = new Com();
       this.translater = Translater.getTranslater();
+      this.gridURL = config.coreUrl + 'individuals/';
     },
 
     onRender: function() {
@@ -76,7 +78,7 @@ define([
         pageSize: 20,
         pagingServerSide: true,
         com: this.com,
-        url: config.coreUrl + 'individuals/',
+        url: this.gridURL,
         urlParams: this.urlParams,
         rowClicked: true,
         totalElement: 'totalEntries',
@@ -109,10 +111,20 @@ define([
     },
 
     displayFilter: function() {
+      var _this=this;
+      this.$el.find('#filter').html('');
       this.filters = new NsFilter({
         url: config.coreUrl + 'individuals/',
         com: this.com,
         filterContainer: this.ui.filter,
+        name: this.moduleName,
+        update:function(){
+          NsFilter.prototype.update.call(this, options);
+          if (this.name == 'AdvancedIndivFilter'){
+            this.criterias.push({'Column':'history','Operator':})
+          }
+
+        }
       });
     },
 
@@ -145,6 +157,27 @@ define([
         position: 'top'
       });*/
     },
+
+    indivSearchTabs: function(e) {
+      var type = $(e.target).attr('name');
+      var elTab = this.$el.find('ul#indivSearchTabs');
+      elTab.find('.tab-ele').removeClass('activeTab');
+      $(e.target).parent().addClass('activeTab');
+
+      if (type == 'standard') {
+        this.moduleName = 'IndivFilter';
+        this.gridURL = config.coreUrl + 'individuals/';
+      } else {
+        this.moduleName = 'AdvancedIndivFilter';
+        this.gridURL = config.coreUrl + 'individuals/advanced/';
+        this.urlParams = [{'history':true}];
+      }
+
+      this.com = new Com();
+      this.displayGrid();
+      this.displayFilter();
+    },
+
 
     exportGrid: function() {
       var url = config.coreUrl + 'individuals/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
