@@ -42,15 +42,15 @@ def unzip(zipFilePath , destFolder, fk_sensor):
         #print("unzip : " +str(name))
         #nameRandom = GenName()
         #print (name)
-        if not os.path.isfile(destFolder+str(name)):
-            with open(os.path.join(destFolder, str(name)), 'wb') as fd:
-                fd.write(zfile.read(name))
-        else:
-            print("le fichier : " +str(name)+" est deja present")
-        #fd.close()
         extType = name.split('.');
         if( extType[len(extType)-1] in ['jpg', 'JPG', 'jpeg', 'JPEG'] ):
-            AddPhotoOnSQL(fk_sensor,destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)))
+            if not os.path.isfile(destFolder+str(name)):
+                with open(os.path.join(destFolder, str(name)), 'wb') as fd:
+                    fd.write(zfile.read(name))
+                AddPhotoOnSQL(fk_sensor,destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)))
+            else:
+                print("le fichier : " +str(name)+" est deja present")
+        #fd.close()
         else:
             print(str(name)+" not a good file")
     zfile.close()
