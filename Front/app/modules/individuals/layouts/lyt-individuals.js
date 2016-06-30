@@ -13,10 +13,12 @@ define([
   'ns_filter_bower',
   './lyt-individuals-detail',
   './lyt-individuals-new',
+ 'dateTimePicker',
+
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv
+  Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv,dateTimePicker
 ) {
 
   'use strict';
@@ -60,6 +62,7 @@ define([
     },
 
     onRender: function() {
+      $('#starDate2').datetimepicker();
       this.$el.i18n();
     },
 
@@ -91,6 +94,12 @@ define([
       this.grid.rowDbClicked = function(args) {
         _this.rowDbClicked(args.row);
       };
+
+      if (this.moduleName != 'IndivFilter'){
+        this.grid.collection.queryParams.history = true;
+      } else {
+        //delete this.collection.queryParams['history'];
+      }
       this.ui.grid.html(this.grid.displayGrid());
       this.ui.paginator.append(this.grid.displayPaginator());
     },
@@ -113,22 +122,19 @@ define([
     displayFilter: function() {
       var _this=this;
       this.$el.find('#filter').html('');
+
       this.filters = new NsFilter({
         url: config.coreUrl + 'individuals/',
         com: this.com,
         filterContainer: this.ui.filter,
         name: this.moduleName,
-        update:function(){
-          NsFilter.prototype.update.call(this, options);
-          if (this.name == 'AdvancedIndivFilter'){
-            this.criterias.push({'Column':'history','Operator':})
-          }
-
-        }
       });
     },
 
     filter: function() {
+      if (this.moduleName != 'IndivFilter'){
+        this.grid.collection.queryParams.startDate =  $('#dateVal').val();
+      }
       this.filters.update();
     },
     clearFilter: function() {
@@ -166,11 +172,17 @@ define([
 
       if (type == 'standard') {
         this.moduleName = 'IndivFilter';
-        this.gridURL = config.coreUrl + 'individuals/';
+        //this.gridURL = config.coreUrl + 'individuals/';
+        $('#startDate2').parent().addClass('hide');
+        this.ui.filter.removeClass('crop3');
       } else {
         this.moduleName = 'AdvancedIndivFilter';
-        this.gridURL = config.coreUrl + 'individuals/advanced/';
-        this.urlParams = [{'history':true}];
+        //this.gridURL = config.coreUrl + 'individuals/advanced/';
+        $('#startDate2').parent().removeClass('hide');
+        this.ui.filter.addClass('crop3');
+
+
+        //this.urlParams = [{'history':true}];
       }
 
       this.com = new Com();

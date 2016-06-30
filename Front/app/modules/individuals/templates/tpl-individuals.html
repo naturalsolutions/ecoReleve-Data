@@ -3,14 +3,23 @@
 		<div class="toolbar top">
 			<legend>Search</legend>
 		</div>
-		<div class="crop2 clearfix">
+		<div class="crop2 clearfix no-scroll">
 			<br>
 			<ul id="indivSearchTabs" class="nav nav-tabs">
                <li class="tab-ele activeTab"><a id="standardTab" class="tab-link" name="standard">Standard</a></li>
                <li class="tab-ele"><a id="advancedTab" class="tab-link" name="advanced">Advanced</a></li>
             </ul>
           <br>
-			<div id="filter"></div>
+          	<div class="form-group border-bottom-filter hide">
+                <span>At Date : </span>
+                <div class='col-md-6 input-group date' id='startDate2'>
+                    <span class="input-group-addon">
+                        <span class="reneco-calendar reneco" ></span>
+                    </span>
+                    <input id="dateVal" type='text' class="form-control" />
+                </div>
+            </div>
+			<div id="filter" class=""></div>
 		</div>
 		<div class="toolbar bottom">
 			<button id="clear" class="btn pull-left">Clear</button>

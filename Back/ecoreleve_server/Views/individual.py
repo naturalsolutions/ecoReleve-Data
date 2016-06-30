@@ -350,15 +350,15 @@ def searchIndiv(request):
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
 
-    print(searchInfo)
-    getStartDate = list(filter(lambda x: x['Column'] == 'StartDate',searchInfo['criteria']))
-    if len(getStartDate) >0 :
-        startDate = datetime.strptime(getStartDate[0]['Value'],'%d/%m/%Y %H:%M:%S')
-        print('search at date')
+    # print(searchInfo)
+    # getStartDate = list(filter(lambda x: x['Column'] == 'StartDate',searchInfo['criteria']))
+    # if len(getStartDate) >0 :
+    #     startDate = datetime.strptime(getStartDate[0]['Value'],'%d/%m/%Y %H:%M:%S')
+    #     print('search at date')
     # if 'startDate' in searchInfo['criteria'] and searchInfo['criteria']['startDate'] != '':
     #     startDate = datetime.strptime(searchInfo['criteria']['startDate'],'%d/%m/%Y %H:%M:%S')
 
-    if 'history' in searchInfo['criteria'] and startDate is None:
+    if 'history' in data and startDate is None:
         history = True
 
     if 'typeObj' in request.params:
