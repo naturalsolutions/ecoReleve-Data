@@ -32,6 +32,7 @@ function($,Marionette, config, Breadcrumb) {
       window.app.user.url = config.coreUrl + 'currentUser';
       window.app.user.fetch({
         success: function(data) {
+          $('body').addClass(window.app.user.get('role'));
           $.xhrPool.allowAbort = true;
           _this.ui.userName.html(window.app.user.get('fullname'));
         }
