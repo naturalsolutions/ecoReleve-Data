@@ -37,6 +37,7 @@ define([
       'click #btnSelectionGrid': 'clearSelectedRows',
       'click table.backgrid th input': 'checkSelectAll',
       'click button#filter': 'filter',
+      'change table td': 'setFieldActivity',
       //'click button#clear': 'clearFilter',
     },
 
@@ -282,6 +283,7 @@ define([
       var datas
       var coll = this.com.getMotherColl();
       coll = new Backbone.Collection(coll.where({import: true}));
+      console.log(coll);
 
 
       coll.url = config.coreUrl + 'stations/';
@@ -325,9 +327,10 @@ define([
           callback(elems);
         }
       });
+    },
+    setFieldActivity : function(){
+       window.formChange  = false;
     }
-
-    //check the code for rowClicked
 
   });
 });
