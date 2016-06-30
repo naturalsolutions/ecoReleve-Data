@@ -495,20 +495,28 @@ textarea {
 .border-bottom-filter{
 
 	border-bottom: 1px solid #e5e5e5;
-	padding-bottom: 15px;
 	margin-top: 0px;
 	margin-left:15px;
 	margin-right:15px;
-
+	margin-bottom:5px;
+	display:inline-block;
 	//width: 100%;
 	font-weight:bold;
 }
 
 .filter-indiv{
-	overflow-y:auto;
-	height:inherit;
+	margin-bottom: 80px;
+
 }
 
+@tabsHeight:50px;
+
+.filter-indiv.crop2{
+		margin-bottom: 0px;
+		padding-bottom: 80px;
+		@crop: @tabsHeight*2;
+  		height: ~"calc(100% - @{crop} )"!important;
+	}
 .no-scroll{
 	overflow:hidden !important;
 }

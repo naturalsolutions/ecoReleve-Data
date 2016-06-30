@@ -2,24 +2,30 @@
 	<div class="col-xs-4 full-height no-padding">
 		<div class="toolbar top">
 			<legend>Search</legend>
-		</div>
-		<div class="crop2 clearfix no-scroll">
-			<br>
-			<ul id="indivSearchTabs" class="nav nav-tabs">
+			<ul id="indivSearchTabs" class="nav nav-tabs pull-right">
                <li class="tab-ele activeTab"><a id="standardTab" class="tab-link" name="standard">Standard</a></li>
                <li class="tab-ele"><a id="advancedTab" class="tab-link" name="advanced">Advanced</a></li>
+               <br>
             </ul>
-          <br>
-          	<div class="form-group border-bottom-filter hide">
-                <span>At Date : </span>
-                <div class='col-md-6 input-group date' id='startDate2'>
-                    <span class="input-group-addon">
-                        <span class="reneco-calendar reneco" ></span>
-                    </span>
-                    <input id="dateVal" type='text' class="form-control" />
+		</div>
+		<div class="crop2 clearfix">
+			<br>
+			<div class="border-bottom-filter hide">
+	          	<div class="form-group col-md-6">
+	                <span>At Date : </span>
+	                <div class='input-group date' id='startDate2'>
+	                    <span class="input-group-addon">
+	                        <span class="reneco-calendar reneco" ></span>
+	                    </span>
+	                    <input id="dateVal" type='text' class="form-control" />
+	                </div>
+	            </div>
+                <div class="">
+                	<span>All history : </span>
+                	<input id="histVal" type='checkbox' class="form-control" />
                 </div>
-            </div>
-			<div id="filter" class=""></div>
+             </div>
+			<div id="filter" class="filter-indiv"></div>
 		</div>
 		<div class="toolbar bottom">
 			<button id="clear" class="btn pull-left">Clear</button>

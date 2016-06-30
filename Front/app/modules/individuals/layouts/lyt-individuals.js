@@ -173,16 +173,13 @@ define([
       if (type == 'standard') {
         this.moduleName = 'IndivFilter';
         //this.gridURL = config.coreUrl + 'individuals/';
-        $('#startDate2').parent().addClass('hide');
-        this.ui.filter.removeClass('crop3');
+        $('.border-bottom-filter').addClass('hide');
+        this.ui.filter.removeClass('crop2');
       } else {
         this.moduleName = 'AdvancedIndivFilter';
         //this.gridURL = config.coreUrl + 'individuals/advanced/';
-        $('#startDate2').parent().removeClass('hide');
-        this.ui.filter.addClass('crop3');
-
-
-        //this.urlParams = [{'history':true}];
+        $('.border-bottom-filter').removeClass('hide');
+        this.ui.filter.addClass('crop2');
       }
 
       this.com = new Com();

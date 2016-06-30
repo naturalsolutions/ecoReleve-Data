@@ -57,6 +57,22 @@
     height: ~"calc(100% - @{crop})";
   }
 }
+/* 
+.crop3{
+  position: relative;
+  @crop: (@toolbarHeight*2)+@tabsHeight;
+  height: ~"calc(100% - @{crop})";
+  //padding: 0px 15px;
+  overflow-y: auto;
+  padding-bottom : 50px;
+&.overflowXH{
+  overflow-x: hidden;
+}
+&.crop-paginator{
+  @crop : @toolbarHeight*2 + @paginatorHeight;
+  height: ~"calc(100% - @{crop})";
+}
+} */
 
 .grid-crop{
   @crop : @paginatorHeight;
