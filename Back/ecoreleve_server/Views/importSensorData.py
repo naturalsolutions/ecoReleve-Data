@@ -46,9 +46,17 @@ def uploadFile(request):
 @view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='GET')
 def checkChunk(request):
     pathPrefix = dbConfig['camTrap']['path']
-    #request.response.status = 200
-    if not os.path.isfile(pathPrefix+'\\'+request.params['path']+'\\'+str(request.params['resumableIdentifier'])):
+    fileName = str(request.params['resumableIdentifier'])+"_"+str(request.params['resumableChunkNumber'])
+
+    if not os.path.isfile(pathPrefix+'\\'+request.params['path']+'\\'+str(fileName)):
         return Response(status=204)
     else:
         #possible pb prog para ne pas uploader le meme fichier depuis 2 pc different
-        return Response(status=200)
+        #vefif la taille du fichier et on supprime le chunk si elle différe
+        sizeOnServer = int(os.path.getsize( pathPrefix+'\\'+request.params['path']+'\\'+str(fileName) ))
+        sizeExpected = int(request.params['resumableCurrentChunkSize'])
+        if sizeOnServer != sizeExpected:
+            os.remove(pathPrefix+'\\'+request.params['path']+'\\'+str(fileName))
+            return Response(status=204)
+        else:
+            return Response(status=200)

@@ -50,7 +50,7 @@ def unzip(zipFilePath , destFolder, fk_sensor):
                 AddPhotoOnSQL(fk_sensor,destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)))
             else:
                 print("le fichier : " +str(name)+" est deja present")
-        #fd.close()
+            #fd.close()
         else:
             print(str(name)+" not a good file")
     zfile.close()
@@ -208,26 +208,26 @@ def uploadFileCamTrapResumable(request):
     #print("paquet recu :" + str(request.POST['resumableChunkNumber']))
 
     uri = pathPrefix+'\\'+pathPost
-    extType = request.POST['resumableIdentifier'].split('.');
+    extType = request.POST['resumableFilename'].split('.');
     #print ("nom du fichier :" +str(request.POST['resumableIdentifier']) )
     #print ("type de fichier :" +str(extType[len(extType)-1]))
     #print("date str " + str())
     #test si le fichier existe deja
-    if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableIdentifier'])):
 
-        inputFile = request.POST['file'].file
-        if( int(request.POST['resumableChunkNumber']) == 1 and int(request.POST['resumableCurrentChunkSize']) == int(request.POST['resumableTotalSize']) ):
-            #print ("on a qu'un seul chunk")
-            #print( "file %s " % str(uri+'\\'+str(request.POST['resumableIdentifier'])))
-            with open(uri+'\\'+str(request.POST['resumableIdentifier']), 'wb') as output_file: # write in the file
+
+    inputFile = request.POST['file'].file
+    if( int(request.POST['resumableChunkNumber']) == 1 and int(request.POST['resumableCurrentChunkSize']) == int(request.POST['resumableTotalSize']) and str(extType[len(extType)-1]) != ".zip" ):
+        #print ("on a qu'un seul chunk")
+        #print( "file %s " % str(uri+'\\'+str(request.POST['resumableIdentifier'])))
+        if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableFilename'])):
+            with open(uri+'\\'+str(request.POST['resumableFilename']), 'wb') as output_file: # write in the file
                 shutil.copyfileobj(inputFile, output_file)
-            idRetour = AddPhotoOnSQL(fk_sensor , str(uri) , str(request.POST['resumableIdentifier']) , str(extType[len(extType)-1]) , dateFromExif (uri+'\\'+str(request.POST['resumableIdentifier'])) )
-        else:
+            idRetour = AddPhotoOnSQL(fk_sensor , str(uri) , str(request.POST['resumableFilename']) , str(extType[len(extType)-1]) , dateFromExif (uri+'\\'+str(request.POST['resumableFilename'])) )
+    else:
+        if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableIdentifier'])):
             position = int(request.POST['resumableChunkNumber']) #calculate the position of cursor
             with open(uri+'\\'+str(request.POST['resumableIdentifier'])+"_"+str(position), 'wb') as output_file: # write in the file
                 shutil.copyfileobj(inputFile, output_file)
-
-            reponseStatus = 200
 
     request.response.status_code = 200
     return reponseStatus
@@ -237,6 +237,9 @@ def concatChunk(request):
     reponseStatus = 200
     res = {}
     message = ""
+    timeConcat = ""
+    messageConcat = ""
+    messageUnzip = ""
     pathPrefix = dbConfig['camTrap']['path']
     #create folder
     if(int(request.POST['action']) == 0 ):
@@ -269,17 +272,20 @@ def concatChunk(request):
         else:
             for i in range( 1, int(request.POST['taille'])+1):#on va parcourir l'ensemble des chunks
                 os.remove(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i))
+            messageConcat =" OK "
 
 
         #destination.close()
         finTime = time.time()
-        print ("durée :" +str(finTime - debutTime))
+        timeConcat = str(finTime - debutTime)
+        print ("durée :" + timeConcat)
         #file concat ok now unzip
         if(message == "" ):
             if( request.POST['type'] == "application/x-zip-compressed" ):
                 debutTime = time.time()
                 print (" on commence la décompression ")
                 unzip(pathPrefix+'\\'+pathPost+'\\'+str(name) , pathPrefix+'\\'+pathPost+'\\' , fk_sensor)
+                messageUnzip = " OK "
                 print ("fin decompression ")
                 finTime = time.time()
                 print ("durée :" +str(finTime - debutTime))
@@ -290,5 +296,5 @@ def concatChunk(request):
                 AddPhotoOnSQL(fk_sensor,destfolder,name, str(extType[len(extType)-1]) , dateFromExif (destfolder+str(name)))
 
     request.response.status_code = 200
-    res = {'message' : message}
+    res = {'message' : message , 'messageConcat' : messageConcat , 'messageUnzip' : messageUnzip, 'timeConcat' : timeConcat }
     return res
