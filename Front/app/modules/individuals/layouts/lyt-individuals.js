@@ -35,6 +35,8 @@ define([
       'click button#createNew': 'newIndividual',
       'click #btn-export': 'exportGrid',
       'click #indivSearchTabs a.tab-link' : 'indivSearchTabs',
+      'click #histVal' : 'resetDate',
+      'dp.change #datetimepicker2' : 'resetHist'
     },
 
     ui: {
@@ -62,11 +64,13 @@ define([
     },
 
     onRender: function() {
-      $('#starDate2').datetimepicker();
+      //$('#starDate2').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
       this.$el.i18n();
     },
 
     onShow: function() {
+      console.log(this.$el.find('#datetimepicker2'))
+      this.$el.find('#datetimepicker2').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
       this.displayFilter();
       this.displayGrid();
       if (this.indivId) {
@@ -96,7 +100,7 @@ define([
       };
 
       if (this.moduleName != 'IndivFilter'){
-        this.grid.collection.queryParams.history = true;
+        this.grid.collection.queryParams.history = false;
       } else {
         //delete this.collection.queryParams['history'];
       }
@@ -134,6 +138,10 @@ define([
     filter: function() {
       if (this.moduleName != 'IndivFilter'){
         this.grid.collection.queryParams.startDate =  $('#dateVal').val();
+        this.grid.collection.queryParams.history =0;
+        if ($('#histVal:checked').val()){
+          this.grid.collection.queryParams.history =1;
+        }
       }
       this.filters.update();
     },
@@ -187,6 +195,16 @@ define([
       this.displayFilter();
     },
 
+    resetDate: function(e){
+      if ($('#histVal:checked').val()){
+        $('#dateVal').val(null);
+      }
+    },
+    resetHist: function(e){
+      if ($('#histVal:checked').val()){
+        $('#histVal').prop('checked', false);
+      }
+    },
 
     exportGrid: function() {
       var url = config.coreUrl + 'individuals/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
