@@ -99,7 +99,6 @@ define([
           if( jqXHR.status === 200 ){
             $('#pause-upload-resumablejs').removeClass('hide');
             $('#start-upload-resumablejs').addClass('hide');
-            $('#cancel-upload-resumablejs').removeClass('hide');
             r.upload();
           }
         })
@@ -168,29 +167,19 @@ define([
         }
       });
       r.on('fileAdded', function(file, event){
-
-        if (file.file.type =='image/jpeg' || file.file.type == 'application/x-zip-compressed') {
+        let extType = file.file.name.split(".");
+        console.log(extType[extType.length-1]);
+        if (extType[extType.length-1] =='jpeg' || extType[extType.length-1] == 'zip' || extType[extType.length-1] == 'ZIP' || extType[extType.length-1] == 'jpg' || extType[extType.length-1] == 'JPG' || extType[extType.length-1] == 'JPEG') {
           $('#start-upload-resumablejs').removeClass('hide');
           _this.nbFiles+=1;
           if (file.chunks.length > 1 ){
             _this.nbFilesToWait +=1;
-            let template ='<div id="'+file.uniqueIdentifier+'-concat" class="col-md-12" >'+
-            '<div  id="name-concat" class="col-md-6 text-center">'+
-            String(file.fileName)+
-            '</div>'+
-            '<div  id="status-concat" class="col-md-6 text-center">'+
-            "Not uploaded yet"+
-            '</div>'+
-            '</div>';
-
-            $('#list-files-concat').removeClass('hide');
-            $('#list-files-concat').append(template);
           }
           let template ='<div id="'+file.uniqueIdentifier+'" class="col-md-12" >'+
-          '<div  id="name" class="col-md-6 text-center">'+
+          '<div  id="name" class="col-md-4 text-center">'+
           String(file.fileName)+
           '</div>'+
-          '<div  id="status" class="col-md-6 text-center">'+
+          '<div  id="status" class="col-md-8 text-center">'+
           "Ready"+
           '</div>'+
           '</div>';
@@ -224,8 +213,8 @@ define([
         if( file.chunks.length > 1 )
         {
           console.log("upload fini fk_sensor :" +_this.data.sensorId);
-          $("#"+file.uniqueIdentifier+"-concat").css("color" ,"#f0ad4e");
-          $("#"+file.uniqueIdentifier+"-concat > "+"#status-concat").text("Processing wait please");
+          $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
+          $("#"+file.uniqueIdentifier+" > "+"#status").text("Processing wait please");
 
 
           //var deferred = $.Deferred();
@@ -250,8 +239,8 @@ define([
           })
           .done( function(response,status,jqXHR){
             if( jqXHR.status === 200 ){
-              $("#"+file.uniqueIdentifier+"-concat").css("color" ,"GREEN");
-              $("#"+file.uniqueIdentifier+"-concat > "+"#status-concat").text("OK");
+              $("#"+file.uniqueIdentifier+"").css("color" ,"GREEN");
+              $("#"+file.uniqueIdentifier+" > "+"#status").text("OK");
               //console.log("bim le fichier est enfin rassemble temps d\'attente : "+ response.timeConcat);
               if( _this.nbFilesConcat === _this.nbFilesToWait && _this.uploadFinished )
               {
@@ -265,17 +254,16 @@ define([
             console.log(textStatus);
             console.log(errorThrown);
             if( jqXHR.status == 510 ){
-             $("#"+file.uniqueIdentifier+"-concat").css("color" ,"#f0ad4e");
-             $("#"+file.uniqueIdentifier+"-concat > "+"#status-concat").text("WARNING! :"+String(jqXHR.responseJSON.message)+"\n"+String(jqXHR.responseJSON.messageConcat)+"\n"+String(jqXHR.responseJSON.messageUnzip));
+             $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
+             $("#"+file.uniqueIdentifier+" > "+"#status").text("WARNING! :"+String(jqXHR.responseJSON.message)+"\n"+String(jqXHR.responseJSON.messageConcat)+"\n"+String(jqXHR.responseJSON.messageUnzip));
            }
            else{
-            $("#"+file.uniqueIdentifier+"-concat").css("color" ,"RED");
-            $("#"+file.uniqueIdentifier+"-concat > "+"#status-concat").text("FAILED");
+            $("#"+file.uniqueIdentifier+"").css("color" ,"RED");
+            $("#"+file.uniqueIdentifier+" > "+"#status").text("FAILED");
           }
           if( _this.nbFilesConcat === _this.nbFilesToWait && _this.uploadFinished )
           {
             $('#start-upload-resumablejs').addClass('hide');
-            $('#cancel-upload-resumablejs').addClass('hide');
             $('#pause-upload-resumablejs').addClass('hide');
             _this.progressBar.finish();
             Swal(
@@ -375,10 +363,8 @@ r.on('cancel' , function() {
   );
   console.log("event Cancel");
   $("#list-files").empty();
-  $("#list-files-concat").empty();
+  $("#list-files").append('<div id="title" class="col-md-12 text-center">List files to upload</div>')
   $('#pause-upload-resumablejs').addClass('hide');
-  $('#start-upload-resumablejs').removeClass('hide');
-  $('#cancel-upload-resumablejs').addClass('hide');
 });
 
 },
@@ -387,7 +373,6 @@ displayFinished: function (){
   var _this = this;
   console.log("bim j'ai fini j'affiche");
   $('#start-upload-resumablejs').addClass('hide');
-  $('#cancel-upload-resumablejs').addClass('hide');
   $('#pause-upload-resumablejs').addClass('hide');
   _this.progressBar.finish();
   Swal({title: 'Well done',
