@@ -334,7 +334,6 @@ def checkExisting(indiv):
 def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
-    print(data)
     history = False
     startDate = None
     # startDate = datetime.strptime('01/02/2008','%d/%m/%Y')
@@ -350,16 +349,14 @@ def searchIndiv(request):
     searchInfo['offset'] = json.loads(data['offset'])
     searchInfo['per_page'] = json.loads(data['per_page'])
 
-    # print(searchInfo)
-    # getStartDate = list(filter(lambda x: x['Column'] == 'StartDate',searchInfo['criteria']))
-    # if len(getStartDate) >0 :
-    #     startDate = datetime.strptime(getStartDate[0]['Value'],'%d/%m/%Y %H:%M:%S')
-    #     print('search at date')
-    # if 'startDate' in searchInfo['criteria'] and searchInfo['criteria']['startDate'] != '':
-    #     startDate = datetime.strptime(searchInfo['criteria']['startDate'],'%d/%m/%Y %H:%M:%S')
+    if 'startDate' in data and data['startDate']!='':
+        startDate = datetime.strptime(data['startDate'],'%d/%m/%Y %H:%M:%S')
+        print(startDate)
 
-    if 'history' in data and startDate is None:
+    if 'history' in data and data['history'] == '1':
         history = True
+        print(history)
+
 
     if 'typeObj' in request.params:
         typeObj = request.params['typeObj']

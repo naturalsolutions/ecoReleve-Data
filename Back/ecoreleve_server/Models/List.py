@@ -133,7 +133,7 @@ class StationList(ListObjectWithDynProp):
 #--------------------------------------------------------------------------
 class IndividualList(ListObjectWithDynProp):
 
-    def __init__(self,frontModule, typeObj = None, startDate = None,history = None,historyView = None) :
+    def __init__(self,frontModule, typeObj = None, startDate = None,history = False,historyView = None) :
         super().__init__(Individual,frontModule, typeObj = typeObj,startDate = startDate,history=history)
 
     def GetJoinTable (self,searchInfo) :
@@ -173,6 +173,8 @@ class IndividualList(ListObjectWithDynProp):
 
         if curProp == 'FK_Sensor':
             query = query.where(eval_.eval_binary_expr(Sensor.UnicIdentifier,criteriaObj['Operator'],criteriaObj['Value']))
+            if self.history or self.startDate:
+                query = self.whereInEquipement(query,[criteriaObj])
 
         if curProp == 'Status_':
             StatusTable = Base.metadata.tables['IndividualStatus']
@@ -204,6 +206,7 @@ class IndividualList(ListObjectWithDynProp):
         return query
 
     def GetFullQuery(self,searchInfo=None) :
+        print('in Cout QUERY')
         ''' return the full query to execute '''
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
@@ -217,11 +220,11 @@ class IndividualList(ListObjectWithDynProp):
         for obj in searchInfo['criteria'] :
             fullQueryJoin = self.WhereInJoinTable(fullQueryJoin,obj)
 
-        print(fullQueryJoin)
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
         return fullQueryJoinOrdered
 
     def GetFullQueryHistory(self,searchInfo=None) :
+        print('in Indiv Search HISTOOOOO')
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
 
@@ -256,7 +259,6 @@ class IndividualList(ListObjectWithDynProp):
         if self.excHist :
             print('add exists histo ')
             fullQueryJoin = fullQueryJoin.where(exists(queryHistory))
-            print(fullQueryJoin)
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
 
         return fullQueryJoinOrdered
@@ -306,7 +308,7 @@ class IndividualList(ListObjectWithDynProp):
              self.excHist = True
 
         subSelect= select([table.c['FK_Individual']]
-            ).select_from(joinTable).where(Individual.ID== table.c['FK_Individual'])
+            ).select_from(joinTable).where(Individual.ID== table.c['FK_Individual']).where(table.c['StartDate'] <= startDate)
 
 # <<<<<<< HEAD
         if sensorObj['Operator'].lower() in ['is null','is not null'] :
@@ -316,7 +318,8 @@ class IndividualList(ListObjectWithDynProp):
             #         ,or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None)
             #             ))
 
-            if not self.history : 
+            if not self.history :
+                print('search equipment with DATE') 
                 subSelect = subSelect.where(or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None))
         else:
             # subSelect = select([table.c['FK_Individual']]
@@ -328,11 +331,13 @@ class IndividualList(ListObjectWithDynProp):
             subSelect = subSelect.where(eval_.eval_binary_expr(Sensor.UnicIdentifier,sensorObj['Operator'],sensor))
 
             if not self.history : 
+                print('2 22222 search equipment with DATE')
                 subSelect = subSelect.where(or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None))
 
-        if sensorObj['Operator'].lower() == 'is null':
+        if  'is not' in sensorObj['Operator'].lower():
+            print('applyNot EXISTS  SS SDSDSDSD')
             fullQueryJoin = fullQueryJoin.where(~exists(subSelect))
-# =======
+# =======   
 #         if sensorObj['Operator'].lower() in ['is null','is not null']:
 #             subSelect = select([table.c['FK_Individual']]
 #                 ).select_from(joinTable).where(
@@ -345,8 +350,10 @@ class IndividualList(ListObjectWithDynProp):
 #                 fullQueryJoin = fullQueryJoin.where(exists(subSelect))
 # >>>>>>> 82bfdc640c04d9a237d184fac499262d3f070470
         else :
+            print('*************apply EXISTS  SS SDSDSDSD')
             fullQueryJoin = fullQueryJoin.where(exists(subSelect))
 
+        print(subSelect)
 
         return fullQueryJoin
 

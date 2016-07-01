@@ -242,9 +242,9 @@ class ListObjectWithDynProp():
                 self.excHist = True
 
         if self.excHist :
-            print('add exists histo ')
+            print('exec Exists in Full HISTO\n')
             fullQueryJoin = fullQueryJoin.where(exists(queryHistory))
-            print(fullQueryJoin)
+
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
 
         return fullQueryJoinOrdered
@@ -336,6 +336,7 @@ class ListObjectWithDynProp():
     def countQuery(self,criteria = None):
 
         if self.history:
+            print('COUNT in Full HISTO **********************\n')
             return self.countHistoryQuery(criteria)
 
         fullQuery = select([func.count(self.ObjWithDynProp.ID)])
@@ -496,7 +497,7 @@ class ListObjectWithDynProp():
                 # Gerer l'exception
         else :
             if self.history and self.startDate is None :
-                print('toto')
+                print('Filter DynPRop in WHOLE history \n')
                 queryHistory = queryHistory.where(and_(eval_.eval_binary_expr(self.historyValuetable.c['Value'+curDynProp['TypeProp']]
                     ,criteria['Operator'],criteria['Value'] ),self.historyValuetable.c['Name']==curProp))
                 self.excHist = True
