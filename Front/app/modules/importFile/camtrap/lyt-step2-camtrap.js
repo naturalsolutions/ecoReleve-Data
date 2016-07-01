@@ -32,12 +32,14 @@ define([
       this.data.sensorId = options.model.attributes.sensorId;
       //console.log(this.data);
       this.path = "";
+      this.nbFiles = 0
       this.nbFilesToWait = 0;
       this.nbFilesConcat = 0;
-      let startDate = this.data['StartDate'].split(" ");
-      let endDate = "0000-00-00"
+      this.uploadFinished = false;
+      this.startDate = this.data['StartDate'].split(" ");
+      this.endDate = "0000-00-00"
       if( this.data['EndDate'] != undefined ) {
-        endDate = this.data['EndDate'].split(" ");
+        this.endDate = this.data['EndDate'].split(" ");
       }
       this.path = String(this.data['UnicIdentifier'])+"_"+String(startDate[0])+"_"+String(endDate[0])+"_"+String(this.data['Name']);
       this.textSwalFilesNotAllowed = "";
@@ -74,7 +76,7 @@ define([
         testChunks: true
       });
 
-      var nbFiles = 0;
+      _this.nbFiles = 0;
       //get dom
       r.assignBrowse(document.getElementById('add-file-resumablejs'));
       r.assignDrop(document.getElementById('drag-drop-zone-resumable'));
@@ -124,7 +126,7 @@ define([
       });
 
 
-      var progressBar = new ProgressBar($('#upload-progress'));
+      _this.progressBar = new ProgressBar($('#upload-progress'));
 
       function ProgressBar(ele) {
         this.thisEle = $(ele);
@@ -167,7 +169,7 @@ define([
 
         if (file.file.type =='image/jpeg' || file.file.type == 'application/x-zip-compressed') {
           $('#start-upload-resumablejs').removeClass('hide');
-          nbFiles+=1;
+          _this.nbFiles+=1;
           if (file.chunks.length > 1 ){
             _this.nbFilesToWait +=1;
             let template ='<div id="'+file.uniqueIdentifier+'-concat" class="col-md-12" >'+
@@ -191,7 +193,7 @@ define([
           '</div>'+
           '</div>';
           $('#list-files').append(template);
-          progressBar.fileAdded();
+          _this.progressBar.fileAdded();
         }
         else{
           let tmp = String(file.file.type);
@@ -236,7 +238,9 @@ define([
               file : file.fileName,
               type : file.file.type,
               taille : file.chunks.length,
-              action : 1
+              action : 1,
+              startDate: _this.startDate,
+              endDate: _this.endDate
             }
           })
           .always( function(){
@@ -247,84 +251,69 @@ define([
               $("#"+file.uniqueIdentifier+"-concat").css("color" ,"GREEN");
               $("#"+file.uniqueIdentifier+"-concat > "+"#status-concat").text("OK");
               //console.log("bim le fichier est enfin rassemble temps d\'attente : "+ response.timeConcat);
-              if( _this.nbFilesConcat === _this.nbFilesToWait )
+              if( _this.nbFilesConcat === _this.nbFilesToWait && _this.uploadFinished )
               {
-                $('#start-upload-resumablejs').removeClass('hide');
-                $('#cancel-upload-resumablejs').addClass('hide');
-                $('#pause-upload-resumablejs').addClass('hide');
-
-                progressBar.finish();
-                Swal({title: 'Well done',
-                text: 'File(s) have been correctly Uploaded\n'
-                + '\t inserted : ' + nbFiles
-                ,
-                type:  'success',
-                showCancelButton: true,
-                confirmButtonText: 'Validate CamTrap',
-                cancelButtonText: 'New import',
-                closeOnConfirm: true,
-                closeOnCancel: true},
-                function(isConfirm) {   if (isConfirm) {
-                  Backbone.history.navigate('validate/Camtrap',{trigger: true});
-                }
+                _this.displayFinished();
               }
-            );
-          }
+            }
+          })
+          .fail( function( jqXHR, textStatus, errorThrown ){
+            $("#"+file.uniqueIdentifier+"-concat").css("color" ,"RED");
+            $("#"+file.uniqueIdentifier+"-concat > "+"#status").text("FAILED");
+            console.log("error");
+            console.log(errorThrown);
+          });
+
         }
-      })
-      .fail( function( jqXHR, textStatus, errorThrown ){
-        $("#"+file.uniqueIdentifier+"-concat").css("color" ,"RED");
-        $("#"+file.uniqueIdentifier+"-concat > "+"#status").text("FAILED");
-        console.log("error");
-        console.log(errorThrown);
+        //console.log(file);
       });
 
-    }
-    //console.log(file);
-  });
+      r.on('fileError', function(file, message){
+        $("#"+file.uniqueIdentifier+"").css("color" ,"RED");
+        $("#"+file.uniqueIdentifier+" > "+"#status").text("FAILED");
+        Swal(
+          {
+            title: 'Warning',
+            text: ' probleme to upload the file',
+            type: 'warning',
+            showCancelButton: false,
+            confirmButtonColor: 'rgb(218, 146, 15)',
 
-  r.on('fileError', function(file, message){
-    $("#"+file.uniqueIdentifier+"").css("color" ,"RED");
-    $("#"+file.uniqueIdentifier+" > "+"#status").text("FAILED");
-    Swal(
-      {
-        title: 'Warning',
-        text: ' probleme to upload the file',
-        type: 'warning',
-        showCancelButton: false,
-        confirmButtonColor: 'rgb(218, 146, 15)',
+            confirmButtonText: 'OK',
 
-        confirmButtonText: 'OK',
+            closeOnConfirm: true,
 
+          }
+        );
+        //console.log(file);
+      });
+
+      r.on('complete', function(file, message) {
+        _this.uploadFinished = true;
+        if( _this.nbFilesConcat === _this.nbFilesToWait && _this.uploadFinished )
+        {
+          _this.displayFinished();
+        }
+        /*    $('#start-upload-resumablejs').removeClass('hide');
+        $('#cancel-upload-resumablejs').addClass('hide');
+        $('#pause-upload-resumablejs').addClass('hide');
+
+        progressBar.finish();
+        Swal({title: 'Well done',
+        text: 'File(s) have been correctly Uploaded\n'
+        + '\t inserted : ' + nbFiles
+        ,
+        type:  'success',
+        showCancelButton: true,
+        confirmButtonText: 'Validate CamTrap',
+        cancelButtonText: 'New import',
         closeOnConfirm: true,
-
+        closeOnCancel: true},
+        function(isConfirm) {   if (isConfirm) {
+        Backbone.history.navigate('validate/Camtrap',{trigger: true});
       }
-    );
-    //console.log(file);
-  });
-
-  r.on('complete', function(file, message) {
-    console.log("file upload complete");
-    /*    $('#start-upload-resumablejs').removeClass('hide');
-    $('#cancel-upload-resumablejs').addClass('hide');
-    $('#pause-upload-resumablejs').addClass('hide');
-
-    progressBar.finish();
-    Swal({title: 'Well done',
-    text: 'File(s) have been correctly Uploaded\n'
-    + '\t inserted : ' + nbFiles
-    ,
-    type:  'success',
-    showCancelButton: true,
-    confirmButtonText: 'Validate CamTrap',
-    cancelButtonText: 'New import',
-    closeOnConfirm: true,
-    closeOnCancel: true},
-    function(isConfirm) {   if (isConfirm) {
-    Backbone.history.navigate('validate/Camtrap',{trigger: true});
-  }
-}
-);*/
+    }
+  );*/
 });
 
 r.on('fileProgress' , function(file){
@@ -340,7 +329,7 @@ r.on('progress' , function(file,message) {
   /*
   $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
   $("#"+file.uniqueIdentifier+" > "+"#status").text("Uploading");*/
-  progressBar.uploading(r.progress()*100);
+  _this.progressBar.uploading(r.progress()*100);
   $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
 });
 
@@ -371,6 +360,31 @@ r.on('cancel' , function() {
   $('#cancel-upload-resumablejs').addClass('hide');
 });
 
+},
+
+displayFinished: function (){
+  var _this = this;
+  console.log("bim j'ai fini j'affiche");
+  $('#start-upload-resumablejs').addClass('hide');
+  $('#cancel-upload-resumablejs').addClass('hide');
+  $('#pause-upload-resumablejs').addClass('hide');
+  _this.progressBar.finish();
+  Swal({title: 'Well done',
+  text: 'File(s) have been correctly Uploaded\n'
+  + '\t inserted : ' + _this.nbFiles
+  ,
+  type:  'success',
+  showCancelButton: true,
+  confirmButtonText: 'Validate CamTrap',
+  cancelButtonText: 'New import',
+  closeOnConfirm: true,
+  closeOnCancel: true},
+  function(isConfirm) {
+    if (isConfirm) {
+      Backbone.history.navigate('validate/Camtrap',{trigger: true});
+    }
+  }
+);
 },
 
 onDestroy: function() {
