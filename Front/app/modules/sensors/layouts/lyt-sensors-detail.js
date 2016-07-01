@@ -22,7 +22,7 @@ define([
 
   return Marionette.LayoutView.extend({
     template: 'app/modules/sensors/templates/tpl-sensors-detail.html',
-    className: 'full-height animated white',
+    className: 'full-height animated white sensor',
     events: {
       'click #hideSensorDetails': 'hideDetail',
       'click #showSensorDetails': 'showDetail',
