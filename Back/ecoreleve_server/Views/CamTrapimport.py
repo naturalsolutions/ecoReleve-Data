@@ -35,8 +35,9 @@ def dateFromExif(imagePath):
         theDate = None
     return theDate
 
-def unzip(zipFilePath , destFolder, fk_sensor):
+def unzip(zipFilePath , destFolder, fk_sensor, startDate , endDate):
     zfile = zipfile.ZipFile(zipFilePath)
+    messageErrorFiles = ""
     #nameRandom = ''
     for name in zfile.namelist():
         #print("unzip : " +str(name))
@@ -47,13 +48,30 @@ def unzip(zipFilePath , destFolder, fk_sensor):
             if not os.path.isfile(destFolder+str(name)):
                 with open(os.path.join(destFolder, str(name)), 'wb') as fd:
                     fd.write(zfile.read(name))
-                AddPhotoOnSQL(fk_sensor,destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)))
+                #ici on peut test
+                newdate1 = time.strptime(startDate, "%Y-%m-%d %H:%M:%S")
+                if( endDate == "0000-00-00 00:00:00"):
+                    newdate2 =  newdate2 =  time.strptime(str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')) , "%Y-%m-%d %H:%M:%S")
+                else:
+                    newdate2 = time.strptime(endDate, "%Y-%m-%d %H:%M:%S")
+                datePhoto = dateFromExif (destFolder+str(name))
+                if(datePhoto == None):
+                    timePhoto =  time.strptime("1985-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
+                else:
+                    timePhoto = time.strptime(str(datePhoto), "%Y-%m-%d %H:%M:%S")
+                if( timePhoto >= newdate1 and timePhoto <= newdate2):
+                    AddPhotoOnSQL(fk_sensor , destFolder , name , str(extType[len(extType)-1]) , datePhoto )
+                else:
+                    os.remove(destFolder+str(name))
+                    messageErrorFiles += str(name)+"Date not valid ("+str(datePhoto)+")\n"
+                #AddPhotoOnSQL(fk_sensor,destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)))
             else:
-                print("le fichier : " +str(name)+" est deja present")
+                messageErrorFiles+= "le fichier : " +str(name)+" est deja present \n"
             #fd.close()
         else:
-            print(str(name)+" not a good file")
+            messageErrorFiles+= str(name)+" not a good file\n"
     zfile.close()
+    return messageErrorFiles
     #if no error remove zip file
 
 
@@ -192,12 +210,14 @@ def uploadFileCamTrapResumable(request):
     print ("Relative path :" + str(request.POST['resumableRelativePath']))
     print(" options :" + str(request.POST['path']))
     print ("File :" + str(request.POST['file']))"""
+    flagDate = False
     reponseStatus = 200
     #print(str(request.POST['resumableType']))
     pathPrefix = dbConfig['camTrap']['path']
     flagCrea = False
     pathPost = str(request.POST['path'])
     fk_sensor = int(request.POST['id'])
+    messageDate =""
 
 
 
@@ -217,20 +237,38 @@ def uploadFileCamTrapResumable(request):
 
     inputFile = request.POST['file'].file
     if( int(request.POST['resumableChunkNumber']) == 1 and int(request.POST['resumableCurrentChunkSize']) == int(request.POST['resumableTotalSize']) and str(extType[len(extType)-1]) != ".zip" ):
-        #print ("on a qu'un seul chunk")
-        #print( "file %s " % str(uri+'\\'+str(request.POST['resumableIdentifier'])))
+        newdate1 = time.strptime(str(request.POST['startDate']), "%Y-%m-%d %H:%M:%S")
+        if( str(request.POST['endDate']) == "0000-00-00 00:00:00"):
+            newdate2 =  time.strptime(str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')) , "%Y-%m-%d %H:%M:%S")
+        else:
+            newdate2 = time.strptime(str(request.POST['endDate']), "%Y-%m-%d %H:%M:%S")
         if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableFilename'])):
             with open(uri+'\\'+str(request.POST['resumableFilename']), 'wb') as output_file: # write in the file
                 shutil.copyfileobj(inputFile, output_file)
-            idRetour = AddPhotoOnSQL(fk_sensor , str(uri) , str(request.POST['resumableFilename']) , str(extType[len(extType)-1]) , dateFromExif (uri+'\\'+str(request.POST['resumableFilename'])) )
+            datePhoto = dateFromExif (uri+'\\'+str(request.POST['resumableFilename']))
+            if(datePhoto == None):
+                timePhoto =  time.strptime("1985-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
+            else:
+                timePhoto = time.strptime(str(datePhoto), "%Y-%m-%d %H:%M:%S")
+            if( timePhoto >= newdate1 and timePhoto <= newdate2):
+                idRetour = AddPhotoOnSQL(fk_sensor , str(uri) , str(request.POST['resumableFilename']) , str(extType[len(extType)-1]) , datePhoto )
+                messageDate = "ok"
+            else:
+                os.remove(uri+'\\'+str(request.POST['resumableFilename']))
+                flagDate = True
+                messageDate = "Date not valid ("+str(datePhoto)+")"
     else:
         if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableIdentifier'])):
             position = int(request.POST['resumableChunkNumber']) #calculate the position of cursor
             with open(uri+'\\'+str(request.POST['resumableIdentifier'])+"_"+str(position), 'wb') as output_file: # write in the file
                 shutil.copyfileobj(inputFile, output_file)
 
-    request.response.status_code = 200
-    return reponseStatus
+    if(flagDate):
+        request.response.status_code = 415
+        return messageDate
+    else:
+        request.response.status_code = 200
+        return "ok"
 
 def concatChunk(request):
     flagSuppression = False
@@ -241,6 +279,7 @@ def concatChunk(request):
     messageConcat = ""
     messageUnzip = ""
     pathPrefix = dbConfig['camTrap']['path']
+    request.response.status_code = 200
     #create folder
     if(int(request.POST['action']) == 0 ):
         pathPost = str(request.POST['path'])
@@ -248,6 +287,7 @@ def concatChunk(request):
             os.makedirs(pathPrefix+'\\'+pathPost)
             request.response.status_code = 200
     else :
+        print(" il faut que la date de l'exif soit entre le "+str(request.POST['startDate'])+" et le "+str(request.POST['endDate']))
         pathPost = str(request.POST['path'])
         fk_sensor = int(request.POST['id'])
         name = str(request.POST['file'])
@@ -266,13 +306,14 @@ def concatChunk(request):
                         break #break the for
 
         else:
-            message = "File : '"+str(name)+"' is already on the server"
+            request.response.status_code = 510
+            message = "File : '"+str(name)+"' is already on the server\n"
         if (flagSuppression):
             os.remove(pathPrefix+'\\'+pathPost+'\\'+str(name)) #supprime le fichier destination et on force la sortie
         else:
             for i in range( 1, int(request.POST['taille'])+1):#on va parcourir l'ensemble des chunks
                 os.remove(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i))
-            messageConcat =" OK "
+
 
 
         #destination.close()
@@ -284,17 +325,34 @@ def concatChunk(request):
             if( request.POST['type'] == "application/x-zip-compressed" ):
                 debutTime = time.time()
                 print (" on commence la décompression ")
-                unzip(pathPrefix+'\\'+pathPost+'\\'+str(name) , pathPrefix+'\\'+pathPost+'\\' , fk_sensor)
-                messageUnzip = " OK "
+                messageUnzip = unzip(pathPrefix+'\\'+pathPost+'\\'+str(name) , pathPrefix+'\\'+pathPost+'\\' , fk_sensor, str(request.POST['startDate']),str(request.POST['endDate']))
+                if( messageUnzip != "" ):
+                    request.response.status_code = 510
                 print ("fin decompression ")
                 finTime = time.time()
                 print ("durée :" +str(finTime - debutTime))
             else:
                 extType = request.POST['file'].split('.');
-
                 destfolder = pathPrefix+'\\'+pathPost+'\\'
-                AddPhotoOnSQL(fk_sensor,destfolder,name, str(extType[len(extType)-1]) , dateFromExif (destfolder+str(name)))
+                newdate1 = time.strptime(str(request.POST['startDate']), "%Y-%m-%d %H:%M:%S")
+                if( str(request.POST['endDate']) == "0000-00-00 00:00:00"):
+                    newdate2 =  time.strptime(str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')) , "%Y-%m-%d %H:%M:%S")
+                else:
+                    newdate2 = time.strptime(str(request.POST['endDate']), "%Y-%m-%d %H:%M:%S")
+                datePhoto = dateFromExif (destfolder+str(name))
+                if(datePhoto == None):
+                    timePhoto =  time.strptime("1985-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
+                else:
+                    timePhoto = time.strptime(str(datePhoto), "%Y-%m-%d %H:%M:%S")
+                if( timePhoto >= newdate1 and timePhoto <= newdate2):
+                    idRetour = AddPhotoOnSQL(fk_sensor , destfolder , name , str(extType[len(extType)-1]) , datePhoto )
+                else:
+                    os.remove(destfolder+str(name))
+                    flagDate = True
+                    request.response.status_code = 510
+                    messageConcat = "Date not valid ("+str(datePhoto)+") \n"
 
-    request.response.status_code = 200
+                #AddPhotoOnSQL(fk_sensor,destfolder,name, str(extType[len(extType)-1]) , dateFromExif (destfolder+str(name)))
+
     res = {'message' : message , 'messageConcat' : messageConcat , 'messageUnzip' : messageUnzip, 'timeConcat' : timeConcat }
     return res

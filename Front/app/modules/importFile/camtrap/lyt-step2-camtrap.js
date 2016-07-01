@@ -37,11 +37,11 @@ define([
       this.nbFilesConcat = 0;
       this.uploadFinished = false;
       this.startDate = this.data['StartDate'].split(" ");
-      this.endDate = "0000-00-00"
+      this.endDate = ["0000-00-00","00:00:00"]
       if( this.data['EndDate'] != undefined ) {
         this.endDate = this.data['EndDate'].split(" ");
       }
-      this.path = String(this.data['UnicIdentifier'])+"_"+String(startDate[0])+"_"+String(endDate[0])+"_"+String(this.data['Name']);
+      this.path = String(this.data['UnicIdentifier'])+"_"+String(this.startDate[0])+"_"+String(this.endDate[0])+"_"+String(this.data['Name']);
       this.textSwalFilesNotAllowed = "";
       /*
       http://192.168.0.78/ecoReleve-Core/sensors/resumable/datas?
@@ -71,7 +71,9 @@ define([
         query:
         {
           "path": this.path,
-          "id" : this.data.sensorId
+          "id" : this.data.sensorId,
+          startDate: _this.startDate[0]+" "+_this.startDate[1],
+          endDate: _this.endDate[0]+" "+_this.endDate[1]
         },
         testChunks: true
       });
@@ -239,8 +241,8 @@ define([
               type : file.file.type,
               taille : file.chunks.length,
               action : 1,
-              startDate: _this.startDate,
-              endDate: _this.endDate
+              startDate: _this.startDate[0]+" "+_this.startDate[1],
+              endDate: _this.endDate[0]+" "+_this.endDate[1]
             }
           })
           .always( function(){
@@ -256,12 +258,43 @@ define([
                 _this.displayFinished();
               }
             }
+
           })
           .fail( function( jqXHR, textStatus, errorThrown ){
-            $("#"+file.uniqueIdentifier+"-concat").css("color" ,"RED");
-            $("#"+file.uniqueIdentifier+"-concat > "+"#status").text("FAILED");
-            console.log("error");
+            console.log(jqXHR);
+            console.log(textStatus);
             console.log(errorThrown);
+            if( jqXHR.status == 510 ){
+             $("#"+file.uniqueIdentifier+"-concat").css("color" ,"#f0ad4e");
+             $("#"+file.uniqueIdentifier+"-concat > "+"#status-concat").text("WARNING! :"+String(jqXHR.responseJSON.message)+"\n"+String(jqXHR.responseJSON.messageConcat)+"\n"+String(jqXHR.responseJSON.messageUnzip));
+           }
+           else{
+            $("#"+file.uniqueIdentifier+"-concat").css("color" ,"RED");
+            $("#"+file.uniqueIdentifier+"-concat > "+"#status-concat").text("FAILED");
+          }
+          if( _this.nbFilesConcat === _this.nbFilesToWait && _this.uploadFinished )
+          {
+            $('#start-upload-resumablejs').addClass('hide');
+            $('#cancel-upload-resumablejs').addClass('hide');
+            $('#pause-upload-resumablejs').addClass('hide');
+            _this.progressBar.finish();
+            Swal(
+              {
+                title: 'Warning upload finished',
+                text: ' Pb on zip look errors ',
+                type: 'warning',
+                showCancelButton: false,
+                confirmButtonColor: 'rgb(218, 146, 15)',
+
+                confirmButtonText: 'OK',
+
+                closeOnConfirm: true,
+
+              }
+            );
+          }
+            //console.log("error");
+            //console.log(errorThrown);
           });
 
         }
@@ -269,23 +302,10 @@ define([
       });
 
       r.on('fileError', function(file, message){
-        $("#"+file.uniqueIdentifier+"").css("color" ,"RED");
-        $("#"+file.uniqueIdentifier+" > "+"#status").text("FAILED");
-        Swal(
-          {
-            title: 'Warning',
-            text: ' probleme to upload the file',
-            type: 'warning',
-            showCancelButton: false,
-            confirmButtonColor: 'rgb(218, 146, 15)',
-
-            confirmButtonText: 'OK',
-
-            closeOnConfirm: true,
-
-          }
-        );
+        $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
+        $("#"+file.uniqueIdentifier+" > "+"#status").text("REFUSED! reasons:"+message);
         //console.log(file);
+        //console.log(message);
       });
 
       r.on('complete', function(file, message) {
@@ -355,6 +375,7 @@ r.on('cancel' , function() {
   );
   console.log("event Cancel");
   $("#list-files").empty();
+  $("#list-files-concat").empty();
   $('#pause-upload-resumablejs').addClass('hide');
   $('#start-upload-resumablejs').removeClass('hide');
   $('#cancel-upload-resumablejs').addClass('hide');
