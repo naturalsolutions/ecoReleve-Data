@@ -152,7 +152,7 @@ class IndividualList(ListObjectWithDynProp):
 
         joinTable = outerjoin(joinTable,EquipmentTable
             ,and_(Individual.ID == EquipmentTable.c['FK_Individual']
-                ,or_(EquipmentTable.c['EndDate'] >= startDate,EquipmentTable.c['EndDate'] == None )))
+                ,and_(or_(EquipmentTable.c['EndDate'] >= startDate,EquipmentTable.c['EndDate'] == None ),EquipmentTable.c['StartDate'] <= startDate)))
                 #EquipmentTable.c['EndDate'] >= func.isnull(EquipmentTable.c['EndDate'],datetime.now()))))
         joinTable = outerjoin(joinTable,Sensor,Sensor.ID == EquipmentTable.c['FK_Sensor'])
         joinTable = outerjoin(joinTable,SensorType,Sensor.FK_SensorType == SensorType.ID)
@@ -173,8 +173,8 @@ class IndividualList(ListObjectWithDynProp):
 
         if curProp == 'FK_Sensor':
             query = query.where(eval_.eval_binary_expr(Sensor.UnicIdentifier,criteriaObj['Operator'],criteriaObj['Value']))
-            if self.history or self.startDate:
-                query = self.whereInEquipement(query,[criteriaObj])
+            # if self.history or self.startDate:
+            #     query = self.whereInEquipement(query,[criteriaObj])
 
         if curProp == 'Status_':
             StatusTable = Base.metadata.tables['IndividualStatus']
