@@ -104,7 +104,9 @@ define([
       } else {
         //delete this.collection.queryParams['history'];
       }
+      this.ui.grid.html('');
       this.ui.grid.html(this.grid.displayGrid());
+      this.ui.paginator.html('');
       this.ui.paginator.append(this.grid.displayPaginator());
     },
 
