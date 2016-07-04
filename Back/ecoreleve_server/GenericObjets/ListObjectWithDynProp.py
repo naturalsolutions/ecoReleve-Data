@@ -38,11 +38,16 @@ class ListObjectWithDynProp():
         self.vAliasList = {}
         self.optionView = View
 
-    def GetDynPropValueView (self): 
-        ''' WARNING !!! : in order to use this class you have to build View over last DATE of dynamic properties '''
+    def GetDynPropValueView (self,countHisto=False): 
+        ''' WARNING !!! : in order to use this class you have to build View over last DATE of dynamic properties 
+        
+        According context (stardDate or history parameters), return a view which call by GetJoinTable method
+
+        '''
         table = Base.metadata.tables[self.ObjWithDynProp.__tablename__+'DynPropValuesNow']
         if self.history and not self.startDate:
             if self.historyValuetable is None  :
+                ''' SET another view to perform filter crieterias over a where clause in exists clause'''
                 dynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
                 valueTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropValuesTable()]
                 joinTable = join(valueTable,dynPropTable
@@ -66,11 +71,13 @@ class ListObjectWithDynProp():
             table = select([valueTable,dynPropTable.c['Name'].label('Name'),dynPropTable.c['TypeProp'].label('TypeProp')]
                 ).select_from(joinTable
                 ).where(and_(not_(exists(queryExists)),valueTable.c['StartDate']  <= self.startDate )).cte()
-        return table
+        if countHisto : 
+            return self.historyValuetable
+        else :
+            return table
 
     def GetAllPropNameInConf(self) :
         ''' Get configured properties to display '''
-
         if self.typeObj : 
             confGridType = self.ObjContext.query(ModuleGrids
             ).filter(and_(ModuleGrids.Module_ID == self.frontModule.ID,
@@ -92,7 +99,6 @@ class ListObjectWithDynProp():
 
         ##### get all foreign keys #####
         self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
-
         self.searchInFK = {}
         for objConf in self.GetAllPropNameInConf() :
             curDynProp = self.GetDynProp(objConf.Name)
@@ -116,9 +122,6 @@ class ListObjectWithDynProp():
                             , v.c[self.ObjWithDynProp().GetDynPropFKName()] == curDynProp['ID']) 
                         )
                     selectable.append(v.c['Value'+curDynProp['TypeProp']].label(curDynProp['Name']))
-                    # if self.history :
-                    #     selectable.append(v.c['StartDate'])
-                    #     self.firstStartDate = 'v'+curDynProp['Name']
                 else:
                     tmpV = self.vAliasList[self.firstStartDate] 
                     joinTable = outerjoin(
@@ -143,16 +146,10 @@ class ListObjectWithDynProp():
         ''' Retrieve all dynamic properties of object ''' 
         DynPropTable = Base.metadata.tables[self.ObjWithDynProp().GetDynPropTable()]
         query = select([DynPropTable]) #.where(DynPropTable.c['Name'] == dynPropName)
-
-        # if self.historyValuetable is not None:
-        #     query = select([self.historyValuetable.c[self.ObjWithDynProp().GetDynPropFKName()],self.historyValuetable.c['Name'],self.historyValuetable.c['TypeProp']]).distinct()
-
         result  = self.sessionmaker().execute(query).fetchall()
-
         if result == []:
             df = None
         else :
-
             df = pd.DataFrame(result, columns = DynPropTable.columns.keys())
         return df
 
@@ -177,7 +174,7 @@ class ListObjectWithDynProp():
         else : 
             return None
 
-    def WhereInJoinTable (self,query,criteriaObj) :
+    def WhereInJoinTable (self,query,criteriaObj,queryHistory = None) :
         ''' Apply where clause over filter criteria '''
 
         curProp = criteriaObj['Column']
@@ -204,59 +201,70 @@ class ListObjectWithDynProp():
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
 
-        joinTable = self.GetJoinTable(searchInfo)
-        fullQueryJoin = select(self.selectable).select_from(joinTable)
-
-        for obj in searchInfo['criteria'] :
-            fullQueryJoin = self.WhereInJoinTable(fullQueryJoin,obj)
-
-        fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
-        return fullQueryJoinOrdered
-
-    def GetFullQueryHistory(self,searchInfo=None) :
-        if searchInfo is None or 'criteria' not in searchInfo:
-            searchInfo['criteria'] = []
+        if self.history and self.historyValuetable:
+            queryHistory = select(self.historyValuetable.c).where(self.historyValuetable.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] == self.ObjWithDynProp.ID)
+            self.excHist = False
+        else :
+            queryHistory = None
 
         joinTable = self.GetJoinTable(searchInfo)
         fullQueryJoin = select(self.selectable).select_from(joinTable)
 
-        queryHistory = select(self.historyValuetable.c).where(self.historyValuetable.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] == self.ObjWithDynProp.ID)
-        self.excHist = False
-
         for obj in searchInfo['criteria'] :
-            curProp = obj['Column']
-            curDynProp = self.GetDynProp(curProp)
-
-            if curProp in self.fk_list and curProp in self.searchInFK and not self.history:
-                fullQueryJoin = fullQueryJoin.where(
-                    eval_.eval_binary_expr(self.searchInFK[curProp]['table'].c[self.searchInFK[curProp]['nameProp']]
-                        ,obj['Operator'],obj['Value'])
-                    )
-
-            elif hasattr(self.ObjWithDynProp,curProp):
-                fullQueryJoin = self.filterOnStaticProp(fullQueryJoin,obj)
-
-            elif curDynProp is not None :
-                queryHistory = queryHistory.where(and_(eval_.eval_binary_expr(self.historyValuetable.c['Value'+curDynProp['TypeProp']]
-                    ,obj['Operator'],obj['Value'] ),self.historyValuetable.c['Name']==curProp))
-                self.excHist = True
+            fullQueryJoin = self.WhereInJoinTable(fullQueryJoin,obj,queryHistory)
 
         if self.excHist :
-            print('exec Exists in Full HISTO\n')
+            print('Apply Exists in Full HISTO\n')
             fullQueryJoin = fullQueryJoin.where(exists(queryHistory))
 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
-
         return fullQueryJoinOrdered
 
+    # def GetFullQueryHistory(self,searchInfo=None) :
+    #     if searchInfo is None or 'criteria' not in searchInfo:
+    #         searchInfo['criteria'] = []
+
+    #     joinTable = self.GetJoinTable(searchInfo)
+    #     fullQueryJoin = select(self.selectable).select_from(joinTable)
+
+    #     queryHistory = select(self.historyValuetable.c).where(self.historyValuetable.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] == self.ObjWithDynProp.ID)
+    #     self.excHist = False
+
+    #     for obj in searchInfo['criteria'] :
+    #         curProp = obj['Column']
+    #         curDynProp = self.GetDynProp(curProp)
+
+    #         if curProp in self.fk_list and curProp in self.searchInFK and not self.history:
+    #             fullQueryJoin = fullQueryJoin.where(
+    #                 eval_.eval_binary_expr(self.searchInFK[curProp]['table'].c[self.searchInFK[curProp]['nameProp']]
+    #                     ,obj['Operator'],obj['Value'])
+    #                 )
+
+    #         elif hasattr(self.ObjWithDynProp,curProp):
+    #             fullQueryJoin = self.filterOnStaticProp(fullQueryJoin,obj)
+
+    #         elif curDynProp is not None :
+    #             queryHistory = queryHistory.where(and_(eval_.eval_binary_expr(self.historyValuetable.c['Value'+curDynProp['TypeProp']]
+    #                 ,obj['Operator'],obj['Value'] ),self.historyValuetable.c['Name']==curProp))
+    #             self.excHist = True
+
+    #     if self.excHist :
+    #         print('exec Exists in Full HISTO\n')
+    #         fullQueryJoin = fullQueryJoin.where(exists(queryHistory))
+
+    #     fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
+
+    #     return fullQueryJoinOrdered
 
     def GetFlatDataList(self,searchInfo=None) :
         ''' Main function to call : return filtered (paged) ordered flat data list according to filter parameters'''
-        if self.history and not self.startDate :
-            print('in search HISTO')
-            fullQueryJoinOrdered = self.GetFullQueryHistory(searchInfo)
-        else :
-            fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
+        # if self.history and not self.startDate :
+        #     print('in search HISTO')
+        #     fullQueryJoinOrdered = self.GetFullQueryHistory(searchInfo)
+        # else :
+        #     fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
+
+        fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
 
         result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
 
@@ -279,16 +287,41 @@ class ListObjectWithDynProp():
 
         return data
 
-    def splitFullPath(self,key,listWithThes) :
-        name,val= key
-        try :
-            if name in listWithThes:
-                newVal = val.split('>')[-1]
-            else :
-                newVal = val
-        except : 
-            newVal = val
-        return (name,newVal)
+    def filterOnStaticProp(self,fullQuery,obj):
+        curTypeAttr = str(self.ObjWithDynProp.__table__.c[obj['Column']].type).split('(')[0]
+        if 'date' in curTypeAttr.lower() :
+            try:
+                obj['Value'] = parse(obj['Value'].replace(' ',''))
+            except: pass
+
+        filterCriteria = eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
+        if filterCriteria is not None :
+            fullQuery = fullQuery.where(filterCriteria)
+
+        return fullQuery
+
+    def filterOnDynProp(self,fullQuery,criteria,queryHistory = None):
+        curDynProp = self.GetDynProp(criteria['Column'])
+        if curDynProp == None:
+            print('Prop dyn inconnue')
+                # Gerer l'exception
+        else :
+            if self.history and queryHistory :
+                print('Filter DynPRop in WHOLE history \n')
+                queryHistory = queryHistory.where(and_(eval_.eval_binary_expr(self.historyValuetable.c['Value'+curDynProp['TypeProp']]
+                    ,criteria['Operator'],criteria['Value'] ),self.historyValuetable.c['Name']==curProp))
+                self.excHist = True
+            else:
+                viewAlias = self.vAliasList['v'+curDynProp['Name']]
+                if 'date' in curDynProp['TypeProp'].lower() :
+                    try:
+                        criteria['Value'] = parse(criteria['Value'].replace(' ',''))
+                    except:
+                        pass
+                      #### Perform the'where' in dyn props ####
+                fullQuery = fullQuery.where(
+                    eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['TypeProp']],criteria['Operator'],criteria['Value']))
+        return fullQuery
 
     def count(self,searchInfo = None) :
         ''' Main function to call : return count according to filter parameters'''
@@ -296,91 +329,112 @@ class ListObjectWithDynProp():
             criteria = None
         else:
             criteria = searchInfo['criteria'] 
-
-        # if self.history : 
-        #     query = self.countHistoryQuery(criteria)
-        # else :
         query = self.countQuery(criteria)
-
         count = self.sessionmaker().execute(query).scalar()
         return count
 
-    def countHistoryQuery(self,criteria = None):
+    # def countHistoryQuery(self,criteria = None):
+    #     fullQuery = select([func.count(self.ObjWithDynProp.ID)])
+    #     queryHistory = select(self.historyValuetable.c
+    #         ).where(self.historyValuetable.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] == self.ObjWithDynProp.ID)
+    #     self.excHist = False
+    #     if criteria is not None:
+    #         for obj in criteria:
+    #             curProp = obj['Column']
+    #             curDynProp = self.GetDynProp(curProp)
 
-        fullQuery = select([func.count(self.ObjWithDynProp.ID)])
+    #             if curProp in self.fk_list and curProp in self.searchInFK and not self.history:
+    #                 fullQuery = fullQuery.where(
+    #                     eval_.eval_binary_expr(self.searchInFK[curProp]['table'].c[self.searchInFK[curProp]['nameProp']]
+    #                         ,obj['Operator'],obj['Value'])
+    #                     )
 
-        queryHistory = select(self.historyValuetable.c).where(self.historyValuetable.c[self.ObjWithDynProp().GetSelfFKNameInValueTable()] == self.ObjWithDynProp.ID)
-        self.excHist = False
-        if criteria is not None:
-            for obj in criteria:
-                curProp = obj['Column']
-                curDynProp = self.GetDynProp(curProp)
+    #             elif hasattr(self.ObjWithDynProp,curProp):
+    #                 fullQuery = self.filterOnStaticProp(fullQuery,obj)
 
-                if curProp in self.fk_list and curProp in self.searchInFK and not self.history:
-                    fullQuery = fullQuery.where(
-                        eval_.eval_binary_expr(self.searchInFK[curProp]['table'].c[self.searchInFK[curProp]['nameProp']]
-                            ,obj['Operator'],obj['Value'])
-                        )
-
-                elif hasattr(self.ObjWithDynProp,curProp):
-                    fullQuery = self.filterOnStaticProp(fullQuery,obj)
-
-                elif curDynProp is not None :
-                    queryHistory = queryHistory.where(and_(eval_.eval_binary_expr(self.historyValuetable.c['Value'+curDynProp['TypeProp']]
-                        ,obj['Operator'],obj['Value'] ),self.historyValuetable.c['Name']==curProp))
+    #             elif curDynProp is not None :
+    #                 queryHistory = queryHistory.where(and_(eval_.eval_binary_expr(self.historyValuetable.c['Value'+curDynProp['TypeProp']]
+    #                     ,obj['Operator'],obj['Value'] ),self.historyValuetable.c['Name']==curProp))
             
-            fullQuery = fullQuery.where(exists(queryHistory)) 
+    #         fullQuery = fullQuery.where(exists(queryHistory)) 
 
-        return fullQuery
+    #     return fullQuery
 
     def countQuery(self,criteria = None):
-
         if self.history:
             print('COUNT in Full HISTO **********************\n')
-            return self.countHistoryQuery(criteria)
+            countHisto = True
+        else :
+            countHisto = False
 
         fullQuery = select([func.count(self.ObjWithDynProp.ID)])
         filterOnDynProp = False
         if self.startDate:
             existQuery = select([self.GetDynPropValueView().c['ID']])
-
             searchInfo = {'criteria':criteria}
             joinTable = self.GetJoinTable(searchInfo)
             fullQuery = fullQuery.select_from(joinTable)
-
             for obj in searchInfo['criteria'] :
                 fullQuery = self.WhereInJoinTable(fullQuery,obj)
+        else :
+            existQuery = select([self.GetDynPropValueView(countHisto=countHisto)])
+
+            self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
+            if criteria is not None:
+                for obj in criteria:
+                    confObj = list(filter(lambda x: x.Name == obj['Column'] ,self.GetAllPropNameInConf()))
+                    if len(confObj)> 0 :
+                        objConf = confObj[0]
+                    else : 
+                        objConf = None
+
+                    if obj['Column'] in self.fk_list and objConf is not None and objConf.QueryName not in [None,'Forced']:
+                        if objConf.QueryName is not None and objConf.QueryName is not 'Forced':
+                            tableRef = self.fk_list[obj['Column']].column.table
+                            nameRef = self.fk_list[obj['Column']].column.name
+
+                            existsQueryFK = select(tableRef.c
+                                ).where(and_(
+                                    eval_.eval_binary_expr(tableRef.c[objConf.QueryName],obj['Operator'],obj['Value']),
+                                    self.ObjWithDynProp.__table__.c[obj['Column']] == tableRef.c[nameRef]
+                                    ))
+                            fullQuery = fullQuery.where(exists(existsQueryFK))
+
+                    elif hasattr(self.ObjWithDynProp,obj['Column']):
+                        fullQuery = self.filterOnStaticProp(fullQuery,obj)
+                    else :
+                        fullQuery = self.countFilterOnDynProp(fullQuery,obj)
+        return fullQuery
+
+    def countFilterOnDynProp(self,fullQuery,criteria):
+        curDynProp = self.GetDynProp(criteria['Column'])
+        countHisto = False
+
+        if curDynProp is None :
             return fullQuery
 
-        else :
-            existQuery = select([self.GetDynPropValueView()])
-        self.fk_list = {fk.parent.name : fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
+        if self.history:
+            countHisto = True
+        if 'date' in curDynProp['TypeProp'].lower() :
+            try:
+                criteria['Value'] = parse(criteria['Value'].replace(' ',''))
+            except: pass
 
-        if criteria is not None:
-            for obj in criteria:
-                confObj = list(filter(lambda x: x.Name == obj['Column'] ,self.GetAllPropNameInConf()))
-                if len(confObj)> 0 :
-                    objConf = confObj[0]
-                else : 
-                    objConf = None
+        filterCriteria = eval_.eval_binary_expr(self.GetDynPropValueView(countHisto=countHisto).c['Value'+curDynProp['TypeProp']]
+            ,criteria['Operator'],criteria['Value'] )
+        if filterCriteria is not None :
+            existQuery = select([self.GetDynPropValueView(countHisto=countHisto)])
+            existQuery = existQuery.where(
+                and_(
+                self.GetDynPropValueView(countHisto=countHisto).c['Name'] == criteria['Column'],
+                filterCriteria
+                ))
+            existQuery = existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView(countHisto=countHisto).c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])
 
-                if obj['Column'] in self.fk_list and objConf is not None and objConf.QueryName not in [None,'Forced']:
-                    if objConf.QueryName is not None and objConf.QueryName is not 'Forced':
-                        tableRef = self.fk_list[obj['Column']].column.table
-                        nameRef = self.fk_list[obj['Column']].column.name
-
-                        existsQueryFK = select(tableRef.c
-                            ).where(and_(
-                                eval_.eval_binary_expr(tableRef.c[objConf.QueryName],obj['Operator'],obj['Value']),
-                                self.ObjWithDynProp.__table__.c[obj['Column']] == tableRef.c[nameRef]
-                                ))
-                        fullQuery = fullQuery.where(exists(existsQueryFK))
-
-                elif hasattr(self.ObjWithDynProp,obj['Column']):
-                    fullQuery = self.filterOnStaticProp(fullQuery,obj)
-
-                else :
-                    fullQuery = self.countFilterOnDynProp(fullQuery,obj)
+        if criteria['Operator'].lower() == 'is null':
+            fullQuery = fullQuery.where(~exists(existQuery))
+        else : 
+            fullQuery = fullQuery.where(exists(existQuery))
         return fullQuery
 
     def OderByAndLimit (self, query, searchInfo) :
@@ -438,80 +492,23 @@ class ListObjectWithDynProp():
             query = query.limit(limit)
 
         if 'offset' in searchInfo :
+            print('in offset ')
             offset = int(searchInfo['offset'])
+            print(offset)
             query = query.offset(offset)
 
         return query
 
-    def countFilterOnDynProp(self,fullQuery,criteria):
-        curDynProp = self.GetDynProp(criteria['Column'])
-        if curDynProp is None :
-            return fullQuery
-
-        if 'date' in curDynProp['TypeProp'].lower() :
-            try:
-                criteria['Value'] = parse(criteria['Value'].replace(' ',''))
-            except: pass
-
-        filterCriteria = eval_.eval_binary_expr(self.GetDynPropValueView().c['Value'+curDynProp['TypeProp']]
-            ,criteria['Operator'],criteria['Value'] )
-        if filterCriteria is not None :
-            existQuery = select([self.GetDynPropValueView()])
-            existQuery = existQuery.where(
-                and_(
-                self.GetDynPropValueView().c['Name'] == criteria['Column'],
-                filterCriteria
-                ))
-            existQuery = existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView().c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])
-            # fullQuery = fullQuery.where(exists(
-            #     existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView().c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])))
-
-        if curDynProp != None and criteria['Operator'].lower() in ['is null','is not null']:
-            nullExistQuery = select([self.GetDynPropValueView()])
-            nullExistQuery = nullExistQuery.where(
-                and_(self.GetDynPropValueView().c['Name'] == criteria['Column']
-                    ,self.ObjWithDynProp.ID == self.GetDynPropValueView().c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])
-                )
-            fullQuery = fullQuery.where(or_(~exists(nullExistQuery),exists(existQuery)))
-        else : 
-            fullQuery = fullQuery.where(exists(existQuery)) 
-        return fullQuery
-
-    def filterOnStaticProp(self,fullQuery,obj):
-        curTypeAttr = str(self.ObjWithDynProp.__table__.c[obj['Column']].type).split('(')[0]
-        if 'date' in curTypeAttr.lower() :
-            try:
-                obj['Value'] = parse(obj['Value'].replace(' ',''))
-            except: pass
-
-        filterCriteria = eval_.eval_binary_expr(self.ObjWithDynProp.__table__.c[obj['Column']],obj['Operator'],obj['Value'])
-        if filterCriteria is not None :
-            fullQuery = fullQuery.where(filterCriteria)
-
-        return fullQuery
-
-    def filterOnDynProp(self,fullQuery,criteria):
-        curDynProp = self.GetDynProp(criteria['Column'])
-        if curDynProp == None:
-            print('Prop dyn inconnue')
-                # Gerer l'exception
-        else :
-            if self.history and self.startDate is None :
-                print('Filter DynPRop in WHOLE history \n')
-                queryHistory = queryHistory.where(and_(eval_.eval_binary_expr(self.historyValuetable.c['Value'+curDynProp['TypeProp']]
-                    ,criteria['Operator'],criteria['Value'] ),self.historyValuetable.c['Name']==curProp))
-                self.excHist = True
-            else:
-                viewAlias = self.vAliasList['v'+curDynProp['Name']]
-                if 'date' in curDynProp['TypeProp'].lower() :
-                    try:
-                        criteria['Value'] = parse(criteria['Value'].replace(' ',''))
-                    except:
-                        pass
-                      #### Perform the'where' in dyn props ####
-                fullQuery = fullQuery.where(
-                    eval_.eval_binary_expr(viewAlias.c['Value'+curDynProp['TypeProp']],criteria['Operator'],criteria['Value']))
-        return fullQuery
+    def splitFullPath(self,key,listWithThes) :
+        name,val= key
+        try :
+            if name in listWithThes:
+                newVal = val.split('>')[-1]
+            else :
+                newVal = val
+        except : 
+            newVal = val
+        return (name,newVal)
 
     def tradThesaurusTerm(self,key,listWithThes):
         name,val= key
