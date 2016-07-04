@@ -10,7 +10,7 @@ Insert into ModuleGrids
 
 SELECT Module_ID, TypeObj, Name, Label, GridRender, GridSize, CellType, GridOrder, QueryName, Options, FilterOrder, FilterSize, FilterClass, IsSearchable, 
                          FilterDefaultValue, FilterRender, FilterType, Status
-FROM ModuleGrids WHERE Module_ID = 8 and Name = 'Sex'
+FROM ModuleGrids WHERE Module_ID = 8 and Name = 'Sex';
 
 
 
