@@ -515,8 +515,21 @@ textarea {
 		margin-bottom: 0px;
 		padding-bottom: 80px;
 		@crop: @tabsHeight*2;
-  		height: ~"calc(100% - @{crop} )"!important;
+		height: ~"calc(100% - @{crop} )"!important;
 	}
 .no-scroll{
 	overflow:hidden !important;
+}
+
+.filter-no-padding {
+	span{
+		padding-left:0px;
+		select{
+			padding-left:5px;
+			padding-right:0px;
+		}
+		div span {
+			padding-left:12px;
+		}
+	}
 }
