@@ -244,13 +244,10 @@ define([
             var maxlen = 250;
             var self = this;
             if ($(this).val().length > maxlen) {
-               _this.showErrorForMaxLength(this);
-               setTimeout(function(){ 
-                _this.cleantextAreaAfterError(self);
-
-              }, 3000);
               return false;
-            }  
+            }  else {
+              _this.cleantextAreaAfterError(this);
+            }
         });
         $(this.formRegion).find('textarea').on('keyup', function (e) {
               var maxlen = 250;
@@ -258,14 +255,20 @@ define([
               var self = this;
               if ($(this).val().length > maxlen) {
                  _this.showErrorForMaxLength(this);
-                 var res = strval.substring(0, 250);
-                $(this).val(res);
-                setTimeout(function(){ 
-                _this.cleantextAreaAfterError(self);
-                }, 3000);
                 return false;
-            }  
+            } 
         });
+        $(this.formRegion).find('textarea').on('keydown' , function(e) {
+             if(event.which == 8) {
+                var maxlen = 250;
+                var strval = $(this).val();
+                var self = this;
+                if ($(this).val().length < maxlen) {
+                 _this.cleantextAreaAfterError(this);
+                }
+             }
+        });
+
 
         if(this.buttonRegion[0]){
           this.displaybuttons();
