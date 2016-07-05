@@ -200,6 +200,7 @@ def getSensorHistory(request):
         curRow = OrderedDict(row)
         curRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
         curRow['EndDate'] = curRow['EndDate'].strftime('%Y-%m-%d %H:%M:%S') if curRow['EndDate'] is not None else None
+        curRow['format'] = 'YYYY-MM-DD HH:mm:ss'
         response.append(curRow)
 
     return response
