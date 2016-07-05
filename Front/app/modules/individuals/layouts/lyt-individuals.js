@@ -209,7 +209,9 @@ define([
     },
 
     exportGrid: function() {
-      var url = config.coreUrl + 'individuals/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
+      var url = config.coreUrl + 'individuals/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria)
+      +'&history='+this.grid.collection.queryParams.history
+      +'&startDate='+this.grid.collection.queryParams.startDate;
       var link = document.createElement('a');
       link.classList.add('DowloadLinka');
       
