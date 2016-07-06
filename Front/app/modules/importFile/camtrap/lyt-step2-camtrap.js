@@ -365,6 +365,7 @@ r.on('cancel' , function() {
   $("#list-files").empty();
   $("#list-files").append('<div id="title" class="col-md-12 text-center">List files to upload</div><div id="name" class="col-md-4 text-center">NAME</div><div id="status" class="col-md-8 text-center">STATUS</div>')
   $('#pause-upload-resumablejs').addClass('hide');
+  $('#start-upload-resumablejs').addClass('hide');
 });
 
 },
