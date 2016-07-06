@@ -352,10 +352,10 @@ define([
           jqhrx = this.model.save(null, {
             success: function (model, response) {
               // Getting ID of created record, from the model (has beeen affected during model.save in the response)
-              _this.savingSuccess(model, response);
-              _this.id = _this.model.id;
               window.formEdition = false;
               window.formChange = false;
+              _this.savingSuccess(model, response);
+              _this.id = _this.model.id;
               if (_this.redirectAfterPost != "") {
                 // If redirect after creation
                 var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
@@ -391,9 +391,9 @@ define([
           this.model.id = this.model.get('id');
           var jqxhr = this.model.save(null, {
             success: function (model, response) {
-              _this.savingSuccess(model, response);
               window.formEdition = false;
               window.formChange = false;
+              _this.savingSuccess(model, response);
               if (_this.reloadAfterSave) {
                 _this.reloadingAfterSave();
               }
