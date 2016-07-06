@@ -242,10 +242,33 @@ define([
 
         $(this.formRegion).find('textarea').on("keypress", function(e) {
             var maxlen = 250;
-            if ($(this).val().length > maxlen) {  
+            var self = this;
+            if ($(this).val().length > maxlen) {
               return false;
-            }  
+            }  else {
+              _this.cleantextAreaAfterError(this);
+            }
         });
+        $(this.formRegion).find('textarea').on('keyup', function (e) {
+              var maxlen = 250;
+              var strval = $(this).val();
+              var self = this;
+              if ($(this).val().length > maxlen) {
+                 _this.showErrorForMaxLength(this);
+                return false;
+            } 
+        });
+        $(this.formRegion).find('textarea').on('keydown' , function(e) {
+             if(event.which == 8) {
+                var maxlen = 250;
+                var strval = $(this).val();
+                var self = this;
+                if ($(this).val().length < maxlen) {
+                 _this.cleantextAreaAfterError(this);
+                }
+             }
+        });
+
 
         if(this.buttonRegion[0]){
           this.displaybuttons();
@@ -257,7 +280,26 @@ define([
         this.afterShow();
       }
     },
+    showErrorForMaxLength : function(_this){
+      var errorTag = $(_this).parent().parent().find('div')[0];
+      $(errorTag).text('Text max length is 250');
+      $(_this).addClass('error');
+    },
+    cleantextAreaAfterError : function(_this){
+        var errorTag = $(_this).parent().parent().find('div')[0];
+        $(errorTag).text('');
+        $(_this).removeClass('error');
 
+    },
+    showAlertforMaxLength : function(){
+      var opts = {
+        title : 'Max length: 255 characters !',
+        showCancelButton: false,
+        type: 'warning',
+        confirmButtonColor: '#DD6B55'
+      };
+      this.swal(opts);
+    },
     updateState: function(state){
 
     },
