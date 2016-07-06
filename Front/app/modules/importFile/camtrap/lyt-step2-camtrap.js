@@ -7,12 +7,12 @@ define([
   'config',
   'sweetAlert',
   'dropzone',
-
+  'resumable',
   'i18n'
 
-], function($, _, Backbone, Marionette, config, Swal, Dropzone
+], function($, _, Backbone, Marionette, config, Swal, Dropzone,Resumable
 
-  ) {
+) {
 
   'use strict';
 
@@ -27,10 +27,34 @@ define([
       //this.sensorId = options.model.attributes.sensorId;
       //console.log(this.options.model.get('row'));
       //this.row = this.options.model.get('row').model.attributes;
+      this.buttonPause = $('#pause-upload-resumablejs');
       this.data =  this.options.model.get('row').model.attributes;
       this.data.sensorId = options.model.attributes.sensorId;
       //console.log(this.data);
-
+      this.path = "";
+      this.nbFiles = 0
+      this.nbFilesToWait = 0;
+      this.nbFilesConcat = 0;
+      this.uploadFinished = false;
+      this.startDate = this.data['StartDate'].split(" ");
+      this.endDate = ["0000-00-00","00:00:00"]
+      if( this.data['EndDate'] != undefined ) {
+        this.endDate = this.data['EndDate'].split(" ");
+      }
+      this.path = String(this.data['UnicIdentifier'])+"_"+String(this.startDate[0])+"_"+String(this.endDate[0])+"_"+String(this.data['Name']);
+      this.textSwalFilesNotAllowed = "";
+      /*
+      http://192.168.0.78/ecoReleve-Core/sensors/resumable/datas?
+      resumableChunkNumber=184
+      &resumableChunkSize=1048576
+      &resumableCurrentChunkSize=1048576
+      &resumableTotalSize=1400531542
+      &resumableType=application%2Fx-zip-compressed
+      &resumableIdentifier=1400531542-archive1zip
+      &resumableFilename=archive1.zip
+      &resumableRelativePath=archive1.zip
+      &resumableTotalChunks=1335
+      */
     },
 
     check: function() {
@@ -39,51 +63,213 @@ define([
 
     onShow: function() {
       var _this = this;
-      // Initialize a drop zone for import
-      var previewNode = document.querySelector('#template');
-      previewNode.id = '';
-      var previewTemplate = previewNode.parentNode.innerHTML;
-      previewNode.parentNode.removeChild(previewNode);
-      var myDropzone = new Dropzone(this.el, {
-        maxFilesize: 3000,
-        url: config.coreUrl + 'sensors/camtrap/datas', // Do a POST on this URl
-        thumbnailWidth: 80,
-        thumbnailHeight: 80,
-        parallelUploads: 8,
-        previewTemplate: previewTemplate,
-        autoQueue: false, // Make sure the files aren't queued until manually added
-        previewsContainer: '#previews', // Define the container to display the previews
-        clickable: '.fileinput-button', // Define the element that should be used as click trigger to select files.
-      });
-      this.totalReturned = new Backbone.Collection();
-      //overwrite addFile function to avoid duplicate files
-      myDropzone.addFile = function(file) {
-        var ext = file.name.split('.');
-        ext = String(ext[ext.length - 1]).toLowerCase(); // get extensions file
-        if ( ! ( ext === 'jpeg' || ext === 'jpg' || ext === 'zip' || ext === 'rar' ) ) {
-          console.log("extensions fichiers invalide")
-          Swal(
-          {
-            title: 'Wrong file type',
-            text: 'The file should be an image (.jpeg or . jpg) or a zip file with images (.zip) ',
-            type: 'error',
-            showCancelButton: false,
-            confirmButtonColor: 'rgb(147, 14, 14)',
-            confirmButtonText: 'OK',
+      _this.id = this.data.sensorId;
 
-            closeOnConfirm: true,
+      //test resumable
+      var r = new Resumable({
+        target:  config.coreUrl + 'sensors/resumable/datas',
+        query:
+        {
+          "path": this.path,
+          "id" : this.data.sensorId,
+          startDate: _this.startDate[0]+" "+_this.startDate[1],
+          endDate: _this.endDate[0]+" "+_this.endDate[1]
+        },
+        testChunks: true
+      });
+
+      _this.nbFiles = 0;
+      //get dom
+      r.assignBrowse(document.getElementById('add-file-resumablejs'));
+      r.assignDrop(document.getElementById('drag-drop-zone-resumable'));
+
+
+      $('#start-upload-resumablejs').click(function(){
+        console.log("on a "+_this.nbFilesToWait+" fichiers à attendre au final");
+        //prevent multithread pb when test if folder doesn't exist and create it
+        $.ajax({
+          type: "POST",
+          url: config.coreUrl + 'sensors/concat/datas',
+          data: {
+            path : _this.path,
+            action : 0 // create folder
           }
-          );
-          return false;
+        })
+        .done( function(response,status,jqXHR){
+          if( jqXHR.status === 200 ){
+            $('#pause-upload-resumablejs').removeClass('hide');
+            $('#start-upload-resumablejs').addClass('hide');
+            r.upload();
+          }
+        })
+        .fail( function( jqXHR, textStatus, errorThrown ){
+          console.log("error");
+          console.log(errorThrown);
+        });
+      });
+
+
+      $('#pause-upload-resumablejs').click(function(){
+        console.log("on pause");
+        //console.log(r);
+        if (r.files.length>0) {
+          if (r.isUploading()) {
+            return  r.pause();
+          }
+          $('#pause-upload-resumablejs').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
+          $('#pause-upload-resumablejs > span').text(" Pause upload")
+          return r.upload();
         }
-        if (this.files.length) {
-          var _i, _len;
-          for (_i = 0, _len = this.files.length; _i < _len; _i++) {
-            if (this.files[_i].name === file.name && this.files[_i].size === file.size) {
-              Swal(
+      });
+      $('#cancel-upload-resumablejs').click(function(){
+        console.log("on cancel");
+        r.cancel();
+      });
+
+
+      _this.progressBar = new ProgressBar($('#upload-progress'));
+
+      function ProgressBar(ele) {
+        this.thisEle = $(ele);
+
+        this.fileAdded = function() {
+          (this.thisEle).removeClass('hide').find('.progress-bar').css('width','0%');
+        },
+
+        this.uploading = function(progress) {
+          (this.thisEle).find('.progress-bar').attr('style', "width:"+progress+'%');
+        },
+
+        this.finish = function() {
+          (this.thisEle).find('.progress-bar').css('width','100%');
+        }
+      }
+      //define event
+      r.on('filesAdded', function(array) {
+        /*  console.log("bim on ajouté des fichiers et tout");
+        console.log(array);*/
+        if(_this.textSwalFilesNotAllowed != ""){
+          Swal(
+            {
+              title: 'Warning file type not allowed (only jpeg and zip)',
+              text: _this.textSwalFilesNotAllowed ,
+              type: 'warning',
+              showCancelButton: false,
+              confirmButtonColor: 'rgb(218, 146, 15)',
+
+              confirmButtonText: 'OK',
+
+              closeOnConfirm: true,
+
+            }
+          );
+          _this.textSwalFilesNotAllowed = "";
+        }
+      });
+      r.on('fileAdded', function(file, event){
+        let extType = file.file.name.split(".");
+        console.log(extType[extType.length-1]);
+        if (extType[extType.length-1] =='jpeg' || extType[extType.length-1] == 'zip' || extType[extType.length-1] == 'ZIP' || extType[extType.length-1] == 'jpg' || extType[extType.length-1] == 'JPG' || extType[extType.length-1] == 'JPEG') {
+          $('#start-upload-resumablejs').removeClass('hide');
+          _this.nbFiles+=1;
+          if (file.chunks.length > 1 ){
+            _this.nbFilesToWait +=1;
+          }
+          let template ='<div id="'+file.uniqueIdentifier+'" class="col-md-12" >'+
+          '<div  id="name" class="col-md-4 text-center">'+
+          String(file.fileName)+
+          '</div>'+
+          '<div  id="status" class="col-md-8 text-center">'+
+          "Ready"+
+          '</div>'+
+          '</div>';
+          $('#list-files').append(template);
+          _this.progressBar.fileAdded();
+        }
+        else{
+          let tmp = String(file.file.type);
+          if( tmp ==="")
+          tmp = "unknow"
+          _this.textSwalFilesNotAllowed+= ''+String(file.fileName)+ 'File type : '+tmp+'';
+          _this.textSwalFilesNotAllowed+='\n';
+
+          r.removeFile(file);
+        }
+
+        //console.log(file);
+      });
+
+      r.on('pause', function(){
+        $('#pause-upload-resumablejs').find('.glyphicon').removeClass('glyphicon-pause').addClass('glyphicon-play');
+        $('#pause-upload-resumablejs > span').text(" Resume upload")
+      });
+
+      r.on('fileSuccess', function(file, message){
+        $("#"+file.uniqueIdentifier+"").css("color" ,"GREEN");
+        $("#"+file.uniqueIdentifier+" > "+"#status").text("OK");
+
+        //$modifStatus.getElementById('status').val("OK");
+        /* envoie d'une requete pour reconstruire le fichier si le tableau de chunks est > 1 */
+        if( file.chunks.length > 1 )
+        {
+          console.log("upload fini fk_sensor :" +_this.data.sensorId);
+          $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
+          $("#"+file.uniqueIdentifier+" > "+"#status").text("Processing wait please");
+
+
+          //var deferred = $.Deferred();
+          //console.log(file);
+          $.ajax({
+            type: "POST",
+            url: config.coreUrl + 'sensors/concat/datas',
+            data: {
+              path : _this.path,
+              id : _this.data.sensorId,
+              name : file.uniqueIdentifier,
+              file : file.fileName,
+              type : file.file.type,
+              taille : file.chunks.length,
+              action : 1,
+              startDate: _this.startDate[0]+" "+_this.startDate[1],
+              endDate: _this.endDate[0]+" "+_this.endDate[1]
+            }
+          })
+          .always( function(){
+            _this.nbFilesConcat+=1;
+          })
+          .done( function(response,status,jqXHR){
+            if( jqXHR.status === 200 ){
+              $("#"+file.uniqueIdentifier+"").css("color" ,"GREEN");
+              $("#"+file.uniqueIdentifier+" > "+"#status").text("OK");
+              //console.log("bim le fichier est enfin rassemble temps d\'attente : "+ response.timeConcat);
+              if( _this.nbFilesConcat === _this.nbFilesToWait && _this.uploadFinished )
               {
-                title: 'Warning Duplicate Files',
-                text: this.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
+                _this.displayFinished();
+              }
+            }
+
+          })
+          .fail( function( jqXHR, textStatus, errorThrown ){
+            console.log(jqXHR);
+            console.log(textStatus);
+            console.log(errorThrown);
+            if( jqXHR.status == 510 ){
+             $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
+             $("#"+file.uniqueIdentifier+" > "+"#status").text("WARNING! :"+String(jqXHR.responseJSON.message)+"\n"+String(jqXHR.responseJSON.messageConcat)+"\n"+String(jqXHR.responseJSON.messageUnzip));
+           }
+           else{
+            $("#"+file.uniqueIdentifier+"").css("color" ,"RED");
+            $("#"+file.uniqueIdentifier+" > "+"#status").text("FAILED");
+          }
+          if( _this.nbFilesConcat === _this.nbFilesToWait && _this.uploadFinished )
+          {
+            $('#start-upload-resumablejs').addClass('hide');
+            $('#pause-upload-resumablejs').addClass('hide');
+            _this.progressBar.finish();
+            Swal(
+              {
+                title: 'Warning upload finished',
+                text: ' Pb on zip look errors ',
                 type: 'warning',
                 showCancelButton: false,
                 confirmButtonColor: 'rgb(218, 146, 15)',
@@ -93,147 +279,125 @@ define([
                 closeOnConfirm: true,
 
               }
-              );
-              return false;
-            }
+            );
           }
+            //console.log("error");
+            //console.log(errorThrown);
+          });
+
         }
-        file.upload = {
-          progress: 0,
-          total: file.size,
-          bytesSent: 0
-        };
-        this.files.push(file);
-        file.status = Dropzone.ADDED;
-        this.emit('addedfile', file);
-        this._enqueueThumbnail(file);
-        return this.accept(file, (function(_this) {
-          return function(error) {
-            if (error) {
-              file.accepted = false;
-              _this._errorProcessing([file], error);
-            } else {
-              file.accepted = true;
-              if (_this.options.autoQueue) {
-                _this.enqueueFile(file);
-              }
-            }
-            return _this._updateMaxFilesReachedClass();
-          };
-        })(this));
-      };
-
-      myDropzone.on('addedfile', function(file) {
-        console.log("addedfile");
-        // Hookup the start button
-        file.previewElement.querySelector('.start').onclick = function() { myDropzone.enqueueFile(file); };
+        //console.log(file);
       });
 
-      // Update the total progress bar
-      myDropzone.on('totaluploadprogress', function(progress) {
-        console.log('uploadprogress');
-        document.querySelector('#total-progress').style.width = progress + '%';
+      r.on('fileError', function(file, message){
+        $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
+        $("#"+file.uniqueIdentifier+" > "+"#status").text("REFUSED! reasons:"+message);
+        //console.log(file);
+        //console.log(message);
       });
 
-      myDropzone.on('sending', function(file , xhr , formData) {
-      /*  console.log("sending");
-        console.log(file);
-        console.log(xhr);
-        console.log(formData);*/
-        // Show the total progress bar when upload starts
-        //document.querySelector('#total-progress').style.opacity = '1';
-        // And disable the start button
-        //console.log(_this.data);
-        for(var key in _this.data)
+      r.on('complete', function(file, message) {
+        _this.uploadFinished = true;
+        if( _this.nbFilesConcat === _this.nbFilesToWait && _this.uploadFinished )
         {
-          if(key.indexOf('Date') != -1 )
-          {
-            //_this.data[key] = _this.data[key].replace(/:/g,'&');
-            var res = _this.data[key].split(" ");
-            //console.log(" data['"+key+"'] : "+ res[0] );
-            formData.append( key , res[0] );
-          }
-          else{
-          //console.log(" data['"+key+"'] : "+_this.data[key]);
-          formData.append( key , _this.data[key] );
-          }
-
+          _this.displayFinished();
         }
-        file.previewElement.querySelector('.start').setAttribute('disabled', 'disabled');
-      });
+        /*    $('#start-upload-resumablejs').removeClass('hide');
+        $('#cancel-upload-resumablejs').addClass('hide');
+        $('#pause-upload-resumablejs').addClass('hide');
 
-      // Hide the total progress bar when nothing's uploading anymore
-      myDropzone.on('queuecomplete', function(progress) {
-        console.log("queue complete on va cacher la barre d'upload");
-        document.querySelector('#total-progress').style.opacity = 0;
-        document.querySelector('#total-progress .progress-bar').style.width = 0;
-      });
+        progressBar.finish();
+        Swal({title: 'Well done',
+        text: 'File(s) have been correctly Uploaded\n'
+        + '\t inserted : ' + nbFiles
+        ,
+        type:  'success',
+        showCancelButton: true,
+        confirmButtonText: 'Validate CamTrap',
+        cancelButtonText: 'New import',
+        closeOnConfirm: true,
+        closeOnCancel: true},
+        function(isConfirm) {   if (isConfirm) {
+        Backbone.history.navigate('validate/Camtrap',{trigger: true});
+      }
+    }
+  );*/
+});
 
-      this.errors = false;
-      myDropzone.on('error', function(file) {
-        this.errors = true;
-        //$(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-danger');
-      });
+r.on('fileProgress' , function(file){
+  //console.log(file);
+  //TODO pas opti on refresh a chaque fois
+  $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
+  $("#"+file.uniqueIdentifier+" > "+"#status").text("Uploading : "+parseInt(file._prevProgress * 100)+"%");
 
-      myDropzone.on('success', function(file,resp) {
-        $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-success');
-        //var inserted = resp[1]['new photo inserted'];
-        _this.totalReturned.add({inserted: 1});
-      });
 
-      myDropzone.on('queuecomplete', function(file) {
-        console.log("fin on va afficher les files ok ");
-        var totalInserted = _this.totalReturned.reduce(function(memo, value) { return memo + value.get("inserted") }, 0);
-        if (!this.errors) {
-          Swal({title: 'Well done',
-            text: 'File(s) have been correctly imported\n'
-                          + '\t inserted : ' + totalInserted
-                          ,
-            type:  'success',
-            showCancelButton: true,
-            confirmButtonText: 'Validate CamTrap',
-            cancelButtonText: 'New import',
-            closeOnConfirm: true,
-            closeOnCancel: true},
-            function(isConfirm) {   if (isConfirm) {
-              Backbone.history.navigate('validate/Camtrap',{trigger: true});
-            }
-          }
-          );
+});
 
-        }else {
-          Swal(
-          {
-            title: 'An error occured',
-            text: 'Please verify your file',
-            type: 'error',
-            showCancelButton: false,
-            confirmButtonText: 'OK',
-            confirmButtonColor: 'rgb(147, 14, 14)',
-            closeOnConfirm: true,
-          }
-          );
-        }
-        this.errors = false;
-      });
+r.on('progress' , function(file,message) {
+  /*
+  $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
+  $("#"+file.uniqueIdentifier+" > "+"#status").text("Uploading");*/
+  _this.progressBar.uploading(r.progress()*100);
+  $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
+});
 
-      // Setup the buttons for all transfers
-      // The 'add files' button doesn't need to be setup because the config
-      // `clickable` has already been specified.
-      document.querySelector('#actions .start').onclick = function() {
-        myDropzone.enqueueFiles(myDropzone.getFilesWithStatus(Dropzone.ADDED));
-      };
-      document.querySelector('#actions .cancel').onclick = function() {
-        myDropzone.removeAllFiles(true);
-      };
+r.on('beforeCancel' , function() {
+  console.log("event beforeCancel");
+});
 
-    },
+r.on('cancel' , function() {
+  let textFileCancelled = "";
+  Swal(
+    {
+      title: 'Warning you have Cancelled the upload',
+      text: ' All files need to be upload again ',
+      type: 'warning',
+      showCancelButton: false,
+      confirmButtonColor: 'rgb(218, 146, 15)',
 
-    onDestroy: function() {
-    },
+      confirmButtonText: 'OK',
 
-    validate: function() {
-    },
+      closeOnConfirm: true,
 
-  });
+    }
+  );
+  console.log("event Cancel");
+  $("#list-files").empty();
+  $("#list-files").append('<div id="title" class="col-md-12 text-center">List files to upload</div><div id="name" class="col-md-4 text-center">NAME</div><div id="status" class="col-md-8 text-center">STATUS</div>')
+  $('#pause-upload-resumablejs').addClass('hide');
+});
+
+},
+
+displayFinished: function (){
+  var _this = this;
+  console.log("bim j'ai fini j'affiche");
+  $('#start-upload-resumablejs').addClass('hide');
+  $('#pause-upload-resumablejs').addClass('hide');
+  _this.progressBar.finish();
+  Swal({title: 'Well done',
+  text: 'File(s) have been correctly Uploaded\n'
+  + '\t inserted : ' + _this.nbFiles
+  ,
+  type:  'success',
+  showCancelButton: true,
+  confirmButtonText: 'Validate CamTrap',
+  cancelButtonText: 'New import',
+  closeOnConfirm: true,
+  closeOnCancel: true},
+  function(isConfirm) {
+    if (isConfirm) {
+      Backbone.history.navigate('validate/Camtrap',{trigger: true});
+    }
+  }
+);
+},
+
+onDestroy: function() {
+},
+
+validate: function() {
+},
+
+});
 });

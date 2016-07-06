@@ -11,6 +11,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       {label: 'Release', href: 'release', icon: 'reneco-to_release'},
       {label: 'Validate', href: 'validate', icon: 'reneco-validate'},
       {label: 'Stations', href: 'stations', icon: 'reneco-stations'},
+	  {label: 'Observations', href: 'observations', icon: 'reneco-stations'},
       {label: 'Individuals', href: 'individuals', icon: 'reneco-individuals'},
       {label: 'Sensors', href: 'sensors', icon: 'reneco-sensors'},
       {label: 'Monitored Sites', href: 'monitoredSites', icon: 'reneco-sensors'},
@@ -31,6 +32,8 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       'stations/new(/)': 'newStation',
       'stations/:id(/)': 'stations',
       'stations(/)': 'stations',
+
+	  'observations/:id(/)': 'observations',
 
       'sensors/new/:type(/)': 'newSensor',
       'sensors/:id(/)': 'sensors',
@@ -56,9 +59,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'controller'],
       }).done(function() {
         callback.apply(this, args);
       }).fail(function(msg) {
-        /*if (msg.status === 502 || msg.status === 403) {
+        if ( msg.status === 403) {
           document.location.href = config.portalUrl;
-        }*/
+        }
       });
     },
 

@@ -122,7 +122,7 @@ def getUnicIdentifier (request):
     sensorType = request.params['sensorType']
     query = select([Sensor.UnicIdentifier.label('label'),Sensor.ID.label('val')]).where(Sensor.FK_SensorType == sensorType)
 
-    if equipment :
+    if ( equipment and sensorType == "5" ) :
         existsQuery = select([Equipment]).where(Equipment.FK_Sensor==Sensor.ID)
         query = query.where(exists(existsQuery))
     response = [ OrderedDict(row) for row in session.execute(query).fetchall()]
@@ -188,7 +188,7 @@ def getSensorHistory(request):
         table = Base.metadata.tables['MonitoredSiteEquipment']
         joinTable = join(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable,MonitoredSite, table.c['FK_MonitoredSite'] == MonitoredSite.ID)
-        query = select([table.c['StartDate'],table.c['EndDate'],Sensor.UnicIdentifier,MonitoredSite.Name]).select_from(joinTable
+        query = select([table.c['StartDate'],table.c['EndDate'],Sensor.UnicIdentifier,MonitoredSite.Name, MonitoredSite.ID.label('MonitoredSiteID')]).select_from(joinTable
             ).where(table.c['FK_Sensor'] == id
             ).order_by(desc(table.c['StartDate']))
 

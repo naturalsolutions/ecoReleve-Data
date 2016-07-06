@@ -43,7 +43,6 @@ define([
     initialize: function(options) {
       this.com = new Com();
       this.collection = options.model.attributes.data_FileContent;
-      
       this.deferred = $.Deferred();
     },
 
