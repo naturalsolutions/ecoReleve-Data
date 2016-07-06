@@ -1,5 +1,6 @@
-from array import array
 
+from array import array
+from ..Models import Base , dbConfig
 from pyramid.view import view_config
 from pyramid.response import Response
 from sqlalchemy import func, desc, select, union, union_all, and_, bindparam, update, or_, literal_column, join, text, update
@@ -21,12 +22,15 @@ from .argosImport import uploadFileArgos
 from .GSMimport import uploadFilesGSM
 from .RFIDimport import uploadFileRFID
 from .CamTrapimport import uploadFileCamTrap, uploadFileCamTrapResumable, concatChunk
+import os,sys
+from pyramid.response import Response
 
 route_prefix = 'sensors/'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST')
 def uploadFile(request):
+    #print("bim je check")
     type_= request.matchdict['type']
     dictFuncImport={
     'argos': uploadFileArgos,
@@ -37,3 +41,22 @@ def uploadFile(request):
     'concat':concatChunk
     }
     return dictFuncImport[type_](request)
+
+
+@view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='GET')
+def checkChunk(request):
+    pathPrefix = dbConfig['camTrap']['path']
+    fileName = str(request.params['resumableIdentifier'])+"_"+str(request.params['resumableChunkNumber'])
+
+    if not os.path.isfile(pathPrefix+'\\'+request.params['path']+'\\'+str(fileName)):
+        return Response(status=204)
+    else:
+        #possible pb prog para ne pas uploader le meme fichier depuis 2 pc different
+        #vefif la taille du fichier et on supprime le chunk si elle différe
+        sizeOnServer = int(os.path.getsize( pathPrefix+'\\'+request.params['path']+'\\'+str(fileName) ))
+        sizeExpected = int(request.params['resumableCurrentChunkSize'])
+        if sizeOnServer != sizeExpected:
+            os.remove(pathPrefix+'\\'+request.params['path']+'\\'+str(fileName))
+            return Response(status=204)
+        else:
+            return Response(status=200)

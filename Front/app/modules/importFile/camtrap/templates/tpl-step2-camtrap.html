@@ -1,27 +1,49 @@
 <div class="step-pane active sample-pane clearfix" data-step="2" id="step2" style="overflow: hidden;">
 
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 full-height" >
-			<div class="resumable" style="padding-right: 20px; padding-bottom: 20px; padding-top: 20px;">
-				<button type="button" class="btn btn-success" aria-label="Add file" id="add-file-resumablejs">
-			                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add file
-			  </button>
-				<button type="button" class="btn btn-info" aria-label="Start upload" id="start-upload-resumablejs">
-					 <span class="glyphicon glyphicon-upload" aria-hidden="true"></span> Start upload
-			 </button>
-			 <button type="button" class="btn btn-warning" aria-label="Pause upload" id="pause-upload-resumablejs">
-					 <span class="glyphicon glyphicon-pause " aria-hidden="true"></span> Pause upload
-			 </button>
-			 <div class="progress hide" id="upload-progress" style=" margin-top : 20px;">
-			      <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"   style="width: 0%">
-			          <span class="sr-only"></span>
-			      </div>
-			 </div>
-			 <div id="list-files">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 full-height" >
+		<div class="resumable" style="padding-right: 20px; padding-bottom: 20px; padding-top: 20px;">
+			<button type="button" class="btn btn-success" aria-label="Add file" id="add-file-resumablejs">
+				<span class="reneco reneco-add" aria-hidden="true"> Add file</span>
+			</button>
+			<button type="button" class="btn btn-danger" aria-label="Cancel upload" id="cancel-upload-resumablejs">
+				<span class="reneco reneco-close " aria-hidden="true"> Cancel upload</span>
+			</button>
+			<button type="button" class="btn btn-info hide" aria-label="Start upload" id="start-upload-resumablejs">
+				<span class="reneco reneco-import" aria-hidden="true"> Start upload</span>
+			</button>
+			<button type="button" class="btn btn-warning hide" aria-label="Pause upload" id="pause-upload-resumablejs">
+				<span class="glyphicon glyphicon-pause " aria-hidden="true"> Pause upload</span>
+			</button>
 
-			 </div>
+			<div class="progress hide" id="upload-progress" style=" margin-top : 20px;">
+				<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"   style="width: 0%">
+					<span class="sr-only"></span>
+				</div>
+			</div>
+			<div id="list-files" class="col-md-12 text-center" style="padding-bottom: 30px;">
+				<div id="title" class="col-md-12 text-center">
+					List files to upload
+				</div>
+				<div id="name" class="col-md-4 text-center">
+					NAME
+				</div>
+				<div id="status" class="col-md-8 text-center">
+					STATUS
+				</div>
+
 			</div>
 
+		</div>
+	</div>
 
-	<div class="clear"></div>
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+		<br><br>
+		<div class="drag-zone-hover" style="height:400px" id="drag-drop-zone-resumable">
+			<span class="huge">Drop your file here</span>
+		</div>
+		<br><br><br>
+	</div>
 
+	<div class="clear">
+	</div>
 </div>
