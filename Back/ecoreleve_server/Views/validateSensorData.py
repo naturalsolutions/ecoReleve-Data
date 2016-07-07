@@ -230,16 +230,18 @@ def details_unchecked_camtrap(request):
 
     query = 'select PK_id,path,name from ecoReleve_Sensor.dbo.TcameraTrap where pk_id in (select pk_id from [dbo].V_dataCamTrap_With_equipSite where fk_sensor = '+str(id_indiv)+' AND FK_MonitoredSite = '+str(ptt)+' AND equipID ='+str(id_equip)+' );'
     data = session.execute(query).fetchall()
-    results = [dict(row) for row in data]
+    dataResults = [dict(row) for row in data]
 
-    for tmp in results:
+    for tmp in dataResults:
         varchartmp = tmp['path'].split('\\')
         tmp['path']="imgcamtrap/"+str(varchartmp[len(varchartmp)-2])+"/"
         tmp['name'] = tmp['name'].replace(" ","%20")
         tmp['id'] = tmp['PK_id']
 
+    result = [{'total_entries':len(dataResults)}]
+    result.append(dataResults)
     ''' todo '''
-    return results
+    return dataResults
 # ------------------------------------------------------------------------------------------------------------------------- #
 
 @view_config(route_name = route_prefix+'uncheckedDatas/id_indiv/ptt', renderer = 'json' , request_method = 'POST' )
