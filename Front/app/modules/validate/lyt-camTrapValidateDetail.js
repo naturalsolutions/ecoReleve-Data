@@ -31,7 +31,8 @@ define([
       events: {
         'click button#validate': 'validate',
         'onkeydown #gallery' : 'keyPressed',
-        'pageable:state:change': 'toto'
+        'pageable:state:change': 'toto',
+        'keypress': 'keyAction'
       },
 
       ui: {
@@ -54,6 +55,9 @@ define([
       regions: {
         'rgNavbar': '#navbar',
         'imageTemplate' : '#gallery'
+      },
+      keyAction: function (e){
+        console.log("bim click sur ",e);
       },
       toto: function(e){
         console.log(this.myImageCollection)
@@ -196,11 +200,10 @@ define([
         });
 
         this.ui.gallery.html('');
-          this.myImageCollection.each(function(model){
-            var newImg = new ImageItemView({model:model});
-            _this.ui.gallery.append(newImg.render().el);
-
-          });
+        this.myImageCollection.each(function(model){
+          var newImg = new ImageItemView({model:model});
+          _this.ui.gallery.append(newImg.render().el);
+        });
       },
 
       displayPaginator: function () {
@@ -224,7 +227,7 @@ define([
       validate: function() {
         console.log("bim on valide");
         console.log("parcours de la collection");
-        this.myImageCollectionView.collection.each(function (model) {
+        this.myImageCollection.each(function (model) {
           switch (model.status) {
             case 0 : {
               console.log("DELETE :"+model.id+" url:"+model.path );
