@@ -60,7 +60,9 @@ define([
         console.log("bim click sur ",e);
       },
       toto: function(e){
-        console.log(this.myImageCollection)
+        console.log("etat change");
+        console.log(this);
+        console.log(e);
       },
       initialize: function(options) {
         console.log("on a lancé la vue pour les camtrap ");
@@ -170,11 +172,13 @@ define([
         var _this = this;
         var ImageModel = Backbone.Model.extend({
           urlRoot: config.coreUrl+'photos',
-          default:{
+          defaults:{
             path :'',
             name: '',
-            id:null,
-            status: -1
+            id: null,
+            checked: 0,
+            validated: 0,
+            test :"toto"
           }
         });
 
@@ -183,23 +187,34 @@ define([
           events:{
             'click #save':'onClickImage'
           },
-          //tagName : 'li',
+          tagName : 'div',
+          className : 'image col-md-2 text-center',
           //template : 'app/modules/validate/templates/tpl-image.html',
           template : 'app/modules/validate/templates/tpl-image.html',
           //template : $('#itemview-image-template').html(),
 
           onClickImage: function(e){
             var _this = this;
-            console.log('click image',this.model.id)
-            // status -1 undefined , 0 delete , 1 save
-            this.model.status = 0;
-            //_this.myImageCollectionView.collection.remove(this.model);
-            //this.model.save();
+            if( !this.model.get("checked") ) {
+              console.log(this.model.get("name")+" is checked now");
+              this.model.set("checked", true)
+            }
+            else if ( !this.model.get("validated") )
+            {
+              console.log(this.model.get("name")+" is validated now");
+              this.model.set("validated", true)
+            }
+            else{
+              console.log(this.model.get("name")+" is deleted now");
+              this.model.set("validated", false)
+            }
 
+            //if( )
           }
         });
 
         this.ui.gallery.html('');
+
         this.myImageCollection.each(function(model){
           var newImg = new ImageItemView({model:model});
           _this.ui.gallery.append(newImg.render().el);
@@ -211,6 +226,7 @@ define([
         this.paginator = new Backgrid.Extension.Paginator({
           collection: this.myImageCollection
         });
+
         var resultat = this.paginator.render().el;
 
       this.ui.paginator.append(resultat);
@@ -224,26 +240,84 @@ define([
         console.log("yeahhhh yeaahh yeaahh "+e.keyCode);
       },
 
+      displayListUnchecked: function(){
+        var _this = this;
+        console.log("et bim on displayListUnchecked");
+        _this.swal({title:"warning",text:"Some photos not checked"},"warning");
+      },
+
+
       validate: function() {
-        console.log("bim on valide");
-        console.log("parcours de la collection");
-        this.myImageCollection.each(function (model) {
-          switch (model.status) {
+      //  console.log("pagination");
+        //console.log(this.paginator);
+        var _this = this;
+        var flagUnchecked = false
+        //console.log("le type ",this.type);
+        var url = config.coreUrl+'sensors/'+this.type+'/uncheckedDatas';
+        console.log("call sur ",url);
+        // parcours de la page
+        var sizePage = this.myImageCollection.length;
+        var sizeAllPages = this.myImageCollection.fullCollection.length;
+        var dataToSend = [];
+        console.log("ma page");
+        console.log(this.myImageCollection);
+        console.log("ma full collection");
+        console.log(this.myImageCollection.fullCollection);
+        console.log("######################################");
+        console.log("test collection model json");
+        var test = this.myImageCollection.toJSON()
+          console.log(test);
+      /*  for ( var i = 0 ; i < sizeAllPages ; i ++ ){
+          console.log(this.myImageCollection.fullCollection.get(i));
+          //console.log(this.myImageCollection.fullCollection.models[i]);
+          dataToSend.push({
+            id:this.myImageCollection.fullCollection.models[i].id,
+            status:this.myImageCollection.fullCollection.models[i].status
+          })
+        };*/
+
+
+        for ( var i = 0 ; i < sizePage && !flagUnchecked ; i ++ ){
+          switch (this.myImageCollection.models[i].status) {
             case 0 : {
-              console.log("DELETE :"+model.id+" url:"+model.path );
+              console.log("DELETE pk_id: "+this.myImageCollection.models[i].id+" url:"+this.myImageCollection.models[i].path );
               break;
             }
             case 1 : {
-              console.log("SAVE   :"+model.id+" url:"+model.path);
+              console.log("SAVE pk_id:"+this.myImageCollection.models[i].id+" url:"+this.myImageCollection.models[i].path);
               break;
             }
             default :{
-              console.log("N/A    :"+model.id+" url:"+model.path);
+              console.log("N/A pk_id:"+this.myImageCollection.models[i].id+" url:"+this.myImageCollection.models[i].path);
+              flagUnchecked = true;
+              _this.displayListUnchecked();
               break;
             }
           }
+        }
+
+        console.log(dataToSend);
+
+          $.ajax({
+            url : url,
+            method: 'POST',
+            data: {data : JSON.stringify(this.myImageCollection) },
+            context: this,
+          })
+          .done( function(response,status,jqXHR) {
+            console.log(jqXHR);
+          })
+          .fail( function(jqXHR, textStatus, errorThrown) {
+            console.log(jqXHR);
+            console.log(textStatus);
+            console.log(errorThrown);
+
+          });
+        },
+        /*this.myImageCollection.each(function (model) {
+          }
           //console.log(model);
-        });
+        });*/
         /*
         var _this = this;
         var url = config.coreUrl + 'sensors/' + this.type      +
@@ -280,7 +354,7 @@ this.swal(resp, resp.type, callback);
 }).fail(function(resp) {
 this.swal(resp, 'error');
 });*/
-},
+//},
 
 swal: function(opt, type, callback) {
   var btnColor;

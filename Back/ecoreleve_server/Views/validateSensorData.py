@@ -228,7 +228,7 @@ def details_unchecked_camtrap(request):
         ).where(and_(unchecked.c['FK_sensor']== ptt
             ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_MonitoredSite'] == id_indiv))).order_by(desc(unchecked.c['date']))"""
 
-    query = 'select PK_id,path,name from ecoReleve_Sensor.dbo.TcameraTrap where pk_id in (select pk_id from [dbo].V_dataCamTrap_With_equipSite where fk_sensor = '+str(id_indiv)+' AND FK_MonitoredSite = '+str(ptt)+' AND equipID ='+str(id_equip)+' );'
+    query = 'select PK_id,path,name,checked,validated from ecoReleve_Sensor.dbo.TcameraTrap where pk_id in (select pk_id from [dbo].V_dataCamTrap_With_equipSite where fk_sensor = '+str(id_indiv)+' AND FK_MonitoredSite = '+str(ptt)+' AND equipID ='+str(id_equip)+' );'
     data = session.execute(query).fetchall()
     dataResults = [dict(row) for row in data]
 
@@ -291,6 +291,8 @@ def auto_validation(request):
     global graphDataDate
 
     type_ = request.matchdict['type']
+    if type_ == 'camtrap':
+        return validateCamTrap(request)
     # print ('\n*************** AUTO VALIDATE *************** \n')
     param = request.params.mixed()
     freq = param['frequency']
@@ -395,3 +397,12 @@ def auto_validate_ALL_stored_procGSM_Argos(user,type_,freq,session):
     nb_insert, exist , error= session.execute(stmt).fetchone()
 
     return nb_insert, exist , error
+
+def validateCamTrap(request):
+    print("route atteinte")
+    data = request.params.mixed()
+    data = json.loads(data['data'])
+    print(data)
+    for tmp in request.POST:
+        print( str(tmp) )
+    return 10
