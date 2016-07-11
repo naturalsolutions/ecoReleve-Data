@@ -33,6 +33,11 @@ define([
         this.com.addModule(this);
       }
 
+      this.ajaxType = 'GET';
+      if (options.ajaxType) {
+        this.ajaxType = options.ajaxType;
+      }
+
       this.totalSelectedUI = options.totalSelectedUI;
 
       this.deferred = $.Deferred();
@@ -114,9 +119,23 @@ define([
       if (options.filterCriteria) {
         this.filterCriteria = options.filterCriteria;
       }
-      
+      if(options.affectTotalRecords){
+        this.affectTotalRecords = options.affectTotalRecords;
+      }
+      if (options.rowSelectorElement){
+        this.rowSelectorElement = options.rowSelectorElement;
+        this.displayRowSelector();
+      }
       this.initGrid();
       this.eventHandler();
+    },
+    initNbRowSelector: function(){
+      var _this = this;
+      $('#'+this.rowSelectorElement+'_gridRow').change(function(){
+        console.log($('#'+_this.rowSelectorElement+'_gridRow').val());
+        _this.collection.state.pageSize = parseInt($('#'+_this.rowSelectorElement+'_gridRow').val());
+        _this.fetchCollection({ init: false });
+      });
     },
 
     initGrid: function () {
@@ -125,7 +144,7 @@ define([
         columns: this.columns,
         collection: this.collection
       });
-
+      this.initNbRowSelector();
       //if no collection is furnished : fetch
       if (!this.coll) {
         this.collection.searchCriteria = {};
@@ -328,8 +347,6 @@ define([
     fetchCollection: function () {
       var _this = this;
 
-
-
       if (this.filterCriteria != null) {
         //<- ??
         if (!this.url){
@@ -345,7 +362,8 @@ define([
 
           this.grid.collection.fetch({
             reset: true, 
-            data: { 'criteria': this.filterCriteria }, 
+            data: { 'criteria': this.filterCriteria },
+            type: _this.ajaxType,
             success: function () {
               if(_this.totalElement){
                 _this.affectTotalRecords();
@@ -383,6 +401,7 @@ define([
           this.grid.body.collection = args;
           this.grid.body.refresh();
         }
+        this.affectTotalRecords();
       }
       else {
         // Server side filter
@@ -391,6 +410,7 @@ define([
     },
 
     displayGrid: function () {
+      //this.initNbRowSelector();
       return this.grid.render().el;
     },
     getGridView : function(){
@@ -405,6 +425,20 @@ define([
 
 
       return resultat;
+    },
+
+    displayRowSelector: function(){
+      if (this.rowSelectorElement){
+        var optionsList = [20,40,80,100,150,200,500];
+        var tpl = '<select id="'+this.rowSelectorElement+'_gridRow" class="form-control">';
+        _.each(optionsList,function(item){
+           tpl+='<option value='+item+'>'+item+'</option>';
+        });
+        tpl+='</select>';
+
+        $('#'+this.rowSelectorElement).html(tpl);
+        return tpl;
+      }
     },
 
     affectTotalRecords: function () {

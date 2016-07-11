@@ -118,6 +118,7 @@ define([
         url: url,
         rowClicked: true,
         totalElement: 'totalEntries',
+        rowSelectorElement: 'rowSelectorSta'
       });
       this.grid.rowClicked = function(args) {
         _this.rowClicked(args.row);
@@ -160,10 +161,12 @@ define([
     },
 
     hideDetails: function() {
-      Backbone.history.navigate('#stations/', {trigger: false});
-      this.ui.detail.addClass('hidden');
+      var _this= this;
+      window.checkExitForm(function(){
+        Backbone.history.navigate('#stations/', {trigger: false});
+        _this.ui.detail.addClass('hidden');
+      });
     },
-
     filter: function(e) {
       this.filters.update();
     },

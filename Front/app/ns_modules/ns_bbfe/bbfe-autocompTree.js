@@ -171,7 +171,7 @@ define([
                 success: function (data) {
                     $('#divAutoComp_' + _this.id).removeClass('error');
                     _this.displayErrorMsg(false);
-
+                   // _this.$el.find('input').trigger('change');
                     var translatedValue = data["TTop_FullPathTranslated"];
                     if (isTranslated) {
                         if (_this.displayValueName == 'valueTranslated') {
@@ -180,13 +180,14 @@ define([
                         _this.$el.find('#' + _this.id + '_value').val(data["TTop_FullPath"]);
                         _this.$el.find('#' + _this.id ).attr('data_value',value);
                         _this.$el.find('#' + _this.id).val(translatedValue);
+                        _this.$el.find('#' + _this.id).attr('title',translatedValue);
                     }
 
                     _this.displayErrorMsg(false);
 
                 },
                 error: function (data) {
-                    _this.$el.find('#' + _this.id).val(_this.value);
+                    _this.$el.find('#' + _this.id).val(value);
                     if (_this.editable) {
                         $('#divAutoComp_' + _this.id).addClass('error');
                         _this.displayErrorMsg(true);
@@ -214,6 +215,7 @@ define([
                 if (this.isTermError) {
                     this.termError = "Invalid term";
                     this.$el.find('#divAutoComp_' + this.id).addClass('error');
+                    this.$el.find('#' + this.id).attr('title','Invalid term');
                     //this.$el.find('#errorMsg').removeClass('hidden');
                 } else {
                     this.termError = "";

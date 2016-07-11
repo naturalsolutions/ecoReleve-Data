@@ -144,6 +144,7 @@ define([
       }
       else {
         this.id = 0;
+        window.formEdition = true;
       }
 
       if(options.displayMode){
@@ -221,7 +222,10 @@ define([
         dataType: 'json',
         success: function (resp) {
           _this.model.schema = resp.schema;
-          
+          window.formEdition = false;
+          if (this.displayMode == 'edit'){
+            window.formEdition = true;
+          }
           if (resp.fieldsets) {
             // if fieldset present in response, we get it
             _this.model.fieldsets = resp.fieldsets;
@@ -261,7 +265,15 @@ define([
           }
         });
       }
-
+      $(this.formRegion).find('input').on("change", function(e) {
+         window.formChange = true;
+      });
+      $(this.formRegion).find('select').on("change", function(e) {
+         window.formChange = true;
+      });
+      $(this.formRegion).find('textarea').on("change", function(e) {
+         window.formChange = true;
+      });
 
         $(this.formRegion).find('textarea').on("keypress", function(e) {
             var maxlen = 250;
@@ -347,7 +359,7 @@ define([
               // Getting ID of created record, from the model (has beeen affected during model.save in the response)
               _this.savingSuccess(model, response);
               _this.id = _this.model.id;
-              
+              window.formEdition = false;
               if (_this.redirectAfterPost != "") {
                 // If redirect after creation
                 var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
@@ -384,6 +396,7 @@ define([
           var jqxhr = this.model.save(null, {
             success: function (model, response) {
               _this.savingSuccess(model, response);
+              window.formEdition = false;
               if (_this.reloadAfterSave) {
                 _this.reloadingAfterSave();
               }
@@ -414,6 +427,7 @@ define([
       this.initModel();
       if(this.buttonRegion)
       this.displaybuttons();
+
     },
     butClickCancel: function (e) {
       this.checkGridRowAgain();
@@ -421,6 +435,7 @@ define([
       this.initModel();
       if(this.buttonRegion)
       this.displaybuttons();
+
     },
     butClickClear: function (e) {
       this.checkGridRowAgain();

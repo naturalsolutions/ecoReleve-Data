@@ -1,0 +1,44 @@
+/*********** you have to check if exists observation with a wrong FK_individual ******/
+SELECT *
+FROM Observation o 
+WHERE not exists (SELECT * FROM Individual WHERE ID = o.FK_Individual)
+AND FK_Individual is not null 
+
+
+/*****  if this previous query return rows, send an email to the customers to do the good correction ******/ 
+/******* you can delete this observation wiht this query ***********/ 
+
+--SELECT ID 
+--INTO #wrongObsID
+--FROM Observation o 
+--WHERE not exists (SELECT * FROM Individual WHERE ID = o.FK_Individual)
+--AND FK_Individual is not null 
+
+--DELETE v 
+--FROM ObservationDynPropValue v 
+--WHERE FK_Observation in (SELECT ID FROM #wrongObsID)
+
+--DELETE Observation WHERE ID in (SELECT ID FROM #wrongObsID)
+
+
+/****** IF all is good, execute this pipe *****/
+ALTER TABLE Observation
+ADD FOREIGN KEY (FK_Individual)
+REFERENCES Individual(ID)
+
+
+ALTER TABLE TVersion
+   ADD TVer_PK_ID INT IDENTITY NOT NULL
+
+
+ALTER TABLE TVersion
+   ADD CONSTRAINT TVer_PK_ID
+   PRIMARY KEY(TVer_PK_ID)
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('66_ADD_FK_Obs_PK_Tversion',GETDATE(),(SELECT db_name()))
+
+
+GO

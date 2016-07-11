@@ -1,0 +1,10 @@
+UPDATE ModuleGrids SET Options = '{"operators" : [{"label":"Is","val":"Is"},{"label":"Is not","val":"Is not"}]}'
+WHERE Name = 'availableOn'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('68_Grid_Conf_Sensor_setOptions_availableOn',GETDATE(),(SELECT db_name()))
+
+
+GO

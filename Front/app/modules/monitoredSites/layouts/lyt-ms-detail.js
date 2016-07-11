@@ -120,12 +120,12 @@ define([
         name: 'StartDate',
         label: 'Start Date',
         editable: false,
-        cell: 'string'
+        cell: 'stringDate'
       },{
         name: 'EndDate',
         label: 'End Date',
         editable: false,
-        cell: 'string'
+        cell: 'stringDate'
       }, {
         name: 'Type',
         label: 'Type',
@@ -164,7 +164,21 @@ define([
         name: 'Name',
         label: 'Name',
         editable: false,
-        cell : 'string'
+        cell: Backgrid.StringCell.extend({
+          render: function () {
+            this.$el.empty();
+            var rawValue = this.model.get(this.column.get("name"));
+            var formattedValue = this.formatter.fromRaw(rawValue, this.model);
+
+            this.$el.append('<a target="_blank"' 
+              +'href= "http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID')+'">\
+                '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
+              </a>');
+
+            this.delegateEvents();
+            return this;
+          }
+        })
       },{
         name: 'StationDate',
         label: 'date',
@@ -184,21 +198,7 @@ define([
         name: 'fieldActivity_Name',
         label: 'FieldActivity',
         editable: false,
-        cell: Backgrid.StringCell.extend({
-          render: function () {
-            this.$el.empty();
-            var rawValue = this.model.get(this.column.get("name"));
-            var formattedValue = this.formatter.fromRaw(rawValue, this.model);
-
-            this.$el.append('<a target="_blank"' 
-              +'href= "http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID')+'">\
-                '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
-              </a>');
-
-            this.delegateEvents();
-            return this;
-          }
-        })
+        cell : 'string'
       }];
 
       this.stationsGrid = new NsGrid({
