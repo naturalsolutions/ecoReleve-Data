@@ -8,7 +8,6 @@ conda install sqlalchemy=1.0.8
 conda install zope.interface
 conda install pywin32
 conda install pycrypto
-pip install jwt
 pip install pyramid_jwtauth
 
 python setup.py develop
