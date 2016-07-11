@@ -210,7 +210,7 @@ def deleteSensor(request):
     session = request.dbsession
     id_ = request.matchdict['id']
     curSensor = session.query(Sensor).get(id_)
-    session.delete(Sensor)
+    session.delete(curSensor)
 
     return True
 

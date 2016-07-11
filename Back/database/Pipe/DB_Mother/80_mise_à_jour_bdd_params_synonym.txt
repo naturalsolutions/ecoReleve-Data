@@ -1,0 +1,1041 @@
+
+
+---- base oiseau
+
+/****** Object:  StoredProcedure [dbo].[pr_ExportAllIndividu]    Script Date: 30/06/2016 15:16:03 ******/
+DROP PROCEDURE [dbo].[pr_ExportAllIndividu]
+GO
+/****** Object:  StoredProcedure [dbo].[pr_ExportAllProtocole]    Script Date: 30/06/2016 15:16:57 ******/
+DROP PROCEDURE [dbo].[pr_ExportAllProtocole]
+GO
+DROP PROCEDURE [dbo].[pr_ExportAllSensor]
+GO
+
+
+/****** Object:  View [dbo].[CurrentlySensorEquiped]    Script Date: 30/06/2016 15:18:32 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER View [dbo].[CurrentlySensorEquiped] as 
+SELECT e.*
+  FROM [dbo].[Equipment] e
+  WHERE not exists (SELECT *
+					FROm [Equipment] e2 
+					WHERE e.FK_Sensor = e2.FK_Sensor and e2.StartDate > e.StartDate 
+					and e2.StartDate <= GETDATE()
+					)
+AND e.StartDate <= GETDATE() and Deploy = 1
+
+
+GO
+
+
+/****** Object:  View [dbo].[IndividualEquipment]    Script Date: 30/06/2016 15:19:13 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+ALTER VIEW [dbo].[IndividualEquipment] as 
+
+SELECT e.ID, e.FK_Sensor,e.FK_Individual,e.StartDate as StartDate,e1.StartDate as EndDate
+  FROM [dbo].[Equipment] e 
+ LEFT JOIN Equipment e1 
+	ON e.FK_Individual = e1.FK_Individual 
+	and e.FK_Sensor = e1.FK_Sensor 
+	and e.ID!=e1.ID 
+	and e.StartDate < e1.StartDate 
+	and e1.Deploy = 0
+	AND NOT exists (
+			SELECT * 
+			FROM Equipment ee
+			WHERE ee.FK_Sensor = e1.FK_Sensor and ee.FK_Individual = e1.FK_Individual and ee.StartDate<e1.StartDate and e.StartDate<ee.StartDate
+	)
+WHERE e.Deploy = 1 AND e.FK_Individual is not null
+
+GO
+
+
+/****** Object:  View [dbo].[MonitoredSiteEquipment]    Script Date: 30/06/2016 15:19:55 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+
+ALTER VIEW [dbo].[MonitoredSiteEquipment] as 
+
+SELECT e.FK_Sensor,e.FK_MonitoredSite,e.StartDate as StartDate,e1.StartDate as EndDate
+  FROM [dbo].[Equipment] e 
+ LEFT JOIN Equipment e1 
+	ON e.FK_MonitoredSite = e1.FK_MonitoredSite 
+	and e.FK_Sensor = e1.FK_Sensor 
+	and e.ID!=e1.ID 
+	and e.StartDate < e1.StartDate 
+	and e1.Deploy = 0
+	AND NOT exists (
+			SELECT * 
+			FROM Equipment ee
+			WHERE ee.FK_Sensor = e1.FK_Sensor and ee.FK_MonitoredSite = e1.FK_MonitoredSite and ee.StartDate<e1.StartDate and e.StartDate<ee.StartDate
+	)
+WHERE e.Deploy = 1 AND e.FK_MonitoredSite is not null 
+
+
+GO
+
+
+
+CREATE SYNONYM [dbo].[sensor_LocationClass] FOR [ecoReleve_Sensor].[dbo].[TLocationClass]
+GO
+CREATE SYNONYM [dbo].[sensor_ArgosGps] FOR [ecoReleve_Sensor].[dbo].[T_argosgps]
+GO
+CREATE SYNONYM [dbo].[sensor_Gsm] FOR [ecoReleve_Sensor].[dbo].[Tgsm]
+GO
+CREATE SYNONYM [dbo].[sensor_Rfid] FOR [ecoReleve_Sensor].[dbo].[T_rfid]
+GO
+
+
+
+/****** Object:  StoredProcedure [dbo].[sp_auto_validate_ALL_Argos_GPS]    Script Date: 30/06/2016 15:29:43 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[sp_auto_validate_ALL_Argos_GPS]
+	@user int,
+	@freq int,
+	@nb_insert int OUTPUT,
+	@exist int output, 
+	@error int output
+	
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	DECLARE @data_to_insert table ( 
+		data_id int,FK_Sensor int, date_ datetime, lat decimal(9,5), lon decimal(9,5)
+		, lc varchar(1), iq tinyint,ele int , nbMsg tinyint, nbMsg120dB tinyint
+		, bestLevel smallint, passDuration	smallint,nopc tinyint,freq float
+		,errorRadius int,semiMajor int,semiMinor int,orientation tinyint,hdop int , 
+		speed int,course int, type_ varchar(3),
+		 FK_ind int,creator int,name varchar(100)
+		 );
+
+	DECLARE @data_duplicate table ( 
+		data_id int,fk_sta_id int
+		);
+
+	DECLARE @output TABLE (ind_loc_id int,data_id varchar(20));
+	DECLARE @NbINserted int ; 
+
+WITH data AS (
+		SELECT *
+			, ROW_NUMBER() OVER (PARTITION BY FK_Individual,FK_Sensor,CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VArgosData_With_EquipIndiv where checked = 0 and FK_Individual IS NOT NULL
+	)
+
+-- insert data creating new Location
+INSERT INTO [dbo].[Individual_Location]
+           ([LAT]
+           ,[LON]
+           ,[Date]
+           ,[Precision]
+           ,[FK_Sensor]
+           ,[FK_Individual]
+           ,[ELE]
+           ,[creationDate]
+           ,[creator]
+           ,[type_]
+		   ,OriginalData_ID
+		   ,FK_Region)
+OUTPUT inserted.ID,inserted.OriginalData_ID INTO @output
+select 
+lat,
+lon,
+date,
+CASE 
+	WHEN type = 'gps' then 
+		CASE WHEN hdop is null then 26
+		ELSE hdop
+		END
+	ELSE loc.[TLocCl_Precision]
+ END
+,FK_Sensor
+,FK_Individual
+,ele
+,GETDATE()
+,@user
+,CASE WHEN [type] = 'arg' THEN 'argos' ELSE [type] END
+,'Targos_gps_'+CONVERT(VARCHAR,PK_id)
+,NULL
+from data i
+LEFT JOIN [dbo].[sensor_LocationClass] loc 
+	ON loc.TLocCl_Classe = i.lc COLLATE SQL_Latin1_General_CP1_CI_AS
+where i.r = 1
+AND not EXISTS (select * FROM Individual_Location s 
+				WHERE round(i.lat,3)=round(s.LAT,3) and round(i.lon,3) = round(s.LON,3) and i.date = s.DATE and s.FK_Individual = i.FK_Individual)
+SET @NbINserted=@@ROWCOUNT;
+
+-------------------------------------------------------------------------------------------
+
+WITH data AS (
+		SELECT *
+			, ROW_NUMBER() OVER (PARTITION BY FK_Individual,FK_Sensor,CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VArgosData_With_EquipIndiv where checked = 0 and FK_Individual IS NOT NULL
+	)
+
+SELECT @exist = (select COUNT(*) FROM data where r=1)- @NbINserted
+
+update [dbo].[sensor_ArgosGps] set imported = 1 where PK_id in (select CONVERT(int,replace(data_id,'Targos_gps_','')) from @output)
+update VArgosData_With_EquipIndiv set checked = 1 where checked = 0 and [FK_Individual] is not null 
+
+SET @nb_insert = @NbINserted
+SET @error=@@ERROR
+
+
+RETURN
+END
+
+GO
+
+
+/****** Object:  StoredProcedure [dbo].[sp_auto_validate_ALL_GSM]    Script Date: 30/06/2016 15:35:49 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+ALTER PROCEDURE [dbo].[sp_auto_validate_ALL_GSM]
+	@user int,
+	@freq int,
+	@nb_insert int OUTPUT,
+	@exist int output, 
+	@error int output
+	
+	
+AS
+BEGIN
+	
+
+	SET NOCOUNT ON;
+	DECLARE @data_to_insert table ( 
+		data_id int,FK_Sensor int, date_ datetime, lat decimal(9,5), lon decimal(9,5)
+		,ele int ,hdop int , 
+		speed int,course int, type_ varchar(3),
+		 FK_ind int,creator int,name varchar(100)
+		 );
+
+	DECLARE @data_duplicate table ( 
+		data_id int,fk_sta_id int
+		);
+
+	DECLARE @output TABLE (ind_loc_id int,data_id varchar(20));
+	DECLARE @NbINserted int ; 
+
+WITH data AS (
+		SELECT *
+			, ROW_NUMBER() OVER (PARTITION BY FK_Individual,FK_Sensor,CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VGSMData_With_EquipIndiv where checked = 0 and FK_Individual IS NOT NULL
+	)
+
+
+-- insert data creating new Location
+INSERT INTO [dbo].[Individual_Location]
+           ([LAT]
+           ,[LON]
+           ,[Date]
+           ,[Precision]
+           ,[FK_Sensor]
+           ,[FK_Individual]
+           ,[ELE]
+           ,[creationDate]
+           ,[creator]
+           ,[type_]
+		   ,OriginalData_ID
+		   ,FK_Region)
+OUTPUT inserted.ID,inserted.OriginalData_ID INTO @output
+select 
+lat,
+lon,
+date,
+CASE 
+WHEN hdop is null then 26
+ELSE hdop
+ END
+,FK_Sensor
+,FK_Individual
+,ele
+,GETDATE()
+,@user
+,[type]
+,'Tgsm'+CONVERT(VARCHAR,PK_id)
+,NULL
+from data i
+where r = 1
+AND not EXISTS (select * FROM Individual_Location s 
+				WHERE i.lat=s.LAT and i.lon = s.LON and i.date = s.DATE and s.FK_Individual = i.FK_Individual)
+SET @NbINserted=@@ROWCOUNT;
+
+
+
+WITH data AS (
+		SELECT *
+			, ROW_NUMBER() OVER (PARTITION BY FK_Individual,FK_Sensor,CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VGSMData_With_EquipIndiv where checked = 0 and FK_Individual IS NOT NULL
+	)
+
+SELECT @exist = (select COUNT(*) FROM data where r=1)- @NbINserted
+
+update [dbo].[sensor_ArgosGps] set imported = 1 where PK_id in (select CONVERT(int,replace(data_id,'Tgsm','')) from @output)
+update VGSMData_With_EquipIndiv set checked = 1 where checked = 0 and [FK_Individual] IS NOT NULL ;
+
+
+SET @nb_insert = @NbINserted
+SET @error=@@ERROR
+
+
+
+RETURN
+END
+
+
+
+
+GO
+
+
+/****** Object:  StoredProcedure [dbo].[sp_auto_validate_Argos_GPS]    Script Date: 30/06/2016 15:36:52 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+/*************************************************************************** *************************************************************************************/
+
+ALTER PROCEDURE [dbo].[sp_auto_validate_Argos_GPS]
+	@ptt int , 
+	@ind int,
+	@user int,
+	@freq int,
+	@nb_insert int OUTPUT,
+	@exist int output, 
+	@error int output
+	
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	DECLARE @data_to_insert table ( 
+		data_id int,FK_Sensor int, date_ datetime, lat decimal(9,5), lon decimal(9,5)
+		, lc varchar(1), iq tinyint,ele int , nbMsg tinyint, nbMsg120dB tinyint
+		, bestLevel smallint, passDuration	smallint,nopc tinyint,freq float
+		,errorRadius int,semiMajor int,semiMinor int,orientation tinyint,hdop int , 
+		speed int,course int, type_ varchar(3),
+		 FK_ind int,creator int,name varchar(100)
+		 );
+
+	DECLARE @data_duplicate table ( 
+		data_id int,fk_sta_id int
+		);
+
+	DECLARE @output TABLE (ind_loc_id int,data_id varchar(20));
+	DECLARE @NbINserted int ; 
+
+WITH data AS (
+		SELECT *
+			, ROW_NUMBER() OVER (PARTITION BY CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VArgosData_With_EquipIndiv where  FK_ptt=@ptt and checked = 0 and FK_Individual = @ind
+	)
+
+-- insert data creating new Location
+INSERT INTO [dbo].[Individual_Location]
+           ([LAT]
+           ,[LON]
+           ,[Date]
+           ,[Precision]
+           ,[FK_Sensor]
+           ,[FK_Individual]
+           ,[ELE]
+           ,[creationDate]
+           ,[creator]
+           ,[type_]
+		   ,OriginalData_ID
+		   ,FK_Region)
+OUTPUT inserted.ID,inserted.OriginalData_ID INTO @output
+select 
+lat,
+lon,
+date,
+CASE 
+	WHEN type = 'gps' then 
+		CASE WHEN hdop is null then 26
+		ELSE hdop
+		END
+	ELSE loc.[TLocCl_Precision]
+ END
+,FK_Sensor
+,FK_Individual
+,ele
+,GETDATE()
+,@user
+,CASE WHEN [type] = 'arg' THEN 'argos' ELSE [type] END
+,'Targos_gps_'+CONVERT(VARCHAR,PK_id)
+,NULL
+from data i
+LEFT JOIN [dbo].[sensor_LocationClass] loc 
+	ON loc.TLocCl_Classe = i.lc COLLATE SQL_Latin1_General_CP1_CI_AS
+where i.r = 1
+AND not EXISTS (select * FROM Individual_Location s 
+				WHERE round(i.lat,3)=round(s.LAT,3) and round(i.lon,3) = round(s.LON,3) and i.date = s.DATE and s.FK_Individual = i.FK_Individual)
+SET @NbINserted=@@ROWCOUNT;
+
+-------------------------------------------------------------------------------------------
+
+WITH data AS (
+		SELECT *
+			, ROW_NUMBER() OVER (PARTITION BY CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VArgosData_With_EquipIndiv where  FK_ptt=@ptt and checked = 0 and FK_Individual = @ind
+	)
+
+SELECT @exist = (select COUNT(*) FROM data where r=1)- @NbINserted
+
+update [dbo].[sensor_ArgosGps] set imported = 1 where PK_id in (select CONVERT(int,replace(data_id,'Targos_gps_','')) from @output)
+update VArgosData_With_EquipIndiv set checked = 1 where checked = 0 and  FK_ptt=@ptt and checked = 0 and FK_Individual = @ind
+
+SET @nb_insert = @NbINserted
+SET @error=@@ERROR
+
+
+RETURN
+END
+
+
+
+
+GO
+
+
+/****** Object:  StoredProcedure [dbo].[sp_auto_validate_argosArgos_argosGPS]    Script Date: 30/06/2016 15:38:32 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+ALTER PROCEDURE [dbo].[sp_auto_validate_argosArgos_argosGPS]
+	@ptt int , 
+	@ind int,
+	@user int,
+	@freq int,
+	@nb_insert int OUTPUT,
+	@exist int output, 
+	@error int output
+	
+	
+AS
+BEGIN
+---------------------------- Declaration -----------------------------------------------------------
+	SET NOCOUNT ON;
+	DECLARE @data_to_insert table ( 
+		data_id int,FK_Sensor int, date_ datetime, lat decimal(9,5), lon decimal(9,5)
+		, lc varchar(1), iq tinyint,ele int , nbMsg tinyint, nbMsg120dB tinyint
+		, bestLevel smallint, passDuration	smallint,nopc tinyint,freq float
+		,errorRadius int,semiMajor int,semiMinor int,orientation tinyint,hdop int , 
+		speed int,course int, type_ varchar(3),
+		 FK_ind int,creator int,name varchar(100)
+		 );
+
+	DECLARE @data_duplicate table ( 
+		data_id int,fk_sta_id int
+		);
+
+	DECLARE @output TABLE (ind_loc_id int,data_id int,type_ varchar(3));
+	DECLARE @NbINserted int ; 
+
+WITH data AS (
+		SELECT PK_ID,
+			date
+			, ROW_NUMBER() OVER (PARTITION BY CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VArgosData_With_EquipIndiv where  FK_ptt=@ptt and checked = 0 and FK_Individual = @ind
+	)
+
+
+------------------------------------- Check data to Inset ------------------------------------------------------------------
+INSERT INTO @data_to_insert (data_id ,FK_Sensor , date_ , lat , lon , lc , iq ,ele  ,
+ nbMsg , nbMsg120dB , bestLevel , passDuration	,nopc ,freq ,
+ errorRadius ,semiMajor,semiMinor ,orientation ,hdop
+ ,speed,course ,type_,
+  FK_ind ,creator )
+SELECT 
+[PK_id],FK_Sensor,[date],[lat],[lon],[lc],[iq],[ele]
+,[nbMsg],[nbMsg120],[bestLevel],[passDuration],[nopc],[freq],
+[errorRadius],[semiMajor],[semiMinor],[orientation],[hdop]
+,[speed],[course],[type]
+,@ind,@user
+FROM VArgosData_With_EquipIndiv
+WHERE PK_id in (
+	select PK_ID from data where r=1
+) 
+and checked = 0
+
+-- check duplicate location before insert data in @data_without_duplicate
+insert into  @data_duplicate  
+select d.data_id, s.ID
+from @data_to_insert d join Individual_Location s on round(d.lat,3)=round(s.LAT,3) and round(d.lon,3) = round(s.LON,3) and d.date_ = s.DATE and s.FK_Individual = d.FK_ind
+
+
+------------------------------------- Insert Data  ------------------------------------------------------------------
+-- insert data creating new Location
+INSERT INTO [dbo].[Individual_Location]
+           ([LAT]
+           ,[LON]
+           ,[Date]
+           ,[Precision]
+           ,[FK_Sensor]
+           ,[FK_Individual]
+           ,[ELE]
+           ,[creationDate]
+           ,[creator]
+           ,[type_]
+		   ,OriginalData_ID)
+select 
+lat,
+lon,
+date_,
+CASE 
+	WHEN type_ = 'gps' then 
+		CASE WHEN hdop is null then 26
+		ELSE hdop
+		END
+	ELSE loc.[TLocCl_Precision]
+ END
+,FK_Sensor
+,FK_ind
+,ele
+,GETDATE()
+,@user
+,[type_]
+,'Targos_gps_'+CONVERT(VARCHAR,data_id)
+from @data_to_insert i
+LEFT JOIN [dbo].[sensor_LocationClass] loc 
+ON loc.TLocCl_Classe = i.lc COLLATE SQL_Latin1_General_CP1_CI_AS
+where i.data_id not in (select data_id from @data_duplicate)
+SET @NbINserted=@@ROWCOUNT
+
+update [dbo].[sensor_ArgosGps] set imported = 1 where PK_id in (select data_id from @data_to_insert)
+update VArgosData_With_EquipIndiv set checked = 1 where FK_ptt = @ptt and [FK_Individual] = @ind
+
+SET @nb_insert = @NbINserted
+SELECT @exist = COUNT(*) FROM @data_duplicate
+SET @error=@@ERROR
+
+RETURN
+END
+
+
+GO
+
+/****** Object:  StoredProcedure [dbo].[sp_auto_validate_GSM]    Script Date: 30/06/2016 15:39:45 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+ALTER PROCEDURE [dbo].[sp_auto_validate_GSM]
+	@ptt int , 
+	@ind int,
+	@user int,
+	@freq int,
+	@nb_insert int OUTPUT,
+	@exist int output, 
+	@error int output
+	
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	DECLARE @data_to_insert table ( 
+		data_id int,FK_Sensor int, date_ datetime, lat decimal(9,5), lon decimal(9,5)
+		,ele int ,hdop int , 
+		speed int,course int, type_ varchar(3),
+		 FK_ind int,creator int,name varchar(100)
+		 );
+
+	DECLARE @data_duplicate table ( 
+		data_id int,fk_sta_id int
+		);
+
+	DECLARE @output TABLE (ind_loc_id int,data_id varchar(20));
+	DECLARE @NbINserted int ; 
+
+WITH data AS (
+		SELECT *
+			, ROW_NUMBER() OVER (PARTITION BY CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VGSMData_With_EquipIndiv where  FK_ptt=@ptt and checked = 0 and FK_Individual = @ind
+	)
+
+-- insert data creating new Location
+INSERT INTO [dbo].[Individual_Location]
+           ([LAT]
+           ,[LON]
+           ,[Date]
+           ,[Precision]
+           ,[FK_Sensor]
+           ,[FK_Individual]
+           ,[ELE]
+           ,[creationDate]
+           ,[creator]
+           ,[type_]
+		   ,OriginalData_ID
+		   ,FK_Region)
+OUTPUT inserted.ID,inserted.OriginalData_ID INTO @output
+select 
+lat,
+lon,
+date,
+CASE 
+WHEN hdop is null then 26
+ELSE hdop
+ END
+,FK_Sensor
+,FK_Individual
+,ele
+,GETDATE()
+,@user
+,[type]
+,'Tgsm'+CONVERT(VARCHAR,PK_id)
+,NULL
+from data i
+where r = 1
+AND not EXISTS (select * FROM Individual_Location s 
+				WHERE i.lat=s.LAT and i.lon = s.LON and i.date = s.DATE and s.FK_Individual = i.FK_Individual)
+SET @NbINserted=@@ROWCOUNT;
+
+
+
+WITH data AS (
+		SELECT *
+			, ROW_NUMBER() OVER (PARTITION BY CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VGSMData_With_EquipIndiv where  FK_ptt=@ptt and checked = 0 and FK_Individual = @ind
+	)
+
+SELECT @exist = (select COUNT(*) FROM data where r=1)- @NbINserted
+
+update [dbo].[sensor_Gsm] set imported = 1 where PK_id in (select CONVERT(int,replace(data_id,'Tgsm','')) from @output)
+update VGSMData_With_EquipIndiv set checked = 1 where  FK_ptt=@ptt and checked = 0 and FK_Individual = @ind ;
+
+
+SET @nb_insert = @NbINserted
+SET @error=@@ERROR
+
+
+
+RETURN
+END
+
+
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[sp_validate_Argos_GPS]    Script Date: 30/06/2016 15:40:44 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+/*************************************************************************** *************************************************************************************/
+
+
+ALTER PROCEDURE [dbo].[sp_validate_Argos_GPS]
+	@listID xml,
+	@ind int,
+	@user int,
+	@ptt int , 
+	@nb_insert int OUTPUT,
+	@exist int output, 
+	@error int output
+	
+	
+AS
+BEGIN
+   
+	SET NOCOUNT ON;
+	DECLARE @data_to_insert table ( 
+		data_id int,FK_Sensor int, date_ datetime, lat decimal(9,5), lon decimal(9,5)
+		, lc varchar(1), iq tinyint,ele int , nbMsg tinyint, nbMsg120dB tinyint
+		, bestLevel smallint, passDuration	smallint,nopc tinyint,freq float
+		,errorRadius int,semiMajor int,semiMinor int,orientation tinyint,hdop int , 
+		speed int,course int, type_ varchar(3),
+		 FK_ind int,creator int,name varchar(100)
+		 );
+
+	DECLARE @data_duplicate table ( 
+		data_id int,fk_sta_id int
+		);
+
+	DECLARE @output TABLE (sta_id int,data_id int,type_ varchar(3));
+	DECLARE @NbINserted int ; 
+
+INSERT INTO @data_to_insert (data_id ,FK_Sensor , date_ , lat , lon , lc , iq ,ele  ,
+ nbMsg , nbMsg120dB , bestLevel , passDuration	,nopc ,freq ,
+ errorRadius ,semiMajor,semiMinor ,orientation ,hdop
+ ,speed,course ,type_,
+  FK_ind ,creator )
+SELECT 
+[PK_id],FK_Sensor,[date],[lat],[lon],[lc],[iq],[ele]
+,[nbMsg],[nbMsg120],[bestLevel],[passDuration],[nopc],[freq],
+[errorRadius],[semiMajor],[semiMinor],[orientation],[hdop]
+,[speed],[course],[type]
+,@ind,@user
+FROM VArgosData_With_EquipIndiv
+WHERE PK_id in (
+select * from [dbo].[XML_int] (@listID)
+) and checked = 0
+
+-- check duplicate location before insert data in @data_without_duplicate
+insert into  @data_duplicate  
+select d.data_id, s.ID
+from @data_to_insert d join Individual_Location s on round(d.lat,3)=round(s.LAT,3) and round(d.lon,3) = round(s.LON,3) and d.date_ = s.DATE and s.FK_Individual = d.FK_ind
+
+
+-- insert data creating new Location
+INSERT INTO [dbo].[Individual_Location]
+           ([LAT]
+           ,[LON]
+           ,[Date]
+           ,[Precision]
+           ,[FK_Sensor]
+           ,[FK_Individual]
+           ,[ELE]
+           ,[creationDate]
+           ,[creator]
+           ,[type_]
+		   ,OriginalData_ID
+		   ,FK_Region)
+select 
+lat,
+lon,
+date_,
+CASE 
+	WHEN type_ = 'gps' then 
+		CASE WHEN hdop is null then 26
+		ELSE hdop
+		END
+	ELSE loc.[TLocCl_Precision]
+ END
+,FK_Sensor
+,FK_ind
+,ele
+,GETDATE()
+,@user
+,CASE WHEN [type_] = 'arg' THEN 'argos' ELSE [type_] END
+,'Targos_gps_'+CONVERT(VARCHAR,data_id)
+,dbo.fn_GetRegionFromLatLon(lat,lon)
+from @data_to_insert i
+LEFT JOIN [dbo].[sensor_LocationClass] loc 
+ON loc.TLocCl_Classe = i.lc COLLATE SQL_Latin1_General_CP1_CI_AS
+where i.data_id not in (select data_id from @data_duplicate)
+SET @NbINserted=@@ROWCOUNT
+
+update [dbo].[sensor_ArgosGps] set imported = 1 where PK_id in (select data_id from @data_to_insert)
+update VArgosData_With_EquipIndiv set checked = 1 where FK_ptt = @ptt and [FK_Individual] = @ind
+
+SET @nb_insert = @NbINserted
+SELECT @exist = COUNT(*) FROM @data_duplicate
+SET @error=@@ERROR
+
+RETURN
+END
+
+
+
+
+GO
+
+
+/****** Object:  StoredProcedure [dbo].[sp_validate_GSM]    Script Date: 30/06/2016 16:32:42 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+
+ALTER PROCEDURE [dbo].[sp_validate_GSM]
+	@listID xml,
+	@ind int,
+	@user int,
+	@ptt int , 
+	@nb_insert int OUTPUT,
+	@exist int output, 
+	@error int output
+	
+	
+AS
+BEGIN
+   
+	SET NOCOUNT ON;
+	DECLARE @data_to_insert table ( 
+		data_id int,FK_Sensor int, date_ datetime, lat decimal(9,5), lon decimal(9,5)
+		,ele int,hdop int , 
+		speed int,course int, type_ varchar(3),
+		 FK_ind int,creator int,name varchar(100)
+		 );
+
+	DECLARE @data_duplicate table ( 
+		data_id int,fk_sta_id int
+		);
+
+	DECLARE @output TABLE (sta_id int,data_id int,type_ varchar(3));
+	DECLARE @NbINserted int ; 
+
+INSERT INTO @data_to_insert (
+data_id ,FK_Sensor , date_ , lat , lon,ele,hdop
+ ,speed,course ,type_,
+  FK_ind ,creator )
+SELECT 
+[PK_id],FK_Sensor,[date],[lat],[lon],[ele]
+,[hdop]
+,[speed],[course],'GSM'
+,@ind,@user
+FROM VGSMData_With_EquipIndiv
+WHERE PK_id in (
+select * from [dbo].[XML_int] (@listID)
+) and checked = 0
+
+-- check duplicate location before insert data in @data_without_duplicate
+insert into  @data_duplicate  
+select d.data_id, s.ID
+from @data_to_insert d 
+join Individual_Location s 
+	on d.lat=s.LAT and d.lon = s.LON and d.date_ = s.DATE and s.FK_Individual = d.FK_ind
+
+
+-- insert data creating new Location
+INSERT INTO [dbo].[Individual_Location]
+           ([LAT]
+           ,[LON]
+           ,[Date]
+           ,[Precision]
+           ,[FK_Sensor]
+           ,[FK_Individual]
+           ,[ELE]
+           ,[creationDate]
+           ,[creator]
+           ,[type_]
+		   ,OriginalData_ID
+		   ,FK_Region)
+select 
+lat,
+lon,
+date_,
+CASE 
+	WHEN hdop is null then 26
+	ELSE hdop
+ END
+,FK_Sensor
+,FK_ind
+,ele
+,GETDATE()
+,@user
+,[type_]
+,'Tgsm'+CONVERT(VARCHAR,data_id)
+,dbo.fn_GetRegionFromLatLon(lat,lon)
+from @data_to_insert i
+where i.data_id not in (select data_id from @data_duplicate)
+SET @NbINserted=@@ROWCOUNT
+
+update [dbo].[sensor_Gsm] set imported = 1 where PK_id in (select data_id from @data_to_insert)
+update VGSMData_With_EquipIndiv set checked = 1 where FK_ptt = @ptt and [FK_Individual] = @ind
+
+SET @nb_insert = @NbINserted
+SELECT @exist = COUNT(*) FROM @data_duplicate
+SET @error=@@ERROR
+
+RETURN
+END
+GO
+
+DROP VIEW [dbo].[checkGPSnightJob]
+GO
+
+
+
+/****** Object:  View [dbo].[V_dataRFID_as_file]    Script Date: 30/06/2016 16:35:51 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+ALTER view [dbo].[V_dataRFID_as_file]
+as 
+
+SELECT  e.ID as equipID,S.UnicIdentifier,rfid.FK_Sensor as FK_Sensor,m.Name as site_name,M.Category as site_type,e.StartDate as StartDate,e3.StartDate EndDate,count (distinct chip_code) as nb_chip_code, count (chip_code) as total_scan,Max(rfid.date_) as last_scan
+	,Min(rfid.date_) as first_scan
+from [dbo].[sensor_Rfid] rfid
+LEFT JOIN Equipment E on e.FK_Sensor = rfid.FK_Sensor and e.Deploy =1 and e.StartDate < rfid.date_
+					and not exists (select * 
+									from  [Equipment] e2 
+									where e2.FK_Sensor = e.FK_Sensor AND e2.StartDate > e.StartDate AND e2.StartDate < rfid.date_)
+LEFT JOIN MonitoredSite M on e.FK_MonitoredSite = M.id
+LEFT JOIN Sensor S on rfid.FK_Sensor = S.ID
+LEFT JOIN Equipment E3 on e3.FK_Sensor = rfid.FK_Sensor and e3.Deploy =0 and e3.StartDate > e.StartDate 
+							and not exists (select * 
+									from  [Equipment] e4 
+									where e4.FK_Sensor = e.FK_Sensor AND e4.StartDate < e3.StartDate and e4.StartDate > e.StartDate)
+where rfid.checked = 0
+GROUP BY S.UnicIdentifier,m.Name,m.Category,e.StartDate,e3.StartDate,e.ID,rfid.FK_Sensor
+
+
+GO
+
+
+
+/****** Object:  View [dbo].[VArgosData_With_EquipIndiv]    Script Date: 30/06/2016 16:37:01 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER View [dbo].[VArgosData_With_EquipIndiv] as (
+
+
+SELECT t.ID, t.FK_Individual,v.ValueString as Survey_type,s.ID as FK_Sensor,t.StartDate,t.EndDate,a.*
+  FROM [dbo].[sensor_ArgosGps] a
+  JOIN dbo.Sensor s ON CONVERT(VARCHAR(250),a.FK_ptt) = s.UnicIdentifier
+  LEFT JOIN IndividualEquipment t
+  ON s.ID = t.FK_Sensor AND a.date >= t.StartDate AND (a.[date] < t.EndDate OR t.EndDate IS NULL)
+  LEFT JOIN IndividualDynPropValuesNow v ON v.FK_Individual = t.FK_Individual and v.Name = 'Survey_type'
+  WHERE a.lon IS NOT NULL AND a.lat IS NOT NULL
+
+  )
+
+
+GO
+
+
+/****** Object:  View [dbo].[VGSMData_With_EquipIndiv]    Script Date: 30/06/2016 16:37:44 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER View [dbo].[VGSMData_With_EquipIndiv] as (
+
+SELECT t.FK_Individual,v.ValueString as Survey_type, s.ID as FK_Sensor,t.StartDate,t.EndDate,
+	a.DateTime as date,
+	a.Latitude_N as lat, 
+	a.Longitude_E as lon,
+	a.Altitude_m as ele,
+	'gsm' as type,
+	a.Speed as speed,
+	a.Course as course,
+	a.platform_ as FK_ptt,
+	a.HDOP as hdop,
+	a.VDOP as vdop,
+	a.SatelliteCount,
+	a.file_date,
+	a.checked,
+	a.imported,
+	a.validated,
+	a.PK_id
+
+  FROM [dbo].[sensor_Gsm] a
+  JOIN Sensor s ON CONVERT(VARCHAR,a.platform_) = s.UnicIdentifier 
+  LEFT JOIN IndividualEquipment t 
+	ON s.ID = t.FK_Sensor AND a.DateTime >= t.StartDate AND (a.DateTime < t.EndDate OR t.EndDate IS NULL)
+  LEFT JOIN IndividualDynPropValuesNow v ON v.FK_Individual = t.FK_Individual and v.Name = 'Survey_type'
+   WHERE a.Longitude_E IS NOT NULL AND a.Latitude_N IS NOT NULL AND (a.HDOP >= 6 
+	OR a.VDOP BETWEEN 1 AND 10 
+	OR a.SatelliteCount >=5 )
+  )
+
+
+
+GO
+
+/****** Object:  View [dbo].[VRfidData_With_equipSite]    Script Date: 30/06/2016 16:38:44 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+
+
+ALTER view [dbo].[VRfidData_With_equipSite]
+as 
+SELECT  e.ID as equipID,e.FK_MonitoredSite,S.UnicIdentifier,m.Name as site_name,M.Category as site_type,e.StartDate as StartDate,e3.StartDate EndDate,rfid.*
+from [dbo].[sensor_Rfid] rfid
+LEFT JOIN Equipment E on e.FK_Sensor = rfid.FK_Sensor and e.Deploy =1 and e.StartDate < rfid.date_
+					and not exists (select * 
+									from  [Equipment] e2 
+									where e2.FK_Sensor = e.FK_Sensor AND e2.StartDate > e.StartDate AND e2.StartDate < rfid.date_)
+LEFT JOIN MonitoredSite M on e.FK_MonitoredSite = M.id
+LEFT JOIN Sensor S on rfid.FK_Sensor = S.ID
+LEFT JOIN Equipment E3 on e3.FK_Sensor = rfid.FK_Sensor and e3.Deploy =0 and e3.StartDate > e.StartDate 
+							and not exists (select * 
+									from  [Equipment] e4 
+									where e4.FK_Sensor = e.FK_Sensor AND e4.StartDate < e3.StartDate and e4.StartDate > e.StartDate)
+
+
+
+
+
+
+
+
+
+
+
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('80_mise_à_jour_bdd_params_synonym',GETDATE(),(SELECT db_name()))
+
+
+GO
