@@ -49,6 +49,8 @@ def add_routes(config):
 
 
     # ------------------------------------------------------------------------------------------------------------------------- #
+    config.add_route('jsLog', 'ecoReleve-Core/log/error')
+
     ##### Security routes #####
     config.add_route('security/login', 'ecoReleve-Core/security/login')
     config.add_route('security/logout', 'ecoReleve-Core/security/logout')
