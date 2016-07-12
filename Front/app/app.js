@@ -96,7 +96,20 @@ function( Marionette, LytRootView, Router, Controller,Swal) {
       }
   };
 
+  window.onerror = function (errorMsg, url, lineNumber, column, errorObj) {
+  /* console.log('Error: ' + errorMsg + ' Script: ' + url + ' Line: ' + lineNumber
+    + ' Column: ' + column + ' StackTrace: ' +  errorObj);*/
 
+    console.log(errorObj);
+    console.log(url);
+    console.log(lineNumber);
+    console.log(errorMsg);
+}
+window.addEventListener("error", function (e) {
+   console.log("Error occured: ", e);
+   console.log("Error occured: ", e.error.stack);
+   return false;
+})
   window.app = app;
   return app;
 });
