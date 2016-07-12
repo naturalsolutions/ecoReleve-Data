@@ -72,7 +72,6 @@ define([
 
       this.displayFilter();
       this.displayGrid();
-      console.log(this.grid.collection);
       var _this = this;
       //Backbone.history.navigate('release/individuals',{trigger: false});
     },
@@ -100,8 +99,6 @@ define([
         rowClicked: true,
         onceFetched: function(params) {
           _this.totalEntries(this.grid);
-          console.log(this.grid);
-          console.log('passed');
         }
       });
       this.grid.rowClicked = function(args) {
@@ -193,7 +190,6 @@ define([
     },
 
     test: function() {
-      console.log(this.grid.grid.collection);
       this.grid.grid.collection = new Backbone.Collection(this.grid.grid.collection.where({Sex: 'femelle'}));
     },
 

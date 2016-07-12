@@ -119,7 +119,6 @@ define([
       this.nsForm.butClickSave();
     },
     cancel: function() {
-      console.log(this.picker);
       if(this.picker){
         this.picker.$el.find('#creation').addClass('hidden');
       }

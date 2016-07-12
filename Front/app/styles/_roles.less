@@ -1,0 +1,55 @@
+body.admin{
+
+}
+
+body.superUser{
+  .js-admin{
+    display: none;
+  }
+
+  .sensor{
+    .NsFormModuleEdit{
+      display: none;
+    }
+  }
+  .protocol{
+    .NsFormModuleDelete{
+      display: inline-block;
+    }
+  }
+}
+
+body.user{
+  .js-superUser,.js-admin{
+    display: none;
+  }
+  .home-page{
+    .js-superUser,.js-admin{
+      &.tile{
+        display: flex;
+        pointer-events: none;
+        cursor: not-allowed;
+        background-color: rgba(0,0,0,0.5)!important;
+        &:hover{
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  .individual{
+    .NsFormModuleEdit{
+      display: none;
+    }
+  }
+  .sensor{
+    .NsFormModuleEdit{
+      display: none;
+    }
+  }
+  .protocol{
+    .NsFormModuleDelete{
+      display: inline-block;
+    }
+  }
+}

@@ -350,7 +350,6 @@ define([
     },
 
     openDetails: function(event) {
-      console.log($(this._input).attr('data_value'))
       var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.ojectName+'/'+ $(this._input).attr('data_value');
       var win = window.open(url, '_blank');
       win.focus();

@@ -16,7 +16,7 @@ from datetime import datetime
 route_prefix = 'export/'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name=route_prefix+'themes', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=route_prefix+'themes', renderer='json' ,request_method='GET')
 def getListThemeEtude(request):
     session = request.dbsession
     th = BaseExport.metadata.tables['ThemeEtude']
@@ -26,7 +26,7 @@ def getListThemeEtude(request):
     return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name=route_prefix+'themes/id/views', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=route_prefix+'themes/id/views', renderer='json' ,request_method='GET')
 def getListViews(request):
     session = request.dbsession
 
@@ -40,7 +40,7 @@ def getListViews(request):
 
     return result
 
-@view_config(route_name=route_prefix+'views/id/action', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=route_prefix+'views/id/action', renderer='json' ,request_method='GET')
 def actionList(request):
     dictActionFunc = {
     'getFields': getFields,
@@ -83,7 +83,7 @@ def count_(request):
     count = gene.count_(criteria)
     return count
 
-@view_config(route_name=route_prefix+'views/id', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=route_prefix+'views/id', renderer='json' ,request_method='GET')
 def search(request):
     session = request.dbsession
     viewId = request.matchdict['id']
@@ -106,7 +106,7 @@ def search(request):
 
 
 
-@view_config(route_name=route_prefix+'views/getFile', renderer='json' ,request_method='GET',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name=route_prefix+'views/getFile', renderer='json' ,request_method='GET')
 def views_filter_export(request):
     session = request.dbsession
     try:
