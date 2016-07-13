@@ -1,4 +1,4 @@
-define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
+define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','config',
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
   'ns_modules/ns_bbfe/bbfe-timePicker',
@@ -17,8 +17,9 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
   'ns_modules/ns_bbfe/bbfe-lat',
   'ns_modules/ns_cell/bg-timestampCell',
   'ns_modules/ns_cell/autocompCell',
+
   ],
-function( Marionette, LytRootView, Router, Controller,Swal) {
+function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
   var app = {};
   var JST = window.JST = window.JST || {};
@@ -96,7 +97,17 @@ function( Marionette, LytRootView, Router, Controller,Swal) {
       }
   };
 
-
+  window.onerror = function (errorMsg, fileURI, lineNumber, column, errorObj) {
+    $.ajax({
+      type : 'POST',
+      url : config.coreUrl+'log/error',
+      data:{StackTrace:errorObj,
+        errorMsg: errorMsg,
+        file : fileURI,
+        lineNumber:lineNumber,
+        column:column }
+    });
+  }
   window.app = app;
   return app;
 });
