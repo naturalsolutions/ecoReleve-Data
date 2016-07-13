@@ -80,15 +80,14 @@ define(['marionette', 'config',
       this.checkAjax();
       this.rgMain.show(new LytStations({id: id}));
     },
-	observations: function(id) {
-		console.log('************** OBSERVATIONS ************************');
-		 $.ajax({
-                context: this,
-                url: config.coreUrl + 'protocols/' + id,
-            }).done(function (data) {
-				window.location.href = window.location.origin + window.location.pathname + '#stations/' + data['FK_Station'] + '?observation=' + id ;
-				console.log(data);
-			}) ;
+  observations: function(id) {
+    console.log('************** OBSERVATIONS ************************');
+     $.ajax({
+          context: this,
+          url: config.coreUrl + 'protocols/' + id,
+        }).done(function (data) {
+        window.location.href = window.location.origin + window.location.pathname + '#stations/' + data['FK_Station'] + '?observation=' + id ;
+      }) ;
       //this.rgMain.show(new LytStations({id: id}));
     },
     newStation: function(from) {
@@ -146,8 +145,6 @@ define(['marionette', 'config',
     },
     checkAjax : function(){
       var xhrPool = window.xhrPool;
-      console.log('new route :');
-      console.log(window.xhrPool);
 
       for(var i=0; i<xhrPool.length; i++){
          xhrPool[i].abort();

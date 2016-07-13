@@ -11,10 +11,10 @@ define([
     return Form.editors.GridFormEditor = Form.editors.Base.extend({
         events: {
             'click .js-addFormBtn' : 'addEmptyForm',
-			'click .js-cloneLast' : 'cloneLast',
+            'click .js-cloneLast' : 'cloneLast',
         },
         initialize: function(options) {
-			
+            
             if (options.schema.validators.length) {
                 this.defaultRequired = true;
             } else {
@@ -39,10 +39,10 @@ define([
             this.template = options.template || this.constructor.template;
             this.options = options;
             this.options.schema.fieldClass = 'col-xs-12';
-			this.showLines = true ;
-			if (this.options.schema.options.showLines != null) {
-				this.showLines = this.options.schema.options.showLines ;
-			}
+            this.showLines = true ;
+            if (this.options.schema.options.showLines != null) {
+                this.showLines = this.options.schema.options.showLines ;
+            }
             this.forms = [];
             this.disabled = options.schema.editorAttrs.disabled;
 
@@ -73,12 +73,12 @@ define([
             model.fieldsets = this.options.schema.fieldsets;
             this.addForm(model,this.forms.length+1);
         },
-		cloneLast: function() {
-			console.log('LAST FORM MODEL BEFORE',this.forms[this.forms.length-1]) ;
-			var resultat = this.forms[this.forms.length-1].commit() ;
-			if (resultat != null) return ; // COmmit NOK, on crée pas la ligne
-			console.log('LAST FORM MODEL',resultat,this.forms[this.forms.length-1]) ;
-			
+        cloneLast: function() {
+            console.log('LAST FORM MODEL BEFORE',this.forms[this.forms.length-1]) ;
+            var resultat = this.forms[this.forms.length-1].commit() ;
+            if (resultat != null) return ; // COmmit NOK, on crée pas la ligne
+            console.log('LAST FORM MODEL',resultat,this.forms[this.forms.length-1]) ;
+            
             var mymodel = Backbone.Model.extend({
                 defaults : this.forms[this.forms.length-1].model.attributes
             });
@@ -89,7 +89,7 @@ define([
             model.fieldsets = this.options.schema.fieldsets;
             this.addForm(model,this.forms.length+1);
         },
-		
+        
 
         addForm: function(model,index){
             var _this = this;
@@ -143,21 +143,21 @@ define([
 
 
             this.$el.find('#formContainer').append(form.el);
-			if (_this.showLines) {
+            if (_this.showLines) {
                 if (this.delFirst && !this.disabled){
                     var optClass = ' firstCol-2';
                 } else {
                     var optClass = '';
                 }
                 /*if (!this.nbFixedCol) {
-				    this.$el.find('#formContainer form fieldset').last().prepend('<div style="height: 34px; text-align: center;" class="grid-field col-md-2'+optClass+'"><span>' + index + '</span></div>');
+                    this.$el.find('#formContainer form fieldset').last().prepend('<div style="height: 34px; text-align: center;" class="grid-field col-md-2'+optClass+'"><span>' + index + '</span></div>');
                 }
                 else {
                     this.$el.find('#formContainer form fieldset').last().append('<div style="height: 34px; text-align: center;" class="grid-field fixedCol col-md-2'+optClass+'"><span>' + index + '</span></div>');
                 }*/
                 this.$el.find('#formContainer form fieldset').last().append('<div style="height: 34px; text-align: center;" class="grid-field fixedCol col-md-2'+optClass+'"><span>' + index + '</span></div>');
 
-			}
+            }
         },
 
         render: function() {
@@ -356,14 +356,14 @@ define([
               template: _.template('\
                 <div>\
                     <button type="button" class=" <%= hidden %> btn btn-success js-addFormBtn">+</button>\
-					<button type="button"  class="js-cloneLast <%= hiddenClone %> btn">Clone Last</button>\
+                    <button type="button"  class="js-cloneLast <%= hiddenClone %> btn">Clone Last</button>\
                     <div class="required grid-form clearfix">\
                         <div class="clear"></div>\
                         <div id="th" class="clearfix"></div>\
                         <div id="formContainer" class="clearfix expand-grid"></div>\
                     </div>\
                     <button type="button"  class="<%= hidden %> btn btn-success js-addFormBtn">+</button>\
-					<button type="button"  class="js-cloneLast <%= hiddenClone %> btn ">Clone Last</button>\
+                    <button type="button"  class="js-cloneLast <%= hiddenClone %> btn ">Clone Last</button>\
                 </div>\
                 ', null, Form.templateSettings),
           });

@@ -22,15 +22,17 @@ define([
     template: tpl,
     redirectAfterPost: '',
     displayDelete: true,
+    gridRow: false,
 
     events : {
       'keypress input' : 'evt'
-
     },
+
     evt : function(){
       alert();
     },
     extendsBBForm: function(){
+      var _this = this;
       Backbone.Form.validators.errMessages.required = '';
       Backbone.Form.Editor.prototype.initialize = function(options){
         var options = options || {};
@@ -67,10 +69,50 @@ define([
         }
 
       };
+
+
+    },
+
+    checkGridRowAgain: function() {
+      var _this = this;
+      Backbone.Form.Field.prototype.render = function() {
+          var schema = this.schema,
+              editor = this.editor;
+
+          //Only render the editor if Hidden
+          if (schema.type == Backbone.Form.editors.Hidden) {
+            return this.setElement(editor.render().el);
+          }
+
+          //Render field
+          var $field = $($.trim(this.template(_.result(this, 'templateData'))));
+
+          if (schema.fieldClass) $field.addClass(schema.fieldClass);
+          if (schema.fieldAttrs) $field.attr(schema.fieldAttrs);
+
+          //mjaouen
+          if (_this.gridRow) $field.addClass('grid-field');
+
+          //Render editor
+          $field.find('[data-editor]').add($field).each(function(i, el) {
+            var $container = $(el),
+                selection = $container.attr('data-editor');
+
+            if (_.isUndefined(selection)) return;
+
+            $container.append(editor.render().el);
+          });
+
+          this.setElement($field);
+
+          return this;
+      };
     },
 
     initialize: function (options) {
       this.extendsBBForm();
+      this.gridRow = options.gridRow || this.gridRow;
+      this.checkGridRowAgain();
 
       var jqxhr;
       this.modelurl = options.modelurl;
@@ -119,7 +161,7 @@ define([
 
       if (options.model) {
         this.model = options.model;
-        this.BBForm = new BackboneForm({ 
+        this.BBForm = new BackboneForm({
           model: this.model,
           data: this.model.data,
           fieldsets: this.model.fieldsets,
@@ -191,7 +233,8 @@ define([
           // give the url to model to manage save
           _this.model.urlRoot = this.modelurl;
 
-          var settings = $.extend({}, _this.data, resp.data);
+          var settings = $.extend({}, _this.data, resp.data); //?
+
           _this.model.attributes = settings;
 
 
@@ -207,23 +250,21 @@ define([
     },
 
     showForm: function (){
-      var self = this;
-      var display = 'form';
+      var _this = this;
       this.BBForm.render();
-      var el = this.BBForm.el;
-      if(display=='table'){
-        el = this.getHtmlTable(el);
-      }
+
       // Call extendable function before the show call
       this.BeforeShow();
-      var _this = this;
 
-      this.formRegion.html(el); //this.formRegion.html(this.BBForm.el);
-      $(this.formRegion).find('input').on("keypress", function(e) {
-        if( e.which == 13 ){
-          self.butClickSave(e);
-        }
-      });
+      this.formRegion.html(this.BBForm.el); //this.formRegion.html(this.BBForm.el);
+
+      if(!this.gridRow) {
+        $(this.formRegion).find('input').on("keypress", function(e) {
+          if( e.which == 13){
+            _this.butClickSave(e);
+          }
+        });
+      }
       $(this.formRegion).find('input').on("change", function(e) {
          window.formChange = true;
       });
@@ -233,12 +274,6 @@ define([
       $(this.formRegion).find('textarea').on("change", function(e) {
          window.formChange = true;
       });
-      
-      if(this.buttonRegion[0]){
-        this.buttonRegion.forEach(function (entry) {
-          _this.buttonRegion[0].html(_this.template);
-          _this.buttonRegion[0].i18n();
-        });
 
         $(this.formRegion).find('textarea').on("keypress", function(e) {
             var maxlen = 250;
@@ -256,7 +291,7 @@ define([
               if ($(this).val().length > maxlen) {
                  _this.showErrorForMaxLength(this);
                 return false;
-            } 
+            }
         });
         $(this.formRegion).find('textarea').on('keydown' , function(e) {
              if(event.which == 8) {
@@ -270,14 +305,25 @@ define([
         });
 
 
+      if(this.buttonRegion){
         if(this.buttonRegion[0]){
-          this.displaybuttons();
-          this.bindEvents();
+          this.buttonRegion.forEach(function (entry) {
+            _this.buttonRegion[0].html(_this.template);
+            _this.buttonRegion[0].i18n();
+          });
+          if(this.buttonRegion[0]){
+            this.displaybuttons();
+            this.bindEvents();
+          }
         }
-      }
 
+      }
       if (this.afterShow) {
         this.afterShow();
+      }
+
+      if (this.gridRow) {
+        this.finilizeToGridRow();
       }
     },
     showErrorForMaxLength : function(_this){
@@ -289,7 +335,6 @@ define([
         var errorTag = $(_this).parent().parent().find('div')[0];
         $(errorTag).text('');
         $(_this).removeClass('error');
-
     },
     showAlertforMaxLength : function(){
       var opts = {
@@ -300,6 +345,7 @@ define([
       };
       this.swal(opts);
     },
+
     updateState: function(state){
 
     },
@@ -333,7 +379,6 @@ define([
     /*afterShow: function(){
 
     },*/
-
 
     butClickSave: function (e) {
       var _this = this;
@@ -403,7 +448,7 @@ define([
               _this.savingError(response);
             }
           });
-          
+
         }
       }else{
         _this.BBForm.$el.find('.error:first').trigger('focus').click();
@@ -419,20 +464,23 @@ define([
 
 
     butClickEdit: function (e) {
+      this.checkGridRowAgain();
       this.displayMode = 'edit';
       this.initModel();
-      if(this.buttonRegion[0])
+      if(this.buttonRegion)
       this.displaybuttons();
 
     },
     butClickCancel: function (e) {
+      this.checkGridRowAgain();
       this.displayMode = 'display';
       this.initModel();
-      if(this.buttonRegion[0])
+      if(this.buttonRegion)
       this.displaybuttons();
 
     },
     butClickClear: function (e) {
+      this.checkGridRowAgain();
       var formContent = this.BBForm.el;
       $(formContent).find('input').not(':disabled').each(function(){
         $(this).val('');
@@ -454,6 +502,7 @@ define([
           window.formEdition = false;
           window.formChange = false;
           _this.afterDelete();
+
         }
       };
 
@@ -462,7 +511,7 @@ define([
 
 
     afterDelete: function(){
-      
+
     },
 
 
@@ -470,8 +519,8 @@ define([
       this.displayMode = 'display';
       // reaload created record from AJAX Call
       this.initModel();
-      this.showForm();
-      if(this.buttonRegion[0])
+      //this.showForm();
+      if(this.buttonRegion)
       this.displaybuttons();
     },
 
@@ -574,26 +623,23 @@ define([
         }
       });
     },
-    getHtmlTable : function(el){
-      var headtr = '<tr>';
-      var bodytr = '<tr>'; 
-      $(el).find('fieldset').each(function( i ) {
-            var j = 0 ;
-            $(this).children().each(function(){
-                // check if we have a  form field 
-                var labelElem = $(this).find('label')[0];
-                if(labelElem) {
-                  headtr += '<td>' + labelElem.textContent +'</td>';
-                  var content = $(this).children('div')[0].outerHTML;
-                   bodytr += '<td>' + content +'</td>';
-                }
-            });
+
+    finilizeToGridRow: function() {
+      var _this = this;
+      /*var button = 'danger';
+      if(!this.model.get('id')){
+        button = 'warning';
+      }*/
+      this.BBForm.$el.find('fieldset').append('\
+          <div class="col-xs-12 control">\
+              <button type="button" class="js-remove btn btn-danger pull-right"><span class="reneco reneco-trash"></span></button>\
+          </div>\
+      ');
+      this.BBForm.$el.find('button.js-remove').on('click', function() {
+        _this.butClickDelete();
       });
-      headtr += '</tr>';
-      bodytr += '</tr>';
-      var table = '<table id="formTable"><thead>' + headtr +'</thead>  <tbody> ' + bodytr +'</tbody></table>';
-      return table;
-    }
+    },
+
   });
 
 });
