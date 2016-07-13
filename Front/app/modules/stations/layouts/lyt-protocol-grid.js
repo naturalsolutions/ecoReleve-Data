@@ -58,6 +58,8 @@ define([
       for (var i = 0; i < this.forms.length; i++) {
         noErrors = this.forms[i].BBForm.commit();
       }
+
+      //???
       setTimeout(function(){
         if(!noErrors) {
 
@@ -89,7 +91,7 @@ define([
     initialize: function(options) {
 
       this.model.attributes.obs = new Backbone.Collection(this.model.get('obs'));
-      
+
       var total = this.model.get('obs').filter(function(md){
         if(md.attributes.data.ID) {
           return true;
@@ -124,12 +126,40 @@ define([
           col.fieldClass += ' grid-field';
         }
 
+
+
+
+
         if(col.title && test) {
+          switch(col.size) {
+              case 10:
+                  size += 250;
+                  break;
+              case 8:
+                  size += 200;
+                  break;
+              case 6:
+                  size += 150;
+                  console.log(size);
+                  break;
+              case 4:
+                  size += 100;
+                  break;
+              case 3:
+                  size += 75;
+                  break;
+              case 2:
+                  size += 50;
+                  break;
+              default:
+                  size += 150;
+          }
+
           this.ui.thead.prepend('<div title="' + col.title + '" class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
           size++;
         }
       }
-      size = size*150;
+      //size = size*150;
       size += 36; //trash button
 
       this.ui.thead.width(size);
@@ -232,8 +262,8 @@ define([
       deleteObs: function(form) {
         this.ui.tbody.find($(form.BBForm.el).parent()).remove();
 
-        this.forms = _.reject(this.forms, function(f) { 
-          return f === form; 
+        this.forms = _.reject(this.forms, function(f) {
+          return f === form;
         });
 
         form.model.destroy();
