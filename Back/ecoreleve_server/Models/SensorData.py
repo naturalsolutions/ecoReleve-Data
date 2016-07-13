@@ -152,9 +152,9 @@ class CamTrap(Base):
     path = Column(String(250) , nullable = False)
     name = Column(String(250) , nullable = False)
     extension = Column(String(250) , nullable = False)
-    checked = Column(Boolean, server_default = '0')
-    validated = Column(Boolean, server_default = '0')
-    uploaded = Column(Boolean, server_default = '0')
+    checked = Column(Boolean, nullable = True)
+    validated = Column(Boolean, nullable = True)
+    uploaded = Column(Boolean, nullable = True)
     date_creation = Column(DateTime, nullable = True)
     date_uploaded = Column(DateTime, server_default = func.now())
 

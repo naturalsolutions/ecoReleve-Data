@@ -27,6 +27,9 @@ define([
       template: 'app/modules/validate/templates/tpl-camTrapValidateDetail.html',
 
       className: 'full-height animated white',
+      childEvents:{
+
+      },
 
       events: {
         'click button#validate': 'validate',
@@ -91,7 +94,7 @@ define([
           state: {
             pageSize: 24
           },
-          url: config.coreUrl+'sensors/'+this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId
+          url: config.coreUrl+'sensors/'+this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
         });
         this.myImageCollection = new ImageCollection();
       },
@@ -176,38 +179,79 @@ define([
             path :'',
             name: '',
             id: null,
-            checked: 0,
-            validated: 0,
-            test :"toto"
+            checked: null,
+            validated: null,
           }
         });
 
         var ImageItemView = Marionette.ItemView.extend({
           model: ImageModel,
+          modelEvents: {
+            "change": "changeValid"
+          },
           events:{
-            'click #save':'onClickImage'
+            'click .image':'onClickImage',
+            'mouseenter .image': 'hoveringStart',
+            'mouseleave': 'hoveringEnd'
           },
           tagName : 'div',
-          className : 'image col-md-2 text-center',
+          className : 'col-md-2 text-center',
           //template : 'app/modules/validate/templates/tpl-image.html',
           template : 'app/modules/validate/templates/tpl-image.html',
           //template : $('#itemview-image-template').html(),
 
+        /*  initialize : function() {
+            model.bind('change', render);
+          },
+
+          render: function() {
+            console.log("le model a changé");
+            //$("#myElement").css('opacity', myModel.isSelect ? 1 : 0)
+
+          },*/
+          hoveringStart: function(e){
+            console.log("enter " +this.model.get("name"));
+            console.log(this);
+            console.log(this.$('#myModalCamTrap'));
+          },
+          hoveringEnd: function(e){
+            console.log("leave " +this.model.get("name"));
+          },
+          initialize: function()
+          {
+          },
+          changeValid: function(){
+            console.log("changer dans itemView");
+          },
           onClickImage: function(e){
+            console.log(e);
             var _this = this;
+            var flagStatus = this.model.get("validated")
+            if( flagStatus == null ){
+              this.model.set("validated",true)
+            }
+            else{
+              flagStatus = !flagStatus //inverse booleen
+              this.model.set("validated",flagStatus)
+              if(!flagStatus) $(e.currentTarget).css("opacity",0.2);
+              else $(e.currentTarget).css("opacity",1);
+            }
+            console.log(this.model.get("name")+"validated :"+this.model.get("validated"));
+          /*  if (this.model.get("checked") ){
+              if ( !this.model.get("validated") )
+              {
+                console.log(this.model.get("name")+" is validated now");
+                this.model.set("validated", true)
+              }
+              else{
+                console.log(this.model.get("name")+" is deleted now");
+                this.model.set("validated", false)
+              }
+            }
             if( !this.model.get("checked") ) {
               console.log(this.model.get("name")+" is checked now");
               this.model.set("checked", true)
-            }
-            else if ( !this.model.get("validated") )
-            {
-              console.log(this.model.get("name")+" is validated now");
-              this.model.set("validated", true)
-            }
-            else{
-              console.log(this.model.get("name")+" is deleted now");
-              this.model.set("validated", false)
-            }
+            }*/
 
             //if( )
           }

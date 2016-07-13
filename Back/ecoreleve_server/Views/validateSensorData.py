@@ -18,7 +18,7 @@ from time import sleep
 import subprocess , psutil
 from pyramid.security import NO_PERMISSION_REQUIRED
 from datetime import datetime
-from ..Models import Base, dbConfig, DBSession,ArgosGps,graphDataDate
+from ..Models import Base, dbConfig, DBSession,ArgosGps,graphDataDate,CamTrap
 from traceback import print_exc
 from pyramid import threadlocal
 
@@ -231,7 +231,6 @@ def details_unchecked_camtrap(request):
     query = 'select PK_id,path,name,checked,validated from ecoReleve_Sensor.dbo.TcameraTrap where pk_id in (select pk_id from [dbo].V_dataCamTrap_With_equipSite where fk_sensor = '+str(id_indiv)+' AND FK_MonitoredSite = '+str(ptt)+' AND equipID ='+str(id_equip)+' );'
     data = session.execute(query).fetchall()
     dataResults = [dict(row) for row in data]
-
     for tmp in dataResults:
         varchartmp = tmp['path'].split('\\')
         tmp['path']="imgcamtrap/"+str(varchartmp[len(varchartmp)-2])+"/"
@@ -398,11 +397,41 @@ def auto_validate_ALL_stored_procGSM_Argos(user,type_,freq,session):
 
     return nb_insert, exist , error
 
+def deletePhotoOnSQL(request ,fk_sensor):
+    session = request.dbsession
+    #currentPhoto = CamTrap(fk_sensor = fk_sensor)
+    currentPhoto = session.query(CamTrap).get(fk_sensor)
+    session.delete(currentPhoto)
+    return True
+
 def validateCamTrap(request):
     print("route atteinte")
     data = request.params.mixed()
     data = json.loads(data['data'])
-    print(data)
-    for tmp in request.POST:
-        print( str(tmp) )
+    pathPrefix = dbConfig['camTrap']['path']
+    for index in data:
+        """if ( index['checked'] == None ):
+            print( " la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a check" )
+            #changer status
+            request.response.status_code = 510
+            return {'message': ""+str(index['name'])+" not checked yet"}
+        else :# photo check"""
+        if (index['validated'] != None):
+            if (index['validated'] == False ):
+                pathSplit = index['path'].split('/')
+                destfolder = str(pathPrefix)+"\\"+str(pathSplit[1])+"\\"+str(index['name'])
+                print (" la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a supprimer")
+                print("on va supprimier :" +str(destfolder))
+                if os.path.isfile(destfolder):
+                    os.remove(destfolder)
+                deletePhotoOnSQL(request,str(index['PK_id']))
+
+            else:
+                print (" la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a sauvegarder")
+                #inserer en base
+        else:
+            print( " la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a check" )
+        """for key in index:
+            if ( str(key) =='checkedvalidated'   )
+            print ( str(key)+":"+str(index[key]))"""
     return 10

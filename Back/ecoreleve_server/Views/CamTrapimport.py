@@ -229,7 +229,7 @@ def uploadFileCamTrapResumable(request):
     #print("paquet recu :" + str(request.POST['resumableChunkNumber']))
 
     uri = pathPrefix+'\\'+pathPost
-    extType = request.POST['resumableFilename'].split('.');
+    extType = request.POST['resumableFilename'].split('.')
     #print ("nom du fichier :" +str(request.POST['resumableIdentifier']) )
     #print ("type de fichier :" +str(extType[len(extType)-1]))
     #print("date str " + str())

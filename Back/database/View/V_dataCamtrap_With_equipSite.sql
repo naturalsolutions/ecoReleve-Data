@@ -1,4 +1,4 @@
-CREATE view [dbo].[V_dataCamTrap_With_equipSite]
+CREATE VIEW V_dataCamTrap_With_equipSite
 as
 
 SELECT
@@ -37,11 +37,3 @@ FROM EcoReleve_ECWP.dbo.Equipment AS e4
 WHERE (FK_Sensor = E.FK_Sensor) AND (StartDate < E3.StartDate) AND (StartDate > E.StartDate)
 )
 WHERE (cam.checked IS NULL )
-
-GO
-
-
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('68_create_view_camtrap_site',GETDATE(),(SELECT db_name()))
-
-
-GO
