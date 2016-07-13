@@ -7,6 +7,7 @@ from sqlalchemy.exc import TimeoutError
 from pyramid import threadlocal
 import pandas as pd
 import datetime
+from traceback import print_exc
 
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
@@ -33,6 +34,7 @@ try:
     dbConfig['dbLog.schema'] = AppConfig['app:main']['dbLog.schema']
     dbConfig['dbLog.url'] =  AppConfig['app:main']['dbLog.url'] 
 except:
+    print_exc()
     pass
 
 DynPropNames = {

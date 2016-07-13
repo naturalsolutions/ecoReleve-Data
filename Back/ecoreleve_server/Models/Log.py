@@ -32,9 +32,6 @@ def sendLog(logLevel,domaine,msg_number = 500,scope='Pyramid', errorDict = None,
     try :
         engine = create_engine(dbConfig['cn.dialect'] + quote_plus(dbConfig['dbLog.url']))
         session = engine.connect()
-
-        print('pass')
-
         try : 
             body = json.loads(request.body.decode("utf-8")) 
         except : 
@@ -73,4 +70,5 @@ def sendLog(logLevel,domaine,msg_number = 500,scope='Pyramid', errorDict = None,
         transaction.commit()
         session.close()
     except :
+        traceback.print_exc()
         pass
