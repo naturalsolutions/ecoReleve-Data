@@ -263,9 +263,9 @@ def releasePost(request):
                 equipInfo = {
                 'FK_Individual': indiv['FK_Individual'],
                 'FK_Sensor' : sensor_id,
-                'Survey_type' : 'Post-Relâcher',
-                'Monitoring_Status' : 'Suivi',
-                'Sensor_Status': 'événement de sortie provisoire de stock>mise en service'
+                'Survey_type' : 'post-relâcher',
+                'Monitoring_Status' : 'suivi',
+                'Sensor_Status': 'sortie de stock>mise en service'
                 }
                 curEquipmentInd.UpdateFromJson(equipInfo,startDate = curStation.StationDate)
                 curEquipmentInd.Station = curStation
