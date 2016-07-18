@@ -127,16 +127,16 @@ def views_filter_export(request):
                 coll.append(table.c[col])
         else :
             splittedColumnLower = {c.name.lower().replace('_',''):c.name for c in table.c}
-            coll = [table.c[splittedColumnLower['lat']].label('LAT'),table.c[splittedColumnLower['lon']].label('LON'),table.c[splittedColumnLower['creationdate']].label('Date')]
-            
+            coll = [table.c[splittedColumnLower['lat']].label('LAT'),table.c[splittedColumnLower['lon']].label('LON')]
+
             if 'stationname' in splittedColumnLower:
                 coll.append(table.c[splittedColumnLower['stationname']].label('SiteName'))
             elif 'name' in splittedColumnLower:
                 coll.append(table.c[splittedColumnLower['name']].label('SiteName'))
             elif 'sitename' in splittedColumnLower:
                 coll.append(table.c[splittedColumnLower['sitename']].label('SiteName'))
-            #if 'date' in splittedColumnLower:
-                #coll.append(table.c[splittedColumnLower['date']].label('Date'))
+            if 'date' in splittedColumnLower:
+                coll.append(table.c[splittedColumnLower['date']].label('Date'))
 
 
         gene = Generator(viewName,session)
