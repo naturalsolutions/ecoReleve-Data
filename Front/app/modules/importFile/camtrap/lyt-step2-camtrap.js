@@ -170,6 +170,7 @@ define([
         console.log(extType[extType.length-1]);
         if (extType[extType.length-1] =='jpeg' || extType[extType.length-1] == 'zip' || extType[extType.length-1] == 'ZIP' || extType[extType.length-1] == 'jpg' || extType[extType.length-1] == 'JPG' || extType[extType.length-1] == 'JPEG') {
           $('#start-upload-resumablejs').removeClass('hide');
+          $('#cancel-upload-resumablejs').removeClass('hide');
           _this.nbFiles+=1;
           if (file.chunks.length > 1 ){
             _this.nbFilesToWait +=1;
@@ -390,6 +391,10 @@ displayFinished: function (){
     if (isConfirm) {
       Backbone.history.navigate('validate/Camtrap',{trigger: true});
     }
+    else{
+      console.log("bim on a cancel");
+    }
+
   }
 );
 },
