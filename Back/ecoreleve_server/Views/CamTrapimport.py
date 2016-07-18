@@ -8,7 +8,7 @@ from traceback import print_exc
 import pandas as pd
 import numpy as np
 import PIL
-from PIL import Image
+from PIL import Image , ImageFile
 import re
 import datetime, time
 import transaction
@@ -22,6 +22,9 @@ from ..Models import CamTrap
 import datetime,time,zipfile
 import exifread
 from pyramid import threadlocal
+#handle error on some photo
+# image file truncated
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def resizePhoto( imgPathSrc ):
     basewidth = 100
@@ -30,8 +33,7 @@ def resizePhoto( imgPathSrc ):
         # Fully load the image now to catch any problems with the image contents.
         img.load()
     except Exception:
-        print("error" + str(Exception) )
-        print ("path" + str(imgPathSrc))
+        #handle error on img file 
         return
     wpercent = ( basewidth / float(img.size[0]) ) # keep ratio
     hsize = int((float(img.size[1]) * float(wpercent)))
@@ -87,17 +89,6 @@ def unzip(zipFilePath , destFolder, fk_sensor, startDate , endDate):
                 with open(os.path.join(destFolder, str(name)), 'wb') as fd:
                     fd.write(zfile.read(name))
                 #ici on peut test
-                """newdate1 = time.strptime(startDate, "%Y-%m-%d %H:%M:%S")
-                if( endDate == "0000-00-00 00:00:00"):
-                    newdate2 =  newdate2 =  time.strptime(str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')) , "%Y-%m-%d %H:%M:%S")
-                else:
-                    newdate2 = time.strptime(endDate, "%Y-%m-%d %H:%M:%S")
-                datePhoto = dateFromExif (destFolder+str(name))
-                if(datePhoto == None):
-                    timePhoto =  time.strptime("1985-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
-                else:
-                    timePhoto = time.strptime(str(datePhoto), "%Y-%m-%d %H:%M:%S")"""
-                #if( timePhoto >= newdate1 and timePhoto <= newdate2):
                 datePhoto = dateFromExif (destFolder+str(name))
                 if( checkDate( datePhoto , startDate , endDate ) ):
                     AddPhotoOnSQL(fk_sensor , destFolder , name , str(extType[len(extType)-1]) , datePhoto )
@@ -152,59 +143,22 @@ def createNamePath( paramsPOST ):
     return cheminParse
 # ------------------------------------------------------------------------------------------------------------------------- #
 def uploadFileCamTrapResumable(request):
-
-    """print("ok resumable envoie bien les requetes et on les reçoit")
-    print ("chunk number :" + str(request.POST['resumableChunkNumber']))
-    print ("chunk size : " + str(request.POST['resumableChunkSize']))
-    print ("current chunk size :" + str(request.POST['resumableCurrentChunkSize']))
-    print ("total size :" + str(request.POST['resumableTotalSize']))
-    print ("type :" + str(request.POST['resumableType']))
-    print ("identifier :"+ str(request.POST['resumableIdentifier']))
-    print ("Filename :" + str(request.POST['resumableFilename']))
-    print ("Relative path :" + str(request.POST['resumableRelativePath']))
-    print(" options :" + str(request.POST['path']))
-    print ("File :" + str(request.POST['file']))"""
     flagDate = False
     reponseStatus = 200
-    #print(str(request.POST['resumableType']))
     pathPrefix = dbConfig['camTrap']['path']
     flagCrea = False
     pathPost = str(request.POST['path'])
     fk_sensor = int(request.POST['id'])
     messageDate =""
 
-
-
-
-    """if (request.POST['resumableType'] == "image/jpeg"):
-        print(" on va post une image")
-    elif ( request.POST['resumableType'] == "application/x-zip-compressed"):
-        print(" on va post un zip")"""
-    #print("paquet recu :" + str(request.POST['resumableChunkNumber']))
-
     uri = pathPrefix+'\\'+pathPost
     extType = request.POST['resumableFilename'].split('.')
-    #print ("nom du fichier :" +str(request.POST['resumableIdentifier']) )
-    #print ("type de fichier :" +str(extType[len(extType)-1]))
-    #print("date str " + str())
-    #test si le fichier existe deja
 
     inputFile = request.POST['file'].file
     if( int(request.POST['resumableChunkNumber']) == 1 and int(request.POST['resumableCurrentChunkSize']) == int(request.POST['resumableTotalSize']) and str(extType[len(extType)-1]) != ".zip" ):
-        """newdate1 = time.strptime(str(request.POST['startDate']), "%Y-%m-%d %H:%M:%S")
-        if( str(request.POST['endDate']) == "0000-00-00 00:00:00"):
-            newdate2 =  time.strptime(str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')) , "%Y-%m-%d %H:%M:%S")
-        else:
-            newdate2 = time.strptime(str(request.POST['endDate']), "%Y-%m-%d %H:%M:%S")"""
         if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableFilename'])):
             with open(uri+'\\'+str(request.POST['resumableFilename']), 'wb') as output_file: # write in the file
                 shutil.copyfileobj(inputFile, output_file)
-        """    datePhoto = dateFromExif (uri+'\\'+str(request.POST['resumableFilename']))
-            if(datePhoto == None):
-                timePhoto =  time.strptime("1985-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
-            else:
-                timePhoto = time.strptime(str(datePhoto), "%Y-%m-%d %H:%M:%S")
-            if( timePhoto >= newdate1 and timePhoto <= newdate2):"""
         datePhoto = dateFromExif (uri+'\\'+str(request.POST['resumableFilename']))
         if( checkDate (datePhoto , str(request.POST['startDate']) , str(request.POST['endDate']) ) ):
             idRetour = AddPhotoOnSQL(fk_sensor , str(uri) , str(request.POST['resumableFilename']) , str(extType[len(extType)-1]) , datePhoto )
@@ -294,16 +248,6 @@ def concatChunk(request):
             else:
                 extType = request.POST['file'].split('.');
                 destfolder = pathPrefix+'\\'+pathPost+'\\'
-                """newdate1 = time.strptime(str(request.POST['startDate']), "%Y-%m-%d %H:%M:%S")
-                if( str(request.POST['endDate']) == "0000-00-00 00:00:00"):
-                    newdate2 =  time.strptime(str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')) , "%Y-%m-%d %H:%M:%S")
-                else:
-                    newdate2 = time.strptime(str(request.POST['endDate']), "%Y-%m-%d %H:%M:%S")
-                if(datePhoto == None):
-                    timePhoto =  time.strptime("1985-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
-                else:
-                    timePhoto = time.strptime(str(datePhoto), "%Y-%m-%d %H:%M:%S")
-                if( timePhoto >= newdate1 and timePhoto <= newdate2):"""
                 datePhoto = dateFromExif (destfolder+str(name))
                 if( checkDate ( datePhoto , str(request.POST['startDate']) ,str(request.POST['endDate']) ) ):
                     idRetour = AddPhotoOnSQL(fk_sensor , destfolder , name , str(extType[len(extType)-1]) , datePhoto )
