@@ -21,7 +21,7 @@ from datetime import datetime
 from .argosImport import uploadFileArgos
 from .GSMimport import uploadFilesGSM
 from .RFIDimport import uploadFileRFID
-from .CamTrapimport import uploadFileCamTrap, uploadFileCamTrapResumable, concatChunk
+from .CamTrapimport import uploadFileCamTrapResumable, concatChunk
 import os,sys
 from pyramid.response import Response
 
@@ -36,7 +36,6 @@ def uploadFile(request):
     'argos': uploadFileArgos,
     'gsm':uploadFilesGSM,
     'rfid':uploadFileRFID,
-    'camtrap':uploadFileCamTrap,
     'resumable':uploadFileCamTrapResumable,
     'concat':concatChunk
     }
