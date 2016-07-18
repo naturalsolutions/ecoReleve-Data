@@ -335,6 +335,7 @@ define([
         var errorTag = $(_this).parent().parent().find('div')[0];
         $(errorTag).text('');
         $(_this).removeClass('error');
+
     },
     showAlertforMaxLength : function(){
       var opts = {
@@ -501,7 +502,7 @@ define([
         callback : function(){
           window.formEdition = false;
           window.formChange = false;
-          _this.afterDelete();
+          _this.afterDelete(_this.model);
 
         }
       };
@@ -630,14 +631,14 @@ define([
       if(!this.model.get('id')){
         button = 'warning';
       }*/
-      this.BBForm.$el.find('fieldset').append('\
-          <div class="col-xs-12 control">\
-              <button type="button" class="js-remove btn btn-danger pull-right"><span class="reneco reneco-trash"></span></button>\
-          </div>\
-      ');
-      this.BBForm.$el.find('button.js-remove').on('click', function() {
-        _this.butClickDelete();
-      });
+      // this.BBForm.$el.find('fieldset').append('\
+      //     <div class="col-xs-12 control">\
+      //         <button type="button" class="js-remove btn btn-danger pull-right"><span class="reneco reneco-trash"></span></button>\
+      //     </div>\
+      // ');
+      // this.BBForm.$el.find('button.js-remove').on('click', function() {
+      //   _this.butClickDelete();
+      // });
     },
 
   });

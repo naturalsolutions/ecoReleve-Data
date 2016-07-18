@@ -26,7 +26,8 @@ define([
         'editBtn': '.js-btn-form-grid-edit',
         'saveBtn': '.js-btn-form-grid-save',
         'cancelBtn': '.js-btn-form-grid-cancel',
-        'clearBtn': '.js-btn-form-grid-clear'
+        'clearBtn': '.js-btn-form-grid-clear',
+        'rowNumber': '.js-tbody-row-number'
       },
 
       events: {
@@ -34,6 +35,7 @@ define([
         'click .js-btn-form-grid-save': 'onSaveBtnClick',
         'click .js-btn-form-grid-cancel': 'onCancelBtnClick',
         'click .js-btn-form-grid-clear': 'onClearBtnClick',
+        'click .js-btn-form-grid-delete': 'onClickDeleteObs',
       },
 
       modelEvents: {
@@ -52,19 +54,17 @@ define([
       },
 
       onSaveBtnClick: function(){
-      //dirty
-      var _this = this;
-      var noErrors = true;
-      for (var i = 0; i < this.forms.length; i++) {
-        noErrors = this.forms[i].BBForm.commit();
+        //dirty
+        var _this = this;
+        var noErrors = true;
+        for (var i = 0; i < this.forms.length; i++) {
+          noErrors = this.forms[i].BBForm.commit();
       }
 
       //???
       setTimeout(function(){
         if(!noErrors) {
-
           for (var i = 0; i < _this.forms.length; i++) {
-            console.log(_this.forms[i].BBForm.getValue());
             _this.forms[i].butClickSave();
           }
           _this.mode = 'display';
@@ -111,14 +111,24 @@ define([
     },
 
 
-
     createThead: function() {
+
       this.schema = this.model.get('obs').models[0].get('schema');
+
+
       delete this.schema['defaultValues'];
 
+
       var size=0;
-      for (var key in this.schema) {
-       var col = this.schema[key];
+      var fieldset = this.model.get('obs').models[0].get('fieldsets')[0].fields;
+
+      if(this.showLineNumber){}
+
+      for (var i = 0; i < fieldset.length; i++) {
+        var col = this.schema[fieldset[i]];
+
+        // if(i == 0)
+        //   col.fieldClass += ' fixedCol ';
          //sucks
          var test = true;
          if(col.fieldClass){
@@ -126,9 +136,7 @@ define([
           col.fieldClass += ' grid-field';
         }
 
-
-
-
+        console.log(col.size);
 
         if(col.title && test) {
           switch(col.size) {
@@ -140,7 +148,6 @@ define([
                   break;
               case 6:
                   size += 150;
-                  console.log(size);
                   break;
               case 4:
                   size += 100;
@@ -155,12 +162,11 @@ define([
                   size += 150;
           }
 
-          this.ui.thead.prepend('<div title="' + col.title + '" class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
-          size++;
+          this.ui.thead.append('<div title="' + col.title + '" class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
         }
       }
       //size = size*150;
-      size += 36; //trash button
+
 
       this.ui.thead.width(size);
       this.ui.tbody.width(size);
@@ -227,6 +233,8 @@ define([
         model.attributes = model.get('data');
         model.urlRoot =  config.coreUrl + 'stations/' + this.stationId + '/protocols' + '/'
 
+
+
         this.ui.tbody.append('<div class="js-form-row js-form-row-' + this.index +' form-row"></div>');
         var formRowContainer = this.ui.tbody.find('.js-form-row-' + this.index);
         this.index++;
@@ -241,8 +249,8 @@ define([
         });
 
         form.afterDelete = function() {
-          if (_this.model.get('id') == 0) {
-            _this.deleteObs();
+          if (this.model.get('id') == 0) {
+            _this.deleteObs(this);
           } else {
             var jqxhr = $.ajax({
               url: this.model.urlRoot + '/' + this.model.get('id'),
@@ -257,19 +265,43 @@ define([
           }
         };
         this.forms.push(form);
+        this.ui.rowNumber.append('\
+          <div class="row-action" index="' + this.forms.length + '">\
+            <button type="button" class="js-btn-form-grid-delete btn btn-xs btn-danger pull-left"><span class="reneco reneco-trash"></span></button>\
+            <span class="row-number pull-right">' + this.forms.length + '</span>\
+          </div>');
+      },
+
+      updateLineNumber: function(){
+        this.ui.rowNumber.html('');
+        for(var i=0; i< this.forms.length; i++){
+          this.ui.rowNumber.append('\
+            <div class="row-action" index="' + (i+1) + '">\
+              <button type="button" class="js-btn-form-grid-delete btn btn-xs btn-danger pull-left"><span class="reneco reneco-trash"></span></button>\
+              <span class="row-number pull-right">' + (i+1) + '</span>\
+            </div>');
+        }
+      },
+
+      onClickDeleteObs: function(e){
+        var index = $(e.currentTarget).parent().attr('index');
+        var form = this.forms[index-1];
+        form.butClickDelete();
       },
 
       deleteObs: function(form) {
         this.ui.tbody.find($(form.BBForm.el).parent()).remove();
-
         this.forms = _.reject(this.forms, function(f) {
           return f === form;
         });
 
         form.model.destroy();
+
         if(!this.model.get('obs')) {
           this.model.destroy();
         }
+
+        this.updateLineNumber();
       },
 
       onRender: function() {
