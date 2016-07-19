@@ -55,6 +55,9 @@ class MonitoredSite (Base,ObjectWithDynProp) :
 
     MonitoredSitePositions = relationship('MonitoredSitePosition',backref='MonitoredSite',cascade="all, delete-orphan")
     MonitoredSiteDynPropValues = relationship('MonitoredSiteDynPropValue',backref='MonitoredSite',cascade="all, delete-orphan")
+    Stations = relationship('Station')
+    Equipments = relationship('Equipment')
+
 
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
