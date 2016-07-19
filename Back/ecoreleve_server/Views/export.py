@@ -126,15 +126,9 @@ def views_filter_export(request):
             for col in columns:
                 coll.append(table.c[col])
         else :
-            print('************* table')
-            print(table)
-            print('****************** date ****************')
-            #print(table.c[splittedColumnLower['creationDate']].label('Date'))
-            print('***************')
             splittedColumnLower = {c.name.lower().replace('_',''):c.name for c in table.c}
-            print(splittedColumnLower)
             coll = [table.c[splittedColumnLower['lat']].label('LAT'),table.c[splittedColumnLower['lon']].label('LON')]
-            
+
             if 'stationname' in splittedColumnLower:
                 coll.append(table.c[splittedColumnLower['stationname']].label('SiteName'))
             elif 'name' in splittedColumnLower:
