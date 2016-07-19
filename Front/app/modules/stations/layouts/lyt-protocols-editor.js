@@ -33,7 +33,7 @@ define([
       this.collection = new Backbone.Collection();
       this.collection.fetch({
         url: config.coreUrl + 'stations/' + this.stationId + '/protocols',
-        reset: true, 
+        reset: true,
         data: {
           FormName: 'ObsForm',
           DisplayMode: 'edit'
@@ -99,7 +99,7 @@ define([
     initProtos: function() {
       this.listenTo(this.collection, 'destroy', this.displayLast);
 
-      this.collection.models[0].set('grid', true);
+      //this.collection.models[0].set('grid', true);
 
       var CustomCollectionView = Marionette.CollectionView.extend({
         getChildView: function(item) {
@@ -118,16 +118,16 @@ define([
         childView: LytProto,
         className: 'full-height clearfix',
       });
-      
+
       this.collViewProto.render();
       this.ui.protoFormsContainer.html(this.collViewProto.el);
     },
 
-    
+
     getIndex: function(e){
       var listItem = $(e.currentTarget);
       var index = this.ui.protoMenuContainer.find('.js-menu-item').index( listItem );
-      
+
       this.updateProtoStatus(index);
       //add obs
       if ($(e.target).is('button') || $(e.target).parent().is('button')) {
@@ -147,7 +147,7 @@ define([
     },
 
 
-    
+
     onRender: function(){
       this.feedProtoPicker();
     },
@@ -214,7 +214,7 @@ define([
         }
       });
     },
-    
+
 
   });
 });
