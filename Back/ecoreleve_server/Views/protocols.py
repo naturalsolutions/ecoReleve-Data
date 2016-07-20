@@ -70,7 +70,6 @@ def GetProtocolsofStation (request) :
                             pass
                     except Exception as e :
                         print_exc()
-                        print('exception!!!')
                         pass
 
                 for i in range(len(listType)) :
@@ -188,7 +187,6 @@ def getObservation(request):
     try :
         curObs = session.query(Observation).filter(and_(Observation.ID ==id_obs, Observation.FK_Station == id_sta )).one()
         curObs.LoadNowValues()
-        print(curObs.PropDynValuesOfNow)
         # if Form value exists in request --> return data with schema else return only data
         if 'FormName' in request.params :
             ModuleName = request.params['FormName']
@@ -202,7 +200,6 @@ def getObservation(request):
         else : 
             response  = curObs.GetFlatObject()
     except Exception as e :
-        print(e)
         response = {}
 
     return response

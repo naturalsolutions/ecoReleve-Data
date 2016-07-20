@@ -206,7 +206,6 @@ def updateMonitoredSite(request):
         response = {}
 
     except IntegrityError as e:
-        print('\n\n\n *****IntegrityError errrroorr') 
         session.rollback()
         response = request.response
         response.status_code = 510
@@ -324,7 +323,6 @@ def getStationHistory (request):
     for row in result :
         row = dict(row)
         row['StationDate'] = row['StationDate'].strftime('%Y-%m-%d %H:%M:%S')
-        print(row)
         response.append(row)
 
     return response

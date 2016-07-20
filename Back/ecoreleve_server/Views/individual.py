@@ -76,8 +76,12 @@ def getFilters (request):
         objType = request.params['typeObj']
     else : 
         objType = 1
+    print(request.params)
+    if 'FilterName' in request.params and request.params['FilterName'] != '':
+        ModuleType = request.params['FilterName']
+    else:
+        ModuleType = 'IndivFilter'
 
-    ModuleType = 'IndivFilter'
     filtersList = Individual(FK_IndividualType = objType).GetFilters(ModuleType)
     filters = {}
     for i in range(len(filtersList)) :
@@ -103,7 +107,7 @@ def getFields(request) :
         objType = 1
 
     ModuleType = request.params['name']
-    if ModuleType == 'default' :
+    if ModuleType in ['default','AdvancedIndivFilter'] :
         ModuleType = 'IndivFilter'
     cols = Individual(FK_IndividualType = objType).GetGridFields(ModuleType)
     return cols
@@ -323,23 +327,33 @@ def checkExisting(indiv):
     return existingID
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = routes_permission[prefix]['GET'])
 @view_config(route_name= prefix, renderer='json', request_method = 'POST', permission = routes_permission[prefix]['GET'])
 def searchIndiv(request):
     session = request.dbsession
-    data = request.params.mixed()
+    history = False
+    startDate = None
 
-    searchInfo = {}
-    searchInfo['criteria'] = []
-    if 'criteria' in data: 
-        data['criteria'] = json.loads(data['criteria'])
-        if data['criteria'] != {} :
-            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+    if searchInfo is None:
+        searchInfo = request.params.mixed()
+        # searchInfo = {}
+        # searchInfo['criteria'] = []
+        if 'criteria' in searchInfo: 
+            searchInfo['criteria'] = json.loads(searchInfo['criteria'])
+            if searchInfo['criteria'] != {} :
+                searchInfo['criteria'] = [obj for obj in searchInfo['criteria'] if obj['Value'] != str(-1) ]
+            else :
+                 searchInfo['criteria'] = []
 
-    searchInfo['order_by'] = json.loads(data['order_by'])
-    searchInfo['offset'] = json.loads(data['offset'])
-    searchInfo['per_page'] = json.loads(data['per_page'])
+        searchInfo['order_by'] = json.loads(searchInfo['order_by'])
+        searchInfo['offset'] = json.loads(searchInfo['offset'])
+        searchInfo['per_page'] = json.loads(searchInfo['per_page'])
+
+    if 'startDate' in searchInfo and searchInfo['startDate']!='':
+        startDate = datetime.strptime(searchInfo['startDate'],'%d/%m/%Y %H:%M:%S')
+
+    if 'history' in searchInfo and searchInfo['history'] == '1':
+        history = True
 
     if 'typeObj' in request.params:
         typeObj = request.params['typeObj']
@@ -351,12 +365,15 @@ def searchIndiv(request):
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront,typeObj = typeObj)
+    listObj = IndividualList(moduleFront,typeObj = typeObj,history=history,startDate=startDate)
     dataResult = listObj.GetFlatDataList(searchInfo)
-    countResult = listObj.count(searchInfo)
 
-    result = [{'total_entries':countResult}]
-    result.append(dataResult)
+    if not noCount:
+        countResult = listObj.count(searchInfo)
+        result = [{'total_entries':countResult}]
+        result.append(dataResult)
+    else :
+        result = dataResult
     return result
 
 
@@ -456,21 +473,18 @@ def delIndivLocation(request):
 @view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
 def individuals_export(request):
     session = request.dbsession
-    data = request.params.mixed()
-    searchInfo = {}
-    searchInfo['criteria'] = []
-    if 'criteria' in data: 
-        data['criteria'] = json.loads(data['criteria'])
-        if data['criteria'] != {} :
-            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+    searchInfo = request.params.mixed()
+    if 'criteria' in searchInfo: 
+        searchInfo['criteria'] = json.loads(searchInfo['criteria'])
+        if searchInfo['criteria'] != {} :
+            searchInfo['criteria'] = [obj for obj in searchInfo['criteria'] if obj['Value'] != str(-1) ]
 
-    searchInfo['order_by'] = []
+    dataResult = searchIndiv(request,searchInfo=searchInfo,noCount=True)
+    # ModuleType = 'IndivFilter'
+    # moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    ModuleType = 'IndivFilter'
-    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
-
-    listObj = IndividualList(moduleFront)
-    dataResult = listObj.GetFlatDataList(searchInfo)
+    # listObj = IndividualList(moduleFront)
+    # dataResult = listObj.GetFlatDataList(searchInfo)
 
     df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
 
