@@ -1,0 +1,46 @@
+USE [EcoReleve_ECWP]
+GO
+
+/****** Object:  View [dbo].[IndividualStatus]    Script Date: 21/07/2016 16:54:15 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+ALTER VIEW  [dbo].[IndividualStatus] AS (
+
+SELECT i.ID AS FK_Individual,CASE  
+WHEN i.Death_date Is not NULL Then 'mort' 
+WHEN s.Status is NULL and i.Death_date is null THEN 'inconnu'
+ELSE s.Status END as Status_
+FROM Individual i 
+		
+LEFT JOIN (SELECT CASE WHEN (
+			SELECT COUNT(*) 
+			FROM Observation o 
+			WHERE v.FK_Individual = o.FK_Individual AND o.FK_ProtocoleType = (SELECT ID FROM ProtocoleType WHERE Name = 'Vertebrate Individual Death')) >0 
+		THEN 'mort' 
+		WHEN ValueString = 'Suivi' THEN 'vivant' 
+		ELSE 'inconnu'
+		END AS [Status]
+		,FK_Individual
+		FROM [IndividualDynPropValuesNow] v
+		WHERE  Name = 'Monitoring_Status' ) s  
+ON i.ID = s.FK_Individual
+
+
+)
+
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('82_Fix_INdivStatus',GETDATE(),(SELECT db_name()))
+
+
+GO
