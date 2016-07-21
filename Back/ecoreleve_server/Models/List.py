@@ -43,8 +43,8 @@ eval_ = Eval()
 #--------------------------------------------------------------------------
 class StationList(ListObjectWithDynProp):
     ''' this class extend ListObjectWithDynProp, it's used to filter stations '''
-    def __init__(self,frontModule) :
-        super().__init__(Station,frontModule)
+    def __init__(self,frontModule, startDate = None) :
+        super().__init__(Station,frontModule, startDate)
 
     def WhereInJoinTable (self,query,criteriaObj) :
         ''' Override parent function to include management of Observation/Protocols and fieldWorkers '''
@@ -133,10 +133,14 @@ class StationList(ListObjectWithDynProp):
 #--------------------------------------------------------------------------
 class IndividualList(ListObjectWithDynProp):
 
-    def __init__(self,frontModule, typeObj = None) :
-        super().__init__(Individual,frontModule, typeObj = typeObj)
+    def __init__(self,frontModule, typeObj = None, startDate = None,history = False,historyView = None) :
+        super().__init__(Individual,frontModule, typeObj = typeObj,startDate = startDate,history=history)
 
     def GetJoinTable (self,searchInfo) :
+        startDate = datetime.now()
+        if self.startDate :
+            startDate = self.startDate
+
         StatusTable = Base.metadata.tables['IndividualStatus']
         EquipmentTable = Base.metadata.tables['IndividualEquipment']
 
@@ -148,7 +152,8 @@ class IndividualList(ListObjectWithDynProp):
 
         joinTable = outerjoin(joinTable,EquipmentTable
             ,and_(Individual.ID == EquipmentTable.c['FK_Individual']
-                ,or_(EquipmentTable.c['EndDate'] == None,EquipmentTable.c['EndDate'] >= func.now())))
+                ,and_(or_(EquipmentTable.c['EndDate'] >= startDate,EquipmentTable.c['EndDate'] == None ),EquipmentTable.c['StartDate'] <= startDate)))
+                #EquipmentTable.c['EndDate'] >= func.isnull(EquipmentTable.c['EndDate'],datetime.now()))))
         joinTable = outerjoin(joinTable,Sensor,Sensor.ID == EquipmentTable.c['FK_Sensor'])
         joinTable = outerjoin(joinTable,SensorType,Sensor.FK_SensorType == SensorType.ID)
 
@@ -164,16 +169,13 @@ class IndividualList(ListObjectWithDynProp):
         if curProp == 'LastImported':
             st = aliased(Individual)
             subSelect = select([Observation]).where(Observation.FK_Individual == Individual.ID)
-            # subSelect2 = select([cast(func.max(st.creationDate),DATE)]).where(st.Original_ID.like('TRACK_%'))
-            # query = query.where(and_(~exists(subSelect)
-            #     # ,and_(~exists(subSelect)
-            #         # ,and_(Individual.Original_ID.like('TRACK_%'),Individual.creationDate >= subSelect2)
-            #         # )
-            #     )
             query = query.where(and_(~exists(subSelect),Individual.Original_ID.like('TRACK_%')))
 
         if curProp == 'FK_Sensor':
-            query = query.where(eval_.eval_binary_expr(Sensor.UnicIdentifier,criteriaObj['Operator'],criteriaObj['Value']))
+            if self.history:
+                query = self.whereInEquipement(query,[criteriaObj])
+            else :
+                query = query.where(eval_.eval_binary_expr(Sensor.UnicIdentifier,criteriaObj['Operator'],criteriaObj['Value']))
 
         if curProp == 'Status_':
             StatusTable = Base.metadata.tables['IndividualStatus']
@@ -183,8 +185,7 @@ class IndividualList(ListObjectWithDynProp):
 
     def countQuery(self,criteria = None):
         query = super().countQuery(criteria)
-        # if len(list(filter(lambda x:'frequency'==x['Column'], criteria)))>0:
-        #     query = self.whereInEquipementVHF(query,criteria)
+
         for obj in criteria :
             if obj['Column'] in ['LastImported']:
                 query = self.WhereInJoinTable(query,obj)
@@ -205,6 +206,7 @@ class IndividualList(ListObjectWithDynProp):
         return query
 
     def GetFullQuery(self,searchInfo=None) :
+        print('in Cout QUERY')
         ''' return the full query to execute '''
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
@@ -222,6 +224,11 @@ class IndividualList(ListObjectWithDynProp):
         return fullQueryJoinOrdered
 
     def whereInEquipementVHF(self,fullQueryJoin,criteria):
+        startDate = datetime.now()
+
+        if self.startDate :
+            startDate = self.startDate
+
         freqObj = list(filter(lambda x:'frequency'==x['Column'], criteria))[0]
         freq = freqObj['Value']
         e2 = aliased(Equipment)
@@ -229,16 +236,24 @@ class IndividualList(ListObjectWithDynProp):
         joinTableExist = join(Equipment,Sensor,Equipment.FK_Sensor==Sensor.ID)
         joinTableExist = join(joinTableExist,vs,vs.c['FK_Sensor']==Sensor.ID)
         
-        queryExist = select([e2]).where(
-            and_(Equipment.FK_Individual==e2.FK_Individual
-                ,and_(e2.StartDate>Equipment.StartDate,e2.StartDate<func.now())))
 
-        fullQueryExist = select([Equipment.FK_Individual]).select_from(joinTableExist)
-        fullQueryExist = fullQueryExist.where(and_(~exists(queryExist)
-            ,and_(vs.c['FK_SensorDynProp']==9,and_(Sensor.FK_SensorType==4,and_(Equipment.Deploy==1,
-                and_(Equipment.StartDate<func.now(),Equipment.FK_Individual==Individual.ID))))))
+        if self.history:
+            queryExist = select([e2]).where(
+            Equipment.FK_Individual==e2.FK_Individual)
+            fullQueryExist = select([Equipment.FK_Individual]).select_from(joinTableExist).where(Equipment.FK_Individual==Individual.ID)
+            fullQueryExist = fullQueryExist.where(and_(vs.c['FK_SensorDynProp']==9,Sensor.FK_SensorType==4))
 
-        if freqObj['Operator'].lower() in ['is'] and freqObj['Value'].lower() == 'null':
+        else :
+            queryExist = select([e2]).where(
+                and_(Equipment.FK_Individual==e2.FK_Individual
+                    ,and_(e2.StartDate>Equipment.StartDate,e2.StartDate<startDate)))
+
+            fullQueryExist = select([Equipment.FK_Individual]).select_from(joinTableExist)
+            fullQueryExist = fullQueryExist.where(and_(~exists(queryExist)
+                ,and_(vs.c['FK_SensorDynProp']==9,and_(Sensor.FK_SensorType==4,and_(Equipment.Deploy==1,
+                    and_(Equipment.StartDate<startDate,Equipment.FK_Individual==Individual.ID))))))
+
+        if freqObj['Operator'].lower() in ['is null'] and freqObj['Value'].lower() == 'null':
             fullQueryJoin = fullQueryJoin.where(~exists(fullQueryExist))
         else :
             fullQueryExist = fullQueryExist.where(eval_.eval_binary_expr(vs.c['ValueInt'],freqObj['Operator'],freq))
@@ -252,62 +267,40 @@ class IndividualList(ListObjectWithDynProp):
 
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = outerjoin(table,Sensor, table.c['FK_Sensor'] == Sensor.ID)
+        startDate = datetime.now()
 
-        if sensorObj['Operator'].lower() in ['is null','is not null']:
-            subSelect = select([table.c['FK_Individual']]
-                ).select_from(joinTable).where(
-                and_(Individual.ID== table.c['FK_Individual']
-                    ,or_(table.c['EndDate'] >= func.now(),table.c['EndDate'] == None)
-                        ))
-            if sensorObj['Operator'].lower() == 'is':
-                fullQueryJoin = fullQueryJoin.where(~exists(subSelect))
-            else :
+        if self.startDate :
+            startDate = self.startDate
+
+        subSelect= select([table.c['FK_Individual']]
+            ).select_from(joinTable).where(Individual.ID== table.c['FK_Individual']).where(table.c['StartDate'] <= startDate)
+
+        if sensorObj['Operator'].lower() in ['is null','is not null'] :
+            if not self.history :
+                print('search equipment with DATE') 
+                subSelect = subSelect.where(or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None))
+
+        else:
+            subSelect = subSelect.where(eval_.eval_binary_expr(Sensor.UnicIdentifier,sensorObj['Operator'],sensor))
+            if not self.history : 
+                subSelect = subSelect.where(or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None))
+
+        if  'is not' in sensorObj['Operator'].lower():
+            if sensorObj['Operator'].lower() == 'is not null' :
                 fullQueryJoin = fullQueryJoin.where(exists(subSelect))
+            else :
+                fullQueryJoin = fullQueryJoin.where(~exists(subSelect))
         else :
-            subSelect = select([table.c['FK_Individual']]
-                ).select_from(joinTable).where(
-                and_(Individual.ID== table.c['FK_Individual']
-                    ,and_(eval_.eval_binary_expr(Sensor.UnicIdentifier,sensorObj['Operator'],sensor)
-                        ,or_(table.c['EndDate'] >= func.now(),table.c['EndDate'] == None))
-                        ))
-            fullQueryJoin = fullQueryJoin.where(exists(subSelect))
+            if sensorObj['Operator'].lower() == 'is null' :
+                fullQueryJoin = fullQueryJoin.where(~exists(subSelect))
+            else:
+                fullQueryJoin = fullQueryJoin.where(exists(subSelect))
         return fullQueryJoin
 
 #--------------------------------------------------------------------------
 class IndivLocationList(Generator):
 
     def __init__(self,table,SessionMaker,id_=None):
-        # joinTable= join(Individual_Location, Sensor
-        #     , Individual_Location.FK_Sensor == Sensor.ID)
-        # regionTable = Base.metadata.tables['Region']
-
-        # if table =='Individual_Location':
-        #     joinTable = outerjoin(Individual_Location,regionTable,Individual_Location.FK_Region == regionTable.c['ID'])
-        #     # Use select statment as ORM Table 
-        #     IndivLoc = select([Individual_Location,regionTable.c['Region']]
-        #         ).select_from(joinTable).where(Individual_Location.FK_Individual == id_).cte()
-
-        # if table == 'Station_geo':
-        #     joinTable = outerjoin(Station,regionTable,Station.FK_Region == regionTable.c['ID'])
-
-        #     print(select([literal("station").label('type_')]))
-        #     IndivLoc = select([Station.ID,Station.LAT,Station.StationDate.label('Date')
-        #         ,Station.LON,Station.LAT,literal("station").label('type_')
-        #         ,regionTable.c['Region'],Station.fieldActivityId]
-        #         ).select_from(joinTable).where(
-        #         exists(select([Observation]
-        #             ).where(and_(Observation.FK_Individual == id_ 
-        #                 , Observation.FK_Station == Station.ID))
-        #         )).cte()
-
-
-        # if table == 'Station':
-        #     joinTable = outerjoin(Station,regionTable,Station.FK_Region == regionTable.c['ID'])
-        #     joinTable = joinTable.join(Observation,and_(Observation.FK_Station == Station.ID, Observation.FK_Individual == id_))
-        #     joinTable = joinTable.join(ProtocoleType,ProtocoleType.ID == Observation.FK_ProtocoleType)
-
-        #     IndivLoc = select([Station,ProtocoleType.Name,literal("station").label('type_')]).select_from(joinTable)
-
         allLocIndiv = Base.metadata.tables['allIndivLocationWithStations']
         IndivLoc = select(allLocIndiv.c).where(allLocIndiv.c['FK_Individual'] == id_
             ).cte()
@@ -316,8 +309,8 @@ class IndivLocationList(Generator):
 #--------------------------------------------------------------------------
 class SensorList(ListObjectWithDynProp):
 
-    def __init__(self,frontModule) :
-        super().__init__(Sensor,frontModule)
+    def __init__(self,frontModule, startDate = None) :
+        super().__init__(Sensor,frontModule, startDate)
 
     def GetJoinTable (self,searchInfo) :
         curEquipmentTable = Base.metadata.tables['CurrentlySensorEquiped']
@@ -332,26 +325,6 @@ class SensorList(ListObjectWithDynProp):
         self.selectable.append(curEquipmentTable.c['FK_Individual'].label('FK_Individual'))
 
         return joinTable
-
-    # def GetJoinTable (self,searchInfo) :
-    #     indivEquipmentTable = Base.metadata.tables['IndividualEquipment']
-    #     siteEquipmentTable = Base.metadata.tables['MonitoredSiteEquipment']
-
-    #     joinTable = super().GetJoinTable(searchInfo)
-
-    #     joinTable = outerjoin(joinTable,indivEquipmentTable
-    #         ,and_(Sensor.ID == indivEquipmentTable.c['FK_Sensor']
-    #             ,or_(indivEquipmentTable.c['EndDate'] == None,indivEquipmentTable.c['EndDate'] >= func.now())))
-
-    #     joinTable = outerjoin(joinTable,siteEquipmentTable
-    #         ,and_(Sensor.ID == siteEquipmentTable.c['FK_Sensor']
-    #             ,or_(siteEquipmentTable.c['EndDate'] == None,siteEquipmentTable.c['EndDate'] >= func.now())))
-
-    #     joinTable = outerjoin(joinTable,MonitoredSite,MonitoredSite.ID == siteEquipmentTable.c['FK_MonitoredSite'])
-
-    #     self.selectable.append(MonitoredSite.Name.label('FK_MonitoredSite'))
-    #     self.selectable.append(indivEquipmentTable.c['FK_Individual'].label('FK_Individual'))
-    #     return joinTable
 
     def WhereInJoinTable (self,query,criteriaObj) :
         query = super().WhereInJoinTable(query,criteriaObj)
@@ -431,11 +404,7 @@ class SensorList(ListObjectWithDynProp):
                     query = query.where(exists(queryExist))
                 else :
                     query = query.where(not_(exists(queryExist)))
-
-
         return query
-
-
 
 
 class MonitoredSiteList(ListObjectWithDynProp):

@@ -117,12 +117,8 @@ def existingEquipment (fk_sensor,equipDate,fk_indiv=None):
 
 def alreadyUnequip (fk_sensor,equipDate,fk_indiv=None,fk_site=None):
     session = threadlocal.get_current_request().dbsession
-
     e1 = aliased(Equipment)
     e2 = aliased(Equipment)
-    print("site ",fk_site)
-    print("sensor ",fk_sensor)
-    print(equipDate)
 
     subQuery = select([e1]
         ).where(
@@ -239,15 +235,10 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
 
 # @event.listens_for(Station, 'after_update')
 # def set_equipment(mapper, connection, target):
-#     print(target.Observations)
-#     print(target.value)
-#     print(target._init_value)
 #     session = threadlocal.get_current_request().dbsession
 #     # target.FK_MonitoredSite = value
-#     print(target.FK_MonitoredSite)
 #     listObs = target.Observations
 #     # equipObsList = list(filter(lambda x: 'site' in x.GetType().Name.lower(),listObs))
-#     # print(equipObs[0].ID)
 
 #     # if int(value) != int(oldvalue) :
 #     #     for obs in equipObsList:
