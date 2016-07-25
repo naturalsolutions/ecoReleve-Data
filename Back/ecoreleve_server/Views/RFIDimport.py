@@ -120,7 +120,6 @@ def uploadFileRFID(request):
                 list_RFID.append(row)
             j=j+1
         data_to_check = pd.DataFrame.from_records(list_RFID,columns = ['id_','FK_Sensor','date_','chip_code','creator','creation_date','validated','checked'])
-        print(startEquip)
         minDateEquip = datetime.strptime(startEquip,'%Y-%m-%d %H:%M:%S')
         try :
             maxDateEquip = datetime.strptime(endEquip,'%Y-%m-%d %H:%M:%S')
@@ -177,11 +176,6 @@ def checkDuplicatedRFID(data_to_check,startEquip,endEquip,fk_sensor):
     existingData = pd.DataFrame.from_records(result,
      columns = ['ID','FK_Sensor','date_','chip_code','creator','creation_date','validated','checked','frequency'])
     existingData.rename(columns={'ID':'$ID','FK_Sensor':'$FK_Sensor','date_':'$date_','chip_code':'$chip_code','creator':'$creator','creation_date':'$creation_date','validated':'$validated','checked':'$checked','frequency':'$frequency'}, inplace=True)
-    # existingData['$FK_Sensor'] = existingData['$FK_Sensor'].astype(int)
-    # data_to_check['FK_Sensor'] = data_to_check['FK_Sensor'].astype(int)
-
-    # existingData['chip_code'] = existingData['chip_code'].astype(str)
-    # data_to_check['chip_code'] = data_to_check['chip_code'].astype(str)
 
     existingData['$date_'] =  pd.to_datetime(existingData['$date_'])
     data_to_check['date_'] =  pd.to_datetime(data_to_check['date_'])
@@ -189,6 +183,5 @@ def checkDuplicatedRFID(data_to_check,startEquip,endEquip,fk_sensor):
 
     DFToInsert = data_to_check[~data_to_check['id_'].isin(merge['id_'])]
     # session1.close()
-    print(DFToInsert)
     return DFToInsert
 

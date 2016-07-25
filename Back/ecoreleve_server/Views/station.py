@@ -136,7 +136,6 @@ def updateStation(request):
         session.commit()
         msg = {}
     except IntegrityError as e:
-        print('\n\n\n Integerity errrorrrrrrr ------------------------------')
         session.rollback()
         request.response.status_code = 510
         msg = {'existingStation' : True}
@@ -167,7 +166,6 @@ def insertOneNewStation (request) :
         session.flush()
         msg = {'ID': newSta.ID}
     except IntegrityError as e:
-        print('\n\n\n Integerity errrorrrrrrr ------------------------------')
         session.rollback()
         request.response.status_code = 510
         msg = {'existingStation' : True}
@@ -365,7 +363,6 @@ def searchStation(request):
 def updateMonitoredSite(request):
     session = request.dbsession
     data = request.params.mixed()
-    print(data)
     curSta = session.query(Station).get(data['id'])
     # data = request.json_body
     # idSite = data['siteId']
@@ -379,7 +376,6 @@ def updateMonitoredSite(request):
         session.commit()
         return 'Monitored site position was updated'
     except IntegrityError as e :
-        print('Integrity EROROROROROR')
         session.rollback()
 
         return 'This location already exists'

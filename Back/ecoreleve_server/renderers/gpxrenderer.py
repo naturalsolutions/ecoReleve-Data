@@ -24,7 +24,6 @@ class GPXRenderer(object):
         for obj in gpx_data:
 
           for key, item in obj.items():
-            print(key)
             if key == "LAT":
               lat = str(item)
             elif key == "LON":
