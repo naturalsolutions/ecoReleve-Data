@@ -173,8 +173,13 @@ class MonitoredSite (Base,ObjectWithDynProp) :
         self.newPosition = MonitoredSitePosition()
         self.positionChanged = False
         super(MonitoredSite,self).UpdateFromJson(DTOObject)
-        if self.positionChanged:
-            self.MonitoredSitePositions.append(self.newPosition)
+        if self.positionChanged :
+            sameDatePosition = list(filter(lambda x: x.StartDate == datetime.strptime(DTOObject['StartDate'],'%d/%m/%Y %H:%M:%S'),self.MonitoredSitePositions))
+            if len(sameDatePosition)>0:
+                sameDatePosition[0].LAT = DTOObject['LAT']
+                sameDatePosition[0].LON = DTOObject['LON']
+            else:
+                self.MonitoredSitePositions.append(self.newPosition)
 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
