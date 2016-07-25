@@ -36,6 +36,7 @@ define([
         'click .js-btn-form-grid-cancel': 'onCancelBtnClick',
         'click .js-btn-form-grid-clear': 'onClearBtnClick',
         'click .js-btn-form-grid-delete': 'onClickDeleteObs',
+        'blur .js-form-row': 'liveSave',
       },
 
       modelEvents: {
@@ -44,6 +45,10 @@ define([
 
       index: 0,
 
+      liveSave: function(e){
+        var index = $(e.currentTarget).index('div.js-form-row');
+        this.lastRowDfd = this.forms[index].butClickSave();
+      },
 
       onEditBtnClick: function(){
         for (var i = 0; i < this.forms.length; i++) {
@@ -54,142 +59,133 @@ define([
       },
 
       onSaveBtnClick: function(){
-        //dirty
         var _this = this;
-        var noErrors = true;
-        for (var i = 0; i < this.forms.length; i++) {
-          noErrors = this.forms[i].BBForm.commit();
-      }
-
-      //???
-      setTimeout(function(){
-        if(!noErrors) {
-          for (var i = 0; i < _this.forms.length; i++) {
-            _this.forms[i].butClickSave();
+        $.when(this.lastRowDfd).then(function(){
+            for (var i = 0; i < _this.forms.length; i++) {
+              if(_this.forms[i].model.get('id')){
+              _this.forms[i].reloadingAfterSave();
+            } else {
+              _this.deleteObs(_this.forms[i]);
+              i-=1;
+            }
           }
           _this.mode = 'display';
           _this.toogleButtons();
+        });
+      },
+
+      onCancelBtnClick: function(){
+        for (var i = 0; i < this.forms.length; i++) {
+          this.forms[i].butClickCancel();
         }
-      }, 1000);
-
-    },
-
-    onCancelBtnClick: function(){
-      for (var i = 0; i < this.forms.length; i++) {
-        this.forms[i].butClickCancel();
-      }
-      this.mode = 'display';
-      this.toogleButtons();
-    },
-
-    onClearBtnClick: function(){
-      for (var i = 0; i < this.forms.length; i++) {
-        this.forms[i].butClickClear();
-      }
-    },
-
-    initialize: function(options) {
-
-      this.model.attributes.obs = new Backbone.Collection(this.model.get('obs'));
-
-      var total = this.model.get('obs').filter(function(md){
-        if(md.attributes.data.ID) {
-          return true;
-        } else {
-          return false;
-        }
-      }).length;
-
-      this.model.set({total: total});
-
-      this.objectType = this.model.get('obs').models[0].attributes.data.FK_ProtocoleType;
-
-      this.stationId = options.stationId;
-      this.forms = [];
-
-      this.bindModelEvts();
-    },
-
-
-    createThead: function() {
-
-      this.schema = this.model.get('obs').models[0].get('schema');
-
-
-      delete this.schema['defaultValues'];
-
-
-      var size=0;
-      var fieldset = this.model.get('obs').models[0].get('fieldsets')[0].fields;
-
-      if(this.showLineNumber){}
-
-      for (var i = 0; i < fieldset.length; i++) {
-        var col = this.schema[fieldset[i]];
-
-        // if(i == 0)
-        //   col.fieldClass += ' fixedCol ';
-         //sucks
-         var test = true;
-         if(col.fieldClass){
-          test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
-          col.fieldClass += ' grid-field';
-        }
-
-        console.log(col.size);
-
-        if(col.title && test) {
-          switch(col.size) {
-              case 10:
-                  size += 250;
-                  break;
-              case 8:
-                  size += 200;
-                  break;
-              case 6:
-                  size += 150;
-                  break;
-              case 4:
-                  size += 100;
-                  break;
-              case 3:
-                  size += 75;
-                  break;
-              case 2:
-                  size += 50;
-                  break;
-              default:
-                  size += 150;
-          }
-
-          this.ui.thead.append('<div title="' + col.title + '" class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
-        }
-      }
-      //size = size*150;
-
-
-      this.ui.thead.width(size);
-      this.ui.tbody.width(size);
-    },
-
-    createTbody: function() {
-      var obs = this.model.get('obs');
-
-      if (obs.models[0].attributes.data.id) {
         this.mode = 'display';
-        for (var i = 0; i < obs.models.length; i++) {
-            // if(i >= this.nbByDefault) {
-            //     this.defaultRequired = false;
-            // }
-            this.addForm(obs.models[i]);
+        this.toogleButtons();
+      },
+
+      onClearBtnClick: function(){
+        for (var i = 0; i < this.forms.length; i++) {
+          this.forms[i].butClickClear();
+        }
+      },
+
+      initialize: function(options) {
+
+        this.model.attributes.obs = new Backbone.Collection(this.model.get('obs'));
+
+        var total = this.model.get('obs').filter(function(md){
+          if(md.attributes.data.ID) {
+            return true;
+          } else {
+            return false;
           }
-              // if (data.length < this.nbByDefault) {
-              //     for (var i = 0; i < data.length; i++) {
-              //         this.addForm(model);
-              //     }
+        }).length;
+
+        this.model.set({total: total});
+
+        this.objectType = this.model.get('obs').models[0].attributes.data.FK_ProtocoleType;
+
+        this.stationId = options.stationId;
+        this.forms = [];
+
+        this.bindModelEvts();
+      },
+
+
+      createThead: function() {
+
+        this.schema = this.model.get('obs').models[0].get('schema');
+
+
+        delete this.schema['defaultValues'];
+
+
+        var size=0;
+        var fieldset = this.model.get('obs').models[0].get('fieldsets')[0].fields;
+
+        if(this.showLineNumber){}
+
+        for (var i = 0; i < fieldset.length; i++) {
+          var col = this.schema[fieldset[i]];
+
+          // if(i == 0)
+          //   col.fieldClass += ' fixedCol ';
+           //sucks
+           var test = true;
+           if(col.fieldClass){
+            test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
+            col.fieldClass += ' grid-field';
+          }
+
+          if(col.title && test) {
+            switch(col.size) {
+                case 10:
+                    size += 250;
+                    break;
+                case 8:
+                    size += 200;
+                    break;
+                case 6:
+                    size += 150;
+                    break;
+                case 4:
+                    size += 100;
+                    break;
+                case 3:
+                    size += 75;
+                    break;
+                case 2:
+                    size += 50;
+                    break;
+                default:
+                    size += 150;
+            }
+
+            this.ui.thead.append('<div title="' + col.title + '" class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
+          }
+        }
+        //size = size*150;
+        this.ui.thead.width(size);
+        this.ui.tbody.width(size);
+      },
+
+      createTbody: function() {
+        var obs = this.model.get('obs');
+
+        if (obs.models[0].attributes.data.id) {
+          this.mode = 'display';
+          for (var i = 0; i < obs.models.length; i++) {
+              // if(i >= this.nbByDefault) {
+              //     this.defaultRequired = false;
               // }
-              // this.defaultRequired = false;
-            } else {
+              this.addForm(obs.models[i]);
+            }
+                // if (data.length < this.nbByDefault) {
+                //     for (var i = 0; i < data.length; i++) {
+                //         this.addForm(model);
+                //     }
+                // }
+                // this.defaultRequired = false;
+        } else {
               this.mode = 'edit';
               this.addForm(obs.models[0]);
           //no obs
@@ -233,36 +229,36 @@ define([
         model.attributes = model.get('data');
         model.urlRoot =  config.coreUrl + 'stations/' + this.stationId + '/protocols' + '/'
 
-
-
-        this.ui.tbody.append('<div class="js-form-row js-form-row-' + this.index +' form-row"></div>');
-        var formRowContainer = this.ui.tbody.find('.js-form-row-' + this.index);
+        this.ui.tbody.append('<div class="js-form-row form-row"></div>');
+        var formRowContainer = this.ui.tbody.find('.js-form-row:last-child');
         this.index++;
-
 
         var form = new NsForm({
           formRegion: formRowContainer,
           model: model,
           gridRow: true,
-          reloadAfterSave: true,
+          //reloadAfterSave: true,
           modelurl: config.coreUrl + 'stations/' + this.stationId + '/protocols'
         });
 
+
+
+
         form.afterDelete = function() {
-          if (this.model.get('id') == 0) {
-            _this.deleteObs(this);
-          } else {
-            var jqxhr = $.ajax({
+          var self = this;
+          if(this.model.get('id')){
+            this.model.destroy({
               url: this.model.urlRoot + '/' + this.model.get('id'),
-              method: 'DELETE',
-              contentType: 'application/json',
-              context: this
-            }).done(function(resp) {
-              _this.deleteObs(this);
-            }).fail(function(resp) {
-              console.error(resp);
-            });
+              wait: true,
+              success:function(){
+                _this.deleteObs(self);
+                console.log(_this.model.get('obs').length)
+              }});
+          } else {
+            this.model.trigger('destroy', this.model, this.model.collection);
+            _this.deleteObs(self);
           }
+
         };
         this.forms.push(form);
         this.ui.rowNumber.append('\
@@ -295,8 +291,6 @@ define([
           return f === form;
         });
 
-        form.model.destroy();
-
         if(!this.model.get('obs')) {
           this.model.destroy();
         }
@@ -326,9 +320,9 @@ define([
           return true;
         }
       });
-      if(existingEmptyForm.length) {
-        //?
-      } else {
+      // if(existingEmptyForm.length) {
+      //   //?
+      // } else {
         this.name = '_' + this.objectType + '_';
         this.jqxhr = $.ajax({
           url: config.coreUrl + 'stations/' + this.stationId + '/protocols/0',
@@ -349,7 +343,7 @@ define([
             console.warn('request error');
           }
         });
-      }
+      //}
     },
 
 
