@@ -303,26 +303,6 @@ define([
         {
           _this.displayFinished();
         }
-        /*    $('#start-upload-resumablejs').removeClass('hide');
-        $('#cancel-upload-resumablejs').addClass('hide');
-        $('#pause-upload-resumablejs').addClass('hide');
-
-        progressBar.finish();
-        Swal({title: 'Well done',
-        text: 'File(s) have been correctly Uploaded\n'
-        + '\t inserted : ' + nbFiles
-        ,
-        type:  'success',
-        showCancelButton: true,
-        confirmButtonText: 'Validate CamTrap',
-        cancelButtonText: 'New import',
-        closeOnConfirm: true,
-        closeOnCancel: true},
-        function(isConfirm) {   if (isConfirm) {
-        Backbone.history.navigate('validate/Camtrap',{trigger: true});
-      }
-    }
-  );*/
 });
 
 r.on('fileProgress' , function(file){
@@ -348,6 +328,9 @@ r.on('beforeCancel' , function() {
 
 r.on('cancel' , function() {
   let textFileCancelled = "";
+  _this.nbFiles = 0
+  _this.nbFilesToWait = 0;
+  _this.nbFilesConcat = 0;
   Swal(
     {
       title: 'Warning you have Cancelled the upload',
@@ -367,19 +350,24 @@ r.on('cancel' , function() {
   $("#list-files").append('<div id="title" class="col-md-12 text-center">List files to upload</div><div id="name" class="col-md-4 text-center">NAME</div><div id="status" class="col-md-8 text-center">STATUS</div>')
   $('#pause-upload-resumablejs').addClass('hide');
   $('#start-upload-resumablejs').addClass('hide');
+  $('#cancel-upload-resumablejs').addClass('hide');
 });
 
 },
 
 displayFinished: function (){
   var _this = this;
+  var nbFilesUploaded = _this.nbFiles;
   console.log("bim j'ai fini j'affiche");
+  _this.nbFiles = 0
+  _this.nbFilesToWait = 0;
+  _this.nbFilesConcat = 0;
   $('#start-upload-resumablejs').addClass('hide');
   $('#pause-upload-resumablejs').addClass('hide');
   _this.progressBar.finish();
   Swal({title: 'Well done',
   text: 'File(s) have been correctly Uploaded\n'
-  + '\t inserted : ' + _this.nbFiles
+  + '\t inserted : ' + nbFilesUploaded
   ,
   type:  'success',
   showCancelButton: true,
