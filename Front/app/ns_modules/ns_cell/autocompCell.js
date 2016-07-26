@@ -1,9 +1,10 @@
 /*
   backgrid-autocomplete-cell
-  https://github.com/PeterDowdy/backgrid-autocomplete-cell
+  options :
+        source : your WS Url or Array({label:'label',value:yourValLabel}),
+        minLength : number of characters to trig autocomplete,
+        target: the target attributes to set the model with value according selected label
 
-  Copyright (c) 2013 Peter Dowdy and contributors
-  Licensed under the MIT @license.
 */
 define([
   'jquery',
