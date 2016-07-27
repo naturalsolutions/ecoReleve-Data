@@ -135,7 +135,7 @@ def releasePost(request):
         if data == {}:
             data = request.json_body
             print(data)
-        if 'patch' in data and 'FK_Sensor' in data['patch' ]:
+        if 'FK_Sensor' in data and data['FK_Sensor'] is not None :
             return isavailableSensor(request,data)
         return 
 

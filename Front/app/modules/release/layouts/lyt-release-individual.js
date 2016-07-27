@@ -127,21 +127,28 @@ define([
           model.set('sta_date',_this.station.get('StationDate'));
         }
       });
+      this.listenTo(this.grid.collection,'error',function(model,col){
+        if (model.get('unicSensorName')!= null) {
+          model.trigger("backgrid:error", model,_this.grid.grid.columns.findWhere({name:'unicSensorName'}));
+          model.set({error:true});
+        }
+      });
 
       this.grid.collection.on('backgrid:autocompEdited',function(model,column,e,s){
-        if (column && column.get('name')=='unicSensorName' && model.get('FK_Sensor')!= null){
+        if (column && column.get('name')=='unicSensorName' && model.get('FK_Sensor')!= null && (model.get('unicSensorName')!= '' && model.get('unicSensorName')!=null) ){
           var check =  _this.grid.collection.where({FK_Sensor: model.get('FK_Sensor')});
           if (check.length>1){
             model.set('error',true);
             model.trigger("backgrid:error",model,_this.grid.grid.columns.findWhere({name:'unicSensorName'}));
           }
         }
+        if (column && column.get('name')=='unicSensorName' && (model.get('unicSensorName')== '' || model.get('unicSensorName')==null)) {
+          model.set('error',false);
+          _this.currentRow.$el.find('.error').removeClass('error');
+
+        }
       });
 
-      this.listenTo(this.grid.collection,'error',function(model,col){
-        model.trigger("backgrid:error", model,_this.grid.grid.columns.findWhere({name:'unicSensorName'}));
-        model.set({error:true});
-      });
     },
     displayGrid: function() {
       var _this = this;

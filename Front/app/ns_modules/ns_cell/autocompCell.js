@@ -34,6 +34,7 @@ var AutocompleteCellEditor = Backgrid.InputCellEditor.extend({
         this.target = options.column.attributes.options.target;
         this.autocompleteSource.select = function(event,ui){
             event.preventDefault();
+
             _this.model.set(_this.key,ui.item.label);
             if (this.target) {
                 _this.model.set(this.target,ui.item.value);
@@ -51,12 +52,11 @@ var AutocompleteCellEditor = Backgrid.InputCellEditor.extend({
         this.autocompleteSource.change = function(event,ui){
             event.preventDefault();
           if (!ui.item) {
-                if (_this.$el.val() != ''){
-                _this.$el.parent('td').addClass('error');
+                if (_this.$el.val() == ''){
+                    _this.saveOrCancel(event,ui.item);
                 }
              } else {
              }
-            _this.saveOrCancel(event,ui.item);
         };
     },
     render: function () {
@@ -75,7 +75,7 @@ var AutocompleteCellEditor = Backgrid.InputCellEditor.extend({
         var model = this.model;
         var column = this.column;
         var command = new Backgrid.Command(e);
-
+        model.set('error',false);
         if (e.type == "autocompleteselect") {
             e.stopPropagation();
             model.set(this.key,item.label);
@@ -88,8 +88,10 @@ var AutocompleteCellEditor = Backgrid.InputCellEditor.extend({
             model.set('error',false);
         }
         if (e.type == "blur") {
+            model.set('error',false);
             model.trigger("backgrid:edited", model, column, command);
             model.trigger("backgrid:autocompEdited", model, column, command);
+
         }
         if (e.type == "autocompletechange" && !item) {
             
@@ -97,6 +99,7 @@ var AutocompleteCellEditor = Backgrid.InputCellEditor.extend({
                 model.set(column.get("name"),null);
                 model.set(this.target,null);
                 model.set('error',false);
+                this.$el.change();
                 model.trigger("backgrid:autocompEdited", model, column, command);
 
             } else {
