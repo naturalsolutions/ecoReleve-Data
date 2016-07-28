@@ -138,13 +138,35 @@ define([
         if (column && column.get('name')=='unicSensorName' && model.get('FK_Sensor')!= null && (model.get('unicSensorName')!= '' && model.get('unicSensorName')!=null) ){
           var check =  _this.grid.collection.where({FK_Sensor: model.get('FK_Sensor')});
           if (check.length>1){
-            model.set('error',true);
-            model.trigger("backgrid:error",model,_this.grid.grid.columns.findWhere({name:'unicSensorName'}));
+            _.each(check,function(curModel){
+              curModel.set('error',true);
+              curModel.set('duplicated',true);
+              curModel.trigger("backgrid:error",curModel,_this.grid.grid.columns.findWhere({name:'unicSensorName'}));
+            });
+          } else{
+            var errorList = _this.ui.grid.find('.error');
           }
         }
+
         if (column && column.get('name')=='unicSensorName' && (model.get('unicSensorName')== '' || model.get('unicSensorName')==null)) {
           model.set('error',false);
           _this.currentRow.$el.find('.error').removeClass('error');
+          var check =  _this.grid.collection.where({duplicated: true});
+          var l = _.groupBy(check,function(model){
+            if (model.get('FK_Sensor')!=undefined || model.get('FK_Sensor')!=null){
+              return model.get('FK_Sensor');
+            }
+          });
+          console.log(l);
+          _.each(l,function(group){
+            if(group.length==1){
+               _.map(_this.grid.grid.body.rows,function(i){
+                if (i.model == group[0]) {
+                  i.$el.find('.error').removeClass('error');
+                }
+              });
+            }
+          });
 
         }
       });
