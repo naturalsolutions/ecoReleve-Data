@@ -121,9 +121,6 @@ class StationList(ListObjectWithDynProp):
     def GetFlatDataList(self,searchInfo=None,getFieldWorkers=True) :
         ''' Override parent function to include management of Observation/Protocols and fieldWorkers '''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
-        print('fullQueryJoin')
-        print(fullQueryJoinOrdered)
-
         result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
         data = []
 
@@ -132,11 +129,8 @@ class StationList(ListObjectWithDynProp):
             # queryCTE = fullQueryJoinOrdered.cte()
             # joinFW = join(Station_FieldWorker,User,Station_FieldWorker.FK_FieldWorker==User.id)
             # joinTable = join(queryCTE,joinFW,queryCTE.c['ID']== Station_FieldWorker.FK_Station)
-
             query = select([Station_FieldWorker.FK_Station,User.Login]).where(Station_FieldWorker.FK_Station.in_(listID))
             FieldWorkers = self.ObjContext.execute(query).fetchall()
-            print('\n\n FW **************************')
-            print(query)
             list_ = {}
             for x,y in FieldWorkers :
                 list_.setdefault(x,[]).append(y)
@@ -158,8 +152,6 @@ class StationList(ListObjectWithDynProp):
         for obj in criteria :
             if obj['Column'] in ['FK_ProtocoleType','FK_FieldWorker','LastImported','FK_Individual','Species']:
                 query = self.WhereInJoinTable(query,obj)
-        print('\n\n *******************countQuery******************\n')
-        print(query)
         return query
 
 
