@@ -5,10 +5,11 @@ define([
   'marionette',
   'backbone-forms',
   'sweetAlert',
+  'ns_ruler/ruler',
   'requirejs-text!./Templates/NsFormsModule.html',
   'fancytree',
   './NsFormsCustomFields',
-], function ($, _, Backbone, Marionette, BackboneForm, Swal, tpl) {
+], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tpl) {
   return Backbone.View.extend({
     BBForm: null,
     modelurl: null,
@@ -190,7 +191,7 @@ define([
           }
           // give the url to model to manage save
           _this.model.urlRoot = this.modelurl;
-
+          //_this.rules = resp.rules;
           var settings = $.extend({}, _this.data, resp.data);
           _this.model.attributes = settings;
 
@@ -205,6 +206,22 @@ define([
         }
       });
     },
+    initRules:function() {
+      var _this = this;
+      this.ruler = new Ruler({
+            form: this.BBForm
+          });
+
+      _.each(this.BBForm.schema,function(curSchema){
+        if (curSchema.rule){
+          var curRule = urSchema.rule;
+          var target = curSchema.name;
+          _this.ruler.addRule(target,curRule.operator,curRule.source);
+        }
+        console.log(curSchema)
+      });
+
+    },
 
     showForm: function (){
       var self = this;
@@ -216,8 +233,9 @@ define([
       }
       // Call extendable function before the show call
       this.BeforeShow();
-      var _this = this;
 
+      var _this = this;
+      this.initRules();
       this.formRegion.html(el); //this.formRegion.html(this.BBForm.el);
       $(this.formRegion).find('input').on("keypress", function(e) {
         if( e.which == 13 ){

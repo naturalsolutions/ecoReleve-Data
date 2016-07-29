@@ -25,6 +25,7 @@ require.config({
     'ns_map': 'ns_modules/ns_map',
     'ns_stepper': 'ns_modules/ns_stepper',
     'ns_navbar': 'ns_modules/ns_navbar',
+    'ns_ruler': 'ns_modules/ns_ruler',
 
     /*==========  Bower  ==========*/
     'jquery': '../bower_components/jquery/jquery',

@@ -28,11 +28,6 @@
         Backbone.$ = $;
 
 
-
-        /*var brfs = require('brfs')
-        var tpl = brfs('./Templates/NsFormsModule.html');*/
-
-
         module.exports = factory(root, exports, $, _, Backbone, BbForms, moment);
         //return Retour ;
         // Finally, as a browser global.
@@ -57,13 +52,29 @@
     NsRuler = Backbone.View.extend({
         form: null,
         sourceFields:{},
+
         initialize: function (options) {
             this.form = options.form;
             this.option = options;
             this.sourceFields = {};
+            this.dictRule = {
+                'count':this.countRule,
+                'equal': this.equalRule,
+                'context': this
+            };
 
         },
         addRule: function (target, operator, source) {
+            var _this = this;
+            var realSource = source ;
+            if (!source.isArray()){
+                source=[source] ;
+            }
+            if (source.isArray()){
+                _.each(source,function(curSource){
+                    _this.sourceFields[curSource].push({source:source, target: target, operator: operator });
+                });
+            }
             var _this = this;
             if (this.sourceFields[source] == null) {
                 this.sourceFields[source] = [{ target: target, operator: operator }];
@@ -72,6 +83,7 @@
                 this.sourceFields[source].push({ target: target, operator: operator });
             }
             //console.log('ADD Rule', this.sourceFields, this.sourceFields[source], this.sourceFields[source].length);
+            console.log(this.form.$el.find(('#' + this.getEditor(source).id)));
 
             this.form.$el.find(('#' + this.getEditor(source).id)).on('change keyup paste', function (e) {
                 _this.ApplyRules(e);
@@ -83,16 +95,37 @@
             //console.log('Editor', this.form.$el.find(('#' + this.getEditor(source).id)), this.getEditor(source).id,this.sourceFields);
             
         },
+
         getEditor: function (name) {
             return this.form.fields[name].editor;
         },
+
         ApplyRules: function (evt) {
-            var sourceName = evt.currentTarget.name;            
+            console.log('Apply Rule');
+            var sourceName = $(evt.currentTarget).attr('name');
             var ruleList = this.sourceFields[sourceName];
             for (var i = 0; i < ruleList.length; i++) {
-                this.form.$el.find(('#' + this.getEditor(ruleList[i].target).id)).val(this.getEditor(sourceName).getValue());
+                var targetName = ruleList[i].target;
+                var operator = ruleList[i].operator;
+                this.dictRule[operator](sourceName,targetName);
+            //this.form.$el.find(('#' + this.getEditor(ruleList[i].target).id)).val(this.getEditor(sourceName).getValue());
             }
-        }
+        },
+
+        countRule : function(sourceName, targetName){
+            var _this = this.context;
+            var result = _this.getEditor(sourceName).getValue().length; 
+            console.log(result);
+            _this.form.$el.find('#' + _this.getEditor(targetName).id).val(result);
+            return result; 
+        },
+
+        equalRule : function(sourceName, targetName){
+            var result = this.getEditor(sourceName).getValue(); 
+            console.log(result);
+            this.form.$el.find('#' + this.getEditor(targetName).id).val(result);
+            return result; 
+        },
     });
 
 
