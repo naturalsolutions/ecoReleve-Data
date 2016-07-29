@@ -62,6 +62,7 @@ define([
         this.RowType = Backgrid.Row.extend({
           events: {
             'click': 'onClick',
+            'dblclick': 'onDbClick',
           },
           onClick: function (e) {
             _this.interaction('rowClicked', {row: this, evt: e});

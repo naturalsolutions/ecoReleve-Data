@@ -26,6 +26,7 @@ from traceback import print_exc
 from collections import OrderedDict
 import pandas as pd
 from collections import Counter
+from ..Models.Equipment import checkSensor,checkEquip
 
 prefix = 'release/'
 
@@ -129,7 +130,13 @@ def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()
 
-    if 'StationID' not in data:
+    if 'StationID' not in data and 'IndividualList' not in data:
+        print(data)
+        if data == {}:
+            data = request.json_body
+            print(data)
+        if 'FK_Sensor' in data and data['FK_Sensor'] is not None :
+            return isavailableSensor(request,data)
         return 
 
     sta_id = int(data['StationID'])
@@ -313,6 +320,16 @@ def releasePost(request):
         message = str(type(e))
 
     return message
+
+
+def isavailableSensor(request,data):
+    availability = checkSensor(data['FK_Sensor'],datetime.strptime(data['sta_date'],'%d/%m/%Y %H:%M:%S'))
+    if availability is True:
+        return 
+    else :
+        request.response.status_code = 510
+        return 'sensor not available'
+
 
 def getFullpath(item,lng):
     name,val= item
