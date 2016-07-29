@@ -131,6 +131,7 @@ define([
         if (model.get('unicSensorName')!= null) {
           model.trigger("backgrid:error", model,_this.grid.grid.columns.findWhere({name:'unicSensorName'}));
           model.set({error:true});
+          model.set({serverError:true});
         }
       });
 
@@ -161,7 +162,7 @@ define([
           _.each(l,function(group){
             if(group.length==1){
                _.map(_this.grid.grid.body.rows,function(i){
-                if (i.model == group[0]) {
+                if (i.model == group[0] && !i.model.get('serverError')) {
                   i.$el.find('.error').removeClass('error');
                 }
               });
@@ -170,6 +171,25 @@ define([
 
         }
       });
+/*
+      this.listenTo(this.grid.collection,"backgrid:duplicatedError",function(model,col){
+          var check =  _this.grid.collection.where({duplicated: true});
+          var l = _.groupBy(check,function(model){
+          if (model.get('FK_Sensor')!=undefined || model.get('FK_Sensor')!=null){
+              return model.get('FK_Sensor');
+          }
+          });
+          _.each(l,function(group){
+            if(group.length>1){
+               _.map(_this.grid.grid.body.rows,function(i){
+                if (i.model == group[0]) {
+                  i.$el.find('.autocomplete-cell').addClass('errorDuplicated');
+                }
+              });
+            }
+          });
+
+      });*/
 
     },
     displayGrid: function() {
