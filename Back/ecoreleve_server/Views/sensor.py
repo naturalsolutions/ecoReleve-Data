@@ -26,6 +26,7 @@ from datetime import datetime
 import io
 from pyramid.response import Response ,FileResponse
 from ..controllers.security import routes_permission
+from sqlalchemy.exc import IntegrityError
 
 
 
@@ -202,6 +203,7 @@ def getSensorHistory(request):
         curRow = OrderedDict(row)
         curRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
         curRow['EndDate'] = curRow['EndDate'].strftime('%Y-%m-%d %H:%M:%S') if curRow['EndDate'] is not None else None
+        curRow['format'] = 'YYYY-MM-DD HH:mm:ss'
         response.append(curRow)
 
     return response
@@ -246,16 +248,25 @@ def insertOneNewSensor (request) :
     for items , value in request.json_body.items() :
         data[items] = value
 
-    sensorType = int(data['FK_SensorType'])
-    newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now())
-    newSensor.SensorType = session.query(SensorType).filter(SensorType.ID== sensorType).first()
-    newSensor.init_on_load()
-    newSensor.UpdateFromJson(data)
+    try:
+        sensorType = int(data['FK_SensorType'])
+        newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now())
+        newSensor.SensorType = session.query(SensorType).filter(SensorType.ID== sensorType).first()
+        newSensor.init_on_load()
+        newSensor.UpdateFromJson(data)
 
-    session.add(newSensor)
-    session.flush()
- 
-    return {'ID': newSensor.ID}
+        session.add(newSensor)
+        session.flush()
+        response = {'ID': newSensor.ID}
+
+    except IntegrityError as e:
+        session.rollback()
+        request.response.status_code = 520
+        response = request.response
+        response.text = "This identifier is already used for another sensor"
+        pass
+
+    return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET')

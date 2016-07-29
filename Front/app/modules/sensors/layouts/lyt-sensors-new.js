@@ -96,9 +96,14 @@ define([
           );
         },
         savingError: function(response) {
+          var msg = 'in creating a new sensor';
+          console.log(response)
+          if (response.status == 520 && response.responseText){
+            msg = response.responseText;
+          }
           Swal({
             title: 'Error',
-            text: 'in creating a new sensor',
+            text: msg ,
             type: 'error',
             showCancelButton: false,
             confirmButtonColor: 'rgb(147, 14, 14)',
