@@ -7,6 +7,19 @@ body.superUser{
     display: none;
   }
 
+  .js-admin{
+      &.tile{
+        display: flex;
+        pointer-events: none;
+        cursor: not-allowed;
+        background-color: rgba(0,0,0,0.5)!important;
+        &:hover{
+          opacity: 1;
+        }
+      }
+    }
+
+
   .sensor{
     .NsFormModuleEdit{
       display: none;
