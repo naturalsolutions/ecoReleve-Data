@@ -56,7 +56,7 @@ def GetProtocolsofStation (request) :
                     try : 
                         DisplayMode = 'display'
                         obs = listObs[i]
-                        typeName = obs.GetType().Name
+                        typeName = obs.GetType().Name.replace('_',' ')
                         typeID = obs.GetType().ID
                         obs.LoadNowValues()
                         try :
@@ -76,7 +76,7 @@ def GetProtocolsofStation (request) :
                        
                         virginTypeID = listType[i].FK_ProtocoleType
                         virginObs = Observation(FK_ProtocoleType = virginTypeID)
-                        viginTypeName = virginObs.GetType().Name
+                        viginTypeName = virginObs.GetType().Name.replace('_',' ')
                         try :
                             if virginTypeID not in listProto :
                                 test_ = listProto[virginTypeID]
@@ -316,7 +316,7 @@ def getListofProtocolTypes (request):
     for row in result:
         elem = {}
         elem['ID'] = row['ID']
-        elem['Name'] = row['Name']
+        elem['Name'] = row['Name'].replace('_',' ')
         res.append(elem)
     res = sorted(res, key=lambda k: k['Name']) 
     return res
