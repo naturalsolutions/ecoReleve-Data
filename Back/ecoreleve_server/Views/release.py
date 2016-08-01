@@ -26,11 +26,14 @@ from traceback import print_exc
 from collections import OrderedDict
 import pandas as pd
 from collections import Counter
+from ..controllers.security import routes_permission
 from ..Models.Equipment import checkSensor,checkEquip
 
-prefix = 'release/'
 
-@view_config(route_name= prefix+'individuals/action', renderer='json', request_method = 'GET')
+
+prefix = 'release'
+
+@view_config(route_name= prefix+'/individuals/action', renderer='json', request_method='GET', permission=routes_permission[prefix]['GET'])
 def actionOnStations(request):
     dictActionFunc = {
     # 'count' : count_,
@@ -89,7 +92,7 @@ def getReleaseMethod(request):
     result = session.execute(query).fetchall()
     return [dict(row) for row in result]
 
-@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/individuals', renderer='json', request_method ='GET', permission=routes_permission[prefix]['GET'])
 def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
@@ -125,7 +128,7 @@ def searchIndiv(request):
     return result
 
 
-@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'POST')
+@view_config(route_name= prefix+'/individuals', renderer='json', request_method ='POST',permission=routes_permission[prefix]['POST'])
 def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()

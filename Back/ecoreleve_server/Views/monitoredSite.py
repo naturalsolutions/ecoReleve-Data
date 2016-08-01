@@ -29,13 +29,15 @@ from traceback import print_exc
 from collections import OrderedDict
 import io
 from pyramid.response import Response ,FileResponse
+from ..controllers.security import routes_permission
+
 
 prefix = 'monitoredSites'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET')
-@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET')
-@view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
+@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
+@view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def actionOnMonitoredSite(request):
     print ('\n*********************** Action **********************\n')
     dictActionFunc = {
@@ -183,7 +185,7 @@ def getMonitoredSiteEquipment(request):
 
     return response
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = routes_permission[prefix]['DELETE'])
 def deleteMonitoredSite(request):
     session = request.dbsession
     id_ = request.matchdict['id']
@@ -192,7 +194,7 @@ def deleteMonitoredSite(request):
     return True
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT',permission = routes_permission[prefix]['PUT'])
 def updateMonitoredSite(request):
     session = request.dbsession
     try:
@@ -211,7 +213,7 @@ def updateMonitoredSite(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/', renderer='json', request_method = 'POST')
+@view_config(route_name= prefix+'/', renderer='json', request_method = 'POST',permission = routes_permission[prefix]['POST'])
 def insertMonitoredSite(request):
     data = request.json_body
     if not isinstance(data,list):
@@ -278,7 +280,7 @@ def searchMonitoredSite(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
-def sensors_export(request):
+def sites_export(request):
     session = request.dbsession
     data = request.params.mixed()
     searchInfo = {}

@@ -31,15 +31,14 @@ from ..utils.generator import Generator
 import io
 from pyramid.response import Response ,FileResponse
 from pyramid import threadlocal
-
+from ..controllers.security import routes_permission
 
 prefix = 'individuals'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-@view_config(route_name= prefix+'/advanced/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-@view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
+@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
+@view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def actionOnIndividuals(request):
     dictActionFunc = {
     'count' : count_,
@@ -121,7 +120,7 @@ def getIndividualType(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def getIndiv(request):
     session = request.dbsession
     id = request.matchdict['id']
@@ -180,7 +179,7 @@ def getIndiv(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def getIndivHistory(request):
     session = request.dbsession
     id = request.matchdict['id']
@@ -208,7 +207,7 @@ def getIndivHistory(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/equipment', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/equipment', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def getIndivEquipment(request):
     session = request.dbsession
     id_indiv = request.matchdict['id']
@@ -235,7 +234,7 @@ def getIndivEquipment(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = routes_permission[prefix]['DELETE'])
 def deleteIndiv(request):
     session = request.dbsession
     id_ = request.matchdict['id']
@@ -245,7 +244,7 @@ def deleteIndiv(request):
     return True
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT',permission = routes_permission[prefix]['PUT'])
 def updateIndiv(request):
     session = request.dbsession
     data = request.json_body
@@ -256,7 +255,7 @@ def updateIndiv(request):
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix  + '/insert', renderer='json', request_method = 'POST')
+@view_config(route_name= prefix  + '/insert', renderer='json', request_method = 'POST',permission = routes_permission[prefix]['POST'])
 def insertIndiv(request):
     session = request.dbsession
     data = request.json_body
@@ -328,9 +327,9 @@ def checkExisting(indiv):
     return existingID
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-@view_config(route_name= prefix, renderer='json', request_method = 'POST', permission = NO_PERMISSION_REQUIRED)
-def searchIndiv(request, searchInfo = None, noCount = False):
+@view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = routes_permission[prefix]['GET'])
+@view_config(route_name= prefix, renderer='json', request_method = 'POST', permission = routes_permission[prefix]['GET'])
+def searchIndiv(request):
     session = request.dbsession
     history = False
     startDate = None
@@ -378,7 +377,7 @@ def searchIndiv(request, searchInfo = None, noCount = False):
     return result
 
 
-@view_config(route_name= prefix+'/id/location/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/location/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def actionOnIndividualsLoc(request):
     dictActionFunc = {
     'getFields': getFieldsLoc,
@@ -393,7 +392,7 @@ def getFieldsLoc(request) :
     gene = IndivLocationList('Individual_Location',session,None)
     return gene.get_col()
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/location', renderer='json',permission = routes_permission[prefix]['GET'])
 def getIndivLocation(request):
 
     id_ = request.matchdict['id']
@@ -456,7 +455,7 @@ def getIndivLocation(request):
     return result
 
 
-@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'PUT')
+@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'PUT',permission = routes_permission[prefix]['PUT'])
 def delIndivLocationList(request):
     session = request.dbsession
 
@@ -464,7 +463,7 @@ def delIndivLocationList(request):
     session.query(Individual_Location).filter(Individual_Location.ID.in_(IdList)).delete(synchronize_session=False)
 
 
-@view_config(route_name= prefix+'/id/location/id_loc', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/location/id_loc', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['PUT'])
 def delIndivLocation(request):
     session = request.dbsession
     Id = request.matchdict['id_loc']
@@ -472,7 +471,7 @@ def delIndivLocation(request):
 
 
 @view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
-def sensors_export(request):
+def individuals_export(request):
     session = request.dbsession
     searchInfo = request.params.mixed()
     if 'criteria' in searchInfo: 
