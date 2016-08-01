@@ -46,8 +46,13 @@ define([
       index: 0,
 
       liveSave: function(e){
-        var index = $(e.currentTarget).index('div.js-form-row');
-        this.lastRowDfd = this.forms[index].butClickSave();
+        var _this = this;
+        setTimeout(function(){
+          //dirty
+          var index = $(e.currentTarget).index('div.js-form-row');
+          _this.lastRowDfd = _this.forms[index].butClickSave();
+        },500);
+
       },
 
       onEditBtnClick: function(){
@@ -60,18 +65,18 @@ define([
 
       onSaveBtnClick: function(){
         var _this = this;
-        $.when(this.lastRowDfd).then(function(){
-            for (var i = 0; i < _this.forms.length; i++) {
-              if(_this.forms[i].model.get('id')){
-              _this.forms[i].reloadingAfterSave();
-            } else {
-              _this.deleteObs(_this.forms[i]);
-              i-=1;
+          $.when(this.lastRowDfd).then(function(){
+              for (var i = 0; i < _this.forms.length; i++) {
+                if(_this.forms[i].model.get('id')){
+                _this.forms[i].reloadingAfterSave();
+              } else {
+                _this.deleteObs(_this.forms[i]);
+                i-=1;
+              }
             }
-          }
-          _this.mode = 'display';
-          _this.toogleButtons();
-        });
+            _this.mode = 'display';
+            _this.toogleButtons();
+          });
       },
 
       onCancelBtnClick: function(){
