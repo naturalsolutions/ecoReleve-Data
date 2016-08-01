@@ -211,15 +211,30 @@ define([
       this.ruler = new Ruler({
             form: _this.BBForm
           });
+      var globalError = {};
+      var errorMsg = 'error on field(s): \n';
 
       _.each(this.BBForm.schema,function(curSchema){
         if (curSchema.rule){
           var curRule = curSchema.rule;
           var target = curSchema.name;
-          _this.ruler.addRule(target,curRule.operator,curRule.source);
+          var curResult = _this.ruler.addRule(target,curRule.operator,curRule.source);
+          if (curResult) {
+            globalError[target] = curResult;
+            errorMsg +=  curResult.object + ':  '+curResult.message+'\n' ;
+          }
         }
       });
 
+      if (!$.isEmptyObject(globalError) && this.displayMode == 'edit'){
+        this.swal({
+          title : 'Rule error',
+          text : errorMsg,
+          type:'error',
+          showCancelButton: false,
+          confirmButtonColor:'#DD6B55',
+          confirmButtonText:'Ok'});
+      }
     },
 
     showForm: function (){
@@ -235,6 +250,8 @@ define([
 
       var _this = this;
       this.initRules();
+
+
       this.formRegion.html(el); //this.formRegion.html(this.BBForm.el);
       $(this.formRegion).find('input').on("keypress", function(e) {
         if( e.which == 13 ){

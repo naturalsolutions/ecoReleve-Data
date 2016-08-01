@@ -74,17 +74,25 @@
             if (!(source instanceof Array)){
                 source=[source] ;
             }
-
-            _.each(source,function(curSource){
-                if (_this.sourceFields[curSource] == null) {
-                    _this.sourceFields[curSource] = [{source:source, target: target, operator: operator }];
-                } else {
-                    _this.sourceFields[curSource].push({source:source, target: target, operator: operator });
-                }
-                _this.form.$el.find(('#' + _this.getEditor(curSource).id)).on('change keyup paste', function (e) {
-                    _this.ApplyRules(e);
+            if (!this.dictRule[operator]){
+                return {message: 'unknown operator', error:'', object: target};
+            }
+            try {
+                _.each(source,function(curSource){
+                    if (_this.sourceFields[curSource] == null) {
+                        _this.sourceFields[curSource] = [{source:source, target: target, operator: operator }];
+                    } else {
+                        _this.sourceFields[curSource].push({source:source, target: target, operator: operator });
+                    }
+                    _this.form.$el.find(('#' + _this.getEditor(curSource).id)).on('change keyup paste', function (evt) {
+                        _this.ApplyRules(evt);
+                    });
                 });
-            });
+                return null;
+            } catch (e) {
+                console.log('totot',e);
+                return {message: 'invalid configuration', error:e, object: target};
+            }
         },
 
         getEditor: function (name) {
