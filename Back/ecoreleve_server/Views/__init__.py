@@ -119,6 +119,7 @@ def add_routes(config):
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/') 
+    config.add_route('individuals/advanced', 'ecoReleve-Core/individuals/advanced/') 
     config.add_route('individuals/insert', 'ecoReleve-Core/individuals')
     config.add_route('individuals/export', 'ecoReleve-Core/individuals/export')
     config.add_route('individuals/id', 'ecoReleve-Core/individuals/{id}',custom_predicates = (integers('id'),))
@@ -129,6 +130,7 @@ def add_routes(config):
     config.add_route('individuals/id/history/action', 'ecoReleve-Core/individuals/{id}/history/{action}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/location/action', 'ecoReleve-Core/individuals/{id}/locations/{action}',custom_predicates = (integers('id'),))
     config.add_route('individuals/id/equipment/action', 'ecoReleve-Core/individuals/{id}/equipment/{action}',custom_predicates = (integers('id'),))
+    config.add_route('individuals/advanced/action', 'ecoReleve-Core/individuals/advanced/{action}')
     config.add_route('individuals/action', 'ecoReleve-Core/individuals/{action}')
 
     # ------------------------------------------------------------------------------------------------------------------------- #

@@ -9,10 +9,11 @@ define([
   'ns_stepper/lyt-step',
   'ns_grid/model-grid',
   'ns_modules/ns_com',
+  'ns_filter_bower',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, Backgrid, config, 
-  Step, NsGrid, Com
+  Step, NsGrid, Com,NsFilter
 ) {
 
   'use strict';
@@ -24,12 +25,16 @@ define([
     name: 'RFID decoder selection',
     events: {
       'change #rfidId': 'updateGrid',
+      /*'dp.change' : 'update',
+      'change select[name=Operator]' : 'update',*/
+      'click button#filterTrigger': 'update'
     },
     ui: {
       'rfidId': '#rfidId',
       'grid': '#grid',
       'paginator': '#paginator',
-      'requirement': '#requirement'
+      'requirement': '#requirement',
+      'filter': '#rfidFilter'
     },
     initialize: function(options) {
       this.model = new Backbone.Model();
@@ -49,7 +54,6 @@ define([
       //this.parseOneTpl(this.template);
       var obj = {name: this.name + '_RFID_identifer',required: true};
       this.stepAttributes = [obj] ;
-
       var content = '';
       var self = this;
       $.ajax({
@@ -65,23 +69,32 @@ define([
           content += '<option value="' + val + '">' + label + '</option>';
         }
         $('select[name="RFID_identifer"]').append(content);
+        this.$el.find('br').remove();
+        this.$el.find('.filterdiv').addClass('fixed-filter col-md-6');
         this.initGrid(firstId);
       })
       .fail(function() {
       });
+      this.initFilter();
     },
 
     onDestroy: function() {
     },
-
+    update: function(){
+      this.filters.update();
+    },
     updateGrid: function(e) {
+      var _this=this;
       this.ui.requirement.val('').change();
       var id = $(e.target).val();
       if(id){
         this.ui.grid.removeClass('hidden');
         this.ui.paginator.removeClass('hidden');
         this.grid.collection.url = config.coreUrl + 'sensors/' + id + '/history';
-        this.grid.fetchCollection();
+        this.grid.collection.fetch().done(function(data){
+          var tmp = _.clone(_this.grid.grid.collection.fullCollection);
+          _this.com.setMotherColl(tmp);
+        });
       }else{
         this.ui.grid.addClass('hidden');
         this.ui.paginator.addClass('hidden');
@@ -138,23 +151,33 @@ define([
         cell: 'string',
         headerCell : null
       }];
-      this.grid = new NsGrid({
-        columns: columns,
-        url: config.coreUrl + 'sensors/' + id + '/history',
-        pageSize: 20,
-        pagingServerSide: false,
-        rowClicked: true,
-        //com: _this.com,
-      }); 
-      this.grid.rowClicked = function(args) {
-        _this.rowClicked(args.row);
-      };
-      this.grid.rowDbClicked = function(args) {
-        _this.rowClicked(args.row);
-      };
-      console.log(this.grid.columns)
-      this.ui.grid.html(this.grid.displayGrid());
-      this.ui.paginator.html(this.grid.displayPaginator());
+
+      this.collection = new Backbone.Collection();
+      this.collection.url = config.coreUrl + 'sensors/' + id + '/history';
+      this.collection.fetch(
+        ).done(function(data){
+        _this.grid = new NsGrid({
+          columns: columns,
+          //url: config.coreUrl + 'sensors/' + id + '/history',
+          collection : _this.collection,
+          pageSize: 20,
+          pagingServerSide: false,
+          rowClicked: true,
+          com: _this.com,
+        }); 
+        _this.grid.rowClicked = function(args) {
+          _this.rowClicked(args.row);
+        };
+        _this.grid.rowDbClicked = function(args) {
+          _this.rowClicked(args.row);
+        };
+        console.log(_this.grid.columns)
+        _this.ui.grid.html(_this.grid.displayGrid());
+        _this.ui.paginator.html(_this.grid.displayPaginator());
+
+        var tmp = _.clone(_this.grid.grid.collection.fullCollection);
+        _this.com.setMotherColl(tmp);
+      });
     },
     rowClicked: function(row) {
       if (this.currentRow) {
@@ -167,6 +190,23 @@ define([
     },
     validate: function() {
       return this.model;
+    },
+
+    initFilter: function(){
+       var filtersList = {
+        1: {
+          name: 'StartDate',
+          type: 'DateTimePickerEditor',
+          label: 'StartDate',
+          title: 'StartDate',
+        }
+      };
+      this.filters = new NsFilter({
+        filters: filtersList,
+        com: this.com,
+        clientSide: true,
+        filterContainer: this.ui.filter
+      });
     }
   });
 });

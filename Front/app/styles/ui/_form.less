@@ -490,3 +490,51 @@ textarea {
 
 	max-height:49px !important;
 }
+
+
+.fixed-filter{
+	position:fixed;
+	z-index: 100000;
+}
+
+.border-bottom-filter{
+
+	border-bottom: 1px solid #e5e5e5;
+	margin-top: 0px;
+	margin-left:15px;
+	margin-right:15px;
+	margin-bottom:5px;
+	display:inline-block;
+	//width: 100%;
+	font-weight:bold;
+}
+
+.filter-indiv{
+	margin-bottom: 80px;
+
+}
+
+@tabsHeight:50px;
+
+.filter-indiv.crop2{
+		margin-bottom: 0px;
+		padding-bottom: 80px;
+		@crop: @tabsHeight*2;
+		height: ~"calc(100% - @{crop} )"!important;
+	}
+.no-scroll{
+	overflow:hidden !important;
+}
+
+.filter-no-padding {
+	span{
+		padding-left:0px;
+		select{
+			padding-left:5px;
+			padding-right:0px;
+		}
+		div span {
+			padding-left:12px;
+		}
+	}
+}
