@@ -60,6 +60,9 @@
             this.dictRule = {
                 'count':this.countRule,
                 'equal': this.equalRule,
+                'sum': this.operationListRule,
+                'minus': this.operationListRule,
+                'times': this.operationListRule,
                 'context': this
             };
 
@@ -67,33 +70,21 @@
         addRule: function (target, operator, source) {
             var _this = this;
             var realSource = source ;
-            if (!source.isArray()){
+            this.sourceFields = {};
+            if (!(source instanceof Array)){
                 source=[source] ;
             }
-            if (source.isArray()){
-                _.each(source,function(curSource){
+
+            _.each(source,function(curSource){
+                if (_this.sourceFields[curSource] == null) {
+                    _this.sourceFields[curSource] = [{source:source, target: target, operator: operator }];
+                } else {
                     _this.sourceFields[curSource].push({source:source, target: target, operator: operator });
+                }
+                _this.form.$el.find(('#' + _this.getEditor(curSource).id)).on('change keyup paste', function (e) {
+                    _this.ApplyRules(e);
                 });
-            }
-            var _this = this;
-            if (this.sourceFields[source] == null) {
-                this.sourceFields[source] = [{ target: target, operator: operator }];
-            }
-            else {
-                this.sourceFields[source].push({ target: target, operator: operator });
-            }
-            //console.log('ADD Rule', this.sourceFields, this.sourceFields[source], this.sourceFields[source].length);
-            console.log(this.form.$el.find(('#' + this.getEditor(source).id)));
-
-            this.form.$el.find(('#' + this.getEditor(source).id)).on('change keyup paste', function (e) {
-                _this.ApplyRules(e);
             });
-            
-            //this.form.$el.find(('#' + this.getEditor(source).id)).keypress(this.ApplyRules);
-
-            
-            //console.log('Editor', this.form.$el.find(('#' + this.getEditor(source).id)), this.getEditor(source).id,this.sourceFields);
-            
         },
 
         getEditor: function (name) {
@@ -101,29 +92,52 @@
         },
 
         ApplyRules: function (evt) {
-            console.log('Apply Rule');
             var sourceName = $(evt.currentTarget).attr('name');
             var ruleList = this.sourceFields[sourceName];
             for (var i = 0; i < ruleList.length; i++) {
                 var targetName = ruleList[i].target;
                 var operator = ruleList[i].operator;
-                this.dictRule[operator](sourceName,targetName);
+                this.dictRule[operator](ruleList[i]);
             //this.form.$el.find(('#' + this.getEditor(ruleList[i].target).id)).val(this.getEditor(sourceName).getValue());
             }
         },
 
-        countRule : function(sourceName, targetName){
+        countRule : function(curRule){
             var _this = this.context;
-            var result = _this.getEditor(sourceName).getValue().length; 
-            console.log(result);
-            _this.form.$el.find('#' + _this.getEditor(targetName).id).val(result);
+            var result = _this.getEditor(curRule.source).getValue().length; 
+            _this.form.$el.find('#' + _this.getEditor(curRule.target).id).val(result);
             return result; 
         },
 
-        equalRule : function(sourceName, targetName){
-            var result = this.getEditor(sourceName).getValue(); 
-            console.log(result);
-            this.form.$el.find('#' + this.getEditor(targetName).id).val(result);
+        equalRule : function(curRule){
+            var _this = this.context;
+            var result = this.getEditor(curRule.source).getValue(); 
+            this.form.$el.find('#' + this.getEditor(curRule.target).id).val(result);
+            return result; 
+        },
+
+        operationListRule : function(curRule){
+            var _this = this.context;
+            var result = 0;
+            if (curRule.operator == 'times') {
+                result = 1;
+            }
+            if (curRule.source instanceof Array) {
+                _.each(curRule.source,function(curSource){
+                    switch (curRule.operator) {
+                        case 'sum': 
+                            result += parseFloat(_this.form.$el.find('#' + _this.getEditor(curSource).id).val());
+                            break;
+                        case 'minus': 
+                            result -= parseFloat(_this.form.$el.find('#' + _this.getEditor(curSource).id).val());
+                            break;
+                        case 'times': 
+                            result = result * parseFloat(_this.form.$el.find('#' + _this.getEditor(curSource).id).val());
+                            break;
+                    }
+                });
+            }
+            _this.form.$el.find('#' + _this.getEditor(curRule.target).id).val(result);
             return result; 
         },
     });

@@ -56,6 +56,7 @@ class ModuleForms(Base):
     Options = Column (String)
     Validators = Column(String)
     DefaultValue = Column(String)
+    Rules = Column(String)
 
     FrontModules = relationship("FrontModules", back_populates="ModuleForms")
 
@@ -115,6 +116,9 @@ class ModuleForms(Base):
             self.dto['options'] = json.loads(self.Options)
         except:
             self.dto['options'] = self.Options
+
+        if self.Rules is not None:
+            self.dto['rule'] = json.loads(self.Rules)
 
         if self.Validators is not None:
             self.dto['validators'] = json.loads(self.Validators)

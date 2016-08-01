@@ -105,11 +105,11 @@ define([
             $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
            });
           _this.filedAcitivityId = this.model.get('fieldActivityId');
-
+/*
           var ruler = new Ruler({
             form: this.BBForm
           });
-          ruler.addRule('NbFieldWorker','count','FieldWorkers');
+          ruler.addRule('NbFieldWorker','count','FieldWorkers');*/
         };
 
  

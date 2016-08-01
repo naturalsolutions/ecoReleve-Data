@@ -209,16 +209,15 @@ define([
     initRules:function() {
       var _this = this;
       this.ruler = new Ruler({
-            form: this.BBForm
+            form: _this.BBForm
           });
 
       _.each(this.BBForm.schema,function(curSchema){
         if (curSchema.rule){
-          var curRule = urSchema.rule;
+          var curRule = curSchema.rule;
           var target = curSchema.name;
           _this.ruler.addRule(target,curRule.operator,curRule.source);
         }
-        console.log(curSchema)
       });
 
     },
