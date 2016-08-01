@@ -1,0 +1,11 @@
+UPDATE ModuleGrids SET Options = '{"source": "autocomplete/sensors/UnicIdentifier/ID", "minLength":3, "target":"FK_Sensor"}', CellType = 'autocomplete'
+WHERE Module_ID = (SELECT ID FROM FrontModules WHERE Name = 'IndivReleaseGrid')
+AND Name = 'unicSensorName'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('85_UPdate_Grid_Release',GETDATE(),(SELECT db_name()))
+
+
+GO
