@@ -68,24 +68,37 @@ class StationList(ListObjectWithDynProp):
 
             joinStaObs = join(s2,o2,s2.ID == o2.FK_Station)
 
+            operator = criteriaObj['Operator']
+            if 'not' in criteriaObj['Operator'] :
+                operator = operator.replace('not ','').replace(' not','')
+
             existInd = select([Individual.ID]
                 ).where(and_(o2.FK_Individual == Individual.ID
-                    ,eval_.eval_binary_expr(Individual.Species,criteriaObj['Operator'],criteriaObj['Value']))
+                    ,eval_.eval_binary_expr(Individual.Species,operator,criteriaObj['Value']))
                 )
 
             existObs = select([obsValTable.c['ID']]
                 ).where(and_(obsValTable.c['FK_Observation'] == o2.ID
-                    ,and_(or_(obsValTable.c['Name'] == 'taxon',obsValTable.c['Name'].like('%species%'))
-                        ,eval_.eval_binary_expr(obsValTable.c['ValueString'],criteriaObj['Operator'],criteriaObj['Value'])
+                    ,and_(or_(obsValTable.c['Name'].like('%taxon%'),obsValTable.c['Name'].like('%species%'))
+                        ,eval_.eval_binary_expr(obsValTable.c['ValueString'],operator,criteriaObj['Value'])
                         )
                     )
                 )
 
-            selectInd = select([s2.ID]).select_from(joinStaObs).where(exists(existInd))
-            selectObs = select([s2.ID]).select_from(joinStaObs).where(exists(existObs))
-            unionQuery = union_all(selectInd,selectObs)
+            selectCommon = select([s2.ID]).select_from(joinStaObs)
+            # if 'not' in criteriaObj['Operator'] :
+            #     selectInd = selectCommon.where(~exists(existInd))
+            #     selectObs = selectCommon.where(~exists(existObs))
+            # else :
+            selectInd = selectCommon.where(exists(existInd))
+            selectObs = selectCommon.where(exists(existObs))
 
-            query = query.where(Station.ID.in_(unionQuery))
+            unionQuery = union_all(selectInd,selectObs)
+            if 'not' in criteriaObj['Operator'] :
+                query = query.where(~Station.ID.in_(unionQuery))
+            else :
+                query = query.where(Station.ID.in_(unionQuery))
+
 
         if curProp == 'FK_Individual':
             if criteriaObj['Operator'].lower() in ['is null','is not null']:
