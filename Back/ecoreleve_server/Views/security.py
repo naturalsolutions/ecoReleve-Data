@@ -3,10 +3,7 @@ from pyramid.security import remember, forget, NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
 from ..Models import DBSession, User
 import transaction
-from ..pyramid_jwtauth import (
-    JWTAuthenticationPolicy,
-    includeme
-    )
+
 route_prefix = 'security/'
 import jwt
 # ------------------------------------------------------------------------------------------------------------------------- #

@@ -22,7 +22,7 @@ define([
 
   return Marionette.LayoutView.extend({
     template: 'app/modules/sensors/templates/tpl-sensors-detail.html',
-    className: 'full-height animated white',
+    className: 'full-height animated white sensor',
     events: {
       'click #hideSensorDetails': 'hideDetail',
       'click #showSensorDetails': 'showDetail',
@@ -128,7 +128,7 @@ define([
           method: 'DELETE',
           contentType: 'application/json'
         }).done(function(resp) {
-          Backbone.history.navigate(_this.rootUrl, {trigger : true});
+          Backbone.history.navigate('#sensors/', {trigger : true});
         }).fail(function(resp) {
         });
       };
@@ -166,7 +166,6 @@ define([
           cell: Backgrid.StringCell.extend({
             render: function () {
               this.$el.empty();
-              console.log(this.model)
               var rawValue = this.model.get(this.column.get("name"));
               var formattedValue = this.formatter.fromRaw(rawValue, this.model);
 

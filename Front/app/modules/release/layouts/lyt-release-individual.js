@@ -99,14 +99,6 @@ define([
         rowClicked: true,
         onceFetched: function(params) {
           _this.totalEntries(this.grid);
-         // this.collection.pluck({sta_date:_this.station.StationDate});
-          console.log(this.collection)
-          /*this.collection.model.sync({success:function(){
-            console.log('save sucesss qsdfzqespiofjpfjqsdofzofsofn')
-          }});*/
-          /*_.bindAll(this.collection.models,function(){
-            console.log('save sucesss qsdfzqespiofjpfjqsdofzofsofn')
-          });*/
         }
       });
       this.grid.rowClicked = function(args) {
