@@ -5,6 +5,7 @@
 
   ALTER TABLE moduleForms 
   ADD Rules varchar(550) NULL
+  GO
 
   UPDATE ModuleForms SET Rules = '{"operator":"count","target":"NbFieldWorker","source":"FieldWorkers"}'
   WHERE module_id = 2 and Name ='NbFieldWorker'
