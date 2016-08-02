@@ -1,6 +1,6 @@
 
-define(['marionette', 'config', './lyt-breadCrumb'],
-function(Marionette, config, Breadcrumb) {
+define(['jquery','marionette', 'config', './lyt-breadCrumb'],
+function($,Marionette, config, Breadcrumb) {
   'use strict';
   return Marionette.LayoutView.extend({
     template: 'app/base/header/tpl-header.html',
@@ -31,7 +31,9 @@ function(Marionette, config, Breadcrumb) {
       window.app.user = new Backbone.Model();
       window.app.user.url = config.coreUrl + 'currentUser';
       window.app.user.fetch({
-        success: function() {
+        success: function(data) {
+          $('body').addClass(window.app.user.get('role'));
+          $.xhrPool.allowAbort = true;
           _this.ui.userName.html(window.app.user.get('fullname'));
         }
       });

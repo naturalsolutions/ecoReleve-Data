@@ -42,7 +42,8 @@ class Individual (Base,ObjectWithDynProp) :
     # Caisse_ID = Column(String(10))
 
     IndividualDynPropValues = relationship('IndividualDynPropValue',backref='Individual',cascade="all, delete-orphan")
-    Locations = relationship('Individual_Location')
+    Locations = relationship('Individual_Location', cascade="all, delete-orphan")
+    Equipments = relationship('Equipment',cascade="all, delete-orphan")
 
     _Status_ = relationship('IndividualStatus',uselist=False, backref="Individual")
     Observations = relationship('Observation')

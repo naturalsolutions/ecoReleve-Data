@@ -360,7 +360,6 @@ define([
       '/uncheckedDatas/' + this.indId + '/' + this.pttId;
       var mds = this.grid.grid.getSelectedModels();
 
-      console.log(mds.length);
       if (!mds.length) {
         return;
       }
