@@ -78,7 +78,6 @@ function(Marionette, config,Swal) {
         }
     },
     navigateNext: function(){
-      this.checkAjax();
       /*backgrid grid issue : https://github.com/backbone-paginator/backbone-pageable/issues/158*/
       this.coll.size();
       if(this.modelIndex < this.coll.size()-1){
@@ -125,13 +124,13 @@ function(Marionette, config,Swal) {
     },
 
     navigatePrev: function(){
-      this.checkAjax();
       if(this.modelIndex != 0){
         //noNeed 2 fetch
         this.modelIndex--;
         this.upClientSide();
       }else{
         //need 2 fetch first
+        $.xhrPool.allowAbort=false;
         if(this.coll.state.currentPage > 1){
           var tmp = this.coll.state.currentPage;
           tmp--;
@@ -141,7 +140,6 @@ function(Marionette, config,Swal) {
           tmp = this.coll.state.lastPage;
         }
         if(this.pagingServerSide){
-
           this.upRowServerSide('prev');
           this.coll.getPage(tmp);
 
@@ -153,6 +151,9 @@ function(Marionette, config,Swal) {
     },
     upRowServerSide: function(from){
       var _this = this;
+      this.checkAjax();
+      $.xhrPool.allowAbort=false;
+
       if(from == 'next'){
         this.grid.upRowServerSide = function(){
           this.currentRow = this.grid.body.rows[0];
@@ -161,6 +162,7 @@ function(Marionette, config,Swal) {
           _this.updateModelEtc(this.currentRow);
           _this.modelIndex=0;
           _this.resetGridFunction();
+          $.xhrPool.allowAbort=true;
         }
       }
       if(from == 'prev'){
@@ -171,6 +173,7 @@ function(Marionette, config,Swal) {
           _this.modelIndex=this.grid.body.rows.length-1;
           _this.updateModelEtc(this.currentRow);
           _this.resetGridFunction();
+          $.xhrPool.allowAbort=true;
         }
       }
     },
@@ -192,6 +195,7 @@ function(Marionette, config,Swal) {
 
 
     upClientSide: function(){
+      this.checkAjax();
 
       this.model = this.coll.at(this.modelIndex);
 
@@ -205,6 +209,8 @@ function(Marionette, config,Swal) {
     },
 
     upRowClientSide: function(from){
+      this.checkAjax();
+
       if(from == 'next'){
         this.modelIndex = 0;
       }
@@ -221,16 +227,7 @@ function(Marionette, config,Swal) {
       this.parent.reloadFromNavbar(this.model);
     },
     checkAjax : function(){
-      var xhrPool = window.xhrPool;
-      console.log('new route :');
-      console.log(window.xhrPool);
-
-      for(var i=0; i<xhrPool.length; i++){
-         xhrPool[i].abort();
-      }
-       window.xhrPool = [];
-
+      $.xhrPool.abortAll();
     }
-
   });
 });

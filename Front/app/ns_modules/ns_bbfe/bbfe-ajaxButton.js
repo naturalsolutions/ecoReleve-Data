@@ -80,8 +80,6 @@ define([
         },
 
         ajaxAlert: function(data){
-            console.log(data,'ajaxAlrtr');
-
             setTimeout(function() {
                 Swal({
                   title: 'Site position',

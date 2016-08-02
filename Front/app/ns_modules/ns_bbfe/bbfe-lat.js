@@ -45,7 +45,6 @@ define([
             self.determineChange();
           }, 0);
         };
-    console.log(e)
     var newVal = this.$el.val();
     var numeric = /^\-?[^\-][0-9]*\.?[0-9]{0,5}$/.test(newVal);
 

@@ -17,6 +17,7 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
   'ns_modules/ns_bbfe/bbfe-lat',
   'ns_modules/ns_cell/bg-timestampCell',
   'ns_modules/ns_cell/autocompCell',
+  'ns_modules/ns_cell/bg-integerCell',
   ],
 function( Marionette, LytRootView, Router, Controller,Swal) {
 
@@ -44,21 +45,59 @@ function( Marionette, LytRootView, Router, Controller,Swal) {
   $(window).ajaxStart(function(e) {
     $('#header-loader').removeClass('hidden');
   });
+
   $(window).ajaxStop(function() {
     $('#header-loader').addClass('hidden');
   });
+
   $(window).ajaxError(function() {
     $('#header-loader').addClass('hidden');
   });
-  $(document).ajaxSend(function(e, xhr, opt){
-    console.log('appel ajax en cours');
-    window.xhrPool.push(xhr);
-  });
+
   window.onerror = function() {
     $('#header-loader').addClass('hidden');
   };
 
+  $.xhrPool = []; // array of uncompleted requests
+  $.xhrPool.allowAbort = false;
+  $.xhrPool.abortAll = function() { // our abort function
+    if ($.xhrPool.allowAbort){
+      $(this).each(function(idx, jqXHR) { 
+          jqXHR.abort();
+      });
+      $.xhrPool.length = 0
+    }
+  };
 
+  $.ajaxSetup({
+    beforeSend: function(jqXHR) { // before jQuery send the request we will push it to our array
+      $.xhrPool.push(jqXHR);
+    },
+    complete: function(jqXHR) { // when some of the requests completed it will splice from the array
+      var index = $.xhrPool.indexOf(jqXHR);
+      if (index > -1) {
+        $.xhrPool.splice(index, 1);
+      }
+    }
+  });
+
+  window.UnauthAlert = function(){
+    Swal({
+        title: 'Unauthorized',
+        text: "You don't have permission",
+        type: 'warning',
+        showCancelButton: false,
+        confirmButtonColor: 'rgb(240, 173, 78)',
+        confirmButtonText: 'OK',
+        closeOnConfirm: true,
+      });
+  }
+
+  $(document).ajaxError(function( event, jqxhr, settings, thrownError ) {
+    if (jqxhr.status == 401){
+      window.UnauthAlert();
+    }
+  });
 
   window.formChange = false;
   window.formEdition = false;
@@ -95,7 +134,6 @@ function( Marionette, LytRootView, Router, Controller,Swal) {
         }
       }
   };
-
 
   window.app = app;
   return app;

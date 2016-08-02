@@ -140,7 +140,9 @@ define([
 
       this.errors = false;
       myDropzone.on('error', function(file) {
-        this.errors = true;
+
+        this.errors = file.xhr.status;
+    
         $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-danger');
       });
 
@@ -170,17 +172,22 @@ define([
           );
 
         }else {
-          Swal(
-          {
-            title: 'An error occured',
-            text: 'Please verify your file',
-            type: 'error',
-            showCancelButton: false,
-            confirmButtonText: 'OK',
-            confirmButtonColor: 'rgb(147, 14, 14)',
-            closeOnConfirm: true,
+          console.log(this.errors)
+          if (this.errors != 401){
+            Swal(
+            {
+              title: 'An error occured',
+              text: 'Please verify your file',
+              type: 'error',
+              showCancelButton: false,
+              confirmButtonText: 'OK',
+              confirmButtonColor: 'rgb(147, 14, 14)',
+              closeOnConfirm: true,
+            }
+            );
+          } else {
+            window.UnauthAlert();
           }
-          );
         }
         this.errors = false;
       });
