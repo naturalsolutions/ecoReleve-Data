@@ -329,7 +329,7 @@ def checkExisting(indiv):
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = routes_permission[prefix]['GET'])
 @view_config(route_name= prefix, renderer='json', request_method = 'POST', permission = routes_permission[prefix]['GET'])
-def searchIndiv(request):
+def searchIndiv(request,searchInfo=None,noCount=False):
     session = request.dbsession
     history = False
     startDate = None
