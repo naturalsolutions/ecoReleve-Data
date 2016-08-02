@@ -128,7 +128,7 @@ define([
           method: 'DELETE',
           contentType: 'application/json'
         }).done(function(resp) {
-          Backbone.history.navigate(_this.rootUrl, {trigger : true});
+          Backbone.history.navigate('#sensors/', {trigger : true});
         }).fail(function(resp) {
         });
       };
