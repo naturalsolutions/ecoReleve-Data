@@ -178,6 +178,8 @@ class MonitoredSite (Base,ObjectWithDynProp) :
             if len(sameDatePosition)>0:
                 sameDatePosition[0].LAT = DTOObject['LAT']
                 sameDatePosition[0].LON = DTOObject['LON']
+                sameDatePosition[0].ELE = DTOObject['ELE']
+                sameDatePosition[0].Precision = DTOObject['Precision']
             else:
                 self.MonitoredSitePositions.append(self.newPosition)
 
