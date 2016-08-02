@@ -79,7 +79,7 @@ class StationList(ListObjectWithDynProp):
 
             existObs = select([obsValTable.c['ID']]
                 ).where(and_(obsValTable.c['FK_Observation'] == o2.ID
-                    ,and_(or_(obsValTable.c['Name'].like('%taxon%'),obsValTable.c['Name'].like('%species%'))
+                    ,and_(or_(obsValTable.c['Name'].like('%taxon'),obsValTable.c['Name'].like('%species%'))
                         ,eval_.eval_binary_expr(obsValTable.c['ValueString'],operator,criteriaObj['Value'])
                         )
                     )
