@@ -23,7 +23,7 @@ define([
   return Marionette.LayoutView.extend({
 
     template: 'app/modules/individuals/templates/tpl-individuals-detail.html',
-    className: 'full-height animated white',
+    className: 'full-height individual animated white',
 
     events: {
       'click #hideIndivDetails': 'hideDetail',
@@ -504,11 +504,7 @@ define([
 
       var coll = new Backbone.Collection(mds);
 
-      console.log(mds);
-
       var params = coll.pluck('ID');
-
-      console.log(params);
 
       var url = config.coreUrl + 'individuals/' + this.indivId  + '/locations';
       $.ajax({

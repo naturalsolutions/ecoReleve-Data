@@ -26,10 +26,14 @@ from traceback import print_exc
 from collections import OrderedDict
 import pandas as pd
 from collections import Counter
+from ..controllers.security import routes_permission
+from ..Models.Equipment import checkSensor,checkEquip
 
-prefix = 'release/'
 
-@view_config(route_name= prefix+'individuals/action', renderer='json', request_method = 'GET')
+
+prefix = 'release'
+
+@view_config(route_name= prefix+'/individuals/action', renderer='json', request_method='GET', permission=routes_permission[prefix]['GET'])
 def actionOnStations(request):
     dictActionFunc = {
     # 'count' : count_,
@@ -88,7 +92,7 @@ def getReleaseMethod(request):
     result = session.execute(query).fetchall()
     return [dict(row) for row in result]
 
-@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/individuals', renderer='json', request_method ='GET', permission=routes_permission[prefix]['GET'])
 def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
@@ -124,12 +128,18 @@ def searchIndiv(request):
     return result
 
 
-@view_config(route_name= prefix+'individuals', renderer='json', request_method = 'POST')
+@view_config(route_name= prefix+'/individuals', renderer='json', request_method ='POST',permission=routes_permission[prefix]['POST'])
 def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()
 
-    if 'StationID' not in data:
+    if 'StationID' not in data and 'IndividualList' not in data:
+        print(data)
+        if data == {}:
+            data = request.json_body
+            print(data)
+        if 'FK_Sensor' in data and data['FK_Sensor'] is not None :
+            return isavailableSensor(request,data)
         return 
 
     sta_id = int(data['StationID'])
@@ -313,6 +323,16 @@ def releasePost(request):
         message = str(type(e))
 
     return message
+
+
+def isavailableSensor(request,data):
+    availability = checkSensor(data['FK_Sensor'],datetime.strptime(data['sta_date'],'%d/%m/%Y %H:%M:%S'))
+    if availability is True:
+        return 
+    else :
+        request.response.status_code = 510
+        return 'sensor not available'
+
 
 def getFullpath(item,lng):
     name,val= item
