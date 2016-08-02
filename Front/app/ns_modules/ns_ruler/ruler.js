@@ -132,15 +132,20 @@
             }
             if (curRule.source instanceof Array) {
                 _.each(curRule.source,function(curSource){
+                    var sourceValue = parseFloat(_this.form.$el.find('#' + _this.getEditor(curSource).id).val());
+                    if (sourceValue == '' || isNaN(sourceValue)){
+                        sourceValue = 0;
+                        //_this.form.$el.find('#' + _this.getEditor(curSource).id).val(0);
+                    }
                     switch (curRule.operator) {
                         case 'sum': 
-                            result += parseFloat(_this.form.$el.find('#' + _this.getEditor(curSource).id).val());
+                            result += sourceValue;
                             break;
                         case 'minus': 
-                            result -= parseFloat(_this.form.$el.find('#' + _this.getEditor(curSource).id).val());
+                            result -=sourceValue;
                             break;
                         case 'times': 
-                            result = result * parseFloat(_this.form.$el.find('#' + _this.getEditor(curSource).id).val());
+                            result = result * sourceValue;
                             break;
                     }
                 });
