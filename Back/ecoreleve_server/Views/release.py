@@ -134,10 +134,8 @@ def releasePost(request):
     data = request.params.mixed()
 
     if 'StationID' not in data and 'IndividualList' not in data:
-        print(data)
         if data == {}:
             data = request.json_body
-            print(data)
         if 'FK_Sensor' in data and data['FK_Sensor'] is not None :
             return isavailableSensor(request,data)
         return 

@@ -209,7 +209,7 @@ class ListObjectWithDynProp():
             fullQueryJoin = self.WhereInJoinTable(fullQueryJoin,obj)
 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin,searchInfo)
-        print(fullQueryJoin)
+
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self,searchInfo=None) :
@@ -412,9 +412,7 @@ class ListObjectWithDynProp():
             query = query.limit(limit)
 
         if 'offset' in searchInfo :
-            print('in offset ')
             offset = int(searchInfo['offset'])
-            print(offset)
             query = query.offset(offset)
 
         return query

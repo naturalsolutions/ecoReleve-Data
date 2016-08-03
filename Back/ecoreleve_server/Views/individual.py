@@ -76,7 +76,6 @@ def getFilters (request):
         objType = request.params['typeObj']
     else : 
         objType = 1
-    print(request.params)
     if 'FilterName' in request.params and request.params['FilterName'] != '':
         ModuleType = request.params['FilterName']
     else:

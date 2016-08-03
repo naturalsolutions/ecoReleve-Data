@@ -192,7 +192,6 @@ def auto_validation(request):
     global graphDataDate
 
     type_ = request.matchdict['type']
-    # print ('\n*************** AUTO VALIDATE *************** \n')
     param = request.params.mixed()
     freq = param['frequency']
     listToValidate = json.loads(param['toValidate'])

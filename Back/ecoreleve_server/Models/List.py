@@ -246,7 +246,6 @@ class IndividualList(ListObjectWithDynProp):
         return query
 
     def GetFullQuery(self,searchInfo=None) :
-        print('in Cout QUERY')
         ''' return the full query to execute '''
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
@@ -317,7 +316,6 @@ class IndividualList(ListObjectWithDynProp):
 
         if sensorObj['Operator'].lower() in ['is null','is not null'] :
             if not self.history :
-                print('search equipment with DATE') 
                 subSelect = subSelect.where(or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None))
 
         else:

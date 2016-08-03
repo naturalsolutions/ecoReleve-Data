@@ -6,7 +6,6 @@ class Eval():
 
     def eval_binary_expr(self,op1, operator, op2):
         op = operator.lower()
-        print(op)
         if op in ['is null', 'is not null']:
             op = op.replace('null','').replace(' ','')
             op2 = None
