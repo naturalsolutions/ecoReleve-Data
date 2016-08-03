@@ -77,15 +77,14 @@ define(['marionette', 'config',
     stations: function(id) {
       this.rgMain.show(new LytStations({id: id}));
     },
-	observations: function(id) {
-		console.log('************** OBSERVATIONS ************************');
-		 $.ajax({
-                context: this,
-                url: config.coreUrl + 'protocols/' + id,
-            }).done(function (data) {
-				window.location.href = window.location.origin + window.location.pathname + '#stations/' + data['FK_Station'] + '?observation=' + id ;
-				console.log(data);
-			}) ;
+  observations: function(id) {
+    console.log('************** OBSERVATIONS ************************');
+     $.ajax({
+          context: this,
+          url: config.coreUrl + 'protocols/' + id,
+        }).done(function (data) {
+        window.location.href = window.location.origin + window.location.pathname + '#stations/' + data['FK_Station'] + '?observation=' + id ;
+      }) ;
       //this.rgMain.show(new LytStations({id: id}));
     },
     newStation: function(from) {
@@ -130,5 +129,15 @@ define(['marionette', 'config',
     export: function() {
       this.rgMain.show(new LytExport());
     },
+    checkAjax : function(){
+      var xhrPool = window.xhrPool;
+
+      for(var i=0; i<xhrPool.length; i++){
+         xhrPool[i].abort();
+      }
+       window.xhrPool = [];
+    }
+
+
   });
 });
