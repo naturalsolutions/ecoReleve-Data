@@ -39,7 +39,6 @@ prefix = 'monitoredSites'
 @view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 @view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def actionOnMonitoredSite(request):
-    print ('\n*********************** Action **********************\n')
     dictActionFunc = {
     'count' : count_,
     'forms' : getForms,
