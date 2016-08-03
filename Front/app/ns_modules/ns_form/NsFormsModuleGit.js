@@ -5,10 +5,11 @@ define([
   'marionette',
   'backbone-forms',
   'sweetAlert',
+  'ns_ruler/ruler',
   'requirejs-text!./Templates/NsFormsModule.html',
   'fancytree',
   './NsFormsCustomFields',
-], function ($, _, Backbone, Marionette, BackboneForm, Swal, tpl) {
+], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tpl) {
   return Backbone.View.extend({
     BBForm: null,
     modelurl: null,
@@ -234,7 +235,6 @@ define([
           _this.model.urlRoot = this.modelurl;
 
           var settings = $.extend({}, _this.data, resp.data); //?
-
           _this.model.attributes = settings;
 
 
@@ -248,6 +248,36 @@ define([
         }
       });
     },
+    initRules:function() {
+      var _this = this;
+      this.ruler = new Ruler({
+            form: _this.BBForm
+          });
+      var globalError = {};
+      var errorMsg = 'error on field(s): \n';
+
+      _.each(this.BBForm.schema,function(curSchema){
+        if (curSchema.rule){
+          var curRule = curSchema.rule;
+          var target = curSchema.name;
+          var curResult = _this.ruler.addRule(target,curRule.operator,curRule.source);
+          if (curResult) {
+            globalError[target] = curResult;
+            errorMsg +=  curResult.object + ':  '+curResult.message+'\n' ;
+          }
+        }
+      });
+
+      if (!$.isEmptyObject(globalError) && this.displayMode == 'edit'){
+        this.swal({
+          title : 'Rule error',
+          text : errorMsg,
+          type:'error',
+          showCancelButton: false,
+          confirmButtonColor:'#DD6B55',
+          confirmButtonText:'Ok'});
+      }
+    },
 
     showForm: function (){
       var _this = this;
@@ -255,6 +285,9 @@ define([
 
       // Call extendable function before the show call
       this.BeforeShow();
+
+      var _this = this;
+      this.initRules();
 
       this.formRegion.html(this.BBForm.el); //this.formRegion.html(this.BBForm.el);
 

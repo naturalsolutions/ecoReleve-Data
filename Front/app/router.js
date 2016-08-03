@@ -90,6 +90,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
           context: this,
           url: config.coreUrl + 'security/has_access'
         }).done(function() {
+          $.xhrPool.abortAll();
           callback.apply(this, args);
         }).fail(function(msg) {
           if (msg.status === 403) {

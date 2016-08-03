@@ -24,6 +24,7 @@ from traceback import print_exc
 from sqlalchemy.exc import IntegrityError
 import io
 from pyramid.response import Response ,FileResponse
+from ..controllers.security import routes_permission
 
 
 
@@ -31,7 +32,7 @@ prefix = 'stations'
 
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = routes_permission[prefix]['GET'])
 def actionOnStations(request):
     dictActionFunc = {
     'count' : count_,
@@ -86,7 +87,7 @@ def getFields(request) :
     return cols
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET', permission = routes_permission[prefix]['GET'])
 def getStation(request):
     session = request.dbsession
     id = request.matchdict['id']
@@ -112,7 +113,7 @@ def getStation(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE', permission = routes_permission[prefix]['DELETE'])
 def deleteStation(request):
     session = request.dbsession
     id_ = request.matchdict['id']
@@ -122,7 +123,7 @@ def deleteStation(request):
     return True
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT',permission = routes_permission[prefix]['PUT'])
 def updateStation(request):
     session = request.dbsession
     data = request.json_body
@@ -142,7 +143,7 @@ def updateStation(request):
     return msg
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix, renderer='json', request_method = 'POST')
+@view_config(route_name= prefix, renderer='json', request_method = 'POST', permission = routes_permission[prefix]['POST'])
 def insertStation(request):
     data = request.json_body
     if not isinstance(data,list):
@@ -279,7 +280,7 @@ def insertListNewStations(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix, renderer='json', request_method = 'GET')
+@view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = routes_permission[prefix]['GET'])
 def searchStation(request):
     session = request.dbsession
 
@@ -383,8 +384,8 @@ def updateMonitoredSite(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 
-@view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
-def sensors_export(request):
+@view_config(route_name=prefix + '/export', renderer='json', request_method='GET', permission = routes_permission[prefix]['GET'])
+def stations_export(request):
     session = request.dbsession
     data = request.params.mixed()
     searchInfo = {}
