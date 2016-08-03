@@ -140,11 +140,11 @@ class StationList(ListObjectWithDynProp):
         data = []
 
         if getFieldWorkers:
-            listID = list(map(lambda x: x['ID'],result))
-            # queryCTE = fullQueryJoinOrdered.cte()
-            # joinFW = join(Station_FieldWorker,User,Station_FieldWorker.FK_FieldWorker==User.id)
-            # joinTable = join(queryCTE,joinFW,queryCTE.c['ID']== Station_FieldWorker.FK_Station)
-            query = select([Station_FieldWorker.FK_Station,User.Login]).where(Station_FieldWorker.FK_Station.in_(listID))
+            # listID = list(map(lambda x: x['ID'],result))
+            queryCTE = fullQueryJoinOrdered.cte()
+            joinFW = join(Station_FieldWorker,User,Station_FieldWorker.FK_FieldWorker==User.id)
+            joinTable = join(queryCTE,joinFW,queryCTE.c['ID']== Station_FieldWorker.FK_Station)
+            query = select([Station_FieldWorker.FK_Station,User.Login]).select_from(joinTable)
             FieldWorkers = self.ObjContext.execute(query).fetchall()
             list_ = {}
             for x,y in FieldWorkers :
