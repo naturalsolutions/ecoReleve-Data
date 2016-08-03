@@ -20,17 +20,18 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
   'ns_modules/ns_cell/bg-integerCell',
 
   ],
-function( Marionette, LytRootView, Router, Controller,Swal) {
+  function( Marionette, LytRootView, Router, Controller,Swal) {
 
-  var app = {};
-  var JST = window.JST = window.JST || {};
-  window.xhrPool = [];
+    var app = {};
+    var JST = window.JST = window.JST || {};
+    window.xhrPool = [];
 
 
-  Backbone.Marionette.Renderer.render = function(template, data) {
-    if (!JST[template]) throw 'Template \'' + template + '\' not found!';
-    return JST[template](data);
-  };
+    Backbone.Marionette.Renderer.render = function(template, data) {
+      if (!JST[template]) throw 'Template \'' + template + '\' not found!';
+      return JST[template](data);
+    };
+
 
   app = new Marionette.Application();
   app.on('start', function() {
@@ -100,41 +101,42 @@ function( Marionette, LytRootView, Router, Controller,Swal) {
     }
   });
 
-  window.formChange = false;
-  window.formEdition = false;
-  window.checkExitForm = function(confirmCallback,cancelCallback) {
-    if(window.formChange && window.formEdition){
+    window.formChange = false;
+    window.formEdition = false;
+    window.checkExitForm = function(confirmCallback,cancelCallback) {
+      if(window.formChange && window.formEdition){
         Swal({
-            title: 'Saving form',
-            text: 'Current form is not yet saved. Would you like to continue without saving it?',
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: 'rgb(221, 107, 85)',
-            confirmButtonText: 'OK',
-            cancelButtonColor: 'grey',
-            cancelButtonText: 'Cancel',
-            closeOnConfirm: true,
+          title: 'Saving form',
+          text: 'Current form is not yet saved. Would you like to continue without saving it?',
+          type: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: 'rgb(221, 107, 85)',
+          confirmButtonText: 'OK',
+          cancelButtonColor: 'grey',
+          cancelButtonText: 'Cancel',
+          closeOnConfirm: true,
         },
         function(isConfirm) {
-           if (!isConfirm) {
-              if (cancelCallback){
-                cancelCallback();
-              }
-              return false;
-            }else {
-                if (confirmCallback){
-                  window.formChange = false;
-                  window.formEdition = false;
-                  confirmCallback();
-                }
-            }
-        });
+         if (!isConfirm) {
+          if (cancelCallback){
+            cancelCallback();
+          }
+          return false;
+        }else {
+          if (confirmCallback){
+            window.formChange = false;
+            window.formEdition = false;
+            confirmCallback();
+          }
+        }
+      });
       } else {
         if (confirmCallback){
           confirmCallback();
         }
       }
-  };
+    };
+
 
   window.app = app;
   return app;

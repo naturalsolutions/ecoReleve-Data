@@ -209,7 +209,6 @@ define([
     },
 
     onObsDestroy: function(mod) {
-      console.log(mod);
       if (this.model.get('obs').length == 0) {
         this.model.destroy();
       }else {

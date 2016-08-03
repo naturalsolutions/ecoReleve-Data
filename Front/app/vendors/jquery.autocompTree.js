@@ -109,6 +109,7 @@
               contentType: "application/json; charset=utf-8",
               data: dataToSend,
             });
+
           }
 
           $.when(window.thesaurus[parametres.startId]).then(function(){
@@ -285,8 +286,8 @@
           }
         });
 
-});
-return _self;
+      });
+      return _self;
 },
 
 
