@@ -137,12 +137,7 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
       }
     };
 
-<<<<<<< HEAD
-    window.app = app;
-    return app;
-  });
-=======
+
   window.app = app;
   return app;
 });
->>>>>>> 3c51b69691447c4eb34722e78127a865406a9b31
