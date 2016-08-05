@@ -22,3 +22,26 @@
     }
   }
 }
+
+
+
+
+.modal-cam-trap{
+  height: ~"calc(100% - @{toolbarHeight})";
+  width: 100%;
+  padding: 50px!important;
+  bottom: @toolbarHeight;
+  .modal-content{
+    height: 100%;
+    width: 100%;
+    .modal-body{
+      height: ~"calc(100% - @{toolbarHeight})";
+      width: 100%;
+      overflow: auto;
+    }
+  }
+}
+
+.modal-backdrop{
+  bottom: 56px;
+}
