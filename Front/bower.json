@@ -31,8 +31,9 @@
     "chartjs": "1.0.2",
     "reneco-fonts": "*",
     "NaturalJS_Filter": "1.0.6",
-    "resumable.js": "resumablejs#^1.0.2"
-
+    "resumable.js": "resumablejs#^1.0.2",
+    "ez-plus": "^1.1.20",
+    "bootstrap-tagsinput": "^0.8.0"
   },
   "resolutions": {
     "jquery": "1.10.2",

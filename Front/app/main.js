@@ -56,6 +56,7 @@ require.config({
     'ns_filter_bower': '../bower_components/NaturalJS_Filter/model-filter',
     'resumable': '../bower_components/resumable.js/resumable',
 
+
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
 
@@ -69,13 +70,17 @@ require.config({
     'autocompTree': './vendors/jquery.autocompTree',
 
     'backgrid-moment-cell':'./vendors/backgrid-moment-cell',
+
+    "bootstrap-modal": "../bower_components/bootstrap/js/modal",
+    "backbone.bootstrap-modal": "../bower_components/backbone.bootstrap-modal/src/backbone.bootstrap-modal",
+    "ez-plus": "../bower_components/ez-plus/src/jquery.ez-plus",
+    "bootstrap-tagsinput" : "../bower_components/bootstrap-tagsinput/src/bootstrap-tagsinput"
   },
   map: {
       '*': {
         'backbone_forms' : 'backbone-forms'
       }
   },
-
   shim: {
     jquery: {
       exports: '$'
