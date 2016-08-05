@@ -40,7 +40,7 @@ define([
     initialize: function(options) {
 
       this.model.attributes.obs = new Backbone.Collection(this.model.get('obs'));
-      
+
       var total = this.model.get('obs').filter(function(md){
         if(md.attributes.data.ID) {
           return true;
@@ -74,7 +74,7 @@ define([
         }
       });
       this.obsCollView = new ObsCollView({
-        collection: this.model.get('obs'), 
+        collection: this.model.get('obs'),
         className: 'full-height'
       });
       this.obsCollView.render();

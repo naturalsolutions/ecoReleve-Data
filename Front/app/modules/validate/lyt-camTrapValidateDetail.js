@@ -8,18 +8,18 @@ define([
   'translater',
   'config',
   'ns_grid/model-grid',
-  'ns_modules/ns_com',
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
   'moment',
   'ns_navbar/ns_navbar',
   'backbone.paginator',
-  'backgrid.paginator',
-
+  './lyt-camTrapItemView',
+  './lyt-camTrapImageModel',
+  './lyt-camTrapToolsBarView'
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
-  config, NsGrid, Com, NsMap, NsForm, moment, Navbar, PageColl, Paginator) {
+  config, NsGrid, NsMap, NsForm, moment, Navbar, PageColl, CamTrapItemView , CamTrapImageModel, ToolsBar) {
 
     'use strict';
 
@@ -33,21 +33,21 @@ define([
 
       events: {
         'click button#validate': 'validate',
-        'onkeydown #gallery' : 'keyPressed',
-        'pageable:state:change': 'toto',
-        'keypress': 'keyAction'
+      //  'onkeydown #gallery' : 'keyPressed',
+      //  'pageable:state:change': 'toto',
+        'keydown #gallery': 'keyAction'
       },
 
       ui: {
         'grid': '#grid',
         'totalEntries': '#totalEntries',
         'gallery': '#gallery',
+        'gallerytest': '#gallerytest',
         'siteForm': '#siteForm',
         'sensorForm': '#sensorForm',
 
         'dataSetIndex': '#dataSetIndex',
         'dataSetTotal': '#dataSetTotal',
-
 
         'totalS' : '#totalS',
         'total' : '#total',
@@ -57,22 +57,39 @@ define([
 
       regions: {
         'rgNavbar': '#navbar',
-        'imageTemplate' : '#gallery'
+        'rgGallery' : '#gallery',
+        'rgModal': '#rgModal',
+        'rgToolsBar' :'#rgToolsBar'
       },
       keyAction: function (e){
-        console.log("bim click sur ",e);
-      },
-      toto: function(e){
-        console.log("etat change");
-        console.log(this);
-        console.log(e);
+        var _this = this;
+          console.log("bim click sur ",e);
+          console.log("elem focus:");
+          console.log(document.activeElement.tagName);
+          console.log(_this.myImageCollection);
+          switch(e.keyCode)
+          {
+            case 13:{
+              console.log("BIM FULLSCREEN");
+              if( document.activeElement.tagName === "IMG" )
+              {
+                console.log(" c'est bien une image");
+                console.log(_this);
+              }
+              break;
+            }
+            default:
+            {
+              console.log("detection touche");
+              break;
+            }
+          }
       },
       initialize: function(options) {
         console.log("on a lancé la vue pour les camtrap ");
         this.translater = Translater.getTranslater();
         this.type = options.type;
         console.log('details/cam',options)
-        this.com = new Com();
         this.model = options.model;
 
 
@@ -89,6 +106,7 @@ define([
         this.globalGrid = options.globalGrid;
         //this.showDeferred = $.Deferred();
 
+
         var ImageCollection = PageColl.extend({
           mode: 'client',
           state: {
@@ -97,8 +115,27 @@ define([
           url: config.coreUrl+'sensors/'+this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
         });
         this.myImageCollection = new ImageCollection();
-      },
+        // this.validatedImg = this.myImageCollection.filter({validated : "true"})
+        // this.deletedImg = this.myImageCollection.filter({validated : "false"})
+        // this.toCheckImg = this.myImageCollection.filter({validated : "null"})
+        // console.log("mes super filtres");
+        // console.log("valide");
+        // console.log(this.validatedImg);
+        // console.log("suppr");
+        // console.log(this.deletedImg);
+        // console.log("a verif");
+        // console.log(this.toCheckImg);
 
+        this.initGallery();
+      },
+      initGallery : function() {
+          /*this.GalCollView = new Marionette.CollectionView({
+            collection : this.myImageCollection,
+            childView : CamTrapItemView
+          });
+          this.GalCollView.render();
+          this.ui.gallerytest.html(this.GalCollView.el);*/
+      },
       onRender: function() {
         this.$el.i18n();
       },
@@ -109,7 +146,6 @@ define([
         this.siteId = this.model.get('FK_MonitoredSite');
         this.equipmentId = this.model.get('equipID');
 
-        this.com = new Com();
         this.display();
       },
 
@@ -120,9 +156,6 @@ define([
         this.listenTo(this.myImageCollection, "reset", function(e,z){
             _this.showImage();
         });
-        this.com.onAction = function() {
-          // _this.setTotal();
-        };
       },
 
       setTotal: function(){
@@ -135,6 +168,7 @@ define([
         this.displaySensorForm();
         this.displaySiteForm();
         this.displayGallery();
+        this.displayToolsBar();
       },
 
 
@@ -173,95 +207,17 @@ define([
       },
       showImage: function(){
         var _this = this;
-        var ImageModel = Backbone.Model.extend({
-          urlRoot: config.coreUrl+'photos',
-          defaults:{
-            path :'',
-            name: '',
-            id: null,
-            checked: null,
-            validated: null,
-          }
-        });
-
-        var ImageItemView = Marionette.ItemView.extend({
-          model: ImageModel,
-          modelEvents: {
-            "change": "changeValid"
-          },
-          events:{
-            'click .image':'onClickImage',
-            'mouseenter .image': 'hoveringStart',
-            'mouseleave': 'hoveringEnd'
-          },
-          tagName : 'div',
-          className : 'col-md-2 text-center',
-          //template : 'app/modules/validate/templates/tpl-image.html',
-          template : 'app/modules/validate/templates/tpl-image.html',
-          //template : $('#itemview-image-template').html(),
-
-        /*  initialize : function() {
-            model.bind('change', render);
-          },
-
-          render: function() {
-            console.log("le model a changé");
-            //$("#myElement").css('opacity', myModel.isSelect ? 1 : 0)
-
-          },*/
-          hoveringStart: function(e){
-            console.log("enter " +this.model.get("name"));
-            console.log(this);
-            console.log(this.$('#myModalCamTrap'));
-          },
-          hoveringEnd: function(e){
-            console.log("leave " +this.model.get("name"));
-          },
-          initialize: function()
-          {
-          },
-          changeValid: function(){
-            console.log("changer dans itemView");
-          },
-          onClickImage: function(e){
-            console.log(e);
-            var _this = this;
-            var flagStatus = this.model.get("validated")
-            if( flagStatus == null ){
-              this.model.set("validated",true)
-            }
-            else{
-              flagStatus = !flagStatus //inverse booleen
-              this.model.set("validated",flagStatus)
-              if(!flagStatus) $(e.currentTarget).css("opacity",0.2);
-              else $(e.currentTarget).css("opacity",1);
-            }
-            console.log(this.model.get("name")+"validated :"+this.model.get("validated"));
-          /*  if (this.model.get("checked") ){
-              if ( !this.model.get("validated") )
-              {
-                console.log(this.model.get("name")+" is validated now");
-                this.model.set("validated", true)
-              }
-              else{
-                console.log(this.model.get("name")+" is deleted now");
-                this.model.set("validated", false)
-              }
-            }
-            if( !this.model.get("checked") ) {
-              console.log(this.model.get("name")+" is checked now");
-              this.model.set("checked", true)
-            }*/
-
-            //if( )
-          }
-        });
+        var ImageModel = new CamTrapImageModel();
 
         this.ui.gallery.html('');
 
         this.myImageCollection.each(function(model){
-          var newImg = new ImageItemView({model:model});
+          var newImg = new CamTrapItemView({
+            model: model,
+            parent: _this,
+          });
           _this.ui.gallery.append(newImg.render().el);
+
         });
       },
 
@@ -273,7 +229,15 @@ define([
 
         var resultat = this.paginator.render().el;
 
-      this.ui.paginator.append(resultat);
+        this.ui.paginator.append(resultat);
+      },
+      displayToolsBar: function () {
+
+        this.toolsBar = new ToolsBar();
+        this.rgToolsBar.show(this.toolsBar);
+        /*var resultat = this.toolsBar.render().el;
+
+        this.ui.paginator.append(resultat);*/
       },
 
       roundDate: function(date, duration) {
@@ -284,7 +248,7 @@ define([
         console.log("yeahhhh yeaahh yeaahh "+e.keyCode);
       },
 
-      displayListUnchecked: function(){
+      displayListUnchecked: function() {
         var _this = this;
         console.log("et bim on displayListUnchecked");
         _this.swal({title:"warning",text:"Some photos not checked"},"warning");
@@ -292,7 +256,7 @@ define([
 
 
       validate: function() {
-      //  console.log("pagination");
+       //  console.log("pagination");
         //console.log(this.paginator);
         var _this = this;
         var flagUnchecked = false
@@ -310,8 +274,8 @@ define([
         console.log("######################################");
         console.log("test collection model json");
         var test = this.myImageCollection.toJSON()
-          console.log(test);
-      /*  for ( var i = 0 ; i < sizeAllPages ; i ++ ){
+        console.log(test);
+        /*  for ( var i = 0 ; i < sizeAllPages ; i ++ ){
           console.log(this.myImageCollection.fullCollection.get(i));
           //console.log(this.myImageCollection.fullCollection.models[i]);
           dataToSend.push({
@@ -357,7 +321,8 @@ define([
             console.log(errorThrown);
 
           });
-        },
+      },
+
         /*this.myImageCollection.each(function (model) {
           }
           //console.log(model);

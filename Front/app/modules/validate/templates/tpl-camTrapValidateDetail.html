@@ -1,5 +1,5 @@
-<div class="full-height no-padding">
-  <div class="toolbar top clearfix">
+<div class="full-height col-md-4 no-padding">
+  <div class="clearfix toolbar top">
     <button id="hideDetail" class="btn pull-left">
       <i class="reneco reneco-back"></i>
       Back
@@ -8,11 +8,8 @@
     <div class="pull-right">
       <div id="navbar"></div>
     </div>
-
   </div>
-
-
-  <div class="col-md-3 crop2">
+  <div class="crop2">
     <br>
     <ul class="nav nav-tabs" role="tablist">
       <li role="presentation" class="active"><a href="#site" aria-controls="site" role="tab" data-toggle="tab">Site details</a></li>
@@ -20,7 +17,7 @@
     </ul>
 
     <!-- Tab panes -->
-    <div class="tab-content">
+    <div class="tab-content" id="preview">
       <div role="tabpanel" class="tab-pane active" id="site">
         <div id="siteForm"></div>
       </div>
@@ -29,20 +26,38 @@
       </div>
     </div>
   </div>
+  <div class="clearfix toolbar bottom"></div>
+</div>
 
-  <div id="gallery" class="col-md-9">
-  </div>
-  <div id="tabTools" class="col-md-9">
-  </div>
-  <div class="modal" id="myModalCamTrap" style="display:none;">
-    bla bla bla
+<div class="full-height no-padding col-md-8 dark">
+  <div class="toolbar top clearfix">
+  <button id="test" class="btn">test</button>
   </div>
 
-  <div class="clearfix toolbar bottom">
-    <div id="paginator" class="pull-left"></div>
+  <div id="gallery" class="crop2 crop-paginator">
+  </div>
+<!--  <div id="gallerytest" class="crop2 crop-paginator">
+  </div>
+-->
 
+  <div id="paginator" class="paginator"></div>
+
+  <div class="clearfix toolbar bottom col-md-12">
+    <div id="rgToolsBar" class="col-md-12"></div>
+    <div class="col-md-2 hide">
     <button id="validate" class="btn btn-success pull-right">Validate</button>
+    </div>
     <!-- <legend class="inherit pull-right">Selected : <span id="totalS"></span><span id="total">/</span></legend> -->
   </div>
 
+
+
+
+
+<!-- <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+  Launch demo modal
+</button>
+ -->
+<!-- Modal -->
 </div>
+<div id="rgModal"></div>
