@@ -35,7 +35,11 @@ define([
         'click button#validate': 'validate',
       //  'onkeydown #gallery' : 'keyPressed',
       //  'pageable:state:change': 'toto',
-        'keydown #gallery': 'keyAction'
+        'click button#displayAll': 'displayAll',
+        'click button#displayDeleted': 'displayDeleted',
+        'click button#displayValidated': 'displayValidated',
+        'click button#displayTags': 'displayTags',
+        'keydown document': 'keyAction'
       },
 
       ui: {
@@ -60,6 +64,76 @@ define([
         'rgGallery' : '#gallery',
         'rgModal': '#rgModal',
         'rgToolsBar' :'#rgToolsBar'
+      },
+      displayAll: function (e){
+
+        this.ui.gallery.html('');
+        this.ui.paginator.html('');
+        this.showImage(this.myImageCollection);
+        this.displayPaginator(this.paginator);
+
+      },
+      displayValidated: function (e){
+        var _this = this ;
+
+        var filterModel = this.myImageCollection.fullCollection.where({validated:true});
+
+        var paginationFiltered = PageColl.extend({
+          mode: 'client',
+          state: {
+            pageSize: 24
+          }
+        });
+
+        this.myImageCollectionValidated = new paginationFiltered(filterModel)
+        this.myPaginationValidated = new Backgrid.Extension.Paginator({
+          collection: this.myImageCollectionValidated
+        });
+
+        this.listenTo(this.myImageCollectionValidated, "reset", function(e,z){
+            _this.showImage(_this.myImageCollectionValidated);
+        });
+
+        this.ui.gallery.html('');
+        this.ui.paginator.html('');
+        this.showImage(this.myImageCollectionValidated);
+        this.displayPaginator(this.myPaginationValidated);
+        if( this.ui.gallery.html() === '' )
+        {
+          this.ui.gallery.html('NO IMAGES TO DISPLAY')
+        }
+
+      },
+      displayDeleted: function (e){
+        var _this = this ;
+
+        var filterModel = this.myImageCollection.fullCollection.where({validated:false});
+
+        var paginationFiltered = PageColl.extend({
+          mode: 'client',
+          state: {
+            pageSize: 24
+          }
+        });
+
+        this.myImageCollectionDeleted = new paginationFiltered(filterModel)
+        this.myPaginationDeleted = new Backgrid.Extension.Paginator({
+          collection: this.myImageCollectionDeleted
+        });
+
+        this.listenTo(this.myImageCollectionDeleted, "reset", function(e,z){
+            _this.showImage(_this.myImageCollectionDeleted);
+        });
+
+        this.ui.gallery.html('');
+        this.ui.paginator.html('');
+        this.showImage(this.myImageCollectionDeleted);
+        this.displayPaginator(this.myPaginationDeleted);
+        if( this.ui.gallery.html() === '' )
+        {
+          this.ui.gallery.html('NO IMAGES TO DISPLAY')
+        }
+
       },
       keyAction: function (e){
         var _this = this;
@@ -86,26 +160,24 @@ define([
           }
       },
       initialize: function(options) {
-        console.log("on a lancé la vue pour les camtrap ");
+
         this.translater = Translater.getTranslater();
         this.type = options.type;
-        console.log('details/cam',options)
         this.model = options.model;
-
+        this.currentElemActive
 
         this.sensorId = this.model.get('fk_sensor');
         this.siteId = this.model.get('FK_MonitoredSite');
         this.equipmentId = this.model.get('equipID');
+
 
         this.navbar = new Navbar({
           parent: this,
           globalGrid: options.globalGrid,
           model: this.model,
         });
-        //this.initCollection();
-        this.globalGrid = options.globalGrid;
-        //this.showDeferred = $.Deferred();
 
+        this.globalGrid = options.globalGrid;
 
         var ImageCollection = PageColl.extend({
           mode: 'client',
@@ -114,7 +186,17 @@ define([
           },
           url: config.coreUrl+'sensors/'+this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
         });
+
         this.myImageCollection = new ImageCollection();
+
+        this.myImageCollection.on("change",function(model){
+          console.log("model :");
+          console.log(model);
+        });
+
+        this.paginator = new Backgrid.Extension.Paginator({
+          collection: this.myImageCollection
+        });
         // this.validatedImg = this.myImageCollection.filter({validated : "true"})
         // this.deletedImg = this.myImageCollection.filter({validated : "false"})
         // this.toCheckImg = this.myImageCollection.filter({validated : "null"})
@@ -126,15 +208,16 @@ define([
         // console.log("a verif");
         // console.log(this.toCheckImg);
 
-        this.initGallery();
+        this.initCollection();
       },
-      initGallery : function() {
-          /*this.GalCollView = new Marionette.CollectionView({
-            collection : this.myImageCollection,
-            childView : CamTrapItemView
-          });
-          this.GalCollView.render();
-          this.ui.gallerytest.html(this.GalCollView.el);*/
+      initCollection : function() {
+        var _this = this;
+        this.myImageCollection.fetch().done(function(){
+          console.log("collection fetch ok");
+          _this.displayGallery(_this.myImageCollection);
+          /*_this.showImage();
+          _this.displayPaginator(_this.paginator);*/
+        });
       },
       onRender: function() {
         this.$el.i18n();
@@ -154,8 +237,9 @@ define([
         this.rgNavbar.show(this.navbar);
         this.display();
         this.listenTo(this.myImageCollection, "reset", function(e,z){
-            _this.showImage();
+            _this.showImage(_this.myImageCollection);
         });
+
       },
 
       setTotal: function(){
@@ -164,10 +248,10 @@ define([
       },
 
       display: function() {
-        var _this = this;
         this.displaySensorForm();
         this.displaySiteForm();
-        this.displayGallery();
+        this.displayGallery(this.myImageCollection);
+        this.displayPaginator(this.paginator)
         this.displayToolsBar();
       },
 
@@ -196,22 +280,24 @@ define([
         });
       },
 
-      displayGallery: function (){
+      displayGallery: function (myCollectionToDisplay){
+        this.showImage(myCollectionToDisplay);
           //var images = new ImageView ({ collection : myImageCollection});
-        var _this = this;
+    /*    var _this = this;
         this.myImageCollection.fetch().done(function(){
           _this.showImage();
-          _this.displayPaginator();
-        });
+          //_this.displayPaginator(_this.paginator);
+        });*/
 
       },
-      showImage: function(){
+      showImage: function(myCollectionToDisplay){
         var _this = this;
+
         var ImageModel = new CamTrapImageModel();
 
         this.ui.gallery.html('');
 
-        this.myImageCollection.each(function(model){
+        myCollectionToDisplay.each(function(model){
           var newImg = new CamTrapItemView({
             model: model,
             parent: _this,
@@ -221,15 +307,9 @@ define([
         });
       },
 
-      displayPaginator: function () {
-
-        this.paginator = new Backgrid.Extension.Paginator({
-          collection: this.myImageCollection
-        });
-
-        var resultat = this.paginator.render().el;
-
-        this.ui.paginator.append(resultat);
+      displayPaginator: function (pagin) {
+        this.ui.paginator.html('');
+        this.ui.paginator.append(pagin.render().el);
       },
       displayToolsBar: function () {
 

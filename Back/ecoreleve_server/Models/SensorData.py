@@ -153,11 +153,10 @@ class CamTrap(Base):
     name = Column(String(250) , nullable = False)
     extension = Column(String(250) , nullable = False)
     checked = Column(Boolean, nullable = True)
-    validated = Column(Boolean, nullable = True)
-    uploaded = Column(Boolean, nullable = True)
+    validated = Column(Integer, nullable = True)
     date_creation = Column(DateTime, nullable = True)
     date_uploaded = Column(DateTime, server_default = func.now())
-
+    tags = Column(String,nullable=True)
     __table_args__ = (
         {'schema': sensor_schema}
     )

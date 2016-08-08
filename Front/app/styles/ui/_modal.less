@@ -29,7 +29,7 @@
 .modal-cam-trap{
   height: ~"calc(100% - @{toolbarHeight})";
   width: 100%;
-  padding: 50px!important;
+  padding-top: 50px;
   bottom: @toolbarHeight;
   .modal-content{
     height: 100%;
@@ -38,6 +38,10 @@
       height: ~"calc(100% - @{toolbarHeight})";
       width: 100%;
       overflow: auto;
+      img{
+        height:100%;
+        width: 100%;
+      }
     }
   }
 }
