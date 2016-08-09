@@ -1,4 +1,4 @@
-//radio
+ //radio
 define([
   'jquery',
   'underscore',
@@ -15,11 +15,13 @@ define([
   'backbone.paginator',
   './lyt-camTrapItemView',
   './lyt-camTrapImageModel',
-  './lyt-camTrapToolsBarView'
+  './lyt-camTrapToolsBarView',
+  'backbone.marionette.keyShortcuts',
+
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
-  config, NsGrid, NsMap, NsForm, moment, Navbar, PageColl, CamTrapItemView , CamTrapImageModel, ToolsBar) {
+  config, NsGrid, NsMap, NsForm, moment, Navbar, PageColl, CamTrapItemView , CamTrapImageModel, ToolsBar, BckMrtKeyShortCut) {
 
     'use strict';
 
@@ -28,6 +30,14 @@ define([
 
       className: 'full-height animated white',
       childEvents:{
+
+      },
+      keyShortcuts:{
+        'up' : 'mouvement',
+        'down' : 'mouvement',
+        'left' : 'mouvement',
+        'right' : 'mouvement',
+        'tab': 'findInput',
 
       },
 
@@ -64,6 +74,73 @@ define([
         'rgGallery' : '#gallery',
         'rgModal': '#rgModal',
         'rgToolsBar' :'#rgToolsBar'
+      },
+      mouvement: function(e){
+        if(document.activeElement.tagName !== "IMG" && ! this.lastImageActive ){
+          console.log("aucune photo active on choisi la premiere");
+        //  console.log(this.$el.find('.imageCamTrap img') );
+          this.$el.find('.imageCamTrap img').first().focus();
+          this.lastNoeudActive = this.$el.find('.imageCamTrap').first();
+          this.lastImageActive = document.activeElement;
+          //initialise la matrice
+        }
+        else{
+          //on se replace sur la derniere image active
+          console.log("on était sur une photo on se replace sur ");
+          //console.log(this.lastImageActive);
+          $(this.lastImageActive).focus();
+      /*  }
+        else {*/
+          switch(e.keyCode)
+          {
+            case 38:
+            {
+              console.log("up");
+              break;
+            }
+            case 40:
+            {
+              console.log("down");
+              break;
+            }
+            case 37:{
+            //  console.log("left");
+              this.lastNoeudActive = $(this.lastNoeudActive).prev()
+              if( this.lastNoeudActive.length === 0 ){ //si pas de suivant on retourne au premier
+                this.$el.find('.imageCamTrap img').last().focus();
+                this.lastNoeudActive = this.$el.find('.imageCamTrap').last();
+                this.lastImageActive = document.activeElement;
+              }
+              else{
+                this.lastNoeudActive.find("img").focus();
+                this.lastImageActive = document.activeElement;
+              }
+              break;
+            }
+            case 39:
+            {
+              //console.log("right");
+              this.lastNoeudActive = $(this.lastNoeudActive).next()
+              if( this.lastNoeudActive.length === 0 ){ //si pas de suivant on retourne au premier
+                this.$el.find('.imageCamTrap img').first().focus();
+                this.lastNoeudActive = this.$el.find('.imageCamTrap').first();
+                this.lastImageActive = document.activeElement;
+              }
+              else{
+                this.lastNoeudActive.find("img").focus();
+                this.lastImageActive = document.activeElement;
+              }
+              break;
+            }
+          }
+        }
+      },
+      findInput: function(e){
+        e.preventDefault(); // disable browser tab
+        console.log("on va chercher input tag et on se place dedans");
+        this.$el.find(".bootstrap-tagsinput  input").focus();
+        //console.log(this.$el.find("#tagsInput").focus());
+        //console.log();
       },
       displayAll: function (e){
 
@@ -164,7 +241,7 @@ define([
         this.translater = Translater.getTranslater();
         this.type = options.type;
         this.model = options.model;
-        this.currentElemActive
+        this.lastImageActive = null;
 
         this.sensorId = this.model.get('fk_sensor');
         this.siteId = this.model.get('FK_MonitoredSite');

@@ -74,7 +74,10 @@ require.config({
     "bootstrap-modal": "../bower_components/bootstrap/js/modal",
     "backbone.bootstrap-modal": "../bower_components/backbone.bootstrap-modal/src/backbone.bootstrap-modal",
     "ez-plus": "../bower_components/ez-plus/src/jquery.ez-plus",
-    "bootstrap-tagsinput" : "../bower_components/bootstrap-tagsinput/src/bootstrap-tagsinput"
+    "bootstrap-tagsinput" : "../bower_components/bootstrap-tagsinput/src/bootstrap-tagsinput",
+    'mousetrap':'vendors/mousetrap/mousetrap.min',
+    'backbone.marionette.keyShortcuts': 'vendors/marionette/backbone.marionette.keyshortcuts',
+
   },
   map: {
       '*': {
@@ -180,6 +183,15 @@ require.config({
           'tooltipster'
       ],
       exports: 'TooltipList'
+    },
+    'mousetrap':{
+      exports: 'MouseTrap'
+    },
+    'backbone.marionette.keyShortcuts':{
+      deps:[
+        'marionette',
+        'mousetrap'
+      ],
     },
   },
 });

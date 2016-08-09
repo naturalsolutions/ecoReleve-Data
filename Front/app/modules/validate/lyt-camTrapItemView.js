@@ -13,20 +13,19 @@ define([
 ], function($, _, Backbone, Marionette, Translater, config , ModalView , CamTrapImageModel ,ezPlus ) {
 
   'use strict';
-	console.log(ezPlus);
   return Marionette.ItemView.extend({
 		model: CamTrapImageModel,//ImageModel,
 		modelEvents: {
 			"change": "changeValid"
 		},
 		events:{
-			'click .image':'onClickImage',
+			'click img':'onClickImage',
 			//'mouseenter .image': 'hoveringStart',
 		//	'mouseleave': 'hoveringEnd',
 		//	'keydown' : 'keyPressed',
 			'click .js-tag': 'addTag'
 		},
-		className : 'col-md-2 text-center',
+		className : 'col-md-2 text-center imageCamTrap',
 		//template : 'app/modules/validate/templates/tpl-image.html',
 		template : 'app/modules/validate/templates/tpl-image.html',
 		//template : $('#itemview-image-template').html(),
