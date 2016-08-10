@@ -104,7 +104,7 @@ define([
               console.log("haut");
               var i = 0;
                 var position = this.myImageCollection.indexOf(this.currentViewImg.model);
-                if( (position - 6 ) > 0  ){
+                if( (position - 6 ) >= 0  ){
                   this.currentViewImg = this.tabView[position-6]; // on se deplace de - 1
                   this.rgModal.currentView.changeImage(this.currentViewImg.model);
                 }
