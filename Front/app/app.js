@@ -49,7 +49,6 @@ function( Marionette, LytRootView, Router, Controller) {
     $('#header-loader').addClass('hidden');
   });
   $(document).ajaxSend(function(e, xhr, opt){
-    console.log('appel ajax en cours');
     window.xhrPool.push(xhr);
   });
   window.onerror = function() {

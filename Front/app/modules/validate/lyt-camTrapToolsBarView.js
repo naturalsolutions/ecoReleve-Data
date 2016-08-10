@@ -18,6 +18,7 @@ define([
 		},
 		//template : 'app/modules/validate/templates/tpl-image.html',
 		template : 'app/modules/validate/templates/tpl-camTrapToolsBar.html',
+		className : 'toolsBarCamTrap',
 		//template : $('#itemview-image-template').html(),
 
 		initialize : function(options) {
@@ -25,7 +26,10 @@ define([
 		},
 		onRender: function(){
       this.$el.find('#tagsInput').tagsinput()
-    }
+    },
+		testBim: function(str){
+			console.log("he : "+str);
+		}
 
 	});
 

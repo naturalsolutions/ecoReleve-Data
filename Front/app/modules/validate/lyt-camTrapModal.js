@@ -18,7 +18,11 @@ define([
     id: 'camTrapModal',
 
     initialize: function(options) {
-    	console.log(options);
+
+		},
+
+		plouf: function(){
+			alert('plouf');
 		},
 
     onShow: function() {
@@ -26,5 +30,10 @@ define([
       this.$el.modal();
     },
 
+		changeImage(model) {
+			this.model = model;
+			this.render();
+
+		},
   });
 });
