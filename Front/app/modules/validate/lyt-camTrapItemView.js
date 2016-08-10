@@ -17,13 +17,14 @@ define([
   return Marionette.ItemView.extend({
 		model: CamTrapImageModel,//ImageModel,
 		keyShortcuts :{
-			'space': 'testModal',
+			//'space': 'onClickImage',
 		},
 		modelEvents: {
 			"change": "changeValid"
 		},
 		events:{
-			'click img':'onClickImage',
+			'click img':'doFocus',
+			'focusin' : 'handleFocus',
 			//'dblclick':'handleFocus',
 			//'mouseenter .image': 'hoveringStart',
 		//	'mouseleave': 'hoveringEnd',
@@ -34,8 +35,13 @@ define([
 		},
 		className : 'col-md-2 text-center imageCamTrap',
 		template : 'app/modules/validate/templates/tpl-image.html',
-
+		doFocus : function(){
+			this.$el.find('img').focus();
+		},
 		handleFocus: function(){
+			this.parent.currentViewImg = this;
+			this.parent.currentPosition = this.parent.myImageCollection.indexOf(this.model);
+			console.log("on a eu le focus on va retour positon :"+this.parent.currentPosition);
 		},
 		leaveFocus: function(){
 		},
@@ -85,10 +91,11 @@ define([
 		changeValid: function(){
 		},
 		onClickImage: function(e){
+			this.$el.find('img').focus();
 			var _this = this;
 			this.parent.rgModal.show(new ModalView({model: this.model}));
 			this.parent.currentViewImg = this;
-
+			console.log(this.parent.myImageCollection.indexOf(this.model));
 			/*
 			var flagStatus = this.model.get("validated")
 			if( flagStatus == null ){

@@ -43,8 +43,9 @@ define([
         'left' : 'mouvement',
         'right' : 'mouvement',
         'tab': 'findInput',
-        //'space': 'displayModal',
+        'space': 'displayModal',
         'backspace' : 'toggleModelStatus',
+        'esc' : 'leaveModal'
 
       },
 
@@ -86,77 +87,76 @@ define([
       toggleModelStatus: function(e){
         e.preventDefault();
       },
+      leaveModal: function(e){
+        if(this.rgModal.currentView !== undefined) {
+          this.rgModal.currentView.hide();
+        }
+      },
       displayModal: function(e){
         e.preventDefault();
+        /*if(this.currentPosition !== null && this.rgModal.currentView !== undefined)
+          this.tabView[this.currentPosition].onClickImage();*/
+          if(this.currentPosition !== null ) { //il faut un focus
+            if(this.rgModal.currentView === undefined) {
+              this.rgModal.show( new ModalView({ model : this.tabView[this.currentPosition].model}))
+            }
+            else {
+              this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+              this.rgModal.currentView.onShow();
+            }
+          }
       },
       mouvement: function(e){
-        if(document.activeElement.tagName !== "IMG" && ! this.lastImageActive ){
-          this.$el.find('.imageCamTrap img').first().focus();
-          this.lastNoeudActive = this.$el.find('.imageCamTrap').first();
-          this.lastImageActive = document.activeElement;
+        console.log("en entrant");
+        console.log("position " + this.currentPosition);
+        if( this.currentPosition === null)
+        {
+          this.tabView[0].$el.find('img').focus();
+          this.currentPosition = 0;
         }
         else{
 
           switch(e.keyCode)
           {
-            case 38:
+            case 38:// up
             {
-              console.log("haut");
-              var i = 0;
-                var position = this.myImageCollection.indexOf(this.currentViewImg.model);
-                if( (position - 6 ) >= 0  ){
-                  this.currentViewImg = this.tabView[position-6]; // on se deplace de - 1
-                  this.rgModal.currentView.changeImage(this.currentViewImg.model);
-                }
-
-                console.log("youhouu je suis position " +position );
-                //this.lastNoeudActive = $(this.lastNoeudActive).prev();
+              if ( this.currentPosition - 6 >= 0){
+                 this.currentPosition-=6;
+                 this.tabView[this.currentPosition].$el.find('img').focus();
+                 if( this.rgModal.currentView !== undefined)
+                  this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+               }
               break;
             }
-            case 40:
+            case 40://down
             {
-              var position = this.myImageCollection.indexOf(this.currentViewImg.model);
-              if( (position + 6 ) < this.tabView.length - 1  ){
-                this.currentViewImg = this.tabView[position+6]; // on se deplace de - 1
-                this.rgModal.currentView.changeImage(this.currentViewImg.model);
-              }
-              console.log("youhouu je suis position " +position );
-              console.log("bas");
-
+              if ( this.currentPosition + 6 <= this.tabView.length - 1 ){
+                 this.currentPosition+=6;
+                 this.tabView[this.currentPosition].$el.find('img').focus();
+                 if( this.rgModal.currentView !== undefined)
+                  this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+               }
               break;
             }
-            //left
-            case 37:{
+            case 37:{ //left
             this.toolsBar.testBim("left");
-              this.lastNoeudActive = $(this.lastNoeudActive).prev()
-              if( this.lastNoeudActive.length === 0 ){ //si pas de suivant on retourne au premier
-                this.$el.find('.imageCamTrap img').first().focus();
-                this.lastNoeudActive = this.$el.find('.imageCamTrap').first();
-                this.lastImageActive = document.activeElement;
-              }
-              else{
-                this.lastNoeudActive.find("img").focus();
-                this.lastImageActive = document.activeElement;
-              }
-              this.prevImage();
+            if ( this.currentPosition - 1 >= 0 ){
+               this.currentPosition-=1;
+               this.tabView[this.currentPosition].$el.find('img').focus();
+               if( this.rgModal.currentView !== undefined)
+                this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+             }
               break;
             }
             //right
-            case 39:
+            case 39://right
             {
-              this.toolsBar.testBim("right");
-              this.lastNoeudActive = $(this.lastNoeudActive).next()
-
-              if( this.lastNoeudActive.length === 0 ){ //si pas de suivant on retourne au premier
-                this.$el.find('.imageCamTrap img').last().focus();
-                this.lastNoeudActive = this.$el.find('.imageCamTrap').last();
-                this.lastImageActive = document.activeElement;
-              }
-              else{
-                this.lastNoeudActive.find("img").focus();
-                this.lastImageActive = document.activeElement;
-              }
-              this.nextImage();
+              if ( this.currentPosition + 1 <= this.tabView.length - 1 ){
+                 this.currentPosition+=1;
+                 this.tabView[this.currentPosition].$el.find('img').focus();
+                 if( this.rgModal.currentView !== undefined)
+                  this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+               }
               break;
             }
           }
@@ -198,6 +198,8 @@ define([
         this.type = options.type;
         this.model = options.model;
         this.lastImageActive = null;
+        this.currentViewImg = null;
+        this.currentPosition = null;
 
         this.sensorId = this.model.get('fk_sensor');
         this.siteId = this.model.get('FK_MonitoredSite');

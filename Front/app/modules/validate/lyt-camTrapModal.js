@@ -21,19 +21,18 @@ define([
 
 		},
 
-		plouf: function(){
-			alert('plouf');
-		},
-
     onShow: function() {
       //this.$el.i18n();
       this.$el.modal();
     },
 
-		changeImage(model) {
+		changeImage:function (model) {
 			this.model = model;
 			this.render();
-
 		},
+
+		hide: function(){
+			this.$el.modal('hide');
+		}
   });
 });
