@@ -41,6 +41,7 @@ define([
 		handleFocus: function(){
 			this.parent.currentViewImg = this;
 			this.parent.currentPosition = this.parent.myImageCollection.indexOf(this.model);
+			this.parent.fillTagsInput();
 			console.log("on a eu le focus on va retour positon :"+this.parent.currentPosition);
 		},
 		leaveFocus: function(){
@@ -90,6 +91,32 @@ define([
 
 		changeValid: function(){
 		},
+
+		setModelTags : function(xmlTags){
+			this.model.set("tags",xmlTags);
+		},
+
+		getModelTags: function(){
+			return this.model.get("tags");
+		},
+
+		setModelValidated: function(valBool) {
+			if( typeof valBool == "boolean" )
+			this.model.set("validated",valBool);
+		},
+
+		toggleModelStatus : function (){
+			var flagStatus = this.model.get("validated")
+			if( flagStatus == null ){
+				this.model.set("validated",true)
+			}
+			else{
+				flagStatus = !flagStatus //inverse booleen
+				this.model.set("validated",flagStatus)
+			}
+			console.log("now validated : "+this.model.get("validated"));
+		},
+
 		onClickImage: function(e){
 			this.$el.find('img').focus();
 			var _this = this;

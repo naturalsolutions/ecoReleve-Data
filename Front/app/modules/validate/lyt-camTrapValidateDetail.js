@@ -53,12 +53,15 @@ define([
         'click button#validate': 'validate',
         //'click img':'onClickImage',
       //  'onkeydown #gallery' : 'keyPressed',
-      //  'pageable:state:change': 'toto',
+        //'pageable:state:change': function(){console.log("on a changé de page");},
         'click button#displayAll': 'displayAll',
         'click button#displayDeleted': 'displayDeleted',
         'click button#displayValidated': 'displayValidated',
         'click button#displayTags': 'displayTags',
-        'keydown document': 'keyAction'
+        'click button#refusedBtn': 'rejectPhoto',
+        'click button#upStarsBtn': 'increaseStars',
+        'click button#downStarsBtn': 'decreaseStars',
+        'click button#acceptedBtn': 'acceptPhoto',
       },
 
       ui: {
@@ -84,8 +87,39 @@ define([
         'rgModal': '#rgModal',
         'rgToolsBar' :'#rgToolsBar'
       },
+      acceptPhoto : function(e){
+        if(this.currentPosition !== null )
+        {
+          console.log("on toggle "+ this.currentPosition);
+          this.tabView[this.currentPosition].setModelValidated(true);
+        }
+        else{
+          console.log("on est sur aucune photo");
+        }
+      },
+
+      rejectPhoto : function(e){
+        if(this.currentPosition !== null )
+        {
+          console.log("on toggle "+ this.currentPosition);
+          this.tabView[this.currentPosition].setModelValidated(false);
+        }
+        else{
+          console.log("on est sur aucune photo");
+        }
+      },
+
       toggleModelStatus: function(e){
         e.preventDefault();
+        console.log("on veut toggle");
+        if(this.currentPosition !== null )
+        {
+          console.log("on toggle "+ this.currentPosition);
+          this.tabView[this.currentPosition].toggleModelStatus();
+        }
+        else{
+          console.log("on est sur aucune photo");
+        }
       },
       leaveModal: function(e){
         if(this.rgModal.currentView !== undefined) {
@@ -98,9 +132,11 @@ define([
           this.tabView[this.currentPosition].onClickImage();*/
           if(this.currentPosition !== null ) { //il faut un focus
             if(this.rgModal.currentView === undefined) {
+              console.log("creation modal");
               this.rgModal.show( new ModalView({ model : this.tabView[this.currentPosition].model}))
             }
             else {
+              console.log("reutilisation modal");
               this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
               this.rgModal.currentView.onShow();
             }
@@ -109,6 +145,7 @@ define([
       mouvement: function(e){
         console.log("en entrant");
         console.log("position " + this.currentPosition);
+
         if( this.currentPosition === null)
         {
           this.tabView[0].$el.find('img').focus();
@@ -123,8 +160,10 @@ define([
               if ( this.currentPosition - 6 >= 0){
                  this.currentPosition-=6;
                  this.tabView[this.currentPosition].$el.find('img').focus();
-                 if( this.rgModal.currentView !== undefined)
-                  this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+                  //console.log(this.tabView[this.currentPosition].getModelTags());
+                 if( this.rgModal.currentView !== undefined){
+                   this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+                  }
                }
               break;
             }
@@ -133,8 +172,22 @@ define([
               if ( this.currentPosition + 6 <= this.tabView.length - 1 ){
                  this.currentPosition+=6;
                  this.tabView[this.currentPosition].$el.find('img').focus();
-                 if( this.rgModal.currentView !== undefined)
-                  this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+                /* this.toolsBar.removeAll();//vide les tags
+                 var tabTagsTmp = this.tabView[this.currentPosition].getModelTags()
+                 console.log("chaine :" +tabTagsTmp);
+                 if( tabTagsTmp !== null )
+                 {
+                   tabTagsTmp = tabTagsTmp.split(","); //charge les nouveaux
+                   console.log("tableau :" +tabTagsTmp);
+                   for(var i = 0 ; i < tabTagsTmp.length ; i++ )
+                    {
+                       this.toolsBar.addTag(tabTagsTmp[i]);
+                    }
+                  }
+                  console.log(this.tabView[this.currentPosition].getModelTags());*/
+                 if( this.rgModal.currentView !== undefined){
+                   this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+                 }
                }
               break;
             }
@@ -143,8 +196,22 @@ define([
             if ( this.currentPosition - 1 >= 0 ){
                this.currentPosition-=1;
                this.tabView[this.currentPosition].$el.find('img').focus();
-               if( this.rgModal.currentView !== undefined)
-                this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+              /* this.toolsBar.removeAll();//vide les tags
+               var tabTagsTmp = this.tabView[this.currentPosition].getModelTags()
+               console.log("chaine :" +tabTagsTmp);
+               if( tabTagsTmp !== null )
+               {
+                 tabTagsTmp = tabTagsTmp.split(","); //charge les nouveaux
+                 console.log("tableau :" +tabTagsTmp);
+                 for(var i = 0 ; i < tabTagsTmp.length ; i++ )
+                  {
+                     this.toolsBar.addTag(tabTagsTmp[i]);
+                  }
+                }
+                console.log(this.tabView[this.currentPosition].getModelTags());*/
+               if( this.rgModal.currentView !== undefined){
+                 this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+               }
              }
               break;
             }
@@ -154,8 +221,22 @@ define([
               if ( this.currentPosition + 1 <= this.tabView.length - 1 ){
                  this.currentPosition+=1;
                  this.tabView[this.currentPosition].$el.find('img').focus();
-                 if( this.rgModal.currentView !== undefined)
-                  this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+                 /*this.toolsBar.removeAll();//vide les tags
+                 var tabTagsTmp = this.tabView[this.currentPosition].getModelTags()
+                 console.log("chaine :" +tabTagsTmp);
+                 if( tabTagsTmp !== null )
+                 {
+                   tabTagsTmp = tabTagsTmp.split(","); //charge les nouveaux
+                   console.log("tableau :" +tabTagsTmp);
+                   for(var i = 0 ; i < tabTagsTmp.length ; i++ )
+                    {
+                       this.toolsBar.addTag(tabTagsTmp[i]);
+                    }
+                  }*/
+                 console.log(this.tabView[this.currentPosition].getModelTags());
+                 if( this.rgModal.currentView !== undefined){
+                   this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+                  }
                }
               break;
             }
@@ -188,6 +269,24 @@ define([
           this.currentViewImg = this.tabView[index + 1];
         }
         this.rgModal.currentView.changeImage(this.currentViewImg.model);
+
+      },
+
+      fillTagsInput : function(){
+        var $inputTags = this.toolsBar.$el.find("#tagsinput");
+        this.toolsBar.removeAll();//vide les tags
+        var tabTagsTmp = this.tabView[this.currentPosition].getModelTags()
+        console.log("chaine :" +tabTagsTmp);
+        if( tabTagsTmp !== null )
+        {
+          tabTagsTmp = tabTagsTmp.split(","); //charge les nouveaux
+          console.log("tableau :" +tabTagsTmp);
+          for(var i = 0 ; i < tabTagsTmp.length ; i++ )
+           {
+              this.toolsBar.addTag(tabTagsTmp[i]);
+           }
+         }
+
 
       },
 
@@ -237,6 +336,14 @@ define([
           collection: this.myImageCollection
         });
         this.myImageCollection.fetch();
+
+        console.log(this.myImageCollection);
+        console.log(this.paginator);
+
+        this.paginator.collection.on('reset', function(e){
+          console.log("jai change de page");
+        });
+
       },
 
       onRender: function() {
@@ -327,7 +434,10 @@ define([
       },
 
       displayToolsBar: function () {
-        this.toolsBar = new ToolsBar();
+        var _this = this ;
+        this.toolsBar = new ToolsBar( {
+          parent : _this,
+        });
         this.rgToolsBar.show(this.toolsBar);
       },
 
@@ -350,6 +460,8 @@ define([
             pageSize: 24
           }
         });
+
+
 
         this.myImageCollectionValidated = new paginationFiltered(filterModel)
         this.myPaginationValidated = new Backgrid.Extension.Paginator({
