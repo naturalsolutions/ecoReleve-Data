@@ -21,6 +21,7 @@ from datetime import datetime
 from ..Models import Base, dbConfig, DBSession,ArgosGps,graphDataDate,CamTrap
 from traceback import print_exc
 from pyramid import threadlocal
+from xml.etree.ElementTree import XMLParser
 
 
 route_prefix = 'sensors/'
@@ -101,7 +102,7 @@ def unchecked_camtrap(request):
     return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt',renderer='json',request_method = 'GET')
+@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt',renderer='json',request_method = 'GET' )
 def details_unchecked_indiv(request):
     session = request.dbsession
 
@@ -156,8 +157,39 @@ def details_unchecked_indiv(request):
 
     return result
 
+@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt/id_equip/pk_id',renderer='json',request_method = 'PATCH' )
+def patchCamTrap(request):
+    print(" Je vais traiter la requete")
+    print(" type : "+str(request.method) )
+    pk_id_patched = request.matchdict['pk_id']
+    print(" on modifie la ressource : " + str(pk_id_patched) )
+    print(" avec les valeurs : ")
+    data = request.params.mixed()
+    print(request.params)
+    print(data)
+    print(request.json_body['PK_id'])
+    print(request.json_body['path'])
+    print(request.json_body['name'])
+    print(request.json_body['checked'])
+    print(request.json_body['validated'])
+    print(request.json_body['tags'])
+
+    session = request.dbsession
+
+
+    curCameraTrap = session.query(CamTrap).get(pk_id_patched)
+    curCameraTrap.validated = request.json_body['validated']
+    listTags = str(request.json_body['tags']).split(",")
+    XMLTags = "<TAGS>"
+    for tag in listTags:
+        XMLTags+= "<TAG>"+str(tag)+"</TAG>"
+    XMLTags+= "</TAGS>"
+    print(XMLTags)
+    curCameraTrap.tags = XMLTags
+    print (curCameraTrap)
+
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt/id_equip',renderer='json',request_method = 'GET')
+@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt/id_equip',renderer='json',request_method = ('GET','PATCH') )
 def details_unchecked_indiv(request):
     session = request.dbsession
 
@@ -215,32 +247,36 @@ def details_unchecked_indiv(request):
     return result
 
 def details_unchecked_camtrap(request):
-    session = threadlocal.get_current_request().dbsession
-    result = []
-    id_indiv = request.matchdict['id_indiv']
-    if(id_indiv == 'none'):
-        id_indiv = None
-    ptt = request.matchdict['id_ptt']
-    id_equip = request.matchdict['id_equip']
+    if( request.method == 'PATCH'):
+        print(" on recoit une requete de validation")
+        print(" type : " + str(request.method) + " authorized" )
+    else:
+        session = threadlocal.get_current_request().dbsession
+        result = []
+        id_indiv = request.matchdict['id_indiv']
+        if(id_indiv == 'none'):
+            id_indiv = None
+        ptt = request.matchdict['id_ptt']
+        id_equip = request.matchdict['id_equip']
 
-    unchecked = DataCamTrapFile
-    """query = select([unchecked]
-        ).where(and_(unchecked.c['FK_sensor']== ptt
-            ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_MonitoredSite'] == id_indiv))).order_by(desc(unchecked.c['date']))"""
+        unchecked = DataCamTrapFile
+        """query = select([unchecked]
+            ).where(and_(unchecked.c['FK_sensor']== ptt
+                ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_MonitoredSite'] == id_indiv))).order_by(desc(unchecked.c['date']))"""
 
-    query = 'select PK_id,path,name,checked,validated,tags from ecoReleve_Sensor.dbo.TcameraTrap where pk_id in (select pk_id from [dbo].V_dataCamTrap_With_equipSite where fk_sensor = '+str(id_indiv)+' AND FK_MonitoredSite = '+str(ptt)+' AND equipID ='+str(id_equip)+' );'
-    data = session.execute(query).fetchall()
-    dataResults = [dict(row) for row in data]
-    for tmp in dataResults:
-        varchartmp = tmp['path'].split('\\')
-        tmp['path']="imgcamtrap/"+str(varchartmp[len(varchartmp)-2])+"/"
-        tmp['name'] = tmp['name'].replace(" ","%20")
-        tmp['id'] = tmp['PK_id']
+        query = 'select PK_id,path,name,checked,validated,tags from ecoReleve_Sensor.dbo.TcameraTrap where pk_id in (select pk_id from [dbo].V_dataCamTrap_With_equipSite where fk_sensor = '+str(id_indiv)+' AND FK_MonitoredSite = '+str(ptt)+' AND equipID ='+str(id_equip)+' );'
+        data = session.execute(query).fetchall()
+        dataResults = [dict(row) for row in data]
+        for tmp in dataResults:
+            varchartmp = tmp['path'].split('\\')
+            tmp['path']="imgcamtrap/"+str(varchartmp[len(varchartmp)-2])+"/"
+            tmp['name'] = tmp['name'].replace(" ","%20")
+            tmp['id'] = tmp['PK_id']
 
-    result = [{'total_entries':len(dataResults)}]
-    result.append(dataResults)
-    ''' todo '''
-    return dataResults
+        result = [{'total_entries':len(dataResults)}]
+        result.append(dataResults)
+        ''' todo '''
+        return dataResults
 # ------------------------------------------------------------------------------------------------------------------------- #
 
 @view_config(route_name = route_prefix+'uncheckedDatas/id_indiv/ptt', renderer = 'json' , request_method = 'POST' )

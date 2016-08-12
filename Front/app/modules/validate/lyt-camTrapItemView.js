@@ -38,15 +38,14 @@ define([
 		doFocus : function(){
 			this.$el.find('img').focus();
 		},
-		handleFocus: function(){
+		handleFocus: function() {
 			this.parent.currentViewImg = this;
 			this.parent.currentPosition = this.parent.myImageCollection.indexOf(this.model);
 			this.parent.fillTagsInput();
-			console.log("on a eu le focus on va retour positon :"+this.parent.currentPosition);
 		},
-		leaveFocus: function(){
+		leaveFocus: function() {
 		},
-		testModal: function(e){
+		testModal: function(e) {
 			e.preventDefault();
 		},
 
@@ -55,6 +54,11 @@ define([
 		},
 
 		onRender: function(){
+			if( this.model.get("validated") === true )
+				this.$el.addClass("accepted");
+			else if( this.model.get("validated") === false )
+				this.$el.addClass("refused");
+
 			this.$("#zoom_"+this.model.get("id")).ezPlus({
 				zoomWindowPosition: 'preview',
 				preloading: false,
@@ -89,7 +93,11 @@ define([
 			}
 		},
 
-		changeValid: function(){
+		changeValid: function(e){
+			console.log("modele change");
+			console.log(e);
+			this.model.save(e.Changed,{patch:true});
+			//this.render();
 		},
 
 		setModelTags : function(xmlTags){
@@ -108,13 +116,21 @@ define([
 		toggleModelStatus : function (){
 			var flagStatus = this.model.get("validated")
 			if( flagStatus == null ){
+				flagStatus = true;
 				this.model.set("validated",true)
 			}
 			else{
 				flagStatus = !flagStatus //inverse booleen
 				this.model.set("validated",flagStatus)
 			}
-			console.log("now validated : "+this.model.get("validated"));
+			if( flagStatus ) {
+				if( this.$el.hasClass('refused') ) this.$el.removeClass('refused');
+				if( !this.$el.hasClass('accepted') ) this.$el.addClass("accepted");
+			}
+			else {
+				if( this.$el.hasClass('accepted') ) this.$el.removeClass('accepted');
+				if( !this.$el.hasClass('refused') ) this.$el.addClass("refused");
+			}
 		},
 
 		onClickImage: function(e){
@@ -122,7 +138,6 @@ define([
 			var _this = this;
 			this.parent.rgModal.show(new ModalView({model: this.model}));
 			this.parent.currentViewImg = this;
-			console.log(this.parent.myImageCollection.indexOf(this.model));
 			/*
 			var flagStatus = this.model.get("validated")
 			if( flagStatus == null ){

@@ -87,73 +87,59 @@ define([
       'rgModal': '#rgModal',
       'rgToolsBar' :'#rgToolsBar'
     },
+
     acceptPhoto : function(e){
-      if(this.currentPosition !== null )
-      {
-        console.log("on toggle "+ this.currentPosition);
+      if(this.currentPosition !== null ) {
         this.tabView[this.currentPosition].setModelValidated(true);
       }
-      else{
-        console.log("on est sur aucune photo");
-      }
+
     },
 
     rejectPhoto : function(e){
-      if(this.currentPosition !== null )
-      {
-        console.log("on toggle "+ this.currentPosition);
+
+      if(this.currentPosition !== null ) {
         this.tabView[this.currentPosition].setModelValidated(false);
       }
-      else{
-        console.log("on est sur aucune photo");
-      }
+
     },
 
     toggleModelStatus: function(e){
       e.preventDefault();
-      console.log("on veut toggle");
-      if(this.currentPosition !== null )
-      {
-        console.log("on toggle "+ this.currentPosition);
+
+      if(this.currentPosition !== null ) {
         this.tabView[this.currentPosition].toggleModelStatus();
       }
-      else{
-        console.log("on est sur aucune photo");
-      }
+
     },
+
     leaveModal: function(e){
       if(this.rgModal.currentView !== undefined) {
         this.rgModal.currentView.hide();
       }
     },
+
     displayModal: function(e){
       e.preventDefault();
-      /*if(this.currentPosition !== null && this.rgModal.currentView !== undefined)
-      this.tabView[this.currentPosition].onClickImage();*/
-      if(this.currentPosition !== null ) { //il faut un focus
+      if(this.currentPosition !== null ) { //il faut une position pour afficher le modal
 
         if(this.rgModal.currentView === undefined) {
-          console.log("creation modal");
           this.rgModal.show( new ModalView({ model : this.tabView[this.currentPosition].model}))
         }
         else {
-          console.log("reutilisation modal");
           this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
           this.rgModal.currentView.onShow();
         }
       }
     },
-    mouvement: function(e){
-      console.log("en entrant");
-      console.log("position " + this.currentPosition);
 
-      if( this.currentPosition === null) {
-        console.log("pas de position");
-        this.tabView[0].$el.find('img').focus();
-        this.currentPosition = 0;
+    mouvement: function(e){
+
+      if( this.currentPosition === null) {//si aucune position
+        this.tabView[0].$el.find('img').focus(); // focus la premiere image
+        this.currentPosition = 0; //et on se place sur 0
       }
       else{
-        var lastPosition = this.currentPosition;
+        var lastPosition = this.currentPosition;//stock la position avant changement pour savoir si on a bougé
 
         switch(e.keyCode)
         {
@@ -187,23 +173,20 @@ define([
           }
         }
 
-        if (lastPosition !== this.currentPosition) {
-          console.log(lastPosition+" != "+this.currentPosition);
-          this.tabView[this.currentPosition].$el.find('img').focus();
-          console.log(this.tabView[this.currentPosition].getModelTags());
-          if( this.rgModal.currentView !== undefined){
+        if (lastPosition !== this.currentPosition) {// si on a bougé
+          this.tabView[this.currentPosition].$el.find('img').focus();//on change le focus
+          if( this.rgModal.currentView !== undefined){//si le modal existe on change
             this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
           }
         }
-        else {
-          console.log(lastPosition+" == "+this.currentPosition);
-        }
       }
+
     },
 
     findInput: function(e){
       e.preventDefault(); // disable browser tab
       this.$el.find(".bootstrap-tagsinput  input").focus();
+
     },
 
     prevImage: function(){
@@ -234,17 +217,13 @@ define([
       var $inputTags = this.toolsBar.$el.find("#tagsinput");
       this.toolsBar.removeAll();//vide les tags
       var tabTagsTmp = this.tabView[this.currentPosition].getModelTags()
-      console.log("chaine :" +tabTagsTmp);
       if( tabTagsTmp !== null )
       {
         tabTagsTmp = tabTagsTmp.split(","); //charge les nouveaux
-        console.log("tableau :" +tabTagsTmp);
-        for(var i = 0 ; i < tabTagsTmp.length ; i++ )
-        {
+        for(var i = 0 ; i < tabTagsTmp.length ; i++ ) {
           this.toolsBar.addTag(tabTagsTmp[i]);
         }
       }
-
 
     },
 
@@ -285,10 +264,13 @@ define([
           pageSize: 24
         },
         url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
+        patch : function(){
+          console.log("ouais ouais ouais j'override");
+        }
       });
 
       this.myImageCollection = new ImageCollection();
-
+      this.myImageCollection.sync('patch', this.myImageCollection , { error: function () { console.log(this.myImageCollection); console.log("sync impossible");} });
 
       this.paginator = new Backgrid.Extension.Paginator({
         collection: this.myImageCollection

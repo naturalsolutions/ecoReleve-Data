@@ -27,19 +27,19 @@ define([
 		initialize : function(options) {
 			this.parent = options.parent;
 		},
+
 		onRender: function(){
       this.$el.find('#tagsInput').tagsinput({
 				 	maxTags: 5,
 					trimValue: true,
 			});
     },
-		testBim: function(str){
-			console.log("he : "+str);
-		},
+
 		addTag: function(tag){
 			this.$el.find('#tagsInput').tagsinput('add',tag);
 			//console.log(e);
 		},
+
 		verifTag: function(e){
 			var capitalise = e.item.substr(0, 1);
 			if(e.item.length > 1 ) {
@@ -53,18 +53,13 @@ define([
 				this.$el.find('#tagsInput').tagsinput('add',capitalise);
 			}
 		},
+
 		saveTags : function(e){
 			var tabTags = this.$el.find('#tagsInput').val();
-			if (tabTags.length <=0) {
-				console.log("le tableau est vide");
-			}
-			else{
-				console.log(tabTags);
-				console.log(this.parent);
+			if (tabTags.length > 0) {
 				if(this.parent.currentPosition !== null ){
 					this.parent.tabView[this.parent.currentPosition].setModelTags(tabTags);
 				}
-				//
 			}
 		},
 		removeAll : function() {
