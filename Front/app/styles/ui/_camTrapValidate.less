@@ -1,14 +1,48 @@
-.accepted{
-  background-color: green;
+#gallery{
+  background-color: #434343;
+
+.imageCamTrap{
+  position : relative;
+  height : 25%;
+  border-radius : 10px;
+  background-color: #3d3d3d;
+
+  img{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+.accepted:after{
+  font-family: 'reneco' !important;
+  content: "\e62a";
+  display: block;
+  float:right;
+  position:relative;
+  color: white;
+  top:-10px;
+  right: -10px;
+  height: 20px;
+  width: 20px;
+  border-radius: 10px;
+  background-color: #39b34a;
 }
 
-.refused{
-  background-color: red;
+.refused:after{
+  font-family: 'reneco' !important;
+  content: "\e65e";
+  display: block;
+  float:right;
+  position:relative;
+  color: white;
+  top:-10px;
+  right: -10px;
+  height: 20px;
+  width: 20px;
+  border-radius: 10px;
+  background-color: #f00;
 }
 
-img:focus:{
-  background-color: blue;
-}
-img:active:{
-  background-color: blue;
+
 }
