@@ -77,6 +77,7 @@ require.config({
     "bootstrap-tagsinput" : "../bower_components/bootstrap-tagsinput/src/bootstrap-tagsinput",
     'mousetrap':'vendors/mousetrap/mousetrap.min',
     'backbone.marionette.keyShortcuts': 'vendors/marionette/backbone.marionette.keyshortcuts',
+    'backbone.virtualcollection' : '../bower_components/backbone.virtualcollection/backbone.virtual-collection',
 
   },
   map: {
