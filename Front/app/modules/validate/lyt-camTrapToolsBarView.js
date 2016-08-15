@@ -40,7 +40,7 @@ define([
 			//console.log(e);
 		},
 
-		verifTag: function(e){
+		verifTag: function(e){//avant d'ajouter un tag
 			var capitalise = e.item.substr(0, 1);
 			if(e.item.length > 1 ) {
 				 capitalise = capitalise.toUpperCase() + e.item.substr(1).toLowerCase();
@@ -56,10 +56,14 @@ define([
 
 		saveTags : function(e){
 			var tabTags = this.$el.find('#tagsInput').val();
-			if (tabTags.length > 0) {
 				if(this.parent.currentPosition !== null ){
+					if (tabTags.length > 0) {
 					this.parent.tabView[this.parent.currentPosition].setModelTags(tabTags);
-				}
+					}
+					else {
+						//TODO effacer les tags 
+						this.parent.tabView[this.parent.currentPosition].setModelTags("");
+					}
 			}
 		},
 		removeAll : function() {
