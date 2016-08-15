@@ -40,7 +40,8 @@ define([
 		},
 		handleFocus: function() {
 			this.parent.currentViewImg = this;
-			this.parent.currentPosition = this.parent.myImageCollection.indexOf(this.model);
+			//TODO fait bugguer la position pour le
+			this.parent.currentPosition = this.parent.currentCollection.indexOf(this.model);
 			this.parent.fillTagsInput();
 		},
 		leaveFocus: function() {
@@ -59,7 +60,7 @@ define([
 			else if( this.model.get("validated") === false )
 				this.$el.addClass("refused");
 
-			this.$("#zoom_"+this.model.get("id")).ezPlus({
+		/*	this.$("#zoom_"+this.model.get("id")).ezPlus({
 				zoomWindowPosition: 'preview',
 				preloading: false,
 				responsive: true,
@@ -69,7 +70,7 @@ define([
 				zoomWindowHeight: 400,
 				zoomWindowWidth: 600,
 				loadingIcon: false,// link to spinner
-			});
+			});*/
 		},
 
 		hoveringStart: function(e){
@@ -96,6 +97,7 @@ define([
 		changeValid: function(e){
 			console.log("modele change");
 			console.log(e);
+			//TODO pb model dans full collection et collection
 			this.model.save(e.Changed,{patch:true});
 			//this.render();
 		},
@@ -109,8 +111,10 @@ define([
 		},
 
 		setModelValidated: function(valBool) {
-			if( typeof valBool == "boolean" )
-			this.model.set("validated",valBool);
+			if( typeof valBool == "boolean" ) {
+				this.model.set("validated",valBool);
+				this.setVisualValidated(valBool);
+			}
 		},
 
 		toggleModelStatus : function (){
@@ -123,7 +127,12 @@ define([
 				flagStatus = !flagStatus //inverse booleen
 				this.model.set("validated",flagStatus)
 			}
-			if( flagStatus ) {
+			this.setVisualValidated(flagStatus);
+
+		},
+
+		setVisualValidated : function(valBool){
+			if( valBool ) {
 				if( this.$el.hasClass('refused') ) this.$el.removeClass('refused');
 				if( !this.$el.hasClass('accepted') ) this.$el.addClass("accepted");
 			}
@@ -133,39 +142,10 @@ define([
 			}
 		},
 
-		onClickImage: function(e){
-			this.$el.find('img').focus();
-			var _this = this;
-			this.parent.rgModal.show(new ModalView({model: this.model}));
-			this.parent.currentViewImg = this;
-			/*
-			var flagStatus = this.model.get("validated")
-			if( flagStatus == null ){
-				this.model.set("validated",true)
-			}
-			else{
-				flagStatus = !flagStatus //inverse booleen
-				this.model.set("validated",flagStatus)
-				if(!flagStatus) $(e.currentTarget).css("opacity",0.2);
-				else $(e.currentTarget).css("opacity",1);
-			}
-
-		*/
-
-
-		/*  if (this.model.get("checked") ){
-				if ( !this.model.get("validated") )
-				{
-					this.model.set("validated", true)
-				}
-				else{
-					this.model.set("validated", false)
-				}
-			}
-			if( !this.model.get("checked") ) {
-				this.model.set("checked", true)
-			}*/
+		onDestroy: function(){
+			console.log("bim destroy");
 		}
+
 	});
 
 });
