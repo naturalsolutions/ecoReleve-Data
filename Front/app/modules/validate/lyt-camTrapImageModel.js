@@ -11,7 +11,6 @@ define([
   'use strict';
 
   return  Backbone.Model.extend({
-    urlRoot: config.coreUrl+'photos',
     defaults:{
       path :'',
       name: '',
