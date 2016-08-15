@@ -179,14 +179,15 @@ def patchCamTrap(request):
 
     curCameraTrap = session.query(CamTrap).get(pk_id_patched)
     curCameraTrap.validated = request.json_body['validated']
-    listTags = str(request.json_body['tags']).split(",")
-    XMLTags = "<TAGS>"
-    for tag in listTags:
-        XMLTags+= "<TAG>"+str(tag)+"</TAG>"
-    XMLTags+= "</TAGS>"
-    print(XMLTags)
-    curCameraTrap.tags = XMLTags
-    print (curCameraTrap)
+    if (str(request.json_body['tags']) !=  'None' ):
+        listTags = str(request.json_body['tags']).split(",")
+        XMLTags = "<TAGS>"
+        for tag in listTags:
+            XMLTags+= "<TAG>"+str(tag)+"</TAG>"
+        XMLTags+= "</TAGS>"
+        print(XMLTags)
+        curCameraTrap.tags = XMLTags
+        print (curCameraTrap)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt/id_equip',renderer='json',request_method = ('GET','PATCH') )
@@ -272,6 +273,16 @@ def details_unchecked_camtrap(request):
             tmp['path']="imgcamtrap/"+str(varchartmp[len(varchartmp)-2])+"/"
             tmp['name'] = tmp['name'].replace(" ","%20")
             tmp['id'] = tmp['PK_id']
+            if( str(tmp['tags']) != 'None'):
+                strTags = tmp['tags'].replace("<TAGS>","")
+                strTags = strTags.replace("<TAG>","")
+                strTags = strTags.replace("</TAGS>","")
+                strTags = strTags.replace("</TAG>",",")
+                strTags = strTags[:len(strTags)-1] #del the last ","
+                if( strTags != 'None' ):
+                    tmp['tags'] = strTags
+                else:
+                    tmp['tags'] = "";
 
         result = [{'total_entries':len(dataResults)}]
         result.append(dataResults)
