@@ -17,14 +17,15 @@ define([
   './lyt-camTrapImageModel',
   './lyt-camTrapToolsBarView',
   './lyt-camTrapModal',
-
   'backbone.marionette.keyShortcuts',
+  'backbone.virtualcollection',
 
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
   config, NsGrid, NsMap, NsForm, moment, Navbar, PageColl,
-  CamTrapItemView , CamTrapImageModel, ToolsBar, ModalView, BckMrtKeyShortCut
+  CamTrapItemView , CamTrapImageModel, ToolsBar, ModalView, BckMrtKeyShortCut,
+  virtualcollection
 
 ) {
 
@@ -45,15 +46,17 @@ define([
       'tab': 'findInput',
       'space': 'displayModal',
       'backspace' : 'toggleModelStatus',
-      'esc' : 'leaveModal'
+      'esc' : 'leaveModal',
+      'pageup': 'nextPage',
+      'pagedown' : 'prevPage',
+      'home' : 'firstPage',
+      'end' : 'lastPage',
 
     },
 
     events: {
       'click button#validate': 'validate',
-      //'click img':'onClickImage',
-      //  'onkeydown #gallery' : 'keyPressed',
-      //'pageable:state:change': function(){console.log("on a changé de page");},
+
       'click button#displayAll': 'displayAll',
       'click button#displayDeleted': 'displayDeleted',
       'click button#displayValidated': 'displayValidated',
@@ -71,6 +74,7 @@ define([
       'gallerytest': '#gallerytest',
       'siteForm': '#siteForm',
       'sensorForm': '#sensorForm',
+      'imageDetailsForm': '#imageDetailsForm',
 
       'dataSetIndex': '#dataSetIndex',
       'dataSetTotal': '#dataSetTotal',
@@ -87,15 +91,69 @@ define([
       'rgModal': '#rgModal',
       'rgToolsBar' :'#rgToolsBar'
     },
+    initialize: function(options) {
+      this.translater = Translater.getTranslater();
+      this.type = options.type;
+      this.model = options.model;
+      this.lastImageActive = null;
+      this.currentViewImg = null;
+      this.currentPosition = null;
+      this.currentCollection = null;
+      this.currentPaginator = null;
 
-    acceptPhoto : function(e){
+      this.sensorId = this.model.get('fk_sensor');
+      this.siteId = this.model.get('FK_MonitoredSite');
+      this.equipmentId = this.model.get('equipID');
+
+      this.navbar = new Navbar({
+        parent: this,
+        globalGrid: options.globalGrid,
+        model: this.model,
+      });
+
+      this.globalGrid = options.globalGrid;
+
+      // this.validatedImg = this.myImageCollection.filter({validated : "true"})
+      // this.deletedImg = this.myImageCollection.filter({validated : "false"})
+      // this.toCheckImg = this.myImageCollection.filter({validated : "null"})
+
+      this.initCollection();
+    },
+
+    acceptPhoto : function(e) {
       if(this.currentPosition !== null ) {
         this.tabView[this.currentPosition].setModelValidated(true);
       }
 
     },
 
-    rejectPhoto : function(e){
+    nextPage : function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if( this.currentCollection.hasNextPage() )
+        this.currentCollection.getNextPage();
+    },
+
+    prevPage : function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if( this.currentCollection.hasPreviousPage() )
+        this.currentCollection.getPreviousPage();
+    },
+
+    firstPage : function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.currentCollection.getFirstPage();
+    },
+
+    lastPage : function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.currentCollection.getLastPage();
+    },
+
+    rejectPhoto : function(e) {
 
       if(this.currentPosition !== null ) {
         this.tabView[this.currentPosition].setModelValidated(false);
@@ -132,32 +190,41 @@ define([
       }
     },
 
+    focusFirstImg(){
+      if( this.currentPosition === null) {//si aucune position
+        if( this.tabView != null){
+          this.tabView[0].$el.find('img').focus(); // focus la premiere image
+          this.currentPosition = 0; //et on se place sur 0
+        }
+      }
+    },
+
     mouvement: function(e){
 
       if( this.currentPosition === null) {//si aucune position
-        this.tabView[0].$el.find('img').focus(); // focus la premiere image
-        this.currentPosition = 0; //et on se place sur 0
+        this.focusFirstImg();
       }
       else{
         var lastPosition = this.currentPosition;//stock la position avant changement pour savoir si on a bougé
-
+        console.log(lastPosition);
         switch(e.keyCode)
         {
           case 38:// up
-          {
+          {console.log("^");
             if ( this.currentPosition - 6 >= 0){
               this.currentPosition-=6;
             }
             break;
           }
           case 40://down
-          {
+          {console.log("v");
             if ( this.currentPosition + 6 <= this.tabView.length - 1 ){
               this.currentPosition+=6;
             }
             break;
           }
           case 37:{ //left
+            console.log("<");
             if ( this.currentPosition - 1 >= 0 ){
               this.currentPosition-=1;
             }
@@ -165,13 +232,14 @@ define([
           }
           //right
           case 39://right
-          {
+          {console.log(">");
             if ( this.currentPosition + 1 <= this.tabView.length - 1 ){
               this.currentPosition+=1;
             }
             break;
           }
         }
+        console.log(this.currentPosition);
 
         if (lastPosition !== this.currentPosition) {// si on a bougé
           this.tabView[this.currentPosition].$el.find('img').focus();//on change le focus
@@ -229,56 +297,31 @@ define([
 
 
 
-    initialize: function(options) {
-      this.translater = Translater.getTranslater();
-      this.type = options.type;
-      this.model = options.model;
-      this.lastImageActive = null;
-      this.currentViewImg = null;
-      this.currentPosition = null;
-
-      this.sensorId = this.model.get('fk_sensor');
-      this.siteId = this.model.get('FK_MonitoredSite');
-      this.equipmentId = this.model.get('equipID');
-
-      this.navbar = new Navbar({
-        parent: this,
-        globalGrid: options.globalGrid,
-        model: this.model,
-      });
-
-      this.globalGrid = options.globalGrid;
-
-      // this.validatedImg = this.myImageCollection.filter({validated : "true"})
-      // this.deletedImg = this.myImageCollection.filter({validated : "false"})
-      // this.toCheckImg = this.myImageCollection.filter({validated : "null"})
-
-      this.initCollection();
-    },
 
     initCollection : function() {
       var _this = this;
       var ImageCollection = PageColl.extend({
+        model : CamTrapImageModel,
         mode: 'client',
         state: {
           pageSize: 24
         },
         url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
         patch : function(){
-          console.log("ouais ouais ouais j'override");
+          console.log("ouais ouais ouais j'overwrite");
         }
       });
 
       this.myImageCollection = new ImageCollection();
+      console.log(this.myImageCollection);
+      console.log(this.myImageCollection.url);
       this.myImageCollection.sync('patch', this.myImageCollection , { error: function () { console.log(this.myImageCollection); console.log("sync impossible");} });
 
       this.paginator = new Backgrid.Extension.Paginator({
         collection: this.myImageCollection
       });
-      this.myImageCollection.fetch();
 
-      /*console.log(this.myImageCollection);
-      console.log(this.paginator);*/
+      this.myImageCollection.fetch();
 
       this.paginator.collection.on('reset', function(e){
         console.log("jai change de page");
@@ -312,9 +355,10 @@ define([
       this.listenTo(this.myImageCollection, 'reset', function(e){
         _this.displayImages(_this.myImageCollection);
       });
-
+      this.currentCollection = this.myImageCollection;
       this.displaySensorForm();
       this.displaySiteForm();
+      this.displayImageDetailForm();
       this.displayPaginator(this.paginator)
       this.displayToolsBar();
     },
@@ -349,13 +393,31 @@ define([
       });
     },
 
+    displayImageDetailForm: function() {
+      this.nsform = new NsForm({
+        name: 'imageDetailsForm',
+        buttonRegion: [this.ui.btn],
+        modelurl: config.coreUrl + 'sensors',
+        formRegion: this.ui.imageDetailsForm,
+        displayMode: 'display',
+        id: this.sensorId,
+        reloadAfterSave: false,
+      });
+    },
+
     displayImages: function(myCollectionToDisplay){
       var _this = this;
 
       var ImageModel = new CamTrapImageModel();
-
+      console.log(this.ui.gallery);
+      //TODO detruit les view a la main sinon pb avec les models
+      if( typeof (_this.tabView) !== "undefined" ){
+        this.destroyViews(_this.tabView);
+      }
       this.ui.gallery.html('');
-      this.tabView = [];
+      console.log("on vide le tableau");
+      _this.currentPosition = null;
+      _this.tabView = [];
       myCollectionToDisplay.each(function(model){
         var newImg = new CamTrapItemView({
           model: model,
@@ -365,7 +427,9 @@ define([
         _this.ui.gallery.append(newImg.render().el);
 
       });
-
+      console.log("on a rempli le tableau");
+      console.log(this.tabView);
+      this.focusFirstImg();
     },
 
     displayPaginator: function (pagin) {
@@ -381,7 +445,17 @@ define([
       this.rgToolsBar.show(this.toolsBar);
     },
 
+    destroyViews : function(tabView){
+
+      for(var i = 0 ; i < tabView.length ; i++)
+      {
+        tabView[i].destroy();
+      }
+
+    },
+
     displayAll: function (e){
+      this.currentCollection = this.myImageCollection;
       this.ui.gallery.html('');
       this.ui.paginator.html('');
       this.displayImages(this.myImageCollection);
@@ -392,18 +466,20 @@ define([
     displayValidated: function (e){
       var _this = this ;
 
-      var filterModel = this.myImageCollection.fullCollection.where({validated:true});
+      var filterModelValidated = new virtualcollection(this.myImageCollection.fullCollection ,
+        {
+          filter : {validated : true}
+        });
 
       var paginationFiltered = PageColl.extend({
         mode: 'client',
         state: {
           pageSize: 24
-        }
+        },
+        url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
       });
 
-
-
-      this.myImageCollectionValidated = new paginationFiltered(filterModel)
+      this.myImageCollectionValidated = new paginationFiltered(filterModelValidated.models)
       this.myPaginationValidated = new Backgrid.Extension.Paginator({
         collection: this.myImageCollectionValidated
       });
@@ -411,7 +487,7 @@ define([
       this.listenTo(this.myImageCollectionValidated, "reset", function(e,z){
         _this.displayImages(_this.myImageCollectionValidated);
       });
-
+      this.currentCollection = this.myImageCollectionValidated;
       this.ui.gallery.html('');
       this.ui.paginator.html('');
       this.displayImages(this.myImageCollectionValidated);
@@ -420,22 +496,30 @@ define([
       {
         this.ui.gallery.html('NO IMAGES TO DISPLAY')
       }
+      this.focusFirstImg();
 
     },
 
     displayDeleted: function (e){
+      /*var filterModel = this.myImageCollection.fullCollection.where({validated:false});
+      console.log(filterModel);
+      filterModel[0].set("validated",true);*/
       var _this = this ;
 
-      var filterModel = this.myImageCollection.fullCollection.where({validated:false});
+      var filterModelDeleted = new virtualcollection(this.myImageCollection.fullCollection ,
+        {
+          filter : {validated : false}
+        });
 
       var paginationFiltered = PageColl.extend({
         mode: 'client',
         state: {
           pageSize: 24
-        }
+        },
+        url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
       });
 
-      this.myImageCollectionDeleted = new paginationFiltered(filterModel)
+      this.myImageCollectionDeleted = new paginationFiltered(filterModelDeleted.models)
       this.myPaginationDeleted = new Backgrid.Extension.Paginator({
         collection: this.myImageCollectionDeleted
       });
@@ -443,6 +527,8 @@ define([
       this.listenTo(this.myImageCollectionDeleted, "reset", function(e,z){
         _this.displayImages(_this.myImageCollectionDeleted);
       });
+
+      this.currentCollection = this.myImageCollectionDeleted
 
       this.ui.gallery.html('');
       this.ui.paginator.html('');
@@ -452,6 +538,7 @@ define([
       {
         this.ui.gallery.html('NO IMAGES TO DISPLAY')
       }
+      this.focusFirstImg();
 
     },
 
