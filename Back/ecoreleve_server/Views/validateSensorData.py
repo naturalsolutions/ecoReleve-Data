@@ -179,15 +179,17 @@ def patchCamTrap(request):
 
     curCameraTrap = session.query(CamTrap).get(pk_id_patched)
     curCameraTrap.validated = request.json_body['validated']
-    if (str(request.json_body['tags']) !=  'None' ):
+    if (str(request.json_body['tags']) not in   ['None', ''] ):
         listTags = str(request.json_body['tags']).split(",")
         XMLTags = "<TAGS>"
         for tag in listTags:
             XMLTags+= "<TAG>"+str(tag)+"</TAG>"
         XMLTags+= "</TAGS>"
         print(XMLTags)
-        curCameraTrap.tags = XMLTags
-        print (curCameraTrap)
+    else:
+        XMLTags = None
+    curCameraTrap.tags = XMLTags
+    print (curCameraTrap)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt/id_equip',renderer='json',request_method = ('GET','PATCH') )
