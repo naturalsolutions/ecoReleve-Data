@@ -43,6 +43,8 @@ define([
 			//TODO fait bugguer la position pour le
 			this.parent.currentPosition = this.parent.currentCollection.indexOf(this.model);
 			this.parent.fillTagsInput();
+			if( !this.model.get("validated") )
+			this.model.set("validated" , 1 ); //Si focus alors la photo est vu
 		},
 		leaveFocus: function() {
 		},
@@ -55,10 +57,21 @@ define([
 		},
 
 		onRender: function(){
-			if( this.model.get("validated") === true )
+			switch(this.model.get("validated") ) {
+				case 2 : {
+					this.$el.addClass("accepted");
+					break;
+				}
+				case 4 : {
+					this.$el.addClass("refused");
+					break;
+				}
+
+				}
+		/*	if( this.model.get("validated") === true )
 				this.$el.addClass("accepted");
 			else if( this.model.get("validated") === false )
-				this.$el.addClass("refused");
+				this.$el.addClass("refused");*/
 
 		/*	this.$("#zoom_"+this.model.get("id")).ezPlus({
 				zoomWindowPosition: 'preview',
@@ -73,32 +86,21 @@ define([
 			});*/
 		},
 
-		hoveringStart: function(e){
-			var flagStatus = this.model.get("validated")
-			 if( flagStatus == null ){
-				 this.model.set("validated",true)
-			 }
-			/* else{
-				 flagStatus = !flagStatus //inverse booleen
-				 this.model.set("validated",flagStatus)
-			 }*/
-
-			//afficher le menu
-		},
-		hoveringEnd: function(e){
-			if( this.model.hasChanged("validated") )
-			{
-				this.model.save();
-			}
-			else{
-			}
-		},
-
 		changeValid: function(e){
+			var _this = this;
 			console.log("modele change");
 			console.log(e);
-			//TODO pb model dans full collection et collection
-			this.model.save(e.Changed,{patch:true});
+			this.model.save(
+				e.Changed,{
+					error : function() {
+							//TODO faire une alerte pour informer l'utilisateur que sa modif n'a pas été pris en compte
+							console.log("une erreur je repercute pas");
+							_this.model.set(_this.model.previousAttributes(),{silent: true});
+					},
+					patch : true,
+				 	wait : true,
+				}
+			);
 			//this.render();
 		},
 
@@ -110,35 +112,44 @@ define([
 			return this.model.get("tags");
 		},
 
-		setModelValidated: function(valBool) {
-			if( typeof valBool == "boolean" ) {
-				this.model.set("validated",valBool);
-				this.setVisualValidated(valBool);
-			}
+		setModelValidated: function(val) {
+				this.model.set("validated",val);
+				this.setVisualValidated(val);
 		},
 
 		toggleModelStatus : function (){
-			var flagStatus = this.model.get("validated")
-			if( flagStatus == null ){
-				flagStatus = true;
-				this.model.set("validated",true)
-			}
-			else{
-				flagStatus = !flagStatus //inverse booleen
-				this.model.set("validated",flagStatus)
-			}
-			this.setVisualValidated(flagStatus);
+			switch( this.model.get("validated") ){
+				case 1 : {
+					this.model.set("validated", 2 );
+					this.setVisualValidated(2);
+					break;
+				}
 
+				case 2 :{
+					this.model.set("validated", 4 );
+					this.setVisualValidated(4);
+					break;
+				}
+				case 4 : {
+					this.model.set("validated" , 2 );
+					this.setVisualValidated(2);
+					break;
+				}
+			}
 		},
 
 		setVisualValidated : function(valBool){
-			if( valBool ) {
-				if( this.$el.hasClass('refused') ) this.$el.removeClass('refused');
-				if( !this.$el.hasClass('accepted') ) this.$el.addClass("accepted");
-			}
-			else {
-				if( this.$el.hasClass('accepted') ) this.$el.removeClass('accepted');
-				if( !this.$el.hasClass('refused') ) this.$el.addClass("refused");
+			switch(this.model.get("validated") ) {
+				case 2 : {
+					if( this.$el.hasClass('refused') ) this.$el.removeClass('refused');
+					if( !this.$el.hasClass('accepted') ) this.$el.addClass("accepted");
+					break;
+				}
+				case 4 : {
+					if( this.$el.hasClass('accepted') ) this.$el.removeClass('accepted');
+					if( !this.$el.hasClass('refused') ) this.$el.addClass("refused");
+					break;
+				}
 			}
 		},
 

@@ -65,6 +65,7 @@ define([
       'click button#upStarsBtn': 'increaseStars',
       'click button#downStarsBtn': 'decreaseStars',
       'click button#acceptedBtn': 'acceptPhoto',
+      'click button#validate' : 'validateAll',
     },
 
     ui: {
@@ -429,7 +430,10 @@ define([
       });
       console.log("on a rempli le tableau");
       console.log(this.tabView);
-      this.focusFirstImg();
+      if (this.tabView.length > 0){
+        console.log("on focus le premier");
+        this.focusFirstImg();
+      }
     },
 
     displayPaginator: function (pagin) {
@@ -468,7 +472,7 @@ define([
 
       var filterModelValidated = new virtualcollection(this.myImageCollection.fullCollection ,
         {
-          filter : {validated : true}
+          filter : {validated : 2}
         });
 
       var paginationFiltered = PageColl.extend({
@@ -488,6 +492,7 @@ define([
         _this.displayImages(_this.myImageCollectionValidated);
       });
       this.currentCollection = this.myImageCollectionValidated;
+      console.log(this.currentCollection);
       this.ui.gallery.html('');
       this.ui.paginator.html('');
       this.displayImages(this.myImageCollectionValidated);
@@ -496,7 +501,10 @@ define([
       {
         this.ui.gallery.html('NO IMAGES TO DISPLAY')
       }
-      this.focusFirstImg();
+      else {
+        console.log(this.ui.gallery.html());
+      }
+      //this.focusFirstImg();
 
     },
 
@@ -508,7 +516,7 @@ define([
 
       var filterModelDeleted = new virtualcollection(this.myImageCollection.fullCollection ,
         {
-          filter : {validated : false}
+          filter : {validated : 4}
         });
 
       var paginationFiltered = PageColl.extend({
@@ -538,7 +546,7 @@ define([
       {
         this.ui.gallery.html('NO IMAGES TO DISPLAY')
       }
-      this.focusFirstImg();
+      //this.focusFirstImg();
 
     },
 
@@ -549,20 +557,81 @@ define([
     keyPressed: function(e){
     },
 
-    displayListUnchecked: function() {
+    displaySwalUnchecked: function(compteur) {
       var _this = this;
-      _this.swal({title:"warning",text:"Some photos not checked"},"warning");
+      Swal({
+                  title: 'Warning validate without checked '+String(compteur.unchecked)+' photos',
+                  text:  'you gonna validate '+String(compteur.total)+' photos ' ,
+                  type: 'warning',
+                  showCancelButton: true,
+                  confirmButtonColor: 'rgb(218, 146, 15)',
+
+                  confirmButtonText: 'Ok',
+
+                  closeOnConfirm: true,
+                },
+                function() {
+                  console.log("je force la validation");
+
+                }
+              );
+      //_this.swal({title:"warning",text:"You gonna validate without checked "+String(nbUnchecked)+" photos"},"warning");
     },
 
-    validate: function() {
+    displaySwalValidate: function(compteur){
       var _this = this;
+      Swal({
+                  title: 'Well done',
+                  text:  'you gonna validate '+String(compteur.total)+' photos ' ,
+                  type: 'success',
+                  showCancelButton: true,
+                  confirmButtonColor: 'rgb(218, 146, 15)',
+
+                  confirmButtonText: 'Ok',
+
+                  closeOnConfirm: true,
+                },
+                function() {
+                  console.log("je valide");
+
+                }
+              );
+    },
+
+
+    validateAll: function() {
+      console.log("on veut tout valider ");
+      var compteur = {};
+      /*for(var i = 0 ; i < this.currentCollection.fullCollection ; i++ )
+      {
+        if(this.currentCollection.fullCollection.models[i].attributes.)
+      }*/
+      compteur.total = 0
+      compteur.unchecked = 0;
+      compteur.total = this.myImageCollection.fullCollection.length;
+      for( var model of this.myImageCollection.fullCollection.models )
+      {
+        if(model.attributes.validated === 0 || model.attributes.validated === null)
+        {
+          compteur.unchecked+=1;
+        }
+      }
+
+      if( compteur.unchecked ){
+        this.displaySwalUnchecked(compteur);
+      }
+      else {
+        this.displaySwalValidate(compteur);
+      }
+      console.log("photo a check : "+compteur.unchecked);
+    /*  var _this = this;
       var flagUnchecked = false
       var url = config.coreUrl+'sensors/'+this.type+'/uncheckedDatas';
       // parcours de la page
       var sizePage = this.myImageCollection.length;
       var sizeAllPages = this.myImageCollection.fullCollection.length;
       var dataToSend = [];
-      var test = this.myImageCollection.toJSON()
+      var test = this.myImageCollection.toJSON()*/
       /*  for ( var i = 0 ; i < sizeAllPages ; i ++ ){
       dataToSend.push({
       id:this.myImageCollection.fullCollection.models[i].id,
@@ -570,7 +639,7 @@ define([
     })
   };*/
 
-  for ( var i = 0 ; i < sizePage && !flagUnchecked ; i ++ ){
+/*  for ( var i = 0 ; i < sizePage && !flagUnchecked ; i ++ ){
     switch (this.myImageCollection.models[i].status) {
       case 0 : {
         break;
@@ -595,10 +664,10 @@ define([
   })
   .fail( function(jqXHR, textStatus, errorThrown) {
 
-  });
+  });*/
 },
 
-swal: function(opt, type, callback) {
+/*swal: function(opt, type, callback) {
   var btnColor;
   switch (type){
     case 'success':
@@ -630,7 +699,7 @@ swal: function(opt, type, callback) {
       callback();
     }
   });
-},
+},*/
 
 });
 });
