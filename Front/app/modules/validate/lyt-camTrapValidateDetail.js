@@ -572,6 +572,7 @@ define([
                 },
                 function() {
                   console.log("je force la validation");
+                  //TODO mettre le status validated a 8 pour sauvegarder la validation de force
 
                 }
               );
@@ -601,29 +602,31 @@ define([
 
     validateAll: function() {
       console.log("on veut tout valider ");
-      var compteur = {};
-      /*for(var i = 0 ; i < this.currentCollection.fullCollection ; i++ )
-      {
-        if(this.currentCollection.fullCollection.models[i].attributes.)
-      }*/
-      compteur.total = 0
-      compteur.unchecked = 0;
-      compteur.total = this.myImageCollection.fullCollection.length;
-      for( var model of this.myImageCollection.fullCollection.models )
-      {
-        if(model.attributes.validated === 0 || model.attributes.validated === null)
-        {
-          compteur.unchecked+=1;
-        }
-      }
-
-      if( compteur.unchecked ){
-        this.displaySwalUnchecked(compteur);
-      }
-      else {
-        this.displaySwalValidate(compteur);
-      }
-      console.log("photo a check : "+compteur.unchecked);
+      var tableau = [1,2,3,4,5,6,7,8,9,10];
+      this.bt(tableau);
+      // var compteur = {};
+      // /*for(var i = 0 ; i < this.currentCollection.fullCollection ; i++ )
+      // {
+      //   if(this.currentCollection.fullCollection.models[i].attributes.)
+      // }*/
+      // compteur.total = 0
+      // compteur.unchecked = 0;
+      // compteur.total = this.myImageCollection.fullCollection.length;
+      // for( var model of this.myImageCollection.fullCollection.models )
+      // {
+      //   if(model.attributes.validated === 0 || model.attributes.validated === null)
+      //   {
+      //     compteur.unchecked+=1;
+      //   }
+      // }
+      //
+      // if( compteur.unchecked ){
+      //   this.displaySwalUnchecked(compteur);
+      // }
+      // else {
+      //   this.displaySwalValidate(compteur);
+      // }
+      // console.log("photo a check : "+compteur.unchecked);
     /*  var _this = this;
       var flagUnchecked = false
       var url = config.coreUrl+'sensors/'+this.type+'/uncheckedDatas';
@@ -666,6 +669,12 @@ define([
 
   });*/
 },
+
+bt : function(tab){
+  var tabtmp = new array();
+  if( somme < 10 ) return;
+  if ( somme == )
+}
 
 /*swal: function(opt, type, callback) {
   var btnColor;

@@ -78,6 +78,7 @@ require.config({
     'mousetrap':'vendors/mousetrap/mousetrap.min',
     'backbone.marionette.keyShortcuts': 'vendors/marionette/backbone.marionette.keyshortcuts',
     'backbone.virtualcollection' : '../bower_components/backbone.virtualcollection/backbone.virtual-collection',
+    'noty' : '../bower_components/noty/js/noty/packaged/jquery.noty.packaged',
 
   },
   map: {

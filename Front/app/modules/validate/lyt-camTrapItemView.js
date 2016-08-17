@@ -9,9 +9,10 @@ define([
 	'./lyt-camTrapImageModel',
 	'ez-plus',
   'backbone.marionette.keyShortcuts',
+	'noty',
 
 
-], function($, _, Backbone, Marionette, Translater, config , ModalView , CamTrapImageModel ,ezPlus, BckMrtKeyShortCut ) {
+], function($, _, Backbone, Marionette, Translater, config , ModalView , CamTrapImageModel ,ezPlus, BckMrtKeyShortCut, noty ) {
 
   'use strict';
   return Marionette.ItemView.extend({
@@ -96,6 +97,12 @@ define([
 							//TODO faire une alerte pour informer l'utilisateur que sa modif n'a pas été pris en compte
 							console.log("une erreur je repercute pas");
 							_this.model.set(_this.model.previousAttributes(),{silent: true});
+							var n = noty({
+								layout : 'bottomLeft',
+								type : 'error',
+								text : 'Connection problem modification \n <img src='+_this.model.get('path')+'/thumbnails/'+_this.model.get('name')+'><br> Not modified please retry (if the problem persist check your connection or contact and admin)'
+							});
+							_this.setVisualValidated(_this.model.get("validated"));
 					},
 					patch : true,
 				 	wait : true,
