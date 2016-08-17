@@ -115,7 +115,7 @@ define([
           if (r.isUploading()) {
             return  r.pause();
           }
-          $('#pause-upload-resumablejs').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
+          $('#pause-upload-resumablejs').find('.reneco').removeClass('reneco-play').addClass('reneco-pause');
           $('#pause-upload-resumablejs > span').text(" Pause upload")
           return r.upload();
         }
@@ -201,7 +201,7 @@ define([
 
 
       r.on('pause', function(){
-        $('#pause-upload-resumablejs').find('.glyphicon').removeClass('glyphicon-pause').addClass('glyphicon-play');
+        $('#pause-upload-resumablejs').find('.reneco').removeClass('recneco-pause').addClass('reneco-play');
         $('#pause-upload-resumablejs > span').text(" Resume upload")
       });
 
@@ -319,7 +319,7 @@ r.on('progress' , function(file,message) {
   $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
   $("#"+file.uniqueIdentifier+" > "+"#status").text("Uploading");*/
   _this.progressBar.uploading(r.progress()*100);
-  $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
+  $('#pause-upload-btn').find('.reneco').removeClass('reneco-play').addClass('reneco-pause');
 });
 
 r.on('beforeCancel' , function() {
