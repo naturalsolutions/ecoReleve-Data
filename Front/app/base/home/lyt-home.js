@@ -7,9 +7,10 @@ define(['marionette',
 	'requirejs-text!base/home/tpl/tpl-dounutGraph.html',
 	'requirejs-text!base/home/tpl/tpl-dounutGraph2.html',
   'moment',
-  'i18n',
+  'sweetAlert',
+  'i18n'
 	],
-function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, TplGraph1, TplGraph2,Moment) {
+function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, TplGraph1, TplGraph2,Moment,Swal) {
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -114,6 +115,20 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, Tp
       this.startTime();
       this.graph.show(this.curveGraph);
       this.$el.i18n();
+      var isMobile = window.matchMedia("only screen and (max-width: 760px)");
+      if (isMobile.matches && (!window.alertMobile)) {
+          Swal({
+              title: 'Mobile compatibility',
+              text: 'This application is not adapted to mobile browsers yet',
+              type: 'warning',
+              showCancelButton: false,
+              confirmButtonColor: 'rgb(221, 107, 85)',
+              confirmButtonText: 'OK',
+              closeOnConfirm: true
+          });
+          $('.sweet-alert.showSweetAlert.visible').css('margin-left', '0px;');
+          window.alertMobile = true;
+      }
     }
   });
 });

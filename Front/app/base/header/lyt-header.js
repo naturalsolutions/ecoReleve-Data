@@ -31,26 +31,42 @@ function(Marionette, config, Breadcrumb) {
 
     onShow: function() {
       var _this = this;
-      this.breadcrumb.show(new Breadcrumb());
-      window.app.user = new Backbone.Model();
-      window.app.user.url = config.coreUrl + 'currentUser';
-      window.app.user.fetch({
-        success: function() {
-          _this.ui.userName.html(window.app.user.get('fullname'));
+      var user  = new Backbone.Model();
+      user.url = config.coreUrl + 'currentUser';
+      user.fetch({
+        success: function(md) {
+           _this.ui.userName.html(user.get('Firstname') + ' ' + user.get('Lastname') );
         }
       });
     },
     pipefyform : function(e){
-      var notdisplayed = $(this.ui.pypefypanel).hasClass('hidden');
+      // check id div is not integrated add it
+      var frmisinserted  = $('.supportpanel').length;
+      if (!frmisinserted) {
+        this.insertForm();
+      } else {
+        this.controlformdisplay();
+      }
+      
+    },
+    closeform : function(){
+      $('div.supportpanel').animate({ "right": "-=560px" }, "slow" ).addClass('hidden');
+    },
+    insertForm : function(){
+      var frm = '<div class="supportpanel hidden">'
+      frm +='<iframe width="560" height="580" src="https://beta.pipefy.com/public_form/49561?embedded=true" frameborder="0" id="iframe"></iframe>'
+      frm+='<a class="pipefyclose"><span class="reneco reneco-close"></span></a> </div>';
+      this.$el.append(frm);
+      this.controlformdisplay();
+    },
+    controlformdisplay : function(){
+      var notdisplayed = $('div.supportpanel').hasClass('hidden');
       if(notdisplayed){
-        $(this.ui.pypefypanel).removeClass('hidden').animate({ "right": "+=560px" }, "slow" );
+        $('div.supportpanel').removeClass('hidden').animate({ "right": "+=560px" }, "slow" );
 
       } else {
         this.closeform();
       }
-    },
-    closeform : function(){
-      $(this.ui.pypefypanel).animate({ "right": "-=560px" }, "slow" ).addClass('hidden');
     }
   });
 });

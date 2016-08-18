@@ -52,7 +52,7 @@ define([
       this.refrechView('#stWithCoords');
       this.map = new NsMap({
         popup: true,
-        zoom: 2,
+        zoom: 1,
         element: 'map',
       });
     },
@@ -94,6 +94,7 @@ define([
     updateMarkerPos: function(lat, lon) {
       if (lat && lon) {
         this.map.addMarker(null, lat, lon);
+        this.map.map.setZoom(10);
       }
     },
 

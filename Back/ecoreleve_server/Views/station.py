@@ -363,6 +363,7 @@ def searchStation(request):
         if countResult < 50000 : 
             exceed = False
             dataResult = listObj.GetFlatDataList(searchInfo,getFW)
+            print(dataResult)
 
             for row in dataResult:
                 print(row)
