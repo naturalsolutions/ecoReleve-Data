@@ -195,6 +195,16 @@ require.config({
         'mousetrap'
       ],
     },
+    'ez-plus':{
+      deps:[
+        'jquery',
+      ]
+    },
+    'bootstrap-tagsinput':{
+      deps:[
+        'jquery',
+      ]
+    }
   },
 });
 

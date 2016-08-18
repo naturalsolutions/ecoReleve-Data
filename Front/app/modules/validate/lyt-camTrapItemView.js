@@ -125,6 +125,7 @@ define([
 		},
 
 		toggleModelStatus : function (){
+			console.log("je suis dans toggle");
 			switch( this.model.get("validated") ){
 				case 1 : {
 					this.model.set("validated", 2 );

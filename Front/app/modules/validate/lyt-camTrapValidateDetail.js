@@ -19,13 +19,14 @@ define([
   './lyt-camTrapModal',
   'backbone.marionette.keyShortcuts',
   'backbone.virtualcollection',
+  './lyt-camTrapToolsBarTopView',
 
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
   config, NsGrid, NsMap, NsForm, moment, Navbar, PageColl,
   CamTrapItemView , CamTrapImageModel, ToolsBar, ModalView, BckMrtKeyShortCut,
-  virtualcollection
+  virtualcollection, ToolsBarTop
 
 ) {
 
@@ -90,7 +91,8 @@ define([
       'rgNavbar': '#navbar',
       'rgGallery' : '#gallery',
       'rgModal': '#rgModal',
-      'rgToolsBar' :'#rgToolsBar'
+      'rgToolsBar' :'#rgToolsBar',
+      'rgToolsBarTop' : '#rgToolsBarTop'
     },
     initialize: function(options) {
       this.translater = Translater.getTranslater();
@@ -123,7 +125,7 @@ define([
 
     acceptPhoto : function(e) {
       if(this.currentPosition !== null ) {
-        this.tabView[this.currentPosition].setModelValidated(true);
+        this.tabView[this.currentPosition].setModelValidated(2);
       }
 
     },
@@ -157,14 +159,14 @@ define([
     rejectPhoto : function(e) {
 
       if(this.currentPosition !== null ) {
-        this.tabView[this.currentPosition].setModelValidated(false);
+        this.tabView[this.currentPosition].setModelValidated(4);
       }
 
     },
 
     toggleModelStatus: function(e){
       e.preventDefault();
-
+      console.log("detect toggle");
       if(this.currentPosition !== null ) {
         this.tabView[this.currentPosition].toggleModelStatus();
       }
@@ -321,6 +323,10 @@ define([
       this.paginator = new Backgrid.Extension.Paginator({
         collection: this.myImageCollection
       });
+      this.myImageCollection.on('sync', function() {
+        console.log("sync");
+        _this.rgToolsBarTop.show(_this.toolsBarTop);
+    });
 
       this.myImageCollection.fetch();
 
@@ -355,6 +361,7 @@ define([
       var _this = this;
       this.listenTo(this.myImageCollection, 'reset', function(e){
         _this.displayImages(_this.myImageCollection);
+        _this.rgToolsBarTop.show(this.toolsBarTop);
       });
       this.currentCollection = this.myImageCollection;
       this.displaySensorForm();
@@ -362,6 +369,7 @@ define([
       this.displayImageDetailForm();
       this.displayPaginator(this.paginator)
       this.displayToolsBar();
+      this.displayToolsBarTop();
     },
 
 
@@ -447,6 +455,15 @@ define([
         parent : _this,
       });
       this.rgToolsBar.show(this.toolsBar);
+    },
+
+    displayToolsBarTop: function(){
+      var _this = this ;
+      this.toolsBarTop = new ToolsBarTop( {
+        parent : _this,
+        nbPhotos : _this.myImageCollection.fullCollection.length
+      });
+      this.rgToolsBarTop.show(this.toolsBarTop);
     },
 
     destroyViews : function(tabView){
@@ -604,29 +621,29 @@ define([
       console.log("on veut tout valider ");
       var tableau = [1,2,3,4,5,6,7,8,9,10];
       this.bt(tableau);
-      // var compteur = {};
-      // /*for(var i = 0 ; i < this.currentCollection.fullCollection ; i++ )
-      // {
-      //   if(this.currentCollection.fullCollection.models[i].attributes.)
-      // }*/
-      // compteur.total = 0
-      // compteur.unchecked = 0;
-      // compteur.total = this.myImageCollection.fullCollection.length;
-      // for( var model of this.myImageCollection.fullCollection.models )
-      // {
-      //   if(model.attributes.validated === 0 || model.attributes.validated === null)
-      //   {
-      //     compteur.unchecked+=1;
-      //   }
-      // }
-      //
-      // if( compteur.unchecked ){
-      //   this.displaySwalUnchecked(compteur);
-      // }
-      // else {
-      //   this.displaySwalValidate(compteur);
-      // }
-      // console.log("photo a check : "+compteur.unchecked);
+      var compteur = {};
+      /*for(var i = 0 ; i < this.currentCollection.fullCollection ; i++ )
+      {
+        if(this.currentCollection.fullCollection.models[i].attributes.)
+      }*/
+      compteur.total = 0
+      compteur.unchecked = 0;
+      compteur.total = this.myImageCollection.fullCollection.length;
+      for( var model of this.myImageCollection.fullCollection.models )
+      {
+        if(model.attributes.validated === 0 || model.attributes.validated === null)
+        {
+          compteur.unchecked+=1;
+        }
+      }
+
+      if( compteur.unchecked ){
+        this.displaySwalUnchecked(compteur);
+      }
+      else {
+        this.displaySwalValidate(compteur);
+      }
+      console.log("photo a check : "+compteur.unchecked);
     /*  var _this = this;
       var flagUnchecked = false
       var url = config.coreUrl+'sensors/'+this.type+'/uncheckedDatas';
@@ -669,12 +686,6 @@ define([
 
   });*/
 },
-
-bt : function(tab){
-  var tabtmp = new array();
-  if( somme < 10 ) return;
-  if ( somme == )
-}
 
 /*swal: function(opt, type, callback) {
   var btnColor;
