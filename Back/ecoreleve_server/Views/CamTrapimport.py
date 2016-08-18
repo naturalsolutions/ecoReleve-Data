@@ -27,13 +27,13 @@ from pyramid import threadlocal
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def resizePhoto( imgPathSrc ):
-    basewidth = 100
+    basewidth = 200
     try:
         img = Image.open(imgPathSrc)
         # Fully load the image now to catch any problems with the image contents.
         img.load()
     except Exception:
-        #handle error on img file 
+        #handle error on img file
         return
     wpercent = ( basewidth / float(img.size[0]) ) # keep ratio
     hsize = int((float(img.size[1]) * float(wpercent)))
