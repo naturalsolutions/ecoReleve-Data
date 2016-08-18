@@ -67,6 +67,9 @@ define([
       'click button#downStarsBtn': 'decreaseStars',
       'click button#acceptedBtn': 'acceptPhoto',
       'click button#validate' : 'validateAll',
+      'click .reneco-ecollectionsmall' : 'clickOnIconeView',
+      'click .reneco-image_file' : 'clickOnIconeView',
+      'clicl .reneco-list' :'clickOnIconeView',
     },
 
     ui: {
@@ -94,6 +97,26 @@ define([
       'rgToolsBar' :'#rgToolsBar',
       'rgToolsBarTop' : '#rgToolsBarTop'
     },
+  clickOnIconeView : function(e){
+      console.log("bim bam boom");
+      console.log(e);
+      var $elem =  $(e.target)
+      if($elem.hasClass('reneco-ecollectionsmall')){
+        if( ! $elem.hasClass('active') )
+           $elem.addClass('active');
+
+        console.log("gallery");
+      }
+      else if( $elem.hasClass('reneco-image_file') ) {
+        if( ! $elem.hasClass('active') )
+           $elem.addClass('active');
+
+        console.log("image file");
+      }
+      else{
+          console.log("list file");
+      }
+    },
     initialize: function(options) {
       this.translater = Translater.getTranslater();
       this.type = options.type;
@@ -103,6 +126,10 @@ define([
       this.currentPosition = null;
       this.currentCollection = null;
       this.currentPaginator = null;
+      this.nbPhotos = 0;
+      this.nbPhotosAccepted = 0;
+      this.nbPhotosRefused = 0;
+      this.nbPhotosChecked = 0;
 
       this.sensorId = this.model.get('fk_sensor');
       this.siteId = this.model.get('FK_MonitoredSite');
@@ -198,6 +225,7 @@ define([
         if( this.tabView != null){
           this.tabView[0].$el.find('img').focus(); // focus la premiere image
           this.currentPosition = 0; //et on se place sur 0
+          this.tabView[0].$el.find('.vignette').toggleClass('active');
         }
       }
     },
@@ -246,6 +274,8 @@ define([
 
         if (lastPosition !== this.currentPosition) {// si on a bougé
           this.tabView[this.currentPosition].$el.find('img').focus();//on change le focus
+          this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
+          this.tabView[this.currentPosition].$el.find('.vignette').toggleClass('active');
           if( this.rgModal.currentView !== undefined){//si le modal existe on change
             this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
           }
@@ -325,7 +355,16 @@ define([
       });
       this.myImageCollection.on('sync', function() {
         console.log("sync");
-        _this.rgToolsBarTop.show(_this.toolsBarTop);
+        _this.nbPhotos = _this.myImageCollection.fullCollection.length;
+        _this.nbPhotosAccepted = _this.myImageCollection.fullCollection.where({validated:2}).length ;
+        _this.nbPhotosRefused  = _this.myImageCollection.fullCollection.where({validated:4}).length ;
+        _this.nbPhotosChecked = _this.myImageCollection.fullCollection.where({validated:1}).length ;
+        _this.toolsBarTop.$el.find("#nbphotos").text(_this.nbPhotos);
+        _this.toolsBarTop.$el.find("#nbphotosaccepted").text(_this.nbPhotosAccepted);
+        _this.toolsBarTop.$el.find("#nbphotosrefused").text(_this.nbPhotosRefused);
+        _this.toolsBarTop.$el.find("#nbphotoschecked").text(_this.nbPhotosChecked);
+        _this.toolsBarTop.$el.find("#nbphotosnotchecked").text(_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused));
+
     });
 
       this.myImageCollection.fetch();
@@ -457,11 +496,10 @@ define([
       this.rgToolsBar.show(this.toolsBar);
     },
 
-    displayToolsBarTop: function(){
+    displayToolsBarTop: function(nbPhotos){
       var _this = this ;
       this.toolsBarTop = new ToolsBarTop( {
         parent : _this,
-        nbPhotos : _this.myImageCollection.fullCollection.length
       });
       this.rgToolsBarTop.show(this.toolsBarTop);
     },
@@ -577,8 +615,8 @@ define([
     displaySwalUnchecked: function(compteur) {
       var _this = this;
       Swal({
-                  title: 'Warning validate without checked '+String(compteur.unchecked)+' photos',
-                  text:  'you gonna validate '+String(compteur.total)+' photos ' ,
+                  title: 'Warning validate without check ALL photos',
+                  text:  +_this.nbPhotosChecked+' photos still underteminate and '+(_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused) )+' not seen yet\n'+'If you continue all of this photos will be accept automatically' ,
                   type: 'warning',
                   showCancelButton: true,
                   confirmButtonColor: 'rgb(218, 146, 15)',
@@ -598,9 +636,19 @@ define([
 
     displaySwalValidate: function(compteur){
       var _this = this;
+      var text = "";
+      if( _this.nbPhotosAccepted == 0 ) {
+        text += _this.nbPhotosRefused+' will be refused';
+      }
+      else if( _this.nbPhotosRefused == 0 ) {
+        text += _this.nbPhotosAccepted+' will be accepted';
+      }else{
+        text +=  _this.nbPhotosAccepted+' will be accepted and '+_this.nbPhotosRefused+' refused';
+      }
+
       Swal({
                   title: 'Well done',
-                  text:  'you gonna validate '+String(compteur.total)+' photos ' ,
+                  text:  'you have finish this sessions\nOn '+_this.nbPhotos+' photos '+text,
                   type: 'success',
                   showCancelButton: true,
                   confirmButtonColor: 'rgb(218, 146, 15)',
@@ -619,14 +667,20 @@ define([
 
     validateAll: function() {
       console.log("on veut tout valider ");
-      var tableau = [1,2,3,4,5,6,7,8,9,10];
-      this.bt(tableau);
       var compteur = {};
+      if( this.nbphotosnotchecked >0 || this.nbPhotosChecked > 0) {
+        this.displaySwalUnchecked();
+      }
+      else {
+        this.displaySwalValidate();
+      }
+
+
       /*for(var i = 0 ; i < this.currentCollection.fullCollection ; i++ )
       {
         if(this.currentCollection.fullCollection.models[i].attributes.)
       }*/
-      compteur.total = 0
+    /*  compteur.total = 0
       compteur.unchecked = 0;
       compteur.total = this.myImageCollection.fullCollection.length;
       for( var model of this.myImageCollection.fullCollection.models )
@@ -643,7 +697,7 @@ define([
       else {
         this.displaySwalValidate(compteur);
       }
-      console.log("photo a check : "+compteur.unchecked);
+      console.log("photo a check : "+compteur.unchecked);*/
     /*  var _this = this;
       var flagUnchecked = false
       var url = config.coreUrl+'sensors/'+this.type+'/uncheckedDatas';

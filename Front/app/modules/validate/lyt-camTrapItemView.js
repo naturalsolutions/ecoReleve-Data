@@ -40,12 +40,21 @@ define([
 			this.$el.find('img').focus();
 		},
 		handleFocus: function() {
+			var lastPosition = this.parent.currentPosition;
+			if(lastPosition === null)
+			lastPosition = 0;
 			this.parent.currentViewImg = this;
 			//TODO fait bugguer la position pour le
 			this.parent.currentPosition = this.parent.currentCollection.indexOf(this.model);
 			this.parent.fillTagsInput();
 			if( !this.model.get("validated") )
 			this.model.set("validated" , 1 ); //Si focus alors la photo est vu
+			this.setVisualValidated(1);
+			if(lastPosition != this.parent.currentPosition){
+				this.parent.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
+				this.parent.tabView[this.parent.currentPosition].$el.find('.vignette').toggleClass('active');
+			}
+
 		},
 		leaveFocus: function() {
 		},
@@ -59,12 +68,20 @@ define([
 
 		onRender: function(){
 			switch(this.model.get("validated") ) {
+				case 1 : {
+					this.$el.addClass("checked");
+					break;
+				}
 				case 2 : {
 					this.$el.addClass("accepted");
 					break;
 				}
 				case 4 : {
 					this.$el.addClass("refused");
+					break;
+				}
+				default:{
+					this.$el.addClass("notchecked");
 					break;
 				}
 
@@ -148,12 +165,21 @@ define([
 
 		setVisualValidated : function(valBool){
 			switch(this.model.get("validated") ) {
+				case 1 :{
+					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');
+					if( !this.$el.hasClass('checked') ) this.$el.addClass('checked');
+					break;
+				}
 				case 2 : {
+					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');
+					if( this.$el.hasClass('checked') ) this.$el.removeClass('checked');
 					if( this.$el.hasClass('refused') ) this.$el.removeClass('refused');
 					if( !this.$el.hasClass('accepted') ) this.$el.addClass("accepted");
 					break;
 				}
 				case 4 : {
+					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');
+					if( this.$el.hasClass('checked') ) this.$el.removeClass('checked');
 					if( this.$el.hasClass('accepted') ) this.$el.removeClass('accepted');
 					if( !this.$el.hasClass('refused') ) this.$el.addClass("refused");
 					break;

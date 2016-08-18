@@ -32,7 +32,91 @@
     }
 }
 .toolsBarCamTrapTop{
-  span{
-    color : #999;
+  .reneco{
+    width: 28px;
+    height: 24px;
+    background-color: #434343;
+    border: 1px solid #666;
+    border-radius: 4px;
   }
+  .active{
+    color : #39b34a;
+  }
+  span{
+    color: #909090;
+    font-family: Exo;
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 25px;
+    letter-spacing: -0.32px;
+  }
+  #nbphotosaccepted{
+    color : green;
+  }
+  .accepted:after{
+    font-family: 'reneco' !important;
+    content: "\e62a";
+    display: inline-block;
+    color: #39b34a;
+    top: 4px;
+    right: 15px;
+    height: 20px;
+    width: 20px;
+    font-size: 80%;
+    line-height: 20px;
+    /*border-radius: 10px;
+    background-color: #39b34a;*/
+  }
+
+  #nbphotosrefused{
+    color : red;
+  }
+  .refused:after{
+    font-family: 'reneco' !important;
+    content: "\e65e";
+    display: inline-block;
+    color: #f00;
+    top: 4px;
+    right: 15px;
+    height: 20px;
+    width: 20px;
+    font-size: 80%;
+    line-height: 20px;
+  /*  border-radius: 10px;
+    background-color: #f00;*/
+  }
+  #nbphotoschecked{
+    color : white;
+  }
+  .checked:after{
+    font-family: 'reneco' !important;
+    content: "\e912";
+    display: inline-block;
+    color: white;
+    top: 4px;
+    right: 15px;
+    height: 20px;
+    width: 20px;
+    font-size: 80%;
+    line-height: 20px;
+    //background-color: #f00;
+  }
+  #nbphotosnotchecked{
+    color : white;
+  }
+  .notchecked:after{
+    font-family: 'reneco' !important;
+    content: "\e644";
+    display: inline-block;
+    color: white;
+    top: 4px;
+    right: 15px;
+    height: 20px;
+    width: 20px;
+    font-size: 80%;
+    line-height: 20px;
+    border-radius: 10px;
+    //background-color: #f00;
+  }
+
 }

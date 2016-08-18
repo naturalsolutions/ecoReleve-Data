@@ -39,6 +39,10 @@
         }
       }
     }
+    .active{
+      border: 1.5px solid #39b34a;
+      border-radius: 8px;
+    }
   }
   .accepted:before{
     font-family: 'reneco' !important;
@@ -72,6 +76,38 @@
     line-height: 20px;
     border-radius: 10px;
     background-color: #f00;
+  }
+  .checked:before{
+    font-family: 'reneco' !important;
+    content: "\e912";
+    display: block;
+    float:right;
+    position:relative;
+    color: white;
+    top: 4px;
+    right: 15px;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+    //background-color: #f00;
+  }
+  #nbphotosnotchecked{
+    color : white;
+  }
+  .notchecked:before{
+    font-family: 'reneco' !important;
+    content: "\e644";
+    display: block;
+    float:right;
+    position:relative;
+    color: white;
+    top: 4px;
+    right: 15px;
+    height: 20px;
+    width: 20px;
+    line-height: 20px;
+    border-radius: 10px;
+    //background-color: #f00;
   }
 }
 
@@ -107,3 +143,6 @@
     background-color: #3d3d3d;
     border-bottom-color: #606060;
   }
+  *:focus {
+    outline: none;
+}
