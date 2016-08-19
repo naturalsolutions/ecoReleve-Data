@@ -98,6 +98,7 @@ define([
       'rgToolsBarTop' : '#rgToolsBarTop'
     },
   clickOnIconeView : function(e){
+      var _this = this;
       var $elemToInactive = $('#rgToolsBarTop .active');
       var $elemToActive =  $(e.target);
       if( $elemToInactive[0]  != $elemToActive[0]){
@@ -108,6 +109,7 @@ define([
           this.leaveModal(e);
         }
         else if( $elemToActive.hasClass('reneco-image_file') ) {
+          console.log("hum");
           this.displayModal(e);
           console.log("image file");
         }
@@ -210,9 +212,10 @@ define([
     displayModal: function(e){
       e.preventDefault();
       if(this.currentPosition !== null ) { //il faut une position pour afficher le modal
+        /*activate icon*/
 
         if(this.rgModal.currentView === undefined) {
-          this.rgModal.show( new ModalView({ model : this.tabView[this.currentPosition].model}))
+          this.rgModal.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
         }
         else {
           this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
@@ -239,25 +242,23 @@ define([
       }
       else{
         var lastPosition = this.currentPosition;//stock la position avant changement pour savoir si on a bougé
-        console.log(lastPosition);
         switch(e.keyCode)
         {
           case 38:// up
-          {console.log("^");
+          {
             if ( this.currentPosition - 6 >= 0){
               this.currentPosition-=6;
             }
             break;
           }
           case 40://down
-          {console.log("v");
+          {
             if ( this.currentPosition + 6 <= this.tabView.length - 1 ){
               this.currentPosition+=6;
             }
             break;
           }
           case 37:{ //left
-            console.log("<");
             if ( this.currentPosition - 1 >= 0 ){
               this.currentPosition-=1;
             }
@@ -265,14 +266,13 @@ define([
           }
           //right
           case 39://right
-          {console.log(">");
+          {
             if ( this.currentPosition + 1 <= this.tabView.length - 1 ){
               this.currentPosition+=1;
             }
             break;
           }
         }
-        console.log(this.currentPosition);
 
         if (lastPosition !== this.currentPosition) {// si on a bougé
           this.tabView[this.currentPosition].$el.find('img').focus();//on change le focus
@@ -289,7 +289,6 @@ define([
     findInput: function(e){
       e.preventDefault(); // disable browser tab
       this.$el.find(".bootstrap-tagsinput  input").focus();
-
     },
 
     prevImage: function(){
@@ -348,15 +347,12 @@ define([
       });
 
       this.myImageCollection = new ImageCollection();
-      console.log(this.myImageCollection);
-      console.log(this.myImageCollection.url);
       this.myImageCollection.sync('patch', this.myImageCollection , { error: function () { console.log(this.myImageCollection); console.log("sync impossible");} });
 
       this.paginator = new Backgrid.Extension.Paginator({
         collection: this.myImageCollection
       });
       this.myImageCollection.on('sync', function() {
-        console.log("sync");
         _this.nbPhotos = _this.myImageCollection.fullCollection.length;
         _this.nbPhotosAccepted = _this.myImageCollection.fullCollection.where({validated:2}).length ;
         _this.nbPhotosRefused  = _this.myImageCollection.fullCollection.where({validated:4}).length ;
@@ -372,7 +368,6 @@ define([
       this.myImageCollection.fetch();
 
       this.paginator.collection.on('reset', function(e){
-        console.log("jai change de page");
       });
 
     },
@@ -459,13 +454,11 @@ define([
       var _this = this;
 
       var ImageModel = new CamTrapImageModel();
-      console.log(this.ui.gallery);
       //TODO detruit les view a la main sinon pb avec les models
       if( typeof (_this.tabView) !== "undefined" ){
         this.destroyViews(_this.tabView);
       }
       this.ui.gallery.html('');
-      console.log("on vide le tableau");
       _this.currentPosition = null;
       _this.tabView = [];
       myCollectionToDisplay.each(function(model){
@@ -477,10 +470,7 @@ define([
         _this.ui.gallery.append(newImg.render().el);
 
       });
-      console.log("on a rempli le tableau");
-      console.log(this.tabView);
       if (this.tabView.length > 0){
-        console.log("on focus le premier");
         this.focusFirstImg();
       }
     },
@@ -549,7 +539,6 @@ define([
         _this.displayImages(_this.myImageCollectionValidated);
       });
       this.currentCollection = this.myImageCollectionValidated;
-      console.log(this.currentCollection);
       this.ui.gallery.html('');
       this.ui.paginator.html('');
       this.displayImages(this.myImageCollectionValidated);

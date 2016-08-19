@@ -165,7 +165,7 @@ define([
 
 		setVisualValidated : function(valBool){
 			switch(this.model.get("validated") ) {
-				case 1 :{
+				case 1 :{// not checked
 					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');
 					if( !this.$el.hasClass('checked') ) this.$el.addClass('checked');
 					break;
