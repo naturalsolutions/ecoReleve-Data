@@ -98,23 +98,24 @@ define([
       'rgToolsBarTop' : '#rgToolsBarTop'
     },
   clickOnIconeView : function(e){
-      console.log("bim bam boom");
-      console.log(e);
-      var $elem =  $(e.target)
-      if($elem.hasClass('reneco-ecollectionsmall')){
-        if( ! $elem.hasClass('active') )
-           $elem.addClass('active');
-
-        console.log("gallery");
-      }
-      else if( $elem.hasClass('reneco-image_file') ) {
-        if( ! $elem.hasClass('active') )
-           $elem.addClass('active');
-
-        console.log("image file");
-      }
-      else{
-          console.log("list file");
+      var $elemToInactive = $('#rgToolsBarTop .active');
+      var $elemToActive =  $(e.target);
+      if( $elemToInactive[0]  != $elemToActive[0]){
+       $elemToInactive.toggleClass('active');
+      $elemToActive.toggleClass('active');
+       if($elemToActive.hasClass('reneco-ecollectionsmall')){
+          console.log("gallery");
+          this.leaveModal(e);
+        }
+        else if( $elemToActive.hasClass('reneco-image_file') ) {
+          this.displayModal(e);
+          console.log("image file");
+        }
+        else{
+            console.log("list file");
+        }
+      }else{
+        console.log("rien a faire");
       }
     },
     initialize: function(options) {
@@ -217,6 +218,7 @@ define([
           this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
           this.rgModal.currentView.onShow();
         }
+
       }
     },
 

@@ -18,6 +18,7 @@ define([
       checked: null,
       validated: null,
 			tags : null,
+			date_creation : '',
     }
   });
 });
