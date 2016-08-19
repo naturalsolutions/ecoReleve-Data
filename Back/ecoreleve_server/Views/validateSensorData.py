@@ -267,7 +267,7 @@ def details_unchecked_camtrap(request):
             ).where(and_(unchecked.c['FK_sensor']== ptt
                 ,and_(unchecked.c['checked'] == 0,unchecked.c['FK_MonitoredSite'] == id_indiv))).order_by(desc(unchecked.c['date']))"""
 
-        query = 'select PK_id,path,name,checked,validated,tags from ecoReleve_Sensor.dbo.TcameraTrap where pk_id in (select pk_id from [dbo].V_dataCamTrap_With_equipSite where fk_sensor = '+str(id_indiv)+' AND FK_MonitoredSite = '+str(ptt)+' AND equipID ='+str(id_equip)+' );'
+        query = 'select PK_id,path,name,checked,validated,tags,date_creation from ecoReleve_Sensor.dbo.TcameraTrap where pk_id in (select pk_id from [dbo].V_dataCamTrap_With_equipSite where fk_sensor = '+str(id_indiv)+' AND FK_MonitoredSite = '+str(ptt)+' AND equipID ='+str(id_equip)+' ) ORDER BY date_creation ASC;'
         data = session.execute(query).fetchall()
         dataResults = [dict(row) for row in data]
         for tmp in dataResults:
@@ -275,6 +275,8 @@ def details_unchecked_camtrap(request):
             tmp['path']="imgcamtrap/"+str(varchartmp[len(varchartmp)-2])+"/"
             tmp['name'] = tmp['name'].replace(" ","%20")
             tmp['id'] = tmp['PK_id']
+            tmp['date_creation'] = str(tmp['date_creation'])
+            tmp['date_creation'] = tmp['date_creation'][:len(tmp['date_creation'])-3]
             if( str(tmp['tags']) != 'None'):
                 strTags = tmp['tags'].replace("<TAGS>","")
                 strTags = strTags.replace("<TAG>","")
@@ -285,6 +287,7 @@ def details_unchecked_camtrap(request):
                     tmp['tags'] = strTags
                 else:
                     tmp['tags'] = "";
+
 
         result = [{'total_entries':len(dataResults)}]
         result.append(dataResults)
