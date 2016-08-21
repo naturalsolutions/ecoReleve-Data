@@ -61,7 +61,7 @@ define([
 					this.parent.tabView[this.parent.currentPosition].setModelTags(tabTags);
 					}
 					else {
-						//TODO effacer les tags 
+						//TODO effacer les tags
 						this.parent.tabView[this.parent.currentPosition].setModelTags("");
 					}
 			}

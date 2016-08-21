@@ -25,10 +25,9 @@ define([
 		},
 		events:{
 			'click img':'doFocus',
-			'focusin' : 'handleFocus',
+			'focusin img' : 'handleFocus',
 			//'dblclick':'handleFocus',
-			//'mouseenter .image': 'hoveringStart',
-		//	'mouseleave': 'hoveringEnd',
+			'mouseenter img': 'hoveringStart',
 		//	'keydown' : 'keyPressed',
 		//	'focusin' : 'handleFocus',
 		//	'focusout' : 'leaveFocus',
@@ -46,6 +45,31 @@ define([
 			this.parent.currentViewImg = this;
 			//TODO fait bugguer la position pour le
 			this.parent.currentPosition = this.parent.currentCollection.indexOf(this.model);
+			// if( lastPosition != this.parent.currentPosition){
+			// 	console.log("on a changé de position on détrui et on instantie");
+			// 	console.log(this.lastzoom);
+			// 	if( this.lastzoom != null ){
+			// 		console.log("on détruit");
+			// 		var action='hide'
+			// 		this.lastzoom.showHideZoomContainer(action);
+			// 		this.lastzoom.showHideWindow(action);
+			// 		this.lastzoom.showHideTint(action);
+			// 		this.lastzoom.showHideLens(action);
+			// 		this.lastzoom.destroy();
+			//
+			// 	}
+			// 	this.$("#zoom_"+this.model.get("id")).ezPlus({
+			// 			zoomWindowPosition: '#js_zoom_plus',
+			// 			preloading: false,
+			// 			responsive: true,
+			// 			scrollZoom: true,
+			// 			zoomWindowHeight: 400,
+			// 			zoomWindowWidth: 600,
+			// 			bordersize:0,
+			// 			easing: true,
+			// 			loadingIcon: false,// link to spinner
+			// 		});
+			// }
 			this.parent.fillTagsInput();
 			if( !this.model.get("validated") )
 			this.model.set("validated" , 1 ); //Si focus alors la photo est vu
@@ -56,6 +80,11 @@ define([
 			}
 
 		},
+		hoveringStart:function(){
+			console.log("je survole la photo");
+			console.log("je charge la photo");
+		},
+
 		leaveFocus: function() {
 		},
 		testModal: function(e) {
@@ -64,6 +93,7 @@ define([
 
 		initialize : function(options) {
 			this.parent = options.parent;
+			this.lastzoom = null;
 		},
 
 		onRender: function(){
@@ -92,14 +122,14 @@ define([
 				this.$el.addClass("refused");*/
 
 		/*	this.$("#zoom_"+this.model.get("id")).ezPlus({
-				zoomWindowPosition: 'preview',
+				zoomWindowPosition: 'js_zoom_plus',
 				preloading: false,
 				responsive: true,
 				scrollZoom: true,
-				zoomWindowPosition: 11,
-				zoomWindowOffsetX: -15,
 				zoomWindowHeight: 400,
 				zoomWindowWidth: 600,
+				bordersize:0,
+				easing: true,
 				loadingIcon: false,// link to spinner
 			});*/
 		},
@@ -117,9 +147,13 @@ define([
 							var n = noty({
 								layout : 'bottomLeft',
 								type : 'error',
-								text : 'Connection problem modification \n <img src='+_this.model.get('path')+'/thumbnails/'+_this.model.get('name')+'><br> Not modified please retry (if the problem persist check your connection or contact and admin)'
+								text : 'Connection problem for modification \n <img src='+_this.model.get('path')+'/thumbnails/'+_this.model.get('name')+'><br> Not modified please retry (if the problem persist check your connection or contact an admin)'
 							});
 							_this.setVisualValidated(_this.model.get("validated"));
+					},
+					success :function(){
+						console.log("parent changer compteur");
+						_this.parent.refreshCounter();
 					},
 					patch : true,
 				 	wait : true,

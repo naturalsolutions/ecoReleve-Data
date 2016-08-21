@@ -69,7 +69,12 @@ define([
       'click button#validate' : 'validateAll',
       'click .reneco-ecollectionsmall' : 'clickOnIconeView',
       'click .reneco-image_file' : 'clickOnIconeView',
-      'clicl .reneco-list' :'clickOnIconeView',
+      'click .reneco-list' :'clickOnIconeView',
+      'click #js_accepted_top' : 'filterCollectionCtrl',
+      'click #js_refused_top' :'filterCollectionCtrl',
+      'click #js_checked_top' : 'filterCollectionCtrl',
+      'click #js_notchecked_top' :'filterCollectionCtrl',
+      'click #infossession' : 'filterCollectionCtrl',
     },
 
     ui: {
@@ -99,26 +104,26 @@ define([
     },
   clickOnIconeView : function(e){
       var _this = this;
+      e.preventDefault();
+
       var $elemToInactive = $('#rgToolsBarTop .active');
       var $elemToActive =  $(e.target);
-      if( $elemToInactive[0]  != $elemToActive[0]){
-       $elemToInactive.toggleClass('active');
-      $elemToActive.toggleClass('active');
+      if( $elemToInactive[0]  != $elemToActive[0]) { //handle click on same icon
+       $elemToInactive.toggleClass('active'); //remove active actual elem
+       $elemToActive.toggleClass('active'); // add active elem clicked
        if($elemToActive.hasClass('reneco-ecollectionsmall')){
-          console.log("gallery");
           this.leaveModal(e);
         }
         else if( $elemToActive.hasClass('reneco-image_file') ) {
-          console.log("hum");
           this.displayModal(e);
-          console.log("image file");
         }
         else{
-            console.log("list file");
+            //console.log("list file");
         }
       }else{
         console.log("rien a faire");
       }
+      e.stopPropagation();
     },
     initialize: function(options) {
       this.translater = Translater.getTranslater();
@@ -133,6 +138,7 @@ define([
       this.nbPhotosAccepted = 0;
       this.nbPhotosRefused = 0;
       this.nbPhotosChecked = 0;
+      this.stopSpace = false;
 
       this.sensorId = this.model.get('fk_sensor');
       this.siteId = this.model.get('FK_MonitoredSite');
@@ -153,6 +159,174 @@ define([
       this.initCollection();
     },
 
+    initCollection : function() {
+      var _this = this;
+      var ImageCollection = PageColl.extend({
+        model : CamTrapImageModel,
+        mode: 'client',
+        state: {
+          pageSize: 24
+        },
+        url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
+        patch : function(){
+          console.log("ouais ouais ouais j'overwrite");
+        }
+      });
+
+      this.myImageCollection = new ImageCollection();
+      this.myImageCollection.sync('patch', this.myImageCollection , { error: function () { console.log(this.myImageCollection); console.log("sync impossible");} });
+
+      this.paginator = new Backgrid.Extension.Paginator({
+        collection: this.myImageCollection
+      });
+      this.myImageCollection.on('sync', function() {
+        _this.refreshCounter();
+
+      });
+
+      this.myImageCollection.fetch();
+
+      this.paginator.collection.on('reset', function(e){
+      });
+
+    },
+
+    onRender: function() {
+      this.$el.i18n();
+    },
+
+    onShow: function() {
+      var _this = this;
+      this.rgNavbar.show(this.navbar);
+      this.display();
+    },
+
+    display: function() {
+      var _this = this;
+      this.listenTo(this.myImageCollection, 'reset', function(e){// trigger on init or on change page
+        _this.displayImages(_this.myImageCollection);
+        _this.rgToolsBarTop.show(this.toolsBarTop);
+      });
+      this.currentCollection = this.myImageCollection;
+      this.displaySensorForm();
+      this.displaySiteForm();
+      this.displayImageDetailForm();
+      this.displayPaginator(this.paginator)
+      this.displayToolsBar();
+      this.displayToolsBarTop();
+    },
+
+    displayImages: function(myCollectionToDisplay){
+      var _this = this;
+      console.log(myCollectionToDisplay);
+      this.currentCollection = myCollectionToDisplay;
+      var ImageModel = new CamTrapImageModel();
+      //TODO detruit les view a la main sinon pb avec les models
+      if( typeof (_this.tabView) !== "undefined" ){
+        this.destroyViews(_this.tabView);
+      }
+      this.ui.gallery.html('');
+      _this.currentPosition = null;
+      _this.tabView = [];
+      myCollectionToDisplay.each(function(model){
+        var newImg = new CamTrapItemView({
+          model: model,
+          parent: _this,
+        });
+        _this.tabView.push(newImg);
+        _this.ui.gallery.append(newImg.render().el);
+
+      });
+      if (this.tabView.length > 0){
+        this.focusFirstImg();
+      }
+    },
+
+    destroyViews : function(tabView){
+
+      for(var i = 0 ; i < tabView.length ; i++)
+      {
+        tabView[i].destroy();
+      }
+
+    },
+
+    displaySensorForm: function() {
+      this.nsform = new NsForm({
+        name: 'sensorForm',
+        buttonRegion: [this.ui.btn],
+        modelurl: config.coreUrl + 'sensors',
+        formRegion: this.ui.sensorForm,
+        displayMode: 'display',
+        id: this.sensorId,
+        reloadAfterSave: false,
+      });
+    },
+
+    displaySiteForm: function() {
+      this.nsform = new NsForm({
+        name: 'siteForm',
+        buttonRegion: [this.ui.btn],
+        modelurl: config.coreUrl + 'monitoredSites',
+        formRegion: this.ui.siteForm,
+        displayMode: 'display',
+        id: this.siteId,
+        reloadAfterSave: false,
+      });
+    },
+
+    displayImageDetailForm: function() {
+      this.nsform = new NsForm({
+        name: 'imageDetailsForm',
+        buttonRegion: [this.ui.btn],
+        modelurl: config.coreUrl + 'sensors',
+        formRegion: this.ui.imageDetailsForm,
+        displayMode: 'display',
+        id: this.sensorId,
+        reloadAfterSave: false,
+      });
+    },
+
+    displayPaginator: function (pagin) {
+      this.currentPaginator = pagin;
+      this.ui.paginator.html('');
+      this.ui.paginator.append(pagin.render().el);
+    },
+
+    displayToolsBar: function () {
+      var _this = this ;
+      this.toolsBar = new ToolsBar( {
+        parent : _this,
+      });
+      this.rgToolsBar.show(this.toolsBar);
+    },
+
+    displayToolsBarTop: function(nbPhotos){
+      var _this = this ;
+      this.toolsBarTop = new ToolsBarTop( {
+        parent : _this,
+      });
+      this.rgToolsBarTop.show(this.toolsBarTop);
+    },
+
+    reloadFromNavbar: function(model) {
+      this.model = model;
+      this.sensorId = this.model.get('fk_sensor');
+      this.siteId = this.model.get('FK_MonitoredSite');
+      this.equipmentId = this.model.get('equipID');
+
+      this.initCollection();
+
+      this.display();
+    },
+
+
+    setTotal: function(){
+      this.ui.totalS.html(this.grid.grid.getSelectedModels().length);
+      this.ui.total.html(this.grid.grid.collection.length);
+    },
+
+
     acceptPhoto : function(e) {
       if(this.currentPosition !== null ) {
         this.tabView[this.currentPosition].setModelValidated(2);
@@ -163,15 +337,20 @@ define([
     nextPage : function(e) {
       e.preventDefault();
       e.stopPropagation();
-      if( this.currentCollection.hasNextPage() )
+      if( this.currentCollection.hasNextPage() ){
+        this.leaveModal();
         this.currentCollection.getNextPage();
+      }
     },
 
     prevPage : function(e) {
       e.preventDefault();
       e.stopPropagation();
-      if( this.currentCollection.hasPreviousPage() )
+      if( this.currentCollection.hasPreviousPage() ){
+        console.log("on a une page avant");
+        this.leaveModal();
         this.currentCollection.getPreviousPage();
+      }
     },
 
     firstPage : function(e) {
@@ -196,7 +375,6 @@ define([
 
     toggleModelStatus: function(e){
       e.preventDefault();
-      console.log("detect toggle");
       if(this.currentPosition !== null ) {
         this.tabView[this.currentPosition].toggleModelStatus();
       }
@@ -204,6 +382,9 @@ define([
     },
 
     leaveModal: function(e){
+      this.stopSpace = false;
+      $('#rgToolsBarTop .reneco-ecollectionsmall').addClass('active');
+      $('#rgToolsBarTop .reneco-image_file').removeClass('active');
       if(this.rgModal.currentView !== undefined) {
         this.rgModal.currentView.hide();
       }
@@ -211,9 +392,11 @@ define([
 
     displayModal: function(e){
       e.preventDefault();
-      if(this.currentPosition !== null ) { //il faut une position pour afficher le modal
-        /*activate icon*/
 
+      if(this.currentPosition !== null && !this.stopSpace) { //il faut une position pour afficher le modal
+        /*activate icon*/
+        $('#rgToolsBarTop .reneco-ecollectionsmall').removeClass('active');
+        $('#rgToolsBarTop .reneco-image_file').addClass('active');
         if(this.rgModal.currentView === undefined) {
           this.rgModal.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
         }
@@ -221,7 +404,7 @@ define([
           this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
           this.rgModal.currentView.onShow();
         }
-
+        this.stopSpace = true;
       }
     },
 
@@ -244,29 +427,26 @@ define([
         var lastPosition = this.currentPosition;//stock la position avant changement pour savoir si on a bougé
         switch(e.keyCode)
         {
-          case 38:// up
-          {
+          case 38: {// up
             if ( this.currentPosition - 6 >= 0){
               this.currentPosition-=6;
             }
             break;
           }
-          case 40://down
-          {
+          case 40: {//down
             if ( this.currentPosition + 6 <= this.tabView.length - 1 ){
               this.currentPosition+=6;
             }
             break;
           }
-          case 37:{ //left
+          case 37: { //left
             if ( this.currentPosition - 1 >= 0 ){
               this.currentPosition-=1;
             }
             break;
           }
           //right
-          case 39://right
-          {
+          case 39: {//right
             if ( this.currentPosition + 1 <= this.tabView.length - 1 ){
               this.currentPosition+=1;
             }
@@ -318,6 +498,7 @@ define([
     fillTagsInput : function(){
       var $inputTags = this.toolsBar.$el.find("#tagsinput");
       this.toolsBar.removeAll();//vide les tags
+
       var tabTagsTmp = this.tabView[this.currentPosition].getModelTags()
       if( tabTagsTmp !== null )
       {
@@ -329,182 +510,6 @@ define([
 
     },
 
-
-
-
-    initCollection : function() {
-      var _this = this;
-      var ImageCollection = PageColl.extend({
-        model : CamTrapImageModel,
-        mode: 'client',
-        state: {
-          pageSize: 24
-        },
-        url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
-        patch : function(){
-          console.log("ouais ouais ouais j'overwrite");
-        }
-      });
-
-      this.myImageCollection = new ImageCollection();
-      this.myImageCollection.sync('patch', this.myImageCollection , { error: function () { console.log(this.myImageCollection); console.log("sync impossible");} });
-
-      this.paginator = new Backgrid.Extension.Paginator({
-        collection: this.myImageCollection
-      });
-      this.myImageCollection.on('sync', function() {
-        _this.nbPhotos = _this.myImageCollection.fullCollection.length;
-        _this.nbPhotosAccepted = _this.myImageCollection.fullCollection.where({validated:2}).length ;
-        _this.nbPhotosRefused  = _this.myImageCollection.fullCollection.where({validated:4}).length ;
-        _this.nbPhotosChecked = _this.myImageCollection.fullCollection.where({validated:1}).length ;
-        _this.toolsBarTop.$el.find("#nbphotos").text(_this.nbPhotos);
-        _this.toolsBarTop.$el.find("#nbphotosaccepted").text(_this.nbPhotosAccepted);
-        _this.toolsBarTop.$el.find("#nbphotosrefused").text(_this.nbPhotosRefused);
-        _this.toolsBarTop.$el.find("#nbphotoschecked").text(_this.nbPhotosChecked);
-        _this.toolsBarTop.$el.find("#nbphotosnotchecked").text(_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused));
-
-    });
-
-      this.myImageCollection.fetch();
-
-      this.paginator.collection.on('reset', function(e){
-      });
-
-    },
-
-    onRender: function() {
-      this.$el.i18n();
-    },
-
-    onShow: function() {
-      var _this = this;
-      this.rgNavbar.show(this.navbar);
-      this.display();
-    },
-
-    reloadFromNavbar: function(model) {
-      this.model = model;
-      this.sensorId = this.model.get('fk_sensor');
-      this.siteId = this.model.get('FK_MonitoredSite');
-      this.equipmentId = this.model.get('equipID');
-
-      this.initCollection();
-
-      this.display();
-    },
-
-    display: function() {
-      var _this = this;
-      this.listenTo(this.myImageCollection, 'reset', function(e){
-        _this.displayImages(_this.myImageCollection);
-        _this.rgToolsBarTop.show(this.toolsBarTop);
-      });
-      this.currentCollection = this.myImageCollection;
-      this.displaySensorForm();
-      this.displaySiteForm();
-      this.displayImageDetailForm();
-      this.displayPaginator(this.paginator)
-      this.displayToolsBar();
-      this.displayToolsBarTop();
-    },
-
-
-    setTotal: function(){
-      this.ui.totalS.html(this.grid.grid.getSelectedModels().length);
-      this.ui.total.html(this.grid.grid.collection.length);
-    },
-
-    displaySiteForm: function() {
-      this.nsform = new NsForm({
-        name: 'siteForm',
-        buttonRegion: [this.ui.btn],
-        modelurl: config.coreUrl + 'monitoredSites',
-        formRegion: this.ui.siteForm,
-        displayMode: 'display',
-        id: this.siteId,
-        reloadAfterSave: false,
-      });
-    },
-
-    displaySensorForm: function() {
-      this.nsform = new NsForm({
-        name: 'sensorForm',
-        buttonRegion: [this.ui.btn],
-        modelurl: config.coreUrl + 'sensors',
-        formRegion: this.ui.sensorForm,
-        displayMode: 'display',
-        id: this.sensorId,
-        reloadAfterSave: false,
-      });
-    },
-
-    displayImageDetailForm: function() {
-      this.nsform = new NsForm({
-        name: 'imageDetailsForm',
-        buttonRegion: [this.ui.btn],
-        modelurl: config.coreUrl + 'sensors',
-        formRegion: this.ui.imageDetailsForm,
-        displayMode: 'display',
-        id: this.sensorId,
-        reloadAfterSave: false,
-      });
-    },
-
-    displayImages: function(myCollectionToDisplay){
-      var _this = this;
-
-      var ImageModel = new CamTrapImageModel();
-      //TODO detruit les view a la main sinon pb avec les models
-      if( typeof (_this.tabView) !== "undefined" ){
-        this.destroyViews(_this.tabView);
-      }
-      this.ui.gallery.html('');
-      _this.currentPosition = null;
-      _this.tabView = [];
-      myCollectionToDisplay.each(function(model){
-        var newImg = new CamTrapItemView({
-          model: model,
-          parent: _this,
-        });
-        _this.tabView.push(newImg);
-        _this.ui.gallery.append(newImg.render().el);
-
-      });
-      if (this.tabView.length > 0){
-        this.focusFirstImg();
-      }
-    },
-
-    displayPaginator: function (pagin) {
-      this.ui.paginator.html('');
-      this.ui.paginator.append(pagin.render().el);
-    },
-
-    displayToolsBar: function () {
-      var _this = this ;
-      this.toolsBar = new ToolsBar( {
-        parent : _this,
-      });
-      this.rgToolsBar.show(this.toolsBar);
-    },
-
-    displayToolsBarTop: function(nbPhotos){
-      var _this = this ;
-      this.toolsBarTop = new ToolsBarTop( {
-        parent : _this,
-      });
-      this.rgToolsBarTop.show(this.toolsBarTop);
-    },
-
-    destroyViews : function(tabView){
-
-      for(var i = 0 ; i < tabView.length ; i++)
-      {
-        tabView[i].destroy();
-      }
-
-    },
-
     displayAll: function (e){
       this.currentCollection = this.myImageCollection;
       this.ui.gallery.html('');
@@ -512,6 +517,163 @@ define([
       this.displayImages(this.myImageCollection);
       this.displayPaginator(this.paginator);
 
+    },
+
+    refreshCounter : function(){
+      this.nbPhotos = this.myImageCollection.fullCollection.length;
+      this.nbPhotosAccepted = this.myImageCollection.fullCollection.where({validated:2}).length ;
+      this.nbPhotosRefused  = this.myImageCollection.fullCollection.where({validated:4}).length ;
+      this.nbPhotosChecked = this.myImageCollection.fullCollection.where({validated:1}).length ;
+      this.toolsBarTop.$el.find("#nbphotos").text(this.nbPhotos);
+      this.toolsBarTop.$el.find("#nbphotosaccepted").text(this.nbPhotosAccepted);
+      this.toolsBarTop.$el.find("#nbphotosrefused").text(this.nbPhotosRefused);
+      this.toolsBarTop.$el.find("#nbphotoschecked").text(this.nbPhotosChecked);
+      this.toolsBarTop.$el.find("#nbphotosnotchecked").text(this.nbPhotos - (this.nbPhotosChecked + this.nbPhotosAccepted + this.nbPhotosRefused));
+    },
+
+    filterCollectionCtrl: function(e) {
+
+        var $elem = $(e.currentTarget);
+        var myFilter = {};
+        if( $('#rgToolsBarTop .reneco-image_file').hasClass('active') )
+          this.leaveModal();
+
+        if ( $elem.hasClass('accepted') ) {
+          myFilter.validated = 2;
+        }
+        else if ( $elem.hasClass('refused') ) {
+          myFilter.validated = 4;
+        }
+        else if ( $elem.hasClass('checked') ) {
+          myFilter.validated = 1;
+        }
+        else if ( $elem.hasClass('notchecked') ) {
+          myFilter.validated = null;
+        }
+        else if ($elem.hasClass('allphotos') ){
+          //remet la collection mere
+          this.ui.gallery.html('');
+          this.displayImages(this.myImageCollection);
+          this.ui.paginator.html('');
+          this.displayPaginator(this.paginator);
+
+        }
+        if ( !$elem.hasClass('allphotos') ){
+          this.initCollectionFiltered(myFilter);
+        }
+
+    },
+
+    initCollectionFiltered: function(filter){
+      var _this = this;
+
+      this.filterModelFiltered = new virtualcollection(
+        this.myImageCollection.fullCollection ,
+        {
+          filter
+        }
+      );
+
+      this.paginationFiltered = PageColl.extend({
+        mode: 'client',
+        state: {
+          pageSize: 24
+        },
+        url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
+      });
+
+      console.log(this.filterModelFiltered);
+      this.displayFiltered();
+    },
+
+    displayFiltered: function (e){
+      var _this = this ;
+
+       var paginationFiltered = PageColl.extend({
+        mode: 'client',
+        state: {
+          pageSize: 24
+        },
+        url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
+        queryParams: {
+          totalPages: null,
+          totalRecords: null,
+        },
+        parseState: function (resp, queryParams, state, options) {
+          return {totalRecords: resp.total_entries};
+        }
+      });
+
+      this.myImageCollectionFiltered = new paginationFiltered(this.filterModelFiltered.models)
+      this.myPaginationFiltered = new Backgrid.Extension.Paginator({
+        collection: this.myImageCollectionFiltered
+      });
+      this.listenTo(this.myImageCollectionFiltered, "reset", function(e){
+        console.log("RESET DE LA COLLECTION");
+        _this.displayImages(_this.myImageCollectionFiltered);
+      });
+
+      this.ui.gallery.html('');
+      this.displayImages(this.myImageCollectionFiltered);
+      this.ui.paginator.html('');
+      this.displayPaginator(this.myPaginationFiltered);
+/*
+      if( typeof this.myImageCollectionFiltered != 'undefined') {
+        console.log("on reset collection filter");
+        //console.log(JSON.stringify(this.filterModelFiltered.updateFilter( {validated : 4}).models) );
+        this.myImageCollectionFiltered.parse(
+          { "total_entries" : this.filterModelFiltered.updateFilter( {validated : 4}).models.length},
+          JSON.stringify(this.filterModelFiltered.updateFilter( {validated : 4}).models)
+        );
+
+        console.log(this.myImageCollectionFiltered);
+      }
+      else{
+        console.log("on new la collection filter");
+        this.myImageCollectionFiltered = new paginationFiltered(this.filterModelFiltered.models)
+      }
+      if( typeof this.myPaginationFiltered != 'undefined') {
+        console.log("on detruit pagination filter");
+        this.myPaginationFiltered = null;
+      }
+      else{
+        console.log("création pagination premiere");
+        this.myPaginationFiltered = new Backgrid.Extension.Paginator({
+          collection: this.myImageCollectionFiltered
+        });
+        _this.ui.gallery.html('');
+        _this.displayImages(_this.myImageCollectionFiltered);
+        _this.ui.paginator.html('');
+        _this.displayPaginator(_this.myPaginationFiltered);
+      }
+
+      this.listenTo(this.myImageCollectionFiltered, "reset", function(e){
+        console.log("RESET DE LA COLLECTION");
+        _this.displayImages(this.myImageCollectionFiltered);
+      });
+      console.log(this.myImageCollectionFiltered);
+      console.log(this.myPaginationFiltered);
+      //_this.myImageCollectionFiltered.parse({ "total_entries" : _this.myImageCollectionFiltered.models.length},_this.myImageCollectionFiltered.models );
+      console.log(this.myImageCollectionFiltered);
+      this.myPaginationFiltered = new Backgrid.Extension.Paginator({
+        collection: this.myImageCollectionFiltered
+      }); // quand la collection a fetch on instantie la pagination
+      console.log(this.myPaginationFiltered);
+      this.ui.gallery.html('');
+      this.displayImages(this.myImageCollectionFiltered);
+      this.ui.paginator.html('');
+      this.displayPaginator(this.myPaginationFiltered);
+      this.currentCollection = this.myImageCollectionFiltered;
+
+      if( this.ui.gallery.html() === '' )
+      {
+        this.ui.gallery.html('NO IMAGES TO DISPLAY')
+      }
+      else {
+      //  console.log(this.ui.gallery.html());
+      }
+      //this.focusFirstImg();
+*/
     },
 
     displayValidated: function (e){
@@ -600,9 +762,6 @@ define([
       return moment(Math.floor((+date) / (+duration)) * (+duration));
     },
 
-    keyPressed: function(e){
-    },
-
     displaySwalUnchecked: function(compteur) {
       var _this = this;
       Swal({
@@ -658,6 +817,8 @@ define([
 
     validateAll: function() {
       console.log("on veut tout valider ");
+      console.log("et bim bam boom");
+      console.log("toto et mario");
       var compteur = {};
       if( this.nbphotosnotchecked >0 || this.nbPhotosChecked > 0) {
         this.displaySwalUnchecked();

@@ -22,16 +22,10 @@ define([
 
 		initialize : function(options) {
 			this.parent = options.parent;
-      this.nbPhotos = options.nbPhotos;
 		},
 
 		onRender: function(){
-      console.log("rendu toolsbar top");
     },
-    serializeData: function() {
-    return { nbPhotos : this.nbPhotos }
-  }
-
 	});
 
 });
