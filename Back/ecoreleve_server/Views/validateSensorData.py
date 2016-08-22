@@ -468,15 +468,15 @@ def validateCamTrap(request):
             request.response.status_code = 510
             return {'message': ""+str(index['name'])+" not checked yet"}
         else :# photo check"""
-        if (index['validated'] != None):
+        if (index['validated'] not in (None , 1 )):
             if (index['validated'] == False ):
                 pathSplit = index['path'].split('/')
                 destfolder = str(pathPrefix)+"\\"+str(pathSplit[1])+"\\"+str(index['name'])
                 print (" la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a supprimer")
-                print("on va supprimier :" +str(destfolder))
-                if os.path.isfile(destfolder):
-                    os.remove(destfolder)
-                deletePhotoOnSQL(request,str(index['PK_id']))
+                print("on va supprimer :" +str(destfolder))
+                #if os.path.isfile(destfolder):
+                #    os.remove(destfolder)
+                #deletePhotoOnSQL(request,str(index['PK_id']))
 
             else:
                 print (" la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a sauvegarder")

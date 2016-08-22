@@ -48,8 +48,8 @@ define([
       'space': 'displayModal',
       'backspace' : 'toggleModelStatus',
       'esc' : 'leaveModal',
-      'pageup': 'nextPage',
-      'pagedown' : 'prevPage',
+      'pagedown': 'nextPage',
+      'pageup' : 'prevPage',
       'home' : 'firstPage',
       'end' : 'lastPage',
 
@@ -57,11 +57,6 @@ define([
 
     events: {
       'click button#validate': 'validate',
-
-      'click button#displayAll': 'displayAll',
-      'click button#displayDeleted': 'displayDeleted',
-      'click button#displayValidated': 'displayValidated',
-      'click button#displayTags': 'displayTags',
       'click button#refusedBtn': 'rejectPhoto',
       'click button#upStarsBtn': 'increaseStars',
       'click button#downStarsBtn': 'decreaseStars',
@@ -132,6 +127,7 @@ define([
       this.lastImageActive = null;
       this.currentViewImg = null;
       this.currentPosition = null;
+      this.pageChange = '';
       this.currentCollection = null;
       this.currentPaginator = null;
       this.nbPhotos = 0;
@@ -187,6 +183,7 @@ define([
       this.myImageCollection.fetch();
 
       this.paginator.collection.on('reset', function(e){
+        console.log("reset du paginator");
       });
 
     },
@@ -204,6 +201,7 @@ define([
     display: function() {
       var _this = this;
       this.listenTo(this.myImageCollection, 'reset', function(e){// trigger on init or on change page
+        console.log("reset");
         _this.displayImages(_this.myImageCollection);
         _this.rgToolsBarTop.show(this.toolsBarTop);
       });
@@ -225,9 +223,9 @@ define([
       if( typeof (_this.tabView) !== "undefined" ){
         this.destroyViews(_this.tabView);
       }
-      this.ui.gallery.html('');
-      _this.currentPosition = null;
-      _this.tabView = [];
+      //this.ui.gallery.html('');
+      this.currentPosition = null;
+      this.tabView = [];
       myCollectionToDisplay.each(function(model){
         var newImg = new CamTrapItemView({
           model: model,
@@ -238,7 +236,26 @@ define([
 
       });
       if (this.tabView.length > 0){
-        this.focusFirstImg();
+        switch(this.pageChange){
+          case 'N':{
+            console.log("page suivante on focus la premiere");
+            this.pageChange = '';
+            this.currentPosition = 0;
+            break;
+          }
+          case 'P': {
+            console.log("page precedente on focus la derniere");
+            this.pageChange = '';
+            this.currentPosition = this.tabView.length-1;
+            break;
+          }
+          default:{
+            console.log('auto focus First');
+            this.currentPosition = 0;
+            break;
+          }
+        }
+        this.focusImg();
       }
     },
 
@@ -335,20 +352,26 @@ define([
     },
 
     nextPage : function(e) {
-      e.preventDefault();
-      e.stopPropagation();
+      if(e){
+        e.preventDefault();
+        e.stopPropagation();
+      }
       if( this.currentCollection.hasNextPage() ){
-        this.leaveModal();
+        //this.leaveModal();
+        this.pageChange = 'N';
         this.currentCollection.getNextPage();
       }
     },
 
     prevPage : function(e) {
-      e.preventDefault();
-      e.stopPropagation();
+      if(e){
+        e.preventDefault();
+        e.stopPropagation();
+      }
       if( this.currentCollection.hasPreviousPage() ){
         console.log("on a une page avant");
-        this.leaveModal();
+        //this.leaveModal();
+        this.pageChange = 'P';
         this.currentCollection.getPreviousPage();
       }
     },
@@ -395,6 +418,7 @@ define([
 
       if(this.currentPosition !== null && !this.stopSpace) { //il faut une position pour afficher le modal
         /*activate icon*/
+        this.stopSpace = true;
         $('#rgToolsBarTop .reneco-ecollectionsmall').removeClass('active');
         $('#rgToolsBarTop .reneco-image_file').addClass('active');
         if(this.rgModal.currentView === undefined) {
@@ -404,37 +428,52 @@ define([
           this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
           this.rgModal.currentView.onShow();
         }
-        this.stopSpace = true;
       }
     },
 
-    focusFirstImg(){
+    focusLastImg(){
       if( this.currentPosition === null) {//si aucune position
         if( this.tabView != null){
-          this.tabView[0].$el.find('img').focus(); // focus la premiere image
-          this.currentPosition = 0; //et on se place sur 0
-          this.tabView[0].$el.find('.vignette').toggleClass('active');
+          console.log("on va aller sur l'image "+this.tabView.length);
+          this.currentPosition = this.tabView.length-1; //et on se place sur 0
+          this.tabView[this.currentPosition].doFocus(); // focus la premiere image
+          this.tabView[this.currentPosition].$el.find('.vignette').toggleClass('active');
         }
       }
+
+    },
+
+    focusImg(){
+      if( this.currentPosition === null) {//si aucune position
+          this.currentPosition = 0;
+        }
+      if( this.tabView != null){
+        this.tabView[this.currentPosition].handleFocus(); // focus la premiere image
+        //this.currentPosition = 0; //et on se place sur 0
+        //this.tabView[0].$el.find('.vignette').toggleClass('active');
+      }
+
     },
 
     mouvement: function(e){
-
+      /** this.stopSpace handle up and down for the fullscreen **/
       if( this.currentPosition === null) {//si aucune position
-        this.focusFirstImg();
+        //this.focusFirstImg();
+        console.log('position is null ')
       }
       else{
         var lastPosition = this.currentPosition;//stock la position avant changement pour savoir si on a bougé
+
         switch(e.keyCode)
         {
           case 38: {// up
-            if ( this.currentPosition - 6 >= 0){
+            if ( this.currentPosition - 6 >= 0 && !this.stopSpace ){
               this.currentPosition-=6;
             }
             break;
           }
           case 40: {//down
-            if ( this.currentPosition + 6 <= this.tabView.length - 1 ){
+            if ( this.currentPosition + 6 <= this.tabView.length - 1 && !this.stopSpace ){
               this.currentPosition+=6;
             }
             break;
@@ -442,6 +481,11 @@ define([
           case 37: { //left
             if ( this.currentPosition - 1 >= 0 ){
               this.currentPosition-=1;
+            } else {
+              /// TODO je change de page (précédente)
+              console.log('page précéndente mvt')
+              this.prevPage();
+              return;
             }
             break;
           }
@@ -449,19 +493,24 @@ define([
           case 39: {//right
             if ( this.currentPosition + 1 <= this.tabView.length - 1 ){
               this.currentPosition+=1;
+            }else {
+              /// TODO je change de page (suivante)
+              console.log('page suivante mvt')
+              this.nextPage();
+              return;
             }
             break;
           }
         }
 
         if (lastPosition !== this.currentPosition) {// si on a bougé
-          this.tabView[this.currentPosition].$el.find('img').focus();//on change le focus
-          this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
-          this.tabView[this.currentPosition].$el.find('.vignette').toggleClass('active');
+          this.tabView[lastPosition].handleFocus();
+          this.tabView[this.currentPosition].handleFocus();
           if( this.rgModal.currentView !== undefined){//si le modal existe on change
             this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
           }
         }
+
       }
 
     },
@@ -512,7 +561,7 @@ define([
 
     displayAll: function (e){
       this.currentCollection = this.myImageCollection;
-      this.ui.gallery.html('');
+      //this.ui.gallery.html('');
       this.ui.paginator.html('');
       this.displayImages(this.myImageCollection);
       this.displayPaginator(this.paginator);
@@ -552,7 +601,7 @@ define([
         }
         else if ($elem.hasClass('allphotos') ){
           //remet la collection mere
-          this.ui.gallery.html('');
+          //this.ui.gallery.html('');
           this.displayImages(this.myImageCollection);
           this.ui.paginator.html('');
           this.displayPaginator(this.paginator);
@@ -613,148 +662,10 @@ define([
         _this.displayImages(_this.myImageCollectionFiltered);
       });
 
-      this.ui.gallery.html('');
+      //this.ui.gallery.html('');
       this.displayImages(this.myImageCollectionFiltered);
       this.ui.paginator.html('');
       this.displayPaginator(this.myPaginationFiltered);
-/*
-      if( typeof this.myImageCollectionFiltered != 'undefined') {
-        console.log("on reset collection filter");
-        //console.log(JSON.stringify(this.filterModelFiltered.updateFilter( {validated : 4}).models) );
-        this.myImageCollectionFiltered.parse(
-          { "total_entries" : this.filterModelFiltered.updateFilter( {validated : 4}).models.length},
-          JSON.stringify(this.filterModelFiltered.updateFilter( {validated : 4}).models)
-        );
-
-        console.log(this.myImageCollectionFiltered);
-      }
-      else{
-        console.log("on new la collection filter");
-        this.myImageCollectionFiltered = new paginationFiltered(this.filterModelFiltered.models)
-      }
-      if( typeof this.myPaginationFiltered != 'undefined') {
-        console.log("on detruit pagination filter");
-        this.myPaginationFiltered = null;
-      }
-      else{
-        console.log("création pagination premiere");
-        this.myPaginationFiltered = new Backgrid.Extension.Paginator({
-          collection: this.myImageCollectionFiltered
-        });
-        _this.ui.gallery.html('');
-        _this.displayImages(_this.myImageCollectionFiltered);
-        _this.ui.paginator.html('');
-        _this.displayPaginator(_this.myPaginationFiltered);
-      }
-
-      this.listenTo(this.myImageCollectionFiltered, "reset", function(e){
-        console.log("RESET DE LA COLLECTION");
-        _this.displayImages(this.myImageCollectionFiltered);
-      });
-      console.log(this.myImageCollectionFiltered);
-      console.log(this.myPaginationFiltered);
-      //_this.myImageCollectionFiltered.parse({ "total_entries" : _this.myImageCollectionFiltered.models.length},_this.myImageCollectionFiltered.models );
-      console.log(this.myImageCollectionFiltered);
-      this.myPaginationFiltered = new Backgrid.Extension.Paginator({
-        collection: this.myImageCollectionFiltered
-      }); // quand la collection a fetch on instantie la pagination
-      console.log(this.myPaginationFiltered);
-      this.ui.gallery.html('');
-      this.displayImages(this.myImageCollectionFiltered);
-      this.ui.paginator.html('');
-      this.displayPaginator(this.myPaginationFiltered);
-      this.currentCollection = this.myImageCollectionFiltered;
-
-      if( this.ui.gallery.html() === '' )
-      {
-        this.ui.gallery.html('NO IMAGES TO DISPLAY')
-      }
-      else {
-      //  console.log(this.ui.gallery.html());
-      }
-      //this.focusFirstImg();
-*/
-    },
-
-    displayValidated: function (e){
-      var _this = this ;
-
-      var filterModelValidated = new virtualcollection(this.myImageCollection.fullCollection ,
-        {
-          filter : {validated : 2}
-        });
-
-      var paginationFiltered = PageColl.extend({
-        mode: 'client',
-        state: {
-          pageSize: 24
-        },
-        url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
-      });
-
-      this.myImageCollectionValidated = new paginationFiltered(filterModelValidated.models)
-      this.myPaginationValidated = new Backgrid.Extension.Paginator({
-        collection: this.myImageCollectionValidated
-      });
-
-      this.listenTo(this.myImageCollectionValidated, "reset", function(e,z){
-        _this.displayImages(_this.myImageCollectionValidated);
-      });
-      this.currentCollection = this.myImageCollectionValidated;
-      this.ui.gallery.html('');
-      this.ui.paginator.html('');
-      this.displayImages(this.myImageCollectionValidated);
-      this.displayPaginator(this.myPaginationValidated);
-      if( this.ui.gallery.html() === '' )
-      {
-        this.ui.gallery.html('NO IMAGES TO DISPLAY')
-      }
-      else {
-        console.log(this.ui.gallery.html());
-      }
-      //this.focusFirstImg();
-
-    },
-
-    displayDeleted: function (e){
-      /*var filterModel = this.myImageCollection.fullCollection.where({validated:false});
-      console.log(filterModel);
-      filterModel[0].set("validated",true);*/
-      var _this = this ;
-
-      var filterModelDeleted = new virtualcollection(this.myImageCollection.fullCollection ,
-        {
-          filter : {validated : 4}
-        });
-
-      var paginationFiltered = PageColl.extend({
-        mode: 'client',
-        state: {
-          pageSize: 24
-        },
-        url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
-      });
-
-      this.myImageCollectionDeleted = new paginationFiltered(filterModelDeleted.models)
-      this.myPaginationDeleted = new Backgrid.Extension.Paginator({
-        collection: this.myImageCollectionDeleted
-      });
-
-      this.listenTo(this.myImageCollectionDeleted, "reset", function(e,z){
-        _this.displayImages(_this.myImageCollectionDeleted);
-      });
-
-      this.currentCollection = this.myImageCollectionDeleted
-
-      this.ui.gallery.html('');
-      this.ui.paginator.html('');
-      this.displayImages(this.myImageCollectionDeleted);
-      this.displayPaginator(this.myPaginationDeleted);
-      if( this.ui.gallery.html() === '' )
-      {
-        this.ui.gallery.html('NO IMAGES TO DISPLAY')
-      }
-      //this.focusFirstImg();
 
     },
 
@@ -776,7 +687,17 @@ define([
                   closeOnConfirm: true,
                 },
                 function() {
-                  console.log("je force la validation");
+                  $.ajax({
+                    url : config.coreUrl+'sensors/'+_this.type+'/uncheckedDatas',
+                    method: 'POST',
+                    data: {data : JSON.stringify(_this.myImageCollection.fullCollection) },
+                    context: _this,
+                  })
+                  .done( function(response,status,jqXHR) {
+                  })
+                  .fail( function(jqXHR, textStatus, errorThrown) {
+
+                  });
                   //TODO mettre le status validated a 8 pour sauvegarder la validation de force
 
                 }
@@ -816,10 +737,6 @@ define([
 
 
     validateAll: function() {
-      console.log("on veut tout valider ");
-      console.log("et bim bam boom");
-      console.log("toto et mario");
-      var compteur = {};
       if( this.nbphotosnotchecked >0 || this.nbPhotosChecked > 0) {
         this.displaySwalUnchecked();
       }

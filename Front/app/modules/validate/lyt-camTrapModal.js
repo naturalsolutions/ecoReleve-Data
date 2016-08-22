@@ -47,18 +47,31 @@ define([
 		});
 		},
 		render: function(){
+			console.log("je render le modal ");
+			console.log(this.model.get("validated"));
+			console.log(this.parent.stopSpace);
+			if( !this.model.get("validated")  && this.parent.stopSpace) {
+				console.log("position : "+this.parent.currentPosition);
+			 this.model.set("validated" , 1 ); //Si focus alors la photo est vu
+			 //this.setVisualValidated(1);
+			 this.parent.tabView[this.parent.currentPosition].setVisualValidated(1);
+			 //this.setVisualValidated(1);
+			 this.changeImage(this.model);
+		 }
 		},
 
     onShow: function() {
 			this.$elementPopover.popover('show');
+			this.parent.$el.find('.backgrid-paginator').css('visibility','hidden');
     },
 
 		changeImage:function (model) {
 			this.model = model;
 			this.evalStatusPhoto(model);
-			console.log(this.statusPhotos);
+			//console.log(this.statusPhotos);
 			this.parent.$el.find('.popover-header').text(this.statusPhotos.textStatus).css(this.statusPhotos.class);
 			this.parent.$el.find('.popover-content img').attr("src", this.model.get('path')+''+this.model.get('name') );
+			this.parent.$el.find('.popover-footer').text(this.model.get('date_creation'));
 			this.render();
 		},
 		evalStatusPhoto: function(model){
@@ -88,6 +101,7 @@ define([
 
 		},
 		hide: function(){
+			this.parent.$el.find('.backgrid-paginator').css('visibility','visible');
 			this.$elementPopover.popover('hide');
 		},
 

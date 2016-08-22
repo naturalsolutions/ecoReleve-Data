@@ -24,10 +24,10 @@ define([
 			"change": "changeValid"
 		},
 		events:{
-			'click img':'doFocus',
-			'focusin img' : 'handleFocus',
+			'click img':'clickFocus',
+			//'focusin img' : 'handleFocus',
 			//'dblclick':'handleFocus',
-			'mouseenter img': 'hoveringStart',
+		//	'mouseenter img': 'hoveringStart',
 		//	'keydown' : 'keyPressed',
 		//	'focusin' : 'handleFocus',
 		//	'focusout' : 'leaveFocus',
@@ -35,16 +35,21 @@ define([
 		},
 		className : 'col-md-2 text-center imageCamTrap',
 		template : 'app/modules/validate/templates/tpl-image.html',
-		doFocus : function(){
-			this.$el.find('img').focus();
-		},
-		handleFocus: function() {
+
+		clickFocus : function(e){
+		//	this.$el.find('img').focus();
 			var lastPosition = this.parent.currentPosition;
 			if(lastPosition === null)
 			lastPosition = 0;
-			this.parent.currentViewImg = this;
+			//this.parent.currentViewImg = this;
 			//TODO fait bugguer la position pour le
 			this.parent.currentPosition = this.parent.currentCollection.indexOf(this.model);
+			this.parent.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
+			this.handleFocus();
+		},
+
+		handleFocus: function(e) {
+			this.$el.find('.vignette').toggleClass('active');
 			// if( lastPosition != this.parent.currentPosition){
 			// 	console.log("on a changé de position on détrui et on instantie");
 			// 	console.log(this.lastzoom);
@@ -71,14 +76,9 @@ define([
 			// 		});
 			// }
 			this.parent.fillTagsInput();
-			if( !this.model.get("validated") )
-			this.model.set("validated" , 1 ); //Si focus alors la photo est vu
-			this.setVisualValidated(1);
-			if(lastPosition != this.parent.currentPosition){
-				this.parent.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
-				this.parent.tabView[this.parent.currentPosition].$el.find('.vignette').toggleClass('active');
-			}
-
+			// if( !this.model.get("validated") )
+			// this.model.set("validated" , 1 ); //Si focus alors la photo est vu
+			// this.setVisualValidated(1);
 		},
 		hoveringStart:function(){
 			console.log("je survole la photo");
@@ -190,7 +190,12 @@ define([
 					break;
 				}
 				case 4 : {
-					this.model.set("validated" , 2 );
+					this.model.set("validated" , 1 );
+					this.setVisualValidated(1);
+					break;
+				}
+				case null : {
+					this.model.set("validated", 2 );
 					this.setVisualValidated(2);
 					break;
 				}
@@ -200,7 +205,8 @@ define([
 		setVisualValidated : function(valBool){
 			switch(this.model.get("validated") ) {
 				case 1 :{// not checked
-					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');
+					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');$
+					if( this.$el.hasClass('refused') ) this.$el.removeClass('refused');
 					if( !this.$el.hasClass('checked') ) this.$el.addClass('checked');
 					break;
 				}
