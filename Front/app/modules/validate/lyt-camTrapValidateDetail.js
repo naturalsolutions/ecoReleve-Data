@@ -58,8 +58,8 @@ define([
     events: {
       'click button#validate': 'validate',
       'click button#refusedBtn': 'rejectPhoto',
-      'click button#upStarsBtn': 'increaseStars',
-      'click button#downStarsBtn': 'decreaseStars',
+      'click button#upStarsBtn': 'leftMouvement',
+      'click button#downStarsBtn': 'rightMouvement',
       'click button#acceptedBtn': 'acceptPhoto',
       'click button#validate' : 'validateAll',
       'click .reneco-ecollectionsmall' : 'clickOnIconeView',
@@ -113,10 +113,12 @@ define([
           this.displayModal(e);
         }
         else{
+          ;
             //console.log("list file");
         }
       }else{
-        console.log("rien a faire");
+        ;
+        //console.log("rien a faire");
       }
       e.stopPropagation();
     },
@@ -216,7 +218,6 @@ define([
 
     displayImages: function(myCollectionToDisplay){
       var _this = this;
-      console.log(myCollectionToDisplay);
       this.currentCollection = myCollectionToDisplay;
       var ImageModel = new CamTrapImageModel();
       //TODO detruit les view a la main sinon pb avec les models
@@ -237,35 +238,33 @@ define([
       });
       if (this.tabView.length > 0){
         switch(this.pageChange){
-          case 'N':{
-            console.log("page suivante on focus la premiere");
+          case 'N':{//next page
             this.pageChange = '';
-            this.currentPosition = 0;
+            this.currentPosition = 0;//position to focus
             break;
           }
-          case 'P': {
-            console.log("page precedente on focus la derniere");
+          case 'P': {//previous page
             this.pageChange = '';
-            this.currentPosition = this.tabView.length-1;
+            this.currentPosition = this.tabView.length-1; //position to focus
             break;
           }
           default:{
-            console.log('auto focus First');
             this.currentPosition = 0;
             break;
           }
         }
         this.focusImg();
+        if( this.rgModal.currentView !== undefined){//si le modal existe on change
+          this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+        }
       }
     },
 
     destroyViews : function(tabView){
-
       for(var i = 0 ; i < tabView.length ; i++)
       {
         tabView[i].destroy();
       }
-
     },
 
     displaySensorForm: function() {
@@ -357,7 +356,6 @@ define([
         e.stopPropagation();
       }
       if( this.currentCollection.hasNextPage() ){
-        //this.leaveModal();
         this.pageChange = 'N';
         this.currentCollection.getNextPage();
       }
@@ -369,8 +367,6 @@ define([
         e.stopPropagation();
       }
       if( this.currentCollection.hasPreviousPage() ){
-        console.log("on a une page avant");
-        //this.leaveModal();
         this.pageChange = 'P';
         this.currentCollection.getPreviousPage();
       }
@@ -434,7 +430,6 @@ define([
     focusLastImg(){
       if( this.currentPosition === null) {//si aucune position
         if( this.tabView != null){
-          console.log("on va aller sur l'image "+this.tabView.length);
           this.currentPosition = this.tabView.length-1; //et on se place sur 0
           this.tabView[this.currentPosition].doFocus(); // focus la premiere image
           this.tabView[this.currentPosition].$el.find('.vignette').toggleClass('active');
@@ -457,11 +452,7 @@ define([
 
     mouvement: function(e){
       /** this.stopSpace handle up and down for the fullscreen **/
-      if( this.currentPosition === null) {//si aucune position
-        //this.focusFirstImg();
-        console.log('position is null ')
-      }
-      else{
+      if( this.currentPosition !== null) {
         var lastPosition = this.currentPosition;//stock la position avant changement pour savoir si on a bougé
 
         switch(e.keyCode)
@@ -482,8 +473,6 @@ define([
             if ( this.currentPosition - 1 >= 0 ){
               this.currentPosition-=1;
             } else {
-              /// TODO je change de page (précédente)
-              console.log('page précéndente mvt')
               this.prevPage();
               return;
             }
@@ -494,8 +483,6 @@ define([
             if ( this.currentPosition + 1 <= this.tabView.length - 1 ){
               this.currentPosition+=1;
             }else {
-              /// TODO je change de page (suivante)
-              console.log('page suivante mvt')
               this.nextPage();
               return;
             }
@@ -513,6 +500,16 @@ define([
 
       }
 
+    },
+
+    rightMouvement: function() {
+      var simE =  {keyCode : 39};
+      this.mouvement(simE);
+    },
+
+    leftMouvement: function() {
+    var simE =  {keyCode : 37};
+      this.mouvement(simE);
     },
 
     findInput: function(e){
@@ -631,7 +628,6 @@ define([
         url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
       });
 
-      console.log(this.filterModelFiltered);
       this.displayFiltered();
     },
 
