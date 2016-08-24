@@ -38,7 +38,7 @@ define([
       'click table.backgrid th input': 'checkSelectAll',
       'click button#filter': 'filter',
       'change table td': 'setFieldActivity',
-      //'click button#clear': 'clearFilter',
+      'click button#clear': 'clearFilter',
     },
 
     initialize: function(options) {
