@@ -24,6 +24,8 @@ define([
 			this.statusPhotos ={};
 			this.statusPhotos.textStatus = "";
 			this.statusPhotos.class = {'color' : 'white'} ;
+			this.position = this.parent.currentCollection.fullCollection.indexOf(this.model) + 1 ;
+			this.total = this.parent.currentCollection.fullCollection.length;
 			this.evalStatusPhoto(this.model);
 
 			this.$elementPopover.popover({
@@ -38,20 +40,13 @@ define([
 				content: function(){
 					return '<div class="popover-header" style="color:'+_this.statusPhotos.class.color+';">'+_this.statusPhotos.textStatus+'</div>'
 								+' <img src='+_this.model.get('path')+''+_this.model.get('name')+'  />'
-								+'<div class="popover-footer">'+_this.model.get('date_creation')+'</div>'
+								+'</div>'
 								;
 				},
-				header: function(){
-					return 'toto';
-				}
 		});
 		},
 		render: function(){
-			console.log("je render le modal ");
-			console.log(this.model.get("validated"));
-			console.log(this.parent.stopSpace);
 			if( !this.model.get("validated")  && this.parent.stopSpace) {
-				console.log("position : "+this.parent.currentPosition);
 			 this.model.set("validated" , 1 ); //Si focus alors la photo est vu
 			 //this.setVisualValidated(1);
 			 this.parent.tabView[this.parent.currentPosition].setVisualValidated(1);
@@ -63,15 +58,25 @@ define([
     onShow: function() {
 			this.$elementPopover.popover('show');
 			this.parent.$el.find('.backgrid-paginator').css('visibility','hidden');
+			this.parent.$el.find('.paginatorCamTrap').prepend('<div class="infosfullscreen">'
+											+this.model.get('date_creation')+''
+											+'<span class="indexposition">'+this.position+'/'+this.total+'</span>'
+											+'  </div>');
+			//this.parent.$el.find('.backgrid-paginator').html("hohoho hahaha");
     },
 
 		changeImage:function (model) {
 			this.model = model;
+			this.position = this.parent.currentCollection.fullCollection.indexOf(model)  + 1 ;
+			this.total = this.parent.currentCollection.fullCollection.length;
 			this.evalStatusPhoto(model);
-			//console.log(this.statusPhotos);
-			this.parent.$el.find('.popover-header').text(this.statusPhotos.textStatus).css(this.statusPhotos.class);
-			this.parent.$el.find('.popover-content img').attr("src", this.model.get('path')+''+this.model.get('name') );
-			this.parent.$el.find('.popover-footer').text(this.model.get('date_creation'));
+			this.parent.$el.find('.popover-content').html('<div class="popover-header" style="color:'+this.statusPhotos.class.color+';">'+this.statusPhotos.textStatus+'</div>'
+						+' <img src='+this.model.get('path')+''+this.model.get('name')+'  />'
+						+'</div>');
+			this.parent.$el.find('.infosfullscreen').html('<div class="infosfullscreen">'
+											+this.model.get('date_creation')+''
+											+'<span class="indexposition">'+this.position+'/'+this.total+'</span>'
+											+'  </div>');
 			this.render();
 		},
 		evalStatusPhoto: function(model){
@@ -101,8 +106,10 @@ define([
 
 		},
 		hide: function(){
+			this.parent.$el.find('.infosfullscreen').remove();
 			this.parent.$el.find('.backgrid-paginator').css('visibility','visible');
 			this.$elementPopover.popover('hide');
+
 		},
 
   });
