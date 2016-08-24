@@ -136,13 +136,11 @@ define([
 
 		changeValid: function(e){
 			var _this = this;
-			console.log("modele change");
-			console.log(e);
+			var detectError = false;
 			this.model.save(
 				e.Changed,{
 					error : function() {
-							//TODO faire une alerte pour informer l'utilisateur que sa modif n'a pas été pris en compte
-							console.log("une erreur je repercute pas");
+							detectError = true;
 							_this.model.set(_this.model.previousAttributes(),{silent: true});
 							var n = noty({
 								layout : 'bottomLeft',
@@ -152,13 +150,15 @@ define([
 							_this.setVisualValidated(_this.model.get("validated"));
 					},
 					success :function(){
-						console.log("parent changer compteur");
 						_this.parent.refreshCounter();
 					},
 					patch : true,
 				 	wait : true,
 				}
 			);
+			if( this.parent.stopSpace && !detectError && this.parent.rgModal.currentView) { // if fullscreen mode refresh view
+				this.parent.rgModal.currentView.changeImage(this.model);
+			}
 			//this.render();
 		},
 
@@ -176,7 +176,6 @@ define([
 		},
 
 		toggleModelStatus : function (){
-			console.log("je suis dans toggle");
 			switch( this.model.get("validated") ){
 				case 1 : {
 					this.model.set("validated", 2 );
@@ -194,9 +193,9 @@ define([
 					this.setVisualValidated(1);
 					break;
 				}
-				case null : {
-					this.model.set("validated", 2 );
-					this.setVisualValidated(2);
+				case 0 : {
+					this.model.set("validated", 1 );
+					this.setVisualValidated(1);
 					break;
 				}
 			}
@@ -205,8 +204,9 @@ define([
 		setVisualValidated : function(valBool){
 			switch(this.model.get("validated") ) {
 				case 1 :{// not checked
-					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');$
+					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');
 					if( this.$el.hasClass('refused') ) this.$el.removeClass('refused');
+					if( this.$el.hasClass('accepted') ) this.$el.removeClass("accepted");
 					if( !this.$el.hasClass('checked') ) this.$el.addClass('checked');
 					break;
 				}
