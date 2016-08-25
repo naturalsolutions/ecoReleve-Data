@@ -10,9 +10,10 @@ define([
 	'ez-plus',
   'backbone.marionette.keyShortcuts',
 	'noty',
+	'jquery.rateit',
 
 
-], function($, _, Backbone, Marionette, Translater, config , ModalView , CamTrapImageModel ,ezPlus, BckMrtKeyShortCut, noty ) {
+], function($, _, Backbone, Marionette, Translater, config , ModalView , CamTrapImageModel ,ezPlus, BckMrtKeyShortCut, noty, RateIt ) {
 
   'use strict';
   return Marionette.ItemView.extend({
@@ -91,6 +92,9 @@ define([
 		},
 
 		onRender: function(){
+			console.log(this.$el.find('.rateit') );
+			this.$el.find('.rateit').rateit();
+			this.$el.find('.rateit').bind('rated', function() { alert('rating: ' + $(this).rateit('value')); });
 			switch(this.model.get("validated") ) {
 				case 1 : {
 					this.$el.addClass("checked");
@@ -227,6 +231,15 @@ define([
 
 		onDestroy: function(){
 			console.log("bim destroy");
+		},
+
+		increaseStar: function(){
+			console.log("on veut augmenter le nombre d'étoiles");
+			this.$el.find('.rateit').rateit('value',this.$el.find('.rateit').rateit('value') +1 );
+		},
+		decreaseStar: function(){
+			console.log("on veut augmenter le nombre d'étoiles");
+			this.$el.find('.rateit').rateit('value',this.$el.find('.rateit').rateit('value') - 1 );
 		}
 
 	});

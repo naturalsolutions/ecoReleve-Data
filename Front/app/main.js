@@ -57,6 +57,7 @@ require.config({
     'resumable': '../bower_components/resumable.js/resumable',
 
 
+
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
 
@@ -79,6 +80,7 @@ require.config({
     'backbone.marionette.keyShortcuts': 'vendors/marionette/backbone.marionette.keyshortcuts',
     'backbone.virtualcollection' : '../bower_components/backbone.virtualcollection/backbone.virtual-collection',
     'noty' : '../bower_components/noty/js/noty/packaged/jquery.noty.packaged',
+    'jquery.rateit': '../bower_components/jquery.rateit/scripts/jquery.rateit',
 
   },
   map: {
@@ -204,7 +206,12 @@ require.config({
       deps:[
         'jquery',
       ]
-    }
+    },
+    'jquery.rateit':{
+      deps:[
+        'jquery',
+      ]
+    },
   },
 });
 

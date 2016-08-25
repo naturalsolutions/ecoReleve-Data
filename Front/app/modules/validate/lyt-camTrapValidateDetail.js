@@ -45,8 +45,13 @@ define([
       'left' : 'mouvement',
       'right' : 'mouvement',
       'tab': 'findInput',
+      '+': 'addStars',
+      '-': 'decreaseStars',
       'space': 'displayModal',
       'backspace' : 'toggleModelStatus',
+      'enter':'acceptPhoto',
+      'del':'rejectPhoto',
+      'ctrl': 'undeterminatePhoto',
       'esc' : 'leaveModal',
       'pagedown': 'nextPage',
       'pageup' : 'prevPage',
@@ -97,6 +102,12 @@ define([
       'rgModal': '#rgModal',
       'rgToolsBar' :'#rgToolsBar',
       'rgToolsBarTop' : '#rgToolsBarTop'
+    },
+    addStars: function(e){
+        this.tabView[this.currentPosition].increaseStar();
+    },
+    decreaseStars: function(e){
+        this.tabView[this.currentPosition].decreaseStar();
     },
   clickOnIconeView : function(e){
       var _this = this;

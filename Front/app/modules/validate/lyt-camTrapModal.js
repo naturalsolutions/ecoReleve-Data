@@ -6,8 +6,9 @@ define([
 	'marionette',
 	'translater',
 	'config',
+	'ez-plus',
 
-], function($, _, Backbone, Marionette, Translater, config) {
+], function($, _, Backbone, Marionette, Translater, config , ezPlus) {
 
   'use strict';
 

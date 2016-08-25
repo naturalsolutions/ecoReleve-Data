@@ -35,7 +35,8 @@
     "ez-plus": "^1.1.20",
     "bootstrap-tagsinput": "^0.8.0",
     "backbone.virtualcollection": "^0.6.13",
-    "noty": "^2.3.8"
+    "noty": "^2.3.8",
+    "jquery.rateit": "^1.0.24"
   },
   "resolutions": {
     "jquery": "1.10.2",
