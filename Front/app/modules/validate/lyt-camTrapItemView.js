@@ -26,7 +26,7 @@ define([
 		events:{
 			'click img':'clickFocus',
 			//'focusin img' : 'handleFocus',
-			//'dblclick':'handleFocus',
+			'dblclick img': 'goFullScreen',
 		//	'mouseenter img': 'hoveringStart',
 		//	'keydown' : 'keyPressed',
 		//	'focusin' : 'handleFocus',
@@ -85,12 +85,6 @@ define([
 			console.log("je charge la photo");
 		},
 
-		leaveFocus: function() {
-		},
-		testModal: function(e) {
-			e.preventDefault();
-		},
-
 		initialize : function(options) {
 			this.parent = options.parent;
 			this.lastzoom = null;
@@ -145,7 +139,7 @@ define([
 							var n = noty({
 								layout : 'bottomLeft',
 								type : 'error',
-								text : 'Connection problem for modification \n <img src='+_this.model.get('path')+'/thumbnails/'+_this.model.get('name')+'><br> Not modified please retry (if the problem persist check your connection or contact an admin)'
+								text : 'Connection problem for modification \n <br> Not modified please retry (if the problem persist check your connection or contact an admin)'
 							});
 							_this.setVisualValidated(_this.model.get("validated"));
 					},
@@ -225,6 +219,10 @@ define([
 					break;
 				}
 			}
+		},
+
+		goFullScreen: function(e) {
+			this.parent.displayModal(e);
 		},
 
 		onDestroy: function(){

@@ -58,8 +58,9 @@ define([
     events: {
       'click button#validate': 'validate',
       'click button#refusedBtn': 'rejectPhoto',
-      'click button#upStarsBtn': 'leftMouvement',
-      'click button#downStarsBtn': 'rightMouvement',
+      'click button#checkedBtn': 'undeterminatePhoto',
+      'click button#leftMouvementBtn': 'leftMouvement',
+      'click button#rightMouvementBtn': 'rightMouvement',
       'click button#acceptedBtn': 'acceptPhoto',
       'click button#validate' : 'validateAll',
       'click .reneco-ecollectionsmall' : 'clickOnIconeView',
@@ -390,6 +391,12 @@ define([
         this.tabView[this.currentPosition].setModelValidated(4);
       }
 
+    },
+    undeterminatePhoto : function(e) {
+
+      if(this.currentPosition !== null ) {
+        this.tabView[this.currentPosition].setModelValidated(1);
+      }
     },
 
     toggleModelStatus: function(e){

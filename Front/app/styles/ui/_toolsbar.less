@@ -28,13 +28,25 @@
           color : white;
         }
       }
+      #checked{
+        #checkedBtn{
+          background: #666;
+          color : white;
+        }
+      }
+      #accepted{
+        #acceptedBtn{
+          background: #39b34a;
+          color : white;
+        }
+      }
 
       #mouvementAction{
         #leftMouvement{
           .reneco{
             color: white;
           }
-          #upStarsBtn{
+          #leftMouvementBtn{
             background: #666;
           }
         }
@@ -42,18 +54,12 @@
           .reneco{
             color: white;
           }
-          #downStarsBtn{
+          #rightMouvementBtn{
             background: #666;
           }
         }
       }
 
-      #accepted{
-        #acceptedBtn{
-          background: #39b34a;
-          color : white;
-        }
-      }
 
     }
 }
@@ -111,7 +117,7 @@
   #js_notchecked_top{
     cursor: pointer;
   }
-  .accepted:after{
+  .accepted:before{
     font-family: 'reneco' !important;
     content: "\e62a";
     position:relative;
@@ -128,7 +134,7 @@
   #nbphotosrefused{
     color : red;
   }
-  .refused:after{
+  .refused:before{
     font-family: 'reneco' !important;
     content: "\e65e";
     position:relative;
@@ -144,7 +150,7 @@
   #nbphotoschecked{
     color : white;
   }
-  .checked:after{
+  .checked:before{
     font-family: 'reneco' !important;
     content: "\e912";
     position:relative;
@@ -159,7 +165,7 @@
   #nbphotosnotchecked{
     color : white;
   }
-  .notchecked:after{
+  .notchecked:before{
     font-family: 'reneco' !important;
     content: "\e644";
     position:relative;

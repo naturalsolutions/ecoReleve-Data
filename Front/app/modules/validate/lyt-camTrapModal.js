@@ -23,7 +23,7 @@ define([
 			var _this = this;
 			this.statusPhotos ={};
 			this.statusPhotos.textStatus = "";
-			this.statusPhotos.class = {'color' : 'white'} ;
+			this.statusPhotos.class = "" ;
 			this.position = this.parent.currentCollection.fullCollection.indexOf(this.model) + 1 ;
 			this.total = this.parent.currentCollection.fullCollection.length;
 			this.evalStatusPhoto(this.model);
@@ -38,7 +38,7 @@ define([
 				html: true,
 				trigger : 'manual',
 				content: function(){
-					return '<div class="popover-header" style="color:'+_this.statusPhotos.class.color+';">'+_this.statusPhotos.textStatus+'</div>'
+					return '<div class="popover-header"> <span class="'+_this.statusPhotos.class+'">'+_this.statusPhotos.textStatus+'</span></div>'
 								+' <img src='+_this.model.get('path')+''+_this.model.get('name')+'  />'
 								+'</div>'
 								;
@@ -67,10 +67,10 @@ define([
 
 		changeImage:function (model) {
 			this.model = model;
-			this.position = this.parent.currentCollection.fullCollection.indexOf(model)  + 1 ;
+			this.position = this.parent.currentCollection.fullCollection.indexOf(model) +1 ;
 			this.total = this.parent.currentCollection.fullCollection.length;
 			this.evalStatusPhoto(model);
-			this.parent.$el.find('.popover-content').html('<div class="popover-header" style="color:'+this.statusPhotos.class.color+';">'+this.statusPhotos.textStatus+'</div>'
+			this.parent.$el.find('.popover-content').html('<div class="popover-header"> <span class="'+this.statusPhotos.class+'">'+this.statusPhotos.textStatus+'</span></div>'
 						+' <img src='+this.model.get('path')+''+this.model.get('name')+'  />'
 						+'</div>');
 			this.parent.$el.find('.infosfullscreen').html('<div class="infosfullscreen">'
@@ -83,23 +83,23 @@ define([
 			switch(  this.model.get('validated') )
 			{
 				case 1:{
-					this.statusPhotos.textStatus  = "UNDERTEMINATE";
-					this.statusPhotos.class = {'color' :'white'}
+					this.statusPhotos.textStatus  = "UNDETERMINATE";
+					this.statusPhotos.class = "chckd"
 					break;
 				}
 				case 2:{
 					this.statusPhotos.textStatus = "ACCEPTED";
-					this.statusPhotos.class = {'color' :'green'}
+					this.statusPhotos.class = "accptd"
 					break;
 				}
 				case 4:{
 					this.statusPhotos.textStatus = "REFUSED";
-					this.statusPhotos.class = {'color' :'red'}
+					this.statusPhotos.class = "rfsd"
 					break;
 				}
 				defaults:{
 					this.statusPhotos.textStatus = "";
-					this.statusPhotos.class = {'color' :'white'}
+					this.statusPhotos.class = ""
 					break;
 				}
 			}
