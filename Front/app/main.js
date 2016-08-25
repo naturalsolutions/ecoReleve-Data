@@ -54,6 +54,7 @@ require.config({
     'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
 
     'ns_filter_bower': '../bower_components/NaturalJS_Filter/model-filter',
+    'ag-grid': '../bower_components/ag-grid/dist/ag-grid',
 
 
     /*==========  Vendors  ==========*/

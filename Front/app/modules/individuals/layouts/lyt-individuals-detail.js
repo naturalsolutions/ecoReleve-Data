@@ -9,13 +9,14 @@ define([
   'ns_grid/model-grid',
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
-  'ns_navbar/ns_navbar',
+  /*'ns_navbar/ns_navbar',*/
   'ns_modules/ns_com',
   'ns_filter_bower',
-  'backbone.paginator'
+  'backbone.paginator',
+  'ns_modules/ns_navbar/ns_navbar.view',
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
- NsGrid, NsMap, NsForm, Navbar, Com,NsFilter,PageColl
+ NsGrid, NsMap, NsForm, /*Navbar,*/ Com,NsFilter,PageColl, Navbar
 ) {
 
   'use strict';
@@ -64,12 +65,12 @@ define([
       }else {
         this.translater = Translater.getTranslater();
         this.model = options.model;
-        this.navbar = new Navbar({
-          parent: this,
-          globalGrid: options.globalGrid,
-          model: options.model,
-        });
       }
+      this.navbar = new Navbar({
+        parent: this,
+        globalGrid: options.globalGrid,
+        model: options.model,
+      });
       this.com = new Com();
       this.nbLocations = [];
     },

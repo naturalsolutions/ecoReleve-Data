@@ -13,12 +13,18 @@ define([
   'ns_filter_bower',
   './lyt-individuals-detail',
   './lyt-individuals-new',
- 'dateTimePicker',
+  'dateTimePicker',
+
+
+  'ns_grid/grid.view',
+
 
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv,dateTimePicker
+  Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv,dateTimePicker,
+  GridView
+
 ) {
 
   'use strict';
@@ -50,6 +56,7 @@ define([
 
     regions: {
       detail: '#detail',
+      rgGrid: '#rgGrid'
     },
 
     rootUrl: '#individuals/',
@@ -72,11 +79,20 @@ define([
       console.log(this.$el.find('#datetimepicker2'))
       this.$el.find('#datetimepicker2').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
       this.displayFilter();
-      this.displayGrid();
+      this.displayAGGrid();
+      //this.displayGrid();
+
       if (this.indivId) {
         this.detail.show(new LytIndivDetail({indivId: this.indivId}));
         this.ui.detail.removeClass('hidden');
       }
+    },
+
+    displayAGGrid: function(){
+        this.rgGrid.show(new GridView({
+          url: config.coreUrl + 'individuals/',
+          type: 'individuals'
+        }));
     },
 
     displayGrid: function() {
@@ -108,9 +124,17 @@ define([
       this.ui.grid.html(this.grid.displayGrid());
       this.ui.paginator.html('');
       this.ui.paginator.append(this.grid.displayPaginator());
+
     },
 
     rowClicked: function(row) {
+      //ag-grid not yet compatible
+      window.currentData = {
+        type: 'individuals',
+        collection: this.grid.collection,
+        model: row.model,
+      };
+
       this.detail.show(new LytIndivDetail({
         model: row.model,
         globalGrid: this.grid
@@ -120,6 +144,7 @@ define([
       this.grid.currentRow = row;
       this.grid.upRowStyle();
       this.ui.detail.removeClass('hidden');
+
     },
 
     rowDbClicked: function(row) {

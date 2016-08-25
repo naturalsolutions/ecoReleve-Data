@@ -34,7 +34,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       'stations/:id(/)': 'stations',
       'stations(/)': 'stations',
 
-	  'observations/:id(/)': 'observations',
+	   'observations/:id(/)': 'observations',
 
       'sensors/new/:type(/)': 'newSensor',
       'sensors/:id(/)': 'sensors',
@@ -53,7 +53,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       '*route(/:page)': 'home',
     },
 
-    execute: function(callback, args) {
+    execute: function(callback, args, route) {
       // get current route
       this.history.push(Backbone.history.fragment);
       var _this= this;
@@ -75,7 +75,17 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       }else {
         this.setNav(patern);
       }
+
+      this.checkResestCurrentDatas(url);
     },
+
+    checkResestCurrentDatas: function(url) {
+      if(window.currentData && (window.currentData.type != url)){
+        alert('');
+        window.currentData = null;
+      }
+    },
+
     previous: function() {
         var href = this.history[this.history.length-2];
         var url = '#'+ href;
