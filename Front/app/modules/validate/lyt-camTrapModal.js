@@ -7,8 +7,9 @@ define([
 	'translater',
 	'config',
 	'ez-plus',
+	'bootstrap-star-rating',
 
-], function($, _, Backbone, Marionette, Translater, config , ezPlus) {
+], function($, _, Backbone, Marionette, Translater, config , ezPlus , btstrp_star ) {
 
   'use strict';
 
@@ -41,12 +42,14 @@ define([
 				content: function(){
 					return '<div class="popover-header"> <span class="'+_this.statusPhotos.class+'">'+_this.statusPhotos.textStatus+'</span></div>'
 								+' <img src='+_this.model.get('path')+''+_this.model.get('name')+'  />'
+								+'<input id="rating_'+_this.model.get('id')+'" name="input-name" type="number" class="rating hide" value="5" >'
 								+'</div>'
 								;
 				},
 		});
 		},
 		render: function(){
+
 			if( !this.model.get("validated")  && this.parent.stopSpace) {
 			 this.model.set("validated" , 1 ); //Si focus alors la photo est vu
 			 //this.setVisualValidated(1);
@@ -58,10 +61,30 @@ define([
 
     onShow: function() {
 			this.$elementPopover.popover('show');
+			var popoverContent = this.parent.$el.find('.popover-content')
+			if(this.model.get('validated') ==2 ) {
+				console.log(popoverContent.find('input'));
+				popoverContent.find('input').removeClass('hide');
+
+				popoverContent.find('input').rating({
+					min:0,
+					max:5,
+					step:1,
+					size:'md',
+					rtl:false,
+					showCaption:false,
+					showClear:false
+				});
+					popoverContent.find('.rating-container').addClass('text-center');
+			}
+			else {
+				popoverContent.find('input').addClass('hide');
+			}
+			console.log(popoverContent ) ;
 			this.parent.$el.find('.backgrid-paginator').css('visibility','hidden');
 			this.parent.$el.find('.paginatorCamTrap').prepend('<div class="infosfullscreen">'
 											+this.model.get('date_creation')+''
-											+'<span class="indexposition">'+this.position+'/'+this.total+'</span>'
+											+'<div class="indexposition">'+this.position+'/'+this.total+'</div>'
 											+'  </div>');
 			//this.parent.$el.find('.backgrid-paginator').html("hohoho hahaha");
     },
@@ -71,12 +94,36 @@ define([
 			this.position = this.parent.currentCollection.fullCollection.indexOf(model) +1 ;
 			this.total = this.parent.currentCollection.fullCollection.length;
 			this.evalStatusPhoto(model);
+
+
 			this.parent.$el.find('.popover-content').html('<div class="popover-header"> <span class="'+this.statusPhotos.class+'">'+this.statusPhotos.textStatus+'</span></div>'
 						+' <img src='+this.model.get('path')+''+this.model.get('name')+'  />'
+						+'<input id="rating_'+this.model.get('id')+'" name="input-name" type="number" class="rating hide" value="5" >'
 						+'</div>');
+			var popoverContent = this.parent.$el.find('.popover-content')
+			//console.log(popoverContent ) ;
+			if(this.model.get('validated') ==2 ) {
+				console.log(popoverContent.find('input'));
+				popoverContent.find('input').removeClass('hide');
+				popoverContent.find('input').rating({
+					min:0,
+					max:5,
+					step:1,
+					size:'md',
+					rtl:false,
+					showCaption:false,
+					showClear:false
+				});
+				popoverContent.find('.rating-container').addClass('text-center');
+			}
+			else {
+				popoverContent.find('input').addClass('hide');
+			}
+
+
 			this.parent.$el.find('.infosfullscreen').html('<div class="infosfullscreen">'
 											+this.model.get('date_creation')+''
-											+'<span class="indexposition">'+this.position+'/'+this.total+'</span>'
+											+'<div class="indexposition">'+this.position+'/'+this.total+'</div>'
 											+'  </div>');
 			this.render();
 		},

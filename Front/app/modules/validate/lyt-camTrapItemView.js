@@ -10,10 +10,10 @@ define([
 	'ez-plus',
   'backbone.marionette.keyShortcuts',
 	'noty',
-	'jquery.rateit',
+	'bootstrap-star-rating',
 
 
-], function($, _, Backbone, Marionette, Translater, config , ModalView , CamTrapImageModel ,ezPlus, BckMrtKeyShortCut, noty, RateIt ) {
+], function($, _, Backbone, Marionette, Translater, config , ModalView , CamTrapImageModel ,ezPlus, BckMrtKeyShortCut, noty, btstrp_star ) {
 
   'use strict';
   return Marionette.ItemView.extend({
@@ -34,7 +34,7 @@ define([
 		//	'focusout' : 'leaveFocus',
 			'click .js-tag': 'addTag'
 		},
-		className : 'col-md-2 text-center imageCamTrap',
+		className : 'col-md-2 imageCamTrap',
 		template : 'app/modules/validate/templates/tpl-image.html',
 
 		clickFocus : function(e){
@@ -92,24 +92,48 @@ define([
 		},
 
 		onRender: function(){
-			console.log(this.$el.find('.rateit') );
-			this.$el.find('.rateit').rateit();
-			this.$el.find('.rateit').bind('rated', function() { alert('rating: ' + $(this).rateit('value')); });
+			var _this = this;
+			//console.log(this.$el.find('.rateit') );
+			var $icon = this.$el.find('i');
+			var lastClass = $icon.attr('class').split(' ').pop();
+			this.$el.find('input').rating({
+				min:0,
+				max:5,
+				step:1,
+				size:'xs',
+				rtl:false,
+				showCaption:false,
+				showClear:false
+			});
+			this.$el.find('.rating-container').addClass('hide');
+
+
+			//this.$el.find('rating-container').addClass('hide');
+			//this.$el.find('.rateit').bind('rated', function() { alert('rating: ' + $(this).rateit('value')); });
+
 			switch(this.model.get("validated") ) {
 				case 1 : {
-					this.$el.addClass("checked");
+					//console.log(this.$icon);
+					//this.$el.addClass("checked");
+					$icon.removeClass( lastClass );
+					$icon.addClass('reneco-support');
 					break;
 				}
 				case 2 : {
-					this.$el.addClass("accepted");
+				//	this.$el.addClass("accepted");
+					$icon.removeClass( lastClass );
+					$icon.addClass('reneco-checked');
+					this.$el.find('.rating-container').removeClass('hide');
 					break;
 				}
 				case 4 : {
-					this.$el.addClass("refused");
+					//this.$el.addClass("refused");
+					$icon.removeClass( lastClass );
+					$icon.addClass('reneco-close');
 					break;
 				}
 				default:{
-					this.$el.addClass("notchecked");
+					//this.$el.addClass("notchecked");
 					break;
 				}
 
@@ -149,6 +173,7 @@ define([
 					},
 					success :function(){
 						_this.parent.refreshCounter();
+					  //_this.render();
 					},
 					patch : true,
 				 	wait : true,
@@ -175,6 +200,11 @@ define([
 
 		toggleModelStatus : function (){
 			switch( this.model.get("validated") ){
+				case 0 : {
+					this.model.set("validated", 1 );
+					this.setVisualValidated(1);
+					break;
+				}
 				case 1 : {
 					this.model.set("validated", 2 );
 					this.setVisualValidated(2);
@@ -191,35 +221,33 @@ define([
 					this.setVisualValidated(1);
 					break;
 				}
-				case 0 : {
-					this.model.set("validated", 1 );
-					this.setVisualValidated(1);
-					break;
-				}
 			}
 		},
 
 		setVisualValidated : function(valBool){
+			var $icon = this.$el.find('i');
+			var lastClass = $icon.attr('class').split(' ').pop();
+
 			switch(this.model.get("validated") ) {
 				case 1 :{// not checked
-					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');
-					if( this.$el.hasClass('refused') ) this.$el.removeClass('refused');
-					if( this.$el.hasClass('accepted') ) this.$el.removeClass("accepted");
-					if( !this.$el.hasClass('checked') ) this.$el.addClass('checked');
+					$icon.removeClass( lastClass );
+					$icon.addClass('reneco-support');
+					this.$el.find('.rating-container').addClass('hide');
+
 					break;
 				}
 				case 2 : {
-					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');
-					if( this.$el.hasClass('checked') ) this.$el.removeClass('checked');
-					if( this.$el.hasClass('refused') ) this.$el.removeClass('refused');
-					if( !this.$el.hasClass('accepted') ) this.$el.addClass("accepted");
+					$icon.removeClass( lastClass );
+					$icon.addClass('reneco-checked');
+					this.$el.find('.rating-container').removeClass('hide');
+
 					break;
 				}
 				case 4 : {
-					if( this.$el.hasClass('notchecked') ) this.$el.removeClass('notchecked');
-					if( this.$el.hasClass('checked') ) this.$el.removeClass('checked');
-					if( this.$el.hasClass('accepted') ) this.$el.removeClass('accepted');
-					if( !this.$el.hasClass('refused') ) this.$el.addClass("refused");
+					$icon.removeClass( lastClass );
+					$icon.addClass('reneco-close');
+					this.$el.find('.rating-container').addClass('hide');
+
 					break;
 				}
 			}
@@ -234,12 +262,18 @@ define([
 		},
 
 		increaseStar: function(){
-			console.log("on veut augmenter le nombre d'étoiles");
-			this.$el.find('.rateit').rateit('value',this.$el.find('.rateit').rateit('value') +1 );
+			var $input = this.$el.find('input');
+			var val = parseInt($input.rating().val());
+			if( val+1 <=5)
+			$input.rating('update', val+1).val();
+		//	this.$el.find('.rateit').rateit('value',this.$el.find('.rateit').rateit('value') +1 );
 		},
 		decreaseStar: function(){
-			console.log("on veut augmenter le nombre d'étoiles");
-			this.$el.find('.rateit').rateit('value',this.$el.find('.rateit').rateit('value') - 1 );
+			var $input = this.$el.find('input');
+			var val = parseInt($input.rating().val());
+			if( val-1 >=1)
+			$input.rating('update', val-1).val();
+	//		this.$el.find('.rateit').rateit('value',this.$el.find('.rateit').rateit('value') - 1 );
 		}
 
 	});

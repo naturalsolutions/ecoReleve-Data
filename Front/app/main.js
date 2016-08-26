@@ -81,6 +81,7 @@ require.config({
     'backbone.virtualcollection' : '../bower_components/backbone.virtualcollection/backbone.virtual-collection',
     'noty' : '../bower_components/noty/js/noty/packaged/jquery.noty.packaged',
     'jquery.rateit': '../bower_components/jquery.rateit/scripts/jquery.rateit',
+    'bootstrap-star-rating': '../bower_components/bootstrap-star-rating/js/star-rating',
 
   },
   map: {
@@ -208,6 +209,11 @@ require.config({
       ]
     },
     'jquery.rateit':{
+      deps:[
+        'jquery',
+      ]
+    },
+    'bootstrap-star-rating':{
       deps:[
         'jquery',
       ]
