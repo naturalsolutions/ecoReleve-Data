@@ -191,7 +191,7 @@ table.backgrid{
   .ag-bootstrap-striped {
     height: 100%;
     .ag-root {
-      border: 1px solid #d9d9d9;
+      //border: 1px solid #d9d9d9;
       border-top: none;
     }
     .ag-menu {
@@ -263,7 +263,8 @@ table.backgrid{
     .ag-header {
       background: #C7C7C7;
       color: #525252;
-      font-weight: bold;
+      font-weight: 400;
+      text-transform: uppercase;
       .ag-header-cell {
         line-height: 40px;
         cursor: pointer;
@@ -276,6 +277,7 @@ table.backgrid{
           }
           .ag-sort-ascending-icon,
           .ag-sort-descending-icon {
+          	padding: 0px 5px;
             float: left;
             margin-left: -.5em;
             svg {
@@ -287,14 +289,8 @@ table.backgrid{
 
         .ag-header-cell-resize {
           background: transparent;
-          &:before {
-            content: "";
-            height: 100%;
-            width: 1px;
-            background: #EEE;
-            display: block;
-            margin-left: 2px;
-          }
+          background: rgba(255,255,255,.5);
+          
         }
         svg {
           fill: #525252;
@@ -335,10 +331,9 @@ table.backgrid{
     .ag-body {
       .ag-row {
         cursor: pointer;
-        line-height: 30px;
+        line-height: 35px;
         transition: background-color 0.1s linear;
         background: #E5E5E5;
-        border-bottom: 1px solid #DDD;
         &.ag-row-even {
           background: #F2F2F2;
         }

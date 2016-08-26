@@ -26,7 +26,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       'importFile(/)': 'importFile',
 
       'individuals/new(/)': 'newIndividual',
-      'individuals/:id(/)': 'individuals',
+      'individuals/:id(/)': 'individual',
       'individuals(/)': 'individuals',
 
       'stations/new/:from(/)': 'newStation',
