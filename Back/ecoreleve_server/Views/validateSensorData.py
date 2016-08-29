@@ -340,7 +340,7 @@ def manual_validate(request) :
 def auto_validation(request):
     session = request.dbsession
     global graphDataDate
-
+    #lancer procedure stocke
     type_ = request.matchdict['type']
     if type_ == 'camtrap':
         return validateCamTrap(request)
@@ -457,33 +457,45 @@ def deletePhotoOnSQL(request ,fk_sensor):
     return True
 
 def validateCamTrap(request):
+    session = request.dbsession
+    #appel de la procedure stocké
+
+    # supression des photos rejete
     print("route atteinte")
     data = request.params.mixed()
-    data = json.loads(data['data'])
+    #data = json.loads(data['data'])
     pathPrefix = dbConfig['camTrap']['path']
-    for index in data:
-        """if ( index['checked'] == None ):
-            print( " la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a check" )
-            #changer status
-            request.response.status_code = 510
-            return {'message': ""+str(index['name'])+" not checked yet"}
-        else :# photo check"""
-        if (index['validated'] not in (None , 1 )):
-            if (index['validated'] == False ):
-                pathSplit = index['path'].split('/')
-                destfolder = str(pathPrefix)+"\\"+str(pathSplit[1])+"\\"+str(index['name'])
-                print (" la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a supprimer")
-                print("on va supprimer :" +str(destfolder))
-                #if os.path.isfile(destfolder):
-                #    os.remove(destfolder)
-                #deletePhotoOnSQL(request,str(index['PK_id']))
+    fkMonitoreSite =  data['fk_MonitoredSite']
+    fkEquipmentId = data['fk_EquipmentId']
+    fkSensor = data['fk_Sensor']
+    print( "site :" +str(fkMonitoreSite) )
+    print( "equip: "+str(fkEquipmentId))
+    print( "sensor :"+str(fkSensor))
 
-            else:
-                print (" la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a sauvegarder")
-                #inserer en base
-        else:
-            print( " la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a check" )
-        """for key in index:
-            if ( str(key) =='checkedvalidated'   )
-            print ( str(key)+":"+str(index[key]))"""
+    query = "EXECUTE [EcoReleve_ECWP].[dbo].[pr_ValidateCameraTrapSession] "+str(fkSensor)+", "+str(fkMonitoreSite)+", "+str(fkEquipmentId)+";"
+    data2 = session.execute(query)
+    print ("resultat")
+    print (data2)
+
+    # for index in data:
+    #     """if ( index['checked'] == None ):
+    #         print( " la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a check" )
+    #         #changer status
+    #         request.response.status_code = 510
+    #         return {'message': ""+str(index['name'])+" not checked yet"}
+    #     else :# photo check"""
+    #     if (index['validated'] == 4):
+    #         pathSplit = index['path'].split('/')
+    #         destfolder = str(pathPrefix)+"\\"+str(pathSplit[1])+"\\"+str(index['name'])
+    #         print (" la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a supprimer")
+    #         print("on va supprimer :" +str(destfolder))
+    #         #if os.path.isfile(destfolder):
+    #         #    os.remove(destfolder)
+    #         #deletePhotoOnSQL(request,str(index['PK_id']))
+    #     else:
+    #         print (" la photo id :"+str(index['PK_id'])+" "+str(index['name'])+" est a sauvegarder")
+    #             #inserer en base
+    #     """for key in index:
+    #         if ( str(key) =='checkedvalidated'   )
+    #         print ( str(key)+":"+str(index[key]))"""
     return 10

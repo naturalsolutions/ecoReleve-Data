@@ -689,6 +689,12 @@ define([
 
     displaySwalUnchecked: function(compteur) {
       var _this = this;
+      /*
+      this.sensorId = this.model.get('fk_sensor');
+      this.siteId = this.model.get('FK_MonitoredSite');
+      this.equipmentId = this.model.get('equipID');
+
+      */
       Swal({
                   title: 'Warning validate without check ALL photos',
                   text:  +_this.nbPhotosChecked+' photos still underteminate and '+(_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused) )+' not seen yet\n'+'If you continue all of this photos will be accept automatically' ,
@@ -704,7 +710,11 @@ define([
                   $.ajax({
                     url : config.coreUrl+'sensors/'+_this.type+'/uncheckedDatas',
                     method: 'POST',
-                    data: {data : JSON.stringify(_this.myImageCollection.fullCollection) },
+                    data: {
+                          fk_Sensor : _this.sensorId,
+                          fk_MonitoredSite : _this.siteId,
+                          fk_EquipmentId : _this.equipmentId,
+                    /*data : JSON.stringify(_this.myImageCollection.fullCollection)*/ },
                     context: _this,
                   })
                   .done( function(response,status,jqXHR) {
