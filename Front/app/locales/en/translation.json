@@ -55,6 +55,8 @@
 		"accuracy" : "accuracy(m)",
 		"distanceObs" :"distance from obs",
 		"date" : "time",
+		"rows" : "rows",
+		"individuals" : "individuals",
 		"option" : {
 			"is" : "Is",
 			"isNot" : "Is not",
@@ -147,6 +149,13 @@
 	},
 	"sensors" : {
 			"new" : "New sensor"
+ 	},
+ 	"individuals" : {
+ 		"advanced " :"Advanced",
+ 		"new" :"New individual",
+ 		"history" : "Historique",
+ 		"equipment" : "Equipement",
+ 		"locations" : "Positions"
  	}
 
 }

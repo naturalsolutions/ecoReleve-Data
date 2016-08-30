@@ -51,6 +51,8 @@
 		"accuracy" : "précision(m)",
 		"distanceObs" :"distance de l'observateur",
 		"date" : "date",
+		"rows" : "lignes",
+		"individuals" : "individus",
 		"option" : {
 			"is" : "est",
 			"isNot" : "n'est pas",
@@ -144,5 +146,12 @@
 		},
 	"sensors" : {
 			"new" : "Nouveau capteur"
-	}
+	},
+ 	"individuals" : {
+ 		"advanced" :"Avancé",
+ 		"new" :"Nouvel individu",
+ 		"history" : "Historique",
+ 		"equipment" : "Equipement",
+ 		"locations" : "Positions"
+ 	}
 }
