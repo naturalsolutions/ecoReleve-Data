@@ -49,6 +49,7 @@ define([
     },
 
     onShow: function() {
+      this.$el.i18n();
       this.displayGrid();
       this.displayFilters();
       this.displayMap();

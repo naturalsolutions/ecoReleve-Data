@@ -1,14 +1,14 @@
 
 <div id="leftZone"  class="col-xs-12 col-md-4 no-padding ns-full-height">
 	<div class="toolbar top">
-		<legend class="inherit">Search</legend>
+		<legend class="inherit"><span data-i18n="stations.search">Search</span></legend>
 	</div>
 
 	<div class="crop2">
 		<br>
 		<ul id="stationType" class=" nav nav-tabs grid-padding">
-			 <li class="tab-ele activeTab"><a class="tab-link" name="allSt">All stations</a></li>
-			 <li class="tab-ele "><a id="tab-impSt" class="tab-link"  name="impSt">Imported stations</a></li>
+			 <li class="tab-ele activeTab"><a class="tab-link" name="allSt" data-i18n="stations.all-tab">All stations</a></li>
+			 <li class="tab-ele "><a id="tab-impSt" class="tab-link"  name="impSt" data-i18n="stations.imported-tab">Imported stations</a></li>
 		</ul>
 		<div class="tab-content all-stations">
 			<div id="allSt" class="tab-pane fade in active tab-ele"></div>
@@ -19,9 +19,9 @@
 	</div>
 
 	<div class="toolbar bottom">
-		<button id="clear" class="pull-left btn" >Clear</button>
+		<button id="clear" class="pull-left btn" data-i18n="button.clear" >Clear</button>
 		<button id="submit" class="btn btn-success pull-right">
-			Search&nbsp;
+			<span data-i18n="button.search">Search</span>&nbsp;
 			<span class="reneco reneco-search"></span>
 		</button>
 	</div>
@@ -30,7 +30,7 @@
 <div id="rightZone" class=" no-padding col-md-8 ns-full-height dark">
 
 	<div class="toolbar top">
-		<legend class="pull-left">Stations total : <span id="totalEntries"></span></legend>
+		<legend class="pull-left"><span data-i18n="stations.total-label">Stations total :</span> <span id="totalEntries"></span></legend>
 		<div class="ctrls pull-right">
 		<div class="clearfix pull-left">
 				<div id="rowSelectorSta"  class="pull-left"></div>
@@ -38,11 +38,11 @@
 		</div>
 		<button id="activeGridPanel" class="small btn btn-labeled btn-success active ">
 			<span class="reneco reneco-sites"></span>
-			&nbsp;Grid
+			&nbsp;<span data-i18n="button.grid">Grid</span>&nbsp;<span data-i18n="button.grid">Grid</span>
 		</button>
 		<button id="activeMapPanel" class="small btn btn-labeled btn-success">
 			<span class="reneco reneco-map"></span>
-			&nbsp;Map
+			&nbsp;<span data-i18n="button.map">Map</span>
 		</button>
 		</div>
 	</div>
@@ -63,12 +63,12 @@
 
 	<div class="toolbar bottom">
 		<button class="btn btn-success pull-left" id="btn-export">
-				Export data&nbsp;
+				<span data-i18n="button.export">Export data</span>&nbsp;
 				<span class="reneco reneco-export"></span>
 		</button>
 		<a href="#stations/new" id="newStation" class="pull-right btn btn-default btn-success whitev">
 			<i class="reneco reneco-entrykey "></i>&nbsp;
-			New station
+			<span data-i18n="stations.new-station-btn">New station</span>
 		</a>
 	</div>
 

@@ -2,7 +2,7 @@
 <div class="clearfix full-height ">
 	<div id="sensorLeft"  class="col-xs-4 full-height no-padding">
 		<div class="toolbar top">
-			<legend>Search</legend>
+			<legend data-i18n="button.search">Search</legend>
 		</div>
 		
 		<div class="crop2">
@@ -11,8 +11,8 @@
 		</div>
 
 		<div class="toolbar bottom">
-			<button id="clear" class="btn pull-left">Clear</button>
-			<button id="btnFilter" class="btn btn-success pull-right">Search&nbsp;
+			<button id="clear" class="btn pull-left" data-i18n="button.clear">Clear</button>
++			<button id="btnFilter" class="btn btn-success pull-right"><span data-i18n="button.search">Search</span>&nbsp;
 				<span class="reneco reneco-search"></span>
 			</button>
 		</div>
@@ -20,7 +20,7 @@
 
 	<div id="sensorRight" class="col-xs-8 full-height dark no-padding">
 		<div class="toolbar top">
-			<legend class="text-right">Total sensors : <span id="totalEntries"></span></legend>
+			<legend class="text-right">Total: <span id="totalEntries"></span></legend>
 			<div class="clearfix pull-right">
 				<div id="rowSelectorSensor"  class="pull-left"></div>
 				<legend class="pull-right"> &nbsp;rows/page</legend>
@@ -36,11 +36,11 @@
 
 		<div class="toolbar bottom">
 			<button class="btn btn-success pull-left" id="btn-export">
-				Export data&nbsp;
+				<span data-i18n="button.export">Export data</span>&nbsp;
 				<span class="reneco reneco-export"></span>
 			</button>
 			<button class="js-admin btn btn-success pull-right" id="btnNew">
-				New sensor&nbsp;
+				<span data-i18n="sensors.new">New sensor</span>&nbsp;
 				<span class="reneco reneco-entrykey"></span>
 			</button>
 		</div>

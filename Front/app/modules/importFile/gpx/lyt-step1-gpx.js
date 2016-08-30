@@ -56,6 +56,7 @@ define([
       $('.fieldactivity').addClass('hidden');
       this.fieldworkers = $('label[for*="FieldWorkers"]').parent();
       $(this.fieldworkers).addClass('hidden');
+      this.$el.i18n();
     },
 
     importFile: function(e) {

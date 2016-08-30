@@ -20,7 +20,7 @@ define([
       'change input': 'changeValue',
     },
 
-    name: 'File type selection',
+    name:'File type selection',
 
     initialize: function() {
 		},
@@ -28,6 +28,7 @@ define([
     onShow: function() {
       this.$el.find('.tile-inside:first input').prop('checked', true).change();
       this.$el.find('.tile-inside:first').addClass('active');
+      this.$el.i18n();
 		},
 
     validate: function() {

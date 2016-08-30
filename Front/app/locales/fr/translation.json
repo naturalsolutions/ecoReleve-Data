@@ -9,7 +9,10 @@
 		"validation" : "Validation",
 		"data" : "Mes données",
 		"stations" : "Stations",
-		"objects" : "Objets"
+		"objects" : "Objets",
+		"new-station" :"Nouvelle station",
+		"sensors" :"Capteurs",
+		"release" :"Relaché"
 	},
 	"stepper" : {
 			"btnNext" : "Suivant",
@@ -26,7 +29,12 @@
 		"delete" : "Supprimer",
 		"addObserver" : "Ajouter un observateur",
 		"removeObserver" : "Enlever un observateur",
-		"geolocation" : "Position courante"
+		"geolocation" : "Position courante",
+		"grid" :"grille",
+		"map" : "carte",
+		"logout" : "Se déconnecter",
+		"export" :"Exporter",
+		"back" : "Retour"
 	},
 	"shared" : {
 		"fieldworker" : "Observateur",
@@ -113,6 +121,28 @@
 		"importingDataWarning" : "Les points sélectionnés sont déjà importés",
 		"importServerError" : "Erreur de transfert de données vers le serveur.",
 		"fieldWorkerNameErr" : "Erreur de nom",
-		"fieldWorkerNameErrMsg" : "Ce nom est déjà sélectionné. Merci de choisir un autre nom."
+		"fieldWorkerNameErrMsg" : "Ce nom est déjà sélectionné. Merci de choisir un autre nom.",
+		"gpx" :"fichier gpx",
+		"rfid" : "fichier rfid",
+		"gsm" : "fichier gsm",
+		"argos" : "fichier argos",
+		"label-selected" :"point(s) séléctionné(s)"
+
+	},
+		"home" : {
+			"hello" : "Bonjour",
+			"graph-label" : "Nombre des nouvelles stations"
+	  },
+	"stations" : {
+			"search" :"Rechercher",
+			"all-tab" : "Toutes les stations",
+			"imported-tab" : "Stations importées",
+			"coords-tab" : "Avec coordonnées",
+			"no-coords-tab" : "Sans coordonnées",
+			"total-label" : "Total :",
+			"new-station-btn" :"Nouvelle station"
+		},
+	"sensors" : {
+			"new" : "Nouveau capteur"
 	}
 }
