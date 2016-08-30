@@ -111,32 +111,12 @@ div.bootstrap-tagsinput{
       background-color: #3d3d3d;
       height : 96%;
       width: 96%;
-      /*.camtrapItemViewHeader{
+      .camtrapItemViewHeader{
         height: 15%;
-        .rateit{
-          float:left;
-          top: 4px;
-          left: 15px;
+        .rating-xs {
+          font-size: 0.8vw;
         }
-      }*/
-      .camtrapItemViewContent{
-        height: 80%;
-        img{
-          position: relative;
-          border-radius: 8px;
-          top:0;
-          //left:0;
-          padding-left: auto;
-          padding-right: auto;
-          max-width: 100%;
-          max-height: 100%;
-          /*  position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 100%;
-          transform: translate(-50%, -50%);*/
-        }
-        i{
+        i.reneco{
           position:absolute;
           font-size: 1.2vw !important;
           top:0px;
@@ -144,6 +124,7 @@ div.bootstrap-tagsinput{
           height: 28px;
           width: 28px;
           border-radius: 14px;
+          background-color: white;
 
         }
         i.reneco-hidden{
@@ -162,19 +143,34 @@ div.bootstrap-tagsinput{
           color : white;
           content: '?';
         }
-
+      }
+      .camtrapItemViewContent{
+        height: 75%;
+        img{
+          position: relative;
+          //border-radius: 8px;
+          //top:0;
+          //left:0;
+          padding-left: auto;
+          padding-right: auto;
+          max-width: 100%;
+          max-height: 100%;
+          /*  position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 100%;
+          transform: translate(-50%, -50%);*/
+        }
       }
       .camtrapItemViewFooter{
-        height: 20%;
+        height: 10%;
         padding: 0;
 
-        .rating-xs {
-          font-size: 0.8vw;
-        }
+
 
         div.dateexif{
-          position:absolute;
-          bottom: 10px;
+          position:relative;
+          //bottom: 10px;
           padding-left: 10px;
           color: white;
           font-size: 10px;

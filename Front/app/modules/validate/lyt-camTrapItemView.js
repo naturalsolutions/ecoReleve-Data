@@ -94,7 +94,7 @@ define([
 		onRender: function(){
 			var _this = this;
 			//console.log(this.$el.find('.rateit') );
-			var $icon = this.$el.find('i');
+			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
 			var lastClass = $icon.attr('class').split(' ').pop();
 			this.$el.find('input').rating({
 				min:0,
@@ -194,8 +194,15 @@ define([
 		},
 
 		setModelValidated: function(val) {
+			var oldVal = this.model.get("validated");
+			if ( oldVal === val) {
+				this.model.set("validated",1);
+				this.setVisualValidated(1);
+			}
+			else {
 				this.model.set("validated",val);
 				this.setVisualValidated(val);
+			}
 		},
 
 		toggleModelStatus : function (){
@@ -225,7 +232,8 @@ define([
 		},
 
 		setVisualValidated : function(valBool){
-			var $icon = this.$el.find('i');
+			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
+			//var $icon2 = this.$el.find('.camtrapItemViewContent > i');
 			var lastClass = $icon.attr('class').split(' ').pop();
 
 			switch(this.model.get("validated") ) {
