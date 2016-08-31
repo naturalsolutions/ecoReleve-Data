@@ -35,6 +35,7 @@ define([
 
     onShow: function() {
       this.displayGrid();
+      this.$el.i18n();
     },
 
     displayGrid: function() {

@@ -37,7 +37,9 @@
 		"grid" :"grid",
 		"map" : "map",
 		"logout" : "logout",
-		"back" : "Back"
+		"back" : "Back",
+		"select-all" : "Select all",
+		"unselect-all" :"Unselect all"
 
 	},
 	"shared" : {
@@ -156,6 +158,14 @@
  		"history" : "Historique",
  		"equipment" : "Equipement",
  		"locations" : "Positions"
+ 	},
+ 	"export" : {
+ 		"legend-theme" : "Choose your theme",
+ 		"legend-view"  :"Choose your view",
+ 		"legend-columns" : "Choose your columns",
+ 		"legend-preview" : "Preview",
+ 		"legend-rows" : "first rows"
+
  	}
 
 }

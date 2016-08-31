@@ -42,6 +42,7 @@ define([
       this.getFieldsListForSelectedView();
       this.displayMap();
       this.displayFilters();
+      this.$el.i18n();
     },
 
     addFilter: function() {

@@ -43,6 +43,7 @@ define([
           _this.ui.themes.append(line);
         });
       });
+      this.$el.i18n();
     },
 
     getViews: function(e) {

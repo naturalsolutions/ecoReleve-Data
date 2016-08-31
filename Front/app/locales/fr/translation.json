@@ -34,7 +34,9 @@
 		"map" : "carte",
 		"logout" : "Se déconnecter",
 		"export" :"Exporter",
-		"back" : "Retour"
+		"back" : "Retour",
+		"select-all" : "Selectionner tout",
+		"unselect-all" :"annuler"
 	},
 	"shared" : {
 		"fieldworker" : "Observateur",
@@ -153,5 +155,13 @@
  		"history" : "Historique",
  		"equipment" : "Equipement",
  		"locations" : "Positions"
+ 	},
+ 	"export" : {
+ 		"legend-theme" : "Choisissez votre thème",
+ 		"legend-view"  :"Choisissez votre vue/protocole",
+ 		"legend-columns" : "Choisissez vos colonnes",
+ 		"legend-preview" : "Aperçu",
+ 		"legend-rows" : "premières lignes"
+
  	}
 }
