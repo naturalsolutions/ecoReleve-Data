@@ -54,7 +54,7 @@ define([
 
         var reader = new FileReader();
         var file = $('#input-file').get(0).files[0] || null;
-
+        $('#clear').removeAttr('disabled');
         var ext = file.name.split('.');
         if (ext[ext.length - 1] != 'txt') {
           swal(
@@ -137,6 +137,7 @@ define([
               var title = 'Error !'
               self.ui.progressBar.css({'background-color': 'rgb(147, 14, 14)'})
               var color = 'rgb(147, 14, 14)';
+              _this.clearFile();
 
             }
             if (data.responseText.length > 250) {
