@@ -9,9 +9,7 @@ define([
 
   'i18n'
 
-], function($, _, Backbone, Marionette, config, AgGrid
-
-) {
+], function($, _, Backbone, Marionette, config, AgGrid) {
 
   'use strict';
 
@@ -22,19 +20,34 @@ define([
     elementSelector: '#grid',
     navigate: true,
     
+    firstGetRows: true,
+    filters: [],
+
     initialize: function(options){
       var _this = this;
-      this.url = options.url;
-      this.type = options.type;
+      this.model = options.model || new Backbone.Model();
+      this.model.set('type', options.type);
+      this.model.set('url', config.coreUrl + options.type + '/');
+      
+      if (options.com) {
+        this.com = options.com;
+        this.com.addModule(this);
+      }
+      
+      //if (typeof options. === 'boolean')
+
+      this.onRowClicked = options.onRowClicked;
+      this.afterGetRows = options.afterGetRows;
+      this.afterFirstGetRows = options.afterFirstGetRows;
 
       this.gridOptions = {
         enableSorting: true,
         enableServerSideSorting: true,
         enableServerSideFilter: false,
         enableColResize: true,
-        rowHeight: 35,
-        headerHeight: 40,
-        paginationPageSize: 200,
+        rowHeight: 40,
+        headerHeight: 30,
+        paginationPageSize: this.pageSize,
         overlayLoadingTemplate: '',
         sortingOrder: ['desc','asc'],
         suppressScrollLag: true,
@@ -44,9 +57,11 @@ define([
         //overlayNoRowsTemplate: '<span>No rows to display</span>',
         
         onRowClicked: function(row){
-          Backbone.history.navigate(_this.type + '/' + (row.data.id || row.data.ID), {trigger: true});
+          if(this.onRowClicked)
+          _this.onRowClicked(row);
         },
       };
+      this.extendAgGrid();
       this.initDataSource();
       this.iniColumns();
     },
@@ -55,24 +70,26 @@ define([
       var columnDefs = [];
 
       this.columnDefered = $.ajax({
-        url: this.url + 'getFields',
+        url: this.model.get('url') + 'getFields',
         method: 'GET',
         context: this,
         data: {
           name: 'default'
         }
       }).done( function(response) {
-
         response.map(function(col, i) {
           var columnDef = {
             headerName: col.label,
             field: col.name,
             hide: !(col.renderable),
             minWidth: 100,
-            maxWidth: 500,
+            maxWidth: 300,
           }
           if(i == 0) {
             columnDef.pinned = 'left';
+            columnDef.minWidth = 50;
+            columnDef.width = 50;
+            columnDef.maxWidth = 100;
           }
           columnDefs.push(columnDef);
         });
@@ -83,11 +100,12 @@ define([
 
     initDataSource: function(){
       var _this = this;
-      this.myDataSource = {
+      this.dataSource = {
         rowCount: null,
-        paginationPageSize : 200,
+        paginationPageSize : this.pageSize,
         maxConcurrentDatasourceRequests: 2,
         getRows : function (params){
+          
           var page = params.endRow / _this.pageSize;
           var offset = (page - 1) * _this.pageSize;
 
@@ -96,26 +114,87 @@ define([
             order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
           }
 
+          var status = {
+            criteria: JSON.stringify(_this.filters),
+            page: page,
+            per_page: _this.pageSize,
+            offset: offset,
+            order_by: JSON.stringify(order_by)
+          };
+
           _this.deferred = $.ajax({
-            url: _this.url,
+            url: _this.model.get('url'),
             method: 'GET',
             context: this,
-            data: {
-              criteria: JSON.stringify({}),
-              page: page,
-              per_page: _this.pageSize,
-              offset: offset,
-              order_by: JSON.stringify(order_by)
-            }
+            data: status
           }).done( function(response) {
             var rowsThisPage = response[1];
             var total = response[0].total_entries;
 
+            _this.model.set('totalRecords', total);
+            _this.model.set('status', status);
+
+            if(_this.afterGetRows){
+              _this.afterGetRows();
+            }
+
+            if(_this.firstGetRows && _this.afterFirstGetRows){
+              _this.afterFirstGetRows();
+            }
+
+            _this.firstGetRows = false;
             params.successCallback(rowsThisPage , total);
           });
 
         }
       };
+    },
+
+    serialize: function() {
+      var data = [];
+      this.gridOptions.api.forEachNodeAfterFilterAndSort(function(node, index){
+        if (node.data) {
+          data.push(node.data || node.data);
+        }
+      });
+      this.model.set({
+        list: data,
+        filterModel: this.gridOptions.api.getFilterModel(),
+        sortModel: this.gridOptions.api.getSortModel(),
+      });
+      return this.model.attributes;
+    },
+
+    action: function(action, params){
+      switch(action){
+        case 'focus':
+          this.focus(params);
+          break;
+        case 'selection':
+          this.selectOne(params);
+          break;
+        case 'selectionMultiple':
+          this.selectMultiple(params);
+          break;
+        case 'filter':
+          this.filter(params);
+          break;
+        default:
+          break;
+      }
+    },
+
+    interaction: function(action, params){
+      if(this.com){
+        this.com.action(action, params);
+      }else{
+        this.action(action, params);
+      }
+    },
+
+    filter: function(filters){
+      this.filters = filters;
+      this.gridOptions.api.setDatasource(this.dataSource);
     },
 
     onShow: function() {
@@ -131,13 +210,61 @@ define([
       $(window).on('resize', this.onResize);
     },
 
+    onDestroy: function(){
+      this.gridOptions.api.destroy();
+      this.grid.destroy();
+    },
+
     displayGrid: function() {
       var _this = this;
+
       var gridDiv = document.querySelector(this.elementSelector);
       this.grid = new AgGrid.Grid(gridDiv, this.gridOptions);
-
+      this.gridOptions.api.setDatasource(this.dataSource);
       this.gridOptions.api.sizeColumnsToFit();
-      this.gridOptions.api.setDatasource(this.myDataSource);
+      this.paginationController = this.gridOptions.api.paginationController;
+    },
+    
+    jumpToPage: function(index){
+      this.paginationController.currentPage = index;
+      this.paginationController.loadPage();      
+    },
+
+    extendAgGrid: function(){
+
+      AgGrid.PaginationController.prototype.createTemplate = function () {
+          var localeTextFunc = this.gridOptionsWrapper.getLocaleTextFunc();
+          var template = '<div class="ag-paging-panel ag-font-style">' +
+              '<span id="pageRowSummaryPanel" class="ag-paging-row-summary-panel">' +
+              '<span id="firstRowOnPage"></span>' +
+              ' [TO] ' +
+              '<span id="lastRowOnPage"></span>' +
+              ' [OF] ' +
+              '<span id="recordCount"></span>' +
+              '</span>' +
+              '<span class="ag-paging-page-summary-panel">' +
+              '<button type="button" class="ag-paging-button btn btn-default" id="btFirst">[FIRST]</button>' +
+              '<button type="button" class="ag-paging-button btn btn-default" id="btPrevious">[PREVIOUS]</button>' +
+              '<span class="col-xs-5">' +
+              '[PAGE] ' +
+              '<span id="current"></span>' +
+              ' [OF]' +
+              '<span id="total"></span>' +
+              '</span>' +
+              '<button type="button" class="ag-paging-button btn btn-default" id="btNext">[NEXT]</button>' +
+              '<button type="button" class="ag-paging-button btn btn-default" id="btLast">[LAST]</button>' +
+              '</span>' +
+              '</div>';
+          return template
+              .replace('[PAGE]', localeTextFunc('page', 'Page'))
+              .replace('[TO]', localeTextFunc('to', 'to'))
+              .replace('[OF]', localeTextFunc('of', 'of'))
+              .replace('[OF]', localeTextFunc('of', 'of'))
+              .replace('[FIRST]', localeTextFunc('first', 'First'))
+              .replace('[PREVIOUS]', localeTextFunc('previous', 'Previous'))
+              .replace('[NEXT]', localeTextFunc('next', 'Next'))
+              .replace('[LAST]', localeTextFunc('last', 'Last'));
+      };
     },
 
   });

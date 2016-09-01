@@ -3,20 +3,24 @@ define([
   'underscore',
   'backbone',
   'marionette',
+  'config',
+  
   'sweetAlert',
   'translater',
-  'config',
+
   'ns_grid/model-grid',
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
-  /*'ns_navbar/ns_navbar',*/
+  'ns_navbar/navbar.view',
+
   'ns_modules/ns_com',
   'ns_filter_bower',
-  'backbone.paginator',
-  'ns_modules/ns_navbar/ns_navbar.view',
+  'backbone.paginator'
 
-], function($, _, Backbone, Marionette, Swal, Translater, config,
- NsGrid, NsMap, NsForm, /*Navbar,*/ Com,NsFilter,PageColl, Navbar
+], function(
+  $, _, Backbone, Marionette, config,
+  Swal, Translater,
+  NsGrid, NsMap, NsForm, NavbarView, Com, NsFilter
 ) {
 
   'use strict';
@@ -24,102 +28,93 @@ define([
   return Marionette.LayoutView.extend({
 
     template: 'app/modules/individuals/templates/tpl-individuals-detail.html',
-    className: 'full-height individual animated white',
+    className: 'individual full-height animated white',
 
     events: {
-      'click #hideIndivDetails': 'hideDetail',
-      'click #showIndivDetails': 'showDetail',
+      'click .js-back': 'back',
+
       'click .tab-link': 'displayTab',
-
       'click table.backgrid th input': 'checkSelectAll',
-
-      'click button#deleteLocations': 'warnDeleteLocations',
-      'click button#filter': 'filter',
-
+      'click button.js-delete-locations': 'warnDeleteLocations',
+      'click button.js-filter': 'filter',
     },
+
     ui: {
-      'grid': '#grid',
-      'gridEquipment': '#gridEquipment',
-      'form': '#form',
-      'map': '#map',
-      'paginator': '#paginator',
-      'paginatorEquipment': '#paginatorEquipment',
-      'details': '#indivLeft',
-      'mapContainer': '#indivRight',
-      'showHideCtr': '#showIndivDetails',
-      'formBtns': '#formBtns',
-      'locationsGrid': '#locationsGrid',
-      'locationsPaginator': '#locationsPaginator',
-      'locationsfilter' : '#locationsFilter'
+      'form': '.js-form',
+      'formBtns': '.js-form-btns',
+
+      'map': '.js-map',
+
+      'historyGrid': '.js-history-grid',
+      'historyPaginator': '.js-history-paginator',
+      
+      'equipmentGrid': '.js-equipment-grid',
+      'equipmentPaginator': '.js-equipment-paginator',
+      
+      'locationsGrid': '.js-locations-grid',
+      'locationsPaginator': '.js-locations-paginator',
+      'locationsfilter' : '.js-locations-filter',
+
+      'totalLocations': '.js-total-locations'
     },
 
     regions: {
-      'rgNavbar': '#navbar'
+      'rgNavbar': '.js-rg-navbar'
     },
 
-    rootUrl : '#individuals/',
+    type : 'individuals',
 
     initialize: function(options) {
-      if (options.indivId) {
-        this.indivId = options.indivId;
-      }else {
-        this.translater = Translater.getTranslater();
-        this.model = options.model;
-      }
-      this.navbar = new Navbar({
-        parent: this,
-        globalGrid: options.globalGrid,
-        model: options.model,
-      });
+      this.indivId = options.id;
+      this.model = new Backbone.Model(); //new IndividualModel()
+      this.model.set('id', options.id);
+
       this.com = new Com();
       this.nbLocations = [];
     },
 
-    reloadFromNavbar: function(model) {
-      this.display(model);
-      this.com.addModule(this.map)
-      this.map.com = this.com;
-      this.map.url = config.coreUrl + 'individuals/' + this.indivId  + '/locations?geo=true';
-      this.map.updateFromServ();
-      this.map.url = false;
-      Backbone.history.navigate(this.rootUrl + this.indivId, {trigger: false});
+    displayNavbar: function(){
+      var _this = this;
+      this.rgNavbar.show(this.navbarView = new NavbarView({
+        parent: _this
+      }));
+    },
+    onShow: function() {
+      this.displayNavbar();
+      this.displayForm(this.indivId);
+      this.displayGrids(this.indivId);
+      this.displayMap();
     },
 
+    back: function(){
+      Backbone.history.navigate(this.type + '/', {trigger: true});
+    },
+
+    reloadFromNavbar: function(id) {
+      this.model.set('id', id);
+      this.indivId = id;
+
+      this.com.addModule(this.map)
+      this.map.com = this.com;
+      this.map.url = config.coreUrl + this.type + '/' + id  + '/locations?geo=true';
+      this.map.updateFromServ();
+      this.map.url = false;
+
+      this.displayForm(this.indivId);
+      this.displayGrids(this.indivId);
+    },
 
     onRender: function() {
       this.$el.i18n();
     },
 
-    onShow: function() {
-      var _this = this;
-      if (this.indivId) {
-        this.displayForm(this.indivId);
-        this.displayGrid(this.indivId);
-        setTimeout(function() {
-          _this.displayMap();
-        },0);
-      }else {
-        this.rgNavbar.show(this.navbar);
-        this.display(this.model);
-        setTimeout(function() {
-          _this.displayMap();
-        },0);
-      }
+    displayGrids: function() {
+      this.displayHistoryGrid();
+      this.displayLocationsGrid();
+      this.displayEquipmentGrid();
     },
 
-    display: function(model) {
-      this.com = new Com();
-      this.model = model;
-
-      this.indivId = parseInt(this.model.get('ID'));
-      this.displayForm(this.indivId);
-
-
-      this.displayGrid(this.indivId);
-
-    },
-
-    displayGrid: function(id) {
+    displayHistoryGrid: function() {
       var cols = [{
         name: 'Name',
         label: 'Name',
@@ -136,14 +131,21 @@ define([
         editable: false,
         cell: 'stringDate',
       },];
-      this.grid = new NsGrid({
+      
+      this.historyGrid = new NsGrid({
         pageSize: 20,
         columns: cols,
         pagingServerSide: false,
-        url: config.coreUrl + 'individuals/' + id  + '/history',
+        url: config.coreUrl + this.type + '/' + this.indivId  + '/history',
         urlParams: this.urlParams,
         rowClicked: true,
       });
+
+      this.ui.historyGrid.html(this.historyGrid.displayGrid());
+      this.ui.historyPaginator.html(this.historyGrid.displayPaginator());
+    },
+
+    displayEquipmentGrid: function(id) {
       var colsEquip = [{
         name: 'StartDate',
         label: 'Start Date',
@@ -165,23 +167,19 @@ define([
         editable: false,
         cell: 'string'
       }];
-      this.gridEquip = new NsGrid({
+
+      this.equipmentGrid = new NsGrid({
         pageSize: 20,
         columns: colsEquip,
         pagingServerSide: false,
-        url: config.coreUrl + 'individuals/' + id  + '/equipment',
+        url: config.coreUrl + this.type + '/' + this.indivId + '/equipment',
         urlParams: this.urlParams,
         rowClicked: true,
       });
 
-      this.ui.grid.html(this.grid.displayGrid());
-      this.ui.gridEquipment.html(this.gridEquip.displayGrid());
-      this.ui.paginator.html(this.grid.displayPaginator());
-      this.ui.paginatorEquipment.html(this.gridEquip.displayPaginator());
-
-      this.displayLocationsGrid();
-      this.displayLocationsFilter();
-
+      this.ui.equipmentGrid.html(this.equipmentGrid.displayGrid());
+      this.ui.equipmentPaginator.html(this.equipmentGrid.displayPaginator());
+      
     },
 
     displayLocationsFilter: function() {
@@ -220,6 +218,7 @@ define([
     },
 
     displayLocationsGrid: function() {
+      this.displayLocationsFilter();
       var _this = this;
       var locationsCols = [{
         name: 'ID',
@@ -238,12 +237,7 @@ define([
              //modelInUnixTimestamp: true,
             displayInUTC: false
           }),*/
-      },/*{
-        name: 'timestamp',
-        label: 'date',
-        editable: false,
-        cell : 'stringDate'
-      }*/{
+      },{
         name: 'LAT',
         label: 'latitude',
         editable: false,
@@ -273,14 +267,6 @@ define([
             var rawValue = this.model.get(this.column.get("name"));
             var formattedValue = this.formatter.fromRaw(rawValue, this.model);
             if (this.model.get('type_')=='station'){
-
-          /*    this.$el.append($('<a>', {
-                  href: 'http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID').replace('sta_',''),
-                  title: formattedValue,
-                  target: '_blank'
-              }).text(formattedValue));*/
-
-
                this.$el.append('<a target="_blank"' 
                 +'href= "http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID').replace('sta_','')+'">\
                   '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
@@ -288,9 +274,8 @@ define([
               this.delegateEvents();
             }
             return this;
-        }
+          }
         })
-
       },{
           editable: true,
           name: 'import',
@@ -320,24 +305,24 @@ define([
             com: _this.com,
             idName: 'ID',
             affectTotalRecords : function(){  
-             var nbobs;
+             var nbOsb;
              if(this.paginator || this.pagingServerSide){
-             nbobs = this.grid.collection.state.totalRecords || 0;
+             nbOsb = this.grid.collection.state.totalRecords || 0;
              }else{
-               nbobs =this.grid.collection.length || 0;
+               nbOsb =this.grid.collection.length || 0;
              }
 
              if(_this.nbLocations.length == 0) {
-                $('#totalLocations').html(nbobs);
-                _this.nbLocations[0] = nbobs;
+                _this.ui.totalLocations.html(nbOsb);
+                _this.nbLocations[0] = nbOsb;
              } else {
-                _this.nbLocations[1] = nbobs;
-               $('#totalLocations').html( nbobs + "/" + _this.nbLocations[0]);
+                _this.nbLocations[1] = nbOsb;
+               _this.ui.totalLocations.html( nbOsb + "/" + _this.nbLocations[0]);
              }
            }
           });
 
-          $('#totalLocations').html(_this.locationsColl.length);
+          _this.ui.totalLocations.html(_this.locationsColl.length);
           _this.nbLocations[0] = _this.locationsColl.length;
       
         _this.locationsGrid.rowClicked = function(args) {
@@ -347,7 +332,7 @@ define([
         _this.ui.locationsGrid.html(_this.locationsGrid.displayGrid());
         _this.ui.locationsPaginator.html(_this.locationsGrid.displayPaginator());
         _this.$el.find('.select-all-header-cell').html('\
-          <button id="deleteLocations" class="btn btn-danger btn-sm">\
+          <button class="js-delete-locations btn btn-danger btn-sm">\
           <span class="reneco reneco-trash"></span>\
           </button>');
 
@@ -355,9 +340,7 @@ define([
         _this.com.setMotherColl(tmp);
         
       });
-
         //url: config.coreUrl + 'individuals/' + this.indivId  + '/locations',
-
     },
 
     //should be in the grid module
@@ -372,35 +355,12 @@ define([
         var id = row.model.get('ID');
         this.locationsGrid.interaction('focus', id);
       }
-      //more efficient
-      //row.model.collection.remove(row.model);
     },
 
     displayMap: function() {
-
       var _this = this;
-/*      this.mapCollection = new Backbone.Collection();
-      this.mapCollection.url = config.coreUrl + 'individuals/' + this.indivId  + '/locations?geo=true';
-      this.mapCollection.fetch({ data : {geo:true}}
-        ).done(function(data){
-          _this.map = new NsMap({
-            //url: config.coreUrl + 'individuals/' + this.indivId  + '/locations?geo=true',
-            geoJson : data,
-            cluster: true,
-            legend: true,
-            zoom: 3,
-            element: 'map',
-            popup: true,
-            com: _this.com,
-            selection: true,
-            idName: 'ID',
-            latName: 'LAT',
-            lonName: 'LON'
-          });
-        });*/
-
         this.map = new NsMap({
-            url: config.coreUrl + 'individuals/' + this.indivId  + '/locations?geo=true',
+            url: config.coreUrl + this.type + '/' + this.indivId  + '/locations?geo=true',
             //geoJson : data,
             cluster: true,
             legend: true,
@@ -442,7 +402,7 @@ define([
       var _this = this;
       this.nsform = new NsForm({
         name: 'IndivForm',
-        modelurl: config.coreUrl + 'individuals',
+        modelurl: config.coreUrl + this.type,
         formRegion: this.ui.form,
         buttonRegion: [this.ui.formBtns],
         displayMode: 'display',
@@ -452,17 +412,6 @@ define([
         displayDelete: false,
       });
 
-      this.nsform.afterDelete = function() {
-        /*
-        var jqxhr = $.ajax({
-          url: config.coreUrl + 'individuals/' + id,
-          method: 'DELETE',
-          contentType: 'application/json'
-        }).done(function(resp) {
-          Backbone.history.navigate(_this.rootUrl, {trigger : true});
-        }).fail(function(resp) {
-        });*/
-      };
     },
 
     hideDetail: function() {
@@ -507,7 +456,7 @@ define([
 
       var params = coll.pluck('ID');
 
-      var url = config.coreUrl + 'individuals/' + this.indivId  + '/locations';
+      var url = config.coreUrl + this.type + '/' + this.indivId  + '/locations';
       $.ajax({
         url: url,
         method: 'PUT',
@@ -527,6 +476,7 @@ define([
     filter: function() {
       this.locfilters.update();
     },
+
     swal: function(opt, type, callback) {
       var btnColor;
       switch (type){

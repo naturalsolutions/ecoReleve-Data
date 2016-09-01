@@ -75,15 +75,16 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       }else {
         this.setNav(patern);
       }
-
-      this.checkResestCurrentDatas(url);
+      this.checkResestCurrentDatas(patern[0]);
     },
 
     checkResestCurrentDatas: function(url) {
-      if(window.currentData && (window.currentData.type != url)){
-        alert('');
-        window.currentData = null;
+      if(window.app.currentData){
+        if((window.app.currentData.type != url)){
+          window.app.currentData = null;
+        }
       }
+
     },
 
     previous: function() {

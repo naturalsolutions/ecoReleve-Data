@@ -263,10 +263,10 @@ table.backgrid{
     .ag-header {
       background: #C7C7C7;
       color: #525252;
-      font-weight: 400;
+      font-weight: bold;
       text-transform: uppercase;
       .ag-header-cell {
-        line-height: 40px;
+        line-height: 30px;
         cursor: pointer;
 
         .ag-header-cell-label {
@@ -331,18 +331,18 @@ table.backgrid{
     .ag-body {
       .ag-row {
         cursor: pointer;
-        line-height: 35px;
+        line-height: 40px;
         transition: background-color 0.1s linear;
-        background: #E5E5E5;
+        border-bottom: 1px solid #dddddd;
         &.ag-row-even {
-          background: #F2F2F2;
+          background: rgba(221, 221, 221, 0.3);
         }
         &:focus,
         &:hover {
           background: white;
         }
         .ag-cell {
-          padding: 0 7px;
+          padding: 0 10px;
           &:first-child {
             font-weight: 500;
           }
@@ -353,6 +353,10 @@ table.backgrid{
       }
     }
   }
+  .ag-pinned-left-cols-viewport{
+    box-shadow: 5px 0px 15px #ddd;
+  }
+
   .ag-overlay-panel {
     span.loader {
       -webkit-animation: loading 2s linear 0s infinite;
@@ -362,7 +366,7 @@ table.backgrid{
       color: #7F7F7F;
     }
     pointer-events: inherit;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.4);
     color: white;
   }
 

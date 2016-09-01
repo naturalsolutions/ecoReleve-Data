@@ -334,6 +334,7 @@ define([
       if (this.clientSide) {
         this.clientFilter(this.criterias);
       }else{
+        console.log('plouf');
         this.interaction('filter', this.criterias);
       }
       return this.criterias;
