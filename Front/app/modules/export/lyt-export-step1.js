@@ -12,7 +12,10 @@ define([
     className: 'full-height',
     template: 'app/modules/export/templates/tpl-export-step1.html',
 
-    name: ' Choose the view to export',
+    name : '<span class="export-step1"></span>',
+    /*name : (function () {
+        return i18n.translate('export.step1-label'); 
+    })(),*/
 
     ui: {
       'themes': '#themes',
@@ -44,6 +47,8 @@ define([
         });
       });
       this.$el.i18n();
+      var stepName = i18n.translate('export.step1-label');
+      $('.export-step1').html(stepName);
     },
 
     getViews: function(e) {

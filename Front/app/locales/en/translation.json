@@ -164,8 +164,15 @@
  		"legend-view"  :"Choose your view",
  		"legend-columns" : "Choose your columns",
  		"legend-preview" : "Preview",
- 		"legend-rows" : "first rows"
-
+ 		"legend-rows" : "first rows",
+ 		"pdf-file" : "Get PDF File",
+ 		"csv-file" :"Get CSV File",
+ 		"excel-file" : "Get Excel File",
+ 		"gpx-file" : "Get GPX File",
+ 		"step1-label" :"Choose the view to export",
+ 		"step2-label" :"Filter",
+ 		"step3-label" :"Preview",
+ 		"step4-label" :"File type"
  	}
 
 }

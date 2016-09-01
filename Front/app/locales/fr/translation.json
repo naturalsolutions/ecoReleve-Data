@@ -161,7 +161,14 @@
  		"legend-view"  :"Choisissez votre vue/protocole",
  		"legend-columns" : "Choisissez vos colonnes",
  		"legend-preview" : "Aperçu",
- 		"legend-rows" : "premières lignes"
-
+ 		"legend-rows" : "premières lignes",
+ 		"pdf-file" : "fichier PDF",
+ 		"csv-file" :"fichier CSV",
+ 		"excel-file" : "fichier Excel",
+ 		"gpx-file" : "fichier GPX",
+ 		"step1-label" :"Choix de vue/protocole",
+ 		"step2-label" :"Filtre",
+ 		"step3-label" :"Aperçu",
+ 		"step4-label" :"Type de fichier"
  	}
 }

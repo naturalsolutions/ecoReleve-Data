@@ -13,7 +13,8 @@ define([
     className: 'full-height',
     template: 'app/modules/export/templates/tpl-export-step3.html',
 
-    name: ' Preview',
+
+    name : '<span class="export-step3"></span>',
 
     ui: {
       'grid': '#grid',
@@ -36,6 +37,8 @@ define([
     onShow: function() {
       this.displayGrid();
       this.$el.i18n();
+      var stepName = i18n.translate('export.step3-label');
+      $('.export-step3').html(stepName);
     },
 
     displayGrid: function() {
