@@ -103,7 +103,10 @@
 		"stepper" : {
 			"step1GPXLabel" : "Données",
 			"step2GPXLabel" : "Details",
-			"step3GPXLabel" : "Metadonnées"
+			"step3GPXLabel" : "Metadonnées",
+			"step0-label" : "Type de fichier",
+			"step1-gpxlabel" : "Chargement du fichier GPX",
+			"step2-gpxlabel" : "Sélection de données"
 		},
 		"gpxHelp" : "GPX ou GPS eXchange Format est un format d'échange de données GPS. Il peut être utilisé pour décrire des points d'intéret (waypoints), des tracés et des itinéraires .",
 		"fileSelection" : "Sélectionnez un fichier",

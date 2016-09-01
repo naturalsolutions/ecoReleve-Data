@@ -23,7 +23,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/gpx/templates/tpl-step2-gpx.html',
 
-    name: 'Datas Selection',
+    name : '<span class="import-step2"></span>',
 
     ui: {
       'grid': '#grid',
@@ -53,6 +53,8 @@ define([
       this.displayGrid();
       this.displayFilters();
       this.displayMap();
+      var stepName = i18n.translate('import.stepper.step2-gpxlabel');
+      $('.import-step2').html(stepName);
     },
 
     displayMap: function() {

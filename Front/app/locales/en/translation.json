@@ -107,7 +107,10 @@
 		"stepper" : {
 			"step1GPXLabel" : "Data",
 			"step2GPXLabel" : "Details",
-			"step3GPXLabel" : "Metadata"
+			"step3GPXLabel" : "Metadata",
+			"step0-label" : "File type selection",
+			"step1-gpxlabel" : "GPX file upload",
+			"step2-gpxlabel" : "Datas Selection"
 		},
 		"gpxHelp" : "GPX, or GPS eXchange Format is an XML schema designed as a common GPS data format. It can be used to describe waypoints, tracks, and routes.",
 		"fileSelection" : "select a file*",

@@ -20,7 +20,7 @@ define([
       'change input': 'changeValue',
     },
 
-    name:'File type selection',
+    name : '<span class="import-step0"></span>',
 
     initialize: function() {
 		},
@@ -29,6 +29,8 @@ define([
       this.$el.find('.tile-inside:first input').prop('checked', true).change();
       this.$el.find('.tile-inside:first').addClass('active');
       this.$el.i18n();
+      var stepName = i18n.translate('import.stepper.step0-label');
+      $('.import-step0').html(stepName);
 		},
 
     validate: function() {
