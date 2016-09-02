@@ -753,7 +753,23 @@ define([
                   closeOnConfirm: true,
                 },
                 function() {
-                  console.log("je valide");
+                  console.log("bim je valide requête en cours");
+                  $.ajax({
+                    url : config.coreUrl+'sensors/'+_this.type+'/uncheckedDatas',
+                    method: 'POST',
+                    data: {
+                          fk_Sensor : _this.sensorId,
+                          fk_MonitoredSite : _this.siteId,
+                          fk_EquipmentId : _this.equipmentId,
+                    /*data : JSON.stringify(_this.myImageCollection.fullCollection)*/ },
+                    context: _this,
+                  })
+                  .done( function(response,status,jqXHR) {
+                  })
+                  .fail( function(jqXHR, textStatus, errorThrown) {
+
+                  });
+                  //TODO mettre le status validated a 8 pour sauvegarder la validation de force
 
                 }
               );

@@ -156,7 +156,7 @@ class CamTrap(Base):
     validated = Column(TINYINT, nullable = True)
     date_creation = Column(DateTime, nullable = True)
     date_uploaded = Column(DateTime, server_default = func.now())
-    tags = Column(String(),nullable=True)
+    tags = Column(String,nullable=True)
     __table_args__ = (
         {'schema': sensor_schema}
     )

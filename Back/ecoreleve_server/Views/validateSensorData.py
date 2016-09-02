@@ -465,17 +465,42 @@ def validateCamTrap(request):
     data = request.params.mixed()
     #data = json.loads(data['data'])
     pathPrefix = dbConfig['camTrap']['path']
-    fkMonitoreSite =  data['fk_MonitoredSite']
+    fkMonitoredSite =  data['fk_MonitoredSite']
     fkEquipmentId = data['fk_EquipmentId']
     fkSensor = data['fk_Sensor']
-    print( "site :" +str(fkMonitoreSite) )
+    print( "site :" +str(fkMonitoredSite) )
     print( "equip: "+str(fkEquipmentId))
     print( "sensor :"+str(fkSensor))
 
-    query = "EXECUTE [EcoReleve_ECWP].[dbo].[pr_ValidateCameraTrapSession] "+str(fkSensor)+", "+str(fkMonitoreSite)+", "+str(fkEquipmentId)+";"
-    data2 = session.execute(query)
+    #query = "EXECUTE [EcoReleve_ECWP].[dbo].[pr_ValidateCameraTrapSession] "+str(fkSensor)+", "+str(fkMonitoredSite)+", "+str(fkEquipmentId)+";"
+
+
+    query = text("""
+     EXEC [EcoReleve_ECWP].[dbo].[pr_ValidateCameraTrapSession] :fkSensor, :fkMonitoredSite, :fkEquipmentId
+    """).bindparams(
+    bindparam('fkSensor', value=fkSensor),
+    bindparam('fkMonitoredSite', value=fkMonitoredSite),
+    bindparam('fkEquipmentId', value=fkEquipmentId)
+    )
+
+    #+str(fkSensor)+", "+str(fkMonitoreSite)+", "+str(fkEquipmentId)+";"
+    # query = text(""" SELECT TOP 10 * FROM Station""")
+    # query = text(""" SELECT 'toto'""")
+    result  = session.execute(query)
     print ("resultat")
-    print (data2)
+    print (result.rowcount)
+    if result.rowcount > 0 :
+        print("procedure a retourne des row")
+        print("appel de la vue pour redimensioner et supprimer")
+
+
+
+    #
+    # for row in result :
+    #     print(row)
+    #for index in data2:
+    #    print (index)
+
 
     # for index in data:
     #     """if ( index['checked'] == None ):

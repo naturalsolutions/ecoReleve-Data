@@ -31,6 +31,12 @@ route_prefix = 'sensors/'
 @view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST')
 def uploadFile(request):
     #print("bim je check")
+    #ici on stock l'acces
+    print("la requete avant d'upload")
+    print(request)
+    print (" user :")
+    print (" file :")
+    print (" date :")
     type_= request.matchdict['type']
     dictFuncImport={
     'argos': uploadFileArgos,
