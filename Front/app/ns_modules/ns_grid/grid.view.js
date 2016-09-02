@@ -102,12 +102,12 @@ define([
       var _this = this;
       this.dataSource = {
         rowCount: null,
-        paginationPageSize : this.pageSize,
         maxConcurrentDatasourceRequests: 2,
         getRows : function (params){
-          
-          var page = params.endRow / _this.pageSize;
-          var offset = (page - 1) * _this.pageSize;
+          console.log(params);
+          var pageSize = params.endRow - params.startRow;
+          var page = params.endRow / pageSize;
+          var offset = (page - 1) * pageSize;
 
           var order_by = [];
           if(params.sortModel.length) {
@@ -117,7 +117,7 @@ define([
           var status = {
             criteria: JSON.stringify(_this.filters),
             page: page,
-            per_page: _this.pageSize,
+            per_page: pageSize,
             offset: offset,
             order_by: JSON.stringify(order_by)
           };
@@ -197,6 +197,12 @@ define([
       this.gridOptions.api.setDatasource(this.dataSource);
     },
 
+    changePageSize: function(pageSize){
+      console.log(pageSize);
+      this.gridOptions.paginationPageSize = new Number(pageSize);
+      this.gridOptions.api.setDatasource(this.dataSource);
+    },
+
     onShow: function() {
       var _this = this;
 
@@ -213,6 +219,15 @@ define([
     onDestroy: function(){
       this.gridOptions.api.destroy();
       this.grid.destroy();
+    },
+
+    exportData: function(){
+      var params = {
+        allColumns: true,
+        fileName: this.model.get('type') + new Date().toJSON().slice(0,10) + '.csv',
+        columnSeparator: ','
+      }
+      this.gridOptions.api.exportDataAsCsv(params);
     },
 
     displayGrid: function() {

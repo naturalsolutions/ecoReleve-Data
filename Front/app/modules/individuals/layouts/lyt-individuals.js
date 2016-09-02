@@ -31,16 +31,16 @@ define([
       'click .js-btn-clear': 'clearFilter',
 
       'click .js-btn-new': 'newIndividual',
-      'click .js-btn-export': 'exportGrid',
+      'click .js-btn-export': 'export',
       'click .js-indiv-tabs a.tab-link' : 'indivSearchTabs',
       'click .js-hist-val' : 'resetDate',
+      'change .js-page-size': 'changePageSize',
       'dp.change .js-date-time' : 'resetHist'
     },
 
     ui: {
       'filter': '.js-filters',
       'btnNew': '.js-btn-new',
-      'rowSelect':'.js-row-selector',
       'totalRecords': '.js-total-records'
     },
 
@@ -63,6 +63,10 @@ define([
       this.$el.find('.js-date-time').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
       this.displayFilter();
       this.displayGridView();
+    },
+
+    changePageSize: function(e){
+      this.gridView.changePageSize($(e.target).val());
     },
 
     displayGridView: function(){
@@ -142,7 +146,11 @@ define([
         $('.js-hist-val').prop('checked', false);
       }
     },
-
+    
+    export: function(){
+      this.gridView.exportData();
+    }
+    
     
   });
 });

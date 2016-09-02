@@ -39,8 +39,14 @@
 		<div class="toolbar top">
 			<legend class="text-right">Total individuals : <span class="js-total-records"></span></legend>
 			<div class="clearfix pull-right">
-				<div class="js-row-selector pull-left"></div>
-				<legend class="pull-right"></legend>
+				<select class="js-page-size form-control">
+					<option value="" disabled selected>rows per page</option>
+					<option value="20">20</option>
+					<option value="50">50</option>
+					<option value="200">200</option>
+					<option value="500">500</option>
+					<option value="1000">1000</option>
+				</select>
 			</div>
 		</div>
 
