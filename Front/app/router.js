@@ -55,6 +55,14 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
 
     execute: function(callback, args) {
       // get current route
+      var route = Backbone.history.fragment;
+
+      if ((route != '') && (route != '#')){
+        var allowed = this.checkRoute();
+        if(!allowed) {
+            return false;
+        }
+      } 
       this.history.push(Backbone.history.fragment);
       var _this= this;
       window.checkExitForm(function(){
@@ -64,10 +72,17 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       });
     },
     onRoute: function(url, patern, params) {
+      var notAllowed = window.notAllowedUrl ;
       patern = patern.replace(/\(/g, '');
       patern = patern.replace(/\)/g, '');
       patern = patern.replace(/\:/g, '');
       patern = patern.split('/');
+
+      for (var i=0; i< notAllowed.length;i++){
+            if (notAllowed[i] == patern[0]) {
+                return ; 
+            }
+      }
 
       if (patern[0] == '*route') {
         $('#arial').html('');
@@ -106,6 +121,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
         return result;
     },
     setNav : function(patern){
+
+        var url = patern[0];
+
         var md = this.collection.findWhere({href: patern[0]});
         $('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
         if (patern[1] && patern[1] != 'id' && patern[1] != 'type') {
@@ -113,6 +131,22 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
         }else {
           $('#arialSub').html('');
         }
-     }
+     },
+     checkRoute : function(){
+        var route = Backbone.history.fragment;
+        var notAllowed = window.notAllowedUrl ;
+        route = route.replace(/\(/g, '');
+        route = route.replace(/\)/g, '');
+        route = route.replace(/\:/g, '');
+        route = route.split('/');
+        for (var i=0; i< notAllowed.length;i++){
+            if (notAllowed[i] == route[0]) {
+              $('#arialSub').html('');
+              Backbone.history.navigate("#",true);
+              return false;
+            }
+        }
+        return true;
+      }
   });
 });

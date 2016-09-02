@@ -19,7 +19,14 @@ function(Marionette, config) {
     },
 
     onShow: function() {
-
+      var disabled = config.disabledFunc ; 
+      if (! disabled){
+        return ;
+      }
+      for (var i=0; i< disabled.length;i++){
+        var functionnality = disabled[i];
+        $("." + functionnality).addClass('disabled');
+      }
     },
   });
 });

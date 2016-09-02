@@ -82,10 +82,22 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, Tp
     },
 
     onShow: function(options) {
+      this.disableTiles();
       this.info.show(this.infoStat);
       this.ui.donuts.html(this.donutGraphs.el);
       this.graph.show(this.curveGraph);
       this.$el.i18n();
+    },
+    disableTiles : function(){
+      // disable tiles for disabled fonctionalities in config.js
+      var disabled = config.disabledFunc ; 
+      if (! disabled){
+        return ;
+      }
+      for (var i=0; i< disabled.length;i++){
+        var functionnality = disabled[i];
+        $("." + functionnality).addClass('tile-locked');
+      }
     }
   });
 });

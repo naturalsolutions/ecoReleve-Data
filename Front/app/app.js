@@ -1,4 +1,4 @@
-define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
+define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',  'config',
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
   'ns_modules/ns_bbfe/bbfe-timePicker',
@@ -20,7 +20,7 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
   'ns_modules/ns_cell/bg-integerCell',
 
   ],
-  function( Marionette, LytRootView, Router, Controller,Swal) {
+  function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
     var app = {};
     var JST = window.JST = window.JST || {};
@@ -103,6 +103,13 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
 
     window.formChange = false;
     window.formEdition = false;
+    // get not allowed urls in config.js
+    var disabled = config.disabledFunc ; 
+    window.notAllowedUrl = [];
+    for (var i=0; i< disabled.length;i++){
+        window.notAllowedUrl.push(disabled[i]);
+    }
+
     window.checkExitForm = function(confirmCallback,cancelCallback) {
       if(window.formChange && window.formEdition){
         Swal({
