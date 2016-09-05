@@ -37,7 +37,7 @@ function(Backbone, Marionette, config) {
     fetch: function(status){
       this.model.set('status', status);
       this.disableBtns(true);
-      this.deferred = $.ajax({
+      return $.ajax({
         url: this.model.get('url'),
         method: 'GET',
         context: this,
@@ -64,40 +64,54 @@ function(Backbone, Marionette, config) {
     
     navigateNext: function(){
       var index = this.model.get('index');
+      var status = this.model.get('status');
+      var totalRecords = this.model.get('totalRecords');
+
       index++;
-      if(index < this.model.get('status').per_page){
-        this.deferred = true;
+      this.deferred = true;
+
+      if(index >= totalRecords){
+        index = 0;
+      }
+      if(index < status.per_page){
       } else {
-        var status = this.model.get('status');
-        if(status.page >= this.model.get('totalRecords') / status.per_page){
+        if(status.per_page)
+        if(status.page >= totalRecords / status.per_page){
           status.page = 1;
         } else {
           status.page++;
         }
         index = 0;
         status.offset = status.per_page * (status.page - 1);
-        this.fetch(status);
+        this.deferred = this.fetch(status);
       }
+
       this.update(index);
     },
 
     navigatePrev: function(){
       var index = this.model.get('index');
       var status = this.model.get('status');
+      var totalRecords = this.model.get('totalRecords');
 
       index--;
-      if(index > -1){
-        this.deferred = true;
-      } else {
-        if(status.page == 1){
-          status.page = (this.model.get('totalRecords') / status.per_page);
+      this.deferred = true;
+      
+      if(index < 0){
+        if((totalRecords / status.per_page) < 1){
+          index = totalRecords - 1;   
         } else {
-          status.page--;
+          if(status.page == 1){
+            status.page = (totalRecords / status.per_page);
+          } else {
+            status.page--;
+          }
+          index = status.per_page -1;
+          status.offset = status.per_page * (status.page - 1);
+          this.deferred = this.fetch(status);
         }
-        index = status.per_page -1;
-        status.offset = status.per_page * (status.page - 1);
-        this.fetch(status);
       }
+
       this.update(index);
     },
 

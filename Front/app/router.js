@@ -12,7 +12,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       {label: 'Release', href: 'release', icon: 'reneco-to_release'},
       {label: 'Validate', href: 'validate', icon: 'reneco-validate'},
       {label: 'Stations', href: 'stations', icon: 'reneco-stations'},
-	  {label: 'Observations', href: 'observations', icon: 'reneco-stations'},
+      {label: 'Observations', href: 'observations', icon: 'reneco-stations'},
       {label: 'Individuals', href: 'individuals', icon: 'reneco-individuals'},
       {label: 'Sensors', href: 'sensors', icon: 'reneco-sensors'},
       {label: 'Monitored Sites', href: 'monitoredSites', icon: 'reneco-sensors'},
@@ -33,8 +33,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       'stations/new(/)': 'newStation',
       'stations/:id(/)': 'stations',
       'stations(/)': 'stations',
-
-	   'observations/:id(/)': 'observations',
+      'observations/:id(/)': 'observations',
 
       'sensors/new/:type(/)': 'newSensor',
       'sensors/:id(/)': 'sensors',
@@ -78,9 +77,11 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       this.checkResestCurrentDatas(patern[0]);
     },
 
-    checkResestCurrentDatas: function(url) {
+    checkResestCurrentDatas: function() {
+      var from = this.history[this.history.length-2];
+      console.log(from);
       if(window.app.currentData){
-        if((window.app.currentData.type != url)){
+        if((window.app.currentData.type != from)){
           window.app.currentData = null;
         }
       }
