@@ -16,6 +16,7 @@ from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
 from ..Models import (
     DBSession,
     Observation,
+    ObservationDynProp,
     ProtocoleType,
     Station,
     Station_FieldWorker,
@@ -35,7 +36,7 @@ from collections import OrderedDict
 from datetime import datetime
 from ..utils.datetime import parse
 from ..utils.generator import Generator
-from sqlalchemy.sql.expression import literal_column,literal
+from sqlalchemy.sql.expression import literal_column,literal, union_all
 
 
 eval_ = Eval()
@@ -50,15 +51,56 @@ class StationList(ListObjectWithDynProp):
         ''' Override parent function to include management of Observation/Protocols and fieldWorkers '''
         query = super().WhereInJoinTable(query,criteriaObj)
         curProp = criteriaObj['Column']
+
         if curProp == 'FK_ProtocoleType':
-            subSelect = select([Observation]
+            o = aliased(Observation)
+            subSelect = select([o.ID]
                 ).where(
-                and_(Station.ID== Observation.FK_Station
-                    ,eval_.eval_binary_expr(Observation.__table__.c[curProp],criteriaObj['Operator'],criteriaObj['Value'])))
+                and_(Station.ID== o.FK_Station
+                    ,eval_.eval_binary_expr(o.FK_ProtocoleType,criteriaObj['Operator'],criteriaObj['Value'])))
             query = query.where(exists(subSelect))
 
-        if curProp == 'FK_Individual':
+        if curProp == 'Species':
+            obsValTable = Base.metadata.tables['ObservationDynPropValuesNow']
+            o2 = aliased(Observation)
+            s2 = aliased(Station)
+            s1 = aliased(Station)
 
+            joinStaObs = join(s2,o2,s2.ID == o2.FK_Station)
+
+            operator = criteriaObj['Operator']
+            if 'not' in criteriaObj['Operator'] :
+                operator = operator.replace('not ','').replace(' not','')
+
+            existInd = select([Individual.ID]
+                ).where(and_(o2.FK_Individual == Individual.ID
+                    ,eval_.eval_binary_expr(Individual.Species,operator,criteriaObj['Value']))
+                )
+
+            existObs = select([obsValTable.c['ID']]
+                ).where(and_(obsValTable.c['FK_Observation'] == o2.ID
+                    ,and_(or_(obsValTable.c['Name'].like('%taxon'),obsValTable.c['Name'].like('%species%'))
+                        ,eval_.eval_binary_expr(obsValTable.c['ValueString'],operator,criteriaObj['Value'])
+                        )
+                    )
+                )
+
+            selectCommon = select([s2.ID]).select_from(joinStaObs)
+            # if 'not' in criteriaObj['Operator'] :
+            #     selectInd = selectCommon.where(~exists(existInd))
+            #     selectObs = selectCommon.where(~exists(existObs))
+            # else :
+            selectInd = selectCommon.where(exists(existInd))
+            selectObs = selectCommon.where(exists(existObs))
+
+            unionQuery = union_all(selectInd,selectObs)
+            if 'not' in criteriaObj['Operator'] :
+                query = query.where(~Station.ID.in_(unionQuery))
+            else :
+                query = query.where(Station.ID.in_(unionQuery))
+
+
+        if curProp == 'FK_Individual':
             if criteriaObj['Operator'].lower() in ['is null','is not null']:
                 subSelect = select([Observation]).where(
                     and_(Station.ID== Observation.FK_Station
@@ -102,10 +144,8 @@ class StationList(ListObjectWithDynProp):
             queryCTE = fullQueryJoinOrdered.cte()
             joinFW = join(Station_FieldWorker,User,Station_FieldWorker.FK_FieldWorker==User.id)
             joinTable = join(queryCTE,joinFW,queryCTE.c['ID']== Station_FieldWorker.FK_Station)
-
             query = select([Station_FieldWorker.FK_Station,User.Login]).select_from(joinTable)
             FieldWorkers = self.ObjContext.execute(query).fetchall()
-        
             list_ = {}
             for x,y in FieldWorkers :
                 list_.setdefault(x,[]).append(y)
@@ -125,7 +165,7 @@ class StationList(ListObjectWithDynProp):
     def countQuery(self,criteria = None):
         query = super().countQuery(criteria)
         for obj in criteria :
-            if obj['Column'] in ['FK_ProtocoleType','FK_FieldWorker','LastImported','FK_Individual']:
+            if obj['Column'] in ['FK_ProtocoleType','FK_FieldWorker','LastImported','FK_Individual','Species']:
                 query = self.WhereInJoinTable(query,obj)
         return query
 
@@ -206,7 +246,6 @@ class IndividualList(ListObjectWithDynProp):
         return query
 
     def GetFullQuery(self,searchInfo=None) :
-        print('in Cout QUERY')
         ''' return the full query to execute '''
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
@@ -277,7 +316,6 @@ class IndividualList(ListObjectWithDynProp):
 
         if sensorObj['Operator'].lower() in ['is null','is not null'] :
             if not self.history :
-                print('search equipment with DATE') 
                 subSelect = subSelect.where(or_(table.c['EndDate'] >= startDate,table.c['EndDate'] == None))
 
         else:
