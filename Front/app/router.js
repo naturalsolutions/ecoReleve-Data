@@ -79,7 +79,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
 
     checkResestCurrentDatas: function() {
       var from = this.history[this.history.length-2];
-      console.log(from);
       if(window.app.currentData){
         if((window.app.currentData.type != from)){
           window.app.currentData = null;
