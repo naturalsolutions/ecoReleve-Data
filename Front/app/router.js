@@ -54,6 +54,16 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
     },
 
     execute: function(callback, args) {
+      // for demo, user language is stored in database, we need to be sure that user is logged to send ajax query to get it,
+      // --> global var to have information ( see lyt-header.js to undersand )
+      window.app.logged = false;
+      $.ajax({
+        context: this,
+        url: config.coreUrl + 'security/has_access',
+        success : function(){
+           window.app.logged = true;
+        }
+      });
       // get current route
       var route = Backbone.history.fragment;
 
