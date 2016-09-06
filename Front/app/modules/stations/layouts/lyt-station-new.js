@@ -55,6 +55,7 @@ define([
         zoom: 2,
         element: 'map',
       });
+      this.$el.i18n();
     },
 
     onDestroy: function() {

@@ -24,7 +24,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/gpx/templates/tpl-step1-gpx.html',
 
-    name: 'GPX file upload',
+    name : '<span class="import-step1"></span>',
 
     events: {
       'change input[type="file"]': 'importFile',
@@ -56,6 +56,9 @@ define([
       $('.fieldactivity').addClass('hidden');
       this.fieldworkers = $('label[for*="FieldWorkers"]').parent();
       $(this.fieldworkers).addClass('hidden');
+      this.$el.i18n();
+      var stepName = i18n.translate('import.stepper.step1-gpxlabel');
+      $('.import-step1').html(stepName);
     },
 
     importFile: function(e) {

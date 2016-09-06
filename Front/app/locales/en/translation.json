@@ -9,7 +9,10 @@
 		"validation" : "Validate",
 		"data" : "My data",
 		"stations" : "Stations",
-		"objects" : "Objects"
+		"objects" : "Objects",
+		"new-station" :"New station",
+		"sensors" :"Sensors",
+		"release" :"Release"
 	},
 	"header" : {
 
@@ -30,7 +33,13 @@
 		"delete" : "Delete",
 		"addObserver" : "Add an observer",
 		"removeObserver" : "Remove an observer",
-		"geolocation" : "Get current position"
+		"geolocation" : "Get current position",
+		"grid" :"grid",
+		"map" : "map",
+		"logout" : "logout",
+		"back" : "Back",
+		"select-all" : "Select all",
+		"unselect-all" :"Unselect all"
 
 	},
 	"shared" : {
@@ -48,6 +57,8 @@
 		"accuracy" : "accuracy(m)",
 		"distanceObs" :"distance from obs",
 		"date" : "time",
+		"rows" : "rows",
+		"individuals" : "individuals",
 		"option" : {
 			"is" : "Is",
 			"isNot" : "Is not",
@@ -96,7 +107,10 @@
 		"stepper" : {
 			"step1GPXLabel" : "Data",
 			"step2GPXLabel" : "Details",
-			"step3GPXLabel" : "Metadata"
+			"step3GPXLabel" : "Metadata",
+			"step0-label" : "File type selection",
+			"step1-gpxlabel" : "GPX file upload",
+			"step2-gpxlabel" : "Datas Selection"
 		},
 		"gpxHelp" : "GPX, or GPS eXchange Format is an XML schema designed as a common GPS data format. It can be used to describe waypoints, tracks, and routes.",
 		"fileSelection" : "select a file*",
@@ -117,7 +131,51 @@
 		"ImportingDataAlert" : "Importing data",
 		"loadingDataAlert" : "Loading data error",
 		"importingDataWarning" : "Selected waypoint(s) are already imported",
-		"importServerError" : "Error sending gpx data to the server."
-	}
+		"importServerError" : "Error sending gpx data to the server.",
+		"gpx" :"gpx file",
+		"rfid" : "rfid file",
+		"gsm" : "gsm files",
+		"argos" : "argos files",
+		"label-selected" :"selected data"
+	},
+	"home" : {
+		"hello" : "Hello",
+		"graph-label" : "Number of new stations"
+	},
+	"stations" : {
+			"search" :"Search",
+			"all-tab" : "All stations",
+			"imported-tab" : "Imported stations",
+			"coords-tab" : "With coordinates",
+			"no-coords-tab" : "Without coordinates",
+			"total-label" : "Stations total :",
+			"new-station-btn" :"New station",
+			"export-btn" :"Export data"
+	},
+	"sensors" : {
+			"new" : "New sensor"
+ 	},
+ 	"individuals" : {
+ 		"advanced " :"Advanced",
+ 		"new" :"New individual",
+ 		"history" : "Historique",
+ 		"equipment" : "Equipement",
+ 		"locations" : "Positions"
+ 	},
+ 	"export" : {
+ 		"legend-theme" : "Choose your theme",
+ 		"legend-view"  :"Choose your view",
+ 		"legend-columns" : "Choose your columns",
+ 		"legend-preview" : "Preview",
+ 		"legend-rows" : "first rows",
+ 		"pdf-file" : "Get PDF File",
+ 		"csv-file" :"Get CSV File",
+ 		"excel-file" : "Get Excel File",
+ 		"gpx-file" : "Get GPX File",
+ 		"step1-label" :"Choose the view to export",
+ 		"step2-label" :"Filter",
+ 		"step3-label" :"Preview",
+ 		"step4-label" :"File type"
+ 	}
 
 }

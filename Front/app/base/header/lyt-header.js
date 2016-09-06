@@ -94,10 +94,12 @@ function($,Marionette, config, Breadcrumb) {
               $('.supportpanel').append('<a class="pipefyclose"><span class="reneco reneco-close"></span></a>');
           } 
         }
+
        );
       } else {
         this.closeform();
       }
+
     },
     getUser : function(){
       var _this = this;
