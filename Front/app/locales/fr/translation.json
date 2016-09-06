@@ -173,5 +173,9 @@
  		"step2-label" :"Filtre",
  		"step3-label" :"Aperçu",
  		"step4-label" :"Type de fichier"
+ 	},
+ 	"swal" : {
+ 		"savingForm-title" : "Enregistrement du formulaire",
+ 		"savingForm-content" : "Ce formulaire n'est pas encore enregistré. Voulez vous continuer sans le sauvegarder?"
  	}
 }

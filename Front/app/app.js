@@ -20,6 +20,7 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','confi
   'ns_modules/ns_cell/bg-timestampCell',
   'ns_modules/ns_cell/autocompCell',
   'ns_modules/ns_cell/bg-integerCell',
+  'i18n'
 
   ],
 
@@ -117,15 +118,18 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
     window.checkExitForm = function(confirmCallback,cancelCallback) {
       if(window.formChange && window.formEdition){
+        var title = i18n.translate('swal.savingForm-title');
+        var savingFormContent =  i18n.translate('swal.savingForm-content');
+        var cancelMsg = i18n.translate('button.cancel');
         Swal({
-          title: 'Saving form',
-          text: 'Current form is not yet saved. Would you like to continue without saving it?',
+          title: title,
+          text: savingFormContent,
           type: 'warning',
           showCancelButton: true,
           confirmButtonColor: 'rgb(221, 107, 85)',
           confirmButtonText: 'OK',
           cancelButtonColor: 'grey',
-          cancelButtonText: 'Cancel',
+          cancelButtonText: cancelMsg,
           closeOnConfirm: true,
         },
         function(isConfirm) {

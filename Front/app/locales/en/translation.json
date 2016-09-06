@@ -176,6 +176,10 @@
  		"step2-label" :"Filter",
  		"step3-label" :"Preview",
  		"step4-label" :"File type"
+ 	},
+ 	"swal" : {
+ 		"savingForm-title" : "Saving form",
+ 		"savingForm-content" : "Current form is not yet saved. Would you like to continue without saving it?"
  	}
 
 }
