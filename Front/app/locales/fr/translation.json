@@ -9,7 +9,10 @@
 		"validation" : "Validation",
 		"data" : "Mes données",
 		"stations" : "Stations",
-		"objects" : "Objets"
+		"objects" : "Objets",
+		"new-station" :"Nouvelle station",
+		"sensors" :"Capteurs",
+		"release" :"Relaché"
 	},
 	"stepper" : {
 			"btnNext" : "Suivant",
@@ -26,7 +29,14 @@
 		"delete" : "Supprimer",
 		"addObserver" : "Ajouter un observateur",
 		"removeObserver" : "Enlever un observateur",
-		"geolocation" : "Position courante"
+		"geolocation" : "Position courante",
+		"grid" :"grille",
+		"map" : "carte",
+		"logout" : "Se déconnecter",
+		"export" :"Exporter",
+		"back" : "Retour",
+		"select-all" : "Selectionner tout",
+		"unselect-all" :"annuler"
 	},
 	"shared" : {
 		"fieldworker" : "Observateur",
@@ -43,6 +53,8 @@
 		"accuracy" : "précision(m)",
 		"distanceObs" :"distance de l'observateur",
 		"date" : "date",
+		"rows" : "lignes",
+		"individuals" : "individus",
 		"option" : {
 			"is" : "est",
 			"isNot" : "n'est pas",
@@ -91,7 +103,10 @@
 		"stepper" : {
 			"step1GPXLabel" : "Données",
 			"step2GPXLabel" : "Details",
-			"step3GPXLabel" : "Metadonnées"
+			"step3GPXLabel" : "Metadonnées",
+			"step0-label" : "Type de fichier",
+			"step1-gpxlabel" : "Chargement du fichier GPX",
+			"step2-gpxlabel" : "Sélection de données"
 		},
 		"gpxHelp" : "GPX ou GPS eXchange Format est un format d'échange de données GPS. Il peut être utilisé pour décrire des points d'intéret (waypoints), des tracés et des itinéraires .",
 		"fileSelection" : "Sélectionnez un fichier",
@@ -113,6 +128,50 @@
 		"importingDataWarning" : "Les points sélectionnés sont déjà importés",
 		"importServerError" : "Erreur de transfert de données vers le serveur.",
 		"fieldWorkerNameErr" : "Erreur de nom",
-		"fieldWorkerNameErrMsg" : "Ce nom est déjà sélectionné. Merci de choisir un autre nom."
-	}
+		"fieldWorkerNameErrMsg" : "Ce nom est déjà sélectionné. Merci de choisir un autre nom.",
+		"gpx" :"fichier gpx",
+		"rfid" : "fichier rfid",
+		"gsm" : "fichier gsm",
+		"argos" : "fichier argos",
+		"label-selected" :"point(s) séléctionné(s)"
+
+	},
+		"home" : {
+			"hello" : "Bonjour",
+			"graph-label" : "Nombre des nouvelles stations"
+	  },
+	"stations" : {
+			"search" :"Rechercher",
+			"all-tab" : "Toutes les stations",
+			"imported-tab" : "Stations importées",
+			"coords-tab" : "Avec coordonnées",
+			"no-coords-tab" : "Sans coordonnées",
+			"total-label" : "Total :",
+			"new-station-btn" :"Nouvelle station"
+		},
+	"sensors" : {
+			"new" : "Nouveau capteur"
+	},
+ 	"individuals" : {
+ 		"advanced" :"Avancé",
+ 		"new" :"Nouvel individu",
+ 		"history" : "Historique",
+ 		"equipment" : "Equipement",
+ 		"locations" : "Positions"
+ 	},
+ 	"export" : {
+ 		"legend-theme" : "Choisissez votre thème",
+ 		"legend-view"  :"Choisissez votre vue/protocole",
+ 		"legend-columns" : "Choisissez vos colonnes",
+ 		"legend-preview" : "Aperçu",
+ 		"legend-rows" : "premières lignes",
+ 		"pdf-file" : "fichier PDF",
+ 		"csv-file" :"fichier CSV",
+ 		"excel-file" : "fichier Excel",
+ 		"gpx-file" : "fichier GPX",
+ 		"step1-label" :"Choix de vue/protocole",
+ 		"step2-label" :"Filtre",
+ 		"step3-label" :"Aperçu",
+ 		"step4-label" :"Type de fichier"
+ 	}
 }

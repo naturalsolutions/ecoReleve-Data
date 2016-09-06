@@ -37,6 +37,7 @@ function($,Marionette, config, Breadcrumb) {
           _this.ui.userName.html(window.app.user.get('fullname'));
         }
       });
+      this.$el.i18n();
     },
   });
 });
