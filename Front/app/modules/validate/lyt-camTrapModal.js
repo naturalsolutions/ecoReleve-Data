@@ -103,7 +103,7 @@ define([
 			var popoverContent = this.parent.$el.find('.popover-content')
 			//console.log(popoverContent ) ;
 			if(this.model.get('validated') ==2 ) {
-				console.log(popoverContent.find('input'));
+			//	console.log(popoverContent.find('input'));
 				popoverContent.find('input').removeClass('hide');
 				popoverContent.find('input').rating({
 					min:0,

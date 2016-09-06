@@ -20,13 +20,14 @@ define([
   'backbone.marionette.keyShortcuts',
   'backbone.virtualcollection',
   './lyt-camTrapToolsBarTopView',
+  'jqueryui',
 
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
   config, NsGrid, NsMap, NsForm, moment, Navbar, PageColl,
   CamTrapItemView , CamTrapImageModel, ToolsBar, ModalView, BckMrtKeyShortCut,
-  virtualcollection, ToolsBarTop
+  virtualcollection, ToolsBarTop, jqueryUi
 
 ) {
 
@@ -51,7 +52,7 @@ define([
       'backspace' : 'toggleModelStatus',
       'enter':'acceptPhoto',
       'del':'rejectPhoto',
-      'ctrl': 'undeterminatePhoto',
+      'shift': 'undeterminatePhoto',
       'esc' : 'leaveModal',
       'pagedown': 'nextPage',
       'pageup' : 'prevPage',
@@ -149,6 +150,7 @@ define([
       this.nbPhotosRefused = 0;
       this.nbPhotosChecked = 0;
       this.stopSpace = false;
+      this.tabSelected  = [];
 
       this.sensorId = this.model.get('fk_sensor');
       this.siteId = this.model.get('FK_MonitoredSite');
@@ -253,14 +255,17 @@ define([
           case 'N':{//next page
             this.pageChange = '';
             this.currentPosition = 0;//position to focus
+            this.tabSelected = [];
             break;
           }
           case 'P': {//previous page
             this.pageChange = '';
             this.currentPosition = this.tabView.length-1; //position to focus
+            this.tabSelected = [];
             break;
           }
           default:{
+            console.log("bim default");
             this.currentPosition = 0;
             break;
           }
@@ -269,6 +274,116 @@ define([
         if( this.rgModal.currentView !== undefined){//si le modal existe on change
           this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
         }
+        $('#gallery').selectable({
+          filter: '.imageCamTrap',
+           distance : 10,
+           start : function(e , ui) {
+             if ( typeof _this.tabSelected != "undefined" && _this.tabSelected.length > 0 ) {
+             for ( var i of _this.tabSelected ) {
+     					if( _this.currentPosition != i  ) {
+                if (_this.tabView[i].$el.find('.vignette').hasClass('active')  ) {
+         					_this.tabView[i].$el.find('.vignette').removeClass('active');
+                }
+   				     }
+             }
+           }
+
+          //    if ( _this.tabView[_this.currentPosition].$el.find('.vignette').hasClass('active') ) {
+          //      _this.tabView[_this.currentPosition].$el.find('.vignette').toggleClass('active')
+          //    }
+           //
+          //    if(e.ctrlKey){// on garde l'ancien tableau
+          //    console.log("ctrl key dans active");
+          //  }
+          //  else {
+           //
+          //  }
+          //    var $tmp = $('.imageCamTrap');
+          //    for ( var i of _this.tabSelected ) {
+          //      _this.tabView[i].$el.find('.vignette').toggleClass('active');
+          //      //$('.imageCamTrap').eq(i).removeClass('ui-selected');
+          //    }
+          //     //$('#gallery').trigger('unselected')
+          //     //_this.tabSelected = [];
+           },
+           selected: function (e , ui){
+             if( e.ctrlKey) {
+               if( $(ui.selected).hasClass('already-selected') ) {
+                 $(ui.selected).removeClass('already-selected')
+                 $(ui.selected).removeClass('ui-selected');
+               }else{
+                 $(ui.selected).addClass('tmp-selectedctrl');
+               }
+               console.log(ui);
+             }
+             else{
+               $(ui.selected).addClass('tmp-selected');
+               $(ui.selected).removeClass('ui-selected');
+             }
+           },
+           unselected: function(e , ui ) {
+             if (e.ctrlKey) {
+               console.log("ctrl key DANS UNSELECTED");
+             }
+             $('#gallery .already-selected').removeClass('already-selected');
+            //  console.log("event");
+            //  console.log(e);
+            //  console.log("ui");
+            //  console.log(ui);
+            //  $(ui).toggleClass('active')
+          },
+           stop: function(e, ui) {
+             if( e.ctrlKey ){
+               console.log("ctrl dans stop ");
+               console.log("ui");
+
+
+             }
+              $('#gallery .tmp-selected').addClass('already-selected').removeClass('tmp-selected').addClass('ui-selected');
+              $('#gallery .tmp-selectedctrl').addClass('already-selected').removeClass('tmp-selectedctrl').addClass('ui-selected');
+
+                var result = "";
+                _this.tabSelected = [];
+
+                $( ".ui-selected", this ).each(function() {
+                   var index = $( ".imageCamTrap" ).index( this );
+                   _this.tabSelected.push(index);
+                   if( ! (_this.tabView[index].$el.find('.vignette').hasClass('active') ) ) {
+                     _this.tabView[index].$el.find('.vignette').toggleClass('active');
+                   }
+                });
+                console.log("tableau ");
+                console.log(_this.tabSelected);
+            //  if(e.ctrlKey){// on garde l'ancien tableau
+            //  console.log("ctrl key");
+            //   /* if( _this.tabSelected.length === 0) {// deselectionne l'ancien tableau
+            //    _this.tabView[_this.currentPosition].$el.find('.vignette').toggleClass('active');
+            //  }*/
+            //  }
+            //  else {//on vide le tableau nouvelle selection
+            //    console.log("pas de ctrl key");
+            // /*   if( _this.tabSelected.length === 0) {// deselectionne l'ancien tableau
+            //    _this.tabView[_this.currentPosition].$el.find('.vignette').toggleClass('active');
+            //  }*/
+            // /*   for ( var i of _this.tabSelected ) {
+            //      //_this.tabView[i].$el.find('.vignette').toggleClass('active');
+            //      $('.imageCamTrap').eq(i).removeClass('ui-selected');
+            //    }*/
+            //    //_this.tabSelected = [];
+            //
+            //  }
+            //   var result = "";
+            //   _this.tabSelected = [];
+            //
+            //   $( ".ui-selected > .vignette", this ).each(function() {
+            //      var index = $( ".vignette" ).index( this );
+            //      _this.tabSelected.push(index);
+            //      if( ! (_this.tabView[index].$el.find('.vignette').hasClass('active') ) ) {
+            //        _this.tabView[index].$el.find('.vignette').toggleClass('active');
+            //      }
+            //   });
+           }
+        });
       }
     },
 
@@ -356,9 +471,19 @@ define([
 
 
     acceptPhoto : function(e) {
-      if(this.currentPosition !== null ) {
-        this.tabView[this.currentPosition].setModelValidated(2);
+      if(this.tabSelected.length == 0) {
+        if(this.currentPosition !== null ) {
+          this.tabView[this.currentPosition].setModelValidated(2);
+        }
+      } else {
+        for(var i of this.tabSelected) {
+          console.log(i);
+          this.tabView[i].setModelValidated(2);
+        }
       }
+    /*  if(this.currentPosition !== null ) {
+        this.tabView[this.currentPosition].setModelValidated(2);
+      }*/
 
     },
 
@@ -398,23 +523,45 @@ define([
 
     rejectPhoto : function(e) {
 
-      if(this.currentPosition !== null ) {
-        this.tabView[this.currentPosition].setModelValidated(4);
+      if(this.tabSelected.length == 0) {
+        if(this.currentPosition !== null ) {
+          this.tabView[this.currentPosition].setModelValidated(4);
+        }
+      } else {
+        for(var i of this.tabSelected) {
+          this.tabView[i].setModelValidated(4);
+        }
       }
-
     },
     undeterminatePhoto : function(e) {
-
-      if(this.currentPosition !== null ) {
-        this.tabView[this.currentPosition].setModelValidated(1);
+      if(this.tabSelected.length == 0) {
+        if(this.currentPosition !== null ) {
+          this.tabView[this.currentPosition].setModelValidated(1);
+        }
+      } else {
+        for(var i of this.tabSelected) {
+          this.tabView[i].setModelValidated(1);
+        }
       }
+    /*  if(this.currentPosition !== null ) {
+        this.tabView[this.currentPosition].setModelValidated(1);
+      }*/
     },
 
     toggleModelStatus: function(e){
       e.preventDefault();
-      if(this.currentPosition !== null ) {
-        this.tabView[this.currentPosition].toggleModelStatus();
+      if(this.tabSelected.length == 0) {
+        if(this.currentPosition !== null ) {
+          this.tabView[this.currentPosition].toggleModelStatus();
+        }
+      } else {
+        for(var i of this.tabSelected) {
+          this.tabView[i].toggleModelStatus();
+        }
       }
+      /*if(this.currentPosition !== null ) {
+        this.tabView[this.currentPosition].toggleModelStatus();
+      }*/
 
     },
 
@@ -509,7 +656,8 @@ define([
         }
 
         if (lastPosition !== this.currentPosition) {// si on a bougé
-          this.tabView[lastPosition].handleFocus();
+          if( this.tabSelected.length === 0)
+            this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
           this.tabView[this.currentPosition].handleFocus();
           if( this.rgModal.currentView !== undefined){//si le modal existe on change
             this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);

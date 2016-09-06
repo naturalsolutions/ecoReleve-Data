@@ -92,7 +92,7 @@ def unchecked_camtrap(request):
     session = request.dbsession
 
     unchecked = DataCamTrapFile
-    queryMoche = "SELECT equipID,UnicIdentifier,fk_sensor,site_name,FK_MonitoredSite,site_type,StartDate,EndDate,COUNT(DISTINCT pk_id) AS nb_photo FROM [dbo].V_dataCamTrap_With_equipSite WHERE equipID IS NOT NULL GROUP BY UnicIdentifier, site_name, site_type, StartDate, EndDate, equipID, fk_sensor, FK_MonitoredSite;"
+    queryMoche = "SELECT equipID,UnicIdentifier,fk_sensor,site_name,FK_MonitoredSite,site_type,StartDate,EndDate,COUNT(DISTINCT pk_id) AS nb_photo FROM [dbo].V_dataCamTrap_With_equipSite WHERE checked IS NULL AND equipID IS NOT NULL GROUP BY UnicIdentifier, site_name, site_type, StartDate, EndDate, equipID, fk_sensor, FK_MonitoredSite;"
     #queryStmt = select(unchecked.c)
     #data = session.execute(queryStmt).fetchall()
     data2 = session.execute(queryMoche).fetchall()
@@ -190,6 +190,8 @@ def patchCamTrap(request):
         XMLTags = None
     curCameraTrap.tags = XMLTags
     print (curCameraTrap)
+    # session.commit()
+    return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt/id_equip',renderer='json',request_method = ('GET','PATCH') )
@@ -492,6 +494,22 @@ def validateCamTrap(request):
     if result.rowcount > 0 :
         print("procedure a retourne des row")
         print("appel de la vue pour redimensioner et supprimer")
+        query2 = text("""
+        select path, name, validated from [ecoReleve_Sensor].[dbo].[TcameraTrap]
+        where pk_id in (
+        select pk_id
+        from V_dataCamTrap_With_equipSite
+        where
+        fk_sensor = :fkSensor
+        AND FK_MonitoredSite = :fkMonitoredSite
+        AND equipID = :fkEquipmentId)""").bindparams(
+        bindparam('fkSensor', value=fkSensor),
+        bindparam('fkMonitoredSite', value=fkMonitoredSite),
+        bindparam('fkEquipmentId', value=fkEquipmentId)
+        )
+        resultat = session.execute(query2).fetchall();
+        print("les photos a traiter")
+        print(resultat)
 
 
 

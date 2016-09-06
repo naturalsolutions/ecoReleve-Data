@@ -10,7 +10,9 @@ M.Name AS site_name,
 M.ID AS FK_MonitoredSite,
 M.Category AS site_type,
 E.StartDate,
-E3.StartDate AS EndDate
+E3.StartDate AS EndDate,
+cam.checked
+
 
 FROM
 ecoReleve_Sensor.dbo.TcameraTrap AS cam
@@ -36,4 +38,3 @@ AND NOT EXISTS
 FROM EcoReleve_ECWP.dbo.Equipment AS e4
 WHERE (FK_Sensor = E.FK_Sensor) AND (StartDate < E3.StartDate) AND (StartDate > E.StartDate)
 )
-WHERE (cam.checked IS NULL )

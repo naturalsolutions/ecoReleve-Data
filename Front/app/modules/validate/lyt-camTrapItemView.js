@@ -39,18 +39,44 @@ define([
 
 		clickFocus : function(e){
 		//	this.$el.find('img').focus();
-			var lastPosition = this.parent.currentPosition;
+		if( e.ctrlKey) {
+			console.log("LE FOCUS ET LE CTRL KEY");
+		} else {
+				var lastPosition = this.parent.currentPosition;
 			if(lastPosition === null)
 			lastPosition = 0;
 			//this.parent.currentViewImg = this;
 			//TODO fait bugguer la position pour le
 			this.parent.currentPosition = this.parent.currentCollection.indexOf(this.model);
-			this.parent.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
+			if ( this.parent.tabView[lastPosition].$el.find('.vignette').hasClass('active') ) {
+			this.parent.tabView[lastPosition].$el.find('.vignette').removeClass('active');
+			}
+			//console.log(this.parent.tabSelected.length);
+			if( this.parent.tabSelected.length > 0) {//supprime les elements select
+				console.log("ON SUPPRRRIMMMEE");
+				$('#gallery .ui-selected').removeClass('ui-selected').removeClass('already-selected');
+				for ( var i of this.parent.tabSelected ) {
+					if( lastPosition != i  )
+					this.parent.tabView[i].$el.find('.vignette').toggleClass('active');
+				}
+			}
+			this.parent.tabSelected = [] ;
 			this.handleFocus();
+				}
 		},
 
 		handleFocus: function(e) {
+			//console.log(" la liste :")
+			//console.log(this.parent.tabSelected);
+			if( this.parent.tabSelected.length > 0) {
+				$('#gallery .ui-selected').removeClass('ui-selected');
+				$('#gallery').trigger('unselected')
+				for ( var i of this.parent.tabSelected ) {
+					this.parent.tabView[i].$el.find('.vignette').toggleClass('active');
+				}
+			}
 			this.$el.find('.vignette').toggleClass('active');
+			this.parent.tabSelected = [] ;
 			// if( lastPosition != this.parent.currentPosition){
 			// 	console.log("on a changé de position on détrui et on instantie");
 			// 	console.log(this.lastzoom);
@@ -195,37 +221,60 @@ define([
 
 		setModelValidated: function(val) {
 			var oldVal = this.model.get("validated");
-			if ( oldVal === val) {
+			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
+			switch(oldVal ) {
+				case 1 :{// not checked
+					$icon.removeClass('reneco-support');
+					break;
+				}
+				case 2 : {
+					$icon.removeClass('reneco-checked');
+					break;
+				}
+				case 4 : {
+					$icon.removeClass('reneco-close');
+					break;
+				}
+				default:{
+						$icon.removeClass('reneco-hidden');
+					break;
+				}
+			}
+		/*	if ( oldVal === val) {
 				this.model.set("validated",1);
 				this.setVisualValidated(1);
 			}
-			else {
+			else {*/
 				this.model.set("validated",val);
 				this.setVisualValidated(val);
-			}
+			//}
 		},
 
 		toggleModelStatus : function (){
 			switch( this.model.get("validated") ){
 				case 0 : {
-					this.model.set("validated", 1 );
-					this.setVisualValidated(1);
+					this.setModelValidated(1);
+					/*this.model.set("validated", 1 );
+					this.setVisualValidated(1);*/
 					break;
 				}
 				case 1 : {
-					this.model.set("validated", 2 );
-					this.setVisualValidated(2);
+					this.setModelValidated(2);
+				/*	this.model.set("validated", 2 );
+					this.setVisualValidated(2);*/
 					break;
 				}
 
 				case 2 :{
-					this.model.set("validated", 4 );
-					this.setVisualValidated(4);
+					this.setModelValidated(4);
+				/*	this.model.set("validated", 4 );
+					this.setVisualValidated(4);*/
 					break;
 				}
 				case 4 : {
-					this.model.set("validated" , 1 );
-					this.setVisualValidated(1);
+					this.setModelValidated(1);
+				/*	this.model.set("validated" , 1 );
+					this.setVisualValidated(1);*/
 					break;
 				}
 			}
@@ -234,25 +283,25 @@ define([
 		setVisualValidated : function(valBool){
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
 			//var $icon2 = this.$el.find('.camtrapItemViewContent > i');
-			var lastClass = $icon.attr('class').split(' ').pop();
+			//var lastClass = $icon.attr('class').split(' ').pop();
 
 			switch(this.model.get("validated") ) {
 				case 1 :{// not checked
-					$icon.removeClass( lastClass );
+				//	$icon.removeClass( lastClass );
 					$icon.addClass('reneco-support');
 					this.$el.find('.rating-container').addClass('hide');
 
 					break;
 				}
 				case 2 : {
-					$icon.removeClass( lastClass );
+				//	$icon.removeClass( lastClass );
 					$icon.addClass('reneco-checked');
 					this.$el.find('.rating-container').removeClass('hide');
 
 					break;
 				}
 				case 4 : {
-					$icon.removeClass( lastClass );
+				//	$icon.removeClass( lastClass );
 					$icon.addClass('reneco-close');
 					this.$el.find('.rating-container').addClass('hide');
 
@@ -262,7 +311,9 @@ define([
 		},
 
 		goFullScreen: function(e) {
-			this.parent.displayModal(e);
+			if (!e.ctrlKey) {
+				this.parent.displayModal(e);
+			}
 		},
 
 		onDestroy: function(){
