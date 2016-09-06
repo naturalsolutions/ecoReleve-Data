@@ -31,7 +31,7 @@ class Observation(Base,ObjectWithDynProp):
     __tablename__ = 'Observation'
     ID =  Column(Integer,Sequence('Observation__id_seq'), primary_key=True)
     FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
-    ObservationDynPropValues = relationship('ObservationDynPropValue',backref='Observation')
+    ObservationDynPropValues = relationship('ObservationDynPropValue',backref='Observation', cascade="all, delete-orphan")
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
     creationDate = Column(DateTime,default = func.now())
     Parent_Observation = Column(Integer,ForeignKey('Observation.ID'))
