@@ -16,7 +16,10 @@ def users(request):
     session = request.dbsession
     query = select([
         User.id.label('PK_id'),
-        User.Login.label('fullname')
+        User.Login.label('fullname'),
+        User.Firstname.label('Firstname'),
+        User.Language.label('Language'),
+        User.Lastname.label('Lastname')
     ]).order_by(User.Lastname, User.Firstname)
     return [dict(row) for row in session.execute(query).fetchall()]
 
