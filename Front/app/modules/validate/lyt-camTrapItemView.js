@@ -119,7 +119,7 @@ define([
 
 		onRender: function(){
 			var _this = this;
-			//console.log(this.$el.find('.rateit') );
+			var $input = this.$el.find('input');
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
 			var lastClass = $icon.attr('class').split(' ').pop();
 			this.$el.find('input').rating({
@@ -129,9 +129,13 @@ define([
 				size:'xs',
 				rtl:false,
 				showCaption:false,
-				showClear:false
+				showClear:false,
+				value : _this.model.get('note')
 			});
 			this.$el.find('.rating-container').addClass('hide');
+			$input.on('rating.change', function(event, value, caption) {
+			    _this.model.set('note',value);
+			});
 
 
 			//this.$el.find('rating-container').addClass('hide');
@@ -316,22 +320,37 @@ define([
 			}
 		},
 
-		onDestroy: function(){
+		onDestroy: function() {
 			console.log("bim destroy");
 		},
 
-		increaseStar: function(){
+		setStars: function( val ) {
+			var $input = this.$el.find('input');
+			val = parseInt(val)
+			if(val > 0 && val <= 5) {
+				$input.rating('update', val).val();
+				$input.trigger('rating.change', [val , null]);
+			}
+
+		},
+
+		increaseStar: function() {
 			var $input = this.$el.find('input');
 			var val = parseInt($input.rating().val());
-			if( val+1 <=5)
-			$input.rating('update', val+1).val();
+			if( val+1 <=5) {
+				$input.rating('update', val+1).val();
+				$input.trigger('rating.change', [val+1 , null]);
+
+			}
 		//	this.$el.find('.rateit').rateit('value',this.$el.find('.rateit').rateit('value') +1 );
 		},
-		decreaseStar: function(){
+		decreaseStar: function() {
 			var $input = this.$el.find('input');
 			var val = parseInt($input.rating().val());
-			if( val-1 >=1)
-			$input.rating('update', val-1).val();
+			if( val-1 > 0){
+				$input.rating('update', val-1).val();
+				$input.trigger('rating.change', [val-1 , null]);
+			}
 	//		this.$el.find('.rateit').rateit('value',this.$el.find('.rateit').rateit('value') - 1 );
 		}
 

@@ -58,16 +58,21 @@ define([
       'pageup' : 'prevPage',
       'home' : 'firstPage',
       'end' : 'lastPage',
+      '1' : 'setStars',
+      '2' : 'setStars',
+      '3' : 'setStars',
+      '4' : 'setStars',
+      '5' : 'setStars'
 
     },
 
     events: {
-      'click button#validate': 'validate',
-      'click button#refusedBtn': 'rejectPhoto',
-      'click button#checkedBtn': 'undeterminatePhoto',
-      'click button#leftMouvementBtn': 'leftMouvement',
-      'click button#rightMouvementBtn': 'rightMouvement',
-      'click button#acceptedBtn': 'acceptPhoto',
+      'click i#validate': 'validate',
+      'click i#refusedBtn': 'rejectPhoto',
+      'click i#checkedBtn': 'undeterminatePhoto',
+      'click i#leftMouvementBtn': 'leftMouvement',
+      'click i#rightMouvementBtn': 'rightMouvement',
+      'click i#acceptedBtn': 'acceptPhoto',
       'click button#validate' : 'validateAll',
       'click .reneco-ecollectionsmall' : 'clickOnIconeView',
       'click .reneco-image_file' : 'clickOnIconeView',
@@ -103,6 +108,9 @@ define([
       'rgModal': '#rgModal',
       'rgToolsBar' :'#rgToolsBar',
       'rgToolsBarTop' : '#rgToolsBarTop'
+    },
+    setStars: function(e) {
+      this.tabView[this.currentPosition].setStars(e.key)
     },
     addStars: function(e){
         this.tabView[this.currentPosition].increaseStar();
@@ -181,7 +189,7 @@ define([
         },
         url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
         patch : function(){
-          console.log("ouais ouais ouais j'overwrite");
+          //console.log("ouais ouais ouais j'overwrite");
         }
       });
 
@@ -199,7 +207,7 @@ define([
       this.myImageCollection.fetch();
 
       this.paginator.collection.on('reset', function(e){
-        console.log("reset du paginator");
+        //console.log("reset du paginator");
       });
 
     },
@@ -217,7 +225,7 @@ define([
     display: function() {
       var _this = this;
       this.listenTo(this.myImageCollection, 'reset', function(e){// trigger on init or on change page
-        console.log("reset");
+        //console.log("reset");
         _this.displayImages(_this.myImageCollection);
         _this.rgToolsBarTop.show(this.toolsBarTop);
       });
@@ -265,8 +273,9 @@ define([
             break;
           }
           default:{
-            console.log("bim default");
+            //console.log("bim default");
             this.currentPosition = 0;
+            this.tabSelected = [];
             break;
           }
         }
@@ -278,33 +287,19 @@ define([
           filter: '.imageCamTrap',
            distance : 10,
            start : function(e , ui) {
-             if ( typeof _this.tabSelected != "undefined" && _this.tabSelected.length > 0 ) {
-             for ( var i of _this.tabSelected ) {
-     					if( _this.currentPosition != i  ) {
-                if (_this.tabView[i].$el.find('.vignette').hasClass('active')  ) {
-         					_this.tabView[i].$el.find('.vignette').removeClass('active');
-                }
-   				     }
+             if (_this.tabView[_this.currentPosition].$el.find('.vignette').hasClass('active')  ) {
+               _this.tabView[_this.currentPosition].$el.find('.vignette').removeClass('active');
              }
-           }
 
-          //    if ( _this.tabView[_this.currentPosition].$el.find('.vignette').hasClass('active') ) {
-          //      _this.tabView[_this.currentPosition].$el.find('.vignette').toggleClass('active')
-          //    }
-           //
-          //    if(e.ctrlKey){// on garde l'ancien tableau
-          //    console.log("ctrl key dans active");
-          //  }
-          //  else {
-           //
-          //  }
-          //    var $tmp = $('.imageCamTrap');
-          //    for ( var i of _this.tabSelected ) {
-          //      _this.tabView[i].$el.find('.vignette').toggleClass('active');
-          //      //$('.imageCamTrap').eq(i).removeClass('ui-selected');
-          //    }
-          //     //$('#gallery').trigger('unselected')
-          //     //_this.tabSelected = [];
+             if ( typeof _this.tabSelected != "undefined" && _this.tabSelected.length > 0 ) {
+               for ( var i of _this.tabSelected ) {
+         					if( _this.currentPosition != i  ) {
+                    if (_this.tabView[i].$el.find('.vignette').hasClass('active')  ) {
+             					_this.tabView[i].$el.find('.vignette').removeClass('active');
+                    }
+     				     }
+               }
+             }
            },
            selected: function (e , ui){
              if( e.ctrlKey) {
@@ -314,7 +309,6 @@ define([
                }else{
                  $(ui.selected).addClass('tmp-selectedctrl');
                }
-               console.log(ui);
              }
              else{
                $(ui.selected).addClass('tmp-selected');
@@ -322,23 +316,10 @@ define([
              }
            },
            unselected: function(e , ui ) {
-             if (e.ctrlKey) {
-               console.log("ctrl key DANS UNSELECTED");
-             }
              $('#gallery .already-selected').removeClass('already-selected');
-            //  console.log("event");
-            //  console.log(e);
-            //  console.log("ui");
-            //  console.log(ui);
-            //  $(ui).toggleClass('active')
           },
            stop: function(e, ui) {
-             if( e.ctrlKey ){
-               console.log("ctrl dans stop ");
-               console.log("ui");
 
-
-             }
               $('#gallery .tmp-selected').addClass('already-selected').removeClass('tmp-selected').addClass('ui-selected');
               $('#gallery .tmp-selectedctrl').addClass('already-selected').removeClass('tmp-selectedctrl').addClass('ui-selected');
 
@@ -352,36 +333,6 @@ define([
                      _this.tabView[index].$el.find('.vignette').toggleClass('active');
                    }
                 });
-                console.log("tableau ");
-                console.log(_this.tabSelected);
-            //  if(e.ctrlKey){// on garde l'ancien tableau
-            //  console.log("ctrl key");
-            //   /* if( _this.tabSelected.length === 0) {// deselectionne l'ancien tableau
-            //    _this.tabView[_this.currentPosition].$el.find('.vignette').toggleClass('active');
-            //  }*/
-            //  }
-            //  else {//on vide le tableau nouvelle selection
-            //    console.log("pas de ctrl key");
-            // /*   if( _this.tabSelected.length === 0) {// deselectionne l'ancien tableau
-            //    _this.tabView[_this.currentPosition].$el.find('.vignette').toggleClass('active');
-            //  }*/
-            // /*   for ( var i of _this.tabSelected ) {
-            //      //_this.tabView[i].$el.find('.vignette').toggleClass('active');
-            //      $('.imageCamTrap').eq(i).removeClass('ui-selected');
-            //    }*/
-            //    //_this.tabSelected = [];
-            //
-            //  }
-            //   var result = "";
-            //   _this.tabSelected = [];
-            //
-            //   $( ".ui-selected > .vignette", this ).each(function() {
-            //      var index = $( ".vignette" ).index( this );
-            //      _this.tabSelected.push(index);
-            //      if( ! (_this.tabView[index].$el.find('.vignette').hasClass('active') ) ) {
-            //        _this.tabView[index].$el.find('.vignette').toggleClass('active');
-            //      }
-            //   });
            }
         });
       }
@@ -477,7 +428,6 @@ define([
         }
       } else {
         for(var i of this.tabSelected) {
-          console.log(i);
           this.tabView[i].setModelValidated(2);
         }
       }
@@ -820,7 +770,7 @@ define([
         collection: this.myImageCollectionFiltered
       });
       this.listenTo(this.myImageCollectionFiltered, "reset", function(e){
-        console.log("RESET DE LA COLLECTION");
+        //console.log("RESET DE LA COLLECTION");
         _this.displayImages(_this.myImageCollectionFiltered);
       });
 
@@ -901,7 +851,7 @@ define([
                   closeOnConfirm: true,
                 },
                 function() {
-                  console.log("bim je valide requête en cours");
+                  //console.log("bim je valide requête en cours");
                   $.ajax({
                     url : config.coreUrl+'sensors/'+_this.type+'/uncheckedDatas',
                     method: 'POST',
