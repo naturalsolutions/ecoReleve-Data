@@ -12,11 +12,12 @@ define([
   'ns_filter_bower',
   'dateTimePicker',
   'ns_grid/grid.view',
+  'ns_filter/filters',
 
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsFilter, dateTimePicker, GridView
+  Com, NsGrid, NsFilterBower, dateTimePicker, GridView, NsFilter
 ) {
 
   'use strict';
@@ -53,6 +54,11 @@ define([
     initialize: function(options) {
       this.com = new Com();
       this.translater = Translater.getTranslater();
+
+      if( window.app.currentData ){
+        this.defaultFilters = window.app.currentData.filters;
+        console.log(this.defaultFilters);
+      }
     },
 
     onRender: function() {
@@ -87,7 +93,8 @@ define([
         type: this.type,
         com: this.com,
         onRowClicked: onRowClicked,
-        afterFirstGetRows: afterFirstGetRows
+        afterFirstGetRows: afterFirstGetRows,
+        filters: this.defaultFilters
       }));
     },
 
@@ -100,6 +107,7 @@ define([
         com: this.com,
         filterContainer: this.ui.filter,
         name: this.moduleName,
+        filtersValues: this.defaultFilters
       });
     },
 

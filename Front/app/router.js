@@ -74,17 +74,24 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       }else {
         this.setNav(patern);
       }
-      this.checkResestCurrentDatas(patern[0]);
+
+      this.checkResestCurrentDatas(patern[0], params);
     },
 
-    checkResestCurrentDatas: function() {
-      var from = this.history[this.history.length-2];
+    checkResestCurrentDatas: function(type, params) {   
+      if(params.length > 1){
+        if(this.currentId && this.currentId != params[0]){
+          window.app.currentData = null;
+        }
+        this.currentId = params[0];
+      } else {
+        this.currentId = null;
+      }
       if(window.app.currentData){
-        if((window.app.currentData.type != from)){
+        if((window.app.currentData.type != type)){
           window.app.currentData = null;
         }
       }
-
     },
 
     previous: function() {

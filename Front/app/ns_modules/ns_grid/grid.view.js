@@ -16,6 +16,8 @@ define([
   return Marionette.LayoutView.extend({
     template: 'app/ns_modules/ns_grid/grid.tpl.html',
     className: 'grid-view full-height',
+    name: 'gird',
+
     pageSize: 200,
     elementSelector: '#grid',
     navigate: true,
@@ -34,6 +36,7 @@ define([
         this.com.addModule(this);
       }
       
+      this.filters = options.filters || [];
       //if (typeof options. === 'boolean')
 
       this.onRowClicked = options.onRowClicked;
@@ -61,9 +64,10 @@ define([
           _this.onRowClicked(row);
         },
       };
+
       this.extendAgGrid();
-      this.initDataSource();
       this.iniColumns();
+      this.initDataSource();
     },
 
     iniColumns: function(){
@@ -104,7 +108,6 @@ define([
         rowCount: null,
         maxConcurrentDatasourceRequests: 2,
         getRows : function (params){
-          console.log(params);
           var pageSize = params.endRow - params.startRow;
           var page = params.endRow / pageSize;
           var offset = (page - 1) * pageSize;
@@ -159,6 +162,7 @@ define([
       });
       this.model.set({
         list: data,
+        filters: this.filters,
         filterModel: this.gridOptions.api.getFilterModel(),
         sortModel: this.gridOptions.api.getSortModel(),
       });
@@ -194,11 +198,12 @@ define([
 
     filter: function(filters){
       this.filters = filters;
-      this.gridOptions.api.setDatasource(this.dataSource);
+      if(this.dataSource){
+        this.gridOptions.api.setDatasource(this.dataSource);
+      }
     },
 
     changePageSize: function(pageSize){
-      console.log(pageSize);
       this.gridOptions.paginationPageSize = new Number(pageSize);
       this.gridOptions.api.setDatasource(this.dataSource);
     },
