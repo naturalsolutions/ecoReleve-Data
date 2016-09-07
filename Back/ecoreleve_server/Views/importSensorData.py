@@ -33,14 +33,16 @@ route_prefix = 'sensors/'
 @view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST',match_param='type=rfid',permission = routes_permission['rfid']['POST'])
 @view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST',match_param='type=gsm',permission = routes_permission['gsm']['POST'])
 @view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST',match_param='type=argos',permission = routes_permission['argos']['POST'])
+@view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST',match_param='type=concat',permission = routes_permission['rfid']['POST'])
+@view_config(route_name=route_prefix+'datas', renderer='json' ,request_method='POST',match_param='type=resumable',permission = routes_permission['rfid']['POST'])
 def uploadFile(request):
     #print("bim je check")
     #ici on stock l'acces
-    print("la requete avant d'upload")
-    print(request)
-    print (" user :")
-    print (" file :")
-    print (" date :")
+    # print("la requete avant d'upload")
+    # print(request)
+    # print (" user :")
+    # print (" file :")
+    # print (" date :")
     type_= request.matchdict['type']
     dictFuncImport={
     'argos': uploadFileArgos,

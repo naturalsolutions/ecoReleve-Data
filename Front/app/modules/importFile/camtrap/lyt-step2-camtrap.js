@@ -256,7 +256,7 @@ define([
             console.log(errorThrown);
             if( jqXHR.status == 510 ){
              $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
-             $("#"+file.uniqueIdentifier+" > "+"#status").text("WARNING! :"+String(jqXHR.responseJSON.message)+"\n"+String(jqXHR.responseJSON.messageConcat)+"\n"+String(jqXHR.responseJSON.messageUnzip));
+             $("#"+file.uniqueIdentifier+" > "+"#status").html("WARNING! : <BR>"+String(jqXHR.responseJSON.message)+"\n"+String(jqXHR.responseJSON.messageConcat)+"\n"+String(jqXHR.responseJSON.messageUnzip));
            }
            else{
             $("#"+file.uniqueIdentifier+"").css("color" ,"RED");

@@ -95,14 +95,18 @@ def unzip(zipFilePath , destFolder, fk_sensor, startDate , endDate):
                     resizePhoto( str(destFolder)+str(name) )
                 else:
                     os.remove(destFolder+str(name))
-                    messageErrorFiles += str(name)+"Date not valid ("+str(datePhoto)+")\n"
+                    messageErrorFiles += str(name)+"Date not valid ("+str(datePhoto)+") <BR>"
                 #AddPhotoOnSQL(fk_sensor,destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)))
             else:
-                messageErrorFiles+= "le fichier : " +str(name)+" est deja present \n"
+                messageErrorFiles+= "File : " +str(name)+" is already on the server <BR>"
             #fd.close()
         else:
-            messageErrorFiles+= str(name)+" not a good file\n"
+            messageErrorFiles+= str(name)+" not a good file <BR>"
     zfile.close()
+    #rename zip file
+    zipFileTab = zipFilePath.split('.')
+    os.remove( zipFilePath )
+
     return messageErrorFiles
     #if no error remove zip file
 
@@ -163,11 +167,11 @@ def uploadFileCamTrapResumable(request):
         if( checkDate (datePhoto , str(request.POST['startDate']) , str(request.POST['endDate']) ) ):
             idRetour = AddPhotoOnSQL(fk_sensor , str(uri) , str(request.POST['resumableFilename']) , str(extType[len(extType)-1]) , datePhoto )
             resizePhoto( str(uri)+"\\" + str(request.POST['resumableFilename']) )
-            messageDate = "ok"
+            messageDate = "ok <BR>"
         else:
             os.remove(uri+'\\'+str(request.POST['resumableFilename']))
             flagDate = True
-            messageDate = "Date not valid ("+str(datePhoto)+")"
+            messageDate = "Date not valid ("+str(datePhoto)+") <BR>"
     else:
         if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableIdentifier'])):
             position = int(request.POST['resumableChunkNumber']) #calculate the position of cursor
@@ -216,12 +220,13 @@ def concatChunk(request):
                         shutil.copyfileobj(open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i), 'rb'), destination)#on le concat dans desitnation
                     else:#si il n'est pas present
                         flagSuppression = True
-                        message = "Chunk file number : '"+str(i)+"' missing try to reupload the file '"+str(request.POST['name'])+"'"
+                        request.response.status_code = 510
+                        message = "Chunk file number : '"+str(i)+"' missing try to reupload the file '"+str(request.POST['file'])+"'"
                         break #break the for
 
         else:
             request.response.status_code = 510
-            message = "File : '"+str(name)+"' is already on the server\n"
+            message = "File : '"+str(name)+"' is already on the server <BR>"
         if (flagSuppression):
             os.remove(pathPrefix+'\\'+pathPost+'\\'+str(name)) #supprime le fichier destination et on force la sortie
         else:
@@ -256,7 +261,7 @@ def concatChunk(request):
                     os.remove(destfolder+str(name))
                     flagDate = True
                     request.response.status_code = 510
-                    messageConcat = "Date not valid ("+str(datePhoto)+") \n"
+                    messageConcat = "Date not valid ("+str(datePhoto)+") <BR>"
 
                 #AddPhotoOnSQL(fk_sensor,destfolder,name, str(extType[len(extType)-1]) , dateFromExif (destfolder+str(name)))
 
