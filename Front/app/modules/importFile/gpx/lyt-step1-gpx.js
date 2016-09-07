@@ -71,6 +71,7 @@ define([
       var fileType = tab[1].toUpperCase();
       var fieldAfield = $('select[name="fieldActivity"]');
       var userBtn = $('button[data-action="add"]');
+      var instance = config.instance;
 
       if (fileType != 'GPX') {
         this.swalError('error file type');
@@ -100,8 +101,9 @@ define([
             $(userBtn).removeAttr('disabled');
             $('#importGpxMsg').addClass('hidden');
             $('.fieldactivity').removeClass('hidden');
-            $(_this.fieldworkers).removeClass('hidden');
-
+            if(instance!='demo') {
+              $(_this.fieldworkers).removeClass('hidden');
+            }
             if (errosList.length > 0) {
               for (var i = 0; i < errosList.length; i++) {
                 _this.displayErrors(errosList[i] + '<br/>');
@@ -171,14 +173,22 @@ define([
       if(error){
         return false;
       }else{
-        var fieldworkers = this.nsform.BBForm.model.get('FieldWorkers');
-        this.setFieldWorkers(fieldworkers);
+        var instance = config.instance;
+        if(instance != 'demo') {
+            var fieldworkers = this.nsform.BBForm.model.get('FieldWorkers');
+            this.setFieldWorkers(fieldworkers);
+        }
         window.app.checkFormSaved = false;
         return true;
       }
     },
     displayForm: function() {
       var model = new GpxForm();
+      // if instance is demo, fieldworker is not required, so hide input
+      var instance = config.instance;
+      if(instance == 'demo') {
+        model.__proto__.schema.FieldWorkers.subschema.FieldWorker.validators = [];
+      }
       this.nsform = new NsForm({
         //name: 'ImportGpxFileForm',
         //modelurl: config.coreUrl+'stations/fileImport',
