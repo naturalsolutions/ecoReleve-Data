@@ -5,6 +5,7 @@ import configparser
 from sqlalchemy import event, select,text
 from sqlalchemy.exc import TimeoutError
 from pyramid import threadlocal
+import pandas as pd
 import datetime
 
 AppConfig = configparser.ConfigParser()
@@ -45,16 +46,12 @@ DynPropNames = {
 
 thesaurusDictTraduction = {}
 invertedThesaurusDict = {'en':{},'fr':{}}
+userOAuthDict = {}
 
 def loadThesaurusTrad(config):
     session = config.registry.dbmaker()
-    query = text(""" SELECT 
-      [TTop_Name] as nameFr
-      ,tl.TLib_Name as nameEn
-      ,[TTop_FullPath] as fullPath FROM [THESAURUS].[dbo].[TTopic] th 
-      JOIN [THESAURUS].[dbo].TTopicLibelle tl on th.TTop_PK_ID = tl.TLib_FK_TTop_ID and TLib_FK_TLan_ID = 'en'
-      where TTop_PK_ID > 204089 
-      and TTop_Type not in ('plantes','vertébrés','Mollusques','Invertébrés')""")
+    thesTable = Base.metadata.tables['ERDThesaurusTerm']
+    query = select(thesTable.c)
 
     results = session.execute(query).fetchall()
 
@@ -64,10 +61,33 @@ def loadThesaurusTrad(config):
         invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
     session.close()
 
+def loadUserRole(config):
+    global userOAuthDict
+    session = config.registry.dbmaker()
+    VuserRole = Base.metadata.tables['VUser_Role']
+    query = select(VuserRole.c)
+
+    results = session.execute(query).fetchall()
+    userOAuthDict = pd.DataFrame.from_records(results
+            ,columns=['user_id','role_id'])
+
+USERS = {2:'superUser',
+    3:'user',
+    1:'admin'}
+
+GROUPS = {'superUser':['group:superUsers'],
+    'user':['group:users'],
+    'admin':['group:admins']}
+
+def groupfinder(userid, request):
+    currentUserRoleID = userOAuthDict.loc[userOAuthDict['user_id'] == int(userid),'role_id'].values[0]
+    if currentUserRoleID in USERS:
+        currentUserRole = USERS[currentUserRoleID]
+        return GROUPS.get(currentUserRole, [])
 
 def cache_callback(request,session):
-            if isinstance(request.exception,TimeoutError):
-                session.get_bind().dispose()
+    if isinstance(request.exception,TimeoutError):
+        session.get_bind().dispose()
 
 def db(request):
     makerDefault = request.registry.dbmaker

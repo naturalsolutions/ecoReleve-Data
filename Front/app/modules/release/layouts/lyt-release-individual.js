@@ -60,7 +60,7 @@ define([
       var _this = this;
 
       this.sensorPicker = null;
-
+      this.nbDuplicated = 0;
       this.initGrid();
     },
 
@@ -69,9 +69,10 @@ define([
     },
 
     onShow: function() {
-
+      var _this=this;
       this.displayFilter();
       this.displayGrid();
+      var _this = this;
       //Backbone.history.navigate('release/individuals',{trigger: false});
     },
 
@@ -98,8 +99,6 @@ define([
         rowClicked: true,
         onceFetched: function(params) {
           _this.totalEntries(this.grid);
-          console.log(this.grid);
-          console.log('passed');
         }
       });
       this.grid.rowClicked = function(args) {
@@ -112,10 +111,89 @@ define([
       this.grid.collection.on('backgrid:selected', function(model, selected) {
         _this.updateSelectedRow();
       });
+
+      this.grid.collection.on('backgrid:edit', function(model, selected) {
+        if (model.model){
+          model.model.set('sta_date',_this.station.get('StationDate'));
+        } else {
+          model.set('sta_date',_this.station.get('StationDate'));
+        }
+      });
+      this.listenTo(this.grid.collection,'error',function(model,col){
+        if (model.get('unicSensorName')!= null) {
+          model.trigger("backgrid:error", model,_this.grid.grid.columns.findWhere({name:'unicSensorName'}));
+          model.set({error:true});
+          model.set({serverError:true});
+          console.log('set Server error');
+
+        }
+      });
+
+      this.listenTo(this.grid.collection,'success',function(model,col){
+        if (model.get('unicSensorName')!= null) {
+          model.trigger("backgrid:error", model,_this.grid.grid.columns.findWhere({name:'unicSensorName'}));
+          model.set({error:false});
+          model.set({serverError:false});
+          console.log('remove Server error');
+        }
+      });
+
+      this.grid.collection.on('backgrid:autocompEdited',function(model,column,e,s){
+        if (column && column.get('name')=='unicSensorName' && model.get('FK_Sensor')!= null && (model.get('unicSensorName')!= '' && model.get('unicSensorName')!=null) ){
+          //console.log(curModel)
+          var check =  _this.grid.collection.where({FK_Sensor: model.get('FK_Sensor')});
+          if (check.length>1){
+            _.each(check,function(curModel){
+              curModel.set('error',true);
+              curModel.set('duplicated',true);
+              console.log('set duplicated error');
+
+              curModel.trigger("backgrid:error",curModel,_this.grid.grid.columns.findWhere({name:'unicSensorName'}));
+            });
+          } else{
+            var errorList = _this.ui.grid.find('.error');
+            //_this.nbDuplicated++;
+            //var check =  _this.grid.collection.where({duplicated: true});
+            model.set('error',false);
+            model.set('duplicated',false);
+          }
+        }
+
+        if (column && column.get('name')=='unicSensorName' && (model.get('unicSensorName')== '' || model.get('unicSensorName')==null)) {
+          model.set({error:false});
+          model.set({serverError:false});
+          model.set({duplicated:false});
+
+          _this.currentRow.$el.find('.error').removeClass('error');
+          var check =  _this.grid.collection.where({duplicated: true});
+          var l = _.groupBy(check,function(model){
+            if (model.get('FK_Sensor')!=undefined || model.get('FK_Sensor')!=null){
+              return model.get('FK_Sensor');
+            }
+          });
+          console.log(l);
+          _.each(l,function(group){
+            if(group.length==1){
+               _.map(_this.grid.grid.body.rows,function(i){
+                if (i.model == group[0] && !i.model.get('serverError')) {
+                  i.$el.find('.error').removeClass('error');
+                  i.model.set('error',false);
+                  i.model.set('duplicated',false);
+                  //console.log('remove duplicated error');
+                }
+              });
+            }
+          });
+/*          console.log(_this.grid.collection.where({duplicated: true}));
+          console.log(_this.grid.collection.where({error: true}));
+          console.log(_this.grid.collection.where({serverError: true}));*/
+
+        }
+      });
+
     },
-
     displayGrid: function() {
-
+      var _this = this;
       this.ui.grid.html(this.grid.displayGrid());
       /*      this.ui.paginator.html(this.grid.displayPaginator());*/
     },
@@ -161,7 +239,6 @@ define([
     },
 
     test: function() {
-      console.log(this.grid.grid.collection);
       this.grid.grid.collection = new Backbone.Collection(this.grid.grid.collection.where({Sex: 'femelle'}));
     },
 
@@ -178,8 +255,22 @@ define([
       $(this.ui.nbTotal).html(this.total);
     },
 
-
-    release: function(releaseMethod) {
+    release: function(releaseMethod){
+      var error = this.grid.collection.findWhere({error:true});
+      if (!error){
+        this.releaseThem(releaseMethod);
+      } else {
+        Swal({
+        title: 'Sensor error',
+        text: 'Wrong sensor identifier',
+        type: 'error',
+        confirmButtonColor: 'rgb(221, 107, 85)',
+        confirmButtonText: 'OK',
+        closeOnConfirm: true,
+      });
+      }
+    },
+    releaseThem: function(releaseMethod) {
       var mds = this.grid.grid.getSelectedModels();
       if (!mds.length) {
         return;
@@ -228,6 +319,7 @@ define([
 
     addSensor: function() {
       if (!this.sensorPicker) {
+            var _this = this;
             var MySensorPicker = ObjectPicker.extend({
             rowClicked: function(row) {
               var id = row.model.get('ID');
@@ -240,6 +332,19 @@ define([
             setValue: function(value,unicName) {
               _this.currentRow.model.set({unicSensorName: unicName});
               _this.currentRow.model.set({FK_Sensor: value});
+              _this.currentRow.model.trigger('backgrid:edited',
+                 _this.currentRow.model
+              );
+              _this.currentRow.model.trigger('backgrid:autocompEdited',
+                 _this.currentRow.model,
+                _this.grid.grid.columns.findWhere({name:'unicSensorName'})
+              );
+              /*var check =  _this.grid.collection.where({FK_Sensor:  _this.currentRow.model.get('FK_Sensor')});
+              if (check.length>1){
+               console.log('duplicated')
+                _this.currentRow.model.trigger("backgrid:error", _this.currentRow.model,_this.grid.grid.columns.findWhere({name:'unicSensorName'}));
+              }*/
+              
               this.hidePicker();
             },
           });

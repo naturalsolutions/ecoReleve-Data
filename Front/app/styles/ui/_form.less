@@ -57,7 +57,7 @@ input, select, textarea{
 
 input.form-control[type=number]:disabled::-webkit-inner-spin-button,
 input.form-control[type=number]:disabled::-webkit-outer-spin-button {
-    -webkit-appearance: none;
+    -awebkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     margin: 0;
@@ -276,15 +276,19 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 /* FIN PIER */
 
 
+.wrapper-grid-from{
+	position: relative;
+}
 
 .grid-form{
+	background: #ddd;
 	overflow: auto;
 	#formContainer{
 		display: block;
 	}
 
 
-	#formContainer>form>fieldset{
+	#formContainer,.tbody>.form-row>form>fieldset,#formContainer>form>fieldset{
 		background: #eee;
 		border: none;
 		border-bottom: 1px solid #ddd;
@@ -319,6 +323,9 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 		}
 	}
 
+	.col-md-10.grid-field{
+		width: 250px;
+	}
 	.col-md-8.grid-field{
 		width: 200px;
 	}
@@ -348,9 +355,12 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 		border-radius: 0px;
 	}
 
-	#th{
+	#th,.thead{
 		background: #ccc;
 		div{
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 			padding: 4px 5px!important;
 			padding-left: 0px!important;
 			font-weight: bold;
@@ -397,8 +407,48 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 
 }
 
-#th&>.fixedCol {background: #ccc;}
+.js-col-row-number{
+	width: 50px;
+	float: left;
+	z-index:10;
+	padding-bottom: 50px;
+    background: #ddd;
 
+	& .row-action{
+		display: block;
+    width: 100%;
+    height: 35px;
+    padding: 6px;
+    font-size: 14px;
+    line-height: 1.42857143;
+		border-bottom: 1px solid #ddd;
+	}
+	.js-tbody-row-number{
+		border-right: 1px solid #bbb;
+		background: #eee;
+	}
+}
+.grid-form-wrapper{
+		width: calc(~"100% - 50px");
+		float: left;
+}
+
+#th&>.fixedCol {background: #ccc;}
+.thead .fixedCol {background: #ccc;}
+
+.firstCol-1{
+	margin-left : 25px !important;
+
+}
+.firstCol-2{
+	margin-left : 50px !important;
+
+}
+
+.firstCol-4{
+	margin-left : 100px !important;
+
+}
 
 .firstCol-6{
 	margin-left : 150px !important;
@@ -411,17 +461,120 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 
 }
 
+.firstCol-10{
+	margin-left : 250px !important;
+
+}
+
+.firstCol-12{
+	margin-left : 300px !important;
+
+}
+
+.firstCol-14{
+	margin-left : 350px !important;
+
+}
+
+.firstCol-16{
+	margin-left : 400px !important;
+
+}
+
+.firstCol-18{
+	margin-left : 450px !important;
+
+}
+
+.firstCol-20{
+	margin-left : 500px !important;
+
+}
+
+.firstCol-22{
+	margin-left : 550px !important;
+
+}
+.firstCol-24{
+	margin-left : 600px !important;
+
+}
+
+
 .col-md-3.grid-field{
 		width: 75px;
  }
 .col-md-2.grid-field{
 	width: 50px;
 }
-
+.col-md-1.grid-field{
+	width: 25px;
+}
 #stationForm textarea {
     height: 50px;
     max-height: 50px;
 }
 textarea {
 	resize: none;
+}
+
+.grid-field textarea{
+	resize: none;
+	height:34px !important;
+}
+#delBtn.fixedCol{
+	width: 50px;
+}
+
+.grid-field .fancytree-container {
+
+	max-height:49px !important;
+}
+
+
+.fixed-filter{
+	position:fixed;
+	z-index: 100000;
+}
+
+.border-bottom-filter{
+
+	border-bottom: 1px solid #e5e5e5;
+	margin-top: 0px;
+	margin-left:15px;
+	margin-right:15px;
+	margin-bottom:5px;
+	display:inline-block;
+	//width: 100%;
+	font-weight:bold;
+}
+
+.filter-indiv{
+	margin-bottom: 80px;
+
+}
+
+@tabsHeight:50px;
+
+.filter-indiv.crop2{
+		margin-bottom: 0px;
+		padding-bottom: 80px;
+		@crop: @tabsHeight*2;
+		height: ~"calc(100% - @{crop} )"!important;
+	}
+.no-scroll{
+	overflow:hidden !important;
+}
+
+.filter-no-padding {
+	span{
+		padding-left:0px;
+		select{
+			padding-left:5px;
+			padding-right:0px;
+		}
+		div span {
+			padding-left:12px;
+		}
+	}
 }

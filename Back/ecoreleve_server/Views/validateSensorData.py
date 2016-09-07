@@ -23,6 +23,9 @@ from traceback import print_exc
 from pyramid import threadlocal
 from xml.etree.ElementTree import XMLParser
 
+from ..controllers.security import routes_permission
+
+
 
 route_prefix = 'sensors/'
 def asInt(s):
@@ -49,7 +52,10 @@ DataCamTrapFile = Table('V_dataCamTrap_With_equipSite', Base.metadata, autoload=
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 # List all PTTs having unchecked locations, with individual id and number of locations.
-@view_config(route_name=route_prefix+'uncheckedDatas',renderer='json')
+@view_config(route_name=route_prefix+'uncheckedDatas',renderer='json',match_param='type=rfid',permission = routes_permission['rfid']['GET'])
+@view_config(route_name=route_prefix+'uncheckedDatas',renderer='json',match_param='type=gsm',permission = routes_permission['gsm']['GET'])
+@view_config(route_name=route_prefix+'uncheckedDatas',renderer='json',match_param='type=argos',permission = routes_permission['argos']['GET'])
+@view_config(route_name=route_prefix+'uncheckedDatas',renderer='json',match_param='type=camtrap',permission = routes_permission['rfid']['GET'])
 def type_unchecked_list(request):
     session = request.dbsession
 
@@ -194,7 +200,10 @@ def patchCamTrap(request):
     return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
+
 @view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt/id_equip',renderer='json',request_method = ('GET','PATCH') )
+@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt',renderer='json',request_method = 'GET',match_param='type=argos',permission = routes_permission['argos']['GET'])
+@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt',renderer='json',request_method = 'GET',match_param='type=gsm',permission = routes_permission['gsm']['GET'])
 def details_unchecked_indiv(request):
     session = request.dbsession
 
@@ -297,7 +306,7 @@ def details_unchecked_camtrap(request):
         return dataResults
 # ------------------------------------------------------------------------------------------------------------------------- #
 
-@view_config(route_name = route_prefix+'uncheckedDatas/id_indiv/ptt', renderer = 'json' , request_method = 'POST' )
+@view_config(route_name = route_prefix+'uncheckedDatas/id_indiv/ptt', renderer = 'json' , request_method = 'POST',permission = routes_permission['gsm']['POST'] )
 def manual_validate(request) :
     global graphDataDate
     session = request.dbsession
@@ -338,15 +347,19 @@ def manual_validate(request) :
         print_exc()
         return error_response(err)
 
-@view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST' )
+@view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST',match_param='type=rfid',permission = routes_permission['rfid']['POST'] )
+@view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST',match_param='type=gsm',permission = routes_permission['gsm']['POST'] )
+@view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST' ,match_param='type=argos',permission = routes_permission['argos']['POST'])
 def auto_validation(request):
     session = request.dbsession
     global graphDataDate
     #lancer procedure stocke
     type_ = request.matchdict['type']
+
     if type_ == 'camtrap':
         return validateCamTrap(request)
     # print ('\n*************** AUTO VALIDATE *************** \n')
+
     param = request.params.mixed()
     freq = param['frequency']
     listToValidate = json.loads(param['toValidate'])

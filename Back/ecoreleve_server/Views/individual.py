@@ -31,14 +31,14 @@ from ..utils.generator import Generator
 import io
 from pyramid.response import Response ,FileResponse
 from pyramid import threadlocal
-
+from ..controllers.security import routes_permission
 
 prefix = 'individuals'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-@view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
+@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
+@view_config(route_name= prefix+'/id/equipment/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def actionOnIndividuals(request):
     dictActionFunc = {
     'count' : count_,
@@ -76,8 +76,11 @@ def getFilters (request):
         objType = request.params['typeObj']
     else : 
         objType = 1
+    if 'FilterName' in request.params and request.params['FilterName'] != '':
+        ModuleType = request.params['FilterName']
+    else:
+        ModuleType = 'IndivFilter'
 
-    ModuleType = 'IndivFilter'
     filtersList = Individual(FK_IndividualType = objType).GetFilters(ModuleType)
     filters = {}
     for i in range(len(filtersList)) :
@@ -103,7 +106,7 @@ def getFields(request) :
         objType = 1
 
     ModuleType = request.params['name']
-    if ModuleType == 'default' :
+    if ModuleType in ['default','AdvancedIndivFilter'] :
         ModuleType = 'IndivFilter'
     cols = Individual(FK_IndividualType = objType).GetGridFields(ModuleType)
     return cols
@@ -116,7 +119,7 @@ def getIndividualType(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def getIndiv(request):
     session = request.dbsession
     id = request.matchdict['id']
@@ -175,7 +178,7 @@ def getIndiv(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/history', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def getIndivHistory(request):
     session = request.dbsession
     id = request.matchdict['id']
@@ -203,7 +206,7 @@ def getIndivHistory(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/equipment', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/equipment', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def getIndivEquipment(request):
     session = request.dbsession
     id_indiv = request.matchdict['id']
@@ -230,7 +233,7 @@ def getIndivEquipment(request):
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = routes_permission[prefix]['DELETE'])
 def deleteIndiv(request):
     session = request.dbsession
     id_ = request.matchdict['id']
@@ -240,7 +243,7 @@ def deleteIndiv(request):
     return True
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT',permission = routes_permission[prefix]['PUT'])
 def updateIndiv(request):
     session = request.dbsession
     data = request.json_body
@@ -251,7 +254,7 @@ def updateIndiv(request):
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix  + '/insert', renderer='json', request_method = 'POST')
+@view_config(route_name= prefix  + '/insert', renderer='json', request_method = 'POST',permission = routes_permission[prefix]['POST'])
 def insertIndiv(request):
     session = request.dbsession
     data = request.json_body
@@ -323,21 +326,33 @@ def checkExisting(indiv):
     return existingID
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
-def searchIndiv(request):
+@view_config(route_name= prefix, renderer='json', request_method = 'GET', permission = routes_permission[prefix]['GET'])
+@view_config(route_name= prefix, renderer='json', request_method = 'POST', permission = routes_permission[prefix]['GET'])
+def searchIndiv(request,searchInfo=None,noCount=False):
     session = request.dbsession
-    data = request.params.mixed()
+    history = False
+    startDate = None
 
-    searchInfo = {}
-    searchInfo['criteria'] = []
-    if 'criteria' in data: 
-        data['criteria'] = json.loads(data['criteria'])
-        if data['criteria'] != {} :
-            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+    if searchInfo is None:
+        searchInfo = request.params.mixed()
+        # searchInfo = {}
+        # searchInfo['criteria'] = []
+        if 'criteria' in searchInfo: 
+            searchInfo['criteria'] = json.loads(searchInfo['criteria'])
+            if searchInfo['criteria'] != {} :
+                searchInfo['criteria'] = [obj for obj in searchInfo['criteria'] if obj['Value'] != str(-1) ]
+            else :
+                 searchInfo['criteria'] = []
 
-    searchInfo['order_by'] = json.loads(data['order_by'])
-    searchInfo['offset'] = json.loads(data['offset'])
-    searchInfo['per_page'] = json.loads(data['per_page'])
+        searchInfo['order_by'] = json.loads(searchInfo['order_by'])
+        searchInfo['offset'] = json.loads(searchInfo['offset'])
+        searchInfo['per_page'] = json.loads(searchInfo['per_page'])
+
+    if 'startDate' in searchInfo and searchInfo['startDate']!='':
+        startDate = datetime.strptime(searchInfo['startDate'],'%d/%m/%Y %H:%M:%S')
+
+    if 'history' in searchInfo and searchInfo['history'] == '1':
+        history = True
 
     if 'typeObj' in request.params:
         typeObj = request.params['typeObj']
@@ -349,16 +364,19 @@ def searchIndiv(request):
     ModuleType = 'IndivFilter'
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    listObj = IndividualList(moduleFront,typeObj = typeObj)
+    listObj = IndividualList(moduleFront,typeObj = typeObj,history=history,startDate=startDate)
     dataResult = listObj.GetFlatDataList(searchInfo)
-    countResult = listObj.count(searchInfo)
 
-    result = [{'total_entries':countResult}]
-    result.append(dataResult)
+    if not noCount:
+        countResult = listObj.count(searchInfo)
+        result = [{'total_entries':countResult}]
+        result.append(dataResult)
+    else :
+        result = dataResult
     return result
 
 
-@view_config(route_name= prefix+'/id/location/action', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+@view_config(route_name= prefix+'/id/location/action', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['GET'])
 def actionOnIndividualsLoc(request):
     dictActionFunc = {
     'getFields': getFieldsLoc,
@@ -373,7 +391,7 @@ def getFieldsLoc(request) :
     gene = IndivLocationList('Individual_Location',session,None)
     return gene.get_col()
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/location', renderer='json',permission = routes_permission[prefix]['GET'])
 def getIndivLocation(request):
 
     id_ = request.matchdict['id']
@@ -436,7 +454,7 @@ def getIndivLocation(request):
     return result
 
 
-@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'PUT')
+@view_config(route_name= prefix+'/id/location', renderer='json', request_method = 'PUT',permission = routes_permission[prefix]['PUT'])
 def delIndivLocationList(request):
     session = request.dbsession
 
@@ -444,7 +462,7 @@ def delIndivLocationList(request):
     session.query(Individual_Location).filter(Individual_Location.ID.in_(IdList)).delete(synchronize_session=False)
 
 
-@view_config(route_name= prefix+'/id/location/id_loc', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/location/id_loc', renderer='json', request_method = 'GET',permission = routes_permission[prefix]['PUT'])
 def delIndivLocation(request):
     session = request.dbsession
     Id = request.matchdict['id_loc']
@@ -452,23 +470,20 @@ def delIndivLocation(request):
 
 
 @view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
-def sensors_export(request):
+def individuals_export(request):
     session = request.dbsession
-    data = request.params.mixed()
-    searchInfo = {}
-    searchInfo['criteria'] = []
-    if 'criteria' in data: 
-        data['criteria'] = json.loads(data['criteria'])
-        if data['criteria'] != {} :
-            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+    searchInfo = request.params.mixed()
+    if 'criteria' in searchInfo: 
+        searchInfo['criteria'] = json.loads(searchInfo['criteria'])
+        if searchInfo['criteria'] != {} :
+            searchInfo['criteria'] = [obj for obj in searchInfo['criteria'] if obj['Value'] != str(-1) ]
 
-    searchInfo['order_by'] = []
+    dataResult = searchIndiv(request,searchInfo=searchInfo,noCount=True)
+    # ModuleType = 'IndivFilter'
+    # moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
 
-    ModuleType = 'IndivFilter'
-    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
-
-    listObj = IndividualList(moduleFront)
-    dataResult = listObj.GetFlatDataList(searchInfo)
+    # listObj = IndividualList(moduleFront)
+    # dataResult = listObj.GetFlatDataList(searchInfo)
 
     df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
 

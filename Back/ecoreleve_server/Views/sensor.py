@@ -25,6 +25,9 @@ from collections import OrderedDict
 from datetime import datetime
 import io
 from pyramid.response import Response ,FileResponse
+from ..controllers.security import routes_permission
+from sqlalchemy.exc import IntegrityError
+
 
 
 
@@ -207,22 +210,23 @@ def getSensorHistory(request):
         curRow = OrderedDict(row)
         curRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
         curRow['EndDate'] = curRow['EndDate'].strftime('%Y-%m-%d %H:%M:%S') if curRow['EndDate'] is not None else None
+        curRow['format'] = 'YYYY-MM-DD HH:mm:ss'
         response.append(curRow)
 
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'DELETE',permission = routes_permission[prefix]['DELETE'])
 def deleteSensor(request):
     session = request.dbsession
     id_ = request.matchdict['id']
     curSensor = session.query(Sensor).get(id_)
-    session.delete(Sensor)
+    session.delete(curSensor)
 
     return True
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT')
+@view_config(route_name= prefix+'/id', renderer='json', request_method = 'PUT',permission = routes_permission[prefix]['PUT'])
 def updateSensor(request):
     session = request.dbsession
     data = request.json_body
@@ -234,7 +238,7 @@ def updateSensor(request):
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix + '/insert', renderer='json', request_method = 'POST')
+@view_config(route_name= prefix + '/insert', renderer='json', request_method = 'POST',permission = routes_permission[prefix]['POST'])
 def insertSensor(request):
     data = request.json_body
     if not isinstance(data,list):
@@ -251,16 +255,25 @@ def insertOneNewSensor (request) :
     for items , value in request.json_body.items() :
         data[items] = value
 
-    sensorType = int(data['FK_SensorType'])
-    newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now())
-    newSensor.SensorType = session.query(SensorType).filter(SensorType.ID== sensorType).first()
-    newSensor.init_on_load()
-    newSensor.UpdateFromJson(data)
+    try:
+        sensorType = int(data['FK_SensorType'])
+        newSensor = Sensor(FK_SensorType = sensorType , creationDate = datetime.now())
+        newSensor.SensorType = session.query(SensorType).filter(SensorType.ID== sensorType).first()
+        newSensor.init_on_load()
+        newSensor.UpdateFromJson(data)
 
-    session.add(newSensor)
-    session.flush()
+        session.add(newSensor)
+        session.flush()
+        response = {'ID': newSensor.ID}
 
-    return {'ID': newSensor.ID}
+    except IntegrityError as e:
+        session.rollback()
+        request.response.status_code = 520
+        response = request.response
+        response.text = "This identifier is already used for another sensor"
+        pass
+
+    return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix, renderer='json', request_method = 'GET')

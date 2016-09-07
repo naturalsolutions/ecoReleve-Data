@@ -31,7 +31,7 @@ class Observation(Base,ObjectWithDynProp):
     __tablename__ = 'Observation'
     ID =  Column(Integer,Sequence('Observation__id_seq'), primary_key=True)
     FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
-    ObservationDynPropValues = relationship('ObservationDynPropValue',backref='Observation')
+    ObservationDynPropValues = relationship('ObservationDynPropValue',backref='Observation', cascade="all, delete-orphan")
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
     creationDate = Column(DateTime,default = func.now())
     Parent_Observation = Column(Integer,ForeignKey('Observation.ID'))
@@ -154,7 +154,7 @@ class Observation(Base,ObjectWithDynProp):
         typeName = 'children'
         sub_ProtocoleType = None
         if self.Observation_children != []:
-            # print ('CHILDREN !!!!!!!!!!') ### Append flatdata to list of data for existing subProto 
+            ### Append flatdata to list of data for existing subProto 
             typeName = self.Observation_children[0].GetType().Name
             for subObs in self.Observation_children:
                 subObs.LoadNowValues()

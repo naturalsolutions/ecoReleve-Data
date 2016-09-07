@@ -46,6 +46,15 @@ define([
       } else {
         this.data = {'stationID':stationID};
       }
+
+      if (this.data){
+        for(var i in this.data){
+          if(this.data[i] == 'null'){
+            this.data[i] = '';
+          }
+        }
+        
+      }
     },
 
     onShow: function() {
@@ -110,7 +119,6 @@ define([
       this.nsForm.butClickSave();
     },
     cancel: function() {
-      console.log(this.picker);
       if(this.picker){
         this.picker.$el.find('#creation').addClass('hidden');
       }

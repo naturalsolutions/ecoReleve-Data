@@ -15,14 +15,16 @@ from sqlalchemy import func,select,and_, or_, join
 from pyramid.security import NO_PERMISSION_REQUIRED
 from collections import OrderedDict
 from traceback import print_exc
+from ..controllers.security import routes_permission
+
 
 
 prefixProt = 'protocols'
 prefix = 'stations'
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'GET')
-@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'GET',permission = routes_permission[prefixProt]['GET'])
+@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'GET',permission = routes_permission[prefixProt]['GET'])
 def GetProtocolsofStation (request) :
     session = request.dbsession
 
@@ -56,7 +58,7 @@ def GetProtocolsofStation (request) :
                     try : 
                         DisplayMode = 'display'
                         obs = listObs[i]
-                        typeName = obs.GetType().Name
+                        typeName = obs.GetType().Name.replace('_',' ')
                         typeID = obs.GetType().ID
                         obs.LoadNowValues()
                         try :
@@ -68,7 +70,6 @@ def GetProtocolsofStation (request) :
                             pass
                     except Exception as e :
                         print_exc()
-                        print('exception!!!')
                         pass
 
                 for i in range(len(listType)) :
@@ -77,7 +78,7 @@ def GetProtocolsofStation (request) :
                        
                         virginTypeID = listType[i].FK_ProtocoleType
                         virginObs = Observation(FK_ProtocoleType = virginTypeID)
-                        viginTypeName = virginObs.GetType().Name
+                        viginTypeName = virginObs.GetType().Name.replace('_',' ')
                         try :
                             if virginTypeID not in listProto :
                                 test_ = listProto[virginTypeID]
@@ -104,8 +105,8 @@ def GetProtocolsofStation (request) :
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST')
-@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'POST')
+@view_config(route_name= prefix+'/id/protocols', renderer='json', request_method = 'POST',permission = routes_permission[prefixProt]['POST'])
+@view_config(route_name= prefix+'/id/protocols/', renderer='json', request_method = 'POST',permission = routes_permission[prefixProt]['POST'])
 def insertNewProtocol (request) :
     session = request.dbsession
     data = {}
@@ -140,7 +141,7 @@ def insertNewProtocol (request) :
     return message
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'PUT')
+@view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'PUT',permission = routes_permission[prefixProt]['PUT'])
 def updateObservation(request):
     session = request.dbsession
     data = request.json_body
@@ -167,7 +168,7 @@ def updateObservation(request):
     return message
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'DELETE')
+@view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'DELETE',permission = routes_permission[prefixProt]['DELETE'])
 def deleteObservation(request):
     session = request.dbsession
     id_obs = request.matchdict['obs_id']
@@ -177,7 +178,7 @@ def deleteObservation(request):
     return {}
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/protocols/obs_id', renderer='json', request_method = 'GET',permission = routes_permission[prefixProt]['GET'])
 def getObservation(request):
     session = request.dbsession
 
@@ -186,7 +187,6 @@ def getObservation(request):
     try :
         curObs = session.query(Observation).filter(and_(Observation.ID ==id_obs, Observation.FK_Station == id_sta )).one()
         curObs.LoadNowValues()
-        print(curObs.PropDynValuesOfNow)
         # if Form value exists in request --> return data with schema else return only data
         if 'FormName' in request.params :
             ModuleName = request.params['FormName']
@@ -200,13 +200,12 @@ def getObservation(request):
         else : 
             response  = curObs.GetFlatObject()
     except Exception as e :
-        print(e)
         response = {}
 
     return response
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefix+'/id/protocols/action', renderer='json', request_method = 'GET')
+@view_config(route_name= prefix+'/id/protocols/action', renderer='json', request_method = 'GET',permission = routes_permission[prefixProt]['GET'])
 def actionOnObs(request):
     session = request.dbsession
 
@@ -242,7 +241,7 @@ def getObsFields(request) :
     return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefixProt, renderer='json', request_method = 'PUT')
+@view_config(route_name= prefixProt, renderer='json', request_method = 'PUT',permission = routes_permission[prefixProt]['PUT'])
 def updateListProtocols(request):
     session = request.dbsession
     # TODO 
@@ -250,13 +249,13 @@ def updateListProtocols(request):
     return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefixProt, renderer='json', request_method = 'POST')
+@view_config(route_name= prefixProt, renderer='json', request_method = 'POST',permission = routes_permission[prefixProt]['POST'])
 def insertProtocols(request):
     session = request.dbsession
     return insertNewProtocol (request)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefixProt+'/action', renderer='json', request_method = 'GET')
+@view_config(route_name= prefixProt+'/action', renderer='json', request_method = 'GET',permission = routes_permission[prefixProt]['GET'])
 def actionOnProtocols(request):
     dictActionFunc = {
     'count' : count,
@@ -274,7 +273,7 @@ def actionOnProtocols(request):
 #     return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name= prefixProt + '/id', renderer='json', request_method = 'GET')
+@view_config(route_name= prefixProt + '/id', renderer='json', request_method = 'GET',permission = routes_permission[prefixProt]['GET'])
 def getProtocol (request):
     session = request.dbsession
 
@@ -325,7 +324,7 @@ def getListofProtocolTypes (request):
     for row in result:
         elem = {}
         elem['ID'] = row['ID']
-        elem['Name'] = row['Name']
+        elem['Name'] = row['Name'].replace('_',' ')
         res.append(elem)
     res = sorted(res, key=lambda k: k['Name']) 
     return res

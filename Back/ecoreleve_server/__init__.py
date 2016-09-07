@@ -14,7 +14,8 @@ from pyramid.authorization import ACLAuthorizationPolicy
 import os,sys
 import errno
 
-from .controllers.security import SecurityRoot, role_loader
+from .controllers.security import SecurityRoot,myJWTAuthenticationPolicy
+
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
@@ -26,14 +27,11 @@ from .Models import (
     Observation,
     Sensor,
     db,
-    loadThesaurusTrad
+    loadThesaurusTrad,
+    loadUserRole,
+    groupfinder
     )
 from .Views import add_routes,add_cors_headers_response_callback
-
-from .pyramid_jwtauth import (
-    JWTAuthenticationPolicy,
-    includeme
-    )
 from pyramid.events import NewRequest
 from sqlalchemy.orm import sessionmaker,scoped_session
 
@@ -61,6 +59,18 @@ def time_adapter(obj, request):
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
     return float(obj)
+
+def includeme(config):
+    authz_policy = ACLAuthorizationPolicy()
+    config.set_authorization_policy(authz_policy)
+
+    settings = config.get_settings()
+    authn_policy = myJWTAuthenticationPolicy.from_settings(settings)
+    authn_policy.find_groups = groupfinder
+    config.set_authentication_policy(authn_policy)
+    config.set_default_permission('read')
+    config.add_forbidden_view(authn_policy.challenge)
+
 
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
@@ -105,6 +115,7 @@ def main(global_config, **settings):
 
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
+    config.include('pyramid_jwtauth')
 
     binds = {"default": engine, "Export": engineExport}
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
@@ -136,6 +147,7 @@ def main(global_config, **settings):
     config.add_renderer('pdf', PDFrenderer)
     config.add_renderer('gpx', GPXRenderer)
 
+    ## include security config from jwt __init__.py
     includeme(config)
     config.set_root_factory(SecurityRoot)
 
@@ -144,8 +156,11 @@ def main(global_config, **settings):
 
     loadThesaurusTrad(config)
 
+    loadUserRole(config)
+
     # Set the default permission level to 'read'
-    config.set_default_permission('read')
+    # config.set_default_permission('read')
+
     add_routes(config)
     config.scan()
     return config.make_wsgi_app()

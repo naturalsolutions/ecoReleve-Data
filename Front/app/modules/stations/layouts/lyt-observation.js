@@ -43,7 +43,7 @@ define([
       if (this.model.get('id') == 0) {
         this.model.attributes.state = 'edit';
         var mode = 'edit';
-      }else {
+      } else {
         this.model.attributes.state = 'display';
         var mode = 'display';
       }

@@ -93,12 +93,6 @@ class ObjectTypeWithDynProp:
             curIndex = Unique_Legends.index(curProp[0])
             resultat[curIndex]['fields'].append(curProp[2])
 
-        # list_of_subschema = list(filter(lambda x : 'subschema' in Schema[x] ,Schema))
-        # if len(list_of_subschema) >0 :
-        #     for subName in list_of_subschema :
-        #         print(subName)
-        #         Schema[subName]['fieldsets'] = self.GetFieldSets(FrontModules,Schema[subName]['subschema'])
-
         return resultat
 
 

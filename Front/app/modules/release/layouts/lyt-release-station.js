@@ -135,6 +135,7 @@ define([
     },
 
     rowDbClicked: function(row) {
+      console.log('rowDbClicked')
       this.rowClicked(row);
       this.useStation();
     },

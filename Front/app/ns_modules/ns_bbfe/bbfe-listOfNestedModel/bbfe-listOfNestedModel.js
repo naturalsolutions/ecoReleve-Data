@@ -41,7 +41,7 @@ define([
         },
         //removeForm
         deleteForm: function() {
-
+            this.$el.trigger('change');
         },
 
         addEmptyForm: function() {
@@ -76,20 +76,34 @@ define([
                   _this.$el.find('#formContainer').find(form.el).remove();
                   var i = _this.forms.indexOf(form);
                   if (i > -1) {
+
                       _this.forms.splice(i, 1);
                   }
+                  _this.$el.trigger('change');
                   return;
                 });
             }
 
-
             this.$el.find('#formContainer').append(form.el);
+
+            this.$el.find('#formContainer input').on("change", function(e) {
+                 window.app.checkFormSaved = true;
+            });
+            this.$el.find('#formContainer select').on("change", function(e) {
+                 window.app.checkFormSaved = true;
+            });
+            this.$el.find('#formContainer  textarea').on("change", function(e) {
+                 window.app.checkFormSaved = true;
+            });
+
         },
 
         render: function() {
             //Backbone.View.prototype.initialize.call(this, options);
             var $el = $($.trim(this.template({
-                hidden: this.hidden
+                hidden: this.hidden,
+                id: this.id,
+                name: this.key
             })));
             this.setElement($el);
             
@@ -168,10 +182,10 @@ define([
         }, {
           //STATICS
           template: _.template('\
-            <div class="required nested clearfix">\
+            <div id="<%= id %>" name="<%= name %>" class="required nested clearfix">\
                 <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
                 <div class="clear"></div>\
-                <div id="formContainer" class="clearfix"></div>\
+                <div id="formContainer"   class="clearfix"></div>\
                 <br />\
                 <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
             </div>\

@@ -21,6 +21,10 @@
 	<div id="sensorRight" class="col-xs-8 full-height dark no-padding">
 		<div class="toolbar top">
 			<legend class="text-right">Total sensors : <span id="totalEntries"></span></legend>
+			<div class="clearfix pull-right">
+				<div id="rowSelectorSensor"  class="pull-left"></div>
+				<legend class="pull-right"> &nbsp;rows/page</legend>
+			</div>
 		</div>
 	
 		<div class="crop2 crop-paginator">
@@ -35,7 +39,7 @@
 				Export data&nbsp;
 				<span class="reneco reneco-export"></span>
 			</button>
-			<button class="btn btn-success pull-right" id="btnNew">
+			<button class="js-admin btn btn-success pull-right" id="btnNew">
 				New sensor&nbsp;
 				<span class="reneco reneco-entrykey"></span>
 			</button>

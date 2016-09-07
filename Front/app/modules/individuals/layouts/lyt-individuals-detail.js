@@ -23,7 +23,7 @@ define([
   return Marionette.LayoutView.extend({
 
     template: 'app/modules/individuals/templates/tpl-individuals-detail.html',
-    className: 'full-height animated white',
+    className: 'full-height individual animated white',
 
     events: {
       'click #hideIndivDetails': 'hideDetail',
@@ -230,13 +230,13 @@ define([
         name: 'Date',
         label: 'date',
         editable: false,
-        //cell: 'stringDate'
-        cell:Backgrid.Extension.MomentCell.extend({
+        cell: 'stringDate'
+ /*       cell:Backgrid.Extension.MomentCell.extend({
             displayFormat: "DD/MM/YYYY HH:mm",
             //modelFormat : "DD/MM/YYYY HH:mm",
              //modelInUnixTimestamp: true,
             displayInUTC: false
-          }),
+          }),*/
       },/*{
         name: 'timestamp',
         label: 'date',
@@ -504,11 +504,7 @@ define([
 
       var coll = new Backbone.Collection(mds);
 
-      console.log(mds);
-
       var params = coll.pluck('ID');
-
-      console.log(params);
 
       var url = config.coreUrl + 'individuals/' + this.indivId  + '/locations';
       $.ajax({

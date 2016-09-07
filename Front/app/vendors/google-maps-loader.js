@@ -35,7 +35,7 @@ define(['jquery'],function($) {
 			google_maps_loaded_def.resolve(google.maps);
 		}
 		require(
-			['http://maps.google.com/maps/api/js?v=3&amp;sensor=false&callback=google_maps_loaded'],
+			['http://maps.google.com/maps/api/js?key=AIzaSyAgVQqaAYMbDQa8__Du8p9SShM1LvmUME4&v=3&amp;sensor=false&callback=google_maps_loaded'],
 			function(){},
 			function(err) {
 				google_maps_loaded_def.reject();
