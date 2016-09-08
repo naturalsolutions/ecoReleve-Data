@@ -9,11 +9,12 @@ define([
 	'ns_modules/ns_com',
 	'ns_form/NSFormsModuleGit',
 	'sweetAlert',
+
 ], function($, _, Backbone, Marionette, Swal, Translater, config, Com, NsForm, swal) {
 
   'use strict';
   return Marionette.ItemView.extend({
-    template: 'app/modules/monitoredSites/templates/tpl-ms-new.html',
+    template: 'app/modules/individuals/tpl-individuals-new.html',
     className: 'white full-height',
 
     ui: {
@@ -24,33 +25,42 @@ define([
       'click button.back': 'removeThis',
       'click #btnCreate': 'save',
       'click #btnCancel': 'cancel'
-
     },
 
-    rootUrl: '#monitoredSites/',
+    rootUrl : '#individuals/',
+
+    initialize: function(options) {
+      this.type = 1;
+    },
 
     onShow: function() {
-      this.displayForm();
+      if (this.type)
+      this.displayForm(this.type);
     },
+
     displayForm: function(type) {
       var self = this;
       this.nsForm = new NsForm({
-        name: 'MonitoredSiteForm',
-        modelurl: config.coreUrl + 'monitoredSites',
+        name: 'IndivForm',
+        modelurl: config.coreUrl + 'individuals',
         buttonRegion: [],
         formRegion: this.ui.form,
         displayMode: 'edit',
-        objectType: 1,
+        objectType: type,
         id: 0,
         reloadAfterSave: false,
         afterSaveSuccess: function() {
+          var type = 'individual';
+          if (self.type != 1) {
+            type = 'group' ;
+          }
           swal({
                 title: 'Succes',
-                text: 'creating new site',
+                text: 'creating new ' + type,
                 type: 'success',
                 showCancelButton: true,
                 confirmButtonColor: 'green',
-                confirmButtonText: 'create another site',
+                confirmButtonText: 'create another ' + type,
                 cancelButtonText: 'cancel',
                 closeOnConfirm: true,
               },
@@ -62,24 +72,12 @@ define([
           );
         },
         savingError: function(response) {
-          var type;
-          var msg;
-          var color;
-          if (response.status == 520) {
-            type = 'warning';
-            msg = 'This name is already used for another monitored site';
-            color = 'rgb(218, 146, 15)';
-          } else {
-            type = 'error';
-            msg = 'an unknow error ooccured';
-            color = 'rgb(147, 14, 14)';
-          }
           Swal({
             title: 'Error',
-            text: msg,
-            type: type,
+            text: 'creating a new ' + type,
+            type: 'error',
             showCancelButton: false,
-            confirmButtonColor: color,
+            confirmButtonColor: 'rgb(147, 14, 14)',
             confirmButtonText: 'OK',
             closeOnConfirm: true,
           }
@@ -93,5 +91,6 @@ define([
     cancel: function() {
       Backbone.history.navigate(this.rootUrl,{trigger: true});
     }
+
   });
 });

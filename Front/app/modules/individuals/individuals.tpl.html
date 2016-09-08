@@ -2,11 +2,6 @@
 	<div class="col-xs-4 full-height no-padding">
 		<div class="toolbar top">
 			<legend>Search</legend>
-			<ul class="js-indiv-tabs nav nav-tabs pull-right">
-               <li class="tab-ele activeTab"><a id="standardTab" class="tab-link" name="standard">Standard</a></li>
-               <li class="tab-ele"><a id="advancedTab" class="tab-link" name="advanced">Advanced</a></li>
-               <br>
-            </ul>
 		</div>
 		<div class="crop2 clearfix">
 			<br>
@@ -25,7 +20,7 @@
                 	<input type='checkbox' class="js-hist-val form-control" />
                 </div>
              </div>
-			<div class="js-filters filter-no-padding filter-indiv"></div>
+			<div class="js-filters filter-no-padding"></div>
 		</div>
 		<div class="toolbar bottom">
 			<button class="js-btn-clear btn pull-left">Clear</button>
@@ -37,7 +32,7 @@
 
 	<div class="col-xs-8 full-height dark no-padding">
 		<div class="toolbar top">
-			<legend class="text-right">Total individuals : <span class="js-total-records"></span></legend>
+			<legend class="text-right">Total <%= type %> : <span class="js-total-records"></span></legend>
 			<div class="clearfix pull-right">
 				<select class="js-page-size form-control">
 					<option value="" disabled selected>rows per page</option>
@@ -60,7 +55,7 @@
 				<span class="reneco reneco-export"></span>
 			</button>
 			<button class="js-btn-new js-admin btn btn-success pull-right">
-				New individual&nbsp;
+				New <%= type %>&nbsp;
 				<span class="reneco reneco-entrykey"></span>
 			</button>
 		</div>

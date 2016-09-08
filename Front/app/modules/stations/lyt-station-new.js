@@ -24,10 +24,9 @@ define([
   'use strict';
 
   return Marionette.LayoutView.extend({
-
+    template: 'app/modules/stations/tpl-station-new.html',
     className: 'full-height white',
 
-    template: 'app/modules/stations/templates/tpl-station-new.html',
     events: {
       'focusout input[name="Dat e_"]': 'checkDate',
       'change input[name="LAT"], input[name="LON"]': 'getLatLng',

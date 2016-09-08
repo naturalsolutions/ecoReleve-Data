@@ -9,19 +9,19 @@ define([
   'ns_grid/model-grid',
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
-  'ns_navbar/ns_navbar',
+  'ns_navbar/navbar.view',
   'ns_modules/ns_com',
   'tooltipster-list',
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
- NsGrid, NsMap, NsForm, Navbar, Com
+ NsGrid, NsMap, NsForm, NavbarView, Com
 ) {
 
   'use strict';
 
   return Marionette.LayoutView.extend({
-    template: 'app/modules/sensors/templates/tpl-sensors-detail.html',
+    template: 'app/modules/sensors/sensor.tpl.html',
     className: 'full-height animated white sensor',
     events: {
       'click #hideSensorDetails': 'hideDetail',
@@ -46,61 +46,43 @@ define([
     regions: {
       'rgNavbar': '#navbar'
     },
-
-    rootUrl: '#sensors/',
+  
+    model: new Backbone.Model({
+      type: 'sensors',
+    }),
+    com: new Com(),
 
     initialize: function(options) {
-      if (options.id) {
-        this.sensorId = options.id;
-      }else {
-        this.translater = Translater.getTranslater();
-        this.model = options.model;
-        this.navbar = new Navbar({
-          parent: this,
-          globalGrid: options.globalGrid,
-          model: options.model,
-        });
-      }
+      this.model.set('id', options.id);
     },
 
-    reloadFromNavbar: function(model) {
-      this.display(model);
-      this.map.url = config.coreUrl + 'sensors/' + this.sensorId  + '?geo=true';
+    reloadFromNavbar: function(id) {
+      this.model.set('id', id);
+
+      this.map.url = config.coreUrl + 'sensors/' + this.model.get('id')  + '?geo=true';
       this.map.updateFromServ();
-      Backbone.history.navigate(this.rootUrl + this.sensorId, {trigger: false});
-    },
 
-    onRender: function() {
-      this.$el.i18n();
+      this.displayForm();
+      this.displayGrid();
     },
 
     onShow: function() {
-      var _this = this;
-      if (this.sensorId) {
-        this.displayForm(this.sensorId);
-        this.displayGrid(this.sensorId);
-        setTimeout(function() {
-          _this.displayMap();
-        },0);
-      }else {
-        this.rgNavbar.show(this.navbar);
-        this.display(this.model);
-        setTimeout(function() {
-          _this.displayMap();
-        },0);
-      }
+      this.$el.i18n();
+      this.displayMap();
+      this.displayNavbar();
+      this.displayForm();
+      this.displayGrid();
     },
 
-    display: function(model) {
-      this.model = model;
-      this.sensorId = this.model.get('ID');
-      this.displayForm(this.sensorId);
-      this.displayGrid(this.sensorId);
+    displayNavbar: function(){
+      this.rgNavbar.show(this.navbarView = new NavbarView({
+        parent: this
+      }));
     },
 
     displayMap: function() {
       this.map = new NsMap({
-        url: config.coreUrl + 'sensors/' + this.sensorId  + '?geo=true',
+        url: config.coreUrl + 'sensors/' + this.model.get('id')  + '?geo=true',
         cluster: true,
         zoom: 3,
         element: 'map',
@@ -108,7 +90,7 @@ define([
       });
     },
 
-    displayForm: function(id) {
+    displayForm: function() {
       this.nsform = new NsForm({
         name: 'SensorForm',
         modelurl: config.coreUrl + 'sensors',
@@ -117,14 +99,14 @@ define([
         buttonRegion: [this.ui.formBtns],
         displayMode: 'display',
         objectType: this.type,
-        id: id,
+        id: this.model.get('id'),
         reloadAfterSave: true,
         parent: this.parent
       });
 
       this.nsform.afterDelete = function() {
         var jqxhr = $.ajax({
-          url: config.coreUrl + 'sensors/' + id,
+          url: config.coreUrl + 'sensors/' + this.model.get('id'),
           method: 'DELETE',
           contentType: 'application/json'
         }).done(function(resp) {
@@ -134,7 +116,7 @@ define([
       };
     },
 
-    displayGrid: function(id) {
+    displayGrid: function() {
       var _this = this;
       var cols = [{
         name: 'FK_Individual',
@@ -199,7 +181,7 @@ define([
         pageSize: 20,
         columns: cols,
         pagingServerSide: false,
-        url: config.coreUrl + 'sensors/' + id  + '/history',
+        url: config.coreUrl + 'sensors/' + this.model.get('id')  + '/history',
         urlParams: this.urlParams,
         rowClicked: true,
       });

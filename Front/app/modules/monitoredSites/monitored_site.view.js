@@ -1,4 +1,3 @@
-//radio
 define([
   'jquery',
   'underscore',
@@ -10,17 +9,17 @@ define([
   'ns_grid/model-grid',
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
-  'ns_navbar/ns_navbar',
+  'ns_navbar/navbar.view',
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
- config, NsGrid, NsMap, NsForm, Navbar
+ config, NsGrid, NsMap, NsForm, NavbarView
 ) {
 
   'use strict';
 
   return Marionette.LayoutView.extend({
 
-    template: 'app/modules/monitoredSites/templates/tpl-ms-detail.html',
+    template: 'app/modules/monitoredSites/monitored_site.tpl.html',
     className: 'full-height animated white',
 
     events: {
@@ -50,28 +49,22 @@ define([
       'rgNavbar': '#navbar'
     },
 
-    rootUrl: '#monitoredSites/',
+    model: new Backbone.Model({
+      type: 'monitoredSites',
+    }),
 
     initialize: function(options) {
-      if (options.id) {
-        this.monitoredSiteId = options.id;
-      }else {
-        this.translater = Translater.getTranslater();
-        this.model = options.model;
-        this.navbar = new Navbar({
-          parent: this,
-          globalGrid: options.globalGrid,
-          model: options.model,
-        });
-      }
-
+      this.model.set('id', options.id);
     },
 
-    reloadFromNavbar: function(model) {
-      this.display(model);
-      this.map.url = config.coreUrl + 'monitoredSites/' + this.monitoredSiteId  + '/history/?geo=true';
+    reloadFromNavbar: function(id) {
+      this.model.set('id', id);
+      this.map.url = config.coreUrl + 'monitoredSites/' + this.model.get('id')  + '/history/?geo=true';
       this.map.updateFromServ();
-      Backbone.history.navigate(this.rootUrl + this.monitoredSiteId, {trigger: false});
+      this.displayForm();
+      this.displayGrid();
+      this.displayStationGrid();
+      this.displayMap();
     },
 
     onRender: function() {
@@ -79,41 +72,27 @@ define([
     },
 
     onShow: function() {
-      var _this = this;
-      if(this.monitoredSiteId){
-        this.displayForm(this.monitoredSiteId);
-        this.displayGrid(this.monitoredSiteId);
-        this.displayStationGrid(this.monitoredSiteId);
-        setTimeout(function() {
-          _this.displayMap();
-        },0);
-      }else{
-        this.rgNavbar.show(this.navbar);
-        this.display(this.model);
-        setTimeout(function() {
-          _this.displayMap();
-        },0);
-      }
+      this.displayNavbar();
+      this.displayForm();
+      this.displayGrid();
+      this.displayStationGrid();
+      this.displayMap();
     },
 
-    display: function(model) {
-      this.model = model;
-      this.monitoredSiteId = this.model.get('ID');
-      this.displayForm(this.monitoredSiteId);
-      this.displayGrid(this.monitoredSiteId);
-      this.displayStationGrid(this.monitoredSiteId);
+    displayNavbar: function(){
+      this.rgNavbar.show(this.navbarView = new NavbarView({
+        parent: this
+      }));
     },
 
-    displayGrid: function(id) {
-
+    displayGrid: function() {
       this.grid = new NsGrid({
         pageSize: 10,
         pagingServerSide: true,
         name: 'MonitoredSiteGridHistory',
-        url: config.coreUrl + 'monitoredSites/' + id  + '/history/',
+        url: config.coreUrl + 'monitoredSites/' + this.model.get('id')  + '/history/',
         urlParams: this.urlParams,
         rowClicked: true,
-
       });
 
       var colsEquip = [{
@@ -141,7 +120,7 @@ define([
         pageSize: 20,
         columns: colsEquip,
         pagingServerSide: false,
-        url: config.coreUrl + 'monitoredSites/' + id  + '/equipment',
+        url: config.coreUrl + 'monitoredSites/' + this.model.get('id')  + '/equipment',
         urlParams: this.urlParams,
         rowClicked: true,
       });
@@ -205,7 +184,7 @@ define([
         pagingServerSide: false,
         pageSize: 10,
         columns: stationsCols,
-        url: config.coreUrl + 'monitoredSites/' + this.monitoredSiteId  + '/stations',
+        url: config.coreUrl + 'monitoredSites/' + this.model.get('id')  + '/stations',
         rowClicked: true,
         com: this.com,
       });
@@ -216,7 +195,7 @@ define([
 
     displayMap: function(geoJson) {
       this.map = new NsMap({
-        url: config.coreUrl + 'monitoredSites/' + this.monitoredSiteId  + '/history/?geo=true',
+        url: config.coreUrl + 'monitoredSites/' + this.model.get('id')  + '/history/?geo=true',
         zoom: 4,
         element: 'map',
         popup: true,
@@ -224,7 +203,7 @@ define([
       });
     },
 
-    displayForm: function(id) {
+    displayForm: function() {
       var _this = this;
       this.nsform = new NsForm({
         name: 'IndivForm',
@@ -233,7 +212,7 @@ define([
         buttonRegion: [this.ui.formBtns],
         displayMode: 'display',
         objectType: this.type,
-        id: id,
+        id: this.model.get('id'),
         reloadAfterSave: true,
         parent: this.parent,
         afterShow: function() {
@@ -245,7 +224,7 @@ define([
 
       this.nsform.afterDelete = function() {
         var jqxhr = $.ajax({
-          url: config.coreUrl + 'monitoredSites/' + id,
+          url: config.coreUrl + 'monitoredSites/' + _this.model.get('id'),
           method: 'DELETE',
           contentType: 'application/json'
         }).done(function(resp) {

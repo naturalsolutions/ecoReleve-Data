@@ -26,13 +26,10 @@ define([
   'use strict';
 
   return Marionette.LayoutView.extend({
-
-    template: 'app/modules/individuals/templates/tpl-individuals-detail.html',
+    template: 'app/modules/individuals/individual.tpl.html',
     className: 'individual full-height animated white',
 
     events: {
-      'click .js-back': 'back',
-
       'click .tab-link': 'displayTab',
       'click table.backgrid th input': 'checkSelectAll',
       'click button.js-delete-locations': 'warnDeleteLocations',
@@ -62,50 +59,63 @@ define([
       'rgNavbar': '.js-rg-navbar'
     },
 
-    type : 'individuals',
+    model: new Backbone.Model({
+      type: 'individuals',
+    }),
+    com: new Com(),
+    nbLocations: [],
 
     initialize: function(options) {
-      this.indivId = options.id;
-      this.model = new Backbone.Model(); //new IndividualModel()
       this.model.set('id', options.id);
-
-      this.com = new Com();
-      this.nbLocations = [];
-    },
-
-    displayNavbar: function(){
-      var _this = this;
-      this.rgNavbar.show(this.navbarView = new NavbarView({
-        parent: _this
-      }));
-    },
-    onShow: function() {
-      this.displayNavbar();
-      this.displayForm(this.indivId);
-      this.displayGrids(this.indivId);
-      this.displayMap();
-    },
-
-    back: function(){
-      Backbone.history.navigate(this.type + '/', {trigger: true});
     },
 
     reloadFromNavbar: function(id) {
       this.model.set('id', id);
-      this.indivId = id;
 
       this.com.addModule(this.map)
       this.map.com = this.com;
-      this.map.url = config.coreUrl + this.type + '/' + id  + '/locations?geo=true';
+      this.map.url = config.coreUrl + this.model.get('type') + '/' + id  + '/locations?geo=true';
       this.map.updateFromServ();
       this.map.url = false;
 
-      this.displayForm(this.indivId);
-      this.displayGrids(this.indivId);
+      this.displayForm(this.model.get('id'));
+      this.displayGrids(this.model.get('id'));
     },
 
     onRender: function() {
       this.$el.i18n();
+    },
+
+    onShow: function() {
+      this.displayNavbar();
+      this.displayMap();
+      this.displayForm();
+      this.displayGrids();
+    },
+
+    displayNavbar: function(){
+      this.rgNavbar.show(this.navbarView = new NavbarView({
+        parent: this
+      }));
+    },
+
+    displayMap: function() {
+      var _this = this;
+        this.map = new NsMap({
+            url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true',
+            //geoJson : data,
+            cluster: true,
+            legend: true,
+            zoom: 3,
+            element: 'map',
+            popup: true,
+            com: _this.com,
+            selection: true,
+            idName: 'ID',
+            latName: 'LAT',
+            lonName: 'LON'
+          });
+        this.map.url = false;
     },
 
     displayGrids: function() {
@@ -136,7 +146,7 @@ define([
         pageSize: 20,
         columns: cols,
         pagingServerSide: false,
-        url: config.coreUrl + this.type + '/' + this.indivId  + '/history',
+        url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '/history',
         urlParams: this.urlParams,
         rowClicked: true,
       });
@@ -145,7 +155,7 @@ define([
       this.ui.historyPaginator.html(this.historyGrid.displayPaginator());
     },
 
-    displayEquipmentGrid: function(id) {
+    displayEquipmentGrid: function() {
       var colsEquip = [{
         name: 'StartDate',
         label: 'Start Date',
@@ -172,14 +182,13 @@ define([
         pageSize: 20,
         columns: colsEquip,
         pagingServerSide: false,
-        url: config.coreUrl + this.type + '/' + this.indivId + '/equipment',
+        url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id') + '/equipment',
         urlParams: this.urlParams,
         rowClicked: true,
       });
 
       this.ui.equipmentGrid.html(this.equipmentGrid.displayGrid());
       this.ui.equipmentPaginator.html(this.equipmentGrid.displayPaginator());
-      
     },
 
     displayLocationsFilter: function() {
@@ -231,12 +240,6 @@ define([
         label: 'date',
         editable: false,
         cell: 'stringDate'
- /*       cell:Backgrid.Extension.MomentCell.extend({
-            displayFormat: "DD/MM/YYYY HH:mm",
-            //modelFormat : "DD/MM/YYYY HH:mm",
-             //modelInUnixTimestamp: true,
-            displayInUTC: false
-          }),*/
       },{
         name: 'LAT',
         label: 'latitude',
@@ -294,7 +297,7 @@ define([
       }];
 
       this.locationsColl = new Backbone.Collection();
-      this.locationsColl.url = config.coreUrl + 'individuals/' + this.indivId  + '/locations';
+      this.locationsColl.url = config.coreUrl + 'individuals/' + this.model.get('id')  + '/locations';
       this.locationsColl.fetch({data :  $.param({ criteria: {} }) }).done(function(data){
           _this.locationsGrid = new NsGrid({
             pagingServerSide: false,
@@ -340,10 +343,9 @@ define([
         _this.com.setMotherColl(tmp);
         
       });
-        //url: config.coreUrl + 'individuals/' + this.indivId  + '/locations',
+        //url: config.coreUrl + 'individuals/' + this.model.get('id')  + '/locations',
     },
 
-    //should be in the grid module
     rowClicked: function(args) {
       var row = args.row;
       var evt = args.evt;
@@ -355,25 +357,6 @@ define([
         var id = row.model.get('ID');
         this.locationsGrid.interaction('focus', id);
       }
-    },
-
-    displayMap: function() {
-      var _this = this;
-        this.map = new NsMap({
-            url: config.coreUrl + this.type + '/' + this.indivId  + '/locations?geo=true',
-            //geoJson : data,
-            cluster: true,
-            legend: true,
-            zoom: 3,
-            element: 'map',
-            popup: true,
-            com: _this.com,
-            selection: true,
-            idName: 'ID',
-            latName: 'LAT',
-            lonName: 'LON'
-          });
-        this.map.url = false;
     },
 
     focus: function(e) {
@@ -398,15 +381,15 @@ define([
       $(tabUnLink).removeClass('active in');
     },
 
-    displayForm: function(id) {
+    displayForm: function() {
       var _this = this;
       this.nsform = new NsForm({
         name: 'IndivForm',
-        modelurl: config.coreUrl + this.type,
+        modelurl: config.coreUrl + this.model.get('type'),
         formRegion: this.ui.form,
         buttonRegion: [this.ui.formBtns],
         displayMode: 'display',
-        id: id,
+        id: this.model.get('id'),
         reloadAfterSave: true,
         parent: this.parent,
         displayDelete: false,
@@ -456,7 +439,7 @@ define([
 
       var params = coll.pluck('ID');
 
-      var url = config.coreUrl + this.type + '/' + this.indivId  + '/locations';
+      var url = config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '/locations';
       $.ajax({
         url: url,
         method: 'PUT',
@@ -473,6 +456,7 @@ define([
         this.swal(resp, 'error');
       });
     },
+
     filter: function() {
       this.locfilters.update();
     },
@@ -515,6 +499,7 @@ define([
         }
       });
     },
+
     loadCollection: function(url, element) {
       var collection =  new Backbone.Collection();
       collection.url = url;

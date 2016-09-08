@@ -43,8 +43,8 @@
 }(this, function (root, NsFilter, $, _, Backbone, BbForms, moment) {
 
     var tpl = '<form class="filter form-horizontal filter-form-<%=fieldname%>">'
-        + '<div   class="filterdiv" >'
-    + '<br><span data-editors="Column"></span>'
+        + '<div   class="filter-container clearfix" >'
+        + '<span data-editors="Column"></span>'
         + '<span class="col-xs-3"><b><%= filterName %>&nbsp:</b></span>'
        + '<span data-editors="ColumnType"></span>'
 
@@ -83,9 +83,6 @@
        + '<span class="col-xs-3 col-xs-offset-3">To</span><span class="col-xs-6 filterinterval" data-editors="To"></span>'
    + '</div>'
    + '</form>'
-   
-
-
 
     var tplAdded = '<div class="filter clearfix">'
       + '<div class="clearfix">'

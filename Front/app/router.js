@@ -5,6 +5,38 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
   'use strict';
   return Marionette.AppRouter.extend({
     history: [],
+    appRoutes: {
+      'export(/)': 'export',
+
+      'importFile(/)': 'importFile',
+
+      'individuals/new(/)': 'newIndividual',
+      'individuals/:id(/)': 'individual',
+      'individuals(/)': 'individuals',
+
+      'monitoredSites/new(/)': 'newMonitoredSite',
+      'monitoredSites/:id(/)': 'monitoredSite',
+      'monitoredSites(/)': 'monitoredSites',
+
+      'sensors/new/:type(/)': 'newSensor',
+      'sensors/:id(/)': 'sensor',
+      'sensors(/)': 'sensors',
+
+      'stations/new/:from(/)': 'newStation',
+      'stations/new(/)': 'newStation',
+      'stations/:id(/)': 'station',
+      'stations(/)': 'stations',
+      'observations/:id(/)': 'observations',
+
+      'validate/:type(/)': 'validateType',
+      'validate(/)': 'validate',
+
+      'release/:id(/)': 'release',
+      'release(/)': 'release',
+
+      '*route(/:page)': 'home',
+    },
+
     initialize: function(opt) {
       this.collection = new Backbone.Collection([
       {label: 'Manual import', href: 'importFile', icon: 'reneco-import'},
@@ -18,38 +50,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       {label: 'Monitored Sites', href: 'monitoredSites', icon: 'reneco-sensors'},
       {label: 'Export', href: 'export', icon: 'reneco-export'},
       ]);
-    },
-
-    appRoutes: {
-      'export(/)': 'export',
-
-      'importFile(/)': 'importFile',
-
-      'individuals/new(/)': 'newIndividual',
-      'individuals/:id(/)': 'individual',
-      'individuals(/)': 'individuals',
-
-      'stations/new/:from(/)': 'newStation',
-      'stations/new(/)': 'newStation',
-      'stations/:id(/)': 'stations',
-      'stations(/)': 'stations',
-      'observations/:id(/)': 'observations',
-
-      'sensors/new/:type(/)': 'newSensor',
-      'sensors/:id(/)': 'sensors',
-      'sensors(/)': 'sensors',
-
-      'monitoredSites/new(/)': 'newMonitoredSite',
-      'monitoredSites/:id(/)': 'monitoredSites',
-      'monitoredSites(/)': 'monitoredSites',
-
-      'validate/:type(/)': 'validateType',
-      'validate(/)': 'validate',
-
-      'release/:id(/)': 'release',
-      'release(/)': 'release',
-
-      '*route(/:page)': 'home',
     },
 
     execute: function(callback, args, route) {

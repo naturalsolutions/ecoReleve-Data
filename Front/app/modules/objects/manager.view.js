@@ -1,4 +1,3 @@
-
 define([
   'jquery',
   'underscore',
@@ -8,35 +7,29 @@ define([
   'translater',
   'config',
   'ns_modules/ns_com',
-  'ns_grid/model-grid',
-  'ns_filter_bower',
-  'dateTimePicker',
   'ns_grid/grid.view',
   'ns_filter/filters',
 
   'i18n'
 
-], function($, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsFilterBower, dateTimePicker, GridView, NsFilter
+], function(
+  $, _, Backbone, Marionette, Swal, Translater, config,
+  Com, GridView, NsFilter
 ) {
 
   'use strict';
 
   return Marionette.LayoutView.extend({
 
-    template: 'app/modules/individuals/templates/tpl-individuals.html',
+    template: 'app/modules/objects/manager.tpl.html',
     className: 'full-height animated white rel',
 
     events: {
       'click .js-btn-filter': 'filter',
       'click .js-btn-clear': 'clearFilter',
-
-      'click .js-btn-new': 'newIndividual',
+      'click .js-btn-new': 'new',
       'click .js-btn-export': 'export',
-      'click .js-indiv-tabs a.tab-link' : 'indivSearchTabs',
-      'click .js-hist-val' : 'resetDate',
       'change .js-page-size': 'changePageSize',
-      'dp.change .js-date-time' : 'resetHist'
     },
 
     ui: {
@@ -49,16 +42,13 @@ define([
       rgGrid: '.js-rg-grid'
     },
 
-    type: 'individuals',
+    translater: Translater.getTranslater(),
+    com: new Com(),
 
     initialize: function(options) {
-      this.com = new Com();
-      this.translater = Translater.getTranslater();
-
       if( window.app.currentData ){
         this.defaultFilters = window.app.currentData.filters;
-        console.log(this.defaultFilters);
-      }
+      }      
     },
 
     onRender: function() {
@@ -69,6 +59,9 @@ define([
       this.$el.find('.js-date-time').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
       this.displayFilter();
       this.displayGridView();
+      if(this.displayMap){
+        this.displayMap();
+      }
     },
 
     changePageSize: function(e){
@@ -90,7 +83,7 @@ define([
       };
 
       this.rgGrid.show(this.gridView = new GridView({
-        type: this.type,
+        type: this.model.get('type'),
         com: this.com,
         onRowClicked: onRowClicked,
         afterFirstGetRows: afterFirstGetRows,
@@ -99,15 +92,12 @@ define([
     },
 
     displayFilter: function() {
-      var _this=this;
-      this.$el.find('.js-filters').html('');
-
       this.filters = new NsFilter({
-        url: config.coreUrl + this.type +'/',
+        url: config.coreUrl + this.model.get('type') +'/',
         com: this.com,
         filterContainer: this.ui.filter,
         name: this.moduleName,
-        filtersValues: this.defaultFilters
+        filtersValues: this.defaultFilters,
       });
     },
 
@@ -119,46 +109,9 @@ define([
       this.filters.reset();
     },
 
-    newIndividual: function() {
-      Backbone.history.navigate(this.type + '/new/', {trigger: true});
-    },
-
-    indivSearchTabs: function(e) {
-      var type = $(e.target).attr('name');
-      var elTab = this.$el.find('ul.js-indiv-tabs');
-      elTab.find('.tab-ele').removeClass('activeTab');
-      $(e.target).parent().addClass('activeTab');
-
-      if (type == 'standard') {
-        this.moduleName = 'IndivFilter';
-        $('.border-bottom-filter').addClass('hide');
-        this.ui.filter.removeClass('crop2');
-      } else {
-        this.moduleName = 'AdvancedIndivFilter';
-        $('.border-bottom-filter').removeClass('hide');
-        this.ui.filter.addClass('crop2');
-      }
-
-      this.com = new Com();
-      this.displayGridView();
-      this.displayFilter();
-    },
-
-    resetDate: function(e){
-      if ($('.js-hist-val:checked').val()){
-        $('.js-date-val').val(null);
-      }
-    },
-    resetHist: function(e){
-      if ($('.js-hist-val:checked').val()){
-        $('.js-hist-val').prop('checked', false);
-      }
-    },
-    
     export: function(){
       this.gridView.exportData();
     }
-    
     
   });
 });

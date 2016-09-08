@@ -187,7 +187,6 @@ table.backgrid{
 
 .grid-view {
   height: 100%;
-  padding: 15px;
   .ag-bootstrap-striped {
     height: 100%;
     .ag-root {
@@ -354,7 +353,7 @@ table.backgrid{
     }
   }
   .ag-pinned-left-cols-viewport{
-    box-shadow: 5px 0px 15px #ddd;
+    box-shadow: 5px 0px 15px rgba(119, 119, 119, 0.2);
   }
 
   .ag-overlay-panel {
@@ -372,7 +371,10 @@ table.backgrid{
 
   .ag-paging-panel{
   	text-align: center;
-  	padding-top: 15px;
+  	padding: 10px;
+    align-items: center;
+    justify-content: center;
+    
   	#current, #total{
   		width: 50px;
   		display: inline-block;

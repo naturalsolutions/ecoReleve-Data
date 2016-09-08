@@ -19,7 +19,7 @@ define([
 
   'use strict';
   return Marionette.ItemView.extend({
-    template: 'app/modules/sensors/templates/tpl-sensors-new.html',
+    template: 'app/modules/sensors/tpl-sensors-new.html',
     className: 'white full-height',
 
     ui: {

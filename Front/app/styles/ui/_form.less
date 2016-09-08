@@ -145,14 +145,6 @@ select:disabled {
     z-index: 100000;
 }
 
-
-
-
-
-
-
-
-
 .error{
 	//works only for required classes
 	//select.required, input.required, textarea.required{
@@ -543,32 +535,15 @@ textarea {
 	font-weight:bold;
 }
 
-.filter-indiv{
-	margin-bottom: 80px;
-
-}
-
-@tabsHeight:50px;
-
-.filter-indiv.crop2{
-		margin-bottom: 0px;
-		padding-bottom: 80px;
-		@crop: @tabsHeight*2;
-		height: ~"calc(100% - @{crop} )"!important;
+.input-group{
+	input.autocompTree{
+		border-radius: 0px 4px 4px 0px!important;
 	}
-.no-scroll{
-	overflow:hidden !important;
 }
 
+.filter-container{
+	padding: 10px 0px;
+}
 .filter-no-padding {
-	span{
-		padding-left:0px;
-		select{
-			padding-left:5px;
-			padding-right:0px;
-		}
-		div span {
-			padding-left:12px;
-		}
-	}
+	padding: 5px 0px;
 }

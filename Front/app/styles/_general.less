@@ -2,7 +2,7 @@ html, body{
   height: 100%;
   //overflow: hidden;
   font-family: 'Exo 2', sans-serif;
-  background: url(./img/bg-home.jpg) center center no-repeat;
+  background: url(./img/perso/bg-home.jpg) center center no-repeat;
   background-position-x: 50%;
   background-position-y: 95%;
   background-attachment: fixed;
@@ -12,7 +12,7 @@ html, body{
 main{
   height: 100%;
   padding-top: 50px;
-  background: rgba(255,255,255,0.25);
+  //background: rgba(255,255,255,0.25);
 }
 .white{
   background: white;
@@ -41,7 +41,7 @@ main{
 }
 
 .oh{
-  overflow: hidden;
+  overflow: hidden!important;
 }
 
 .btn-circle{
@@ -50,7 +50,6 @@ main{
   border-radius: 100%;
   color: white;
   margin: 0px 15px;
-
 }
 
 .rel{
@@ -262,7 +261,6 @@ li.list-group-item{
 
 #locationsGrid th.select-all-header-cell input{
   display: none;
-
 }
 
 
@@ -278,4 +276,18 @@ button:focus {
 }
 #locationsFilter .filter-form-Date {
   margin-top: 1em;
+}
+
+a.btn{
+  color: inherit;
+  &:not([class*="btn-"]){
+    background: rgb(221, 221, 221);
+  }
+  &[class*="btn-"] {
+    &:hover, &:focus, &:visited{
+      text-decoration: none;
+      color: white;
+    }
+    color: white;
+  }
 }
