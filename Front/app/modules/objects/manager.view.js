@@ -42,10 +42,10 @@ define([
       rgGrid: '.js-rg-grid'
     },
 
-    translater: Translater.getTranslater(),
-    com: new Com(),
+    //translater: Translater.getTranslater(),
 
     initialize: function(options) {
+      this.com = new Com();
       if( window.app.currentData ){
         this.defaultFilters = window.app.currentData.filters;
       }      
