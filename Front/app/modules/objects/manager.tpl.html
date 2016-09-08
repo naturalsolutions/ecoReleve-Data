@@ -8,7 +8,7 @@
   		</a>
   		<legend class="pull-left">Search</legend>
 		</div>
-		<div class="crop2 no-padding clearfix">
+		<div class="crop2 clearfix">
 			<div class="js-filters filter-no-padding"></div>
 		</div>
 		<div class="toolbar bottom">
@@ -43,9 +43,19 @@
 				Export data&nbsp;
 				<span class="reneco reneco-export"></span>
 			</button>
-			<a href="#<%= type %>/new" class="js-admin btn btn-success pull-right">
-				New <%= single %>&nbsp;
-				<span class="reneco reneco-entrykey"></span>
-			</a>
+
+
+			<% if (typeof(availableOptions) === 'undefined') { %>
+					<a href="#<%= type %>" class="js-admin btn btn-success pull-right">
+					New <%= single %>&nbsp;
+					<span class="reneco reneco-entrykey"></span>
+					</a>			    
+			<% } else { %>
+					<button class="js-admin js-btn-new btn btn-success pull-right">
+					New <%= single %>&nbsp;
+					<span class="reneco reneco-entrykey"></span>
+					</button>
+			<% } %>
+			
 		</div>
 	</div>

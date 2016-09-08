@@ -48,7 +48,7 @@
         + '<span class="col-xs-3"><b><%= filterName %>&nbsp:</b></span>'
        + '<span data-editors="ColumnType"></span>'
 
-       + '<span class="col-xs-3" data-editors="Operator"></span>'
+       + '<span class="col-xs-3 no-padding" data-editors="Operator"></span>'
         + '<span class="col-xs-6 filter" data-editors="Value"></span>'
     + '</div>'
     + '<div class="clear"></div>'

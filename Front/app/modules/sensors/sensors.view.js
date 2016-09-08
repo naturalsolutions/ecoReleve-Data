@@ -9,6 +9,19 @@ define([
       label: 'sensors',
       single: 'sensor',
       type: 'sensors',
+      availableOptions: [{
+        label: 'Argos',
+        val: 'argos'
+      }, {
+        label: 'GSM',
+        val: 'gsm'
+      },{
+        label: 'RFID',
+        val: 'rfid'
+      },{
+        label: 'VHF',
+        val: 'vhf'
+      }],
     }),
   });
 });

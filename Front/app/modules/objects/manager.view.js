@@ -110,8 +110,31 @@ define([
     },
 
     export: function(){
-      this.gridView.exportData();
-    }
+        var url = config.coreUrl + this.model.get('type') + '/export?criteria=' + JSON.stringify(this.gridView.filters);
+        var link = document.createElement('a');
+        link.classList.add('DowloadLinka');
+        
+        link.href = url;
+        link.onclick = function () {
+            var href = $(link).attr('href');
+            window.location.href = link;
+            document.body.removeChild(link);
+        };
+       document.body.appendChild(link);
+       link.click();
+    },
+
+    new: function(e) {
+      var _this = this;
+      this.ui.btnNew.tooltipList({
+        availableOptions: this.model.get('availableOptions'),
+        liClickEvent: function(liClickValue) {
+          var url = '#' + _this.model.get('type') + '/new/' + liClickValue;
+          Backbone.history.navigate(url, {trigger: true});
+        },
+        position: 'top'
+      });
+    },
     
   });
 });
