@@ -162,7 +162,10 @@ define([
       this.ui.obs.find('div.obs').each(function(i) {
         if (i == index) {
           $(this).parent().removeClass('hidden');
-          $(this).parent().find('input:enabled:first').focus();
+          var elem = $(this).parent().find('input:enabled:first');
+          if (!$(elem).hasClass('autocompTree')){
+            $(elem).focus();
+          }
         }else {
           $(this).parent().addClass('hidden');
         }
