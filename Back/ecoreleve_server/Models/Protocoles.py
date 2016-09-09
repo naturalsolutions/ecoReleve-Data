@@ -103,7 +103,7 @@ class Observation(Base,ObjectWithDynProp):
                             subDictList.append(subDict)
                     curData['listOfSubObs'] = subDictList
 
-                if 'ID' in curData :
+                if 'ID' in curData and curData['ID'] is not None:
                     subObs = list(filter(lambda x : x.ID==curData['ID'],self.Observation_children))[0]
                     subObs.LoadNowValues()
                 else :
