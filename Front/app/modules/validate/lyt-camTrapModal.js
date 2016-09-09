@@ -51,9 +51,9 @@ define([
 		render: function(){
 
 			if( !this.model.get("validated")  && this.parent.stopSpace) {
-			 this.model.set("validated" , 1 ); //Si focus alors la photo est vu
+			 //this.model.set("validated" , 1 ); //Si focus alors la photo est vu
 			 //this.setVisualValidated(1);
-			 this.parent.tabView[this.parent.currentPosition].setVisualValidated(1);
+			 this.parent.tabView[this.parent.currentPosition].setModelValidated(1);
 			 //this.setVisualValidated(1);
 			 this.changeImage(this.model);
 		 }

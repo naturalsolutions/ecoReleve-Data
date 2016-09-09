@@ -49,7 +49,8 @@ def uploadFile(request):
     'gsm':uploadFilesGSM,
     'rfid':uploadFileRFID,
     'resumable':uploadFileCamTrapResumable,
-    'concat':concatChunk
+    'concat':concatChunk,
+    '1': checkStatut
     }
     return dictFuncImport[type_](request)
 
@@ -71,3 +72,8 @@ def checkChunk(request):
             return Response(status=204)
         else:
             return Response(status=200)
+
+@view_config(route_name=route_prefix+'statut', renderer='json' ,request_method='GET')
+def checkStatut(request):
+    print("je veux le statut")
+    return

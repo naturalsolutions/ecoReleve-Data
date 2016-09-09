@@ -213,25 +213,47 @@ def concatChunk(request):
         print("name " +str(name))
         print("on veut reconstruire le fichier" + str(name) + " qui se trouve dans " + str(request.POST['path']) +" en :"+str(request.POST['taille'])+" fichiers")
         #destination = open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name']) ,'wb')
-        if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(name)): # si le fichier n'existe pas on va le reconstruire
-            with open(pathPrefix+'\\'+pathPost+'\\'+str(name) ,'wb') as destination: #on ouvre le fichier comme destination
-                for i in range( 1, int(request.POST['taille'])+1):#on va parcourir l'ensemble des chunks
-                    if os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i)):#si le chunk est present
-                        shutil.copyfileobj(open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i), 'rb'), destination)#on le concat dans desitnation
-                    else:#si il n'est pas present
-                        flagSuppression = True
-                        request.response.status_code = 510
-                        message = "Chunk file number : '"+str(i)+"' missing try to reupload the file '"+str(request.POST['file'])+"'"
-                        break #break the for
-
-        else:
-            request.response.status_code = 510
-            message = "File : '"+str(name)+"' is already on the server <BR>"
-        if (flagSuppression):
-            os.remove(pathPrefix+'\\'+pathPost+'\\'+str(name)) #supprime le fichier destination et on force la sortie
-        else:
-            for i in range( 1, int(request.POST['taille'])+1):#on va parcourir l'ensemble des chunks
-                os.remove(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i))
+        txtConcat = str(name).split('.')
+        print ("avant text")
+        if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(txtConcat[0])+str('.txt')):
+            with open(pathPrefix+'\\'+pathPost+'\\'+str(txtConcat[0])+str('.txt') ,'a' ) as socketConcat:
+                print("fichier socket ok")
+                print ( "%s\n%s\n" % ( str(request.POST['taille']) , str('0') ) )
+                socketConcat.write("%s\n%s\n" % ( request.POST['taille'] , 0 ) )
+                if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(name)): # si le fichier n'existe pas on va le reconstruire
+                    with open(pathPrefix+'\\'+pathPost+'\\'+str(name) ,'wb') as destination: #on ouvre le fichier comme destination
+                        for i in range( 1, int(request.POST['taille'])+1):#on va parcourir l'ensemble des chunks
+                            if os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i)):#si le chunk est present
+                                shutil.copyfileobj(open(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i), 'rb'), destination)#on le concat dans desitnation
+                                socketConcat.write("%s\n" % (i) )
+                                socketConcat.flush()
+                                if (i == 30 ):
+                                    with open(pathPrefix+'\\'+pathPost+'\\'+str(txtConcat[0])+str('.txt') ,'r' ) as testConcat:
+                                        first = testConcat.readline()
+                                        for last in testConcat:
+                                            avantDer = last
+                                        print(" first ")
+                                        print (first)
+                                        print(" last ")
+                                        print (last)
+                                        print (avantDer)
+                                    testConcat.close()
+                            else:#si il n'est pas present
+                                flagSuppression = True
+                                request.response.status_code = 510
+                                message = "Chunk file number : '"+str(i)+"' missing try to reupload the file '"+str(request.POST['file'])+"'"
+                                break #break the for
+                    destination.close()
+                else:
+                    request.response.status_code = 510
+                    message = "File : '"+str(name)+"' is already on the server <BR>"
+                if (flagSuppression):
+                    os.remove(pathPrefix+'\\'+pathPost+'\\'+str(name)) #supprime le fichier destination et on force la sortie
+                else:
+                    socketConcat.close()
+                    os.remove( pathPrefix+'\\'+pathPost+'\\'+str(txtConcat[0])+str('.txt') )
+                    for i in range( 1, int(request.POST['taille'])+1):#on va parcourir l'ensemble des chunks
+                        os.remove(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i))
 
 
 
@@ -264,6 +286,7 @@ def concatChunk(request):
                     messageConcat = "Date not valid ("+str(datePhoto)+") <BR>"
 
                 #AddPhotoOnSQL(fk_sensor,destfolder,name, str(extType[len(extType)-1]) , dateFromExif (destfolder+str(name)))
-
+    #os.remove(pathPrefix+'\\'+pathPost+'\\'+str(txtConcat[0])+str('.txt')) #supprime le fichier destination et on force la sortie
+    #os.remove(pathPrefix+'\\'+pathPost+'\\'+str(name)) #supprime le fichier destination et on force la sortie
     res = {'message' : message , 'messageConcat' : messageConcat , 'messageUnzip' : messageUnzip, 'timeConcat' : timeConcat }
     return res

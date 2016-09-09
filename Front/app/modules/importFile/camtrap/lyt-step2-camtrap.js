@@ -286,6 +286,22 @@ define([
             //console.log(errorThrown);
           });
 
+        /*  $.ajax({
+            type: "GET",
+            url: config.coreUrl + 'sensors/1/statut',
+            data: {
+              path : _this.path,
+              file : file.fileName,
+            }
+          })
+          .done( function(response,status,jqXHR){
+            console.log("done");
+          })
+          .fail( function( jqXHR, textStatus, errorThrown ){
+            console.log("error");
+            console.log(errorThrown);
+          });*/
+
         }
         //console.log(file);
       });

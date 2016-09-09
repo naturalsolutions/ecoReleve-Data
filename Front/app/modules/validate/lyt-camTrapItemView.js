@@ -38,7 +38,7 @@ define([
 		template : 'app/modules/validate/templates/tpl-image.html',
 
 		clickFocus : function(e){
-		//	this.$el.find('img').focus();
+		this.$el.find('img').focus();
 		if( e.ctrlKey) {
 			console.log("LE FOCUS ET LE CTRL KEY");
 		} else {
@@ -226,6 +226,7 @@ define([
 		setModelValidated: function(val) {
 			var oldVal = this.model.get("validated");
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
+			console.log(oldVal);
 			switch(oldVal ) {
 				case 1 :{// not checked
 					$icon.removeClass('reneco-support');
@@ -239,8 +240,9 @@ define([
 					$icon.removeClass('reneco-close');
 					break;
 				}
-				default:{
-						$icon.removeClass('reneco-hidden');
+				default: {
+					console.log("valeur defaut");
+					$icon.removeClass('reneco-hidden');
 					break;
 				}
 			}
