@@ -33,12 +33,14 @@ define([
       'grid': '#grid',
       'gridEquipment': '#gridEquipment',
       'stationsGrid': '#stationsGrid',
+      'camTrapGrid': '#camTrapGrid',
 
       'form': '#form',
       'map': '#map',
       'paginator': '#paginator',
       'paginatorEquipment': '#paginatorEquipment',
       'paginatorStation': '#paginatorStation',
+      'paginatorCamTrap': '#paginatorCamTrap',
 
       'details': '#infos',
       'mapContainer': '#mapContainer',
@@ -84,6 +86,7 @@ define([
         this.displayForm(this.monitoredSiteId);
         this.displayGrid(this.monitoredSiteId);
         this.displayStationGrid(this.monitoredSiteId);
+        this.displayCameraTrap(this.monitoredSiteId);
         setTimeout(function() {
           _this.displayMap();
         },0);
@@ -102,6 +105,7 @@ define([
       this.displayForm(this.monitoredSiteId);
       this.displayGrid(this.monitoredSiteId);
       this.displayStationGrid(this.monitoredSiteId);
+      this.displayCameraTrap(this.monitoredSiteId);
     },
 
     displayGrid: function(id) {
@@ -152,6 +156,48 @@ define([
       this.ui.paginatorEquipment.html(this.gridEquip.displayPaginator());
     },
 
+    displayCameraTrap: function() {
+      var _this = this;
+      var stationsCols = [{
+        name: 'ID',
+        label: 'ID',
+        editable: false,
+        cell: 'string'
+      },{
+        name: 'StationDate',
+        label: 'date',
+        editable: false,
+        cell: 'stringDate'
+      },{
+        name: 'LAT',
+        label: 'latitude',
+        editable: false,
+        cell: 'string'
+      },{
+        name: 'LON',
+        label: 'longitude',
+        editable: false,
+        cell: 'string'
+      },{
+        name: 'fieldActivity_Name',
+        label: 'FieldActivity',
+        editable: false,
+        cell : 'string'
+      }];
+       console.log("YOUHOUUUUUUUUUUUU");
+       console.log(config.coreUrl);
+       console.log(this.monitoredSiteId);
+      this.camTrapGrid = new NsGrid({
+        pagingServerSide: false,
+        pageSize: 10,
+        columns: stationsCols,
+        url: config.coreUrl + 'photos/?siteid='+_this.monitoredSiteId+'',
+      });
+
+      this.ui.camTrapGrid.html(this.camTrapGrid.displayGrid());
+      this.ui.paginatorCamTrap.html(this.camTrapGrid.displayPaginator());
+    },
+
     displayStationGrid: function() {
       var _this = this;
       var stationsCols = [{
@@ -170,7 +216,7 @@ define([
             var rawValue = this.model.get(this.column.get("name"));
             var formattedValue = this.formatter.fromRaw(rawValue, this.model);
 
-            this.$el.append('<a target="_blank"' 
+            this.$el.append('<a target="_blank"'
               +'href= "http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID')+'">\
                 '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
               </a>');

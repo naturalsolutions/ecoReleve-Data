@@ -151,7 +151,9 @@ def add_routes(config):
     config.add_route('monitoredSites/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
     config.add_route('monitoredSites/action', 'ecoReleve-Core/monitoredSites/{action}')
 
-
+    #-------------------------------------------------------#
+    #### cameratrap visualisation
+    config.add_route('cameratrap' , 'ecoReleve-Core/photos/')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Release #####
