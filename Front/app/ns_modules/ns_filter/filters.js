@@ -195,6 +195,8 @@
             this.url = options.url + 'getFilters';
             this.forms = [];
 
+            this.extraFilters = options.extraFilters || [];
+
             if (options.filtersValues) {
                 this.filtersValues = this.getValuesAsDic(options.filtersValues);
             }
@@ -305,7 +307,7 @@
                         //console.log('keypressed') ;
                         e.preventDefault();
                         _this.update() ;
-                        //do something   
+                        //do something
                     }
                 });
 
@@ -335,8 +337,6 @@
                         }
                     }
                 }
-
-
             }
         },
 
@@ -699,6 +699,7 @@
         },
 
         update: function () {
+
             this.criterias = [];
             var currentForm, value;
             for (var i = 0; i < this.forms.length; i++) {
@@ -733,16 +734,17 @@
                         }
                     }
                     // TODO Gestion interval
-
-
-
                 }
             }
             if (this.clientSide != null) {
                 this.clientFilter(this.criterias);
             } else {
+                if(this.extraFilters.length){
+                    this.criterias = this.extraFilters.concat(this.criterias);
+                }
                 this.filters = this.criterias;
                 this.interaction('filter', this.criterias);
+
             }
             return this.criterias;
         },
@@ -774,6 +776,7 @@
                 this.getContainer().append(form.el);
 
                 $(form.el).find('select').focus();
+
                 if (data[key].type == 'Checkboxes') {
                     this.getContainer().find('input[type="checkbox"]').each(function () {
                         $(this).prop('checked', true);

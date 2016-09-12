@@ -818,38 +818,26 @@ define([
 
     updateFromServ: function(param){
       var _this = this;
-      if(param)
-        this.searchCriteria = param;
-      //station last imported?
-      if(this.lastImported){
-        var data = {
-          'criteria': JSON.stringify(this.searchCriteria),
-          'lastImported' : this.lastImported,
-        };
-      }else{
-        var data = {
-          'criteria': JSON.stringify(this.searchCriteria),
-        };
-      }
+      this.searchCriteria = param;
+      
+      var data = {
+        'criteria': JSON.stringify(this.searchCriteria),
+      };
 
       $.ajax({
         url: this.url,
         data: data,
+        context: this
       }).done(function(geoJson) {
-        if (_this.cluster){
-          _this.updateLayers(geoJson);
+        if (this.cluster){
+          this.updateLayers(geoJson);
         }else{
-          _this.initLayer(geoJson);
+          this.initLayer(geoJson);
         }
       });
       return;
     },
 
-
-    lastImportedUpdate: function(lastImported){
-      this.lastImported = lastImported;
-      this.updateFromServ();
-    },
     //apply filters on the map from a collection
 
     //param can be filters or directly a collection

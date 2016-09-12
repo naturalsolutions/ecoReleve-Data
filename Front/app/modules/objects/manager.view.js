@@ -47,8 +47,12 @@ define([
     initialize: function(options) {
       this.com = new Com();
       if( window.app.currentData ){
-        this.defaultFilters = window.app.currentData.filters;
-      }      
+        this.populateCurrentData();
+      }
+    },
+
+    populateCurrentData: function(){
+      this.defaultFilters = window.app.currentData.filters;
     },
 
     onRender: function() {

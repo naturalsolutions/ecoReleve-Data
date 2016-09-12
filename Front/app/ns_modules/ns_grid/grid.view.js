@@ -166,6 +166,8 @@ define([
         filterModel: this.gridOptions.api.getFilterModel(),
         sortModel: this.gridOptions.api.getSortModel(),
       });
+      console.log(this.model.attributes);      
+
       return this.model.attributes;
     },
 

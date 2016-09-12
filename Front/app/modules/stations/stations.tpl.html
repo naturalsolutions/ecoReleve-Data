@@ -7,14 +7,37 @@
 	      <span data-i18n="button.back">Back</span>
   		</a>
   		<legend class="pull-left">Search</legend>
+
+			<% if (typeof(lastImported) === 'undefined') { %>
+				<ul class="nav nav-tabs pull-right">
+					 <li class="tab-ele active">
+					 		<a class="tab-link">All stations</a>
+					 </li>
+					 <li id="lastImportedStations" class="tab-ele">
+					 	<a class="tab-link">Imported stations</a>
+					 </li>
+				</ul>   
+			<% } else { %>
+				<ul class="nav nav-tabs pull-right">
+					 <li class="tab-ele">
+					 		<a class="tab-link">All stations</a>
+					 </li>
+					 <li id="lastImportedStations" class="tab-ele active">
+					 	<a class="tab-link">Imported stations</a>
+					 </li>
+				</ul>
+			<% } %>
+
 		</div>
 		<div class="crop2 clearfix ">
 			<div class="js-filters filter-no-padding"></div>
 		</div>
 		<div class="toolbar bottom">
 			<button class="js-btn-clear btn pull-left">Clear</button>
-			<button class="js-btn-filter btn btn-success pull-right">Search&nbsp;
+			<button class="js-btn-filter btn btn-success pull-right">
 				<span class="reneco reneco-search"></span>
+				&nbsp;
+				Search
 			</button>
 		</div>
 	</div>
@@ -56,8 +79,9 @@
 
 		<div class="toolbar bottom">
 			<button class="js-btn-export btn btn-success pull-left">
-				Export data&nbsp;
 				<span class="reneco reneco-export"></span>
+				&nbsp;
+				Export data
 			</button>
 
 			<% if (typeof(availableOptions) === 'undefined') { %>

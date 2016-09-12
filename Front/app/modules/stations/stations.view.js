@@ -26,8 +26,39 @@ define([
 		  'click .js-btn-new': 'new',
 		  'click .js-btn-export': 'export',
 		  'change .js-page-size': 'changePageSize',
-		  'click .js-btn-panel': 'togglePanel'
+      'click .js-btn-panel': 'togglePanel',
+		  'click .tab-ele': 'toggleTab',
+
 		},
+
+    populateCurrentData: function(){
+      this.defaultFilters = window.app.currentData.filters;
+      if(this.defaultFilters.length){
+        if(this.defaultFilters[0].Column == 'LastImported'){
+          this.extraFilters = this.defaultFilters[0];
+          this.model.set('lastImported', true);
+        }
+      }
+    },
+
+    toggleTab: function(e) {
+      if(!$(e.currentTarget).hasClass('active')){
+        this.$el.find('.tab-ele').each(function(){
+          $(this).toggleClass('active');
+        })
+        if(this.$el.find('#lastImportedStations').hasClass('active')) {
+          console.log(this.filters);
+          this.filters.extraFilters = [{
+            Column: 'LastImported',
+            Operator: '=',
+            Value: true
+          }];
+        } else {
+          this.filters.extraFilters = false;
+        }
+        this.filters.update();
+      }      
+    },
 
     togglePanel: function(e) {
     	if(!$(e.currentTarget).hasClass('active')){
