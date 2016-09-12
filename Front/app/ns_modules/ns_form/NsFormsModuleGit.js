@@ -6,7 +6,7 @@ define([
   'backbone-forms',
   'sweetAlert',
   'ns_ruler/ruler',
-  'requirejs-text!./Templates/NsFormsModule.html',
+  'requirejs-text!./NsFormsModule.html',
   'fancytree',
   './NsFormsCustomFields',
 ], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tpl) {
