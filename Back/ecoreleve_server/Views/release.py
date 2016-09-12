@@ -162,12 +162,12 @@ def releasePost(request):
         return newObs
 
     protoTypes = pd.DataFrame(session.execute(select([ProtocoleType])).fetchall(), columns = ProtocoleType.__table__.columns.keys())
-    vertebrateGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate group','ID'].values[0])
-    vertebrateIndID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate individual','ID'].values[0])
-    biometryID = int(protoTypes.loc[protoTypes['Name'] == 'Bird Biometry','ID'].values[0])
-    releaseGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Release Group','ID'].values[0])
-    releaseIndID = int(protoTypes.loc[protoTypes['Name'] == 'Release Individual','ID'].values[0])
-    equipmentIndID = int(protoTypes.loc[protoTypes['Name'] == 'Individual equipment','ID'].values[0])
+    vertebrateGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate_group','ID'].values[0])
+    vertebrateIndID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate_individual','ID'].values[0])
+    biometryID = int(protoTypes.loc[protoTypes['Name'] == 'Bird_Biometry','ID'].values[0])
+    releaseGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Release_Group','ID'].values[0])
+    releaseIndID = int(protoTypes.loc[protoTypes['Name'] == 'Release_Individual','ID'].values[0])
+    equipmentIndID = int(protoTypes.loc[protoTypes['Name'] == 'Individual_equipment','ID'].values[0])
 
     vertebrateIndList = []
     biometryList = []

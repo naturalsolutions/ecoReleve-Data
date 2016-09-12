@@ -485,7 +485,14 @@ define([
 
         }
       }else{
-        _this.BBForm.$el.find('.error:first').trigger('focus').click();
+        var errorList = _this.BBForm.$el.find('.error');
+        for (var i=0; i<errorList.length ;i++){
+          var elmName = errorList[i].nodeName ;
+          if (elmName.toUpperCase()!= 'SPAN'){
+            $(errorList[i]).trigger('focus').click();
+            break;
+          }
+        }
         return false;
       }
       this.afterSavingModel();
