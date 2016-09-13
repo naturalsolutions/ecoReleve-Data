@@ -287,8 +287,8 @@ define([
           filter: '.imageCamTrap',
            distance : 10,
            start : function(e , ui) {
-             _this.tabView[_this.currentPosition].$el.find('img').focus();
              if (_this.tabView[_this.currentPosition].$el.find('.vignette').hasClass('active')  ) {
+               _this.tabView[_this.current]
                _this.tabView[_this.currentPosition].$el.find('.vignette').removeClass('active');
              }
 

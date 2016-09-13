@@ -11,9 +11,10 @@ define([
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
   'ns_navbar/ns_navbar',
+  './lyt-camTrapValidateDetail'
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
- config, NsGrid, NsMap, NsForm, Navbar
+ config, NsGrid, NsMap, NsForm, Navbar, camTrapVisualisation
 ) {
 
   'use strict';
@@ -49,7 +50,9 @@ define([
     },
 
     regions: {
-      'rgNavbar': '#navbar'
+      'rgMap' : '#map',
+      'rgNavbar': '#navbar',
+      'rgPhotos': '#gallery'
     },
 
     rootUrl: '#monitoredSites/',
@@ -159,30 +162,31 @@ define([
     displayCameraTrap: function() {
       var _this = this;
       var stationsCols = [{
-        name: 'ID',
+        name: 'UnicIdentifier',
         label: 'ID',
         editable: false,
         cell: 'string'
       },{
-        name: 'StationDate',
-        label: 'date',
+        name: 'equipID',
+        label: 'equipid',
         editable: false,
-        cell: 'stringDate'
+        renderable: false,
+        cell: 'string',
       },{
-        name: 'LAT',
-        label: 'latitude',
+        name: 'StartDate',
+        label: 'start date',
         editable: false,
         cell: 'string'
       },{
-        name: 'LON',
-        label: 'longitude',
+        name: 'EndDate',
+        label: 'end date',
         editable: false,
         cell: 'string'
       },{
-        name: 'fieldActivity_Name',
-        label: 'FieldActivity',
+        name: 'nbPhotos',
+        label: 'nb photos',
         editable: false,
-        cell : 'string'
+        cell: 'string'
       }];
        console.log("YOUHOUUUUUUUUUUUU");
        console.log(config.coreUrl);
@@ -192,10 +196,71 @@ define([
         pageSize: 10,
         columns: stationsCols,
         url: config.coreUrl + 'photos/?siteid='+_this.monitoredSiteId+'',
+        rowClicked: true,
+
       });
+      this.camTrapGrid.rowClicked = function(args) {
+        console.log("bim je clique");
+        console.log(args);
+      //  _this.rowClicked(args);
+      };
+      this.camTrapGrid.rowDbClicked = function(args) {
+        var that = this;
+        console.log("bim je double clique");
+        console.log(args);
+        var row = args.row
+        var idCamTrap = row.model.get('UnicIdentifier')
+        var startDate = row.model.get('StartDate')
+        var endDate = row.model.get('EndDate')
+        var equipId = row.model.get('equipID')
+        var date = ""
+        if( startDate !== 'N/A' ) {
+          date = startDate;
+        }
+        else if (endDate !== 'N/A'){
+          date = endDate;
+        }
+        _this.ui.map.hide();
+      //  _this.displayGallery(idCamTrap , equipId, date );
+        _this.rgPhotos.show( new camTrapVisualisation ({
+          id : _this.monitoredSiteId,
+          equipId : equipId,
+          date : date
+        }));
+      //  _this.rowDbClicked(args);
+      };
 
       this.ui.camTrapGrid.html(this.camTrapGrid.displayGrid());
       this.ui.paginatorCamTrap.html(this.camTrapGrid.displayPaginator());
+    },
+
+    displayGallery: function(id, equipId, date) {
+      var _this = this;
+      console.log("on veut la session");
+      console.log("id : " + id );
+      console.log("date :" + date);
+      console.log("equipid :" +equipId );
+      $.ajax({
+        type: "GET",
+        url: config.coreUrl  + 'photos/?siteid='+_this.monitoredSiteId+'&equipid='+equipId+'',
+      })
+      .done( function(response,status,jqXHR){
+        if( jqXHR.status === 200 ){
+          console.log("ok");
+          console.log(response);
+          _this.ui.map.html('');
+          for ( var tmp of response) {
+            console.log(tmp);
+            _this.ui.map.append('<img src="'+tmp.path+''+tmp.FileName+'" height="100" /><BR>')
+          }
+        }
+      })
+      .fail( function( jqXHR, textStatus, errorThrown ){
+        console.log("error");
+        console.log(errorThrown);
+      });
+
+
     },
 
     displayStationGrid: function() {
@@ -255,6 +320,7 @@ define([
         rowClicked: true,
         com: this.com,
       });
+
 
       this.ui.stationsGrid.html(this.stationsGrid.displayGrid());
       this.ui.paginatorStation.html(this.stationsGrid.displayPaginator());
