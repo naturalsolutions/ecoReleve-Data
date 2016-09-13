@@ -368,8 +368,18 @@ define([
     },
 
     displayTab: function(e) {
+      var _this = this;
       e.preventDefault();
       var ele = $(e.target);
+      if( $(e.target).text() !== 'Camera Trap'  ) {
+        _this.rgPhotos.$el.hide();
+        _this.ui.map.show();
+      }
+      else {
+        _this.rgPhotos.$el.show();
+        _this.ui.map.hide();
+      }
+
       var tabLink = $(ele).attr('href');
       var tabUnLink = $('li.active.tab-ele a').attr('href');
       $('li.active.tab-ele').removeClass('active');
