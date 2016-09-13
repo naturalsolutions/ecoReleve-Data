@@ -56,7 +56,11 @@ BEGIN
 		(ID INT NOT NULL)
 
 		INSERT INTO #StationID
-		SELECT DISTINCT S.ID FROM Station  S JOIN Observation O on o.FK_Station = s.ID JOIN ProtocoleType PT ON o.FK_ProtocoleType = PT.ID AND PT.Name ='Entomo_Pop_Census'
+		SELECT DISTINCT S.ID 
+		FROM Station  S 
+		JOIN Observation O on o.FK_Station = s.ID 
+		JOIN ProtocoleType PT ON o.FK_ProtocoleType = PT.ID AND PT.Name ='Entomo_Pop_Census'
+		JOIN ObservationDynPropValuesNow v ON v.FK_Observation = o.ID and v.Name = 'sampled' and v.ValueInt=1
 		
 
 
@@ -194,10 +198,3 @@ END
 GO
 
 
-
-
-
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('92_ERD_CreateMessage_for_eColl',GETDATE(),(SELECT db_name()))
-
-
-GO
