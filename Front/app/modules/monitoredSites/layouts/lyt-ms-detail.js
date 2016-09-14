@@ -52,7 +52,7 @@ define([
     regions: {
       'rgMap' : '#map',
       'rgNavbar': '#navbar',
-      'rgPhotos': '#gallery'
+      'rgPhotos': '#gallerycamtrap'
     },
 
     rootUrl: '#monitoredSites/',

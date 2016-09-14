@@ -15,8 +15,6 @@ define([
       path :'',
       FileName: '',
       id: null,
-      checked: null,
-      validated: null,
 			tags : null,
 			note : '',
 			date_creation : '',

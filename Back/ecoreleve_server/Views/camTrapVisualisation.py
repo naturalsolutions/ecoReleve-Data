@@ -54,10 +54,10 @@ def allPhotos (request):
 
     elif ( queryStatut == 2 ):
         query = text("""
-        select path, FileName
+        select  P.id AS id,path, FileName , P.Date AS date_creation, P.Note AS note
         from V_dataCamTrap_With_equipSite AS V
-    		join photos as P
-    		on V.pk_id = P.old_id
+		join photos as P
+		on V.pk_id = P.old_id
         where checked = 1
         AND V.equipID = :equipid
         AND V.FK_MonitoredSite = :fkmonitoredsite""").bindparams(

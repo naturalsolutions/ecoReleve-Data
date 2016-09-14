@@ -34,7 +34,7 @@ define([
   return Marionette.LayoutView.extend({
     template: 'app/modules/monitoredSites/templates/tpl-camTrapValidateDetail.html',
 
-    className: 'full-height animated white',
+    className: 'full-height animated',
     childEvents:{
 
     },
@@ -150,6 +150,7 @@ define([
         collection: this.myImageCollection
       });
       this.myImageCollection.on('sync', function() {
+        console.log(_this.myImageCollection);
       });
 
       this.myImageCollection.fetch();
@@ -228,59 +229,6 @@ define([
         if( this.rgModal.currentView !== undefined){//si le modal existe on change
           this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
         }
-        $('#gallery').selectable({
-          filter: '.imageCamTrap',
-           distance : 10,
-           start : function(e , ui) {
-             if (_this.tabView[_this.currentPosition].$el.find('.vignette').hasClass('active')  ) {
-               _this.tabView[_this.current]
-               _this.tabView[_this.currentPosition].$el.find('.vignette').removeClass('active');
-             }
-
-             if ( typeof _this.tabSelected != "undefined" && _this.tabSelected.length > 0 ) {
-               for ( var i of _this.tabSelected ) {
-         					if( _this.currentPosition != i  ) {
-                    if (_this.tabView[i].$el.find('.vignette').hasClass('active')  ) {
-             					_this.tabView[i].$el.find('.vignette').removeClass('active');
-                    }
-     				     }
-               }
-             }
-           },
-           selected: function (e , ui){
-             if( e.ctrlKey) {
-               if( $(ui.selected).hasClass('already-selected') ) {
-                 $(ui.selected).removeClass('already-selected')
-                 $(ui.selected).removeClass('ui-selected');
-               }else{
-                 $(ui.selected).addClass('tmp-selectedctrl');
-               }
-             }
-             else{
-               $(ui.selected).addClass('tmp-selected');
-               $(ui.selected).removeClass('ui-selected');
-             }
-           },
-           unselected: function(e , ui ) {
-             $('#gallery .already-selected').removeClass('already-selected');
-          },
-           stop: function(e, ui) {
-
-              $('#gallery .tmp-selected').addClass('already-selected').removeClass('tmp-selected').addClass('ui-selected');
-              $('#gallery .tmp-selectedctrl').addClass('already-selected').removeClass('tmp-selectedctrl').addClass('ui-selected');
-
-                var result = "";
-                _this.tabSelected = [];
-
-                $( ".ui-selected", this ).each(function() {
-                   var index = $( ".imageCamTrap" ).index( this );
-                   _this.tabSelected.push(index);
-                   if( ! (_this.tabView[index].$el.find('.vignette').hasClass('active') ) ) {
-                     _this.tabView[index].$el.find('.vignette').toggleClass('active');
-                   }
-                });
-           }
-        });
       }
     },
 
@@ -382,10 +330,13 @@ define([
         this.stopSpace = true;
         $('#rgToolsBarTop .reneco-ecollectionsmall').removeClass('active');
         $('#rgToolsBarTop .reneco-image_file').addClass('active');
+        console.log(this.rgModal);
         if(this.rgModal.currentView === undefined) {
-          this.rgModal.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
+          this.rgModal.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}));
+          console.log(this.rgModal);
         }
         else {
+          console.log(this.rgModal);
           this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
           this.rgModal.currentView.onShow();
         }

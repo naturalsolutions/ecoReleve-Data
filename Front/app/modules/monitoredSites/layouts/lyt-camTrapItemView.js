@@ -82,6 +82,20 @@ define([
 
 		onRender: function(){
 			var _this = this;
+			var $input = this.$el.find('input');
+	/*		var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
+			var lastClass = $icon.attr('class').split(' ').pop();*/
+			this.$el.find('input').rating({
+				min:0,
+				max:5,
+				step:1,
+				size:'xs',
+				displayOnly: true,
+				rtl:false,
+				showCaption:false,
+				showClear:false,
+				value : _this.model.get('note')
+			});
 
 		},
 
