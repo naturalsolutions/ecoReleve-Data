@@ -41,29 +41,32 @@ define([
 		this.$el.find('img').focus();
 		if( e.ctrlKey) {
 			console.log("LE FOCUS ET LE CTRL KEY");
-		} else {
+		}
+		else {
 				var lastPosition = this.parent.currentPosition;
-			if(lastPosition === null)
-			lastPosition = 0;
-			//this.parent.currentViewImg = this;
-			//TODO fait bugguer la position pour le
-			this.parent.currentPosition = this.parent.currentCollection.indexOf(this.model);
-			if ( this.parent.tabView[lastPosition].$el.find('.vignette').hasClass('active') ) {
-			this.parent.tabView[lastPosition].$el.find('.vignette').removeClass('active');
-			}
-			//console.log(this.parent.tabSelected.length);
-			if( this.parent.tabSelected.length > 0) {//supprime les elements select
-				console.log("ON SUPPRRRIMMMEE");
-				$('#gallery .ui-selected').removeClass('ui-selected').removeClass('already-selected');
-				for ( var i of this.parent.tabSelected ) {
-					if( lastPosition != i  )
-					this.parent.tabView[i].$el.find('.vignette').toggleClass('active');
+				if(lastPosition === null)
+				lastPosition = 0;
+				//this.parent.currentViewImg = this;
+				//TODO fait bugguer la position pour le
+				this.parent.currentPosition = this.parent.currentCollection.indexOf(this.model);
+				if ( this.parent.tabView[lastPosition].$el.find('.vignette').hasClass('active') ) {
+				this.parent.tabView[lastPosition].$el.find('.vignette').removeClass('active');
+				}
+				//console.log(this.parent.tabSelected.length);
+				if( this.parent.tabSelected.length > 0) {//supprime les elements select
+					console.log("ON SUPPRRRIMMMEE");
+					$('#gallery .ui-selected').removeClass('ui-selected').removeClass('already-selected');
+					for ( var i of this.parent.tabSelected ) {
+						if( lastPosition != i  )
+						this.parent.tabView[i].$el.find('.vignette').toggleClass('active');
+					}
+				}
+				this.parent.tabSelected = [] ;
+				this.handleFocus();
+				if( lastPosition != this.parent.currentPosition) {
+					this.parent.rgImageDetails.currentView.changeDetails(this.model);
 				}
 			}
-			this.parent.tabSelected = [] ;
-			this.handleFocus();
-			this.parent.rgImageDetails.currentView.changeDetails(this.model)
-				}
 		},
 
 		handleFocus: function(e) {
@@ -227,7 +230,6 @@ define([
 		setModelValidated: function(val) {
 			var oldVal = this.model.get("validated");
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
-			console.log(oldVal);
 			switch(oldVal ) {
 				case 1 :{// not checked
 					$icon.removeClass('reneco-support');

@@ -42,7 +42,7 @@ define([
 				content: function(){
 					return '<div class="popover-header"> <span class="'+_this.statusPhotos.class+'">'+_this.statusPhotos.textStatus+'</span></div>'
 								+' <img src='+_this.model.get('path')+''+_this.model.get('name')+'  />'
-								+'<input id="rating_'+_this.model.get('id')+'" name="input-name" type="number" class="rating hide" value="5" >'
+								+'<input id="rating_'+_this.model.get('id')+'" name="input-name" type="number" class="rating hide" value="'+_this.model.get('note')+'" >'
 								+'</div>'
 								;
 				},
@@ -98,7 +98,7 @@ define([
 
 			this.parent.$el.find('.popover-content').html('<div class="popover-header"> <span class="'+this.statusPhotos.class+'">'+this.statusPhotos.textStatus+'</span></div>'
 						+' <img src='+this.model.get('path')+''+this.model.get('name')+'  />'
-						+'<input id="rating_'+this.model.get('id')+'" name="input-name" type="number" class="rating hide" value="5" >'
+						+'<input id="rating_'+this.model.get('id')+'" name="input-name" type="number" class="rating hide" value="'+this.model.get('note')+'" >'
 						+'</div>');
 			var popoverContent = this.parent.$el.find('.popover-content')
 			//console.log(popoverContent ) ;

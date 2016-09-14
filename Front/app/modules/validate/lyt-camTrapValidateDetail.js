@@ -661,6 +661,7 @@ define([
         this.currentViewImg = this.tabView[index - 1]; // on se deplace de - 1
       }
       this.rgModal.currentView.changeImage(this.currentViewImg.model);
+      this.rgImageDetails.changeDetails(this.currentViewImg.model)
 
     },
 
@@ -673,6 +674,7 @@ define([
         this.currentViewImg = this.tabView[index + 1];
       }
       this.rgModal.currentView.changeImage(this.currentViewImg.model);
+      this.rgImageDetails.changeDetails(this.currentViewImg.model)
 
     },
 

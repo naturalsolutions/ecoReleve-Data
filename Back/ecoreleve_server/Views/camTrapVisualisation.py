@@ -31,11 +31,6 @@ def allPhotos (request):
             print ("statut change et va devenir 2 ")
             queryStatut = 2
 
-    else: #aucun params
-        query = "SELECT * FROM V_CamTrap"
-            # query pour toute les session
-    print ( "query statut")
-    print ( queryStatut )
     if ( queryStatut == 1 ):
         query = text("""
         select
@@ -64,8 +59,6 @@ def allPhotos (request):
         bindparam('fkmonitoredsite',value=fkMonitoredSite),
         bindparam('equipid', value=fkequipid)
         )
-    print("the query")
-    print( query )
 
     data = session.execute(query).fetchall()
     dataResult = [dict(row) for row in data]
