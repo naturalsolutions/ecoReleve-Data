@@ -92,7 +92,7 @@ define([
       'gallerytest': '#gallerytest',
       'siteForm': '#siteForm',
       'sensorForm': '#sensorForm',
-      'imageDetails': '#imageDetails',
+
 
       'dataSetIndex': '#dataSetIndex',
       'dataSetTotal': '#dataSetTotal',
@@ -108,7 +108,8 @@ define([
       'rgGallery' : '#gallery',
       'rgModal': '#rgModal',
       'rgToolsBar' :'#rgToolsBar',
-      'rgToolsBarTop' : '#rgToolsBarTop'
+      'rgToolsBarTop' : '#rgToolsBarTop',
+      'rgImageDetails': '#imageDetails',
     },
     setStars: function(e) {
       this.tabView[this.currentPosition].setStars(e.key)
@@ -229,11 +230,13 @@ define([
         //console.log("reset");
         _this.displayImages(_this.myImageCollection);
         _this.rgToolsBarTop.show(this.toolsBarTop);
+        console.log(_this.myImageCollection.models[0]);
+        this.displayImageDetails(_this.myImageCollection.models[0]);
       });
       this.currentCollection = this.myImageCollection;
       this.displaySensorForm();
       this.displaySiteForm();
-      this.displayImageDetails();
+      console.log(_this.myImageCollection);
       this.displayPaginator(this.paginator)
       this.displayToolsBar();
       this.displayToolsBarTop();
@@ -371,14 +374,16 @@ define([
       });
     },
 
-    displayImageDetails: function() {
+    displayImageDetails: function(model) {
+      console.log(model);
       var _this = this;
       //imageDetails
       this.imageDetails = new imageDetailsView({
         parent : _this,
+        model: model,
       });
-      console.log(this.imageDetails);
-      this.ui.imageDetails.show(this.imageDetails)
+
+      this.rgImageDetails.show(this.imageDetails)
 
 
       /*new NsForm({
@@ -622,6 +627,9 @@ define([
           this.tabView[this.currentPosition].handleFocus();
           if( this.rgModal.currentView !== undefined){//si le modal existe on change
             this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+          }
+          if( this.rgImageDetails.currentView != undefined ){
+            this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model)
           }
         }
 

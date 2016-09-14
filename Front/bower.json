@@ -36,7 +36,8 @@
     "noty": "^2.3.8",
     "jquery.rateit": "^1.0.24",
     "bootstrap-star-rating": "^4.0.1",
-    "NaturalJS_Filter": "1.1.1"
+    "NaturalJS_Filter": "1.1.1",
+    "exif-js": "^2.1.1"
   },
   "resolutions": {
     "jquery": "1.10.2",

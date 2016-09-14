@@ -83,6 +83,7 @@ require.config({
     'noty' : '../bower_components/noty/js/noty/packaged/jquery.noty.packaged',
     'jquery.rateit': '../bower_components/jquery.rateit/scripts/jquery.rateit',
     'bootstrap-star-rating': '../bower_components/bootstrap-star-rating/js/star-rating',
+    'exif-js' : '../bower_components/exif-js/exif'
 
   },
   map: {

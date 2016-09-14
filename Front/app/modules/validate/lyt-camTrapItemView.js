@@ -62,6 +62,7 @@ define([
 			}
 			this.parent.tabSelected = [] ;
 			this.handleFocus();
+			this.parent.rgImageDetails.currentView.changeDetails(this.model)
 				}
 		},
 

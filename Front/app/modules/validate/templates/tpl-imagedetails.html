@@ -1,3 +1,42 @@
-<div >
-  BIM BAM BOOM LES SUPER details
+<div id="detailsStatusPhotos" class="col-md-12 nopadding">
+  <div id="detailstitle" class="col-md-12 nopadding">
+    <span>STATUS</span>
+  </div>
+  <div id="detailsstatuscontent" class="col-md-12 nopadding">
+    <div id="detailsflag" class="col-md-6 nopadding">
+      Status
+      <form action="">
+        <input type="radio" name="flag" value="2" checked disabled> accepted
+        <input type="radio" name="flag" value="1" disabled> undeterminate <br>
+        <input type="radio" name="flag" value="4" disabled> refused
+      </form>
+    </div>
+    <div id="detailsstars" class="col-md-6 nopadding">
+      Rating
+        <input id="rating_<%=id%>" name="input-name" type="number" class="rating" value="<%= note %>" >
+    </div>
+  </div>
+</div>
+<div id="detailsAnnotationPhotos">
+  <div id="detailstitle">
+    <span>ANNOTATIONS</span>
+  </div>
+  <div id="detailsTags">TAGS<br>
+    <div class="bootstrap-tagsinput">
+    </div>
+
+  </div>
+
+  <div id="detailsComments">COMMENTS </div>
+</div>
+<div id="detailsExifsPhotos">
+  <div id="detailstitle">
+    <span>EXIF INFOS</span>
+  </div>
+  <div id="detailsExif" class="col-md-12 nopadding">
+    <div id="keyExif"  class="col-md-6 nopadding">
+    </div>
+    <div id="valueExif"  class="col-md-6 nopadding">
+    </div>
+  </div>
 </div>
