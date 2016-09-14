@@ -21,13 +21,14 @@ define([
   'backbone.virtualcollection',
   './lyt-camTrapToolsBarTopView',
   'jqueryui',
+  './lyt-imageDetails'
 
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
   config, NsGrid, NsMap, NsForm, moment, Navbar, PageColl,
   CamTrapItemView , CamTrapImageModel, ToolsBar, ModalView, BckMrtKeyShortCut,
-  virtualcollection, ToolsBarTop, jqueryUi
+  virtualcollection, ToolsBarTop, jqueryUi, imageDetailsView
 
 ) {
 
@@ -91,7 +92,7 @@ define([
       'gallerytest': '#gallerytest',
       'siteForm': '#siteForm',
       'sensorForm': '#sensorForm',
-      'imageDetailsForm': '#imageDetailsForm',
+      'imageDetails': '#imageDetails',
 
       'dataSetIndex': '#dataSetIndex',
       'dataSetTotal': '#dataSetTotal',
@@ -232,7 +233,7 @@ define([
       this.currentCollection = this.myImageCollection;
       this.displaySensorForm();
       this.displaySiteForm();
-      this.displayImageDetailForm();
+      this.displayImageDetails();
       this.displayPaginator(this.paginator)
       this.displayToolsBar();
       this.displayToolsBarTop();
@@ -370,8 +371,17 @@ define([
       });
     },
 
-    displayImageDetailForm: function() {
-      this.nsform = new NsForm({
+    displayImageDetails: function() {
+      var _this = this;
+      //imageDetails
+      this.imageDetails = new imageDetailsView({
+        parent : _this,
+      });
+      console.log(this.imageDetails);
+      this.ui.imageDetails.show(this.imageDetails)
+
+
+      /*new NsForm({
         name: 'imageDetailsForm',
         buttonRegion: [this.ui.btn],
         modelurl: config.coreUrl + 'sensors',
@@ -379,7 +389,7 @@ define([
         displayMode: 'display',
         id: this.sensorId,
         reloadAfterSave: false,
-      });
+      });*/
     },
 
     displayPaginator: function (pagin) {
