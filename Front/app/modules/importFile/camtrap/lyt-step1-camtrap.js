@@ -21,7 +21,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/camtrap/templates/tpl-step1-camtrap.html',
 
-    name: 'Camtrap Device selection',
+    name: 'Camera Trap Device selection',
     events: {
       'change #camtrapId': 'updateGrid',
     },

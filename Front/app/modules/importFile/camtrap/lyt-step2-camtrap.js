@@ -21,7 +21,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/camtrap/templates/tpl-step2-camtrap.html',
 
-    name: 'Upload Cam Trap Files',
+    name: 'Upload Camera Trap Files',
 
     initialize: function(options) {
       //this.sensorId = options.model.attributes.sensorId;
@@ -33,9 +33,11 @@ define([
       //console.log(this.data);
       this.path = "";
       this.nbFiles = 0
+      this.nbFilesRefused = 0;
       this.nbFilesToWait = 0;
       this.nbFilesConcat = 0;
       this.uploadFinished = false;
+      this.warningFlag = false;
       this.startDate = this.data['StartDate'].split(" ");
       this.endDate = ["0000-00-00","00:00:00"]
       if( this.data['EndDate'] != undefined ) {
@@ -270,7 +272,10 @@ define([
             Swal(
               {
                 title: 'Warning upload finished',
-                text: ' Pb on zip look errors ',
+                text: ' Problem on zip look errors '
+                      +'\n\t files in zip : ' +jqXHR.responseJSON.nbInZip
+                      +'\n\t files inserted : '+jqXHR.responseJSON.nbInserted
+                ,
                 type: 'warning',
                 showCancelButton: false,
                 confirmButtonColor: 'rgb(218, 146, 15)',
@@ -307,8 +312,10 @@ define([
       });
 
       r.on('fileError', function(file, message){
+        _this.warningFlag = true;
+        _this.nbFilesRefused+=1;
         $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
-        $("#"+file.uniqueIdentifier+" > "+"#status").text("REFUSED! reasons:"+message);
+        $("#"+file.uniqueIdentifier+" > "+"#status").html("REFUSED! reasons: "+ String(message).replace(/\"/g,'').replace(/\'/g,''));
         //console.log(file);
         //console.log(message);
       });
@@ -374,33 +381,63 @@ r.on('cancel' , function() {
 displayFinished: function (){
   var _this = this;
   var nbFilesUploaded = _this.nbFiles;
+  var nbFilesRefused = _this.nbFilesRefused;
   console.log("bim j'ai fini j'affiche");
   _this.nbFiles = 0
   _this.nbFilesToWait = 0;
   _this.nbFilesConcat = 0;
+  _this.nbFilesRefused = 0;
   $('#start-upload-resumablejs').addClass('hide');
   $('#pause-upload-resumablejs').addClass('hide');
   _this.progressBar.finish();
-  Swal({title: 'Well done',
-  text: 'File(s) have been correctly Uploaded\n'
-  + '\t inserted : ' + nbFilesUploaded
-  ,
-  type:  'success',
-  showCancelButton: true,
-  confirmButtonText: 'Validate CamTrap',
-  cancelButtonText: 'New import',
-  closeOnConfirm: true,
-  closeOnCancel: true},
-  function(isConfirm) {
-    if (isConfirm) {
-      Backbone.history.navigate('validate/Camtrap',{trigger: true});
-    }
-    else{
-      console.log("bim on a cancel");
-    }
-
+  if ( !_this.warningFlag ) {
+    Swal({
+      title: 'Well done',
+      text: 'File(s) have been correctly Uploaded'
+      + '\n\t inserted  : ' + ( nbFilesUploaded - nbFilesRefused )
+      +'\n\t  uploaded : ' + ( nbFilesUploaded)
+      +'\n\t refused  : ' + ( nbFilesRefused )
+      ,
+      type:  'success',
+      showCancelButton: true,
+      confirmButtonText: 'Validate Camera Trap',
+      cancelButtonText: 'New import',
+      closeOnConfirm: true,
+      closeOnCancel: true},
+      function(isConfirm) {
+        if (isConfirm) {
+          Backbone.history.navigate('validate/camtrap',{trigger: true});
+        }
+        else{
+          console.log("bim on a cancel");
+        }
+      }
+    );
   }
-);
+  else {
+    Swal({
+      title: 'Warning',
+      text: 'Some File(s) refused'
+      + '\n\t inserted  : ' + ( nbFilesUploaded - nbFilesRefused )
+      +'\n\t  uploaded : ' + ( nbFilesUploaded)
+      +'\n\t refused  : ' + ( nbFilesRefused )
+      ,
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Validate Camera Trap',
+      cancelButtonText: 'New import',
+      closeOnConfirm: true,
+      closeOnCancel: true},
+      function(isConfirm) {
+        if (isConfirm) {
+          Backbone.history.navigate('validate/camtrap',{trigger: true});
+        }
+        else{
+          console.log("bim on a cancel");
+        }
+      }
+    );
+  }
 },
 
 onDestroy: function() {

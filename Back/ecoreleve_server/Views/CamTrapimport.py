@@ -78,24 +78,30 @@ def checkDate(exifDate , startDate , endDate):
 def unzip(zipFilePath , destFolder, fk_sensor, startDate , endDate):
     zfile = zipfile.ZipFile(zipFilePath)
     messageErrorFiles = ""
+    nbFilesTotal = 0
+    nbFilesInserted = 0
+
     #nameRandom = ''
     for name in zfile.namelist():
         #print("unzip : " +str(name))
         #nameRandom = GenName()
         #print (name)
+        nbFilesTotal += 1
         extType = name.split('.');
         if( extType[len(extType)-1] in ['jpg', 'JPG', 'jpeg', 'JPEG'] ):
             if not os.path.isfile(destFolder+str(name)):
                 with open(os.path.join(destFolder, str(name)), 'wb') as fd:
                     fd.write(zfile.read(name))
+                fd.close()
                 #ici on peut test
                 datePhoto = dateFromExif (destFolder+str(name))
                 if( checkDate( datePhoto , startDate , endDate ) ):
                     AddPhotoOnSQL(fk_sensor , destFolder , name , str(extType[len(extType)-1]) , datePhoto )
                     resizePhoto( str(destFolder)+str(name) )
+                    nbFilesInserted += 1
                 else:
                     os.remove(destFolder+str(name))
-                    messageErrorFiles += str(name)+"Date not valid ("+str(datePhoto)+") <BR>"
+                    messageErrorFiles += str(name)+'Date not valid ('+str(datePhoto)+') <BR>'
                 #AddPhotoOnSQL(fk_sensor,destFolder,name, str(extType[len(extType)-1]) , dateFromExif (destFolder+'\\'+str(name)))
             else:
                 messageErrorFiles+= "File : " +str(name)+" is already on the server <BR>"
@@ -106,8 +112,9 @@ def unzip(zipFilePath , destFolder, fk_sensor, startDate , endDate):
     #rename zip file
     zipFileTab = zipFilePath.split('.')
     os.remove( zipFilePath )
-
-    return messageErrorFiles
+    print(" Nb files in zip " + str(nbFilesTotal))
+    print(" Nb files inserted " + str(nbFilesInserted))
+    return messageErrorFiles , nbFilesTotal , nbFilesInserted
     #if no error remove zip file
 
 
@@ -163,6 +170,7 @@ def uploadFileCamTrapResumable(request):
         if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableFilename'])):
             with open(uri+'\\'+str(request.POST['resumableFilename']), 'wb') as output_file: # write in the file
                 shutil.copyfileobj(inputFile, output_file)
+            output_file.close()
         datePhoto = dateFromExif (uri+'\\'+str(request.POST['resumableFilename']))
         if( checkDate (datePhoto , str(request.POST['startDate']) , str(request.POST['endDate']) ) ):
             idRetour = AddPhotoOnSQL(fk_sensor , str(uri) , str(request.POST['resumableFilename']) , str(extType[len(extType)-1]) , datePhoto )
@@ -171,12 +179,13 @@ def uploadFileCamTrapResumable(request):
         else:
             os.remove(uri+'\\'+str(request.POST['resumableFilename']))
             flagDate = True
-            messageDate = "Date not valid ("+str(datePhoto)+") <BR>"
+            messageDate = 'Date not valid ('+str(datePhoto)+') <BR>'
     else:
         if not os.path.isfile(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['resumableIdentifier'])):
             position = int(request.POST['resumableChunkNumber']) #calculate the position of cursor
             with open(uri+'\\'+str(request.POST['resumableIdentifier'])+"_"+str(position), 'wb') as output_file: # write in the file
                 shutil.copyfileobj(inputFile, output_file)
+            output_file.close()
 
     if(flagDate):
         request.response.status_code = 415
@@ -193,6 +202,8 @@ def concatChunk(request):
     timeConcat = ""
     messageConcat = ""
     messageUnzip = ""
+    nbInZip = 0
+    nbInserted = 0
     pathPrefix = dbConfig['camTrap']['path']
     request.response.status_code = 200
     #create folder
@@ -254,6 +265,7 @@ def concatChunk(request):
                     os.remove( pathPrefix+'\\'+pathPost+'\\'+str(txtConcat[0])+str('.txt') )
                     for i in range( 1, int(request.POST['taille'])+1):#on va parcourir l'ensemble des chunks
                         os.remove(pathPrefix+'\\'+pathPost+'\\'+str(request.POST['name'])+'_'+str(i))
+            socketConcat.close()
 
 
 
@@ -266,7 +278,8 @@ def concatChunk(request):
             if( request.POST['type'] == "application/x-zip-compressed" ):
                 debutTime = time.time()
                 print (" on commence la décompression ")
-                messageUnzip = unzip(pathPrefix+'\\'+pathPost+'\\'+str(name) , pathPrefix+'\\'+pathPost+'\\' , fk_sensor, str(request.POST['startDate']),str(request.POST['endDate']))
+                messageUnzip, nbInZip, nbInserted  = unzip(pathPrefix+'\\'+pathPost+'\\'+str(name) , pathPrefix+'\\'+pathPost+'\\' , fk_sensor, str(request.POST['startDate']),str(request.POST['endDate']))
+                print ( messageUnzip )
                 if( messageUnzip != "" ):
                     request.response.status_code = 510
                 print ("fin decompression ")
@@ -283,10 +296,17 @@ def concatChunk(request):
                     os.remove(destfolder+str(name))
                     flagDate = True
                     request.response.status_code = 510
-                    messageConcat = "Date not valid ("+str(datePhoto)+") <BR>"
+                    messageConcat = 'Date not valid ('+str(datePhoto)+') <BR>'
 
                 #AddPhotoOnSQL(fk_sensor,destfolder,name, str(extType[len(extType)-1]) , dateFromExif (destfolder+str(name)))
     #os.remove(pathPrefix+'\\'+pathPost+'\\'+str(txtConcat[0])+str('.txt')) #supprime le fichier destination et on force la sortie
     #os.remove(pathPrefix+'\\'+pathPost+'\\'+str(name)) #supprime le fichier destination et on force la sortie
-    res = {'message' : message , 'messageConcat' : messageConcat , 'messageUnzip' : messageUnzip, 'timeConcat' : timeConcat }
+    res = {
+    'message' : message,
+    'messageConcat' : messageConcat,
+    'messageUnzip' : messageUnzip,
+    'timeConcat' : timeConcat,
+    'nbInZip': nbInZip,
+    'nbInserted' : nbInserted
+    }
     return res
