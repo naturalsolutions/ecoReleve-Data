@@ -34,7 +34,7 @@ define([
     events: {
       'click .tab-link': 'displayTab',
       'click table.backgrid th input': 'checkSelectAll',
-      'click button.js-delete-locations': 'warnDeleteLocations',
+      'click button.js-btn-delete-locations': 'warnDeleteLocations',
       'click button.js-filter': 'filter',
     },
 
@@ -44,8 +44,6 @@ define([
 
       'map': '.js-map',
       
-      'locationsGrid': '.js-locations-grid',
-      'locationsPaginator': '.js-locations-paginator',
       'locationsfilter' : '.js-locations-filter',
 
       'totalLocations': '.js-total-locations'
@@ -323,15 +321,14 @@ define([
 
     warnDeleteLocations: function() {
       var _this = this;
+      var selectedNodes = this.locationsGrid.gridOptions.api.getSelectedNodes();
 
-      var mds = this.locationsGrid.grid.getSelectedModels();
-
-      if (!mds.length) {
+      if(!selectedNodes.length){
         return;
       }
 
       var callback = function() {
-        _this.deleteLocations(mds);
+        _this.deleteLocations(selectedNodes);
       };
       var opt = {
         title: 'Are you sure?',
@@ -340,26 +337,22 @@ define([
       this.swal(opt, 'warning', callback);
     },
 
-    deleteLocations: function(mds) {
+    deleteLocations: function(selectedNodes) {
       var _this = this;
-
-      var coll = new Backbone.Collection(mds);
-
-      var params = coll.pluck('ID');
-
       var url = config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '/locations';
+
+      var selectedIds = selectedNodes.map(function(node){
+        return node.data.ID;
+      });
+
       $.ajax({
         url: url,
         method: 'PUT',
-        data: {'IDs': JSON.stringify(params)},
+        data: {'IDs': JSON.stringify(selectedIds)},
         context: this,
       }).done(function(resp) {
         _this.map.updateFromServ();
-        var fullColl = _this.locationsGrid.grid.body.collection.fullCollection;
-        for (var i = 0; i < mds.length; i++) {
-          fullColl.remove(mds[i]);
-        }
-        fullColl.reset(fullColl.models);
+        this.locationsGrid.gridOptions.api.removeItems(selectedNodes);
       }).fail(function(resp) {
         this.swal(resp, 'error');
       });

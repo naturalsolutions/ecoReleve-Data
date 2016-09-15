@@ -22,6 +22,7 @@ define([
     first: true,
     filters: [],
     comeback: false,
+    ready: true,
 
     initialize: function(options){
       this.extendAgGrid();
@@ -51,7 +52,6 @@ define([
         enableColResize: true,
         rowHeight: 40,
         headerHeight: 30,
-        suppressScrollLag: true,
         rowSelection: 'multiple',
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),
@@ -88,7 +88,9 @@ define([
     },
 
     onRowSelected: function(e){
-      this.interaction('selection', e.node.data.id || e.node.data.ID, this);
+      if(this.ready){
+        this.interaction('selection', e.node.data.id || e.node.data.ID, this);
+      }
     },
 
     formatColumns: function(columns){
@@ -297,10 +299,14 @@ define([
       var _this = this;
       this.gridOptions.api.forEachNode( function (node) {
           if (node.data.ID === param) {
-              if(from === this){
-                node.setSelectedInitialValue(!node.selected);
+              if(from === _this){
+                _this.ready = false;
+                node.setSelected(node.selected);
+                _this.ready = true;
               } else {
-                node.setSelectedInitialValue(node.selected);
+                _this.ready = false;
+                node.setSelected(!node.selected);
+                _this.ready = true;
               }
           }
       });
