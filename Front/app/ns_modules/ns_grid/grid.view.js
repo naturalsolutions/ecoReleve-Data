@@ -46,6 +46,7 @@ define([
       this.afterFirstRowFetch = options.afterFirstRowFetch;
 
       this.gridOptions = {
+        //container: this, ?
         enableSorting: true,
         enableColResize: true,
         rowHeight: 40,
@@ -296,19 +297,16 @@ define([
       var _this = this;
       this.gridOptions.api.forEachNode( function (node) {
           if (node.data.ID === param) {
-              console.log(node);
               if(from === this){
                 node.setSelectedInitialValue(!node.selected);
               } else {
                 node.setSelectedInitialValue(node.selected);
               }
-              console.log(node);       
           }
       });
     },
 
     clientSideFilter: function(filters){
-      console.log(filters);
     },
 
     filter: function(filters){

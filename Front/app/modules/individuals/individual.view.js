@@ -88,6 +88,7 @@ define([
         field: 'ID',
         headerName: 'ID',
         checkboxSelection: true,
+        pinned: 'left'
       },{
         field: 'Date',
         headerName: 'date',
@@ -200,6 +201,7 @@ define([
     },
 
     displayLocationsGrid: function() {
+      var _this = this;
       this.rgLocationsGrid.show(this.locationsGrid = new GridView({
         com: this.com,
         columns: this.model.get('locationsColumnDefs'),
@@ -207,6 +209,9 @@ define([
         url: this.model.get('type') + '/' + this.model.get('id')  + '/locations',
         clientSide: true,
         gridOptions: {
+          onRowClicked: function(row){
+            _this.locationsGrid.interaction('focus', row.data.ID || row.data.id);
+          }
         }
       }));
 
