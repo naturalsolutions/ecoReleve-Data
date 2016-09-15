@@ -180,14 +180,14 @@ table.backgrid{
 }
 
 
-
-
-
-
-
+.tab-pane{
+  height: 500px;
+}
 .grid-view {
   height: 100%;
+  position: relative;
   .ag-bootstrap-striped {
+    position: relative;
     height: 100%;
     .ag-root {
       //border: 1px solid #d9d9d9;
@@ -348,6 +348,14 @@ table.backgrid{
           &.text-right:last-child {
             padding-right: 30px;
           }
+        }
+        &.ag-row-selected{
+          background: #bbb;
+        }
+        span.ag-selection-checkbox{
+          position: relative;
+          top: -1px;
+          padding-right: 5px;
         }
       }
     }

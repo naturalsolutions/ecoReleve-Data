@@ -13,14 +13,16 @@ define([
   'ns_form/NSFormsModuleGit',
   'ns_navbar/navbar.view',
 
+  'ns_grid/grid.view',
+
   'ns_modules/ns_com',
-  'ns_filter_bower',
+  'ns_filter/filters',
   'backbone.paginator'
 
 ], function(
   $, _, Backbone, Marionette, config,
   Swal, Translater,
-  NsGrid, NsMap, NsForm, NavbarView, Com, NsFilter
+  NsGrid, NsMap, NsForm, NavbarView, GridView, Com, NsFilter
 ) {
 
   'use strict';
@@ -41,12 +43,6 @@ define([
       'formBtns': '.js-form-btns',
 
       'map': '.js-map',
-
-      'historyGrid': '.js-history-grid',
-      'historyPaginator': '.js-history-paginator',
-      
-      'equipmentGrid': '.js-equipment-grid',
-      'equipmentPaginator': '.js-equipment-paginator',
       
       'locationsGrid': '.js-locations-grid',
       'locationsPaginator': '.js-locations-paginator',
@@ -56,23 +52,85 @@ define([
     },
 
     regions: {
-      'rgNavbar': '.js-rg-navbar'
+      'rgNavbar': '.js-rg-navbar',
+      'rgHistoryGrid': '.js-rg-history-grid',
+      'rgEquipmentGrid': '.js-rg-equipment-grid',
+      'rgLocationsGrid': '.js-rg-locations-grid',
     },
 
     model: new Backbone.Model({
       type: 'individuals',
+      historyColumnDefs: [
+      {
+        field: 'Name',
+        headerName: 'Name',
+      }, {
+        field: 'value',
+        headerName: 'Value',
+      }, {
+        field: 'StartDate',
+        headerName: 'Start Date',
+      },],
+      equipmentColumnDefs: [{
+        field: 'StartDate',
+        headerName: 'Start Date',
+      },{
+        field: 'EndDate',
+        headerName: 'End Date',
+      }, {
+        field: 'Type',
+        headerName: 'Type',
+      },{
+        field: 'UnicIdentifier',
+        headerName: 'Identifier',
+      }],
+      locationsColumnDefs: [{
+        field: 'ID',
+        headerName: 'ID',
+        checkboxSelection: true,
+      },{
+        field: 'Date',
+        headerName: 'date',
+      },{
+        field: 'LAT',
+        headerName: 'latitude',
+      }, {
+        field: 'LON',
+        headerName: 'longitude',
+      },{
+        field: 'region',
+        headerName: 'Region',
+      },{
+        field: 'type_',
+        headerName: 'Type',
+      },{
+        field: 'fieldActivity_Name',
+        headerName: 'FieldActivity',
+        cellRenderer: function(params){
+          if(params.data.ID.split('_').length > 1){
+            //ex: sta_44960
+            var url = '#stations/' + params.data.ID.split('_')[1];
+            return  '<a target="_blank" href="'+ url +'" >' + 
+            params.value + ' <span class="reneco reneco-info right"></span>' +
+            '</a>';
+          } else {
+            return ''; 
+          }
+        }
+      }]
     }),
-    com: new Com(),
+
     nbLocations: [],
 
     initialize: function(options) {
+      this.com = new Com();
       this.model.set('id', options.id);
     },
 
     reloadFromNavbar: function(id) {
       this.model.set('id', id);
 
-      this.com.addModule(this.map)
+      this.com.addModule(this.map);
       this.map.com = this.com;
       this.map.url = config.coreUrl + this.model.get('type') + '/' + id  + '/locations?geo=true';
       this.map.updateFromServ();
@@ -103,7 +161,6 @@ define([
       var _this = this;
         this.map = new NsMap({
             url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true',
-            //geoJson : data,
             cluster: true,
             legend: true,
             zoom: 3,
@@ -120,77 +177,42 @@ define([
 
     displayGrids: function() {
       this.displayHistoryGrid();
-      this.displayLocationsGrid();
       this.displayEquipmentGrid();
+      this.displayLocationsGrid();
     },
 
     displayHistoryGrid: function() {
-      var cols = [{
-        name: 'Name',
-        label: 'Name',
-        editable: false,
-        cell: 'string'
-      }, {
-        name: 'value',
-        label: 'Value',
-        editable: false,
-        cell: 'string'
-      }, {
-        name: 'StartDate',
-        label: 'Start Date',
-        editable: false,
-        cell: 'stringDate',
-      },];
-      
-      this.historyGrid = new NsGrid({
-        pageSize: 20,
-        columns: cols,
-        pagingServerSide: false,
-        url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '/history',
-        urlParams: this.urlParams,
-        rowClicked: true,
-      });
-
-      this.ui.historyGrid.html(this.historyGrid.displayGrid());
-      this.ui.historyPaginator.html(this.historyGrid.displayPaginator());
+      this.rgHistoryGrid.show(this.historyGrid = new GridView({
+        columns: this.model.get('historyColumnDefs'),
+        type: this.model.get('type'),
+        url: this.model.get('type') + '/' + this.model.get('id')  + '/history',
+        clientSide: true,
+      }));
     },
 
     displayEquipmentGrid: function() {
-      var colsEquip = [{
-        name: 'StartDate',
-        label: 'Start Date',
-        editable: false,
-        cell: 'stringDate'
-      },{
-        name: 'EndDate',
-        label: 'End Date',
-        editable: false,
-        cell: 'stringDate'
-      }, {
-        name: 'Type',
-        label: 'Type',
-        editable: false,
-        cell: 'string'
-      },{
-        name: 'UnicIdentifier',
-        label: 'Identifier',
-        editable: false,
-        cell: 'string'
-      }];
-
-      this.equipmentGrid = new NsGrid({
-        pageSize: 20,
-        columns: colsEquip,
-        pagingServerSide: false,
-        url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id') + '/equipment',
-        urlParams: this.urlParams,
-        rowClicked: true,
-      });
-
-      this.ui.equipmentGrid.html(this.equipmentGrid.displayGrid());
-      this.ui.equipmentPaginator.html(this.equipmentGrid.displayPaginator());
+      this.rgEquipmentGrid.show(this.equipmentGrid = new GridView({
+        columns: this.model.get('equipmentColumnDefs'),
+        type: this.model.get('type'),
+        url: this.model.get('type') + '/' + this.model.get('id')  + '/equipment',
+        clientSide: true,
+      }));
     },
 
+    displayLocationsGrid: function() {
+      this.rgLocationsGrid.show(this.locationsGrid = new GridView({
+        com: this.com,
+        columns: this.model.get('locationsColumnDefs'),
+        type: this.model.get('type'),
+        url: this.model.get('type') + '/' + this.model.get('id')  + '/locations',
+        clientSide: true,
+        gridOptions: {
+        }
+      }));
+
+      this.displayLocationsFilter();
+
+    },
     displayLocationsFilter: function() {
       $(this.ui.locationsfilter).empty();
       var locfiltersList = {
@@ -226,125 +248,6 @@ define([
       this.loadCollection(config.coreUrl + 'fieldActivity', 'select.fieldActivity_Name');
     },
 
-    displayLocationsGrid: function() {
-      this.displayLocationsFilter();
-      var _this = this;
-      var locationsCols = [{
-        name: 'ID',
-        label: 'ID',
-        editable: false,
-        renderable: false,
-        cell: 'string'
-      },{
-        name: 'Date',
-        label: 'date',
-        editable: false,
-        cell: 'stringDate'
-      },{
-        name: 'LAT',
-        label: 'latitude',
-        editable: false,
-        cell: 'string'
-      }, {
-        name: 'LON',
-        label: 'longitude',
-        editable: false,
-        cell: 'string'
-      },{
-        name: 'region',
-        label: 'Region',
-        editable: false,
-        cell: 'string'
-      },{
-        name: 'type_',
-        label: 'Type',
-        editable: false,
-        cell: 'string'
-      },{
-        name: 'fieldActivity_Name',
-        label: 'FieldActivity',
-        editable: false,
-        cell: Backgrid.StringCell.extend({
-          render: function () {
-            this.$el.empty();
-            var rawValue = this.model.get(this.column.get("name"));
-            var formattedValue = this.formatter.fromRaw(rawValue, this.model);
-            if (this.model.get('type_')=='station'){
-               this.$el.append('<a target="_blank"' 
-                +'href= "http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID').replace('sta_','')+'">\
-                  '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
-                </a>');
-              this.delegateEvents();
-            }
-            return this;
-          }
-        })
-      },{
-          editable: true,
-          name: 'import',
-          label: 'Import',
-          cell: Backgrid.Extension.SelectRowCell.extend({
-            render:function(){
-              this.$el.empty().append('<input tabindex="-1" type="checkbox" />');
-              this.delegateEvents();
-              if (this.model.get('type_')== 'station'){
-                this.$el.addClass('hidden');
-              }
-              return this;
-              }
-          }),
-          headerCell: 'select-all'
-      }];
-
-      this.locationsColl = new Backbone.Collection();
-      this.locationsColl.url = config.coreUrl + 'individuals/' + this.model.get('id')  + '/locations';
-      this.locationsColl.fetch({data :  $.param({ criteria: {} }) }).done(function(data){
-          _this.locationsGrid = new NsGrid({
-            pagingServerSide: false,
-            pageSize: 10,
-            columns: locationsCols,
-            collection : _this.locationsColl,
-            rowClicked: true,
-            com: _this.com,
-            idName: 'ID',
-            affectTotalRecords : function(){  
-             var nbOsb;
-             if(this.paginator || this.pagingServerSide){
-             nbOsb = this.grid.collection.state.totalRecords || 0;
-             }else{
-               nbOsb =this.grid.collection.length || 0;
-             }
-
-             if(_this.nbLocations.length == 0) {
-                _this.ui.totalLocations.html(nbOsb);
-                _this.nbLocations[0] = nbOsb;
-             } else {
-                _this.nbLocations[1] = nbOsb;
-               _this.ui.totalLocations.html( nbOsb + "/" + _this.nbLocations[0]);
-             }
-           }
-          });
-
-          _this.ui.totalLocations.html(_this.locationsColl.length);
-          _this.nbLocations[0] = _this.locationsColl.length;
-      
-        _this.locationsGrid.rowClicked = function(args) {
-          _this.rowClicked(args);
-        };
-
-        _this.ui.locationsGrid.html(_this.locationsGrid.displayGrid());
-        _this.ui.locationsPaginator.html(_this.locationsGrid.displayPaginator());
-        _this.$el.find('.select-all-header-cell').html('\
-          <button class="js-delete-locations btn btn-danger btn-sm">\
-          <span class="reneco reneco-trash"></span>\
-          </button>');
-
-        var tmp = _.clone(_this.locationsGrid.grid.collection.fullCollection);
-        _this.com.setMotherColl(tmp);
-        
-      });
-        //url: config.coreUrl + 'individuals/' + this.model.get('id')  + '/locations',
-    },
 
     rowClicked: function(args) {
       var row = args.row;

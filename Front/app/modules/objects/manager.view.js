@@ -75,23 +75,24 @@ define([
     displayGridView: function(){
       var _this = this;
       var onRowClicked = function(row){
-        /*Carefull, context is the gridView*/
-        window.app.currentData = this.serialize();
+        window.app.currentData = _this.gridView.serialize();
         window.app.currentData.index = row.rowIndex;
 
-        Backbone.history.navigate('#' + this.model.get('type') + '/' + (row.data.id || row.data.ID), {trigger: true});
+        Backbone.history.navigate('#' + _this.gridView.model.get('type') + '/' + (row.data.id || row.data.ID), {trigger: true});
       };
-      var afterFirstGetRows = function(){
+      var afterFirstRowFetch = function(){
         _this.ui.totalRecords.html(this.model.get('totalRecords'));
-
       };
 
       this.rgGrid.show(this.gridView = new GridView({
         type: this.model.get('type'),
         com: this.com,
-        onRowClicked: onRowClicked,
-        afterFirstGetRows: afterFirstGetRows,
-        filters: this.defaultFilters
+        afterFirstRowFetch: afterFirstRowFetch,
+        filters: this.defaultFilters,
+        gridOptions: {
+          onRowClicked: onRowClicked,
+          rowModelType: 'pagination'
+        }
       }));
     },
 

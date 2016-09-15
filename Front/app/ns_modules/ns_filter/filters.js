@@ -146,19 +146,7 @@
 
         };
     };
-    /*
-    
-    define([
-        'jquery',
-        'underscore',
-        'backbone',
-        'backbone_forms',
-        'moment',
-        'requirejs-text!./Templates/tpl-filters.html',
-        'requirejs-text!./Templates/tpl-CheckBoxes.html',
-        'requirejs-text!./Templates/tpl-filters-added.html',
-    ], function ($, _, Backbone, BbForms, moment, tpl, tplcheck,tplAdded) {
-        'use strict';*/
+
     NSFilter = Backbone.View.extend({
         name: 'filters',
         events: {
@@ -175,9 +163,6 @@
         datas: null,
         forms: [],
         filtersValues: null,
-        /*=====================================
-        =            Filter Module            =
-        =====================================*/
 
         initialize: function (options) {
             this.filterContainer = options.filterContainer;
@@ -340,8 +325,6 @@
             }
         },
 
-
-
         initFilter: function (dataRow, added) {
             var form;
             var _this = this ;
@@ -375,7 +358,6 @@
                 }
             }
 
-
             editorClass += ' ' + dataRow['name'];
             if (isInterval) {
 
@@ -385,12 +367,7 @@
 
                 form = this.getBBFormFromFilter(dataRow, editorClass, type, operators, template);
             }
-            /*
-            form.$el.find(".dateTimePicker").each(function () {
-                console.log('THGIS', this);
-                $(this).datetimepicker();
-            });*/
-            //console.log(form.model);
+
             return form;
         },
         getBBFormFromFilter: function (dataRow, editorClass, type, operators, template, indice) {
@@ -806,7 +783,6 @@
             var result = [];
             var ctx = this;
 
-
             var pass, rx, objVal;
             if (filters.length) {
                 var coll = _.clone(tmp);
@@ -835,7 +811,7 @@
                             } else {
                                 if (objVal &&  val) {
                                     pass = ctx.testMatch (objVal, op, val);
-                                } else { 
+                                } else {
                                     pass = false;
                                 }
                             };
@@ -865,7 +841,7 @@
                     break;
                 case 'is not':
                     objVal = objVal.toUpperCase();
-                    rx = new RegExp('^(^' + objVal + ')$'); //todo : not sure
+                    rx = new RegExp('^(^' + objVal + ')$');
                     if (rx.test(val.toUpperCase())) {
                         return false;
                     };

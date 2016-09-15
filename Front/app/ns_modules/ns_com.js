@@ -82,17 +82,32 @@ define([
 
     },
 
-    action: function(action, ids){
+    action: function(action, ids, from){
       this.onAction();
       if(action === 'selection' || action === 'selection'){
         this.updateMotherColl(ids);
       }
       for (var i = 0; i < this.components.length; i++) {
-        this.components[i].action(action, ids);
+        this.components[i].action(action, ids, from);
       };
     },
   };
-
+  // this.onAction();
+  // if(action === 'selection' || action === 'selection'){
+  //   this.updateMotherColl(params);
+  // }
+  // var doIt = true;
+  
+  // for (var i = 0; i < this.components.length; i++) {
+  //   if(this.components[i] == from && this.components[i].comeback == false){
+  //     doIt = false;
+  //   }
+  // };
+  // if(doIt){
+  //   for (var i = 0; i < this.components.length; i++) {
+  //     this.components[i].action(action, params, from);
+  //   }
+  // }
 
   // -------------------------------------------------- //
   // -------------------------------------------------- //

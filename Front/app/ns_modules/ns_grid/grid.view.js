@@ -3,7 +3,7 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
+  'config', //unecessary
   'ag-grid',
 
   'i18n'
@@ -18,61 +18,96 @@ define([
     name: 'gird',
 
     pageSize: 200,
-    elementSelector: '#grid',
-    navigate: true,
-    
-    firstGetRows: true,
+    firstRowFetch: true,
+    first: true,
     filters: [],
+    comeback: false,
 
     initialize: function(options){
+      this.extendAgGrid();
+
       var _this = this;
       this.model = options.model || new Backbone.Model();
       this.model.set('type', options.type);
-      this.model.set('url', config.coreUrl + options.type + '/');
-      
+      if(options.url){
+        this.model.set('url', config.coreUrl + options.url);
+      } else {
+        this.model.set('url', config.coreUrl + options.type + '/');
+      }
+
       if (options.com) {
         this.com = options.com;
         this.com.addModule(this);
       }
-      
-      this.filters = options.filters || [];
-      //if (typeof options. === 'boolean')
 
-      this.onRowClicked = options.onRowClicked;
+      this.clientSide = options.clientSide || false;
+      this.filters = options.filters || [];
       this.afterGetRows = options.afterGetRows;
-      this.afterFirstGetRows = options.afterFirstGetRows;
+      this.afterFirstRowFetch = options.afterFirstRowFetch;
 
       this.gridOptions = {
         enableSorting: true,
-        enableServerSideSorting: true,
-        enableServerSideFilter: false,
         enableColResize: true,
         rowHeight: 40,
         headerHeight: 30,
-        paginationPageSize: this.pageSize,
-        overlayLoadingTemplate: '',
-        sortingOrder: ['desc','asc'],
         suppressScrollLag: true,
-        rowModelType: 'pagination',
-
-        //rowData: this.data,
-        //overlayNoRowsTemplate: '<span>No rows to display</span>',
-        
-        onRowClicked: function(row){
-          if(this.onRowClicked)
-          _this.onRowClicked(row);
+        rowSelection: 'multiple',
+        suppressRowClickSelection: true,
+        onRowSelected: this.onRowSelected.bind(this),
+        onGridReady: function(){
+            setTimeout(function(){
+              _this.gridOptions.api.sizeColumnsToFit();
+            }, 0)
         },
+        //overlayNoRowsTemplate: '<span>No rows to display</span>',
+        //overlayLoadingTemplate: '',
       };
 
-      this.extendAgGrid();
-      this.iniColumns();
-      this.initDataSource();
+      if(!this.clientSide) {
+        $.extend(this.gridOptions, {
+          enableServerSideSorting: true,
+          paginationPageSize: this.pageSize,
+        });
+      }
+
+      $.extend(this.gridOptions, options.gridOptions || {});
+
+      if(options.columns){
+        this.gridOptions.columnDefs = options.columns;
+        this.columnDeferred = true;
+      } else {
+        this.fetchColumns();
+      }
+
+      if(this.clientSide){
+        this.fetchData();
+      } else {
+        this.initDataSource();
+      }
     },
 
-    iniColumns: function(){
-      var columnDefs = [];
+    onRowSelected: function(e){
+      this.interaction('selection', e.node.data.id || e.node.data.ID, this);
+    },
 
-      this.columnDefered = $.ajax({
+    formatColumns: function(columns){
+      var columnDefs = [];
+      columns.map(function(col, i) {
+        var columnDef = {
+          headerName: col.label,
+          field: col.name,
+          //hide: !(col.renderable),
+          minWidth: 100,
+          maxWidth: 300,
+        }
+        columnDefs.push(columnDef);
+      });
+
+      return columnDefs;
+    },
+
+    fetchColumns: function(){
+      this.columnDeferred = $.ajax({
         url: this.model.get('url') + 'getFields',
         method: 'GET',
         context: this,
@@ -80,25 +115,72 @@ define([
           name: 'default'
         }
       }).done( function(response) {
-        response.map(function(col, i) {
-          var columnDef = {
-            headerName: col.label,
-            field: col.name,
-            hide: !(col.renderable),
-            minWidth: 100,
-            maxWidth: 300,
-          }
-          if(i == 0) {
-            columnDef.pinned = 'left';
-            columnDef.minWidth = 50;
-            columnDef.width = 50;
-            columnDef.maxWidth = 100;
-          }
-          columnDefs.push(columnDef);
-        });
-
-        this.gridOptions.columnDefs = columnDefs;
+        this.gridOptions.columnDefs = this.formatColumns(response);
       });
+    },
+
+    fetchData: function(){
+      this.deferred = $.ajax({
+        url: this.model.get('url'),
+        method: 'GET',
+        context: this,
+      }).done( function(response) {
+        this.gridOptions.rowData = response;
+        this.gridOptions.api.setRowData(response);
+      });
+
+    },
+
+
+    initDataSourceBis: function(){
+      var _this = this;
+      this.dataSource = {
+        rowCount: null,
+        maxConcurrentDatasourceRequests: 2,
+        getRows : function (params){
+          var pageSize = params.endRow - params.startRow;
+          var page = params.endRow / pageSize;
+          var offset = (page - 1) * pageSize;
+
+          var order_by = [];
+          if(params.sortModel.length) {
+            order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
+          }
+
+          var status = {
+            criteria: JSON.stringify(_this.filters),
+            page: page,
+            per_page: pageSize,
+            offset: offset,
+            order_by: JSON.stringify(order_by)
+          };
+
+          _this.deferred = $.ajax({
+            url: _this.model.get('url'),
+            method: 'GET',
+            context: this,
+            data: status
+          }).done( function(response) {
+            var rowsThisPage = response[1];
+            var total = response[0].total_entries;
+
+            _this.model.set('totalRecords', total);
+            _this.model.set('status', status);
+
+            if(_this.afterGetRows){
+              _this.afterGetRows();
+            }
+
+            if(_this.firstRowFetch && _this.afterFirstRowFetch){
+              _this.afterFirstRowFetch();
+            }
+
+            _this.firstRowFetch = false;
+            params.successCallback(rowsThisPage , total);
+          });
+
+        }
+      };
     },
 
     initDataSource: function(){
@@ -140,11 +222,11 @@ define([
               _this.afterGetRows();
             }
 
-            if(_this.firstGetRows && _this.afterFirstGetRows){
-              _this.afterFirstGetRows();
+            if(_this.firstRowFetch && _this.afterFirstRowFetch){
+              _this.afterFirstRowFetch();
             }
 
-            _this.firstGetRows = false;
+            _this.firstRowFetch = false;
             params.successCallback(rowsThisPage , total);
           });
 
@@ -165,18 +247,17 @@ define([
         filterModel: this.gridOptions.api.getFilterModel(),
         sortModel: this.gridOptions.api.getSortModel(),
       });
-      console.log(this.model.attributes);      
 
       return this.model.attributes;
     },
 
-    action: function(action, params){
+    action: function(action, params, from){
       switch(action){
         case 'focus':
           this.focus(params);
           break;
         case 'selection':
-          this.selectOne(params);
+          this.selectOne(params, from);
           break;
         case 'selectionMultiple':
           this.selectMultiple(params);
@@ -184,21 +265,57 @@ define([
         case 'filter':
           this.filter(params);
           break;
+        case 'focus':
+          this.focus(params);
+          break;
         default:
           break;
       }
     },
-
     interaction: function(action, params){
       if(this.com){
-        this.com.action(action, params);
+        this.com.action(action, params, this);
       }else{
         this.action(action, params);
       }
     },
 
+    focus: function(param){
+      var _this = this;
+      this.gridOptions.api.forEachNode( function (node) {
+          if (node.data.ID === param) {
+            _this.gridOptions.api.ensureIndexVisible(node.childIndex);
+            setTimeout(function(){
+              _this.gridOptions.api.setFocusedCell(node.childIndex, 'ID', null);
+            },0);
+          }
+      });
+    },
+
+    selectOne: function(param, from){
+      var _this = this;
+      this.gridOptions.api.forEachNode( function (node) {
+          if (node.data.ID === param) {
+              console.log(node);
+              if(from === this){
+                node.setSelectedInitialValue(!node.selected);
+              } else {
+                node.setSelectedInitialValue(node.selected);
+              }
+              console.log(node);       
+          }
+      });
+    },
+
+    clientSideFilter: function(filters){
+      console.log(filters);
+    },
+
     filter: function(filters){
       this.filters = filters;
+      
+      this.clientSideFilter(filters);
+
       if(this.dataSource){
         this.gridOptions.api.setDatasource(this.dataSource);
       }
@@ -212,7 +329,7 @@ define([
     onShow: function() {
       var _this = this;
 
-      $.when(this.columnDefered).then(function(){
+      $.when(this.columnDeferred).then(function(){
         _this.displayGrid();
       })
 
@@ -239,11 +356,18 @@ define([
     displayGrid: function() {
       var _this = this;
 
-      var gridDiv = document.querySelector(this.elementSelector);
+      var gridDiv = this.$el.find('#grid')[0];
       this.grid = new AgGrid.Grid(gridDiv, this.gridOptions);
-      this.gridOptions.api.setDatasource(this.dataSource);
-      this.gridOptions.api.sizeColumnsToFit();
-      this.paginationController = this.gridOptions.api.paginationController;
+
+
+      if(!this.clientSide){
+        this.gridOptions.api.setDatasource(this.dataSource);
+      }
+      if(this.gridOptions.rowModelType == 'pagination'){
+        this.paginationController = this.gridOptions.api.paginationController;
+      }
+
+
     },
     
     jumpToPage: function(index){
