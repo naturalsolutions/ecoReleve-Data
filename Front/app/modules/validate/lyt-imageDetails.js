@@ -129,7 +129,7 @@ define([
 				iso :"",
 				created :"",
 			};
-			exifJson.name = _this.model.get('name');
+			exifJson.name = _this.model.get('name').replace('%20',' ');
 			exifJson.created = _this.model.get('date_creation');
 
 

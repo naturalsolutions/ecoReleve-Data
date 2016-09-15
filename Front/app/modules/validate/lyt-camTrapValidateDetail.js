@@ -231,7 +231,7 @@ define([
         _this.displayImages(_this.myImageCollection);
         _this.rgToolsBarTop.show(this.toolsBarTop);
         console.log(_this.myImageCollection.models[0]);
-        this.displayImageDetails(_this.myImageCollection.models[0]);
+        this.displayImageDetails(_this.myImageCollection.models[this.currentPosition]);
       });
       this.currentCollection = this.myImageCollection;
       this.displaySensorForm();
@@ -287,6 +287,11 @@ define([
         if( this.rgModal.currentView !== undefined){//si le modal existe on change
           this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
         }
+    /*    if( this.currentPosition >= 0 ) {
+          console.log(this.currentPosition);
+          console.log(this.tabView);
+          this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model);
+        }*/
         $('#gallery').selectable({
           filter: '.imageCamTrap',
            distance : 10,
