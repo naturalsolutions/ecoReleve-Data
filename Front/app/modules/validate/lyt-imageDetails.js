@@ -18,6 +18,7 @@ define([
 			//'space': 'onClickImage',
 		},
 		events:{
+			'click div#detailstitle': 'changeExif'
 
 		},
 		className : "detailsimage",
@@ -119,60 +120,63 @@ define([
 
     },
     changeExif: function() {
-      var _this = this ;
-      var exifJson = {
-				name :"",
-				type:"",
-				size:"",
-				dimensions:"",
-				resolution:"",
-				iso :"",
-				created :"",
-			};
-			exifJson.name = _this.model.get('name').replace('%20',' ');
-			exifJson.created = _this.model.get('date_creation');
+			if( !this.flagExif ) {
+	      var _this = this ;
+	      var exifJson = {
+					name :"",
+					type:"",
+					size:"",
+					dimensions:"",
+					resolution:"",
+					iso :"",
+					created :"",
+				};
+				exifJson.name = _this.model.get('name').replace('%20',' ');
+				exifJson.created = _this.model.get('date_creation');
 
 
-			var http = new XMLHttpRequest();
-			http.addEventListener('readystatechange', function() {
-		    if (http.readyState === XMLHttpRequest.DONE && http.status === 200) {
+				var http = new XMLHttpRequest();
+				http.addEventListener('readystatechange', function() {
+			    if (http.readyState === XMLHttpRequest.DONE && http.status === 200) {
 
-		    }
-		});
-	    http.open('GET', ''+_this.model.get('path')+''+_this.model.get('name'), true);
-	    http.responseType = "blob";
-	    http.onload = function(e) {
-			//	console.log(e);
-	        if (this.status === 200) {
-						//	console.log(this);
-							exifJson.type = this.response.type;
-							exifJson.size = ( (this.response.size / 1024 ) / 1000 ).toFixed(2) + " MB"
+			    }
+			});
+		    http.open('GET', ''+_this.model.get('path')+''+_this.model.get('name'), true);
+		    http.responseType = "blob";
+		    http.onload = function(e) {
+				//	console.log(e);
+		        if (this.status === 200) {
+							//	console.log(this);
+								exifJson.type = this.response.type;
+								exifJson.size = ( (this.response.size / 1024 ) / 1000 ).toFixed(2) + " MB"
 
-	            Exif.getData(http.response, function() {
-								//console.log(((this.size/1024)/1000)+"MB");
-								//	var chaine = Exif.getAllTags(this);
-									exifJson.dimensions = Exif.getTag(this, "PixelXDimension")+" X "+Exif.getTag(this, "PixelYDimension");//chaine.PixelYDimension;
-									exifJson.resolution = Exif.getTag(this, "XResolution") +" DPI";
-									exifJson.iso = Exif.getTag(this, "ISOSpeedRatings");//chaine.ISOSpeedRatings;
-									var $keyExif = _this.$el.find('#keyExif');
-									$keyExif.html('');
-									var $valueExif = _this.$el.find('#valueExif');
-									$valueExif.html('');
-									for ( var tmp in exifJson ) {
-								//		console.log(tmp);
-										$keyExif.append(tmp+"<br>")
-										$valueExif.append(exifJson[tmp]+"<br>")
-                    _this.flagExif = true;
-									//	console.log(exifJson[tmp]);
-									}
-							//		console.log(chaine);
-	                //alert(Exif.getAllTags(this));
-								//	console.log(exifJson);
-	            });
-							//Exif.g
-	        }
-	    };
-	    http.send()
+		            Exif.getData(http.response, function() {
+									//console.log(((this.size/1024)/1000)+"MB");
+									//	var chaine = Exif.getAllTags(this);
+										exifJson.dimensions = Exif.getTag(this, "PixelXDimension")+" X "+Exif.getTag(this, "PixelYDimension");//chaine.PixelYDimension;
+										exifJson.resolution = Exif.getTag(this, "XResolution") +" DPI";
+										exifJson.iso = Exif.getTag(this, "ISOSpeedRatings");//chaine.ISOSpeedRatings;
+										var $keyExif = _this.$el.find('#keyExif');
+										$keyExif.html('');
+										var $valueExif = _this.$el.find('#valueExif');
+										$valueExif.html('');
+										for ( var tmp in exifJson ) {
+									//		console.log(tmp);
+											$keyExif.append(tmp+"<br>")
+											$valueExif.append(exifJson[tmp]+"<br>")
+	                    _this.flagExif = true;
+										//	console.log(exifJson[tmp]);
+										}
+								//		console.log(chaine);
+		                //alert(Exif.getAllTags(this));
+									//	console.log(exifJson);
+		            });
+								//Exif.g
+		        }
+		    };
+		    http.send()
+
+		}
 
     },
 
@@ -181,13 +185,13 @@ define([
       this.changeStatus();
       this.changeStars();
       this.changeTags();
-      if(!this.flagExif) {
+      /*if(!this.flagExif) {
         console.log("on va afficher lexif");
         this.changeExif();
       }
       else {
         console.log("on affiche pas lexif");
-      }
+      }*/
 
 		},
 
@@ -196,6 +200,10 @@ define([
       this.stopListening(this.model);
       this.flagExif = false;
 			this.model = model;
+			var $keyExif = _this.$el.find('#keyExif');
+			$keyExif.html('');
+			var $valueExif = _this.$el.find('#valueExif');
+			$valueExif.html('');
       this.listenTo(this.model, "change", function() {
         _this.onRender();
       });
