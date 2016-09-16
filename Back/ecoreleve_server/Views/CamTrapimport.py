@@ -122,7 +122,9 @@ def unzip(zipFilePath , destFolder, fk_sensor, startDate , endDate):
 
 def AddPhotoOnSQL(fk_sensor , path , name , extension , date_creation):
     session = threadlocal.get_current_request().dbsession
-    currentPhoto = CamTrap(fk_sensor = fk_sensor ,path = str(path),name = str(name), extension = '.jpg', date_creation = date_creation )
+    if( not path.endswith('\\') ):
+        path+= '\\'
+    currentPhoto = CamTrap(fk_sensor = fk_sensor ,path = str(path),name = str(name), extension = '.jpg', date_creation = date_creation , note=5 )
     session.add(currentPhoto)
     session.flush()
     return currentPhoto.pk_id

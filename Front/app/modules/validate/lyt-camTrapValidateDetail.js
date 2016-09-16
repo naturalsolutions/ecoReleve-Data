@@ -877,7 +877,7 @@ define([
                   closeOnConfirm: true,
                 },
                 function() {
-                  //console.log("bim je valide requête en cours");
+                  console.log("bim je valide requête en cours");
                   $.ajax({
                     url : config.coreUrl+'sensors/'+_this.type+'/uncheckedDatas',
                     method: 'POST',

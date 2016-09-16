@@ -352,6 +352,7 @@ def manual_validate(request) :
 @view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST',match_param='type=rfid',permission = routes_permission['rfid']['POST'] )
 @view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST',match_param='type=gsm',permission = routes_permission['gsm']['POST'] )
 @view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST' ,match_param='type=argos',permission = routes_permission['argos']['POST'])
+@view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST',match_param='type=camtrap',permission = routes_permission['rfid']['POST'] )
 def auto_validation(request):
     session = request.dbsession
     global graphDataDate

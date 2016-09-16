@@ -29,10 +29,11 @@ define([
       //this.row = this.options.model.get('row').model.attributes;
       this.buttonPause = $('#pause-upload-resumablejs');
       this.data =  this.options.model.get('row').model.attributes;
+      this.model = this.options.model.get('row');
       this.data.sensorId = options.model.attributes.sensorId;
-      //console.log(this.data);
+      console.log(this.data);
       this.path = "";
-      this.nbFiles = 0
+      this.nbFiles = 0;
       this.nbFilesRefused = 0;
       this.nbFilesToWait = 0;
       this.nbFilesConcat = 0;
@@ -58,6 +59,14 @@ define([
       &resumableTotalChunks=1335
       */
     },
+    serializeData: function(){
+    return {
+      "UnicIdentifier": this.data.UnicIdentifier,
+      "StartDate" : this.data.StartDate,
+      "EndDate" : this.data.EndDate,
+      "Name" : this.data.Name
+    }
+  },
 
     check: function() {
 
