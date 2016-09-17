@@ -8,12 +8,69 @@ define([
 	'config',
 	'ez-plus',
 	'bootstrap-star-rating',
+	'./lyt-camTrapImageModel',
 
-], function($, _, Backbone, Marionette, Translater, config , ezPlus , btstrp_star ) {
+], function($, _, Backbone, Marionette, Translater, config , ezPlus , btstrp_star , CamTrapImageModel  ) {
 
   'use strict';
+	return Marionette.ItemView.extend({
+		model: CamTrapImageModel,//ImageModel,
+		keyShortcuts :{
+			//'space': 'onClickImage',
+		},
+		events:{
 
-  return Marionette.LayoutView.extend({
+		},
+		className : 'full-height',
+		template : 'app/modules/validate/templates/tpl-camTrapModal.html',
+
+
+		initialize : function(options) {
+      var _this = this;
+			this.parent = options.parent;
+      this.model = options.model;
+			this.position = this.parent.currentCollection.fullCollection.indexOf(this.model) + 1 ;
+			this.total = this.parent.currentCollection.fullCollection.length;
+      this.listenTo(this.model, "change", function() {
+        console.log("j'ai changé");
+        _this.render();
+      });
+		},
+		onRender: function() {
+			this.parent.$el.find('.backgrid-paginator').css('visibility','hidden');
+			this.parent.$el.find('.paginatorCamTrap').prepend('<div class="infosfullscreen">'
+											+this.model.get('date_creation')+''
+											+'<div class="indexposition">'+this.position+'/'+this.total+'</div>'
+											+'  </div>');
+		},
+
+		changeModel(model){
+      var _this = this;
+      this.stopListening(this.model);
+			this.parent.$el.find('.infosfullscreen').html('');
+			this.model = model;
+			this.position = this.parent.currentCollection.fullCollection.indexOf(this.model) + 1 ;
+			this.total = this.parent.currentCollection.fullCollection.length;
+      this.listenTo(this.model, "change", function() {
+        _this.render();
+      });
+			this.render();
+		},
+		hide: function(){
+			this.parent.$el.find('.infosfullscreen').remove();
+			this.parent.$el.find('.backgrid-paginator').css('visibility','visible');
+		},
+
+		onDestroy: function() {
+			console.log("bim destroy");
+		}
+
+	});
+
+
+
+
+  /*return Marionette.LayoutView.extend({
 
     template: 'app/modules/validate/templates/tpl-camTrapModal.html',
     className: 'modal fade modal-cam-trap',
@@ -23,7 +80,7 @@ define([
 			this.parent = options.parent;
 			this.$elementPopover = $(options.parent.$el.find('.reneco-image_file'));
 			var _this = this;
-			this.statusPhotos ={};
+			this.statusPhotos = {};
 			this.statusPhotos.textStatus = "";
 			this.statusPhotos.class = "" ;
 			this.position = this.parent.currentCollection.fullCollection.indexOf(this.model) + 1 ;
@@ -160,5 +217,5 @@ define([
 
 		},
 
-  });
+  });*/
 });

@@ -99,18 +99,20 @@ define([
 
       'totalS' : '#totalS',
       'total' : '#total',
-      'paginator':'#paginator'
+      'paginator':'#paginator',
+      'imageFullScreen': '#imageFullScreen'
 
     },
 
     regions: {
       'rgNavbar': '#navbar',
       'rgGallery' : '#gallery',
-      'rgModal': '#rgModal',
+      'rgFullScreen' : '#imageFullScreen',
       'rgToolsBar' :'#rgToolsBar',
       'rgToolsBarTop' : '#rgToolsBarTop',
       'rgImageDetails': '#imageDetails',
     },
+
     setStars: function(e) {
       this.tabView[this.currentPosition].setStars(e.key)
     },
@@ -130,10 +132,23 @@ define([
        $elemToInactive.toggleClass('active'); //remove active actual elem
        $elemToActive.toggleClass('active'); // add active elem clicked
        if($elemToActive.hasClass('reneco-ecollectionsmall')){
-          this.leaveModal(e);
+          this.ui.gallery.show();
+          this.rgFullScreen.currentView.hide();
+          this.rgFullScreen.$el.hide()
         }
         else if( $elemToActive.hasClass('reneco-image_file') ) {
-          this.displayModal(e);
+          this.ui.gallery.hide();
+        //  this.ui.imageFullScreen.show()
+          if(this.rgFullScreen.currentView === undefined) {
+            console.log("initialise");
+            this.rgFullScreen.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
+            this.rgFullScreen.$el.show(this.rgFullScreen.currentView);
+
+          }
+          else {
+            this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
+            this.rgFullScreen.$el.show(this.rgFullScreen.currentView);
+          }
         }
         else{
           ;
@@ -178,6 +193,7 @@ define([
       // this.deletedImg = this.myImageCollection.filter({validated : "false"})
       // this.toCheckImg = this.myImageCollection.filter({validated : "null"})
 
+
       this.initCollection();
     },
 
@@ -216,11 +232,13 @@ define([
 
     onRender: function() {
       this.$el.i18n();
+
     },
 
     onShow: function() {
       var _this = this;
       this.rgNavbar.show(this.navbar);
+      this.ui.imageFullScreen.hide()
       this.display();
     },
 
@@ -284,8 +302,8 @@ define([
           }
         }
         this.focusImg();
-        if( this.rgModal.currentView !== undefined){//si le modal existe on change
-          this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+        if( this.rgFullScreen.currentView !== undefined){//si le modal existe on change
+          this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
         }
     /*    if( this.currentPosition >= 0 ) {
           console.log(this.currentPosition);
@@ -400,6 +418,10 @@ define([
         id: this.sensorId,
         reloadAfterSave: false,
       });*/
+    },
+
+    displayImageFullScreen: function(model) {
+
     },
 
     displayPaginator: function (pagin) {
@@ -540,8 +562,11 @@ define([
       this.stopSpace = false;
       $('#rgToolsBarTop .reneco-ecollectionsmall').addClass('active');
       $('#rgToolsBarTop .reneco-image_file').removeClass('active');
-      if(this.rgModal.currentView !== undefined) {
-        this.rgModal.currentView.hide();
+      if(this.rgFullScreen.currentView !== undefined) {
+        //this.rgFullScreen.currentView.hide();
+        this.ui.gallery.show();
+        this.rgFullScreen.currentView.hide();
+        this.rgFullScreen.$el.hide();
       }
     },
 
@@ -553,12 +578,16 @@ define([
         this.stopSpace = true;
         $('#rgToolsBarTop .reneco-ecollectionsmall').removeClass('active');
         $('#rgToolsBarTop .reneco-image_file').addClass('active');
-        if(this.rgModal.currentView === undefined) {
-          this.rgModal.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
+        this.ui.gallery.hide();
+        if(this.rgFullScreen.currentView === undefined) {
+          this.rgFullScreen.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
+          this.rgFullScreen.$el.show(this.rgFullScreen.currentView);
+
         }
         else {
-          this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
-          this.rgModal.currentView.onShow();
+          this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
+          //this.rgFullScreen.currentView.show();
+          this.rgFullScreen.$el.show(this.rgFullScreen.currentView);
         }
       }
     },
@@ -630,11 +659,14 @@ define([
           if( this.tabSelected.length === 0)
             this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
           this.tabView[this.currentPosition].handleFocus();
-          if( this.rgModal.currentView !== undefined){//si le modal existe on change
-            this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
+          if( this.rgFullScreen.currentView !== undefined){//si le modal existe on change
+            this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
           }
           if( this.rgImageDetails.currentView != undefined ){
             this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model)
+          }
+          if( this.rgFullScreen.currentView !== undefined) {
+            this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
           }
         }
 
@@ -665,7 +697,7 @@ define([
       else {
         this.currentViewImg = this.tabView[index - 1]; // on se deplace de - 1
       }
-      this.rgModal.currentView.changeImage(this.currentViewImg.model);
+      this.rgFullScreen.currentView.changeModel(this.currentViewImg.model);
       this.rgImageDetails.changeDetails(this.currentViewImg.model)
 
     },
@@ -678,7 +710,7 @@ define([
       else {
         this.currentViewImg = this.tabView[index + 1];
       }
-      this.rgModal.currentView.changeImage(this.currentViewImg.model);
+      this.rgFullScreen.currentView.changeModel(this.currentViewImg.model);
       this.rgImageDetails.changeDetails(this.currentViewImg.model)
 
     },
