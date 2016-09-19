@@ -114,6 +114,19 @@ div.bootstrap-tagsinput{
   }
 
 }
+#imageFullScreen {
+  padding : 0;
+  .fullscreenimg {
+    width: 100%;
+    height: 100%;
+    background-color: #434343;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit:contain;
+    }
+  }
+}
 
 #gallery{
   background-color: #434343;
@@ -133,7 +146,6 @@ div.bootstrap-tagsinput{
      border: 1.5px solid #39b34a;
     border-radius: 8px;
   }
-
   .imageCamTrap{
     margin: 0;
     padding: 0;
@@ -206,8 +218,11 @@ div.bootstrap-tagsinput{
           /*  position: absolute;
           top: 50%;
           left: 50%;
+
           width: 100%;
-          transform: translate(-50%, -50%);*/
+          height: 100%;
+          object-fit:cover;
+          overflow: hidden;*/
         }
         img:focus + div.dateexif{
           animation : blink 2s linear;
