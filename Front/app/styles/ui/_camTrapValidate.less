@@ -121,6 +121,11 @@ div.bootstrap-tagsinput{
 
   .ui-selecting > .vignette {
     background-color: #39b34a !important;
+
+    img{
+      opacity: 0.7;
+    }
+
     border: 1.5px solid #39b34a;
     border-radius: 8px;
   }
@@ -180,7 +185,8 @@ div.bootstrap-tagsinput{
         }
       }
       .camtrapItemViewContent{
-        height: 75%;
+        height: 100%;
+        border-radius: 8px;
         img{
           //position: relative;
           //border-radius: 8px;
@@ -194,12 +200,47 @@ div.bootstrap-tagsinput{
           width: 100%;
           object-fit: cover;
           overflow: hidden;
+          border-radius: 8px;
+          -webkit-clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 0%, 100% 0);
+          transition : -webkit-clip-path 0.5s;
           /*  position: absolute;
           top: 50%;
           left: 50%;
           width: 100%;
           transform: translate(-50%, -50%);*/
         }
+        img:focus + div.dateexif{
+          animation : blink 2s linear;
+        }
+        @keyframes blink {
+          0%,100% { opacity: 0 }
+          50% { opacity: 1 }
+        }
+
+        div.dateexif{
+          opacity: 0;
+          //display : none;
+          position:relative;
+          bottom: 30px;
+          color: white;
+          font-size: 15px;
+          font-weight: 600;
+          font-size: 0.9vw;
+          line-height: 30px;
+          background: rgba(0, 0, 0, 0.5);
+        //  transition: display 1s linear;
+          transition: opacity 0.8s linear;
+        }
+
+
+
+        img.checked{
+          -webkit-clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 25%, 75% 0);
+        }
+      }
+      .camtrapItemViewContent:hover div.dateexif{
+        //display:block;
+        opacity: 1;
       }
       .camtrapItemViewFooter{
         height: 10%;
@@ -219,7 +260,7 @@ div.bootstrap-tagsinput{
       }
     }
     .active{
-      border: 1.5px solid #39b34a;
+      border: 3px solid #39b34a;
       border-radius: 8px;
     }
 

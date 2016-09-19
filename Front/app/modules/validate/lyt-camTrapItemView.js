@@ -80,6 +80,7 @@ define([
 				}
 			}
 			this.$el.find('.vignette').toggleClass('active');
+			this.$el.find('img').focus();
 			this.parent.tabSelected = [] ;
 			// if( lastPosition != this.parent.currentPosition){
 			// 	console.log("on a changé de position on détrui et on instantie");
@@ -144,8 +145,8 @@ define([
 
 			//this.$el.find('rating-container').addClass('hide');
 			//this.$el.find('.rateit').bind('rated', function() { alert('rating: ' + $(this).rateit('value')); });
-
-			switch(this.model.get("validated") ) {
+			this.setVisualValidated( this.model.get("validated") );
+		/*	switch(this.model.get("validated") ) {
 				case 1 : {
 					//console.log(this.$icon);
 					//this.$el.addClass("checked");
@@ -171,7 +172,7 @@ define([
 					break;
 				}
 
-				}
+			}*/
 		/*	if( this.model.get("validated") === true )
 				this.$el.addClass("accepted");
 			else if( this.model.get("validated") === false )
@@ -230,6 +231,7 @@ define([
 		setModelValidated: function(val) {
 			var oldVal = this.model.get("validated");
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
+
 			switch(oldVal ) {
 				case 1 :{// not checked
 					$icon.removeClass('reneco-support');
@@ -291,6 +293,8 @@ define([
 
 		setVisualValidated : function(valBool){
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
+			var $content = this.$el.children('.vignette').children('.camtrapItemViewContent')
+			var $image = $content.children('img')
 			//var $icon2 = this.$el.find('.camtrapItemViewContent > i');
 			//var lastClass = $icon.attr('class').split(' ').pop();
 
@@ -305,6 +309,8 @@ define([
 				case 2 : {
 				//	$icon.removeClass( lastClass );
 					$icon.addClass('reneco-checked');
+					$image.addClass('checked');
+					$content.css("background-color" , "green");
 					this.$el.find('.rating-container').removeClass('hide');
 
 					break;
@@ -312,6 +318,8 @@ define([
 				case 4 : {
 				//	$icon.removeClass( lastClass );
 					$icon.addClass('reneco-close');
+					$image.addClass('checked');
+					$content.css("background-color" , "red");
 					this.$el.find('.rating-container').addClass('hide');
 
 					break;
