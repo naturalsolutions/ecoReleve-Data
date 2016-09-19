@@ -55,7 +55,8 @@ def allPhotos (request):
 		on V.pk_id = P.old_id
         where checked = 1
         AND V.equipID = :equipid
-        AND V.FK_MonitoredSite = :fkmonitoredsite""").bindparams(
+        AND V.FK_MonitoredSite = :fkmonitoredsite
+		ORDER BY date_creation ASC""").bindparams(
         bindparam('fkmonitoredsite',value=fkMonitoredSite),
         bindparam('equipid', value=fkequipid)
         )
