@@ -83,7 +83,9 @@ require.config({
     'noty' : '../bower_components/noty/js/noty/packaged/jquery.noty.packaged',
     'jquery.rateit': '../bower_components/jquery.rateit/scripts/jquery.rateit',
     'bootstrap-star-rating': '../bower_components/bootstrap-star-rating/js/star-rating',
-    'exif-js' : '../bower_components/exif-js/exif'
+    'exif-js' : '../bower_components/exif-js/exif',
+    'wheelzoom' : './vendors/wheelzoom',
+    'imageLoaded' : '../bower_components/imagesloaded/imagesloaded.pkgd',
 
   },
   map: {
@@ -220,7 +222,16 @@ require.config({
         'jquery',
       ]
     },
-  },
+    'wheelzoom':{
+        exports: 'wheelzoom'
+    },
+    'imageLoaded': {
+      deps:[
+        'jquery',
+      ],
+      exports: 'imageLoaded'
+    }
+  }
 });
 
 require(['app', 'templates','translater'],

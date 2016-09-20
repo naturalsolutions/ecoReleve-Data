@@ -132,12 +132,14 @@ define([
        $elemToInactive.toggleClass('active'); //remove active actual elem
        $elemToActive.toggleClass('active'); // add active elem clicked
        if($elemToActive.hasClass('reneco-ecollectionsmall')){
-          this.ui.gallery.show();
+        /*  this.ui.gallery.show();
           this.rgFullScreen.currentView.hide();
-          this.rgFullScreen.$el.hide()
+          this.rgFullScreen.$el.hide()*/
+          this.leaveModal();
         }
         else if( $elemToActive.hasClass('reneco-image_file') ) {
-          this.ui.gallery.hide();
+          this.displayModal(e);
+        /*  this.ui.gallery.hide();
         //  this.ui.imageFullScreen.show()
           if(this.rgFullScreen.currentView === undefined) {
             console.log("initialise");
@@ -148,7 +150,7 @@ define([
           else {
             this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
             this.rgFullScreen.$el.show(this.rgFullScreen.currentView);
-          }
+          }*/
         }
         else{
           ;
@@ -581,13 +583,13 @@ define([
         this.ui.gallery.hide();
         if(this.rgFullScreen.currentView === undefined) {
           this.rgFullScreen.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
-          this.rgFullScreen.$el.show(this.rgFullScreen.currentView);
+          this.rgFullScreen.$el.show();
 
         }
         else {
           this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
           //this.rgFullScreen.currentView.show();
-          this.rgFullScreen.$el.show(this.rgFullScreen.currentView);
+        this.rgFullScreen.$el.show();
         }
       }
     },
@@ -659,13 +661,13 @@ define([
           if( this.tabSelected.length === 0)
             this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
           this.tabView[this.currentPosition].handleFocus();
-          if( this.rgFullScreen.currentView !== undefined){//si le modal existe on change
+        /*  if( this.rgFullScreen.currentView !== undefined){//si le modal existe on change
             this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
-          }
+          }*/
           if( this.rgImageDetails.currentView != undefined ){
             this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model)
           }
-          if( this.rgFullScreen.currentView !== undefined) {
+          if( this.rgFullScreen.currentView !== undefined && this.stopSpace) {
             this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
           }
         }
@@ -779,6 +781,7 @@ define([
           this.ui.paginator.html('');
           //this.ui.paginator.find('.backgrid-paginator').css('visibility','visible');
           this.displayPaginator(this.paginator);
+          this.ui.paginator.find('.backgrid-paginator').css('visibility','visible');
 
         }
         if ( !$elem.hasClass('allphotos') ){
@@ -936,12 +939,13 @@ define([
 
 
     validateAll: function() {
-      if( this.nbphotosnotchecked >0 || this.nbPhotosChecked > 0) {
+      $(".fullscreenimg [id^='zoom_']").trigger('wheelzoom.reset');
+    /*  if( this.nbphotosnotchecked >0 || this.nbPhotosChecked > 0) {
         this.displaySwalUnchecked();
       }
       else {
         this.displaySwalValidate();
-      }
+      }*/
 
 
       /*for(var i = 0 ; i < this.currentCollection.fullCollection ; i++ )
