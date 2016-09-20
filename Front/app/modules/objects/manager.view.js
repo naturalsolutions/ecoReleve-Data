@@ -42,7 +42,7 @@ define([
       rgGrid: '.js-rg-grid'
     },
 
-    //translater: Translater.getTranslater(),
+    translater: Translater.getTranslater(),
 
     initialize: function(options) {
       this.com = new Com();

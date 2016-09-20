@@ -28,11 +28,13 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       'stations(/)': 'stations',
       'observations/:id(/)': 'observations',
 
+      //'stations/:id/release(/)': 'stationRelease',
+      'release/:id(/)': 'releaseIndividuals',
+      'release(/)': 'release',
+
       'validate/:type(/)': 'validateType',
       'validate(/)': 'validate',
 
-      'release/:id(/)': 'release',
-      'release(/)': 'release',
 
       '*route(/:page)': 'home',
     },

@@ -9,7 +9,9 @@ define([
   './modules/validate/lyt-sensorValidate',
   './modules/validate/lyt-sensorValidateType',
   './modules/validate/lyt-sensorValidateDetail',
-  './modules/release/layouts/lyt-release-station',
+
+  './modules/release/release.view',
+  './modules/release/layouts/lyt-release-individual',
 
   './modules/stations/station.view',
   './modules/stations/stations.view',
@@ -38,7 +40,8 @@ define([
   LytSensorValidateType,
   LytSensorValidateDetail,
 
-  LytReleaseStation,
+  LytRelease,
+  LytStationsRelease,
 
   LytStation, LytStations, LytStationsNew,
 
@@ -129,9 +132,13 @@ define([
       }));
     },
 
-    release: function(id) {
-      // (id of the station..)
-      this.rgMain.show(new LytReleaseStation({id : id}));
+    release: function() {
+      this.rgMain.show(new LytRelease());
+    },
+
+    //detail
+    releaseIndividuals: function(id) {
+      this.rgMain.show(new LytStationsRelease({id : id}));
     },
 
     export: function() {

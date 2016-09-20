@@ -43,7 +43,6 @@ define([
       'click #test': 'test'
     },
 
-
     regions: {
       modal: '#modal',
     },
@@ -52,17 +51,21 @@ define([
       this.translater = Translater.getTranslater();
       this.com = new Com();
 
-      this.station = options.station;
-      this.model = options.station;
+      this.station = new Backbone.Model();
+      this.station.set('ID', options.id);
+      this.station.url = config.coreUrl + 'stations/' + options.id;
+
+      this.model = this.station;
 
       this.releaseMethod = null;
       this.getReleaseMethod();
       var _this = this;
 
       this.sensorPicker = null;
-
       this.initGrid();
     },
+
+    
 
     onRender: function() {
       this.$el.i18n();
@@ -72,8 +75,11 @@ define([
       var _this=this;
       this.displayFilter();
       this.displayGrid();
-      var _this = this;
-      //Backbone.history.navigate('release/individuals',{trigger: false});
+
+      this.station.fetch({success: function(model){
+        _this.$el.find('.js-station-name').html(model.get('Name'));
+        _this.$el.find('.js-station-date').html(model.get('StationDate'));
+      }});
     },
 
     getReleaseMethod: function(){

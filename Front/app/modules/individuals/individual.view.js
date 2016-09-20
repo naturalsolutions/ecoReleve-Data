@@ -251,31 +251,6 @@ define([
       this.loadCollection(config.coreUrl + 'fieldActivity', 'select.fieldActivity_Name');
     },
 
-
-    rowClicked: function(args) {
-      var row = args.row;
-      var evt = args.evt;
-
-      if ($(evt.target).is('input')) {
-        var id = $(evt.target).parent().parent().find('td').html();
-        this.locationsGrid.interaction('selection', id);
-      } else {
-        var id = row.model.get('ID');
-        this.locationsGrid.interaction('focus', id);
-      }
-    },
-
-    focus: function(e) {
-      var tr, id;
-      if ($(e.target).is('td')) {
-        tr = $(e.target).parent();
-      } else if ($(e.target).parent().is('td')) {
-        tr = $(e.target).parent().parent();
-      }
-      id = tr.find('td').first().text();
-      this.locationsGrid.interaction('focus', id);
-    },
-
     displayTab: function(e) {
       e.preventDefault();
       var ele = $(e.target);
@@ -303,21 +278,6 @@ define([
 
     },
 
-    hideDetail: function() {
-      $(this.ui.details).animate({
-        marginLeft: '-60%',
-      }, 500, function() {
-      });
-      this.updateSize('hide');
-    },
-
-    showDetail: function() {
-      $(this.ui.details).animate({
-        marginLeft: '0',
-      }, 500, function() {
-      });
-      this.updateSize('show');
-    },
 
     warnDeleteLocations: function() {
       var _this = this;
