@@ -568,7 +568,8 @@ define([
         //this.rgFullScreen.currentView.hide();
         this.ui.gallery.show();
         this.rgFullScreen.currentView.hide();
-        this.rgFullScreen.$el.hide();
+        //this.rgFullScreen.currentView.hide();
+        //this.rgFullScreen.$el.hide();
       }
     },
 

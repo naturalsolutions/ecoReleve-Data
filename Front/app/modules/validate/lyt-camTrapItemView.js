@@ -213,9 +213,9 @@ define([
 				 	wait : true,
 				}
 			);
-			if( this.parent.stopSpace && !detectError && this.parent.rgModal.currentView) { // if fullscreen mode refresh view
+			/*if( this.parent.stopSpace && !detectError && this.parent.rgModal.currentView) { // if fullscreen mode refresh view
 				this.parent.rgModal.currentView.changeImage(this.model);
-			}
+			}*/
 			//this.render();
 		},
 
