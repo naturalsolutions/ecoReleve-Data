@@ -96,7 +96,7 @@ define([
 			this.render();
 		},
 		hide: function(){
-		//	this.stopListening(this.model);
+		this.stopListening(this.model);
 		console.log("dans le hide");
 			this.$el.find('img')[0].dispatchEvent(new CustomEvent('wheelzoom.destroy'));
 			//this.$el.find('img').trigger('wheelzoom.destroy');

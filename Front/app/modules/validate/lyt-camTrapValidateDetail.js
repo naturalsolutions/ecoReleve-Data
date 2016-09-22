@@ -565,6 +565,7 @@ define([
       $('#rgToolsBarTop .reneco-ecollectionsmall').addClass('active');
       $('#rgToolsBarTop .reneco-image_file').removeClass('active');
       if(this.rgFullScreen.currentView !== undefined) {
+        this.rgFullScreen.$el.removeClass("crop2 crop-paginator");
         //this.rgFullScreen.currentView.hide();
         this.ui.gallery.show();
         this.rgFullScreen.currentView.hide();
@@ -582,10 +583,11 @@ define([
         $('#rgToolsBarTop .reneco-ecollectionsmall').removeClass('active');
         $('#rgToolsBarTop .reneco-image_file').addClass('active');
         this.ui.gallery.hide();
+        //console.log(this.rgFullScreen);
+        this.rgFullScreen.$el.addClass("crop2 crop-paginator");
         if(this.rgFullScreen.currentView === undefined) {
           this.rgFullScreen.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
           this.rgFullScreen.$el.show();
-
         }
         else {
           this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
