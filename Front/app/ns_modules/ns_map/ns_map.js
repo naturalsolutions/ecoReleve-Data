@@ -120,6 +120,9 @@ define([
         case 'filter':
           this.filter(params);
           break;
+        case 'loadFeatureCollection':
+          this.loadFeatureCollection(params);
+          break;
         default:
           break;
       }
@@ -415,7 +418,7 @@ define([
             default:
           }
 
-          if(feature.checked){
+          if(feature.selected){
             className += ' selected';
           }else{
             className += ' ';
@@ -424,10 +427,11 @@ define([
           icon = new L.DivIcon({className : className});
           marker = L.marker(latlng, {icon: icon});
 
-          if(feature.checked){
-            marker.checked=true;
+          //useless: doesn't update the parent cluster
+          if(feature.selected){
+            marker.selected=true;
           }else{
-            marker.checked=false;
+            marker.selected=false;
           }
 
           if(_this.popup){
@@ -443,11 +447,12 @@ define([
           _this.dict[feature.id] = marker;
 
           marker.on('click', function(e){
-            if(_this.selection){
+            if(_this.selection && feature.properties.type_ !== 'station'){
               _this.interaction('selection', this.feature.id);
             }
             _this.interaction('focus', this.feature.id);
           });
+            
           markerList.push(marker);
         }else{
           console.warn('latlng null');
@@ -510,7 +515,7 @@ define([
           var contains=false;
 
           for (var i = 0; i < childMarkers.length; i++) {
-            if(childMarkers[i].checked){
+            if(childMarkers[i].selected){
               nbContains++;
               contains=true;
             }else{
@@ -532,7 +537,7 @@ define([
       var childs = c.getAllChildMarkers();
 
       for (var i = childs.length - 1; i >= 0; i--) {
-        childs[i].checked = true;
+        childs[i].selected = true;
         this.selectedMarkers[childs[i].feature.id] = childs[i];
         this.toggleIconClass(childs[i]);
       }
@@ -597,7 +602,7 @@ define([
                 _this.updateAllClusters(marker, true);
 
                 for (var i = childs.length - 1; i >= 0; i--) {
-                  childs[i].checked = true;
+                  childs[i].selected = true;
                   _this.selectedMarkers[childs[i].feature.id] = childs[i];
                   bbox.push(childs[i].feature.id);
 
@@ -643,8 +648,8 @@ define([
       if(this.selection){
       var marker;
         marker=this.dict[id];
-        marker.checked=!marker.checked;
-        if(this.checkedMarkers){
+        marker.selected=!marker.selected;
+        if(this.selectedMarkers){
           this.selectedMarkers[id]=marker;
         }else{
           delete(this.selectedMarkers[id]);
@@ -665,7 +670,7 @@ define([
         var marker;
         for (var i = 0; i < ids.length; i++) {
           marker=this.dict[ids[i]];
-          marker.checked = true;
+          marker.selected = true;
 
           this.avoidDoublon(ids[i], marker);
 
@@ -678,6 +683,7 @@ define([
     /*==========  focusMarker :: focus & zoom on a point  ==========*/
     focus: function(id, zoom){
       var marker = this.dict[String(id)];
+      if(!marker) return;
       var center = marker.getLatLng();
       var zoom = this.disableClustring;
 
@@ -692,10 +698,24 @@ define([
     toggleIconClass: function(m){
       var className = 'marker';
 
-      if (m.checked /*&& !$(m._icon).hasClass('station-marker')*/) {
-          $(m._icon).addClass('selected');
+      if (m.selected) {
+          //$(m._icon).addClass('selected');
           className += ' selected';
       }
+      
+      switch(m.feature.properties.type_) {
+        case 'station':
+          className += ' marker-station';
+          break;
+        case 'gps':
+          className += ' marker-gps';
+          break;
+        case 'argos':
+          className += ' marker-argos';
+          break;
+        default:
+      }
+
       m.setIcon(new L.DivIcon({className  : className}));
       if (m == this.lastFocused) {
           $(m._icon).addClass('focus');
@@ -841,10 +861,20 @@ define([
     //apply filters on the map from a collection
 
     //param can be filters or directly a collection
+    loadFeatureCollection: function(params){
+      if(params.featureCollection.features.length){
+        this.updateLayers(params.featureCollection);
+        if(params.selectedFeaturesIds){
+          this.selectMultiple(params.selectedFeaturesIds);
+        }
+      } else {
+        this.map.removeLayer(this.markersLayer);
+        this.geoJsonLayers = [];
+      }
+    },
+
     filter: function(param){
       //TODO : refact
-
-
       var _this = this;
       if(this.url){
         this.updateFromServ(param);
@@ -861,15 +891,15 @@ define([
           this.map.removeLayer(this.markersLayer);
           this.geoJsonLayers = [];
         }
-        var checkedMarkers = [];
+        var selectedMarkers = [];
         for (var i = coll.models.length - 1; i >= 0; i--) {
           //todo : generic term (import)
           if(coll.models[i].attributes.import)
-            checkedMarkers.push((coll.models[i].attributes.id || coll.models[i].attributes.ID));
+            selectedMarkers.push((coll.models[i].attributes.id || coll.models[i].attributes.ID));
         }
         //todo : amelioration
 
-        this.selectMultiple(checkedMarkers);
+        this.selectMultiple(selectedMarkers);
       }
     },
 

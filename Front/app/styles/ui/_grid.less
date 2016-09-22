@@ -17,8 +17,6 @@
 }
 
 
-
-
 table.backgrid{
 
 	thead{
@@ -180,11 +178,9 @@ table.backgrid{
 }
 
 
-.tab-pane{
-  height: 500px;
-}
 .grid-view {
   height: 100%;
+  background: rgb(242, 242, 242);
   position: relative;
   .ag-bootstrap-striped {
     position: relative;
@@ -194,10 +190,10 @@ table.backgrid{
       border-top: none;
     }
     .ag-menu {
-      -webkit-box-shadow: 4px 4px 4px 0 rgba(0,0,0,0.3);
-      -moz-box-shadow: 4px 4px 4px 0 rgba(0,0,0,0.3);
-      box-shadow: 4px 4px 4px 0 rgba(0,0,0,0.3);
-      padding: 0 7px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+      border-radius: 2px;
+      padding: 5px;
+      padding-top: 0px;
       .header-filter {
         color: white;
         p {
@@ -298,7 +294,7 @@ table.backgrid{
           position: absolute;
           float: none;
           right: 5px;
-          padding-left: 5px;
+          padding: 0px 5px;
           background: -moz-linear-gradient(left, rgba(199,199,199,0) 0%, rgba(199,199,199,1) 30%, rgba(199,199,199,1) 100%);
           background: -webkit-linear-gradient(left, rgba(199,199,199,0) 0%,rgba(199,199,199,1) 30%,rgba(199,199,199,1) 100%);
           background: linear-gradient(to right, rgba(199,199,199,0) 0%,rgba(199,199,199,1) 30%,rgba(199,199,199,1) 100%);
@@ -331,14 +327,20 @@ table.backgrid{
       .ag-row {
         cursor: pointer;
         line-height: 40px;
-        transition: background-color 0.1s linear;
-        border-bottom: 1px solid #dddddd;
+        transition: background 0.05s linear;
+        border-bottom: 1px solid rgb(221, 221, 221);
+        background: rgb(229, 229, 229);
         &.ag-row-even {
-          background: rgba(221, 221, 221, 0.3);
+          background: rgb(242, 242, 242);
         }
-        &:focus,
-        &:hover {
+        &.ag-row-hover {
           background: white;
+        }
+        &.ag-row-focus{
+          background:rgba(255, 165, 0, .5);
+        }
+        &.ag-row-selected{
+          background: rgba(0, 0, 0, .3);
         }
         .ag-cell {
           padding: 0 10px;
@@ -349,9 +351,7 @@ table.backgrid{
             padding-right: 30px;
           }
         }
-        &.ag-row-selected{
-          background: #bbb;
-        }
+
         span.ag-selection-checkbox{
           position: relative;
           top: -1px;
@@ -360,9 +360,9 @@ table.backgrid{
       }
     }
   }
-  .ag-pinned-left-cols-viewport{
+  /* .ag-pinned-left-cols-viewport{
     box-shadow: 5px 0px 15px rgba(119, 119, 119, 0.2);
-  }
+  } */
 
   .ag-overlay-panel {
     span.loader {

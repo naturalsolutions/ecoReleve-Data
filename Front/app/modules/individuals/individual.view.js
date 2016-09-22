@@ -43,8 +43,6 @@ define([
       'formBtns': '.js-form-btns',
 
       'map': '.js-map',
-      
-      'locationsfilter' : '.js-locations-filter',
 
       'totalLocations': '.js-total-locations'
     },
@@ -58,14 +56,13 @@ define([
 
     model: new Backbone.Model({
       type: 'individuals',
-      historyColumnDefs: [
-      {
+      historyColumnDefs: [{
         field: 'Name',
         headerName: 'Name',
-      }, {
+      },{
         field: 'value',
         headerName: 'Value',
-      }, {
+      },{
         field: 'StartDate',
         headerName: 'Start Date',
       },],
@@ -75,7 +72,7 @@ define([
       },{
         field: 'EndDate',
         headerName: 'End Date',
-      }, {
+      },{
         field: 'Type',
         headerName: 'Type',
       },{
@@ -85,28 +82,43 @@ define([
       locationsColumnDefs: [{
         field: 'ID',
         headerName: 'ID',
-        checkboxSelection: true,
-        pinned: 'left'
+        hide: true,
       },{
         field: 'Date',
         headerName: 'date',
+        checkboxSelection: true,
+        filter: 'text',
+        pinned: 'left',
+        minWidth: 200,
+        cellRenderer: function(params){
+          if(params.data.type_ === 'station'){
+            //params.node.removeEventListener('rowSelected', params.node.eventService.allListeners.rowSelected[0]);
+            $(params.eGridCell).find('.ag-selection-checkbox').addClass('hidden'); 
+          }
+          return params.value;
+        }
       },{
         field: 'LAT',
         headerName: 'latitude',
+        filter: 'number',
       }, {
         field: 'LON',
         headerName: 'longitude',
+        filter: 'number',
       },{
         field: 'region',
         headerName: 'Region',
+        filter: 'text',
       },{
         field: 'type_',
         headerName: 'Type',
+        filter: 'text',
       },{
         field: 'fieldActivity_Name',
         headerName: 'FieldActivity',
+        filter: 'text',
         cellRenderer: function(params){
-          if(params.data.ID.split('_').length > 1){
+          if(params.data.type_ === 'station'){
             //ex: sta_44960
             var url = '#stations/' + params.data.ID.split('_')[1];
             return  '<a target="_blank" href="'+ url +'" >' + 
@@ -118,8 +130,6 @@ define([
         }
       }]
     }),
-
-    nbLocations: [],
 
     initialize: function(options) {
       this.com = new Com();
@@ -144,10 +154,10 @@ define([
     },
 
     onShow: function() {
-      this.displayNavbar();
       this.displayMap();
       this.displayForm();
       this.displayGrids();
+      this.displayNavbar();
     },
 
     displayNavbar: function(){
@@ -159,18 +169,18 @@ define([
     displayMap: function() {
       var _this = this;
         this.map = new NsMap({
-            url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true',
-            cluster: true,
-            legend: true,
-            zoom: 3,
-            element: 'map',
-            popup: true,
-            com: _this.com,
-            selection: true,
-            idName: 'ID',
-            latName: 'LAT',
-            lonName: 'LON'
-          });
+          url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true',
+          cluster: true,
+          legend: true,
+          zoom: 3,
+          element: 'map',
+          popup: true,
+          com: _this.com,
+          selection: true,
+          idName: 'ID',
+          latName: 'LAT',
+          lonName: 'LON'
+        });
         this.map.url = false;
     },
 
@@ -207,59 +217,29 @@ define([
         url: this.model.get('type') + '/' + this.model.get('id')  + '/locations',
         clientSide: true,
         gridOptions: {
+          enableFilter: true,
           onRowClicked: function(row){
             _this.locationsGrid.interaction('focus', row.data.ID || row.data.id);
           }
         }
       }));
-
-      this.displayLocationsFilter();
-
-    },
-    displayLocationsFilter: function() {
-      $(this.ui.locationsfilter).empty();
-      var locfiltersList = {
-        1: {
-          name: 'type_',
-          type: 'Text',
-          label: 'Types',
-          title: 'types'
-        },
-        2: {
-        type: 'Select' ,
-        title: 'Fieldacivity',
-        name: 'fieldActivity_Name',
-        editorClass: 'form-control',
-        options: [],
-        fieldClass: 'fieldactivity',
-        validators: []
-      },
-        3: {
-          name: 'Date',
-          type: 'DateTimePickerEditor',
-          label: 'Date',
-          title: 'Date',
-          options:{isInterval: 1}
-        }
-      };
-      this.locfilters = new NsFilter({
-        filters: locfiltersList,
-        com: this.com,
-        clientSide: true,
-        filterContainer: this.ui.locationsfilter
-      });
-      this.loadCollection(config.coreUrl + 'fieldActivity', 'select.fieldActivity_Name');
     },
 
     displayTab: function(e) {
       e.preventDefault();
-      var ele = $(e.target);
-      var tabLink = $(ele).attr('href');
-      var tabUnLink = $('li.active.tab-ele a').attr('href');
-      $('li.active.tab-ele').removeClass('active');
-      $(ele).parent().addClass('active');
-      $(tabLink).addClass('in active');
-      $(tabUnLink).removeClass('active in');
+      this.$el.find('.nav-tabs>li').each(function(){
+        $(this).removeClass('active in');
+      });
+      $(e.currentTarget).parent().addClass('active in');
+
+      this.$el.find('.tab-content>.tab-pane').each(function(){
+        $(this).removeClass('active in');
+      });
+      var id = $(e.currentTarget).attr('href');
+      this.$el.find('.tab-content>.tab-pane' + id).addClass('active in');
+
+      this.equipmentGrid.gridOptions.api.sizeColumnsToFit();
+      this.locationsGrid.gridOptions.api.sizeColumnsToFit();
     },
 
     displayForm: function() {
@@ -275,9 +255,7 @@ define([
         parent: this.parent,
         displayDelete: false,
       });
-
     },
-
 
     warnDeleteLocations: function() {
       var _this = this;
@@ -318,9 +296,6 @@ define([
       });
     },
 
-    filter: function() {
-      this.locfilters.update();
-    },
 
     swal: function(opt, type, callback) {
       var btnColor;
@@ -360,24 +335,5 @@ define([
         }
       });
     },
-
-    loadCollection: function(url, element) {
-      var collection =  new Backbone.Collection();
-      collection.url = url;
-      var elem = $(element);
-      elem.append('<option></option>');
-      collection.fetch({
-        success: function(data) {
-          //could be a collectionView
-          for (var i in data.models) {
-            var current = data.models[i];
-            var value = current.get('value') || current.get('PK_id');
-            var label = current.get('label') || current.get('fullname');
-            elem.append("<option value ='" + label + "'>"+ label + "</option>");
-          }
-        }
-      });
-    },
-
   });
 });

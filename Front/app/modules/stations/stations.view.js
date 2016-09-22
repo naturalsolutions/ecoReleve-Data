@@ -47,7 +47,6 @@ define([
           $(this).toggleClass('active');
         })
         if(this.$el.find('#lastImportedStations').hasClass('active')) {
-          console.log(this.filters);
           this.filters.extraFilters = [{
             Column: 'LastImported',
             Operator: '=',

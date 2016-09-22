@@ -3,12 +3,12 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config', //unecessary
+  'config',
   'ag-grid',
 
   'i18n'
 
-], function($, _, Backbone, Marionette, config, AgGrid) {
+], function($, _, Backbone, Marionette, config, AgGrid, utils_1) {
 
   'use strict';
 
@@ -23,6 +23,10 @@ define([
     filters: [],
     comeback: false,
     ready: true,
+
+    events: {
+      'click #agMenu': 'focusFilter',
+    },
 
     initialize: function(options){
       this.extendAgGrid();
@@ -60,6 +64,9 @@ define([
               _this.gridOptions.api.sizeColumnsToFit();
             }, 0)
         },
+        onAfterFilterChanged: function(){
+          _this.clientSideFilter();
+        }
         //overlayNoRowsTemplate: '<span>No rows to display</span>',
         //overlayLoadingTemplate: '',
       };
@@ -74,7 +81,7 @@ define([
       $.extend(this.gridOptions, options.gridOptions || {});
 
       if(options.columns){
-        this.gridOptions.columnDefs = options.columns;
+        this.gridOptions.columnDefs = this.formatColumns(options.columns);
         this.columnDeferred = true;
       } else {
         this.fetchColumns();
@@ -93,19 +100,21 @@ define([
       }
     },
 
-    formatColumns: function(columns){
-      var columnDefs = [];
-      columns.map(function(col, i) {
-        var columnDef = {
-          headerName: col.label,
-          field: col.name,
-          //hide: !(col.renderable),
-          minWidth: 100,
-          maxWidth: 300,
+    formatColumns: function(columnDefs){
+      var filter = {
+        'string' : 'text',
+        'integer': 'number',
+      };
+      columnDefs.map(function(col, i) {
+        if(col.name){
+          col.headerName = col.label;
+          col.field = col.name;
+          col.filter = filter[col.cell];
         }
-        columnDefs.push(columnDef);
+        col.minWidth = col.minWidth || 100;
+        col.maxWidth = col.maxWidth || 300;
+        col.filterParams = col.filterParams || {apply: true};
       });
-
       return columnDefs;
     },
 
@@ -313,13 +322,40 @@ define([
     },
 
     clientSideFilter: function(filters){
+      var data = [];
+      var featureCollection = {
+          'features': [],
+          'type': 'FeatureCollection'
+      };
+      var feature;
+
+      var selectedFeaturesIds = [];
+
+      //because it's better than to do others loops
+      this.gridOptions.api.forEachNodeAfterFilterAndSort(function(node, index){
+        feature = {
+            'type': 'Feature',
+            'id': node.data.id || node.data.ID,
+            'geometry': {
+                'type': 'Point',
+                'coordinates': [node.data.LAT, node.data.LON],
+            },
+            'properties': node.data,
+        };
+        featureCollection.features.push(feature);
+        if(node.selected){
+          selectedFeaturesIds.push(node.data.id || node.data.ID);
+        }
+      });
+
+      this.interaction('loadFeatureCollection', {
+        featureCollection: featureCollection,
+        selectedFeaturesIds: selectedFeaturesIds
+      });
     },
 
     filter: function(filters){
       this.filters = filters;
-      
-      this.clientSideFilter(filters);
-
       if(this.dataSource){
         this.gridOptions.api.setDatasource(this.dataSource);
       }
@@ -379,7 +415,72 @@ define([
       this.paginationController.loadPage();      
     },
 
+    focusFilter: function(e){
+      setTimeout(function(){
+        $(e.currentTarget).parent().addClass('current-filter');
+      }, 0);
+    },
+
     extendAgGrid: function(){
+      var _this = this;
+
+      AgGrid.StandardMenuFactory.prototype.showPopup = function (column, positionCallback) {
+          var filterWrapper = this.filterManager.getOrCreateFilterWrapper(column);
+          //ag Menu
+          var eMenu = document.createElement('div');
+          var addCssClass = function (element, className) {
+            var _this = this;
+            if (!className || className.length === 0) {
+                return;
+            }
+            if (className.indexOf(' ') >= 0) {
+                className.split(' ').forEach(function (value) { return _this.addCssClass(element, value); });
+                return;
+            }
+            if (element.classList) {
+                element.classList.add(className);
+            }
+            else {
+                if (element.className && element.className.length > 0) {
+                    var cssClasses = element.className.split(' ');
+                    if (cssClasses.indexOf(className) < 0) {
+                        cssClasses.push(className);
+                        element.className = cssClasses.join(' ');
+                    }
+                }
+                else {
+                    element.className = className;
+                }
+            }
+        };
+
+          //utils_1.Utils.addCssClass(eMenu, 'ag-menu');
+          addCssClass(eMenu, 'ag-menu');
+
+          eMenu.appendChild(filterWrapper.gui);
+
+          //Add header
+          var eheader = document.createElement('div');
+          eheader.className = 'header-filter';
+          eheader.innerHTML = "<p><span class='glyphicon glyphicon-align-right glyphicon-filter'></span></p>";
+          eMenu.insertBefore(eheader, eMenu.firstChild);
+
+          // need to show filter before positioning, as only after filter
+          // is visible can we find out what the width of it is
+          var elt = this.filterManager.gridCore.eGridDiv;
+          var closedCallback = function(){
+            $(elt).find('.ag-header-cell').removeClass('current-filter');
+          };
+          var hidePopup = this.popupService.addAsModalPopup(eMenu, true, closedCallback);
+
+          positionCallback(eMenu);
+          if (filterWrapper.filter.afterGuiAttached) {
+              var params = {
+                  hidePopup: hidePopup
+              };
+              filterWrapper.filter.afterGuiAttached(params);
+          }
+      };
 
       AgGrid.PaginationController.prototype.createTemplate = function () {
           var localeTextFunc = this.gridOptionsWrapper.getLocaleTextFunc();
