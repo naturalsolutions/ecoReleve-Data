@@ -250,14 +250,14 @@ define([
 					break;
 				}
 			}
-		/*	if ( oldVal === val) {
-				this.model.set("validated",1);
-				this.setVisualValidated(1);
+			if ( oldVal === val) {
+				this.model.set("validated",null);
+				this.setVisualValidated(0);
 			}
-			else {*/
+			else {
 				this.model.set("validated",val);
 				this.setVisualValidated(val);
-			//}
+			}
 		},
 
 		toggleModelStatus : function (){
@@ -321,6 +321,11 @@ define([
 					$content.css("background-color" , "red");
 					this.$el.find('.rating-container').addClass('hide');
 
+					break;
+				}
+				default : {
+					$content.css("background-color", "");
+					$image.removeClass('checked');
 					break;
 				}
 			}
