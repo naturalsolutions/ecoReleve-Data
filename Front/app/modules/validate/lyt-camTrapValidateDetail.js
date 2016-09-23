@@ -289,7 +289,7 @@ define([
             this.currentPosition = 0;//position to focus
             this.tabSelected = [];
             break;
-          }
+          }-re
           case 'P': {//previous page
             this.pageChange = '';
             this.currentPosition = this.tabView.length-1; //position to focus
@@ -304,7 +304,7 @@ define([
           }
         }
         this.focusImg();
-        if( this.rgFullScreen.currentView !== undefined){//si le modal existe on change
+        if( this.rgFullScreen.currentView !== undefined && this.stopSpace){//si le modal existe on change
           this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
         }
     /*    if( this.currentPosition >= 0 ) {
@@ -584,12 +584,16 @@ define([
         $('#rgToolsBarTop .reneco-image_file').addClass('active');
         this.ui.gallery.hide();
         //console.log(this.rgFullScreen);
-        this.rgFullScreen.$el.addClass("crop2 crop-paginator");
+
         if(this.rgFullScreen.currentView === undefined) {
           this.rgFullScreen.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
+          this.rgFullScreen.$el.addClass("crop2 crop-paginator");
           this.rgFullScreen.$el.show();
         }
         else {
+          if( !this.rgFullScreen.$el.hasClass("crop2") ) {
+            this.rgFullScreen.$el.addClass("crop2 crop-paginator");
+          }
           this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
           //this.rgFullScreen.currentView.show();
         this.rgFullScreen.$el.show();
