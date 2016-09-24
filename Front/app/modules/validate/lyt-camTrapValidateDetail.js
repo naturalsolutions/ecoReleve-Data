@@ -561,16 +561,15 @@ define([
     },
 
     leaveModal: function(e){
-      this.stopSpace = false;
-      $('#rgToolsBarTop .reneco-ecollectionsmall').addClass('active');
-      $('#rgToolsBarTop .reneco-image_file').removeClass('active');
-      if(this.rgFullScreen.currentView !== undefined) {
-        this.rgFullScreen.$el.removeClass("crop2 crop-paginator");
-        //this.rgFullScreen.currentView.hide();
-        this.ui.gallery.show();
-        this.rgFullScreen.currentView.hide();
-        //this.rgFullScreen.currentView.hide();
-        //this.rgFullScreen.$el.hide();
+      if (this.stopSpace) {
+        this.stopSpace = false;
+        $('#rgToolsBarTop .reneco-ecollectionsmall').addClass('active');
+        $('#rgToolsBarTop .reneco-image_file').removeClass('active');
+        if(this.rgFullScreen.currentView !== undefined) {
+          this.rgFullScreen.$el.removeClass("crop2 crop-paginator");
+          this.ui.gallery.show();
+          this.rgFullScreen.currentView.hide();
+        }
       }
     },
 
