@@ -309,7 +309,10 @@ define([
 				//	$icon.removeClass( lastClass );
 					$icon.addClass('reneco-checked');
 					$image.addClass('checked');
-					$content.css("background-color" , "green");
+					if( $content.hasClass('rejected') ) {
+						$content.removeClass('rejected');
+					}
+					$content.addClass('accepted');//css("background-color" , "green");
 					this.$el.find('.rating-container').removeClass('hide');
 
 					break;
@@ -318,13 +321,22 @@ define([
 				//	$icon.removeClass( lastClass );
 					$icon.addClass('reneco-close');
 					$image.addClass('checked');
-					$content.css("background-color" , "red");
+					if ( $content.hasClass('accepted') ) {
+						$content.removeClass('accepted');
+					}
+					$content.addClass('rejected');//css("background-color" , "red");
 					this.$el.find('.rating-container').addClass('hide');
 
 					break;
 				}
 				default : {
-					$content.css("background-color", "");
+					if ( $content.hasClass('accepted') ) {
+						$content.removeClass('accepted');
+					}
+					if( $content.hasClass('rejected') ) {
+						$content.removeClass('rejected');
+					}
+
 					$image.removeClass('checked');
 					break;
 				}

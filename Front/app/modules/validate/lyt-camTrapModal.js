@@ -20,6 +20,10 @@ define([
 		keyShortcuts :{
 			//'space': 'onClickImage',
 		},
+		ui : {
+			'canLeft' : 'i.reneco-chevron_left',
+			'canRight' : 'i.reneco-chevron_right'
+		},
 		events:{
 
 		},
@@ -43,6 +47,12 @@ define([
 
 		onRender: function() {
 			var _this = this;
+			if (this.position > 1) {
+				this.ui.canLeft.css('visibility','visible');
+			}
+			if (this.position < this.total ) {
+				this.ui.canRight.css('visibility','visible');
+			}
 			this.parent.$el.find('.backgrid-paginator').css('visibility','hidden');
 			this.parent.$el.find('.paginatorCamTrap').prepend('<div class="infosfullscreen">'
 											+this.model.get('date_creation')+''

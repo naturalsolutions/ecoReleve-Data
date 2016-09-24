@@ -49,6 +49,18 @@ div.bootstrap-tagsinput{
       margin-right: auto;
       object-fit:contain;
     }
+    i {
+      visibility: hidden;
+      position: absolute;
+      top:~"calc(50% - 35px)";
+      background-color: rgba(67,67,67,0.8);
+    }
+    i.reneco-chevron_left {
+      left: 0;
+    }
+    i.reneco-chevron_right {
+      right: 0;
+    }
   }
 }
 
@@ -124,14 +136,6 @@ div.bootstrap-tagsinput{
         height: 100%;
         border-radius: 8px;
         img{
-          //position: relative;
-          //border-radius: 8px;
-          //top:0;
-          //left:0;
-          // padding-left: auto;
-          // padding-right: auto;
-          // max-width: 100%;
-          // max-height: 100%;
           height: 100%;
           width: 100%;
           cursor : pointer;
@@ -140,18 +144,11 @@ div.bootstrap-tagsinput{
           border-radius: 8px;
           -webkit-clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 0%, 100% 0);
           transition : -webkit-clip-path 0.5s;
-          /*  position: absolute;
-          top: 50%;
-          left: 50%;
-
-          width: 100%;
-          height: 100%;
-          object-fit:cover;
-          overflow: hidden;*/
         }
         img:focus + div.dateexif{
           animation : blink 2s linear;
         }
+
         @keyframes blink {
           0%,100% { opacity: 0 }
           50% { opacity: 1 }
@@ -178,9 +175,29 @@ div.bootstrap-tagsinput{
           -webkit-clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 25%, 75% 0);
         }
       }
-      .camtrapItemViewContent:hover div.dateexif{
+      .camtrapItemViewContent:hover div.dateexif {
         //display:block;
         opacity: 1;
+      }
+      .camtrapItemViewContent:hover div.rating-container {
+        opacity: 1;
+      }
+      .camtrapItemViewContent .rating-xs {
+        font-size : 1.2em ;
+      }
+      .camtrapItemViewContent .rating-container {
+        opacity: 0;
+        position: absolute;
+        top : 0;
+        z-index: 999;
+        transition: opacity 0.8s linear;
+
+      }
+      .camtrapItemViewContent.accepted{
+        background-color : green;
+      }
+      .camtrapItemViewContent.rejected{
+          background-color : red;
       }
       .camtrapItemViewFooter{
         height: 10%;
