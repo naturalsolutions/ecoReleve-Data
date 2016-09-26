@@ -26,6 +26,13 @@ define([
 
     events: {
       'click #agMenu': 'focusFilter',
+      'keypress .ag-row': 'keypress'
+    },
+
+    keypress: function(e){
+      if(e.keyCode == 13){
+        $(e.currentTarget).click();
+      }
     },
 
     initialize: function(options){
@@ -49,9 +56,11 @@ define([
       this.filters = options.filters || [];
       this.afterGetRows = options.afterGetRows;
       this.afterFirstRowFetch = options.afterFirstRowFetch;
+      this.goTo = options.goTo || false;
+
+      this.name = options.name || false;
 
       this.gridOptions = {
-        //container: this, ?
         enableSorting: true,
         enableColResize: true,
         rowHeight: 40,
@@ -124,7 +133,7 @@ define([
         method: 'GET',
         context: this,
         data: {
-          name: 'default'
+          name: this.name || 'default'
         }
       }).done( function(response) {
         this.gridOptions.columnDefs = this.formatColumns(response);
@@ -132,67 +141,22 @@ define([
     },
 
     fetchData: function(){
+      var _this = this;
       this.deferred = $.ajax({
         url: this.model.get('url'),
         method: 'GET',
         context: this,
       }).done( function(response) {
         this.gridOptions.rowData = response;
-        this.gridOptions.api.setRowData(response);
+        $.when(this.columnDeferred).then(function(){
+          if(response[1] instanceof Array){
+            _this.gridOptions.api.setRowData(response[1]);
+          } else {
+            _this.gridOptions.api.setRowData(response);
+          }
+        })
       });
 
-    },
-
-
-    initDataSourceBis: function(){
-      var _this = this;
-      this.dataSource = {
-        rowCount: null,
-        maxConcurrentDatasourceRequests: 2,
-        getRows : function (params){
-          var pageSize = params.endRow - params.startRow;
-          var page = params.endRow / pageSize;
-          var offset = (page - 1) * pageSize;
-
-          var order_by = [];
-          if(params.sortModel.length) {
-            order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
-          }
-
-          var status = {
-            criteria: JSON.stringify(_this.filters),
-            page: page,
-            per_page: pageSize,
-            offset: offset,
-            order_by: JSON.stringify(order_by)
-          };
-
-          _this.deferred = $.ajax({
-            url: _this.model.get('url'),
-            method: 'GET',
-            context: this,
-            data: status
-          }).done( function(response) {
-            var rowsThisPage = response[1];
-            var total = response[0].total_entries;
-
-            _this.model.set('totalRecords', total);
-            _this.model.set('status', status);
-
-            if(_this.afterGetRows){
-              _this.afterGetRows();
-            }
-
-            if(_this.firstRowFetch && _this.afterFirstRowFetch){
-              _this.afterFirstRowFetch();
-            }
-
-            _this.firstRowFetch = false;
-            params.successCallback(rowsThisPage , total);
-          });
-
-        }
-      };
     },
 
     initDataSource: function(){
@@ -209,6 +173,7 @@ define([
           if(params.sortModel.length) {
             order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
           }
+          
 
           var status = {
             criteria: JSON.stringify(_this.filters),
@@ -302,6 +267,15 @@ define([
             },0);
           }
       });
+    },
+
+    focusByIndex: function(params) {
+      console.log(params);
+      var _this = this;
+        _this.gridOptions.api.ensureIndexVisible(params.index);
+        setTimeout(function(){
+          _this.gridOptions.api.setFocusedCell(params.index, 'ID', null);
+        },0);
     },
 
     selectOne: function(param, from){
@@ -407,7 +381,17 @@ define([
         this.paginationController = this.gridOptions.api.paginationController;
       }
 
-
+      /*if(this.goTo){
+        $.when(this.deferred).then(function(){
+          _this.jumpToPage(_this.goTo.page - 1);
+          setTimeout(function(){
+          _this.gridOptions.api.ensureIndexVisible(_this.goTo.index);
+          setTimeout(function(){
+            _this.gridOptions.api.setFocusedCell(_this.goTo.index, 'ID', null);
+          }, 0);
+          },500);
+      });
+      }*/
     },
     
     jumpToPage: function(index){

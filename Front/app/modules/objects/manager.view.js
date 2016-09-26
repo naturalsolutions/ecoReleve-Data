@@ -47,12 +47,19 @@ define([
     initialize: function(options) {
       this.com = new Com();
       if( window.app.currentData ){
-        this.populateCurrentData();
+        this.populateCurrentData(window.app.currentData);
       }
     },
 
-    populateCurrentData: function(){
-      this.defaultFilters = window.app.currentData.filters;
+    populateCurrentData: function(currentData){
+      this.defaultFilters = currentData.filters;
+
+      if(currentData.index !== 'undefined'){
+        this.goTo = {
+          index: currentData.index,
+          page: currentData.status.page
+        }
+      }
     },
 
     onRender: function() {
@@ -92,8 +99,10 @@ define([
         gridOptions: {
           onRowClicked: onRowClicked,
           rowModelType: 'pagination'
-        }
+        },
+        goTo: (this.goTo || false)
       }));
+
     },
 
     displayFilter: function() {

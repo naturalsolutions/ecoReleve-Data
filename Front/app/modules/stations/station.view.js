@@ -3,46 +3,39 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'radio',
   'sweetAlert',
   'config',
+
   'ns_form/NSFormsModuleGit',
   'ns_navbar/navbar.view',
   './layouts/lyt-protocols-editor',
 
-  'i18n'
+  'modules/objects/detail.view',
+  './station.model',
 
-], function($, _, Backbone, Marionette, Radio,
-  Swal, config, NsForm, NavbarView, LytProtoEditor
+], function(
+  $, _, Backbone, Marionette, Swal, config,
+  NsForm, NavbarView, LytProtoEditor, 
+  DetailView, StationModel
 ) {
 
   'use strict';
 
-  return Marionette.LayoutView.extend({
+  return DetailView.extend({
     template: 'app/modules/stations/station.tpl.html',
-    className: 'full-height white',
+    className: 'full-height white station',
 
-    regions: {
-      'rgStation': '#rgStation',
-      'rgProtoEditor': '#rgProtoEditor',
-      'rgNavbar': '#navbar'
-    },
+    model: new StationModel(),
 
     ui: {
-      protoEditor: '#protoEditor',
-      total: '#total',
-      formStation: '#stationForm',
-      formStationBtns: '#stationFormBtns',
+      formStation: '.js-from-station',
+      formStationBtns: '.js-from-btns',
     },
 
-    total: 0,
-
-    model: new Backbone.Model({
-      type: 'stations',
-    }),
-
-    initialize: function(options) {
-      this.model.set('id', options.id);
+    regions: {
+      'rgStation': '.js-rg-station',
+      'rgProtoEditor': '.js-rg-proto-editor',
+      'rgNavbar': '.js-navbar'
     },
 
     reloadFromNavbar: function(id) {
@@ -50,16 +43,9 @@ define([
       this.displayStation();
     },
 
-    onDestroy: function() {
-    },
-    
-    onRender: function() {
-      this.$el.i18n();
-    },
-
     onShow: function() {
-      this.displayNavbar();
       this.displayStation();
+      this.displayNavbar();
     },
 
     displayNavbar: function(){
@@ -70,38 +56,34 @@ define([
 
     displayStation: function() {
       this.total = 0;
-      var stationType = 1;
       var _this = this;
-      this.nsForm = new NsForm({
-        name: 'StaForm',
-        modelurl: config.coreUrl + 'stations',
-        formRegion: this.ui.formStation,
-        buttonRegion: [this.ui.formStationBtns],
-        displayMode: 'display',
-        objectType: stationType,
-        id: this.model.get('id'),
-        reloadAfterSave: true,
-        });
+      
+      var formConfig = this.model.get('formConfig');
 
-        this.nsForm.BeforeShow = function(){
-          
-        };
+      formConfig.id = this.model.get('id');
+      formConfig.formRegion = this.ui.formStation;
+      formConfig.buttonRegion = [this.ui.formStationBtns];
 
-        this.nsForm.afterShow = function(){
-          $(".datetime").attr('placeholder','DD/MM/YYYY');
-          $("#dateTimePicker").on("dp.change", function (e) {
-            $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
-           });
-          _this.filedAcitivityId = this.model.get('fieldActivityId');
-        };
+      this.nsForm = new NsForm(formConfig);
+      this.nsForm.BeforeShow = function(){
+        
+      };
+
+      this.nsForm.afterShow = function(){
+        $(".datetime").attr('placeholder','DD/MM/YYYY');
+        $("#dateTimePicker").on("dp.change", function (e) {
+          $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
+         });
+        _this.filedAcitivityId = this.model.get('fieldActivityId');
+      };
 
       this.nsForm.afterDelete = function() {
         var jqxhr = $.ajax({
-          url: config.coreUrl + 'stations/' + _this.model.get('id'),
+          url: config.coreUrl + _this.model.get( 'type') + '/' + _this.model.get('id'),
           method: 'DELETE',
-          contentType: 'application/json'
+          contentType: 'application/json',
         }).done(function(resp) {
-          Backbone.history.navigate('#stations', {trigger: true});
+          Backbone.history.navigate('#' + _this.model.get( 'type'), {trigger: true});
         }).fail(function(resp) {
         });
       };
@@ -130,7 +112,7 @@ define([
       this.nsForm.afterSaveSuccess = function() {
         if(this.model.get('fieldActivityId') != _this.fieldActivityId){
           _this.displayProtos();
-          _this.fieldActivityId = this.model.get('fieldActivityId');
+          _this.fieldActivityId = _this.model.get('fieldActivityId');
         }
       },
 
@@ -139,7 +121,6 @@ define([
 
     displayProtos: function() {
       this.lytProtoEditor = new LytProtoEditor({stationId: this.model.get('id')});
-
       this.rgProtoEditor.show(this.lytProtoEditor);
     },
 

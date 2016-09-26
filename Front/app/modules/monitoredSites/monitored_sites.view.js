@@ -1,14 +1,11 @@
 define([
-  'modules/objects/manager.view'
-], function(ManagerView) {
+  'modules/objects/manager.view',
+  './monitored_site.model'
+], function(ManagerView, MonitoredSiteModel) {
 
   'use strict';
 
   return ManagerView.extend({
-  	model: new Backbone.Model({
-  	  label: 'monitored sites',
-  	  single: 'monitored site',
-  	  type: 'monitoredSites',
-  	}),
+  	model: new MonitoredSiteModel(),
   });
 });

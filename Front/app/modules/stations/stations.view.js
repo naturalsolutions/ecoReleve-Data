@@ -1,11 +1,13 @@
 define([
   'modules/objects/manager.view',
+  './station.model',
   'ns_filter/filters',
   'config',
   'ns_map/ns_map',
 
 ], function(
 	ManagerView,
+  StationModel,
 	NsFilter,
 	config,
 	NsMap
@@ -13,12 +15,8 @@ define([
   'use strict';
 
   return ManagerView.extend({
-  	template: 'app/modules/stations/stations.tpl.html',
-    model: new Backbone.Model({
-      label: 'stations',
-      single: 'station',
-      type: 'stations',
-    }),
+    template: 'app/modules/stations/stations.tpl.html',
+    model: new StationModel(),
 
 		events: {
 		  'click .js-btn-filter': 'filter',
@@ -31,12 +29,19 @@ define([
 
 		},
 
-    populateCurrentData: function(){
-      this.defaultFilters = window.app.currentData.filters;
+    populateCurrentData: function(currentData){
+      this.defaultFilters = currentData.filters;
       if(this.defaultFilters.length){
         if(this.defaultFilters[0].Column == 'LastImported'){
           this.extraFilters = this.defaultFilters[0];
           this.model.set('lastImported', true);
+        }
+      }
+
+      if(currentData.index !== 'undefined'){
+        this.goTo = {
+          index: currentData.index,
+          page: currentData.status.page
         }
       }
     },

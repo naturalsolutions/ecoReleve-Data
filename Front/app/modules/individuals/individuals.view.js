@@ -1,16 +1,12 @@
 define([
-  'modules/objects/manager.view'
-], function(ManagerView) {
+  'modules/objects/manager.view',
+  './individual.model',
+], function(ManagerView, IndividualModel) {
 
   'use strict';
 
   return ManagerView.extend({
   	//template: 'app/modules/individuals/individuals.tpl.html',
-  	model: new Backbone.Model({
-  	  label: 'individuals',
-  	  single: 'individual',
-  	  type: 'individuals',
-  	}),
-		
+  	model: new IndividualModel(),
   });
 });
