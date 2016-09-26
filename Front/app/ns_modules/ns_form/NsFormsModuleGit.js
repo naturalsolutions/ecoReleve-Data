@@ -260,7 +260,7 @@ define([
         if (curSchema.rule){
           var curRule = curSchema.rule;
           var target = curSchema.name;
-          var curResult = _this.ruler.addRule(target,curRule.operator,curRule.source);
+          var curResult = _this.ruler.addRule(target,curRule.operator,curRule.source,curRule.value);
           if (curResult) {
             globalError[target] = curResult;
             errorMsg +=  curResult.object + ':  '+curResult.message+'\n' ;
