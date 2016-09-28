@@ -9,7 +9,8 @@ define([
   'ns_modules/ns_com',
   'ns_grid/grid.view',
   'ns_filter/filters',
-
+  
+  'tooltipster-list',
   'i18n'
 
 ], function(

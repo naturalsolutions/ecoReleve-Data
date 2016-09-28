@@ -15,19 +15,19 @@ define([
 
   './modules/stations/station.view',
   './modules/stations/stations.view',
-  './modules/stations/lyt-station-new',
+  './modules/stations/stations.new.view',
 
   './modules/individuals/individual.view',
   './modules/individuals/individuals.view',
-  './modules/individuals/lyt-individuals-new',
+  './modules/individuals/individuals.new.view',
 
   './modules/sensors/sensor.view',
   './modules/sensors/sensors.view',
-  './modules/sensors/lyt-sensors-new',
+  './modules/sensors/sensors.new.view',
 
   './modules/monitoredSites/monitored_site.view',
   './modules/monitoredSites/monitored_sites.view',
-  './modules/monitoredSites/lyt-ms-new',
+  './modules/monitoredSites/monitored_sites.new.view',
 
 ],function(
   Marionette, config,
@@ -80,24 +80,14 @@ define([
       this.rgMain.show(new LytStationsNew({from: from}));
     },
 
-    observations: function(id) {
-     $.ajax({
-          context: this,
-          url: config.coreUrl + 'protocols/' + id,
-        }).done(function (data) {
-        window.location.href = window.location.origin + window.location.pathname + '#stations/' + data['FK_Station'] + '?observation=' + id ;
-      }) ;
-      //this.rgMain.show(new LytStations({id: id}));
-    },
-
     individual: function(id) {
       this.rgMain.show(new LytIndividual({id: id}));
     },
     individuals: function() {
       this.rgMain.show(new LytIndividuals());
     },
-    newIndividual: function(type) {
-      this.rgMain.show(new LytIndividualsNew({type: type}));
+    newIndividual: function(objectType) {
+      this.rgMain.show(new LytIndividualsNew({objectType: objectType}));
     },
 
 
@@ -118,8 +108,8 @@ define([
     sensors: function() {
       this.rgMain.show(new LytSensors());
     },
-    newSensor: function(type) {
-      this.rgMain.show(new LytSensorsNew({type: type}));
+    newSensor: function(objectType) {
+      this.rgMain.show(new LytSensorsNew({objectType: objectType}));
     },
 
 
@@ -144,6 +134,7 @@ define([
     export: function() {
       this.rgMain.show(new LytExport());
     },
+
     checkAjax : function(){
       var xhrPool = window.xhrPool;
 

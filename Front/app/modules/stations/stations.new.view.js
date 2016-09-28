@@ -3,44 +3,43 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'radio',
+  'config',
 
   'moment',
   'dateTimePicker',
   'sweetAlert',
-  'config',
 
   'ns_form/NSFormsModuleGit',
-
   'ns_map/ns_map',
 
   'i18n'
 
-], function($, _, Backbone, Marionette, Radio,
-
-  moment, datetime, Swal, config, NsForm, NsMap
-) {
+], function(
+  $, _, Backbone, Marionette, config,
+  moment, datetime, Swal, 
+  NsForm, NsMap
+){
 
   'use strict';
 
   return Marionette.LayoutView.extend({
-    template: 'app/modules/stations/tpl-station-new.html',
+    template: 'app/modules/stations/stations.new.tpl.html',
     className: 'full-height white',
 
     events: {
+      'click .js-btn-current-position': 'getCurrentPosition',
+      'click .js-btn-save': 'save',
+
       'focusout input[name="Dat e_"]': 'checkDate',
       'change input[name="LAT"], input[name="LON"]': 'getLatLng',
-      'click #getCurrentPosition': 'getCurrentPosition',
       'click .tab-link': 'displayTab',
       'change select[name="FieldWorker"]': 'checkUsers',
-      'click button#save': 'save'
     },
 
     name: 'Station creation',
 
     ui: {
-      'staForm': '#staForm',
-      'saveBtn': 'button#save'
+      'staForm': '.js-form',
     },
 
     initialize: function(options) {
@@ -145,11 +144,11 @@ define([
       switch (stationType){
         case '#stWithCoords':
           stTypeId = 1;
-          $('#getCurrentPosition').removeClass('hidden');
+          $('.js-get-current-position').removeClass('hidden');
           break;
         case '#stWithoutCoords':
           stTypeId = 3;
-          $('#getCurrentPosition').addClass('hidden');
+          $('.js-get-current-position').addClass('hidden');
           break;
         default:
           break;

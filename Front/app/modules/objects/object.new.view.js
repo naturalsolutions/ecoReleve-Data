@@ -19,28 +19,32 @@ define([
 
     ui: {
       'form': '.js-form',
-      'btnform': '.js-btn-form'
     },
     events: {
       'click .js-back': 'removeThis',
       'click .js-btn-save': 'save',
       'click .js-cancel': 'cancel'
     },
+    
+    model: new Backbone.Model(),
 
     initialize: function(options) {
-      this.model = new Backbone.Model();
-      this.model.set('objectType', options.objectType);
+      if (options.objectType){
+        this.model.set('objectType', options.objectType);
+      } else {
+        this.model.set('objectType', 1);
+      }
     },
 
     onShow: function() {
-      this.displayForm(this.type);
+      this.displayForm();
     },
 
-    displayForm: function(type) {
+    displayForm: function() {
       var self = this;
       this.nsForm = new NsForm({
         name: 'SensorForm',
-        modelurl: config.coreUrl + model.get('type'),
+        modelurl: config.coreUrl + this.model.get('type'),
         buttonRegion: [],
         formRegion: this.ui.form,
         displayMode: 'edit',
@@ -48,25 +52,23 @@ define([
         id: 0,
         reloadAfterSave: false,
         afterSaveSuccess: function() {
-          console.log(this.model);
           swal({
-                title: 'Succes',
-                text: 'creating new sensor',
-                type: 'success',
-                showCancelButton: true,
-                confirmButtonColor: 'green',
-                confirmButtonText: 'create another sensor',
-                cancelButtonText: 'cancel',
-                closeOnConfirm: true,
-              },
-              function(isConfirm) {
-                if (!isConfirm) {
-                  self.cancel();
-                } else {
-                  	self.nsForm.butClickClear();
-                }
-              }
-          );
+            title: 'Succes',
+            text: 'creating new sensor',
+            type: 'success',
+            showCancelButton: true,
+            confirmButtonColor: 'green',
+            confirmButtonText: 'create another sensor',
+            cancelButtonText: 'cancel',
+            closeOnConfirm: true,
+          },
+          function(isConfirm) {
+            if (!isConfirm) {
+              self.cancel();
+            } else {
+              	self.nsForm.butClickClear();
+            }
+          });
         },
         savingError: function(response) {
           var msg = 'in creating a new sensor';

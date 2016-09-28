@@ -26,7 +26,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       'stations/new(/)': 'newStation',
       'stations/:id(/)': 'station',
       'stations(/)': 'stations',
-      'observations/:id(/)': 'observations',
 
       //'stations/:id/release(/)': 'stationRelease',
       'release/:id(/)': 'releaseIndividuals',
