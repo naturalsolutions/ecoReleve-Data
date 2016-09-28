@@ -122,8 +122,8 @@ define([
         data: {'IDs': JSON.stringify(selectedIds)},
         context: this,
       }).done(function(resp) {
-        _this.map.updateFromServ();
         this.locationsGrid.gridOptions.api.removeItems(selectedNodes);
+        this.locationsGrid.clientSideFilter();
       }).fail(function(resp) {
         this.swal(resp, 'error');
       });
