@@ -49,6 +49,8 @@ def add_routes(config):
 
 
     # ------------------------------------------------------------------------------------------------------------------------- #
+    config.add_route('jsLog', 'ecoReleve-Core/log/error')
+
     ##### Security routes #####
     config.add_route('security/login', 'ecoReleve-Core/security/login')
     config.add_route('security/logout', 'ecoReleve-Core/security/logout')
@@ -161,5 +163,7 @@ def add_routes(config):
     config.add_route('export/views/id/action', 'ecoReleve-Core/export/views/{id}/{action}') #filtres, cols, count
     config.add_route('export/views/getFile', 'ecoReleve-Core/export/views/getFile') #getFile
 
-
-
+    # ------------------------------------------------------------------------------------------------------------------------- #
+    ##### Excel file import #####
+    config.add_route('file_import/getTemplate', 'ecoReleve-Core/file_import/getTemplate')
+    config.add_route('file_import/getExcelFile' , 'ecoReleve-Core/file_import/getExcelFile')

@@ -135,6 +135,10 @@ class Station(Base,ObjectWithDynProp):
     #         resultat['data']['FieldWorkers'] = [{'id' : 0}]
     #     return resultat
 
+    def GetImportTemplate():
+
+        return ['Station_Date', 'Station_Name','Station_LAT','Station_LON','Station_ELE','Station_precision','Station_creator','Station_Comments','add your protocol fields (to rename)...']
+
 @event.listens_for(Station, 'before_insert')
 @event.listens_for(Station, 'before_update')
 def updateRegion(mapper, connection, target):

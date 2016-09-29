@@ -91,6 +91,7 @@ def main(global_config, **settings):
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
     config.include('pyramid_jwtauth')
+    config.include('pyramid_excel')
 
     binds = {"default": engine, "Export": engineExport}
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
