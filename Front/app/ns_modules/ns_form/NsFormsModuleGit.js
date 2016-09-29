@@ -455,7 +455,7 @@ define([
                   _this.reloadingAfterSave();
                 }
               }
-              _this.afterSaveSuccess();
+              _this.afterSaveSuccess(response);
               return true;
             },
             error: function (response) {
@@ -476,7 +476,7 @@ define([
               if (_this.reloadAfterSave) {
                 _this.reloadingAfterSave();
               }
-              _this.afterSaveSuccess();
+              _this.afterSaveSuccess(response);
             },
             error: function (model,response) {
               _this.savingError(response);

@@ -5,12 +5,11 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
-  'config',
   'ns_modules/ns_com',
   'ns_form/NSFormsModuleGit',
   'sweetAlert',
 
-], function($, _, Backbone, Marionette, Swal, Translater, config, Com, NsForm, swal) {
+], function($, _, Backbone, Marionette, Swal, Translater, Com, NsForm, swal) {
 
   'use strict';
   return Marionette.ItemView.extend({
@@ -67,7 +66,7 @@ define([
       this.nsForm = new NsForm({
         name: 'name',
         data: this.data,
-        modelurl: config.coreUrl + this.ojectName,
+        modelurl: this.ojectName,
         buttonRegion: [],
         formRegion: this.ui.form,
         displayMode: 'edit',

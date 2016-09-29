@@ -1,10 +1,9 @@
 define([
   'jquery',
   'underscore',
-  'backbone',
-  'config'
+  'backbone'
 ], function(
-  $, _, Backbone, config
+  $, _, Backbone
 ){
   'use strict';
 
@@ -14,9 +13,12 @@ define([
       label: 'individuals',
       single: 'individual',
       type: 'individuals',
+      
+      icon: 'reneco-bustard',
+      subincon: 'reneco-bustard',
 
       formConfig: {
-        modelurl: config.coreUrl + 'individuals',
+        modelurl: 'individuals',
         displayMode: 'display',
         reloadAfterSave: true,
         displayDelete: false,

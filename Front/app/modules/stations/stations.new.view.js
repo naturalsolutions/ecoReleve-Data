@@ -3,7 +3,6 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
 
   'moment',
   'dateTimePicker',
@@ -162,7 +161,7 @@ define([
 
       this.nsForm = new NsForm({
         name: 'StaForm',
-        modelurl: config.coreUrl + 'stations/',
+        modelurl: 'stations/',
         buttonRegion: [],
         formRegion: this.ui.staForm,
         displayMode: 'edit',
@@ -209,7 +208,7 @@ define([
 
     getCoordFromMs: function(msId) {
       var _this = this;
-      var url = config.coreUrl + 'monitoredSites/' + msId;
+      var url = 'monitoredSites/' + msId;
 
       $.ajax({
         context: this,

@@ -3,7 +3,6 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   'ns_modules/ns_com',
   //'ns_filter/model-filter_module',
   'ns_filter_bower',
@@ -12,7 +11,7 @@ define([
   'sweetAlert',
   'i18n'
 
-], function($, _, Backbone, Marionette, config,
+], function($, _, Backbone, Marionette,
   Com, NsFilter, NsMap, NsGrid, Swal
 ) {
 
@@ -134,7 +133,7 @@ define([
       /*var html = Marionette.Renderer.render('app/modules/import/_gpx/templates/options-list.html');
             var optionsList = $.parseHTML(html);*/
       var optionsList;
-      this.loadCollection(config.coreUrl + 'fieldActivity', function(data) {
+      this.loadCollection('fieldActivity', function(data) {
         optionsList = $.parseHTML(data);
         var option = [];
         for (var i = 0; i < optionsList.length; i++) {
@@ -287,7 +286,7 @@ define([
       console.log(coll);
 
 
-      coll.url = config.coreUrl + 'stations/';
+      coll.url = 'stations/';
       Backbone.sync('create', coll, {
         success: function(data) {
           _this.deferred.resolve();

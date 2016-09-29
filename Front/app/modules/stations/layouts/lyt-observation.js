@@ -7,11 +7,10 @@ define([
 
   'moment',
   'sweetAlert',
-  'config',
   'ns_form/NSFormsModuleGit',
   'i18n',
 ], function($, _, Backbone, Marionette, Radio,
-  moment, Swal, config, NsForm
+  moment, Swal, NsForm
 ) {
 
   'use strict';
@@ -38,7 +37,7 @@ define([
       this.model.schema = this.model.get('schema');
       this.model.fieldsets = this.model.get('fieldsets');
       this.model.attributes = this.model.get('data');
-      this.model.urlRoot =  config.coreUrl + 'stations/' + this.stationId + '/protocols' + '/'
+      this.model.urlRoot =  'stations/' + this.stationId + '/protocols' + '/'
 
       if (this.model.get('id') == 0) {
         this.model.attributes.state = 'edit';
@@ -52,7 +51,7 @@ define([
 
       var nsform = new NsForm({
         model: this.model,
-        modelurl: config.coreUrl + 'stations/' + this.stationId + '/protocols',
+        modelurl: 'stations/' + this.stationId + '/protocols',
         //have 2 change the button region function
         buttonRegion: [this.ui.stationFormBtns],
         displayMode: this.model.attributes.state,
@@ -84,7 +83,7 @@ define([
       nsform.afterDelete = function() {
         //_this.sweetAlert('warning', 'warning', 'warning');
         var jqxhr = $.ajax({
-          url: config.coreUrl + 'stations/' + _this.stationId + '/protocols/' + this.model.get('ID'),
+          url: 'stations/' + _this.stationId + '/protocols/' + this.model.get('ID'),
           method: 'DELETE',
           contentType: 'application/json'
         }).done(function(resp) {

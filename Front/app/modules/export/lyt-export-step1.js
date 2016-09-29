@@ -3,9 +3,8 @@ define([
 	'underscore',
 	'backbone',
 	'marionette',
-	'config',
 	'i18n'
-], function($, _, Backbone, Marionette, config
+], function($, _, Backbone, Marionette
 ) {
   'use strict';
   return Marionette.LayoutView.extend({
@@ -28,7 +27,7 @@ define([
     initialize: function(options) {
       this.model = new Backbone.Model();
       this.themeColl = new Backbone.Collection();
-      this.themeColl.url = config.coreUrl + 'export/themes';
+      this.themeColl.url = 'export/themes';
       this.defered = this.themeColl.fetch();
 
       this.model.set('viewId', '');
@@ -55,7 +54,7 @@ define([
 
       this.viewColl = new Backbone.Collection();
       var id = $(e.target).val();
-      this.viewColl.url = config.coreUrl + 'export/themes/' + id + '/views';
+      this.viewColl.url = 'export/themes/' + id + '/views';
       var defered = this.viewColl.fetch();
 
       _this.ui.views.empty();

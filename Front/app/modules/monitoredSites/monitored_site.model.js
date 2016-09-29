@@ -2,9 +2,8 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  'config'
 ], function(
-  $, _, Backbone, config
+  $, _, Backbone
 ){
   'use strict';
 
@@ -14,8 +13,12 @@ define([
       single: 'monitored site',
       type: 'monitoredSites',
 
+      icon: 'reneco-site',
+
+      fk: 'FK_MonitoredSite',
+
       formConfig: {
-        modelurl: config.coreUrl + 'monitoredSites',
+        modelurl: 'monitoredSites',
         displayMode: 'display',
         reloadAfterSave: true,
         afterShow: function() {

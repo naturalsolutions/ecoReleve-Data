@@ -5,7 +5,6 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
-  'config',
   'ns_modules/ns_com',
   'ns_grid/model-grid',
   'ns_filter_bower',
@@ -13,7 +12,7 @@ define([
   'requirejs-text!./tpl-bbfe-nonIdPicker.html',
   'objects/layouts/lyt-objects-new'
 ], function(
-  $, _, Backbone, Marionette, Swal, Translater, config,
+  $, _, Backbone, Marionette, Swal, Translater,
   Com, NsGrid, NsFilter, Form, Tpl, LytObjectsNew
 ) {
   'use strict';
@@ -38,7 +37,7 @@ define([
 
       var schemaOps = options.schema.options;
       this.firstShow = true;
-      this.url = config.coreUrl + schemaOps.url + '/';
+      this.url = schemaOps.url + '/';
 
       this.typeObj = 1;
 

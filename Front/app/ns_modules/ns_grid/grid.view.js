@@ -3,12 +3,11 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   'ag-grid',
 
   'i18n'
 
-], function($, _, Backbone, Marionette, config, AgGrid, utils_1) {
+], function($, _, Backbone, Marionette, AgGrid, utils_1) {
 
   'use strict';
 
@@ -42,9 +41,9 @@ define([
       this.model = options.model || new Backbone.Model();
       this.model.set('type', options.type);
       if(options.url){
-        this.model.set('url', config.coreUrl + options.url);
+        this.model.set('url', options.url);
       } else {
-        this.model.set('url', config.coreUrl + options.type + '/');
+        this.model.set('url', options.type + '/');
       }
 
       if (options.com) {

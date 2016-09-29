@@ -5,14 +5,13 @@ define([
   'marionette',
   'sweetAlert',
   'backgrid',
-  'config',
   'ns_stepper/lyt-step',
   'ns_grid/model-grid',
   'ns_modules/ns_com',
   'ns_filter_bower',
   'i18n'
 
-], function($, _, Backbone, Marionette, Swal, Backgrid, config, 
+], function($, _, Backbone, Marionette, Swal, Backgrid,
   Step, NsGrid, Com,NsFilter
 ) {
 
@@ -58,7 +57,7 @@ define([
       var self = this;
       $.ajax({
         context: this,
-        url: config.coreUrl + 'sensors/getUnicIdentifier',
+        url: 'sensors/getUnicIdentifier',
         data: {sensorType: 3},
       }).done(function(data) {
         var len = data.length;
@@ -90,7 +89,7 @@ define([
       if(id){
         this.ui.grid.removeClass('hidden');
         this.ui.paginator.removeClass('hidden');
-        this.grid.collection.url = config.coreUrl + 'sensors/' + id + '/history';
+        this.grid.collection.url = 'sensors/' + id + '/history';
         this.grid.collection.fetch().done(function(data){
           var tmp = _.clone(_this.grid.grid.collection.fullCollection);
           _this.com.setMotherColl(tmp);
@@ -153,12 +152,12 @@ define([
       }];
 
       this.collection = new Backbone.Collection();
-      this.collection.url = config.coreUrl + 'sensors/' + id + '/history';
+      this.collection.url = 'sensors/' + id + '/history';
       this.collection.fetch(
         ).done(function(data){
         _this.grid = new NsGrid({
           columns: columns,
-          //url: config.coreUrl + 'sensors/' + id + '/history',
+          //url: 'sensors/' + id + '/history',
           collection : _this.collection,
           pageSize: 20,
           pagingServerSide: false,

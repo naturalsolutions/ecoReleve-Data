@@ -3,11 +3,10 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   'sweetAlert',
   'i18n',
 
-], function($, _, Backbone, Marionette, config, swal
+], function($, _, Backbone, Marionette, swal
 ) {
 
   'use strict';
@@ -71,7 +70,7 @@ define([
             );
           return false;
         } else {
-          var url = config.coreUrl + 'sensors/rfid/datas';
+          var url = 'sensors/rfid/datas';
           var data = new FormData();
           var self = this;
 

@@ -3,9 +3,8 @@ define([
     'jquery',
     'backbone',
     'backbone-forms',
-    'config',
     'jqueryui',
-], function(_, $, Backbone, Form, config
+], function(_, $, Backbone, Form
 ) {
     'use strict';
     return Form.editors.AutocompleteEditor = Form.editors.Base.extend({
@@ -38,7 +37,7 @@ define([
             if (options.schema.options) {
                 if (typeof options.schema.options.source === 'string'){
 
-                   this.autocompleteSource.source = config.coreUrl + url;
+                   this.autocompleteSource.source = url;
                 }
                 this.autocompleteSource.select = function(event,ui){
                     event.preventDefault();
@@ -78,7 +77,7 @@ define([
                 value = null; 
                 var initValue = this.model.get(this.key);
                 $.ajax({
-                    url : config.coreUrl+this.options.schema.options.object+'/'+this.model.get(this.key),
+                    url : this.options.schema.options.object+'/'+this.model.get(this.key),
                     success : function(data){
                         _this.$el.find('#' + _this.id ).val(data[_this.options.schema.options.label]);
                     }

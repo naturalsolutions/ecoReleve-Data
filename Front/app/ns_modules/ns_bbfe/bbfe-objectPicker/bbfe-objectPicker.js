@@ -5,16 +5,16 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
-  'config',
-  'ns_modules/ns_com',
-  'ns_grid/model-grid',
-  'ns_filter_bower',
+
+  'modules/monitoredSites/monitored_sites.view',
+  'modules/monitoredSites/monitored_sites.new.view',
+
   'backbone-forms',
   'requirejs-text!./tpl-bbfe-objectPicker.html',
-  'objects/layouts/lyt-objects-new'
 ], function(
-  $, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsFilter, Form, Tpl, LytObjectsNew
+  $, _, Backbone, Marionette, Swal, Translater, 
+  MonitoredSitesView, NewView,
+  Form, Tpl
 ) {
   'use strict';
   return Form.editors.ObjectPicker = Form.editors.Base.extend({
@@ -22,42 +22,44 @@ define([
     className: '',
     events: {
       'click span.picker': 'showPicker',
-      'click #btnFilterPicker': 'filter',
-      'click .cancel': 'hidePicker',
-      'click button#new': 'onClickNew',
-      'click button#detailsShow': 'openDetails',
     },
 
     initialize: function(options) {
       options.schema.editorClass='';
       Form.editors.Text.prototype.initialize.call(this, options);
-      this.com = new Com();
-      //get the foreign key 2
-      this.key = options.key;
-      var key = options.key;
-      this.options = options;
-      key = key.split('FK_')[1];
+      this.validators = options.schema.validators || [];
+
+      this.model = new Backbone.Model();
+
+      this.model.set('key', options.key);
+      this.model.set('type', 'text');
+      
+      var name = options.key.split('FK_')[1];
+      this.ojectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
+      this.url = this.ojectName + '/';
 
       var dictCSS = {
         'individuals':'reneco reneco-bustard',
         'sensors': 'reneco reneco-emitters',
         'monitoredSites': 'reneco reneco-site',
       };
+      this.model.set('icon',dictCSS[this.ojectName]);
 
-      this.validators = options.schema.validators || [];
-      
-      //todo : refact
-      this.ojectName = key.charAt(0).toLowerCase() + key.slice(1) + 's';
-      this.url = config.coreUrl + this.ojectName + '/';
+      //this.confModel = window.app.conf.entities[objectName];Tpl
 
-      this.model = new Backbone.Model();
 
-      this.pickerTitle = options.schema.title;
-
-      this.model.set('iconFont',dictCSS[this.ojectName]);
-      this.model.set('pickerTitle', this.pickerTitle);
-      this.model.set('key', options.key);
-      this.model.set('type', 'text');
+      if (options.schema.options && options.schema.options.usedLabel){
+        this.usedLabel = options.schema.options.usedLabel;
+        this.displayingValue = true;
+        this.initValue = value;
+        this.validators.push({ type: 'Thesaurus', parent: this}); //?
+        this.initAutocomplete();
+      } else {
+        this.usedLabel = 'ID';
+        this.noAutocomp = true;
+        this.model.set('type', 'number');
+      }
+      this.isTermError = false;
 
       var value;
       if (options) {
@@ -67,33 +69,16 @@ define([
           value = options.value;
         }
 
-      if (options.schema.options && options.schema.options.usedLabel){
-        this.usedLabel = options.schema.options.usedLabel;
-        this.displayingValue = true;
-        this.initValue = value;
-        this.validators.push({ type: 'Thesaurus', parent: this});
-        this.initAutocomplete();
-      } else {
-        this.usedLabel = 'ID';
-        this.noAutocomp = true;
-        this.model.set('type', 'number');
-      }
-      this.isTermError = false;
-
         if (value) {
-
           this.model.set('value', value);
           if (this.displayingValue) {
             this.model.set('value', '');
             this.matchedValue = value;
-            //this.model.set('initValue', initValue);
           }
           this.model.set('data_value', value);
-
         }else {
           this.model.set('value', '');
           this.model.set('data_value', '');
-
         }
 
         if (options.schema.editable) {
@@ -102,28 +87,24 @@ define([
         }else {
           this.model.set('disabled', 'disabled');
           this.model.set('visu', 'hidden');
-          this.model.set('iconFont',dictCSS[this.ojectName]+' no-border');
         }
       }
 
       var required;
       if(options.schema.validators){
-          required = options.schema.validators[0];
+        required = options.schema.validators[0];
       }else{
         required = '';
       }
       this.model.set('required', required);
 
-      //dirty
-      var template =  _.template(Tpl, this.model.attributes);
-      this.$el.html(template);
-      this.afterTpl();
+      this.template =  _.template(Tpl, this.model.attributes);
     },
 
     initAutocomplete: function() {
       var _this = this;
       this.autocompleteSource = {};
-      this.autocompleteSource.source = config.coreUrl +'autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID';
+      this.autocompleteSource.source ='autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID';
       this.autocompleteSource.minLength = 3;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
@@ -167,15 +148,6 @@ define([
       };
     },
 
-    afterTpl: function() {
-      this._input = this.$el.find('input[name="' + this.key + '" ]')[0];
-      this.$el.find('#new').addClass('hidden');
-      this.getTypes();
-      this.displayGrid();
-      this.displayFilter();
-      this.translater = Translater.getTranslater();
-    },
-
     getDisplayValue: function(val){
       var _this = this;
       $.ajax({
@@ -191,122 +163,83 @@ define([
     },
 
     render: function(){
+      var _this = this;
+      this.$el.html(this.template);
+      
+      this._input = this.$el.find('input[name="' + this.model.get('key') + '" ]')[0];
       if (this.displayingValue){
         if (this.initValue && this.initValue != null){
           this.getDisplayValue(this.initValue);
         }
-        var _this = this;
         _(function () {
             $(_this._input).autocomplete(_this.autocompleteSource);
         }).defer();
       }
+      
+      this.initPicker();
+
       return this;
     },
 
-    getTypes: function() {
-      $.ajax({
-        url: this.url + 'getType',
-        method: 'GET',
-        contentType: 'application/json',
-        context: this,
-      }).done(function(data) {
-        this.tooltipListData = data;
-        this.$el.find('#new').removeClass('hidden');
-      }).fail(function(resp) {
-        console.error(this.url + 'getType');
-      });
+    showPicker: function(){
+      this.regionManager.get('modal').show(this.pickerView = new this.PickerView());
+      $('#modal').css('display', 'block');
     },
 
-    onClickNew: function(e) {
+    initPicker: function(){
       var _this = this;
-      
-      var data = _this.form.getValue();
-      if (data['StationDate']) {
-        data['StartDate'] = data['StationDate'];
-        //data['Name'] = '';
-      } else {
-        data = {};
-      }
-      this.$el.find('#new').tooltipList({
-        availableOptions: this.tooltipListData,
-        liClickEvent: function(value, parent, elem) {
-          //var val = $(elem)[0].textContent.replace(/\s/g, '');
-          var val = value;
-          //todo
-          var params = {
-            picker: _this,
-            type: val,
-            ojectName: _this.ojectName,
-            data: data
-          };
-          _this.displayCreateNewLyt(params);
+
+      this.regionManager = new Marionette.RegionManager();
+      this.regionManager.addRegions({
+        modal: "#modal",
+      });
+
+      this.NewView = NewView.extend({
+        back: function(e){
+          e.preventDefault();
+          _this.showPicker();
         },
-        position: 'top'
-      });
-    },
+        afterSaveSuccess: function(response){
+          var id = response.ID
+          var displayValue = this.model.get(_this.usedLabel);
 
-    displayCreateNewLyt: function(params) {
-      this.lytObjNew = new LytObjectsNew(params);
-      var tmp = this.lytObjNew.render();
-      this.$el.find('#creation').html(this.lytObjNew.el);
-      this.lytObjNew.onShow();
-      this.$el.find('#creation').removeClass('hidden');
-    },
-
-    displayGrid: function() {
-      var _this = this;
-      this.grid = new NsGrid({
-        pageSize: 20,
-        pagingServerSide: true,
-        com: this.com,
-        url: this.url,
-        rowClicked: true,
+          _this.setValue(id,displayValue);
+          _this.isTermError = false;
+          _this.displayErrorMsg(false);
+          _this.hidePicker();
+        },
       });
 
-      this.grid.rowClicked = function(args) {
-        _this.rowClicked(args.row);
-      };
-      this.grid.rowDbClicked = function(args) {
-        _this.rowDbClicked(args.row);
-      };
-
-      var gridCont = this.$el.find('#grid')[0];
-      $(gridCont).html(this.grid.displayGrid());
-      var paginatorCont = this.$el.find('#paginator')[0];
-      $(paginatorCont).html(this.grid.displayPaginator());
-    },
-
-    displayFilter: function() {
-      this.filters = new NsFilter({
-        url: this.url,
-        com: this.com,
-        filterContainer: this.$el.find('#filter'),
+      this.PickerView = MonitoredSitesView.extend({
+        onRowClicked: function(row){
+          var id = row.data.ID;
+          var displayValue = row.data[_this.usedLabel];
+          _this.setValue(id,displayValue);
+          _this.isTermError = false;
+          _this.displayErrorMsg(false);
+          _this.hidePicker();
+        },
+        back: function(e){
+          e.preventDefault();
+          _this.hidePicker();
+        },
+        new: function(e){
+          e.preventDefault();
+          _this.regionManager.get('modal').show(new _this.NewView());
+        },
       });
-    },
-    filter: function(e) {
-      e.preventDefault();
-      this.filters.update();
-    },
 
-    rowClicked: function(row) {
-      var id = row.model.get('ID');
-      var displayValue = row.model.get(this.usedLabel);
-      this.setValue(id,displayValue);
-      this.isTermError = false;
-      this.displayErrorMsg(false);
-    },
-
-    rowDbClicked: function(row) {
-      this.rowClicked(row);
     },
 
     getValue: function() {
+      console.log('passed');
       if (this.isTermError) {
         return null ;
       }
       if (this.noAutocomp){
         return $(this._input).val();
       }
+
       return $(this._input).attr('data_value');
     },
 
@@ -319,41 +252,21 @@ define([
       $(this._input).attr('data_value',value);
       this.matchedValue = value;
       $(this._input).change();
-      this.$el.find('#creation').addClass('hidden');
       this.hidePicker();
     },
 
-    showPicker: function() {
-      //this.displayGrid();
-      this.filters.update();
-      this.$el.find('#modal-outer').fadeIn('fast');
-    },
-
     hidePicker: function() {
-      this.$el.find('#modal-outer').fadeOut('fast');
+      $('#modal').css('display', 'none');
+      this.regionManager.get('modal').empty();
     },
 
     displayErrorMsg: function (bool) {
-/*      if (this.editable) {
-        this.isTermError = bool;*/
         if (this.isTermError) {
-
-          //this.termError = "Invalid term";
           $(this._input).addClass('error');
-          //his.$el.find('#errorMsg').removeClass('hidden');
         } else {
-          //this.termError = "";
           $(this._input).removeClass('error');
-          //this.$el.find('#errorMsg').addClass('hidden');
         }
-      //}
     },
-
-    openDetails: function(event) {
-      var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.ojectName+'/'+ $(this._input).attr('data_value');
-      var win = window.open(url, '_blank');
-      win.focus();
-    }
   }
   );
 });

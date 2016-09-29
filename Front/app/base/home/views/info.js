@@ -23,7 +23,7 @@ define([
       this.$el.hide();
       $.ajax({
         context: this,
-        url: config.coreUrl + 'individuals/count',
+        url: 'individuals/count',
       }).done(function(data) {
         this.model.set('nbIndiv', data);
         this.$el.fadeIn();

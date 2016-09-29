@@ -5,10 +5,9 @@ define([
 	'marionette',
 	'sweetAlert',
 	'translater',
-	'config',
 	'ns_form/NSFormsModuleGit',
 ], function(
-  $, _, Backbone, Marionette, Swal, Translater, config,
+  $, _, Backbone, Marionette, Swal, Translater,
   NsForm
 ){
 
@@ -21,9 +20,8 @@ define([
       'form': '.js-form',
     },
     events: {
-      'click .js-back': 'removeThis',
       'click .js-btn-save': 'save',
-      'click .js-cancel': 'cancel'
+      'click .js-link-back': 'back',
     },
     
     model: new Backbone.Model(),
@@ -41,35 +39,17 @@ define([
     },
 
     displayForm: function() {
-      var self = this;
+      var _this = this;
       this.nsForm = new NsForm({
         name: 'SensorForm',
-        modelurl: config.coreUrl + this.model.get('type'),
+        modelurl: this.model.get('type'),
         buttonRegion: [],
         formRegion: this.ui.form,
         displayMode: 'edit',
         objectType: this.model.get('objectType'),
         id: 0,
         reloadAfterSave: false,
-        afterSaveSuccess: function() {
-          swal({
-            title: 'Succes',
-            text: 'creating new sensor',
-            type: 'success',
-            showCancelButton: true,
-            confirmButtonColor: 'green',
-            confirmButtonText: 'create another sensor',
-            cancelButtonText: 'cancel',
-            closeOnConfirm: true,
-          },
-          function(isConfirm) {
-            if (!isConfirm) {
-              self.cancel();
-            } else {
-              	self.nsForm.butClickClear();
-            }
-          });
-        },
+        afterSaveSuccess: this.afterSaveSuccess.bind(this),
         savingError: function(response) {
           var msg = 'in creating a new sensor';
           if (response.status == 520 && response.responseText){
@@ -87,11 +67,33 @@ define([
         }
       });
     },
+
+    afterSaveSuccess: function(){
+      var _this = this;
+      swal({
+        title: 'Succes',
+        text: 'creating new sensor',
+        type: 'success',
+        showCancelButton: true,
+        confirmButtonColor: 'green',
+        confirmButtonText: 'create another sensor',
+        cancelButtonText: 'cancel',
+        closeOnConfirm: true,
+      },
+      function(isConfirm) {
+        if (!isConfirm) {
+          _this.cancel();
+        } else {
+          _this.nsForm.butClickClear();
+        }
+      });
+    },
+
     save: function() {
       this.nsForm.butClickSave();
     },
-    cancel: function() {
-      Backbone.history.navigate('#' + this.model.get('type'),{trigger: true});
+
+    back: function() {
     },
   });
 });

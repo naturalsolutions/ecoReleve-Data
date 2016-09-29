@@ -6,7 +6,7 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
-  'config',
+
   'ns_grid/model-grid',
   'ns_modules/ns_com',
   'ns_map/ns_map',
@@ -17,7 +17,7 @@ define([
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
- config, NsGrid, Com, NsMap, NsForm, moment, Navbar) {
+ NsGrid, Com, NsMap, NsForm, moment, Navbar) {
 
   'use strict';
 
@@ -213,7 +213,7 @@ define([
         headerCell: 'select-all'
       }];
 
-      var url = config.coreUrl + 'sensors/' + this.type      +
+      var url = 'sensors/' + this.type      +
       '/uncheckedDatas/' + this.indId + '/' + this.pttId;
       this.grid = new NsGrid({
         pagingServerSide: false,
@@ -275,7 +275,7 @@ define([
     },
 
     displayMap: function() {
-      var url = config.coreUrl + 'sensors/' + this.type      +
+      var url = 'sensors/' + this.type      +
       '/uncheckedDatas/' + this.indId + '/' + this.pttId + '?geo=true';
       this.map = new NsMap({
         url: url,
@@ -292,7 +292,7 @@ define([
       this.nsform = new NsForm({
         name: 'IndivForm',
         buttonRegion: [this.ui.btn],
-        modelurl: config.coreUrl + 'individuals',
+        modelurl: 'individuals',
         formRegion: this.ui.indForm,
         displayMode: 'display',
         id: this.indId,
@@ -304,7 +304,7 @@ define([
       this.nsform = new NsForm({
         name: 'sensorForm',
         buttonRegion: [this.ui.btn],
-        modelurl: config.coreUrl + 'sensors',
+        modelurl: 'sensors',
         formRegion: this.ui.sensorForm,
         displayMode: 'display',
         id: this.sensorId,
@@ -356,7 +356,7 @@ define([
 
     validate: function() {
       var _this = this;
-      var url = config.coreUrl + 'sensors/' + this.type      +
+      var url = 'sensors/' + this.type      +
       '/uncheckedDatas/' + this.indId + '/' + this.pttId;
       var mds = this.grid.grid.getSelectedModels();
 

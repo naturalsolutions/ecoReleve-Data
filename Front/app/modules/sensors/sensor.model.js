@@ -1,9 +1,8 @@
 define([
   'underscore',
-  'backbone',
-  'config'
+  'backbone'
 ], function(
-  _, Backbone, config
+  _, Backbone
 ) {
   'use strict';
 
@@ -12,6 +11,11 @@ define([
       label: 'sensors',
       single: 'sensor',
       type: 'sensors',
+
+      icon: 'reneco-emitters',
+
+      fk: 'FK_Sensor',
+
       availableOptions: [{
         label: 'Argos',
         val: 'argos'
@@ -28,7 +32,7 @@ define([
 
       formConfig: {
         name: 'SensorForm',
-        modelurl: config.coreUrl + 'sensors',
+        modelurl: 'sensors',
         displayMode: 'display',
         reloadAfterSave: true,
       },

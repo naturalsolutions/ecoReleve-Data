@@ -5,12 +5,11 @@ define([
   'marionette',
   'radio',
   './lyt-observation',
-  'config',
   'ns_form/NSFormsModuleGit',
   'bootstrap',
   'i18n'
 
-], function($, _, Backbone, Marionette, Radio, LytObs, config, NsForm, bootstrap
+], function($, _, Backbone, Marionette, Radio, LytObs, NsForm, bootstrap
 ) {
   'use strict';
   return Marionette.LayoutView.extend({
@@ -118,7 +117,7 @@ define([
       var patern = new Backbone.Model();
 
       this.jqxhr = $.ajax({
-        url: config.coreUrl + 'stations/' + this.stationId + '/protocols/0',
+        url: 'stations/' + this.stationId + '/protocols/0',
         context: this,
         type: 'GET',
         data: {
@@ -128,7 +127,7 @@ define([
         },
         dataType: 'json',
         success: function(resp) {
-          patern.urlRoot = config.coreUrl + 'stations/' + _this.options.stationId + '/protocols';
+          patern.urlRoot = 'stations/' + _this.options.stationId + '/protocols';
           patern.attributes.data = resp.data;
           patern.attributes.fieldsets = resp.fieldsets;
           patern.attributes.schema = resp.schema;

@@ -6,11 +6,10 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
-  'config',
   'ns_grid/model-grid',
   'ns_modules/ns_com',
   './lyt-sensorValidateDetail'
-], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com, LytSensorValidateDetail) {
+], function($, _, Backbone, Marionette, Swal, Translater, NsGrid, Com, LytSensorValidateDetail) {
 
   'use strict';
 
@@ -284,7 +283,7 @@ define([
         columns: this.cols,
         pageSize: 20,
         com: this.com,
-        url: config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas',
+        url: 'sensors/' + this.type_ + '/uncheckedDatas',
         rowClicked: true,
         totalElement: 'totalEntriesType',
         idCell: 'FK_Sensor'
@@ -348,7 +347,7 @@ define([
         params.toValidate = 'all';
       }
       params.toValidate = JSON.stringify(params.toValidate);
-      var url = config.coreUrl + 'sensors/' + this.type_ + '/uncheckedDatas';
+      var url = 'sensors/' + this.type_ + '/uncheckedDatas';
       $.ajax({
         url: url,
         method: 'POST',

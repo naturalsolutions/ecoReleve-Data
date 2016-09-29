@@ -5,7 +5,6 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   'sweetAlert',
   'vendors/XmlParser',
   'ns_form/NSFormsModuleGit',
@@ -13,7 +12,7 @@ define([
   'i18n',
 
 
-], function($, _, Backbone, Marionette, config, Swal,
+], function($, _, Backbone, Marionette, Swal,
  XmlParser, NsForm, GpxForm
 
 ) {
@@ -51,7 +50,7 @@ define([
     onShow: function() {
       this.displayForm();
       // fieldactivity
-      this.loadCollection(config.coreUrl + 'fieldActivity', 'select[name="fieldActivity"]');
+      this.loadCollection('fieldActivity', 'select[name="fieldActivity"]');
       $('button[data-action="add"]').attr('disabled','disabled');
       $('.fieldactivity').addClass('hidden');
       this.fieldworkers = $('label[for*="FieldWorkers"]').parent();

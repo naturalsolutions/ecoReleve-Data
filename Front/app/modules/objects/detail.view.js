@@ -3,7 +3,6 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   
   'sweetAlert',
   'translater',
@@ -15,7 +14,7 @@ define([
   'ns_modules/ns_com',
 
 ], function(
-  $, _, Backbone, Marionette, config,
+  $, _, Backbone, Marionette,
   Swal, Translater,
   NsMap, NsForm, NavbarView, GridView, Com
 ){
@@ -76,7 +75,7 @@ define([
 
       this.com.addModule(this.map);
       this.map.com = this.com;
-      this.map.url = config.coreUrl + this.model.get('type') + '/' + id  + '/locations?geo=true';
+      this.map.url = this.model.get('type') + '/' + id  + '/locations?geo=true';
       this.map.updateFromServ();
       this.map.url = false;
 
@@ -86,7 +85,7 @@ define([
 
     displayMap: function() {
       this.map = new NsMap({
-        url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '?geo=true',
+        url: this.model.get('type') + '/' + this.model.get('id')  + '?geo=true',
         cluster: true,
         zoom: 3,
         element: 'map',
@@ -141,7 +140,7 @@ define([
 
       this.nsForm.afterDelete = function() {
         var jqxhr = $.ajax({
-          url: config.coreUrl + _this.model.get('type') + '/' + _this.model.get('id'),
+          url: _this.model.get('type') + '/' + _this.model.get('id'),
           method: 'DELETE',
           contentType: 'application/json',
         }).done(function(resp) {

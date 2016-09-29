@@ -3,7 +3,6 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   
   'sweetAlert',
   'translater',
@@ -16,7 +15,7 @@ define([
   'ns_grid/grid.view',
 
 ], function(
-  $, _, Backbone, Marionette, config,
+  $, _, Backbone, Marionette,
   Swal, Translater, IndividualModel, DetailView,
   NsMap, NsForm, GridView
 ){
@@ -35,7 +34,7 @@ define([
 
     displayMap: function() {
       this.map = new NsMap({
-        url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true',
+        url: this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true',
         cluster: true,
         legend: true,
         zoom: 3,
@@ -110,7 +109,7 @@ define([
 
     deleteLocations: function(selectedNodes) {
       var _this = this;
-      var url = config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '/locations';
+      var url = this.model.get('type') + '/' + this.model.get('id')  + '/locations';
 
       var selectedIds = selectedNodes.map(function(node){
         return node.data.ID;

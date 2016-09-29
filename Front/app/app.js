@@ -24,8 +24,6 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
 
     var app = {};
     var JST = window.JST = window.JST || {};
-    window.xhrPool = [];
-
 
     Backbone.Marionette.Renderer.render = function(template, data) {
       if (!JST[template]) throw 'Template \'' + template + '\' not found!';
@@ -47,19 +45,17 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
   $(window).ajaxStart(function(e) {
     $('#header-loader').removeClass('hidden');
   });
-
   $(window).ajaxStop(function() {
     $('#header-loader').addClass('hidden');
   });
-
   $(window).ajaxError(function() {
     $('#header-loader').addClass('hidden');
   });
-
   window.onerror = function() {
     $('#header-loader').addClass('hidden');
   };
 
+  window.xhrPool = [];//??
   $.xhrPool = []; // array of uncompleted requests
   $.xhrPool.allowAbort = false;
   $.xhrPool.abortAll = function() { // our abort function
@@ -71,17 +67,26 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
     }
   };
 
+  var baseUrl = 'http://localhost/erd/';
   $.ajaxSetup({
-    beforeSend: function(jqXHR) { // before jQuery send the request we will push it to our array
+    // before jQuery send the request we will push it to our array
+    beforeSend: function(jqXHR, options) {
+      if(options.url.indexOf('http://') !== -1) {
+        options.url = options.url;
+      } else {
+        options.url = baseUrl + options.url;
+      }
       $.xhrPool.push(jqXHR);
     },
-    complete: function(jqXHR) { // when some of the requests completed it will splice from the array
+    // when some of the requests completed it will splice from the array
+    complete: function(jqXHR){
       var index = $.xhrPool.indexOf(jqXHR);
       if (index > -1) {
         $.xhrPool.splice(index, 1);
       }
     }
   });
+
 
   window.UnauthAlert = function(){
     Swal({
@@ -100,6 +105,24 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
       window.UnauthAlert();
     }
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     window.formChange = false;
     window.formEdition = false;

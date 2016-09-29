@@ -10,9 +10,8 @@ define([
   'jquery',
   'underscore',
   'backgrid',
-  'config'
 ], function(
-  $,_, Backgrid,config
+  $,_, Backgrid
 ){
   'use strict';
 
@@ -29,7 +28,7 @@ var AutocompleteCellEditor = Backgrid.InputCellEditor.extend({
         Backgrid.InputCellEditor.prototype.initialize.apply(this, arguments);
         var _this = this;
         this.autocompleteSource = JSON.parse(JSON.stringify(options.column.attributes.options));
-        this.autocompleteSource.source = config.coreUrl + options.column.attributes.options.source;
+        this.autocompleteSource.source = options.column.attributes.options.source;
         this.key = options.column.attributes.name
         this.target = options.column.attributes.options.target;
         this.autocompleteSource.select = function(event,ui){

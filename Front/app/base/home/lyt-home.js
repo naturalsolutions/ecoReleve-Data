@@ -3,12 +3,11 @@ define(['marionette',
 	'./views/curveGraph',
 	'./views/donutGraph',
 	'./views/info',
-	'config',
 	'requirejs-text!base/home/tpl/tpl-dounutGraph.html',
 	'requirejs-text!base/home/tpl/tpl-dounutGraph2.html',
 	'i18n'
 	],
-function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, TplGraph1, TplGraph2) {
+function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, TplGraph1, TplGraph2) {
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -48,19 +47,19 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, Tp
 
     initStats: function() {
       var collGraphObj = [{
-        url: config.coreUrl + 'sensor/uncheckedDatas/graph',
+        url: 'sensor/uncheckedDatas/graph',
         ele: '#validate',
         title: 'pending',
         stored: false,
         template: 'app/base/home/tpl/tpl-dounutGraph.html'
       },{
-        url: config.coreUrl + 'individuals/location/graph',
+        url: 'individuals/location/graph',
         ele: '#locations',
         title: 'location',
         stored: false,
         template: 'app/base/home/tpl/tpl-dounutGraph2.html'
       }/*,{
-				url : config.coreUrl + 'stats/individuals/monitored/graph',
+				url : 'stats/individuals/monitored/graph',
 				ele : '#monitored',
 				title : 'monitored',
 				stored : false,

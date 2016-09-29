@@ -19,7 +19,7 @@ function($,Marionette, config, Breadcrumb) {
     logout: function() {
       $.ajax({
         context: this,
-        url: config.coreUrl + 'security/logout'
+        url: 'security/logout'
       }).done(function() {
         document.location.href = config.portalUrl;
       });
@@ -29,7 +29,7 @@ function($,Marionette, config, Breadcrumb) {
       var _this = this;
       this.breadcrumb.show(new Breadcrumb());
       window.app.user = new Backbone.Model();
-      window.app.user.url = config.coreUrl + 'currentUser';
+      window.app.user.url = 'currentUser';
       window.app.user.fetch({
         success: function(data) {
           $('body').addClass(window.app.user.get('role'));

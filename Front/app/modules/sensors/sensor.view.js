@@ -5,7 +5,6 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
-  'config',
 
   'ns_map/ns_map',
   'ns_grid/grid.view',
@@ -16,7 +15,7 @@ define([
 
 
 ], function(
-  $, _, Backbone, Marionette, Swal, Translater, config, 
+  $, _, Backbone, Marionette, Swal, Translater,
   NsMap, GridView, NsForm,
   DetailView, SensorModel
 ){
@@ -39,7 +38,7 @@ define([
 
     displayMap: function() {
       this.map = new NsMap({
-        url: config.coreUrl + this.model.get('type') + '/' + this.model.get('id')  + '?geo=true',
+        url: this.model.get('type') + '/' + this.model.get('id')  + '?geo=true',
         cluster: true,
         zoom: 3,
         element: 'map',

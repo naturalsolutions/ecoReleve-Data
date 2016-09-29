@@ -5,7 +5,6 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
-  'config',
 
   'ns_map/ns_map',
   'ns_grid/grid.view',
@@ -16,7 +15,7 @@ define([
 
 
 ], function(
-  $, _, Backbone, Marionette, Swal, Translater, config, 
+  $, _, Backbone, Marionette, Swal, Translater,
   NsMap, GridView, NsForm,
   DetailView, MonitoredSiteModel
 ){
@@ -35,7 +34,7 @@ define([
     
     displayMap: function(geoJson) {
       this.map = new NsMap({
-        url: config.coreUrl + 'monitoredSites/' + this.model.get('id')  + '/history/?geo=true',
+        url: 'monitoredSites/' + this.model.get('id')  + '/history/?geo=true',
         zoom: 4,
         element: 'map',
         popup: true,

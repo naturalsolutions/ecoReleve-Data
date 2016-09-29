@@ -3,10 +3,9 @@ define([
 	'underscore',
 	'backbone',
 	'marionette',
-	'config',
 	'ns_grid/model-grid',
 	'i18n'
-], function($, _, Backbone, Marionette, config, NsGrid
+], function($, _, Backbone, Marionette, NsGrid
 ) {
   'use strict';
   return Marionette.LayoutView.extend({
@@ -42,7 +41,7 @@ define([
       this.grid = new NsGrid({
         pageSize: 20,
         pagingServerSide: true,
-        url: config.coreUrl + 'export/views/' + this.model.get('viewId') + '/',
+        url: 'export/views/' + this.model.get('viewId') + '/',
         urlParams: this.model.get('filters'),
         totalElement: 'total',
         onceFetched: function() {

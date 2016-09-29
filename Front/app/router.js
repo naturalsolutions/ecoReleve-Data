@@ -1,6 +1,6 @@
 
 define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'],
-  function($, Marionette, Backbone, config,Swal) {
+  function($, Marionette, Backbone, config, Swal) {
 
   'use strict';
   return Marionette.AppRouter.extend({
@@ -107,7 +107,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
     continueNav : function(callback, args){
         $.ajax({
           context: this,
-          url: config.coreUrl + 'security/has_access'
+          url: 'security/has_access'
         }).done(function() {
           $.xhrPool.abortAll();
           callback.apply(this, args);

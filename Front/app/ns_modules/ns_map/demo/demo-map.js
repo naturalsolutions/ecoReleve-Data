@@ -3,13 +3,12 @@ define([
     'underscore',
     'backbone',
     'marionette',
-    'config',
     'text!./tpl-demo.html',
     'ns_modules_map/ns_map',
     'ns_modules_com',
     'modules2/validate/gsm/views/gsm-grid',
 
-], function($, _, Backbone , Marionette, config, tpl, NsMap, Com, GsmGridView) {
+], function($, _, Backbone , Marionette, tpl, NsMap, Com, GsmGridView) {
 
     'use strict';
 
@@ -60,7 +59,7 @@ define([
         },
         onShow: function(){
           this.rg_map.show(new NsMap({
-            url: config.coreUrl+'/individuals/stations?id=3',
+            url: '/individuals/stations?id=3',
             cluster: true,
             popup: false,
             com : this.com,

@@ -4,7 +4,6 @@ define([
   'backbone',
   'marionette',
   'sweetAlert',
-  'config',
 
   'ns_form/NSFormsModuleGit',
   'ns_navbar/navbar.view',
@@ -14,7 +13,7 @@ define([
   './station.model',
 
 ], function(
-  $, _, Backbone, Marionette, Swal, config,
+  $, _, Backbone, Marionette, Swal,
   NsForm, NavbarView, LytProtoEditor, 
   DetailView, StationModel
 ) {
@@ -79,7 +78,7 @@ define([
 
       this.nsForm.afterDelete = function() {
         var jqxhr = $.ajax({
-          url: config.coreUrl + _this.model.get( 'type') + '/' + _this.model.get('id'),
+          url: _this.model.get( 'type') + '/' + _this.model.get('id'),
           method: 'DELETE',
           contentType: 'application/json',
         }).done(function(resp) {

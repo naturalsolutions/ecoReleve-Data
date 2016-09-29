@@ -6,14 +6,14 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
-  'config',
+
   'ns_modules/ns_com',
   'ns_grid/model-grid',
   //'ns_filter/model-filter_module',
   'ns_filter_bower',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
-], function($, _, Backbone, Marionette, Swal, Translater, config,
+], function($, _, Backbone, Marionette, Swal, Translater,
   Com, NsGrid, NsFilter, ObjectPicker
 ) {
 
@@ -53,7 +53,7 @@ define([
 
       this.station = new Backbone.Model();
       this.station.set('ID', options.id);
-      this.station.url = config.coreUrl + 'stations/' + options.id;
+      this.station.url = 'stations/' + options.id;
 
       this.model = this.station;
 
@@ -85,7 +85,7 @@ define([
     getReleaseMethod: function(){
       var _this = this;
       $.ajax({
-        url:config.coreUrl+'release/individuals/getReleaseMethod'
+        url: 'release/individuals/getReleaseMethod'
       }).done(function(data){
         _this.releaseMethodList=data;
       });
@@ -100,7 +100,7 @@ define([
         pageSize: 1400,
         pagingServerSide: false,
         com: this.com,
-        url: config.coreUrl + 'release/individuals/',
+        url: 'release/individuals/',
         urlParams: this.urlParams,
         rowClicked: true,
         onceFetched: function(params) {
@@ -199,7 +199,7 @@ define([
     displayFilter: function() {
       var _this = this;
       this.filters = new NsFilter({
-        url: config.coreUrl + 'release/individuals/',
+        url: 'release/individuals/',
         com: this.com,
         filterContainer: this.ui.filters,
       });
@@ -283,7 +283,7 @@ define([
       var _this = this;
       var col = new Backbone.Collection(mds);
       $.ajax({
-        url: config.coreUrl + 'release/individuals/',
+        url: 'release/individuals/',
         method: 'POST',
         data: {IndividualList: JSON.stringify(col),StationID: this.station.get('ID'),releaseMethod: releaseMethod},
         context: this,

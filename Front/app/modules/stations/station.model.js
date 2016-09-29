@@ -1,9 +1,8 @@
 define([
   'underscore',
   'backbone',
-  'config',
 ], function(
-  _, Backbone, config
+  _, Backbone
 ) {
   'use strict';
 
@@ -15,7 +14,7 @@ define([
 
       formConfig: {
         name: 'StaForm',
-        modelurl: config.coreUrl + 'stations',
+        modelurl: 'stations',
         displayMode: 'display',
         objectType: 1,
         reloadAfterSave: true,

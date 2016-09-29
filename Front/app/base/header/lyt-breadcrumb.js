@@ -1,5 +1,5 @@
-define(['marionette', 'config'],
-function(Marionette, config) {
+define(['marionette'],
+function(Marionette) {
   'use strict';
   return Marionette.LayoutView.extend({
     template: 'app/base/header/tpl-breadcrumb.html',

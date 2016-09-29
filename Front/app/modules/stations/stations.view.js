@@ -2,14 +2,12 @@ define([
   'modules/objects/manager.view',
   './station.model',
   'ns_filter/filters',
-  'config',
   'ns_map/ns_map',
 
 ], function(
 	ManagerView,
   StationModel,
 	NsFilter,
-	config,
 	NsMap
 ) {
   'use strict';
@@ -74,7 +72,7 @@ define([
 
     displayFilter: function() {
       this.filters = new NsFilter({
-        url: config.coreUrl + this.model.get('type') +'/',
+        url: this.model.get('type') +'/',
         com: this.com,
         filterContainer: this.ui.filter,
         name: this.moduleName,
@@ -85,7 +83,7 @@ define([
 
     displayMap: function() {
       this.map = new NsMap({
-        url: config.coreUrl + this.model.get('type') + '/?geo=true',
+        url: this.model.get('type') + '/?geo=true',
         cluster: true,
         com: this.com,
         zoom: 3,

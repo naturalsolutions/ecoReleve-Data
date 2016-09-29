@@ -33,10 +33,6 @@ define([
   'use strict';
 
   return NewStepper.extend({
-    /*===================================================
-    		=            Layout Stepper Orchestrator            =
-    		===================================================*/
-    //dedicated to be overloaded
 
     initSteps: function() {
       this.steps = [Step0];

@@ -5,7 +5,6 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
-  'config',
   'ns_modules/ns_com',
   'ns_grid/grid.view',
   'ns_filter/filters',
@@ -14,7 +13,7 @@ define([
   'i18n'
 
 ], function(
-  $, _, Backbone, Marionette, Swal, Translater, config,
+  $, _, Backbone, Marionette, Swal, Translater,
   Com, GridView, NsFilter
 ) {
 
@@ -30,6 +29,8 @@ define([
       'click .js-btn-clear': 'clearFilter',
       'click .js-btn-new': 'new',
       'click .js-btn-export': 'export',
+      'click .js-link-back': 'back',
+      'click .js-link-new': 'new',
       'change .js-page-size': 'changePageSize',
     },
 
@@ -51,6 +52,10 @@ define([
         this.populateCurrentData(window.app.currentData);
       }
     },
+
+    new: function(){},
+    back: function(){},
+
 
     populateCurrentData: function(currentData){
       this.defaultFilters = currentData.filters;
@@ -80,14 +85,16 @@ define([
       this.gridView.changePageSize($(e.target).val());
     },
 
+    onRowClicked: function(row){
+      window.app.currentData = this.gridView.serialize();
+      window.app.currentData.index = row.rowIndex;
+
+      var url = '#' + this.gridView.model.get('type') + '/' + (row.data.id || row.data.ID);
+      Backbone.history.navigate(url, {trigger: true});
+    },
+
     displayGridView: function(){
       var _this = this;
-      var onRowClicked = function(row){
-        window.app.currentData = _this.gridView.serialize();
-        window.app.currentData.index = row.rowIndex;
-
-        Backbone.history.navigate('#' + _this.gridView.model.get('type') + '/' + (row.data.id || row.data.ID), {trigger: true});
-      };
       var afterFirstRowFetch = function(){
         _this.ui.totalRecords.html(this.model.get('totalRecords'));
       };
@@ -98,7 +105,7 @@ define([
         afterFirstRowFetch: afterFirstRowFetch,
         filters: this.defaultFilters,
         gridOptions: {
-          onRowClicked: onRowClicked,
+          onRowClicked: this.onRowClicked.bind(this),
           rowModelType: 'pagination'
         },
         goTo: (this.goTo || false)
@@ -108,7 +115,7 @@ define([
 
     displayFilter: function() {
       this.filters = new NsFilter({
-        url: config.coreUrl + this.model.get('type') +'/',
+        url: this.model.get('type') +'/',
         com: this.com,
         filterContainer: this.ui.filter,
         name: this.moduleName,
@@ -125,7 +132,7 @@ define([
     },
 
     export: function(){
-        var url = config.coreUrl + this.model.get('type') + '/export?criteria=' + JSON.stringify(this.gridView.filters);
+        var url = this.model.get('type') + '/export?criteria=' + JSON.stringify(this.gridView.filters);
         var link = document.createElement('a');
         link.classList.add('DowloadLinka');
         
