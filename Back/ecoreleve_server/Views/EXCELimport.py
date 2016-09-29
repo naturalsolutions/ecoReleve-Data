@@ -113,17 +113,34 @@ def get_file(request):
         df.convert_objects(convert_dates=True, convert_numeric=True)
         userId = request.authenticated_userid['iss']
         tableName = 'TImport_excel_' + userId
+        print(df)
 
-        schema = generateImportTable(data[0],protoId,tableName,session)
+        command = "IF OBJECT_ID ('" + tableName + "') IS NOT NULL "
+        command = command +  ''' BEGIN  DROP TABLE "''' + tableName + '''" END CREATE TABLE "''' + tableName + '''" ( "Id" int) '''
+        session.execute(command)
+        session.commit()
+        # schema = generateImportTable(data[0],protoId,tableName,session)
         
         df.to_sql(tableName , session.get_bind(),if_exists='replace')
 
-        generateMetaData(protoId,tableName,userId,session)
+        # generateMetaData(protoId,tableName,userId,session)
         
+        req = text("""
+        DECLARE @return_value int
+
+        EXEC    @return_value = [dbo].[sp_import_excel]
+        @tableName = :tempTableName,
+        @creator = :user,
+        @IdTypeProto = :protoID
+
+        """).bindparams(bindparam('tempTableName', tableName),bindparam('user', userId),bindparam('protoID', protoId))
+
+        session.execute(req)
 
     except:
-        request.response.status =510
+        # request.response.status =510
         print_exc()
+        raise
     return 
 def generateImportTable (columns,protoId,tableName,session):
     # get schema for protocols fields
@@ -162,6 +179,8 @@ def generateImportTable (columns,protoId,tableName,session):
     command = "IF OBJECT_ID ('" + tableName + "') IS NOT NULL "
     command = command +  ''' BEGIN  DROP TABLE "''' + tableName + '''" END CREATE TABLE "''' + tableName + '''" ( "Id" int  primary key IDENTITY, '''
 
+    print('\n ***********************')
+    print(schema)
     for elem in schema:
         command = command + '"' +  elem["col"] +'" '+ elem["type"] + ','
 
@@ -179,6 +198,7 @@ def generateImportTable (columns,protoId,tableName,session):
 
 def generateMetaData(protoId,tableName,userId, session) : 
     # comment
+    """ TODO Creer table import fichier et insérer les action d'import"""
     command  = text(""" INSERT INTO TImport_excel_metadata ([table_name], [proto_id], [user_id]) VALUES  """ + "'" + tableName  + "'" + """ , """ + str (protoId ) + """ , """ + userId )
         
     print('************ meta data ***************')
