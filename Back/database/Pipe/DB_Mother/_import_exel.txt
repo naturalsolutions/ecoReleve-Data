@@ -1,0 +1,96 @@
+/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+
+  GO  
+DECLARE @datenow DATETIME = SYSDATETIME()
+DECLARE @importid VARCHAR(50) 
+DECLARE @nbInserted INT
+DECLARE @nbTotal INT
+
+SET @importid  = 'import_excel-' + CONVERT(varchar(50), @datenow, 121)
+SELECT
+	[index]
+   ,[Station_Date]
+   ,[Station_Name]
+   ,[Station_LAT]
+   ,[Station_LON]
+   ,[Station_ELE]
+   ,[Station_precision]
+   ,[Station_creator]
+   ,[Station_Comments]
+
+INTO #TstationsImport
+
+FROM [dbo].[TImport_excel_454] AS t_imp
+
+WHERE NOT EXISTS (
+	SELECT * FROM [dbo].[Station] AS t_sta
+	WHERE t_sta.[StationDate] = t_imp.[Station_Date]
+	AND t_sta.[LAT] = t_imp.[Station_LAT]
+	AND t_sta.[LON] = t_imp.[Station_LON]
+) 
+
+INSERT INTO [dbo].[Station]
+(
+	   [StationDate]
+      ,[Name]
+      ,[LAT]
+      ,[LON]
+      ,[ELE]
+      ,[precision]
+      ,[creator]
+      ,[creationDate]
+      ,[FK_StationType]
+      ,[original_id]
+      ,[Comments] 
+)
+SELECT
+	[Station_Date]
+   ,[Station_Name]
+   ,[Station_LAT]
+   ,[Station_LON]
+   ,[Station_ELE]
+   ,[Station_precision]
+   ,454
+   ,GETDATE()
+   ,1
+   , @importid
+   ,[Station_Comments]
+	
+FROM #TstationsImport
+
+/* nb inserted stations */
+set @nbInserted = (SELECT count (*) FROM #TstationsImport)
+
+PRINT  ' nb inserted stations : '
+
+PRINT  @nbInserted
+
+/*DROP table #TstationsImport*/
+
+/* get list of new created stations */
+
+SELECT [ID]
+      ,[StationDate] 
+	  ,[LAT]
+      ,[LON]
+
+INTO #TNewstations
+
+FROM [dbo].[Station] WHERE [original_id] = @importid
+
+/* add stations id to "table temporaire" to be used to generate obs data   */
+
+
+SELECT t1.[index] as import_id, t2.ID as sta_id
+INTO #TNewStations2
+FROM #TstationsImport t1 JOIN #TNewstations t2
+     ON (t1.[Station_Date] = t2.[StationDate]  AND  CONVERT(decimal(10,5), t1.[Station_LAT]) = t2.[LAT] AND  CONVERT(decimal(10,5), t1.[Station_LON]) = t2.[LON])
+
+
+
+
+	 /* select * from #TNewStations2
+
+	 DROP TABLE #TstationsImport  */
+
+select * from #TNewStations2

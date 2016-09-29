@@ -17,6 +17,10 @@ define([
 
 	'./argos/lyt-step1-argos',
 
+  './excel/lyt-step1-excel',
+  './excel/lyt-step2-excel'
+
+
 ], function($, _, Backbone, Marionette, NewStepper, Step0,
 	Step1GPX,
 	Step2GPX,
@@ -27,7 +31,10 @@ define([
 	Step1GSM,
 	Step2GSM,
 
-	Step1ARGOS
+	Step1ARGOS,
+
+  Step1EXCEL,
+  Step2EXCEL
 ) {
 
   'use strict';
@@ -69,6 +76,10 @@ define([
             var argosSteps = [Step1ARGOS];
             this.addSteps(argosSteps, 1);
             //this.addSteps();
+            break;
+          case 'excel':
+            var excelSteps = [Step1EXCEL, Step2EXCEL];
+            this.addSteps(excelSteps, 1);
             break;
           default:
             //not in step0
