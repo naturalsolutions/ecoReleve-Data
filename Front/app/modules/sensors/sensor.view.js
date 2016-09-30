@@ -13,7 +13,6 @@ define([
   'modules/objects/detail.view',
   './sensor.model',
 
-
 ], function(
   $, _, Backbone, Marionette, Swal, Translater,
   NsMap, GridView, NsForm,
@@ -23,7 +22,6 @@ define([
   'use strict';
 
   return DetailView.extend({
-    model: new SensorModel(),
 
     regions: {
       'rgNavbar': '.js-rg-navbar',
@@ -31,6 +29,8 @@ define([
       'rgEquipmentGrid': '.js-rg-equipment-grid',
       'rgStationsGrid': '.js-rg-stations-grid',
     },
+
+    model: new SensorModel(),
 
     displayGrids: function(){
       this.displayHistoryGrid();

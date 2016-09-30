@@ -1,5 +1,5 @@
 define([
-  'marionette', 'config',
+  'marionette',
 
   './base/home/lyt-home',
 
@@ -30,25 +30,19 @@ define([
   './modules/monitoredSites/monitored_sites.new.view',
 
 ],function(
-  Marionette, config,
-
+  Marionette,
   LytHome,
   LytImportFile,
   LytExport,
-
   LytSensorValidate,
   LytSensorValidateType,
   LytSensorValidateDetail,
-
   LytRelease,
   LytStationsRelease,
-
+  
   LytStation, LytStations, LytStationsNew,
-
   LytIndividual, LytIndividuals, LytIndividualsNew,
-
   LytSensor, LytSensors, LytSensorsNew,
-
   LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew
 ) {
   'use strict';
@@ -56,9 +50,36 @@ define([
   return Marionette.Object.extend({
 
     initialize: function() {
-      this.rgMain = window.app.rootView.rgMain;
-      this.rgHeader = window.app.rootView.rgHeader;
-      this.rgFooter = window.app.rootView.rgFooter;
+      var app = window.app;
+
+      this.rgMain = app.rootView.rgMain;
+      this.rgHeader = app.rootView.rgHeader;
+      this.rgFooter = app.rootView.rgFooter;
+      
+      app.entityConfs = {
+        'stations': {
+          'entity': LytStation,
+          'entities': LytStations,
+          'newEntity': LytStationsNew
+        },
+        'individuals': {
+          'entity': LytIndividual,
+          'entities': LytIndividuals,
+          'newEntity': LytIndividualsNew
+        },
+        'sensors': {
+          'entity': LytSensor,
+          'entities': LytSensors,
+          'newEntity': LytSensorsNew
+        },
+        'monitoredSites': {
+          'entity': LytMonitoredSite,
+          'entities': LytMonitoredSites,
+          'newEntity': LytMonitoredSitesNew
+        },
+      };
+
+      console.log(window.app);
     },
 
     home: function() {
@@ -90,7 +111,6 @@ define([
       this.rgMain.show(new LytIndividualsNew({objectType: objectType}));
     },
 
-
     monitoredSite: function(id) {
       this.rgMain.show(new LytMonitoredSite({id: id}));
     },
@@ -101,7 +121,6 @@ define([
       this.rgMain.show(new LytMonitoredSitesNew());
     },
 
-
     sensor: function(id) {
       this.rgMain.show(new LytSensor({id: id}));
     },
@@ -111,7 +130,6 @@ define([
     newSensor: function(objectType) {
       this.rgMain.show(new LytSensorsNew({objectType: objectType}));
     },
-
 
     validate: function() {
       this.rgMain.show(new LytSensorValidate());

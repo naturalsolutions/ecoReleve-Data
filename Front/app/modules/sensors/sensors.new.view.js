@@ -6,7 +6,6 @@ define([
   
   'modules/objects/object.new.view',
   './sensor.model',
-
 ], function(
   $, _, Backbone, Marionette,
   NewView, SensorModel
@@ -14,7 +13,9 @@ define([
 
   'use strict';
   return NewView.extend({
+
     model: new SensorModel(),
+    
     initialize: function(options) {
       switch (options.objectType){
         case 'argos':

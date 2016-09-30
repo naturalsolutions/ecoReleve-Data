@@ -1,4 +1,11 @@
-define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
+define([
+  'marionette', 
+  'config', 
+  'lyt-rootview', 
+  'router', 
+  'controller',
+  'sweetAlert',
+  
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
   'ns_modules/ns_bbfe/bbfe-timePicker',
@@ -20,16 +27,15 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
   'ns_modules/ns_cell/bg-integerCell',
 
   ],
-  function( Marionette, LytRootView, Router, Controller,Swal) {
+function(
+  Marionette, config, LytRootView, Router, Controller, Swal,
+){
 
-    var app = {};
-    var JST = window.JST = window.JST || {};
-
-    Backbone.Marionette.Renderer.render = function(template, data) {
+  var JST = window.JST = window.JST || {};
+  Backbone.Marionette.Renderer.render = function(template, data) {
       if (!JST[template]) throw 'Template \'' + template + '\' not found!';
       return JST[template](data);
-    };
-
+  };
 
   app = new Marionette.Application();
   app.on('start', function() {
@@ -67,14 +73,13 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
     }
   };
 
-  var baseUrl = 'http://localhost/erd/';
   $.ajaxSetup({
     // before jQuery send the request we will push it to our array
     beforeSend: function(jqXHR, options) {
       if(options.url.indexOf('http://') !== -1) {
         options.url = options.url;
       } else {
-        options.url = baseUrl + options.url;
+        options.url = config.coreUrl + options.url;
       }
       $.xhrPool.push(jqXHR);
     },
@@ -105,24 +110,6 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert',
       window.UnauthAlert();
     }
   });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     window.formChange = false;
     window.formEdition = false;

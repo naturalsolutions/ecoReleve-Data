@@ -15,7 +15,6 @@ define([
   return ManagerView.extend({
     template: 'app/modules/stations/stations.tpl.html',
     model: new StationModel(),
-
 		events: {
 		  'click .js-btn-filter': 'filter',
 		  'click .js-btn-clear': 'clearFilter',

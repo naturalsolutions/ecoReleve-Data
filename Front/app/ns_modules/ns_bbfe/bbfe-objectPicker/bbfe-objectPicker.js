@@ -35,17 +35,16 @@ define([
       this.model.set('type', 'text');
       
       var name = options.key.split('FK_')[1];
-      this.ojectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
-      this.url = this.ojectName + '/';
+      this.objectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
+      this.url = this.objectName + '/';
 
       var dictCSS = {
         'individuals':'reneco reneco-bustard',
         'sensors': 'reneco reneco-emitters',
         'monitoredSites': 'reneco reneco-site',
       };
-      this.model.set('icon',dictCSS[this.ojectName]);
+      this.model.set('icon',dictCSS[this.objectName]);
 
-      //this.confModel = window.app.conf.entities[objectName];Tpl
 
 
       if (options.schema.options && options.schema.options.usedLabel){
@@ -104,7 +103,7 @@ define([
     initAutocomplete: function() {
       var _this = this;
       this.autocompleteSource = {};
-      this.autocompleteSource.source ='autocomplete/'+ this.ojectName + '/'+this.usedLabel+'/ID';
+      this.autocompleteSource.source ='autocomplete/'+ this.objectName + '/'+this.usedLabel+'/ID';
       this.autocompleteSource.minLength = 3;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
@@ -194,6 +193,7 @@ define([
         modal: "#modal",
       });
 
+      var NewView = window.app.entityConfs[this.objectName].newEntity;
       this.NewView = NewView.extend({
         back: function(e){
           e.preventDefault();
@@ -210,7 +210,8 @@ define([
         },
       });
 
-      this.PickerView = MonitoredSitesView.extend({
+      var PickerView = window.app.entityConfs[this.objectName].entities;
+      this.PickerView = PickerView.extend({
         onRowClicked: function(row){
           var id = row.data.ID;
           var displayValue = row.data[_this.usedLabel];
@@ -225,21 +226,30 @@ define([
         },
         new: function(e){
           e.preventDefault();
-          _this.regionManager.get('modal').show(new _this.NewView());
+
+          if(this.model.get('availableOptions')){
+            this.ui.btnNew.tooltipList({
+              availableOptions: this.model.get('availableOptions'),
+              liClickEvent: function(liClickValue) {
+                _this.regionManager.get('modal').show(new _this.NewView({objectType: liClickValue}));
+              },
+              position: 'top'
+            });
+          } else {
+            _this.regionManager.get('modal').show(new _this.NewView());
+          }
         },
       });
 
     },
 
     getValue: function() {
-      console.log('passed');
       if (this.isTermError) {
         return null ;
       }
       if (this.noAutocomp){
         return $(this._input).val();
       }
-
       return $(this._input).attr('data_value');
     },
 
