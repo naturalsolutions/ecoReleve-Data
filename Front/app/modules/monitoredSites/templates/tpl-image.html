@@ -1,12 +1,12 @@
 <div class="vignette ">
-  <div class="camtrapItemViewHeader">
-    <input id="rating_<%=id%>" name="input-name" type="number" class="rating" value="<%= note %>" >
+  <div class="camtrapItemViewHeader" style="display : none">
+    <i class="reneco icon-two reneco-hidden"></i>
   </div>
   <div class="camtrapItemViewContent">
-    <img id="zoom_<%=id%>" src =<%= path %>thumbnails/<%= FileName %> tabindex="<%=id%>" alt="<%= name %>" />
-
+    <input id="rating_<%=id%>" name="input-name" type="number" class="rating" value="<%= note %>" >
+    <img id="zoom_<%=id%>" src =<%= path %>thumbnails/<%= FileName %> tabindex="<%=id%>" alt="<%= FileName %>" data-zoom-image="<%= path %><%= FileName %>" />
+      <div class="dateexif text-center"><%= date_creation %></div>
   </div>
-  <div class="camtrapItemViewFooter">
-      <div class="dateexif text-left"><%= date_creation %></div>
+  <div class="camtrapItemViewFooter" style="display : none">
   </div>
 </div>

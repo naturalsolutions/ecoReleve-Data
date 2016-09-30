@@ -231,7 +231,7 @@ define([
 			var oldVal = this.model.get("validated");
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
 
-			switch(oldVal ) {
+		/*	switch(oldVal ) {
 				case 1 :{// not checked
 					$icon.removeClass('reneco-support');
 					break;
@@ -249,15 +249,15 @@ define([
 					$icon.removeClass('reneco-hidden');
 					break;
 				}
-			}
-			if ( oldVal === val) {
+			}*/
+		/*	if ( oldVal === val) {
 				this.model.set("validated",null);
 				this.setVisualValidated(0);
 			}
-			else {
+			else {*/
 				this.model.set("validated",val);
 				this.setVisualValidated(val);
-			}
+			//}
 		},
 
 		toggleModelStatus : function (){

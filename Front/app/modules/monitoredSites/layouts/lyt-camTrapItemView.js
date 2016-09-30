@@ -53,6 +53,9 @@ define([
 			}
 			this.parent.tabSelected = [] ;
 			this.handleFocus();
+		/*	if( lastPosition != this.parent.currentPosition) {
+				this.parent.rgImageDetails.currentView.changeDetails(this.model)
+			}*/
 				}
 		},
 
@@ -67,6 +70,7 @@ define([
 				}
 			}
 			this.$el.find('.vignette').toggleClass('active');
+			this.$el.find('img').focus();
 			this.parent.tabSelected = [] ;
 
 		},
@@ -78,11 +82,14 @@ define([
 		initialize : function(options) {
 			this.parent = options.parent;
 			this.lastzoom = null;
+			//console.log(this.model);
 		},
 
 		onRender: function(){
 			var _this = this;
 			var $input = this.$el.find('input');
+			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
+			var lastClass = $icon.attr('class').split(' ').pop();
 	/*		var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
 			var lastClass = $icon.attr('class').split(' ').pop();*/
 			this.$el.find('input').rating({

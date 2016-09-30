@@ -53,7 +53,7 @@ define([
       'backspace' : 'toggleModelStatus',
       'enter':'acceptPhoto',
       'del':'rejectPhoto',
-      'shift': 'undeterminatePhoto',
+      //'shift': 'undeterminatePhoto',
       'esc' : 'leaveModal',
       'pagedown': 'nextPage',
       'pageup' : 'prevPage',
