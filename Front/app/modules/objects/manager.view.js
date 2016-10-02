@@ -32,6 +32,8 @@ define([
       'click .js-link-back': 'back',
       'click .js-link-new': 'new',
       'change .js-page-size': 'changePageSize',
+      'click .js-btn-panel': 'togglePanel',
+      'click .tab-ele': 'toggleTab',
     },
 
     ui: {
@@ -73,6 +75,7 @@ define([
     },
 
     onShow: function() {
+      this.com = new Com();
       this.$el.find('.js-date-time').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
       this.displayFilter();
       this.displayGridView();
@@ -102,6 +105,7 @@ define([
       this.rgGrid.show(this.gridView = new GridView({
         type: this.model.get('type'),
         com: this.com,
+        typeObj: this.model.get('typeObj'),
         afterFirstRowFetch: afterFirstRowFetch,
         filters: this.defaultFilters,
         gridOptions: {
@@ -118,7 +122,7 @@ define([
         url: this.model.get('type') +'/',
         com: this.com,
         filterContainer: this.ui.filter,
-        name: this.moduleName,
+        typeObj: this.model.get('typeObj'),
         filtersValues: this.defaultFilters,
       });
     },

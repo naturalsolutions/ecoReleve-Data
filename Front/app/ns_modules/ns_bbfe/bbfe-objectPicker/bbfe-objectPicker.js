@@ -6,14 +6,10 @@ define([
   'sweetAlert',
   'translater',
 
-  'modules/monitoredSites/monitored_sites.view',
-  'modules/monitoredSites/monitored_sites.new.view',
-
   'backbone-forms',
   'requirejs-text!./tpl-bbfe-objectPicker.html',
 ], function(
   $, _, Backbone, Marionette, Swal, Translater, 
-  MonitoredSitesView, NewView,
   Form, Tpl
 ) {
   'use strict';
@@ -182,7 +178,8 @@ define([
 
     showPicker: function(){
       this.regionManager.get('modal').show(this.pickerView = new this.PickerView());
-      $('#modal').css('display', 'block');
+      $('#modal').fadeIn('fast');
+      $('#modal').on('click', $.proxy(this.checkHidePicker, this));
     },
 
     initPicker: function(){
@@ -226,20 +223,25 @@ define([
         },
         new: function(e){
           e.preventDefault();
-
+          
           if(this.model.get('availableOptions')){
             this.ui.btnNew.tooltipList({
+              position: 'top',
               availableOptions: this.model.get('availableOptions'),
               liClickEvent: function(liClickValue) {
-                _this.regionManager.get('modal').show(new _this.NewView({objectType: liClickValue}));
+                _this.regionManager.get('modal').show(new _this.NewView({
+                  objectType: liClickValue
+                }));
               },
-              position: 'top'
             });
           } else {
-            _this.regionManager.get('modal').show(new _this.NewView());
+            _this.regionManager.get('modal').show(new _this.NewView({
+              objectType: this.model.get('objectType')
+            }));
           }
         },
       });
+
 
     },
 
@@ -265,9 +267,18 @@ define([
       this.hidePicker();
     },
 
+    
+
+    checkHidePicker: function(e){
+      if($(e.target).attr('id') === 'modal'){
+        this.hidePicker();
+      }
+    },
+
     hidePicker: function() {
-      $('#modal').css('display', 'none');
-      this.regionManager.get('modal').empty();
+      var _this = this;
+      $('#modal').off('click', this.checkHidePicker);
+      $('#modal').fadeOut('fast');
     },
 
     displayErrorMsg: function (bool) {

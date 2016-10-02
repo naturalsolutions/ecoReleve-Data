@@ -7,5 +7,20 @@ define([
 
   return ManagerView.extend({
   	model: new IndividualModel(),
+
+  	toggleTab: function(e) {
+  	  if(!$(e.currentTarget).hasClass('active')){
+  	    this.$el.find('.tab-ele').each(function(){
+  	      $(this).toggleClass('active');
+  	    })
+  	    console.log($(e.currentTarget).attr('id'));
+  	    if($(e.currentTarget).attr('id') === 'unidentified'){
+  	    	this.model.set('typeObj', 2);
+  	    } else {
+  	    	this.model.set('typeObj', 1);
+  	    }
+				this.onShow();
+  	  }
+  	},
   });
 });

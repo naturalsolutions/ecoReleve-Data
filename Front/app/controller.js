@@ -79,7 +79,6 @@ define([
         },
       };
 
-      console.log(window.app);
     },
 
     home: function() {

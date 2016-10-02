@@ -27,11 +27,7 @@ define([
     model: new Backbone.Model(),
 
     initialize: function(options) {
-      if (options.objectType){
-        this.model.set('objectType', options.objectType);
-      } else {
-        this.model.set('objectType', 1);
-      }
+      this.model.set('objectType', options.objectType);
     },
 
     onShow: function() {
@@ -41,7 +37,6 @@ define([
     displayForm: function() {
       var _this = this;
       this.nsForm = new NsForm({
-        name: 'SensorForm',
         modelurl: this.model.get('type'),
         buttonRegion: [],
         formRegion: this.ui.form,

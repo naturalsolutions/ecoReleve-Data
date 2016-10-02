@@ -28,7 +28,7 @@ define([
 
   ],
 function(
-  Marionette, config, LytRootView, Router, Controller, Swal,
+  Marionette, config, LytRootView, Router, Controller, Swal
 ){
 
   var JST = window.JST = window.JST || {};

@@ -24,6 +24,17 @@ define([
         displayDelete: false,
       },
 
+      uiTabs: [
+        {
+          name: 'standard',
+          label: 'Standard'
+        },
+        {
+          name: 'unidentified',
+          label: 'Unidentified'
+        }
+      ],
+
       uiGridConfs: [
         {
           name: 'history',

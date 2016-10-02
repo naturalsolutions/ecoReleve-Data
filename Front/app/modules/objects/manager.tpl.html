@@ -6,8 +6,18 @@
 	      &nbsp;
 	      <span data-i18n="button.back">Back</span>
   		</a>
-  		<legend class="pull-left">Search</legend>
+  		
+  		<% if (typeof(uiTabs) !== 'undefined') { %>
+	  		<ul class="js-nav-tabs nav nav-tabs pull-right hide modal-visible">
+	  			<% _.each(uiTabs, function(uiTab, index){ %>
+	  			    <li id="<%= uiTab.name %>" class="tab-ele <%= (index == 0)? 'active' : '' %>">
+	  			      <a class="tab-link"><%= uiTab.label %></a>
+	  			    </li>
+	  			<% }); %>
+	  		</ul>
+  		<% } %>
 		</div>
+
 		<div class="crop2 clearfix">
 			<div class="js-filters filter-no-padding"></div>
 		</div>
@@ -32,10 +42,25 @@
 					<option value="1000">1000</option>
 				</select>
 			</div>
+
+			<% if (typeof(map) !== 'undefined') { %>
+			<div class="pull-right">
+				<button class="js-btn-panel btn btn-success active ">
+					<span class="reneco reneco-sites"></span>
+					&nbsp;Grid
+				</button>
+				<button class="js-btn-panel btn btn-success">
+					<span class="reneco reneco-map"></span>
+					&nbsp;Map
+				</button>
+			</div>
+			<% } %>
 		</div>
 
-		<div class="crop2 no-padding">
-			<div class="js-rg-grid full-height"></div>
+
+		<div class="crop2 oh no-padding">
+			<div class="js-rg-grid col-xs-12 no-padding dyn-panel full-height active"></div>
+			<div id="map" class="js-map-pannel col-xs-12 no-padding dyn-panel"></div>
 		</div>
 
 		<div class="toolbar bottom">

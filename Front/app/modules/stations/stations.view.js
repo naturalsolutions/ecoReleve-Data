@@ -13,18 +13,7 @@ define([
   'use strict';
 
   return ManagerView.extend({
-    template: 'app/modules/stations/stations.tpl.html',
     model: new StationModel(),
-		events: {
-		  'click .js-btn-filter': 'filter',
-		  'click .js-btn-clear': 'clearFilter',
-		  'click .js-btn-new': 'new',
-		  'click .js-btn-export': 'export',
-		  'change .js-page-size': 'changePageSize',
-      'click .js-btn-panel': 'togglePanel',
-		  'click .tab-ele': 'toggleTab',
-
-		},
 
     populateCurrentData: function(currentData){
       this.defaultFilters = currentData.filters;
@@ -48,7 +37,7 @@ define([
         this.$el.find('.tab-ele').each(function(){
           $(this).toggleClass('active');
         })
-        if(this.$el.find('#lastImportedStations').hasClass('active')) {
+        if(this.$el.find('#lastImported').hasClass('active')) {
           this.filters.extraFilters = [{
             Column: 'LastImported',
             Operator: '=',
@@ -58,15 +47,25 @@ define([
           this.filters.extraFilters = false;
         }
         this.filters.update();
-      }      
+      }
     },
 
     togglePanel: function(e) {
     	if(!$(e.currentTarget).hasClass('active')){
     		this.$el.find('.js-btn-panel,.dyn-panel').each(function(){
     			$(this).toggleClass('active');
-    		})
+    		});
     	}
+    },
+
+    onShow: function() {
+      this.$el.find('.js-date-time').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
+      this.displayFilter();
+      this.displayGridView();
+      if(this.displayMap){
+        this.displayMap();
+      }
+      this.$el.find('.js-nav-tabs').removeClass('hidden');
     },
 
     displayFilter: function() {

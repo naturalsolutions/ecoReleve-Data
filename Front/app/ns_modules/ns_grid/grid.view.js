@@ -40,6 +40,7 @@ define([
       var _this = this;
       this.model = options.model || new Backbone.Model();
       this.model.set('type', options.type);
+      this.model.set('typeObj', options.typeObj || 1);
       if(options.url){
         this.model.set('url', options.url);
       } else {
@@ -179,7 +180,8 @@ define([
             page: page,
             per_page: pageSize,
             offset: offset,
-            order_by: JSON.stringify(order_by)
+            order_by: JSON.stringify(order_by),
+            typeObj: _this.model.get('typeObj')
           };
 
           _this.deferred = $.ajax({
@@ -467,7 +469,9 @@ define([
 
       AgGrid.PaginationController.prototype.createTemplate = function () {
           var localeTextFunc = this.gridOptionsWrapper.getLocaleTextFunc();
-          var template = '<div class="ag-paging-panel ag-font-style">' +
+          var template = Backbone.Marionette.Renderer.render('app/ns_modules/ns_grid/pagination.tpl.html');
+
+          /*'<div class="ag-paging-panel ag-font-style">' +
               '<span id="pageRowSummaryPanel" class="ag-paging-row-summary-panel">' +
               '<span id="firstRowOnPage"></span>' +
               ' [TO] ' +
@@ -487,7 +491,7 @@ define([
               '<button type="button" class="ag-paging-button btn btn-default" id="btNext">[NEXT]</button>' +
               '<button type="button" class="ag-paging-button btn btn-default" id="btLast">[LAST]</button>' +
               '</span>' +
-              '</div>';
+              '</div>';*/
           return template
               .replace('[PAGE]', localeTextFunc('page', 'Page'))
               .replace('[TO]', localeTextFunc('to', 'to'))
