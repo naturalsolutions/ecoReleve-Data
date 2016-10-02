@@ -9,9 +9,9 @@ conda install zope.interface
 conda install pywin32
 conda install pycrypto
 pip install pyramid_jwtauth
+pip install exifread
 
 python setup.py develop
 
 cd ../Front
 npm install && bower install && grunt dev
-
