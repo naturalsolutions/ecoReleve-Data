@@ -7,12 +7,12 @@ define([
 	'translater',
 	'config',
 	'ez-plus',
-	'bootstrap-star-rating',
 	'./lyt-camTrapImageModel',
 	'wheelzoom',
-	'imageLoaded'
+	'imageLoaded',
+	'bootstrap-star-rating'
 
-], function($, _, Backbone, Marionette, Translater, config , ezPlus , btstrp_star , CamTrapImageModel, wheelzoom , imageLoaded  ) {
+], function($, _, Backbone, Marionette, Translater, config , ezPlus , CamTrapImageModel, wheelzoom , imageLoaded, btstrp_star ) {
 
   'use strict';
 	return Marionette.ItemView.extend({
@@ -25,7 +25,8 @@ define([
 			'canRight' : 'i.reneco-chevron_right'
 		},
 		events:{
-
+			'click div.leftnavicon' : 'mouveleft',
+			'click div.rightnavicon' : 'mouveright'
 		},
 		className : 'full-height',
 		template : 'app/modules/validate/templates/tpl-camTrapModal.html',
@@ -58,6 +59,34 @@ define([
 											+this.model.get('date_creation')+''
 											+'<div class="indexposition">'+this.position+'/'+this.total+'</div>'
 											+'  </div>');
+
+			console.log("input");
+			console.log(this.$el.find('input'));
+			var $input = this.$el.find('input');
+			this.$el.find('input').rating({
+				min:0,
+				max:5,
+				step:1,
+				size:'md',
+				rtl:false,
+				showCaption:false,
+				showClear:false,
+				value : _this.model.get('note')
+			});
+			$input.on('rating.change', function(event, value, caption) {
+					_this.model.set('note',value);
+			});
+
+			/*$input.rating({
+				min:0,
+				max:5,
+				step:1,
+				size:'xs',
+				rtl:false,
+				showCaption:false,
+				showClear:false,
+				value : _this.model.get('note')
+			});*/
 										/*	$('.fullscreenimg img').imageLoaded()
 											.always( function( instance ) {
 										    console.log('all images loaded');
@@ -114,6 +143,14 @@ define([
 			this.parent.$el.find('.backgrid-paginator').css('visibility','visible');
 			this.$el.empty();
 			//this.destroy();
+		},
+
+		mouveleft : function() {
+				this.parent.leftMouvement();
+		},
+
+		mouveright : function() {
+			this.parent.rightMouvement();
 		},
 
 		onDestroy: function() {

@@ -49,18 +49,54 @@ div.bootstrap-tagsinput{
       margin-right: auto;
       object-fit:contain;
     }
-    i {
+
+
+    div.leftnavicon {
+      height: 100%;
+      position: absolute;
+      width: 70px;
+      left : 0;
+    }
+    div.leftnavicon:hover i{
+      opacity: 1;
+    }
+    div.rightnavicon {
+      height: 100%;
+      position: absolute;
+      width: 70px;
+      right: 0;
+      top: 0;
+    }
+    div.rightnavicon:hover i.reneco-chevron_left i.reneco-chevron_right{
+      opacity: 1;
+    }
+    i.reneco-chevron_left {
       visibility: hidden;
+      opacity: 0;
       position: absolute;
       top:~"calc(50% - 35px)";
       background-color: rgba(67,67,67,0.8);
-    }
-    i.reneco-chevron_left {
+      transition: opacity 0.8s linear;
       left: 0;
     }
     i.reneco-chevron_right {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      top:~"calc(50% - 35px)";
+      background-color: rgba(67,67,67,0.8);
+      transition: opacity 0.8s linear;
       right: 0;
     }
+  }
+
+  .fullscreenimg .rating-container {
+    opacity: 0;
+    position: absolute;
+    top : 0;
+    z-index: 999;
+    transition: opacity 0.8s linear;
+
   }
 }
 
