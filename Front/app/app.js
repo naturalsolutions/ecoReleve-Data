@@ -5,7 +5,7 @@ define([
   'router', 
   'controller',
   'sweetAlert',
-  
+
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
   'ns_modules/ns_bbfe/bbfe-timePicker',
@@ -27,9 +27,8 @@ define([
   'ns_modules/ns_cell/bg-integerCell',
 
   ],
-function(
-  Marionette, config, LytRootView, Router, Controller, Swal
-){
+
+function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
   var JST = window.JST = window.JST || {};
   Backbone.Marionette.Renderer.render = function(template, data) {
@@ -147,6 +146,18 @@ function(
       }
     };
 
+
+  window.onerror = function (errorMsg, fileURI, lineNumber, column, errorObj) {
+    $.ajax({
+      type : 'POST',
+      url : config.coreUrl+'log/error',
+      data:{StackTrace:errorObj,
+        errorMsg: errorMsg,
+        file : fileURI,
+        lineNumber:lineNumber,
+        column:column }
+    });
+  }
 
   window.app = app;
   return app;
