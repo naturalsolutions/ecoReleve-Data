@@ -12,7 +12,6 @@ define([
   'ns_modules/ns_bbfe/bbfe-dateTimePicker',
   'ns_modules/ns_bbfe/bbfe-autocomplete',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
-  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-nonIdPicker',
   'ns_modules/ns_bbfe/bbfe-listOfNestedModel/bbfe-listOfNestedModel',
   'ns_modules/ns_bbfe/bbfe-gridForm',
   'ns_modules/ns_bbfe/bbfe-autocompTree',
