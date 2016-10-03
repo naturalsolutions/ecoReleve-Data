@@ -40,8 +40,22 @@ define([
 			this.total = this.parent.currentCollection.fullCollection.length;
 			this.theWheel = null;
       this.listenTo(this.model, "change", function() {
+				console.log("bim changement detecté");
+
 				if( ! this.parent.stopSpace ) {
+					console.log("je render a nouveau");
 					_this.render();
+				}
+				else {
+					console.log("je render pas ");
+					if ( this.model.get('validated') == 2 ) {
+						console.log("mais je passe etoile en visilbe");
+						this.$el.find('.rating-container').css('visibility' , 'visible')
+					}
+					else {
+						console.log("mais je rend les étoiles invisible");
+							this.$el.find('.rating-container').css('visibility' , 'hidden')
+					}
 				}
       });
 		},
@@ -63,19 +77,28 @@ define([
 			console.log("input");
 			console.log(this.$el.find('input'));
 			var $input = this.$el.find('input');
-			this.$el.find('input').rating({
-				min:0,
-				max:5,
-				step:1,
-				size:'md',
-				rtl:false,
-				showCaption:false,
-				showClear:false,
-				value : _this.model.get('note')
-			});
-			$input.on('rating.change', function(event, value, caption) {
+				this.$el.find('input').rating({
+					min:0,
+					max:5,
+					step:1,
+					size:'xl',
+					rtl:false,
+					showCaption:false,
+					showClear:false,
+					value : _this.model.get('note')
+				});
+				this.$el.find('.rating-container').css('visibility' , 'hidden')
+				$input.on('rating.change', function(event, value, caption) {
 					_this.model.set('note',value);
-			});
+				});
+			if ( this.model.get('validated') == 2 ) {
+				this.$el.find('.rating-container').css('visibility' , 'visible')
+				//$input.css('visibility' , 'visible')
+			}
+			else {
+					this.$el.find('.rating-container').css('visibility' , 'hidden')
+			//	$input.css('visibility' , 'hidden')
+			}
 
 			/*$input.rating({
 				min:0,
@@ -124,12 +147,24 @@ define([
       var _this = this;
       this.stopListening(this.model);
 			this.parent.$el.find('.infosfullscreen').html('');
+			this.parent.$el.find('.infosfullscreen').remove();
 			this.model = model;
 			this.position = this.parent.currentCollection.fullCollection.indexOf(this.model) + 1 ;
 			this.total = this.parent.currentCollection.fullCollection.length;
       this.listenTo(this.model, "change", function() {
 				if( ! this.parent.stopSpace ) {
 					_this.render();
+				}
+				else {
+					console.log("je render pas ");
+					if ( this.model.get('validated') == 2 ) {
+						console.log("mais je passe etoile en visilbe");
+						this.$el.find('.rating-container').css('visibility' , 'visible')
+					}
+					else {
+						console.log("mais je rend les étoiles invisible");
+							this.$el.find('.rating-container').css('visibility' , 'hidden')
+					}
 				}
       });
 			this.render();

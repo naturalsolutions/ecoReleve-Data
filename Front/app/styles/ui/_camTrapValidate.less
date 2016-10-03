@@ -41,6 +41,10 @@ div.bootstrap-tagsinput{
     width: 100%;
     height: 100%;
     background-color: #434343;
+    .infosonimg {
+      width: 100%;
+      height: 100%;
+    }
     img {
       display: block;
       max-width: 100%;
@@ -54,7 +58,7 @@ div.bootstrap-tagsinput{
     div.leftnavicon {
       height: 100%;
       position: absolute;
-      width: 70px;
+      width: 40px;
       left : 0;
     }
     div.leftnavicon:hover i{
@@ -63,11 +67,14 @@ div.bootstrap-tagsinput{
     div.rightnavicon {
       height: 100%;
       position: absolute;
-      width: 70px;
+      width: 40px;
       right: 0;
       top: 0;
     }
-    div.rightnavicon:hover i.reneco-chevron_left i.reneco-chevron_right{
+    div.rightnavicon:hover i.reneco-chevron_left {
+      opacity: 1;
+    }
+    div.rightnavicon:hover i.reneco-chevron_right {
       opacity: 1;
     }
     i.reneco-chevron_left {
@@ -75,7 +82,8 @@ div.bootstrap-tagsinput{
       opacity: 0;
       position: absolute;
       top:~"calc(50% - 35px)";
-      background-color: rgba(67,67,67,0.8);
+      color : white;
+      text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
       transition: opacity 0.8s linear;
       left: 0;
     }
@@ -84,19 +92,27 @@ div.bootstrap-tagsinput{
       opacity: 0;
       position: absolute;
       top:~"calc(50% - 35px)";
-      background-color: rgba(67,67,67,0.8);
+      color : white;
+      text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;
       transition: opacity 0.8s linear;
       right: 0;
     }
   }
 
-  .fullscreenimg .rating-container {
+  .infosonimg .rating-container {
     opacity: 0;
     position: absolute;
+    width: 100%;
+    text-align: center;
     top : 0;
-    z-index: 999;
+    z-index: 8;
     transition: opacity 0.8s linear;
-
+  }
+  .rating-xl {
+    font-size: 4vw !important;
+  }
+  .infosonimg:hover .rating-container{
+    opacity: 1;
   }
 }
 
@@ -225,7 +241,7 @@ div.bootstrap-tagsinput{
         opacity: 0;
         position: absolute;
         top : 0;
-        z-index: 999;
+        z-index: 8;
         transition: opacity 0.8s linear;
 
       }
@@ -333,8 +349,14 @@ div.bootstrap-tagsinput{
   max-height: 45px;
   background-color: #434343;
   .infosfullscreen{
-    color: white;
+    position: absolute;
+    width: 100%;
     text-align: center;
+    opacity: 1;
+    color: white;
+    font-weight: 600;
+    font-size: 2vw;
+    line-height: 30px;
     span{
       float : right;
       margin-right: 20px;
@@ -366,8 +388,11 @@ div.bootstrap-tagsinput{
     }
   }
 }
-.indexposition{
-  float : right;
+.indexposition {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  text-align: right;
   padding-right: 50px;
 }
 

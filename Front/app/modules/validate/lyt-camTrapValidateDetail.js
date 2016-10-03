@@ -83,6 +83,9 @@ define([
       'click #js_checked_top' : 'filterCollectionCtrl',
       'click #js_notchecked_top' :'filterCollectionCtrl',
       'click #infossession' : 'filterCollectionCtrl',
+      'click button#filternavbtn' : 'filterNavOpen',
+      'click i#closeNav' : 'filterNavClose',
+      'click input[name="filterstatus"]': 'filterCollectionCtrl',
     },
 
     ui: {
@@ -113,6 +116,22 @@ define([
       'rgImageDetails': '#imageDetails',
     },
 
+    filterCollectionCtrl2 : function (event) {
+
+      console.log(event);
+    },
+
+    filterNavOpen : function () {
+      console.log("boommm");
+       var sidenav = this.$el.find("#mySidenav");
+       console.log(sidenav);
+       sidenav.css('width', "250px");
+    },
+    filterNavClose : function () {
+      var sidenav = this.$el.find("#mySidenav");
+      console.log(sidenav);
+      sidenav.css('width', "0");
+    },
     setStars: function(e) {
       this.tabView[this.currentPosition].setStars(e.key)
     },
@@ -234,6 +253,13 @@ define([
 
     onRender: function() {
       this.$el.i18n();
+    /*  this.$el.append('<div id="mySidenav" class="sidenav">'
+        +'<a href="javascript:void(0)" class="closebtn" onclick="">&times;</a>'
+        +'<a href="#">About</a>'
+        +'<a href="#">Services</a>'
+        +'<a href="#">Clients</a>'
+        +'<a href="#">Contact</a>'
+        +'</div>')*/
 
     },
 

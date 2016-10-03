@@ -37,7 +37,12 @@
   <div class="camTrap toolbar top clearfix">
     <div id="rgToolsBarTop" class="col-md-10"></div>
     <div class="col-md-2">
-      <button id="validate" class="btn btn-success pull-right">Validate</button>
+      <div class="btn-group">
+        <a class="btn btn-default disabled" role="button">
+            <i class="reneco reneco-search2 icon-one"></i>
+        </a>
+        <button id="filternavbtn" class="btn btn-success">Filter</button>
+      </div>
     </div>
   <!--  <button><i class="reneco reneco-ecollectionsmall icon-two"></i></button>
   <button><i class="reneco reneco-image_file icon-two"></i></button>
@@ -75,3 +80,32 @@
 <!-- Modal -->
 </div>
 <div id="rgModal"></div>
+<div id="mySidenav" class="sidenav">
+  <i id="closeNav" class="closebtn"><span class="reneco reneco-close icon-one right"></span></i>
+  <div class="col-md-12">
+       <h4>Filter On status</h4>
+
+      <div class="funkyradio">
+          <div class="funkyradio-success">
+              <input type="radio" name="filterstatus" id="radio1" class="allphotos" value="0" />
+              <label for="radio1">All Status</label>
+          </div>
+          <div class="funkyradio-success">
+              <input type="radio" name="filterstatus" id="radio2" class="accepted" value="1"/>
+              <label for="radio2">Accepted</label>
+          </div>
+          <div class="funkyradio-success">
+              <input type="radio" name="filterstatus" id="radio3" class="refused" value="2"/>
+              <label for="radio3">Rejected</label>
+          </div>
+          <div class="funkyradio-success">
+              <input type="radio" name="filterstatus" id="radio4" class="checked" value="3"/>
+              <label for="radio4">Unknown</label>
+          </div>
+          <div class="funkyradio-success">
+              <input type="radio" name="filterstatus" id="radio5" class="notchecked" value="4"/>
+              <label for="radio5">Not seen</label>
+          </div>
+      </div>
+  </div>
+</div>
