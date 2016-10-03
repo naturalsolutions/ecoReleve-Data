@@ -1,10 +1,10 @@
 define([
   'marionette', 
-  'config', 
   'lyt-rootview', 
   'router', 
   'controller',
   'sweetAlert',
+  'config', 
 
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
