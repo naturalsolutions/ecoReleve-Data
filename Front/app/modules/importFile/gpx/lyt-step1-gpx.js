@@ -38,6 +38,7 @@ define([
       'selectFieldActivity': '#c14_fieldActivity',
       'fileInput': 'input#fileInput',
       'form': '#form',
+      'importGpxMsg' : '#importGpxMsg'
     },
 
     initialize: function() {
@@ -115,6 +116,7 @@ define([
             $(userBtn).attr('disabled','disabled');
             $('.fieldactivity').addClass('hidden');
             $(_this.fieldworkers).addClass('hidden');
+            _this.swalError('file error : we can\'t parse it');
           }
         };
       }
@@ -122,7 +124,7 @@ define([
     },
 
     displayErrors: function(errors) {
-      this.ui.importGpxMsg.append(errors);
+      this.ui.importGpxMsg.append("<errors style='color:red;'>"+errors+"</errors>"); //importGpxMsg doesn't exist
     },
 
     swalError: function(title) {
@@ -212,7 +214,7 @@ define([
        this.wayPointList.each(function(model) {
         model.set('FieldWorkers', list);
       });
-       
+
     }
   });
 });
