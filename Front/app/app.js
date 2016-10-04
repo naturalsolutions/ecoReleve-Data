@@ -27,6 +27,15 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
     var app = {};
     var JST = window.JST = window.JST || {};
     window.xhrPool = [];
+    
+    window.onkeydown = function (e) {
+      if (e.keyCode == 8 ) {  //backspace key
+        if( e.target.tagName != 'INPUT') { //handle event if not in input
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    };
 
 
     Backbone.Marionette.Renderer.render = function(template, data) {
@@ -66,7 +75,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
   $.xhrPool.allowAbort = false;
   $.xhrPool.abortAll = function() { // our abort function
     if ($.xhrPool.allowAbort){
-      $(this).each(function(idx, jqXHR) { 
+      $(this).each(function(idx, jqXHR) {
           jqXHR.abort();
       });
       $.xhrPool.length = 0
