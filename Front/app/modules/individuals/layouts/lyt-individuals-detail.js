@@ -189,12 +189,12 @@ define([
         1: {
           name: 'type_',
           type: 'Text',
-          label: 'Types',
-          title: 'types'
+          label: 'Type',
+          title: 'type'
         },
         2: {
         type: 'Select' ,
-        title: 'Fieldacivity',
+        title: 'Field activity',
         name: 'fieldActivity_Name',
         editorClass: 'form-control',
         options: [],
@@ -264,7 +264,7 @@ define([
         cell: 'Integer'
       },{
         name: 'fieldActivity_Name',
-        label: 'FieldActivity',
+        label: 'Field Activity',
         editable: false,
         cell: Backgrid.StringCell.extend({
           render: function () {
