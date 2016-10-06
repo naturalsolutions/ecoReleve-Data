@@ -157,7 +157,7 @@ define([
         if (!this.errors) {
           Swal({
             title: 'Well done',
-            text: 'File(s) have been correctly imported\n\n' 
+            text: 'File(s) have been correctly imported\n\n'
             + '\t inserted Argos : ' + totalInsertedArgos + '\t existing Argos : ' + totalExistingArgos+','
             +'\n\t inserted GPS : ' + totalInsertedGPS + '\t existing GPS : ' + totalExistingGPS+','
             +'\n\t inserted Engineering : ' + totalInsertedEng + '\t existing Engineering : ' + totalExistingEng

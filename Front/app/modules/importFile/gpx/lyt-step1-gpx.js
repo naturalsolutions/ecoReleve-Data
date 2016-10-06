@@ -11,10 +11,11 @@ define([
   'ns_form/NSFormsModuleGit',
   'models/gpxForm',
   'i18n',
+  'dropzone'
 
 
 ], function($, _, Backbone, Marionette, config, Swal,
- XmlParser, NsForm, GpxForm
+ XmlParser, NsForm, GpxForm, Dropzone
 
 ) {
 
@@ -31,6 +32,10 @@ define([
       'change select[name="fieldActivity"]': 'setFieldActivity',
       'click #resetFieldActivity': 'resetFieldActivity',
       'click button[data-action="add"]': 'setUsers',
+      'drop .drag-zone-hover' : 'handleDrop',
+      'dragover .drag-zone-hover' : 'handleDragOVer',
+      'dragleave .drag-zone-hover' : 'handleDragLeave',
+      'click button#importGpxFile' :'simulateImport'
     },
 
     ui: {
@@ -38,19 +43,43 @@ define([
       'selectFieldActivity': '#c14_fieldActivity',
       'fileInput': 'input#fileInput',
       'form': '#form',
-      'importGpxMsg' : '#importGpxMsg'
+      'importGpxMsg' : '#importGpxMsg',
+      'divimpgpxfile' : '#btnImpGpxFile'
+    },
+    simulateImport : function () {
+      //this.ui.fileInput.click();
+      $('input[type=file]').click();
+
+    },
+    handleDrop : function(e) {
+      e.originalEvent.stopPropagation();
+      e.originalEvent.preventDefault();
+      this.importFile(e.originalEvent.dataTransfer.files);
+    },
+
+    handleDragOVer : function(e) {
+      e.originalEvent.stopPropagation();
+      e.originalEvent.preventDefault();
+    },
+
+    handleDragLeave : function(e) {
     },
 
     initialize: function() {
       this.model = new Backbone.Model();
       this.wayPointList = new Backbone.Collection();
       this.errors = true;
+      this.importedFile = false;
       this.deferred = $.Deferred();
 
     },
 
     onShow: function() {
       this.displayForm();
+      this.ui.divimpgpxfile.insertBefore('.filesinputselector');
+      this.$el.find('.filesinputselector').css('display', 'none');//.css('visibility','hidden');
+
+
       // fieldactivity
       this.loadCollection(config.coreUrl + 'fieldActivity', 'select[name="fieldActivity"]');
       $('button[data-action="add"]').attr('disabled','disabled');
@@ -60,19 +89,27 @@ define([
     },
 
     importFile: function(e) {
-
       var _this = this;
-      var file = e.target.files[0];
+      if(typeof e.target === 'undefined') {
+        _this.importedFile = true;
+        var file = e[0];
+      }
+      else {
+        var file = e.target.files[0];
+      }
       var reader = new FileReader();
       var fileName = file.name;
+      $('#fileNameSelected').text(fileName); //add filename after btn
       var tab = fileName.split('.');
       var fileType = tab[1].toUpperCase();
       var fieldAfield = $('select[name="fieldActivity"]');
       var userBtn = $('button[data-action="add"]');
 
       if (fileType != 'GPX') {
+        _this.importedFile = false;
         this.swalError('error file type');
         this.model.set('data_FileName', '');
+        $('#fileNameSelected').text('No file selected');
         this.errors = true;
         $(fieldAfield).attr('disabled', 'disabled');
         $(userBtn).attr('disabled', 'disabled');
@@ -80,6 +117,7 @@ define([
       } else {
         reader.onload = function(e, fileName) {
           window.app.checkFormSaved = false;
+
           var xml = e.target.result;
 
           // get waypoints collection
@@ -103,6 +141,11 @@ define([
             if (errosList.length > 0) {
               for (var i = 0; i < errosList.length; i++) {
                 _this.displayErrors(errosList[i] + '<br/>');
+              }
+            }
+            else {
+              if ( _this.importedFile ) {
+                $('input[type=hidden]').val("file"); //hack for nsform
               }
             }
             _this.errors = false;
