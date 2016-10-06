@@ -41,7 +41,6 @@ define([
 
     initialize: function() {
       this.model = new Backbone.Model();
-      this.wayPointList = new Backbone.Collection();
       this.errors = true;
       this.deferred = $.Deferred();
 
@@ -145,8 +144,9 @@ define([
     setFieldActivity: function(e) {
       //could be bugged
       var fieldActivity = $(e.target).val();
-      this.wayPointList.each(function(model) {
-        model.set('fieldActivity', fieldActivity);
+      this.wayPointList.map(function(m) {
+
+        m.fieldActivity = fieldActivity;
         window.app.checkFormSaved = false;
       });
     },
@@ -208,8 +208,8 @@ define([
        for (var i=0;i<tab.length;i++){
         list.push(parseInt(tab[i].FieldWorker));
        }
-       this.wayPointList.each(function(model) {
-        model.set('FieldWorkers', list);
+       this.wayPointList.map(function(m) {
+        m.FieldWorkers = list;
       });
        
     }

@@ -102,11 +102,11 @@ define([
         case 'focus':
           this.focus(params);
           break;
-        case 'selection':
-          this.selectOne(params);
+        case 'singleSelection':
+          this.singleSelection(params);
           break;
-        case 'selectionMultiple':
-          this.selectMultiple(params);
+        case 'multiSelection':
+          this.multiSelection(params);
           break;
         case 'popup':
           this.popup(params);
@@ -445,10 +445,10 @@ define([
           marker.feature = feature;
 
           _this.dict[feature.id] = marker;
-
+          
           marker.on('click', function(e){
-            if(_this.selection && feature.properties.type_ !== 'station'){
-              _this.interaction('selection', this.feature.id);
+            if(_this.selection && this.feature.properties.type_ !== 'station'){
+              _this.interaction('singleSelection', this.feature.id);
             }
             _this.interaction('focus', this.feature.id);
           });
@@ -614,7 +614,7 @@ define([
               }
           }
         }
-        _this.interaction('selectionMultiple', bbox);
+        _this.interaction('multiSelection', bbox);
         $(_this).trigger('ns_bbox_end', e.boxZoomBounds);
       });
     },
@@ -644,7 +644,7 @@ define([
       });
     },
 
-    selectOne: function(id){
+    singleSelection: function(id){
       if(this.selection){
       var marker;
         marker=this.dict[id];
@@ -665,7 +665,7 @@ define([
     },
 
     //from child to parent
-    selectMultiple: function(ids){
+    multiSelection: function(ids){
       if(this.selection){
         var marker;
         for (var i = 0; i < ids.length; i++) {
@@ -865,7 +865,7 @@ define([
       if(params.featureCollection.features.length){
         this.updateLayers(params.featureCollection);
         if(params.selectedFeaturesIds){
-          this.selectMultiple(params.selectedFeaturesIds);
+          this.multiSelection(params.selectedFeaturesIds);
         }
       } else {
         this.map.removeLayer(this.markersLayer);
@@ -899,7 +899,7 @@ define([
         }
         //todo : amelioration
 
-        this.selectMultiple(selectedMarkers);
+        this.multiSelection(selectedMarkers);
       }
     },
 

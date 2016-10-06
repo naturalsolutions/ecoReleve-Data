@@ -94,14 +94,14 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
   window.UnauthAlert = function(){
     Swal({
-        title: 'Unauthorized',
-        text: "You don't have permission",
-        type: 'warning',
-        showCancelButton: false,
-        confirmButtonColor: 'rgb(240, 173, 78)',
-        confirmButtonText: 'OK',
-        closeOnConfirm: true,
-      });
+      title: 'Unauthorized',
+      text: "You don't have permission",
+      type: 'warning',
+      showCancelButton: false,
+      confirmButtonColor: 'rgb(240, 173, 78)',
+      confirmButtonText: 'OK',
+      closeOnConfirm: true,
+    });
   }
 
   $(document).ajaxError(function( event, jqxhr, settings, thrownError ) {

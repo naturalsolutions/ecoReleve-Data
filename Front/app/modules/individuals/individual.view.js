@@ -81,6 +81,7 @@ define([
         url: this.model.get('type') + '/' + this.model.get('id')  + '/locations',
         clientSide: true,
         gridOptions: {
+          rowSelection: 'multiple',
           enableFilter: true,
           onRowClicked: function(row){
             _this.locationsGrid.interaction('focus', row.data.ID || row.data.id);

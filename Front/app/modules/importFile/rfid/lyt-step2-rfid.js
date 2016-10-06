@@ -32,9 +32,8 @@ define([
     },
 
     initialize: function(options) {
-      this.sensorId = options.model.attributes.sensorId;
-      console.log(this.options.model.get('row'));
-      this.row = this.options.model.get('row');
+      this.sensorId = options.model.get('sensorId');
+      this.row = options.model.get('row');
     },
 
     clearFile: function() {
@@ -85,12 +84,13 @@ define([
 
         reader.onload = function(e, fileName) {
           data.append('data', e.target.result);
-          //data.append('module', self.model.get(self.parent.steps[self.parent.currentStep-1].name+'_RFID_identifer'));
-          data.append('FK_Sensor',self.sensorId);
-          data.append('StartDate', _this.row.model.get('StartDate'));
-          data.append('EndDate', _this.row.model.get('EndDate'));
 
-          console.log(data);
+          //data.append('module', self.model.get(self.parent.steps[self.parent.currentStep-1].name+'_RFID_identifer'));
+          
+          data.append('FK_Sensor',self.sensorId);
+          data.append('StartDate', _this.row.StartDate);
+          data.append('EndDate', _this.row.EndDate);
+
 
           $.ajax({
             type: 'POST',

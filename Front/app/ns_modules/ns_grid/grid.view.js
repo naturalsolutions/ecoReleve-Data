@@ -65,7 +65,6 @@ define([
         enableColResize: true,
         rowHeight: 40,
         headerHeight: 30,
-        rowSelection: 'multiple',
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),
         onGridReady: function(){
@@ -96,16 +95,18 @@ define([
         this.fetchColumns();
       }
 
-      if(this.clientSide){
-        this.fetchData();
-      } else {
-        this.initDataSource();
+      if(!this.gridOptions.rowData){
+        if(this.clientSide){
+          this.fetchData();
+        } else {
+          this.initDataSource();
+        }
       }
     },
 
     onRowSelected: function(e){
       if(this.ready){
-        this.interaction('selection', e.node.data.id || e.node.data.ID, this);
+        this.interaction('singleSelection', e.node.data.id || e.node.data.ID, this);
       }
     },
 
@@ -150,9 +151,14 @@ define([
         this.gridOptions.rowData = response;
         $.when(this.columnDeferred).then(function(){
           if(response[1] instanceof Array){
+            _this.model.set('totalRecords', response[0].total_entries);
             _this.gridOptions.api.setRowData(response[1]);
           } else {
+            _this.model.set('totalRecords', response.length);
             _this.gridOptions.api.setRowData(response);
+          }
+          if(_this.afterFirstRowFetch){
+            _this.afterFirstRowFetch();
           }
         })
       });
@@ -230,24 +236,10 @@ define([
     },
 
     action: function(action, params, from){
-      switch(action){
-        case 'focus':
-          this.focus(params);
-          break;
-        case 'selection':
-          this.selectOne(params, from);
-          break;
-        case 'selectionMultiple':
-          this.selectMultiple(params);
-          break;
-        case 'filter':
-          this.filter(params);
-          break;
-        case 'focus':
-          this.focus(params);
-          break;
-        default:
-          break;
+      if(this[action]){
+        this[action](params, from);
+      } else {
+        console.warn(this, 'doesn\'t have an action for whith this name');
       }
     },
     interaction: function(action, params){
@@ -261,28 +253,43 @@ define([
     focus: function(param){
       var _this = this;
       this.gridOptions.api.forEachNode( function (node) {
-          if (node.data.ID === param) {
+          if (node.data.ID === param || node.data.id === param) {
             _this.gridOptions.api.ensureIndexVisible(node.childIndex);
             setTimeout(function(){
-              _this.gridOptions.api.setFocusedCell(node.childIndex, 'ID', null);
+              var tmp = (node.data.id)? 'id' : 'ID';
+              _this.gridOptions.api.setFocusedCell(node.childIndex, tmp, null);
             },0);
           }
       });
     },
 
     focusByIndex: function(params) {
-      console.log(params);
       var _this = this;
         _this.gridOptions.api.ensureIndexVisible(params.index);
         setTimeout(function(){
           _this.gridOptions.api.setFocusedCell(params.index, 'ID', null);
+          //_this.gridOptions.api.setFocusedCell(params.index, 'id', null);
         },0);
     },
-
-    selectOne: function(param, from){
+    
+    multiSelection: function(params, from){
+      //could certainly be optimized
       var _this = this;
       this.gridOptions.api.forEachNode( function (node) {
-          if (node.data.ID === param) {
+        params.map( function (param) {
+          if(node.data.ID === param || node.data.id === param){
+              _this.ready = false;
+              node.setSelected(true);
+              _this.ready = true;
+          }
+        });
+      });
+    },
+
+    singleSelection: function(param, from){
+      var _this = this;
+      this.gridOptions.api.forEachNode( function (node) {
+          if (node.data.ID === param || node.data.id === param) {
               if(from === _this){
                 _this.ready = false;
                 node.setSelected(node.selected);
@@ -313,7 +320,7 @@ define([
             'id': node.data.id || node.data.ID,
             'geometry': {
                 'type': 'Point',
-                'coordinates': [node.data.LAT, node.data.LON],
+                'coordinates': [node.data.LAT || node.data.latitude, node.data.LON || node.data.longitude],
             },
             'properties': node.data,
         };
@@ -375,7 +382,7 @@ define([
       this.grid = new AgGrid.Grid(gridDiv, this.gridOptions);
 
 
-      if(!this.clientSide){
+      if(!this.clientSide && !this.gridOptions.rowData){
         this.gridOptions.api.setDatasource(this.dataSource);
       }
       if(this.gridOptions.rowModelType == 'pagination'){

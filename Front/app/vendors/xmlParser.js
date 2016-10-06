@@ -9,13 +9,13 @@ define([
     gpxParser: function(xml) {
       var _this = this;
       try {
-        var waypointList = new Backbone.Collection();
+        var waypointList = [];
         var errors = [];
         // id waypoint
         var id = 0;  // used to get number of valid waypoint
         var nbWaypoints = 0; // used to get number of  waypoints in gpx file
         $(xml).find('wpt').each(function() {
-          var waypoint = new Backbone.Model();
+          var waypoint = {};
           var lat = $(this).attr('lat');
           var lon = $(this).attr('lon');
           var ele = $(this).find('ele').text() || 0 ;
@@ -60,24 +60,24 @@ define([
           if (lat != '' && lon != '' && dateStr != 'Invalid date' && time != ' Invalid date') {
             id += 1;
             //var idwpt = id;
-            waypoint.set('id', id);
-            waypoint.set('name', waypointName);
-            waypoint.set('latitude', latitude);
-            waypoint.set('longitude', longitude);
-            waypoint.set('elevation', ele);
-            waypoint.set('waypointTime', dateStr);
-            waypoint.set('displayDate', timestamp);
-            waypoint.set('time', time);
-            waypoint.set('fieldActivity', '');
-            waypoint.set('import', false);
-            waypoint.set('FieldWorkers', []);
-            waypoint.set('precision', 10);
-            waypointList.add(waypoint);
+            waypoint.id = id;
+            waypoint.name = waypointName;
+            waypoint.latitude = latitude;
+            waypoint.longitude = longitude;
+            waypoint.elevation = ele;
+            waypoint.waypointTime = dateStr;
+            waypoint.displayDate = timestamp;
+            waypoint.time = time;
+            waypoint.fieldActivity = '';
+            waypoint.import = false;
+            waypoint.FieldWorkers = [];
+            waypoint.precision = 10;
+
+            waypointList.push(waypoint);
           } else {
             errors.push(waypointName);
           }
         });
-        console.log(waypointList);
         // check if all wayponits are imported
         if (id != nbWaypoints) {
           //alert("some waypoints are not imported, please check coordinates and date for each waypoint");

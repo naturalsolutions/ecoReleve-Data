@@ -5,271 +5,56 @@ define([
   'backbone',
   'marionette',
   'sweetAlert',
-  'translater',
-  'ns_grid/model-grid',
+
   'ns_modules/ns_com',
-  './lyt-sensorValidateDetail'
-], function($, _, Backbone, Marionette, Swal, Translater, NsGrid, Com, LytSensorValidateDetail) {
+  'ns_grid/grid.view',
+  './validate.model'
+
+], function($, _, Backbone, Marionette, Swal, 
+  Com, GridView, ValidateModel
+){
 
   'use strict';
 
   return Marionette.LayoutView.extend({
 
     template: 'app/modules/validate/templates/tpl-sensorValidateType.html',
-    className: 'full-height animated rel',
+    className: 'full-height animated rel white',
 
     events: {
-      'click button#autoValidate': 'autoValidate',
-      'change select#frequency': 'setFrequency',
-      'click button#back': 'back',
-      'click button#hideDetail': 'hideDetail',
+      'click .js-btn-auto-validation': 'autoValidation',
+      'change .js-select-frequency': 'setFrequency',
     },
 
     ui: {
-      'grid': '#grid',
-      'paginator': '#paginator',
-      'frequency': 'select#frequency',
-      'detail': '#detail',
+      'totalRecords': '.js-total-records',
+      'frequency': '.js-select-frequency',
     },
 
     regions: {
-      'rgDetail': '#detail'
+      rgGrid: '.js-rg-grid'
     },
+
+    model: new ValidateModel(),
 
     initialize: function(options) {
-      this.translater = Translater.getTranslater();
       this.type_ = options.type;
       this.com = new Com();
+      this.columnDefs = this.model.get(this.type_ + 'ColumnDefs');
     },
 
-    back: function() {
-      Backbone.history.navigate('validate', {trigger: true});
-    },
-
-    hideDetail: function() {
-      this.ui.detail.addClass('hidden');
-    },
 
     onRender: function() {
       this.$el.i18n();
     },
 
     onShow: function() {
-      this.ui.frequency.find('option[value="all"]').prop('selected', true);
-      switch (this.type_){
-        case 'rfid':
-          this.ui.frequency.find('option[value="60"]').prop('selected', true);
-
-          this.cols = [
-            {
-              name: 'UnicIdentifier',
-              label: 'Unic Identifier',
-              editable: false,
-              cell: 'string'
-            },{
-              name: 'FK_Sensor',
-              label: 'FK_Sensor',
-              editable: false,
-              renderable: false,
-              cell: 'string'
-            },{
-              name: 'equipID',
-              label: 'equipID',
-              editable: false,
-              renderable: false,
-              cell: 'string'
-            }, {
-              name: 'site_name',
-              label: 'site name',
-              editable: false,
-              cell: 'string'
-            }, {
-              name: 'site_type',
-              label: 'site type',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'StartDate',
-              label: 'Start Date',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'EndDate',
-              label: 'End Date',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'nb_chip_code',
-              label: 'nb indiv',
-              editable: false,
-              cell: 'string',
-            },{
-              name: 'total_scan',
-              label: 'total scan',
-              editable: false,
-              cell: 'string',
-            },{
-              name: 'first_scan',
-              label: 'first scan',
-              editable: false,
-              cell: 'string',
-            },{
-              name: 'last_scan',
-              label: 'last scan',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'import',
-              editable: true,
-              label: 'IMPORT',
-              cell: 'select-row',
-              headerCell: 'select-all'
-            }
-          ];
-          break;
-        case 'gsm':
-          this.ui.frequency.find('option[value="60"]').prop('selected', true);
-          this.cols = [
-            {
-              name: 'FK_ptt',
-              label: 'Unic Identifier',
-              editable: false,
-              cell: 'string'
-            },
-            {
-              name: 'FK_Individual',
-              label: 'Individual ID',
-              editable: false,
-              cell: 'string',
-              formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
-                fromRaw: function(rawValue, model) {
-                  if (rawValue == null) {
-                    rawValue = '<span class="bull-warn">&#x25cf;</span> No Individual attached !';
-                  }
-                  return rawValue;
-                }
-            }),
-            },{
-              name: 'Survey_type',
-              label: 'Survey Type',
-              editable: false,
-              cell: 'string'
-            },
-            {
-              name: 'FK_Sensor',
-              label: 'FK_Sensor',
-              editable: false,
-              cell: 'string',
-              renderable: false
-            }, 
-            {
-              name: 'nb',
-              label: 'NB',
-              editable: false,
-              cell: 'string'
-            }, {
-              name: 'StartDate',
-              label: 'Start equipment',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'EndDate',
-              label: 'End equipment',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'min_date',
-              label: 'Data from',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'max_date',
-              label: 'Data To',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'import',
-              editable: true,
-              label: 'IMPORT',
-              cell: 'select-row',
-              headerCell: 'select-all'
-            }
-          ];
-          break;
-        case 'argos':
-          this.ui.frequency.find('option[value="all"]').prop('selected', true);
-          this.cols = [
-            {
-              name: 'FK_ptt',
-              label: 'Sensor Identifier',
-              editable: false,
-              cell: 'string'
-            },
-            {
-              name: 'FK_Individual',
-              label: 'Individual ID',
-              editable: false,
-              cell: 'string',
-              formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
-                fromRaw: function(rawValue, model) {
-                  if (rawValue == null) {
-                    rawValue = '<span class="bull-warn">&#x25cf;</span> No Individual attached !';
-                  }
-                  return rawValue;
-                }
-              }),
-            },{
-              name: 'Survey_type',
-              label: 'Survey Type',
-              editable: false,
-              cell: 'string'
-            },{
-              name: 'FK_Sensor',
-              label: 'Sensor',
-              editable: false,
-              renderable: false,
-              cell: 'string'
-            }, {
-              name: 'nb',
-              label: 'NB',
-              editable: false,
-              cell: 'string'
-            }, {
-              name: 'StartDate',
-              label: 'Start equipment',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'EndDate',
-              label: 'End equipment',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'min_date',
-              label: 'Data from',
-              editable: false,
-              cell: 'string',
-            }, {
-              name: 'max_date',
-              label: 'Data To',
-              editable: false,
-              cell: 'string',
-            }, {
-              editable: true,
-              name: 'import',
-              label: 'IMPORT',
-              cell: 'select-row',
-              headerCell: 'select-all'
-            }
-          ];
-          break;
-        default:
-          console.warn('type error');
-          break;
-      }
-
       this.displayGrid();
       this.frequency = this.ui.frequency.val();
+    },
+
+    onRowClicked: function() {
+      
     },
 
     setFrequency: function(e) {
@@ -278,46 +63,30 @@ define([
 
     displayGrid: function() {
       var _this = this;
-      this.grid = new NsGrid({
-        pagingServerSide: false,
-        columns: this.cols,
-        pageSize: 20,
-        com: this.com,
-        url: 'sensors/' + this.type_ + '/uncheckedDatas',
-        rowClicked: true,
-        totalElement: 'totalEntriesType',
-        idCell: 'FK_Sensor'
-      });
-
-      this.grid.rowClicked = function(args) {
-        if (_this.type_ != 'rfid')
-        _this.rowClicked(args);
+      var afterFirstRowFetch = function(){
+        _this.ui.totalRecords.html(this.model.get('totalRecords'));
       };
 
-      this.ui.grid.html(this.grid.displayGrid());
-      this.ui.paginator.html(this.grid.displayPaginator());
+      this.rgGrid.show(this.gridView = new GridView({
+        columns: this.columnDefs,
+        com: this.com,
+        url: 'sensors/' + this.type_ + '/uncheckedDatas',
+        afterFirstRowFetch: afterFirstRowFetch,
+        clientSide: true,        
+        gridOptions: {
+          onRowClicked: this.onRowClicked.bind(this),
+        },
+      }));
     },
 
-    rowClicked: function(args) {
-      var row = args.row;
-      var evt = args.evt;
-
-      if (!$(evt.target).is('input')) {
-        this.rgDetail.show(new LytSensorValidateDetail({
-          type: this.type_,
-          frequency: this.frequency,
-          parentGrid: this.grid.collection.fullCollection,
-          model: row.model,
-          globalGrid: this.grid
-        }));
-        this.grid.currentRow = row;
-        this.grid.upRowStyle();
-
-        this.ui.detail.removeClass('hidden');
+    /*rowClicked: function(args) {
+      {
+        type: this.type_,
+        frequency: this.frequency,
       }
     },
-
-    autoValidate: function() {
+*/
+    autoValidation: function() {
       var params = {
         'frequency': this.frequency,
         'toValidate': []
