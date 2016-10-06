@@ -113,7 +113,6 @@ define([
           suppressRowClickSelection: false,
           onRowSelected: function(row){
             _this.model.set('row', row.node.data);
-
             _this.ui.requirement.val('check').change();
           }
         }

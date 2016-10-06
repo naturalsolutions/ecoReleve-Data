@@ -42,6 +42,7 @@ define([
         popup: true,
         com: this.com,
         selection: true,
+        //bbox: true,
       });
       this.map.url = false;
     },

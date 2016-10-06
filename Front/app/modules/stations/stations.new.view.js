@@ -14,7 +14,7 @@ define([
   'i18n'
 
 ], function(
-  $, _, Backbone, Marionette, config,
+  $, _, Backbone, Marionette,
   moment, datetime, Swal, 
   NsForm, NsMap
 ){

@@ -97,34 +97,11 @@ define([
       this.map.remove();
     },
 
-    action: function(action, params){
-      switch(action){
-        case 'focus':
-          this.focus(params);
-          break;
-        case 'singleSelection':
-          this.singleSelection(params);
-          break;
-        case 'multiSelection':
-          this.multiSelection(params);
-          break;
-        case 'popup':
-          this.popup(params);
-          break;
-        case 'resetAll':
-          this.resetAll();
-          break;
-        case 'selectAll':
-          this.selectAll();
-          break;
-        case 'filter':
-          this.filter(params);
-          break;
-        case 'loadFeatureCollection':
-          this.loadFeatureCollection(params);
-          break;
-        default:
-          break;
+    action: function(action, params, from){
+      if(this[action]){
+        this[action](params, from);
+      } else {
+        console.warn(this, 'doesn\'t have an action for whith this name');
       }
     },
 
@@ -588,32 +565,36 @@ define([
 
       this.map.on('boxzoomend', function(e) {
 
-        var bbox=[], childIds=[];
+        var bbox = [];
         for(var key in  markers._featureGroup._layers){
           marker =  markers._featureGroup._layers[key];
           if (e.boxZoomBounds.contains(marker._latlng) /*&& !_this.selectedMarkers[key]*/) {
 
-              if(!marker._markers){
+            if(!marker._markers){
+              if(marker.feature.properties.type_ !== 'station'){
                 bbox.push(marker.feature.id);
-              }else{
-                childs = marker.getAllChildMarkers();
+              }
+            }else{
+              childs = marker.getAllChildMarkers();
 
-                //bad functionName
-                _this.updateAllClusters(marker, true);
+              //bad functionName
+              _this.updateAllClusters(marker, true);
 
-                for (var i = childs.length - 1; i >= 0; i--) {
+              for (var i = childs.length - 1; i >= 0; i--) {
+                if(childs[i].feature.properties.type_ !== 'station'){
                   childs[i].selected = true;
                   _this.selectedMarkers[childs[i].feature.id] = childs[i];
                   bbox.push(childs[i].feature.id);
-
                   _this.toggleIconClass(childs[i]);
                 }
-                if(marker.__parent){
-                    _this.updateClusterParents(marker, []);
-                }
               }
+              if(marker.__parent){
+                  _this.updateClusterParents(marker, []);
+              }
+            }
           }
         }
+        
         _this.interaction('multiSelection', bbox);
         $(_this).trigger('ns_bbox_end', e.boxZoomBounds);
       });
