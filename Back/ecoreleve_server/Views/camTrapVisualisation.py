@@ -18,7 +18,50 @@ def allPhotos (request):
     print("bienvenue sur le service web visualisation des photos")
     print ( len( request.params ) )
     print (request.params)
+    print ( request.params.keys() )
+    compteur = 0
+    queryStrTotalParams = ""
+    query = ""
     queryStatut = 0
+    for item in request.params:
+        if compteur > 0:
+            queryStrTotalParams += ' AND '
+        queryStringParams = ""
+        paramTab = item.split('.')
+        queryStringParams +=paramTab[0]
+        if( len( paramTab ) > 1 ) : #parse col, operator , value
+            if( paramTab[1] == 'eq'):
+                #print(' = ')
+                queryStringParams += ' = '
+            if( paramTab[1] == 'lt'):
+                #print(' < ')
+                queryStringParams += ' < '
+            if( paramTab[1] == 'gt'):
+                #print(' > ')
+                queryStringParams += ' > '
+            if( paramTab[1] == 'lte'):
+                #print(' <= ')
+                queryStringParams += ' <= '
+            if( paramTab[1] == 'gte'):
+                #print(' >= ')
+                queryStringParams += ' >= '
+            if( paramTab[1] == 'ne'):
+                #print(' <> ')
+                queryStringParams += ' <> '
+        #print(request.params[item])
+        if paramTab[0] == 'date':
+            queryStringParams += 'convert( datetime , \''+str(request.params[item])+'\' )'
+        elif paramTab[0] == 'label':
+            queryStringParams += ' LIKE \'%'+str(request.params[item])+'%\''
+        else:
+            queryStringParams += request.params[item]
+        if queryStringParams != "" and compteur == 0:
+            compteur +=1
+            queryStatut = 3
+            queryStrTotalParams += "WHERE "
+        queryStrTotalParams += queryStringParams
+
+
     if len( request.params ) > 0 :
         print("traitement des parametres")
         if 'siteid' in request.params.keys():
@@ -60,6 +103,9 @@ def allPhotos (request):
         bindparam('fkmonitoredsite',value=fkMonitoredSite),
         bindparam('equipid', value=fkequipid)
         )
+    elif ( queryStatut == 3 ):
+        query = text(""" select * from Photos,Tags """+ str(queryStrTotalParams))
+        print ( query )
 
     data = session.execute(query).fetchall()
     dataResult = [dict(row) for row in data]

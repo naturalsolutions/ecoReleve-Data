@@ -85,7 +85,7 @@ require.config({
     'bootstrap-star-rating': '../bower_components/bootstrap-star-rating/js/star-rating',
     'exif-js' : '../bower_components/exif-js/exif',
     'wheelzoom' : './vendors/wheelzoom',
-    'imageLoaded' : '../bower_components/imagesloaded/imagesloaded.pkgd',
+    'imageLoaded' : '../bower_components/imagesloaded/imagesloaded.pkgd'
 
   },
   map: {
