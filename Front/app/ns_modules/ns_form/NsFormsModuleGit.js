@@ -151,6 +151,9 @@ define([
       if(options.displayMode){
         this.displayMode = options.displayMode;
       }
+      if(options.loadingError){
+        this.loadingError = options.loadingError;
+      }
 
       if (options.objectType) {
         this.objectType = options.objectType;
@@ -244,6 +247,7 @@ define([
         },
         error: function (data) {
           console.warn('request error');
+          _this.loadingError();
           //alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objectType);
         }
       });
@@ -581,7 +585,9 @@ define([
     savingError: function (response) {
       // To be extended, called after save on model if error
     },
+    loadingError : function(response) {
 
+    },
 
     bindEvents: function(){
       var _this = this;

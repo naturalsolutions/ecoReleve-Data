@@ -110,25 +110,21 @@ define([
 
     newSensor: function(e) {
       var _this = this;
-      this.ui.btnNew.tooltipList({
-        availableOptions: [{
-          label: 'Argos',
-          val: 'argos'
-        }, {
-          label: 'GSM',
-          val: 'gsm'
-        },{
-          label: 'RFID',
-          val: 'rfid'
-        },{
-          label: 'VHF',
-          val: 'vhf'
-        }],
-        liClickEvent: function(liClickValue) {
-          var url = _this.rootUrl + 'new/' + liClickValue;
-          Backbone.history.navigate(url, {trigger: true});
-        },
-        position: 'top'
+      var url = config.coreUrl + 'sensors/getType';
+      $.ajax({
+        url: url,
+        context: this,
+      success : function(data) {
+              console.log(data);
+              this.ui.btnNew.tooltipList({
+              availableOptions: data,
+              liClickEvent: function(liClickValue) {
+                var url2 = _this.rootUrl + 'new/' + liClickValue;
+                Backbone.history.navigate(url2, {trigger: true});
+              },
+              position: 'top'
+            });
+          }
       });
     },
 
