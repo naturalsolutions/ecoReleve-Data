@@ -1,7 +1,8 @@
 <div class="container">
-	<div class="mid-height clearfix hidden-xs hidden-sm">
+	<div class="mid-height clearfix hidden-xs hidden-sm hidden-md">
 		<div class="col-lg-6">
 			<br>
+			<h1 class="hello"><span data-i18n="home.hello">Hello,</span><br><span id="userFirst"></span> <span id="userLast"></span></h1>
 			<div id="info" class="col-lg-12 col-lg-offset-0" style = "text-align:center;">
 			</div>
 			<br>
@@ -28,20 +29,20 @@
 
 				<a href="#stations/new" class="tile small_tile last tile-pumpkin">
 					<p>
-						<i class="reneco reneco-entrykey "></i> 
-						<span>New station</span>
+						<i class="reneco reneco-entrykey "></i>
+						<span data-i18n="tiles.new-station">New station</span>
 					</p>
 				</a>
 
-				<a href="#release" class="js-admin tile small_tile tile-pumpkin">
+				<a href="#release" class="js-admin tile small_tile tile-pumpkin release">
 					<p>
 						<i class="reneco reneco-to_release"></i>
 						<span data-i18n="tiles.release">Release</span>
 					</p>
 				</a>
-				
 
-				<a href="#" class="tile small_tile tile-alizarin tile-locked ">
+
+				<a href="#" class="tile small_tile tile-alizarin autoImport">
 					<p>
 						<i class="reneco reneco-sensorimport"></i>
 						<span data-i18n="tiles.auto-import">Automatic import</span>
@@ -70,20 +71,20 @@
 			<div class="wrapper">
 				<a href="#stations" class="tile small_tile first tile-green">
 					<p>
-						<i class="reneco reneco-stations"></i> 
+						<i class="reneco reneco-stations"></i>
 						<span>Stations</span>
 					</p>
 				</a>
 
 				<a href="#individuals" class="tile small_tile tile-green">
-					
+
 					<p>
 						<i class="reneco reneco-individuals"></i>
 						<span data-i18n="tiles.individuals">Individuals</span>
 					</p>
 				</a>
 
-				<a href="#" class="tile small_tile last tile-teal tile-locked">
+				<a href="#" class="tile small_tile last tile-teal myData tile-locked">
 					<p>
 						<i class="reneco reneco-mydata"></i>
 						<span data-i18n="tiles.data">My data</span>
@@ -93,11 +94,11 @@
 				<a href="#sensors" class="tile small_tile first tile-green">
 					<p>
 						<i class="reneco reneco-sensors"></i>
-						<span>Sensors</span>
+						<span data-i18n="tiles.sensors">Sensors</span>
 					</p>
 				</a>
 
-				<a href="#monitoredSites" class="tile small_tile tile-green">
+				<a href="#monitoredSites" class="tile small_tile tile-green monitoredSites">
 					<p>
 						<i class="reneco reneco-sensors"></i>
 						<span data-i18n="tiles.sites">Monitored sites</span>
