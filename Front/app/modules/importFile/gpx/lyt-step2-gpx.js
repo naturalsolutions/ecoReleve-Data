@@ -15,6 +15,7 @@ define([
   Com, NsMap, GridView
 ) {
 
+  'use strict';
 
   return Marionette.LayoutView.extend({
 

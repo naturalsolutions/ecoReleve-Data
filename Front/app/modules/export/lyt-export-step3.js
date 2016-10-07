@@ -3,10 +3,13 @@ define([
 	'underscore',
 	'backbone',
 	'marionette',
-	'ns_grid/model-grid',
+
+  'ns_grid/grid.view',
+
 	'i18n'
-], function($, _, Backbone, Marionette, NsGrid
-) {
+], function($, _, Backbone, Marionette, GridView
+){
+
   'use strict';
   return Marionette.LayoutView.extend({
     className: 'full-height',
@@ -15,15 +18,19 @@ define([
     name: ' Preview',
 
     ui: {
-      'grid': '#grid',
       'columns': '#columns',
-      'requirement': '#requirement'
+      'requirement': '#requirement',
+      'totalRecords': '.js-total-records'
     },
 
     events: {
-      'change .col-chk': 'updateGrid',
+      'change .js-col-chk': 'updateGrid',
       'click button#all': 'selectAll',
       'click button#none': 'unselectAll',
+    },
+
+    regions: {
+      rgGrid: '.js-rg-grid'
     },
 
     initialize: function(options) {
@@ -38,36 +45,31 @@ define([
 
     displayGrid: function() {
       var _this = this;
-      this.grid = new NsGrid({
-        pageSize: 20,
-        pagingServerSide: true,
+      var afterFirstRowFetch = function(){
+        _this.ui.totalRecords.html(this.model.get('totalRecords'));
+        _this.displayColumnsPicker(this.gridOptions.columnApi.getAllGridColumns());
+        _this.verififyCols();
+      };
+      this.rgGrid.show(this.gridView = new GridView({
+        clientSide: true,
         url: 'export/views/' + this.model.get('viewId') + '/',
-        urlParams: this.model.get('filters'),
-        totalElement: 'total',
-        onceFetched: function() {
-          _this.displayColumnsPicker();
-        },
-      });
-
-      this.ui.grid.html(this.grid.displayGrid());
+        afterFirstRowFetch: afterFirstRowFetch
+      }));
     },
 
-    displayColumnsPicker: function() {
+    displayColumnsPicker: function(columnsList) {
       var _this = this;
-      this.columns = this.grid.columns;
-      this.columns.each(function(model, index) {
-        var colLine = '<div class="checkbox"><label><input class="col-chk" type="checkbox" value="' + model.get('name') + '">' + model.get('name') + '</label></div>';
+      
+      columnsList.map(function(col){
+        var colLine = '<div class="checkbox">' +
+          '<label><input class="js-col-chk" checked type="checkbox" value="' + col.colDef.field + '">' + col.colDef.headerName + '</label>' +
+        '</div>';
         _this.ui.columns.append(colLine);
       });
     },
 
     updateGrid: function(e) {
-      var model = this.columns.findWhere({'name': $(e.target).val()});
-      if ($(e.target).is(':checked')) {
-        model.set('renderable', true);
-      }else {
-        model.set('renderable', false);
-      }
+      this.gridView.gridOptions.columnApi.setColumnVisible($(e.target).val(), $(e.target).is(':checked'));
       this.verififyCols();
     },
 
