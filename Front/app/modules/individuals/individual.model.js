@@ -76,10 +76,6 @@ define([
       }],
 
       locationsColumnDefs: [{
-        field: 'ID',
-        headerName: 'ID',
-        hide: true,
-      },{
         field: 'Date',
         headerName: 'date',
         checkboxSelection: true,
@@ -93,6 +89,10 @@ define([
           }
           return params.value;
         }
+      },{
+        field: 'ID',
+        headerName: 'ID',
+        hide: true,
       },{
         field: 'LAT',
         headerName: 'latitude',

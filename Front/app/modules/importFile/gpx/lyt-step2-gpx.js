@@ -142,12 +142,6 @@ define([
         },{
           field: 'displayDate',
           headerName: 'Date',
-          /*cell : Backgrid.Extension.MomentCell.extend({
-            displayFormat: "DD/MM/YYYY HH:mm",
-            //modelFormat : "DD/MM/YYYY HH:mm",
-             modelInUnixTimestamp: true,
-            displayInUTC: false
-          }),*/
         },{
           field: 'latitude',
           headerName: 'LAT',

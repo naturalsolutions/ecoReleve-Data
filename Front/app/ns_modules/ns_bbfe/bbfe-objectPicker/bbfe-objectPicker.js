@@ -21,6 +21,8 @@ define([
     },
 
     initialize: function(options) {
+      this.fromGrid = options.fromGrid;
+
       options.schema.editorClass='';
       Form.editors.Text.prototype.initialize.call(this, options);
       this.validators = options.schema.validators || [];
@@ -41,8 +43,6 @@ define([
       };
       this.model.set('icon',dictCSS[this.objectName]);
 
-
-
       if (options.schema.options && options.schema.options.usedLabel){
         this.usedLabel = options.schema.options.usedLabel;
         this.displayingValue = true;
@@ -57,33 +57,30 @@ define([
       this.isTermError = false;
 
       var value;
-      if (options) {
-        if (options.model) {
-          value = options.model.get(options.schema.name);
-        }else {
-          value = options.value;
-        }
-
-        if (value) {
-          this.model.set('value', value);
-          if (this.displayingValue) {
-            this.model.set('value', '');
-            this.matchedValue = value;
-          }
-          this.model.set('data_value', value);
-        }else {
-          this.model.set('value', '');
-          this.model.set('data_value', '');
-        }
-
-        if (options.schema.editable) {
-          this.model.set('disabled', '');
-          this.model.set('visu', '');
-        }else {
-          this.model.set('disabled', 'disabled');
-          this.model.set('visu', 'hidden');
-        }
+      if (options.model) {
+        value = options.model.get(options.schema.name) || options.value;
       }
+
+      if (value) {
+        this.model.set('value', value);
+        if (this.displayingValue) {
+          this.model.set('value', '');
+          this.matchedValue = value;
+        }
+        this.model.set('data_value', value);
+      }else {
+        this.model.set('value', '');
+        this.model.set('data_value', '');
+      }
+
+      if (options.schema.editable) {
+        this.model.set('disabled', '');
+        this.model.set('visu', '');
+      }else {
+        this.model.set('disabled', 'disabled');
+        this.model.set('visu', 'hidden');
+      }
+
 
       var required;
       if(options.schema.validators){
@@ -160,6 +157,12 @@ define([
     render: function(){
       var _this = this;
       this.$el.html(this.template);
+
+      //quick (dirty) hack
+      if(this.fromGrid){
+        this.$el.find('.form-control').removeClass('form-control').addClass('ag-cell-edit-input');
+        this.$el.find('.span').addClass('');
+      }
       
       this._input = this.$el.find('input[name="' + this.model.get('key') + '" ]')[0];
       if (this.displayingValue){

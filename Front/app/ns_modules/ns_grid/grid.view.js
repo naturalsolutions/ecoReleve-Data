@@ -4,10 +4,11 @@ define([
   'backbone',
   'marionette',
   'ag-grid',
+  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, utils_1) {
+], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, utils_1) {
 
   'use strict';
 
@@ -68,9 +69,11 @@ define([
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),
         onGridReady: function(){
+          $.when(_this.deferred).then(function(){
             setTimeout(function(){
               _this.gridOptions.api.sizeColumnsToFit();
-            }, 0)
+            }, 0);
+          });
         },
         onAfterFilterChanged: function(){
           _this.clientSideFilter();
@@ -111,6 +114,7 @@ define([
     },
 
     formatColumns: function(columnDefs){
+      var _this = this;
       var filter = {
         'string' : 'text',
         'integer': 'number',
@@ -121,12 +125,65 @@ define([
           col.field = col.name;
           col.filter = filter[col.cell];
         }
+              
+        // if(col.renderable === false){
+        //   col.hide = true;
+        // } else {
+        //     col.hide = false;
+        // }
+
+        if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
+          col.checkboxSelection = true;
+        }
+
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
+
+
+        //draft
+        if(col.cell == 'autocomplete'){
+          _this.addBBFEditor(col);
+        }
       });
       return columnDefs;
     },
+    
+    addBBFEditor: function(col){
+      //draft
+      var BBFEditor = function () {
+        
+      };
+      
+      var options = {
+        key: col.options.target,
+        schema: {
+          editable: true
+        },
+        fromGrid: true
+      };
+
+      BBFEditor.prototype.init = function(params){
+        var self = this;
+        this.picker = new ObjectPicker(options);
+        this.input = this.picker.render();
+
+        
+        this.input.$el.find('input').val(params.value).change();
+      };
+      BBFEditor.prototype.getGui = function(){
+        return this.input.el;
+      };
+      BBFEditor.prototype.afterGuiAttached = function () {
+        this.input.$el.find('input').focus();
+      };
+      BBFEditor.prototype.getValue = function() {
+        return this.input.$el.find('input').val();
+      };
+
+      col.cellEditor = BBFEditor;
+    },
+      
 
     fetchColumns: function(){
       this.columnDeferred = $.ajax({
@@ -245,8 +302,6 @@ define([
     interaction: function(action, params){
       if(this.com){
         this.com.action(action, params, this);
-      }else{
-        this.action(action, params);
       }
     },
 
