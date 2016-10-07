@@ -25,23 +25,29 @@ define([
 			'canRight' : 'i.reneco-chevron_right'
 		},
 		events:{
-
+			'click div.leftnavicon' : 'mouveleft',
+			'click div.rightnavicon' : 'mouveright'
 		},
 		className : 'full-height',
-		template : 'app/modules/validate/templates/tpl-camTrapModal.html',
+		template : 'app/modules/monitoredSites/templates/tpl-camTrapModal.html',
 
 
 		initialize : function(options) {
       var _this = this;
 			this.parent = options.parent;
       this.model = options.model;
-			console.log(this.model);
 			this.position = this.parent.currentCollection.fullCollection.indexOf(this.model) + 1 ;
 			this.total = this.parent.currentCollection.fullCollection.length;
 			this.theWheel = null;
       this.listenTo(this.model, "change", function() {
+				console.log("bim changement detecté");
+
 				if( ! this.parent.stopSpace ) {
+					console.log("je render a nouveau");
 					_this.render();
+				}
+				else {
+						this.$el.find('.rating-container').css('visibility' , 'visible')
 				}
       });
 		},
@@ -59,6 +65,26 @@ define([
 											+this.model.get('date_creation')+''
 											+'<div class="indexposition">'+this.position+'/'+this.total+'</div>'
 											+'  </div>');
+
+			console.log("input");
+			console.log(this.$el.find('input'));
+			var $input = this.$el.find('input');
+				this.$el.find('input').rating({
+					min:0,
+					max:5,
+					step:1,
+					size:'xl',
+					displayOnly: true,
+					rtl:false,
+					showCaption:false,
+					showClear:false,
+					value : _this.model.get('note')
+				});
+				this.$el.find('.rating-container').css('visibility' , 'hidden')
+				$input.on('rating.change', function(event, value, caption) {
+					_this.model.set('note',value);
+				});
+				this.$el.find('.rating-container').css('visibility' , 'visible')
 										/*	$('.fullscreenimg img').imageLoaded()
 											.always( function( instance ) {
 										    console.log('all images loaded');
@@ -103,6 +129,9 @@ define([
 				if( ! this.parent.stopSpace ) {
 					_this.render();
 				}
+				else {
+						this.$el.find('.rating-container').css('visibility' , 'visible')
+				}
       });
 			this.render();
 		},
@@ -115,6 +144,16 @@ define([
 			this.parent.$el.find('.backgrid-paginator').css('visibility','visible');
 			this.$el.empty();
 			//this.destroy();
+		},
+
+		mouveleft : function() {
+			console.log("bim clic gauche");
+				this.parent.leftMouvement();
+		},
+
+		mouveright : function() {
+			console.log("bom clic droit");
+			this.parent.rightMouvement();
 		},
 
 		onDestroy: function() {

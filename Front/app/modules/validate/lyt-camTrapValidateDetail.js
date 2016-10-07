@@ -972,12 +972,12 @@ define([
 
     validateAll: function() {
       $(".fullscreenimg [id^='zoom_']").trigger('wheelzoom.reset');
-    /*  if( this.nbphotosnotchecked >0 || this.nbPhotosChecked > 0) {
+      if( this.nbphotosnotchecked >0 || this.nbPhotosChecked > 0) {
         this.displaySwalUnchecked();
       }
       else {
         this.displaySwalValidate();
-      }*/
+      }
 
 
       /*for(var i = 0 ; i < this.currentCollection.fullCollection ; i++ )
