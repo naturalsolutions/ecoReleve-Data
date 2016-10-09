@@ -50,7 +50,8 @@ define([
       '+': 'addStars',
       '-': 'decreaseStars',
       'space': 'displayModal',
-      'backspace' : 'toggleModelStatus',
+      'backspace': 'undeterminatePhoto',
+      //'backspace' : 'toggleModelStatus',
       'enter':'acceptPhoto',
       'del':'rejectPhoto',
       //'shift': 'undeterminatePhoto',
@@ -388,7 +389,20 @@ define([
                    if( ! (_this.tabView[index].$el.find('.vignette').hasClass('active') ) ) {
                      _this.tabView[index].$el.find('.vignette').toggleClass('active');
                    }
+
                 });
+                if( _this.tabSelected.length > 0) {
+                  var $inputTags = _this.toolsBar.$el.find("#tagsInput");
+                  var $inputTag = _this.toolsBar.$el.find(".bootstrap-tagsinput input");
+                  var $bootstrapTag = _this.toolsBar.$el.find(".bootstrap-tagsinput");
+                  console.log($inputTags);
+                  console.log($inputTags.prop("disabled"));
+                  if ( ! $inputTags.prop("disabled") ) {
+                    $inputTag.prop("disabled" , true);
+                    $inputTags.prop("disabled" , true);
+                    $bootstrapTag.css("visibility" , "hidden");
+                  }
+                }
            }
         });
       }
@@ -778,11 +792,12 @@ define([
       this.nbPhotosAccepted = this.myImageCollection.fullCollection.where({validated:2}).length ;
       this.nbPhotosRefused  = this.myImageCollection.fullCollection.where({validated:4}).length ;
       this.nbPhotosChecked = this.myImageCollection.fullCollection.where({validated:1}).length ;
+      this.nbphotosnotchecked = this.nbPhotos - (this.nbPhotosChecked + this.nbPhotosAccepted + this.nbPhotosRefused);
       this.toolsBarTop.$el.find("#nbphotos").text(this.nbPhotos);
       this.toolsBarTop.$el.find("#nbphotosaccepted").text(this.nbPhotosAccepted);
       this.toolsBarTop.$el.find("#nbphotosrefused").text(this.nbPhotosRefused);
       this.toolsBarTop.$el.find("#nbphotoschecked").text(this.nbPhotosChecked);
-      this.toolsBarTop.$el.find("#nbphotosnotchecked").text(this.nbPhotos - (this.nbPhotosChecked + this.nbPhotosAccepted + this.nbPhotosRefused));
+      this.toolsBarTop.$el.find("#nbphotosnotchecked").text(this.nbphotosnotchecked);
     },
 
     filterCollectionCtrl: function(e) {
@@ -891,31 +906,48 @@ define([
       */
       Swal({
                   title: 'Warning validate without check ALL photos',
-                  text:  +_this.nbPhotosChecked+' photos still underteminate and '+(_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused) )+' not seen yet\n'+'If you continue all of this photos will be accept automatically' ,
-                  type: 'warning',
+                  text:  +_this.nbPhotosChecked+' photos still underteminate and '+(_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused) )+' not seen yet\n'+'If you continue all of this photos will be accept automatically\n\n Please write "FORCED VALIDATION" if you want to continue' ,
+                  type: 'input',
                   showCancelButton: true,
                   confirmButtonColor: 'rgb(218, 146, 15)',
 
                   confirmButtonText: 'Ok',
 
-                  closeOnConfirm: true,
+                  closeOnConfirm: false,
+                  inputPlaceholder: "Write something"
                 },
-                function() {
-                  $.ajax({
-                    url : config.coreUrl+'sensors/'+_this.type+'/uncheckedDatas',
-                    method: 'POST',
-                    data: {
-                          fk_Sensor : _this.sensorId,
-                          fk_MonitoredSite : _this.siteId,
-                          fk_EquipmentId : _this.equipmentId,
-                    /*data : JSON.stringify(_this.myImageCollection.fullCollection)*/ },
-                    context: _this,
-                  })
-                  .done( function(response,status,jqXHR) {
-                  })
-                  .fail( function(jqXHR, textStatus, errorThrown) {
+                function (inputValue) {
+                  if (inputValue === false)
+                   return false;
+                  if (inputValue == "FORCED VALIDATION") {
+                    //Swal("Nice!", "You wrote: " + inputValue, "success");
+                    _this.displaySwalValidate();
+                  }
+                  else {
+                    Swal.showInputError("You need to write FORCED VALIDATION");
+                    return false;
+                  }
 
-                  });
+                },
+                function(isConfirm) {
+
+                  //_this.displaySwalValidate();
+
+                  // $.ajax({
+                  //   url : config.coreUrl+'sensors/'+_this.type+'/uncheckedDatas',
+                  //   method: 'POST',
+                  //   data: {
+                  //         fk_Sensor : _this.sensorId,
+                  //         fk_MonitoredSite : _this.siteId,
+                  //         fk_EquipmentId : _this.equipmentId,
+                  //   /*data : JSON.stringify(_this.myImageCollection.fullCollection)*/ },
+                  //   context: _this,
+                  // })
+                  // .done( function(response,status,jqXHR) {
+                  // })
+                  // .fail( function(jqXHR, textStatus, errorThrown) {
+                  //
+                  // });
                   //TODO mettre le status validated a 8 pour sauvegarder la validation de force
 
                 }
@@ -942,11 +974,12 @@ define([
                   showCancelButton: true,
                   confirmButtonColor: 'rgb(218, 146, 15)',
 
-                  confirmButtonText: 'Ok',
-
+                  confirmButtonText: 'Go to monitored sites',
+                  cancelButtonText: 'Return to validation',
                   closeOnConfirm: true,
+                  closeOnCancel: true
                 },
-                function() {
+                function(isConfirm) {
                   console.log("bim je valide requête en cours");
                   $.ajax({
                     url : config.coreUrl+'sensors/'+_this.type+'/uncheckedDatas',
@@ -959,6 +992,13 @@ define([
                     context: _this,
                   })
                   .done( function(response,status,jqXHR) {
+                    if (isConfirm) {
+                      Backbone.history.navigate('monitoredSites/'+_this.siteId,{trigger: true});
+                    }
+                    else{
+                      Backbone.history.navigate('validate/camtrap');
+                      window.location.reload();
+                    }
                   })
                   .fail( function(jqXHR, textStatus, errorThrown) {
 
@@ -966,6 +1006,9 @@ define([
                   //TODO mettre le status validated a 8 pour sauvegarder la validation de force
 
                 }
+                /*function(isConfirm) {
+
+                }*/
               );
     },
 
@@ -973,6 +1016,7 @@ define([
     validateAll: function() {
       $(".fullscreenimg [id^='zoom_']").trigger('wheelzoom.reset');
       if( this.nbphotosnotchecked >0 || this.nbPhotosChecked > 0) {
+
         this.displaySwalUnchecked();
       }
       else {

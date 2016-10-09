@@ -59,6 +59,17 @@ define([
 					if( lastPosition != i  )
 					this.parent.tabView[i].$el.find('.vignette').toggleClass('active');
 				}
+				var $inputTags = this.parent.toolsBar.$el.find("#tagsInput");
+				var $inputTag = this.parent.toolsBar.$el.find(".bootstrap-tagsinput input");
+				var $bootstrapTag = this.parent.toolsBar.$el.find(".bootstrap-tagsinput");
+				console.log($inputTags);
+				console.log($inputTag);
+				console.log($bootstrapTag);
+				if ( $inputTags.prop("disabled") ) {
+					$inputTag.prop("disabled" , false);
+					$inputTags.prop("disabled" , false);
+					$bootstrapTag.css("visibility" , "visible");
+				}
 			}
 			this.parent.tabSelected = [] ;
 			this.handleFocus();
@@ -292,16 +303,25 @@ define([
 
 		setVisualValidated : function(valBool){
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
-			var $content = this.$el.children('.vignette').children('.camtrapItemViewContent')
-			var $image = $content.children('img')
+			var $content = this.$el.children('.vignette').children('.camtrapItemViewContent');
+			var $image = $content.children('img');
+			var $ratingStar = this.$el.find('.rating-container');
 			//var $icon2 = this.$el.find('.camtrapItemViewContent > i');
 			//var lastClass = $icon.attr('class').split(' ').pop();
 
 			switch(this.model.get("validated") ) {
 				case 1 :{// not checked
 				//	$icon.removeClass( lastClass );
-					$icon.addClass('reneco-support');
-					this.$el.find('.rating-container').addClass('hide');
+				if ( $content.hasClass('accepted') ) {
+					$content.removeClass('accepted');
+				}
+				if( $content.hasClass('rejected') ) {
+					$content.removeClass('rejected');
+				}
+				$image.removeClass('checked');
+				if( ! $ratingStar.hasClass('hide') ) {
+					$ratingStar.addClass('hide');
+				}
 
 					break;
 				}
@@ -313,7 +333,9 @@ define([
 						$content.removeClass('rejected');
 					}
 					$content.addClass('accepted');//css("background-color" , "green");
-					this.$el.find('.rating-container').removeClass('hide');
+					if( $ratingStar.hasClass('hide') ) {
+						$ratingStar.removeClass('hide');
+					}
 
 					break;
 				}
@@ -325,7 +347,9 @@ define([
 						$content.removeClass('accepted');
 					}
 					$content.addClass('rejected');//css("background-color" , "red");
-					this.$el.find('.rating-container').addClass('hide');
+					if( ! $ratingStar.hasClass('hide') ) {
+						$ratingStar.addClass('hide');
+					}
 
 					break;
 				}
@@ -338,6 +362,9 @@ define([
 					}
 
 					$image.removeClass('checked');
+					if( ! $ratingStar.hasClass('hide') ) {
+						$ratingStar.addClass('hide');
+					}
 					break;
 				}
 			}

@@ -11,7 +11,7 @@ div.bootstrap-tagsinput{
       color: white !important;
     }
     .tag [data-role="remove"]:hover{
-      background-color: red;
+      color: red;
     }
 }
 
@@ -56,13 +56,14 @@ div.bootstrap-tagsinput{
       object-fit:contain;
     }
     img:active {
-        cursor : -webkit-grabbing;
+      cursor : -webkit-grabbing;
     }
 
 
     div.leftnavicon {
       height: 100%;
       position: absolute;
+      cursor: pointer;
       width: 40px;
       left : 0;
     }
@@ -72,6 +73,7 @@ div.bootstrap-tagsinput{
     div.rightnavicon {
       height: 100%;
       position: absolute;
+      cursor: pointer;
       width: 40px;
       right: 0;
       top: 0;
@@ -103,13 +105,6 @@ div.bootstrap-tagsinput{
       right: 0;
     }
   }
-
-  .grabbinghack{
-      cursor: -webkit-grabbing !important;
-    }
-    .grabhack {
-        cursor: -webkit-grab !important;
-    }
 
   .infosonimg .rating-container {
     opacity: 0;
@@ -372,6 +367,10 @@ div.bootstrap-tagsinput{
     span{
       float : right;
       margin-right: 20px;
+    }
+    .infosfullscreenStatus {
+      position: absolute;
+      padding-left: 50px;
     }
   }
   .backgrid-paginator {
