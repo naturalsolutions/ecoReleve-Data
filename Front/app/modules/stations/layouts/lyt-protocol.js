@@ -165,6 +165,8 @@ define([
           var elem = $(this).parent().find('input:enabled:first');
           if (!$(elem).hasClass('autocompTree')){
             $(elem).focus();
+          } else {
+            $(elem).blur(); 
           }
         }else {
           $(this).parent().addClass('hidden');
