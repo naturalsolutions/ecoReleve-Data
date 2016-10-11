@@ -70,8 +70,8 @@ define(['marionette', 'config',
       this.rgMain.show(new LytHome());
     },
 
-    importFile: function() {
-      this.rgMain.show(new LytImportFile());
+    importFile: function(type) {
+      this.rgMain.show(new LytImportFile({type : type}));
     },
 
     stations: function(id) {

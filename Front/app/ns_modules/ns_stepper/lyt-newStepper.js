@@ -72,7 +72,7 @@ define([
 
 		//dedicated to be overloaded
 		initSteps: function(){
-			
+
 		},
 
 		onRender: function(){
@@ -168,6 +168,7 @@ define([
 			//check if we have to wait to parse the template (bind evts)
 
 			$.when( this.currentStep.rdy ).then( this.bindRequiredFields.bind(this));
+
 		},
 
 		displayStepNav: function(){
@@ -207,7 +208,7 @@ define([
 
 		bindRequiredFields: function(){
 			var _this = this;
-
+			console.log(this.currentStep.rdy);
 			//test with _this as context
 			this.onEditEvt = $.proxy(function(e){
 				this.checkNextBtn(e);
@@ -220,7 +221,7 @@ define([
 				//if no .required found, enable nextBtn
 				this.enableNextBtn();
 			}
-			
+
 		},
 
 		unbindRequiredFields: function(){

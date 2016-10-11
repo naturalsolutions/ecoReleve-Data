@@ -29,13 +29,14 @@ define([
 
     events: {
       'change input[type="file"]': 'importFile',
-      'change select[name="fieldActivity"]': 'setFieldActivity',
-      'click #resetFieldActivity': 'resetFieldActivity',
-      'click button[data-action="add"]': 'setUsers',
+      //'change select[name="fieldActivity"]': 'setFieldActivity',
+      //'click #resetFieldActivity': 'resetFieldActivity',
+      //'click button[data-action="add"]': 'setUsers',
       'drop .drag-zone-hover' : 'handleDrop',
       'dragover .drag-zone-hover' : 'handleDragOVer',
       'dragleave .drag-zone-hover' : 'handleDragLeave',
-      'click button#importGpxFile' :'simulateImport'
+      'click button#importGpxFile' :'simulateImport',
+      //'change select[name="FieldWorker"]': 'check',
     },
 
     ui: {
@@ -65,27 +66,24 @@ define([
     handleDragLeave : function(e) {
     },
 
-    initialize: function() {
+    initialize: function(options) {
       this.model = new Backbone.Model();
       this.wayPointList = new Backbone.Collection();
       this.errors = true;
       this.importedFile = false;
       this.deferred = $.Deferred();
+      console.log(options)
+      this.parent = options.parent;
+      this.rdy = $.Deferred();
 
     },
 
     onShow: function() {
+      var _this = this;
+      this.parent.disableNextBtn();
       this.displayForm();
-      this.ui.divimpgpxfile.insertBefore('.filesinputselector');
-      this.$el.find('.filesinputselector').css('display', 'none');//.css('visibility','hidden');
+      //this.parent.bindRequiredFields();
 
-
-      // fieldactivity
-      this.loadCollection(config.coreUrl + 'fieldActivity', 'select[name="fieldActivity"]');
-      $('button[data-action="add"]').attr('disabled','disabled');
-      $('.fieldactivity').addClass('hidden');
-      this.fieldworkers = $('label[for*="FieldWorkers"]').parent();
-      $(this.fieldworkers).addClass('hidden');
     },
 
     importFile: function(e) {
@@ -102,8 +100,8 @@ define([
       $('#fileNameSelected').text(fileName); //add filename after btn
       var tab = fileName.split('.');
       var fileType = tab[1].toUpperCase();
-      var fieldAfield = $('select[name="fieldActivity"]');
-      var userBtn = $('button[data-action="add"]');
+      //var fieldAfield = $('select[name="fieldActivity"]');
+      //var userBtn = $('button[data-action="add"]');
 
       if (fileType != 'GPX') {
         _this.importedFile = false;
@@ -111,9 +109,9 @@ define([
         this.model.set('data_FileName', '');
         $('#fileNameSelected').text('No file selected');
         this.errors = true;
-        $(fieldAfield).attr('disabled', 'disabled');
-        $(userBtn).attr('disabled', 'disabled');
-        $('#importGpxMsg').removeClass('hidden');
+      //  $(fieldAfield).attr('disabled', 'disabled');
+      //  $(userBtn).attr('disabled', 'disabled');
+      //  $('#importGpxMsg').removeClass('hidden');
       } else {
         reader.onload = function(e, fileName) {
           window.app.checkFormSaved = false;
@@ -130,36 +128,20 @@ define([
 
           //success
           if (_this.wayPointList.length > 0) {
-            //_this.ui.fielActivity.removeClass('hidden');
-            //warning
-            $(fieldAfield).removeAttr('disabled');
-            $(userBtn).removeAttr('disabled');
-            $('#importGpxMsg').addClass('hidden');
-            $('.fieldactivity').removeClass('hidden');
-            $(_this.fieldworkers).removeClass('hidden');
 
             if (errosList.length > 0) {
-              for (var i = 0; i < errosList.length; i++) {
-                _this.displayErrors(errosList[i] + '<br/>');
-              }
+                _this.deferred.resolve();
+                _this.displayErrors('file error');
+                //_this.ui.fielActivity.addClass('hidden');
+                _this.errors = true;
+                // $(fieldAfield).attr('disabled','disabled');
+                // $(userBtn).attr('disabled','disabled');
+                // $('.fieldactivity').addClass('hidden');
+                // $(_this.fieldworkers).addClass('hidden');
+                _this.swalError('file error : we can\'t parse it');
             }
-            else {
-              if ( _this.importedFile ) {
-                $('input[type=hidden]').val("file"); //hack for nsform
-              }
-            }
-            _this.errors = false;
-            _this.deferred.resolve();
-            //error
           } else {
-            _this.displayErrors('file error');
-            //_this.ui.fielActivity.addClass('hidden');
-            _this.errors = true;
-            $(fieldAfield).attr('disabled','disabled');
-            $(userBtn).attr('disabled','disabled');
-            $('.fieldactivity').addClass('hidden');
-            $(_this.fieldworkers).addClass('hidden');
-            _this.swalError('file error : we can\'t parse it');
+            _this.errors = false;
           }
         };
       }
@@ -167,7 +149,8 @@ define([
     },
 
     displayErrors: function(errors) {
-      this.ui.importGpxMsg.append("<errors style='color:red;'>"+errors+"</errors>"); //importGpxMsg doesn't exist
+      //this.ui.importGpxMsg.append("<errors style='color:red;'>"+errors+"</errors>"); //importGpxMsg doesn't exist
+      this.swalError(errors);
     },
 
     swalError: function(title) {
@@ -188,49 +171,65 @@ define([
       });
     },
 
-    setFieldActivity: function(e) {
-      //could be bugged
-      var fieldActivity = $(e.target).val();
-      this.wayPointList.each(function(model) {
-        model.set('fieldActivity', fieldActivity);
-        window.app.checkFormSaved = false;
-      });
-    },
     onDestroy: function() {
     },
 
     isRdyAccess: function() {
-
+      console.log('isRdyAccess')
     },
 
     validate: function() {
+      console.log('validate')
+      var formData = this.nsform.BBForm.getValue();
+      this.setWaypointListWithForm(formData);
       return this.wayPointList;
     },
 
-    check: function() {
+    check: function(e) {
       var error = this.nsform.BBForm.commit();
+      console.log('check', error);
+            if(error){
+              return false;
+            }else{
+              //var fieldworkers = this.nsform.BBForm.model.get('FieldWorkers');
+              //this.setFieldWorkers(fieldworkers);
+              window.app.checkFormSaved = false;
+              return true;
+            }
+    },
 
-      if(error){
-        return false;
-      }else{
-        var fieldworkers = this.nsform.BBForm.model.get('FieldWorkers');
-        this.setFieldWorkers(fieldworkers);
-        window.app.checkFormSaved = false;
-        return true;
-      }
+    displayInputFile(){
+      this.ui.form.find('.filesinputselector').parent().prepend('<div id="btnImpGpxFile">'+
+        '<button id="importGpxFile" type="button" class="btn btn-success fileinput-button" data-i18n="import.fileSelection">'+
+            '<i class="glyphicon glyphicon-plus"></i>'+
+            '<span>Select a file</span>'+
+        '</button>'+
+        '<span id="fileNameSelected">No file selected</span>'+
+      '</div>');
     },
     displayForm: function() {
-      var model = new GpxForm();
-      this.nsform = new NsForm({
-        //name: 'ImportGpxFileForm',
-        //modelurl: config.coreUrl+'stations/fileImport',
-        model: model,
-        buttonRegion: [],
-        formRegion: this.ui.form,
-        //displayMode: 'display',
-        reloadAfterSave: false,
-        disabled : false,
+      var self = this;
+      var model = new Backbone.Model();
+      $.ajax({
+        url:config.coreUrl+'stations/importGPX',
+
+      }).then(function(data){
+        model.schema = data.schema;
+        model.fieldsets = data.fieldsets;
+        self.nsform = new NsForm({
+          //name: 'ImportGpxFileForm',
+          //modelurl: config.coreUrl+'stations/fileImport',
+          model: model,
+          buttonRegion: [],
+          formRegion: self.ui.form,
+          //displayMode: 'display',
+          reloadAfterSave: false,
+          disabled : false,
+        });
+        self.displayInputFile();
+        self.rdy.resolve();
       });
+
     },
     loadCollection: function(url, element) {
       var collection =  new Backbone.Collection();
@@ -249,13 +248,16 @@ define([
         }
       });
     },
-    setFieldWorkers : function(tab){
-       var list = [];
-       for (var i=0;i<tab.length;i++){
-        list.push(parseInt(tab[i].FieldWorker));
-       }
+    setWaypointListWithForm : function(formData){
+      console.log("bim on veut set les fieldworkers");
+      var fwList = [];
+      _.forEach(formData.FieldWorkers,function(curFw){
+        fwList.push(parseInt(curFw.FieldWorker))
+      })
        this.wayPointList.each(function(model) {
-        model.set('FieldWorkers', list);
+        model.set('FieldWorkers',fwList );
+        model.set('NbFieldWorker', formData.NbFieldWorker);
+        model.set('fieldActivityId', formData.fieldActivity);
       });
 
     }

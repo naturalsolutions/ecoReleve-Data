@@ -186,7 +186,7 @@ define([
           cell: myCell
         },{
           editable: true,
-          name: 'fieldActivity',
+          name: 'fieldActivityId',
           label: 'Field Activity',
           cell: Backgrid.SelectCell.extend({
             optionValues: optionsList
@@ -251,7 +251,7 @@ define([
         this.grid.interaction('selection', id);
         this.grid.interaction('focus', id);
       }
-      
+
     },*/
 
     checkSelectAll: function(e) {
@@ -291,19 +291,28 @@ define([
       Backbone.sync('create', coll, {
         success: function(data) {
           _this.deferred.resolve();
+          console.log("sweet alert");
+          console.log(data);
           var inserted = data.new;
           var exisits = data.exist;
           Swal({
             title: 'Stations import',
             text: 'inserted stations :' + inserted + ', exisiting stations:' + exisits,
             type: 'success',
-            showCancelButton: false,
+            showCancelButton: true,
             confirmButtonColor: 'green',
-            confirmButtonText: 'OK',
+            cancelButtonText: 'Home',
+            confirmButtonText: 'Show imported data',
             closeOnConfirm: true,
+
           },
           function(isConfirm) {
+            if( isConfirm ) {
+              Backbone.history.navigate('stations/', {trigger: true})
+            }
+            else {
               Backbone.history.navigate('home', {trigger: true})
+            }
           });
         },
         error: function() {
