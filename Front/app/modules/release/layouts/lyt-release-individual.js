@@ -92,38 +92,19 @@ define([
     },
 
     release: function(releaseMethod){
-      var error = this.grid.collection.findWhere({error:true});
-      if (!error){
-        this.releaseThem(releaseMethod);
-      } else {
-        Swal({
-        title: 'Sensor error',
-        text: 'Wrong sensor identifier',
-        type: 'error',
-        confirmButtonColor: 'rgb(221, 107, 85)',
-        confirmButtonText: 'OK',
-        closeOnConfirm: true,
-      });
-      }
-    },
-    releaseThem: function(releaseMethod) {
-      var mds = this.grid.grid.getSelectedModels();
-      if (!mds.length) {
-        return;
-      } else {
-        for (var i = 0; i < mds.length; i++) {
-          if (mds[i] == undefined) {         
-            mds.splice(i, 1);
-            i--;
-          }
+      var visibleSelectedRows = [];
+      var model = this.gridView.gridOptions.api.getModel();
+      for (var i = 0; i < model.getRowCount(); i++) {
+        var visibleRowNode = model.getRow(i);
+        if(visibleRowNode.selected){
+          visibleSelectedRows.push(visibleRowNode.data);
         }
       }
-      var _this = this;
-      var col = new Backbone.Collection(mds);
+
       $.ajax({
         url: 'release/individuals/',
         method: 'POST',
-        data: {IndividualList: JSON.stringify(col),StationID: this.model.get('ID'),releaseMethod: releaseMethod},
+        data: {IndividualList: JSON.stringify(visibleSelectedRows),StationID: this.model.get('ID'),releaseMethod: releaseMethod},
         context: this,
       }).done(function(resp) {
         if (resp.errors) {
@@ -135,23 +116,19 @@ define([
           resp.type = 'success';
           var callback = function() {
             Backbone.history.navigate('stations/' + _this.model.get('ID'), {trigger: true});
-            //$('#back').click();
           };
-
         }
         resp.text = 'release: ' + resp.release;
-
-        //remove the model from the coll once this one is validated
         this.swal(resp, resp.type, callback);
 
       }).fail(function(resp) {
         var callback = function() {
            return true;
-            //$('#back').click();
-          };
-        this.swal(resp, 'error',callback);
+        };
+        this.swal(resp, 'error', callback);
       });
     },
+
 
     swal: function(opt, type, callback) {
       var btnColor;
@@ -191,7 +168,7 @@ define([
         if (isConfirm && callback) {
           callback();
         }else {
-          Backbone.history.loadUrl(Backbone.history.fragment);
+          //Backbone.history.loadUrl(Backbone.history.fragment);
         }
       });
     },

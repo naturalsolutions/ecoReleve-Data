@@ -6,11 +6,8 @@ define([
 	'marionette',
 	'sweetAlert',
 	'translater',
-	'config',
-	'ns_grid/model-grid',
-	'ns_modules/ns_com',
 
-], function($, _, Backbone, Marionette, Swal, Translater, config, NsGrid, Com) {
+], function($, _, Backbone, Marionette, Swal, Translater) {
 
   'use strict';
 

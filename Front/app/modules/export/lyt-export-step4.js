@@ -3,11 +3,10 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'ns_grid/model-grid',
   'sweetAlert',
   'moment',
   'i18n'
-], function($, _, Backbone, Marionette, NsGrid, Swal, Moment
+], function($, _, Backbone, Marionette, Swal, Moment
 ) {
   'use strict';
   return Marionette.LayoutView.extend({

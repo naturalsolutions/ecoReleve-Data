@@ -47,6 +47,7 @@ define([
       } else {
         this.model.set('url', options.type + '/');
       }
+      this.idName = options.idName || false;
 
       if (options.com) {
         this.com = options.com;
@@ -109,7 +110,7 @@ define([
 
     onRowSelected: function(e){
       if(this.ready){
-        this.interaction('singleSelection', e.node.data.id || e.node.data.ID, this);
+        this.interaction('singleSelection', e.node.data[this.idName] || e.node.data.id || e.node.data.ID, this);
       }
     },
 
@@ -308,10 +309,10 @@ define([
     focus: function(param){
       var _this = this;
       this.gridOptions.api.forEachNode( function (node) {
-          if (node.data.ID === param || node.data.id === param) {
+          if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
             _this.gridOptions.api.ensureIndexVisible(node.childIndex);
             setTimeout(function(){
-              var tmp = (node.data.id)? 'id' : 'ID';
+               var tmp = _this.idName || (node.data.id)? 'id' : 'ID'; 
               _this.gridOptions.api.setFocusedCell(node.childIndex, tmp, null);
             },0);
           }
@@ -332,7 +333,7 @@ define([
       var _this = this;
       this.gridOptions.api.forEachNode( function (node) {
         params.map( function (param) {
-          if(node.data.ID === param || node.data.id === param){
+          if(node.data[_this.idName] === param || node.data.ID === param || node.data.id === param){
               _this.ready = false;
               node.setSelected(true);
               _this.ready = true;
@@ -344,7 +345,7 @@ define([
     singleSelection: function(param, from){
       var _this = this;
       this.gridOptions.api.forEachNode( function (node) {
-          if (node.data.ID === param || node.data.id === param) {
+          if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
               if(from === _this){
                 _this.ready = false;
                 node.setSelected(node.selected);
@@ -359,6 +360,7 @@ define([
     },
 
     clientSideFilter: function(filters){
+      var _this = this;
       var data = [];
       var featureCollection = {
           'features': [],
@@ -372,7 +374,7 @@ define([
       this.gridOptions.api.forEachNodeAfterFilterAndSort(function(node, index){
         feature = {
             'type': 'Feature',
-            'id': node.data.id || node.data.ID,
+            'id': node.data[_this.idName] || node.data.id || node.data.ID,
             'geometry': {
                 'type': 'Point',
                 'coordinates': [node.data.LAT || node.data.latitude, node.data.LON || node.data.longitude],
@@ -470,6 +472,8 @@ define([
 
     extendAgGrid: function(){
       var _this = this;
+
+
 
       AgGrid.StandardMenuFactory.prototype.showPopup = function (column, positionCallback) {
           var filterWrapper = this.filterManager.getOrCreateFilterWrapper(column);

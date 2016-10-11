@@ -53,8 +53,10 @@ define([
       this.frequency = this.ui.frequency.val();
     },
 
-    onRowClicked: function() {
-      
+    onRowClicked: function(row) {
+      console.log(row);
+      var dataset = row.data.FK_Sensor + '_' + row.data.FK_Individual + '_' + row.data.FK_ptt;
+      Backbone.history.navigate('validate/' + this.type_ + '/' + dataset, {trigger: true});
     },
 
     setFrequency: function(e) {

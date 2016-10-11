@@ -139,6 +139,13 @@ define([
       }));
     },
 
+    validateDetail: function(type, dataset){
+      this.rgMain.show(new LytSensorValidateDetail({
+        type: type,
+        dataset: dataset
+      }));
+    },
+
     release: function() {
       this.rgMain.show(new LytRelease());
     },

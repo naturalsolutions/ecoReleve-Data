@@ -1,12 +1,10 @@
 define([
   'modules/stations/stations.view',
-  'ns_grid/grid.view',
-  'config',
+  'ns_grid/grid.view'
   
 ], function(
 	StationsView,
-	GridView,
-  config
+	GridView
 ) {
   'use strict';
 

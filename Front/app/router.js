@@ -1,5 +1,5 @@
 
-define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'],
+define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
   function($, Marionette, Backbone, config, Swal) {
 
   'use strict';
@@ -31,8 +31,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
       'release/:id(/)': 'releaseIndividuals',
       'release(/)': 'release',
 
-      'validate/:type(/)': 'validateType',
       'validate(/)': 'validate',
+      'validate/:type(/)': 'validateType',
+      'validate/:type/:dataset(/)': 'validateDetail',
 
 
       '*route(/:page)': 'home',

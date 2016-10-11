@@ -47,10 +47,6 @@ define([
       this.model.set('id', options.id);
     },
 
-    onRender: function() {
-      this.$el.i18n();
-    },
-
     onShow: function() {
       this.initRegions();
       this.displayMap();
@@ -63,9 +59,12 @@ define([
       var _this = this;
       if(this.model.get('uiGridConfs')){
         this.model.get('uiGridConfs').map(function(uiGridConf){
-          _this.addRegions({
-            ['rg' + uiGridConf.label + 'Grid']: '.js-rg-' + uiGridConf.name + '-grid'
-          });
+          //uglify hack
+          console.log('plouf');
+          var tmp =  'rg' + uiGridConf.label + 'Grid';
+          var obj = {};
+          obj[tmp] = '.js-rg-' + uiGridConf.name + '-grid';
+          _this.addRegions(obj);
         });
       }
     },
@@ -116,14 +115,12 @@ define([
       var id = $(e.currentTarget).attr('href');
       this.$el.find('.tab-content>.tab-pane' + id).addClass('active in');
 
-
       this.gridViews.map(function(gridView){
         gridView.gridOptions.api.sizeColumnsToFit();
       })
     },
 
     displayGrids: function(){
-
     },
 
     displayForm: function(){

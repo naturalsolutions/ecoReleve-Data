@@ -6,18 +6,17 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
+  'moment',
 
-  'ns_grid/model-grid',
   'ns_modules/ns_com',
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
-  'moment',
-  'ns_navbar/ns_navbar'
+  'ns_grid/grid.view'
 
-
-
-], function($, _, Backbone, Marionette, Swal, Translater,
- NsGrid, Com, NsMap, NsForm, moment, Navbar) {
+], function(
+  $, _, Backbone, Marionette, Swal, Translater, moment,
+  Com, NsMap, NsForm, GridView
+){
 
   'use strict';
 
@@ -27,256 +26,52 @@ define([
     className: 'full-height animated white',
 
     events: {
-      'click button#autoValidate': 'autoValidate',
-      'click table.backgrid th input': 'checkSelectAll',
-      'click button#validate': 'validate',
       'change select#frequency': 'updateFrequency',
+      'click .js-btn-validate': 'validate',
     },
 
     ui: {
-      'grid': '#grid',
-      'totalEntries': '#totalEntries',
       'map': '#map',
-      'indForm': '#indForm',
-      'sensorForm': '#sensorForm',
-      'frequency': 'select#frequency',
 
-      'dataSetIndex': '#dataSetIndex',
-      'dataSetTotal': '#dataSetTotal',
-
-      'totalS' : '#totalS',
-      'total' : '#total',
-      'paginator': '#paginator',
-
-      totalSelected: '#totalSelected'
+      'individualForm': '.js-individual-form',
+      'sensorForm': '.js-sensor-form',
     },
 
     regions: {
-      'rgNavbar': '#navbar'
+      'rgGrid': '.js-rg-grid'
     },
 
     initialize: function(options) {
-      this.translater = Translater.getTranslater();
-      this.type = options.type;
+      this.model = new Backbone.Model();
 
       this.com = new Com();
-      this.model = options.model;
 
-      this.indId = this.model.get('FK_Individual');
-      this.pttId = this.model.get('FK_ptt');
-      this.sensorId = this.model.get('FK_Sensor');
+      var datasetInfos = options.dataset.split('_');
 
-      this.frequency = options.frequency;
-
-      this.navbar = new Navbar({
-        parent: this,
-        globalGrid: options.globalGrid,
-        model: this.model,
-      });
-
-      this.globalGrid = options.globalGrid;
-    },
-
-    onRender: function() {
-      this.$el.i18n();
-    },
-
-    reloadFromNavbar: function(model) {
-      this.model = model;
-      this.pttId = model.get('FK_ptt');
-      this.indId = model.get('FK_Individual');
-      this.sensorId = this.model.get('FK_Sensor');
-      this.com = new Com();
-      this.map.destroy();
-      this.ui.map.html('');
-      this.display();
-    },
-
-    onShow: function() {
-      var _this = this;
-      this.rgNavbar.show(this.navbar);
-      this.display();
-      this.com.onAction = function() {
-        // _this.setTotal();
-      };
-    },
-
-    setTotal: function(){
-      this.ui.totalS.html(this.grid.grid.getSelectedModels().length);
-      this.ui.total.html(this.grid.grid.collection.length);
-    }, 
-
-    display: function() {
-      var _this = this;
-      if (this.indId == 'null' || !this.indId) this.indId = 'none';
-      if (this.indId == 'none') {
-        this.swal({title: 'No individual attached'}, 'warning');
-        this.ui.indForm.html('<span class="bull-warn">●</span>No individual is attached');
-      }else {
-        this.displayIndForm();
+      if(datasetInfos.length != 3){
+        
       }
-      this.displayGrid();
+      
+      this.model.set('type', options.type);
 
-      setTimeout(function(){
-        _this.displayMap();
-        $.when(_this.map.deffered, _this.grid.deferred).done(function() {
-            _this.initFrequency();
-        });
-      }, 0);
+      this.model.set('FK_Sensor', datasetInfos[0]);
+      this.model.set('FK_Individual', datasetInfos[1]);
+      this.model.set('FK_ptt', datasetInfos[2]);
+      
+
+      //this.frequency = options.frequency;
+      
+    },
+
+    onShow: function(){
+      this.displayMap();
+      this.displayIndForm();
       this.displaySensorForm();
-    },
-
-    //initialize the frequency
-    initFrequency: function() {
-      if (this.frequency) {
-        this.ui.frequency.find('option[value="' + this.frequency + '"]').prop('selected', true);
-      }else {
-        this.frequency = this.ui.frequency.val();
-      }
-      this.perHour(this.frequency);
-    },
-
-    displayGrid: function() {
-      var _this = this;
-      var myCell = Backgrid.NumberCell.extend({
-        decimals: 5,
-        orderSeparator: ' ',
-      });
-
-      var cols = [{
-        name: 'PK_id',
-        label: 'PK_id',
-        editable: false,
-        renderable: false,
-        cell: 'string',
-      }, {
-        name: 'date',
-        label: 'DATE',
-        editable: false,
-        cell: 'string'
-      }, {
-        editable: false,
-        name: 'lat',
-        label: 'LAT',
-        cell: myCell,
-      }, {
-        editable: false,
-        name: 'lon',
-        label: 'LON',
-        cell: myCell,
-      }, {
-        editable: false,
-        name: 'ele',
-        label: 'ELE (m)',
-        cell: Backgrid.IntegerCell.extend({
-          orderSeparator: ''
-        }),
-      }, {
-        editable: false,
-        name: 'dist',
-        label: 'DIST (km)',
-        cell: myCell,
-      }, {
-        editable: false,
-        name: 'speed',
-        label: 'SPEED (km/h)',
-        cell: myCell,
-        formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
-          fromRaw: function(rawValue, model) {
-            if (rawValue == 'NaN') {
-              rawValue = 0;
-            }
-            return rawValue;
-          }
-        }),
-      },{
-        name: 'type',
-        label: 'Type',
-        renderable: this.showTypeCol,
-        editable: false,
-        formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
-          fromRaw: function(rawValue, model) {
-            if (rawValue == 'arg') {
-              rawValue = 'Argos';
-            } else {
-              rawValue = 'GPS'
-            }
-            return rawValue;
-          }
-        }),
-        cell: 'string'
-      }, {
-        editable: true,
-        name: 'import',
-        label: 'IMPORT',
-        cell: 'select-row',
-        headerCell: 'select-all'
-      }];
-
-      var url = 'sensors/' + this.type      +
-      '/uncheckedDatas/' + this.indId + '/' + this.pttId;
-      this.grid = new NsGrid({
-        pagingServerSide: false,
-        columns: cols,
-        com: this.com,
-        pageSize: 50,
-        url: url,
-        idName: 'PK_id',
-        rowClicked: true,
-        totalElement: 'totalEntries',
-        totalSelectedUI: _this.ui.totalSelected
-      });
-
-      this.grid.onceFetched = function() {
-        _this.clone();
-      };
-
-      this.grid.rowClicked = function(args) {
-        _this.rowClicked(args);
-      };
-      this.grid.rowDbClicked = function(args) {
-        _this.rowDbClicked(args);
-      };
-
-      this.ui.grid.html(this.grid.displayGrid());
-      this.ui.paginator.html(this.grid.displayPaginator());
-    },
-
-    rowClicked: function(args) {
-      var row = args.row;
-      var id = row.model.get('PK_id');
-
-      if ($(args.evt.target).is('input')) {
-        this.grid.interaction('selection', id);
-      } else {
-        this.grid.interaction('focus', id);
-      }
-    },
-
-    rowDbClicked: function(args) {
-      var row = args.row;
-      var id = row.model.get('PK_id');
-      if ($(args.evt.target).is('input')) {
-        this.grid.interaction('selection', id);
-      } else {
-        this.grid.interaction('selection', id);
-        this.grid.interaction('focus', id);
-      }
-    },
-
-    checkSelectAll: function(e) {
-      var ids = _.pluck(this.grid.collection.fullCollection.models, 'PK_id');
-      var ids = this.grid.collection.fullCollection.pluck('PK_id');
-      if (!$(e.target).is(':checked')) {
-        this.grid.interaction('resetAll', ids);
-      } else {
-        this.grid.interaction('selectionMultiple', ids);
-      }
+      this.displayGrid();
     },
 
     displayMap: function() {
-      var url = 'sensors/' + this.type      +
-      '/uncheckedDatas/' + this.indId + '/' + this.pttId + '?geo=true';
+      var url = 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt') + '?geo=true';
       this.map = new NsMap({
         url: url,
         selection: true,
@@ -291,11 +86,11 @@ define([
     displayIndForm: function() {
       this.nsform = new NsForm({
         name: 'IndivForm',
-        buttonRegion: [this.ui.btn],
+        buttonRegion: [],
         modelurl: 'individuals',
-        formRegion: this.ui.indForm,
+        formRegion: this.ui.individualForm,
         displayMode: 'display',
-        id: this.indId,
+        id: this.model.get('FK_Individual'),
         reloadAfterSave: false,
       });
     },
@@ -303,13 +98,75 @@ define([
     displaySensorForm: function() {
       this.nsform = new NsForm({
         name: 'sensorForm',
-        buttonRegion: [this.ui.btn],
+        buttonRegion: [],
         modelurl: 'sensors',
         formRegion: this.ui.sensorForm,
         displayMode: 'display',
-        id: this.sensorId,
+        id: this.model.get('FK_Sensor'),
         reloadAfterSave: false,
       });
+    },
+
+    displayGrid: function(){
+      var _this = this;
+
+      var columnDefs = [{
+        field: 'date',
+        headerName: 'DATE',
+        minWidth: 200,
+      }, {
+        field: 'PK_id',
+        headerName: 'PK_id',
+        hide: false,
+      }, {
+        field: 'lat',
+        headerName: 'LAT',
+      }, {
+        field: 'lon',
+        headerName: 'LON',
+      }, {
+        field: 'ele',
+        headerName: 'ELE (m)',
+      }, {
+        field: 'dist',
+        headerName: 'DIST (km)',
+      }, {
+        field: 'speed',
+        headerName: 'SPEED (km/h)',
+      },{
+        field: 'type',
+        headerName: 'Type',
+      }];
+
+      this.rgGrid.show(this.gridView = new GridView({
+        columns: columnDefs,
+        com: this.com,
+        url: 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt'),
+        //afterFirstRowFetch: afterFirstRowFetch,
+        clientSide: true,        
+        idName: 'PK_id',
+        gridOptions: {
+          rowSelection: 'multiple',
+          enableFilter: true,
+          onRowClicked: function(row){
+            _this.gridView.interaction('focus', row.data.PK_id || row.data.id);
+          }
+        },
+      }));
+    },
+
+    onRender: function() {
+      this.$el.i18n();
+    },
+
+    //initialize the frequency
+    initFrequency: function() {
+      if (this.frequency) {
+        this.ui.frequency.find('option[value="' + this.frequency + '"]').prop('selected', true);
+      }else {
+        this.frequency = this.ui.frequency.val();
+      }
+      this.perHour(this.frequency);
     },
 
     roundDate: function(date, duration) {
@@ -356,19 +213,21 @@ define([
 
     validate: function() {
       var _this = this;
-      var url = 'sensors/' + this.type      +
-      '/uncheckedDatas/' + this.indId + '/' + this.pttId;
-      var mds = this.grid.grid.getSelectedModels();
-
-      if (!mds.length) {
+      var url = 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt');
+      var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+      if(!selectedNodes.length){
         return;
       }
-      var col = new Backbone.Collection(mds);
-      var params = col.pluck('PK_id');
+
+      var selectedIds = selectedNodes.map(function(node){
+        return node.data.PK_id;
+      });
+      
+
       $.ajax({
         url: url,
         method: 'POST',
-        data: {data: JSON.stringify(params)},
+        data: {data: JSON.stringify(selectedIds)},
         context: this,
       }).done(function(resp) {
         if (resp.errors) {
@@ -380,9 +239,7 @@ define([
         }
 
         var callback = function() {
-          _this.navbar.navigateNext();
-          //loose the focus due to re-fetch
-          _this.globalGrid.fetchCollection();
+          //_this.navbar.navigateNext();
         };
         resp.text = 'existing: ' + resp.existing + ', inserted: ' + resp.inserted + ', errors:' + resp.errors;
         this.swal(resp, resp.type, callback);
