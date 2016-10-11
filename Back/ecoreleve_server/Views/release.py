@@ -98,8 +98,9 @@ def getReleaseMethod(request):
         where Name = 'release_method' """)
     result = session.execute(query).fetchall()
     result = [dict(row) for row in result]
-    for row in result:
-        row['label'] = thesaurusDictTraduction[row['label']][userLng]
+    if userLng != 'fr':
+        for row in result:
+            row['label'] = thesaurusDictTraduction[row['label']][userLng]
     return result
 
 
