@@ -2,6 +2,8 @@
   "name": "EcoReleve",
   "version": "0.1.0",
   "dependencies": {
+    "underscore": "1.5.2",
+    "backbone": "1.1.2",
     "marionette": "2.4.4",
     "requirejs": "2.1.22",
     "bootstrap": "3.3.6",
@@ -26,9 +28,5 @@
     "reneco-fonts": "*",
     "NaturalJS_Filter": "1.1.1",
     "ag-grid": "^5.2.0"
-  },
-  "resolutions": {
-    "jquery": "1.10.2",
-    "underscore": "1.5.2"
   }
 }
