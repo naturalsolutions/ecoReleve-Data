@@ -23,7 +23,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/gpx/templates/tpl-step2-gpx.html',
 
-    name: 'Datas Selection',
+    name : '<span class="import-step2"></span>',
 
     ui: {
       'grid': '#grid',
@@ -37,19 +37,24 @@ define([
       'click #btnSelectionGrid': 'clearSelectedRows',
       'click table.backgrid th input': 'checkSelectAll',
       'click button#filter': 'filter',
-      //'click button#clear': 'clearFilter',
+      'change table td': 'setFieldActivity',
+      'click button#clear': 'clearFilter',
     },
 
     initialize: function(options) {
       this.com = new Com();
       this.collection = options.model.attributes.data_FileContent;
       this.deferred = $.Deferred();
+      window.formChange  = false;
     },
 
     onShow: function() {
+      this.$el.i18n();
       this.displayGrid();
       this.displayFilters();
       this.displayMap();
+      var stepName = i18n.translate('import.stepper.step2-gpxlabel');
+      $('.import-step2').html(stepName);
     },
 
     displayMap: function() {
@@ -282,6 +287,7 @@ define([
       var datas
       var coll = this.com.getMotherColl();
       coll = new Backbone.Collection(coll.where({import: true}));
+      console.log(coll);
 
 
       coll.url = config.coreUrl + 'stations/';
@@ -325,9 +331,10 @@ define([
           callback(elems);
         }
       });
+    },
+    setFieldActivity : function(){
+       window.formChange  = false;
     }
-
-    //check the code for rowClicked
 
   });
 });

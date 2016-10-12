@@ -51,12 +51,12 @@ input, select, textarea{
 	//padding-left: 0px;
 }
 
-input.form-control[type=number]:disabled::-webkit-inner-spin-button, 
-input.form-control[type=number]:disabled::-webkit-outer-spin-button { 
-    -webkit-appearance: none;
+input.form-control[type=number]:disabled::-webkit-inner-spin-button,
+input.form-control[type=number]:disabled::-webkit-outer-spin-button {
+    -awebkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    margin: 0; 
+    margin: 0;
 }
 
 select:disabled {
@@ -202,7 +202,7 @@ select:disabled {
 }
 
 
-/* CSS 2 PIER 
+/* CSS 2 PIER
 *
 *  A mettre dans les bons fichiers CSS
 *
@@ -245,7 +245,7 @@ span.fancytree-title {
 }
 span.fancytree-title:hover {
 	background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;
-	-webkit-background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;	
+	-webkit-background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;
 }
 ul.fancytree-container{
   z-index: 1;
@@ -264,23 +264,27 @@ div.fancytreeview{
 span.fancytree-title{
 	//margin: 0px;
 }
-/* 
-Dans detail station, bloc "Detailled Infos", en mode edit : 
+/*
+Dans detail station, bloc "Detailled Infos", en mode edit :
  - Ajouter une class sur une div contenant le bloc qui change de statut pour indiquer le mode "edit" sinon ce n'est pas possible de différencier les styles
  - Pour avoir la croix à côté de la liste déroulante, il faut change le template de listeoFnestedModel comme sur ecollection. Avoir le bouton "x" dans un col-md-2 et le select dans col-md-10
  */
 /* FIN PIER */
 
 
+.wrapper-grid-from{
+	position: relative;
+}
 
 .grid-form{
+	background: #ddd;
 	overflow: auto;
 	#formContainer{
 		display: block;
 	}
 
 
-	#formContainer>form>fieldset{
+	#formContainer,.tbody>.form-row>form>fieldset,#formContainer>form>fieldset{
 		background: #eee;
 		border: none;
 		border-bottom: 1px solid #ddd;
@@ -320,15 +324,15 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 	.col-md-8.grid-field{
 		width: 200px;
 	}
-	
+
 	.col-md-6.grid-field{
 		width: 150px;
 	}
-	
+
 	.col-md-4.grid-field{
 		width: 100px;
 	}
-	
+
 	.col-md-3.grid-field{
 		width: 75px;
 	}
@@ -337,7 +341,7 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 		width: 50px;
 	}
 
-	
+
 	.form-control[disabled] {
 		cursor: auto;
 		background: transparent;
@@ -346,9 +350,12 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 		border-radius: 0px;
 	}
 
-	#th{
+	#th,.thead{
 		background: #ccc;
 		div{
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 			padding: 4px 5px!important;
 			padding-left: 0px!important;
 			font-weight: bold;
@@ -395,7 +402,34 @@ Dans detail station, bloc "Detailled Infos", en mode edit :
 
 }
 
+.js-col-row-number{
+	width: 50px;
+	float: left;
+	z-index:10;
+	padding-bottom: 50px;
+    background: #ddd;
+
+	& .row-action{
+		display: block;
+    width: 100%;
+    height: 35px;
+    padding: 6px;
+    font-size: 14px;
+    line-height: 1.42857143;
+		border-bottom: 1px solid #ddd;
+	}
+	.js-tbody-row-number{
+		border-right: 1px solid #bbb;
+		background: #eee;
+	}
+}
+.grid-form-wrapper{
+		width: calc(~"100% - 50px");
+		float: left;
+}
+
 #th&>.fixedCol {background: #ccc;}
+.thead .fixedCol {background: #ccc;}
 
 .firstCol-1{
 	margin-left : 25px !important;
@@ -489,4 +523,52 @@ textarea {
 .grid-field .fancytree-container {
 
 	max-height:49px !important;
+}
+
+
+.fixed-filter{
+	position:fixed;
+	z-index: 100000;
+}
+
+.border-bottom-filter{
+
+	border-bottom: 1px solid #e5e5e5;
+	margin-top: 0px;
+	margin-left:15px;
+	margin-right:15px;
+	margin-bottom:5px;
+	display:inline-block;
+	//width: 100%;
+	font-weight:bold;
+}
+
+.filter-indiv{
+	margin-bottom: 80px;
+
+}
+
+@tabsHeight:50px;
+
+.filter-indiv.crop2{
+		margin-bottom: 0px;
+		padding-bottom: 80px;
+		@crop: @tabsHeight*2;
+		height: ~"calc(100% - @{crop} )"!important;
+	}
+.no-scroll{
+	overflow:hidden !important;
+}
+
+.filter-no-padding {
+	span{
+		padding-left:0px;
+		select{
+			padding-left:5px;
+			padding-right:0px;
+		}
+		div span {
+			padding-left:12px;
+		}
+	}
 }

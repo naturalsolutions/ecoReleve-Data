@@ -134,7 +134,6 @@ def location_graph(request):
         data.sort(key = itemgetter('label'))
         indivLocationData = data
 
-    else : print('indiv loc already fetched')
     return indivLocationData
 
 @view_config(route_name = 'uncheckedDatas_graph', renderer = 'json')
@@ -183,7 +182,6 @@ def uncheckedDatas_graph(request):
             data.append({'value':curRow['nb'],'label':'RFID'})
         data.sort(key = itemgetter('label'))
         pendingSensorData = data
-    else : print('unchecked data already fetched')
 
     session1.close()
     session2.close()

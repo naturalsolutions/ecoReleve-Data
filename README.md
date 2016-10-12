@@ -18,7 +18,7 @@ ecoReleve data is design to allow field data entry on any devices (IOS, Android 
 The data entry forms are fully customizable to allow users to design their own protocols.
 	
 
-![ecoReleve](https://static.squarespace.com/static/519a7bc0e4b08ccdf8f31445/t/53c9549ae4b0a11d417c1d12/1405703324816/?format=1000w)
+![ecoReleve](https://static1.squarespace.com/static/519a7bc0e4b08ccdf8f31445/t/57addb672e69cf1f18bf7d3d/1471011777134/?format=1000w)
 
 ## Features
 
@@ -29,7 +29,7 @@ The data entry forms are fully customizable to allow users to design their own p
 ### Requirements
 
  - [Node.js](https://nodejs.org/) (for [npm](https://www.npmjs.com/))
- - [bower](http://bower.io/) `npm install -g bower`
+ - [bower](http://bower.io/) `npm install -g bower` (run it in an console with administrator privileges)
  - [python3.4](https://www.python.org/download/releases/3.4.0/) (for Windows you can install [miniconda3.4](http://conda.pydata.org/miniconda.html))
 
 
@@ -63,6 +63,8 @@ Run the setup install :
 
 Also, you can run the [install.bat](https://github.com/NaturalSolutions/ecoReleve-Data/blob/master/Back/install.bat) file in the [Back folder](https://github.com/NaturalSolutions/ecoReleve-Data/tree/master/Back/)
 which will launch all commands in order to install this project (Front setup & Back setup).
+
+An error can occured if an other instance of pyramid WGSI run with the `pserve` command. Don't worry, it does not have any impact. 
 
 ## Technolgies && Usage
 

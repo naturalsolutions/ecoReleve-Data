@@ -1,0 +1,82 @@
+
+UPDATE ModuleGrids
+SET TypeObj = 1  
+WHERE Module_ID = 8 and Name = 'Sex'
+
+
+Insert into ModuleGrids
+	(Module_ID, TypeObj, Name, Label, GridRender, GridSize, CellType, GridOrder, QueryName, Options, FilterOrder, FilterSize, FilterClass, IsSearchable, 
+                         FilterDefaultValue, FilterRender, FilterType, Status)
+
+SELECT Module_ID, TypeObj, Name, Label, GridRender, GridSize, CellType, GridOrder, QueryName, Options, FilterOrder, FilterSize, FilterClass, IsSearchable, 
+                         FilterDefaultValue, FilterRender, FilterType, Status
+FROM ModuleGrids WHERE Module_ID = 8 and Name = 'Sex';
+
+
+
+WITH idsex AS 
+( 
+SELECT TOP 1 * 
+FROM ModuleGrids
+WHERE Module_ID = 8 and Name = 'Sex'
+) 
+UPDATE idsex SET TypeObj=2
+
+UPDATE ModuleGrids 
+SET FilterOrder= 119
+WHERE Module_ID = 8 and Name = 'Sex' and TypeObj = 2 
+
+UPDATE ModuleGrids 
+SET FilterOrder= 121
+WHERE Module_ID = 8 and Name = 'Transmitter_Shape' and TypeObj = 2 
+
+UPDATE ModuleGrids 
+SET FilterOrder= 122
+WHERE Module_ID = 8 and Name = 'Transmitter_Model' and TypeObj = 2 
+
+UPDATE ModuleGrids 
+SET FilterOrder= 123
+WHERE Module_ID = 8 and Name = 'Ring_position_1' and TypeObj = 2 
+
+UPDATE ModuleGrids 
+SET FilterOrder= 124
+WHERE Module_ID = 8 and Name = 'Ring_color_1' and TypeObj = 2 
+
+
+UPDATE ModuleGrids 
+SET FilterOrder= 125
+WHERE Module_ID = 8 and Name = 'Ring_position_2' and TypeObj = 2 
+
+
+UPDATE ModuleGrids 
+SET FilterOrder= 126
+WHERE Module_ID = 8 and Name = 'Ring_color_2' and TypeObj = 2 
+
+
+UPDATE ModuleGrids 
+SET FilterOrder= 127
+WHERE Module_ID = 8 and Name = 'Microchip' and TypeObj = 2 
+
+UPDATE ModuleGrids 
+SET FilterOrder= 128
+WHERE Module_ID = 8 and Name = 'Mark_Position_1' and TypeObj = 2 
+
+UPDATE ModuleGrids 
+SET FilterOrder= 129
+WHERE Module_ID = 8 and Name = 'Mark_Color_1' and TypeObj = 2 
+
+UPDATE ModuleGrids 
+SET FilterOrder= 130
+WHERE Module_ID = 8 and Name = 'Mark_Position_2' and TypeObj = 2 
+
+UPDATE ModuleGrids 
+SET FilterOrder= 131
+WHERE Module_ID = 8 and Name = 'Mark_Color_2' and TypeObj = 2 
+
+
+
+ 
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('75_Up_indiv_non_identif_reorder_filter',GETDATE(),(SELECT db_name()))
+
+
+GO

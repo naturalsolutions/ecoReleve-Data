@@ -13,10 +13,12 @@ define([
   'ns_filter_bower',
   './lyt-individuals-detail',
   './lyt-individuals-new',
+ 'dateTimePicker',
+
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal, Translater, config,
-  Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv
+  Com, NsGrid, NsFilter, LytIndivDetail, LytNewIndiv,dateTimePicker
 ) {
 
   'use strict';
@@ -31,7 +33,10 @@ define([
       'click #back': 'hideDetails',
       'click button#clear': 'clearFilter',
       'click button#createNew': 'newIndividual',
-      'click #btn-export': 'exportGrid'
+      'click #btn-export': 'exportGrid',
+      'click #indivSearchTabs a.tab-link' : 'indivSearchTabs',
+      'click #histVal' : 'resetDate',
+      'dp.change #datetimepicker2' : 'resetHist'
     },
 
     ui: {
@@ -55,13 +60,16 @@ define([
       }
       this.com = new Com();
       this.translater = Translater.getTranslater();
+      this.gridURL = config.coreUrl + 'individuals/';
     },
 
     onRender: function() {
-      this.$el.i18n();
+      //$('#starDate2').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
     },
 
     onShow: function() {
+      this.$el.i18n();
+      this.$el.find('#datetimepicker2').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
       this.displayFilter();
       this.displayGrid();
       if (this.indivId) {
@@ -76,7 +84,7 @@ define([
         pageSize: 20,
         pagingServerSide: true,
         com: this.com,
-        url: config.coreUrl + 'individuals/',
+        url: this.gridURL,
         urlParams: this.urlParams,
         rowClicked: true,
         totalElement: 'totalEntries',
@@ -89,7 +97,15 @@ define([
       this.grid.rowDbClicked = function(args) {
         _this.rowDbClicked(args.row);
       };
+
+      if (this.moduleName != 'IndivFilter'){
+        this.grid.collection.queryParams.history = false;
+      } else {
+        //delete this.collection.queryParams['history'];
+      }
+      this.ui.grid.html('');
       this.ui.grid.html(this.grid.displayGrid());
+      this.ui.paginator.html('');
       this.ui.paginator.append(this.grid.displayPaginator());
     },
 
@@ -109,14 +125,25 @@ define([
     },
 
     displayFilter: function() {
+      var _this=this;
+      this.$el.find('#filter').html('');
+
       this.filters = new NsFilter({
         url: config.coreUrl + 'individuals/',
         com: this.com,
         filterContainer: this.ui.filter,
+        name: this.moduleName,
       });
     },
 
     filter: function() {
+      if (this.moduleName != 'IndivFilter'){
+        this.grid.collection.queryParams.startDate =  $('#dateVal').val();
+        this.grid.collection.queryParams.history =0;
+        if ($('#histVal:checked').val()){
+          this.grid.collection.queryParams.history =1;
+        }
+      }
       this.filters.update();
     },
     clearFilter: function() {
@@ -146,8 +173,44 @@ define([
       });*/
     },
 
+    indivSearchTabs: function(e) {
+      var type = $(e.target).attr('name');
+      var elTab = this.$el.find('ul#indivSearchTabs');
+      elTab.find('.tab-ele').removeClass('activeTab');
+      $(e.target).parent().addClass('activeTab');
+
+      if (type == 'standard') {
+        this.moduleName = 'IndivFilter';
+        //this.gridURL = config.coreUrl + 'individuals/';
+        $('.border-bottom-filter').addClass('hide');
+        this.ui.filter.removeClass('crop2');
+      } else {
+        this.moduleName = 'AdvancedIndivFilter';
+        //this.gridURL = config.coreUrl + 'individuals/advanced/';
+        $('.border-bottom-filter').removeClass('hide');
+        this.ui.filter.addClass('crop2');
+      }
+
+      this.com = new Com();
+      this.displayGrid();
+      this.displayFilter();
+    },
+
+    resetDate: function(e){
+      if ($('#histVal:checked').val()){
+        $('#dateVal').val(null);
+      }
+    },
+    resetHist: function(e){
+      if ($('#histVal:checked').val()){
+        $('#histVal').prop('checked', false);
+      }
+    },
+
     exportGrid: function() {
-      var url = config.coreUrl + 'individuals/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
+      var url = config.coreUrl + 'individuals/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria)
+      +'&history='+this.grid.collection.queryParams.history
+      +'&startDate='+this.grid.collection.queryParams.startDate;
       var link = document.createElement('a');
       link.classList.add('DowloadLinka');
       

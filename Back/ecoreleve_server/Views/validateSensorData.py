@@ -20,6 +20,8 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from datetime import datetime
 from ..Models import Base, dbConfig, DBSession,ArgosGps,graphDataDate
 from traceback import print_exc
+from ..controllers.security import routes_permission
+
 
 
 route_prefix = 'sensors/'
@@ -46,7 +48,9 @@ DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True)
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 # List all PTTs having unchecked locations, with individual id and number of locations.
-@view_config(route_name=route_prefix+'uncheckedDatas',renderer='json')
+@view_config(route_name=route_prefix+'uncheckedDatas',renderer='json',match_param='type=rfid',permission = routes_permission['rfid']['GET'])
+@view_config(route_name=route_prefix+'uncheckedDatas',renderer='json',match_param='type=gsm',permission = routes_permission['gsm']['GET'])
+@view_config(route_name=route_prefix+'uncheckedDatas',renderer='json',match_param='type=argos',permission = routes_permission['argos']['GET'])
 def type_unchecked_list(request):
     session = request.dbsession
 
@@ -84,7 +88,8 @@ def unchecked_rfid(request):
     return result
 
 # ------------------------------------------------------------------------------------------------------------------------- #
-@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt',renderer='json',request_method = 'GET')
+@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt',renderer='json',request_method = 'GET',match_param='type=argos',permission = routes_permission['argos']['GET'])
+@view_config(route_name=route_prefix+'uncheckedDatas/id_indiv/ptt',renderer='json',request_method = 'GET',match_param='type=gsm',permission = routes_permission['gsm']['GET'])
 def details_unchecked_indiv(request):
     session = request.dbsession
 
@@ -138,7 +143,7 @@ def details_unchecked_indiv(request):
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 
-@view_config(route_name = route_prefix+'uncheckedDatas/id_indiv/ptt', renderer = 'json' , request_method = 'POST' )
+@view_config(route_name = route_prefix+'uncheckedDatas/id_indiv/ptt', renderer = 'json' , request_method = 'POST',permission = routes_permission['gsm']['POST'] )
 def manual_validate(request) :
     global graphDataDate
     session = request.dbsession
@@ -179,13 +184,14 @@ def manual_validate(request) :
         print_exc()
         return error_response(err)
 
-@view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST' )
+@view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST',match_param='type=rfid',permission = routes_permission['rfid']['POST'] )
+@view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST',match_param='type=gsm',permission = routes_permission['gsm']['POST'] )
+@view_config(route_name = route_prefix+'uncheckedDatas', renderer = 'json' , request_method = 'POST' ,match_param='type=argos',permission = routes_permission['argos']['POST'])
 def auto_validation(request):
     session = request.dbsession
     global graphDataDate
 
     type_ = request.matchdict['type']
-    # print ('\n*************** AUTO VALIDATE *************** \n')
     param = request.params.mixed()
     freq = param['frequency']
     listToValidate = json.loads(param['toValidate'])

@@ -31,10 +31,11 @@ class Sensor (Base,ObjectWithDynProp) :
     Compagny = Column(String(250))
     SerialNumber = Column(String(250))
     creationDate = Column (DateTime,nullable=False)
-
     FK_SensorType = Column(Integer, ForeignKey('SensorType.ID'))
 
     SensorDynPropValues = relationship('SensorDynPropValue',backref='Sensor',cascade="all, delete-orphan")
+    Equipments = relationship('Equipment')
+    Locations = relationship('Individual_Location')
 
     def __init__(self,**kwargs):
         super().__init__(**kwargs)

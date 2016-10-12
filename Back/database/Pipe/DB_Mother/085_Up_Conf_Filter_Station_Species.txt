@@ -1,0 +1,11 @@
+INSERT INTO ModuleGrids
+VALUES (3,NULL,'Species','Vertebrate species',0,1,'string',0,'Forced',204089,71,2,NULL,1,NULL,4,'AutocompTreeEditor',NULL),
+(3,NULL,'Species','Invertebrate species',0,1,'string',0,'Forced',204087,72,2,NULL,1,NULL,4,'AutocompTreeEditor',NULL),
+(3,NULL,'Species','Plants species',0,1,'string',0,'Forced',204083,73,2,NULL,1,NULL,4,'AutocompTreeEditor',NULL)
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('85_Up_Conf_Filter_Station_Species',GETDATE(),(SELECT db_name()))
+
+
+GO
