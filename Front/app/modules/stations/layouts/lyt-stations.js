@@ -104,6 +104,7 @@ define([
         }));
         this.ui.detail.removeClass('hidden');
       }
+      this.$el.i18n();
     },
 
     initGrid: function(url) {

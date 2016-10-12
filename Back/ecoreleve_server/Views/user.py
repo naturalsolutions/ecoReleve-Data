@@ -45,7 +45,10 @@ def current_user(request):
 
     query = select([
         User.id.label('PK_id'),
-        User.Login.label('fullname')
+        User.Login.label('fullname'),
+        User.Firstname.label('Firstname'),
+        User.Language.label('Language'),
+        User.Lastname.label('Lastname')
     ]).where(User.id == request.authenticated_userid['iss'])
     response = dict(session.execute(query).fetchone())
     response['role'] = currentUserRole
@@ -62,13 +65,13 @@ def getUser(request) :
 
 
     Tuser_role = Base.metadata.tables['VUser_Role']
-    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(userid))
+    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(user_id))
 
     dbUserRoleID = session.execute(query_check_role).scalar()
-    currentUserRoleID = userOAuthDict.loc[userOAuthDict['user_id'] == int(userid),'role_id'].values[0]
+    currentUserRoleID = userOAuthDict.loc[userOAuthDict['user_id'] == int(user_id),'role_id'].values[0]
 
     if (dbUserRoleID != currentUserRoleID):
-        userOAuthDict.loc[userOAuthDict['user_id'] == int(userid),'role_id'] = dbUserRoleID
+        userOAuthDict.loc[userOAuthDict['user_id'] == int(user_id),'role_id'] = dbUserRoleID
         currentUserRoleID = dbUserRoleID
     currentUserRole = USERS[currentUserRoleID]
 

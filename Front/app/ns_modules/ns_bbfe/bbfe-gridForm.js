@@ -3,9 +3,10 @@ define([
   'underscore',
   'backbone',
   'marionette',
+  'ns_ruler/ruler',
   'backbone-forms',
 
-  ], function ($, _, Backbone, Marionette, Form, List, tpl) {
+  ], function ($, _, Backbone, Marionette,Ruler, Form, List, tpl) {
 
     'use strict';
     return Form.editors.GridFormEditor = Form.editors.Base.extend({
@@ -106,7 +107,8 @@ define([
             form.$el.find('textarea').on("change", function(e) {
                 window.formChange = true;
             });
-      
+
+            this.initRules(form);
             this.forms.push(form);
 
             if(!this.defaultRequired){
@@ -345,9 +347,39 @@ define([
                 };
                 return values;
             }
-
-
         },
+
+    initRules:function(form) {
+      var _this = this;
+      this.ruler = new Ruler({
+            form: form
+          });
+      var globalError = {};
+      var errorMsg = 'error on field(s): \n';
+
+      _.each(form.schema,function(curSchema){
+        if (curSchema.rule){
+          var curRule = curSchema.rule;
+          var target = curSchema.name;
+          var curResult = _this.ruler.addRule(target,curRule.operator,curRule.source,curRule.value);
+          if (curResult) {
+            globalError[target] = curResult;
+            errorMsg +=  curResult.object + ':  '+curResult.message+'\n' ;
+          }
+        }
+      });
+
+      if (!$.isEmptyObject(globalError) && this.displayMode == 'edit'){
+        this.swal({
+          title : 'Rule error',
+          text : errorMsg,
+          type:'error',
+          showCancelButton: false,
+          confirmButtonColor:'#DD6B55',
+          confirmButtonText:'Ok'});
+      }
+    },
+
         }, {
               //STATICS
               template: _.template('\

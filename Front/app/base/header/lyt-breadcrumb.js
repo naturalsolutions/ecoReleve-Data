@@ -1,4 +1,4 @@
-define(['marionette', 'config'],
+define(['marionette', 'config','i18n'],
 function(Marionette, config) {
   'use strict';
   return Marionette.LayoutView.extend({
@@ -19,7 +19,15 @@ function(Marionette, config) {
     },
 
     onShow: function() {
-
+       this.$el.i18n();
+      var disabled = config.disabledFunc ;
+      if (!disabled){
+        return ;
+      }
+      for (var i=0; i< disabled.length;i++){
+        var functionnality = disabled[i];
+        $("." + functionnality).addClass('disabled');
+      }
     },
   });
 });

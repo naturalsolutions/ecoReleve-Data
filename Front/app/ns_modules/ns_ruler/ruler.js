@@ -63,11 +63,12 @@
                 'sum': this.operationListRule,
                 'minus': this.operationListRule,
                 'times': this.operationListRule,
+                'disable': this.disable,
                 'context': this
             };
 
         },
-        addRule: function (target, operator, source) {
+        addRule: function (target, operator, source,value) {
             var _this = this;
             var realSource = source ;
             this.sourceFields = {};
@@ -80,17 +81,22 @@
             try {
                 _.each(source,function(curSource){
                     if (_this.sourceFields[curSource] == null) {
-                        _this.sourceFields[curSource] = [{source:source, target: target, operator: operator }];
+                        _this.sourceFields[curSource] = [{source:source, target: target, operator: operator, value:value}];
                     } else {
-                        _this.sourceFields[curSource].push({source:source, target: target, operator: operator });
+                        _this.sourceFields[curSource].push({source:source, target: target, operator: operator, value:value});
                     }
-                    _this.form.$el.find(('#' + _this.getEditor(curSource).id)).on('change keyup paste', function (evt) {
-                        _this.ApplyRules(evt);
-                    });
+
+                    if (operator == 'disable'){
+                          _this.ApplyRules(null,{source:curSource,value:value});
+                    }
+                    else {
+                        _this.form.$el.find(('#' + _this.getEditor(curSource).id)).on('change keyup paste', function (evt) {
+                            _this.ApplyRules(evt,null);
+                        });
+                    }
                 });
                 return null;
             } catch (e) {
-                console.log('totot',e);
                 return {message: 'invalid configuration', error:e, object: target};
             }
         },
@@ -99,12 +105,17 @@
             return this.form.fields[name].editor;
         },
 
-        ApplyRules: function (evt) {
-            var sourceName = $(evt.currentTarget).attr('name');
+        ApplyRules: function (evt,ruleVal) {
+            if (evt) {
+                var sourceName = $(evt.currentTarget).attr('name');
+            } else {
+                var sourceName = ruleVal.source;
+            }
             var ruleList = this.sourceFields[sourceName];
             for (var i = 0; i < ruleList.length; i++) {
                 var targetName = ruleList[i].target;
                 var operator = ruleList[i].operator;
+
                 this.dictRule[operator](ruleList[i]);
             //this.form.$el.find(('#' + this.getEditor(ruleList[i].target).id)).val(this.getEditor(sourceName).getValue());
             }
@@ -153,9 +164,14 @@
             _this.form.$el.find('#' + _this.getEditor(curRule.target).id).val(result);
             return result; 
         },
+        disable: function(curRule){
+            var _this = this.context;
+            var result = _this.getEditor(curRule.source).getValue();
+            if (result==curRule.value) {
+                _this.form.$el.find('#' + _this.getEditor(curRule.target).id).prop("disabled", true);
+            }
+        }
     });
-
-
 
     return (NsRuler);
 
