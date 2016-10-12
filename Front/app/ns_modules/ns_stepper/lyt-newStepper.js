@@ -5,7 +5,7 @@ define([
 	'backbone',
 	'marionette',
 	'sweetAlert',
-	'translater',
+	'i18n',
 ], function($, _, Backbone, Marionette, Swal, Translater
 ){
 
@@ -60,7 +60,7 @@ define([
 		},
 
 		initialize: function(){
-			this.translater = Translater.getTranslater();
+			//this.translater = Translater.getTranslater();
 			this.currentStepIndex = 0;
 			this.models = [];
 			this.initSteps();
@@ -82,6 +82,7 @@ define([
 		onShow : function(){
 			this.displayStepNav();
 			this.displayStep(0);
+			this.$el.i18n();
 		},
 
 		//clean the stored datas from current Step

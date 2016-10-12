@@ -25,7 +25,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/gpx/templates/tpl-step1-gpx.html',
 
-    name: 'GPX file upload',
+    name : '<span class="import-step1"></span>',
 
     events: {
       'change input[type="file"]': 'importFile',
@@ -103,6 +103,7 @@ define([
       //var fieldAfield = $('select[name="fieldActivity"]');
       //var userBtn = $('button[data-action="add"]');
 
+
       if (fileType != 'GPX') {
         _this.importedFile = false;
         this.swalError('error file type');
@@ -115,7 +116,6 @@ define([
       } else {
         reader.onload = function(e, fileName) {
           window.app.checkFormSaved = false;
-
           var xml = e.target.result;
 
           // get waypoints collection
@@ -128,7 +128,6 @@ define([
 
           //success
           if (_this.wayPointList.length > 0) {
-
             if (errosList.length > 0) {
                 _this.deferred.resolve();
                 _this.displayErrors('file error');
@@ -197,6 +196,7 @@ define([
               return true;
             }
     },
+
 
     displayInputFile(){
       this.ui.form.find('.filesinputselector').parent().prepend('<div id="btnImpGpxFile">'+
