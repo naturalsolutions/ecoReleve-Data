@@ -31,11 +31,11 @@ define([
       'click .tab-link': 'displayTab',
     },
     ui: {
-      'grid': '#grid',
+      'gridHistory': '#gridHistory',
       'gridEquipment': '#gridEquipment',
       'form': '#form',
       'map': '#map',
-      'paginator': '#paginator',
+      'paginatorHistory': '#paginatorHistory',
       'paginatorEquipment': '#paginatorEquipment',
       'details': '#sensorLeft',
       'mapContainer': '#sensorRight',
@@ -108,6 +108,17 @@ define([
       });
     },
 
+    displayTab: function(e) {
+      e.preventDefault();
+      var ele = $(e.target);
+      var tabLink = $(ele).attr('href');
+      var tabUnLink = $('li.active.tab-ele a').attr('href');
+      $('li.active.tab-ele').removeClass('active');
+      $(ele).parent().addClass('active');
+      $(tabLink).addClass('in active');
+      $(tabUnLink).removeClass('active in');
+    },
+
     displayForm: function(id) {
       this.nsform = new NsForm({
         name: 'SensorForm',
@@ -136,7 +147,7 @@ define([
 
     displayGrid: function(id) {
       var _this = this;
-      var cols = [{
+      var colsEquipment = [{
         name: 'FK_Individual',
         label: 'Individual id',
         editable: false,
@@ -147,8 +158,8 @@ define([
             var rawValue = this.model.get(this.column.get("name"));
             var formattedValue = this.formatter.fromRaw(rawValue, this.model);
 
-            if (this.model.get('FK_Individual')){ 
-              this.$el.append('<a target="_blank"' 
+            if (this.model.get('FK_Individual')){
+              this.$el.append('<a target="_blank"'
                 +'href= "http://'+window.location.hostname+window.location.pathname+'#individuals/'+this.model.get('FK_Individual')+'">\
                   '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
                 </a>');
@@ -170,7 +181,7 @@ define([
               var formattedValue = this.formatter.fromRaw(rawValue, this.model);
 
               if (this.model.get('Name')){
-                this.$el.append('<a target="_blank"' 
+                this.$el.append('<a target="_blank"'
                   +'href= "http://'+window.location.hostname+window.location.pathname+'#monitoredSites/'+this.model.get('MonitoredSiteID')+'">\
                     '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
                   </a>');
@@ -195,16 +206,44 @@ define([
         headerCell : null
       }
       ];
-      this.grid = new NsGrid({
+      this.gridEquipment = new NsGrid({
         pageSize: 20,
-        columns: cols,
+        columns: colsEquipment,
+        pagingServerSide: false,
+        url: config.coreUrl + 'sensors/' + id  + '/equipment',
+        urlParams: this.urlParams,
+        rowClicked: true,
+      });
+
+      var colsHisto = [{
+        name: 'Name',
+        label: 'Name',
+        editable: false,
+        cell: 'string'
+      }, {
+        name: 'value',
+        label: 'Value',
+        editable: false,
+        cell: 'string'
+      }, {
+        name: 'StartDate',
+        label: 'Start Date',
+        editable: false,
+        cell: 'stringDate',
+      },];
+      this.gridHistory = new NsGrid({
+        pageSize: 20,
+        columns: colsHisto,
         pagingServerSide: false,
         url: config.coreUrl + 'sensors/' + id  + '/history',
         urlParams: this.urlParams,
         rowClicked: true,
       });
-      this.ui.grid.html(this.grid.displayGrid());
-      this.ui.paginator.html(this.grid.displayPaginator());
+
+      this.ui.gridEquipment.html(this.gridEquipment.displayGrid());
+      this.ui.paginatorEquipment.html(this.gridEquipment.displayPaginator());
+      this.ui.gridHistory.html(this.gridHistory.displayGrid());
+      this.ui.paginatorHistory.html(this.gridHistory.displayPaginator());
     }
   });
 
