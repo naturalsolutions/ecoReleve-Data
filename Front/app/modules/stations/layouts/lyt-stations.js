@@ -57,7 +57,12 @@ define([
 
     initialize: function(options) {
       if (options.id) {
-        this.stationId = options.id;
+        if ( Number.isInteger(options.id)  ) {
+          this.stationId = options.id;
+        }
+        else {
+          this.importedStations = true;
+        }
       }
       this.com = new Com();
     },
@@ -104,22 +109,47 @@ define([
         }));
         this.ui.detail.removeClass('hidden');
       }
+      if (this.importedStations ) {
+        this.importedStations = false;
+
+        $('#tab-impSt').click();
+        /*var fakeEvent = {
+                          target: {
+                            name : "test"
+                          }
+                        }
+        this.displayTab(fakeEvent)*/
+      }
     },
 
     initGrid: function(url) {
       var _this = this;
       var url = config.coreUrl + 'stations/';
 
+    /*  var myGrid = NSGrid.extend({
+      })*/
       this.grid = new NSGrid({
         pageSize: 20,
         pagingServerSide: true,
         com: this.com,
         name: 'StationGrid',
         url: url,
+      //  urlParams: {lastImported:true},
         rowClicked: true,
         totalElement: 'totalEntries',
         rowSelectorElement: 'rowSelectorSta'
       });
+       /*new NSGrid({
+        pageSize: 20,
+        pagingServerSide: true,
+        com: this.com,
+        name: 'StationGrid',
+        url: url,
+      //  urlParams: {lastImported:true},
+        rowClicked: true,
+        totalElement: 'totalEntries',
+        rowSelectorElement: 'rowSelectorSta'
+      });*/
       this.grid.rowClicked = function(args) {
         _this.rowClicked(args.row);
       };
@@ -194,7 +224,7 @@ define([
       var url = config.coreUrl + 'stations/export?criteria='+JSON.stringify(this.grid.collection.searchCriteria);
       var link = document.createElement('a');
       link.classList.add('DowloadLinka');
-      
+
       //link.download = url;
       link.href = url;
       link.onclick = function () {

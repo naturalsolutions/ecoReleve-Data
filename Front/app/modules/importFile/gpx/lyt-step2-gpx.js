@@ -310,7 +310,7 @@ define([
           },
           function(isConfirm) {
             if( isConfirm ) {
-              Backbone.history.navigate('stations/', {trigger: true});
+              Backbone.history.navigate('stations/lastImported', {trigger: true});
             }
             else {
               Backbone.history.navigate('home', {trigger: true});
