@@ -27,7 +27,6 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','confi
 
 function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
-
     var app = {};
     var JST = window.JST = window.JST || {};
     window.xhrPool = [];
