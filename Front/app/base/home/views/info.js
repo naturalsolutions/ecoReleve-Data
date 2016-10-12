@@ -21,13 +21,16 @@ define([
 
     initialize: function() {
       this.$el.hide();
-      $.ajax({
-        context: this,
-        url: config.coreUrl + 'individuals/count',
-      }).done(function(data) {
-        this.model.set('nbIndiv', data);
-        this.$el.fadeIn();
-      });
+      var isDomoInstance = config.instance ;
+      if(!isDomoInstance || (isDomoInstance != 'demo')) {
+          $.ajax({
+            context: this,
+            url: config.coreUrl + 'individuals/count',
+          }).done(function(data) {
+            this.model.set('nbIndiv', data);
+            this.$el.fadeIn();
+          });
+      }
     },
 
     onDestroy: function() {
