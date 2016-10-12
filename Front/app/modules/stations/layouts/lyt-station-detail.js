@@ -65,8 +65,7 @@ define([
         this.display(this.model);
         //this.feedProtoList();
       }
-      //this.$el.i18n();
-      //this.translater = Translater.getTranslater();
+      this.$el.i18n();
     },
 
     reloadFromNavbar: function(model) {

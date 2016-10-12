@@ -305,11 +305,6 @@ def checkExisting(indiv):
     session = threadlocal.get_current_registry().dbmaker()
     indivData = indiv.PropDynValuesOfNow
 
-    # del indivData['creationDate']
-    for key in indivData:
-        if indivData[key] is None: 
-            indivData[key] = 'null'
-    
     searchInfo = {'criteria':[{'Column':key,'Operator':'is','Value':val} for key,val in indivData.items()],'order_by':['ID:asc']}
  
     ModuleType = 'IndivFilter'

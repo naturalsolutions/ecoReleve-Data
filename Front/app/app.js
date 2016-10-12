@@ -1,4 +1,6 @@
+
 define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','config',
+
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
   'ns_modules/ns_bbfe/bbfe-timePicker',
@@ -18,8 +20,10 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','confi
   'ns_modules/ns_cell/bg-timestampCell',
   'ns_modules/ns_cell/autocompCell',
   'ns_modules/ns_cell/bg-integerCell',
+  'i18n'
 
   ],
+
 
 function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
@@ -65,13 +69,13 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
   $.xhrPool.allowAbort = false;
   $.xhrPool.abortAll = function() { // our abort function
     if ($.xhrPool.allowAbort){
-      $(this).each(function(idx, jqXHR) { 
+      $(this).each(function(idx, jqXHR) {
           jqXHR.abort();
       });
-      $.xhrPool.length = 0
+      $.xhrPool.length = 0;
     }
   };
-
+  //
   $.ajaxSetup({
     beforeSend: function(jqXHR) { // before jQuery send the request we will push it to our array
       $.xhrPool.push(jqXHR);
@@ -94,7 +98,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
         confirmButtonText: 'OK',
         closeOnConfirm: true,
       });
-  }
+  };
 
   $(document).ajaxError(function( event, jqxhr, settings, thrownError ) {
     if (jqxhr.status == 401){
@@ -104,17 +108,29 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
     window.formChange = false;
     window.formEdition = false;
+    // get not allowed urls in config.js
+    window.notAllowedUrl = [];
+    if (config.disabledFunc){
+      var disabled = config.disabledFunc ;
+      for (var i=0; i< disabled.length;i++){
+        window.notAllowedUrl.push(disabled[i]);
+      }
+    }
+
     window.checkExitForm = function(confirmCallback,cancelCallback) {
       if(window.formChange && window.formEdition){
+        var title = i18n.translate('swal.savingForm-title');
+        var savingFormContent =  i18n.translate('swal.savingForm-content');
+        var cancelMsg = i18n.translate('button.cancel');
         Swal({
-          title: 'Saving form',
-          text: 'Current form is not yet saved. Would you like to continue without saving it?',
+          title: title,
+          text: savingFormContent,
           type: 'warning',
           showCancelButton: true,
           confirmButtonColor: 'rgb(221, 107, 85)',
           confirmButtonText: 'OK',
           cancelButtonColor: 'grey',
-          cancelButtonText: 'Cancel',
+          cancelButtonText: cancelMsg,
           closeOnConfirm: true,
         },
         function(isConfirm) {
@@ -149,7 +165,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
         lineNumber:lineNumber,
         column:column }
     });
-  }
+  };
 
   window.app = app;
   return app;

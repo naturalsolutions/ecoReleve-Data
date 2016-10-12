@@ -184,10 +184,25 @@ class ModuleForms(Base):
                 subschema.update(gridRanged)
             else :
                 subschema[conf.Name] = conf.GetDTOFromConf(self.Editable)
-
+        
+        subschema['ID'] = {
+            'name': 'ID',
+            'type': 'Number',
+            'title' : 'ID',
+            'editable' : True,
+            'editorClass' : 'form-control' ,
+            'validators': [],
+            'options': None,
+            'fieldClass':'hide col-md-1',
+            'defaultValue' : None,
+            'editorAttrs' : {'disabled': True},
+            'fullPath':False,
+            'size':3
+            }
         fields = []
         resultat = []
         Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name) for obj in result if obj.FormOrder is not None and obj.InputType != 'GridRanged'], key = lambda x : x[1])
+        Legends.append((None,0,'ID'))
         # Legend2s = sorted ([(obj.Legend)for obj in result if obj.FormOrder is not None ], key = lambda x : x[1])
         withOutLegends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in result if obj.FormOrder is not None and obj.Legend is None and obj.InputType != 'GridRanged'], key = lambda x : x[1])
 

@@ -65,11 +65,10 @@ define([
 
     onRender: function() {
       //$('#starDate2').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
-      this.$el.i18n();
     },
 
     onShow: function() {
-      console.log(this.$el.find('#datetimepicker2'))
+      this.$el.i18n();
       this.$el.find('#datetimepicker2').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
       this.displayFilter();
       this.displayGrid();
