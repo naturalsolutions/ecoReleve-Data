@@ -22,7 +22,7 @@ define([
     className: 'full-height animated rel white',
 
     events: {
-      'click .js-btn-auto-validation': 'autoValidation',
+      'click .js-btn-auto-validation': 'handleAutoValidation',
       'change .js-select-frequency': 'setFrequency',
     },
 
@@ -39,7 +39,6 @@ define([
 
     initialize: function(options) {
       this.type_ = options.type;
-      this.com = new Com();
       this.columnDefs = this.model.get(this.type_ + 'ColumnDefs');
     },
 
@@ -50,11 +49,11 @@ define([
 
     onShow: function() {
       this.displayGrid();
-      this.frequency = this.ui.frequency.val();
+      this.frequency = this.model.get('defaultFrequency')[this.type_];
+      this.ui.frequency.val(this.frequency);
     },
 
     onRowClicked: function(row) {
-      console.log(row);
       var dataset = row.data.FK_Sensor + '_' + row.data.FK_Individual + '_' + row.data.FK_ptt;
       Backbone.history.navigate('validate/' + this.type_ + '/' + dataset, {trigger: true});
     },
@@ -71,52 +70,49 @@ define([
 
       this.rgGrid.show(this.gridView = new GridView({
         columns: this.columnDefs,
-        com: this.com,
         url: 'sensors/' + this.type_ + '/uncheckedDatas',
         afterFirstRowFetch: afterFirstRowFetch,
         clientSide: true,        
         gridOptions: {
+          rowSelection: 'multiple',
           onRowClicked: this.onRowClicked.bind(this),
         },
       }));
     },
 
-    /*rowClicked: function(args) {
-      {
-        type: this.type_,
-        frequency: this.frequency,
+    handleAutoValidation: function() {
+      var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+      if(!selectedNodes.length){
+        return;
       }
-    },
-*/
-    autoValidation: function() {
       var params = {
         'frequency': this.frequency,
         'toValidate': []
       };
-      var tmp = {};
-      if (!this.grid.grid.getSelectedModels().length) {
-        return;
-      }
+      var selectedIds = selectedNodes.map(function(node){
+        return node.data.PK_id;
+      });
 
-      if (this.type_ == 'rfid') {
-        _.each(this.grid.grid.getSelectedModels(), function(model) {
-          params.toValidate.push({
-            'equipID': model.get('equipID'),
-            'FK_Sensor': model.get('FK_Sensor')
-          });
+      if (this.type_ === 'rfid') {
+        params.toValidate = selectedNodes.map(function(node){
+          return {
+            'equipID': node.data.equipID,
+            'FK_Sensor': node.data.FK_Sensor
+          };
         });
       }else {
-        _.each(this.grid.grid.getSelectedModels(), function(model) {
-          params.toValidate.push({
-            'FK_Individual': model.get('FK_Individual'),
-            'FK_ptt': model.get('FK_ptt')
-          });
+        params.toValidate = selectedNodes.map(function(node){
+          return {
+            'FK_Individual': node.data.FK_Individual,
+            'FK_ptt': node.data.FK_ptt
+          };
         });
       }
 
-      if (params.toValidate.length == this.grid.collection.state.totalRecords) {
+      if (params.toValidate.length === this.gridView.gridOptions.rowData[1].length) {
         params.toValidate = 'all';
       }
+
       params.toValidate = JSON.stringify(params.toValidate);
       var url = 'sensors/' + this.type_ + '/uncheckedDatas';
       $.ajax({

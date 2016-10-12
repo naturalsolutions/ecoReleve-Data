@@ -59,7 +59,7 @@ define([
       this.model.set('FK_Individual', datasetInfos[1]);
       this.model.set('FK_ptt', datasetInfos[2]);
       
-
+      
       //this.frequency = options.frequency;
       
     },
@@ -176,6 +176,9 @@ define([
     handleFrequency: function(e){
       var _this= this;
       var hz =$(e.target).val();
+      this.$el.find('.js-select-ferquency').each(function(){
+        $(this).val(hz);
+      });
 
       if(hz === 'all'){
         this.gridView.interaction('selectAll');

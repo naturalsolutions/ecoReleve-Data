@@ -65,7 +65,6 @@ define([
           field: 'FK_Individual',
           headerName: 'Individual ID',
           cellRenderer: function(params){
-            console.log(params.data.FK_Individual);
             if(!params.data.FK_Individual){
               return '<span class="bull-warn">&#x25cf;</span> No Individual attached !';
             }

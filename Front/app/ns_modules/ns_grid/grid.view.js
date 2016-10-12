@@ -360,7 +360,9 @@ define([
     },
 
     deselectAll: function(){
+      this.ready = false;
       this.gridOptions.api.deselectAll();
+      this.ready = true;
     },
 
     selectAll: function(){
