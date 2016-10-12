@@ -46,6 +46,8 @@ define([
       this.collection = options.model.attributes.data_FileContent;
       this.deferred = $.Deferred();
       window.formChange  = false;
+      console.log(options)
+      this.parent = options.parent;
     },
 
     onShow: function() {
@@ -308,10 +310,15 @@ define([
           },
           function(isConfirm) {
             if( isConfirm ) {
-              Backbone.history.navigate('stations/', {trigger: true})
+              Backbone.history.navigate('stations/', {trigger: true});
             }
             else {
-              Backbone.history.navigate('home', {trigger: true})
+              Backbone.history.navigate('home', {trigger: true});
+
+              // method to return at the 1st step
+              // _this.parent.currentStepIndex--;
+              // var index = _this.parent.currentStepIndex;
+              // _this.parent.displayStep(index);
             }
           });
         },

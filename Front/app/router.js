@@ -23,8 +23,8 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert', 'controller'
     appRoutes: {
       'export(/)': 'export',
 
-      'importFile(/)' : 'importFile',
       'importFile/:type(/)': 'importFile',
+      'importFile(/)' : 'importFile',
 
       'individuals/new(/)': 'newIndividual',
       'individuals/:id(/)': 'individuals',
