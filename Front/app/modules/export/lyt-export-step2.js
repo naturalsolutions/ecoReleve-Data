@@ -74,14 +74,17 @@ define([
         getValueOptions: function (DataRow) {
             var valueOptions;
             switch (DataRow['type']) {
-                case "Select": case 'Checkboxes':
-                    return DataRow['options']
+                case "Select":
+                    return DataRow['options'];
+                    break;
+								case 'Checkboxes':
+                    return DataRow['options'];
                     break;
                 case 'AutocompTreeEditor':
-                    return DataRow['options']
+                    return DataRow['options'];
                     break;
                 case 'AutocompleteEditor':
-                    return DataRow['options']
+                    return DataRow['options'];
                     break;
                 case "DATETIME":
                     return valueOptions = [{
@@ -91,7 +94,7 @@ define([
                     break;
                 case "DateTimePickerEditor" :
                     DataRow['options'].format =  "DD/MM/YYYY";
-                    return DataRow['options']
+                    return DataRow['options'];
                     break;
                 default:
                     return valueOptions = DataRow['options'];
