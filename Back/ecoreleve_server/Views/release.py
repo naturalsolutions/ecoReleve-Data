@@ -9,17 +9,19 @@ from ..Models import (
     Equipment,
     IndividualList,
     ErrorAvailable,
-    invertedThesaurusDict
-    )
+    invertedThesaurusDict,
+    thesaurusDictTraduction
+)
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
 import transaction
-import json, itertools
+import json
+import itertools
 from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-from sqlalchemy import select, and_,cast, DATE,func,desc,join, text
+from sqlalchemy import select, and_, cast, DATE, func, desc, join, text
 from sqlalchemy.orm import aliased
 from pyramid.security import NO_PERMISSION_REQUIRED
 from traceback import print_exc
@@ -27,35 +29,37 @@ from collections import OrderedDict
 import pandas as pd
 from collections import Counter
 from ..controllers.security import routes_permission
-from ..Models.Equipment import checkSensor,checkEquip
-
+from ..Models.Equipment import checkSensor, checkEquip
 
 
 prefix = 'release'
 
-@view_config(route_name= prefix+'/individuals/action', renderer='json', request_method='GET', permission=routes_permission[prefix]['GET'])
+
+@view_config(route_name=prefix + '/individuals/action', renderer='json', request_method='GET', permission=routes_permission[prefix]['GET'])
 def actionOnStations(request):
     dictActionFunc = {
-    # 'count' : count_,
-    'getFields': getFields,
-    'getFilters': getFilters,
-    'getReleaseMethod':getReleaseMethod
+        # 'count' : count_,
+        'getFields': getFields,
+        'getFilters': getFilters,
+        'getReleaseMethod': getReleaseMethod
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
 
-def getFilters (request):
+
+def getFilters(request):
     ModuleType = 'IndivReleaseGrid'
     filtersList = Individual().GetFilters(ModuleType)
     filters = {}
-    for i in range(len(filtersList)) :
+    for i in range(len(filtersList)):
         filters[str(i)] = filtersList[i]
     transaction.commit()
     return filters
 
+
 def getFields(request):
     ModuleType = request.params['name']
-    if ModuleType == 'default' :
+    if ModuleType == 'default':
         ModuleType = 'IndivReleaseGrid'
     cols = Individual().GetGridFields('IndivReleaseGrid')
     # cols.append({
@@ -72,63 +76,73 @@ def getFields(request):
     #     'renderable': False,
     #     'cell' : 'string'
     #     })
-    cols.insert(0,{
-        'name' :'import',
-        'label' : 'import',
+    cols.insert(0, {
+        'name': 'import',
+        'label': 'import',
         'renderable': True,
         'editable': True,
-        'cell' : 'select-row',
+        'cell': 'select-row',
         'headerCell': 'select-all'
-        })
+    })
     return cols
+
 
 def getReleaseMethod(request):
     session = request.dbsession
-
+    userLng = request.authenticated_userid['userlanguage'].lower()
+    if not userLng:
+        userLng = 'fr'
     query = text("""SELECT TTop_FullPath as val, TTop_Name as label"""
-        +""" FROM THESAURUS.dbo.TTopic th 
+                 + """ FROM THESAURUS.dbo.TTopic th
         JOIN [ModuleForms] f on th.TTop_ParentID = f.Options
         where Name = 'release_method' """)
     result = session.execute(query).fetchall()
-    return [dict(row) for row in result]
+    result = [dict(row) for row in result]
+    if userLng != 'fr':
+        for row in result:
+            row['label'] = thesaurusDictTraduction[row['label']][userLng]
+    return result
 
-@view_config(route_name= prefix+'/individuals', renderer='json', request_method ='GET', permission=routes_permission[prefix]['GET'])
+
+@view_config(route_name=prefix + '/individuals', renderer='json', request_method='GET', permission=routes_permission[prefix]['GET'])
 def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
 
     searchInfo = {}
     searchInfo['criteria'] = []
-    if 'criteria' in data: 
+    if 'criteria' in data:
         data['criteria'] = json.loads(data['criteria'])
-        if data['criteria'] != {} :
-            searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+        if data['criteria'] != {}:
+            searchInfo['criteria'] = [obj for obj in data[
+                'criteria'] if obj['Value'] != str(-1)]
 
     try:
         searchInfo['order_by'] = json.loads(data['order_by'])
     except:
         searchInfo['order_by'] = ['ID:desc']
     criteria = [
-    {
-    'Column': 'LastImported',
-    'Operator' : '=',
-    'Value' : True
-    }]
+        {
+            'Column': 'LastImported',
+            'Operator': '=',
+            'Value': True
+        }]
     searchInfo['criteria'].extend(criteria)
 
     ModuleType = 'IndivReleaseGrid'
-    moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
+    moduleFront = session.query(FrontModules).filter(
+        FrontModules.Name == ModuleType).one()
     listObj = IndividualList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
 
     countResult = listObj.count(searchInfo)
-    result = [{'total_entries':countResult}]
+    result = [{'total_entries': countResult}]
     result.append(dataResult)
 
     return result
 
 
-@view_config(route_name= prefix+'/individuals', renderer='json', request_method ='POST',permission=routes_permission[prefix]['POST'])
+@view_config(route_name=prefix + '/individuals', renderer='json', request_method='POST', permission=routes_permission[prefix]['POST'])
 def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()
@@ -136,9 +150,9 @@ def releasePost(request):
     if 'StationID' not in data and 'IndividualList' not in data:
         if data == {}:
             data = request.json_body
-        if 'FK_Sensor' in data and data['FK_Sensor'] is not None :
-            return isavailableSensor(request,data)
-        return 
+        if 'FK_Sensor' in data and data['FK_Sensor'] is not None:
+            return isavailableSensor(request, data)
+        return
 
     sta_id = int(data['StationID'])
     indivListFromData = json.loads(data['IndividualList'])
@@ -150,24 +164,31 @@ def releasePost(request):
     userLang = request.authenticated_userid['userlanguage']
     # get fullPath thesaurus therm according to user language
     indivList = []
-    for row in indivListFromData :
-        row = dict(map(lambda k : getFullpath(k,userLang), row.items()))
+    for row in indivListFromData:
+        row = dict(map(lambda k: getFullpath(k, userLang), row.items()))
         indivList.append(row)
 
     def getnewObs(typeID):
         newObs = Observation()
-        newObs.FK_ProtocoleType=typeID
+        newObs.FK_ProtocoleType = typeID
         newObs.FK_Station = sta_id
         newObs.__init__()
         return newObs
 
-    protoTypes = pd.DataFrame(session.execute(select([ProtocoleType])).fetchall(), columns = ProtocoleType.__table__.columns.keys())
-    vertebrateGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate_group','ID'].values[0])
-    vertebrateIndID = int(protoTypes.loc[protoTypes['Name'] == 'Vertebrate_individual','ID'].values[0])
-    biometryID = int(protoTypes.loc[protoTypes['Name'] == 'Bird_Biometry','ID'].values[0])
-    releaseGrpID = int(protoTypes.loc[protoTypes['Name'] == 'Release_Group','ID'].values[0])
-    releaseIndID = int(protoTypes.loc[protoTypes['Name'] == 'Release_Individual','ID'].values[0])
-    equipmentIndID = int(protoTypes.loc[protoTypes['Name'] == 'Individual_equipment','ID'].values[0])
+    protoTypes = pd.DataFrame(session.execute(select([ProtocoleType])).fetchall(
+    ), columns=ProtocoleType.__table__.columns.keys())
+    vertebrateGrpID = int(
+        protoTypes.loc[protoTypes['Name'] == 'Vertebrate_group', 'ID'].values[0])
+    vertebrateIndID = int(
+        protoTypes.loc[protoTypes['Name'] == 'Vertebrate_individual', 'ID'].values[0])
+    biometryID = int(
+        protoTypes.loc[protoTypes['Name'] == 'Bird_Biometry', 'ID'].values[0])
+    releaseGrpID = int(
+        protoTypes.loc[protoTypes['Name'] == 'Release_Group', 'ID'].values[0])
+    releaseIndID = int(
+        protoTypes.loc[protoTypes['Name'] == 'Release_Individual', 'ID'].values[0])
+    equipmentIndID = int(
+        protoTypes.loc[protoTypes['Name'] == 'Individual_equipment', 'ID'].values[0])
 
     vertebrateIndList = []
     biometryList = []
@@ -175,19 +196,20 @@ def releasePost(request):
     equipmentIndList = []
 
     binaryDict = {
-    9: 'nb_adult_indeterminate',
-    10: 'nb_adult_male',
-    12: 'nb_adult_female',
-    17: 'nb_juvenile_indeterminate',
-    18: 'nb_juvenile_male',
-    20: 'nb_juvenile_female',
-    33: 'nb_indeterminate',
-    36: 'nb_indeterminate',
-    34: 'nb_indeterminate'
+        9: 'nb_adult_indeterminate',
+        10: 'nb_adult_male',
+        12: 'nb_adult_female',
+        17: 'nb_juvenile_indeterminate',
+        18: 'nb_juvenile_male',
+        20: 'nb_juvenile_female',
+        33: 'nb_indeterminate',
+        36: 'nb_indeterminate',
+        34: 'nb_indeterminate'
     }
 
     def MoF_AoJ(obj):
-        #### binary ponderation female : 4, male :2 , indeterminateSex : 1, adult:8, juvenile : 16, indeterminateAge : 32
+        # binary ponderation female : 4, male :2 , indeterminateSex : 1,
+        # adult:8, juvenile : 16, indeterminateAge : 32
         curSex = None
         curAge = None
         binP = 0
@@ -197,7 +219,7 @@ def releasePost(request):
         elif obj['Sex'] is not None and obj['Sex'].lower() == 'female':
             curSex = 'female'
             binP += 4
-        else : 
+        else:
             curSex == 'Indeterminate'
             binP += 1
 
@@ -207,7 +229,7 @@ def releasePost(request):
         elif obj['Age'] is not None and obj['Age'].lower() == 'juvenile':
             curAge = 'Juvenile'
             binP += 16
-        else : 
+        else:
             curAge == 'Indeterminate'
             binP += 32
         return binaryDict[binP]
@@ -215,20 +237,20 @@ def releasePost(request):
     try:
         errorEquipment = None
         binList = []
-        for indiv in indivList: 
+        for indiv in indivList:
 
             curIndiv = session.query(Individual).get(indiv['ID'])
             curIndiv.LoadNowValues()
             if not taxon:
                 taxon = curIndiv.Species
-            try : 
+            try:
                 indiv['taxon'] = curIndiv.Species
                 del indiv['species']
-            except: 
+            except:
                 indiv['taxon'] = curIndiv.Species
                 del indiv['Species']
                 pass
-            curIndiv.UpdateFromJson(indiv,startDate = curStation.StationDate)
+            curIndiv.UpdateFromJson(indiv, startDate=curStation.StationDate)
 
             binList.append(MoF_AoJ(indiv))
             for k in indiv.keys():
@@ -240,25 +262,27 @@ def releasePost(request):
             indiv['FK_Station'] = sta_id
             try:
                 indiv['weight'] = indiv['poids']
-            except: 
+            except:
                 indiv['weight'] = indiv['Poids']
                 pass
-            try: 
+            try:
                 indiv['Comments'] = indiv['release_comments']
             except:
                 print_exc()
                 pass
 
             curVertebrateInd = getnewObs(vertebrateIndID)
-            curVertebrateInd.UpdateFromJson(indiv,startDate = curStation.StationDate)
+            curVertebrateInd.UpdateFromJson(
+                indiv, startDate=curStation.StationDate)
             vertebrateIndList.append(curVertebrateInd)
 
             curBiometry = getnewObs(biometryID)
-            curBiometry.UpdateFromJson(indiv,startDate = curStation.StationDate)
+            curBiometry.UpdateFromJson(indiv, startDate=curStation.StationDate)
             biometryList.append(curBiometry)
 
             curReleaseInd = getnewObs(releaseIndID)
-            curReleaseInd.UpdateFromJson(indiv,startDate = curStation.StationDate)
+            curReleaseInd.UpdateFromJson(
+                indiv, startDate=curStation.StationDate)
             releaseIndList.append(curReleaseInd)
 
             try:
@@ -269,53 +293,58 @@ def releasePost(request):
 
                 curEquipmentInd = getnewObs(equipmentIndID)
                 equipInfo = {
-                'FK_Individual': indiv['FK_Individual'],
-                'FK_Sensor' : sensor_id,
-                'Survey_type' : 'post-relâcher',
-                'Monitoring_Status' : 'suivi',
-                'Sensor_Status': 'sortie de stock>mise en service'
+                    'FK_Individual': indiv['FK_Individual'],
+                    'FK_Sensor': sensor_id,
+                    'Survey_type': 'post-relâcher',
+                    'Monitoring_Status': 'suivi',
+                    'Sensor_Status': 'sortie de stock>mise en service'
                 }
-                curEquipmentInd.UpdateFromJson(equipInfo,startDate = curStation.StationDate)
+                curEquipmentInd.UpdateFromJson(
+                    equipInfo, startDate=curStation.StationDate)
                 curEquipmentInd.Station = curStation
                 equipmentIndList.append(curEquipmentInd)
             except Exception as e:
                 if e.__class__.__name__ == 'ErrorAvailable':
-                    sensor_available = 'is' if e.value['sensor_available'] else 'is not'
-                    tpl = 'SensorID {0} {1} available for equipment'.format(equipInfo['FK_Sensor'],sensor_available)
+                    sensor_available = 'is' if e.value[
+                        'sensor_available'] else 'is not'
+                    tpl = 'SensorID {0} {1} available for equipment'.format(
+                        equipInfo['FK_Sensor'], sensor_available)
                     if errorEquipment is None:
                         errorEquipment = tpl
                     else:
-                        errorEquipment += ',   '+tpl
+                        errorEquipment += ',   ' + tpl
                 pass
 
-        vertebrateGrp = Observation(FK_ProtocoleType=vertebrateGrpID, FK_Station =sta_id )
+        vertebrateGrp = Observation(
+            FK_ProtocoleType=vertebrateGrpID, FK_Station=sta_id)
         dictVertGrp = dict(Counter(binList))
         dictVertGrp['taxon'] = taxon
         dictVertGrp['nb_total'] = len(releaseIndList)
-        
+
         vertebrateGrp.UpdateFromJson(dictVertGrp)
         vertebrateGrp.Observation_children.extend(vertebrateIndList)
 
-        releaseGrp = Observation(FK_ProtocoleType=releaseGrpID, FK_Station =sta_id)
-        releaseGrp.PropDynValuesOfNow={}
-        releaseGrp.UpdateFromJson({'taxon':taxon, 'release_method':releaseMethod, 'nb_individuals':len(releaseIndList)})
+        releaseGrp = Observation(
+            FK_ProtocoleType=releaseGrpID, FK_Station=sta_id)
+        releaseGrp.PropDynValuesOfNow = {}
+        releaseGrp.UpdateFromJson(
+            {'taxon': taxon, 'release_method': releaseMethod, 'nb_individuals': len(releaseIndList)})
         releaseGrp.Observation_children.extend(releaseIndList)
-
 
         if errorEquipment is not None:
             session.rollback()
             request.response.status_code = 510
             message = errorEquipment
 
-        else: 
+        else:
             session.add(vertebrateGrp)
             session.add(releaseGrp)
             session.add_all(biometryList)
             session.add_all(equipmentIndList)
 
-            message = {'release':len(releaseIndList)}
+            message = {'release': len(releaseIndList)}
 
-    except Exception as e :
+    except Exception as e:
         print_exc()
         session.rollback()
         message = str(type(e))
@@ -323,20 +352,21 @@ def releasePost(request):
     return message
 
 
-def isavailableSensor(request,data):
-    availability = checkSensor(data['FK_Sensor'],datetime.strptime(data['sta_date'],'%d/%m/%Y %H:%M:%S'))
+def isavailableSensor(request, data):
+    availability = checkSensor(data['FK_Sensor'], datetime.strptime(
+        data['sta_date'], '%d/%m/%Y %H:%M:%S'))
     if availability is True:
-        return 
-    else :
+        return
+    else:
         request.response.status_code = 510
         return 'sensor not available'
 
 
-def getFullpath(item,lng):
-    name,val= item
+def getFullpath(item, lng):
+    name, val = item
 
-    try : 
+    try:
         newVal = invertedThesaurusDict[lng][val]
     except:
         newVal = val
-    return (name,newVal)
+    return (name, newVal)
