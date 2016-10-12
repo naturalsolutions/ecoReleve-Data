@@ -162,7 +162,22 @@ define([
         name: 'UnicIdentifier',
         label: 'Identifier',
         editable: false,
-        cell: 'string'
+        cell: Backgrid.StringCell.extend({
+          render: function () {
+            this.$el.empty();
+            var rawValue = this.model.get(this.column.get("name"));
+            var formattedValue = this.formatter.fromRaw(rawValue, this.model);
+
+            if (this.model.get('UnicIdentifier')){
+              this.$el.append('<a target="_blank"'
+                +'href= "http://'+window.location.hostname+window.location.pathname+'#sensors/'+this.model.get('SensorID')+'">\
+                  '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
+                </a>');
+              this.delegateEvents();
+           }
+            return this;
+          }
+        })
       }];
       this.gridEquip = new NsGrid({
         pageSize: 20,
@@ -280,7 +295,7 @@ define([
               }).text(formattedValue));*/
 
 
-               this.$el.append('<a target="_blank"' 
+               this.$el.append('<a target="_blank"'
                 +'href= "http://'+window.location.hostname+window.location.pathname+'#stations/'+this.model.get('ID').replace('sta_','')+'">\
                   '+rawValue +'&nbsp;&nbsp;&nbsp;<span class="reneco reneco-info" ></span>\
                 </a>');
@@ -318,7 +333,7 @@ define([
             rowClicked: true,
             com: _this.com,
             idName: 'ID',
-            affectTotalRecords : function(){  
+            affectTotalRecords : function(){
              var nbobs;
              if(this.paginator || this.pagingServerSide){
              nbobs = this.grid.collection.state.totalRecords || 0;
@@ -338,7 +353,7 @@ define([
 
           $('#totalLocations').html(_this.locationsColl.length);
           _this.nbLocations[0] = _this.locationsColl.length;
-      
+
         _this.locationsGrid.rowClicked = function(args) {
           _this.rowClicked(args);
         };
@@ -352,7 +367,7 @@ define([
 
         var tmp = _.clone(_this.locationsGrid.grid.collection.fullCollection);
         _this.com.setMotherColl(tmp);
-        
+
       });
 
         //url: config.coreUrl + 'individuals/' + this.indivId  + '/locations',
