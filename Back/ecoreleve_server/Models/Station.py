@@ -28,8 +28,8 @@ from ..GenericObjets.FrontModules import FrontModules,ModuleGrids
 from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
 from datetime import datetime
 from collections import OrderedDict
-import pandas as pd 
-import numpy as np 
+import pandas as pd
+import numpy as np
 import json
 from traceback import print_exc
 from pyramid import threadlocal
@@ -60,7 +60,7 @@ class Station(Base,ObjectWithDynProp):
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
     FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'), nullable=True)
 
-    
+
     Place = Column(String(250))
 
     Station_FieldWorkers = relationship('Station_FieldWorker', backref='Station',cascade="all, delete-orphan")
@@ -89,7 +89,7 @@ class Station(Base,ObjectWithDynProp):
             fws=[]
             if len(values) !=0 :
                 for item in values:
-                    if 'ID' in item:
+                    if 'ID' in item and item['ID'] is not None:
                         curFW = list(filter(lambda x : x.ID==item['ID'],self.Station_FieldWorkers))[0]
                         curFW.FK_FieldWorker = int(item['FieldWorker'])
                     else:
@@ -105,7 +105,7 @@ class Station(Base,ObjectWithDynProp):
     def init_on_load(self):
         ''' init_on_load is called on the fetch of object '''
         ObjectWithDynProp.__init__(self)
-        
+
     def GetNewValue(self,nameProp):
         ReturnedValue = StationDynPropValue()
         try:
