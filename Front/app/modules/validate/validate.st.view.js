@@ -13,7 +13,7 @@ define([
 
   return Marionette.LayoutView.extend({
 
-    template: 'app/modules/validate/templates/tpl-sensorValidate.html',
+    template: 'app/modules/validate/validate.st.view.html',
     className: 'full-height animated layer',
 
     initialize: function(options) {

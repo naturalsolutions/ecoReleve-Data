@@ -18,7 +18,7 @@ define([
 
   return Marionette.LayoutView.extend({
 
-    template: 'app/modules/validate/templates/tpl-sensorValidateType.html',
+    template: 'app/modules/validate/validate.nd.tpl.html',
     className: 'full-height animated rel white',
 
     events: {

@@ -6,9 +6,9 @@ define([
   './modules/importFile/lyt-entry-importFile',
   './modules/export/lyt-export-stepper',
 
-  './modules/validate/lyt-sensorValidate',
-  './modules/validate/lyt-sensorValidateType',
-  './modules/validate/lyt-sensorValidateDetail',
+  './modules/validate/validate.st.view',
+  './modules/validate/validate.nd.view',
+  './modules/validate/validate.rd.view',
 
   './modules/release/release.view',
   './modules/release/layouts/lyt-release-individual',

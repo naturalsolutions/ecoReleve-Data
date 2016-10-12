@@ -21,13 +21,14 @@ define([
   'use strict';
 
   return Marionette.LayoutView.extend({
-    template: 'app/modules/validate/templates/tpl-sensorValidateDetail.html',
+    template: 'app/modules/validate/validate.rd.tpl.html',
 
     className: 'full-height animated white',
 
     events: {
-      'change select#frequency': 'updateFrequency',
+      'change .js-select-ferquency': 'handleFrequency',
       'click .js-btn-validate': 'validate',
+
     },
 
     ui: {
@@ -159,57 +160,47 @@ define([
       this.$el.i18n();
     },
 
-    //initialize the frequency
     initFrequency: function() {
       if (this.frequency) {
         this.ui.frequency.find('option[value="' + this.frequency + '"]').prop('selected', true);
       }else {
         this.frequency = this.ui.frequency.val();
       }
-      this.perHour(this.frequency);
+      this.roundDate(this.frequency);
     },
 
     roundDate: function(date, duration) {
       return moment(Math.floor((+date) / (+duration)) * (+duration));
     },
 
-    clone: function() {
-      this.origin = this.grid.collection.fullCollection.clone();
-    },
+    handleFrequency: function(e){
+      var _this= this;
+      var hz =$(e.target).val();
 
-    perHour: function(frequency) {
-      this.grid.interaction('resetAll');
-      var _this = this;
-
-      if (frequency != 'all') {
-        frequency = parseInt(frequency);
-        var col0 = this.origin.at(0);
-
-        var date = new moment(col0.get('date'),'DD/MM/YYYY HH:mm:ss');
-        var groups = this.origin.groupBy(function(model) {
-          var curr = new moment(model.get('date'),'DD/MM/YYYY HH:mm:ss');
-          return _this.roundDate(curr, moment.duration(frequency, 'minutes'));
-        });
-        var ids = [];
-        var i = 0;
-        for (var rangeDate in groups) {
-          var curLength = groups[rangeDate].length;
-          var tmp = groups[rangeDate][curLength - 1].get('PK_id');
-          ids.push(tmp);
-        }
-        this.grid.interaction('selectionMultiple', ids);
-      } else {
-        var ids = this.grid.collection.fullCollection.pluck('PK_id');
-        this.grid.interaction('selectionMultiple', ids);
+      if(hz === 'all'){
+        this.gridView.interaction('selectAll');
+        return;
       }
-    },
 
-    updateFrequency: function(e) {
-      var frequency = $(e.target).val();
-      if (!isNaN(frequency))
-      this.perHour(frequency);
-    },
+      this.gridView.interaction('deselectAll');
 
+      hz = parseInt(hz);
+      var coll = new Backbone.Collection(this.gridView.gridOptions.rowData[1]);
+
+      var groups = coll.groupBy(function(model) {
+        var modelDAte = new moment(model.get('date'),'DD/MM/YYYY HH:mm:ss');
+        return _this.roundDate(modelDAte, moment.duration(hz, 'minutes'));
+      });
+
+      var idList = [];
+      for (var rangeDate in groups) {
+        var curLength = groups[rangeDate].length;
+        var lastOccurence = groups[rangeDate][curLength - 1].get('PK_id');
+        idList.push(lastOccurence);
+      }
+
+      this.gridView.interaction('multiSelection', idList);
+    },
 
     validate: function() {
       var _this = this;

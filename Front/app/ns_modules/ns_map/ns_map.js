@@ -509,6 +509,7 @@ define([
     },
     /** from parent to child */
     updateAllClusters: function(c, all){
+      
 
       this.updateClusterStyle(c, all);
       var childs = c.getAllChildMarkers();
@@ -742,13 +743,13 @@ define([
       }
     },
 
-    resetAll: function(){
-
+    deselectAll: function(){
       this.updateLayers(this.geoJson);
     },
 
     selectAll: function(){
-      var firstProp, layers = this.markersLayer._featureGroup._layers;
+      var firstProp;
+      var layers = this.markersLayer._featureGroup._layers;
       
       //get the first layer (marker cluster)
       for(var key in layers) {
@@ -764,7 +765,7 @@ define([
       }
 
       this.topParent = firstProp;
-
+      
       this.updateAllClusters(firstProp, true);
     },
 

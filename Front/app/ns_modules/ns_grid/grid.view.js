@@ -359,6 +359,16 @@ define([
       });
     },
 
+    deselectAll: function(){
+      this.gridOptions.api.deselectAll();
+    },
+
+    selectAll: function(){
+      this.ready = false;
+      this.gridOptions.api.selectAll();
+      this.ready = true;
+    },
+
     clientSideFilter: function(filters){
       var _this = this;
       var data = [];
