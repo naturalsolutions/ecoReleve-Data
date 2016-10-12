@@ -1,9 +1,3 @@
-/*1 Argos
-2 GSM
-3 RFID
-4 VHF
-*/
-
 define([
 	'jquery',
 	'underscore',
@@ -35,32 +29,32 @@ define([
     rootUrl: '#sensors/',
 
     initialize: function(options) {
-      this.model = new Backbone.Model();
-      this.model.set('type', options.type);
-      switch (options.type){
-        case 'argos':
-          this.type = 1;
-          break;
-        case 'gsm':
-          this.type = 2;
-          break;
-        case 'rfid':
-          this.type = 3;
-          break;
-        case 'vhf':
-          this.type = 4;
-          break;
-        default:
-          Backbone.history.navigate('#', {trigger: true});
-          break;
-      }
+      this.getSensorLabel(options);
+      this.type = parseInt(options.type);
     },
 
     onShow: function() {
       if (this.type)
       this.displayForm(this.type);
     },
+    getSensorLabel : function(options){
+      var _this = this;
+      var url = config.coreUrl + 'sensors/getType';
+      $.ajax({
+        url: url,
+        context: this,
+      success : function(data) {
+        // data is an array of objets { label: , val}
+        for(var i=0;i<data.length; i++) {
+          if (data[i].val == parseInt(options.type) ) {
+            $('.sensorLabel').text(data[i].label);
+            break;
+          }
+        }
 
+      }
+      });
+    },
     displayForm: function(type) {
       var self = this;
       this.nsForm = new NsForm({
@@ -71,9 +65,9 @@ define([
         displayMode: 'edit',
         objectType: this.type,
         id: 0,
-        reloadAfterSave: false,
-         afterShow: function() {
-
+        reloadAfterSave: false, 
+        loadingError : function() { 
+          Backbone.history.navigate('#', {trigger: true});
         },
         afterSaveSuccess: function() {
           swal({
