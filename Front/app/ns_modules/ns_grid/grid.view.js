@@ -14,7 +14,7 @@ define([
 
   return Marionette.LayoutView.extend({
     template: 'app/ns_modules/ns_grid/grid.tpl.html',
-    className: 'grid-view full-height',
+    className: 'grid-view full-height flex-column',
     name: 'gird',
 
     pageSize: 200,
@@ -27,6 +27,12 @@ define([
     events: {
       'click #agMenu': 'focusFilter',
       'keypress .ag-row': 'keypress'
+    },
+
+    ui: {
+      'totalSelected': '.js-total-selected',
+      'totalRecords': '.js-total-records',
+
     },
 
     keypress: function(e){
@@ -73,6 +79,10 @@ define([
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
               _this.gridOptions.api.sizeColumnsToFit();
+              if(!_this.model.get('totalRecords')){
+                _this.model.set('totalRecords', _this.gridOptions.rowData.length);
+              }
+              _this.ui.totalRecords.html(_this.model.get('totalRecords'));
             }, 0);
           });
         },
@@ -82,6 +92,8 @@ define([
         //overlayNoRowsTemplate: '<span>No rows to display</span>',
         //overlayLoadingTemplate: '',
       };
+
+
 
       if(!this.clientSide) {
         $.extend(this.gridOptions, {
@@ -103,8 +115,15 @@ define([
         if(this.clientSide){
           this.fetchData();
         } else {
+          this.deferred = $.Deferred();
           this.initDataSource();
         }
+      }
+
+      if(this.gridOptions.rowSelection === undefined){
+        this.model.set('legend', false);
+      } else {
+        this.model.set('legend', true);
       }
     },
 
@@ -112,6 +131,7 @@ define([
       if(this.ready){
         this.interaction('singleSelection', e.node.data[this.idName] || e.node.data.id || e.node.data.ID, this);
       }
+      this.handleDisplayTotalSeleted();
     },
 
     formatColumns: function(columnDefs){
@@ -201,6 +221,7 @@ define([
 
     fetchData: function(){
       var _this = this;
+
       this.deferred = $.ajax({
         url: this.model.get('url'),
         method: 'GET',
@@ -224,6 +245,7 @@ define([
     },
 
     initDataSource: function(){
+      
       var _this = this;
       this.dataSource = {
         rowCount: null,
@@ -248,7 +270,8 @@ define([
             typeObj: _this.model.get('typeObj')
           };
 
-          _this.deferred = $.ajax({
+          
+          $.ajax({
             url: _this.model.get('url'),
             method: 'GET',
             context: this,
@@ -256,7 +279,7 @@ define([
           }).done( function(response) {
             var rowsThisPage = response[1];
             var total = response[0].total_entries;
-
+            
             _this.model.set('totalRecords', total);
             _this.model.set('status', status);
 
@@ -270,6 +293,8 @@ define([
 
             _this.firstRowFetch = false;
             params.successCallback(rowsThisPage , total);
+
+            _this.deferred.resolve();
           });
 
         }
@@ -447,7 +472,7 @@ define([
     displayGrid: function() {
       var _this = this;
 
-      var gridDiv = this.$el.find('#grid')[0];
+      var gridDiv = this.$el.find('.js-ag-grid')[0];
       this.grid = new AgGrid.Grid(gridDiv, this.gridOptions);
 
 
@@ -469,6 +494,10 @@ define([
           },500);
       });
       }*/
+    },
+
+    handleDisplayTotalSeleted: function(){
+      this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length); 
     },
     
     jumpToPage: function(index){

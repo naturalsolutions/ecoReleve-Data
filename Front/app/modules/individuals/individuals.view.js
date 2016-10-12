@@ -13,7 +13,6 @@ define([
   	    this.$el.find('.tab-ele').each(function(){
   	      $(this).toggleClass('active');
   	    })
-  	    console.log($(e.currentTarget).attr('id'));
   	    if($(e.currentTarget).attr('id') === 'unidentified'){
   	    	this.model.set('typeObj', 2);
   	    } else {

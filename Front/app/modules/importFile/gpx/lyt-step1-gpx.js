@@ -120,7 +120,7 @@ define([
     },
 
     displayErrors: function(errors) {
-      this.ui.importGpxMsg.append(errors);
+      //this.ui.importGpxMsg.append(errors);
     },
 
     swalError: function(title) {

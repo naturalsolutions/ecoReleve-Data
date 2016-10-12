@@ -1,4 +1,3 @@
-
 	<div class="col-xs-4 full-height no-padding">
 		<div class="toolbar top">
 			<a class="js-link-back btn pull-left" href="#">
@@ -23,8 +22,9 @@
 		</div>
 		<div class="toolbar bottom">
 			<button class="js-btn-clear btn pull-left">Clear</button>
-			<button class="js-btn-filter btn btn-success pull-right">Search&nbsp;
+			<button class="js-btn-filter btn btn-success pull-right">
 				<span class="reneco reneco-search"></span>
+				&nbsp;Search
 			</button>
 		</div>
 	</div>
@@ -65,20 +65,22 @@
 
 		<div class="toolbar bottom">
 			<button class="js-btn-export btn btn-success pull-left">
-				Export data&nbsp;
 				<span class="reneco reneco-export"></span>
+				&nbsp;Export data
 			</button>
 
 
 			<% if (typeof(availableOptions) === 'undefined') { %>
 					<a href="#<%= type %>/new" class="js-admin js-link-new btn btn-success pull-right">
-					New <%= single %>&nbsp;
 					<span class="reneco reneco-entrykey"></span>
+					&nbsp;
+					New <%= single %>
 					</a>			    
 			<% } else { %>
 					<button class="js-admin js-btn-new btn btn-success pull-right">
-					New <%= single %>&nbsp;
 					<span class="reneco reneco-entrykey"></span>
+					&nbsp;
+					New <%= single %>
 					</button>
 			<% } %>
 			

@@ -1,190 +1,27 @@
-.backgrid-container{
-	height: auto;
-	min-height: 500px;
-}
-.backgrid th.renderable, .backgrid td.renderable{
-	text-align: left;
-}
-
-.backgrid-paginator ul>li>a, .backgrid-paginator ul>li>span{
-	height: auto;
-	width: auto;
-	padding: 0px 10px;
-}
-
-.grid-auto{
-	overflow: auto;
-}
-
-
-table.backgrid{
-
-	thead{
-		background: #ccc;
-		tr:hover{
-			background: #ccc;
-		}
-	}
-	th{
-		background: transparent;
-		text-transform: uppercase;
-	}
-	tbody{
-		tr{
-			border-bottom: 1px solid rgb(221, 221, 221);
-		}
-		td{
-			border: 0px;
-		}
-		a {
-			color:#337ab7;
-			&:hover{
-			color:#23527c;
-			text-decoration: underline;
-			}
-			&:focus{
-			color:##23527c;
-			text-decoration: underline;
-			}
-		}
-		
-
-	}
-	tr{
-
-		transition: .05s all;
-		&:nth-child(2n){
-			background: rgba(221, 221, 221, 0.3);
-		}
-		cursor: pointer;
-		&:hover{
-			background: #ccc;
-		}
-		&.active{
-			background:rgba(255, 165, 0, .5)!important;
-		}
-	}
-	td{
-		padding: 8px 5px;
-	}
-	a{
-		color: inherit;
-	}
-}
-
-.backgrid-paginator{
-	ul{
-		padding: 0px;
-		li{
-			curor: pointer;
-		}
-	}
-}
-
-
-.full-border{
-	table.backgrid{
-		td{
-			border: 1px solid #B1B1B1 ;
-		}
-		tr{
-			&.active{
-				td{
-					//border: 1px solid white ;
-				}
-			}
-		}
-	}
-}
-
-.enhanced-grid{
-	table.backgrid{
-		th{
-			padding: 10px 0px !important;
-		}
-
-		thead{
-			background: transparent;
-		}
-	}
-}
-/* .dark table.backgrid{
-	color: #C0C0C0;
-	th a{
-		color: #C0C0C0;
-	}
-}
-.paginator.dark {
-	color: white;
-} */
-.paginator.dark ul>.active>a, .paginator.dark a:hover {
-	color: black;
-}
-
-.grid-padding{
-	padding-left:15px;
-	padding-right: 15px;
-}
-
-.select-row-cell {
-	border: transparent !important;
-	padding-left: 10px !important;
-}
-
-.select-all-header-cell input[type="Checkbox"] {
-	transform: scale(1.5);
-    padding-left: 10px;
-    margin-left: 10px;
-}
-
-.fit-grid{
-	    height: calc(~"100% - 180px");
-    	overflow: auto;
-}
-.fit-filter{
-	height: calc(~"100% - 150px");
-    overflow: auto;
-    &.with-tab{
-		height: calc(~"100% - 205px");
-    }
-}
-
-#grid.ns-fit{
-	position: relative;
-    height: 100%;
-}
-
-.ns-actions {
-    border-bottom: 1px solid;
-    margin-bottom: 10px;
-    padding: 15px 0px;
-
-    legend{ 
-		margin:0;
-    }
-    button{
-    	height:30px;
-    	margin-right:10px;
-    }
-}
-
-.release-grid .backgrid td.error {
-    background-color: rgba(247, 137, 69, 0.22)!important;
-    outline: 1px solid #bf3333!important;
-}
-
-.release-grid .backgrid th{
-	padding-left:0px;
-}
-
+@legendHeight: 30px;
 
 .grid-view {
+  width: 100%;
   height: 100%;
-  background: rgb(242, 242, 242);
   position: relative;
-  .ag-bootstrap-striped {
+
+  .grid-legend{
+    width: 100%;
+    height: @legendHeight;
     position: relative;
-    height: 100%;
+    background: rgb(51, 51, 51);
+    color: rgb(255, 255, 255);
+    font-weight: 300;
+    border : 1px solid #777;
+    border-right: 0;
+    border-left: 0;
+    padding: 0px 10px;
+  }
+
+  .ag-grid-container {
+    background: rgb(242, 242, 242);
+    width: 100%;
+    position: relative;
     .ag-root {
       //border: 1px solid #d9d9d9;
       border-top: none;

@@ -22,7 +22,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/gpx/templates/tpl-step2-gpx.html',
 
-    name: 'Data Selection',
+    name: 'Select stations to import',
 
     ui: {
       'totalSelected': '.js-total-selected'
