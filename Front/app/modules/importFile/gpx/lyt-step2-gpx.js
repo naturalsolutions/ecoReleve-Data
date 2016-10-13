@@ -41,6 +41,8 @@ define([
       this.data = options.model.attributes.data_FileContent;
       this.deferred = $.Deferred();
       window.formChange  = false;
+      console.log(options)
+      this.parent = options.parent;
     },
 
     onShow: function() {
@@ -206,19 +208,33 @@ define([
       Backbone.sync('create', coll, {
         success: function(data) {
           _this.deferred.resolve();
+          console.log("sweet alert");
+          console.log(data);
           var inserted = data.new;
           var exisits = data.exist;
           Swal({
             title: 'Stations import',
             text: 'inserted stations :' + inserted + ', exisiting stations:' + exisits,
             type: 'success',
-            showCancelButton: false,
+            showCancelButton: true,
             confirmButtonColor: 'green',
-            confirmButtonText: 'OK',
+            cancelButtonText: 'Home',
+            confirmButtonText: 'Show imported data',
             closeOnConfirm: true,
+
           },
           function(isConfirm) {
-              Backbone.history.navigate('home', {trigger: true})
+            if( isConfirm ) {
+              Backbone.history.navigate('stations/lastImported', {trigger: true});
+            }
+            else {
+              Backbone.history.navigate('home', {trigger: true});
+
+              // method to return at the 1st step
+              // _this.parent.currentStepIndex--;
+              // var index = _this.parent.currentStepIndex;
+              // _this.parent.displayStep(index);
+            }
           });
         },
         error: function() {

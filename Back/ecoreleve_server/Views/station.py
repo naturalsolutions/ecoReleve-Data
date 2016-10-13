@@ -40,24 +40,25 @@ def actionOnStations(request):
     '0' : getForms,
     'getFields': getFields,
     'getFilters': getFilters,
-    'updateSiteLocation':updateMonitoredSite
+    'updateSiteLocation':updateMonitoredSite,
+    'importGPX': getFormImportGPX
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
 
 def count_ (request = None,listObj = None):
-    if request is not None : 
+    if request is not None :
         data = request.params
-        if 'criteria' in data: 
+        if 'criteria' in data:
             data['criteria'] = json.loads(data['criteria'])
             if data['criteria'] != {} :
                 searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
 
         listObj = ListObjectWithDynProp(Station)
         count = listObj.count(searchInfo = searchInfo)
-    else : 
+    else :
         count = listObj.count()
-    return count 
+    return count
 
 def getFilters (request):
     ModuleType = 'StationGrid'
@@ -86,6 +87,40 @@ def getFields(request) :
 
     return cols
 
+
+# @view_config(route_name= prefix+'/importGPX', renderer='json', request_method = 'GET', permission = NO_PERMISSION_REQUIRED)
+def getFormImportGPX(request):
+    session = request.dbsession
+    conf = session.query(FrontModules).filter(FrontModules.Name=='ImportFileForm' ).first()
+    print(conf.ModuleForms)
+    response = {'schema':{}}
+    inputs_ = session.query(ModuleForms).filter(ModuleForms.Module_ID==conf.ID).filter(ModuleForms.TypeObj==1).order_by(ModuleForms.FormOrder.asc()).all()
+    for input_ in inputs_:
+        print(input_.Name)
+        response['schema'][input_.Name] = input_.GetDTOFromConf(True)
+
+    fields = []
+    resultat = []
+    Legends = sorted ([(obj.Legend,obj.FormOrder,obj.Name)for obj in inputs_ if obj.FormOrder is not None], key = lambda x : x[1])
+    # Legend2s = sorted ([(obj.Legend)for obj in Fields if obj.FormOrder is not None ], key = lambda x : x[1])
+    Unique_Legends = list()
+    # Get distinct Fieldset in correct order
+    for x in Legends:
+        if x[0] not in Unique_Legends:
+            Unique_Legends.append(x[0])
+
+    for curLegend in Unique_Legends:
+        curFieldSet = {'fields' :[],'legend' : curLegend}
+        resultat.append(curFieldSet)
+
+    for curProp in Legends:
+        curIndex = Unique_Legends.index(curProp[0])
+        resultat[curIndex]['fields'].append(curProp[2])
+
+    response['fieldsets'] = resultat
+
+    return response
+
 # ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(route_name= prefix+'/id', renderer='json', request_method = 'GET', permission = routes_permission[prefix]['GET'])
 def getStation(request):
@@ -98,7 +133,7 @@ def getStation(request):
         ModuleName = request.params['FormName']
         try :
             DisplayMode = request.params['DisplayMode']
-        except : 
+        except :
             DisplayMode = 'display'
 
         Conf = session.query(FrontModules).filter(FrontModules.Name=='StationForm' ).first()
@@ -107,7 +142,7 @@ def getStation(request):
         # response['schema']['FK_MonitoredSite']['editable'] = False
         response['data']['fieldActivityId'] = str(response['data']['fieldActivityId'])
 
-    else : 
+    else :
         response  = curSta.GetFlatObject()
 
     return response
@@ -146,6 +181,7 @@ def updateStation(request):
 @view_config(route_name= prefix, renderer='json', request_method = 'POST', permission = routes_permission[prefix]['POST'])
 def insertStation(request):
     data = request.json_body
+    print(data)
     if not isinstance(data,list):
         return insertOneNewStation(request)
     else :
@@ -189,12 +225,13 @@ def insertListNewStations(request):
         newRow['ELE'] = row['elevation']
         newRow['precision'] = row['precision']
         newRow['Name'] = row['name']
-        newRow['fieldActivityId'] = row['fieldActivity']
+        newRow['fieldActivityId'] = row['fieldActivityId']
         newRow['precision'] = 10 #row['Precision']
         newRow['creationDate'] = dateNow
         newRow['creator'] = request.authenticated_userid['iss']
         newRow['FK_StationType']= 4
         newRow['id'] = row['id']
+        newRow['NbFieldWorker'] = row['NbFieldWorker']
         newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dt)
 
         data_to_insert.append(newRow)
@@ -248,7 +285,7 @@ def insertListNewStations(request):
             curSta.UpdateFromJson(sta)
             curSta.StationDate = curDate
 
-            try : 
+            try :
                 session.add(curSta)
                 session.flush()
                 session.commit()
@@ -274,7 +311,7 @@ def insertListNewStations(request):
             list_ = list(itertools.chain.from_iterable(list_))
             stmt = Station_FieldWorker.__table__.insert().values(list_)
             session.execute(stmt)
-    else : 
+    else :
         result = []
     response = {'exist': len(data)-len(data_to_insert) + nbExc, 'new': len(data_to_insert) - nbExc}
     return response
@@ -306,7 +343,7 @@ def searchStation(request):
         ]
         searchInfo['criteria'].extend(criteria)
 
-    if 'criteria' in data: 
+    if 'criteria' in data:
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
@@ -343,7 +380,7 @@ def searchStation(request):
     listObj = StationList(moduleFront)
     countResult = listObj.count(searchInfo)
 
-    if 'geo' in data: 
+    if 'geo' in data:
         geoJson=[]
         exceed = True
         if countResult < 50000 :
@@ -391,7 +428,7 @@ def stations_export(request):
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = []
-    if 'criteria' in data: 
+    if 'criteria' in data:
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]

@@ -9,7 +9,7 @@ from traceback import print_exc
 FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
 
 def isRenderable (int_Render) :
-        return int(int_Render) > 0 
+        return int(int_Render) > 0
 
 def isEditable (int_Render) :
     edit = int(int_Render) > 2
@@ -24,7 +24,7 @@ class FrontModules(Base):
     TypeModule = Column(Unicode(250))
     Comments = Column(String)
 
-    ModuleForms = relationship('ModuleForms',lazy='dynamic',back_populates='FrontModules')
+    ModuleForms = relationship('ModuleForms',back_populates='FrontModules')
     ModuleGrids = relationship('ModuleGrids',lazy='dynamic',back_populates='FrontModules')
 
     def __init__(self):
@@ -62,7 +62,7 @@ class ModuleForms(Base):
 
     def __init__(self):
         self.session = threadlocal.get_current_request().dbsession
-    
+
     @orm.reconstructor
     def init_on_load(self):
         self.__init__()
@@ -112,7 +112,7 @@ class ModuleForms(Base):
             'size':curSize
             }
 
-        try : 
+        try :
             self.dto['options'] = json.loads(self.Options)
         except:
             self.dto['options'] = self.Options
@@ -153,12 +153,12 @@ class ModuleForms(Base):
         return self.dto
 
     def InputSelect (self) :
-        if self.Options is not None and self.Options != '' :
+        if self.Options is not None and self.Options != '' and 'select' in self.Options.lower() :
             self.dto['options'] = []
             result = self.session.execute(text(self.Options)).fetchall()
             for row in result :
                 temp = {}
-                for key in row.keys() : 
+                for key in row.keys() :
                     temp[key]= row[key]
                 self.dto['options'].append(temp)
             self.dto['options'] = sorted(self.dto['options'], key=lambda k: k['label'])
@@ -184,7 +184,7 @@ class ModuleForms(Base):
                 subschema.update(gridRanged)
             else :
                 subschema[conf.Name] = conf.GetDTOFromConf(self.Editable)
-        
+
         subschema['ID'] = {
             'name': 'ID',
             'type': 'Number',
@@ -211,7 +211,7 @@ class ModuleForms(Base):
         for x in Legends:
             if x[0] not in Unique_Legends:
                 Unique_Legends.append(x[0])
-        
+
         for curLegend in Unique_Legends:
             curFieldSet = {'fields' :[],'legend' : curLegend}
             resultat.append(curFieldSet)
@@ -229,7 +229,7 @@ class ModuleForms(Base):
             for order,name in l:
                 resultat[curIndex]['fields'].append(name)
 
-            if 'fixedCol' in subschema[resultat[curIndex]['fields'][0]]['fieldClass'] : 
+            if 'fixedCol' in subschema[resultat[curIndex]['fields'][0]]['fieldClass'] :
                 rr = resultat[curIndex]['fields'].pop(0)
                 resultat[curIndex]['fields'].append(rr)
 
@@ -240,7 +240,7 @@ class ModuleForms(Base):
         # try :
         #     subTypeObj = int(self.Options)
         #     self.dto['defaultValue'] = {'FK_ProtocoleType':subTypeObj}
-        # except : 
+        # except :
         #     pass
 
     def InputThesaurus(self) :
@@ -263,7 +263,7 @@ class ModuleForms(Base):
                 for row in result:
                     self.dto['options']['source'].append(row[0])
             self.dto['options']['iconFont'] = 'reneco reneco-autocomplete'
-    
+
     def GridRanged (self):
         options = json.loads(self.Options)
         self.dto = {}
@@ -345,10 +345,10 @@ class ModuleGrids (Base) :
         self.__init__()
 
     def FKName (self):
-        if self.QueryName not in [None,'Forced'] : 
+        if self.QueryName not in [None,'Forced'] :
             return self.Name+'_'+self.QueryName
-        else : 
-            return self.Name 
+        else :
+            return self.Name
 
     def GenerateColumn (self):
         ''' return grid field to build Grid '''
@@ -388,12 +388,12 @@ class ModuleGrids (Base) :
         except :
             filter_['options'] = self.Options
 
-        if (self.FilterClass) : 
-            filter_['fieldClass'] = self.FilterClass+ ' ' + FieldSizeToClass[self.FilterSize] 
-        else :  
+        if (self.FilterClass) :
+            filter_['fieldClass'] = self.FilterClass+ ' ' + FieldSizeToClass[self.FilterSize]
+        else :
             filter_['fieldClass'] = FieldSizeToClass[self.FilterSize],
 
-        if self.FilterType == 'Select' and self.Options != None : 
+        if self.FilterType == 'Select' and self.Options != None :
             result = self.session.execute(text(self.Options)).fetchall()
             filter_['options'] = [{'label':row['label'],'val':row['val']} for row in result]
         if self.FilterType == 'Checkboxes' :
@@ -415,7 +415,7 @@ class ModuleGrids (Base) :
                 result = self.session.execute(text(option['source'])).fetchall()
                 for row in result:
                     filter_['options']['source'].append(row[0])
-            else : 
+            else :
                 filter_['options'] = filter_['options']
             filter_['options']['iconFont'] = 'reneco reneco-autocomplete'
 

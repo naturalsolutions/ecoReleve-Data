@@ -34,51 +34,112 @@ define([
 
   return NewStepper.extend({
 
+		initialize: function (options) {
+			this.urlToHold = options.type;
+			NewStepper.prototype.initialize.call(this,options);
+			console.log(this.urlToHold);
+
+		},
+
     initSteps: function() {
       this.steps = [Step0];
+			if ( this.urlToHold !== null ) {
+				this.goToThisUrl();
+			}
     },
+		onShow : function(){
+			this.displayStepNav();
+			this.displayStep(this.currentStepIndex);
+		},
 
-    testAdd: function() {
-      this.addStep(Step0, 2);
-    },
+    // testAdd: function() {
+    //   this.addStep(Step0, 2);
+    // },
+		// onShow : function(){
+		// 	this.displayStepNav();
+		// 	// console.log(this.steps)
+		// 	this.displayStep(0);
+		// },
+    // testRemove: function() {
+    //   this.removeStep(2);
+    // },
 
-    testRemove: function() {
-      this.removeStep(2);
-    },
+		goToThisUrl:function (){
+			console.log("dans go to url");
+			console.log('goToThisUrl',this.urlToHold);
+			switch ( this.urlToHold ) {
+				case 'gpx': {
+					console.log("GPX");
+					this.steps = [Step0,Step1GPX, Step2GPX];
+					this.currentStepIndex = 1;
+					break;
+				}
+				case 'rfid': {
+					console.log("RFID");
+					this.steps = [Step0, Step1RFID, Step2RFID];
+					this.currentStepIndex = 1;
+					break;
+				}
+				case 'gsm': {
+					console.log("GSM");
+					this.steps = [Step0,Step1GSM];
+					this.currentStepIndex = 1;
+						break;
+				}
+				case 'argos': {
+					console.log("ARGOS");
+					this.steps = [Step0,Step1ARGOS];
+					this.currentStepIndex = 1;
+						break;
+				}
+				default: {
+					console.log("RIEN DU TOUT");
+						this.steps = [Step0];
+						break;
+				}
+			}
+
+			//Backbone.history.navigate('/importFile/'+this.urlToHold+'/'+this.currentStepIndex,{trigger:false, replace: false});
+
+		},
 
     beforeNext: function(type, index) {
-      if (index == 0) {
-        switch (type){
-          case 'gpx':
-            var gpxSteps = [Step1GPX, Step2GPX];
-            this.addSteps(gpxSteps, 1);
-            break;
-          case 'rfid':
-            var rfidSteps = [Step1RFID, Step2RFID];
-            this.addSteps(rfidSteps, 1);
-            break;
-          case 'gsm':
-            var gsmSteps = [Step1GSM];
-            this.addSteps(gsmSteps, 1);
-            break;
-          case 'argos':
-            var argosSteps = [Step1ARGOS];
-            this.addSteps(argosSteps, 1);
-            //this.addSteps();
-            break;
-          default:
-            //not in step0
-            return false;
-            break;
-        }
-      }
+	      if (index == 0) {
+	        switch (type){
+	          case 'gpx':
+	            var gpxSteps = [Step1GPX, Step2GPX];
+	            this.addSteps(gpxSteps, 1);
+	            break;
+	          case 'rfid':
+	            var rfidSteps = [Step1RFID, Step2RFID];
+	            this.addSteps(rfidSteps, 1);
+
+	            break;
+	          case 'gsm':
+	            var gsmSteps = [Step1GSM];
+	            this.addSteps(gsmSteps, 1);
+
+	            break;
+	          case 'argos':
+	            var argosSteps = [Step1ARGOS];
+	            this.addSteps(argosSteps, 1);
+
+	            //this.addSteps();
+	            break;
+	          default:
+	            //not in step0
+	            return false;
+	            break;
+	        }
+					Backbone.history.navigate('/importFile/'+type,{trigger:false, replace: false});
+	      }
     },
 
     beforePrev: function(index) {
       if ((index - 1) == 0) {
         this.removeSteps(1);
+				Backbone.history.navigate('/importFile',{trigger:false, replace: false});
       }
-
     },
 
   });

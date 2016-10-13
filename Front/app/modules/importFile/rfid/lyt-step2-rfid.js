@@ -28,7 +28,24 @@ define([
     },
     events: {
       'change input[type="file"]': 'importFile',
-      'click button#clear': 'clearFile'
+      'click button#clear': 'clearFile',
+      'drop .drag-zone-hover' : 'handleDrop',
+      'dragover .drag-zone-hover' : 'handleDragOVer',
+      'dragleave .drag-zone-hover' : 'handleDragLeave'
+    },
+
+    handleDrop : function(e) {
+      e.originalEvent.stopPropagation();
+      e.originalEvent.preventDefault();
+      this.importFile(e.originalEvent.dataTransfer.files);
+    },
+
+    handleDragOVer : function(e) {
+      e.originalEvent.stopPropagation();
+      e.originalEvent.preventDefault();
+    },
+
+    handleDragLeave : function(e) {
     },
 
     initialize: function(options) {
@@ -51,7 +68,12 @@ define([
       if (module !== '') {
 
         var reader = new FileReader();
-        var file = $('#input-file').get(0).files[0] || null;
+        if (typeof event.target ==='undefined' ) {
+          var file = event[0];
+        }
+        else {
+          var file = $('#input-file').get(0).files[0] || null;
+        }
         $('#clear').removeAttr('disabled');
         var ext = file.name.split('.');
         if (ext[ext.length - 1] != 'txt') {

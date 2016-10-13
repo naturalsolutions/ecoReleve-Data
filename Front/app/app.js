@@ -27,8 +27,21 @@ define([
 
 function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
-  var JST = window.JST = window.JST || {};
-  Backbone.Marionette.Renderer.render = function(template, data) {
+    var app = {};
+    var JST = window.JST = window.JST || {};
+    window.xhrPool = [];
+
+    window.onkeydown = function (e) {
+      if (e.keyCode == 8 ) {  //backspace key
+        if( e.target.tagName != 'INPUT') { //handle event if not in input
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    };
+
+
+    Backbone.Marionette.Renderer.render = function(template, data) {
       if (!JST[template]) throw 'Template \'' + template + '\' not found!';
       return JST[template](data);
   };
