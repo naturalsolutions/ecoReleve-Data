@@ -204,12 +204,12 @@ define([
         1: {
           name: 'type_',
           type: 'Text',
-          label: 'Types',
-          title: 'types'
+          label: 'Type',
+          title: 'type'
         },
         2: {
         type: 'Select' ,
-        title: 'Fieldacivity',
+        title: 'Field activity',
         name: 'fieldActivity_Name',
         editorClass: 'form-control',
         options: [],
@@ -222,7 +222,13 @@ define([
           label: 'Date',
           title: 'Date',
           options:{isInterval: 1}
-        }
+        },
+        4: {
+            name: 'precision',
+            type: 'Number',
+            label: 'precision',
+            title: 'precision',
+          }
       };
       this.locfilters = new NsFilter({
         filters: locfiltersList,
@@ -246,18 +252,7 @@ define([
         label: 'date',
         editable: false,
         cell: 'stringDate'
- /*       cell:Backgrid.Extension.MomentCell.extend({
-            displayFormat: "DD/MM/YYYY HH:mm",
-            //modelFormat : "DD/MM/YYYY HH:mm",
-             //modelInUnixTimestamp: true,
-            displayInUTC: false
-          }),*/
-      },/*{
-        name: 'timestamp',
-        label: 'date',
-        editable: false,
-        cell : 'stringDate'
-      }*/{
+      },{
         name: 'LAT',
         label: 'latitude',
         editable: false,
@@ -278,8 +273,13 @@ define([
         editable: false,
         cell: 'string'
       },{
+        name: 'precision',
+        label: 'Precision(m)',
+        editable: false,
+        cell: 'Integer'
+      },{
         name: 'fieldActivity_Name',
-        label: 'FieldActivity',
+        label: 'Field Activity',
         editable: false,
         cell: Backgrid.StringCell.extend({
           render: function () {

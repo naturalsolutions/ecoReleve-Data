@@ -112,6 +112,11 @@ define([
         headerName: 'longitude',
         filter: 'number',
       },{
+        field: 'precision',
+        headerName: 'Precision(m)',
+        filter: 'number',
+      },{
+      },{
         field: 'region',
         headerName: 'Region',
         filter: 'text',
