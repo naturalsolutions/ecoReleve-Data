@@ -41,7 +41,6 @@ define([
       this.data = options.model.attributes.data_FileContent;
       this.deferred = $.Deferred();
       window.formChange  = false;
-      console.log(options)
       this.parent = options.parent;
     },
 
@@ -174,22 +173,6 @@ define([
         }
       }));
 
-    },
-
-    rowClicked: function(args) {
-      var row = args.row;
-      var id = row.model.get('id');
-      var e = args.evt;
-
-      if($(e.target).hasClass('editable') || $(e.target).is('select')){
-        return;
-      }
-
-      if ($(args.evt.target).is('input')) {
-        this.grid.interaction('selection', id);
-      } else {
-        this.grid.interaction('focus', id);
-      }
     },
 
 

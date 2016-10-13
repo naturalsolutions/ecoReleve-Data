@@ -1,5 +1,3 @@
-//waypoints?
-
 define([
   'jquery',
   'underscore',
@@ -13,10 +11,8 @@ define([
   'i18n',
   'dropzone'
 
-
 ], function($, _, Backbone, Marionette, config, Swal,
  XmlParser, NsForm, GpxForm, Dropzone
-
 ) {
 
   'use strict';
@@ -25,18 +21,15 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/gpx/templates/tpl-step1-gpx.html',
 
-    name : '<span class="import-step1"></span>',
+    name : '',
 
     events: {
       'change input[type="file"]': 'importFile',
-      //'change select[name="fieldActivity"]': 'setFieldActivity',
-      //'click #resetFieldActivity': 'resetFieldActivity',
-      //'click button[data-action="add"]': 'setUsers',
+
       'drop .drag-zone-hover' : 'handleDrop',
       'dragover .drag-zone-hover' : 'handleDragOVer',
       'dragleave .drag-zone-hover' : 'handleDragLeave',
       'click button#importGpxFile' :'simulateImport',
-      //'change select[name="FieldWorker"]': 'check',
     },
 
     ui: {
@@ -48,10 +41,9 @@ define([
       'divimpgpxfile' : '#btnImpGpxFile'
     },
     simulateImport : function () {
-      //this.ui.fileInput.click();
       $('input[type=file]').click();
-
     },
+
     handleDrop : function(e) {
       e.originalEvent.stopPropagation();
       e.originalEvent.preventDefault();
@@ -81,10 +73,9 @@ define([
       var _this = this;
       this.parent.disableNextBtn();
       this.displayForm();
-      //this.parent.bindRequiredFields();
 
     },
-
+  
     importFile: function(e) {
       var _this = this;
       if(typeof e.target === 'undefined') {
@@ -96,12 +87,9 @@ define([
       }
       var reader = new FileReader();
       var fileName = file.name;
-      $('#fileNameSelected').text(fileName); //add filename after btn
+      $('#fileNameSelected').text(fileName);
       var tab = fileName.split('.');
       var fileType = tab[1].toUpperCase();
-      //var fieldAfield = $('select[name="fieldActivity"]');
-      //var userBtn = $('button[data-action="add"]');
-
 
       if (fileType != 'GPX') {
         _this.importedFile = false;
@@ -109,15 +97,11 @@ define([
         this.model.set('data_FileName', '');
         $('#fileNameSelected').text('No file selected');
         this.errors = true;
-      //  $(fieldAfield).attr('disabled', 'disabled');
-      //  $(userBtn).attr('disabled', 'disabled');
-      //  $('#importGpxMsg').removeClass('hidden');
       } else {
         reader.onload = function(e, fileName) {
           window.app.checkFormSaved = false;
           var xml = e.target.result;
 
-          // get waypoints collection
 
           var importResulr =  XmlParser.gpxParser(xml);
           _this.wayPointList =  importResulr[0];
@@ -125,17 +109,11 @@ define([
 
           _this.model.set('data_FileContent', _this.wayPointList);
 
-          //success
           if (_this.wayPointList.length > 0) {
             if (errosList.length > 0) {
                 _this.deferred.resolve();
                 _this.displayErrors('file error');
-                //_this.ui.fielActivity.addClass('hidden');
                 _this.errors = true;
-                // $(fieldAfield).attr('disabled','disabled');
-                // $(userBtn).attr('disabled','disabled');
-                // $('.fieldactivity').addClass('hidden');
-                // $(_this.fieldworkers).addClass('hidden');
                 _this.swalError('file error : we can\'t parse it');
             }
           } else {
@@ -146,6 +124,7 @@ define([
       reader.readAsText(file);
     },
 
+  
     displayErrors: function(errors) {
       this.swalError(errors);
     },
@@ -188,15 +167,12 @@ define([
             if(error){
               return false;
             }else{
-              //var fieldworkers = this.nsform.BBForm.model.get('FieldWorkers');
-              //this.setFieldWorkers(fieldworkers);
               window.app.checkFormSaved = false;
               return true;
             }
     },
-
-
-    displayInputFile(){
+    
+    displayInputFile: function(){
       this.ui.form.find('.filesinputselector').parent().prepend('<div id="btnImpGpxFile">'+
         '<button id="importGpxFile" type="button" class="btn btn-success fileinput-button" data-i18n="import.fileSelection">'+
             '<i class="glyphicon glyphicon-plus"></i>'+
@@ -205,6 +181,7 @@ define([
         '<span id="fileNameSelected">No file selected</span>'+
       '</div>');
     },
+
     displayForm: function() {
       var self = this;
       var model = new Backbone.Model();
@@ -215,12 +192,9 @@ define([
         model.schema = data.schema;
         model.fieldsets = data.fieldsets;
         self.nsform = new NsForm({
-          //name: 'ImportGpxFileForm',
-          //modelurl: config.coreUrl+'stations/fileImport',
           model: model,
           buttonRegion: [],
           formRegion: self.ui.form,
-          //displayMode: 'display',
           reloadAfterSave: false,
           disabled : false,
         });
@@ -229,6 +203,7 @@ define([
       });
 
     },
+    
     loadCollection: function(url, element) {
       var collection =  new Backbone.Collection();
       collection.url = url;
@@ -246,6 +221,7 @@ define([
         }
       });
     },
+
     setWaypointListWithForm : function(formData){
       console.log("bim on veut set les fieldworkers");
       var fwList = [];
