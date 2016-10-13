@@ -250,12 +250,12 @@ define([
       console.log("bim on veut set les fieldworkers");
       var fwList = [];
       _.forEach(formData.FieldWorkers,function(curFw){
-        fwList.push(parseInt(curFw.FieldWorker))
-      })
-       this.wayPointList.each(function(model) {
-        model.set('FieldWorkers',fwList );
-        model.set('NbFieldWorker', formData.NbFieldWorker);
-        model.set('fieldActivityId', formData.fieldActivity);
+        fwList.push(parseInt(curFw.FieldWorker));
+      });
+       this.wayPointList.map(function(model) {
+        model.FieldWorkers = fwList;
+        model.NbFieldWorker = formData.NbFieldWorker;
+        model.fieldActivity = formData.fieldActivityId;
       });
 
     }
