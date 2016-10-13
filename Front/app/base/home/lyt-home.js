@@ -5,9 +5,10 @@ define(['marionette',
 	'./views/info',
 	'requirejs-text!base/home/tpl/tpl-dounutGraph.html',
 	'requirejs-text!base/home/tpl/tpl-dounutGraph2.html',
+	'config',
 	'i18n'
 	],
-function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, TplGraph1, TplGraph2) {
+function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, TplGraph1, TplGraph2,config) {
   'use strict';
 
   return Marionette.LayoutView.extend({

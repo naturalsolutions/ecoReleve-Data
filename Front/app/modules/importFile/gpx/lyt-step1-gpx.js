@@ -9,11 +9,12 @@ define([
   'vendors/XmlParser',
   'ns_form/NSFormsModuleGit',
   'models/gpxForm',
+  'config',
   'i18n',
 
 
 ], function($, _, Backbone, Marionette, Swal,
- XmlParser, NsForm, GpxForm
+ XmlParser, NsForm, GpxForm,config
 
 ) {
 
