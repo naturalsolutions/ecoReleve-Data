@@ -13,7 +13,7 @@ define([
       label: 'individuals',
       single: 'individual',
       type: 'individuals',
-      
+
       icon: 'reneco-bustard',
       subincon: 'reneco-bustard',
 
@@ -73,6 +73,16 @@ define([
       },{
         field: 'UnicIdentifier',
         headerName: 'Identifier',
+        cellRenderer: function(params){
+          if(params.data.SensorID){
+            var url = '#sensors/' + params.data.SensorID;
+            return  '<a target="_blank" href="'+ url +'" >' +
+            params.value + ' <span class="reneco reneco-info right"></span>' +
+            '</a>';
+          } else {
+            return '';
+          }
+        }
       }],
 
       locationsColumnDefs: [{
@@ -117,11 +127,11 @@ define([
           if(params.data.type_ === 'station'){
             //ex: sta_44960
             var url = '#stations/' + params.data.ID.split('_')[1];
-            return  '<a target="_blank" href="'+ url +'" >' + 
+            return  '<a target="_blank" href="'+ url +'" >' +
             params.value + ' <span class="reneco reneco-info right"></span>' +
             '</a>';
           } else {
-            return ''; 
+            return '';
           }
         }
       }]

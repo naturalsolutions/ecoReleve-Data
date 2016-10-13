@@ -30,10 +30,15 @@ define([
       'rgStationsGrid': '.js-rg-stations-grid',
     },
 
+    events: {
+      'click .tab-link': 'displayTab',
+    },
+
     model: new SensorModel(),
 
     displayGrids: function(){
       this.displayHistoryGrid();
+      this.displayDeploymentGrid();
     },
 
     displayMap: function() {
@@ -53,6 +58,17 @@ define([
         url: this.model.get('type') + '/' + this.model.get('id')  + '/history',
         clientSide: true,
       }));
+      this.gridViews.push(this.rgHistoryGrid);
+    },
+
+    displayDeploymentGrid: function() {
+      this.rgDeploymentGrid.show(this.deploymentGrid = new GridView({
+        columns: this.model.get('deploymentColumnsDefs'),
+        type: this.model.get('type'),
+        url: this.model.get('type') + '/' + this.model.get('id')  + '/equipment',
+        clientSide: true,
+      }));
+      this.gridViews.push(this.rgDeploymentGrid);
     },
 
   });

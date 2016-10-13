@@ -42,16 +42,20 @@ define([
         {
           name: 'history',
           label: 'History'
-        }
+        },
+        {
+          name: 'deployment',
+          label: 'Deployment'
+        },
       ],
 
-      historyColumnsDefs: [{
+      deploymentColumnsDefs: [{
         field: 'FK_Individual',
         headerName: 'Individual id',
         cellRenderer: function(params){
           if(params.data.FK_Individual){
             var url = '#individuals/' + params.data.FK_Individual;
-            return  '<a target="_blank" href="'+ url +'" >' + 
+            return  '<a target="_blank" href="'+ url +'" >' +
             params.value + ' <span class="reneco reneco-info right"></span>' +
             '</a>';
           } else {
@@ -60,12 +64,12 @@ define([
         }
       },
       {
-        field: 'Name',
+        field: 'FK_MonitoredSite',
         headerName: 'Monitored site',
         cellRenderer: function(params){
           if(params.data.MonitoredSiteID) {
             var url = '#monitoredSites/' + params.data.MonitoredSiteID;
-            return  '<a target="_blank" href="'+ url +'" >' + 
+            return  '<a target="_blank" href="'+ url +'" >' +
             params.value + ' <span class="reneco reneco-info right"></span>' +
             '</a>';
           } else {
@@ -81,7 +85,19 @@ define([
         field: 'EndDate',
         headerName: 'End Date',
       }
-      ]
+    ],
+    historyColumnsDefs : [{
+      field: 'Name',
+      headerName: 'Name',
+    }, {
+      field: 'value',
+      headerName: 'Value',
+    }, {
+      field: 'StartDate',
+      headerName: 'Start Date',
+    },]
+
+
     }
   });
 });
