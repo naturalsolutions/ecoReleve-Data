@@ -1,0 +1,56 @@
+<div id="infos"  class="col-xs-12 col-md-5 full-height no-padding">
+  <div class="toolbar top">
+    <a class="btn" href="#<%= type %>">
+        <span class="reneco reneco-back"></span>
+        &nbsp;
+        <span data-i18n="button.back">Back</span>
+    </a>
+    <div class="js-rg-navbar pull-right"></div>
+  </div>
+
+  <div class="crop1 no-padding">
+    
+    <div id="formTab" class="half-height">
+        <div class="js-form crop1"></div>
+        <div class="toolbar bottom">
+          <div class="js-form-btns"></div>
+        </div>
+    </div>
+
+    <div class="half-height">
+      <ul class="nav nav-tabs toolbar bottom">
+      <% _.each(uiGridConfs, function(uiGridConf, index){ %>
+          <li class="tab-ele <%= (index == 0)? 'active' : '' %>">
+            <a href="#<%= uiGridConf.name %>Tab" class="tab-link"><%= uiGridConf.label %></a>
+          </li>
+      <% }); %>
+      </ul>
+      <div class="tab-content crop1 no-padding">
+      <% _.each(uiGridConfs, function(uiGridConf, index){ %>
+        <div id="<%= uiGridConf.name %>Tab" class="tab-pane full-height fade <%= (index == 0)? 'in active' : '' %>">
+        <% if(uiGridConf.name !== "locations") { %>
+          <div class="js-rg-<%= uiGridConf.name %>-grid full-height"></div>
+        <% } else { %>
+          <div class="js-rg-<%= uiGridConf.name %>-grid crop1 no-padding"></div>
+          <div class="toolbar bottom">
+            <button class="js-btn-delete-locations btn btn-danger pull-right">
+              <i class="reneco reneco-trash"></i> &nbsp;
+              Delete selected locations
+            </button>
+          </div>
+        <% } %>
+        </div>
+      <% }); %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class=" no-padding col-xs-12 col-md-7 ns-full-height">
+    <div id="map">
+      <div id="showDetails" class="masqued">
+        <span class="glyphicon glyphicon-chevron-right big"/>
+      </div>
+    </div>
+  </div>
+</div>

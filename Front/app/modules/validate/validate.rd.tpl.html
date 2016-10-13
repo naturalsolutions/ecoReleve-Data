@@ -1,0 +1,80 @@
+<div id="infos"  class="col-xs-12 col-md-5 full-height no-padding">
+  <div class="toolbar top">
+    <a class="btn" href="#validate/<%= type %>">
+        <span class="reneco reneco-back"></span>
+        &nbsp;
+        <span data-i18n="button.back">Back</span>
+    </a>
+    <div class="js-rg-navbar pull-right"></div>
+  </div>
+
+  <div class="crop1 no-padding">
+    
+    <div class="half-height">
+      <div class="tab-content crop1">
+        <div role="tabpanel" class="tab-pane active" id="individual">
+          <div class='js-individual-form'></div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="sensor">
+          <div class='js-sensor-form'></div>
+        </div>
+      </div>
+      <div class="toolbar bottom">
+        <ul class="nav nav-tabs" role="tablist">
+          <li role="presentation" class="active"><a href="#individual" aria-controls="individual" role="tab" data-toggle="tab">Individual details</a></li>
+          <li role="presentation"><a href="#sensor" aria-controls="sensor" role="tab" data-toggle="tab">Sensor details</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="half-height">
+      <div class="toolbar top">
+        <div class="col-xs-4 no-padding">
+        <select class="js-select-ferquency form-control pull-left">
+          <option disabled>Select a frequency</option>
+          <option value="all">All</option>
+          <option value="10">10 min</option>
+          <option value="15">15 min</option>
+          <option value="30" >30 min</option>
+          <option value="60">60 min</option>
+          <option value="120">120 min</option>
+        </select>
+        </div>
+        <button class="pull-right js-btn-validate btn btn-success">
+          <i class="reneco reneco-validate"></i>
+          &nbsp;
+          Validate selected positions
+        </button>
+      </div>
+      <div class="js-rg-grid crop2 col-xs-12 no-padding"></div>
+      <div class="toolbar bottom">
+        <div class="col-xs-4 no-padding">
+        <select class="js-select-ferquency form-control pull-left">
+          <option disabled>Select a frequency</option>
+          <option value="all">All</option>
+          <option value="10">10 min</option>
+          <option value="15">15 min</option>
+          <option value="30" >30 min</option>
+          <option value="60">60 min</option>
+          <option value="120">120 min</option>
+        </select>
+        </div>
+        <button class="pull-right js-btn-validate btn btn-success">
+          <i class="reneco reneco-validate"></i>
+          &nbsp;
+          Validate selected positions
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class=" no-padding col-xs-12 col-md-7 ns-full-height">
+    <div id="map">
+      <div id="showDetails" class="masqued">
+        <span class="glyphicon glyphicon-chevron-right big"/>
+      </div>
+    </div>
+  </div>
+</div>

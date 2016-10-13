@@ -1,5 +1,10 @@
-
-define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','config',
+define([
+  'marionette',
+  'lyt-rootview',
+  'router',
+  'controller',
+  'sweetAlert',
+  'config',
 
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
@@ -7,7 +12,6 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','confi
   'ns_modules/ns_bbfe/bbfe-dateTimePicker',
   'ns_modules/ns_bbfe/bbfe-autocomplete',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
-  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-nonIdPicker',
   'ns_modules/ns_bbfe/bbfe-listOfNestedModel/bbfe-listOfNestedModel',
   'ns_modules/ns_bbfe/bbfe-gridForm',
   'ns_modules/ns_bbfe/bbfe-autocompTree',
@@ -17,26 +21,17 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','confi
   'ns_modules/ns_bbfe/bbfe-ajaxButton',
   'ns_modules/ns_bbfe/bbfe-lon',
   'ns_modules/ns_bbfe/bbfe-lat',
-  'ns_modules/ns_cell/bg-timestampCell',
-  'ns_modules/ns_cell/autocompCell',
-  'ns_modules/ns_cell/bg-integerCell',
-  'i18n'
 
   ],
 
 
 function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
-    var app = {};
-    var JST = window.JST = window.JST || {};
-    window.xhrPool = [];
-
-
-    Backbone.Marionette.Renderer.render = function(template, data) {
+  var JST = window.JST = window.JST || {};
+  Backbone.Marionette.Renderer.render = function(template, data) {
       if (!JST[template]) throw 'Template \'' + template + '\' not found!';
       return JST[template](data);
-    };
-
+  };
 
   app = new Marionette.Application();
   app.on('start', function() {
@@ -52,19 +47,17 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
   $(window).ajaxStart(function(e) {
     $('#header-loader').removeClass('hidden');
   });
-
   $(window).ajaxStop(function() {
     $('#header-loader').addClass('hidden');
   });
-
   $(window).ajaxError(function() {
     $('#header-loader').addClass('hidden');
   });
-
   window.onerror = function() {
     $('#header-loader').addClass('hidden');
   };
 
+  window.xhrPool = [];//??
   $.xhrPool = []; // array of uncompleted requests
   $.xhrPool.allowAbort = false;
   $.xhrPool.abortAll = function() { // our abort function
@@ -77,10 +70,17 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
   };
   //
   $.ajaxSetup({
-    beforeSend: function(jqXHR) { // before jQuery send the request we will push it to our array
+    // before jQuery send the request we will push it to our array
+    beforeSend: function(jqXHR, options) {
+      if(options.url.indexOf('http://') !== -1) {
+        options.url = options.url;
+      } else {
+        options.url = config.coreUrl + options.url;
+      }
       $.xhrPool.push(jqXHR);
     },
-    complete: function(jqXHR) { // when some of the requests completed it will splice from the array
+    // when some of the requests completed it will splice from the array
+    complete: function(jqXHR){
       var index = $.xhrPool.indexOf(jqXHR);
       if (index > -1) {
         $.xhrPool.splice(index, 1);
@@ -88,17 +88,18 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
     }
   });
 
+
   window.UnauthAlert = function(){
     Swal({
-        title: 'Unauthorized',
-        text: "You don't have permission",
-        type: 'warning',
-        showCancelButton: false,
-        confirmButtonColor: 'rgb(240, 173, 78)',
-        confirmButtonText: 'OK',
-        closeOnConfirm: true,
-      });
-  };
+      title: 'Unauthorized',
+      text: "You don't have permission",
+      type: 'warning',
+      showCancelButton: false,
+      confirmButtonColor: 'rgb(240, 173, 78)',
+      confirmButtonText: 'OK',
+      closeOnConfirm: true,
+    });
+  }
 
   $(document).ajaxError(function( event, jqxhr, settings, thrownError ) {
     if (jqxhr.status == 401){

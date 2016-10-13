@@ -1,17 +1,16 @@
 define([
     'jquery',
     'chart',
-    'config',
     'marionette',
     'moment'
-], function($, Chart, config, Marionette, moment) {
+], function($, Chart, Marionette, moment) {
   'use strict';
   return Marionette.ItemView.extend({
     //template: 'app/base/home/tpl/tpl-dounutGraph.html',
 
     initialize: function(options) {
       var model = options.model;
-      this.url = model.get('url'); //config.coreUrl + 'individuals/location/graph';
+      this.url = model.get('url');
       this.storageName = 'ecoreleveChartDonuts' + model.get('title');
       this.storedData = model.get('stored');
       this.ele = model.get('ele');

@@ -7,9 +7,8 @@ define([
 	//'ns_filter/model-filter_module',
   'ns_filter_bower',
 	'ns_map/ns_map',
-	'config',
 	'i18n'
-], function($, _, Backbone, Marionette, Com, NsFilter, NsMap, config
+], function($, _, Backbone, Marionette, Com, NsFilter, NsMap
 ) {
 
   'use strict';
@@ -112,7 +111,7 @@ define([
 
     getFieldsListForSelectedView: function() {
       var _this = this;
-      var viewUrl = config.coreUrl + 'export/views/' + this.viewId + '/getFilters';
+      var viewUrl = 'export/views/' + this.viewId + '/getFilters';
       var jqxhr = $.ajax({
         url: viewUrl,
         context: this,
@@ -138,7 +137,7 @@ define([
         com: this.com,
         element: 'map',
         zoom: 2,
-        url: config.coreUrl + 'export/views/' + this.viewId + '/?geo=true',
+        url: 'export/views/' + this.viewId + '/?geo=true',
         totalElt: this.ui.total,
       });
     },

@@ -290,10 +290,30 @@ def searchStation(request):
     searchInfo['criteria'] = []
     user = request.authenticated_userid['iss']
 
+    #### add filter parameters to retrieve last stations imported : last day of station created by user and without linked observation ####
+    def lastImported(obj, searchInfo):
+        obj['Operator'] = '='
+        obj['Value'] = True
+        criteria = [
+        {'Column' : 'creator',
+        'Operator' : '=',
+        'Value' : user
+        },
+        {'Column' : 'FK_StationType',
+        'Operator' : '=',
+        'Value' : 4 # => TypeID of GPX station
+        }
+        ]
+        searchInfo['criteria'].extend(criteria)
+
     if 'criteria' in data: 
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
+            print(type(searchInfo['criteria']))
+            for obj in searchInfo['criteria']:
+                if obj['Column'] == 'LastImported':
+                    lastImported(obj, searchInfo)
 
     if not 'geo' in data:
         ModuleType = 'StationGrid'
@@ -318,25 +338,6 @@ def searchStation(request):
         searchInfo['criteria'].extend(criteria)
         # searchInfo['offset'] = 0
 
-    #### add filter parameters to retrieve last stations imported : last day of station created by user and without linked observation ####
-    if 'lastImported' in data :
-        criteria = [
-        {'Column' : 'creator',
-        'Operator' : '=',
-        'Value' : user
-        },
-        {
-        'Column': 'LastImported',
-        'Operator' : '=',
-        'Value' : True
-        },
-        {'Column' : 'FK_StationType',
-        'Operator' : '=',
-        'Value' : 4 # => TypeID of GPX station
-        },
-        ]
-        searchInfo['criteria'].extend(criteria)
-
     moduleFront  = session.query(FrontModules).filter(FrontModules.Name == ModuleType).one()
     start = datetime.now()
     listObj = StationList(moduleFront)
@@ -345,7 +346,7 @@ def searchStation(request):
     if 'geo' in data: 
         geoJson=[]
         exceed = True
-        if countResult < 50000 : 
+        if countResult < 50000 :
             exceed = False
             dataResult = listObj.GetFlatDataList(searchInfo,getFW)
             for row in dataResult:

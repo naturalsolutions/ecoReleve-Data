@@ -5,7 +5,6 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   'sweetAlert',
   'vendors/XmlParser',
   'ns_form/NSFormsModuleGit',
@@ -13,7 +12,7 @@ define([
   'i18n',
 
 
-], function($, _, Backbone, Marionette, config, Swal,
+], function($, _, Backbone, Marionette, Swal,
  XmlParser, NsForm, GpxForm
 
 ) {
@@ -42,7 +41,6 @@ define([
 
     initialize: function() {
       this.model = new Backbone.Model();
-      this.wayPointList = new Backbone.Collection();
       this.errors = true;
       this.deferred = $.Deferred();
 
@@ -51,7 +49,7 @@ define([
     onShow: function() {
       this.displayForm();
       // fieldactivity
-      this.loadCollection(config.coreUrl + 'fieldActivity', 'select[name="fieldActivity"]');
+      this.loadCollection('fieldActivity', 'select[name="fieldActivity"]');
       $('button[data-action="add"]').attr('disabled','disabled');
       $('.fieldactivity').addClass('hidden');
       this.fieldworkers = $('label[for*="FieldWorkers"]').parent();
@@ -127,7 +125,7 @@ define([
     },
 
     displayErrors: function(errors) {
-      this.ui.importGpxMsg.append(errors);
+      //this.ui.importGpxMsg.append(errors);
     },
 
     swalError: function(title) {
@@ -151,9 +149,10 @@ define([
     setFieldActivity: function(e) {
       //could be bugged
       var fieldActivity = $(e.target).val();
+
       this.wayPointList.each(function(model) {
         model.set('fieldActivity', fieldActivity);
-         window.formEdition = false; 
+         window.formEdition = false;
       });
     },
     onDestroy: function() {
@@ -222,10 +221,10 @@ define([
        for (var i=0;i<tab.length;i++){
         list.push(parseInt(tab[i].FieldWorker));
        }
-       this.wayPointList.each(function(model) {
-        model.set('FieldWorkers', list);
+       this.wayPointList.map(function(m) {
+        m.FieldWorkers = list;
       });
-       
+
     }
   });
 });

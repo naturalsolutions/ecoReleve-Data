@@ -6,7 +6,7 @@ define([
   'backbone-forms',
   'sweetAlert',
   'ns_ruler/ruler',
-  'requirejs-text!./Templates/NsFormsModule.html',
+  'requirejs-text!./NsFormsModule.html',
   'fancytree',
   './NsFormsCustomFields',
 ], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tpl) {
@@ -459,7 +459,7 @@ define([
                   _this.reloadingAfterSave();
                 }
               }
-              _this.afterSaveSuccess();
+              _this.afterSaveSuccess(response);
               return true;
             },
             error: function (response) {
@@ -480,7 +480,7 @@ define([
               if (_this.reloadAfterSave) {
                 _this.reloadingAfterSave();
               }
-              _this.afterSaveSuccess();
+              _this.afterSaveSuccess(response);
             },
             error: function (model,response) {
               _this.savingError(response);

@@ -5,12 +5,11 @@ define([
   'marionette',
   'radio',
   './lyt-observation',
-  'config',
   'ns_form/NSFormsModuleGit',
   'bootstrap',
   'i18n'
 
-  ], function($, _, Backbone, Marionette, Radio, LytObs, config, NsForm, bootstrap
+  ], function($, _, Backbone, Marionette, Radio, LytObs, NsForm, bootstrap
     ) {
     'use strict';
     return Marionette.LayoutView.extend({
@@ -232,7 +231,7 @@ define([
         model.schema = model.get('schema');
         model.fieldsets = model.get('fieldsets');
         model.attributes = model.get('data');
-        model.urlRoot =  config.coreUrl + 'stations/' + this.stationId + '/protocols' + '/'
+        model.urlRoot =  'stations/' + this.stationId + '/protocols' + '/'
 
         this.ui.tbody.append('<div class="js-form-row form-row"></div>');
         var formRowContainer = this.ui.tbody.find('.js-form-row:last-child');
@@ -243,7 +242,7 @@ define([
           model: model,
           gridRow: true,
           //reloadAfterSave: true,
-          modelurl: config.coreUrl + 'stations/' + this.stationId + '/protocols'
+          modelurl: 'stations/' + this.stationId + '/protocols'
         });
 
 
@@ -330,7 +329,7 @@ define([
       // } else {
         this.name = '_' + this.objectType + '_';
         this.jqxhr = $.ajax({
-          url: config.coreUrl + 'stations/' + this.stationId + '/protocols/0',
+          url: 'stations/' + this.stationId + '/protocols/0',
           context: this,
           type: 'GET',
           data: {

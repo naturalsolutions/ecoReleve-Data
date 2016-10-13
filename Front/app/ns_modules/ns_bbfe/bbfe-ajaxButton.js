@@ -2,9 +2,8 @@ define([
   'jquery',
   'backbone_forms',
   'sweetAlert',
-  'config',
 ], function(
-  $, Form,Swal,config
+  $, Form, Swal
 ){
   'use strict';
   return Form.editors.ajaxButtonEditor = Form.editors.Base.extend({
@@ -65,7 +64,7 @@ define([
 
         callback: function() {
             var _this = this;
-            var url = config.coreUrl+this.options.url;
+            var url = this.options.url;
             $.ajax({
                 url: url,
                 context: this,
