@@ -8,11 +8,11 @@ define([
   'ns_modules/ns_com',
   'ns_map/ns_map',
   'ns_grid/grid.view',
-
+  'moment',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,
-  Com, NsMap, GridView
+  Com, NsMap, GridView,Moment
 ) {
 
   'use strict';
@@ -130,6 +130,9 @@ define([
         return text;
       };
 
+      var dateTimestampRender = function(params){
+        return Moment.unix(params.data.displayDate).format("DD/MM/YYYY HH:mm:SS");
+      };
 
       var columnsDefs = [
         {
@@ -143,6 +146,7 @@ define([
         },{
           field: 'displayDate',
           headerName: 'Date',
+          cellRenderer: dateTimestampRender
         },{
           field: 'latitude',
           headerName: 'LAT',
