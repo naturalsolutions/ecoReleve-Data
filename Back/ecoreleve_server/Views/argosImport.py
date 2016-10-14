@@ -84,7 +84,7 @@ def parseDSFileAndInsert(full_filename,session):
         os.makedirs(out_path)
     try:
         os.remove(con_file)
-    except : 
+    except :
         pass
 
     # Config init.txt for MTI-PArser
@@ -92,7 +92,7 @@ def parseDSFileAndInsert(full_filename,session):
     cc['out'] = out_path
     cc['ini'] = con_file
 
-    with open(con_file,'w') as f: 
+    with open(con_file,'w') as f:
         print('-eng\n-title\n-out\n'+out_path+'\n'+full_filename, file=f)
 
     # execute MTI-Parser
@@ -119,7 +119,7 @@ def parseDSFileAndInsert(full_filename,session):
         parent.kill()
     except: pass
 
-    # WARNING if another client execute this process this function kill all active process 
+    # WARNING if another client execute this process this function kill all active process
     # try:
     #     os.system('taskkill /f /im MTIwinGPS.exe')
     # except:
@@ -169,7 +169,7 @@ def parseDSFileAndInsert(full_filename,session):
             except :
                 EngDataBis = tempEng
 
-    if EngData is not None : 
+    if EngData is not None :
         EngToInsert = checkExistingEng(EngData,session)
         nb_existingEng += EngData.shape[0]
         if EngToInsert.shape[0] != 0 :
@@ -226,7 +226,7 @@ def checkExistingEng(EngData,session) :
         # Extract non existing data
         DFToInsert = EngData[~EngData['id'].isin(merge['id'])]
 
-        # rename column 
+        # rename column
         DFToInsert['FK_ptt'] = DFToInsert['ptt']
         DFToInsert = DFToInsert.drop(['id','ptt'],1)
     except:
@@ -316,7 +316,7 @@ def parseDIAGFileAndInsert(full_filename,session):
             else:
                 try :
                     splitParameters[i] = re.sub('[\s]'," ",splitParameters[i])
-                    a = 1 
+                    a = 1
                     if colsInBlock[i] in ['lon1','lon2','lat1','lat2']:
                         if 'W' in splitParameters[i] or 'S' in splitParameters[i]:
                             a = -1
@@ -336,7 +336,7 @@ def parseDIAGFileAndInsert(full_filename,session):
     df = pd.DataFrame.from_dict(ListOfdictParams)
     df = df.dropna(subset=['date'])
     DFToInsert = checkExistingArgos(df,session)
-    DFToInsert.loc[:,('type')]=list(itertools.repeat('arg',len(DFToInsert.index)))
+    DFToInsert.loc[:,('type')]=list(itertools.repeat('argos',len(DFToInsert.index)))
     DFToInsert.loc[:,('checked')]=list(itertools.repeat(0,len(DFToInsert.index)))
     DFToInsert.loc[:,('imported')]=list(itertools.repeat(0,len(DFToInsert.index)))
     DFToInsert = DFToInsert.drop(['id','lat1','lat2','lon1','lon2'],1)
@@ -361,7 +361,7 @@ def checkExistingArgos (dfToCheck,session) :
     queryArgos = queryArgos.where(and_(ArgosGps.date >= minDate , ArgosGps.date <= maxDate))
     data = session.execute(queryArgos).fetchall()
 
-    # load data from Db into DF 
+    # load data from Db into DF
     ArgosRecords = pd.DataFrame.from_records(data
         ,columns=[ArgosGps.pk_id.name, ArgosGps.date.name, ArgosGps.lat.name, ArgosGps.lon.name, ArgosGps.ptt.name]
         , coerce_float=True )
