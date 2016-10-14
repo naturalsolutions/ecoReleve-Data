@@ -3,12 +3,11 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   './lyt-protocol',
   './lyt-protocol-grid',
 
   'i18n'
-], function($, _, Backbone, Marionette, config, LytProto, LytProtoGrid) {
+], function($, _, Backbone, Marionette, LytProto, LytProtoGrid) {
   'use strict';
   return Marionette.LayoutView.extend({
     template: 'app/modules/stations/templates/tpl-protocols-editor.html',
@@ -32,7 +31,7 @@ define([
 
       this.collection = new Backbone.Collection();
       this.collection.fetch({
-        url: config.coreUrl + 'stations/' + this.stationId + '/protocols',
+        url: 'stations/' + this.stationId + '/protocols',
         reset: true,
         data: {
           FormName: 'ObsForm',
@@ -157,7 +156,7 @@ define([
       this.ui.protoPicker.append('<option value="" disabled selected>Add a protocol</option>');
       this.protoSelectList = new Backbone.Collection();
       this.protoSelectList.fetch({
-        url: config.coreUrl + '/protocolTypes',
+        url: '/protocolTypes',
         reset: true,
         success: function() {
           _.each(_this.protoSelectList.models,function(model) {
@@ -187,7 +186,7 @@ define([
       var proto = new Backbone.Model();
 
       this.jqxhr = $.ajax({
-        url: config.coreUrl + 'stations/' + this.stationId + '/protocols/0',
+        url: 'stations/' + this.stationId + '/protocols/0',
         context: this,
         type: 'GET',
         data: {

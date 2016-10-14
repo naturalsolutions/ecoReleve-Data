@@ -1,68 +1,83 @@
-define(['marionette', 'config',
+define([
+  'marionette',
 
   './base/home/lyt-home',
 
-  /*==========  modules  ==========*/
-
-  './modules/stations/layouts/lyt-stations',
-  './modules/stations/layouts/lyt-station-new',
-
   './modules/importFile/lyt-entry-importFile',
-
-  './modules/individuals/layouts/lyt-individuals',
-  './modules/individuals/layouts/lyt-individuals-new',
-  './modules/individuals/layouts/lyt-individuals-detail',
-
-  './modules/sensors/layouts/lyt-sensors',
-  './modules/sensors/layouts/lyt-sensors-new',
-
-  './modules/monitoredSites/layouts/lyt-ms',
-  './modules/monitoredSites/layouts/lyt-ms-new',
-
-  './modules/validate/lyt-sensorValidate',
-  './modules/validate/lyt-sensorValidateType',
-  './modules/validate/lyt-sensorValidateDetail',
-  './modules/release/layouts/lyt-release-station',
-
   './modules/export/lyt-export-stepper',
 
-],function(Marionette, config,
+  './modules/validate/validate.st.view',
+  './modules/validate/validate.nd.view',
+  './modules/validate/validate.rd.view',
+
+  './modules/release/release.view',
+  './modules/release/layouts/lyt-release-individual',
+
+  './modules/stations/station.view',
+  './modules/stations/stations.view',
+  './modules/stations/stations.new.view',
+
+  './modules/individuals/individual.view',
+  './modules/individuals/individuals.view',
+  './modules/individuals/individuals.new.view',
+
+  './modules/sensors/sensor.view',
+  './modules/sensors/sensors.view',
+  './modules/sensors/sensors.new.view',
+
+  './modules/monitoredSites/monitored_site.view',
+  './modules/monitoredSites/monitored_sites.view',
+  './modules/monitoredSites/monitored_sites.new.view',
+
+],function(
+  Marionette,
   LytHome,
-
-  /*==========  modules  ==========*/
-
-  LytStations,
-  LytStationsNew,
-
   LytImportFile,
-
-  LytIndividuals,
-  LytIndividualsNew,
-  LytIndivDetails,
-
-  LytSensors,
-  LytSensorsNew,
-
-  LytMonitoredSites,
-  LytMonitoredSitesNew,
-
+  LytExport,
   LytSensorValidate,
   LytSensorValidateType,
   LytSensorValidateDetail,
-
-  LytReleaseStation,
-
-  LytExport
-
+  LytRelease,
+  LytStationsRelease,
+  
+  LytStation, LytStations, LytStationsNew,
+  LytIndividual, LytIndividuals, LytIndividualsNew,
+  LytSensor, LytSensors, LytSensorsNew,
+  LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew
 ) {
   'use strict';
 
   return Marionette.Object.extend({
 
     initialize: function() {
-      this.rgMain = window.app.rootView.rgMain;
-      this.rgHeader = window.app.rootView.rgHeader;
-      this.rgFooter = window.app.rootView.rgFooter;
+      var app = window.app;
+
+      this.rgMain = app.rootView.rgMain;
+      this.rgHeader = app.rootView.rgHeader;
+      this.rgFooter = app.rootView.rgFooter;
+      
+      app.entityConfs = {
+        'stations': {
+          'entity': LytStation,
+          'entities': LytStations,
+          'newEntity': LytStationsNew
+        },
+        'individuals': {
+          'entity': LytIndividual,
+          'entities': LytIndividuals,
+          'newEntity': LytIndividualsNew
+        },
+        'sensors': {
+          'entity': LytSensor,
+          'entities': LytSensors,
+          'newEntity': LytSensorsNew
+        },
+        'monitoredSites': {
+          'entity': LytMonitoredSite,
+          'entities': LytMonitoredSites,
+          'newEntity': LytMonitoredSitesNew
+        },
+      };
     },
 
     home: function() {
@@ -70,46 +85,48 @@ define(['marionette', 'config',
       this.rgMain.show(new LytHome());
     },
 
-    importFile: function() {
-      this.rgMain.show(new LytImportFile());
+    importFile: function(type) {
+      this.rgMain.show(new LytImportFile({type : type}));
     },
 
-    stations: function(id) {
-      this.rgMain.show(new LytStations({id: id}));
-    },
-  observations: function(id) {
-    console.log('************** OBSERVATIONS ************************');
-     $.ajax({
-          context: this,
-          url: config.coreUrl + 'protocols/' + id,
-        }).done(function (data) {
-        window.location.href = window.location.origin + window.location.pathname + '#stations/' + data['FK_Station'] + '?observation=' + id ;
-      }) ;
-      //this.rgMain.show(new LytStations({id: id}));
+    station: function(id) {
+      this.rgMain.show(new LytStation({id: id}));
+    },    
+    stations: function() {
+      this.rgMain.show(new LytStations());
     },
     newStation: function(from) {
       this.rgMain.show(new LytStationsNew({from: from}));
     },
 
-    individuals: function(id) {
-      this.rgMain.show(new LytIndividuals({id: id}));
+    individual: function(id) {
+      this.rgMain.show(new LytIndividual({id: id}));
     },
-    newIndividual: function(type) {
-      this.rgMain.show(new LytIndividualsNew({type: type}));
+    individuals: function() {
+      this.rgMain.show(new LytIndividuals());
     },
-
-    sensors: function(id) {
-      this.rgMain.show(new LytSensors({id: id}));
-    },
-    newSensor: function(type) {
-      this.rgMain.show(new LytSensorsNew({type: type}));
+    newIndividual: function(objectType) {
+      this.rgMain.show(new LytIndividualsNew({objectType: objectType}));
     },
 
-    monitoredSites: function(id) {
-      this.rgMain.show(new LytMonitoredSites({id: id}));
+    monitoredSite: function(id) {
+      this.rgMain.show(new LytMonitoredSite({id: id}));
+    },
+    monitoredSites: function() {
+      this.rgMain.show(new LytMonitoredSites());
     },
     newMonitoredSite: function(type) {
       this.rgMain.show(new LytMonitoredSitesNew());
+    },
+
+    sensor: function(id) {
+      this.rgMain.show(new LytSensor({id: id}));
+    },
+    sensors: function() {
+      this.rgMain.show(new LytSensors());
+    },
+    newSensor: function(objectType) {
+      this.rgMain.show(new LytSensorsNew({objectType: objectType}));
     },
 
     validate: function() {
@@ -121,14 +138,26 @@ define(['marionette', 'config',
       }));
     },
 
-    release: function(id) {
-      // (id of the station..)
-      this.rgMain.show(new LytReleaseStation({id : id}));
+    validateDetail: function(type, dataset){
+      this.rgMain.show(new LytSensorValidateDetail({
+        type: type,
+        dataset: dataset
+      }));
+    },
+
+    release: function() {
+      this.rgMain.show(new LytRelease());
+    },
+
+    //detail
+    releaseIndividuals: function(id) {
+      this.rgMain.show(new LytStationsRelease({id : id}));
     },
 
     export: function() {
       this.rgMain.show(new LytExport());
     },
+
     checkAjax : function(){
       var xhrPool = window.xhrPool;
 
@@ -137,7 +166,5 @@ define(['marionette', 'config',
       }
        window.xhrPool = [];
     }
-
-
   });
 });

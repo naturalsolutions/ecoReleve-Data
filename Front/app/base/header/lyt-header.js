@@ -19,7 +19,7 @@ function($,Marionette, config, Breadcrumb) {
     logout: function() {
       $.ajax({
         context: this,
-        url: config.coreUrl + 'security/logout'
+        url: 'security/logout'
       }).done(function() {
         document.location.href = config.portalUrl;
       });
@@ -55,15 +55,13 @@ function($,Marionette, config, Breadcrumb) {
             });
       }
       this.breadcrumb.show(new Breadcrumb());
-    },
-
-    getUser : function(){
-      var _this = this;
-      var user  = new Backbone.Model();
-      user.url = config.coreUrl + 'currentUser';
-      user.fetch({
-        success: function(md) {
-           _this.ui.userName.html(user.get('Firstname') + ' ' + user.get('Lastname') );
+      window.app.user = new Backbone.Model();
+      window.app.user.url = 'currentUser';
+      window.app.user.fetch({
+        success: function(data) {
+          $('body').addClass(window.app.user.get('role'));
+          $.xhrPool.allowAbort = true;
+          _this.ui.userName.html(window.app.user.get('fullname'));
         }
       });
     }

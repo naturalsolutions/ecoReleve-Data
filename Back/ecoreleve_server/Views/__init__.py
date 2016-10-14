@@ -84,9 +84,9 @@ def add_routes(config):
     config.add_route('stations', 'ecoReleve-Core/stations/')
     config.add_route('stations/export', 'ecoReleve-Core/stations/export')
     #config.add_route('stations/fileImport', 'ecoReleve-Core/stations/fileImport/{id}')
-    config.add_route(
-        'stations/id', 'ecoReleve-Core/stations/{id}', custom_predicates=(integers('id'),))
+    config.add_route('stations/id', 'ecoReleve-Core/stations/{id}', custom_predicates = (integers('id'),))
     config.add_route('stations/action', 'ecoReleve-Core/stations/{action}')
+    config.add_route('stations/importGPX', 'ecoReleve-Core/stations/importGPX')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Stations/Protocols #####
@@ -103,8 +103,7 @@ def add_routes(config):
     ##### Protocols #####
     # config.add_route('protocols', 'ecoReleve-Core/protocols')
     config.add_route('protocols', 'ecoReleve-Core/protocols/')
-    config.add_route(
-        'protocols/id', 'ecoReleve-Core/protocols/{id}', custom_predicates=(integers('id'),))
+    config.add_route('protocols/id', 'ecoReleve-Core/protocols/{id}',custom_predicates = (integers('id'),))
     config.add_route('protocols/action', 'ecoReleve-Core/protocols/{action}')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
@@ -140,8 +139,7 @@ def add_routes(config):
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Individuals #####
     config.add_route('individuals', 'ecoReleve-Core/individuals/')
-    config.add_route('individuals/advanced',
-                     'ecoReleve-Core/individuals/advanced/')
+    config.add_route('individuals/advanced', 'ecoReleve-Core/individuals/advanced/')
     config.add_route('individuals/insert', 'ecoReleve-Core/individuals')
     config.add_route('individuals/export', 'ecoReleve-Core/individuals/export')
     config.add_route(
@@ -169,24 +167,15 @@ def add_routes(config):
     ##### MonitoredSite #####
     config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites/')
     config.add_route('monitoredSites/', 'ecoReleve-Core/monitoredSites')
-    config.add_route('monitoredSites/export',
-                     'ecoReleve-Core/monitoredSites/export')
-    config.add_route('monitoredSites/id',
-                     'ecoReleve-Core/monitoredSites/{id}', custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/history',
-                     'ecoReleve-Core/monitoredSites/{id}/history/', custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/station',
-                     'ecoReleve-Core/monitoredSites/{id}/stations', custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/equipment',
-                     'ecoReleve-Core/monitoredSites/{id}/equipment', custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/history/action',
-                     'ecoReleve-Core/monitoredSites/{id}/history/{action}', custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/station/action',
-                     'ecoReleve-Core/monitoredSites/{id}/stations/{action}', custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/equipment/action',
-                     'ecoReleve-Core/monitoredSites/{id}/equipment/{action}', custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/action',
-                     'ecoReleve-Core/monitoredSites/{action}')
+    config.add_route('monitoredSites/export', 'ecoReleve-Core/monitoredSites/export')
+    config.add_route('monitoredSites/id', 'ecoReleve-Core/monitoredSites/{id}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/history', 'ecoReleve-Core/monitoredSites/{id}/history/',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/station', 'ecoReleve-Core/monitoredSites/{id}/stations',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/equipment', 'ecoReleve-Core/monitoredSites/{id}/equipment',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/history/action', 'ecoReleve-Core/monitoredSites/{id}/history/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/station/action', 'ecoReleve-Core/monitoredSites/{id}/stations/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/id/equipment/action', 'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',custom_predicates = (integers('id'),))
+    config.add_route('monitoredSites/action', 'ecoReleve-Core/monitoredSites/{action}')
 
     # ------------------------------------------------------------------------------------------------------------------------- #
     ##### Release #####
@@ -201,12 +190,7 @@ def add_routes(config):
     ##### Export #####
     config.add_route('export', 'ecoReleve-Core/export/')
     config.add_route('export/themes', 'ecoReleve-Core/export/themes')
-    config.add_route('export/themes/id/views',
-                     'ecoReleve-Core/export/themes/{id}/views')
-    config.add_route('export/views/id',
-                     'ecoReleve-Core/export/views/{id}/')  # geo, datas
-    # filtres, cols, count
-    config.add_route('export/views/id/action',
-                     'ecoReleve-Core/export/views/{id}/{action}')
-    config.add_route('export/views/getFile',
-                     'ecoReleve-Core/export/views/getFile')  # getFile
+    config.add_route('export/themes/id/views', 'ecoReleve-Core/export/themes/{id}/views')
+    config.add_route('export/views/id', 'ecoReleve-Core/export/views/{id}/') #geo, datas
+    config.add_route('export/views/id/action', 'ecoReleve-Core/export/views/{id}/{action}') #filtres, cols, count
+    config.add_route('export/views/getFile', 'ecoReleve-Core/export/views/getFile') #getFile

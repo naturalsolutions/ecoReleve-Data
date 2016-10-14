@@ -4,13 +4,12 @@ define([
 	'underscore',
 	'backbone',
 	'marionette',
-	'config',
 	'sweetAlert',
 	'dropzone',
 
 	'i18n'
 
-], function($, _, Backbone, Marionette, config, Swal, Dropzone
+], function($, _, Backbone, Marionette, Swal, Dropzone
 ) {
 
   'use strict';
@@ -38,7 +37,7 @@ define([
       previewNode.parentNode.removeChild(previewNode);
 
       var myDropzone = new Dropzone(this.el, {
-        url: config.coreUrl + 'sensors/argos/datas',
+        url: 'sensors/argos/datas',
         parallelUploads: 1,
         previewTemplate: previewTemplate,
         previewsContainer: '#previews', // Define the container to display the previews
@@ -157,7 +156,7 @@ define([
         if (!this.errors) {
           Swal({
             title: 'Well done',
-            text: 'File(s) have been correctly imported\n\n' 
+            text: 'File(s) have been correctly imported\n\n'
             + '\t inserted Argos : ' + totalInsertedArgos + '\t existing Argos : ' + totalExistingArgos+','
             +'\n\t inserted GPS : ' + totalInsertedGPS + '\t existing GPS : ' + totalExistingGPS+','
             +'\n\t inserted Engineering : ' + totalInsertedEng + '\t existing Engineering : ' + totalExistingEng

@@ -3,11 +3,10 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   'sweetAlert',
   'i18n',
 
-], function($, _, Backbone, Marionette, config, swal
+], function($, _, Backbone, Marionette, swal
 ) {
 
   'use strict';
@@ -29,13 +28,29 @@ define([
     },
     events: {
       'change input[type="file"]': 'importFile',
-      'click button#clear': 'clearFile'
+      'click button#clear': 'clearFile',
+      'drop .drag-zone-hover' : 'handleDrop',
+      'dragover .drag-zone-hover' : 'handleDragOVer',
+      'dragleave .drag-zone-hover' : 'handleDragLeave'
+    },
+
+    handleDrop : function(e) {
+      e.originalEvent.stopPropagation();
+      e.originalEvent.preventDefault();
+      this.importFile(e.originalEvent.dataTransfer.files);
+    },
+
+    handleDragOVer : function(e) {
+      e.originalEvent.stopPropagation();
+      e.originalEvent.preventDefault();
+    },
+
+    handleDragLeave : function(e) {
     },
 
     initialize: function(options) {
-      this.sensorId = options.model.attributes.sensorId;
-      console.log(this.options.model.get('row'));
-      this.row = this.options.model.get('row');
+      this.sensorId = options.model.get('sensorId');
+      this.row = options.model.get('row');
     },
 
     clearFile: function() {
@@ -53,7 +68,12 @@ define([
       if (module !== '') {
 
         var reader = new FileReader();
-        var file = $('#input-file').get(0).files[0] || null;
+        if (typeof event.target ==='undefined' ) {
+          var file = event[0];
+        }
+        else {
+          var file = $('#input-file').get(0).files[0] || null;
+        }
         $('#clear').removeAttr('disabled');
         var ext = file.name.split('.');
         if (ext[ext.length - 1] != 'txt') {
@@ -71,7 +91,7 @@ define([
             );
           return false;
         } else {
-          var url = config.coreUrl + 'sensors/rfid/datas';
+          var url = 'sensors/rfid/datas';
           var data = new FormData();
           var self = this;
 
@@ -86,12 +106,13 @@ define([
 
         reader.onload = function(e, fileName) {
           data.append('data', e.target.result);
-          //data.append('module', self.model.get(self.parent.steps[self.parent.currentStep-1].name+'_RFID_identifer'));
-          data.append('FK_Sensor',self.sensorId);
-          data.append('StartDate', _this.row.model.get('StartDate'));
-          data.append('EndDate', _this.row.model.get('EndDate'));
 
-          console.log(data);
+          //data.append('module', self.model.get(self.parent.steps[self.parent.currentStep-1].name+'_RFID_identifer'));
+          
+          data.append('FK_Sensor',self.sensorId);
+          data.append('StartDate', _this.row.StartDate);
+          data.append('EndDate', _this.row.EndDate);
+
 
           $.ajax({
             type: 'POST',

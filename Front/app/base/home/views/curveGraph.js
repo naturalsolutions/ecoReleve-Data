@@ -1,10 +1,9 @@
 define([
     'jquery',
     'chart',
-    'config',
     'marionette',
     'moment'
-], function($, Chart, config, Marionette, moment) {
+], function($, Chart, Marionette, moment) {
   'use strict';
   return Marionette.ItemView.extend({
     template: 'app/base/home/tpl/tpl-graph.html',
@@ -25,7 +24,7 @@ define([
         var gData = JSON.parse(dataGraph);
         _this.drawGraph(gData);
       } else {
-        var url = config.coreUrl + 'stations/graph';
+        var url = 'stations/graph';
         $.ajax({
           context: this,
           url: url,

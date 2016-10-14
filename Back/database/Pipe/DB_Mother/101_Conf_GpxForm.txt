@@ -1,0 +1,90 @@
+INSERT INTO [dbo].[FrontModules]
+           ([Name]
+           ,[TypeModule]
+           ,[Comments])
+     VALUES
+           ('ImportFileForm'
+           ,1
+           ,'')
+GO
+
+
+
+DECLARE @IDModule INT; SET @IDModule = (SELECT ID From FrontModules WHERE Name = 'ImportFileForm')
+
+INSERT INTO ModuleForms
+SELECT @IDModule
+      ,1
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,NULL
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+      ,[Rules]
+  FROM [ModuleForms]
+  WHERE module_id = 2 AND (TypeObj is null OR TypeObj = 1)
+  AND NAme in ('FieldWorkers','NbFieldWorker','fieldActivityId','FieldWorker')
+
+UNION ALL 
+
+SELECT @IDModule
+  ,1
+  ,'file'
+  ,'File'
+  ,1
+  ,12
+  ,12
+  ,'FileUploadEditor'
+  ,'form-control'
+  ,2
+  ,1
+  ,NULL
+  ,'{extensions: null}'
+  ,NULL
+  ,'filesinputselector hide'
+  ,'filesinputselector hide'
+  ,NULL,NULL,NULL,NULL
+
+Union ALL 
+
+  SELECT @IDModule
+      ,1000
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,[FormOrder]
+      ,NULL
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+      ,[Rules]
+FROM ModuleForms 
+WHERE Name = 'fieldWorker' and module_id = 2 
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('101_Conf_GpxForm',GETDATE(),(SELECT db_name()))
+
+
+GO
