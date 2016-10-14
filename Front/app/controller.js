@@ -78,7 +78,6 @@ define([
           'newEntity': LytMonitoredSitesNew
         },
       };
-
     },
 
     home: function() {

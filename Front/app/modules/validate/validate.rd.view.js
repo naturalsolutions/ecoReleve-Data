@@ -11,64 +11,111 @@ define([
   'ns_modules/ns_com',
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
-  'ns_grid/grid.view'
+  'ns_grid/grid.view',
+  'ns_navbar/navbar.view',
 
 ], function(
   $, _, Backbone, Marionette, Swal, Translater, moment,
-  Com, NsMap, NsForm, GridView
+  Com, NsMap, NsForm, GridView, NavbarView
 ){
 
   'use strict';
 
   return Marionette.LayoutView.extend({
     template: 'app/modules/validate/validate.rd.tpl.html',
-
     className: 'full-height animated white',
 
     events: {
       'change .js-select-ferquency': 'handleFrequency',
       'click .js-btn-validate': 'validate',
-
     },
 
     ui: {
       'map': '#map',
-
       'individualForm': '.js-individual-form',
       'sensorForm': '.js-sensor-form',
     },
 
     regions: {
-      'rgGrid': '.js-rg-grid'
+      'rgGrid': '.js-rg-grid',
+      'rgNavbar': '.js-rg-navbar',
     },
 
     initialize: function(options) {
       this.model = new Backbone.Model();
-
       this.com = new Com();
 
-      var datasetInfos = options.dataset.split('_');
-
-      if(datasetInfos.length != 3){
-        
-      }
-      
       this.model.set('type', options.type);
 
-      this.model.set('FK_Sensor', datasetInfos[0]);
-      this.model.set('FK_Individual', datasetInfos[1]);
-      this.model.set('FK_ptt', datasetInfos[2]);
+      this.formatDatasetId(options.dataset);
+
       
-      
-      //this.frequency = options.frequency;
-      
+      this.frequency = options.frequency;
+    },
+
+    formatDatasetId: function(datasetId){
+      this.model.set('datasetId', datasetId);
+      var datasetId = datasetId.split('_');
+      if(datasetId.length != 3){
+                
+      }
+
+      this.model.set('FK_Sensor', datasetId[0]);
+      this.model.set('FK_Individual', datasetId[1]);
+      this.model.set('FK_ptt', datasetId[2]);
+
+    },
+
+    reloadFromNavbar: function(id) {
+      console.log(id);
+      this.formatDatasetId(id);
+      this.com.addModule(this.map);
+      this.map.com = this.com;
+      this.map.url = 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt') + '?geo=true';
+      this.map.updateFromServ();
+      this.map.url = false;
+
+      this.displayForms();
+      this.displayGrids();
     },
 
     onShow: function(){
       this.displayMap();
+      this.displayForms();
+      this.displayGrids();
+      this.displayNavbar();
+    },
+
+    displayNavbar: function(){
+      var _this = this;
+      return $.ajax({
+        url: 'sensors/' + this.model.get('type') + '/uncheckedDatas',
+        method: 'GET',
+        context: this,
+      }).done( function(data) {
+        var index = 0;
+        data[1] = data[1].map(function(dataset, i){
+          var datasetId = dataset.FK_Sensor + '_' + dataset.FK_Individual + '_' + dataset.FK_ptt;
+          if(datasetId === _this.model.get('datasetId')){
+            index = i;
+          }
+          return datasetId;
+        });
+
+        console.log(index);
+
+        this.rgNavbar.show(this.navbarView = new NavbarView({
+          parent: this,
+          index: index,
+          list: data[1],
+          type: this.model.get('type')
+        }));
+      });
+    },
+
+    displayForms: function(){
       this.displayIndForm();
       this.displaySensorForm();
-      this.displayGrid();
     },
 
     displayMap: function() {
@@ -108,7 +155,7 @@ define([
       });
     },
 
-    displayGrid: function(){
+    displayGrids: function(){
       var _this = this;
 
       var columnDefs = [{

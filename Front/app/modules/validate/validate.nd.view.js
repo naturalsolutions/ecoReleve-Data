@@ -43,6 +43,19 @@ define([
     },
 
 
+    reloadFromNavbar: function(id) {
+      this.model.set('id', id);
+
+      this.com.addModule(this.map);
+      this.map.com = this.com;
+      this.map.url = this.model.get('type') + '/' + id  + '/locations?geo=true';
+      this.map.updateFromServ();
+      this.map.url = false;
+
+      this.displayForm();
+      this.displayGrids();
+    },
+
     onRender: function() {
       this.$el.i18n();
     },

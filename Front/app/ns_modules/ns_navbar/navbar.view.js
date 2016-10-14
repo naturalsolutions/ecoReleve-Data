@@ -1,3 +1,4 @@
+//could be better but algorithms are fine
 define(['backbone', 'marionette', 'config'],
 function(Backbone, Marionette, config) {
   'use strict';
@@ -17,12 +18,28 @@ function(Backbone, Marionette, config) {
 
     initialize: function(options){
       this.parent = options.parent;
+      
       if(window.app.currentData && window.app.currentData.list.length > 1) {
         this.model = new Backbone.Model(window.app.currentData);
         this.model.set('display', true);
       } else {
         this.model = new Backbone.Model();
         this.model.set('display', false);
+      }
+
+      if(options.index && options.list.length > 1){
+        this.model = new Backbone.Model();
+        this.model.set('display', true); 
+        this.model.set('index', parseInt(options.index));
+        this.model.set('list', options.list);
+        this.model.set('totalRecords', options.list.length);
+        this.model.set('type', options.type);
+        var status = {
+          offset: 0
+        };
+        this.model.set('status', status);
+
+        this.clientSide = true;
       }
     },
 
@@ -53,16 +70,39 @@ function(Backbone, Marionette, config) {
       this.model.set('index', index);
 
       $.when(this.deferred).then(function(data){
-        var id = _this.model.get('list')[index]['ID'];
+        var id = _this.model.get('list')[index]['ID'] || _this.model.get('list')[index];
         _this.render();
         _this.parent.reloadFromNavbar(id);
         _this.disableBtns(false);
-        Backbone.history.navigate('#' + window.app.currentData.type + '/' + id, {trigger: false});
+        var hash = window.location.hash.split('/').slice(0,-1).join('/');
+        Backbone.history.navigate(hash + '/' + id, {trigger: false});
       });
 
     },
+
+    nextClientSide: function(){
+      var index = this.model.get('index');
+      var totalRecords = this.model.get('totalRecords');
+      index++;
+      if(index == totalRecords){
+        index = 0;
+      }
+      this.update(index);
+    },
+    prevClientSide: function(){
+      var index = this.model.get('index');
+      index--;
+      if(index < 0){
+        index = this.length - 1;
+      }
+      this.update(index);
+    },
     
     navigateNext: function(){
+      if(this.clientSide){
+        this.nextClientSide();
+        return;
+      }
       var index = this.model.get('index');
       var status = this.model.get('status');
       var totalRecords = this.model.get('totalRecords');
@@ -90,6 +130,10 @@ function(Backbone, Marionette, config) {
     },
 
     navigatePrev: function(){
+      if(this.clientSide){
+        this.pervClientSide();
+        return;
+      }
       var index = this.model.get('index');
       var status = this.model.get('status');
       var totalRecords = this.model.get('totalRecords');
