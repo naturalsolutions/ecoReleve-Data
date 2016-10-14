@@ -225,7 +225,7 @@ def insertListNewStations(request):
         newRow['ELE'] = row['elevation']
         newRow['precision'] = row['precision']
         newRow['Name'] = row['name']
-        newRow['fieldActivityId'] = row['fieldActivityId']
+        newRow['fieldActivityId'] = row['fieldActivity']
         newRow['precision'] = 10 #row['Precision']
         newRow['creationDate'] = dateNow
         newRow['creator'] = request.authenticated_userid['iss']

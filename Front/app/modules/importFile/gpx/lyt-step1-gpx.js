@@ -47,7 +47,12 @@ define([
     handleDrop : function(e) {
       e.originalEvent.stopPropagation();
       e.originalEvent.preventDefault();
-      this.importFile(e.originalEvent.dataTransfer.files);
+      var obj = new Object({});
+      obj.target = {files:''};
+      obj.target.files = e.originalEvent.dataTransfer.files;
+      $('input[name="file"]').attr('value','file').change(obj);
+      this.importFile(obj);
+
     },
 
     handleDragOVer : function(e) {
@@ -63,28 +68,19 @@ define([
       this.errors = true;
       this.importedFile = false;
       this.deferred = $.Deferred();
-      console.log(options)
       this.parent = options.parent;
       this.rdy = $.Deferred();
-
     },
 
     onShow: function() {
       var _this = this;
       this.parent.disableNextBtn();
       this.displayForm();
-
     },
-  
+
     importFile: function(e) {
       var _this = this;
-      if(typeof e.target === 'undefined') {
-        _this.importedFile = true;
-        var file = e[0];
-      }
-      else {
-        var file = e.target.files[0];
-      }
+      var file = e.target.files[0];
       var reader = new FileReader();
       var fileName = file.name;
       $('#fileNameSelected').text(fileName);
@@ -124,7 +120,7 @@ define([
       reader.readAsText(file);
     },
 
-  
+
     displayErrors: function(errors) {
       this.swalError(errors);
     },
@@ -151,11 +147,9 @@ define([
     },
 
     isRdyAccess: function() {
-      console.log('isRdyAccess')
     },
 
     validate: function() {
-      console.log('validate')
       var formData = this.nsform.BBForm.getValue();
       this.setWaypointListWithForm(formData);
       return this.wayPointList;
@@ -171,7 +165,7 @@ define([
               return true;
             }
     },
-    
+
     displayInputFile: function(){
       this.ui.form.find('.filesinputselector').parent().prepend('<div id="btnImpGpxFile">'+
         '<button id="importGpxFile" type="button" class="btn btn-success fileinput-button" data-i18n="import.fileSelection">'+
@@ -203,7 +197,7 @@ define([
       });
 
     },
-    
+
     loadCollection: function(url, element) {
       var collection =  new Backbone.Collection();
       collection.url = url;
