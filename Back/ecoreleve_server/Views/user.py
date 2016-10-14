@@ -45,7 +45,10 @@ def current_user(request):
 
     query = select([
         User.id.label('PK_id'),
-        User.Login.label('fullname')
+        User.Login.label('fullname'),
+        User.Firstname.label('Firstname'),
+        User.Language.label('Language'),
+        User.Lastname.label('Lastname')
     ]).where(User.id == request.authenticated_userid['iss'])
     response = dict(session.execute(query).fetchone())
     response['role'] = currentUserRole

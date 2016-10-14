@@ -15,7 +15,8 @@ define([
     className: 'full-height export-layout',
     template: 'app/modules/export/templates/tpl-export-step4.html',
 
-    name: 'File type',
+
+    name : '<span class="export-step4"></span>',
 
     ui:  {
       'pdfTile': '#pdfTile',
@@ -41,6 +42,9 @@ define([
     onShow: function() {
       this.$el.find('.tile-inside:first input').prop('checked', true).change();
       this.$el.find('.tile-inside:first').addClass('active');
+      this.$el.i18n();
+      var stepName = i18n.translate('export.step4-label');
+      $('.export-step4').html(stepName);
     },
 
     changeValue: function(e) {

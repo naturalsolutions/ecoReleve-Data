@@ -24,7 +24,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/gpx/templates/tpl-step1-gpx.html',
 
-    name: 'GPX file upload',
+    name : '<span class="import-step1"></span>',
 
     events: {
       'change input[type="file"]': 'importFile',
@@ -56,10 +56,13 @@ define([
       $('.fieldactivity').addClass('hidden');
       this.fieldworkers = $('label[for*="FieldWorkers"]').parent();
       $(this.fieldworkers).addClass('hidden');
+      this.$el.i18n();
+      var stepName = i18n.translate('import.stepper.step1-gpxlabel');
+      $('.import-step1').html(stepName);
     },
 
     importFile: function(e) {
-
+      window.formEdition = false;
       var _this = this;
       var file = e.target.files[0];
       var reader = new FileReader();
@@ -68,6 +71,7 @@ define([
       var fileType = tab[1].toUpperCase();
       var fieldAfield = $('select[name="fieldActivity"]');
       var userBtn = $('button[data-action="add"]');
+      var instance = config.instance;
 
       if (fileType != 'GPX') {
         this.swalError('error file type');
@@ -78,7 +82,7 @@ define([
         $('#importGpxMsg').removeClass('hidden');
       } else {
         reader.onload = function(e, fileName) {
-          window.app.checkFormSaved = false;
+          window.formEdition = false;
           var xml = e.target.result;
 
           // get waypoints collection
@@ -97,8 +101,9 @@ define([
             $(userBtn).removeAttr('disabled');
             $('#importGpxMsg').addClass('hidden');
             $('.fieldactivity').removeClass('hidden');
-            $(_this.fieldworkers).removeClass('hidden');
-
+            if(instance!='demo') {
+              $(_this.fieldworkers).removeClass('hidden');
+            }
             if (errosList.length > 0) {
               for (var i = 0; i < errosList.length; i++) {
                 _this.displayErrors(errosList[i] + '<br/>');
@@ -148,7 +153,7 @@ define([
       var fieldActivity = $(e.target).val();
       this.wayPointList.each(function(model) {
         model.set('fieldActivity', fieldActivity);
-        window.app.checkFormSaved = false;
+         window.formEdition = false; 
       });
     },
     onDestroy: function() {
@@ -168,14 +173,22 @@ define([
       if(error){
         return false;
       }else{
-        var fieldworkers = this.nsform.BBForm.model.get('FieldWorkers');
-        this.setFieldWorkers(fieldworkers);
-        window.app.checkFormSaved = false;
+        var instance = config.instance;
+        if(instance != 'demo') {
+            var fieldworkers = this.nsform.BBForm.model.get('FieldWorkers');
+            this.setFieldWorkers(fieldworkers);
+        }
+         window.formEdition = false;
         return true;
       }
     },
     displayForm: function() {
       var model = new GpxForm();
+      // if instance is demo, fieldworker is not required, so hide input
+      var instance = config.instance;
+      if(instance == 'demo') {
+        model.__proto__.schema.FieldWorkers.subschema.FieldWorker.validators = [];
+      }
       this.nsform = new NsForm({
         //name: 'ImportGpxFileForm',
         //modelurl: config.coreUrl+'stations/fileImport',

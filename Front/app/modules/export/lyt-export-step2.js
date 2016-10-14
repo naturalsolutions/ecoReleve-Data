@@ -30,7 +30,7 @@ define([
       'click button#filter': 'filter',
     },
 
-    name: ' Filter',
+    name : '<span class="export-step2"></span>',
 
     initialize: function(options) {
       this.com = new Com();
@@ -42,6 +42,9 @@ define([
       this.getFieldsListForSelectedView();
       this.displayMap();
       this.displayFilters();
+      this.$el.i18n();
+      var stepName = i18n.translate('export.step2-label');
+      $('.export-step2').html(stepName);
     },
 
     addFilter: function() {
