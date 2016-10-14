@@ -6,9 +6,7 @@ function($,Marionette, config, Breadcrumb) {
     template: 'app/base/header/tpl-header.html',
     className: 'header',
     events: {
-      'click #logout': 'logout',
-      'click #pipefy' : 'pipefyform',
-      'click .pipefyclose' :'closeform'
+      'click #logout': 'logout'
     },
     regions: {
       'breadcrumb': '#breadcrumb'
@@ -16,8 +14,6 @@ function($,Marionette, config, Breadcrumb) {
 
     ui: {
       'userName': '#userName',
-      'pypefy' : '#pipefy',
-      'pypefypanel' :'div.supportpanel'
     },
 
     logout: function() {
@@ -60,41 +56,7 @@ function($,Marionette, config, Breadcrumb) {
       }
       this.breadcrumb.show(new Breadcrumb());
     },
-     pipefyform : function(e){
-      // check id div is not integrated add it
-      var frmisinserted  = $('.supportpanel').length;
-      if (!frmisinserted) {
-        this.insertForm();
-      } else {
-        this.controlformdisplay();
-      }
 
-    },
-    closeform : function(){
-      $('div.supportpanel').animate({ "right": "-=560px" }, "slow" ).addClass('hidden');
-    },
-    insertForm : function(){
-      var frm = '<div class="supportpanel hidden"><div class="supportheader">Support</div>'
-      frm +='<iframe width="560" height="800" src="https://beta.pipefy.com/public_form/49561?embedded=true" frameborder="0" id="iframe"></iframe></div>';
-      this.$el.append(frm);
-      this.controlformdisplay();
-    },
-    controlformdisplay : function(){
-      var notdisplayed = $('div.supportpanel').hasClass('hidden');
-      if(notdisplayed){
-        $('div.supportpanel').removeClass('hidden').animate({
-          "right": "+=560px"}, { duration: 700,
-          complete: function() {
-              $('.supportpanel').append('<a class="pipefyclose"><span class="reneco reneco-close"></span></a>');
-          }
-        }
-
-       );
-      } else {
-        this.closeform();
-      }
-
-    },
     getUser : function(){
       var _this = this;
       var user  = new Backbone.Model();
