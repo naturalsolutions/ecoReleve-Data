@@ -92,6 +92,7 @@ define([
     },
 
     release: function(releaseMethod){
+      var _this = this;
       var visibleSelectedRows = [];
       var model = this.gridView.gridOptions.api.getModel();
       for (var i = 0; i < model.getRowCount(); i++) {

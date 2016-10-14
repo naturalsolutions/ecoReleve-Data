@@ -9,7 +9,7 @@ define([
   'backbone-forms',
   'requirejs-text!./tpl-bbfe-objectPicker.html',
 ], function(
-  $, _, Backbone, Marionette, Swal, Translater, 
+  $, _, Backbone, Marionette, Swal, Translater,
   Form, Tpl
 ) {
   'use strict';
@@ -31,7 +31,7 @@ define([
 
       this.model.set('key', options.key);
       this.model.set('type', 'text');
-      
+
       var name = options.key.split('FK_')[1];
       this.objectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
       this.url = this.objectName + '/';
@@ -43,6 +43,10 @@ define([
       };
       this.model.set('icon',dictCSS[this.objectName]);
 
+      var value;
+      if (options.model) {
+        value = options.model.get(options.schema.name) || options.value;
+      }
       if (options.schema.options && options.schema.options.usedLabel){
         this.usedLabel = options.schema.options.usedLabel;
         this.displayingValue = true;
@@ -56,10 +60,6 @@ define([
       }
       this.isTermError = false;
 
-      var value;
-      if (options.model) {
-        value = options.model.get(options.schema.name) || options.value;
-      }
 
       if (value) {
         this.model.set('value', value);
@@ -163,7 +163,7 @@ define([
         this.$el.find('.form-control').removeClass('form-control').addClass('ag-cell-edit-input');
         this.$el.find('.span').addClass('');
       }
-      
+
       this._input = this.$el.find('input[name="' + this.model.get('key') + '" ]')[0];
       if (this.displayingValue){
         if (this.initValue && this.initValue != null){
@@ -173,7 +173,7 @@ define([
             $(_this._input).autocomplete(_this.autocompleteSource);
         }).defer();
       }
-      
+
       this.initPicker();
 
       return this;
@@ -226,7 +226,7 @@ define([
         },
         new: function(e){
           e.preventDefault();
-          
+
           if(this.model.get('availableOptions')){
             this.ui.btnNew.tooltipList({
               position: 'top',
@@ -270,7 +270,7 @@ define([
       this.hidePicker();
     },
 
-    
+
 
     checkHidePicker: function(e){
       if($(e.target).attr('id') === 'modal'){
@@ -294,4 +294,3 @@ define([
   }
   );
 });
-
