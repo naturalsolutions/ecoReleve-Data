@@ -237,7 +237,7 @@ def getIndivEquipment(request):
     joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
     joinTable = join(joinTable, SensorType,
                      Sensor.FK_SensorType == SensorType.ID)
-    query = select([table.c['StartDate'], table.c['EndDate'], Sensor.UnicIdentifier, table.c['FK_Individual'], SensorType.Name.label('Type')]
+    query = select([table.c['StartDate'], table.c['EndDate'], Sensor.UnicIdentifier, Sensor.ID.label('SensorID'), table.c['FK_Individual'], SensorType.Name.label('Type')]
                    ).select_from(joinTable
                                  ).where(table.c['FK_Individual'] == id_indiv
                                          ).order_by(desc(table.c['StartDate']))
