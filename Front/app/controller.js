@@ -92,8 +92,10 @@ define([
     station: function(id) {
       this.rgMain.show(new LytStation({id: id}));
     },    
-    stations: function() {
-      this.rgMain.show(new LytStations());
+    stations: function(params) {
+      this.rgMain.show(new LytStations({
+        params: params
+      }));
     },
     newStation: function(from) {
       this.rgMain.show(new LytStationsNew({from: from}));
