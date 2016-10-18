@@ -1,0 +1,13 @@
+UPDATE [dbo].[ModuleForms]
+   SET [Label] = 'End time'
+ WHERE 
+ TypeObj = (select ID from [dbo].[ProtocoleType] where Name = 'Transmitter_research_condition')
+ AND
+ Name like 'start_time'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('102_Update_Label_Form_Transmitter_Research_Condition',GETDATE(),(SELECT db_name()))
+
+
+GO
