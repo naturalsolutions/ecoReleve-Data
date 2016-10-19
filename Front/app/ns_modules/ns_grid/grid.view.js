@@ -94,8 +94,6 @@ define([
         //overlayLoadingTemplate: '',
       };
 
-
-
       if(!this.clientSide) {
         $.extend(this.gridOptions, {
           enableServerSideSorting: true,
@@ -161,8 +159,7 @@ define([
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
-
-
+        
 
         if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
           _this.formatSelectColumn(col)          
@@ -334,7 +331,6 @@ define([
             order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
           }
           
-
           var status = {
             criteria: JSON.stringify(_this.filters),
             page: page,
@@ -344,7 +340,6 @@ define([
             typeObj: _this.model.get('typeObj')
           };
 
-          
           $.ajax({
             url: _this.model.get('url'),
             method: 'GET',
