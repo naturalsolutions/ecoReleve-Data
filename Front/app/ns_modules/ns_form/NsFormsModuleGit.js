@@ -240,7 +240,6 @@ define([
           var settings = $.extend({}, _this.data, resp.data); //?
           _this.model.attributes = settings;
 
-
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
           _this.showForm();
           _this.updateState(this.displayMode);
@@ -463,7 +462,7 @@ define([
                       _this.reloadingAfterSave();
                     }
                   }
-                  _this.afterSaveSuccess();
+                  _this.afterSaveSuccess(response);
                   return true;
                 },
                 error: function (response) {
@@ -484,7 +483,7 @@ define([
                   if (_this.reloadAfterSave) {
                     _this.reloadingAfterSave();
                   }
-                  _this.afterSaveSuccess();
+                  _this.afterSaveSuccess(response);
                 },
                 error: function (model,response) {
                   _this.savingError(response);
@@ -516,7 +515,6 @@ define([
           this.afterSavingModel();
           return jqxhr;
         },
-
 
     afterSaveSuccess: function(){
 
@@ -569,7 +567,6 @@ define([
       this.swal(opts);
     },
 
-
     afterDelete: function(){
 
     },
@@ -593,50 +590,50 @@ define([
 
           var testTmp = true;
           for ( var key in objAttributes ) {
-            switch ( typeof objAttributes[key] ) {
-              case "number" : {
-                if( typeof objSchema[key] != "undefined" && (typeof objSchema[key].fieldClass != "undefined" && objSchema[key].fieldClass.indexOf('hide') == -1 ) &&  ( objAttributes[key]!= null || objAttributes[key]!= 0 ) && objAttributes[key] != objSchema[key].defaultValue) {
-                  console.warn("we can save [NUMBER]"+key+" "+objAttributes[key]);
-                  if( testBool )
-                    testBool = false;
-                    return testBool;
-                }
-                break;
-              }
-              case "string" : {
-                if( typeof objSchema[key] != "undefined" && (typeof objSchema[key].fieldClass != "undefined" &&  objSchema[key].fieldClass.indexOf('hide') == -1 ) && objAttributes[key]!= "" && objAttributes[key] != objSchema[key].defaultValue) {
-                  console.warn("we can save [STRNG] "+key+" "+objAttributes[key]);
-                  if( testBool )
-                    testBool = false;
-                    return testBool;
-                }
-                break;
-              }
-              case "boolean" : { // skip boolean type
-                break;
-              }
-              case "object" : {
-                if( typeof objSchema[key] != "undefined") {//key in schema
-                  if( Array.isArray(objAttributes[key]) ) { // array subform
-                    for ( var elem of objAttributes[key] ) { // for each subform
-                      testTmp = this.recurciveValidation (objSchema[key].subschema, elem , true) // call with subform schema and attributes
-                      if(!testTmp)
-                      return testTmp;
-                    }
+            if (key != 'defaultValues') {
+              switch ( typeof objAttributes[key] ) {
+                case "number" : {
+                  if( objSchema[key].fieldClass.indexOf('hide') == -1 && ( objAttributes[key]!= null || objAttributes[key]!= 0 ) && objAttributes[key] != objSchema[key].defaultValue) {
+                    console.warn("we can save [NUMBER]"+key+" "+objAttributes[key]);
+                    if( testBool )
+                      testBool = false;
+                      return testBool;
                   }
-                  else { //case thesaurus
-                    if( objAttributes[key] != null ) {
-                      if( testBool )
-                        testBool = false;
-                        return testBool;
-                    }
-                  }
+                  break;
                 }
-                break;
-              }
-              default : {
-                console.warn("Error! case undefined or another type not possible");
-                break;
+                case "string" : {
+                  if( objSchema[key].fieldClass.indexOf('hide') == -1 && objAttributes[key]!= "" && objAttributes[key] != objSchema[key].defaultValue) {
+                    console.warn("we can save [STRNG] "+key+" "+objAttributes[key]);
+                    if( testBool )
+                      testBool = false;
+                      return testBool;
+                  }
+                  break;
+                }
+                case "boolean" : { // skip boolean type
+                  break;
+                }
+                case "object" : {
+                    if( Array.isArray(objAttributes[key]) ) { // array subform
+                      for ( var elem of objAttributes[key] ) { // for each subform
+                        testTmp = this.recurciveValidation (objSchema[key].subschema, elem , true) // call with subform schema and attributes
+                        if(!testTmp)
+                        return testTmp;
+                      }
+                    }
+                    else { //case thesaurus
+                      if( objAttributes[key] != null ) {
+                        if( testBool )
+                          testBool = false;
+                          return testBool;
+                      }
+                    }
+                  break;
+                }
+                default : {
+                  console.warn("Error! case undefined or another type not possible");
+                  break;
+                }
               }
             }
           }
@@ -645,9 +642,9 @@ define([
 
         onSavingModel: function () {
           // To be extended, calld after commit before save on model
-          return this.recurciveValidation(this.model.schema,this.model.attributes , true );
+          return this.recurciveValidation(this.model.schema,this.BBForm.getValue() , true );
         },
-    afterSavingModel: function () {
+        afterSavingModel: function () {
       // To be extended called after model.save()
     },
     BeforeShow: function () {
