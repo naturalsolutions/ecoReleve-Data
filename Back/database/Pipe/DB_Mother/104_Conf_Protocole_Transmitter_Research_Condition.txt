@@ -11,11 +11,11 @@ UPDATE [dbo].[ModuleForms]
 GO
 
 UPDATE [dbo].[ProtocoleType_ObservationDynProp]
-   SET [FK_ObservationDynProp] = (select ID from [dbo].[ObservationDynProp] where Name = 'end_time')
- WHERE
- FK_ProtocoleType = (select ID from [dbo].[ProtocoleType] where Name  = 'Transmitter_research_condition')
- AND
- FK_ObservationDynProp = (select ID from [dbo].[ObservationDynProp] where Name = 'start_time')
+  SET [FK_ObservationDynProp] = (select ID from [dbo].[ObservationDynProp] where Name = 'end_time')
+  WHERE
+  FK_ProtocoleType = (select ID from [dbo].[ProtocoleType] where Name  = 'Transmitter_research_condition')
+  AND
+  FK_ObservationDynProp = (select ID from [dbo].[ObservationDynProp] where Name = 'start_time')
 GO
 
 COMMIT TRAN T1;
