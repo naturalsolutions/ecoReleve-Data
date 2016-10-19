@@ -52,7 +52,7 @@ define([
 
       this.releaseMethod = null;
       this.getReleaseMethod();
-
+      this.errors = 0;
       this.sensorPicker = null;
     },
 
@@ -80,15 +80,106 @@ define([
     },
 
     displayGrid: function() {
+      var _this = this;
       this.rgGrid.show(this.gridView = new GridView({
         clientSide: true,
         url: 'release/individuals/',
         gridOptions: {
           enableFilter: true,
+          editType: 'fullRow',
+          singleClickEdit : true,
           rowSelection: 'multiple',
+          onCellValueChanged : _this.checkAll.bind(_this),
+        },
+        afterFetchColumns: function(options) {
+          var colDefs = options.gridOptions.columnDefs;
+          console.log('afterFetchColumns',options.gridOptions.columnDefs);
+          colDefs.map(function(colDef){
+            if (colDef.field == 'UnicIdentifier'){
+              colDef.cellRenderer = _this.sensorCellRenderer.bind(_this);
+              colDef.cellClassRules = {
+                'error': function(params){
+                  return params.node.error === true;},
+                'ag-error-highlight': function(params){
+                  return params.node.errorDuplicated === true;
+                },
+                'no-error':function(params){
+                  return params.node.error === false;
+                },
+                'no-duplicated':function(params){
+                   return params.node.errorDuplicated === false;
+                }
+                };
+              }
+          });
         }
       }));
+    },
 
+    checkAll: function(options){
+      var _this = this;
+      var error = false;
+      console.log('checkAll',options);
+      var duplicatedSensors = _this.checkDuplicateSensor(options);
+      if (!duplicatedSensors && options.data.UnicIdentifier){
+          var availableDeffered = _this.checkSensorAvailability(options);
+          availableDeffered.always(function(){
+            options.api.refreshView();
+          });
+        }
+      options.api.refreshView();
+    },
+
+    sensorCellRenderer : function(params){
+      var _this = this;
+      console.log(params);
+      if (params.value){
+        var displayVal = params.value.label;
+      }
+      if (params.value && params.value != 'undefined') {
+        return displayVal;
+      } else {
+        return '';
+      }
+    },
+
+    checkSensorAvailability: function(options){
+      var resp;
+      options.data.sta_date = this.model.get('StationDate');
+      options.data.FK_Sensor = options.data.UnicIdentifier.value;
+       return $.ajax({
+        type : 'POST',
+        url : 'release/individuals/',
+        data : options.data,
+      }).success(function(){
+        options.node.error = false;
+      }).fail(function(){
+        options.node.error = true;
+      });
+    },
+
+    checkDuplicateSensor: function(options){
+      console.log(options);
+      var nodeList = options.api.rowModel.rowsToDisplay;
+      var nodeListGrouped = _.groupBy(nodeList,function(node){
+          if (node.data.UnicIdentifier) {
+            return node.data.UnicIdentifier.label;
+          } else {
+            return node.data.UnicIdentifier;
+          }
+      });
+
+      _.each(nodeListGrouped,function(listNode,key){
+        if (key!='undefined' && key!='' && listNode.length > 1 ){
+          _.map(listNode,function(node){
+            node.errorDuplicated = true;
+          });
+        } else {
+          _.map(listNode,function(node){
+            node.errorDuplicated = false;
+          });
+        }
+      });
     },
 
     release: function(releaseMethod){

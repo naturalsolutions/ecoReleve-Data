@@ -26,7 +26,7 @@ define([
       options.schema.editorClass='';
       Form.editors.Text.prototype.initialize.call(this, options);
       this.validators = options.schema.validators || [];
-
+      this.options = options;
       this.model = new Backbone.Model();
 
       this.model.set('key', options.key);
@@ -52,6 +52,9 @@ define([
         this.displayingValue = true;
         this.initValue = value;
         this.validators.push({ type: 'Thesaurus', parent: this}); //?
+        if (options.schema.options.target){
+          this.target = options.schema.options.target;
+        }
         this.initAutocomplete();
       } else {
         this.usedLabel = 'ID';
@@ -100,8 +103,10 @@ define([
       this.autocompleteSource.minLength = 3;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
-        $(_this._input).attr('data_value',ui.item.value);
-        $(_this._input).val(ui.item.label);
+        // $(_this._input).attr('data_value',ui.item.value);
+        // $(_this._input).val(ui.item.label);
+        _this.setValue(ui.item.value,ui.item.label);
+
 
         _this.matchedValue = ui.item;
         _this.isTermError = false;
@@ -140,18 +145,25 @@ define([
       };
     },
 
-    getDisplayValue: function(val){
+    fetchDisplayValue: function(val){
       var _this = this;
       $.ajax({
         url : _this.url+val,
         success : function(data){
-          $(_this._input).attr('data_value',val);
-          $(_this._input).val(data[_this.usedLabel]);
-          //_this.setValue(val,data[_this.usedLabel]);
+          // $(_this._input).attr('data_value',val);
+          // $(_this._input).val(data[_this.usedLabel]);
+          _this.setValue(val,data[_this.usedLabel]);
           _this.displayErrorMsg(false);
           _this.isTermError = false;
         }
       });
+    },
+
+    getItem : function(){
+      if ($(this._input).val() === ''){
+        $(this._input).attr('data_value','');
+      }
+      return {label: $(this._input).val(), value: $(this._input).attr('data_value')};
     },
 
     render: function(){
@@ -167,7 +179,7 @@ define([
       this._input = this.$el.find('input[name="' + this.model.get('key') + '" ]')[0];
       if (this.displayingValue){
         if (this.initValue && this.initValue != null){
-          this.getDisplayValue(this.initValue);
+          this.fetchDisplayValue(this.initValue);
         }
         _(function () {
             $(_this._input).autocomplete(_this.autocompleteSource);
@@ -244,8 +256,6 @@ define([
           }
         },
       });
-
-
     },
 
     getValue: function() {
@@ -258,11 +268,21 @@ define([
       return $(this._input).attr('data_value');
     },
 
+    getDisplayValue: function() {
+      if (this.isTermError) {
+        return null ;
+      }
+      return $(this._input).val();
+    },
+
     setValue: function(value,displayValue) {
       if (displayValue || displayValue == ''){
         $(this._input).val(displayValue);
       } else {
-        this.getDisplayValue(value);
+        this.fetchDisplayValue(value);
+      }
+      if (this.target){
+        this.model.set(this.target,value);
       }
       $(this._input).attr('data_value',value);
       this.matchedValue = value;
