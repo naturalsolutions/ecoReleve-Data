@@ -240,7 +240,6 @@ define([
           var settings = $.extend({}, _this.data, resp.data); //?
           _this.model.attributes = settings;
 
-
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
           _this.showForm();
           _this.updateState(this.displayMode);
@@ -419,89 +418,103 @@ define([
     },*/
 
     butClickSave: function (e) {
-      var _this = this;
-      var errors = this.BBForm.commit();
-      var jqhrx;
+          var _this = this;
+          var flagEmpty = true;
+          var errors = this.BBForm.commit();
+          var jqhrx;
 
+          flagEmpty = this.onSavingModel();
+          if ( !flagEmpty ) {
 
-      if(!errors){
-          if (this.model.attributes["id"] == 0) {
-            // To force post when model.save()
-          this.model.attributes["id"] = null;
-        }
-        this.onSavingModel();
-        if (this.model.id == 0) {
-          // New Record
-          jqhrx = this.model.save(null, {
-            success: function (model, response) {
-              // Getting ID of created record, from the model (has beeen affected during model.save in the response)
-              window.formEdition = false;
-              window.formChange = false;
-              _this.savingSuccess(model, response);
-              _this.id = _this.model.id;
-              if (_this.redirectAfterPost != "") {
-                // If redirect after creation
-                var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
-
-                if (window.location.href == window.location.origin + TargetUrl) {
-                  // if same page, relaod
-                  window.location.reload();
-                }
-                else {
-                  // otpherwise redirect
-                  window.location.href = TargetUrl;
-                }
-
-              }
-              else {
-                // If no redirect after creation
-                if (_this.reloadAfterSave) {
-                  _this.reloadingAfterSave();
-                }
-              }
-              _this.afterSaveSuccess(response);
-              return true;
-            },
-            error: function (response) {
-              _this.savingError(response);
-              return false;
+          if(!errors) {
+            if (this.model.attributes["id"] == 0) {
+                // To force post when model.save()
+              this.model.attributes["id"] = null;
             }
 
-          });
-        }
-        else {
-          // After update of existing record
-          this.model.id = this.model.get('id');
-          var jqxhr = this.model.save(null, {
-            success: function (model, response) {
-              window.formEdition = false;
-              window.formChange = false;
-              _this.savingSuccess(model, response);
-              if (_this.reloadAfterSave) {
-                _this.reloadingAfterSave();
-              }
-              _this.afterSaveSuccess(response);
-            },
-            error: function (model,response) {
-              _this.savingError(response);
-            }
-          });
 
-        }
-      }else{
-        var errorList = _this.BBForm.$el.find('.error');
-        for (var i=0; i<errorList.length ;i++){
-          var elmName = errorList[i].nodeName ;
-          if (elmName.toUpperCase()!= 'SPAN'){
-            $(errorList[i]).trigger('focus').click();
-            break;
+            if (this.model.id == 0) {
+              // New Record
+              jqhrx = this.model.save(null, {
+                success: function (model, response) {
+                  // Getting ID of created record, from the model (has beeen affected during model.save in the response)
+                  window.formEdition = false;
+                  window.formChange = false;
+                  _this.savingSuccess(model, response);
+                  _this.id = _this.model.id;
+                  if (_this.redirectAfterPost != "") {
+                    // If redirect after creation
+                    var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
+
+                    if (window.location.href == window.location.origin + TargetUrl) {
+                      // if same page, relaod
+                      window.location.reload();
+                    }
+                    else {
+                      // otpherwise redirect
+                      window.location.href = TargetUrl;
+                    }
+
+                  }
+                  else {
+                    // If no redirect after creation
+                    if (_this.reloadAfterSave) {
+                      _this.reloadingAfterSave();
+                    }
+                  }
+                  _this.afterSaveSuccess(response);
+                  return true;
+                },
+                error: function (response) {
+                  _this.savingError(response);
+                  return false;
+                }
+
+              });
+            }
+            else {
+              // After update of existing record
+              this.model.id = this.model.get('id');
+              var jqxhr = this.model.save(null, {
+                success: function (model, response) {
+                  window.formEdition = false;
+                  window.formChange = false;
+                  _this.savingSuccess(model, response);
+                  if (_this.reloadAfterSave) {
+                    _this.reloadingAfterSave();
+                  }
+                  _this.afterSaveSuccess(response);
+                },
+                error: function (model,response) {
+                  _this.savingError(response);
+                }
+              });
+
+            }
+          }else{
+            var errorList = _this.BBForm.$el.find('.error');
+            for (var i=0; i<errorList.length ;i++){
+              var elmName = errorList[i].nodeName ;
+              if (elmName.toUpperCase()!= 'SPAN'){
+                $(errorList[i]).trigger('focus').click();
+                break;
+              }
+            }
+            return false;
           }
         }
-        return false;
-      }
-      this.afterSavingModel();
-      return jqxhr;
-    },
+        else {
+          this.swal({
+            title : 'Empty input',
+            text : 'all input are empty',
+            type:'error',
+            showCancelButton: false,
+            confirmButtonColor:'#DD6B55',
+            confirmButtonText:'Ok'});
+        }
+          this.afterSavingModel();
+          return jqxhr;
+        },
 
     afterSaveSuccess: function(){
 
@@ -554,7 +567,6 @@ define([
       this.swal(opts);
     },
 
-
     afterDelete: function(){
 
     },
@@ -569,10 +581,70 @@ define([
       this.displaybuttons();
     },
 
-    onSavingModel: function () {
-      // To be extended, calld after commit before save on model
-    },
-    afterSavingModel: function () {
+    /*function arguments schema and attribute object and a boolean(true)    */
+        /* for each attributes check if he is in schema                         */
+        /* and if he is not null , diff of defaultValue and visible ( not hide )*/
+        /* stop and return false if one attributes is not empty                 */
+
+        recurciveValidation: function ( objSchema , objAttributes , testBool) {
+
+          var testTmp = true;
+          for ( var key in objAttributes ) {
+            if (key != 'defaultValues') {
+              switch ( typeof objAttributes[key] ) {
+                case "number" : {
+                  if( objSchema[key].fieldClass.indexOf('hide') == -1 && ( objAttributes[key]!= null || objAttributes[key]!= 0 ) && objAttributes[key] != objSchema[key].defaultValue) {
+                    console.warn("we can save [NUMBER]"+key+" "+objAttributes[key]);
+                    if( testBool )
+                      testBool = false;
+                      return testBool;
+                  }
+                  break;
+                }
+                case "string" : {
+                  if( objSchema[key].fieldClass.indexOf('hide') == -1 && objAttributes[key]!= "" && objAttributes[key] != objSchema[key].defaultValue) {
+                    console.warn("we can save [STRNG] "+key+" "+objAttributes[key]);
+                    if( testBool )
+                      testBool = false;
+                      return testBool;
+                  }
+                  break;
+                }
+                case "boolean" : { // skip boolean type
+                  break;
+                }
+                case "object" : {
+                    if( Array.isArray(objAttributes[key]) ) { // array subform
+                      for ( var elem of objAttributes[key] ) { // for each subform
+                        testTmp = this.recurciveValidation (objSchema[key].subschema, elem , true) // call with subform schema and attributes
+                        if(!testTmp)
+                        return testTmp;
+                      }
+                    }
+                    else { //case thesaurus
+                      if( objAttributes[key] != null ) {
+                        if( testBool )
+                          testBool = false;
+                          return testBool;
+                      }
+                    }
+                  break;
+                }
+                default : {
+                  console.warn("Error! case undefined or another type not possible");
+                  break;
+                }
+              }
+            }
+          }
+          return testBool;
+        },
+
+        onSavingModel: function () {
+          // To be extended, calld after commit before save on model
+          return this.recurciveValidation(this.model.schema,this.BBForm.getValue() , true );
+        },
+        afterSavingModel: function () {
       // To be extended called after model.save()
     },
     BeforeShow: function () {
