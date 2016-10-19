@@ -18,6 +18,7 @@ define([
     className: '',
     events: {
       'click span.picker': 'showPicker',
+      'click button#detailsShow': 'openDetails',
     },
 
     initialize: function(options) {
@@ -103,11 +104,7 @@ define([
       this.autocompleteSource.minLength = 3;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
-        // $(_this._input).attr('data_value',ui.item.value);
-        // $(_this._input).val(ui.item.label);
         _this.setValue(ui.item.value,ui.item.label);
-
-
         _this.matchedValue = ui.item;
         _this.isTermError = false;
         _this.displayErrorMsg(false);
@@ -118,12 +115,12 @@ define([
 
       this.autocompleteSource.change = function(event,ui){
         event.preventDefault();
-          if ($(_this._input).val() != '' && !_this.matchedValue){
+          if ($(_this._input).val() !== '' && !_this.matchedValue){
             _this.isTermError = true;
             _this.displayErrorMsg(true);
           }
           else {
-            if ($(_this._input).val() == ''){
+            if ($(_this._input).val() === ''){
               $(_this._input).attr('data_value','');
             }
             _this.isTermError = false;
@@ -178,7 +175,7 @@ define([
 
       this._input = this.$el.find('input[name="' + this.model.get('key') + '" ]')[0];
       if (this.displayingValue){
-        if (this.initValue && this.initValue != null){
+        if (this.initValue && this.initValue !== null){
           this.fetchDisplayValue(this.initValue);
         }
         _(function () {
@@ -212,7 +209,7 @@ define([
           _this.showPicker();
         },
         afterSaveSuccess: function(response){
-          var id = response.ID
+          var id = response.ID;
           var displayValue = this.model.get(_this.usedLabel);
 
           _this.setValue(id,displayValue);
@@ -276,7 +273,7 @@ define([
     },
 
     setValue: function(value,displayValue) {
-      if (displayValue || displayValue == ''){
+      if (displayValue || displayValue === ''){
         $(this._input).val(displayValue);
       } else {
         this.fetchDisplayValue(value);
@@ -289,8 +286,6 @@ define([
       $(this._input).change();
       this.hidePicker();
     },
-
-
 
     checkHidePicker: function(e){
       if($(e.target).attr('id') === 'modal'){
@@ -311,6 +306,11 @@ define([
           $(this._input).removeClass('error');
         }
     },
-  }
-  );
+
+    openDetails: function(event) {
+      var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.objectName+'/'+ $(this._input).attr('data_value');
+      var win = window.open(url, '_blank');
+      win.focus();
+    }
+  });
 });
