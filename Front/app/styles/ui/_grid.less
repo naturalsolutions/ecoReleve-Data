@@ -30,7 +30,6 @@
       box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
       border-radius: 2px;
       padding: 5px;
-      padding-top: 0px;
       .header-filter {
         color: white;
         p {
@@ -52,11 +51,11 @@
         .ag-filter-select {
           width: 170px;
         }
-        .btn-link,
+        /* .btn-link,
         input,
         select {
           margin-top: 6px;
-        }
+        } */
         .ag-filter-apply-panel {
           margin: 4px 4px 6px;
         }
@@ -155,7 +154,9 @@
             background: linear-gradient(to right, rgba(199,199,199,0) 0%,rgb(217, 83, 79) 30%,rgb(217, 83, 79) 100%);
             filter: progid:DXImageTransform.Microsoft.gradient( startColorstr= 'rgb(217, 83, 79)', endColorstr='rgb(217, 83, 79)',GradientType=1 );
             opacity: 1!important;
-            // color: white;
+            svg {
+              fill: white;
+            }
           }
         }
       }
@@ -238,6 +239,12 @@
   .input-group-btn-icon{
     display: none;
   }
+}
 
 
+#applyButton{
+  font-weight: 500;
+  font-size: 14px;
+  background: rgba(255,255,255,0.5);
+  color: white;
 }
