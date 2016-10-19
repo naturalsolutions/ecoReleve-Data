@@ -424,20 +424,6 @@ define([
       var jqhrx;
 
 
-      var values = this.BBForm.getValue();
-      var empty = true;
-      for(key in values){
-        if(values[key] != null || value[key] != ''){
-          empty = false;
-        }
-      }
-
-      if(empty){
-        return;
-      }
-
-      return;
-
       if(!errors){
           if (this.model.attributes["id"] == 0) {
             // To force post when model.save()
