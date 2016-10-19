@@ -94,8 +94,6 @@ define([
         //overlayLoadingTemplate: '',
       };
 
-
-
       if(!this.clientSide) {
         $.extend(this.gridOptions, {
           enableServerSideSorting: true,
@@ -161,8 +159,7 @@ define([
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
-
-
+        
 
         if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
           _this.formatSelectColumn(col)          
@@ -334,7 +331,6 @@ define([
             order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
           }
           
-
           var status = {
             criteria: JSON.stringify(_this.filters),
             page: page,
@@ -344,7 +340,6 @@ define([
             typeObj: _this.model.get('typeObj')
           };
 
-          
           $.ajax({
             url: _this.model.get('url'),
             method: 'GET',
@@ -598,47 +593,43 @@ define([
     extendAgGrid: function(){
       var _this = this;
 
+      if(AgGrid.extended){
+        return;
+      }
+
+      AgGrid.TextFilter.prototype.afterGuiAttached = function(options) {
+        this.eFilterTextField.focus();
+        $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
+        $(this.eGui).find('input, select').each(function(){
+          $(this).addClass('form-control input-sm');
+        });
+      };
+
+
+      AgGrid.NumberFilter.prototype.afterGuiAttached = function(options) {
+        this.eFilterTextField.focus();
+        $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
+        $(this.eGui).find('input, select').each(function(){
+          $(this).addClass('form-control input-sm');
+        });
+        $(this.eGui).find('input').each(function(){
+          $(this).attr('type', 'number');
+        });
+      };
 
 
       AgGrid.StandardMenuFactory.prototype.showPopup = function (column, positionCallback) {
           var filterWrapper = this.filterManager.getOrCreateFilterWrapper(column);
           //ag Menu
           var eMenu = document.createElement('div');
-          var addCssClass = function (element, className) {
-            var _this = this;
-            if (!className || className.length === 0) {
-                return;
-            }
-            if (className.indexOf(' ') >= 0) {
-                className.split(' ').forEach(function (value) { return _this.addCssClass(element, value); });
-                return;
-            }
-            if (element.classList) {
-                element.classList.add(className);
-            }
-            else {
-                if (element.className && element.className.length > 0) {
-                    var cssClasses = element.className.split(' ');
-                    if (cssClasses.indexOf(className) < 0) {
-                        cssClasses.push(className);
-                        element.className = cssClasses.join(' ');
-                    }
-                }
-                else {
-                    element.className = className;
-                }
-            }
-        };
-
-          //utils_1.Utils.addCssClass(eMenu, 'ag-menu');
-          addCssClass(eMenu, 'ag-menu');
+          $(eMenu).addClass('ag-menu');
 
           eMenu.appendChild(filterWrapper.gui);
 
           //Add header
           var eheader = document.createElement('div');
           eheader.className = 'header-filter';
-          eheader.innerHTML = "<p><span class='glyphicon glyphicon-align-right glyphicon-filter'></span></p>";
+          //eheader.innerHTML = "<p><span class='glyphicon glyphicon-align-right glyphicon-filter'></span></p>";
           eMenu.insertBefore(eheader, eMenu.firstChild);
 
           // need to show filter before positioning, as only after filter
@@ -693,6 +684,8 @@ define([
               .replace('[NEXT]', localeTextFunc('next', 'Next'))
               .replace('[LAST]', localeTextFunc('last', 'Last'));
       };
+
+      AgGrid.extended = true;
     },
 
   });
