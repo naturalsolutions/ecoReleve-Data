@@ -353,11 +353,11 @@ class ModuleGrids (Base) :
     def GenerateColumn (self):
         ''' return grid field to build Grid '''
         column = {
-        'name' :self.FKName(),
-        'label' : '| '+self.Label,
+        'name': self.FKName(),
+        'label': self.Label,
         'renderable': isRenderable(self.GridRender),
         'editable': isEditable(self.GridRender),
-        'cell' : self.CellType,
+        'cell': self.CellType,
         }
         try :
             options = json.loads(self.Options)
