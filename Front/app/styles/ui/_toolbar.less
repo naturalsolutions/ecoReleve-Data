@@ -1,19 +1,21 @@
-@toolbarHeight : 66px;
+@toolbarHeight : 60px;
 @paginatorHeight: 45px;
 
 .toolbar{
   height: @toolbarHeight;
   overflow: auto;
-  padding: 15px;
+  padding: 12px;
   padding-bottom: 0px;
   position: relative;
   z-index:1;
-  box-shadow: 0px 0px 15px 0px rgba(107, 107, 107, 0.5);
+
   &.bottom{
-    border-top: 1px solid #ddd;
+    box-shadow: 0px 0px 15px 0px rgba(107, 107, 107, 0.5);
+    //border-top: 1px solid #ddd;
   }
   &.top{
     border-bottom: 1px solid #ddd;
+      background-color: #e8e7e7;
   }
   & legend{
     display: inline-block;
@@ -58,7 +60,7 @@
     height: ~"calc(100% - @{crop})";
   }
 }
-/* 
+/*
 .crop3{
   position: relative;
   @crop: (@toolbarHeight*2)+@tabsHeight;

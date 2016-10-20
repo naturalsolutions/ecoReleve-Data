@@ -3,10 +3,10 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  
+
   'sweetAlert',
   'translater',
-  
+
   './individual.model',
   'modules/objects/detail.view',
 
@@ -59,6 +59,10 @@ define([
         type: this.model.get('type'),
         url: this.model.get('type') + '/' + this.model.get('id')  + '/history',
         clientSide: true,
+        gridOptions : {
+          rowHeight : 30,
+          rowClass: 'line-30'
+        }
       }));
       this.gridViews.push(this.historyGrid);
     },
@@ -69,6 +73,10 @@ define([
         type: this.model.get('type'),
         url: this.model.get('type') + '/' + this.model.get('id')  + '/equipment',
         clientSide: true,
+        gridOptions : {
+          rowHeight : 30,
+          rowClass: 'line-30'
+        }
       }));
       this.gridViews.push(this.equipmentGrid);
     },
@@ -84,6 +92,8 @@ define([
         gridOptions: {
           rowSelection: 'multiple',
           enableFilter: true,
+          rowHeight : 30,
+          rowClass: 'line-30',
           onRowClicked: function(row){
             _this.locationsGrid.interaction('focus', row.data.ID || row.data.id);
           }

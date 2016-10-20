@@ -146,7 +146,7 @@ define([
           col.field = col.name;
           col.filter = filter[col.cell];
         }
-              
+
         // if(col.renderable === false){
         //   col.hide = true;
         // } else {
@@ -169,13 +169,13 @@ define([
       });
       return columnDefs;
     },
-    
+
     addBBFEditor: function(col){
       //draft
       var BBFEditor = function () {
-        
+
       };
-      
+
       var options = {
         key: col.options.target,
         schema: {
@@ -189,7 +189,7 @@ define([
         this.picker = new ObjectPicker(options);
         this.input = this.picker.render();
 
-        
+
         this.input.$el.find('input').val(params.value).change();
       };
       BBFEditor.prototype.getGui = function(){
@@ -204,7 +204,7 @@ define([
 
       col.cellEditor = BBFEditor;
     },
-      
+
 
     fetchColumns: function(){
       this.columnDeferred = $.ajax({
@@ -245,7 +245,7 @@ define([
     },
 
     initDataSource: function(){
-      
+
       var _this = this;
       this.dataSource = {
         rowCount: null,
@@ -259,7 +259,7 @@ define([
           if(params.sortModel.length) {
             order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
           }
-          
+
 
           var status = {
             criteria: JSON.stringify(_this.filters),
@@ -270,7 +270,7 @@ define([
             typeObj: _this.model.get('typeObj')
           };
 
-          
+
           $.ajax({
             url: _this.model.get('url'),
             method: 'GET',
@@ -279,7 +279,7 @@ define([
           }).done( function(response) {
             var rowsThisPage = response[1];
             var total = response[0].total_entries;
-            
+
             _this.model.set('totalRecords', total);
             _this.model.set('status', status);
 
@@ -337,7 +337,7 @@ define([
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
             _this.gridOptions.api.ensureIndexVisible(node.childIndex);
             setTimeout(function(){
-               var tmp = _this.idName || (node.data.id)? 'id' : 'ID'; 
+               var tmp = _this.idName || (node.data.id)? 'id' : 'ID';
               _this.gridOptions.api.setFocusedCell(node.childIndex, tmp, null);
             },0);
           }
@@ -352,7 +352,7 @@ define([
           //_this.gridOptions.api.setFocusedCell(params.index, 'id', null);
         },0);
     },
-    
+
     multiSelection: function(params, from){
       //could certainly be optimized
       var _this = this;
@@ -497,12 +497,12 @@ define([
     },
 
     handleDisplayTotalSeleted: function(){
-      this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length); 
+      this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length);
     },
-    
+
     jumpToPage: function(index){
       this.paginationController.currentPage = index;
-      this.paginationController.loadPage();      
+      this.paginationController.loadPage();
     },
 
     focusFilter: function(e){

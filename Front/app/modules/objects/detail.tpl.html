@@ -1,4 +1,4 @@
-<div id="infos"  class="col-xs-12 col-md-5 full-height no-padding">
+<div id="infos"  class="col-xs-12 col-md-6 full-height no-padding">
   <div class="toolbar top">
     <a class="btn" href="#<%= type %>">
         <span class="reneco reneco-back"></span>
@@ -8,17 +8,34 @@
     <div class="js-rg-navbar pull-right"></div>
   </div>
 
-  <div class="crop1 no-padding">
-    
-    <div id="formTab" class="half-height">
-        <div class="js-form crop1"></div>
-        <div class="toolbar bottom">
-          <div class="js-form-btns"></div>
+  <div class="crop1 no-padding" style="background: #fdfcfc;">
+    <div id="formTab" class="third-height" style="padding:10px">
+      <div class="col-md-2 no-padding">
+        <div class="reneco <%=icon%>" style="
+          /* width: 90%; */
+          /* height: 90%; */
+          position: relative;
+          font-size: 700%;
+          margin-top: 5%;
+          margin-right: 0;
+          margin-left: 10%;
+          background-color: #d8d8d8;
+          color: white;
+          border-radius: 10px;
+          padding: 10px;">
         </div>
+      </div>
+        <div class="js-form-global-infos col-md-10 hide-fieldsets no-padding"></div>
+        <!-- <div class="toolbar bottom">
+          <div class="js-form-btns"></div>
+        </div> -->
     </div>
 
-    <div class="half-height">
+    <div class="seventh-height">
       <ul class="nav nav-tabs toolbar bottom">
+        <li>
+          <a href="#detailsTab" class="tab-link">Details</a>
+        </li>
       <% _.each(uiGridConfs, function(uiGridConf, index){ %>
           <li class="tab-ele <%= (index == 0)? 'active' : '' %>">
             <a href="#<%= uiGridConf.name %>Tab" class="tab-link"><%= uiGridConf.label %></a>
@@ -26,6 +43,9 @@
       <% }); %>
       </ul>
       <div class="tab-content crop1 no-padding">
+        <div id="detailsTab" class="tab-pane full-height fade">
+          <div class='js-form'></div>
+        </div>
       <% _.each(uiGridConfs, function(uiGridConf, index){ %>
         <div id="<%= uiGridConf.name %>Tab" class="tab-pane full-height fade <%= (index == 0)? 'in active' : '' %>">
         <% if(uiGridConf.name !== "locations") { %>
@@ -46,7 +66,7 @@
   </div>
 </div>
 
-<div class=" no-padding col-xs-12 col-md-7 ns-full-height">
+<div class=" no-padding col-xs-12 col-md-6 ns-full-height">
     <div id="map">
       <div id="showDetails" class="masqued">
         <span class="glyphicon glyphicon-chevron-right big"/>
