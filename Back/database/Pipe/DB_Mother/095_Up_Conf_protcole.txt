@@ -1,0 +1,44 @@
+
+  
+  UPDATE f SET InputType = 'GridFormEditor',Options = '{"protocoleType":'+Options+',"nbFixedCol":0,"delFirst":0,"showLines":0}'
+  FROM [ModuleForms] f
+  where Options in (214,222)  and InputType like '%listof%' and module_id = 1
+  
+  Update f SET FieldSizeDisplay= 3, FieldSizeEdit = 3
+  FROM ModuleForms f
+  WHERE TypeObj = 222 and module_id = 1 
+  AND Name = 'sampled'
+
+  Update f SET FieldSizeDisplay= 5, FieldSizeEdit = 5
+  FROM ModuleForms f
+  WHERE TypeObj = 222 and module_id = 1 
+  AND Name = 'Measured_by'
+
+
+  Update f SET FieldSizeDisplay= 4, FieldSizeEdit = 4
+  FROM ModuleForms f
+  WHERE TypeObj = 222 and module_id = 1 
+  AND Name = 'Egg_code'
+
+
+
+   Update f SET FieldSizeDisplay= 4, FieldSizeEdit = 4
+  FROM ModuleForms f
+  WHERE TypeObj = 214 and module_id = 1 
+  AND Name = 'frequency'
+
+  Update f SET FieldSizeDisplay= 5, FieldSizeEdit = 5
+  FROM ModuleForms f
+  WHERE TypeObj = 214 and module_id = 1 
+  AND Name in ('sex','age','signal')
+
+
+Update f SET Options = 2010086
+FROM ModuleForms f
+WHERE module_id = 1 and TypeObj = 231 and Name = 'sex'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('95_Up_Conf_protcole',GETDATE(),(SELECT db_name()))
+
+
+GO

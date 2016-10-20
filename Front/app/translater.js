@@ -8,11 +8,30 @@ define(['marionette','config','i18n'], function(Marionette, config) {
     },
 
     initi18n: function() {
-      i18n.init({
-        resGetPath: this.url,
-        getAsync: true,
-        lng: config.language || 'en' //navigator.language || navigator.userLanguagenavigator.language || navigator.userLanguage
-      });
+      var isDomoInstance = config.instance ;
+      if(isDomoInstance == 'demo') {
+      // get user language
+          $.ajax({
+              context: this,
+              url: config.coreUrl + 'currentUser',
+              success : function(data){
+                var language = data.Language;
+                i18n.init({
+                      resGetPath: this.url,
+                      getAsync: true,
+                      lng: language || 'en'
+                    });
+              }
+          });
+
+      } else {
+        i18n.init({
+          resGetPath: this.url,
+          getAsync: true,
+          lng: config.language || 'en' //navigator.language || navigator.userLanguagenavigator.language || navigator.userLanguage
+        });
+      }
+
     },
 
     getValueFromKey: function(key) {
