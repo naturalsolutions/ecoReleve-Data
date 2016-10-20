@@ -67,7 +67,6 @@ define([
     },
 
     reloadFromNavbar: function(id) {
-      console.log(id);
       this.formatDatasetId(id);
       this.com.addModule(this.map);
       this.map.com = this.com;
@@ -101,8 +100,6 @@ define([
           }
           return datasetId;
         });
-
-        console.log(index);
 
         this.rgNavbar.show(this.navbarView = new NavbarView({
           parent: this,
