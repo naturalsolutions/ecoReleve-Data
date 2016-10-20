@@ -21,7 +21,7 @@ define([
             <input type="text" id="<%=id%>" value="<%=value%>" data_value="<%=data_value%>" initValue="<%=initValue%>"/></div>\
             </div>\
         </div>',
-        
+
         initialize: function (options) {
             Form.editors.Base.prototype.initialize.call(this, options);
             this.template = options.template || this.template;
@@ -34,7 +34,7 @@ define([
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled)  {
                 this.iconFont = 'hidden';
             }
-            
+
             if (options.schema.options) {
                 if (typeof options.schema.options.source === 'string'){
 
@@ -59,12 +59,15 @@ define([
                         if (!_this.$el.find('#' + _this.id ).attr('initValue') && _this.$el.find('#' + _this.id ).attr('data_value') != _this.$el.find('#' + _this.id ).val()){
                             _this.$el.find('#' + _this.id ).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
                         }
+                        if (_this.$el.find('#' + _this.id).val() === ''){
+                            _this.$el.find('#' + _this.id ).attr('data_value','');
+                        }
                     }
                 };
             }
             this.options = options;
         },
-        
+
           getValue: function() {
            return this.$el.find('#' + this.id ).attr('data_value') ;
           },
@@ -75,7 +78,7 @@ define([
             var _this = this;
 
             if (value && this.options.schema.options.label != this.options.schema.options.value && this.options.schema.options.object) {
-                value = null; 
+                value = null;
                 var initValue = this.model.get(this.key);
                 $.ajax({
                     url : config.coreUrl+this.options.schema.options.object+'/'+this.model.get(this.key),
@@ -83,7 +86,7 @@ define([
                         _this.$el.find('#' + _this.id ).val(data[_this.options.schema.options.label]);
                     }
                 })
-            } 
+            }
             var $el = _.template(
                 this.template, { id: this.id,value: value,data_value :_this.model.get(_this.key), initValue:initValue,iconFont:_this.iconFont
             });
@@ -93,7 +96,7 @@ define([
               this.$el.find('input').addClass('required');
             }
             _(function () {
-                
+
                 _this.$el.find('#' + _this.id).autocomplete(_this.autocompleteSource);
                 _this.$el.find('#' + _this.id).addClass(_this.options.schema.editorClass) ;
                 if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
