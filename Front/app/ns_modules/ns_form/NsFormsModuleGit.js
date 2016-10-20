@@ -251,6 +251,7 @@ define([
         }
       });
     },
+
     initRules:function() {
       var _this = this;
       this.ruler = new Ruler({
@@ -362,17 +363,19 @@ define([
         this.finilizeToGridRow();
       }
     },
+
     showErrorForMaxLength : function(_this){
       var errorTag = $(_this).parent().parent().find('div')[0];
       $(errorTag).text('Text max length is 250');
       $(_this).addClass('error');
     },
+
     cleantextAreaAfterError : function(_this){
         var errorTag = $(_this).parent().parent().find('div')[0];
         $(errorTag).text('');
         $(_this).removeClass('error');
-
     },
+
     showAlertforMaxLength : function(){
       var opts = {
         title : 'Max length: 255 characters !',
@@ -386,7 +389,6 @@ define([
     updateState: function(state){
 
     },
-
 
     displaybuttons: function () {
       var name = this.name;
@@ -413,25 +415,32 @@ define([
 
     },
 
-    /*afterShow: function(){
-
-    },*/
-
     butClickSave: function (e) {
           var _this = this;
-          var flagEmpty = true;
+          var flagEmpty = false;
           var errors = this.BBForm.commit();
           var jqhrx;
 
-          flagEmpty = this.onSavingModel();
-          if ( !flagEmpty ) {
+          if(!errors){
+            flagEmpty = this.checkFormIsEmpty(this.model.schema,this.BBForm.getValue());
+          }
+          if(flagEmpty){
+            this.swal({
+              title : 'Empty observation',
+              text : 'The observation won\'t be recorded',
+              type:'warning',
+              showCancelButton: false,
+              confirmButtonColor:'#DD6B55',
+              confirmButtonText:'Ok'
+            });
+            return;
+          }
 
           if(!errors) {
             if (this.model.attributes["id"] == 0) {
                 // To force post when model.save()
               this.model.attributes["id"] = null;
             }
-
 
             if (this.model.id == 0) {
               // New Record
@@ -493,7 +502,8 @@ define([
             }
           }else{
             var errorList = _this.BBForm.$el.find('.error');
-            for (var i=0; i<errorList.length ;i++){
+
+            for(var i=0; i < errorList.length; i++){
               var elmName = errorList[i].nodeName ;
               if (elmName.toUpperCase()!= 'SPAN'){
                 $(errorList[i]).trigger('focus').click();
@@ -502,16 +512,6 @@ define([
             }
             return false;
           }
-        }
-        else {
-          this.swal({
-            title : 'Empty input',
-            text : 'all input are empty',
-            type:'error',
-            showCancelButton: false,
-            confirmButtonColor:'#DD6B55',
-            confirmButtonText:'Ok'});
-        }
           this.afterSavingModel();
           return jqxhr;
         },
@@ -581,72 +581,59 @@ define([
       this.displaybuttons();
     },
 
-    /*function arguments schema and attribute object and a boolean(true)    */
-        /* for each attributes check if he is in schema                         */
-        /* and if he is not null , diff of defaultValue and visible ( not hide )*/
-        /* stop and return false if one attributes is not empty                 */
 
-        recurciveValidation: function ( objSchema , objAttributes , testBool) {
+    checkFormIsEmpty: function(objSchema , values) {
+      var isEmpty = true;
 
-          var testTmp = true;
-          for ( var key in objAttributes ) {
-            if (key != 'defaultValues') {
-              switch ( typeof objAttributes[key] ) {
-                case "number" : {
-                  if( objSchema[key].fieldClass.indexOf('hide') == -1 && ( objAttributes[key]!= null || objAttributes[key]!= 0 ) && objAttributes[key] != objSchema[key].defaultValue) {
-                    console.warn("we can save [NUMBER]"+key+" "+objAttributes[key]);
-                    if( testBool )
-                      testBool = false;
-                      return testBool;
-                  }
-                  break;
-                }
-                case "string" : {
-                  if( objSchema[key].fieldClass.indexOf('hide') == -1 && objAttributes[key]!= "" && objAttributes[key] != objSchema[key].defaultValue) {
-                    console.warn("we can save [STRNG] "+key+" "+objAttributes[key]);
-                    if( testBool )
-                      testBool = false;
-                      return testBool;
-                  }
-                  break;
-                }
-                case "boolean" : { // skip boolean type
-                  break;
-                }
-                case "object" : {
-                    if( Array.isArray(objAttributes[key]) ) { // array subform
-                      for ( var elem of objAttributes[key] ) { // for each subform
-                        testTmp = this.recurciveValidation (objSchema[key].subschema, elem , true) // call with subform schema and attributes
-                        if(!testTmp)
-                        return testTmp;
-                      }
-                    }
-                    else { //case thesaurus
-                      if( objAttributes[key] != null ) {
-                        if( testBool )
-                          testBool = false;
-                          return testBool;
-                      }
-                    }
-                  break;
-                }
-                default : {
-                  console.warn("Error! case undefined or another type not possible");
-                  break;
-                }
-              }
+      for( var key in values ){
+        var editorValue = values[key];
+        var editorSchema = objSchema[key];
+        
+        if(key == 'defaultValues'){
+          continue;
+        }
+        if(editorSchema.fieldClass.indexOf('hide') != -1){
+          continue;
+        }
+        if(editorSchema.type == 'Checkbox'){
+          continue;
+        }
+        if(editorValue != null && editorValue != ''){
+          isEmpty = false;
+          return;
+        }
+
+        if(editorSchema.defaultValue){
+            if(editorSchema.defaultValue != editorValue){
+              isEmpty = false;
+              return;
+            }
+        }
+
+        if( Array.isArray(editorValue) ){
+          //subform
+          for( var values of editorValue ){
+            if(!this.checkFormIsEmpty(editorSchema.subschema, values)){
+              isEmpty = false;
+              return;
             }
           }
-          return testBool;
-        },
+        }
+      }
 
-        onSavingModel: function () {
-          // To be extended, calld after commit before save on model
-          return this.recurciveValidation(this.model.schema,this.BBForm.getValue() , true );
-        },
-        afterSavingModel: function () {
-      // To be extended called after model.save()
+      return isEmpty;
     },
+
+
+
+    onSavingModel: function () {
+      // To be extended, calld after commit before save on model
+    },
+
+    afterSavingModel: function () {
+  // To be extended called after model.save()
+    },
+
     BeforeShow: function () {
       // to be extended called after render, before the show function
     },
@@ -654,9 +641,11 @@ define([
     savingSuccess: function (model, response) {
       // To be extended, called after save on model if success
     },
+
     savingError: function (response) {
       // To be extended, called after save on model if error
     },
+
     loadingError : function(response) {
 
     },
