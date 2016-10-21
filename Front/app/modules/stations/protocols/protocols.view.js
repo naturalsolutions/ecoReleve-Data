@@ -3,81 +3,56 @@ define([
   'underscore',
   'backbone',
   'marionette',
+  './protocol.view',
 
   'i18n'
-], function($, _, Backbone, Marionette) {
+], function($, _, Backbone, Marionette, Protocol) {
   'use strict';
   return Marionette.LayoutView.extend({
-    template: 'app/modules/stations/templates/tpl-protocols-editor.html',
-    className: 'protocol-editor full-height',
+    template: 'app/modules/stations/protocols/protocols.tpl.html',
+    className: 'protocols full-height',
 
     ui: {
-      protoMenuContainer: '#protoMenuContainer',
-      protoFormsContainer: 'div#protoFormsContainer',
-      protoPicker: 'select#protoPicker'
+      protocolsMenu: '.js-protocols-menu',
     },
 
     events: {
-      'click #addProto': 'addProtoFromList',
-      'click button#addObs': 'addObs',
-      'click #protoMenuContainer .js-menu-item': 'getIndex',
+
     },
 
     initialize: function(options) {
-      var _this = this;
       this.stationId = options.stationId;
-
+      this.parent = options.parent;
       this.collection = new Backbone.Collection();
-      this.collection.fetch({
-        url: 'stations/' + this.stationId + '/protocols',
-        reset: true,
-        data: {
-          FormName: 'ObsForm',
-          DisplayMode: 'edit'
-        },
-        success: function(data){
-          console.log(data);
-          _this.initMenu();
-          
-        },
-      });
-    },
-
-    displayFirst: function(){
-      this.ui.protoMenuContainer.find('.js-menu-item:first').click();
-    },
-
-    displayLast: function(){
-      this.ui.protoMenuContainer.find('.js-menu-item:last').click();
     },
 
     initMenu: function() {
+      var _this = this;
       var LytMenuItem = Marionette.LayoutView.extend({
-        modelEvents: {
-          'change:total': 'updateTotal',
-        },
-
+        template: 'app/modules/stations/templates/tpl-menuItemView.html',
         className: 'js-menu-item noselect clearfix col-xs-12',
+
+        // modelEvents: {
+        //   'change:total': 'updateTotal',
+        // },
+
+        events: {
+         'click': 'onClick',
+        },
+          
 
         ui: {
           'total' : 'span#total'
         },
 
         initialize: function(model){
-          this.template = 'app/modules/stations/templates/tpl-menuItemView.html';
+          
         },
 
-        updateTotal: function() {
-          this.ui.total.html(this.model.get('total'));
+        onClick:function(){
+          _this.displayProtocol(this.model);
         },
 
-        updateVisibility: function() {
-          if (this.model.get('current')) {
-            this.$el.addClass('active');
-          } else {
-            this.$el.removeClass('active');
-          }
-        },
       });
 
       this.collViewMenu = new Marionette.CollectionView({
@@ -86,13 +61,43 @@ define([
         className: 'coll-view'
       });
       this.collViewMenu.render();
-      this.ui.protoMenuContainer.html(this.collViewMenu.el);
+      this.ui.protocolsMenu.html(this.collViewMenu.el);
+    },
+      
+    displayProtocol: function(model){
+      this.parent.rgProtocol.show(new Protocol({
+        model: model
+      }));
     },
 
 
-    onRender: function(){
-      this.feedProtoPicker();
+    onShow: function(){
+      var _this = this; 
+      this.collection.fetch({
+        url: 'stations/' + this.stationId + '/protocols',
+        reset: true,
+        data: {
+          FormName: 'ObsForm',
+          DisplayMode: 'edit'
+        },
+        success: function(data){
+          _this.initMenu();
+        },
+      });
+
+      //this.feedProtoPicker();
     },
+
+
+
+
+
+
+
+
+
+
+
 
     feedProtoPicker: function() {
       var _this = this;

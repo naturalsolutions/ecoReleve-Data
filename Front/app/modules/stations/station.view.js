@@ -7,14 +7,14 @@ define([
 
   'ns_form/NSFormsModuleGit',
   'ns_navbar/navbar.view',
-  './layouts/lyt-protocols-editor',
+  './protocols/protocols.view',
 
   'modules/objects/detail.view',
   './station.model',
 
 ], function(
   $, _, Backbone, Marionette, Swal,
-  NsForm, NavbarView, LytProtoEditor, 
+  NsForm, NavbarView, LytProtocols, 
   DetailView, StationModel
 ) {
 
@@ -33,7 +33,8 @@ define([
 
     regions: {
       'rgStation': '.js-rg-station',
-      'rgProtoEditor': '.js-rg-proto-editor',
+      'rgProtocols': '.js-rg-protocols',
+      'rgProtocol': '.js-rg-protocol',
       'rgNavbar': '.js-navbar'
     },
 
@@ -119,8 +120,10 @@ define([
     },
 
     displayProtos: function() {
-      this.lytProtoEditor = new LytProtoEditor({stationId: this.model.get('id')});
-      this.rgProtoEditor.show(this.lytProtoEditor);
+      this.rgProtocols.show(this.LytProtocols = new LytProtocols({
+        stationId: this.model.get('id'),
+        parent: this,
+      }));
     },
 
   });
