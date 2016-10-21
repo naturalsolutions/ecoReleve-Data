@@ -17,64 +17,86 @@ define([
     },
 
     events: {
-
+      
     },
 
     initialize: function(options) {
-      this.stationId = options.stationId;
       this.parent = options.parent;
       this.collection = new Backbone.Collection();
     },
 
+    displayFirstProto: function(){
+      var protoId = this.model.get('protocolId');
+      var view;
+      if(protoId){
+        var model = this.protocolsItems.collection.findWhere({'ID': parseInt(protoId)});
+        if(this.model.get('observationId') && model){
+          model.set('observationId', this.model.get('observationId'));
+        }
+        view = this.protocolsItems.children.findByModel(model);
+      }
+      if(!view){
+        view = this.protocolsItems.children.findByIndex(0);
+      }
+      this.cProtoItemView = view;
+      this.displayProtocol(view);
+    },
+
     initMenu: function() {
       var _this = this;
-      var LytMenuItem = Marionette.LayoutView.extend({
+      var ProtoItem = Marionette.LayoutView.extend({
         template: 'app/modules/stations/templates/tpl-menuItemView.html',
-        className: 'js-menu-item noselect clearfix col-xs-12',
-
-        // modelEvents: {
-        //   'change:total': 'updateTotal',
-        // },
+        className: 'js-proto-item noselect clearfix col-xs-12',
 
         events: {
-         'click': 'onClick',
+         'click': 'displayAssociatedProtocol',
+         'click .js-btn-add-obs': 'addObs',
         },
           
-
         ui: {
           'total' : 'span#total'
         },
 
         initialize: function(model){
-          
+          this.model.set('stationId', _this.model.get('id'));
         },
 
-        onClick:function(){
-          _this.displayProtocol(this.model);
+        displayAssociatedProtocol:function(e){
+          _this.displayProtocol(this);
         },
 
+        addObs: function(e){
+          e.stopPropagation();
+          _this.displayProtocol(this, true);
+        }
       });
 
-      this.collViewMenu = new Marionette.CollectionView({
+      this.protocolsItems = new Marionette.CollectionView({
         collection : this.collection,
-        childView: LytMenuItem,
-        className: 'coll-view'
+        childView: ProtoItem,
+        className: 'coll-view',
       });
-      this.collViewMenu.render();
-      this.ui.protocolsMenu.html(this.collViewMenu.el);
+      this.protocolsItems.render();
+      this.ui.protocolsMenu.html(this.protocolsItems.el);
+
+      this.displayFirstProto();
     },
-      
-    displayProtocol: function(model){
+    
+    displayProtocol: function(protoItemView, newObs){
+      this.cProtoItemView.$el.removeClass('active');
+      this.cProtoItemView = protoItemView;
+
+      protoItemView.$el.addClass('active');
       this.parent.rgProtocol.show(new Protocol({
-        model: model
+        model: protoItemView.model,
+        newObs: true
       }));
     },
-
 
     onShow: function(){
       var _this = this; 
       this.collection.fetch({
-        url: 'stations/' + this.stationId + '/protocols',
+        url: 'stations/' + _this.model.get('id') + '/protocols',
         reset: true,
         data: {
           FormName: 'ObsForm',
@@ -84,20 +106,8 @@ define([
           _this.initMenu();
         },
       });
-
       //this.feedProtoPicker();
     },
-
-
-
-
-
-
-
-
-
-
-
 
     feedProtoPicker: function() {
       var _this = this;

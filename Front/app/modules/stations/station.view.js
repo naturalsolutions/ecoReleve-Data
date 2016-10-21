@@ -5,6 +5,7 @@ define([
   'marionette',
   'sweetAlert',
 
+  'ns_modules/ns_com',
   'ns_form/NSFormsModuleGit',
   'ns_navbar/navbar.view',
   './protocols/protocols.view',
@@ -14,7 +15,7 @@ define([
 
 ], function(
   $, _, Backbone, Marionette, Swal,
-  NsForm, NavbarView, LytProtocols, 
+  Com, NsForm, NavbarView, LytProtocols, 
   DetailView, StationModel
 ) {
 
@@ -38,6 +39,13 @@ define([
       'rgNavbar': '.js-navbar'
     },
 
+    initialize: function(options) {
+      this.com = new Com();
+      this.model.set('id', options.id);
+      this.model.set('stationId', options.id);
+      this.model.set('protocolId', options.protocolId);
+      this.model.set('observationId', options.observationId);
+    },
     reloadFromNavbar: function(id) {
       this.model.set('id', id);
       this.displayStation();
@@ -121,7 +129,7 @@ define([
 
     displayProtos: function() {
       this.rgProtocols.show(this.LytProtocols = new LytProtocols({
-        stationId: this.model.get('id'),
+        model: this.model,
         parent: this,
       }));
     },

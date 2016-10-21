@@ -10,32 +10,36 @@ define([
   'use strict';
   return Marionette.LayoutView.extend({
     template: 'app/modules/stations/protocols/observation.tpl.html',
-    className: 'observation full-height',
+    className: 'observation full-height white',
 
     ui: {
       'form': '.js-obs-form'
     },
 
     initialize: function(options){
-      this.model.schema = this.model.get('schema');
-      this.model.fieldsets = this.model.get('fieldsets');
-      this.model.attributes = this.model.get('data');
-      this.model.urlRoot =  'stations/' + this.stationId + '/protocols' + '/'
+      
     },
 
     onShow: function(){
-      this.displayForm();
+      var _this = this;
+      if(this.model.get('id')){
+        this.diplsayMode = 'display';
+        this.model.fetch({success: _this.displayForm.bind(_this)});
+      } else {
+        this.diplsayMode = 'edit';
+        this.displayForm();
+      }
+
     },
 
     displayForm: function(){
       this.form = new NsForm({
         model: this.model,
-        modelurl: 'stations/' + this.stationId + '/protocols',
         buttonRegion: [],
+        displayMode: this.displayMode,
         displayMode: this.model.attributes.state,
         formRegion: this.ui.form,
         reloadAfterSave: true,
-        objectType: this.objectType,
         savingError: this.handleErrors
       });
     },
@@ -54,10 +58,11 @@ define([
       else if(response.responseJSON.errorSite == true ){
       _this.sweetAlert('Data saving error', 'error', 'No monitored site is attached');
       }
-    }
+    },
 
-
-
+    onDestroy: function(){
+      //abort xhr & thesaurus calls
+    },
   });
 });
 

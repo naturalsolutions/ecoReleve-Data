@@ -165,6 +165,7 @@ define([
 
       if (options.model) {
         this.model = options.model;
+        
         this.BBForm = new BackboneForm({
           model: this.model,
           data: this.model.data,
@@ -212,6 +213,8 @@ define([
       var url = this.modelurl + '/' + id;
 
       this.name = '_' + this.objectType + '_';
+
+
 
       //initialize model from AJAX call
       this.jqxhr = $.ajax({
