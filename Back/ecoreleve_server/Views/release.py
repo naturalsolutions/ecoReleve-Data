@@ -62,28 +62,7 @@ def getFields(request):
     if ModuleType == 'default':
         ModuleType = 'IndivReleaseGrid'
     cols = Individual().GetGridFields('IndivReleaseGrid')
-    # cols.append({
-    #     'name': 'unicSensorName',
-    #     'label': '| Sensor',
-    #     'editable': False,
-    #     'renderable': True,
-    #     'cell' : 'string'
-    #     })
-    # cols.append({
-    #     'name': 'FK_Sensor',
-    #     'label': '| FK_Sensor',
-    #     'editable': False,
-    #     'renderable': False,
-    #     'cell' : 'string'
-    #     })
-    cols.insert(0, {
-        'name': 'import',
-        'label': 'import',
-        'renderable': True,
-        'editable': True,
-        'cell': 'select-row',
-        'headerCell': 'select-all'
-    })
+    
     return cols
 
 

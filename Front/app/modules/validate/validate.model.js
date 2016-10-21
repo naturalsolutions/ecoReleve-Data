@@ -94,9 +94,6 @@ define([
         }, {
           field: 'max_date',
           headerName: 'Data To',
-        }, {
-          field: 'import',
-          headerName: 'IMPORT',
         }
       ],
 

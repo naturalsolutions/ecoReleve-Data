@@ -60,7 +60,6 @@ define([
       if(this.model.get('uiGridConfs')){
         this.model.get('uiGridConfs').map(function(uiGridConf){
           //uglify hack
-          console.log('plouf');
           var tmp =  'rg' + uiGridConf.label + 'Grid';
           var obj = {};
           obj[tmp] = '.js-rg-' + uiGridConf.name + '-grid';
