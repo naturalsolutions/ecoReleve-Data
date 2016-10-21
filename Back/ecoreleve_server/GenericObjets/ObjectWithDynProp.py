@@ -75,7 +75,7 @@ class ObjectWithDynProp:
         return self.allProp
 
     def getLinkedField (self):
-        curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + self.GetType().GetDynPropContextTable() 
+        curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + self.GetType().GetDynPropContextTable()
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery +=  ' C  JOIN ' + self.GetType().GetDynPropTable() + ' D ON C.' + self.GetType().Get_FKToDynPropTable() + '= D.ID '
         curQuery += ' where C.' + self.GetType().GetFK_DynPropContextTable() + ' = ' + str(self.GetType().ID )
@@ -95,7 +95,7 @@ class ObjectWithDynProp:
         return self.FrontModules.ID
 
     def GetGridFields (self,ModuleType):
-        ''' Function to call : return Name and Type of Grid fields to display in front end 
+        ''' Function to call : return Name and Type of Grid fields to display in front end
         according to configuration in table ModuleGrids'''
         try:
             typeID = self.GetType().ID
@@ -129,7 +129,7 @@ class ObjectWithDynProp:
         return cols
 
     def GetFilters (self,ModuleType) :
-        ''' Function to call : return Name and Type of Filters to display in front end 
+        ''' Function to call : return Name and Type of Filters to display in front end
         according to configuration in table ModuleGrids'''
         filters = []
         defaultFilters = []
@@ -236,9 +236,12 @@ class ObjectWithDynProp:
                     if useDate is not None:
                         oldvalue = self.GetDynPropWithDate(nameProp,StartDate = useDate)
                         if oldvalue is not None:
+                            print('existsng dynprop value update old Value')
                             setattr(oldvalue,Cle[self.GetPropWithName(nameProp)['type']],valeur)
 
                     if oldvalue is None:
+                        print('NOOOOT existsng dynprop value at THIS Date')
+
                         NouvelleValeur = self.GetNewValue(nameProp)
                         NouvelleValeur.StartDate = datetime.today() if useDate is None else useDate
                         setattr(NouvelleValeur,Cle[self.GetPropWithName(nameProp)['type']],valeur)
@@ -286,23 +289,25 @@ class ObjectWithDynProp:
 
     def UpdateFromJson(self,DTOObject,startDate = None):
         ''' Function to call : update properties of new or existing object with JSON/dict of value'''
-        # try : 
-        #     startDate = self.GetStartDate()
-        # except : 
-        #     startDate = None
 
         for curProp in DTOObject:
-            #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id' and DTOObject[curProp] != '-1' ):
                 if isinstance(DTOObject[curProp],str) and len(DTOObject[curProp].split())==0:
                     DTOObject[curProp] = None
-                self.SetProperty(curProp,DTOObject[curProp],startDate)
+                if isinstance(DTOObject[curProp],dict) and 'StartDate' in DTOObject[curProp]:
+                    print('value OBJECT '+curProp)
+                    print(DTOObject[curProp])
+                    givenStartDate = DTOObject[curProp]['StartDate']
+                    DTOObject[curProp] = DTOObject[curProp][curProp]
+                else :
+                    givenStartDate = startDate
+                self.SetProperty(curProp,DTOObject[curProp],givenStartDate)
 
     def GetFlatObject(self,schema=None):
         ''' return flat object with static properties and last existing value of dyn props '''
         resultat = {}
         hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
-        if self.ID is not None : 
+        if self.ID is not None :
             max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow),len(hybrid_properties))
             for i in range(max_iter) :
                 #### Get static Properties ####
@@ -323,7 +328,7 @@ class ObjectWithDynProp:
                 except Exception as e :
                     pass
 
-        else : 
+        else :
             max_iter = len( self.__table__.columns)
             for i in range(max_iter) :
                 #### Get static Properties ####
@@ -376,7 +381,7 @@ class ObjectWithDynProp:
             resultat['data']['id'] = self.ID
             # for key, value in schema.items():
             #     if (DisplayMode.lower() != 'edit' and 'fullPath' in schema[key] and schema[key]['fullPath'] is True):
-            #         try : 
+            #         try :
             #             resultat['data'][key] = self.splitFullPath(resultat['data'][key])
             #         except : pass
         else :
@@ -387,7 +392,7 @@ class ObjectWithDynProp:
 
         # resultat['schema']['defaultValues'] = defaultValues
         return resultat
-    
+
     def linkedFieldDate(self):
         return datetime.now()
 
@@ -398,7 +403,7 @@ class ObjectWithDynProp:
         for linkProp in self.getLinkedField() :
             curPropName = linkProp['Name']
             obj = LinkedTables[linkProp['LinkedTable']]
-            try : 
+            try :
                 linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
                 curObj = self.ObjContext.query(obj).filter(getattr(obj,linkProp['LinkedID']) == linkedSource).one()
                 curObj.init_on_load()
@@ -426,7 +431,7 @@ class ObjectWithDynProp:
                         linkedObj.SetProperty(linkedField,None)
                     else :
                         dynPropValueToDel = linkedObj.GetDynPropWithDate(linkedField,useDate)
-                        if dynPropValueToDel is not None : 
+                        if dynPropValueToDel is not None :
                             session.delete(dynPropValueToDel)
 
                     session.commit()
@@ -455,5 +460,3 @@ class ObjectWithDynProp:
         else :
             resultat = defaultValues
         return resultat
-
-

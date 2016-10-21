@@ -9,6 +9,7 @@ define([
   'requirejs-text!./NsFormsModule.html',
   'fancytree',
   './NsFormsCustomFields',
+  'ns_modules/ns_bbfe/bbfe-autocompTree',
 ], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tpl) {
   return Backbone.View.extend({
     BBForm: null,
@@ -169,7 +170,7 @@ define([
           model: this.model,
           data: this.model.data,
           fieldsets: this.model.fieldsets,
-          schema: this.model.schema
+          schema: this.model.schema,
         });
         this.showForm();
       }
@@ -286,7 +287,7 @@ define([
     showForm: function (){
       var _this = this;
       this.BBForm.render();
-
+      this.BBForm.parentForm = this;
       // Call extendable function before the show call
       this.BeforeShow();
 

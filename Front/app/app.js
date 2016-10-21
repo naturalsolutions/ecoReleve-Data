@@ -21,6 +21,7 @@ define([
   'ns_modules/ns_bbfe/bbfe-ajaxButton',
   'ns_modules/ns_bbfe/bbfe-lon',
   'ns_modules/ns_bbfe/bbfe-lat',
+  'ns_modules/ns_bbfe/bbfe-popOver/bbfe-popOverEditor',
 
   ],
 

@@ -163,7 +163,49 @@ class ModuleForms(Base):
                 self.dto['options'].append(temp)
             self.dto['options'] = sorted(self.dto['options'], key=lambda k: k['label'])
 
-    def InputLNM(self) :
+    def InputPopOver(self):
+        if self.Options is not None :
+            try:
+                opt = json.loads(self.Options)
+                subformType = opt['popOverForm']
+            except:
+                prototype = self.Options
+                pass
+        popOverModule = self.session.query(FrontModules).filter(FrontModules.Name == 'PopOverForm').one()
+        print(popOverModule)
+        result = self.session.query(ModuleForms).filter(and_(ModuleForms.TypeObj == subformType, ModuleForms.Module_ID == popOverModule.ID)).all()
+        # subNameObj = result[0].Name
+        subschema = {}
+        for conf in result:
+            subschema[conf.Name] = conf.GetDTOFromConf(True)
+
+        fields = []
+        resultat = []
+        Legends = sorted([(obj.Legend, obj.FormOrder, obj.Name) for obj in result if obj.FormOrder is not None and obj.InputType != 'GridRanged'], key=lambda x : x[1])
+
+        # Legend2s = sorted ([(obj.Legend)for obj in result if obj.FormOrder is not None ], key = lambda x : x[1])
+        withOutLegends = sorted([(obj.Legend, obj.FormOrder, obj.Name)for obj in result if obj.FormOrder is not None and obj.Legend is None and obj.InputType != 'GridRanged'], key = lambda x : x[1])
+
+        Unique_Legends = list()
+        # Get distinct Fieldset in correct order
+        for x in Legends:
+            if x[0] not in Unique_Legends:
+                Unique_Legends.append(x[0])
+
+        for curLegend in Unique_Legends:
+            curFieldSet = {'fields': [], 'legend': curLegend}
+            resultat.append(curFieldSet)
+
+        for curProp in Legends:
+            curIndex = Unique_Legends.index(curProp[0])
+            resultat[curIndex]['fields'].append(curProp[2])
+
+        if 'defaultValues' in subschema:
+            del subschema['defaultValues']
+        self.dto['fieldsets'] = resultat
+        self.dto['subschema'] = subschema
+
+    def InputLNM(self):
         ''' build ListOfNestedModel input type : used for complex protocols and Fieldworkers in station form '''
         if self.Options != None :
             try :
@@ -308,6 +350,7 @@ class ModuleForms(Base):
         'AutocompTreeEditor' : InputThesaurus,
         'AutocompleteEditor': InputAutocomplete,
         'GridRanged': GridRanged,
+        'PopOverEditor':InputPopOver
         }
 
 
