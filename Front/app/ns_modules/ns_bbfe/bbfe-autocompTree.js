@@ -8,7 +8,7 @@ define([
 ], function (
     _, $, $ui, Backbone, Form, autocompTree
 ) {
-   
+
     Backbone.Form.validators.Thesaurus = function (options) {
         return function Thesaurus(value) {
             if (!options.parent.isTermError) {
@@ -56,11 +56,11 @@ define([
             this.validators = options.schema.validators || [];
 
             this.isTermError = false;
-            
+
             this.template = options.template || this.constructor.template;
             this.id = options.id;
             var editorAttrs = "";
-            
+
             this.editable = options.schema.editable || true;
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled)  {
                 this.editable = false;
@@ -146,6 +146,9 @@ define([
                 }
                 _this.FirstRender = false;
             }).defer();
+            if (!this.editable){
+              this.$el.find('.input-group-addon').hide();
+            }
             return this;
         },
         validateAndTranslate: function (value, isTranslated) {

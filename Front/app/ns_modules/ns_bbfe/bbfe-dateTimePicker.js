@@ -11,7 +11,7 @@ define([
   return Form.editors.DateTimePickerEditor = Form.editors.Base.extend({
 
 
-    
+
         previousValue: '',
 
         events: {
@@ -48,8 +48,10 @@ define([
                 this.datetimepickerOptions.defaultDate = moment(this.defaultDate,this.format);
             }
             if (this.maxDate ) {
-                this.datetimepickerOptions.maxDate = moment(this.maxDate,this.format) ;   
+                this.datetimepickerOptions.maxDate = moment(this.maxDate,this.format) ;
             }
+
+
 
             this.classIcon = 'reneco-calendar reneco';
             if (this.format && (this.format.toLowerCase() == 'hh:mm:ss')) {
@@ -85,7 +87,7 @@ define([
                     value = val;
                   }
                 }
-                
+
               }else {
                     if (options.model) {
                       value = options.model.get(this.options.key);
@@ -104,6 +106,11 @@ define([
                 iconClass: _this.classIcon
             })));
             this.setElement($el);
+            //_this.datetimepickerOptions.widgetParent = $('#main');
+              _this.datetimepickerOptions.widgetPositioning = {
+            horizontal: 'auto',
+            vertical: 'bottom'
+         };
 			$($el[0]).datetimepicker(_this.datetimepickerOptions);
 
             //tmp solution ? datetimepicker remove the value
@@ -116,10 +123,10 @@ define([
         },
         }, {
         // STATICS
-            template: _.template('<div class="input-group date dateTimePicker"'  
+            template: _.template('<div class="input-group date dateTimePicker"'
                 +'data-editors="Date_"><span class="input-group-addon <%= hidden %>">'
                 +'<span class="<%= iconClass %> "></span></span><input id="<%=inputID%>" '
-                +'name="Date_" class="<%= editorClass %> <%= required %>" type="text" ' 
+                +'name="Date_" class="<%= editorClass %> <%= required %>" type="text" '
                 +' value="<%= value %>" <%= editable %> ></div>', null, Form.templateSettings) //data-date-format="DD/MM/YYYY HH:mm:ss" placeholder="jj/mm/aaaa hh:mm:ss"
     });
 });

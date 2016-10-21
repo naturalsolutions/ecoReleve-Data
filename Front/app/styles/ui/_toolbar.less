@@ -12,6 +12,7 @@
   &.bottom{
     box-shadow: 0px 0px 15px 0px rgba(107, 107, 107, 0.5);
     //border-top: 1px solid #ddd;
+  //  margin-bottom: 15px;
   }
   &.top{
     border-bottom: 1px solid #ddd;
@@ -43,6 +44,10 @@
   &.crop-paginator{
     @crop: @toolbarHeight + @paginatorHeight + 1;
     height: ~"calc(100% - @{crop})";
+  }
+  &.tab-content{
+    padding: 0;
+    padding-top:15px;
   }
 }
 

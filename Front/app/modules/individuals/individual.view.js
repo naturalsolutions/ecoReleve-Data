@@ -32,6 +32,11 @@ define([
 
     model: new IndividualModel(),
 
+    onShow: function() {
+      DetailView.prototype.onShow.call(this);
+      $('.js-form-btns').hide();
+    },
+
     displayMap: function() {
       this.map = new NsMap({
         url: this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true',

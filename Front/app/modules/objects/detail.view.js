@@ -137,7 +137,7 @@ define([
         var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
         console.log(globalEl);
         //_this.ui.globalInfo.append(globalEl);
-        globalEl.appendTo(_this.ui.globalInfo);
+        _this.ui.globalInfo.html(globalEl);
       };
       this.nsForm = new NsForm(formConfig);
 
