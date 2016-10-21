@@ -132,7 +132,7 @@ define([
 
     sensorCellRenderer : function(params){
       var _this = this;
-      console.log(params);
+      alert(params);
       if (params.value){
         var displayVal = params.value.label;
       }
