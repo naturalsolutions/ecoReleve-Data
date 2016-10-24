@@ -585,37 +585,35 @@ define([
     checkFormIsEmpty: function(objSchema , values) {
       var isEmpty = true;
 
-      for( var key in values ){
+      for( var key in values ) {
         var editorValue = values[key];
         var editorSchema = objSchema[key];
-        
-        if(key == 'defaultValues'){
+
+        if(key == 'defaultValues') {
           continue;
         }
-        if(editorSchema.fieldClass.indexOf('hide') != -1){
+        if(editorSchema.fieldClass.indexOf('hide') != -1) {
           continue;
         }
-        if(editorSchema.type == 'Checkbox'){
+        if(editorSchema.type == 'Checkbox') {
           continue;
         }
-        if(editorValue != null && editorValue != ''){
-          isEmpty = false;
-          return;
+        //need to check if not an array
+        if(editorValue != null && editorValue != '' && !Array.isArray(editorValue) ) {
+          return isEmpty = false;
         }
 
-        if(editorSchema.defaultValue){
-            if(editorSchema.defaultValue != editorValue){
-              isEmpty = false;
-              return;
+        if(editorSchema.defaultValue) {
+            if(editorSchema.defaultValue != editorValue) {
+              return isEmpty = false;
             }
         }
 
-        if( Array.isArray(editorValue) ){
+        if( Array.isArray(editorValue) ) {
           //subform
-          for( var values of editorValue ){
-            if(!this.checkFormIsEmpty(editorSchema.subschema, values)){
-              isEmpty = false;
-              return;
+          for( var values of editorValue ) {
+            if(!this.checkFormIsEmpty(editorSchema.subschema, values)) {
+              return isEmpty = false;
             }
           }
         }
