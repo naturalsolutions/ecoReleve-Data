@@ -87,13 +87,12 @@ define([
           });
         },
         onAfterFilterChanged: function(){
+          _this.handleSelectAllChkBhv();
           _this.clientSideFilter();
         }
         //overlayNoRowsTemplate: '<span>No rows to display</span>',
         //overlayLoadingTemplate: '',
       };
-
-
 
       if(!this.clientSide) {
         $.extend(this.gridOptions, {
@@ -131,7 +130,17 @@ define([
       if(this.ready){
         this.interaction('singleSelection', e.node.data[this.idName] || e.node.data.id || e.node.data.ID, this);
       }
-      this.handleDisplayTotalSeleted();
+
+      // verify if all elts are selected
+      var rowsToDisplay = this.gridOptions.api.getModel().rowsToDisplay;
+      var allSelected = false;
+      var allSelected = rowsToDisplay.every(function(node){
+        return node.selected;
+      });
+      this.checkUncheckSelectAllUI(allSelected);
+
+      // update status bar ui
+      this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length); 
     },
 
     formatColumns: function(columnDefs){
@@ -146,22 +155,15 @@ define([
           col.field = col.name;
           col.filter = filter[col.cell];
         }
-              
-        // if(col.renderable === false){
-        //   col.hide = true;
-        // } else {
-        //     col.hide = false;
-        // }
-
-        if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
-          col.checkboxSelection = true;
-        }
-
+        
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
+        
 
-
+        if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
+          _this.formatSelectColumn(col)          
+        }
         //draft
         if(col.cell == 'autocomplete'){
           _this.addBBFEditor(col);
@@ -169,7 +171,78 @@ define([
       });
       return columnDefs;
     },
-    
+
+    handleSelectAllChkBhv: function(){
+      if(!this.$el.find('.js-check-all')){
+        return;
+      }
+
+      var allSelected = false;
+
+      var selectedNodes = this.gridOptions.api.getSelectedNodes();
+      var rowsToDisplay = this.gridOptions.api.getModel().rowsToDisplay;
+
+      if(Object.keys(this.gridOptions.api.getFilterModel()).length === 0 ){
+        if(selectedNodes.length === rowsToDisplay.length){
+          allSelected = true;
+        }
+      } else {
+        if(selectedNodes.length < rowsToDisplay.length){
+         allSelected = false; 
+        } else {
+          allSelected = rowsToDisplay.every(function(node){
+            return node.selected;
+          });
+        }
+      }
+      this.checkUncheckSelectAllUI(allSelected);
+    },
+
+    formatSelectColumn: function(col){
+      var _this = this;
+      col.checkboxSelection = true;
+      col.headerCellTemplate = function() {
+        var eCell = document.createElement('span');
+        eCell.innerHTML = '\
+            <img class="js-check-all pull-left" value="unchecked" src="./app/styles/img/unchecked.png" title="check only visible rows (after filter)" style="padding-left:10px; padding-top:7px" />\
+            <div id="agResizeBar" class="ag-header-cell-resize"></div>\
+            <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button"></span>\
+            <div id="agHeaderCellLabel" class="ag-header-cell-label">\
+              <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>\
+              <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>\
+              <span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>\
+              <span id="agFilter" class="ag-header-icon ag-filter-icon"></span>\
+              <span id="agText" class="ag-header-cell-text"></span>\
+            </div>\
+        ';
+          var checkboxElt = eCell.querySelector('.js-check-all');
+
+          checkboxElt.addEventListener('click', function(e) {
+            if($(this).attr('value') === 'unchecked'){
+              _this.checkUncheckSelectAllUI(true);
+              _this.selectAllVisible();
+            } else {
+              _this.checkUncheckSelectAllUI(false);
+              _this.deselectAllVisible();
+            }
+          });
+
+        return eCell;
+      };
+    },
+
+    checkUncheckSelectAllUI: function(allSelected){
+      var checkbox = this.$el.find('.js-check-all');
+      if(allSelected){
+        checkbox.attr('value', 'checked');
+        checkbox.attr('src', './app/styles/img/checked.png');
+      } else {
+        checkbox.attr('value', 'unchecked');
+        checkbox.attr('src', './app/styles/img/unchecked.png');
+      }
+    },
+
+
     addBBFEditor: function(col){
       //draft
       var BBFEditor = function () {
@@ -204,8 +277,7 @@ define([
 
       col.cellEditor = BBFEditor;
     },
-      
-
+    
     fetchColumns: function(){
       this.columnDeferred = $.ajax({
         url: this.model.get('url') + 'getFields',
@@ -245,7 +317,6 @@ define([
     },
 
     initDataSource: function(){
-      
       var _this = this;
       this.dataSource = {
         rowCount: null,
@@ -260,7 +331,6 @@ define([
             order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
           }
           
-
           var status = {
             criteria: JSON.stringify(_this.filters),
             page: page,
@@ -270,7 +340,6 @@ define([
             typeObj: _this.model.get('typeObj')
           };
 
-          
           $.ajax({
             url: _this.model.get('url'),
             method: 'GET',
@@ -322,7 +391,7 @@ define([
       if(this[action]){
         this[action](params, from);
       } else {
-        console.warn(this, 'doesn\'t have an action for whith this name');
+        console.warn(this, 'doesn\'t have ' + action + ' action');
       }
     },
     interaction: function(action, params){
@@ -369,20 +438,30 @@ define([
 
     singleSelection: function(param, from){
       var _this = this;
+      if(from == this){
+        return;
+      }
       this.gridOptions.api.forEachNode( function (node) {
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
-              if(from === _this){
-                _this.ready = false;
-                node.setSelected(node.selected);
-                _this.ready = true;
-              } else {
-                _this.ready = false;
-                node.setSelected(!node.selected);
-                _this.ready = true;
-              }
+            _this.ready = false;
+            node.setSelected(!node.selected);
+            _this.ready = true;
           }
       });
     },
+
+    selectAllVisible: function(){
+      this.gridOptions.api.getModel().rowsToDisplay.map(function(node){
+        node.setSelected(true);
+      });
+    },
+    
+    deselectAllVisible: function(){
+      this.gridOptions.api.getModel().rowsToDisplay.map(function(node){
+        node.setSelected(false);
+      });
+    },
+
 
     deselectAll: function(){
       this.ready = false;
@@ -409,18 +488,22 @@ define([
 
       //because it's better than to do others loops
       this.gridOptions.api.forEachNodeAfterFilterAndSort(function(node, index){
+
         feature = {
             'type': 'Feature',
             'id': node.data[_this.idName] || node.data.id || node.data.ID,
             'geometry': {
                 'type': 'Point',
-                'coordinates': [node.data.LAT || node.data.latitude, node.data.LON || node.data.longitude],
+                'coordinates': [
+                  node.data.LAT || node.data.latitude || node.data.lat, 
+                  node.data.LON || node.data.longitude || node.data.lon
+                ],
             },
             'properties': node.data,
         };
         featureCollection.features.push(feature);
         if(node.selected){
-          selectedFeaturesIds.push(node.data.id || node.data.ID);
+          selectedFeaturesIds.push(node.data[_this.idName] || node.data.id || node.data.ID);
         }
       });
 
@@ -495,10 +578,6 @@ define([
       });
       }*/
     },
-
-    handleDisplayTotalSeleted: function(){
-      this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length); 
-    },
     
     jumpToPage: function(index){
       this.paginationController.currentPage = index;
@@ -514,47 +593,43 @@ define([
     extendAgGrid: function(){
       var _this = this;
 
+      if(AgGrid.extended){
+        return;
+      }
+
+      AgGrid.TextFilter.prototype.afterGuiAttached = function(options) {
+        this.eFilterTextField.focus();
+        $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
+        $(this.eGui).find('input, select').each(function(){
+          $(this).addClass('form-control input-sm');
+        });
+      };
+
+
+      AgGrid.NumberFilter.prototype.afterGuiAttached = function(options) {
+        this.eFilterTextField.focus();
+        $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
+        $(this.eGui).find('input, select').each(function(){
+          $(this).addClass('form-control input-sm');
+        });
+        $(this.eGui).find('input').each(function(){
+          $(this).attr('type', 'number');
+        });
+      };
 
 
       AgGrid.StandardMenuFactory.prototype.showPopup = function (column, positionCallback) {
           var filterWrapper = this.filterManager.getOrCreateFilterWrapper(column);
           //ag Menu
           var eMenu = document.createElement('div');
-          var addCssClass = function (element, className) {
-            var _this = this;
-            if (!className || className.length === 0) {
-                return;
-            }
-            if (className.indexOf(' ') >= 0) {
-                className.split(' ').forEach(function (value) { return _this.addCssClass(element, value); });
-                return;
-            }
-            if (element.classList) {
-                element.classList.add(className);
-            }
-            else {
-                if (element.className && element.className.length > 0) {
-                    var cssClasses = element.className.split(' ');
-                    if (cssClasses.indexOf(className) < 0) {
-                        cssClasses.push(className);
-                        element.className = cssClasses.join(' ');
-                    }
-                }
-                else {
-                    element.className = className;
-                }
-            }
-        };
-
-          //utils_1.Utils.addCssClass(eMenu, 'ag-menu');
-          addCssClass(eMenu, 'ag-menu');
+          $(eMenu).addClass('ag-menu');
 
           eMenu.appendChild(filterWrapper.gui);
 
           //Add header
           var eheader = document.createElement('div');
           eheader.className = 'header-filter';
-          eheader.innerHTML = "<p><span class='glyphicon glyphicon-align-right glyphicon-filter'></span></p>";
+          //eheader.innerHTML = "<p><span class='glyphicon glyphicon-align-right glyphicon-filter'></span></p>";
           eMenu.insertBefore(eheader, eMenu.firstChild);
 
           // need to show filter before positioning, as only after filter
@@ -609,6 +684,8 @@ define([
               .replace('[NEXT]', localeTextFunc('next', 'Next'))
               .replace('[LAST]', localeTextFunc('last', 'Last'));
       };
+
+      AgGrid.extended = true;
     },
 
   });

@@ -65,7 +65,7 @@ define([
       if(this.displayMap){
         this.displayMap();
       }
-      this.$el.find('.js-nav-tabs').removeClass('hidden');
+      this.$el.find('.js-nav-tabs').removeClass('hide');
     },
 
     displayFilter: function() {

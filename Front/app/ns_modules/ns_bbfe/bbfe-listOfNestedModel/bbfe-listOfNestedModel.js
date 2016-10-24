@@ -66,7 +66,7 @@ define([
 
             this.forms.push(form);
 
-            if(!this.defaultRequired){
+
                 form.$el.find('fieldset').append('\
                     <div class="' + this.hidden + ' col-xs-12 control">\
                         <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
@@ -79,23 +79,21 @@ define([
 
                       _this.forms.splice(i, 1);
                   }
+
                   _this.$el.trigger('change');
+                  if(!_this.forms.length){
+                    _this.addEmptyForm();
+                  }
+
                   return;
                 });
-            }
+
 
             this.$el.find('#formContainer').append(form.el);
 
-            this.$el.find('#formContainer input').on("change", function(e) {
+            this.$el.find('#formContainer input,select,textarea').on("change", function(e) {
                  window.app.checkFormSaved = true;
             });
-            this.$el.find('#formContainer select').on("change", function(e) {
-                 window.app.checkFormSaved = true;
-            });
-            this.$el.find('#formContainer  textarea').on("change", function(e) {
-                 window.app.checkFormSaved = true;
-            });
-
         },
 
         render: function() {
@@ -106,7 +104,7 @@ define([
                 name: this.key
             })));
             this.setElement($el);
-            
+
 
             var data = this.options.model.attributes[this.key];
 

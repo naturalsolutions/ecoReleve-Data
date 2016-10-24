@@ -101,7 +101,7 @@ define([
       if(this[action]){
         this[action](params, from);
       } else {
-        console.warn(this, 'doesn\'t have an action for whith this name');
+        console.warn(this, 'doesn\'t have ' + action + ' action');
       }
     },
 
@@ -844,6 +844,7 @@ define([
 
     //param can be filters or directly a collection
     loadFeatureCollection: function(params){
+      var _this = this;
       if(params.featureCollection.features.length){
         this.updateLayers(params.featureCollection);
         if(params.selectedFeaturesIds){

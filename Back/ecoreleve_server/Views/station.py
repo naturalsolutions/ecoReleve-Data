@@ -234,6 +234,12 @@ def insertListNewStations(request):
         newRow['NbFieldWorker'] = row['NbFieldWorker']
         newRow['StationDate'] = datetime.strptime(row['waypointTime'],format_dt)
 
+        if 'fieldActivity' in row:
+            newRow['fieldActivityId'] = row['fieldActivity']
+
+        if 'NbFieldWorker' in row:
+            newRow['NbFieldWorker'] = row['NbFieldWorker']
+
         data_to_insert.append(newRow)
 
     ##### Load date into pandas DataFrame then round LAT,LON into decimal(5) #####
