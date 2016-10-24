@@ -53,6 +53,7 @@ define([
             //model.default = this.options.model.attributes[this.key];
             model.schema = this.options.schema.subschema;
             model.fieldsets = this.options.schema.fieldsets;
+            //this.$el.find('.badge').html(this.model.attributes[this.schema.name].length);
             this.addForm(model);
         },
 
@@ -65,28 +66,28 @@ define([
             }).render();
 
             this.forms.push(form);
+            this.$el.find('.js_badge').html(this.forms.length);
+            form.$el.find('fieldset').append('\
+                <div class="' + this.hidden + ' col-xs-12 control">\
+                    <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
+                </div>\
+            ');
 
+            form.$el.find('button#remove').on('click', function() {
+              _this.$el.find('#formContainer').find(form.el).remove();
+              var i = _this.forms.indexOf(form);
+              if (i > -1) {
+                  _this.forms.splice(i, 1);
+                  _this.$el.find('.js_badge').html(_this.forms.length);
+              }
 
-                form.$el.find('fieldset').append('\
-                    <div class="' + this.hidden + ' col-xs-12 control">\
-                        <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
-                    </div>\
-                ');
-                form.$el.find('button#remove').on('click', function() {
-                  _this.$el.find('#formContainer').find(form.el).remove();
-                  var i = _this.forms.indexOf(form);
-                  if (i > -1) {
+              _this.$el.trigger('change');
+              if(!_this.forms.length){
+                _this.addEmptyForm();
+              }
 
-                      _this.forms.splice(i, 1);
-                  }
-
-                  _this.$el.trigger('change');
-                  if(!_this.forms.length){
-                    _this.addEmptyForm();
-                  }
-
-                  return;
-                });
+              return;
+            });
 
 
             this.$el.find('#formContainer').append(form.el);
@@ -181,6 +182,9 @@ define([
           //STATICS
           template: _.template('\
             <div id="<%= id %>" name="<%= name %>" class="required nested clearfix">\
+                <% if (this.schema.editorClass === "form-control" ) {  %>\
+                <span>Nb Sub Protocol <span class="js_badge badge">0</span> </span>\
+                <% } %>\
                 <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
                 <div class="clear"></div>\
                 <div id="formContainer"   class="clearfix"></div>\
