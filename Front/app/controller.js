@@ -140,11 +140,18 @@ define([
       }));
     },
 
-    validateDetail: function(type, dataset){
-      this.rgMain.show(new LytSensorValidateDetail({
-        type: type,
-        dataset: dataset
-      }));
+    validateDetail: function(type, index){
+      if(this.rgMain.currentView instanceof LytSensorValidateDetail){
+        this.rgMain.currentView.reload({
+          type: type,
+          index: index
+        });
+      } else {
+        this.rgMain.show(new LytSensorValidateDetail({
+          type: type,
+          index: index
+        }));
+      }
     },
 
     release: function() {
