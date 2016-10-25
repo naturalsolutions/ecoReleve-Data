@@ -57,6 +57,16 @@ define([
             this.addForm(model);
         },
 
+        indexPresent : function (elem, index, array) {
+          var cpt = -1
+          while (index < array.length ) {
+            if (array[index].cid === elem.cid ) {
+               cpt = index;
+            }
+            index+=1;
+          }
+          return cpt;
+        },
         addForm: function(model){
             var _this = this;
             var form = new Backbone.Form({
@@ -67,6 +77,10 @@ define([
 
             this.forms.push(form);
             this.$el.find('.js_badge').html(this.forms.length);
+
+            if (this.schema.editorClass === "form-control" ) {
+              form.$el.find('fieldset').append('<button type="button"  class="btn btn-default display js_index_subForm" >'+this.indexPresent(form,0,this.forms)+'</button>')
+            }
             form.$el.find('fieldset').append('\
                 <div class="' + this.hidden + ' col-xs-12 control">\
                     <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
@@ -84,6 +98,12 @@ define([
               _this.$el.trigger('change');
               if(!_this.forms.length){
                 _this.addEmptyForm();
+              }
+              alert("boom on a clique sur delete");
+              var tabBtn = $('.js_index_subForm');//_this.$el.find('.js_index_subForm');
+              console.log(tabBtn);
+              for( var tmp of tabBtn) {
+                console.log(tabBtn[tmp]);
               }
 
               return;
