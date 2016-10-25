@@ -77,9 +77,8 @@ define([
 
             this.forms.push(form);
             this.$el.find('.js_badge').html(this.forms.length);
-
-            if (this.schema.editorClass === "form-control" ) {
-              form.$el.find('fieldset').append('<button type="button"  class="btn btn-default display js_index_subForm" >'+this.indexPresent(form,0,this.forms)+'</button>')
+            if (this.schema.editorClass.indexOf("form-control") != -1 ) {
+              form.$el.find('fieldset').prepend('<a role="button"  class="col-md-12 btn btn-success js_index_subForm" >'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</button>')
             }
             form.$el.find('fieldset').append('\
                 <div class="' + this.hidden + ' col-xs-12 control">\
@@ -99,11 +98,12 @@ define([
               if(!_this.forms.length){
                 _this.addEmptyForm();
               }
-              alert("boom on a clique sur delete");
-              var tabBtn = $('.js_index_subForm');//_this.$el.find('.js_index_subForm');
-              console.log(tabBtn);
-              for( var tmp of tabBtn) {
-                console.log(tabBtn[tmp]);
+
+              var tabBtn = $('.js_index_subForm');
+              var tmp = i;
+              while( tmp <= tabBtn.length) {
+                $(tabBtn[tmp]).text(tmp+1)
+                tmp+=1;
               }
 
               return;
@@ -202,7 +202,7 @@ define([
           //STATICS
           template: _.template('\
             <div id="<%= id %>" name="<%= name %>" class="required nested clearfix">\
-                <% if (this.schema.editorClass === "form-control" ) {  %>\
+                <% if (this.schema.editorClass.indexOf("form-control") != -1 ) {  %>\
                 <span>Nb Sub Protocol <span class="js_badge badge">0</span> </span>\
                 <% } %>\
                 <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
