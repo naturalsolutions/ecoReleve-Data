@@ -43,8 +43,7 @@ define([
       this.com = new Com();
       this.model.set('id', options.id);
       this.model.set('stationId', options.id);
-      this.model.set('protocolId', options.protocolId);
-      this.model.set('observationId', options.observationId);
+      this.model.set('obs', options.observationId);
     },
     reloadFromNavbar: function(id) {
       this.model.set('id', id);

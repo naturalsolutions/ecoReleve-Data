@@ -23,23 +23,24 @@ define([
     initialize: function(options) {
       this.parent = options.parent;
       this.collection = new Backbone.Collection();
+      console.log(this.model);
     },
 
     displayFirstProto: function(){
-      var protoId = this.model.get('protocolId');
-      var view;
-      if(protoId){
-        var model = this.protocolsItems.collection.findWhere({'ID': parseInt(protoId)});
-        if(this.model.get('observationId') && model){
-          model.set('observationId', this.model.get('observationId'));
-        }
-        view = this.protocolsItems.children.findByModel(model);
-      }
-      if(!view){
-        view = this.protocolsItems.children.findByIndex(0);
-      }
-      this.cProtoItemView = view;
-      this.displayProtocol(view);
+      // var protoId = this.model.get('protocolId');
+      // var view;
+      // if(protoId){
+      //   var model = this.protocolsItems.collection.findWhere({'ID': parseInt(protoId)});
+      //   if(this.model.get('observationId') && model){
+      //     model.set('observationId', this.model.get('observationId'));
+      //   }
+      //   view = this.protocolsItems.children.findByModel(model);
+      // }
+      // if(!view){
+      //   view = this.protocolsItems.children.findByIndex(0);
+      // }
+      // this.cProtoItemView = view;
+      // this.displayProtocol(view);
     },
 
     initMenu: function() {
@@ -47,6 +48,11 @@ define([
       var ProtoItem = Marionette.LayoutView.extend({
         template: 'app/modules/stations/templates/tpl-menuItemView.html',
         className: 'js-proto-item noselect clearfix col-xs-12',
+
+        modelEvents: {
+          'change:total': 'updateTotal',
+          'change:active': 'handleActive'
+        },
 
         events: {
          'click': 'displayAssociatedProtocol',
@@ -57,17 +63,36 @@ define([
           'total' : 'span#total'
         },
 
+        updateTotal: function(){
+          
+        },
+
+        handleActive: function(){
+          console.log(this.model.get('active'));
+        },
+
         initialize: function(model){
           this.model.set('stationId', _this.model.get('id'));
+          this.model.set('active', false);
         },
 
         displayAssociatedProtocol:function(e){
-          _this.displayProtocol(this);
+          //this.model.set('active', true);
+          //_this.displayProtocol(this);
+        },
+
+        onRender: function(){
+          this.model.get('obs').map(function(obs){
+            if(_this.model.get('obs') == obs){
+              this.$el.addClass('active');
+              _this.displayProtocol(this);
+            }
+          })
         },
 
         addObs: function(e){
           e.stopPropagation();
-          _this.displayProtocol(this, true);
+          _this.displayProtocol(this);
         }
       });
 
@@ -82,14 +107,12 @@ define([
       this.displayFirstProto();
     },
     
-    displayProtocol: function(protoItemView, newObs){
-      this.cProtoItemView.$el.removeClass('active');
-      this.cProtoItemView = protoItemView;
-
-      protoItemView.$el.addClass('active');
+    displayProtocol: function(protoItemView, obsIndex){
+      
+      //protoItemView.$el.addClass('active');
+      //var obsId = 
       this.parent.rgProtocol.show(new Protocol({
-        model: protoItemView.model,
-        newObs: true
+        model: protoItemView.model
       }));
     },
 

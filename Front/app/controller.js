@@ -89,10 +89,9 @@ define([
       this.rgMain.show(new LytImportFile({type : type}));
     },
 
-    station: function(id, protocolId, observationId) {
+    station: function(id, observationId) {
       this.rgMain.show(new LytStation({
         id: id,
-        protocolId: protocolId,
         observationId: observationId
       }));
     },    

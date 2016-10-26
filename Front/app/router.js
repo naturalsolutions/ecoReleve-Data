@@ -30,8 +30,8 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'stations/lastImported(/)': 'stations',
       
       'stations/new(/)': 'newStation',
-      'stations/:id/:id/:id(/)': 'station',
-      'stations/:id/:id(/)': 'station',
+
+      'stations/:id?obs=:obs(/)': 'station',
       'stations/:id(/)': 'station',
       'stations(/)': 'stations',
 
