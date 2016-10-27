@@ -191,6 +191,7 @@
             var position = $(this).offset();
             var screenWidth = $(window).width();
             var screenHeight =  $(window).height();
+
             position.top += $me.outerHeight(); // height input
 
             console.log("largeur ecran" , screenWidth);
@@ -199,14 +200,22 @@
               $("div[id^=treeView]").each(function () {
                 $(this).css('display', 'none');
               });
+              if ( $(treeContainer).find('ul').css("max-height") ) {
+                console.log("presence max-height");
+              }
+              else {
+                console.log("pas de max-height");
+              }
+              $(treeContainer).find('ul').css({"max-height" : ''} );
               var treeContainer = $("#treeView" + $me.attr("id"));
               var treeContainerWidth = $(treeContainer).width();
               var treeContainerHeight = $(treeContainer).height();
+
               treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
             //treeContainer.css('display', 'block').css('border', 'solid 1px').css('z-index', '100');
-            if( position.top + treeContainerHeight > screenHeight ) {
-              console.log("ca va depasser en bas");
 
+            if( position.top + treeContainerHeight > screenHeight ) {
+              $(treeContainer).find('ul').css({"max-height" : (screenHeight-position.top )-2 });
             }
 
             if(position.left + treeContainerWidth > screenWidth ) {
@@ -216,6 +225,7 @@
                 right : 0
               };
             }
+
             treeContainer.css(position);//{top: $me.outerHeight() + 20 });
             console.log(treeContainer);
             console.log("largeur tree",treeContainerWidth );
