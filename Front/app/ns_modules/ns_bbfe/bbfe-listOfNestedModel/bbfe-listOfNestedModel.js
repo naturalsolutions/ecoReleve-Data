@@ -38,6 +38,7 @@ define([
             this.key = this.options.key;
             this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
 
+
         },
         //removeForm
         deleteForm: function() {
@@ -74,11 +75,13 @@ define([
                 fieldsets: model.fieldsets,
                 schema: model.schema
             }).render();
-
-            this.forms.push(form);
-            this.$el.find('.js_badge').html(this.forms.length);
             if (this.schema.editorClass.indexOf("form-control") != -1 ) {
-              form.$el.find('fieldset').prepend('<a role="button"  class="col-md-12 btn btn-success js_index_subForm" >'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</button>')
+              this.form.$el.find(".js_badge").css({'display': '','margin-left': '5px'})
+            }
+            this.forms.push(form);
+            this.form.$el.find(".js_badge").html(this.forms.length);
+            if (this.schema.editorClass.indexOf("form-control") != -1 ) {
+              form.$el.find('fieldset').prepend('<div class="col-md-12 js_container_index_subForm"><a role="button"  class="btn btn-success disabled js_index_subForm" >'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</button></div>')
             }
             form.$el.find('fieldset').append('\
                 <div class="' + this.hidden + ' col-xs-12 control">\
@@ -91,7 +94,7 @@ define([
               var i = _this.forms.indexOf(form);
               if (i > -1) {
                   _this.forms.splice(i, 1);
-                  _this.$el.find('.js_badge').html(_this.forms.length);
+                  _this.form.$el.find(".js_badge").html(_this.forms.length);
               }
 
               _this.$el.trigger('change');
@@ -127,6 +130,8 @@ define([
             this.setElement($el);
 
 
+
+
             var data = this.options.model.attributes[this.key];
 
             if (data) {
@@ -160,6 +165,7 @@ define([
                     this.defaultRequired = false;
                 }
             }
+
             return this;
         },
 
@@ -202,9 +208,6 @@ define([
           //STATICS
           template: _.template('\
             <div id="<%= id %>" name="<%= name %>" class="required nested clearfix">\
-                <% if (this.schema.editorClass.indexOf("form-control") != -1 ) {  %>\
-                <span>Nb Sub Protocol <span class="js_badge badge">0</span> </span>\
-                <% } %>\
                 <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
                 <div class="clear"></div>\
                 <div id="formContainer"   class="clearfix"></div>\
