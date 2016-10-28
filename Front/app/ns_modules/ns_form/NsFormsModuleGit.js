@@ -214,8 +214,6 @@ define([
 
       this.name = '_' + this.objectType + '_';
 
-
-
       //initialize model from AJAX call
       this.jqxhr = $.ajax({
         url: url,
@@ -255,7 +253,7 @@ define([
         }
       });
     },
-    initRules:function() {
+    initRules: function() {
       var _this = this;
       this.ruler = new Ruler({
             form: _this.BBForm

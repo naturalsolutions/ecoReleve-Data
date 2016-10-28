@@ -89,13 +89,23 @@ define([
       this.rgMain.show(new LytImportFile({type : type}));
     },
 
-    station: function(id, observationId) {
-      this.rgMain.show(new LytStation({
-        id: id,
-        observationId: observationId
-      }));
+    station: function(id, proto, obs) {
+      if(this.rgMain.currentView instanceof  LytStation){
+        this.rgMain.currentView.reload({
+          id: id,
+          proto: proto,
+          obs: obs
+        });
+      } else {
+        this.rgMain.show(new LytStation({
+          id: id,
+          proto: proto,
+          obs: obs
+        }));
+      }
     },    
     stations: function(params) {
+
       this.rgMain.show(new LytStations({
         params: params
       }));

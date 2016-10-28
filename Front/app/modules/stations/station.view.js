@@ -42,9 +42,26 @@ define([
     initialize: function(options) {
       this.com = new Com();
       this.model.set('id', options.id);
+
       this.model.set('stationId', options.id);
-      this.model.set('obs', options.observationId);
+
+      this.model.set('urlParams', {
+        proto: options.proto,
+        obs: options.obs
+      });
     },
+
+    reload: function(params){
+      this.LytProtocols.protocolsItems.getViewFromUrlParams(params);
+    },
+
+    displayProtos: function() {
+      this.rgProtocols.show(this.LytProtocols = new LytProtocols({
+        model: this.model,
+        parent: this,
+      }));
+    },
+
     reloadFromNavbar: function(id) {
       this.model.set('id', id);
       this.displayStation();
@@ -126,12 +143,7 @@ define([
       _this.displayProtos();
     },
 
-    displayProtos: function() {
-      this.rgProtocols.show(this.LytProtocols = new LytProtocols({
-        model: this.model,
-        parent: this,
-      }));
-    },
+
 
   });
 });

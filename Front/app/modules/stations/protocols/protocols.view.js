@@ -12,7 +12,7 @@ define([
     template: 'app/modules/stations/protocols/protocols.tpl.html',
     className: 'protocols full-height',
 
-    ui: {
+    regions: {
       protocolsMenu: '.js-protocols-menu',
     },
 
@@ -20,100 +20,10 @@ define([
       
     },
 
+
     initialize: function(options) {
       this.parent = options.parent;
       this.collection = new Backbone.Collection();
-      console.log(this.model);
-    },
-
-    displayFirstProto: function(){
-      // var protoId = this.model.get('protocolId');
-      // var view;
-      // if(protoId){
-      //   var model = this.protocolsItems.collection.findWhere({'ID': parseInt(protoId)});
-      //   if(this.model.get('observationId') && model){
-      //     model.set('observationId', this.model.get('observationId'));
-      //   }
-      //   view = this.protocolsItems.children.findByModel(model);
-      // }
-      // if(!view){
-      //   view = this.protocolsItems.children.findByIndex(0);
-      // }
-      // this.cProtoItemView = view;
-      // this.displayProtocol(view);
-    },
-
-    initMenu: function() {
-      var _this = this;
-      var ProtoItem = Marionette.LayoutView.extend({
-        template: 'app/modules/stations/templates/tpl-menuItemView.html',
-        className: 'js-proto-item noselect clearfix col-xs-12',
-
-        modelEvents: {
-          'change:total': 'updateTotal',
-          'change:active': 'handleActive'
-        },
-
-        events: {
-         'click': 'displayAssociatedProtocol',
-         'click .js-btn-add-obs': 'addObs',
-        },
-          
-        ui: {
-          'total' : 'span#total'
-        },
-
-        updateTotal: function(){
-          
-        },
-
-        handleActive: function(){
-          console.log(this.model.get('active'));
-        },
-
-        initialize: function(model){
-          this.model.set('stationId', _this.model.get('id'));
-          this.model.set('active', false);
-        },
-
-        displayAssociatedProtocol:function(e){
-          //this.model.set('active', true);
-          //_this.displayProtocol(this);
-        },
-
-        onRender: function(){
-          this.model.get('obs').map(function(obs){
-            if(_this.model.get('obs') == obs){
-              this.$el.addClass('active');
-              _this.displayProtocol(this);
-            }
-          })
-        },
-
-        addObs: function(e){
-          e.stopPropagation();
-          _this.displayProtocol(this);
-        }
-      });
-
-      this.protocolsItems = new Marionette.CollectionView({
-        collection : this.collection,
-        childView: ProtoItem,
-        className: 'coll-view',
-      });
-      this.protocolsItems.render();
-      this.ui.protocolsMenu.html(this.protocolsItems.el);
-
-      this.displayFirstProto();
-    },
-    
-    displayProtocol: function(protoItemView, obsIndex){
-      
-      //protoItemView.$el.addClass('active');
-      //var obsId = 
-      this.parent.rgProtocol.show(new Protocol({
-        model: protoItemView.model
-      }));
     },
 
     onShow: function(){
@@ -131,6 +41,143 @@ define([
       });
       //this.feedProtoPicker();
     },
+
+    initMenu: function() {
+      var _this = this;
+      var ProtoItem = Marionette.LayoutView.extend({
+        template: 'app/modules/stations/templates/tpl-menuItemView.html',
+        className: 'js-proto-item noselect clearfix col-xs-12',
+
+        modelEvents: {
+          'change:total': 'updateTotal',
+        },
+
+        events: {
+         'click': 'handleActive',
+         'click .js-btn-add-obs': 'addObs',
+        },
+          
+        ui: {
+          'total' : 'span#total'
+        },
+
+        updateTotal: function(){
+          this.model.set('total', this.model.get('obs').length);
+        },
+
+        handleActive:function(e){
+          var hash = window.location.hash.split('?');
+          var obs;
+          if(this.model.get('obs').length){
+            //here
+            obs = this.model.get('obs')[0];
+          }
+          if(!obs){
+            obs = 0;
+          }
+          var url = hash[0] + '?proto=' + this.model.get('ID') + '&obs=' + obs;
+          Backbone.history.navigate(url, {trigger: true});
+        },
+
+        addObs: function(e){
+          e.stopPropagation();
+          var hash = window.location.hash.split('?');
+          var url = hash[0] + '?proto=' + this.model.get('ID') + '&obs=' + 0;
+          Backbone.history.navigate(url, {trigger: true});
+        }
+      });
+      
+      var Tmp = Marionette.CollectionView.extend({
+        getViewFromUrlParams: function(params){
+          var view;
+          var views = this.children._views;
+          if(!params.obs && !params.proto){
+            view = views[Object.keys(views)[0]];
+          }
+
+          console.log(params.obs);
+
+          if(params.obs && params.obs != 0){
+            for(var key in views){
+              var cView = views[key];
+              cView.$el.removeClass('active');
+              
+              cView.model.get('obs').map(function(obs, i){
+                if(obs == params.obs){
+                  view = cView;
+                  view.model.set('currentObs', params.obs);
+                  return;
+                }
+              });
+            }
+          }
+
+          if(!view){
+            if(params.obs){
+              console.warn('Observation n°' + params.obs + ' doesn\'t exist for this station');
+            }
+
+            for(var key in views){
+              var cView = views[key];
+              cView.$el.removeClass('active');
+              if(params.proto == cView.model.get('ID')){
+                view = cView;
+                if(view.model.get('obs').length){
+                  if(params.obs != 0){
+                    view.model.set('currentObs', view.model.get('obs')[0]);
+                  } else {
+                    view.model.set('currentObs', 0);
+                  }
+                  
+                } else {
+                  view.model.set('currentObs', 0);
+                }
+              }
+            }
+          }
+
+          if(!view){
+            if(params.proto){
+              console.warn('Protocol n°' + params.proto + ' doesn\'t exist for this station');
+            }
+
+            view = views[Object.keys(views)[0]];
+            if(view.model.get('obs').length){
+              var tmp = view.model.get('obs')[0];
+              if(!tmp){
+                tmp = view.model.get('obs')[0];
+              }
+              view.model.set('currentObs', tmp);
+            } else {
+              view.model.set('currentObs', 0);
+            }
+          }
+
+
+          view.model.set('stationId', _this.model.get('stationId'));
+          view.$el.addClass('active');
+
+          _this.parent.rgProtocol.show(new Protocol({
+            model: view.model
+          }));
+          
+          
+        },
+
+        onShow: function(){
+          this.getViewFromUrlParams(_this.model.get('urlParams'));
+        }
+      });
+
+      this.protocolsItems = new Tmp({
+        collection : this.collection,
+        childView: ProtoItem,
+        className: 'coll-view',
+      });
+      this.protocolsMenu.show(this.protocolsItems);
+    },
+
+
 
     feedProtoPicker: function() {
       var _this = this;
@@ -156,7 +203,7 @@ define([
         var index = this.collection.indexOf(md);
         this.updateProtoStatus(index);
         this.currentView.addObs();
-      }else {
+      } else {
         this.addNewProtoType(name, objectType);
       }
     },

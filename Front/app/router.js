@@ -31,7 +31,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       
       'stations/new(/)': 'newStation',
 
-      'stations/:id?obs=:obs(/)': 'station',
+      'stations/:id?(proto=:proto&)obs=:obs(/)': 'station',
       'stations/:id(/)': 'station',
       'stations(/)': 'stations',
 

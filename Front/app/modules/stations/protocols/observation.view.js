@@ -13,31 +13,40 @@ define([
     className: 'observation full-height white',
 
     ui: {
-      'form': '.js-obs-form'
+      'form': '.js-obs-form',
+      'formBtns': '.js-form-btns' 
     },
 
     initialize: function(options){
-      
+      console.log(options);
     },
 
     onShow: function(){
       var _this = this;
-      if(this.model.get('id')){
-        this.diplsayMode = 'display';
-        this.model.fetch({success: _this.displayForm.bind(_this)});
+      if(this.model.get('id') == 0){
+        this.displayMode = 'edit';
       } else {
-        this.diplsayMode = 'edit';
-        this.displayForm();
+        this.displayMode = 'display';
       }
+      this.model.fetch({
+        data: { FormName: 1, ObjectType: _this.model.get('ID')},
+        success: _this.displayForm.bind(_this)
+      });
+
 
     },
 
     displayForm: function(){
+
+      this.model.schema = this.model.get('schema');
+      this.model.fieldsets = this.model.get('fieldsets');
+      this.model.attributes = this.model.get('data');
+
       this.form = new NsForm({
+        modelurl: this.model.urlRoot,
         model: this.model,
-        buttonRegion: [],
+        buttonRegion: [this.ui.formBtns],
         displayMode: this.displayMode,
-        displayMode: this.model.attributes.state,
         formRegion: this.ui.form,
         reloadAfterSave: true,
         savingError: this.handleErrors
