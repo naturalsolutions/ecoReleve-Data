@@ -194,41 +194,37 @@
 
             position.top += $me.outerHeight(); // height input
 
-            console.log("largeur ecran" , screenWidth);
-
             setTimeout(function(){
               $("div[id^=treeView]").each(function () {
                 $(this).css('display', 'none');
               });
-              if ( $(treeContainer).find('ul').css("max-height") ) {
-                console.log("presence max-height");
-              }
-              else {
-                console.log("pas de max-height");
-              }
-              $(treeContainer).find('ul').css({"max-height" : ''} );
+            /*  if ( !$(treeContainer).find('ul').css("max-height") ) {
+                  $(treeContainer).find('ul')
+              }*/
+
               var treeContainer = $("#treeView" + $me.attr("id"));
               var treeContainerWidth = $(treeContainer).width();
               var treeContainerHeight = $(treeContainer).height();
 
               treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
+              //$(treeContainer).find('ul').css("max-height",'200')
             //treeContainer.css('display', 'block').css('border', 'solid 1px').css('z-index', '100');
 
-            if( position.top + treeContainerHeight > screenHeight ) {
-              $(treeContainer).find('ul').css({"max-height" : (screenHeight-position.top )-2 });
+            if( position.top + treeContainerHeight > screenHeight-2 ) {
+              position.top-=treeContainerHeight+$me.outerHeight()+2;
             }
 
             if(position.left + treeContainerWidth > screenWidth ) {
-              console.log("ca va depasser a droite ");
+              treeContainer.css('left','');
               position = {
                 top : position.top,
                 right : 0
               };
             }
-
+            else {
+              treeContainer.css('right','');
+            }
             treeContainer.css(position);//{top: $me.outerHeight() + 20 });
-            console.log(treeContainer);
-            console.log("largeur tree",treeContainerWidth );
             //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
             $(document).delegate("body", "click", function (event) {
               if (!$(event.target).is("#" + $me.attr("id") + ",span[class^=fancytree], div[id^=treeView], ul")) {
