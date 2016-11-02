@@ -33,14 +33,14 @@ from sqlalchemy.orm import sessionmaker,scoped_session
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects."""
-    try: 
+    try:
         return obj.strftime ('%d/%m/%Y %H:%M:%S')
     except :
         return obj.strftime ('%d/%m/%Y')
 
 def date_adapter(obj, request):
     """Json adapter for datetime objects."""
-    try: 
+    try:
         return obj.strftime ('%d/%m/%Y')
     except :
         return obj
@@ -51,7 +51,7 @@ def time_adapter(obj, request):
         return obj.strftime('%H:%M')
     except:
         return obj.strftime('%H:%M:%S')
-    
+
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
     return float(obj)
@@ -85,7 +85,7 @@ def main(global_config, **settings):
 
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
-    Base.metadata.reflect(views=True, extend_existing=False) 
+    Base.metadata.reflect(views=True, extend_existing=False)
 
 
     config = Configurator(settings=settings)
@@ -99,8 +99,8 @@ def main(global_config, **settings):
 
     if 'loadExportDB' in settings and settings['loadExportDB'] == 'False' :
         print('''
-            /!\================================/!\ 
-            WARNING : 
+            /!\================================/!\
+            WARNING :
             Export DataBase NOT loaded, Export Functionality will not working
             /!\================================/!\ \n''')
     else:
@@ -126,16 +126,9 @@ def main(global_config, **settings):
     includeme(config)
     config.set_root_factory(SecurityRoot)
 
-
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
 
     loadThesaurusTrad(config)
-
-    loadUserRole(config)
-
-    # Set the default permission level to 'read'
-    # config.set_default_permission('read')
-
     add_routes(config)
     config.scan()
     return config.make_wsgi_app()
