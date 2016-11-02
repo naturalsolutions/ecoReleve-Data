@@ -8,8 +8,6 @@ GO
 
 
 
-
-
 ALTER PROCEDURE [dbo].[pr_MessageExportProtoEntomo]
 (
 @ProtocoleID INT  = NULL
@@ -19,7 +17,7 @@ BEGIN
 
 	BEGIN TRY
 	BEGIN TRAN
-	
+--DECLARE @ProtocoleID INT  SET @ProtocoleID= NULL
 	
 		IF OBJECT_ID('tempdb..#ProtocoleID') IS NOT NULL
 		DROP TABLE #ProtocoleID
@@ -60,7 +58,7 @@ BEGIN
 		FROM Station  S 
 		JOIN Observation O on o.FK_Station = s.ID 
 		JOIN ProtocoleType PT ON o.FK_ProtocoleType = PT.ID AND PT.Name ='Entomo_Pop_Census'
-		JOIN ObservationDynPropValuesNow v ON v.FK_Observation = o.ID and v.Name = 'sampled' and v.ValueInt=1
+
 		
 
 
@@ -133,10 +131,10 @@ BEGIN
 			   )
 		OUTPUT INSERTED.pk_MessageSend INTO #MessageIDs	
 		SELECT Pt.Name,o.id,dbo.GetProvenance() + '_' + convert(varchar,o.ID),'Create',getdate(),NULL,NULL
-		FROM Observation  O JOIN ProtocoleType PT ON o.FK_ProtocoleType = PT.ID AND PT.Name ='Entomo_Pop_Census'
-			WHERE o.ID  IN (select ID FROM #ProtocoleID)
-		
-		
+		FROM Observation  O 
+		JOIN ProtocoleType PT ON o.FK_ProtocoleType = PT.ID AND PT.Name ='Entomo_Pop_Census'
+		JOIN ObservationDynPropValuesNow v ON v.FK_Observation = o.ID and v.Name = 'sampled' and v.ValueInt=1
+		WHERE o.ID  IN (select ID FROM #ProtocoleID)
 
 		INSERT INTO [dbo].[TMessageSendDetail]
 				   ([fk_MessageSend]
@@ -144,11 +142,12 @@ BEGIN
 				   ,[PropValue]
 				   ,[Parametre])
 		select m.pk_MessageSend,C.PropName,PropValue,NULL
-		from Observation O JOIN [TMessageSend]  M on m.[ObjectId] = O.ID 
+		from Observation O 
+		JOIN [TMessageSend]  M on m.[ObjectId] = O.ID 
 		CROSS APPLY
 		(
 			values	
-			('ECol_id',replace(convert(varchar,O.original_id),'Fichier_Alex_ss_Prot_',''))
+			('ECol_id',Case WHEN o.original_id like 'Ecol_%' THEN replace(convert(varchar,O.original_id),'Ecol_','') ELSE NULL END )
 			,('Comments',O.Comments)
 			,('FK_Station',convert(varchar,O.FK_Station))
 			
@@ -162,9 +161,14 @@ BEGIN
            ,[PropName]
            ,[PropValue]
            ,[Parametre])
-		SELECT m.pk_MessageSend,v.Name,CASE WHEN TYPEPROP ='STring' THEN ValueString WHEN Typeprop ='Integer' THEN convert(varchar,valueint) ELSE ValueString END,NULL
-		FROM ObservationDynPropValuesNow V JOIN [TMessageSend]  M on convert(int,m.[ObjectId]) = V.FK_Observation
+		SELECT distinct  m.pk_MessageSend,v.Name,CASE WHEN TYPEPROP ='STring' THEN ValueString WHEN Typeprop ='Integer' THEN convert(varchar,valueint) ELSE ValueString END,NULL
+		FROM ObservationDynPropValuesNow V 
+		JOIN [TMessageSend]  M on convert(int,m.[ObjectId]) = V.FK_Observation
 		WHERE M.pk_MessageSend in (SELECT ID FROM #MessageIDs)
+
+
+
+		---SELECT * FROM TMessageSend WHERE pk_MessageSend = 748436
 
 		print 'COMMIT TRAN'
 		IF @@TRANCOUNT > 0 COMMIT TRAN
@@ -195,6 +199,11 @@ END
 
 
 
+
 GO
 
 
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('092_ERD_CreateMessage_for_eColl',GETDATE(),(SELECT db_name()))
+
+
+GO
