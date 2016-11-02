@@ -70,11 +70,11 @@
     var methods = {
       init: function(parametres) {
         //Fusion des paramètres envoyer avec les params par defaut
-        
+
         if (parametres) {
           var parametres = $.extend(defauts, parametres);
         };
-        //Information à envoyer 
+        //Information à envoyer
         var dataToSend = '';
         if (parametres.language.hasLanguage) {
           dataToSend = '{"StartNodeID":"' + parametres.startId + '", "lng": "' + parametres.language.lng + '"}';
@@ -90,13 +90,15 @@
           //$me.parent().prepend('<span class="input-group-addon reneco reneco-thesaurus"></span>');
 
           var htmlInsert = '';
-          //Si isDisplayDifferent = true on crée un input hidden afin de stocker la valeur 
+          //Si isDisplayDifferent = true on crée un input hidden afin de stocker la valeur
           if (parametres.display.isDisplayDifferent) {
             htmlInsert = '<input type="hidden" id="' + $me.attr("name") + parametres.display.suffixeId + '" name="' + $me.attr("name") + parametres.display.suffixeId + '" runat="server" enabled="true"/>'
           }
           //Div qui sera le conteneur du treeview
-          htmlInsert += '<div class="fancytreeview" id="treeView' + $me.attr('id') + '" style="display:none"></div>';
-          $me.parent().append(htmlInsert);
+          htmlInsert += '<div class="fancytreeview" id="treeView' + $me.attr('id') + '" style="display:none;"></div>';
+
+          //$me.parent().append(htmlInsert);
+          $('main').append(htmlInsert);
 
           //Insertion de la valeur dans l'input
           $me.val(parametres.inputValue);
@@ -185,16 +187,46 @@
 
 
           $me.focus(function () {
+
+            var position = $(this).offset();
+            var screenWidth = $(window).width();
+            var screenHeight =  $(window).height();
+
+            position.top += $me.outerHeight(); // height input
+
             setTimeout(function(){
               $("div[id^=treeView]").each(function () {
                 $(this).css('display', 'none');
               });
+            /*  if ( !$(treeContainer).find('ul').css("max-height") ) {
+                  $(treeContainer).find('ul')
+              }*/
+
               var treeContainer = $("#treeView" + $me.attr("id"));
+              var treeContainerWidth = $(treeContainer).width();
+              var treeContainerHeight = $(treeContainer).height();
+
               treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
+              //$(treeContainer).find('ul').css("max-height",'200')
             //treeContainer.css('display', 'block').css('border', 'solid 1px').css('z-index', '100');
-            treeContainer.css({top: $me.outerHeight() + 20 });
+
+            if( position.top + treeContainerHeight > screenHeight-2 ) {
+              position.top-=treeContainerHeight+$me.outerHeight()+2;
+            }
+
+            if(position.left + treeContainerWidth > screenWidth ) {
+              treeContainer.css('left','');
+              position = {
+                top : position.top,
+                right : 0
+              };
+            }
+            else {
+              treeContainer.css('right','');
+            }
+            treeContainer.css(position);//{top: $me.outerHeight() + 20 });
             //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
-            $(document).delegate("body", "click", function (event) {                            
+            $(document).delegate("body", "click", function (event) {
               if (!$(event.target).is("#" + $me.attr("id") + ",span[class^=fancytree], div[id^=treeView], ul")) {
                 var treeContainer = $("#treeView" + $me.attr("id"));
                 treeContainer.css('display', 'none');
@@ -225,7 +257,7 @@
             //Si le nombrte d'élément est < a 100 on oblige l'utilisation d'au moins trois caractère pour des raisons de performances
             if (searchAutoComp != null) {
               clearTimeout(searchAutoComp);
-            } 
+            }
             searchAutoComp = setTimeout(function(){
               searchAutoComp = null;
               if (fancytree.count() < 100 || $me.val().length >= 3) {
