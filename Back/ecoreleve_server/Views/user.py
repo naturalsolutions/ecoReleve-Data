@@ -30,9 +30,8 @@ def current_user(request, user_id=None):
     """
     session = request.dbsession
     if user_id is not None:
-        print(user_id)
         userid = user_id
-    else :
+    else:
         userid = int(request.authenticated_userid['iss'])
     currentUserRole = groupfinder(userid, request)
 
