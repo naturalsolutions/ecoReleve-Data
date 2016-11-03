@@ -19,8 +19,8 @@ function(Marionette, config) {
     },
 
     onShow: function() {
-       this.$el.i18n();
-      var disabled = config.disabledFunc ;
+      this.$el.i18n();
+      var disabled = config.disabledFunc;
       if (!disabled){
         return ;
       }

@@ -19,7 +19,6 @@ define([
     events:{
       'click .js-prev': 'prevObs',
       'click .js-next': 'nextObs',
-
     },
 
     prevObs: function(){
@@ -71,12 +70,13 @@ define([
       } else {
         model.set('id', this.model.get('obs')[this.model.get('index') - 1]);
       }
-
+      
       model.urlRoot = 'stations/' + this.model.get('stationId') + '/protocols' + '/';
       model.set('ID', this.model.get('ID'));
 
       this.rgObservation.show(this.obs = new LytObservation({
         model: model,
+        parentModel: this.model
       }));
     },
   });

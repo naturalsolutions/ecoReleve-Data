@@ -18,7 +18,7 @@ define([
     },
 
     initialize: function(options){
-      console.log(options);
+      this.parentModel = options.parentModel;
     },
 
     onShow: function(){
@@ -37,26 +37,42 @@ define([
     },
 
     displayForm: function(){
+      var _this = this;
 
       this.model.schema = this.model.get('schema');
       this.model.fieldsets = this.model.get('fieldsets');
       this.model.attributes = this.model.get('data');
-
+      
       this.form = new NsForm({
         modelurl: this.model.urlRoot,
         model: this.model,
         buttonRegion: [this.ui.formBtns],
         displayMode: this.displayMode,
         formRegion: this.ui.form,
-        reloadAfterSave: true,
-        savingError: this.handleErrors
+        reloadAfterSave: false,
+        savingError: this.handleErrors,
+        afterSaveSuccess: function(response){
+          _this.updateAfterSave(response, _this);
+        },
       });
+    },
+
+    updateAfterSave: function(response, _this){
+      if(this.model.changed.id){
+        _this.parentModel.get('obs').push(response.id);
+      }
+
+      _this.parentModel.trigger('change:obs', _this.parentModel);
+
+      var hash = window.location.hash.split('?');
+      var url = hash[0] + '?proto=' + _this.parentModel.get('ID') + '&obs=' + response.id;
+      Backbone.history.navigate(url, {trigger: true});
     },
 
     handleErrors: function(response){
       // individual equipment sensor is not available
       if(response.responseJSON.sensor_available == false){
-      _this.sweetAlert('Data saving error', 'error', 'Selected sensor is not available');
+       _this.sweetAlert('Data saving error', 'error', 'Selected sensor is not available');
       }
       else if(response.responseJSON.already_unequip == true ){
       _this.sweetAlert('Data saving error', 'error', 'Selected sensor is already unequiped');

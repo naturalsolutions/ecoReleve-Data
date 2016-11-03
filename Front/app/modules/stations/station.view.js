@@ -54,7 +54,7 @@ define([
     reload: function(params){
       this.LytProtocols.protocolsItems.getViewFromUrlParams(params);
     },
-
+    
     displayProtos: function() {
       this.rgProtocols.show(this.LytProtocols = new LytProtocols({
         model: this.model,
@@ -64,6 +64,7 @@ define([
 
     reloadFromNavbar: function(id) {
       this.model.set('id', id);
+      this.model.set('stationId', id);
       this.displayStation();
     },
 
