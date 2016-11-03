@@ -26,10 +26,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       
 
       
-      'stations/new/:from(/)': 'newStation',
-      'stations/lastImported(/)': 'stations',
-      
-      'stations/new(/)': 'newStation',
+            'stations/new/:from(/)': 'newStation',
+            'stations/new(/)': 'newStation',
+             'stations/lastImported(/)': 'stations',
 
       'stations/:id?(proto=:proto&)obs=:obs(/)': 'station',
       'stations/:id(/)': 'station',
@@ -149,15 +148,15 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
     },
     setNav : function(patern){
 
-        var url = patern[0];
+        // var url = patern[0];
 
-        var md = this.collection.findWhere({href: patern[0]});
-        $('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
-        if (patern[1] && patern[1] != 'id' && patern[1] != 'type') {
-          $('#arialSub').html('<a href="#' + patern[0] + '/' + patern[1] + '">| &nbsp;' + patern[1] + '</a>');
-        }else {
-          $('#arialSub').html('');
-        }
+        // var md = this.collection.findWhere({href: patern[0]});
+        // $('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
+        // if (patern[1] && patern[1] != 'id' && patern[1] != 'type') {
+        //   $('#arialSub').html('<a href="#' + patern[0] + '/' + patern[1] + '">| &nbsp;' + patern[1] + '</a>');
+        // }else {
+        //   $('#arialSub').html('');
+        // }
      },
      checkRoute : function(){
         var route = Backbone.history.fragment;

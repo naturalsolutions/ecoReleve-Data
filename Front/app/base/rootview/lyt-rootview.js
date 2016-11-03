@@ -8,7 +8,7 @@ function(Marionette, TransitionRegion, LytHeader,config) {
     className: 'full-height',
 
     events: {
-      'click #pipefy' : 'pipefyform',
+      'click #pipefy' : 'controlformdisplay',
       'click .pipefyclose' :'closeform'
     },
 
@@ -26,7 +26,11 @@ function(Marionette, TransitionRegion, LytHeader,config) {
     },
 
     onRender: function() {
-      this.rgHeader.show(new LytHeader);
+       var isDomoInstance = config.instance ;
+       this.rgHeader.show(new LytHeader);
+       if(isDomoInstance == 'demo') {
+            this.insertForm();
+       }
     },
     closeform : function(){
       $('div.supportpanel').animate({ "right": "-=560px" }, "slow" ).addClass('hidden');
@@ -57,17 +61,6 @@ function(Marionette, TransitionRegion, LytHeader,config) {
       var frm = '<div class="supportpanel hidden"><div class="supportheader">Support</div>'
       frm +='<iframe width="560" height="800" src="https://beta.pipefy.com/public_form/49561?embedded=true" frameborder="0" id="iframe"></iframe></div>';
       this.$el.append(frm);
-      this.controlformdisplay();
-    },
-    pipefyform : function(e){
-      // check id div is not integrated add it
-      var frmisinserted  = $('.supportpanel').length;
-      if (!frmisinserted) {
-        this.insertForm();
-      } else {
-        this.controlformdisplay();
-      }
-
-    },
+    }
   });
 });

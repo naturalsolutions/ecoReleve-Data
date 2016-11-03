@@ -22,7 +22,7 @@ function(Marionette, config) {
       this.$el.i18n();
       var disabled = config.disabledFunc;
       if (!disabled){
-        return ;
+        return;
       }
       for (var i=0; i< disabled.length;i++){
         var functionnality = disabled[i];
