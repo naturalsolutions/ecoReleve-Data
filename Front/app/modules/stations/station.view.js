@@ -51,8 +51,14 @@ define([
       });
     },
 
-    reload: function(params){
-      this.LytProtocols.protocolsItems.getViewFromUrlParams(params);
+    reload: function(options){
+      if(options.id == this.model.get('id')){
+        this.LytProtocols.protocolsItems.getViewFromUrlParams(options);
+      } else {  
+        this.model.set('id', options.id);
+        this.model.set('stationId', options.id);
+        this.displayStation();
+      }
     },
     
     displayProtos: function() {
@@ -60,12 +66,6 @@ define([
         model: this.model,
         parent: this,
       }));
-    },
-
-    reloadFromNavbar: function(id) {
-      this.model.set('id', id);
-      this.model.set('stationId', id);
-      this.displayStation();
     },
 
     onShow: function() {

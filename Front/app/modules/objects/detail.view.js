@@ -68,12 +68,12 @@ define([
       }
     },
 
-    reloadFromNavbar: function(id) {
-      this.model.set('id', id);
+    reload: function(options) {
+      this.model.set('id', options.id);
 
       this.com.addModule(this.map);
       this.map.com = this.com;
-      this.map.url = this.model.get('type') + '/' + id  + '/locations?geo=true';
+      this.map.url = this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true';
       this.map.updateFromServ();
       this.map.url = false;
 

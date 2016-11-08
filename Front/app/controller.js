@@ -103,19 +103,28 @@ define([
           obs: obs
         }));
       }
-    },    
-    stations: function(params) {
+    },
 
+    stations: function(params) {
       this.rgMain.show(new LytStations({
         params: params
       }));
     },
+    
     newStation: function(from) {
       this.rgMain.show(new LytStationsNew({from: from}));
     },
 
     individual: function(id) {
-      this.rgMain.show(new LytIndividual({id: id}));
+      if(this.rgMain.currentView instanceof LytIndividual){
+        this.rgMain.currentView.reload({
+          id: id
+        });
+      } else {
+        this.rgMain.show(new LytIndividual({
+          id: id
+        }));
+      }
     },
     individuals: function() {
       this.rgMain.show(new LytIndividuals());
@@ -125,7 +134,15 @@ define([
     },
 
     monitoredSite: function(id) {
-      this.rgMain.show(new LytMonitoredSite({id: id}));
+      if(this.rgMain.currentView instanceof LytMonitoredSite){
+        this.rgMain.currentView.reload({
+          id: id
+        });
+      } else {
+        this.rgMain.show(new LytMonitoredSite({
+          id: id
+        }));
+      }
     },
     monitoredSites: function() {
       this.rgMain.show(new LytMonitoredSites());
@@ -135,7 +152,15 @@ define([
     },
 
     sensor: function(id) {
-      this.rgMain.show(new LytSensor({id: id}));
+      if(this.rgMain.currentView instanceof LytSensor){
+        this.rgMain.currentView.reload({
+          id: id
+        });
+      } else {
+        this.rgMain.show(new LytSensor({
+          id: id
+        }));
+      }
     },
     sensors: function() {
       this.rgMain.show(new LytSensors());
@@ -153,11 +178,18 @@ define([
       }));
     },
 
-    validateDetail: function(type, dataset){
-      this.rgMain.show(new LytSensorValidateDetail({
-        type: type,
-        dataset: dataset
-      }));
+    validateDetail: function(type, index){
+      if(this.rgMain.currentView instanceof LytSensorValidateDetail){
+        this.rgMain.currentView.reload({
+          type: type,
+          index: index
+        });
+      } else {
+        this.rgMain.show(new LytSensorValidateDetail({
+          type: type,
+          index: index
+        }));
+      }
     },
 
     release: function() {

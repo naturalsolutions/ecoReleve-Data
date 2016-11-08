@@ -1,4 +1,5 @@
 //could be better but algorithms are fine
+
 define(['backbone', 'marionette', 'config'],
 function(Backbone, Marionette, config) {
   'use strict';
@@ -27,7 +28,7 @@ function(Backbone, Marionette, config) {
         this.model.set('display', false);
       }
 
-      if(options.index && options.list.length > 1){
+      if(options.index >= 0 && options.list.length > 1){
         this.model = new Backbone.Model();
         this.model.set('display', true); 
         this.model.set('index', parseInt(options.index));
@@ -69,13 +70,19 @@ function(Backbone, Marionette, config) {
 
       this.model.set('index', index);
 
+      var id;
+      var hash = window.location.hash.split('/').slice(0,-1).join('/');
+
       $.when(this.deferred).then(function(data){
-        var id = _this.model.get('list')[index]['ID'] || _this.model.get('list')[index];
+        if(_this.clientSide){
+          id = (index + 1);
+        } else {
+          id = _this.model.get('list')[index]['ID'] || _this.model.get('list')[index];
+          _this.disableBtns(false);
+        }
+        Backbone.history.navigate(hash + '/' + id, {trigger: true});
         _this.render();
-        _this.parent.reloadFromNavbar(id);
-        _this.disableBtns(false);
-        var hash = window.location.hash.split('/').slice(0,-1).join('/');
-        Backbone.history.navigate(hash + '/' + id, {trigger: false});
+
       });
 
     },
@@ -131,7 +138,7 @@ function(Backbone, Marionette, config) {
 
     navigatePrev: function(){
       if(this.clientSide){
-        this.pervClientSide();
+        this.prevClientSide();
         return;
       }
       var index = this.model.get('index');
