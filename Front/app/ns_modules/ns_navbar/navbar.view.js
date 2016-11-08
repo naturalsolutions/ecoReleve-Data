@@ -70,15 +70,18 @@ function(Backbone, Marionette, config) {
       this.model.set('index', index);
 
       $.when(this.deferred).then(function(data){
-        var hash = window.location.hash.split('/').slice(0,-1).join('/');
-        Backbone.history.navigate(hash + '/' + (index + 1), {trigger: true});
-        _this.render();
-        return;
+        if(_this.clientSide){
+          var hash = window.location.hash.split('/').slice(0,-1).join('/');
+          Backbone.history.navigate(hash + '/' + (index + 1), {trigger: true});
+          _this.render();
+          return;
+        } else {
+          var id = _this.model.get('list')[index]['ID'] || _this.model.get('list')[index];
+          _this.parent.reloadFromNavbar(id);
+          _this.disableBtns(false);
+        }
 
-        var id = _this.model.get('list')[index]['ID'] || _this.model.get('list')[index];
 
-        _this.parent.reloadFromNavbar(id);
-        _this.disableBtns(false);
       });
 
     },

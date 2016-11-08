@@ -97,7 +97,6 @@ define([
         _this.displayForms();
         _this.displayGrids();
       });
-
     },
 
     displayForms: function(){
@@ -120,7 +119,8 @@ define([
 
     displayIndForm: function() {
       if(this.model.get('FK_Individual') === null){
-        this.ui.individualForm.html('');
+        this.swal({title: 'No individual attached'}, 'warning');
+        this.ui.individualForm.html('<br /><span class="bull-warn">●</span>No individual is attached');
         return;
       }
 
@@ -256,13 +256,10 @@ define([
         return;
       }
 
-
-
       var selectedIds = selectedNodes.map(function(node){
         return node.data.PK_id;
       });
       
-
       $.ajax({
         url: url,
         method: 'POST',
