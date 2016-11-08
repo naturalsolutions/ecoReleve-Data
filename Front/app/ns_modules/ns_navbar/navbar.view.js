@@ -1,4 +1,5 @@
 //could be better but algorithms are fine
+
 define(['backbone', 'marionette', 'config'],
 function(Backbone, Marionette, config) {
   'use strict';
@@ -69,18 +70,18 @@ function(Backbone, Marionette, config) {
 
       this.model.set('index', index);
 
+      var id;
+      var hash = window.location.hash.split('/').slice(0,-1).join('/');
+
       $.when(this.deferred).then(function(data){
         if(_this.clientSide){
-          var hash = window.location.hash.split('/').slice(0,-1).join('/');
-          Backbone.history.navigate(hash + '/' + (index + 1), {trigger: true});
-          _this.render();
-          return;
+          id = (index + 1);
         } else {
-          var id = _this.model.get('list')[index]['ID'] || _this.model.get('list')[index];
-          _this.parent.reloadFromNavbar(id);
+          id = _this.model.get('list')[index]['ID'] || _this.model.get('list')[index];
           _this.disableBtns(false);
         }
-
+        Backbone.history.navigate(hash + '/' + id, {trigger: true});
+        _this.render();
 
       });
 

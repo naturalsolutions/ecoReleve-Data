@@ -31,10 +31,24 @@ define([
       this.displayStationsGrid();
     },
 
+
+    reload: function(options) {
+      this.model.set('id', options.id);
+
+      this.com.addModule(this.map);
+      this.map.com = this.com;
+      this.map.url = this.model.get('type') + '/' + this.model.get('id')  + '/history/?geo=true'; //only this one
+      this.map.updateFromServ();
+      this.map.url = false;
+
+      this.displayForm();
+      this.displayGrids();
+    },
+
     
     displayMap: function(geoJson) {
       this.map = new NsMap({
-        url: 'monitoredSites/' + this.model.get('id')  + '/history/?geo=true',
+        url: 'monitoredSites/' + this.model.get('id')  + '/history/?geo=true', ////only this one
         zoom: 4,
         element: 'map',
         popup: true,
