@@ -93,7 +93,6 @@ define([
         },
         afterFetchColumns: function(options) {
           var colDefs = options.gridOptions.columnDefs;
-          console.log('afterFetchColumns',options.gridOptions.columnDefs);
           colDefs.map(function(colDef){
             if (colDef.field == 'UnicIdentifier'){
               colDef.cellRenderer = _this.sensorCellRenderer.bind(_this);
@@ -119,14 +118,15 @@ define([
     checkAll: function(options){
       var _this = this;
       var error = false;
-      console.log('checkAll',options);
       var duplicatedSensors = _this.checkDuplicateSensor(options);
       if (!duplicatedSensors && options.data.UnicIdentifier){
-          var availableDeffered = _this.checkSensorAvailability(options);
-          availableDeffered.always(function(){
-            options.api.refreshView();
-          });
-        }
+        var availableDeffered = _this.checkSensorAvailability(options);
+        availableDeffered.always(function(){
+          options.api.refreshView();
+        });
+      } else {
+        options.node.error = false;
+      }
       options.api.refreshView();
     },
 
@@ -158,7 +158,6 @@ define([
     },
 
     checkDuplicateSensor: function(options){
-      console.log(options);
       var nodeList = options.api.rowModel.rowsToDisplay;
       var nodeListGrouped = _.groupBy(nodeList,function(node){
           if (node.data.UnicIdentifier) {
@@ -188,6 +187,9 @@ define([
       for (var i = 0; i < model.getRowCount(); i++) {
         var visibleRowNode = model.getRow(i);
         if(visibleRowNode.selected){
+          if(visibleRowNode.error || visibleRowNode.errorDuplicated){
+            return this.swal({text:'unavailable sensor or duplicated sensor is equiped',title:'sensor error'}, 'error',null);
+          }
           visibleSelectedRows.push(visibleRowNode.data);
         }
       }

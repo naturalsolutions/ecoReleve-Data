@@ -269,7 +269,7 @@ define([
           this.input.$el.find('input').val(params.charPress).change();
         } else {
           if (params.value){
-            if (params.value.label){
+            if (params.value.label !== undefined  ){
               this.input.$el.find('input').attr('data_value',params.value.value);
               this.input.$el.find('input').val(params.value.label).change();
             } else {
