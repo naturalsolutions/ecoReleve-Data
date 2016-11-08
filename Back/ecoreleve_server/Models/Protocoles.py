@@ -143,7 +143,7 @@ class Observation(Base,ObjectWithDynProp):
         self.SubObservation_children = listSubValues
 
     def UpdateFromJson(self,DTOObject,startDate = None):
-        ObjectWithDynProp.UpdateFromJson(self,DTOObject,startDate)
+        ObjectWithDynProp.UpdateFromJson(self,DTOObject,None)
         if 'listOfSubObs' in DTOObject :
             self.SubObservation_childrens = DTOObject['listOfSubObs']
         self.updateLinkedField()
@@ -154,7 +154,7 @@ class Observation(Base,ObjectWithDynProp):
         typeName = 'children'
         sub_ProtocoleType = None
         if self.Observation_children != []:
-            ### Append flatdata to list of data for existing subProto 
+            ### Append flatdata to list of data for existing subProto
             typeName = self.Observation_children[0].GetType().Name
             for subObs in self.Observation_children:
                 subObs.LoadNowValues()
@@ -201,7 +201,7 @@ class ObservationDynProp(Base):
 class ProtocoleType(Base,ObjectTypeWithDynProp):
 
     @orm.reconstructor
-    def init_on_load(self):        
+    def init_on_load(self):
         ObjectTypeWithDynProp.__init__(self)
 
     __tablename__ = 'ProtocoleType'
@@ -242,4 +242,3 @@ class ObservationDynPropSubValue (Base):
     FieldName = Column(String(250))
     ValueNumeric =  Column(Numeric(30,10))
     FK_Observation = Column(Integer, ForeignKey('Observation.ID'))
-
