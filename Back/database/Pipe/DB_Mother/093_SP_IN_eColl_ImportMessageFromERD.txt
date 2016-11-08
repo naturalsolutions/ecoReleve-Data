@@ -1,9 +1,5 @@
+﻿
 
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
 
 
 
@@ -98,43 +94,60 @@ BEGIN
 
 		--SET IDENTITY_INSERT [Samples] ON
 
-	
-		INSERT INTO [Samples]
-			   (--ID,
-			   [Original_Id]
-			   ,[Status]
-			   ,[Name]
-			   ,[Tampon]
-			   ,[CreationDate]
-			   ,[SampleDate]
-			   ,[Container]
-			   ,[Holder]
-			   ,[Position]
-			   ,[Comment]
-			   ,[ParentSample_ID]
-			   ,[Subject_ID]
-			   ,[TypeObj_ID]
-			   ,Qte)
-			   
-		SELECT DISTINCT  /*convert(bigint,DID.PropValue) ID, */m.Provenance + '_' + convert(varchar,m.ObjectId),2,'','',getdate(),SV.ValueDate,NULL,NULL,NULL,DCo.PropValue,NULL,S.ID,ST.ID,convert(INT,DNb.PropValue)
+		
+		
+		UPDATE S SET S.ORiginal_ID = m.Provenance + '_' + convert(varchar,m.ObjectId)
 		FROM 	TMessageReceived M 
-		JOIN  TMessageReceivedDetail DID ON M.pk_MessageReceived=DID.fk_MessageReceived and DID.PropName = 'ECol_id' and DID.Provenance = m.Provenance and DID.PropValue IS NOT NULL
-		JOIN  TMessageReceivedDetail DSta ON M.pk_MessageReceived=DSta.fk_MessageReceived and DSta.PropName = 'FK_Station' and DSta.Provenance = m.Provenance
-		JOIN  TMessageReceivedDetail DCo ON M.pk_MessageReceived=DCo.fk_MessageReceived and DCo.PropName = 'Comments' and DCo.Provenance = m.Provenance
-		JOIN  TMessageReceivedDetail DNb ON M.pk_MessageReceived=DNb.fk_MessageReceived and DNb.PropName = 'number' and DNb.Provenance = m.Provenance
-		JOIN Subjects S ON s.Original_Id = M.Provenance + '_' + DSta.PropValue
-		JOIN SampleTypes ST ON ST.Name = CASE WHEN convert(INT,DNb.PropValue) >1 THEN 'Group' ELSE 'Individual' END
-		LEFT JOIN SubjectDynPropValuesNow SV ON SV.Subject_ID = s.id and SV.Name ='StationDate'
+		JOIN TMessageReceivedDetail ecol ON M.pk_MessageReceived = ecol.fk_MessageReceived AND ecol.PropName = 'ecol_ID'  AND ecol.Provenance = m.Provenance AND ecol.PropValue is NOT null
+		JOIN Samples S ON S.ID = ecol.PropValue
 		WHERE  M.ObjectType ='Entomo_Pop_Census' AND m.Provenance like  'EcoReleve_%'
 		AND Importdate IS NULL 
-		AND NOT EXISTS (SELECT * FROM Samples ES WHERE ES.original_ID =  m.Provenance + '_' + convert(varchar,m.ObjectId))
+		--AND NOT EXISTS (SELECT * FROM Samples ES WHERE ES.original_ID = m.Provenance + '_' + convert(varchar,m.ObjectId))
+
+	IF OBJECT_ID('tempdb..#tempSampleID') IS NOT NULL
+		Drop table #tempSampleID
+		
+	Create table #tempSampleID (ID int)
+
+		--INSERT INTO [Samples]
+		--	   (--ID,
+		--	   [Original_Id]
+		--	   ,[Status]
+		--	   ,[Name]
+		--	   ,[Tampon]
+		--	   ,[CreationDate]
+		--	   ,[SampleDate]
+		--	   ,[Container]
+		--	   ,[Holder]
+		--	   ,[Position]
+		--	   ,[Comment]
+		--	   ,[ParentSample_ID]
+		--	   ,[Subject_ID]
+		--	   ,[TypeObj_ID]
+		--	   ,Qte)
+		--OUTPUT inserted.ID into #tempSampleID
+		
+		--SELECT DISTINCT  /*convert(bigint,DID.PropValue) ID, */m.Provenance + '_' + convert(varchar,m.ObjectId),2,'','',getdate(),SV.ValueDate,NULL,NULL,NULL,DCo.PropValue,NULL,S.ID,ST.ID,convert(INT,DNb.PropValue)
+		--FROM 	TMessageReceived M 
+		--JOIN  TMessageReceivedDetail DID ON M.pk_MessageReceived=DID.fk_MessageReceived and DID.PropName = 'ECol_id' and DID.Provenance = m.Provenance and DID.PropValue IS NOT NULL
+		--JOIN  TMessageReceivedDetail DSta ON M.pk_MessageReceived=DSta.fk_MessageReceived and DSta.PropName = 'FK_Station' and DSta.Provenance = m.Provenance
+		--JOIN  TMessageReceivedDetail DCo ON M.pk_MessageReceived=DCo.fk_MessageReceived and DCo.PropName = 'Comments' and DCo.Provenance = m.Provenance
+		--JOIN  TMessageReceivedDetail DNb ON M.pk_MessageReceived=DNb.fk_MessageReceived and DNb.PropName = 'number' and DNb.Provenance = m.Provenance
+		--JOIN Subjects S ON s.Original_Id = M.Provenance + '_' + DSta.PropValue
+		--JOIN SampleTypes ST ON ST.Name = CASE WHEN convert(INT,DNb.PropValue) >1 THEN 'Group' ELSE 'Individual' END
+		--LEFT JOIN SubjectDynPropValuesNow SV ON SV.Subject_ID = s.id and SV.Name ='StationDate'
+		--WHERE  M.ObjectType ='Entomo_Pop_Census' AND m.Provenance like  'EcoReleve_%'
+		--AND Importdate IS NULL 
+		--AND NOT EXISTS (SELECT * 
+		--				FROM Samples ES 
+		--				WHERE ES.original_ID =  m.Provenance + '_' + convert(varchar,m.ObjectId)
+		--				)
 
 
 		--SET IDENTITY_INSERT [Samples] OFF
 
 
 		-- CREATION DES SAMPLES SANS ID
-
 		INSERT INTO [Samples]
 			   ([Original_Id]
 			   ,[Status]
@@ -150,18 +163,19 @@ BEGIN
 			   ,[Subject_ID]
 			   ,[TypeObj_ID]
 			   ,Qte)
+		OUTPUT inserted.ID into #tempSampleID
 		SELECT DISTINCT m.Provenance + '_' + convert(varchar,m.ObjectId),2,'','',getdate(),SV.ValueDate,NULL,NULL,NULL,DCo.PropValue,NULL,S.ID,ST.ID,convert(INT,DNb.PropValue)
 		FROM 	TMessageReceived M 
 		JOIN  TMessageReceivedDetail DSta ON M.pk_MessageReceived=DSta.fk_MessageReceived and DSta.PropName = 'FK_Station' and DSta.Provenance = m.Provenance
 		JOIN  TMessageReceivedDetail DCo ON M.pk_MessageReceived=DCo.fk_MessageReceived and DCo.PropName = 'Comments' and DCo.Provenance = m.Provenance
 		JOIN  TMessageReceivedDetail DNb ON M.pk_MessageReceived=DNb.fk_MessageReceived and DNb.PropName = 'number' and DNb.Provenance = m.Provenance --and DNb.PropValue is not null 
+		JOIN TMessageReceivedDetail ecol ON M.pk_MessageReceived = ecol.fk_MessageReceived AND ecol.PropName = 'ecol_ID'  AND ecol.Provenance = m.Provenance AND ecol.PropValue is null
 		JOIN Subjects S ON s.Original_Id = M.Provenance + '_' + DSta.PropValue
 		JOIN SampleTypes ST ON ST.Name = CASE WHEN convert(INT,DNb.PropValue) >1 THEN 'Group' ELSE 'Individual' END
 		LEFT JOIN SubjectDynPropValuesNow SV ON SV.Subject_ID = s.id and SV.Name ='StationDate'
 		WHERE  M.ObjectType ='Entomo_Pop_Census' AND m.Provenance like  'EcoReleve_%'
 		AND Importdate IS NULL 
 		AND NOT EXISTS (SELECT * FROM Samples ES WHERE ES.original_ID = m.Provenance + '_' + convert(varchar,m.ObjectId))
-
 
 
 		---- Get originalspecies
@@ -178,11 +192,13 @@ BEGIN
 		SELECT DISTINCT GETDATE(),NULL,NULL,D.PropValue,NULL,NULL,S.ID,DP.ID
 		FROM 	TMessageReceived M 
 		JOIN Samples S on S.Original_Id = m.Provenance + '_' + convert(varchar,m.ObjectId)
+		JOIN #tempSampleID tp on tp.ID = s.ID
 		JOIN  TMessageReceivedDetail D ON M.pk_MessageReceived=D.fk_MessageReceived and d.Provenance = m.Provenance
 		JOIN SampleDynProps DP ON DP.Name  in ('determinatedSpecies')
 		WHERE Importdate IS NULL AND M.ObjectType ='Entomo_Pop_Census' AND m.Provenance like  'EcoReleve_%'
 		and d.PropName = 'taxon'
-		AND m.isMessageComplete = 1
+		AND m.isMessageComplete = 1 
+		--AND NOT EXISTS (SELECT * FROM Samples ES WHERE ES.original_ID = m.Provenance + '_' + convert(varchar,m.ObjectId))
 		order by s.ID,DP.ID
 
 		INSERT INTO [SampleDynPropValues]
@@ -197,12 +213,14 @@ BEGIN
 		SELECT  GETDATE(),NULL,NULL,D.PropValue,NULL,NULL,S.ID,Case WHEN DP.ID is NULL THEN (SELECT ID FROM SampleDynProps WHERE Name = 'Age') ELSE DP.ID END
 		FROM 	TMessageReceived M 
 		JOIN Samples S on S.Original_Id = m.Provenance + '_' + convert(varchar,m.ObjectId)
+		JOIN #tempSampleID tp on tp.ID = s.ID		
 		JOIN  TMessageReceivedDetail D ON M.pk_MessageReceived=D.fk_MessageReceived and d.Provenance = m.Provenance
 		LEFT JOIN SampleDynProps DP ON  dp.name = D.PropName
-		WHERE --Importdate IS NULL AND 
+		WHERE Importdate IS NULL AND 
 		M.ObjectType ='Entomo_Pop_Census' AND m.Provenance like  'EcoReleve_%'
 		and d.PropName in ('Stade','Sex')
 		AND m.isMessageComplete = 1
+		--AND NOT EXISTS (SELECT * FROM Samples ES WHERE ES.original_ID = m.Provenance + '_' + convert(varchar,m.ObjectId))
 		order by s.ID,DP.ID
 
 		-- TODO Créer un Event
@@ -215,7 +233,8 @@ BEGIN
 		,Sample_ID BIGINT
 		) 
 
-
+		select *
+		from #tempSampleID
 		INSERT INTO [dbo].[EcolEvents]
            ([Status]
            ,[Name]
@@ -227,11 +246,21 @@ BEGIN
            ,[TypeObj_ID]
            ,[SamplePositionHisto_ID])
 		   OUTPUT inserted.ID,inserted.sample_id into #EventCreated
-		select 2,'',GETDATE(),CASE WHEN D.PropValue IS NULL THEN '' ELSE D.PropValue END,NULL,NULL,S.id,T.ID ,NULL
-		FROM 	TMessageReceived M 
-		JOIN Samples S on S.Original_Id =m.Provenance + '_' + convert(varchar,m.ObjectId) 
+		select 4,'',GETDATE(),1,NULL,NULL,tp.id,T.ID ,NULL
+		FROM #tempSampleID tp
 		JOIN EcolEventtypes T ON T.Name ='Imported'
-		JOIN  TMessageReceivedDetail D ON D.fk_MessageReceived = m.pk_MessageReceived and D.PropName='Identified_by'
+		
+		
+		--TMessageReceived M 
+		--JOIN Samples S on S.Original_Id =m.Provenance + '_' + convert(varchar,m.ObjectId) 
+		--JOIN EcolEventtypes T ON T.Name ='Imported'
+		----LEFT JOIN  TMessageReceivedDetail D ON D.fk_MessageReceived = m.pk_MessageReceived and D.PropName='Identified_by'
+		--JOIN #tempSampleID tp on tp.ID = s.ID		
+
+		select *
+		FROM #EventCreated
+
+		select count(*)		FROM #tempSampleID
 
 		INSERT INTO [dbo].[EcolEventDynPropValues]
            ([StartDate]
@@ -242,16 +271,17 @@ BEGIN
            ,[ValueFloat]
            ,[EcolEvent_ID]
            ,[EcolEventDynProp_ID])
-
 		   select  getdate(),null,null,D.PropValue,NULL,NULL,C.Event_ID, DP.ID
 		   from  #EventCreated C JOIN Samples S on C.Sample_ID = S.ID 
 		   JOIN  TMessageReceived M  ON S.Original_Id = m.Provenance + '_' + convert(varchar,m.ObjectId)
-		   JOIN  TMessageReceivedDetail D ON D.fk_MessageReceived = m.pk_MessageReceived and D.PropName='taxon'
+		   JOIN  TMessageReceivedDetail D ON D.fk_MessageReceived = m.pk_MessageReceived and D.PropName='taxon' AND m.Provenance = d.Provenance
 		   JOIN EcolEventDynProps DP ON DP.Name  in ('species')
-	
-		--UPDATE S
-		--SET Original_Id = m.ObjectOriginalID
-		--FROM Samples S JOIN TMessageReceived M ON S.Original_Id =  CONVERT(varchar,m.ObjectID)
+		   JOIN #tempSampleID tp on tp.ID = s.ID
+
+
+		UPDATE S
+		SET Original_Id = m.ObjectOriginalID
+		FROM Samples S JOIN TMessageReceived M ON S.Original_Id =  CONVERT(varchar,m.ObjectID)
 
 
 
@@ -282,13 +312,13 @@ BEGIN
 					   );
 		END CATCH	
 END
+
+
+
+
+
 GO
 
-
-
-
-
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('93_SP_IN_eColl_ImportMessageFromERD',GETDATE(),(SELECT db_name()))
-
 
 GO
