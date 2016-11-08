@@ -78,7 +78,7 @@ define([
         onGridReady: function(){
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
-              _this.gridOptions.api.sizeColumnsToFit();
+              _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
               if(!_this.model.get('totalRecords')){
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
               }
@@ -140,7 +140,7 @@ define([
       this.checkUncheckSelectAllUI(allSelected);
 
       // update status bar ui
-      this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length); 
+      this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length);
     },
 
     formatColumns: function(columnDefs){
@@ -150,19 +150,14 @@ define([
         'integer': 'number',
       };
       columnDefs.map(function(col, i) {
-        if(col.name){
-          col.headerName = col.label;
-          col.field = col.name;
-          col.filter = filter[col.cell];
-        }
-        
+
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
-        
+
 
         if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
-          _this.formatSelectColumn(col)          
+          _this.formatSelectColumn(col)
         }
         //draft
         if(col.cell == 'autocomplete'){
@@ -188,7 +183,7 @@ define([
         }
       } else {
         if(selectedNodes.length < rowsToDisplay.length){
-         allSelected = false; 
+         allSelected = false;
         } else {
           allSelected = rowsToDisplay.every(function(node){
             return node.selected;
@@ -246,9 +241,9 @@ define([
     addBBFEditor: function(col){
       //draft
       var BBFEditor = function () {
-        
+
       };
-      
+
       var options = {
         key: col.options.target,
         schema: {
@@ -262,7 +257,7 @@ define([
         this.picker = new ObjectPicker(options);
         this.input = this.picker.render();
 
-        
+
         this.input.$el.find('input').val(params.value).change();
       };
       BBFEditor.prototype.getGui = function(){
@@ -277,7 +272,7 @@ define([
 
       col.cellEditor = BBFEditor;
     },
-    
+
     fetchColumns: function(){
       this.columnDeferred = $.ajax({
         url: this.model.get('url') + 'getFields',
@@ -330,7 +325,7 @@ define([
           if(params.sortModel.length) {
             order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
           }
-          
+
           var status = {
             criteria: JSON.stringify(_this.filters),
             page: page,
@@ -348,7 +343,7 @@ define([
           }).done( function(response) {
             var rowsThisPage = response[1];
             var total = response[0].total_entries;
-            
+
             _this.model.set('totalRecords', total);
             _this.model.set('status', status);
 
@@ -406,7 +401,7 @@ define([
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
             _this.gridOptions.api.ensureIndexVisible(node.childIndex);
             setTimeout(function(){
-               var tmp = _this.idName || (node.data.id)? 'id' : 'ID'; 
+               var tmp = _this.idName || (node.data.id)? 'id' : 'ID';
               _this.gridOptions.api.setFocusedCell(node.childIndex, tmp, null);
             },0);
           }
@@ -421,7 +416,7 @@ define([
           //_this.gridOptions.api.setFocusedCell(params.index, 'id', null);
         },0);
     },
-    
+
     multiSelection: function(params, from){
       //could certainly be optimized
       var _this = this;
@@ -455,7 +450,7 @@ define([
         node.setSelected(true);
       });
     },
-    
+
     deselectAllVisible: function(){
       this.gridOptions.api.getModel().rowsToDisplay.map(function(node){
         node.setSelected(false);
@@ -495,7 +490,7 @@ define([
             'geometry': {
                 'type': 'Point',
                 'coordinates': [
-                  node.data.LAT || node.data.latitude || node.data.lat, 
+                  node.data.LAT || node.data.latitude || node.data.lat,
                   node.data.LON || node.data.longitude || node.data.lon
                 ],
             },
@@ -578,10 +573,10 @@ define([
       });
       }*/
     },
-    
+
     jumpToPage: function(index){
       this.paginationController.currentPage = index;
-      this.paginationController.loadPage();      
+      this.paginationController.loadPage();
     },
 
     focusFilter: function(e){

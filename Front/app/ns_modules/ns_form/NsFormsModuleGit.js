@@ -122,6 +122,7 @@ define([
       this.buttonRegion = options.buttonRegion;
       this.formRegion = options.formRegion;
 
+      this.afterDelete = options.afterDelete || false;
 
       if(options.displayDelete != undefined){
         this.displayDelete = options.displayDelete;
@@ -557,24 +558,29 @@ define([
         type: 'warning',
         confirmButtonText: 'Yes, delete it!',
         confirmButtonColor: '#DD6B55',
-        callback : function(){
+        callback: function(){
           window.formEdition = false;
           window.formChange = false;
-          _this.afterDelete(_this.model);
+          _this.deleteModel();
         }
       };
-
       this.swal(opts);
     },
 
     deleteModel: function(){
-      this.model.destroy();
+      var _this = this;
+      this.model.id = this.model.get('id');
+      this.model.destroy({
+        success: function(response){
+          if(_this.afterDelete){
+            _this.afterDelete(response, _this.model);
+          }
+        }, 
+        fail: function(response){
+          console.error(response);
+        }
+      });
     },
-
-    afterDelete: function(model){
-      
-    },
-
 
     reloadingAfterSave: function () {
       this.displayMode = 'display';

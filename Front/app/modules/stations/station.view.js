@@ -88,6 +88,9 @@ define([
       formConfig.id = this.model.get('id');
       formConfig.formRegion = this.ui.formStation;
       formConfig.buttonRegion = [this.ui.formStationBtns];
+      formConfig.afterDelete = function(response, model){
+        Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
+      };
 
       this.nsForm = new NsForm(formConfig);
       this.nsForm.BeforeShow = function(){
@@ -100,17 +103,6 @@ define([
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
          });
         _this.filedAcitivityId = this.model.get('fieldActivityId');
-      };
-
-      this.nsForm.afterDelete = function() {
-        var jqxhr = $.ajax({
-          url: _this.model.get( 'type') + '/' + _this.model.get('id'),
-          method: 'DELETE',
-          contentType: 'application/json',
-        }).done(function(resp) {
-          Backbone.history.navigate('#' + _this.model.get( 'type'), {trigger: true});
-        }).fail(function(resp) {
-        });
       };
 
       this.nsForm.savingError = function (response) {

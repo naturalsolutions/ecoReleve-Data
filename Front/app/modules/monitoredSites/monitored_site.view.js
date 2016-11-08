@@ -31,7 +31,6 @@ define([
       this.displayStationsGrid();
     },
 
-    
     displayMap: function(geoJson) {
       this.map = new NsMap({
         url: 'monitoredSites/' + this.model.get('id')  + '/history/?geo=true',
