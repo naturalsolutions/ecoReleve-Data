@@ -78,7 +78,7 @@ define([
         onGridReady: function(){
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
-              //_this.gridOptions.api.sizeColumnsToFit();
+              _this.gridOptions.api.sizeColumnsToFit();
               if(!_this.model.get('totalRecords')){
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
               }
