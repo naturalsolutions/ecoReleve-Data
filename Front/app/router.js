@@ -25,6 +25,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
 
       'stations/new/:from(/)': 'newStation',
       'stations/new(/)': 'newStation',
+      'stations/lastImported(/)': 'stations',
       'stations/:id(/)': 'station',
       'stations(/)': 'stations',
 

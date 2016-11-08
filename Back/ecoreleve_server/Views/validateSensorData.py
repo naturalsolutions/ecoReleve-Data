@@ -96,7 +96,7 @@ def details_unchecked_indiv(request):
     type_= request.matchdict['type']
     id_indiv = request.matchdict['id_indiv']
 
-    if(id_indiv == 'none'):
+    if(id_indiv == 'null'):
         id_indiv = None
     ptt = request.matchdict['id_ptt']
 

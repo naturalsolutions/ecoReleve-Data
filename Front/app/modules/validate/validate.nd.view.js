@@ -43,19 +43,6 @@ define([
     },
 
 
-    reloadFromNavbar: function(id) {
-      this.model.set('id', id);
-
-      this.com.addModule(this.map);
-      this.map.com = this.com;
-      this.map.url = this.model.get('type') + '/' + id  + '/locations?geo=true';
-      this.map.updateFromServ();
-      this.map.url = false;
-
-      this.displayForm();
-      this.displayGrids();
-    },
-
     onRender: function() {
       this.$el.i18n();
     },
@@ -67,8 +54,7 @@ define([
     },
 
     onRowClicked: function(row) {
-      var dataset = row.data.FK_Sensor + '_' + row.data.FK_Individual + '_' + row.data.FK_ptt;
-      Backbone.history.navigate('validate/' + this.type_ + '/' + dataset, {trigger: true});
+      Backbone.history.navigate('validate/' + this.type_ + '/' + (row.rowIndex + 1), {trigger: true});
     },
 
     setFrequency: function(e) {

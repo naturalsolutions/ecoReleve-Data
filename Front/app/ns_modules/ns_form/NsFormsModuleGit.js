@@ -240,7 +240,6 @@ define([
           var settings = $.extend({}, _this.data, resp.data); //?
           _this.model.attributes = settings;
 
-
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
           _this.showForm();
           _this.updateState(this.displayMode);
@@ -252,6 +251,7 @@ define([
         }
       });
     },
+
     initRules:function() {
       var _this = this;
       this.ruler = new Ruler({
@@ -363,17 +363,19 @@ define([
         this.finilizeToGridRow();
       }
     },
+
     showErrorForMaxLength : function(_this){
       var errorTag = $(_this).parent().parent().find('div')[0];
       $(errorTag).text('Text max length is 250');
       $(_this).addClass('error');
     },
+
     cleantextAreaAfterError : function(_this){
         var errorTag = $(_this).parent().parent().find('div')[0];
         $(errorTag).text('');
         $(_this).removeClass('error');
-
     },
+
     showAlertforMaxLength : function(){
       var opts = {
         title : 'Max length: 255 characters !',
@@ -387,7 +389,6 @@ define([
     updateState: function(state){
 
     },
-
 
     displaybuttons: function () {
       var name = this.name;
@@ -414,94 +415,106 @@ define([
 
     },
 
-    /*afterShow: function(){
-
-    },*/
-
     butClickSave: function (e) {
-      var _this = this;
-      var errors = this.BBForm.commit();
-      var jqhrx;
+          var _this = this;
+          var flagEmpty = false;
+          var errors = this.BBForm.commit();
+          var jqhrx;
 
-
-      if(!errors){
-          if (this.model.attributes["id"] == 0) {
-            // To force post when model.save()
-          this.model.attributes["id"] = null;
-        }
-        this.onSavingModel();
-        if (this.model.id == 0) {
-          // New Record
-          jqhrx = this.model.save(null, {
-            success: function (model, response) {
-              // Getting ID of created record, from the model (has beeen affected during model.save in the response)
-              window.formEdition = false;
-              window.formChange = false;
-              _this.savingSuccess(model, response);
-              _this.id = _this.model.id;
-              if (_this.redirectAfterPost != "") {
-                // If redirect after creation
-                var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
-
-                if (window.location.href == window.location.origin + TargetUrl) {
-                  // if same page, relaod
-                  window.location.reload();
-                }
-                else {
-                  // otpherwise redirect
-                  window.location.href = TargetUrl;
-                }
-
-              }
-              else {
-                // If no redirect after creation
-                if (_this.reloadAfterSave) {
-                  _this.reloadingAfterSave();
-                }
-              }
-              _this.afterSaveSuccess(response);
-              return true;
-            },
-            error: function (response) {
-              _this.savingError(response);
-              return false;
-            }
-
-          });
-        }
-        else {
-          // After update of existing record
-          this.model.id = this.model.get('id');
-          var jqxhr = this.model.save(null, {
-            success: function (model, response) {
-              window.formEdition = false;
-              window.formChange = false;
-              _this.savingSuccess(model, response);
-              if (_this.reloadAfterSave) {
-                _this.reloadingAfterSave();
-              }
-              _this.afterSaveSuccess(response);
-            },
-            error: function (model,response) {
-              _this.savingError(response);
-            }
-          });
-
-        }
-      }else{
-        var errorList = _this.BBForm.$el.find('.error');
-        for (var i=0; i<errorList.length ;i++){
-          var elmName = errorList[i].nodeName ;
-          if (elmName.toUpperCase()!= 'SPAN'){
-            $(errorList[i]).trigger('focus').click();
-            break;
+          if(!errors){
+            flagEmpty = this.checkFormIsEmpty(this.model.schema,this.BBForm.getValue());
           }
-        }
-        return false;
-      }
-      this.afterSavingModel();
-      return jqxhr;
-    },
+          if(flagEmpty){
+            this.swal({
+              title : 'Empty observation',
+              text : 'The observation won\'t be recorded',
+              type:'warning',
+              showCancelButton: false,
+              confirmButtonColor:'#DD6B55',
+              confirmButtonText:'Ok'
+            });
+            return;
+          }
+
+          if(!errors) {
+            if (this.model.attributes["id"] == 0) {
+                // To force post when model.save()
+              this.model.attributes["id"] = null;
+            }
+
+            if (this.model.id == 0) {
+              // New Record
+              jqhrx = this.model.save(null, {
+                success: function (model, response) {
+                  // Getting ID of created record, from the model (has beeen affected during model.save in the response)
+                  window.formEdition = false;
+                  window.formChange = false;
+                  _this.savingSuccess(model, response);
+                  _this.id = _this.model.id;
+                  if (_this.redirectAfterPost != "") {
+                    // If redirect after creation
+                    var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
+
+                    if (window.location.href == window.location.origin + TargetUrl) {
+                      // if same page, relaod
+                      window.location.reload();
+                    }
+                    else {
+                      // otpherwise redirect
+                      window.location.href = TargetUrl;
+                    }
+
+                  }
+                  else {
+                    // If no redirect after creation
+                    if (_this.reloadAfterSave) {
+                      _this.reloadingAfterSave();
+                    }
+                  }
+                  _this.afterSaveSuccess(response);
+                  return true;
+                },
+                error: function (response) {
+                  _this.savingError(response);
+                  return false;
+                }
+
+              });
+            }
+            else {
+              // After update of existing record
+              this.model.id = this.model.get('id');
+              var jqxhr = this.model.save(null, {
+                success: function (model, response) {
+                  window.formEdition = false;
+                  window.formChange = false;
+                  _this.savingSuccess(model, response);
+                  if (_this.reloadAfterSave) {
+                    _this.reloadingAfterSave();
+                  }
+                  _this.afterSaveSuccess(response);
+                },
+                error: function (model,response) {
+                  _this.savingError(response);
+                }
+              });
+
+            }
+          }else{
+            var errorList = _this.BBForm.$el.find('.error');
+
+            for(var i=0; i < errorList.length; i++){
+              var elmName = errorList[i].nodeName ;
+              if (elmName.toUpperCase()!= 'SPAN'){
+                $(errorList[i]).trigger('focus').click();
+                break;
+              }
+            }
+            return false;
+          }
+          this.afterSavingModel();
+          return jqxhr;
+        },
 
     afterSaveSuccess: function(){
 
@@ -554,7 +567,6 @@ define([
       this.swal(opts);
     },
 
-
     afterDelete: function(){
 
     },
@@ -569,12 +581,57 @@ define([
       this.displaybuttons();
     },
 
+
+    checkFormIsEmpty: function(objSchema , values) {
+      var isEmpty = true;
+
+      for( var key in values ) {
+        var editorValue = values[key];
+        var editorSchema = objSchema[key];
+
+        if(key == 'defaultValues') {
+          continue;
+        }
+        if(editorSchema.fieldClass.indexOf('hide') != -1) {
+          continue;
+        }
+        if(editorSchema.type == 'Checkbox') {
+          continue;
+        }
+        //need to check if not an array
+        if(editorValue != null && editorValue != '' && !Array.isArray(editorValue) ) {
+          return isEmpty = false;
+        }
+
+        if(editorSchema.defaultValue) {
+            if(editorSchema.defaultValue != editorValue) {
+              return isEmpty = false;
+            }
+        }
+
+        if( Array.isArray(editorValue) ) {
+          //subform
+          for( var values of editorValue ) {
+            if(!this.checkFormIsEmpty(editorSchema.subschema, values)) {
+              return isEmpty = false;
+            }
+          }
+        }
+      }
+
+      return isEmpty;
+    },
+
+
+
     onSavingModel: function () {
       // To be extended, calld after commit before save on model
     },
+
     afterSavingModel: function () {
-      // To be extended called after model.save()
+  // To be extended called after model.save()
     },
+
     BeforeShow: function () {
       // to be extended called after render, before the show function
     },
@@ -582,9 +639,11 @@ define([
     savingSuccess: function (model, response) {
       // To be extended, called after save on model if success
     },
+
     savingError: function (response) {
       // To be extended, called after save on model if error
     },
+
     loadingError : function(response) {
 
     },
