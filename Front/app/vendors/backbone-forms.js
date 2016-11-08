@@ -6,7 +6,7 @@
  * If using regular <script> tags to include your files, use backbone-forms.min.js
  *
  * Copyright (c) 2013 Charles Davison, Pow Media Ltd
- * 
+ *
  * License and more information at:
  * http://github.com/powmedia/backbone-forms
  */
@@ -20,7 +20,7 @@ var Form = Backbone.View.extend({
 
   /**
    * Constructor
-   * 
+   *
    * @param {Object} [options.schema]
    * @param {Backbone.Model} [options.model]
    * @param {Object} [options.data]
@@ -233,7 +233,7 @@ var Form = Backbone.View.extend({
 
     //Set the main element
     this.setElement($form);
-    
+
     //Set class
     $form.addClass(this.className);
 
@@ -326,7 +326,7 @@ var Form = Backbone.View.extend({
     }, options);
 
     this.model.set(this.getValue(), setOptions);
-    
+
     if (modelError) return modelError;
   },
 
@@ -456,8 +456,8 @@ var Form = Backbone.View.extend({
   ', null, this.templateSettings),
 
   templateSettings: {
-    evaluate: /<%([\s\S]+?)%>/g, 
-    interpolate: /<%=([\s\S]+?)%>/g, 
+    evaluate: /<%([\s\S]+?)%>/g,
+    interpolate: /<%=([\s\S]+?)%>/g,
     escape: /<%-([\s\S]+?)%>/g
   },
 
@@ -465,7 +465,7 @@ var Form = Backbone.View.extend({
 
 });
 
-  
+
 //==================================================================================================
 //VALIDATORS
 //==================================================================================================
@@ -481,87 +481,87 @@ Form.validators = (function() {
     url: 'Invalid URL',
     match: _.template('Must match field "<%= field %>"', null, Form.templateSettings)
   };
-  
+
   validators.required = function(options) {
     options = _.extend({
       type: 'required',
       message: this.errMessages.required
     }, options);
-     
+
     return function required(value) {
       options.value = value;
-      
+
       var err = {
         type: options.type,
         message: _.isFunction(options.message) ? options.message(options) : options.message
       };
-      
+
       if (value === null || value === undefined || value === false || value === '') return err;
     };
   };
-  
+
   validators.regexp = function(options) {
     if (!options.regexp) throw new Error('Missing required "regexp" option for "regexp" validator');
-  
+
     options = _.extend({
       type: 'regexp',
       message: this.errMessages.regexp
     }, options);
-    
+
     return function regexp(value) {
       options.value = value;
-      
+
       var err = {
         type: options.type,
         message: _.isFunction(options.message) ? options.message(options) : options.message
       };
-      
+
       //Don't check empty values (add a 'required' validator for this)
       if (value === null || value === undefined || value === '') return;
 
       if (!options.regexp.test(value)) return err;
     };
   };
-  
+
   validators.email = function(options) {
     options = _.extend({
       type: 'email',
       message: this.errMessages.email,
       regexp: /^[\w\-]{1,}([\w\-\+.]{1,1}[\w\-]{1,}){0,}[@][\w\-]{1,}([.]([\w\-]{1,})){1,3}$/
     }, options);
-    
+
     return validators.regexp(options);
   };
-  
+
   validators.url = function(options) {
     options = _.extend({
       type: 'url',
       message: this.errMessages.url,
       regexp: /^(http|https):\/\/(([A-Z0-9][A-Z0-9_\-]*)(\.[A-Z0-9][A-Z0-9_\-]*)+)(:(\d+))?\/?/i
     }, options);
-    
+
     return validators.regexp(options);
   };
-  
+
   validators.match = function(options) {
     if (!options.field) throw new Error('Missing required "field" options for "match" validator');
-    
+
     options = _.extend({
       type: 'match',
       message: this.errMessages.match
     }, options);
-    
+
     return function match(value, attrs) {
       options.value = value;
-      
+
       var err = {
         type: options.type,
         message: _.isFunction(options.message) ? options.message(options) : options.message
       };
-      
+
       //Don't check empty values (add a 'required' validator for this)
       if (value === null || value === undefined || value === '') return;
-      
+
       if (value !== attrs[options.field]) return err;
     };
   };
@@ -596,7 +596,7 @@ Form.Fieldset = Backbone.View.extend({
 
     //Store the fields for this fieldset
     this.fields = _.pick(options.fields, schema.fields);
-    
+
     //Override defaults
     this.template = options.template || this.constructor.template;
   },
@@ -681,14 +681,14 @@ Form.Fieldset = Backbone.View.extend({
 
     Backbone.View.prototype.remove.call(this);
   }
-  
+
 }, {
   //STATICS
 
   template: _.template('\
     <fieldset data-fields>\
       <% if (legend) { %>\
-        <legend><%= legend %></legend>\
+        <legend><%= legend %><span class="js_badge badge" style="display:none !important;">0</span></legend>\
       <% } %>\
     </fieldset>\
   ', null, Form.templateSettings)
@@ -704,7 +704,7 @@ Form.Field = Backbone.View.extend({
 
   /**
    * Constructor
-   * 
+   *
    * @param {Object} options.key
    * @param {Object} options.form
    * @param {Object} [options.schema]
@@ -892,13 +892,13 @@ Form.Field = Backbone.View.extend({
     if (this.editor.hasNestedForm) return;
 
     //Add error CSS class
-    
+
     var elem = this.$el.find('input:first');
     if(!elem.length){
       elem = this.$el.find('select:first');
     }
     elem.addClass(this.errorClassName);
-    
+
     //this.$el.addClass(this.errorClassName);
 
     //Set error message
@@ -1102,7 +1102,7 @@ Form.Editor = Form.editors.Base = Backbone.View.extend({
   focus: function() {
     throw new Error('Not implemented');
   },
-  
+
   /**
    * Remove focus from the editor
    * Extend and override this method
@@ -1190,11 +1190,11 @@ Form.Editor = Form.editors.Base = Backbone.View.extend({
     if (_.isRegExp(validator)) {
       return validators.regexp({ regexp: validator });
     }
-    
+
     //Use a built-in validator if given a string
     if (_.isString(validator)) {
       if (!validators[validator]) throw new Error('Validator "'+validator+'" not found');
-      
+
       return validators[validator]();
     }
 
@@ -1204,10 +1204,10 @@ Form.Editor = Form.editors.Base = Backbone.View.extend({
     //Use a customised built-in validator if given an object
     if (_.isObject(validator) && validator.type) {
       var config = validator;
-      
+
       return validators[config.type](config);
     }
-    
+
     //Unkown validator type
     throw new Error('Invalid validator: ' + validator);
   }
@@ -1215,7 +1215,7 @@ Form.Editor = Form.editors.Base = Backbone.View.extend({
 
 /**
  * Text
- * 
+ *
  * Text input with focus, blur and change events
  */
 Form.editors.Text = Form.Editor.extend({
@@ -1344,7 +1344,7 @@ Form.editors.Password = Form.editors.Text.extend({
 
 /**
  * NUMBER
- * 
+ *
  * Normal text input that only allows a number. Letters etc. are not entered.
  */
 Form.editors.Number = Form.editors.Text.extend({
@@ -1891,7 +1891,7 @@ Form.editors.Checkboxes = Form.editors.Select.extend({
       if (_.isObject(option)) {
         if (option.group) {
           var originalId = self.id;
-          self.id += "-" + self.groupNumber++; 
+          self.id += "-" + self.groupNumber++;
           itemHtml = ('<fieldset class="group"> <legend>'+option.group+'</legend>');
           itemHtml += (self._arrayToHtml(option.options));
           itemHtml += ('</fieldset>');
@@ -2001,7 +2001,7 @@ Form.editors.Object = Form.editors.Base.extend({
 
   _observeFormEvents: function() {
     if (!this.nestedForm) return;
-    
+
     this.nestedForm.on('all', function() {
       // args = ["key:change", form, fieldEditor]
       var args = _.toArray(arguments);
