@@ -84,7 +84,7 @@ define([
               _this.form.$el.find(".js_badge").html(_this.forms.length);
             },0);
             if (this.schema.editorClass.indexOf("form-control") != -1 ) {
-              form.$el.find('fieldset').prepend('<div class="col-md-12 js_container_index_subForm"><a role="button"  class="btn btn-success disabled js_index_subForm" >'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</button></div>')
+              form.$el.find('fieldset').prepend('<div class="col-md-12 js_container_index_subForm"><a role="button"  class="js_index_subForm" >'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</button></div>')
             }
             form.$el.find('fieldset').append('\
                 <div class="' + this.hidden + ' col-xs-12 control">\
