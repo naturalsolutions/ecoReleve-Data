@@ -561,15 +561,18 @@ define([
           window.formEdition = false;
           window.formChange = false;
           _this.afterDelete(_this.model);
-
         }
       };
 
       this.swal(opts);
     },
 
-    afterDelete: function(){
+    deleteModel: function(){
+      this.model.destroy();
+    },
 
+    afterDelete: function(model){
+      
     },
 
 

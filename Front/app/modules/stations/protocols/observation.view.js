@@ -32,8 +32,8 @@ define([
         data: { FormName: 1, ObjectType: _this.model.get('ID')},
         success: _this.displayForm.bind(_this)
       });
-
-
+      
+      
     },
 
     displayForm: function(){
@@ -55,6 +55,25 @@ define([
           _this.updateAfterSave(response, _this);
         },
       });
+
+      this.form.afterDelete = function() {
+        var jqxhr = $.ajax({
+          url: _this.model.urlRoot + _this.model.get('id'),
+          method: 'DELETE',
+          contentType: 'application/json',
+        }).done(function(response) {
+          
+          var index = _this.parentModel.get('obs').indexOf(_this.model.get('id'));
+          _this.parentModel.get('obs').splice(index, 1);
+          _this.parentModel.trigger('change:obs', _this.parentModel);
+          var hash = window.location.hash.split('?');
+          var url = hash[0] + '?proto=' + _this.parentModel.get('ID') + '&obs=' + _this.parentModel.get('obs')[index];
+          Backbone.history.navigate(url, {trigger: true});
+
+        }).fail(function(response) {
+          console.error(response);
+        });
+      };
     },
 
     updateAfterSave: function(response, _this){
