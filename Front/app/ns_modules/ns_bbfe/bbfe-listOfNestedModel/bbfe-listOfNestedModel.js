@@ -75,11 +75,14 @@ define([
                 fieldsets: model.fieldsets,
                 schema: model.schema
             }).render();
-            if (this.schema.editorClass.indexOf("form-control") != -1 ) {
-              this.form.$el.find(".js_badge").css({'display': '','margin-left': '5px'})
-            }
             this.forms.push(form);
-            this.form.$el.find(".js_badge").html(this.forms.length);
+
+            setTimeout( function() { //
+              if (_this.schema.editorClass.indexOf("form-control") != -1 ) {
+                _this.form.$el.find(".js_badge").css({'display': '','margin-left': '5px'})
+              }
+              _this.form.$el.find(".js_badge").html(_this.forms.length);
+            },0);
             if (this.schema.editorClass.indexOf("form-control") != -1 ) {
               form.$el.find('fieldset').prepend('<div class="col-md-12 js_container_index_subForm"><a role="button"  class="btn btn-success disabled js_index_subForm" >'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</button></div>')
             }
