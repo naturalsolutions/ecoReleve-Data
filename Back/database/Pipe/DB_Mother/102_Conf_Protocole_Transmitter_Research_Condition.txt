@@ -26,7 +26,7 @@ GO
 
 COMMIT TRAN T1;
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('104_Conf_Protocole_Transmitter_Research_Condition',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('102_Conf_Protocole_Transmitter_Research_Condition',GETDATE(),(SELECT db_name()))
 
 
 GO
