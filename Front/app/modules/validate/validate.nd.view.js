@@ -54,8 +54,7 @@ define([
     },
 
     onRowClicked: function(row) {
-      var dataset = row.data.FK_Sensor + '_' + row.data.FK_Individual + '_' + row.data.FK_ptt;
-      Backbone.history.navigate('validate/' + this.type_ + '/' + dataset, {trigger: true});
+      Backbone.history.navigate('validate/' + this.type_ + '/' + (row.rowIndex + 1), {trigger: true});
     },
 
     setFrequency: function(e) {

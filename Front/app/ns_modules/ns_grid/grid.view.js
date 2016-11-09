@@ -151,12 +151,7 @@ define([
         'integer': 'number',
       };
       columnDefs.map(function(col, i) {
-        if(col.name){
-          col.headerName = col.label;
-          col.field = col.name;
-          col.filter = filter[col.cell];
-        }
-        
+
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};

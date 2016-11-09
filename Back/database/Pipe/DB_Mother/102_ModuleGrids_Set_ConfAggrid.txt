@@ -1,0 +1,28 @@
+ALTER Table ModuleGrids 
+ADD ColumnParams varchar(250)
+GO
+
+ALTER Table ModuleGrids 
+ALTER Column GridSize varchar(250)
+GO
+
+
+UPDATE g SET GridSize = '{"width":100,"maxWidth":350,"minWidth":50}'
+FROM ModuleGrids g
+GO
+
+UPDATE g SET GridSize = '{"width":200,"maxWidth":350,"minWidth":50}'
+FROM ModuleGrids g
+WHERE Name = 'Species'
+GO
+
+Update g set ColumnParams = '{"pinned":"left"}'
+FROM [EcoReleve_NARC].[dbo].[ModuleGrids] g
+WHERE Name = 'ID'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('102_ModuleGrids_Set_ConfAggrid',GETDATE(),(SELECT db_name()))
+
+
+GO
