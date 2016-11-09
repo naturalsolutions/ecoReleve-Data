@@ -160,6 +160,8 @@ define([
           view.model.set('stationId', _this.model.get('stationId'));
           view.$el.addClass('active');
 
+          console.log(view.model);
+
           _this.parent.rgProtocol.show(new Protocol({
             model: view.model
           }));
