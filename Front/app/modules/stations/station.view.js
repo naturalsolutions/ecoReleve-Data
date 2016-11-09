@@ -37,8 +37,8 @@ define([
       'rgNavbar': '.js-navbar'
     },
 
-    reloadFromNavbar: function(id) {
-      this.model.set('id', id);
+    reload: function(options) {
+      this.model.set('id', options.id);
       this.displayStation();
     },
 

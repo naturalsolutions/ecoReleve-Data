@@ -44,30 +44,42 @@ define([
     initialize: function(options) {
       this.model = new Backbone.Model();
       this.com = new Com();
-
       this.model.set('type', options.type);
-
-      this.formatDatasetId(options.dataset);
-
-      
-      this.frequency = options.frequency;
+      this.frequency = options.frequency;      
+      this.index = options.index - 1;
+      this.fetchGrid();
     },
 
-    formatDatasetId: function(datasetId){
-      this.model.set('datasetId', datasetId);
-      var datasetId = datasetId.split('_');
-      if(datasetId.length != 3){
-                
-      }
+    fetchGrid: function(){
+      var _this = this;
+      return this.deferred = $.ajax({
+        url: 'sensors/' + this.model.get('type') + '/uncheckedDatas',
+        method: 'GET',
+        context: this,
+      }).done(function(data){
+        _this.model.set('data', data[1]);
+        _this.populateModel();
 
-      this.model.set('FK_Sensor', datasetId[0]);
-      this.model.set('FK_Individual', datasetId[1]);
-      this.model.set('FK_ptt', datasetId[2]);
-
+        _this.rgNavbar.show(this.navbarView = new NavbarView({
+          parent: _this,
+          index: _this.index,
+          list: data[1],
+          type: _this.model.get('type')
+        }));
+      });
     },
 
-    reloadFromNavbar: function(id) {
-      this.formatDatasetId(id);
+    populateModel: function(){
+      this.model.set('FK_Individual', this.model.get('data')[this.index].FK_Individual);
+      this.model.set('FK_Sensor', this.model.get('data')[this.index].FK_Sensor);
+      this.model.set('FK_ptt', this.model.get('data')[this.index].FK_ptt);
+    },
+
+    reload: function(options){
+      this.index = parseInt(options.index) - 1;
+      this.populateModel();
+
+      this.com = new Com();
       this.com.addModule(this.map);
       this.map.com = this.com;
       this.map.url = 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt') + '?geo=true';
@@ -79,34 +91,11 @@ define([
     },
 
     onShow: function(){
-      this.displayMap();
-      this.displayForms();
-      this.displayGrids();
-      this.displayNavbar();
-    },
-
-    displayNavbar: function(){
       var _this = this;
-      return $.ajax({
-        url: 'sensors/' + this.model.get('type') + '/uncheckedDatas',
-        method: 'GET',
-        context: this,
-      }).done( function(data) {
-        var index = 0;
-        data[1] = data[1].map(function(dataset, i){
-          var datasetId = dataset.FK_Sensor + '_' + dataset.FK_Individual + '_' + dataset.FK_ptt;
-          if(datasetId === _this.model.get('datasetId')){
-            index = i;
-          }
-          return datasetId;
-        });
-
-        this.rgNavbar.show(this.navbarView = new NavbarView({
-          parent: this,
-          index: index,
-          list: data[1],
-          type: this.model.get('type')
-        }));
+      $.when(this.deferred).then(function(resp){
+        _this.displayMap();
+        _this.displayForms();
+        _this.displayGrids();
       });
     },
 
@@ -129,6 +118,12 @@ define([
     },
 
     displayIndForm: function() {
+      if(this.model.get('FK_Individual') === null){
+        this.swal({title: 'No individual attached'}, 'warning');
+        this.ui.individualForm.html('<br /><span class="bull-warn">●</span>No individual is attached');
+        return;
+      }
+
       this.nsform = new NsForm({
         name: 'IndivForm',
         buttonRegion: [],
@@ -249,8 +244,12 @@ define([
       this.gridView.interaction('multiSelection', idList);
     },
 
-    validate: function() {
+    validate: function(){
       var _this = this;
+      if(this.model.get('FK_Individual') === null){
+        return;
+      }
+
       var url = 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt');
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
       if(!selectedNodes.length){
@@ -261,7 +260,6 @@ define([
         return node.data.PK_id;
       });
       
-
       $.ajax({
         url: url,
         method: 'POST',
@@ -277,7 +275,19 @@ define([
         }
 
         var callback = function() {
-          //_this.navbar.navigateNext();
+          $.when(_this.fetchGrid()).then(function(){
+            var hash = window.location.hash.split('/').slice(0,-1).join('/');
+            if(!_this.model.get('data').length){
+              Backbone.history.navigate(hash + '/', {trigger: true});
+              return;
+            }
+            if(_this.index + 1 == _this.model.get('data').length){
+              _this.index = 0;
+              Backbone.history.navigate(hash + '/' + (_this.index + 1), {trigger: true});
+              return;
+            }
+            Backbone.history.loadUrl(Backbone.history.fragment);
+          });
         };
         resp.text = 'existing: ' + resp.existing + ', inserted: ' + resp.inserted + ', errors:' + resp.errors;
         this.swal(resp, resp.type, callback);
