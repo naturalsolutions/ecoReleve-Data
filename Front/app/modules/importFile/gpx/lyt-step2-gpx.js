@@ -205,7 +205,7 @@ define([
             type: 'success',
             showCancelButton: true,
             confirmButtonColor: 'green',
-            cancelButtonText: 'Home',
+            cancelButtonText: 'New import',
             confirmButtonText: 'Show imported data',
             closeOnConfirm: true,
 
@@ -215,7 +215,9 @@ define([
               Backbone.history.navigate('stations/lastImported', {trigger: true});
             }
             else {
-              Backbone.history.navigate('home', {trigger: true});
+              Backbone.history.navigate('importFile',{trigger: true});
+
+              //Backbone.history.navigate('home', {trigger: true});
 
               // method to return at the 1st step
               // _this.parent.currentStepIndex--;

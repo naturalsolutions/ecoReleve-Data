@@ -6,10 +6,10 @@ define([
 	'marionette',
 	'sweetAlert',
 	'dropzone',
-
+	'config',
 	'i18n'
 
-], function($, _, Backbone, Marionette, Swal, Dropzone
+], function($, _, Backbone, Marionette, Swal, Dropzone, config
 ) {
 
   'use strict';
@@ -37,7 +37,7 @@ define([
       previewNode.parentNode.removeChild(previewNode);
 
       var myDropzone = new Dropzone(this.el, {
-        url: 'sensors/argos/datas',
+        url: config.coreUrl+'sensors/argos/datas',
         parallelUploads: 1,
         previewTemplate: previewTemplate,
         previewsContainer: '#previews', // Define the container to display the previews
@@ -171,6 +171,14 @@ define([
               if (isConfirm) {
               Backbone.history.navigate('validate/argos',{trigger: true});
               }
+							else {
+								Backbone.history.navigate('importFile',{trigger: true});
+
+								// method to return at the 1st step
+								// _this.parent.currentStepIndex--;
+								// var index = _this.parent.currentStepIndex;
+								// _this.parent.displayStep(index);
+							}
             });
         } else {
           Swal({
