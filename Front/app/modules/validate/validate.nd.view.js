@@ -57,6 +57,9 @@ define([
       if( this.type_ != 'rfid' ) {
         Backbone.history.navigate('validate/' + this.type_ + '/' + (row.rowIndex + 1), {trigger: true});
       }
+      else {
+        row.node.setSelected(!row.node.isSelected());
+      }
     },
 
     setFrequency: function(e) {
