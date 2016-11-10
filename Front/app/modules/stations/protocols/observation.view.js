@@ -61,9 +61,17 @@ define([
         afterDelete: function(){
           var index = _this.parentModel.get('obs').indexOf(_this.model.get('id'));
           _this.parentModel.get('obs').splice(index, 1);
-          _this.parentModel.trigger('change:obs', _this.parentModel);
+
+          var url;
           var hash = window.location.hash.split('?');
-          var url = hash[0] + '?proto=' + _this.parentModel.get('ID') + '&obs=' + _this.parentModel.get('obs')[index];
+          
+          if(!_this.parentModel.get('obs').length){
+            _this.parentModel.destroy();
+            url = hash[0];
+          } else {
+            _this.parentModel.trigger('change:obs', _this.parentModel);
+            url = hash[0] + '?proto=' + _this.parentModel.get('ID') + '&obs=' + _this.parentModel.get('obs')[index];          
+          }          
           Backbone.history.navigate(url, {trigger: true});
         }
       });

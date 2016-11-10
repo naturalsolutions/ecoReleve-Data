@@ -113,9 +113,7 @@ define([
       });
       var id = $(e.currentTarget).attr('href');
       this.$el.find('.tab-content>.tab-pane' + id).addClass('active in');
-      
-      //console.log(this.gridViews);
-      //bugged?
+
       this.gridViews.map(function(gridView){
         gridView.gridOptions.api.sizeColumnsToFit();
       })

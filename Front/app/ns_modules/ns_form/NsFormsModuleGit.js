@@ -570,6 +570,9 @@ define([
     deleteModel: function(){
       var _this = this;
       this.model.id = this.model.get('id');
+      if(this.model.get('id') == 0){
+        _this.afterDelete(_this.model);
+      }
       this.model.destroy({
         success: function(response){
           if(_this.afterDelete){

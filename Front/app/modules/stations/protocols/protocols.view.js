@@ -100,6 +100,7 @@ define([
           var view;
           var views = this.children._views;
 
+          
           //search obs
           if(params.obs && params.obs != 0){
             for(var key in views){
@@ -144,8 +145,12 @@ define([
             if(params.proto){
               console.warn('Protocol n°' + params.proto + ' doesn\'t exist for this station');
             }
-
+            
             view = views[Object.keys(views)[0]];
+            if(!view){
+              return;
+            }
+
             if(view.model.get('obs').length){
               view.model.set('currentObs', view.model.get('obs')[0]);
             } else {

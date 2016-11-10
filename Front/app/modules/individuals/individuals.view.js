@@ -14,9 +14,9 @@ define([
   	      $(this).toggleClass('active');
   	    })
   	    if($(e.currentTarget).attr('id') === 'unidentified'){
-  	    	this.model.set('typeObj', 2);
+  	    	this.model.set('objectType', 2);
   	    } else {
-  	    	this.model.set('typeObj', 1);
+  	    	this.model.set('objectType', 1);
   	    }
 				this.onShow();
   	  }
