@@ -70,11 +70,11 @@
     var methods = {
       init: function(parametres) {
         //Fusion des paramètres envoyer avec les params par defaut
-        
+
         if (parametres) {
           var parametres = $.extend(defauts, parametres);
         };
-        //Information à envoyer 
+        //Information à envoyer
         var dataToSend = '';
         if (parametres.language.hasLanguage) {
           dataToSend = '{"StartNodeID":"' + parametres.startId + '", "lng": "' + parametres.language.lng + '"}';
@@ -90,7 +90,7 @@
           //$me.parent().prepend('<span class="input-group-addon reneco reneco-thesaurus"></span>');
 
           var htmlInsert = '';
-          //Si isDisplayDifferent = true on crée un input hidden afin de stocker la valeur 
+          //Si isDisplayDifferent = true on crée un input hidden afin de stocker la valeur
           if (parametres.display.isDisplayDifferent) {
             htmlInsert = '<input type="hidden" id="' + $me.attr("name") + parametres.display.suffixeId + '" name="' + $me.attr("name") + parametres.display.suffixeId + '" runat="server" enabled="true"/>'
           }
@@ -194,7 +194,7 @@
             //treeContainer.css('display', 'block').css('border', 'solid 1px').css('z-index', '100');
             treeContainer.css({top: $me.outerHeight() + 20 });
             //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
-            $(document).delegate("body", "click", function (event) {                            
+            $(document).delegate("body", "click", function (event) {
               if (!$(event.target).is("#" + $me.attr("id") + ",span[class^=fancytree], div[id^=treeView], ul")) {
                 var treeContainer = $("#treeView" + $me.attr("id"));
                 treeContainer.css('display', 'none');
@@ -225,11 +225,10 @@
             //Si le nombrte d'élément est < a 100 on oblige l'utilisation d'au moins trois caractère pour des raisons de performances
             if (searchAutoComp != null) {
               clearTimeout(searchAutoComp);
-            } 
+            }
             searchAutoComp = setTimeout(function(){
               searchAutoComp = null;
               if (fancytree.count() < 100 || $me.val().length >= 3) {
-                console.log('passed');
                 treeHtml.find('ul.fancytree-container li').css("padding", "1px 0 0 0");
                 treeHtml.fancytree("getRootNode").visit(function (node) {
                   if (node.span) {
