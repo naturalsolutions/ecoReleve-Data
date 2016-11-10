@@ -21,7 +21,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/gpx/templates/tpl-step1-gpx.html',
 
-    name : '',
+    name : 'GPX import selection',
 
     events: {
       'change input[type="file"]': 'importFile',
