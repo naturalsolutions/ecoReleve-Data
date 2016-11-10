@@ -108,7 +108,7 @@ define([
           data.append('data', e.target.result);
 
           //data.append('module', self.model.get(self.parent.steps[self.parent.currentStep-1].name+'_RFID_identifer'));
-          
+
           data.append('FK_Sensor',self.sensorId);
           data.append('StartDate', _this.row.StartDate);
           data.append('EndDate', _this.row.EndDate);
@@ -131,17 +131,17 @@ define([
                 type: 'success',
                 showCancelButton: true,
                 confirmButtonColor: 'green',
-                confirmButtonText: 'Import new RFID',
-                cancelButtonText: 'Go to Validate',
+                confirmButtonText: 'Go to Validate',
+                cancelButtonText: 'Import new RFID',
                 closeOnConfirm: true,
 
               },
               function(isConfirm) {
                 self.ui.progress.hide();
                 if (isConfirm) {
-                  Backbone.history.navigate('importFile',{trigger: true});
-                } else {
                   Backbone.history.navigate('validate/rfid',{trigger: true});
+                } else {
+                  Backbone.history.navigate('importFile',{trigger: true});
                 }
               }
             );
