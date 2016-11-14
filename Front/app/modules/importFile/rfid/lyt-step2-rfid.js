@@ -141,7 +141,10 @@ define([
                 if (isConfirm) {
                   Backbone.history.navigate('validate/rfid',{trigger: true});
                 } else {
-                  Backbone.history.navigate('importFile',{trigger: true});
+                  //Backbone.history.navigate('importFile',{trigger: true});
+                  _this.options.parent.currentStepIndex--;
+                  var index = _this.options.parent.currentStepIndex;
+                  _this.options.parent.displayStep(index);
                 }
               }
             );
