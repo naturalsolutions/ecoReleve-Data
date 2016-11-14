@@ -267,7 +267,9 @@ define([
         },
 
         afterShow: function(){
-          this.$el.find('.js-nav-tabs').removeClass('hide');
+          if(_this.options && _this.options.withToggle){
+            this.$el.find('.js-nav-tabs').removeClass('hide');
+          }
         },
         new: function(e){
           e.preventDefault();
