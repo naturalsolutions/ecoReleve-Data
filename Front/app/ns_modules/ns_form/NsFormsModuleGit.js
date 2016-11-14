@@ -303,7 +303,11 @@ define([
         });
       }
       $(this.formRegion).find('input').on("change", function(e) {
-         window.formChange = true;
+        if($(e.target).val() !== ''){
+          window.formChange = true;
+        } else {
+          window.formChange = false;
+       }
       });
       $(this.formRegion).find('select').on("change", function(e) {
          window.formChange = true;

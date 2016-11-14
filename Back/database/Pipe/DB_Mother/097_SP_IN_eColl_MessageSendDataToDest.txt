@@ -1,9 +1,12 @@
 
+
+/****** Object:  StoredProcedure [dbo].[MessageSendDataToDest]    Script Date: 26/09/2016 11:52:38 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 
 
@@ -139,14 +142,14 @@ BEGIN
 		
   END         
 
-GO
-
-
-
-
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('91_ERD_SP_SendData',GETDATE(),(SELECT db_name()))
-
 
 GO
 
 
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('97_SP_IN_eColl_MessageSendDataToDest',GETDATE(),(SELECT db_name()))
+
+
+GO
