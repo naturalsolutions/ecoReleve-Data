@@ -48,9 +48,9 @@ def GetProtocolsofStation(request):
                                           ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
             Conf = session.query(FrontModules).filter(
                 FrontModules.Name == ModuleName).first()
- 
+
             listProto = {}
-            if listObs: 
+            if listObs:
                 for i in range(len(listObs)):
                     DisplayMode = 'edit'
                     curObs = listObs[i]
@@ -74,15 +74,15 @@ def GetProtocolsofStation(request):
                 for i in range(len(listVirginProto)):
                     DisplayMode = 'edit'
                     typeID = listVirginProto[i].FK_ProtocoleType
-                    
+
                     curVirginObs = Observation(FK_ProtocoleType=typeID)
                     typeName = curVirginObs.GetType().Name.replace('_', ' ')
                     curVirginObsForm = curVirginObs.GetForm(Conf, DisplayMode)
 
                     listProto[typeID] = {
                     'Name': typeName,
-                    'schema': curObsForm['schema'],
-                    'fieldsets':curObsForm['fieldsets'],
+                    'schema': curVirginObsForm['schema'],
+                    'fieldsets':curVirginObsForm['fieldsets'],
                     'obs':[]
                     }
 
@@ -91,7 +91,7 @@ def GetProtocolsofStation(request):
             'Name': listProto[typeID]['Name'],
             'schema':listProto[typeID]['schema'],
             'fieldsets':listProto[typeID]['fieldsets'],
-            'obs':listProto[typeID]['obs']} 
+            'obs':listProto[typeID]['obs']}
             for typeID in listProto.keys()
             ]
 
