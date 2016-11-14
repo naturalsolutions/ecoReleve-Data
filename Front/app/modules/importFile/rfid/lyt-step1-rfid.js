@@ -49,16 +49,16 @@ define([
     onShow: function() {
       var obj = {name: this.name + '_RFID_identifer',required: true};
       this.stepAttributes = [obj];
-      
+
       $.ajax({
         url: 'sensors/getUnicIdentifier',
         data: {sensorType: 3},
         context: this,
       }).done(function(data) {
-        
+
         var firstId = data[0]['val'];
         var content = '';
-        
+
         data.map(function(rfid){
           content += '<option value="' + rfid.val + '">' + rfid.label + '</option>';
         });
@@ -104,7 +104,7 @@ define([
       }];
 
       this.rgGrid.show(this.gridView = new GridView({
-        url: 'sensors/' + id + '/history',
+        url: 'sensors/' + id + '/equipment',
         columns: columnsDefs,
         clientSide: true,
         gridOptions: {
@@ -119,7 +119,7 @@ define([
       }));
     },
 
-    
+
 
     validate: function() {
       return this.model;

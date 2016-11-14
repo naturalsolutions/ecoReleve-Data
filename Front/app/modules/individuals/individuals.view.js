@@ -16,7 +16,7 @@ define([
 
         var typeObj = this.availableTypeObj.filter(function(obj){
           if (obj.label.toLowerCase() === $(e.currentTarget).attr('id').toLowerCase()){
-            return obj
+            return obj;
           }
         })[0];
 
@@ -28,7 +28,6 @@ define([
         } else {
           this.$el.find('.js-link-new').html('<span class="reneco reneco-entrykey"></span> &nbsp; Save from criteria');
         }
-
 				this.onShow();
   	  }
   	},

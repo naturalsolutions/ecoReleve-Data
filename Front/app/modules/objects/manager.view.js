@@ -61,12 +61,7 @@ define([
           this.availableTypeObj = resp;
           this.model.set('objectType',resp[0].val);
           this.model.set('objectTypeLabel',resp[0].label);
-          // if(options.showUiTab){
-          //   var uiTabs = [];
-          //   resp.map(function(obj){
-          //     uiTabs.push({name:obj.val, label: obj.label});
-          //   });
-          // }
+
       }).fail(function(resp) {
       });
     },
@@ -74,14 +69,14 @@ define([
     back: function(){},
 
     populateCurrentData: function(currentData){
-      this.defaultFilters = currentData.filters;
+      // this.defaultFilters = currentData.filters;
 
-      if(currentData.index !== 'undefined'){
-        this.goTo = {
-          index: currentData.index,
-          page: currentData.status.page
-        }
-      }
+      // if(currentData.index !== 'undefined'){
+      //   this.goTo = {
+      //     index: currentData.index,
+      //     page: currentData.status.page
+      //   }
+      // }
     },
 
     onRender: function() {
@@ -117,23 +112,22 @@ define([
 
     displayGridView: function(){
       var _this = this;
-      var afterFirstRowFetch = function(){
+      var afterGetRows = function(){
         _this.ui.totalRecords.html(this.model.get('totalRecords'));
       };
 
       this.rgGrid.show(this.gridView = new GridView({
         type: this.model.get('type'),
         com: this.com,
-        typeObj: this.model.get('objectType'),
-        afterFirstRowFetch: afterFirstRowFetch,
-        filters: this.defaultFilters,
+        objectType: this.model.get('objectType'),
+        afterGetRows: afterGetRows,
+        //filters: this.defaultFilters,
         gridOptions: {
           onRowClicked: this.onRowClicked.bind(this),
           rowModelType: 'pagination'
         },
         goTo: (this.goTo || false)
       }));
-
     },
 
     displayFilter: function() {
@@ -141,7 +135,7 @@ define([
         url: this.model.get('type') +'/',
         com: this.com,
         filterContainer: this.ui.filter,
-        typeObj: this.model.get('objectType'),
+        objectType: this.model.get('objectType'),
         filtersValues: this.defaultFilters,
       });
     },

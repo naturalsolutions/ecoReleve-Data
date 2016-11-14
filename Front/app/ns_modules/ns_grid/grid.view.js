@@ -47,7 +47,7 @@ define([
       var _this = this;
       this.model = options.model || new Backbone.Model();
       this.model.set('type', options.type);
-      this.model.set('typeObj', options.typeObj || 1);
+      this.model.set('objectType', options.objectType || 1);
       if(options.url){
         this.model.set('url', options.url);
       } else {
@@ -78,7 +78,7 @@ define([
         onGridReady: function(){
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
-              _this.gridOptions.api.sizeColumnsToFit();
+              _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
               if(!_this.model.get('totalRecords')){
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
               }
@@ -332,7 +332,7 @@ define([
             per_page: pageSize,
             offset: offset,
             order_by: JSON.stringify(order_by),
-            typeObj: _this.model.get('typeObj')
+            typeObj: _this.model.get('objectType')
           };
 
           $.ajax({
@@ -534,6 +534,7 @@ define([
     },
 
     onDestroy: function(){
+      $(window).off('resize', this.onResize);
       this.gridOptions.api.destroy();
       this.grid.destroy();
     },
@@ -552,7 +553,6 @@ define([
 
       var gridDiv = this.$el.find('.js-ag-grid')[0];
       this.grid = new AgGrid.Grid(gridDiv, this.gridOptions);
-
 
       if(!this.clientSide && !this.gridOptions.rowData){
         this.gridOptions.api.setDatasource(this.dataSource);

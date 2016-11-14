@@ -264,6 +264,7 @@ define([
         back: function(e){
           e.preventDefault();
           _this.hidePicker();
+          this.model.set('objectType', 1);
         },
 
         afterShow: function(){

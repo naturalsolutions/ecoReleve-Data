@@ -27,9 +27,14 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'sensors/:id(/)': 'sensor',
       'sensors(/)': 'sensors',
 
-      'stations/new/:from(/)': 'newStation',
-      'stations/new(/)': 'newStation',
-      'stations/lastImported(/)': 'stations',
+      
+
+      
+            'stations/new/:from(/)': 'newStation',
+            'stations/new(/)': 'newStation',
+             'stations/lastImported(/)': 'stations',
+
+      'stations/:id?(proto=:proto&)obs=:obs(/)': 'station',
       'stations/:id(/)': 'station',
       'stations(/)': 'stations',
 
