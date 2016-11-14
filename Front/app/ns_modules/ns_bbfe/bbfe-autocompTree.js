@@ -8,7 +8,7 @@ define([
 ], function (
     _, $, $ui, Backbone, Form, autocompTree
 ) {
-   
+
     Backbone.Form.validators.Thesaurus = function (options) {
         return function Thesaurus(value) {
             if (!options.parent.isTermError) {
@@ -28,14 +28,20 @@ define([
         previousValue: '',
 
         events: {
-            'hide': "hasChanged"
+            'hide': "hasChanged",
+            'change':'inputChange'
         },
         editable:false,
+
         hasChanged: function (currentValue) {
             if (currentValue !== this.previousValue) {
                 this.previousValue = currentValue;
                 this.trigger('change', this);
             }
+        },
+
+        inputChange: function(e){
+          this.isTermError = true;
         },
 
         initialize: function (options) {
@@ -55,12 +61,12 @@ define([
 
             this.validators = options.schema.validators || [];
 
-            this.isTermError = false;
-            
+            this.isTermError = true;
+
             this.template = options.template || this.constructor.template;
             this.id = options.id;
             var editorAttrs = "";
-            
+
             this.editable = options.schema.editable || true;
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled)  {
                 this.editable = false;
@@ -169,9 +175,10 @@ define([
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
-                    $('#divAutoComp_' + _this.id).removeClass('error');
+                    //$('#divAutoComp_' + _this.id).removeClass('error');
+                    $('#' + _this.id).removeClass('error');
                     _this.displayErrorMsg(false);
-                   // _this.$el.find('input').trigger('change');
+                    _this.$el.find('input').trigger('change');
                     var translatedValue = data["TTop_FullPathTranslated"];
                     if (isTranslated) {
                         if (_this.displayValueName == 'valueTranslated') {
@@ -189,7 +196,8 @@ define([
                 error: function (data) {
                     _this.$el.find('#' + _this.id).val(value);
                     if (_this.editable) {
-                        $('#divAutoComp_' + _this.id).addClass('error');
+                        //$('#divAutoComp_' + _this.id).addClass('error');
+                        $('#' + _this.id).addClass('error');
                         _this.displayErrorMsg(true);
                     }
                 }
@@ -214,12 +222,14 @@ define([
                 this.isTermError = bool;
                 if (this.isTermError) {
                     this.termError = "Invalid term";
-                    this.$el.find('#divAutoComp_' + this.id).addClass('error');
+                    //this.$el.find('#divAutoComp_' + this.id).addClass('error');
+                    this.$el.find('#' + this.id).addClass('error');
                     this.$el.find('#' + this.id).attr('title','Invalid term');
                     //this.$el.find('#errorMsg').removeClass('hidden');
                 } else {
                     this.termError = "";
-                    this.$el.find('#divAutoComp_' + this.id).removeClass('error');
+                    //this.$el.find('#divAutoComp_' + this.id).removeClass('error');
+                    $('#' + this.id).removeClass('error');
                     this.$el.find('#errorMsg').addClass('hidden');
                 }
             }
