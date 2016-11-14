@@ -151,7 +151,7 @@ define([
 
           var totalInsertedEng = _this.totalReturned.reduce(function(memo, value) { return memo + value.get('inserted Engineering') }, 0);
           var totalExistingEng = _this.totalReturned.reduce(function(memo, value) { return memo + value.get('existing Engineering') }, 0);
-          console.log(_this.totalReturned);
+
 
         if (!this.errors) {
           Swal({
@@ -164,7 +164,7 @@ define([
             showCancelButton: true,
             confirmButtonColor: '#DD6B55',
             confirmButtonText: 'Validate Argos',
-            cancelButtonText: 'New import',
+            cancelButtonText: 'Import new Argos',
             closeOnConfirm: true,
             closeOnCancel: true},
             function(isConfirm) {
@@ -172,12 +172,7 @@ define([
               Backbone.history.navigate('validate/argos',{trigger: true});
               }
 							else {
-								Backbone.history.navigate('importFile',{trigger: true});
-
-								// method to return at the 1st step
-								// _this.parent.currentStepIndex--;
-								// var index = _this.parent.currentStepIndex;
-								// _this.parent.displayStep(index);
+								document.querySelector('#actions .cancel').click();
 							}
             });
         } else {
