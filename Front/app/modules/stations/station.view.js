@@ -136,7 +136,5 @@ define([
       _this.displayProtos();
     },
 
-
-
   });
 });

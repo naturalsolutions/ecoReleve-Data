@@ -148,6 +148,7 @@ define([
             
             view = views[Object.keys(views)[0]];
             if(!view){
+              _this.parent.rgProtocol.empty();
               return;
             }
 
@@ -165,11 +166,10 @@ define([
           view.model.set('stationId', _this.model.get('stationId'));
           view.$el.addClass('active');
 
-          console.log(view.model);
-
           _this.parent.rgProtocol.show(new Protocol({
             model: view.model
           }));
+
           
         },
 
@@ -211,6 +211,7 @@ define([
       } else {
         this.addNewProtoType(name, objectType);
       }
+      this.ui.protoPicker.val(this.ui.protoPicker.find('option:first').val());
     },
 
     addNewProtoType: function(name, objectType) {
