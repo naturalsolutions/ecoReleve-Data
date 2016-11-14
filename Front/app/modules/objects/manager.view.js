@@ -8,7 +8,7 @@ define([
   'ns_modules/ns_com',
   'ns_grid/grid.view',
   'ns_filter/filters',
-  
+
   'tooltipster-list',
   'i18n'
 
@@ -53,11 +53,25 @@ define([
       if( window.app.currentData ){
         this.populateCurrentData(window.app.currentData);
       }
+
+      this.xhrTypeObj = $.ajax({
+        url: this.model.get('type')+'/getType',
+        context: this
+      }).done(function(resp) {
+          this.availableTypeObj = resp;
+          this.model.set('objectType',resp[0].val);
+          this.model.set('objectTypeLabel',resp[0].label);
+          // if(options.showUiTab){
+          //   var uiTabs = [];
+          //   resp.map(function(obj){
+          //     uiTabs.push({name:obj.val, label: obj.label});
+          //   });
+          // }
+      }).fail(function(resp) {
+      });
     },
 
-    new: function(){},
     back: function(){},
-
 
     populateCurrentData: function(currentData){
       this.defaultFilters = currentData.filters;
@@ -82,6 +96,11 @@ define([
       if(this.displayMap){
         this.displayMap();
       }
+      this.afterShow();
+    },
+
+    afterShow: function(){
+      //console.warn('method not implemented');
     },
 
     changePageSize: function(e){
@@ -105,7 +124,7 @@ define([
       this.rgGrid.show(this.gridView = new GridView({
         type: this.model.get('type'),
         com: this.com,
-        typeObj: this.model.get('typeObj'),
+        typeObj: this.model.get('objectType'),
         afterFirstRowFetch: afterFirstRowFetch,
         filters: this.defaultFilters,
         gridOptions: {
@@ -122,7 +141,7 @@ define([
         url: this.model.get('type') +'/',
         com: this.com,
         filterContainer: this.ui.filter,
-        typeObj: this.model.get('typeObj'),
+        typeObj: this.model.get('objectType'),
         filtersValues: this.defaultFilters,
       });
     },
@@ -139,7 +158,7 @@ define([
         var url = this.model.get('type') + '/export?criteria=' + JSON.stringify(this.gridView.filters);
         var link = document.createElement('a');
         link.classList.add('DowloadLinka');
-        
+
         link.href = url;
         link.onclick = function () {
             var href = $(link).attr('href');
@@ -152,15 +171,23 @@ define([
 
     new: function(e) {
       var _this = this;
-      this.ui.btnNew.tooltipList({
-        availableOptions: this.model.get('availableOptions'),
-        liClickEvent: function(liClickValue) {
-          var url = '#' + _this.model.get('type') + '/new/' + liClickValue;
-          Backbone.history.navigate(url, {trigger: true});
-        },
-        position: 'top'
-      });
+
+      if(this.availableTypeObj && this.availableTypeObj.length>1){
+
+        this.ui.btnNew.tooltipList({
+          availableOptions: this.availableTypeObj,
+          liClickEvent: function(liClickValue) {
+            var url = '#' + _this.model.get('type') + '/new/' + liClickValue;
+            Backbone.history.navigate(url, {trigger: true});
+          },
+          position: 'top'
+        });
+      } else {
+        var url = '#' + _this.model.get('type') + '/new/'+this.availableTypeObj[0].val;
+        Backbone.history.navigate(url, {trigger: true});
+
+      }
     },
-    
+
   });
 });

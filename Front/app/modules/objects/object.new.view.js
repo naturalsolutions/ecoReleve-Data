@@ -23,11 +23,12 @@ define([
       'click .js-btn-save': 'save',
       'click .js-link-back': 'back',
     },
-    
+
     model: new Backbone.Model(),
 
     initialize: function(options) {
       this.model.set('objectType', options.objectType);
+			this.data = options.data;
     },
 
     onShow: function() {
@@ -43,6 +44,7 @@ define([
         displayMode: 'edit',
         objectType: this.model.get('objectType'),
         id: 0,
+        data: this.data,
         reloadAfterSave: false,
         afterSaveSuccess: this.afterSaveSuccess.bind(this),
         savingError: function(response) {

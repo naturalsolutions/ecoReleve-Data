@@ -9,7 +9,7 @@ define([
   'backbone-forms',
   'requirejs-text!./tpl-bbfe-objectPicker.html',
 ], function(
-  $, _, Backbone, Marionette, Swal, Translater, 
+  $, _, Backbone, Marionette, Swal, Translater,
   Form, Tpl
 ) {
   'use strict';
@@ -31,7 +31,7 @@ define([
 
       this.model.set('key', options.key);
       this.model.set('type', 'text');
-      
+
       var name = options.key.split('FK_')[1];
       this.objectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
       this.url = this.objectName + '/';
@@ -55,7 +55,7 @@ define([
         this.model.set('type', 'number');
       }
       this.isTermError = false;
-
+      this.options = options.schema.options;
       var value;
       if (options.model) {
         value = options.model.get(options.schema.name) || options.value;
@@ -113,7 +113,7 @@ define([
 
       this.autocompleteSource.change = function(event,ui){
         event.preventDefault();
-          if ($(_this._input).val() != '' && !_this.matchedValue){
+          if ($(_this._input).val() !== '' && !_this.matchedValue){
             _this.isTermError = true;
             _this.displayErrorMsg(true);
           }
@@ -163,7 +163,7 @@ define([
         this.$el.find('.form-control').removeClass('form-control').addClass('ag-cell-edit-input');
         this.$el.find('.span').addClass('');
       }
-      
+
       this._input = this.$el.find('input[name="' + this.model.get('key') + '" ]')[0];
       if (this.displayingValue){
         if (this.initValue && this.initValue != null){
@@ -173,10 +173,50 @@ define([
             $(_this._input).autocomplete(_this.autocompleteSource);
         }).defer();
       }
-      
+
       this.initPicker();
 
       return this;
+    },
+
+    getNewFunc: function(ctx) {
+      var _this = this;
+      switch (ctx.model.get('type')){
+        case 'individuals':
+          var data;
+          if(ctx.model.get('objectTypeLabel').toLowerCase() !== 'standard'){
+            ctx.filters.update();
+            data = {};
+            for (var i = 0; i < ctx.filters.criterias.length; i++) {
+              data[ctx.filters.criterias[i]['Column']] = ctx.filters.criterias[i]['Value'];
+            }
+          } else{
+            data = null;
+          }
+          _this.regionManager.get('modal').show(new _this.NewView({
+            objectType: ctx.model.get('objectType') || 1,
+            data: data
+          }));
+          break;
+
+        case 'monitoredSites':
+            _this.regionManager.get('modal').show(new _this.NewView({
+              objectType: ctx.model.get('objectType')
+            }));
+            break;
+
+        case 'sensors':
+            ctx.ui.btnNew.tooltipList({
+              position: 'top',
+              availableOptions: ctx.availableTypeObj,
+              liClickEvent: function(liClickValue) {
+                _this.regionManager.get('modal').show(new _this.NewView({
+                  objectType: liClickValue
+                }));
+              },
+            });
+            break;
+      }
     },
 
     showPicker: function(){
@@ -220,32 +260,20 @@ define([
           _this.displayErrorMsg(false);
           _this.hidePicker();
         },
+
         back: function(e){
           e.preventDefault();
           _this.hidePicker();
         },
+
+        afterShow: function(){
+          this.$el.find('.js-nav-tabs').removeClass('hide');
+        },
         new: function(e){
           e.preventDefault();
-          
-          if(this.model.get('availableOptions')){
-            this.ui.btnNew.tooltipList({
-              position: 'top',
-              availableOptions: this.model.get('availableOptions'),
-              liClickEvent: function(liClickValue) {
-                _this.regionManager.get('modal').show(new _this.NewView({
-                  objectType: liClickValue
-                }));
-              },
-            });
-          } else {
-            _this.regionManager.get('modal').show(new _this.NewView({
-              objectType: this.model.get('objectType')
-            }));
-          }
+          _this.getNewFunc(this);
         },
       });
-
-
     },
 
     getValue: function() {
@@ -259,7 +287,7 @@ define([
     },
 
     setValue: function(value,displayValue) {
-      if (displayValue || displayValue == ''){
+      if (displayValue || displayValue === ''){
         $(this._input).val(displayValue);
       } else {
         this.getDisplayValue(value);
@@ -269,8 +297,6 @@ define([
       $(this._input).change();
       this.hidePicker();
     },
-
-    
 
     checkHidePicker: function(e){
       if($(e.target).attr('id') === 'modal'){
@@ -291,7 +317,5 @@ define([
           $(this._input).removeClass('error');
         }
     },
-  }
-  );
+  });
 });
-

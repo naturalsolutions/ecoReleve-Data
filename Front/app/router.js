@@ -14,10 +14,14 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'individuals/new(/)': 'newIndividual',
       'individuals/:id(/)': 'individual',
       'individuals(/)': 'individuals',
+      'individuals/new/:type(/)': 'newIndividual',
+
 
       'monitoredSites/new(/)': 'newMonitoredSite',
       'monitoredSites/:id(/)': 'monitoredSite',
       'monitoredSites(/)': 'monitoredSites',
+      'monitoredSites/new/:type(/)': 'newMonitoredSite',
+
 
       'sensors/new/:type(/)': 'newSensor',
       'sensors/:id(/)': 'sensor',
