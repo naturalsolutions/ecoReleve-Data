@@ -138,6 +138,7 @@ define([
       },
       function(isConfirm) {
         $('form')[0].reset();
+        $('#fileNameSelected').text('No file selected');
         $('.fieldactivity').addClass('hidden');
         $(_this.fieldworkers).addClass('hidden');
       });
