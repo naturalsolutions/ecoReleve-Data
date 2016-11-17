@@ -23,7 +23,6 @@ define([
     template: tpl,
     redirectAfterPost: '',
     displayDelete: true,
-    gridRow: false,
 
     events : {
       'keypress input' : 'evt'
@@ -34,6 +33,7 @@ define([
     },
     extendsBBForm: function(){
       var _this = this;
+
       Backbone.Form.validators.errMessages.required = '';
       Backbone.Form.Editor.prototype.initialize = function(options){
         var options = options || {};
@@ -62,58 +62,20 @@ define([
         this.$el.attr('id', this.id);
         //bug with same name
         this.$el.attr('name', this.getName());
+
+        console.log(options.key);
+
         if (schema.editorClass) this.$el.addClass(schema.editorClass);
         if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);
 
         if(options.schema.validators && options.schema.validators[0] == "required"){
           this.$el.addClass('required');
         }
-
-      };
-
-
-    },
-
-    checkGridRowAgain: function() {
-      var _this = this;
-      Backbone.Form.Field.prototype.render = function() {
-          var schema = this.schema,
-              editor = this.editor;
-
-          //Only render the editor if Hidden
-          if (schema.type == Backbone.Form.editors.Hidden) {
-            return this.setElement(editor.render().el);
-          }
-
-          //Render field
-          var $field = $($.trim(this.template(_.result(this, 'templateData'))));
-
-          if (schema.fieldClass) $field.addClass(schema.fieldClass);
-          if (schema.fieldAttrs) $field.attr(schema.fieldAttrs);
-
-          //mjaouen
-          if (_this.gridRow) $field.addClass('grid-field');
-
-          //Render editor
-          $field.find('[data-editor]').add($field).each(function(i, el) {
-            var $container = $(el),
-                selection = $container.attr('data-editor');
-
-            if (_.isUndefined(selection)) return;
-
-            $container.append(editor.render().el);
-          });
-
-          this.setElement($field);
-
-          return this;
       };
     },
 
     initialize: function (options) {
       this.extendsBBForm();
-      this.gridRow = options.gridRow || this.gridRow;
-      this.checkGridRowAgain();
 
       var jqxhr;
       this.modelurl = options.modelurl;
@@ -297,13 +259,11 @@ define([
 
       this.formRegion.html(this.BBForm.el); //this.formRegion.html(this.BBForm.el);
 
-      if(!this.gridRow) {
-        $(this.formRegion).find('input').on("keypress", function(e) {
-          if( e.which == 13){
-            _this.butClickSave(e);
-          }
-        });
-      }
+      $(this.formRegion).find('input').on("keypress", function(e) {
+        if( e.which == 13){
+          _this.butClickSave(e);
+        }
+      });
       $(this.formRegion).find('input').on("change", function(e) {
          window.formChange = true;
       });
@@ -361,9 +321,6 @@ define([
         this.afterShow();
       }
 
-      if (this.gridRow) {
-        this.finilizeToGridRow();
-      }
     },
 
     showErrorForMaxLength : function(_this){
@@ -417,10 +374,12 @@ define([
 
     },
 
-    butClickSave: function (e) {
+    butClickSave: function () {
           var _this = this;
           var flagEmpty = false;
-          var errors = this.BBForm.commit();
+          alert('save');
+          var errors = this.BBForm.commit('test');
+          return;
           var jqhrx;
 
           if(!errors){
@@ -524,7 +483,6 @@ define([
 
 
     butClickEdit: function (e) {
-      this.checkGridRowAgain();
       this.displayMode = 'edit';
       this.initModel();
       if(this.buttonRegion)
@@ -532,7 +490,6 @@ define([
 
     },
     butClickCancel: function (e) {
-      this.checkGridRowAgain();
       this.displayMode = 'display';
       this.initModel();
       if(this.buttonRegion)
@@ -540,7 +497,6 @@ define([
 
     },
     butClickClear: function (e) {
-      this.checkGridRowAgain();
       var formContent = this.BBForm.el;
       $(formContent).find('input').not(':disabled').each(function(){
         $(this).val('');
@@ -743,22 +699,7 @@ define([
       });
     },
 
-    finilizeToGridRow: function() {
-      var _this = this;
-      /*var button = 'danger';
-      if(!this.model.get('id')){
-        button = 'warning';
-      }*/
-      // this.BBForm.$el.find('fieldset').append('\
-      //     <div class="col-xs-12 control">\
-      //         <button type="button" class="js-remove btn btn-danger pull-right"><span class="reneco reneco-trash"></span></button>\
-      //     </div>\
-      // ');
-      // this.BBForm.$el.find('button.js-remove').on('click', function() {
-      //   _this.butClickDelete();
-      // });
-    },
-
+    
   });
 
 });

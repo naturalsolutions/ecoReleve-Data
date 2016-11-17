@@ -5,8 +5,9 @@ define([
   'marionette',
   'ns_ruler/ruler',
   'backbone-forms',
+  'ns_grid/grid.view',
 
-  ], function ($, _, Backbone, Marionette,Ruler, Form, List, tpl) {
+  ], function ($, _, Backbone, Marionette,Ruler, Form, GridView, tpl) {
 
     'use strict';
     return Form.editors.GridFormEditor = Form.editors.Base.extend({
@@ -14,8 +15,68 @@ define([
             'click .js-addFormBtn' : 'addEmptyForm',
             'click .js-cloneLast' : 'cloneLast',
         },
+
+            // <button type="button" class=" <%= hidden %> btn btn-success js-addFormBtn">+</button>\
+            // <button type="button"  class="js-cloneLast <%= hiddenClone %> btn">Clone Last</button>\
+            // <button type="button"  class="<%= hidden %> btn btn-success js-addFormBtn">+</button>\
+            // <button type="button"  class="js-cloneLast <%= hiddenClone %> btn ">Clone Last</button>\
+
+        template: '\
+            <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 200px"></div>\
+        ',
+
+
+        render: function(){
+            this.template = _.template(this.template, this.templateSettings);
+            console.log(this.template);
+            this.$el.html(this.template);
+            return this;
+        },
+
+        afterRender: function(){
+            this.regionManager.addRegions({
+              rgGrid: '.js-rg-grid-subform'
+            });
+            this.regionManager.get('rgGrid');
+            this.regionManager.get('rgGrid').show(this.gridView = new GridView({
+                columns: this.columnsDefs,
+                clientSide: true,
+                gridOptions: {
+                  rowData: this.options.model.get(this.options.key)
+                },
+              }));
+        },
+
         initialize: function(options) {
+            this.regionManager = new Marionette.RegionManager();
+            _.bindAll(this, 'render', 'afterRender'); 
+            this.render = _.wrap(this.render, function(render) {
+                render();    
+                setTimeout(function(){
+                    _this.afterRender();
+                }, 0);
+                return _this;
+            });
+
+            var _this = this; 
+            //Form.editors.Base.prototype.initialize.call(this, options);
+            this.options = options;
+            this.formatColumns();
             
+            this.templateSettings = {
+                hidden: false,
+                hiddenClone: false,
+            };
+            
+            this.options.schema.fieldClass = 'col-xs-12';
+            return;
+
+
+
+
+
+
+
             if (options.schema.validators.length) {
                 this.defaultRequired = true;
             } else {
@@ -35,11 +96,8 @@ define([
                 this.hiddenClone = 'hidden';
             }
 
-            Form.editors.Base.prototype.initialize.call(this, options);
 
             this.template = options.template || this.constructor.template;
-            this.options = options;
-            this.options.schema.fieldClass = 'col-xs-12';
             this.showLines = true ;
             if (this.options.schema.options.showLines != null) {
                 this.showLines = this.options.schema.options.showLines ;
@@ -56,8 +114,44 @@ define([
 
             this.key = this.options.key;
             this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
-
         },
+
+        formatColumns: function(){
+            // console.log(this.options);
+            var odrFields = this.options.schema.fieldsets[0].fields;
+            this.columnsDefs = [];
+            for (var i = odrFields.length - 1; i >= 0; i--) {
+                var field = this.options.schema.subschema[odrFields[i]];
+                // console.log(field);
+                var colDef = {
+                    editable: true,
+                    field: field.name,
+                    headerName: field.title
+                };
+                // console.log(colDef);
+                this.columnsDefs.push(colDef)
+            }
+            
+        },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         //removeForm
         deleteForm: function() {
 
@@ -76,7 +170,7 @@ define([
         },
 
 		cloneLast: function() {
-			var resultat = this.forms[this.forms.length-1].commit() ;
+			//var resultat = this.forms[this.forms.length-1].commit() ;
 			if (resultat != null) return ; // COmmit NOK, on crée pas la ligne
 
             var mymodel = Backbone.Model.extend({
@@ -159,7 +253,9 @@ define([
             }
         },
 
-        render: function() {
+
+
+        plouf: function() {
             //Backbone.View.prototype.initialize.call(this, options);
             var _this = this;
 
@@ -322,9 +418,9 @@ define([
         getValue: function() {
             var errors = false;
             for (var i = 0; i < this.forms.length; i++) {
-                if (this.forms[i].commit()) {
-                    errors = true;
-                }
+                // if (this.forms[i].commit()) {
+                //     errors = true;
+                // }
             };
             if (errors) {
                 return false;
@@ -380,20 +476,5 @@ define([
       }
     },
 
-        }, {
-              //STATICS
-              template: _.template('\
-                <div>\
-                    <button type="button" class=" <%= hidden %> btn btn-success js-addFormBtn">+</button>\
-                    <button type="button"  class="js-cloneLast <%= hiddenClone %> btn">Clone Last</button>\
-                    <div class="required grid-form clearfix">\
-                        <div class="clear"></div>\
-                        <div id="th" class="clearfix"></div>\
-                        <div id="formContainer" class="clearfix expand-grid"></div>\
-                    </div>\
-                    <button type="button"  class="<%= hidden %> btn btn-success js-addFormBtn">+</button>\
-                    <button type="button"  class="js-cloneLast <%= hiddenClone %> btn ">Clone Last</button>\
-                </div>\
-                ', null, Form.templateSettings),
-          });
+    });
 });
