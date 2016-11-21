@@ -19,7 +19,7 @@ define(['jquery','marionette','config','i18n'], function($, Marionette, config) 
 
     initi18n: function(language){
       i18n.init({
-        resGetPath: window.location.href.replace('#','') + 'app/locales/__lng__/__ns__.json',
+        resGetPath: window.location.origin+ window.location.pathname + 'app/locales/__lng__/__ns__.json',
         getAsync: false,
         lng: language || 'en' //navigator.language || navigator.userLanguagenavigator.language || navigator.userLanguage
       });
