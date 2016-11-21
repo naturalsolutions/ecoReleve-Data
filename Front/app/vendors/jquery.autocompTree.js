@@ -143,7 +143,8 @@
             },
             //Servant ici a afficher les termes enfants des termes filtré
             click: function (event, data) {
-              var node = data.node,
+              var node = data.node;
+              console.log('thes click',event,data)
               tt = $.ui.fancytree.getEventTargetType(event.originalEvent);
               //Bubbles permet de déterminer si l'evt vient d'un click souris oud'un faux clique setExpand
               if (tt === "expander" && event.bubbles) {
@@ -157,6 +158,7 @@
             },
             //evenement d'activation de l'arbre (au clique)
             activate: function (event, data) {
+              console.log('active thes list')
               var tree = $("#treeView" + $me.attr("id")).fancytree('getTree');
               if (parametres.display.isDisplayDifferent) {
                 $me.val(data.node.data[parametres.display.displayValueName]);
@@ -181,10 +183,8 @@
             }
           });
 
-          //Permet l'affichage du treeview au focus sur l'input
-
-
-          $me.focus(function () {
+          var onFocus = function () {
+            console.log('input thes is focused',$me)
             setTimeout(function(){
               $("div[id^=treeView]").each(function () {
                 $(this).css('display', 'none');
@@ -216,7 +216,13 @@
               }
             }
           }, parametres.timeout + 50);
-          });
+        };
+          //Permet l'affichage du treeview au focus sur l'input
+          if ($me.is(':focus') ) {
+            onFocus();
+          }
+
+          $me.focus(onFocus);
 
           //Fonction de recherche et de filtration
           $me.keyup(function (e) {
@@ -288,6 +294,7 @@
       });
       return _self;
 },
+
 
 
 reload: function (source) {
