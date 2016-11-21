@@ -27,9 +27,9 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'sensors/:id(/)': 'sensor',
       'sensors(/)': 'sensors',
 
-      
 
-      
+
+
             'stations/new/:from(/)': 'newStation',
             'stations/new(/)': 'newStation',
              'stations/lastImported(/)': 'stations',
@@ -156,7 +156,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
 
         var md = this.collection.findWhere({href: patern[0]});
         $('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
-        if (patern[1] && patern[1] != 'id' && patern[1] != 'type') {
+        if (patern[1] && patern[1] != 'id' && patern[1] != 'type' && patern[1].indexOf('=') == -1 ) {
           $('#arialSub').html('<a href="#' + patern[0] + '/' + patern[1] + '">| &nbsp;' + patern[1] + '</a>');
         }else {
           $('#arialSub').html('');
