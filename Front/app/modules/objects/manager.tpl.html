@@ -7,7 +7,7 @@
   		</a>
   		
   		<% if (typeof(uiTabs) !== 'undefined') { %>
-	  		<ul class="js-nav-tabs nav nav-tabs pull-right hide modal-visible">
+	  		<ul class="js-nav-tabs nav nav-tabs pull-right modal-visible">
 	  			<% _.each(uiTabs, function(uiTab, index){ %>
 	  			    <li id="<%= uiTab.name %>" class="tab-ele <%= (index == 0)? 'active' : '' %>">
 	  			      <a class="tab-link"><%= uiTab.label %></a>

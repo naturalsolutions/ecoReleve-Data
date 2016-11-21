@@ -1,0 +1,19 @@
+<div class="toolbar top">
+	<legend><%= Name %></legend>
+	<div class="pull-right">
+		<% if (obs.length > 1) { %>
+		<span class="btn text-center switcher pull-left">
+				<span class="js-record-index"><%= index %></span>/<span class="js-total-records"><%= obs.length %></span>
+		</span>
+		<button class="js-prev btn pull-left">
+				<span class="reneco reneco-leftarrow"></span>
+		</button>
+
+		<button class="js-next btn pull-left">
+				<span class="reneco reneco-rightarrow"></span>
+		</button>
+		<% } %>
+	</div>
+</div>
+
+<div class="js-rg-observation crop1 osbservations-container"></div>

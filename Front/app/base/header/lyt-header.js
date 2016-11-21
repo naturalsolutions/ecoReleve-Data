@@ -1,5 +1,11 @@
 
-define(['jquery','marionette', 'config', './lyt-breadCrumb'],
+define([
+  'jquery',
+  'marionette',
+  'config',
+  './lyt-breadCrumb',
+  'bootstrap'
+],
 function($,Marionette, config, Breadcrumb) {
   'use strict';
   return Marionette.LayoutView.extend({

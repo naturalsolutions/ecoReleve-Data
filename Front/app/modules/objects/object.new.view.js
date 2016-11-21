@@ -27,7 +27,7 @@ define([
     model: new Backbone.Model(),
 
     initialize: function(options) {
-      this.model.set('objectType', options.objectType);
+      this.model.set('objectType', options.objectType || 1);
     },
 
     onShow: function() {
