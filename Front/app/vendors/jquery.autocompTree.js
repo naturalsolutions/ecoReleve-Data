@@ -95,10 +95,8 @@
             htmlInsert = '<input type="hidden" id="' + $me.attr("name") + parametres.display.suffixeId + '" name="' + $me.attr("name") + parametres.display.suffixeId + '" runat="server" enabled="true"/>'
           }
           //Div qui sera le conteneur du treeview
-          htmlInsert += '<div class="fancytreeview" id="treeView' + $me.attr('id') + '" style="display:none;"></div>';
-
-          //$me.parent().append(htmlInsert);
-          $('main').append(htmlInsert);
+          htmlInsert += '<div class="fancytreeview" id="treeView' + $me.attr('id') + '" style="display:none"></div>';
+          $me.parent().append(htmlInsert);
 
           //Insertion de la valeur dans l'input
           $me.val(parametres.inputValue);
@@ -187,44 +185,14 @@
 
 
           $me.focus(function () {
-
-            var position = $(this).offset();
-            var screenWidth = $(window).width();
-            var screenHeight =  $(window).height();
-
-            position.top += $me.outerHeight(); // height input
-
             setTimeout(function(){
               $("div[id^=treeView]").each(function () {
                 $(this).css('display', 'none');
               });
-            /*  if ( !$(treeContainer).find('ul').css("max-height") ) {
-                  $(treeContainer).find('ul')
-              }*/
-
               var treeContainer = $("#treeView" + $me.attr("id"));
-              var treeContainerWidth = $(treeContainer).width();
-              var treeContainerHeight = $(treeContainer).height();
-
               treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
-              //$(treeContainer).find('ul').css("max-height",'200')
             //treeContainer.css('display', 'block').css('border', 'solid 1px').css('z-index', '100');
-
-            if( position.top + treeContainerHeight > screenHeight-2 ) {
-              position.top-=treeContainerHeight+$me.outerHeight()+2;
-            }
-
-            if(position.left + treeContainerWidth > screenWidth ) {
-              treeContainer.css('left','');
-              position = {
-                top : position.top,
-                right : 0
-              };
-            }
-            else {
-              treeContainer.css('right','');
-            }
-            treeContainer.css(position);//{top: $me.outerHeight() + 20 });
+            treeContainer.css({top: $me.outerHeight() + 20 });
             //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
             $(document).delegate("body", "click", function (event) {
               if (!$(event.target).is("#" + $me.attr("id") + ",span[class^=fancytree], div[id^=treeView], ul")) {
@@ -261,7 +229,6 @@
             searchAutoComp = setTimeout(function(){
               searchAutoComp = null;
               if (fancytree.count() < 100 || $me.val().length >= 3) {
-                console.log('passed');
                 treeHtml.find('ul.fancytree-container li').css("padding", "1px 0 0 0");
                 treeHtml.fancytree("getRootNode").visit(function (node) {
                   if (node.span) {

@@ -361,8 +361,7 @@ class ObjectWithDynProp:
                 resultat[curStatProp.Name] = curStatProp.GetDTOFromConf(Editable)
         return resultat
 
-    def GetDTOWithSchema(self,FrontModules,DisplayMode):
-        ''' Function to call: return full schema according to configuration (table :ModuleForms) '''
+    def GetForm(self,FrontModules,DisplayMode):
         schema = self.GetSchemaFromStaticProps(FrontModules,DisplayMode)
         ObjType = self.GetType()
         ObjType.AddDynamicPropInSchemaDTO(schema,FrontModules,DisplayMode)
@@ -371,19 +370,18 @@ class ObjectWithDynProp:
             'schema':schema,
             'fieldsets' : ObjType.GetFieldSets(FrontModules,schema)
             }
+        return resultat
 
+    def GetDTOWithSchema(self,FrontModules,DisplayMode):
+        ''' Function to call: return full schema according to configuration (table :ModuleForms) '''
+        resultat = self.GetForm(FrontModules,DisplayMode)
         #### IF ID is send from front --> get data of this object in order to display value into form which will be sent ####
-        data = self.GetFlatObject(schema)
+        data = self.GetFlatObject(resultat['schema'])
         resultat['data'] = data
         resultat['recursive_level'] = 0
         resultat = self.getDefaultValue(resultat)
         if self.ID :
             resultat['data']['id'] = self.ID
-            # for key, value in schema.items():
-            #     if (DisplayMode.lower() != 'edit' and 'fullPath' in schema[key] and schema[key]['fullPath'] is True):
-            #         try :
-            #             resultat['data'][key] = self.splitFullPath(resultat['data'][key])
-            #         except : pass
         else :
             # add default values for each field in data if exists
             #for attr in schema:

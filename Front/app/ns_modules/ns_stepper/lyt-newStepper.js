@@ -209,7 +209,7 @@ define([
 
 		bindRequiredFields: function(){
 			var _this = this;
-			console.log(this.currentStep.rdy);
+			//console.log(this.currentStep.rdy);
 			//test with _this as context
 			this.onEditEvt = $.proxy(function(e){
 				this.checkNextBtn(e);

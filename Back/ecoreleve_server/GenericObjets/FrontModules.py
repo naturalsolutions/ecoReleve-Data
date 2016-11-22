@@ -8,8 +8,8 @@ from traceback import print_exc
 
 FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
 
-def isRenderable (int_Render) :
-        return int(int_Render) > 0
+def isHidden (int_Render) :
+        return not (int(int_Render) > 0)
 
 def isEditable (int_Render) :
     edit = int(int_Render) > 2
@@ -364,7 +364,7 @@ class ModuleGrids (Base) :
     Name = Column(String)
     Label = Column(String)
     GridRender = Column(Integer)
-    GridSize = Column(Integer)
+    GridSize = Column(String)
     CellType = Column(String)
     GridOrder = Column(Integer)
     QueryName = Column(String)
@@ -377,6 +377,7 @@ class ModuleGrids (Base) :
     FilterType = Column (String)
     FilterClass = Column (String)
     Status = Column(Integer)
+    ColumnParams = Column(String(250))
     FrontModules = relationship("FrontModules", back_populates="ModuleGrids")
 
 
@@ -396,12 +397,20 @@ class ModuleGrids (Base) :
     def GenerateColumn (self):
         ''' return grid field to build Grid '''
         column = {
-        'name': self.FKName(),
-        'label': self.Label,
-        'renderable': isRenderable(self.GridRender),
+        'field': self.FKName(),
+        'headerName': self.Label,
+        'hide': isHidden(self.GridRender),
         'editable': isEditable(self.GridRender),
-        'cell': self.CellType,
+        'filter': self.CellType,
+        # 'width':self.GridSize,
+        # 'filterParams': self.?,
+        # 'cellEditor':self.CellType
+        # 'cellRenderer':self.CellRenderer
+        # 'cellRendererParams':self.CellOptions['cellRendererParmas']
         }
+        column.update(json.loads(self.GridSize))
+        if self.ColumnParams is not None:
+            column.update(json.loads(self.ColumnParams))
         try :
             options = json.loads(self.Options)
             column['options'] = options

@@ -28,18 +28,13 @@ prefix = 'stations'
 @view_config(route_name=prefix + '/id/protocols', renderer='json', request_method='GET', permission=routes_permission[prefixProt]['GET'])
 def GetProtocolsofStation(request):
     session = request.dbsession
-    response = None
     sta_id = request.matchdict['id']
-    data = {}
-    searchInfo = {}
-    criteria = [{'Column': 'FK_Station', 'Operator': '=', 'Value': sta_id}]
-    response = []
     curSta = session.query(Station).get(sta_id)
+    response = []
     try:
-        if 'criteria' in request.params or request.params == {}:
-            searchInfo = data
-            searchInfo['criteria'] = []
-            searchInfo['criteria'].extend(criteria)
+        if 'criteria' in request.params.mixed() or request.params.mixed() == {}:
+            searchInfo = {}
+            searchInfo['criteria'] = [{'Column': 'FK_Station', 'Operator': '=', 'Value': sta_id}]
             listObs = ListObjectWithDynProp(session, Observation, searchInfo)
             response = listObs.GetFlatList()
     except:
@@ -53,65 +48,55 @@ def GetProtocolsofStation(request):
                                           ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
             Conf = session.query(FrontModules).filter(
                 FrontModules.Name == ModuleName).first()
-            # TODO : if protocols exists, append the new protocol form at the
-            # after : 2 loops, no choice
-            if listObs or listType:
-                # max_iter = max(len(listObs),len(listType))
-                listProto = {}
+
+            listProto = {}
+            if listObs:
                 for i in range(len(listObs)):
-                    try:
-                        DisplayMode = 'display'
-                        obs = listObs[i]
-                        typeName = obs.GetType().Name.replace('_', ' ')
-                        typeID = obs.GetType().ID
-                        obs.LoadNowValues()
-                        try:
-                            listProto[typeID]['obs'].append(
-                                obs.GetDTOWithSchema(Conf, DisplayMode))
-                        except:
-                            listObsWithSchema = []
-                            listObsWithSchema.append(
-                                obs.GetDTOWithSchema(Conf, DisplayMode))
-                            listProto[typeID] = {
-                                'Name': typeName, 'obs': listObsWithSchema}
-                            pass
-                    except Exception as e:
-                        print_exc()
-                        pass
+                    DisplayMode = 'edit'
+                    curObs = listObs[i]
+                    typeID = curObs.GetType().ID
+                    if typeID in listProto:
+                        listProto[typeID]['obs'].append(curObs.ID)
+                    else:
+                        typeName = curObs.GetType().Name.replace('_', ' ')
+                        curObsForm = curObs.GetForm(Conf, DisplayMode)
 
-                for i in range(len(listType)):
-                    try:
-                        DisplayMode = 'edit'
+                        listProto[typeID] = {
+                        'Name': typeName,
+                        'schema': curObsForm['schema'],
+                        'fieldsets':curObsForm['fieldsets'],
+                        'obs':[curObs.ID]
+                        }
 
-                        virginTypeID = listType[i].FK_ProtocoleType
-                        virginObs = Observation(FK_ProtocoleType=virginTypeID)
-                        viginTypeName = virginObs.GetType().Name.replace('_', ' ')
-                        try:
-                            if virginTypeID not in listProto:
-                                test_ = listProto[virginTypeID]
-                                virginForm = virginObs.GetDTOWithSchema(
-                                    Conf, DisplayMode)
-                                virginForm['data'][
-                                    'FK_ProtocoleType'] = virginTypeID
-                                listProto[virginTypeID][
-                                    'obs'].append(virginForm)
-                        except:
-                            if virginTypeID not in listProto:
-                                listSchema = []
-                                virginForm = virginObs.GetDTOWithSchema(
-                                    Conf, DisplayMode)
-                                virginForm['data'][
-                                    'FK_ProtocoleType'] = virginTypeID
-                                listSchema.append(virginForm)
-                                listProto[virginTypeID] = {
-                                    'Name': viginTypeName, 'obs': listSchema}
-                                pass
-                    except:
-                        print_exc()
-                        pass
-                globalListProto = [{'ID': objID, 'Name': listProto[objID][
-                    'Name'], 'obs':listProto[objID]['obs']} for objID in listProto.keys()]
-                response = sorted(globalListProto, key=lambda k: k['Name'])
+            if listType:
+                listVirginProto = list(filter(lambda proto: proto.FK_ProtocoleType not in listProto, listType))
+
+                for i in range(len(listVirginProto)):
+                    DisplayMode = 'edit'
+                    typeID = listVirginProto[i].FK_ProtocoleType
+
+                    curVirginObs = Observation(FK_ProtocoleType=typeID)
+                    typeName = curVirginObs.GetType().Name.replace('_', ' ')
+                    curVirginObsForm = curVirginObs.GetForm(Conf, DisplayMode)
+
+                    listProto[typeID] = {
+                    'Name': typeName,
+                    'schema': curVirginObsForm['schema'],
+                    'fieldsets':curVirginObsForm['fieldsets'],
+                    'obs':[]
+                    }
+
+            globalListProto = [
+            {'ID': typeID,
+            'Name': listProto[typeID]['Name'],
+            'schema':listProto[typeID]['schema'],
+            'fieldsets':listProto[typeID]['fieldsets'],
+            'obs':listProto[typeID]['obs']}
+            for typeID in listProto.keys()
+            ]
+
+            response = sorted(globalListProto, key=lambda k: k['Name'])
+
     except Exception as e:
         print_exc()
         print(e)

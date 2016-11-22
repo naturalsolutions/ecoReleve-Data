@@ -223,6 +223,7 @@ define([
         back: function(e){
           e.preventDefault();
           _this.hidePicker();
+          this.model.set('objectType', 1);
         },
         new: function(e){
           e.preventDefault();
@@ -244,8 +245,6 @@ define([
           }
         },
       });
-
-
     },
 
     getValue: function() {

@@ -171,15 +171,15 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
 
   window.onerror = function (errorMsg, fileURI, lineNumber, column, errorObj) {
-    $.ajax({
-      type : 'POST',
-      url : config.coreUrl+'log/error',
-      data:{StackTrace:errorObj,
-        errorMsg: errorMsg,
-        file : fileURI,
-        lineNumber:lineNumber,
-        column:column }
-    });
+    // $.ajax({
+    //   type : 'POST',
+    //   url : config.coreUrl+'log/error',
+    //   data:{StackTrace:errorObj,
+    //     errorMsg: errorMsg,
+    //     file : fileURI,
+    //     lineNumber:lineNumber,
+    //     column:column }
+    // });
   };
 
   window.app = app;

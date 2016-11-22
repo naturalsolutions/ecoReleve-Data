@@ -10,7 +10,7 @@ define([
   'ns_grid/grid.view',
   './validate.model'
 
-], function($, _, Backbone, Marionette, Swal, 
+], function($, _, Backbone, Marionette, Swal,
   Com, GridView, ValidateModel
 ){
 
@@ -54,8 +54,12 @@ define([
     },
 
     onRowClicked: function(row) {
-      var dataset = row.data.FK_Sensor + '_' + row.data.FK_Individual + '_' + row.data.FK_ptt;
-      Backbone.history.navigate('validate/' + this.type_ + '/' + dataset, {trigger: true});
+      if( this.type_ != 'rfid' ) {
+        Backbone.history.navigate('validate/' + this.type_ + '/' + (row.rowIndex + 1), {trigger: true});
+      }
+      else {
+        row.node.setSelected(!row.node.isSelected());
+      }
     },
 
     setFrequency: function(e) {
@@ -72,7 +76,7 @@ define([
         columns: this.columnDefs,
         url: 'sensors/' + this.type_ + '/uncheckedDatas',
         afterFirstRowFetch: afterFirstRowFetch,
-        clientSide: true,        
+        clientSide: true,
         gridOptions: {
           rowSelection: 'multiple',
           onRowClicked: this.onRowClicked.bind(this),

@@ -1,4 +1,4 @@
-/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+﻿/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
 
   INSERT INTO [FrontModules]
   VALUES ('PopOverForm',1,NULL)
@@ -59,7 +59,7 @@ UPDATE ModuleForms SET Options = '{"target":"Monitoring_Status","popOverForm":1,
 WHERE Name =  'Monitoring_Status' and module_id = 9 
 
 ---
-
+	GO
   DECLARE @PopModuleID int ; SET @PopModuleID = (SELECT ID FROM FrontModules WHERE Name ='PopOverForm')
 
   INSERT INTO ModuleForms

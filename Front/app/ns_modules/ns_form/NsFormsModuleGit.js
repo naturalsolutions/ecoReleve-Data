@@ -123,6 +123,7 @@ define([
       this.buttonRegion = options.buttonRegion;
       this.formRegion = options.formRegion;
 
+      this.afterDelete = options.afterDelete || false;
 
       if(options.displayDelete != undefined){
         this.displayDelete = options.displayDelete;
@@ -166,6 +167,7 @@ define([
 
       if (options.model) {
         this.model = options.model;
+        
         this.BBForm = new BackboneForm({
           model: this.model,
           data: this.model.data,
@@ -304,7 +306,11 @@ define([
         });
       }
       $(this.formRegion).find('input').on("change", function(e) {
-         window.formChange = true;
+        if($(e.target).val() !== ''){
+          window.formChange = true;
+        } else {
+          window.formChange = false;
+       }
       });
       $(this.formRegion).find('select').on("change", function(e) {
          window.formChange = true;
@@ -557,21 +563,32 @@ define([
         type: 'warning',
         confirmButtonText: 'Yes, delete it!',
         confirmButtonColor: '#DD6B55',
-        callback : function(){
+        callback: function(){
           window.formEdition = false;
           window.formChange = false;
-          _this.afterDelete(_this.model);
-
+          _this.deleteModel();
         }
       };
-
       this.swal(opts);
     },
 
-    afterDelete: function(){
-
+    deleteModel: function(){
+      var _this = this;
+      this.model.id = this.model.get('id');
+      if(this.model.get('id') == 0){
+        _this.afterDelete(_this.model);
+      }
+      this.model.destroy({
+        success: function(response){
+          if(_this.afterDelete){
+            _this.afterDelete(response, _this.model);
+          }
+        }, 
+        fail: function(response){
+          console.error(response);
+        }
+      });
     },
-
 
     reloadingAfterSave: function () {
       this.displayMode = 'display';

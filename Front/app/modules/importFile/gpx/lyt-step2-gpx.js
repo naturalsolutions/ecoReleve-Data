@@ -195,8 +195,6 @@ define([
       Backbone.sync('create', coll, {
         success: function(data) {
           _this.deferred.resolve();
-          console.log("sweet alert");
-          console.log(data);
           var inserted = data.new;
           var exisits = data.exist;
           Swal({
@@ -205,7 +203,7 @@ define([
             type: 'success',
             showCancelButton: true,
             confirmButtonColor: 'green',
-            cancelButtonText: 'Home',
+            cancelButtonText: 'Import new gpx',
             confirmButtonText: 'Show imported data',
             closeOnConfirm: true,
 
@@ -215,12 +213,14 @@ define([
               Backbone.history.navigate('stations/lastImported', {trigger: true});
             }
             else {
-              Backbone.history.navigate('home', {trigger: true});
+            //  Backbone.history.navigate('importFile',{trigger: true});
 
-              // method to return at the 1st step
-              // _this.parent.currentStepIndex--;
-              // var index = _this.parent.currentStepIndex;
-              // _this.parent.displayStep(index);
+              //Backbone.history.navigate('home', {trigger: true});
+
+              //method to return at the 1st step
+              _this.options.parent.currentStepIndex--;
+              var index = _this.options.parent.currentStepIndex;
+              _this.options.parent.displayStep(index);
             }
           });
         },

@@ -69,12 +69,12 @@ define([
       }
     },
 
-    reloadFromNavbar: function(id) {
-      this.model.set('id', id);
+    reload: function(options) {
+      this.model.set('id', options.id);
 
       this.com.addModule(this.map);
       this.map.com = this.com;
-      this.map.url = this.model.get('type') + '/' + id  + '/locations?geo=true';
+      this.map.url = this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true';
       this.map.updateFromServ();
       this.map.url = false;
 
@@ -121,6 +121,7 @@ define([
     },
 
     displayGrids: function(){
+
     },
 
     displayForm: function(){
@@ -133,24 +134,13 @@ define([
       formConfig.buttonRegion = [this.ui.formBtns];
       formConfig.parent = this.parent;
       formConfig.afterShow = function(options){
-        console.log('afterShow',$(this.BBForm.el).find('fieldset').first());
         var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
-        console.log(globalEl);
-        //_this.ui.globalInfo.append(globalEl);
         _this.ui.globalInfo.html(globalEl);
       };
-      this.nsForm = new NsForm(formConfig);
-
-      this.nsForm.afterDelete = function() {
-        var jqxhr = $.ajax({
-          url: _this.model.get('type') + '/' + _this.model.get('id'),
-          method: 'DELETE',
-          contentType: 'application/json',
-        }).done(function(resp) {
-          Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
-        }).fail(function(resp) {
-        });
+      formConfig.afterDelete = function(response, model){
+        Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
       };
+      this.nsForm = new NsForm(formConfig);
     },
 
   });

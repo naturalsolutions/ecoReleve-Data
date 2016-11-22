@@ -60,14 +60,14 @@ define([
 
 
     populateCurrentData: function(currentData){
-      this.defaultFilters = currentData.filters;
+      // this.defaultFilters = currentData.filters;
 
-      if(currentData.index !== 'undefined'){
-        this.goTo = {
-          index: currentData.index,
-          page: currentData.status.page
-        }
-      }
+      // if(currentData.index !== 'undefined'){
+      //   this.goTo = {
+      //     index: currentData.index,
+      //     page: currentData.status.page
+      //   }
+      // }
     },
 
     onRender: function() {
@@ -98,23 +98,22 @@ define([
 
     displayGridView: function(){
       var _this = this;
-      var afterFirstRowFetch = function(){
+      var afterGetRows = function(){
         _this.ui.totalRecords.html(this.model.get('totalRecords'));
       };
 
       this.rgGrid.show(this.gridView = new GridView({
         type: this.model.get('type'),
         com: this.com,
-        typeObj: this.model.get('typeObj'),
-        afterFirstRowFetch: afterFirstRowFetch,
-        filters: this.defaultFilters,
+        objectType: this.model.get('objectType'),
+        afterGetRows: afterGetRows,
+        //filters: this.defaultFilters,
         gridOptions: {
           onRowClicked: this.onRowClicked.bind(this),
           rowModelType: 'pagination'
         },
         goTo: (this.goTo || false)
       }));
-
     },
 
     displayFilter: function() {
@@ -122,7 +121,7 @@ define([
         url: this.model.get('type') +'/',
         com: this.com,
         filterContainer: this.ui.filter,
-        typeObj: this.model.get('typeObj'),
+        objectType: this.model.get('objectType'),
         filtersValues: this.defaultFilters,
       });
     },
