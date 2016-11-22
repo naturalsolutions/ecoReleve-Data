@@ -22,7 +22,13 @@ graphDataDate = {'indivLocationData': None, 'pendingSensorData': None}
 
 
 DBSession = None
-Base = declarative_base()
+
+
+class myBase(object):
+
+    __table_args__ = {'implicit_returning': False}
+
+Base = declarative_base(cls=myBase)
 BaseExport = declarative_base()
 dbConfig = {
     'dialect': 'mssql',
