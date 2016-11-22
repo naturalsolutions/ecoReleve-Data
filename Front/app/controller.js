@@ -11,7 +11,7 @@ define([
   './modules/validate/validate.rd.view',
 
   './modules/release/release.view',
-  './modules/release/layouts/lyt-release-individual',
+  './modules/release/release.individual.view',
 
   './modules/stations/station.view',
   './modules/stations/stations.view',
@@ -39,7 +39,7 @@ define([
   LytSensorValidateDetail,
   LytRelease,
   LytStationsRelease,
-  
+
   LytStation, LytStations, LytStationsNew,
   LytIndividual, LytIndividuals, LytIndividualsNew,
   LytSensor, LytSensors, LytSensorsNew,
@@ -55,7 +55,7 @@ define([
       this.rgMain = app.rootView.rgMain;
       this.rgHeader = app.rootView.rgHeader;
       this.rgFooter = app.rootView.rgFooter;
-      
+
       app.entityConfs = {
         'stations': {
           'entity': LytStation,
@@ -99,7 +99,7 @@ define([
           id: id
         }));
       }
-    },    
+    },
     stations: function(params) {
       this.rgMain.show(new LytStations({
         params: params
