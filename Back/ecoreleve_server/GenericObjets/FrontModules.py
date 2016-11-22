@@ -359,6 +359,7 @@ class ModuleGrids (Base) :
         'hide': isHidden(self.GridRender),
         'editable': isEditable(self.GridRender),
         'filter': self.CellType,
+        'cell': self.CellType,
         # 'width':self.GridSize,
         # 'filterParams': self.?,
         # 'cellEditor':self.CellType

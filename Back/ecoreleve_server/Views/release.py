@@ -129,7 +129,7 @@ def releasePost(request):
     if 'StationID' not in data and 'IndividualList' not in data:
         if data == {}:
             data = request.json_body
-        if 'FK_Sensor' in data and data['FK_Sensor'] is not None:
+        if 'FK_Sensor' in data and data['FK_Sensor'] not in (None,''):
             return isavailableSensor(request, data)
         return
 

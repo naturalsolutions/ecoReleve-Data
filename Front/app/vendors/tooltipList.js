@@ -72,7 +72,6 @@
                 <div class="">\
                     <input type="text" />\
                     <i class="reneco search"></i>\
-                    <br /> \
                     <ul>' +  html + '</ul>\
                 </div>\
             ')

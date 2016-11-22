@@ -9,7 +9,7 @@ define([
   'backbone-forms',
   'requirejs-text!./tpl-bbfe-objectPicker.html',
 ], function(
-  $, _, Backbone, Marionette, Swal, Translater, 
+  $, _, Backbone, Marionette, Swal, Translater,
   Form, Tpl
 ) {
   'use strict';
@@ -18,6 +18,7 @@ define([
     className: '',
     events: {
       'click span.picker': 'showPicker',
+      'click button#detailsShow': 'openDetails',
     },
 
     initialize: function(options) {
@@ -26,12 +27,12 @@ define([
       options.schema.editorClass='';
       Form.editors.Text.prototype.initialize.call(this, options);
       this.validators = options.schema.validators || [];
-
+      this.options = options;
       this.model = new Backbone.Model();
 
       this.model.set('key', options.key);
       this.model.set('type', 'text');
-      
+
       var name = options.key.split('FK_')[1];
       this.objectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
       this.url = this.objectName + '/';
@@ -43,11 +44,18 @@ define([
       };
       this.model.set('icon',dictCSS[this.objectName]);
 
+      var value;
+      if (options.model) {
+        value = options.model.get(options.schema.name) || options.value;
+      }
       if (options.schema.options && options.schema.options.usedLabel){
         this.usedLabel = options.schema.options.usedLabel;
         this.displayingValue = true;
         this.initValue = value;
         this.validators.push({ type: 'Thesaurus', parent: this}); //?
+        if (options.schema.options.target){
+          this.target = options.schema.options.target;
+        }
         this.initAutocomplete();
       } else {
         this.usedLabel = 'ID';
@@ -56,10 +64,6 @@ define([
       }
       this.isTermError = false;
 
-      var value;
-      if (options.model) {
-        value = options.model.get(options.schema.name) || options.value;
-      }
 
       if (value) {
         this.model.set('value', value);
@@ -100,9 +104,7 @@ define([
       this.autocompleteSource.minLength = 3;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
-        $(_this._input).attr('data_value',ui.item.value);
-        $(_this._input).val(ui.item.label);
-
+        _this.setValue(ui.item.value,ui.item.label);
         _this.matchedValue = ui.item;
         _this.isTermError = false;
         _this.displayErrorMsg(false);
@@ -113,12 +115,12 @@ define([
 
       this.autocompleteSource.change = function(event,ui){
         event.preventDefault();
-          if ($(_this._input).val() != '' && !_this.matchedValue){
+          if ($(_this._input).val() !== '' && !_this.matchedValue){
             _this.isTermError = true;
             _this.displayErrorMsg(true);
           }
           else {
-            if ($(_this._input).val() == ''){
+            if ($(_this._input).val() === ''){
               $(_this._input).attr('data_value','');
             }
             _this.isTermError = false;
@@ -140,18 +142,25 @@ define([
       };
     },
 
-    getDisplayValue: function(val){
+    fetchDisplayValue: function(val){
       var _this = this;
       $.ajax({
         url : _this.url+val,
         success : function(data){
-          $(_this._input).attr('data_value',val);
-          $(_this._input).val(data[_this.usedLabel]);
-          //_this.setValue(val,data[_this.usedLabel]);
+          // $(_this._input).attr('data_value',val);
+          // $(_this._input).val(data[_this.usedLabel]);
+          _this.setValue(val,data[_this.usedLabel]);
           _this.displayErrorMsg(false);
           _this.isTermError = false;
         }
       });
+    },
+
+    getItem : function(){
+      if ($(this._input).val() === ''){
+        $(this._input).attr('data_value','');
+      }
+      return {label: $(this._input).val(), value: $(this._input).attr('data_value')};
     },
 
     render: function(){
@@ -163,17 +172,17 @@ define([
         this.$el.find('.form-control').removeClass('form-control').addClass('ag-cell-edit-input');
         this.$el.find('.span').addClass('');
       }
-      
+
       this._input = this.$el.find('input[name="' + this.model.get('key') + '" ]')[0];
       if (this.displayingValue){
-        if (this.initValue && this.initValue != null){
-          this.getDisplayValue(this.initValue);
+        if (this.initValue && this.initValue !== null){
+          this.fetchDisplayValue(this.initValue);
         }
         _(function () {
             $(_this._input).autocomplete(_this.autocompleteSource);
         }).defer();
       }
-      
+
       this.initPicker();
 
       return this;
@@ -200,7 +209,7 @@ define([
           _this.showPicker();
         },
         afterSaveSuccess: function(response){
-          var id = response.ID
+          var id = response.ID;
           var displayValue = this.model.get(_this.usedLabel);
 
           _this.setValue(id,displayValue);
@@ -227,7 +236,7 @@ define([
         },
         new: function(e){
           e.preventDefault();
-          
+
           if(this.model.get('availableOptions')){
             this.ui.btnNew.tooltipList({
               position: 'top',
@@ -257,19 +266,27 @@ define([
       return $(this._input).attr('data_value');
     },
 
+    getDisplayValue: function() {
+      if (this.isTermError) {
+        return null ;
+      }
+      return $(this._input).val();
+    },
+
     setValue: function(value,displayValue) {
-      if (displayValue || displayValue == ''){
+      if (displayValue || displayValue === ''){
         $(this._input).val(displayValue);
       } else {
-        this.getDisplayValue(value);
+        this.fetchDisplayValue(value);
+      }
+      if (this.target){
+        this.model.set(this.target,value);
       }
       $(this._input).attr('data_value',value);
       this.matchedValue = value;
       $(this._input).change();
       this.hidePicker();
     },
-
-    
 
     checkHidePicker: function(e){
       if($(e.target).attr('id') === 'modal'){
@@ -290,7 +307,11 @@ define([
           $(this._input).removeClass('error');
         }
     },
-  }
-  );
-});
 
+    openDetails: function(event) {
+      var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.objectName+'/'+ $(this._input).attr('data_value');
+      var win = window.open(url, '_blank');
+      win.focus();
+    }
+  });
+});
