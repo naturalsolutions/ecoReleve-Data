@@ -1,7 +1,7 @@
 define([
   'jquery',
   '../ns_modules/ns_bbfe/bbfe-timePicker',
-], function($, timePicker) {
+], function($, TimePicker) {
 
   'use strict';
   function DateFilter() {
