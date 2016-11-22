@@ -63,6 +63,7 @@ define([
       this.clientSide = options.clientSide || false;
       this.filters = options.filters || [];
       this.afterGetRows = options.afterGetRows;
+      this.afterFetchColumns = options.afterFetchColumns;
       this.afterFirstRowFetch = options.afterFirstRowFetch;
       this.goTo = options.goTo || false;
 
@@ -240,6 +241,7 @@ define([
 
     addBBFEditor: function(col){
       //draft
+      var _this = this;
       var BBFEditor = function () {
 
       };
@@ -247,6 +249,7 @@ define([
       var options = {
         key: col.options.target,
         schema: {
+          options: col.options,
           editable: true
         },
         fromGrid: true
@@ -256,9 +259,19 @@ define([
         var self = this;
         this.picker = new ObjectPicker(options);
         this.input = this.picker.render();
-
-
-        this.input.$el.find('input').val(params.value).change();
+        var _this = this;
+        if (params.charPress){
+          this.input.$el.find('input').val(params.charPress).change();
+        } else {
+          if (params.value){
+            if (params.value.label !== undefined  ){
+              this.input.$el.find('input').attr('data_value',params.value.value);
+              this.input.$el.find('input').val(params.value.label).change();
+            } else {
+              this.input.$el.find('input').val(params.value).change();
+            }
+          }
+        }
       };
       BBFEditor.prototype.getGui = function(){
         return this.input.el;
@@ -267,9 +280,11 @@ define([
         this.input.$el.find('input').focus();
       };
       BBFEditor.prototype.getValue = function() {
-        return this.input.$el.find('input').val();
+        if (this.input.getItem){
+          return this.input.getItem();
+        }
+        return this.input.getValue();
       };
-
       col.cellEditor = BBFEditor;
     },
 
@@ -283,6 +298,9 @@ define([
         }
       }).done( function(response) {
         this.gridOptions.columnDefs = this.formatColumns(response);
+        if (this.afterFetchColumns){
+          this.afterFetchColumns(this);
+        }
       });
     },
 
@@ -306,7 +324,7 @@ define([
           if(_this.afterFirstRowFetch){
             _this.afterFirstRowFetch();
           }
-        })
+        });
       });
 
     },
