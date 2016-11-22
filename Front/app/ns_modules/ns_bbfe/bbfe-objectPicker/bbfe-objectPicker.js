@@ -43,6 +43,10 @@ define([
       };
       this.model.set('icon',dictCSS[this.objectName]);
 
+      var value;
+      if (options.model) {
+        value = options.model.get(options.schema.name) || options.value;
+      }
       if (options.schema.options && options.schema.options.usedLabel){
         this.usedLabel = options.schema.options.usedLabel;
         this.displayingValue = true;
@@ -56,10 +60,6 @@ define([
       }
       this.isTermError = false;
       this.options = options.schema.options;
-      var value;
-      if (options.model) {
-        value = options.model.get(options.schema.name) || options.value;
-      }
 
       if (value) {
         this.model.set('value', value);
