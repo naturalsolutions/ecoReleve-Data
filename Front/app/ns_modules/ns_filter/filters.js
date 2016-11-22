@@ -166,13 +166,11 @@
 
         initialize: function (options) {
             this.filterContainer = options.filterContainer;
-
             this.channel = options.channel;
-
             this.clientSide = options.clientSide;
             this.name = options.name || '';
             this.com = options.com;
-            this.typeObj = options.typeObj;
+            this.typeObj = options.objectType;
             this.url = options.url;
             this.datas = {};
 
