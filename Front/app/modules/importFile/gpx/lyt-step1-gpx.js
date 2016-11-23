@@ -158,7 +158,6 @@ define([
 
     check: function(e) {
       var error = this.nsform.BBForm.commit();
-      console.log('check', error);
             if(error){
               return false;
             }else{
@@ -218,7 +217,6 @@ define([
     },
 
     setWaypointListWithForm : function(formData){
-      console.log("bim on veut set les fieldworkers");
       var fwList = [];
       _.forEach(formData.FieldWorkers,function(curFw){
         fwList.push(parseInt(curFw.FieldWorker));
