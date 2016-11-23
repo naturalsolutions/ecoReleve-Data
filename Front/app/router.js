@@ -22,13 +22,10 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'sensors/new/:type(/)': 'newSensor',
       'sensors/:id(/)': 'sensor',
       'sensors(/)': 'sensors',
-
       
-
-      
-            'stations/new/:from(/)': 'newStation',
-            'stations/new(/)': 'newStation',
-             'stations/lastImported(/)': 'stations',
+      'stations/new/:from(/)': 'newStation',
+      'stations/new(/)': 'newStation',
+      'stations/lastImported(/)': 'stations',
 
       'stations/:id?(proto=:proto&)obs=:obs(/)': 'station',
       'stations/:id(/)': 'station',
@@ -41,7 +38,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'validate(/)': 'validate',
       'validate/:type(/)': 'validateType',
       'validate/:type/:dataset(/)': 'validateDetail',
-
 
       '*route(/:page)': 'home',
     },
@@ -63,6 +59,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
 
     execute: function(callback, args, route) {
       // get current route
+
       var route = Backbone.history.fragment;
 
       if ((route != '') && (route != '#')){
@@ -71,15 +68,18 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
             return false;
         }
       }
+
       this.history.push(Backbone.history.fragment);
       var _this= this;
       window.checkExitForm(function(){
-        _this.continueNav(callback, args);
+        _this.continueNav(callback, args, route);
       },function(){
         _this.previous();
       });
     },
+
     onRoute: function(url, patern, params) {
+      
       var notAllowed = window.notAllowedUrl ;
       patern = patern.replace(/\(/g, '');
       patern = patern.replace(/\)/g, '');
@@ -119,26 +119,21 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
     },
 
     previous: function() {
-        var href = this.history[this.history.length-2];
-        var url = '#'+ href;
-        Backbone.history.navigate(url,{trigger:false, replace: false});
-        this.history.pop();
-        var patern = href.split('/');
-        this.setNav(patern);
+      var href = this.history[this.history.length-2];
+      var url = '#'+ href;
+      Backbone.history.navigate(url,{trigger:false, replace: false});
+      this.history.pop();
+      var patern = href.split('/');
+      this.setNav(patern);
     },
-    continueNav : function(callback, args){
-        $.ajax({
-          context: this,
-          url: 'security/has_access'
-        }).done(function() {
-          $.xhrPool.abortAll();
-          callback.apply(this, args);
-        }).fail(function(msg) {
-          if (msg.status === 403) {
-            document.location.href = config.portalUrl;
-          }
-        });
+
+    continueNav : function(callback, args, route){
+      $.xhrPool.abortAll();
+      setTimeout(function(){
+        callback.apply(this, args);
+      }, 0);
     },
+
     unique : function(list) {
         var result = [];
         $.each(list, function(i, e) {
@@ -146,6 +141,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
         });
         return result;
     },
+
     setNav : function(patern){
 
         var url = patern[0];
@@ -158,6 +154,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
           $('#arialSub').html('');
         }
      },
+
      checkRoute : function(){
         var route = Backbone.history.fragment;
         var notAllowed = window.notAllowedUrl ;

@@ -70,18 +70,20 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
     $('#header-loader').addClass('hidden');
   };
 
-  window.xhrPool = [];//??
-  $.xhrPool = []; // array of uncompleted requests
+  $.xhrPool = {};
+
+  $.xhrPool.calls = []; // array of uncompleted requests
+  
   $.xhrPool.allowAbort = false;
+
   $.xhrPool.abortAll = function() { // our abort function
     if ($.xhrPool.allowAbort){
-      $(this).each(function(idx, jqXHR) {
+      this.calls.map(function(jqXHR){
           jqXHR.abort();
       });
-      $.xhrPool.length = 0;
+      $.xhrPool.calls = [];
     }
   };
-  //
   $.ajaxSetup({
     // before jQuery send the request we will push it to our array
     beforeSend: function(jqXHR, options) {
@@ -90,17 +92,20 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
       } else {
         options.url = config.coreUrl + options.url;
       }
-      $.xhrPool.push(jqXHR);
+      if(options.type === 'GET'){
+        $.xhrPool.calls.push(jqXHR);
+        //console.log(options);
+      }
+      //console.log($.xhrPool.calls);
     },
     // when some of the requests completed it will splice from the array
-    complete: function(jqXHR){
-      var index = $.xhrPool.indexOf(jqXHR);
-      if (index > -1) {
-        $.xhrPool.splice(index, 1);
-      }
+    complete: function(jqXHR, options){      
+      // var index = $.xhrPool.indexOf(jqXHR);
+      // if (index > -1) {
+      //   $.xhrPool.splice(index, 1);
+      // }
     }
   });
-
 
   window.UnauthAlert = function(){
     Swal({
@@ -167,7 +172,6 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
         }
       }
     };
-
 
   window.onerror = function (errorMsg, fileURI, lineNumber, column, errorObj) {
     // $.ajax({

@@ -90,7 +90,8 @@ define([
     },
 
     station: function(id, proto, obs) {
-      if(this.rgMain.currentView instanceof  LytStation){
+      
+      if(this.rgMain.currentView instanceof LytStation){
         this.rgMain.currentView.reload({
           id: id,
           proto: proto,
@@ -205,13 +206,5 @@ define([
       this.rgMain.show(new LytExport());
     },
 
-    checkAjax : function(){
-      var xhrPool = window.xhrPool;
-
-      for(var i=0; i<xhrPool.length; i++){
-         xhrPool[i].abort();
-      }
-       window.xhrPool = [];
-    }
   });
 });

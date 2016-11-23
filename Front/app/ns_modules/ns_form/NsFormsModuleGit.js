@@ -247,7 +247,7 @@ define([
           _this.updateState(this.displayMode);
         },
         error: function (data) {
-          console.warn('request error');
+          //console.warn('request error');
           _this.loadingError();
           //alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objectType);
         }
@@ -295,6 +295,7 @@ define([
       var _this = this;
       this.initRules();
 
+      
       this.formRegion.html(this.BBForm.el); //this.formRegion.html(this.BBForm.el);
 
       if(!this.gridRow) {
