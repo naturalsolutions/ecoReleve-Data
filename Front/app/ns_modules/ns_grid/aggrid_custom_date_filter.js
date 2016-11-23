@@ -1,7 +1,8 @@
 define([
   'jquery',
-  '../ns_modules/ns_bbfe/bbfe-timePicker',
-], function($, TimePicker) {
+  '../ns_filter/filters',
+  'moment'
+], function($, NsFilter,moment) {
 
   'use strict';
   function DateFilter() {
@@ -17,20 +18,7 @@ define([
       this.eGui = document.createElement('div');
       this.eGui.innerHTML =
       '<div>' +
-        '<select class="ag-filter-select" id="filterType">' +
-          '<option value="1">[EQUALS]</option>' +
-          '<option value="2">[NOT EQUAL]</option>' +
-          '<option value="3">[LESS THAN]</option>' +
-          '<option value="4">[LESS THAN OR EQUAL]</option>' +
-          '<option value="5">[GREATER THAN]</option>' +
-          '<option value="6">[GREATER THAN OR EQUAL]</option>' +
-        '</select>' +
-      '</div>' +
-      '<div class="js-datefrom">'+
-        '<input type="text" class="ag-filter-filter js-datefrom-input" name="from" placeholder="'+placeholderFrom+'">'+
-      '</div>'+
-      '<div class="js-dateto">'+
-        '<input type="text" class="ag-filter-filter js-dateto-input"name="to" placeholder="'+placeholderTo+'">'+
+      '<div class="testbbfe">'+
       '</div>'+
       '<div class="ag-filter-apply-panel" id="applyPanel">' +
         '<button class="btn btn-lg btn-block btn-filter" type="button" id="applyButton">'+apply+'</button>' +
@@ -39,16 +27,31 @@ define([
       '</div>'+
       '</div>';
       this.$eGui = $(this.eGui);
-      var timepick = new timePicker();
+      var testOptions = {
+        schema: {
+          "options": {
+            "isInterval": 1
+          },
+          "validators": [],
+          "type": "DateTimePickerEditor",
+          "editable": true,
+          "name": "StationDate",
+          "label": "Date",
+          "fieldClass": [
+            "col-md-12"
+          ],
+          "title": "Date"
+        }
+      }
 
-      this.dateFrom = this.eGui.querySelector('.js-datefrom-input');
-      this.dateTo = this.eGui.querySelector('.js-dateto-input');
-      this.eTypeSelect = this.eGui.querySelector("#filterType");
+      var nsfilter = new NsFilter({});
+      this.theform = nsfilter.initFilter(testOptions.schema,null);
+      this.theform.render();
 
       this.cleanBtn = this.eGui.querySelector('#cleanBtn');
       this.cleanBtn.addEventListener('click', this.dateClean.bind(this));
 
-      //this.filterActive = false;
+      this.filterActive = false;
       this.applyActive = true;
       this.filterChangedCallback = params.filterChangedCallback;
       this.filterModifiedCallback = params.filterModifiedCallback;
@@ -57,23 +60,49 @@ define([
       this.createGui();
     },
 
+    afterGuiAttached : function() {
+      $('.testbbfe').append(this.theform.el);
+    },
+
     getGui : function () {
       return this.eGui;
     },
     isFilterActive : function () {
-      return this.filterActive;
+      return true;//this.filterActive;
     },
     doesFilterPass : function (params) {
-      console.log(params);
-      //return params.data.year >= 2010;
+      var valTmp = this.valueGetter(params);
+      if (!this.filterModel) {
+        return true;
+      } else if ( this.filterModel.From && this.filterModel.To  ) {
+        return (valTmp > this.filterModel.From && valTmp < this.filterModel.To);
+      }else if( this.filterModel.From ) {
+        return valTmp > this.filterModel.From;
+      }else if (this.filterModel.To) {
+        return valTmp < this.filterModel.To;
+      }
     },
     getModel : function() {
-      console.log(this.eTypeSelect);
-      console.log("date from",this.dateFrom.value);
-      console.log("operator", $('#filterType option:selected').text());
-      console.log("date to ",this.dateTo.value);
-      //var model = {value: this.rbSince2010.checked};
-    //  return model;
+      var value = this.theform.getValue();
+      var model = {
+        "From" : null,
+        "To" : null,
+      }
+      if ( this.isFilterActive() ) {
+        if ( value.From != '' ) {
+          model.From = moment(value.From, "DD/MM/YYYY HH:mm:SS").unix();
+        }
+        if (value.To != '' ) {
+          model.To = moment(value.To, "DD/MM/YYYY HH:mm:SS").unix();
+        }
+        //  console.log("test value bbfe",this.dateTimePick.getValue());
+        //var model = {value: this.rbSince2010.checked};
+        console.log(model);
+        return model;
+      }
+      else {
+        return model;
+      }
     },
     setModel : function(model) {
       console.log(model);
@@ -83,6 +112,16 @@ define([
     /**************************************   OPTIONAL METHOD  **************************************/
     createGui : function () {
       this.setupApply();
+    },
+
+    onFilterChanged: function () {
+      console.log("onfilterchanged");
+      this.getModel();
+      this.filterChanged();
+    },
+
+    filterChanged: function() {
+      //this.filterChangedCallback();
     },
 
     isFilterValid : function() {
@@ -98,15 +137,17 @@ define([
       // }
       //
       // return isValid;
-      return true;
+      return this.filterModel !== null;
     },
 
     setupApply : function () {
       var _this = this;
+      this.filterActive = true;
       if (this.applyActive) {
         this.eApplyButton = this.eGui.querySelector('#applyButton');
         this.eApplyButton.addEventListener('click', function () {
-          _this.getModel();
+          _this.filterModel = null;
+          _this.filterModel = _this.getModel();
           if (_this.isFilterValid()) {
             _this.filterChangedCallback();
           }
@@ -115,16 +156,14 @@ define([
     },
 
     dateClean : function() {
-      this.dateFrom.value = "";
-      this.dateTo.value = "";
-      var tabToClean = this.$eGui.find('input')
-      console.log(tabToClean);
-      // for (var tmp of tabToClean ) {
-      //   console.log(tmp);
-      // }
-
-      // this.onFilterChanged();
-        // this.filterChangedCallback();
+       var tabToClean =$("input[name='Date_']")
+       for (var i=0 ; i < tabToClean.length ; i+=1) {
+         $(tabToClean[i]).val('');
+       }
+       this.filterModel = null;
+       this.filterActive = false;
+        this.onFilterChanged();
+        this.filterChangedCallback();
         if ( $('.ag-filter').length ) {
           $('body').trigger('click'); // simule un clique sur le body fermera le popup :p
         }
