@@ -97,31 +97,11 @@ define([
       this.map.remove();
     },
 
-    action: function(action, params){
-      switch(action){
-        case 'focus':
-          this.focus(params);
-          break;
-        case 'selection':
-          this.selectOne(params);
-          break;
-        case 'selectionMultiple':
-          this.selectMultiple(params);
-          break;
-        case 'popup':
-          this.popup(params);
-          break;
-        case 'resetAll':
-          this.resetAll();
-          break;
-        case 'selectAll':
-          this.selectAll();
-          break;
-        case 'filter':
-          this.filter(params);
-          break;
-        default:
-          break;
+    action: function(action, params, from){
+      if(this[action]){
+        this[action](params, from);
+      } else {
+        console.warn(this, 'doesn\'t have ' + action + ' action');
       }
     },
 
@@ -415,7 +395,7 @@ define([
             default:
           }
 
-          if(feature.checked){
+          if(feature.selected){
             className += ' selected';
           }else{
             className += ' ';
@@ -424,10 +404,11 @@ define([
           icon = new L.DivIcon({className : className});
           marker = L.marker(latlng, {icon: icon});
 
-          if(feature.checked){
-            marker.checked=true;
+          //useless: doesn't update the parent cluster
+          if(feature.selected){
+            marker.selected=true;
           }else{
-            marker.checked=false;
+            marker.selected=false;
           }
 
           if(_this.popup){
@@ -441,13 +422,14 @@ define([
           marker.feature = feature;
 
           _this.dict[feature.id] = marker;
-
+          
           marker.on('click', function(e){
-            if(_this.selection){
-              _this.interaction('selection', this.feature.id);
+            if(_this.selection && this.feature.properties.type_ !== 'station'){
+              _this.interaction('singleSelection', this.feature.id);
             }
             _this.interaction('focus', this.feature.id);
           });
+            
           markerList.push(marker);
         }else{
           console.warn('latlng null');
@@ -510,7 +492,7 @@ define([
           var contains=false;
 
           for (var i = 0; i < childMarkers.length; i++) {
-            if(childMarkers[i].checked){
+            if(childMarkers[i].selected){
               nbContains++;
               contains=true;
             }else{
@@ -527,12 +509,13 @@ define([
     },
     /** from parent to child */
     updateAllClusters: function(c, all){
+      
 
       this.updateClusterStyle(c, all);
       var childs = c.getAllChildMarkers();
 
       for (var i = childs.length - 1; i >= 0; i--) {
-        childs[i].checked = true;
+        childs[i].selected = true;
         this.selectedMarkers[childs[i].feature.id] = childs[i];
         this.toggleIconClass(childs[i]);
       }
@@ -583,33 +566,37 @@ define([
 
       this.map.on('boxzoomend', function(e) {
 
-        var bbox=[], childIds=[];
+        var bbox = [];
         for(var key in  markers._featureGroup._layers){
           marker =  markers._featureGroup._layers[key];
           if (e.boxZoomBounds.contains(marker._latlng) /*&& !_this.selectedMarkers[key]*/) {
 
-              if(!marker._markers){
+            if(!marker._markers){
+              if(marker.feature.properties.type_ !== 'station'){
                 bbox.push(marker.feature.id);
-              }else{
-                childs = marker.getAllChildMarkers();
+              }
+            }else{
+              childs = marker.getAllChildMarkers();
 
-                //bad functionName
-                _this.updateAllClusters(marker, true);
+              //bad functionName
+              _this.updateAllClusters(marker, true);
 
-                for (var i = childs.length - 1; i >= 0; i--) {
-                  childs[i].checked = true;
+              for (var i = childs.length - 1; i >= 0; i--) {
+                if(childs[i].feature.properties.type_ !== 'station'){
+                  childs[i].selected = true;
                   _this.selectedMarkers[childs[i].feature.id] = childs[i];
                   bbox.push(childs[i].feature.id);
-
                   _this.toggleIconClass(childs[i]);
                 }
-                if(marker.__parent){
-                    _this.updateClusterParents(marker, []);
-                }
               }
+              if(marker.__parent){
+                  _this.updateClusterParents(marker, []);
+              }
+            }
           }
         }
-        _this.interaction('selectionMultiple', bbox);
+        
+        _this.interaction('multiSelection', bbox);
         $(_this).trigger('ns_bbox_end', e.boxZoomBounds);
       });
     },
@@ -639,12 +626,12 @@ define([
       });
     },
 
-    selectOne: function(id){
+    singleSelection: function(id){
       if(this.selection){
       var marker;
         marker=this.dict[id];
-        marker.checked=!marker.checked;
-        if(this.checkedMarkers){
+        marker.selected=!marker.selected;
+        if(this.selectedMarkers){
           this.selectedMarkers[id]=marker;
         }else{
           delete(this.selectedMarkers[id]);
@@ -660,12 +647,12 @@ define([
     },
 
     //from child to parent
-    selectMultiple: function(ids){
+    multiSelection: function(ids){
       if(this.selection){
         var marker;
         for (var i = 0; i < ids.length; i++) {
           marker=this.dict[ids[i]];
-          marker.checked = true;
+          marker.selected = true;
 
           this.avoidDoublon(ids[i], marker);
 
@@ -678,6 +665,7 @@ define([
     /*==========  focusMarker :: focus & zoom on a point  ==========*/
     focus: function(id, zoom){
       var marker = this.dict[String(id)];
+      if(!marker) return;
       var center = marker.getLatLng();
       var zoom = this.disableClustring;
 
@@ -692,10 +680,24 @@ define([
     toggleIconClass: function(m){
       var className = 'marker';
 
-      if (m.checked /*&& !$(m._icon).hasClass('station-marker')*/) {
-          $(m._icon).addClass('selected');
+      if (m.selected) {
+          //$(m._icon).addClass('selected');
           className += ' selected';
       }
+      
+      switch(m.feature.properties.type_) {
+        case 'station':
+          className += ' marker-station';
+          break;
+        case 'gps':
+          className += ' marker-gps';
+          break;
+        case 'argos':
+          className += ' marker-argos';
+          break;
+        default:
+      }
+
       m.setIcon(new L.DivIcon({className  : className}));
       if (m == this.lastFocused) {
           $(m._icon).addClass('focus');
@@ -741,13 +743,13 @@ define([
       }
     },
 
-    resetAll: function(){
-
+    deselectAll: function(){
       this.updateLayers(this.geoJson);
     },
 
     selectAll: function(){
-      var firstProp, layers = this.markersLayer._featureGroup._layers;
+      var firstProp;
+      var layers = this.markersLayer._featureGroup._layers;
       
       //get the first layer (marker cluster)
       for(var key in layers) {
@@ -763,7 +765,7 @@ define([
       }
 
       this.topParent = firstProp;
-
+      
       this.updateAllClusters(firstProp, true);
     },
 
@@ -818,45 +820,44 @@ define([
 
     updateFromServ: function(param){
       var _this = this;
-      if(param)
-        this.searchCriteria = param;
-      //station last imported?
-      if(this.lastImported){
-        var data = {
-          'criteria': JSON.stringify(this.searchCriteria),
-          'lastImported' : this.lastImported,
-        };
-      }else{
-        var data = {
-          'criteria': JSON.stringify(this.searchCriteria),
-        };
-      }
+      this.searchCriteria = param;
+      
+      var data = {
+        'criteria': JSON.stringify(this.searchCriteria),
+      };
 
       $.ajax({
         url: this.url,
         data: data,
+        context: this
       }).done(function(geoJson) {
-        if (_this.cluster){
-          _this.updateLayers(geoJson);
+        if (this.cluster){
+          this.updateLayers(geoJson);
         }else{
-          _this.initLayer(geoJson);
+          this.initLayer(geoJson);
         }
       });
       return;
     },
 
-
-    lastImportedUpdate: function(lastImported){
-      this.lastImported = lastImported;
-      this.updateFromServ();
-    },
     //apply filters on the map from a collection
 
     //param can be filters or directly a collection
+    loadFeatureCollection: function(params){
+      var _this = this;
+      if(params.featureCollection.features.length){
+        this.updateLayers(params.featureCollection);
+        if(params.selectedFeaturesIds){
+          this.multiSelection(params.selectedFeaturesIds);
+        }
+      } else {
+        this.map.removeLayer(this.markersLayer);
+        this.geoJsonLayers = [];
+      }
+    },
+
     filter: function(param){
       //TODO : refact
-
-
       var _this = this;
       if(this.url){
         this.updateFromServ(param);
@@ -873,15 +874,15 @@ define([
           this.map.removeLayer(this.markersLayer);
           this.geoJsonLayers = [];
         }
-        var checkedMarkers = [];
+        var selectedMarkers = [];
         for (var i = coll.models.length - 1; i >= 0; i--) {
           //todo : generic term (import)
           if(coll.models[i].attributes.import)
-            checkedMarkers.push((coll.models[i].attributes.id || coll.models[i].attributes.ID));
+            selectedMarkers.push((coll.models[i].attributes.id || coll.models[i].attributes.ID));
         }
         //todo : amelioration
 
-        this.selectMultiple(checkedMarkers);
+        this.multiSelection(selectedMarkers);
       }
     },
 

@@ -49,27 +49,22 @@ require.config({
     'leaflet_google': '../bower_components/leaflet-plugins/layer/tile/Google',
     'dropzone': '../bower_components/dropzone/dist/dropzone',
     'i18n': '../bower_components/i18n/i18next',
-    'floatThead': '../bower_components/floatThead/dist/jquery.floatThead-slim',
     'chart': '../bower_components/chartjs/Chart',
     'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
 
     'ns_filter_bower': '../bower_components/NaturalJS_Filter/model-filter',
+    'ag-grid': '../bower_components/ag-grid/dist/ag-grid',
 
 
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
 
-    //'fancytree': '../bower_components/fancytree/dist/jquery.fancytree-all.min',
-    //'backbone-forms': '../bower_components/backbone-forms/distribution.amd/backbone-forms',
     'backbone-forms': 'vendors/backbone-forms',
     'fancytree': 'vendors/jquery.fancytree-all.min',
-    'backgrid': 'vendors/backgrid',
-    'backgrid.paginator': 'vendors/backgrid-paginator',
-    'backgridSelect_all': 'vendors/backgrid-select-all',
+
     'autocompTree': './vendors/jquery.autocompTree',
     'tooltipster-list': 'vendors/tooltipList',
 
-    'backgrid-moment-cell':'./vendors/backgrid-moment-cell',
   },
   map: {
       '*': {
@@ -120,18 +115,6 @@ require.config({
     'backbone.paginator': {
       exports: 'backbone.paginator',
     },
-    backgrid: {
-      exports: 'Backgrid'
-    },
-    'backgrid.paginator': {
-      exports: 'backgrid.paginator',
-    },
-    backgridSelect_all: {
-      exports: 'BackgridSelect_all'
-    },
-    'backgrid-moment-cell': {
-      deps: ['moment','backgrid'],
-    },
     leaflet_cluster: {
       deps: ['L'],
       exports: 'leaflet_cluster'
@@ -160,10 +143,6 @@ require.config({
       deps: ['jquery'],
       exports: 'i18n'
     },
-    floatThead: {
-      deps: ['backgrid'],
-      exports:  'FloatThead'
-    },
     tooltipster: {
       deps: [
           'jquery'
@@ -182,6 +161,9 @@ require.config({
 
 require(['app', 'templates','translater'],
 function(app, templates, Translater) {
-  app.start();
   this.translater = Translater.getTranslater();
+  this.translater.dfd.done(function(){
+    app.start();
+  })
+  
 });

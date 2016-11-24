@@ -4,13 +4,12 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   'sweetAlert',
   'dropzone',
 
   'i18n'
 
-], function($, _, Backbone, Marionette, config, Swal, Dropzone
+], function($, _, Backbone, Marionette, Swal, Dropzone
 
   ) {
 
@@ -39,7 +38,7 @@ define([
       var previewTemplate = previewNode.parentNode.innerHTML;
       previewNode.parentNode.removeChild(previewNode);
       var myDropzone = new Dropzone(this.el, {
-        url: config.coreUrl + 'sensors/gsm/datas', // Set the url
+        url: 'sensors/gsm/datas', // Set the url
         thumbnailWidth: 80,
         thumbnailHeight: 80,
         parallelUploads: 8,

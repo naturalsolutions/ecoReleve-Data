@@ -59,46 +59,26 @@
        }
      },
      requirejs: {
-       compile: {
          options: {
-            findNestedDependencies: false,
+            optimize: 'uglify2',
             baseUrl: 'app',
             mainConfigFile: 'app/main.js',
             include: 'main',
-            name: '../bower_components/requirejs/require',
             out: 'build/prod.js',
-            preserveLicenseComments: true,
-            optimize: 'uglify',
-            generateSourceMaps: false,
-           done: function(done, output) {
-             var duplicates = require('rjs-build-analysis').duplicates(output);
-             if (duplicates.length > 0) {
-               grunt.log.subhead('Duplicates found in requirejs build:');
-               grunt.log.warn(duplicates);
-               done(new Error('r.js built duplicate modules, please check the excludes option.'));
+            name: '../bower_components/requirejs/require',
+            generateSourceMaps: true,
+            preserveLicenseComments: false
+         },
+         dev: {
+             options: {
+                 build: false
              }
-             done();
-           }
+         },
+         prod: {
+             options: {
+                 build: true
+             }
          }
-       }
-     },
-     jasmine: {
-       all: {
-         src: 'app/modules/{,*/}*.js',
-         options: {
-           keepRunner: true,
-           specs: 'test/**/*.js',
-           vendor: [
-           'bower_components/jquery/dist/jquery.js',
-           'bower_components/underscore/underscore.js',
-           'bower_components/backbone/backbone.js',
-           'bower_components/marionette/lib/core/backbone.marionette.js',
-           'bower_components/backbone.babysitter/lib/backbone.babysitter.js',
-           'bower_components/backbone.wreqr/lib/backbone.wreqr.js',
-           'bower_components/bootstrap/dist/js/bootstrap.js',
-					]
-         }
-       }
      },
 
      /*==========  Build Tasks  ==========*/
@@ -147,11 +127,9 @@
 
    /*==========  Loaded Tasks  ==========*/
 
-   grunt.loadNpmTasks('grunt-requirejs');
+   grunt.loadNpmTasks('grunt-contrib-requirejs');
 
    grunt.loadNpmTasks('grunt-contrib-watch');
-
-   grunt.loadNpmTasks('grunt-contrib-jasmine');
 
    grunt.loadNpmTasks('grunt-contrib-jst');
 
@@ -165,6 +143,8 @@
 
    grunt.loadNpmTasks('grunt-cache-breaker');
 
+   grunt.loadNpmTasks('grunt-contrib-uglify');
+
    /*==========  Regitred Tasks  ==========*/
 
    grunt.registerTask('build', [
@@ -172,8 +152,7 @@
    'clean:dist',
    'jst',
    'less',
-   'requirejs',
-   //'jasmine'
+   'requirejs:prod'
    ]);
 
    grunt.registerTask('dev', ['build', 'fileblocks:develop']);

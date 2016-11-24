@@ -457,7 +457,7 @@ def getIndivLocation(request):
         order_by = None
 
     if 'geo' in request.params:
-        result = gene.get_geoJSON(criteria, ['ID', 'Date', 'type_'])
+        result = gene.get_geoJSON(criteria, ['ID', 'Date', 'type_', 'precision'])
 
     else:
         result = gene.search(criteria, offset=offset,
