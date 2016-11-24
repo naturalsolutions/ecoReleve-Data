@@ -64,10 +64,12 @@ define([
       }
       this.isTermError = false;
       this.options = options.schema.options;
+
       var value;
       if (options.model) {
         value = options.model.get(options.schema.name) || options.value;
       }
+
 
       if (value) {
         this.model.set('value', value);
