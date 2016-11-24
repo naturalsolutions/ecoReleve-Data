@@ -10,10 +10,11 @@ define([
   'ns_grid/grid.view',
   'moment',
   'ns_grid/aggrid_custom_date_filter',
+  'ns_grid/aggrid_custom_select_filter',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,
-  Com, NsMap, GridView,Moment, DateFilter
+  Com, NsMap, GridView,Moment, DateFilter, SelectFilter
 ) {
 
   'use strict';
@@ -121,6 +122,7 @@ define([
       };
 
       var FieldActivityRenderer = function(params){
+        console.log(params);
         var text = '';
         _this.fieldActivityList.map(function(fa){
           if(params.data.fieldActivity == fa.value){
@@ -133,59 +135,6 @@ define([
       var dateTimestampRender = function(params){
         return Moment.unix(params.data.displayDate).format("DD/MM/YYYY HH:mm:SS");
       };
-
-    /*  function DateFilter() {
-      }
-
-      DateFilter.prototype.init = function (params) {
-        this.eGui = document.createElement('div');
-        this.eGui.innerHTML =
-            '<div style="display: inline-block; width: 400px;">' +
-            '<div style="padding: 10px; background-color: #d3d3d3; text-align: center;">' +
-            'This is a very wide filter' +
-            '</div>'+
-            '<label style="margin: 10px; padding: 50px; display: inline-block; background-color: #999999">'+
-            '  <input type="radio" name="yearFilter" checked="true" id="rbAllYears" filter-checkbox="true"/> All'+
-            '</label>'+
-            '<label style="margin: 10px; padding: 50px; display: inline-block; background-color: #999999">'+
-            '  <input type="radio" name="yearFilter" id="rbSince2010" filter-checkbox="true"/> Since 2010'+
-            '</label>' +
-            '</div>';
-        this.rbAllYears = this.eGui.querySelector('#rbAllYears');
-        this.rbSince2010 = this.eGui.querySelector('#rbSince2010');
-        this.rbAllYears.addEventListener('change', this.onRbChanged.bind(this));
-        this.rbSince2010.addEventListener('change', this.onRbChanged.bind(this));
-        this.filterActive = false;
-        this.filterChangedCallback = params.filterChangedCallback;
-        this.valueGetter = params.valueGetter;
-    };
-
-    DateFilter.prototype.getGui = function () {
-      return this.eGui;
-    };
-
-    DateFilter.prototype.onRbChanged = function () {
-        this.filterActive = this.rbSince2010.checked;
-        this.filterChangedCallback();
-    };
-
-
-    DateFilter.prototype.doesFilterPass = function (params) {
-        return params.data.year >= 2010;
-    };
-
-    DateFilter.prototype.isFilterActive = function () {
-        return this.filterActive;
-    };
-
-    DateFilter.prototype.getModel = function() {
-        var model = {value: this.rbSince2010.checked};
-        return model;
-    };
-
-    DateFilter.prototype.setModel = function(model) {
-        this.rbSince2010.checked = model.value;
-    };*/
 
       var columnsDefs = [
         {
@@ -204,15 +153,18 @@ define([
         },{
           field: 'latitude',
           headerName: 'LAT',
+          filter :"number"
         },{
           field: 'longitude',
           headerName: 'LON',
+          filter :"number"
         },{
           editable: true,
           field: 'fieldActivity',
           headerName: 'Field Activity',
           cellEditor: FieldActivityEditor,
-          cellRenderer: FieldActivityRenderer
+          cellRenderer: FieldActivityRenderer,
+          filter : SelectFilter,
         },
       ];
 

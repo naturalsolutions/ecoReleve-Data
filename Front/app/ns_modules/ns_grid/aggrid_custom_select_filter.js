@@ -1,8 +1,6 @@
 define([
   'jquery',
-  'dateTimePicker',
-  'moment'
-], function($, datetimepicker,moment) {
+], function($) {
 
   'use strict';
   function DateFilter() {
@@ -11,6 +9,7 @@ define([
   DateFilter.prototype = {
     /**************************************   MANDORTY METHOD  **************************************/
     init : function (params) {
+      var _this = this;
       var testOptions = {
         schema: {
           "options": {
@@ -33,11 +32,9 @@ define([
       var placeholderTo =  "date de fin";
       this.eGui = document.createElement('div');
       this.eGui.innerHTML =
-      '<div class="js-datefrom">'+
-        '<input type="text" class="ag-filter-filter js-datefrom-input" name="from" placeholder="'+placeholderFrom+'">'+
-      '</div>'+
-      '<div class="js-dateto">'+
-        '<input type="text" class="ag-filter-filter js-dateto-input"name="to" placeholder="'+placeholderTo+'">'+
+      '<div class="js-select">'+
+        '<select class="ag-filter-filter js-select-filter" name="selectedVal">'+
+        '</select>'+
       '</div>'+
       '<div class="ag-filter-apply-panel" id="applyPanel">' +
         '<button class="btn btn-lg btn-block btn-filter" type="button" id="applyButton">'+apply+'</button>' +
@@ -46,16 +43,9 @@ define([
       '</div>';
       this.$eGui = $(this.eGui);
 
-      this.dateFrom = this.eGui.querySelector('.js-datefrom-input');
-      this.dateTo = this.eGui.querySelector('.js-dateto-input');
-
-      this.datetimepickerOptions = {
-        /*locale : "fr",*/
-        format : "DD/MM/YYYY HH:mm:ss",
-        useCurrent: false
-      }
 
       this.cleanBtn = this.eGui.querySelector('#cleanBtn');
+      this.$select = this.eGui.querySelector('.js-select-filter');
       this.cleanBtn.addEventListener('click', this.dateClean.bind(this));
       this.filterDate = null;
 
@@ -63,8 +53,41 @@ define([
       this.filterChangedCallback = params.filterChangedCallback;
        this.filterModifiedCallback = params.filterModifiedCallback;
        this.valueGetter = params.valueGetter;
+       this.params = params;
+       this.tabSelect = [];
+       params.column.gridOptionsWrapper.gridOptions.api.forEachNode(function printNode(node, index) {
+        if (node.data) {
+            if( !_this.exist(node.data.fieldActivity)  ) {
+              _this.tabSelect.push(node.data.fieldActivity);
+              //TODO
+              /*
+              params.column.gridOptionsWrapper.gridOptions.columnDefs[5].cellRenderer({
+"data": {
+  "fieldActivity": "41",
+}
+})
+              */
+              $(_this.$select).append('<option value="'+node.data.fieldActivity+'">'+node.data.fieldActivity+'</option>')
+            }
+          }
+      });
 
-      this.createGui();
+
+      $.when(this.loadFieldsActivity()).then(function(){
+        console.log(_this.fieldActivityList);
+        _this.createGui();
+      });
+      //this.createGui();
+    },
+
+    exist: function (val){
+      var present = false;
+      var tabLength = this.tabSelect.length;
+      for(var i= 0 ; i < tabLength && !present ; i+=1 ) {
+        if(this.tabSelect[i] === val )
+          present = true;
+      }
+      return present;
     },
 
     dateClean : function() {
@@ -84,11 +107,9 @@ define([
       $( this.dateFrom ).datetimepicker(self.datetimepickerOptions);
       $( this.dateTo ).datetimepicker(self.datetimepickerOptions);
       $(this.dateFrom).on("dp.change", function (e) {
-        $(this).data('DateTimePicker').hide();
         self.onFilterChanged();
       });
       $(this.dateTo).on("dp.change", function (e) {
-        $(this).data('DateTimePicker').hide();
         self.onFilterChanged();
       });
     },
@@ -182,6 +203,16 @@ define([
           else this.setFilter(null);
         }
       };
+    },
+
+    loadFieldsActivity: function() {
+      return $.ajax({
+        url: 'fieldActivity',
+        method: 'GET',
+        context: this,
+      }).done(function(data){
+        this.fieldActivityList = data;
+      });
     },
 
     doesFilterPass : function (params) {
