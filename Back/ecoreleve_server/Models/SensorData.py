@@ -46,16 +46,16 @@ class ArgosGps(Base):
         __table_args__ = (
             Index(
                 'idx_Targosgps_checked_with_pk_ptt_date',
-                checked, 
+                checked,
                 ptt,
                 mssql_include=[pk_id, date]
             ),
-            {'schema': sensor_schema}
+            {'schema': sensor_schema,'implicit_returning': False}
         )
     else:
         __table_args__ = (
             Index('idx_Targosgps_checked_ptt', checked, ptt),
-            {'schema': sensor_schema}
+            {'schema': sensor_schema,'implicit_returning': False}
         )
 
 class Gsm(Base):
@@ -74,33 +74,33 @@ class Gsm(Base):
     HDOP = Column(Integer)
     VDOP = Column(Integer)
     validated = Column(Boolean, nullable=False, server_default='0')
-    
+
     if dialect.startswith('mssql'):
         __table_args__ = (
             Index('idx_Tgsm_checked_with_pk_ptt_date', checked, platform_,
                 mssql_include=[pk_id, date]
             ),
-            {'schema': sensor_schema}
+            {'schema': sensor_schema,'implicit_returning': False}
         )
     else:
         __table_args__ = (
             Index('idx_Tgsm_checked_ptt', checked, platform_),
-            {'schema': sensor_schema}
+            {'schema': sensor_schema,'implicit_returning': False}
         )
 
 class GsmEngineering (Base) :
     __tablename__ = 'Tengineering_gsm'
     PK_id = Column(Integer, Sequence('seq_Tengineering_gsm_id'), primary_key=True)
     platform_ = Column(Integer , nullable = False)
-    date = Column('DateTime', DateTime, nullable = False) 
+    date = Column('DateTime', DateTime, nullable = False)
     ActivityCount = Column(Integer, )
     Temperature_C = Column(Numeric)
     BatteryVoltage_V = Column(Numeric)
-    file_date = Column(DateTime) 
+    file_date = Column(DateTime)
 
     __table_args__ = (
         Index('idx_Tengineering_gsm_pttDate_ptt', date, platform_),
-        {'schema': sensor_schema}
+        {'schema': sensor_schema,'implicit_returning': False}
     )
 class ArgosEngineering(Base):
     __tablename__ = 'Tgps_engineering'
@@ -125,7 +125,7 @@ class ArgosEngineering(Base):
 
     __table_args__ = (
         Index('idx_Tgps_engineering_pttDate_ptt', pttDate, fk_ptt),
-        {'schema': sensor_schema}
+        {'schema': sensor_schema,'implicit_returning': False}
     )
 
 class Rfid(Base):
@@ -142,5 +142,5 @@ class Rfid(Base):
     __table_args__ = (
         Index('idx_Trfid_chipcode_date', chip_code, date_),
         UniqueConstraint(FK_Sensor, chip_code, date_),
-        {'schema': sensor_schema}
+        {'schema': sensor_schema,'implicit_returning': False}
     )
