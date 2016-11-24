@@ -26,11 +26,11 @@ class User(Base):
     ModificationDate = Column(DateTime, nullable=False,server_default=func.now())
     if db_dialect =='mssql':
         __table_args__ = (
-            Index('idx_Tuser_lastname_firstname', Lastname, Firstname, mssql_include=[id]),
+            Index('idx_Tuser_lastname_firstname', Lastname, Firstname, mssql_include=[id]),{'implicit_returning': False}
         )
     else:
         __table_args__ = (
-            Index('idx_Tuser_lastname_firstname', Lastname, Firstname),
+            Index('idx_Tuser_lastname_firstname', Lastname, Firstname),{'implicit_returning': False}
         )
 
     @hybrid_property
@@ -38,15 +38,15 @@ class User(Base):
         """ Return the fullname of a user.
         """
         return self.Lastname + ' ' + self.Firstname
-    
+
     def check_password(self, given_pwd):
         """Check the password of a user.
-        
+
         Parameters
         ----------
         given_pwd : string
             The password to check, assumed to be an SHA1 hash of the real one.
-            
+
         Returns
         -------
         boolean

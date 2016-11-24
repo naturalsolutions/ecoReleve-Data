@@ -91,6 +91,7 @@ define([
       if(this.displayMap){
         this.displayMap();
       }
+      this.$el.find('.js-nav-tabs').addClass('hide');
       this.afterShow();
     },
 

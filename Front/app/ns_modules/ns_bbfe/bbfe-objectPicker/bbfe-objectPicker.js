@@ -339,11 +339,12 @@ define([
           $(this._input).removeClass('error');
         }
     },
-    
+
     openDetails: function(event) {
       var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.objectName+'/'+ $(this._input).attr('data_value');
       var win = window.open(url, '_blank');
       win.focus();
     }
+
   });
 });

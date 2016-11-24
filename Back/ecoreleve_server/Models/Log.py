@@ -23,7 +23,7 @@ class Log(Base):
     LOG_MESSAGE = Column(String(255))
     OTHERSINFOS = Column(String)
 
-    __table_args__ = ({'schema': 'NSLog.dbo'})
+    __table_args__ = ({'schema': 'NSLog.dbo','implicit_returning': False})
 
 
 def sendLog(logLevel,domaine,msg_number = 500,scope='Pyramid', errorDict = None, logMsg = None):
@@ -32,9 +32,9 @@ def sendLog(logLevel,domaine,msg_number = 500,scope='Pyramid', errorDict = None,
     try :
         engine = create_engine(dbConfig['cn.dialect'] + quote_plus(dbConfig['dbLog.url']))
         session = engine.connect()
-        try : 
-            body = json.loads(request.body.decode("utf-8")) 
-        except : 
+        try :
+            body = json.loads(request.body.decode("utf-8"))
+        except :
             body = {}
 
         try :
@@ -44,7 +44,7 @@ def sendLog(logLevel,domaine,msg_number = 500,scope='Pyramid', errorDict = None,
         if errorDict is None :
             exc_type, exc_value, exc_traceback = sys.exc_info()
             errorDict = json.dumps({
-                        'stackTrace': traceback.format_exc(), 
+                        'stackTrace': traceback.format_exc(),
                         'request': {
                         'url': request.url,
                         'method': request.method,
@@ -53,7 +53,7 @@ def sendLog(logLevel,domaine,msg_number = 500,scope='Pyramid', errorDict = None,
                         })
             logMsg = str(exc_value)
 
-        stmt = text(""" 
+        stmt = text("""
             EXEC  """+dbConfig['dbLog.schema']+ """.[PR_LOG_MESSAGE] :lvl, :origin, :scope, :user, :domain , :msg_number, :other, :log_msg;
             """
                     ).bindparams(

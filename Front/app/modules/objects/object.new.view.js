@@ -67,13 +67,13 @@ define([
 
     afterSaveSuccess: function(){
       var _this = this;
-      swal({
+      Swal({
         title: 'Succes',
-        text: 'creating new sensor',
+        text: 'creating new ' + _this.model.get('single'),
         type: 'success',
         showCancelButton: true,
         confirmButtonColor: 'green',
-        confirmButtonText: 'create another sensor',
+        confirmButtonText: 'create another ' + _this.model.get('single'),
         cancelButtonText: 'cancel',
         closeOnConfirm: true,
       },
@@ -92,5 +92,9 @@ define([
 
     back: function() {
     },
+
+		cancel: function() {
+			Backbone.history.navigate(this.model.get('type'),{trigger: true});
+		},
   });
 });
