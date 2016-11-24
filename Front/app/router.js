@@ -66,8 +66,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       
       var route = Backbone.history.fragment;
 
-      console.log(this);
-
       if ((route != '') && (route != '#')){
         var allowed = this.checkRoute();
         if (!allowed) {
