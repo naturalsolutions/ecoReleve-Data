@@ -57,23 +57,25 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       ]);
     },
 
-    execute: function(callback, args, route) {
-      // get current route
-
+    execute: function(callback, args) {
+      var _this= this;
+      
       var route = Backbone.history.fragment;
+
+      console.log(this);
 
       if ((route != '') && (route != '#')){
         var allowed = this.checkRoute();
-        if(!allowed) {
-            return false;
+        if (!allowed) {
+          return false;
         }
       }
 
       this.history.push(Backbone.history.fragment);
-      var _this= this;
+      
       window.checkExitForm(function(){
         _this.continueNav(callback, args, route);
-      },function(){
+      }, function(){
         _this.previous();
       });
     },
@@ -86,16 +88,16 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       patern = patern.replace(/\:/g, '');
       patern = patern.split('/');
 
-      for (var i=0; i< notAllowed.length;i++){
-            if (notAllowed[i] == patern[0]) {
-                return ;
-            }
+      for (var i=0; i< notAllowed.length;i++) {
+        if (notAllowed[i] == patern[0]) {
+          return ;
+        }
       }
 
       if (patern[0] == '*route') {
         $('#arial').html('');
         $('#arialSub').html('');
-      }else {
+      } else {
         this.setNav(patern);
       }
 
@@ -127,23 +129,22 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       this.setNav(patern);
     },
 
-    continueNav : function(callback, args, route){
+    continueNav: function(callback, args, route){
       $.xhrPool.abortAll();
       setTimeout(function(){
         callback.apply(this, args);
       }, 0);
     },
 
-    unique : function(list) {
+    unique: function(list){
         var result = [];
-        $.each(list, function(i, e) {
+        $.each(list, function(i, e){
             if ($.inArray(e, result) == -1) result.push(e);
         });
         return result;
     },
 
-    setNav : function(patern){
-
+    setNav: function(patern){
         var url = patern[0];
 
         var md = this.collection.findWhere({href: patern[0]});
@@ -155,21 +156,21 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
         }
      },
 
-     checkRoute : function(){
-        var route = Backbone.history.fragment;
-        var notAllowed = window.notAllowedUrl ;
-        route = route.replace(/\(/g, '');
-        route = route.replace(/\)/g, '');
-        route = route.replace(/\:/g, '');
-        route = route.split('/');
-        for (var i=0; i< notAllowed.length;i++){
-            if (notAllowed[i] == route[0]) {
-              $('#arialSub').html('');
-              Backbone.history.navigate("#",true);
-              return false;
-            }
+    checkRoute: function(){
+      var route = Backbone.history.fragment;
+      var notAllowed = window.notAllowedUrl ;
+      route = route.replace(/\(/g, '');
+      route = route.replace(/\)/g, '');
+      route = route.replace(/\:/g, '');
+      route = route.split('/');
+      for (var i=0; i< notAllowed.length;i++){
+        if (notAllowed[i] == route[0]) {
+          $('#arialSub').html('');
+          Backbone.history.navigate("#",true);
+          return false;
         }
-        return true;
       }
+      return true;
+    }
   });
 });

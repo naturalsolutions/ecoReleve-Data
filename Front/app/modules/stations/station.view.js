@@ -54,7 +54,7 @@ define([
     reload: function(options){
       if(options.id == this.model.get('id')){
         this.LytProtocols.protocolsItems.getViewFromUrlParams(options);
-      } else {  
+      } else {
         this.model.set('id', options.id);
         this.model.set('stationId', options.id);
         this.displayStation();

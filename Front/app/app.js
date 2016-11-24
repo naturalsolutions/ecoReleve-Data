@@ -24,7 +24,6 @@ define([
 
   ],
 
-
 function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
     var app = {};
@@ -39,7 +38,6 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
         }
       }
     };
-
 
     Backbone.Marionette.Renderer.render = function(template, data) {
       if (!JST[template]) throw 'Template \'' + template + '\' not found!';
@@ -78,100 +76,97 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
   $.xhrPool.abortAll = function() { // our abort function
     if ($.xhrPool.allowAbort){
-      this.calls.map(function(jqXHR){
-          jqXHR.abort();
+      this.calls.map(function(jqxhr){
+          jqxhr.abort();
       });
       $.xhrPool.calls = [];
     }
   };
   $.ajaxSetup({
     // before jQuery send the request we will push it to our array
-    beforeSend: function(jqXHR, options) {
+    beforeSend: function(jqxhr, options) {
       if(options.url.indexOf('http://') !== -1) {
         options.url = options.url;
       } else {
         options.url = config.coreUrl + options.url;
       }
       if(options.type === 'GET'){
-        $.xhrPool.calls.push(jqXHR);
-        //console.log(options);
+        $.xhrPool.calls.push(jqxhr);
       }
-      //console.log($.xhrPool.calls);
     },
     // when some of the requests completed it will splice from the array
-    complete: function(jqXHR, options){      
-      // var index = $.xhrPool.indexOf(jqXHR);
+    complete: function(jqxhr, options){      
+      // var index = $.xhrPool.indexOf(jqxhr);
       // if (index > -1) {
       //   $.xhrPool.splice(index, 1);
       // }
-    }
-  });
-
-  window.UnauthAlert = function(){
-    Swal({
-      title: 'Unauthorized',
-      text: "You don't have permission",
-      type: 'warning',
-      showCancelButton: false,
-      confirmButtonColor: 'rgb(240, 173, 78)',
-      confirmButtonText: 'OK',
-      closeOnConfirm: true,
-    });
-  }
-
-  $(document).ajaxError(function( event, jqxhr, settings, thrownError ) {
-    if (jqxhr.status == 401){
-      window.UnauthAlert();
+    },
+    error: function(jqxhr, options){
+      if(jqxhr.status == 403){
+        document.location.href = config.portalUrl;
+      }
+      if(jqxhr.status == 401){
+        Swal({
+          title: 'Unauthorized',
+          text: "You don't have permission",
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(240, 173, 78)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        });
+      }
     }
   });
 
     window.formChange = false;
     window.formEdition = false;
+
     // get not allowed urls in config.js
     window.notAllowedUrl = [];
-    if (config.disabledFunc){
-      var disabled = config.disabledFunc ;
-      for (var i=0; i< disabled.length;i++){
+    if (config.disabledFunc) {
+      var disabled = config.disabledFunc;
+      for (var i=0; i< disabled.length;i++) {
         window.notAllowedUrl.push(disabled[i]);
       }
     }
 
-    window.checkExitForm = function(confirmCallback,cancelCallback) {
-      if(window.formChange && window.formEdition){
-        var title = i18n.translate('swal.savingForm-title');
-        var savingFormContent =  i18n.translate('swal.savingForm-content');
-        var cancelMsg = i18n.translate('button.cancel');
-        Swal({
-          title: title,
-          text: savingFormContent,
-          type: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: 'rgb(221, 107, 85)',
-          confirmButtonText: 'OK',
-          cancelButtonColor: 'grey',
-          cancelButtonText: cancelMsg,
-          closeOnConfirm: true,
-        },
-        function(isConfirm) {
-         if (!isConfirm) {
-          if (cancelCallback){
+  window.checkExitForm = function(confirmCallback,cancelCallback) {
+    if(window.formChange && window.formEdition){
+      var title = i18n.translate('swal.savingForm-title');
+      var savingFormContent =  i18n.translate('swal.savingForm-content');
+      var cancelMsg = i18n.translate('button.cancel');
+      Swal({
+        title: title,
+        text: savingFormContent,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'rgb(221, 107, 85)',
+        confirmButtonText: 'OK',
+        cancelButtonColor: 'grey',
+        cancelButtonText: cancelMsg,
+        closeOnConfirm: true,
+      },
+      function(isConfirm) {
+        if (!isConfirm) {
+          if (cancelCallback) {
             cancelCallback();
           }
           return false;
-        }else {
-          if (confirmCallback){
+        } else {
+          if (confirmCallback) {
             window.formChange = false;
             window.formEdition = false;
             confirmCallback();
           }
         }
       });
-      } else {
-        if (confirmCallback){
-          confirmCallback();
-        }
+    } else {
+      if (confirmCallback){
+        confirmCallback();
       }
-    };
+    }
+  };
 
   window.onerror = function (errorMsg, fileURI, lineNumber, column, errorObj) {
     // $.ajax({
