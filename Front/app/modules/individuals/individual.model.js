@@ -27,11 +27,13 @@ define([
       uiTabs: [
         {
           name: 'standard',
-          label: 'Standard'
+          label: 'Standard',
+          typeObj : 1
         },
         {
-          name: 'unidentified',
-          label: 'Unidentified'
+          name: 'Non identified',
+          label: 'Unidentified',
+          typeObj : 2
         }
       ],
 

@@ -63,7 +63,11 @@ define([
         this.model.set('type', 'number');
       }
       this.isTermError = false;
-
+      this.options = options.schema.options;
+      var value;
+      if (options.model) {
+        value = options.model.get(options.schema.name) || options.value;
+      }
 
       if (value) {
         this.model.set('value', value);
@@ -188,6 +192,46 @@ define([
       return this;
     },
 
+    getNewFunc: function(ctx) {
+      var _this = this;
+      switch (ctx.model.get('type')){
+        case 'individuals':
+          var data;
+          if(ctx.model.get('objectTypeLabel').toLowerCase() !== 'standard'){
+            ctx.filters.update();
+            data = {};
+            for (var i = 0; i < ctx.filters.criterias.length; i++) {
+              data[ctx.filters.criterias[i]['Column']] = ctx.filters.criterias[i]['Value'];
+            }
+          } else{
+            data = null;
+          }
+          _this.regionManager.get('modal').show(new _this.NewView({
+            objectType: ctx.model.get('objectType') || 1,
+            data: data
+          }));
+          break;
+
+        case 'monitoredSites':
+            _this.regionManager.get('modal').show(new _this.NewView({
+              objectType: ctx.model.get('objectType')
+            }));
+            break;
+
+        case 'sensors':
+            ctx.ui.btnNew.tooltipList({
+              position: 'top',
+              availableOptions: ctx.availableTypeObj,
+              liClickEvent: function(liClickValue) {
+                _this.regionManager.get('modal').show(new _this.NewView({
+                  objectType: liClickValue
+                }));
+              },
+            });
+            break;
+      }
+    },
+
     showPicker: function(){
       this.regionManager.get('modal').show(this.pickerView = new this.PickerView());
       $('#modal').fadeIn('fast');
@@ -229,29 +273,21 @@ define([
           _this.displayErrorMsg(false);
           _this.hidePicker();
         },
+
         back: function(e){
           e.preventDefault();
           _this.hidePicker();
           this.model.set('objectType', 1);
         },
+
+        afterShow: function(){
+          if(_this.options && _this.options.withToggle){
+            this.$el.find('.js-nav-tabs').removeClass('hide');
+          }
+        },
         new: function(e){
           e.preventDefault();
-
-          if(this.model.get('availableOptions')){
-            this.ui.btnNew.tooltipList({
-              position: 'top',
-              availableOptions: this.model.get('availableOptions'),
-              liClickEvent: function(liClickValue) {
-                _this.regionManager.get('modal').show(new _this.NewView({
-                  objectType: liClickValue
-                }));
-              },
-            });
-          } else {
-            _this.regionManager.get('modal').show(new _this.NewView({
-              objectType: this.model.get('objectType')
-            }));
-          }
+          _this.getNewFunc(this);
         },
       });
     },
@@ -313,5 +349,6 @@ define([
       var win = window.open(url, '_blank');
       win.focus();
     }
+
   });
 });
