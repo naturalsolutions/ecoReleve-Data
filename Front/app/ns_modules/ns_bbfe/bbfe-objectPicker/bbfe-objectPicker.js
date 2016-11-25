@@ -194,12 +194,13 @@ define([
         case 'individuals':
           var data;
           if(ctx.model.get('objectTypeLabel').toLowerCase() !== 'standard'){
+            ctx.com.components = [];
             ctx.filters.update();
             data = {};
             for (var i = 0; i < ctx.filters.criterias.length; i++) {
               data[ctx.filters.criterias[i]['Column']] = ctx.filters.criterias[i]['Value'];
             }
-          } else{
+          } else {
             data = null;
           }
           _this.regionManager.get('modal').show(new _this.NewView({
@@ -209,22 +210,22 @@ define([
           break;
 
         case 'monitoredSites':
-            _this.regionManager.get('modal').show(new _this.NewView({
-              objectType: ctx.model.get('objectType')
-            }));
-            break;
+          _this.regionManager.get('modal').show(new _this.NewView({
+            objectType: ctx.model.get('objectType')
+          }));
+          break;
 
         case 'sensors':
-            ctx.ui.btnNew.tooltipList({
-              position: 'top',
-              availableOptions: ctx.availableTypeObj,
-              liClickEvent: function(liClickValue) {
-                _this.regionManager.get('modal').show(new _this.NewView({
-                  objectType: liClickValue
-                }));
-              },
-            });
-            break;
+          ctx.ui.btnNew.tooltipList({
+            position: 'top',
+            availableOptions: ctx.availableTypeObj,
+            liClickEvent: function(liClickValue) {
+              _this.regionManager.get('modal').show(new _this.NewView({
+                objectType: liClickValue
+              }));
+            },
+          });
+          break;
       }
     },
 
@@ -264,7 +265,7 @@ define([
         onRowClicked: function(row){
           var id = row.data.ID;
           var displayValue = row.data[_this.usedLabel];
-          _this.setValue(id,displayValue);
+          _this.setValue(id, displayValue);
           _this.isTermError = false;
           _this.displayErrorMsg(false);
           _this.hidePicker();
