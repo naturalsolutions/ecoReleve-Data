@@ -295,7 +295,7 @@ define([
       var _this = this;
       this.initRules();
 
-      if(this.formRegion){
+      if(this.formRegion.html){
         this.formRegion.html(this.BBForm.el);
       } else {
         return;
