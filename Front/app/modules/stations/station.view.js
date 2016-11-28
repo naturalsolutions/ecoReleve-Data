@@ -102,8 +102,7 @@ define([
         $("#dateTimePicker").on("dp.change", function (e) {
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
          });
-        _this.filedAcitivityId = this.model.get('fieldActivityId');
-        _this.displayProtos();
+
       };
 
       this.nsForm.savingError = function (response) {
@@ -133,7 +132,11 @@ define([
           _this.fieldActivityId = _this.model.get('fieldActivityId');
         }
       };
-
+      
+      $.when(this.nsForm.jqxhr).then(function(){
+        _this.fieldActivityId = this.model.get('fieldActivityId');
+        _this.displayProtos();
+      })
 
     },
 
