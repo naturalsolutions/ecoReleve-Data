@@ -24,7 +24,6 @@ define([
       'change .js-proto-picker': 'addProtoFromList' 
     },
 
-
     initialize: function(options) {
       this.parent = options.parent;
       this.collection = new Backbone.Collection();
@@ -99,7 +98,6 @@ define([
         getViewFromUrlParams: function(params){
           var view;
           var views = this.children._views;
-
           
           //search obs
           if(params.obs && params.obs != 0){
@@ -161,7 +159,13 @@ define([
 
           var hash = window.location.hash.split('?');
           var url = hash[0] + '?proto=' + view.model.get('ID') + '&obs=' + view.model.get('currentObs');
-          Backbone.history.navigate(url, {trigger: true});          
+          
+
+          if(view.model.get('currentObs') == 0){
+            $.xhrPool.allowAbort = false;
+          }
+          Backbone.history.navigate(url, {trigger: true});
+          $.xhrPool.allowAbort = true;
 
           view.model.set('stationId', _this.model.get('stationId'));
           view.$el.addClass('active');
@@ -170,7 +174,6 @@ define([
             model: view.model
           }));
 
-          
         },
 
         onShow: function(){

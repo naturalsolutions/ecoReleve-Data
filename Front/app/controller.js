@@ -90,7 +90,8 @@ define([
     },
 
     station: function(id, proto, obs) {
-      if(this.rgMain.currentView instanceof  LytStation){
+
+      if(this.rgMain.currentView instanceof LytStation){
         this.rgMain.currentView.reload({
           id: id,
           proto: proto,
@@ -126,9 +127,11 @@ define([
         }));
       }
     },
+
     individuals: function() {
       this.rgMain.show(new LytIndividuals());
     },
+
     newIndividual: function(objectType) {
       this.rgMain.show(new LytIndividualsNew({objectType: objectType}));
     },
@@ -144,9 +147,11 @@ define([
         }));
       }
     },
+
     monitoredSites: function() {
       this.rgMain.show(new LytMonitoredSites());
     },
+
     newMonitoredSite: function(type) {
       this.rgMain.show(new LytMonitoredSitesNew());
     },
@@ -162,9 +167,11 @@ define([
         }));
       }
     },
+    
     sensors: function() {
       this.rgMain.show(new LytSensors());
     },
+    
     newSensor: function(objectType) {
       this.rgMain.show(new LytSensorsNew({objectType: objectType}));
     },
@@ -172,6 +179,7 @@ define([
     validate: function() {
       this.rgMain.show(new LytSensorValidate());
     },
+    
     validateType: function(type) {
       this.rgMain.show(new LytSensorValidateType({
         type: type
@@ -205,13 +213,5 @@ define([
       this.rgMain.show(new LytExport());
     },
 
-    checkAjax : function(){
-      var xhrPool = window.xhrPool;
-
-      for(var i=0; i<xhrPool.length; i++){
-         xhrPool[i].abort();
-      }
-       window.xhrPool = [];
-    }
   });
 });
