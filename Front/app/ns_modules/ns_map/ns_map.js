@@ -831,6 +831,7 @@ define([
         data: data,
         context: this
       }).done(function(geoJson) {
+        this.geoJson = geoJson;
         if (this.cluster){
           this.updateLayers(geoJson);
         }else{
