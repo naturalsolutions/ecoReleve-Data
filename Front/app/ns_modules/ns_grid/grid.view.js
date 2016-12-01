@@ -294,6 +294,7 @@ define([
         method: 'GET',
         context: this,
         data: {
+          typeObj: this.model.get('objectType'),
           name: this.name || 'default'
         }
       }).done( function(response) {
