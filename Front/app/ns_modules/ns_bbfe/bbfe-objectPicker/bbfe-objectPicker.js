@@ -5,7 +5,6 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
-
   'backbone-forms',
   'requirejs-text!./tpl-bbfe-objectPicker.html',
 ], function(
@@ -269,6 +268,14 @@ define([
           _this.isTermError = false;
           _this.displayErrorMsg(false);
           _this.hidePicker();
+        },
+
+        setDefaultOperatorFilter: function(){
+          if(this.model.get('objectType') == 2){
+            this.firstOperator = 'is null';
+          } else {
+            this.firstOperator = null;
+          }
         },
 
         back: function(e){
