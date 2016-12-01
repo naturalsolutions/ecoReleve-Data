@@ -89,7 +89,7 @@ define([
 
       if (fileType != 'GPX') {
         _this.importedFile = false;
-        this.swalError('error file type');
+        this.swalError('error file type',null);
         this.model.set('data_FileName', '');
         $('#fileNameSelected').text('No file selected');
         this.errors = true;
@@ -108,9 +108,8 @@ define([
           if (_this.wayPointList.length > 0) {
             if (errosList.length > 0) {
                 _this.deferred.resolve();
-                _this.displayErrors('file error');
                 _this.errors = true;
-                _this.swalError('file error : we can\'t parse it');
+                _this.swalError('File error: we can\'t parse it','Name of waypoint(s) with errors:\n '+errosList);
             }
           } else {
             _this.errors = false;
@@ -125,11 +124,11 @@ define([
       this.swalError(errors);
     },
 
-    swalError: function(title) {
+    swalError: function(title,content) {
       var _this = this;
       Swal({
         title: title,
-        text: 'error',
+        text: content,
         type: 'error',
         showCancelButton: false,
         confirmButtonColor: 'rgb(147, 14, 14)',
@@ -158,7 +157,6 @@ define([
 
     check: function(e) {
       var error = this.nsform.BBForm.commit();
-      console.log('check', error);
             if(error){
               return false;
             }else{
@@ -218,7 +216,6 @@ define([
     },
 
     setWaypointListWithForm : function(formData){
-      console.log("bim on veut set les fieldworkers");
       var fwList = [];
       _.forEach(formData.FieldWorkers,function(curFw){
         fwList.push(parseInt(curFw.FieldWorker));

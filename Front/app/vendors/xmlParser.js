@@ -33,7 +33,7 @@ define([
             // possible formats   // <cmt>25-FEB-16 18:02</cmt> or <cmt>04-03-16 12:04</cmt>  <cmt>2010-04-27T08:02:00Z</cmt>
                 var tm = waypointTimeTag.split('-');
                 var tab = waypointTimeTag.split(' ');
-               
+
                 if(tm[0].length == 4 ){
                   //<cmt>2010-04-27T08:02:00Z</cmt>
                   dateStr = moment(waypointTimeTag).format('DD/MM/YYYY HH:mm');
@@ -50,14 +50,14 @@ define([
                } else {
                 //<cmt>2010-04-27T08:02:00Z</cmt>
                   dateStr = moment(waypointTimeTag).format('DD/MM/YYYY HH:mm');
-               }    
+               }
           } else {
             waypointTimeTag = $(this).find('time').text();
             dateStr = moment(waypointTimeTag).format('DD/MM/YYYY HH:mm');
           }
           var timestamp =  moment(dateStr, 'DD/MM/YYYY HH:mm').unix();
           nbWaypoints += 1;
-          if (lat != '' && lon != '' && dateStr != 'Invalid date' && time != ' Invalid date') {
+          if (lat != '' && lon != '' && dateStr != 'Invalid date' && time != 'Invalid date') {
             id += 1;
             //var idwpt = id;
             waypoint.id = id;
@@ -94,28 +94,28 @@ define([
 
     }, isValidDate : function(strDate) {
         var isvalid = false;
-        if(moment(strDate,"DD-MM-YY HH:mm").isValid()){
+        if(moment(strDate,"DD-MM-YY HH:mm", true).isValid()){
           isvalid = true;
         }
-        if(moment(strDate,"DD-MM-YY HH:mm:ss").isValid()){
+        if(moment(strDate,"DD-MM-YY HH:mm:ss", true).isValid()){
           isvalid = true;
         }
-         if(moment(strDate,"DD-MM-YYYY HH:mm:ss").isValid()){
+         if(moment(strDate,"DD-MM-YYYY HH:mm:ss", true).isValid()){
           isvalid = true;
         }
-         if(moment(strDate,"DD-MM-YYYY HH:mm").isValid()){
+         if(moment(strDate,"DD-MM-YYYY HH:mm", true).isValid()){
           isvalid = true;
         }
-         if(moment(strDate,"YYYY-MM-DD HH:mm").isValid()){
+         if(moment(strDate,"YYYY-MM-DD HH:mm", true).isValid()){
           isvalid = true;
         }
-         if(moment(strDate,"YYYY-MM-DD HH:mm:ss").isValid()){
+         if(moment(strDate,"YYYY-MM-DD HH:mm:ss", true).isValid()){
           isvalid = true;
         }
-        if(moment(strDate,"YY-MMM-DD HH:mm:ss").isValid()){
+        if(moment(strDate,"YY-MMM-DD HH:mm:ss", true).isValid()){
           isvalid = true;
         }
-        if(moment(strDate,"YY-MMM-DD HH:mm").isValid()){
+        if(moment(strDate,"YY-MMM-DD HH:mm", true).isValid()){
           isvalid = true;
         }
         if(moment(strDate).isValid()){
@@ -126,4 +126,3 @@ define([
     }
   };
 });
-
