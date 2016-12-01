@@ -21,8 +21,8 @@ define([
           var ele = $(this).find('ele').text() || 0 ;
           ele = parseFloat(ele);
           // convert lat & long to number and round to 5 decimals
-          var latitude = parseFloat(lat);// parseFloat(lat).toFixed(5);
-          var longitude = parseFloat(lon);
+          var latitude = parseFloat(lat).toFixed(5);// parseFloat(lat).toFixed(5);
+          var longitude = parseFloat(lon).toFixed(5);
           var waypointName = $(this).find('name').text();
           var waypointTime, time;
           // if tag "cmt" exisits, take date from it, else use tag "time"
