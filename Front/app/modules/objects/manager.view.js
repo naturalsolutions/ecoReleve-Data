@@ -138,6 +138,7 @@ define([
         filterContainer: this.ui.filter,
         objectType: this.model.get('objectType'),
         filtersValues: this.defaultFilters,
+        firstOperator: this.firstOperator,
       });
     },
 

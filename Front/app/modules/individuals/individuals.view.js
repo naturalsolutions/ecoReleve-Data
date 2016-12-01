@@ -28,9 +28,14 @@ define([
         } else {
           this.$el.find('.js-link-new').html('<span class="reneco reneco-entrykey"></span> &nbsp; Save from criteria');
         }
+        this.setDefaultOperatorFilter();
 				this.onShow();
   	  }
   	},
+
+    setDefaultOperatorFilter: function(){
+      // to extend
+    },
 
     new: function(){
       var url = '#' + this.model.get('type') + '/new/'+this.availableTypeObj[0].val;
