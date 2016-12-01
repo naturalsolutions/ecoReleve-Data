@@ -55,7 +55,8 @@ define([
             waypointTimeTag = $(this).find('time').text();
             dateStr = moment(waypointTimeTag).format('DD/MM/YYYY HH:mm');
           }
-          var timestamp =  moment(dateStr, 'DD/MM/YYYY HH:mm').unix();
+          // var timestamp =  moment(dateStr, 'DD/MM/YYYY HH:mm').unix();
+          var timestamp =  moment(dateStr, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
           nbWaypoints += 1;
           if (lat != '' && lon != '' && dateStr != 'Invalid date' && time != 'Invalid date') {
             id += 1;
