@@ -1,4 +1,4 @@
-<div class="col-xs-4 full-height no-padding">
+
   <div class="toolbar top">
     <a class="js-link-back btn pull-left" href="#release">
       <span class="reneco reneco-back"></span>
@@ -6,46 +6,15 @@
       <span data-i18n="button.back">Back</span>
     </a>
 
-    <% if (typeof(uiTabs) !== 'undefined') { %>
-      <ul class="js-nav-tabs nav nav-tabs pull-right modal-visible">
-        <% _.each(uiTabs, function(uiTab, index){ %>
-            <li id="<%= uiTab.name %>" class="tab-ele <%= (index == 0)? 'active' : '' %>">
-              <a class="tab-link"><%= uiTab.label %></a>
-            </li>
-        <% }); %>
-      </ul>
-    <% } %>
-  </div>
-
-  <div class="crop2 clearfix">
-    <div id="filtersRelease" class="js-filters filter-no-padding"></div>
-  </div>
-  <div class="toolbar bottom">
-    <button id="clearRel" class="js-btn-clear btn pull-left">Clear</button>
-    <button id="btnFilterRel" class="js-btn-filter btn btn-success pull-right">
-      <span class="reneco reneco-search"></span>
-      &nbsp;Search
-    </button>
-  </div>
-</div>
-
-<div class="col-xs-8 full-height dark no-padding">
-  <div class="toolbar top">
-    <legend class="inherit pull-left">
+        <legend class="inherit pull-left">
       Station: <span class="js-station-name"></span> | Date: <span class="js-station-date"></span>
     </legend>
-    <!-- <legend class="inherit pull-right">
-      <span id="nbSelected">0</span> indiv. selected for release /
-      <span class="js-nb-total">0</span>
-    </legend> -->
-  </div>
 
-  <div class="js-rg-grid crop2 col-xs-12 no-padding"></div>
-
-  <div class="toolbar bottom">
     <button class="btn btn-success pull-right" id='release'>
       <span class="icon reneco reneco-to_release" data-position="top"></span>
       <span >Release&nbsp;</span>
     </button>
   </div>
-</div>
+
+  <div class="js-rg-grid crop1 col-xs-12 no-padding"></div>
+

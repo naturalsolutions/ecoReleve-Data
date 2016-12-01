@@ -5,10 +5,10 @@ define([
   'marionette',
   'ag-grid',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
-
+  './custom.text.filter',
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, utils_1) {
+], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter) {
 
   'use strict';
 
@@ -146,19 +146,22 @@ define([
 
     formatColumns: function(columnDefs){
       var _this = this;
-      var filter = {
-        'string' : 'text',
-        'integer': 'number',
-      };
       columnDefs.map(function(col, i) {
 
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
 
-
         if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
           _this.formatSelectColumn(col)
+        }
+        
+        switch(col.filter){
+          case 'number':
+            col.filter = 'number';
+            return;
+          default:
+            col.filter = CustomTextFilter;
         }
         //draft
         if(col.cell == 'autocomplete'){
@@ -611,7 +614,7 @@ define([
         return;
       }
 
-      AgGrid.TextFilter.prototype.afterGuiAttached = function(options) {
+      CustomTextFilter.prototype.afterGuiAttached = function(options) {
         this.eFilterTextField.focus();
         $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
         $(this.eGui).find('input, select').each(function(){
