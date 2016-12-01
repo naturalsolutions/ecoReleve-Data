@@ -8,13 +8,13 @@ define([
   'ns_modules/ns_com',
   'ns_grid/grid.view',
   'ns_filter/filters',
-
+  'config',
   'tooltipster-list',
   'i18n'
 
 ], function(
   $, _, Backbone, Marionette, Swal, Translater,
-  Com, GridView, NsFilter
+  Com, GridView, NsFilter, Config
 ) {
 
   'use strict';
@@ -151,7 +151,7 @@ define([
     },
 
     export: function(){
-        var url = this.model.get('type') + '/export?criteria=' + JSON.stringify(this.gridView.filters);
+        var url = Config.coreUrl+this.model.get('type') + '/export?criteria=' + JSON.stringify(this.gridView.filters);
         var link = document.createElement('a');
         link.classList.add('DowloadLinka');
 
