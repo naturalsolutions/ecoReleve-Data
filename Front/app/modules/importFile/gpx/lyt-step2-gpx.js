@@ -135,13 +135,13 @@ define([
 
       var columnsDefs = [
         {
-          field: 'id',
-          headerName: 'ID',
-          hide: true,
-        },{
           field: 'name',
           headerName: 'Name',
           checkboxSelection: true,
+        },{
+          field: 'id',
+          headerName: 'ID',
+          hide: true,
         },{
           field: 'displayDate',
           headerName: 'Date',
