@@ -129,6 +129,14 @@ define([
         return text;
       };
 
+      var latRenderer = function(params){
+        return params.data.latitude.toFixed(5);
+      };
+
+      var lonRenderer = function(params){
+        return params.data.longitude.toFixed(5);
+      };
+
       var dateTimestampRender = function(params){
         return Moment.unix(params.data.displayDate).format("DD/MM/YYYY HH:mm:SS");
       };
@@ -149,9 +157,11 @@ define([
         },{
           field: 'latitude',
           headerName: 'LAT',
+          cellRenderer: latRenderer
         },{
           field: 'longitude',
           headerName: 'LON',
+          cellRenderer: lonRenderer
         },{
           editable: true,
           field: 'fieldActivity',
@@ -168,6 +178,7 @@ define([
         gridOptions: {
           rowData: this.data,
           enableFilter: true,
+          singleClickEdit : true,
           rowSelection: 'multiple',
           onRowClicked: function(row){
             if(_this.gridView.gridOptions.api.getFocusedCell().column.colId != 'fieldActivity'){
