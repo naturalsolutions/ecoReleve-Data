@@ -82,7 +82,7 @@ def getForms(request) :
         typeMonitoredSite = request.params['ObjectType']
     else:
         typeMonitoredSite = 1
-        
+
     ModuleName = 'MonitoredSiteForm'
     Conf = session.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = typeMonitoredSite)
@@ -222,7 +222,7 @@ def insertMonitoredSite(request):
     if not isinstance(data,list):
         return insertOneNewMonitoredSite(request)
     else :
-        print('_______INsert LIST')
+        return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewMonitoredSite (request) :
