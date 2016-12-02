@@ -243,7 +243,7 @@ class ListObjectWithDynProp():
         # change thesaural term into laguage user
         userLng = threadlocal.get_current_request().authenticated_userid[
             'userlanguage']
-        #print(thesaurusDictTraduction['inconnu'][userLng])
+
         for row in result:
             row = dict(map(lambda k: self.tradThesaurusTerm
                            (k, listWithThes, userLng.lower()), row.items()))

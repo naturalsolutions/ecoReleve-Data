@@ -212,17 +212,6 @@ class ProtocoleType(Base,ObjectTypeWithDynProp):
     ProtocoleType_ObservationDynProps = relationship('ProtocoleType_ObservationDynProp',backref='ProtocoleType')
     Observations = relationship('Observation',backref='ProtocoleType')
 
-    # def AddDynamicPropInSchemaDTO(self,SchemaDTO,FrontModules,DisplayMode) :
-    #     ObjectTypeWithDynProp.AddDynamicPropInSchemaDTO(self,SchemaDTO,FrontModules,DisplayMode)
-    #     print(self.Status)
-    #     if self.Status == 8:
-    #         print('inaddDYnpropSHEMA')
-    #         Editable = (DisplayMode.lower()  == 'edit')
-    #         Field = self.ObjContext.query(ModuleForms).filter(ModuleForms.InputType == 'GridRanged').first()
-
-    #         SchemaDTO.update(Field.GetDTOFromConf(Editable))
-
-
 #--------------------------------------------------------------------------
 class ProtocoleType_ObservationDynProp(Base):
 
