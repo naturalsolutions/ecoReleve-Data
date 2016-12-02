@@ -44,16 +44,6 @@ define([
             this.createGui();
         },
 
-        exist: function(val) {
-            var present = false;
-            var tabLength = this.tabSelect.length;
-            for (var i = 0; i < tabLength && !present; i += 1) {
-                if (this.tabSelect[i] === val)
-                    present = true;
-            }
-            return present;
-        },
-
         dateClean: function() {
             $(this.$select).val("");
 
@@ -134,16 +124,6 @@ define([
                     } else this.setFilter(null);
                 }
             };
-        },
-
-        loadFieldsActivity: function() {
-            return $.ajax({
-                url: 'fieldActivity',
-                method: 'GET',
-                context: this,
-            }).done(function(data) {
-                this.fieldActivityList = data;
-            });
         },
 
         doesFilterPass: function(params) {
