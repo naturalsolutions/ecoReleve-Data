@@ -114,6 +114,7 @@ define([
     },
 
     init: function(){
+      var _this = this;
       //set defaults icons styles
       L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images';
       this.selectedIcon = new L.DivIcon({className  : 'custom-marker selected'});
@@ -130,18 +131,20 @@ define([
         keyboard: false, //fix scroll window
         attributionControl: false,
       });
-      this.google();
 
-      if(this.url){
-        this.requestGeoJson(this.url);
-      }else{
-        if (this.cluster){
-          this.initClusters(this.geoJson);
+      $.when(this.google()).then(function(){
+        if(_this.url){
+          _this.requestGeoJson(_this.url);
         }else{
-          this.initLayer(this.geoJson);
+          if (_this.cluster){
+            _this.initClusters(_this.geoJson);
+          }else{
+            _this.initLayer(_this.geoJson);
+          }
+          _this.ready();
         }
-        this.ready();
-      }
+      });
+
     },
 
     ready: function(){
@@ -160,7 +163,8 @@ define([
 
     google: function(){
       var _this = this;
-      GoogleMapsLoader.done(function(){
+
+      return GoogleMapsLoader.done(function(){
         var CustomGMap = L.Google.extend({
           _initMapObject: function() {
             if (!this._ready) return;
@@ -199,7 +203,7 @@ define([
         });
         _this.map.addLayer(_this.googleLayer);
       }).fail(function(){
-        console.error("ERROR: Google maps library failed to load");
+        console.error('Google maps library failed to load');
       });
     },
 

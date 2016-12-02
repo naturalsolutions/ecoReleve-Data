@@ -57,6 +57,10 @@ define([
       } else {
         this.model.set('id', options.id);
         this.model.set('stationId', options.id);
+        this.model.set('urlParams', {
+          proto: options.proto,
+          obs: options.obs
+        });
         this.displayStation();
       }
     },
