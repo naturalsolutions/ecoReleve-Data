@@ -53,7 +53,7 @@ var template = '<div>' +
     '<option value="3">[NOT EQUALS]</option>' +
     '<option value="4">[STARTS WITH]</option>' +
     '<option value="5">[ENDS WITH]</option>' +
-    '<option value="6">IN</option>' +
+    '<option value="6">In</option>' +
     '</select>' +
     '</div>' +
     '<div>' +
