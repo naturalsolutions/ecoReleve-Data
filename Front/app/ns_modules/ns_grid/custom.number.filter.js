@@ -48,11 +48,12 @@
 var template = '<div>' +
     '<div>' +
     '<select class="ag-filter-select" id="filterType">' +
-    '<option value="1">[CONTAINS]</option>' +
-    '<option value="2">[EQUALS]</option>' +
-    '<option value="3">[NOT EQUALS]</option>' +
-    '<option value="4">[STARTS WITH]</option>' +
-    '<option value="5">[ENDS WITH]</option>' +
+    '<option value="1">[EQUALS]</option>' +
+    '<option value="2">[NOT EQUAL]</option>' +
+    '<option value="3">[LESS THAN]</option>' +
+    '<option value="4">[LESS THAN OR EQUAL]</option>' +
+    '<option value="5">[GREATER THAN]</option>' +
+    '<option value="6">[GREATER THAN OR EQUAL]</option>' +
     '<option value="7">In</option>' +
     '</select>' +
     '</div>' +
@@ -63,16 +64,17 @@ var template = '<div>' +
     '<button type="button" id="applyButton">[APPLY FILTER]</button>' +
     '</div>' +
     '</div>';
-var CONTAINS = 1;
-var EQUALS = 2;
-var NOT_EQUALS = 3;
-var STARTS_WITH = 4;
-var ENDS_WITH = 5;
+var EQUALS = 1;
+var NOT_EQUAL = 2;
+var LESS_THAN = 3;
+var LESS_THAN_OR_EQUAL = 4;
+var GREATER_THAN = 5;
+var GREATER_THAN_OR_EQUAL = 6;
 var IN = 7;
 return (function () {
-    function TextFilter() {
+    function NumberFilter() {
     }
-    TextFilter.prototype.init = function (params) {
+    NumberFilter.prototype.init = function (params) {
         this.filterParams = params.filterParams;
         this.applyActive = this.filterParams && this.filterParams.apply === true;
         this.filterChangedCallback = params.filterChangedCallback;
@@ -80,44 +82,51 @@ return (function () {
         this.localeTextFunc = params.localeTextFunc;
         this.valueGetter = params.valueGetter;
         this.createGui();
-        this.filterText = null;
-        this.filterType = CONTAINS;
+        this.filterNumber = null;
+        this.filterType = EQUALS;
         this.createApi();
     };
-    TextFilter.prototype.onNewRowsLoaded = function () {
+    NumberFilter.prototype.onNewRowsLoaded = function () {
         var keepSelection = this.filterParams && this.filterParams.newRowsAction === 'keep';
         if (!keepSelection) {
-            this.api.setType(CONTAINS);
+            this.api.setType(EQUALS);
             this.api.setFilter(null);
         }
     };
-    TextFilter.prototype.afterGuiAttached = function () {
+    NumberFilter.prototype.afterGuiAttached = function () {
         this.eFilterTextField.focus();
     };
-    TextFilter.prototype.doesFilterPass = function (node) {
-        if (!this.filterText) {
+    NumberFilter.prototype.doesFilterPass = function (node) {
+
+        if (this.filterNumber === null) {
             return true;
         }
         var value = this.valueGetter(node);
-        if (!value) {
+        if (!value && value !== 0) {
             return false;
         }
-
-
-        var valueLowerCase = value.toString().toLowerCase();
+        var valueAsNumber;
+        if (typeof value === 'number') {
+            valueAsNumber = value;
+        }
+        else {
+            valueAsNumber = parseFloat(value);
+        }
         switch (this.filterType) {
-            case CONTAINS:
-                return valueLowerCase.indexOf(this.filterText) >= 0;
             case EQUALS:
-                return valueLowerCase === this.filterText;
-            case NOT_EQUALS:
-                return valueLowerCase != this.filterText;
-            case STARTS_WITH:
-                return valueLowerCase.indexOf(this.filterText) === 0;
-            case ENDS_WITH:
-                var index = valueLowerCase.lastIndexOf(this.filterText);
-                return index >= 0 && index === (valueLowerCase.length - this.filterText.length);
+                return valueAsNumber === this.filterNumber;
+            case LESS_THAN:
+                return valueAsNumber < this.filterNumber;
+            case GREATER_THAN:
+                return valueAsNumber > this.filterNumber;
+            case LESS_THAN_OR_EQUAL:
+                return valueAsNumber <= this.filterNumber;
+            case GREATER_THAN_OR_EQUAL:
+                return valueAsNumber >= this.filterNumber;
+            case NOT_EQUAL:
+                return valueAsNumber != this.filterNumber;
             case IN: 
+                console.log(this.filterText);
                 var tab = this.filterText.split(',');
                 if(tab.length <= 1){
                     tab = this.filterText.split(';');
@@ -127,7 +136,7 @@ return (function () {
                 }
                     
                 for (var i=0; i< tab.length; i++){
-                    if ((tab[i].toLowerCase() == valueLowerCase)) {
+                    if ((tab[i].toLowerCase() == valueAsNumber)) {
                         return true;
                     }
                 }
@@ -138,25 +147,24 @@ return (function () {
                 return false;
         }
     };
-    TextFilter.prototype.getGui = function () {
+    NumberFilter.prototype.getGui = function () {
         return this.eGui;
     };
-    TextFilter.prototype.isFilterActive = function () {
-        return this.filterText !== null;
+    NumberFilter.prototype.isFilterActive = function () {
+        return this.filterNumber !== null;
     };
-    TextFilter.prototype.createTemplate = function () {
+    NumberFilter.prototype.createTemplate = function () {
         return template
             .replace('[FILTER...]', this.localeTextFunc('filterOoo', 'Filter...'))
             .replace('[EQUALS]', this.localeTextFunc('equals', 'Equals'))
-            .replace('[NOT EQUALS]', this.localeTextFunc('notEquals', 'Not equals'))
-            .replace('[CONTAINS]', this.localeTextFunc('contains', 'Contains'))
-            .replace('[STARTS WITH]', this.localeTextFunc('startsWith', 'Starts with'))
-            .replace('[ENDS WITH]', this.localeTextFunc('endsWith', 'Ends with'))
+            .replace('[LESS THAN]', this.localeTextFunc('lessThan', 'Less than'))
+            .replace('[GREATER THAN]', this.localeTextFunc('greaterThan', 'Greater than'))
+            .replace('[LESS THAN OR EQUAL]', this.localeTextFunc('lessThanOrEqual', 'Less than or equal'))
+            .replace('[GREATER THAN OR EQUAL]', this.localeTextFunc('greaterThanOrEqual', 'Greater than or equal'))
+            .replace('[NOT EQUAL]', this.localeTextFunc('notEqual', 'Not equal'))
             .replace('[APPLY FILTER]', this.localeTextFunc('applyFilter', 'Apply Filter'));
     };
-    TextFilter.prototype.createGui = function () {
-        
-
+    NumberFilter.prototype.createGui = function () {
         this.eGui = utils_1.Utils.loadTemplate(this.createTemplate());
         this.eFilterTextField = this.eGui.querySelector("#filterText");
         this.eTypeSelect = this.eGui.querySelector("#filterType");
@@ -164,7 +172,7 @@ return (function () {
         this.eTypeSelect.addEventListener("change", this.onTypeChanged.bind(this));
         this.setupApply();
     };
-    TextFilter.prototype.setupApply = function () {
+    NumberFilter.prototype.setupApply = function () {
         var _this = this;
         if (this.applyActive) {
             this.eApplyButton = this.eGui.querySelector('#applyButton');
@@ -176,67 +184,68 @@ return (function () {
             utils_1.Utils.removeElement(this.eGui, '#applyPanel');
         }
     };
-    TextFilter.prototype.onTypeChanged = function () {
+    NumberFilter.prototype.onTypeChanged = function () {
         this.filterType = parseInt(this.eTypeSelect.value);
         this.filterChanged();
     };
-    TextFilter.prototype.onFilterChanged = function () {
-        var filterText = utils_1.Utils.makeNull(this.eFilterTextField.value);
-        if (filterText && filterText.trim() === '') {
-            filterText = null;
-        }
-        var newFilterText;
-        if (filterText !== null && filterText !== undefined) {
-            newFilterText = filterText.toLowerCase();
-        }
-        else {
-            newFilterText = null;
-        }
-        if (this.filterText !== newFilterText) {
-            this.filterText = newFilterText;
-            this.filterChanged();
-        }
-    };
-    TextFilter.prototype.filterChanged = function () {
+    NumberFilter.prototype.filterChanged = function () {
         this.filterModifiedCallback();
         if (!this.applyActive) {
             this.filterChangedCallback();
         }
     };
-    TextFilter.prototype.createApi = function () {
+    NumberFilter.prototype.onFilterChanged = function () {
+        var filterText = utils_1.Utils.makeNull(this.eFilterTextField.value);
+        //mjaouen
+        this.filterText = filterText;
+        //
+        if (filterText && filterText.trim() === '') {
+            filterText = null;
+        }
+        var newFilter;
+        if (filterText !== null && filterText !== undefined) {
+            newFilter = parseFloat(filterText);
+        }
+        else {
+            newFilter = null;
+        }
+        if (this.filterNumber !== newFilter) {
+            this.filterNumber = newFilter;
+            this.filterChanged();
+        }
+    };
+    NumberFilter.prototype.createApi = function () {
         var that = this;
         this.api = {
             EQUALS: EQUALS,
-            NOT_EQUALS: NOT_EQUALS,
-            CONTAINS: CONTAINS,
-            STARTS_WITH: STARTS_WITH,
-            ENDS_WITH: ENDS_WITH,
+            NOT_EQUAL: NOT_EQUAL,
+            LESS_THAN: LESS_THAN,
+            GREATER_THAN: GREATER_THAN,
+            LESS_THAN_OR_EQUAL: LESS_THAN_OR_EQUAL,
+            GREATER_THAN_OR_EQUAL: GREATER_THAN_OR_EQUAL,
             setType: function (type) {
                 that.filterType = type;
                 that.eTypeSelect.value = type;
             },
             setFilter: function (filter) {
                 filter = utils_1.Utils.makeNull(filter);
-                if (filter) {
-                    that.filterText = filter.toLowerCase();
-                    that.eFilterTextField.value = filter;
+                if (filter !== null && !(typeof filter === 'number')) {
+                    filter = parseFloat(filter);
                 }
-                else {
-                    that.filterText = null;
-                    that.eFilterTextField.value = null;
-                }
+                that.filterNumber = filter;
+                that.eFilterTextField.value = filter;
             },
             getType: function () {
                 return that.filterType;
             },
             getFilter: function () {
-                return that.filterText;
+                return that.filterNumber;
             },
             getModel: function () {
                 if (that.isFilterActive()) {
                     return {
                         type: that.filterType,
-                        filter: that.filterText
+                        filter: that.filterNumber
                     };
                 }
                 else {
@@ -254,10 +263,10 @@ return (function () {
             }
         };
     };
-    TextFilter.prototype.getApi = function () {
+    NumberFilter.prototype.getApi = function () {
         return this.api;
     };
-    return TextFilter;
+    return NumberFilter;
 })();
 
 });

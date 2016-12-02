@@ -6,9 +6,10 @@ define([
   'ag-grid',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
   './custom.text.filter',
+  './custom.number.filter',
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter) {
+], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter) {
 
   'use strict';
 
@@ -158,7 +159,7 @@ define([
         
         switch(col.filter){
           case 'number':
-            col.filter = 'number';
+            col.filter = CustomNumberFilter;
             return;
           default:
             col.filter = CustomTextFilter;
@@ -622,16 +623,15 @@ define([
         });
       };
 
-
-      AgGrid.NumberFilter.prototype.afterGuiAttached = function(options) {
+      CustomNumberFilter.prototype.afterGuiAttached = function(options) {
         this.eFilterTextField.focus();
         $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
         $(this.eGui).find('input, select').each(function(){
           $(this).addClass('form-control input-sm');
         });
-        $(this.eGui).find('input').each(function(){
-          $(this).attr('type', 'number');
-        });
+        // $(this.eGui).find('input').each(function(){
+        //   $(this).attr('type', 'number');
+        // });
       };
 
 
