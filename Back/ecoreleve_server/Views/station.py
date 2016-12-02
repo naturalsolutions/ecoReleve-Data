@@ -101,11 +101,9 @@ def getStationType(request):
 def getFormImportGPX(request):
     session = request.dbsession
     conf = session.query(FrontModules).filter(FrontModules.Name=='ImportFileForm' ).first()
-    print(conf.ModuleForms)
     response = {'schema':{}}
     inputs_ = session.query(ModuleForms).filter(ModuleForms.Module_ID==conf.ID).filter(ModuleForms.TypeObj==1).order_by(ModuleForms.FormOrder.asc()).all()
     for input_ in inputs_:
-        print(input_.Name)
         response['schema'][input_.Name] = input_.GetDTOFromConf(True)
 
     fields = []
@@ -190,7 +188,6 @@ def updateStation(request):
 @view_config(route_name= prefix, renderer='json', request_method = 'POST', permission = routes_permission[prefix]['POST'])
 def insertStation(request):
     data = request.json_body
-    print(data)
     if not isinstance(data,list):
         return insertOneNewStation(request)
     else :
@@ -362,7 +359,6 @@ def searchStation(request):
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
-            print(type(searchInfo['criteria']))
             for obj in searchInfo['criteria']:
                 if obj['Column'] == 'LastImported':
                     lastImported(obj, searchInfo)

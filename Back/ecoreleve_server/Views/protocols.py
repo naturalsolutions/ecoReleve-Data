@@ -99,7 +99,6 @@ def GetProtocolsofStation(request):
 
     except Exception as e:
         print_exc()
-        print(e)
         pass
     return response
 
@@ -289,12 +288,6 @@ def actionOnProtocols(request):
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
-
-# ------------------------------------------------------------------------------------------------------------------------- #
-# @view_config(route_name= prefixProt, renderer='json', request_method = 'GET')
-# def getListofProtocol (request):
-#     print(request.params)
-#     return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 

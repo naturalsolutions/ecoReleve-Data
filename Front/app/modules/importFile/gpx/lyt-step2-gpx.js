@@ -8,11 +8,13 @@ define([
   'ns_modules/ns_com',
   'ns_map/ns_map',
   'ns_grid/grid.view',
+  'ns_grid/customCellRenderer/decimal5Renderer',
+  'ns_grid/customCellRenderer/dateTimeRenderer',
   'moment',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,
-  Com, NsMap, GridView,Moment
+  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer, Moment
 ) {
 
   'use strict';
@@ -129,6 +131,10 @@ define([
         return text;
       };
 
+      // var decimal5Renderer = function(params){
+      //   return params.data[params.column.colId].toFixed(5);
+      // };
+
       var dateTimestampRender = function(params){
         return Moment.unix(params.data.displayDate).format("DD/MM/YYYY HH:mm:SS");
       };
@@ -145,13 +151,15 @@ define([
         },{
           field: 'displayDate',
           headerName: 'Date',
-          cellRenderer: dateTimestampRender
+          cellRenderer: DateTimeRenderer
         },{
           field: 'latitude',
           headerName: 'LAT',
+          cellRenderer: Decimal5Renderer
         },{
           field: 'longitude',
           headerName: 'LON',
+          cellRenderer: Decimal5Renderer
         },{
           editable: true,
           field: 'fieldActivity',
@@ -168,6 +176,7 @@ define([
         gridOptions: {
           rowData: this.data,
           enableFilter: true,
+          singleClickEdit : true,
           rowSelection: 'multiple',
           onRowClicked: function(row){
             if(_this.gridView.gridOptions.api.getFocusedCell().column.colId != 'fieldActivity'){

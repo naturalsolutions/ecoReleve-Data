@@ -21,7 +21,7 @@ define([
           var ele = $(this).find('ele').text() || 0 ;
           ele = parseFloat(ele);
           // convert lat & long to number and round to 5 decimals
-          var latitude = parseFloat(lat);// parseFloat(lat).toFixed(5);
+          var latitude = parseFloat(lat);
           var longitude = parseFloat(lon);
           var waypointName = $(this).find('name').text();
           var waypointTime, time;
@@ -55,7 +55,8 @@ define([
             waypointTimeTag = $(this).find('time').text();
             dateStr = moment(waypointTimeTag).format('DD/MM/YYYY HH:mm');
           }
-          var timestamp =  moment(dateStr, 'DD/MM/YYYY HH:mm').unix();
+          // var timestamp =  moment(dateStr, 'DD/MM/YYYY HH:mm').unix();
+          var timestamp =  moment(dateStr, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
           nbWaypoints += 1;
           if (lat != '' && lon != '' && dateStr != 'Invalid date' && time != 'Invalid date') {
             id += 1;

@@ -123,11 +123,11 @@ class StationList(ListObjectWithDynProp):
 
         if curProp == 'LastImported':
             st = aliased(Station)
-            subSelect = select([Observation]).where(
-                Observation.FK_Station == Station.ID)
+            # subSelect = select([Observation]).where(
+            #     Observation.FK_Station == Station.ID)
             subSelect2 = select([st]).where(
                 cast(st.creationDate, DATE) > cast(Station.creationDate, DATE))
-            query = query.where(and_(~exists(subSelect), ~exists(subSelect2)))
+            query = query.where(~exists(subSelect2))
 
         return query
 
