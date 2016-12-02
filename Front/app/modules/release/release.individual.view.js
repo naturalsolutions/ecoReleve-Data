@@ -10,10 +10,11 @@ define([
   'ns_modules/ns_com',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
   'ns_grid/grid.view',
+  'ns_filter/filters',
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
-  Com, ObjectPicker, GridView
+  Com, ObjectPicker, GridView, NsFilter
 ){
 
   'use strict';
@@ -26,13 +27,14 @@ define([
       'totalEntries': '#totalEntries',
       'nbSelected': '#nbSelected',
       'release':'#release',
-      'nbTotal': '.js-nb-total'
+      'nbTotal': '.js-nb-total',
+      'filter': '#filtersRelease',
     },
 
     events: {
-      'click #btnFilterRel': 'filter',
+      'click button#btnFilterRel': 'filter',
       'click #back': 'hideDetails',
-      'click button#clear': 'clearFilter',
+      'click button#clearRel': 'clearFilter',
       'click #release': 'toolTipShow',
       'click #addSensor': 'addSensor',
       'click #test': 'test'
@@ -66,17 +68,50 @@ define([
         _this.$el.find('.js-station-name').html(model.get('Name'));
         _this.$el.find('.js-station-date').html(model.get('StationDate'));
       }});
-
+      this.displayFilter();
       this.displayGrid();
     },
 
     getReleaseMethod: function(){
       var _this = this;
       $.ajax({
-        url: 'release/individuals/getReleaseMethod'
+        url: 'release/individuals/getReleaseMethod' 
       }).done(function(data){
         _this.releaseMethodList=data;
       });
+    },
+
+    displayFilter: function() {
+      this.filters = new NsFilter({
+        url: 'release/individuals/',
+        com: this.com,
+        filterContainer: this.ui.filter,
+        objectType: 'individus',
+        filtersValues: this.defaultFilters,
+      });
+    },
+
+    filter: function() {
+      var criterias = this.filters.update();
+      var _this=this;
+      console.log(criterias);
+      var aggridCriteria = {};
+
+      // console.log(this.gridView.gridOptions.api.getFilterInstance('Species'))
+      criterias.map(function(model){
+        aggridCriteria[model.Column] = {type:1 ,filter:model.Value}
+      });
+      console.log(aggridCriteria)
+      this.gridView.gridOptions.api.setFilterModel(aggridCriteria);
+      this.gridView.gridOptions.api.onFilterChanged();
+
+
+    },
+
+    clearFilter: function() {
+      this.gridView.gridOptions.api.setFilterModel(null);
+      this.gridView.gridOptions.api.onFilterChanged();
+      this.filters.reset();
     },
 
     displayGrid: function() {
