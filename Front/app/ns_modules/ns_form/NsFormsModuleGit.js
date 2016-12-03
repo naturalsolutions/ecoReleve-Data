@@ -490,6 +490,7 @@ define([
                   // Getting ID of created record, from the model (has beeen affected during model.save in the response)
                   window.formEdition = false;
                   window.formChange = false;
+                  _this.formChange = false;
                   _this.savingSuccess(model, response);
                   _this.id = _this.model.id;
                   if (_this.redirectAfterPost != "") {

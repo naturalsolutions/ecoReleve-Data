@@ -161,7 +161,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
     if(i > 0){
       var title = i18n.translate('swal.savingForm-title');
       var savingFormContent =  i18n.translate('swal.savingForm-content');
-      var cancelMsg = i18n.translate('button.cancel');
+      //var cancelMsg = i18n.translate('button.cancel');
 
       Swal({
         title: title,
@@ -169,9 +169,9 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
         type: 'warning',
         showCancelButton: true,
         confirmButtonColor: 'rgb(221, 107, 85)',
-        confirmButtonText: 'OK',
+        confirmButtonText: 'Quit',
         cancelButtonColor: 'grey',
-        cancelButtonText: cancelMsg,
+        cancelButtonText: 'Continue edition',
         closeOnConfirm: true,
       },
       function(isConfirm) {
