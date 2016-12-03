@@ -114,7 +114,6 @@ define([
       this.extendsBBForm();
       this.gridRow = options.gridRow || this.gridRow;
       this.checkGridRowAgain();
-
       var jqxhr;
       this.modelurl = options.modelurl;
 
@@ -147,6 +146,7 @@ define([
       else {
         this.id = 0;
         window.formEdition = true;
+
       }
 
       if(options.displayMode){
@@ -166,14 +166,17 @@ define([
 
       if (options.model) {
         this.model = options.model;
-        
+
         this.BBForm = new BackboneForm({
           model: this.model,
           data: this.model.data,
           fieldsets: this.model.fieldsets,
           schema: this.model.schema
         });
+
         this.showForm();
+        this.pushFormInEdit(this);
+
       }
       else {
         this.initModel();
@@ -192,10 +195,34 @@ define([
       }
 
       this.data = options.data || {};
+      var _this = this;
 
-      $(this.BBForm).on( "click", function() {
+      // $(this.BBForm).on( "click", function() {
+      //
+      // });
+    },
 
-      });
+    pushFormInEdit: function(_this){
+      //if(_this.displayMode.toLowerCase() == 'edit'){
+        this.formChange = false;
+        if(!window.formInEdition.form){
+            window.formInEdition.form = {baseUri: _this.$el[0].baseURI};
+            window.formInEdition.form[_this.formRegion.selector]= _this;
+          } else {
+            if(window.formInEdition.form['undefined']){
+              delete window.formInEdition.form['undefined'];
+            }
+            window.formInEdition.form[_this.formRegion.selector] = _this;
+            window.formInEdition.form.baseUri = _this.$el[0].baseURI;
+          //}
+          if(_this.displayMode.toLowerCase() == 'edit'){
+              _this.bindChanges();
+            }
+      // } else {
+      //   if(window.formInEdition['form']){
+      //     delete window.formInEdition['form'];
+      //   }
+      }
     },
 
     initModel: function () {
@@ -244,6 +271,7 @@ define([
 
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
           _this.showForm();
+          _this.pushFormInEdit(_this);
           _this.updateState(this.displayMode);
         },
         error: function (data) {
@@ -285,42 +313,20 @@ define([
       }
     },
 
-    showForm: function (){
+    bindChanges: function(){
       var _this = this;
-      this.BBForm.render();
-
-      // Call extendable function before the show call
-      this.BeforeShow();
-
-      var _this = this;
-      this.initRules();
-
-      if(this.formRegion.html){
-        this.formRegion.html(this.BBForm.el);
-      } else {
-        return;
-      }
-      
-      if(!this.gridRow) {
-        $(this.formRegion).find('input').on("keypress", function(e) {
-          if( e.which == 13){
-            _this.butClickSave(e);
-          }
-        });
-      }
-
       $(this.formRegion).find('input').on("change", function(e) {
         if($(e.target).val() !== ''){
-          window.formChange = true;
+          _this.formChange = true;
         } else {
-          window.formChange = false;
+          _this.formChange = false;
        }
       });
       $(this.formRegion).find('select').on("change", function(e) {
-         window.formChange = true;
+         _this.formChange = true;
       });
       $(this.formRegion).find('textarea').on("change", function(e) {
-         window.formChange = true;
+         _this.formChange = true;
       });
 
       $(this.formRegion).find('textarea').on("keypress", function(e) {
@@ -351,6 +357,31 @@ define([
           }
         }
       });
+    },
+
+    showForm: function (){
+      var _this = this;
+      this.BBForm.render();
+
+      // Call extendable function before the show call
+      this.BeforeShow();
+
+      var _this = this;
+      this.initRules();
+
+      if(this.formRegion.html){
+        this.formRegion.html(this.BBForm.el);
+      } else {
+        return;
+      }
+
+      if(!this.gridRow) {
+        $(this.formRegion).find('input').on("keypress", function(e) {
+          if( e.which == 13){
+            _this.butClickSave(e);
+          }
+        });
+      }
 
       if(this.buttonRegion){
         if(this.buttonRegion[0]){
@@ -586,7 +617,7 @@ define([
           if(_this.afterDelete){
             _this.afterDelete(response, _this.model);
           }
-        }, 
+        },
         fail: function(response){
           console.error(response);
         }

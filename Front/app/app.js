@@ -5,6 +5,8 @@ define([
   'controller',
   'sweetAlert',
   'config',
+  'jquery',
+  'backbone',
 
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
@@ -24,7 +26,7 @@ define([
 
   ],
 
-function( Marionette, LytRootView, Router, Controller,Swal,config) {
+function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) {
 
     var app = {};
     var JST = window.JST = window.JST || {};
@@ -71,7 +73,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
   $.xhrPool = {};
 
   $.xhrPool.calls = []; // array of uncompleted requests
-  
+
   $.xhrPool.allowAbort = false;
 
   $.xhrPool.abortAll = function() { // our abort function
@@ -96,7 +98,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
       }
     },
     // when some of the requests completed it will splice from the array
-    complete: function(jqxhr, options){      
+    complete: function(jqxhr, options){
       // var index = $.xhrPool.indexOf(jqxhr);
       // if (index > -1) {
       //   $.xhrPool.splice(index, 1);
@@ -122,6 +124,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
 
     window.formChange = false;
     window.formEdition = false;
+    window.formInEdition= {};
 
     // get not allowed urls in config.js
     window.notAllowedUrl = [];
@@ -133,10 +136,33 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
     }
 
   window.checkExitForm = function(confirmCallback,cancelCallback) {
-    if(window.formChange && window.formEdition){
+    var i = 0;
+    var urlChangeMax = 0 ;
+    var indexMax = 0 ;
+    if(!$.isEmptyObject(window.formInEdition)){
+
+        var newUrlSplit=  window.location.hash.split('?');
+        var oldUrlSplit = window.formInEdition.form.baseUri.replace(window.location.origin,'').replace(window.location.pathname,'').split('?');
+
+        var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
+          if( newUrlSplit[index2-1] != oldUrlSplit[index2-1]){
+            if(window.formInEdition.form[key2].formChange){
+              i++;
+            }
+            urlChangeMax++;
+            return 1;
+          } else{
+            indexMax++;
+            return 0;
+          }
+        });
+    }
+
+    if(i > 0){
       var title = i18n.translate('swal.savingForm-title');
       var savingFormContent =  i18n.translate('swal.savingForm-content');
       var cancelMsg = i18n.translate('button.cancel');
+
       Swal({
         title: title,
         text: savingFormContent,
@@ -158,16 +184,22 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
           if (confirmCallback) {
             window.formChange = false;
             window.formEdition = false;
+            if(indexMax-urlChangeMax<=0){
+              window.formInEdition = {};
+            }
             confirmCallback();
           }
         }
       });
     } else {
       if (confirmCallback){
+        if(indexMax-urlChangeMax<=0){
+          window.formInEdition = {};
+        }
         confirmCallback();
       }
     }
-  };
+};
 
   window.app = app;
   return app;

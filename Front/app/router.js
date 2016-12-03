@@ -26,7 +26,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'sensors/new/:type(/)': 'newSensor',
       'sensors/:id(/)': 'sensor',
       'sensors(/)': 'sensors',
-      
+
       'stations/new/:from(/)': 'newStation',
       'stations/new(/)': 'newStation',
       'stations/lastImported(/)': 'stations',
@@ -63,7 +63,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
 
     execute: function(callback, args) {
       var _this= this;
-      
+
       var route = Backbone.history.fragment;
 
       if ((route != '') && (route != '#')){
@@ -73,17 +73,16 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
         }
       }
 
-      this.history.push(Backbone.history.fragment);
-      
       window.checkExitForm(function(){
         _this.continueNav(callback, args, route);
       }, function(){
         _this.previous();
       });
+      this.history.push(Backbone.history.fragment);
     },
 
     onRoute: function(url, patern, params) {
-      
+
       var notAllowed = window.notAllowedUrl ;
       patern = patern.replace(/\(/g, '');
       patern = patern.replace(/\)/g, '');
