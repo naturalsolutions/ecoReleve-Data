@@ -203,7 +203,6 @@ define([
     },
 
     pushFormInEdit: function(_this){
-      //if(_this.displayMode.toLowerCase() == 'edit'){
         this.formChange = false;
         if(!window.formInEdition.form){
             window.formInEdition.form = {baseUri: _this.$el[0].baseURI};
@@ -214,14 +213,9 @@ define([
             }
             window.formInEdition.form[_this.formRegion.selector] = _this;
             window.formInEdition.form.baseUri = _this.$el[0].baseURI;
-          //}
           if(_this.displayMode.toLowerCase() == 'edit'){
               _this.bindChanges();
             }
-      // } else {
-      //   if(window.formInEdition['form']){
-      //     delete window.formInEdition['form'];
-      //   }
       }
     },
 
@@ -326,6 +320,9 @@ define([
          _this.formChange = true;
       });
       $(this.formRegion).find('textarea').on("change", function(e) {
+         _this.formChange = true;
+      });
+      $(this.formRegion).find('.grid-form').on("change", function(e) {
          _this.formChange = true;
       });
 

@@ -130,8 +130,8 @@
             //return null;
             //var myRegEx = new RegExp('[\d*\s]*\d*$');
             var myRegEx = new RegExp('^([0-9]+(\.[0-9]+)?[\t|\,|\x20]*)+$');
-            
-            
+
+
             if (myRegEx.test(value)) {
                 return null;
             }
@@ -260,7 +260,7 @@
 
         initFilters: function (data) {
             var _this = this;
-            
+
             var form;
             this.getContainer().html('');
             this.forms = [];
@@ -276,20 +276,13 @@
                     }
                 }
                 this.getContainer().find("input[type='checkbox']").on('click', this.clickedCheck);
-                /*
-                this.getContainer().find("#dateTimePicker").each(function () {
-                    console.log('THGIS', this);
-                    $(this).datetimepicker();
-                });*/
-                
                 this.forms.push(form);
                 this.filterLoaded();
             };
 
-            this.getContainer().keypress(function (e) {                                       
-                    
+            this.getContainer().keypress(function (e) {
+
                     if (e.which == 13) {
-                        //console.log('keypressed') ;
                         e.preventDefault();
                         _this.update() ;
                         //do something
@@ -375,7 +368,7 @@
             var fieldName = dataRow['name'];
 
             var operatorList =  operators || this.getOpOptions(type);
-            
+
             var schm = {
                 Column: { name: 'Column', type: 'Hidden', title: dataRow['label'], value: fieldName },
                 ColumnType: { name: 'ColumnType', title: '', type: 'Hidden', value: type },
@@ -415,7 +408,7 @@
                     }
                 }
             }
-            var Formdata = {    
+            var Formdata = {
                 ColumnType: type,
                 Column: fieldName,
                 Operator: operatorValue
@@ -799,8 +792,8 @@
                             objVal = obj.attributes[col];
 
                             var format = obj.get('format');
-                            //date  
-                            var dt = moment(val, 'DD/MM/YYYY HH:mm:ss'); 
+                            //date
+                            var dt = moment(val, 'DD/MM/YYYY HH:mm:ss');
                             var operator = false;
                             if(['=', '>','<','>=','<=','<>'].indexOf(op) >= 0) {
                                 operator = true;
@@ -912,14 +905,14 @@
                         return false;
                     };
                     break;
-                 case 'not end':  
+                 case 'not end':
                     objVal = objVal.toUpperCase();
                     rx = new  RegExp( objVal +  '$', "i");
                     if (rx.test(val.toUpperCase())) {
                         return false;
                     };
                     break;
-                case 'in':  
+                case 'in':
                     var elems = objVal.split(',');
                     var elems2 = objVal.split(';');
                     var tab;
@@ -938,7 +931,7 @@
                         }
                     }
                     return false;
-                    
+
                 default:
 
                     console.warn('wrong opperator');
@@ -998,7 +991,7 @@
             return true;
 
         },
-        
+
         interaction: function (action, params) {
             if (this.com) {
                 this.com.action(action, params);

@@ -253,7 +253,6 @@ define([
               wait: true,
               success:function(){
                 _this.deleteObs(self);
-                console.log(_this.model.get('obs').length)
               }});
           } else {
             this.model.trigger('destroy', this.model, this.model.collection);

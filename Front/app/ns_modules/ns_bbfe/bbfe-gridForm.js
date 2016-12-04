@@ -15,7 +15,7 @@ define([
             'click .js-cloneLast' : 'cloneLast',
         },
         initialize: function(options) {
-            
+
             if (options.schema.validators.length) {
                 this.defaultRequired = true;
             } else {
@@ -90,6 +90,10 @@ define([
             this.addForm(model,this.forms.length+1);
         },
 
+        subFormChange: function(){
+            this.$el.find('.grid-form').change();
+        },
+
         addForm: function(model,index){
             var _this = this;
             var form = new Backbone.Form({
@@ -99,13 +103,18 @@ define([
             }).render();
 
             form.$el.find('input').on("change", function(e) {
-                window.formChange = true;
+                _this.formChange = true;
+                _this.subFormChange();
+
             });
             form.$el.find('select').on("change", function(e) {
-                window.formChange = true;
+                _this.formChange = true;
+                _this.subFormChange();
             });
             form.$el.find('textarea').on("change", function(e) {
-                window.formChange = true;
+                _this.formChange = true;
+                _this.subFormChange();
+
             });
 
             this.initRules(form);
@@ -168,7 +177,7 @@ define([
                 hiddenClone : this.hiddenClone
             })));
             this.setElement($el);
-            
+
 
             var data = this.options.model.attributes[this.key];
 
