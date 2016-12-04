@@ -122,8 +122,6 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
     }
   });
 
-    window.formChange = false;
-    window.formEdition = false;
     window.formInEdition= {};
 
     // get not allowed urls in config.js
@@ -182,8 +180,6 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
           return false;
         } else {
           if (confirmCallback) {
-            window.formChange = false;
-            window.formEdition = false;
             if(indexMax-urlChangeMax<=0){
               window.formInEdition = {};
             }
