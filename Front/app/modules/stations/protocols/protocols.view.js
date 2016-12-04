@@ -163,8 +163,8 @@ define([
 
           if(view.model.get('currentObs') == 0){
             $.xhrPool.allowAbort = false;
+            Backbone.history.navigate(url, {trigger: false});
           }
-          Backbone.history.navigate(url, {trigger: true});
           $.xhrPool.allowAbort = true;
 
           view.model.set('stationId', _this.model.get('stationId'));
