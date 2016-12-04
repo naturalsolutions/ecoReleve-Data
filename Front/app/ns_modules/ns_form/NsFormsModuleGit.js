@@ -145,8 +145,6 @@ define([
       }
       else {
         this.id = 0;
-        window.formEdition = true;
-
       }
 
       if(options.displayMode){
@@ -249,10 +247,6 @@ define([
         dataType: 'json',
         success: function (resp) {
           _this.model.schema = resp.schema;
-          window.formEdition = false;
-          if (this.displayMode == 'edit'){
-            window.formEdition = true;
-          }
           if (resp.fieldsets) {
             // if fieldset present in response, we get it
             _this.model.fieldsets = resp.fieldsets;
@@ -323,6 +317,9 @@ define([
          _this.formChange = true;
       });
       $(this.formRegion).find('.grid-form').on("change", function(e) {
+         _this.formChange = true;
+      });
+      $(this.formRegion).find('.nested').on("change", function(e) {
          _this.formChange = true;
       });
 
@@ -485,9 +482,6 @@ define([
               jqhrx = this.model.save(null, {
                 success: function (model, response) {
                   // Getting ID of created record, from the model (has beeen affected during model.save in the response)
-                  window.formEdition = false;
-                  window.formChange = false;
-                  _this.formChange = false;
                   _this.savingSuccess(model, response);
                   _this.id = _this.model.id;
                   if (_this.redirectAfterPost != "") {
@@ -502,7 +496,6 @@ define([
                       // otpherwise redirect
                       window.location.href = TargetUrl;
                     }
-
                   }
                   else {
                     // If no redirect after creation
@@ -517,7 +510,6 @@ define([
                   _this.savingError(response);
                   return false;
                 }
-
               });
             }
             else {
@@ -525,8 +517,6 @@ define([
               this.model.id = this.model.get('id');
               var jqxhr = this.model.save(null, {
                 success: function (model, response) {
-                  window.formEdition = false;
-                  window.formChange = false;
                   _this.savingSuccess(model, response);
                   if (_this.reloadAfterSave) {
                     _this.reloadingAfterSave();
@@ -537,7 +527,6 @@ define([
                   _this.savingError(response);
                 }
               });
-
             }
           }else{
             var errorList = _this.BBForm.$el.find('.error');
@@ -551,6 +540,7 @@ define([
             }
             return false;
           }
+          _this.formChange = false;
           this.afterSavingModel();
           return jqxhr;
         },
@@ -558,7 +548,6 @@ define([
     afterSaveSuccess: function(){
 
     },
-
 
     butClickEdit: function (e) {
       this.checkGridRowAgain();
@@ -596,8 +585,7 @@ define([
         confirmButtonText: 'Yes, delete it!',
         confirmButtonColor: '#DD6B55',
         callback: function(){
-          window.formEdition = false;
-          window.formChange = false;
+          _this.formChange = false;
           _this.deleteModel();
         }
       };

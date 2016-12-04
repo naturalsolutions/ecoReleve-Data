@@ -40,7 +40,6 @@ define([
 
 
         },
-        //removeForm
         deleteForm: function() {
             this.$el.trigger('change');
         },
@@ -51,10 +50,8 @@ define([
             });
 
             var model = new mymodel();
-            //model.default = this.options.model.attributes[this.key];
             model.schema = this.options.schema.subschema;
             model.fieldsets = this.options.schema.fieldsets;
-            //this.$el.find('.badge').html(this.model.attributes[this.schema.name].length);
             this.addForm(model);
         },
 
@@ -68,6 +65,28 @@ define([
           }
           return cpt;
         },
+        subFormChange: function(){
+            this.$el.change();
+        },
+
+        bindChanges: function(form){
+          var _this = this;
+          form.$el.find('input').on("change", function(e) {
+              _this.formChange = true;
+              _this.subFormChange();
+
+          });
+          form.$el.find('select').on("change", function(e) {
+              _this.formChange = true;
+              _this.subFormChange();
+          });
+          form.$el.find('textarea').on("change", function(e) {
+              _this.formChange = true;
+              _this.subFormChange();
+
+          });
+        },
+
         addForm: function(model){
             var _this = this;
             var form = new Backbone.Form({
@@ -96,11 +115,10 @@ define([
               _this.$el.find('#formContainer').find(form.el).remove();
               var i = _this.forms.indexOf(form);
               if (i > -1) {
-                  _this.forms.splice(i, 1);
-                  _this.form.$el.find(".js_badge").html(_this.forms.length);
+                _this.forms.splice(i, 1);
+                _this.form.$el.find(".js_badge").html(_this.forms.length);
               }
-
-              _this.$el.trigger('change');
+              _this.subFormChange();
               if(!_this.forms.length){
                 _this.addEmptyForm();
               }
@@ -111,16 +129,11 @@ define([
                 $(tabBtn[tmp]).text(tmp+1)
                 tmp+=1;
               }
-
               return;
             });
 
-
             this.$el.find('#formContainer').append(form.el);
-
-            this.$el.find('#formContainer input,select,textarea').on("change", function(e) {
-                 window.app.checkFormSaved = true;
-            });
+            this.bindChanges(form);
         },
 
         render: function() {
@@ -131,12 +144,7 @@ define([
                 name: this.key
             })));
             this.setElement($el);
-
-
-
-
             var data = this.options.model.attributes[this.key];
-
             if (data) {
                 //data
                 if (data.length) {
@@ -149,12 +157,11 @@ define([
                         model.fieldsets = this.options.schema.fieldsets;
                         model.attributes = data[i];
                         this.addForm(model);
-
-                    };
+                    }
 
                     if (data.length < this.nbByDefault) {
                         for (var i = 0; i < data.length; i++) {
-                            this.addForm(model);
+                          this.addForm(model);
                         }
                     }
                     this.defaultRequired = false;
@@ -168,12 +175,10 @@ define([
                     this.defaultRequired = false;
                 }
             }
-
             return this;
         },
 
         feedRequiredEmptyForms: function() {
-
         },
 
         getValue: function() {
@@ -182,7 +187,7 @@ define([
                 if (this.forms[i].commit()) {
                     errors = true;
                 }
-            };
+            }
             if (errors) {
                 return false;
             } else {
@@ -201,11 +206,9 @@ define([
                         }*/
                         values[i] = tmp;
                     }
-                };
+                }
                 return values;
             }
-
-
         },
         }, {
           //STATICS
