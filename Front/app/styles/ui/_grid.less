@@ -48,6 +48,10 @@
         > div > div {
           position: relative;
         }
+        select option[disabled] {
+          display: none;
+        }
+
         .ag-filter-select {
           width: 170px;
         }
@@ -121,7 +125,7 @@
         .ag-header-cell-resize {
           background: transparent;
           background: rgba(255,255,255,.5);
-          
+
         }
         svg {
           fill: #525252;
@@ -220,7 +224,7 @@
   	padding: 10px;
     align-items: center;
     justify-content: center;
-    
+
   	#current, #total{
   		width: 50px;
   		display: inline-block;
