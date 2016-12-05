@@ -8,9 +8,14 @@ define([
 
     SelectFilter.prototype = {
         init: function(params) {
+            if (typeof(params.filterParams) === 'undefined' || typeof(params.filterParams.selectList) === 'undefined') {
+                console.error("Select filter need filterParams : { selectList : [{value : '' , label: ' ' }] } ");
+                return null;
+            }
             var _this = this;
             var apply = "APPLY";
             var clear = "CLEAR";
+            console.log(params);
 
             this.eGui = document.createElement('div');
             this.eGui.innerHTML =
@@ -37,11 +42,38 @@ define([
             this.filterModifiedCallback = params.filterModifiedCallback;
             this.valueGetter = params.valueGetter;
             this.tabSelect = [];
+            this.params = params;
             for (var i = 0; i < params.filterParams.selectList.length; i++) {
-                $(_this.$select).append('<option value="' + params.filterParams.selectList[i].value + '">' + params.filterParams.selectList[i].label + '</option>')
+                $(_this.$select).append('<option disabled value="' + params.filterParams.selectList[i].value + '">' + params.filterParams.selectList[i].label + '</option>')
             }
 
+            this.fillOptionsList();
+
+            $(this.$select).on("mousedown", function(e) {
+                _this.fillOptionsList();
+            });
             this.createGui();
+        },
+
+        isPresent: function(tab, val) {
+            for (var j = 0; j < tab.length; j++) {
+                if (tab[j] === val) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        fillOptionsList() {
+            var tabUniqVal = [];
+            $(this.$select).find("option[value!='']").attr('disabled', true);
+            for (var i = 0; i < this.params.rowModel.rowsToDisplay.length; i++) {
+                var valeur = this.valueGetter(this.params.rowModel.rowsToDisplay[i]);
+                if (!this.isPresent(tabUniqVal, valeur)) {
+                    tabUniqVal.push(valeur);
+                    $(this.$select).find("option[value=" + valeur + "]").attr('disabled', false);
+                }
+            }
         },
 
         dateClean: function() {
