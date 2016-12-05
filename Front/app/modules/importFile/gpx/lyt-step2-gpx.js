@@ -11,13 +11,10 @@ define([
   'ns_grid/customCellRenderer/decimal5Renderer',
   'ns_grid/customCellRenderer/dateTimeRenderer',
   'moment',
-  'ns_grid/aggrid_custom_date_filter',
-  'ns_grid/aggrid_custom_select_filter',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,
-  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer ,Moment, DateFilter, SelectFilter
-) {
+  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer ,Moment ) {
 
   'use strict';
 
@@ -144,18 +141,23 @@ define([
 
       var columnsDefs = [
         {
-          field: 'name',
-          headerName: 'Name',
-          checkboxSelection: true,
-        },{
           field: 'id',
           headerName: 'ID',
-          hide: true,
+          checkboxSelection: true
+
+        },{
+          field: 'name',
+          headerName: 'Name',
+          filter :"textAutocomplete",
+          filterParams : {
+            apply : true,
+            tabToOrder : this.data.map(function(elem) {return elem.name;})
+           }
         },{
           field: 'displayDate',
           headerName: 'Date',
           cellRenderer: DateTimeRenderer,
-          filter : DateFilter
+          filter : "date"
         },{
           field: 'latitude',
           headerName: 'LAT',
@@ -172,7 +174,7 @@ define([
           headerName: 'Field Activity',
           cellEditor: FieldActivityEditor,
           cellRenderer: FieldActivityRenderer,
-          filter : SelectFilter,
+          filter : "select",
           filterParams : { selectList : this.fieldActivityList }
         },
       ];
