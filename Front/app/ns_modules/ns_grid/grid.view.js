@@ -5,10 +5,11 @@ define([
   'marionette',
   'ag-grid',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
-
+  './custom.text.filter',
+  './custom.number.filter',
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, utils_1) {
+], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter) {
 
   'use strict';
 
@@ -63,6 +64,7 @@ define([
       this.clientSide = options.clientSide || false;
       this.filters = options.filters || [];
       this.afterGetRows = options.afterGetRows;
+      this.afterFetchColumns = options.afterFetchColumns;
       this.afterFirstRowFetch = options.afterFirstRowFetch;
       this.goTo = options.goTo || false;
 
@@ -145,19 +147,22 @@ define([
 
     formatColumns: function(columnDefs){
       var _this = this;
-      var filter = {
-        'string' : 'text',
-        'integer': 'number',
-      };
       columnDefs.map(function(col, i) {
 
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
 
-
         if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
           _this.formatSelectColumn(col)
+        }
+        
+        switch(col.filter){
+          case 'number':
+            col.filter = CustomNumberFilter;
+            return;
+          default:
+            col.filter = CustomTextFilter;
         }
         //draft
         if(col.cell == 'autocomplete'){
@@ -240,6 +245,7 @@ define([
 
     addBBFEditor: function(col){
       //draft
+      var _this = this;
       var BBFEditor = function () {
 
       };
@@ -247,6 +253,7 @@ define([
       var options = {
         key: col.options.target,
         schema: {
+          options: col.options,
           editable: true
         },
         fromGrid: true
@@ -256,9 +263,19 @@ define([
         var self = this;
         this.picker = new ObjectPicker(options);
         this.input = this.picker.render();
-
-
-        this.input.$el.find('input').val(params.value).change();
+        var _this = this;
+        if (params.charPress){
+          this.input.$el.find('input').val(params.charPress).change();
+        } else {
+          if (params.value){
+            if (params.value.label !== undefined  ){
+              this.input.$el.find('input').attr('data_value',params.value.value);
+              this.input.$el.find('input').val(params.value.label).change();
+            } else {
+              this.input.$el.find('input').val(params.value).change();
+            }
+          }
+        }
       };
       BBFEditor.prototype.getGui = function(){
         return this.input.el;
@@ -267,9 +284,11 @@ define([
         this.input.$el.find('input').focus();
       };
       BBFEditor.prototype.getValue = function() {
-        return this.input.$el.find('input').val();
+        if (this.input.getItem){
+          return this.input.getItem();
+        }
+        return this.input.getValue();
       };
-
       col.cellEditor = BBFEditor;
     },
 
@@ -279,10 +298,14 @@ define([
         method: 'GET',
         context: this,
         data: {
+          typeObj: this.model.get('objectType'),
           name: this.name || 'default'
         }
       }).done( function(response) {
         this.gridOptions.columnDefs = this.formatColumns(response);
+        if (this.afterFetchColumns){
+          this.afterFetchColumns(this);
+        }
       });
     },
 
@@ -306,7 +329,7 @@ define([
           if(_this.afterFirstRowFetch){
             _this.afterFirstRowFetch();
           }
-        })
+        });
       });
 
     },
@@ -592,7 +615,7 @@ define([
         return;
       }
 
-      AgGrid.TextFilter.prototype.afterGuiAttached = function(options) {
+      CustomTextFilter.prototype.afterGuiAttached = function(options) {
         this.eFilterTextField.focus();
         $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
         $(this.eGui).find('input, select').each(function(){
@@ -600,16 +623,15 @@ define([
         });
       };
 
-
-      AgGrid.NumberFilter.prototype.afterGuiAttached = function(options) {
+      CustomNumberFilter.prototype.afterGuiAttached = function(options) {
         this.eFilterTextField.focus();
         $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
         $(this.eGui).find('input, select').each(function(){
           $(this).addClass('form-control input-sm');
         });
-        $(this.eGui).find('input').each(function(){
-          $(this).attr('type', 'number');
-        });
+        // $(this.eGui).find('input').each(function(){
+        //   $(this).attr('type', 'number');
+        // });
       };
 
 

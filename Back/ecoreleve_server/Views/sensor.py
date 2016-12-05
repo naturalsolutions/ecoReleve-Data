@@ -298,9 +298,7 @@ def insertSensor(request):
     if not isinstance(data, list):
         return insertOneNewSensor(request)
     else:
-        print('_______INsert LIST')
-        # transaction.commit()
-        # return insertListNewSensord(request)
+        return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 

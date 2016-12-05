@@ -353,12 +353,14 @@ class ModuleGrids (Base) :
 
     def GenerateColumn (self):
         ''' return grid field to build Grid '''
+        dictFilterInGrid = {'string': 'text', 'integer': 'number'}
         column = {
         'field': self.FKName(),
         'headerName': self.Label,
         'hide': isHidden(self.GridRender),
         'editable': isEditable(self.GridRender),
-        'filter': self.CellType,
+        'filter': dictFilterInGrid.get(self.CellType),
+        'cell': self.CellType,
         # 'width':self.GridSize,
         # 'filterParams': self.?,
         # 'cellEditor':self.CellType

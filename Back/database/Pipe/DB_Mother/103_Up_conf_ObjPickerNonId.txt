@@ -1,0 +1,13 @@
+
+
+  UPDATE f SET Options = '{"withToggle":1}'
+  FROM [ModuleForms] f 
+  where InputType = 'objectPicker' AND Label like '%Non%' And Name = 'FK_Individual'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('103_Up_conf_ObjPickerNonId',GETDATE(),(SELECT db_name()))
+
+
+GO

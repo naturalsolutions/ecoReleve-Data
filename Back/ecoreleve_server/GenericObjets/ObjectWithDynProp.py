@@ -75,7 +75,7 @@ class ObjectWithDynProp:
         return self.allProp
 
     def getLinkedField (self):
-        curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + self.GetType().GetDynPropContextTable() 
+        curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + self.GetType().GetDynPropContextTable()
         #curQuery += 'not exists (select * from ' + self.GetDynPropValuesTable() + ' V2 '
         curQuery +=  ' C  JOIN ' + self.GetType().GetDynPropTable() + ' D ON C.' + self.GetType().Get_FKToDynPropTable() + '= D.ID '
         curQuery += ' where C.' + self.GetType().GetFK_DynPropContextTable() + ' = ' + str(self.GetType().ID )
@@ -95,7 +95,7 @@ class ObjectWithDynProp:
         return self.FrontModules.ID
 
     def GetGridFields (self,ModuleType):
-        ''' Function to call : return Name and Type of Grid fields to display in front end 
+        ''' Function to call : return Name and Type of Grid fields to display in front end
         according to configuration in table ModuleGrids'''
         try:
             typeID = self.GetType().ID
@@ -129,7 +129,7 @@ class ObjectWithDynProp:
         return cols
 
     def GetFilters (self,ModuleType) :
-        ''' Function to call : return Name and Type of Filters to display in front end 
+        ''' Function to call : return Name and Type of Filters to display in front end
         according to configuration in table ModuleGrids'''
         filters = []
         defaultFilters = []
@@ -246,7 +246,6 @@ class ObjectWithDynProp:
 
                     self.PropDynValuesOfNow[nameProp] = valeur
                 else:
-                    # print('valeur non modifiée pour ' + nameProp)
                     return
 
             else :
@@ -286,13 +285,12 @@ class ObjectWithDynProp:
 
     def UpdateFromJson(self,DTOObject,startDate = None):
         ''' Function to call : update properties of new or existing object with JSON/dict of value'''
-        # try : 
+        # try :
         #     startDate = self.GetStartDate()
-        # except : 
+        # except :
         #     startDate = None
 
         for curProp in DTOObject:
-            #print('Affectation propriété ' + curProp)
             if (curProp.lower() != 'id' and DTOObject[curProp] != '-1' ):
                 if isinstance(DTOObject[curProp],str) and len(DTOObject[curProp].split())==0:
                     DTOObject[curProp] = None
@@ -302,7 +300,7 @@ class ObjectWithDynProp:
         ''' return flat object with static properties and last existing value of dyn props '''
         resultat = {}
         hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
-        if self.ID is not None : 
+        if self.ID is not None :
             max_iter = max(len( self.__table__.columns),len(self.PropDynValuesOfNow),len(hybrid_properties))
             for i in range(max_iter) :
                 #### Get static Properties ####
@@ -323,7 +321,7 @@ class ObjectWithDynProp:
                 except Exception as e :
                     pass
 
-        else : 
+        else :
             max_iter = len( self.__table__.columns)
             for i in range(max_iter) :
                 #### Get static Properties ####
@@ -385,7 +383,7 @@ class ObjectWithDynProp:
 
         # resultat['schema']['defaultValues'] = defaultValues
         return resultat
-    
+
     def linkedFieldDate(self):
         return datetime.now()
 
@@ -396,7 +394,7 @@ class ObjectWithDynProp:
         for linkProp in self.getLinkedField() :
             curPropName = linkProp['Name']
             obj = LinkedTables[linkProp['LinkedTable']]
-            try : 
+            try :
                 linkedSource = self.GetProperty(linkProp['LinkSourceID'].replace('@Dyn:',''))
                 curObj = self.ObjContext.query(obj).filter(getattr(obj,linkProp['LinkedID']) == linkedSource).one()
                 curObj.init_on_load()
@@ -424,7 +422,7 @@ class ObjectWithDynProp:
                         linkedObj.SetProperty(linkedField,None)
                     else :
                         dynPropValueToDel = linkedObj.GetDynPropWithDate(linkedField,useDate)
-                        if dynPropValueToDel is not None : 
+                        if dynPropValueToDel is not None :
                             session.delete(dynPropValueToDel)
 
                     session.commit()
@@ -453,5 +451,3 @@ class ObjectWithDynProp:
         else :
             resultat = defaultValues
         return resultat
-
-

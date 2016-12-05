@@ -64,7 +64,7 @@ class Station(Base,ObjectWithDynProp):
     Place = Column(String(250))
 
     Station_FieldWorkers = relationship('Station_FieldWorker', backref='Station',cascade="all, delete-orphan")
-    __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON', name='_unique_constraint_lat_lon_date'),)
+    __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON', name='_unique_constraint_lat_lon_date'), {'implicit_returning': False})
 
 
     def __init__(self,**kwargs):

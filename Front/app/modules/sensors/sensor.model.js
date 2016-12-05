@@ -1,10 +1,12 @@
 define([
+  'jquery',
   'underscore',
   'backbone',
+  'ns_grid/customCellRenderer/decimal5Renderer',
+  'ns_grid/customCellRenderer/dateTimeRenderer',
 ], function(
-  _, Backbone
-
-) {
+  $, _, Backbone, Decimal5Renderer, DateTimeRenderer
+){
   'use strict';
 
   return Backbone.Model.extend({
@@ -80,10 +82,12 @@ define([
       {
         field: 'StartDate',
         headerName: 'Start date',
+        cellRenderer: DateTimeRenderer
       },
       {
         field: 'EndDate',
         headerName: 'End Date',
+        cellRenderer: DateTimeRenderer
       }
     ],
     historyColumnsDefs : [{
@@ -95,6 +99,7 @@ define([
     }, {
       field: 'StartDate',
       headerName: 'Start Date',
+      cellRenderer: DateTimeRenderer
     },]
 
 

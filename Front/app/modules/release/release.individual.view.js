@@ -10,29 +10,31 @@ define([
   'ns_modules/ns_com',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
   'ns_grid/grid.view',
+  'ns_filter/filters',
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
-  Com, ObjectPicker, GridView
+  Com, ObjectPicker, GridView, NsFilter
 ){
 
   'use strict';
 
   return Marionette.LayoutView.extend({
 
-    template: 'app/modules/release/templates/tpl-release-individual.html',
+    template: 'app/modules/release/release.individual.tpl.html',
     className: 'full-height animated white rel',
     ui: {
       'totalEntries': '#totalEntries',
       'nbSelected': '#nbSelected',
       'release':'#release',
-      'nbTotal': '.js-nb-total'
+      'nbTotal': '.js-nb-total',
+      'filter': '#filtersRelease',
     },
 
     events: {
-      'click #btnFilterRel': 'filter',
+      'click button#btnFilterRel': 'filter',
       'click #back': 'hideDetails',
-      'click button#clear': 'clearFilter',
+      'click button#clearRel': 'clearFilter',
       'click #release': 'toolTipShow',
       'click #addSensor': 'addSensor',
       'click #test': 'test'
@@ -52,7 +54,7 @@ define([
 
       this.releaseMethod = null;
       this.getReleaseMethod();
-
+      this.errors = 0;
       this.sensorPicker = null;
     },
 
@@ -66,7 +68,7 @@ define([
         _this.$el.find('.js-station-name').html(model.get('Name'));
         _this.$el.find('.js-station-date').html(model.get('StationDate'));
       }});
-
+      this.displayFilter();
       this.displayGrid();
     },
 
@@ -79,24 +81,150 @@ define([
       });
     },
 
+    displayFilter: function() {
+      this.filters = new NsFilter({
+        url: 'release/individuals/',
+        com: this.com,
+        filterContainer: this.ui.filter,
+        objectType: 'individus',
+        filtersValues: this.defaultFilters,
+      });
+    },
+
+    filter: function() {
+      var criterias = this.filters.update();
+      var _this=this;
+      console.log(criterias);
+      var aggridCriteria = {};
+
+      // console.log(this.gridView.gridOptions.api.getFilterInstance('Species'))
+      criterias.map(function(model){
+        aggridCriteria[model.Column] = {type:1 ,filter:model.Value}
+      });
+      console.log(aggridCriteria)
+      this.gridView.gridOptions.api.setFilterModel(aggridCriteria);
+      this.gridView.gridOptions.api.onFilterChanged();
+
+
+    },
+
+    clearFilter: function() {
+      this.gridView.gridOptions.api.setFilterModel(null);
+      this.gridView.gridOptions.api.onFilterChanged();
+      this.filters.reset();
+    },
+
     displayGrid: function() {
+      var _this = this;
       this.rgGrid.show(this.gridView = new GridView({
         clientSide: true,
         url: 'release/individuals/',
         gridOptions: {
           enableFilter: true,
+          editType: 'fullRow',
+          singleClickEdit : true,
           rowSelection: 'multiple',
+          onCellValueChanged : _this.checkAll.bind(_this),
+        },
+        afterFetchColumns: function(options) {
+          var colDefs = options.gridOptions.columnDefs;
+          colDefs.map(function(colDef){
+            if (colDef.field == 'UnicIdentifier'){
+              colDef.cellRenderer = _this.sensorCellRenderer.bind(_this);
+              colDef.cellClassRules = {
+                'error': function(params){
+                  return params.node.error === true;},
+                'ag-error-highlight': function(params){
+                  return params.node.errorDuplicated === true;
+                },
+                'no-error':function(params){
+                  return params.node.error === false;
+                },
+                'no-duplicated':function(params){
+                   return params.node.errorDuplicated === false;
+                }
+                };
+              }
+          });
         }
       }));
+    },
 
+    checkAll: function(options){
+      var _this = this;
+      var error = false;
+      var duplicatedSensors = _this.checkDuplicateSensor(options);
+      if (!duplicatedSensors && options.data.UnicIdentifier){
+        var availableDeffered = _this.checkSensorAvailability(options);
+        availableDeffered.always(function(){
+          options.api.refreshView();
+        });
+      } else {
+        options.node.error = false;
+      }
+      options.api.refreshView();
+    },
+
+    sensorCellRenderer : function(params){
+      var _this = this;
+      if (params.value){
+        var displayVal = params.value.label;
+      }
+      if (params.value && params.value != 'undefined') {
+        return displayVal;
+      } else {
+        return '';
+      }
+    },
+
+    checkSensorAvailability: function(options){
+      var resp;
+      options.data.sta_date = this.model.get('StationDate');
+      options.data.FK_Sensor = options.data.UnicIdentifier.value;
+       return $.ajax({
+        type : 'POST',
+        url : 'release/individuals/',
+        data : options.data,
+      }).success(function(){
+        options.node.error = false;
+      }).fail(function(){
+        options.node.error = true;
+      });
+    },
+
+    checkDuplicateSensor: function(options){
+      var nodeList = options.api.rowModel.rowsToDisplay;
+      var nodeListGrouped = _.groupBy(nodeList,function(node){
+          if (node.data.UnicIdentifier) {
+            return node.data.UnicIdentifier.label;
+          } else {
+            return node.data.UnicIdentifier;
+          }
+      });
+
+      _.each(nodeListGrouped,function(listNode,key){
+        if (key!='undefined' && key!='' && listNode.length > 1 ){
+          _.map(listNode,function(node){
+            node.errorDuplicated = true;
+          });
+        } else {
+          _.map(listNode,function(node){
+            node.errorDuplicated = false;
+          });
+        }
+      });
     },
 
     release: function(releaseMethod){
+      var _this = this;
       var visibleSelectedRows = [];
       var model = this.gridView.gridOptions.api.getModel();
       for (var i = 0; i < model.getRowCount(); i++) {
         var visibleRowNode = model.getRow(i);
         if(visibleRowNode.selected){
+          if(visibleRowNode.error || visibleRowNode.errorDuplicated){
+            return this.swal({text:'unavailable sensor or duplicated sensor is equiped',title:'sensor error'}, 'error',null);
+          }
           visibleSelectedRows.push(visibleRowNode.data);
         }
       }

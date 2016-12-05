@@ -8,13 +8,15 @@ define([
   'ns_modules/ns_com',
   'ns_map/ns_map',
   'ns_grid/grid.view',
+  'ns_grid/customCellRenderer/decimal5Renderer',
+  'ns_grid/customCellRenderer/dateTimeRenderer',
   'moment',
   'ns_grid/aggrid_custom_date_filter',
   'ns_grid/aggrid_custom_select_filter',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,
-  Com, NsMap, GridView,Moment, DateFilter, SelectFilter
+  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer ,Moment, DateFilter, SelectFilter
 ) {
 
   'use strict';
@@ -132,31 +134,37 @@ define([
         return text;
       };
 
+      // var decimal5Renderer = function(params){
+      //   return params.data[params.column.colId].toFixed(5);
+      // };
+
       var dateTimestampRender = function(params){
         return Moment.unix(params.data.displayDate).format("DD/MM/YYYY HH:mm:SS");
       };
 
       var columnsDefs = [
         {
-          field: 'id',
-          headerName: 'ID',
-          hide: true,
-        },{
           field: 'name',
           headerName: 'Name',
           checkboxSelection: true,
         },{
+          field: 'id',
+          headerName: 'ID',
+          hide: true,
+        },{
           field: 'displayDate',
           headerName: 'Date',
-          cellRenderer: dateTimestampRender,
-          filter : DateFilter,
+          cellRenderer: DateTimeRenderer,
+          filter : DateFilter
         },{
           field: 'latitude',
           headerName: 'LAT',
+          cellRenderer: Decimal5Renderer,
           filter :"number"
         },{
           field: 'longitude',
           headerName: 'LON',
+          cellRenderer: Decimal5Renderer,
           filter :"number"
         },{
           editable: true,
@@ -176,6 +184,7 @@ define([
         gridOptions: {
           rowData: this.data,
           enableFilter: true,
+          singleClickEdit : true,
           rowSelection: 'multiple',
           onRowClicked: function(row){
             if(_this.gridView.gridOptions.api.getFocusedCell().column.colId != 'fieldActivity'){

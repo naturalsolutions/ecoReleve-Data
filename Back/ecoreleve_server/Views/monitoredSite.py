@@ -52,18 +52,18 @@ def actionOnMonitoredSite(request):
 
 def count_ (request = None,listObj = None) :
     session = request.dbsession
-    if request is not None : 
+    if request is not None :
         data = request.params
-        if 'criteria' in data: 
+        if 'criteria' in data:
             data['criteria'] = json.loads(data['criteria'])
             if data['criteria'] != {} :
                 searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
 
         listObj = ListObjectWithDynProp(MonitoredSite)
         count = listObj.count(searchInfo = searchInfo)
-    else : 
+    else :
         count = listObj.count()
-    return count 
+    return count
 
 def getFilters (request):
     session = request.dbsession
@@ -78,7 +78,11 @@ def getFilters (request):
 def getForms(request) :
     session = request.dbsession
 
-    typeMonitoredSite = request.params['ObjectType']
+    if 'ObjectType' in request.params:
+        typeMonitoredSite = request.params['ObjectType']
+    else:
+        typeMonitoredSite = 1
+
     ModuleName = 'MonitoredSiteForm'
     Conf = session.query(FrontModules).filter(FrontModules.Name==ModuleName ).first()
     newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = typeMonitoredSite)
@@ -116,11 +120,11 @@ def getMonitoredSite(request):
         ModuleName = request.params['FormName']
         try :
             DisplayMode = request.params['DisplayMode']
-        except : 
+        except :
             DisplayMode = 'display'
         Conf = session.query(FrontModules).filter(FrontModules.Name=='MonitoredSiteForm').first()
         response = curMonitoredSite.GetDTOWithSchema(Conf,DisplayMode)
-    else : 
+    else :
         response  = curMonitoredSite.GetFlatObject()
     return response
 
@@ -151,7 +155,7 @@ def getMonitoredSiteHistory(request):
         for row in dataResult:
             geoJson.append({'type':'Feature', 'properties':{'Date':row['StartDate']}, 'geometry':{'type':'Point', 'coordinates':[row['LAT'],row['LON']]}})
         result = {'type':'FeatureCollection', 'features':geoJson}
-    else : 
+    else :
         countResult = listObj.count(searchInfo)
         result = [{'total_entries':countResult}]
         result.append(dataResult)
@@ -170,7 +174,7 @@ def getMonitoredSiteEquipment(request):
         ).select_from(joinTable
         ).where(table.c['FK_MonitoredSite'] == id_site
         ).order_by(desc(table.c['StartDate']))
-    
+
     result = session.execute(query).fetchall()
     response = []
     for row in result:
@@ -218,7 +222,7 @@ def insertMonitoredSite(request):
     if not isinstance(data,list):
         return insertOneNewMonitoredSite(request)
     else :
-        print('_______INsert LIST')
+        return
 
 # ------------------------------------------------------------------------------------------------------------------------- #
 def insertOneNewMonitoredSite (request) :
@@ -227,7 +231,7 @@ def insertOneNewMonitoredSite (request) :
     data = {}
     for items , value in request.json_body.items() :
         data[items] = value
-    try:        
+    try:
         newMonitoredSite = MonitoredSite(FK_MonitoredSiteType = data['FK_MonitoredSiteType'], Creator = request.authenticated_userid['iss'] )
         newMonitoredSite.MonitoredSiteType = session.query(MonitoredSiteType).filter(MonitoredSiteType.ID==data['FK_MonitoredSiteType']).first()
         newMonitoredSite.init_on_load()
@@ -253,7 +257,7 @@ def searchMonitoredSite(request):
     searchInfo = {}
     searchInfo['criteria'] = []
 
-    if 'criteria' in data: 
+    if 'criteria' in data:
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]
@@ -268,7 +272,7 @@ def searchMonitoredSite(request):
     start = datetime.now()
     # listObj = ListObjectWithDynProp(MonitoredSite,moduleFront,View=Base.metadata.tables['MonitoredSitePositionsNow'])
     listObj = MonitoredSiteList(moduleFront,View=Base.metadata.tables['MonitoredSitePositionsNow'])
-    
+
     dataResult = listObj.GetFlatDataList(searchInfo)
     countResult = listObj.count(searchInfo)
 
@@ -284,7 +288,7 @@ def sites_export(request):
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = []
-    if 'criteria' in data: 
+    if 'criteria' in data:
         data['criteria'] = json.loads(data['criteria'])
         if data['criteria'] != {} :
             searchInfo['criteria'] = [obj for obj in data['criteria'] if obj['Value'] != str(-1) ]

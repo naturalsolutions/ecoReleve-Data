@@ -357,7 +357,7 @@ def checkExistingArgos (dfToCheck,session) :
     dfToCheck['lat2'] = dfToCheck['lat'].round(3)
     dfToCheck['lon2'] = dfToCheck['lon'].round(3)
     # Retrieve data from DB
-    queryArgos = select([ArgosGps.pk_id, ArgosGps.date, ArgosGps.lat, ArgosGps.lon, ArgosGps.ptt]).where(ArgosGps.type_ == 'arg')
+    queryArgos = select([ArgosGps.pk_id, ArgosGps.date, ArgosGps.lat, ArgosGps.lon, ArgosGps.ptt]).where(ArgosGps.type_ == 'argos')
     queryArgos = queryArgos.where(and_(ArgosGps.date >= minDate , ArgosGps.date <= maxDate))
     data = session.execute(queryArgos).fetchall()
 
