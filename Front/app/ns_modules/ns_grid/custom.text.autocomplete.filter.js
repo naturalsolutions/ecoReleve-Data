@@ -109,9 +109,7 @@ define([
 
         isFilterValid: function() {
             var optSel = $(this.$autoComp).val();
-            console.log(optSel);
-            var isValid = (optSel > 0)
-            console.log(isValid);
+            var isValid = (optSel != "")
             return isValid;
         },
 
@@ -180,36 +178,28 @@ define([
         },
 
         doesFilterPass: function(params) {
-            if (!this.filterAutocomp) {
-              console.log("null");
+            if (!this.filterAutocomp || !this.filterAutocomp.text) {
                 return true;
             }
             var valTmp = this.valueGetter(params);
             if( !valTmp ) {
-              console.log("pas de val");
               return false;
             }
             var valTmpLowCase = valTmp.toString().toLowerCase();
 
             switch (this.filterAutocomp.type) {
                 case CONTAINS:
-                    console.log("contains");
                     return valTmpLowCase.indexOf(this.filterAutocomp.text) >= 0;
                 case EQUALS:
-                    console.log("equals");
                     return valTmpLowCase === this.filterAutocomp.text;
                 case NOT_EQUALS:
-                    console.log("not equals");
                     return valTmpLowCase != this.filterAutocomp.text;
                 case STARTS_WITH:
-                    console.log("start with");
                     return valTmpLowCase.indexOf(this.filterAutocomp.text) === 0;
                 case ENDS_WITH:
-                    console.log("end with");
                     var index = valTmpLowCase.lastIndexOf(this.filterAutocomp.text);
                     return index >= 0 && index === (valTmpLowCase.length - this.filterAutocomp.text.length);
                 case IN:
-                    console.log("in");
                     var tab = this.filterAutocomp.text.split(',');
                     if(tab.length <= 1){
                         tab = this.filterAutocomp.text.split(';');
