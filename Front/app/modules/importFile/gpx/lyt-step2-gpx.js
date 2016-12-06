@@ -41,7 +41,6 @@ define([
       this.com = new Com();
       this.data = options.model.attributes.data_FileContent;
       this.deferred = $.Deferred();
-      window.formChange  = false;
       this.parent = options.parent;
     },
 
@@ -250,10 +249,8 @@ define([
       return this.deferred;
     },
 
-
-
     setFieldActivity : function(){
-       window.formChange  = false;
+
     }
 
   });
