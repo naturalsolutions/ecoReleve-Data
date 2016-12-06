@@ -9,7 +9,7 @@ define([
   return Form.editors.ajaxButtonEditor = Form.editors.Base.extend({
 
 
-    
+
         previousValue: '',
 
         events: {
@@ -34,10 +34,6 @@ define([
             this.parentModel = options.model;
             this.dataToSend = {};
             var _this = this;
-            /*params.forEach(function(params){
-                this.dataToSend[params] = this.parentModel.get(params);
-            },this);
-            console.log(this.parentModel.toJSON())*/
 
         },
 
@@ -95,7 +91,7 @@ define([
         render: function(){
             var options = this.options;
             var _this = this;
-           
+
             var $el = _.template(
                 this.template, {btnText:this.options.btnText ,iconFont:this.options.iconFont, editable: _this.editable
             });

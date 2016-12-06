@@ -95,10 +95,7 @@ define([
         this.errors = true;
       } else {
         reader.onload = function(e, fileName) {
-          window.app.checkFormSaved = false;
           var xml = e.target.result;
-
-
           var importResulr =  XmlParser.gpxParser(xml);
           _this.wayPointList =  importResulr[0];
           var errosList = importResulr[1];
@@ -160,7 +157,6 @@ define([
             if(error){
               return false;
             }else{
-              window.app.checkFormSaved = false;
               return true;
             }
     },

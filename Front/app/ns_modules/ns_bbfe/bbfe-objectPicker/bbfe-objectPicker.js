@@ -100,7 +100,7 @@ define([
       var _this = this;
       this.autocompleteSource = {};
       this.autocompleteSource.source ='autocomplete/'+ this.objectName + '/'+this.usedLabel+'/ID';
-      this.autocompleteSource.minLength = 3;
+      this.autocompleteSource.minLength = 2;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
         _this.setValue(ui.item.value,ui.item.label);

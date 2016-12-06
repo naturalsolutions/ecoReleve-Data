@@ -94,18 +94,13 @@ define([
     filter: function() {
       var criterias = this.filters.update();
       var _this=this;
-      console.log(criterias);
       var aggridCriteria = {};
 
-      // console.log(this.gridView.gridOptions.api.getFilterInstance('Species'))
       criterias.map(function(model){
-        aggridCriteria[model.Column] = {type:1 ,filter:model.Value}
+        aggridCriteria[model.Column] = {type:1 ,filter:model.Value};
       });
-      console.log(aggridCriteria)
       this.gridView.gridOptions.api.setFilterModel(aggridCriteria);
       this.gridView.gridOptions.api.onFilterChanged();
-
-
     },
 
     clearFilter: function() {
