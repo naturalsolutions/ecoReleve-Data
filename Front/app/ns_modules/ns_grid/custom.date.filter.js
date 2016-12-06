@@ -51,8 +51,10 @@ define([
 
       this.datetimepickerOptions = {
         /*locale : "fr",*/
-        format : "DD/MM/YYYY HH:mm",
-        useCurrent: false
+        format      : "DD/MM/YYYY HH:mm",
+        useCurrent  : false,
+        showClose   : true,
+        //focusOnShow : false
       }
 
       this.cleanBtn = this.eGui.querySelector('#cleanBtn');
@@ -63,6 +65,18 @@ define([
       this.filterChangedCallback = params.filterChangedCallback;
        this.filterModifiedCallback = params.filterModifiedCallback;
        this.valueGetter = params.valueGetter;
+       var self = this;
+
+       $( this.dateFrom ).datetimepicker(self.datetimepickerOptions);
+       $( this.dateTo ).datetimepicker(self.datetimepickerOptions);
+       $(this.dateFrom).on("dp.change", function (e) {
+         $(this).data('DateTimePicker').hide();
+         self.onFilterChanged();
+       });
+       $(this.dateTo).on("dp.change", function (e) {
+         $(this).data('DateTimePicker').hide();
+         self.onFilterChanged();
+       });
 
       this.createGui();
     },
@@ -70,7 +84,7 @@ define([
     dateClean : function() {
       this.dateFrom.value = "";
       this.dateTo.value = "";
-
+      $(this.dateFrom).data().DateTimePicker.date(null);;
       this.onFilterChanged();
       this.filterChangedCallback();
       if ( $('.ag-filter').length ) {
@@ -79,18 +93,7 @@ define([
     },
 
     afterGuiAttached : function() {
-      var self = this;
 
-      $( this.dateFrom ).datetimepicker(self.datetimepickerOptions);
-      $( this.dateTo ).datetimepicker(self.datetimepickerOptions);
-      $(this.dateFrom).on("dp.change", function (e) {
-        $(this).data('DateTimePicker').hide();
-        self.onFilterChanged();
-      });
-      $(this.dateTo).on("dp.change", function (e) {
-        $(this).data('DateTimePicker').hide();
-        self.onFilterChanged();
-      });
     },
 
     isFilterValid : function() {
