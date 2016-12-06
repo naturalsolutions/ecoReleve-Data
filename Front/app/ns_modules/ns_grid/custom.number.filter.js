@@ -125,16 +125,15 @@ return (function () {
                 return valueAsNumber >= this.filterNumber;
             case NOT_EQUAL:
                 return valueAsNumber != this.filterNumber;
-            case IN: 
-                console.log(this.filterText);
+            case IN:
                 var tab = this.filterText.split(',');
                 if(tab.length <= 1){
                     tab = this.filterText.split(';');
                 }
                 if(tab.length <= 1){
-                    tab = this.filterText.split(' ');                    
+                    tab = this.filterText.split(' ');
                 }
-                    
+
                 for (var i=0; i< tab.length; i++){
                     if ((tab[i].toLowerCase() == valueAsNumber)) {
                         return true;

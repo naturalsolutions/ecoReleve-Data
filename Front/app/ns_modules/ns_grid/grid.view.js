@@ -174,9 +174,6 @@ define([
             return;
           }
           case 'textAutocomplete': {
-            console.log("presence autocomplete");
-            console.log(col.filter);
-            console.log(CustomTextAutocompleteFilter);
             col.filter = CustomTextAutocompleteFilter;
             return;
           }
@@ -190,7 +187,6 @@ define([
           _this.addBBFEditor(col);
         }
       });
-      console.log(columnDefs);
       return columnDefs;
     },
 
@@ -221,7 +217,6 @@ define([
     },
 
     formatSelectColumn: function(col){
-      console.log(col);
       var _this = this;
       col.checkboxSelection = true;
       col.headerCellTemplate = function() {
