@@ -15,7 +15,7 @@ define([
             'click .js-cloneLast' : 'cloneLast',
         },
         initialize: function(options) {
-            
+
             if (options.schema.validators.length) {
                 this.defaultRequired = true;
             } else {
@@ -75,9 +75,9 @@ define([
             this.addForm(model,this.forms.length+1);
         },
 
-		cloneLast: function() {
-			var resultat = this.forms[this.forms.length-1].commit() ;
-			if (resultat != null) return ; // COmmit NOK, on crée pas la ligne
+        cloneLast: function() {
+          var resultat = this.forms[this.forms.length-1].commit() ;
+          if (resultat != null) return ; // COmmit NOK, on crée pas la ligne
 
             var mymodel = Backbone.Model.extend({
                 defaults : this.forms[this.forms.length-1].model.attributes
@@ -90,6 +90,26 @@ define([
             this.addForm(model,this.forms.length+1);
         },
 
+        subFormChange: function(){
+            this.$el.find('.grid-form').change();
+        },
+
+        bindChanges: function(form){
+          var _this = this;
+          form.$el.find('input').on("change", function(e) {
+              _this.formChange = true;
+              _this.subFormChange();
+          });
+          form.$el.find('select').on("change", function(e) {
+              _this.formChange = true;
+              _this.subFormChange();
+          });
+          form.$el.find('textarea').on("change", function(e) {
+              _this.formChange = true;
+              _this.subFormChange();
+          });
+        },
+
         addForm: function(model,index){
             var _this = this;
             var form = new Backbone.Form({
@@ -97,49 +117,34 @@ define([
                 fieldsets: model.fieldsets,
                 schema: model.schema
             }).render();
-
-            form.$el.find('input').on("change", function(e) {
-                window.formChange = true;
-            });
-            form.$el.find('select').on("change", function(e) {
-                window.formChange = true;
-            });
-            form.$el.find('textarea').on("change", function(e) {
-                window.formChange = true;
-            });
-
+            this.bindChanges(form);
             this.initRules(form);
             this.forms.push(form);
 
             if(!this.defaultRequired){
-       /*         form.$el.find('fieldset').append('\
-                    <div class="' + this.hidden + ' col-xs-12 control">\
-                        <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
-                    </div>\
-                ');*/
-                 if (this.delFirst){
-                    var optClass = ' fixedCol';
-                    var opt2Class = ' pull-left';
-                } else {
-                    var optClass = '';
-                    var opt2Class = ' pull-right';
+              if (this.delFirst){
+                  var optClass = ' fixedCol';
+                  var opt2Class = ' pull-left';
+              } else {
+                  var optClass = '';
+                  var opt2Class = ' pull-right';
+              }
+
+              form.$el.find('fieldset').append('\
+                  <div id="delBtn" class="' + this.hidden +optClass+ ' col-xs-12 control grid-field" style={background: #eee;}>\
+                      <button type="button" class="btn btn-danger'+ opt2Class +'" id="remove"><span class="reneco reneco-trash"></span></button>\
+                  </div>\
+              ');
+              form.$el.find('button#remove').on('click', function() {
+                _this.$el.find('#formContainer').find(form.el).remove();
+                var i = _this.forms.indexOf(form);
+                if (i > -1) {
+                    _this.forms.splice(i, 1);
                 }
-
-                form.$el.find('fieldset').append('\
-                    <div id="delBtn" class="' + this.hidden +optClass+ ' col-xs-12 control grid-field" style={background: #eee;}>\
-                        <button type="button" class="btn btn-danger'+ opt2Class +'" id="remove"><span class="reneco reneco-trash"></span></button>\
-                    </div>\
-                ');
-                form.$el.find('button#remove').on('click', function() {
-                  _this.$el.find('#formContainer').find(form.el).remove();
-                  var i = _this.forms.indexOf(form);
-                  if (i > -1) {
-                      _this.forms.splice(i, 1);
-                  }
-                  return;
-                });
+                _this.subFormChange();
+                return;
+              });
             }
-
 
             this.$el.find('#formContainer').append(form.el);
             if (_this.showLines) {
@@ -162,16 +167,12 @@ define([
         render: function() {
             //Backbone.View.prototype.initialize.call(this, options);
             var _this = this;
-
             var $el = $($.trim(this.template({
                 hidden: this.hidden,
                 hiddenClone : this.hiddenClone
             })));
             this.setElement($el);
-            
-
             var data = this.options.model.attributes[this.key];
-
             var model = new Backbone.Model();
             model.schema = this.options.schema.subschema;
 
@@ -208,26 +209,20 @@ define([
                             col.fieldClass += ' firstCol-'+prevSize;
                         }*/
                         col.fieldClass += ' firstCol-'+prevSize;
-
                     }
                     this.options.schema.subschema[odrFields[i]].fieldClass = col.fieldClass;
                     prevSize += col.size;
-
                 }
-
                 if(col.title && test) {
                  this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
                 }
-
                 if ( col.size == null) {
                     size += 150;
                 }
                 else {
                     size += col.size*25;
                 }
-
             }
-
 
             if (this.delFirst && !this.disabled){
                 if (this.nbFixedCol) {
@@ -270,10 +265,8 @@ define([
             else {
                 size += 285;
             }
-
             //this.$el.find('#th').prepend('<div style="width: 34px;" class="pull-left" ><span class="reneco reneco-trash"></span></div>');
             // size += 35;
-
             this.$el.find('#th').width(size);
             this.$el.find('#formContainer').width(size);
 
@@ -289,8 +282,7 @@ define([
                         model.fieldsets = this.options.schema.fieldsets;
                         model.attributes = data[i];
                         this.addForm(model,i+1);
-
-                    };
+                    }
 
                     if (data.length < this.nbByDefault) {
                         for (var i = 0; i < data.length; i++) {
@@ -308,7 +300,6 @@ define([
                     this.defaultRequired = false;
                 }
             }
-
             return this;
         },
 
