@@ -126,7 +126,6 @@ define([
         headerName: 'Precision(m)',
         filter: 'number',
       },{
-      },{
         field: 'region',
         headerName: 'Region',
         filter: 'text',
@@ -134,6 +133,12 @@ define([
         field: 'type_',
         headerName: 'Type',
         filter: 'text',
+        filterParams : {selectList : [
+          {value : 'argos' , label: 'argos' },
+          {value : 'gps' , label: 'gps' },
+          {value : 'rfid' , label: 'rfid' },
+          {value : 'station' , label: 'station' },
+        ]},
       },{
         field: 'fieldActivity_Name',
         headerName: 'FieldActivity',
