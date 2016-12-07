@@ -224,26 +224,27 @@ define([
         eCell.innerHTML = '\
             <img class="js-check-all pull-left" value="unchecked" src="./app/styles/img/unchecked.png" title="check only visible rows (after filter)" style="padding-left:10px; padding-top:7px" />\
             <div id="agResizeBar" class="ag-header-cell-resize"></div>\
-            <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button"></span>\
+            <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg width="12" height="12"><rect y="0" width="12" height="2" class="ag-header-icon"></rect><rect y="5" width="12" height="2" class="ag-header-icon"></rect><rect y="10" width="12" height="2" class="ag-header-icon"></rect></svg></span>\
             <div id="agHeaderCellLabel" class="ag-header-cell-label">\
-              <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>\
-              <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>\
-              <span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>\
-              <span id="agFilter" class="ag-header-icon ag-filter-icon"></span>\
+              <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>\
+              <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>\
+              <span id="agNoSort" class="ag-header-icon ag-sort-none-icon ag-hidden"><svg width="10" height="10"><polygon points="0,4 5,0 10,4"></polygon><polygon points="0,6 5,10 10,6"></polygon></svg></span>\
+              <span id="agFilter" class="ag-header-icon ag-filter-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 4,4 4,10 6,10 6,4 10,0" class="ag-header-icon"></polygon></svg></span>\
               <span id="agText" class="ag-header-cell-text"></span>\
             </div>\
         ';
-          var checkboxElt = eCell.querySelector('.js-check-all');
+        
+        var checkboxElt = eCell.querySelector('.js-check-all');
 
-          checkboxElt.addEventListener('click', function(e) {
-            if($(this).attr('value') === 'unchecked'){
-              _this.checkUncheckSelectAllUI(true);
-              _this.selectAllVisible();
-            } else {
-              _this.checkUncheckSelectAllUI(false);
-              _this.deselectAllVisible();
-            }
-          });
+        checkboxElt.addEventListener('click', function(e) {
+          if($(this).attr('value') === 'unchecked'){
+            _this.checkUncheckSelectAllUI(true);
+            _this.selectAllVisible();
+          } else {
+            _this.checkUncheckSelectAllUI(false);
+            _this.deselectAllVisible();
+          }
+        });
 
         return eCell;
       };
