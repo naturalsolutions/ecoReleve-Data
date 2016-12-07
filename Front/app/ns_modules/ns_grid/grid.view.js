@@ -160,6 +160,10 @@ define([
           _this.formatSelectColumn(col)
         }
 
+        if(col.cell == 'autocomplete'){
+          _this.addBBFEditor(col);
+        }
+        
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;
@@ -183,9 +187,7 @@ define([
           }
         }
         //draft
-        if(col.cell == 'autocomplete'){
-          _this.addBBFEditor(col);
-        }
+
       });
       return columnDefs;
     },
@@ -233,7 +235,7 @@ define([
               <span id="agText" class="ag-header-cell-text"></span>\
             </div>\
         ';
-        
+
         var checkboxElt = eCell.querySelector('.js-check-all');
 
         checkboxElt.addEventListener('click', function(e) {
