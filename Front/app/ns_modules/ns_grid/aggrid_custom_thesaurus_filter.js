@@ -9,19 +9,19 @@ define([
     SelectFilter.prototype = {
         init: function(params) {
             var _this = this;
-            var apply = "APPLY";
-            var clear = "CLEAR";
+            var apply = "Apply Filter";
+            var clear = "Clear";
             var placeholder = "Input thésau";
 
             this.eGui = document.createElement('div');
             this.eGui.innerHTML =
                 '<div class="js-select">' +
-                '<input type="text" class="ag-filter-filter js-autocomp-input" id="prout" placeholder="'+placeholder+'">'+
+                '<input type="text" class="ag-filter-filter js-autocomp-input form-control input-sm" id="prout" placeholder="'+placeholder+'">'+
                 '</div>' +
                 '<div class="ag-filter-apply-panel" id="applyPanel">' +
-                '<button class="btn btn-lg btn-block btn-filter" type="button" id="applyButton">' + apply + '</button>' +
+                '<button class="btn btn-block" type="button" id="applyButton">' + apply + '</button>' +
                 '<div class="bottom clearfix" />' +
-                '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="icon material-icon">close</span>' + clear + '</button>' +
+                '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="reneco reneco-close">close</span> ' + clear + '</button>' +
                 '</div>';
             this.$eGui = $(this.eGui);
 

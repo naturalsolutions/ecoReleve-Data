@@ -173,10 +173,10 @@ define([
             col.filter = CustomSelectFilter;
             return;
           }
-          case 'textAutocomplete': {
-            col.filter = CustomTextAutocompleteFilter;
-            return;
-          }
+          // case 'textAutocomplete': {
+          //   col.filter = CustomTextAutocompleteFilter;
+          //   return;
+          // }
           default: {
             col.filter = CustomTextFilter;
             return;
@@ -632,25 +632,6 @@ define([
       if(AgGrid.extended){
         return;
       }
-
-      CustomTextFilter.prototype.afterGuiAttached = function(options) {
-        this.eFilterTextField.focus();
-        $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
-        $(this.eGui).find('input, select').each(function(){
-          $(this).addClass('form-control input-sm');
-        });
-      };
-
-      CustomNumberFilter.prototype.afterGuiAttached = function(options) {
-        this.eFilterTextField.focus();
-        $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
-        $(this.eGui).find('input, select').each(function(){
-          $(this).addClass('form-control input-sm');
-        });
-        // $(this.eGui).find('input').each(function(){
-        //   $(this).attr('type', 'number');
-        // });
-      };
 
 
       AgGrid.StandardMenuFactory.prototype.showPopup = function (column, positionCallback) {

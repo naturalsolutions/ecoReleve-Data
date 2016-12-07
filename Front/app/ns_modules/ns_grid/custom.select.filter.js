@@ -13,20 +13,20 @@ define([
                 return null;
             }
             var _this = this;
-            var apply = "APPLY";
-            var clear = "CLEAR";
+            var apply = "Apply Filter";
+            var clear = "Clear";
 
             this.eGui = document.createElement('div');
             this.eGui.innerHTML =
                 '<div class="js-select">' +
-                '<select class="ag-filter-filter js-select-filter" name="selectedVal">' +
+                '<select class="ag-filter-filter js-select-filter form-control input-sm" name="selectedVal">' +
                 '<option value=""></option>' +
                 '</select>' +
                 '</div>' +
                 '<div class="ag-filter-apply-panel" id="applyPanel">' +
-                '<button class="btn btn-lg btn-block btn-filter" type="button" id="applyButton">' + apply + '</button>' +
+                '<button class="btn btn-block" type="button" id="applyButton">' + apply + '</button>' +
                 '<div class="bottom clearfix" />' +
-                '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="icon material-icon">close</span>' + clear + '</button>' +
+                '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="reneco reneco-close"></span> ' + clear + '</button>' +
                 '</div>';
             this.$eGui = $(this.eGui);
 

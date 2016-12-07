@@ -44,10 +44,10 @@
                 return value;
             }
         };
-
+var clear = 'Clear';
 var template = '<div>' +
     '<div>' +
-    '<select class="ag-filter-select" id="filterType">' +
+    '<select class="ag-filter-select form-control input-sm" id="filterType">' +
     '<option value="1">[EQUALS]</option>' +
     '<option value="2">[NOT EQUAL]</option>' +
     '<option value="3">[LESS THAN]</option>' +
@@ -58,10 +58,11 @@ var template = '<div>' +
     '</select>' +
     '</div>' +
     '<div>' +
-    '<input class="ag-filter-filter" id="filterText" type="text" placeholder="[FILTER...]"/>' +
+    '<input class="ag-filter-filter form-control input-sm" id="filterText" type="text" placeholder="[FILTER...]"/>' +
     '</div>' +
     '<div class="ag-filter-apply-panel" id="applyPanel">' +
-    '<button type="button" id="applyButton">[APPLY FILTER]</button>' +
+    '<button type="button" class="btn btn-block" id="applyButton">[APPLY FILTER]</button>' +
+    '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="reneco reneco-close"></span> ' + clear + '</button>' +
     '</div>' +
     '</div>';
 var EQUALS = 1;
@@ -93,9 +94,19 @@ return (function () {
             this.api.setFilter(null);
         }
     };
+
     NumberFilter.prototype.afterGuiAttached = function () {
         this.eFilterTextField.focus();
+        this.cleanBtn = this.eGui.querySelector('#cleanBtn');
+        this.cleanBtn.addEventListener('click', this.clean.bind(this));
     };
+
+    NumberFilter.prototype.clean = function(){
+        $(this.eGui).find('input').val('');
+        this.onFilterChanged();
+        this.filterChangedCallback();
+    };
+
     NumberFilter.prototype.doesFilterPass = function (node) {
 
         if (this.filterNumber === null) {

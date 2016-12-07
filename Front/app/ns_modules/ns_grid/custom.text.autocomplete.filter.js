@@ -19,14 +19,14 @@ define([
                 return null;
             }
             var _this = this;
-            var apply = "APPLY";
-            var clear = "CLEAR";
+            var apply = "Apply Filter";
+            var clear = "Clear";
 
             this.eGui = document.createElement('div');
             this.eGui.innerHTML =
                 '<div class="js-autocomp">' +
                 '<div>' +
-                '<select class="ag-filter-select" id="filterType">' +
+                '<select class="ag-filter-select form-control input-sm" id="filterType">' +
                 '<option value="1">Contains</option>' +
                 '<option value="2">Equals</option>' +
                 '<option value="3">Not equals</option>' +
@@ -36,12 +36,12 @@ define([
                 '</select>' +
                 '</div>' +
                 '<div>'+
-                '<input type="text" class="ag-filter-filter js-text-input" >'+
+                '<input type="text" class="ag-filter-filter js-text-input form-control input-sm" >'+
                 '</div>' +
                 '<div class="ag-filter-apply-panel" id="applyPanel">' +
-                '<button class="btn btn-lg btn-block btn-filter" type="button" id="applyButton">' + apply + '</button>' +
+                '<button class="btn btn-block" type="button" id="applyButton">' + apply + '</button>' +
                 '<div class="bottom clearfix" />' +
-                '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="icon material-icon">close</span>' + clear + '</button>' +
+                '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="reneco reneco-close"></span> ' + clear + '</button>' +
                 '</div>';
             this.$eGui = $(this.eGui);
 
