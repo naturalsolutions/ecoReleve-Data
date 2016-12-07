@@ -96,7 +96,7 @@ define([
         field: 'Date',
         headerName: 'date',
         checkboxSelection: true,
-        filter: 'text',
+        filter: 'date',
         pinned: 'left',
         minWidth: 200,
         cellRenderer: function(params){
