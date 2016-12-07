@@ -14,8 +14,7 @@ define([
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,
-  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer, Moment
-) {
+  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer ,Moment ) {
 
   'use strict';
 
@@ -121,6 +120,7 @@ define([
       };
 
       var FieldActivityRenderer = function(params){
+      //  console.log(params);
         var text = '';
         _this.fieldActivityList.map(function(fa){
           if(params.data.fieldActivity == fa.value){
@@ -140,31 +140,41 @@ define([
 
       var columnsDefs = [
         {
-          field: 'name',
-          headerName: 'Name',
-          checkboxSelection: true,
-        },{
           field: 'id',
           headerName: 'ID',
-          hide: true,
+          checkboxSelection: true
+
+        },{
+          field: 'name',
+          headerName: 'Name',
+          filter :"textAutocomplete",
+          filterParams : {
+            apply : true,
+            tabToOrder : this.data.map(function(elem) {return elem.name;})
+           }
         },{
           field: 'displayDate',
           headerName: 'Date',
-          cellRenderer: DateTimeRenderer
+          cellRenderer: DateTimeRenderer,
+          filter : "date"
         },{
           field: 'latitude',
           headerName: 'LAT',
-          cellRenderer: Decimal5Renderer
+          cellRenderer: Decimal5Renderer,
+          filter :"number"
         },{
           field: 'longitude',
           headerName: 'LON',
-          cellRenderer: Decimal5Renderer
+          cellRenderer: Decimal5Renderer,
+          filter :"number"
         },{
           editable: true,
           field: 'fieldActivity',
           headerName: 'Field Activity',
           cellEditor: FieldActivityEditor,
-          cellRenderer: FieldActivityRenderer
+          cellRenderer: FieldActivityRenderer,
+          filter : "select",
+          filterParams : { selectList : this.fieldActivityList }
         },
       ];
 
