@@ -353,13 +353,13 @@ class ModuleGrids (Base) :
 
     def GenerateColumn (self):
         ''' return grid field to build Grid '''
-        dictFilterInGrid = {'string': 'text', 'integer': 'number'}
+        dictFilterInGrid = {'Text': 'text', 'Number': 'number', 'DateTimePickerEditor':'date'}
         column = {
         'field': self.FKName(),
         'headerName': self.Label,
         'hide': isHidden(self.GridRender),
         'editable': isEditable(self.GridRender),
-        'filter': dictFilterInGrid.get(self.CellType),
+        'filter': dictFilterInGrid.get(self.FilterType,'text'),
         'cell': self.CellType,
         # 'width':self.GridSize,
         # 'filterParams': self.?,
