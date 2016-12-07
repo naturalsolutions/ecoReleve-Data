@@ -233,7 +233,7 @@ define([
               <span id="agText" class="ag-header-cell-text"></span>\
             </div>\
         ';
-        
+
         var checkboxElt = eCell.querySelector('.js-check-all');
 
         checkboxElt.addEventListener('click', function(e) {
@@ -376,6 +376,13 @@ define([
             order_by: JSON.stringify(order_by),
             typeObj: _this.model.get('objectType')
           };
+
+          if(this.startDate){
+            status.startDate = this.startDate;
+          }
+          if(this.history){
+            status.history = this.history;
+          }
 
           $.ajax({
             url: _this.model.get('url'),
@@ -567,7 +574,7 @@ define([
 
       $.when(this.columnDeferred).then(function(){
         _this.displayGrid();
-      })
+      });
 
       this.onResize = _.debounce( function() {
         _this.gridOptions.api.sizeColumnsToFit();

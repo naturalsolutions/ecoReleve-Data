@@ -5,7 +5,7 @@
 	      &nbsp;
 	      <span data-i18n="button.back">Back</span>
   		</a>
-  		
+
   		<% if (typeof(uiTabs) !== 'undefined') { %>
 	  		<ul class="js-nav-tabs nav nav-tabs pull-right modal-visible">
 	  			<% _.each(uiTabs, function(uiTab, index){ %>
@@ -18,6 +18,22 @@
 		</div>
 
 		<div class="crop2 clearfix">
+			<br>
+			<div class="border-bottom-filter hide">
+					<div class="form-group col-md-6">
+						<span>At Date : </span>
+						<div class='input-group date' id='datetimepicker2'>
+								<span class="input-group-addon">
+										<span class="reneco-calendar reneco" ></span>
+								</span>
+								<input id="dateVal" type='text' class="form-control" />
+						</div>
+					</div>
+						<div class="">
+							<span>All history : </span>
+							<input id="histVal" type='checkbox' class="form-control" />
+						</div>
+			</div>
 			<div class="js-filters filter-no-padding"></div>
 		</div>
 		<div class="toolbar bottom">
@@ -75,7 +91,7 @@
 					<span class="reneco reneco-entrykey"></span>
 					&nbsp;
 					New <%= single %>
-					</a>			    
+					</a>
 			<% } else { %>
 					<button class="js-admin js-btn-new btn btn-success pull-right">
 					<span class="reneco reneco-entrykey"></span>
@@ -83,6 +99,6 @@
 					New <%= single %>
 					</button>
 			<% } %>
-			
+
 		</div>
 	</div>
