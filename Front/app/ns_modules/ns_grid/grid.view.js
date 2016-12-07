@@ -7,9 +7,12 @@ define([
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
   './custom.text.filter',
   './custom.number.filter',
+  './custom.date.filter',
+  './custom.select.filter',
+  './custom.text.autocomplete.filter',
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter) {
+], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter) {
 
   'use strict';
 
@@ -156,13 +159,28 @@ define([
         if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
           _this.formatSelectColumn(col)
         }
-        
+
         switch(col.filter){
-          case 'number':
+          case 'number': {
             col.filter = CustomNumberFilter;
             return;
-          default:
+          }
+          case 'date': {
+            col.filter = CustomDateFilter;
+            return;
+          }
+          case 'select': {
+            col.filter = CustomSelectFilter;
+            return;
+          }
+          // case 'textAutocomplete': {
+          //   col.filter = CustomTextAutocompleteFilter;
+          //   return;
+          // }
+          default: {
             col.filter = CustomTextFilter;
+            return;
+          }
         }
         //draft
         if(col.cell == 'autocomplete'){
@@ -614,25 +632,6 @@ define([
       if(AgGrid.extended){
         return;
       }
-
-      CustomTextFilter.prototype.afterGuiAttached = function(options) {
-        this.eFilterTextField.focus();
-        $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
-        $(this.eGui).find('input, select').each(function(){
-          $(this).addClass('form-control input-sm');
-        });
-      };
-
-      CustomNumberFilter.prototype.afterGuiAttached = function(options) {
-        this.eFilterTextField.focus();
-        $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
-        $(this.eGui).find('input, select').each(function(){
-          $(this).addClass('form-control input-sm');
-        });
-        // $(this.eGui).find('input').each(function(){
-        //   $(this).attr('type', 'number');
-        // });
-      };
 
 
       AgGrid.StandardMenuFactory.prototype.showPopup = function (column, positionCallback) {
