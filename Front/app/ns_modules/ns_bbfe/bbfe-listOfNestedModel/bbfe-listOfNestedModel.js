@@ -89,6 +89,7 @@ define([
 
         addForm: function(model){
             var _this = this;
+            model.set('FK_Station',this.options.model.get('FK_Station'));
             var form = new Backbone.Form({
                 model: model,
                 fieldsets: model.fieldsets,

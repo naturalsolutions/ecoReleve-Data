@@ -200,7 +200,10 @@ define([
               data[ctx.filters.criterias[i]['Column']] = ctx.filters.criterias[i]['Value'];
             }
           } else {
-            data = null;
+            data = {};
+            if (_this.form.model.get('FK_Station')) {
+              data['stationID'] = _this.form.model.get('FK_Station');
+            }
           }
           _this.regionManager.get('modal').show(new _this.NewView({
             objectType: ctx.model.get('objectType') || 1,
