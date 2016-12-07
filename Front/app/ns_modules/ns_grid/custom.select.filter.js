@@ -93,9 +93,10 @@ define([
         },
 
         isFilterValid: function() {
-            var optSel = $(this.$select).val();
-            var isValid = (optSel > 0)
-            return isValid;
+            // var optSel = $(this.$select).val();
+            // var isValid = (optSel > 0)
+            // return isValid;
+            return true;
         },
 
         onFilterChanged: function() {
