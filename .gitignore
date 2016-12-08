@@ -16,6 +16,7 @@ Front/app/styles/_perso.less
 Front/app/styles/img/perso/*
 
 Back/build/*
+Back/pserve*
 
 **/config.js
 
