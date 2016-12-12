@@ -141,11 +141,11 @@ def getMonitoredSite(request):
 def getMonitoredSiteHistory(request):
     session = request.dbsession
 
-    id = request.matchdict['id']
+    _id = request.matchdict['id']
     data = request.params.mixed()
     searchInfo = {}
     searchInfo['criteria'] = [
-        {'Column': 'ID', 'Operator': 'Is', 'Value': int(id)}]
+        {'Column': 'ID', 'Operator': 'Is', 'Value': int(_id)}]
     try:
         searchInfo['order_by'] = json.loads(data['order_by'])
     except:
@@ -230,8 +230,8 @@ def updateMonitoredSite(request):
     session = request.dbsession
     try:
         data = request.json_body
-        id = request.matchdict['id']
-        curMonitoredSite = session.query(MonitoredSite).get(id)
+        _id = request.matchdict['id']
+        curMonitoredSite = session.query(MonitoredSite).get(_id)
         curMonitoredSite.LoadNowValues()
         curMonitoredSite.UpdateFromJson(data)
         response = {}
@@ -363,7 +363,7 @@ def sites_export(request):
 @view_config(route_name=prefix + '/id/station',
              renderer='json',
              request_method='GET')
-def getStationHistory(request):
+def station_history(request):
     session = request.dbsession
     id_site = request.matchdict['id']
     joinTable = join(Station, fieldActivity,
