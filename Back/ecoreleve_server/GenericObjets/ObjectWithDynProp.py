@@ -241,17 +241,14 @@ class ObjectWithDynProp:
         raise Exception("GetStartDate not implemented in children")
 
     def LoadNowValues(self):
-        curQuery = 'select V.*, P.Name,P.TypeProp from '
-        + self.GetDynPropValuesTable()
-        + ' V JOIN ' + self.GetDynPropTable() + \
+        curQuery = 'select V.*, P.Name,P.TypeProp from ' + self.GetDynPropValuesTable() + \
+            ' V JOIN ' + self.GetDynPropTable() + \
             ' P ON P.' + self.GetDynPropValuesTableID() + '= V.' + \
             self.GetDynPropFKName() + ' where '
         curQuery += 'not exists (select * from ' + \
             self.GetDynPropValuesTable() + ' V2 '
-        curQuery += 'where V2.' + self.GetDynPropFKName() + ' = V.'
-        + self.GetDynPropFKName() + ' and V2.' + \
-            self.GetSelfFKNameInValueTable() + ' = V.'
-        + self.GetSelfFKNameInValueTable() + ' '
+        curQuery += 'where V2.' + self.GetDynPropFKName() + ' = V.' +  self.GetDynPropFKName() + ' and V2.' + \
+            self.GetSelfFKNameInValueTable() + ' = V.' + self.GetSelfFKNameInValueTable() + ' '
         curQuery += 'AND V2.startdate > V.startdate)'
         curQuery += 'and v.' + self.GetSelfFKNameInValueTable() + ' =  ' + \
             str(self.GetpkValue())
