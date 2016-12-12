@@ -1,27 +1,28 @@
-from ..Models import Base, DBSession, thesaurusDictTraduction
-from sqlalchemy import (Column, DateTime, Float,
-                        ForeignKey, Index, Integer, Numeric,
-                        String, Text, Unicode, Sequence, select, and_, or_, exists, func, join, outerjoin, not_)
-from sqlalchemy.sql import text, elements
-from sqlalchemy.dialects.mssql.base import BIT
-from sqlalchemy.orm import relationship, aliased
-from collections import OrderedDict
-from datetime import datetime
-from .FrontModules import FrontModules, ModuleGrids
-import transaction
+from ..Models import Base, thesaurusDictTraduction
+from sqlalchemy import (
+    select,
+    and_,
+    or_,
+    exists,
+    func,
+    join,
+    outerjoin,
+    not_)
+from sqlalchemy.sql import elements
+from sqlalchemy.orm import aliased
+from .FrontModules import ModuleGrids
 from ..utils import Eval
 import pandas as pd
-import json
-from traceback import print_exc
 from pyramid import threadlocal
 from ..utils.datetime import parse
-from ..utils.parseValue import isNumeric
+
 
 eval_ = Eval()
 
 
 class ListObjectWithDynProp():
-    ''' This class is used to filter Object with dyn props over all properties '''
+    ''' This class is used to filter Object
+    with dyn props over all properties '''
 
     def __init__(self, ObjWithDynProp, frontModule, history=False, historyView=None, View=None, typeObj=None, startDate=None):
         self.ObjContext = threadlocal.get_current_request().dbsession
