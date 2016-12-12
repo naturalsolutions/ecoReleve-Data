@@ -5,7 +5,6 @@ from sqlalchemy import (
     cast,
     Date,
     select,
-    join,
     and_,
 )
 import datetime
@@ -15,7 +14,6 @@ from ..Models import (Base,
                       Gsm,
                       Individual_Location,
                       Station,
-                      Sensor,
                       Individual,
                       Rfid)
 from operator import itemgetter
