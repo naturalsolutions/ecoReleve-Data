@@ -8,7 +8,7 @@ import numpy as np
 import transaction
 from ..utils.distance import haversine
 from datetime import datetime
-from ..Models import Base, dbConfig
+from ..Models import Base, dbConfig, graphDataDate
 from traceback import print_exc
 from ..controllers.security import routes_permission
 

@@ -9,13 +9,15 @@ from sqlalchemy import (
 )
 import datetime
 import operator
-from ..Models import (Base,
-                      ArgosGps,
-                      Gsm,
-                      Individual_Location,
-                      Station,
-                      Individual,
-                      Rfid)
+from ..Models import (
+    Base,
+    ArgosGps,
+    Gsm,
+    Individual_Location,
+    Station,
+    Individual,
+    Rfid,
+    graphDataDate)
 from operator import itemgetter
 import transaction
 from pyramid import threadlocal
