@@ -6,14 +6,11 @@ from ..Models import (
     fieldActivity,
     Station,
     ErrorAvailable,
+    ListObjectWithDynProp,
     sendLog
 )
 from ..GenericObjets.FrontModules import FrontModules
-import json
-from datetime import datetime
-from sqlalchemy import func, select, and_, or_, join
-from pyramid.security import NO_PERMISSION_REQUIRED
-from collections import OrderedDict
+from sqlalchemy import select, and_, or_, join
 from traceback import print_exc
 from ..controllers.security import routes_permission
 
@@ -21,11 +18,15 @@ from ..controllers.security import routes_permission
 prefixProt = 'protocols'
 prefix = 'stations'
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/id/protocols/', renderer='json', request_method='GET', permission=routes_permission[prefixProt]['GET'])
-@view_config(route_name=prefix + '/id/protocols', renderer='json', request_method='GET', permission=routes_permission[prefixProt]['GET'])
+@view_config(route_name=prefix + '/id/protocols/',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefixProt]['GET'])
+@view_config(route_name=prefix + '/id/protocols',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefixProt]['GET'])
 def GetProtocolsofStation(request):
     session = request.dbsession
     sta_id = request.matchdict['id']
@@ -34,7 +35,8 @@ def GetProtocolsofStation(request):
     try:
         if 'criteria' in request.params.mixed() or request.params.mixed() == {}:
             searchInfo = {}
-            searchInfo['criteria'] = [{'Column': 'FK_Station', 'Operator': '=', 'Value': sta_id}]
+            searchInfo['criteria'] = [
+                {'Column': 'FK_Station', 'Operator': '=', 'Value': sta_id}]
             listObs = ListObjectWithDynProp(session, Observation, searchInfo)
             response = listObs.GetFlatList()
     except:
@@ -62,14 +64,15 @@ def GetProtocolsofStation(request):
                         curObsForm = curObs.GetForm(Conf, DisplayMode)
 
                         listProto[typeID] = {
-                        'Name': typeName,
-                        'schema': curObsForm['schema'],
-                        'fieldsets':curObsForm['fieldsets'],
-                        'obs':[curObs.ID]
+                            'Name': typeName,
+                            'schema': curObsForm['schema'],
+                            'fieldsets': curObsForm['fieldsets'],
+                            'obs': [curObs.ID]
                         }
 
             if listType:
-                listVirginProto = list(filter(lambda proto: proto.FK_ProtocoleType not in listProto, listType))
+                listVirginProto = list(
+                    filter(lambda proto: proto.FK_ProtocoleType not in listProto, listType))
 
                 for i in range(len(listVirginProto)):
                     DisplayMode = 'edit'
@@ -80,19 +83,19 @@ def GetProtocolsofStation(request):
                     curVirginObsForm = curVirginObs.GetForm(Conf, DisplayMode)
 
                     listProto[typeID] = {
-                    'Name': typeName,
-                    'schema': curVirginObsForm['schema'],
-                    'fieldsets':curVirginObsForm['fieldsets'],
-                    'obs':[]
+                        'Name': typeName,
+                        'schema': curVirginObsForm['schema'],
+                        'fieldsets': curVirginObsForm['fieldsets'],
+                        'obs': []
                     }
 
             globalListProto = [
-            {'ID': typeID,
-            'Name': listProto[typeID]['Name'],
-            'schema':listProto[typeID]['schema'],
-            'fieldsets':listProto[typeID]['fieldsets'],
-            'obs':listProto[typeID]['obs']}
-            for typeID in listProto.keys()
+                {'ID': typeID,
+                 'Name': listProto[typeID]['Name'],
+                 'schema':listProto[typeID]['schema'],
+                 'fieldsets':listProto[typeID]['fieldsets'],
+                 'obs':listProto[typeID]['obs']}
+                for typeID in listProto.keys()
             ]
 
             response = sorted(globalListProto, key=lambda k: k['Name'])
@@ -102,11 +105,15 @@ def GetProtocolsofStation(request):
         pass
     return response
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/id/protocols', renderer='json', request_method='POST', permission=routes_permission[prefixProt]['POST'])
-@view_config(route_name=prefix + '/id/protocols/', renderer='json', request_method='POST', permission=routes_permission[prefixProt]['POST'])
+@view_config(route_name=prefix + '/id/protocols',
+             renderer='json',
+             request_method='POST',
+             permission=routes_permission[prefixProt]['POST'])
+@view_config(route_name=prefix + '/id/protocols/',
+             renderer='json',
+             request_method='POST',
+             permission=routes_permission[prefixProt]['POST'])
 def insertNewProtocol(request):
     session = request.dbsession
     data = {}
@@ -115,17 +122,15 @@ def insertNewProtocol(request):
 
     data['FK_Station'] = request.matchdict['id']
     sta = session.query(Station).get(request.matchdict['id'])
-    newProto = Observation(FK_ProtocoleType=data['FK_ProtocoleType'], FK_Station=data[
-                           'FK_Station'])  # ,FK_Station=data['FK_Station'])
+    newProto = Observation(FK_ProtocoleType=data['FK_ProtocoleType'],
+                           FK_Station=data['FK_Station'])
     newProto.ProtocoleType = session.query(ProtocoleType).filter(
         ProtocoleType.ID == data['FK_ProtocoleType']).first()
     listOfSubProtocols = []
     for items, value in data.items():
         if isinstance(value, list) and items != 'children':
             listOfSubProtocols = value
-    # if listOfSubProtocols !=[] and 'sub_ProtocoleType' in data:
-    #     for obj in listOfSubProtocols:
-    #         obj['FK_ProtocoleType']=data['sub_ProtocoleType']
+
     data['Observation_childrens'] = listOfSubProtocols
     newProto.init_on_load()
     newProto.UpdateFromJson(data)
@@ -142,10 +147,11 @@ def insertNewProtocol(request):
 
     return message
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/id/protocols/obs_id', renderer='json', request_method='PUT', permission=routes_permission[prefixProt]['PUT'])
+@view_config(route_name=prefix + '/id/protocols/obs_id',
+             renderer='json',
+             request_method='PUT',
+             permission=routes_permission[prefixProt]['PUT'])
 def updateObservation(request):
     session = request.dbsession
     data = request.json_body
@@ -153,7 +159,6 @@ def updateObservation(request):
     curObs = session.query(Observation).get(id_obs)
     curObs.LoadNowValues()
     listOfSubProtocols = []
-    subObsList = []
     message = 'ok'
 
     for items, value in data.items():
@@ -171,10 +176,11 @@ def updateObservation(request):
         message = e.value
     return message
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/id/protocols/obs_id', renderer='json', request_method='DELETE', permission=routes_permission[prefixProt]['DELETE'])
+@view_config(route_name=prefix + '/id/protocols/obs_id',
+             renderer='json',
+             request_method='DELETE',
+             permission=routes_permission[prefixProt]['DELETE'])
 def deleteObservation(request):
     session = request.dbsession
     id_obs = request.matchdict['obs_id']
@@ -183,23 +189,20 @@ def deleteObservation(request):
 
     return {}
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/id/protocols/obs_id', renderer='json', request_method='GET', permission=routes_permission[prefixProt]['GET'])
+@view_config(route_name=prefix + '/id/protocols/obs_id',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefixProt]['GET'])
 def getObservation(request):
     session = request.dbsession
-
     id_obs = request.matchdict['obs_id']
     id_sta = request.matchdict['id']
     try:
         curObs = session.query(Observation).filter(
             and_(Observation.ID == id_obs, Observation.FK_Station == id_sta)).one()
         curObs.LoadNowValues()
-        # if Form value exists in request --> return data with schema else
-        # return only data
         if 'FormName' in request.params:
-            ModuleName = request.params['FormName']
             try:
                 DisplayMode = request.params['DisplayMode']
             except:
@@ -215,27 +218,18 @@ def getObservation(request):
 
     return response
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/id/protocols/action', renderer='json', request_method='GET', permission=routes_permission[prefixProt]['GET'])
+@view_config(route_name=prefix + '/id/protocols/action',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefixProt]['GET'])
 def actionOnObs(request):
-    session = request.dbsession
-
     dictActionFunc = {
-        'count': countObs,
         'forms': getObsForms,
         '0': getObsForms,
-        'fields': getObsFields
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
-
-
-def countObs(request):
-    session = request.dbsession
-#   ## TODO count stations
-    return
 
 
 def getObsForms(request):
@@ -252,57 +246,35 @@ def getObsForms(request):
     return schema
 
 
-def getObsFields(request):
-    session = request.dbsession
-#     ## TODO return fields Station
-    return
-
-# ------------------------------------------------------------------------------------------------------------------------- #
-
-
-@view_config(route_name=prefixProt, renderer='json', request_method='PUT', permission=routes_permission[prefixProt]['PUT'])
-def updateListProtocols(request):
-    session = request.dbsession
-    # TODO
-    # update a list of protocols
-    return
-
-# ------------------------------------------------------------------------------------------------------------------------- #
-
-
-@view_config(route_name=prefixProt, renderer='json', request_method='POST', permission=routes_permission[prefixProt]['POST'])
+@view_config(route_name=prefixProt,
+             renderer='json',
+             request_method='POST',
+             permission=routes_permission[prefixProt]['POST'])
 def insertProtocols(request):
-    session = request.dbsession
     return insertNewProtocol(request)
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefixProt + '/action', renderer='json', request_method='GET', permission=routes_permission[prefixProt]['GET'])
+@view_config(route_name=prefixProt + '/action',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefixProt]['GET'])
 def actionOnProtocols(request):
-    dictActionFunc = {
-        'count': count,
-        'forms': getForms,
-        '0': getForms,
-        'fields': getFields
-    }
-    actionName = request.matchdict['action']
-    return dictActionFunc[actionName](request)
 
-# ------------------------------------------------------------------------------------------------------------------------- #
+    return False
 
 
-@view_config(route_name=prefixProt + '/id', renderer='json', request_method='GET', permission=routes_permission[prefixProt]['GET'])
+@view_config(route_name=prefixProt + '/id',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefixProt]['GET'])
 def getProtocol(request):
     session = request.dbsession
 
-    id = request.matchdict['id']
-    curProt = session.query(Observation).get(id)
+    _id = request.matchdict['id']
+    curProt = session.query(Observation).get(_id)
     curProt.LoadNowValues()
-    # if Form value exists in request --> return data with schema else return
-    # only data
+
     if 'FormName' in request.params:
-        ModuleName = request.params['FormName']
         try:
             DisplayMode = request.params['DisplayMode']
         except:
@@ -315,10 +287,10 @@ def getProtocol(request):
         response = curProt.GetFlatObject()
     return response
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name='fieldActivity', renderer='json', request_method='GET')
+@view_config(route_name='fieldActivity',
+             renderer='json',
+             request_method='GET')
 def getFieldActivityList(request):
     session = request.dbsession
 
@@ -330,10 +302,10 @@ def getFieldActivityList(request):
         res.append({'label': row['label'], 'value': row['value']})
     return sorted(res, key=lambda x: x['label'])
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name='protocolTypes', renderer='json', request_method='GET')
+@view_config(route_name='protocolTypes',
+             renderer='json',
+             request_method='GET')
 def getListofProtocolTypes(request):
     session = request.dbsession
     if 'FieldActivityID' in request.params:
@@ -341,7 +313,8 @@ def getListofProtocolTypes(request):
         join_table = join(ProtocoleType, FieldActivity_ProtocoleType,
                           ProtocoleType.ID == FieldActivity_ProtocoleType.FK_ProtocoleType)
         query = select([ProtocoleType.ID, ProtocoleType.Name]
-                       ).where(and_(or_(ProtocoleType.Status == 4, ProtocoleType.Status == 8), FieldActivity_ProtocoleType.FK_fieldActivity == fieldActivityID)
+                       ).where(and_(or_(ProtocoleType.Status == 4, ProtocoleType.Status == 8),
+                                    FieldActivity_ProtocoleType.FK_fieldActivity == fieldActivityID)
                                ).select_from(join_table)
     else:
         query = select([ProtocoleType.ID, ProtocoleType.Name]).where(

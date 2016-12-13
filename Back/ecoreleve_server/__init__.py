@@ -1,17 +1,11 @@
 import datetime
 from decimal import Decimal
-import transaction
 from urllib.parse import quote_plus
-
 from sqlalchemy import engine_from_config
-
 from pyramid.config import Configurator
-from pyramid.request import Request, Response
 from pyramid.renderers import JSON
-from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
-
-from .controllers.security import SecurityRoot,myJWTAuthenticationPolicy
+from .controllers.security import SecurityRoot, myJWTAuthenticationPolicy
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
@@ -19,31 +13,31 @@ from .Models import (
     Base,
     BaseExport,
     dbConfig,
-    Station,
-    Observation,
-    Sensor,
     db,
     loadThesaurusTrad,
     loadUserRole,
     groupfinder
-    )
-from .Views import add_routes,add_cors_headers_response_callback
+)
+from .Views import add_routes, add_cors_headers_response_callback
 from pyramid.events import NewRequest
-from sqlalchemy.orm import sessionmaker,scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session
+
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects."""
-    try: 
-        return obj.strftime ('%d/%m/%Y %H:%M:%S')
-    except :
-        return obj.strftime ('%d/%m/%Y')
+    try:
+        return obj.strftime('%d/%m/%Y %H:%M:%S')
+    except:
+        return obj.strftime('%d/%m/%Y')
+
 
 def date_adapter(obj, request):
     """Json adapter for datetime objects."""
-    try: 
-        return obj.strftime ('%d/%m/%Y')
-    except :
+    try:
+        return obj.strftime('%d/%m/%Y')
+    except:
         return obj
+
 
 def time_adapter(obj, request):
     """Json adapter for datetime objects."""
@@ -51,10 +45,12 @@ def time_adapter(obj, request):
         return obj.strftime('%H:%M')
     except:
         return obj.strftime('%H:%M:%S')
-    
+
+
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
     return float(obj)
+
 
 def includeme(config):
     authz_policy = ACLAuthorizationPolicy()
@@ -71,11 +67,15 @@ def includeme(config):
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
 
-    settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.Export.url'])
-    engineExport = engine_from_config(settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
+    settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + \
+        quote_plus(settings['sqlalchemy.Export.url'])
+    engineExport = engine_from_config(
+        settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
 
-    settings['sqlalchemy.default.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.default.url'])
-    engine = engine_from_config(settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
+    settings['sqlalchemy.default.url'] = settings['cn.dialect'] + \
+        quote_plus(settings['sqlalchemy.default.url'])
+    engine = engine_from_config(
+        settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
 
     dbConfig['url'] = settings['sqlalchemy.default.url']
     dbConfig['wsThesaurus'] = {}
@@ -85,19 +85,17 @@ def main(global_config, **settings):
 
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
-    Base.metadata.reflect(views=True, extend_existing=False) 
-
+    Base.metadata.reflect(views=True, extend_existing=False)
 
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
     config.include('pyramid_jwtauth')
 
-    binds = {"default": engine, "Export": engineExport}
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
     dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine))
     config.add_request_method(db, name='dbsession', reify=True)
 
-    if 'loadExportDB' in settings and settings['loadExportDB'] == 'False' :
+    if 'loadExportDB' in settings and settings['loadExportDB'] == 'False':
         print('''
             /!\================================/!\ 
             WARNING : 
@@ -107,7 +105,8 @@ def main(global_config, **settings):
         BaseExport.metadata.bind = engineExport
         BaseExport.metadata.create_all(engineExport)
         BaseExport.metadata.reflect(views=True, extend_existing=False)
-        config.registry.dbmakerExport = scoped_session(sessionmaker(bind=engineExport))
+        config.registry.dbmakerExport = scoped_session(
+            sessionmaker(bind=engineExport))
     # Add renderer for JSON objects
     json_renderer = JSON()
     json_renderer.add_adapter(datetime.datetime, datetime_adapter)
@@ -122,10 +121,9 @@ def main(global_config, **settings):
     config.add_renderer('pdf', PDFrenderer)
     config.add_renderer('gpx', GPXRenderer)
 
-    ## include security config from jwt __init__.py
+    # include security config from jwt __init__.py
     includeme(config)
     config.set_root_factory(SecurityRoot)
-
 
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
 

@@ -1,10 +1,9 @@
 from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
 from sqlalchemy import select
-from ..Models import DBSession, User, userOAuthDict, Base,USERS
+from ..Models import User, userOAuthDict, Base, USERS
 
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 @view_config(
     route_name='core/user',
     permission=NO_PERMISSION_REQUIRED,
@@ -20,7 +19,7 @@ def users(request):
     ]).order_by(User.Lastname, User.Firstname)
     return [dict(row) for row in session.execute(query).fetchall()]
 
-# ------------------------------------------------------------------------------------------------------------------------- #
+
 @view_config(
     route_name='core/currentUser',
     renderer='json'
@@ -32,13 +31,16 @@ def current_user(request):
     userid = int(request.authenticated_userid['iss'])
 
     Tuser_role = Base.metadata.tables['VUser_Role']
-    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(userid))
+    query_check_role = select([Tuser_role.c['role']]
+                              ).where(Tuser_role.c['userID'] == int(userid))
 
     dbUserRoleID = session.execute(query_check_role).scalar()
-    currentUserRoleID = userOAuthDict.loc[userOAuthDict['user_id'] == userid,'role_id'].values[0]
+    currentUserRoleID = userOAuthDict.loc[
+        userOAuthDict['user_id'] == userid, 'role_id'].values[0]
 
     if (dbUserRoleID != currentUserRoleID):
-        userOAuthDict.loc[userOAuthDict['user_id'] == userid,'role_id'] = dbUserRoleID
+        userOAuthDict.loc[userOAuthDict['user_id']
+                          == userid, 'role_id'] = dbUserRoleID
         currentUserRoleID = dbUserRoleID
 
     currentUserRole = USERS[currentUserRoleID]
@@ -59,19 +61,21 @@ def current_user(request):
     route_name='users/id',
     renderer='json'
 )
-def getUser(request) :
+def getUser(request):
     session = request.dbsession
     user_id = request.matchdict['id']
 
-
     Tuser_role = Base.metadata.tables['VUser_Role']
-    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(user_id))
+    query_check_role = select([Tuser_role.c['role']]).where(
+        Tuser_role.c['userID'] == int(user_id))
 
     dbUserRoleID = session.execute(query_check_role).scalar()
-    currentUserRoleID = userOAuthDict.loc[userOAuthDict['user_id'] == int(user_id),'role_id'].values[0]
+    currentUserRoleID = userOAuthDict.loc[userOAuthDict[
+        'user_id'] == int(user_id), 'role_id'].values[0]
 
     if (dbUserRoleID != currentUserRoleID):
-        userOAuthDict.loc[userOAuthDict['user_id'] == int(user_id),'role_id'] = dbUserRoleID
+        userOAuthDict.loc[userOAuthDict['user_id'] ==
+                          int(user_id), 'role_id'] = dbUserRoleID
         currentUserRoleID = dbUserRoleID
     currentUserRole = USERS[currentUserRoleID]
 

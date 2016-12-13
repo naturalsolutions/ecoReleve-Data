@@ -4,8 +4,6 @@ from ..Models import (
     SensorType,
     SensorDynPropValue,
     SensorDynProp,
-    Equipment,
-    Individual,
     MonitoredSite,
     Base,
     SensorList
@@ -13,30 +11,22 @@ from ..Models import (
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
 import json
-import itertools
 from datetime import datetime
-import datetime as dt
 import pandas as pd
-import numpy as np
-from sqlalchemy import select, and_, cast, DATE, func, desc, join, distinct, outerjoin, asc
-from sqlalchemy.orm import aliased
-from pyramid.security import NO_PERMISSION_REQUIRED
-from traceback import print_exc
+from sqlalchemy import select, desc, join, distinct
 from collections import OrderedDict
-from datetime import datetime
 import io
-from pyramid.response import Response, FileResponse
+from pyramid.response import Response
 from ..controllers.security import routes_permission
 from sqlalchemy.exc import IntegrityError
 
 
 prefix = 'sensors'
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/action', renderer='json', request_method='GET')
-#@view_config(route_name= prefix+'/id/history/action', renderer='json', request_method = 'GET')
+@view_config(route_name=prefix + '/action',
+             renderer='json',
+             request_method='GET')
 def actionOnSensors(request):
     dictActionFunc = {
         'count': count_,
@@ -55,9 +45,9 @@ def actionOnSensors(request):
 
 
 def count_(request=None, listObj=None):
-    session = request.dbsession
     if request is not None:
         data = request.params
+        searchInfo = {}
         if 'criteria' in data:
             data['criteria'] = json.loads(data['criteria'])
             if data['criteria'] != {}:
@@ -94,7 +84,6 @@ def getForms(request):
 
 
 def getFields(request):
-    session = request.dbsession
     ModuleType = request.params['name']
     if ModuleType == 'default':
         ModuleType = 'SensorFilter'
@@ -148,7 +137,6 @@ def getData(query, session):
     response = []
     for row in result:
         curRow = OrderedDict(row)
-        dictRow = {}
         for key in curRow:
             if curRow[key] is not None:
                 response.append(curRow[key])
@@ -163,8 +151,6 @@ def getSensorType(request):
 
     return response
 
-# ------------------------------------------------------------------------------------------------------------------------- #
-
 
 @view_config(route_name=prefix + '/id', renderer='json', request_method='GET')
 def getSensor(request):
@@ -173,10 +159,7 @@ def getSensor(request):
     curSensor = session.query(Sensor).get(id)
     curSensor.LoadNowValues()
 
-    # if Form value exists in request --> return data with schema else return
-    # only data
     if 'FormName' in request.params:
-        ModuleName = request.params['FormName']
         try:
             DisplayMode = request.params['DisplayMode']
         except:
@@ -193,19 +176,21 @@ def getSensor(request):
 
     return response
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/id/history', renderer='json', request_method='GET', permission=routes_permission[prefix]['GET'])
+@view_config(route_name=prefix + '/id/history',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefix]['GET'])
 def getSensorHistory(request):
     session = request.dbsession
-    id = request.matchdict['id']
+    _id = request.matchdict['id']
 
     tableJoin = join(SensorDynPropValue, SensorDynProp,
                      SensorDynPropValue.FK_SensorDynProp == SensorDynProp.ID)
-    query = select([SensorDynPropValue, SensorDynProp.Name]).select_from(tableJoin).where(
-        SensorDynPropValue.FK_Sensor == id
-    ).order_by(desc(SensorDynPropValue.StartDate))
+    query = select([SensorDynPropValue, SensorDynProp.Name]
+                   ).select_from(tableJoin
+                                 ).where(SensorDynPropValue.FK_Sensor == _id
+                                         ).order_by(desc(SensorDynPropValue.StartDate))
 
     result = session.execute(query).fetchall()
     response = []
@@ -226,11 +211,13 @@ def getSensorHistory(request):
     return response
 
 
-@view_config(route_name=prefix + '/id/equipment', renderer='json', request_method='GET')
+@view_config(route_name=prefix + '/id/equipment',
+             renderer='json',
+             request_method='GET')
 def getSensorEquipment(request):
     session = request.dbsession
-    id = request.matchdict['id']
-    curSensor = session.query(Sensor).get(id)
+    _id = request.matchdict['id']
+    curSensor = session.query(Sensor).get(_id)
     curSensorType = curSensor.GetType().Name
 
     if ('RFID' in curSensorType.upper()):
@@ -238,16 +225,22 @@ def getSensorEquipment(request):
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable, MonitoredSite, table.c[
                          'FK_MonitoredSite'] == MonitoredSite.ID)
-        query = select([table.c['StartDate'], table.c['EndDate'], Sensor.UnicIdentifier, MonitoredSite.Name, MonitoredSite.ID.label('MonitoredSiteID')]).select_from(joinTable
-                                                                                                                                                                     ).where(table.c['FK_Sensor'] == id
-                                                                                                                                                                             ).order_by(desc(table.c['StartDate']))
+        query = select([table.c['StartDate'],
+                        table.c['EndDate'],
+                        Sensor.UnicIdentifier,
+                        MonitoredSite.Name,
+                        MonitoredSite.ID.label('MonitoredSiteID')]
+                       ).select_from(joinTable
+                                     ).where(table.c['FK_Sensor'] == _id).order_by(desc(table.c['StartDate']))
 
     elif (curSensorType.lower() in ['gsm', 'satellite', 'vhf']):
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
-        query = select([table.c['StartDate'], table.c['EndDate'], table.c['FK_Individual'], Sensor.UnicIdentifier]).select_from(joinTable
-                                                                                                                                ).where(table.c['FK_Sensor'] == id
-                                                                                                                                        ).order_by(desc(table.c['StartDate']))
+        query = select([table.c['StartDate'],
+                        table.c['EndDate'],
+                        table.c['FK_Individual'],
+                        Sensor.UnicIdentifier]).select_from(joinTable
+                                                            ).where(table.c['FK_Sensor'] == _id).order_by(desc(table.c['StartDate']))
     else:
         return 'bad request'
 
@@ -263,10 +256,11 @@ def getSensorEquipment(request):
 
     return response
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/id', renderer='json', request_method='DELETE', permission=routes_permission[prefix]['DELETE'])
+@view_config(route_name=prefix + '/id',
+             renderer='json',
+             request_method='DELETE',
+             permission=routes_permission[prefix]['DELETE'])
 def deleteSensor(request):
     session = request.dbsession
     id_ = request.matchdict['id']
@@ -275,32 +269,32 @@ def deleteSensor(request):
 
     return True
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/id', renderer='json', request_method='PUT', permission=routes_permission[prefix]['PUT'])
+@view_config(route_name=prefix + '/id',
+             renderer='json',
+             request_method='PUT',
+             permission=routes_permission[prefix]['PUT'])
 def updateSensor(request):
     session = request.dbsession
     data = request.json_body
-    id = request.matchdict['id']
-    curSensor = session.query(Sensor).get(id)
+    _id = request.matchdict['id']
+    curSensor = session.query(Sensor).get(_id)
     curSensor.LoadNowValues()
     curSensor.UpdateFromJson(data)
 
     return {}
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 
-
-@view_config(route_name=prefix + '/insert', renderer='json', request_method='POST', permission=routes_permission[prefix]['POST'])
+@view_config(route_name=prefix + '/insert',
+             renderer='json',
+             request_method='POST',
+             permission=routes_permission[prefix]['POST'])
 def insertSensor(request):
     data = request.json_body
     if not isinstance(data, list):
         return insertOneNewSensor(request)
     else:
         return
-
-# ------------------------------------------------------------------------------------------------------------------------- #
 
 
 def insertOneNewSensor(request):
@@ -330,8 +324,6 @@ def insertOneNewSensor(request):
         pass
 
     return response
-
-# ------------------------------------------------------------------------------------------------------------------------- #
 
 
 @view_config(route_name=prefix, renderer='json', request_method='GET')
@@ -364,7 +356,9 @@ def searchSensor(request):
     return result
 
 
-@view_config(route_name=prefix + '/export', renderer='json', request_method='GET')
+@view_config(route_name=prefix + '/export',
+             renderer='json',
+             request_method='GET')
 def sensors_export(request):
     session = request.dbsession
     data = request.params.mixed()
@@ -385,8 +379,9 @@ def sensors_export(request):
     listObj = SensorList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
 
-    df = pd.DataFrame.from_records(dataResult, columns=dataResult[
-                                   0].keys(), coerce_float=True)
+    df = pd.DataFrame.from_records(dataResult,
+                                   columns=dataResult[0].keys(),
+                                   coerce_float=True)
 
     fout = io.BytesIO()
     writer = pd.ExcelWriter(fout)
@@ -395,4 +390,7 @@ def sensors_export(request):
     file = fout.getvalue()
 
     dt = datetime.now().strftime('%d-%m-%Y')
-    return Response(file, content_disposition="attachment; filename=sensor_export_" + dt + ".xlsx", content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    return Response(
+        file,
+        content_disposition="attachment; filename=sensor_export_" + dt + ".xlsx",
+        ontent_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
