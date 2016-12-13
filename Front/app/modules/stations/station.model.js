@@ -8,7 +8,7 @@ define([
 
   return Backbone.Model.extend({
     defaults: {
-      map: true,
+      displayMap: true,
 
       label: 'stations',
       single: 'station',
@@ -18,12 +18,10 @@ define([
         {
           name: 'all',
           label: 'All',
-          typeObj: 1
         },
         {
           name: 'lastImported',
           label: 'Last imported',
-          typeObj: 2
         }
       ],
 

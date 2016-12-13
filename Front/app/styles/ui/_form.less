@@ -215,11 +215,12 @@ span.fancytree-title:hover {
 ul.fancytree-container{
   z-index: 1;
 	border:0;
-  max-height: 200px;
+  max-height: 500px;
   padding-right: 10px;
 }
 div.fancytreeview{
 	//input-group : diplsay table cell
+  top: 34px!important;
 	position: absolute;
 	border: 1px solid rgba(46, 204, 64, 0.6) !important;
 	width: auto;
@@ -521,4 +522,26 @@ textarea {
 	&:nth-child(3) {
     padding: 0px;
 	}
+}
+
+.js_container_index_subForm {
+	width: 100%;
+	height: 34px;
+	top: -15px;
+	margin-bottom: 0 !important;
+	a{
+		background-color: #777777;
+		height: 34px;
+		width: 34px;
+		text-align: center;
+		line-height: 34px;
+		font-size: 14px;
+		color: white;
+	}
+}
+.js_index_subForm {
+	opacity: 1 !important;
+	position : absolute;
+	left: 0;
+
 }

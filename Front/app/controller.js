@@ -11,7 +11,7 @@ define([
   './modules/validate/validate.rd.view',
 
   './modules/release/release.view',
-  './modules/release/layouts/lyt-release-individual',
+  './modules/release/release.individual.view',
 
   './modules/stations/station.view',
   './modules/stations/stations.view',
@@ -39,7 +39,7 @@ define([
   LytSensorValidateDetail,
   LytRelease,
   LytStationsRelease,
-  
+
   LytStation, LytStations, LytStationsNew,
   LytIndividual, LytIndividuals, LytIndividualsNew,
   LytSensor, LytSensors, LytSensorsNew,
@@ -55,7 +55,7 @@ define([
       this.rgMain = app.rootView.rgMain;
       this.rgHeader = app.rootView.rgHeader;
       this.rgFooter = app.rootView.rgFooter;
-      
+
       app.entityConfs = {
         'stations': {
           'entity': LytStation,
@@ -89,44 +89,89 @@ define([
       this.rgMain.show(new LytImportFile({type : type}));
     },
 
-    station: function(id) {
-      this.rgMain.show(new LytStation({id: id}));
-    },    
+    station: function(id, proto, obs) {
+
+      if(this.rgMain.currentView instanceof LytStation){
+        this.rgMain.currentView.reload({
+          id: id,
+          proto: proto,
+          obs: obs
+        });
+      } else {
+        this.rgMain.show(new LytStation({
+          id: id,
+          proto: proto,
+          obs: obs
+        }));
+      }
+    },
+
     stations: function(params) {
       this.rgMain.show(new LytStations({
         params: params
       }));
     },
+
     newStation: function(from) {
       this.rgMain.show(new LytStationsNew({from: from}));
     },
 
     individual: function(id) {
-      this.rgMain.show(new LytIndividual({id: id}));
+      if(this.rgMain.currentView instanceof LytIndividual){
+        this.rgMain.currentView.reload({
+          id: id
+        });
+      } else {
+        this.rgMain.show(new LytIndividual({
+          id: id
+        }));
+      }
     },
+
     individuals: function() {
       this.rgMain.show(new LytIndividuals());
     },
+
     newIndividual: function(objectType) {
       this.rgMain.show(new LytIndividualsNew({objectType: objectType}));
     },
 
     monitoredSite: function(id) {
-      this.rgMain.show(new LytMonitoredSite({id: id}));
+      if(this.rgMain.currentView instanceof LytMonitoredSite){
+        this.rgMain.currentView.reload({
+          id: id
+        });
+      } else {
+        this.rgMain.show(new LytMonitoredSite({
+          id: id
+        }));
+      }
     },
+
     monitoredSites: function() {
       this.rgMain.show(new LytMonitoredSites());
     },
+
     newMonitoredSite: function(type) {
       this.rgMain.show(new LytMonitoredSitesNew());
     },
 
     sensor: function(id) {
-      this.rgMain.show(new LytSensor({id: id}));
+      if(this.rgMain.currentView instanceof LytSensor){
+        this.rgMain.currentView.reload({
+          id: id
+        });
+      } else {
+        this.rgMain.show(new LytSensor({
+          id: id
+        }));
+      }
     },
+    
     sensors: function() {
       this.rgMain.show(new LytSensors());
     },
+    
     newSensor: function(objectType) {
       this.rgMain.show(new LytSensorsNew({objectType: objectType}));
     },
@@ -134,17 +179,25 @@ define([
     validate: function() {
       this.rgMain.show(new LytSensorValidate());
     },
+    
     validateType: function(type) {
       this.rgMain.show(new LytSensorValidateType({
         type: type
       }));
     },
 
-    validateDetail: function(type, dataset){
-      this.rgMain.show(new LytSensorValidateDetail({
-        type: type,
-        dataset: dataset
-      }));
+    validateDetail: function(type, index){
+      if(this.rgMain.currentView instanceof LytSensorValidateDetail){
+        this.rgMain.currentView.reload({
+          type: type,
+          index: index
+        });
+      } else {
+        this.rgMain.show(new LytSensorValidateDetail({
+          type: type,
+          index: index
+        }));
+      }
     },
 
     release: function() {
@@ -160,13 +213,5 @@ define([
       this.rgMain.show(new LytExport());
     },
 
-    checkAjax : function(){
-      var xhrPool = window.xhrPool;
-
-      for(var i=0; i<xhrPool.length; i++){
-         xhrPool[i].abort();
-      }
-       window.xhrPool = [];
-    }
   });
 });

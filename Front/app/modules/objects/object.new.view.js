@@ -23,11 +23,12 @@ define([
       'click .js-btn-save': 'save',
       'click .js-link-back': 'back',
     },
-    
+
     model: new Backbone.Model(),
 
     initialize: function(options) {
-      this.model.set('objectType', options.objectType);
+			this.data = options.data;
+      this.model.set('objectType', options.objectType || 1);
     },
 
     onShow: function() {
@@ -43,6 +44,7 @@ define([
         displayMode: 'edit',
         objectType: this.model.get('objectType'),
         id: 0,
+        data: this.data,
         reloadAfterSave: false,
         afterSaveSuccess: this.afterSaveSuccess.bind(this),
         savingError: function(response) {
@@ -65,13 +67,13 @@ define([
 
     afterSaveSuccess: function(){
       var _this = this;
-      swal({
+      Swal({
         title: 'Succes',
-        text: 'creating new sensor',
+        text: 'creating new ' + _this.model.get('single'),
         type: 'success',
         showCancelButton: true,
         confirmButtonColor: 'green',
-        confirmButtonText: 'create another sensor',
+        confirmButtonText: 'create another ' + _this.model.get('single'),
         cancelButtonText: 'cancel',
         closeOnConfirm: true,
       },
@@ -90,5 +92,9 @@ define([
 
     back: function() {
     },
+
+		cancel: function() {
+			Backbone.history.navigate(this.model.get('type'),{trigger: true});
+		},
   });
 });

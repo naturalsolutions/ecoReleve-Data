@@ -2,8 +2,10 @@ define([
   'jquery',
   'underscore',
   'backbone',
+  'ns_grid/customCellRenderer/decimal5Renderer',
+  'ns_grid/customCellRenderer/dateTimeRenderer',
 ], function(
-  $, _, Backbone
+  $, _, Backbone, Decimal5Renderer, DateTimeRenderer
 ){
   'use strict';
 
@@ -27,7 +29,7 @@ define([
           });
         }
       },
-      
+
       uiGridConfs: [
         {
           name: 'history',
@@ -46,9 +48,11 @@ define([
       equipmentColumnDefs: [{
         field: 'StartDate',
         headerName: 'Start Date',
+        cellRenderer: DateTimeRenderer
       },{
         field: 'EndDate',
         headerName: 'End Date',
+        cellRenderer: DateTimeRenderer
       },{
         field: 'Type',
         headerName: 'Type',
@@ -66,14 +70,14 @@ define([
         headerName: 'Name',
         cellRenderer: function(params){
             var url = '#stations/' + params.data.ID;
-            return  '<a target="_blank" href="'+ url +'" >' + 
+            return  '<a target="_blank" href="'+ url +'" >' +
             params.value + ' <span class="reneco reneco-info right"></span>' +
             '</a>';
         }
       },{
         field: 'StationDate',
         headerName: 'date',
-        //cell: 'stringDate'
+        cellRenderer: DateTimeRenderer
       },{
         field: 'LAT',
         headerName: 'latitude',

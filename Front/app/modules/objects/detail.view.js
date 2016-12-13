@@ -68,12 +68,12 @@ define([
       }
     },
 
-    reloadFromNavbar: function(id) {
-      this.model.set('id', id);
+    reload: function(options) {
+      this.model.set('id', options.id);
 
       this.com.addModule(this.map);
       this.map.com = this.com;
-      this.map.url = this.model.get('type') + '/' + id  + '/locations?geo=true';
+      this.map.url = this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true';
       this.map.updateFromServ();
       this.map.url = false;
 
@@ -120,6 +120,7 @@ define([
     },
 
     displayGrids: function(){
+      
     },
 
     displayForm: function(){
@@ -131,19 +132,11 @@ define([
       formConfig.formRegion = this.ui.form;
       formConfig.buttonRegion = [this.ui.formBtns];
       formConfig.parent = this.parent;
+      formConfig.afterDelete = function(response, model){
+        Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
+      };
 
       this.nsForm = new NsForm(formConfig);
-
-      this.nsForm.afterDelete = function() {
-        var jqxhr = $.ajax({
-          url: _this.model.get('type') + '/' + _this.model.get('id'),
-          method: 'DELETE',
-          contentType: 'application/json',
-        }).done(function(resp) {
-          Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
-        }).fail(function(resp) {
-        });
-      };
     },
 
   });

@@ -1,28 +1,26 @@
-from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker
 import configparser
-from sqlalchemy import event, select, text
+from sqlalchemy import select
 from sqlalchemy.exc import TimeoutError
-from pyramid import threadlocal
 import pandas as pd
-import datetime
 from traceback import print_exc
 
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
 print(AppConfig['app:main']['sensor_schema'])
-# Create a database session : one for the whole application
-#DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 
 pendingSensorData = []
 indivLocationData = []
 stationData = []
 graphDataDate = {'indivLocationData': None, 'pendingSensorData': None}
-
-
 DBSession = None
-Base = declarative_base()
+
+
+class myBase(object):
+
+    __table_args__ = {'implicit_returning': False}
+
+Base = declarative_base(cls=myBase)
 BaseExport = declarative_base()
 dbConfig = {
     'dialect': 'mssql',
@@ -120,14 +118,9 @@ def db(request):
     request.add_finished_callback(cleanup)
     return session
 
-# def remove_session(request):
-#     request.dbsession.close()
-#     DBSession.remove()
 
-# def setup_post_request(event):
-#     event.request.add_finished_callback(remove_session)
 from ..GenericObjets.ObjectWithDynProp import LinkedTables
-
+from ..GenericObjets.FrontModules import *
 from .CustomTypes import *
 from .Protocoles import *
 from .User import User

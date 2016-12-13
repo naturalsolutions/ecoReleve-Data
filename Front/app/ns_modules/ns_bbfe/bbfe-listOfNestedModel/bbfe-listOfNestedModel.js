@@ -38,8 +38,8 @@ define([
             this.key = this.options.key;
             this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
 
+
         },
-        //removeForm
         deleteForm: function() {
             this.$el.trigger('change');
         },
@@ -50,52 +50,91 @@ define([
             });
 
             var model = new mymodel();
-            //model.default = this.options.model.attributes[this.key];
             model.schema = this.options.schema.subschema;
             model.fieldsets = this.options.schema.fieldsets;
             this.addForm(model);
         },
 
+        indexPresent : function (elem, index, array) {
+          var cpt = -1
+          while (index < array.length ) {
+            if (array[index].cid === elem.cid ) {
+               cpt = index;
+            }
+            index+=1;
+          }
+          return cpt;
+        },
+        subFormChange: function(){
+            this.$el.change();
+        },
+
+        bindChanges: function(form){
+          var _this = this;
+          form.$el.find('input').on("change", function(e) {
+              _this.formChange = true;
+              _this.subFormChange();
+
+          });
+          form.$el.find('select').on("change", function(e) {
+              _this.formChange = true;
+              _this.subFormChange();
+          });
+          form.$el.find('textarea').on("change", function(e) {
+              _this.formChange = true;
+              _this.subFormChange();
+
+          });
+        },
+
         addForm: function(model){
             var _this = this;
+            model.set('FK_Station',this.options.model.get('FK_Station'));
             var form = new Backbone.Form({
                 model: model,
                 fieldsets: model.fieldsets,
                 schema: model.schema
             }).render();
-
             this.forms.push(form);
 
-            if(!this.defaultRequired){
-                form.$el.find('fieldset').append('\
-                    <div class="' + this.hidden + ' col-xs-12 control">\
-                        <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
-                    </div>\
-                ');
-                form.$el.find('button#remove').on('click', function() {
-                  _this.$el.find('#formContainer').find(form.el).remove();
-                  var i = _this.forms.indexOf(form);
-                  if (i > -1) {
-
-                      _this.forms.splice(i, 1);
-                  }
-                  _this.$el.trigger('change');
-                  return;
-                });
+            setTimeout( function() { //
+              if (_this.schema.editorClass.indexOf("form-control") != -1 ) {
+                _this.form.$el.find(".js_badge").css({'display': '','margin-left': '5px'})
+              }
+              _this.form.$el.find(".js_badge").html(_this.forms.length);
+            },0);
+            if (this.schema.editorClass.indexOf("form-control") != -1 ) {
+              form.$el.find('fieldset').prepend('<div class="col-md-12 js_container_index_subForm"><a role="button"  class="js_index_subForm" >'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</button></div>')
             }
+            form.$el.find('fieldset').append('\
+                <div class="' + this.hidden + ' col-xs-12 control">\
+                    <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
+                </div>\
+            ');
+
+            form.$el.find('button#remove').on('click', function() {
+              _this.$el.find('#formContainer').find(form.el).remove();
+              var i = _this.forms.indexOf(form);
+              if (i > -1) {
+                _this.forms.splice(i, 1);
+                _this.form.$el.find(".js_badge").html(_this.forms.length);
+              }
+              _this.subFormChange();
+              if(!_this.forms.length){
+                _this.addEmptyForm();
+              }
+
+              var tabBtn = $('.js_index_subForm');
+              var tmp = i;
+              while( tmp <= tabBtn.length) {
+                $(tabBtn[tmp]).text(tmp+1)
+                tmp+=1;
+              }
+              return;
+            });
 
             this.$el.find('#formContainer').append(form.el);
-
-            this.$el.find('#formContainer input').on("change", function(e) {
-                 window.app.checkFormSaved = true;
-            });
-            this.$el.find('#formContainer select').on("change", function(e) {
-                 window.app.checkFormSaved = true;
-            });
-            this.$el.find('#formContainer  textarea').on("change", function(e) {
-                 window.app.checkFormSaved = true;
-            });
-
+            this.bindChanges(form);
         },
 
         render: function() {
@@ -106,10 +145,7 @@ define([
                 name: this.key
             })));
             this.setElement($el);
-            
-
             var data = this.options.model.attributes[this.key];
-
             if (data) {
                 //data
                 if (data.length) {
@@ -122,12 +158,11 @@ define([
                         model.fieldsets = this.options.schema.fieldsets;
                         model.attributes = data[i];
                         this.addForm(model);
-
-                    };
+                    }
 
                     if (data.length < this.nbByDefault) {
                         for (var i = 0; i < data.length; i++) {
-                            this.addForm(model);
+                          this.addForm(model);
                         }
                     }
                     this.defaultRequired = false;
@@ -145,7 +180,6 @@ define([
         },
 
         feedRequiredEmptyForms: function() {
-
         },
 
         getValue: function() {
@@ -154,7 +188,7 @@ define([
                 if (this.forms[i].commit()) {
                     errors = true;
                 }
-            };
+            }
             if (errors) {
                 return false;
             } else {
@@ -173,11 +207,9 @@ define([
                         }*/
                         values[i] = tmp;
                     }
-                };
+                }
                 return values;
             }
-
-
         },
         }, {
           //STATICS
