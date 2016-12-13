@@ -63,9 +63,9 @@ def loadThesaurusTrad(config):
     session.close()
 
 
-def loadUserRole(config):
+def loadUserRole(session):
     global userOAuthDict
-    session = config.registry.dbmaker()
+    # session = config.registry.dbmaker()
     VuserRole = Base.metadata.tables['VUser_Role']
     query = select(VuserRole.c)
 
@@ -83,8 +83,11 @@ GROUPS = {'superUser': ['group:superUsers'],
 
 
 def groupfinder(userid, request):
-    currentUserRoleID = userOAuthDict.loc[userOAuthDict[
-        'user_id'] == int(userid), 'role_id'].values[0]
+    session = request.dbsession
+    Tuser_role = Base.metadata.tables['VUser_Role']
+    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(userid))
+    currentUserRoleID = session.execute(query_check_role).scalar()
+
     if currentUserRoleID in USERS:
         currentUserRole = USERS[currentUserRoleID]
         return GROUPS.get(currentUserRole, [])

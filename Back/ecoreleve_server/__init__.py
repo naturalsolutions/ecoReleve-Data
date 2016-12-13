@@ -15,7 +15,6 @@ from .Models import (
     dbConfig,
     db,
     loadThesaurusTrad,
-    loadUserRole,
     groupfinder
 )
 from .Views import add_routes, add_cors_headers_response_callback
@@ -97,8 +96,8 @@ def main(global_config, **settings):
 
     if 'loadExportDB' in settings and settings['loadExportDB'] == 'False':
         print('''
-            /!\================================/!\ 
-            WARNING : 
+            /!\================================/!\
+            WARNING :
             Export DataBase NOT loaded, Export Functionality will not working
             /!\================================/!\ \n''')
     else:
@@ -128,12 +127,6 @@ def main(global_config, **settings):
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
 
     loadThesaurusTrad(config)
-
-    loadUserRole(config)
-
-    # Set the default permission level to 'read'
-    # config.set_default_permission('read')
-
     add_routes(config)
     config.scan()
     return config.make_wsgi_app()
