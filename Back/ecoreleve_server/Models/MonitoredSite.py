@@ -252,6 +252,6 @@ class MonitoredSiteType (Base, ObjectTypeWithDynProp):
         'MonitoredSiteType_MonitoredSiteDynProp', backref='MonitoredSiteType')
     MonitoredSites = relationship('MonitoredSite', backref='MonitoredSiteType')
 
-    # @orm.reconstructor
-    # def init_on_load(self):
-    #     ObjectTypeWithDynProp.__init__(self, DBSession)
+    @orm.reconstructor
+    def init_on_load(self):
+        ObjectTypeWithDynProp.__init__(self)
