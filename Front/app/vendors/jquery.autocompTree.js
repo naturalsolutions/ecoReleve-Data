@@ -10,6 +10,7 @@
   $.fn.autocompTree = function(methodOrOptions) {
     //On définit nos paramètres par défaut
     var searchAutoComp = null;
+    var first = false;
     var _self = $(this);
     var defauts =
     {
@@ -112,7 +113,44 @@
 
           }
 
+
           $.when(window.thesaurus[parametres.startId]).then(function(){
+              var onFocus = function () {
+                setTimeout(function(){
+                  $("div[id^=treeView]").each(function () {
+                    $(this).css('display', 'none');
+                  });
+                  var treeContainer = $("#treeView" + $me.attr("id"));
+                  treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
+                //treeContainer.css('display', 'block').css('border', 'solid 1px').css('z-index', '100');
+                treeContainer.css({top: $me.outerHeight() + 20 });
+                //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
+                $(document).delegate("body", "click", function (event) {
+                  if (!$(event.target).is("#" + $me.attr("id") + ",span[class^=fancytree], div[id^=treeView], ul")) {
+                    var treeContainer = $("#treeView" + $me.attr("id"));
+                    treeContainer.css('display', 'none');
+                    //$(document).undelegate();
+                    if (parametres.onInputBlur) {
+                      try {
+                        $.proxy(parametres.onInputBlur(), $me);
+                      } catch (e) {
+                        throw ('An error occured during onInputBlur -> ' + e);
+                      }
+                    }
+                  }
+                });
+                if (parametres.onInputFocus) {
+                  try {
+                    parametres.onInputFocus();
+                  } catch (e) {
+                    throw ('An error occured during onInputFocus -> ' + e);
+                  }
+                }
+              }, parametres.timeout + 50);
+            };
+            
+            $me.on('focus', onFocus);
+
             $('#treeView' + $me.attr("id")).fancytree({
               debugLevel: 0,
               extensions: ["filter"],
@@ -161,15 +199,22 @@
               if (parametres.display.isDisplayDifferent) {
                 $me.val(data.node.data[parametres.display.displayValueName]);
                 $('[name=' + $me.attr('name') + parametres.display.suffixeId + ']').val(data.node.data[parametres.display.storedValueName]);
+
+                $me.off('focus', onFocus);
+                $me.focus();
+                $me.on('focus', onFocus);
+
                 $("#treeView" + $me.attr("id")).css('display', 'none');
                 tree.activateKey(false);
-                //On désactive le pseudo blur afin qu'il ne s'éxécute plus si l'arbre a disparu et que le vrai focus n'est plus l'input
-                //$(document).undelegate();
               } else {
                 $me.val(data.node.data[parametres.display.displayValueName]);
+
+                $me.off('focus', onFocus);
+                $me.focus();
+                $me.on('focus', onFocus);
+
                 $("#treeView" + $me.attr("id")).css('display', 'none');
                 tree.activateKey(false);
-                //$(document).undelegate();
               }
               if (parametres.onItemClick) {
                 try {
@@ -179,52 +224,28 @@
                 }
               }
             }
-          });
+          });//end then
 
-          var onFocus = function () {
-            setTimeout(function(){
-              $("div[id^=treeView]").each(function () {
-                $(this).css('display', 'none');
-              });
-              var treeContainer = $("#treeView" + $me.attr("id"));
-              treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
-            //treeContainer.css('display', 'block').css('border', 'solid 1px').css('z-index', '100');
-            treeContainer.css({top: $me.outerHeight() + 20 });
-            //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
-            $(document).delegate("body", "click", function (event) {
-              if (!$(event.target).is("#" + $me.attr("id") + ",span[class^=fancytree], div[id^=treeView], ul")) {
-                var treeContainer = $("#treeView" + $me.attr("id"));
-                treeContainer.css('display', 'none');
-                //$(document).undelegate();
-                if (parametres.onInputBlur) {
-                  try {
-                    $.proxy(parametres.onInputBlur(), $me);
-                  } catch (e) {
-                    throw ('An error occured during onInputBlur -> ' + e);
-                  }
-                }
-              }
-            });
-            if (parametres.onInputFocus) {
-              try {
-                parametres.onInputFocus();
-              } catch (e) {
-                throw ('An error occured during onInputFocus -> ' + e);
-              }
-            }
-          }, parametres.timeout + 50);
-        };
-          //Permet l'affichage du treeview au focus sur l'input
-          if ($me.is(':focus') ) {
-            onFocus();
+
+
+
+
+
+        $me.keyup(function (e) {
+          var _this = this;
+          var treeHtml = $("#treeView" + $me.attr("id"));
+          var fancytree = treeHtml.fancytree("getTree");
+
+          //down arrow
+          if(e && e.which === 40){
+            $("#treeView" + $me.attr("id")).css('display', 'block');
+            $me.parent().find('.fancytree-container').focus();
+            fancytree.getFirstChild().setFocus();
+            return;
           }
 
-          $me.focus(onFocus);
-
           //Fonction de recherche et de filtration
-          $me.keyup(function (e) {
-            var treeHtml = $("#treeView" + $me.attr("id"));
-            var fancytree = treeHtml.fancytree("getTree");
+
             //Si le nombrte d'élément est < a 100 on oblige l'utilisation d'au moins trois caractère pour des raisons de performances
             if (searchAutoComp != null) {
               clearTimeout(searchAutoComp);
@@ -248,11 +269,13 @@
                 var n,
                 match = $me.val();
 
-                if (e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === "") {
+
+                if (e && e.which === 40 || $.trim(match) === "") {
                   fancytree.clearFilter();
                   treeHtml.fancytree("getRootNode").visit(function (node) {
                     node.setExpanded(false);
                   });
+                
                   return;
                 }
                 n = fancytree.filterNodes(match, false);
@@ -271,6 +294,7 @@
                 });
               }
             },parametres.timeout);
+
           });
 
           if (parametres.display.isDisplayDifferent) {
@@ -291,6 +315,19 @@
       });
       return _self;
 },
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
