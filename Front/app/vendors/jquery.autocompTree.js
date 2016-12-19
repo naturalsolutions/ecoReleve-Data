@@ -138,6 +138,7 @@
                       }
                     }
                   }
+                  
                 });
                 if (parametres.onInputFocus) {
                   try {
