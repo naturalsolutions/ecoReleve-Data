@@ -1,0 +1,12 @@
+ALTER TABLE SourceTarget
+ADD DisableConstraint BIT 
+GO
+
+Update SourceTarget Set DisableConstraint = 0 
+GO 
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('109_Alter_Table_SourceTarget',GETDATE(),(SELECT db_name()))
+
+
+GO
