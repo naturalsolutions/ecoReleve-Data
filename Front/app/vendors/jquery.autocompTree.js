@@ -151,6 +151,10 @@
             
             $me.on('focus', onFocus);
 
+            if($me.is(':focus')){
+              onFocus();
+            };
+
             $('#treeView' + $me.attr("id")).fancytree({
               debugLevel: 0,
               extensions: ["filter"],
@@ -224,10 +228,7 @@
                 }
               }
             }
-          });//end then
-
-          onFocus();
-
+          });
 
 
 
