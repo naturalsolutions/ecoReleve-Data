@@ -226,7 +226,7 @@
             }
           });//end then
 
-
+          onFocus();
 
 
 
