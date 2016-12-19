@@ -3,12 +3,12 @@ define(['marionette',
 	'./views/curveGraph',
 	'./views/donutGraph',
 	'./views/info',
-	'config',
 	'requirejs-text!base/home/tpl/tpl-dounutGraph.html',
 	'requirejs-text!base/home/tpl/tpl-dounutGraph2.html',
+	'config',
 	'i18n'
 	],
-function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, TplGraph1, TplGraph2) {
+function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, TplGraph1, TplGraph2,config) {
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -22,7 +22,9 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, Tp
     },
 
     ui: {
-      'donuts': '#donuts'
+      'donuts': '#donuts',
+      'userFirst': '#userFirst',
+      'userLast': '#userLast',
     },
 
     animateIn: function() {
@@ -47,45 +49,99 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, config, Tp
     },
 
     initStats: function() {
+      var isDomoInstance = config.instance ;
       var collGraphObj = [{
-        url: config.coreUrl + 'sensor/uncheckedDatas/graph',
+        url: 'sensor/uncheckedDatas/graph',
         ele: '#validate',
         title: 'pending',
         stored: false,
         template: 'app/base/home/tpl/tpl-dounutGraph.html'
       },{
-        url: config.coreUrl + 'individuals/location/graph',
+        url: 'individuals/location/graph',
         ele: '#locations',
         title: 'location',
         stored: false,
         template: 'app/base/home/tpl/tpl-dounutGraph2.html'
       }/*,{
-				url : config.coreUrl + 'stats/individuals/monitored/graph',
+				url : 'stats/individuals/monitored/graph',
 				ele : '#monitored',
 				title : 'monitored',
 				stored : false,
 				template : 'app/base/home/tpl/tpl-dounutGraph3.html'
 			}*/];
       var collGraph = new Backbone.Collection(collGraphObj);
-      var GraphViews = Backbone.Marionette.CollectionView.extend({
-        childView: DonutGraphView,
-      });
 
-      this.donutGraphs = new GraphViews({collection: collGraph});
-      this.curveGraph = new CurveGraphView();
+
+      if(!isDomoInstance || (isDomoInstance != 'demo')) {
+          var GraphViews = Backbone.Marionette.CollectionView.extend({
+            childView: DonutGraphView,
+          });
+          this.donutGraphs = new GraphViews({collection: collGraph});
+      }
       this.infoStat = new InfoView();
+      this.curveGraph = new CurveGraphView();
     },
 
     onRender: function() {
       this.initStats();
-      this.donutGraphs.render();
+      var isDomoInstance = config.instance ;
+      if(!isDomoInstance || (isDomoInstance != 'demo')) {
+        this.donutGraphs.render();
+      }
     },
 
     onShow: function(options) {
+      var isDomoInstance = config.instance ;
+      this.disableTiles();
+
+      if(!isDomoInstance || (isDomoInstance != 'demo')) {
+        this.ui.donuts.html(this.donutGraphs.el);
+        $('.hello').addClass('masqued');
+      } else {
+        this.getUser();
+        $('#siteName').addClass('masqued');
+      }
       this.info.show(this.infoStat);
-      this.ui.donuts.html(this.donutGraphs.el);
       this.graph.show(this.curveGraph);
+
       this.$el.i18n();
+      // mobile compatibility
+      var isMobile = window.matchMedia("only screen and (max-width: 760px)");
+      if (isMobile.matches && (!window.alertMobile)) {
+          Swal({
+              title: 'Mobile compatibility',
+              text: 'This application is not adapted to mobile browsers yet',
+              type: 'warning',
+              showCancelButton: false,
+              confirmButtonColor: 'rgb(221, 107, 85)',
+              confirmButtonText: 'OK',
+              closeOnConfirm: true
+          });
+          $('.sweet-alert.showSweetAlert.visible').css('margin-left', '0px;');
+          window.alertMobile = true;
+      }
+    },
+    disableTiles : function(){
+      // disable tiles for disabled fonctionalities in config.js
+      var disabled = config.disabledFunc ;
+      if (! disabled){
+        return ;
+      }
+      for (var i=0; i< disabled.length;i++){
+        var functionnality = disabled[i];
+        $("." + functionnality).addClass('tile-locked');
+      }
+    },
+    getUser : function(){
+      var _this = this;
+      var user  = new Backbone.Model();
+      user.url = config.coreUrl + 'currentUser';
+      user.fetch({
+        success: function(md) {
+          _this.ui.userFirst.html(user.get('Firstname'));
+          _this.ui.userLast.html(user.get('Lastname'));
+        }
+      });
     }
   });
 });

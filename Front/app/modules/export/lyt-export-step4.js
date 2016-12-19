@@ -3,19 +3,19 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
-  'ns_grid/model-grid',
   'sweetAlert',
   'moment',
+  'config',
   'i18n'
-], function($, _, Backbone, Marionette, config, NsGrid, Swal, Moment
+], function($, _, Backbone, Marionette, Swal, Moment, Config
 ) {
   'use strict';
   return Marionette.LayoutView.extend({
     className: 'full-height export-layout',
     template: 'app/modules/export/templates/tpl-export-step4.html',
 
-    name: 'File type',
+
+    name : '<span class="export-step4"></span>',
 
     ui:  {
       'pdfTile': '#pdfTile',
@@ -41,6 +41,9 @@ define([
     onShow: function() {
       this.$el.find('.tile-inside:first input').prop('checked', true).change();
       this.$el.find('.tile-inside:first').addClass('active');
+      this.$el.i18n();
+      var stepName = i18n.translate('export.step4-label');
+      $('.export-step4').html(stepName);
     },
 
     changeValue: function(e) {
@@ -88,10 +91,10 @@ define([
       };
 
       if (this.model.get('fileType') == 'excel'){
-        var url =  config.coreUrl + 'export/views/getFile?criteria='+JSON.stringify(this.datas);
+        var url =  Config.coreUrl+'export/views/getFile?criteria='+JSON.stringify(this.datas);
         var link = document.createElement('a');
         link.classList.add('DowloadLinka');
-      
+
         //link.download = url;
         link.href = url;
         link.onclick = function () {
@@ -120,7 +123,7 @@ define([
         link.click();
       } else {
 
-        var route = config.coreUrl + 'export/views/getFile';
+        var route = 'export/views/getFile';
         $.ajax({
           url: route,
           data: {criteria: JSON.stringify(this.datas)},

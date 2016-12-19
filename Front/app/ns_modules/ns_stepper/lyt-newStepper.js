@@ -5,7 +5,7 @@ define([
 	'backbone',
 	'marionette',
 	'sweetAlert',
-	'translater',
+	'i18n',
 ], function($, _, Backbone, Marionette, Swal, Translater
 ){
 
@@ -60,7 +60,7 @@ define([
 		},
 
 		initialize: function(){
-			this.translater = Translater.getTranslater();
+			//this.translater = Translater.getTranslater();
 			this.currentStepIndex = 0;
 			this.models = [];
 			this.initSteps();
@@ -72,7 +72,7 @@ define([
 
 		//dedicated to be overloaded
 		initSteps: function(){
-			
+
 		},
 
 		onRender: function(){
@@ -82,6 +82,7 @@ define([
 		onShow : function(){
 			this.displayStepNav();
 			this.displayStep(0);
+			this.$el.i18n();
 		},
 
 		//clean the stored datas from current Step
@@ -168,6 +169,7 @@ define([
 			//check if we have to wait to parse the template (bind evts)
 
 			$.when( this.currentStep.rdy ).then( this.bindRequiredFields.bind(this));
+
 		},
 
 		displayStepNav: function(){
@@ -207,7 +209,7 @@ define([
 
 		bindRequiredFields: function(){
 			var _this = this;
-
+			//console.log(this.currentStep.rdy);
 			//test with _this as context
 			this.onEditEvt = $.proxy(function(e){
 				this.checkNextBtn(e);
@@ -220,7 +222,7 @@ define([
 				//if no .required found, enable nextBtn
 				this.enableNextBtn();
 			}
-			
+
 		},
 
 		unbindRequiredFields: function(){

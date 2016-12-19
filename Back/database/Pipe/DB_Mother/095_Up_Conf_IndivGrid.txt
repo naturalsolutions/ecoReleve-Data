@@ -1,0 +1,11 @@
+UPDATE g SET FilterType = 'AutocompTreeEditor', Options = 223066
+  FROM [ModuleGrids] g
+  where Module_ID = 8 and name = 'Status_'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('95_Uo_Conf_IndivGrid',GETDATE(),(SELECT db_name()))
+
+
+GO

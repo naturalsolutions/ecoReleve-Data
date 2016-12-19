@@ -3,16 +3,18 @@ define([
 	'underscore',
 	'backbone',
 	'marionette',
-	'config',
 	'i18n'
-], function($, _, Backbone, Marionette, config
+], function($, _, Backbone, Marionette
 ) {
   'use strict';
   return Marionette.LayoutView.extend({
     className: 'full-height',
     template: 'app/modules/export/templates/tpl-export-step1.html',
 
-    name: ' Choose the view to export',
+    name : '<span class="export-step1"></span>',
+    /*name : (function () {
+        return i18n.translate('export.step1-label'); 
+    })(),*/
 
     ui: {
       'themes': '#themes',
@@ -28,7 +30,7 @@ define([
     initialize: function(options) {
       this.model = new Backbone.Model();
       this.themeColl = new Backbone.Collection();
-      this.themeColl.url = config.coreUrl + 'export/themes';
+      this.themeColl.url = 'export/themes';
       this.defered = this.themeColl.fetch();
 
       this.model.set('viewId', '');
@@ -43,6 +45,9 @@ define([
           _this.ui.themes.append(line);
         });
       });
+      this.$el.i18n();
+      var stepName = i18n.translate('export.step1-label');
+      $('.export-step1').html(stepName);
     },
 
     getViews: function(e) {
@@ -55,7 +60,7 @@ define([
 
       this.viewColl = new Backbone.Collection();
       var id = $(e.target).val();
-      this.viewColl.url = config.coreUrl + 'export/themes/' + id + '/views';
+      this.viewColl.url = 'export/themes/' + id + '/views';
       var defered = this.viewColl.fetch();
 
       _this.ui.views.empty();

@@ -7,9 +7,8 @@ define([
 	//'ns_filter/model-filter_module',
   'ns_filter_bower',
 	'ns_map/ns_map',
-	'config',
 	'i18n'
-], function($, _, Backbone, Marionette, Com, NsFilter, NsMap, config
+], function($, _, Backbone, Marionette, Com, NsFilter, NsMap
 ) {
 
   'use strict';
@@ -30,7 +29,7 @@ define([
       'click button#filter': 'filter',
     },
 
-    name: ' Filter',
+    name : '<span class="export-step2"></span>',
 
     initialize: function(options) {
       this.com = new Com();
@@ -42,6 +41,9 @@ define([
       this.getFieldsListForSelectedView();
       this.displayMap();
       this.displayFilters();
+      this.$el.i18n();
+      var stepName = i18n.translate('export.step2-label');
+      $('.export-step2').html(stepName);
     },
 
     addFilter: function() {
@@ -74,14 +76,17 @@ define([
         getValueOptions: function (DataRow) {
             var valueOptions;
             switch (DataRow['type']) {
-                case "Select": case 'Checkboxes':
-                    return DataRow['options']
+                case "Select":
+                    return DataRow['options'];
+                    break;
+								case 'Checkboxes':
+                    return DataRow['options'];
                     break;
                 case 'AutocompTreeEditor':
-                    return DataRow['options']
+                    return DataRow['options'];
                     break;
                 case 'AutocompleteEditor':
-                    return DataRow['options']
+                    return DataRow['options'];
                     break;
                 case "DATETIME":
                     return valueOptions = [{
@@ -91,7 +96,7 @@ define([
                     break;
                 case "DateTimePickerEditor" :
                     DataRow['options'].format =  "DD/MM/YYYY";
-                    return DataRow['options']
+                    return DataRow['options'];
                     break;
                 default:
                     return valueOptions = DataRow['options'];
@@ -109,7 +114,7 @@ define([
 
     getFieldsListForSelectedView: function() {
       var _this = this;
-      var viewUrl = config.coreUrl + 'export/views/' + this.viewId + '/getFilters';
+      var viewUrl = 'export/views/' + this.viewId + '/getFilters';
       var jqxhr = $.ajax({
         url: viewUrl,
         context: this,
@@ -135,7 +140,7 @@ define([
         com: this.com,
         element: 'map',
         zoom: 2,
-        url: config.coreUrl + 'export/views/' + this.viewId + '/?geo=true',
+        url: 'export/views/' + this.viewId + '/?geo=true',
         totalElt: this.ui.total,
       });
     },

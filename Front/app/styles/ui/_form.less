@@ -108,12 +108,14 @@ select:disabled {
 			cursor: pointer;
 			color:#3A3939;
 			background: transparent;
+			background-color: transparent;
 			border: 0px;
 			border-bottom: 2px solid #ddd;
 			&:hover, &:visited{
 				cursor: pointer;
 				color:#3A3939;
-				background: transparent;
+				background: transparent!important;
+				background-color: transparent!important;
 				border: 0px;
 				border-bottom: 2px solid #ddd;
 			}
@@ -121,9 +123,13 @@ select:disabled {
 		&.active, &.activeTab{
 			a{
 				cursor: pointer;
+				background: transparent!important;
+				background-color: transparent!important;
 				border: 0px;
 				border-bottom: 2px solid #3A3939;
 				&:hover, &:focus{
+					background: transparent!important;
+					background-color: transparent!important;
 					cursor: pointer;
 					border: 0px;
 					border-bottom: 2px solid #3A3939;
@@ -135,23 +141,14 @@ select:disabled {
 }
 
 .ui-autocomplete{
-
 	position: absolute;
-    top: 0;
-    left: 0;
-    cursor: default;
-    max-height: 350px;
-    overflow-y: auto;
-    z-index: 100000;
+  top: 0;
+  left: 0;
+  cursor: default;
+  max-height: 350px;
+  overflow-y: auto;
+  z-index: 100000;
 }
-
-
-
-
-
-
-
-
 
 .error{
 	//works only for required classes
@@ -201,38 +198,6 @@ select:disabled {
 	}
 }
 
-
-/* CSS 2 PIER
-*
-*  A mettre dans les bons fichiers CSS
-*
-Bouton*/
-/* .panel-heading .btn-prevent-collapse {
-	padding: 25px 20px 3px 12px;
-}
-.btn-success{
-	position: relative;
-    padding: 6px 40px 6px 12px;
-}
-div#stationForm button.btn-success{
-	padding: 23px 20px 6px 12px;
-}
-.btn-success .reneco {
-    position: absolute;
-    height: 100%;
-    left: auto;
-    right: 0;
-    border-radius: 0;
-    border-top-right-radius: inherit;
-    border-bottom-right-radius: inherit;
-    box-shadow: 1px 0 0 0 transparent inset;
-    width: 2.57142857em;
-    background-color: rgba(0,0,0,.05);
-    top: 0;
-    line-height: 30px;
-} */
-/* Formulaires
-dans les stations enlever les class "list-inline" des select */
 
 
 div.form-control{
@@ -543,32 +508,40 @@ textarea {
 	font-weight:bold;
 }
 
-.filter-indiv{
-	margin-bottom: 80px;
-
-}
-
-@tabsHeight:50px;
-
-.filter-indiv.crop2{
-		margin-bottom: 0px;
-		padding-bottom: 80px;
-		@crop: @tabsHeight*2;
-		height: ~"calc(100% - @{crop} )"!important;
+.input-group{
+	input.autocompTree{
+		border-radius: 0px 4px 4px 0px!important;
 	}
-.no-scroll{
-	overflow:hidden !important;
 }
 
+.filter-container{
+	padding: 10px 0px;
+}
 .filter-no-padding {
-	span{
-		padding-left:0px;
-		select{
-			padding-left:5px;
-			padding-right:0px;
-		}
-		div span {
-			padding-left:12px;
-		}
+	padding: 20px 0px;
+	&:nth-child(3) {
+    padding: 0px;
 	}
+}
+
+.js_container_index_subForm {
+	width: 100%;
+	height: 34px;
+	top: -15px;
+	margin-bottom: 0 !important;
+	a{
+		background-color: #777777;
+		height: 34px;
+		width: 34px;
+		text-align: center;
+		line-height: 34px;
+		font-size: 14px;
+		color: white;
+	}
+}
+.js_index_subForm {
+	opacity: 1 !important;
+	position : absolute;
+	left: 0;
+
 }
