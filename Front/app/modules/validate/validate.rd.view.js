@@ -26,7 +26,7 @@ define([
     className: 'full-height animated white',
 
     events: {
-      'change .js-select-ferquency': 'handleFrequency',
+      'change .js-select-frequency': 'handleFrequency',
       'click .js-btn-validate': 'validate',
     },
 
@@ -34,6 +34,7 @@ define([
       'map': '#map',
       'individualForm': '.js-individual-form',
       'sensorForm': '.js-sensor-form',
+      'selectFrequency': '.js-select-frequency'
     },
 
     regions: {
@@ -76,6 +77,7 @@ define([
     },
 
     reload: function(options){
+      this.ui.selectFrequency.val('');
       this.index = parseInt(options.index) - 1;
       this.populateModel();
 
@@ -182,7 +184,7 @@ define([
         columns: columnDefs,
         com: this.com,
         url: 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt'),
-        //afterFirstRowFetch: afterFirstRowFetch,
+        afterFirstRowFetch: this.initFrequency.bind(this),
         clientSide: true,        
         idName: 'PK_id',
         gridOptions: {
@@ -200,12 +202,11 @@ define([
     },
 
     initFrequency: function() {
-      if (this.frequency) {
-        this.ui.frequency.find('option[value="' + this.frequency + '"]').prop('selected', true);
-      }else {
-        this.frequency = this.ui.frequency.val();
+      var hz = 'all';
+      if(this.model.get('type') == 'gsm' || this.model.get('type') == 'rfid'){
+        hz = 60;
       }
-      this.roundDate(this.frequency);
+      this.ui.selectFrequency.find('option[value="' + hz + '"]').prop('selected', true).change();
     },
 
     roundDate: function(date, duration) {
@@ -214,10 +215,7 @@ define([
 
     handleFrequency: function(e){
       var _this= this;
-      var hz =$(e.target).val();
-      this.$el.find('.js-select-ferquency').each(function(){
-        $(this).val(hz);
-      });
+      var hz = $(e.target).val();
 
       if(hz === 'all'){
         this.gridView.interaction('selectAll');

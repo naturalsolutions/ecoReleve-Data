@@ -8,7 +8,7 @@ define([
 
   return Backbone.Model.extend({
     defaults: {
-      map: true,
+      displayMap: true,
 
       label: 'stations',
       single: 'station',

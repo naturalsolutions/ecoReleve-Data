@@ -5,8 +5,9 @@ define([
   'marionette',
   'sweetAlert',
   'moment',
+  'config',
   'i18n'
-], function($, _, Backbone, Marionette, Swal, Moment
+], function($, _, Backbone, Marionette, Swal, Moment, Config
 ) {
   'use strict';
   return Marionette.LayoutView.extend({
@@ -90,10 +91,10 @@ define([
       };
 
       if (this.model.get('fileType') == 'excel'){
-        var url =  'export/views/getFile?criteria='+JSON.stringify(this.datas);
+        var url =  Config.coreUrl+'export/views/getFile?criteria='+JSON.stringify(this.datas);
         var link = document.createElement('a');
         link.classList.add('DowloadLinka');
-      
+
         //link.download = url;
         link.href = url;
         link.onclick = function () {

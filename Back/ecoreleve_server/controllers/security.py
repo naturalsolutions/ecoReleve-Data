@@ -1,20 +1,11 @@
-"""
-Created on Mon Aug 25 13:00:16 2014
-@author: Natural Solutions (Thomas)
-"""
-
-from ..Models import DBSession , User, userOAuthDict
-import transaction 
-from pyramid.httpexceptions import HTTPUnauthorized,HTTPForbidden
-from pyramid_jwtauth import * 
+from pyramid.httpexceptions import HTTPUnauthorized, HTTPForbidden
+from pyramid_jwtauth import JWTAuthenticationPolicy
 from pyramid.security import (
-    ALL_PERMISSIONS,
-    DENY_ALL,
     Allow,
     Authenticated,
 )
 
-# Root class security #
+
 class SecurityRoot(object):
     __acl__ = [
         (Allow, Authenticated, 'read'),
@@ -26,37 +17,37 @@ class SecurityRoot(object):
         (Allow, 'group:superUsers', 'all'),
         # DENY_ALL
     ]
-    
+
     def __init__(self, request):
         self.request = request
 
 
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
 
-
     def get_userID(self, request):
-        try :
+        try:
             token = request.cookies.get("ecoReleve-Core")
             claims = self.decode_jwt(request, token)
             userid = claims['iss']
             return userid
-        except: 
+        except:
             return
+
     def get_userInfo(self, request):
-        try :
+        try:
             token = request.cookies.get("ecoReleve-Core")
             claims = self.decode_jwt(request, token, verify=True)
             return claims, True
-        except: 
+        except:
             try:
                 token = request.cookies.get("ecoReleve-Core")
                 claims = self.decode_jwt(request, token, verify=False)
-                return claims,False
+                return claims, False
             except:
                 return None, False
 
     def user_info(self, request):
-        claim,verify_okay = self.get_userInfo(request)
+        claim, verify_okay = self.get_userInfo(request)
         if claim is None:
             return None
         return claim
@@ -74,7 +65,7 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
         return userid
 
     def remember(self, response, principal, **kw):
-        response.set_cookie('ecoReleve-Core', principal, max_age = 100000)
+        response.set_cookie('ecoReleve-Core', principal, max_age=100000)
 
     def forget(self, request):
         request.response.delete_cookie('ecoReleve-Core')
@@ -94,68 +85,64 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
 
 
 routes_permission = {
-    'stations' : {
+    'stations': {
         'GET': 'all',
         'POST': 'all',
         'PUT': 'all',
         'DELETE': 'admin'
     },
-    'protocols' : {
+    'protocols': {
         'GET': 'all',
         'POST': 'all',
         'PUT': 'all',
         'DELETE': 'all'
     },
-    'sensors' : {
+    'sensors': {
         'GET': 'all',
         'POST': 'admin',
         'PUT': 'admin',
         'DELETE': 'admin'
     },
-    'individuals' : {
+    'individuals': {
         'GET': 'all',
         'POST': 'admin',
         'PUT': 'superUser',
         'DELETE': 'noONe'
     },
-    'monitoredSites' : {
+    'monitoredSites': {
         'GET': 'all',
         'POST': 'all',
         'PUT': 'all',
         'DELETE': 'admin'
     },
-    'release' : {
+    'release': {
         'GET': 'admin',
         'POST': 'admin',
         'PUT': 'admin',
         'DELETE': 'admin'
     },
-    'export' : {
+    'export': {
         'GET': 'all',
         'POST': 'all',
         'PUT': 'all',
         'DELETE': 'all'
     },
-    'rfid' : {
+    'rfid': {
         'GET': 'all',
         'POST': 'all',
         'PUT': 'all',
         'DELETE': 'all'
     },
-    'argos' : {
+    'argos': {
         'GET': 'superUser',
         'POST': 'superUser',
         'PUT': 'superUser',
         'DELETE': 'superUser'
     },
-    'gsm' : {
+    'gsm': {
         'GET': 'superUser',
         'POST': 'superUser',
         'PUT': 'superUser',
         'DELETE': 'superUser'
     },
 }
-
-
-
-

@@ -4,11 +4,24 @@ define([
   'backbone',
   'marionette',
   'ag-grid',
-  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
+  './custom.text.filter',
+  './custom.number.filter',
+  './custom.date.filter',
+  './custom.select.filter',
+  './custom.text.autocomplete.filter',
+
+  'vendors/utils',
+
+  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
+  'ns_modules/ns_bbfe/bbfe-autoCompTree',
+  
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, utils_1) {
+], function($, _, Backbone, Marionette, AgGrid, 
+  CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter, utils_1,
+  ObjectPicker, ThesaurusPicker
+) {
 
   'use strict';
 
@@ -63,6 +76,7 @@ define([
       this.clientSide = options.clientSide || false;
       this.filters = options.filters || [];
       this.afterGetRows = options.afterGetRows;
+      this.afterFetchColumns = options.afterFetchColumns;
       this.afterFirstRowFetch = options.afterFirstRowFetch;
       this.goTo = options.goTo || false;
 
@@ -89,6 +103,16 @@ define([
         onAfterFilterChanged: function(){
           _this.handleSelectAllChkBhv();
           _this.clientSideFilter();
+        },
+        onCellFocused: function(cell){
+          
+
+          if(!_this.rowIndex)
+              _this.rowIndex = cell.rowIndex;
+          if(_this.rowIndex != cell.rowIndex && _this.onFocusedRowChange){
+
+            this.onFocusedRowChange(cell);
+          }
         }
         //overlayNoRowsTemplate: '<span>No rows to display</span>',
         //overlayLoadingTemplate: '',
@@ -126,6 +150,8 @@ define([
       }
     },
 
+
+
     onRowSelected: function(e){
       if(this.ready){
         this.interaction('singleSelection', e.node.data[this.idName] || e.node.data.id || e.node.data.ID, this);
@@ -145,24 +171,53 @@ define([
 
     formatColumns: function(columnDefs){
       var _this = this;
-      var filter = {
-        'string' : 'text',
-        'integer': 'number',
-      };
       columnDefs.map(function(col, i) {
 
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
 
-
         if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
           _this.formatSelectColumn(col)
         }
-        //draft
-        if(col.cell == 'autocomplete'){
-          _this.addBBFEditor(col);
+
+        // if(col.cell == 'autocomplete'){
+        //   _this.addBBFEditor(col);
+        // }
+
+        switch(col.type){
+          case 'AutocompTreeEditor':
+            _this.addBBFEditor(col, ThesaurusPicker);
+            break;
+          case 'ObjectPicker':
+            _this.addBBFEditor(col, ObjectPicker);
+            break;
         }
+
+        switch(col.filter){
+          case 'number': {
+            col.filter = CustomNumberFilter;
+            return;
+          }
+          case 'date': {
+            col.filter = CustomDateFilter;
+            return;
+          }
+          case 'select': {
+            col.filter = CustomSelectFilter;
+            return;
+          }
+          // case 'textAutocomplete': {
+          //   col.filter = CustomTextAutocompleteFilter;
+          //   return;
+          // }
+          default: {
+            col.filter = CustomTextFilter;
+            return;
+          }
+        }
+        //draft
+
       });
       return columnDefs;
     },
@@ -201,26 +256,27 @@ define([
         eCell.innerHTML = '\
             <img class="js-check-all pull-left" value="unchecked" src="./app/styles/img/unchecked.png" title="check only visible rows (after filter)" style="padding-left:10px; padding-top:7px" />\
             <div id="agResizeBar" class="ag-header-cell-resize"></div>\
-            <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button"></span>\
+            <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg width="12" height="12"><rect y="0" width="12" height="2" class="ag-header-icon"></rect><rect y="5" width="12" height="2" class="ag-header-icon"></rect><rect y="10" width="12" height="2" class="ag-header-icon"></rect></svg></span>\
             <div id="agHeaderCellLabel" class="ag-header-cell-label">\
-              <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>\
-              <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>\
-              <span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>\
-              <span id="agFilter" class="ag-header-icon ag-filter-icon"></span>\
+              <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>\
+              <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>\
+              <span id="agNoSort" class="ag-header-icon ag-sort-none-icon ag-hidden"><svg width="10" height="10"><polygon points="0,4 5,0 10,4"></polygon><polygon points="0,6 5,10 10,6"></polygon></svg></span>\
+              <span id="agFilter" class="ag-header-icon ag-filter-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 4,4 4,10 6,10 6,4 10,0" class="ag-header-icon"></polygon></svg></span>\
               <span id="agText" class="ag-header-cell-text"></span>\
             </div>\
         ';
-          var checkboxElt = eCell.querySelector('.js-check-all');
 
-          checkboxElt.addEventListener('click', function(e) {
-            if($(this).attr('value') === 'unchecked'){
-              _this.checkUncheckSelectAllUI(true);
-              _this.selectAllVisible();
-            } else {
-              _this.checkUncheckSelectAllUI(false);
-              _this.deselectAllVisible();
-            }
-          });
+        var checkboxElt = eCell.querySelector('.js-check-all');
+
+        checkboxElt.addEventListener('click', function(e) {
+          if($(this).attr('value') === 'unchecked'){
+            _this.checkUncheckSelectAllUI(true);
+            _this.selectAllVisible();
+          } else {
+            _this.checkUncheckSelectAllUI(false);
+            _this.deselectAllVisible();
+          }
+        });
 
         return eCell;
       };
@@ -238,38 +294,78 @@ define([
     },
 
 
-    addBBFEditor: function(col){
+    addBBFEditor: function(col, BBFEType){
       //draft
-      var BBFEditor = function () {
+      var _this = this;
 
+      var BBFEditor = function () {
       };
 
       var options = {
-        key: col.options.target,
+        key: col.options.target || col.field,
         schema: {
+          options: col.options,
           editable: true
         },
         fromGrid: true
       };
 
-      BBFEditor.prototype.init = function(params){
-        var self = this;
-        this.picker = new ObjectPicker(options);
+      BBFEditor.prototype.init = function(params){        
+        console.log(params);
+        
+        this.picker = new BBFEType(options);
         this.input = this.picker.render();
+        if (params.charPress){
+          this.input.$el.find('input').val(params.charPress).change();
+        } else {
+          if (params.value){
+            if (params.value.label !== undefined  ){
+              this.input.$el.find('input').attr('data_value',params.value.value);
+              this.input.$el.find('input').val(params.value.label).change();
+            } else {
+              this.input.$el.find('input').val(params.value).change();
+            }
+          }
+        }
 
+        this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
+            var isNavigationKey = event.keyCode === 38 || event.keyCode === 40;
+            if (isNavigationKey) {
+                event.stopPropagation();
+            }
+        });
 
-        this.input.$el.find('input').val(params.value).change();
+        // this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
+        //     alert('');
+        //     event.stopPropagation();
+        // });
       };
+
+      BBFEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
+        eElement.addEventListener(event, listener);
+      }
+
       BBFEditor.prototype.getGui = function(){
         return this.input.el;
       };
+
       BBFEditor.prototype.afterGuiAttached = function () {
         this.input.$el.find('input').focus();
       };
-      BBFEditor.prototype.getValue = function() {
-        return this.input.$el.find('input').val();
+
+      BBFEditor.prototype.getValue = function(){
+        if (this.input.getItem){
+          return this.input.getItem();
+        }
+        return this.input.getValue();
       };
 
+      BBFEditor.prototype.isPopup= function(){
+        return true;
+      }
+      BBFEditor.prototype.destroy= function(){
+        return true;
+      }
       col.cellEditor = BBFEditor;
     },
 
@@ -279,10 +375,14 @@ define([
         method: 'GET',
         context: this,
         data: {
+          typeObj: this.model.get('objectType'),
           name: this.name || 'default'
         }
       }).done( function(response) {
         this.gridOptions.columnDefs = this.formatColumns(response);
+        if (this.afterFetchColumns){
+          this.afterFetchColumns(this);
+        }
       });
     },
 
@@ -306,7 +406,7 @@ define([
           if(_this.afterFirstRowFetch){
             _this.afterFirstRowFetch();
           }
-        })
+        });
       });
 
     },
@@ -592,25 +692,36 @@ define([
         return;
       }
 
-      AgGrid.TextFilter.prototype.afterGuiAttached = function(options) {
-        this.eFilterTextField.focus();
-        $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
-        $(this.eGui).find('input, select').each(function(){
-          $(this).addClass('form-control input-sm');
-        });
-      };
+      // AgGrid.RenderedRow.prototype.addCellFocusedListener = function () {
+      //     var _this = this;
+      //     var rowFocusedLastTime = null;
 
+      //     var addOrRemoveCssClass = function (element, className, addOrRemove) {
+      //       if (addOrRemove) {
+      //           this.addCssClass(element, className);
+      //       }
+      //       else {
+      //           this.removeCssClass(element, className);
+      //       }
+      //   };
 
-      AgGrid.NumberFilter.prototype.afterGuiAttached = function(options) {
-        this.eFilterTextField.focus();
-        $(this.eGui.querySelector('#applyButton')).addClass('btn full-width');
-        $(this.eGui).find('input, select').each(function(){
-          $(this).addClass('form-control input-sm');
-        });
-        $(this.eGui).find('input').each(function(){
-          $(this).attr('type', 'number');
-        });
-      };
+      //     var rowFocusedListener = function () {
+      //         var rowFocused = _this.focusedCellController.isRowFocused(_this.rowIndex, _this.rowNode.floating);
+      //         if (rowFocused !== rowFocusedLastTime) {
+      //             _this.eAllRowContainers.forEach(function (row) { return utils_1.Utils.addOrRemoveCssClass(row, 'ag-row-focus', rowFocused); });
+      //             _this.eAllRowContainers.forEach(function (row) { return utils_1.Utils.addOrRemoveCssClass(row, 'ag-row-no-focus', !rowFocused); });
+      //             if(rowFocusedLastTime){
+      //               console.log(_this.rowIndex);
+      //             }
+      //             rowFocusedLastTime = rowFocused;
+      //         }
+      //     };
+      //     this.mainEventService.addEventListener('cellFocused', rowFocusedListener);
+      //     this.destroyFunctions.push(function () {
+      //         _this.mainEventService.removeEventListener('cellFocused', rowFocusedListener);
+      //     });
+      //     rowFocusedListener();
+      // };
 
 
       AgGrid.StandardMenuFactory.prototype.showPopup = function (column, positionCallback) {

@@ -12,7 +12,7 @@ define([
     'use strict';
     return Form.editors.GridFormEditor = Form.editors.Base.extend({
         events: {
-            'click .js-addFormBtn' : 'addEmptyForm',
+            'click .js-btn-add' : 'addRow',
             'click .js-cloneLast' : 'cloneLast',
         },
 
@@ -22,13 +22,18 @@ define([
             // <button type="button"  class="js-cloneLast <%= hiddenClone %> btn ">Clone Last</button>\
 
         template: '\
-            <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 200px"></div>\
+            <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 500px">\
+            </div>\
+            <button type="button" class="js-btn-add btn btn-success">Add</button>\
         ',
 
+        
+        addRow: function(){
+            this.gridView.gridOptions.api.addItems([{}]);
+        },
 
         render: function(){
             this.template = _.template(this.template, this.templateSettings);
-            console.log(this.template);
             this.$el.html(this.template);
             return this;
         },
@@ -44,7 +49,9 @@ define([
                 gridOptions: {
                   rowData: this.options.model.get(this.options.key)
                 },
-              }));
+                onFocusedRowChange: function(row){
+                }
+            }));
         },
 
         initialize: function(options) {
@@ -70,11 +77,6 @@ define([
             
             this.options.schema.fieldClass = 'col-xs-12';
             return;
-
-
-
-
-
 
 
             if (options.schema.validators.length) {
@@ -117,39 +119,25 @@ define([
         },
 
         formatColumns: function(){
-            // console.log(this.options);
             var odrFields = this.options.schema.fieldsets[0].fields;
+                
+            
+
             this.columnsDefs = [];
             for (var i = odrFields.length - 1; i >= 0; i--) {
                 var field = this.options.schema.subschema[odrFields[i]];
-                // console.log(field);
+
                 var colDef = {
                     editable: true,
                     field: field.name,
-                    headerName: field.title
+                    headerName: field.title,
+                    type: field.type,
+                    options: field.options
                 };
-                // console.log(colDef);
+                
                 this.columnsDefs.push(colDef)
-            }
-            
+            }            
         },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         //removeForm
@@ -416,33 +404,10 @@ define([
 
         },
         getValue: function() {
-            var errors = false;
-            for (var i = 0; i < this.forms.length; i++) {
-                // if (this.forms[i].commit()) {
-                //     errors = true;
-                // }
-            };
-            if (errors) {
-                return false;
-            } else {
-                var values = [];
-                for (var i = 0; i < this.forms.length; i++) {
-                    var tmp = this.forms[i].getValue();
-                    var empty = true;
-                    for (var key in tmp) {
-                        if(tmp[key]){
-                            empty = false;
-                        }
-                    }
-                    if(!empty){
-                       /* if (this.defaultValue) {
-                            tmp['FK_ProtocoleType'] = this.defaultValue;
-                        }*/
-                        values[i] = tmp;
-                    }
-                };
-                return values;
-            }
+            var rowData = [];
+            this.gridView.gridOptions.api.forEachNode( function(node) {
+                rowData.push(node.data);
+            });
         },
 
     initRules:function(form) {
