@@ -116,6 +116,7 @@
 
           $.when(window.thesaurus[parametres.startId]).then(function(){
               var onFocus = function () {
+                console.log('plouf');
                 setTimeout(function(){
                   $("div[id^=treeView]").each(function () {
                     $(this).css('display', 'none');
