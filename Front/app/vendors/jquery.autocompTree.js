@@ -116,6 +116,7 @@
 
           $.when(window.thesaurus[parametres.startId]).then(function(){
               var onFocus = function () {
+                console.log('plouf');
                 setTimeout(function(){
                   $("div[id^=treeView]").each(function () {
                     $(this).css('display', 'none');
@@ -150,6 +151,10 @@
             };
             
             $me.on('focus', onFocus);
+
+            if($me.is(':focus')){
+              onFocus();
+            };
 
             $('#treeView' + $me.attr("id")).fancytree({
               debugLevel: 0,
@@ -224,10 +229,7 @@
                 }
               }
             }
-          });//end then
-
-          onFocus();
-
+          });
 
 
 
