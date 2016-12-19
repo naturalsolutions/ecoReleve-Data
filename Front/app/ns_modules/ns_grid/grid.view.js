@@ -329,7 +329,7 @@ define([
         }
 
         this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
-            var isNavigationKey = event.keyCode === 38 || event.keyCode === 40;
+            var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
             if (isNavigationKey) {
                 event.stopPropagation();
             }
