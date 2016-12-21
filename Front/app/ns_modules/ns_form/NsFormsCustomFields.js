@@ -48,17 +48,29 @@ define([
 		}),
 
 		initialize: function(options) {
-		editors.Text.prototype.initialize.call(this, options);
+			editors.Text.prototype.initialize.call(this, options);
 
-		var schema = this.schema;
+			var schema = this.schema;
 
-		this.$el.attr('type', 'number');
+			this.$el.attr('type', 'number');
 
-		if (!schema || !schema.editorAttrs || !schema.editorAttrs.step) {
-		  // provide a default for `step` attr,
-		  // but don't overwrite if already specified
-		  this.$el.attr('step', 'any');
-		}
+			if (!schema || !schema.editorAttrs || !schema.editorAttrs.step) {
+			  // provide a default for `step` attr,
+			  // but don't overwrite if already specified
+				this.$el.attr('min','0');
+			  this.$el.attr('step', 'any');
+			}
+			if(schema.options) {
+				if( schema.options.min ) {
+					this.$el.attr('min', schema.options.min);
+				}
+				if( schema.options.max ) {
+					this.$el.attr('max', schema.options.max);
+				}
+				if( schema.options.step ) {
+					this.$el.attr('step', schema.options.step);
+				}
+			}
 		},
 
 		/**
@@ -116,25 +128,25 @@ define([
 
 	});
 	editors.BackboneDatepicker = Form.editors.Base.extend({
-	 
+
 	  previousValue: '',
-	 
+
 	  events: {
 	    'hide': "hasChanged"
 	  },
-	 
+
 	  hasChanged: function(currentValue) {
 	    if (currentValue !== this.previousValue){
 	      this.previousValue = currentValue;
 	      this.trigger('change', this);
 	    }
 	  },
-	 
+
 	  initialize: function(options) {
 	    editors.Base.prototype.initialize.call(this, options);
 	    this.template = options.template || this.constructor.template;
 	  },
-	 
+
 	  getValue: function() {
 	    var date =  moment(this.el.children['Date_'].value, "DD-MM-YYYY HH:mm");
 	    return date
@@ -145,10 +157,10 @@ define([
 	      value: this.schema.options[0]["defaultValue"]
 	    })));
 	    this.setElement($el);
-	    
+
 	    return this;
 	  },
-	 
+
 	}, {
 	  // STATICS
 	  template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><span class="input-group-addon"><span class="glyphicon-calendar glyphicon"></span></span><input id="c24_Date_" name="Date_" class="form-control dateTimePicker" type="text" placeholder="jj/mm/aaaa hh:mm" data-date-format="DD/MM/YYYY HH:mm"></div>', null, Form.templateSettings)
@@ -175,15 +187,15 @@ define([
 
 		return function min(value, attrs) {
 		  options.value <= value;
-		  
+
 		  var err = {
 		    type: options.type,
 		    message: "min value is " +  options.value//_.isFunction(options.message) ? options.message(options) : options.message
 		  };
-		  
+
 		  //Don't check empty values (add a 'required' validator for this)
 		  if (value === null || value === undefined || value === '') return;
-		  
+
 		  if (value < options.value) return err;
 		};
 	};
@@ -197,15 +209,15 @@ define([
 
 		return function max(value, attrs) {
 		  options.value >= value;
-		  
+
 		  var err = {
 		    type: options.type,
 		    message: "max value is " +  options.value//_.isFunction(options.message) ? options.message(options) : options.message
 		  };
-		  
+
 		  //Don't check empty values (add a 'required' validator for this)
 		  if (value === null || value === undefined || value === '') return;
-		  
+
 		  if (value > options.value) return err;
 		};
 	};
@@ -215,19 +227,19 @@ define([
 	      type: 'required',
 	      message: this.errMessages.required
 	    }, options);
-	     
+
 	    return function required(value) {
 	      options.value = value;
-	      
+
 	      var err = {
 	        type: options.type,
 	        message: _.isFunction(options.message) ? options.message(options) : options.message
 	      };
-	      
+
 	      if (value === null || value === undefined || value === false || value === '' || value === '-1') return err;
 	    };
 	  };
 
-	
+
 	return Backbone;
 });
