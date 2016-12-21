@@ -154,7 +154,7 @@ define([
 
       eHeader.innerHTML =
         '<div id="agResizeBar" class="ag-header-cell-resize"></div>'+
-        '<span id="agMenu" class="ag-header-icon ag-header-cell-menu-button ag-filter-icon" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg width="14" height="14"><polygon points="0,0 8,8 8,14 10,14 10,8 14,0" class="ag-header-icon"></polygon></svg></span>'+
+        '<span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg width="14" height="14"><polygon points="0,0 5,5 5,14 10,14 10,4 14,0" class="ag-header-icon"></polygon></svg></span>'+
         '<div id="agHeaderCellLabel" class="ag-header-cell-label">'+
         '<span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>'+
         '<span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>'+
@@ -249,7 +249,7 @@ define([
         eCell.innerHTML = '\
             <img class="js-check-all pull-left" value="unchecked" src="./app/styles/img/unchecked.png" title="check only visible rows (after filter)" style="padding-left:10px; padding-top:7px" />\
             <div id="agResizeBar" class="ag-header-cell-resize"></div>\
-            <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button ag-filter-icon" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg width="14" height="14"><polygon points="0,0 8,8 8,14 10,14 10,8 14,0" class="ag-header-icon"></polygon></svg></span>\
+            <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg width="14" height="14"><polygon points="0,0 5,5 5,14 10,14 10,4 14,0" class="ag-header-icon"></polygon></svg></span>\
             <div id="agHeaderCellLabel" class="ag-header-cell-label">\
               <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>\
               <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>\
