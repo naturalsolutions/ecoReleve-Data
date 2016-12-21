@@ -36,6 +36,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       if(document.activeElement.type == "number"){
         event.preventDefault();
         event.stopPropagation();
+        document.activeElement.blur();
       }
     });
 
