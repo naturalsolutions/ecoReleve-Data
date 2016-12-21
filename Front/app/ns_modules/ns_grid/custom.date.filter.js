@@ -74,6 +74,20 @@ define([
        $( this.dateFrom ).datetimepicker(self.datetimepickerOptions);
        $( this.dateTo ).datetimepicker(self.datetimepickerOptions);
 
+       $(this.dateFrom ).on("mousedown", function() {
+         var test = $(this).siblings('.bootstrap-datetimepicker-widget')
+         if( !test.length  ) {
+           $(self.dateFrom ).blur();
+           $(self.dateFrom ).focus();
+         }
+       });
+       $(this.dateTo ).on("mousedown", function() {
+         var test = $(this).siblings('.bootstrap-datetimepicker-widget')
+         if( !test.length  ) {
+           $(self.dateTo ).blur();
+           $(self.dateTo ).focus();
+         }
+       });
        $(this.dateFrom ).on("dp.show", function() {
          var positionHG =  $( self.dateFrom ).offset(); //pos coin haut gauche input
          var heightBtn =  $( self.dateFrom ).outerHeight(); // height input
