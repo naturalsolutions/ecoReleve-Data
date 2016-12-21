@@ -118,10 +118,17 @@ class Station(Base, ObjectWithDynProp):
         else:
             return self.ObjContext.query(StationType).get(self.FK_StationType)
 
-
+    @staticmethod
     def GetImportTemplate():
+        return ['Station_Date',
+                'Station_Name',
+                'Station_LAT',
+                'Station_LON',
+                'Station_ELE',
+                'Station_precision',
+                'Station_Comments',
+                'add your protocol fields (to rename)...']
 
-        return ['Station_Date', 'Station_Name','Station_LAT','Station_LON','Station_ELE','Station_precision','Station_creator','Station_Comments','add your protocol fields (to rename)...']
 
 @event.listens_for(Station, 'before_insert')
 @event.listens_for(Station, 'before_update')
