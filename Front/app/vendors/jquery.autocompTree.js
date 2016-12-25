@@ -121,8 +121,8 @@
                     $(this).css('display', 'none');
                   });
                   var treeContainer = $("#treeView" + $me.attr("id"));
-                  treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('border', 'solid 1px').css('z-index', '100');
-                //treeContainer.css('display', 'block').css('border', 'solid 1px').css('z-index', '100');
+                  treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('z-index', '100');
+                
                 treeContainer.css({top: $me.outerHeight() + 20 });
                 //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
                 $(document).delegate("body", "click", function (event) {
@@ -246,7 +246,7 @@
 
           //Fonction de recherche et de filtration
 
-/*            //Si le nombrte d'élément est < a 100 on oblige l'utilisation d'au moins trois caractère pour des raisons de performances
+            //Si le nombrte d'élément est < a 100 on oblige l'utilisation d'au moins trois caractère pour des raisons de performances
             if (searchAutoComp != null) {
               clearTimeout(searchAutoComp);
             }
@@ -293,7 +293,7 @@
                   node.setExpanded(false);
                 });
               }
-            },parametres.timeout);*/
+            },parametres.timeout);
 
           });
 

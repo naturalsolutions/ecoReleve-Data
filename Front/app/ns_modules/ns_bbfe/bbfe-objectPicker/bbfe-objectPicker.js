@@ -167,10 +167,10 @@ define([
       this.$el.html(this.template);
 
       //quick (dirty) hack
-      if(this.fromGrid){
-        this.$el.find('.form-control').removeClass('form-control').addClass('ag-cell-edit-input');
-        this.$el.find('.span').addClass('');
-      }
+      // if(this.fromGrid){
+      //   this.$el.find('.form-control').removeClass('form-control').addClass('ag-cell-edit-input');
+      //   this.$el.find('.span').addClass('');
+      // }
 
       this._input = this.$el.find('input[name="' + this.model.get('key') + '" ]')[0];
       if (this.displayingValue){

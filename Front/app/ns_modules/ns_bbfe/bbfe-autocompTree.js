@@ -66,10 +66,7 @@ define([
             this.template = options.template || this.constructor.template;
             this.id = this.cid;
 
-            console.log(this);
-
             var editorAttrs = "";
-
 
             this.editable = options.schema.editable || true;
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled)  {
@@ -97,8 +94,11 @@ define([
             this.wsUrl = options.schema.options.wsUrl;
             this.lng = options.schema.options.lng;
             this.timeout = options.schema.options.timeout;
+
             this.displayValueName = options.schema.options.displayValueName || 'fullpathTranslated';
             this.storedValueName = options.schema.options.storedValueName || 'fullpath';
+
+
             if (this.ValidationRealTime) {
                 this.validators.push({ type: 'Thesaurus', startId: this.startId, wsUrl: this.wsUrl, parent: this });
             }
@@ -244,7 +244,7 @@ define([
         template: '<div id="divAutoComp_<%=inputID%>" >\
         <div class="input-group">\
             <span class="input-group-addon <%=iconFont%>"></span>\
-            <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
+            <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree form-control <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
         </div>\
         <span id="errorMsg" class="error hidden">Invalid term</span>\
         </div>',

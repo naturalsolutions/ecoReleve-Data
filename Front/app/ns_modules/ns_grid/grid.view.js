@@ -16,11 +16,14 @@ define([
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
   'ns_modules/ns_bbfe/bbfe-autoCompTree',
   
+  './custom.renderers',
+  './custom.editors',
+
   'i18n'
 
 ], function($, _, Backbone, Marionette, AgGrid, 
   CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter, utils_1,
-  ObjectPicker, ThesaurusPicker
+  ObjectPicker, ThesaurusPicker, Renderers, Editors
 ) {
 
   'use strict';
@@ -55,6 +58,7 @@ define([
     },
 
     initialize: function(options){
+      console.log(Renderers);
       this.extendAgGrid();
 
       var _this = this;
@@ -85,7 +89,8 @@ define([
       this.gridOptions = {
         enableSorting: true,
         enableColResize: true,
-        rowHeight: 40,
+        editType: 'fullRow',
+        rowHeight: 34,
         headerHeight: 30,
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),
@@ -173,6 +178,13 @@ define([
       var _this = this;
       columnDefs.map(function(col, i) {
 
+        if(col.field == 'FK_ProtocoleType'){
+          col.hide = true;
+          return;
+        }
+
+        
+
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
@@ -181,16 +193,14 @@ define([
           _this.formatSelectColumn(col)
         }
 
-        // if(col.cell == 'autocomplete'){
-        //   _this.addBBFEditor(col);
-        // }
-
         switch(col.type){
           case 'AutocompTreeEditor':
-            _this.addBBFEditor(col, ThesaurusPicker);
+            col.cellEditor = Editors.Thesaurus;
+            col.cellRenderer = Renderers.Thesaurus;
             break;
           case 'ObjectPicker':
-            _this.addBBFEditor(col, ObjectPicker);
+            col.cellEditor = Editors.Thesaurus;
+            col.cellRenderer = Renderers.Thesaurus;
             break;
         }
 
@@ -216,9 +226,20 @@ define([
             return;
           }
         }
-        //draft
 
       });
+
+      // var deleteCol = {
+      //   editable: false,
+      //   field: 'Delete',
+      //   headerName: 'Delete',
+      //   maxWidth: 300,
+      //   minWidth: 100,
+      //   cellRenderer: Renderers.Delete
+      // };
+
+      //columnDefs.push(deleteCol);
+
       return columnDefs;
     },
 
@@ -291,82 +312,6 @@ define([
         checkbox.attr('value', 'unchecked');
         checkbox.attr('src', './app/styles/img/unchecked.png');
       }
-    },
-
-
-    addBBFEditor: function(col, BBFEType){
-      //draft
-      var _this = this;
-
-      var BBFEditor = function () {
-      };
-
-      var options = {
-        key: col.options.target || col.field,
-        schema: {
-          options: col.options,
-          editable: true
-        },
-        fromGrid: true
-      };
-
-      BBFEditor.prototype.init = function(params){        
-        console.log(params);
-        
-        this.picker = new BBFEType(options);
-        this.input = this.picker.render();
-        if (params.charPress){
-          this.input.$el.find('input').val(params.charPress).change();
-        } else {
-          if (params.value){
-            if (params.value.label !== undefined  ){
-              this.input.$el.find('input').attr('data_value',params.value.value);
-              this.input.$el.find('input').val(params.value.label).change();
-            } else {
-              this.input.$el.find('input').val(params.value).change();
-            }
-          }
-        }
-
-        this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
-            var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
-            if (isNavigationKey) {
-                event.stopPropagation();
-            }
-        });
-
-        // this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
-        //     alert('');
-        //     event.stopPropagation();
-        // });
-      };
-
-      BBFEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
-        eElement.addEventListener(event, listener);
-      }
-
-      BBFEditor.prototype.getGui = function(){
-        return this.input.el;
-      };
-
-      BBFEditor.prototype.afterGuiAttached = function () {
-        this.input.$el.find('input').focus();
-      };
-
-      BBFEditor.prototype.getValue = function(){
-        if (this.input.getItem){
-          return this.input.getItem();
-        }
-        return this.input.getValue();
-      };
-
-      BBFEditor.prototype.isPopup= function(){
-        return true;
-      }
-      BBFEditor.prototype.destroy= function(){
-        return true;
-      }
-      col.cellEditor = BBFEditor;
     },
 
     fetchColumns: function(){

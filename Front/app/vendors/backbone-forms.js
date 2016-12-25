@@ -252,7 +252,7 @@ var Form = Backbone.View.extend({
         errors = {};
 
     options = options || {};
-    
+
     //Collect errors from schema validation
     _.each(fields, function(field) {
       var error = field.validate();
@@ -262,7 +262,6 @@ var Form = Backbone.View.extend({
     });
 
     //Get errors from default Backbone model validator
-
     if (!options.skipModelValidate && model && model.validate) {
       var modelErrors = model.validate(this.getValue());
 
@@ -308,8 +307,6 @@ var Form = Backbone.View.extend({
    */
   commit: function(options) {
     //Validate
-    console.log(options);
-    alert('commit');
     options = options || {};
 
     var validateOptions = {
@@ -931,7 +928,7 @@ Form.Field = Backbone.View.extend({
    * @return {Mixed}
    */
   commit: function() {
-    //return this.editor.commit();
+    return this.editor.commit();
   },
 
   /**
@@ -1287,7 +1284,6 @@ Form.editors.Text = Form.Editor.extend({
    * @return {String}
    */
   getValue: function() {
-    console.log(this.$el);
     return this.$el.val();
   },
 
@@ -2068,13 +2064,13 @@ Form.editors.NestedModel = Form.editors.Object.extend({
    * @return {Error|null} Validation error or null
    */
   commit: function() {
-    //var error = this.nestedForm.commit();
+    var error = this.nestedForm.commit();
     if (error) {
       this.$el.addClass('error');
       return error;
     }
 
-    //return Form.editors.Object.prototype.commit.call(this);
+    return Form.editors.Object.prototype.commit.call(this);
   }
 
 });
