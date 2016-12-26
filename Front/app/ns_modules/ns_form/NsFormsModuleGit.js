@@ -23,6 +23,7 @@ define([
     template: tpl,
     redirectAfterPost: '',
     displayDelete: true,
+    
 
     events : {
       'keypress input' : 'evt'
@@ -33,7 +34,6 @@ define([
     },
     extendsBBForm: function(){
       var _this = this;
-
       Backbone.Form.validators.errMessages.required = '';
       Backbone.Form.Editor.prototype.initialize = function(options){
         var options = options || {};
@@ -62,20 +62,22 @@ define([
         this.$el.attr('id', this.id);
         //bug with same name
         this.$el.attr('name', this.getName());
-
-
         if (schema.editorClass) this.$el.addClass(schema.editorClass);
         if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);
 
         if(options.schema.validators && options.schema.validators[0] == "required"){
           this.$el.addClass('required');
         }
+
       };
+
+
     },
 
     initialize: function (options) {
       this.extendsBBForm();
-
+      
+      
       var jqxhr;
       this.modelurl = options.modelurl;
 
@@ -278,9 +280,9 @@ define([
       $(this.formRegion).find('textarea').on("change", function(e) {
          _this.formChange = true;
       });
-      $(this.formRegion).find('.grid-form').on("change", function(e) {
-         _this.formChange = true;
-      });
+      // $(this.formRegion).find('.grid-form').on("change", function(e) {
+      //    _this.formChange = true;
+      // });
       $(this.formRegion).find('.nested').on("change", function(e) {
          _this.formChange = true;
       });
@@ -331,14 +333,7 @@ define([
         return;
       }
 
-      if(!this.gridRow) {
-        $(this.formRegion).find('input').on("keypress", function(e) {
-          if( e.which == 13){
-            _this.butClickSave(e);
-          }
-        });
-      }
-
+      
 
       if(this.buttonRegion){
         if(this.buttonRegion[0]){
@@ -356,6 +351,7 @@ define([
       if (this.afterShow) {
         this.afterShow();
       }
+
 
     },
 
@@ -410,12 +406,10 @@ define([
 
     },
 
-    butClickSave: function () {
+    butClickSave: function (e) {
           var _this = this;
           var flagEmpty = false;
-          alert('save');
-          var errors = this.BBForm.commit('test');
-          return;
+          var errors = this.BBForm.commit();
           var jqhrx;
 
           if(!errors){
@@ -512,6 +506,7 @@ define([
     },
 
     butClickEdit: function (e) {
+      
       this.displayMode = 'edit';
       this.initModel();
       if(this.buttonRegion)
@@ -519,6 +514,7 @@ define([
 
     },
     butClickCancel: function (e) {
+      
       this.displayMode = 'display';
       this.initModel();
       if(this.buttonRegion)
@@ -526,6 +522,7 @@ define([
 
     },
     butClickClear: function (e) {
+      
       var formContent = this.BBForm.el;
       $(formContent).find('input').not(':disabled').each(function(){
         $(this).val('');
