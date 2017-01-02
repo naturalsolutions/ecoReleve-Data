@@ -58,7 +58,6 @@ define([
     },
 
     initialize: function(options){
-      console.log(Renderers);
       this.extendAgGrid();
 
       var _this = this;
@@ -109,18 +108,6 @@ define([
           _this.handleSelectAllChkBhv();
           _this.clientSideFilter();
         },
-        onCellFocused: function(cell){
-          
-
-          if(!_this.rowIndex)
-              _this.rowIndex = cell.rowIndex;
-          if(_this.rowIndex != cell.rowIndex && _this.onFocusedRowChange){
-
-            this.onFocusedRowChange(cell);
-          }
-        }
-        //overlayNoRowsTemplate: '<span>No rows to display</span>',
-        //overlayLoadingTemplate: '',
       };
 
       if(!this.clientSide) {
@@ -199,8 +186,8 @@ define([
             col.cellRenderer = Renderers.Thesaurus;
             break;
           case 'ObjectPicker':
-            col.cellEditor = Editors.Thesaurus;
-            col.cellRenderer = Renderers.Thesaurus;
+            col.cellEditor = Editors.ObjectPicker;
+            col.cellRenderer = Renderers.ObjectPicker;
             break;
         }
 

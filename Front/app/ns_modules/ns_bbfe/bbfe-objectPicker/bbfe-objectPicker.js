@@ -23,6 +23,8 @@ define([
     initialize: function(options) {
       this.fromGrid = options.fromGrid;
 
+      console.log(options);
+
       options.schema.editorClass='';
       Form.editors.Text.prototype.initialize.call(this, options);
       this.validators = options.schema.validators || [];
@@ -45,8 +47,9 @@ define([
 
       var value;
       if (options.model) {
-        value = options.model.get(options.schema.name) || options.value;
+        value = options.model.get(options.key) || options.value;
       }
+
       if (options.schema.options && options.schema.options.usedLabel){
         this.usedLabel = options.schema.options.usedLabel;
         this.displayingValue = true;
@@ -165,13 +168,6 @@ define([
     render: function(){
       var _this = this;
       this.$el.html(this.template);
-
-      //quick (dirty) hack
-      // if(this.fromGrid){
-      //   this.$el.find('.form-control').removeClass('form-control').addClass('ag-cell-edit-input');
-      //   this.$el.find('.span').addClass('');
-      // }
-
       this._input = this.$el.find('input[name="' + this.model.get('key') + '" ]')[0];
       if (this.displayingValue){
         if (this.initValue && this.initValue !== null){

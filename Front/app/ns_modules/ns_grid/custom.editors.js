@@ -73,6 +73,68 @@ define([
 
 		Editors.Thesaurus = Thesaurus;
 
+
+
+
+    var ObjectPickerEditor = function () {
+    };
+		ObjectPickerEditor.prototype.init = function(params){
+		  var col = params.column.colDef;
+
+		  var options = {
+		    key: col.options.target || col.field,
+		    schema: {
+		      options: col.options,
+		      editable: true,
+		    },
+		    fromGrid: true
+		  };
+
+		  var model = new Backbone.Model();
+		  
+		  var value = '';
+		  if(params.value){
+		  	value = params.value.value || params.value;
+		  }
+		  model.set(options.key, value);
+
+		  options.model = model;
+
+		  this.picker = new ObjectPicker(options);
+		  this.element = this.picker.render();
+		  
+		  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
+		    event.stopPropagation();
+		  });
+
+		  this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
+	      var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
+	      if (isNavigationKey) {
+	        event.stopPropagation();
+	      }
+		  });
+		};
+		ObjectPickerEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
+		  eElement.addEventListener(event, listener);
+		}
+		ObjectPickerEditor.prototype.getGui = function(){
+		  return this.element.el;
+		};
+		ObjectPickerEditor.prototype.afterGuiAttached = function(){
+		  this.element.$el.find('input').focus();
+		};
+		ObjectPickerEditor.prototype.getValue = function(){
+		  if (this.element.getItem){
+		    return this.element.getItem();
+		  }
+		  return this.element.getValue();
+		};
+		ObjectPickerEditor.prototype.destroy= function(){
+		  return true;
+		}
+
+		Editors.ObjectPicker = ObjectPickerEditor;
+
     return Editors;
 
 });

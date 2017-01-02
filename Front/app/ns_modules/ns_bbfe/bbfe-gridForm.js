@@ -17,16 +17,11 @@ define([
             'click .js-cloneLast' : 'cloneLast',
         },
 
-            // <button type="button" class=" <%= hidden %> btn btn-success js-addFormBtn">+</button>\
-            // <button type="button"  class="js-cloneLast <%= hiddenClone %> btn">Clone Last</button>\
-            // <button type="button"  class="<%= hidden %> btn btn-success js-addFormBtn">+</button>\
-            // <button type="button"  class="js-cloneLast <%= hiddenClone %> btn ">Clone Last</button>\
-
         template: '\
-            <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 500px">\
+            <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 300px">\
             </div>\
-            <button type="button" class="js-btn-add btn btn-success">Add</button>\
-            <button type="button" class="js-btn-delete btn btn-danger">Delete rows</button>\
+            <button type="button" class="js-btn-add btn btn-success"><span class="reneco reneco-add"></span></button>\
+            <button type="button" class="js-btn-delete btn btn-danger pull-right"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
         ',
 
         
@@ -41,12 +36,14 @@ define([
         },
 
         deleteRows: function() {
-            var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+          var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
 
           var _this = this;
           
-        //2fix
+          //2fix
           var url = this.model.get('type') + '/' + this.model.get('id')  + '/';
+
+          
 
           var selectedIds = selectedNodes.map(function(node){
             return node.data.ID;
@@ -67,97 +64,60 @@ define([
 
 
         afterRender: function(){
-            this.regionManager.addRegions({
-              rgGrid: '.js-rg-grid-subform'
-            });
-            this.regionManager.get('rgGrid');
-            this.regionManager.get('rgGrid').show(this.gridView = new GridView({
-                columns: this.columnsDefs,
-                clientSide: true,
-                gridOptions: {
-                  rowData: this.options.model.get(this.options.key),
-                  rowSelection: 'multiple',
-                },
-                onFocusedRowChange: function(row){
-                }
-            }));
+          this.regionManager.addRegions({
+            rgGrid: '.js-rg-grid-subform'
+          });
+          this.regionManager.get('rgGrid');
+          this.regionManager.get('rgGrid').show(this.gridView = new GridView({
+            columns: this.columnsDefs,
+            clientSide: true,
+            gridOptions: {
+              rowData: this.options.model.get(this.options.key),
+              rowSelection: 'multiple',
+            },
+            onFocusedRowChange: function(row){
+
+            }
+          }));
+
         },
 
         initialize: function(options) {
-            this.regionManager = new Marionette.RegionManager();
-            _.bindAll(this, 'render', 'afterRender'); 
-            this.render = _.wrap(this.render, function(render) {
-                render();    
-                setTimeout(function(){
-                    _this.afterRender();
-                }, 0);
-                return _this;
-            });
+          var _this = this; 
+          this.options = options;
+          
+          this.regionManager = new Marionette.RegionManager();
+          _.bindAll(this, 'render', 'afterRender'); 
+          this.render = _.wrap(this.render, function(render) {
+              render();    
+              setTimeout(function(){
+                  _this.afterRender();
+              }, 0);
+              return _this;
+          });
 
-            var _this = this; 
-            //Form.editors.Base.prototype.initialize.call(this, options);
-            this.options = options;
-            this.formatColumns();
-            
-            this.templateSettings = {
-                hidden: false,
-                hiddenClone: false,
-            };
-            
-            this.options.schema.fieldClass = 'col-xs-12';
-            return;
+          this.options.schema.fieldClass = 'col-xs-12';
 
+          var editable = options.schema.editable;
+          this.formatColumns(editable);
+          
+          this.templateSettings = {
+              hidden: false,
+              hiddenClone: false,
+          };
 
-            if (options.schema.validators.length) {
-                this.defaultRequired = true;
-            } else {
-                options.schema.validators.push('required');
-                this.defaultRequired = false;
-            }
-
-            if (options.schema.options.nbFixedCol){
-                this.nbFixedCol = options.schema.options.nbFixedCol;
-            }
-
-            if (options.schema.options.delFirst){
-                this.delFirst = options.schema.options.delFirst;
-            }
-
-             if (!options.schema.options.cloneLast){
-                this.hiddenClone = 'hidden';
-            }
-
-
-            this.template = options.template || this.constructor.template;
-            this.showLines = true ;
-            if (this.options.schema.options.showLines != null) {
-                this.showLines = this.options.schema.options.showLines ;
-            }
-            this.forms = [];
-            this.disabled = options.schema.editorAttrs.disabled;
-
-            this.hidden = '';
-            if(this.disabled) {
-                this.hidden = 'hidden';
-                this.hiddenClone = 'hidden';
-            }
-            this.hasNestedForm = true;
-
-            this.key = this.options.key;
-            this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
+          return;
         },
 
-        formatColumns: function(){
+        formatColumns: function(editable){
             var odrFields = this.options.schema.fieldsets[0].fields;
-                
-            
-
+                            
             this.columnsDefs = [];
             for (var i = odrFields.length - 1; i >= 0; i--) {
                 var field = this.options.schema.subschema[odrFields[i]];
 
                 var colDef = {
-                    editable: true,
+                    editable: editable,
                     field: field.name,
                     headerName: field.title,
                     type: field.type,
@@ -171,10 +131,11 @@ define([
 
 
         getValue: function() {
-            var rowData = [];
-            this.gridView.gridOptions.api.forEachNode( function(node) {
-                rowData.push(node.data);
-            });
+          var rowsData = [];
+          this.gridView.gridOptions.api.forEachNode( function(node) {
+              rowsData.push(node.data);
+          });
+          return rowsData;
         },
 
     initRules:function(form) {

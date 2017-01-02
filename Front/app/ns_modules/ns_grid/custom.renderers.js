@@ -3,7 +3,7 @@ define(['ag-grid'], function(AgGrid) {
     var Renderers = {};
 
 		function Thesaurus() {
-		    this.eGui = document.createElement("span");
+		    this.eGui = document.createElement('span');
 		}
 
 		Thesaurus.prototype.init = function (params) {
@@ -20,15 +20,37 @@ define(['ag-grid'], function(AgGrid) {
 		};
 
 		Thesaurus.prototype.getGui = function() {
-		    return this.eGui;
+		  return this.eGui;
 		};
 
 		Thesaurus.prototype.refresh = function (params) {
-		    this.eGui.innerHTML = '';
-		    this.init(params);
+		  this.eGui.innerHTML = '';
+		  this.init(params);
 		};
 
 		Renderers.Thesaurus = Thesaurus;
+
+		function ObjectPicker() {
+	    this.eGui = document.createElement('span');
+		}
+
+		ObjectPicker.prototype.init = function (params) {
+			var label = '';
+			if(params.value)
+				label = params.value.label || params.value;
+	    $(this.eGui).html(label);
+		};
+
+		ObjectPicker.prototype.getGui = function() {
+	    return this.eGui;
+		};
+
+		ObjectPicker.prototype.refresh = function (params) {
+	    this.eGui.innerHTML = '';
+	    this.init(params);
+		};
+
+		Renderers.ObjectPicker = ObjectPicker;
 
 
     return Renderers;
