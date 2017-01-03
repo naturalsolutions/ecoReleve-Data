@@ -624,38 +624,6 @@ define([
         return;
       }
 
-      // AgGrid.RenderedRow.prototype.addCellFocusedListener = function () {
-      //     var _this = this;
-      //     var rowFocusedLastTime = null;
-
-      //     var addOrRemoveCssClass = function (element, className, addOrRemove) {
-      //       if (addOrRemove) {
-      //           this.addCssClass(element, className);
-      //       }
-      //       else {
-      //           this.removeCssClass(element, className);
-      //       }
-      //   };
-
-      //     var rowFocusedListener = function () {
-      //         var rowFocused = _this.focusedCellController.isRowFocused(_this.rowIndex, _this.rowNode.floating);
-      //         if (rowFocused !== rowFocusedLastTime) {
-      //             _this.eAllRowContainers.forEach(function (row) { return utils_1.Utils.addOrRemoveCssClass(row, 'ag-row-focus', rowFocused); });
-      //             _this.eAllRowContainers.forEach(function (row) { return utils_1.Utils.addOrRemoveCssClass(row, 'ag-row-no-focus', !rowFocused); });
-      //             if(rowFocusedLastTime){
-      //               console.log(_this.rowIndex);
-      //             }
-      //             rowFocusedLastTime = rowFocused;
-      //         }
-      //     };
-      //     this.mainEventService.addEventListener('cellFocused', rowFocusedListener);
-      //     this.destroyFunctions.push(function () {
-      //         _this.mainEventService.removeEventListener('cellFocused', rowFocusedListener);
-      //     });
-      //     rowFocusedListener();
-      // };
-
-
       AgGrid.StandardMenuFactory.prototype.showPopup = function (column, positionCallback) {
           var filterWrapper = this.filterManager.getOrCreateFilterWrapper(column);
           //ag Menu
@@ -690,28 +658,6 @@ define([
       AgGrid.PaginationController.prototype.createTemplate = function () {
           var localeTextFunc = this.gridOptionsWrapper.getLocaleTextFunc();
           var template = Backbone.Marionette.Renderer.render('app/ns_modules/ns_grid/pagination.tpl.html');
-
-          /*'<div class="ag-paging-panel ag-font-style">' +
-              '<span id="pageRowSummaryPanel" class="ag-paging-row-summary-panel">' +
-              '<span id="firstRowOnPage"></span>' +
-              ' [TO] ' +
-              '<span id="lastRowOnPage"></span>' +
-              ' [OF] ' +
-              '<span id="recordCount"></span>' +
-              '</span>' +
-              '<span class="ag-paging-page-summary-panel">' +
-              '<button type="button" class="ag-paging-button btn btn-default" id="btFirst">[FIRST]</button>' +
-              '<button type="button" class="ag-paging-button btn btn-default" id="btPrevious">[PREVIOUS]</button>' +
-              '<span class="col-xs-5">' +
-              '[PAGE] ' +
-              '<span id="current"></span>' +
-              ' [OF]' +
-              '<span id="total"></span>' +
-              '</span>' +
-              '<button type="button" class="ag-paging-button btn btn-default" id="btNext">[NEXT]</button>' +
-              '<button type="button" class="ag-paging-button btn btn-default" id="btLast">[LAST]</button>' +
-              '</span>' +
-              '</div>';*/
           return template
               .replace('[PAGE]', localeTextFunc('page', 'Page'))
               .replace('[TO]', localeTextFunc('to', 'to'))

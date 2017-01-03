@@ -21,9 +21,8 @@ define([
     },
 
     initialize: function(options) {
+      
       this.fromGrid = options.fromGrid;
-
-      console.log(options);
 
       options.schema.editorClass='';
       Form.editors.Text.prototype.initialize.call(this, options);

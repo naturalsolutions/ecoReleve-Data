@@ -64,15 +64,17 @@ define([
 
 
         afterRender: function(){
+          var rowData = this.options.model.get(this.options.key) || [];
           this.regionManager.addRegions({
             rgGrid: '.js-rg-grid-subform'
           });
+
           this.regionManager.get('rgGrid');
           this.regionManager.get('rgGrid').show(this.gridView = new GridView({
             columns: this.columnsDefs,
             clientSide: true,
             gridOptions: {
-              rowData: this.options.model.get(this.options.key),
+              rowData: rowData,
               rowSelection: 'multiple',
             },
             onFocusedRowChange: function(row){
