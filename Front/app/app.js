@@ -88,7 +88,6 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
   $.ajaxSetup({
     // before jQuery send the request we will push it to our array
     beforeSend: function(jqxhr, options) {
-      console.log(jqxhr, options);
       if(options.url.indexOf('http://') !== -1) {
         options.url = options.url;
       } else {

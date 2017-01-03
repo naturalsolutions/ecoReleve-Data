@@ -47,7 +47,7 @@ define([
         buttonRegion: [this.ui.formBtns],
         displayMode: this.displayMode,
         formRegion: this.ui.form,
-        reloadAfterSave: false,
+        reloadAfterSave: true,
         savingError: this.handleErrors,
         afterSaveSuccess: function(response){
           var id;
