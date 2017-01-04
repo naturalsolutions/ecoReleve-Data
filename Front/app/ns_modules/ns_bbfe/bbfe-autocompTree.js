@@ -29,7 +29,8 @@ define([
 
         events: {
             'hide': "hasChanged",
-            'change':'inputChange'
+            //'change':'inputChange',
+            'keyup': 'inputChange'
         },
         editable:false,
 
@@ -116,6 +117,16 @@ define([
             }
         },
 
+        isEmptyVal: function(value){
+            if (value == null || value == '') {
+                this.displayErrorMsg(false);
+                this.$el.find('#' + this.id ).attr('data_value','');
+                return true;
+            } else {
+                return false;
+            }
+        },
+
         render: function () {
             var $el = $(this.template);
             this.setElement($el);
@@ -148,8 +159,11 @@ define([
                 }
                 if (_this.FirstRender) {
                     _this.$el.find('#' + _this.id).blur(function (options) {
+                        var value = _this.$el.find('#' + _this.id + '_value').val();
+                        if(_this.isEmptyVal(value)){
+                            return;
+                        }
                         setTimeout(function (options) {
-                            var value = _this.$el.find('#' + _this.id + '_value').val();
                             _this.onEditValidation(value);
                         }, 150);
                     });
@@ -162,9 +176,7 @@ define([
         validateAndTranslate: function (value, isTranslated) {
             var _this = this;
 
-            if (value == null || value == '') {
-                _this.displayErrorMsg(false);
-                _this.$el.find('#' + _this.id ).attr('data_value','');
+            if (this.isEmptyVal(value)) {
                 return;
             }
             var TypeField = "FullPath";
