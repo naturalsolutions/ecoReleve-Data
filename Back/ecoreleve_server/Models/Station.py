@@ -120,12 +120,17 @@ class Station(Base, ObjectWithDynProp):
 
     @staticmethod
     def GetImportTemplate():
-        return ['Station_Date',
+        return ['Station_StationDate',
                 'Station_Name',
                 'Station_LAT',
                 'Station_LON',
                 'Station_ELE',
                 'Station_precision',
+                'Station_Region',
+                'Station_FieldActivity',
+                'Station_FieldWorker1',
+                'Station_FieldWorker2',
+                'Station_FieldWorker3',
                 'Station_Comments',
                 'add your protocol fields (to rename)...']
 

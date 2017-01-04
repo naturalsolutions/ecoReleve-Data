@@ -1,16 +1,17 @@
 from pyramid.view import view_config
-from sqlalchemy import text, bindparam
+from sqlalchemy import text, DATETIME, String
 from ..Models import (
     Station,
     Observation,
     File,
-    File_Type
+    File_Type,
+    FrontModules
 )
-from traceback import print_exc
 import pandas as pd
 import io
 from pyramid.response import Response
 import uuid
+import numpy as np
 
 route_prefix = 'file_import/'
 
@@ -19,21 +20,35 @@ route_prefix = 'file_import/'
              renderer='json',
              request_method='GET')
 def get_excel(request):
+    session = request.dbsession
+
     protocolID = int(request.params["id"])
     protocolName = request.params["name"]
     protocolName.replace(" ", "_")
     stationFields = Station.GetImportTemplate()
 
+    newSta = Station(FK_StationType=1)
+    ConfSta = session.query(FrontModules).filter(
+        FrontModules.Name == 'StationForm').first()
+    stationFields = newSta.GetForm(ConfSta, 'edit')
+    stationFields = list(stationFields['schema'].keys())
+    stationFields = list(map(lambda x: 'Station_'+x,
+                            list(filter(lambda y: y not in ['updateSite', 'FieldWorkers', 'ID']
+                                    , stationFields))))
+
+    stationFields.extend(['Station_FieldWorker1',
+                          'Station_FieldWorker2',
+                          'Station_FieldWorker3'])
     if(protocolID == 0):
         fields = stationFields
     else:
         newObs = Observation(FK_ProtocoleType=protocolID)
-        allprops = newObs.GetAllProp()
-        protocolFields = get_props(allprops)
-        # remove last element of  station fields (not needed for existing
-        # protocol)
-        del stationFields[-1]
-        fields = stationFields + protocolFields
+        Conf = session.query(FrontModules).filter(
+            FrontModules.Name == 'ObservationForm').first()
+        allprops = newObs.GetForm(Conf, 'edit')
+        allprops = list(allprops['schema'].keys())
+
+        fields = stationFields + allprops
 
     df = pd.DataFrame(data=[], columns=fields)
     fout = io.BytesIO()
@@ -53,14 +68,9 @@ def get_props(attrs):
     commentField = False
     for s in attrs:
         name = s["name"]
-        if(name not in ['ID', 'FK_ProtocoleType',
-                        'FK_Station', 'creationDate',
-                        'Parent_Observation', 'FK_Individual', 'Comments']):
-            protocolAttrs.append(name)
+        protocolAttrs.append(name)
         if(name == "Comments"):
             commentField = "Comments"
-    # put 'comment' field in last position of the liste to avoid confusion
-    # with station 'comment' field
     if(commentField):
         protocolAttrs.append(commentField)
 
@@ -74,7 +84,7 @@ def import_file(request):
     try:
         session = request.dbsession
         data = request.get_array(field_name='excelFile')
-
+        fileName = request.POST['excelFile'].filename
         columns = data[0]
         protoId = int(request.POST['protoId'])
         protoName = request.POST['protoName']
@@ -91,55 +101,60 @@ def import_file(request):
         df.convert_objects(convert_dates=True, convert_numeric=True)
         userId = request.authenticated_userid['iss']
         tableName = 'TImport_excel_' + str(uuid.uuid4().hex)
-
         fileType = session.query(File_Type
                                  ).filter(File_Type.Name == 'excel_protocol'
                                           ).one()
-        file = File(Name='excel_'+protoName,
+        file = File(Name=fileName,
+                    ObjectName='Observation',
+                    ObjectType=protoId,
                     Creator=userId,
                     TempTable_GUID=tableName,
-                    FK_File_Type=fileType.ID
+                    Type=fileType
                     )
-        # generateMetaData(protoId,tableName,userId,session)
         session.add(file)
-
+        session.flush()
         command = "IF OBJECT_ID ('" + tableName + "') IS NOT NULL "
         command = command + ''' BEGIN  DROP TABLE "''' + tableName + \
             '''" END CREATE TABLE "''' + tableName + '''" ( "ID" int) '''
         session.execute(command)
         session.commit()
-        # schema = generateImportTable(data[0],protoId,tableName,session)
+        df.index += 2
+        df = df.replace('', np.nan, regex=True)
 
-        df.to_sql(tableName, session.get_bind(), if_exists='replace')
+        df.to_sql(tableName,
+                  session.get_bind(),
+                  if_exists='replace',
+                  dtype={'Station_StationDate': DATETIME,
+                         'Station_FieldWorker1': String,
+                         'Station_FieldWorker2': String,
+                         'Station_FieldWorker3': String
+                         })
 
-        # req = text("""
-        # DECLARE @return_value int
+        info = file.main_process()
 
-        # EXEC    @return_value = [dbo].[sp_import_excel]
-        # @tableName = :tempTableName,
-        # @creator = :user,
-        # @IdTypeProto = :protoID
-
-        # """).bindparams(bindparam('tempTableName', tableName),
-        #                 bindparam('user', userId),
-        #                 bindparam('protoID', protoId))
-
-        # session.execute(req)
+        if file.error:
+            request.response.status = 510
+            return info
 
     except:
-        # request.response.status =510
-        print_exc()
+        request.response.status = 530
+
+        session.rollback()
         raise
     return
 
 
 def checkProtoColumns(protoID, excelCols):
     stationColumns = Station.GetImportTemplate()[:-1]
+
+    duplicatedCols = set([x for x in excelCols if excelCols.count(x) > 1])
+    if len(duplicatedCols) > 0:
+        return False
+
     protocolColumns = list(set(excelCols) - set(stationColumns))
     newObs = Observation(FK_ProtocoleType=protoID)
     allprops = newObs.GetAllProp()
     protocolColsInDB = get_props(allprops)
-
     isSame = set(protocolColumns).issubset(set(protocolColsInDB))
     return isSame
 
