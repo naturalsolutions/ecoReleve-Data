@@ -121,8 +121,9 @@
                     $(this).css('display', 'none');
                   });
                   var treeContainer = $("#treeView" + $me.attr("id"));
+
                   treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('z-index', '100');
-                
+
                 treeContainer.css({top: $me.outerHeight() + 20 });
                 //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
                 $(document).delegate("body", "click", function (event) {
@@ -138,6 +139,7 @@
                       }
                     }
                   }
+
                 });
                 if (parametres.onInputFocus) {
                   try {
@@ -150,6 +152,11 @@
             };
             
             $me.on('focus', onFocus);
+
+            if($me.is(':focus')){
+              onFocus();
+            };
+
 
             $('#treeView' + $me.attr("id")).fancytree({
               debugLevel: 0,
@@ -225,9 +232,6 @@
               }
             }
           });//end then
-
-
-
 
 
 
@@ -315,16 +319,6 @@
       });
       return _self;
 },
-
-
-
-
-
-
-
-
-
-
 
 
 
