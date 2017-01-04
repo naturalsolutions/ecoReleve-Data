@@ -50,6 +50,8 @@ def get_excel(request):
 
         fields = stationFields + allprops
 
+    # TODO : order columns by form order 
+    
     df = pd.DataFrame(data=[], columns=fields)
     fout = io.BytesIO()
     writer = pd.ExcelWriter(fout)
