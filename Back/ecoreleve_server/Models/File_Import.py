@@ -1,4 +1,4 @@
-from ..Models import Base, sendLog
+from ..Models import Base, db
 from sqlalchemy import (
     Column,
     DateTime,
@@ -12,9 +12,16 @@ from sqlalchemy import (
     func)
 from sqlalchemy.orm import relationship
 from pyramid import threadlocal
+from traceback import print_exc
 
-# from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
-# from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
+
+class CustomErrorSQL(Exception):
+    def __init__(self, value):
+        self.value = value
+        print('CustomErrorSQL')
+
+    def __str__(self):
+        return repr(self.value)
 
 
 class File (Base):
@@ -31,42 +38,70 @@ class File (Base):
     TempTable_GUID = Column(String(250))
     FK_File_Type = Column(Integer, ForeignKey('File_Type.ID'))
     Status = Column(Integer)
-    Type = relationship('File_Type', uselist=False)
+    ObjectName = Column(String(100))
+    ObjectType = Column(Integer)
+    Type = relationship('File_Type', uselist=False, backref='Files')
+
+    error = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.ObjContext = threadlocal.get_current_request().dbsession
+        engine = threadlocal.get_current_request().registry.dbmaker().get_bind()
+        self.ObjContext = engine.connect()
         self.processInfo = {}
 
-    def run_process(self, current_process):
+    def run_process(self, current_process, trans):
         try:
-            if current_process.ProcessType == 'sql':
+            if 'sql' in current_process.ProcessType:
                 req = text("""
-                           DECLARE @result varchar(20), @error int
+                           DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
                            EXEC [dbo].""" + current_process.Name +
-                           """@file_ID = :file_ID, @result OUTPUT, @error OUTPUT;
-                           SELECT @result, @error;"""
+                           """  :file_ID, @result OUTPUT, @error OUTPUT,  @errorIndexes OUTPUT;
+                           SELECT @result, @error, @errorIndexes;"""
                            ).bindparams(bindparam('file_ID', self.ID))
-                result, error = self.ObjContext.execute(req)
-            else:
-                self.FuncProcess[current_process.Name]()
-            return result, error
+                result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
+                self.processInfo[current_process.Name] = {
+                    'desc': current_process.DescriptionFr,
+                    'error': error,
+                    'result': result,
+                    'errorIndexes': errorIndexes}
+
+                trans.commit()
+                return result, error, errorIndexes
+
         except Exception as e:
-            self.log()
+            print_exc()
+            trans.rollback()
             if current_process.Blocking:
-                raise Exception
+                raise
             else:
                 pass
 
     def main_process(self):
-        self.ObjContext.begin()
-        for process in self.Type.ProcessList:
-            self.run_process(process)
-        self.ObjContext.commit()
-        return
+        dictSession = {}
+        try:
+            for process in self.Type.ProcessList:
+                dictSession[process.Name] = self.ObjContext.begin()
+                print(process.Name)
+                result, error, errorIndexes = self.run_process(process, dictSession[process.Name])
+                print(result, error, errorIndexes)
+                if result.lower() == 'error' and process.Blocking:
+                    raise CustomErrorSQL(process.Name + 'not passed')
+
+            self.ObjContext.commit()
+            self.error = False
+        except:
+            print('\n\n in except main process')
+            for session in dictSession:
+                dictSession[session].rollback()
+            self.ObjContext.rollback()
+
+        finally:
+            self.ObjContext.close()
+            return self.processInfo
 
     def log(self):
-        sendLog()
+        print('error log')
         return
 
 
