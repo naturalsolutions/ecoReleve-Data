@@ -178,8 +178,8 @@
  		"step4-label" :"File type"
  	},
  	"swal" : {
- 		"savingForm-title" : "Saving form",
- 		"savingForm-content" : "Current form is not yet saved. Would you like to continue without saving it?"
+ 		"savingForm-title" : "Exit form",
+ 		"savingForm-content" : "Current form is not yet saved. Are you sure to quit without saving it?"
  	}
 
 }

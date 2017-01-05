@@ -8,12 +8,13 @@ define([
   'ns_modules/ns_com',
   'ns_map/ns_map',
   'ns_grid/grid.view',
+  'ns_grid/customCellRenderer/decimal5Renderer',
+  'ns_grid/customCellRenderer/dateTimeRenderer',
   'moment',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,
-  Com, NsMap, GridView,Moment
-) {
+  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer ,Moment ) {
 
   'use strict';
 
@@ -40,7 +41,6 @@ define([
       this.com = new Com();
       this.data = options.model.attributes.data_FileContent;
       this.deferred = $.Deferred();
-      window.formChange  = false;
       this.parent = options.parent;
     },
 
@@ -120,6 +120,7 @@ define([
       };
 
       var FieldActivityRenderer = function(params){
+      //  console.log(params);
         var text = '';
         _this.fieldActivityList.map(function(fa){
           if(params.data.fieldActivity == fa.value){
@@ -129,6 +130,10 @@ define([
         return text;
       };
 
+      // var decimal5Renderer = function(params){
+      //   return params.data[params.column.colId].toFixed(5);
+      // };
+
       var dateTimestampRender = function(params){
         return Moment.unix(params.data.displayDate).format("DD/MM/YYYY HH:mm:SS");
       };
@@ -137,27 +142,39 @@ define([
         {
           field: 'id',
           headerName: 'ID',
-          hide: true,
+          checkboxSelection: true
+
         },{
           field: 'name',
           headerName: 'Name',
-          checkboxSelection: true,
+          filter :"textAutocomplete",
+          filterParams : {
+            apply : true,
+            tabToOrder : this.data.map(function(elem) {return elem.name;})
+           }
         },{
           field: 'displayDate',
           headerName: 'Date',
-          cellRenderer: dateTimestampRender
+          cellRenderer: DateTimeRenderer,
+          filter : "date"
         },{
           field: 'latitude',
           headerName: 'LAT',
+          cellRenderer: Decimal5Renderer,
+          filter :"number"
         },{
           field: 'longitude',
           headerName: 'LON',
+          cellRenderer: Decimal5Renderer,
+          filter :"number"
         },{
           editable: true,
           field: 'fieldActivity',
           headerName: 'Field Activity',
           cellEditor: FieldActivityEditor,
-          cellRenderer: FieldActivityRenderer
+          cellRenderer: FieldActivityRenderer,
+          filter : "select",
+          filterParams : { selectList : this.fieldActivityList }
         },
       ];
 
@@ -168,6 +185,7 @@ define([
         gridOptions: {
           rowData: this.data,
           enableFilter: true,
+          singleClickEdit : true,
           rowSelection: 'multiple',
           onRowClicked: function(row){
             if(_this.gridView.gridOptions.api.getFocusedCell().column.colId != 'fieldActivity'){
@@ -231,10 +249,8 @@ define([
       return this.deferred;
     },
 
-
-
     setFieldActivity : function(){
-       window.formChange  = false;
+
     }
 
   });

@@ -134,6 +134,7 @@ define([
 
                         onItemClick: function (options) {
                             var value = _this.$el.find('#' + _this.id + '_value').val();
+                            _this.$el.find('input').trigger('change');
                             _this.onEditValidation(value);
                         }
                     });
@@ -181,7 +182,7 @@ define([
                     //$('#divAutoComp_' + _this.id).removeClass('error');
                     $('#' + _this.id).removeClass('error');
                     _this.displayErrorMsg(false);
-                    _this.$el.find('input').trigger('change');
+                    //_this.$el.find('input').trigger('change');
                     var translatedValue = data["TTop_FullPathTranslated"];
                     if (isTranslated) {
                         if (_this.displayValueName == 'valueTranslated') {

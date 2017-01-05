@@ -14,21 +14,22 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'individuals/new(/)': 'newIndividual',
       'individuals/:id(/)': 'individual',
       'individuals(/)': 'individuals',
+      'individuals/new/:type(/)': 'newIndividual',
+
 
       'monitoredSites/new(/)': 'newMonitoredSite',
       'monitoredSites/:id(/)': 'monitoredSite',
       'monitoredSites(/)': 'monitoredSites',
+      'monitoredSites/new/:type(/)': 'newMonitoredSite',
+
 
       'sensors/new/:type(/)': 'newSensor',
       'sensors/:id(/)': 'sensor',
       'sensors(/)': 'sensors',
 
-      
-
-      
-            'stations/new/:from(/)': 'newStation',
-            'stations/new(/)': 'newStation',
-             'stations/lastImported(/)': 'stations',
+      'stations/new/:from(/)': 'newStation',
+      'stations/new(/)': 'newStation',
+      'stations/lastImported(/)': 'stations',
 
       'stations/:id?(proto=:proto&)obs=:obs(/)': 'station',
       'stations/:id(/)': 'station',
@@ -41,7 +42,6 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'validate(/)': 'validate',
       'validate/:type(/)': 'validateType',
       'validate/:type/:dataset(/)': 'validateDetail',
-
 
       '*route(/:page)': 'home',
     },
@@ -61,41 +61,44 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       ]);
     },
 
-    execute: function(callback, args, route) {
-      // get current route
+    execute: function(callback, args) {
+      var _this= this;
+
       var route = Backbone.history.fragment;
 
       if ((route != '') && (route != '#')){
         var allowed = this.checkRoute();
-        if(!allowed) {
-            return false;
+        if (!allowed) {
+          return false;
         }
       }
-      this.history.push(Backbone.history.fragment);
-      var _this= this;
+
       window.checkExitForm(function(){
-        _this.continueNav(callback, args);
-      },function(){
+        _this.continueNav(callback, args, route);
+      }, function(){
         _this.previous();
       });
+      this.history.push(Backbone.history.fragment);
     },
+
     onRoute: function(url, patern, params) {
+
       var notAllowed = window.notAllowedUrl ;
       patern = patern.replace(/\(/g, '');
       patern = patern.replace(/\)/g, '');
       patern = patern.replace(/\:/g, '');
       patern = patern.split('/');
 
-      for (var i=0; i< notAllowed.length;i++){
-            if (notAllowed[i] == patern[0]) {
-                return ;
-            }
+      for (var i=0; i< notAllowed.length;i++) {
+        if (notAllowed[i] == patern[0]) {
+          return ;
+        }
       }
 
       if (patern[0] == '*route') {
         $('#arial').html('');
         $('#arialSub').html('');
-      }else {
+      } else {
         this.setNav(patern);
       }
 
@@ -119,60 +122,56 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
     },
 
     previous: function() {
-        var href = this.history[this.history.length-2];
-        var url = '#'+ href;
-        Backbone.history.navigate(url,{trigger:false, replace: false});
-        this.history.pop();
-        var patern = href.split('/');
-        this.setNav(patern);
+      var href = this.history[this.history.length-2];
+      var url = '#'+ href;
+      Backbone.history.navigate(url,{trigger:false, replace: false});
+      this.history.pop();
+      var patern = href.split('/');
+      this.setNav(patern);
     },
-    continueNav : function(callback, args){
-        $.ajax({
-          context: this,
-          url: 'security/has_access'
-        }).done(function() {
-          $.xhrPool.abortAll();
-          callback.apply(this, args);
-        }).fail(function(msg) {
-          if (msg.status === 403) {
-            document.location.href = config.portalUrl;
-          }
-        });
+
+    continueNav: function(callback, args, route){
+      $.xhrPool.abortAll();
+      setTimeout(function(){
+        callback.apply(this, args);
+      }, 0);
     },
-    unique : function(list) {
+
+    unique: function(list){
         var result = [];
-        $.each(list, function(i, e) {
+        $.each(list, function(i, e){
             if ($.inArray(e, result) == -1) result.push(e);
         });
         return result;
     },
-    setNav : function(patern){
 
+    setNav: function(patern){
         var url = patern[0];
 
         var md = this.collection.findWhere({href: patern[0]});
         $('#arial').html('<a href="#' + md.get('href') + '">| &nbsp; ' + md.get('label') + '</a>');
-        if (patern[1] && patern[1] != 'id' && patern[1] != 'type') {
+        if (patern[1] && patern[1] != 'id' && patern[1] != 'type' && patern[1].indexOf('=') == -1 ) {
           $('#arialSub').html('<a href="#' + patern[0] + '/' + patern[1] + '">| &nbsp;' + patern[1] + '</a>');
         }else {
           $('#arialSub').html('');
         }
      },
-     checkRoute : function(){
-        var route = Backbone.history.fragment;
-        var notAllowed = window.notAllowedUrl ;
-        route = route.replace(/\(/g, '');
-        route = route.replace(/\)/g, '');
-        route = route.replace(/\:/g, '');
-        route = route.split('/');
-        for (var i=0; i< notAllowed.length;i++){
-            if (notAllowed[i] == route[0]) {
-              $('#arialSub').html('');
-              Backbone.history.navigate("#",true);
-              return false;
-            }
+
+    checkRoute: function(){
+      var route = Backbone.history.fragment;
+      var notAllowed = window.notAllowedUrl ;
+      route = route.replace(/\(/g, '');
+      route = route.replace(/\)/g, '');
+      route = route.replace(/\:/g, '');
+      route = route.split('/');
+      for (var i=0; i< notAllowed.length;i++){
+        if (notAllowed[i] == route[0]) {
+          $('#arialSub').html('');
+          Backbone.history.navigate("#",true);
+          return false;
         }
-        return true;
       }
+      return true;
+    }
   });
 });

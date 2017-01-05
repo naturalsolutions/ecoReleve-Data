@@ -15,7 +15,7 @@ define([
 
 ], function(
   $, _, Backbone, Marionette, Swal,
-  Com, NsForm, NavbarView, LytProtocols, 
+  Com, NsForm, NavbarView, LytProtocols,
   DetailView, StationModel
 ) {
 
@@ -54,13 +54,17 @@ define([
     reload: function(options){
       if(options.id == this.model.get('id')){
         this.LytProtocols.protocolsItems.getViewFromUrlParams(options);
-      } else {  
+      } else {
         this.model.set('id', options.id);
         this.model.set('stationId', options.id);
+        this.model.set('urlParams', {
+          proto: options.proto,
+          obs: options.obs
+        });
         this.displayStation();
       }
     },
-    
+
     displayProtos: function() {
       this.rgProtocols.show(this.LytProtocols = new LytProtocols({
         model: this.model,
@@ -82,7 +86,7 @@ define([
     displayStation: function() {
       this.total = 0;
       var _this = this;
-      
+
       var formConfig = this.model.get('formConfig');
 
       formConfig.id = this.model.get('id');
@@ -94,7 +98,7 @@ define([
 
       this.nsForm = new NsForm(formConfig);
       this.nsForm.BeforeShow = function(){
-        
+
       };
 
       this.nsForm.afterShow = function(){
@@ -102,7 +106,7 @@ define([
         $("#dateTimePicker").on("dp.change", function (e) {
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
          });
-        _this.filedAcitivityId = this.model.get('fieldActivityId');
+
       };
 
       this.nsForm.savingError = function (response) {
@@ -131,9 +135,13 @@ define([
           _this.displayProtos();
           _this.fieldActivityId = _this.model.get('fieldActivityId');
         }
-      },
+      };
+      
+      $.when(this.nsForm.jqxhr).then(function(){
+        _this.fieldActivityId = this.model.get('fieldActivityId');
+        _this.displayProtos();
+      })
 
-      _this.displayProtos();
     },
 
   });

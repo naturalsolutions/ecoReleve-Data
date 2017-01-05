@@ -5,6 +5,8 @@ define([
   'controller',
   'sweetAlert',
   'config',
+  'jquery',
+  'backbone',
 
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
@@ -25,8 +27,7 @@ define([
 
   ],
 
-
-function( Marionette, LytRootView, Router, Controller,Swal,config) {
+function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) {
 
     var app = {};
     var JST = window.JST = window.JST || {};
@@ -40,7 +41,6 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
         }
       }
     };
-
 
     Backbone.Marionette.Renderer.render = function(template, data) {
       if (!JST[template]) throw 'Template \'' + template + '\' not found!';
@@ -71,116 +71,132 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
     $('#header-loader').addClass('hidden');
   };
 
-  window.xhrPool = [];//??
-  $.xhrPool = []; // array of uncompleted requests
+  $.xhrPool = {};
+
+  $.xhrPool.calls = []; // array of uncompleted requests
+
   $.xhrPool.allowAbort = false;
+
   $.xhrPool.abortAll = function() { // our abort function
     if ($.xhrPool.allowAbort){
-      $(this).each(function(idx, jqXHR) {
-          jqXHR.abort();
+      this.calls.map(function(jqxhr){
+          jqxhr.abort();
       });
-      $.xhrPool.length = 0;
+      $('#header-loader').addClass('hidden');
+      $.xhrPool.calls = [];
     }
   };
-  //
   $.ajaxSetup({
     // before jQuery send the request we will push it to our array
-    beforeSend: function(jqXHR, options) {
+    beforeSend: function(jqxhr, options) {
       if(options.url.indexOf('http://') !== -1) {
         options.url = options.url;
       } else {
         options.url = config.coreUrl + options.url;
       }
-      $.xhrPool.push(jqXHR);
+      if(options.type === 'GET'){
+        $.xhrPool.calls.push(jqxhr);
+      }
     },
     // when some of the requests completed it will splice from the array
-    complete: function(jqXHR){
-      var index = $.xhrPool.indexOf(jqXHR);
-      if (index > -1) {
-        $.xhrPool.splice(index, 1);
+    complete: function(jqxhr, options){
+      // var index = $.xhrPool.indexOf(jqxhr);
+      // if (index > -1) {
+      //   $.xhrPool.splice(index, 1);
+      // }
+    },
+    error: function(jqxhr, options){
+      if(jqxhr.status == 403){
+        document.location.href = config.portalUrl;
+      }
+      if(jqxhr.status == 401){
+        Swal({
+          title: 'Unauthorized',
+          text: "You don't have permission",
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(240, 173, 78)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        });
       }
     }
   });
 
+    window.formInEdition= {};
 
-  window.UnauthAlert = function(){
-    Swal({
-      title: 'Unauthorized',
-      text: "You don't have permission",
-      type: 'warning',
-      showCancelButton: false,
-      confirmButtonColor: 'rgb(240, 173, 78)',
-      confirmButtonText: 'OK',
-      closeOnConfirm: true,
-    });
-  }
-
-  $(document).ajaxError(function( event, jqxhr, settings, thrownError ) {
-    if (jqxhr.status == 401){
-      window.UnauthAlert();
-    }
-  });
-
-    window.formChange = false;
-    window.formEdition = false;
     // get not allowed urls in config.js
     window.notAllowedUrl = [];
-    if (config.disabledFunc){
-      var disabled = config.disabledFunc ;
-      for (var i=0; i< disabled.length;i++){
+    if (config.disabledFunc) {
+      var disabled = config.disabledFunc;
+      for (var i=0; i< disabled.length;i++) {
         window.notAllowedUrl.push(disabled[i]);
       }
     }
 
-    window.checkExitForm = function(confirmCallback,cancelCallback) {
-      if(window.formChange && window.formEdition){
-        var title = i18n.translate('swal.savingForm-title');
-        var savingFormContent =  i18n.translate('swal.savingForm-content');
-        var cancelMsg = i18n.translate('button.cancel');
-        Swal({
-          title: title,
-          text: savingFormContent,
-          type: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: 'rgb(221, 107, 85)',
-          confirmButtonText: 'OK',
-          cancelButtonColor: 'grey',
-          cancelButtonText: cancelMsg,
-          closeOnConfirm: true,
-        },
-        function(isConfirm) {
-         if (!isConfirm) {
-          if (cancelCallback){
+  window.checkExitForm = function(confirmCallback,cancelCallback) {
+    var i = 0;
+    var urlChangeMax = 0 ;
+    var indexMax = 0 ;
+    if(!$.isEmptyObject(window.formInEdition)){
+
+        var newUrlSplit=  window.location.hash.split('?');
+        var oldUrlSplit = window.formInEdition.form.baseUri.replace(window.location.origin,'').replace(window.location.pathname,'').split('?');
+
+        var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
+          if( newUrlSplit[index2-1] != oldUrlSplit[index2-1]){
+            if(window.formInEdition.form[key2].formChange){
+              i++;
+            }
+            urlChangeMax++;
+            return 1;
+          } else{
+            indexMax++;
+            return 0;
+          }
+        });
+    }
+
+    if(i > 0){
+      var title = i18n.translate('swal.savingForm-title');
+      var savingFormContent =  i18n.translate('swal.savingForm-content');
+      //var cancelMsg = i18n.translate('button.cancel');
+
+      Swal({
+        title: title,
+        text: savingFormContent,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'rgb(221, 107, 85)',
+        confirmButtonText: 'Quit',
+        cancelButtonColor: 'grey',
+        cancelButtonText: 'Continue edition',
+        closeOnConfirm: true,
+      },
+      function(isConfirm) {
+        if (!isConfirm) {
+          if (cancelCallback) {
             cancelCallback();
           }
           return false;
-        }else {
-          if (confirmCallback){
-            window.formChange = false;
-            window.formEdition = false;
+        } else {
+          if (confirmCallback) {
+            if(indexMax-urlChangeMax<=0){
+              window.formInEdition = {};
+            }
             confirmCallback();
           }
         }
       });
-      } else {
-        if (confirmCallback){
-          confirmCallback();
+    } else {
+      if (confirmCallback){
+        if(indexMax-urlChangeMax<=0){
+          window.formInEdition = {};
         }
+        confirmCallback();
       }
-    };
-
-
-  window.onerror = function (errorMsg, fileURI, lineNumber, column, errorObj) {
-    // $.ajax({
-    //   type : 'POST',
-    //   url : config.coreUrl+'log/error',
-    //   data:{StackTrace:errorObj,
-    //     errorMsg: errorMsg,
-    //     file : fileURI,
-    //     lineNumber:lineNumber,
-    //     column:column }
-    // });
-  };
+    }
+};
 
   window.app = app;
   return app;

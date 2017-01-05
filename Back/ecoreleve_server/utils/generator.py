@@ -62,10 +62,9 @@ class Generator :
                     cell_type = 'string'
                 else:
                     cell_type='string'
-                final.append({'name':field_name,
-                    'label':field_label,
+                final.append({'field':field_name,
+                    'headerName':field_label,
                     'cell':cell_type,
-                    'renderable':True,
                     'editable':False})
                 # self.cols.append({'name':field_name,'type_grid':cell_type})
         else : 
@@ -80,10 +79,9 @@ class Generator :
                     
                 else:
                     cell_type='string'
-                final.append({'name':field_name,
-                    'label':field_label,
+                final.append({'field':field_name,
+                    'headerName':field_label,
                     'cell':cell_type,
-                    'renderable':False,
                     'editable':False})
                 self.cols.append({'name':field_name,'type_grid':cell_type})
 
