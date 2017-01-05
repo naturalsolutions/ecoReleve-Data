@@ -42,10 +42,11 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
 
     window.onkeydown = function (e) {
       if (e.keyCode == 8 ) {  //backspace key
-        if( e.target.tagName != 'INPUT') { //handle event if not in input
+        if( !( e.target.tagName == 'INPUT' ||  e.target.tagName == 'TEXTAREA') ) { //handle event if not in input or textarea
           e.preventDefault();
           e.stopPropagation();
         }
+
       }
     };
 
