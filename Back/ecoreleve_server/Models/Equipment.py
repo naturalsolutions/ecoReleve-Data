@@ -13,6 +13,7 @@ from sqlalchemy import (
     exists)
 from sqlalchemy.orm import aliased
 from pyramid import threadlocal
+from datetime import timedelta
 
 
 class Equipment(Base):
@@ -166,29 +167,18 @@ def checkUnequip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
 def set_equipment(target, value=None, oldvalue=None, initiator=None):
     typeName = target.GetType().Name
     curSta = value
-    if 'unequip' in typeName.lower():
-        deploy = 0
-    else:
-        deploy = 1
-
-        try:
-            Survey_type = target.GetProperty('Survey_type')
-        except:
-            Survey_type = None
-        try:
-            Monitoring_Status = target.GetProperty('Monitoring_Status')
-        except:
-            Monitoring_Status = None
-        try:
-            Status = target.GetProperty('Sensor_Status')
-        except:
-            Status = None
 
     if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
         try:
             equipDate = target.Station.StationDate
         except:
             equipDate = curSta.StationDate
+
+        if 'unequip' in typeName.lower():
+            deploy = 0
+            equipDate = equipDate - timedelta(seconds=1)
+        else:
+            deploy = 1
 
         fk_sensor = target.GetProperty('FK_Sensor')
         if 'individual' in typeName.lower():
