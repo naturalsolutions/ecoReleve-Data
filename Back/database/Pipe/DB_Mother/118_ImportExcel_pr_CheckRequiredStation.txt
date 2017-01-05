@@ -1,0 +1,146 @@
+
+---------------------------------------------------------------------------------
+-- Stored procedure that will  ### Do something
+-- Gets: @file_ID int,
+-- Returns: @@result varchar(255)
+-- Returns: @error int
+---------------------------------------------------------------------------------
+IF OBJECT_ID('pr_CheckRequiredStation', 'P') IS NOT NULL
+DROP PROCEDURE dbo.[pr_CheckRequiredStation];
+GO 
+CREATE PROCEDURE [dbo].[pr_CheckRequiredStation]
+	@file_ID int,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorIndexes varchar(max) OUTPUT
+AS
+SET NOCOUNT ON
+
+DECLARE @SQL_STATEMENT nvarchar(max),
+@iErrorCode_exec int,
+@TLogMessage_ID int,
+@Creator int,
+@ObjectType int,
+@TempTable_GUID varchar(250),
+@ObjectName varchar(100),
+@count int
+
+SET @result='ERROR'
+
+BEGIN TRY
+
+--DECLARE @file_ID int 
+--SET @file_ID = 133
+
+	SELECT 
+			@Creator= Creator,
+			@TempTable_GUID = TempTable_GUID,
+			@ObjectName = ObjectName,
+			@ObjectType = ObjectType
+	FROM [File] 
+	WHERE ID = @file_ID
+
+	
+	IF OBJECT_ID('tempdb..#tempIndexError') IS NOT NULL
+	DROP TABLE #tempIndexError
+
+	CREATE TABLE #tempIndexError (
+	index_ int
+	)
+
+	
+	IF OBJECT_ID('tempdb..#temp') IS NOT NULL
+		DROP TABLE #temp
+
+	--- Recupération des champs required pour la station
+  SELECT COLUMN_NAME 
+  INto #temp
+  FROM 
+	(SELECT COLUMN_NAME --REPLACE(COLUMN_NAME,'Station_','')
+	FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @TempTable_GUID AND COLUMN_NAME like 'Station_%' ) t
+JOIN 
+	(SELECT 
+	Name FROM [dbo].[ModuleForms] 
+	WHERE 
+	Module_id = 2
+	And
+	Required = 1 and Name not like '%fieldWorker%') f ON t.COLUMN_NAME like '%'+f.Name+'%'
+
+
+	SET @SQL_STATEMENT = '@'
+	select @SQL_STATEMENT+= 'OR '+COLUMN_NAME+' IS NOT NULL '
+	FROM  #temp
+
+
+	SET @SQL_STATEMENT = 'SELECT [index] '
+			+'
+			FROM '+ @TempTable_GUID+ replace(@SQL_STATEMENT,'@OR',' WHERE ')
+	
+	--SELECT @SQL_STATEMENT 
+
+
+	INSERT INTO #tempIndexError
+	EXEC SP_EXECUTESQL @SQL_STATEMENT;
+
+	IF (SELECT COUNT(*) FROM #tempIndexError) > 0 
+		BEGIN 
+			SET @error = 1
+			SET @errorIndexes = (SELECT  CONVERT(varchar(200),(SELECT STUFF((SELECT ','+ CONVERT(varchar(200),index_)
+																	FROM #tempIndexError
+																 FOR XML PATH('')), 1, 1, ''))
+											) 
+								)
+		END 
+END TRY
+BEGIN CATCH
+	SET @error = ERROR_NUMBER()
+
+	--recording error log
+	SET @SQL_STATEMENT = 'INSERT INTO NSLog.dbo.TLOG_MESSAGES ([JCRE]
+      ,[LOG_LEVEL]
+      ,[ORIGIN]
+      ,[SCOPE]
+      ,[LOGUSER]
+      ,[DOMAINE]
+      ,[MESSAGE_NUMBER]
+      ,[LOG_MESSAGE]
+      ,[OTHERSINFOS])
+	  SELECT 
+			GETDATE(),
+			5,
+			''Import excel protocol'',
+			''pr_DoSomething'',
+			1,
+			3,
+			'+@iErrorCode_exec +
+			',ERROR_MESSAGE(),
+			''@file_ID =  '' +CONVERT(VARCHAR,@file_ID);'
+			
+			--SELECT @TLogMessage_ID = SCOPE_IDENTITY()	'				
+			
+	EXEC SP_EXECUTESQL @SQL_STATEMENT
+					
+END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT @result,  @error, @errorIndexes
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('118_ImportExcel_pr_CheckRequiredStation',GETDATE(),(SELECT db_name()))
+
+
+GO
