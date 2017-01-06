@@ -15,7 +15,7 @@ define([
 
 ], function(
   $, _, Backbone, Marionette,
-  moment, datetime, Swal, 
+  moment, datetime, Swal,
   NsForm, NsMap
 ){
 
@@ -127,7 +127,7 @@ define([
       window.checkExitForm(function(){
         _this.swithTab(e);
       });
-       
+
      },
      swithTab : function(e){
        var ele = $(e.target);
@@ -171,7 +171,6 @@ define([
         afterShow: function() {
           if(_this.from == 'release'){
             _this.$el.find('[name="fieldActivityId"]').val('1').change();
-            window.app.checkFormSaved = false;
           }
           _this.$el.find('input[name="FK_MonitoredSite"]').on('change', function() {
               var msId = _this.$el.find('input[name="FK_MonitoredSite"]').attr('data_value');

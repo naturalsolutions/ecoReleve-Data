@@ -8,13 +8,13 @@ define([
   'ns_modules/ns_com',
   'ns_grid/grid.view',
   'ns_filter/filters',
-  
+  'config',
   'tooltipster-list',
   'i18n'
 
 ], function(
   $, _, Backbone, Marionette, Swal, Translater,
-  Com, GridView, NsFilter
+  Com, GridView, NsFilter, Config
 ) {
 
   'use strict';
@@ -53,21 +53,30 @@ define([
       if( window.app.currentData ){
         this.populateCurrentData(window.app.currentData);
       }
+
+      this.xhrTypeObj = $.ajax({
+        url: this.model.get('type')+'/getType',
+        context: this
+      }).done(function(resp) {
+          this.availableTypeObj = resp;
+          this.model.set('objectType',resp[0].val);
+          this.model.set('objectTypeLabel',resp[0].label);
+
+      }).fail(function(resp) {
+      });
     },
 
-    new: function(){},
     back: function(){},
 
-
     populateCurrentData: function(currentData){
-      this.defaultFilters = currentData.filters;
+      // this.defaultFilters = currentData.filters;
 
-      if(currentData.index !== 'undefined'){
-        this.goTo = {
-          index: currentData.index,
-          page: currentData.status.page
-        }
-      }
+      // if(currentData.index !== 'undefined'){
+      //   this.goTo = {
+      //     index: currentData.index,
+      //     page: currentData.status.page
+      //   }
+      // }
     },
 
     onRender: function() {
@@ -82,6 +91,12 @@ define([
       if(this.displayMap){
         this.displayMap();
       }
+      this.$el.find('.js-nav-tabs').addClass('hide');
+      this.afterShow();
+    },
+
+    afterShow: function(){
+      //console.warn('method not implemented');
     },
 
     changePageSize: function(e){
@@ -98,23 +113,22 @@ define([
 
     displayGridView: function(){
       var _this = this;
-      var afterFirstRowFetch = function(){
+      var afterGetRows = function(){
         _this.ui.totalRecords.html(this.model.get('totalRecords'));
       };
 
       this.rgGrid.show(this.gridView = new GridView({
         type: this.model.get('type'),
         com: this.com,
-        typeObj: this.model.get('typeObj'),
-        afterFirstRowFetch: afterFirstRowFetch,
-        filters: this.defaultFilters,
+        objectType: this.model.get('objectType'),
+        afterGetRows: afterGetRows,
+        //filters: this.defaultFilters,
         gridOptions: {
           onRowClicked: this.onRowClicked.bind(this),
           rowModelType: 'pagination'
         },
         goTo: (this.goTo || false)
       }));
-
     },
 
     displayFilter: function() {
@@ -122,8 +136,9 @@ define([
         url: this.model.get('type') +'/',
         com: this.com,
         filterContainer: this.ui.filter,
-        typeObj: this.model.get('typeObj'),
+        objectType: this.model.get('objectType'),
         filtersValues: this.defaultFilters,
+        firstOperator: this.firstOperator,
       });
     },
 
@@ -136,10 +151,10 @@ define([
     },
 
     export: function(){
-        var url = this.model.get('type') + '/export?criteria=' + JSON.stringify(this.gridView.filters);
+        var url = Config.coreUrl+this.model.get('type') + '/export?criteria=' + JSON.stringify(this.gridView.filters);
         var link = document.createElement('a');
         link.classList.add('DowloadLinka');
-        
+
         link.href = url;
         link.onclick = function () {
             var href = $(link).attr('href');
@@ -152,15 +167,23 @@ define([
 
     new: function(e) {
       var _this = this;
-      this.ui.btnNew.tooltipList({
-        availableOptions: this.model.get('availableOptions'),
-        liClickEvent: function(liClickValue) {
-          var url = '#' + _this.model.get('type') + '/new/' + liClickValue;
-          Backbone.history.navigate(url, {trigger: true});
-        },
-        position: 'top'
-      });
+
+      if(this.availableTypeObj && this.availableTypeObj.length>1){
+
+        this.ui.btnNew.tooltipList({
+          availableOptions: this.availableTypeObj,
+          liClickEvent: function(liClickValue) {
+            var url = '#' + _this.model.get('type') + '/new/' + liClickValue;
+            Backbone.history.navigate(url, {trigger: true});
+          },
+          position: 'top'
+        });
+      } else {
+        var url = '#' + _this.model.get('type') + '/new/'+this.availableTypeObj[0].val;
+        Backbone.history.navigate(url, {trigger: true});
+
+      }
     },
-    
+
   });
 });

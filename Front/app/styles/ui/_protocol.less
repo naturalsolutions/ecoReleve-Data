@@ -1,8 +1,8 @@
-.protocol-editor{
+.protocols{
   &>.toolbar{
     z-index: 10;
   }
-  .js-menu-item{
+  .js-proto-item{
     padding-bottom: 15px;
     padding-top: 15px;
     border-bottom: 1px solid #ddd;
@@ -35,9 +35,20 @@
     }
     
   }
+}
   .protocol{
-    .toolbar.top{
-      overflow: auto;
+    .osbservations-container{
+      padding: 0px;
+    }
+    .observation{
+    }
+
+    .js-obs-form{
+      padding: 15px;
+      background: rgba(170,170,170,1);
+      &>form{
+        background: white;
+      }
     }
   }
 
@@ -52,4 +63,4 @@
       border-radius: 4px;
     }
   }
-}
+

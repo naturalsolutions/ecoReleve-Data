@@ -2,8 +2,10 @@ define([
   'jquery',
   'underscore',
   'backbone',
+  'ns_grid/customCellRenderer/decimal5Renderer',
+  'ns_grid/customCellRenderer/dateTimeRenderer',
 ], function(
-  $, _, Backbone
+  $, _, Backbone, Decimal5Renderer, DateTimeRenderer
 ){
   'use strict';
 
@@ -27,11 +29,13 @@ define([
       uiTabs: [
         {
           name: 'standard',
-          label: 'Standard'
+          label: 'Standard',
+          typeObj : 1
         },
         {
-          name: 'unidentified',
-          label: 'Unidentified'
+          name: 'Non identified',
+          label: 'Unidentified',
+          typeObj : 2
         }
       ],
 
@@ -59,14 +63,17 @@ define([
       },{
         field: 'StartDate',
         headerName: 'Start Date',
+        cellRenderer: DateTimeRenderer
       }],
 
       equipmentColumnDefs: [{
         field: 'StartDate',
         headerName: 'Start Date',
+        cellRenderer: DateTimeRenderer
       },{
         field: 'EndDate',
         headerName: 'End Date',
+        cellRenderer: DateTimeRenderer
       },{
         field: 'Type',
         headerName: 'Type',
@@ -89,7 +96,7 @@ define([
         field: 'Date',
         headerName: 'date',
         checkboxSelection: true,
-        filter: 'text',
+        filter: 'date',
         pinned: 'left',
         minWidth: 200,
         cellRenderer: function(params){
@@ -97,7 +104,8 @@ define([
             //params.node.removeEventListener('rowSelected', params.node.eventService.allListeners.rowSelected[0]);
             $(params.eGridCell).find('.ag-selection-checkbox').addClass('hidden');
           }
-          return params.value;
+          return DateTimeRenderer(params)
+          //return params.value;
         }
       },{
         field: 'ID',
@@ -107,15 +115,16 @@ define([
         field: 'LAT',
         headerName: 'latitude',
         filter: 'number',
+        cellRenderer: Decimal5Renderer
       }, {
         field: 'LON',
         headerName: 'longitude',
         filter: 'number',
+        cellRenderer: Decimal5Renderer
       },{
         field: 'precision',
         headerName: 'Precision(m)',
         filter: 'number',
-      },{
       },{
         field: 'region',
         headerName: 'Region',
@@ -124,6 +133,12 @@ define([
         field: 'type_',
         headerName: 'Type',
         filter: 'text',
+        filterParams : {selectList : [
+          {value : 'argos' , label: 'argos' },
+          {value : 'gps' , label: 'gps' },
+          {value : 'rfid' , label: 'rfid' },
+          {value : 'station' , label: 'station' },
+        ]},
       },{
         field: 'fieldActivity_Name',
         headerName: 'FieldActivity',

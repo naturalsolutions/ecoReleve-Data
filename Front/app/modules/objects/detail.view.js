@@ -120,6 +120,7 @@ define([
     },
 
     displayGrids: function(){
+      
     },
 
     displayForm: function(){
@@ -131,19 +132,11 @@ define([
       formConfig.formRegion = this.ui.form;
       formConfig.buttonRegion = [this.ui.formBtns];
       formConfig.parent = this.parent;
+      formConfig.afterDelete = function(response, model){
+        Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
+      };
 
       this.nsForm = new NsForm(formConfig);
-
-      this.nsForm.afterDelete = function() {
-        var jqxhr = $.ajax({
-          url: _this.model.get('type') + '/' + _this.model.get('id'),
-          method: 'DELETE',
-          contentType: 'application/json',
-        }).done(function(resp) {
-          Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
-        }).fail(function(resp) {
-        });
-      };
     },
 
   });

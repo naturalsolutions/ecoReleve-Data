@@ -31,7 +31,6 @@ define([
       this.displayStationsGrid();
     },
 
-
     reload: function(options) {
       this.model.set('id', options.id);
 
@@ -45,7 +44,6 @@ define([
       this.displayGrids();
     },
 
-    
     displayMap: function(geoJson) {
       this.map = new NsMap({
         url: 'monitoredSites/' + this.model.get('id')  + '/history/?geo=true', ////only this one

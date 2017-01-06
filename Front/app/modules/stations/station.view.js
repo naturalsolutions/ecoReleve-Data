@@ -5,16 +5,17 @@ define([
   'marionette',
   'sweetAlert',
 
+  'ns_modules/ns_com',
   'ns_form/NSFormsModuleGit',
   'ns_navbar/navbar.view',
-  './layouts/lyt-protocols-editor',
+  './protocols/protocols.view',
 
   'modules/objects/detail.view',
   './station.model',
 
 ], function(
   $, _, Backbone, Marionette, Swal,
-  NsForm, NavbarView, LytProtoEditor, 
+  Com, NsForm, NavbarView, LytProtocols,
   DetailView, StationModel
 ) {
 
@@ -33,13 +34,42 @@ define([
 
     regions: {
       'rgStation': '.js-rg-station',
-      'rgProtoEditor': '.js-rg-proto-editor',
+      'rgProtocols': '.js-rg-protocols',
+      'rgProtocol': '.js-rg-protocol',
       'rgNavbar': '.js-navbar'
     },
 
-    reload: function(options) {
+    initialize: function(options) {
+      this.com = new Com();
       this.model.set('id', options.id);
-      this.displayStation();
+
+      this.model.set('stationId', options.id);
+
+      this.model.set('urlParams', {
+        proto: options.proto,
+        obs: options.obs
+      });
+    },
+
+    reload: function(options){
+      if(options.id == this.model.get('id')){
+        this.LytProtocols.protocolsItems.getViewFromUrlParams(options);
+      } else {
+        this.model.set('id', options.id);
+        this.model.set('stationId', options.id);
+        this.model.set('urlParams', {
+          proto: options.proto,
+          obs: options.obs
+        });
+        this.displayStation();
+      }
+    },
+
+    displayProtos: function() {
+      this.rgProtocols.show(this.LytProtocols = new LytProtocols({
+        model: this.model,
+        parent: this,
+      }));
     },
 
     onShow: function() {
@@ -56,16 +86,19 @@ define([
     displayStation: function() {
       this.total = 0;
       var _this = this;
-      
+
       var formConfig = this.model.get('formConfig');
 
       formConfig.id = this.model.get('id');
       formConfig.formRegion = this.ui.formStation;
       formConfig.buttonRegion = [this.ui.formStationBtns];
+      formConfig.afterDelete = function(response, model){
+        Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
+      };
 
       this.nsForm = new NsForm(formConfig);
       this.nsForm.BeforeShow = function(){
-        
+
       };
 
       this.nsForm.afterShow = function(){
@@ -73,18 +106,7 @@ define([
         $("#dateTimePicker").on("dp.change", function (e) {
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
          });
-        _this.filedAcitivityId = this.model.get('fieldActivityId');
-      };
 
-      this.nsForm.afterDelete = function() {
-        var jqxhr = $.ajax({
-          url: _this.model.get( 'type') + '/' + _this.model.get('id'),
-          method: 'DELETE',
-          contentType: 'application/json',
-        }).done(function(resp) {
-          Backbone.history.navigate('#' + _this.model.get( 'type'), {trigger: true});
-        }).fail(function(resp) {
-        });
       };
 
       this.nsForm.savingError = function (response) {
@@ -113,14 +135,13 @@ define([
           _this.displayProtos();
           _this.fieldActivityId = _this.model.get('fieldActivityId');
         }
-      },
+      };
+      
+      $.when(this.nsForm.jqxhr).then(function(){
+        _this.fieldActivityId = this.model.get('fieldActivityId');
+        _this.displayProtos();
+      })
 
-      _this.displayProtos();
-    },
-
-    displayProtos: function() {
-      this.lytProtoEditor = new LytProtoEditor({stationId: this.model.get('id')});
-      this.rgProtoEditor.show(this.lytProtoEditor);
     },
 
   });

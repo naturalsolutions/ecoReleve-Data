@@ -114,7 +114,6 @@ define([
       this.extendsBBForm();
       this.gridRow = options.gridRow || this.gridRow;
       this.checkGridRowAgain();
-
       var jqxhr;
       this.modelurl = options.modelurl;
 
@@ -122,6 +121,7 @@ define([
       this.buttonRegion = options.buttonRegion;
       this.formRegion = options.formRegion;
 
+      this.afterDelete = options.afterDelete || false;
 
       if(options.displayDelete != undefined){
         this.displayDelete = options.displayDelete;
@@ -145,7 +145,6 @@ define([
       }
       else {
         this.id = 0;
-        window.formEdition = true;
       }
 
       if(options.displayMode){
@@ -165,13 +164,17 @@ define([
 
       if (options.model) {
         this.model = options.model;
+
         this.BBForm = new BackboneForm({
           model: this.model,
           data: this.model.data,
           fieldsets: this.model.fieldsets,
           schema: this.model.schema
         });
+
         this.showForm();
+        this.pushFormInEdit(this);
+
       }
       else {
         this.initModel();
@@ -190,10 +193,28 @@ define([
       }
 
       this.data = options.data || {};
+      var _this = this;
 
-      $(this.BBForm).on( "click", function() {
+      // $(this.BBForm).on( "click", function() {
+      //
+      // });
+    },
 
-      });
+    pushFormInEdit: function(_this){
+        this.formChange = false;
+        if(!window.formInEdition.form){
+            window.formInEdition.form = {baseUri: _this.$el[0].baseURI};
+            window.formInEdition.form[_this.formRegion.selector]= _this;
+          } else {
+            if(window.formInEdition.form['undefined']){
+              delete window.formInEdition.form['undefined'];
+            }
+            window.formInEdition.form[_this.formRegion.selector] = _this;
+            window.formInEdition.form.baseUri = _this.$el[0].baseURI;
+          if(_this.displayMode && _this.displayMode.toLowerCase() == 'edit'){
+              _this.bindChanges();
+            }
+      }
     },
 
     initModel: function () {
@@ -226,10 +247,6 @@ define([
         dataType: 'json',
         success: function (resp) {
           _this.model.schema = resp.schema;
-          window.formEdition = false;
-          if (this.displayMode == 'edit'){
-            window.formEdition = true;
-          }
           if (resp.fieldsets) {
             // if fieldset present in response, we get it
             _this.model.fieldsets = resp.fieldsets;
@@ -242,10 +259,11 @@ define([
 
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
           _this.showForm();
+          _this.pushFormInEdit(_this);
           _this.updateState(this.displayMode);
         },
         error: function (data) {
-          console.warn('request error');
+          //console.warn('request error');
           _this.loadingError();
           //alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objectType);
         }
@@ -283,6 +301,58 @@ define([
       }
     },
 
+    bindChanges: function(){
+      var _this = this;
+      $(this.formRegion).find('input').on("change", function(e) {
+        if($(e.target).val() !== ''){
+          _this.formChange = true;
+        } else {
+          _this.formChange = false;
+       }
+      });
+      $(this.formRegion).find('select').on("change", function(e) {
+         _this.formChange = true;
+      });
+      $(this.formRegion).find('textarea').on("change", function(e) {
+         _this.formChange = true;
+      });
+      $(this.formRegion).find('.grid-form').on("change", function(e) {
+         _this.formChange = true;
+      });
+      $(this.formRegion).find('.nested').on("change", function(e) {
+         _this.formChange = true;
+      });
+
+      $(this.formRegion).find('textarea').on("keypress", function(e) {
+        var maxlen = 250;
+        var self = this;
+        if ($(this).val().length > maxlen) {
+          return false;
+        }  else {
+          _this.cleantextAreaAfterError(this);
+        }
+      });
+      $(this.formRegion).find('textarea').on('keyup', function (e) {
+        var maxlen = 250;
+        var strval = $(this).val();
+        var self = this;
+        if ($(this).val().length > maxlen) {
+           _this.showErrorForMaxLength(this);
+          return false;
+        }
+      });
+      $(this.formRegion).find('textarea').on('keydown' , function(e) {
+        if(event.which == 8) {
+          var maxlen = 250;
+          var strval = $(this).val();
+          var self = this;
+          if ($(this).val().length < maxlen) {
+           _this.cleantextAreaAfterError(this);
+          }
+        }
+      });
+    },
+
     showForm: function (){
       var _this = this;
       this.BBForm.render();
@@ -293,7 +363,11 @@ define([
       var _this = this;
       this.initRules();
 
-      this.formRegion.html(this.BBForm.el); //this.formRegion.html(this.BBForm.el);
+      if(this.formRegion.html){
+        this.formRegion.html(this.BBForm.el);
+      } else {
+        return;
+      }
 
       if(!this.gridRow) {
         $(this.formRegion).find('input').on("keypress", function(e) {
@@ -302,45 +376,6 @@ define([
           }
         });
       }
-      $(this.formRegion).find('input').on("change", function(e) {
-         window.formChange = true;
-      });
-      $(this.formRegion).find('select').on("change", function(e) {
-         window.formChange = true;
-      });
-      $(this.formRegion).find('textarea').on("change", function(e) {
-         window.formChange = true;
-      });
-
-        $(this.formRegion).find('textarea').on("keypress", function(e) {
-            var maxlen = 250;
-            var self = this;
-            if ($(this).val().length > maxlen) {
-              return false;
-            }  else {
-              _this.cleantextAreaAfterError(this);
-            }
-        });
-        $(this.formRegion).find('textarea').on('keyup', function (e) {
-              var maxlen = 250;
-              var strval = $(this).val();
-              var self = this;
-              if ($(this).val().length > maxlen) {
-                 _this.showErrorForMaxLength(this);
-                return false;
-            }
-        });
-        $(this.formRegion).find('textarea').on('keydown' , function(e) {
-             if(event.which == 8) {
-                var maxlen = 250;
-                var strval = $(this).val();
-                var self = this;
-                if ($(this).val().length < maxlen) {
-                 _this.cleantextAreaAfterError(this);
-                }
-             }
-        });
-
 
       if(this.buttonRegion){
         if(this.buttonRegion[0]){
@@ -353,8 +388,8 @@ define([
             this.bindEvents();
           }
         }
-
       }
+
       if (this.afterShow) {
         this.afterShow();
       }
@@ -447,8 +482,6 @@ define([
               jqhrx = this.model.save(null, {
                 success: function (model, response) {
                   // Getting ID of created record, from the model (has beeen affected during model.save in the response)
-                  window.formEdition = false;
-                  window.formChange = false;
                   _this.savingSuccess(model, response);
                   _this.id = _this.model.id;
                   if (_this.redirectAfterPost != "") {
@@ -463,7 +496,6 @@ define([
                       // otpherwise redirect
                       window.location.href = TargetUrl;
                     }
-
                   }
                   else {
                     // If no redirect after creation
@@ -478,7 +510,6 @@ define([
                   _this.savingError(response);
                   return false;
                 }
-
               });
             }
             else {
@@ -486,8 +517,6 @@ define([
               this.model.id = this.model.get('id');
               var jqxhr = this.model.save(null, {
                 success: function (model, response) {
-                  window.formEdition = false;
-                  window.formChange = false;
                   _this.savingSuccess(model, response);
                   if (_this.reloadAfterSave) {
                     _this.reloadingAfterSave();
@@ -498,7 +527,6 @@ define([
                   _this.savingError(response);
                 }
               });
-
             }
           }else{
             var errorList = _this.BBForm.$el.find('.error');
@@ -512,6 +540,7 @@ define([
             }
             return false;
           }
+          _this.formChange = false;
           this.afterSavingModel();
           return jqxhr;
         },
@@ -519,7 +548,6 @@ define([
     afterSaveSuccess: function(){
 
     },
-
 
     butClickEdit: function (e) {
       this.checkGridRowAgain();
@@ -556,21 +584,31 @@ define([
         type: 'warning',
         confirmButtonText: 'Yes, delete it!',
         confirmButtonColor: '#DD6B55',
-        callback : function(){
-          window.formEdition = false;
-          window.formChange = false;
-          _this.afterDelete(_this.model);
-
+        callback: function(){
+          _this.formChange = false;
+          _this.deleteModel();
         }
       };
-
       this.swal(opts);
     },
 
-    afterDelete: function(){
-
+    deleteModel: function(){
+      var _this = this;
+      this.model.id = this.model.get('id');
+      if(this.model.get('id') == 0){
+        _this.afterDelete(_this.model);
+      }
+      this.model.destroy({
+        success: function(response){
+          if(_this.afterDelete){
+            _this.afterDelete(response, _this.model);
+          }
+        },
+        fail: function(response){
+          console.error(response);
+        }
+      });
     },
-
 
     reloadingAfterSave: function () {
       this.displayMode = 'display';
