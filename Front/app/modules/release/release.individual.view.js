@@ -29,6 +29,7 @@ define([
       'release':'#release',
       'nbTotal': '.js-nb-total',
       'filter': '#filtersRelease',
+      'iconrelease' : '#iconbtnrelase'
     },
 
     events: {
@@ -227,9 +228,21 @@ define([
       $.ajax({
         url: 'release/individuals/',
         method: 'POST',
-        data: {IndividualList: JSON.stringify(visibleSelectedRows),StationID: this.model.get('ID'),releaseMethod: releaseMethod},
-        context: this,
+        data: {
+          IndividualList: JSON.stringify(visibleSelectedRows),
+          StationID: this.model.get('ID'),
+          releaseMethod: releaseMethod
+        },
+        context: this
+      }).always(function() {
+        console.log("call finish ");
+        //this.ui.release.removeClass('Loading');
+        this.ui.release.prop('disabled', false);
+        this.ui.iconrelease.removeClass();
+        this.ui.iconrelease.addClass("icon reneco reneco-to_release");
+        this.gridView.gridOptions.api.hideOverlay()
       }).done(function(resp) {
+        console.log("bim bam boom ok ");
         if (resp.errors) {
           resp.title = 'An error occured';
           resp.type = 'error';
@@ -245,6 +258,7 @@ define([
         this.swal(resp, resp.type, callback);
 
       }).fail(function(resp) {
+        console.log("bim bam boom pas ok du tout");
         var callback = function() {
            return true;
         };
@@ -303,8 +317,15 @@ define([
         //  pass avalaible options
         availableOptions: _this.releaseMethodList,
         liClickEvent:function(liClickValue) {
+          _this.ui.release.tooltipster('hide');
+          //_this.ui.release.addClass('Loading');
+          _this.ui.release.prop('disabled', true);
+          _this.ui.iconrelease.removeClass();
+          _this.ui.iconrelease.addClass('loading');
+          _this.gridView.gridOptions.api.showLoadingOverlay();
           _this.release(liClickValue);
-        },
+
+        }
       });
       this.ui.release.tooltipster('show');
     }
