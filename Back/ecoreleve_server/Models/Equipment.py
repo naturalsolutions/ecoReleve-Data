@@ -10,7 +10,9 @@ from sqlalchemy import (
     func,
     event,
     select,
-    exists)
+    exists,
+    text,
+    bindparam)
 from sqlalchemy.orm import aliased
 from pyramid import threadlocal
 from datetime import timedelta
@@ -39,27 +41,13 @@ class Equipment(Base):
 
 def checkSensor(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
     session = threadlocal.get_current_registry().dbmaker()
-    e2 = aliased(Equipment)
 
-    subQuery = select([e2]).where(
-        and_(e2.FK_Sensor == Equipment.FK_Sensor,
-             and_(e2.StartDate > Equipment.StartDate, e2.StartDate < equipDate)
-             )
-    )
-
-    query = select([Equipment]).where(
-        and_(~exists(subQuery),
-             and_(Equipment.StartDate < equipDate,
-                  and_(Equipment.Deploy == 1, Equipment.FK_Sensor == Sensor.ID))
-             )
-    )
-
-    fullQuery = select([Sensor.ID]
-                       ).where(
-        and_(~exists(query), Sensor.ID == fk_sensor)
-    )
-
-    Nb = len(session.execute(fullQuery).fetchall())
+    query = text('''DECLARE @result int;
+                 EXEC dbo.[pr_checkSensorAvailability] :date, :sensorID, @result OUTPUT;
+                 SELECT @result
+                 ''').bindparams(bindparam('sensorID', fk_sensor),
+                                 bindparam('date', equipDate))
+    Nb = session.execute(query).scalar()
     if Nb > 0:
         return True
     else:
