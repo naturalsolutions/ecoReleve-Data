@@ -106,6 +106,7 @@ def GetProtocolsofStation(request):
     return response
 
 
+
 @view_config(route_name=prefix + '/id/protocols',
              renderer='json',
              request_method='POST',
@@ -121,6 +122,7 @@ def insertNewProtocol(request):
         data[items] = value
 
     data['FK_Station'] = request.matchdict['id']
+
     sta = session.query(Station).get(request.matchdict['id'])
     newProto = Observation(FK_ProtocoleType=data['FK_ProtocoleType'],
                            FK_Station=data['FK_Station'])
@@ -148,14 +150,14 @@ def insertNewProtocol(request):
     return message
 
 
-@view_config(route_name=prefix + '/id/protocols/obs_id',
+@view_config(route_name='observations/id',
              renderer='json',
              request_method='PUT',
              permission=routes_permission[prefixProt]['PUT'])
 def updateObservation(request):
     session = request.dbsession
     data = request.json_body
-    id_obs = request.matchdict['obs_id']
+    id_obs = request.matchdict['id']
     curObs = session.query(Observation).get(id_obs)
     curObs.LoadNowValues()
     listOfSubProtocols = []
@@ -176,31 +178,27 @@ def updateObservation(request):
         message = e.value
     return message
 
-
-@view_config(route_name=prefix + '/id/protocols/obs_id',
+@view_config(route_name='observations/id',
              renderer='json',
              request_method='DELETE',
              permission=routes_permission[prefixProt]['DELETE'])
 def deleteObservation(request):
     session = request.dbsession
-    id_obs = request.matchdict['obs_id']
+    id_obs = request.matchdict['id']
     curObs = session.query(Observation).get(id_obs)
     session.delete(curObs)
 
     return {}
 
-
-@view_config(route_name=prefix + '/id/protocols/obs_id',
+@view_config(route_name='observations/id',
              renderer='json',
              request_method='GET',
              permission=routes_permission[prefixProt]['GET'])
 def getObservation(request):
     session = request.dbsession
-    id_obs = request.matchdict['obs_id']
-    id_sta = request.matchdict['id']
+    id_obs = request.matchdict['id']
     try:
-        curObs = session.query(Observation).filter(
-            and_(Observation.ID == id_obs, Observation.FK_Station == id_sta)).one()
+        curObs = session.query(Observation).get(id_obs)
         curObs.LoadNowValues()
         if 'FormName' in request.params:
             try:
@@ -218,6 +216,45 @@ def getObservation(request):
 
     return response
 
+@view_config(route_name='stations/id/protocols/type/observations',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefixProt]['GET'])
+def getProtocolObservations(request):
+    session = request.dbsession
+    protocolType = request.matchdict['type']
+    sta_id = request.matchdict['id']
+    listObs = list(session.query(Observation)
+        .filter(Observation.FK_ProtocoleType == protocolType,)
+        .filter(Observation.FK_Station == sta_id))
+
+    values = []
+    for i in range(len(listObs)):
+        curObs = listObs[i]
+        curObs.LoadNowValues()
+        values.append(curObs.GetFlatObject())
+    return values
+
+@view_config(route_name='stations/id/protocols/type/observations',
+             renderer='json',
+             request_method='PUT',
+             permission=routes_permission[prefixProt]['PUT'])
+def saveProtocolObservations(request):
+    session = request.dbsession
+    protocolType = request.matchdict['type']
+    sta_id = request.matchdict['id']
+    data = request.json_body
+
+    for i in range(len(data)):
+        if data[i]['ID'] != 0:
+            curObs = session.query(Observation).get(data[i]['ID'])
+            curObs.LoadNowValues()
+            curObs.UpdateFromJson(data[i])
+        else: 
+            #new (POST)
+            print()
+
+    return {}
 
 @view_config(route_name=prefix + '/id/protocols/action',
              renderer='json',
@@ -230,7 +267,6 @@ def actionOnObs(request):
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
-
 
 def getObsForms(request):
     session = request.dbsession

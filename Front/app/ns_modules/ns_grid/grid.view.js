@@ -170,8 +170,6 @@ define([
           return;
         }
 
-        
-
         col.minWidth = col.minWidth || 100;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
@@ -215,18 +213,6 @@ define([
         }
 
       });
-
-      // var deleteCol = {
-      //   editable: false,
-      //   field: 'Delete',
-      //   headerName: 'Delete',
-      //   maxWidth: 300,
-      //   minWidth: 100,
-      //   cellRenderer: Renderers.Delete
-      // };
-
-      //columnDefs.push(deleteCol);
-
       return columnDefs;
     },
 
@@ -326,6 +312,7 @@ define([
         method: 'GET',
         context: this,
       }).done( function(response) {
+        
         this.gridOptions.rowData = response;
         $.when(this.columnDeferred).then(function(){
           if(response[1] instanceof Array){

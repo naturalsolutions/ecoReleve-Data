@@ -10,6 +10,7 @@ define([
     var Thesaurus = function () {
     };
 		Thesaurus.prototype.init = function(params){     
+			console.log(params.value);
 		  var col = params.column.colDef;
 		  var options = {
 		    key: col.options.target || col.field,

@@ -4,9 +4,10 @@ define([
   'backbone',
   'marionette',
   './protocol.view',
+  './protocol.grid.view',
 
   'i18n'
-], function($, _, Backbone, Marionette, Protocol) {
+], function($, _, Backbone, Marionette, Protocol, ProtocolGrid) {
   'use strict';
   return Marionette.LayoutView.extend({
     template: 'app/modules/stations/protocols/protocols.tpl.html',
@@ -24,7 +25,7 @@ define([
       'change .js-proto-picker': 'addProtoFromList' 
     },
 
-    initialize: function(options) {
+    initialize: function(options){
       this.parent = options.parent;
       this.collection = new Backbone.Collection();
     },
@@ -75,7 +76,6 @@ define([
           var hash = window.location.hash.split('?');
           var obs;
           if(this.model.get('obs').length){
-
             obs = this.model.get('obs')[0];
           }
           if(!obs){
@@ -131,7 +131,6 @@ define([
                   } else {
                     view.model.set('currentObs', 0);
                   }
-                  
                 } else {
                   view.model.set('currentObs', 0);
                 }
@@ -161,19 +160,24 @@ define([
           var url = hash[0] + '?proto=' + view.model.get('ID') + '&obs=' + view.model.get('currentObs');
           
 
-          if(view.model.get('currentObs') == 0){
-            $.xhrPool.allowAbort = false;
-            Backbone.history.navigate(url, {trigger: false});
-          }
+          $.xhrPool.allowAbort = false;
+          Backbone.history.navigate(url, {trigger: false});
           $.xhrPool.allowAbort = true;
 
           view.model.set('stationId', _this.model.get('stationId'));
           view.$el.addClass('active');
 
-          _this.parent.rgProtocol.show(new Protocol({
-            model: view.model
-          }));
+          view.model.set('grid', true);
 
+          if( view.model.get('grid') ){
+            _this.parent.rgProtocol.show(new ProtocolGrid({
+              model: view.model
+            }));
+          } else {
+            _this.parent.rgProtocol.show(new Protocol({
+              model: view.model
+            }));
+          }
         },
 
         onShow: function(){
