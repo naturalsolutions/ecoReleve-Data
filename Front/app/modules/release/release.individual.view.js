@@ -237,14 +237,11 @@ define([
         },
         context: this
       }).always(function() {
-        console.log("call finish ");
-        //this.ui.release.removeClass('Loading');
         this.ui.release.prop('disabled', false);
         this.ui.iconrelease.removeClass();
         this.ui.iconrelease.addClass("icon reneco reneco-to_release");
         this.gridView.gridOptions.api.hideOverlay()
       }).done(function(resp) {
-        console.log("bim bam boom ok ");
         if (resp.errors) {
           resp.title = 'An error occured';
           resp.type = 'error';
@@ -252,6 +249,7 @@ define([
         }else {
           resp.title = 'Success';
           resp.type = 'success';
+          this.gridView.gridOptions.api.removeItems(this.gridView.gridOptions.api.getSelectedNodes())
           var callback = function() {
             Backbone.history.navigate('stations/' + _this.model.get('ID'), {trigger: true});
           };
@@ -260,7 +258,6 @@ define([
         this.swal(resp, resp.type, callback);
 
       }).fail(function(resp) {
-        console.log("bim bam boom pas ok du tout");
         var callback = function() {
            return true;
         };
