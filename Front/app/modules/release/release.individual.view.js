@@ -121,6 +121,8 @@ define([
           singleClickEdit : true,
           rowSelection: 'multiple',
           onCellValueChanged : _this.checkAll.bind(_this),
+          overlayLoadingTemplate: '<span class="loading" ></span><span class="ag-overlay-loading-center">Loading .....</span>',
+
         },
         afterFetchColumns: function(options) {
           var colDefs = options.gridOptions.columnDefs;
@@ -318,7 +320,6 @@ define([
         availableOptions: _this.releaseMethodList,
         liClickEvent:function(liClickValue) {
           _this.ui.release.tooltipster('hide');
-          //_this.ui.release.addClass('Loading');
           _this.ui.release.prop('disabled', true);
           _this.ui.iconrelease.removeClass();
           _this.ui.iconrelease.addClass('loading');
