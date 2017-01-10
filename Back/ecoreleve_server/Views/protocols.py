@@ -105,63 +105,17 @@ def GetProtocolsofStation(request):
         pass
     return response
 
-
-
-@view_config(route_name=prefix + '/id/protocols',
-             renderer='json',
-             request_method='POST',
-             permission=routes_permission[prefixProt]['POST'])
-@view_config(route_name=prefix + '/id/protocols/',
-             renderer='json',
-             request_method='POST',
-             permission=routes_permission[prefixProt]['POST'])
-def insertNewProtocol(request):
+def updateObservation(request, json_body, obs_id):
     session = request.dbsession
-    data = {}
-    for items, value in request.json_body.items():
-        data[items] = value
-
-    data['FK_Station'] = request.matchdict['id']
-
-    sta = session.query(Station).get(request.matchdict['id'])
-    newProto = Observation(FK_ProtocoleType=data['FK_ProtocoleType'],
-                           FK_Station=data['FK_Station'])
-    newProto.ProtocoleType = session.query(ProtocoleType).filter(
-        ProtocoleType.ID == data['FK_ProtocoleType']).first()
-    listOfSubProtocols = []
-    for items, value in data.items():
-        if isinstance(value, list) and items != 'children':
-            listOfSubProtocols = value
-
-    data['Observation_childrens'] = listOfSubProtocols
-    newProto.init_on_load()
-    newProto.UpdateFromJson(data)
-    try:
-        newProto.Station = sta
-        session.add(newProto)
-        session.flush()
-        message = {'id': newProto.ID}
-    except ErrorAvailable as e:
-        session.rollback()
-        request.response.status_code = 510
-        message = e.value
-        sendLog(logLevel=1, domaine=3, msg_number=request.response.status_code)
-
-    return message
-
-
-@view_config(route_name='observations/id',
-             renderer='json',
-             request_method='PUT',
-             permission=routes_permission[prefixProt]['PUT'])
-def updateObservation(request):
-    session = request.dbsession
-    data = request.json_body
-    id_obs = request.matchdict['id']
-    curObs = session.query(Observation).get(id_obs)
+    data = json_body
+    curObs = session.query(Observation).get(obs_id)
     curObs.LoadNowValues()
     listOfSubProtocols = []
-    message = 'ok'
+
+    responseBody = {
+        'entity': curObs.ID,
+        'response': 'success'
+    }
 
     for items, value in data.items():
         if isinstance(value, list) and items != 'children':
@@ -175,30 +129,115 @@ def updateObservation(request):
     except ErrorAvailable as e:
         session.rollback()
         request.response.status_code = 510
-        message = e.value
-    return message
+        responseBody['response'] = e.value
 
-@view_config(route_name='observations/id',
+    return responseBody
+
+def createObservation(request, json_body):
+    session = request.dbsession
+    data = {}
+    for items, value in json_body.items():
+        data[items] = value
+
+    data['FK_Station'] = request.matchdict['id']
+    data['FK_ProtocoleType'] = request.json_body['objectType']
+
+
+    sta = session.query(Station).get(request.matchdict['id'])
+
+    curObs = Observation(FK_ProtocoleType=data['FK_ProtocoleType'],
+                           FK_Station=data['FK_Station'])
+
+    curObs.ProtocoleType = session.query(ProtocoleType).filter(
+        ProtocoleType.ID == data['FK_ProtocoleType']).first()
+    listOfSubProtocols = []
+
+    for items, value in data.items():
+        if isinstance(value, list) and items != 'children':
+            listOfSubProtocols = value
+
+    data['Observation_childrens'] = listOfSubProtocols
+    curObs.init_on_load()
+    curObs.UpdateFromJson(data)
+
+    responseBody = {
+        'entity': '0',
+        'response': 'success'
+    }
+
+    try:
+        curObs.Station = sta
+        session.add(curObs)
+        session.flush()
+        responseBody['entity'] = curObs.ID
+    except ErrorAvailable as e:
+        session.rollback()
+        request.response.status_code = 510
+        responseBody['response'] = e.value
+        sendLog(logLevel=1, domaine=3, msg_number=request.response.status_code)
+
+    return responseBody
+
+@view_config(route_name='stations/id/observations/batch',
+             renderer='json',
+             request_method='POST',
+             permission=routes_permission[prefixProt]['PUT'])
+def saveMultiObservations(request):
+    session = request.dbsession
+    sta_id = request.matchdict['id']
+    rowData = request.json_body['rowData']
+
+    responseBody = {
+        'updatedObservations': [],
+        'createdObservations': []
+    }
+
+    for i in range(len(rowData)):
+        json_body = rowData[i]
+        if 'ID' in rowData[i]:
+            responseBody['updatedObservations'].append(updateObservation(request, json_body, rowData[i]['ID']))
+        else:
+            responseBody['createdObservations'].append(createObservation(request, json_body))
+    
+    return responseBody
+
+
+@view_config(route_name='stations/id/observations/obs_id',
+             renderer='json',
+             request_method='POST',
+             permission=routes_permission[prefixProt]['POST'])
+def handleObservationCreation(request):
+    return createObservation(request, request.json_body)
+
+
+@view_config(route_name='stations/id/observations/obs_id',
+             renderer='json',
+             request_method='PUT',
+             permission=routes_permission[prefixProt]['PUT'])
+def handleObservationUpdate(request):
+    return updateObservation(request, request.json_body, request.matchdict['obs_id'])
+
+@view_config(route_name='stations/id/observations/obs_id',
              renderer='json',
              request_method='DELETE',
              permission=routes_permission[prefixProt]['DELETE'])
 def deleteObservation(request):
     session = request.dbsession
-    id_obs = request.matchdict['id']
-    curObs = session.query(Observation).get(id_obs)
+    obs_id = request.matchdict['obs_id']
+    curObs = session.query(Observation).get(obs_id)
     session.delete(curObs)
 
     return {}
 
-@view_config(route_name='observations/id',
+@view_config(route_name='stations/id/observations/obs_id',
              renderer='json',
              request_method='GET',
              permission=routes_permission[prefixProt]['GET'])
 def getObservation(request):
     session = request.dbsession
-    id_obs = request.matchdict['id']
+    obs_id = request.matchdict['obs_id']
     try:
-        curObs = session.query(Observation).get(id_obs)
+        curObs = session.query(Observation).get(obs_id)
         curObs.LoadNowValues()
         if 'FormName' in request.params:
             try:
@@ -216,13 +255,13 @@ def getObservation(request):
 
     return response
 
-@view_config(route_name='stations/id/protocols/type/observations',
+@view_config(route_name='stations/id/observations',
              renderer='json',
              request_method='GET',
              permission=routes_permission[prefixProt]['GET'])
 def getProtocolObservations(request):
     session = request.dbsession
-    protocolType = request.matchdict['type']
+    protocolType = request.params['objectType']
     sta_id = request.matchdict['id']
     listObs = list(session.query(Observation)
         .filter(Observation.FK_ProtocoleType == protocolType,)
@@ -235,26 +274,6 @@ def getProtocolObservations(request):
         values.append(curObs.GetFlatObject())
     return values
 
-@view_config(route_name='stations/id/protocols/type/observations',
-             renderer='json',
-             request_method='PUT',
-             permission=routes_permission[prefixProt]['PUT'])
-def saveProtocolObservations(request):
-    session = request.dbsession
-    protocolType = request.matchdict['type']
-    sta_id = request.matchdict['id']
-    data = request.json_body
-
-    for i in range(len(data)):
-        if data[i]['ID'] != 0:
-            curObs = session.query(Observation).get(data[i]['ID'])
-            curObs.LoadNowValues()
-            curObs.UpdateFromJson(data[i])
-        else: 
-            #new (POST)
-            print()
-
-    return {}
 
 @view_config(route_name=prefix + '/id/protocols/action',
              renderer='json',

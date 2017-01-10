@@ -306,13 +306,18 @@ define([
 
     fetchData: function(){
       var _this = this;
-
+      var data = {};
+      if(this.model.get('objectType')){
+        data.objectType = this.model.get('objectType');
+      }
+  
       this.deferred = $.ajax({
         url: this.model.get('url'),
         method: 'GET',
         context: this,
+        data: data,
       }).done( function(response) {
-        
+
         this.gridOptions.rowData = response;
         $.when(this.columnDeferred).then(function(){
           if(response[1] instanceof Array){

@@ -21,7 +21,7 @@ define([
 
     initialize: function(options){  
       this.editable = false;
-      this.url = 'stations/' + this.model.get('stationId') + '/protocols/' + this.model.get('ID') + '/observations';
+      this.url = 'stations/' + this.model.get('stationId') + '/observations';
     },
 
     handleBtnClick: function(e){
@@ -40,6 +40,9 @@ define([
           break;
         case 'delete': 
           this.deleteObs();
+          break;        
+        case 'add': 
+          this.addRow();
           break;
       }
 
@@ -51,11 +54,16 @@ define([
       this.gridView.gridOptions.api.forEachNode( function(node) {
         rowData.push(node.data);
       });
+
+      var data = JSON.stringify({
+          rowData: rowData,
+          objectType: this.model.get('ID')
+        });
       $.ajax({
-        url: this.url,
-        method: 'PUT',
+        url: this.url + '/batch',
+        method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify(rowData),
+        data: data,
         context: this,
       }).done(function(resp) {
         this.toggleEditionMode();
@@ -65,14 +73,22 @@ define([
       });
     },
 
+    addRow: function(){
+      this.gridView.gridOptions.api.addItems([{}]);
+    },
+
     deleteObs: function(){
       this.gridView.gridOptions.api.stopEditing();
       var rowData = this.gridView.gridOptions.api.getSelectedRows();
       $.ajax({
-        url: this.url,
-        method: 'DELETE',
+        url: this.url + '/batch',
+        method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify(rowData),
+        data: {
+          rowData: JSON.stringify(rowData),
+          objectType: this.model.get('ID'),
+          delete: true
+        },
         context: this,
       }).done(function(resp) {
         this.toggleEditionMode();
@@ -115,10 +131,12 @@ define([
     },
 
     onShow: function(){
+      console.log(this.model.get('ID'));
       this.rgGrid.show(this.gridView = new GridView({
         columns: this.formatColumns(this.options.model),
         clientSide: true,
         url: this.url,
+        objectType: this.model.get('ID'),
         gridOptions: {
           rowSelection: 'multiple',
         }
