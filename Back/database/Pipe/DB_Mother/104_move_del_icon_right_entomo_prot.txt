@@ -1,0 +1,11 @@
+UPDATE [dbo].[ModuleForms]
+   SET [Options] = '{"protocoleType":231,"nbFixedCol":1,"delFirst":0,"showLines":1}'
+ WHERE name like 'Entomo_Pop_Census'
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('104_move_del_icon_right_entomo_prot',GETDATE(),(SELECT db_name()))
+
+
+GO
