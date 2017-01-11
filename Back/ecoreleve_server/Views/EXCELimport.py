@@ -25,20 +25,20 @@ def get_excel(request):
     protocolID = int(request.params["id"])
     protocolName = request.params["name"]
     protocolName.replace(" ", "_")
-    stationFields = Station.GetImportTemplate()
 
-    newSta = Station(FK_StationType=1)
-    ConfSta = session.query(FrontModules).filter(
-        FrontModules.Name == 'StationForm').first()
-    stationFields = newSta.GetForm(ConfSta, 'edit')
-    stationFields = list(stationFields['schema'].keys())
-    stationFields = list(map(lambda x: 'Station_'+x,
-                            list(filter(lambda y: y not in ['updateSite', 'FieldWorkers', 'ID']
-                                    , stationFields))))
-
-    stationFields.extend(['Station_FieldWorker1',
-                          'Station_FieldWorker2',
-                          'Station_FieldWorker3'])
+    stationFields = getTemplateColStation(session)
+    # newSta = Station(FK_StationType=1)
+    # ConfSta = session.query(FrontModules).filter(
+    #     FrontModules.Name == 'StationForm').first()
+    # stationFields = newSta.GetForm(ConfSta, 'edit')
+    # stationFields = list(stationFields['schema'].keys())
+    # stationFields = list(map(lambda x: 'Station_'+x,
+    #                         list(filter(lambda y: y not in ['updateSite', 'FieldWorkers', 'ID']
+    #                                 , stationFields))))
+    #
+    # stationFields.extend(['Station_FieldWorker1',
+    #                       'Station_FieldWorker2',
+    #                       'Station_FieldWorker3'])
     if(protocolID == 0):
         fields = stationFields
     else:
@@ -50,8 +50,8 @@ def get_excel(request):
 
         fields = stationFields + allprops
 
-    # TODO : order columns by form order 
-    
+    # TODO : order columns by form order
+
     df = pd.DataFrame(data=[], columns=fields)
     fout = io.BytesIO()
     writer = pd.ExcelWriter(fout)
@@ -64,6 +64,20 @@ def get_excel(request):
         content_disposition="attachment; filename=" + protocolName + ".xlsx",
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
+def getTemplateColStation(session):
+    newSta = Station(FK_StationType=1)
+    ConfSta = session.query(FrontModules).filter(
+        FrontModules.Name == 'StationForm').first()
+    stationFields = newSta.GetForm(ConfSta, 'edit')
+    stationFields = list(stationFields['schema'].keys())
+    stationFields = list(map(lambda x: 'Station_'+x,
+                            list(filter(lambda y: y not in ['updateSite', 'FieldWorkers', 'ID']
+                                    , stationFields))))
+
+    stationFields.extend(['Station_FieldWorker1',
+                          'Station_FieldWorker2',
+                              'Station_FieldWorker3'])
+    return stationFields
 
 def get_props(attrs):
     protocolAttrs = []
@@ -91,11 +105,11 @@ def import_file(request):
         protoId = int(request.POST['protoId'])
         protoName = request.POST['protoName']
 
-        if not checkStationColumns(columns):
+        if not checkStationColumns(columns, session):
             request.response.status_code = 510
             return 'Station columns not coresponding'
 
-        if protoId != 0 and not checkProtoColumns(protoId, columns):
+        if protoId != 0 and not checkProtoColumns(protoId, columns, session):
             request.response.status_code = 510
             return 'Protocol columns not coresponding'
 
@@ -146,8 +160,8 @@ def import_file(request):
     return
 
 
-def checkProtoColumns(protoID, excelCols):
-    stationColumns = Station.GetImportTemplate()[:-1]
+def checkProtoColumns(protoID, excelCols, session):
+    stationColumns = getTemplateColStation(session)
 
     duplicatedCols = set([x for x in excelCols if excelCols.count(x) > 1])
     if len(duplicatedCols) > 0:
@@ -155,14 +169,16 @@ def checkProtoColumns(protoID, excelCols):
 
     protocolColumns = list(set(excelCols) - set(stationColumns))
     newObs = Observation(FK_ProtocoleType=protoID)
-    allprops = newObs.GetAllProp()
-    protocolColsInDB = get_props(allprops)
+    Conf = session.query(FrontModules).filter(
+        FrontModules.Name == 'ObservationForm').first()
+    protocolColsInDB = newObs.GetForm(Conf, 'edit')
+    protocolColsInDB = list(protocolColsInDB['schema'].keys())
     isSame = set(protocolColumns).issubset(set(protocolColsInDB))
     return isSame
 
 
-def checkStationColumns(excelCols):
-    stationColumns = Station.GetImportTemplate()[:-1]
+def checkStationColumns(excelCols, session):
+    stationColumns = getTemplateColStation(session)
     s = set(stationColumns)
     p = set(excelCols)
 
