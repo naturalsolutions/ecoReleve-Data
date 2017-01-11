@@ -21,10 +21,15 @@ requires = [
     'waitress',
     'webtest',
     'XlsxWriter==0.8.4',
-    'pyexcel-xlsx',
     'openpyxl===2.2.2',
     'psutil',
-    'pyramid_jwtauth'
+    'pyramid_jwtauth',
+    'pyexcel==0.2.5',
+    'pyexcel-io==0.2.2',
+    'pyexcel-webio==0.0.7',
+    'pyexcel-xls==0.2.2',
+    'pyexcel-xlsx==0.2.1',
+    'pyramid-excel==0.0.3'
     ]
 
 setup(name='ecoreleve_server',
