@@ -1,14 +1,11 @@
-
----------------------------------------------------------------------------------
--- Stored procedure that will  ### Do something
--- Gets: @file_ID int,
--- Returns: @@result varchar(255)
--- Returns: @error int
----------------------------------------------------------------------------------
-IF OBJECT_ID('pr_CheckRequiredStation', 'P') IS NOT NULL
-DROP PROCEDURE dbo.[pr_CheckRequiredStation];
-GO 
-CREATE PROCEDURE [dbo].[pr_CheckRequiredStation]
+USE [EcoReleve_ECWP]
+GO
+/****** Object:  StoredProcedure [dbo].[pr_CheckRequiredStation]    Script Date: 11/01/2017 14:45:29 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[pr_CheckRequiredStation]
 	@file_ID int,
 	@result varchar(255) OUTPUT,
 	@error int OUTPUT,
@@ -29,18 +26,18 @@ SET @result='ERROR'
 
 BEGIN TRY
 
---DECLARE @file_ID int 
+--DECLARE @file_ID int
 --SET @file_ID = 133
 
-	SELECT 
+	SELECT
 			@Creator= Creator,
 			@TempTable_GUID = TempTable_GUID,
 			@ObjectName = ObjectName,
 			@ObjectType = ObjectType
-	FROM [File] 
+	FROM [File]
 	WHERE ID = @file_ID
 
-	
+
 	IF OBJECT_ID('tempdb..#tempIndexError') IS NOT NULL
 	DROP TABLE #tempIndexError
 
@@ -48,49 +45,49 @@ BEGIN TRY
 	index_ int
 	)
 
-	
+
 	IF OBJECT_ID('tempdb..#temp') IS NOT NULL
 		DROP TABLE #temp
 
 	--- Recupération des champs required pour la station
-  SELECT COLUMN_NAME 
+  SELECT COLUMN_NAME
   INto #temp
-  FROM 
+  FROM
 	(SELECT COLUMN_NAME --REPLACE(COLUMN_NAME,'Station_','')
 	FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @TempTable_GUID AND COLUMN_NAME like 'Station_%' ) t
-JOIN 
-	(SELECT 
-	Name FROM [dbo].[ModuleForms] 
-	WHERE 
+JOIN
+	(SELECT
+	Name FROM [dbo].[ModuleForms]
+	WHERE
 	Module_id = 2
 	And
-	Required = 1 and Name not like '%fieldWorker%') f ON t.COLUMN_NAME like '%'+f.Name+'%'
+	Required = 1 and Name not like '%fieldWorker%') f ON t.COLUMN_NAME like 'Station_%'+f.Name
 
 
 	SET @SQL_STATEMENT = '@'
-	select @SQL_STATEMENT+= 'OR '+COLUMN_NAME+' IS NOT NULL '
+	select @SQL_STATEMENT+= 'OR '+COLUMN_NAME+' IS NULL '
 	FROM  #temp
 
 
 	SET @SQL_STATEMENT = 'SELECT [index] '
 			+'
 			FROM '+ @TempTable_GUID+ replace(@SQL_STATEMENT,'@OR',' WHERE ')
-	
-	--SELECT @SQL_STATEMENT 
+
+	--SELECT @SQL_STATEMENT
 
 
 	INSERT INTO #tempIndexError
 	EXEC SP_EXECUTESQL @SQL_STATEMENT;
 
-	IF (SELECT COUNT(*) FROM #tempIndexError) > 0 
-		BEGIN 
+	IF (SELECT COUNT(*) FROM #tempIndexError) > 0
+		BEGIN
 			SET @error = 1
 			SET @errorIndexes = (SELECT  CONVERT(varchar(200),(SELECT STUFF((SELECT ','+ CONVERT(varchar(200),index_)
 																	FROM #tempIndexError
 																 FOR XML PATH('')), 1, 1, ''))
-											) 
+											)
 								)
-		END 
+		END
 END TRY
 BEGIN CATCH
 	SET @error = ERROR_NUMBER()
@@ -105,7 +102,7 @@ BEGIN CATCH
       ,[MESSAGE_NUMBER]
       ,[LOG_MESSAGE]
       ,[OTHERSINFOS])
-	  SELECT 
+	  SELECT
 			GETDATE(),
 			5,
 			''Import excel protocol'',
@@ -115,11 +112,11 @@ BEGIN CATCH
 			'+@iErrorCode_exec +
 			',ERROR_MESSAGE(),
 			''@file_ID =  '' +CONVERT(VARCHAR,@file_ID);'
-			
-			--SELECT @TLogMessage_ID = SCOPE_IDENTITY()	'				
-			
+
+			--SELECT @TLogMessage_ID = SCOPE_IDENTITY()	'
+
 	EXEC SP_EXECUTESQL @SQL_STATEMENT
-					
+
 END CATCH;
 
 IF @@ERROR <> 0
@@ -135,12 +132,3 @@ ELSE
 		SET @result = 'OK'
     END
 SELECT @result,  @error, @errorIndexes
-
-
-GO
-
-
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('118_ImportExcel_pr_CheckRequiredStation',GETDATE(),(SELECT db_name()))
-
-
-GO

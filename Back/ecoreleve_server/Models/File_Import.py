@@ -79,6 +79,7 @@ class File (Base):
 
     def main_process(self):
         dictSession = {}
+        self.error = True
         try:
             for process in self.Type.ProcessList:
                 dictSession[process.Name] = self.ObjContext.begin()
@@ -86,12 +87,13 @@ class File (Base):
                 result, error, errorIndexes = self.run_process(process, dictSession[process.Name])
                 print(result, error, errorIndexes)
                 if result.lower() == 'error' and process.Blocking:
-                    raise CustomErrorSQL(process.Name + 'not passed')
+                        raise CustomErrorSQL(process.Name + 'not passed')
 
-            self.ObjContext.commit()
             self.error = False
+            #self.ObjContext.commit()
         except:
             print('\n\n in except main process')
+            self.error = True
             for session in dictSession:
                 dictSession[session].rollback()
             self.ObjContext.rollback()
@@ -156,6 +158,3 @@ class File_ProcessList (Base):
 #     FK_File = Column(Integer, ForeignKey('File.ID'))
 #     FK_SensorID = Column (Integer, ForeignKey('Sensor.ID'))
 #     Content = Column(String)
-
-
-
