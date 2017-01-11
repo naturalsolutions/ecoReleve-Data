@@ -80,14 +80,17 @@ def GetProtocolsofStation(request):
 
                     curVirginObs = Observation(FK_ProtocoleType=typeID)
                     typeName = curVirginObs.GetType().Name.replace('_', ' ')
-                    curVirginObsForm = curVirginObs.GetForm(Conf, DisplayMode)
+                    protoStatus = curVirginObs.GetType().obsolete
 
-                    listProto[typeID] = {
-                        'Name': typeName,
-                        'schema': curVirginObsForm['schema'],
-                        'fieldsets': curVirginObsForm['fieldsets'],
-                        'obs': []
-                    }
+                    if protoStatus != 1:
+                        curVirginObsForm = curVirginObs.GetForm(Conf, DisplayMode)
+
+                        listProto[typeID] = {
+                            'Name': typeName,
+                            'schema': curVirginObsForm['schema'],
+                            'fieldsets': curVirginObsForm['fieldsets'],
+                            'obs': []
+                        }
 
             globalListProto = [
                 {'ID': typeID,
@@ -297,7 +300,8 @@ def getObsForms(request):
     newObs = Observation(FK_ProtocoleType=typeObs, FK_Station=sta_id)
     newObs.init_on_load()
     schema = newObs.GetDTOWithSchema(Conf, 'edit')
-
+    if newObs.GetType().obsolete == 1:
+        schema = None
     return schema
 
 
@@ -374,8 +378,8 @@ def getListofProtocolTypes(request):
     else:
         query = select([ProtocoleType.ID, ProtocoleType.Name]).where(
             or_(ProtocoleType.Status == 4, ProtocoleType.Status == 8))
+    query = query.where(ProtocoleType.obsolete == False)
     result = session.execute(query).fetchall()
-
     res = []
     for row in result:
         elem = {}
