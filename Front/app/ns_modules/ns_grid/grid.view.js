@@ -370,7 +370,7 @@ define([
             order_by = [params.sortModel[0].colId + ':' + params.sortModel[0].sort];
           }
 
-          status = {
+          var status = {
             criteria: JSON.stringify(_this.filters),
             page: page,
             per_page: pageSize,
