@@ -23,6 +23,14 @@ AS
 --DECLARE @ObjectType varchar(255) SET @ObjectType = 'Protocole'
 --DECLARE @id_frontmodule BIGINT SET @id_frontmodule = 1
 --DECLARE @proto_id int SET @proto_id=241
+IF object_id('tempdb..#oldConf') IS NOT NULL
+			DROP TABLE #oldConf
+
+SELECT * 
+ INTO #oldConf
+ FROM [ModuleForms] f
+WHERE module_id= @id_frontmodule
+AND TypeObj = @proto_id 
 
 DELETE f 
 FROM [ModuleForms] f
@@ -75,9 +83,9 @@ FI.Legend,
 CASE WHEN IPurl.value is NOT NULL THEN '{"source":"'+IPurl.value+'","minLength":'+IPlength.value+'}'
 WHEN IPobjLab.value is not null THEN '{"usedLabel":"'+IPobjLab.value+'"}'
 WHEN FI.type = 'ObjectPicker' AND IPobjT.Name = 'Non Identified Individual' THEN '{"withToggle":1}'
-WHEN IPThes.value is not null then IPThes.value
+WHEN IPThes.value is not null then  CONVERT(varchar(250),IPThes.value)
 WHEN FBD.FBInputPropertyValue Is NOT NULL THEN '{"'+FBD.FBInputPropertyName+'":"'+FBD.FBInputPropertyValue+'"}'
-WHEN FI.type = 'select' THEN IPdefVal.value
+WHEN FI.type = 'select' THEN CONVERT(varchar(250),IPdefVal.value)
  ELSE CONVERT(varchar(250),PT.ID) END as Options,
 NULL,
 Fi.fieldClassDisplay,
@@ -116,6 +124,14 @@ WHERE FF.internalID =  @proto_id AND
 FF.ObjectType = @ObjectType 
 
 
+/*** update rules because Formbuilder doesn't manage it yet ***/ 
+
+UPDATE f SET Rules = o.Rules
+FROM [ModuleForms] f
+JOIN #oldConf o ON f.Name = o.Name AND f.TypeObj = o.TypeObj
+WHERE f.module_id = 1
+
+
 
 /* update status of child form in ProtocolType */
 Update pt SET [Status] = 6
@@ -145,7 +161,7 @@ INSERT INTO [ModuleForms]
 		   ,DefaultValue
 		   )
 SELECT @id_frontmodule
-           ,i.subFromID
+           ,@proto_id
            ,'FK_ProtocoleType'
            ,'FK_ProtocoleType'
            ,0
@@ -162,9 +178,9 @@ SELECT @id_frontmodule
            ,'hide'
            ,NULL
 		   ,0
-		   ,i.subFromID 
-FROM  #inserted i 
-WHERE i.inputType =  'ListOfNestedModel'
+		   ,@proto_id
+--FROM  #inserted i 
+--WHERE i.inputType =  'ListOfNestedModel'
   
 END
 
