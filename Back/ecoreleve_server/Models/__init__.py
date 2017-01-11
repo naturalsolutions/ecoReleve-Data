@@ -1,26 +1,18 @@
-from zope.sqlalchemy import ZopeTransactionExtension
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker
 import configparser
-from sqlalchemy import event, select, text
+from sqlalchemy import select
 from sqlalchemy.exc import TimeoutError
-from pyramid import threadlocal
 import pandas as pd
-import datetime
 from traceback import print_exc
 
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
 print(AppConfig['app:main']['sensor_schema'])
-# Create a database session : one for the whole application
-#DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 
 pendingSensorData = []
 indivLocationData = []
 stationData = []
 graphDataDate = {'indivLocationData': None, 'pendingSensorData': None}
-
-
 DBSession = None
 
 
@@ -71,9 +63,9 @@ def loadThesaurusTrad(config):
     session.close()
 
 
-def loadUserRole(config):
+def loadUserRole(session):
     global userOAuthDict
-    session = config.registry.dbmaker()
+    # session = config.registry.dbmaker()
     VuserRole = Base.metadata.tables['VUser_Role']
     query = select(VuserRole.c)
 
@@ -91,8 +83,11 @@ GROUPS = {'superUser': ['group:superUsers'],
 
 
 def groupfinder(userid, request):
-    currentUserRoleID = userOAuthDict.loc[userOAuthDict[
-        'user_id'] == int(userid), 'role_id'].values[0]
+    session = request.dbsession
+    Tuser_role = Base.metadata.tables['VUser_Role']
+    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(userid))
+    currentUserRoleID = session.execute(query_check_role).scalar()
+
     if currentUserRoleID in USERS:
         currentUserRole = USERS[currentUserRoleID]
         return GROUPS.get(currentUserRole, [])
@@ -123,14 +118,9 @@ def db(request):
     request.add_finished_callback(cleanup)
     return session
 
-# def remove_session(request):
-#     request.dbsession.close()
-#     DBSession.remove()
 
-# def setup_post_request(event):
-#     event.request.add_finished_callback(remove_session)
 from ..GenericObjets.ObjectWithDynProp import LinkedTables
-
+from ..GenericObjets.FrontModules import *
 from .CustomTypes import *
 from .Protocoles import *
 from .User import User

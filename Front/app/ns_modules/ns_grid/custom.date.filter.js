@@ -113,14 +113,17 @@ define([
     onFilterChanged: function () {
       var dateFrom = null;
       var dateTo = null;
+      var format;
       if(this.dateFrom.value !== "") {
-        dateFrom = moment(this.dateFrom.value, "DD/MM/YYYY HH:mm").unix();//moment(this.dateFrom.value, this.dateFormat).toDate();
+        format = this.getDateFormat(this.dateFrom.value);
+        dateFrom = moment(this.dateFrom.value, format).unix();//moment(this.dateFrom.value, this.dateFormat).toDate();
       }
       else{
         dateFrom = "";
       }
       if(this.dateTo.value !== "") {
-        dateTo = moment(this.dateTo.value, "DD/MM/YYYY HH:mm").unix();//moment(this.dateTo.value, this.dateFormat).toDate();
+        format = this.getDateFormat(this.dateTo.value);
+        dateTo = moment(this.dateTo.value,format).unix();//moment(this.dateTo.value, this.dateFormat).toDate();
       }
       else {
         dateTo = "";
@@ -187,17 +190,26 @@ define([
       };
     },
 
+    getDateFormat: function(val){
+      var formats = ['DD/MM/YYYY HH:mm:ss','YYYY-MM-DD HH:mm:ss','YYYY-MM-DD HH:mm','DD/MM/YYYY HH:mm'];
+      var result = formats.filter(function(format){
+        return moment(val,format, true).isValid();
+      });
+      return result[0];
+    },
+
     doesFilterPass : function (params) {
       var valTmp = this.valueGetter(params);
-      valTmp = moment(valTmp, "YYYY-MM-DD HH:mm").unix();
+      var format = this.getDateFormat(valTmp);
+      valTmp = moment(valTmp,format).unix();
       if (!this.filterDate) {
         return true;
       } else if ( this.filterDate.dateFrom && this.filterDate.dateTo  ) {
-        return (valTmp > this.filterDate.dateFrom && valTmp < this.filterDate.dateTo);
+        return (valTmp >= this.filterDate.dateFrom && valTmp <= this.filterDate.dateTo);
       }else if( this.filterDate.dateFrom ) {
-        return valTmp > this.filterDate.dateFrom;
+        return valTmp >= this.filterDate.dateFrom;
       }else if (this.filterDate.dateTo) {
-        return valTmp < this.filterDate.dateTo;
+        return valTmp <= this.filterDate.dateTo;
       }else {
         return false;
       }

@@ -1,0 +1,20 @@
+
+  UPDATE g SET GridRender = 1,  GridOrder = 10
+  FROM [ModuleGrids] g
+  WHERE module_id = 17 and Name = 'Date_Sortie'
+
+ update [ModuleGrids] SET GridSize = '{"width":120,"maxWidth":350,"minWidth":100}'
+
+ update [ModuleGrids] SET GridSize = '{"width":120,"maxWidth":350,"minWidth":180}'
+    WHERE module_id = 17
+
+update [ModuleGrids] SET GridSize = '{"width":100,"maxWidth":350,"minWidth":100}'
+    WHERE module_id = 17 and Name in ('Box_ID', 'ID') 
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('105_up_Conf_releaseGrid_colsize',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -160,6 +160,10 @@ define([
           _this.formatSelectColumn(col)
         }
 
+        if(col.cell == 'autocomplete'){
+          _this.addBBFEditor(col);
+        }
+        
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;
@@ -183,9 +187,7 @@ define([
           }
         }
         //draft
-        if(col.cell == 'autocomplete'){
-          _this.addBBFEditor(col);
-        }
+
       });
       return columnDefs;
     },

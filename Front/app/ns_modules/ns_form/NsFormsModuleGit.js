@@ -211,7 +211,7 @@ define([
             }
             window.formInEdition.form[_this.formRegion.selector] = _this;
             window.formInEdition.form.baseUri = _this.$el[0].baseURI;
-          if(_this.displayMode.toLowerCase() == 'edit'){
+          if(_this.displayMode && _this.displayMode.toLowerCase() == 'edit'){
               _this.bindChanges();
             }
       }
