@@ -379,6 +379,7 @@ define([
             typeObj: _this.model.get('objectType')
           };
 
+
           if(this.startDate){
             status.startDate = this.startDate;
           }

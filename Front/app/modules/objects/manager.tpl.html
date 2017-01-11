@@ -17,25 +17,28 @@
   		<% } %>
 		</div>
 
-		<div class="crop2 clearfix">
-			<br>
-			<div class="border-bottom-filter hide">
-					<div class="form-group col-md-6">
-						<span>At Date : </span>
-						<div class='input-group date' id='datetimepicker2'>
-								<span class="input-group-addon">
-										<span class="reneco-calendar reneco" ></span>
-								</span>
-								<input id="dateVal" type='text' class="form-control" />
+		<div class="crop2 clearfix flex-column no-padding">
+			<%  if (label === 'individuals') { %>
+				<div class="height-padding col">
+						<div class="col-md-6">
+							<label>From date (history): </label>
+							<div class="js-datetimepicker-history input-group date">
+									<span class="input-group-addon">
+											<span class="reneco-calendar reneco" ></span>
+									</span>
+									<input class="js-date-history form-control" type="text" />
+							</div>
 						</div>
-					</div>
-						<div class="">
-							<span>All history : </span>
-							<input id="histVal" type='checkbox' class="form-control" />
+						<div class="col-md-6">
+								<label>All (history): </label>
+								<input class="js-checkbox-history form-control" type="checkbox" />
 						</div>
-			</div>
-			<div class="js-filters filter-no-padding"></div>
+				</div>
+			<% } %>
+
+			<div class="js-filters clearfix full-height flex1 overflow-auto height-padding"></div>
 		</div>
+
 		<div class="toolbar bottom">
 			<button class="js-btn-clear btn pull-left">Clear</button>
 			<button class="js-btn-filter btn btn-success pull-right">
