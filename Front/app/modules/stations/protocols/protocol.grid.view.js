@@ -56,8 +56,8 @@ define([
       });
 
       var data = JSON.stringify({
-          rowData: rowData,
-          objectType: this.model.get('ID')
+          'rowData': rowData,
+          'FK_ProtocoleType': this.model.get('ID')
         });
       $.ajax({
         url: this.url + '/batch',
@@ -80,15 +80,16 @@ define([
     deleteObs: function(){
       this.gridView.gridOptions.api.stopEditing();
       var rowData = this.gridView.gridOptions.api.getSelectedRows();
+
+      var data = JSON.stringify({
+        rowData: rowData,
+        delete: true
+      });
       $.ajax({
         url: this.url + '/batch',
         method: 'POST',
         contentType: 'application/json',
-        data: {
-          rowData: JSON.stringify(rowData),
-          objectType: this.model.get('ID'),
-          delete: true
-        },
+        data: data,
         context: this,
       }).done(function(resp) {
         this.toggleEditionMode();
@@ -131,7 +132,6 @@ define([
     },
 
     onShow: function(){
-      console.log(this.model.get('ID'));
       this.rgGrid.show(this.gridView = new GridView({
         columns: this.formatColumns(this.options.model),
         clientSide: true,

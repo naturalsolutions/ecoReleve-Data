@@ -112,10 +112,7 @@ def updateObservation(request, json_body, obs_id):
     curObs.LoadNowValues()
     listOfSubProtocols = []
 
-    responseBody = {
-        'entity': curObs.ID,
-        'response': 'success'
-    }
+    responseBody = { 'id': curObs.ID }
 
     for items, value in data.items():
         if isinstance(value, list) and items != 'children':
@@ -140,8 +137,7 @@ def createObservation(request, json_body):
         data[items] = value
 
     data['FK_Station'] = request.matchdict['id']
-    data['FK_ProtocoleType'] = request.json_body['objectType']
-
+    data['FK_ProtocoleType'] = request.json_body['FK_ProtocoleType']
 
     sta = session.query(Station).get(request.matchdict['id'])
 
@@ -160,16 +156,13 @@ def createObservation(request, json_body):
     curObs.init_on_load()
     curObs.UpdateFromJson(data)
 
-    responseBody = {
-        'entity': '0',
-        'response': 'success'
-    }
+    responseBody = {}
 
     try:
         curObs.Station = sta
         session.add(curObs)
         session.flush()
-        responseBody['entity'] = curObs.ID
+        responseBody['id'] = curObs.ID
     except ErrorAvailable as e:
         session.rollback()
         request.response.status_code = 510
@@ -181,8 +174,8 @@ def createObservation(request, json_body):
 @view_config(route_name='stations/id/observations/batch',
              renderer='json',
              request_method='POST',
-             permission=routes_permission[prefixProt]['PUT'])
-def saveMultiObservations(request):
+             permission=routes_permission[prefixProt]['POST'])
+def batch(request):
     session = request.dbsession
     sta_id = request.matchdict['id']
     rowData = request.json_body['rowData']
@@ -193,6 +186,11 @@ def saveMultiObservations(request):
     }
 
     for i in range(len(rowData)):
+
+        if 'delete' in request.json_body:
+            responseBody['updatedObservations'].append(deleteObservation(request, rowData[i]['ID']))
+            return
+
         json_body = rowData[i]
         if 'ID' in rowData[i]:
             responseBody['updatedObservations'].append(updateObservation(request, json_body, rowData[i]['ID']))
@@ -201,8 +199,15 @@ def saveMultiObservations(request):
     
     return responseBody
 
+def deleteObservation(request, obs_id):
+    session = request.dbsession
+    curObs = session.query(Observation).get(obs_id)
+    responseBody = { 'id': obs_id }
+    session.delete(curObs)
+    return responseBody
 
-@view_config(route_name='stations/id/observations/obs_id',
+
+@view_config(route_name='stations/id/observations',
              renderer='json',
              request_method='POST',
              permission=routes_permission[prefixProt]['POST'])
@@ -221,13 +226,8 @@ def handleObservationUpdate(request):
              renderer='json',
              request_method='DELETE',
              permission=routes_permission[prefixProt]['DELETE'])
-def deleteObservation(request):
-    session = request.dbsession
-    obs_id = request.matchdict['obs_id']
-    curObs = session.query(Observation).get(obs_id)
-    session.delete(curObs)
-
-    return {}
+def handleDeleteObservation(request):
+    return deleteObservation(request, request.matchdict['obs_id'])
 
 @view_config(route_name='stations/id/observations/obs_id',
              renderer='json',
@@ -275,7 +275,7 @@ def getProtocolObservations(request):
     return values
 
 
-@view_config(route_name=prefix + '/id/protocols/action',
+@view_config(route_name='stations/id/observations/action',
              renderer='json',
              request_method='GET',
              permission=routes_permission[prefixProt]['GET'])

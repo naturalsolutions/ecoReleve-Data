@@ -78,7 +78,6 @@ def add_routes(config):
                      'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
 
 
-
     # Stations
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
@@ -91,8 +90,6 @@ def add_routes(config):
     config.add_route('stations/importGPX', 'ecoReleve-Core/stations/importGPX')
 
 
-
-
     # GET Stations/Protocols (with obs ids)
     config.add_route('stations/id/protocols',
                      'ecoReleve-Core/stations/{id}/protocols',
@@ -100,36 +97,32 @@ def add_routes(config):
     config.add_route('stations/id/protocols/',
                      'ecoReleve-Core/stations/{id}/protocols/',
                      custom_predicates=(integers('id'),))
-    
 
 
-    # POST PUT GET DELETE
+    # Observations
+    # PUT GET DELETE
     config.add_route('stations/id/observations/obs_id',
                      'ecoReleve-Core/stations/{id}/observations/{obs_id}',
+                     custom_predicates=(integers('id', 'obs_id'),))
+
+    # BATCH (POST also used for PUT & DELETE) ?objectType
+    config.add_route('stations/id/observations/batch',
+                     'ecoReleve-Core/stations/{id}/observations/batch',
                      custom_predicates=(integers('id'),))
     
-    # GET ?objType
+    # Action (action == 0 == form)
+    config.add_route('stations/id/observations/action',
+                     'ecoReleve-Core/stations/{id}/observations/{action}',
+                     custom_predicates=(integers('id'),))
+    
+    # POST GET ?objType
     config.add_route('stations/id/observations',
                      'ecoReleve-Core/stations/{id}/observations',
                      custom_predicates=(integers('id'),))
 
-    # BATCH (POST also used for PUT & DELETE)
-    config.add_route('stations/id/observations/batch',
-                     'ecoReleve-Core/stations/{id}/observations/batch',
-                     custom_predicates=(integers('id'),))
-
-
-    # config.add_route('stations/id/protocols/type/observations',
-    #                  'ecoReleve-Core/stations/{id}/protocols/{type}/observations',
-    #                  custom_predicates=(integers('id', 'type'),))
-
 
     # Protocols
-    config.add_route('stations/id/protocols/action',
-                     'ecoReleve-Core/stations/{id}/protocols/{action}')
-
     config.add_route('protocols', 'ecoReleve-Core/protocols/')
-
 
     config.add_route('protocols/id',
                      'ecoReleve-Core/protocols/{id}',
@@ -142,19 +135,6 @@ def add_routes(config):
 
     # FieldActivity
     config.add_route('fieldActivity', 'ecoReleve-Core/fieldActivity')
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
