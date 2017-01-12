@@ -6,7 +6,7 @@ define([
   'backbone-forms',
   'sweetAlert',
   'ns_ruler/ruler',
-  'requirejs-text!./Templates/NsFormsModule.html',
+  'requirejs-text!./NsFormsModule.html',
   'fancytree',
   './NsFormsCustomFields',
 ], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tpl) {
@@ -114,7 +114,6 @@ define([
       this.extendsBBForm();
       this.gridRow = options.gridRow || this.gridRow;
       this.checkGridRowAgain();
-
       var jqxhr;
       this.modelurl = options.modelurl;
 
@@ -122,6 +121,7 @@ define([
       this.buttonRegion = options.buttonRegion;
       this.formRegion = options.formRegion;
 
+      this.afterDelete = options.afterDelete || false;
 
       if(options.displayDelete != undefined){
         this.displayDelete = options.displayDelete;
@@ -145,7 +145,6 @@ define([
       }
       else {
         this.id = 0;
-        window.formEdition = true;
       }
 
       if(options.displayMode){
@@ -165,13 +164,17 @@ define([
 
       if (options.model) {
         this.model = options.model;
+
         this.BBForm = new BackboneForm({
           model: this.model,
           data: this.model.data,
           fieldsets: this.model.fieldsets,
           schema: this.model.schema
         });
+
         this.showForm();
+        this.pushFormInEdit(this);
+
       }
       else {
         this.initModel();
@@ -190,10 +193,28 @@ define([
       }
 
       this.data = options.data || {};
+      var _this = this;
 
-      $(this.BBForm).on( "click", function() {
+      // $(this.BBForm).on( "click", function() {
+      //
+      // });
+    },
 
-      });
+    pushFormInEdit: function(_this){
+        this.formChange = false;
+        if(!window.formInEdition.form){
+            window.formInEdition.form = {baseUri: _this.$el[0].baseURI};
+            window.formInEdition.form[_this.formRegion.selector]= _this;
+          } else {
+            if(window.formInEdition.form['undefined']){
+              delete window.formInEdition.form['undefined'];
+            }
+            window.formInEdition.form[_this.formRegion.selector] = _this;
+            window.formInEdition.form.baseUri = _this.$el[0].baseURI;
+          if(_this.displayMode && _this.displayMode.toLowerCase() == 'edit'){
+              _this.bindChanges();
+            }
+      }
     },
 
     initModel: function () {
@@ -226,10 +247,6 @@ define([
         dataType: 'json',
         success: function (resp) {
           _this.model.schema = resp.schema;
-          window.formEdition = false;
-          if (this.displayMode == 'edit'){
-            window.formEdition = true;
-          }
           if (resp.fieldsets) {
             // if fieldset present in response, we get it
             _this.model.fieldsets = resp.fieldsets;
@@ -240,18 +257,19 @@ define([
           var settings = $.extend({}, _this.data, resp.data); //?
           _this.model.attributes = settings;
 
-
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
           _this.showForm();
+          _this.pushFormInEdit(_this);
           _this.updateState(this.displayMode);
         },
         error: function (data) {
-          console.warn('request error');
+          //console.warn('request error');
           _this.loadingError();
           //alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objectType);
         }
       });
     },
+
     initRules:function() {
       var _this = this;
       this.ruler = new Ruler({
@@ -283,6 +301,58 @@ define([
       }
     },
 
+    bindChanges: function(){
+      var _this = this;
+      $(this.formRegion).find('input').on("change", function(e) {
+        if($(e.target).val() !== ''){
+          _this.formChange = true;
+        } else {
+          _this.formChange = false;
+       }
+      });
+      $(this.formRegion).find('select').on("change", function(e) {
+         _this.formChange = true;
+      });
+      $(this.formRegion).find('textarea').on("change", function(e) {
+         _this.formChange = true;
+      });
+      $(this.formRegion).find('.grid-form').on("change", function(e) {
+         _this.formChange = true;
+      });
+      $(this.formRegion).find('.nested').on("change", function(e) {
+         _this.formChange = true;
+      });
+
+      $(this.formRegion).find('textarea').on("keypress", function(e) {
+        var maxlen = 250;
+        var self = this;
+        if ($(this).val().length > maxlen) {
+          return false;
+        }  else {
+          _this.cleantextAreaAfterError(this);
+        }
+      });
+      $(this.formRegion).find('textarea').on('keyup', function (e) {
+        var maxlen = 250;
+        var strval = $(this).val();
+        var self = this;
+        if ($(this).val().length > maxlen) {
+           _this.showErrorForMaxLength(this);
+          return false;
+        }
+      });
+      $(this.formRegion).find('textarea').on('keydown' , function(e) {
+        if(event.which == 8) {
+          var maxlen = 250;
+          var strval = $(this).val();
+          var self = this;
+          if ($(this).val().length < maxlen) {
+           _this.cleantextAreaAfterError(this);
+          }
+        }
+      });
+    },
+
     showForm: function (){
       var _this = this;
       this.BBForm.render();
@@ -293,7 +363,11 @@ define([
       var _this = this;
       this.initRules();
 
-      this.formRegion.html(this.BBForm.el); //this.formRegion.html(this.BBForm.el);
+      if(this.formRegion.html){
+        this.formRegion.html(this.BBForm.el);
+      } else {
+        return;
+      }
 
       if(!this.gridRow) {
         $(this.formRegion).find('input').on("keypress", function(e) {
@@ -302,45 +376,6 @@ define([
           }
         });
       }
-      $(this.formRegion).find('input').on("change", function(e) {
-         window.formChange = true;
-      });
-      $(this.formRegion).find('select').on("change", function(e) {
-         window.formChange = true;
-      });
-      $(this.formRegion).find('textarea').on("change", function(e) {
-         window.formChange = true;
-      });
-
-        $(this.formRegion).find('textarea').on("keypress", function(e) {
-            var maxlen = 250;
-            var self = this;
-            if ($(this).val().length > maxlen) {
-              return false;
-            }  else {
-              _this.cleantextAreaAfterError(this);
-            }
-        });
-        $(this.formRegion).find('textarea').on('keyup', function (e) {
-              var maxlen = 250;
-              var strval = $(this).val();
-              var self = this;
-              if ($(this).val().length > maxlen) {
-                 _this.showErrorForMaxLength(this);
-                return false;
-            }
-        });
-        $(this.formRegion).find('textarea').on('keydown' , function(e) {
-             if(event.which == 8) {
-                var maxlen = 250;
-                var strval = $(this).val();
-                var self = this;
-                if ($(this).val().length < maxlen) {
-                 _this.cleantextAreaAfterError(this);
-                }
-             }
-        });
-
 
       if(this.buttonRegion){
         if(this.buttonRegion[0]){
@@ -353,8 +388,8 @@ define([
             this.bindEvents();
           }
         }
-
       }
+
       if (this.afterShow) {
         this.afterShow();
       }
@@ -363,17 +398,19 @@ define([
         this.finilizeToGridRow();
       }
     },
+
     showErrorForMaxLength : function(_this){
       var errorTag = $(_this).parent().parent().find('div')[0];
       $(errorTag).text('Text max length is 250');
       $(_this).addClass('error');
     },
+
     cleantextAreaAfterError : function(_this){
         var errorTag = $(_this).parent().parent().find('div')[0];
         $(errorTag).text('');
         $(_this).removeClass('error');
-
     },
+
     showAlertforMaxLength : function(){
       var opts = {
         title : 'Max length: 255 characters !',
@@ -387,7 +424,6 @@ define([
     updateState: function(state){
 
     },
-
 
     displaybuttons: function () {
       var name = this.name;
@@ -414,99 +450,104 @@ define([
 
     },
 
-    /*afterShow: function(){
-
-    },*/
-
     butClickSave: function (e) {
-      var _this = this;
-      var errors = this.BBForm.commit();
-      var jqhrx;
+          var _this = this;
+          var flagEmpty = false;
+          var errors = this.BBForm.commit();
+          var jqhrx;
 
-
-      if(!errors){
-          if (this.model.attributes["id"] == 0) {
-            // To force post when model.save()
-          this.model.attributes["id"] = null;
-        }
-        this.onSavingModel();
-        if (this.model.id == 0) {
-          // New Record
-          jqhrx = this.model.save(null, {
-            success: function (model, response) {
-              // Getting ID of created record, from the model (has beeen affected during model.save in the response)
-              window.formEdition = false;
-              window.formChange = false;
-              _this.savingSuccess(model, response);
-              _this.id = _this.model.id;
-              if (_this.redirectAfterPost != "") {
-                // If redirect after creation
-                var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
-
-                if (window.location.href == window.location.origin + TargetUrl) {
-                  // if same page, relaod
-                  window.location.reload();
-                }
-                else {
-                  // otpherwise redirect
-                  window.location.href = TargetUrl;
-                }
-
-              }
-              else {
-                // If no redirect after creation
-                if (_this.reloadAfterSave) {
-                  _this.reloadingAfterSave();
-                }
-              }
-              _this.afterSaveSuccess();
-              return true;
-            },
-            error: function (response) {
-              _this.savingError(response);
-              return false;
-            }
-
-          });
-        }
-        else {
-          // After update of existing record
-          this.model.id = this.model.get('id');
-          var jqxhr = this.model.save(null, {
-            success: function (model, response) {
-              window.formEdition = false;
-              window.formChange = false;
-              _this.savingSuccess(model, response);
-              if (_this.reloadAfterSave) {
-                _this.reloadingAfterSave();
-              }
-              _this.afterSaveSuccess();
-            },
-            error: function (model,response) {
-              _this.savingError(response);
-            }
-          });
-
-        }
-      }else{
-        var errorList = _this.BBForm.$el.find('.error');
-        for (var i=0; i<errorList.length ;i++){
-          var elmName = errorList[i].nodeName ;
-          if (elmName.toUpperCase()!= 'SPAN'){
-            $(errorList[i]).trigger('focus').click();
-            break;
+          if(!errors){
+            flagEmpty = this.checkFormIsEmpty(this.model.schema,this.BBForm.getValue());
           }
-        }
-        return false;
-      }
-      this.afterSavingModel();
-      return jqxhr;
-    },
+          if(flagEmpty){
+            this.swal({
+              title : 'Empty observation',
+              text : 'The observation won\'t be recorded',
+              type:'warning',
+              showCancelButton: false,
+              confirmButtonColor:'#DD6B55',
+              confirmButtonText:'Ok'
+            });
+            return;
+          }
+
+          if(!errors) {
+            if (this.model.attributes["id"] == 0) {
+                // To force post when model.save()
+              this.model.attributes["id"] = null;
+            }
+
+            if (this.model.id == 0) {
+              // New Record
+              jqhrx = this.model.save(null, {
+                success: function (model, response) {
+                  // Getting ID of created record, from the model (has beeen affected during model.save in the response)
+                  _this.savingSuccess(model, response);
+                  _this.id = _this.model.id;
+                  if (_this.redirectAfterPost != "") {
+                    // If redirect after creation
+                    var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
+
+                    if (window.location.href == window.location.origin + TargetUrl) {
+                      // if same page, relaod
+                      window.location.reload();
+                    }
+                    else {
+                      // otpherwise redirect
+                      window.location.href = TargetUrl;
+                    }
+                  }
+                  else {
+                    // If no redirect after creation
+                    if (_this.reloadAfterSave) {
+                      _this.reloadingAfterSave();
+                    }
+                  }
+                  _this.afterSaveSuccess(response);
+                  return true;
+                },
+                error: function (model, response) {
+                  _this.savingError(response);
+                  return false;
+                }
+              });
+            }
+            else {
+              // After update of existing record
+              this.model.id = this.model.get('id');
+              var jqxhr = this.model.save(null, {
+                success: function (model, response) {
+                  _this.savingSuccess(model, response);
+                  if (_this.reloadAfterSave) {
+                    _this.reloadingAfterSave();
+                  }
+                  _this.afterSaveSuccess(response);
+                },
+                error: function (model,response) {
+                  _this.savingError(response);
+                }
+              });
+            }
+          }else{
+            var errorList = _this.BBForm.$el.find('.error');
+
+            for(var i=0; i < errorList.length; i++){
+              var elmName = errorList[i].nodeName ;
+              if (elmName.toUpperCase()!= 'SPAN'){
+                $(errorList[i]).trigger('focus').click();
+                break;
+              }
+            }
+            return false;
+          }
+          _this.formChange = false;
+          this.afterSavingModel();
+          return jqxhr;
+        },
 
     afterSaveSuccess: function(){
 
     },
-
 
     butClickEdit: function (e) {
       this.checkGridRowAgain();
@@ -543,22 +584,31 @@ define([
         type: 'warning',
         confirmButtonText: 'Yes, delete it!',
         confirmButtonColor: '#DD6B55',
-        callback : function(){
-          window.formEdition = false;
-          window.formChange = false;
-          _this.afterDelete(_this.model);
-
+        callback: function(){
+          _this.formChange = false;
+          _this.deleteModel();
         }
       };
-
       this.swal(opts);
     },
 
-
-    afterDelete: function(){
-
+    deleteModel: function(){
+      var _this = this;
+      this.model.id = this.model.get('id');
+      if(this.model.get('id') == 0){
+        _this.afterDelete(_this.model);
+      }
+      this.model.destroy({
+        success: function(response){
+          if(_this.afterDelete){
+            _this.afterDelete(response, _this.model);
+          }
+        },
+        fail: function(response){
+          console.error(response);
+        }
+      });
     },
-
 
     reloadingAfterSave: function () {
       this.displayMode = 'display';
@@ -569,12 +619,57 @@ define([
       this.displaybuttons();
     },
 
+
+    checkFormIsEmpty: function(objSchema , values) {
+      var isEmpty = true;
+
+      for( var key in values ) {
+        var editorValue = values[key];
+        var editorSchema = objSchema[key];
+
+        if(key == 'defaultValues') {
+          continue;
+        }
+        if(editorSchema.fieldClass.indexOf('hide') != -1) {
+          continue;
+        }
+        if(editorSchema.type == 'Checkbox') {
+          continue;
+        }
+        //need to check if not an array
+        if(editorValue != null && editorValue != '' && !Array.isArray(editorValue) ) {
+          return isEmpty = false;
+        }
+
+        if(editorSchema.defaultValue) {
+            if(editorSchema.defaultValue != editorValue) {
+              return isEmpty = false;
+            }
+        }
+
+        if( Array.isArray(editorValue) ) {
+          //subform
+          for( var values of editorValue ) {
+            if(!this.checkFormIsEmpty(editorSchema.subschema, values)) {
+              return isEmpty = false;
+            }
+          }
+        }
+      }
+
+      return isEmpty;
+    },
+
+
+
     onSavingModel: function () {
       // To be extended, calld after commit before save on model
     },
+
     afterSavingModel: function () {
-      // To be extended called after model.save()
+  // To be extended called after model.save()
     },
+
     BeforeShow: function () {
       // to be extended called after render, before the show function
     },
@@ -582,9 +677,11 @@ define([
     savingSuccess: function (model, response) {
       // To be extended, called after save on model if success
     },
+
     savingError: function (response) {
       // To be extended, called after save on model if error
     },
+
     loadingError : function(response) {
 
     },

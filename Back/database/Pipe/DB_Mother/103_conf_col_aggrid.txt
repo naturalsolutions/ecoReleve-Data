@@ -1,0 +1,34 @@
+--monitored site
+ UPDATE [dbo].[ModuleGrids]
+   SET [ColumnParams] = '{ "pinned" : "left" }'
+ WHERE Module_ID = (select ID from [dbo].[FrontModules] where Name like 'MonitoredSiteGrid')
+ AND( Name = 'Name')
+GO
+
+--stations
+ UPDATE [dbo].[ModuleGrids]
+   SET [ColumnParams] = '{ "pinned" : "left" }'
+ WHERE Module_ID = (select ID from [dbo].[FrontModules] where Name like 'StationGrid')
+ AND( Name = 'ID'
+ OR  Name = 'Name'
+ OR Name = 'StationDate')
+GO
+
+--Indiv
+ UPDATE [dbo].[ModuleGrids]
+   SET [ColumnParams] = '{ "pinned" : "left" }'
+ WHERE Module_ID = (select ID from [dbo].[FrontModules] where Name like 'IndivFilter')
+ AND( Name = 'ID')
+GO
+
+--sensors
+ UPDATE [dbo].[ModuleGrids]
+   SET [ColumnParams] = '{ "pinned" : "left" }'
+ WHERE Module_ID = (select ID from [dbo].[FrontModules] where Name like 'SensorFilter')
+ AND( Name = 'UnicIdentifier')
+GO
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('103_conf_col_aggrid',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -3,12 +3,11 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
-  'ns_grid/model-grid',
   'sweetAlert',
   'moment',
+  'config',
   'i18n'
-], function($, _, Backbone, Marionette, config, NsGrid, Swal, Moment
+], function($, _, Backbone, Marionette, Swal, Moment, Config
 ) {
   'use strict';
   return Marionette.LayoutView.extend({
@@ -92,10 +91,10 @@ define([
       };
 
       if (this.model.get('fileType') == 'excel'){
-        var url =  config.coreUrl + 'export/views/getFile?criteria='+JSON.stringify(this.datas);
+        var url =  Config.coreUrl+'export/views/getFile?criteria='+JSON.stringify(this.datas);
         var link = document.createElement('a');
         link.classList.add('DowloadLinka');
-      
+
         //link.download = url;
         link.href = url;
         link.onclick = function () {
@@ -124,7 +123,7 @@ define([
         link.click();
       } else {
 
-        var route = config.coreUrl + 'export/views/getFile';
+        var route = 'export/views/getFile';
         $.ajax({
           url: route,
           data: {criteria: JSON.stringify(this.datas)},

@@ -4,13 +4,12 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'config',
   'sweetAlert',
   'dropzone',
-
+  'config',
   'i18n'
 
-], function($, _, Backbone, Marionette, config, Swal, Dropzone
+], function($, _, Backbone, Marionette, Swal, Dropzone , config
 
   ) {
 
@@ -39,7 +38,7 @@ define([
       var previewTemplate = previewNode.parentNode.innerHTML;
       previewNode.parentNode.removeChild(previewNode);
       var myDropzone = new Dropzone(this.el, {
-        url: config.coreUrl + 'sensors/gsm/datas', // Set the url
+        url: config.coreUrl+'sensors/gsm/datas', // Set the url
         thumbnailWidth: 80,
         thumbnailHeight: 80,
         parallelUploads: 8,
@@ -142,7 +141,7 @@ define([
       myDropzone.on('error', function(file) {
 
         this.errors = file.xhr.status;
-    
+
         $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-danger');
       });
 
@@ -156,23 +155,31 @@ define([
         var totalInserted = _this.totalReturned.reduce(function(memo, value) { return memo + value.get("inserted") }, 0);
         if (!this.errors) {
           Swal({title: 'Well done',
-            text: 'File(s) have been correctly imported\n' 
+            text: 'File(s) have been correctly imported\n'
                           + '\t inserted : ' + totalInserted
                           ,
             type:  'success',
             showCancelButton: true,
             confirmButtonText: 'Validate GSM',
-            cancelButtonText: 'New import',
+            cancelButtonText: 'Import new GSM',
             closeOnConfirm: true,
             closeOnCancel: true},
-            function(isConfirm) {   if (isConfirm) {
+            function(isConfirm) {
+              if (isConfirm) {
               Backbone.history.navigate('validate/gsm',{trigger: true});
-            }
+              }
+              else {
+                document.querySelector('#actions .cancel').click();
+                // var ret = Backbone.history.navigate('importFile/gsm', true);
+                // if (ret === undefined) {
+                //     Backbone.history.loadUrl('importFile/gsm');
+                // }
+              }
           }
           );
 
         }else {
-          console.log(this.errors)
+
           if (this.errors != 401){
             Swal(
             {
