@@ -121,7 +121,7 @@ define([
         url: this.url,
         objectType: this.model.get('ID'),
         gridOptions: {
-          rowSelection: 'multiple',
+          rowSelection: (this.editable)? 'multiple' : '',
         }
       }));
     },

@@ -185,6 +185,12 @@ li.list-group-item{
   word-wrap : break-word;
 }
 
+.height-padding{
+  padding-top: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
 .noselect {
 	* {
 		cursor : pointer;
@@ -259,16 +265,41 @@ li.list-group-item{
   border-right: 1px solid #ccc;
 }
 
-#locationsGrid th.select-all-header-cell input{
-  display: none;
+
+.loading {
+      display: inline-block;
+      font-family: 'reneco' !important;
+      speak: none;
+      font-style: normal;
+      font-weight: normal;
+      font-variant: normal;
+      text-transform: none;
+      line-height: 1;
+      -webkit-font-smoothing: antialiased;
+
+    -animation: spin .7s infinite linear;
+    -ms-animation: spin .7s infinite linear;
+    -webkit-animation: spinw .7s infinite linear;
+    -moz-animation: spinm .7s infinite linear;
+}
+.loading:before{
+  content: "\e65a";
+}
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
 }
 
-.js-filter {
-  margin: 1em;
+@-webkit-keyframes spinw {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
 }
-#locationsFilter .filter-form-Date {
-  margin-top: 1em;
+
+@-moz-keyframes spinm {
+    from { -moz-transform: rotate(0deg);}
+    to { -moz-transform: rotate(360deg);}
 }
+
 
 a.btn{
   color: inherit;

@@ -103,22 +103,14 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
         this.setNav(patern);
       }
 
-      this.checkResestCurrentDatas(patern[0], params);
+      this.checkStatus(patern);
     },
 
-    checkResestCurrentDatas: function(type, params) {
-      if(params.length > 1){
-        if(this.currentId && this.currentId != params[0]){
-          window.app.currentData = null;
-        }
-        this.currentId = params[0];
-      } else {
-        this.currentId = null;
-      }
-      if(window.app.currentData){
-        if((window.app.currentData.type != type)){
-          window.app.currentData = null;
-        }
+    checkStatus: function(patern) {
+      if(!window.app.currentData)
+        return;
+      if (window.app.currentData.type != patern[0]) {
+        window.app.currentData = null;
       }
     },
 
