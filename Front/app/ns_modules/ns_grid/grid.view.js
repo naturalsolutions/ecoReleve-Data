@@ -91,6 +91,7 @@ define([
         enableColResize: true,
         editType: 'fullRow',
         rowHeight: 34,
+        suppressNoRowsOverlay: true,
         headerHeight: 30,
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),

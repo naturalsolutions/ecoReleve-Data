@@ -52,6 +52,7 @@ define([
       var rowData = [];
       this.gridView.gridOptions.api.stopEditing();
       this.gridView.gridOptions.api.forEachNode( function(node) {
+        if(Object.keys(node.data).length !== 0)
         rowData.push(node.data);
       });
 
