@@ -1,12 +1,33 @@
-﻿<div class="col-xs-12">
-	<br><br>
-	<div class="btn-group pull-right" id="NsFormButton">
-		<button type="button" class="btn btn-success btn-lg" id="NsFormModuleSave" data-i18n="button.save">
-			<span class="glyphicon glyphicon-print"></span>
-			Save
+﻿<script type="text/template" id="test">
+	<div id="NsFormButton">
+	
+
+		<button class="js-admin NsFormModuleDelete btn btn-danger">
+			<span class="reneco reneco-trash"></span>
 		</button>
-		<button type="button" class="btn btn-success btn-lg" id="NsFormModuleEdit" data-i18n="button.edit">Edit</button>
-		<button type="button" class="btn btn-default btn-lg" id="NsFormModuleClear" data-i18n="button.clear">Clear</button>
+		
+		
+		
+		<button class="NsFormModuleClear btn btn-default" >
+			<span data-i18n="button.clear">Clear</span>
+		</button>
+		
+
+		<div class="pull-right">
+			<button class="NsFormModuleEdit btn btn-default" >
+				<span class="reneco reneco-edit"></span>
+				&nbsp;
+				<span data-i18n="button.edit">Edit</span>
+			</button>
+			<button class="NsFormModuleCancel btn btn-default">
+				<span data-i18n="button.cancel">Cancel</span>
+			</button>
+			<button class="NsFormModuleSave btn btn-success" >
+				<span class="reneco reneco-write"></span>
+				&nbsp;
+				<span data-i18n="button.save">Save</span>
+			</button>
+		</div>
 
 	</div>
-</div>
+</script>

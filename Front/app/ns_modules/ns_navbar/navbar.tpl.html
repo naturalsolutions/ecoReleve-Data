@@ -1,0 +1,12 @@
+<% if (display) { %>
+<span class="btn text-center switcher pull-left">
+		<span class="js-record-index"><%= index + status.offset + 1 %></span>/<span class="js-total-records"><%= totalRecords %></span>
+</span>
+<button class="js-prev btn pull-left">
+		<span class="reneco reneco-leftarrow"></span>
+</button>
+
+<button class="js-next btn pull-left">
+		<span class="reneco reneco-rightarrow"></span>
+</button>
+<% } %>

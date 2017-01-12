@@ -1,0 +1,32 @@
+BEGIN TRAN T1;
+
+UPDATE [dbo].[ObservationDynPropValue]
+SET [FK_ObservationDynProp] = (select ID from [dbo].[ObservationDynProp] where Name = 'end_time')
+where EXISTS ( select ID from Observation where FK_Observation = ID AND FK_ProtocoleType = (select ID from [dbo].[ProtocoleType] where Name  = 'Transmitter_research_condition') )
+and FK_ObservationDynProp = (select ID from [dbo].[ObservationDynProp] where Name = 'start_time')
+GO
+
+UPDATE [dbo].[ProtocoleType_ObservationDynProp]
+  SET [FK_ObservationDynProp] = (select ID from [dbo].[ObservationDynProp] where Name = 'end_time')
+  WHERE
+  FK_ProtocoleType = (select ID from [dbo].[ProtocoleType] where Name  = 'Transmitter_research_condition')
+  AND
+  FK_ObservationDynProp = (select ID from [dbo].[ObservationDynProp] where Name = 'start_time')
+GO
+
+UPDATE [dbo].[ModuleForms]
+   SET [Name] = 'end_time'
+      ,[Label] = 'End time'
+	WHERE id = (  select id from [dbo].[ModuleForms]
+	where
+	Name like '%start_time%'
+	and
+	typeobj = (select ID from [dbo].[ProtocoleType] where Name  = 'Transmitter_research_condition'))
+GO
+
+COMMIT TRAN T1;
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('102_Conf_Protocole_Transmitter_Research_Condition',GETDATE(),(SELECT db_name()))
+
+
+GO

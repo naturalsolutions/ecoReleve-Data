@@ -1,44 +1,34 @@
 from pyramid.view import view_config
 from ..Models import (
-    DBSession,
     Individual,
     Station,
     Observation,
     ProtocoleType,
-    Sensor,
-    Equipment,
     IndividualList,
-    ErrorAvailable,
     invertedThesaurusDict,
     thesaurusDictTraduction
 )
 from ..GenericObjets.FrontModules import FrontModules
-from ..GenericObjets import ListObjectWithDynProp
 import transaction
 import json
-import itertools
 from datetime import datetime
-import datetime as dt
 import pandas as pd
-import numpy as np
-from sqlalchemy import select, and_, cast, DATE, func, desc, join, text
-from sqlalchemy.orm import aliased
-from pyramid.security import NO_PERMISSION_REQUIRED
+from sqlalchemy import select, text
 from traceback import print_exc
-from collections import OrderedDict
-import pandas as pd
 from collections import Counter
 from ..controllers.security import routes_permission
-from ..Models.Equipment import checkSensor, checkEquip
+from ..Models.Equipment import checkSensor
 
 
 prefix = 'release'
 
 
-@view_config(route_name=prefix + '/individuals/action', renderer='json', request_method='GET', permission=routes_permission[prefix]['GET'])
+@view_config(route_name=prefix + '/individuals/action',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefix]['GET'])
 def actionOnStations(request):
     dictActionFunc = {
-        # 'count' : count_,
         'getFields': getFields,
         'getFilters': getFilters,
         'getReleaseMethod': getReleaseMethod
@@ -62,28 +52,7 @@ def getFields(request):
     if ModuleType == 'default':
         ModuleType = 'IndivReleaseGrid'
     cols = Individual().GetGridFields('IndivReleaseGrid')
-    # cols.append({
-    #     'name': 'unicSensorName',
-    #     'label': '| Sensor',
-    #     'editable': False,
-    #     'renderable': True,
-    #     'cell' : 'string'
-    #     })
-    # cols.append({
-    #     'name': 'FK_Sensor',
-    #     'label': '| FK_Sensor',
-    #     'editable': False,
-    #     'renderable': False,
-    #     'cell' : 'string'
-    #     })
-    cols.insert(0, {
-        'name': 'import',
-        'label': 'import',
-        'renderable': True,
-        'editable': True,
-        'cell': 'select-row',
-        'headerCell': 'select-all'
-    })
+
     return cols
 
 
@@ -104,7 +73,10 @@ def getReleaseMethod(request):
     return result
 
 
-@view_config(route_name=prefix + '/individuals', renderer='json', request_method='GET', permission=routes_permission[prefix]['GET'])
+@view_config(route_name=prefix + '/individuals',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefix]['GET'])
 def searchIndiv(request):
     session = request.dbsession
     data = request.params.mixed()
@@ -142,7 +114,10 @@ def searchIndiv(request):
     return result
 
 
-@view_config(route_name=prefix + '/individuals', renderer='json', request_method='POST', permission=routes_permission[prefix]['POST'])
+@view_config(route_name=prefix + '/individuals',
+             renderer='json',
+             request_method='POST',
+             permission=routes_permission[prefix]['POST'])
 def releasePost(request):
     session = request.dbsession
     data = request.params.mixed()
@@ -150,7 +125,7 @@ def releasePost(request):
     if 'StationID' not in data and 'IndividualList' not in data:
         if data == {}:
             data = request.json_body
-        if 'FK_Sensor' in data and data['FK_Sensor'] is not None:
+        if 'FK_Sensor' in data and data['FK_Sensor'] not in (None, ''):
             return isavailableSensor(request, data)
         return
 
@@ -159,10 +134,9 @@ def releasePost(request):
     releaseMethod = data['releaseMethod']
     curStation = session.query(Station).get(sta_id)
     taxon = False
-    taxons = dict(Counter(indiv['Species'] for indiv in indivListFromData))
+    # taxons = dict(Counter(indiv['Species'] for indiv in indivListFromData))
 
     userLang = request.authenticated_userid['userlanguage']
-    # get fullPath thesaurus therm according to user language
     indivList = []
     for row in indivListFromData:
         row = dict(map(lambda k: getFullpath(k, userLang), row.items()))
@@ -207,9 +181,12 @@ def releasePost(request):
         34: 'nb_indeterminate'
     }
 
+    """ Return sex, age repartition of released individuals
+
+        binary ponderation female : 4, male :2 , indeterminateSex : 1,
+        adult:8, juvenile : 16, indeterminateAge : 32
+    """
     def MoF_AoJ(obj):
-        # binary ponderation female : 4, male :2 , indeterminateSex : 1,
-        # adult:8, juvenile : 16, indeterminateAge : 32
         curSex = None
         curAge = None
         binP = 0
@@ -238,7 +215,6 @@ def releasePost(request):
         errorEquipment = None
         binList = []
         for indiv in indivList:
-
             curIndiv = session.query(Individual).get(indiv['ID'])
             curIndiv.LoadNowValues()
             if not taxon:
@@ -327,8 +303,9 @@ def releasePost(request):
         releaseGrp = Observation(
             FK_ProtocoleType=releaseGrpID, FK_Station=sta_id)
         releaseGrp.PropDynValuesOfNow = {}
-        releaseGrp.UpdateFromJson(
-            {'taxon': taxon, 'release_method': releaseMethod, 'nb_individuals': len(releaseIndList)})
+        releaseGrp.UpdateFromJson({'taxon': taxon,
+                                   'release_method': releaseMethod,
+                                   'nb_individuals': len(releaseIndList)})
         releaseGrp.Observation_children.extend(releaseIndList)
 
         if errorEquipment is not None:
@@ -341,7 +318,6 @@ def releasePost(request):
             session.add(releaseGrp)
             session.add_all(biometryList)
             session.add_all(equipmentIndList)
-
             message = {'release': len(releaseIndList)}
 
     except Exception as e:
@@ -364,7 +340,6 @@ def isavailableSensor(request, data):
 
 def getFullpath(item, lng):
     name, val = item
-
     try:
         newVal = invertedThesaurusDict[lng][val]
     except:

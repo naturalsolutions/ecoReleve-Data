@@ -1,22 +1,16 @@
 
 <input type="input" id="requirement" class="required hidden">
-<div class="full-height">
-	<div class="toolbar top">
-			<div class="col-md-3">
-				<select name="RFID_identifer" id="rfidId" valule="" class="form-control required" placeholder="Identifier">
-					<option value="" disabled="" selected="">Select a RFID decoder</option>
-				</select>
-			</div>
-			<div class="col-md-6">
-				<div id = "rfidFilter" class=""></div>
-			</div>
-			<button id="filterTrigger" class="btn btn-success pull-right"> Filter&nbsp;
-			<span class="reneco reneco-search"></span></button>
+
+<div class="toolbar top">
+	<legend class="pull-left">Please select your RFID decoder identifier: </legend>
+	<div class="col-md-2">
+		<select name="RFID_identifer" class="js-select-rfid-id form-control required" placeholder="Identifier">
+		</select>
 	</div>
-		<div class="crop1 crop-paginator">
-			<br>
-			<span>Please select a row</span>
-			<div id="grid" class="hidden"></div>
-		</div>
-		<div id="paginator" class="paginator hidden"></div>
+</div>
+
+<div class="js-rg-grid crop2 col-xs-12 no-padding"></div>
+
+<div class="toolbar bottom">
+	<legend>Then select a row</legend>
 </div>

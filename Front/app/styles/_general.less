@@ -12,7 +12,7 @@ html, body{
 main{
   height: 100%;
   padding-top: 50px;
-  background: rgba(255,255,255,0.25);
+  //background: rgba(255,255,255,0.25);
 }
 .white{
   background: white;
@@ -41,7 +41,7 @@ main{
 }
 
 .oh{
-  overflow: hidden;
+  overflow: hidden!important;
 }
 
 .btn-circle{
@@ -50,7 +50,6 @@ main{
   border-radius: 100%;
   color: white;
   margin: 0px 15px;
-
 }
 
 .rel{
@@ -104,11 +103,19 @@ a{
   overflow: auto;
   height: 100%;
 }
+.full-width{
+  width: 100%;
+}
 .mid-height{
   height: 50%!important;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.half-height{
+  height: 50%;
+  overflow: auto;
 }
 
 @media (max-width: @screen-lg){
@@ -142,7 +149,7 @@ span.bull-warn{
 
 
 .col-border {
-  border-right: 1px solid @gray-lighter;
+  border-right: 1px solid rgb(221, 221, 221);
 }
 
 li.list-group-item{
@@ -176,6 +183,12 @@ li.list-group-item{
 
 .break{
   word-wrap : break-word;
+}
+
+.height-padding{
+  padding-top: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
 }
 
 .noselect {
@@ -262,7 +275,6 @@ li.list-group-item{
 
 #locationsGrid th.select-all-header-cell input{
   display: none;
-
 }
 
 
@@ -278,4 +290,18 @@ button:focus {
 }
 #locationsFilter .filter-form-Date {
   margin-top: 1em;
+}
+
+a.btn{
+  color: inherit;
+  &:not([class*="btn-"]){
+    background: rgb(221, 221, 221);
+  }
+  &[class*="btn-"] {
+    &:hover, &:focus, &:visited{
+      text-decoration: none;
+      color: white;
+    }
+    color: white;
+  }
 }
