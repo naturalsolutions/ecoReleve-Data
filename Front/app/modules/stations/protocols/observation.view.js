@@ -79,17 +79,18 @@ define([
 
     handleErrors: function(response){
       // individual equipment sensor is not available
+      var btnColor = 'rgb(221, 107, 85)';
       if(response.responseJSON.sensor_available == false){
-       _this.sweetAlert('Data saving error', 'error', 'Selected sensor is not available');
+       this.swal({'title':'Data saving error', 'type':'error', 'text':'Selected sensor is not available', 'confirmButtonColor':'rgb(221, 107, 85)'});
       }
       else if(response.responseJSON.already_unequip == true ){
-      _this.sweetAlert('Data saving error', 'error', 'Selected sensor is already unequiped');
+      this.swal({'title':'Data saving error', 'type':'error', 'text':'Selected sensor is already unequiped', 'confirmButtonColor':'rgb(221, 107, 85)'});
       }
       else if(response.responseJSON.existing_equipment == false ){
-      _this.sweetAlert('Data saving error', 'error', 'Selected sensor is not equiped with this individual');
+      this.swal({'title':'Data saving error', 'type':'error', 'text':'Selected sensor is not equiped with this individual', 'confirmButtonColor':'rgb(221, 107, 85)'});
       }
       else if(response.responseJSON.errorSite == true ){
-      _this.sweetAlert('Data saving error', 'error', 'No monitored site is attached');
+      this.swal({'title':'Data saving error', 'type':'error', 'text':'No monitored site is attached', 'confirmButtonColor':'rgb(221, 107, 85)'});
       }
     },
 
