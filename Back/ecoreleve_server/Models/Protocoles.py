@@ -11,6 +11,7 @@ from sqlalchemy import (
     orm,
     func,
     event)
+from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
@@ -215,6 +216,7 @@ class ProtocoleType(Base, ObjectTypeWithDynProp):
     ID = Column(Integer, Sequence('ProtocoleType__id_seq'), primary_key=True)
     Name = Column(Unicode(250))
     Status = Column(Integer)
+    obsolete = Column(BIT)
     ProtocoleType_ObservationDynProps = relationship(
         'ProtocoleType_ObservationDynProp', backref='ProtocoleType')
     Observations = relationship('Observation', backref='ProtocoleType')

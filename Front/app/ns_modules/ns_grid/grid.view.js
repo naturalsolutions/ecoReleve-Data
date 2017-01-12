@@ -402,6 +402,14 @@ define([
             typeObj: _this.model.get('objectType')
           };
 
+          //mm
+          if(this.startDate){
+            status.startDate = this.startDate;
+          }
+          if(this.history){
+            status.history = this.history;
+          }
+
           $.ajax({
             url: _this.model.get('url'),
             method: 'GET',
