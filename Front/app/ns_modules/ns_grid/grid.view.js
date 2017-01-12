@@ -4,6 +4,7 @@ define([
   'backbone',
   'marionette',
   'ag-grid',
+  'sweetAlert',
 
   './custom.text.filter',
   './custom.number.filter',
@@ -21,7 +22,7 @@ define([
 
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, 
+], function($, _, Backbone, Marionette, AgGrid, Swal,
   CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter, utils_1,
   ObjectPicker, ThesaurusPicker, Renderers, Editors
 ) {
@@ -608,6 +609,100 @@ define([
         $(e.currentTarget).parent().addClass('current-filter');
       }, 0);
     },
+
+
+    swal: function(opt, type, callback) {
+      var btnColor;
+      switch (type){
+        case 'success':
+          btnColor = 'green';
+          opt.title = 'Success';
+          break;
+        case 'error':
+          btnColor = 'rgb(147, 14, 14)';
+          opt.title = 'Error';
+          break;
+        case 'warning':
+          if (!opt.title) {
+            opt.title = 'warning';
+          }
+          btnColor = 'orange';
+          break;
+        default:
+          return;
+          break;
+      }
+
+      Swal({
+        title: opt.title,
+        text: opt.text || '',
+        type: type,
+        showCancelButton: true,
+        confirmButtonColor: btnColor,
+        confirmButtonText: 'OK',
+        closeOnConfirm: true,
+      },
+      function(isConfirm) {
+        //could be better
+        if (isConfirm && callback) {
+          callback();
+        }
+      });
+    },
+
+    deleteSelectedRows: function(){
+      var _this = this;
+      var selectedNodes = this.gridOptions.api.getSelectedNodes();
+      if(!selectedNodes.length){
+        return;
+      }
+
+      var callback = function() {
+        _this.destroySelectedRows();
+      };
+      var opt = {
+        title: 'Are you sure?',
+        text: 'selected rows will be deleted'
+      };
+      this.swal(opt, 'warning', callback);
+
+    },
+
+    destroySelectedRows: function(){
+      var _this = this;
+      var rowData = [];
+      
+      var selectedNodes = this.gridOptions.api.getSelectedNodes();
+
+      for (var i = 0; i < selectedNodes.length; i++) {
+        var node = selectedNodes[i];
+        if(node.data.ID) {
+          rowData.push(node.data);
+        } else {
+          this.gridOptions.api.removeItems([node]);
+        }
+      }
+
+      if(rowData.length){
+        var data = JSON.stringify({
+          rowData: rowData,
+          delete: true
+        });
+        $.ajax({
+          url: this.model.get('url') + '/batch',
+          method: 'POST',
+          contentType: 'application/json',
+          data: data,
+          context: this,
+        }).done(function(resp) {
+          this.gridOptions.api.removeItems(this.gridOptions.api.getSelectedNodes());
+        }).fail(function(resp) {
+          console.log(resp);
+        });
+      }
+
+    },
+
 
     extendAgGrid: function(){
       var _this = this;

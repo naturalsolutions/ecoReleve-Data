@@ -78,25 +78,7 @@ define([
     },
 
     deleteObs: function(){
-      this.gridView.gridOptions.api.stopEditing();
-      var rowData = this.gridView.gridOptions.api.getSelectedRows();
-
-      var data = JSON.stringify({
-        rowData: rowData,
-        delete: true
-      });
-      $.ajax({
-        url: this.url + '/batch',
-        method: 'POST',
-        contentType: 'application/json',
-        data: data,
-        context: this,
-      }).done(function(resp) {
-        this.toggleEditionMode();
-        this.hardRefresh();
-      }).fail(function(resp) {
-        
-      });
+      this.gridView.deleteSelectedRows();
     },
 
     toggleEditionMode: function(){
@@ -115,17 +97,17 @@ define([
       var columnsDefs = [];
 
       for (var i = odrFields.length - 1; i >= 0; i--) {
-          var field = this.model.get('schema')[odrFields[i]];
+        var field = this.model.get('schema')[odrFields[i]];
 
-          var colDef = {
-              editable: this.editable,
-              field: field.name,
-              headerName: field.title,
-              type: field.type,
-              options: field.options
-          };
+        var colDef = {
+          editable: this.editable,
+          field: field.name,
+          headerName: field.title,
+          type: field.type,
+          options: field.options
+        };
 
-          columnsDefs.push(colDef)
+        columnsDefs.push(colDef)
       }
 
       return columnsDefs;             
