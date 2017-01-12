@@ -26,40 +26,17 @@ define([
 
     
     addRow: function(){
-        this.gridView.gridOptions.api.addItems([{}]);
+      this.gridView.gridOptions.api.addItems([{}]);
     },
 
-
-
     deleteRows: function() {
-      var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
-
-      var _this = this;
-      
-      //2fix
-      var url = this.model.get('type') + '/' + this.model.get('id')  + '/';
-
-      
-
-      var selectedIds = selectedNodes.map(function(node){
-        return node.data.ID;
-      });
-
-      $.ajax({
-        url: url,
-        method: 'DELETE',
-        data: {'IDs': JSON.stringify(selectedIds)},
-        context: this,
-      }).done(function(resp) {
-        this.gridView.gridOptions.api.removeItems(selectedNodes);
-        this.gridView.clientSideFilter();
-      }).fail(function(resp) {
-        this.swal(resp, 'error');
-      });
+      this.gridView.deleteSelectedRows();
     },
 
     initialize: function(options) {
       var _this = this; 
+
+      console.log(options );
 
       options.schema.fieldClass = 'col-xs-12';
       this.formatColumns(options.schema);
@@ -92,10 +69,13 @@ define([
         rgGrid: '.js-rg-grid-subform'
       });
 
+      var url = 'stations/' + this.model.get('FK_Station') + '/observations'; 
+
       this.regionManager.get('rgGrid');
       this.regionManager.get('rgGrid').show(this.gridView = new GridView({
         columns: this.formatColumns(options.schema),
         clientSide: true,
+        url: url,
         gridOptions: {
           rowData: rowData,
           rowSelection: 'multiple',
