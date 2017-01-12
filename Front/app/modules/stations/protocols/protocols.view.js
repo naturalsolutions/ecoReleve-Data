@@ -167,7 +167,7 @@ define([
           view.model.set('stationId', _this.model.get('stationId'));
           view.$el.addClass('active');
 
-          //view.model.set('grid', true);
+          view.model.set('grid', true);
 
           if( view.model.get('grid') ){
             _this.parent.rgProtocol.show(new ProtocolGrid({
@@ -227,7 +227,7 @@ define([
       var proto = new Backbone.Model();
 
       this.jqxhr = $.ajax({
-        url: 'stations/' + this.stationId + '/protocols/0',
+        url: 'stations/' + this.model.get('id') + '/observations/0',
         context: this,
         type: 'GET',
         data: {

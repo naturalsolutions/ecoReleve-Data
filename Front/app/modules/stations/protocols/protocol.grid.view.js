@@ -91,26 +91,27 @@ define([
     },
 
     formatColumns: function(model){
-      var editable = this.model.get('schema').editable;
-      var odrFields = this.model.get('fieldsets')[0].fields;
-                        
       var columnsDefs = [];
 
-      for (var i = odrFields.length - 1; i >= 0; i--) {
-        var field = this.model.get('schema')[odrFields[i]];
+      for (var i = 0; i < this.model.get('fieldsets').length; i++) {
+        var ordFields = this.model.get('fieldsets')[i].fields;
+        for (var j = 0; j < ordFields.length; j++) {
+                      
+          var field = this.model.get('schema')[ordFields[j]];
+          
+          var colDef = {
+            editable: this.editable,
+            field: field.name,
+            headerName: field.title,
+            type: field.type,
+            options: field.options
+          };
 
-        var colDef = {
-          editable: this.editable,
-          field: field.name,
-          headerName: field.title,
-          type: field.type,
-          options: field.options
-        };
-
-        columnsDefs.push(colDef)
+          columnsDefs.push(colDef)
+        }
       }
 
-      return columnsDefs;             
+      return columnsDefs;
     },
 
     onShow: function(){

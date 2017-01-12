@@ -245,6 +245,8 @@ define([
 
     formatSelectColumn: function(col){
       var _this = this;
+      col.pinned = 'left';
+      col.suppressMovable = true;
       col.checkboxSelection = true;
       col.headerCellTemplate = function() {
         var eCell = document.createElement('span');
