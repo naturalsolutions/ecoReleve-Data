@@ -10,9 +10,11 @@ define([
   './custom.date.filter',
   './custom.select.filter',
   './custom.text.autocomplete.filter',
+  'ns_grid/customCellRenderer/decimal5Renderer',
+  'ns_grid/customCellRenderer/dateTimeRenderer',
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter) {
+], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter, Decimal5Renderer, DateTimeRenderer) {
 
   'use strict';
 
@@ -171,6 +173,7 @@ define([
           }
           case 'date': {
             col.filter = CustomDateFilter;
+            col.cellRenderer = DateTimeRenderer;
             return;
           }
           case 'select': {
