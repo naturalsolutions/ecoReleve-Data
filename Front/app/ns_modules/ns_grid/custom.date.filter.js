@@ -1,3 +1,4 @@
+
 define([
   'jquery',
   'dateTimePicker',
@@ -54,9 +55,10 @@ define([
         format      : "DD/MM/YYYY HH:mm",
         useCurrent  : false,
         showClose   : true,
-        widgetPositioning: {
-          vertical: 'bottom'
-        }   
+        widgetPositioning :{
+          horizontal: "left",
+          vertical : "bottom"
+        }
         //focusOnShow : false
       }
 
@@ -72,6 +74,110 @@ define([
 
        $( this.dateFrom ).datetimepicker(self.datetimepickerOptions);
        $( this.dateTo ).datetimepicker(self.datetimepickerOptions);
+
+       $(this.dateFrom ).on("mousedown", function() {
+         var test = $(this).siblings('.bootstrap-datetimepicker-widget')
+         if( !test.length  ) {
+           $(self.dateFrom ).blur();
+           $(self.dateFrom ).focus();
+         }
+       });
+       $(this.dateTo ).on("mousedown", function() {
+         var test = $(this).siblings('.bootstrap-datetimepicker-widget')
+         if( !test.length  ) {
+           $(self.dateTo ).blur();
+           $(self.dateTo ).focus();
+         }
+       });
+       $(this.dateFrom ).on("dp.show", function() {
+         var positionHG =  $( self.dateFrom ).offset(); //pos coin haut gauche input
+         var heightBtn =  $( self.dateFrom ).outerHeight(); // height input
+         var widthBtn = $( self.dateFrom ).outerWidth();
+         var positionBG = positionHG.top + heightBtn;
+         var sizeScreen = {
+                             height :$(window).height(),
+                             width : $(window).width()
+         };
+         var datepicker = $(this).siblings('.bootstrap-datetimepicker-widget');
+        var  datePickerHeight = datepicker.outerHeight();
+        var  datePickerWidth = datepicker.outerWidth();
+        if( (datePickerWidth+positionHG.left) > sizeScreen.width  ) { //depasse a droite
+          if(!datepicker.hasClass('pull-right')) {
+            datepicker.addClass('pull-right');
+          }
+          datepicker.css({
+            'left' : "auto",
+            'right': sizeScreen.width - (positionHG.left + widthBtn)
+          });
+        } else {
+          if(datepicker.hasClass('pull-right')) {
+            datepicker.removeClass('pull-right');
+          }
+        }
+        if( datePickerHeight + positionBG > sizeScreen.height ) {
+          if(datepicker.hasClass('bottom')) {
+            datepicker.removeClass('bottom');
+            datepicker.addClass('top');
+          }
+          datepicker.css({
+            'position' : 'fixed',
+            'top' : positionHG.top - (datePickerHeight + 4) ,
+            'left' : "auto",
+          });
+        } else {
+          datepicker.css({
+            'position' : 'fixed',
+            'top' : positionBG ,
+            'left' : "auto"
+          });
+        }
+       });
+       $(this.dateTo ).on("dp.show", function() {
+         var positionHG =  $( self.dateTo ).offset(); //pos coin haut gauche input
+         var heightBtn =  $( self.dateTo ).outerHeight(); // height input
+         var widthBtn = $( self.dateTo ).outerWidth();
+         var positionBG = positionHG.top + heightBtn;
+         var sizeScreen = {
+                             height :$(window).height(),
+                             width : $(window).width()
+         };
+         var datepicker = $(this).siblings('.bootstrap-datetimepicker-widget');
+        var  datePickerHeight = datepicker.outerHeight();
+        var  datePickerWidth = datepicker.outerWidth();
+        if( (datePickerWidth+positionHG.left) > sizeScreen.width  ) { //depasse a droite
+          if(!datepicker.hasClass('pull-right')) {
+            datepicker.addClass('pull-right');
+          }
+          datepicker.css({
+            'left' : "auto",
+            'right': sizeScreen.width - (positionHG.left + widthBtn)
+          });
+        } else {
+          if(datepicker.hasClass('pull-right')) {
+            datepicker.removeClass('pull-right');
+          }
+        }
+        if( datePickerHeight + positionBG > sizeScreen.height ) {
+          if(datepicker.hasClass('bottom')) {
+            datepicker.removeClass('bottom');
+            datepicker.addClass('top');
+          }
+          datepicker.css({
+            'position' : 'fixed',
+            'top' : positionHG.top - (datePickerHeight + 4),
+            'left': "auto"
+          });
+        }
+        else {
+          datepicker.css({
+            'position' : 'fixed',
+            'top' : positionBG ,
+            'left': "auto"
+          });
+        }
+
+
+       });
        $(this.dateFrom).on("dp.change", function (e) {
          $(this).data('DateTimePicker').hide();
          self.onFilterChanged();
