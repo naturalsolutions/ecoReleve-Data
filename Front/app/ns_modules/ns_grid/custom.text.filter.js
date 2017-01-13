@@ -33,7 +33,7 @@
     };
 
     utils_1.Utils.removeElement = function (parent, cssSelector) {
-        this.removeFromParent(parent.querySelector(cssSelector));
+        // utils_1.Utils.removeFromParent(parent.querySelector(cssSelector));
     };
 
     utils_1.Utils.makeNull = function (value) {
