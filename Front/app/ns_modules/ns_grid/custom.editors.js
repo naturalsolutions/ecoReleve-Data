@@ -2,15 +2,15 @@ define([
 	'ag-grid',
 	'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 	'ns_modules/ns_bbfe/bbfe-autoCompTree',
+	'ns_modules/ns_bbfe/bbfe-number',
 
-], function(AgGrid, ObjectPicker, ThesaurusPicker) {
+], function(AgGrid, ObjectPicker, ThesaurusPicker, BBFENumber) {
     
     var Editors = {};
 
     var Thesaurus = function () {
     };
 		Thesaurus.prototype.init = function(params){     
-			console.log(params.value);
 		  var col = params.column.colDef;
 		  var options = {
 		    key: col.options.target || col.field,
@@ -135,6 +135,63 @@ define([
 		}
 
 		Editors.ObjectPicker = ObjectPickerEditor;
+
+    var NumberEditor = function () {
+    };
+		NumberEditor.prototype.init = function(params){
+			var col = params.column.colDef;
+
+			var options = {
+			  key: col.field,
+			  schema: {
+			    options: col.options,
+			    editable: true,
+			  },
+			  fromGrid: true
+			};
+
+			
+		  var model = new Backbone.Model();
+		  
+		  var value = '';
+		  if(params.value){
+		  	value = params.value.value || params.value;
+		  }
+		  model.set(options.key, value);
+
+		  options.model = model;
+
+		  this.bbfe = new BBFENumber(options);
+		  this.element = this.bbfe.render();
+		  
+		  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
+		    event.stopPropagation();
+		  });
+
+		  this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
+	      var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
+	      if (isNavigationKey) {
+	        event.stopPropagation();
+	      }
+		  });
+		};
+		NumberEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
+		  eElement.addEventListener(event, listener);
+		}
+		NumberEditor.prototype.getGui = function(){
+		  return this.element.el;
+		};
+		NumberEditor.prototype.afterGuiAttached = function(){
+		  this.element.$el.find('input').focus();
+		};
+		NumberEditor.prototype.getValue = function(){
+		  return this.element.getValue();
+		};
+		NumberEditor.prototype.destroy= function(){
+		  return true;
+		}
+
+		Editors.NumberEditor = NumberEditor;
 
     return Editors;
 

@@ -49,6 +49,7 @@ define([
     },
 
     saveObs: function(){
+      var _this = this;
       var rowData = [];
       this.gridView.gridOptions.api.stopEditing();
       this.gridView.gridOptions.api.forEachNode( function(node) {
@@ -66,7 +67,11 @@ define([
         contentType: 'application/json',
         data: data,
         context: this,
-      }).done(function(resp) {
+      }).done(function(response) {
+        response.createdObservations.map(function(obs){
+          _this.model.get('obs').push(obs.id);
+        })
+        _this.model.trigger('change:obs', _this.model);
         this.toggleEditionMode();
         this.hardRefresh();
       }).fail(function(resp) {
@@ -126,9 +131,6 @@ define([
         }
       }));
     },
-    
-    
 
   });
 });
-

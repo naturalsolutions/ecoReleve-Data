@@ -9,7 +9,7 @@ define([
   'backbone',
 
   //circular dependencies, I don't konw where to put it 4 the moment
-  'ns_modules/ns_bbfe/bbfe-number',
+
   'ns_modules/ns_bbfe/bbfe-timePicker',
   'ns_modules/ns_bbfe/bbfe-dateTimePicker',
   'ns_modules/ns_bbfe/bbfe-autocomplete',

@@ -9,6 +9,8 @@ define([
   'requirejs-text!./NsFormsModule.html',
   'fancytree',
   './NsFormsCustomFields',
+  //'ns_modules/ns_bbfe/bbfe-number',
+
 ], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tpl) {
   return Backbone.View.extend({
     BBForm: null,

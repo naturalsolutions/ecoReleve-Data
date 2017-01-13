@@ -188,7 +188,10 @@ define([
           case 'ObjectPicker':
             col.cellEditor = Editors.ObjectPicker;
             col.cellRenderer = Renderers.ObjectPicker;
-            break;
+            break;          
+/*          case 'Number':
+            col.cellEditor = Editors.NumberEditor;
+            break;*/
         }
 
         switch(col.filter){
@@ -661,25 +664,24 @@ define([
       });
     },
 
-    deleteSelectedRows: function(){
+    deleteSelectedRows: function(callback){
       var _this = this;
       var selectedNodes = this.gridOptions.api.getSelectedNodes();
       if(!selectedNodes.length){
         return;
       }
 
-      var callback = function() {
-        _this.destroySelectedRows();
-      };
       var opt = {
         title: 'Are you sure?',
         text: 'selected rows will be deleted'
       };
-      this.swal(opt, 'warning', callback);
+      this.swal(opt, 'warning', function(callback) {
+        _this.destroySelectedRows(callback);
+      });
 
     },
 
-    destroySelectedRows: function(){
+    destroySelectedRows: function(callback){
       var _this = this;
       var rowData = [];
       
@@ -707,13 +709,16 @@ define([
           context: this,
         }).done(function(resp) {
           this.gridOptions.api.removeItems(this.gridOptions.api.getSelectedNodes());
+          if(callback)
+            callback(params);
         }).fail(function(resp) {
           console.log(resp);
         });
+        if(callback)
+          callback(params);
       }
 
     },
-
 
     extendAgGrid: function(){
       var _this = this;

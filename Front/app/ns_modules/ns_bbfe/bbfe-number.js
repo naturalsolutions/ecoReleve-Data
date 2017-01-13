@@ -7,13 +7,23 @@ define([
   $, Backbone, Form
 ){
   'use strict';
-  return Form.editors.Number = Form.editors.Number.extend({
-    defaultValue: '',
+  Form.editors.Number.prototype.initialize = function(options) {
+      Form.editors.Text.prototype.initialize.call(this, options);
 
-    //var lat = /^\-?([1-8]?[0-9]|[1-9]0)(\.[0-9]{0,6})?$/.test(newVal);
-    //long = /^\-?([1]?[1-7][1-9]|[1]?[1-8][0]|[1-9]?[0-9])(\.[0-9]{0,6})?$/.test(newVal);
+      console.log(options);
+
+      var schema = this.schema;
+
+      this.$el.attr('type', 'number');
+
+      if (!schema || !schema.editorAttrs || !schema.editorAttrs.step) {
+        // provide a default for `step` attr,
+        // but don't overwrite if already specified
+        this.$el.attr('step', 'any');
+      }
+    };
     
-    onKeyPress: function(event) {
+/*    onKeyPress: function(event) {
       var self = this,
           delayedDetermineChange = function() {
             setTimeout(function() {
@@ -40,6 +50,6 @@ define([
       } else {
         event.preventDefault();
       }
-    },
-  });
+    },*/
+  // });
 });
