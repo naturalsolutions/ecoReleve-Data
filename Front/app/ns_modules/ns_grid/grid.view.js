@@ -169,25 +169,29 @@ define([
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;
-            return;
+            break;
           }
           case 'date': {
             col.filter = CustomDateFilter;
             col.cellRenderer = DateTimeRenderer;
-            return;
+            break;
           }
           case 'select': {
             col.filter = CustomSelectFilter;
-            return;
+            break;
           }
           // case 'textAutocomplete': {
           //   col.filter = CustomTextAutocompleteFilter;
           //   return;
           // }
-          default: {
-            col.filter = CustomTextFilter;
+          case 'text': {
+            col.filter = CustomSelectFilter;
             return;
           }
+          /*default: {
+            col.filter = CustomTextFilter;
+            return;
+          }*/
         }
         //draft
 

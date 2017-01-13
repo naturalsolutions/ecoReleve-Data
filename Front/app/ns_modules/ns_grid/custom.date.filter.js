@@ -54,6 +54,9 @@ define([
         format      : "DD/MM/YYYY HH:mm",
         useCurrent  : false,
         showClose   : true,
+        widgetPositioning: {
+          vertical: 'bottom'
+        }   
         //focusOnShow : false
       }
 
