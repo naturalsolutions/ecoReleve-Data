@@ -189,9 +189,9 @@ define([
             col.cellEditor = Editors.ObjectPicker;
             col.cellRenderer = Renderers.ObjectPicker;
             break;          
-/*          case 'Number':
+          case 'Number':
             col.cellEditor = Editors.NumberEditor;
-            break;*/
+            break;
         }
 
         switch(col.filter){

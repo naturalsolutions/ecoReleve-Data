@@ -1,3 +1,5 @@
+//Not used for now
+
 define([
   'jquery',
   'backbone',
@@ -10,8 +12,6 @@ define([
   Form.editors.Number.prototype.initialize = function(options) {
       Form.editors.Text.prototype.initialize.call(this, options);
 
-      console.log(options);
-
       var schema = this.schema;
 
       this.$el.attr('type', 'number');
@@ -22,6 +22,8 @@ define([
         this.$el.attr('step', 'any');
       }
     };
+
+    return Form.editors.Number;
     
 /*    onKeyPress: function(event) {
       var self = this,

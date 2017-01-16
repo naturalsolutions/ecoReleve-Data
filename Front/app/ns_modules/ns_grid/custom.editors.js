@@ -1,10 +1,11 @@
 define([
+	'jquery',
 	'ag-grid',
+	'backbone-forms',
 	'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 	'ns_modules/ns_bbfe/bbfe-autoCompTree',
-	'ns_modules/ns_bbfe/bbfe-number',
 
-], function(AgGrid, ObjectPicker, ThesaurusPicker, BBFENumber) {
+], function($, AgGrid, Form, ObjectPicker, ThesaurusPicker) {
     
     var Editors = {};
 
@@ -146,6 +147,7 @@ define([
 			  schema: {
 			    options: col.options,
 			    editable: true,
+			    editorAttrs: 'form-control'
 			  },
 			  fromGrid: true
 			};
@@ -161,7 +163,7 @@ define([
 
 		  options.model = model;
 
-		  this.bbfe = new BBFENumber(options);
+		  this.bbfe = new Form.editors.Number(options);
 		  this.element = this.bbfe.render();
 		  
 		  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
@@ -179,10 +181,11 @@ define([
 		  eElement.addEventListener(event, listener);
 		}
 		NumberEditor.prototype.getGui = function(){
+			this.element.$el.addClass('form-control');
 		  return this.element.el;
 		};
 		NumberEditor.prototype.afterGuiAttached = function(){
-		  this.element.$el.find('input').focus();
+		  this.element.$el.focus();
 		};
 		NumberEditor.prototype.getValue = function(){
 		  return this.element.getValue();
