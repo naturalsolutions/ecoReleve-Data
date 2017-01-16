@@ -675,7 +675,7 @@ define([
         title: 'Are you sure?',
         text: 'selected rows will be deleted'
       };
-      this.swal(opt, 'warning', function(callback) {
+      this.swal(opt, 'warning', function() {
         _this.destroySelectedRows(callback);
       });
 
@@ -710,12 +710,12 @@ define([
         }).done(function(resp) {
           this.gridOptions.api.removeItems(this.gridOptions.api.getSelectedNodes());
           if(callback)
-            callback(params);
+            callback();
         }).fail(function(resp) {
           console.log(resp);
         });
         if(callback)
-          callback(params);
+          callback();
       }
 
     },

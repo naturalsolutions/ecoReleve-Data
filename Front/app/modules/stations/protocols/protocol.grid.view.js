@@ -84,7 +84,19 @@ define([
     },
 
     deleteObs: function(){
-      this.gridView.deleteSelectedRows();
+      var _this = this;
+      var afterDestroySelectedRows = function(){
+        var rowData = [];
+        _this.gridView.gridOptions.api.forEachNode( function(node) {
+          if(Object.keys(node.data).length !== 0 && node.data.ID){
+            rowData.push(node.data.ID);
+          }
+        });
+        _this.model.set('obs', rowData);
+        _this.model.trigger('change:obs', _this.model);
+      }
+
+      this.gridView.deleteSelectedRows(afterDestroySelectedRows);
     },
 
     toggleEditionMode: function(){
