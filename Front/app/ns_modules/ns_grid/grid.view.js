@@ -185,7 +185,7 @@ define([
           //   return;
           // }
           case 'text': {
-            col.filter = CustomSelectFilter;
+            col.filter = CustomTextFilter;
             return;
           }
           /*default: {
