@@ -20,13 +20,17 @@ define([
   './custom.renderers',
   './custom.editors',
 
+  'ns_grid/customCellRenderer/decimal5Renderer',
+  'ns_grid/customCellRenderer/dateTimeRenderer',
+
   'i18n'
 
 ], function($, _, Backbone, Marionette, AgGrid, Swal,
   CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter, utils_1,
-  ObjectPicker, ThesaurusPicker, Renderers, Editors
+  ObjectPicker, ThesaurusPicker, Renderers, Editors,
+  Decimal5Renderer, DateTimeRenderer
 ) {
-
+  
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -197,24 +201,29 @@ define([
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;
-            return;
+            break;
           }
           case 'date': {
             col.filter = CustomDateFilter;
-            return;
+            col.cellRenderer = DateTimeRenderer;
+            break;
           }
           case 'select': {
             col.filter = CustomSelectFilter;
-            return;
+            break;
           }
           // case 'textAutocomplete': {
           //   col.filter = CustomTextAutocompleteFilter;
           //   return;
           // }
-          default: {
+          case 'text': {
             col.filter = CustomTextFilter;
             return;
           }
+          /*default: {
+            col.filter = CustomTextFilter;
+            return;
+          }*/
         }
 
       });

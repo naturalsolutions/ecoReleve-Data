@@ -88,19 +88,15 @@ define([
       },{
         field: 'StartDate',
         headerName: 'Start date',
+        filter: 'date'
       },
       {
         field: 'EndDate',
         headerName: 'End Date',
-      },{
-        field: 'MonitoredSiteID',
-        headerName: 'FK_MonitoredSite',
+        filter: 'date'        
       },{
         field: 'Name',
         headerName: 'Site Name',
-      },{
-        field: 'Deploy',
-        headerName: 'Deploy',
       }];
 
       this.rgGrid.show(this.gridView = new GridView({
