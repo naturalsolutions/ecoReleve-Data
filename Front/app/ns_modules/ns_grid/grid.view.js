@@ -184,21 +184,27 @@ define([
           _this.formatSelectColumn(col)
         }
 
+        
+
         switch(col.type){
           case 'AutocompTreeEditor':
             col.cellEditor = Editors.Thesaurus;
             col.cellRenderer = Renderers.Thesaurus;
+            break;          
+          case 'AutocompleteEditor':
+            col.cellEditor = Editors.AutocompleteEditor;
+            col.cellRenderer = Renderers.AutocompleteRenderer;
             break;
           case 'ObjectPicker':
             col.cellEditor = Editors.ObjectPicker;
             col.cellRenderer = Renderers.ObjectPicker;
             break;          
-          case 'Number':
-            col.cellEditor = Editors.NumberEditor;
-            break;
           case 'Checkbox':
             col.cellEditor = Editors.CheckboxEditor;
             col.cellRenderer = Renderers.CheckboxRenderer;
+            break;
+          case 'Number':
+            col.cellEditor = Editors.NumberEditor;
             break;
         }
 

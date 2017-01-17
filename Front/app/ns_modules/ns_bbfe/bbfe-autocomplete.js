@@ -12,7 +12,7 @@ define([
         previousValue: '',
 
         events: {
-            'hide': "hasChanged"
+            'hide': 'hasChanged'
         },
         template: '<div>\
         <div class="input-group">\
@@ -23,11 +23,14 @@ define([
 
         initialize: function (options) {
             Form.editors.Base.prototype.initialize.call(this, options);
+            var _this = this;
+
+            console.log(options.schema.options);
             this.template = options.template || this.template;
+
             // clone options.schema to avoid modifying source object (pointer)
             this.autocompleteSource = JSON.parse(JSON.stringify(options.schema.options));
             var url = options.schema.options.source;
-            var _this = this;
 
             this.iconFont = options.schema.options.iconFont || 'hidden';
             if (options.schema.editorAttrs && options.schema.editorAttrs.disabled)  {
@@ -36,13 +39,13 @@ define([
 
             if (options.schema.options) {
                 if (typeof options.schema.options.source === 'string'){
-
+                    
                    this.autocompleteSource.source = url;
                 }
                 this.autocompleteSource.select = function(event,ui){
                     event.preventDefault();
-                    _this.$el.find('#' + _this.id ).attr('data_value',ui.item.value).change();
-                    _this.$el.find('#' + _this.id ).val(ui.item.label);
+                    _this.$input.attr('data_value',ui.item.value).change();
+                    _this.$input.val(ui.item.label);
                 };
                 this.autocompleteSource.focus = function(event,ui){
                     event.preventDefault();
@@ -51,15 +54,15 @@ define([
                 this.autocompleteSource.change = function(event,ui){
                     event.preventDefault();
                     if (ui.item) {
-                        _this.$el.find('#' + _this.id ).attr('data_value',ui.item.value).change();
-                        _this.$el.find('#' + _this.id ).val(ui.item.label);
+                        _this.$input.attr('data_value',ui.item.value).change();
+                        _this.$input.val(ui.item.label);
                     } else {
 
-                        if (!_this.$el.find('#' + _this.id ).attr('initValue') && _this.$el.find('#' + _this.id ).attr('data_value') != _this.$el.find('#' + _this.id ).val()){
-                            _this.$el.find('#' + _this.id ).attr('data_value',_this.$el.find('#' + _this.id ).val()).change();
+                        if (!_this.$input.attr('initValue') && _this.$input.attr('data_value') != _this.$input.val()){
+                            _this.$input.attr('data_value',_this.$input.val()).change();
                         }
-                        if (_this.$el.find('#' + _this.id).val() === ''){
-                            _this.$el.find('#' + _this.id ).attr('data_value','');
+                        if (_this.$input.val() === ''){
+                            _this.$input.attr('data_value','');
                         }
                     }
                 };
@@ -67,14 +70,17 @@ define([
             this.options = options;
         },
 
-          getValue: function() {
-           return this.$el.find('#' + this.id ).attr('data_value') ;
-          },
+      getValue: function() {
+       return this.$input.attr('data_value') ;
+      },
 
         render: function () {
+            var _this = this;
+
             var value = this.model.get(this.key);
             var data_value;
-            var _this = this;
+
+            console.log(this.key);
 
             if (value && this.options.schema.options.label != this.options.schema.options.value && this.options.schema.options.object) {
                 value = null;
@@ -82,24 +88,33 @@ define([
                 $.ajax({
                     url : this.options.schema.options.object+'/'+this.model.get(this.key),
                     success : function(data){
-                        _this.$el.find('#' + _this.id ).val(data[_this.options.schema.options.label]);
+                        console.log(data);
+                        console.log(_this.options.schema.options.label);
+                        _this.$input.val(data[_this.options.schema.options.label]);
                     }
                 })
             }
-            var $el = _.template(
-                this.template, { id: this.id,value: value,data_value :_this.model.get(_this.key), initValue:initValue,iconFont:_this.iconFont
+            var $el = _.template( this.template, {
+                id: this.cid,
+                value: value,
+                data_value :_this.model.get(_this.key),
+                initValue:initValue,
+                iconFont:_this.iconFont
             });
 
             this.setElement($el);
             if(this.options.schema.validators && this.options.schema.validators[0] == "required"){
               this.$el.find('input').addClass('required');
             }
-            _(function () {
 
-                _this.$el.find('#' + _this.id).autocomplete(_this.autocompleteSource);
-                _this.$el.find('#' + _this.id).addClass(_this.options.schema.editorClass) ;
+            this.$input = _this.$el.find('#' + _this.cid);
+
+            _(function () {
+                
+                _this.$input.autocomplete(_this.autocompleteSource); // HERE
+
                 if (_this.options.schema.editorAttrs && _this.options.schema.editorAttrs.disabled) {
-                    _this.$el.find('#' + _this.id).prop('disabled', true);
+                    _this.$input.prop('disabled', true);
                 }
             }).defer();
             return this;

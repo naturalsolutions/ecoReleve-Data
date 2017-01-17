@@ -30,6 +30,10 @@ define(['ag-grid'], function(AgGrid) {
 
 		Renderers.Thesaurus = Thesaurus;
 
+
+
+
+
 		function ObjectPicker() {
 	    this.eGui = document.createElement('span');
 		}
@@ -51,6 +55,10 @@ define(['ag-grid'], function(AgGrid) {
 		};
 
 		Renderers.ObjectPicker = ObjectPicker;
+
+
+
+
 
 		function CheckboxRenderer() {
 	    this.eGui = document.createElement('span');
@@ -76,6 +84,31 @@ define(['ag-grid'], function(AgGrid) {
 
 		Renderers.CheckboxRenderer = CheckboxRenderer;
 
+
+
+
+
+		function AutocompleteRenderer() {
+	    this.eGui = document.createElement('span');
+		}
+
+		AutocompleteRenderer.prototype.init = function (params) {
+			var label = '';
+			if(params.value)
+				label = params.value.label || params.value;
+	    $(this.eGui).html(label);
+		};
+
+		AutocompleteRenderer.prototype.getGui = function() {
+	    return this.eGui;
+		};
+
+		AutocompleteRenderer.prototype.refresh = function (params) {
+	    this.eGui.innerHTML = '';
+	    this.init(params);
+		};
+
+		Renderers.AutocompleteRenderer = AutocompleteRenderer;
 
     return Renderers;
 
