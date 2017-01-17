@@ -46,7 +46,11 @@ define([
         },
 
         initialize: function (options) {
+
             Form.editors.Base.prototype.initialize.call(this, options);
+
+            this.formGrid = options.formGrid;
+
             this.FirstRender = true;
             this.languages = {
                 'fr': '',
@@ -129,7 +133,11 @@ define([
 
         render: function () {
             var $el = $(this.template);
+            if(this.formGrid){
+                $el.find('.input-group-addon').addClass('hide');
+            }
             this.setElement($el);
+
             var _this = this;
             _(function () {
                 if (_this.editable) {

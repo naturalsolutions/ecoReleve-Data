@@ -22,7 +22,7 @@ define([
 
     initialize: function(options) {
       
-      this.fromGrid = options.fromGrid;
+      this.formGrid = options.formGrid;
 
       options.schema.editorClass='';
       Form.editors.Text.prototype.initialize.call(this, options);

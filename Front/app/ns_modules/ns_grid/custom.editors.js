@@ -19,7 +19,7 @@ define([
 		      options: col.options,
 		      editable: true,
 		    },
-		    fromGrid: true
+		    formGrid: true
 		  };
 
 		  var model = new Backbone.Model();
@@ -89,7 +89,7 @@ define([
 		      options: col.options,
 		      editable: true,
 		    },
-		    fromGrid: true
+		    formGrid: true
 		  };
 
 		  var model = new Backbone.Model();
@@ -149,7 +149,7 @@ define([
 			    editable: true,
 			    editorAttrs: 'form-control'
 			  },
-			  fromGrid: true
+			  formGrid: true
 			};
 
 			
