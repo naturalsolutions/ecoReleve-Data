@@ -29,6 +29,7 @@ define([
       'release':'#release',
       'nbTotal': '.js-nb-total',
       'filter': '#filtersRelease',
+      'iconrelease' : '#iconbtnrelase'
     },
 
     events: {
@@ -120,6 +121,8 @@ define([
           singleClickEdit : true,
           rowSelection: 'multiple',
           onCellValueChanged : _this.checkAll.bind(_this),
+          overlayLoadingTemplate: '<span class="loading" ></span><span class="ag-overlay-loading-center">Loading .....</span>',
+
         },
         afterFetchColumns: function(options) {
           var colDefs = options.gridOptions.columnDefs;
@@ -227,8 +230,17 @@ define([
       $.ajax({
         url: 'release/individuals/',
         method: 'POST',
-        data: {IndividualList: JSON.stringify(visibleSelectedRows),StationID: this.model.get('ID'),releaseMethod: releaseMethod},
-        context: this,
+        data: {
+          IndividualList: JSON.stringify(visibleSelectedRows),
+          StationID: this.model.get('ID'),
+          releaseMethod: releaseMethod
+        },
+        context: this
+      }).always(function() {
+        this.ui.release.prop('disabled', false);
+        this.ui.iconrelease.removeClass();
+        this.ui.iconrelease.addClass("icon reneco reneco-to_release");
+        this.gridView.gridOptions.api.hideOverlay()
       }).done(function(resp) {
         if (resp.errors) {
           resp.title = 'An error occured';
@@ -237,6 +249,7 @@ define([
         }else {
           resp.title = 'Success';
           resp.type = 'success';
+          this.gridView.gridOptions.api.removeItems(this.gridView.gridOptions.api.getSelectedNodes())
           var callback = function() {
             Backbone.history.navigate('stations/' + _this.model.get('ID'), {trigger: true});
           };
@@ -303,8 +316,14 @@ define([
         //  pass avalaible options
         availableOptions: _this.releaseMethodList,
         liClickEvent:function(liClickValue) {
+          _this.ui.release.tooltipster('hide');
+          _this.ui.release.prop('disabled', true);
+          _this.ui.iconrelease.removeClass();
+          _this.ui.iconrelease.addClass('loading');
+          _this.gridView.gridOptions.api.showLoadingOverlay();
           _this.release(liClickValue);
-        },
+
+        }
       });
       this.ui.release.tooltipster('show');
     }
