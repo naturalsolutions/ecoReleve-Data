@@ -52,6 +52,30 @@ define(['ag-grid'], function(AgGrid) {
 
 		Renderers.ObjectPicker = ObjectPicker;
 
+		function CheckboxRenderer() {
+	    this.eGui = document.createElement('span');
+		}
+
+		CheckboxRenderer.prototype.init = function (params) {
+			var checked = ''; 
+			if(params.value == 1)
+				checked = 'checked';
+
+			var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
+	    $(this.eGui).html(chk);
+		};
+
+		CheckboxRenderer.prototype.getGui = function() {
+	    return this.eGui;
+		};
+
+		CheckboxRenderer.prototype.refresh = function (params) {
+	    this.eGui.innerHTML = '';
+	    this.init(params);
+		};
+
+		Renderers.CheckboxRenderer = CheckboxRenderer;
+
 
     return Renderers;
 

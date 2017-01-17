@@ -1,16 +1,19 @@
 <div class="toolbar top">
-  <legend><%= Name %></legend>
+  <legend class="pull-left" ><%= Name %></legend>
+  <button class="js-btn-form btn btn-success hide pull-right" role="add">
+    <span class="reneco reneco-add"></span>
+  </button>
 </div>
 
 <div class="js-rg-grid crop2 no-padding"></div>
 
 <div class="toolbar bottom">
-  <button class="js-admin js-btn-form btn btn-danger hide" role="delete">
+  <button class="js-btn-form btn btn-success hide" role="add">
+    <span class="reneco reneco-add"></span>
+  </button>
+  <button class="js-admin js-btn-form btn btn-danger hide btn-sm" role="delete">
   	<span class="reneco reneco-trash"></span>
   	&nbsp;Delete selected observations
-  </button>
-  <button class="js-btn-form btn btn-success hide" role="add">
-  	<span class="reneco reneco-add"></span>
   </button>
 
   <div class="pull-right">

@@ -196,6 +196,10 @@ define([
           case 'Number':
             col.cellEditor = Editors.NumberEditor;
             break;
+          case 'Checkbox':
+            col.cellEditor = Editors.CheckboxEditor;
+            col.cellRenderer = Renderers.CheckboxRenderer;
+            break;
         }
 
         switch(col.filter){

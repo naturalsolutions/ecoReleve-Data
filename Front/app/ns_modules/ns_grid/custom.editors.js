@@ -194,7 +194,66 @@ define([
 		  return true;
 		}
 
-		Editors.NumberEditor = NumberEditor;
+		Editors.CheckboxEditor = CheckboxEditor;
+
+		    var CheckboxEditor = function () {
+		    };
+				CheckboxEditor.prototype.init = function(params){
+					var col = params.column.colDef;
+
+					var options = {
+					  key: col.field,
+					  schema: {
+					    options: col.options,
+					    editable: true,
+					    editorAttrs: 'form-control'
+					  },
+					  formGrid: true
+					};
+
+					
+				  var model = new Backbone.Model();
+				  
+				  var value = '';
+				  if(params.value){
+				  	value = params.value.value || params.value;
+				  }
+				  model.set(options.key, value);
+
+				  options.model = model;
+
+				  this.bbfe = new Form.editors.Checkbox(options);
+				  this.element = this.bbfe.render();
+				  
+				  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
+				    event.stopPropagation();
+				  });
+
+				  this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
+			      var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
+			      if (isNavigationKey) {
+			        event.stopPropagation();
+			      }
+				  });
+				};
+				CheckboxEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
+				  eElement.addEventListener(event, listener);
+				}
+				CheckboxEditor.prototype.getGui = function(){
+					this.element.$el.addClass('form-control col-xs-12');
+				  return this.element.el;
+				};
+				CheckboxEditor.prototype.afterGuiAttached = function(){
+				  this.element.$el.focus();
+				};
+				CheckboxEditor.prototype.getValue = function(){
+				  return this.element.getValue();
+				};
+				CheckboxEditor.prototype.destroy= function(){
+				  return true;
+				}
+
+				Editors.CheckboxEditor = CheckboxEditor;
 
     return Editors;
 
