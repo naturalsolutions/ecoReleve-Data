@@ -25,7 +25,6 @@ define([
     },
 
     handleBtnClick: function(e){
-      
       switch($(e.currentTarget).attr('role')){
         case 'save':
           this.saveObs();

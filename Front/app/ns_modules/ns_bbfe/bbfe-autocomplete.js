@@ -17,7 +17,7 @@ define([
         template: '<div>\
         <div class="input-group">\
             <span class="input-group-addon <%=iconFont%>"></span>\
-            <input type="text" id="<%=id%>" value="<%=value%>" data_value="<%=data_value%>" initValue="<%=initValue%>"/></div>\
+            <input class="form-control" type="text" id="<%=id%>" value="<%=value%>" data_value="<%=data_value%>" initValue="<%=initValue%>"/></div>\
             </div>\
         </div>',
 

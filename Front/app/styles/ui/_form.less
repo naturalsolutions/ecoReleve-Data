@@ -100,8 +100,13 @@ select:disabled {
 
 }
 
-.input-group .form-control {
-	z-index: inherit;
+.input-group{
+	.input-group-addon{
+		border-radius: 0px;
+	}
+	.form-control {
+		z-index: inherit;
+	}
 }
 
 .nested-model{
@@ -521,7 +526,16 @@ textarea {
 }
 
 .filter-container{
-	padding: 10px 0px;
+	padding-bottom: 15px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	.filter-label{
+		text-align: right;
+		color: rgb(82, 82, 82);
+		font-weight: bold;
+		text-transform: uppercase;
+	}
 }
 .filter-no-padding {
 	padding: 20px 0px;

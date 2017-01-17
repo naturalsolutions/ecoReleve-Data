@@ -255,6 +255,7 @@ define([
     }, {
         template: '<div id="divAutoComp_<%=inputID%>" >\
         <div class="input-group">\
+            <span class="input-group-addon <%=iconFont%>"></span>\
             <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree form-control <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
         </div>\
         <span id="errorMsg" class="error hidden">Invalid term</span>\
