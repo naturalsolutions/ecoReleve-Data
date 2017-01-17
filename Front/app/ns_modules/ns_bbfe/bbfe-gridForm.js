@@ -20,8 +20,8 @@ define([
     template: '\
         <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 300px">\
         </div>\
-        <button type="button" class="js-btn-add btn btn-success"><span class="reneco reneco-add"></span></button>\
-        <button type="button" class="js-btn-delete btn btn-danger pull-right"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
+        <button type="button" class="js-btn-add btn btn-success btn-sm hide"><span class="reneco reneco-add"></span></button>\
+        <button type="button" class="js-btn-delete btn btn-danger btn-sm pull-right hide"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
     ',
 
     
@@ -36,7 +36,7 @@ define([
     initialize: function(options) {
       var _this = this; 
 
-      console.log(options );
+      this.editable = options.schema.editable;
 
       options.schema.fieldClass = 'col-xs-12';
       this.formatColumns(options.schema);
@@ -60,6 +60,10 @@ define([
     render: function(){
         this.template = _.template(this.template, this.templateSettings);
         this.$el.html(this.template);
+        if(this.editable){
+          this.$el.find('.js-btn-add').removeClass('hide');
+          this.$el.find('.js-btn-delete').removeClass('hide');
+        }
         return this;
     },
 
@@ -78,7 +82,7 @@ define([
         url: url,
         gridOptions: {
           rowData: rowData,
-          rowSelection: 'multiple',
+          rowSelection: (this.editable)? 'multiple' : '',
         },
         onFocusedRowChange: function(row){
 
@@ -88,7 +92,6 @@ define([
     },
 
     formatColumns: function(schema){
-      var editable = schema.editable;
       var odrFields = schema.fieldsets[0].fields;
                         
       var columnsDefs = [];
@@ -97,7 +100,7 @@ define([
           var field = schema.subschema[odrFields[i]];
 
           var colDef = {
-              editable: editable,
+              editable: this.editable,
               field: field.name,
               headerName: field.title,
               type: field.type,
