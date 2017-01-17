@@ -28,8 +28,8 @@ define([
         previousValue: '',
 
         events: {
-            'hide': "hasChanged",
-            'keyup': 'inputChange'
+            'hide': 'hasChanged',
+            'keyup': 'inputChange',
             'changeEditor':'inputChange'
         },
         editable:false,
