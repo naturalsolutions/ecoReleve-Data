@@ -1,18 +1,26 @@
 define([
-
-], function() {
+ 'moment',
+], function(moment) {
 
   'use strict';
   function dateTimeRenderer(params) {
-  }
-  var dateTimeRenderer = function(params){
+    }
 
+  var dateTimeRenderer = function(params){
     var valueDate = params.data[params.column.colId];
+    var formats = ['DD/MM/YYYY HH:mm:ss',
+                   'DD/MM/YYYY HH:mm',
+                   'DD/MM/YYYY',
+                   'YYYY-MM-DD HH:mm:ss',
+                   'YYYY-MM-DD HH:mm',
+                   'YYYY-MM-DD'
+                   ];
+    var result = formats.filter(function(format){
+      return moment(valueDate,format, true).isValid();
+      });
     var displayDate = '';
     if (valueDate !== null && valueDate !== ''){
-      var hours_ = valueDate.split(' ');
-      var date_ = hours_[0].split('-');
-      displayDate = date_[2]+'/'+date_[1]+'/'+date_[0]+' '+hours_[1];
+      displayDate = moment.utc(valueDate,result[0]).format('DD/MM/YYYY HH:mm:ss');
     }
     return displayDate;
   };

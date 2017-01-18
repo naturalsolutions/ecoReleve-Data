@@ -507,7 +507,7 @@ define([
                   _this.afterSaveSuccess(response);
                   return true;
                 },
-                error: function (response) {
+                error: function (model, response) {
                   _this.savingError(response);
                   return false;
                 }

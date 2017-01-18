@@ -132,7 +132,8 @@ define([
         attributionControl: false,
       });
 
-      $.when(this.google()).then(function(){
+      this.google.defered  = this.google();
+      $.when(this.google.defered).then(function(){
         if(_this.url){
           _this.requestGeoJson(_this.url);
         }else{

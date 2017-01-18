@@ -10,9 +10,11 @@ define([
   './custom.date.filter',
   './custom.select.filter',
   './custom.text.autocomplete.filter',
+  'ns_grid/customCellRenderer/decimal5Renderer',
+  'ns_grid/customCellRenderer/dateTimeRenderer',
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter) {
+], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter, Decimal5Renderer, DateTimeRenderer) {
 
   'use strict';
 
@@ -167,24 +169,29 @@ define([
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;
-            return;
+            break;
           }
           case 'date': {
             col.filter = CustomDateFilter;
-            return;
+            col.cellRenderer = DateTimeRenderer;
+            break;
           }
           case 'select': {
             col.filter = CustomSelectFilter;
-            return;
+            break;
           }
           // case 'textAutocomplete': {
           //   col.filter = CustomTextAutocompleteFilter;
           //   return;
           // }
-          default: {
+          case 'text': {
             col.filter = CustomTextFilter;
             return;
           }
+          /*default: {
+            col.filter = CustomTextFilter;
+            return;
+          }*/
         }
         //draft
 
@@ -378,6 +385,14 @@ define([
             order_by: JSON.stringify(order_by),
             typeObj: _this.model.get('objectType')
           };
+
+          //mm
+          if(this.startDate){
+            status.startDate = this.startDate;
+          }
+          if(this.history){
+            status.history = this.history;
+          }
 
           $.ajax({
             url: _this.model.get('url'),

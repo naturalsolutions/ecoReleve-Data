@@ -69,14 +69,14 @@ define([
     back: function(){},
 
     populateCurrentData: function(currentData){
-      // this.defaultFilters = currentData.filters;
+      this.defaultFilters = currentData.filters;
 
-      // if(currentData.index !== 'undefined'){
-      //   this.goTo = {
-      //     index: currentData.index,
-      //     page: currentData.status.page
-      //   }
-      // }
+      if(currentData.index !== 'undefined'){
+        this.goTo = {
+          index: currentData.index,
+          page: currentData.status.page
+        }
+      }
     },
 
     onRender: function() {
@@ -122,7 +122,7 @@ define([
         com: this.com,
         objectType: this.model.get('objectType'),
         afterGetRows: afterGetRows,
-        //filters: this.defaultFilters,
+        filters: this.defaultFilters,
         gridOptions: {
           onRowClicked: this.onRowClicked.bind(this),
           rowModelType: 'pagination'

@@ -147,7 +147,7 @@ define([
         },{
           field: 'name',
           headerName: 'Name',
-          filter :"textAutocomplete",
+          filter :"text",
           filterParams : {
             apply : true,
             tabToOrder : this.data.map(function(elem) {return elem.name;})

@@ -73,16 +73,17 @@ define([
     },
 
     getDateFormat: function (val) {
-      var formats = ['DD/MM/YYYY HH:mm:ss',
+      var formats = [
         'YYYY-MM-DD HH:mm:ss',
         'YYYY-MM-DD HH:mm',
+        'DD/MM/YYYY HH:mm:ss',
         'DD/MM/YYYY HH:mm',
-        "DD-MM-YY HH:mm",
-        "DD-MM-YY HH:mm:ss",
         'DD-MM-YYYY HH:mm:ss',
         'DD-MM-YYYY HH:mm',
-        'YY-MMM-DD HH:mm:ss',
-        'YY-MMM-DD HH:mm'];
+        'DD-MM-YY HH:mm',
+        'DD-MM-YY HH:mm:ss',
+        'DD-MMM-YY HH:mm:ss',
+        'DD-MMM-YY HH:mm'];
       var result = formats.filter(function (format) {
         return moment(val, format, true).isValid();
       });
