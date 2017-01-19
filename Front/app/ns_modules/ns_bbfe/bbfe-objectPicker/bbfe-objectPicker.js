@@ -288,6 +288,7 @@ define([
         },
 
         afterShow: function(){
+          PickerView.prototype.afterShow.call(this);
           if(_this.options && _this.options.withToggle){
             this.$el.find('.js-nav-tabs').removeClass('hide');
           }

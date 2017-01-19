@@ -33,6 +33,7 @@ define([
     model: new IndividualModel(),
 
     displayMap: function() {
+      var _this = this;
       this.map = new NsMap({
         url: this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true',
         cluster: true,
@@ -44,7 +45,12 @@ define([
         selection: true,
         //bbox: true,
       });
-      this.map.url = false;
+
+      $.when(this.map.google.defered).then(
+        function(){
+          _this.map.url = false;
+        }
+      );
     },
 
     displayGrids: function() {
