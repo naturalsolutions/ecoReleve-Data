@@ -82,7 +82,11 @@ define([
                 $.ajax({
                     url : this.options.schema.options.object+'/'+this.model.get(this.key),
                     success : function(data){
+                      if (typeof data.fullname != 'undefined') {
+                        _this.$el.find('#' + _this.id ).val(data.fullname)
+                      }else {
                         _this.$el.find('#' + _this.id ).val(data[_this.options.schema.options.label]);
+                      }
                     }
                 })
             }
