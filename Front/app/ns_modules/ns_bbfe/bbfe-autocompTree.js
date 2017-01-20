@@ -193,7 +193,7 @@ define([
             }
             var erreur;
 
-            $.ajax({
+            return $.ajax({
                 url: _this.wsUrl + "/getTRaductionByType",
                 data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '",lng:"' + _this.lng + '"  }',
                 dataType: "json",

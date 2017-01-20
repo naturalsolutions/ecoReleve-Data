@@ -25,7 +25,6 @@ define([
             Form.editors.Base.prototype.initialize.call(this, options);
             var _this = this;
 
-            console.log(options.schema.options);
             this.template = options.template || this.template;
 
             // clone options.schema to avoid modifying source object (pointer)
@@ -80,7 +79,7 @@ define([
             var value = this.model.get(this.key);
             var data_value;
 
-            console.log(this.key);
+            //console.log(this.key);
 
             if (value && this.options.schema.options.label != this.options.schema.options.value && this.options.schema.options.object) {
                 value = null;
@@ -88,8 +87,8 @@ define([
                 $.ajax({
                     url : this.options.schema.options.object+'/'+this.model.get(this.key),
                     success : function(data){
-                        console.log(data);
-                        console.log(_this.options.schema.options.label);
+                        // console.log(data);
+                        // console.log(_this.options.schema.options.label);
                         _this.$input.val(data[_this.options.schema.options.label]);
                     }
                 })
