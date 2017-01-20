@@ -1,4 +1,4 @@
-define(['ag-grid'], function(AgGrid) {
+define(['jquery', 'ag-grid'], function($, AgGrid) {
 
     var Renderers = {};
 
@@ -7,20 +7,87 @@ define(['ag-grid'], function(AgGrid) {
 		}
 
 		Thesaurus.prototype.init = function (params) {
-		  if((typeof params.value !== 'string')){
-		    return;
-		  }
-		  var tmp = params.value.split('>');
+			var _this= this;
 
-		  if(tmp.length > 0){
-		    $(this.eGui).html(tmp[tmp.length - 1]);
-		  } else {
-		    $(this.eGui).html();
-		  }
+			var value = params.value;
+			var dfd;
+
+			if(value instanceof Object){
+				value = params.value.value;
+				dfd = params.value.dfd;
+			}
+			_this.formatDisplayedValue(value);
+
+			var validators = params.colDef.schema.validators;
+			if(!value && validators.length){
+				// required //'cause thesaurus validators are weird
+				if(validators[0] === 'required'){
+					this.handleError(params);
+				}
+			} else {
+					//async validation
+				if(dfd){
+					dfd.then(
+					function(resp){
+						//remove colname from error col
+						_this.handeRemoveError(params);
+						_this.formatDisplayedValue(value);
+						
+						params.data[params.colDef.field] = value;
+					},
+					function(){
+						_this.handleError(params);
+					});
+				}
+			}
+		};
+
+		Thesaurus.prototype.handeRemoveError = function(params){
+			params.data[params.colDef.field] = '';
+		  $(params.eGridCell).removeClass('ag-cell-error');
+
+			var errorsColumn =  params.data['_error'];
+			if(($.isArray(errorsColumn))) {
+			  var index = errorsColumn.indexOf(params.colDef.field);
+			  if (index > -1) {
+			      errorsColumn.splice(index, 1);
+			  }
+			}
+			params.data['_error'] = errorsColumn;
+		};
+
+		Thesaurus.prototype.handleError = function(params) {
+			params.data[params.colDef.field] = '';
+		  $(params.eGridCell).addClass('ag-cell-error');
+		  $(this.eGui).html();
+
+			var errorsColumn =  params.data['_error'];
+
+			if(!($.isArray(errorsColumn))) {
+			  errorsColumn = [];
+			}
+			errorsColumn.push(params.colDef.field);
+			errorsColumn = errorsColumn.filter(function(elem, index, self) {
+			    return index == self.indexOf(elem);
+			})
+			params.data['_error'] = errorsColumn;
 		};
 
 		Thesaurus.prototype.getGui = function() {
 		  return this.eGui;
+		};
+
+		Thesaurus.prototype.formatDisplayedValue = function(value) {
+			if((typeof value !== 'string')){
+			  return;
+			}
+			var tmp = value.split('>');
+
+			if(tmp.length > 0){
+			  $(this.eGui).html(tmp[tmp.length - 1]);
+			} else {
+			  //$(this.eGui).html(); //?
+			}
 		};
 
 		Thesaurus.prototype.refresh = function (params) {

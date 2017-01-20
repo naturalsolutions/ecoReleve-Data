@@ -20,7 +20,7 @@ define([
     },
 
     initialize: function(options){  
-      this.editable = false;
+      this.editable = true;
       this.url = 'stations/' + this.model.get('stationId') + '/observations';
     },
 
@@ -47,14 +47,26 @@ define([
 
     },
 
+    handleErrors: function(errors){
+      
+    },
+
     saveObs: function(){
       var _this = this;
       var rowData = [];
       this.gridView.gridOptions.api.stopEditing();
+      var errors = [];
+
       this.gridView.gridOptions.api.forEachNode( function(node) {
         if(Object.keys(node.data).length !== 0)
         rowData.push(node.data);
+        errors.push(node.data._error);
       });
+
+      if(errors.length){
+        this.handleErrors(errors);
+        return;
+      }
 
       var data = JSON.stringify({
           'rowData': rowData,
@@ -110,18 +122,25 @@ define([
     formatColumns: function(model){
       var columnsDefs = [];
 
+      var errorCol = {
+        field: '_error',
+        headerName: '_error',
+      }
+
+      columnsDefs.push(errorCol);
+
       for (var i = 0; i < this.model.get('fieldsets').length; i++) {
         var ordFields = this.model.get('fieldsets')[i].fields;
         for (var j = 0; j < ordFields.length; j++) {
                       
           var field = this.model.get('schema')[ordFields[j]];
-          
           var colDef = {
             editable: this.editable,
             field: field.name,
             headerName: field.title,
             type: field.type,
-            options: field.options
+            options: field.options,
+            schema: field,
           };
 
           columnsDefs.push(colDef)
@@ -132,6 +151,10 @@ define([
     },
 
     onShow: function(){
+      //debbug
+      this.$el.find('.js-btn-form').toggleClass('hide');
+
+
       this.rgGrid.show(this.gridView = new GridView({
         columns: this.formatColumns(this.options.model),
         clientSide: true,

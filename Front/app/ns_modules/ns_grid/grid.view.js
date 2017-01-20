@@ -169,8 +169,9 @@ define([
 
     formatColumns: function(columnDefs){
       var _this = this;
-      columnDefs.map(function(col, i) {
 
+      columnDefs.map(function(col, i) {
+      
         if(col.field == 'FK_ProtocoleType'){
           col.hide = true;
           return;
@@ -184,7 +185,6 @@ define([
           _this.formatSelectColumn(col)
         }
 
-        
 
         switch(col.type){
           case 'AutocompTreeEditor':
@@ -207,6 +207,10 @@ define([
             col.cellEditor = Editors.NumberEditor;
             break;
         }
+
+        col.valueSetter = function(){
+          return 'aaaaa';
+        };
 
         switch(col.filter){
           case 'number': {

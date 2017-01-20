@@ -12,25 +12,31 @@ define([
 
     var Thesaurus = function () {
     };
-		Thesaurus.prototype.init = function(params){     
+		Thesaurus.prototype.init = function(params){
+
 		  var col = params.column.colDef;
+
+		  var value = params.value;
+		  if(value instanceof Object){
+		  	value = params.value.value;
+		  }
+
+			this.params = params;
+
 		  var options = {
 		    key: col.options.target || col.field,
-		    schema: {
-		      options: col.options,
-		      editable: true,
-		    },
+		    schema: col.schema,
 		    formGrid: true
 		  };
 
 		  var model = new Backbone.Model();
-		  model.set(options.key, params.value);
-
+		  model.set(options.key, value);
 		  options.model = model;
 
 		  this.picker = new ThesaurusPicker(options);
 		  this.element = this.picker.render();
-		  
+		 
+
 		  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
 		    event.stopPropagation();
 		  });
@@ -42,12 +48,13 @@ define([
 		      }
 		  });
 
-		  if (params.charPress){
+			//?		  
+			if (params.charPress){
 		    this.element.$el.find('input').val(params.charPress).change();
 		  } else {
 		    if (params.value){
 		      if (params.value.label !== undefined){
-		        this.element.$el.find('input').attr('data_value',params.value.value);
+		        this.element.$el.find('input').attr('data_value', params.value.value);
 		        this.element.$el.find('input').val(params.value.label).change();
 		      } else {
 		        this.element.$el.find('input').val(params.value).change();
@@ -55,6 +62,7 @@ define([
 		    }
 		  }
 		};
+
 		Thesaurus.prototype.addDestroyableEventListener = function(eElement, event, listener){
 		  eElement.addEventListener(event, listener);
 		}
@@ -65,18 +73,22 @@ define([
 		  this.element.$el.find('input').focus();
 		};
 		Thesaurus.prototype.getValue = function(){
-		  if (this.element.getItem){
-		    return this.element.getItem();
-		  }
-		  return this.element.getValue();
+			var value = this.element.getValue();
+			var dfd = this.element.validateAndTranslate(value);
+			//var error = this.element.commit();
+
+			return {
+				value: value,
+				dfd: dfd,
+				//error: error
+			};
+
 		};
 		Thesaurus.prototype.destroy= function(){
 		  return true;
 		}
 
 		Editors.Thesaurus = Thesaurus;
-
-
 
 
 
@@ -87,10 +99,7 @@ define([
 
 		  var options = {
 		    key: col.options.target || col.field,
-		    schema: {
-		      options: col.options,
-		      editable: true,
-		    },
+		    schema: col.schema,
 		    formGrid: true
 		  };
 
@@ -150,11 +159,7 @@ define([
 
 			var options = {
 			  key: col.field,
-			  schema: {
-			    options: col.options,
-			    editable: true,
-			    editorClass: 'form-control'
-			  },
+			  schema: col.schema,
 			  formGrid: true
 			};
 
@@ -211,12 +216,8 @@ define([
 			var col = params.column.colDef;
 
 			var options = {
-			  key: col.field,
-			  schema: {
-			    options: col.options,
-			    editable: true,
-			    editorClass: 'form-control'
-			  },
+			  key: col.options.target || col.field,
+			  schema: col.schema,
 			  formGrid: true
 			};
 
@@ -276,15 +277,9 @@ define([
 		AutocompleteEditor.prototype.init = function(params){
 			var col = params.column.colDef;
 
-			console.log(col.options);
-
 			var options = {
-			  key: col.field,
-			  schema: {
-			    options: col.options,
-			    editable: true,
-			    editorClass: 'form-control'
-			  },
+			  key: col.options.target || col.field,
+			  schema: col.schema,
 			  formGrid: true
 			};
 
