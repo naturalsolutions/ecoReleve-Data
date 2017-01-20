@@ -26,6 +26,7 @@ define([
       modGroup: '#group-mod',
       modInput: '#input-mod',
       startbtn: '.start',
+      spacer: '.spacer'
     },
     events: {
       'change input[type="file"]': 'importFile',
@@ -33,9 +34,12 @@ define([
       'drop .drag-zone-hover' : 'handleDrop',
       'dragover .drag-zone-hover' : 'handleDragOVer',
       'dragleave .drag-zone-hover' : 'handleDragLeave',
-      'click button.start' : 'sendFile'
+      'click button.start' : 'sendFile',
+      'click .fileinput-button' : 'simulateImport'
     },
-
+    simulateImport : function () {
+      $('input[type=file]').click();
+    },
     handleDrop : function(e) {
       e.originalEvent.stopPropagation();
       e.originalEvent.preventDefault();
@@ -57,6 +61,7 @@ define([
 
     clearFile: function() {
       $('#input-file').val('');
+      this.ui.spacer.html('')
       this.ui.startbtn.addClass('hidden');
       this.ui.progressBar.width('0' + '%');
     },
@@ -83,7 +88,8 @@ define([
           this.file = $('#input-file').get(0).files[0] || null;
         }
         if(typeof this.file !=='undefined') {
-          this.ui.startbtn.removeClass('hidden')
+          this.ui.startbtn.removeClass('hidden');
+          this.ui.spacer.html("<br>"+this.file.name+"<br><br>")
         }
         $('#clear').removeAttr('disabled');
         var ext = this.file.name.split('.');
@@ -215,6 +221,7 @@ define([
       this.ui.fileGroup.removeClass('has-error');
       this.ui.modHelper.text('');
       this.ui.modGroup.removeClass('has-error');
+
     },
 
   });
