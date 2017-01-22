@@ -135,15 +135,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 	    $(this.eGui).html(label);
 		};
 
-		ObjectPicker.prototype.getGui = function() {
-	    return this.eGui;
-		};
-
-		ObjectPicker.prototype.refresh = function (params) {
-	    this.eGui.innerHTML = '';
-	    this.init(params);
-		};
-
 		Renderers.ObjectPicker = ObjectPicker;
 
 
@@ -163,14 +154,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 	    $(this.eGui).html(chk);
 		};
 
-		CheckboxRenderer.prototype.getGui = function() {
-	    return this.eGui;
-		};
-
-		CheckboxRenderer.prototype.refresh = function (params) {
-	    this.eGui.innerHTML = '';
-	    this.init(params);
-		};
 
 		Renderers.CheckboxRenderer = CheckboxRenderer;
 
@@ -187,15 +170,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 			if(params.value)
 				label = params.value.label || params.value;
 	    $(this.eGui).html(label);
-		};
-
-		AutocompleteRenderer.prototype.getGui = function() {
-	    return this.eGui;
-		};
-
-		AutocompleteRenderer.prototype.refresh = function (params) {
-	    this.eGui.innerHTML = '';
-	    this.init(params);
 		};
 
 		Renderers.AutocompleteRenderer = AutocompleteRenderer;
