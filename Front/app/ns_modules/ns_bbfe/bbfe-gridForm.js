@@ -10,6 +10,20 @@ define([
   ], function ($, _, Backbone, Marionette,Ruler, Form, GridView, tpl) {
 
   'use strict';
+
+  Backbone.Form.validators.SubFormGrid = function (options) {
+      return function SubFormGrid(value) {
+          if (!options.parent.isError) {
+              return null;
+          }
+          var retour = {
+              type: 'subFormGrid',
+              message: ''
+          };
+          return retour;
+      };
+  };
+
   return Form.editors.GridFormEditor = Form.editors.Base.extend({
     events: {
         'click .js-btn-add' : 'addRow',
@@ -33,7 +47,7 @@ define([
       this.gridView.deleteSelectedRows();
     },
 
-    initialize: function(options) {
+    initialize: function(options){
       var _this = this; 
 
       this.editable = options.schema.editable;
@@ -116,11 +130,18 @@ define([
 
 
     getValue: function() {
-      var rowData = [];
-      this.gridView.gridOptions.api.forEachNode( function(node) {
-          rowData.push(node.data);
-      });
-      return rowData;
+      var rowDataAndErrors = this.gridView.getRowDataAndErrors();
+
+      if(rowDataAndErrors.errors.length){
+        this.handleErrors(rowDataAndErrors.errors);
+        return;
+      }
+
+      if(errors.length){
+        this.isError = true;
+      }
+
+      return rowDataAndErrors.rowData;
     },
 
     initRules:function(form) {

@@ -48,28 +48,20 @@ define([
     },
 
     handleErrors: function(errors){
-      
+      console.log('errors detected');
+      console.log(errors);
     },
 
     saveObs: function(){
-      var _this = this;
-      var rowData = [];
-      this.gridView.gridOptions.api.stopEditing();
-      var errors = [];
+      var rowDataAndErrors = this.gridView.getRowDataAndErrors();
 
-      this.gridView.gridOptions.api.forEachNode( function(node) {
-        if(Object.keys(node.data).length !== 0)
-        rowData.push(node.data);
-        errors.push(node.data._error);
-      });
-
-      if(errors.length){
-        this.handleErrors(errors);
+      if(rowDataAndErrors.errors.length){
+        this.handleErrors(rowDataAndErrors.errors);
         return;
       }
 
       var data = JSON.stringify({
-          'rowData': rowData,
+          'rowData': rowDataAndErrors.rowData,
           'FK_ProtocoleType': this.model.get('ID')
         });
       $.ajax({
@@ -80,9 +72,9 @@ define([
         context: this,
       }).done(function(response) {
         response.createdObservations.map(function(obs){
-          _this.model.get('obs').push(obs.id);
+          this.model.get('obs').push(obs.id);
         })
-        _this.model.trigger('change:obs', _this.model);
+        this.model.trigger('change:obs', this.model);
         this.toggleEditionMode();
         this.hardRefresh();
       }).fail(function(resp) {
@@ -123,8 +115,8 @@ define([
       var columnsDefs = [];
 
       var errorCol = {
-        field: '_error',
-        headerName: '_error',
+        field: '_errors',
+        headerName: '_errors',
       }
 
       columnsDefs.push(errorCol);

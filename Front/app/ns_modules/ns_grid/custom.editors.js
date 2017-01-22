@@ -10,8 +10,61 @@ define([
     
     var Editors = {};
 
+		var CustomEditor = function(){
+		};
+
+		CustomEditor.prototype.init = function(eElement, event, listener){
+		  
+		}
+
+		CustomEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
+		  eElement.addEventListener(event, listener);
+		  this.destroyFunctions.push(function(){
+		  	eElement.removeEventListener(event, listener);
+		  });
+		}
+		CustomEditor.prototype.getGui = function(){
+		  return this.element.el;
+		};
+
+		CustomEditor.prototype.afterGuiAttached = function () {
+		  this.element.$el.focus();
+		  this.element.$el.find('input').focus();
+		};
+
+		CustomEditor.prototype.destroy= function(){
+			this.destroyFunctions.forEach(function (func) { return func(); });
+			this.bbfe.remove();
+		  return true;
+		};
+
+		CustomEditor.prototype.getValue = function(){
+		  return this.element.getValue();
+		};
+
+		CustomEditor.prototype.preventNavigationEvents = function(){
+			this.destroyFunctions = [];
+
+		  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
+		    event.stopPropagation();
+		  });
+
+		  this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
+	      var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
+	      if (isNavigationKey) {
+	        event.stopPropagation();
+	      }
+		  });
+		};
+
+
+
     var Thesaurus = function () {
+
     };
+		
+		Thesaurus.prototype = new CustomEditor();
+
 		Thesaurus.prototype.init = function(params){
 
 		  var col = params.column.colDef;
@@ -33,23 +86,14 @@ define([
 		  model.set(options.key, value);
 		  options.model = model;
 
-		  this.picker = new ThesaurusPicker(options);
-		  this.element = this.picker.render();
+		  this.bbfe = new ThesaurusPicker(options);
+		  this.element = this.bbfe.render();
 		 
 
-		  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
-		    event.stopPropagation();
-		  });
 
-		  this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
-		      var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
-		      if (isNavigationKey) {
-		          event.stopPropagation();
-		      }
-		  });
 
-			//?		  
-			if (params.charPress){
+			//?
+/*			if (params.charPress){
 		    this.element.$el.find('input').val(params.charPress).change();
 		  } else {
 		    if (params.value){
@@ -60,18 +104,11 @@ define([
 		        this.element.$el.find('input').val(params.value).change();
 		      }
 		    }
-		  }
+		  }*/
+
+		  this.preventNavigationEvents();
 		};
 
-		Thesaurus.prototype.addDestroyableEventListener = function(eElement, event, listener){
-		  eElement.addEventListener(event, listener);
-		}
-		Thesaurus.prototype.getGui = function(){
-		  return this.element.el;
-		};
-		Thesaurus.prototype.afterGuiAttached = function () {
-		  this.element.$el.find('input').focus();
-		};
 		Thesaurus.prototype.getValue = function(){
 			var value = this.element.getValue();
 			var dfd = this.element.validateAndTranslate(value);
@@ -84,9 +121,7 @@ define([
 			};
 
 		};
-		Thesaurus.prototype.destroy= function(){
-		  return true;
-		}
+
 
 		Editors.Thesaurus = Thesaurus;
 
@@ -94,6 +129,9 @@ define([
 
     var ObjectPickerEditor = function () {
     };
+
+		ObjectPickerEditor.prototype = new CustomEditor();
+
 		ObjectPickerEditor.prototype.init = function(params){
 		  var col = params.column.colDef;
 
@@ -113,38 +151,20 @@ define([
 
 		  options.model = model;
 
-		  this.picker = new ObjectPicker(options);
-		  this.element = this.picker.render();
-		  
-		  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
-		    event.stopPropagation();
-		  });
+		  this.bbfe = new ObjectPicker(options);
+		  this.element = this.bbfe.render();
 
-		  this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
-	      var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
-	      if (isNavigationKey) {
-	        event.stopPropagation();
-	      }
-		  });
+		  this.preventNavigationEvents();
+
 		};
-		ObjectPickerEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
-		  eElement.addEventListener(event, listener);
-		}
-		ObjectPickerEditor.prototype.getGui = function(){
-		  return this.element.el;
-		};
-		ObjectPickerEditor.prototype.afterGuiAttached = function(){
-		  this.element.$el.find('input').focus();
-		};
+
 		ObjectPickerEditor.prototype.getValue = function(){
 		  if (this.element.getItem){
 		    return this.element.getItem();
 		  }
 		  return this.element.getValue();
 		};
-		ObjectPickerEditor.prototype.destroy= function(){
-		  return true;
-		}
+
 
 		Editors.ObjectPicker = ObjectPickerEditor;
 
@@ -154,6 +174,9 @@ define([
 
     var NumberEditor = function () {
     };
+
+    NumberEditor.prototype = new CustomEditor();
+
 		NumberEditor.prototype.init = function(params){
 			var col = params.column.colDef;
 
@@ -176,33 +199,8 @@ define([
 		  this.bbfe = new Form.editors.Number(options);
 		  this.element = this.bbfe.render();
 		  
-		  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
-		    event.stopPropagation();
-		  });
-
-		  this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
-	      var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
-	      if (isNavigationKey) {
-	        event.stopPropagation();
-	      }
-		  });
+		  this.preventNavigationEvents();
 		};
-		NumberEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
-		  eElement.addEventListener(event, listener);
-		}
-		NumberEditor.prototype.getGui = function(){
-			this.element.$el.addClass('form-control');
-		  return this.element.el;
-		};
-		NumberEditor.prototype.afterGuiAttached = function(){
-		  this.element.$el.focus();
-		};
-		NumberEditor.prototype.getValue = function(){
-		  return this.element.getValue();
-		};
-		NumberEditor.prototype.destroy= function(){
-		  return true;
-		}
 
 		Editors.NumberEditor = NumberEditor;
 
@@ -212,6 +210,8 @@ define([
 
     var CheckboxEditor = function () {
     };
+    CheckboxEditor.prototype = new CustomEditor();
+
 		CheckboxEditor.prototype.init = function(params){
 			var col = params.column.colDef;
 
@@ -235,45 +235,23 @@ define([
 		  this.bbfe = new Form.editors.Checkbox(options);
 		  this.element = this.bbfe.render();
 		  
-		  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
-		    event.stopPropagation();
-		  });
-
-		  this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
-	      var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
-	      if (isNavigationKey) {
-	        event.stopPropagation();
-	      }
-		  });
+		  this.preventNavigationEvents();
 		};
-		CheckboxEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
-		  eElement.addEventListener(event, listener);
-		}
+
 		CheckboxEditor.prototype.getGui = function(){
-			this.element.$el.addClass('form-control');
 			this.element.$el.css({
-				'margin': '5px'
+				'margin': '5px 10px'
 			});
 		  return this.element.el;
 		};
-		CheckboxEditor.prototype.afterGuiAttached = function(){
-		  this.element.$el.focus();
-		};
-		CheckboxEditor.prototype.getValue = function(){
-		  return this.element.getValue();
-		};
-		CheckboxEditor.prototype.destroy= function(){
-		  return true;
-		}
-
 		Editors.CheckboxEditor = CheckboxEditor;
-
-
 
 
 
     var AutocompleteEditor = function () {
     };
+
+    AutocompleteEditor.prototype = new CustomEditor();
 		AutocompleteEditor.prototype.init = function(params){
 			var col = params.column.colDef;
 
@@ -297,32 +275,9 @@ define([
 		  this.bbfe = new Autocomplete(options);
 		  this.element = this.bbfe.render();
 		  
-		  this.addDestroyableEventListener(this.getGui(), 'mousedown', function (event) {
-		    event.stopPropagation();
-		  });
+		  this.preventNavigationEvents();
+		};
 
-		  this.addDestroyableEventListener(this.getGui(), 'keydown', function (event) {
-	      var isNavigationKey = event.keyCode === 37 || event.keyCode === 38 || event.keyCode === 39 || event.keyCode === 40;
-	      if (isNavigationKey) {
-	        event.stopPropagation();
-	      }
-		  });
-		};
-		AutocompleteEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
-		  eElement.addEventListener(event, listener);
-		}
-		AutocompleteEditor.prototype.getGui = function(){
-		  return this.element.el;
-		};
-		AutocompleteEditor.prototype.afterGuiAttached = function(){
-		  this.element.$el.find('input').focus();
-		};
-		AutocompleteEditor.prototype.getValue = function(){
-		  return this.element.getValue();
-		};
-		AutocompleteEditor.prototype.destroy= function(){
-		  return true;
-		}
 
 		Editors.AutocompleteEditor = AutocompleteEditor;
     return Editors;

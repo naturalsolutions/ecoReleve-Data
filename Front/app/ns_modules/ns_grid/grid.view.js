@@ -704,6 +704,29 @@ define([
 
     },
 
+    getRowDataAndErrors: function(){
+      this.gridOptions.api.stopEditing();
+
+      var rowData = [];
+      var errors = [];
+
+      this.gridOptions.api.forEachNode( function(node) {
+        if(Object.keys(node.data).length !== 0 || (Object.keys(node.data).length == 1 && Object.keys(node.data)[0] != '_errors')){
+          rowData.push(node.data);
+        }
+        if(node.data._errors){
+          if(node.data._errors.length){
+            errors.push(node.data._errors);
+          }
+        }
+      });
+
+      return {
+          rowData: rowData,
+          errors: errors
+      }
+    },
+
     destroySelectedRows: function(callback){
       var _this = this;
       var rowData = [];
