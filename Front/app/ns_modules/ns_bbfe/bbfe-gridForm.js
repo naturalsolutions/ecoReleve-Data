@@ -137,7 +137,7 @@ define([
         return;
       }
 
-      if(errors.length){
+      if(rowDataAndErrors.errors.length){
         this.isError = true;
       }
 
