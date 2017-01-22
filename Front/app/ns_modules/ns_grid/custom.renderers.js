@@ -124,9 +124,11 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
 
 
-		function ObjectPicker() {
+		var ObjectPicker = function () {
 	    this.eGui = document.createElement('span');
 		}
+
+		ObjectPicker.prototype = new CustomRenderer();
 
 		ObjectPicker.prototype.init = function (params) {
 			var label = '';
@@ -141,9 +143,11 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
 
 
-		function CheckboxRenderer() {
+		var CheckboxRenderer = function() {
 	    this.eGui = document.createElement('span');
 		}
+
+		CheckboxRenderer.prototype = new CustomRenderer();
 
 		CheckboxRenderer.prototype.init = function (params) {
 			var checked = ''; 
@@ -161,9 +165,11 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
 
 
-		function AutocompleteRenderer() {
+		var AutocompleteRenderer = function() {
 	    this.eGui = document.createElement('span');
 		}
+
+		AutocompleteRenderer.prototype = new CustomRenderer();
 
 		AutocompleteRenderer.prototype.init = function (params) {
 			var label = '';
