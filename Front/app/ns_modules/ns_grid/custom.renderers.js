@@ -25,6 +25,8 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 			if(!valueTodisplay)
 				valueTodisplay = value;
 
+			console.log(value);
+
     	_this.formatValueToDisplay(valueTodisplay);
 
 

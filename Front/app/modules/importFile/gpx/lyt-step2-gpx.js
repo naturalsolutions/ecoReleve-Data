@@ -142,8 +142,6 @@ define([
         {
           field: 'id',
           headerName: 'ID',
-          checkboxSelection: true
-
         },{
           field: 'name',
           headerName: 'Name',

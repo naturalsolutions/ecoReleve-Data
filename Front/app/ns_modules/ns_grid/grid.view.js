@@ -181,14 +181,10 @@ define([
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
 
-        if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
-          _this.formatSelectColumn(col)
-        }
-
 
         switch(col.type){
           case 'AutocompTreeEditor':
-            col.cellEditor = Editors.Thesaurus;
+            col.cellEditor = Editors.ThesaurusEditor;
             col.cellRenderer = Renderers.Thesaurus;
             break;          
           case 'AutocompleteEditor':
@@ -240,6 +236,19 @@ define([
         }
 
       });
+
+      
+      if(_this.gridOptions.rowSelection === 'multiple'){
+        var col = {
+          minWidth: 40,
+          maxWidth: 40,
+          field: '',
+          headerName: ''
+        };
+        _this.formatSelectColumn(col);
+        columnDefs.unshift(col);
+      }
+
       return columnDefs;
     },
 

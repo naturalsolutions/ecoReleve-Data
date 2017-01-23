@@ -95,7 +95,6 @@ define([
       locationsColumnDefs: [{
         field: 'Date',
         headerName: 'date',
-        checkboxSelection: true,
         filter: 'date',
         pinned: 'left',
         minWidth: 200,
