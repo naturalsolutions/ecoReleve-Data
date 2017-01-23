@@ -114,13 +114,6 @@ define([
     formatColumns: function(model){
       var columnsDefs = [];
 
-      var errorCol = {
-        field: '_errors',
-        headerName: '_errors',
-      }
-
-      columnsDefs.push(errorCol);
-
       for (var i = 0; i < this.model.get('fieldsets').length; i++) {
         var ordFields = this.model.get('fieldsets')[i].fields;
         for (var j = 0; j < ordFields.length; j++) {
@@ -138,6 +131,12 @@ define([
           columnsDefs.push(colDef)
         }
       }
+      var errorCol = {
+        field: '_errors',
+        headerName: '_errors',
+        hide: true
+      }
+      columnsDefs.push(errorCol);
 
       return columnsDefs;
     },

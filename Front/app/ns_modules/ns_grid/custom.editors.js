@@ -5,27 +5,60 @@ define([
 	'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 	'ns_modules/ns_bbfe/bbfe-autoCompTree',
 	'ns_modules/ns_bbfe/bbfe-autocomplete',
+	'ns_modules/ns_bbfe/bbfe-dateTimePicker',
+	'ns_modules/ns_bbfe/bbfe-timePicker',
 
-], function($, AgGrid, Form, ObjectPicker, ThesaurusPicker, Autocomplete) {
+], function($, AgGrid, Form,
+	ObjectPicker, 
+	ThesaurusPicker, 
+	AutocompletePicker, 
+	DateTimePicker,
+	TimePicker
+){
     
     var Editors = {};
 
 		var CustomEditor = function(){
 		};
 
-		CustomEditor.prototype.init = function(eElement, event, listener){
+		CustomEditor.prototype.init = function(params){
+		  var col = params.column.colDef;
+
+		  var value = params.value;
+		  if(value instanceof Object){
+		  	value = params.value.value;
+		  }
+
+		  var options = {
+		    key: col.field,
+		    schema: col.schema,
+		    formGrid: true
+		  };
+
+		  var model = new Backbone.Model();
+		  model.set(options.key, value);
+		  options.model = model;
+
+			this.initBBFE(options);
+
+		  this.preventNavigationEvents();
+		};
+
+		CustomEditor.prototype.initBBFE = function(options){
 		  
-		}
+		};
 
 		CustomEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
 		  eElement.addEventListener(event, listener);
 		  this.destroyFunctions.push(function(){
 		  	eElement.removeEventListener(event, listener);
 		  });
-		}
+		};
+
 		CustomEditor.prototype.getGui = function(){
 		  return this.element.el;
 		};
+		
 
 		CustomEditor.prototype.afterGuiAttached = function () {
 		  this.element.$el.focus();
@@ -59,37 +92,13 @@ define([
 
 
 
-    var Thesaurus = function () {
+    var ThesaurusEditor = function () {};
+		ThesaurusEditor.prototype = new CustomEditor();
 
-    };
-		
-		Thesaurus.prototype = new CustomEditor();
-
-		Thesaurus.prototype.init = function(params){
-
-		  var col = params.column.colDef;
-
-		  var value = params.value;
-		  if(value instanceof Object){
-		  	value = params.value.value;
-		  }
-
-			this.params = params;
-
-		  var options = {
-		    key: col.options.target || col.field,
-		    schema: col.schema,
-		    formGrid: true
-		  };
-
-		  var model = new Backbone.Model();
-		  model.set(options.key, value);
-		  options.model = model;
-
+		ThesaurusEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new ThesaurusPicker(options);
 		  this.element = this.bbfe.render();
 		 
-
 			//?
 /*			if (params.charPress){
 		    this.element.$el.find('input').val(params.charPress).change();
@@ -104,10 +113,9 @@ define([
 		    }
 		  }*/
 
-		  this.preventNavigationEvents();
 		};
 
-		Thesaurus.prototype.getValue = function(){
+		ThesaurusEditor.prototype.getValue = function(){
 			var value = this.element.getValue();
 			var dfd = this.element.validateAndTranslate(value);
 			//var error = this.element.commit();
@@ -121,39 +129,13 @@ define([
 		};
 
 
-		Editors.Thesaurus = Thesaurus;
 
-
-
-    var ObjectPickerEditor = function () {
-    };
-
+    var ObjectPickerEditor = function () {};
 		ObjectPickerEditor.prototype = new CustomEditor();
 
-		ObjectPickerEditor.prototype.init = function(params){
-		  var col = params.column.colDef;
-
-		  var options = {
-		    key: col.options.target || col.field,
-		    schema: col.schema,
-		    formGrid: true
-		  };
-
-		  var model = new Backbone.Model();
-		  
-		  var value = '';
-		  if(params.value){
-		  	value = params.value.value || params.value;
-		  }
-		  model.set(options.key, value);
-
-		  options.model = model;
-
+		ObjectPickerEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new ObjectPicker(options);
 		  this.element = this.bbfe.render();
-
-		  this.preventNavigationEvents();
-
 		};
 
 		ObjectPickerEditor.prototype.getValue = function(){
@@ -164,76 +146,24 @@ define([
 		};
 
 
-		Editors.ObjectPicker = ObjectPickerEditor;
 
 
-
-
-
-    var NumberEditor = function () {
-    };
-
+    var NumberEditor = function () {};
     NumberEditor.prototype = new CustomEditor();
 
-		NumberEditor.prototype.init = function(params){
-			var col = params.column.colDef;
-
-			var options = {
-			  key: col.field,
-			  schema: col.schema,
-			  formGrid: true
-			};
-
-			
-		  var model = new Backbone.Model();
-		  
-		  var value = '';
-		  if(params.value){
-		  	value = params.value.value || params.value;
-		  }
-		  model.set(options.key, value);
-
-		  options.model = model;
+		NumberEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new Form.editors.Number(options);
 		  this.element = this.bbfe.render();
-		  
-		  this.preventNavigationEvents();
 		};
 
-		Editors.NumberEditor = NumberEditor;
 
 
-
-
-
-    var CheckboxEditor = function () {
-    };
+    var CheckboxEditor = function () {};
     CheckboxEditor.prototype = new CustomEditor();
 
-		CheckboxEditor.prototype.init = function(params){
-			var col = params.column.colDef;
-
-			var options = {
-			  key: col.options.target || col.field,
-			  schema: col.schema,
-			  formGrid: true
-			};
-
-			
-		  var model = new Backbone.Model();
-		  
-		  var value = '';
-		  if(params.value){
-		  	value = params.value.value || params.value;
-		  }
-		  model.set(options.key, value);
-
-		  options.model = model;
-
+		CheckboxEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new Form.editors.Checkbox(options);
 		  this.element = this.bbfe.render();
-		  
-		  this.preventNavigationEvents();
 		};
 
 		CheckboxEditor.prototype.getGui = function(){
@@ -242,49 +172,43 @@ define([
 			});
 		  return this.element.el;
 		};
-		Editors.CheckboxEditor = CheckboxEditor;
 
 
 
-    var AutocompleteEditor = function () {
-    };
+    var AutocompleteEditor = function () {};
 
     AutocompleteEditor.prototype = new CustomEditor();
-		AutocompleteEditor.prototype.init = function(params){
-			var col = params.column.colDef;
-
-			var options = {
-			  key: col.options.target || col.field,
-			  schema: col.schema,
-			  formGrid: true
-			};
-
-			
-		  var model = new Backbone.Model();
-		  
-		  var value = '';
-		  if(params.value){
-		  	value = params.value.value || params.value;
-		  }
-		  model.set(options.key, value);
-
-		  options.model = model;
-
-		  this.bbfe = new Autocomplete(options);
+		AutocompleteEditor.prototype.initBBFE = function(options){
+		  this.bbfe = new AutocompletePicker(options);
 		  this.element = this.bbfe.render();
-		  
-		  this.preventNavigationEvents();
+
 		};
 
 		AutocompleteEditor.prototype.getValue = function(){
 		  return {
 		  	value: this.element.getValue(),
-		  	label: this.element.$input[0].value
+		  	label: this.element.$input[0].value //not sure why
 		  } 
 		};
 
 
+    var DateTimeEditor = function () {};
+
+    DateTimeEditor.prototype = new CustomEditor();
+		DateTimeEditor.prototype.initBBFE = function(options){
+		  this.bbfe = new DateTimePicker(options);
+		  this.element = this.bbfe.render();
+
+		};
+
+
+		Editors.ThesaurusEditor = ThesaurusEditor;
+		Editors.ObjectPicker = ObjectPickerEditor;
+		Editors.NumberEditor = NumberEditor;
+		Editors.CheckboxEditor = CheckboxEditor;
 		Editors.AutocompleteEditor = AutocompleteEditor;
+		Editors.DateTimeEditor = DateTimeEditor;
+
     return Editors;
 
 });

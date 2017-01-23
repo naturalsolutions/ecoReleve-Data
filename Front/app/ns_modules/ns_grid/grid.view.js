@@ -205,6 +205,9 @@ define([
             break;
           case 'Number':
             col.cellEditor = Editors.NumberEditor;
+            break;          
+          case 'DateTimePickerEditor':
+            col.cellEditor = Editors.DateTimeEditor;
             break;
         }
 
