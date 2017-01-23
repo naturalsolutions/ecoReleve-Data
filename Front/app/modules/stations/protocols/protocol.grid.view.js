@@ -147,7 +147,6 @@ define([
       //this.editable = true;
       //this.$el.find('.js-btn-form').toggleClass('hide');
 
-
       this.rgGrid.show(this.gridView = new GridView({
         columns: this.formatColumns(this.options.model),
         clientSide: true,

@@ -205,6 +205,12 @@ define([
           case 'DateTimePickerEditor':
             col.cellEditor = Editors.DateTimeEditor;
             break;
+          case 'Text':
+            col.cellEditor = Editors.TextEditor;
+            break;
+          case 'TextArea':
+            col.cellEditor = Editors.TextEditor;
+            break;
         }
 
         switch(col.filter){

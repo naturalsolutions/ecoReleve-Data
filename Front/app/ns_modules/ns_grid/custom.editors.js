@@ -152,7 +152,16 @@ define([
     NumberEditor.prototype = new CustomEditor();
 
 		NumberEditor.prototype.initBBFE = function(options){
-		  this.bbfe = new Form.editors.Number(options);
+		  this.bbfe = new Form.editors.Text(options);
+		  this.element = this.bbfe.render();
+		};
+
+
+    var TextEditor = function () {};
+    TextEditor.prototype = new CustomEditor();
+
+		TextEditor.prototype.initBBFE = function(options){
+		  this.bbfe = new Form.editors.Text(options);
 		  this.element = this.bbfe.render();
 		};
 
@@ -205,6 +214,7 @@ define([
 		Editors.ThesaurusEditor = ThesaurusEditor;
 		Editors.ObjectPicker = ObjectPickerEditor;
 		Editors.NumberEditor = NumberEditor;
+		Editors.TextEditor = TextEditor;
 		Editors.CheckboxEditor = CheckboxEditor;
 		Editors.AutocompleteEditor = AutocompleteEditor;
 		Editors.DateTimeEditor = DateTimeEditor;
