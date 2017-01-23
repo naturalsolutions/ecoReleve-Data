@@ -53,6 +53,7 @@ define([
     },
 
     saveObs: function(){
+      var _this = this;
       var rowDataAndErrors = this.gridView.getRowDataAndErrors();
 
       if(rowDataAndErrors.errors.length){
@@ -72,8 +73,8 @@ define([
         context: this,
       }).done(function(response) {
         response.createdObservations.map(function(obs){
-          this.model.get('obs').push(obs.id);
-        })
+          _this.model.get('obs').push(obs.id);
+        });
         this.model.trigger('change:obs', this.model);
         this.toggleEditionMode();
         this.hardRefresh();

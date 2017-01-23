@@ -16,7 +16,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     	var dfd;
     	var valueTodisplay;
 
-
     	if(value instanceof Object){
     		value = params.value.value;
     		dfd = params.value.dfd;
@@ -28,33 +27,41 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
     	_this.formatValueToDisplay(valueTodisplay);
 
-    	var validators = params.colDef.schema.validators;
-    	if(validators.length){
-    		// required //'cause thesaurus validators are weird
-    		if(validators[0] === 'required'){
-    				$(params.eGridCell).addClass('ag-cell-required');
-    				if(!value){
-    					this.handleError(params);
-    				}
-    		}
-    	}
 
-			//could be a call whith params.colDef
+				//could be a call whith params.colDef
     	if(dfd && value){
     		dfd.then(
     		function(resp){
-    			_this.handeRemoveError(params);
     			_this.formatValueToDisplay(valueTodisplay);
     			
+    			_this.handeRemoveError(params);
     			_this.manualDataSet(params, value);
     		},
     		function(){
     			_this.handleError(params);
     		});
     	} else {
-				this.manualDataSet(params, value)
+    		var validators = params.colDef.schema.validators;
+    		if(validators.length){
+    			
+    			if(validators[0] === 'required'){
+    					$(params.eGridCell).addClass('ag-cell-required');
+    					if(!value){
+    						this.handleError(params);
+    					} else {
+		    				this.handeRemoveError(params);
+								this.manualDataSet(params, value);
+    					}
+    			} else {
+						this.handeRemoveError(params);
+						this.manualDataSet(params, value);
+    			}
+
+    		}
     	}
     };
+
+
 
     CustomRenderer.prototype.manualDataSet = function(params, value) {
     	//critic

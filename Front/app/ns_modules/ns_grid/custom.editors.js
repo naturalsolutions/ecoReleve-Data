@@ -100,7 +100,8 @@ define([
 		  this.element = this.bbfe.render();
 		 
 			//?
-/*			if (params.charPress){
+			/*
+			if (params.charPress){
 		    this.element.$el.find('input').val(params.charPress).change();
 		  } else {
 		    if (params.value){
@@ -111,7 +112,8 @@ define([
 		        this.element.$el.find('input').val(params.value).change();
 		      }
 		    }
-		  }*/
+		  }
+		  */
 
 		};
 
@@ -139,13 +141,11 @@ define([
 		};
 
 		ObjectPickerEditor.prototype.getValue = function(){
-		  if (this.element.getItem){
-		    return this.element.getItem();
+		  return {
+		  	value: this.element.getDisplayValue(),
+		  	label: this.element.getValue(),
 		  }
-		  return this.element.getValue();
 		};
-
-
 
 
     var NumberEditor = function () {};
