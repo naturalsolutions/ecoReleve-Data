@@ -25,6 +25,7 @@ define([
       modHelper: '#help-mod',
       modGroup: '#group-mod',
       modInput: '#input-mod',
+      clearbtn: '#clear',
       startbtn: '.start',
       spacer: '.spacer'
     },
@@ -62,6 +63,7 @@ define([
     clearFile: function() {
       $('#input-file').val('');
       this.ui.spacer.html('')
+      this.ui.clearbtn.attr('disabled','disabled')
       this.ui.startbtn.addClass('hidden');
       this.ui.progressBar.width('0' + '%');
     },
