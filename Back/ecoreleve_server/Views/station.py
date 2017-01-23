@@ -420,6 +420,14 @@ def searchStation(request):
                 'Value': None
             }]
         searchInfo['criteria'].extend(criteria)
+
+    criteria = [
+        {'Column': 'creator',
+         'Operator': '=',
+         'Value': user
+         }
+    ]
+    searchInfo['criteria'].extend(criteria)
         # searchInfo['offset'] = 0
 
     moduleFront = session.query(FrontModules).filter(
@@ -495,7 +503,13 @@ def stations_export(request):
                 'criteria'] if obj['Value'] != str(-1)]
 
     searchInfo['order_by'] = []
-
+    criteria = [
+        {'Column': 'creator',
+         'Operator': '=',
+         'Value': user
+         }
+    ]
+    searchInfo['criteria'].extend(criteria)
     ModuleType = 'StationGrid'
     moduleFront = session.query(FrontModules).filter(
         FrontModules.Name == ModuleType).one()
