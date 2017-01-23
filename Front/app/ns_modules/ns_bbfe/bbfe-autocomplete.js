@@ -38,7 +38,6 @@ define([
 
             if (options.schema.options) {
                 if (typeof options.schema.options.source === 'string'){
-                    
                    this.autocompleteSource.source = url;
                 }
                 this.autocompleteSource.select = function(event,ui){

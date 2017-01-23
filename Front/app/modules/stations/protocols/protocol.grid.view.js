@@ -20,7 +20,7 @@ define([
     },
 
     initialize: function(options){  
-      this.editable = true;
+      this.editable = false;
       this.url = 'stations/' + this.model.get('stationId') + '/observations';
     },
 
@@ -48,11 +48,12 @@ define([
     },
 
     handleErrors: function(errors){
-      console.log('errors detected');
+      //console.log('errors detected');
       console.log(errors);
     },
 
     saveObs: function(){
+      var _this = this;
       var rowDataAndErrors = this.gridView.getRowDataAndErrors();
 
       if(rowDataAndErrors.errors.length){
@@ -72,8 +73,8 @@ define([
         context: this,
       }).done(function(response) {
         response.createdObservations.map(function(obs){
-          this.model.get('obs').push(obs.id);
-        })
+          _this.model.get('obs').push(obs.id);
+        });
         this.model.trigger('change:obs', this.model);
         this.toggleEditionMode();
         this.hardRefresh();
@@ -143,7 +144,8 @@ define([
 
     onShow: function(){
       //debbug
-      this.$el.find('.js-btn-form').toggleClass('hide');
+      //this.editable = true;
+      //this.$el.find('.js-btn-form').toggleClass('hide');
 
 
       this.rgGrid.show(this.gridView = new GridView({

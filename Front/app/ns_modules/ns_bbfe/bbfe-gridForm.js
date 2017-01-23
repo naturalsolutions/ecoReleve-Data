@@ -123,6 +123,12 @@ define([
           
           columnsDefs.push(colDef)
       }
+      var errorCol = {
+        field: '_errors',
+        headerName: '_errors',
+        hide: true
+      }
+      columnsDefs.push(errorCol);
 
       return columnsDefs;             
     },
