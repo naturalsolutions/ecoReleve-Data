@@ -90,8 +90,6 @@ define([
 		  this.element = this.bbfe.render();
 		 
 
-
-
 			//?
 /*			if (params.charPress){
 		    this.element.$el.find('input').val(params.charPress).change();
@@ -276,6 +274,13 @@ define([
 		  this.element = this.bbfe.render();
 		  
 		  this.preventNavigationEvents();
+		};
+
+		AutocompleteEditor.prototype.getValue = function(){
+		  return {
+		  	value: this.element.getValue(),
+		  	label: this.element.$input[0].value
+		  } 
 		};
 
 

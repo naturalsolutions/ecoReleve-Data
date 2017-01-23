@@ -3,21 +3,30 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     var Renderers = {};
 
     var CustomRenderer = function(){
-    	this.eGui = document.createElement('span'); //not sure it's necessary
     }
 
     CustomRenderer.prototype.init = function (params) {
+    	this.eGui = document.createElement('span'); //not sure it's necessary
+			this.afterInit(params);
+    };
+
+    CustomRenderer.prototype.afterInit = function(params) {
     	var _this= this;
     	var value = params.value;
-    	var first = true;
     	var dfd;
+    	var valueTodisplay;
+
 
     	if(value instanceof Object){
-    		first = true;
     		value = params.value.value;
     		dfd = params.value.dfd;
+    		valueTodisplay = params.value.label;
     	}
-    	_this.formatDisplayedValue(value);
+
+			if(!valueTodisplay)
+				valueTodisplay = value;
+
+    	_this.formatValueToDisplay(valueTodisplay);
 
     	var validators = params.colDef.schema.validators;
     	if(validators.length){
@@ -30,28 +39,38 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     		}
     	}
 
+			//could be a call whith params.colDef
     	if(dfd && value){
     		dfd.then(
     		function(resp){
-    			//remove colname from error col
     			_this.handeRemoveError(params);
-    			_this.formatDisplayedValue(value);
+    			_this.formatValueToDisplay(valueTodisplay);
     			
-    			params.data[params.colDef.field] = value;
+    			_this.manualDataSet(params, value);
     		},
     		function(){
     			_this.handleError(params);
     		});
+    	} else {
+				this.manualDataSet(params, value)
+    	}
+    };
+
+    CustomRenderer.prototype.manualDataSet = function(params, value) {
+    	//critic
+    	if(!this.error){
+    		params.data[params.colDef.field] = value;
     	}
     };
 
   	CustomRenderer.prototype.refresh = function (params) {
       this.eGui.innerHTML = '';
-      this.init(params);
+      this.afterInit(params);
   	};
 
 
   	CustomRenderer.prototype.handeRemoveError = function(params){
+  		this.error = false;
   	  $(params.eGridCell).removeClass('ag-cell-error');
 
   		var errorsColumn =  params.data['_errors'];
@@ -65,9 +84,9 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   	};
 
   	CustomRenderer.prototype.handleError = function(params) {
+  		this.error = true;
   		params.data[params.colDef.field] = '';
   	  $(params.eGridCell).addClass('ag-cell-error');
-  	  //$(params.eGridCell).removeClass('ag-cell-required');
   	  $(this.eGui).html();
 
   		var errorsColumn =  params.data['_errors'];
@@ -86,72 +105,48 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   	CustomRenderer.prototype.getGui = function() {
   	  return this.eGui;
   	};
-  	CustomRenderer.prototype.formatDisplayedValue = function() {
-  	  
+  	CustomRenderer.prototype.formatValueToDisplay = function(value) {
+  	  $(this.eGui).html(value);
   	};
+
+
 
 
 		/*
 			Custom childrens
 		*/
 
-
-
-		var Thesaurus = function(options) {
-				CustomRenderer.call(this, options);
-		    this.eGui = document.createElement('span');
-		}
+		var Thesaurus = function(options) {}
 		Thesaurus.prototype = new CustomRenderer();
 
-		Thesaurus.prototype.formatDisplayedValue = function(value) {
+		Thesaurus.prototype.formatValueToDisplay = function(value) {
 			if((typeof value !== 'string')){
 			  return;
 			}
 			var tmp = value.split('>');
 
-			if(tmp.length > 0){
-			  $(this.eGui).html(tmp[tmp.length - 1]);
+			//not sure
+			$(this.eGui).html(tmp[tmp.length - 1]);
+			
+			/*if(tmp.length > 0){
 			} else {
 			  //$(this.eGui).html(); //?
-			}
+			}*/
 		};
 
 
 
-		Renderers.Thesaurus = Thesaurus;
-
-
-
-
-
-		var ObjectPicker = function () {
-	    this.eGui = document.createElement('span');
-		}
-
+		var ObjectPicker = function () {}
 		ObjectPicker.prototype = new CustomRenderer();
 
-		ObjectPicker.prototype.init = function (params) {
-			var label = '';
-			if(params.value)
-				label = params.value.label || params.value;
-	    $(this.eGui).html(label);
-		};
-
-		Renderers.ObjectPicker = ObjectPicker;
 
 
 
-
-
-		var CheckboxRenderer = function() {
-	    this.eGui = document.createElement('span');
-		}
-
+		var CheckboxRenderer = function() {}
 		CheckboxRenderer.prototype = new CustomRenderer();
-
-		CheckboxRenderer.prototype.init = function (params) {
+		CheckboxRenderer.prototype.formatValueToDisplay = function (value) {
 			var checked = ''; 
-			if(params.value == 1)
+			if(value == 1)
 				checked = 'checked';
 
 			var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
@@ -159,25 +154,17 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 		};
 
 
-		Renderers.CheckboxRenderer = CheckboxRenderer;
 
 
-
-
-
-		var AutocompleteRenderer = function() {
-	    this.eGui = document.createElement('span');
-		}
-
+		var AutocompleteRenderer = function() {}
 		AutocompleteRenderer.prototype = new CustomRenderer();
 
-		AutocompleteRenderer.prototype.init = function (params) {
-			var label = '';
-			if(params.value)
-				label = params.value.label || params.value;
-	    $(this.eGui).html(label);
-		};
 
+
+
+		Renderers.Thesaurus = Thesaurus;
+		Renderers.ObjectPicker = ObjectPicker;
+		Renderers.CheckboxRenderer = CheckboxRenderer;
 		Renderers.AutocompleteRenderer = AutocompleteRenderer;
 
     return Renderers;

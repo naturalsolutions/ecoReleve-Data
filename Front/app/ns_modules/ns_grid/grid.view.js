@@ -208,10 +208,6 @@ define([
             break;
         }
 
-        col.valueSetter = function(){
-          return 'aaaaa';
-        };
-
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;

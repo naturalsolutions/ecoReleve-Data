@@ -70,7 +70,7 @@ define([
         },
 
       getValue: function() {
-       return this.$input.attr('data_value') ;
+       return this.$input.attr('data_value');
       },
 
         render: function () {
@@ -79,17 +79,19 @@ define([
             var value = this.model.get(this.key);
             var data_value;
 
-            //console.log(this.key);
-
             if (value && this.options.schema.options.label != this.options.schema.options.value && this.options.schema.options.object) {
                 value = null;
+
                 var initValue = this.model.get(this.key);
                 $.ajax({
                     url : this.options.schema.options.object+'/'+this.model.get(this.key),
+                    context: this,
                     success : function(data){
-                        // console.log(data);
-                        // console.log(_this.options.schema.options.label);
-                        _this.$input.val(data[_this.options.schema.options.label]);
+                        if (typeof data.fullname != 'undefined') {
+                            this.$input.val(data.fullname)
+                        }else {
+                            this.$input.val(data[_this.options.schema.options.label]);
+                        }
                     }
                 })
             }
