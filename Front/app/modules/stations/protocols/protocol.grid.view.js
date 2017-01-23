@@ -20,7 +20,7 @@ define([
     },
 
     initialize: function(options){  
-      this.editable = true;
+      this.editable = false;
       this.url = 'stations/' + this.model.get('stationId') + '/observations';
     },
 
@@ -144,7 +144,8 @@ define([
 
     onShow: function(){
       //debbug
-      this.$el.find('.js-btn-form').toggleClass('hide');
+      //this.editable = true;
+      //this.$el.find('.js-btn-form').toggleClass('hide');
 
 
       this.rgGrid.show(this.gridView = new GridView({
