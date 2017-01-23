@@ -91,7 +91,8 @@ define([
                 inputID: this.id,
                 editorAttrs: editorAttrs,
                 editorClass: options.schema.editorClass,
-                iconFont:iconFont
+                iconFont:iconFont,
+                inputGroup: (this.formGrid) ? '' : 'input-group'
             }
 
             this.template = _.template(this.template, tplValeurs);
@@ -262,7 +263,7 @@ define([
 
     }, {
         template: '<div id="divAutoComp_<%=inputID%>" >\
-        <div class="input-group">\
+        <div class="<%= inputGroup %>">\
             <span class="input-group-addon <%=iconFont%>"></span>\
             <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree form-control <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
         </div>\
