@@ -48,8 +48,8 @@ define([
     },
 
     handleErrors: function(errors){
-      console.log('errors detected');
-      console.log(errors);
+/*      console.log('errors detected');
+      console.log(errors);*/
     },
 
     saveObs: function(){
