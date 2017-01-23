@@ -42,6 +42,15 @@ define([
     onShow: function() {
       this.loadCollection(config.coreUrl + 'protocolTypes', 'select[name="protocols"]');
       //
+      var ws = new WebSocket("ws://127.0.0.1:6545/__sockjs__");
+      ws.onmessage = function(msg) {
+        console.log("<p>" + msg.data + "</p>");
+      };
+
+      ws.onopen = function(){
+        console.log(' websocket is open')
+      };
+
 
     },
     loadCollection: function(url, element) {

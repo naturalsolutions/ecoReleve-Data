@@ -6,6 +6,7 @@ from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from pyramid.authorization import ACLAuthorizationPolicy
 from .controllers.security import SecurityRoot, myJWTAuthenticationPolicy
+# from .controllers.WebSocket import Root
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
@@ -15,11 +16,16 @@ from .Models import (
     dbConfig,
     db,
     loadThesaurusTrad,
-    groupfinder
+    groupfinder,
+    AppConfig
 )
 from .Views import add_routes, add_cors_headers_response_callback
 from pyramid.events import NewRequest
 from sqlalchemy.orm import sessionmaker, scoped_session
+from eventlet import wsgi
+import eventlet
+import logging.config
+
 
 
 def datetime_adapter(obj, request):
@@ -86,10 +92,16 @@ def main(global_config, **settings):
     Base.metadata.create_all(engine)
     Base.metadata.reflect(views=True, extend_existing=False)
 
+    # logging.config.fileConfig(
+    #     settings['logging.config'],
+    #     disable_existing_loggers=False
+    # )
+
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
     config.include('pyramid_jwtauth')
     config.include('pyramid_excel')
+
 
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
     dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine))
@@ -130,4 +142,9 @@ def main(global_config, **settings):
     loadThesaurusTrad(config)
     add_routes(config)
     config.scan()
-    return config.make_wsgi_app()
+
+    app = config.make_wsgi_app()
+    # listener = eventlet.listen((AppConfig['server:main']['host'], int(AppConfig['server:main']['port'])))
+    # wsgi.server(listener, app)
+
+    return app

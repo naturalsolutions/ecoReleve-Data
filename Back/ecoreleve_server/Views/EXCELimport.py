@@ -12,8 +12,20 @@ import io
 from pyramid.response import Response
 import uuid
 import numpy as np
+import asyncio
 
 route_prefix = 'file_import/'
+
+
+# @view_config(route_name=route_prefix + 'run',
+#              mapper=WebsocketMapper)
+@asyncio.coroutine
+def echo(ws):
+    while True:
+        message = yield from ws.recv()
+        if message is None:
+            break
+        yield from ws.send(message)
 
 
 @view_config(route_name=route_prefix + 'getTemplate',
