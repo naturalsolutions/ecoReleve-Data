@@ -163,6 +163,8 @@ define([
           rowSelection: (this.editable)? 'multiple' : '',
         }
       }));
+
+      
     },
 
   });

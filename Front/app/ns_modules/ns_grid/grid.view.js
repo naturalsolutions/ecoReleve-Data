@@ -100,8 +100,11 @@ define([
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),
         onGridReady: function(){
+          console.log(_this.gridOptions);
+          
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
+              _this.focusFirstCell();
               _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
               if(!_this.model.get('totalRecords')){
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
@@ -148,7 +151,13 @@ define([
       }
     },
 
-
+    focusFirstCell: function(){
+      if ( this.gridOptions.columnDefs[0].checkboxSelection ) {
+        this.gridOptions.api.setFocusedCell(0, this.gridOptions.columnDefs[1].field, null);
+      } else {
+        this.gridOptions.api.setFocusedCell(0, this.gridOptions.columnDefs[0].field, null);
+      }
+    },
 
     onRowSelected: function(e){
       if(this.ready){
