@@ -48,8 +48,12 @@ define([
     },
 
     handleErrors: function(errors){
-      //console.log('errors detected');
-      console.log(errors);
+      var opt = {
+        title: 'Errors detected',
+        text: 'Please fix errors before save your data'
+      };
+      
+      window.swal(opt, 'warning', null, false);
     },
 
     saveObs: function(){
@@ -164,7 +168,7 @@ define([
         }
       }));
 
-      
+
     },
 
   });
