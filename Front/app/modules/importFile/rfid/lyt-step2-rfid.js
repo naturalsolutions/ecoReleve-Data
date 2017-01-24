@@ -65,6 +65,8 @@ define([
       this.ui.spacer.html('')
       this.ui.clearbtn.attr('disabled','disabled')
       this.ui.startbtn.addClass('hidden');
+      this.ui.progress.addClass('hidden');
+      this.ui.progress.width('90' + '%');
       this.ui.progressBar.width('0' + '%');
     },
 
@@ -91,7 +93,7 @@ define([
         }
         if(typeof this.file !=='undefined') {
           this.ui.startbtn.removeClass('hidden');
-          this.ui.spacer.html("<br>"+this.file.name+"<br><br>")
+          this.ui.spacer.html("<br>"+this.file.name+"<br><br>");
         }
         $('#clear').removeAttr('disabled');
         var ext = this.file.name.split('.');
@@ -113,6 +115,7 @@ define([
           var url = 'sensors/rfid/datas';
           var data = new FormData();
           var self = this;
+          _this.ui.progress.removeClass('hidden');
 
         }
 
