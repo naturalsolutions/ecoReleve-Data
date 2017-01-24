@@ -43,6 +43,7 @@ define([
 
     initialize: function(options) {
       this.from = options.from;
+      this.histoMonitoredSite = {};
     },
 
     onShow: function() {
@@ -216,8 +217,63 @@ define([
       }).done(function(data) {
         var lat = data['LAT'];
         var lon = data['LON'];
+        console.log(data);
+        _this.histoMonitoredSite = data;
+        console.log(_this.histoMonitoredSite);
         _this.$el.find('input[name="LAT"]').val(lat).change();
         _this.$el.find('input[name="LON"]').val(lon).change();
+
+        $.ajax({
+          context: this,
+          url: 'monitoredSites/'+_this.histoMonitoredSite.FK_MonitoredSite+'/history/',
+        }).done(function(data) {
+          this.histoMonitoredSite.history = data[1];
+          var dateCustom = null;
+          var dayMonthYear = null;
+          var day = null;
+          var month = null;
+          var year = null;
+          var hoursMinSec = null;
+          var hours = null;
+          var min = null;
+          var seconds = null;
+          var newDate = null;
+          var veryFirstDate = new Date().getTime();
+          var veryLastDate = new Date().getTime();
+          console.log(veryLastDate);
+          console.log(veryFirstDate);
+          for( var i = 0 ; i < data[1].length ; i++ ) {
+            dateCustom = data[1][i].StartDate.split(" ");
+            dayMonthYear = dateCustom[0].split("/");
+            day = dayMonthYear[0];
+            month = dayMonthYear[1];
+            year = dayMonthYear[2];
+            hoursMinSec = dateCustom[1].split(":");
+            hours = hoursMinSec[0];
+            min = hoursMinSec[1];
+            seconds = hoursMinSec[2];
+            newDate = new Date(month+"/"+day+"/"+year+" "+hours+":"+min+":"+seconds);
+            console.log(newDate);
+            if( veryFirstDate >= newDate.getTime() ) {
+              console.log("date plus vielle");
+              veryFirstDate = newDate.getTime();
+            }
+            if ( veryLastDate <= newDate.getTime() ) {
+              console.console.log("date plus récente");
+              veryLastDate = newDate.getTime();
+            }
+
+          }
+          console.log("nouvelle first date = ");
+          console.log(veryFirstDate);
+          console.log(new Date(veryFirstDate));
+          console.log("nouvelle last date = ");
+          console.log(veryLastDate);
+          console.log(new Date(veryLastDate));
+        }).fail(function() {
+          console.error('an error occured');
+        });
+
       }).fail(function() {
         console.error('an error occured');
       });
@@ -234,6 +290,21 @@ define([
     },
 
     save: function() {
+      // console.log("on verif ");
+      // Swal({
+      //   title: 'Verif station and monitored sites',
+      //   text: 'blabla ! ',
+      //   type: 'warning',
+      //   showCancelButton: false,
+      //   confirmButtonColor: 'rgb(147, 14, 14)',
+      //   confirmButtonText: 'OK',
+      //   closeOnConfirm: true,
+      // },
+      // function(isConfirm) {
+      //   console.log("confirm");
+      //   //$(e.target).val('');
+      // });
+
       this.nsForm.butClickSave();
     },
 
