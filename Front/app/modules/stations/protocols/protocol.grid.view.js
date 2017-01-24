@@ -144,8 +144,14 @@ define([
 
     onShow: function(){
       //debbug
-      //this.editable = true;
       //this.$el.find('.js-btn-form').toggleClass('hide');
+
+      var rowData = null;
+      if(!(this.model.get('obs').length)){
+        this.toggleEditionMode();
+        this.$el.find('.js-btn-form').toggleClass('hide');
+        rowData = [{}];
+      }
 
       this.rgGrid.show(this.gridView = new GridView({
         columns: this.formatColumns(this.options.model),
@@ -153,6 +159,7 @@ define([
         url: this.url,
         objectType: this.model.get('ID'),
         gridOptions: {
+          rowData: rowData,
           rowSelection: (this.editable)? 'multiple' : '',
         }
       }));
