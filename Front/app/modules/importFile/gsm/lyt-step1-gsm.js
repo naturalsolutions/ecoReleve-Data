@@ -22,7 +22,7 @@ define([
 
     name: 'Upload GSM Files',
     ui: {
-      'startBtn': 'button.start',
+      'startBtn' : 'button.start',
       'cancelBtn' : 'button.cancel'
     },
 
