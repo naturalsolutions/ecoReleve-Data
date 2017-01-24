@@ -152,9 +152,10 @@ define([
     NumberEditor.prototype = new CustomEditor();
 
 		NumberEditor.prototype.initBBFE = function(options){
-		  this.bbfe = new Form.editors.Text(options);
+		  this.bbfe = new Form.editors.Number(options);
 		  this.element = this.bbfe.render();
 		};
+
 
 
     var TextEditor = function () {};
@@ -190,7 +191,6 @@ define([
 		AutocompleteEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new AutocompletePicker(options);
 		  this.element = this.bbfe.render();
-
 		};
 
 		AutocompleteEditor.prototype.getValue = function(){
