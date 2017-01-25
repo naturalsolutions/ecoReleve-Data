@@ -100,8 +100,6 @@ define([
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),
         onGridReady: function(){
-          console.log(_this.gridOptions);
-          
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
               _this.focusFirstCell();

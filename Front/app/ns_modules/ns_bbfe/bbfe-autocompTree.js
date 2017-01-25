@@ -47,6 +47,9 @@ define([
 
         initialize: function (options) {
             Form.editors.Base.prototype.initialize.call(this, options);
+
+            this.formGrid = options.formGrid;
+
             this.FirstRender = true;
             this.languages = {
                 'fr': '',
@@ -86,7 +89,8 @@ define([
                 inputID: this.id,
                 editorAttrs: editorAttrs,
                 editorClass: options.schema.editorClass,
-                iconFont:iconFont
+                iconFont: iconFont,
+                inputGroup: (this.formGrid) ? '' : 'input-group'
             }
 
             this.template = _.template(this.template, tplValeurs);
@@ -114,9 +118,14 @@ define([
         },
 
         render: function () {
+            var _this = this;
             var $el = $(this.template);
             this.setElement($el);
-            var _this = this;
+
+            if(this.formGrid){
+                $el.find('.input-group-addon').addClass('hide');
+            }
+            
             _(function () {
                 if (_this.editable) {
                     _this.$el.find('#' + _this.id).autocompTree({
@@ -253,7 +262,7 @@ define([
 
     }, {
         template: '<div id="divAutoComp_<%=inputID%>" >\
-        <div class="input-group">\
+        <div class="<%= inputGroup %>">\
             <span class="input-group-addon <%=iconFont%>"></span>\
             <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
         </div>\

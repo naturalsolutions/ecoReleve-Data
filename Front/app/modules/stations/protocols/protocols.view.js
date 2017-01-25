@@ -66,6 +66,7 @@ define([
         },
 
         initialize: function(){
+          this.model.set('grid', true);
         },
 
         updateTotal: function(){
@@ -167,7 +168,7 @@ define([
           view.model.set('stationId', _this.model.get('stationId'));
           view.$el.addClass('active');
 
-          view.model.set('grid', true);
+
 
           if( view.model.get('grid') ){
             _this.parent.rgProtocol.show(new ProtocolGrid({

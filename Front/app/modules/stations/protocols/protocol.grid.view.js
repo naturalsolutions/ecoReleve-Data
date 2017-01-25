@@ -19,7 +19,8 @@ define([
       'click .js-btn-form': 'handleBtnClick'
     },
 
-    initialize: function(options){  
+    initialize: function(options){
+      //console.log(options);
       this.editable = false;
       this.url = 'stations/' + this.model.get('stationId') + '/observations';
     },
