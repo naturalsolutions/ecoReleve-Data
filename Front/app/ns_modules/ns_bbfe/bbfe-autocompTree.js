@@ -28,7 +28,7 @@ define([
         previousValue: '',
 
         events: {
-            'hide': 'hasChanged',
+            'hide': "hasChanged",
             'keyup': 'inputChange',
             'changeEditor':'inputChange'
         },
@@ -46,11 +46,7 @@ define([
         },
 
         initialize: function (options) {
-
             Form.editors.Base.prototype.initialize.call(this, options);
-
-            this.formGrid = options.formGrid;
-
             this.FirstRender = true;
             this.languages = {
                 'fr': '',
@@ -70,7 +66,6 @@ define([
 
             this.template = options.template || this.constructor.template;
             this.id = this.cid;
-
             var editorAttrs = "";
 
             this.editable = options.schema.editable || true;
@@ -91,8 +86,7 @@ define([
                 inputID: this.id,
                 editorAttrs: editorAttrs,
                 editorClass: options.schema.editorClass,
-                iconFont:iconFont,
-                inputGroup: (this.formGrid) ? '' : 'input-group'
+                iconFont:iconFont
             }
 
             this.template = _.template(this.template, tplValeurs);
@@ -100,11 +94,8 @@ define([
             this.wsUrl = options.schema.options.wsUrl;
             this.lng = options.schema.options.lng;
             this.timeout = options.schema.options.timeout;
-
             this.displayValueName = options.schema.options.displayValueName || 'fullpathTranslated';
             this.storedValueName = options.schema.options.storedValueName || 'fullpath';
-
-
             if (this.ValidationRealTime) {
                 this.validators.push({ type: 'Thesaurus', startId: this.startId, wsUrl: this.wsUrl, parent: this });
             }
@@ -122,23 +113,9 @@ define([
             }
         },
 
-        isEmptyVal: function(value){
-            if (value == null || value == '') {
-                this.displayErrorMsg(false);
-                this.$el.find('#' + this.id ).attr('data_value','');
-                return true;
-            } else {
-                return false;
-            }
-        },
-
         render: function () {
             var $el = $(this.template);
-            if(this.formGrid){
-                $el.find('.input-group-addon').addClass('hide');
-            }
             this.setElement($el);
-
             var _this = this;
             _(function () {
                 if (_this.editable) {
@@ -168,11 +145,12 @@ define([
                 }
                 if (_this.FirstRender) {
                     _this.$el.find('#' + _this.id).blur(function (options) {
-                        var value = _this.$el.find('#' + _this.id + '_value').val();
+/*                        var value = _this.$el.find('#' + _this.id + '_value').val();
                         if(_this.isEmptyVal(value)){
                             return;
-                        }
+                        }*/
                         setTimeout(function (options) {
+                            var value = _this.$el.find('#' + _this.id + '_value').val();
                             _this.onEditValidation(value);
                         }, 150);
                     });
@@ -182,8 +160,20 @@ define([
             }).defer();
             return this;
         },
+
+        isEmptyVal: function(value){
+            if (value == null || value == '') {
+                this.displayErrorMsg(false);
+                this.$el.find('#' + this.id ).attr('data_value','');
+                return true;
+            } else {
+                return false;
+            }
+        },
+
         validateAndTranslate: function (value, isTranslated) {
             var _this = this;
+
 
             if (this.isEmptyVal(value)) {
                 return;
@@ -263,12 +253,13 @@ define([
 
     }, {
         template: '<div id="divAutoComp_<%=inputID%>" >\
-        <div class="<%= inputGroup %>">\
+        <div class="input-group">\
             <span class="input-group-addon <%=iconFont%>"></span>\
-            <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree form-control <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
+            <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
         </div>\
         <span id="errorMsg" class="error hidden">Invalid term</span>\
         </div>',
     });
+
 
 });
