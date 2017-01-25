@@ -217,65 +217,43 @@ define([
       }).done(function(data) {
         var lat = data['LAT'];
         var lon = data['LON'];
-        console.log(data);
+
         _this.histoMonitoredSite = data;
+        _this.histoMonitoredSite.error = false;
         console.log(_this.histoMonitoredSite);
-        _this.$el.find('input[name="LAT"]').val(lat).change();
-        _this.$el.find('input[name="LON"]').val(lon).change();
+
 
         $.ajax({
           context: this,
           url: 'monitoredSites/'+_this.histoMonitoredSite.FK_MonitoredSite+'/history/',
         }).done(function(data) {
-          this.histoMonitoredSite.history = data[1];
-          var dateCustom = null;
-          var dayMonthYear = null;
-          var day = null;
-          var month = null;
-          var year = null;
-          var hoursMinSec = null;
-          var hours = null;
-          var min = null;
-          var seconds = null;
-          var newDate = null;
-          var veryFirstDate = new Date().getTime();
-          var veryLastDate = new Date().getTime();
-          console.log(veryLastDate);
-          console.log(veryFirstDate);
+          _this.histoMonitoredSite.veryFirstDate = new moment().valueOf();
+          _this.histoMonitoredSite.veryLastDate = new moment('00/00/0000 00:00:00','DD/MM/YYYY HH:mm:ss').valueOf();
+          var tmpDate = null;
           for( var i = 0 ; i < data[1].length ; i++ ) {
-            dateCustom = data[1][i].StartDate.split(" ");
-            dayMonthYear = dateCustom[0].split("/");
-            day = dayMonthYear[0];
-            month = dayMonthYear[1];
-            year = dayMonthYear[2];
-            hoursMinSec = dateCustom[1].split(":");
-            hours = hoursMinSec[0];
-            min = hoursMinSec[1];
-            seconds = hoursMinSec[2];
-            newDate = new Date(month+"/"+day+"/"+year+" "+hours+":"+min+":"+seconds);
-            console.log(newDate);
-            if( veryFirstDate >= newDate.getTime() ) {
-              console.log("date plus vielle");
-              veryFirstDate = newDate.getTime();
+            tmpDate = new moment(data[1][i].StartDate , 'DD/MM/YYYY HH:mm:ss');
+            if( _this.histoMonitoredSite.veryFirstDate >= tmpDate.valueOf() ) {
+              _this.histoMonitoredSite.veryFirstDate = tmpDate.valueOf();
             }
-            if ( veryLastDate <= newDate.getTime() ) {
-              console.console.log("date plus récente");
-              veryLastDate = newDate.getTime();
+            if ( _this.histoMonitoredSite.veryLastDate <= tmpDate.valueOf() ) {
+              _this.histoMonitoredSite.veryLastDate = tmpDate.valueOf();
             }
-
           }
-          console.log("nouvelle first date = ");
-          console.log(veryFirstDate);
-          console.log(new Date(veryFirstDate));
-          console.log("nouvelle last date = ");
-          console.log(veryLastDate);
-          console.log(new Date(veryLastDate));
+
+          _this.$el.find('input[name="LAT"]').val(_this.histoMonitoredSite.LAT).change();
+          _this.$el.find('input[name="LON"]').val(_this.histoMonitoredSite.LON).change();
+          // console.log("nouvelle first date = ");
+          // console.log(moment(_this.histoMonitoredSite.veryFirstDate).format('DD/MM/YYYY HH:mm:ss'));
+          // console.log("nouvelle last date = ");
+          // console.log(moment(_this.histoMonitoredSite.veryLastDate).format('DD/MM/YYYY HH:mm:ss'));
         }).fail(function() {
           console.error('an error occured');
+          _this.histoMonitoredSite.error = true;
         });
 
       }).fail(function() {
         console.error('an error occured');
+        _this.histoMonitoredSite.error = true;
       });
     },
 
@@ -290,23 +268,37 @@ define([
     },
 
     save: function() {
-      // console.log("on verif ");
-      // Swal({
-      //   title: 'Verif station and monitored sites',
-      //   text: 'blabla ! ',
-      //   type: 'warning',
-      //   showCancelButton: false,
-      //   confirmButtonColor: 'rgb(147, 14, 14)',
-      //   confirmButtonText: 'OK',
-      //   closeOnConfirm: true,
-      // },
-      // function(isConfirm) {
-      //   console.log("confirm");
-      //   //$(e.target).val('');
-      // });
+      console.log(this.nsForm);
+      console.log( this.nsForm.BBForm.getValue() );
 
-      this.nsForm.butClickSave();
-    },
+      var tmpValues = this.nsForm.BBForm.getValue();
+    //   if ( ) {
+         if( !this.histoMonitoredSite.error &&  moment(tmpValues.StationDate).valueOf() < moment(this.histoMonitoredSite.startDate).valueOf() ) {
+           Swal({
+             title: 'Careful, there is no coordinate for this monitored site at this date',
+             text: 'The creationdate of this monitored site\'s coordinates will be modified. Do you want to proceed?',
+             type: 'warning',
+             showCancelButton: false,
+             confirmButtonColor: 'rgb(147, 14, 14)',
+             confirmButtonText: 'OK',
+             closeOnConfirm: true,
+           },
+           function(isConfirm) {
+             console.log("confirm");
+             //$(e.target).val('');
+           });
+         }
+         else {
+           this.nsForm.butClickSave();
+         }
+      // }
+
+
+      // console.log("on verif ");
+
+
+    //  this.nsForm.butClickSave();
+    }
 
   });
 });
