@@ -8,7 +8,7 @@ define([
   'translater',
 
   'ns_map/ns_map',
-  'ns_form/NSFormsModuleGit',
+  'ns_form/ns.form.view',
   'ns_navbar/navbar.view',
   'ns_grid/grid.view',
   'ns_modules/ns_com',
@@ -31,13 +31,13 @@ define([
     },
 
     ui: {
-      'form': '.js-form',
       'formBtns': '.js-form-btns',
       'map': '.js-map',
     },
 
     regions: {
       'rgNavbar': '.js-rg-navbar',
+      'rgForm': '.js-rg-form',
     },
 
     gridViews: [],
@@ -129,14 +129,13 @@ define([
       var formConfig = this.model.get('formConfig');
 
       formConfig.id = this.model.get('id');
-      formConfig.formRegion = this.ui.form;
       formConfig.buttonRegion = [this.ui.formBtns];
       formConfig.parent = this.parent;
       formConfig.afterDelete = function(response, model){
         Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
       };
 
-      this.nsForm = new NsForm(formConfig);
+      this.rgForm.show(this.nsForm = new NsForm(formConfig));
     },
 
   });

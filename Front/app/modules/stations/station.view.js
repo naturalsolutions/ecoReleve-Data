@@ -6,7 +6,7 @@ define([
   'sweetAlert',
 
   'ns_modules/ns_com',
-  'ns_form/NSFormsModuleGit',
+  'ns_form/ns.form.view',
   'ns_navbar/navbar.view',
   './protocols/protocols.view',
 
@@ -28,15 +28,15 @@ define([
     model: new StationModel(),
 
     ui: {
-      formStation: '.js-from-station',
-      formStationBtns: '.js-from-btns',
+      formStationBtns: '.js-form-btns',
     },
 
     regions: {
       'rgStation': '.js-rg-station',
       'rgProtocols': '.js-rg-protocols',
       'rgProtocol': '.js-rg-protocol',
-      'rgNavbar': '.js-navbar'
+      'rgNavbar': '.js-navbar',
+      'rgForm': '.js-rg-form',
     },
 
     initialize: function(options) {
@@ -90,16 +90,12 @@ define([
       var formConfig = this.model.get('formConfig');
 
       formConfig.id = this.model.get('id');
-      formConfig.formRegion = this.ui.formStation;
       formConfig.buttonRegion = [this.ui.formStationBtns];
       formConfig.afterDelete = function(response, model){
         Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
       };
 
-      this.nsForm = new NsForm(formConfig);
-      this.nsForm.BeforeShow = function(){
-
-      };
+      this.rgForm.show(this.nsForm = new NsForm(formConfig));
 
       this.nsForm.afterShow = function(){
         $(".datetime").attr('placeholder','DD/MM/YYYY');

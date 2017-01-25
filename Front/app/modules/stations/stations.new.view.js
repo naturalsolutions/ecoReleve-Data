@@ -8,7 +8,7 @@ define([
   'dateTimePicker',
   'sweetAlert',
 
-  'ns_form/NSFormsModuleGit',
+  'ns_form/ns.form.view',
   'ns_map/ns_map',
 
   'i18n'
@@ -37,8 +37,8 @@ define([
 
     name: 'Station creation',
 
-    ui: {
-      'staForm': '.js-form',
+    regions: {
+      'rgForm': '.js-rg-form',
     },
 
     initialize: function(options) {
@@ -153,18 +153,17 @@ define([
         default:
           break;
       }
-
+/*
       if (this.nsForm) {
         this.nsForm.destroy();
       }
 
       this.ui.staForm.empty();
-
-      this.nsForm = new NsForm({
+*/
+      this.rgForm.show(this.nsForm = new NsForm({
         name: 'StaForm',
         modelurl: 'stations/',
         buttonRegion: [],
-        formRegion: this.ui.staForm,
         displayMode: 'edit',
         objectType: stTypeId,
         id: 0,
@@ -177,7 +176,7 @@ define([
               _this.getCoordFromMs(msId);
           });
         }
-      });
+      }));
 
       this.nsForm.savingSuccess =  function(model, resp) {
         _this.afterSave(model, resp);

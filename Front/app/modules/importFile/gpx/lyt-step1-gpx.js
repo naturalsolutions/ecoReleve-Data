@@ -6,7 +6,7 @@ define([
   'config',
   'sweetAlert',
   'vendors/XmlParser',
-  'ns_form/NSFormsModuleGit',
+  'ns_form/ns.form.view',
   'models/gpxForm',
   'i18n',
   'dropzone'
@@ -30,16 +30,23 @@ define([
       'dragover .drag-zone-hover' : 'handleDragOVer',
       'dragleave .drag-zone-hover' : 'handleDragLeave',
       'click button#importGpxFile' :'simulateImport',
+
+
     },
 
     ui: {
       'fielActivity': '#fielActivity',
       'selectFieldActivity': '#c14_fieldActivity',
       'fileInput': 'input#fileInput',
-      'form': '#form',
       'importGpxMsg' : '#importGpxMsg',
       'divimpgpxfile' : '#btnImpGpxFile'
     },
+
+    regions: {
+      'rgForm': '.js-rg-form',
+    },
+
+
     simulateImport : function () {
       $('input[type=file]').click();
     },
@@ -147,13 +154,13 @@ define([
     },
 
     validate: function() {
-      var formData = this.nsform.BBForm.getValue();
+      var formData = this.nsForm.BBForm.getValue();
       this.setWaypointListWithForm(formData);
       return this.wayPointList;
     },
 
     check: function(e) {
-      var error = this.nsform.BBForm.commit();
+      var error = this.nsForm.BBForm.commit();
             if(error){
               return false;
             }else{
@@ -162,7 +169,7 @@ define([
     },
 
     displayInputFile: function(){
-      this.ui.form.find('.filesinputselector').parent().prepend('<div id="btnImpGpxFile">'+
+      this.nsForm.$el.find('.filesinputselector').parent().prepend('<div id="btnImpGpxFile">'+
         '<button id="importGpxFile" type="button" class="btn btn-success fileinput-button" data-i18n="import.fileSelection">'+
             '<i class="glyphicon glyphicon-plus"></i>'+
             '<span>Select a file</span>'+
@@ -175,18 +182,18 @@ define([
       var self = this;
       var model = new Backbone.Model();
       $.ajax({
-        url:config.coreUrl+'stations/importGPX',
-
+        url: config.coreUrl + 'stations/importGPX',
       }).then(function(data){
         model.schema = data.schema;
         model.fieldsets = data.fieldsets;
-        self.nsform = new NsForm({
+        
+        self.rgForm.show(self.nsForm = new NsForm({
           model: model,
           buttonRegion: [],
-          formRegion: self.ui.form,
           reloadAfterSave: false,
-          disabled : false,
-        });
+          disabled: false,
+        }));
+
         self.displayInputFile();
         self.rdy.resolve();
       });

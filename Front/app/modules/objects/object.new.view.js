@@ -5,20 +5,21 @@ define([
 	'marionette',
 	'sweetAlert',
 	'translater',
-	'ns_form/NSFormsModuleGit',
+	'ns_form/ns.form.view',
 ], function(
   $, _, Backbone, Marionette, Swal, Translater,
   NsForm
 ){
 
   'use strict';
-  return Marionette.ItemView.extend({
+  return Marionette.LayoutView.extend({
     template: 'app/modules/objects/object.new.tpl.html',
     className: 'white full-height new',
 
-    ui: {
-      'form': '.js-form',
+    regions: {
+      'rgForm': '.js-rg-form',
     },
+
     events: {
       'click .js-btn-save': 'save',
       'click .js-link-back': 'back',
@@ -37,10 +38,9 @@ define([
 
     displayForm: function() {
       var _this = this;
-      this.nsForm = new NsForm({
+      this.rgForm.show(this.nsForm = new NsForm({
         modelurl: this.model.get('type'),
         buttonRegion: [],
-        formRegion: this.ui.form,
         displayMode: 'edit',
         objectType: this.model.get('objectType'),
         id: 0,
@@ -62,7 +62,7 @@ define([
             closeOnConfirm: true,
           });
         }
-      });
+      }));
     },
 
     afterSaveSuccess: function(){

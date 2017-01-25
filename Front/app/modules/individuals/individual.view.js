@@ -11,13 +11,12 @@ define([
   'modules/objects/detail.view',
 
   'ns_map/ns_map',
-  'ns_form/NSFormsModuleGit',
   'ns_grid/grid.view',
 
 ], function(
   $, _, Backbone, Marionette,
   Swal, Translater, IndividualModel, DetailView,
-  NsMap, NsForm, GridView
+  NsMap, GridView
 ){
 
   'use strict';

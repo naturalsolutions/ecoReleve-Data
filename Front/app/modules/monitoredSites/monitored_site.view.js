@@ -8,7 +8,6 @@ define([
 
   'ns_map/ns_map',
   'ns_grid/grid.view',
-  'ns_form/NSFormsModuleGit',
 
   'modules/objects/detail.view',
   './monitored_site.model',
@@ -16,7 +15,7 @@ define([
 
 ], function(
   $, _, Backbone, Marionette, Swal, Translater,
-  NsMap, GridView, NsForm,
+  NsMap, GridView,
   DetailView, MonitoredSiteModel
 ){
 

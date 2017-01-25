@@ -8,14 +8,13 @@ define([
 
   'ns_map/ns_map',
   'ns_grid/grid.view',
-  'ns_form/NSFormsModuleGit',
 
   'modules/objects/detail.view',
   './sensor.model',
 
 ], function(
   $, _, Backbone, Marionette, Swal, Translater,
-  NsMap, GridView, NsForm,
+  NsMap, GridView,
   DetailView, SensorModel
 ){
 
