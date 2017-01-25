@@ -50,7 +50,7 @@ define([
     handleErrors: function(errors){
       var opt = {
         title: 'Errors detected',
-        text: 'Please fix errors before save your data'
+        text: 'Please fix error before save your data'
       };
       
       window.swal(opt, 'warning', null, false);
