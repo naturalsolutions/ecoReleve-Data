@@ -4,7 +4,7 @@ from pyramid.security import (
     Allow,
     Authenticated,
 )
-# from .WebSocket import Job, JobRoot
+from .WebSocket import WebsocketsRoot
 
 
 class SecurityRoot(object):
@@ -20,33 +20,14 @@ class SecurityRoot(object):
     ]
 
     def __init__(self, request):
+        print('init SecurityRoot')
         self.request = request
-        self._jobs = {}
+        self.__name__ = ''
+        self.__parent__ = None
 
-    # def __getitem__(self, item):
-    #     try:
-    #         return self._jobs[item]
-    #     except KeyError:
-    #         return self.create_job(item)
-
-    # def create_job(self, id):
-    #     job = Job(id, self)
-    #     self._jobs[id] = job
-    #     return job
-
-
-# class Root(dict):
-#     """The root of url traversal"""
-
-#     def __init__(self):
-#         super(Root, self).__init__(jobs=JobRoot())
-
-
-# root = Root()
-
-
-# def root_factory(request):
-#     return root
+    def __getitem__(self, item):
+        if item == 'ecoReleve-Websockets':
+            return WebsocketsRoot(item, self)
 
 
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
