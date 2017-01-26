@@ -2,9 +2,7 @@ from pyramid.httpexceptions import HTTPNotFound
 from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
 from ..Models import sendLog
-# from stargate import is_websocket
-# from ..controllers.WebSocket import Job
-# from ..Views.webSockets import JobView
+from stargate import is_websocket
 
 
 def add_cors_headers_response_callback(event):
@@ -31,9 +29,8 @@ def error_view(exc, request):
 def notfound(request):
     return HTTPNotFound('Not found')
 
+
 # test if the match url is integer
-
-
 def integers(*segment_names):
     def predicate(info, request):
         match = info['match']
@@ -47,16 +44,6 @@ def integers(*segment_names):
         return True
     return predicate
 
-
-# def control(job, request):
-#     """Post to this view to set the state
-
-#     this will trigger Job to report the state to connected clients
-#     """
-#     state = request.POST.get("state")
-#     if state:
-#         job.control(state)
-#     return dict(id=job.__name__, state=job.state)
 
 def add_routes(config):
 
@@ -239,11 +226,9 @@ def add_routes(config):
                      'ecoReleve-Core/file_import/getTemplate')
     config.add_route('file_import/getExcelFile',
                      'ecoReleve-Core/file_import/getExcelFile')
-    config.add_route('file_import/run',
-                     'ecoReleve-Core/run')
 
-    # config.add_view(JobView, context=Job, custom_predicates=[is_websocket])
-
-    # config.add_view(control, context=Job, renderer="json", xhr=True)
-
-
+    # Web sockets call
+    # config.add_view(JobView,
+    #                 context=FileImportJob,
+    #                 custom_predicates=[is_websocket],
+    #                 permission=NO_PERMISSION_REQUIRED)
