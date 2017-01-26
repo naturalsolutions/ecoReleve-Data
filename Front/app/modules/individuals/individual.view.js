@@ -30,7 +30,7 @@ define([
       'click button.js-btn-delete-locations': 'warnDeleteLocations',
     },
 
-    model: new IndividualModel(),
+    ModelPrototype: IndividualModel,
 
     displayMap: function() {
       var _this = this;

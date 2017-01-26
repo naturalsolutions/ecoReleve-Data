@@ -7,6 +7,6 @@ define([
   'use strict';
 
   return ManagerView.extend({
-  	model: new SensorModel(),
+  	ModelPrototype: SensorModel,
   });
 });
