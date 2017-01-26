@@ -10,7 +10,7 @@ define([
 
   'ns_modules/ns_com',
   'ns_map/ns_map',
-  'ns_form/NSFormsModuleGit',
+  'ns_form/ns.form.view',
   'ns_grid/grid.view',
   'ns_navbar/navbar.view',
 
@@ -32,14 +32,14 @@ define([
 
     ui: {
       'map': '#map',
-      'individualForm': '.js-individual-form',
-      'sensorForm': '.js-sensor-form',
       'selectFrequency': '.js-select-frequency'
     },
 
     regions: {
       'rgGrid': '.js-rg-grid',
       'rgNavbar': '.js-rg-navbar',
+      'rgIndividualForm': '.js-rg-individual-form',
+      'rgSensorForm': '.js-rg-sensor-form',
     },
 
     initialize: function(options) {
@@ -126,7 +126,7 @@ define([
         return;
       }
 
-      this.nsform = new NsForm({
+      this.rgIndividualForm.show(this.individualForm = new NsForm({
         name: 'IndivForm',
         buttonRegion: [],
         modelurl: 'individuals',
@@ -134,11 +134,11 @@ define([
         displayMode: 'display',
         id: this.model.get('FK_Individual'),
         reloadAfterSave: false,
-      });
+      }));
     },
 
     displaySensorForm: function() {
-      this.nsform = new NsForm({
+      this.rgSensorForm.show(this.sensorForm = new NsForm({
         name: 'sensorForm',
         buttonRegion: [],
         modelurl: 'sensors',
@@ -146,7 +146,7 @@ define([
         displayMode: 'display',
         id: this.model.get('FK_Sensor'),
         reloadAfterSave: false,
-      });
+      }));
     },
 
     displayGrids: function(){

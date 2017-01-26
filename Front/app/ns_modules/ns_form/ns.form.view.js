@@ -8,10 +8,11 @@ define([
   'ns_ruler/ruler',
   'requirejs-text!./NsFormsModule.html',
   'fancytree',
-  './NsFormsCustomFields',
-], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tpl) {
-  return Backbone.View.extend({
-    BBForm: null,
+
+], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tplBtns) {
+  return Marionette.LayoutView.extend({
+    template: 'app/ns_modules/ns_form/ns.form.tpl.html',
+    className: 'form-view hull-height laoding-bg',
     modelurl: null,
     Name: null,
     objectType: null,
@@ -20,18 +21,14 @@ define([
     formRegion: null,
     id: null,
     reloadAfterSave: false,
-    template: tpl,
+    
     redirectAfterPost: '',
     displayDelete: true,
-    gridRow: false,
 
-    events : {
-      'keypress input' : 'evt'
+    ui: {
+      'form': '.js-form'
     },
 
-    evt : function(){
-      alert();
-    },
     extendsBBForm: function(){
       var _this = this;
       Backbone.Form.validators.errMessages.required = '';
@@ -70,90 +67,42 @@ define([
         }
 
       };
-
-
     },
 
-    checkGridRowAgain: function() {
-      var _this = this;
-      Backbone.Form.Field.prototype.render = function() {
-          var schema = this.schema,
-              editor = this.editor;
-
-          //Only render the editor if Hidden
-          if (schema.type == Backbone.Form.editors.Hidden) {
-            return this.setElement(editor.render().el);
-          }
-
-          //Render field
-          var $field = $($.trim(this.template(_.result(this, 'templateData'))));
-
-          if (schema.fieldClass) $field.addClass(schema.fieldClass);
-          if (schema.fieldAttrs) $field.attr(schema.fieldAttrs);
-
-          //mjaouen
-          if (_this.gridRow) $field.addClass('grid-field');
-
-          //Render editor
-          $field.find('[data-editor]').add($field).each(function(i, el) {
-            var $container = $(el),
-                selection = $container.attr('data-editor');
-
-            if (_.isUndefined(selection)) return;
-
-            $container.append(editor.render().el);
-          });
-
-          this.setElement($field);
-
-          return this;
-      };
-    },
 
     initialize: function (options) {
       this.extendsBBForm();
-      this.gridRow = options.gridRow || this.gridRow;
-      this.checkGridRowAgain();
-      var jqxhr;
       this.modelurl = options.modelurl;
+      this.model = options.model;
 
       this.name = options.name;
       this.buttonRegion = options.buttonRegion;
-      this.formRegion = options.formRegion;
-
+      var variables = { formname: this.name };
+      if (options.template) {
+        this.bntTpl = _.template($(options.template).html(), variables);
+      }
+      else {
+        this.bntTpl = _.template($(tplBtns).html(), variables);
+      }
+      
       this.afterDelete = options.afterDelete || false;
+      this.reloadAfterSave = options.reloadAfterSave || this.reloadAfterSave;
 
       if(options.displayDelete != undefined){
         this.displayDelete = options.displayDelete;
       }
-
-      this.reloadAfterSave = options.reloadAfterSave || this.reloadAfterSave;
-      // The template need formname as vrairable, to make it work if several NSForms in the same page
-      // With adding formname, there will be no name conflit on Button class
-      var variables = { formname: this.name };
-      if (options.template) {
-        // if a specific template is given, we use it
-        this.template = _.template($(options.template).html(), variables);
-      }
-      else {
-        // else use default template
-        this.template = _.template($(tpl).html(), variables);
-      }
-
       if (options.id && !isNaN(options.id)) {
         this.id = options.id;
       }
       else {
         this.id = 0;
       }
-
       if(options.displayMode){
         this.displayMode = options.displayMode;
       }
       if(options.loadingError){
         this.loadingError = options.loadingError;
       }
-
       if (options.objectType) {
         this.objectType = options.objectType;
       }
@@ -162,26 +111,7 @@ define([
       }
       this.objectType = options.objectType;
 
-      if (options.model) {
-        this.model = options.model;
-
-        this.BBForm = new BackboneForm({
-          model: this.model,
-          data: this.model.data,
-          fieldsets: this.model.fieldsets,
-          schema: this.model.schema
-        });
-
-        this.showForm();
-        this.pushFormInEdit(this);
-
-      }
-      else {
-        this.initModel();
-      }
-
       if (options.redirectAfterPost){
-        // allow to redirect after creation (post) using the id of created object
         this.redirectAfterPost = options.redirectAfterPost;
       }
       this.afterShow = options.afterShow;
@@ -191,29 +121,40 @@ define([
       if(options.savingError) {
         this.savingError = options.savingError;
       }
-
       this.data = options.data || {};
-      var _this = this;
-
-      // $(this.BBForm).on( "click", function() {
-      //
-      // });
     },
 
-    pushFormInEdit: function(_this){
-        this.formChange = false;
-        if(!window.formInEdition.form){
-            window.formInEdition.form = {baseUri: _this.$el[0].baseURI};
-            window.formInEdition.form[_this.formRegion.selector]= _this;
-          } else {
-            if(window.formInEdition.form['undefined']){
-              delete window.formInEdition.form['undefined'];
-            }
-            window.formInEdition.form[_this.formRegion.selector] = _this;
-            window.formInEdition.form.baseUri = _this.$el[0].baseURI;
-          if(_this.displayMode && _this.displayMode.toLowerCase() == 'edit'){
-              _this.bindChanges();
-            }
+    onShow: function(){
+      if (this.model) {
+        this.BBForm = new BackboneForm({
+          model: this.model,
+          data: this.model.data,
+          fieldsets: this.model.fieldsets,
+          schema: this.model.schema
+        });
+
+        this.showForm();
+      } else {
+        this.initModel();
+      }
+    },
+
+    //???
+    pushFormInEdit: function(){
+      this.formChange = false;
+      console.log(this);
+      if(!window.formInEdition.form){
+          window.formInEdition.form = {baseUri: this.$el[0].baseURI};
+          //window.formInEdition.form[this.cid] = this;
+      } else {
+          if(window.formInEdition.form['undefined']){
+            delete window.formInEdition.form['undefined'];
+          }
+          //window.formInEdition.form[this.cid] = this;
+          window.formInEdition.form.baseUri = this.$el[0].baseURI;
+        if(this.displayMode && this.displayMode.toLowerCase() == 'edit'){
+            this.bindChanges();
+          }
       }
     },
 
@@ -259,7 +200,6 @@ define([
 
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
           _this.showForm();
-          _this.pushFormInEdit(_this);
           _this.updateState(this.displayMode);
         },
         error: function (data) {
@@ -268,6 +208,7 @@ define([
           //alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objectType);
         }
       });
+
     },
 
     initRules:function() {
@@ -303,27 +244,30 @@ define([
 
     bindChanges: function(){
       var _this = this;
-      $(this.formRegion).find('input').on("change", function(e) {
+      this.ui.form.find('input').on("change", function(e) {
         if($(e.target).val() !== ''){
           _this.formChange = true;
         } else {
           _this.formChange = false;
        }
       });
-      $(this.formRegion).find('select').on("change", function(e) {
+      this.ui.form.find('select').on("change", function(e) {
          _this.formChange = true;
+       console.log('blla');
       });
-      $(this.formRegion).find('textarea').on("change", function(e) {
-         _this.formChange = true;
-      });
-      $(this.formRegion).find('.grid-form').on("change", function(e) {
-         _this.formChange = true;
-      });
-      $(this.formRegion).find('.nested').on("change", function(e) {
+      this.ui.form.find('textarea').on("change", function(e) {
          _this.formChange = true;
       });
 
-      $(this.formRegion).find('textarea').on("keypress", function(e) {
+      //obsolete
+      this.ui.form.find('.grid-form').on("change", function(e) {
+         _this.formChange = true;
+      });
+      this.ui.form.find('.nested').on("change", function(e) {
+         _this.formChange = true;
+      });
+
+      this.ui.form.find('textarea').on("keypress", function(e) {
         var maxlen = 250;
         var self = this;
         if ($(this).val().length > maxlen) {
@@ -332,7 +276,7 @@ define([
           _this.cleantextAreaAfterError(this);
         }
       });
-      $(this.formRegion).find('textarea').on('keyup', function (e) {
+      this.ui.form.find('textarea').on('keyup', function (e) {
         var maxlen = 250;
         var strval = $(this).val();
         var self = this;
@@ -341,7 +285,7 @@ define([
           return false;
         }
       });
-      $(this.formRegion).find('textarea').on('keydown' , function(e) {
+      this.ui.form.find('textarea').on('keydown' , function(e) {
         if(event.which == 8) {
           var maxlen = 250;
           var strval = $(this).val();
@@ -354,39 +298,24 @@ define([
     },
 
     showForm: function (){
+      this.pushFormInEdit();
       var _this = this;
       this.BBForm.render();
-
-      // Call extendable function before the show call
-      this.BeforeShow();
 
       var _this = this;
       this.initRules();
 
-      if(this.formRegion.html){
-        this.formRegion.html(this.BBForm.el);
-      } else {
-        return;
-      }
+      this.ui.form.html(this.BBForm.el);
 
-      if(!this.gridRow) {
-        $(this.formRegion).find('input').on("keypress", function(e) {
-          if( e.which == 13){
-            _this.butClickSave(e);
-          }
-        });
-      }
 
       if(this.buttonRegion){
         if(this.buttonRegion[0]){
           this.buttonRegion.forEach(function (entry) {
-            _this.buttonRegion[0].html(_this.template);
+            _this.buttonRegion[0].html(_this.bntTpl);
             _this.buttonRegion[0].i18n();
           });
-          if(this.buttonRegion[0]){
-            this.displaybuttons();
-            this.bindEvents();
-          }
+          this.displaybuttons();
+          this.bindEvents();
         }
       }
 
@@ -394,9 +323,6 @@ define([
         this.afterShow();
       }
 
-      if (this.gridRow) {
-        this.finilizeToGridRow();
-      }
     },
 
     showErrorForMaxLength : function(_this){
@@ -433,7 +359,7 @@ define([
         this.buttonRegion[0].find('.NsFormModuleSave').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleEdit').addClass('hidden');
-        this.formRegion.find('input:enabled:first').focus();
+        this.ui.form.find('input:enabled:first').focus();
       }else{
         this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
@@ -451,106 +377,105 @@ define([
     },
 
     butClickSave: function (e) {
-          var _this = this;
-          var flagEmpty = false;
-          var errors = this.BBForm.commit();
-          var jqhrx;
+      var _this = this;
+      var flagEmpty = false;
+      var errors = this.BBForm.commit();
+      var jqhrx;
 
-          if(!errors){
-            flagEmpty = this.checkFormIsEmpty(this.model.schema,this.BBForm.getValue());
-          }
-          if(flagEmpty){
-            this.swal({
-              title : 'Empty observation',
-              text : 'The observation won\'t be recorded',
-              type:'warning',
-              showCancelButton: false,
-              confirmButtonColor:'#DD6B55',
-              confirmButtonText:'Ok'
-            });
-            return;
-          }
+      if(!errors){
+        flagEmpty = this.checkFormIsEmpty(this.model.schema,this.BBForm.getValue());
+      }
+      if(flagEmpty){
+        this.swal({
+          title : 'Empty observation',
+          text : 'The observation won\'t be recorded',
+          type:'warning',
+          showCancelButton: false,
+          confirmButtonColor:'#DD6B55',
+          confirmButtonText:'Ok'
+        });
+        return;
+      }
 
-          if(!errors) {
-            if (this.model.attributes["id"] == 0) {
-                // To force post when model.save()
-              this.model.attributes["id"] = null;
-            }
+      if(!errors) {
+        if (this.model.attributes["id"] == 0) {
+            // To force post when model.save()
+          this.model.attributes["id"] = null;
+        }
 
-            if (this.model.id == 0) {
-              // New Record
-              jqhrx = this.model.save(null, {
-                success: function (model, response) {
-                  // Getting ID of created record, from the model (has beeen affected during model.save in the response)
-                  _this.savingSuccess(model, response);
-                  _this.id = _this.model.id;
-                  if (_this.redirectAfterPost != "") {
-                    // If redirect after creation
-                    var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
+        if (this.model.id == 0) {
+          // New Record
+          jqhrx = this.model.save(null, {
+            success: function (model, response) {
+              // Getting ID of created record, from the model (has beeen affected during model.save in the response)
+              _this.savingSuccess(model, response);
+              _this.id = _this.model.id;
+              if (_this.redirectAfterPost != "") {
+                // If redirect after creation
+                var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
 
-                    if (window.location.href == window.location.origin + TargetUrl) {
-                      // if same page, relaod
-                      window.location.reload();
-                    }
-                    else {
-                      // otpherwise redirect
-                      window.location.href = TargetUrl;
-                    }
-                  }
-                  else {
-                    // If no redirect after creation
-                    if (_this.reloadAfterSave) {
-                      _this.reloadingAfterSave();
-                    }
-                  }
-                  _this.afterSaveSuccess(response);
-                  return true;
-                },
-                error: function (model, response) {
-                  _this.savingError(response);
-                  return false;
+                if (window.location.href == window.location.origin + TargetUrl) {
+                  // if same page, relaod
+                  window.location.reload();
                 }
-              });
-            }
-            else {
-              // After update of existing record
-              this.model.id = this.model.get('id');
-              var jqxhr = this.model.save(null, {
-                success: function (model, response) {
-                  _this.savingSuccess(model, response);
-                  if (_this.reloadAfterSave) {
-                    _this.reloadingAfterSave();
-                  }
-                  _this.afterSaveSuccess(response);
-                },
-                error: function (model,response) {
-                  _this.savingError(response);
+                else {
+                  // otpherwise redirect
+                  window.location.href = TargetUrl;
                 }
-              });
-            }
-          }else{
-            var errorList = _this.BBForm.$el.find('.error');
-
-            for(var i=0; i < errorList.length; i++){
-              var elmName = errorList[i].nodeName ;
-              if (elmName.toUpperCase()!= 'SPAN'){
-                $(errorList[i]).trigger('focus').click();
-                break;
               }
+              else {
+                // If no redirect after creation
+                if (_this.reloadAfterSave) {
+                  _this.reloadingAfterSave();
+                }
+              }
+              _this.afterSaveSuccess(response);
+              return true;
+            },
+            error: function (model, response) {
+              _this.savingError(response);
+              return false;
             }
-            return false;
+          });
+        }
+        else {
+          // After update of existing record
+          this.model.id = this.model.get('id');
+          var jqxhr = this.model.save(null, {
+            success: function (model, response) {
+              _this.savingSuccess(model, response);
+              if (_this.reloadAfterSave) {
+                _this.reloadingAfterSave();
+              }
+              _this.afterSaveSuccess(response);
+            },
+            error: function (model,response) {
+              _this.savingError(response);
+            }
+          });
+        }
+      }else{
+        var errorList = _this.BBForm.$el.find('.error');
+
+        for(var i=0; i < errorList.length; i++){
+          var elmName = errorList[i].nodeName ;
+          if (elmName.toUpperCase()!= 'SPAN'){
+            $(errorList[i]).trigger('focus').click();
+            break;
           }
-          _this.formChange = false;
-          this.afterSavingModel();
-          return jqxhr;
-        },
+        }
+        return false;
+      }
+      _this.formChange = false;
+      this.afterSavingModel();
+      return jqxhr;
+    },
 
     afterSaveSuccess: function(){
 
     },
 
     butClickEdit: function (e) {
-      this.checkGridRowAgain();
       this.displayMode = 'edit';
       this.initModel();
       if(this.buttonRegion)
@@ -558,7 +483,6 @@ define([
 
     },
     butClickCancel: function (e) {
-      this.checkGridRowAgain();
       this.displayMode = 'display';
       this.initModel();
       if(this.buttonRegion)
@@ -566,7 +490,6 @@ define([
 
     },
     butClickClear: function (e) {
-      this.checkGridRowAgain();
       var formContent = this.BBForm.el;
       $(formContent).find('input').not(':disabled').each(function(){
         $(this).val('');
@@ -614,7 +537,6 @@ define([
       this.displayMode = 'display';
       // reaload created record from AJAX Call
       this.initModel();
-      //this.showForm();
       if(this.buttonRegion)
       this.displaybuttons();
     },
@@ -670,10 +592,6 @@ define([
   // To be extended called after model.save()
     },
 
-    BeforeShow: function () {
-      // to be extended called after render, before the show function
-    },
-
     savingSuccess: function (model, response) {
       // To be extended, called after save on model if success
     },
@@ -690,35 +608,35 @@ define([
       var _this = this;
       var name = this.name;
 
-      /*==========  Edit  ==========*/
+      // Edit
       this.onEditEvt = $.proxy(function(e){
         this.butClickEdit();
       }, this);
 
       this.buttonRegion[0].find('.NsFormModuleEdit').on('click', this.onEditEvt);
 
-      /*==========  Cancel  ==========*/
+      // Cancel
       this.onCancelEvt = $.proxy(function(e){
         this.butClickCancel();
       }, this);
 
       this.buttonRegion[0].find('.NsFormModuleCancel').on('click', this.onCancelEvt);
 
-      /*==========  save  ==========*/
+      // Save
       this.onSaveEvt = $.proxy(function(){
         this.butClickSave();
       }, this);
 
       this.buttonRegion[0].find('.NsFormModuleSave').on('click', this.onSaveEvt);
 
-      /*==========  Clear  ==========*/
+      // Clear
       this.onClearEvt = $.proxy(function(){
         this.butClickClear();
       }, this);
 
       this.buttonRegion[0].find('.NsFormModuleClear').on('click', this.onClearEvt);
 
-      /*==========  Delete  ==========*/
+      // Delete
       if(this.displayDelete){
         this.onDeleteEvt = $.proxy(function(){
           this.butClickDelete();
@@ -732,7 +650,6 @@ define([
 
 
     unbind: function(){
-
       var _this = this;
       var name = this.name;
 
@@ -744,6 +661,7 @@ define([
     },
 
     destroy: function(){
+      this.BBForm.remove();
       if(this.buttonRegion[0]){
         this.unbind();
       }
@@ -768,22 +686,7 @@ define([
       });
     },
 
-    finilizeToGridRow: function() {
-      var _this = this;
-      /*var button = 'danger';
-      if(!this.model.get('id')){
-        button = 'warning';
-      }*/
-      // this.BBForm.$el.find('fieldset').append('\
-      //     <div class="col-xs-12 control">\
-      //         <button type="button" class="js-remove btn btn-danger pull-right"><span class="reneco reneco-trash"></span></button>\
-      //     </div>\
-      // ');
-      // this.BBForm.$el.find('button.js-remove').on('click', function() {
-      //   _this.butClickDelete();
-      // });
-    },
-
+    
   });
 
 });

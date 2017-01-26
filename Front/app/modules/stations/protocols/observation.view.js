@@ -3,7 +3,7 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'ns_form/NSFormsModuleGit',
+  'ns_form/ns.form.view',
 
   'i18n'
 ], function($, _, Backbone, Marionette, NsForm) {
@@ -13,8 +13,11 @@ define([
     className: 'observation full-height white',
 
     ui: {
-      'form': '.js-obs-form',
       'formBtns': '.js-form-btns' 
+    },
+
+    regions: {
+      'rgForm': '.js-rg-obs-form',
     },
 
     initialize: function(options){
@@ -41,12 +44,12 @@ define([
       this.model.fieldsets = this.model.get('fieldsets');
       this.model.attributes = this.model.get('data');
       
-      this.form = new NsForm({
+
+      this.rgForm.show(this.nsForm = new NsForm({
         modelurl: this.model.urlRoot,
         model: this.model,
         buttonRegion: [this.ui.formBtns],
         displayMode: this.displayMode,
-        formRegion: this.ui.form,
         reloadAfterSave: false,
         savingError: this.handleErrors,
         afterSaveSuccess: function(response){
@@ -74,7 +77,7 @@ define([
           }          
           Backbone.history.navigate(url, {trigger: true});
         }
-      });
+      }));
     },
 
     handleErrors: function(response){

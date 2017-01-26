@@ -9,7 +9,6 @@ define([
   'backbone',
 
   //circular dependencies, I don't konw where to put it 4 the moment
-  'ns_modules/ns_bbfe/bbfe-number',
   'ns_modules/ns_bbfe/bbfe-timePicker',
   'ns_modules/ns_bbfe/bbfe-dateTimePicker',
   'ns_modules/ns_bbfe/bbfe-autocomplete',
@@ -139,23 +138,25 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
     var indexMax = 0 ;
     if(!$.isEmptyObject(window.formInEdition)){
 
-        var newUrlSplit=  window.location.hash.split('?');
-        var oldUrlSplit = window.formInEdition.form.baseUri.replace(window.location.origin,'').replace(window.location.pathname,'').split('?');
+      var newUrlSplit=  window.location.hash.split('?');
+      var oldUrlSplit = window.formInEdition.form.baseUri.replace(window.location.origin,'').replace(window.location.pathname,'').split('?');
 
-        var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
-          if( newUrlSplit[index2-1] != oldUrlSplit[index2-1]){
-            if(window.formInEdition.form[key2].formChange){
-              i++;
-            }
-            urlChangeMax++;
-            return 1;
-          } else{
-            indexMax++;
-            return 0;
+      var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
+        if( newUrlSplit[index2-1] != oldUrlSplit[index2-1]){
+          if(window.formInEdition.form[key2].formChange){
+            i++;
           }
-        });
+          urlChangeMax++;
+          return 1;
+        } else{
+          indexMax++;
+          return 0;
+        }
+      });
     }
-
+    
+    
+    
     if(i > 0){
       var title = i18n.translate('swal.savingForm-title');
       var savingFormContent =  i18n.translate('swal.savingForm-content');
