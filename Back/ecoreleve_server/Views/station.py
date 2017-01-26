@@ -221,7 +221,7 @@ def insertOneNewStation(request):
     data = {}
     for items, value in request.json_body.items():
         data[items] = value
-
+#modif pour sitemonitoré 
     newSta = Station(
         FK_StationType=data['FK_StationType'],
         creator=request.authenticated_userid['iss'])

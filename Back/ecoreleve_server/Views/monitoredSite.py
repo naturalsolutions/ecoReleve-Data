@@ -134,6 +134,29 @@ def getMonitoredSite(request):
         response = curMonitoredSite.GetFlatObject()
     return response
 
+@view_config(route_name=prefix + '/id/history',
+             renderer='json',
+             request_method='POST',
+             permission=routes_permission[prefix]['POST'])
+def updateStartDateMonitoredSite(request):
+    session = request.dbsession
+    try:
+        data = request.json_body
+        _id = request.matchdict['id']
+        print( "on va rajouter la date à l\'historique du site monitoré numéro")
+        print( _id )
+        # curMonitoredSite = session.query(MonitoredSite).get(_id)
+        # curMonitoredSite.LoadNowValues()
+        # curMonitoredSite.UpdateFromJson(data)
+        # response = {}
+
+    except IntegrityError as e:
+        session.rollback()
+        response = request.response
+        response.status_code = 510
+        response.text = "IntegrityError"
+    return response
+
 
 @view_config(route_name=prefix + '/id/history',
              renderer='json',

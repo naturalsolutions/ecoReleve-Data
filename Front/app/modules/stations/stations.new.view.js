@@ -242,10 +242,10 @@ define([
 
           _this.$el.find('input[name="LAT"]').val(_this.histoMonitoredSite.LAT).change();
           _this.$el.find('input[name="LON"]').val(_this.histoMonitoredSite.LON).change();
-          // console.log("nouvelle first date = ");
-          // console.log(moment(_this.histoMonitoredSite.veryFirstDate).format('DD/MM/YYYY HH:mm:ss'));
-          // console.log("nouvelle last date = ");
-          // console.log(moment(_this.histoMonitoredSite.veryLastDate).format('DD/MM/YYYY HH:mm:ss'));
+           console.log("nouvelle first date = ");
+           console.log(moment(_this.histoMonitoredSite.veryFirstDate).format('DD/MM/YYYY HH:mm:ss'));
+           console.log("nouvelle last date = ");
+           console.log(moment(_this.histoMonitoredSite.veryLastDate).format('DD/MM/YYYY HH:mm:ss'));
         }).fail(function() {
           console.error('an error occured');
           _this.histoMonitoredSite.error = true;
@@ -278,12 +278,21 @@ define([
              title: 'Careful, there is no coordinate for this monitored site at this date',
              text: 'The creationdate of this monitored site\'s coordinates will be modified. Do you want to proceed?',
              type: 'warning',
-             showCancelButton: false,
+             showCancelButton: true,
              confirmButtonColor: 'rgb(147, 14, 14)',
              confirmButtonText: 'OK',
              closeOnConfirm: true,
            },
            function(isConfirm) {
+             if( isConfirm ) {
+               
+               console.log('appel route modif stardate');
+             }
+             else {
+
+               console.log("on enleve le site monitoré");
+             }
+
              console.log("confirm");
              //$(e.target).val('');
            });
