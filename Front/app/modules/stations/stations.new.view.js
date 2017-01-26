@@ -220,8 +220,6 @@ define([
 
         _this.histoMonitoredSite = data;
         _this.histoMonitoredSite.error = false;
-        console.log(_this.histoMonitoredSite);
-
 
         $.ajax({
           context: this,
@@ -242,10 +240,6 @@ define([
 
           _this.$el.find('input[name="LAT"]').val(_this.histoMonitoredSite.LAT).change();
           _this.$el.find('input[name="LON"]').val(_this.histoMonitoredSite.LON).change();
-           console.log("nouvelle first date = ");
-           console.log(moment(_this.histoMonitoredSite.veryFirstDate).format('DD/MM/YYYY HH:mm:ss'));
-           console.log("nouvelle last date = ");
-           console.log(moment(_this.histoMonitoredSite.veryLastDate).format('DD/MM/YYYY HH:mm:ss'));
         }).fail(function() {
           console.error('an error occured');
           _this.histoMonitoredSite.error = true;
@@ -268,11 +262,9 @@ define([
     },
 
     save: function() {
-      console.log(this.nsForm);
-      console.log( this.nsForm.BBForm.getValue() );
-
+      var _this = this;
       var tmpValues = this.nsForm.BBForm.getValue();
-    //   if ( ) {
+
          if( !this.histoMonitoredSite.error &&  moment(tmpValues.StationDate).valueOf() < moment(this.histoMonitoredSite.startDate).valueOf() ) {
            Swal({
              title: 'Careful, there is no coordinate for this monitored site at this date',
@@ -284,29 +276,41 @@ define([
              closeOnConfirm: true,
            },
            function(isConfirm) {
-             if( isConfirm ) {
-               
-               console.log('appel route modif stardate');
+             if( isConfirm ) { //update startdate monitored site
+               var data = {
+               'LAT': tmpValues.LAT,
+               'LON': tmpValues.LON,
+               'StartDate': tmpValues.StationDate,
+               'ELE': tmpValues.ELE,
+               'Precision': tmpValues.precision,
+               'Comments': tmpValues.Comments,
+               'FK_MonitoredSite': tmpValues.FK_MonitoredSite
              }
-             else {
-
-               console.log("on enleve le site monitoré");
+               tmpValues.StartDate = tmpValues.StationDate;
+               $.ajax({
+                 context: _this,
+                 url: 'monitoredSites/'+_this.histoMonitoredSite.FK_MonitoredSite+'/history/',
+                 data: JSON.stringify(data),
+                 dataType: "json",
+                 type: "POST",
+                 contentType: "application/json; charset=utf-8",
+                 success: function (data) {
+                    _this.nsForm.butClickSave();
+                 },
+                 error: function (data) {
+                  console.error('an error occured');
+                 }
+               });
              }
-
-             console.log("confirm");
-             //$(e.target).val('');
+             else {//remove MonitoredSite's stations
+               _this.$el.find('input[name="FK_MonitoredSite"]').val("").change();
+               _this.nsForm.butClickSave();
+             }
            });
          }
          else {
            this.nsForm.butClickSave();
          }
-      // }
-
-
-      // console.log("on verif ");
-
-
-    //  this.nsForm.butClickSave();
     }
 
   });
