@@ -97,6 +97,7 @@ define([
           _this.handleSelectAllChkBhv();
           _this.clientSideFilter();
         }
+
         //overlayNoRowsTemplate: '<span>No rows to display</span>',
         //overlayLoadingTemplate: '',
       };
@@ -150,6 +151,25 @@ define([
       this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length);
     },
 
+    headerCellRendererFunc: function() {
+      var eHeader = document.createElement('span');
+
+      eHeader.innerHTML =
+        '<div id="agResizeBar" class="ag-header-cell-resize"></div>'+
+        '<span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg width="14" height="14"><polygon points="0,0 5,5 5,14 10,14 10,4 14,0" class="ag-header-icon"></polygon></svg></span>'+
+        '<div id="agHeaderCellLabel" class="ag-header-cell-label">'+
+        '<span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>'+
+        '<span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>'+
+        '<span id="agNoSort" class="ag-header-icon ag-sort-none-icon ag-hidden"><svg width="10" height="10"><polygon points="0,4 5,0 10,4"></polygon><polygon points="0,6 5,10 10,6"></polygon></svg></span>'+
+        '<span id="agFilter" class="ag-header-icon ag-filter-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 4,4 4,10 6,10 6,4 10,0" class="ag-header-icon"></polygon></svg></span>'+
+        '<span id="agText" class="ag-header-cell-text"></span>'+
+        '</div>';
+      //eHeader.appendChild(eTitle);
+      return eHeader;
+
+
+    },
+
     formatColumns: function(columnDefs){
       var _this = this;
       columnDefs.map(function(col, i) {
@@ -161,11 +181,14 @@ define([
         if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
           _this.formatSelectColumn(col)
         }
+        else {
+          col.headerCellTemplate = _this.headerCellRendererFunc();
+        }
 
         if(col.cell == 'autocomplete'){
           _this.addBBFEditor(col);
         }
-        
+
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;
@@ -233,7 +256,7 @@ define([
         eCell.innerHTML = '\
             <img class="js-check-all pull-left" value="unchecked" src="./app/styles/img/unchecked.png" title="check only visible rows (after filter)" style="padding-left:10px; padding-top:7px" />\
             <div id="agResizeBar" class="ag-header-cell-resize"></div>\
-            <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg width="12" height="12"><rect y="0" width="12" height="2" class="ag-header-icon"></rect><rect y="5" width="12" height="2" class="ag-header-icon"></rect><rect y="10" width="12" height="2" class="ag-header-icon"></rect></svg></span>\
+            <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg width="14" height="14"><polygon points="0,0 5,5 5,14 10,14 10,4 14,0" class="ag-header-icon"></polygon></svg></span>\
             <div id="agHeaderCellLabel" class="ag-header-cell-label">\
               <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>\
               <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>\

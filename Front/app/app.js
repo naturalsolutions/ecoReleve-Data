@@ -32,12 +32,21 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
     var JST = window.JST = window.JST || {};
     window.xhrPool = [];
 
+    window.addEventListener('mousewheel', function(event) {
+      if(document.activeElement.type == "number"){
+        event.preventDefault();
+        event.stopPropagation();
+        document.activeElement.blur();
+      }
+    });
+
     window.onkeydown = function (e) {
       if (e.keyCode == 8 ) {  //backspace key
-         if( !( e.target.tagName == 'INPUT' ||  e.target.tagName == 'TEXTAREA') ) { //handle event if not in input or textarea
+        if( !( e.target.tagName == 'INPUT' ||  e.target.tagName == 'TEXTAREA') ) { //handle event if not in input or textarea
           e.preventDefault();
           e.stopPropagation();
         }
+
       }
     };
 
