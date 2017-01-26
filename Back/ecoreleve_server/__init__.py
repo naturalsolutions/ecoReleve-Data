@@ -6,7 +6,7 @@ from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from pyramid.authorization import ACLAuthorizationPolicy
 from .controllers.security import SecurityRoot, myJWTAuthenticationPolicy
-# from .controllers.WebSocket import Root
+
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
@@ -22,10 +22,9 @@ from .Models import (
 from .Views import add_routes, add_cors_headers_response_callback
 from pyramid.events import NewRequest
 from sqlalchemy.orm import sessionmaker, scoped_session
-from eventlet import wsgi
 import eventlet
-import logging.config
-
+from eventlet import wsgi
+import logging
 
 
 def datetime_adapter(obj, request):
@@ -71,7 +70,6 @@ def includeme(config):
 
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
-
     settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + \
         quote_plus(settings['sqlalchemy.Export.url'])
     engineExport = engine_from_config(
@@ -92,10 +90,10 @@ def main(global_config, **settings):
     Base.metadata.create_all(engine)
     Base.metadata.reflect(views=True, extend_existing=False)
 
-    # logging.config.fileConfig(
-    #     settings['logging.config'],
-    #     disable_existing_loggers=False
-    # )
+    logging.config.fileConfig(
+        settings['logging.config'],
+        disable_existing_loggers=False
+    )
 
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
@@ -136,6 +134,7 @@ def main(global_config, **settings):
     # include security config from jwt __init__.py
     includeme(config)
     config.set_root_factory(SecurityRoot)
+    # config.set_root_factory(root_factory)
 
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
 
@@ -144,7 +143,7 @@ def main(global_config, **settings):
     config.scan()
 
     app = config.make_wsgi_app()
-    # listener = eventlet.listen((AppConfig['server:main']['host'], int(AppConfig['server:main']['port'])))
-    # wsgi.server(listener, app)
-
+    listener = eventlet.listen((AppConfig['server:main']['host'], int(AppConfig['server:main']['port'])))
+    wsgi.server(listener, app)
     return app
+
