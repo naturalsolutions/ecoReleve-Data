@@ -115,7 +115,7 @@ define([
         headerName: 'latitude',
         filter: 'number',
         cellRenderer: Decimal5Renderer
-      }, {
+      },{
         field: 'LON',
         headerName: 'longitude',
         filter: 'number',

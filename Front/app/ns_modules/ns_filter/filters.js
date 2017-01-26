@@ -58,7 +58,7 @@
 
     var tplcheck =
     '<form class="filter form-horizontal filter-form-<%=fieldname%>" style="position:relative">'
-    + '<br><div class="filter-container"  style="margin-bottom: 30px;">'
+    + '<div class="filter-container"  style="padding: 30px 0px;">'
         + '<span data-editors="Column"></span>'
         + '<span class="col-xs-3 filter-label"><%= filterName %></span>'
         + '<span data-editors="ColumnType"></span>'
