@@ -10,7 +10,7 @@ from webob import Response
 from pyramid.httpexceptions import HTTPBadRequest
 from ws4py.streaming import Stream
 import base64
-from stargate.handshake import websocket_handshake, HandShakeFailed
+from .handshake import websocket_handshake, HandShakeFailed
 from past.builtins import basestring 
 
 class WebSocket(object):
@@ -75,6 +75,7 @@ class WebSocket(object):
         """
         Shutdowns then closes the underlying connection.
         """
+        print('close sock')
         try:
             self.sock.shutdown(socket.SHUT_RDWR)
         finally:
@@ -94,13 +95,9 @@ class WebSocket(object):
         @param binary: if set, handles the payload as a binary message
         """
         if isinstance(payload, basestring) or isinstance(payload, bytearray):
-            print('in send message')
             if not binary:
-                print('is no binary')
                 self.write_to_connection(self.stream.text_message(payload).single())
             else:
-                print('is  binary')
-                
                 self.write_to_connection(self.stream.binary_message(payload).single())
 
         elif type(payload) == types.GeneratorType:
@@ -151,6 +148,8 @@ class WebSocket(object):
                 next_size = s.parser.send(bytes)
 
                 if s.closing is not None:
+                    print('closing')
+                    
                     if not self.server_terminated:
                         next_size = 2
                         self.close(s.closing.code, s.closing.reason)
@@ -159,6 +158,8 @@ class WebSocket(object):
                     raise IOError()
 
                 elif s.errors:
+                    print('errors')
+                    
                     errors = s.errors[:]
                     for error in s.errors:
                         self.close(error.code, error.reason)
@@ -175,11 +176,13 @@ class WebSocket(object):
                         s.message = None
 
                 for ping in s.pings:
+                    print('ping')
                     self.write_to_connection(s.pong(str(ping.data)))
                 s.pings = []
                 s.pongs = []
 
                 if message is not None:
+                    print('message')
                     return message
 
 
@@ -228,7 +231,10 @@ class WebSocketView(object):
         # use this undocumented feature of eventlet.wsgi to close the
         # connection properly
         resp = Response()
-        resp.app_iter = wsgi.ALREADY_HANDLED
+        # resp.app_iter = wsgi.ALREADY_HANDLED
+
+        print('response ')
+        print(resp)
         return resp
 
     def handle_upgrade(self):

@@ -5,9 +5,9 @@ persistent connected clients. Both should be subclassed to provide send and rece
 functionality desired
 """
 
-from stargate.handshake import websocket_handshake, HandShakeFailed
-from stargate.resource import WebSocketAwareResource
-from stargate.view import IncorrectlyConfigured, WebSocketView
+from .handshake import websocket_handshake, HandShakeFailed
+from .resource import WebSocketAwareResource
+from .view import IncorrectlyConfigured, WebSocketView
 
 
 def is_websocket(context, request):

@@ -42,14 +42,23 @@ define([
     onShow: function() {
       this.loadCollection(config.coreUrl + 'protocolTypes', 'select[name="protocols"]');
       //
-      var ws = new WebSocket("ws://127.0.0.1:6545/__sockjs__");
-      ws.onmessage = function(msg) {
-        console.log("<p>" + msg.data + "</p>");
+      var ws = new WebSocket("ws://127.0.0.1:6545/ecoReleve-Websockets/fileImport/2");
+      // var ws2 = new WebSocket("ws://127.0.0.1:6545/jobs/2/");
+      // var ws3 = new WebSocket("ws://127.0.0.1:6545/ecoReleve-Core/run/jobs");
+        ws.onmessage = function(msg) {
+        console.log("<run>" + msg.data + "</p>");
       };
 
-      ws.onopen = function(){
-        console.log(' websocket is open')
-      };
+      // ws2.onmessage = function(msg) {
+      //   console.log("<p>" + msg.data + "</p>");
+      // };
+
+      // ws2.onopen = function(){
+      //   console.log(' websocket is open')
+      // };
+      // //   ws2.onopen = function(){
+      //   console.log(' websocket 222 is open')
+      // };
 
 
     },
