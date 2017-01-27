@@ -9,7 +9,8 @@ from sqlalchemy import (
     Sequence,
     text,
     bindparam,
-    func)
+    func,
+    orm)
 from sqlalchemy.orm import relationship
 from pyramid import threadlocal
 from traceback import print_exc
@@ -23,6 +24,12 @@ class CustomErrorSQL(Exception):
     def __str__(self):
         return repr(self.value)
 
+def coroutine(func):
+    def starter(*args, **kwargs):
+        gen = func(*args, **kwargs)
+        next(gen)
+        return gen
+    return starter
 
 class File (Base):
 
@@ -46,9 +53,13 @@ class File (Base):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        engine = threadlocal.get_current_request().registry.dbmaker().get_bind()
+        engine = threadlocal.get_current_registry().dbmaker().get_bind()
         self.ObjContext = engine.connect()
         self.processInfo = {}
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self.__init__()
 
     def run_process(self, current_process, trans):
         try:
@@ -111,34 +122,36 @@ class File (Base):
             else:
                 pass
 
+    @coroutine
     def main_process(self):
         dictSession = {}
-        self.error = True
-        try:
-            print(self.Type.ProcessList)
-            for process in self.Type.ProcessList:
-                print(process)
-                dictSession[process.Name] = self.ObjContext.begin()
-                print("process name : "+process.Name)
-                result, error, errorIndexes = self.run_process(process, dictSession[process.Name])
-                print(result, error, errorIndexes)
-                # self.processInfo = {'result':result, 'error':error, 'errorIndexes':errorIndexes}
-                if result.lower() == 'error' and process.Blocking:
-                        raise CustomErrorSQL(process.Name + 'not passed')
+        # self.error = True
+    # try:
+        yield
+        print(self.Type.ProcessList)
+        for process in self.Type.ProcessList:
 
-            self.error = False
-            #self.ObjContext.commit()
-        except Exception as e:
-            print('in except main process')
-            print (e)
-            self.error = True
-            for session in dictSession:
-                dictSession[session].rollback()
-            self.ObjContext.rollback()
+            dictSession[process.Name] = self.ObjContext.begin()
+            # print("process name : "+process.Name)
+            result, error, errorIndexes = self.run_process(process, dictSession[process.Name])
+            # print(result, error, errorIndexes)
+            # if result.lower() == 'error' and process.Blocking:
+            #         raise CustomErrorSQL(process.Name + 'not passed')
+            yield "{'process':"+str(process.Name)+", 'error':"+str(error)+", 'errorIndexes':"+str(errorIndexes)+"}"
 
-        finally:
-            self.ObjContext.close()
-            return self.processInfo
+        #     self.error = False
+        #     #self.ObjContext.commit()
+        # except Exception as e:
+        #     print('in except main process')
+        #     print (e)
+        #     self.error = True
+        #     for session in dictSession:
+        #         dictSession[session].rollback()
+        #     self.ObjContext.rollback()
+
+        # finally:
+        #     self.ObjContext.close()
+            # return self.processInfo
 
     def log(self):
         print('error log')

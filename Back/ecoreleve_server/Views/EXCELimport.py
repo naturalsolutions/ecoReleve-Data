@@ -158,18 +158,18 @@ def import_file(request):
                          'Station_FieldWorker3': String
                          })
 
-        info = file.main_process()
+        # info = file.main_process()
 
-        if file.error:
-            request.response.status = 510
-            return info
+        # if file.error:
+        #     request.response.status = 510
+        #     return info
 
     except:
         request.response.status = 530
 
         session.rollback()
         raise
-    return
+    return file.ID
 
 
 def checkProtoColumns(protoID, excelCols, session):

@@ -82,30 +82,45 @@ define([
           data: formData,
           processData: false, // Don't process the files
           contentType: false, // Set content type to false as jQuery will tell the server its a query string request
-          success: function(data, textStatus, jqXHR){
-                if ((data=='station columns error') || ( data=='protocol columns error') ){
-                  _this.swalError(data);
+          // success: function(data, textStatus, jqXHR){
+          //       if ((data=='station columns error') || ( data=='protocol columns error') ){
+          //         _this.swalError(data);
 
-                }
-                if(textStatus=='success') {
-                  Swal({
-                    title: 'Success',
-                    text: 'File import is successfully done.',
-                    type: 'success',
-                    showCancelButton: false,
-                    confirmButtonColor: 'green',
-                    confirmButtonText: 'OK',
-                    closeOnConfirm: true,
-                  });
-                }
+          //       }
+           success: function(msg){
+                _this.startWebSocket(msg);
+
+                // if(textStatus=='success') {
+                //   Swal({
+                //     title: 'Success',
+                //     text: 'File import is successfully done.',
+                //     type: 'success',
+                //     showCancelButton: false,
+                //     confirmButtonColor: 'green',
+                //     confirmButtonText: 'OK',
+                //     closeOnConfirm: true,
+                //   });
+                // }
+
           },
           error: function(jqXHR, textStatus, errorThrown){
                  _this.swalError('error server side');
           }
           });
       }
-
     },
+
+    startWebSocket: function(guid){
+      var _this = this;
+         var ws = new WebSocket("ws://127.0.0.1:6545/ecoReleve-Websockets/fileImport/"+guid);
+      // var ws2 = new WebSocket("ws://127.0.0.1:6545/jobs/2/");
+      // var ws3 = new WebSocket("ws://127.0.0.1:6545/ecoReleve-Core/run/jobs");
+        ws.onmessage = function(msg) {
+          _this.$el.find('#js-wsmsg').append("<span>" + msg.data + "</span></br>");
+          console.log("<span>" + msg.data + "</span>");
+      };
+    },
+    
     swalError: function(title) {
       var _this = this;
       Swal({

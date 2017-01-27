@@ -3,6 +3,9 @@ import eventlet
 from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
 from ..controllers.WebSocket import FileImportJob
+from ..Models.File_Import import File
+from pyramid import threadlocal
+
 
 
 def coroutine(func):
@@ -40,22 +43,16 @@ class JobView(WebSocketView):
 
     def handler(self, websocket):
         print('in handler WS')
-        print(websocket)
         self.processList = ['toto', 'tata' , 'tutu']
+        session = threadlocal.get_current_registry().dbmaker()
+        print(session)
         job = self.request.context
         job.add_listener(websocket)
-        runner = self.run()
+
+        curFile = session.query(File).get(job.__name__)
+        runner = curFile.main_process()
         for result in runner:
             job.send(result)
 
 
-@view_config(context=FileImportJob, renderer="json", xhr=True, permission=NO_PERMISSION_REQUIRED)
-def control(job, request):
-    """Post to this view to set the state
 
-    this will trigger Job to report the state to connected clients
-    """
-    state = request.POST.get("state")
-    if state:
-        job.control(state)
-    return dict(id=job.__name__, state=job.state)
