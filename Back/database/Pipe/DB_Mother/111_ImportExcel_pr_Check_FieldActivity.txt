@@ -48,7 +48,7 @@ BEGIN TRY
 	)
 
 	SET @SQL_STATEMENT = 'SELECT [index] FROM '+@TempTable_GUID + ' t '	
-	+' WHERE NOT EXISTS (SELECT * FROM fieldActivity f WHERE f.Name = t.fieldActivityId ) AND t.fieldActivityId IS NOT NULL'
+		+' WHERE NOT EXISTS (SELECT * FROM fieldActivity f WHERE f.Name = t.Station_fieldActivityId )'
 	
 	INSERT INTO #tempIndexError
 	EXEC SP_EXECUTESQL @SQL_STATEMENT;

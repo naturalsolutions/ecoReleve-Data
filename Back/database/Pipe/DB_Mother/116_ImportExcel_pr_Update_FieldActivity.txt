@@ -47,9 +47,9 @@ BEGIN TRY
 	index_ int
 	)
 
-	SET @SQL_STATEMENT = 'UPDATE t SET fieldActivityId = f.ID'
+	SET @SQL_STATEMENT = 'UPDATE t SET Station_fieldActivityId = f.ID'
 	+' FROM '+@TempTable_GUID + ' t '	
-	+' JOIN fieldActivity f ON f.Name = t.fieldActivityId '
+	+' JOIN fieldActivity f ON f.Name = t.Station_fieldActivityId '
 	
 	INSERT INTO #tempIndexError
 	EXEC SP_EXECUTESQL @SQL_STATEMENT;

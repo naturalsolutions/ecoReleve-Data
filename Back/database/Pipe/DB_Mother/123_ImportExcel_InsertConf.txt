@@ -5,6 +5,7 @@ GO
 INSERT [dbo].[File_Type] ([ID], [Name]) VALUES (1, N'excel_protocol')
 GO
 SET IDENTITY_INSERT [dbo].[File_Type] OFF
+
 GO
 SET IDENTITY_INSERT [dbo].[File_ProcessList] ON 
 
@@ -19,7 +20,8 @@ INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [E
 GO
 INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (5, N'pr_Check_Autocomplete', 1, N'sql_check', 5, 0, NULL, NULL)
 GO
-INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (6, N'pr_Check_FieldActivity', NULL, N'sql_check', 6, 0, NULL, NULL)
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (6, N'pr_Check_FieldActivity', 1, N'sql_check', 6, 0, NULL, NULL)
+
 GO
 INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (7, N'pr_Check_Thesaurus', 1, N'sql_check', 7, 0, NULL, NULL)
 GO
@@ -31,8 +33,20 @@ INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [E
 GO
 INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (11, N'pr_Check_FK_Individual_IS_INT', 1, N'sql_check', 11, 0, NULL, NULL)
 GO
-INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (12, N'pr_Update_TempFile', NULL, NULL, NULL, 1, NULL, NULL)
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (13, N'pr_Update_Autocomplete', 1, N'sql_update', 100, 1, NULL, NULL)
+
 GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (18, N'pr_Update_FieldActivity', 1, N'sql_update', 101, 1, NULL, NULL)
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (20, N'pr_Update_FieldWorkerName', 1, N'sql_update', 102, 1, NULL, NULL)
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (21, N'pr_Update_Select', 1, N'sql_update', 103, 1, NULL, NULL)
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (22, N'pr_Update_ThesaurusVal', 1, N'sql_update', 104, 1, NULL, NULL)
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (29, N'pr_InsertStations_From_Import', 1, N'sql_insert', 200, 1, NULL, NULL)
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (30, N'pr_insertObservations_From_Import', 1, N'sql_insert', 201, 1, NULL, NULL)
 SET IDENTITY_INSERT [dbo].[File_ProcessList] OFF
 GO
 

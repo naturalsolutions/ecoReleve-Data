@@ -1,11 +1,14 @@
-USE [EcoReleve_ECWP]
-GO
 /****** Object:  StoredProcedure [dbo].[pr_CheckRequiredStation]    Script Date: 11/01/2017 14:45:29 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-ALTER PROCEDURE [dbo].[pr_CheckRequiredStation]
+
+IF OBJECT_ID('pr_CheckRequiredStation', 'P') IS NOT NULL
+DROP PROCEDURE dbo.[pr_CheckRequiredStation];
+GO 
+
+CREATE PROCEDURE [dbo].[pr_CheckRequiredStation]
 	@file_ID int,
 	@result varchar(255) OUTPUT,
 	@error int OUTPUT,
