@@ -52,7 +52,7 @@ class File (Base):
 
     def run_process(self, current_process, trans):
         try:
-            if 'sql' in current_process.ProcessType:
+            if 'check' in current_process.ProcessType:
                 req = text("""
                            DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
                            EXEC [dbo].""" + current_process.Name +
@@ -61,7 +61,23 @@ class File (Base):
                            ).bindparams(bindparam('file_ID', self.ID))
                 result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
                 self.processInfo[current_process.Name] = {
-                    'desc': current_process.DescriptionFr,
+                    # 'desc': current_process.DescriptionFr,
+                    'error': error,
+                    'result': result,
+                    'errorIndexes': errorIndexes}
+                trans.commit()
+                return result, error, errorIndexes
+
+            if 'update' in current_process.ProcessType:
+                req = text("""
+                           DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
+                           EXEC [dbo].""" + current_process.Name +
+                           """  :file_ID, @result OUTPUT, @error OUTPUT,  @errorIndexes OUTPUT;
+                           SELECT @result, @error, @errorIndexes;"""
+                           ).bindparams(bindparam('file_ID', self.ID))
+                result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
+                self.processInfo[current_process.Name] = {
+                    # 'desc': current_process.DescriptionFr,
                     'error': error,
                     'result': result,
                     'errorIndexes': errorIndexes}
@@ -69,7 +85,25 @@ class File (Base):
                 trans.commit()
                 return result, error, errorIndexes
 
+            if 'insert' in current_process.ProcessType:
+                req = text("""
+                           DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
+                           EXEC [dbo].""" + current_process.Name +
+                           """  :file_ID, @result OUTPUT, @error OUTPUT,  @errorIndexes OUTPUT;
+                           SELECT @result, @error, @errorIndexes;"""
+                           ).bindparams(bindparam('file_ID', self.ID))
+                result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
+                self.processInfo[current_process.Name] = {
+                    # 'desc': current_process.DescriptionFr,
+                    'error': error,
+                    'result': result,
+                    'errorIndexes': errorIndexes}
+                trans.commit()
+                return result, error, errorIndexes
+
         except Exception as e:
+            print("****************************************************")
+            print (e)
             print_exc()
             trans.rollback()
             if current_process.Blocking:
@@ -79,19 +113,25 @@ class File (Base):
 
     def main_process(self):
         dictSession = {}
+        self.error = True
         try:
+            print(self.Type.ProcessList)
             for process in self.Type.ProcessList:
+                print(process)
                 dictSession[process.Name] = self.ObjContext.begin()
-                print(process.Name)
+                print("process name : "+process.Name)
                 result, error, errorIndexes = self.run_process(process, dictSession[process.Name])
                 print(result, error, errorIndexes)
+                # self.processInfo = {'result':result, 'error':error, 'errorIndexes':errorIndexes}
                 if result.lower() == 'error' and process.Blocking:
-                    raise CustomErrorSQL(process.Name + 'not passed')
+                        raise CustomErrorSQL(process.Name + 'not passed')
 
-            self.ObjContext.commit()
             self.error = False
-        except:
-            print('\n\n in except main process')
+            #self.ObjContext.commit()
+        except Exception as e:
+            print('in except main process')
+            print (e)
+            self.error = True
             for session in dictSession:
                 dictSession[session].rollback()
             self.ObjContext.rollback()
@@ -156,6 +196,3 @@ class File_ProcessList (Base):
 #     FK_File = Column(Integer, ForeignKey('File.ID'))
 #     FK_SensorID = Column (Integer, ForeignKey('Sensor.ID'))
 #     Content = Column(String)
-
-
-
