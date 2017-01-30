@@ -135,6 +135,7 @@ define([
                         onItemClick: function (options) {
                             var value = _this.$el.find('#' + _this.id + '_value').val();
                             _this.$el.find('input').trigger('changeEditor');
+                            _this.$el.find('input').trigger('thesaurusChange');
                             _this.onEditValidation(value);
                         }
                     });
