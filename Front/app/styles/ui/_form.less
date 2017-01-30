@@ -220,14 +220,18 @@ ul.fancytree-container{
   background: white;
 }
 div.fancytreeview{
-	//input-group : diplsay table cell
   top: 34px!important;
   max-height: 250px;
 	position: absolute;
 	border: 1px solid rgba(46, 204, 64, 0.6) !important;
-	width: calc(~"100% - 39px");
 	overflow: auto;
 	background: white;
+	width: 100%;
+}
+.input-group{
+	.fancytreeview{
+		width: calc(~"100% - 39px");
+	}
 }
 
 span.fancytree-title{
