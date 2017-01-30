@@ -96,6 +96,9 @@ def getFilters(request):
 def getForms(request):
     session = request.dbsession
     typeIndiv = request.params['ObjectType']
+    if typeIndiv in [None, '']:
+        typeIndiv = 1
+
     ModuleName = 'IndivForm'
     Conf = session.query(FrontModules).filter(
         FrontModules.Name == ModuleName).first()

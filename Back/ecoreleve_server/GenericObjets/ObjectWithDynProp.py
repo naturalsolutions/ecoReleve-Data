@@ -53,6 +53,7 @@ class ObjectWithDynProp:
             self.allProp = statProps
         return self.allProp
 
+
     def getLinkedField(self):
         curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + \
             self.GetType().GetDynPropContextTable()
@@ -60,6 +61,7 @@ class ObjectWithDynProp:
             self.GetType().Get_FKToDynPropTable() + '= D.ID '
         curQuery += ' where C.' + self.GetType().GetFK_DynPropContextTable() + \
             ' = ' + str(self.GetType().ID)
+
         curQuery += ' AND C.LinkedTable is not null'
         Values = self.ObjContext.execute(curQuery).fetchall()
 
@@ -76,7 +78,8 @@ class ObjectWithDynProp:
                 FrontModules).filter(FrontModules.Name == ModuleType).one()
         return self.FrontModules.ID
 
-    def GetGridFields(self, ModuleType):
+
+    def GetGridFields (self,ModuleType):
         ''' Function to call : return Name and Type of Grid fields to display in front end
         according to configuration in table ModuleGrids'''
         try:
@@ -106,7 +109,8 @@ class ObjectWithDynProp:
 
         return cols
 
-    def GetFilters(self, ModuleType):
+
+    def GetFilters (self,ModuleType) :
         ''' Function to call : return Name and Type of Filters to display in front end
         according to configuration in table ModuleGrids'''
         filters = []
@@ -202,10 +206,12 @@ class ObjectWithDynProp:
                         oldvalue = self.GetDynPropWithDate(
                             nameProp, StartDate=useDate)
                         if oldvalue is not None:
-                            setattr(oldvalue, Cle[self.GetPropWithName(
-                                nameProp)['type']], valeur)
+                            print('existsng dynprop value update old Value')
+                            setattr(oldvalue,Cle[self.GetPropWithName(nameProp)['type']],valeur)
 
                     if oldvalue is None:
+                        print('NOOOOT existsng dynprop value at THIS Date')
+
                         NouvelleValeur = self.GetNewValue(nameProp)
                         NouvelleValeur.StartDate = datetime.today() if useDate is None else useDate
                         setattr(NouvelleValeur, Cle[
@@ -261,21 +267,28 @@ class ObjectWithDynProp:
     def GetRealValue(self, row):
         return row[Cle[row['TypeProp']]]
 
-    def UpdateFromJson(self, DTOObject, startDate=None):
-        ''' Function to call : update properties of new
-        or existing object with JSON/dict of value'''
+    def UpdateFromJson(self,DTOObject,startDate = None):
+        ''' Function to call : update properties of new or existing object with JSON/dict of value'''
 
         for curProp in DTOObject:
-            if (curProp.lower() != 'id' and DTOObject[curProp] != '-1'):
-                if (isinstance(DTOObject[curProp], str)
-                        and len(DTOObject[curProp].split()) == 0):
+            if (curProp.lower() != 'id' and DTOObject[curProp] != '-1' ):
+                if isinstance(DTOObject[curProp],str) and len(DTOObject[curProp].split())==0:
                     DTOObject[curProp] = None
-                self.SetProperty(curProp, DTOObject[curProp], startDate)
+                if isinstance(DTOObject[curProp],dict) and 'StartDate' in DTOObject[curProp]:
+                    print('value OBJECT '+curProp)
+                    print(DTOObject[curProp])
+                    givenStartDate = DTOObject[curProp]['StartDate']
+                    DTOObject[curProp] = DTOObject[curProp][curProp]
+                else :
+                    givenStartDate = startDate
+                self.SetProperty(curProp,DTOObject[curProp],givenStartDate)
+
 
     def GetFlatObject(self, schema=None):
         ''' return flat object with static properties and last existing value of dyn props '''
         resultat = {}
         hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
+
         if self.ID is not None:
             max_iter = max(len(self.__table__.columns), len(
                 self.PropDynValuesOfNow), len(hybrid_properties))

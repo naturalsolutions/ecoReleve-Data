@@ -3,7 +3,7 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  
+
   'sweetAlert',
   'translater',
 
@@ -32,6 +32,7 @@ define([
 
     ui: {
       'form': '.js-form',
+      'globalInfo':'.js-form-global-infos',
       'formBtns': '.js-form-btns',
       'map': '.js-map',
     },
@@ -116,11 +117,11 @@ define([
 
       this.gridViews.map(function(gridView){
         gridView.gridOptions.api.sizeColumnsToFit();
-      })
+      });
     },
 
     displayGrids: function(){
-      
+
     },
 
     displayForm: function(){
@@ -132,10 +133,13 @@ define([
       formConfig.formRegion = this.ui.form;
       formConfig.buttonRegion = [this.ui.formBtns];
       formConfig.parent = this.parent;
+      formConfig.afterShow = function(options){
+        var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
+        _this.ui.globalInfo.html(globalEl);
+      };
       formConfig.afterDelete = function(response, model){
         Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
       };
-
       this.nsForm = new NsForm(formConfig);
     },
 

@@ -1,0 +1,128 @@
+﻿/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+
+  INSERT INTO [FrontModules]
+  VALUES ('PopOverForm',1,NULL)
+
+  DECLARE @PopModuleID int ; SET @PopModuleID = (SELECT ID FROM FrontModules WHERE Name ='PopOverForm')
+
+  INSERT INTO ModuleForms
+  SELECT @PopModuleID
+      ,1
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,12
+      ,12
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,10
+      ,NULL
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+      ,[Rules]
+      ,NULL
+FROM ModuleForms 
+WHERE Name = 'StartDate' and module_id = 12 
+
+UNION ALL 
+
+  SELECT @PopModuleID
+      ,1
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,12
+      ,12
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,1
+      ,NULL
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+      ,[Rules]
+      ,NULL
+FROM ModuleForms 
+WHERE Name = 'Monitoring_Status' and module_id = 9 
+
+
+UPDATE ModuleForms SET Options = '{"target":"Monitoring_Status","popOverForm":1,"displaySave":1}',InputType = 'PopOverEditor'
+WHERE Name =  'Monitoring_Status' and module_id = 9 
+
+---
+	GO
+  DECLARE @PopModuleID int ; SET @PopModuleID = (SELECT ID FROM FrontModules WHERE Name ='PopOverForm')
+
+  INSERT INTO ModuleForms
+  SELECT @PopModuleID
+      ,2
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,12
+      ,12
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,10
+      ,NULL
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+      ,[Rules]
+      ,NULL
+FROM ModuleForms 
+WHERE Name = 'StartDate' and module_id = 12 
+
+UNION ALL 
+
+  SELECT @PopModuleID
+      ,2
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,12
+      ,12
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,1
+      ,NULL
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+      ,[Rules]
+      ,NULL
+FROM ModuleForms 
+WHERE Name = 'Survey_Type' and module_id = 9 
+
+
+UPDATE ModuleForms SET Options = '{"target":"Survey_type","popOverForm":2,"displaySave":1}',InputType = 'PopOverEditor'
+WHERE Name =  'Survey_Type' and module_id = 9 
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('102_Conf_Indiv_Add_PopOverEditor',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -153,6 +153,9 @@ define([
                 }
                 _this.FirstRender = false;
             }).defer();
+            if (!this.editable){
+              this.$el.find('.input-group-addon').hide();
+            }
             return this;
         },
         validateAndTranslate: function (value, isTranslated) {
