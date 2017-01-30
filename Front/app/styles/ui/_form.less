@@ -215,15 +215,19 @@ span.fancytree-title:hover {
 ul.fancytree-container{
   z-index: 1;
 	border:0;
-  max-height: 500px;
   padding-right: 10px;
+  overflow: visible;
+  background: white;
 }
 div.fancytreeview{
 	//input-group : diplsay table cell
   top: 34px!important;
+  max-height: 250px;
 	position: absolute;
 	border: 1px solid rgba(46, 204, 64, 0.6) !important;
-	width: auto;
+	width: calc(~"100% - 39px");
+	overflow: auto;
+	background: white;
 }
 
 span.fancytree-title{
