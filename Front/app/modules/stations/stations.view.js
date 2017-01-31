@@ -13,7 +13,7 @@ define([
   'use strict';
 
   return ManagerView.extend({
-    model: new StationModel(),
+    ModelPrototype: StationModel,
 
     populateCurrentData: function(currentData){
       this.defaultFilters = currentData.filters;
