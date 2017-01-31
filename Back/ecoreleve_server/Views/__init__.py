@@ -2,7 +2,6 @@ from pyramid.httpexceptions import HTTPNotFound
 from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
 from ..Models import sendLog
-from stargate import is_websocket
 
 
 def add_cors_headers_response_callback(event):

@@ -29,7 +29,10 @@ requires = [
     'pyexcel-webio==0.0.7',
     'pyexcel-xls==0.2.2',
     'pyexcel-xlsx==0.2.1',
-    'pyramid-excel==0.0.3'
+    'pyramid-excel==0.0.3',
+    'ws4py',
+    'pyramid_zcml',
+    'eventlet'
     ]
 
 setup(name='ecoreleve_server',
