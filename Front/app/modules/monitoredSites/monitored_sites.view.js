@@ -6,6 +6,6 @@ define([
   'use strict';
 
   return ManagerView.extend({
-  	model: new MonitoredSiteModel(),
+  	ModelPrototype: MonitoredSiteModel,
   });
 });

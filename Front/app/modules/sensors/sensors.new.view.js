@@ -14,6 +14,6 @@ define([
   'use strict';
   return NewView.extend({
 
-    model: new SensorModel(),
+    ModelPrototype: SensorModel,
   });
 });
