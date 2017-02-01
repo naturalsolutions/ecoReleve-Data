@@ -358,12 +358,6 @@ define([
           }
         }
       });
-
-      $(this.formRegion).find('input[type="number"]').on('keyup' , function(e) {
-        if ($(this).val()< 0) {
-          $(this).val('');
-        }
-      });
     },
 
     showForm: function (){
