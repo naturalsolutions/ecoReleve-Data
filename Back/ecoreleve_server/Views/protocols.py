@@ -67,6 +67,7 @@ def GetProtocolsofStation(request):
                             'Name': typeName,
                             'schema': curObsForm['schema'],
                             'fieldsets': curObsForm['fieldsets'],
+                            'grid': curObsForm['grid'],
                             'obs': [curObs.ID]
                         }
 
@@ -89,6 +90,7 @@ def GetProtocolsofStation(request):
                             'Name': typeName,
                             'schema': curVirginObsForm['schema'],
                             'fieldsets': curVirginObsForm['fieldsets'],
+                            'grid': curVirginObsForm['grid'],
                             'obs': []
                         }
 
@@ -97,6 +99,7 @@ def GetProtocolsofStation(request):
                  'Name': listProto[typeID]['Name'],
                  'schema':listProto[typeID]['schema'],
                  'fieldsets':listProto[typeID]['fieldsets'],
+                 'grid':listProto[typeID]['grid'],
                  'obs':listProto[typeID]['obs']}
                 for typeID in listProto.keys()
             ]

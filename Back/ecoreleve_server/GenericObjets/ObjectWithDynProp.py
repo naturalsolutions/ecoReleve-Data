@@ -342,8 +342,11 @@ class ObjectWithDynProp:
 
         resultat = {
             'schema': schema,
-            'fieldsets': ObjType.GetFieldSets(FrontModules, schema)
+            'fieldsets': ObjType.GetFieldSets(FrontModules, schema),
+            'grid': False
         }
+        if (ObjType.Status == 10):
+            resultat['grid'] = True
         return resultat
 
     def GetDTOWithSchema(self, FrontModules, DisplayMode):
