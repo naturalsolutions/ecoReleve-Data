@@ -125,33 +125,14 @@ class File (Base):
     @coroutine
     def main_process(self):
         dictSession = {}
-        # self.error = True
-    # try:
         yield
-        print(self.Type.ProcessList)
         for process in self.Type.ProcessList:
-
-            dictSession[process.Name] = self.ObjContext.begin()
-            # print("process name : "+process.Name)
-            result, error, errorIndexes = self.run_process(process, dictSession[process.Name])
-            # print(result, error, errorIndexes)
-            # if result.lower() == 'error' and process.Blocking:
-            #         raise CustomErrorSQL(process.Name + 'not passed')
-            yield "{'process':"+str(process.Name)+", 'error':"+str(error)+", 'errorIndexes':"+str(errorIndexes)+"}"
-
-        #     self.error = False
-        #     #self.ObjContext.commit()
-        # except Exception as e:
-        #     print('in except main process')
-        #     print (e)
-        #     self.error = True
-        #     for session in dictSession:
-        #         dictSession[session].rollback()
-        #     self.ObjContext.rollback()
-
-        # finally:
-        #     self.ObjContext.close()
-            # return self.processInfo
+            try:
+                dictSession[process.Name] = self.ObjContext.begin()
+                result, error, errorIndexes = self.run_process(process, dictSession[process.Name])
+                yield "{'process':"+str(process.Name)+", 'error':"+str(error)+", 'errorIndexes':"+str(errorIndexes)+"}"
+            except:
+                yield "{'process':"+str(process.Name)+", 'error':'internal error', 'errorIndexes': 'error'}"
 
     def log(self):
         print('error log')
