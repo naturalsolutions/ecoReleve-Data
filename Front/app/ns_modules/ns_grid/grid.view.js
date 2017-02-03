@@ -737,15 +737,25 @@ define([
 
       var rowData = [];
       var errors = [];
+      
 
       this.gridOptions.api.forEachNode( function(node) {
-        if(Object.keys(node.data).length !== 0 || (Object.keys(node.data).length == 1 && Object.keys(node.data)[0] != '_errors')){
-          rowData.push(node.data);
-        }
-        if(node.data._errors){
-          if(node.data._errors.length){
-            errors.push(node.data._errors);
+        var empty;
+        for( var key in node.data ){
+          if(key == '_errors' && node.data._errors) {
+            if(node.data._errors.length){
+              errors.push(node.data._errors);
+            }
+            continue;
           }
+
+          if(node.data[key] != null || node.data[key] != 'undefined' || node.data[key] != ''){
+            empty = false;
+          }
+        }
+
+        if(!empty){
+          rowData.push(node.data);
         }
       });
 

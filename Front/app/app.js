@@ -132,7 +132,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       } else {
         options.url = config.coreUrl + options.url;
       }
-      if(options.type === 'GET'){
+      if(options.type === 'GET' || options.url.indexOf('http://') !==-1 ){ //should be a GET!! (thesaurus calls)
         $.xhrPool.calls.push(jqxhr);
       }
     },

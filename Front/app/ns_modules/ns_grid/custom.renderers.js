@@ -13,12 +13,10 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     CustomRenderer.prototype.afterInit = function(params) {
     	var _this= this;
     	var value = params.value;
-    	var dfd;
     	var valueTodisplay;
 
     	if(value instanceof Object){
     		value = params.value.value;
-    		dfd = params.value.dfd;
     		valueTodisplay = params.value.label;
     	}
 
@@ -44,7 +42,9 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     					}
     			} else {
 						this.handleRemoveError(params);
-						this.manualDataSet(params, value);
+            if(value){
+						  this.manualDataSet(params, value);
+            }
     			}
 
     		}
@@ -133,7 +133,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         url: url,
         data: JSON.stringify(data),
         dataType: 'json',
-        type: 'POST',
+        type: 'POST', //should be a GET
         contentType: 'application/json; charset=utf-8',
         success: function (data){
           if(data['TTop_FullPath'] != null){
@@ -145,6 +145,9 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           }
         },
         error: function (data) {
+          if (data.statusText == 'abort') {
+            return;
+          }
           _this.handleError(params);
         }
       });

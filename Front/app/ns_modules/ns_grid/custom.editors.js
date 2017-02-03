@@ -72,6 +72,9 @@ define([
 		};
 
 		CustomEditor.prototype.getValue = function(){
+			if(this.element.getValue() === "" || this.element.getValue() === null){
+				return;
+			}
 		  return this.element.getValue();
 		};
 
@@ -116,20 +119,6 @@ define([
 		  */
 
 		};
-
-		ThesaurusEditor.prototype.getValue = function(){
-			var value = this.element.getValue();
-			var dfd = this.element.validateAndTranslate(value);
-			//var error = this.element.commit();
-
-			return {
-				value: value,
-				dfd: dfd,
-				//error: error
-			};
-
-		};
-
 
 
     var ObjectPickerEditor = function () {};
