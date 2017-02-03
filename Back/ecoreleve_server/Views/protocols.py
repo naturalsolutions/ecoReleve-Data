@@ -195,7 +195,7 @@ def batch(request):
 
         if 'delete' in request.json_body:
             responseBody['updatedObservations'].append(deleteObservation(request, rowData[i]['ID']))
-            return
+            continue
 
         json_body = rowData[i]
         if 'ID' in rowData[i]:
