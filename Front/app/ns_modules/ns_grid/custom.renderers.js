@@ -110,9 +110,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   	  $(this.eGui).html(value);
   	};
 
-
-
-
 		var Thesaurus = function(options) {}
     Thesaurus.prototype = new CustomRenderer();
     Thesaurus.prototype.deferred = true;
@@ -171,13 +168,8 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 			}*/
 		};
 
-
-
 		var ObjectPicker = function () {}
 		ObjectPicker.prototype = new CustomRenderer();
-
-
-
 
 		var CheckboxRenderer = function() {}
 		CheckboxRenderer.prototype = new CustomRenderer();
@@ -189,9 +181,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 			var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
 	    $(this.eGui).html(chk);
 		};
-
-
-
 
 		var AutocompleteRenderer = function() {}
     AutocompleteRenderer.prototype = new CustomRenderer();

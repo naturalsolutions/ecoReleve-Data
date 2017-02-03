@@ -66,7 +66,7 @@ define([
         },
 
         initialize: function(){
-         // this.model.set('grid', false);
+         this.model.set('grid', true);
         },
 
         updateTotal: function(){
