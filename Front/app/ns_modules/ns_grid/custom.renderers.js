@@ -28,17 +28,8 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     	_this.formatValueToDisplay(valueTodisplay);
 
 				//could be a call whith params.colDef
-    	if(dfd && value){
-    		dfd.then(
-    		function(resp){
-    			_this.formatValueToDisplay(valueTodisplay);
-    			
-    			_this.handeRemoveError(params);
-    			_this.manualDataSet(params, value);
-    		},
-    		function(){
-    			_this.handleError(params);
-    		});
+    	if(this.deferred && value){
+    		this.deferredValidation(params, value);
     	} else {
     		var validators = params.colDef.schema.validators;
     		if(validators.length){
@@ -48,11 +39,11 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     					if(!value){
     						this.handleError(params);
     					} else {
-		    				this.handeRemoveError(params);
+		    				this.handleRemoveError(params);
 								this.manualDataSet(params, value);
     					}
     			} else {
-						this.handeRemoveError(params);
+						this.handleRemoveError(params);
 						this.manualDataSet(params, value);
     			}
 
@@ -75,7 +66,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   	};
 
 
-  	CustomRenderer.prototype.handeRemoveError = function(params){
+  	CustomRenderer.prototype.handleRemoveError = function(params){
   		this.error = false;
   	  $(params.eGridCell).removeClass('ag-cell-error');
 
@@ -93,7 +84,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   		this.error = true;
   		params.data[params.colDef.field] = '';
   	  $(params.eGridCell).addClass('ag-cell-error');
-  	  $(this.eGui).html();
+  	  //$(this.eGui).html();
 
   		var errorsColumn =  params.data['_errors'];
 
@@ -108,8 +99,12 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   		
   	};
 
-  	CustomRenderer.prototype.getGui = function() {
-  	  return this.eGui;
+    CustomRenderer.prototype.getGui = function() {
+      return this.eGui;
+    };
+
+    CustomRenderer.prototype.deferredValidation = function() {
+  	  return false;
   	};
   	CustomRenderer.prototype.formatValueToDisplay = function(value) {
   	  $(this.eGui).html(value);
@@ -118,12 +113,48 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
 
 
-		/*
-			Custom childrens
-		*/
-
 		var Thesaurus = function(options) {}
-		Thesaurus.prototype = new CustomRenderer();
+    Thesaurus.prototype = new CustomRenderer();
+    Thesaurus.prototype.deferred = true;
+
+		Thesaurus.prototype.deferredValidation = function(params, value){
+      var _this = this;
+      var TypeField = 'FullPath';
+      if (value && value.indexOf('>') == -1) {
+          TypeField = 'Name';
+      }  
+      var data = {
+        sInfo: value,
+        sTypeField: TypeField,
+        iParentId: params.colDef.schema.options.startId,
+        lng: params.colDef.schema.options.lng //language
+      };
+
+      var url = params.colDef.schema.options.wsUrl + '/getTRaductionByType';
+
+      $.ajax({
+        url: url,
+        data: JSON.stringify(data),
+        dataType: 'json',
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        success: function (data){
+          if(data['TTop_FullPath'] != null){
+            _this.formatValueToDisplay(data['TTop_NameTranslated']);
+            _this.handleRemoveError(params);
+            _this.manualDataSet(params, data['TTop_FullPath']);
+          } else {
+            _this.handleError(params);
+          }
+        },
+        error: function (data) {
+          _this.handleError(params);
+        }
+      });
+
+      return true;
+
+    };
 
 		Thesaurus.prototype.formatValueToDisplay = function(value) {
 			if((typeof value !== 'string')){
@@ -163,10 +194,33 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
 
 		var AutocompleteRenderer = function() {}
-		AutocompleteRenderer.prototype = new CustomRenderer();
+    AutocompleteRenderer.prototype = new CustomRenderer();
+    AutocompleteRenderer.prototype.deferred = true;
 
+    AutocompleteRenderer.prototype.deferredValidation = function(params, value){
+      var data = {
+        term: value
+      };
 
+      var opt = params.colDef.schema.options;
 
+      $.ajax({
+        url: opt.object + '/' + value,
+        context: this,
+        success: function(data){
+            this.handleRemoveError(params);
+            this.manualDataSet(params, data['PK_id']);
+
+            if (typeof data.fullname != 'undefined') {
+              this.formatValueToDisplay(data.fullname);
+            } else {
+              this.formatValueToDisplay(data[opt.label]);
+            }
+        }
+      })
+
+      return;
+    };
 
 		Renderers.Thesaurus = Thesaurus;
 		Renderers.ObjectPicker = ObjectPicker;

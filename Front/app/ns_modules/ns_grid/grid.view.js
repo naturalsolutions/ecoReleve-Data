@@ -176,7 +176,6 @@ define([
 
     formatColumns: function(columnDefs){
       var _this = this;
-console.log(columnDefs);
       columnDefs.map(function(col, i) {
       
         if(col.field == 'FK_ProtocoleType'){
@@ -247,7 +246,6 @@ console.log(columnDefs);
             return;
           }*/
         }
-        console.log(col);
         col.headerCellTemplate = _this.getHeaderCellTemplate();
       });
 
