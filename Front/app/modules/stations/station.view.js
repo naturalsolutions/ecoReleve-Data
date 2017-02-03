@@ -25,7 +25,7 @@ define([
     template: 'app/modules/stations/station.tpl.html',
     className: 'full-height white station',
 
-    model: new StationModel(),
+    ModelPrototype: StationModel,
 
     ui: {
       formStation: '.js-from-station',
@@ -40,6 +40,7 @@ define([
     },
 
     initialize: function(options) {
+      this.model = new this.ModelPrototype();
       this.com = new Com();
       this.model.set('id', options.id);
 

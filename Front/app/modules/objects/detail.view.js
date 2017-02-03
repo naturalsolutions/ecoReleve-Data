@@ -42,7 +42,10 @@ define([
 
     gridViews: [],
 
+    ModelPrototype: Backbone.Model,
+
     initialize: function(options) {
+      this.model = new this.ModelPrototype();
       this.com = new Com();
       this.model.set('id', options.id);
     },

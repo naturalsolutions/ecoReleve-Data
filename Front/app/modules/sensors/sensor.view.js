@@ -34,7 +34,7 @@ define([
       'click .tab-link': 'displayTab',
     },
 
-    model: new SensorModel(),
+    ModelPrototype: SensorModel,
 
     displayGrids: function(){
       this.displayHistoryGrid();

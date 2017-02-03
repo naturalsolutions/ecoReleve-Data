@@ -225,6 +225,7 @@ define([
             break;
           }
           case 'date': {
+            col.minWidth = 180;
             col.filter = CustomDateFilter;
             col.cellRenderer = DateTimeRenderer;
             break;

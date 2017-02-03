@@ -242,13 +242,29 @@ ul.fancytree-container{
   line-height: 20px!important;
 	border: 1px solid #999;
   padding: 5px;
+  padding-right: 10px;
+  overflow: visible;
+  background: white;
+
 }
 
 
 div.fancytreeview{
   top: 34px!important;
+  max-height: 250px;
 	position: absolute;
+
 	width: auto;
+
+	border: 1px solid rgba(46, 204, 64, 0.6) !important;
+	overflow: auto;
+	background: white;
+	width: 100%;
+}
+.input-group{
+	.fancytreeview{
+		width: calc(~"100% - 39px");
+	}
 }
 
 
