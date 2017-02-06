@@ -99,19 +99,14 @@ define([
           _this.handleSelectAllChkBhv();
           _this.clientSideFilter();
 
-          var tmp = _this.gridOptions.api.getFilterModel();
-          var p = 0;
-          for (var i in tmp) {
-          	p++;
-          }
-          if( !p ) {
+          if( _.isEmpty(this.api.getFilterModel()) ){
             _this.ui.filtered.addClass('hidden');
-            _this.ui.filteredElems.html(_this.gridOptions.api.inMemoryRowModel.rowsToDisplay.length);
-          }
-          else {
+            _this.ui.filteredElems.html(this.api.getModel().getRowCount());
+          } else {
             _this.ui.filtered.removeClass('hidden');
-            _this.ui.filteredElems.html(_this.gridOptions.api.inMemoryRowModel.rowsToDisplay.length);
+            _this.ui.filteredElems.html(this.api.getModel().getRowCount());
           }
+
         }
         //overlayNoRowsTemplate: '<span>No rows to display</span>',
         //overlayLoadingTemplate: '',
