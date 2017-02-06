@@ -7,21 +7,6 @@ from ..Models.File_Import import File
 from pyramid import threadlocal
 
 
-
-def coroutine(func):
-    def starter(*args, **kwargs):
-        gen = func(*args, **kwargs)
-        next(gen)
-        return gen
-    return starter
-
-@coroutine
-def printer(prefix=''):
-    while True:
-        data = yield
-        print('{}{}'.format(prefix, data))
-
-
 @view_config(context=FileImportJob, permission=NO_PERMISSION_REQUIRED)
 class JobView(WebSocketView):
     """The view connects pyramid with the resource
@@ -31,15 +16,6 @@ class JobView(WebSocketView):
     comes in. In real life you'd do things like listening for updates and
     handling messages coming in on the websocket in the while block.
     """
-
-    @coroutine
-    def run(self):
-        yield
-        for process in self.processList:
-        # while True:
-            print('je fais tourné mon process : '+str(process))
-            yield process+' a bien tourné'
-            eventlet.sleep(1)
 
     def handler(self, websocket):
         print('in handler WS')
@@ -53,6 +29,4 @@ class JobView(WebSocketView):
         runner = curFile.main_process()
         for result in runner:
             job.send(result)
-
-
 

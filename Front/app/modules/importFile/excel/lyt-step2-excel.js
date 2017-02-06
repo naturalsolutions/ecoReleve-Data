@@ -113,12 +113,15 @@ define([
     startWebSocket: function(guid){
       var _this = this;
          var ws = new WebSocket("ws://127.0.0.1:6545/ecoReleve-Websockets/fileImport/"+guid);
-      // var ws2 = new WebSocket("ws://127.0.0.1:6545/jobs/2/");
-      // var ws3 = new WebSocket("ws://127.0.0.1:6545/ecoReleve-Core/run/jobs");
         ws.onmessage = function(msg) {
           _this.$el.find('#js-wsmsg').append("<span>" + msg.data + "</span></br>");
-          console.log("<span>" + msg.data + "</span>");
       };
+      ws.onclose = function(msg){
+      };
+
+      ws.onopen = function(msg){
+      };
+
     },
     
     swalError: function(title) {

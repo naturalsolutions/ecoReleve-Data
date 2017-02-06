@@ -24,12 +24,14 @@ class CustomErrorSQL(Exception):
     def __str__(self):
         return repr(self.value)
 
+
 def coroutine(func):
     def starter(*args, **kwargs):
         gen = func(*args, **kwargs)
         next(gen)
         return gen
     return starter
+
 
 class File (Base):
 
@@ -113,8 +115,6 @@ class File (Base):
                 return result, error, errorIndexes
 
         except Exception as e:
-            print("****************************************************")
-            print (e)
             print_exc()
             trans.rollback()
             if current_process.Blocking:

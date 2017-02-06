@@ -20,7 +20,6 @@ class SecurityRoot(object):
     ]
 
     def __init__(self, request):
-        print('init SecurityRoot')
         self.request = request
         self.__name__ = ''
         self.__parent__ = None

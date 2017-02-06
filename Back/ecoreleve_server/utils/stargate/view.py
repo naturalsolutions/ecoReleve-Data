@@ -11,7 +11,8 @@ from pyramid.httpexceptions import HTTPBadRequest
 from ws4py.streaming import Stream
 import base64
 from .handshake import websocket_handshake, HandShakeFailed
-from past.builtins import basestring 
+from past.builtins import basestring
+from traceback import print_exc
 
 class WebSocket(object):
     def __init__(self, sock, environ, protocols=None, extensions=None):
@@ -44,7 +45,9 @@ class WebSocket(object):
         """
         if not self.server_terminated:
             self.server_terminated = True
-            self.write_to_connection(self.stream.close(code=code, reason=reason))
+            closingFrame = self.stream.close(code=code, reason=reason)
+            self.write_to_connection(closingFrame.fragment(first=True))
+            # self.write_to_connection(base64.b64encode(str(self.stream.close(code=code, reason=reason))))
         self.close_connection()
 
     @property
@@ -75,9 +78,10 @@ class WebSocket(object):
         """
         Shutdowns then closes the underlying connection.
         """
-        print('close sock')
         try:
             self.sock.shutdown(socket.SHUT_RDWR)
+        except Exception as e:
+            pass
         finally:
             self.sock.close()
 
@@ -148,23 +152,19 @@ class WebSocket(object):
                 next_size = s.parser.send(bytes)
 
                 if s.closing is not None:
-                    print('closing')
-                    
                     if not self.server_terminated:
                         next_size = 2
                         self.close(s.closing.code, s.closing.reason)
                     else:
                         self.client_terminated = True
-                    raise IOError()
+                    # raise IOError()
 
                 elif s.errors:
-                    print('errors')
-                    
                     errors = s.errors[:]
                     for error in s.errors:
                         self.close(error.code, error.reason)
                         s.errors.remove(error)
-                    raise IOError()
+                    # raise IOError()
 
                 elif s.has_message:
                     if message_obj:
@@ -176,13 +176,11 @@ class WebSocket(object):
                         s.message = None
 
                 for ping in s.pings:
-                    print('ping')
                     self.write_to_connection(s.pong(str(ping.data)))
                 s.pings = []
                 s.pongs = []
 
                 if message is not None:
-                    print('message')
                     return message
 
 
@@ -225,17 +223,18 @@ class WebSocketView(object):
         """
         try:
             self.handler(websocket)
+            # websocket.close()
         except Exception as e: #pragma NO COVER
+            print('exception handle ws')
             if get_errno(e) != errno.EPIPE:
                 raise
-        # use this undocumented feature of eventlet.wsgi to close the
-        # connection properly
-        resp = Response()
-        # resp.app_iter = wsgi.ALREADY_HANDLED
 
-        print('response ')
-        print(resp)
+        resp = Response(headers=dict(Connection='Close'))
+        resp.app_iter = wsgi.ALREADY_HANDLED
+        # print('response ')
+        # print(resp.app_iter)
         return resp
+
 
     def handle_upgrade(self):
         """Completes the upgrade request sent by the browser
@@ -247,20 +246,24 @@ class WebSocketView(object):
 
         :returns: :exc:`webob.exc.HTTPBadRequest` if handshake fails
         """
-        #from nose.tools import set_trace; set_trace()
         try:
             v, handshake_reply = websocket_handshake(self.request.headers)
         except HandShakeFailed:
+            # print('\n\n ****handshake failed')
             _, val, _ = sys.exc_info()
             response = HTTPBadRequest(headers=dict(Connection='Close'),
                                       body='Upgrade negotiation failed:\n\t%s\n%s' % \
                                                 (val, self.request.headers))
             return response
-        sock = self.environ['eventlet.input'].get_socket()
 
+        sock = self.environ['eventlet.input'].get_socket()
+        # print('sock')
+        # print(sock)
         sock.sendall(handshake_reply.encode('utf-8'))
         if v < 2:
-            return self.handle_websocket(v76WebSocket(self.sock, self.environ))
+            hh = self.handle_websocket(v76WebSocket(self.sock, self.environ))
         else:
-            return self.handle_websocket(WebSocket(self.sock, self.environ))
-  
+            hh = self.handle_websocket(WebSocket(self.sock, self.environ))
+        # print('hhhhhhhh')
+        if hh != '':
+            return hh

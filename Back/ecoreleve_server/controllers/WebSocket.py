@@ -25,17 +25,12 @@ class FileImportJobRoot(object):
         self.__parent__ = parent
 
     def __getitem__(self, item):
-        print('in get item JobROOT')
-        print(item)
         try:
             return self._jobs[item]
         except KeyError:
             return self.create_job(item)
 
     def create_job(self, id):
-        print('in create_job JobROOT')
-        print(id)
-
         job = FileImportJob(id, self)
         self._jobs[id] = job
         return job
@@ -52,16 +47,3 @@ class FileImportJob(WebSocketAwareResource):
         self.__name__ = id
         self.__parent__ = parent
         self.state = "OFF"
-        print('init Job :: ' + str(id))
-
-
-# def control(job, request):
-#     """Post to this view to set the state
-
-#     this will trigger Job to report the state to connected clients
-#     """
-#     print('in cotrol webSockets')
-#     state = request.POST.get("state")
-#     if state:
-#         job.control(state)
-#     return dict(id=job.__name__, state=job.state)
