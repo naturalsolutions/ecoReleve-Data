@@ -120,19 +120,27 @@ define([
     formatColumns: function(model){
       var columnsDefs = [];
 
+      var editable = this.editable;
+
       for (var i = 0; i < this.model.get('fieldsets').length; i++) {
         var ordFields = this.model.get('fieldsets')[i].fields;
         for (var j = 0; j < ordFields.length; j++) {
-                      
+
           var field = this.model.get('schema')[ordFields[j]];
+          if(field.editorAttrs.disabled){
+            editable = false;
+          }
+
           var colDef = {
-            editable: this.editable,
+            editable: editable,
             field: field.name,
             headerName: field.title,
             type: field.type,
             options: field.options,
             schema: field,
           };
+
+          editable = this.editable;
 
           columnsDefs.push(colDef)
         }

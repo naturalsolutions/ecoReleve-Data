@@ -25,14 +25,17 @@ define([
 		  var col = params.column.colDef;
 
 		  var value = params.value;
+		  var valueToDisplay;
 		  if(value instanceof Object){
+				valueToDisplay = params.value.label;
 		  	value = params.value.value;
 		  }
 
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,
-		    formGrid: true
+		    formGrid: true,
+				valueToDisplay: valueToDisplay
 		  };
 
 		  var model = new Backbone.Model();
@@ -101,24 +104,16 @@ define([
 		ThesaurusEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new ThesaurusPicker(options);
 		  this.element = this.bbfe.render();
-		 
-			//?
-			/*
-			if (params.charPress){
-		    this.element.$el.find('input').val(params.charPress).change();
-		  } else {
-		    if (params.value){
-		      if (params.value.label !== undefined){
-		        this.element.$el.find('input').attr('data_value', params.value.value);
-		        this.element.$el.find('input').val(params.value.label).change();
-		      } else {
-		        this.element.$el.find('input').val(params.value).change();
-		      }
-		    }
-		  }
-		  */
-
 		};
+
+		ThesaurusEditor.prototype.getValue = function(){
+		  return {
+		  	value: this.element.getValue(),
+		  	label: this.element.getDisplayedValue(),
+		  }
+		};
+
+
 
 
     var ObjectPickerEditor = function () {};
@@ -131,9 +126,25 @@ define([
 
 		ObjectPickerEditor.prototype.getValue = function(){
 		  return {
-		  	value: this.element.getDisplayValue(),
-		  	label: this.element.getValue(),
+		  	value: this.element.getValue(),
+		  	label: this.element.getDisplayValue(),
 		  }
+		};
+
+
+    var AutocompleteEditor = function () {};
+
+    AutocompleteEditor.prototype = new CustomEditor();
+		AutocompleteEditor.prototype.initBBFE = function(options){
+		  this.bbfe = new AutocompletePicker(options);
+		  this.element = this.bbfe.render();
+		};
+
+		AutocompleteEditor.prototype.getValue = function(){
+		  return {
+		  	value: this.element.getValue(),
+		  	label: this.element.$input[0].value //not sure why
+		  } 
 		};
 
 
@@ -145,8 +156,6 @@ define([
 		  this.element = this.bbfe.render();
 		};
 
-
-
     var TextEditor = function () {};
     TextEditor.prototype = new CustomEditor();
 
@@ -154,8 +163,6 @@ define([
 		  this.bbfe = new Form.editors.Text(options);
 		  this.element = this.bbfe.render();
 		};
-
-
 
     var CheckboxEditor = function () {};
     CheckboxEditor.prototype = new CustomEditor();
@@ -174,20 +181,6 @@ define([
 
 
 
-    var AutocompleteEditor = function () {};
-
-    AutocompleteEditor.prototype = new CustomEditor();
-		AutocompleteEditor.prototype.initBBFE = function(options){
-		  this.bbfe = new AutocompletePicker(options);
-		  this.element = this.bbfe.render();
-		};
-
-		AutocompleteEditor.prototype.getValue = function(){
-		  return {
-		  	value: this.element.getValue(),
-		  	label: this.element.$input[0].value //not sure why
-		  } 
-		};
 
 
     var DateTimeEditor = function () {};

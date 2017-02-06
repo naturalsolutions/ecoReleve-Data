@@ -117,6 +117,10 @@ define([
             }
         },
 
+        getDisplayedValue: function(){
+            return this.$el.find('#' + this.id).val();
+        },
+
         render: function () {
             var _this = this;
             var $el = $(this.template);

@@ -227,40 +227,43 @@ div.form-control{
 }
 
 
-span.fancytree-title {
-	border-radius: 0px;	
-	padding: 0px 5px;
-	 margin: 0px 5px;
-}
-span.fancytree-title:hover {
-	background: rgba(0,0,0, 0.1);
-}
-ul.fancytree-container{
-  z-index: 10;
-	border:0;
-  max-height: 250px;
-  line-height: 20px!important;
-	border: 1px solid #999;
-  padding: 5px;
-  padding-right: 10px;
-  overflow: visible;
-  background: white;
-
-}
-
-
 div.fancytreeview{
+  border: 1px solid rgb(153, 153, 153);
   top: 34px!important;
-  max-height: 250px;
 	position: absolute;
-
-	width: auto;
-
-	border: 1px solid rgba(46, 204, 64, 0.6) !important;
 	overflow: auto;
 	background: white;
 	width: 100%;
+	outline: none !important;
+	z-index: 10;
+	ul.fancytree-container{
+		outline: none !important;
+		border: 0!important;
+	  max-height: 250px;
+	  line-height: 20px!important;
+		border: 1px solid #999;
+	  padding: 5px;
+	  overflow: visible;
+	  background: white;
+	}
+
+	span.fancytree-title {
+		border-radius: 0px;	
+		padding: 0px 5px;
+		 margin: 0px 5px;
+	}
+	span.fancytree-title:hover {
+		background: rgba(0,0,0, 0.1);
+	}
 }
+
+.ag-grid-container{
+	div.fancytreeview{
+		width: auto;
+		max-witdh: 250px;
+	}	
+}
+
 .input-group{
 	.fancytreeview{
 		width: calc(~"100% - 39px");

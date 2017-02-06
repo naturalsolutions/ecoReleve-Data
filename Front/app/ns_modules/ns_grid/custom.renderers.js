@@ -1,70 +1,90 @@
 define(['jquery', 'ag-grid'], function($, AgGrid) {
 
+    //number && text are default renderers.
+
     var Renderers = {};
 
     var CustomRenderer = function(){
-    }
+    };
 
     CustomRenderer.prototype.init = function (params) {
     	this.eGui = document.createElement('span'); //not sure it's necessary
-			this.afterInit(params);
+
+      var value = this.handleValues(params);
+
+      //check only before the first render of the grid, otherwise, use refresh
+      if(!params.api.firstRenderPassed){
+        this.handleValueValidation(params, value);
+      }
+
+      //new lines, ciritic
+      if(Object.keys(params.data).length === 0){
+       this.handleValueValidation(params, value);
+      }
+
+
+      // after sort filter etc check if there was already an error then display it
+      if(params.data._errors !== undefined){
+        for (var i = 0; i < params.data._errors.length; i++) {
+          if(params.data._errors[i] == params.colDef.field){
+            this.handleError(params);
+          }
+        }
+      }
+      
     };
 
-    CustomRenderer.prototype.afterInit = function(params) {
-    	var _this= this;
-    	var value = params.value;
-    	var valueTodisplay;
+    CustomRenderer.prototype.handleValues = function(params){
+      var value = params.value;
+      var valueTodisplay;
 
-    	if(value instanceof Object){
-    		value = params.value.value;
-    		valueTodisplay = params.value.label;
-    	}
+      //critic
+      if(value instanceof Object){
+        value = params.value.value;
+        valueTodisplay = params.value.label;
+      }
 
-			if(!valueTodisplay)
-				valueTodisplay = value;
+      if(!valueTodisplay)
+        valueTodisplay = value;
 
-    	_this.formatValueToDisplay(valueTodisplay);
+      this.formatValueToDisplay(valueTodisplay);
 
-				//could be a call whith params.colDef
-    	if(this.deferred && value){
-    		this.deferredValidation(params, value);
-    	} else {
-    		var validators = params.colDef.schema.validators;
-    		if(validators.length){
-    			
-    			if(validators[0] === 'required'){
-    					$(params.eGridCell).addClass('ag-cell-required');
-    					if(!value){
-    						this.handleError(params);
-    					} else {
-		    				this.handleRemoveError(params);
-								this.manualDataSet(params, value);
-    					}
-    			} else {
-						this.handleRemoveError(params);
-            if(value){
-						  this.manualDataSet(params, value);
-            }
-    			}
-
-    		}
-    	}
+      return value;
     };
 
-
+    CustomRenderer.prototype.handleValueValidation = function(params, value) {
+      if(this.deferred && value){
+        this.deferredValidation(params, value);
+      } else {
+        var validators = params.colDef.schema.validators;
+        if(validators.length){
+          
+          if(validators[0] === 'required'){
+              $(params.eGridCell).addClass('ag-cell-required');
+              if(!value){
+                this.handleError(params);
+              } else {
+                this.handleRemoveError(params);
+              }
+          } else {
+            this.handleRemoveError(params);
+          }
+        }
+      }      
+    };
 
     CustomRenderer.prototype.manualDataSet = function(params, value) {
-    	//critic
-    	if(!this.error){
-    		params.data[params.colDef.field] = value;
-    	}
+      //critic
+      if(!this.error){
+        params.data[params.colDef.field] = value;
+      }
     };
 
   	CustomRenderer.prototype.refresh = function (params) {
       this.eGui.innerHTML = '';
-      this.afterInit(params);
+      var value = this.handleValues(params);
+      this.handleValueValidation(params, value);
   	};
-
 
   	CustomRenderer.prototype.handleRemoveError = function(params){
   		this.error = false;
@@ -110,11 +130,23 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   	  $(this.eGui).html(value);
   	};
 
-		var Thesaurus = function(options) {}
-    Thesaurus.prototype = new CustomRenderer();
-    Thesaurus.prototype.deferred = true;
 
-		Thesaurus.prototype.deferredValidation = function(params, value){
+
+    var NumberRenderer = function(options) {};
+    NumberRenderer.prototype = new CustomRenderer();
+
+    var TextRenderer = function(options) {};
+    TextRenderer.prototype = new CustomRenderer();
+    
+    var DateTimeRenderer = function(options) {};
+    DateTimeRenderer.prototype = new CustomRenderer();
+
+
+		var ThesaurusRenderer = function(options) {};
+    ThesaurusRenderer.prototype = new CustomRenderer();
+    ThesaurusRenderer.prototype.deferred = true;
+
+		ThesaurusRenderer.prototype.deferredValidation = function(params, value){
       var _this = this;
       var TypeField = 'FullPath';
       if (value && value.indexOf('>') == -1) {
@@ -135,28 +167,35 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         dataType: 'json',
         type: 'POST', //should be a GET
         contentType: 'application/json; charset=utf-8',
+        context: this,
         success: function (data){
           if(data['TTop_FullPath'] != null){
-            _this.formatValueToDisplay(data['TTop_NameTranslated']);
-            _this.handleRemoveError(params);
-            _this.manualDataSet(params, data['TTop_FullPath']);
+            this.formatValueToDisplay(data['TTop_NameTranslated']);
+            this.handleRemoveError(params);
+            var values = {
+              value: data['TTop_FullPath'],
+              label: data['TTop_NameTranslated']
+            };
+            this.manualDataSet(params, values);
+
           } else {
-            _this.handleError(params);
+            this.handleError(params);
           }
         },
         error: function (data) {
           if (data.statusText == 'abort') {
             return;
           }
-          _this.handleError(params);
+          this.handleError(params);
         }
       });
 
       return true;
-
     };
 
-		Thesaurus.prototype.formatValueToDisplay = function(value) {
+
+/*
+		ThesaurusRenderer.prototype.formatValueToDisplay = function(value) {
 			if((typeof value !== 'string')){
 			  return;
 			}
@@ -165,25 +204,66 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 			//not sure
 			$(this.eGui).html(tmp[tmp.length - 1]);
 			
-			/*if(tmp.length > 0){
-			} else {
-			  //$(this.eGui).html(); //?
-			}*/
-		};
+			// if(tmp.length > 0){
+			// } else {
+			//   //$(this.eGui).html(); //?
+			// }
+		};*/
 
-		var ObjectPicker = function () {}
-		ObjectPicker.prototype = new CustomRenderer();
 
-		var CheckboxRenderer = function() {}
-		CheckboxRenderer.prototype = new CustomRenderer();
-		CheckboxRenderer.prototype.formatValueToDisplay = function (value) {
-			var checked = ''; 
-			if(value == 1)
-				checked = 'checked';
+		var ObjectPickerRenderer = function () {}
+		ObjectPickerRenderer.prototype = new CustomRenderer();
+    ObjectPickerRenderer.prototype.deferred = true;
 
-			var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
-	    $(this.eGui).html(chk);
-		};
+    ObjectPickerRenderer.prototype.deferredValidation = function(params, value) {
+      var colDef = params.colDef;
+      var name = colDef.field.split('FK_')[1];
+      var objectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
+      var url = objectName + '/' + value;
+
+      //return;
+
+      $.ajax({
+        url: url,
+        context: this,
+        success: function(data){
+          this.handleRemoveError(params);
+          var valueToDisplay;
+          
+          if (colDef.schema.options && colDef.schema.options.usedLabel){
+            valueToDisplay = data[colDef.schema.options.usedLabel];
+          } else {
+            valueToDisplay = data[colDef.field];
+          }
+
+          this.formatValueToDisplay(valueToDisplay);
+
+          var values = {
+            value: value,
+            label: valueToDisplay
+          };
+
+          this.manualDataSet(params, values);
+
+        }, error: function(data){
+          this.handleError(params);
+        }
+
+      });
+    };
+
+
+    var CheckboxRenderer = function() {}
+    CheckboxRenderer.prototype = new CustomRenderer();
+    CheckboxRenderer.prototype.formatValueToDisplay = function (value) {
+      var checked = ''; 
+      if(value == 1)
+        checked = 'checked';
+
+      var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
+      $(this.eGui).html(chk);
+    };
+
 
 		var AutocompleteRenderer = function() {}
     AutocompleteRenderer.prototype = new CustomRenderer();
@@ -200,22 +280,47 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         url: opt.object + '/' + value,
         context: this,
         success: function(data){
-            this.handleRemoveError(params);
-            this.manualDataSet(params, data['PK_id']);
+          this.handleRemoveError(params);
+          
+          var valueToDisplay; 
 
-            if (typeof data.fullname != 'undefined') {
-              this.formatValueToDisplay(data.fullname);
-            } else {
-              this.formatValueToDisplay(data[opt.label]);
-            }
+          this.manualDataSet(params, data['PK_id']);
+
+          if (typeof data.fullname != 'undefined') {
+            valueToDisplay = data.fullname;
+          } else {
+            valueToDisplay = data[opt.label];
+          }
+          
+          this.formatValueToDisplay(data.fullname);
+
+          var values = {
+            value: value,
+            label: valueToDisplay
+          };
+
+          this.manualDataSet(params, values);
+        },
+        error: function(){
+
+          var values = {
+            value: value,
+            label: value
+          };
+
+          this.formatValueToDisplay(value);
+          this.manualDataSet(params, values);
         }
-      })
-
-      return;
+  
+      });
     };
 
-		Renderers.Thesaurus = Thesaurus;
-		Renderers.ObjectPicker = ObjectPicker;
+
+    Renderers.NumberRenderer = NumberRenderer;
+    Renderers.TextRenderer = TextRenderer;
+    Renderers.DateTimeRenderer = DateTimeRenderer;
+		Renderers.ThesaurusRenderer = ThesaurusRenderer;
+		Renderers.ObjectPickerRenderer = ObjectPickerRenderer;
 		Renderers.CheckboxRenderer = CheckboxRenderer;
 		Renderers.AutocompleteRenderer = AutocompleteRenderer;
 

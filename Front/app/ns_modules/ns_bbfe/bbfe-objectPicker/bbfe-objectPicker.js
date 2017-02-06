@@ -49,6 +49,7 @@ define([
         value = options.model.get(options.key) || options.value;
       }
 
+      this.usedLabel = options.key;
       if (options.schema.options && options.schema.options.usedLabel){
         this.usedLabel = options.schema.options.usedLabel;
         this.displayingValue = true;
@@ -101,7 +102,7 @@ define([
     initAutocomplete: function() {
       var _this = this;
       this.autocompleteSource = {};
-      this.autocompleteSource.source ='autocomplete/'+ this.objectName + '/'+this.usedLabel+'/ID';
+      this.autocompleteSource.source = 'autocomplete/' + this.objectName + '/' + this.usedLabel + '/ID';
       this.autocompleteSource.minLength = 2;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();

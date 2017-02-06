@@ -13,9 +13,6 @@ define([
   './custom.text.autocomplete.filter',
 
   'vendors/utils',
-
-  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
-  'ns_modules/ns_bbfe/bbfe-autoCompTree',
   
   './custom.renderers',
   './custom.editors',
@@ -26,8 +23,8 @@ define([
   'i18n'
 
 ], function($, _, Backbone, Marionette, AgGrid, Swal,
-  CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter, utils_1,
-  ObjectPicker, ThesaurusPicker, Renderers, Editors,
+  CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, 
+  CustomTextAutocompleteFilter, utils_1, Renderers, Editors,
   Decimal5Renderer, DateTimeRenderer
 ) {
   
@@ -102,6 +99,7 @@ define([
         onGridReady: function(){
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
+              _this.gridOptions.api.firstRenderPassed = true;
               _this.focusFirstCell();
               _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
               if(!_this.model.get('totalRecords')){
@@ -177,7 +175,18 @@ define([
     formatColumns: function(columnDefs){
       var _this = this;
       columnDefs.map(function(col, i) {
-      
+
+        /*        
+          col.newValueHandler = function(params){
+          console.log(params);
+          return params.newValue;
+        };*/
+/*
+        col.cellFormatter = function(params){
+          console.log(params);
+          return 2;
+        };*/
+
         if(col.field == 'FK_ProtocoleType'){
           col.hide = true;
           return;
@@ -191,7 +200,7 @@ define([
         switch(col.type){
           case 'AutocompTreeEditor':
             col.cellEditor = Editors.ThesaurusEditor;
-            col.cellRenderer = Renderers.Thesaurus;
+            col.cellRenderer = Renderers.ThesaurusRenderer;
             break;          
           case 'AutocompleteEditor':
             col.cellEditor = Editors.AutocompleteEditor;
@@ -199,7 +208,7 @@ define([
             break;
           case 'ObjectPicker':
             col.cellEditor = Editors.ObjectPicker;
-            col.cellRenderer = Renderers.ObjectPicker;
+            col.cellRenderer = Renderers.ObjectPickerRenderer;
             break;          
           case 'Checkbox':
             col.cellEditor = Editors.CheckboxEditor;
@@ -207,15 +216,20 @@ define([
             break;
           case 'Number':
             col.cellEditor = Editors.NumberEditor;
+            col.cellRenderer = Renderers.NumberRenderer;
+            //console.log(col );
             break;          
           case 'DateTimePickerEditor':
             col.cellEditor = Editors.DateTimeEditor;
+            col.cellRenderer = Renderers.DateTimeRenderer;
             break;
           case 'Text':
             col.cellEditor = Editors.TextEditor;
+            col.cellRenderer = Renderers.TextRenderer;
             break;
           case 'TextArea':
             col.cellEditor = Editors.TextEditor;
+            col.cellRenderer = Renderers.TextRenderer;
             break;
         }
 
@@ -751,6 +765,9 @@ define([
 
           if(node.data[key] != null || node.data[key] != 'undefined' || node.data[key] != ''){
             empty = false;
+            if(node.data[key] instanceof Object){
+              node.data[key] = node.data[key].value;
+            }
           }
         }
 
