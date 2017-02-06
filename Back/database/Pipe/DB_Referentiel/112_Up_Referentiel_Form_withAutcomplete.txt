@@ -1,5 +1,5 @@
 
-UPDATE f SET InputType = 'Select', Options = 'SELECT ID as val, Login as label FROM [User] UNION ALL SELECT -1 as val, '' as label'
+UPDATE f SET InputType = 'Select', Options = 'SELECT ID as val, Login as label FROM [User] UNION ALL SELECT -1 as val, '''' as label'
   FROM [ModuleForms] f
   where InputType = 'autocompleteeditor'
   and module_id = 1 and Label in ('Observer','Assistant') 
