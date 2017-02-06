@@ -1,0 +1,13 @@
+
+UPDATE f SET InputType = 'Select', Options = 'SELECT ID as val, Login as label FROM [User] UNION ALL SELECT -1 as val, '' as label'
+  FROM [ModuleForms] f
+  where InputType = 'autocompleteeditor'
+  and module_id = 1 and Label in ('Observer','Assistant') 
+
+GO 
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('112_Up_Referentiel_Form_withAutcomplete',GETDATE(),(SELECT db_name()))
+
+
+GO
