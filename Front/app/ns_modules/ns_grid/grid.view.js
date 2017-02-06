@@ -37,12 +37,14 @@ define([
 
     ui: {
       'totalSelected': '.js-total-selected',
-      'totalRecords': '.js-total-records',
+      'totalRecords' : '.js-total-records',
+      'filteredElems': '.js-filtered-content',
+      'filtered' : '.js-filtered'
 
     },
 
-    keypress: function(e){
-      if(e.keyCode == 13){
+    keypress: function(e) {
+      if(e.keyCode == 13) {
         $(e.currentTarget).click();
       }
     },
@@ -96,6 +98,20 @@ define([
         onAfterFilterChanged: function(){
           _this.handleSelectAllChkBhv();
           _this.clientSideFilter();
+
+          var tmp = _this.gridOptions.api.getFilterModel();
+          var p = 0;
+          for (var i in tmp) {
+          	p++;
+          }
+          if( !p ) {
+            _this.ui.filtered.addClass('hidden');
+            _this.ui.filteredElems.html(_this.gridOptions.api.inMemoryRowModel.rowsToDisplay.length);
+          }
+          else {
+            _this.ui.filtered.removeClass('hidden');
+            _this.ui.filteredElems.html(_this.gridOptions.api.inMemoryRowModel.rowsToDisplay.length);
+          }
         }
         //overlayNoRowsTemplate: '<span>No rows to display</span>',
         //overlayLoadingTemplate: '',
@@ -165,7 +181,7 @@ define([
         if(col.cell == 'autocomplete'){
           _this.addBBFEditor(col);
         }
-        
+
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;
