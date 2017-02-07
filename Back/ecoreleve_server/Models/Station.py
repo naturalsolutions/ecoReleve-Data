@@ -20,6 +20,7 @@ from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from traceback import print_exc
+from datetime import datetime
 
 
 class Station(Base, ObjectWithDynProp):
@@ -117,6 +118,34 @@ class Station(Base, ObjectWithDynProp):
             return self.StationType
         else:
             return self.ObjContext.query(StationType).get(self.FK_StationType)
+
+    def UpdateFromJson(self, DTOObject, startDate=None):
+        if self.allowUpdate(DTOObject):
+            ObjectWithDynProp.UpdateFromJson(self, DTOObject, startDate=None)
+            return True
+        else:
+            return False
+
+    def allowUpdate(self, DTOObject):
+        from ..utils.parseValue import isNumeric
+
+        allow = True
+        site = int(DTOObject['FK_MonitoredSite']) if isNumeric(DTOObject['FK_MonitoredSite']) else None
+        dateSta = datetime.strptime(DTOObject['StationDate'], '%d/%m/%Y %H:%M:%S')
+        equipmentExist = self.existingProtocolEquipment()
+
+        if equipmentExist and (
+            self.FK_MonitoredSite != site or self.StationDate != dateSta):
+            print('\n\n permission to update denied ************')
+            allow = False
+        return allow
+
+    def existingProtocolEquipment(self):
+        protolist = list(filter(lambda x: x.GetType().Name.lower() in ['site_equipment',
+                                                                       'site_unequipment',
+                                                                       'individual_unequipment',
+                                                                       'individual_unequipment'], self.Observations))
+        return len(protolist) > 0
 
 
 @event.listens_for(Station, 'before_insert')

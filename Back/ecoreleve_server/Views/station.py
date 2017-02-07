@@ -193,9 +193,14 @@ def updateStation(request):
     curSta = session.query(Station).get(id)
     curSta.LoadNowValues()
     try:
-        curSta.UpdateFromJson(data)
-        session.commit()
-        msg = {}
+        isUpdated = curSta.UpdateFromJson(data)
+        if not isUpdated:
+            session.rollback()
+            request.response.status_code = 510
+            msg = {'updateDenied': True}
+        else:
+            session.commit()
+            msg = {}
     except IntegrityError as e:
         session.rollback()
         request.response.status_code = 510
