@@ -192,7 +192,7 @@ define([
           return;
         }
 
-        col.minWidth = col.minWidth || 100;
+        col.minWidth = col.minWidth || 150;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
 
@@ -230,6 +230,10 @@ define([
           case 'TextArea':
             col.cellEditor = Editors.TextEditor;
             col.cellRenderer = Renderers.TextRenderer;
+            break;
+          case 'Select':
+            col.cellEditor = Editors.SelectEditor;
+            col.cellRenderer = Renderers.SelectRenderer;
             break;
         }
 

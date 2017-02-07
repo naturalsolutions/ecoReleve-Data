@@ -315,6 +315,10 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       });
     };
 
+    var SelectRenderer = function() {}
+    SelectRenderer.prototype = new CustomRenderer();
+    
+
 
     Renderers.NumberRenderer = NumberRenderer;
     Renderers.TextRenderer = TextRenderer;
@@ -322,7 +326,8 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 		Renderers.ThesaurusRenderer = ThesaurusRenderer;
 		Renderers.ObjectPickerRenderer = ObjectPickerRenderer;
 		Renderers.CheckboxRenderer = CheckboxRenderer;
-		Renderers.AutocompleteRenderer = AutocompleteRenderer;
+    Renderers.AutocompleteRenderer = AutocompleteRenderer;
+		Renderers.SelectRenderer = SelectRenderer;
 
     return Renderers;
 

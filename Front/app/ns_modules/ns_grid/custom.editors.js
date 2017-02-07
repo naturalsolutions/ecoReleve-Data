@@ -7,13 +7,15 @@ define([
 	'ns_modules/ns_bbfe/bbfe-autocomplete',
 	'ns_modules/ns_bbfe/bbfe-dateTimePicker',
 	'ns_modules/ns_bbfe/bbfe-timePicker',
+	'ns_modules/ns_bbfe/bbfe-select',
 
 ], function($, AgGrid, Form,
 	ObjectPicker, 
 	ThesaurusPicker, 
 	AutocompletePicker, 
 	DateTimePicker,
-	TimePicker
+	TimePicker,
+	SelectPicker
 ){
     
     var Editors = {};
@@ -193,6 +195,29 @@ define([
 		};
 
 
+    var SelectEditor = function () {};
+
+    SelectEditor.prototype = new CustomEditor();
+		SelectEditor.prototype.initBBFE = function(options){
+		  this.bbfe = new SelectPicker(options);
+		  this.element = this.bbfe.render();
+		};
+
+		SelectEditor.prototype.afterGuiAttached = function () {
+			this.element.$el.focus();
+		};
+
+
+		SelectEditor.prototype.getValue = function(){
+			return {
+				value: this.element.getValue(),
+				label: this.element.$el.find('option:selected').text(),
+			}
+		};
+
+
+
+
 		Editors.ThesaurusEditor = ThesaurusEditor;
 		Editors.ObjectPicker = ObjectPickerEditor;
 		Editors.NumberEditor = NumberEditor;
@@ -200,6 +225,7 @@ define([
 		Editors.CheckboxEditor = CheckboxEditor;
 		Editors.AutocompleteEditor = AutocompleteEditor;
 		Editors.DateTimeEditor = DateTimeEditor;
+		Editors.SelectEditor = SelectEditor;
 
     return Editors;
 
