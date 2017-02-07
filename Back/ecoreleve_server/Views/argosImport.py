@@ -241,6 +241,8 @@ def checkExistingEng(EngData, session):
         DFToInsert = EngData[~EngData['id'].isin(merge['id'])]
 
         # rename column
+        DFToInsert.loc[:, ('creationDate')] = list(
+            itertools.repeat(datetime.now(), len(DFToInsert.index)))
         DFToInsert['FK_ptt'] = DFToInsert['ptt']
         DFToInsert = DFToInsert.drop(['id', 'ptt'], 1)
     except:
@@ -305,6 +307,8 @@ def checkExistingGPS(GPSData, session):
         itertools.repeat(0, len(DFToInsert.index)))
     DFToInsert.loc[:, ('imported')] = list(
         itertools.repeat(0, len(DFToInsert.index)))
+    DFToInsert.loc[:, ('creationDate')] = list(
+        itertools.repeat(datetime.now(), len(DFToInsert.index)))
 
     return DFToInsert
 
@@ -383,6 +387,8 @@ def parseDIAGFileAndInsert(full_filename, session):
         itertools.repeat(0, len(DFToInsert.index)))
     DFToInsert.loc[:, ('imported')] = list(
         itertools.repeat(0, len(DFToInsert.index)))
+    DFToInsert.loc[:, ('creationDate')] = list(
+        itertools.repeat(datetime.now(), len(DFToInsert.index)))
     DFToInsert = DFToInsert.drop(['id', 'lat1', 'lat2', 'lon1', 'lon2'], 1)
 
     if DFToInsert.shape[0] != 0:
