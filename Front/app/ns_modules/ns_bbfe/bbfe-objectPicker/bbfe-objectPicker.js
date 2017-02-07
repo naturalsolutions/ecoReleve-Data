@@ -165,7 +165,7 @@ define([
     render: function(){
       var _this = this;
       this.$el.html(this.template);
-
+      this.$el.find('input').attr('min','0');
       //quick (dirty) hack
       if(this.fromGrid){
         this.$el.find('.form-control').removeClass('form-control').addClass('ag-cell-edit-input');
