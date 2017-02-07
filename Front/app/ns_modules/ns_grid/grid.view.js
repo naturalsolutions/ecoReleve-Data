@@ -743,35 +743,61 @@ define([
 
       var rowData = [];
       var errors = [];
-      
 
-      this.gridOptions.api.forEachNode( function(node) {
-        var empty;
+      var empty = true;;
       
+      var i = 0;
+      this.gridOptions.api.forEachNode( function(node) {
+        var row = {};
+        //some part are useless, eg. could abord at first error.
+
         var keys = Object.keys(node.data);
-        
+        empty = true;
+
         if(keys.length === 0 || (keys.length === 1 && keys[0] === '_errors' ) ){
-          empty = true;
           return;
         } else {
+          //check each val
           for( var key in node.data ){
+            //ignore _error
             if(key == '_errors' && node.data._errors) {
-              if(node.data._errors.length){
-                errors.push(node.data._errors);
-              }
               continue;
             }
 
-            if(node.data[key] != null || node.data[key] != 'undefined' || node.data[key] != ''){
+            //if val == {value, label} then check value
+            var val = node.data[key];
+            if(node.data[key] instanceof Object){
+              val = node.data[key].value;
+            }
+
+            //finaly check if empty
+            if(val != null && val != 'undefined' && val != ''){
               empty = false;
+
+              //finaly copy node data in the object
               if(node.data[key] instanceof Object){
-                node.data[key] = node.data[key].value;
+                row[key] = node.data[key].value;
+              } else {
+                row[key] = node.data[key];
               }
             }
+
           }
+
+
+          // if not empty & error then push the error
+          if(!empty && node.data._errors){
+            if(node.data._errors.length){
+              errors.push(node.data._errors);
+            }
+          }
+        
+          
         }
+
+        //last check, if not empty, push to save
         if(!empty){
-          rowData.push(node.data);
+          rowData.push(row);
         }
 
       });

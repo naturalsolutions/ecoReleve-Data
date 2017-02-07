@@ -17,23 +17,49 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         this.handleValueValidation(params, value);
       }
 
-      //new lines, ciritic
-      var keys = Object.keys(params.data);
-      if(keys.length === 0 || (keys.length === 1 && keys[0] === '_errors' )){
-        this.newLine = true;
-       this.requiredValidation(params, value, true);
-      }
 
-
-      // after sort filter etc check if there was already an error then display it
-      if(params.data._errors !== undefined){
-        for (var i = 0; i < params.data._errors.length; i++) {
-          if(params.data._errors[i] == params.colDef.field){
-            this.requiredValidation(params, value);
+      this.isEmptyRow = this.checkIfEmptyRow(params);
+      
+      if(this.isEmptyRow){
+        //console.log('empty');
+        this.requiredValidation(params, value);
+      } else {
+        // after sort filter etc check if there was already an error then display it
+        if(params.data._errors !== undefined){
+          for (var i = 0; i < params.data._errors.length; i++) {
+            if(params.data._errors[i] == params.colDef.field){
+              this.handleError(params);
+            }
           }
         }
       }
-      
+
+    };    
+
+    CustomRenderer.prototype.checkIfEmptyRow = function(params){
+      //new lines & empty lines, ciritic
+      //console.log(params.data);
+      var keys = Object.keys(params.data);
+      var empty = true;
+      for( var key in params.data ){
+        if(key == '_errors' && params.data._errors) {
+          continue;
+        }
+        //riscky
+        //console.log(params.data[key]);
+        var val = params.data[key]
+        if(params.data[key] instanceof Object){
+          val = params.data[key].value;
+        }
+        if(val != null && val != 'undefined' && val != ''){
+          empty = false; 
+        }
+      }
+      //optionnal
+      if(keys.length === 0 || (keys.length === 1 && keys[0] === '_errors' )){
+        empty = true;
+      }      
+      return empty;
     };
 
     CustomRenderer.prototype.handleValues = function(params){
@@ -87,6 +113,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     };
 
   	CustomRenderer.prototype.refresh = function (params) {
+      this.isEmptyRow = false;
       this.eGui.innerHTML = '';
       var value = this.handleValues(params);
       this.handleValueValidation(params, value);
@@ -109,9 +136,9 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   	CustomRenderer.prototype.handleError = function(params) {
   		this.error = true;
 
-      if(!this.newLine){
-  		params.data[params.colDef.field] = '';
-  	  $(params.eGridCell).addClass('ag-cell-error');
+      if(!this.isEmptyRow){
+    		params.data[params.colDef.field] = '';
+    	  $(params.eGridCell).addClass('ag-cell-error');
       }
 
   		var errorsColumn =  params.data['_errors'];

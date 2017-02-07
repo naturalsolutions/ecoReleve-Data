@@ -152,7 +152,7 @@ define([
       var errorCol = {
         field: '_errors',
         headerName: '_errors',
-        hide: true
+        //hide: true
       }
       columnsDefs.push(errorCol);
 
