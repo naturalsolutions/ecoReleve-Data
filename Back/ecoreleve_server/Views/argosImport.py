@@ -266,7 +266,7 @@ def checkExistingGPS(GPSData, session):
                       ArgosGps.lat,
                       ArgosGps.lon,
                       ArgosGps.ptt]
-                      ).where(ArgosGps.type_ == 'gps')
+                      ).where(ArgosGps.type_ == 'GPS')
     queryGPS = queryGPS.where(
         and_(ArgosGps.date >= minDateGPS, ArgosGps.date <= maxDateGPS))
     data = session.execute(queryGPS).fetchall()
@@ -300,7 +300,7 @@ def checkExistingGPS(GPSData, session):
     DFToInsert = DFToInsert.replace('2D fix', np.nan)
     DFToInsert = DFToInsert.replace('low alt', np.nan)
     DFToInsert.loc[:, ('type')] = list(
-        itertools.repeat('gps', len(DFToInsert.index)))
+        itertools.repeat('GPS', len(DFToInsert.index)))
     DFToInsert.loc[:, ('checked')] = list(
         itertools.repeat(0, len(DFToInsert.index)))
     DFToInsert.loc[:, ('imported')] = list(
@@ -378,7 +378,7 @@ def parseDIAGFileAndInsert(full_filename, session):
     df = df.dropna(subset=['date'])
     DFToInsert = checkExistingArgos(df, session)
     DFToInsert.loc[:, ('type')] = list(
-        itertools.repeat('argos', len(DFToInsert.index)))
+        itertools.repeat('Argos', len(DFToInsert.index)))
     DFToInsert.loc[:, ('checked')] = list(
         itertools.repeat(0, len(DFToInsert.index)))
     DFToInsert.loc[:, ('imported')] = list(
@@ -413,7 +413,7 @@ def checkExistingArgos(dfToCheck, session):
                          ArgosGps.lat,
                          ArgosGps.lon,
                          ArgosGps.ptt]
-                        ).where(ArgosGps.type_ == 'argos')
+                        ).where(ArgosGps.type_ == 'Argos')
     queryArgos = queryArgos.where(
         and_(ArgosGps.date >= minDate, ArgosGps.date <= maxDate))
     data = session.execute(queryArgos).fetchall()
