@@ -749,8 +749,8 @@ define([
         var empty;
       
         var keys = Object.keys(node.data);
-
-        if(keys === 0 || (keys.length === 1 && keys[0] === '_errors' ) ){
+        
+        if(keys.length === 0 || (keys.length === 1 && keys[0] === '_errors' ) ){
           empty = true;
           return;
         } else {

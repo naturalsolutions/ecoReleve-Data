@@ -18,7 +18,8 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       }
 
       //new lines, ciritic
-      if(Object.keys(params.data).length === 0){
+      var keys = Object.keys(params.data);
+      if(keys.length === 0 || (keys.length === 1 && keys[0] === '_errors' )){
         this.newLine = true;
        this.requiredValidation(params, value, true);
       }
