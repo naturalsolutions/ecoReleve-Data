@@ -19,7 +19,8 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
       //new lines, ciritic
       if(Object.keys(params.data).length === 0){
-       this.handleValueValidation(params, value);
+        this.newLine = true;
+       this.requiredValidation(params, value, true);
       }
 
 
@@ -27,7 +28,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       if(params.data._errors !== undefined){
         for (var i = 0; i < params.data._errors.length; i++) {
           if(params.data._errors[i] == params.colDef.field){
-            this.handleError(params);
+            this.requiredValidation(params, value);
           }
         }
       }
@@ -56,21 +57,25 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       if(this.deferred && value){
         this.deferredValidation(params, value);
       } else {
-        var validators = params.colDef.schema.validators;
-        if(validators.length){
-          
-          if(validators[0] === 'required'){
-              $(params.eGridCell).addClass('ag-cell-required');
-              if(!value){
-                this.handleError(params);
-              } else {
-                this.handleRemoveError(params);
-              }
-          } else {
-            this.handleRemoveError(params);
-          }
-        }
+        this.requiredValidation(params, value)
       }      
+    };
+
+    CustomRenderer.prototype.requiredValidation = function(params, value){
+      var validators = params.colDef.schema.validators;
+      if(validators.length){
+        
+        if(validators[0] === 'required'){
+            $(params.eGridCell).addClass('ag-cell-required');
+            if(!value){
+              this.handleError(params);
+            } else {
+              this.handleRemoveError(params);
+            }
+        } else {
+          this.handleRemoveError(params);
+        }
+      }
     };
 
     CustomRenderer.prototype.manualDataSet = function(params, value) {
@@ -102,9 +107,11 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
   	CustomRenderer.prototype.handleError = function(params) {
   		this.error = true;
+
+      if(!this.newLine){
   		params.data[params.colDef.field] = '';
   	  $(params.eGridCell).addClass('ag-cell-error');
-  	  //$(this.eGui).html();
+      }
 
   		var errorsColumn =  params.data['_errors'];
 
@@ -193,24 +200,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       return true;
     };
 
-
-/*
-		ThesaurusRenderer.prototype.formatValueToDisplay = function(value) {
-			if((typeof value !== 'string')){
-			  return;
-			}
-			var tmp = value.split('>');
-
-			//not sure
-			$(this.eGui).html(tmp[tmp.length - 1]);
-			
-			// if(tmp.length > 0){
-			// } else {
-			//   //$(this.eGui).html(); //?
-			// }
-		};*/
-
-
 		var ObjectPickerRenderer = function () {}
 		ObjectPickerRenderer.prototype = new CustomRenderer();
     ObjectPickerRenderer.prototype.deferred = true;
@@ -220,8 +209,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       var name = colDef.field.split('FK_')[1];
       var objectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
       var url = objectName + '/' + value;
-
-      //return;
 
       $.ajax({
         url: url,

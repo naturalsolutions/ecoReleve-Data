@@ -20,7 +20,6 @@ define([
     },
 
     initialize: function(options){
-      //console.log(options);
       this.editable = false;
       this.url = 'stations/' + this.model.get('stationId') + '/observations';
     },
@@ -83,8 +82,13 @@ define([
         this.model.trigger('change:obs', this.model);
         this.toggleEditionMode();
         this.hardRefresh();
-      }).fail(function(resp) {
+      }).fail(function(reponse) {
+        var opt = {
+          title: 'Something went wrong',
+          text: reponse.responseText
+        };
         
+        window.swal(opt, 'warning', null, false);
       });
     },
 

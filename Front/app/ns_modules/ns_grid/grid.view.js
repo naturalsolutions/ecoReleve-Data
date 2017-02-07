@@ -176,17 +176,6 @@ define([
       var _this = this;
       columnDefs.map(function(col, i) {
 
-        /*        
-          col.newValueHandler = function(params){
-          console.log(params);
-          return params.newValue;
-        };*/
-/*
-        col.cellFormatter = function(params){
-          console.log(params);
-          return 2;
-        };*/
-
         if(col.field == 'FK_ProtocoleType'){
           col.hide = true;
           return;
@@ -217,7 +206,6 @@ define([
           case 'Number':
             col.cellEditor = Editors.NumberEditor;
             col.cellRenderer = Renderers.NumberRenderer;
-            //console.log(col );
             break;          
           case 'DateTimePickerEditor':
             col.cellEditor = Editors.DateTimeEditor;
@@ -759,25 +747,33 @@ define([
 
       this.gridOptions.api.forEachNode( function(node) {
         var empty;
-        for( var key in node.data ){
-          if(key == '_errors' && node.data._errors) {
-            if(node.data._errors.length){
-              errors.push(node.data._errors);
-            }
-            continue;
-          }
+      
+        var keys = Object.keys(node.data);
 
-          if(node.data[key] != null || node.data[key] != 'undefined' || node.data[key] != ''){
-            empty = false;
-            if(node.data[key] instanceof Object){
-              node.data[key] = node.data[key].value;
+        if(keys === 0 || (keys.length === 1 && keys[0] === '_errors' ) ){
+          empty = true;
+          return;
+        } else {
+          for( var key in node.data ){
+            if(key == '_errors' && node.data._errors) {
+              if(node.data._errors.length){
+                errors.push(node.data._errors);
+              }
+              continue;
+            }
+
+            if(node.data[key] != null || node.data[key] != 'undefined' || node.data[key] != ''){
+              empty = false;
+              if(node.data[key] instanceof Object){
+                node.data[key] = node.data[key].value;
+              }
             }
           }
         }
-
         if(!empty){
           rowData.push(node.data);
         }
+
       });
 
       return {
