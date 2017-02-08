@@ -73,7 +73,7 @@ define([
 
     this.elem = options.element || 'map';
     this.zoom = config.mapZoom;
-    this.disableClustring = options.disableClustring || 16;
+    this.disableClustering = options.disableClustering || 16;
     this.bbox = options.bbox || false;
     this.area = options.area || false;
     this.cluster = options.cluster || false;
@@ -227,8 +227,14 @@ define([
           }
         },
       });
+
+      var disableClusteringAtZoom = 16; //16 (scale at 200m), maxZomm at 18 (scale at 20m)
+      if(geoJson.features.length < 500){
+        disableClusteringAtZoom = 2; //minZoom
+      }
+
       this.markersLayer = new CustomMarkerClusterGroup({
-        disableClusteringAtZoom : this.disableClustring, //16 (scale at 200m), maxZomm at 18 (scale at 20m)
+        disableClusteringAtZoom: disableClusteringAtZoom, 
         maxClusterRadius: 70,
         polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
       });
@@ -670,11 +676,24 @@ define([
     },
 
     /*==========  focusMarker :: focus & zoom on a point  ==========*/
-    focus: function(id, zoom){
+    focus: function(id){
       var marker = this.dict[String(id)];
       if(!marker) return;
       var center = marker.getLatLng();
-      var zoom = this.disableClustring;
+
+      if(this.lastFocused) {
+        $(this.lastFocused._icon).removeClass('focus');
+      }
+      this.lastFocused = marker;
+      this.map.setView(center);
+      this.toggleIconClass(marker);
+    },
+
+    focusAndZoom: function(id, zoom){
+      var marker = this.dict[String(id)];
+      if(!marker) return;
+      var center = marker.getLatLng();
+      var zoom = this.disableClustering;
 
       if(this.lastFocused) {
         $(this.lastFocused._icon).removeClass('focus');
