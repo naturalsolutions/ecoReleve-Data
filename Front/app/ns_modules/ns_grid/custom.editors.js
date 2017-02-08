@@ -25,10 +25,10 @@ define([
 
 		CustomEditor.prototype.init = function(params){
 			//Insert new line if this is last one
-			// if(params.node.lastChild){
-			// 	params.api.addItems([{}]); //redraw every rows
-			// 	params.api.startEditingCell({ colKey: params.column.colDef.field, rowIndex: params.node.childIndex });
-			// }
+			if(params.node.lastChild){
+				params.api.addItems([{}]); //redraw every rows
+				params.api.startEditingCell({ colKey: params.column.colDef.field, rowIndex: params.node.childIndex });
+			}
 			
 		  var col = params.column.colDef;
 
