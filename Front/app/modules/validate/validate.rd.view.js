@@ -192,6 +192,9 @@ define([
           enableFilter: true,
           onRowClicked: function(row){
             _this.gridView.interaction('focus', row.data.PK_id || row.data.id);
+          },
+          onRowDoubleClicked: function(row){
+            _this.gridView.interaction('focusAndZoom', row.data.PK_id || row.data.id);
           }
         },
       }));
