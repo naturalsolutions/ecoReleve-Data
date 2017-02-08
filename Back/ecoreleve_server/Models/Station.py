@@ -119,24 +119,18 @@ class Station(Base, ObjectWithDynProp):
         else:
             return self.ObjContext.query(StationType).get(self.FK_StationType)
 
-    def UpdateFromJson(self, DTOObject, startDate=None):
-        if self.allowUpdate(DTOObject):
-            ObjectWithDynProp.UpdateFromJson(self, DTOObject, startDate=None)
-            return True
-        else:
-            return False
-
     def allowUpdate(self, DTOObject):
         from ..utils.parseValue import isNumeric
 
         allow = True
-        site = int(DTOObject['FK_MonitoredSite']) if isNumeric(DTOObject['FK_MonitoredSite']) else None
+        site = None
+        if 'FK_MonitoredSite' in DTOObject:
+            site = int(DTOObject['FK_MonitoredSite']) if isNumeric(DTOObject['FK_MonitoredSite']) else None
         dateSta = datetime.strptime(DTOObject['StationDate'], '%d/%m/%Y %H:%M:%S')
         equipmentExist = self.existingProtocolEquipment()
 
         if equipmentExist and (
             self.FK_MonitoredSite != site or self.StationDate != dateSta):
-            print('\n\n permission to update denied ************')
             allow = False
         return allow
 
