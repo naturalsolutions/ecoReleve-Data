@@ -13,16 +13,16 @@ define([
   'use strict';
 
   return ManagerView.extend({
-    model: new StationModel(),
+    ModelPrototype: StationModel,
 
     populateCurrentData: function(currentData){
-      // this.defaultFilters = currentData.filters;
-      // if(this.defaultFilters.length){
-      //   if(this.defaultFilters[0].Column == 'LastImported'){
-      //     this.extraFilters = this.defaultFilters[0];
-      //     this.model.set('lastImported', true);
-      //   }
-      // }
+      this.defaultFilters = currentData.filters;
+      if(this.defaultFilters.length){
+        if(this.defaultFilters[0].Column == 'LastImported'){
+          this.extraFilters = this.defaultFilters[0];
+          this.model.set('lastImported', true);
+        }
+      }
 
       // if(currentData.index !== 'undefined'){
       //   this.goTo = {

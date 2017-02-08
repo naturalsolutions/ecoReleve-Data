@@ -24,9 +24,10 @@ define([
       'click .js-link-back': 'back',
     },
 
-    model: new Backbone.Model(),
+    ModelPrototype: Backbone.Model,
 
     initialize: function(options) {
+      this.model = new this.ModelPrototype();
 			this.data = options.data;
       this.model.set('objectType', options.objectType || 1);
     },

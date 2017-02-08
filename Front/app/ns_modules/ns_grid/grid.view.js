@@ -10,9 +10,11 @@ define([
   './custom.date.filter',
   './custom.select.filter',
   './custom.text.autocomplete.filter',
+  'ns_grid/customCellRenderer/decimal5Renderer',
+  'ns_grid/customCellRenderer/dateTimeRenderer',
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter) {
+], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter, Decimal5Renderer, DateTimeRenderer) {
 
   'use strict';
 
@@ -35,12 +37,14 @@ define([
 
     ui: {
       'totalSelected': '.js-total-selected',
-      'totalRecords': '.js-total-records',
+      'totalRecords' : '.js-total-records',
+      'filteredElems': '.js-filtered-content',
+      'filtered' : '.js-filtered'
 
     },
 
-    keypress: function(e){
-      if(e.keyCode == 13){
+    keypress: function(e) {
+      if(e.keyCode == 13) {
         $(e.currentTarget).click();
       }
     },
@@ -94,6 +98,15 @@ define([
         onAfterFilterChanged: function(){
           _this.handleSelectAllChkBhv();
           _this.clientSideFilter();
+
+          if( _.isEmpty(this.api.getFilterModel()) ){
+            _this.ui.filtered.addClass('hidden');
+            _this.ui.filteredElems.html(this.api.getModel().getRowCount());
+          } else {
+            _this.ui.filtered.removeClass('hidden');
+            _this.ui.filteredElems.html(this.api.getModel().getRowCount());
+          }
+
         }
         //overlayNoRowsTemplate: '<span>No rows to display</span>',
         //overlayLoadingTemplate: '',
@@ -163,28 +176,34 @@ define([
         if(col.cell == 'autocomplete'){
           _this.addBBFEditor(col);
         }
-        
+
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;
-            return;
+            break;
           }
           case 'date': {
+            col.minWidth = 180;
             col.filter = CustomDateFilter;
-            return;
+            col.cellRenderer = DateTimeRenderer;
+            break;
           }
           case 'select': {
             col.filter = CustomSelectFilter;
-            return;
+            break;
           }
           // case 'textAutocomplete': {
           //   col.filter = CustomTextAutocompleteFilter;
           //   return;
           // }
-          default: {
+          case 'text': {
             col.filter = CustomTextFilter;
             return;
           }
+          /*default: {
+            col.filter = CustomTextFilter;
+            return;
+          }*/
         }
         //draft
 
@@ -378,6 +397,14 @@ define([
             order_by: JSON.stringify(order_by),
             typeObj: _this.model.get('objectType')
           };
+
+          //mm
+          if(this.startDate){
+            status.startDate = this.startDate;
+          }
+          if(this.history){
+            status.history = this.history;
+          }
 
           $.ajax({
             url: _this.model.get('url'),

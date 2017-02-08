@@ -6,7 +6,13 @@ define([
   function decimal5Renderer(params) {
   }
   var decimal5Renderer = function(params){
-    return params.data[params.column.colId].toFixed(5);
+    var val = params.data[params.column.colId];
+
+    var displayVal = '';
+    if (val){
+      displayVal = val.toFixed(5);
+    }
+    return displayVal;
   };
   return decimal5Renderer;
 });

@@ -23,7 +23,7 @@ define([
   'use strict';
 
   return DetailView.extend({
-    model: new MonitoredSiteModel(),
+    ModelPrototype: MonitoredSiteModel,
 
     displayGrids: function(){
       this.displayHistoryGrid();

@@ -310,6 +310,13 @@ define([
           _this.formChange = false;
        }
       });
+      $(this.formRegion).find('input').on("thesaurusChange", function(e) {
+        if($(e.target).val() !== ''){
+          _this.formChange = true;
+        } else {
+          _this.formChange = false;
+       }
+      });
       $(this.formRegion).find('select').on("change", function(e) {
          _this.formChange = true;
       });
@@ -506,7 +513,7 @@ define([
                   _this.afterSaveSuccess(response);
                   return true;
                 },
-                error: function (response) {
+                error: function (model, response) {
                   _this.savingError(response);
                   return false;
                 }

@@ -29,7 +29,7 @@ define([
 
         events: {
             'hide': "hasChanged",
-            'change':'inputChange'
+            'changeEditor':'inputChange'
         },
         editable:false,
 
@@ -134,7 +134,8 @@ define([
 
                         onItemClick: function (options) {
                             var value = _this.$el.find('#' + _this.id + '_value').val();
-                            _this.$el.find('input').trigger('change');
+                            _this.$el.find('input').trigger('changeEditor');
+                            _this.$el.find('input').trigger('thesaurusChange');
                             _this.onEditValidation(value);
                         }
                     });

@@ -6,7 +6,7 @@ define([
   'use strict';
 
   return ManagerView.extend({
-  	model: new IndividualModel(),
+  	ModelPrototype: IndividualModel,
 
   	toggleTab: function(e) {
   	  if(!$(e.currentTarget).hasClass('active')){
@@ -35,6 +35,36 @@ define([
 
     setDefaultOperatorFilter: function(){
       // to extend
+    },
+
+    afterShow: function(){
+      var _this = this;
+      this.$chk = this.$el.find('.js-checkbox-history');
+      this.$date = this.$el.find('.js-date-history');
+
+      this.$el.find('.js-datetimepicker-history')
+        .datetimepicker({format : "DD/MM/YYYY HH:mm:ss"})
+        .on('dp.change', function(){
+          if(_this.$chk.prop('checked'))
+            _this.$chk.prop('checked', false);
+      });
+      
+      this.$el.find('.js-checkbox-history')
+        .on('click', function(){
+          if(_this.$chk.prop('checked'))
+            _this.$date.val(null);
+      });
+    },
+
+    filter: function() {
+      this.gridView.dataSource.startDate = this.$date.val();
+
+      if (this.$chk.prop('checked')){
+        this.gridView.dataSource.history = 1;
+      } else {
+        this.gridView.dataSource.history = 0;
+      }
+      this.filters.update();
     },
 
     new: function(){

@@ -106,6 +106,9 @@ def searchIndiv(request):
         FrontModules.Name == ModuleType).one()
     listObj = IndividualList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
+    for row in dataResult:
+        if 'Date_Sortie' in row:
+            row['Date_Sortie'] = row['Date_Sortie'].strftime('%Y-%m-%d %H:%M:%S')
 
     countResult = listObj.count(searchInfo)
     result = [{'total_entries': countResult}]
