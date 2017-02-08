@@ -73,7 +73,7 @@ define([
 
     this.elem = options.element || 'map';
     this.zoom = config.mapZoom;
-    this.disableClustring = options.disableClustring || 15;
+    this.disableClustring = options.disableClustring || 16;
     this.bbox = options.bbox || false;
     this.area = options.area || false;
     this.cluster = options.cluster || false;
@@ -126,6 +126,7 @@ define([
         center: this.center ,
         zoom: this.zoom,
         minZoom: 2,
+        maxZoom : 18,
         inertia: false,
         zoomAnimation: true,
         keyboard: false, //fix scroll window
@@ -133,7 +134,7 @@ define([
       });
 
       this.google.defered  = this.google();
-      $.when(this.google.defered).then(function(){
+      $.when(this.google.defered).always(function(){
         if(_this.url){
           _this.requestGeoJson(_this.url);
         }else{
@@ -209,6 +210,7 @@ define([
     },
 
     initClusters: function(geoJson){
+      console.log(geoJson);
       var firstLvl= true;
       this.firstLvl= [];
       var _this= this;
@@ -226,8 +228,8 @@ define([
         },
       });
       this.markersLayer = new CustomMarkerClusterGroup({
-        disableClusteringAtZoom : this.disableClustring, //2km
-        maxClusterRadius: 100,
+        disableClusteringAtZoom : this.disableClustring, //16 (scale at 200m), maxZomm at 18 (scale at 20m)
+        maxClusterRadius: 70,
         polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
       });
       this.setGeoJsonLayer(geoJson);
