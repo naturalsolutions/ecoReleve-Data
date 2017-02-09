@@ -1,14 +1,13 @@
-define(['jquery','marionette','config','i18n'], function($, Marionette, config) {
-
+define(['jquery', 'marionette', 'config', 'i18n'], function ($, Marionette, config) {
   var Translater = Marionette.Object.extend({
 
-    initialize: function(options) {
+    initialize: function (options) {
       this.dfd = $.Deferred();
-      if(config.instance == 'demo') {
+      if (config.instance == 'demo') {
         this.dfd = $.ajax({
           context: this,
-          url: config.coreUrl + 'currentUser',
-        }).done(function(data){
+          url: config.coreUrl + 'currentUser'
+        }).done(function (data) {
           this.initi18n(data.Language);
         });
         return;
@@ -17,15 +16,15 @@ define(['jquery','marionette','config','i18n'], function($, Marionette, config) 
       this.initi18n();
     },
 
-    initi18n: function(language){
+    initi18n: function (language) {
       i18n.init({
-        resGetPath: window.location.origin+ window.location.pathname + 'app/locales/__lng__/__ns__.json',
+        resGetPath: window.location.origin + window.location.pathname + 'app/locales/__lng__/__ns__.json',
         getAsync: false,
-        lng: language || 'en' //navigator.language || navigator.userLanguagenavigator.language || navigator.userLanguage
+        lng: language || 'en' // navigator.language || navigator.userLanguagenavigator.language || navigator.userLanguage
       });
     },
 
-    getValueFromKey: function(key) {
+    getValueFromKey: function (key) {
       return $.t(key);
     }
   });
@@ -33,7 +32,6 @@ define(['jquery','marionette','config','i18n'], function($, Marionette, config) 
   var translater = new Translater();
 
   return {
-    getTranslater: function(options) { return translater; }
+    getTranslater: function (options) { return translater; }
   };
-
 });

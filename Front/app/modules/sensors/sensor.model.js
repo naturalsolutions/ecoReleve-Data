@@ -3,10 +3,10 @@ define([
   'underscore',
   'backbone',
   'ns_grid/customCellRenderer/decimal5Renderer',
-  'ns_grid/customCellRenderer/dateTimeRenderer',
-], function(
+  'ns_grid/customCellRenderer/dateTimeRenderer'
+], function (
   $, _, Backbone, Decimal5Renderer, DateTimeRenderer
-){
+) {
   'use strict';
 
   return Backbone.Model.extend({
@@ -22,13 +22,13 @@ define([
       availableOptions: [{
         label: 'Argos',
         val: 'argos'
-      },{
+      }, {
         label: 'GSM',
         val: 'gsm'
-      },{
+      }, {
         label: 'RFID',
         val: 'rfid'
-      },{
+      }, {
         label: 'VHF',
         val: 'vhf'
       }],
@@ -37,7 +37,7 @@ define([
         name: 'SensorForm',
         modelurl: 'sensors',
         displayMode: 'display',
-        reloadAfterSave: true,
+        reloadAfterSave: true
       },
 
       uiGridConfs: [
@@ -48,35 +48,33 @@ define([
         {
           name: 'deployment',
           label: 'Deployment'
-        },
+        }
       ],
 
       deploymentColumnsDefs: [{
         field: 'FK_Individual',
         headerName: 'Individual id',
-        cellRenderer: function(params){
-          if(params.data.FK_Individual){
+        cellRenderer: function (params) {
+          if (params.data.FK_Individual) {
             var url = '#individuals/' + params.data.FK_Individual;
-            return  '<a target="_blank" href="'+ url +'" >' +
+            return '<a target="_blank" href="' + url + '" >' +
             params.value + ' <span class="reneco reneco-info right"></span>' +
             '</a>';
-          } else {
-            return '';
           }
+          return '';
         }
       },
       {
         field: 'FK_MonitoredSite',
         headerName: 'Monitored site',
-        cellRenderer: function(params){
-          if(params.data.MonitoredSiteID) {
+        cellRenderer: function (params) {
+          if (params.data.MonitoredSiteID) {
             var url = '#monitoredSites/' + params.data.MonitoredSiteID;
-            return  '<a target="_blank" href="'+ url +'" >' +
+            return '<a target="_blank" href="' + url + '" >' +
             params.value + ' <span class="reneco reneco-info right"></span>' +
             '</a>';
-          } else {
-            return '';
           }
+          return '';
         }
       },
       {
@@ -89,18 +87,18 @@ define([
         headerName: 'End Date',
         cellRenderer: DateTimeRenderer
       }
-    ],
-    historyColumnsDefs : [{
-      field: 'Name',
-      headerName: 'Name',
-    }, {
-      field: 'value',
-      headerName: 'Value',
-    }, {
-      field: 'StartDate',
-      headerName: 'Start Date',
-      cellRenderer: DateTimeRenderer
-    },]
+      ],
+      historyColumnsDefs: [{
+        field: 'Name',
+        headerName: 'Name'
+      }, {
+        field: 'value',
+        headerName: 'Value'
+      }, {
+        field: 'StartDate',
+        headerName: 'Start Date',
+        cellRenderer: DateTimeRenderer
+      } ]
 
 
     }

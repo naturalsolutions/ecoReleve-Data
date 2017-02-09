@@ -4,11 +4,10 @@ define([
   'backbone',
   'marionette',
   'sweetAlert',
-  'i18n',
+  'i18n'
 
-], function($, _, Backbone, Marionette, swal
+], function ($, _, Backbone, Marionette, swal
 ) {
-
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -29,46 +28,45 @@ define([
     events: {
       'change input[type="file"]': 'importFile',
       'click button#clear': 'clearFile',
-      'drop .drag-zone-hover' : 'handleDrop',
-      'dragover .drag-zone-hover' : 'handleDragOVer',
-      'dragleave .drag-zone-hover' : 'handleDragLeave'
+      'drop .drag-zone-hover': 'handleDrop',
+      'dragover .drag-zone-hover': 'handleDragOVer',
+      'dragleave .drag-zone-hover': 'handleDragLeave'
     },
 
-    handleDrop : function(e) {
+    handleDrop: function (e) {
       e.originalEvent.stopPropagation();
       e.originalEvent.preventDefault();
       this.importFile(e.originalEvent.dataTransfer.files);
     },
 
-    handleDragOVer : function(e) {
+    handleDragOVer: function (e) {
       e.originalEvent.stopPropagation();
       e.originalEvent.preventDefault();
     },
 
-    handleDragLeave : function(e) {
+    handleDragLeave: function (e) {
     },
 
-    initialize: function(options) {
+    initialize: function (options) {
       this.sensorId = options.model.get('sensorId');
       this.row = options.model.get('row');
     },
 
-    clearFile: function() {
+    clearFile: function () {
       $('#input-file').val('');
     },
 
-    validate: function(){
+    validate: function () {
 
     },
 
-    importFile: function(event) {
+    importFile: function (event) {
       var _this = this;
       this.clear();
       var module = this.ui.modInput.val();
       if (module !== '') {
-
         var reader = new FileReader();
-        if (typeof event.target ==='undefined' ) {
+        if (typeof event.target === 'undefined') {
           var file = event[0];
         }
         else {
@@ -78,38 +76,37 @@ define([
         var ext = file.name.split('.');
         if (ext[ext.length - 1] != 'txt') {
           swal(
-              {
-                title: 'Wrong file type',
-                text: 'The file should be a text file (.txt)',
-                type: 'error',
-                showCancelButton: false,
-                confirmButtonColor: 'rgb(147, 14, 14)',
-                confirmButtonText: 'OK',
+            {
+              title: 'Wrong file type',
+              text: 'The file should be a text file (.txt)',
+              type: 'error',
+              showCancelButton: false,
+              confirmButtonColor: 'rgb(147, 14, 14)',
+              confirmButtonText: 'OK',
 
-                closeOnConfirm: true,
-              }
+              closeOnConfirm: true
+            }
             );
           return false;
-        } else {
-          var url = 'sensors/rfid/datas';
-          var data = new FormData();
-          var self = this;
-
         }
+        var url = 'sensors/rfid/datas';
+        var data = new FormData();
+        var self = this;
 
-        reader.onprogress = function(data) {
+
+        reader.onprogress = function (data) {
           if (data.lengthComputable) {
             var progress = parseInt(data.loaded / data.total * 100).toString();
             self.ui.progressBar.width(progress + '%');
           }
         };
 
-        reader.onload = function(e, fileName) {
+        reader.onload = function (e, fileName) {
           data.append('data', e.target.result);
 
-          //data.append('module', self.model.get(self.parent.steps[self.parent.currentStep-1].name+'_RFID_identifer'));
+          // data.append('module', self.model.get(self.parent.steps[self.parent.currentStep-1].name+'_RFID_identifer'));
 
-          data.append('FK_Sensor',self.sensorId);
+          data.append('FK_Sensor', self.sensorId);
           data.append('StartDate', _this.row.StartDate);
           data.append('EndDate', _this.row.EndDate);
 
@@ -120,10 +117,10 @@ define([
             data: data,
             processData: false,
             contentType: false
-          }).done(function(data) {
+          }).done(function (data) {
             $('.cancel').removeAttr('disabled');
 
-            self.ui.progressBar.css({'background-color': 'green'})
+            self.ui.progressBar.css({ 'background-color': 'green' });
             swal(
               {
                 title: 'Succes',
@@ -133,36 +130,34 @@ define([
                 confirmButtonColor: 'green',
                 confirmButtonText: 'Go to Validate',
                 cancelButtonText: 'Import new RFID',
-                closeOnConfirm: true,
+                closeOnConfirm: true
 
               },
-              function(isConfirm) {
+              function (isConfirm) {
                 self.ui.progress.hide();
                 if (isConfirm) {
-                  Backbone.history.navigate('validate/rfid',{trigger: true});
+                  Backbone.history.navigate('validate/rfid', { trigger: true });
                 } else {
-                  //Backbone.history.navigate('importFile',{trigger: true});
+                  // Backbone.history.navigate('importFile',{trigger: true});
                   _this.options.parent.currentStepIndex--;
                   var index = _this.options.parent.currentStepIndex;
                   _this.options.parent.displayStep(index);
                 }
               }
             );
-
-          }).fail(function(data) {
+          }).fail(function (data) {
             $('#btnNext').attr('disabled');
             if (data.status == 520 || data.status == 510) {
               var type = 'warning';
-              var title = 'Warning !'
-              self.ui.progressBar.css({'background-color': 'rgb(218, 146, 15)'})
+              var title = 'Warning !';
+              self.ui.progressBar.css({ 'background-color': 'rgb(218, 146, 15)' });
               var color = 'rgb(218, 146, 15)';
             } else {
               var type = 'error';
-              var title = 'Error !'
-              self.ui.progressBar.css({'background-color': 'rgb(147, 14, 14)'})
+              var title = 'Error !';
+              self.ui.progressBar.css({ 'background-color': 'rgb(147, 14, 14)' });
               var color = 'rgb(147, 14, 14)';
               _this.clearFile();
-
             }
             if (data.responseText.length > 250) {
               data.responseText = 'An error occured, please contact an admninstrator';
@@ -175,9 +170,9 @@ define([
                 showCancelButton: false,
                 confirmButtonColor: color,
                 confirmButtonText: 'OK',
-                closeOnConfirm: true,
+                closeOnConfirm: true
               },
-              function(isConfirm) {
+              function (isConfirm) {
               }
             );
           });
@@ -197,14 +192,14 @@ define([
       }
     },
 
-    clear: function() {
+    clear: function () {
       this.ui.progressBar.width('0%');
       this.ui.progress.hide();
       this.ui.fileHelper.text('');
       this.ui.fileGroup.removeClass('has-error');
       this.ui.modHelper.text('');
       this.ui.modGroup.removeClass('has-error');
-    },
+    }
 
   });
 });

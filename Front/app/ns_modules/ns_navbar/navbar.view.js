@@ -1,26 +1,27 @@
-//could be better but algorithms are fine
+// could be better but algorithms are fine
 
 define(['backbone', 'marionette', 'config'],
-function(Backbone, Marionette, config) {
+function (Backbone, Marionette, config) {
   'use strict';
+
   return Marionette.LayoutView.extend({
     template: 'app/ns_modules/ns_navbar/navbar.tpl.html',
     className: '',
 
     events: {
-      'click .js-prev' : 'navigatePrev',
-      'click .js-next' : 'navigateNext',
+      'click .js-prev': 'navigatePrev',
+      'click .js-next': 'navigateNext'
     },
 
     ui: {
-      'totalRecords': '.js-total-records',
-      'recordIndex': '.js-record-index'
+      totalRecords: '.js-total-records',
+      recordIndex: '.js-record-index'
     },
 
-    initialize: function(options){
+    initialize: function (options) {
       this.parent = options.parent;
-      
-      if(window.app.currentData && window.app.currentData.list.length > 1) {
+
+      if (window.app.currentData && window.app.currentData.list.length > 1) {
         this.model = new Backbone.Model(window.app.currentData);
         this.model.set('display', true);
       } else {
@@ -28,9 +29,9 @@ function(Backbone, Marionette, config) {
         this.model.set('display', false);
       }
 
-      if(options.index >= 0 && options.list.length > 1){
+      if (options.index >= 0 && options.list.length > 1) {
         this.model = new Backbone.Model();
-        this.model.set('display', true); 
+        this.model.set('display', true);
         this.model.set('index', parseInt(options.index));
         this.model.set('list', options.list);
         this.model.set('totalRecords', options.list.length);
@@ -44,15 +45,15 @@ function(Backbone, Marionette, config) {
       }
     },
 
-    onShow: function(){
-           
+    onShow: function () {
+
     },
 
-    disableBtns: function(disable){
+    disableBtns: function (disable) {
       this.$el.find('button').prop('disabled', disable);
     },
 
-    fetch: function(status){
+    fetch: function (status) {
       this.model.set('status', status);
       this.disableBtns(true);
       return $.ajax({
@@ -60,53 +61,51 @@ function(Backbone, Marionette, config) {
         method: 'GET',
         context: this,
         data: status
-      }).done( function(response) {
+      }).done(function (response) {
         this.model.set('list', response[1]);
       });
     },
 
-    update: function(index){
+    update: function (index) {
       var _this = this;
 
       this.model.set('index', index);
 
       var id;
-      var hash = window.location.hash.split('/').slice(0,-1).join('/');
+      var hash = window.location.hash.split('/').slice(0, -1).join('/');
 
-      $.when(this.deferred).then(function(data){
-        if(_this.clientSide){
+      $.when(this.deferred).then(function (data) {
+        if (_this.clientSide) {
           id = (index + 1);
         } else {
-          id = _this.model.get('list')[index]['ID'] || _this.model.get('list')[index];
+          id = _this.model.get('list')[index].ID || _this.model.get('list')[index];
           _this.disableBtns(false);
         }
-        Backbone.history.navigate(hash + '/' + id, {trigger: true});
+        Backbone.history.navigate(hash + '/' + id, { trigger: true });
         _this.render();
-
       });
-
     },
 
-    nextClientSide: function(){
+    nextClientSide: function () {
       var index = this.model.get('index');
       var totalRecords = this.model.get('totalRecords');
       index++;
-      if(index == totalRecords){
+      if (index == totalRecords) {
         index = 0;
       }
       this.update(index);
     },
-    prevClientSide: function(){
+    prevClientSide: function () {
       var index = this.model.get('index');
       index--;
-      if(index < 0){
+      if (index < 0) {
         index = this.length - 1;
       }
       this.update(index);
     },
-    
-    navigateNext: function(){
-      if(this.clientSide){
+
+    navigateNext: function () {
+      if (this.clientSide) {
         this.nextClientSide();
         return;
       }
@@ -117,17 +116,17 @@ function(Backbone, Marionette, config) {
       index++;
       this.deferred = true;
 
-      if(index >= totalRecords){
+      if (index >= totalRecords) {
         index = 0;
       }
-      if(index < status.per_page){
+      if (index < status.per_page) {
       } else {
-        if(status.per_page)
-        if(status.page >= totalRecords / status.per_page){
+        if (status.per_page)
+        { if (status.page >= totalRecords / status.per_page) {
           status.page = 1;
         } else {
           status.page++;
-        }
+        } }
         index = 0;
         status.offset = status.per_page * (status.page - 1);
         this.deferred = this.fetch(status);
@@ -136,8 +135,8 @@ function(Backbone, Marionette, config) {
       this.update(index);
     },
 
-    navigatePrev: function(){
-      if(this.clientSide){
+    navigatePrev: function () {
+      if (this.clientSide) {
         this.prevClientSide();
         return;
       }
@@ -147,30 +146,30 @@ function(Backbone, Marionette, config) {
 
       index--;
       this.deferred = true;
-      
-      if(index < 0){
-        if((totalRecords / status.per_page) < 1){
-          index = totalRecords - 1;   
+
+      if (index < 0) {
+        if ((totalRecords / status.per_page) < 1) {
+          index = totalRecords - 1;
         } else {
-          if(status.page == 1){
+          if (status.page == 1) {
             status.page = (totalRecords / status.per_page);
           } else {
             status.page--;
           }
-          index = status.per_page -1;
+          index = status.per_page - 1;
           status.offset = status.per_page * (status.page - 1);
           this.deferred = this.fetch(status);
         }
       }
 
       this.update(index);
-    },
+    }
 
   });
 });
 
 
-/*TODO
+/* TODO
   - store async requests
   - stop async requests unusefall
 */

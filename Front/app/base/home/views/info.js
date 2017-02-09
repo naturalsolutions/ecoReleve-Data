@@ -1,11 +1,12 @@
 define([
-    'underscore',
-    'backbone',
-    'config',
-    'marionette',
-    'moment'
-], function(_, Backbone, config, Marionette, moment) {
+  'underscore',
+  'backbone',
+  'config',
+  'marionette',
+  'moment'
+], function (_, Backbone, config, Marionette, moment) {
   'use strict';
+
   return Marionette.ItemView.extend({
     template: 'app/base/home/tpl/tpl-info.html',
 
@@ -16,24 +17,24 @@ define([
     }),
 
     modelEvents: {
-      'change': 'render'
+      change: 'render'
     },
 
-    initialize: function() {
+    initialize: function () {
       this.$el.hide();
-      var isDomoInstance = config.instance ;
-      if(!isDomoInstance || (isDomoInstance != 'demo')) {
-          $.ajax({
-            context: this,
-            url: config.coreUrl + 'individuals/count',
-          }).done(function(data) {
-            this.model.set('nbIndiv', data);
-            this.$el.fadeIn();
-          });
+      var isDomoInstance = config.instance;
+      if (!isDomoInstance || (isDomoInstance != 'demo')) {
+        $.ajax({
+          context: this,
+          url: config.coreUrl + 'individuals/count'
+        }).done(function (data) {
+          this.model.set('nbIndiv', data);
+          this.$el.fadeIn();
+        });
       }
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
       delete this.model;
     }
   });

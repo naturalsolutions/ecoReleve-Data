@@ -11,65 +11,64 @@ define([
   'ns_form/NSFormsModuleGit',
 
   'modules/objects/detail.view',
-  './sensor.model',
+  './sensor.model'
 
-], function(
+], function (
   $, _, Backbone, Marionette, Swal, Translater,
   NsMap, GridView, NsForm,
   DetailView, SensorModel
-){
-
+) {
   'use strict';
 
   return DetailView.extend({
 
     regions: {
-      'rgNavbar': '.js-rg-navbar',
-      'rgHistoryGrid': '.js-rg-history-grid',
-      'rgEquipmentGrid': '.js-rg-equipment-grid',
-      'rgStationsGrid': '.js-rg-stations-grid',
+      rgNavbar: '.js-rg-navbar',
+      rgHistoryGrid: '.js-rg-history-grid',
+      rgEquipmentGrid: '.js-rg-equipment-grid',
+      rgStationsGrid: '.js-rg-stations-grid'
     },
 
     events: {
-      'click .tab-link': 'displayTab',
+      'click .tab-link': 'displayTab'
     },
 
     ModelPrototype: SensorModel,
 
-    displayGrids: function(){
+    displayGrids: function () {
       this.displayHistoryGrid();
       this.displayDeploymentGrid();
     },
 
-    displayMap: function() {
+    displayMap: function () {
       this.map = new NsMap({
-        url: this.model.get('type') + '/' + this.model.get('id')  + '?geo=true',
+        url: this.model.get('type') + '/' + this.model.get('id') + '?geo=true',
         cluster: true,
         zoom: 3,
         element: 'map',
-        popup: true,
+        popup: true
       });
     },
 
-    displayHistoryGrid: function() {
+    displayHistoryGrid: function () {
       this.rgHistoryGrid.show(this.historyGrid = new GridView({
         columns: this.model.get('historyColumnsDefs'),
         type: this.model.get('type'),
-        url: this.model.get('type') + '/' + this.model.get('id')  + '/history',
-        clientSide: true,
+        url: this.model.get('type') + '/' + this.model.get('id') + '/history',
+        clientSide: true
       }));
       this.gridViews.push(this.rgHistoryGrid);
     },
 
-    displayDeploymentGrid: function() {
+    displayDeploymentGrid: function () {
       this.rgDeploymentGrid.show(this.deploymentGrid = new GridView({
         columns: this.model.get('deploymentColumnsDefs'),
         type: this.model.get('type'),
-        url: this.model.get('type') + '/' + this.model.get('id')  + '/equipment',
-        clientSide: true,
+        url: this.model.get('type') + '/' + this.model.get('id') + '/equipment',
+        clientSide: true
       }));
       this.gridViews.push(this.rgDeploymentGrid);
-    },
+    }
 
   });
 });

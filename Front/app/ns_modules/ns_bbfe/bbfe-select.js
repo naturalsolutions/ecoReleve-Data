@@ -1,20 +1,20 @@
 define([
   'jquery',
   'backbone',
-  'backbone-forms',
+  'backbone-forms'
 
-], function(
+], function (
   $, Backbone, Form
 ) {
   'use strict';
+
   return Form.editors.Select = Form.editors.Select.extend({
-    getValue: function() {
+    getValue: function () {
       var val = this.$el.val();
       if (val == -1) {
         return '';
-      }else {
-        return this.$el.val();
       }
-    },
+      return this.$el.val();
+    }
   });
 });

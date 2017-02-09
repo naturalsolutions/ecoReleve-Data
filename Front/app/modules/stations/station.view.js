@@ -11,14 +11,13 @@ define([
   './protocols/protocols.view',
 
   'modules/objects/detail.view',
-  './station.model',
+  './station.model'
 
-], function(
+], function (
   $, _, Backbone, Marionette, Swal,
   Com, NsForm, NavbarView, LytProtocols,
   DetailView, StationModel
 ) {
-
   'use strict';
 
   return DetailView.extend({
@@ -29,17 +28,17 @@ define([
 
     ui: {
       formStation: '.js-from-station',
-      formStationBtns: '.js-from-btns',
+      formStationBtns: '.js-from-btns'
     },
 
     regions: {
-      'rgStation': '.js-rg-station',
-      'rgProtocols': '.js-rg-protocols',
-      'rgProtocol': '.js-rg-protocol',
-      'rgNavbar': '.js-navbar'
+      rgStation: '.js-rg-station',
+      rgProtocols: '.js-rg-protocols',
+      rgProtocol: '.js-rg-protocol',
+      rgNavbar: '.js-navbar'
     },
 
-    initialize: function(options) {
+    initialize: function (options) {
       this.model = new this.ModelPrototype();
       this.com = new Com();
       this.model.set('id', options.id);
@@ -52,8 +51,8 @@ define([
       });
     },
 
-    reload: function(options){
-      if(options.id == this.model.get('id')){
+    reload: function (options) {
+      if (options.id == this.model.get('id')) {
         this.LytProtocols.protocolsItems.getViewFromUrlParams(options);
       } else {
         this.model.set('id', options.id);
@@ -66,25 +65,25 @@ define([
       }
     },
 
-    displayProtos: function() {
+    displayProtos: function () {
       this.rgProtocols.show(this.LytProtocols = new LytProtocols({
         model: this.model,
-        parent: this,
+        parent: this
       }));
     },
 
-    onShow: function() {
+    onShow: function () {
       this.displayStation();
       this.displayNavbar();
     },
 
-    displayNavbar: function(){
+    displayNavbar: function () {
       this.rgNavbar.show(this.navbarView = new NavbarView({
         parent: this
       }));
     },
 
-    displayStation: function() {
+    displayStation: function () {
       this.total = 0;
       var _this = this;
 
@@ -93,21 +92,20 @@ define([
       formConfig.id = this.model.get('id');
       formConfig.formRegion = this.ui.formStation;
       formConfig.buttonRegion = [this.ui.formStationBtns];
-      formConfig.afterDelete = function(response, model){
-        Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
+      formConfig.afterDelete = function (response, model) {
+        Backbone.history.navigate('#' + _this.model.get('type'), { trigger: true });
       };
 
       this.nsForm = new NsForm(formConfig);
-      this.nsForm.BeforeShow = function(){
+      this.nsForm.BeforeShow = function () {
 
       };
 
-      this.nsForm.afterShow = function(){
-        $(".datetime").attr('placeholder','DD/MM/YYYY');
-        $("#dateTimePicker").on("dp.change", function (e) {
-          $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
-         });
-
+      this.nsForm.afterShow = function () {
+        $('.datetime').attr('placeholder', 'DD/MM/YYYY');
+        $('#dateTimePicker').on('dp.change', function (e) {
+          $('#dateTimePicker').data('DateTimePicker').format('DD/MM/YYYY').maxDate(new Date());
+        });
       };
 
       this.nsForm.savingError = function (response) {
@@ -115,12 +113,12 @@ define([
         var type_ = 'error';
         var title = 'Error saving';
         if (response.status == 510) {
-          console.log(response)
+          console.log(response);
           if (response.responseJSON.existingStation) {
             msg = 'A station already exists with these parameters';
           }
           else if (response.responseJSON.updateDenied) {
-            msg = "Equipment is present on this station, you can't change Station Date or Monitored Site";
+            msg = 'Equipment is present on this station, you can\'t change Station Date or Monitored Site';
           }
           type_ = 'warning';
           title = 'Error saving';
@@ -133,23 +131,22 @@ define([
           showCancelButton: false,
           confirmButtonColor: 'rgb(147, 14, 14)',
           confirmButtonText: 'OK',
-          closeOnConfirm: true,
+          closeOnConfirm: true
         });
       };
 
-      this.nsForm.afterSaveSuccess = function() {
-        if(this.model.get('fieldActivityId') != _this.fieldActivityId){
+      this.nsForm.afterSaveSuccess = function () {
+        if (this.model.get('fieldActivityId') != _this.fieldActivityId) {
           _this.displayProtos();
           _this.fieldActivityId = _this.model.get('fieldActivityId');
         }
       };
-      
-      $.when(this.nsForm.jqxhr).then(function(){
+
+      $.when(this.nsForm.jqxhr).then(function () {
         _this.fieldActivityId = this.model.get('fieldActivityId');
         _this.displayProtos();
-      })
-
-    },
+      });
+    }
 
   });
 });

@@ -1,7 +1,8 @@
 define(['marionette', 'config'],
-function(Marionette, config) {
+function (Marionette, config) {
   'use strict';
-  return Marionette.Behaviors.behaviorsLookup = function() {
+
+  return Marionette.Behaviors.behaviorsLookup = function () {
 
   };
 });

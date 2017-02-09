@@ -1,16 +1,15 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'ns_modules/ns_com',
-	//'ns_filter/model-filter_module',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'ns_modules/ns_com',
+	// 'ns_filter/model-filter_module',
   'ns_filter_bower',
-	'ns_map/ns_map',
-	'i18n'
-], function($, _, Backbone, Marionette, Com, NsFilter, NsMap
+  'ns_map/ns_map',
+  'i18n'
+], function ($, _, Backbone, Marionette, Com, NsFilter, NsMap
 ) {
-
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -19,25 +18,25 @@ define([
     template: 'app/modules/export/templates/tpl-export-step2.html',
 
     ui: {
-      'filtersList': 'select#filtersList',
-      'filters': 'div#filters',
-      'total': 'span#total'
+      filtersList: 'select#filtersList',
+      filters: 'div#filters',
+      total: 'span#total'
     },
 
     events: {
       'change select#filtersList': 'addFilter',
-      'click button#filter': 'filter',
+      'click button#filter': 'filter'
     },
 
-    name : '<span class="export-step2"></span>',
+    name: '<span class="export-step2"></span>',
 
-    initialize: function(options) {
+    initialize: function (options) {
       this.com = new Com();
       this.viewId = options.model.get('viewId');
       this.model.set('filters', []);
     },
 
-    onShow: function() {
+    onShow: function () {
       this.getFieldsListForSelectedView();
       this.displayMap();
       this.displayFilters();
@@ -46,11 +45,11 @@ define([
       $('.export-step2').html(stepName);
     },
 
-    addFilter: function() {
+    addFilter: function () {
       var option = this.ui.filtersList.find('option:selected');
 
       if (option.val() == 'choose')
-      return false;
+      { return false; }
 
       var filterName = option.val();
       var filterLabel = option.text();
@@ -62,7 +61,7 @@ define([
         fieldClass: [''],
         title: filterLabel,
         name: filterName,
-        options:options,
+        options: options,
         type: type,
         validators: []
       }];
@@ -71,55 +70,55 @@ define([
       this.ui.filtersList.val('choose');
     },
 
-    displayFilters: function() {
+    displayFilters: function () {
       var myFilter = NsFilter.extend({
         getValueOptions: function (DataRow) {
-            var valueOptions;
-            switch (DataRow['type']) {
-                case "Select":
-                    return DataRow['options'];
-                    break;
-								case 'Checkboxes':
-                    return DataRow['options'];
-                    break;
-                case 'AutocompTreeEditor':
-                    return DataRow['options'];
-                    break;
-                case 'AutocompleteEditor':
-                    return DataRow['options'];
-                    break;
-                case "DATETIME":
-                    return valueOptions = [{
-                        dateFormat: 'd/m/yyyy',
-                        defaultValue: new Date().getDate() + "/" + (new Date().getMonth() + 1) + "/" + new Date().getFullYear()
-                    }];
-                    break;
-                case "DateTimePickerEditor" :
-                    DataRow['options'].format =  "DD/MM/YYYY";
-                    return DataRow['options'];
-                    break;
-                default:
-                    return valueOptions = DataRow['options'];
-                    break;
-            }
-        },
+          var valueOptions;
+          switch (DataRow.type) {
+          case 'Select':
+            return DataRow.options;
+            break;
+          case 'Checkboxes':
+            return DataRow.options;
+            break;
+          case 'AutocompTreeEditor':
+            return DataRow.options;
+            break;
+          case 'AutocompleteEditor':
+            return DataRow.options;
+            break;
+          case 'DATETIME':
+            return valueOptions = [{
+              dateFormat: 'd/m/yyyy',
+              defaultValue: new Date().getDate() + '/' + (new Date().getMonth() + 1) + '/' + new Date().getFullYear()
+            }];
+            break;
+          case 'DateTimePickerEditor' :
+            DataRow.options.format = 'DD/MM/YYYY';
+            return DataRow.options;
+            break;
+          default:
+            return valueOptions = DataRow.options;
+            break;
+          }
+        }
       });
 
       this.filters = new myFilter({
         com: this.com,
         filterContainer: this.ui.filters,
-        custom: true,
+        custom: true
       });
     },
 
-    getFieldsListForSelectedView: function() {
+    getFieldsListForSelectedView: function () {
       var _this = this;
       var viewUrl = 'export/views/' + this.viewId + '/getFilters';
       var jqxhr = $.ajax({
         url: viewUrl,
         context: this,
         dataType: 'json'
-      }).done(function(data) {
+      }).done(function (data) {
         this.fieldsList = {};
         var exportFieldsList = [];
         _this.ui.filtersList.append('<option value="choose">Add a filter</option>');
@@ -130,31 +129,31 @@ define([
           this.fieldsList[data[i].name] = data[i];
         }
         $('#filter-btn').removeClass('masqued');
-      }).fail(function(msg) {
-			});
+      }).fail(function (msg) {
+      });
     },
 
-    displayMap: function(geoJson) {
+    displayMap: function (geoJson) {
       this.map = new NsMap({
         cluster: true,
         com: this.com,
         element: 'map',
         zoom: 2,
         url: 'export/views/' + this.viewId + '/?geo=true',
-        totalElt: this.ui.total,
+        totalElt: this.ui.total
       });
     },
 
-    filter: function() {
+    filter: function () {
       this.model.set('filters', this.filters.update());
     },
 
-    validate: function() {
+    validate: function () {
       return this.model;
     },
 
-    check: function() {
+    check: function () {
       return true;
-    },
+    }
   });
 });

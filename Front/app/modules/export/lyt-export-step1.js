@@ -1,33 +1,34 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'i18n'
-], function($, _, Backbone, Marionette
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'i18n'
+], function ($, _, Backbone, Marionette
 ) {
   'use strict';
+
   return Marionette.LayoutView.extend({
     className: 'full-height',
     template: 'app/modules/export/templates/tpl-export-step1.html',
 
-    name : '<span class="export-step1"></span>',
-    /*name : (function () {
-        return i18n.translate('export.step1-label'); 
+    name: '<span class="export-step1"></span>',
+    /* name : (function () {
+        return i18n.translate('export.step1-label');
     })(),*/
 
     ui: {
-      'themes': '#themes',
-      'views': '#views',
-      'requirement': '#requirement'
+      themes: '#themes',
+      views: '#views',
+      requirement: '#requirement'
     },
 
     events: {
       'click #themes>li': 'getViews',
-      'click #views>li': 'enableNext',
+      'click #views>li': 'enableNext'
     },
 
-    initialize: function(options) {
+    initialize: function (options) {
       this.model = new Backbone.Model();
       this.themeColl = new Backbone.Collection();
       this.themeColl.url = 'export/themes';
@@ -37,10 +38,10 @@ define([
       this.model.set('viewName', '');
     },
 
-    onShow: function() {
+    onShow: function () {
       var _this = this;
-      $.when(this.defered).done(function() {
-        _this.themeColl.each(function(model, index) {
+      $.when(this.defered).done(function () {
+        _this.themeColl.each(function (model, index) {
           var line = $('<li class="list-group-item" value="' + model.get('ID') + '">' + model.get('Caption') + '</li>');
           _this.ui.themes.append(line);
         });
@@ -50,7 +51,7 @@ define([
       $('.export-step1').html(stepName);
     },
 
-    getViews: function(e) {
+    getViews: function (e) {
       var _this = this;
 
       this.ui.themes.find('.active').removeClass('active');
@@ -64,15 +65,15 @@ define([
       var defered = this.viewColl.fetch();
 
       _this.ui.views.empty();
-      $.when(defered).done(function() {
-        _this.viewColl.each(function(model, index) {
+      $.when(defered).done(function () {
+        _this.viewColl.each(function (model, index) {
           var line = $('<li class="list-group-item" value="' + model.get('ID') + '">' + model.get('Caption') + '</li>');
           _this.ui.views.append(line);
         });
       });
     },
 
-    enableNext: function(e) {
+    enableNext: function (e) {
       this.ui.views.find('.active').removeClass('active');
       $(e.target).addClass('active');
       var viewId = $(e.target).val();
@@ -83,17 +84,16 @@ define([
       this.model.set('viewName', viewName);
     },
 
-    validate: function() {
+    validate: function () {
       return this.model;
     },
 
-    check: function() {
+    check: function () {
       if (this.ui.requirement.val()) {
         return true;
-      }else {
-        return false;
       }
-    },
+      return false;
+    }
 
   });
 });

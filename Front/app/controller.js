@@ -27,9 +27,9 @@ define([
 
   './modules/monitoredSites/monitored_site.view',
   './modules/monitoredSites/monitored_sites.view',
-  './modules/monitoredSites/monitored_sites.new.view',
+  './modules/monitoredSites/monitored_sites.new.view'
 
-],function(
+], function (
   Marionette,
   LytHome,
   LytImportFile,
@@ -49,7 +49,7 @@ define([
 
   return Marionette.Object.extend({
 
-    initialize: function() {
+    initialize: function () {
       var app = window.app;
 
       this.rgMain = app.rootView.rgMain;
@@ -57,41 +57,40 @@ define([
       this.rgFooter = app.rootView.rgFooter;
 
       app.entityConfs = {
-        'stations': {
-          'entity': LytStation,
-          'entities': LytStations,
-          'newEntity': LytStationsNew
+        stations: {
+          entity: LytStation,
+          entities: LytStations,
+          newEntity: LytStationsNew
         },
-        'individuals': {
-          'entity': LytIndividual,
-          'entities': LytIndividuals,
-          'newEntity': LytIndividualsNew
+        individuals: {
+          entity: LytIndividual,
+          entities: LytIndividuals,
+          newEntity: LytIndividualsNew
         },
-        'sensors': {
-          'entity': LytSensor,
-          'entities': LytSensors,
-          'newEntity': LytSensorsNew
+        sensors: {
+          entity: LytSensor,
+          entities: LytSensors,
+          newEntity: LytSensorsNew
         },
-        'monitoredSites': {
-          'entity': LytMonitoredSite,
-          'entities': LytMonitoredSites,
-          'newEntity': LytMonitoredSitesNew
-        },
+        monitoredSites: {
+          entity: LytMonitoredSite,
+          entities: LytMonitoredSites,
+          newEntity: LytMonitoredSitesNew
+        }
       };
     },
 
-    home: function() {
+    home: function () {
       Backbone.history.navigate('');
       this.rgMain.show(new LytHome());
     },
 
-    importFile: function(type) {
-      this.rgMain.show(new LytImportFile({type : type}));
+    importFile: function (type) {
+      this.rgMain.show(new LytImportFile({ type: type }));
     },
 
-    station: function(id, proto, obs) {
-
-      if(this.rgMain.currentView instanceof LytStation){
+    station: function (id, proto, obs) {
+      if (this.rgMain.currentView instanceof LytStation) {
         this.rgMain.currentView.reload({
           id: id,
           proto: proto,
@@ -106,18 +105,18 @@ define([
       }
     },
 
-    stations: function(params) {
+    stations: function (params) {
       this.rgMain.show(new LytStations({
         params: params
       }));
     },
 
-    newStation: function(from) {
-      this.rgMain.show(new LytStationsNew({from: from}));
+    newStation: function (from) {
+      this.rgMain.show(new LytStationsNew({ from: from }));
     },
 
-    individual: function(id) {
-      if(this.rgMain.currentView instanceof LytIndividual){
+    individual: function (id) {
+      if (this.rgMain.currentView instanceof LytIndividual) {
         this.rgMain.currentView.reload({
           id: id
         });
@@ -128,16 +127,16 @@ define([
       }
     },
 
-    individuals: function() {
+    individuals: function () {
       this.rgMain.show(new LytIndividuals());
     },
 
-    newIndividual: function(objectType) {
-      this.rgMain.show(new LytIndividualsNew({objectType: objectType}));
+    newIndividual: function (objectType) {
+      this.rgMain.show(new LytIndividualsNew({ objectType: objectType }));
     },
 
-    monitoredSite: function(id) {
-      if(this.rgMain.currentView instanceof LytMonitoredSite){
+    monitoredSite: function (id) {
+      if (this.rgMain.currentView instanceof LytMonitoredSite) {
         this.rgMain.currentView.reload({
           id: id
         });
@@ -148,16 +147,16 @@ define([
       }
     },
 
-    monitoredSites: function() {
+    monitoredSites: function () {
       this.rgMain.show(new LytMonitoredSites());
     },
 
-    newMonitoredSite: function(type) {
+    newMonitoredSite: function (type) {
       this.rgMain.show(new LytMonitoredSitesNew());
     },
 
-    sensor: function(id) {
-      if(this.rgMain.currentView instanceof LytSensor){
+    sensor: function (id) {
+      if (this.rgMain.currentView instanceof LytSensor) {
         this.rgMain.currentView.reload({
           id: id
         });
@@ -167,27 +166,27 @@ define([
         }));
       }
     },
-    
-    sensors: function() {
+
+    sensors: function () {
       this.rgMain.show(new LytSensors());
     },
-    
-    newSensor: function(objectType) {
-      this.rgMain.show(new LytSensorsNew({objectType: objectType}));
+
+    newSensor: function (objectType) {
+      this.rgMain.show(new LytSensorsNew({ objectType: objectType }));
     },
 
-    validate: function() {
+    validate: function () {
       this.rgMain.show(new LytSensorValidate());
     },
-    
-    validateType: function(type) {
+
+    validateType: function (type) {
       this.rgMain.show(new LytSensorValidateType({
         type: type
       }));
     },
 
-    validateDetail: function(type, index){
-      if(this.rgMain.currentView instanceof LytSensorValidateDetail){
+    validateDetail: function (type, index) {
+      if (this.rgMain.currentView instanceof LytSensorValidateDetail) {
         this.rgMain.currentView.reload({
           type: type,
           index: index
@@ -200,18 +199,18 @@ define([
       }
     },
 
-    release: function() {
+    release: function () {
       this.rgMain.show(new LytRelease());
     },
 
-    //detail
-    releaseIndividuals: function(id) {
-      this.rgMain.show(new LytStationsRelease({id : id}));
+    // detail
+    releaseIndividuals: function (id) {
+      this.rgMain.show(new LytStationsRelease({ id: id }));
     },
 
-    export: function() {
+    export: function () {
       this.rgMain.show(new LytExport());
-    },
+    }
 
   });
 });

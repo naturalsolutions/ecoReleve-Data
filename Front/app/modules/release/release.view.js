@@ -1,25 +1,25 @@
 define([
   'modules/stations/stations.view',
   'ns_grid/grid.view'
-  
-], function(
+
+], function (
 	StationsView,
 	GridView
 ) {
   'use strict';
 
   return StationsView.extend({
-    displayGridView: function(){
+    displayGridView: function () {
       var _this = this;
-      var onRowClicked = function(row){
+      var onRowClicked = function (row) {
         window.app.currentData = _this.gridView.serialize();
         window.app.currentData.index = row.rowIndex;
-        
-        //var url = '#' + _this.gridView.model.get('type') + '/' + (row.data.id || row.data.ID) + '/release';
+
+        // var url = '#' + _this.gridView.model.get('type') + '/' + (row.data.id || row.data.ID) + '/release';
         var url = '#release/' + (row.data.id || row.data.ID);
-        Backbone.history.navigate(url, {trigger: true});
+        Backbone.history.navigate(url, { trigger: true });
       };
-      var afterFirstRowFetch = function(){
+      var afterFirstRowFetch = function () {
         _this.ui.totalRecords.html(this.model.get('totalRecords'));
       };
 
@@ -33,6 +33,6 @@ define([
           rowModelType: 'pagination'
         }
       }));
-    },
+    }
   });
 });

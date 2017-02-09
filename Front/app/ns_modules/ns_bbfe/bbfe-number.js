@@ -1,22 +1,22 @@
 define([
   'jquery',
   'backbone',
-  'backbone-forms',
+  'backbone-forms'
 
-], function(
+], function (
   $, Backbone, Form
-){
+) {
   'use strict';
+
   return Form.editors.Number = Form.editors.Number.extend({
     defaultValue: '',
 
-    //var lat = /^\-?([1-8]?[0-9]|[1-9]0)(\.[0-9]{0,6})?$/.test(newVal);
-    //long = /^\-?([1]?[1-7][1-9]|[1]?[1-8][0]|[1-9]?[0-9])(\.[0-9]{0,6})?$/.test(newVal);
-    initialize: function(options){
+    // var lat = /^\-?([1-8]?[0-9]|[1-9]0)(\.[0-9]{0,6})?$/.test(newVal);
+    // long = /^\-?([1]?[1-7][1-9]|[1]?[1-8][0]|[1-9]?[0-9])(\.[0-9]{0,6})?$/.test(newVal);
+    initialize: function (options) {
       Form.editors.Number.prototype.initialize.call(this, options);
       // this.options = options.schema.options;
-      
-    },
+    }
     // onKeyPress: function(event) {
     //   var self = this,
     //       delayedDetermineChange = function() {
@@ -30,7 +30,6 @@ define([
     //     delayedDetermineChange();
     //     return;
     //   }
-
 
 
     //   //Get the whole new value so that we can prevent things like double decimals points etc.

@@ -1,6 +1,7 @@
 define(['underscore', 'marionette'],
-function(_, Marionette) {
+function (_, Marionette) {
   'use strict';
+
   return Marionette.TransitionRegion = Marionette.Region.extend({
     transitionInCss: {
     },
@@ -10,40 +11,40 @@ function(_, Marionette) {
     // This is queue manager code that doesn't belong in regions.
     // maybe when this transition region is in Marionette,
     // you will be some sort of mixin for a region.
-    setQueue: function(view, options) {
+    setQueue: function (view, options) {
       this._queuedView = view;
       this._queueOptions = options;
     },
 
-    setInQueue: function(view, options) {
+    setInQueue: function (view, options) {
       this._inQueueView = view;
       this._inQueueOptions = options;
     },
 
-    _clearInQueue: function() {
+    _clearInQueue: function () {
       delete this._inQueueView;
       delete this._inQueueOptions;
     },
 
-    checkQueue: function() {
+    checkQueue: function () {
       if (this._queued) { return false; }
 
       this._queued = true;
       this.once('animateIn', _.bind(this.showQueue, this));
     },
 
-    showQueue: function() {
+    showQueue: function () {
       this.show(this._queuedView, this._queuedOptions);
       this._queued = false;
       this.clearQueue();
     },
 
-    clearQueue: function() {
+    clearQueue: function () {
       delete this._queuedView;
       delete this._queuedOptions;
     },
 
-    show: function(view, options) {
+    show: function (view, options) {
       // If animating out, set the animateInQueue.
       // This new view will be what is transitioned in
       if (this._animatingOut) {
@@ -78,13 +79,12 @@ function(_, Marionette) {
       else if (animateOut && concurrent) {
         currentView.animateOut(options);
         return this._onTransitionOut();
-      } else {
-        return this._onTransitionOut();
       }
+      return this._onTransitionOut();
     },
 
     // This is most of the original show function.
-    _onTransitionOut: function() {
+    _onTransitionOut: function () {
       this.triggerMethod('animateOut', this.currentView);
       var view = this._inQueueView;
       var options = this._inQueueOptions;
@@ -98,7 +98,7 @@ function(_, Marionette) {
 
       var showOptions = options || {};
       var isDifferentView = view !== this.currentView;
-      var preventDestroy =  !!showOptions.preventDestroy;
+      var preventDestroy = !!showOptions.preventDestroy;
       var forceShow = !!showOptions.forceShow;
 
       // we are only changing the view if there is a view to change to begin with
@@ -112,7 +112,7 @@ function(_, Marionette) {
 
       // Destroy the old view
       if (_shouldDestroyView) {
-        this.empty({animate: false});
+        this.empty({ animate: false });
       }
 
       // show the view if the view is different or if you want to re-show the view
@@ -170,19 +170,18 @@ function(_, Marionette) {
       }
 
       // Otherwise, continue on
-      else {
-        return this._onTransitionIn(showOptions);
-      }
+
+      return this._onTransitionIn(showOptions);
     },
 
     // Append the new child
-    appendHtml: function(view) {
+    appendHtml: function (view) {
       this.el.appendChild(view.el);
     },
 
     // After it's shown, then we triggerMethod 'animateIn'
-    _onTransitionIn: function(options) {
-      var preventDestroy =  options.preventDestroy;
+    _onTransitionIn: function (options) {
+      var preventDestroy = options.preventDestroy;
 
       var oldView = this._oldView;
       // // Destroy the old view
@@ -197,7 +196,7 @@ function(_, Marionette) {
     },
 
     // Empty the region, animating the view out first if it needs to be
-    empty: function(options) {
+    empty: function (options) {
       options = options || {};
 
       var view = this.currentView;
@@ -216,7 +215,7 @@ function(_, Marionette) {
       }
     },
 
-    _destroyView: function() {
+    _destroyView: function () {
       var view = this.currentView;
       if (!view || view.isDestroyed) { return; }
 
@@ -228,6 +227,6 @@ function(_, Marionette) {
       this.triggerMethod('empty', view);
 
       delete this.currentView;
-    },
+    }
   });
 });

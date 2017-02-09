@@ -5,15 +5,15 @@ define([
   'marionette',
 
   'modules/objects/object.new.view',
-  './sensor.model',
-], function(
+  './sensor.model'
+], function (
   $, _, Backbone, Marionette,
   NewView, SensorModel
-){
-
+) {
   'use strict';
+
   return NewView.extend({
 
-    ModelPrototype: SensorModel,
+    ModelPrototype: SensorModel
   });
 });

@@ -11,32 +11,31 @@ define([
   'ns_form/NSFormsModuleGit',
 
   'modules/objects/detail.view',
-  './monitored_site.model',
+  './monitored_site.model'
 
 
-], function(
+], function (
   $, _, Backbone, Marionette, Swal, Translater,
   NsMap, GridView, NsForm,
   DetailView, MonitoredSiteModel
-){
-
+) {
   'use strict';
 
   return DetailView.extend({
     ModelPrototype: MonitoredSiteModel,
 
-    displayGrids: function(){
+    displayGrids: function () {
       this.displayHistoryGrid();
       this.displayEquipmentGrid();
       this.displayStationsGrid();
     },
 
-    reload: function(options) {
+    reload: function (options) {
       this.model.set('id', options.id);
 
       this.com.addModule(this.map);
       this.map.com = this.com;
-      this.map.url = this.model.get('type') + '/' + this.model.get('id')  + '/history/?geo=true'; //only this one
+      this.map.url = this.model.get('type') + '/' + this.model.get('id') + '/history/?geo=true'; // only this one
       this.map.updateFromServ();
       this.map.url = false;
 
@@ -44,9 +43,9 @@ define([
       this.displayGrids();
     },
 
-    displayMap: function(geoJson) {
+    displayMap: function (geoJson) {
       this.map = new NsMap({
-        url: 'monitoredSites/' + this.model.get('id')  + '/history/?geo=true', ////only this one
+        url: 'monitoredSites/' + this.model.get('id') + '/history/?geo=true', // //only this one
         zoom: 4,
         element: 'map',
         popup: true,
@@ -54,36 +53,36 @@ define([
       });
     },
 
-    displayHistoryGrid: function() {
+    displayHistoryGrid: function () {
       this.rgHistoryGrid.show(this.historyGrid = new GridView({
-        //columns: this.model.get('historyColumnsDefs'),
+        // columns: this.model.get('historyColumnsDefs'),
         name: 'MonitoredSiteGridHistory',
         type: this.model.get('type'),
-        url: this.model.get('type') + '/' + this.model.get('id')  + '/history/',
-        clientSide: true,
+        url: this.model.get('type') + '/' + this.model.get('id') + '/history/',
+        clientSide: true
       }));
       this.gridViews.push(this.historyGrid);
     },
 
-    displayEquipmentGrid: function() {
+    displayEquipmentGrid: function () {
       this.rgEquipmentGrid.show(this.equipmentGrid = new GridView({
         columns: this.model.get('equipmentColumnDefs'),
         type: this.model.get('type'),
-        url: this.model.get('type') + '/' + this.model.get('id')  + '/equipment',
-        clientSide: true,
+        url: this.model.get('type') + '/' + this.model.get('id') + '/equipment',
+        clientSide: true
       }));
       this.gridViews.push(this.equipmentGrid);
     },
 
-    displayStationsGrid: function() {
+    displayStationsGrid: function () {
       this.rgStationsGrid.show(this.stationsGrid = new GridView({
         columns: this.model.get('stationsColumnDefs'),
         type: this.model.get('type'),
-        url: this.model.get('type') + '/' + this.model.get('id')  + '/stations',
-        clientSide: true,
+        url: this.model.get('type') + '/' + this.model.get('id') + '/stations',
+        clientSide: true
       }));
       this.gridViews.push(this.stationsGrid);
-    },
+    }
 
   });
 });

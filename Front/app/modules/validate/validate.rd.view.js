@@ -1,4 +1,4 @@
-//radio
+// radio
 define([
   'jquery',
   'underscore',
@@ -12,13 +12,12 @@ define([
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
   'ns_grid/grid.view',
-  'ns_navbar/navbar.view',
+  'ns_navbar/navbar.view'
 
-], function(
+], function (
   $, _, Backbone, Marionette, Swal, Translater, moment,
   Com, NsMap, NsForm, GridView, NavbarView
-){
-
+) {
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -27,37 +26,37 @@ define([
 
     events: {
       'change .js-select-frequency': 'handleFrequency',
-      'click .js-btn-validate': 'validate',
+      'click .js-btn-validate': 'validate'
     },
 
     ui: {
-      'map': '#map',
-      'individualForm': '.js-individual-form',
-      'sensorForm': '.js-sensor-form',
-      'selectFrequency': '.js-select-frequency'
+      map: '#map',
+      individualForm: '.js-individual-form',
+      sensorForm: '.js-sensor-form',
+      selectFrequency: '.js-select-frequency'
     },
 
     regions: {
-      'rgGrid': '.js-rg-grid',
-      'rgNavbar': '.js-rg-navbar',
+      rgGrid: '.js-rg-grid',
+      rgNavbar: '.js-rg-navbar'
     },
 
-    initialize: function(options) {
+    initialize: function (options) {
       this.model = new Backbone.Model();
       this.com = new Com();
       this.model.set('type', options.type);
-      this.frequency = options.frequency;      
+      this.frequency = options.frequency;
       this.index = options.index - 1;
       this.fetchGrid();
     },
 
-    fetchGrid: function(){
+    fetchGrid: function () {
       var _this = this;
       return this.deferred = $.ajax({
         url: 'sensors/' + this.model.get('type') + '/uncheckedDatas',
         method: 'GET',
-        context: this,
-      }).done(function(data){
+        context: this
+      }).done(function (data) {
         _this.model.set('data', data[1]);
         _this.populateModel();
 
@@ -70,13 +69,13 @@ define([
       });
     },
 
-    populateModel: function(){
+    populateModel: function () {
       this.model.set('FK_Individual', this.model.get('data')[this.index].FK_Individual);
       this.model.set('FK_Sensor', this.model.get('data')[this.index].FK_Sensor);
       this.model.set('FK_ptt', this.model.get('data')[this.index].FK_ptt);
     },
 
-    reload: function(options){
+    reload: function (options) {
       this.ui.selectFrequency.val('');
       this.index = parseInt(options.index) - 1;
       this.populateModel();
@@ -92,21 +91,21 @@ define([
       this.displayGrids();
     },
 
-    onShow: function(){
+    onShow: function () {
       var _this = this;
-      $.when(this.deferred).then(function(resp){
+      $.when(this.deferred).then(function (resp) {
         _this.displayMap();
         _this.displayForms();
         _this.displayGrids();
       });
     },
 
-    displayForms: function(){
+    displayForms: function () {
       this.displayIndForm();
       this.displaySensorForm();
     },
 
-    displayMap: function() {
+    displayMap: function () {
       var url = 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt') + '?geo=true';
       this.map = new NsMap({
         url: url,
@@ -119,9 +118,9 @@ define([
       });
     },
 
-    displayIndForm: function() {
-      if(this.model.get('FK_Individual') === null){
-        this.swal({title: 'No individual attached'}, 'warning');
+    displayIndForm: function () {
+      if (this.model.get('FK_Individual') === null) {
+        this.swal({ title: 'No individual attached' }, 'warning');
         this.ui.individualForm.html('<br /><span class="bull-warn">●</span>No individual is attached');
         return;
       }
@@ -133,11 +132,11 @@ define([
         formRegion: this.ui.individualForm,
         displayMode: 'display',
         id: this.model.get('FK_Individual'),
-        reloadAfterSave: false,
+        reloadAfterSave: false
       });
     },
 
-    displaySensorForm: function() {
+    displaySensorForm: function () {
       this.nsform = new NsForm({
         name: 'sensorForm',
         buttonRegion: [],
@@ -145,39 +144,39 @@ define([
         formRegion: this.ui.sensorForm,
         displayMode: 'display',
         id: this.model.get('FK_Sensor'),
-        reloadAfterSave: false,
+        reloadAfterSave: false
       });
     },
 
-    displayGrids: function(){
+    displayGrids: function () {
       var _this = this;
 
       var columnDefs = [{
         field: 'date',
         headerName: 'DATE',
-        minWidth: 200,
+        minWidth: 200
       }, {
         field: 'PK_id',
         headerName: 'PK_id',
-        hide: false,
+        hide: false
       }, {
         field: 'lat',
-        headerName: 'LAT',
+        headerName: 'LAT'
       }, {
         field: 'lon',
-        headerName: 'LON',
+        headerName: 'LON'
       }, {
         field: 'ele',
-        headerName: 'ELE (m)',
+        headerName: 'ELE (m)'
       }, {
         field: 'dist',
-        headerName: 'DIST (km)',
+        headerName: 'DIST (km)'
       }, {
         field: 'speed',
-        headerName: 'SPEED (km/h)',
-      },{
+        headerName: 'SPEED (km/h)'
+      }, {
         field: 'type',
-        headerName: 'Type',
+        headerName: 'Type'
       }];
 
       this.rgGrid.show(this.gridView = new GridView({
@@ -185,42 +184,42 @@ define([
         com: this.com,
         url: 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt'),
         afterFirstRowFetch: this.initFrequency.bind(this),
-        clientSide: true,        
+        clientSide: true,
         idName: 'PK_id',
         gridOptions: {
           rowSelection: 'multiple',
           enableFilter: true,
-          onRowClicked: function(row){
+          onRowClicked: function (row) {
             _this.gridView.interaction('focus', row.data.PK_id || row.data.id);
           },
-          onRowDoubleClicked: function(row){
+          onRowDoubleClicked: function (row) {
             _this.gridView.interaction('focusAndZoom', row.data.PK_id || row.data.id);
           }
-        },
+        }
       }));
     },
 
-    onRender: function() {
+    onRender: function () {
       this.$el.i18n();
     },
 
-    initFrequency: function() {
+    initFrequency: function () {
       var hz = 'all';
-      if(this.model.get('type') == 'gsm' || this.model.get('type') == 'rfid'){
+      if (this.model.get('type') == 'gsm' || this.model.get('type') == 'rfid') {
         hz = 60;
       }
       this.ui.selectFrequency.find('option[value="' + hz + '"]').prop('selected', true).change();
     },
 
-    roundDate: function(date, duration) {
+    roundDate: function (date, duration) {
       return moment(Math.floor((+date) / (+duration)) * (+duration));
     },
 
-    handleFrequency: function(e){
-      var _this= this;
+    handleFrequency: function (e) {
+      var _this = this;
       var hz = $(e.target).val();
 
-      if(hz === 'all'){
+      if (hz === 'all') {
         this.gridView.interaction('selectAll');
         return;
       }
@@ -230,8 +229,8 @@ define([
       hz = parseInt(hz);
       var coll = new Backbone.Collection(this.gridView.gridOptions.rowData[1]);
 
-      var groups = coll.groupBy(function(model) {
-        var modelDAte = new moment(model.get('date'),'DD/MM/YYYY HH:mm:ss');
+      var groups = coll.groupBy(function (model) {
+        var modelDAte = new moment(model.get('date'), 'DD/MM/YYYY HH:mm:ss');
         return _this.roundDate(modelDAte, moment.duration(hz, 'minutes'));
       });
 
@@ -245,46 +244,46 @@ define([
       this.gridView.interaction('multiSelection', idList);
     },
 
-    validate: function(){
+    validate: function () {
       var _this = this;
-      if(this.model.get('FK_Individual') === null){
+      if (this.model.get('FK_Individual') === null) {
         return;
       }
 
       var url = 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt');
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
-      if(!selectedNodes.length){
+      if (!selectedNodes.length) {
         return;
       }
 
-      var selectedIds = selectedNodes.map(function(node){
+      var selectedIds = selectedNodes.map(function (node) {
         return node.data.PK_id;
       });
-      
+
       $.ajax({
         url: url,
         method: 'POST',
-        data: {data: JSON.stringify(selectedIds)},
-        context: this,
-      }).done(function(resp) {
+        data: { data: JSON.stringify(selectedIds) },
+        context: this
+      }).done(function (resp) {
         if (resp.errors) {
           resp.title = 'An error occured';
           resp.type = 'error';
-        }else {
+        } else {
           resp.title = 'Success';
           resp.type = 'success';
         }
 
-        var callback = function() {
-          $.when(_this.fetchGrid()).then(function(){
-            var hash = window.location.hash.split('/').slice(0,-1).join('/');
-            if(!_this.model.get('data').length){
-              Backbone.history.navigate(hash + '/', {trigger: true});
+        var callback = function () {
+          $.when(_this.fetchGrid()).then(function () {
+            var hash = window.location.hash.split('/').slice(0, -1).join('/');
+            if (!_this.model.get('data').length) {
+              Backbone.history.navigate(hash + '/', { trigger: true });
               return;
             }
-            if(_this.index + 1 == _this.model.get('data').length){
+            if (_this.index + 1 == _this.model.get('data').length) {
               _this.index = 0;
-              Backbone.history.navigate(hash + '/' + (_this.index + 1), {trigger: true});
+              Backbone.history.navigate(hash + '/' + (_this.index + 1), { trigger: true });
               return;
             }
             Backbone.history.loadUrl(Backbone.history.fragment);
@@ -292,26 +291,26 @@ define([
         };
         resp.text = 'existing: ' + resp.existing + ', inserted: ' + resp.inserted + ', errors:' + resp.errors;
         this.swal(resp, resp.type, callback);
-      }).fail(function(resp) {
+      }).fail(function (resp) {
         this.swal(resp, 'error');
       });
     },
 
-    swal: function(opt, type, callback) {
+    swal: function (opt, type, callback) {
       var btnColor;
-      switch (type){
-        case 'success':
-          btnColor = 'green';
-          break;
-        case 'error':
-          btnColor = 'rgb(147, 14, 14)';
-          break;
-        case 'warning':
-          btnColor = 'orange';
-          break;
-        default:
-          return;
-          break;
+      switch (type) {
+      case 'success':
+        btnColor = 'green';
+        break;
+      case 'error':
+        btnColor = 'rgb(147, 14, 14)';
+        break;
+      case 'warning':
+        btnColor = 'orange';
+        break;
+      default:
+        return;
+        break;
       }
 
       Swal({
@@ -321,15 +320,15 @@ define([
         showCancelButton: false,
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
-        closeOnConfirm: true,
+        closeOnConfirm: true
       },
-      function(isConfirm) {
-        //could be better
+      function (isConfirm) {
+        // could be better
         if (callback) {
           callback();
         }
       });
-    },
+    }
 
   });
 });

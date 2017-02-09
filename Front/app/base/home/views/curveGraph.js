@@ -1,19 +1,20 @@
 define([
-    'jquery',
-    'chart',
-    'marionette',
-    'moment'
-], function($, Chart, Marionette, moment) {
+  'jquery',
+  'chart',
+  'marionette',
+  'moment'
+], function ($, Chart, Marionette, moment) {
   'use strict';
+
   return Marionette.ItemView.extend({
     template: 'app/base/home/tpl/tpl-graph.html',
 
-    onShow: function() {
+    onShow: function () {
       this.initChart();
     },
-    initChart: function() {
+    initChart: function () {
       var _this = this;
-      //caching graph data for a day
+      // caching graph data for a day
       var dataGraph = localStorage.getItem('ecoreleveChart');
       // get current day and compare it with stored day
       var d = (new Date() + '').split(' ');
@@ -29,7 +30,7 @@ define([
           context: this,
           url: url,
           dataType: 'json'
-        }).done(function(data) {
+        }).done(function (data) {
           var strData = JSON.stringify(data);
           // store data in localstorage
           localStorage.setItem('ecoreleveChart', strData);
@@ -37,12 +38,12 @@ define([
           var day_ = d[2];
           localStorage.setItem('ecoreleveChartDay', day_);
           _this.drawGraph(data);
-        }).fail(function(msg) {
+        }).fail(function (msg) {
           console.error(msg);
         });
       }
     },
-    drawGraph: function(data) {
+    drawGraph: function (data) {
       var canvas = this.$el.find('canvas');
       var labels = [];
       var lineData = [];
@@ -52,7 +53,7 @@ define([
       var i = 0;
       for (var key in data) {
         var dataObj = {};
-        var month = new moment(key,'MMM YYYY').format('MM/YY');
+        var month = new moment(key, 'MMM YYYY').format('MM/YY');
         var value = data[key] || 0;
         labels.push(month);
         lineData.push(parseInt(value));
@@ -65,10 +66,10 @@ define([
           data: lineData
         }]
       };
-      this.chart = new Chart(canvas[0].getContext('2d')).Line(gData,{scaleShowLabels: true});
+      this.chart = new Chart(canvas[0].getContext('2d')).Line(gData, { scaleShowLabels: true });
     },
 
-    onDestroy: function() {
+    onDestroy: function () {
       if (this.chart) {
         this.chart.destroy();
       }

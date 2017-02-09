@@ -1,4 +1,4 @@
-//radio
+// radio
 define([
   'jquery',
   'underscore',
@@ -10,10 +10,9 @@ define([
   'ns_grid/grid.view',
   './validate.model'
 
-], function($, _, Backbone, Marionette, Swal,
+], function ($, _, Backbone, Marionette, Swal,
   Com, GridView, ValidateModel
-){
-
+) {
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -23,12 +22,12 @@ define([
 
     events: {
       'click .js-btn-auto-validation': 'handleAutoValidation',
-      'change .js-select-frequency': 'setFrequency',
+      'change .js-select-frequency': 'setFrequency'
     },
 
     ui: {
-      'totalRecords': '.js-total-records',
-      'frequency': '.js-select-frequency',
+      totalRecords: '.js-total-records',
+      frequency: '.js-select-frequency'
     },
 
     regions: {
@@ -37,38 +36,38 @@ define([
 
     model: new ValidateModel(),
 
-    initialize: function(options) {
+    initialize: function (options) {
       this.type_ = options.type;
       this.columnDefs = this.model.get(this.type_ + 'ColumnDefs');
     },
 
 
-    onRender: function() {
+    onRender: function () {
       this.$el.i18n();
     },
 
-    onShow: function() {
+    onShow: function () {
       this.displayGrid();
       this.frequency = this.model.get('defaultFrequency')[this.type_];
       this.ui.frequency.val(this.frequency);
     },
 
-    onRowClicked: function(row) {
-      if( this.type_ != 'rfid' ) {
-        Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.id) + 1), {trigger: true});
+    onRowClicked: function (row) {
+      if (this.type_ != 'rfid') {
+        Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.id) + 1), { trigger: true });
       }
       else {
         row.node.setSelected(!row.node.isSelected());
       }
     },
 
-    setFrequency: function(e) {
+    setFrequency: function (e) {
       this.frequency = $(e.target).val();
     },
 
-    displayGrid: function() {
+    displayGrid: function () {
       var _this = this;
-      var afterFirstRowFetch = function(){
+      var afterFirstRowFetch = function () {
         _this.ui.totalRecords.html(this.model.get('totalRecords'));
       };
 
@@ -79,36 +78,36 @@ define([
         clientSide: true,
         gridOptions: {
           rowSelection: 'multiple',
-          onRowClicked: this.onRowClicked.bind(this),
-        },
+          onRowClicked: this.onRowClicked.bind(this)
+        }
       }));
     },
 
-    handleAutoValidation: function() {
+    handleAutoValidation: function () {
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
-      if(!selectedNodes.length){
+      if (!selectedNodes.length) {
         return;
       }
       var params = {
-        'frequency': this.frequency,
-        'toValidate': []
+        frequency: this.frequency,
+        toValidate: []
       };
-      var selectedIds = selectedNodes.map(function(node){
+      var selectedIds = selectedNodes.map(function (node) {
         return node.data.PK_id;
       });
 
       if (this.type_ === 'rfid') {
-        params.toValidate = selectedNodes.map(function(node){
+        params.toValidate = selectedNodes.map(function (node) {
           return {
-            'equipID': node.data.equipID,
-            'FK_Sensor': node.data.FK_Sensor
+            equipID: node.data.equipID,
+            FK_Sensor: node.data.FK_Sensor
           };
         });
-      }else {
-        params.toValidate = selectedNodes.map(function(node){
+      } else {
+        params.toValidate = selectedNodes.map(function (node) {
           return {
-            'FK_Individual': node.data.FK_Individual,
-            'FK_ptt': node.data.FK_ptt
+            FK_Individual: node.data.FK_Individual,
+            FK_ptt: node.data.FK_ptt
           };
         });
       }
@@ -122,51 +121,51 @@ define([
       $.ajax({
         url: url,
         method: 'POST',
-        data : params,
+        data: params,
         context: this
-      }).done(function(resp) {
+      }).done(function (resp) {
         var msg = new Object();
-        msg.title='Succes';
+        msg.title = 'Succes';
         msg.resp = resp;
         this.swal(msg, 'success');
         this.displayGrid();
-      }).fail(function(resp) {
+      }).fail(function (resp) {
         var msg = new Object();
-        msg.title='Succes';
+        msg.title = 'Succes';
         msg.resp = resp;
         this.swal(msg, 'error');
       });
     },
 
-    swal: function(opt, type){
+    swal: function (opt, type) {
       var btnColor;
-      switch(type){
-        case 'success':
-          btnColor = 'green';
-          break;
-        case 'error':
-          btnColor = 'rgb(147, 14, 14)';
-          break;
-        case 'warning':
-          btnColor = 'orange';
-          break;
-        default:
-          return;
-          break;
+      switch (type) {
+      case 'success':
+        btnColor = 'green';
+        break;
+      case 'error':
+        btnColor = 'rgb(147, 14, 14)';
+        break;
+      case 'warning':
+        btnColor = 'orange';
+        break;
+      default:
+        return;
+        break;
       }
       Swal({
         title: opt.title || 'error',
-        text: JSON.stringify(opt.resp)|| '',
+        text: JSON.stringify(opt.resp) || '',
         type: type,
-        //timer: 2000,
+        // timer: 2000,
         showCancelButton: false,
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
-        closeOnConfirm: true,
+        closeOnConfirm: true
       },
-      function(isConfirm){
+      function (isConfirm) {
       });
-    },
+    }
 
   });
 });

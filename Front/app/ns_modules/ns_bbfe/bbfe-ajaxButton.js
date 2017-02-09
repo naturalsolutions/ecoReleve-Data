@@ -1,108 +1,107 @@
 define([
   'jquery',
   'backbone_forms',
-  'sweetAlert',
-], function(
+  'sweetAlert'
+], function (
   $, Form, Swal
-){
+) {
   'use strict';
+
   return Form.editors.ajaxButtonEditor = Form.editors.Base.extend({
 
 
+    previousValue: '',
 
-        previousValue: '',
+    events: {
+      'click button': 'actionOnBtn'
+    },
 
-        events: {
-            'click button': "actionOnBtn"
-        },
-
-        template: '<div>\
+    template: '<div>\
         <div class="input-group">\
             <button class="btn btn-success" <%=editable%> ><%=btnText%>&nbsp\
                 <span class="<%=iconFont%>"></span>\
             </button>\
             </div>\
         </div>',
-        initialize: function(options) {
-            Form.editors.Base.prototype.initialize.call(this, options);
-            this.options = options.schema.options;
-            this.editable = '';
-            if (options.schema.fieldClass.indexOf('hide') != -1 ) {
-              this.editable = 'disabled';
-            }
-            var params = this.options.target_params;
-            this.parentModel = options.model;
-            this.dataToSend = {};
-            var _this = this;
+    initialize: function (options) {
+      Form.editors.Base.prototype.initialize.call(this, options);
+      this.options = options.schema.options;
+      this.editable = '';
+      if (options.schema.fieldClass.indexOf('hide') != -1) {
+        this.editable = 'disabled';
+      }
+      var params = this.options.target_params;
+      this.parentModel = options.model;
+      this.dataToSend = {};
+      var _this = this;
+    },
 
-        },
-
-        actionOnBtn: function(e){
-            var _this = this;
-            e.preventDefault();
-             Swal({
-              title: 'Warning',
-              text: 'Monitored Site coordinates will be updated, are you sure ? ',
-              type: 'warning',
-              showCancelButton: true,
-              CancelButtonColor:'red',
-              CancelButtonText: 'No',
-              confirmButtonColor: 'green',
-              confirmButtonText: 'Yes',
-              closeOnConfirm: true
-              },
-              function(isConfirm) {
-                  if (isConfirm){
-                    _this.callback();
-                  }
-              });
-        },
-
-        callback: function() {
-            var _this = this;
-            var url = this.options.url;
-            $.ajax({
-                url: url,
-                context: this,
-                data:this.parentModel.toJSON(),
-                success: function(data){
-                    _this.ajaxAlert(data);
-                },
-                error: function(data){
-                    console.log(data)
+    actionOnBtn: function (e) {
+      var _this = this;
+      e.preventDefault();
+      Swal({
+        title: 'Warning',
+        text: 'Monitored Site coordinates will be updated, are you sure ? ',
+        type: 'warning',
+        showCancelButton: true,
+        CancelButtonColor: 'red',
+        CancelButtonText: 'No',
+        confirmButtonColor: 'green',
+        confirmButtonText: 'Yes',
+        closeOnConfirm: true
+      },
+              function (isConfirm) {
+                if (isConfirm) {
+                  _this.callback();
                 }
-            });
-        },
+              });
+    },
 
-        ajaxAlert: function(data){
-            setTimeout(function() {
-                Swal({
-                  title: 'Site position',
-                  text: data,
-                  type: 'info',
-                  showCancelButton: false,
-                  confirmButtonColor: 'rgb(201, 218, 225)',
-                  confirmButtonText: 'OK',
-                  closeOnConfirm: true,
+    callback: function () {
+      var _this = this;
+      var url = this.options.url;
+      $.ajax({
+        url: url,
+        context: this,
+        data: this.parentModel.toJSON(),
+        success: function (data) {
+          _this.ajaxAlert(data);
+        },
+        error: function (data) {
+          console.log(data);
+        }
+      });
+    },
+
+    ajaxAlert: function (data) {
+      setTimeout(function () {
+        Swal({
+          title: 'Site position',
+          text: data,
+          type: 'info',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(201, 218, 225)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true
+        });
+      }, 500);
+    },
+
+    render: function () {
+      var options = this.options;
+      var _this = this;
+
+      var $el = _.template(
+                this.template, { btnText: this.options.btnText, iconFont: this.options.iconFont, editable: _this.editable
                 });
-            }, 500);
-        },
-
-        render: function(){
-            var options = this.options;
-            var _this = this;
-
-            var $el = _.template(
-                this.template, {btnText:this.options.btnText ,iconFont:this.options.iconFont, editable: _this.editable
-            });
-           this.setElement($el);
-            //tmp solution ? datetimepicker remove the value
+      this.setElement($el);
+            // tmp solution ? datetimepicker remove the value
 /*            if(this.options){
                 var value = this.options.model.get(this.options.key);
                 $el.find('input').val(value);
             }*/
 
-            return this;
-        }
-    });
+      return this;
+    }
+  });
 });

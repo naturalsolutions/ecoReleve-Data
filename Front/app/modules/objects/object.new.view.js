@@ -1,42 +1,42 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
-	'ns_form/NSFormsModuleGit',
-], function(
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater',
+  'ns_form/NSFormsModuleGit'
+], function (
   $, _, Backbone, Marionette, Swal, Translater,
   NsForm
-){
-
+) {
   'use strict';
+
   return Marionette.ItemView.extend({
     template: 'app/modules/objects/object.new.tpl.html',
     className: 'white full-height new',
 
     ui: {
-      'form': '.js-form',
+      form: '.js-form'
     },
     events: {
       'click .js-btn-save': 'save',
-      'click .js-link-back': 'back',
+      'click .js-link-back': 'back'
     },
 
     ModelPrototype: Backbone.Model,
 
-    initialize: function(options) {
+    initialize: function (options) {
       this.model = new this.ModelPrototype();
-			this.data = options.data;
+      this.data = options.data;
       this.model.set('objectType', options.objectType || 1);
     },
 
-    onShow: function() {
+    onShow: function () {
       this.displayForm();
     },
 
-    displayForm: function() {
+    displayForm: function () {
       var _this = this;
       this.nsForm = new NsForm({
         modelurl: this.model.get('type'),
@@ -48,25 +48,25 @@ define([
         data: this.data,
         reloadAfterSave: false,
         afterSaveSuccess: this.afterSaveSuccess.bind(this),
-        savingError: function(response) {
+        savingError: function (response) {
           var msg = 'in creating a new sensor';
-          if (response.status == 520 && response.responseText){
+          if (response.status == 520 && response.responseText) {
             msg = response.responseText;
           }
           Swal({
             title: 'Error',
-            text: msg ,
+            text: msg,
             type: 'error',
             showCancelButton: false,
             confirmButtonColor: 'rgb(147, 14, 14)',
             confirmButtonText: 'OK',
-            closeOnConfirm: true,
+            closeOnConfirm: true
           });
         }
       });
     },
 
-    afterSaveSuccess: function(){
+    afterSaveSuccess: function () {
       var _this = this;
       Swal({
         title: 'Succes',
@@ -76,9 +76,9 @@ define([
         confirmButtonColor: 'green',
         confirmButtonText: 'create another ' + _this.model.get('single'),
         cancelButtonText: 'cancel',
-        closeOnConfirm: true,
+        closeOnConfirm: true
       },
-      function(isConfirm) {
+      function (isConfirm) {
         if (!isConfirm) {
           _this.cancel();
         } else {
@@ -87,15 +87,15 @@ define([
       });
     },
 
-    save: function() {
+    save: function () {
       this.nsForm.butClickSave();
     },
 
-    back: function() {
+    back: function () {
     },
 
-		cancel: function() {
-			Backbone.history.navigate(this.model.get('type'),{trigger: true});
-		},
+    cancel: function () {
+      Backbone.history.navigate(this.model.get('type'), { trigger: true });
+    }
   });
 });

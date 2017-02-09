@@ -1,6 +1,6 @@
 define(['marionette'],
-function(Marionette) {
+function (Marionette) {
   'use strict';
 
-  //todo : copy the lib code here
+  // todo : copy the lib code here
 });

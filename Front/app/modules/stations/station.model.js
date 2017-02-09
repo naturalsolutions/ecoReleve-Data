@@ -1,7 +1,7 @@
 define([
   'underscore',
   'backbone'
-], function(
+], function (
   _, Backbone
 ) {
   'use strict';
@@ -17,11 +17,11 @@ define([
       uiTabs: [
         {
           name: 'all',
-          label: 'All',
+          label: 'All'
         },
         {
           name: 'lastImported',
-          label: 'Last imported',
+          label: 'Last imported'
         }
       ],
 
@@ -30,7 +30,7 @@ define([
         modelurl: 'stations',
         displayMode: 'display',
         objectType: 1,
-        reloadAfterSave: true,
+        reloadAfterSave: true
       }
     }
   });

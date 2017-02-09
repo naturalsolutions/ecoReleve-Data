@@ -1,157 +1,152 @@
 define([
-    'jquery','autocompTree',
-], function( $, autocompTree) {
+  'jquery', 'autocompTree'
+], function ($, autocompTree) {
+  'use strict';
 
-    'use strict';
+  function SelectFilter() {}
 
-    function SelectFilter() {}
+  SelectFilter.prototype = {
+    init: function (params) {
+      var _this = this;
+      var apply = 'Apply Filter';
+      var clear = 'Clear';
+      var placeholder = 'Input thésau';
 
-    SelectFilter.prototype = {
-        init: function(params) {
-            var _this = this;
-            var apply = "Apply Filter";
-            var clear = "Clear";
-            var placeholder = "Input thésau";
-
-            this.eGui = document.createElement('div');
-            this.eGui.innerHTML =
+      this.eGui = document.createElement('div');
+      this.eGui.innerHTML =
                 '<div class="js-select">' +
-                '<input type="text" class="ag-filter-filter js-autocomp-input form-control input-sm" id="prout" placeholder="'+placeholder+'">'+
+                '<input type="text" class="ag-filter-filter js-autocomp-input form-control input-sm" id="prout" placeholder="' + placeholder + '">' +
                 '</div>' +
                 '<div class="ag-filter-apply-panel" id="applyPanel">' +
                 '<button class="btn btn-block" type="button" id="applyButton">' + apply + '</button>' +
                 '<div class="bottom clearfix" />' +
                 '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="reneco reneco-close">close</span> ' + clear + '</button>' +
                 '</div>';
-            this.$eGui = $(this.eGui);
+      this.$eGui = $(this.eGui);
 
 
-            this.cleanBtn = this.eGui.querySelector('#cleanBtn');
-            this.$autoComp = this.eGui.querySelector('.js-autocomp-input');
-            this.cleanBtn.addEventListener('click', this.dateClean.bind(this));
-            this.filterThesau = null;
+      this.cleanBtn = this.eGui.querySelector('#cleanBtn');
+      this.$autoComp = this.eGui.querySelector('.js-autocomp-input');
+      this.cleanBtn.addEventListener('click', this.dateClean.bind(this));
+      this.filterThesau = null;
 
-            this.applyActive = true;
-            this.filterChangedCallback = params.filterChangedCallback;
-            this.filterModifiedCallback = params.filterModifiedCallback;
-            this.valueGetter = params.valueGetter;
+      this.applyActive = true;
+      this.filterChangedCallback = params.filterChangedCallback;
+      this.filterModifiedCallback = params.filterModifiedCallback;
+      this.valueGetter = params.valueGetter;
 
 
-            $(this.$autoComp).autocompTree({
-                wsUrl: "http://localhost/ThesaurusCore/api/Thesaurus",
-                webservices: 'fastInitForCompleteTree',
-                language: { hasLanguage: true, lng: "fr" },
-                display: {
-                    isDisplayDifferent: false,
+      $(this.$autoComp).autocompTree({
+        wsUrl: 'http://localhost/ThesaurusCore/api/Thesaurus',
+        webservices: 'fastInitForCompleteTree',
+        language: { hasLanguage: true, lng: 'fr' },
+        display: {
+          isDisplayDifferent: false
                     // suffixeId: '_value',
                     // displayValueName: "valueTranslated",
                     // storedValueName: "fullpath"
-                },
-                inputValue: null,
-                startId: "204089",
-                timeout: undefined,
-
-                onItemClick: function (options) {
-                    _this.onFilterChanged();
-
-                }
-            });
-
-            this.createGui();
         },
+        inputValue: null,
+        startId: '204089',
+        timeout: undefined,
 
-        dateClean: function() {
-            $(this.$autoComp).val("");
+        onItemClick: function (options) {
+          _this.onFilterChanged();
+        }
+      });
 
-            this.onFilterChanged();
-            this.filterChangedCallback();
-            if ($('.ag-filter').length) {
-                $('body').trigger('click'); // simule un clique sur le body fermera le popup :p
-            }
-        },
+      this.createGui();
+    },
 
-        afterGuiAttached: function() {
-            var self = this;
-            $(this.$autoComp).on("changeThe", function(e) {
-                self.onFilterChanged();
-            })
-        },
+    dateClean: function () {
+      $(this.$autoComp).val('');
 
-        isFilterValid: function() {
-            var optSel = $(this.$autoComp).val();
-            var isValid = (optSel != "")
-            return isValid;
-        },
+      this.onFilterChanged();
+      this.filterChangedCallback();
+      if ($('.ag-filter').length) {
+        $('body').trigger('click'); // simule un clique sur le body fermera le popup :p
+      }
+    },
 
-        onFilterChanged: function() {
-            this.filterThesau = $(this.$autoComp).val()
-            this.filterChanged();
-        },
+    afterGuiAttached: function () {
+      var self = this;
+      $(this.$autoComp).on('changeThe', function (e) {
+        self.onFilterChanged();
+      });
+    },
 
-        filterChanged: function() {
-            this.filterModifiedCallback();
-            if (!this.applyActive) {
-                this.filterChangedCallback();
-            }
-        },
+    isFilterValid: function () {
+      var optSel = $(this.$autoComp).val();
+      var isValid = (optSel != '');
+      return isValid;
+    },
 
-        getGui: function() {
-            return this.eGui;
-        },
+    onFilterChanged: function () {
+      this.filterThesau = $(this.$autoComp).val();
+      this.filterChanged();
+    },
 
-        createGui: function() {
-            this.setupApply();
-        },
+    filterChanged: function () {
+      this.filterModifiedCallback();
+      if (!this.applyActive) {
+        this.filterChangedCallback();
+      }
+    },
 
-        isFilterActive: function() {
-            return this.filterThesau;
-        },
+    getGui: function () {
+      return this.eGui;
+    },
 
-        setupApply: function() {
-            var _this = this;
-            if (this.applyActive) {
-                this.eApplyButton = this.eGui.querySelector('#applyButton');
-                this.eApplyButton.addEventListener('click', function() {
-                    if (_this.isFilterValid()) {
-                        _this.filterChangedCallback();
-                    }
-                });
-            }
-        },
+    createGui: function () {
+      this.setupApply();
+    },
 
-        getApi: function() {
-            var that = this;
+    isFilterActive: function () {
+      return this.filterThesau;
+    },
+
+    setupApply: function () {
+      var _this = this;
+      if (this.applyActive) {
+        this.eApplyButton = this.eGui.querySelector('#applyButton');
+        this.eApplyButton.addEventListener('click', function () {
+          if (_this.isFilterValid()) {
+            _this.filterChangedCallback();
+          }
+        });
+      }
+    },
+
+    getApi: function () {
+      var that = this;
+      return {
+        getModel: function () {
+          if (that.isFilterActive()) {
             return {
-                getModel: function() {
-                    if (that.isFilterActive()) {
-                        return {
-                            type: 1,
-                            filter: that.filterThesau
-                        };
-                    } else {
-                        return null;
-                    }
-                },
-                setModel: function(model) {
-                    if (model) {
-                        this.setType(model.type);
-                        this.setFilter(model.filter);
-                    } else this.setFilter(null);
-                }
+              type: 1,
+              filter: that.filterThesau
             };
+          }
+          return null;
         },
+        setModel: function (model) {
+          if (model) {
+            this.setType(model.type);
+            this.setFilter(model.filter);
+          } else this.setFilter(null);
+        }
+      };
+    },
 
-        doesFilterPass: function(params) {
-            var valTmp = this.valueGetter(params);
+    doesFilterPass: function (params) {
+      var valTmp = this.valueGetter(params);
 
-            if (!this.filterThesau) {
-                return true;
-            } else {
-                return (valTmp == this.filterThesau);
-            }
-
-        },
+      if (!this.filterThesau) {
+        return true;
+      }
+      return (valTmp == this.filterThesau);
     }
+  };
 
-    return SelectFilter;
+  return SelectFilter;
 });

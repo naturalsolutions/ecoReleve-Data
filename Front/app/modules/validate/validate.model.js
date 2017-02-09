@@ -1,10 +1,10 @@
 define([
   'jquery',
   'underscore',
-  'backbone',
-], function(
+  'backbone'
+], function (
   $, _, Backbone
-){
+) {
   'use strict';
 
   return Backbone.Model.extend({
@@ -19,39 +19,39 @@ define([
         {
           field: 'UnicIdentifier',
           headerName: 'Unic Identifier',
-          checkboxSelection: true,
-        },{
+          checkboxSelection: true
+        }, {
           field: 'FK_Sensor',
           headerName: 'FK_Sensor',
-          hide: true,
-        },{
+          hide: true
+        }, {
           field: 'equipID',
           headerName: 'equipID',
-          hide: true,
+          hide: true
         }, {
           field: 'site_name',
-          headerName: 'site name',
+          headerName: 'site name'
         }, {
           field: 'site_type',
-          headerName: 'site type',
+          headerName: 'site type'
         }, {
           field: 'StartDate',
-          headerName: 'Start Date',
+          headerName: 'Start Date'
         }, {
           field: 'EndDate',
-          headerName: 'End Date',
+          headerName: 'End Date'
         }, {
           field: 'nb_chip_code',
-          headerName: 'nb indiv',
-        },{
+          headerName: 'nb indiv'
+        }, {
           field: 'total_scan',
-          headerName: 'total scan',
-        },{
+          headerName: 'total scan'
+        }, {
           field: 'first_scan',
-          headerName: 'first scan',
-        },{
+          headerName: 'first scan'
+        }, {
           field: 'last_scan',
-          headerName: 'last scan',
+          headerName: 'last scan'
         }
       ],
 
@@ -59,41 +59,41 @@ define([
         {
           field: 'FK_ptt',
           headerName: 'Unic Identifier',
-          checkboxSelection: true,
+          checkboxSelection: true
         },
         {
           field: 'FK_Individual',
           headerName: 'Individual ID',
-          cellRenderer: function(params){
-            if(!params.data.FK_Individual){
+          cellRenderer: function (params) {
+            if (!params.data.FK_Individual) {
               return '<span class="bull-warn">&#x25cf;</span> No Individual attached !';
             }
             return params.value;
           }
-        },{
+        }, {
           field: 'Survey_type',
-          headerName: 'Survey Type',
+          headerName: 'Survey Type'
         },
         {
           field: 'FK_Sensor',
           headerName: 'FK_Sensor',
-          hide: true,
-        }, 
+          hide: true
+        },
         {
           field: 'nb',
-          headerName: 'NB',
+          headerName: 'NB'
         }, {
           field: 'StartDate',
-          headerName: 'Start equipment',
+          headerName: 'Start equipment'
         }, {
           field: 'EndDate',
-          headerName: 'End equipment',
+          headerName: 'End equipment'
         }, {
           field: 'min_date',
-          headerName: 'Data from',
+          headerName: 'Data from'
         }, {
           field: 'max_date',
-          headerName: 'Data To',
+          headerName: 'Data To'
         }
       ],
 
@@ -101,42 +101,42 @@ define([
         {
           field: 'FK_ptt',
           headerName: 'Sensor Identifier',
-          checkboxSelection: true,
+          checkboxSelection: true
         },
         {
           field: 'FK_Individual',
           headerName: 'Individual ID',
-          cellRenderer: function(params){
-            if(!params.data.FK_Individual){
+          cellRenderer: function (params) {
+            if (!params.data.FK_Individual) {
               return '<span class="bull-warn">&#x25cf;</span> No Individual attached !';
             }
             return params.value;
           }
-        },{
+        }, {
           field: 'Survey_type',
-          headerName: 'Survey Type',
-        },{
+          headerName: 'Survey Type'
+        }, {
           field: 'FK_Sensor',
           headerName: 'Sensor',
-          hide: true,
+          hide: true
         }, {
           field: 'nb',
-          headerName: 'NB',
+          headerName: 'NB'
         }, {
           field: 'StartDate',
-          headerName: 'Start equipment',
+          headerName: 'Start equipment'
         }, {
           field: 'EndDate',
-          headerName: 'End equipment',
+          headerName: 'End equipment'
         }, {
           field: 'min_date',
-          headerName: 'Data from',
+          headerName: 'Data from'
         }, {
           field: 'max_date',
-          headerName: 'Data To',
+          headerName: 'Data To'
         }, {
           field: 'import',
-          headerName: 'IMPORT',
+          headerName: 'IMPORT'
         }
       ]
 

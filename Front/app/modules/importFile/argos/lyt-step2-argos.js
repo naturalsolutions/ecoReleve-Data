@@ -1,14 +1,13 @@
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
 
-	'i18n'
+  'i18n'
 
-], function($, _, Backbone, Marionette
+], function ($, _, Backbone, Marionette
 ) {
-
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -18,20 +17,20 @@ define([
 
     name: 'step2 Argos',
 
-    initialize: function() {
-		},
+    initialize: function () {
+    },
 
-    check: function() {
-		},
+    check: function () {
+    },
 
-    onShow: function() {
-		},
+    onShow: function () {
+    },
 
-    onDestroy: function() {
-		},
+    onDestroy: function () {
+    },
 
-    validate: function() {
-		},
+    validate: function () {
+    }
 
   });
 });

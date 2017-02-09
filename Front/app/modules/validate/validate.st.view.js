@@ -1,14 +1,13 @@
-//radio
+// radio
 define([
-	'jquery',
-	'underscore',
-	'backbone',
-	'marionette',
-	'sweetAlert',
-	'translater',
+  'jquery',
+  'underscore',
+  'backbone',
+  'marionette',
+  'sweetAlert',
+  'translater'
 
-], function($, _, Backbone, Marionette, Swal, Translater) {
-
+], function ($, _, Backbone, Marionette, Swal, Translater) {
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -16,12 +15,12 @@ define([
     template: 'app/modules/validate/validate.st.tpl.html',
     className: 'full-height animated layer',
 
-    initialize: function(options) {
-		},
-
-    onRender: function() {
-      this.$el.i18n();
+    initialize: function (options) {
     },
+
+    onRender: function () {
+      this.$el.i18n();
+    }
 
   });
 });
