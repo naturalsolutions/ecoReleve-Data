@@ -4,13 +4,12 @@ define([
 	'underscore',
 	'backbone',
 	'marionette',
-	'config',
 	'sweetAlert',
 	'dropzone',
-
+	'config',
 	'i18n'
 
-], function($, _, Backbone, Marionette, config, Swal, Dropzone
+], function($, _, Backbone, Marionette, Swal, Dropzone, config
 ) {
 
   'use strict';
@@ -38,7 +37,7 @@ define([
       previewNode.parentNode.removeChild(previewNode);
 
       var myDropzone = new Dropzone(this.el, {
-        url: config.coreUrl + 'sensors/argos/datas',
+        url: config.coreUrl+'sensors/argos/datas',
         parallelUploads: 1,
         previewTemplate: previewTemplate,
         previewsContainer: '#previews', // Define the container to display the previews
@@ -152,12 +151,12 @@ define([
 
           var totalInsertedEng = _this.totalReturned.reduce(function(memo, value) { return memo + value.get('inserted Engineering') }, 0);
           var totalExistingEng = _this.totalReturned.reduce(function(memo, value) { return memo + value.get('existing Engineering') }, 0);
-          console.log(_this.totalReturned);
+
 
         if (!this.errors) {
           Swal({
             title: 'Well done',
-            text: 'File(s) have been correctly imported\n\n' 
+            text: 'File(s) have been correctly imported\n\n'
             + '\t inserted Argos : ' + totalInsertedArgos + '\t existing Argos : ' + totalExistingArgos+','
             +'\n\t inserted GPS : ' + totalInsertedGPS + '\t existing GPS : ' + totalExistingGPS+','
             +'\n\t inserted Engineering : ' + totalInsertedEng + '\t existing Engineering : ' + totalExistingEng
@@ -165,13 +164,16 @@ define([
             showCancelButton: true,
             confirmButtonColor: '#DD6B55',
             confirmButtonText: 'Validate Argos',
-            cancelButtonText: 'New import',
+            cancelButtonText: 'Import new Argos',
             closeOnConfirm: true,
             closeOnCancel: true},
             function(isConfirm) {
               if (isConfirm) {
               Backbone.history.navigate('validate/argos',{trigger: true});
               }
+							else {
+								document.querySelector('#actions .cancel').click();
+							}
             });
         } else {
           Swal({

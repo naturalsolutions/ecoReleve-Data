@@ -82,17 +82,16 @@ define([
 
     },
 
-    action: function(action, ids){
+    action: function(action, ids, from){
       this.onAction();
       if(action === 'selection' || action === 'selection'){
         this.updateMotherColl(ids);
       }
       for (var i = 0; i < this.components.length; i++) {
-        this.components[i].action(action, ids);
+        this.components[i].action(action, ids, from);
       };
     },
   };
-
 
   // -------------------------------------------------- //
   // -------------------------------------------------- //

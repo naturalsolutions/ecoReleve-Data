@@ -10,6 +10,7 @@ define([
         type: 'FileUploadEditor',
         title: 'File',
         editorClass: 'form-control',
+				fieldClass: 'filesinputselector',
         validators: ['required'],
         options: {extensions: null}
       },
@@ -52,4 +53,3 @@ define([
     }
   });
 });
-

@@ -1,0 +1,16 @@
+UPDATE [dbo].[ProtocoleType]
+   SET [Name] = 'Mark_1_management'
+ WHERE ID = (select ID from [dbo].[ProtocoleType] where Name = 'Mark_code_1_management')
+GO
+
+UPDATE [dbo].[ProtocoleType]
+   SET [Name] = 'Mark_2_management'
+ WHERE ID = (select ID from [dbo].[ProtocoleType] where Name = 'Mark_code_2_management')
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('108_Change_Protocole_Name_MarkManagment_restored',GETDATE(),(SELECT db_name()))
+
+
+GO

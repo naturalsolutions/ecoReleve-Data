@@ -1,0 +1,86 @@
+
+
+/****** Object:  StoredProcedure [dbo].[pr_MessageExportSample]    Script Date: 26/09/2016 10:21:35 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER PROCEDURE [dbo].[pr_MessageExportSample](
+@SampleList ListOfIDs READONLY
+)
+AS
+BEGIN
+ DECLARE @MessageIDs TABLE(
+  ID BIGINT
+ )
+ 
+ INSERT INTO [dbo].[TMessageSend]
+      ([ObjectType]
+      ,[ObjectId]
+      ,[ObjectOriginalID]
+      ,[Operation]
+      ,[CreationDate]
+      ,[SendDate]
+      ,[Comment])           
+ OUTPUT INSERTED.pk_MessageSend INTO @MessageIDs      
+ select 'sample',S.ID,S.Original_Id,'Creation',GETDATE(),NULL,NULL
+ from Samples S 
+ --JOIN Subjects su on s.Subject_ID = su.id and su.Original_Id IS NOT NULL
+ where S.ID IN  (SELECT ID FROM @SampleList)
+
+
+ INSERT INTO [dbo].[TMessageSendDetail]
+      ([fk_MessageSend]
+      ,[PropName]
+      ,[PropValue]
+      ,[Parametre])
+ select m.pk_MessageSend,p.Name,
+ CASE 
+  WHEN p.TypeProp = 'entier' THEN CONVERT(varchar,V.ValueInt) 
+  WHEN p.TypeProp = 'date' THEN CONVERT(varchar,V.ValueDAte,120)
+  WHEN p.TypeProp = 'float' THEN CONVERT(varchar,V.ValueFloat)
+  ELSE v.ValueString
+  END
+  ,NULL
+ from SampleDynPropValuesNow V 
+ JOIN SampleDynProps P on v.SampleDynProp_ID = p.ID 
+ JOIN [TMessageSend]  M on m.[ObjectId] = V.Sample_ID
+ WHERE M.pk_MessageSend IN (SELECT ID FROM @MessageIDs)
+ 
+ 
+ 
+ INSERT INTO [dbo].[TMessageSendDetail]
+      ([fk_MessageSend]
+      ,[PropName]
+      ,[PropValue]
+      ,[Parametre])
+ select m.pk_MessageSend,C.PropName,PropValue,NULL
+ from Samples S 
+ JOIN [TMessageSend]  M on m.[ObjectId] = S.ID
+ JOIN Subjects su on s.Subject_ID = su.id and su.Original_Id IS NOT NULL
+ JOIN SampleTypes st on s.TypeObj_ID = st.ID
+ CROSS APPLY
+ (
+  values 
+  ('IndividuID',CONVERT(varchar,su.Original_Id))
+  ,('SampleDate',CONVERT(varchar,s.SampleDate,120))
+  ,('SampleType',st.Name)
+  ,('nb',CONVERT(varchar,CONVERT(int,s.Qte)) )
+ ) C (PropName,PropValue)
+ WHERE M.pk_MessageSend IN (SELECT ID FROM @MessageIDs) 
+ 
+END
+
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('96_SO_IN_eColl_pr_MessageExportSample',GETDATE(),(SELECT db_name()))
+
+
+GO

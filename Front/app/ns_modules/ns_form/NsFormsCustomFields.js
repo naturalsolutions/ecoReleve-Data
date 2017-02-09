@@ -43,56 +43,55 @@ define([
 		defaultValue: '',
 
 		events: _.extend({}, editors.Text.prototype.events, {
-		'keypress': 'onKeyPress',
-		'change': 'onKeyPress'
+		//'keypress': 'onKeyPress',
+		//'change': 'onKeyPress',
+		'keyup': 'onKeyUp'
 		}),
 
 		initialize: function(options) {
-		editors.Text.prototype.initialize.call(this, options);
+			editors.Text.prototype.initialize.call(this, options);
 
-		var schema = this.schema;
+			var schema = this.schema;
 
-		this.$el.attr('type', 'number');
+			this.$el.attr('type', 'number');
 
-		if (!schema || !schema.editorAttrs || !schema.editorAttrs.step) {
-		  // provide a default for `step` attr,
-		  // but don't overwrite if already specified
-		  this.$el.attr('step', 'any');
-		}
+				// provide a default for `step` attr,
+				// but don't overwrite if already specified
+			if (!schema || !schema.editorAttrs || !schema.editorAttrs.step) {
+					// provide a default for `step` attr,
+					// but don't overwrite if already specified
+					this.min = 0;
+					this.$el.attr('min','0');
+					this.$el.attr('step', 'any');
+				}
+			if(schema.options) {
+				if( schema.options.min ) {
+					this.$el.attr('min', schema.options.min);
+					this.min =  parseInt(schema.options.min);
+				}
+				if( schema.options.max ) {
+					this.$el.attr('max', schema.options.max);
+					this.max =  parseInt(schema.options.max);
+					
+				}
+				if( schema.options.step ) {
+					this.$el.attr('step', schema.options.step);
+				}
+			}
 		},
 
-		/**
-		* Check value is numeric
-		*/
-		onKeyPress: function(event) {
-		var self = this,
-
-		    delayedDetermineChange = function() {
-		      setTimeout(function() {
-		        self.determineChange();
-		      }, 0);
-		    };
-
-		//Allow backspace
-		if (event.charCode === 0) {
-		  delayedDetermineChange();
-		  return;
-		}
-
-		//Get the whole new value so that we can prevent things like double decimals points etc.
-		var newVal = this.$el.val()
-		if( event.charCode != undefined ) {
-		  newVal = newVal + String.fromCharCode(event.charCode);
-		}
-		var numeric = /^-?[0-9]*\.?[0-9]*?$/.test(newVal);
-
-		if (numeric) {
-		  delayedDetermineChange();
-		}
-		else {
-		  event.preventDefault();
-		}
+		onKeyUp: function(event) {
+			if (typeof this.min === 'number' && (parseInt(this.$el.val()) < this.min)){
+          this.$el.val('');
+			}
+			if (typeof this.max === 'number' && (parseInt(this.$el.val()) > this.max)){
+         this.$el.val('');
+        }
+			if (this.$el.val() == ''){ //abort value if not a number ex : 99--9
+				this.$el.val('');
+			}
 		},
+
 
 		getValue: function() {
 		var value = this.$el.val();

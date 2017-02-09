@@ -1,0 +1,9 @@
+UPDATE [EcoReleve_ECWP].[dbo].[ModuleGrids]
+SET GridOrder = 35
+WHERE GridRender = 1 AND Name = 'Monitoring_Status'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('95_Change_Order_Of_MoniStatus_In_Indiv_Grid',GETDATE(),(SELECT db_name()))
+
+
+GO

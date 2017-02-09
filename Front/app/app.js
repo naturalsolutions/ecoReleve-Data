@@ -1,5 +1,12 @@
-
-define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','config',
+define([
+  'marionette',
+  'lyt-rootview',
+  'router',
+  'controller',
+  'sweetAlert',
+  'config',
+  'jquery',
+  'backbone',
 
   //circular dependencies, I don't konw where to put it 4 the moment
   'ns_modules/ns_bbfe/bbfe-number',
@@ -7,7 +14,6 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','confi
   'ns_modules/ns_bbfe/bbfe-dateTimePicker',
   'ns_modules/ns_bbfe/bbfe-autocomplete',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
-  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-nonIdPicker',
   'ns_modules/ns_bbfe/bbfe-listOfNestedModel/bbfe-listOfNestedModel',
   'ns_modules/ns_bbfe/bbfe-gridForm',
   'ns_modules/ns_bbfe/bbfe-autocompTree',
@@ -17,26 +23,28 @@ define(['marionette', 'lyt-rootview', 'router', 'controller','sweetAlert','confi
   'ns_modules/ns_bbfe/bbfe-ajaxButton',
   'ns_modules/ns_bbfe/bbfe-lon',
   'ns_modules/ns_bbfe/bbfe-lat',
-  'ns_modules/ns_cell/bg-timestampCell',
-  'ns_modules/ns_cell/autocompCell',
-  'ns_modules/ns_cell/bg-integerCell',
-  'i18n'
 
   ],
 
-
-function( Marionette, LytRootView, Router, Controller,Swal,config) {
+function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) {
 
     var app = {};
     var JST = window.JST = window.JST || {};
     window.xhrPool = [];
 
+    window.onkeydown = function (e) {
+      if (e.keyCode == 8 ) {  //backspace key
+         if( !( e.target.tagName == 'INPUT' ||  e.target.tagName == 'TEXTAREA') ) { //handle event if not in input or textarea
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    };
 
     Backbone.Marionette.Renderer.render = function(template, data) {
       if (!JST[template]) throw 'Template \'' + template + '\' not found!';
       return JST[template](data);
-    };
-
+  };
 
   app = new Marionette.Application();
   app.on('start', function() {
@@ -52,120 +60,168 @@ function( Marionette, LytRootView, Router, Controller,Swal,config) {
   $(window).ajaxStart(function(e) {
     $('#header-loader').removeClass('hidden');
   });
-
   $(window).ajaxStop(function() {
     $('#header-loader').addClass('hidden');
   });
-
   $(window).ajaxError(function() {
     $('#header-loader').addClass('hidden');
   });
-
   window.onerror = function() {
     $('#header-loader').addClass('hidden');
   };
 
-  $.xhrPool = []; // array of uncompleted requests
+  $.xhrPool = {};
+
+  $.xhrPool.calls = []; // array of uncompleted requests
+
   $.xhrPool.allowAbort = false;
+
   $.xhrPool.abortAll = function() { // our abort function
     if ($.xhrPool.allowAbort){
-      $(this).each(function(idx, jqXHR) {
-          jqXHR.abort();
+      this.calls.map(function(jqxhr){
+          jqxhr.abort();
       });
-      $.xhrPool.length = 0;
+      $('#header-loader').addClass('hidden');
+      $.xhrPool.calls = [];
     }
   };
-  //
   $.ajaxSetup({
-    beforeSend: function(jqXHR) { // before jQuery send the request we will push it to our array
-      $.xhrPool.push(jqXHR);
+    // before jQuery send the request we will push it to our array
+    beforeSend: function(jqxhr, options) {
+      if(options.url.indexOf('http://') !== -1) {
+        options.url = options.url;
+      } else {
+        options.url = config.coreUrl + options.url;
+      }
+      if(options.type === 'GET'){
+        $.xhrPool.calls.push(jqxhr);
+      }
     },
-    complete: function(jqXHR) { // when some of the requests completed it will splice from the array
-      var index = $.xhrPool.indexOf(jqXHR);
-      if (index > -1) {
-        $.xhrPool.splice(index, 1);
+    // when some of the requests completed it will splice from the array
+    complete: function(jqxhr, options){
+      // var index = $.xhrPool.indexOf(jqxhr);
+      // if (index > -1) {
+      //   $.xhrPool.splice(index, 1);
+      // }
+    },
+    error: function(jqxhr, options){
+      if(jqxhr.status == 403){
+        document.location.href = config.portalUrl;
+      }
+      if(jqxhr.status == 401){
+        Swal({
+          title: 'Unauthorized',
+          text: "You don't have permission",
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(240, 173, 78)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        });
       }
     }
   });
 
-  window.UnauthAlert = function(){
-    Swal({
-        title: 'Unauthorized',
-        text: "You don't have permission",
-        type: 'warning',
-        showCancelButton: false,
-        confirmButtonColor: 'rgb(240, 173, 78)',
-        confirmButtonText: 'OK',
-        closeOnConfirm: true,
-      });
-  };
+    window.formInEdition= {};
 
-  $(document).ajaxError(function( event, jqxhr, settings, thrownError ) {
-    if (jqxhr.status == 401){
-      window.UnauthAlert();
-    }
-  });
-
-    window.formChange = false;
-    window.formEdition = false;
     // get not allowed urls in config.js
     window.notAllowedUrl = [];
-    if (config.disabledFunc){
-      var disabled = config.disabledFunc ;
-      for (var i=0; i< disabled.length;i++){
+    if (config.disabledFunc) {
+      var disabled = config.disabledFunc;
+      for (var i=0; i< disabled.length;i++) {
         window.notAllowedUrl.push(disabled[i]);
       }
     }
 
-    window.checkExitForm = function(confirmCallback,cancelCallback) {
-      if(window.formChange && window.formEdition){
-        var title = i18n.translate('swal.savingForm-title');
-        var savingFormContent =  i18n.translate('swal.savingForm-content');
-        var cancelMsg = i18n.translate('button.cancel');
-        Swal({
-          title: title,
-          text: savingFormContent,
-          type: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: 'rgb(221, 107, 85)',
-          confirmButtonText: 'OK',
-          cancelButtonColor: 'grey',
-          cancelButtonText: cancelMsg,
-          closeOnConfirm: true,
-        },
-        function(isConfirm) {
-         if (!isConfirm) {
-          if (cancelCallback){
+  window.checkExitForm = function(confirmCallback,cancelCallback) {
+    var i = 0;
+    var urlChangeMax = 0 ;
+    var indexMax = 0 ;
+    if(!$.isEmptyObject(window.formInEdition)){
+
+        var newUrlSplit=  window.location.hash.split('?');
+        var oldUrlSplit = window.formInEdition.form.baseUri.replace(window.location.origin,'').replace(window.location.pathname,'').split('?');
+
+        var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
+          if( (newUrlSplit[index2-1] != oldUrlSplit[index2-1]) || newUrlSplit[0] != oldUrlSplit[0]){
+            if(window.formInEdition.form[key2].formChange){
+              i++;
+            }
+            urlChangeMax++;
+            return 1;
+          } else{
+            indexMax++;
+            return 0;
+          }
+        });
+    }
+
+    if(i > 0){
+      var title = i18n.translate('swal.savingForm-title');
+      var savingFormContent =  i18n.translate('swal.savingForm-content');
+      window.onExitForm = $.Deferred();
+      //var cancelMsg = i18n.translate('button.cancel');
+
+      Swal({
+        title: title,
+        text: savingFormContent,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'rgb(221, 107, 85)',
+        confirmButtonText: 'Quit',
+        cancelButtonColor: 'grey',
+        cancelButtonText: 'Continue edition',
+        closeOnConfirm: false,
+      },
+      function(isConfirm) {
+        if (!isConfirm) {
+          if (cancelCallback) {
+            window.onExitForm.reject();
             cancelCallback();
           }
           return false;
-        }else {
-          if (confirmCallback){
-            window.formChange = false;
-            window.formEdition = false;
-            confirmCallback();
+        } else {
+          if (confirmCallback) {
+            Swal({
+              title: 'Saving form',
+              text: 'save it ?',
+              type: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: 'green',
+              confirmButtonText: 'Yes',
+              cancelButtonColor: 'grey',
+              cancelButtonText: 'No',
+              closeOnConfirm: true,
+            }, 
+            function(isConfirm){
+              if (isConfirm) {
+                var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
+                    if(window.formInEdition.form[key2].formChange){
+                      window.formInEdition.form[key2].reloadingAfterSave = function(){};
+                      window.formInEdition.form[key2].afterSaveSuccess = function(response){};
+                      window.formInEdition.form[key2].butClickSave(null);
+                    }
+                });
+              }
+              if(indexMax-urlChangeMax<=0){
+                window.formInEdition = {};
+              }
+              window.onExitForm.resolve();
+              confirmCallback();
+            });
           }
         }
       });
-      } else {
-        if (confirmCallback){
-          confirmCallback();
+    } else {
+      if (confirmCallback){
+        if(indexMax-urlChangeMax<=0){
+          window.formInEdition = {};
         }
+        //window.onExitForm.resolve();
+        confirmCallback();
       }
-    };
-
-
-  window.onerror = function (errorMsg, fileURI, lineNumber, column, errorObj) {
-    $.ajax({
-      type : 'POST',
-      url : config.coreUrl+'log/error',
-      data:{StackTrace:errorObj,
-        errorMsg: errorMsg,
-        file : fileURI,
-        lineNumber:lineNumber,
-        column:column }
-    });
-  };
+    }
+};
 
   window.app = app;
   return app;
