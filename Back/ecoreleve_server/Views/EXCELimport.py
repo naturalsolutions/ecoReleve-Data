@@ -17,17 +17,6 @@ import asyncio
 route_prefix = 'file_import/'
 
 
-# @view_config(route_name=route_prefix + 'run',
-#              mapper=WebsocketMapper)
-@asyncio.coroutine
-def echo(ws):
-    while True:
-        message = yield from ws.recv()
-        if message is None:
-            break
-        yield from ws.send(message)
-
-
 @view_config(route_name=route_prefix + 'getTemplate',
              renderer='json',
              request_method='GET')
@@ -76,6 +65,7 @@ def get_excel(request):
         content_disposition="attachment; filename=" + protocolName + ".xlsx",
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
+
 def getTemplateColStation(session):
     newSta = Station(FK_StationType=1)
     ConfSta = session.query(FrontModules).filter(
@@ -90,6 +80,7 @@ def getTemplateColStation(session):
                           'Station_FieldWorker2',
                               'Station_FieldWorker3'])
     return stationFields
+
 
 def get_props(attrs):
     protocolAttrs = []

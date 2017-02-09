@@ -19,9 +19,7 @@ class JobView(WebSocketView):
 
     def handler(self, websocket):
         print('in handler WS')
-        self.processList = ['toto', 'tata' , 'tutu']
         session = threadlocal.get_current_registry().dbmaker()
-        print(session)
         job = self.request.context
         job.add_listener(websocket)
 
