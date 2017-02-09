@@ -8,8 +8,8 @@ define([
   'ns_ruler/ruler',
   'requirejs-text!./NsFormsModule.html',
   'fancytree',
-  './NsFormsCustomFields',
-], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tpl) {
+  './NsFormsCustomFields'
+], function ($, _, Backbone, Marionette, BackboneForm, Swal, Ruler, tpl) {
   return Backbone.View.extend({
     BBForm: null,
     modelurl: null,
@@ -25,22 +25,19 @@ define([
     displayDelete: true,
     gridRow: false,
 
-    events : {
-      'keypress input' : 'evt'
+    events: {
+      'keypress input': 'evt'
     },
 
-    evt : function(){
-      alert();
-    },
-    extendsBBForm: function(){
+    extendsBBForm: function () {
       var _this = this;
       Backbone.Form.validators.errMessages.required = '';
-      Backbone.Form.Editor.prototype.initialize = function(options){
+      Backbone.Form.Editor.prototype.initialize = function (options) {
         var options = options || {};
 
-        //Set initial value
+        // Set initial value
         if (options.model) {
-          if (!options.key) throw new Error("Missing option: 'key'");
+          if (!options.key) throw new Error('Missing option: \'key\'');
 
           this.model = options.model;
 
@@ -51,62 +48,59 @@ define([
 
         if (this.value === undefined) this.value = this.defaultValue;
 
-        //Store important data
+        // Store important data
         _.extend(this, _.pick(options, 'key', 'form'));
 
         var schema = this.schema = options.schema || {};
 
         this.validators = options.validators || schema.validators;
 
-        //Main attributes
+        // Main attributes
         this.$el.attr('id', this.id);
-        //bug with same name
+        // bug with same name
         this.$el.attr('name', this.getName());
         if (schema.editorClass) this.$el.addClass(schema.editorClass);
         if (schema.editorAttrs) this.$el.attr(schema.editorAttrs);
 
-        if(options.schema.validators && options.schema.validators[0] == "required"){
+        if (options.schema.validators && options.schema.validators[0] == 'required') {
           this.$el.addClass('required');
         }
-
       };
-
-
     },
 
-    checkGridRowAgain: function() {
+    checkGridRowAgain: function () {
       var _this = this;
-      Backbone.Form.Field.prototype.render = function() {
-          var schema = this.schema,
-              editor = this.editor;
+      Backbone.Form.Field.prototype.render = function () {
+        var schema = this.schema,
+          editor = this.editor;
 
-          //Only render the editor if Hidden
-          if (schema.type == Backbone.Form.editors.Hidden) {
-            return this.setElement(editor.render().el);
-          }
+          // Only render the editor if Hidden
+        if (schema.type == Backbone.Form.editors.Hidden) {
+          return this.setElement(editor.render().el);
+        }
 
-          //Render field
-          var $field = $($.trim(this.template(_.result(this, 'templateData'))));
+          // Render field
+        var $field = $($.trim(this.template(_.result(this, 'templateData'))));
 
-          if (schema.fieldClass) $field.addClass(schema.fieldClass);
-          if (schema.fieldAttrs) $field.attr(schema.fieldAttrs);
+        if (schema.fieldClass) $field.addClass(schema.fieldClass);
+        if (schema.fieldAttrs) $field.attr(schema.fieldAttrs);
 
-          //mjaouen
-          if (_this.gridRow) $field.addClass('grid-field');
+          // mjaouen
+        if (_this.gridRow) $field.addClass('grid-field');
 
-          //Render editor
-          $field.find('[data-editor]').add($field).each(function(i, el) {
-            var $container = $(el),
-                selection = $container.attr('data-editor');
+          // Render editor
+        $field.find('[data-editor]').add($field).each(function (i, el) {
+          var $container = $(el),
+            selection = $container.attr('data-editor');
 
-            if (_.isUndefined(selection)) return;
+          if (_.isUndefined(selection)) return;
 
-            $container.append(editor.render().el);
-          });
+          $container.append(editor.render().el);
+        });
 
-          this.setElement($field);
+        this.setElement($field);
 
-          return this;
+        return this;
       };
     },
 
@@ -123,7 +117,7 @@ define([
 
       this.afterDelete = options.afterDelete || false;
 
-      if(options.displayDelete != undefined){
+      if (options.displayDelete != undefined) {
         this.displayDelete = options.displayDelete;
       }
 
@@ -147,10 +141,10 @@ define([
         this.id = 0;
       }
 
-      if(options.displayMode){
+      if (options.displayMode) {
         this.displayMode = options.displayMode;
       }
-      if(options.loadingError){
+      if (options.loadingError) {
         this.loadingError = options.loadingError;
       }
 
@@ -174,21 +168,20 @@ define([
 
         this.showForm();
         this.pushFormInEdit(this);
-
       }
       else {
         this.initModel();
       }
 
-      if (options.redirectAfterPost){
+      if (options.redirectAfterPost) {
         // allow to redirect after creation (post) using the id of created object
         this.redirectAfterPost = options.redirectAfterPost;
       }
       this.afterShow = options.afterShow;
-      if (options.afterSaveSuccess){
-        this.afterSaveSuccess = options.afterSaveSuccess ;
+      if (options.afterSaveSuccess) {
+        this.afterSaveSuccess = options.afterSaveSuccess;
       }
-      if(options.savingError) {
+      if (options.savingError) {
         this.savingError = options.savingError;
       }
 
@@ -200,20 +193,20 @@ define([
       // });
     },
 
-    pushFormInEdit: function(_this){
-        this.formChange = false;
-        if(!window.formInEdition.form){
-            window.formInEdition.form = {baseUri: _this.$el[0].baseURI};
-            window.formInEdition.form[_this.formRegion.selector]= _this;
-          } else {
-            if(window.formInEdition.form['undefined']){
-              delete window.formInEdition.form['undefined'];
-            }
-            window.formInEdition.form[_this.formRegion.selector] = _this;
-            window.formInEdition.form.baseUri = _this.$el[0].baseURI;
-          if(_this.displayMode && _this.displayMode.toLowerCase() == 'edit'){
-              _this.bindChanges();
-            }
+    pushFormInEdit: function (_this) {
+      this.formChange = false;
+      if (!window.formInEdition.form) {
+        window.formInEdition.form = { baseUri: _this.$el[0].baseURI };
+        window.formInEdition.form[_this.formRegion.selector] = _this;
+      } else {
+        if (window.formInEdition.form.undefined) {
+          delete window.formInEdition.form.undefined;
+        }
+        window.formInEdition.form[_this.formRegion.selector] = _this;
+        window.formInEdition.form.baseUri = _this.$el[0].baseURI;
+        if (_this.displayMode && _this.displayMode.toLowerCase() == 'edit') {
+          _this.bindChanges();
+        }
       }
     },
 
@@ -224,7 +217,7 @@ define([
         this.model = new Backbone.Model();
       }
 
-      if (this.model.attributes.id ) {
+      if (this.model.attributes.id) {
         id = this.model.attributes.id;
       } else {
         id = this.id;
@@ -234,7 +227,7 @@ define([
 
       this.name = '_' + this.objectType + '_';
 
-      //initialize model from AJAX call
+      // initialize model from AJAX call
       this.jqxhr = $.ajax({
         url: url,
         context: this,
@@ -254,7 +247,7 @@ define([
           // give the url to model to manage save
           _this.model.urlRoot = this.modelurl;
 
-          var settings = $.extend({}, _this.data, resp.data); //?
+          var settings = $.extend({}, _this.data, resp.data); // ?
           _this.model.attributes = settings;
 
           _this.BBForm = new BackboneForm({ model: _this.model, data: _this.model.data, fieldsets: _this.model.fieldsets, schema: _this.model.schema });
@@ -263,104 +256,103 @@ define([
           _this.updateState(this.displayMode);
         },
         error: function (data) {
-          //console.warn('request error');
+          // console.warn('request error');
           _this.loadingError();
-          //alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objectType);
+          // alert('error Getting Fields for Form ' + this.name + ' on type ' + this.objectType);
         }
       });
     },
 
-    initRules:function() {
+    initRules: function () {
       var _this = this;
       this.ruler = new Ruler({
-            form: _this.BBForm
-          });
+        form: _this.BBForm
+      });
       var globalError = {};
       var errorMsg = 'error on field(s): \n';
 
-      _.each(this.BBForm.schema,function(curSchema){
-        if (curSchema.rule){
+      _.each(this.BBForm.schema, function (curSchema) {
+        if (curSchema.rule) {
           var curRule = curSchema.rule;
           var target = curSchema.name;
-          var curResult = _this.ruler.addRule(target,curRule.operator,curRule.source,curRule.value);
+          var curResult = _this.ruler.addRule(target, curRule.operator, curRule.source, curRule.value);
           if (curResult) {
             globalError[target] = curResult;
-            errorMsg +=  curResult.object + ':  '+curResult.message+'\n' ;
+            errorMsg += curResult.object + ':  ' + curResult.message + '\n';
           }
         }
       });
 
-      if (!$.isEmptyObject(globalError) && this.displayMode == 'edit'){
+      if (!$.isEmptyObject(globalError) && this.displayMode == 'edit') {
         this.swal({
-          title : 'Rule error',
-          text : errorMsg,
-          type:'error',
+          title: 'Rule error',
+          text: errorMsg,
+          type: 'error',
           showCancelButton: false,
-          confirmButtonColor:'#DD6B55',
-          confirmButtonText:'Ok'});
+          confirmButtonColor: '#DD6B55',
+          confirmButtonText: 'Ok' });
       }
     },
 
-    bindChanges: function(){
+    bindChanges: function () {
       var _this = this;
-      $(this.formRegion).find('input').on("change", function(e) {
-        if($(e.target).val() !== ''){
+      $(this.formRegion).find('input').on('change', function (e) {
+        if ($(e.target).val() !== '') {
           _this.formChange = true;
         } else {
           _this.formChange = false;
-       }
+        }
       });
-      $(this.formRegion).find('input').on("thesaurusChange", function(e) {
-        if($(e.target).val() !== ''){
+      $(this.formRegion).find('input').on('thesaurusChange', function (e) {
+        if ($(e.target).val() !== '') {
           _this.formChange = true;
         } else {
           _this.formChange = false;
-       }
+        }
       });
-      $(this.formRegion).find('select').on("change", function(e) {
-         _this.formChange = true;
+      $(this.formRegion).find('select').on('change', function (e) {
+        _this.formChange = true;
       });
-      $(this.formRegion).find('textarea').on("change", function(e) {
-         _this.formChange = true;
+      $(this.formRegion).find('textarea').on('change', function (e) {
+        _this.formChange = true;
       });
-      $(this.formRegion).find('.grid-form').on("change", function(e) {
-         _this.formChange = true;
+      $(this.formRegion).find('.grid-form').on('change', function (e) {
+        _this.formChange = true;
       });
-      $(this.formRegion).find('.nested').on("change", function(e) {
-         _this.formChange = true;
+      $(this.formRegion).find('.nested').on('change', function (e) {
+        _this.formChange = true;
       });
 
-      $(this.formRegion).find('textarea').on("keypress", function(e) {
+      $(this.formRegion).find('textarea').on('keypress', function (e) {
         var maxlen = 250;
         var self = this;
         if ($(this).val().length > maxlen) {
           return false;
-        }  else {
-          _this.cleantextAreaAfterError(this);
         }
+        _this.cleantextAreaAfterError(this);
       });
       $(this.formRegion).find('textarea').on('keyup', function (e) {
         var maxlen = 250;
         var strval = $(this).val();
         var self = this;
         if ($(this).val().length > maxlen) {
-           _this.showErrorForMaxLength(this);
+          _this.showErrorForMaxLength(this);
           return false;
         }
       });
-      $(this.formRegion).find('textarea').on('keydown' , function(e) {
-        if(event.which == 8) {
+      $(this.formRegion).find('textarea').on('keydown', function (e) {
+        if (event.which == 8) {
           var maxlen = 250;
           var strval = $(this).val();
           var self = this;
           if ($(this).val().length < maxlen) {
-           _this.cleantextAreaAfterError(this);
+            _this.cleantextAreaAfterError(this);
           }
         }
       });
     },
 
-    showForm: function (){
+    showForm: function () {
       var _this = this;
       this.BBForm.render();
 
@@ -370,27 +362,27 @@ define([
       var _this = this;
       this.initRules();
 
-      if(this.formRegion.html){
+      if (this.formRegion.html) {
         this.formRegion.html(this.BBForm.el);
       } else {
         return;
       }
 
-      if(!this.gridRow) {
-        $(this.formRegion).find('input').on("keypress", function(e) {
-          if( e.which == 13){
+      if (!this.gridRow) {
+        $(this.formRegion).find('input').on('keypress', function (e) {
+          if (e.which == 13) {
             _this.butClickSave(e);
           }
         });
       }
 
-      if(this.buttonRegion){
-        if(this.buttonRegion[0]){
+      if (this.buttonRegion) {
+        if (this.buttonRegion[0]) {
           this.buttonRegion.forEach(function (entry) {
             _this.buttonRegion[0].html(_this.template);
             _this.buttonRegion[0].i18n();
           });
-          if(this.buttonRegion[0]){
+          if (this.buttonRegion[0]) {
             this.displaybuttons();
             this.bindEvents();
           }
@@ -406,21 +398,21 @@ define([
       }
     },
 
-    showErrorForMaxLength : function(_this){
+    showErrorForMaxLength: function (_this) {
       var errorTag = $(_this).parent().parent().find('div')[0];
       $(errorTag).text('Text max length is 250');
       $(_this).addClass('error');
     },
 
-    cleantextAreaAfterError : function(_this){
-        var errorTag = $(_this).parent().parent().find('div')[0];
-        $(errorTag).text('');
-        $(_this).removeClass('error');
+    cleantextAreaAfterError: function (_this) {
+      var errorTag = $(_this).parent().parent().find('div')[0];
+      $(errorTag).text('');
+      $(_this).removeClass('error');
     },
 
-    showAlertforMaxLength : function(){
+    showAlertforMaxLength: function () {
       var opts = {
-        title : 'Max length: 255 characters !',
+        title: 'Max length: 255 characters !',
         showCancelButton: false,
         type: 'warning',
         confirmButtonColor: '#DD6B55'
@@ -428,20 +420,20 @@ define([
       this.swal(opts);
     },
 
-    updateState: function(state){
+    updateState: function (state) {
 
     },
 
     displaybuttons: function () {
       var name = this.name;
-      if(this.displayMode == 'edit'){
+      if (this.displayMode == 'edit') {
         this.buttonRegion[0].find('.NsFormModuleDelete').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleSave').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleEdit').addClass('hidden');
         this.formRegion.find('input:enabled:first').focus();
-      }else{
+      } else {
         this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleSave').addClass('hidden');
@@ -450,109 +442,108 @@ define([
         this.buttonRegion[0].find('.NsFormModuleEdit').removeClass('hidden');
       }
 
-      //need a fix
-      if(!this.model.attributes.id){
+      // need a fix
+      if (!this.model.attributes.id) {
         this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
       }
-
     },
 
     butClickSave: function (e) {
-          var _this = this;
-          var flagEmpty = false;
-          var errors = this.BBForm.commit();
-          var jqhrx;
+      var _this = this;
+      var flagEmpty = false;
+      var errors = this.BBForm.commit();
+      var jqhrx;
 
-          if(!errors){
-            flagEmpty = this.checkFormIsEmpty(this.model.schema,this.BBForm.getValue());
-          }
-          if(flagEmpty){
-            this.swal({
-              title : 'Empty observation',
-              text : 'The observation won\'t be recorded',
-              type:'warning',
-              showCancelButton: false,
-              confirmButtonColor:'#DD6B55',
-              confirmButtonText:'Ok'
-            });
-            return;
-          }
+      if (!errors) {
+        flagEmpty = this.checkFormIsEmpty(this.model.schema, this.BBForm.getValue());
+      }
+      if (flagEmpty) {
+        this.swal({
+          title: 'Empty observation',
+          text: 'The observation won\'t be recorded',
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: '#DD6B55',
+          confirmButtonText: 'Ok'
+        });
+        return;
+      }
 
-          if(!errors) {
-            if (this.model.attributes["id"] == 0) {
+      if (!errors) {
+        if (this.model.attributes.id == 0) {
                 // To force post when model.save()
-              this.model.attributes["id"] = null;
-            }
+          this.model.attributes.id = null;
+        }
 
-            if (this.model.id == 0) {
+        if (this.model.id == 0) {
               // New Record
-              jqhrx = this.model.save(null, {
-                success: function (model, response) {
+          jqhrx = this.model.save(null, {
+            success: function (model, response) {
                   // Getting ID of created record, from the model (has beeen affected during model.save in the response)
-                  _this.savingSuccess(model, response);
-                  _this.id = _this.model.id;
-                  if (_this.redirectAfterPost != "") {
+              _this.savingSuccess(model, response);
+              _this.id = _this.model.id;
+              if (_this.redirectAfterPost != '') {
                     // If redirect after creation
-                    var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
+                var TargetUrl = _this.redirectAfterPost.replace('@id', _this.id);
 
-                    if (window.location.href == window.location.origin + TargetUrl) {
+                if (window.location.href == window.location.origin + TargetUrl) {
                       // if same page, relaod
-                      window.location.reload();
-                    }
-                    else {
+                  window.location.reload();
+                }
+                else {
                       // otpherwise redirect
-                      window.location.href = TargetUrl;
-                    }
-                  }
-                  else {
-                    // If no redirect after creation
-                    if (_this.reloadAfterSave) {
-                      _this.reloadingAfterSave();
-                    }
-                  }
-                  _this.afterSaveSuccess(response);
-                  return true;
-                },
-                error: function (model, response) {
-                  _this.savingError(response);
-                  return false;
+                  window.location.href = TargetUrl;
                 }
-              });
-            }
-            else {
-              // After update of existing record
-              this.model.id = this.model.get('id');
-              var jqxhr = this.model.save(null, {
-                success: function (model, response) {
-                  _this.savingSuccess(model, response);
-                  if (_this.reloadAfterSave) {
-                    _this.reloadingAfterSave();
-                  }
-                  _this.afterSaveSuccess(response);
-                },
-                error: function (model,response) {
-                  _this.savingError(response);
-                }
-              });
-            }
-          }else{
-            var errorList = _this.BBForm.$el.find('.error');
-
-            for(var i=0; i < errorList.length; i++){
-              var elmName = errorList[i].nodeName ;
-              if (elmName.toUpperCase()!= 'SPAN'){
-                $(errorList[i]).trigger('focus').click();
-                break;
               }
+              else {
+                    // If no redirect after creation
+                if (_this.reloadAfterSave) {
+                  _this.reloadingAfterSave();
+                }
+              }
+              _this.afterSaveSuccess(response);
+              return true;
+            },
+            error: function (model, response) {
+              _this.savingError(response);
+              return false;
             }
-            return false;
-          }
-          _this.formChange = false;
-          this.afterSavingModel();
-          return jqxhr;
-        },
+          });
+        }
+        else {
+              // After update of existing record
+          this.model.id = this.model.get('id');
+          var jqxhr = this.model.save(null, {
+            success: function (model, response) {
+              _this.savingSuccess(model, response);
+              if (_this.reloadAfterSave) {
+                _this.reloadingAfterSave();
+              }
+              _this.afterSaveSuccess(response);
+            },
+            error: function (model, response) {
+              _this.savingError(response);
+            }
+          });
+        }
+      } else {
+        var errorList = _this.BBForm.$el.find('.error');
 
-    afterSaveSuccess: function(){
+        for (var i = 0; i < errorList.length; i++) {
+          var elmName = errorList[i].nodeName;
+          if (elmName.toUpperCase() != 'SPAN') {
+            $(errorList[i]).trigger('focus').click();
+            break;
+          }
+        }
+        return false;
+      }
+      _this.formChange = false;
+      this.afterSavingModel();
+      return jqxhr;
+    },
+
+    afterSaveSuccess: function () {
 
     },
 
@@ -560,22 +551,20 @@ define([
       this.checkGridRowAgain();
       this.displayMode = 'edit';
       this.initModel();
-      if(this.buttonRegion)
-      this.displaybuttons();
-
+      if (this.buttonRegion)
+        { this.displaybuttons(); }
     },
     butClickCancel: function (e) {
       this.checkGridRowAgain();
       this.displayMode = 'display';
       this.initModel();
-      if(this.buttonRegion)
-      this.displaybuttons();
-
+      if (this.buttonRegion)
+        { this.displaybuttons(); }
     },
     butClickClear: function (e) {
       this.checkGridRowAgain();
       var formContent = this.BBForm.el;
-      $(formContent).find('input').not(':disabled').each(function(){
+      $(formContent).find('input').not(':disabled').each(function () {
         $(this).val('');
       });
       $(formContent).find('select').val('');
@@ -583,15 +572,15 @@ define([
       $(formContent).find('input[type="checkbox"]').attr('checked', false);
     },
 
-    butClickDelete: function(){
+    butClickDelete: function () {
       var _this = this;
       var opts = {
-        title : 'Are you sure?',
+        title: 'Are you sure?',
         showCancelButton: true,
         type: 'warning',
         confirmButtonText: 'Yes, delete it!',
         confirmButtonColor: '#DD6B55',
-        callback: function(){
+        callback: function () {
           _this.formChange = false;
           _this.deleteModel();
         }
@@ -599,19 +588,19 @@ define([
       this.swal(opts);
     },
 
-    deleteModel: function(){
+    deleteModel: function () {
       var _this = this;
       this.model.id = this.model.get('id');
-      if(this.model.get('id') == 0){
+      if (this.model.get('id') == 0) {
         _this.afterDelete(_this.model);
       }
       this.model.destroy({
-        success: function(response){
-          if(_this.afterDelete){
+        success: function (response) {
+          if (_this.afterDelete) {
             _this.afterDelete(response, _this.model);
           }
         },
-        fail: function(response){
+        fail: function (response) {
           console.error(response);
         }
       });
@@ -621,43 +610,45 @@ define([
       this.displayMode = 'display';
       // reaload created record from AJAX Call
       this.initModel();
-      //this.showForm();
-      if(this.buttonRegion)
-      this.displaybuttons();
+      // this.showForm();
+      if (this.buttonRegion)
+      { this.displaybuttons(); }
     },
 
 
-    checkFormIsEmpty: function(objSchema , values) {
+    checkFormIsEmpty: function (objSchema, values) {
       var isEmpty = true;
 
-      for( var key in values ) {
+      for (var key in values) {
         var editorValue = values[key];
         var editorSchema = objSchema[key];
 
-        if(key == 'defaultValues') {
+        if (key == 'defaultValues') {
           continue;
         }
-        if(editorSchema.fieldClass.indexOf('hide') != -1) {
+        if (editorSchema.fieldClass.indexOf('hide') != -1) {
           continue;
         }
-        if(editorSchema.type == 'Checkbox') {
+        if (editorSchema.type == 'Checkbox') {
           continue;
         }
-        //need to check if not an array
-        if(editorValue != null && editorValue != '' && !Array.isArray(editorValue) ) {
+        // need to check if not an array
+        if (editorValue != null && editorValue != '' && !Array.isArray(editorValue)) {
           return isEmpty = false;
         }
 
-        if(editorSchema.defaultValue) {
-            if(editorSchema.defaultValue != editorValue) {
-              return isEmpty = false;
-            }
+        if (editorSchema.defaultValue) {
+          if (editorSchema.defaultValue != editorValue) {
+            return isEmpty = false;
+          }
         }
 
-        if( Array.isArray(editorValue) ) {
-          //subform
-          for( var values of editorValue ) {
-            if(!this.checkFormIsEmpty(editorSchema.subschema, values)) {
+        if (Array.isArray(editorValue)) {
+          // subform
+
+          // ??? never used
+          for (var values in editorValue) {
+            if (!this.checkFormIsEmpty(editorSchema.subschema, values)) {
               return isEmpty = false;
             }
           }
@@ -666,7 +657,6 @@ define([
 
       return isEmpty;
     },
-
 
 
     onSavingModel: function () {
@@ -689,57 +679,56 @@ define([
       // To be extended, called after save on model if error
     },
 
-    loadingError : function(response) {
+    loadingError: function (response) {
 
     },
 
-    bindEvents: function(){
+    bindEvents: function () {
       var _this = this;
       var name = this.name;
 
-      /*==========  Edit  ==========*/
-      this.onEditEvt = $.proxy(function(e){
+      /*= =========  Edit  ==========*/
+      this.onEditEvt = $.proxy(function (e) {
         this.butClickEdit();
       }, this);
 
       this.buttonRegion[0].find('.NsFormModuleEdit').on('click', this.onEditEvt);
 
-      /*==========  Cancel  ==========*/
-      this.onCancelEvt = $.proxy(function(e){
+      /*= =========  Cancel  ==========*/
+      this.onCancelEvt = $.proxy(function (e) {
         this.butClickCancel();
       }, this);
 
       this.buttonRegion[0].find('.NsFormModuleCancel').on('click', this.onCancelEvt);
 
-      /*==========  save  ==========*/
-      this.onSaveEvt = $.proxy(function(){
+      /*= =========  save  ==========*/
+      this.onSaveEvt = $.proxy(function () {
         this.butClickSave();
       }, this);
 
       this.buttonRegion[0].find('.NsFormModuleSave').on('click', this.onSaveEvt);
 
-      /*==========  Clear  ==========*/
-      this.onClearEvt = $.proxy(function(){
+      /*= =========  Clear  ==========*/
+      this.onClearEvt = $.proxy(function () {
         this.butClickClear();
       }, this);
 
       this.buttonRegion[0].find('.NsFormModuleClear').on('click', this.onClearEvt);
 
-      /*==========  Delete  ==========*/
-      if(this.displayDelete){
-        this.onDeleteEvt = $.proxy(function(){
+      /*= =========  Delete  ==========*/
+      if (this.displayDelete) {
+        this.onDeleteEvt = $.proxy(function () {
           this.butClickDelete();
         }, this);
 
         this.buttonRegion[0].find('.NsFormModuleDelete').on('click', this.onDeleteEvt);
-      }else{
+      } else {
         this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
       }
     },
 
 
-    unbind: function(){
-
+    unbind: function () {
       var _this = this;
       var name = this.name;
 
@@ -750,14 +739,14 @@ define([
       this.buttonRegion[0].find('.NsFormModuleDelete').off('click', this.onDeleteEvt);
     },
 
-    destroy: function(){
-      if(this.buttonRegion[0]){
+    destroy: function () {
+      if (this.buttonRegion[0]) {
         this.unbind();
       }
     },
 
 
-    swal: function(opts){
+    swal: function (opts) {
       Swal({
         title: opts.title || opts.responseText || 'error',
         text: opts.text || '',
@@ -765,19 +754,19 @@ define([
         showCancelButton: opts.showCancelButton,
         confirmButtonColor: opts.confirmButtonColor,
         confirmButtonText: opts.confirmButtonText,
-        closeOnConfirm: opts.closeOnConfirm || true,
+        closeOnConfirm: opts.closeOnConfirm || true
       },
-      function(isConfirm){
-        //could be better
-        if(opts.callback && isConfirm){
+      function (isConfirm) {
+        // could be better
+        if (opts.callback && isConfirm) {
           opts.callback();
         }
       });
     },
 
-    finilizeToGridRow: function() {
+    finilizeToGridRow: function () {
       var _this = this;
-      /*var button = 'danger';
+      /* var button = 'danger';
       if(!this.model.get('id')){
         button = 'warning';
       }*/
@@ -789,8 +778,7 @@ define([
       // this.BBForm.$el.find('button.js-remove').on('click', function() {
       //   _this.butClickDelete();
       // });
-    },
+    }
 
   });
-
 });
