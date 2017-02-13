@@ -5,6 +5,7 @@ from ..Models import (
     Observation,
     File,
     File_Type,
+    File_ProcessList,
     FrontModules,
     ModuleForms
 )
@@ -232,8 +233,14 @@ def generateImportTable(columns, protoId, tableName, session):
     return schema
 
 
-def generateMetaData(protoId, tableName, userId, session):
-    # comment
-    """ TODO Creer table import fichier et insérer les action d'import"""
-    command = text(""" INSERT INTO TImport_excel_metadata ([table_name], [proto_id], [user_id]) VALUES """ +
-                   "'" + tableName  + "'" + """ , """ + str (protoId ) + """ , """ + userId )
+@view_config(route_name=route_prefix + 'processList',
+             renderer='json',
+             request_method='GET')
+def getProcessLis(request):
+    session = request.dbsession
+    data = request.params.mixed()
+    fileType = session.query(File_Type).filter(File_Type.Name == data['fileType']).one()
+    processList = [{'name': process.Name,
+                    'descriptionFr': process.DescriptionFr,
+                    'descriptionEn': process.DescriptionEn, } for process in fileType.ProcessList]
+    return processList

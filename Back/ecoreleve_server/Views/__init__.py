@@ -225,6 +225,8 @@ def add_routes(config):
                      'ecoReleve-Core/file_import/getTemplate')
     config.add_route('file_import/getExcelFile',
                      'ecoReleve-Core/file_import/getExcelFile')
+    config.add_route('file_import/processList',
+                     'ecoReleve-Core/file_import/processList')
 
     # Web sockets call
     # config.add_view(JobView,

@@ -34,8 +34,8 @@ define([
     },
 
     onShow: function() {
+      this.displayProcess();
       this.displayForm();
-
     },
 
 
@@ -82,25 +82,8 @@ define([
           data: formData,
           processData: false, // Don't process the files
           contentType: false, // Set content type to false as jQuery will tell the server its a query string request
-          // success: function(data, textStatus, jqXHR){
-          //       if ((data=='station columns error') || ( data=='protocol columns error') ){
-          //         _this.swalError(data);
-
-          //       }
-           success: function(msg){
+          success: function(msg){
                 _this.startWebSocket(msg);
-
-                // if(textStatus=='success') {
-                //   Swal({
-                //     title: 'Success',
-                //     text: 'File import is successfully done.',
-                //     type: 'success',
-                //     showCancelButton: false,
-                //     confirmButtonColor: 'green',
-                //     confirmButtonText: 'OK',
-                //     closeOnConfirm: true,
-                //   });
-                // }
 
           },
           error: function(jqXHR, textStatus, errorThrown){
@@ -108,6 +91,21 @@ define([
           }
           });
       }
+    },
+
+    displayProcess: function(){
+      var _this = this;
+      $.ajax({
+        url: config.coreUrl + 'file_import/processList?fileType='+'excel_protocol',
+        type: 'GET',
+        success: function(msg){
+             console.log(msg)
+
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+                _this.swalError('error server side');
+        }
+        });
     },
 
     startWebSocket: function(guid){

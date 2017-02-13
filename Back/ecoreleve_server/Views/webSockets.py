@@ -23,12 +23,11 @@ class JobView(WebSocketView):
         session = threadlocal.get_current_registry().dbmaker()
         job = self.request.context
         job.add_listener(websocket)
-
         curFile = session.query(File).get(job.__name__)
         runner = curFile.main_process()
         for result in runner:
             process, msg = result
             job.send(msg)
-            if process.Blocking and json.loads(msg)['error'] == "1":
-                break
+            # if process.Blocking and json.loads(msg)['error'] == "1":
+            #     break
 
