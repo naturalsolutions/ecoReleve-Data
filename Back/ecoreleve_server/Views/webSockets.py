@@ -5,6 +5,7 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from ..controllers.WebSocket import FileImportJob
 from ..Models.File_Import import File
 from pyramid import threadlocal
+import json
 
 
 @view_config(context=FileImportJob, permission=NO_PERMISSION_REQUIRED)
@@ -26,5 +27,8 @@ class JobView(WebSocketView):
         curFile = session.query(File).get(job.__name__)
         runner = curFile.main_process()
         for result in runner:
-            job.send(result)
+            process, msg = result
+            job.send(msg)
+            if process.Blocking and json.loads(msg)['error'] == "1":
+                break
 

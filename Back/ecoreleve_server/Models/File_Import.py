@@ -73,11 +73,6 @@ class File (Base):
                            SELECT @result, @error, @errorIndexes;"""
                            ).bindparams(bindparam('file_ID', self.ID))
                 result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
-                self.processInfo[current_process.Name] = {
-                    # 'desc': current_process.DescriptionFr,
-                    'error': error,
-                    'result': result,
-                    'errorIndexes': errorIndexes}
                 trans.commit()
                 return result, error, errorIndexes
 
@@ -89,12 +84,6 @@ class File (Base):
                            SELECT @result, @error, @errorIndexes;"""
                            ).bindparams(bindparam('file_ID', self.ID))
                 result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
-                self.processInfo[current_process.Name] = {
-                    # 'desc': current_process.DescriptionFr,
-                    'error': error,
-                    'result': result,
-                    'errorIndexes': errorIndexes}
-
                 trans.commit()
                 return result, error, errorIndexes
 
@@ -106,20 +95,13 @@ class File (Base):
                            SELECT @result, @error, @errorIndexes;"""
                            ).bindparams(bindparam('file_ID', self.ID))
                 result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
-                self.processInfo[current_process.Name] = {
-                    # 'desc': current_process.DescriptionFr,
-                    'error': error,
-                    'result': result,
-                    'errorIndexes': errorIndexes}
                 trans.commit()
                 return result, error, errorIndexes
 
         except Exception as e:
             print_exc()
             trans.rollback()
-            if current_process.Blocking:
-                raise
-            else:
+            if not current_process.Blocking:
                 pass
 
     @coroutine
@@ -130,9 +112,9 @@ class File (Base):
             try:
                 dictSession[process.Name] = self.ObjContext.begin()
                 result, error, errorIndexes = self.run_process(process, dictSession[process.Name])
-                yield "{'process':"+str(process.Name)+", 'error':"+str(error)+", 'errorIndexes':"+str(errorIndexes)+"}"
+                yield process, '{"process":"'+str(process.Name)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
             except:
-                yield "{'process':"+str(process.Name)+", 'error':'internal error', 'errorIndexes': 'error'}"
+                yield process, '{"process":"'+str(process.Name)+'", "error":"internal error", "errorIndexes": "error"}'
 
     def log(self):
         print('error log')
