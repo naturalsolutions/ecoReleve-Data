@@ -18,7 +18,7 @@ INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [E
 GO
 INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (4, N'pr_Check_FieldWorkerName', 1, N'sql_check', 4, 0, N'Check des nom FW', NULL)
 GO
-INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (5, N'pr_Check_Autocomplete', 1, N'sql_check', 5, 0, NULL, NULL)
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (5, N'pr_Check_ObjectPicker', 1, N'sql_check', 5, 0, NULL, NULL)
 GO
 INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (6, N'pr_Check_FieldActivity', 1, N'sql_check', 6, 0, NULL, NULL)
 
@@ -33,7 +33,7 @@ INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [E
 GO
 INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (11, N'pr_Check_FK_Individual_IS_INT', 1, N'sql_check', 11, 0, NULL, NULL)
 GO
-INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (13, N'pr_Update_Autocomplete', 1, N'sql_update', 100, 1, NULL, NULL)
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (13, N'pr_Update_ObjectPicker', 1, N'sql_update', 100, 1, NULL, NULL)
 
 GO
 INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (18, N'pr_Update_FieldActivity', 1, N'sql_update', 101, 1, NULL, NULL)
