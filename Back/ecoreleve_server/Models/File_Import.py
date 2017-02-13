@@ -51,7 +51,7 @@ class File (Base):
     ObjectType = Column(Integer)
     Type = relationship('File_Type', uselist=False, backref='Files')
 
-    error = True
+    error = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -76,7 +76,7 @@ class File (Base):
                 trans.commit()
                 return result, error, errorIndexes
 
-            if 'update' in current_process.ProcessType:
+            if 'update' in current_process.ProcessType and not self.error:
                 req = text("""
                            DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
                            EXEC [dbo].""" + current_process.Name +
@@ -87,7 +87,7 @@ class File (Base):
                 trans.commit()
                 return result, error, errorIndexes
 
-            if 'insert' in current_process.ProcessType:
+            if 'insert' in current_process.ProcessType and not self.error:
                 req = text("""
                            DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
                            EXEC [dbo].""" + current_process.Name +
@@ -97,7 +97,8 @@ class File (Base):
                 result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
                 trans.commit()
                 return result, error, errorIndexes
-
+            if self.error:
+                return 'not executed', 1, None
         except Exception as e:
             print_exc()
             trans.rollback()
@@ -112,9 +113,11 @@ class File (Base):
             try:
                 dictSession[process.Name] = self.ObjContext.begin()
                 result, error, errorIndexes = self.run_process(process, dictSession[process.Name])
-                yield process, '{"process":"'+str(process.Name)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
+                if error and process.Blocking and not self.error:
+                    self.error = True
+                yield process, '{"process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
             except:
-                yield process, '{"process":"'+str(process.Name)+'", "error":"internal error", "errorIndexes": "error"}'
+                yield process, '{"process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes": "error"}'
 
     def log(self):
         print('error log')
