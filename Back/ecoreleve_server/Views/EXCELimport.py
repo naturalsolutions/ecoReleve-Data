@@ -1,18 +1,19 @@
 from pyramid.view import view_config
-from sqlalchemy import text, DATETIME, String
+from sqlalchemy import text, DATETIME, String, select, and_, or_
 from ..Models import (
     Station,
     Observation,
     File,
     File_Type,
-    FrontModules
+    FrontModules,
+    ModuleForms
 )
 import pandas as pd
 import io
 from pyramid.response import Response
 import uuid
 import numpy as np
-import asyncio
+
 
 route_prefix = 'file_import/'
 
@@ -28,28 +29,13 @@ def get_excel(request):
     protocolName.replace(" ", "_")
 
     stationFields = getTemplateColStation(session)
-    # newSta = Station(FK_StationType=1)
-    # ConfSta = session.query(FrontModules).filter(
-    #     FrontModules.Name == 'StationForm').first()
-    # stationFields = newSta.GetForm(ConfSta, 'edit')
-    # stationFields = list(stationFields['schema'].keys())
-    # stationFields = list(map(lambda x: 'Station_'+x,
-    #                         list(filter(lambda y: y not in ['updateSite', 'FieldWorkers', 'ID']
-    #                                 , stationFields))))
-    #
-    # stationFields.extend(['Station_FieldWorker1',
-    #                       'Station_FieldWorker2',
-    #                       'Station_FieldWorker3'])
+
     if(protocolID == 0):
         fields = stationFields
     else:
         newObs = Observation(FK_ProtocoleType=protocolID)
-        Conf = session.query(FrontModules).filter(
-            FrontModules.Name == 'ObservationForm').first()
-        allprops = newObs.GetForm(Conf, 'edit')
-        allprops = list(allprops['schema'].keys())
-
-        fields = stationFields + allprops
+        obsFields = getTemplateColObs(session, protocolID)
+        fields = stationFields + obsFields
 
     # TODO : order columns by form order
 
@@ -66,19 +52,34 @@ def get_excel(request):
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 
+def getTemplateColObs(session, protocolID):
+    newObs = Observation(FK_ProtocoleType=protocolID)
+    Conf = session.query(FrontModules).filter(
+        FrontModules.Name == 'ObservationForm').first()
+    obsForm = newObs.GetForm(Conf, 'edit')
+    obsFields = []
+
+    for obj in obsForm['fieldsets']:
+        obsFields.extend(obj['fields'])
+    obsFields = list(filter(lambda y: y not in ['creationDate', 'ID'], obsFields))
+    return obsFields
+
+
 def getTemplateColStation(session):
     newSta = Station(FK_StationType=1)
     ConfSta = session.query(FrontModules).filter(
         FrontModules.Name == 'StationForm').first()
-    stationFields = newSta.GetForm(ConfSta, 'edit')
-    stationFields = list(stationFields['schema'].keys())
-    stationFields = list(map(lambda x: 'Station_'+x,
-                            list(filter(lambda y: y not in ['updateSite', 'FieldWorkers', 'ID']
-                                    , stationFields))))
+    stationForm = newSta.GetForm(ConfSta, 'edit')
 
+    stationFields = []
+    for obj in stationForm['fieldsets']:
+        stationFields.extend(obj['fields'])
+    stationFields = list(map(lambda x: 'Station_'+x,
+                            list(filter(lambda y: y not in ['creationDate', 'updateSite', 'FieldWorkers', 'ID']
+                                    , stationFields))))
     stationFields.extend(['Station_FieldWorker1',
                           'Station_FieldWorker2',
-                              'Station_FieldWorker3'])
+                          'Station_FieldWorker3'])
     return stationFields
 
 
@@ -106,7 +107,6 @@ def import_file(request):
         fileName = request.POST['excelFile'].filename
         columns = data[0]
         protoId = int(request.POST['protoId'])
-        protoName = request.POST['protoName']
 
         if not checkStationColumns(columns, session):
             request.response.status_code = 510
@@ -149,15 +149,8 @@ def import_file(request):
                          'Station_FieldWorker3': String
                          })
 
-        # info = file.main_process()
-
-        # if file.error:
-        #     request.response.status = 510
-        #     return info
-
     except:
         request.response.status = 530
-
         session.rollback()
         raise
     return file.ID
@@ -165,18 +158,15 @@ def import_file(request):
 
 def checkProtoColumns(protoID, excelCols, session):
     stationColumns = getTemplateColStation(session)
+    obsFields = getTemplateColObs(session, protoID)
 
     duplicatedCols = set([x for x in excelCols if excelCols.count(x) > 1])
     if len(duplicatedCols) > 0:
         return False
 
     protocolColumns = list(set(excelCols) - set(stationColumns))
-    newObs = Observation(FK_ProtocoleType=protoID)
-    Conf = session.query(FrontModules).filter(
-        FrontModules.Name == 'ObservationForm').first()
-    protocolColsInDB = newObs.GetForm(Conf, 'edit')
-    protocolColsInDB = list(protocolColsInDB['schema'].keys())
-    isSame = set(protocolColumns).issubset(set(protocolColsInDB))
+
+    isSame = set(protocolColumns).issubset(set(obsFields))
     return isSame
 
 
@@ -184,7 +174,6 @@ def checkStationColumns(excelCols, session):
     stationColumns = getTemplateColStation(session)
     s = set(stationColumns)
     p = set(excelCols)
-
     isSame = s.issubset(p)
     return isSame
 
@@ -248,10 +237,3 @@ def generateMetaData(protoId, tableName, userId, session):
     """ TODO Creer table import fichier et insérer les action d'import"""
     command = text(""" INSERT INTO TImport_excel_metadata ([table_name], [proto_id], [user_id]) VALUES """ +
                    "'" + tableName  + "'" + """ , """ + str (protoId ) + """ , """ + userId )
-    # try:
-    #     session.execute(command)
-    #     session.commit()
-    # except:
-    #     request.response.status =510
-    #     return False
-    # return schema
