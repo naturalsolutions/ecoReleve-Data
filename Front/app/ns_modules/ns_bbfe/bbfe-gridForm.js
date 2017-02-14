@@ -118,7 +118,8 @@ define([
               field: field.name,
               headerName: field.title,
               type: field.type,
-              options: field.options
+              options: field.options,
+              schema: field
           };
           
           columnsDefs.push(colDef)
