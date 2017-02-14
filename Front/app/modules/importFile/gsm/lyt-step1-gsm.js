@@ -164,7 +164,14 @@ define([
 
       myDropzone.on('success', function(file,resp) {
         $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-success');
-        var inserted = resp[1]['new GPS data inserted'];
+        var inserted = undefined
+        if( typeof resp[1]['new GPS data inserted'] !== 'undefined') {
+          inserted = resp[1]['new GPS data inserted'];
+        }
+        if ( typeof resp[1]['new Engineering data inserted'] !== 'undefined') {
+          inserted = resp[1]['new Engineering data inserted']
+        }
+
         _this.totalReturned.add({inserted: inserted});
       });
 
@@ -226,6 +233,7 @@ define([
         myDropzone.removeAllFiles(true);
         _this.ui.cancelBtn.addClass('hidden')
         _this.ui.startBtn.addClass('hidden')
+        _this.totalReturned.reset()
 
       };
 
