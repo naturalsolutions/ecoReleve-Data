@@ -375,12 +375,12 @@ def getListofProtocolTypes(request):
         join_table = join(ProtocoleType, FieldActivity_ProtocoleType,
                           ProtocoleType.ID == FieldActivity_ProtocoleType.FK_ProtocoleType)
         query = select([ProtocoleType.ID, ProtocoleType.Name]
-                       ).where(and_(or_(ProtocoleType.Status == 4, ProtocoleType.Status == 8),
+                       ).where(and_(ProtocoleType.Status.in_([4,8,10]),
                                     FieldActivity_ProtocoleType.FK_fieldActivity == fieldActivityID)
                                ).select_from(join_table)
     else:
         query = select([ProtocoleType.ID, ProtocoleType.Name]).where(
-            or_(ProtocoleType.Status == 4, ProtocoleType.Status == 8))
+            ProtocoleType.Status.in_([4,8,10]))
     query = query.where(ProtocoleType.obsolete == False)
     result = session.execute(query).fetchall()
     res = []
