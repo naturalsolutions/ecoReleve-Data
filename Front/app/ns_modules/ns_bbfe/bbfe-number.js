@@ -1,3 +1,5 @@
+//Not used for now
+
 define([
   'jquery',
   'backbone',
@@ -7,39 +9,19 @@ define([
   $, Backbone, Form
 ){
   'use strict';
-  return Form.editors.Number = Form.editors.Number.extend({
-    defaultValue: '',
+  Form.editors.Number.prototype.initialize = function(options) {
+      Form.editors.Text.prototype.initialize.call(this, options);
 
-    //var lat = /^\-?([1-8]?[0-9]|[1-9]0)(\.[0-9]{0,6})?$/.test(newVal);
-    //long = /^\-?([1]?[1-7][1-9]|[1]?[1-8][0]|[1-9]?[0-9])(\.[0-9]{0,6})?$/.test(newVal);
-    
-    onKeyPress: function(event) {
-      var self = this,
-          delayedDetermineChange = function() {
-            setTimeout(function() {
-              self.determineChange();
-            }, 0);
-          };
+      var schema = this.schema;
 
-      //Allow backspace
-      if (event.charCode === 0) {
-        delayedDetermineChange();
-        return;
+      this.$el.attr('type', 'number');
+
+      if (!schema || !schema.editorAttrs || !schema.editorAttrs.step) {
+        // provide a default for `step` attr,
+        // but don't overwrite if already specified
+        this.$el.attr('step', 'any');
       }
+    };
 
-      //Get the whole new value so that we can prevent things like double decimals points etc.
-      var newVal = this.$el.val()
-      if( event.charCode != undefined ) {
-        newVal = newVal + String.fromCharCode(event.charCode);
-      }
-
-      var numeric = /^\-?[0-9]*\.?[0-9]*?$/.test(newVal);
-
-      if (numeric) {
-        delayedDetermineChange();
-      } else {
-        event.preventDefault();
-      }
-    },
-  });
+    return Form.editors.Number;
 });

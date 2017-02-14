@@ -48,7 +48,10 @@ define([
 
     translater: Translater.getTranslater(),
 
+    ModelPrototype: Backbone.Model,
+
     initialize: function(options) {
+      this.model = new this.ModelPrototype();
       this.com = new Com();
       if( window.app.currentData ){
         this.populateCurrentData(window.app.currentData);

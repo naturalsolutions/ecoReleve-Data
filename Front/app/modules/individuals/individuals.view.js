@@ -6,7 +6,7 @@ define([
   'use strict';
 
   return ManagerView.extend({
-  	model: new IndividualModel(),
+  	ModelPrototype: IndividualModel,
 
   	toggleTab: function(e) {
   	  if(!$(e.currentTarget).hasClass('active')){

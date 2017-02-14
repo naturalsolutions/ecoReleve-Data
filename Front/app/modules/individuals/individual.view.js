@@ -30,7 +30,7 @@ define([
       'click button.js-btn-delete-locations': 'warnDeleteLocations',
     },
 
-    model: new IndividualModel(),
+    ModelPrototype: IndividualModel,
 
     displayMap: function() {
       var _this = this;
@@ -90,6 +90,9 @@ define([
         gridOptions: {
           rowSelection: 'multiple',
           enableFilter: true,
+          onRowDoubleClicked: function (row){
+            _this.locationsGrid.interaction('focusAndZoom', row.data.ID || row.data.id);
+          },
           onRowClicked: function(row){
             _this.locationsGrid.interaction('focus', row.data.ID || row.data.id);
           }

@@ -14,6 +14,6 @@ define([
 
   'use strict';
   return NewView.extend({
-    model: new MonitoredSiteModel(),
+    ModelPrototype: MonitoredSiteModel,
   });
 });
