@@ -25,7 +25,7 @@ define([
     template: 'app/modules/stations/station.tpl.html',
     className: 'full-height white station',
 
-    model: new StationModel(),
+    ModelPrototype: StationModel,
 
     ui: {
       formStation: '.js-from-station',
@@ -40,6 +40,7 @@ define([
     },
 
     initialize: function(options) {
+      this.model = new this.ModelPrototype();
       this.com = new Com();
       this.model.set('id', options.id);
 
@@ -114,7 +115,13 @@ define([
         var type_ = 'error';
         var title = 'Error saving';
         if (response.status == 510) {
-          msg = 'A station already exists with these parameters';
+          console.log(response)
+          if (response.responseJSON.existingStation) {
+            msg = 'A station already exists with these parameters';
+          }
+          else if (response.responseJSON.updateDenied) {
+            msg = "Equipment is present on this station, you can't change Station Date or Monitored Site";
+          }
           type_ = 'warning';
           title = 'Error saving';
         }

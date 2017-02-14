@@ -1,3 +1,17 @@
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+  border-color: rgb(102, 175, 233);
+  outline: 0;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, 0.6);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+
+.form-control{
+  border-radius: 0px!important;
+}
 
 fieldset{
 	border: 1px solid #e5e5e5;
@@ -8,11 +22,14 @@ fieldset{
 		margin-bottom: 10px;
 	}
 	legend{
-		margin: 0px 5px;
+		margin: -10px 5px;
 		padding: 10px 10px;
 	}
 	label{
-		display: block;
+		display: inline-block;
+	}
+	textarea{
+		height: 72px;
 	}
 }
 legend{
@@ -30,7 +47,7 @@ label{
 	font-weight: 300;
 }
 textarea.form-control{
-	height: 34px;
+	height: 70px;
 	max-width: 100%;
 	&:disabled{
 		resize: none;
@@ -73,10 +90,10 @@ select:disabled {
 
 .form-control[type="checkbox"]{
 	box-shadow: none;
-	height: 34px;
-	width: 25px;
+	height: 22px;
+	width: 22px;
 	cursor: pointer;
-	margin: 0px;
+	margin: 5px 0px;
 }
 .form-control[disabled], fieldset[disabled] .form-control{
 	cursor: auto;
@@ -85,8 +102,13 @@ select:disabled {
 
 }
 
-.input-group .form-control {
-	z-index: inherit;
+.input-group{
+	.input-group-addon{
+		border-radius: 0px;
+	}
+	.form-control {
+		z-index: inherit;
+	}
 }
 
 .nested-model{
@@ -204,37 +226,49 @@ div.form-control{
   height: auto;
 }
 
-/* Thesaurus */
-span.fancytree-title {
-	font-family: 'Exo 2', sans-serif;
-}
-span.fancytree-title:hover {
-	background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;
-	-webkit-background: linear-gradient(to bottom, rgba(46, 204, 64, 0.1) 0%, rgba(46, 204, 64, 0.3) 100%) !important;
-}
-ul.fancytree-container{
-  z-index: 1;
-	border:0;
-  max-height: 500px;
-  padding-right: 10px;
-}
+
 div.fancytreeview{
-	//input-group : diplsay table cell
+  border: 1px solid rgb(153, 153, 153);
   top: 34px!important;
 	position: absolute;
-	border: 1px solid rgba(46, 204, 64, 0.6) !important;
-	width: auto;
+	overflow: auto;
+	background: white;
+	width: 100%;
+	outline: none !important;
+	z-index: 10;
+	ul.fancytree-container{
+		outline: none !important;
+		border: 0!important;
+	  max-height: 250px;
+	  line-height: 20px!important;
+		border: 1px solid #999;
+	  padding: 5px;
+	  overflow: visible;
+	  background: white;
+	}
+
+	span.fancytree-title {
+		border-radius: 0px;	
+		padding: 0px 5px;
+		 margin: 0px 5px;
+	}
+	span.fancytree-title:hover {
+		background: rgba(0,0,0, 0.1);
+	}
 }
 
-span.fancytree-title{
-	//margin: 0px;
+.ag-grid-container{
+	div.fancytreeview{
+		width: auto;
+		max-witdh: 250px;
+	}	
 }
-/*
-Dans detail station, bloc "Detailled Infos", en mode edit :
- - Ajouter une class sur une div contenant le bloc qui change de statut pour indiquer le mode "edit" sinon ce n'est pas possible de différencier les styles
- - Pour avoir la croix à côté de la liste déroulante, il faut change le template de listeoFnestedModel comme sur ecollection. Avoir le bouton "x" dans un col-md-2 et le select dans col-md-10
- */
-/* FIN PIER */
+
+.input-group{
+	.fancytreeview{
+		width: calc(~"100% - 39px");
+	}
+}
 
 
 .wrapper-grid-from{
@@ -486,7 +520,6 @@ textarea {
 }
 
 .grid-field .fancytree-container {
-
 	max-height:49px !important;
 }
 
@@ -497,7 +530,6 @@ textarea {
 }
 
 .border-bottom-filter{
-
 	border-bottom: 1px solid #e5e5e5;
 	margin-top: 0px;
 	margin-left:15px;
@@ -510,12 +542,21 @@ textarea {
 
 .input-group{
 	input.autocompTree{
-		border-radius: 0px 4px 4px 0px!important;
+		//border-radius: 0px 4px 4px 0px!important;
 	}
 }
 
 .filter-container{
-	padding: 10px 0px;
+	padding-bottom: 15px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	.filter-label{
+		text-align: right;
+		color: rgb(82, 82, 82);
+		font-weight: bold;
+		text-transform: uppercase;
+	}
 }
 .filter-no-padding {
 	padding: 20px 0px;

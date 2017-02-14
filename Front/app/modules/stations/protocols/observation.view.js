@@ -47,16 +47,20 @@ define([
         buttonRegion: [this.ui.formBtns],
         displayMode: this.displayMode,
         formRegion: this.ui.form,
-        reloadAfterSave: false,
+        reloadAfterSave: true,
         savingError: this.handleErrors,
         afterSaveSuccess: function(response){
+          var id;
           if(this.model.changed.id){
             _this.parentModel.get('obs').push(response.id);
+            id = response.id;
+          } else {
+            id = this.model.get('ID');
           }
           _this.parentModel.trigger('change:obs', _this.parentModel);
           var hash = window.location.hash.split('?');
-          var url = hash[0] + '?proto=' + _this.parentModel.get('ID') + '&obs=' + response.id;
-          Backbone.history.navigate(url, {trigger: true});
+          var url = hash[0] + '?proto=' + _this.parentModel.get('ID') + '&obs=' + id;
+          Backbone.history.navigate(url, {trigger: false});
         },
         afterDelete: function(){
           var index = _this.parentModel.get('obs').indexOf(_this.model.get('id'));

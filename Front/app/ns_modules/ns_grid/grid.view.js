@@ -4,18 +4,30 @@ define([
   'backbone',
   'marionette',
   'ag-grid',
-  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
+  'sweetAlert',
+
   './custom.text.filter',
   './custom.number.filter',
   './custom.date.filter',
   './custom.select.filter',
   './custom.text.autocomplete.filter',
+
+  'vendors/utils',
+  
+  './custom.renderers',
+  './custom.editors',
+
   'ns_grid/customCellRenderer/decimal5Renderer',
   'ns_grid/customCellRenderer/dateTimeRenderer',
+
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, ObjectPicker, CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, CustomTextAutocompleteFilter, Decimal5Renderer, DateTimeRenderer) {
-
+], function($, _, Backbone, Marionette, AgGrid, Swal,
+  CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, 
+  CustomTextAutocompleteFilter, utils_1, Renderers, Editors,
+  Decimal5Renderer, DateTimeRenderer
+) {
+  
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -37,12 +49,14 @@ define([
 
     ui: {
       'totalSelected': '.js-total-selected',
-      'totalRecords': '.js-total-records',
+      'totalRecords' : '.js-total-records',
+      'filteredElems': '.js-filtered-content',
+      'filtered' : '.js-filtered'
 
     },
 
-    keypress: function(e){
-      if(e.keyCode == 13){
+    keypress: function(e) {
+      if(e.keyCode == 13) {
         $(e.currentTarget).click();
       }
     },
@@ -78,13 +92,17 @@ define([
       this.gridOptions = {
         enableSorting: true,
         enableColResize: true,
-        rowHeight: 40,
+        editType: 'fullRow',
+        rowHeight: 34,
+        suppressNoRowsOverlay: true,
         headerHeight: 30,
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),
         onGridReady: function(){
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
+              _this.gridOptions.api.firstRenderPassed = true;
+              _this.focusFirstCell();
               _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
               if(!_this.model.get('totalRecords')){
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
@@ -96,9 +114,17 @@ define([
         onAfterFilterChanged: function(){
           _this.handleSelectAllChkBhv();
           _this.clientSideFilter();
+
+          if( _.isEmpty(this.api.getFilterModel()) ){
+            _this.ui.filtered.addClass('hidden');
+            _this.ui.filteredElems.html(this.api.getModel().getRowCount());
+          } else {
+            _this.ui.filtered.removeClass('hidden');
+            _this.ui.filteredElems.html(this.api.getModel().getRowCount());
+          }
+
         }
-        //overlayNoRowsTemplate: '<span>No rows to display</span>',
-        //overlayLoadingTemplate: '',
+
       };
 
       if(!this.clientSide) {
@@ -133,6 +159,14 @@ define([
       }
     },
 
+    focusFirstCell: function(){
+      if ( this.gridOptions.columnDefs[0].checkboxSelection ) {
+        this.gridOptions.api.setFocusedCell(0, this.gridOptions.columnDefs[1].field, null);
+      } else {
+        this.gridOptions.api.setFocusedCell(0, this.gridOptions.columnDefs[0].field, null);
+      }
+    },
+
     onRowSelected: function(e){
       if(this.ready){
         this.interaction('singleSelection', e.node.data[this.idName] || e.node.data.id || e.node.data.ID, this);
@@ -154,24 +188,62 @@ define([
       var _this = this;
       columnDefs.map(function(col, i) {
 
-        col.minWidth = col.minWidth || 100;
+        if(col.field == 'FK_ProtocoleType'){
+          col.hide = true;
+          return;
+        }
+
+        col.minWidth = col.minWidth || 150;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
 
-        if(_this.gridOptions.rowSelection === 'multiple' && i == 0){
-          _this.formatSelectColumn(col)
+
+        switch(col.type){
+          case 'AutocompTreeEditor':
+            col.cellEditor = Editors.ThesaurusEditor;
+            col.cellRenderer = Renderers.ThesaurusRenderer;
+            break;          
+          case 'AutocompleteEditor':
+            col.cellEditor = Editors.AutocompleteEditor;
+            col.cellRenderer = Renderers.AutocompleteRenderer;
+            break;
+          case 'ObjectPicker':
+            col.cellEditor = Editors.ObjectPicker;
+            col.cellRenderer = Renderers.ObjectPickerRenderer;
+            break;          
+          case 'Checkbox':
+            col.cellEditor = Editors.CheckboxEditor;
+            col.cellRenderer = Renderers.CheckboxRenderer;
+            break;
+          case 'Number':
+            col.cellEditor = Editors.NumberEditor;
+            col.cellRenderer = Renderers.NumberRenderer;
+            break;          
+          case 'DateTimePickerEditor':
+            col.cellEditor = Editors.DateTimeEditor;
+            col.cellRenderer = Renderers.DateTimeRenderer;
+            break;
+          case 'Text':
+            col.cellEditor = Editors.TextEditor;
+            col.cellRenderer = Renderers.TextRenderer;
+            break;
+          case 'TextArea':
+            col.cellEditor = Editors.TextEditor;
+            col.cellRenderer = Renderers.TextRenderer;
+            break;
+          case 'Select':
+            col.cellEditor = Editors.SelectEditor;
+            col.cellRenderer = Renderers.SelectRenderer;
+            break;
         }
 
-        if(col.cell == 'autocomplete'){
-          _this.addBBFEditor(col);
-        }
-        
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;
             break;
           }
           case 'date': {
+            col.minWidth = 180;
             col.filter = CustomDateFilter;
             col.cellRenderer = DateTimeRenderer;
             break;
@@ -186,16 +258,28 @@ define([
           // }
           case 'text': {
             col.filter = CustomTextFilter;
-            return;
+            break;
           }
           /*default: {
             col.filter = CustomTextFilter;
             return;
           }*/
         }
-        //draft
-
+        col.headerCellTemplate = _this.getHeaderCellTemplate();
       });
+
+      
+      if(_this.gridOptions.rowSelection === 'multiple'){
+        var col = {
+          minWidth: 40,
+          maxWidth: 40,
+          field: '',
+          headerName: ''
+        };
+        _this.formatSelectColumn(col);
+        columnDefs.unshift(col);
+      }
+
       return columnDefs;
     },
 
@@ -227,20 +311,14 @@ define([
 
     formatSelectColumn: function(col){
       var _this = this;
+      col.pinned = 'left';
+      col.suppressMovable = true;
       col.checkboxSelection = true;
       col.headerCellTemplate = function() {
         var eCell = document.createElement('span');
         eCell.innerHTML = '\
             <img class="js-check-all pull-left" value="unchecked" src="./app/styles/img/unchecked.png" title="check only visible rows (after filter)" style="padding-left:10px; padding-top:7px" />\
             <div id="agResizeBar" class="ag-header-cell-resize"></div>\
-            <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg width="12" height="12"><rect y="0" width="12" height="2" class="ag-header-icon"></rect><rect y="5" width="12" height="2" class="ag-header-icon"></rect><rect y="10" width="12" height="2" class="ag-header-icon"></rect></svg></span>\
-            <div id="agHeaderCellLabel" class="ag-header-cell-label">\
-              <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>\
-              <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>\
-              <span id="agNoSort" class="ag-header-icon ag-sort-none-icon ag-hidden"><svg width="10" height="10"><polygon points="0,4 5,0 10,4"></polygon><polygon points="0,6 5,10 10,6"></polygon></svg></span>\
-              <span id="agFilter" class="ag-header-icon ag-filter-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 4,4 4,10 6,10 6,4 10,0" class="ag-header-icon"></polygon></svg></span>\
-              <span id="agText" class="ag-header-cell-text"></span>\
-            </div>\
         ';
 
         var checkboxElt = eCell.querySelector('.js-check-all');
@@ -259,6 +337,21 @@ define([
       };
     },
 
+    getHeaderCellTemplate: function() {
+      var eHeader = document.createElement('span');
+      eHeader.innerHTML =
+        '<div id="agResizeBar" class="ag-header-cell-resize"></div>'+
+        '<span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg style="padding-top: 5px;" width="24" height="24" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg></span>'+
+        '<div id="agHeaderCellLabel" class="ag-header-cell-label">'+
+        '<span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>'+
+        '<span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>'+
+        '<span id="agNoSort" class="ag-header-icon ag-sort-none-icon ag-hidden"><svg width="10" height="10"><polygon points="0,4 5,0 10,4"></polygon><polygon points="0,6 5,10 10,6"></polygon></svg></span>'+
+        '<span id="agFilter" class="ag-header-icon ag-filter-icon ag-hidden"></span>'+
+        '<span id="agText" class="ag-header-cell-text"></span>'+
+        '</div>';
+      return eHeader;
+    },
+
     checkUncheckSelectAllUI: function(allSelected){
       var checkbox = this.$el.find('.js-check-all');
       if(allSelected){
@@ -268,56 +361,6 @@ define([
         checkbox.attr('value', 'unchecked');
         checkbox.attr('src', './app/styles/img/unchecked.png');
       }
-    },
-
-
-    addBBFEditor: function(col){
-      //draft
-      var _this = this;
-      var BBFEditor = function () {
-
-      };
-
-      var options = {
-        key: col.options.target,
-        schema: {
-          options: col.options,
-          editable: true
-        },
-        fromGrid: true
-      };
-
-      BBFEditor.prototype.init = function(params){
-        var self = this;
-        this.picker = new ObjectPicker(options);
-        this.input = this.picker.render();
-        var _this = this;
-        if (params.charPress){
-          this.input.$el.find('input').val(params.charPress).change();
-        } else {
-          if (params.value){
-            if (params.value.label !== undefined  ){
-              this.input.$el.find('input').attr('data_value',params.value.value);
-              this.input.$el.find('input').val(params.value.label).change();
-            } else {
-              this.input.$el.find('input').val(params.value).change();
-            }
-          }
-        }
-      };
-      BBFEditor.prototype.getGui = function(){
-        return this.input.el;
-      };
-      BBFEditor.prototype.afterGuiAttached = function () {
-        this.input.$el.find('input').focus();
-      };
-      BBFEditor.prototype.getValue = function() {
-        if (this.input.getItem){
-          return this.input.getItem();
-        }
-        return this.input.getValue();
-      };
-      col.cellEditor = BBFEditor;
     },
 
     fetchColumns: function(){
@@ -339,12 +382,18 @@ define([
 
     fetchData: function(){
       var _this = this;
-
+      var data = {};
+      if(this.model.get('objectType')){
+        data.objectType = this.model.get('objectType');
+      }
+  
       this.deferred = $.ajax({
         url: this.model.get('url'),
         method: 'GET',
         context: this,
+        data: data,
       }).done( function(response) {
+
         this.gridOptions.rowData = response;
         $.when(this.columnDeferred).then(function(){
           if(response[1] instanceof Array){
@@ -644,13 +693,178 @@ define([
       }, 0);
     },
 
+
+    swal: function(opt, type, callback) {
+      var btnColor;
+      switch (type){
+        case 'success':
+          btnColor = 'green';
+          opt.title = 'Success';
+          break;
+        case 'error':
+          btnColor = 'rgb(147, 14, 14)';
+          opt.title = 'Error';
+          break;
+        case 'warning':
+          if (!opt.title) {
+            opt.title = 'warning';
+          }
+          btnColor = 'orange';
+          break;
+        default:
+          return;
+          break;
+      }
+
+      Swal({
+        title: opt.title,
+        text: opt.text || '',
+        type: type,
+        showCancelButton: true,
+        confirmButtonColor: btnColor,
+        confirmButtonText: 'OK',
+        closeOnConfirm: true,
+      },
+      function(isConfirm) {
+        //could be better
+        if (isConfirm && callback) {
+          callback();
+        }
+      });
+    },
+
+    deleteSelectedRows: function(callback){
+      var _this = this;
+      var selectedNodes = this.gridOptions.api.getSelectedNodes();
+      if(!selectedNodes.length){
+        return;
+      }
+
+      var opt = {
+        title: 'Are you sure?',
+        text: 'selected rows will be deleted'
+      };
+      this.swal(opt, 'warning', function() {
+        _this.destroySelectedRows(callback);
+      });
+
+    },
+
+    getRowDataAndErrors: function(){
+      this.gridOptions.api.stopEditing();
+
+      var rowData = [];
+      var errors = [];
+
+      var empty = true;;
+      
+      var i = 0;
+      this.gridOptions.api.forEachNode( function(node) {
+        var row = {};
+        //some part are useless, eg. could abord at first error.
+
+        var keys = Object.keys(node.data);
+        empty = true;
+
+        if(keys.length === 0 || (keys.length === 1 && keys[0] === '_errors' ) ){
+          return;
+        } else {
+          //check each val
+          for( var key in node.data ){
+            //ignore _error
+            if(key == '_errors' && node.data._errors) {
+              continue;
+            }
+
+            //if val == {value, label} then check value
+            var val = node.data[key];
+            if(node.data[key] instanceof Object){
+              val = node.data[key].value;
+            }
+
+            //finaly check if empty
+            if(val != null && val != 'undefined' && val != ''){
+              empty = false;
+
+              //finaly copy node data in the object
+              if(node.data[key] instanceof Object){
+                row[key] = node.data[key].value;
+              } else {
+                row[key] = node.data[key];
+              }
+            }
+
+          }
+
+
+          // if not empty & error then push the error
+          if(!empty && node.data._errors){
+            if(node.data._errors.length){
+              errors.push(node.data._errors);
+            }
+          }
+        
+          
+        }
+
+        //last check, if not empty, push to save
+        if(!empty){
+          rowData.push(row);
+        }
+
+      });
+
+      return {
+          rowData: rowData,
+          errors: errors
+      }
+    },
+
+    destroySelectedRows: function(callback){
+      var _this = this;
+      var rowData = [];
+      
+      var selectedNodes = this.gridOptions.api.getSelectedNodes();
+
+      for (var i = 0; i < selectedNodes.length; i++) {
+        var node = selectedNodes[i];
+        if(node.data.ID) {
+          rowData.push(node.data);
+        } else {
+          this.gridOptions.api.removeItems([node]);
+        }
+      }
+
+      if(rowData.length){
+        var data = JSON.stringify({
+          rowData: rowData,
+          delete: true
+        });
+        $.ajax({
+          url: this.model.get('url') + '/batch',
+          method: 'POST',
+          contentType: 'application/json',
+          data: data,
+          context: this,
+        }).done(function(resp) {
+          this.gridOptions.api.removeItems(this.gridOptions.api.getSelectedNodes());
+          if(callback)
+            callback();
+        }).fail(function(resp) {
+          console.log(resp);
+        });
+        if(callback)
+          callback();
+      }
+
+    },
+
     extendAgGrid: function(){
       var _this = this;
 
       if(AgGrid.extended){
         return;
       }
-
 
       AgGrid.StandardMenuFactory.prototype.showPopup = function (column, positionCallback) {
           var filterWrapper = this.filterManager.getOrCreateFilterWrapper(column);
@@ -686,28 +900,6 @@ define([
       AgGrid.PaginationController.prototype.createTemplate = function () {
           var localeTextFunc = this.gridOptionsWrapper.getLocaleTextFunc();
           var template = Backbone.Marionette.Renderer.render('app/ns_modules/ns_grid/pagination.tpl.html');
-
-          /*'<div class="ag-paging-panel ag-font-style">' +
-              '<span id="pageRowSummaryPanel" class="ag-paging-row-summary-panel">' +
-              '<span id="firstRowOnPage"></span>' +
-              ' [TO] ' +
-              '<span id="lastRowOnPage"></span>' +
-              ' [OF] ' +
-              '<span id="recordCount"></span>' +
-              '</span>' +
-              '<span class="ag-paging-page-summary-panel">' +
-              '<button type="button" class="ag-paging-button btn btn-default" id="btFirst">[FIRST]</button>' +
-              '<button type="button" class="ag-paging-button btn btn-default" id="btPrevious">[PREVIOUS]</button>' +
-              '<span class="col-xs-5">' +
-              '[PAGE] ' +
-              '<span id="current"></span>' +
-              ' [OF]' +
-              '<span id="total"></span>' +
-              '</span>' +
-              '<button type="button" class="ag-paging-button btn btn-default" id="btNext">[NEXT]</button>' +
-              '<button type="button" class="ag-paging-button btn btn-default" id="btLast">[LAST]</button>' +
-              '</span>' +
-              '</div>';*/
           return template
               .replace('[PAGE]', localeTextFunc('page', 'Page'))
               .replace('[TO]', localeTextFunc('to', 'to'))

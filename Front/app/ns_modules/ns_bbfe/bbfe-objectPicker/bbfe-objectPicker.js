@@ -21,12 +21,15 @@ define([
     },
 
     initialize: function(options) {
-      this.fromGrid = options.fromGrid;
-
       options.schema.editorClass='';
       Form.editors.Text.prototype.initialize.call(this, options);
       this.validators = options.schema.validators || [];
+
+
+      this.formGrid = options.formGrid;
       this.options = options;
+      this.valueToDisplay = options.valueToDisplay;
+
       this.model = new Backbone.Model();
 
       this.model.set('key', options.key);
@@ -45,8 +48,10 @@ define([
 
       var value;
       if (options.model) {
-        value = options.model.get(options.schema.name) || options.value;
+        value = options.model.get(options.key) || options.value;
       }
+
+      this.usedLabel = options.key;
       if (options.schema.options && options.schema.options.usedLabel){
         this.usedLabel = options.schema.options.usedLabel;
         this.displayingValue = true;
@@ -99,7 +104,7 @@ define([
     initAutocomplete: function() {
       var _this = this;
       this.autocompleteSource = {};
-      this.autocompleteSource.source ='autocomplete/'+ this.objectName + '/'+this.usedLabel+'/ID';
+      this.autocompleteSource.source = 'autocomplete/' + this.objectName + '/' + this.usedLabel + '/ID';
       this.autocompleteSource.minLength = 2;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
@@ -114,18 +119,18 @@ define([
 
       this.autocompleteSource.change = function(event,ui){
         event.preventDefault();
-          if ($(_this._input).val() !== '' && !_this.matchedValue){
+          if (_this.$input.val() !== '' && !_this.matchedValue){
             _this.isTermError = true;
             _this.displayErrorMsg(true);
           }
           else {
-            if ($(_this._input).val() === ''){
-              $(_this._input).attr('data_value','');
+            if (_this.$input.val() === ''){
+              _this.$input.attr('data_value','');
             }
             _this.isTermError = false;
             _this.displayErrorMsg(false);
           }
-          $(_this._input).change();
+          _this.$input.change();
       };
 
       this.autocompleteSource.response = function(event,ui){
@@ -146,8 +151,8 @@ define([
       $.ajax({
         url : _this.url+val,
         success : function(data){
-          // $(_this._input).attr('data_value',val);
-          // $(_this._input).val(data[_this.usedLabel]);
+          // _this.$input.attr('data_value',val);
+          // _this.$input.val(data[_this.usedLabel]);
           _this.setValue(val,data[_this.usedLabel]);
           _this.displayErrorMsg(false);
           _this.isTermError = false;
@@ -156,29 +161,29 @@ define([
     },
 
     getItem : function(){
-      if ($(this._input).val() === ''){
-        $(this._input).attr('data_value','');
+      if (this.$input.val() === ''){
+        this.$input.attr('data_value','');
       }
-      return {label: $(this._input).val(), value: $(this._input).attr('data_value')};
+      return {label: this.$input.val(), value: this.$input.attr('data_value')};
     },
 
     render: function(){
       var _this = this;
       this.$el.html(this.template);
 
-      //quick (dirty) hack
-      if(this.fromGrid){
-        this.$el.find('.form-control').removeClass('form-control').addClass('ag-cell-edit-input');
-        this.$el.find('.span').addClass('');
+      this.$el.find('input').attr('min','0');
+
+      if(this.valueToDisplay){
+        this.$el.find('input').attr('value', this.valueToDisplay);
       }
 
-      this._input = this.$el.find('input[name="' + this.model.get('key') + '" ]')[0];
+      this.$input= this.$el.find('input[name="' + this.model.get('key') + '" ]');
       if (this.displayingValue){
         if (this.initValue && this.initValue !== null){
           this.fetchDisplayValue(this.initValue);
         }
         _(function () {
-            $(_this._input).autocomplete(_this.autocompleteSource);
+            _this.$input.autocomplete(_this.autocompleteSource);
         }).defer();
       }
 
@@ -305,30 +310,30 @@ define([
         return null ;
       }
       if (this.noAutocomp){
-        return $(this._input).val();
+        return this.$input.val();
       }
-      return $(this._input).attr('data_value');
+      return this.$input.attr('data_value');
     },
 
     getDisplayValue: function() {
       if (this.isTermError) {
         return null ;
       }
-      return $(this._input).val();
+      return this.$input.val();
     },
 
     setValue: function(value,displayValue) {
       if (displayValue || displayValue === ''){
-        $(this._input).val(displayValue);
+        this.$input.val(displayValue);
       } else {
         this.fetchDisplayValue(value);
       }
       if (this.target){
         this.model.set(this.target,value);
       }
-      $(this._input).attr('data_value',value);
+      this.$input.attr('data_value',value);
       this.matchedValue = value;
-      $(this._input).change();
+      this.$input.change();
       this.hidePicker();
     },
 
@@ -342,18 +347,19 @@ define([
       var _this = this;
       $('#modal').off('click', this.checkHidePicker);
       $('#modal').fadeOut('fast');
+      this.$input.focus();
     },
 
     displayErrorMsg: function (bool) {
         if (this.isTermError) {
-          $(this._input).addClass('error');
+          this.$input.addClass('error');
         } else {
-          $(this._input).removeClass('error');
+          this.$input.removeClass('error');
         }
     },
 
     openDetails: function(event) {
-      var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.objectName+'/'+ $(this._input).attr('data_value');
+      var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.objectName+'/'+ this.$input.attr('data_value');
       var win = window.open(url, '_blank');
       win.focus();
     }
