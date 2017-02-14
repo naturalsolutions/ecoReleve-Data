@@ -185,6 +185,11 @@ define([
           enableFilter: true,
           singleClickEdit : true,
           rowSelection: 'multiple',
+          onRowDoubleClicked: function (row){
+            if(_this.gridView.gridOptions.api.getFocusedCell().column.colId != 'fieldActivity'){
+              _this.gridView.interaction('focusAndZoom', row.data.ID || row.data.id);
+            }
+          },
           onRowClicked: function(row){
             if(_this.gridView.gridOptions.api.getFocusedCell().column.colId != 'fieldActivity'){
               _this.gridView.interaction('focus', row.data.ID || row.data.id);

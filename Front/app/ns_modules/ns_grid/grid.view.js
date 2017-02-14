@@ -49,12 +49,14 @@ define([
 
     ui: {
       'totalSelected': '.js-total-selected',
-      'totalRecords': '.js-total-records',
+      'totalRecords' : '.js-total-records',
+      'filteredElems': '.js-filtered-content',
+      'filtered' : '.js-filtered'
 
     },
 
-    keypress: function(e){
-      if(e.keyCode == 13){
+    keypress: function(e) {
+      if(e.keyCode == 13) {
         $(e.currentTarget).click();
       }
     },
@@ -112,7 +114,17 @@ define([
         onAfterFilterChanged: function(){
           _this.handleSelectAllChkBhv();
           _this.clientSideFilter();
-        },
+
+          if( _.isEmpty(this.api.getFilterModel()) ){
+            _this.ui.filtered.addClass('hidden');
+            _this.ui.filteredElems.html(this.api.getModel().getRowCount());
+          } else {
+            _this.ui.filtered.removeClass('hidden');
+            _this.ui.filteredElems.html(this.api.getModel().getRowCount());
+          }
+
+        }
+
       };
 
       if(!this.clientSide) {
