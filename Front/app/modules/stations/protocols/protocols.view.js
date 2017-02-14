@@ -243,6 +243,7 @@ define([
           proto.set({fieldsets: data.fieldsets});
           proto.set({schema: data.schema});
           proto.set({obs: []});
+          proto.set({grid: data.grid});
 
           this.collection.push(proto);
           var index = this.collection.indexOf(proto);
