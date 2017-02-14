@@ -264,7 +264,8 @@ def insertListNewStations(request):
         newRow['creator'] = request.authenticated_userid['iss']
         newRow['FK_StationType'] = 4
         newRow['id'] = row['id']
-        newRow['NbFieldWorker'] = row['NbFieldWorker']
+        if 'NbFieldWorker' in row :
+            newRow['NbFieldWorker'] = row['NbFieldWorker']
         newRow['StationDate'] = datetime.strptime(
             row['waypointTime'], format_dt)
 
