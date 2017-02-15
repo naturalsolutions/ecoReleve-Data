@@ -110,7 +110,7 @@ define([
                         
       var columnsDefs = [];
 
-      for (var i = odrFields.length - 1; i >= 0; i--) {
+      for (var i = 0; i < odrFields.length; i++) {
           var field = schema.subschema[odrFields[i]];
 
           var colDef = {
