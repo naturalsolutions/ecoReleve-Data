@@ -52,6 +52,8 @@ define([
 
       this.editable = options.schema.editable;
 
+      this.subProtocolType = options.schema.options.protocoleType;
+
       options.schema.fieldClass = 'col-xs-12';
 
       this.templateSettings = {
@@ -147,6 +149,11 @@ define([
 
       if(rowDataAndErrors.errors.length){
         this.isError = true;
+      }
+
+      console.log(rowDataAndErrors.rowData);
+      for (var i = 0; i < rowDataAndErrors.rowData.length; i++) {
+        rowDataAndErrors.rowData[i]['FK_ProtocoleType'] = this.subProtocolType;
       }
 
       return rowDataAndErrors.rowData;
