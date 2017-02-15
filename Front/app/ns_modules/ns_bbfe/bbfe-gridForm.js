@@ -53,7 +53,6 @@ define([
       this.editable = options.schema.editable;
 
       options.schema.fieldClass = 'col-xs-12';
-      this.formatColumns(options.schema);
 
       this.templateSettings = {
           hidden: false,
@@ -111,18 +110,20 @@ define([
       var columnsDefs = [];
 
       for (var i = 0; i < odrFields.length; i++) {
-          var field = schema.subschema[odrFields[i]];
-
-          var colDef = {
-              editable: this.editable,
-              field: field.name,
-              headerName: field.title,
-              type: field.type,
-              options: field.options,
-              schema: field
-          };
-          
-          columnsDefs.push(colDef)
+        var field = schema.subschema[odrFields[i]];
+        if(field.name == 'ID'){
+          continue;
+        }
+        var colDef = {
+          editable: this.editable,
+          field: field.name,
+          headerName: field.title,
+          type: field.type,
+          options: field.options,
+          schema: field
+        };
+        
+        columnsDefs.push(colDef)
       }
       var errorCol = {
         field: '_errors',
