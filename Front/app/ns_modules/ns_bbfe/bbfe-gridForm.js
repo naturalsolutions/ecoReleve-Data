@@ -44,7 +44,20 @@ define([
     },
 
     deleteRows: function() {
-      this.gridView.deleteSelectedRows();
+      var _this = this;
+      var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+      if(!selectedNodes.length){
+        return;
+      }
+      
+      var opt = {
+        title: 'Are you sure?',
+        text: 'selected rows will be deleted'
+      };
+      window.swal(opt, 'warning', function() {
+        _this.gridView.gridOptions.api.removeItems(selectedNodes);
+      });
+
     },
 
     initialize: function(options){
