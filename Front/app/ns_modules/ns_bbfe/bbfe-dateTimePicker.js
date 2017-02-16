@@ -63,7 +63,6 @@ define([
     },
 
     getValue: function() {
-        console.log(this.$el.find('#' + this.id).val());
         return this.$el.find('#' + this.id).val();
     },
 

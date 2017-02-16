@@ -88,6 +88,10 @@ define([
         rgGrid: '.js-rg-grid-subform'
       });
 
+      if(!(rowData.length) && this.editable){
+        rowData = [{}];
+      }
+
       var url = 'stations/' + this.model.get('FK_Station') + '/observations'; 
 
       this.regionManager.get('rgGrid');
@@ -151,7 +155,6 @@ define([
         this.isError = true;
       }
 
-      console.log(rowDataAndErrors.rowData);
       for (var i = 0; i < rowDataAndErrors.rowData.length; i++) {
         rowDataAndErrors.rowData[i]['FK_ProtocoleType'] = this.subProtocolType;
       }

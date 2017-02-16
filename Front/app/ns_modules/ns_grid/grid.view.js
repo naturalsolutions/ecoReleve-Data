@@ -152,7 +152,7 @@ define([
         }
       }
 
-      if(this.gridOptions.rowSelection === undefined){
+      if(!this.gridOptions.rowSelection){
         this.model.set('legend', false);
       } else {
         this.model.set('legend', true);
