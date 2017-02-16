@@ -184,8 +184,10 @@ define([
       this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length);
     },
 
-    formatColumns: function(columnDefs){
+    formatColumns: function(colDefs){
       var _this = this;
+      var columnDefs = $.extend(true, [], colDefs);
+      
       columnDefs.map(function(col, i) {
 
         if(col.field == 'FK_ProtocoleType'){
