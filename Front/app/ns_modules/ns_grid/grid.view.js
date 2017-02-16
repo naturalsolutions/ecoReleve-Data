@@ -19,13 +19,15 @@ define([
 
   'ns_grid/customCellRenderer/decimal5Renderer',
   'ns_grid/customCellRenderer/dateTimeRenderer',
+  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
+
 
   'i18n'
 
 ], function($, _, Backbone, Marionette, AgGrid, Swal,
   CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, 
   CustomTextAutocompleteFilter, utils_1, Renderers, Editors,
-  Decimal5Renderer, DateTimeRenderer
+  Decimal5Renderer, DateTimeRenderer, ObjectPicker
 ) {
   
   'use strict';
@@ -239,6 +241,10 @@ define([
             break;
         }
 
+         if(col.cell == 'autocomplete'){
+          _this.addBBFEditor(col);
+        }
+
         switch(col.filter){
           case 'number': {
             col.filter = CustomNumberFilter;
@@ -283,6 +289,72 @@ define([
       }
 
       return columnDefs;
+    },
+
+    addBBFEditor: function(col){
+      //draft
+      var _this = this;
+      var BBFEditor = function () {
+
+      };
+
+      var options = {
+        key: col.options.target,
+        schema: {
+          options: col.options,
+          editable: true
+        },
+        fromGrid: true
+      };
+
+      BBFEditor.prototype.init = function(params){
+        var self = this;
+        this.picker = new ObjectPicker(options);
+        this.input = this.picker.render();
+        var _this = this;
+        if (params.charPress){
+          this.input.$el.find('input').val(params.charPress).change();
+        } else {
+          if (params.value){
+            if (params.value.label !== undefined  ){
+              this.input.$el.find('input').attr('data_value',params.value.value);
+              this.input.$el.find('input').val(params.value.label).change();
+            } else {
+              this.input.$el.find('input').val(params.value).change();
+            }
+          }
+        }
+      };
+      BBFEditor.prototype.getGui = function(){
+        return this.input.el;
+      };
+      BBFEditor.prototype.afterGuiAttached = function () {
+        this.input.$el.find('input').focus();
+      };
+      BBFEditor.prototype.getValue = function() {
+        if (this.input.getItem){
+          return this.input.getItem();
+        }
+        return this.input.getValue();
+      };
+      col.cellEditor = BBFEditor;
+    },
+
+    fetchColumns: function(){
+      this.columnDeferred = $.ajax({
+        url: this.model.get('url') + 'getFields',
+        method: 'GET',
+        context: this,
+        data: {
+          typeObj: this.model.get('objectType'),
+          name: this.name || 'default'
+        }
+      }).done( function(response) {
+        this.gridOptions.columnDefs = this.formatColumns(response);
+        if (this.afterFetchColumns){
+          this.afterFetchColumns(this);
+        }
+      });
     },
 
     handleSelectAllChkBhv: function(){
