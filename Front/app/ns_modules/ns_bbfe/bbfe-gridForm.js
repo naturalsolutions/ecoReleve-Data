@@ -34,8 +34,8 @@ define([
     template: '\
         <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 300px">\
         </div>\
-        <button type="button" class="js-btn-add btn btn-success btn-sm hide"><span class="reneco reneco-add"></span></button>\
-        <button type="button" class="js-btn-delete btn btn-danger btn-sm pull-right hide"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
+        <button type="button" class="js-btn-add btn btn-success hide"><span class="reneco reneco-add"></span></button>\
+        <button type="button" class="js-btn-delete btn btn-danger btn-sm hide"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
     ',
 
     
@@ -44,7 +44,20 @@ define([
     },
 
     deleteRows: function() {
-      this.gridView.deleteSelectedRows();
+      var _this = this;
+      var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+      if(!selectedNodes.length){
+        return;
+      }
+      
+      var opt = {
+        title: 'Are you sure?',
+        text: 'selected rows will be deleted'
+      };
+      window.swal(opt, 'warning', function() {
+        _this.gridView.gridOptions.api.removeItems(selectedNodes);
+      });
+
     },
 
     initialize: function(options){
@@ -52,8 +65,9 @@ define([
 
       this.editable = options.schema.editable;
 
+      this.subProtocolType = options.schema.options.protocoleType;
+
       options.schema.fieldClass = 'col-xs-12';
-      this.formatColumns(options.schema);
 
       this.templateSettings = {
           hidden: false,
@@ -87,6 +101,10 @@ define([
         rgGrid: '.js-rg-grid-subform'
       });
 
+      if(!(rowData.length) && this.editable){
+        rowData = [{}];
+      }
+
       var url = 'stations/' + this.model.get('FK_Station') + '/observations'; 
 
       this.regionManager.get('rgGrid');
@@ -110,19 +128,21 @@ define([
                         
       var columnsDefs = [];
 
-      for (var i = odrFields.length - 1; i >= 0; i--) {
-          var field = schema.subschema[odrFields[i]];
-
-          var colDef = {
-              editable: this.editable,
-              field: field.name,
-              headerName: field.title,
-              type: field.type,
-              options: field.options,
-              schema: field
-          };
-          
-          columnsDefs.push(colDef)
+      for (var i = 0; i < odrFields.length; i++) {
+        var field = schema.subschema[odrFields[i]];
+        if(field.name == 'ID'){
+          continue;
+        }
+        var colDef = {
+          editable: this.editable,
+          field: field.name,
+          headerName: field.title,
+          type: field.type,
+          options: field.options,
+          schema: field
+        };
+        
+        columnsDefs.push(colDef)
       }
       var errorCol = {
         field: '_errors',
@@ -146,6 +166,10 @@ define([
 
       if(rowDataAndErrors.errors.length){
         this.isError = true;
+      }
+
+      for (var i = 0; i < rowDataAndErrors.rowData.length; i++) {
+        rowDataAndErrors.rowData[i]['FK_ProtocoleType'] = this.subProtocolType;
       }
 
       return rowDataAndErrors.rowData;
