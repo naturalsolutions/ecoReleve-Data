@@ -257,6 +257,7 @@ def getObservation(request):
         else:
             response = curObs.GetFlatObject()
     except Exception as e:
+        print_exc()
         response = {}
 
     return response

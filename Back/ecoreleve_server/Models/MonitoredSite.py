@@ -38,6 +38,9 @@ class MonitoredSitePosition(Base):
 class MonitoredSite (Base, ObjectWithDynProp):
 
     __tablename__ = 'MonitoredSite'
+    FrontModuleForm = 'MonitoredSiteForm'
+    FrontModuleGrid = 'MonitoredSiteGrid'
+
     ID = Column(Integer, Sequence('MonitoredSite__id_seq'), primary_key=True)
     Name = Column(String(250), nullable=False)
     Category = Column(String(250), nullable=False)
