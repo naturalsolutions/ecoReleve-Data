@@ -34,10 +34,6 @@ define([
 
 		  var value = params.value;
 		  var valueToDisplay;
-		  if(value instanceof Object){
-				valueToDisplay = params.value.label;
-		  	value = params.value.value;
-		  }
 
 		  var options = {
 		    key: col.field,
@@ -105,23 +101,26 @@ define([
 		};
 
 
-
     var ThesaurusEditor = function () {};
 		ThesaurusEditor.prototype = new CustomEditor();
 
 		ThesaurusEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new ThesaurusPicker(options);
+			this.bbfe.getValue = function(){
+				var value = this.getDisplayedValue();
+				this.onEditValidation(value);
+				return ThesaurusPicker.prototype.getValue.call(this,options);
+			};
 		  this.element = this.bbfe.render();
 		};
 
 		ThesaurusEditor.prototype.getValue = function(){
 		  return {
 		  	value: this.element.getValue(),
-		  	label: this.element.getDisplayedValue(),
+		  	displayValue: this.element.getDisplayedValue(),
+				error: this.element.isTermError,
 		  }
 		};
-
-
 
 
     var ObjectPickerEditor = function () {};
@@ -188,9 +187,6 @@ define([
 		};
 
 
-
-
-
     var DateTimeEditor = function () {};
 
     DateTimeEditor.prototype = new CustomEditor();
@@ -199,7 +195,6 @@ define([
 		  this.element = this.bbfe.render();
 
 		};
-
 
     var SelectEditor = function () {};
 
@@ -220,8 +215,6 @@ define([
 				label: this.element.$el.find('option:selected').text(),
 			}
 		};
-
-
 
 
 		Editors.ThesaurusEditor = ThesaurusEditor;

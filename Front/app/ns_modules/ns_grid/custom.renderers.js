@@ -68,7 +68,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
       //critic
       if(value instanceof Object){
-        value = params.value.value;
+        valuerReal = params.value.value;
         valueTodisplay = params.value.displayValue;
       }
 
@@ -137,7 +137,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   		this.error = true;
 
       if(!this.isEmptyRow){
-    		params.data[params.colDef.field] = '';
+    		//params.data[params.colDef.field] = ''; why do you want to set value as empty ?? 
     	  $(params.eGridCell).addClass('ag-cell-error');
       }
 
@@ -180,50 +180,31 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 		var ThesaurusRenderer = function(options) {};
     ThesaurusRenderer.prototype = new CustomRenderer();
     ThesaurusRenderer.prototype.deferred = true;
+    ThesaurusRenderer.prototype.handleValues = function(params){
+      var objectValue = params.value;
+      this.formatValueToDisplay(objectValue); // prefer manage value to display here in order to keep object value all along the time
+      return objectValue;
+    };
+    
+    ThesaurusRenderer.prototype.formatValueToDisplay = function(objectValue) {
+      var valueToDisplay;
+      if(!objectValue){
+        return;
+      }
+      if(objectValue.displayValue !== ''){
+        valueToDisplay = objectValue.displayValue;
+      } else {
+        valueToDisplay = objectValue.value;
+      }
+  	  $(this.eGui).html(valueToDisplay); 
+  	};
 
-		ThesaurusRenderer.prototype.deferredValidation = function(params, value){
-      var _this = this;
-      var TypeField = 'FullPath';
-      if (value && value.indexOf('>') == -1) {
-          TypeField = 'Name';
-      }  
-      var data = {
-        sInfo: value,
-        sTypeField: TypeField,
-        iParentId: params.colDef.schema.options.startId,
-        lng: params.colDef.schema.options.lng //language
-      };
-
-      var url = params.colDef.schema.options.wsUrl + '/getTRaductionByType';
-
-      $.ajax({
-        url: url,
-        data: JSON.stringify(data),
-        dataType: 'json',
-        type: 'POST', //should be a GET
-        contentType: 'application/json; charset=utf-8',
-        context: this,
-        success: function (data){
-          if(data['TTop_FullPath'] != null){
-            this.formatValueToDisplay(data['TTop_NameTranslated']);
-            this.handleRemoveError(params);
-            var values = {
-              value: data['TTop_FullPath'],
-              label: data['TTop_NameTranslated']
-            };
-            this.manualDataSet(params, values);
-
-          } else {
-            this.handleError(params);
-          }
-        },
-        error: function (data) {
-          if (data.statusText == 'abort') {
-            return;
-          }
-          this.handleError(params);
-        }
-      });
+		ThesaurusRenderer.prototype.deferredValidation = function(params, objectValue){
+      if(objectValue.error || (objectValue.value !== '' && objectValue.displayValue === '')){
+        this.handleError(params);
+      } else {
+        this.handleRemoveError(params);
+      }
 
       return true;
     };
