@@ -150,13 +150,12 @@ define([
                             var value = _this.$el.find('#' + _this.id + '_value').val();
                             _this.$el.find('input').trigger('changeEditor');
                             _this.$el.find('input').trigger('thesaurusChange');
-                            _this.onEditValidation(value);
+                            $('#' + _this.id).removeClass('error');
+                            _this.isTermError = false;
                         }
                     });
                 }
-                if (_this.translateOnRender) {
-                    //_this.validateAndTranslate(_this.value, true);
-                }
+
                 if (_this.FirstRender) {
                     _this.$el.find('#' + _this.id).val(_this.value.displayValue);
                     _this.$el.find('#' + _this.id + '_value').val(_this.value.value);
@@ -172,7 +171,7 @@ define([
                     }
 
                     setTimeout(function (options) {
-                        var value = _this.$el.find('#' + _this.id + '_value').val();
+                        var value = _this.$el.find('#' + _this.id).val();
                         _this.onEditValidation(value);
                     }, 15);
                 });
@@ -191,52 +190,32 @@ define([
             }
         },
 
-        validateAndTranslate: function (value, isTranslated) {
+        validateAndTranslate: function (displayValue, isTranslated) {
             var _this = this;
 
-
-            if (this.isEmptyVal(value)) {
+            if (this.isEmptyVal(displayValue)) {
                 return;
-            }
-            var TypeField = "FullPath";
-            if (value && value.indexOf(">") == -1) {
-                TypeField = 'Name';
             }
             var erreur;
 
-            return $.ajax({
-                url: _this.wsUrl + "/getTRaductionByType",
-                data: '{ "sInfo" : "' + value + '", "sTypeField" : "' + TypeField + '", "iParentId":"' + _this.startId + '",lng:"' + _this.lng + '"  }',
-                dataType: "json",
-                type: "POST",
-                contentType: "application/json; charset=utf-8",
-                success: function (data) {
-                    $('#' + _this.id).removeClass('error');
-                    _this.displayErrorMsg(false);
-                    var translatedValue = data["TTop_FullPathTranslated"];
-
-                    if (isTranslated) {
-                        if (_this.displayValueName == 'valueTranslated') {
-                            translatedValue = data["TTop_NameTranslated"];
-                        }
-                        _this.$el.find('#' + _this.id + '_value').val(data["TTop_FullPath"]);
-                        _this.$el.find('#' + _this.id ).attr('data_value',value);
-                        _this.$el.find('#' + _this.id).val(translatedValue);
-                        _this.$el.find('#' + _this.id).attr('title',translatedValue);
+            valueFound = _this.$el.find('#treeView' + _this.id).fancytree('getTree').findFirst(function(node){
+                    if(node.data.valueTranslated == displayValue){
+                        return true;
                     }
+                });
+            
+            if(valueFound){
+                value = valueFound.data.fullpath
+                _this.$el.find('#' + _this.id + '_value').val(value);
+                this.isTermError = false;
+                $('#' + _this.id).removeClass('error');
 
-                    _this.displayErrorMsg(false);
-
-                },
-                error: function (data) {
-                    _this.$el.find('#' + _this.id).val(value);
-                    if (_this.editable) {
-                        //$('#divAutoComp_' + _this.id).addClass('error');
-                        $('#' + _this.id).addClass('error');
-                        _this.displayErrorMsg(true);
-                    }
+            } else{
+                if (_this.editable) {
+                    $('#' + _this.id).addClass('error');
+                    _this.displayErrorMsg(true);
                 }
-            });
+            }
         },
 
         onEditValidation: function (value) {
@@ -245,11 +224,8 @@ define([
                 this.isTermError = false;
                 return;
             }
-
             _this.isTermError = true;
             _this.validateAndTranslate(value, true);
-
-
         },
 
         displayErrorMsg: function (bool) {
@@ -257,13 +233,10 @@ define([
                 this.isTermError = bool;
                 if (this.isTermError) {
                     this.termError = "Invalid term";
-                    //this.$el.find('#divAutoComp_' + this.id).addClass('error');
                     this.$el.find('#' + this.id).addClass('error');
                     this.$el.find('#' + this.id).attr('title','Invalid term');
-                    //this.$el.find('#errorMsg').removeClass('hidden');
                 } else {
                     this.termError = "";
-                    //this.$el.find('#divAutoComp_' + this.id).removeClass('error');
                     $('#' + this.id).removeClass('error');
                     this.$el.find('#errorMsg').addClass('hidden');
                 }
