@@ -24,16 +24,23 @@ define([
       fileGroup: '#group-file',
       modHelper: '#help-mod',
       modGroup: '#group-mod',
-      modInput: '#input-mod'
+      modInput: '#input-mod',
+      clearbtn: '#clear',
+      startbtn: '.start',
+      spacer: '.spacer'
     },
     events: {
       'change input[type="file"]': 'importFile',
       'click button#clear': 'clearFile',
       'drop .drag-zone-hover' : 'handleDrop',
       'dragover .drag-zone-hover' : 'handleDragOVer',
-      'dragleave .drag-zone-hover' : 'handleDragLeave'
+      'dragleave .drag-zone-hover' : 'handleDragLeave',
+      'click button.start' : 'sendFile',
+      'click .fileinput-button' : 'simulateImport'
     },
-
+    simulateImport : function () {
+      $('input[type=file]').click();
+    },
     handleDrop : function(e) {
       e.originalEvent.stopPropagation();
       e.originalEvent.preventDefault();
@@ -55,10 +62,20 @@ define([
 
     clearFile: function() {
       $('#input-file').val('');
+      this.ui.spacer.html('')
+      this.ui.clearbtn.attr('disabled','disabled')
+      this.ui.startbtn.addClass('hidden');
+      this.ui.progress.addClass('hidden');
+      this.ui.progress.width('90' + '%');
+      this.ui.progressBar.width('0' + '%');
     },
 
     validate: function(){
 
+    },
+
+    sendFile: function(){
+        this.reader.readAsText(this.file);
     },
 
     importFile: function(event) {
@@ -67,15 +84,19 @@ define([
       var module = this.ui.modInput.val();
       if (module !== '') {
 
-        var reader = new FileReader();
+      this.reader = new FileReader();
         if (typeof event.target ==='undefined' ) {
-          var file = event[0];
+          this.file = event[0];
         }
         else {
-          var file = $('#input-file').get(0).files[0] || null;
+          this.file = $('#input-file').get(0).files[0] || null;
+        }
+        if(typeof this.file !=='undefined') {
+          this.ui.startbtn.removeClass('hidden');
+          this.ui.spacer.html("<br>"+this.file.name+"<br><br>");
         }
         $('#clear').removeAttr('disabled');
-        var ext = file.name.split('.');
+        var ext = this.file.name.split('.');
         if (ext[ext.length - 1] != 'txt') {
           swal(
               {
@@ -94,17 +115,18 @@ define([
           var url = 'sensors/rfid/datas';
           var data = new FormData();
           var self = this;
+          _this.ui.progress.removeClass('hidden');
 
         }
 
-        reader.onprogress = function(data) {
+        this.reader.onprogress = function(data) {
           if (data.lengthComputable) {
             var progress = parseInt(data.loaded / data.total * 100).toString();
             self.ui.progressBar.width(progress + '%');
           }
         };
 
-        reader.onload = function(e, fileName) {
+        this.reader.onload = function(e, fileName) {
           data.append('data', e.target.result);
 
           //data.append('module', self.model.get(self.parent.steps[self.parent.currentStep-1].name+'_RFID_identifer'));
@@ -183,10 +205,10 @@ define([
           });
         };
 
-        if (file) {
+        if (this.file) {
           this.clear();
           this.ui.progress.show();
-          reader.readAsText(file);
+
         } else {
           this.ui.fileGroup.addClass('has-error');
           this.ui.fileHelper.text('Required');
@@ -204,6 +226,7 @@ define([
       this.ui.fileGroup.removeClass('has-error');
       this.ui.modHelper.text('');
       this.ui.modGroup.removeClass('has-error');
+
     },
 
   });
