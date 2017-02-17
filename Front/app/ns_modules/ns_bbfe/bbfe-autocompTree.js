@@ -65,7 +65,7 @@ define([
 
             this.validators = options.schema.validators || [];
 
-            this.isTermError = true;
+            this.isTermError = false;
 
             this.template = options.template || this.constructor.template;
             this.id = this.cid;
@@ -155,21 +155,27 @@ define([
                     });
                 }
                 if (_this.translateOnRender) {
-                    _this.validateAndTranslate(_this.value, true);
+                    //_this.validateAndTranslate(_this.value, true);
                 }
                 if (_this.FirstRender) {
-                    _this.$el.find('#' + _this.id).blur(function (options) {
-/*                        var value = _this.$el.find('#' + _this.id + '_value').val();
-                        if(_this.isEmptyVal(value)){
-                            return;
-                        }*/
-                        setTimeout(function (options) {
-                            var value = _this.$el.find('#' + _this.id + '_value').val();
-                            _this.onEditValidation(value);
-                        }, 150);
-                    });
-
+                    _this.$el.find('#' + _this.id).val(_this.value.displayValue);
+                    _this.$el.find('#' + _this.id + '_value').val(_this.value.value);
+                    if (_this.value.displayValue === '' && _this.value.value){
+                        _this.isTermError = true;
+                        _this.$el.find('#' + _this.id).val(_this.value.value);
+                    }
                 }
+                _this.$el.find('#' + _this.id).blur(function (options) {
+                    var value = _this.$el.find('#' + _this.id + '_value').val();
+                    if(_this.isEmptyVal(value)){
+                        return;
+                    }
+
+                    setTimeout(function (options) {
+                        var value = _this.$el.find('#' + _this.id + '_value').val();
+                        _this.onEditValidation(value);
+                    }, 15);
+                });
                 _this.FirstRender = false;
             }).defer();
             return this;
@@ -205,11 +211,10 @@ define([
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
-                    //$('#divAutoComp_' + _this.id).removeClass('error');
                     $('#' + _this.id).removeClass('error');
                     _this.displayErrorMsg(false);
-                    //_this.$el.find('input').trigger('change');
                     var translatedValue = data["TTop_FullPathTranslated"];
+
                     if (isTranslated) {
                         if (_this.displayValueName == 'valueTranslated') {
                             translatedValue = data["TTop_NameTranslated"];

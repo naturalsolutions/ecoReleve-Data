@@ -57,13 +57,13 @@ def formatThesaurus(data):
     lng = threadlocal.get_current_request().authenticated_userid['userlanguage']
     try: 
         data = {
-            'displayValue': thesaurusDictTraduction[data]['en'],
+            'displayValue': thesaurusDictTraduction[data][lng],
             'value': data
         }
     except:
          data = {
             'displayValue': '',
-            'value': ''
+            'value': data
         }
     return data
 

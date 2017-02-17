@@ -69,7 +69,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       //critic
       if(value instanceof Object){
         value = params.value.value;
-        valueTodisplay = params.value.label;
+        valueTodisplay = params.value.displayValue;
       }
 
       if(!valueTodisplay)
