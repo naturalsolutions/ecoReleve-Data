@@ -156,7 +156,7 @@ define([
                     });
                 }
 
-                if (_this.FirstRender) {
+                if (_this.FirstRender && _this.value) {
                     _this.$el.find('#' + _this.id).val(_this.value.displayValue);
                     _this.$el.find('#' + _this.id + '_value').val(_this.value.value);
                     if (_this.value.displayValue === '' && _this.value.value){

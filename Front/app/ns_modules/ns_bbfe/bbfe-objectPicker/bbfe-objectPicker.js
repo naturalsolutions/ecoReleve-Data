@@ -73,9 +73,9 @@ define([
         this.model.set('value', value);
         if (this.displayingValue) {
           this.model.set('value', '');
-          this.matchedValue = value;
+          this.matchedValue = value.displayValue;
         }
-        this.model.set('data_value', value);
+        this.model.set('data_value', value.value);
       }else {
         this.model.set('value', '');
         this.model.set('data_value', '');
@@ -139,6 +139,7 @@ define([
           var item = ui.content[0];
           _this.setValue(item.value,item.label);
           _this.matchedValue = item;
+          _this.isTermError = false;
 
         } else {
           _this.matchedValue = undefined;
@@ -180,8 +181,9 @@ define([
       this.$input= this.$el.find('input[name="' + this.model.get('key') + '" ]');
       if (this.displayingValue){
         if (this.initValue && this.initValue !== null){
-          this.fetchDisplayValue(this.initValue);
+          //this.fetchDisplayValue(this.initValue);
         }
+        this.$input.val(this.matchedValue);
         _(function () {
             _this.$input.autocomplete(_this.autocompleteSource);
         }).defer();
