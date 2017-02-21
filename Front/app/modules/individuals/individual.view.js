@@ -32,6 +32,27 @@ define([
 
     ModelPrototype: IndividualModel,
 
+    displayForm: function(){
+      var detailsFormRegion = this.$el.find('.js-rg-details-grid');
+      var _this = this;
+
+      var formConfig = this.model.get('formConfig');
+
+      formConfig.id = this.model.get('id');
+      formConfig.formRegion = detailsFormRegion;
+      formConfig.buttonRegion = [this.ui.formBtns];
+      formConfig.parent = this.parent;
+      formConfig.afterDelete = function(response, model){
+        Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
+      };
+      formConfig.afterShow = function(options){
+         var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
+         _this.ui.form.html(globalEl);
+         //globalEl.appendTo(_this.ui.form);
+       };
+      this.nsForm = new NsForm(formConfig);
+    },
+
     displayMap: function() {
       var _this = this;
       this.map = new NsMap({
