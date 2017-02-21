@@ -288,7 +288,7 @@ class ListObjectWithDynProp():
             'userlanguage']
 
         for row in result:
-            row = dict(map(lambda k: self.tradThesaurusTerm
+            row = dict(map(lambda k: tradThesaurusTerm
                            (k, listWithThes, userLng.lower()), row.items()))
             data.append(row)
         return data
@@ -514,24 +514,26 @@ class ListObjectWithDynProp():
 
         return query
 
-    def splitFullPath(self, key, listWithThes):
-        name, val = key
-        try:
-            if name in listWithThes:
-                newVal = val.split('>')[-1]
-            else:
-                newVal = val
-        except:
-            newVal = val
-        return (name, newVal)
 
-    def tradThesaurusTerm(self, key, listWithThes, userLng='en'):
-        name, val = key
-        try:
-            if name in listWithThes:
-                newVal = thesaurusDictTraduction[val][userLng]
-            else:
-                newVal = val
-        except:
-            (name, newVal) = self.splitFullPath(key, listWithThes)
-        return (name, newVal)
+def splitFullPath(key, listWithThes):
+    name, val = key
+    try:
+        if name in listWithThes:
+            newVal = val.split('>')[-1]
+        else:
+            newVal = val
+    except:
+        newVal = val
+    return (name, newVal)
+
+
+def tradThesaurusTerm(key, listWithThes, userLng='en'):
+    name, val = key
+    try:
+        if name in listWithThes:
+            newVal = thesaurusDictTraduction[val][userLng]
+        else:
+            newVal = val
+    except:
+        (name, newVal) = splitFullPath(key, listWithThes)
+    return (name, newVal)
