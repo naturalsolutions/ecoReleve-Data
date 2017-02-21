@@ -404,6 +404,8 @@ define([
       if (this.gridRow) {
         this.finilizeToGridRow();
       }
+      // fix checkbox select when clic on label
+      $(this.formRegion).find('input[type="checkbox"]').parent().parent().parent().find('label').removeAttr('for') ;
     },
 
     showErrorForMaxLength : function(_this){
