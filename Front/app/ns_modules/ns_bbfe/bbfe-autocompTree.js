@@ -208,6 +208,7 @@ define([
                     //$('#divAutoComp_' + _this.id).removeClass('error');
                     $('#' + _this.id).removeClass('error');
                     _this.displayErrorMsg(false);
+                    var errorMsg = false ; 
                     //_this.$el.find('input').trigger('change');
                     var translatedValue = data["TTop_FullPathTranslated"];
                     if (isTranslated) {
@@ -216,11 +217,19 @@ define([
                         }
                         _this.$el.find('#' + _this.id + '_value').val(data["TTop_FullPath"]);
                         _this.$el.find('#' + _this.id ).attr('data_value',value);
-                        _this.$el.find('#' + _this.id).val(translatedValue);
-                        _this.$el.find('#' + _this.id).attr('title',translatedValue);
+                        if(translatedValue) {
+                            _this.$el.find('#' + _this.id).val(translatedValue);
+                            _this.$el.find('#' + _this.id).attr('title',translatedValue);
+
+
+                        } else {
+
+                            errorMsg = true ;
+                        }
+
                     }
 
-                    _this.displayErrorMsg(false);
+                    _this.displayErrorMsg(errorMsg);
 
                 },
                 error: function (data) {
