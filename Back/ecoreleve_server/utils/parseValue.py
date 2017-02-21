@@ -43,10 +43,10 @@ def isEqual(val1,val2):
 
 def formatValue(data, schema):
     for key in data:
-        if key in schema: 
+        if key in schema:
             if (schema[key]['type'] == 'AutocompTreeEditor'):
                 data[key] = formatThesaurus(data[key])
-            elif (schema[key]['type'] == 'ObjectPicker' and schema[key] is not None and 'usedLabel' in schema[key]['options']):
+            elif (schema[key]['type'] == 'ObjectPicker' and key != 'FK_Individual' and 'usedLabel' in schema[key]['options']):
                 label = schema[key]['options']['usedLabel']
                 data[key] = formatObjetPicker(data[key], key, label)
 
