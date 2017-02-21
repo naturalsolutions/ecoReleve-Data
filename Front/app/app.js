@@ -41,6 +41,14 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       }
     };
 
+     window.addEventListener('mousewheel', function(event) {
+      if(document.activeElement.type == "number"){
+        event.preventDefault();
+        event.stopPropagation();
+        document.activeElement.blur();
+      }
+    });
+
     Backbone.Marionette.Renderer.render = function(template, data) {
       if (!JST[template]) throw 'Template \'' + template + '\' not found!';
       return JST[template](data);
