@@ -280,13 +280,45 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         'sensors': 'reneco reneco-emitters',
         'monitoredSites': 'reneco reneco-site',
       };
-      var tpl = '<div ">\
+      if(!value){
+        value = '';
+      }
+      var tpl = '<div>\
                     <a href="'+ url +'" class="'+dictCSS[this.objectName]+'" target="_blank">\
                     </a>\
                     <span>'+value+'</span> \
                 </div>';
       $(this.eGui).html(tpl);
     };
+
+    ObjectPickerRenderer.prototype.init = function (params) {
+    	this.eGui = document.createElement('span'); //not sure it's necessary
+
+      var value = this.handleValues(params);
+
+      //check only before the first render of the grid, otherwise, use refresh
+      // if(!params.api.firstRenderPassed){
+      //   this.handleValueValidation(params, value);
+      // }
+
+      this.handleValueValidation(params, value);
+      this.isEmptyRow = this.checkIfEmptyRow(params);
+      
+      if(this.isEmptyRow){
+        //console.log('empty');
+        this.requiredValidation(params, value);
+      } else {
+        // after sort filter etc check if there was already an error then display it
+        if(params.data._errors !== undefined){
+          for (var i = 0; i < params.data._errors.length; i++) {
+            if(params.data._errors[i] == params.colDef.field){
+              this.handleError(params);
+            }
+          }
+        }
+      }
+
+    };    
 
 
     var CheckboxRenderer = function() {}
