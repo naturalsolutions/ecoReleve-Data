@@ -698,7 +698,7 @@
 
                     }
                     else {
-                        if (value.Value) {
+                        if (value.Value || value.Operator == 'is null') {
                             this.criterias.push(value);
                             currentForm.$el.find('input.filter').addClass('active');
                         }
