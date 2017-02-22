@@ -288,9 +288,9 @@ define([
       $(this.formRegion).find('textarea').on("change", function(e) {
          _this.formChange = true;
       });
-      // $(this.formRegion).find('.grid-form').on("change", function(e) {
-      //    _this.formChange = true;
-      // });
+      $(this.formRegion).find('.sub-grid-form').on("change", function(e) {
+         _this.formChange = true;
+      });
       $(this.formRegion).find('.nested').on("change", function(e) {
          _this.formChange = true;
       });
