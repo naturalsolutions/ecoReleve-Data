@@ -171,7 +171,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
         confirmButtonText: 'Quit',
         cancelButtonColor: 'grey',
         cancelButtonText: 'Continue edition',
-        closeOnConfirm: false,
+        closeOnConfirm: true,
       },
       function(isConfirm) {
         if (!isConfirm) {
@@ -182,33 +182,33 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
           return false;
         } else {
           if (confirmCallback) {
-            Swal({
-              title: 'Saving form',
-              text: 'save it ?',
-              type: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: 'green',
-              confirmButtonText: 'Yes',
-              cancelButtonColor: 'grey',
-              cancelButtonText: 'No',
-              closeOnConfirm: true,
-            }, 
-            function(isConfirm){
-              if (isConfirm) {
-                var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
-                    if(window.formInEdition.form[key2].formChange){
-                      window.formInEdition.form[key2].reloadingAfterSave = function(){};
-                      window.formInEdition.form[key2].afterSaveSuccess = function(response){};
-                      window.formInEdition.form[key2].butClickSave(null);
-                    }
-                });
-              }
+            // Swal({
+            //   title: 'Saving form',
+            //   text: 'save it ?',
+            //   type: 'warning',
+            //   showCancelButton: true,
+            //   confirmButtonColor: 'green',
+            //   confirmButtonText: 'Yes',
+            //   cancelButtonColor: 'grey',
+            //   cancelButtonText: 'No',
+            //   closeOnConfirm: true,
+            // }, 
+            // function(isConfirm){
+            //   if (isConfirm) {
+            //     var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
+            //         if(window.formInEdition.form[key2].formChange){
+            //           window.formInEdition.form[key2].reloadingAfterSave = function(){};
+            //           window.formInEdition.form[key2].afterSaveSuccess = function(response){};
+            //           window.formInEdition.form[key2].butClickSave(null);
+            //         }
+            //     });
+          // }
               if(indexMax-urlChangeMax<=0){
                 window.formInEdition = {};
               }
               window.onExitForm.resolve();
               confirmCallback();
-            });
+            // });
           }
         }
       });
