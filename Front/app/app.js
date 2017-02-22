@@ -190,7 +190,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
         var oldUrlSplit = window.formInEdition.form.baseUri.replace(window.location.origin,'').replace(window.location.pathname,'').split('?');
 
         var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
-          if( newUrlSplit[index2-1] != oldUrlSplit[index2-1]){
+          if( (newUrlSplit[index2-1] != oldUrlSplit[index2-1]) || newUrlSplit[0] != oldUrlSplit[0]){
             if(window.formInEdition.form[key2].formChange){
               i++;
             }
@@ -206,6 +206,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
     if(i > 0){
       var title = i18n.translate('swal.savingForm-title');
       var savingFormContent =  i18n.translate('swal.savingForm-content');
+      window.onExitForm = $.Deferred();
       //var cancelMsg = i18n.translate('button.cancel');
 
       Swal({
@@ -222,15 +223,39 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       function(isConfirm) {
         if (!isConfirm) {
           if (cancelCallback) {
+            window.onExitForm.reject();
             cancelCallback();
           }
           return false;
         } else {
           if (confirmCallback) {
-            if(indexMax-urlChangeMax<=0){
-              window.formInEdition = {};
-            }
-            confirmCallback();
+            // Swal({
+            //   title: 'Saving form',
+            //   text: 'save it ?',
+            //   type: 'warning',
+            //   showCancelButton: true,
+            //   confirmButtonColor: 'green',
+            //   confirmButtonText: 'Yes',
+            //   cancelButtonColor: 'grey',
+            //   cancelButtonText: 'No',
+            //   closeOnConfirm: true,
+            // }, 
+            // function(isConfirm){
+            //   if (isConfirm) {
+            //     var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
+            //         if(window.formInEdition.form[key2].formChange){
+            //           window.formInEdition.form[key2].reloadingAfterSave = function(){};
+            //           window.formInEdition.form[key2].afterSaveSuccess = function(response){};
+            //           window.formInEdition.form[key2].butClickSave(null);
+            //         }
+            //     });
+          // }
+              if(indexMax-urlChangeMax<=0){
+                window.formInEdition = {};
+              }
+              window.onExitForm.resolve();
+              confirmCallback();
+            // });
           }
         }
       });
@@ -239,6 +264,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
         if(indexMax-urlChangeMax<=0){
           window.formInEdition = {};
         }
+        //window.onExitForm.resolve();
         confirmCallback();
       }
     }
