@@ -224,6 +224,7 @@
                     if (parametres.onItemClick) {
                       try {
                         $.proxy(parametres.onItemClick(), $me);
+                        event.stopPropagation();
                       } catch (e) {
                         throw ('An error occured during onItemClick -> ' + e);
                       }
