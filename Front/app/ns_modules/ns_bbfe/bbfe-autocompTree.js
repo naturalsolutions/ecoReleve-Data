@@ -223,6 +223,8 @@ define([
                     }
                     if(!translatedValue){
                         _this.$el.find('#' + _this.id).val(value);
+                        _this.$el.find('#' + _this.id + '_value').val(value);
+                        _this.$el.find('#' + _this.id ).attr('data_value',value);
                         _this.isTermError = true;
                         $('#' + _this.id).addClass('error');
                         _this.displayErrorMsg(true);
