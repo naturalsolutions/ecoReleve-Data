@@ -176,7 +176,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
         showCancelButton: true,
         confirmButtonColor: 'rgb(221, 107, 85)',
         confirmButtonText: 'Quit',
-        cancelButtonColor: 'grey',
+        customClass: 'swal-cancel-btn-green',
         cancelButtonText: 'Continue edition',
         closeOnConfirm: true,
       },
