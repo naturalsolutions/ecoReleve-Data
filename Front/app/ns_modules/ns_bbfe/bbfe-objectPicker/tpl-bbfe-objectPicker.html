@@ -1,9 +1,9 @@
 <div class="input-group picker">
-  <span class="input-group-btn input-group-btn-icon">
+  <span class="input-group-btn input-group-btn-icon picker-icon">
     <button type="button" id="detailsShow" class="btn <%= icon %>"  title="See detail">
     </button>
   </span>
-  <input <%= disabled %> class="form-control <%= required %>" name="<%= key %>" type="<%=type%>" value="<%= value %>" data_value="<%= data_value %>">
+  <input <%= disabled %> class="form-control <%= required %>" name="<%= key %>" type="<%=type%>" value="<%= value %>" data_value="<%= data_value %>" min="0">
   <span class="input-group-btn picker">
     <button type="button" class="btn <%= visu %> glyphicon-plus">
     </button>

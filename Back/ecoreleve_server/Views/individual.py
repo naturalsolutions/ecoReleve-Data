@@ -204,6 +204,8 @@ def getIndiv(request):
              request_method='GET',
              permission=routes_permission[prefix]['GET'])
 def getIndivHistory(request):
+    from ..Models import thesaurusDictTraduction
+    
     session = request.dbsession
     id = request.matchdict['id']
 
@@ -215,13 +217,18 @@ def getIndivHistory(request):
 
     result = session.execute(query).fetchall()
     response = []
+
+    userLng = request.authenticated_userid['userlanguage']
     for row in result:
         curRow = OrderedDict(row)
         dictRow = {}
         for key in curRow:
             if curRow[key] is not None:
                 if 'Value' in key:
-                    dictRow['value'] = curRow[key]
+                    if curRow[key] in thesaurusDictTraduction:
+                        dictRow['value'] = thesaurusDictTraduction[curRow[key]][userLng]
+                    else:
+                        dictRow['value'] = curRow[key]
                 elif 'FK' not in key:
                     dictRow[key] = curRow[key]
         dictRow['StartDate'] = curRow[

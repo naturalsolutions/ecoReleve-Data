@@ -20,6 +20,10 @@ define([
     template: 'app/modules/importFile/argos/templates/tpl-step1-argos.html',
 
     name: 'Upload Argos Files',
+		ui: {
+			'startBtn' : 'button.start',
+			'cancelBtn' : 'button.cancel'
+		},
 
     initialize: function() {
 
@@ -40,9 +44,17 @@ define([
         url: config.coreUrl+'sensors/argos/datas',
         parallelUploads: 1,
         previewTemplate: previewTemplate,
+				autoQueue: false,
         previewsContainer: '#previews', // Define the container to display the previews
         clickable: '.fileinput-button', // Define the element that should be used as click trigger to select files.
       });
+
+			myDropzone.on('removedfile' , function(e){
+				if (this.files.length == 0) {
+					_this.ui.cancelBtn.addClass('hidden');
+					_this.ui.startBtn.addClass('hidden');
+				}
+			});
 
       //overwrite addFile function to avoid duplicate files
       myDropzone.addFile = function(file) {
@@ -109,7 +121,11 @@ define([
 
       myDropzone.on('addedfile', function(file) {
         // Hookup the start button
-        file.previewElement.querySelector('.start').onclick = function() { myDropzone.enqueueFile(file); };
+				_this.ui.cancelBtn.removeClass('hidden')
+				_this.ui.startBtn.removeClass('hidden')
+        file.previewElement.querySelector('.start').onclick = function() {
+					myDropzone.enqueueFile(file);
+				};
       });
 
       // Update the total progress bar
@@ -199,6 +215,8 @@ define([
       };
       document.querySelector('#actions .cancel').onclick = function() {
         myDropzone.removeAllFiles(true);
+				_this.ui.cancelBtn.addClass('hidden')
+				_this.ui.startBtn.addClass('hidden')
       };
 
     },
