@@ -218,13 +218,23 @@ define([
                         _this.$el.find('#' + _this.id ).attr('data_value',value);
                         _this.$el.find('#' + _this.id).val(translatedValue);
                         _this.$el.find('#' + _this.id).attr('title',translatedValue);
+
+                       
                     }
+                    if(!translatedValue){
+                        _this.$el.find('#' + _this.id).val(value);
+                        _this.isTermError = true;
+                        $('#' + _this.id).addClass('error');
+                        _this.displayErrorMsg(true);
 
-                    _this.displayErrorMsg(false);
-
+                    } else {
+                        _this.displayErrorMsg(false);
+                    }
                 },
                 error: function (data) {
                     _this.$el.find('#' + _this.id).val(value);
+                    _this.$el.find('#' + _this.id + '_value').val(value);
+                    _this.$el.find('#' + _this.id ).attr('data_value',value);
                     if (_this.editable) {
                         //$('#divAutoComp_' + _this.id).addClass('error');
                         $('#' + _this.id).addClass('error');
