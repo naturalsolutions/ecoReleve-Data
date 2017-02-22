@@ -188,6 +188,9 @@ define([
       }
 
       this.initPicker();
+      this.$input.on('keypressed', function(e){
+        _this.input.change()
+      });
 
       return this;
     },

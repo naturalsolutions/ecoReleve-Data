@@ -38,9 +38,10 @@ define([
         <button type="button" class="js-btn-delete btn btn-danger btn-sm hide"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
     ',
 
-    
+    className: 'sub-grid-form' ,
     addRow: function(){
       this.gridView.gridOptions.api.addItems([{}]);
+      this.$el.trigger('change');
     },
 
     deleteRows: function() {
@@ -50,14 +51,15 @@ define([
         return;
       }
       
-      var opt = {
-        title: 'Are you sure?',
-        text: 'selected rows will be deleted'
-      };
-      window.swal(opt, 'warning', function() {
-        _this.gridView.gridOptions.api.removeItems(selectedNodes);
-      });
-
+      // var opt = {
+      //   title: 'Are you sure?',
+      //   text: 'selected rows will be deleted'
+      // };
+      // window.swal(opt, 'warning', function() {
+      //   _this.gridView.gridOptions.api.removeItems(selectedNodes);
+      // });
+      _this.gridView.gridOptions.api.removeItems(selectedNodes);
+      this.$el.trigger('change');
     },
 
     initialize: function(options){
@@ -96,6 +98,7 @@ define([
     },
 
     afterRender: function(options){
+      var _this = this;
       var rowData = options.model.get(options.key) || [];
       this.regionManager.addRegions({
         rgGrid: '.js-rg-grid-subform'
@@ -117,12 +120,37 @@ define([
           singleClickEdit : true,
           rowData: rowData,
           rowSelection: (this.editable)? 'multiple' : '',
+          onCellValueChanged: function(e){
+            _this.customValueChanged(e)
+          }
         },
         onFocusedRowChange: function(row){
-
         }
       }));
 
+    },
+
+    customValueChanged: function(options){
+      var column = options.colDef.field;
+      if(column == '_errors'){
+        return;
+      }
+      console.log(column)
+      var newValue, oldValue;
+      if(options.newValue instanceof Object){
+        newValue = options.newValue.value;
+      } else {
+        newValue = options.newValue;
+      }
+      if(options.oldValue instanceof Object){
+        oldValue = options.oldValue.value;
+      } else {
+        oldValue = options.oldValue;
+      }
+
+      if(newValue != oldValue){
+        this.$el.trigger('change');
+      }
     },
 
     formatColumns: function(schema){
