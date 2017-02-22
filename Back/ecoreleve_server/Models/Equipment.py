@@ -10,9 +10,12 @@ from sqlalchemy import (
     func,
     event,
     select,
-    exists)
+    exists,
+    text,
+    bindparam)
 from sqlalchemy.orm import aliased
 from pyramid import threadlocal
+from datetime import timedelta
 
 
 class Equipment(Base):
@@ -38,27 +41,13 @@ class Equipment(Base):
 
 def checkSensor(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
     session = threadlocal.get_current_registry().dbmaker()
-    e2 = aliased(Equipment)
 
-    subQuery = select([e2]).where(
-        and_(e2.FK_Sensor == Equipment.FK_Sensor,
-             and_(e2.StartDate > Equipment.StartDate, e2.StartDate < equipDate)
-             )
-    )
-
-    query = select([Equipment]).where(
-        and_(~exists(subQuery),
-             and_(Equipment.StartDate < equipDate,
-                  and_(Equipment.Deploy == 1, Equipment.FK_Sensor == Sensor.ID))
-             )
-    )
-
-    fullQuery = select([Sensor.ID]
-                       ).where(
-        and_(~exists(query), Sensor.ID == fk_sensor)
-    )
-
-    Nb = len(session.execute(fullQuery).fetchall())
+    query = text('''DECLARE @result int;
+                 EXEC dbo.[pr_checkSensorAvailability] :date, :sensorID, @result OUTPUT;
+                 SELECT @result
+                 ''').bindparams(bindparam('sensorID', fk_sensor),
+                                 bindparam('date', equipDate))
+    Nb = session.execute(query).scalar()
     if Nb > 0:
         return True
     else:
@@ -166,29 +155,18 @@ def checkUnequip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
 def set_equipment(target, value=None, oldvalue=None, initiator=None):
     typeName = target.GetType().Name
     curSta = value
-    if 'unequip' in typeName.lower():
-        deploy = 0
-    else:
-        deploy = 1
-
-        try:
-            Survey_type = target.GetProperty('Survey_type')
-        except:
-            Survey_type = None
-        try:
-            Monitoring_Status = target.GetProperty('Monitoring_Status')
-        except:
-            Monitoring_Status = None
-        try:
-            Status = target.GetProperty('Sensor_Status')
-        except:
-            Status = None
 
     if 'equipment' in typeName.lower() and typeName.lower() != 'station equipment':
         try:
             equipDate = target.Station.StationDate
         except:
             equipDate = curSta.StationDate
+
+        if 'unequip' in typeName.lower():
+            deploy = 0
+            equipDate = equipDate - timedelta(seconds=1)
+        else:
+            deploy = 1
 
         fk_sensor = target.GetProperty('FK_Sensor')
         if 'individual' in typeName.lower():
