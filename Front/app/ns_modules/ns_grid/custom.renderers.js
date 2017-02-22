@@ -237,34 +237,55 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       var name = colDef.field.split('FK_')[1];
       var objectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
       var url = objectName + '/' + value;
+      this.objectName = objectName;
 
-      $.ajax({
-        url: url,
-        context: this,
-        success: function(data){
-          this.handleRemoveError(params);
-          var valueToDisplay;
-          
-          if (colDef.schema.options && colDef.schema.options.usedLabel){
-            valueToDisplay = data[colDef.schema.options.usedLabel];
-          } else {
-            valueToDisplay = data[colDef.field];
+      if (objectName != 'individuals') {
+        $.ajax({
+          url: url,
+          context: this,
+          success: function(data){
+            this.handleRemoveError(params);
+            var valueToDisplay;
+            
+            if (colDef.schema.options && colDef.schema.options.usedLabel){
+              valueToDisplay = data[colDef.schema.options.usedLabel];
+            } else {
+              valueToDisplay = data[colDef.field];
+            }
+
+            this.formatValueToDisplay(valueToDisplay);
+
+            var values = {
+              value: value,
+              label: valueToDisplay
+            };
+
+            this.manualDataSet(params, values);
+
+          }, error: function(data){
+            this.handleError(params);
           }
 
-          this.formatValueToDisplay(valueToDisplay);
+        });
+      } else {
+        this.formatValueToDisplay(value);
+      }
+    };
 
-          var values = {
-            value: value,
-            label: valueToDisplay
-          };
+    ObjectPickerRenderer.prototype.formatValueToDisplay = function (value) {
+      var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.objectName+'/'+value;
 
-          this.manualDataSet(params, values);
-
-        }, error: function(data){
-          this.handleError(params);
-        }
-
-      });
+      var dictCSS = {
+        'individuals':'reneco reneco-bustard',
+        'sensors': 'reneco reneco-emitters',
+        'monitoredSites': 'reneco reneco-site',
+      };
+      var tpl = '<div ">\
+                    <a href="'+ url +'" class="'+dictCSS[this.objectName]+'" target="_blank">\
+                    </a>\
+                    <span>'+value+'</span> \
+                </div>';
+      $(this.eGui).html(tpl);
     };
 
 
@@ -275,7 +296,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       if(value == 1)
         checked = 'checked';
 
-      var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
+      var chk = '<input class="form-control" type="checkbox" '+ checked +' />';
       $(this.eGui).html(chk);
     };
 
