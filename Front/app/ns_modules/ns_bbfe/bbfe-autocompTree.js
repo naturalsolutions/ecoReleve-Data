@@ -42,7 +42,13 @@ define([
         },
 
         inputChange: function(e){
-          this.isTermError = true;
+          
+          var code = e.keyCode || e.which;
+            if (code == '9') {
+                    this.$el.find('#treeView' + this.id).css('display', 'none');
+            } else {
+                this.isTermError = true;
+            }
         },
 
         initialize: function (options) {
@@ -152,6 +158,7 @@ define([
                             _this.$el.find('input').trigger('thesaurusChange');
                             _this.onEditValidation(value);
                         },
+
                     });
                 }
 
