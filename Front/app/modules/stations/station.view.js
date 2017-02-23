@@ -26,6 +26,10 @@ define([
     className: 'full-height white station',
 
     ModelPrototype: StationModel,
+    
+    events: {
+      'click .tab-link': 'displayTab',
+    },
 
     ui: {
       formStation: '.js-from-station',
@@ -73,6 +77,24 @@ define([
       }));
     },
 
+    displayTab: function(e) {
+      e.preventDefault();
+      this.$el.find('.nav-tabs>li').each(function(){
+        $(this).removeClass('active in');
+      });
+      $(e.currentTarget).parent().addClass('active in');
+
+      this.$el.find('.tab-content>.tab-pane').each(function(){
+        $(this).removeClass('active in');
+      });
+      var id = $(e.currentTarget).attr('href');
+      this.$el.find('.tab-content>.tab-pane' + id).addClass('active in');
+
+      // this.gridViews.map(function(gridView){
+      //   gridView.gridOptions.api.sizeColumnsToFit();
+      // })
+    },
+
     onShow: function() {
       this.displayStation();
       this.displayNavbar();
@@ -87,11 +109,11 @@ define([
     displayStation: function() {
       this.total = 0;
       var _this = this;
-
+      var detailsFormRegion = this.$el.find('.js-rg-details');
       var formConfig = this.model.get('formConfig');
 
       formConfig.id = this.model.get('id');
-      formConfig.formRegion = this.ui.formStation;
+      formConfig.formRegion = detailsFormRegion;
       formConfig.buttonRegion = [this.ui.formStationBtns];
       formConfig.afterDelete = function(response, model){
         Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
@@ -103,6 +125,9 @@ define([
       };
 
       this.nsForm.afterShow = function(){
+         var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
+         _this.ui.formStation.html(globalEl);
+
         $(".datetime").attr('placeholder','DD/MM/YYYY');
         $("#dateTimePicker").on("dp.change", function (e) {
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());

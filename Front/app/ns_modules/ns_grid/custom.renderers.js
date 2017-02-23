@@ -328,7 +328,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       if(value == 1)
         checked = 'checked';
 
-      var chk = '<input class="form-control" type="checkbox" '+ checked +' />';
+      var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
       $(this.eGui).html(chk);
     };
 

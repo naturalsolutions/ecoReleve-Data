@@ -2,25 +2,41 @@
 
   <div class="js-rg-station half-height">
     <div class="toolbar top">
-      <a class="btn" href="#<%= type %>">
+      <a class="btn pull-left" href="#<%= type %>">
           <span class="reneco reneco-back"></span>
           &nbsp;
           <span data-i18n="button.back">Back</span>
       </a>
-      <div class="js-navbar pull-right"></div>
+      <div class="js-navbar pull-left"></div>
+      <div class="js-from-btns pull-right"></div>
     </div>
     <div class="crop2">
       <div class="js-from-station"></div>
     </div>
-    <div class="toolbar top">
-      <div class="js-from-btns"></div>
+    <div class="">
+      <ul class="nav nav-tabs toolbar bottom">
+      <% _.each(uiGridConfs, function(uiGridConf, index){ %>
+          <li class="tab-ele <%= (index == 0)? 'active' : '' %>">
+            <a href="#<%= uiGridConf.name %>Tab" class="tab-link"><%= uiGridConf.label %></a>
+          </li>
+      <% }); %>
+      
+      </ul>
+      <!--<div class="js-from-btns"></div>-->
     </div>
   </div>
+  
+  <!--<div class="js-rg-protocols half-height">-->
+  <!--</div>-->
+    <div class="tab-content half-height no-padding station-protocols-panel">
+      <% _.each(uiGridConfs, function(uiGridConf, index){ %>
+        <div id="<%= uiGridConf.name %>Tab" class="tab-pane full-height fade <%= (index == 0)? 'in active' : '' %>">
 
-  <div class="js-rg-protocols half-height">
-    
+          <div class="js-rg-<%= uiGridConf.name %> full-height no-padding"></div>
+        </div>
+      <% }); %>
+      </div>
 
-  </div>
 </div>
 
 <div class="js-rg-protocol col-xs-12 col-md-8 no-padding full-height dark">
