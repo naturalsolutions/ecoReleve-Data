@@ -151,9 +151,10 @@ define([
                             _this.$el.find('input').trigger('changeEditor');
                             _this.$el.find('input').trigger('thesaurusChange');
                             _this.onEditValidation(value);
-                        }
+                        },
                     });
                 }
+
                 if (_this.translateOnRender) {
                     _this.validateAndTranslate(_this.value, true);
                 }
