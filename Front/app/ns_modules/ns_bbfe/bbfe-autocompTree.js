@@ -30,7 +30,7 @@ define([
         events: {
             'hide': "hasChanged",
             'keyup': 'inputChange',
-            'changeEditor':'inputChange'
+            'changeEditor':'inputChange',
         },
         editable:false,
 
@@ -161,7 +161,22 @@ define([
 
                     });
                 }
-
+                $('#treeView' + _this.id).on('keyup',function(e){
+                    var $this = $(this);
+                    if (e.keyCode == 38 || e.keyCode == 40){
+                        var itemFocus = $('#treeView' + _this.id).find('.fancytree-focused');
+                        var calcul =$this.scrollTop()+ $this.outerHeight()-itemFocus.height();
+                        if(itemFocus.position().top >= calcul){
+                            $('#treeView' + _this.id).scrollTop(itemFocus.position().top);
+                        }
+                        if(itemFocus.position().top < $this.scrollTop()){
+                            $('#treeView' + _this.id).scrollTop(itemFocus.position().top);
+                        }
+                    }
+                    if (e.keyCode == 27 || e.keyCode == 9){
+                        $this.css('display', 'none');
+                    }
+                });
                 if (_this.translateOnRender) {
                     _this.validateAndTranslate(_this.value, true);
                 }
