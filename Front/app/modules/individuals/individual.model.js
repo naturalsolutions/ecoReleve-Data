@@ -42,6 +42,10 @@ define([
 
       uiGridConfs: [
         {
+          name: 'details',
+          label: 'Details'
+        },
+        {
           name: 'history',
           label: 'History'
         },

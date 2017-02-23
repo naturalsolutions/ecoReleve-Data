@@ -14,6 +14,17 @@ define([
       single: 'station',
       type: 'stations',
 
+      uiGridConfs: [
+        {
+          name: 'details',
+          label: 'Details'
+        },
+        {
+          name: 'protocols',
+          label: 'Protocols'
+        },
+      ],
+
       uiTabs: [
         {
           name: 'all',
