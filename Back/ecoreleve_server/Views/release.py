@@ -17,7 +17,7 @@ from sqlalchemy import select, text
 from traceback import print_exc
 from collections import Counter
 from ..controllers.security import routes_permission
-from ..Models.Equipment import checkSensor
+from ..Models.Equipment import checkEquip
 
 
 prefix = 'release'
@@ -332,7 +332,7 @@ def releasePost(request):
 
 
 def isavailableSensor(request, data):
-    availability = checkSensor(data['FK_Sensor'], datetime.strptime(
+    availability = checkEquip(data['FK_Sensor'], datetime.strptime(
         data['sta_date'], '%d/%m/%Y %H:%M:%S'))
     if availability is True:
         return
