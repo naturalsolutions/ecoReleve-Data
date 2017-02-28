@@ -127,7 +127,7 @@ define([
       this.nsForm.afterShow = function(){
          var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
          _this.ui.formStation.html(globalEl);
-
+         this.bindChanges(_this.ui.formStation);
         $(".datetime").attr('placeholder','DD/MM/YYYY');
         $("#dateTimePicker").on("dp.change", function (e) {
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
