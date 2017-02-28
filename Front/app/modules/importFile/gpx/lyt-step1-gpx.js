@@ -50,7 +50,7 @@ define([
       var obj = new Object({});
       obj.target = {files:''};
       obj.target.files = e.originalEvent.dataTransfer.files;
-      $('input[name="file"]').attr('value','file').change(obj);
+      $('input[name="file"]').attr('value','file').change();
       this.importFile(obj);
 
     },
