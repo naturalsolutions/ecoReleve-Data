@@ -42,13 +42,7 @@ define([
         },
 
         inputChange: function(e){
-          
-          var code = e.keyCode || e.which;
-            if (code == '9') {
-                    this.$el.find('#treeView' + this.id).css('display', 'none');
-            } else {
-                this.isTermError = true;
-            }
+            this.isTermError = true;
         },
 
         initialize: function (options) {
