@@ -266,36 +266,41 @@ define([
       }
     },
 
-    bindChanges: function(){
+    bindChanges: function(DOMele){
       var _this = this;
-      $(this.formRegion).find('input').on("change", function(e) {
+      var formRegion = this.formRegion;
+
+      if (DOMele){
+        formRegion = DOMele;
+      }
+      $(formRegion).find('input').on("change", function(e) {
         if($(e.target).val() !== ''){
           _this.formChange = true;
         } else {
           _this.formChange = false;
        }
       });
-      $(this.formRegion).find('input').on("thesaurusChange", function(e) {
+      $(formRegion).find('input').on("thesaurusChange", function(e) {
         if($(e.target).val() !== ''){
           _this.formChange = true;
         } else {
           _this.formChange = false;
        }
       });
-      $(this.formRegion).find('select').on("change", function(e) {
+      $(formRegion).find('select').on("change", function(e) {
          _this.formChange = true;
       });
-      $(this.formRegion).find('textarea').on("change", function(e) {
+      $(formRegion).find('textarea').on("change", function(e) {
          _this.formChange = true;
       });
-      $(this.formRegion).find('.sub-grid-form').on("change", function(e) {
+      $(formRegion).find('.sub-grid-form').on("change", function(e) {
          _this.formChange = true;
       });
-      $(this.formRegion).find('.nested').on("change", function(e) {
+      $(formRegion).find('.nested').on("change", function(e) {
          _this.formChange = true;
       });
 
-      $(this.formRegion).find('textarea').on("keypress", function(e) {
+      $(formRegion).find('textarea').on("keypress", function(e) {
         var maxlen = 250;
         var self = this;
         if ($(this).val().length > maxlen) {
@@ -304,7 +309,7 @@ define([
           _this.cleantextAreaAfterError(this);
         }
       });
-      $(this.formRegion).find('textarea').on('keyup', function (e) {
+      $(formRegion).find('textarea').on('keyup', function (e) {
         var maxlen = 250;
         var strval = $(this).val();
         var self = this;
@@ -313,7 +318,7 @@ define([
           return false;
         }
       });
-      $(this.formRegion).find('textarea').on('keydown' , function(e) {
+      $(formRegion).find('textarea').on('keydown' , function(e) {
         if(event.which == 8) {
           var maxlen = 250;
           var strval = $(this).val();
