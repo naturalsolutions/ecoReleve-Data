@@ -45,7 +45,7 @@
     var tpl = '<form class="filter form-horizontal filter-form-<%=fieldname%>">'
         + '<div   class="filter-container clearfix" >'
         + '<span data-editors="Column"></span>'
-        + '<span class="col-xs-3"><b><%= filterName %>&nbsp:</b></span>'
+        + '<span class="col-xs-3 filter-label"><%= filterName %></span>'
        + '<span data-editors="ColumnType"></span>'
 
        + '<span class="col-xs-3 no-padding" data-editors="Operator"></span>'
@@ -58,9 +58,9 @@
 
     var tplcheck =
     '<form class="filter form-horizontal filter-form-<%=fieldname%>" style="position:relative">'
-    + '<br><div   style="margin-bottom: 30px;">'
+    + '<div class="filter-container"  style="padding: 30px 0px;">'
         + '<span data-editors="Column"></span>'
-        + '<span class="col-xs-3"><b><%= filterName %>&nbsp:</b></span>'
+        + '<span class="col-xs-3 filter-label"><%= filterName %></span>'
         + '<span data-editors="ColumnType"></span>'
 
         + '<span class="hidden col-xs-4" data-editors="Operator"></span>'
@@ -72,22 +72,22 @@
 
     var tplinterval =
    '<form class="filter form-horizontal filter-form-<%=fieldname%>" style="position:relative">'
-   + '<div   class="clearfix">'
+   + '<div   class="filter-container clearfix">'
        + '<span data-editors="Column"></span>'
-       + '<span class="col-xs-3"><b><%= filterName %>&nbsp:</b></span>'
+       + '<span class="col-xs-3 filter-label"><%= filterName %></span>'
        + '<span data-editors="ColumnType"></span>'
        + '<span class="hidden col-xs-4" data-editors="Operator"></span>'
        + '<span class="col-xs-3">From</span><span class="col-xs-6 filterinterval" data-editors="From"></span>'
     + '</div>'
-    + '<div class="clearfix">'
+    + '<div class="filter-container clearfix">'
        + '<span class="col-xs-3 col-xs-offset-3">To</span><span class="col-xs-6 filterinterval" data-editors="To"></span>'
    + '</div>'
    + '</form>'
 
     var tplAdded = '<div class="filter clearfix">'
-      + '<div class="clearfix">'
+      + '<div class="filter-container clearfix">'
         + '<div class="legend">'
-         + '<label class="col-xs-12"><%= filterName %>:</label>'
+         + '<label class="col-xs-12"><%= filterName %></label>'
           + '<span data-editors="Column"></span>'
           + '<span data-editors="ColumnType"></span>'
         + '</div>'
@@ -104,9 +104,9 @@
     + '</div>';
 
     var tplAddedInterval = '<div class="filter clearfix">'
-     + '<div class="clearfix">'
+     + '<div class="filter-container clearfix">'
        + '<div class="legend">'
-        + '<label class="col-xs-12"><%= filterName %>:</label>'
+        + '<label class="col-xs-12"><%= filterName %></label>'
          + '<span data-editors="Column"></span>'
          + '<span data-editors="ColumnType"></span>'
        + '</div>'
@@ -409,7 +409,7 @@
                 }
             }
             var Formdata = {
-                ColumnType: type,
+                //ColumnType: type,
                 Column: fieldName,
                 Operator: operatorValue
             };
@@ -420,7 +420,7 @@
                 schema: schm,
                 defaults: {
                     Column: fieldName,
-                    ColumnType: type,
+                    //ColumnType: type,
                     // For FireFox, select first option
                     Operator: operatorValue,
                     Value: valeur
@@ -432,7 +432,7 @@
                 template: _.template(template),
                 model: mod,
                 data: Formdata,
-                templateData: { filterName: dataRow['title'], ColumnType: type, fieldname: fieldName }
+                templateData: { filterName: dataRow['title'], fieldname: fieldName }
             }).render();
             form.previousOperator = mod.get('Operator').val;
             if (!form.previousOperator){
@@ -548,7 +548,7 @@
 
             }
             var Formdata = {
-                ColumnType: type,
+                //ColumnType: type,
                 Column: fieldName,
                 Operator: schm['Operator'].options[0]
             };
@@ -560,7 +560,7 @@
                 schema: schm,
                 defaults: {
                     Column: fieldName,
-                    ColumnType: type,
+                    //ColumnType: type,
                     // For FireFox, select first option
                     Operator: operatorValue,
                     Value: valeur,
@@ -575,7 +575,7 @@
                 template: _.template(template),
                 model: mod,
                 data: Formdata,
-                templateData: { filterName: dataRow['title'], ColumnType: type, fieldname: fieldName }
+                templateData: { filterName: dataRow['title'], fieldname: fieldName }
             }).render();
 
             return form;
@@ -682,8 +682,8 @@
                     //delete value.ColumnType;
 
                     if (value.Operator == 'between') {
-                        var ValueFrom = { Operator: '>=', ColumnType: value.ColumnType, Column: value.Column, Value: null };
-                        var ValueTo = { Operator: '<=', ColumnType: value.ColumnType, Column: value.Column, Value: null };
+                        var ValueFrom = { Operator: '>=', Column: value.Column, Value: null };
+                        var ValueTo = { Operator: '<=', Column: value.Column, Value: null };
                         if (value.From) {
                             ValueFrom.Value = value.From;
                             this.criterias.push(ValueFrom);

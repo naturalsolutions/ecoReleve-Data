@@ -17,7 +17,7 @@ from sqlalchemy import select, text
 from traceback import print_exc
 from collections import Counter
 from ..controllers.security import routes_permission
-from ..Models.Equipment import checkSensor
+from ..Models.Equipment import checkEquip
 
 
 prefix = 'release'
@@ -107,7 +107,7 @@ def searchIndiv(request):
     listObj = IndividualList(moduleFront)
     dataResult = listObj.GetFlatDataList(searchInfo)
     for row in dataResult:
-        if 'Date_Sortie' in row:
+        if 'Date_Sortie' in row and row['Date_Sortie'] is not None:
             row['Date_Sortie'] = row['Date_Sortie'].strftime('%Y-%m-%d %H:%M:%S')
 
     countResult = listObj.count(searchInfo)
@@ -332,7 +332,7 @@ def releasePost(request):
 
 
 def isavailableSensor(request, data):
-    availability = checkSensor(data['FK_Sensor'], datetime.strptime(
+    availability = checkEquip(data['FK_Sensor'], datetime.strptime(
         data['sta_date'], '%d/%m/%Y %H:%M:%S'))
     if availability is True:
         return
