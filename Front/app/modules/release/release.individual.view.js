@@ -223,7 +223,6 @@ define([
         if(visibleRowNode.selected){
           if(visibleRowNode.error || visibleRowNode.errorDuplicated){
             error = true;
-            break;
           }
           visibleSelectedRows.push(visibleRowNode.data);
         }
