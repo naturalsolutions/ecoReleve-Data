@@ -49,7 +49,7 @@ define([
 		  var model = new Backbone.Model();
 		  model.set(options.key, value);
 		  options.model = model;
-
+			this.params = params;
 			this.initBBFE(options);
 
 		  this.preventNavigationEvents();
@@ -110,7 +110,11 @@ define([
 		ThesaurusEditor.prototype = new CustomEditor();
 
 		ThesaurusEditor.prototype.initBBFE = function(options){
-		  this.bbfe = new ThesaurusPicker(options);
+		  var _this = this;
+			this.bbfe = new ThesaurusPicker(options);
+			this.bbfe.itemClick = function(){
+				_this.element.$el.change();
+			};
 		  this.element = this.bbfe.render();
 		};
 
