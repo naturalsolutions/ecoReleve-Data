@@ -121,6 +121,10 @@ define([
             return this.$el.find('#' + this.id).val();
         },
 
+        itemClick: function(){
+
+        },
+
         render: function () {
             var _this = this;
             var $el = $(this.template);
@@ -150,6 +154,7 @@ define([
                             var value = _this.$el.find('#' + _this.id + '_value').val();
                             _this.$el.find('input').trigger('changeEditor');
                             _this.$el.find('input').trigger('thesaurusChange');
+                            _this.itemClick();
                             _this.onEditValidation(value);
                         },
 
