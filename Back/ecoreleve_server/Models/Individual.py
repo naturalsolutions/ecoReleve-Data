@@ -9,13 +9,23 @@ from sqlalchemy import (Column,
                         orm,
                         Table,
                         cast,
-                        Date)
+                        Date,
+                        select,
+                        or_,
+                        and_,
+                        func)
 
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from ..Models import IntegerDateTime
+
+
+class ErrorCheckIndividualCodes(Exception):
+
+    def __str__(self):
+        return 'Individual code exists'
 
 
 class Individual (Base, ObjectWithDynProp):
@@ -73,6 +83,26 @@ class Individual (Base, ObjectWithDynProp):
             return self.IndividualType
         else:
             return self.ObjContext.query(IndividualType).get(self.FK_IndividualType)
+
+    def UpdateFromJson(self, DTOObject, startDate=None):
+        if self.checkIndividualCodes(DTOObject):
+            ObjectWithDynProp.UpdateFromJson(self, DTOObject, startDate)
+        else:
+            raise ErrorCheckIndividualCodes
+
+    def checkIndividualCodes(self, DTOObject):
+        individualDynPropValue = Base.metadata.tables['IndividualDynPropValuesNow']
+        query = select([func.count(individualDynPropValue.c['ID'])])
+        session = self.ObjContext
+
+        cond = or_(*[and_(individualDynPropValue.c['Name'] == key,
+                          individualDynPropValue.c['ValueString'] == DTOObject[key]) 
+                     for key in DTOObject if key in ['Breeding_Ring_Code', 'Chip_Code', 'Release_Ring_Code']])
+        query = query.where(and_(individualDynPropValue.c['FK_Individual'] != self.ID, cond))
+
+        result = session.execute(query).scalar()
+
+        return result < 1
 
 
 class IndividualDynProp (Base):

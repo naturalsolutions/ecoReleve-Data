@@ -10,7 +10,8 @@ from ..Models import (
     IndividualList,
     Base,
     IndivLocationList,
-    Station
+    Station,
+    ErrorCheckIndividualCodes
 )
 from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
@@ -297,8 +298,12 @@ def updateIndiv(request):
     id = request.matchdict['id']
     curIndiv = session.query(Individual).get(id)
     curIndiv.LoadNowValues()
-    curIndiv.UpdateFromJson(data)
-    return {}
+    try:
+        curIndiv.UpdateFromJson(data)
+        return {}
+    except ErrorCheckIndividualCodes as e:
+        request.response.status_code = 510
+        return str(e)
 
 
 @view_config(route_name=prefix + '/insert',
@@ -332,21 +337,24 @@ def insertOneNewIndiv(request):
     newIndiv = Individual(FK_IndividualType=indivType,
                           creationDate=datetime.now(), Original_ID='0')
     newIndiv.init_on_load()
-    newIndiv.UpdateFromJson(data, startDate=startDate)
+    try:
+        newIndiv.UpdateFromJson(data, startDate=startDate)
 
-    if indivType == 2:
-        existingIndivID = checkExisting(newIndiv)
-        if existingIndivID is not None:
-            session.rollback()
-            session.close()
-            indivID = existingIndivID
+        if indivType == 2:
+            existingIndivID = checkExisting(newIndiv)
+            if existingIndivID is not None:
+                session.rollback()
+                session.close()
+                indivID = existingIndivID
 
-    if existingIndivID is None:
-        session.add(newIndiv)
-        session.flush()
-        indivID = newIndiv.ID
+        if existingIndivID is None:
+            session.add(newIndiv)
+            session.flush()
+            indivID = newIndiv.ID
 
-    return {'ID': indivID}
+        return {'ID': indivID}
+    except ErrorCheckIndividualCodes as e:
+        return 'error'
 
 
 def checkExisting(indiv):
