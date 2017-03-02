@@ -205,7 +205,7 @@ define([
             ctx.filters.update();
             data = {};
             for (var i = 0; i < ctx.filters.criterias.length; i++) {
-              data[ctx.filters.criterias[i]['Column']] = ctx.filters.criterias[i]['Value'];
+              data[ctx.filters.criterias[i]['Column']] = ctx.filters.criterias[i]['Value'] === 'null' ? '': ctx.filters.criterias[i]['Value'];
             }
           } else {
             data = {};
