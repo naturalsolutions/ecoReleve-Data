@@ -58,11 +58,12 @@ class Individual (Base, ObjectWithDynProp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         ObjectWithDynProp.__init__(self)
+        self._constraintsFunctionLists = [self.checkIndividualCodes]
 
     @orm.reconstructor
     def init_on_load(self):
         ''' init_on_load is called on the fetch of object '''
-        ObjectWithDynProp.__init__(self)
+        self.__init__()
 
     def GetNewValue(self, nameProp):
         ReturnedValue = IndividualDynPropValue()
@@ -91,18 +92,24 @@ class Individual (Base, ObjectWithDynProp):
     #         raise ErrorCheckIndividualCodes
 
     def checkIndividualCodes(self, DTOObject):
-        individualDynPropValue = Base.metadata.tables['IndividualDynPropValuesNow']
-        query = select([func.count(individualDynPropValue.c['ID'])])
-        session = self.ObjContext
+        '''check existing Breeding_Ring_Code, Chip_Code and Release_Ring_Code
+         return False if the value already existing '''
 
-        cond = or_(*[and_(individualDynPropValue.c['Name'] == key,
-                          individualDynPropValue.c['ValueString'] == DTOObject[key]) 
-                     for key in DTOObject if key in ['Breeding_Ring_Code', 'Chip_Code', 'Release_Ring_Code']])
-        query = query.where(and_(individualDynPropValue.c['FK_Individual'] != self.ID, cond))
+        propertiesToCheck = ['Breeding_Ring_Code', 'Chip_Code', 'Release_Ring_Code']
+        if any(DTOObject.get(prop, None) for prop in propertiesToCheck):
+            individualDynPropValue = Base.metadata.tables['IndividualDynPropValuesNow']
+            query = select([func.count(individualDynPropValue.c['ID'])])
+            session = self.ObjContext
 
-        result = session.execute(query).scalar()
+            cond = or_(*[and_(individualDynPropValue.c['Name'] == key,
+                              individualDynPropValue.c['ValueString'] == DTOObject[key])
+                         for key in DTOObject if key in propertiesToCheck])
+            query = query.where(and_(individualDynPropValue.c['FK_Individual'] != self.ID, cond))
+            nbExistingValue = session.execute(query).scalar()
 
-        return result < 1
+        else:
+            nbExistingValue = 0
+        return nbExistingValue < 1
 
 
 class IndividualDynProp (Base):

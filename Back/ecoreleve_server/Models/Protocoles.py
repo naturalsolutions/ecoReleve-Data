@@ -52,7 +52,7 @@ class Observation(Base, ObjectWithDynProp):
 
     @orm.reconstructor
     def init_on_load(self):
-        ObjectWithDynProp.__init__(self)
+        self.__init__()
 
     def GetNewValue(self, nameProp):
         ReturnedValue = ObservationDynPropValue()
