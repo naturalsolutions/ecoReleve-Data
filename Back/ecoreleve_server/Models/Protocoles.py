@@ -155,7 +155,7 @@ class Observation(Base, ObjectWithDynProp):
         ObjectWithDynProp.UpdateFromJson(self, DTOObject, None)
         if 'listOfSubObs' in DTOObject:
             self.SubObservation_childrens = DTOObject['listOfSubObs']
-        self.updateLinkedField()
+        self.updateLinkedField(DTOObject)
 
     def GetFlatObject(self, schema=None):
         result = super().GetFlatObject()

@@ -30,6 +30,9 @@ class ObjectWithDynProp:
         self.PropDynValuesOfNow = {}
         self.GetAllProp()
 
+    def checkConstraintsOnData(self, data):
+        return
+
     def GetAllProp(self):
         ''' Get all object properties (dynamic and static) '''
         if self.allProp is None:
@@ -372,21 +375,27 @@ class ObjectWithDynProp:
     def linkedFieldDate(self):
         return datetime.now()
 
-    def updateLinkedField(self, useDate=None):
+    def updateLinkedField(self,DTOObject, useDate=None):
         if useDate is None:
             useDate = self.linkedFieldDate()
 
-        for linkProp in self.getLinkedField():
+        linkedFields = self.getLinkedField()
+
+        for linkProp in linkedFields:
+            data = {}
             curPropName = linkProp['Name']
-            obj = LinkedTables[linkProp['LinkedTable']]
+            linkedEntity = LinkedTables[linkProp['LinkedTable']]
+            linkedPropName = linkProp['LinkedField'].replace('@Dyn:', '')
+            data[linkedPropName] = self.GetProperty(curPropName)
             try:
                 linkedSource = self.GetProperty(
                     linkProp['LinkSourceID'].replace('@Dyn:', ''))
-                curObj = self.ObjContext.query(obj).filter(
-                    getattr(obj, linkProp['LinkedID']) == linkedSource).one()
-                curObj.init_on_load()
-                curObj.SetProperty(linkProp['LinkedField'].replace(
-                    '@Dyn:', ''), self.GetProperty(curPropName), useDate)
+                linkedObj = self.ObjContext.query(linkedEntity).filter(
+                    getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
+                linkedObj.init_on_load()
+                linkedObj.UpdateFromJson(data, startDate=useDate)
+                # linkedObj.SetProperty(linkProp['LinkedField'].replace(
+                #     '@Dyn:', ''), self.GetProperty(curPropName), useDate)
             except:
                 pass
 

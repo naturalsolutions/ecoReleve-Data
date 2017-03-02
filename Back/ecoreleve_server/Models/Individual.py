@@ -84,11 +84,11 @@ class Individual (Base, ObjectWithDynProp):
         else:
             return self.ObjContext.query(IndividualType).get(self.FK_IndividualType)
 
-    def UpdateFromJson(self, DTOObject, startDate=None):
-        if self.checkIndividualCodes(DTOObject):
-            ObjectWithDynProp.UpdateFromJson(self, DTOObject, startDate)
-        else:
-            raise ErrorCheckIndividualCodes
+    # def UpdateFromJson(self, DTOObject, startDate=None):
+    #     if self.checkIndividualCodes(DTOObject):
+    #         ObjectWithDynProp.UpdateFromJson(self, DTOObject, startDate)
+    #     else:
+    #         raise ErrorCheckIndividualCodes
 
     def checkIndividualCodes(self, DTOObject):
         individualDynPropValue = Base.metadata.tables['IndividualDynPropValuesNow']
