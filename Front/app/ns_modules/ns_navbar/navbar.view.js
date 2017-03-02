@@ -68,7 +68,6 @@ function(Backbone, Marionette, config) {
     update: function(index){
       var _this = this;
 
-      this.model.set('index', index);
 
       var id;
       var hash = window.location.hash.split('/').slice(0,-1).join('/');
@@ -81,8 +80,18 @@ function(Backbone, Marionette, config) {
           _this.disableBtns(false);
         }
         Backbone.history.navigate(hash + '/' + id, {trigger: true});
-        _this.render();
+        
+        if(window.onExitForm){
+          window.onExitForm.done(function(){
+            _this.model.set('index', index);
+            _this.render();
+          }).fail(function(){
 
+          });
+        } else {
+          _this.model.set('index', index);
+          _this.render();
+        }
       });
 
     },

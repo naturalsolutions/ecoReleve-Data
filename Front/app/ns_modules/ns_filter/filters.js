@@ -409,7 +409,7 @@
                 }
             }
             var Formdata = {
-                ColumnType: type,
+                //ColumnType: type,
                 Column: fieldName,
                 Operator: operatorValue
             };
@@ -420,7 +420,7 @@
                 schema: schm,
                 defaults: {
                     Column: fieldName,
-                    ColumnType: type,
+                    //ColumnType: type,
                     // For FireFox, select first option
                     Operator: operatorValue,
                     Value: valeur
@@ -432,7 +432,7 @@
                 template: _.template(template),
                 model: mod,
                 data: Formdata,
-                templateData: { filterName: dataRow['title'], ColumnType: type, fieldname: fieldName }
+                templateData: { filterName: dataRow['title'], fieldname: fieldName }
             }).render();
             form.previousOperator = mod.get('Operator').val;
             if (!form.previousOperator){
@@ -548,7 +548,7 @@
 
             }
             var Formdata = {
-                ColumnType: type,
+                //ColumnType: type,
                 Column: fieldName,
                 Operator: schm['Operator'].options[0]
             };
@@ -560,7 +560,7 @@
                 schema: schm,
                 defaults: {
                     Column: fieldName,
-                    ColumnType: type,
+                    //ColumnType: type,
                     // For FireFox, select first option
                     Operator: operatorValue,
                     Value: valeur,
@@ -575,7 +575,7 @@
                 template: _.template(template),
                 model: mod,
                 data: Formdata,
-                templateData: { filterName: dataRow['title'], ColumnType: type, fieldname: fieldName }
+                templateData: { filterName: dataRow['title'], fieldname: fieldName }
             }).render();
 
             return form;
@@ -682,8 +682,8 @@
                     //delete value.ColumnType;
 
                     if (value.Operator == 'between') {
-                        var ValueFrom = { Operator: '>=', ColumnType: value.ColumnType, Column: value.Column, Value: null };
-                        var ValueTo = { Operator: '<=', ColumnType: value.ColumnType, Column: value.Column, Value: null };
+                        var ValueFrom = { Operator: '>=', Column: value.Column, Value: null };
+                        var ValueTo = { Operator: '<=', Column: value.Column, Value: null };
                         if (value.From) {
                             ValueFrom.Value = value.From;
                             this.criterias.push(ValueFrom);
@@ -698,7 +698,7 @@
 
                     }
                     else {
-                        if (value.Value) {
+                        if (value.Value || value.Operator == 'is null') {
                             this.criterias.push(value);
                             currentForm.$el.find('input.filter').addClass('active');
                         }

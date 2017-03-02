@@ -218,35 +218,88 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       var name = colDef.field.split('FK_')[1];
       var objectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
       var url = objectName + '/' + value;
+      this.objectName = objectName;
 
-      $.ajax({
-        url: url,
-        context: this,
-        success: function(data){
-          this.handleRemoveError(params);
-          var valueToDisplay;
-          
-          if (colDef.schema.options && colDef.schema.options.usedLabel){
-            valueToDisplay = data[colDef.schema.options.usedLabel];
-          } else {
-            valueToDisplay = data[colDef.field];
+      if (objectName != 'individuals') {
+        $.ajax({
+          url: url,
+          context: this,
+          success: function(data){
+            this.handleRemoveError(params);
+            var valueToDisplay;
+            
+            if (colDef.schema.options && colDef.schema.options.usedLabel){
+              valueToDisplay = data[colDef.schema.options.usedLabel];
+            } else {
+              valueToDisplay = data[colDef.field];
+            }
+
+            this.formatValueToDisplay(valueToDisplay);
+
+            var values = {
+              value: value,
+              label: valueToDisplay
+            };
+
+            this.manualDataSet(params, values);
+
+          }, error: function(data){
+            this.handleError(params);
           }
 
-          this.formatValueToDisplay(valueToDisplay);
-
-          var values = {
-            value: value,
-            label: valueToDisplay
-          };
-
-          this.manualDataSet(params, values);
-
-        }, error: function(data){
-          this.handleError(params);
-        }
-
-      });
+        });
+      } else {
+        this.formatValueToDisplay(value);
+      }
     };
+
+    ObjectPickerRenderer.prototype.formatValueToDisplay = function (value) {
+      var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.objectName+'/'+value;
+
+      var dictCSS = {
+        'individuals':'reneco reneco-bustard',
+        'sensors': 'reneco reneco-emitters',
+        'monitoredSites': 'reneco reneco-site',
+      };
+      if(!value){
+        value = '';
+      }
+      var tpl = '<div>\
+                    <a href="'+ url +'" class="'+dictCSS[this.objectName]+'" target="_blank">\
+                    </a>\
+                    <span>'+value+'</span> \
+                </div>';
+      $(this.eGui).html(tpl);
+    };
+
+    ObjectPickerRenderer.prototype.init = function (params) {
+    	this.eGui = document.createElement('span'); //not sure it's necessary
+
+      var value = this.handleValues(params);
+
+      //check only before the first render of the grid, otherwise, use refresh
+      // if(!params.api.firstRenderPassed){
+      //   this.handleValueValidation(params, value);
+      // }
+
+      this.handleValueValidation(params, value);
+      this.isEmptyRow = this.checkIfEmptyRow(params);
+      
+      if(this.isEmptyRow){
+        //console.log('empty');
+        this.requiredValidation(params, value);
+      } else {
+        // after sort filter etc check if there was already an error then display it
+        if(params.data._errors !== undefined){
+          for (var i = 0; i < params.data._errors.length; i++) {
+            if(params.data._errors[i] == params.colDef.field){
+              this.handleError(params);
+            }
+          }
+        }
+      }
+
+    };    
 
 
     var CheckboxRenderer = function() {}

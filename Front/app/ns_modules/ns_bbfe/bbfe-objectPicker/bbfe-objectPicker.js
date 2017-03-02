@@ -108,7 +108,7 @@ define([
       this.autocompleteSource.minLength = 2;
       this.autocompleteSource.select = function(event,ui){
         event.preventDefault();
-        _this.setValue(ui.item.value,ui.item.label);
+        _this.setValue(ui.item.value,ui.item.label,true);
         _this.matchedValue = ui.item;
         _this.isTermError = false;
         _this.displayErrorMsg(false);
@@ -137,7 +137,7 @@ define([
         event.preventDefault();
         if (ui.content.length == 1){
           var item = ui.content[0];
-          _this.setValue(item.value,item.label);
+          _this.setValue(item.value,item.label,false);
           _this.matchedValue = item;
           _this.isTermError = false;
 
@@ -154,7 +154,7 @@ define([
         success : function(data){
           // _this.$input.attr('data_value',val);
           // _this.$input.val(data[_this.usedLabel]);
-          _this.setValue(val,data[_this.usedLabel]);
+          _this.setValue(val,data[_this.usedLabel],false);
           _this.displayErrorMsg(false);
           _this.isTermError = false;
         }
@@ -190,6 +190,9 @@ define([
       }
 
       this.initPicker();
+      this.$input.on('keypressed', function(e){
+        _this.input.change()
+      });
 
       return this;
     },
@@ -219,8 +222,20 @@ define([
           break;
 
         case 'monitoredSites':
+          data = {};
+
+          data['LAT'] = _this.form.model.get('LAT');
+          data['LON'] = _this.form.model.get('LON');
+          data['Name'] = _this.form.model.get('Name');
+          data['ELE'] = _this.form.model.get('ELE');
+          data['Precision'] = _this.form.model.get('precision');
+
+          data['StartDate'] = _this.form.model.get('StationDate');
+
+
           _this.regionManager.get('modal').show(new _this.NewView({
-            objectType: ctx.model.get('objectType')
+            objectType: ctx.model.get('objectType'),
+            data: data,
           }));
           break;
 
@@ -262,7 +277,7 @@ define([
           var id = response.ID;
           var displayValue = this.model.get(_this.usedLabel);
 
-          _this.setValue(id,displayValue);
+          _this.setValue(id,displayValue, true);
           _this.isTermError = false;
           _this.displayErrorMsg(false);
           _this.hidePicker();
@@ -274,7 +289,7 @@ define([
         onRowClicked: function(row){
           var id = row.data.ID;
           var displayValue = row.data[_this.usedLabel];
-          _this.setValue(id, displayValue);
+          _this.setValue(id, displayValue, true);
           _this.isTermError = false;
           _this.displayErrorMsg(false);
           _this.hidePicker();
@@ -324,7 +339,7 @@ define([
       return this.$input.val();
     },
 
-    setValue: function(value,displayValue) {
+    setValue: function(value, displayValue, confirmChange) {
       if (displayValue || displayValue === ''){
         this.$input.val(displayValue);
       } else {
@@ -335,8 +350,11 @@ define([
       }
       this.$input.attr('data_value',value);
       this.matchedValue = value;
-      this.$input.change();
       this.hidePicker();
+      
+      if(confirmChange){
+        this.$input.change();
+      }
     },
 
     checkHidePicker: function(e){

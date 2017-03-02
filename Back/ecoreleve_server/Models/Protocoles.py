@@ -15,7 +15,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.ext.hybrid import hybrid_property
 from ..utils.parseValue import isNumeric
 
@@ -79,9 +79,12 @@ class Observation(Base, ObjectWithDynProp):
 
     def linkedFieldDate(self):
         try:
-            return self.Station.StationDate
+            linkedDate = self.Station.StationDate
         except:
-            return datetime.now()
+            linkedDate = datetime.now()
+        if 'unequipment' in self.GetType().Name.lower() :
+            linkedDate = linkedDate - timedelta(seconds=1)
+        return linkedDate
 
     @hybrid_property
     def Observation_childrens(self):

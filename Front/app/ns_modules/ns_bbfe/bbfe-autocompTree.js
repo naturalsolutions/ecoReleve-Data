@@ -30,7 +30,7 @@ define([
         events: {
             'hide': "hasChanged",
             'keyup': 'inputChange',
-            'changeEditor':'inputChange'
+            'changeEditor':'inputChange',
         },
         editable:false,
 
@@ -42,7 +42,7 @@ define([
         },
 
         inputChange: function(e){
-          this.isTermError = true;
+            this.isTermError = true;
         },
 
         initialize: function (options) {
@@ -121,6 +121,10 @@ define([
             return this.$el.find('#' + this.id).val();
         },
 
+        itemClick: function(){
+
+        },
+
         render: function () {
             var _this = this;
             var $el = $(this.template);
@@ -150,11 +154,32 @@ define([
                             var value = _this.$el.find('#' + _this.id + '_value').val();
                             _this.$el.find('input').trigger('changeEditor');
                             _this.$el.find('input').trigger('thesaurusChange');
+
                             $('#' + _this.id).removeClass('error');
                             _this.isTermError = false;
-                        }
+                            _this.itemClick();
+                            _this.onEditValidation(value);
+                        },
+
                     });
                 }
+
+                $('#treeView' + _this.id).on('keyup',function(e){
+                    var $this = $(this);
+                    if (e.keyCode == 38 || e.keyCode == 40){
+                        var itemFocus = $('#treeView' + _this.id).find('.fancytree-focused');
+                        var calcul =$this.scrollTop()+ $this.outerHeight()-itemFocus.height();
+                        if(itemFocus.position().top >= calcul){
+                            $('#treeView' + _this.id).scrollTop(itemFocus.position().top);
+                        }
+                        if(itemFocus.position().top < $this.scrollTop()){
+                            $('#treeView' + _this.id).scrollTop(itemFocus.position().top);
+                        }
+                    }
+                    if (e.keyCode == 27 || e.keyCode == 9){
+                        $this.css('display', 'none');
+                    }
+                });
 
                 if (_this.FirstRender && _this.value) {
                     _this.$el.find('#' + _this.id).val(_this.value.displayValue);

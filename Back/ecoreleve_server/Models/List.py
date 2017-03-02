@@ -411,6 +411,7 @@ class SensorList(ListObjectWithDynProp):
                 pass
             e = aliased(Equipment)
             e2 = aliased(Equipment)
+            e3 = aliased(Equipment)
 
             subQueryEquip = select([e2]).where(
                 and_(e.FK_Sensor == e2.FK_Sensor,
@@ -423,10 +424,17 @@ class SensorList(ListObjectWithDynProp):
                                not_(exists(subQueryEquip)))
                           )
                      ))
+
+            subQueryNotEquip = select([e3]).where(
+                and_(Sensor.ID == e3.FK_Sensor,
+                     e3.StartDate < date))
+
             if criteriaObj['Operator'].lower() != 'is not':
-                query = query.where(exists(querySensor))
+                query = query.where(or_(exists(querySensor),
+                                        not_(exists(subQueryNotEquip))))
             else:
-                query = query.where(not_(exists(querySensor)))
+                query = query.where(or_(not_(exists(querySensor)),
+                                        not_(exists(subQueryNotEquip))))
 
         if 'FK_MonitoredSiteName' == curProp:
             MonitoredSiteTable = Base.metadata.tables['MonitoredSite']
@@ -442,6 +450,7 @@ class SensorList(ListObjectWithDynProp):
                 criteriaObj['Operator'],
                 val))
 
+        print(query)
         return query
 
     def countQuery(self, criteria=None):

@@ -25,10 +25,10 @@ define([
 
 		CustomEditor.prototype.init = function(params){
 			//Insert new line if this is last one
-			if(params.node.lastChild){
-				params.api.addItems([{}]); //redraw every rows
-				params.api.startEditingCell({ colKey: params.column.colDef.field, rowIndex: params.node.childIndex });
-			}
+			// if(params.node.lastChild){
+			// 	params.api.addItems([{}]); //redraw every rows
+			// 	params.api.startEditingCell({ colKey: params.column.colDef.field, rowIndex: params.node.childIndex });
+			// }
 			
 		  var col = params.column.colDef;
 
@@ -45,7 +45,7 @@ define([
 		  var model = new Backbone.Model();
 		  model.set(options.key, value);
 		  options.model = model;
-
+			this.params = params;
 			this.initBBFE(options);
 
 		  this.preventNavigationEvents();
@@ -105,7 +105,11 @@ define([
 		ThesaurusEditor.prototype = new CustomEditor();
 
 		ThesaurusEditor.prototype.initBBFE = function(options){
-		  this.bbfe = new ThesaurusPicker(options);
+		  var _this = this;
+			this.bbfe = new ThesaurusPicker(options);
+			this.bbfe.itemClick = function(){
+				_this.element.$el.change();
+			};
 			this.bbfe.getValue = function(){
 				var value = this.getDisplayedValue();
 				this.onEditValidation(value);

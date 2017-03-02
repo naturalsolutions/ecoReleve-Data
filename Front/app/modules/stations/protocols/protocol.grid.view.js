@@ -176,6 +176,8 @@ define([
         url: this.url,
         objectType: this.model.get('ID'),
         gridOptions: {
+          editType: 'fullRow',
+          singleClickEdit : true,
           rowData: rowData,
           rowSelection: (this.editable)? 'multiple' : '',
         }
