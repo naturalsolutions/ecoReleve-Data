@@ -148,7 +148,7 @@ define([
         oldValue = options.oldValue;
       }
 
-      if(newValue != oldValue){
+      if(newValue !== oldValue){
         this.$el.trigger('change');
       }
     },
