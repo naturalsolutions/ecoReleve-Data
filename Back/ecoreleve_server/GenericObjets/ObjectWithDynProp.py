@@ -163,6 +163,12 @@ class ObjectWithDynProp:
 
         return filters
 
+    def getTypeObjectName(self):
+        return self.__tablename__ + 'Type'
+
+    def getTypeObjectFKName(self):
+        return 'FK_' + self.__tablename__ + 'Type'
+
     def GetType(self):
         raise Exception("GetType not implemented in children")
 
