@@ -223,7 +223,7 @@ define([
             }
             var erreur;
 
-            valueFound = _this.$el.find('#treeView' + _this.id).fancytree('getTree').findFirst(function(node){
+            var valueFound = _this.$el.find('#treeView' + _this.id).fancytree('getTree').findFirst(function(node){
                     if(node.data.valueTranslated == displayValue){
                         return true;
                     }

@@ -33,13 +33,14 @@ define([
 		  var col = params.column.colDef;
 
 		  var value = params.value;
-		  var valueToDisplay;
+		  
+		  //var displayValue;
 
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,
 		    formGrid: true,
-				valueToDisplay: valueToDisplay
+				//displayValue: displayValue
 		  };
 
 		  var model = new Backbone.Model();
@@ -138,7 +139,7 @@ define([
 		ObjectPickerEditor.prototype.getValue = function(){
 		  return {
 		  	value: this.element.getValue(),
-		  	label: this.element.getDisplayValue(),
+		  	displayValue: this.element.getDisplayValue(),
 		  }
 		};
 
