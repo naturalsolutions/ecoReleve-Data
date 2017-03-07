@@ -32,7 +32,7 @@ class Individual (Base, ObjectWithDynProp):
 
     __tablename__ = 'Individual'
     ID = Column(Integer, Sequence('Individual__id_seq'), primary_key=True)
-    creationDate = Column(DateTime, nullable=False)
+    creationDate = Column(DateTime, nullable=False, default=func.now())
     Species = Column(String(250))
     Age = Column(String(250))
     Birth_date = Column(Date)
