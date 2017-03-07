@@ -37,7 +37,8 @@ eval_ = Eval()
 class StationList(ListObjectWithDynProp):
     ''' this class extend ListObjectWithDynProp, it's used to filter stations '''
 
-    def __init__(self, frontModule, startDate=None):
+    def __init__(self, frontModule, typeObj=None, startDate=None,
+                 history=False, historyView=None):
         super().__init__(Station, frontModule, startDate)
 
     def WhereInJoinTable(self, query, criteriaObj):
@@ -132,29 +133,29 @@ class StationList(ListObjectWithDynProp):
         result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
         data = []
 
-        if getFieldWorkers:
-            queryCTE = fullQueryJoinOrdered.cte()
-            joinFW = join(Station_FieldWorker, User,
-                          Station_FieldWorker.FK_FieldWorker == User.id)
-            joinTable = join(queryCTE, joinFW, queryCTE.c[
-                             'ID'] == Station_FieldWorker.FK_Station)
-            query = select([Station_FieldWorker.FK_Station,
-                            User.Login]).select_from(joinTable)
-            FieldWorkers = self.ObjContext.execute(query).fetchall()
-            list_ = {}
-            for x, y in FieldWorkers:
-                list_.setdefault(x, []).append(y)
-            for row in result:
-                row = OrderedDict(row)
-                try:
-                    row['FK_FieldWorker_FieldWorkers'] = list_[row['ID']]
-                except:
-                    pass
-                data.append(row)
-        else:
-            for row in result:
-                row = OrderedDict(row)
-                data.append(row)
+        # if getFieldWorkers:
+        #     queryCTE = fullQueryJoinOrdered.cte()
+        #     joinFW = join(Station_FieldWorker, User,
+        #                   Station_FieldWorker.FK_FieldWorker == User.id)
+        #     joinTable = join(queryCTE, joinFW, queryCTE.c[
+        #                      'ID'] == Station_FieldWorker.FK_Station)
+        #     query = select([Station_FieldWorker.FK_Station,
+        #                     User.Login]).select_from(joinTable)
+        #     FieldWorkers = self.ObjContext.execute(query).fetchall()
+        #     list_ = {}
+        #     for x, y in FieldWorkers:
+        #         list_.setdefault(x, []).append(y)
+        #     for row in result:
+        #         row = OrderedDict(row)
+        #         try:
+        #             row['FK_FieldWorker_FieldWorkers'] = list_[row['ID']]
+        #         except:
+        #             pass
+        #         data.append(row)
+
+        for row in result:
+            row = OrderedDict(row)
+            data.append(row)
         return data
 
     def countQuery(self, criteria=None):
@@ -257,6 +258,7 @@ class IndividualList(ListObjectWithDynProp):
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
 
+        self.addObjectTypeParams(searchInfo)
         joinTable = self.GetJoinTable(searchInfo)
         fullQueryJoin = select(self.selectable).select_from(joinTable)
 
@@ -364,7 +366,7 @@ class IndividualList(ListObjectWithDynProp):
 
 class IndivLocationList(Generator):
 
-    def __init__(self, table, SessionMaker, id_=None):
+    def __init__(self, SessionMaker, id_=None):
         allLocIndiv = Base.metadata.tables['allIndivLocationWithStations']
         IndivLoc = select(allLocIndiv.c
                           ).where(
@@ -375,7 +377,8 @@ class IndivLocationList(Generator):
 
 class SensorList(ListObjectWithDynProp):
 
-    def __init__(self, frontModule, startDate=None):
+    def __init__(self, frontModule, typeObj=None, startDate=None,
+                 history=False, historyView=None):
         super().__init__(Sensor, frontModule, startDate)
 
     def GetJoinTable(self, searchInfo):
@@ -411,6 +414,7 @@ class SensorList(ListObjectWithDynProp):
                 pass
             e = aliased(Equipment)
             e2 = aliased(Equipment)
+            e3 = aliased(Equipment)
 
             subQueryEquip = select([e2]).where(
                 and_(e.FK_Sensor == e2.FK_Sensor,
@@ -423,10 +427,17 @@ class SensorList(ListObjectWithDynProp):
                                not_(exists(subQueryEquip)))
                           )
                      ))
+
+            subQueryNotEquip = select([e3]).where(
+                and_(Sensor.ID == e3.FK_Sensor,
+                     e3.StartDate < date))
+
             if criteriaObj['Operator'].lower() != 'is not':
-                query = query.where(exists(querySensor))
+                query = query.where(or_(exists(querySensor),
+                                        not_(exists(subQueryNotEquip))))
             else:
-                query = query.where(not_(exists(querySensor)))
+                query = query.where(or_(not_(exists(querySensor)),
+                                        not_(exists(subQueryNotEquip))))
 
         if 'FK_MonitoredSiteName' == curProp:
             MonitoredSiteTable = Base.metadata.tables['MonitoredSite']
@@ -441,7 +452,6 @@ class SensorList(ListObjectWithDynProp):
                 curEquipmentTable.c['FK_Individual'],
                 criteriaObj['Operator'],
                 val))
-
         return query
 
     def countQuery(self, criteria=None):
@@ -503,7 +513,10 @@ class SensorList(ListObjectWithDynProp):
 
 class MonitoredSiteList(ListObjectWithDynProp):
 
-    def __init__(self, frontModule, typeObj=None, View=None):
+    def __init__(self, frontModule, typeObj=None,
+                 View=None, startDate=None, history=False):
+        if not View:
+            View = Base.metadata.tables['MonitoredSitePositionsNow']
         super().__init__(MonitoredSite, frontModule, typeObj=typeObj, View=View)
 
     def GetJoinTable(self, searchInfo):

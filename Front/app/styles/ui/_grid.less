@@ -168,7 +168,7 @@
     .ag-body {
       .ag-row {
         cursor: pointer;
-        line-height: 40px;
+        line-height: 34px;
         //transition: background 0.01s linear;
         border-bottom: 1px solid rgb(221, 221, 221);
         background: rgb(229, 229, 229);
@@ -192,6 +192,16 @@
           &.text-right:last-child {
             padding-right: 30px;
           }
+          &.ag-cell-error{
+            border-left: 5px solid @error;
+          }          
+          &.ag-cell-required{
+            border-bottom: 1px solid rgba(255, 165, 0, 0.5);
+          }
+        }
+
+        &.row-new{
+          background: rgba(68, 157, 68, 0.2);
         }
 
         span.ag-selection-checkbox{
@@ -201,6 +211,11 @@
         }
       }
     }
+  }
+
+
+  .ag-popup-editor{
+    max-width: 100px;
   }
   /* .ag-pinned-left-cols-viewport{
     box-shadow: 5px 0px 15px rgba(119, 119, 119, 0.2);
@@ -236,12 +251,29 @@
   		float: right;
   	}
   }
+
+  .ag-cell.ag-cell-inline-editing{
+    overflow: inherit;
+  }
+
+
+  input{
+    border-radius: 0px;
+    display: block;
+    color: rgb(85, 85, 85);
+    background-color: rgb(255, 255, 255);
+    background-image: none;
+    border: 1px solid rgb(204, 204, 204);
+  }
 }
 
 .ag-cell-inline-editing{
   padding: 0px!important;
   .input-group-btn-icon{
     display: none;
+  }
+  .picker-icon{
+    display: table-cell;
   }
 }
 

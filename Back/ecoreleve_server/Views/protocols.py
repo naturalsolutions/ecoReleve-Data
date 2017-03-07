@@ -67,6 +67,7 @@ def GetProtocolsofStation(request):
                             'Name': typeName,
                             'schema': curObsForm['schema'],
                             'fieldsets': curObsForm['fieldsets'],
+                            'grid': curObsForm['grid'],
                             'obs': [curObs.ID]
                         }
 
@@ -89,6 +90,7 @@ def GetProtocolsofStation(request):
                             'Name': typeName,
                             'schema': curVirginObsForm['schema'],
                             'fieldsets': curVirginObsForm['fieldsets'],
+                            'grid': curVirginObsForm['grid'],
                             'obs': []
                         }
 
@@ -97,6 +99,7 @@ def GetProtocolsofStation(request):
                  'Name': listProto[typeID]['Name'],
                  'schema':listProto[typeID]['schema'],
                  'fieldsets':listProto[typeID]['fieldsets'],
+                 'grid':listProto[typeID]['grid'],
                  'obs':listProto[typeID]['obs']}
                 for typeID in listProto.keys()
             ]
@@ -108,61 +111,14 @@ def GetProtocolsofStation(request):
         pass
     return response
 
-
-@view_config(route_name=prefix + '/id/protocols',
-             renderer='json',
-             request_method='POST',
-             permission=routes_permission[prefixProt]['POST'])
-@view_config(route_name=prefix + '/id/protocols/',
-             renderer='json',
-             request_method='POST',
-             permission=routes_permission[prefixProt]['POST'])
-def insertNewProtocol(request):
+def updateObservation(request, json_body, obs_id):
     session = request.dbsession
-    data = {}
-    for items, value in request.json_body.items():
-        data[items] = value
-
-    data['FK_Station'] = request.matchdict['id']
-    sta = session.query(Station).get(request.matchdict['id'])
-    newProto = Observation(FK_ProtocoleType=data['FK_ProtocoleType'],
-                           FK_Station=data['FK_Station'])
-    newProto.ProtocoleType = session.query(ProtocoleType).filter(
-        ProtocoleType.ID == data['FK_ProtocoleType']).first()
-    listOfSubProtocols = []
-    for items, value in data.items():
-        if isinstance(value, list) and items != 'children':
-            listOfSubProtocols = value
-
-    data['Observation_childrens'] = listOfSubProtocols
-    newProto.init_on_load()
-    newProto.UpdateFromJson(data)
-    try:
-        newProto.Station = sta
-        session.add(newProto)
-        session.flush()
-        message = {'id': newProto.ID}
-    except ErrorAvailable as e:
-        session.rollback()
-        request.response.status_code = 510
-        message = e.value
-        sendLog(logLevel=1, domaine=3, msg_number=request.response.status_code)
-
-    return message
-
-
-@view_config(route_name=prefix + '/id/protocols/obs_id',
-             renderer='json',
-             request_method='PUT',
-             permission=routes_permission[prefixProt]['PUT'])
-def updateObservation(request):
-    session = request.dbsession
-    data = request.json_body
-    id_obs = request.matchdict['obs_id']
-    curObs = session.query(Observation).get(id_obs)
+    data = json_body
+    curObs = session.query(Observation).get(obs_id)
     curObs.LoadNowValues()
     listOfSubProtocols = []
-    message = 'ok'
+
+    responseBody = { 'id': curObs.ID }
 
     for items, value in data.items():
         if isinstance(value, list) and items != 'children':
@@ -176,34 +132,118 @@ def updateObservation(request):
     except ErrorAvailable as e:
         session.rollback()
         request.response.status_code = 510
-        message = e.value
-    return message
+        responseBody['response'] = e.value
+
+    return responseBody
+
+def createObservation(request, json_body):
+    session = request.dbsession
+    data = {}
+    for items, value in json_body.items():
+        data[items] = value
+
+    data['FK_Station'] = request.matchdict['id']
+    data['FK_ProtocoleType'] = request.json_body['FK_ProtocoleType']
+
+    sta = session.query(Station).get(request.matchdict['id'])
+
+    curObs = Observation(FK_ProtocoleType=data['FK_ProtocoleType'],
+                           FK_Station=data['FK_Station'])
+
+    curObs.ProtocoleType = session.query(ProtocoleType).filter(
+        ProtocoleType.ID == data['FK_ProtocoleType']).first()
+    listOfSubProtocols = []
+
+    for items, value in data.items():
+        if isinstance(value, list) and items != 'children':
+            listOfSubProtocols = value
+
+    data['Observation_childrens'] = listOfSubProtocols
+    curObs.init_on_load()
+    curObs.UpdateFromJson(data)
+
+    responseBody = {}
+
+    try:
+        curObs.Station = sta
+        session.add(curObs)
+        session.flush()
+        responseBody['id'] = curObs.ID
+    except ErrorAvailable as e:
+        session.rollback()
+        request.response.status_code = 510
+        responseBody['response'] = e.value
+        sendLog(logLevel=1, domaine=3, msg_number=request.response.status_code)
+
+    return responseBody
+
+@view_config(route_name='stations/id/observations/batch',
+             renderer='json',
+             request_method='POST',
+             permission=routes_permission[prefixProt]['POST'])
+def batch(request):
+    session = request.dbsession
+    sta_id = request.matchdict['id']
+    rowData = request.json_body['rowData']
+
+    responseBody = {
+        'updatedObservations': [],
+        'createdObservations': []
+    }
+
+    for i in range(len(rowData)):
+
+        if 'delete' in request.json_body:
+            responseBody['updatedObservations'].append(deleteObservation(request, rowData[i]['ID']))
+            continue
+
+        json_body = rowData[i]
+        if 'ID' in rowData[i]:
+            responseBody['updatedObservations'].append(updateObservation(request, json_body, rowData[i]['ID']))
+        else:
+            responseBody['createdObservations'].append(createObservation(request, json_body))
+    
+    return responseBody
+
+def deleteObservation(request, obs_id):
+    session = request.dbsession
+    curObs = session.query(Observation).get(obs_id)
+    responseBody = { 'id': obs_id }
+    session.delete(curObs)
+    return responseBody
 
 
-@view_config(route_name=prefix + '/id/protocols/obs_id',
+@view_config(route_name='stations/id/observations',
+             renderer='json',
+             request_method='POST',
+             permission=routes_permission[prefixProt]['POST'])
+def handleObservationCreation(request):
+    return createObservation(request, request.json_body)
+
+
+@view_config(route_name='stations/id/observations/obs_id',
+             renderer='json',
+             request_method='PUT',
+             permission=routes_permission[prefixProt]['PUT'])
+def handleObservationUpdate(request):
+    return updateObservation(request, request.json_body, request.matchdict['obs_id'])
+
+@view_config(route_name='stations/id/observations/obs_id',
              renderer='json',
              request_method='DELETE',
              permission=routes_permission[prefixProt]['DELETE'])
-def deleteObservation(request):
-    session = request.dbsession
-    id_obs = request.matchdict['obs_id']
-    curObs = session.query(Observation).get(id_obs)
-    session.delete(curObs)
+def handleDeleteObservation(request):
+    return deleteObservation(request, request.matchdict['obs_id'])
 
-    return {}
-
-
-@view_config(route_name=prefix + '/id/protocols/obs_id',
+@view_config(route_name='stations/id/observations/obs_id',
              renderer='json',
              request_method='GET',
              permission=routes_permission[prefixProt]['GET'])
 def getObservation(request):
     session = request.dbsession
-    id_obs = request.matchdict['obs_id']
-    id_sta = request.matchdict['id']
+    obs_id = request.matchdict['obs_id']
     try:
-        curObs = session.query(Observation).filter(
-            and_(Observation.ID == id_obs, Observation.FK_Station == id_sta)).one()
+        curObs = session.query(Observation).get(obs_id)
         curObs.LoadNowValues()
         if 'FormName' in request.params:
             try:
@@ -221,8 +261,27 @@ def getObservation(request):
 
     return response
 
+@view_config(route_name='stations/id/observations',
+             renderer='json',
+             request_method='GET',
+             permission=routes_permission[prefixProt]['GET'])
+def getProtocolObservations(request):
+    session = request.dbsession
+    protocolType = request.params['objectType']
+    sta_id = request.matchdict['id']
+    listObs = list(session.query(Observation)
+        .filter(Observation.FK_ProtocoleType == protocolType,)
+        .filter(Observation.FK_Station == sta_id))
 
-@view_config(route_name=prefix + '/id/protocols/action',
+    values = []
+    for i in range(len(listObs)):
+        curObs = listObs[i]
+        curObs.LoadNowValues()
+        values.append(curObs.GetFlatObject())
+    return values
+
+
+@view_config(route_name='stations/id/observations/action',
              renderer='json',
              request_method='GET',
              permission=routes_permission[prefixProt]['GET'])
@@ -233,7 +292,6 @@ def actionOnObs(request):
     }
     actionName = request.matchdict['action']
     return dictActionFunc[actionName](request)
-
 
 def getObsForms(request):
     session = request.dbsession
@@ -317,12 +375,12 @@ def getListofProtocolTypes(request):
         join_table = join(ProtocoleType, FieldActivity_ProtocoleType,
                           ProtocoleType.ID == FieldActivity_ProtocoleType.FK_ProtocoleType)
         query = select([ProtocoleType.ID, ProtocoleType.Name]
-                       ).where(and_(or_(ProtocoleType.Status == 4, ProtocoleType.Status == 8),
+                       ).where(and_(ProtocoleType.Status.in_([4,8,10]),
                                     FieldActivity_ProtocoleType.FK_fieldActivity == fieldActivityID)
                                ).select_from(join_table)
     else:
         query = select([ProtocoleType.ID, ProtocoleType.Name]).where(
-            or_(ProtocoleType.Status == 4, ProtocoleType.Status == 8))
+            ProtocoleType.Status.in_([4,8,10]))
     query = query.where(ProtocoleType.obsolete == False)
     result = session.execute(query).fetchall()
     res = []

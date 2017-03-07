@@ -217,52 +217,63 @@ define([
       var _this = this;
       var visibleSelectedRows = [];
       var model = this.gridView.gridOptions.api.getModel();
+      var error;
       for (var i = 0; i < model.getRowCount(); i++) {
         var visibleRowNode = model.getRow(i);
         if(visibleRowNode.selected){
           if(visibleRowNode.error || visibleRowNode.errorDuplicated){
-            return this.swal({text:'unavailable sensor or duplicated sensor is equiped',title:'sensor error'}, 'error',null);
+            error = true;
           }
           visibleSelectedRows.push(visibleRowNode.data);
         }
       }
 
-      $.ajax({
-        url: 'release/individuals/',
-        method: 'POST',
-        data: {
-          IndividualList: JSON.stringify(visibleSelectedRows),
-          StationID: this.model.get('ID'),
-          releaseMethod: releaseMethod
-        },
-        context: this
-      }).always(function() {
-        this.ui.release.prop('disabled', false);
-        this.ui.iconrelease.removeClass();
-        this.ui.iconrelease.addClass("icon reneco reneco-to_release");
-        this.gridView.gridOptions.api.hideOverlay()
-      }).done(function(resp) {
-        if (resp.errors) {
-          resp.title = 'An error occured';
-          resp.type = 'error';
-          var callback = function() {};
-        }else {
-          resp.title = 'Success';
-          resp.type = 'success';
-          this.gridView.gridOptions.api.removeItems(this.gridView.gridOptions.api.getSelectedNodes())
-          var callback = function() {
-            Backbone.history.navigate('stations/' + _this.model.get('ID'), {trigger: true});
-          };
-        }
-        resp.text = 'release: ' + resp.release;
-        this.swal(resp, resp.type, callback);
+      if(!error && visibleSelectedRows.length > 0){
 
-      }).fail(function(resp) {
-        var callback = function() {
-           return true;
-        };
-        this.swal(resp, 'error', callback);
-      });
+        $.ajax({
+          url: 'release/individuals/',
+          method: 'POST',
+          data: {
+            IndividualList: JSON.stringify(visibleSelectedRows),
+            StationID: this.model.get('ID'),
+            releaseMethod: releaseMethod
+          },
+          context: this
+        }).always(function() {
+          _this.hideLoading();
+        }).done(function(resp) {
+          if (resp.errors) {
+            resp.title = 'An error occured';
+            resp.type = 'error';
+            var callback = function() {};
+          }else {
+            resp.title = 'Success';
+            resp.type = 'success';
+            this.gridView.gridOptions.api.removeItems(this.gridView.gridOptions.api.getSelectedNodes())
+            var callback = function() {
+              Backbone.history.navigate('stations/' + _this.model.get('ID'), {trigger: true});
+            };
+          }
+          resp.text = 'release: ' + resp.release;
+          this.swal(resp, resp.type, callback);
+
+        }).fail(function(resp) {
+          var callback = function() {
+            return true;
+          };
+          this.swal(resp, 'error', callback);
+        });
+        
+      } else {
+        if(error){
+          this.swal({text:'unavailable sensor or duplicated sensor is equiped',title:'sensor error'}, 'error',null);
+        }
+        if(visibleSelectedRows.length == 0){
+          this.swal({text:'No individual selected',title:'error'}, 'error',null);
+        }
+        this.hideLoading();
+        return;
+      }
     },
 
 
@@ -309,6 +320,20 @@ define([
       });
     },
 
+    showLoading: function(){
+      this.ui.release.prop('disabled', true);
+      this.ui.iconrelease.removeClass();
+      this.ui.iconrelease.addClass('loading');
+      this.gridView.gridOptions.api.showLoadingOverlay();
+    },
+
+    hideLoading: function(){
+      this.gridView.gridOptions.api.hideOverlay();
+      this.ui.release.prop('disabled', false);
+      this.ui.iconrelease.removeClass();
+      this.ui.iconrelease.addClass("icon reneco reneco-to_release");
+    },
+
     toolTipShow: function(e) {
       var _this = this;
       this.ui.release.tooltipList({
@@ -317,12 +342,8 @@ define([
         availableOptions: _this.releaseMethodList,
         liClickEvent:function(liClickValue) {
           _this.ui.release.tooltipster('hide');
-          _this.ui.release.prop('disabled', true);
-          _this.ui.iconrelease.removeClass();
-          _this.ui.iconrelease.addClass('loading');
-          _this.gridView.gridOptions.api.showLoadingOverlay();
+          _this.showLoading();
           _this.release(liClickValue);
-
         }
       });
       this.ui.release.tooltipster('show');

@@ -65,7 +65,7 @@ class MonitoredSite (Base, ObjectWithDynProp):
     @orm.reconstructor
     def init_on_load(self):
         ''' init_on_load is called on the fetch of object '''
-        ObjectWithDynProp.__init__(self)
+        self.__init__()
 
     def GetNewValue(self, nameProp):
         ReturnedValue = MonitoredSiteDynPropValue()

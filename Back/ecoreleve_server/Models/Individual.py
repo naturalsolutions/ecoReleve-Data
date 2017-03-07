@@ -9,7 +9,11 @@ from sqlalchemy import (Column,
                         orm,
                         Table,
                         cast,
-                        Date)
+                        Date,
+                        select,
+                        or_,
+                        and_,
+                        func)
 
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
@@ -18,11 +22,17 @@ from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from ..Models import IntegerDateTime
 
 
+class ErrorCheckIndividualCodes(Exception):
+
+    def __str__(self):
+        return 'Individual code exists'
+
+
 class Individual (Base, ObjectWithDynProp):
 
     __tablename__ = 'Individual'
     ID = Column(Integer, Sequence('Individual__id_seq'), primary_key=True)
-    creationDate = Column(DateTime, nullable=False)
+    creationDate = Column(DateTime, nullable=False, default=func.now())
     Species = Column(String(250))
     Age = Column(String(250))
     Birth_date = Column(Date)
@@ -48,11 +58,12 @@ class Individual (Base, ObjectWithDynProp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         ObjectWithDynProp.__init__(self)
+        self._constraintsFunctionLists = [self.checkIndividualCodes]
 
     @orm.reconstructor
     def init_on_load(self):
         ''' init_on_load is called on the fetch of object '''
-        ObjectWithDynProp.__init__(self)
+        self.__init__()
 
     def GetNewValue(self, nameProp):
         ReturnedValue = IndividualDynPropValue()
@@ -73,6 +84,32 @@ class Individual (Base, ObjectWithDynProp):
             return self.IndividualType
         else:
             return self.ObjContext.query(IndividualType).get(self.FK_IndividualType)
+
+    # def UpdateFromJson(self, DTOObject, startDate=None):
+    #     if self.checkIndividualCodes(DTOObject):
+    #         ObjectWithDynProp.UpdateFromJson(self, DTOObject, startDate)
+    #     else:
+    #         raise ErrorCheckIndividualCodes
+
+    def checkIndividualCodes(self, DTOObject):
+        '''check existing Breeding_Ring_Code, Chip_Code and Release_Ring_Code
+         return False if the value already existing '''
+
+        propertiesToCheck = ['Breeding_Ring_Code', 'Chip_Code', 'Release_Ring_Code']
+        if any(DTOObject.get(prop, None) for prop in propertiesToCheck):
+            individualDynPropValue = Base.metadata.tables['IndividualDynPropValuesNow']
+            query = select([func.count(individualDynPropValue.c['ID'])])
+            session = self.ObjContext
+
+            cond = or_(*[and_(individualDynPropValue.c['Name'] == key,
+                              individualDynPropValue.c['ValueString'] == DTOObject[key])
+                         for key in DTOObject if key in propertiesToCheck])
+            query = query.where(and_(individualDynPropValue.c['FK_Individual'] != self.ID, cond))
+            nbExistingValue = session.execute(query).scalar()
+
+        else:
+            nbExistingValue = 0
+        return nbExistingValue < 1
 
 
 class IndividualDynProp (Base):

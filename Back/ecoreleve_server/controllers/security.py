@@ -3,10 +3,36 @@ from pyramid_jwtauth import JWTAuthenticationPolicy
 from pyramid.security import (
     Allow,
     Authenticated,
+    ALL_PERMISSIONS,
+    Everyone
 )
 
 
-class SecurityRoot(object):
+class Resource(dict):
+
+    def __init__(self, ref, parent):
+        self.__name__ = ref
+        self.__parent__ = parent
+
+    def __repr__(self):
+        # use standard object representation (not dict's)
+        return object.__repr__(self)
+
+    def add_child(self, ref, klass):
+        resource = klass(ref=ref, parent=self)
+        self[ref] = resource
+
+    def integers(self, ref):
+        try:
+            ref = int(ref)
+            if int(ref) == 0:
+                return False
+        except (TypeError, ValueError):
+            return False
+        return True
+
+
+class SecurityRoot(Resource):
     __acl__ = [
         (Allow, Authenticated, 'read'),
         (Allow, Authenticated, 'all'),
@@ -19,7 +45,50 @@ class SecurityRoot(object):
     ]
 
     def __init__(self, request):
+        Resource.__init__(self, ref='', parent=None)
         self.request = request
+
+    def __getitem__(self, item):
+        return RootCore(item, self)
+
+    @property
+    def actions(self):
+        return self.__actions__
+
+    @actions.setter
+    def actions(self, dictActions):
+        self.__actions__.update(dictActions)
+
+
+class RootCore(SecurityRoot):
+
+    listChildren = []
+
+    def __init__(self, ref, parent):
+        Resource.__init__(self, ref, parent)
+        self.add_children()
+
+    def add_children(self):
+        for ref, klass in self.listChildren:
+            self.add_child(ref, klass)
+
+    def __getitem__(self, item):
+        return self.get(item)
+
+
+# class Sensor(DynamicObject):
+
+#     model = SensorDB
+#     formModuleName = 'SensorForm'
+#     gridModuleName = 'SensorFilter'
+
+
+# class Sensors(DynamicObjectCollection):
+#     __acl__ = [
+#         (Allow, Everyone, ALL_PERMISSIONS),
+#     ]
+#     collection = SensorList
+#     item = Sensor
 
 
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):

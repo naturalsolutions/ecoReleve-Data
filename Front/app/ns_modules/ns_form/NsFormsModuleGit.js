@@ -9,6 +9,7 @@ define([
   'requirejs-text!./NsFormsModule.html',
   'fancytree',
   './NsFormsCustomFields',
+
 ], function ($, _, Backbone, Marionette, BackboneForm, Swal,Ruler, tpl) {
   return Backbone.View.extend({
     BBForm: null,
@@ -23,7 +24,7 @@ define([
     template: tpl,
     redirectAfterPost: '',
     displayDelete: true,
-    gridRow: false,
+    
 
     events : {
       'keypress input' : 'evt'
@@ -74,46 +75,10 @@ define([
 
     },
 
-    checkGridRowAgain: function() {
-      var _this = this;
-      Backbone.Form.Field.prototype.render = function() {
-          var schema = this.schema,
-              editor = this.editor;
-
-          //Only render the editor if Hidden
-          if (schema.type == Backbone.Form.editors.Hidden) {
-            return this.setElement(editor.render().el);
-          }
-
-          //Render field
-          var $field = $($.trim(this.template(_.result(this, 'templateData'))));
-
-          if (schema.fieldClass) $field.addClass(schema.fieldClass);
-          if (schema.fieldAttrs) $field.attr(schema.fieldAttrs);
-
-          //mjaouen
-          if (_this.gridRow) $field.addClass('grid-field');
-
-          //Render editor
-          $field.find('[data-editor]').add($field).each(function(i, el) {
-            var $container = $(el),
-                selection = $container.attr('data-editor');
-
-            if (_.isUndefined(selection)) return;
-
-            $container.append(editor.render().el);
-          });
-
-          this.setElement($field);
-
-          return this;
-      };
-    },
-
     initialize: function (options) {
       this.extendsBBForm();
-      this.gridRow = options.gridRow || this.gridRow;
-      this.checkGridRowAgain();
+      
+      
       var jqxhr;
       this.modelurl = options.modelurl;
 
@@ -301,36 +266,41 @@ define([
       }
     },
 
-    bindChanges: function(){
+    bindChanges: function(DOMele){
       var _this = this;
-      $(this.formRegion).find('input').on("change", function(e) {
+      var formRegion = this.formRegion;
+
+      if (DOMele){
+        formRegion = DOMele;
+      }
+      $(formRegion).find('input').on("change", function(e) {
         if($(e.target).val() !== ''){
           _this.formChange = true;
         } else {
           _this.formChange = false;
        }
       });
-      $(this.formRegion).find('input').on("thesaurusChange", function(e) {
+      $(formRegion).find('input').on("thesaurusChange", function(e) {
         if($(e.target).val() !== ''){
           _this.formChange = true;
         } else {
           _this.formChange = false;
        }
       });
-      $(this.formRegion).find('select').on("change", function(e) {
+      $(formRegion).find('select').on("change", function(e) {
          _this.formChange = true;
       });
-      $(this.formRegion).find('textarea').on("change", function(e) {
+      $(formRegion).find('textarea').on("change", function(e) {
          _this.formChange = true;
       });
-      $(this.formRegion).find('.grid-form').on("change", function(e) {
+      $(formRegion).find('.sub-grid-form').on("change", function(e) {
          _this.formChange = true;
       });
-      $(this.formRegion).find('.nested').on("change", function(e) {
+      $(formRegion).find('.nested').on("change", function(e) {
          _this.formChange = true;
       });
 
-      $(this.formRegion).find('textarea').on("keypress", function(e) {
+      $(formRegion).find('textarea').on("keypress", function(e) {
         var maxlen = 250;
         var self = this;
         if ($(this).val().length > maxlen) {
@@ -339,7 +309,7 @@ define([
           _this.cleantextAreaAfterError(this);
         }
       });
-      $(this.formRegion).find('textarea').on('keyup', function (e) {
+      $(formRegion).find('textarea').on('keyup', function (e) {
         var maxlen = 250;
         var strval = $(this).val();
         var self = this;
@@ -348,7 +318,7 @@ define([
           return false;
         }
       });
-      $(this.formRegion).find('textarea').on('keydown' , function(e) {
+      $(formRegion).find('textarea').on('keydown' , function(e) {
         if(event.which == 8) {
           var maxlen = 250;
           var strval = $(this).val();
@@ -376,13 +346,7 @@ define([
         return;
       }
 
-      if(!this.gridRow) {
-        $(this.formRegion).find('input').on("keypress", function(e) {
-          if( e.which == 13){
-            _this.butClickSave(e);
-          }
-        });
-      }
+      
 
       if(this.buttonRegion){
         if(this.buttonRegion[0]){
@@ -401,9 +365,7 @@ define([
         this.afterShow();
       }
 
-      if (this.gridRow) {
-        this.finilizeToGridRow();
-      }
+
     },
 
     showErrorForMaxLength : function(_this){
@@ -557,7 +519,7 @@ define([
     },
 
     butClickEdit: function (e) {
-      this.checkGridRowAgain();
+      
       this.displayMode = 'edit';
       this.initModel();
       if(this.buttonRegion)
@@ -565,7 +527,7 @@ define([
 
     },
     butClickCancel: function (e) {
-      this.checkGridRowAgain();
+      
       this.displayMode = 'display';
       this.initModel();
       if(this.buttonRegion)
@@ -573,7 +535,7 @@ define([
 
     },
     butClickClear: function (e) {
-      this.checkGridRowAgain();
+      
       var formContent = this.BBForm.el;
       $(formContent).find('input').not(':disabled').each(function(){
         $(this).val('');
@@ -775,22 +737,7 @@ define([
       });
     },
 
-    finilizeToGridRow: function() {
-      var _this = this;
-      /*var button = 'danger';
-      if(!this.model.get('id')){
-        button = 'warning';
-      }*/
-      // this.BBForm.$el.find('fieldset').append('\
-      //     <div class="col-xs-12 control">\
-      //         <button type="button" class="js-remove btn btn-danger pull-right"><span class="reneco reneco-trash"></span></button>\
-      //     </div>\
-      // ');
-      // this.BBForm.$el.find('button.js-remove').on('click', function() {
-      //   _this.butClickDelete();
-      // });
-    },
-
+    
   });
 
 });

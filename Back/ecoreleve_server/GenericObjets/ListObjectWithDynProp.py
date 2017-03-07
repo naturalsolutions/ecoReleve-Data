@@ -258,11 +258,19 @@ class ListObjectWithDynProp():
 
         return query
 
+    def addObjectTypeParams(self, searchInfo):
+
+        if self.typeObj:
+            searchInfo['criteria'].append({'Column': self.ObjWithDynProp().getTypeObjectFKName(),
+                                           'Operator': '=',
+                                           'Value': self.typeObj})
+
     def GetFullQuery(self, searchInfo=None):
         ''' return the full query to execute '''
         if searchInfo is None or 'criteria' not in searchInfo:
             searchInfo['criteria'] = []
 
+        self.addObjectTypeParams(searchInfo)
         joinTable = self.GetJoinTable(searchInfo)
         fullQueryJoin = select(self.selectable).select_from(joinTable)
 
@@ -270,7 +278,7 @@ class ListObjectWithDynProp():
             fullQueryJoin = self.WhereInJoinTable(fullQueryJoin, obj)
 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin, searchInfo)
-
+        self.fullQueryJoinOrdered = fullQueryJoinOrdered
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self, searchInfo=None):
@@ -288,7 +296,7 @@ class ListObjectWithDynProp():
             'userlanguage']
 
         for row in result:
-            row = dict(map(lambda k: self.tradThesaurusTerm
+            row = dict(map(lambda k: tradThesaurusTerm
                            (k, listWithThes, userLng.lower()), row.items()))
             data.append(row)
         return data
@@ -327,7 +335,7 @@ class ListObjectWithDynProp():
                             criteria['Value'].replace(' ', ''))
                     except:
                         pass
-                      # Perform the'where' in dyn props
+                # Perform the'where' in dyn props
                 fullQuery = fullQuery.where(
                     eval_.eval_binary_expr(viewAlias.c['Value' + curDynProp['TypeProp']],
                                            criteria['Operator'],
@@ -338,14 +346,15 @@ class ListObjectWithDynProp():
         ''' Main function to call : return count
         according to filter parameters'''
         if searchInfo is None:
-            criteria = None
-        else:
-            criteria = searchInfo['criteria']
+            searchInfo = {'criteria': []}
+
+        self.addObjectTypeParams(searchInfo)
+        criteria = searchInfo['criteria']
         query = self.countQuery(criteria)
         count = self.sessionmaker().execute(query).scalar()
         return count
 
-    def countQuery(self, criteria=None):
+    def countQuery(self, criteria=[]):
         if self.history:
             countHisto = True
         else:
@@ -365,7 +374,7 @@ class ListObjectWithDynProp():
 
             self.fk_list = {
                 fk.parent.name: fk for fk in self.ObjWithDynProp.__table__.foreign_keys}
-            if criteria is not None:
+            if bool(criteria):
                 for obj in criteria:
                     confObj = list(filter(lambda x: x.Name == obj[
                                    'Column'], self.GetAllPropNameInConf()))
@@ -514,24 +523,26 @@ class ListObjectWithDynProp():
 
         return query
 
-    def splitFullPath(self, key, listWithThes):
-        name, val = key
-        try:
-            if name in listWithThes:
-                newVal = val.split('>')[-1]
-            else:
-                newVal = val
-        except:
-            newVal = val
-        return (name, newVal)
 
-    def tradThesaurusTerm(self, key, listWithThes, userLng='en'):
-        name, val = key
-        try:
-            if name in listWithThes:
-                newVal = thesaurusDictTraduction[val][userLng]
-            else:
-                newVal = val
-        except:
-            (name, newVal) = self.splitFullPath(key, listWithThes)
-        return (name, newVal)
+def splitFullPath(key, listWithThes):
+    name, val = key
+    try:
+        if name in listWithThes:
+            newVal = val.split('>')[-1]
+        else:
+            newVal = val
+    except:
+        newVal = val
+    return (name, newVal)
+
+
+def tradThesaurusTerm(key, listWithThes, userLng='en'):
+    name, val = key
+    try:
+        if name in listWithThes:
+            newVal = thesaurusDictTraduction[val][userLng]
+        else:
+            newVal = val
+    except:
+        (name, newVal) = splitFullPath(key, listWithThes)
+    return (name, newVal)

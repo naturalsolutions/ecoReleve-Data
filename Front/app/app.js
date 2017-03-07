@@ -9,11 +9,10 @@ define([
   'backbone',
 
   //circular dependencies, I don't konw where to put it 4 the moment
-  'ns_modules/ns_bbfe/bbfe-number',
+
   'ns_modules/ns_bbfe/bbfe-timePicker',
   'ns_modules/ns_bbfe/bbfe-dateTimePicker',
   'ns_modules/ns_bbfe/bbfe-autocomplete',
-  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
   'ns_modules/ns_bbfe/bbfe-listOfNestedModel/bbfe-listOfNestedModel',
   'ns_modules/ns_bbfe/bbfe-gridForm',
   'ns_modules/ns_bbfe/bbfe-autocompTree',
@@ -23,6 +22,7 @@ define([
   'ns_modules/ns_bbfe/bbfe-ajaxButton',
   'ns_modules/ns_bbfe/bbfe-lon',
   'ns_modules/ns_bbfe/bbfe-lat',
+  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
   ],
 
@@ -41,6 +41,14 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       }
     };
 
+     window.addEventListener('mousewheel', function(event) {
+      if(document.activeElement.type == "number"){
+        event.preventDefault();
+        event.stopPropagation();
+        document.activeElement.blur();
+      }
+    });
+
     Backbone.Marionette.Renderer.render = function(template, data) {
       if (!JST[template]) throw 'Template \'' + template + '\' not found!';
       return JST[template](data);
@@ -54,6 +62,45 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
     app.rootView.render();
     Backbone.history.start();
   });
+
+  window.swal = function(opt, type, callback, showCancelBtn) {
+    var btnColor;
+    switch (type){
+      case 'success':
+        btnColor = 'green';
+        opt.title = 'Success';
+        break;
+      case 'error':
+        btnColor = 'rgb(147, 14, 14)';
+        opt.title = 'Error';
+        break;
+      case 'warning':
+        if (!opt.title) {
+          opt.title = 'warning';
+        }
+        btnColor = 'orange';
+        break;
+      default:
+        return;
+        break;
+    }
+
+    Swal({
+      title: opt.title,
+      text: opt.text || '',
+      type: type,
+      showCancelButton: showCancelBtn,
+      confirmButtonColor: btnColor,
+      confirmButtonText: 'OK',
+      closeOnConfirm: true,
+    },
+    function(isConfirm) {
+      //could be better
+      if (isConfirm && callback) {
+        callback();
+      }
+    });
+  };
 
   window.thesaurus = {};
 
@@ -93,7 +140,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
       } else {
         options.url = config.coreUrl + options.url;
       }
-      if(options.type === 'GET'){
+      if(options.type === 'GET' || options.url.indexOf('http://') !==-1 ){ //should be a GET!! (thesaurus calls)
         $.xhrPool.calls.push(jqxhr);
       }
     },
@@ -169,9 +216,9 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
         showCancelButton: true,
         confirmButtonColor: 'rgb(221, 107, 85)',
         confirmButtonText: 'Quit',
-        cancelButtonColor: 'grey',
+        customClass: 'swal-cancel-btn-green',
         cancelButtonText: 'Continue edition',
-        closeOnConfirm: false,
+        closeOnConfirm: true,
       },
       function(isConfirm) {
         if (!isConfirm) {
@@ -182,33 +229,33 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
           return false;
         } else {
           if (confirmCallback) {
-            Swal({
-              title: 'Saving form',
-              text: 'save it ?',
-              type: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: 'green',
-              confirmButtonText: 'Yes',
-              cancelButtonColor: 'grey',
-              cancelButtonText: 'No',
-              closeOnConfirm: true,
-            }, 
-            function(isConfirm){
-              if (isConfirm) {
-                var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
-                    if(window.formInEdition.form[key2].formChange){
-                      window.formInEdition.form[key2].reloadingAfterSave = function(){};
-                      window.formInEdition.form[key2].afterSaveSuccess = function(response){};
-                      window.formInEdition.form[key2].butClickSave(null);
-                    }
-                });
-              }
+            // Swal({
+            //   title: 'Saving form',
+            //   text: 'save it ?',
+            //   type: 'warning',
+            //   showCancelButton: true,
+            //   confirmButtonColor: 'green',
+            //   confirmButtonText: 'Yes',
+            //   cancelButtonColor: 'grey',
+            //   cancelButtonText: 'No',
+            //   closeOnConfirm: true,
+            // }, 
+            // function(isConfirm){
+            //   if (isConfirm) {
+            //     var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
+            //         if(window.formInEdition.form[key2].formChange){
+            //           window.formInEdition.form[key2].reloadingAfterSave = function(){};
+            //           window.formInEdition.form[key2].afterSaveSuccess = function(response){};
+            //           window.formInEdition.form[key2].butClickSave(null);
+            //         }
+            //     });
+          // }
               if(indexMax-urlChangeMax<=0){
                 window.formInEdition = {};
               }
               window.onExitForm.resolve();
               confirmCallback();
-            });
+            // });
           }
         }
       });
