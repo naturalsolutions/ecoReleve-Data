@@ -377,7 +377,8 @@ class IndivLocationList(Generator):
 
 class SensorList(ListObjectWithDynProp):
 
-    def __init__(self, frontModule, startDate=None):
+    def __init__(self, frontModule, typeObj=None, startDate=None,
+                 history=False, historyView=None):
         super().__init__(Sensor, frontModule, startDate)
 
     def GetJoinTable(self, searchInfo):

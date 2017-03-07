@@ -7,7 +7,8 @@ from sqlalchemy import (
     Numeric,
     String,
     Sequence,
-    orm)
+    orm,
+    func)
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
@@ -21,7 +22,7 @@ class Sensor (Base, ObjectWithDynProp):
     Model = Column(String(250))
     Compagny = Column(String(250))
     SerialNumber = Column(String(250))
-    creationDate = Column(DateTime, nullable=False)
+    creationDate = Column(DateTime, nullable=False, default=func.now())
     FK_SensorType = Column(Integer, ForeignKey('SensorType.ID'))
 
     SensorDynPropValues = relationship(
