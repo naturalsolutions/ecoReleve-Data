@@ -6,11 +6,6 @@ from pyramid.security import (
     ALL_PERMISSIONS,
     Everyone
 )
-from pyramid.traversal import find_root
-from pyramid.view import view_config, view_defaults
-from ..Models import Station as StationDB, StationList, FrontModules, Base, Sensor as SensorDB, SensorList
-from collections import OrderedDict
-from sqlalchemy import select
 
 
 class Resource(dict):
@@ -56,42 +51,6 @@ class SecurityRoot(Resource):
     def __getitem__(self, item):
         return RootCore(item, self)
 
-
-class RootCore(SecurityRoot):
-
-    def __init__(self, ref, parent):
-        Resource.__init__(self, ref, parent)
-        self.add_children()
-
-    def add_children(self):
-        self.add_child('TestSensors', Sensors)
-        self.add_child('TestStations', Stations)
-
-    def __getitem__(self, item):
-        return self.get(item)
-
-
-class DynamicObject(SecurityRoot):
-
-    def __init__(self, ref, parent):
-        Resource.__init__(self, ref, parent)
-        root = find_root(self)
-        self.request = root.request
-        self.session = root.request.dbsession
-
-        self.__actions__ = {'forms': self.getForm,
-                            '0': self.getForm,
-                            'getFields': self.getGrid,
-                            'getFilters': self.getFilter,
-                            'getType': self.getType,
-                            }
-
-        if self.integers(ref):
-            self.objectDB = self.session.query(self.model).get(ref)
-        else:
-            self.objectDB = self.model()
-            self.retrieve = self.actions.get(ref)
-
     @property
     def actions(self):
         return self.__actions__
@@ -100,169 +59,36 @@ class DynamicObject(SecurityRoot):
     def actions(self, dictActions):
         self.__actions__.update(dictActions)
 
-    @property
-    def model(self):
-        raise Exception('method has to be overriden')
 
-    @property
-    def formModuleName(self):
-        raise Exception('method has to be overriden')
+class RootCore(SecurityRoot):
 
-    @property
-    def gridModuleName(self):
-        raise Exception('method has to be overriden')
-
-    def getData(self):
-        self.objectDB.LoadNowValues()
-        return self.objectDB.GetFlatObject()
-
-    def getDataWithForm(self):
-        conf = self.getConf()
-        try:
-            displayMode = self.request.params['DisplayMode']
-        except:
-            displayMode = 'display'
-        self.objectDB.LoadNowValues()
-        return self.objectDB.GetDTOWithSchema(conf, displayMode)
-
-    @view_config(request_method='GET', renderer='json')
-    def retrieve(self):
-        return self.getDataWithForm()
-
-    def update(self, data, patch=False):
-        self.objectDB.UpdateFromJson(data)
-        return 'update'
-
-    def delete(self):
-        return 'delete'
-
-    def getConf(self):
-        return self.session.query(FrontModules
-                                  ).filter(FrontModules.Name == self.formModuleName
-                                           ).first()
-
-    def getForm(self):
-        objectType = self.request.params['ObjectType']
-        Conf = self.getConf()
-        setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
-        schema = self.objectDB.GetForm(Conf, 'edit')
-        return schema
-
-    def getGrid(self):
-        cols = self.model().GetGridFields(self.gridModuleName)
-        return cols
-
-    def getFilter(self):
-        moduleName = self.request.params.get('FilterName', None)
-        if not moduleName:
-            moduleName = self.gridModuleName
-        filtersList = self.objectDB.GetFilters(moduleName)
-        filters = {}
-        for i in range(len(filtersList)):
-            filters[str(i)] = filtersList[i]
-        return filters
-
-    def getType(self):
-        table = Base.metadata.tables[self.objectDB.getTypeObjectName()]
-        query = select([table.c['ID'].label('val'),
-                        table.c['Name'].label('label')])
-        response = [OrderedDict(row) for row in self.session.execute(query).fetchall()]
-        return response
-
-
-class DynamicObjectCollection(SecurityRoot):
+    listChildren = []
 
     def __init__(self, ref, parent):
         Resource.__init__(self, ref, parent)
-        print('DynamicObjectCollection')
-        print(ref, parent)
+        self.add_children()
 
-    def __getitem__(self, ref):
-        print('DynamicObjectCollection getitem')
-        return self.item(ref, self)
+    def add_children(self):
+        for ref, klass in self.listChildren:
+            self.add_child(ref, klass)
 
-    @property
-    def item(self):
-        raise Exception('method has to be overriden')
-
-    @property
-    def collection(self):
-        raise Exception('method has to be overriden')
-
-    def retrieve(self):
-        return 'search return list of values'
-
-    def create(self):
-        return 'create/ insert return new ID'
-
-    def export(self):
-        return 'export return Excel File'
+    def __getitem__(self, item):
+        return self.get(item)
 
 
-class Station(DynamicObject):
+# class Sensor(DynamicObject):
 
-    model = StationDB
-    formModuleName = 'StationForm'
-    gridModuleName = 'StationGrid'
-
-
-class Stations(DynamicObjectCollection):
-
-    collection = StationList
-    item = Station
+#     model = SensorDB
+#     formModuleName = 'SensorForm'
+#     gridModuleName = 'SensorFilter'
 
 
-class Sensor(DynamicObject):
-
-    model = SensorDB
-    formModuleName = 'SensorForm'
-    gridModuleName = 'SensorFilter'
-
-
-class Sensors(DynamicObjectCollection):
-    __acl__ = [
-        (Allow, Everyone, ALL_PERMISSIONS),
-    ]
-    collection = SensorList
-    item = Sensor
-
-
-# @view_config(request_method='GET', context=Stations, renderer='json')
-# def search_stations(context, request):
-#     r = context.retrieve()
-#     return r
-
-
-# @view_config(request_method='GET', context=Station, renderer='json')
-# def get_station(context, request):
-#     r = context.retrieve()
-#     return r
-
-
-# @view_config(request_method='GET', context=Sensors, renderer='json')
-# def search_sensors(context, request):
-#     r = context.retrieve()
-#     return r
-
-
-# @view_config(request_method='GET', context=Sensor, renderer='json')
-# def get_sensor(context, request):
-#     r = context.retrieve()
-#     return r
-
-
-@view_defaults(context=Sensors)
-class View(object):
-
-    def __init__(self, context, request):
-        self.request = request
-        self.context = context
-
-    @view_config(request_method='GET', renderer='json')
-    def search_stations(self):
-        r = self.context.retrieve()
-        return r
-
+# class Sensors(DynamicObjectCollection):
+#     __acl__ = [
+#         (Allow, Everyone, ALL_PERMISSIONS),
+#     ]
+#     collection = SensorList
+#     item = Sensor
 
 
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):

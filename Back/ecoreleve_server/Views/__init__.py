@@ -1,7 +1,13 @@
 from pyramid.httpexceptions import HTTPNotFound
 from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
-from ..Models import sendLog
+from ..Models import sendLog, FrontModules, Base
+from ..controllers.security import SecurityRoot, Resource
+from pyramid.traversal import find_root
+from collections import OrderedDict
+from sqlalchemy import select, join, desc
+import json
+from datetime import datetime
 
 
 def add_cors_headers_response_callback(event):
@@ -23,6 +29,337 @@ def add_cors_headers_response_callback(event):
 def error_view(exc, request):
     sendLog(logLevel=5, domaine=3)
     return exc
+
+
+class DynamicObject(SecurityRoot):
+
+    def __init__(self, ref, parent):
+        Resource.__init__(self, ref, parent)
+        self.parent = parent
+        root = find_root(self)
+        self.request = root.request
+        self.session = root.request.dbsession
+        self.__actions__ = {'history': self.history,
+                            }
+
+        if self.integers(ref):
+            self.objectDB = self.session.query(self.model).get(ref)
+
+    def __getitem__(self, ref):
+        if ref in self.actions:
+            self.retrieve = self.actions.get(ref)
+            return self
+        return self.item(ref, self)
+
+    @property
+    def model(self):
+        raise Exception('method has to be overriden')
+
+    def getData(self):
+        self.objectDB.LoadNowValues()
+        return self.objectDB.GetFlatObject()
+
+    def getDataWithForm(self):
+        conf = self.parent.getConf()
+        try:
+            displayMode = self.request.params['DisplayMode']
+        except:
+            displayMode = 'display'
+        self.objectDB.LoadNowValues()
+        return self.objectDB.GetDTOWithSchema(conf, displayMode)
+
+    def retrieve(self):
+        return self.getDataWithForm()
+
+    def update(self):
+        data = self.request.json_body
+        self.objectDB.LoadNowValues()
+        self.objectDB.UpdateFromJson(data)
+        return 'updated'
+
+    def delete(self):
+        self.session.delete(self.objectDB)
+        return 'deleted'
+
+    def history(self):
+        from ..Models import thesaurusDictTraduction
+
+        propertiesTable = Base.metadata.tables[self.objectDB.GetDynPropTable()]
+        dynamicValuesTable = Base.metadata.tables[self.objectDB.GetDynPropValuesTable()]
+        FK_name = self.objectDB.GetSelfFKNameInValueTable()
+        FK_property_name = self.objectDB.GetDynPropFKName()
+
+        tableJoin = join(dynamicValuesTable, propertiesTable,
+                         dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
+        query = select([dynamicValuesTable, propertiesTable.c['Name']]
+                       ).select_from(tableJoin).where(
+                dynamicValuesTable.c[FK_name] == self.objectDB.ID
+            ).order_by(desc(dynamicValuesTable.c['StartDate']))
+
+        result = self.session.execute(query).fetchall()
+        response = []
+
+        userLng = self.request.authenticated_userid['userlanguage']
+        for row in result:
+            curRow = OrderedDict(row)
+            dictRow = {}
+            for key in curRow:
+                if curRow[key] is not None:
+                    if 'Value' in key:
+                        if curRow[key] in thesaurusDictTraduction:
+                            dictRow['value'] = thesaurusDictTraduction[curRow[key]][userLng]
+                        else:
+                            dictRow['value'] = curRow[key]
+                    elif 'FK' not in key:
+                        dictRow[key] = curRow[key]
+            dictRow['StartDate'] = curRow[
+                'StartDate'].strftime('%Y-%m-%d %H:%M:%S')
+            response.append(dictRow)
+
+        return response
+
+
+class DynamicObjectCollection(SecurityRoot):
+
+    def __init__(self, ref, parent):
+        Resource.__init__(self, ref, parent)
+        root = find_root(self)
+        self.request = root.request
+        self.session = root.request.dbsession
+        self.objectDB = self.item.model()
+
+        if 'typeObj' in self.request.params and self.request.params['typeObj'] is not None:
+            objType = self.request.params['typeObj']
+            self.setType(objType)
+            self.typeObj = objType
+        else:
+            self.typeObj = None
+
+        self.__actions__ = {'forms': self.getForm,
+                            '0': self.getForm,
+                            'getFields': self.getGrid,
+                            'getFilters': self.getFilter,
+                            'getType': self.getType,
+                            'export': self.export,
+                            'count': self.count_
+                            }
+
+    def __getitem__(self, ref):
+        ''' return the next item in the traversal tree if ref is an id
+        else override the retrieve functions by the action name '''
+        if self.integers(ref):
+            return self.item(ref, self)
+        else:
+            self.retrieve = self.actions.get(ref)
+            return self
+
+    @property
+    def actions(self):
+        return self.__actions__
+
+    @actions.setter
+    def actions(self, dictActions):
+        self.__actions__.update(dictActions)
+
+    @property
+    def item(self):
+        raise Exception('method has to be overriden')
+
+    @property
+    def formModuleName(self):
+        raise Exception('method has to be overriden')
+
+    @property
+    def gridModuleName(self):
+        raise Exception('method has to be overriden')
+
+    @property
+    def Collection(self):
+        raise Exception('method has to be overriden')
+
+    def insert(self):
+        data = self.request.json_body.items()
+        self.setType()
+        self.objectDB.init_on_load()
+        self.objectDB.UpdateFromJson(data)
+        self.session.add(self.objectDB)
+        self.session.flush()
+        return {'ID': self.objectDB.ID}
+
+    def insertMany(self):
+        raise Exception('method has to be overriden')
+
+    def handleCriteria(self, criteria):
+        return criteria
+
+    def handleResult(self, result):
+        return result
+
+    def handleCount(self, count, callback, params):
+        return callback(params)
+
+    def retrieve(self):
+        return self.search()
+
+    def formatParams(self, params, paging):
+        history = False
+        startDate = None
+        searchInfo = {}
+        searchInfo['criteria'] = []
+
+        if not bool(params):
+            params = self.request.params.mixed()
+
+        if 'criteria' in params:
+            params['criteria'] = json.loads(params['criteria'])
+            if params['criteria'] != {}:
+                searchInfo['criteria'] = [obj for obj in params[
+                    'criteria'] if obj['Value'] != str(-1)]
+            else:
+                searchInfo['criteria'] = []
+
+        if 'history' in params and params['history'] == '1':
+            history = True
+
+        if 'startDate' in params and params['startDate'] != '':
+            startDate = datetime.strptime(params['startDate'],
+                                          '%d/%m/%Y %H:%M:%S')
+
+        if paging:
+            self.pagingSearch(searchInfo, params)
+        searchInfo = self.handleCriteria(searchInfo)
+        return searchInfo, history, startDate
+
+    def count_(self, listObj=None):
+        moduleFront = self.getConf(self.gridModuleName)
+
+        if self.request is not None:
+            searchInfo, history, startDate = self.formatParams({}, paging=False)
+            self.collection = self.Collection(moduleFront, typeObj=self.typeObj)
+            count = self.collection.count(searchInfo=searchInfo)
+        else:
+            count = self.collection.count()
+        return count
+
+    def search(self, paging=True, params={}, noCount=False):
+        params, history, startDate = self.formatParams(params, paging)
+        moduleFront = self.getConf(self.gridModuleName)
+        self.collection = self.Collection(moduleFront, typeObj=self.typeObj,
+                                          history=history, startDate=startDate)
+
+        if not noCount:
+            countResult = self.collection.count(params)
+            result = [{'total_entries': countResult}]
+            dataResult = self.handleCount(countResult,
+                                          self.collection.GetFlatDataList,
+                                          params)
+            result.append(dataResult)
+        else:
+            result = self.collection.GetFlatDataList(params)
+
+        return self.handleResult(result)
+
+    def pagingSearch(self, searchInfo, params):
+        searchInfo['offset'] = json.loads(params['offset'], None)
+        searchInfo['per_page'] = json.loads(params['per_page'], None)
+        searchInfo['order_by'] = json.loads(params['order_by'], [])
+        return params
+
+    def create(self):
+        data = self.request.json_body
+        if not isinstance(data, list):
+            return self.insert(self.request)
+        else:
+            return self.insertMany(self.request)
+
+    def getConf(self, moduleName=None):
+        if not moduleName:
+            moduleName = self.formModuleName
+        return self.session.query(FrontModules
+                                  ).filter(FrontModules.Name == moduleName
+                                           ).first()
+
+    def getForm(self, objectType=None, moduleName=None, mode='edit'):
+        if objectType is None:
+            objectType = self.request.params['ObjectType']
+        Conf = self.getConf(moduleName)
+        self.setType(objectType)
+        # setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
+        schema = self.objectDB.GetDTOWithSchema(Conf, mode)
+        return schema
+
+    def getGrid(self):
+        cols = self.objectDB.GetGridFields(self.gridModuleName)
+        return cols
+
+    def getFilter(self):
+        moduleName = self.request.params.get('FilterName', None)
+        if not moduleName:
+            moduleName = self.gridModuleName
+        filtersList = self.objectDB.GetFilters(moduleName)
+        filters = {}
+        for i in range(len(filtersList)):
+            filters[str(i)] = filtersList[i]
+        return filters
+
+    def setType(self, objectType=1):
+        setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
+
+    def getType(self):
+        table = Base.metadata.tables[self.objectDB.getTypeObjectName()]
+        query = select([table.c['ID'].label('val'),
+                        table.c['Name'].label('label')])
+        response = [OrderedDict(row) for row in self.session.execute(query).fetchall()]
+        return response
+
+    def export(self):
+        import pandas as pd
+        import io
+        from pyramid.response import Response
+        from datetime import datetime
+
+        dataResult = self.search(paging=False, noCount=True)
+        df = pd.DataFrame.from_records(dataResult,
+                                       columns=dataResult[0].keys(),
+                                       coerce_float=True)
+
+        fout = io.BytesIO()
+        writer = pd.ExcelWriter(fout)
+        df.to_excel(writer, sheet_name='Sheet1')
+        writer.save()
+        file = fout.getvalue()
+
+        dt = datetime.now().strftime('%d-%m-%Y')
+        return Response(
+            file,
+            content_disposition="attachment; filename=individuals_export_" + dt + ".xlsx",
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+
+class RESTView(object):
+    def __init__(self, context, request):
+        self.request = request
+        self.context = context
+
+    @view_config(request_method='GET', renderer='json')
+    def get(self):
+        return self.context.retrieve()
+
+    @view_config(request_method='POST', renderer='json')
+    def post(self):
+        return self.context.create()
+
+    @view_config(request_method='DELETE', renderer='json')
+    def delete(self):
+        return self.context.delete()
+
+    @view_config(request_method='PATCH', renderer='json')
+    def patch(self):
+        return self.context.update()
+
+    @view_config(request_method='PUT', renderer='json')
+    def put(self):
+        return self.context.update()
 
 
 def notfound(request):
@@ -77,18 +414,9 @@ def add_routes(config):
     config.add_route('autocomplete/ID',
                      'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
 
-
     # Stations
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
-    config.add_route('stations', 'ecoReleve-Core/stations/')
-    config.add_route('stations/export', 'ecoReleve-Core/stations/export')
-    config.add_route('stations/id',
-                     'ecoReleve-Core/stations/{id}',
-                     custom_predicates=(integers('id'),))
-    config.add_route('stations/action', 'ecoReleve-Core/stations/{action}')
-    config.add_route('stations/importGPX', 'ecoReleve-Core/stations/importGPX')
-
 
     # GET Stations/Protocols (with obs ids)
     config.add_route('stations/id/protocols',
@@ -97,7 +425,6 @@ def add_routes(config):
     config.add_route('stations/id/protocols/',
                      'ecoReleve-Core/stations/{id}/protocols/',
                      custom_predicates=(integers('id'),))
-
 
     # Observations
     # PUT GET DELETE
@@ -109,17 +436,16 @@ def add_routes(config):
     config.add_route('stations/id/observations/batch',
                      'ecoReleve-Core/stations/{id}/observations/batch',
                      custom_predicates=(integers('id'),))
-    
+
     # Action (action == 0 == form)
     config.add_route('stations/id/observations/action',
                      'ecoReleve-Core/stations/{id}/observations/{action}',
                      custom_predicates=(integers('id'),))
-    
+
     # POST GET ?objType
     config.add_route('stations/id/observations',
                      'ecoReleve-Core/stations/{id}/observations',
                      custom_predicates=(integers('id'),))
-
 
     # Protocols
     config.add_route('protocols', 'ecoReleve-Core/protocols/')
@@ -135,8 +461,6 @@ def add_routes(config):
 
     # FieldActivity
     config.add_route('fieldActivity', 'ecoReleve-Core/fieldActivity')
-
-
 
     # Sensors datas (Argos + GSM + RFID)
     config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
@@ -159,41 +483,6 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{id}/equipment',
                      custom_predicates=(integers('id'),))
     config.add_route('sensors/action', 'ecoReleve-Core/sensors/{action}')
-
-    # Individuals
-    config.add_route('individuals', 'ecoReleve-Core/individuals/')
-    config.add_route('individuals/advanced',
-                     'ecoReleve-Core/individuals/advanced/')
-    config.add_route('individuals/insert', 'ecoReleve-Core/individuals')
-    config.add_route('individuals/export', 'ecoReleve-Core/individuals/export')
-    config.add_route('individuals/id',
-                     'ecoReleve-Core/individuals/{id}',
-                     custom_predicates=(integers('id'),))
-    config.add_route('individuals/id/history',
-                     'ecoReleve-Core/individuals/{id}/history',
-                     custom_predicates=(integers('id'),))
-    config.add_route('individuals/id/equipment',
-                     'ecoReleve-Core/individuals/{id}/equipment',
-                     custom_predicates=(integers('id'),))
-    config.add_route('individuals/id/location',
-                     'ecoReleve-Core/individuals/{id}/locations',
-                     custom_predicates=(integers('id'),))
-    config.add_route('individuals/id/location/id_loc',
-                     'ecoReleve-Core/individuals/{id}/locations/{id_loc}',
-                     custom_predicates=(integers('id', 'id_loc'),))
-    config.add_route('individuals/id/history/action',
-                     'ecoReleve-Core/individuals/{id}/history/{action}',
-                     custom_predicates=(integers('id'),))
-    config.add_route('individuals/id/location/action',
-                     'ecoReleve-Core/individuals/{id}/locations/{action}',
-                     custom_predicates=(integers('id'),))
-    config.add_route('individuals/id/equipment/action',
-                     'ecoReleve-Core/individuals/{id}/equipment/{action}',
-                     custom_predicates=(integers('id'),))
-    config.add_route('individuals/advanced/action',
-                     'ecoReleve-Core/individuals/advanced/{action}')
-    config.add_route('individuals/action',
-                     'ecoReleve-Core/individuals/{action}')
 
     # MonitoredSite
     config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites/')
