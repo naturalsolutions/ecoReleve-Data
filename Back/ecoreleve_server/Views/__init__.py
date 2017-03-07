@@ -471,50 +471,6 @@ def add_routes(config):
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
 
-    # Sensors caracteristics(Argos + GSM + RFID)
-    # config.add_route('sensors', 'ecoReleve-Core/sensors/')
-    # config.add_route('sensors/insert', 'ecoReleve-Core/sensors')
-    # config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
-    # config.add_route('sensors/id',
-    #                  'ecoReleve-Core/sensors/{id}',
-    #                  custom_predicates=(integers('id'),))
-    # config.add_route('sensors/id/history',
-    #                  'ecoReleve-Core/sensors/{id}/history',
-    #                  custom_predicates=(integers('id'),))
-    # config.add_route('sensors/id/equipment',
-    #                  'ecoReleve-Core/sensors/{id}/equipment',
-    #                  custom_predicates=(integers('id'),))
-    # config.add_route('sensors/action', 'ecoReleve-Core/sensors/{action}')
-
-    # MonitoredSite
-    config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites/')
-    config.add_route('monitoredSites/', 'ecoReleve-Core/monitoredSites')
-    config.add_route('monitoredSites/export',
-                     'ecoReleve-Core/monitoredSites/export')
-    config.add_route('monitoredSites/id',
-                     'ecoReleve-Core/monitoredSites/{id}',
-                     custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/history',
-                     'ecoReleve-Core/monitoredSites/{id}/history/',
-                     custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/station',
-                     'ecoReleve-Core/monitoredSites/{id}/stations',
-                     custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/equipment',
-                     'ecoReleve-Core/monitoredSites/{id}/equipment',
-                     custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/history/action',
-                     'ecoReleve-Core/monitoredSites/{id}/history/{action}',
-                     custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/station/action',
-                     'ecoReleve-Core/monitoredSites/{id}/stations/{action}',
-                     custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/id/equipment/action',
-                     'ecoReleve-Core/monitoredSites/{id}/equipment/{action}',
-                     custom_predicates=(integers('id'),))
-    config.add_route('monitoredSites/action',
-                     'ecoReleve-Core/monitoredSites/{action}')
-
     # Release
     config.add_route('release', 'ecoReleve-Core/release/')
     config.add_route('release/individuals',

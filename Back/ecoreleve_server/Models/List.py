@@ -513,7 +513,10 @@ class SensorList(ListObjectWithDynProp):
 
 class MonitoredSiteList(ListObjectWithDynProp):
 
-    def __init__(self, frontModule, typeObj=None, View=None):
+    def __init__(self, frontModule, typeObj=None,
+                 View=None, startDate=None, history=False):
+        if not View:
+            View = Base.metadata.tables['MonitoredSitePositionsNow']
         super().__init__(MonitoredSite, frontModule, typeObj=typeObj, View=View)
 
     def GetJoinTable(self, searchInfo):

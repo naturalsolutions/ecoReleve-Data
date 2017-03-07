@@ -1,11 +1,9 @@
 from ..Models import (
     Sensor,
-    SensorType,
     MonitoredSite,
     Base,
     SensorList
 )
-from datetime import datetime
 from sqlalchemy import select, desc, join
 from collections import OrderedDict
 from sqlalchemy.exc import IntegrityError
