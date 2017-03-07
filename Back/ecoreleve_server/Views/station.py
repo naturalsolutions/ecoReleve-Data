@@ -13,13 +13,10 @@ import pandas as pd
 from sqlalchemy import select, and_, join
 from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore
-from . import DynamicObject, DynamicObjectCollection
+from . import DynamicObjectView, DynamicObjectCollectionView
 
 
-PREFIX = 'stations'
-
-
-class StationView(DynamicObject):
+class StationView(DynamicObjectView):
 
     model = StationDB
 
@@ -43,7 +40,7 @@ class StationView(DynamicObject):
         return msg
 
 
-class StationsView(DynamicObjectCollection):
+class StationsView(DynamicObjectCollectionView):
 
     Collection = StationList
     item = StationView
@@ -51,7 +48,7 @@ class StationsView(DynamicObjectCollection):
     gridModuleName = 'StationGrid'
 
     def __init__(self, ref, parent):
-        DynamicObjectCollection.__init__(self, ref, parent)
+        DynamicObjectCollectionView.__init__(self, ref, parent)
         self.actions = {'updateSiteLocation': self.updateMonitoredSite,
                         'importGPX': self.getFormImportGPX
                         }

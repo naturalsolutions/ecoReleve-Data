@@ -31,7 +31,7 @@ def error_view(exc, request):
     return exc
 
 
-class DynamicObject(SecurityRoot):
+class DynamicObjectView(SecurityRoot):
 
     def __init__(self, ref, parent):
         Resource.__init__(self, ref, parent)
@@ -119,7 +119,7 @@ class DynamicObject(SecurityRoot):
         return response
 
 
-class DynamicObjectCollection(SecurityRoot):
+class DynamicObjectCollectionView(SecurityRoot):
 
     def __init__(self, ref, parent):
         Resource.__init__(self, ref, parent)
@@ -178,7 +178,9 @@ class DynamicObjectCollection(SecurityRoot):
         raise Exception('method has to be overriden')
 
     def insert(self):
-        data = self.request.json_body.items()
+        data = {}
+        for items, value in self.request.json_body.items():
+            data[items] = value
         self.setType()
         self.objectDB.init_on_load()
         self.objectDB.UpdateFromJson(data)
@@ -268,9 +270,9 @@ class DynamicObjectCollection(SecurityRoot):
     def create(self):
         data = self.request.json_body
         if not isinstance(data, list):
-            return self.insert(self.request)
+            return self.insert()
         else:
-            return self.insertMany(self.request)
+            return self.insertMany()
 
     def getConf(self, moduleName=None):
         if not moduleName:
@@ -470,19 +472,19 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
 
     # Sensors caracteristics(Argos + GSM + RFID)
-    config.add_route('sensors', 'ecoReleve-Core/sensors/')
-    config.add_route('sensors/insert', 'ecoReleve-Core/sensors')
-    config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
-    config.add_route('sensors/id',
-                     'ecoReleve-Core/sensors/{id}',
-                     custom_predicates=(integers('id'),))
-    config.add_route('sensors/id/history',
-                     'ecoReleve-Core/sensors/{id}/history',
-                     custom_predicates=(integers('id'),))
-    config.add_route('sensors/id/equipment',
-                     'ecoReleve-Core/sensors/{id}/equipment',
-                     custom_predicates=(integers('id'),))
-    config.add_route('sensors/action', 'ecoReleve-Core/sensors/{action}')
+    # config.add_route('sensors', 'ecoReleve-Core/sensors/')
+    # config.add_route('sensors/insert', 'ecoReleve-Core/sensors')
+    # config.add_route('sensors/export', 'ecoReleve-Core/sensors/export')
+    # config.add_route('sensors/id',
+    #                  'ecoReleve-Core/sensors/{id}',
+    #                  custom_predicates=(integers('id'),))
+    # config.add_route('sensors/id/history',
+    #                  'ecoReleve-Core/sensors/{id}/history',
+    #                  custom_predicates=(integers('id'),))
+    # config.add_route('sensors/id/equipment',
+    #                  'ecoReleve-Core/sensors/{id}/equipment',
+    #                  custom_predicates=(integers('id'),))
+    # config.add_route('sensors/action', 'ecoReleve-Core/sensors/{action}')
 
     # MonitoredSite
     config.add_route('monitoredSites', 'ecoReleve-Core/monitoredSites/')

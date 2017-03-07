@@ -1,4 +1,3 @@
-from pyramid.view import view_config
 from ..Models import (
     Individual,
     Individual_Location,
@@ -14,20 +13,17 @@ import json
 from datetime import datetime
 from sqlalchemy import select, join, desc
 from collections import OrderedDict
-from ..controllers.security import routes_permission, RootCore, Resource, SecurityRoot
-from . import DynamicObject, DynamicObjectCollection
+from ..controllers.security import RootCore, Resource, SecurityRoot
+from . import DynamicObjectView, DynamicObjectCollectionView
 from pyramid.traversal import find_root
 
 
-prefix = 'individuals'
-
-
-class IndividualView(DynamicObject):
+class IndividualView(DynamicObjectView):
 
     model = Individual
 
     def __init__(self, ref, parent):
-        DynamicObject.__init__(self, ref, parent)
+        DynamicObjectView.__init__(self, ref, parent)
         self.add_child('locations', IndividualLocationsView)
         self.actions = {'equipment': self.getEquipment}
 
@@ -77,7 +73,7 @@ class IndividualView(DynamicObject):
         return response
 
 
-class IndividualsView(DynamicObjectCollection):
+class IndividualsView(DynamicObjectCollectionView):
 
     Collection = IndividualList
     item = IndividualView
@@ -85,7 +81,7 @@ class IndividualsView(DynamicObjectCollection):
     gridModuleName = 'IndivFilter'
 
     def __init__(self, ref, parent):
-        DynamicObjectCollection.__init__(self, ref, parent)
+        DynamicObjectCollectionView.__init__(self, ref, parent)
         if not self.typeObj:
             self.typeObj = 1
 
