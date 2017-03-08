@@ -34,14 +34,7 @@ class Resource(dict):
 
 class SecurityRoot(Resource):
     __acl__ = [
-        (Allow, Authenticated, 'read'),
-        (Allow, Authenticated, 'all'),
-        (Allow, 'group:admins', 'admin'),
-        (Allow, 'group:admins', 'superUser'),
-        (Allow, 'group:admins', 'all'),
-        (Allow, 'group:superUsers', 'superUser'),
-        (Allow, 'group:superUsers', 'all'),
-        # DENY_ALL
+        (Allow, Authenticated, 'read')
     ]
 
     def __init__(self, request):
@@ -74,21 +67,6 @@ class RootCore(SecurityRoot):
 
     def __getitem__(self, item):
         return self.get(item)
-
-
-# class Sensor(DynamicObject):
-
-#     model = SensorDB
-#     formModuleName = 'SensorForm'
-#     gridModuleName = 'SensorFilter'
-
-
-# class Sensors(DynamicObjectCollection):
-#     __acl__ = [
-#         (Allow, Everyone, ALL_PERMISSIONS),
-#     ]
-#     collection = SensorList
-#     item = Sensor
 
 
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
@@ -151,6 +129,39 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
             return HTTPUnauthorized(content, headers=self.forget(request))
 
         return HTTPForbidden(content, headers=self.forget(request))
+
+
+context_permissions = {
+    'stations': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', ('create', 'update', 'read')),
+                (Allow, 'group:users', ('create', 'update', 'read'))
+              ],
+
+    'observations': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', ALL_PERMISSIONS),
+                (Allow, 'group:users', ALL_PERMISSIONS)
+              ],
+
+    'individuals': [
+                (Allow, 'group:admins', ('create', 'update', 'read')),
+                (Allow, 'group:superUsers', ('update', 'read')),
+                (Allow, 'group:users', 'read')
+              ],
+
+    'monitoredSites': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', ('create', 'update', 'read')),
+                (Allow, 'group:users', ('create', 'update', 'read'))
+              ],
+
+    'sensors': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', 'read'),
+                (Allow, 'group:users', 'read')
+              ],
+}
 
 
 routes_permission = {
