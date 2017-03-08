@@ -127,7 +127,6 @@ class DynamicObjectCollectionView(SecurityRoot):
     def __init__(self, ref, parent):
         Resource.__init__(self, ref, parent)
         root = find_root(self)
-        print(ref)
         self.request = root.request
         self.session = root.request.dbsession
         self.objectDB = self.item.model()
@@ -432,14 +431,6 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
-
-    # Release
-    config.add_route('release', 'ecoReleve-Core/release/')
-    config.add_route('release/individuals',
-                     'ecoReleve-Core/release/individuals/')
-    config.add_route('release/individuals/action',
-                     'ecoReleve-Core/release/individuals/{action}')
-    config.add_route('release/action', 'ecoReleve-Core/release/{action}')
 
     # Export
     config.add_route('export', 'ecoReleve-Core/export/')

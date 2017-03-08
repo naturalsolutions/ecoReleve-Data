@@ -161,6 +161,10 @@ context_permissions = {
                 (Allow, 'group:superUsers', 'read'),
                 (Allow, 'group:users', 'read')
               ],
+
+    'release': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+              ],
 }
 
 

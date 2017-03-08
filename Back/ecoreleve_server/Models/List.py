@@ -184,6 +184,10 @@ class IndividualList(ListObjectWithDynProp):
 
         joinTable = super().GetJoinTable(searchInfo)
 
+        releaseFilter = list(filter(lambda x: x['Column'] == 'LastImported', searchInfo['criteria']))
+        if len(releaseFilter) > 0:
+            return joinTable
+
         joinTable = outerjoin(joinTable, StatusTable, StatusTable.c[
                               'FK_Individual'] == Individual.ID)
 
