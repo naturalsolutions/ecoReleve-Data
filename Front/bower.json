@@ -26,7 +26,7 @@
     "tooltipster": "3.3.0",
     "chartjs": "1.0.2",
     "reneco-fonts": "*",
-    "ag-grid": "^5.2.0",
+    "ag-grid": "^8.1.0",
     "NaturalJS_Filter":"1.1.4"
   },
   "resolutions": {

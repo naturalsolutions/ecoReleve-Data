@@ -11,9 +11,10 @@ define([
   './custom.date.filter',
   './custom.select.filter',
   './custom.text.autocomplete.filter',
+  './custom2.number.filter',
 
   'vendors/utils',
-  
+
   './custom.renderers',
   './custom.editors',
 
@@ -25,11 +26,11 @@ define([
   'i18n'
 
 ], function($, _, Backbone, Marionette, AgGrid, Swal,
-  CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, 
-  CustomTextAutocompleteFilter, utils_1, Renderers, Editors,
+  CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter,
+  CustomTextAutocompleteFilter,CustomNumberFilter2, utils_1, Renderers, Editors,
   Decimal5Renderer, DateTimeRenderer, ObjectPicker
 ) {
-  
+
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -189,7 +190,7 @@ define([
     formatColumns: function(colDefs){
       var _this = this;
       var columnDefs = $.extend(true, [], colDefs);
-      
+
       columnDefs.map(function(col, i) {
 
         if(col.field == 'FK_ProtocoleType'){
@@ -206,7 +207,7 @@ define([
           case 'AutocompTreeEditor':
             col.cellEditor = Editors.ThesaurusEditor;
             col.cellRenderer = Renderers.ThesaurusRenderer;
-            break;          
+            break;
           case 'AutocompleteEditor':
             col.cellEditor = Editors.AutocompleteEditor;
             col.cellRenderer = Renderers.AutocompleteRenderer;
@@ -214,7 +215,7 @@ define([
           case 'ObjectPicker':
             col.cellEditor = Editors.ObjectPicker;
             col.cellRenderer = Renderers.ObjectPickerRenderer;
-            break;          
+            break;
           case 'Checkbox':
             col.cellEditor = Editors.CheckboxEditor;
             col.cellRenderer = Renderers.CheckboxRenderer;
@@ -222,7 +223,7 @@ define([
           case 'Number':
             col.cellEditor = Editors.NumberEditor;
             col.cellRenderer = Renderers.NumberRenderer;
-            break;          
+            break;
           case 'DateTimePickerEditor':
             col.cellEditor = Editors.DateTimeEditor;
             col.cellRenderer = Renderers.DateTimeRenderer;
@@ -247,6 +248,10 @@ define([
 
         switch(col.filter){
           case 'number': {
+            if(col.field = 'LAT') {
+              col.filter = CustomNumberFilter2
+            }
+            else
             col.filter = CustomNumberFilter;
             break;
           }
@@ -276,7 +281,7 @@ define([
         col.headerCellTemplate = _this.getHeaderCellTemplate();
       });
 
-      
+
       if(_this.gridOptions.rowSelection === 'multiple'){
         var col = {
           minWidth: 40,
@@ -460,7 +465,7 @@ define([
       if(this.model.get('objectType')){
         data.objectType = this.model.get('objectType');
       }
-  
+
       this.deferred = $.ajax({
         url: this.model.get('url'),
         method: 'GET',
@@ -831,7 +836,7 @@ define([
       var errors = [];
 
       var empty = true;;
-      
+
       var i = 0;
       this.gridOptions.api.forEachNode( function(node) {
         var row = {};
@@ -877,8 +882,8 @@ define([
               errors.push(node.data._errors);
             }
           }
-        
-          
+
+
         }
 
         //last check, if not empty, push to save
@@ -897,7 +902,7 @@ define([
     destroySelectedRows: function(callback){
       var _this = this;
       var rowData = [];
-      
+
       var selectedNodes = this.gridOptions.api.getSelectedNodes();
 
       for (var i = 0; i < selectedNodes.length; i++) {
