@@ -2,7 +2,7 @@ from pyramid.httpexceptions import HTTPNotFound
 from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
 from ..Models import sendLog, FrontModules, Base
-from ..controllers.security import SecurityRoot, Resource
+from ..controllers.security import SecurityRoot, Resource, context_permissions
 from pyramid.traversal import find_root
 from collections import OrderedDict
 from sqlalchemy import select, join, desc
@@ -44,6 +44,9 @@ class DynamicObjectView(SecurityRoot):
 
         if self.integers(ref):
             self.objectDB = self.session.query(self.model).get(ref)
+
+        '''Set security according to permissions dict... yes just that ! '''
+        self.__acl__ = context_permissions[parent.__name__]
 
     def __getitem__(self, ref):
         if ref in self.actions:
@@ -124,6 +127,7 @@ class DynamicObjectCollectionView(SecurityRoot):
     def __init__(self, ref, parent):
         Resource.__init__(self, ref, parent)
         root = find_root(self)
+        print(ref)
         self.request = root.request
         self.session = root.request.dbsession
         self.objectDB = self.item.model()
@@ -342,23 +346,23 @@ class RESTView(object):
         self.request = request
         self.context = context
 
-    @view_config(request_method='GET', renderer='json')
+    @view_config(request_method='GET', renderer='json', permission='read')
     def get(self):
         return self.context.retrieve()
 
-    @view_config(request_method='POST', renderer='json')
+    @view_config(request_method='POST', renderer='json', permission='create')
     def post(self):
         return self.context.create()
 
-    @view_config(request_method='DELETE', renderer='json')
+    @view_config(request_method='DELETE', renderer='json', permission='delete')
     def delete(self):
         return self.context.delete()
 
-    @view_config(request_method='PATCH', renderer='json')
+    @view_config(request_method='PATCH', renderer='json', permission='update')
     def patch(self):
         return self.context.update()
 
-    @view_config(request_method='PUT', renderer='json')
+    @view_config(request_method='PUT', renderer='json', permission='update')
     def put(self):
         return self.context.update()
 
