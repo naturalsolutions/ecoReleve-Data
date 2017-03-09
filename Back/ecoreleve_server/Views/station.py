@@ -14,11 +14,25 @@ from sqlalchemy import select, and_, join
 from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore
 from . import DynamicObjectView, DynamicObjectCollectionView
+from .protocols import ObservationsView
 
 
 class StationView(DynamicObjectView):
 
     model = StationDB
+
+    def __init__(self, ref, parent):
+        DynamicObjectView.__init__(self, ref, parent)
+        self.add_child('observations', ObservationsView)
+
+    def __getitem__(self, ref):
+        if ref in self.actions:
+            self.retrieve = self.actions.get(ref)
+            return self
+        return self.get(ref)
+
+    def getObs(self, ref):
+        return ObservationsView(ref, self)
 
     def update(self):
         data = self.request.json_body

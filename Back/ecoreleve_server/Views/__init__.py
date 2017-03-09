@@ -2,7 +2,7 @@ from pyramid.httpexceptions import HTTPNotFound
 from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
 from ..Models import sendLog, FrontModules, Base
-from ..controllers.security import SecurityRoot, Resource
+from ..controllers.security import SecurityRoot, Resource, context_permissions
 from pyramid.traversal import find_root
 from collections import OrderedDict
 from sqlalchemy import select, join, desc
@@ -44,6 +44,9 @@ class DynamicObjectView(SecurityRoot):
 
         if self.integers(ref):
             self.objectDB = self.session.query(self.model).get(ref)
+
+        '''Set security according to permissions dict... yes just that ! '''
+        self.__acl__ = context_permissions[parent.__name__]
 
     def __getitem__(self, ref):
         if ref in self.actions:
@@ -285,8 +288,7 @@ class DynamicObjectCollectionView(SecurityRoot):
         if objectType is None:
             objectType = self.request.params['ObjectType']
         Conf = self.getConf(moduleName)
-        self.setType(objectType)
-        # setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
+        self.setType(int(objectType))
         schema = self.objectDB.GetDTOWithSchema(Conf, mode)
         return schema
 
@@ -343,23 +345,23 @@ class RESTView(object):
         self.request = request
         self.context = context
 
-    @view_config(request_method='GET', renderer='json')
+    @view_config(request_method='GET', renderer='json', permission='read')
     def get(self):
         return self.context.retrieve()
 
-    @view_config(request_method='POST', renderer='json')
+    @view_config(request_method='POST', renderer='json', permission='create')
     def post(self):
         return self.context.create()
 
-    @view_config(request_method='DELETE', renderer='json')
+    @view_config(request_method='DELETE', renderer='json', permission='delete')
     def delete(self):
         return self.context.delete()
 
-    @view_config(request_method='PATCH', renderer='json')
+    @view_config(request_method='PATCH', renderer='json', permission='update')
     def patch(self):
         return self.context.update()
 
-    @view_config(request_method='PUT', renderer='json')
+    @view_config(request_method='PUT', renderer='json', permission='update')
     def put(self):
         return self.context.update()
 
@@ -420,47 +422,6 @@ def add_routes(config):
     config.add_route('area', 'ecoReleve-Core/area')
     config.add_route('locality', 'ecoReleve-Core/locality')
 
-    # GET Stations/Protocols (with obs ids)
-    config.add_route('stations/id/protocols',
-                     'ecoReleve-Core/stations/{id}/protocols',
-                     custom_predicates=(integers('id'),))
-    config.add_route('stations/id/protocols/',
-                     'ecoReleve-Core/stations/{id}/protocols/',
-                     custom_predicates=(integers('id'),))
-
-    # Observations
-    # PUT GET DELETE
-    config.add_route('stations/id/observations/obs_id',
-                     'ecoReleve-Core/stations/{id}/observations/{obs_id}',
-                     custom_predicates=(integers('id', 'obs_id'),))
-
-    # BATCH (POST also used for PUT & DELETE) ?objectType
-    config.add_route('stations/id/observations/batch',
-                     'ecoReleve-Core/stations/{id}/observations/batch',
-                     custom_predicates=(integers('id'),))
-
-    # Action (action == 0 == form)
-    config.add_route('stations/id/observations/action',
-                     'ecoReleve-Core/stations/{id}/observations/{action}',
-                     custom_predicates=(integers('id'),))
-
-    # POST GET ?objType
-    config.add_route('stations/id/observations',
-                     'ecoReleve-Core/stations/{id}/observations',
-                     custom_predicates=(integers('id'),))
-
-    # Protocols
-    config.add_route('protocols', 'ecoReleve-Core/protocols/')
-
-    config.add_route('protocols/id',
-                     'ecoReleve-Core/protocols/{id}',
-                     custom_predicates=(integers('id'),))
-
-    config.add_route('protocols/action', 'ecoReleve-Core/protocols/{action}')
-
-    # Protocols types
-    config.add_route('protocolTypes', 'ecoReleve-Core/protocolTypes')
-
     # FieldActivity
     config.add_route('fieldActivity', 'ecoReleve-Core/fieldActivity')
 
@@ -470,14 +431,6 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
-
-    # Release
-    config.add_route('release', 'ecoReleve-Core/release/')
-    config.add_route('release/individuals',
-                     'ecoReleve-Core/release/individuals/')
-    config.add_route('release/individuals/action',
-                     'ecoReleve-Core/release/individuals/{action}')
-    config.add_route('release/action', 'ecoReleve-Core/release/{action}')
 
     # Export
     config.add_route('export', 'ecoReleve-Core/export/')
