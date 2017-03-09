@@ -11,7 +11,6 @@ define([
   './custom.date.filter',
   './custom.select.filter',
   './custom.text.autocomplete.filter',
-  './custom2.number.filter',
 
   'vendors/utils',
 
@@ -27,7 +26,7 @@ define([
 
 ], function($, _, Backbone, Marionette, AgGrid, Swal,
   CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter,
-  CustomTextAutocompleteFilter,CustomNumberFilter2, utils_1, Renderers, Editors,
+  CustomTextAutocompleteFilter, utils_1, Renderers, Editors,
   Decimal5Renderer, DateTimeRenderer, ObjectPicker
 ) {
 
@@ -248,10 +247,6 @@ define([
 
         switch(col.filter){
           case 'number': {
-            if(col.field = 'LAT') {
-              col.filter = CustomNumberFilter2
-            }
-            else
             col.filter = CustomNumberFilter;
             break;
           }
