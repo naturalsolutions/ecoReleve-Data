@@ -438,15 +438,3 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
-
-    # Export
-    # config.add_route('export', 'ecoReleve-Core/export/')
-    # config.add_route('export/themes', 'ecoReleve-Core/export/themes')
-    # config.add_route('export/themes/id/views',
-    #                  'ecoReleve-Core/export/themes/{id}/views')
-    # config.add_route('export/views/id',
-    #                  'ecoReleve-Core/export/views/{id}/')  # geo, datas
-    # config.add_route('export/views/id/action',
-    #                  'ecoReleve-Core/export/views/{id}/{action}')  # filtres,cols,count
-    # config.add_route('export/views/getFile',
-    #                  'ecoReleve-Core/export/views/getFile')  # getFile
