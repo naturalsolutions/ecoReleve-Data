@@ -19,6 +19,7 @@ class CustomExportView(CustomView):
         try:
             self.session = self.request.registry.dbmakerExport
         except:
+            ''' occures when DB export is not loaded, see development.ini :: loadDBExport '''
             pass
 
 
@@ -104,7 +105,7 @@ class ExportQueryView(CustomExportView):
                             'sitename']].label('SiteName'))
             if 'date' in splittedColumnLower:
                 queryColumns.append(self.table.c[splittedColumnLower['date']].label('Date'))
-        return
+        return queryColumns
 
     def getFile(self):
         try:
