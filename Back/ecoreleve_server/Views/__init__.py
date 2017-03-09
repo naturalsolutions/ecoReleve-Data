@@ -31,7 +31,7 @@ def error_view(exc, request):
     return exc
 
 
-class DynamicObjectView(SecurityRoot):
+class CustomView(SecurityRoot):
 
     def __init__(self, ref, parent):
         Resource.__init__(self, ref, parent)
@@ -39,6 +39,34 @@ class DynamicObjectView(SecurityRoot):
         root = find_root(self)
         self.request = root.request
         self.session = root.request.dbsession
+        self.__actions__ = {}
+
+    def __getitem__(self, ref):
+        if ref in self.actions:
+            self.retrieve = self.actions.get(ref)
+            return self
+        return self.item(ref, self)
+
+    @property
+    def actions(self):
+        return self.__actions__
+
+    @actions.setter
+    def actions(self, dictActions):
+        self.__actions__.update(dictActions)
+
+    @property
+    def item(self):
+        raise Exception('method has to be overriden')
+
+    def retrieve(self):
+        raise Exception('method has to be overriden')
+
+
+class DynamicObjectView(CustomView):
+
+    def __init__(self, ref, parent):
+        CustomView.__init__(self, ref, parent)
         self.__actions__ = {'history': self.history,
                             }
 
@@ -47,12 +75,6 @@ class DynamicObjectView(SecurityRoot):
 
         '''Set security according to permissions dict... yes just that ! '''
         self.__acl__ = context_permissions[parent.__name__]
-
-    def __getitem__(self, ref):
-        if ref in self.actions:
-            self.retrieve = self.actions.get(ref)
-            return self
-        return self.item(ref, self)
 
     @property
     def model(self):
@@ -122,13 +144,10 @@ class DynamicObjectView(SecurityRoot):
         return response
 
 
-class DynamicObjectCollectionView(SecurityRoot):
+class DynamicObjectCollectionView(CustomView):
 
     def __init__(self, ref, parent):
-        Resource.__init__(self, ref, parent)
-        root = find_root(self)
-        self.request = root.request
-        self.session = root.request.dbsession
+        CustomView.__init__(self, ref, parent)
         self.objectDB = self.item.model()
 
         if 'typeObj' in self.request.params and self.request.params['typeObj'] is not None:
@@ -147,6 +166,8 @@ class DynamicObjectCollectionView(SecurityRoot):
                             'count': self.count_
                             }
 
+        # self.__acl__ = context_permissions[parent.__name__]
+
     def __getitem__(self, ref):
         ''' return the next item in the traversal tree if ref is an id
         else override the retrieve functions by the action name '''
@@ -155,18 +176,6 @@ class DynamicObjectCollectionView(SecurityRoot):
         else:
             self.retrieve = self.actions.get(ref)
             return self
-
-    @property
-    def actions(self):
-        return self.__actions__
-
-    @actions.setter
-    def actions(self, dictActions):
-        self.__actions__.update(dictActions)
-
-    @property
-    def item(self):
-        raise Exception('method has to be overriden')
 
     @property
     def formModuleName(self):
@@ -433,13 +442,13 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
 
     # Export
-    config.add_route('export', 'ecoReleve-Core/export/')
-    config.add_route('export/themes', 'ecoReleve-Core/export/themes')
-    config.add_route('export/themes/id/views',
-                     'ecoReleve-Core/export/themes/{id}/views')
-    config.add_route('export/views/id',
-                     'ecoReleve-Core/export/views/{id}/')  # geo, datas
-    config.add_route('export/views/id/action',
-                     'ecoReleve-Core/export/views/{id}/{action}')  # filtres,cols,count
-    config.add_route('export/views/getFile',
-                     'ecoReleve-Core/export/views/getFile')  # getFile
+    # config.add_route('export', 'ecoReleve-Core/export/')
+    # config.add_route('export/themes', 'ecoReleve-Core/export/themes')
+    # config.add_route('export/themes/id/views',
+    #                  'ecoReleve-Core/export/themes/{id}/views')
+    # config.add_route('export/views/id',
+    #                  'ecoReleve-Core/export/views/{id}/')  # geo, datas
+    # config.add_route('export/views/id/action',
+    #                  'ecoReleve-Core/export/views/{id}/{action}')  # filtres,cols,count
+    # config.add_route('export/views/getFile',
+    #                  'ecoReleve-Core/export/views/getFile')  # getFile
