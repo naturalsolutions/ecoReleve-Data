@@ -166,8 +166,6 @@ class DynamicObjectCollectionView(CustomView):
                             'count': self.count_
                             }
 
-        # self.__acl__ = context_permissions[parent.__name__]
-
     def __getitem__(self, ref):
         ''' return the next item in the traversal tree if ref is an id
         else override the retrieve functions by the action name '''

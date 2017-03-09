@@ -34,7 +34,7 @@ class Resource(dict):
 
 class SecurityRoot(Resource):
     __acl__ = [
-        (Allow, Authenticated, ALL_PERMISSIONS)
+        (Allow, Authenticated, 'read')
     ]
 
     def __init__(self, request):
