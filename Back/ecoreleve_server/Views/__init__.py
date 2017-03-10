@@ -5,7 +5,7 @@ from ..Models import sendLog, FrontModules, Base
 from ..controllers.security import SecurityRoot, Resource, context_permissions
 from pyramid.traversal import find_root
 from collections import OrderedDict
-from sqlalchemy import select, join, desc
+from sqlalchemy import select, join, desc, asc
 import json
 from datetime import datetime
 
@@ -29,7 +29,6 @@ def add_cors_headers_response_callback(event):
 def error_view(exc, request):
     sendLog(logLevel=5, domaine=3)
     return exc
-
 
 class CustomView(SecurityRoot):
 
@@ -61,6 +60,49 @@ class CustomView(SecurityRoot):
 
     def retrieve(self):
         raise Exception('method has to be overriden')
+
+
+class AutocompleteView(CustomView):
+
+    def __init__(self, ref, parent):
+        CustomView.__init__(self, ref, parent)
+        self.__actions__ = {}
+        self.targetValue = None
+        self.attribute = None
+
+    def __getitem__(self, ref):
+        if self.attribute:
+            self.targetValue = ref
+        else:
+            self.attribute = ref
+        return self
+
+    def retrieve(self):
+        objName = self.parent.item.model.__tablename__
+        criteria = self.request.params['term']
+        prop = self.attribute
+
+        if self.integers(prop):
+            table = Base.metadata.tables[objName + 'DynPropValuesNow']
+            query = select([table.c['ValueString'].label('label'),
+                            table.c['ValueString'].label('value')]
+                           ).distinct(table.c['ValueString']
+                                      ).where(table.c['FK_' + objName + 'DynProp'] == prop)
+            query = query.where(table.c['ValueString'].like('%' + criteria + '%')
+                                ).order_by(asc(table.c['ValueString']))
+        else:
+            NameValReturn = prop
+            if self.targetValue:
+                NameValReturn = self.targetValue
+
+            table = Base.metadata.tables[objName]
+            query = select([table.c[NameValReturn].label('value'),
+                            table.c[prop].label('label')]
+                           ).distinct(table.c[prop])
+            query = query.where(table.c[prop].like(
+                '%' + criteria + '%')).order_by(asc(table.c[prop]))
+
+        return [dict(row) for row in self.session.execute(query).fetchall()]
 
 
 class DynamicObjectView(CustomView):
@@ -163,7 +205,7 @@ class DynamicObjectCollectionView(CustomView):
                             'getFilters': self.getFilter,
                             'getType': self.getType,
                             'export': self.export,
-                            'count': self.count_
+                            'count': self.count_,
                             }
 
     def __getitem__(self, ref):
@@ -171,6 +213,8 @@ class DynamicObjectCollectionView(CustomView):
         else override the retrieve functions by the action name '''
         if self.integers(ref):
             return self.item(ref, self)
+        elif ref == 'autocomplete':
+            return AutocompleteView(ref, self)
         else:
             self.retrieve = self.actions.get(ref)
             return self
