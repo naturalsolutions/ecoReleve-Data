@@ -470,13 +470,6 @@ def add_routes(config):
     config.add_route('autocomplete/ID',
                      'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
 
-    # Stations
-    config.add_route('area', 'ecoReleve-Core/area')
-    config.add_route('locality', 'ecoReleve-Core/locality')
-
-    # FieldActivity
-    config.add_route('fieldActivity', 'ecoReleve-Core/fieldActivity')
-
     # Sensors datas (Argos + GSM + RFID)
     config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
     config.add_route('sensors/uncheckedDatas',
