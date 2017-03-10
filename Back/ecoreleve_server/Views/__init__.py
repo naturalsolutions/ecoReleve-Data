@@ -30,6 +30,7 @@ def error_view(exc, request):
     sendLog(logLevel=5, domaine=3)
     return exc
 
+
 class CustomView(SecurityRoot):
 
     def __init__(self, ref, parent):

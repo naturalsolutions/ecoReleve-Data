@@ -12,10 +12,10 @@ import pandas as pd
 from sqlalchemy import select, text
 from traceback import print_exc
 from collections import Counter
-from ..controllers.security import RootCore, Resource, SecurityRoot, context_permissions
+from ..controllers.security import RootCore, context_permissions
 from ..Models.Equipment import checkEquip
 from .individual import IndividualsView
-from pyramid.traversal import find_root
+from . import CustomView
 
 
 class ReleaseIndividualsView(IndividualsView):
@@ -251,25 +251,15 @@ class ReleaseIndividualsView(IndividualsView):
         return message
 
 
-class ReleaseView(SecurityRoot):
+class ReleaseView(CustomView):
 
     item = ReleaseIndividualsView
 
     def __init__(self, ref, parent):
-        Resource.__init__(self, ref, parent)
-        self.parent = parent
-        root = find_root(self)
-        self.request = root.request
-        self.session = root.request.dbsession
+        CustomView.__init__(self, ref, parent)
         self.__actions__ = {'getReleaseMethod': self.getReleaseMethod,
                             }
         self.__acl__ = context_permissions['release']
-
-    def __getitem__(self, ref):
-        if ref in self.actions:
-            self.retrieve = self.actions.get(ref)
-            return self
-        return self.item(ref, self)
 
     def getReleaseMethod(self):
         userLng = self.request.authenticated_userid['userlanguage'].lower()
