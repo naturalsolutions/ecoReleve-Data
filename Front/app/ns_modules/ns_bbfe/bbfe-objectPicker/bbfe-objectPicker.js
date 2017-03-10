@@ -25,7 +25,6 @@ define([
       Form.editors.Text.prototype.initialize.call(this, options);
       this.validators = options.schema.validators || [];
 
-
       this.formGrid = options.formGrid;
       this.options = options;
       this.valueToDisplay = options.valueToDisplay;
@@ -46,9 +45,19 @@ define([
       };
       this.model.set('icon',dictCSS[this.objectName]);
 
+
       var value;
       if (options.model) {
         value = options.model.get(options.key) || options.value;
+        //individuals
+        if(!(options.model.get(options.key) instanceof Object)){
+          var values = {
+            value: value,
+            displayValue: value
+          }
+          options.model.set(options.key, values);
+          value = values;
+        }
       }
 
       this.usedLabel = options.key;
@@ -62,21 +71,23 @@ define([
         }
         this.initAutocomplete();
       } else {
+        //individuals
         this.usedLabel = 'ID';
         this.noAutocomp = true;
         this.model.set('type', 'number');
       }
+
       this.isTermError = false;
       this.options = options.schema.options;
 
       if (value) {
-        this.model.set('value', value);
+        this.model.set('value', value.value);
         if (this.displayingValue) {
           this.model.set('value', '');
-          this.matchedValue = value;
+          this.matchedValue = value.displayValue;
         }
-        this.model.set('data_value', value);
-      }else {
+        this.model.set('data_value', value.value);
+      } else {
         this.model.set('value', '');
         this.model.set('data_value', '');
       }
@@ -84,11 +95,10 @@ define([
       if (options.schema.editable) {
         this.model.set('disabled', '');
         this.model.set('visu', '');
-      }else {
+      } else {
         this.model.set('disabled', 'disabled');
         this.model.set('visu', 'hidden');
       }
-
 
       var required;
       if(options.schema.validators){
@@ -139,6 +149,7 @@ define([
           var item = ui.content[0];
           _this.setValue(item.value,item.label,false);
           _this.matchedValue = item;
+          _this.isTermError = false;
 
         } else {
           _this.matchedValue = undefined;
@@ -173,15 +184,16 @@ define([
 
       this.$el.find('input').attr('min','0');
 
-      if(this.valueToDisplay){
+      /*if(this.valueToDisplay){
         this.$el.find('input').attr('value', this.valueToDisplay);
-      }
+      }*/
 
       this.$input= this.$el.find('input[name="' + this.model.get('key') + '" ]');
       if (this.displayingValue){
         if (this.initValue && this.initValue !== null){
-          this.fetchDisplayValue(this.initValue);
+          //this.fetchDisplayValue(this.initValue);
         }
+        this.$input.val(this.matchedValue);
         _(function () {
             _this.$input.autocomplete(_this.autocompleteSource);
         }).defer();
