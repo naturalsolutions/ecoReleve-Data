@@ -4,6 +4,7 @@ from ..Models import (
     Station_FieldWorker,
     StationList,
     MonitoredSitePosition,
+    fieldActivity,
     User
 )
 import json
@@ -64,7 +65,8 @@ class StationsView(DynamicObjectCollectionView):
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
         self.actions = {'updateSiteLocation': self.updateMonitoredSite,
-                        'importGPX': self.getFormImportGPX
+                        'importGPX': self.getFormImportGPX,
+                        'fieldActivity': self.getFieldActivityList
                         }
         self.__acl__ = context_permissions[ref]
 
@@ -141,6 +143,15 @@ class StationsView(DynamicObjectCollectionView):
         else:
             paging = True
         return self.search(paging=paging)
+
+    def getFieldActivityList(self):
+        query = select([fieldActivity.ID.label('value'),
+                        fieldActivity.Name.label('label')])
+        result = self.session.execute(query).fetchall()
+        res = []
+        for row in result:
+            res.append({'label': row['label'], 'value': row['value']})
+        return sorted(res, key=lambda x: x['label'])
 
     def getFieldWorkers(self, data):
         queryCTE = self.collection.fullQueryJoinOrdered.cte()
