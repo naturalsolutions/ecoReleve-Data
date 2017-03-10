@@ -135,7 +135,6 @@ define([
       if(column == '_errors'){
         return;
       }
-      console.log(column)
       var newValue, oldValue;
       if(options.newValue instanceof Object){
         newValue = options.newValue.value;
@@ -184,7 +183,9 @@ define([
       return columnsDefs;             
     },
 
+    handleErrors: function(errors){
 
+    },
 
     getValue: function() {
       var rowDataAndErrors = this.gridView.getRowDataAndErrors();

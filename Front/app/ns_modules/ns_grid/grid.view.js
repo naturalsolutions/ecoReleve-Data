@@ -189,8 +189,41 @@ define([
     formatColumns: function(colDefs){
       var _this = this;
       var columnDefs = $.extend(true, [], colDefs);
+
       
       columnDefs.map(function(col, i) {
+
+        //e.g types
+        var comparator = function (valueA, valueB, nodeA, nodeB, isInverted) {
+          var value1;
+          var value2;
+          if(valueA && valueA instanceof Object){
+            value1 = valueA.displayValue;
+          } else {
+            value1 = valueA;
+          }
+
+          if(valueB && valueB instanceof Object){
+            value2 = valueB.displayValue;
+          } else {
+            value2 = valueB;
+          }
+
+          if(!valueA){
+            value1 = '';
+          }
+          if(!valueB){
+            value2 = '';
+          }
+
+          switch(typeof value1){
+            case 'number':
+              return value1 - value2;
+            default:
+              return value1 < value2; //isInverted?
+          }
+        }
+        col.comparator = comparator;
 
         if(col.field == 'FK_ProtocoleType'){
           col.hide = true;
@@ -240,6 +273,7 @@ define([
             col.cellRenderer = Renderers.SelectRenderer;
             break;
         }
+
 
          if(col.cell == 'autocomplete'){
           _this.addBBFEditor(col);
@@ -925,7 +959,6 @@ define([
           if(callback)
             callback();
         }).fail(function(resp) {
-          console.log(resp);
         });
         if(callback)
           callback();

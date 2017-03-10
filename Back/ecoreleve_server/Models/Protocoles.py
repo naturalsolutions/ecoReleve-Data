@@ -22,6 +22,10 @@ from ..utils.parseValue import isNumeric
 
 class Observation(Base, ObjectWithDynProp):
     __tablename__ = 'Observation'
+
+    FrontModuleForm = 'ObservationForm'
+    FrontModuleGrid = None
+
     ID = Column(Integer, Sequence('Observation__id_seq'), primary_key=True)
     FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
     ObservationDynPropValues = relationship(
