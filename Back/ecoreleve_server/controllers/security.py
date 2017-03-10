@@ -48,7 +48,8 @@ class SecurityRoot(Resource):
         self.request = request
 
     def __getitem__(self, item):
-        return RootCore(item, self)
+        if item == 'ecoReleve-Core':
+            return RootCore(item, self)
 
 
 class RootCore(SecurityRoot):
