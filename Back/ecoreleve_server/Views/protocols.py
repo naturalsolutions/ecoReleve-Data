@@ -1,7 +1,9 @@
+from pyramid.view import view_config
 from ..Models import (
     Observation,
     ProtocoleType,
     FieldActivity_ProtocoleType,
+    fieldActivity,
     ErrorAvailable,
     sendLog
 )
@@ -251,3 +253,18 @@ class ObservationsView(DynamicObjectCollectionView):
 
 
 RootCore.listChildren.append(('protocols', ObservationsView))
+
+
+@view_config(route_name='fieldActivity',
+             renderer='json',
+             request_method='GET')
+def getFieldActivityList(request):
+    session = request.dbsession
+
+    query = select([fieldActivity.ID.label('value'),
+                    fieldActivity.Name.label('label')])
+    result = session.execute(query).fetchall()
+    res = []
+    for row in result:
+        res.append({'label': row['label'], 'value': row['value']})
+    return sorted(res, key=lambda x: x['label'])
