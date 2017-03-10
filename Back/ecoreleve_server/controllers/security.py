@@ -34,7 +34,13 @@ class Resource(dict):
 
 class SecurityRoot(Resource):
     __acl__ = [
-        (Allow, Authenticated, 'read')
+         (Allow, Authenticated, 'read'),
+         (Allow, Authenticated, 'all'),
+         (Allow, 'group:admins', 'admin'),
+         (Allow, 'group:admins', 'superUser'),
+         (Allow, 'group:admins', 'all'),
+         (Allow, 'group:superUsers', 'superUser'),
+         (Allow, 'group:superUsers', 'all')
     ]
 
     def __init__(self, request):
@@ -43,14 +49,6 @@ class SecurityRoot(Resource):
 
     def __getitem__(self, item):
         return RootCore(item, self)
-
-    @property
-    def actions(self):
-        return self.__actions__
-
-    @actions.setter
-    def actions(self, dictActions):
-        self.__actions__.update(dictActions)
 
 
 class RootCore(SecurityRoot):
@@ -67,6 +65,9 @@ class RootCore(SecurityRoot):
 
     def __getitem__(self, item):
         return self.get(item)
+
+    def retrieve(self):
+        return {'next items': self}
 
 
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):

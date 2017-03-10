@@ -13,7 +13,7 @@ import json
 from datetime import datetime
 from sqlalchemy import select, join, desc
 from collections import OrderedDict
-from ..controllers.security import RootCore, Resource, SecurityRoot
+from ..controllers.security import RootCore, Resource, SecurityRoot, context_permissions
 from . import DynamicObjectView, DynamicObjectCollectionView
 from pyramid.traversal import find_root
 
@@ -82,6 +82,8 @@ class IndividualsView(DynamicObjectCollectionView):
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
+        self.__acl__ = context_permissions[ref]
+
         if not self.typeObj:
             self.typeObj = 1
 

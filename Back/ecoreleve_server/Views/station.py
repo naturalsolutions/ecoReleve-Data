@@ -13,7 +13,7 @@ import pandas as pd
 from sqlalchemy import select, and_, join
 from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore
-from . import DynamicObjectView, DynamicObjectCollectionView
+from . import DynamicObjectView, DynamicObjectCollectionView, context_permissions
 from .protocols import ObservationsView
 
 
@@ -66,6 +66,7 @@ class StationsView(DynamicObjectCollectionView):
         self.actions = {'updateSiteLocation': self.updateMonitoredSite,
                         'importGPX': self.getFormImportGPX
                         }
+        self.__acl__ = context_permissions[ref]
 
     def updateMonitoredSite(self):
         session = self.request.dbsession
@@ -195,7 +196,7 @@ class StationsView(DynamicObjectCollectionView):
                 'exceed': exceed}
         return data
 
-    def insert(self, request):
+    def insert(self):
         session = self.request.dbsession
         data = {}
         for items, value in self.request.json_body.items():
@@ -220,7 +221,7 @@ class StationsView(DynamicObjectCollectionView):
 
         return msg
 
-    def insertMany(self, request):
+    def insertMany(self):
         session = self.request.dbsession
         data = self.request.json_body
         data_to_insert = []

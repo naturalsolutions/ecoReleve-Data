@@ -7,7 +7,7 @@ from ..Models import (
 from sqlalchemy import select, desc, join
 from collections import OrderedDict
 from sqlalchemy.exc import IntegrityError
-from ..controllers.security import RootCore
+from ..controllers.security import RootCore, context_permissions
 from . import DynamicObjectView, DynamicObjectCollectionView
 
 
@@ -78,6 +78,10 @@ class SensorsView(DynamicObjectCollectionView):
     item = SensorView
     formModuleName = 'SensorForm'
     gridModuleName = 'SensorFilter'
+
+    def __init__(self, ref, parent):
+        DynamicObjectCollectionView.__init__(self, ref, parent)
+        self.__acl__ = context_permissions[ref]
 
     def insert(self):
         try:
