@@ -56,7 +56,10 @@ class Observation(Base, ObjectWithDynProp):
 
     @orm.reconstructor
     def init_on_load(self):
-        ObjectWithDynProp.__init__(self)
+        self.__init__()
+
+    def getTypeObjectFKName(self):
+        return 'FK_ProtocoleType'
 
     def GetNewValue(self, nameProp):
         ReturnedValue = ObservationDynPropValue()
@@ -159,7 +162,7 @@ class Observation(Base, ObjectWithDynProp):
         ObjectWithDynProp.UpdateFromJson(self, DTOObject, None)
         if 'listOfSubObs' in DTOObject:
             self.SubObservation_childrens = DTOObject['listOfSubObs']
-        self.updateLinkedField()
+        self.updateLinkedField(DTOObject)
 
     def GetFlatObject(self, schema=None):
         result = super().GetFlatObject()

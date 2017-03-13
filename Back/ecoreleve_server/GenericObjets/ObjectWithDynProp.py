@@ -20,6 +20,15 @@ Cle = {'String': 'ValueString',
 LinkedTables = {}
 
 
+class CheckingConstraintsException(Exception):
+
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return str(self.value) + ' failed'
+
+
 class ObjectWithDynProp:
     ''' Class to extend for mapped object with dynamic properties '''
     PropDynValuesOfNow = {}
@@ -29,6 +38,23 @@ class ObjectWithDynProp:
         self.ObjContext = threadlocal.get_current_request().dbsession
         self.PropDynValuesOfNow = {}
         self.GetAllProp()
+        self._constraintsFunctionLists = []
+
+    @property
+    def constraintsFunctionLists(self):
+        return self._constraintsFunctionLists
+
+    @constraintsFunctionLists.setter
+    def constraintsFunctionLists(self, list):
+        self._constraintsFunctionLists.extend(list)
+
+    def checkConstraintsOnData(self, data):
+        error = 0
+        for func in self._constraintsFunctionLists:
+            if not func(data):
+                error += 1
+                raise CheckingConstraintsException(func.__name__)
+        return error < 1
 
     def GetAllProp(self):
         ''' Get all object properties (dynamic and static) '''
@@ -136,6 +162,12 @@ class ObjectWithDynProp:
                 filters.append(curConf.GenerateFilter())
 
         return filters
+
+    def getTypeObjectName(self):
+        return self.__tablename__ + 'Type'
+
+    def getTypeObjectFKName(self):
+        return 'FK_' + self.__tablename__ + 'Type'
 
     def GetType(self):
         raise Exception("GetType not implemented in children")
@@ -265,12 +297,13 @@ class ObjectWithDynProp:
         ''' Function to call : update properties of new
         or existing object with JSON/dict of value'''
 
-        for curProp in DTOObject:
-            if (curProp.lower() != 'id' and DTOObject[curProp] != '-1'):
-                if (isinstance(DTOObject[curProp], str)
-                        and len(DTOObject[curProp].split()) == 0):
-                    DTOObject[curProp] = None
-                self.SetProperty(curProp, DTOObject[curProp], startDate)
+        if self.checkConstraintsOnData(DTOObject):
+            for curProp in DTOObject:
+                if (curProp.lower() != 'id' and DTOObject[curProp] != '-1'):
+                    if (isinstance(DTOObject[curProp], str)
+                            and len(DTOObject[curProp].split()) == 0):
+                        DTOObject[curProp] = None
+                    self.SetProperty(curProp, DTOObject[curProp], startDate)
 
     def GetFlatObject(self, schema=None):
         ''' return flat object with static properties and last existing value of dyn props '''
@@ -379,30 +412,36 @@ class ObjectWithDynProp:
     def linkedFieldDate(self):
         return datetime.now()
 
-    def updateLinkedField(self, useDate=None):
+    def updateLinkedField(self, DTOObject, useDate=None):
         if useDate is None:
             useDate = self.linkedFieldDate()
 
-        for linkProp in self.getLinkedField():
+        linkedFields = self.getLinkedField()
+        entitiesToUpdate = {}
+        for linkProp in linkedFields:
             curPropName = linkProp['Name']
-            obj = LinkedTables[linkProp['LinkedTable']]
-            try:
-                linkedSource = self.GetProperty(
-                    linkProp['LinkSourceID'].replace('@Dyn:', ''))
-                curObj = self.ObjContext.query(obj).filter(
-                    getattr(obj, linkProp['LinkedID']) == linkedSource).one()
-                curObj.init_on_load()
-                curObj.SetProperty(linkProp['LinkedField'].replace(
-                    '@Dyn:', ''), self.GetProperty(curPropName), useDate)
-            except:
-                pass
+            linkedEntity = LinkedTables[linkProp['LinkedTable']]
+            linkedPropName = linkProp['LinkedField'].replace('@Dyn:', '')
+            linkedSource = self.GetProperty(
+                linkProp['LinkSourceID'].replace('@Dyn:', ''))
+            linkedObj = self.ObjContext.query(linkedEntity).filter(
+                getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
+
+            if linkedObj in entitiesToUpdate:
+                entitiesToUpdate[linkedObj][linkedPropName] = self.GetProperty(curPropName)
+            else:
+                entitiesToUpdate[linkedObj] = {linkedPropName: self.GetProperty(curPropName)}
+
+        for entity in entitiesToUpdate:
+            data = entitiesToUpdate[entity]
+            entity.init_on_load()
+            entity.UpdateFromJson(data, startDate=useDate)
 
     def deleteLinkedField(self, useDate=None):
         session = dbConfig['dbSession']()
         if useDate is None:
             useDate = self.linkedFieldDate()
         for linkProp in self.getLinkedField():
-            curPropName = linkProp['Name']
             obj = LinkedTables[linkProp['LinkedTable']]
 
             try:

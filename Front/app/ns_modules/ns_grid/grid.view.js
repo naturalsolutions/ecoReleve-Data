@@ -751,8 +751,10 @@ define([
 
     onDestroy: function(){
       $(window).off('resize', this.onResize);
-      this.gridOptions.api.destroy();
-      this.grid.destroy();
+      if(this.gridOptions.api){
+        this.gridOptions.api.destroy();
+        this.grid.destroy();
+      }
     },
 
     exportData: function(){
