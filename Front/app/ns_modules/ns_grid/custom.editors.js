@@ -24,6 +24,7 @@ define([
 		};
 
 		CustomEditor.prototype.init = function(params){
+			console.log(params);
 			//Insert new line if this is last one
 			// if(params.node.lastChild){
 			// 	params.api.addItems([{}]); //redraw every rows
@@ -33,14 +34,20 @@ define([
 		  var col = params.column.colDef;
 
 		  var value = params.value;
-		  
-		  //var displayValue;
+
+			if(params.charPress){
+				if(value instanceof Object){
+					value.displayValue = params.charPress;
+					value.value = params.charPress;
+				} else {
+					value = params.charPress;
+				}
+			}
 
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,
 		    formGrid: true,
-				//displayValue: displayValue
 		  };
 
 		  var model = new Backbone.Model();
