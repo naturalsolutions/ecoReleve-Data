@@ -266,6 +266,10 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         displayValue = value;
       }
 
+      if(!displayValue){
+        displayValue = '';
+      }
+
       var url = 'http://' + window.location.hostname+window.location.pathname + '#' + this.objectName + '/' + rValue;
 
       var dictCSS = {
@@ -278,8 +282,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         rValue = '';
       }
       var tpl = '<div>\
-                    <a href="'+ url +'" class="'+dictCSS[this.objectName]+'" target="_blank">\
-                    </a>\
+                    <a href="'+ url +'" class="'+dictCSS[this.objectName]+' grid-link" target="_blank"></a>\
                     <span>' + displayValue + '</span> \
                 </div>';
       $(this.eGui).html(tpl);
@@ -348,7 +351,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       });
     };
 
-    var SelectRenderer = function() {}
+    var SelectRenderer = function(options) {}
     SelectRenderer.prototype = new CustomRenderer();
 
     Renderers.NumberRenderer = NumberRenderer;

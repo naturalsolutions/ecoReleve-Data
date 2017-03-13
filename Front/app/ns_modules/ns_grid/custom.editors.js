@@ -33,14 +33,11 @@ define([
 		  var col = params.column.colDef;
 
 		  var value = params.value;
-		  
-		  //var displayValue;
 
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,
-		    formGrid: true,
-				//displayValue: displayValue
+		    formGrid: true
 		  };
 
 		  var model = new Backbone.Model();
@@ -155,7 +152,7 @@ define([
 		AutocompleteEditor.prototype.getValue = function(){
 		  return {
 		  	value: this.element.getValue(),
-		  	label: this.element.$input[0].value //not sure why
+		  	displayValue: this.element.$input[0].value //not sure why
 		  } 
 		};
 
@@ -217,7 +214,7 @@ define([
 		SelectEditor.prototype.getValue = function(){
 			return {
 				value: this.element.getValue(),
-				label: this.element.$el.find('option:selected').text(),
+				displayValue: this.element.$el.find('option:selected').text(),
 			}
 		};
 
