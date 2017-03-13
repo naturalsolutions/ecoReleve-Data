@@ -593,10 +593,11 @@ define([
       var isEmpty = true;
 
       for( var key in values ) {
+
         var editorValue = values[key];
         var editorSchema = objSchema[key];
-
-        if(key == 'defaultValues') {
+        
+        if(key == 'defaultValues' || key == 'Parent_Observation') {
           continue;
         }
         if(editorSchema.fieldClass.indexOf('hide') != -1) {

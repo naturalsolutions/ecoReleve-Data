@@ -57,7 +57,7 @@ def loadThesaurusTrad(config):
     results = session.execute(query).fetchall()
 
     for row in results:
-        thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr': row['nameFr']}
+        thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr':row['nameFr']}
         invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
         invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
     session.close()

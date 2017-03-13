@@ -31,6 +31,11 @@ class ErrorCheckIndividualCodes(Exception):
 class Individual (Base, ObjectWithDynProp):
 
     __tablename__ = 'Individual'
+
+
+    FrontModuleForm = 'IndivForm'
+    FrontModuleGrid = 'IndivGrid'
+
     ID = Column(Integer, Sequence('Individual__id_seq'), primary_key=True)
     creationDate = Column(DateTime, nullable=False, default=func.now())
     Species = Column(String(250))

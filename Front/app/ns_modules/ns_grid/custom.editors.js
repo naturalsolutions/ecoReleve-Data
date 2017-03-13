@@ -33,17 +33,14 @@ define([
 		  var col = params.column.colDef;
 
 		  var value = params.value;
-		  var valueToDisplay;
-		  if(value instanceof Object){
-				valueToDisplay = params.value.label;
-		  	value = params.value.value;
-		  }
+		  
+		  //var displayValue;
 
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,
 		    formGrid: true,
-				valueToDisplay: valueToDisplay
+				//displayValue: displayValue
 		  };
 
 		  var model = new Backbone.Model();
@@ -105,7 +102,6 @@ define([
 		};
 
 
-
     var ThesaurusEditor = function () {};
 		ThesaurusEditor.prototype = new CustomEditor();
 
@@ -115,17 +111,21 @@ define([
 			this.bbfe.itemClick = function(){
 				_this.element.$el.change();
 			};
+			this.bbfe.getValue = function(){
+				var value = this.getDisplayedValue();
+				this.onEditValidation(value);
+				return ThesaurusPicker.prototype.getValue.call(this,options);
+			};
 		  this.element = this.bbfe.render();
 		};
 
 		ThesaurusEditor.prototype.getValue = function(){
 		  return {
 		  	value: this.element.getValue(),
-		  	label: this.element.getDisplayedValue(),
+		  	displayValue: this.element.getDisplayedValue(),
+				error: this.element.isTermError,
 		  }
 		};
-
-
 
 
     var ObjectPickerEditor = function () {};
@@ -139,7 +139,7 @@ define([
 		ObjectPickerEditor.prototype.getValue = function(){
 		  return {
 		  	value: this.element.getValue(),
-		  	label: this.element.getDisplayValue(),
+		  	displayValue: this.element.getDisplayValue(),
 		  }
 		};
 
@@ -192,9 +192,6 @@ define([
 		};
 
 
-
-
-
     var DateTimeEditor = function () {};
 
     DateTimeEditor.prototype = new CustomEditor();
@@ -203,7 +200,6 @@ define([
 		  this.element = this.bbfe.render();
 
 		};
-
 
     var SelectEditor = function () {};
 
@@ -224,8 +220,6 @@ define([
 				label: this.element.$el.find('option:selected').text(),
 			}
 		};
-
-
 
 
 		Editors.ThesaurusEditor = ThesaurusEditor;

@@ -6,7 +6,7 @@ from datetime import datetime
 from .FrontModules import FrontModules, ModuleForms, ModuleGrids
 from pyramid import threadlocal
 from ..utils.datetime import parse
-from ..utils.parseValue import find, isEqual
+from ..utils.parseValue import find, isEqual, formatValue
 from sqlalchemy_utils import get_hybrid_properties
 
 Cle = {'String': 'ValueString',
@@ -96,11 +96,11 @@ class ObjectWithDynProp:
             self.GetAllProp()
         return find(lambda x: x['name'].lower() == nameProp.lower(), self.allProp)
 
-    def GetFrontModulesID(self, ModuleType):
+    def GetFrontModules(self, ModuleType):
         if not hasattr(self, 'FrontModules'):
             self.FrontModules = self.ObjContext.query(
                 FrontModules).filter(FrontModules.Name == ModuleType).one()
-        return self.FrontModules.ID
+        return self.FrontModules
 
     def GetGridFields(self, ModuleType):
         ''' Function to call : return Name and Type of Grid fields to display in front end
@@ -109,13 +109,13 @@ class ObjectWithDynProp:
             typeID = self.GetType().ID
             gridFields = self.ObjContext.query(ModuleGrids
                                                ).filter(
-                and_(ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType),
+                and_(ModuleGrids.Module_ID == self.GetFrontModules(ModuleType).ID,
                      or_(ModuleGrids.TypeObj == typeID, ModuleGrids.TypeObj == None))
             ).filter(
                 ModuleGrids.GridRender > 0).order_by(asc(ModuleGrids.GridOrder)).all()
         except:
             gridFields = self.ObjContext.query(ModuleGrids).filter(
-                ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
+                ModuleGrids.Module_ID == self.GetFrontModules(ModuleType).ID
             ).filter(ModuleGrids.GridRender > 0).order_by(asc(ModuleGrids.GridOrder)).all()
 
         cols = []
@@ -148,7 +148,7 @@ class ObjectWithDynProp:
         except:
             filterFields = self.ObjContext.query(ModuleGrids
                                                  ).filter(
-                ModuleGrids.Module_ID == self.GetFrontModulesID(ModuleType)
+                ModuleGrids.Module_ID == self.GetFrontModules(ModuleType).ID
             ).order_by(asc(ModuleGrids.FilterOrder)).all()
 
         for curConf in filterFields:
@@ -307,6 +307,7 @@ class ObjectWithDynProp:
 
     def GetFlatObject(self, schema=None):
         ''' return flat object with static properties and last existing value of dyn props '''
+
         resultat = {}
         hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
         if self.ID is not None:
@@ -344,7 +345,9 @@ class ObjectWithDynProp:
                             curStatProp.key)
                 except:
                     pass
-
+        if not schema:
+            schema = self.GetForm()['schema']
+        resultat = formatValue(resultat, schema)
         return resultat
 
     def GetSchemaFromStaticProps(self, FrontModules, DisplayMode):
@@ -368,7 +371,11 @@ class ObjectWithDynProp:
                     Editable)
         return resultat
 
-    def GetForm(self, FrontModules, DisplayMode):
+    def GetForm(self, FrontModules=None, DisplayMode='edit'):
+
+        if FrontModules is None:
+            FrontModules = self.GetFrontModules(self.FrontModuleForm)
+
         schema = self.GetSchemaFromStaticProps(FrontModules, DisplayMode)
         ObjType = self.GetType()
         ObjType.AddDynamicPropInSchemaDTO(schema, FrontModules, DisplayMode)
