@@ -6,12 +6,11 @@ define([
   'backbone',
   'marionette',
   'config',
-  'sweetAlert',
   'ns_form/NSFormsModuleGit',
   'i18n',
 
 
-], function($, _, Backbone, Marionette, config, Swal, NsForm) {
+], function($, _, Backbone, Marionette, config, NsForm) {
 
   'use strict';
 
@@ -59,9 +58,8 @@ define([
       // //   ws2.onopen = function(){
       //   console.log(' websocket 222 is open')
       // };
-
-
     },
+
     loadCollection: function(url, element) {
       var _this = this;
       var collection =  new Backbone.Collection();
@@ -83,10 +81,10 @@ define([
       });
     },
 
-
     setProtocol: function(e) {
       var protocolID = $(e.target).val();
       var protocoleName = $('select option:selected').text();
+
       if(protocolID) {
           $('#btnNext').removeAttr('disabled');
           $(this.ui.newproto).val('');
@@ -95,23 +93,26 @@ define([
 
           this.model.set('protoName',protocoleName);
           this.model.set('protoID',protocolID);
+
       } else {
+
         $('#btnNext').attr('disabled','disabled');
         $('.template').addClass('hidden');
+
       }
-
-
     },
+
     setNewProto : function(){
       var name = $(this.ui.newproto).val();
       if(name) {
         // check if nalme don't exists
-        for(var i=0;i<this.protocols.length;i++){
+        for(var i = 0; i < this.protocols.length; i++){
+
           if(this.protocols[i].toUpperCase() == name.toUpperCase()) {
             alert('name exists !');
             $(this.ui.newproto).val('');
             $('.template').addClass('hidden');
-            return ;
+            return;
           }
         }
         $('select[name="protocols"]').val('');
@@ -124,43 +125,40 @@ define([
       }
 
     },
+
     onDestroy: function() {
     },
+
     getExcelTpl : function(){
       var _this = this;
+
       var protoId = this.model.get('protoID');
       var protoName = this.model.get('protoName');
-      var url =  config.coreUrl + 'file_import/getTemplate?' + 'id=' + protoId + '&name=' + protoName ;
+
+      var url =  config.coreUrl + 'file_import/getTemplate?' + 'id=' + protoId + '&name=' + protoName;
       var link = document.createElement('a');
       link.classList.add('DowloadLinka');
       link.href = url;
+
       link.onclick = function () {
+
             var href = $(link).attr('href');
             window.location.href = link;
             document.body.removeChild(link);
-
-             Swal({
-                title: 'Loading file succeeded!',
-                text:  '',
-                type:'success',
-                showCancelButton: false,
-                confirmButtonColor: false,
-                confirmButtonText:'ok',
-
-            });
+            
+             var options = {
+              title: 'Loading file succeeded!',
+            };
+            window.swal(options, 'success', false);
         };
 
         document.body.appendChild(link);
         link.click();
-
-        // end 
-
-
     },
+
     validate: function() {
       return true;
     }
-
 
   });
 });
