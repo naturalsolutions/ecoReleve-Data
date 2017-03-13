@@ -28,9 +28,8 @@ def error_view(exc, request):
 def notfound(request):
     return HTTPNotFound('Not found')
 
+
 # test if the match url is integer
-
-
 def integers(*segment_names):
     def predicate(info, request):
         match = info['match']
@@ -243,3 +242,17 @@ def add_routes(config):
                      'ecoReleve-Core/export/views/{id}/{action}')  # filtres,cols,count
     config.add_route('export/views/getFile',
                      'ecoReleve-Core/export/views/getFile')  # getFile
+
+    # Excel file import
+    config.add_route('file_import/getTemplate',
+                     'ecoReleve-Core/file_import/getTemplate')
+    config.add_route('file_import/getExcelFile',
+                     'ecoReleve-Core/file_import/getExcelFile')
+    config.add_route('file_import/processList',
+                     'ecoReleve-Core/file_import/processList')
+
+    # Web sockets call
+    # config.add_view(JobView,
+    #                 context=FileImportJob,
+    #                 custom_predicates=[is_websocket],
+    #                 permission=NO_PERMISSION_REQUIRED)

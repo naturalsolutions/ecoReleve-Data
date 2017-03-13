@@ -4,6 +4,7 @@ from pyramid.security import (
     Allow,
     Authenticated,
 )
+from .WebSocket import WebsocketsRoot
 
 
 class SecurityRoot(object):
@@ -20,6 +21,12 @@ class SecurityRoot(object):
 
     def __init__(self, request):
         self.request = request
+        self.__name__ = ''
+        self.__parent__ = None
+
+    def __getitem__(self, item):
+        if item == 'ecoReleve-Websockets':
+            return WebsocketsRoot(item, self)
 
 
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
