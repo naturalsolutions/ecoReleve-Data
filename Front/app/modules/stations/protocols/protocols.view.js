@@ -33,7 +33,7 @@ define([
     onShow: function(){
       var _this = this; 
       this.collection.fetch({
-        url: 'stations/' + _this.model.get('id') + '/protocols',
+        url: 'stations/' + _this.model.get('id') + '/observations',
         reset: true,
         data: {
           FormName: 'ObsForm',
@@ -198,7 +198,7 @@ define([
       var _this = this;
       this.protoSelectList = new Backbone.Collection();
       this.protoSelectList.fetch({
-        url: '/protocolTypes',
+        url: '/protocols/getType',
         reset: true,
         success: function() {
           _.each(_this.protoSelectList.models,function(model) {

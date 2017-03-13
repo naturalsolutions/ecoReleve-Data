@@ -102,9 +102,9 @@ def db(request):
     makerDefault = request.registry.dbmaker
     session = makerDefault()
 
-    if 'ecoReleve-Core/export/' in request.url:
-        makerExport = request.registry.dbmakerExport
-        session = makerExport()
+    # if 'ecoReleve-Core/export/' in request.url:
+    #     makerExport = request.registry.dbmakerExport
+    #     session = makerExport()
 
     def cleanup(request):
         if request.exception is not None:

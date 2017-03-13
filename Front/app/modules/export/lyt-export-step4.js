@@ -91,7 +91,7 @@ define([
       };
 
       if (this.model.get('fileType') == 'excel'){
-        var url =  Config.coreUrl+'export/views/getFile?criteria='+JSON.stringify(this.datas);
+        var url =  Config.coreUrl+'export/views/'+this.model.get('viewId')+'/getFile?criteria='+JSON.stringify(this.datas);
         var link = document.createElement('a');
         link.classList.add('DowloadLinka');
 
@@ -123,7 +123,7 @@ define([
         link.click();
       } else {
 
-        var route = 'export/views/getFile';
+        var route = 'export/views/'+ this.model.get('viewId') +'/getFile';
         $.ajax({
           url: route,
           data: {criteria: JSON.stringify(this.datas)},

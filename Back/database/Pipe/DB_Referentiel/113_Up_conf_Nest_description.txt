@@ -1,0 +1,11 @@
+
+update f SET Options = '{"withToggle":1}'
+  FROM [ModuleForms] f 
+  where Name = 'Fk_Individual' and TypeObj = 225
+  GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('113_Up_conf_Nest_description',GETDATE(),(SELECT db_name()))
+
+
+GO
