@@ -131,7 +131,7 @@ define([
         headerName: 'N°',
         cellRenderer: function(params){
           if(!params.api.firstRenderPassed){
-            params.data[params.colDef.field] = params.rowIndex + 1;
+            params.data[params.colDef.field] = String(params.rowIndex + 1);
             return params.rowIndex + 1;
           } else {
             return params.value;   

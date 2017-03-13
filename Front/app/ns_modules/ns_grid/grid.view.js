@@ -885,6 +885,9 @@ define([
             if(key == '_errors' && node.data._errors) {
               continue;
             }
+            if(key == 'index') {
+              continue;
+            }
 
             //if val == {value, label} then check value
             var val = node.data[key];

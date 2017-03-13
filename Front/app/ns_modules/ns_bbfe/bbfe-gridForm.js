@@ -40,7 +40,7 @@ define([
 
     className: 'sub-grid-form' ,
     addRow: function(){
-      this.gridView.gridOptions.api.addItems([{}]);
+      this.gridView.gridOptions.api.addItems([{'index': '_'}]);
       this.$el.trigger('change');
     },
 
@@ -156,6 +156,22 @@ define([
       var odrFields = schema.fieldsets[0].fields;
                         
       var columnsDefs = [];
+
+      var colDefIndex = {
+        editable: false,
+        field: 'index',
+        headerName: 'N°',
+        cellRenderer: function(params){
+          if(!params.api.firstRenderPassed){
+            params.data[params.colDef.field] = String(params.rowIndex + 1);
+            return params.rowIndex + 1;
+          } else {
+            return params.value;   
+          }
+        }
+      };
+
+      columnsDefs.push(colDefIndex);
 
       for (var i = 0; i < odrFields.length; i++) {
         var field = schema.subschema[odrFields[i]];
