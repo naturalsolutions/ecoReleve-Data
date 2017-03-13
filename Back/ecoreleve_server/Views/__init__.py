@@ -137,7 +137,10 @@ class DynamicObjectView(CustomView):
         return self.objectDB.GetDTOWithSchema(conf, displayMode)
 
     def retrieve(self):
-        return self.getDataWithForm()
+        if 'FormName' in self.request.params:
+            return self.getDataWithForm()
+        else:
+            return self.getData()
 
     def update(self):
         data = self.request.json_body
