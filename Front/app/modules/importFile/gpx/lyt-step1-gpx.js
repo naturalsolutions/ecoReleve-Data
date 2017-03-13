@@ -102,7 +102,7 @@ define([
 
           _this.model.set('data_FileContent', _this.wayPointList);
 
-          if (_this.wayPointList.length > 0) {
+          if (_this.wayPointList.length > 0 || (errosList.length > 0)) {
             if (errosList.length > 0) {
                 _this.deferred.resolve();
                 _this.errors = true;
