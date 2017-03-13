@@ -40,7 +40,8 @@ define([
 
     className: 'sub-grid-form' ,
     addRow: function(){
-      this.gridView.gridOptions.api.addItems([{'index': '_'}]);
+      this.gridView.gridOptions.api.setSortModel({});
+      this.gridView.gridOptions.api.addItems([{}]);
       this.$el.trigger('change');
     },
 
@@ -51,13 +52,8 @@ define([
         return;
       }
       
-      // var opt = {
-      //   title: 'Are you sure?',
-      //   text: 'selected rows will be deleted'
-      // };
-      // window.swal(opt, 'warning', function() {
-      //   _this.gridView.gridOptions.api.removeItems(selectedNodes);
-      // });
+      this.gridView.gridOptions.api.setSortModel({});
+
       _this.gridView.gridOptions.api.removeItems(selectedNodes);
       this.$el.trigger('change');
     },
@@ -161,12 +157,20 @@ define([
         editable: false,
         field: 'index',
         headerName: 'N°',
+        width: 50,
+        minWidth: 50,
+        maxWidth: 50,
+        pinned: 'left',
+        suppressNavigable: true,
+        suppressFilter: true,
+        suppressMovable: true,
+        suppressSizeToFit: true,
         cellRenderer: function(params){
-          if(!params.api.firstRenderPassed){
-            params.data[params.colDef.field] = String(params.rowIndex + 1);
+          if(!params.value){
+            params.data[params.colDef.field] = params.rowIndex + 1;
             return params.rowIndex + 1;
           } else {
-            return params.value;   
+            return params.value;
           }
         }
       };
@@ -214,6 +218,8 @@ define([
       if(rowDataAndErrors.errors.length){
         this.isError = true;
       }
+
+      this.gridView.gridOptions.api.setSortModel({});
 
       for (var i = 0; i < rowDataAndErrors.rowData.length; i++) {
         rowDataAndErrors.rowData[i]['FK_ProtocoleType'] = this.subProtocolType;

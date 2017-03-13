@@ -886,6 +886,7 @@ define([
               continue;
             }
             if(key == 'index') {
+              console.log(node.data.index);
               continue;
             }
 
