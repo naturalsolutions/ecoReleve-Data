@@ -24,6 +24,7 @@ define([
 		};
 
 		CustomEditor.prototype.init = function(params){
+			console.log(params);
 			//Insert new line if this is last one
 			// if(params.node.lastChild){
 			// 	params.api.addItems([{}]); //redraw every rows
