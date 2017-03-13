@@ -85,7 +85,7 @@ define([
 
     loadFieldsActivity: function() {
       return $.ajax({
-        url: 'fieldActivity',
+        url: 'stations/fieldActivity',
         method: 'GET',
         context: this,
       }).done(function(data){

@@ -4,6 +4,7 @@ from ..Models import (
     Station_FieldWorker,
     StationList,
     MonitoredSitePosition,
+    fieldActivity,
     User
 )
 import json
@@ -13,12 +14,26 @@ import pandas as pd
 from sqlalchemy import select, and_, join
 from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore
-from . import DynamicObjectView, DynamicObjectCollectionView
+from . import DynamicObjectView, DynamicObjectCollectionView, context_permissions
+from .protocols import ObservationsView
 
 
 class StationView(DynamicObjectView):
 
     model = StationDB
+
+    def __init__(self, ref, parent):
+        DynamicObjectView.__init__(self, ref, parent)
+        self.add_child('observations', ObservationsView)
+
+    def __getitem__(self, ref):
+        if ref in self.actions:
+            self.retrieve = self.actions.get(ref)
+            return self
+        return self.get(ref)
+
+    def getObs(self, ref):
+        return ObservationsView(ref, self)
 
     def update(self):
         data = self.request.json_body
@@ -50,8 +65,10 @@ class StationsView(DynamicObjectCollectionView):
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
         self.actions = {'updateSiteLocation': self.updateMonitoredSite,
-                        'importGPX': self.getFormImportGPX
+                        'importGPX': self.getFormImportGPX,
+                        'fieldActivity': self.getFieldActivityList
                         }
+        self.__acl__ = context_permissions[ref]
 
     def updateMonitoredSite(self):
         session = self.request.dbsession
@@ -127,6 +144,15 @@ class StationsView(DynamicObjectCollectionView):
             paging = True
         return self.search(paging=paging)
 
+    def getFieldActivityList(self):
+        query = select([fieldActivity.ID.label('value'),
+                        fieldActivity.Name.label('label')])
+        result = self.session.execute(query).fetchall()
+        res = []
+        for row in result:
+            res.append({'label': row['label'], 'value': row['value']})
+        return sorted(res, key=lambda x: x['label'])
+
     def getFieldWorkers(self, data):
         queryCTE = self.collection.fullQueryJoinOrdered.cte()
         joinFW = join(Station_FieldWorker, User,
@@ -181,7 +207,7 @@ class StationsView(DynamicObjectCollectionView):
                 'exceed': exceed}
         return data
 
-    def insert(self, request):
+    def insert(self):
         session = self.request.dbsession
         data = {}
         for items, value in self.request.json_body.items():
@@ -206,7 +232,7 @@ class StationsView(DynamicObjectCollectionView):
 
         return msg
 
-    def insertMany(self, request):
+    def insertMany(self):
         session = self.request.dbsession
         data = self.request.json_body
         data_to_insert = []

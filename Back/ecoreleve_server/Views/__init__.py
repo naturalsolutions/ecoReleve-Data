@@ -2,10 +2,10 @@ from pyramid.httpexceptions import HTTPNotFound
 from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
 from ..Models import sendLog, FrontModules, Base
-from ..controllers.security import SecurityRoot, Resource
+from ..controllers.security import SecurityRoot, Resource, context_permissions
 from pyramid.traversal import find_root
 from collections import OrderedDict
-from sqlalchemy import select, join, desc
+from sqlalchemy import select, join, desc, asc
 import json
 from datetime import datetime
 
@@ -31,7 +31,7 @@ def error_view(exc, request):
     return exc
 
 
-class DynamicObjectView(SecurityRoot):
+class CustomView(SecurityRoot):
 
     def __init__(self, ref, parent):
         Resource.__init__(self, ref, parent)
@@ -39,17 +39,85 @@ class DynamicObjectView(SecurityRoot):
         root = find_root(self)
         self.request = root.request
         self.session = root.request.dbsession
-        self.__actions__ = {'history': self.history,
-                            }
-
-        if self.integers(ref):
-            self.objectDB = self.session.query(self.model).get(ref)
+        self.__actions__ = {}
 
     def __getitem__(self, ref):
         if ref in self.actions:
             self.retrieve = self.actions.get(ref)
             return self
         return self.item(ref, self)
+
+    @property
+    def actions(self):
+        return self.__actions__
+
+    @actions.setter
+    def actions(self, dictActions):
+        self.__actions__.update(dictActions)
+
+    @property
+    def item(self):
+        raise Exception('method has to be overriden')
+
+    def retrieve(self):
+        raise Exception('method has to be overriden')
+
+
+class AutocompleteView(CustomView):
+
+    def __init__(self, ref, parent):
+        CustomView.__init__(self, ref, parent)
+        self.__actions__ = {}
+        self.targetValue = None
+        self.attribute = None
+
+    def __getitem__(self, ref):
+        if self.attribute:
+            self.targetValue = ref
+        else:
+            self.attribute = ref
+        return self
+
+    def retrieve(self):
+        objName = self.parent.item.model.__tablename__
+        criteria = self.request.params['term']
+        prop = self.attribute
+
+        if self.integers(prop):
+            table = Base.metadata.tables[objName + 'DynPropValuesNow']
+            query = select([table.c['ValueString'].label('label'),
+                            table.c['ValueString'].label('value')]
+                           ).distinct(table.c['ValueString']
+                                      ).where(table.c['FK_' + objName + 'DynProp'] == prop)
+            query = query.where(table.c['ValueString'].like('%' + criteria + '%')
+                                ).order_by(asc(table.c['ValueString']))
+        else:
+            NameValReturn = prop
+            if self.targetValue:
+                NameValReturn = self.targetValue
+
+            table = Base.metadata.tables[objName]
+            query = select([table.c[NameValReturn].label('value'),
+                            table.c[prop].label('label')]
+                           ).distinct(table.c[prop])
+            query = query.where(table.c[prop].like(
+                '%' + criteria + '%')).order_by(asc(table.c[prop]))
+
+        return [dict(row) for row in self.session.execute(query).fetchall()]
+
+
+class DynamicObjectView(CustomView):
+
+    def __init__(self, ref, parent):
+        CustomView.__init__(self, ref, parent)
+        self.__actions__ = {'history': self.history,
+                            }
+
+        if self.integers(ref):
+            self.objectDB = self.session.query(self.model).get(ref)
+
+        '''Set security according to permissions dict... yes just that ! '''
+        self.__acl__ = context_permissions[parent.__name__]
 
     @property
     def model(self):
@@ -69,7 +137,10 @@ class DynamicObjectView(SecurityRoot):
         return self.objectDB.GetDTOWithSchema(conf, displayMode)
 
     def retrieve(self):
-        return self.getDataWithForm()
+        if 'FormName' in self.request.params:
+            return self.getDataWithForm()
+        else:
+            return self.getData()
 
     def update(self):
         data = self.request.json_body
@@ -119,13 +190,10 @@ class DynamicObjectView(SecurityRoot):
         return response
 
 
-class DynamicObjectCollectionView(SecurityRoot):
+class DynamicObjectCollectionView(CustomView):
 
     def __init__(self, ref, parent):
-        Resource.__init__(self, ref, parent)
-        root = find_root(self)
-        self.request = root.request
-        self.session = root.request.dbsession
+        CustomView.__init__(self, ref, parent)
         self.objectDB = self.item.model()
 
         if 'typeObj' in self.request.params and self.request.params['typeObj'] is not None:
@@ -141,7 +209,7 @@ class DynamicObjectCollectionView(SecurityRoot):
                             'getFilters': self.getFilter,
                             'getType': self.getType,
                             'export': self.export,
-                            'count': self.count_
+                            'count': self.count_,
                             }
 
     def __getitem__(self, ref):
@@ -149,21 +217,11 @@ class DynamicObjectCollectionView(SecurityRoot):
         else override the retrieve functions by the action name '''
         if self.integers(ref):
             return self.item(ref, self)
+        elif ref == 'autocomplete':
+            return AutocompleteView(ref, self)
         else:
             self.retrieve = self.actions.get(ref)
             return self
-
-    @property
-    def actions(self):
-        return self.__actions__
-
-    @actions.setter
-    def actions(self, dictActions):
-        self.__actions__.update(dictActions)
-
-    @property
-    def item(self):
-        raise Exception('method has to be overriden')
 
     @property
     def formModuleName(self):
@@ -285,8 +343,7 @@ class DynamicObjectCollectionView(SecurityRoot):
         if objectType is None:
             objectType = self.request.params['ObjectType']
         Conf = self.getConf(moduleName)
-        self.setType(objectType)
-        # setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
+        self.setType(int(objectType))
         schema = self.objectDB.GetDTOWithSchema(Conf, mode)
         return schema
 
@@ -343,23 +400,23 @@ class RESTView(object):
         self.request = request
         self.context = context
 
-    @view_config(request_method='GET', renderer='json')
+    @view_config(request_method='GET', renderer='json', permission='read')
     def get(self):
         return self.context.retrieve()
 
-    @view_config(request_method='POST', renderer='json')
+    @view_config(request_method='POST', renderer='json', permission='create')
     def post(self):
         return self.context.create()
 
-    @view_config(request_method='DELETE', renderer='json')
+    @view_config(request_method='DELETE', renderer='json', permission='delete')
     def delete(self):
         return self.context.delete()
 
-    @view_config(request_method='PATCH', renderer='json')
+    @view_config(request_method='PATCH', renderer='json', permission='update')
     def patch(self):
         return self.context.update()
 
-    @view_config(request_method='PUT', renderer='json')
+    @view_config(request_method='PUT', renderer='json', permission='update')
     def put(self):
         return self.context.update()
 
@@ -416,77 +473,9 @@ def add_routes(config):
     config.add_route('autocomplete/ID',
                      'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
 
-    # Stations
-    config.add_route('area', 'ecoReleve-Core/area')
-    config.add_route('locality', 'ecoReleve-Core/locality')
-
-    # GET Stations/Protocols (with obs ids)
-    config.add_route('stations/id/protocols',
-                     'ecoReleve-Core/stations/{id}/protocols',
-                     custom_predicates=(integers('id'),))
-    config.add_route('stations/id/protocols/',
-                     'ecoReleve-Core/stations/{id}/protocols/',
-                     custom_predicates=(integers('id'),))
-
-    # Observations
-    # PUT GET DELETE
-    config.add_route('stations/id/observations/obs_id',
-                     'ecoReleve-Core/stations/{id}/observations/{obs_id}',
-                     custom_predicates=(integers('id', 'obs_id'),))
-
-    # BATCH (POST also used for PUT & DELETE) ?objectType
-    config.add_route('stations/id/observations/batch',
-                     'ecoReleve-Core/stations/{id}/observations/batch',
-                     custom_predicates=(integers('id'),))
-
-    # Action (action == 0 == form)
-    config.add_route('stations/id/observations/action',
-                     'ecoReleve-Core/stations/{id}/observations/{action}',
-                     custom_predicates=(integers('id'),))
-
-    # POST GET ?objType
-    config.add_route('stations/id/observations',
-                     'ecoReleve-Core/stations/{id}/observations',
-                     custom_predicates=(integers('id'),))
-
-    # Protocols
-    config.add_route('protocols', 'ecoReleve-Core/protocols/')
-
-    config.add_route('protocols/id',
-                     'ecoReleve-Core/protocols/{id}',
-                     custom_predicates=(integers('id'),))
-
-    config.add_route('protocols/action', 'ecoReleve-Core/protocols/{action}')
-
-    # Protocols types
-    config.add_route('protocolTypes', 'ecoReleve-Core/protocolTypes')
-
-    # FieldActivity
-    config.add_route('fieldActivity', 'ecoReleve-Core/fieldActivity')
-
     # Sensors datas (Argos + GSM + RFID)
     config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
     config.add_route('sensors/uncheckedDatas',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
-
-    # Release
-    config.add_route('release', 'ecoReleve-Core/release/')
-    config.add_route('release/individuals',
-                     'ecoReleve-Core/release/individuals/')
-    config.add_route('release/individuals/action',
-                     'ecoReleve-Core/release/individuals/{action}')
-    config.add_route('release/action', 'ecoReleve-Core/release/{action}')
-
-    # Export
-    config.add_route('export', 'ecoReleve-Core/export/')
-    config.add_route('export/themes', 'ecoReleve-Core/export/themes')
-    config.add_route('export/themes/id/views',
-                     'ecoReleve-Core/export/themes/{id}/views')
-    config.add_route('export/views/id',
-                     'ecoReleve-Core/export/views/{id}/')  # geo, datas
-    config.add_route('export/views/id/action',
-                     'ecoReleve-Core/export/views/{id}/{action}')  # filtres,cols,count
-    config.add_route('export/views/getFile',
-                     'ecoReleve-Core/export/views/getFile')  # getFile

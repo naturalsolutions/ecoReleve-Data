@@ -7,7 +7,7 @@ from ..Models import (
 from sqlalchemy import select, desc, join
 from collections import OrderedDict
 from sqlalchemy.exc import IntegrityError
-from ..controllers.security import RootCore
+from ..controllers.security import RootCore, context_permissions
 from . import DynamicObjectView, DynamicObjectCollectionView
 
 
@@ -79,6 +79,11 @@ class SensorsView(DynamicObjectCollectionView):
     formModuleName = 'SensorForm'
     gridModuleName = 'SensorFilter'
 
+    def __init__(self, ref, parent):
+        DynamicObjectCollectionView.__init__(self, ref, parent)
+        self.actions = {'getUnicIdentifier': self.getUnicIdentifier}
+        self.__acl__ = context_permissions[ref]
+
     def insert(self):
         try:
             response = DynamicObjectCollectionView.insert(self)
@@ -88,6 +93,14 @@ class SensorsView(DynamicObjectCollectionView):
             response = self.request.response
             response.text = "This identifier is already used for another sensor"
             pass
+        return response
+
+    def getUnicIdentifier(self):
+        sensorType = self.request.params['sensorType']
+        query = select([Sensor.UnicIdentifier.label('label'), Sensor.ID.label(
+            'val')]).where(Sensor.FK_SensorType == sensorType)
+        response = [OrderedDict(row) for row in self.session.execute(query).fetchall()]
+
         return response
 
 

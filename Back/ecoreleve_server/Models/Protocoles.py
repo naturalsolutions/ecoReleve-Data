@@ -58,6 +58,9 @@ class Observation(Base, ObjectWithDynProp):
     def init_on_load(self):
         self.__init__()
 
+    def getTypeObjectFKName(self):
+        return 'FK_ProtocoleType'
+
     def GetNewValue(self, nameProp):
         ReturnedValue = ObservationDynPropValue()
         ReturnedValue.ObservationDynProp = self.ObjContext.query(

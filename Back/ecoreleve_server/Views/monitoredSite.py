@@ -12,7 +12,7 @@ import json
 from sqlalchemy import select, desc, join
 from sqlalchemy.exc import IntegrityError
 from collections import OrderedDict
-from ..controllers.security import RootCore
+from ..controllers.security import RootCore, context_permissions
 from . import DynamicObjectView, DynamicObjectCollectionView
 
 
@@ -139,6 +139,8 @@ class MonitoredSitesView(DynamicObjectCollectionView):
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
+        self.__acl__ = context_permissions[ref]
+
         if not self.typeObj:
             self.typeObj = 1
 

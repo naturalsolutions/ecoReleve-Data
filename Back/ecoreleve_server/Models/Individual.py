@@ -114,7 +114,7 @@ class Individual (Base, ObjectWithDynProp):
 
         else:
             nbExistingValue = 0
-        return nbExistingValue < 1
+        return True
 
 
 class IndividualDynProp (Base):
