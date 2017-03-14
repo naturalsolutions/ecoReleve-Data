@@ -51,11 +51,12 @@ define([
       if(!selectedNodes.length){
         return;
       }
-      
-      this.gridView.gridOptions.api.setSortModel({});
 
+      this.gridView.gridOptions.api.deletingRows = true;
+      this.gridView.gridOptions.api.setSortModel({});
       _this.gridView.gridOptions.api.removeItems(selectedNodes);
       this.$el.trigger('change');
+      this.gridView.gridOptions.api.deletingRows = false;
     },
 
     initialize: function(options){
@@ -111,6 +112,7 @@ define([
         columns: this.formatColumns(options.schema),
         clientSide: true,
         url: url,
+        displayRowIndex: true,
         gridOptions: {
           editType: 'fullRow',
           singleClickEdit : true,
@@ -149,33 +151,10 @@ define([
     },
 
     formatColumns: function(schema){
+      var _this = this;
       var odrFields = schema.fieldsets[0].fields;
                         
       var columnsDefs = [];
-
-      var colDefIndex = {
-        editable: false,
-        field: 'index',
-        headerName: 'N°',
-        width: 50,
-        minWidth: 50,
-        maxWidth: 50,
-        pinned: 'left',
-        suppressNavigable: true,
-        suppressFilter: true,
-        suppressMovable: true,
-        suppressSizeToFit: true,
-        cellRenderer: function(params){
-          if(!params.value){
-            params.data[params.colDef.field] = params.rowIndex + 1;
-            return params.rowIndex + 1;
-          } else {
-            return params.value;
-          }
-        }
-      };
-
-      columnsDefs.push(colDefIndex);
 
       for (var i = 0; i < odrFields.length; i++) {
         var field = schema.subschema[odrFields[i]];

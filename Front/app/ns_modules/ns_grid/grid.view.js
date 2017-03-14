@@ -82,6 +82,8 @@ define([
         this.com.addModule(this);
       }
 
+      this.displayRowIndex = options.displayRowIndex;
+
       this.clientSide = options.clientSide || false;
       this.filters = options.filters || [];
       this.afterGetRows = options.afterGetRows;
@@ -311,17 +313,50 @@ define([
       });
 
       
+
+      if(_this.displayRowIndex === true){
+        var colDefIndex = {
+          width: 40,
+          minWidth: 40,
+          maxWidth: 100,
+          editable: false,
+          field: 'index',
+          headerName: 'N°',
+          pinned: 'left',
+          suppressNavigable: true,
+          suppressMovable: true,
+          suppressSizeToFit: true,
+          // cellClass: 'pinned-col',
+          cellRenderer: function(params){
+            if(!params.value || params.api.deletingRows){
+              params.data[params.colDef.field] = params.rowIndex + 1;
+              return params.rowIndex + 1;
+            } else {
+              return params.value;
+            }
+          }
+        };
+        columnDefs.unshift(colDefIndex);
+      }
+
       if(_this.gridOptions.rowSelection === 'multiple'){
         var col = {
+          width: 40,
           minWidth: 40,
           maxWidth: 40,
           field: '',
-          headerName: ''
+          headerName: '',
+          pinned: 'left',
+          checkboxSelection: true,
+          suppressNavigable: true,
+          suppressFilter: true,
+          suppressMovable: true,
+          suppressSizeToFit: true,
+          // cellClass: 'pinned-col',
         };
         _this.formatSelectColumn(col);
         columnDefs.unshift(col);
       }
-
       return columnDefs;
     },
 
@@ -419,9 +454,6 @@ define([
 
     formatSelectColumn: function(col){
       var _this = this;
-      col.pinned = 'left';
-      col.suppressMovable = true;
-      col.checkboxSelection = true;
       col.headerCellTemplate = function() {
         var eCell = document.createElement('span');
         eCell.innerHTML = '\
@@ -843,19 +875,21 @@ define([
       });
     },
 
-    deleteSelectedRows: function(callback){
+    deleteSelectedRows: function(callback, deletingRows){
       var _this = this;
       var selectedNodes = this.gridOptions.api.getSelectedNodes();
       if(!selectedNodes.length){
         return;
       }
+      
+      this.gridOptions.api.deletingRows = true;
 
       var opt = {
         title: 'Are you sure?',
         text: 'selected rows will be deleted'
       };
       this.swal(opt, 'warning', function() {
-        _this.destroySelectedRows(callback);
+        _this.destroySelectedRows(callback, deletingRows);
       });
 
     },
@@ -866,7 +900,7 @@ define([
       var rowData = [];
       var errors = [];
 
-      var empty = true;;
+      var empty = true;
       
       var i = 0;
       this.gridOptions.api.forEachNode( function(node) {
@@ -886,7 +920,6 @@ define([
               continue;
             }
             if(key == 'index') {
-              console.log(node.data.index);
               continue;
             }
 
@@ -917,8 +950,7 @@ define([
               errors.push(node.data._errors);
             }
           }
-        
-          
+                  
         }
 
         //last check, if not empty, push to save
@@ -927,7 +959,7 @@ define([
         }
 
       });
-
+      
       return {
           rowData: rowData,
           errors: errors
@@ -962,12 +994,15 @@ define([
           context: this,
         }).done(function(resp) {
           this.gridOptions.api.removeItems(this.gridOptions.api.getSelectedNodes());
+          this.gridOptions.api.deletingRows = false;
           if(callback)
             callback();
         }).fail(function(resp) {
         });
         if(callback)
           callback();
+      } else {
+        this.gridOptions.api.deletingRows = false;
       }
 
     },

@@ -111,8 +111,9 @@ define([
         _this.model.set('obs', rowData);
         _this.model.trigger('change:obs', _this.model);
       }
-
+      
       this.gridView.deleteSelectedRows(afterDestroySelectedRows);
+      
     },
 
     toggleEditionMode: function(){
@@ -125,33 +126,10 @@ define([
     },
 
     formatColumns: function(model){
+      var _this = this;
       var columnsDefs = [];
 
       var editable = this.editable;
-
-      var colDefIndex = {
-        editable: false,
-        field: 'index',
-        headerName: 'N°',
-        width: 50,
-        minWidth: 50,
-        maxWidth: 50,
-        pinned: 'left',
-        suppressNavigable: true,
-        suppressFilter: true,
-        suppressMovable: true,
-        suppressSizeToFit: true,
-        cellRenderer: function(params){
-          if(!params.value){
-            params.data[params.colDef.field] = params.rowIndex + 1;
-            return params.rowIndex + 1;
-          } else {
-            return params.value;   
-          }
-        }
-      };
-
-      columnsDefs.push(colDefIndex);
 
       for (var i = 0; i < this.model.get('fieldsets').length; i++) {
         var ordFields = this.model.get('fieldsets')[i].fields;
@@ -202,6 +180,7 @@ define([
         clientSide: true,
         url: this.url,
         objectType: this.model.get('ID'),
+        displayRowIndex: true,
         gridOptions: {
           editType: 'fullRow',
           singleClickEdit : true,
