@@ -46,6 +46,9 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         if(key == '_errors' && params.data._errors) {
           continue;
         }
+        if(key == 'index') {
+          continue;
+        }
         //riscky
         var val = params.data[key]
         if(params.data[key] instanceof Object){
@@ -137,7 +140,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   		this.error = true;
 
       if(!this.isEmptyRow){
-    		//params.data[params.colDef.field] = ''; why do you want to set value as empty ?? 
     	  $(params.eGridCell).addClass('ag-cell-error');
       }
 
