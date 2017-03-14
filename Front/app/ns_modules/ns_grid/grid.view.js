@@ -875,7 +875,7 @@ define([
       });
     },
 
-    deleteSelectedRows: function(callback){
+    deleteSelectedRows: function(callback, deletingRows){
       var _this = this;
       var selectedNodes = this.gridOptions.api.getSelectedNodes();
       if(!selectedNodes.length){
@@ -889,7 +889,7 @@ define([
         text: 'selected rows will be deleted'
       };
       this.swal(opt, 'warning', function() {
-        _this.destroySelectedRows(callback);
+        _this.destroySelectedRows(callback, deletingRows);
       });
 
     },

@@ -126,6 +126,7 @@ define([
     },
 
     formatColumns: function(model){
+      var _this = this;
       var columnsDefs = [];
 
       var editable = this.editable;
