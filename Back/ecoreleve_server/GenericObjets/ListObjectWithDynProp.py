@@ -292,8 +292,11 @@ class ListObjectWithDynProp():
         listWithThes = list(map(lambda x: x.Name, listWithThes))
 
         # change thesaural term into laguage user
-        userLng = threadlocal.get_current_request().authenticated_userid[
-            'userlanguage']
+        try:
+            userLng = threadlocal.get_current_request().authenticated_userid[
+                'userlanguage']
+        except:
+            userLng = 'fr'
 
         for row in result:
             row = dict(map(lambda k: tradThesaurusTerm
