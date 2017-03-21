@@ -23,8 +23,8 @@ from ..utils.parseValue import isNumeric
 class Observation(Base, ObjectWithDynProp):
     __tablename__ = 'Observation'
 
-    FrontModuleForm = 'ObservationForm'
-    FrontModuleGrid = None
+    moduleFormName = 'ObservationForm'
+    moduleGridName = None
 
     ID = Column(Integer, Sequence('Observation__id_seq'), primary_key=True)
     FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
@@ -63,7 +63,7 @@ class Observation(Base, ObjectWithDynProp):
 
     def GetNewValue(self, nameProp):
         ReturnedValue = ObservationDynPropValue()
-        ReturnedValue.ObservationDynProp = self.ObjContext.query(
+        ReturnedValue.ObservationDynProp = self.session.query(
             ObservationDynProp).filter(ObservationDynProp.Name == nameProp).first()
         return ReturnedValue
 
@@ -71,14 +71,14 @@ class Observation(Base, ObjectWithDynProp):
         return self.ObservationDynPropValues
 
     def GetDynProps(self, nameProp):
-        return self.ObjContext.query(ObservationDynProp
+        return self.session.query(ObservationDynProp
                                      ).filter(ObservationDynProp.Name == nameProp).one()
 
     def GetType(self):
         if self.ProtocoleType != None:
             return self.ProtocoleType
         else:
-            return self.ObjContext.query(ProtocoleType).get(self.FK_ProtocoleType)
+            return self.session.query(ProtocoleType).get(self.FK_ProtocoleType)
 
     def linkedFieldDate(self):
         try:

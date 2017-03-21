@@ -4,6 +4,7 @@ from sqlalchemy import (
 from collections import OrderedDict
 from datetime import datetime
 from .FrontModules import FrontModules, ModuleForms, ModuleGrids
+from .DataBaseObjects import ConfiguredDbObjectMapped
 from pyramid import threadlocal
 from ..utils.datetime import parse
 from ..utils.parseValue import find, isEqual, formatValue
@@ -20,41 +21,32 @@ Cle = {'String': 'ValueString',
 LinkedTables = {}
 
 
-class CheckingConstraintsException(Exception):
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return str(self.value) + ' failed'
-
-
-class ObjectWithDynProp:
+class ObjectWithDynProp(ConfiguredDbObjectMapped):
     ''' Class to extend for mapped object with dynamic properties '''
     PropDynValuesOfNow = {}
     allProp = None
 
-    def __init__(self, ObjContext=None):
-        self.ObjContext = threadlocal.get_current_request().dbsession
+    def __init__(self, session=None):
+        self.session = threadlocal.get_current_request().dbsession
         self.PropDynValuesOfNow = {}
         self.GetAllProp()
-        self._constraintsFunctionLists = []
+    #     self._constraintsFunctionLists = []
 
-    @property
-    def constraintsFunctionLists(self):
-        return self._constraintsFunctionLists
+    # @property
+    # def constraintsFunctionLists(self):
+    #     return self._constraintsFunctionLists
 
-    @constraintsFunctionLists.setter
-    def constraintsFunctionLists(self, list):
-        self._constraintsFunctionLists.extend(list)
+    # @constraintsFunctionLists.setter
+    # def constraintsFunctionLists(self, list):
+    #     self._constraintsFunctionLists.extend(list)
 
-    def checkConstraintsOnData(self, data):
-        error = 0
-        for func in self._constraintsFunctionLists:
-            if not func(data):
-                error += 1
-                raise CheckingConstraintsException(func.__name__)
-        return error < 1
+    # def checkConstraintsOnData(self, data):
+    #     error = 0
+    #     for func in self._constraintsFunctionLists:
+    #         if not func(data):
+    #             error += 1
+    #             raise CheckingConstraintsException(func.__name__)
+    #     return error < 1
 
     def GetAllProp(self):
         ''' Get all object properties (dynamic and static) '''
@@ -69,7 +61,7 @@ class ObjectWithDynProp:
             if type_:
                 result = type_.GetDynProps()
             else:
-                result = self.ObjContext.execute(
+                result = self.session.execute(
                     select([dynPropTable])).fetchall()
             statProps = [{'name': statProp.key, 'type': statProp.type,
                           'ID': None} for statProp in self.__table__.columns]
@@ -87,7 +79,7 @@ class ObjectWithDynProp:
         curQuery += ' where C.' + self.GetType().GetFK_DynPropContextTable() + \
             ' = ' + str(self.GetType().ID)
         curQuery += ' AND C.LinkedTable is not null'
-        Values = self.ObjContext.execute(curQuery).fetchall()
+        Values = self.session.execute(curQuery).fetchall()
 
         return [dict(row) for row in Values]
 
@@ -95,73 +87,6 @@ class ObjectWithDynProp:
         if self.allProp is None:
             self.GetAllProp()
         return find(lambda x: x['name'].lower() == nameProp.lower(), self.allProp)
-
-    def GetFrontModules(self, ModuleType):
-        if not hasattr(self, 'FrontModules'):
-            self.FrontModules = self.ObjContext.query(
-                FrontModules).filter(FrontModules.Name == ModuleType).one()
-        return self.FrontModules
-
-    def GetGridFields(self, ModuleType):
-        ''' Function to call : return Name and Type of Grid fields to display in front end
-        according to configuration in table ModuleGrids'''
-        try:
-            typeID = self.GetType().ID
-            gridFields = self.ObjContext.query(ModuleGrids
-                                               ).filter(
-                and_(ModuleGrids.Module_ID == self.GetFrontModules(ModuleType).ID,
-                     or_(ModuleGrids.TypeObj == typeID, ModuleGrids.TypeObj == None))
-            ).filter(
-                ModuleGrids.GridRender > 0).order_by(asc(ModuleGrids.GridOrder)).all()
-        except:
-            gridFields = self.ObjContext.query(ModuleGrids).filter(
-                ModuleGrids.Module_ID == self.GetFrontModules(ModuleType).ID
-            ).filter(ModuleGrids.GridRender > 0).order_by(asc(ModuleGrids.GridOrder)).all()
-
-        cols = []
-        for curConf in gridFields:
-            curConfName = curConf.Name
-            gridField = list(
-                filter(lambda x: x['name'] == curConfName, self.GetAllProp()))
-            if len(gridField) > 0:
-                cols.append(curConf.GenerateColumn())
-            elif curConf.QueryName is not None:
-                cols.append(curConf.GenerateColumn())
-            elif curConf.Name == 'StartDate':
-                cols.append(curConf.GenerateColumn())
-
-        return cols
-
-    def GetFilters(self, ModuleType):
-        ''' Function to call : return Name and Type of Filters to display in front end
-        according to configuration in table ModuleGrids'''
-        filters = []
-        try:
-            typeID = self.GetType().ID
-            filterFields = self.ObjContext.query(ModuleGrids).filter(
-                and_(
-                    ModuleGrids.Module_ID == self.GetFrontModulesID(
-                        ModuleType),
-                    or_(ModuleGrids.TypeObj == typeID,
-                        ModuleGrids.TypeObj == None)
-                )).order_by(asc(ModuleGrids.FilterOrder)).all()
-        except:
-            filterFields = self.ObjContext.query(ModuleGrids
-                                                 ).filter(
-                ModuleGrids.Module_ID == self.GetFrontModules(ModuleType).ID
-            ).order_by(asc(ModuleGrids.FilterOrder)).all()
-
-        for curConf in filterFields:
-            curConfName = curConf.Name
-            filterField = list(filter(lambda x: x['name'] == curConfName
-                                      and curConf.IsSearchable == 1, self.GetAllProp()))
-
-            if len(filterField) > 0:
-                filters.append(curConf.GenerateFilter())
-            elif curConf.QueryName is not None and curConf.FilterRender != 0:
-                filters.append(curConf.GenerateFilter())
-
-        return filters
 
     def getTypeObjectName(self):
         return self.__tablename__ + 'Type'
@@ -285,7 +210,7 @@ class ObjectWithDynProp:
         curQuery += 'and v.' + self.GetSelfFKNameInValueTable() + ' =  ' + \
             str(self.GetpkValue())
 
-        Values = self.ObjContext.execute(curQuery).fetchall()
+        Values = self.session.execute(curQuery).fetchall()
         for curValue in Values:
             row = OrderedDict(curValue)
             self.PropDynValuesOfNow[row['Name']] = self.GetRealValue(row)
@@ -346,55 +271,26 @@ class ObjectWithDynProp:
                 except:
                     pass
         if not schema:
-            schema = self.GetForm()['schema']
+            schema = self.getForm()['schema']
         resultat = formatValue(resultat, schema)
         return resultat
 
-    def GetSchemaFromStaticProps(self, FrontModules, DisplayMode):
-        ''' return schema of static props to feed front end form '''
-        Editable = (DisplayMode.lower() == 'edit')
-        resultat = {}
-        type_ = self.GetType().ID
-        Fields = self.ObjContext.query(ModuleForms
-                                       ).filter(
-            and_(ModuleForms.Module_ID == FrontModules.ID,
-                 ModuleForms.FormRender > 0)
-        ).filter(or_(ModuleForms.TypeObj == type_,
-                     ModuleForms.TypeObj == None)
-                 ).order_by(ModuleForms.FormOrder).all()
-
-        for curStatProp in Fields:
-            CurModuleForms = list(
-                filter(lambda x: curStatProp.Name == x.key, self.__table__.columns))
-            if (len(CurModuleForms) > 0):
-                resultat[curStatProp.Name] = curStatProp.GetDTOFromConf(
-                    Editable)
-        return resultat
-
-    def GetForm(self, FrontModules=None, DisplayMode='edit'):
-
-        if FrontModules is None:
-            FrontModules = self.GetFrontModules(self.FrontModuleForm)
-
-        schema = self.GetSchemaFromStaticProps(FrontModules, DisplayMode)
+    def getForm(self, displayMode='edit', type_=None, moduleName=None):
         ObjType = self.GetType()
-        ObjType.AddDynamicPropInSchemaDTO(schema, FrontModules, DisplayMode)
-
-        resultat = {
-            'schema': schema,
-            'fieldsets': ObjType.GetFieldSets(FrontModules, schema),
-            'grid': False
-        }
+        form = ConfiguredDbObjectMapped.getForm(self, displayMode, ObjType.ID, moduleName)
         if (ObjType.Status == 10):
-            resultat['grid'] = True
-        return resultat
+            form['grid'] = True
+        return form
 
-    def GetDTOWithSchema(self, FrontModules, DisplayMode):
+    def GetDTOWithSchema(self, displayMode='edit'):
         ''' Function to call: return full schema
         according to configuration (table :ModuleForms) '''
-        resultat = self.GetForm(FrontModules, DisplayMode)
-        # IF ID is send from front --> get data of this object in order to
-        # display value into form which will be sent ####
+        print('GetDTOWithSchema', displayMode)
+
+        resultat = self.getForm(displayMode=displayMode)
+
+        '''IF ID is send from front --> get data of this object in order to
+        display value into form which will be sent'''
         data = self.GetFlatObject(resultat['schema'])
         resultat['data'] = data
         resultat['recursive_level'] = 0

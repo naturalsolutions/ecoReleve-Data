@@ -128,13 +128,12 @@ class DynamicObjectView(CustomView):
         return self.objectDB.GetFlatObject()
 
     def getDataWithForm(self):
-        conf = self.parent.getConf()
         try:
             displayMode = self.request.params['DisplayMode']
         except:
             displayMode = 'display'
         self.objectDB.LoadNowValues()
-        return self.objectDB.GetDTOWithSchema(conf, displayMode)
+        return self.objectDB.GetDTOWithSchema(displayMode=displayMode)
 
     def retrieve(self):
         if 'FormName' in self.request.params:
@@ -342,20 +341,19 @@ class DynamicObjectCollectionView(CustomView):
     def getForm(self, objectType=None, moduleName=None, mode='edit'):
         if objectType is None:
             objectType = self.request.params['ObjectType']
-        Conf = self.getConf(moduleName)
         self.setType(int(objectType))
-        schema = self.objectDB.GetDTOWithSchema(Conf, mode)
+        schema = self.objectDB.getForm(mode, objectType)
         return schema
 
     def getGrid(self):
-        cols = self.objectDB.GetGridFields(self.gridModuleName)
+        cols = self.objectDB.getGrid(moduleName=self.gridModuleName)
         return cols
 
     def getFilter(self):
         moduleName = self.request.params.get('FilterName', None)
         if not moduleName:
             moduleName = self.gridModuleName
-        filtersList = self.objectDB.GetFilters(moduleName)
+        filtersList = self.objectDB.getFilters(moduleName=moduleName)
         filters = {}
         for i in range(len(filtersList)):
             filters[str(i)] = filtersList[i]

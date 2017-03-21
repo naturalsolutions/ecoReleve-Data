@@ -177,7 +177,7 @@ class ObservationsView(DynamicObjectCollectionView):
                             listProto[typeID]['obs'].append(curObs.ID)
                         else:
                             typeName = curObs.GetType().Name.replace('_', ' ')
-                            curObsForm = curObs.GetForm(Conf, DisplayMode)
+                            curObsForm = curObs.getForm(displayMode=DisplayMode)
 
                             listProto[typeID] = {
                                 'Name': typeName,
@@ -200,7 +200,7 @@ class ObservationsView(DynamicObjectCollectionView):
                         protoStatus = curVirginObs.GetType().obsolete
 
                         if protoStatus != 1:
-                            curVirginObsForm = curVirginObs.GetForm(Conf, DisplayMode)
+                            curVirginObsForm = curVirginObs.getForm(displayMode=DisplayMode)
 
                             listProto[typeID] = {
                                 'Name': typeName,
