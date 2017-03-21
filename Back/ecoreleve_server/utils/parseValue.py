@@ -25,13 +25,12 @@ def dateParser(stringDate):
         Change the formats here cause a changement in the whole application.
     """
     formats = ['%d/%m/%Y %H:%M:%S', '%d/%m/%Y%H:%M:%S', '%d/%m/%Y', '%H:%M:%S']
-    dateValue = None
+    dateValue = stringDate
     for format_ in formats:
         try:
             dateValue = datetime.strptime(stringDate, format_)
             break
-        except ValueError:
-            dateValue = stringDate
+        except:
             pass
     return dateValue
 
@@ -46,6 +45,8 @@ def parseValue(value):
 
 
 def nullBitParser(value):
+    if isinstance(value, str) and value.isspace():
+        value = None
     oldValue = value
     try:
         newValue = dictVal[oldValue]

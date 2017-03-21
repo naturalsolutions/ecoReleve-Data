@@ -96,11 +96,6 @@ class Station(Base, ObjectWithDynProp):
     def FieldWorkers(cls):
         return Station_FieldWorker.id
 
-    @orm.reconstructor
-    def init_on_load(self):
-        ''' init_on_load is called on the fetch of object '''
-        self.__init__()
-
     def GetNewValue(self, nameProp):
         ReturnedValue = StationDynPropValue()
         try:

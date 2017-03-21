@@ -38,11 +38,6 @@ class Sensor (Base, ObjectWithDynProp):
         super().__init__(**kwargs)
         ObjectWithDynProp.__init__(self)
 
-    @orm.reconstructor
-    def init_on_load(self):
-        ''' init_on_load is called on the fetch of object '''
-        self.__init__()
-
     def GetNewValue(self, nameProp):
         ReturnedValue = SensorDynPropValue()
         ReturnedValue.SensorDynProp = self.session.query(

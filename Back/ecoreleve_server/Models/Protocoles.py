@@ -54,10 +54,6 @@ class Observation(Base, ObjectWithDynProp):
         Base.__init__(self, **kwargs)
         ObjectWithDynProp.__init__(self)
 
-    @orm.reconstructor
-    def init_on_load(self):
-        self.__init__()
-
     def getTypeObjectFKName(self):
         return 'FK_ProtocoleType'
 
@@ -127,7 +123,7 @@ class Observation(Base, ObjectWithDynProp):
                     subObs.init_on_load()
 
                 if subObs is not None:
-                    subObs.UpdateFromJson(curData)
+                    subObs.updateFromJSON(curData)
                     listObs.append(subObs)
         self.Observation_children = listObs
 
@@ -158,21 +154,21 @@ class Observation(Base, ObjectWithDynProp):
                     listSubValues.append(subObsValue)
         self.SubObservation_children = listSubValues
 
-    def UpdateFromJson(self, DTOObject, startDate=None):
-        ObjectWithDynProp.UpdateFromJson(self, DTOObject, None)
+    def updateFromJSON(self, DTOObject, startDate=None):
+        ObjectWithDynProp.updateFromJSON(self, DTOObject, None)
         if 'listOfSubObs' in DTOObject:
             self.SubObservation_childrens = DTOObject['listOfSubObs']
         self.updateLinkedField(DTOObject)
 
-    def GetFlatObject(self, schema=None):
-        result = super().GetFlatObject()
+    def getFlatObject(self, schema=None):
+        result = super().getFlatObject()
         subObsList = []
         typeName = 'children'
         if self.Observation_children != []:
             typeName = self.Observation_children[0].GetType().Name
             for subObs in self.Observation_children:
                 subObs.LoadNowValues()
-                flatObs = subObs.GetFlatObject()
+                flatObs = subObs.getFlatObject()
                 if len(subObs.SubObservation_children) > 0:
                     flatObs.update(subObs.SubObservation_childrens)
                 subObsList.append(flatObs)

@@ -125,7 +125,7 @@ class DynamicObjectView(CustomView):
 
     def getData(self):
         self.objectDB.LoadNowValues()
-        return self.objectDB.GetFlatObject()
+        return self.objectDB.getFlatObject()
 
     def getDataWithForm(self):
         try:
@@ -133,7 +133,7 @@ class DynamicObjectView(CustomView):
         except:
             displayMode = 'display'
         self.objectDB.LoadNowValues()
-        return self.objectDB.GetDTOWithSchema(displayMode=displayMode)
+        return self.objectDB.getDataWithSchema(displayMode=displayMode)
 
     def retrieve(self):
         if 'FormName' in self.request.params:
@@ -144,7 +144,7 @@ class DynamicObjectView(CustomView):
     def update(self):
         data = self.request.json_body
         self.objectDB.LoadNowValues()
-        self.objectDB.UpdateFromJson(data)
+        self.objectDB.updateFromJSON(data)
         return 'updated'
 
     def delete(self):
@@ -240,7 +240,7 @@ class DynamicObjectCollectionView(CustomView):
             data[items] = value
         self.setType()
         self.objectDB.init_on_load()
-        self.objectDB.UpdateFromJson(data)
+        self.objectDB.updateFromJSON(data)
         self.session.add(self.objectDB)
         self.session.flush()
         return {'ID': self.objectDB.ID}

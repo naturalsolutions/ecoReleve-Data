@@ -40,7 +40,7 @@ class ObservationView(DynamicObjectView):
                 listOfSubProtocols = value
 
         data['Observation_childrens'] = listOfSubProtocols
-        curObs.UpdateFromJson(data)
+        curObs.updateFromJSON(data)
         try:
             if curObs.Equipment is not None:
                 curObs.Station = curObs.Station
@@ -105,7 +105,7 @@ class ObservationsView(DynamicObjectCollectionView):
 
         data['Observation_childrens'] = listOfSubProtocols
         curObs.init_on_load()
-        curObs.UpdateFromJson(data)
+        curObs.updateFromJSON(data)
 
         responseBody = {}
 
@@ -151,7 +151,7 @@ class ObservationsView(DynamicObjectCollectionView):
         for i in range(len(listObs)):
             curObs = listObs[i]
             curObs.LoadNowValues()
-            values.append(curObs.GetFlatObject())
+            values.append(curObs.getFlatObject())
         return values
 
     def getProtocolsofStation(self):
