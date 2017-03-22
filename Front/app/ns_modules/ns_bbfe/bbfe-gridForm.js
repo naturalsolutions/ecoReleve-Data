@@ -64,9 +64,9 @@ define([
 
     initialize: function(options){
       var _this = this; 
-
+      console.log(options)
       this.editable = options.schema.editable;
-
+      this.form = options.form;
       this.subProtocolType = options.schema.options.protocoleType;
 
       options.schema.fieldClass = 'col-xs-12';
@@ -114,6 +114,7 @@ define([
       this.regionManager.get('rgGrid').show(this.gridView = new GridView({
         columns: this.formatColumns(options.schema),
         clientSide: true,
+        form: _this.form,
         url: url,
         gridOptions: {
           editType: 'fullRow',
