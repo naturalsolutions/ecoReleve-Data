@@ -1,0 +1,190 @@
+
+---------------------------------------------------------------------------------
+-- Stored procedure that will  ### Do something
+-- Gets: @file_ID int,
+-- Returns: @@result varchar(255)
+-- Returns: @error int
+---------------------------------------------------------------------------------
+
+IF OBJECT_ID('pr_InsertStations_From_Import', 'P') IS NOT NULL
+DROP PROCEDURE dbo.[pr_InsertStations_From_Import];
+GO 
+
+
+CREATE PROCEDURE [dbo].[pr_InsertStations_From_Import] 
+	(
+	@file_ID int,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorfake varchar(255) OUTPUT
+	)
+AS
+BEGIN TRAN
+BEGIN TRY
+	SET NOCOUNT ON;
+	DECLARE @SQL_STATEMENT nvarchar(max),
+	@SQL nvarchar(max),
+	@SQL_1 nvarchar(max),
+	@iErrorCode_exec int,
+	@TLogMessage_ID int,
+	@Creator int,
+	@ObjectType int,
+	@TempTable_GUID varchar(250), 
+	@ObjectName varchar(100),
+	@count int
+	
+	SET @result='ERROR'
+
+		SELECT
+			@Creator= Creator,
+			@TempTable_GUID = TempTable_GUID,
+			@ObjectName = ObjectName,
+			@ObjectType = ObjectType
+	FROM [File]
+	WHERE ID = @file_ID
+
+	EXEC('ALTER TABLE '+@TempTable_GUID+' ADD [FK_Station] int null;') --pour stocker les id retournées aprés insertion de stations
+
+	EXEC('ALTER TABLE '+@TempTable_GUID+' ADD [Station_original_id] varchar(max) null;')
+	EXEC('UPDATE '+@TempTable_GUID+' SET [Station_original_id] = '''+@TempTable_GUID+'''+''_''+CONVERT(VARCHAR(20),[index]);')
+
+		/****************************************************************************************/
+
+	
+	SET @SQL_1 =''
+
+		--Recovery columns in station present in import excel table
+		DECLARE @col nvarchar(max),
+		@colImport nvarchar(max)
+
+		SELECT  @col = COALESCE(@col + ', ', '') +'['+TC1.COLUMN_NAME+']',
+		@colImport = COALESCE(@colImport + ', ', '') +'[Station_'+TC1.COLUMN_NAME+']'
+			FROM INFORMATION_SCHEMA.COLUMNS  [TC1]
+			JOIN INFORMATION_SCHEMA.COLUMNS  [TC2]
+			ON 'Station_'+TC1.COLUMN_NAME = TC2.COLUMN_NAME
+			WHERE TC1.TABLE_NAME = 'Station'
+			AND TC2.TABLE_NAME = @TempTable_GUID
+
+		SET @col = @col + ', creationDate, FK_StationType '
+		SET @colImport = @colImport + ', GETDATE(), 4 '
+		--insert into station new station from exceltab
+		SET @SQL_1 = @SQL_1 +'DECLARE @tempListId TABLE (
+			[ID] [int]  NOT NULL,
+			[ORIGINAL_INDEX] varchar(255) NOT NULL
+			)
+			INSERT INTO Station ( '+@col+' )
+			OUTPUT Inserted.ID, Inserted.[original_id] AS original_id into @templistId
+			SELECT '+@colImport+' 
+			FROM '+@TempTable_GUID+';'
+		-- get back inserted id in exceltab FK_Station	
+		SET @SQL_1 = @SQL_1 +' UPDATE
+			'+@TempTable_GUID+'
+			SET
+			FK_Station = TMP.ID
+			FROM
+			@tempListId AS TMP
+			WHERE
+			[index] = REPLACE(TMP.ORIGINAL_INDEX , '''+@TempTable_GUID+'_'','''');
+			'
+			EXEC SP_EXECUTESQL @SQL_1;
+		-- now insert dyn prop for station
+
+		DECLARE  @tempDynProp TABLE (excelColName varchar(100),FK_StationDynProp int, TypeProp varchar(20), ValueInt int , ValueFloat decimal(12,5), ValueDate datetime, ValueString varchar(255) )
+		DECLARE @sqlDyn nvarchar(max) 
+
+		SET @sqlDyn = '@'
+
+		INSERT INTO @tempDynProp (excelColName, FK_StationDynProp, TypeProp)
+		SELECT  tc2.COLUMN_NAME, dp.ID, dp.TypeProp
+			FROM INFORMATION_SCHEMA.COLUMNS  [TC2]
+			JOIN StationDynProp dp ON tc2.COLUMN_NAME = 'Station_'+dp.Name
+			WHERE TC2.TABLE_NAME = @TempTable_GUID
+
+
+		select @sqlDyn = @sqlDyn+'UNION ALL SELECT GETDATE(), '
+		+ CASE WHEN TypeProp =  'Integer' THEN excelColName ELSE 'NULL' END +' AS ValueInt, '
+		+CASE  WHEN TypeProp = 'String' THEN excelColName ELSE 'NULL' END +' AS ValueString, '
+		+CASE  WHEN TypeProp = 'Float' THEN excelColName ELSE 'NULL' END +' AS ValueFloat, '
+		+CASE WHEN TypeProp = 'Date' OR TypeProp = 'Date Only' OR TypeProp = 'Time' THEN excelColName ELSE 'NULL' END +' AS ValueDate, '
+		+ CONVERT(VARCHAR,FK_StationDynProp)+' AS FK_StationDynProp, FK_Station FROM '+@TempTable_GUID+' '
+		FROM @tempDynProp
+
+		SELECT @sqlDyn = REPLACE(@sqlDyn, '@UNION ALL','')
+		INSERT INTO StationDynPropValue (StartDate,ValueInt, ValueString, ValueFloat, ValueDate, FK_StationDynProp, FK_Station)
+		EXEC SP_EXECUTESQL @sqlDyn;
+
+		-- insert fieldworker
+			SET @SQL_1 = '
+			INSERT INTO Station_FieldWorker ( FK_Station , FK_FieldWorker )
+			SELECT [FK_Station] AS FK_Station,fieldWorker as FK_FieldWorker 
+			FROM (
+				SELECT FK_Station,  Station_FieldWorker1 AS fieldworker
+				FROM   '+@TempTable_GUID+'
+				WHERE Station_FieldWorker1 is not null
+				UNION ALL 
+				SELECT FK_Station,  Station_FieldWorker2 AS fieldworker
+				FROM   '+@TempTable_GUID+'
+				WHERE Station_FieldWorker2 is not null
+				UNION ALL 
+				SELECT FK_Station ,  Station_FieldWorker3 AS fieldworker
+				FROM   '+@TempTable_GUID+'
+				WHERE Station_FieldWorker3 is not null
+
+			) as Tfil
+			'
+			EXEC SP_EXECUTESQL @SQL_1;
+	SET @errorfake = 'nope'; 
+	
+	IF @@TRANCOUNT > 0 
+		COMMIT TRAN
+
+
+	END TRY
+	BEGIN CATCH
+		ROLLBACK TRAN
+		SET @error = ERROR_NUMBER()
+
+		--recording error log
+		SET @SQL_STATEMENT = 'INSERT INTO NSLog.dbo.TLOG_MESSAGES ([JCRE]
+		  ,[LOG_LEVEL]
+		  ,[ORIGIN]
+		  ,[SCOPE]
+		  ,[LOGUSER]
+		  ,[DOMAINE]
+		  ,[MESSAGE_NUMBER]
+		  ,[LOG_MESSAGE]
+		  ,[OTHERSINFOS])
+		  SELECT 
+				GETDATE(),
+				5,
+				''Import excel protocol'',
+				''pr_InsertStations_From_Import'',
+				1,
+				3,
+				'+CONVERT(VARCHAR(max),@error)+',
+				'''+CONVERT(VARCHAR(max),REplace(ERROR_MESSAGE(),'''',''))+''',
+				''@file_ID =  ''+CONVERT(VARCHAR,' +CONVERT(VARCHAR,@file_ID)+')'
+			
+		EXEC SP_EXECUTESQL @SQL_STATEMENT
+					
+	END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT  @result,  @error , @errorfake
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('124_pr_InsertStations_From_Import',GETDATE(),(SELECT db_name()))
+
+
+GO

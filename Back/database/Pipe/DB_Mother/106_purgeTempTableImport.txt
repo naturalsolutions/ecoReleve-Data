@@ -1,0 +1,28 @@
+
+
+CREATE PROCEDURE dbo.purgeTempTableImport
+AS BEGIN
+
+DECLARE @sql NVARCHAR(MAX) = N'';
+
+SELECT @sql += N'
+if OBJECT_ID('''+[TempTable_GUID]+''',''U'') is not null
+DROP TABLE '
+  + QUOTENAME([TempTable_GUID]) +';'
+FROM [File]
+WHERE ImportDate < GETDATE()
+
+
+select @sql
+exec sp_executesql @sql
+
+
+END
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('106_purgeTempTableImport',GETDATE(),(SELECT db_name()))
+
+
+GO

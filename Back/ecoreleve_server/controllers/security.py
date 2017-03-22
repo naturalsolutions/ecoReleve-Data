@@ -6,6 +6,7 @@ from pyramid.security import (
     ALL_PERMISSIONS,
     Everyone
 )
+from .WebSocket import WebsocketsRoot
 
 
 class Resource(dict):
@@ -46,6 +47,12 @@ class SecurityRoot(Resource):
     def __init__(self, request):
         Resource.__init__(self, ref='', parent=None)
         self.request = request
+        self.__name__ = ''
+        self.__parent__ = None
+
+    def __getitem__(self, item):
+        if item == 'ecoReleve-Websockets':
+            return WebsocketsRoot(item, self)
 
     def __getitem__(self, item):
         if item == 'ecoReleve-Core':

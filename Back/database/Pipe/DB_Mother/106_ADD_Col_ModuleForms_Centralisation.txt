@@ -1,16 +1,22 @@
 
-ALTER TABLE ModuleForms 
-ADD Orginal_FB_ID INT 
-GO 
+ALTER TABLE ModuleForms
+ADD Orginal_FB_ID INT
+GO
 
 UPDATE f SET Orginal_FB_ID = CONVERT(INT,replace(pt.OriginalId,'FormBuilder-',''))
 FROM ModuleForms f
-JOIN ProtocoleType pt ON f.TypeObj = pt.ID 
+JOIN ProtocoleType pt ON f.TypeObj = pt.ID
 
 
-ALTER TABLE ProtocoleType 
-ADD obsolete BIT 
+ALTER TABLE ProtocoleType
+ADD obsolete BIT
 
-GO 
-UPDATE ProtocoleType SET obsolete = 0 
-GO 
+GO
+UPDATE ProtocoleType SET obsolete = 0
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('106_ADD_Col_ModuleForms_Centralisation',GETDATE(),(SELECT db_name()))
+
+
+GO

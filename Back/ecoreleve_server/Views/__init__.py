@@ -424,9 +424,8 @@ class RESTView(object):
 def notfound(request):
     return HTTPNotFound('Not found')
 
+
 # test if the match url is integer
-
-
 def integers(*segment_names):
     def predicate(info, request):
         match = info['match']
@@ -479,3 +478,18 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+
+    # Excel file import
+    config.add_route('file_import/getTemplate',
+                     'ecoReleve-Core/file_import/getTemplate')
+    config.add_route('file_import/getExcelFile',
+                     'ecoReleve-Core/file_import/getExcelFile')
+    config.add_route('file_import/processList',
+                     'ecoReleve-Core/file_import/processList')
+
+    # Web sockets call
+    # config.add_view(JobView,
+    #                 context=FileImportJob,
+    #                 custom_predicates=[is_websocket],
+    #                 permission=NO_PERMISSION_REQUIRED)
+
