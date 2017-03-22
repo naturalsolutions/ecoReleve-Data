@@ -143,7 +143,7 @@ class DynamicObjectView(CustomView):
 
     def update(self):
         data = self.request.json_body
-        self.objectDB.LoadNowValues()
+        self.objectDB.beforeUpdate()
         self.objectDB.updateFromJSON(data)
         return 'updated'
 
@@ -236,6 +236,12 @@ class DynamicObjectCollectionView(CustomView):
     def Collection(self):
         raise Exception('method has to be overriden')
 
+    def getCollection(self, moduleFront=None, history=None, startDate=None):
+        return self.Collection(moduleFront,
+                               typeObj=self.typeObj,
+                               history=history,
+                               startDate=startDate)
+
     def insert(self):
         data = {}
         for items, value in self.request.json_body.items():
@@ -296,7 +302,9 @@ class DynamicObjectCollectionView(CustomView):
 
         if self.request is not None:
             searchInfo, history, startDate = self.formatParams({}, paging=False)
-            self.collection = self.Collection(moduleFront, typeObj=self.typeObj)
+            self.collection = self.getCollection(moduleFront,
+                                                 history=history,
+                                                 startDate=startDate)
             count = self.collection.count(searchInfo=searchInfo)
         else:
             count = self.collection.count()
@@ -305,8 +313,9 @@ class DynamicObjectCollectionView(CustomView):
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)
         moduleFront = self.getConf(self.moduleGridName)
-        self.collection = self.Collection(moduleFront, typeObj=self.typeObj,
-                                          history=history, startDate=startDate)
+        self.collection = self.getCollection(moduleFront,
+                                             history=history,
+                                             startDate=startDate)
 
         if not noCount:
             countResult = self.collection.count(params)

@@ -92,6 +92,9 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
     def GetpkValue(self):
         return self.ID
 
+    def beforeUpdate(self):
+        self.LoadNowValues()
+
     def setProperty(self, propertyName, value, useDate=None):
         ''' Set object properties (static and dynamic) '''
         DbObject.setProperty(self, propertyName, value)

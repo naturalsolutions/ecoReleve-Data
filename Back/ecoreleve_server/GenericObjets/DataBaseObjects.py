@@ -168,7 +168,6 @@ class DbObject(object):
     def updateFromJSON(self, data, startDate=None):
         ''' Function to call : update properties of new
         or existing object with JSON/dict of value'''
-        self.beforeUpdate()
         if self.checkConstraintsOnData(data):
             for curProp in data:
                 if (curProp.lower() != 'id' and data[curProp] != '-1'):
