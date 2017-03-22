@@ -117,14 +117,13 @@ class DynamicObjectView(CustomView):
             self.objectDB = self.session.query(self.model).get(ref)
 
         '''Set security according to permissions dict... yes just that ! '''
-        # self.__acl__ = context_permissions[parent.__name__]
+        self.__acl__ = context_permissions[parent.__name__]
 
     @property
     def model(self):
         raise Exception('method has to be overriden')
 
     def getData(self):
-        self.objectDB.LoadNowValues()
         return self.objectDB.getFlatObject()
 
     def getDataWithForm(self):
@@ -132,7 +131,6 @@ class DynamicObjectView(CustomView):
             displayMode = self.request.params['DisplayMode']
         except:
             displayMode = 'display'
-        # self.objectDB.LoadNowValues()
         return self.objectDB.getDataWithSchema(displayMode=displayMode)
 
     def retrieve(self):

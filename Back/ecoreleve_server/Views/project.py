@@ -19,7 +19,7 @@ class ProjectsView(DynamicObjectCollectionView):
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
-        # self.__acl__ = context_permissions['stations']
+        self.__acl__ = context_permissions[ref]
 
 
 RootCore.listChildren.append(('projects', ProjectsView))
