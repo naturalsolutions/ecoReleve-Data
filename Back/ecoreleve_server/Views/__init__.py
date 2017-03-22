@@ -212,7 +212,6 @@ class DynamicObjectCollectionView(CustomView):
                             }
 
     def __getitem__(self, ref):
-        print(ref)
         ''' return the next item in the traversal tree if ref is an id
         else override the retrieve functions by the action name '''
         if self.integers(ref):
