@@ -54,7 +54,6 @@ class SecurityRoot(Resource):
         if item == 'ecoReleve-Websockets':
             return WebsocketsRoot(item, self)
 
-    def __getitem__(self, item):
         if item == 'ecoReleve-Core':
             return RootCore(item, self)
 
