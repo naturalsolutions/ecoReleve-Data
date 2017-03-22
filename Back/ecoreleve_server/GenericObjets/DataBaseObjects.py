@@ -157,7 +157,7 @@ class DbObject(object):
         except:
             return self.__properties__[nameProp]
 
-    def setProperty(self, propertyName, value):
+    def setProperty(self, propertyName, value, startDate=None):
         ''' Set object properties (static and dynamic) '''
         if hasattr(self, propertyName):
                 if propertyName in self.__table__.c:
@@ -232,6 +232,27 @@ class DbObject(object):
             data = formatValue(data, schema)
 
         return data
+
+    def getDataWithSchema(self, displayMode='edit'):
+        ''' Function to call: return full schema
+        according to configuration (table :ModuleForms) '''
+        if hasattr(self, 'getForm'):
+            dataWithForm = self.getForm(displayMode=displayMode)
+            '''IF ID is send from front --> get data of this object in order to
+            display value into form which will be sent'''
+            data = self.getFlatObject(dataWithForm['schema'])
+            dataWithForm['data'] = data
+            dataWithForm['recursive_level'] = 0
+            dataWithForm = self.getDefaultValue(dataWithForm)
+            if self.ID:
+                dataWithForm['data']['id'] = self.ID
+            else:
+                # add default values for each field in data if exists
+                # for attr in schema:
+                dataWithForm['data']['id'] = 0
+                dataWithForm['data'].update(dataWithForm['schema']['defaultValues'])
+
+            return dataWithForm
 
 
 class CheckingConstraintsException(Exception):

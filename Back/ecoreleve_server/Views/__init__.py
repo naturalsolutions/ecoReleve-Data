@@ -117,7 +117,7 @@ class DynamicObjectView(CustomView):
             self.objectDB = self.session.query(self.model).get(ref)
 
         '''Set security according to permissions dict... yes just that ! '''
-        self.__acl__ = context_permissions[parent.__name__]
+        # self.__acl__ = context_permissions[parent.__name__]
 
     @property
     def model(self):
@@ -132,7 +132,7 @@ class DynamicObjectView(CustomView):
             displayMode = self.request.params['DisplayMode']
         except:
             displayMode = 'display'
-        self.objectDB.LoadNowValues()
+        # self.objectDB.LoadNowValues()
         return self.objectDB.getDataWithSchema(displayMode=displayMode)
 
     def retrieve(self):
@@ -197,7 +197,7 @@ class DynamicObjectCollectionView(CustomView):
         CustomView.__init__(self, ref, parent)
         self.objectDB = self.item.model()
 
-        if 'typeObj' in self.request.params and self.request.params['typeObj'] is not None:
+        if 'typeObj' in self.request.params and self.request.params['typeObj']:
             objType = self.request.params['typeObj']
             self.setType(objType)
             self.typeObj = objType
@@ -214,6 +214,7 @@ class DynamicObjectCollectionView(CustomView):
                             }
 
     def __getitem__(self, ref):
+        print(ref)
         ''' return the next item in the traversal tree if ref is an id
         else override the retrieve functions by the action name '''
         if self.integers(ref):
@@ -247,7 +248,7 @@ class DynamicObjectCollectionView(CustomView):
         for items, value in self.request.json_body.items():
             data[items] = value
         self.setType()
-        self.objectDB.init_on_load()
+        # self.objectDB.init_on_load()
         self.objectDB.updateFromJSON(data)
         self.session.add(self.objectDB)
         self.session.flush()
@@ -352,9 +353,8 @@ class DynamicObjectCollectionView(CustomView):
     def getForm(self, objectType=None, moduleName=None, mode='edit'):
         if 'ObjectType' in self.request.params:
             objectType = self.request.params['ObjectType']
-        if not objectType:
-            objectType = None
-        self.setType(int(objectType))
+        if objectType:
+            self.setType(int(objectType))
 
         form = self.getConfigJSON(self.moduleFormName + mode, self.typeObj)
         if not form:
@@ -394,7 +394,8 @@ class DynamicObjectCollectionView(CustomView):
         self.configJSON[moduleName][typeObj] = configObject
 
     def setType(self, objectType=1):
-        setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
+        if hasattr(self.objectDB, 'getTypeObjectFKName'):
+            setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
 
     def getType(self):
         table = Base.metadata.tables[self.objectDB.getTypeObjectName()]
