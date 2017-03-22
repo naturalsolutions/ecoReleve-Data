@@ -79,9 +79,6 @@ class ExportQueryView(CustomExportView):
 
         return result
 
-    def retrieve(self):
-        return self.search()
-
     def formatColumns(self, fileType, columns):
         queryColumns = []
         if fileType != 'gpx':

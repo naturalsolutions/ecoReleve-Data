@@ -65,7 +65,9 @@ define([
 
     initialize: function(options){
       this.extendAgGrid();
-
+      if(options.form){
+        this.form = options.form;
+      }
       var _this = this;
       this.model = options.model || new Backbone.Model();
       this.model.set('type', options.type);
@@ -229,7 +231,9 @@ define([
           col.hide = true;
           return;
         }
-
+        if(_this.form){
+          col.form = _this.form;
+        }
         col.minWidth = col.minWidth || 150;
         col.maxWidth = col.maxWidth || 300;
         col.filterParams = col.filterParams || {apply: true};
@@ -751,8 +755,10 @@ define([
 
     onDestroy: function(){
       $(window).off('resize', this.onResize);
-      this.gridOptions.api.destroy();
-      this.grid.destroy();
+      if(this.gridOptions.api){
+        this.gridOptions.api.destroy();
+        this.grid.destroy();
+      }
     },
 
     exportData: function(){

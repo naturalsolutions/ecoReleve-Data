@@ -21,7 +21,8 @@ from ..Models import (
     Equipment,
     Sensor,
     SensorType,
-    MonitoredSite
+    MonitoredSite,
+    Project
 )
 from ..utils import Eval
 from collections import OrderedDict
@@ -130,7 +131,7 @@ class StationList(ListObjectWithDynProp):
         ''' Override parent function to include
         management of Observation/Protocols and fieldWorkers '''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
-        result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
+        result = self.session.execute(fullQueryJoinOrdered).fetchall()
         data = []
 
         # if getFieldWorkers:
@@ -141,7 +142,7 @@ class StationList(ListObjectWithDynProp):
         #                      'ID'] == Station_FieldWorker.FK_Station)
         #     query = select([Station_FieldWorker.FK_Station,
         #                     User.Login]).select_from(joinTable)
-        #     FieldWorkers = self.ObjContext.execute(query).fetchall()
+        #     FieldWorkers = self.session.execute(query).fetchall()
         #     list_ = {}
         #     for x, y in FieldWorkers:
         #         list_.setdefault(x, []).append(y)
@@ -603,3 +604,10 @@ class MonitoredSiteList(ListObjectWithDynProp):
                      ))
             fullQueryJoin = fullQueryJoin.where(exists(subSelect))
         return fullQueryJoin
+
+
+class ProjectList(ListObjectWithDynProp):
+
+    def __init__(self, frontModule, typeObj=None,
+                 View=None, startDate=None, history=False):
+        super().__init__(Project, frontModule, typeObj=typeObj, View=View)

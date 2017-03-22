@@ -32,7 +32,7 @@ class ListObjectWithDynProp():
                  View=None,
                  typeObj=None,
                  startDate=None):
-        self.ObjContext = threadlocal.get_current_request().dbsession
+        self.session = threadlocal.get_current_request().dbsession
         self.sessionmaker = threadlocal.get_current_registry().dbmaker
 
         self.typeObj = typeObj
@@ -114,7 +114,7 @@ class ListObjectWithDynProp():
     def GetAllPropNameInConf(self):
         ''' Get configured properties to display '''
         if self.typeObj:
-            confGridType = self.ObjContext.query(ModuleGrids
+            confGridType = self.session.query(ModuleGrids
                                                  ).filter(
                 and_(ModuleGrids.Module_ID == self.frontModule.ID,
                      or_(ModuleGrids.TypeObj == self.typeObj,
@@ -132,8 +132,12 @@ class ListObjectWithDynProp():
         ''' build join table and select statement over
         all dynamic properties and foreign keys in filter query'''
         joinTable = self.ObjWithDynProp
-        view = self.GetDynPropValueView()
+
         selectable = [self.ObjWithDynProp.ID]
+        if not hasattr(self.ObjWithDynProp(), 'GetDynPropTable'):
+            return joinTable
+
+        view = self.GetDynPropValueView()
         objTable = self.ObjWithDynProp.__table__
         self.firstStartDate = None
 
@@ -285,15 +289,18 @@ class ListObjectWithDynProp():
         ''' Main function to call : return filtered (paged) ordered flat
         data list according to filter parameters'''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
-        result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
+        result = self.session.execute(fullQueryJoinOrdered).fetchall()
         data = []
         listWithThes = list(
             filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType, self.Conf))
         listWithThes = list(map(lambda x: x.Name, listWithThes))
 
         # change thesaural term into laguage user
-        userLng = threadlocal.get_current_request().authenticated_userid[
-            'userlanguage']
+        try:
+            userLng = threadlocal.get_current_request().authenticated_userid[
+                'userlanguage']
+        except:
+            userLng = 'fr'
 
         for row in result:
             row = dict(map(lambda k: tradThesaurusTerm

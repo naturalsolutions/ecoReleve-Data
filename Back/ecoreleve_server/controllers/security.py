@@ -48,7 +48,8 @@ class SecurityRoot(Resource):
         self.request = request
 
     def __getitem__(self, item):
-        return RootCore(item, self)
+        if item == 'ecoReleve-Core':
+            return RootCore(item, self)
 
 
 class RootCore(SecurityRoot):
@@ -158,6 +159,12 @@ context_permissions = {
               ],
 
     'sensors': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', 'read'),
+                (Allow, 'group:users', 'read')
+              ],
+
+    'projects': [
                 (Allow, 'group:admins', ALL_PERMISSIONS),
                 (Allow, 'group:superUsers', 'read'),
                 (Allow, 'group:users', 'read')

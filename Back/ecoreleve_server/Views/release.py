@@ -20,7 +20,7 @@ from . import CustomView
 
 class ReleaseIndividualsView(IndividualsView):
 
-    gridModuleName = 'IndivReleaseGrid'
+    moduleGridName = 'IndivReleaseGrid'
 
     def handleCriteria(self, params):
         criteria = [{
@@ -149,7 +149,7 @@ class ReleaseIndividualsView(IndividualsView):
                     indiv['taxon'] = curIndiv.Species
                     del indiv['Species']
                     pass
-                curIndiv.UpdateFromJson(indiv, startDate=curStation.StationDate)
+                curIndiv.updateFromJSON(indiv, startDate=curStation.StationDate)
 
                 binList.append(MoF_AoJ(indiv))
                 for k in indiv.keys():
@@ -171,16 +171,16 @@ class ReleaseIndividualsView(IndividualsView):
                     pass
 
                 curVertebrateInd = getnewObs(vertebrateIndID)
-                curVertebrateInd.UpdateFromJson(
+                curVertebrateInd.updateFromJSON(
                     indiv, startDate=curStation.StationDate)
                 vertebrateIndList.append(curVertebrateInd)
 
                 curBiometry = getnewObs(biometryID)
-                curBiometry.UpdateFromJson(indiv, startDate=curStation.StationDate)
+                curBiometry.updateFromJSON(indiv, startDate=curStation.StationDate)
                 biometryList.append(curBiometry)
 
                 curReleaseInd = getnewObs(releaseIndID)
-                curReleaseInd.UpdateFromJson(
+                curReleaseInd.updateFromJSON(
                     indiv, startDate=curStation.StationDate)
                 releaseIndList.append(curReleaseInd)
 
@@ -198,7 +198,7 @@ class ReleaseIndividualsView(IndividualsView):
                         'Monitoring_Status': 'suivi',
                         'Sensor_Status': 'sortie de stock>mise en service'
                     }
-                    curEquipmentInd.UpdateFromJson(
+                    curEquipmentInd.updateFromJSON(
                         equipInfo, startDate=curStation.StationDate)
                     curEquipmentInd.Station = curStation
                     equipmentIndList.append(curEquipmentInd)
@@ -220,13 +220,13 @@ class ReleaseIndividualsView(IndividualsView):
             dictVertGrp['taxon'] = taxon
             dictVertGrp['nb_total'] = len(releaseIndList)
 
-            vertebrateGrp.UpdateFromJson(dictVertGrp)
+            vertebrateGrp.updateFromJSON(dictVertGrp)
             vertebrateGrp.Observation_children.extend(vertebrateIndList)
 
             releaseGrp = Observation(
                 FK_ProtocoleType=releaseGrpID, FK_Station=sta_id)
             releaseGrp.PropDynValuesOfNow = {}
-            releaseGrp.UpdateFromJson({'taxon': taxon,
+            releaseGrp.updateFromJSON({'taxon': taxon,
                                     'release_method': releaseMethod,
                                     'nb_individuals': len(releaseIndList)})
             releaseGrp.Observation_children.extend(releaseIndList)

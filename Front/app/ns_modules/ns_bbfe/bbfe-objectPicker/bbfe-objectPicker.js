@@ -209,6 +209,17 @@ define([
 
     getNewFunc: function(ctx) {
       var _this = this;
+      var _this = this;
+
+      var model;
+      if( _this.form) {
+        model =  _this.form.model;
+      }
+      else {
+        model = new Backbone.Model();
+        model.set({"FK_Station":window.location.hash.replace('#stations/' , '').split('?')[0]});
+      }
+
       switch (ctx.model.get('type')){
         case 'individuals':
           var data;
@@ -221,8 +232,8 @@ define([
             }
           } else {
             data = {};
-            if (_this.form.model.get('FK_Station')) {
-              data['stationID'] = _this.form.model.get('FK_Station');
+            if (model.get('FK_Station')) {
+              data['stationID'] = model.get('FK_Station');
             }
           }
           _this.regionManager.get('modal').show(new _this.NewView({
@@ -361,7 +372,7 @@ define([
       this.$input.attr('data_value',value);
       this.matchedValue = value;
       this.hidePicker();
-      
+
       if(confirmChange){
         this.$input.change();
       }

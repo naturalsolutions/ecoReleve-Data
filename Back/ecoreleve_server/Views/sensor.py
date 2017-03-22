@@ -76,8 +76,8 @@ class SensorsView(DynamicObjectCollectionView):
 
     Collection = SensorList
     item = SensorView
-    formModuleName = 'SensorForm'
-    gridModuleName = 'SensorFilter'
+    moduleFormName = 'SensorForm'
+    moduleGridName = 'SensorFilter'
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
