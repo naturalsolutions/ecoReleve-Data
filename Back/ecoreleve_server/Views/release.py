@@ -20,7 +20,7 @@ from . import CustomView
 
 class ReleaseIndividualsView(IndividualsView):
 
-    gridModuleName = 'IndivReleaseGrid'
+    moduleGridName = 'IndivReleaseGrid'
 
     def handleCriteria(self, params):
         criteria = [{

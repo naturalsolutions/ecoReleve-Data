@@ -61,8 +61,8 @@ class ObservationsView(DynamicObjectCollectionView):
 
     Collection = None
     item = ObservationView
-    formModuleName = 'ObservationForm'
-    gridModuleName = 'ObservationFilter'
+    moduleFormName = 'ObservationForm'
+    moduleGridName = 'ObservationFilter'
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
@@ -165,24 +165,29 @@ class ObservationsView(DynamicObjectCollectionView):
                     and_(Observation.FK_Station == sta_id, Observation.Parent_Observation == None)))
                 listType = list(self.session.query(FieldActivity_ProtocoleType
                                                    ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
-                Conf = self.getConf()
 
                 listProto = {}
                 if listObs:
                     for i in range(len(listObs)):
                         DisplayMode = 'edit'
                         curObs = listObs[i]
-                        typeID = curObs.GetType().ID
+                        curObsType = curObs.GetType()
+                        typeID = curObsType.ID
                         if typeID in listProto:
                             listProto[typeID]['obs'].append(curObs.ID)
                         else:
-                            typeName = curObs.GetType().Name.replace('_', ' ')
-                            curObsForm = curObs.getForm(displayMode=DisplayMode)
+                            typeName = curObsType.Name.replace('_', ' ')
+                            if curObsType.Status == 10:
+                                curObsForm = curObs.getForm(displayMode=DisplayMode)
+                                curObsForm['grid'] = True
+                            else:
+                                curObsForm = {}
+                                curObsForm['grid'] = False
 
                             listProto[typeID] = {
                                 'Name': typeName,
-                                'schema': curObsForm['schema'],
-                                'fieldsets': curObsForm['fieldsets'],
+                                'schema': curObsForm.get('schema', None),
+                                'fieldsets': curObsForm.get('fieldsets', None),
                                 'grid': curObsForm['grid'],
                                 'obs': [curObs.ID]
                             }
@@ -196,16 +201,22 @@ class ObservationsView(DynamicObjectCollectionView):
                         typeID = listVirginProto[i].FK_ProtocoleType
 
                         curVirginObs = Observation(FK_ProtocoleType=typeID)
-                        typeName = curVirginObs.GetType().Name.replace('_', ' ')
-                        protoStatus = curVirginObs.GetType().obsolete
+                        curVirginObsType = curVirginObs.GetType()
+                        typeName = curVirginObsType.Name.replace('_', ' ')
+                        protoStatus = curVirginObsType.obsolete
 
                         if protoStatus != 1:
-                            curVirginObsForm = curVirginObs.getForm(displayMode=DisplayMode)
+                            if curVirginObsType.Status == 10:
+                                curVirginObsForm = curVirginObs.getForm(displayMode=DisplayMode)
+                                curVirginObsForm['grid'] = True
+                            else:
+                                curVirginObsForm = {}
+                                curVirginObsForm['grid'] = False
 
                             listProto[typeID] = {
                                 'Name': typeName,
-                                'schema': curVirginObsForm['schema'],
-                                'fieldsets': curVirginObsForm['fieldsets'],
+                                'schema': curVirginObsForm.get('schema', None),
+                                'fieldsets': curVirginObsForm.get('fieldsets', None),
                                 'grid': curVirginObsForm['grid'],
                                 'obs': []
                             }

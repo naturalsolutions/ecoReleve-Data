@@ -77,8 +77,8 @@ class IndividualsView(DynamicObjectCollectionView):
 
     Collection = IndividualList
     item = IndividualView
-    formModuleName = 'IndivForm'
-    gridModuleName = 'IndivFilter'
+    moduleFormName = 'IndivForm'
+    moduleGridName = 'IndivFilter'
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
@@ -133,7 +133,7 @@ class IndividualsView(DynamicObjectCollectionView):
                              for key, val in indivData.items()],
                       'order_by': ['ID:asc']}
 
-        moduleFront = self.getConf(self.gridModuleName)
+        moduleFront = self.getConf(self.moduleGridName)
 
         listObj = IndividualList(moduleFront, typeObj=2)
         dataResult = listObj.GetFlatDataList(searchInfo)

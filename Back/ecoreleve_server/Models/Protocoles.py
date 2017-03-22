@@ -71,7 +71,7 @@ class Observation(Base, ObjectWithDynProp):
                                      ).filter(ObservationDynProp.Name == nameProp).one()
 
     def GetType(self):
-        if self.ProtocoleType != None:
+        if self.ProtocoleType is not None:
             return self.ProtocoleType
         else:
             return self.session.query(ProtocoleType).get(self.FK_ProtocoleType)
@@ -81,7 +81,7 @@ class Observation(Base, ObjectWithDynProp):
             linkedDate = self.Station.StationDate
         except:
             linkedDate = datetime.now()
-        if 'unequipment' in self.GetType().Name.lower() :
+        if 'unequipment' in self.GetType().Name.lower():
             linkedDate = linkedDate - timedelta(seconds=1)
         return linkedDate
 

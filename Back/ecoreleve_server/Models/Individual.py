@@ -33,7 +33,7 @@ class Individual (Base, ObjectWithDynProp):
     __tablename__ = 'Individual'
 
     moduleFormName = 'IndivForm'
-    moduleGridName = 'IndivGrid'
+    moduleGridName = 'IndivFilter'
 
     ID = Column(Integer, Sequence('Individual__id_seq'), primary_key=True)
     creationDate = Column(DateTime, nullable=False, default=func.now())

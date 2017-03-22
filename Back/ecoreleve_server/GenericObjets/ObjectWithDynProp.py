@@ -201,7 +201,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
     def linkedFieldDate(self):
         return datetime.now()
 
-    def updateLinkedField(self, DTOObject, useDate=None):
+    def updateLinkedField(self, data, useDate=None):
         if useDate is None:
             useDate = self.linkedFieldDate()
 
@@ -253,20 +253,3 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
             except:
                 pass
 
-    def getDefaultValue(self, form):
-        defaultValues = {}
-        recursive_level = form['recursive_level']
-        for key, value in form['schema'].items():
-            if 'defaultValue' in value and value['defaultValue'] is not None:
-                defaultValues[key] = value['defaultValue']
-            if 'subschema' in value:
-                temp = {'schema': value['subschema'], 'defaultValues': {
-                }, 'recursive_level': recursive_level + 1}
-                subData = self.getDefaultValue(temp)
-                form['schema'][key]['subschema']['defaultValues'] = subData
-
-        if recursive_level < 1:
-            form['schema']['defaultValues'] = defaultValues
-        else:
-            form = defaultValues
-        return form

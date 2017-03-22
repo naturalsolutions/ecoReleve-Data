@@ -52,7 +52,8 @@ class ConfiguredDbObjectMapped(object):
 
         return {'schema': schema,
                 'fieldsets': self.sortFieldsets(fields),
-                'grid': False
+                'grid': False,
+                'data': {'id': 0}
                 }
 
     def sortFieldsets(self, fields):
@@ -88,7 +89,7 @@ class ConfiguredDbObjectMapped(object):
             gridFields = gridFields.filter(or_(ModuleGrids.TypeObj == type_,
                                                ModuleGrids.TypeObj == None))
 
-        gridFields.order_by(asc(ModuleGrids.GridOrder)).all()
+        gridFields = gridFields.order_by(asc(ModuleGrids.GridOrder)).all()
         return [curConf.GenerateColumn() for curConf in gridFields]
 
     def getFilters(self, type_=None, moduleName=None):
@@ -103,14 +104,31 @@ class ConfiguredDbObjectMapped(object):
         if type_:
             filterFields = filterFields.filter(or_(ModuleGrids.TypeObj == type_,
                                                    ModuleGrids.TypeObj == None))
-        filterFields.order_by(asc(ModuleGrids.FilterOrder)).all()
-
+        filterFields = filterFields.order_by(asc(ModuleGrids.FilterOrder)).all()
         for curConf in filterFields:
             if curConf.IsSearchable:
                 filters.append(curConf.GenerateFilter())
             elif curConf.QueryName is not None and curConf.FilterRender != 0:
                 filters.append(curConf.GenerateFilter())
         return filters
+
+    def getDefaultValue(self, form):
+        defaultValues = {}
+        recursive_level = form['recursive_level']
+        for key, value in form['schema'].items():
+            if 'defaultValue' in value and value['defaultValue'] is not None:
+                defaultValues[key] = value['defaultValue']
+            if 'subschema' in value:
+                temp = {'schema': value['subschema'], 'defaultValues': {
+                }, 'recursive_level': recursive_level + 1}
+                subData = self.getDefaultValue(temp)
+                form['schema'][key]['subschema']['defaultValues'] = subData
+
+        if recursive_level < 1:
+            form['schema']['defaultValues'] = defaultValues
+        else:
+            form = defaultValues
+        return form
 
 
 class DbObject(object):

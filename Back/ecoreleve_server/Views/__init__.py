@@ -191,6 +191,8 @@ class DynamicObjectView(CustomView):
 
 class DynamicObjectCollectionView(CustomView):
 
+    configJSON = {}
+
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
         self.objectDB = self.item.model()
@@ -223,11 +225,11 @@ class DynamicObjectCollectionView(CustomView):
             return self
 
     @property
-    def formModuleName(self):
+    def moduleFormName(self):
         raise Exception('method has to be overriden')
 
     @property
-    def gridModuleName(self):
+    def moduleGridName(self):
         raise Exception('method has to be overriden')
 
     @property
@@ -290,7 +292,7 @@ class DynamicObjectCollectionView(CustomView):
         return searchInfo, history, startDate
 
     def count_(self, listObj=None):
-        moduleFront = self.getConf(self.gridModuleName)
+        moduleFront = self.getConf(self.moduleGridName)
 
         if self.request is not None:
             searchInfo, history, startDate = self.formatParams({}, paging=False)
@@ -302,7 +304,7 @@ class DynamicObjectCollectionView(CustomView):
 
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)
-        moduleFront = self.getConf(self.gridModuleName)
+        moduleFront = self.getConf(self.moduleGridName)
         self.collection = self.Collection(moduleFront, typeObj=self.typeObj,
                                           history=history, startDate=startDate)
 
@@ -333,31 +335,54 @@ class DynamicObjectCollectionView(CustomView):
 
     def getConf(self, moduleName=None):
         if not moduleName:
-            moduleName = self.formModuleName
+            moduleName = self.objectDB.moduleFormName
         return self.session.query(FrontModules
                                   ).filter(FrontModules.Name == moduleName
                                            ).first()
 
     def getForm(self, objectType=None, moduleName=None, mode='edit'):
-        if objectType is None:
+        if 'ObjectType' in self.request.params:
             objectType = self.request.params['ObjectType']
+        if not objectType:
+            objectType = None
         self.setType(int(objectType))
-        schema = self.objectDB.getForm(mode, objectType)
-        return schema
+
+        form = self.getConfigJSON(self.moduleFormName + mode, self.typeObj)
+        if not form:
+            form = self.objectDB.getForm(mode, objectType)
+            self.setConfigJSON(self.moduleFormName + mode, self.typeObj, form)
+        return form
 
     def getGrid(self):
-        cols = self.objectDB.getGrid(moduleName=self.gridModuleName)
-        return cols
+        gridCols = self.getConfigJSON(self.moduleGridName, self.typeObj)
+        if not gridCols:
+            gridCols = self.objectDB.getGrid(type_=self.typeObj, moduleName=self.moduleGridName)
+            self.setConfigJSON(self.moduleGridName, self.typeObj, gridCols)
+
+        return gridCols
 
     def getFilter(self):
         moduleName = self.request.params.get('FilterName', None)
         if not moduleName:
-            moduleName = self.gridModuleName
-        filtersList = self.objectDB.getFilters(moduleName=moduleName)
-        filters = {}
-        for i in range(len(filtersList)):
-            filters[str(i)] = filtersList[i]
+            moduleName = self.objectDB.moduleGridName
+
+        filters = self.getConfigJSON(moduleName+'Filter', self.typeObj)
+        if not filters:
+            filtersList = self.objectDB.getFilters(type_=self.typeObj, moduleName=moduleName)
+            filters = {}
+            for i in range(len(filtersList)):
+                filters[str(i)] = filtersList[i]
+            self.setConfigJSON(moduleName+'Filter', self.typeObj, filters)
+
         return filters
+
+    def getConfigJSON(self, moduleName, typeObj):
+        return self.configJSON.get(moduleName, {}).get(typeObj, None)
+
+    def setConfigJSON(self, moduleName, typeObj, configObject):
+        if moduleName not in self.configJSON:
+            self.configJSON[moduleName] = {}
+        self.configJSON[moduleName][typeObj] = configObject
 
     def setType(self, objectType=1):
         setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
@@ -417,26 +442,6 @@ class RESTView(object):
     @view_config(request_method='PUT', renderer='json', permission='update')
     def put(self):
         return self.context.update()
-
-
-def notfound(request):
-    return HTTPNotFound('Not found')
-
-# test if the match url is integer
-
-
-def integers(*segment_names):
-    def predicate(info, request):
-        match = info['match']
-        for segment_name in segment_names:
-            try:
-                match[segment_name] = int(match[segment_name])
-                if int(match[segment_name]) == 0:
-                    return False
-            except (TypeError, ValueError):
-                return False
-        return True
-    return predicate
 
 
 def add_routes(config):

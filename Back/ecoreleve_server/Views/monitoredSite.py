@@ -134,8 +134,8 @@ class MonitoredSitesView(DynamicObjectCollectionView):
 
     Collection = MonitoredSiteList
     item = MonitoredSiteView
-    formModuleName = 'MonitoredSiteForm'
-    gridModuleName = 'MonitoredSiteGrid'
+    moduleFormName = 'MonitoredSiteForm'
+    moduleGridName = 'MonitoredSiteGrid'
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)

@@ -59,8 +59,8 @@ class StationsView(DynamicObjectCollectionView):
 
     Collection = StationList
     item = StationView
-    formModuleName = 'StationForm'
-    gridModuleName = 'StationGrid'
+    moduleFormName = 'StationForm'
+    moduleGridName = 'StationGrid'
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
