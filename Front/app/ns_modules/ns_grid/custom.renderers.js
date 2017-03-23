@@ -22,7 +22,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       this.isEmptyRow = this.checkIfEmptyRow(params);
       
       if(this.isEmptyRow){
-        //console.log('empty');
         this.requiredValidation(params, value);
       } else {
         // after sort filter etc check if there was already an error then display it
@@ -181,7 +180,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
 		var ThesaurusRenderer = function(options) {};
     ThesaurusRenderer.prototype = new CustomRenderer();
-    //ThesaurusRenderer.prototype.deferred = true;
+    ThesaurusRenderer.prototype.deferred = true;
     ThesaurusRenderer.prototype.handleValues = function(params){
       var objectValue = params.value;
       this.formatValueToDisplay(objectValue); // prefer manage value to display here in order to keep object value all along the time
@@ -198,7 +197,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       } else {
         valueToDisplay = objectValue.value;
       }
-  	  $(this.eGui).html(valueToDisplay); 
+  	  $(this.eGui).html(valueToDisplay);
   	};
 
 		ThesaurusRenderer.prototype.deferredValidation = function(params, objectValue){

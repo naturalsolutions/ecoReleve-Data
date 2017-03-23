@@ -122,8 +122,8 @@ define([
 				_this.element.$el.change();
 			};
 			this.bbfe.getValue = function(){
-				var value = this.getDisplayedValue();
-				this.onEditValidation(value);
+				var displayValue = this.getDisplayedValue();
+				this.validateValue(displayValue);
 				return ThesaurusPicker.prototype.getValue.call(this,options);
 			};
 		  this.element = this.bbfe.render();
