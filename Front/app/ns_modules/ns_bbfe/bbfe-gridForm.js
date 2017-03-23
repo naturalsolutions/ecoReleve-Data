@@ -62,6 +62,11 @@ define([
     initialize: function(options){
       var _this = this; 
       console.log(options)
+
+      this.validators = options.schema.validators || [];
+
+      this.validators.push({ type: 'SubFormGrid', parent: this });
+
       this.editable = options.schema.editable;
       this.form = options.form;
       this.subProtocolType = options.schema.options.protocoleType;
@@ -183,20 +188,15 @@ define([
       return columnsDefs;             
     },
 
-    handleErrors: function(errors){
-
-    },
 
     getValue: function() {
       var rowDataAndErrors = this.gridView.getRowDataAndErrors();
 
       if(rowDataAndErrors.errors.length){
-        this.handleErrors(rowDataAndErrors.errors);
-        return;
-      }
-
-      if(rowDataAndErrors.errors.length){
         this.isError = true;
+        return;
+      } else {
+        this.isError = false;
       }
 
       this.gridView.gridOptions.api.setSortModel({});

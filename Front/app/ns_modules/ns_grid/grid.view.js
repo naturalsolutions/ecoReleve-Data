@@ -899,6 +899,7 @@ define([
     },
 
     getRowDataAndErrors: function(){
+      var _this = this;
       this.gridOptions.api.stopEditing();
 
       var rowData = [];
@@ -951,7 +952,12 @@ define([
           // if not empty & error then push the error
           if(!empty && node.data._errors){
             if(node.data._errors.length){
-              errors.push(node.data._errors);
+              errors.push({
+                column: node.data._errors,
+              });
+
+              //focus on cell with error
+              _this.gridOptions.api.setFocusedCell(node.childIndex, node.data._errors, null);
             }
           }
                   
