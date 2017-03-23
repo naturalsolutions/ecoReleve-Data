@@ -61,7 +61,6 @@ define([
 
     initialize: function(options){
       var _this = this; 
-      console.log(options)
 
       this.validators = options.schema.validators || [];
 
