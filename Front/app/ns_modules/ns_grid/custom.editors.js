@@ -34,10 +34,19 @@ define([
 
 		  var value = params.value;
 
+			if(params.charPress){
+				if(value instanceof Object){
+					value.displayValue = params.charPress;
+					value.value = params.charPress;
+				} else {
+					value = params.charPress;
+				}
+			}
+
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,
-		    formGrid: true
+		    formGrid: true,
 		  };
 			if(col.form){
 				options.form = col.form;
