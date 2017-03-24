@@ -166,6 +166,9 @@ define([
     },
 
     focusFirstCell: function(){
+      if($(this.$el.parent()).hasClass('js-rg-grid-subform')){
+        return;
+      }
       if ( this.gridOptions.columnDefs[0].checkboxSelection ) {
         this.gridOptions.api.setFocusedCell(0, this.gridOptions.columnDefs[1].field, null);
       } else {

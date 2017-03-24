@@ -32,24 +32,12 @@ define([
         previousValue: '',
 
         events: {
-            'hide': "hasChanged",
-            'keyup': 'inputChange',
-            'changeEditor':'inputChange',
+            'change': 'onChange',
         },
 
-        editable:false,
-
-
-        //for global form prevent
-        hasChanged: function (currentValue) {
-            if (currentValue !== this.previousValue) {
-                this.previousValue = currentValue;
-                this.trigger('change', this);
-            }
-        },
-
-        inputChange: function(e){
-            this.isTermError = true;
+        onChange: function(e){
+            var value = this.$el.find('#' + this.id).val();
+            this.validateValue(value);
         },
 
         initialize: function (options) {
@@ -131,22 +119,15 @@ define([
                     },
                     inputValue: _this.value,
                     startId: _this.startId,
-                    timeout: _this.timeout, //can raise an error
+                    timeout: _this.timeout, // can raise an error
 
                     onItemClick: function (options) {
+                        //for global
                         _this.$el.find('input').trigger('thesaurusChange');
 
                         var value = _this.$el.find('#' + _this.id).val();
                         _this.validateValue(value);
                     },
-
-                });
-
-                //on blur, manual because focus on three trigger blur on input
-                _this.$el.find('#' + _this.id).blur(function (options) {
-
-                    var value = _this.$el.find('#' + _this.id).val();
-                    _this.validateValue(value);
 
                 });
 
