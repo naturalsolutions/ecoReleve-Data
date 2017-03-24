@@ -39,7 +39,7 @@ define([
     },
 
     onShow: function() {
-      this.loadCollection(config.coreUrl + 'protocolTypes', 'select[name="protocols"]');
+      this.loadCollection(config.coreUrl + 'protocols/getType', 'select[name="protocols"]');
       //
       // var ws = new WebSocket("ws://127.0.0.1:6545/ecoReleve-Websockets/fileImport/2");
       // // var ws2 = new WebSocket("ws://127.0.0.1:6545/jobs/2/");
@@ -145,7 +145,7 @@ define([
             var href = $(link).attr('href');
             window.location.href = link;
             document.body.removeChild(link);
-            
+
              var options = {
               title: 'Loading file succeeded!',
             };

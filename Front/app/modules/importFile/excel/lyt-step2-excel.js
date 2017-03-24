@@ -21,7 +21,9 @@ define([
     name: 'File selection',
 
     ui: {
-      'form': '#form'
+      'form': '#form',
+      'gridWsMsg': '#js-wsmsg',
+      'progressBar': '.progress'
     },
 
     events: {
@@ -30,6 +32,8 @@ define([
 
     initialize: function(options) {
       this.model = options.model;
+      this.nbLines = 0;
+      this.nbProcess = 0;
 
     },
 
@@ -110,7 +114,9 @@ define([
         url: config.coreUrl + 'file_import/processList?fileType=excel_protocol',
         type: 'GET',
         success: function(msg){
-          console.log(msg)
+          _this.nbProcess = msg.length;
+          _this.updateProgressBar('js_statusProcess',0,_this.nbProcess)
+          _this.initiateGridImport(msg);
         },
         error: function(jqXHR, textStatus, errorThrown){
           var options = {
@@ -120,13 +126,198 @@ define([
         }
         });
     },
+    notPresent: function(tab , elem) {
+      for( var i = 0 ; i < tab.length ; i++) {
+        if(tab[i] === elem){
+          return false;
+        }
+      }
+      return true;
+
+    },
+
+    initiateGridImport: function(data) {
+      var _this = this;
+      var uniqProcressArray = [];
+      for( var i=0; i < data.length ; i++ ) {
+        if( this.notPresent(uniqProcressArray, data[i].name ) ) {
+          this.nbLines +=1;
+          uniqProcressArray.push(data[i].name);
+
+        var divContent = document.createElement('div');
+        var divRow = document.createElement('div');
+        var divProcess = document.createElement('div');
+        var divMsg = document.createElement('div');
+        var divError = document.createElement('div');
+        var divErrorIndexes = document.createElement('div');
+        var btnDetails = document.createElement('a');
+        var divRowDetails = document.createElement('div');
+
+        if( this.nbLines % 2 ) {
+          divRow.className = 'row content even';
+        }
+        else {
+          divRow.className = 'row content odd';
+        }
+        divContent.className = 'row';
+        divContent.id = 'js-'+this.nbLines+'-'+data[i].name;
+        divProcess.className = 'col-md-7 content_import_process';
+        divMsg.className = 'col-md-3 content_import_status';
+        divError.className = 'col-md-3 content_import_error hide';
+        divErrorIndexes.className = 'col-md-2 content_import_details';
+        divRowDetails.className = 'row col-md-12 detailsContent collapse';
+        divRowDetails.id = 'importLg'+data[i].name;
+
+        divProcess.textContent = data[i].name ;
+        divMsg.textContent  = "Unstarted" ;
+        divError.textContent = "-" ;
+        //divErrorIndexes.textContent = "-" ;
+        divRowDetails.textContent = "-";
+        btnDetails.textContent = "-";
+
+        divContent.appendChild(divRow);
+        divContent.appendChild(divRowDetails);
+        divRow.appendChild(divProcess);
+        divRow.appendChild(divMsg);
+        divRow.appendChild(divError);
+        divRow.appendChild(divErrorIndexes);
+
+        //divRow.appendChild(divRowDetails);
+
+        _this.ui.gridWsMsg.append(divContent);
+        }
+      }
+
+
+
+    },
+
+    updateRow : function(idRow,data) {
+      var elemRootRow = this.ui.gridWsMsg.find('[id$='+idRow+'][class=row]');
+      var elemProcess = elemRootRow[0].querySelector('.content_import_process');
+      var elemMsg = elemRootRow[0].querySelector('.content_import_status');
+      var elemError = elemRootRow[0].querySelector('.content_import_error');
+      var elemErrorIndexes = elemRootRow[0].querySelector('.content_import_details');
+      var elemRowDetails = elemRootRow[0].querySelector('.detailsContent');
+
+      switch(data.msg.toLowerCase()) {
+        case 'ok' : {
+          var elemIcon = document.createElement('i');
+          elemIcon.className = "reneco reneco-checked";
+          elemMsg.textContent = data.msg;//+'<i class=" reneco reneco-entrykey "></i>';
+          elemMsg.appendChild(elemIcon);
+          break;
+        }
+        case 'error': {
+          var elemIcon = document.createElement('i');
+          elemIcon.className = "reneco reneco-close";
+          elemMsg.textContent = data.msg;//+'<i class=" reneco reneco-entrykey "></i>';
+          elemMsg.appendChild(elemIcon);
+          break;
+        }
+        default : {
+          elemMsg.textContent = data.msg;
+          break;
+        }
+      }
+      elemError.textContent = data.error;
+      elemRowDetails.textContent = data.errorIndexes;
+      if( data.error.toLowerCase() !== 'none') {
+        var btnDetails = document.createElement('a');
+        btnDetails.textContent = "Details";
+        btnDetails.setAttribute('data-toggle','collapse');
+        btnDetails.setAttribute('href','#importLg'+idRow);
+
+        elemRootRow[0].querySelector('.row.content').className += ' errorImport';//addClass('errorImport');
+        elemErrorIndexes.append(btnDetails);
+      }
+      else {
+        elemErrorIndexes.textContent = '-';
+      }
+
+    },
+
+    updateProgressBar: function(idBar,valueCur,valueMax) {
+      var progressBar = this.ui.progressBar.filter('#'+idBar).find('.progress-bar');
+      var percentage = Math.trunc( (valueCur/valueMax) * 100 )
+      progressBar[0].setAttribute('aria-valuenow',valueCur);
+      progressBar[0].style.width = percentage+'%' ;
+      progressBar[0].textContent = percentage+'% Complete';
+
+    },
 
     startWebSocket: function(guid){
       var _this = this;
+      var nbLines = 0;
+      var uniqProcressArray = [];
       // domain name should be in config
       var ws = new WebSocket('ws://127.0.0.1:6545/ecoReleve-Websockets/fileImport/' + guid);
       ws.onmessage = function(msg) {
-        _this.$el.find('#js-wsmsg').append('<span>' + msg.data + '</span></br>');
+        var jsonMsg = JSON.parse(msg.data);
+        _this.updateRow(jsonMsg.process,jsonMsg);
+        for( var i = 0 ; i < uniqProcressArray.length ; i++) {
+          if( uniqProcressArray[i] === jsonMsg.process ) {
+            break;
+          }
+        }
+        if( i === uniqProcressArray.length ) {
+          uniqProcressArray.push(jsonMsg.process)
+          nbLines+=1;
+          _this.updateProgressBar('js_statusProcess',nbLines,_this.nbProcess)
+        }
+        //_this.$el.find('#js-wsmsg').append('<span>' + msg.data + '</span></br>');
+/******
+
+        var divContent = document.createElement('div');
+        var divRow = document.createElement('div');
+        var divProcess = document.createElement('div');
+        var divMsg = document.createElement('div');
+        var divError = document.createElement('div');
+        var divErrorIndexes = document.createElement('div');
+        var btnDetails = document.createElement('a');
+        var divRowDetails = document.createElement('div');
+
+        if( nbLines % 2 ) {
+          divRow.className = 'row content even';
+        }
+        else {
+          divRow.className = 'row content odd';
+        }
+        divContent.className = 'row';
+        divProcess.className = 'col-md-3 content_import_process';
+        divMsg.className = 'col-md-3 content_import_status';
+        divError.className = 'col-md-3 content_import_error';
+        divErrorIndexes.className = 'col-md-3 content_import_details';
+        divRowDetails.className = 'row col-md-12 detailsContent collapse';
+        divRowDetails.id = 'importLg'+nbLines;
+        btnDetails.setAttribute('data-toggle','collapse');
+        btnDetails.setAttribute('href','#importLg'+nbLines);
+
+        divProcess.textContent = jsonMsg.process ;
+        divMsg.textContent  = jsonMsg.msg ;
+        divError.textContent = jsonMsg.error ;
+        //divErrorIndexes.textContent = jsonMsg.errorIndexes ;
+        divRowDetails.textContent = jsonMsg.errorIndexes;
+        btnDetails.textContent = "Details";
+
+        divContent.appendChild(divRow);
+        divContent.appendChild(divRowDetails);
+        divRow.appendChild(divProcess);
+        divRow.appendChild(divMsg);
+        divRow.appendChild(divError);
+        divRow.appendChild(divErrorIndexes);
+
+        //divRow.appendChild(divRowDetails);
+        if( jsonMsg.error.toLowerCase() !== 'none') {
+          divRow.className = divRow.className +' errorImport '
+          divErrorIndexes.appendChild(btnDetails);
+        }
+        else {
+          divErrorIndexes.textContent = 'NA'
+        }
+        _this.ui.gridWsMsg.append(divContent);
+        //_this.ui.gridWsMsg.append(divRowDetails);
+        ****/
       };
       ws.onclose = function(msg){
       };
