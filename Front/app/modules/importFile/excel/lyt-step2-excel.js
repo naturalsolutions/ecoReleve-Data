@@ -86,13 +86,34 @@ define([
         formData.append("excelFile", file);
         formData.append("protoId",this.model.get('protoID'));
         formData.append("protoName",this.model.get('protoName'));
-
+        console.log(file);
         $.ajax({
           url: config.coreUrl + 'file_import/getExcelFile',
           type: 'POST',
           data: formData,
           processData: false, // Don't process the files
           contentType: false, // Set content type to false as jQuery will tell the server its a query string request
+          xhr : function () {
+            //upload Progress
+            var xhr = $.ajaxSettings.xhr();
+            if (xhr.upload) {
+              _this.updateProgressBar('js_uploadFileImported',0,100);
+              xhr.upload.addEventListener('progress', function(event) {
+                  var percent = 0;
+                  var position = event.loaded || event.position;
+                  var total = event.total;
+                  if (event.lengthComputable) {
+                      percent = Math.ceil(position / total * 100);
+                  }
+                  console.log(event);
+                  _this.updateProgressBar('js_uploadFileImported',percent,event.total);
+                  //update progressbar
+                  /*$(progress_bar_id +" .progress-bar").css("width", + percent +"%");
+                  $(progress_bar_id + " .status").text(percent +"%");*/
+              }, true);
+            }
+            return xhr;
+          },
           success: function(msg){
             _this.startWebSocket(msg);
           },
