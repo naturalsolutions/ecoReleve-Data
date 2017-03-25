@@ -63,7 +63,7 @@ def getTemplateColObs(session, protocolID):
     for obj in obsForm['fieldsets']:
         obsFields.extend(obj['fields'])
     obsFields = list(filter(lambda y: y not in ['creationDate', 'ID'], obsFields))
-    return obsFields
+    return list(set(obsFields))
 
 
 def getTemplateColStation(session):
@@ -81,7 +81,7 @@ def getTemplateColStation(session):
     stationFields.extend(['Station_FieldWorker1',
                           'Station_FieldWorker2',
                           'Station_FieldWorker3'])
-    return stationFields
+    return list(set(stationFields))
 
 
 def get_props(attrs):
