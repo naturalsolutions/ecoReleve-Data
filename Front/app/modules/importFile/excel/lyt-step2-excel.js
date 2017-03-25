@@ -106,7 +106,7 @@ define([
                       percent = Math.ceil(position / total * 100);
                   }
                   console.log(event);
-                  _this.updateProgressBar('js_uploadFileImported',percent,event.total);
+                  _this.updateProgressBar('js_uploadFileImported',percent,100);
                   //update progressbar
                   /*$(progress_bar_id +" .progress-bar").css("width", + percent +"%");
                   $(progress_bar_id + " .status").text(percent +"%");*/
