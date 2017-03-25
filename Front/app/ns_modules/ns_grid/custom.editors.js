@@ -48,12 +48,16 @@ define([
 		    schema: col.schema,
 		    formGrid: true,
 		  };
-
+			if(col.form){
+				options.form = col.form;
+			}
 		  var model = new Backbone.Model();
 		  model.set(options.key, value);
 		  options.model = model;
 			this.params = params;
+
 			this.initBBFE(options);
+
 
 		  this.preventNavigationEvents();
 		};
