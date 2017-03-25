@@ -61,7 +61,7 @@ define([
 
 		  this.preventNavigationEvents();
 		};
-
+	
 		CustomEditor.prototype.initBBFE = function(options){
 		  
 		};

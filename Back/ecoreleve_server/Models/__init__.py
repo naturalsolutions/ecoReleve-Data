@@ -134,6 +134,7 @@ from .Equipment import *
 from .SensorData import *
 from .List import *
 from .Log import sendLog
+from .File_Import import *
 
 
 LinkedTables['Individual'] = Individual
