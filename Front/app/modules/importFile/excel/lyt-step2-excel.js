@@ -86,7 +86,6 @@ define([
         formData.append("excelFile", file);
         formData.append("protoId",this.model.get('protoID'));
         formData.append("protoName",this.model.get('protoName'));
-        console.log(file);
         $.ajax({
           url: config.coreUrl + 'file_import/getExcelFile',
           type: 'POST',
@@ -105,7 +104,6 @@ define([
                   if (event.lengthComputable) {
                       percent = Math.ceil(position / total * 100);
                   }
-                  console.log(event);
                   _this.updateProgressBar('js_uploadFileImported',percent,100);
                   //update progressbar
                   /*$(progress_bar_id +" .progress-bar").css("width", + percent +"%");
@@ -118,7 +116,6 @@ define([
             _this.startWebSocket(msg);
           },
           error: function(jqXHR, textStatus, errorThrown){
-            console.log(jqXHR, textStatus, errorThrown);
             var options = {
               title: 'Something wrong append',
             };
@@ -220,6 +217,7 @@ define([
       var elemError = elemRootRow[0].querySelector('.content_import_error');
       var elemErrorIndexes = elemRootRow[0].querySelector('.content_import_details');
       var elemRowDetails = elemRootRow[0].querySelector('.detailsContent');
+      var arrayIntToOrder = [];
 
       switch(data.msg.toLowerCase()) {
         case 'ok' : {
@@ -242,7 +240,11 @@ define([
         }
       }
       elemError.textContent = data.error;
-      elemRowDetails.textContent = data.errorIndexes;
+      arrayIntToOrder = data.errorIndexes.split(",");
+      arrayIntToOrder.sort( function(a,b){
+        return a-b;
+      })
+      elemRowDetails.innerHTML = arrayIntToOrder.join("<br />");
       if( data.error.toLowerCase() !== 'none') {
         var btnDetails = document.createElement('a');
         btnDetails.textContent = "Details";
@@ -286,59 +288,6 @@ define([
           nbLines+=1;
           _this.updateProgressBar('js_statusProcess',nbLines,_this.nbProcess)
         }
-        //_this.$el.find('#js-wsmsg').append('<span>' + msg.data + '</span></br>');
-/******
-
-        var divContent = document.createElement('div');
-        var divRow = document.createElement('div');
-        var divProcess = document.createElement('div');
-        var divMsg = document.createElement('div');
-        var divError = document.createElement('div');
-        var divErrorIndexes = document.createElement('div');
-        var btnDetails = document.createElement('a');
-        var divRowDetails = document.createElement('div');
-
-        if( nbLines % 2 ) {
-          divRow.className = 'row content even';
-        }
-        else {
-          divRow.className = 'row content odd';
-        }
-        divContent.className = 'row';
-        divProcess.className = 'col-md-3 content_import_process';
-        divMsg.className = 'col-md-3 content_import_status';
-        divError.className = 'col-md-3 content_import_error';
-        divErrorIndexes.className = 'col-md-3 content_import_details';
-        divRowDetails.className = 'row col-md-12 detailsContent collapse';
-        divRowDetails.id = 'importLg'+nbLines;
-        btnDetails.setAttribute('data-toggle','collapse');
-        btnDetails.setAttribute('href','#importLg'+nbLines);
-
-        divProcess.textContent = jsonMsg.process ;
-        divMsg.textContent  = jsonMsg.msg ;
-        divError.textContent = jsonMsg.error ;
-        //divErrorIndexes.textContent = jsonMsg.errorIndexes ;
-        divRowDetails.textContent = jsonMsg.errorIndexes;
-        btnDetails.textContent = "Details";
-
-        divContent.appendChild(divRow);
-        divContent.appendChild(divRowDetails);
-        divRow.appendChild(divProcess);
-        divRow.appendChild(divMsg);
-        divRow.appendChild(divError);
-        divRow.appendChild(divErrorIndexes);
-
-        //divRow.appendChild(divRowDetails);
-        if( jsonMsg.error.toLowerCase() !== 'none') {
-          divRow.className = divRow.className +' errorImport '
-          divErrorIndexes.appendChild(btnDetails);
-        }
-        else {
-          divErrorIndexes.textContent = 'NA'
-        }
-        _this.ui.gridWsMsg.append(divContent);
-        //_this.ui.gridWsMsg.append(divRowDetails);
-        ****/
       };
       ws.onclose = function(msg){
       };
