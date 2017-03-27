@@ -129,6 +129,10 @@ define([
                         _this.validateValue(value);
                     },
 
+                    onInputInitialize: function(options){
+                        _this.validateValue(_this.value.displayValue);
+                    }
+
                 });
 
                 // tree navigation arrow
