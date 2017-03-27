@@ -173,10 +173,6 @@ define([
           if(_this.from == 'release'){
             _this.$el.find('[name="fieldActivityId"]').val('1').change();
           }
-          // _this.$el.find('input[name="FK_MonitoredSite"]').on('change', function() {
-          //     var msId = _this.$el.find('input[name="FK_MonitoredSite"]').attr('data_value');
-          //     _this.getCoordFromMs(msId);
-          // });
         }
       });
 

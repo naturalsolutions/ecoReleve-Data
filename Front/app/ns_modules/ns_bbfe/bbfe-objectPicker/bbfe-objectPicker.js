@@ -236,9 +236,11 @@ define([
           case 'individuals':
             break;
           case 'monitoredSites':
-            this.form.fields.StationDate.editor.on('change',function(e, v){
-              _this.onChange();
-            });
+            if (this.form.fields.StationDate){
+              this.form.fields.StationDate.editor.on('change',function(e, v){
+                _this.onChange();
+              });
+            }
             break;
           case 'sensors':
             break;
@@ -368,9 +370,7 @@ define([
           data['Name'] = _this.form.model.get('Name');
           data['ELE'] = _this.form.model.get('ELE');
           data['Precision'] = _this.form.model.get('precision');
-
           data['StartDate'] = _this.form.model.get('StationDate');
-
 
           _this.regionManager.get('modal').show(new _this.NewView({
             objectType: ctx.model.get('objectType'),
