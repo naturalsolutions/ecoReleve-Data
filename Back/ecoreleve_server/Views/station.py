@@ -84,7 +84,7 @@ class StationsView(DynamicObjectCollectionView):
                 LON=curSta.LON,
                 ELE=curSta.ELE,
                 Precision=curSta.precision,
-                FK_MonitoredSite=curSta.FK_MonitoredSite)
+                FK_MonitoredSite=data['FK_MonitoredSite'])
 
             session.add(newSitePos)
             session.commit()
