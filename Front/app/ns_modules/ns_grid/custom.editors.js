@@ -34,10 +34,19 @@ define([
 
 		  var value = params.value;
 
+			if(params.charPress){
+				if(value instanceof Object){
+					value.displayValue = params.charPress;
+					value.value = params.charPress;
+				} else {
+					value = params.charPress;
+				}
+			}
+
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,
-		    formGrid: true
+		    formGrid: true,
 		  };
 			if(col.form){
 				options.form = col.form;
@@ -113,8 +122,8 @@ define([
 				_this.element.$el.change();
 			};
 			this.bbfe.getValue = function(){
-				var value = this.getDisplayedValue();
-				this.onEditValidation(value);
+				var displayValue = this.getDisplayedValue();
+				this.validateValue(displayValue);
 				return ThesaurusPicker.prototype.getValue.call(this,options);
 			};
 		  this.element = this.bbfe.render();
