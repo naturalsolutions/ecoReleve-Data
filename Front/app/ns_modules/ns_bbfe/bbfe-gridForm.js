@@ -40,6 +40,7 @@ define([
 
     className: 'sub-grid-form' ,
     addRow: function(){
+      this.gridView.gridOptions.api.setSortModel({});
       this.gridView.gridOptions.api.addItems([{}]);
       this.$el.trigger('change');
     },
@@ -50,23 +51,23 @@ define([
       if(!selectedNodes.length){
         return;
       }
-      
-      // var opt = {
-      //   title: 'Are you sure?',
-      //   text: 'selected rows will be deleted'
-      // };
-      // window.swal(opt, 'warning', function() {
-      //   _this.gridView.gridOptions.api.removeItems(selectedNodes);
-      // });
+
+      this.gridView.gridOptions.api.deletingRows = true;
+      this.gridView.gridOptions.api.setSortModel({});
       _this.gridView.gridOptions.api.removeItems(selectedNodes);
       this.$el.trigger('change');
+      this.gridView.gridOptions.api.deletingRows = false;
     },
 
     initialize: function(options){
       var _this = this; 
 
-      this.editable = options.schema.editable;
+      this.validators = options.schema.validators || [];
 
+      this.validators.push({ type: 'SubFormGrid', parent: this });
+
+      this.editable = options.schema.editable;
+      this.form = options.form;
       this.subProtocolType = options.schema.options.protocoleType;
 
       options.schema.fieldClass = 'col-xs-12';
@@ -114,7 +115,9 @@ define([
       this.regionManager.get('rgGrid').show(this.gridView = new GridView({
         columns: this.formatColumns(options.schema),
         clientSide: true,
+        form: _this.form,
         url: url,
+        displayRowIndex: true,
         gridOptions: {
           editType: 'fullRow',
           singleClickEdit : true,
@@ -153,6 +156,7 @@ define([
     },
 
     formatColumns: function(schema){
+      var _this = this;
       var odrFields = schema.fieldsets[0].fields;
                         
       var columnsDefs = [];
@@ -183,21 +187,18 @@ define([
       return columnsDefs;             
     },
 
-    handleErrors: function(errors){
-
-    },
 
     getValue: function() {
       var rowDataAndErrors = this.gridView.getRowDataAndErrors();
 
       if(rowDataAndErrors.errors.length){
-        this.handleErrors(rowDataAndErrors.errors);
+        this.isError = true;
         return;
+      } else {
+        this.isError = false;
       }
 
-      if(rowDataAndErrors.errors.length){
-        this.isError = true;
-      }
+      this.gridView.gridOptions.api.setSortModel({});
 
       for (var i = 0; i < rowDataAndErrors.rowData.length; i++) {
         rowDataAndErrors.rowData[i]['FK_ProtocoleType'] = this.subProtocolType;
