@@ -33,14 +33,20 @@ define([
 		  var col = params.column.colDef;
 
 		  var value = params.value;
-		  
-		  //var displayValue;
+
+			if(params.charPress){
+				if(value instanceof Object){
+					value.displayValue = params.charPress;
+					value.value = params.charPress;
+				} else {
+					value = params.charPress;
+				}
+			}
 
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,
 		    formGrid: true,
-				//displayValue: displayValue
 		  };
 			if(col.form){
 				options.form = col.form;
@@ -116,8 +122,8 @@ define([
 				_this.element.$el.change();
 			};
 			this.bbfe.getValue = function(){
-				var value = this.getDisplayedValue();
-				this.onEditValidation(value);
+				var displayValue = this.getDisplayedValue();
+				this.validateValue(displayValue);
 				return ThesaurusPicker.prototype.getValue.call(this,options);
 			};
 		  this.element = this.bbfe.render();
@@ -159,7 +165,7 @@ define([
 		AutocompleteEditor.prototype.getValue = function(){
 		  return {
 		  	value: this.element.getValue(),
-		  	label: this.element.$input[0].value //not sure why
+		  	displayValue: this.element.$input[0].value //not sure why
 		  } 
 		};
 
@@ -221,7 +227,7 @@ define([
 		SelectEditor.prototype.getValue = function(){
 			return {
 				value: this.element.getValue(),
-				label: this.element.$el.find('option:selected').text(),
+				displayValue: this.element.$el.find('option:selected').text(),
 			}
 		};
 

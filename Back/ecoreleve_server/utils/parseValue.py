@@ -99,9 +99,10 @@ def formatThesaurus(data):
             'value': data
         }
     except:
-        data = {'displayValue': '',
-                'value': data
-                }
+        data = {
+            'displayValue': data,
+            'value': data
+        }
     return data
 
 
