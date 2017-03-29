@@ -52,8 +52,12 @@ class ObservationView(DynamicObjectView):
         return responseBody
 
     def delete(self):
-        response = {'id': self.objectDB.ID}
-        DynamicObjectView.delete(self)
+        if self.objectDB:
+            id_ =  self.objectDB.ID
+            DynamicObjectView.delete(self)
+        else :
+            id_ = None
+        response = {'id': id_}
         return response
 
 
