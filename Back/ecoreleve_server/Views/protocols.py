@@ -52,7 +52,6 @@ class ObservationView(DynamicObjectView):
         return responseBody
 
     def delete(self):
-        print("*********************** prop object ************************")
         if self.objectDB:
             if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
                 return { 'protected' : True } # on devrait retourner une erreur 500 quelque chose
