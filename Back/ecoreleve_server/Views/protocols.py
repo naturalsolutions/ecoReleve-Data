@@ -54,7 +54,8 @@ class ObservationView(DynamicObjectView):
     def delete(self):
         if self.objectDB:
             if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
-                return { 'protected' : True } # on devrait retourner une erreur 500 quelque chose
+                self.request.response.status_code = 409
+                return {'protected' : True}
             else:
                 id_ = self.objectDB.ID
                 DynamicObjectView.delete(self)
