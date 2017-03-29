@@ -62,7 +62,7 @@ def formatThesaurus(data):
         }
     except:
          data = {
-            'displayValue': '',
+            'displayValue': data,
             'value': data
         }
     return data
