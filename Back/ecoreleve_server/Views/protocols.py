@@ -96,7 +96,7 @@ class ObservationsView(DynamicObjectCollectionView):
             data[items] = value
 
         sta = self.parent.objectDB
-        curObs = self.item.model(FK_ProtocoleType=data['FK_ProtocoleType'])
+        curObs = self.item.model(FK_ProtocoleType=data['FK_ProtocoleType'], FK_Station=sta.ID)
         listOfSubProtocols = []
 
         for items, value in data.items():

@@ -165,6 +165,9 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         form = ConfiguredDbObjectMapped.getForm(self, displayMode, ObjType.ID, moduleName)
         if (ObjType.Status == 10):
             form['grid'] = True
+        form['data'] = {'id': 0}
+        form['data'].update(form['schema']['defaultValues'])
+        form['data'][self.getTypeObjectFKName()] = ObjType.ID
         return form
 
     def getDataWithSchema(self, displayMode='edit'):
