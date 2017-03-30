@@ -1,4 +1,4 @@
-import eventlet; eventlet.monkey_patch()
+import eventlet; eventlet.monkey_patch()  # raise errors but it works...
 from eventlet import wsgi
 import datetime
 from decimal import Decimal
