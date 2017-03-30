@@ -20,13 +20,17 @@ class SensorView(DynamicObjectView):
 
     def __init__(self, ref, parent):
         DynamicObjectView.__init__(self, ref, parent)
-        self.actions = {'equipment': self.getEquipment}
+        self.actions = {'equipment': self.getEquipment,
+                        'locations': self.getLocations}
 
     def __getitem__(self, ref):
         if ref in self.actions:
             self.retrieve = self.actions.get(ref)
             return self
         return self.get(ref)
+    
+    def getLocations(self):
+        return 'no locations available'
 
     def getEquipment(self):
         _id = self.objectDB.ID
