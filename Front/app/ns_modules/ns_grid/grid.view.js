@@ -582,7 +582,7 @@ define([
             typeObj: _this.model.get('objectType')
           };
 
-          //mm
+
           if(this.startDate){
             status.startDate = this.startDate;
           }
@@ -780,7 +780,7 @@ define([
 
       $.when(this.columnDeferred).then(function(){
         _this.displayGrid();
-      })
+      });
 
       this.onResize = _.debounce( function() {
         _this.gridOptions.api.sizeColumnsToFit();
