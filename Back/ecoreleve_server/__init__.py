@@ -1,3 +1,5 @@
+import eventlet; eventlet.monkey_patch()
+from eventlet import wsgi
 import datetime
 from decimal import Decimal
 from urllib.parse import quote_plus
@@ -22,9 +24,6 @@ from .Models import (
 from .Views import add_routes, add_cors_headers_response_callback
 from pyramid.events import NewRequest
 from sqlalchemy.orm import sessionmaker, scoped_session
-import eventlet
-from eventlet import wsgi
-import logging
 
 
 def datetime_adapter(obj, request):
@@ -90,10 +89,10 @@ def main(global_config, **settings):
     Base.metadata.create_all(engine)
     Base.metadata.reflect(views=True, extend_existing=False)
 
-    logging.config.fileConfig(
-        settings['logging.config'],
-        disable_existing_loggers=False
-    )
+    # logging.config.fileConfig(
+    #     settings['logging.config'],
+    #     disable_existing_loggers=False
+    # )
 
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
@@ -143,7 +142,7 @@ def main(global_config, **settings):
     config.scan()
 
     app = config.make_wsgi_app()
-    listener = eventlet.listen((AppConfig['server:main']['host'], int(AppConfig['server:main']['port'])))
-    wsgi.server(listener, app)
+    listener = eventlet.listen((AppConfig['server:main']['host'],
+                                int(AppConfig['server:main']['port'])))
+    app = wsgi.server(listener, app, log_output=False)
     return app
-
