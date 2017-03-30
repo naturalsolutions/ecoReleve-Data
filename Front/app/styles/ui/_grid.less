@@ -166,8 +166,15 @@
       }
     }
     .ag-body {
+//        cursor: default !important;
+
+
       .ag-row {
         cursor: pointer;
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+        user-select: text !important;
         line-height: 34px;
         //transition: background 0.01s linear;
         border-bottom: 1px solid rgb(221, 221, 221);
@@ -194,7 +201,7 @@
           }
           &.ag-cell-error{
             border-left: 5px solid @error;
-          }          
+          }
           &.ag-cell-required{
             border-bottom: 1px solid rgba(255, 165, 0, 0.5);
           }
