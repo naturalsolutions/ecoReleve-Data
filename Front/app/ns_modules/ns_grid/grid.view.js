@@ -6,6 +6,8 @@ define([
   'ag-grid',
   'sweetAlert',
 
+  './custom.defaultHeaderComponent',
+
   './custom.text.filter',
   './custom.number.filter',
   './custom.date.filter',
@@ -24,7 +26,7 @@ define([
 
   'i18n'
 
-], function($, _, Backbone, Marionette, AgGrid, Swal,
+], function($, _, Backbone, Marionette, AgGrid, Swal,CustomDefaultHeaderComponent,
   CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter,
   CustomTextAutocompleteFilter, utils_1, Renderers, Editors,
   Decimal5Renderer, DateTimeRenderer, ObjectPicker
@@ -67,6 +69,7 @@ define([
       this.extendAgGrid();
 
       var _this = this;
+
       this.model = options.model || new Backbone.Model();
       this.model.set('type', options.type);
       this.model.set('objectType', options.objectType || 1);
@@ -100,6 +103,12 @@ define([
         headerHeight: 30,
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),
+      /*  defaultColDef : {
+          headerComponent : CustomDefaultHeaderComponent,
+          headerComponentParams : {
+            menuIcon : 'reneco-menu'
+          }
+        },*/
         onGridReady: function(){
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
@@ -114,7 +123,6 @@ define([
           });
         },
         onAfterFilterChanged: function(){
-          _this.handleSelectAllChkBhv();
           _this.clientSideFilter();
 
           if( _.isEmpty(this.api.getFilterModel()) ){
@@ -173,14 +181,6 @@ define([
       if(this.ready){
         this.interaction('singleSelection', e.node.data[this.idName] || e.node.data.id || e.node.data.ID, this);
       }
-
-      // verify if all elts are selected
-      var rowsToDisplay = this.gridOptions.api.getModel().rowsToDisplay;
-      var allSelected = false;
-      var allSelected = rowsToDisplay.every(function(node){
-        return node.selected;
-      });
-      this.checkUncheckSelectAllUI(allSelected);
 
       // update status bar ui
       this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length);
@@ -273,7 +273,7 @@ define([
             return;
           }*/
         }
-        col.headerCellTemplate = _this.getHeaderCellTemplate();
+        //col.headerCellTemplate = _this.getHeaderCellTemplate();
       });
 
 
@@ -282,7 +282,16 @@ define([
           minWidth: 40,
           maxWidth: 40,
           field: '',
-          headerName: ''
+          headerName: '',
+          pinned : 'left',
+          supressMenu : true,
+          suppressSorting : true,
+          suppressFilter: true,
+          suppressMovable : true,
+          headerCheckboxSelection: true,
+          headerCheckboxSelectionFilteredOnly: true,
+          checkboxSelection: true
+
         };
         _this.formatSelectColumn(col);
         columnDefs.unshift(col);
@@ -357,34 +366,9 @@ define([
       });
     },
 
-    handleSelectAllChkBhv: function(){
-      if(!this.$el.find('.js-check-all')){
-        return;
-      }
-
-      var allSelected = false;
-
-      var selectedNodes = this.gridOptions.api.getSelectedNodes();
-      var rowsToDisplay = this.gridOptions.api.getModel().rowsToDisplay;
-
-      if(Object.keys(this.gridOptions.api.getFilterModel()).length === 0 ){
-        if(selectedNodes.length === rowsToDisplay.length){
-          allSelected = true;
-        }
-      } else {
-        if(selectedNodes.length < rowsToDisplay.length){
-         allSelected = false;
-        } else {
-          allSelected = rowsToDisplay.every(function(node){
-            return node.selected;
-          });
-        }
-      }
-      this.checkUncheckSelectAllUI(allSelected);
-    },
 
     formatSelectColumn: function(col){
-      var _this = this;
+    /*  var _this = this;
       col.pinned = 'left';
       col.suppressMovable = true;
       col.checkboxSelection = true;
@@ -408,34 +392,23 @@ define([
         });
 
         return eCell;
-      };
+      };*/
     },
 
-    getHeaderCellTemplate: function() {
-      var eHeader = document.createElement('span');
-      eHeader.innerHTML =
-        '<div id="agResizeBar" class="ag-header-cell-resize"></div>'+
-        '<span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg style="padding-top: 5px;" width="24" height="24" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg></span>'+
-        '<div id="agHeaderCellLabel" class="ag-header-cell-label">'+
-        '<span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>'+
-        '<span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>'+
-        '<span id="agNoSort" class="ag-header-icon ag-sort-none-icon ag-hidden"><svg width="10" height="10"><polygon points="0,4 5,0 10,4"></polygon><polygon points="0,6 5,10 10,6"></polygon></svg></span>'+
-        '<span id="agFilter" class="ag-header-icon ag-filter-icon ag-hidden"></span>'+
-        '<span id="agText" class="ag-header-cell-text"></span>'+
-        '</div>';
-      return eHeader;
-    },
-
-    checkUncheckSelectAllUI: function(allSelected){
-      var checkbox = this.$el.find('.js-check-all');
-      if(allSelected){
-        checkbox.attr('value', 'checked');
-        checkbox.attr('src', './app/styles/img/checked.png');
-      } else {
-        checkbox.attr('value', 'unchecked');
-        checkbox.attr('src', './app/styles/img/unchecked.png');
-      }
-    },
+    // getHeaderCellTemplate: function() {
+    //   var eHeader = document.createElement('span');
+    //   eHeader.innerHTML =
+    //     '<div id="agResizeBar" class="ag-header-cell-resize"></div>'+
+    //     '<span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg style="padding-top: 5px;" width="24" height="24" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg></span>'+
+    //     '<div id="agHeaderCellLabel" class="ag-header-cell-label">'+
+    //     '<span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>'+
+    //     '<span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>'+
+    //     '<span id="agNoSort" class="ag-header-icon ag-sort-none-icon ag-hidden"><svg width="10" height="10"><polygon points="0,4 5,0 10,4"></polygon><polygon points="0,6 5,10 10,6"></polygon></svg></span>'+
+    //     '<span id="agFilter" class="ag-header-icon ag-filter-icon ag-hidden"></span>'+
+    //     '<span id="agText" class="ag-header-cell-text"></span>'+
+    //     '</div>';
+    //   return eHeader;
+    // },
 
     fetchColumns: function(){
       this.columnDeferred = $.ajax({
@@ -627,30 +600,6 @@ define([
       });
     },
 
-    selectAllVisible: function(){
-      this.gridOptions.api.getModel().rowsToDisplay.map(function(node){
-        node.setSelected(true);
-      });
-    },
-
-    deselectAllVisible: function(){
-      this.gridOptions.api.getModel().rowsToDisplay.map(function(node){
-        node.setSelected(false);
-      });
-    },
-
-
-    deselectAll: function(){
-      this.ready = false;
-      this.gridOptions.api.deselectAll();
-      this.ready = true;
-    },
-
-    selectAll: function(){
-      this.ready = false;
-      this.gridOptions.api.selectAll();
-      this.ready = true;
-    },
 
     clientSideFilter: function(filters){
       var _this = this;
@@ -971,7 +920,7 @@ define([
           }
       };
 
-      AgGrid.PaginationController.prototype.createTemplate = function () {
+  /*    AgGrid.PaginationController.prototype.createTemplate = function () {
           var localeTextFunc = this.gridOptionsWrapper.getLocaleTextFunc();
           var template = Backbone.Marionette.Renderer.render('app/ns_modules/ns_grid/pagination.tpl.html');
           return template
@@ -983,7 +932,7 @@ define([
               .replace('[PREVIOUS]', localeTextFunc('previous', 'Previous'))
               .replace('[NEXT]', localeTextFunc('next', 'Next'))
               .replace('[LAST]', localeTextFunc('last', 'Last'));
-      };
+      };*/
 
       AgGrid.extended = true;
     },
