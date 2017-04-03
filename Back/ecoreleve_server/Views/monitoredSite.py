@@ -43,7 +43,7 @@ class MonitoredSiteView(DynamicObjectView):
         return response
 
     def getGrid(self):
-        cols = self.objectDB.GetGridFields('MonitoredSiteGridHistory')
+        cols = self.objectDB.getGrid(moduleName='MonitoredSiteGridHistory')
         return cols
 
     def getStations(self):
@@ -134,8 +134,8 @@ class MonitoredSitesView(DynamicObjectCollectionView):
 
     Collection = MonitoredSiteList
     item = MonitoredSiteView
-    formModuleName = 'MonitoredSiteForm'
-    gridModuleName = 'MonitoredSiteGrid'
+    moduleFormName = 'MonitoredSiteForm'
+    moduleGridName = 'MonitoredSiteGrid'
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)

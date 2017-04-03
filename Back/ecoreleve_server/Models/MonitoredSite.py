@@ -38,8 +38,8 @@ class MonitoredSitePosition(Base):
 class MonitoredSite (Base, ObjectWithDynProp):
 
     __tablename__ = 'MonitoredSite'
-    FrontModuleForm = 'MonitoredSiteForm'
-    FrontModuleGrid = 'MonitoredSiteGrid'
+    moduleFormName = 'MonitoredSiteForm'
+    moduleGridName = 'MonitoredSiteGrid'
 
     ID = Column(Integer, Sequence('MonitoredSite__id_seq'), primary_key=True)
     Name = Column(String(250), nullable=False)
@@ -65,14 +65,14 @@ class MonitoredSite (Base, ObjectWithDynProp):
         super().__init__(**kwargs)
         ObjectWithDynProp.__init__(self)
 
-    @orm.reconstructor
-    def init_on_load(self):
-        ''' init_on_load is called on the fetch of object '''
-        self.__init__()
+    # @orm.reconstructor
+    # def init_on_load(self):
+    #     ''' init_on_load is called on the fetch of object '''
+    #     self.__init__()
 
     def GetNewValue(self, nameProp):
         ReturnedValue = MonitoredSiteDynPropValue()
-        ReturnedValue.MonitoredSiteDynProp = self.ObjContext.query(
+        ReturnedValue.MonitoredSiteDynProp = self.session.query(
             MonitoredSiteDynProp
         ).filter(MonitoredSiteDynProp.Name == nameProp
                  ).first()
@@ -82,14 +82,14 @@ class MonitoredSite (Base, ObjectWithDynProp):
         return self.MonitoredSiteDynPropValues
 
     def GetDynProps(self, nameProp):
-        return self.ObjContext.query(MonitoredSiteDynProp
+        return self.session.query(MonitoredSiteDynProp
                                      ).filter(MonitoredSiteDynProp.Name == nameProp).one()
 
     def GetType(self):
         if self.MonitoredSiteType != None:
             return self.MonitoredSiteType
         else:
-            return self.ObjContext.query(MonitoredSiteType
+            return self.session.query(MonitoredSiteType
                                          ).get(self.FK_MonitoredSiteType)
 
     def GetAllProp(self):
@@ -105,7 +105,7 @@ class MonitoredSite (Base, ObjectWithDynProp):
                  MonitoredSitePosition.StartDate <= date_)
         ).order_by(desc(MonitoredSitePosition.StartDate)
                    ).limit(1)
-        curPos = dict(self.ObjContext.execute(query).fetchone())
+        curPos = dict(self.session.execute(query).fetchone())
         return curPos
 
     def LoadNowValues(self):
@@ -113,13 +113,13 @@ class MonitoredSite (Base, ObjectWithDynProp):
         lastPos = self.GetLastPositionWithDate(func.now())
         if lastPos is not None:
             for key in lastPos:
-                self.PropDynValuesOfNow[key] = lastPos[key]
+                self.__properties__[key] = lastPos[key]
 
     def GetSchemaFromStaticProps(self, FrontModules, DisplayMode):
         Editable = (DisplayMode.lower() == 'edit')
         resultat = {}
         type_ = self.GetType().ID
-        Fields = self.ObjContext.query(ModuleForms).filter(
+        Fields = self.session.query(ModuleForms).filter(
             ModuleForms.Module_ID == FrontModules.ID
         ).order_by(ModuleForms.FormOrder).all()
         SiteProps = dict(self.__table__.columns)
@@ -137,23 +137,23 @@ class MonitoredSite (Base, ObjectWithDynProp):
                     Editable)
         return resultat
 
-    def GetFlatObject(self, schema=None):
+    def getFlatObject(self, schema=None):
         ''' return flat object with static properties and
         last existing value of dyn props '''
         resultat = {}
         if self.ID is not None:
             max_iter = max(len(self.__table__.columns),
-                           len(self.PropDynValuesOfNow))
+                           len(self.__properties__))
             for i in range(max_iter):
                 try:
                     curStatProp = list(self.__table__.columns)[i]
-                    resultat[curStatProp.key] = self.GetProperty(
+                    resultat[curStatProp.key] = self.getProperty(
                         curStatProp.key)
                 except:
                     pass
                 try:
-                    curDynPropName = list(self.PropDynValuesOfNow)[i]
-                    resultat[curDynPropName] = self.GetProperty(curDynPropName)
+                    curDynPropName = list(self.__properties__)[i]
+                    resultat[curDynPropName] = self.getProperty(curDynPropName)
                 except Exception as e:
                     # print_exc()
                     pass
@@ -162,16 +162,16 @@ class MonitoredSite (Base, ObjectWithDynProp):
             for i in range(max_iter):
                 try:
                     curStatProp = list(self.__table__.columns)[i]
-                    curVal = self.GetProperty(curStatProp.key)
+                    curVal = self.getProperty(curStatProp.key)
                     if curVal is not None:
-                        resultat[curStatProp.key] = self.GetProperty(
+                        resultat[curStatProp.key] = self.getProperty(
                             curStatProp.key)
                 except:
                     pass
         return resultat
 
-    def SetProperty(self, nameProp, valeur, useDate=None):
-        super().SetProperty(nameProp, valeur)
+    def setProperty(self, nameProp, valeur, useDate=None):
+        super().setProperty(nameProp, valeur)
         if hasattr(self.newPosition, nameProp):
             curTypeAttr = str(self.newPosition.__table__.c[
                               nameProp].type).split('(')[0]
@@ -181,14 +181,14 @@ class MonitoredSite (Base, ObjectWithDynProp):
                 setattr(self.newPosition, nameProp, valeur)
             else:
                 setattr(self.newPosition, nameProp, valeur)
-            if ((nameProp not in self.PropDynValuesOfNow)
-                    or (isEqual(self.PropDynValuesOfNow[nameProp], valeur) is False)):
+            if ((nameProp not in self.__properties__)
+                    or (isEqual(self.__properties__[nameProp], valeur) is False)):
                 self.positionChanged = True
 
-    def UpdateFromJson(self, DTOObject):
+    def updateFromJSON(self, DTOObject):
         self.newPosition = MonitoredSitePosition()
         self.positionChanged = False
-        super(MonitoredSite, self).UpdateFromJson(DTOObject)
+        super(MonitoredSite, self).updateFromJSON(DTOObject)
         if self.positionChanged:
             sameDatePosition = list(filter(lambda x: x.StartDate == datetime.strptime(
                 DTOObject['StartDate'], '%d/%m/%Y %H:%M:%S'), self.MonitoredSitePositions))
