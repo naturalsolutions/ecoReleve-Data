@@ -13,7 +13,7 @@ define([
   './custom.text.autocomplete.filter',
 
   'vendors/utils',
-  
+
   './custom.renderers',
   './custom.editors',
 
@@ -25,11 +25,11 @@ define([
   'i18n'
 
 ], function($, _, Backbone, Marionette, AgGrid, Swal,
-  CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, 
+  CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter,
   CustomTextAutocompleteFilter, utils_1, Renderers, Editors,
   Decimal5Renderer, DateTimeRenderer, ObjectPicker
 ) {
-  
+
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -53,7 +53,8 @@ define([
       'totalSelected': '.js-total-selected',
       'totalRecords' : '.js-total-records',
       'filteredElems': '.js-filtered-content',
-      'filtered' : '.js-filtered'
+      'filtered' : '.js-filtered',
+      'jsGrid' :'.js-ag-grid'
 
     },
 
@@ -104,6 +105,8 @@ define([
         headerHeight: 30,
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),
+        onDragStarted : this.onDragStarted.bind(this),
+        onDragStopped: this.onDragStopped.bind(this),
         onGridReady: function(){
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
@@ -176,6 +179,12 @@ define([
       }
     },
 
+    onDragStarted: function(e) {
+      this.ui.jsGrid.removeClass('selectableTextInGrid');
+    },
+    onDragStopped: function(e) {
+      this.ui.jsGrid.addClass('selectableTextInGrid');
+    },
     onRowSelected: function(e){
       if(this.ready){
         this.interaction('singleSelection', e.node.data[this.idName] || e.node.data.id || e.node.data.ID, this);
@@ -197,7 +206,7 @@ define([
       var _this = this;
       var columnDefs = $.extend(true, [], colDefs);
 
-      
+
       columnDefs.map(function(col, i) {
 
         //e.g types
@@ -248,7 +257,7 @@ define([
           case 'AutocompTreeEditor':
             col.cellEditor = Editors.ThesaurusEditor;
             col.cellRenderer = Renderers.ThesaurusRenderer;
-            break;          
+            break;
           case 'AutocompleteEditor':
             col.cellEditor = Editors.AutocompleteEditor;
             col.cellRenderer = Renderers.AutocompleteRenderer;
@@ -256,7 +265,7 @@ define([
           case 'ObjectPicker':
             col.cellEditor = Editors.ObjectPicker;
             col.cellRenderer = Renderers.ObjectPickerRenderer;
-            break;          
+            break;
           case 'Checkbox':
             col.cellEditor = Editors.CheckboxEditor;
             col.cellRenderer = Renderers.CheckboxRenderer;
@@ -264,7 +273,7 @@ define([
           case 'Number':
             col.cellEditor = Editors.NumberEditor;
             col.cellRenderer = Renderers.NumberRenderer;
-            break;          
+            break;
           case 'DateTimePickerEditor':
             col.cellEditor = Editors.DateTimeEditor;
             col.cellRenderer = Renderers.DateTimeRenderer;
@@ -319,7 +328,7 @@ define([
         col.headerCellTemplate = _this.getHeaderCellTemplate();
       });
 
-      
+
 
       if(_this.displayRowIndex === true){
         var colDefIndex = {
@@ -533,7 +542,7 @@ define([
       if(this.model.get('objectType')){
         data.objectType = this.model.get('objectType');
       }
-  
+
       this.deferred = $.ajax({
         url: this.model.get('url'),
         method: 'GET',
@@ -888,7 +897,7 @@ define([
       if(!selectedNodes.length){
         return;
       }
-      
+
       this.gridOptions.api.deletingRows = true;
 
       var opt = {
@@ -909,7 +918,7 @@ define([
       var errors = [];
 
       var empty = true;
-      
+
       var i = 0;
       this.gridOptions.api.forEachNode( function(node) {
         var row = {};
@@ -963,7 +972,7 @@ define([
               _this.gridOptions.api.setFocusedCell(node.childIndex, node.data._errors, null);
             }
           }
-                  
+
         }
 
         //last check, if not empty, push to save
@@ -972,7 +981,7 @@ define([
         }
 
       });
-      
+
       return {
           rowData: rowData,
           errors: errors
@@ -982,7 +991,7 @@ define([
     destroySelectedRows: function(callback){
       var _this = this;
       var rowData = [];
-      
+
       var selectedNodes = this.gridOptions.api.getSelectedNodes();
 
       for (var i = 0; i < selectedNodes.length; i++) {
