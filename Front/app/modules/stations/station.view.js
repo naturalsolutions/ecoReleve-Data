@@ -59,6 +59,7 @@ define([
     },
 
     reload: function(options){
+      var _this = this;
       if(options.id == this.model.get('id')){
         this.LytProtocols.protocolsItems.getViewFromUrlParams(options);
       } else {
@@ -69,6 +70,13 @@ define([
           obs: options.obs
         });
         this.displayStation();
+      }
+      if(this.map){
+        $.when(this.nsForm.jqxhr).then(function(){
+          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LAT'));
+        });
+      } else {
+        this.displayMap();
       }
     },
 
