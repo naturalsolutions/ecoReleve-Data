@@ -134,10 +134,20 @@ from .Equipment import *
 from .SensorData import *
 from .List import *
 from .Log import sendLog
-
+from ..GenericObjets.OrmModelsMixin import MyObject
 
 LinkedTables['Individual'] = Individual
 LinkedTables['Station'] = Station
 LinkedTables['Protocoles'] = Protocoles
 LinkedTables['Sensor'] = Sensor
 LinkedTables['MonitoredSite'] = MonitoredSite
+
+def test(config):
+    # session = config.registry.dbmaker()
+    # o = session.query(MyObject).get(1)
+    # print(o)
+    # print(o.type)
+    # print(o._type.properties)
+    # print(o.values)
+    pass
+

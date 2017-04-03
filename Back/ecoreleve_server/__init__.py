@@ -15,7 +15,8 @@ from .Models import (
     dbConfig,
     db,
     loadThesaurusTrad,
-    groupfinder
+    groupfinder,
+    test
 )
 from .Views import add_routes, add_cors_headers_response_callback
 from pyramid.events import NewRequest
@@ -127,6 +128,9 @@ def main(global_config, **settings):
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
 
     loadThesaurusTrad(config)
+
+    test(config)
+
     add_routes(config)
     config.scan()
     return config.make_wsgi_app()
