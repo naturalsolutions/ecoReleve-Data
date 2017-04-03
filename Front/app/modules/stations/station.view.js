@@ -13,10 +13,11 @@ define([
   'modules/objects/detail.view',
   './station.model',
 
+  'ns_map/ns_map',
 ], function(
   $, _, Backbone, Marionette, Swal,
   Com, NsForm, NavbarView, LytProtocols,
-  DetailView, StationModel
+  DetailView, StationModel, NsMap
 ) {
 
   'use strict';
@@ -34,6 +35,7 @@ define([
     ui: {
       formStation: '.js-from-station',
       formStationBtns: '.js-from-btns',
+      'map': '.js-map',
     },
 
     regions: {
@@ -77,6 +79,17 @@ define([
       }));
     },
 
+    displayMap: function() {
+      var map = this.map = new NsMap({
+        zoom: 3,
+        popup: true,
+      });
+      $.when(this.nsForm.jqxhr).then(function(){
+        map.addMarker(null, this.model.get('LAT'), this.model.get('LAT'));
+      });
+    },
+
+
     displayTab: function(e) {
       e.preventDefault();
       this.$el.find('.nav-tabs>li').each(function(){
@@ -90,9 +103,9 @@ define([
       var id = $(e.currentTarget).attr('href');
       this.$el.find('.tab-content>.tab-pane' + id).addClass('active in');
 
-      // this.gridViews.map(function(gridView){
-      //   gridView.gridOptions.api.sizeColumnsToFit();
-      // })
+      if(id === '#mapTab' && !this.map){
+        this.displayMap();
+      }
     },
 
     onShow: function() {
@@ -166,9 +179,14 @@ define([
       };
 
       this.nsForm.afterSaveSuccess = function() {
+        if(_this.map){
+          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LAT'));
+        }
+
         if(this.model.get('fieldActivityId') != _this.fieldActivityId){
           _this.displayProtos();
           _this.fieldActivityId = _this.model.get('fieldActivityId');
+
         }
       };
       
