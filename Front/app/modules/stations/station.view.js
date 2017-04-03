@@ -73,10 +73,8 @@ define([
       }
       if(this.map){
         $.when(this.nsForm.jqxhr).then(function(){
-          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LAT'));
+          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
         });
-      } else {
-        this.displayMap();
       }
     },
 
@@ -93,7 +91,7 @@ define([
         popup: true,
       });
       $.when(this.nsForm.jqxhr).then(function(){
-        map.addMarker(null, this.model.get('LAT'), this.model.get('LAT'));
+        map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
       });
     },
 
@@ -188,7 +186,7 @@ define([
 
       this.nsForm.afterSaveSuccess = function() {
         if(_this.map){
-          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LAT'));
+          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
         }
 
         if(this.model.get('fieldActivityId') != _this.fieldActivityId){
