@@ -22,7 +22,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       this.isEmptyRow = this.checkIfEmptyRow(params);
       
       if(this.isEmptyRow){
-        //console.log('empty');
         this.requiredValidation(params, value);
       } else {
         // after sort filter etc check if there was already an error then display it
@@ -44,6 +43,9 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       var empty = true;
       for( var key in params.data ){
         if(key == '_errors' && params.data._errors) {
+          continue;
+        }
+        if(key == 'index') {
           continue;
         }
         //riscky
@@ -137,7 +139,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   		this.error = true;
 
       if(!this.isEmptyRow){
-    		//params.data[params.colDef.field] = ''; why do you want to set value as empty ?? 
     	  $(params.eGridCell).addClass('ag-cell-error');
       }
 
@@ -179,7 +180,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
 		var ThesaurusRenderer = function(options) {};
     ThesaurusRenderer.prototype = new CustomRenderer();
-    //ThesaurusRenderer.prototype.deferred = true;
+    ThesaurusRenderer.prototype.deferred = true;
     ThesaurusRenderer.prototype.handleValues = function(params){
       var objectValue = params.value;
       this.formatValueToDisplay(objectValue); // prefer manage value to display here in order to keep object value all along the time
@@ -196,7 +197,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       } else {
         valueToDisplay = objectValue.value;
       }
-  	  $(this.eGui).html(valueToDisplay); 
+  	  $(this.eGui).html(valueToDisplay);
   	};
 
 		ThesaurusRenderer.prototype.deferredValidation = function(params, objectValue){
@@ -266,6 +267,10 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         displayValue = value;
       }
 
+      if(!displayValue){
+        displayValue = '';
+      }
+
       var url = 'http://' + window.location.hostname+window.location.pathname + '#' + this.objectName + '/' + rValue;
 
       var dictCSS = {
@@ -278,8 +283,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         rValue = '';
       }
       var tpl = '<div>\
-                    <a href="'+ url +'" class="'+dictCSS[this.objectName]+'" target="_blank">\
-                    </a>\
+                    <a href="'+ url +'" class="'+dictCSS[this.objectName]+' grid-link" target="_blank"></a>\
                     <span>' + displayValue + '</span> \
                 </div>';
       $(this.eGui).html(tpl);
@@ -348,7 +352,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       });
     };
 
-    var SelectRenderer = function() {}
+    var SelectRenderer = function(options) {}
     SelectRenderer.prototype = new CustomRenderer();
 
     Renderers.NumberRenderer = NumberRenderer;
