@@ -125,16 +125,15 @@ class DynamicObjectView(CustomView):
 
     def getData(self):
         self.objectDB.LoadNowValues()
-        return self.objectDB.GetFlatObject()
+        return self.objectDB.getFlatObject()
 
     def getDataWithForm(self):
-        conf = self.parent.getConf()
         try:
             displayMode = self.request.params['DisplayMode']
         except:
             displayMode = 'display'
         self.objectDB.LoadNowValues()
-        return self.objectDB.GetDTOWithSchema(conf, displayMode)
+        return self.objectDB.getDataWithSchema(displayMode=displayMode)
 
     def retrieve(self):
         if 'FormName' in self.request.params:
@@ -144,8 +143,8 @@ class DynamicObjectView(CustomView):
 
     def update(self):
         data = self.request.json_body
-        self.objectDB.LoadNowValues()
-        self.objectDB.UpdateFromJson(data)
+        self.objectDB.beforeUpdate()
+        self.objectDB.updateFromJSON(data)
         return 'updated'
 
     def delete(self):
@@ -192,6 +191,8 @@ class DynamicObjectView(CustomView):
 
 class DynamicObjectCollectionView(CustomView):
 
+    configJSON = {}
+
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
         self.objectDB = self.item.model()
@@ -224,16 +225,22 @@ class DynamicObjectCollectionView(CustomView):
             return self
 
     @property
-    def formModuleName(self):
+    def moduleFormName(self):
         raise Exception('method has to be overriden')
 
     @property
-    def gridModuleName(self):
+    def moduleGridName(self):
         raise Exception('method has to be overriden')
 
     @property
     def Collection(self):
         raise Exception('method has to be overriden')
+
+    def getCollection(self, moduleFront=None, history=None, startDate=None):
+        return self.Collection(moduleFront,
+                               typeObj=self.typeObj,
+                               history=history,
+                               startDate=startDate)
 
     def insert(self):
         data = {}
@@ -241,7 +248,7 @@ class DynamicObjectCollectionView(CustomView):
             data[items] = value
         self.setType()
         self.objectDB.init_on_load()
-        self.objectDB.UpdateFromJson(data)
+        self.objectDB.updateFromJSON(data)
         self.session.add(self.objectDB)
         self.session.flush()
         return {'ID': self.objectDB.ID}
@@ -291,11 +298,13 @@ class DynamicObjectCollectionView(CustomView):
         return searchInfo, history, startDate
 
     def count_(self, listObj=None):
-        moduleFront = self.getConf(self.gridModuleName)
+        moduleFront = self.getConf(self.moduleGridName)
 
         if self.request is not None:
             searchInfo, history, startDate = self.formatParams({}, paging=False)
-            self.collection = self.Collection(moduleFront, typeObj=self.typeObj)
+            self.collection = self.getCollection(moduleFront,
+                                                 history=history,
+                                                 startDate=startDate)
             count = self.collection.count(searchInfo=searchInfo)
         else:
             count = self.collection.count()
@@ -303,9 +312,10 @@ class DynamicObjectCollectionView(CustomView):
 
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)
-        moduleFront = self.getConf(self.gridModuleName)
-        self.collection = self.Collection(moduleFront, typeObj=self.typeObj,
-                                          history=history, startDate=startDate)
+        moduleFront = self.getConf(self.moduleGridName)
+        self.collection = self.getCollection(moduleFront,
+                                             history=history,
+                                             startDate=startDate)
 
         if not noCount:
             countResult = self.collection.count(params)
@@ -334,32 +344,65 @@ class DynamicObjectCollectionView(CustomView):
 
     def getConf(self, moduleName=None):
         if not moduleName:
-            moduleName = self.formModuleName
+            moduleName = self.objectDB.moduleFormName
         return self.session.query(FrontModules
                                   ).filter(FrontModules.Name == moduleName
                                            ).first()
 
     def getForm(self, objectType=None, moduleName=None, mode='edit'):
-        if objectType is None:
+        if 'ObjectType' in self.request.params:
             objectType = self.request.params['ObjectType']
-        Conf = self.getConf(moduleName)
+        if not objectType:
+            objectType = None
         self.setType(int(objectType))
-        schema = self.objectDB.GetDTOWithSchema(Conf, mode)
-        return schema
+        if not moduleName:
+            moduleName = self.moduleFormName
 
-    def getGrid(self):
-        cols = self.objectDB.GetGridFields(self.gridModuleName)
-        return cols
+        form = self.getConfigJSON(moduleName + mode, self.typeObj)
+        if not form:
+            form = self.objectDB.getForm(mode, objectType, moduleName)
+            self.setConfigJSON(moduleName + mode, objectType, form)
+        return form
 
-    def getFilter(self):
+    def getGrid(self, type_=None, moduleName=None):
+        if not moduleName:
+            moduleName = self.objectDB.moduleGridName
+
+        if not type_:
+            type_ = self.typeObj
+
+        gridCols = self.getConfigJSON(moduleName, type_)
+        if not gridCols:
+            gridCols = self.objectDB.getGrid(type_=type_, moduleName=moduleName)
+            self.setConfigJSON(moduleName, type_, gridCols)
+
+        return gridCols
+
+    def getFilter(self, type_=None, moduleName=None):
         moduleName = self.request.params.get('FilterName', None)
         if not moduleName:
-            moduleName = self.gridModuleName
-        filtersList = self.objectDB.GetFilters(moduleName)
-        filters = {}
-        for i in range(len(filtersList)):
-            filters[str(i)] = filtersList[i]
+            moduleName = self.objectDB.moduleGridName
+
+        if not type_:
+            type_ = self.typeObj
+
+        filters = self.getConfigJSON(moduleName+'Filter', type_)
+        if not filters:
+            filtersList = self.objectDB.getFilters(type_=type_, moduleName=moduleName)
+            filters = {}
+            for i in range(len(filtersList)):
+                filters[str(i)] = filtersList[i]
+            self.setConfigJSON(moduleName+'Filter', type_, filters)
+
         return filters
+
+    def getConfigJSON(self, moduleName, typeObj):
+        return self.configJSON.get(moduleName, {}).get(typeObj, None)
+
+    def setConfigJSON(self, moduleName, typeObj, configObject):
+        if moduleName not in self.configJSON:
+            self.configJSON[moduleName] = {}
+        self.configJSON[moduleName][typeObj] = configObject
 
     def setType(self, objectType=1):
         setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
@@ -425,8 +468,9 @@ def notfound(request):
     return HTTPNotFound('Not found')
 
 
-# test if the match url is integer
 def integers(*segment_names):
+    '''test if the match url is integer'''
+
     def predicate(info, request):
         match = info['match']
         for segment_name in segment_names:
@@ -486,10 +530,4 @@ def add_routes(config):
                      'ecoReleve-Core/file_import/getExcelFile')
     config.add_route('file_import/processList',
                      'ecoReleve-Core/file_import/processList')
-
-    # Web sockets call
-    # config.add_view(JobView,
-    #                 context=FileImportJob,
-    #                 custom_predicates=[is_websocket],
-    #                 permission=NO_PERMISSION_REQUIRED)
 

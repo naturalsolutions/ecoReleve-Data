@@ -130,7 +130,9 @@ define([
                     },
 
                     onInputInitialize: function(options){
-                        _this.validateValue(_this.value.displayValue);
+                        if(_this.value){
+                            _this.validateValue(_this.value.displayValue);
+                        }
                     }
 
                 });

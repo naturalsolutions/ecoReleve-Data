@@ -9,8 +9,8 @@ from pyramid import threadlocal
 class ObjectTypeWithDynProp:
     ''' Class to extend for mapped object type with dynamic props'''
 
-    def __init__(self, ObjContext=None):
-        self.ObjContext = threadlocal.get_current_request().dbsession
+    def __init__(self, session=None):
+        self.session = threadlocal.get_current_request().dbsession
         self.DynPropNames = self.GetDynPropNames()
 
     def GetDynPropContextTable(self):
@@ -41,7 +41,7 @@ class ObjectTypeWithDynProp:
         ''' return schema of dynamic props according to object type
         and configuration in table : FrontModules > ModuleForms '''
         Editable = (DisplayMode.lower() == 'edit')
-        Fields = self.ObjContext.query(ModuleForms
+        Fields = self.session.query(ModuleForms
                                        ).filter(
             ModuleForms.Module_ID == FrontModules.ID
         ).filter(
@@ -58,7 +58,7 @@ class ObjectTypeWithDynProp:
             self.GetDynPropTable() + ' D ON C.' + self.Get_FKToDynPropTable() + '= D.ID '
         curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + \
             str(self.ID)
-        Values = self.ObjContext.execute(curQuery).fetchall()
+        Values = self.session.execute(curQuery).fetchall()
         resultat = []
         for curValue in Values:
             resultat.append(curValue['Name'].lower())
@@ -70,33 +70,5 @@ class ObjectTypeWithDynProp:
             self.Get_FKToDynPropTable() + '= D.ID '
         curQuery += ' where C.' + self.GetFK_DynPropContextTable() + ' = ' + \
             str(self.ID)
-        Values = self.ObjContext.execute(curQuery).fetchall()
+        Values = self.session.execute(curQuery).fetchall()
         return Values
-
-    def GetFieldSets(self, FrontModules, Schema):
-        ''' return ordered FiledSet according to configuration '''
-        resultat = []
-        Fields = self.ObjContext.query(ModuleForms
-                                       ).filter(
-            ModuleForms.Module_ID == FrontModules.ID
-        ).filter(
-            or_(ModuleForms.TypeObj == self.ID,
-                ModuleForms.TypeObj == None)).all()
-
-        Legends = sorted([(obj.Legend, obj.FormOrder, obj.Name)
-                          for obj in Fields if obj.FormOrder is not None], key=lambda x: x[1])
-        Unique_Legends = list()
-        # Get distinct Fieldset in correct order
-        for x in Legends:
-            if x[0] not in Unique_Legends:
-                Unique_Legends.append(x[0])
-
-        for curLegend in Unique_Legends:
-            curFieldSet = {'fields': [], 'legend': curLegend}
-            resultat.append(curFieldSet)
-
-        for curProp in Legends:
-            curIndex = Unique_Legends.index(curProp[0])
-            resultat[curIndex]['fields'].append(curProp[2])
-
-        return resultat
