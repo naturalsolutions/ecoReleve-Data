@@ -42,7 +42,7 @@ class ExportQueryView(CustomExportView):
         self.table = BaseExport.metadata.tables[self.viewName]
 
     def retrieve(self):
-        self.search()
+        return self.search()
 
     def getFields(self):
         return self.generator.get_col()
@@ -78,9 +78,6 @@ class ExportQueryView(CustomExportView):
             result = self.generator.search(criteria, offset=0, per_page=20, order_by=[])
 
         return result
-
-    def retrieve(self):
-        return self.search()
 
     def formatColumns(self, fileType, columns):
         queryColumns = []

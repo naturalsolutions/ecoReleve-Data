@@ -27,8 +27,8 @@ class Station(Base, ObjectWithDynProp):
 
     __tablename__ = 'Station'
 
-    FrontModuleForm = 'StationForm'
-    FrontModuleGrid = 'StationGrid'
+    moduleFormName = 'StationForm'
+    moduleGridName = 'StationGrid'
 
     ID = Column(Integer, Sequence('Stations__id_seq'), primary_key=True)
     StationDate = Column(DateTime, index=True, nullable=False)
@@ -96,15 +96,10 @@ class Station(Base, ObjectWithDynProp):
     def FieldWorkers(cls):
         return Station_FieldWorker.id
 
-    @orm.reconstructor
-    def init_on_load(self):
-        ''' init_on_load is called on the fetch of object '''
-        self.__init__()
-
     def GetNewValue(self, nameProp):
         ReturnedValue = StationDynPropValue()
         try:
-            ReturnedValue.FK_StationDynProp = self.ObjContext.execute(
+            ReturnedValue.FK_StationDynProp = self.session.execute(
                 select([StationDynProp.ID]).where(StationDynProp.Name == nameProp)).scalar()
         except:
             print_exc()
@@ -114,13 +109,13 @@ class Station(Base, ObjectWithDynProp):
         return self.StationDynPropValues
 
     def GetDynProps(self, nameProp):
-        return self.ObjContext.query(StationDynProp).filter(StationDynProp.Name == nameProp).one()
+        return self.session.query(StationDynProp).filter(StationDynProp.Name == nameProp).one()
 
     def GetType(self):
         if self.StationType is not None:
             return self.StationType
         else:
-            return self.ObjContext.query(StationType).get(self.FK_StationType)
+            return self.session.query(StationType).get(self.FK_StationType)
 
     def allowUpdate(self, DTOObject):
         from ..utils.parseValue import isNumeric

@@ -37,7 +37,7 @@ class IndividualView(DynamicObjectView):
         data = self.request.json_body
         self.objectDB.LoadNowValues()
         try:
-            self.objectDB.UpdateFromJson(data)
+            self.objectDB.updateFromJSON(data)
             return {}
         except ErrorCheckIndividualCodes as e:
             self.request.response.status_code = 510
@@ -77,8 +77,8 @@ class IndividualsView(DynamicObjectCollectionView):
 
     Collection = IndividualList
     item = IndividualView
-    formModuleName = 'IndivForm'
-    gridModuleName = 'IndivFilter'
+    moduleFormName = 'IndivForm'
+    moduleGridName = 'IndivFilter'
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
@@ -106,7 +106,7 @@ class IndividualsView(DynamicObjectCollectionView):
                                    Original_ID='0')
         newIndiv.init_on_load()
         try:
-            newIndiv.UpdateFromJson(data, startDate=startDate)
+            newIndiv.updateFromJSON(data, startDate=startDate)
 
             if self.typeObj == 2:
                 existingIndivID = self.checkExisting(newIndiv)
@@ -133,7 +133,7 @@ class IndividualsView(DynamicObjectCollectionView):
                              for key, val in indivData.items()],
                       'order_by': ['ID:asc']}
 
-        moduleFront = self.getConf(self.gridModuleName)
+        moduleFront = self.getConf(self.moduleGridName)
 
         listObj = IndividualList(moduleFront, typeObj=2)
         dataResult = listObj.GetFlatDataList(searchInfo)
@@ -233,7 +233,7 @@ class IndividualLocationsView(SecurityRoot):
         #     result = {'type':'FeatureCollection', 'features':geoJson}
         #     response = result
         # else :
-        #     response  = curIndiv.GetFlatObject()
+        #     response  = curIndiv.getFlatObject()
 
         return result
 

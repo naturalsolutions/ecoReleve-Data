@@ -32,9 +32,8 @@ class Individual (Base, ObjectWithDynProp):
 
     __tablename__ = 'Individual'
 
-
-    FrontModuleForm = 'IndivForm'
-    FrontModuleGrid = 'IndivGrid'
+    moduleFormName = 'IndivForm'
+    moduleGridName = 'IndivFilter'
 
     ID = Column(Integer, Sequence('Individual__id_seq'), primary_key=True)
     creationDate = Column(DateTime, nullable=False, default=func.now())
@@ -63,16 +62,11 @@ class Individual (Base, ObjectWithDynProp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         ObjectWithDynProp.__init__(self)
-        self._constraintsFunctionLists = [self.checkIndividualCodes]
-
-    @orm.reconstructor
-    def init_on_load(self):
-        ''' init_on_load is called on the fetch of object '''
-        self.__init__()
+        self.constraintFunctionList = [self.checkIndividualCodes]
 
     def GetNewValue(self, nameProp):
         ReturnedValue = IndividualDynPropValue()
-        ReturnedValue.IndividualDynProp = self.ObjContext.query(
+        ReturnedValue.IndividualDynProp = self.session.query(
             IndividualDynProp).filter(IndividualDynProp.Name == nameProp).first()
         return ReturnedValue
 
@@ -80,7 +74,7 @@ class Individual (Base, ObjectWithDynProp):
         return self.IndividualDynPropValues
 
     def GetDynProps(self, nameProp):
-        return self.ObjContext.query(IndividualDynProp
+        return self.session.query(IndividualDynProp
                                      ).filter(IndividualDynProp.Name == nameProp
                                               ).one()
 
@@ -88,11 +82,11 @@ class Individual (Base, ObjectWithDynProp):
         if self.IndividualType is not None:
             return self.IndividualType
         else:
-            return self.ObjContext.query(IndividualType).get(self.FK_IndividualType)
+            return self.session.query(IndividualType).get(self.FK_IndividualType)
 
-    # def UpdateFromJson(self, DTOObject, startDate=None):
+    # def updateFromJSON(self, DTOObject, startDate=None):
     #     if self.checkIndividualCodes(DTOObject):
-    #         ObjectWithDynProp.UpdateFromJson(self, DTOObject, startDate)
+    #         ObjectWithDynProp.updateFromJSON(self, DTOObject, startDate)
     #     else:
     #         raise ErrorCheckIndividualCodes
 
@@ -104,7 +98,7 @@ class Individual (Base, ObjectWithDynProp):
         if any(DTOObject.get(prop, None) for prop in propertiesToCheck):
             individualDynPropValue = Base.metadata.tables['IndividualDynPropValuesNow']
             query = select([func.count(individualDynPropValue.c['ID'])])
-            session = self.ObjContext
+            session = self.session
 
             cond = or_(*[and_(individualDynPropValue.c['Name'] == key,
                               individualDynPropValue.c['ValueString'] == DTOObject[key])
