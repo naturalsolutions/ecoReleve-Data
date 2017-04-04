@@ -198,7 +198,9 @@
 			"placeholder":{
 				"number" : "Un nombre",
 				"numberTo" : "Jusqu'au nombre",
-				"text" : "mot or mot1;mot2;etc"
+				"text" : "mot or mot1;mot2;etc",
+				"date" : "Beginning date",
+				"dateTo" : "End date"
 			},
 			"btn" : {
 				"apply" : "Appliquer",

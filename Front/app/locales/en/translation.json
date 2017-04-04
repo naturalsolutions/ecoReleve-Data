@@ -201,7 +201,9 @@
 			"placeholder":{
 				"number" : "A number",
 				"numberTo" : "To number",
-				"text" : "word or word1;word2;etc"
+				"text" : "word or word1;word2;etc",
+				"date" : "Beginning date",
+				"dateTo" : "End date"
 			},
 			"btn" : {
 				"apply" : "Apply",
