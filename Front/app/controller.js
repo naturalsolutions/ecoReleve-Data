@@ -28,7 +28,11 @@ define([
   './modules/monitoredSites/monitored_site.view',
   './modules/monitoredSites/monitored_sites.view',
   './modules/monitoredSites/monitored_sites.new.view',
+
+  './modules/projects/project.view',
+  './modules/projects/projects.view',
   './modules/projects/projects.new.view',
+
 
 ],function(
   Marionette,
@@ -46,7 +50,7 @@ define([
   LytSensor, LytSensors, LytSensorsNew,
   LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew,
 
-  LytProjectsNew
+  LytProject, LytProjects, LytProjectsNew
 ) {
   'use strict';
 
@@ -81,6 +85,8 @@ define([
           'newEntity': LytMonitoredSitesNew
         },
         'projects' : {
+          'entity': LytProject,
+          'entities': LytProjects,
           'newEntity': LytProjectsNew
           
         }
@@ -220,8 +226,22 @@ define([
     },
 
     //  project
+    projects: function() {
+      this.rgMain.show(new LytProjects());
+    },
     newProject: function() {
       this.rgMain.show(new LytProjectsNew());
+    },
+    project: function(id) {
+      if(this.rgMain.currentView instanceof LytProject){
+        this.rgMain.currentView.reload({
+          id: id
+        });
+      } else {
+        this.rgMain.show(new LytProject({
+          id: id
+        }));
+      }
     },
 
   });

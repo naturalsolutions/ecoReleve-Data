@@ -1,19 +1,19 @@
 define([
   'modules/objects/manager.view',
-  './station.model',
+  './project.model',
   'ns_filter/filters',
   'ns_map/ns_map',
 
 ], function(
 	ManagerView,
-  StationModel,
+  ProjectModel,
 	NsFilter,
 	NsMap
 ) {
   'use strict';
 
   return ManagerView.extend({
-    ModelPrototype: StationModel,
+    ModelPrototype: ProjectModel,
 
     populateCurrentData: function(currentData){
       this.defaultFilters = currentData.filters;
@@ -75,7 +75,7 @@ define([
         filterContainer: this.ui.filter,
         name: this.moduleName,
         filtersValues: this.defaultFilters,
-        name: 'StationGrid',
+        name: 'ProjectGrid',
       });
     },
 

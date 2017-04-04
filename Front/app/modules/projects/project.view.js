@@ -8,36 +8,34 @@ define([
   'ns_modules/ns_com',
   'ns_form/NSFormsModuleGit',
   'ns_navbar/navbar.view',
-  './protocols/protocols.view',
-
   'modules/objects/detail.view',
-  './station.model',
+  './project.model',
 
 ], function(
   $, _, Backbone, Marionette, Swal,
-  Com, NsForm, NavbarView, LytProtocols,
-  DetailView, StationModel
+  Com, NsForm, NavbarView, 
+  DetailView, ProjectModel
 ) {
 
   'use strict';
 
   return DetailView.extend({
-    template: 'app/modules/stations/station.tpl.html',
-    className: 'full-height white station',
+    template: 'app/modules/projects/project.tpl.html',
+    className: 'full-height white project',
 
-    ModelPrototype: StationModel,
+    ModelPrototype: ProjectModel,
     
     events: {
       'click .tab-link': 'displayTab',
     },
 
     ui: {
-      formStation: '.js-from-station',
-      formStationBtns: '.js-from-btns',
+      formProject: '.js-from-project',
+      formProjectBtns: '.js-from-btns',
     },
 
     regions: {
-      'rgStation': '.js-rg-station',
+      'rgProject': '.js-rg-project',
       'rgProtocols': '.js-rg-protocols',
       'rgProtocol': '.js-rg-protocol',
       'rgNavbar': '.js-navbar'
@@ -48,7 +46,7 @@ define([
       this.com = new Com();
       this.model.set('id', options.id);
 
-      this.model.set('stationId', options.id);
+      this.model.set('projectId', options.id);
 
       this.model.set('urlParams', {
         proto: options.proto,
@@ -58,24 +56,18 @@ define([
 
     reload: function(options){
       if(options.id == this.model.get('id')){
-        this.LytProtocols.protocolsItems.getViewFromUrlParams(options);
+        //this.LytProtocols.protocolsItems.getViewFromUrlParams(options);
       } else {
         this.model.set('id', options.id);
-        this.model.set('stationId', options.id);
+        this.model.set('projectId', options.id);
         this.model.set('urlParams', {
           proto: options.proto,
           obs: options.obs
         });
-        this.displayStation();
+        this.displayProject();
       }
     },
 
-    displayProtos: function() {
-      this.rgProtocols.show(this.LytProtocols = new LytProtocols({
-        model: this.model,
-        parent: this,
-      }));
-    },
 
     displayTab: function(e) {
       e.preventDefault();
@@ -96,7 +88,7 @@ define([
     },
 
     onShow: function() {
-      this.displayStation();
+      this.displayProject();
       this.displayNavbar();
     },
 
@@ -106,7 +98,7 @@ define([
       }));
     },
 
-    displayStation: function() {
+    displayProject : function() {
       this.total = 0;
       var _this = this;
       var detailsFormRegion = this.$el.find('.js-rg-details');
@@ -114,7 +106,7 @@ define([
 
       formConfig.id = this.model.get('id');
       formConfig.formRegion = detailsFormRegion;
-      formConfig.buttonRegion = [this.ui.formStationBtns];
+      formConfig.buttonRegion = [this.ui.formProjectBtns];
       formConfig.afterDelete = function(response, model){
         Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
       };
@@ -126,10 +118,10 @@ define([
 
       this.nsForm.afterShow = function(){
         var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
-        _this.ui.formStation.html(globalEl);
+        _this.ui.formProject.html(globalEl);
 
         if(this.displayMode.toLowerCase() == 'edit'){
-          this.bindChanges(_this.ui.formStation);
+          this.bindChanges(_this.ui.formProject);
           $(".datetime").attr('placeholder','DD/MM/YYYY');
           $("#dateTimePicker").on("dp.change", function (e) {
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
@@ -144,11 +136,11 @@ define([
         var title = 'Error saving';
         if (response.status == 510) {
           console.log(response)
-          if (response.responseJSON.existingStation) {
-            msg = 'A station already exists with these parameters';
+          if (response.responseJSON.existingProject) {
+            msg = 'A project  already exists with these parameters';
           }
           else if (response.responseJSON.updateDenied) {
-            msg = "Equipment is present on this station, you can't change Station Date or Monitored Site";
+            msg = "Equipment is present on this project, you can't change Project  Date or Monitored Site";
           }
           type_ = 'warning';
           title = 'Error saving';
@@ -167,14 +159,12 @@ define([
 
       this.nsForm.afterSaveSuccess = function() {
         if(this.model.get('fieldActivityId') != _this.fieldActivityId){
-          _this.displayProtos();
-          _this.fieldActivityId = _this.model.get('fieldActivityId');
+
         }
       };
       
       $.when(this.nsForm.jqxhr).then(function(){
-        _this.fieldActivityId = this.model.get('fieldActivityId');
-        _this.displayProtos();
+
       })
 
     },

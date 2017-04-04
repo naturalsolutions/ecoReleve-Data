@@ -16,7 +16,20 @@ define([
 
     return NewView.extend({
     ModelPrototype: ProjectModel,
+    events: {
 
+       'click input[type="file"]': 'checkFile',
+        'click .js-btn-save': 'save',
+
+
+     },
+     checkFile : function(){
+      alert('cliked');
+
+     },
+    save: function() {
+      this.nsForm.butClickSave();
+    },
     // template: 'app/modules/projects/tpl-new-project.html',
     // className: 'full-height white',
 

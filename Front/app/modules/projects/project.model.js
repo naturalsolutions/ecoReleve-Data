@@ -27,6 +27,19 @@ define([
       },
 
       uiGridConfs: [
+        {
+          name: 'Project_reference',
+          label: 'Référence'
+        },
+        {
+          name: 'Name',
+          label: 'Nom du projet'
+        },
+        {
+          name: 'Creation_Date',
+          label: 'Date de création'
+        }
+
       ],
 
       //MonitoredSiteGridHistory
