@@ -41,7 +41,7 @@ class StationView(DynamicObjectView):
         try:
             isAllowToUpdate = self.objectDB.allowUpdate(data)
             if isAllowToUpdate:
-                self.objectDB.UpdateFromJson(data)
+                self.objectDB.updateFromJSON(data)
                 self.session.commit()
                 msg = {}
             else:
@@ -59,8 +59,8 @@ class StationsView(DynamicObjectCollectionView):
 
     Collection = StationList
     item = StationView
-    formModuleName = 'StationForm'
-    gridModuleName = 'StationGrid'
+    moduleFormName = 'StationForm'
+    moduleGridName = 'StationGrid'
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
@@ -84,7 +84,7 @@ class StationsView(DynamicObjectCollectionView):
                 LON=curSta.LON,
                 ELE=curSta.ELE,
                 Precision=curSta.precision,
-                FK_MonitoredSite=curSta.FK_MonitoredSite)
+                FK_MonitoredSite=data['FK_MonitoredSite'])
 
             session.add(newSitePos)
             session.commit()
@@ -219,7 +219,7 @@ class StationsView(DynamicObjectCollectionView):
         newSta.StationType = session.query(StationType).filter(
             StationType.ID == data['FK_StationType']).first()
         newSta.init_on_load()
-        newSta.UpdateFromJson(data)
+        newSta.updateFromJSON(data)
 
         try:
             session.add(newSta)
@@ -314,7 +314,7 @@ class StationsView(DynamicObjectCollectionView):
                 curSta.init_on_load()
                 curDate = datetime.strptime(
                     sta['StationDate'], "%Y-%m-%dT%H:%M:%S.%fZ")
-                curSta.UpdateFromJson(sta)
+                curSta.updateFromJSON(sta)
                 curSta.StationDate = curDate
 
                 try:

@@ -32,7 +32,7 @@ class ListObjectWithDynProp():
                  View=None,
                  typeObj=None,
                  startDate=None):
-        self.ObjContext = threadlocal.get_current_request().dbsession
+        self.session = threadlocal.get_current_request().dbsession
         self.sessionmaker = threadlocal.get_current_registry().dbmaker
 
         self.typeObj = typeObj
@@ -114,7 +114,7 @@ class ListObjectWithDynProp():
     def GetAllPropNameInConf(self):
         ''' Get configured properties to display '''
         if self.typeObj:
-            confGridType = self.ObjContext.query(ModuleGrids
+            confGridType = self.session.query(ModuleGrids
                                                  ).filter(
                 and_(ModuleGrids.Module_ID == self.frontModule.ID,
                      or_(ModuleGrids.TypeObj == self.typeObj,
@@ -285,7 +285,7 @@ class ListObjectWithDynProp():
         ''' Main function to call : return filtered (paged) ordered flat
         data list according to filter parameters'''
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
-        result = self.ObjContext.execute(fullQueryJoinOrdered).fetchall()
+        result = self.session.execute(fullQueryJoinOrdered).fetchall()
         data = []
         listWithThes = list(
             filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType, self.Conf))

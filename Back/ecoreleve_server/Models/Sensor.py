@@ -18,9 +18,9 @@ class Sensor (Base, ObjectWithDynProp):
 
     __tablename__ = 'Sensor'
 
-    FrontModuleForm = 'SensorForm'
-    FrontModuleGrid = 'SensorFilter'
-    
+    moduleFormName = 'SensorForm'
+    moduleGridName = 'SensorFilter'
+
     ID = Column(Integer, Sequence('Sensor__id_seq'), primary_key=True)
     UnicIdentifier = Column(String(250))
     Model = Column(String(250))
@@ -38,14 +38,9 @@ class Sensor (Base, ObjectWithDynProp):
         super().__init__(**kwargs)
         ObjectWithDynProp.__init__(self)
 
-    @orm.reconstructor
-    def init_on_load(self):
-        ''' init_on_load is called on the fetch of object '''
-        self.__init__()
-
     def GetNewValue(self, nameProp):
         ReturnedValue = SensorDynPropValue()
-        ReturnedValue.SensorDynProp = self.ObjContext.query(
+        ReturnedValue.SensorDynProp = self.session.query(
             SensorDynProp).filter(SensorDynProp.Name == nameProp).first()
         return ReturnedValue
 
@@ -53,13 +48,13 @@ class Sensor (Base, ObjectWithDynProp):
         return self.SensorDynPropValues
 
     def GetDynProps(self, nameProp):
-        return self.ObjContext.query(SensorDynProp).filter(SensorDynProp.Name == nameProp).one()
+        return self.session.query(SensorDynProp).filter(SensorDynProp.Name == nameProp).one()
 
     def GetType(self):
         if self.SensorType is not None:
             return self.SensorType
         else:
-            return self.ObjContext.query(SensorType).get(self.FK_SensorType)
+            return self.session.query(SensorType).get(self.FK_SensorType)
 
 
 class SensorDynProp (Base):

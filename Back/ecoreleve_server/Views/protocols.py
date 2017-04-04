@@ -40,7 +40,7 @@ class ObservationView(DynamicObjectView):
                 listOfSubProtocols = value
 
         data['Observation_childrens'] = listOfSubProtocols
-        curObs.UpdateFromJson(data)
+        curObs.updateFromJSON(data)
         try:
             if curObs.Equipment is not None:
                 curObs.Station = curObs.Station
@@ -61,8 +61,8 @@ class ObservationsView(DynamicObjectCollectionView):
 
     Collection = None
     item = ObservationView
-    formModuleName = 'ObservationForm'
-    gridModuleName = 'ObservationFilter'
+    moduleFormName = 'ObservationForm'
+    moduleGridName = 'ObservationFilter'
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
@@ -96,7 +96,7 @@ class ObservationsView(DynamicObjectCollectionView):
             data[items] = value
 
         sta = self.parent.objectDB
-        curObs = self.item.model(FK_ProtocoleType=data['FK_ProtocoleType'])
+        curObs = self.item.model(FK_ProtocoleType=data['FK_ProtocoleType'], FK_Station=sta.ID)
         listOfSubProtocols = []
 
         for items, value in data.items():
@@ -105,7 +105,7 @@ class ObservationsView(DynamicObjectCollectionView):
 
         data['Observation_childrens'] = listOfSubProtocols
         curObs.init_on_load()
-        curObs.UpdateFromJson(data)
+        curObs.updateFromJSON(data)
 
         responseBody = {}
 
@@ -151,7 +151,7 @@ class ObservationsView(DynamicObjectCollectionView):
         for i in range(len(listObs)):
             curObs = listObs[i]
             curObs.LoadNowValues()
-            values.append(curObs.GetFlatObject())
+            values.append(curObs.getFlatObject())
         return values
 
     def getProtocolsofStation(self):
@@ -165,24 +165,29 @@ class ObservationsView(DynamicObjectCollectionView):
                     and_(Observation.FK_Station == sta_id, Observation.Parent_Observation == None)))
                 listType = list(self.session.query(FieldActivity_ProtocoleType
                                                    ).filter(FieldActivity_ProtocoleType.FK_fieldActivity == curSta.fieldActivityId))
-                Conf = self.getConf()
 
                 listProto = {}
                 if listObs:
                     for i in range(len(listObs)):
                         DisplayMode = 'edit'
                         curObs = listObs[i]
-                        typeID = curObs.GetType().ID
+                        curObsType = curObs.GetType()
+                        typeID = curObsType.ID
                         if typeID in listProto:
                             listProto[typeID]['obs'].append(curObs.ID)
                         else:
-                            typeName = curObs.GetType().Name.replace('_', ' ')
-                            curObsForm = curObs.GetForm(Conf, DisplayMode)
+                            typeName = curObsType.Name.replace('_', ' ')
+                            if curObsType.Status == 10:
+                                curObsForm = curObs.getForm(displayMode=DisplayMode)
+                                curObsForm['grid'] = True
+                            else:
+                                curObsForm = {}
+                                curObsForm['grid'] = False
 
                             listProto[typeID] = {
                                 'Name': typeName,
-                                'schema': curObsForm['schema'],
-                                'fieldsets': curObsForm['fieldsets'],
+                                'schema': curObsForm.get('schema', None),
+                                'fieldsets': curObsForm.get('fieldsets', None),
                                 'grid': curObsForm['grid'],
                                 'obs': [curObs.ID]
                             }
@@ -196,16 +201,22 @@ class ObservationsView(DynamicObjectCollectionView):
                         typeID = listVirginProto[i].FK_ProtocoleType
 
                         curVirginObs = Observation(FK_ProtocoleType=typeID)
-                        typeName = curVirginObs.GetType().Name.replace('_', ' ')
-                        protoStatus = curVirginObs.GetType().obsolete
+                        curVirginObsType = curVirginObs.GetType()
+                        typeName = curVirginObsType.Name.replace('_', ' ')
+                        protoStatus = curVirginObsType.obsolete
 
                         if protoStatus != 1:
-                            curVirginObsForm = curVirginObs.GetForm(Conf, DisplayMode)
+                            if curVirginObsType.Status == 10:
+                                curVirginObsForm = curVirginObs.getForm(displayMode=DisplayMode)
+                                curVirginObsForm['grid'] = True
+                            else:
+                                curVirginObsForm = {}
+                                curVirginObsForm['grid'] = False
 
                             listProto[typeID] = {
                                 'Name': typeName,
-                                'schema': curVirginObsForm['schema'],
-                                'fieldsets': curVirginObsForm['fieldsets'],
+                                'schema': curVirginObsForm.get('schema', None),
+                                'fieldsets': curVirginObsForm.get('fieldsets', None),
                                 'grid': curVirginObsForm['grid'],
                                 'obs': []
                             }
