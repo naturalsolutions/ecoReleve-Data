@@ -44,7 +44,6 @@ define([
           this.addRow();
           break;
       }
-
     },
 
     handleErrors: function(errors){
@@ -64,6 +63,8 @@ define([
         this.handleErrors(rowDataAndErrors.errors);
         return;
       }
+
+      this.gridView.gridOptions.api.setSortModel({});
 
       var data = JSON.stringify({
           'rowData': rowDataAndErrors.rowData,
@@ -93,10 +94,12 @@ define([
     },
 
     addRow: function(){
+      this.gridView.gridOptions.api.setSortModel({});
       this.gridView.gridOptions.api.addItems([{}]);
     },
 
     deleteObs: function(){
+      this.gridView.gridOptions.api.setSortModel({});
       var _this = this;
       var afterDestroySelectedRows = function(){
         var rowData = [];
@@ -108,8 +111,9 @@ define([
         _this.model.set('obs', rowData);
         _this.model.trigger('change:obs', _this.model);
       }
-
+      
       this.gridView.deleteSelectedRows(afterDestroySelectedRows);
+      
     },
 
     toggleEditionMode: function(){
@@ -122,6 +126,7 @@ define([
     },
 
     formatColumns: function(model){
+      var _this = this;
       var columnsDefs = [];
 
       var editable = this.editable;
@@ -146,7 +151,7 @@ define([
 
           editable = this.editable;
 
-          columnsDefs.push(colDef)
+          columnsDefs.push(colDef);
         }
       }
       var errorCol = {
@@ -175,6 +180,7 @@ define([
         clientSide: true,
         url: this.url,
         objectType: this.model.get('ID'),
+        displayRowIndex: true,
         gridOptions: {
           editType: 'fullRow',
           singleClickEdit : true,
@@ -182,7 +188,6 @@ define([
           rowSelection: (this.editable)? 'multiple' : '',
         }
       }));
-
 
     },
 

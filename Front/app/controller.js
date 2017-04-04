@@ -28,6 +28,7 @@ define([
   './modules/monitoredSites/monitored_site.view',
   './modules/monitoredSites/monitored_sites.view',
   './modules/monitoredSites/monitored_sites.new.view',
+  './modules/projects/projects.new.view',
 
 ],function(
   Marionette,
@@ -43,7 +44,9 @@ define([
   LytStation, LytStations, LytStationsNew,
   LytIndividual, LytIndividuals, LytIndividualsNew,
   LytSensor, LytSensors, LytSensorsNew,
-  LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew
+  LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew,
+
+  LytProjectsNew
 ) {
   'use strict';
 
@@ -77,6 +80,10 @@ define([
           'entities': LytMonitoredSites,
           'newEntity': LytMonitoredSitesNew
         },
+        'projects' : {
+          'newEntity': LytProjectsNew
+          
+        }
       };
     },
 
@@ -210,6 +217,11 @@ define([
 
     export: function() {
       this.rgMain.show(new LytExport());
+    },
+
+    //  project
+    newProject: function() {
+      this.rgMain.show(new LytProjectsNew());
     },
 
   });

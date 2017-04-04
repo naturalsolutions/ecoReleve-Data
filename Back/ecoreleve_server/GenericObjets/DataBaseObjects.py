@@ -50,11 +50,15 @@ class ConfiguredDbObjectMapped(object):
                 schema[field.Name] = field.GetDTOFromConf(
                     Editable)
 
-        return {'schema': schema,
+        form = {'schema': schema,
                 'fieldsets': self.sortFieldsets(fields),
                 'grid': False,
-                'data': {'id': 0}
+                # 'data': {'id': 0}
+                'recursive_level': 0
                 }
+        form = self.getDefaultValue(form)
+        del form['recursive_level']
+        return form
 
     def sortFieldsets(self, fields):
         ''' return ordered FiledSet according to configuration '''

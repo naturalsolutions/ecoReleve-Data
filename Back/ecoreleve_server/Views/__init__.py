@@ -350,35 +350,47 @@ class DynamicObjectCollectionView(CustomView):
     def getForm(self, objectType=None, moduleName=None, mode='edit'):
         if 'ObjectType' in self.request.params:
             objectType = self.request.params['ObjectType']
-        if objectType:
-            self.setType(int(objectType))
+        if not objectType:
+            objectType = None
+        self.setType(int(objectType))
+        if not moduleName:
+            moduleName = self.moduleFormName
 
-        form = self.getConfigJSON(self.moduleFormName + mode, self.typeObj)
+        form = self.getConfigJSON(moduleName + mode, self.typeObj)
         if not form:
-            form = self.objectDB.getForm(mode, objectType)
-            self.setConfigJSON(self.moduleFormName + mode, self.typeObj, form)
+            form = self.objectDB.getForm(mode, objectType, moduleName)
+            self.setConfigJSON(moduleName + mode, objectType, form)
         return form
 
-    def getGrid(self):
-        gridCols = self.getConfigJSON(self.moduleGridName, self.typeObj)
+    def getGrid(self, type_=None, moduleName=None):
+        if not moduleName:
+            moduleName = self.objectDB.moduleGridName
+
+        if not type_:
+            type_ = self.typeObj
+
+        gridCols = self.getConfigJSON(moduleName, type_)
         if not gridCols:
-            gridCols = self.objectDB.getGrid(type_=self.typeObj, moduleName=self.moduleGridName)
-            self.setConfigJSON(self.moduleGridName, self.typeObj, gridCols)
+            gridCols = self.objectDB.getGrid(type_=type_, moduleName=moduleName)
+            self.setConfigJSON(moduleName, type_, gridCols)
 
         return gridCols
 
-    def getFilter(self):
+    def getFilter(self, type_=None, moduleName=None):
         moduleName = self.request.params.get('FilterName', None)
         if not moduleName:
             moduleName = self.objectDB.moduleGridName
 
-        filters = self.getConfigJSON(moduleName+'Filter', self.typeObj)
+        if not type_:
+            type_ = self.typeObj
+
+        filters = self.getConfigJSON(moduleName+'Filter', type_)
         if not filters:
-            filtersList = self.objectDB.getFilters(type_=self.typeObj, moduleName=moduleName)
+            filtersList = self.objectDB.getFilters(type_=type_, moduleName=moduleName)
             filters = {}
             for i in range(len(filtersList)):
                 filters[str(i)] = filtersList[i]
-            self.setConfigJSON(moduleName+'Filter', self.typeObj, filters)
+            self.setConfigJSON(moduleName+'Filter', type_, filters)
 
         return filters
 

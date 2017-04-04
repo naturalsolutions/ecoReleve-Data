@@ -124,7 +124,7 @@ from ..GenericObjets.FrontModules import *
 from .CustomTypes import *
 from .Protocoles import *
 from .User import User
-from .Project import Project
+from .Project import *
 from .Station import *
 from .Region import *
 from .FieldActivity import *

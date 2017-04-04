@@ -1,0 +1,10 @@
+INSERT INTO ProjectType 
+VALUES ('standard', 4)
+GO 
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('113_Conf_PRojectType',GETDATE(),(SELECT db_name()))
+
+
+GO

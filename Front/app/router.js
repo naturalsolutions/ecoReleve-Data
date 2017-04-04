@@ -44,6 +44,8 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'validate/:type(/)': 'validateType',
       'validate/:type/:dataset(/)': 'validateDetail',
 
+      'projects/new(/)': 'newProject',
+
       '*route(/:page)': 'home',
     },
 

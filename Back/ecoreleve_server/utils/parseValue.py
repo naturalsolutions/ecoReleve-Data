@@ -24,7 +24,11 @@ def dateParser(stringDate):
     """ Date parsing tool.
         Change the formats here cause a changement in the whole application.
     """
-    formats = ['%d/%m/%Y %H:%M:%S', '%d/%m/%Y%H:%M:%S', '%d/%m/%Y', '%H:%M:%S']
+    formats = ['%d/%m/%Y %H:%M:%S',
+               '%d/%m/%Y%H:%M:%S',
+               '%d/%m/%Y',
+               '%H:%M:%S',
+               '%Y-%m-%d %H:%M:%S']
     dateValue = stringDate
     for format_ in formats:
         try:
@@ -104,10 +108,12 @@ def formatThesaurus(data):
             'value': data
         }
     except:
-        data = {'displayValue': '',
-                'value': data
-                }
-        pass
+
+        data = {
+            'displayValue': data,
+            'value': data
+        }
+
     return data
 
 
