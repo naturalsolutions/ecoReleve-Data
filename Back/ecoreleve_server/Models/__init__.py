@@ -143,11 +143,12 @@ LinkedTables['Sensor'] = Sensor
 LinkedTables['MonitoredSite'] = MonitoredSite
 
 def test(config):
-    # session = config.registry.dbmaker()
-    # o = session.query(MyObject).get(1)
-    # print(o)
-    # print(o.type)
-    # print(o._type.properties)
-    # print(o.values)
+    session = config.registry.dbmaker()
+    o = session.query(MyObject).get(1)
+    print(o)
+    print(o.type)
+    print(o._type.properties)
+    print(o.properties)
+    print(o.values)
     pass
 
