@@ -225,14 +225,11 @@ class WebSocketView(object):
             self.handler(websocket)
             # websocket.close()
         except Exception as e: #pragma NO COVER
-            print('exception handle ws')
             if get_errno(e) != errno.EPIPE:
                 raise
 
         resp = Response(headers=dict(Connection='Close'))
         resp.app_iter = wsgi.ALREADY_HANDLED
-        # print('response ')
-        # print(resp.app_iter)
         return resp
 
 
@@ -249,7 +246,6 @@ class WebSocketView(object):
         try:
             v, handshake_reply = websocket_handshake(self.request.headers)
         except HandShakeFailed:
-            # print('\n\n ****handshake failed')
             _, val, _ = sys.exc_info()
             response = HTTPBadRequest(headers=dict(Connection='Close'),
                                       body='Upgrade negotiation failed:\n\t%s\n%s' % \
@@ -257,13 +253,11 @@ class WebSocketView(object):
             return response
 
         sock = self.environ['eventlet.input'].get_socket()
-        # print('sock')
-        # print(sock)
+
         sock.sendall(handshake_reply.encode('utf-8'))
         if v < 2:
             hh = self.handle_websocket(v76WebSocket(self.sock, self.environ))
         else:
             hh = self.handle_websocket(WebSocket(self.sock, self.environ))
-        # print('hhhhhhhh')
         if hh != '':
             return hh
