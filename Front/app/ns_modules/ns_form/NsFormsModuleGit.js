@@ -584,7 +584,7 @@ define([
                 confirmButtonText: 'OK!',
                 confirmButtonColor: '#DD6B55'
               };
-              _this.swal(opts);
+              setTimeout(  function () {_this.swal(opts);}, 400);
           }
         }
       });
