@@ -101,7 +101,18 @@ class GenericType(ORMUtils):
 
 
 class HasDynamicProperties(ORMUtils):
+    ''' core object creating all stuff to manage dynamic
+        properties on a new declaration:
+            create automatically tables and relationships:
+                - Type
+                - Properties
+                - PropertyValues
+                - Type_Properties
 
+            create automatically indexes, uniques constraints and view
+        history_track parameter (default:True) is used to track new property's value
+        and get historization of dynamic properties
+    '''
     history_track = True
 
     id = Column(Integer(), primary_key=True)
@@ -228,7 +239,7 @@ class HasDynamicProperties(ORMUtils):
         ''' create/intialize view of last dynamic properties values,
             return the mapped view'''
         @event.listens_for(cls, 'mapper_configured')
-        def initView(mapper, t):
+        def lastValueView(mapper, t):
             cls = mapper.class_
             viewName = cls.DynamicValuesClass.__tablename__+'Now'
             if viewName not in Base.metadata.tables:
@@ -240,7 +251,7 @@ class HasDynamicProperties(ORMUtils):
                                                   Base.metadata,
                                                   autoload=True)
             return viewName
-        return initView
+        return lastValueView
 
     def getLatestDynamicValues(self):
         ''' retrieve latest values of dynamic properties '''
@@ -350,18 +361,4 @@ class HasDynamicProperties(ORMUtils):
 
 class MyObject(HasDynamicProperties, Base):
     __tablename__ = 'MyObject'
-    id = Column(Integer(), primary_key=True)
     toto = Column(String)
-
-
-class OHMyObject(HasDynamicProperties, Base):
-    __tablename__ = 'OHMyObject'
-    id = Column(Integer(), primary_key=True)
-    tutu = Column(String)
-
-
-class OHMINDEX(HasDynamicProperties, Base):
-    __tablename__ = 'OHMINDEX'
-    id = Column(Integer(), primary_key=True)
-    tutu = Column(String)
-
