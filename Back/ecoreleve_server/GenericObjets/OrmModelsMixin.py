@@ -95,7 +95,18 @@ class GenericType(ORMUtils):
 
 class HasDynamicProperties(ORMUtils):
 
+    history_track = True
+
+    id = Column(Integer(), primary_key=True)
+
+    def __init__(self, **kwargs):
+        self.session = kwargs.get('session', None)
+        pass
+
     @orm.reconstructor
+    def init_on_load(self):
+        self.session = inspect(self).session
+
     @declared_attr
     def table_type_name(cls):
         return cls.__tablename__+'Type'
