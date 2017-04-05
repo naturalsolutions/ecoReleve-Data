@@ -6,10 +6,11 @@ define([
   'sweetAlert',
   'translater',
   'backbone-forms',
+  'moment',
   'requirejs-text!./tpl-bbfe-objectPicker.html',
 ], function(
   $, _, Backbone, Marionette, Swal, Translater,
-  Form, Tpl
+  Form, moment, Tpl
 ) {
   'use strict';
   return Form.editors.ObjectPicker = Form.editors.Base.extend({
@@ -18,6 +19,7 @@ define([
     events: {
       'click span.picker': 'showPicker',
       'click button#detailsShow': 'openDetails',
+      'change': 'onChange'
     },
 
     initialize: function(options) {
@@ -203,8 +205,126 @@ define([
       this.$input.on('keypressed', function(e){
         _this.input.change()
       });
-
+      this.listenForm();
       return this;
+    },
+
+    loadData: function(){
+      var data = {};
+      switch (this.objectName){
+        case 'individuals':
+          break;
+        case 'monitoredSites':
+          var model = this.form.getValue();
+
+          data['LAT'] = model.LAT;
+          data['LON'] = model.LON;
+          data['Name'] = model.Name;
+          data['ELE'] = model.ELE;
+          data['Precision'] = model.precision;
+          data['StartDate'] = model.StationDate;
+          break;
+        case 'sensors':
+          break;
+      }
+      return data;
+    },
+
+    listenForm: function(){
+      var _this = this;
+      switch (this.objectName){
+          case 'individuals':
+            break;
+          case 'monitoredSites':
+            if (this.form.fields.StationDate){
+              this.form.fields.StationDate.editor.on('change',function(e, v){
+                _this.onChange();
+              });
+            }
+            break;
+          case 'sensors':
+            break;
+      }
+    },
+
+    onChange: function(){
+      var _this = this;
+      switch (this.objectName){
+          case 'individuals':
+            break;
+          case 'monitoredSites':
+            var id_ = this.getValue();
+            if(!id_){
+              return;
+            }
+            var data = this.loadData();
+            var stationDate = new moment(data.StartDate, 'DD/MM/YYYY HH:mm:ss');
+            $.ajax({
+              context: this,
+              url: 'monitoredSites/'+id_+'/history',
+            }).done(function(positions) {
+              var positions = positions[1];
+              var minPosition = positions.reduce(function(min, next){
+                var minDate = new moment(min.StartDate, 'DD/MM/YYYY HH:mm:ss').valueOf();
+                var nextDate = new moment(next.StartDate, 'DD/MM/YYYY HH:mm:ss').valueOf();
+                return minDate < nextDate ? min : next;
+              });
+              var minPositionDate = new moment(minPosition.StartDate, 'DD/MM/YYYY HH:mm:ss');
+              if (stationDate.valueOf() < minPositionDate.valueOf()){
+                _this.ruleOnchange(minPosition);
+                }
+              }).fail(function() {
+                // console.error('an error occured');
+                // _this.histoMonitoredSite.error = true;
+              });
+            break;
+          case 'sensors':
+            break;
+        }
+    },
+
+    ruleOnchange: function(data){
+      var _this = this;
+      switch (this.objectName){
+        case 'individuals':
+          break;
+        case 'monitoredSites':
+          Swal({
+             title: 'Careful, there is no coordinate for this monitored site at this date',
+             text: 'The creationdate of this monitored site\'s coordinates will be modified. Do you want to proceed?',
+             type: 'warning',
+             showCancelButton: true,
+             confirmButtonColor: 'rgb(147, 14, 14)',
+             confirmButtonText: 'OK',
+             closeOnConfirm: true,
+            },
+            function(isConfirm) {
+              var stationDate = _this.loadData().StartDate;
+              if( isConfirm ) { //update startdate monitored site
+                data.StartDate = stationDate;
+                $.ajax({
+                  context: _this,
+                  url: 'monitoredSites/'+_this.getValue(),
+                  data: JSON.stringify(data),
+                  dataType: "json",
+                  type: "PUT",
+                  contentType: "application/json; charset=utf-8",
+                  success: function (data) {
+                      //_this.nsForm.butClickSave();
+                  },
+                  error: function (data) {
+                    console.error('an error occured');
+                  }
+                });
+              }
+              else {//remove MonitoredSite's stations
+                _this.setValue('','');
+              }
+            });
+          break;
+        case 'sensors':
+          break;
+      }
     },
 
     getNewFunc: function(ctx) {
@@ -250,9 +370,7 @@ define([
           data['Name'] = _this.form.model.get('Name');
           data['ELE'] = _this.form.model.get('ELE');
           data['Precision'] = _this.form.model.get('precision');
-
           data['StartDate'] = _this.form.model.get('StationDate');
-
 
           _this.regionManager.get('modal').show(new _this.NewView({
             objectType: ctx.model.get('objectType'),
