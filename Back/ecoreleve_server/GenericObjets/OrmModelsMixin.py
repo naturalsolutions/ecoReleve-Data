@@ -10,7 +10,9 @@ from sqlalchemy import (Column,
                         not_,
                         exists,
                         event,
-                        Table)
+                        Table,
+                        Index,
+                        UniqueConstraint)
 from sqlalchemy.orm import relationship, aliased, class_mapper
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declared_attr
@@ -48,7 +50,6 @@ class GenericType(ORMUtils):
     name = Column(String(250), nullable=False)
     parent = None
 
-    # @staticmethod
     @classmethod
     def getPropertiesClass(cls):
 
@@ -58,6 +59,12 @@ class GenericType(ORMUtils):
             name = Column(String(250), nullable=False)
             typeProp = Column(String(250), nullable=False)
 
+            @declared_attr
+            def __table_args__(cls):
+                return (UniqueConstraint(
+                            cls.name,
+                            name='uqc_'+cls.__tablename__+'_name'),
+                        )
         cls.PropertiesClass = Properties
         return Properties
 
@@ -166,6 +173,23 @@ class HasDynamicProperties(ORMUtils):
                                  nullable=False
                                  )
             property_name = association_proxy('property_id', 'name')
+
+            @declared_attr
+            def __table_args__(cls):
+                return (Index('idx_%s' % cls.__tablename__+'_other',
+                              cls.fk_parent,
+                              cls.fk_property,
+                              'StartDate'),
+                        Index('idx_%s' % cls.__tablename__+'_ValueString',
+                              cls.fk_parent,
+                              'ValueString'),
+                        UniqueConstraint(
+                            cls.fk_parent,
+                            cls.fk_property,
+                            'StartDate',
+                            name='uqc_'+cls.__tablename__
+                        ),
+                        )
 
         cls.DynamicValuesClass = DynamicValues
         return DynamicValues
@@ -332,6 +356,12 @@ class MyObject(HasDynamicProperties, Base):
 
 class OHMyObject(HasDynamicProperties, Base):
     __tablename__ = 'OHMyObject'
+    id = Column(Integer(), primary_key=True)
+    tutu = Column(String)
+
+
+class OHMINDEX(HasDynamicProperties, Base):
+    __tablename__ = 'OHMINDEX'
     id = Column(Integer(), primary_key=True)
     tutu = Column(String)
 
