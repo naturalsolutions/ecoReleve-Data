@@ -134,7 +134,12 @@ from .Equipment import *
 from .SensorData import *
 from .List import *
 from .Log import sendLog
-from ..GenericObjets.OrmModelsMixin import MyObject
+
+from sqlalchemy import exc as sa_exc
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+    from ..GenericObjets.OrmModelsMixin import MyObject, OHMyObject
 
 LinkedTables['Individual'] = Individual
 LinkedTables['Station'] = Station
@@ -143,12 +148,31 @@ LinkedTables['Sensor'] = Sensor
 LinkedTables['MonitoredSite'] = MonitoredSite
 
 def test(config):
-    session = config.registry.dbmaker()
-    o = session.query(MyObject).get(1)
-    print(o)
-    print(o.type)
-    print(o._type.properties)
-    print(o.properties)
-    print(o.values)
+    # session = config.registry.dbmaker()
+    # o = session.query(MyObject).get(1)
+    # # print(o)
+    # # print(o.type)
+    # # print(o._type.properties)
+    # # print(o.properties)
+    # print(o.values)
+    # values = {'FK_MyObjectType':1,
+    #            'toto':'blelelelqsdqsddqsdfelele',
+    #            'test1':'newsdsdccwxcx   xcwxcsdfwx  <dssss'}
+
+    # o.updateValues(values, '02/08/2016')
+
+
+    # o2 = MyObject(session=session)
+    # o2.values={'FK_MyObjectType':1,
+    #            'toto':'newtotoVal',
+    #            'test1':'test rockssssssssss'}
+    # print(o2.type)
+    # print(o2.properties)
+    # session.add(o2)
+    # # print(MyObject.lastValueView())*
+    # print(OHMyObject.TypeClass.PropertiesClass.__tablename__)
+    # print(MyObject.TypeClass.PropertiesClass.__tablename__)
+    # print(MyObject.LastDynamicValueViewClass.select())
+    # session.commit()
     pass
 
