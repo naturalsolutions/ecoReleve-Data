@@ -362,3 +362,24 @@ class HasDynamicProperties(ORMUtils):
 class MyObject(HasDynamicProperties, Base):
     __tablename__ = 'MyObject'
     toto = Column(String)
+
+
+''' TODO :
+    1) insert conf object from config file like :
+        {
+            MyObject:{
+                type1:[
+                    (propType1,String),
+                    (prop2_Type1,Integer),
+                    (prop3_Type1,Float)
+                    ],
+
+                type2:[
+                    (propType1,String), --> same of type1
+                    (prop2_Type2,String)
+                ]
+            }
+        }
+    2) manage linkedField
+
+    '''

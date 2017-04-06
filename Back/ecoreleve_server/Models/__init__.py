@@ -139,7 +139,7 @@ from sqlalchemy import exc as sa_exc
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", category=sa_exc.SAWarning)
-    from ..GenericObjets.OrmModelsMixin import MyObject, OHMyObject
+from ..GenericObjets.OrmModelsMixin import MyObject
 
 LinkedTables['Individual'] = Individual
 LinkedTables['Station'] = Station
@@ -148,13 +148,13 @@ LinkedTables['Sensor'] = Sensor
 LinkedTables['MonitoredSite'] = MonitoredSite
 
 def test(config):
-    # session = config.registry.dbmaker()
-    # o = session.query(MyObject).get(1)
-    # # print(o)
-    # # print(o.type)
-    # # print(o._type.properties)
-    # # print(o.properties)
-    # print(o.values)
+    session = config.registry.dbmaker()
+    o = session.query(MyObject).get(1)
+    print(o)
+    print(o.type)
+    print(o._type.properties)
+    print(o.properties)
+    print(o.values)
     # values = {'FK_MyObjectType':1,
     #            'toto':'blelelelqsdqsddqsdfelele',
     #            'test1':'newsdsdccwxcx   xcwxcsdfwx  <dssss'}
