@@ -55,9 +55,7 @@ def get_excel(request):
 
 def getTemplateColObs(session, protocolID):
     newObs = Observation(FK_ProtocoleType=protocolID)
-    Conf = session.query(FrontModules).filter(
-        FrontModules.Name == 'ObservationForm').first()
-    obsForm = newObs.GetForm(Conf, 'edit')
+    obsForm = newObs.getForm(type_=protocolID)
     obsFields = []
 
     for obj in obsForm['fieldsets']:
@@ -68,9 +66,7 @@ def getTemplateColObs(session, protocolID):
 
 def getTemplateColStation(session):
     newSta = Station(FK_StationType=1)
-    ConfSta = session.query(FrontModules).filter(
-        FrontModules.Name == 'StationForm').first()
-    stationForm = newSta.GetForm(ConfSta, 'edit')
+    stationForm = newSta.getForm(type_=1)
 
     stationFields = []
     for obj in stationForm['fieldsets']:
