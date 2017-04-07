@@ -130,7 +130,7 @@ define([
                     },
 
                     onInputInitialize: function(options){
-                        if(_this.value){
+                        if(_this.value && _this.value.displayValue){
                             _this.validateValue(_this.value.displayValue);
                         }
                     }
