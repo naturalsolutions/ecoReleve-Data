@@ -13,10 +13,10 @@ GO
 
 
    INSERT INTO [dbo].[ModuleForms] (module_id,Name,Label,Required,FieldSizeEdit,
-   FieldSizeDisplay,InputType,editorClass,FormRender,FormOrder,Options,Locked) VALUES (@FormId,'Name','Nom du projet',1,6,6,'Text','form-control',2,1,NULL,1),
-   (@FormId,'Project_reference','Référence du projet',1,6,6,'Text','form-control',2,2,NULL,1),
-   (@FormId,'Description','Description',1,12,12,'Text','form-control',2,4,NULL,1),
-    (@FormId,'Delimitation','Délimitation géographique',1,6,6,'FileUploadEditor','form-control',2,3,'{extensions: geojson}',1)
+   FieldSizeDisplay,InputType,editorClass,FormRender,FormOrder,Options,Locked,displayClass) VALUES (@FormId,'Name','Nom du projet',1,6,6,'Text','form-control',2,1,NULL,1,NULL),
+   (@FormId,'Project_reference','Référence du projet',1,6,6,'Text','form-control',2,2,NULL,1,NULL),
+   (@FormId,'Description','Description',1,12,12,'Text','form-control',2,4,NULL,1,NULL),
+    (@FormId,'Delimitation','Délimitation géographique',1,6,6,'FileUploadEditor','form-control',2,3,'{extensions: geojson}',1, 'fileInput')
 
 
 	  INSERT INTO [dbo].[ModuleGrids] (Module_ID,Name,Label, GridRender,GridSize,CellType,GridOrder,FilterOrder,FilterSize,IsSearchable,FilterRender,FilterType) VALUES ( @GridId,'Name','Nom du projet',2,

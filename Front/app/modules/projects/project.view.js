@@ -122,11 +122,12 @@ define([
 
         if(this.displayMode.toLowerCase() == 'edit'){
           this.bindChanges(_this.ui.formProject);
-          $(".datetime").attr('placeholder','DD/MM/YYYY');
-          $("#dateTimePicker").on("dp.change", function (e) {
-          $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
-          });
         }
+        $('div.fileInput').addClass('hidden');
+        // else {
+        //    $('div.fileInput').addClass('hidden');
+        // }
+       
 
       };
 
