@@ -2,30 +2,26 @@ CREATE PROCEDURE [dbo].[pr_checkIfProtoProtected]
  @FK_sensor int,
  @Date datetime,
  @result int OUTPUT
-   AS  
-   BEGIN  
+   AS
+   BEGIN
 	DECLARE
 	@StartDate datetime,
 	@EndDate datetime
 
 		select @StartDate = StartDate , @EndDate = EndDate from SensorEquipment
 		where FK_Sensor =  @FK_sensor
-		and  @Date >= StartDate 
-		and  @Date <=  EndDate 
+		and  (@Date >= StartDate and (EndDate is null or  @Date <=  EndDate ) )
 
-		if ( select count(*) from Individual_Location where 
+		if ( select count(*) from Individual_Location where
 		date >= @StartDate
 		and (@EndDate is null or date <=  @EndDate )
 		and FK_sensor = @FK_sensor ) > 0
-		
+
 		SET @result =  1
 		else
 		SET @result =  0
 
-   END  
-
-
-GO
+   END
 
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('113_add_sp_checkIfProtoProtected',GETDATE(),(SELECT db_name()))
