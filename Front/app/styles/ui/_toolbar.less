@@ -1,4 +1,6 @@
+
 @toolbarHeight : 53px;
+
 @paginatorHeight: 45px;
 
 .toolbar{
@@ -8,12 +10,15 @@
   padding-bottom: 0px;
   position: relative;
   z-index:1;
-  box-shadow: 0px 0px 15px 0px rgba(107, 107, 107, 0.5);
+
   &.bottom{
-    border-top: 1px solid #ddd;
+    box-shadow: 0px 0px 15px 0px rgba(107, 107, 107, 0.5);
+    //border-top: 1px solid #ddd;
+  //  margin-bottom: 15px;
   }
   &.top{
     border-bottom: 1px solid #ddd;
+      background-color: #e8e7e7;
   }
   & legend{
     display: inline-block;
@@ -32,6 +37,16 @@
   &.overflowXH{
     overflow-x: hidden;
   }
+
+  // &.crop-paginator{
+  //   @crop: @toolbarHeight + @paginatorHeight + 1;
+  //   height: ~"calc(100% - @{crop})";
+  // }
+  // &.tab-content{
+  //   padding: 0;
+  //   padding-top:15px;
+  // }
+
 }
 
 .crop2{
@@ -43,4 +58,34 @@
   &.overflowXH{
     overflow-x: hidden;
   }
+
+//   &.crop-paginator{
+//     @crop : @toolbarHeight*2 + @paginatorHeight;
+//     height: ~"calc(100% - @{crop})";
+//   }
+// }
+// /*
+// .crop3{
+//   position: relative;
+//   @crop: (@toolbarHeight*2)+@tabsHeight;
+//   height: ~"calc(100% - @{crop})";
+//   //padding: 0px 15px;
+//   overflow-y: auto;
+//   padding-bottom : 50px;
+// &.overflowXH{
+//   overflow-x: hidden;
+// }
+// &.crop-paginator{
+//   @crop : @toolbarHeight*2 + @paginatorHeight;
+//   height: ~"calc(100% - @{crop})";
+// }
+// } */
+
+// .grid-crop{
+//   @crop : @paginatorHeight;
+//   height: ~"calc(100% - @{crop})";
+//   /* overflow-x: hidden; */
+//   overflow-y: auto;
+//     padding: 15px;
+
 }
