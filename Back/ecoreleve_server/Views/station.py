@@ -120,6 +120,12 @@ class StationsView(DynamicObjectCollectionView):
         if not lastImported:
             map(lambda x: obj['Column'] != 'FK_StationType', params['criteria'])
 
+        params['criteria'].extend([{
+                     'Column': 'creator',
+                     'Operator': '=',
+                     'Value': self.request.authenticated_userid['iss']
+                     }])
+
         if 'geo' in self.request.params.mixed():
             self.getGeoJsonParams(params)
         return params
