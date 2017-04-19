@@ -24,7 +24,7 @@ define([
     template: tpl,
     redirectAfterPost: '',
     displayDelete: true,
-    
+
 
     events : {
       'keypress input' : 'evt'
@@ -77,8 +77,8 @@ define([
 
     initialize: function (options) {
       this.extendsBBForm();
-      
-      
+
+
       var jqxhr;
       this.modelurl = options.modelurl;
 
@@ -346,7 +346,7 @@ define([
         return;
       }
 
-      
+
 
       if(this.buttonRegion){
         if(this.buttonRegion[0]){
@@ -519,7 +519,7 @@ define([
     },
 
     butClickEdit: function (e) {
-      
+
       this.displayMode = 'edit';
       this.initModel();
       if(this.buttonRegion)
@@ -527,7 +527,7 @@ define([
 
     },
     butClickCancel: function (e) {
-      
+
       this.displayMode = 'display';
       this.initModel();
       if(this.buttonRegion)
@@ -535,7 +535,7 @@ define([
 
     },
     butClickClear: function (e) {
-      
+
       var formContent = this.BBForm.el;
       $(formContent).find('input').not(':disabled').each(function(){
         $(this).val('');
@@ -599,10 +599,10 @@ define([
         if(key == 'defaultValues') {
           continue;
         }
-        if(editorSchema.fieldClass.indexOf('hide') != -1) {
+        if(editorSchema && editorSchema.fieldClass.indexOf('hide') != -1) {
           continue;
         }
-        if(editorSchema.type == 'Checkbox') {
+        if(editorSchema && editorSchema.type == 'Checkbox') {
           continue;
         }
         //need to check if not an array
@@ -737,7 +737,7 @@ define([
       });
     },
 
-    
+
   });
 
 });
