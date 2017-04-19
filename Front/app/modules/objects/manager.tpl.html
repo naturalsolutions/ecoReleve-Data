@@ -5,7 +5,7 @@
 	      &nbsp;
 	      <span data-i18n="button.back">Back</span>
   		</a>
-  		
+
   		<% if (typeof(uiTabs) !== 'undefined') { %>
 	  		<ul class="js-nav-tabs nav nav-tabs pull-right modal-visible">
 	  			<% _.each(uiTabs, function(uiTab, index){ %>
@@ -36,7 +36,7 @@
 				</div>
 			<% } %>
 
-			<div class="js-filters clearfix full-height flex1 overflow-auto height-padding full-width"></div>
+			<div class="js-filters clearfix full-height flex1 overflow-auto height-padding full-width bottom-padding"></div>
 		</div>
 
 		<div class="toolbar bottom">
@@ -94,7 +94,7 @@
 					<span class="reneco reneco-entrykey"></span>
 					&nbsp;
 					New <%= single %>
-					</a>			    
+					</a>
 			<% } else { %>
 					<button class="js-admin js-btn-new btn btn-success pull-right">
 					<span class="reneco reneco-entrykey"></span>
@@ -102,6 +102,6 @@
 					New <%= single %>
 					</button>
 			<% } %>
-			
+
 		</div>
 	</div>
