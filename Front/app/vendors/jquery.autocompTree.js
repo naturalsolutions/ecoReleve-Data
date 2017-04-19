@@ -197,6 +197,7 @@
                         node.span.className = node.span.className.replace('fancytree-node', 'fancytree-node fancytree-expanded');
                       }
                     }
+                    event.stopPropagation();
                   },
                   //evenement d'activation de l'arbre (au clique)
                   activate: function(event, data) {

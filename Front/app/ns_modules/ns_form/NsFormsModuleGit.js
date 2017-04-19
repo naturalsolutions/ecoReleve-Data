@@ -610,7 +610,7 @@ define([
           return isEmpty = false;
         }
 
-        if(editorSchema.defaultValue) {
+        if(editorSchema && editorSchema.defaultValue) {
             if(editorSchema.defaultValue != editorValue) {
               return isEmpty = false;
             }

@@ -83,7 +83,7 @@ define([
             this.wsUrl = options.schema.options.wsUrl;
             this.lng = options.schema.options.lng;
             this.timeout = options.schema.options.timeout;
-
+            this.schema = options.schema;
             if(this.value instanceof Object){
                 this.value = this.value.value;
             }
@@ -163,18 +163,53 @@ define([
                     }
                 });
 
-            }
-
-            //set inital values
-            if (_this.value) {
-                if(_this.value instanceof Object){
-                  var displayValue = _this.value.displayValue;
-                } else {
-                  var displayValue = _this.translateValue(_this.value);
+                if (_this.value) {
+                  if(_this.value instanceof Object){
+                    var displayValue = _this.value.displayValue;
+                  } else {
+                    var displayValue = _this.translateValue(_this.value);
+                  }
+                  _this.$el.find('#' + _this.id).val(displayValue);
+                  // _this.$el.find('#' + _this.id + '_value').val(_this.value.value);
                 }
-                _this.$el.find('#' + _this.id).val(displayValue);
-                // _this.$el.find('#' + _this.id + '_value').val(_this.value.value);
+            } else {
+
+              var TypeField = 'FullPath';
+              if (_this.value && _this.value.indexOf('>') == -1) {
+                TypeField = 'Name';
+              }
+              var data = {
+                sInfo: _this.value,
+                sTypeField: TypeField,
+                iParentId: _this.startId,
+                lng: _this.lng //language
+              };
+
+              var url = _this.wsUrl + '/getTRaductionByType';
+
+              $.ajax({
+                url: url,
+                data: JSON.stringify(data),
+                dataType: 'json',
+                type: 'POST', //should be a GET
+                contentType: 'application/json; charset=utf-8',
+                context: this,
+                success: function (data){
+                  if(data['TTop_FullPath'] != null){
+                    var values = {
+                      value: data['TTop_FullPath'],
+                      displayValue: data['TTop_NameTranslated']
+                    };
+                    _this.$el.find('#' + _this.id).val(values.displayValue);
+                    _this.$el.find('#' + _this.id + '_value').val(values.value);
+                  } else {
+                    _this.$el.find('#' + _this.id).val(_this.value);
+                    _this.$el.find('#' + _this.id + '_value').val(_this.value);
+                  }
+                }
+              });
             }
+            //set inital values
 
             }).defer();
 

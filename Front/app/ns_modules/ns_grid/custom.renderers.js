@@ -240,7 +240,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
               this.handleRemoveError(params);
               var values = {
                 value: data['TTop_FullPath'],
-                label: data['TTop_NameTranslated']
+                displayValue: data['TTop_NameTranslated']
               };
               this.manualDataSet(params, values);
 
