@@ -23,7 +23,7 @@ define([
           // convert lat & long to number and round to 5 decimals
           var latitude = parseFloat(lat);
           var longitude = parseFloat(lon);
-          var waypointName = $(this).find('name').text();
+          var waypointName = $(this).find('name').text() || 'point';
           var waypointTime, time;
           // if tag "cmt" exisits, take date from it, else use tag "time"
           var waypointTimeTag = $(this).find('cmt').text();
@@ -32,7 +32,7 @@ define([
           if (format) {
             dateStr =  moment.utc(waypointTimeTag, format).format('DD/MM/YYYY HH:mm');
           } else {
-            waypointTimeTag = $(this).find('time').text();
+            waypointTimeTag = $(this).find('time').text() || (moment().format('DD/MM/YYYY HH:mm'));
             format =  _this.getDateFormat(waypointTimeTag);
             dateStr = moment.utc(waypointTimeTag,format).format('DD/MM/YYYY HH:mm');
           }

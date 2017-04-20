@@ -170,6 +170,11 @@ class ModuleForms(Base):
             self.dto['options'] = sorted(
                 self.dto['options'], key=lambda k: k['label'])
 
+        elif self.Options not in [None, '']:
+                listVal = json.loads(self.Options)
+                listVal = [ {'label': x['fr'], 'val': x['fr']} for x in listVal]
+                self.dto['options'] = listVal
+
     def InputLNM(self):
         ''' build ListOfNestedModel input type :
         used for complex protocols and Fieldworkers in station form '''

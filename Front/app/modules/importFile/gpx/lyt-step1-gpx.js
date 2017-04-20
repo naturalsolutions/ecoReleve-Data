@@ -218,7 +218,7 @@ define([
       });
        this.wayPointList.map(function(model) {
         model.FieldWorkers = fwList;
-        model.NbFieldWorker = formData.NbFieldWorker;
+        model.NbFieldWorker = formData.NbFieldWorker || 1;
         model.fieldActivity = formData.fieldActivityId;
       });
 
