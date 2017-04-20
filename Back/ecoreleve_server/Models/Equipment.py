@@ -35,8 +35,8 @@ class Equipment(Base):
         curSensor = session.query(Sensor).get(self.FK_Sensor)
         curIndiv.init_on_load()
         curSensor.init_on_load()
-        curSensor.UpdateFromJson(kwargs, StartDate)
-        curIndiv.UpdateFromJson(kwargs, StartDate)
+        curSensor.updateFromJSON(kwargs, StartDate)
+        curIndiv.updateFromJSON(kwargs, StartDate)
 
 
 def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
@@ -93,12 +93,12 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
         else:
             deploy = 1
 
-        fk_sensor = target.GetProperty('FK_Sensor')
+        fk_sensor = target.getProperty('FK_Sensor')
         if 'individual' in typeName.lower():
-            fk_indiv = target.GetProperty('FK_Individual')
+            fk_indiv = target.getProperty('FK_Individual')
             fk_site = None
         elif 'site' in typeName.lower():
-            fk_site = target.Station.GetProperty('FK_MonitoredSite')
+            fk_site = target.Station.getProperty('FK_MonitoredSite')
             fk_indiv = None
             if fk_site is None:
                 raise ErrorAvailable({'errorSite': True})
