@@ -45,7 +45,8 @@ define([
 		events: _.extend({}, editors.Text.prototype.events, {
 		//'keypress': 'onKeyPress',
 		//'change': 'onKeyPress',
-		'keyup': 'onKeyUp'
+			'keyup': 'onKeyUp',
+			'keydown':'onKeyPress'
 		}),
 
 		initialize: function(options) {
@@ -79,18 +80,34 @@ define([
 				}
 			}
 		},
+		 onKeyUp : function(e){
+		    var self = this,
+		        delayedDetermineChange = function() {
+		          setTimeout(function() {
+		            self.determineChange();
+		          }, 0);
+		        };
+		    var newVal = this.$el.val();
+		    var numeric = /^\-?[^\-][0-9]*\.?[0-9]{0,5}$/.test(newVal);
 
-		onKeyUp: function(event) {
-			if (typeof this.min === 'number' && (parseInt(this.$el.val()) < this.min)){
-          this.$el.val('');
-			}
-			if (typeof this.max === 'number' && (parseInt(this.$el.val()) > this.max)){
-         this.$el.val('');
-        }
-			if (this.$el.val() == ''){ //abort value if not a number ex : 99--9
-				this.$el.val('');
-			}
-		},
+		     if (!numeric && newVal!= ""){
+		      if (e.keyCode!=8 && e.keyCode != 110 && this.oldValue!='') {
+		        this.$el.val(this.oldValue);
+		      }
+		    }
+
+		    newVal = parseFloat(newVal);
+		    if(newVal < this.min) {
+		    	 this.$el.val(this.min);
+
+		    }
+		    if (newVal > this.max) {
+		    	 this.$el.val(this.max);
+		    }
+		  },
+		    onKeyPress: function(event) {
+		    this.oldValue = this.$el.val();
+		  },
 
 
 		getValue: function() {
