@@ -194,10 +194,6 @@ define([
       this.ui.jsGrid.addClass('selectableTextInGrid');
     },
     onRowSelected: function(e){
-      if(this.ready){
-        this.interaction('singleSelection', e.node.data[this.idName] || e.node.data.id || e.node.data.ID, this);
-      }
-
       // update status bar ui
       this.ui.totalSelected.html(this.gridOptions.api.getSelectedRows().length);
     },
@@ -319,10 +315,10 @@ define([
             col.filter = CustomTextFilter;
             break;
           }
-          /*default: {
+          default: {
             col.filter = CustomTextFilter;
             return;
-          }*/
+          }
         }
         //col.headerCellTemplate = _this.getHeaderCellTemplate();
       });
@@ -600,35 +596,6 @@ define([
           //_this.gridOptions.api.setFocusedCell(params.index, 'id', null);
         },0);
     },
-
-    multiSelection: function(params, from){
-      //could certainly be optimized
-      var _this = this;
-      this.gridOptions.api.forEachNode( function (node) {
-        params.map( function (param) {
-          if(node.data[_this.idName] === param || node.data.ID === param || node.data.id === param){
-              _this.ready = false;
-              node.setSelected(true);
-              _this.ready = true;
-          }
-        });
-      });
-    },
-
-    singleSelection: function(param, from){
-      var _this = this;
-      if(from == this){
-        return;
-      }
-      this.gridOptions.api.forEachNode( function (node) {
-          if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
-            _this.ready = false;
-            node.setSelected(!node.selected);
-            _this.ready = true;
-          }
-      });
-    },
-
 
     clientSideFilter: function(filters){
       var _this = this;
