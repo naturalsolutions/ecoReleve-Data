@@ -80,7 +80,7 @@ define([
   DateFilter.prototype.createGui = function () {
     this.templateDiv = document.createElement("div")
     this.templateDiv.innerHTML = template;
-    this.eTypeSelect = this.getGui().querySelector("#filterType");
+  //  this.eTypeSelect = this.getGui().querySelector("#filterType");
     this.cleanBtn =  this.getGui().querySelector('#cleanBtn');
     this.cleanBtn.addEventListener('click', this.clean.bind(this));
 
@@ -264,10 +264,10 @@ define([
     }
   };
 
-  DateFilter.prototype.onTypeChanged = function () {
-      this.filterType = this.eTypeSelect.value;
-      this.filterChanged();
-  };
+  // DateFilter.prototype.onTypeChanged = function () {
+  //     this.filterType = this.eTypeSelect.value;
+  //     this.filterChanged();
+  // };
 
   DateFilter.prototype.setupApply = function () {
     var _this = this;
@@ -296,7 +296,9 @@ define([
     if (filter !== null && !(typeof filter === 'number')) {
         filter = parseFloat(filter);
     }
-    this.filterDate.dateFrom = filter;
+    if ( this.filterDate ) {
+      this.filterDate.dateFrom = filter;
+    }
     this.dateFrom.value = filter;
   };
 
@@ -304,18 +306,26 @@ define([
     if (filter !== null && !(typeof filter === 'number')) {
         filter = parseFloat(filter);
     }
-    this.filterDate.dateTo = filter;
+    if ( this.filterDate ) {
+      this.filterDate.dateTo = filter;
+    }
     this.dateTo.value = filter;
   };
 
+  // DateFilter.prototype.setType = function(type) {
+  //
+  //     this.filterType = type;
+  //     this.eTypeSelect.value = type;
+  // };
+
   DateFilter.prototype.setModel = function (model) {
     if (model) {
-      this.setType(model.type);
+    //  this.setType(model.type);
       this.setFilter(model.filter);
       this.setFilterTo(model.filterTo);
     }
     else {
-        this.setType(DateFilter.EQUALS);
+      //  this.setType(DateFilter.EQUALS);
         this.setFilter(null);
         this.setFilterTo(null);
     }
