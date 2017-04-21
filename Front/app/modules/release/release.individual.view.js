@@ -76,7 +76,7 @@ define([
     getReleaseMethod: function(){
       var _this = this;
       $.ajax({
-        url: 'release/individuals/getReleaseMethod'
+        url: 'release/getReleaseMethod'
       }).done(function(data){
         _this.releaseMethodList=data;
       });

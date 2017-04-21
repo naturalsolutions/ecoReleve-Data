@@ -1,386 +1,159 @@
-from pyramid.view import view_config
 from ..Models import (
     Station,
     MonitoredSite,
-    MonitoredSiteType,
     Sensor,
     SensorType,
     Base,
     fieldActivity,
     MonitoredSiteList
 )
-from ..GenericObjets.FrontModules import FrontModules
 from ..GenericObjets import ListObjectWithDynProp
 import json
-from datetime import datetime
-import pandas as pd
 from sqlalchemy import select, desc, join
 from sqlalchemy.exc import IntegrityError
-from pyramid.response import Response
 from collections import OrderedDict
-import io
-from ..controllers.security import routes_permission
+from ..controllers.security import RootCore, context_permissions
+from . import DynamicObjectView, DynamicObjectCollectionView
 
 
-prefix = 'monitoredSites'
+class MonitoredSiteView(DynamicObjectView):
 
+    model = MonitoredSite
 
-@view_config(route_name=prefix + '/action',
-             renderer='json',
-             request_method='GET',
-             permission=routes_permission[prefix]['GET'])
-@view_config(route_name=prefix + '/id/history/action',
-             renderer='json',
-             request_method='GET',
-             permission=routes_permission[prefix]['GET'])
-@view_config(route_name=prefix + '/id/equipment/action',
-             renderer='json',
-             request_method='GET',
-             permission=routes_permission[prefix]['GET'])
-def actionOnMonitoredSite(request):
-    dictActionFunc = {
-        'count': count_,
-        'forms': getForms,
-        '0': getForms,
-        'getFields': getFields,
-        'getFilters': getFilters,
-        'getType': getMonitoredSiteType
-    }
-    actionName = request.matchdict['action']
-    return dictActionFunc[actionName](request)
+    def __init__(self, ref, parent):
+        DynamicObjectView.__init__(self, ref, parent)
+        self.actions = {'equipment': self.getEquipment,
+                        'stations': self.getStations,
+                        'getFields': self.getGrid}
 
+    def __getitem__(self, ref):
+        if ref in self.actions:
+            self.retrieve = self.actions.get(ref)
+            return self
+        return self
 
-def count_(request=None, listObj=None):
-    if request is not None:
-        data = request.params
-        searchInfo = {}
-        if 'criteria' in data:
-            data['criteria'] = json.loads(data['criteria'])
-            if data['criteria'] != {}:
-                searchInfo['criteria'] = [obj for obj in data[
-                    'criteria'] if obj['Value'] != str(-1)]
-
-        listObj = ListObjectWithDynProp(MonitoredSite)
-        count = listObj.count(searchInfo=searchInfo)
-    else:
-        count = listObj.count()
-    return count
-
-
-def getFilters(request):
-    ModuleType = 'MonitoredSiteGrid'
-    filtersList = MonitoredSite().GetFilters(ModuleType)
-    filters = {}
-    for i in range(len(filtersList)):
-        filters[str(i)] = filtersList[i]
-
-    return filters
-
-
-def getForms(request):
-    session = request.dbsession
-
-    if 'ObjectType' in request.params:
-        typeMonitoredSite = request.params['ObjectType']
-    else:
-        typeMonitoredSite = 1
-
-    ModuleName = 'MonitoredSiteForm'
-    Conf = session.query(FrontModules).filter(
-        FrontModules.Name == ModuleName).first()
-    newMonitoredSite = MonitoredSite(FK_MonitoredSiteType=typeMonitoredSite)
-    newMonitoredSite.init_on_load()
-    schema = newMonitoredSite.GetDTOWithSchema(Conf, 'edit')
-
-    return schema
-
-
-def getFields(request):
-    ModuleType = request.params['name']
-    if ModuleType == 'default':
-        ModuleType = 'MonitoredSiteGrid'
-    cols = MonitoredSite().GetGridFields(ModuleType)
-
-    return cols
-
-
-def getMonitoredSiteType(request):
-    session = request.dbsession
-    query = select([MonitoredSiteType.ID.label('val'),
-                    MonitoredSiteType.Name.label('label')])
-    response = [OrderedDict(row) for row in session.execute(query).fetchall()]
-    return response
-
-
-@view_config(route_name=prefix + '/id', renderer='json', request_method='GET')
-def getMonitoredSite(request):
-    session = request.dbsession
-
-    id = request.matchdict['id']
-    curMonitoredSite = session.query(MonitoredSite).get(id)
-    curMonitoredSite.LoadNowValues()
-
-    # if Form value exists in request --> return data with schema else return
-    # only data
-    if 'FormName' in request.params:
+    def update(self):
         try:
-            DisplayMode = request.params['DisplayMode']
+            response = DynamicObjectView.update(self)
+        except IntegrityError as e:
+            self.session.rollback()
+            response = self.request.response
+            response.status_code = 510
+            response.text = "IntegrityError"
+        return response
+
+    def getGrid(self):
+        cols = self.objectDB.getGrid(moduleName='MonitoredSiteGridHistory')
+        return cols
+
+    def getStations(self):
+        id_site = self.objectDB.ID
+        joinTable = join(Station, fieldActivity,
+                         Station.fieldActivityId == fieldActivity.ID)
+        query = select([Station.StationDate,
+                        Station.LAT,
+                        Station.LON,
+                        Station.ID,
+                        Station.Name,
+                        fieldActivity.Name.label('fieldActivity_Name')]
+                       ).select_from(joinTable
+                                     ).where(Station.FK_MonitoredSite == id_site)
+
+        result = self.session.execute(query).fetchall()
+        response = []
+        for row in result:
+            row = dict(row)
+            row['StationDate'] = row['StationDate'].strftime('%Y-%m-%d %H:%M:%S')
+            response.append(row)
+        return response
+
+    def history(self):
+        _id = self.objectDB.ID
+        data = self.request.params.mixed()
+        searchInfo = {}
+        searchInfo['criteria'] = [
+            {'Column': 'ID', 'Operator': 'Is', 'Value': _id}]
+        try:
+            searchInfo['order_by'] = json.loads(data['order_by'])
         except:
-            DisplayMode = 'display'
-        Conf = session.query(FrontModules).filter(
-            FrontModules.Name == 'MonitoredSiteForm').first()
-        response = curMonitoredSite.GetDTOWithSchema(Conf, DisplayMode)
-    else:
-        response = curMonitoredSite.GetFlatObject()
-    return response
+            searchInfo['order_by'] = []
 
+        moduleFront = self.parent.getConf('MonitoredSiteGridHistory')
+        view = Base.metadata.tables['MonitoredSitePosition']
+        listObj = ListObjectWithDynProp(MonitoredSite, moduleFront, View=view)
+        dataResult = listObj.GetFlatDataList(searchInfo)
 
-@view_config(route_name=prefix + '/id/history',
-             renderer='json',
-             request_method='GET')
-def getMonitoredSiteHistory(request):
-    session = request.dbsession
-
-    _id = request.matchdict['id']
-    data = request.params.mixed()
-    searchInfo = {}
-    searchInfo['criteria'] = [
-        {'Column': 'ID', 'Operator': 'Is', 'Value': int(_id)}]
-    try:
-        searchInfo['order_by'] = json.loads(data['order_by'])
-    except:
-        searchInfo['order_by'] = []
-
-    ModuleType = 'MonitoredSiteGridHistory'
-    moduleFront = session.query(FrontModules).filter(
-        FrontModules.Name == ModuleType).one()
-    view = Base.metadata.tables['MonitoredSitePosition']
-    listObj = ListObjectWithDynProp(MonitoredSite, moduleFront, View=view)
-    dataResult = listObj.GetFlatDataList(searchInfo)
-
-    if 'geo' in request.params:
-        geoJson = []
-        for row in dataResult:
-            geoJson.append({
-                'type': 'Feature',
-                'properties': {'Date': row['StartDate']},
-                'geometry': {
-                    'type': 'Point',
-                    'coordinates': [row['LAT'], row['LON']]}
-                })
-        result = {'type': 'FeatureCollection', 'features': geoJson}
-    else:
-        countResult = listObj.count(searchInfo)
-        result = [{'total_entries': countResult}]
-        result.append(dataResult)
-    return result
-
-
-@view_config(route_name=prefix + '/id/equipment',
-             renderer='json',
-             request_method='GET')
-def getMonitoredSiteEquipment(request):
-    session = request.dbsession
-    table = Base.metadata.tables['MonitoredSiteEquipment']
-    id_site = request.matchdict['id']
-
-    joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
-    joinTable = join(joinTable, SensorType,
-                     Sensor.FK_SensorType == SensorType.ID)
-    query = select([table.c['StartDate'],
-                    table.c['EndDate'],
-                    Sensor.UnicIdentifier,
-                    table.c['FK_MonitoredSite'],
-                    SensorType.Name.label('Type')]
-                   ).select_from(joinTable
-                                 ).where(table.c['FK_MonitoredSite'] == id_site
-                                         ).order_by(desc(table.c['StartDate']))
-
-    result = session.execute(query).fetchall()
-    response = []
-    for row in result:
-        curRow = OrderedDict(row)
-        curRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
-        if curRow['EndDate'] is not None:
-            curRow['EndDate'] = curRow['EndDate'].strftime('%Y-%m-%d %H:%M:%S')
+        if 'geo' in self.request.params:
+            geoJson = []
+            for row in dataResult:
+                geoJson.append({
+                    'type': 'Feature',
+                    'properties': {'Date': row['StartDate']},
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [row['LAT'], row['LON']]}
+                    })
+            result = {'type': 'FeatureCollection', 'features': geoJson}
         else:
-            curRow['EndDate'] = ''
-        response.append(curRow)
+            countResult = listObj.count(searchInfo)
+            result = [{'total_entries': countResult}]
+            result.append(dataResult)
+        return result
 
-    return response
+    def getEquipment(self):
+        id_site = self.objectDB.ID
+        table = Base.metadata.tables['MonitoredSiteEquipment']
 
+        joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
+        joinTable = join(joinTable, SensorType,
+                         Sensor.FK_SensorType == SensorType.ID)
+        query = select([table.c['StartDate'],
+                        table.c['EndDate'],
+                        Sensor.UnicIdentifier,
+                        table.c['FK_MonitoredSite'],
+                        SensorType.Name.label('Type')]
+                       ).select_from(joinTable
+                                     ).where(table.c['FK_MonitoredSite'] == id_site
+                                             ).order_by(desc(table.c['StartDate']))
 
-@view_config(route_name=prefix + '/id',
-             renderer='json',
-             request_method='DELETE',
-             permission=routes_permission[prefix]['DELETE'])
-def deleteMonitoredSite(request):
-    session = request.dbsession
-    id_ = request.matchdict['id']
-    curMonitoredSite = session.query(MonitoredSite).get(id_)
-    session.delete(curMonitoredSite)
-    return True
+        result = self.session.execute(query).fetchall()
+        response = []
+        for row in result:
+            curRow = OrderedDict(row)
+            curRow['StartDate'] = curRow['StartDate'].strftime('%Y-%m-%d %H:%M:%S')
+            if curRow['EndDate'] is not None:
+                curRow['EndDate'] = curRow['EndDate'].strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                curRow['EndDate'] = ''
+            response.append(curRow)
 
-
-@view_config(route_name=prefix + '/id',
-             renderer='json',
-             request_method='PUT',
-             permission=routes_permission[prefix]['PUT'])
-def updateMonitoredSite(request):
-    session = request.dbsession
-    try:
-        data = request.json_body
-        _id = request.matchdict['id']
-        curMonitoredSite = session.query(MonitoredSite).get(_id)
-        curMonitoredSite.LoadNowValues()
-        curMonitoredSite.UpdateFromJson(data)
-        response = {}
-
-    except IntegrityError as e:
-        session.rollback()
-        response = request.response
-        response.status_code = 510
-        response.text = "IntegrityError"
-    return response
+        return response
 
 
-@view_config(route_name=prefix + '/',
-             renderer='json',
-             request_method='POST',
-             permission=routes_permission[prefix]['POST'])
-def insertMonitoredSite(request):
-    data = request.json_body
-    if not isinstance(data, list):
-        return insertOneNewMonitoredSite(request)
-    else:
-        return
+class MonitoredSitesView(DynamicObjectCollectionView):
+
+    Collection = MonitoredSiteList
+    item = MonitoredSiteView
+    moduleFormName = 'MonitoredSiteForm'
+    moduleGridName = 'MonitoredSiteGrid'
+
+    def __init__(self, ref, parent):
+        DynamicObjectCollectionView.__init__(self, ref, parent)
+        self.__acl__ = context_permissions[ref]
+
+        if not self.typeObj:
+            self.typeObj = 1
+
+    def insert(self):
+        try:
+            response = DynamicObjectCollectionView.insert(self)
+        except IntegrityError as e:
+            self.session.rollback()
+            self.request.response.status_code = 520
+            response = self.request.response
+            response.text = "This name is already used for another monitored site"
+            pass
+        return response
 
 
-def insertOneNewMonitoredSite(request):
-    session = request.dbsession
-
-    data = {}
-    for items, value in request.json_body.items():
-        data[items] = value
-    try:
-        newMonitoredSite = MonitoredSite(
-            FK_MonitoredSiteType=data['FK_MonitoredSiteType'],
-            Creator=request.authenticated_userid['iss'])
-        newMonitoredSite.MonitoredSiteType = session.query(MonitoredSiteType).filter(
-            MonitoredSiteType.ID == data['FK_MonitoredSiteType']).first()
-        newMonitoredSite.init_on_load()
-        newMonitoredSite.UpdateFromJson(data)
-        session.add(newMonitoredSite)
-        session.flush()
-        response = {'ID': newMonitoredSite.ID}
-
-    except IntegrityError as e:
-        session.rollback()
-        request.response.status_code = 520
-        response = request.response
-        response.text = "This name is already used for another monitored site"
-        pass
-
-    return response
-
-
-@view_config(route_name=prefix, renderer='json', request_method='GET')
-def searchMonitoredSite(request):
-    session = request.dbsession
-    data = request.params.mixed()
-    searchInfo = {}
-    searchInfo['criteria'] = []
-
-    if 'criteria' in data:
-        data['criteria'] = json.loads(data['criteria'])
-        if data['criteria'] != {}:
-            searchInfo['criteria'] = [obj for obj in data[
-                'criteria'] if obj['Value'] != str(-1)]
-
-    searchInfo['order_by'] = json.loads(data['order_by'])
-    searchInfo['offset'] = json.loads(data['offset'])
-    searchInfo['per_page'] = json.loads(data['per_page'])
-
-    ModuleType = 'MonitoredSiteGrid'
-    moduleFront = session.query(FrontModules).filter(
-        FrontModules.Name == ModuleType).one()
-
-    listObj = MonitoredSiteList(
-        moduleFront,
-        View=Base.metadata.tables['MonitoredSitePositionsNow'])
-
-    dataResult = listObj.GetFlatDataList(searchInfo)
-    countResult = listObj.count(searchInfo)
-
-    result = [{'total_entries': countResult}]
-    result.append(dataResult)
-
-    return result
-
-
-@view_config(route_name=prefix + '/export',
-             renderer='json',
-             request_method='GET')
-def sites_export(request):
-    session = request.dbsession
-    data = request.params.mixed()
-    searchInfo = {}
-    searchInfo['criteria'] = []
-    if 'criteria' in data:
-        data['criteria'] = json.loads(data['criteria'])
-        if data['criteria'] != {}:
-            searchInfo['criteria'] = [obj for obj in data[
-                'criteria'] if obj['Value'] != str(-1)]
-
-    searchInfo['order_by'] = []
-
-    ModuleType = 'MonitoredSiteGrid'
-    moduleFront = session.query(FrontModules).filter(
-        FrontModules.Name == ModuleType).one()
-
-    listObj = ListObjectWithDynProp(
-        MonitoredSite,
-        moduleFront,
-        View=Base.metadata.tables['MonitoredSitePositionsNow'])
-    dataResult = listObj.GetFlatDataList(searchInfo)
-
-    df = pd.DataFrame.from_records(dataResult, columns=dataResult[
-                                   0].keys(), coerce_float=True)
-
-    fout = io.BytesIO()
-    writer = pd.ExcelWriter(fout)
-    df.to_excel(writer, sheet_name='Sheet1')
-    writer.save()
-    file = fout.getvalue()
-
-    dt = datetime.now().strftime('%d-%m-%Y')
-    return Response(
-        file,
-        content_disposition="attachment; filename=monitoredSites_export_" + dt + ".xlsx",
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-
-@view_config(route_name=prefix + '/id/station',
-             renderer='json',
-             request_method='GET')
-def station_history(request):
-    session = request.dbsession
-    id_site = request.matchdict['id']
-    joinTable = join(Station, fieldActivity,
-                     Station.fieldActivityId == fieldActivity.ID)
-    query = select([Station.StationDate,
-                    Station.LAT,
-                    Station.LON,
-                    Station.ID,
-                    Station.Name,
-                    fieldActivity.Name.label('fieldActivity_Name')]
-                   ).select_from(joinTable).where(Station.FK_MonitoredSite == id_site)
-
-    result = session.execute(query).fetchall()
-    response = []
-    for row in result:
-        row = dict(row)
-        row['StationDate'] = row['StationDate'].strftime('%Y-%m-%d %H:%M:%S')
-        response.append(row)
-
-    return response
+RootCore.listChildren.append(('monitoredSites', MonitoredSitesView))
