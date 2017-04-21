@@ -5,6 +5,7 @@ define([
     var template = '<div>' +
         '<div class="js-select">' +
         '<select class="ag-filter-filter js-select-filter form-control input-sm" name="selectedVal">' +
+        '<option value="-1"></option>'+
         '</select>' +
         '</div>' +
         '<div class="ag-filter-apply-panel" id="applyPanel">' +
@@ -21,7 +22,7 @@ define([
     };
 
     SelectFilter.prototype.init = function(params) {
-
+      
         if (typeof(params) === 'undefined' || typeof(params.selectList) === 'undefined') {
             console.error("Select filter need filterParams : { selectList : [{value : '' , label: ' ' }] } ");
             return null;
@@ -133,9 +134,9 @@ define([
 
     SelectFilter.prototype.onFilterChanged = function() {
 
-        var newFilter = this.eFilterSelectField.options[this.eFilterSelectField.selectedIndex].label;
+        var newFilter = this.eFilterSelectField.options[this.eFilterSelectField.selectedIndex].value;
 
-        if (newFilter === "") {
+        if (newFilter === "-1") {
             newFilter = null;
             this.eFilterSelectField.value = -1;
         };
