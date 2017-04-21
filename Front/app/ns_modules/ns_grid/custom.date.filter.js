@@ -315,7 +315,7 @@ define([
       this.setFilterTo(model.filterTo);
     }
     else {
-        this.setType(NumberFilter.EQUALS);
+        this.setType(DateFilter.EQUALS);
         this.setFilter(null);
         this.setFilterTo(null);
     }
