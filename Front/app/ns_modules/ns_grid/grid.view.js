@@ -97,7 +97,7 @@ define([
       this.gridOptions = {
         enableSorting: true,
         enableColResize: true,
-        editType: 'fullRow',
+        //editType: 'fullRow',
         rowHeight: 34,
         suppressNoRowsOverlay: true,
         headerHeight: 30,
@@ -874,7 +874,7 @@ define([
               filterWrapper.filter.afterGuiAttached(params);
           }
       };
-      
+
       //TODO need to find a way to create template
 
   /*    AgGrid.PaginationController.prototype.createTemplate = function () {

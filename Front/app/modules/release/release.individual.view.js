@@ -117,7 +117,7 @@ define([
         url: 'release/individuals/',
         gridOptions: {
           enableFilter: true,
-          editType: 'fullRow',
+          //editType: 'fullRow',
           singleClickEdit : true,
           rowSelection: 'multiple',
           onCellValueChanged : _this.checkAll.bind(_this),
