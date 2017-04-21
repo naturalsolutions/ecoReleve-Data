@@ -293,7 +293,6 @@ define([
           checkboxSelection: true
 
         };
-        _this.formatSelectColumn(col);
         columnDefs.unshift(col);
       }
 
@@ -365,50 +364,6 @@ define([
         }
       });
     },
-
-
-    formatSelectColumn: function(col){
-    /*  var _this = this;
-      col.pinned = 'left';
-      col.suppressMovable = true;
-      col.checkboxSelection = true;
-      col.headerCellTemplate = function() {
-        var eCell = document.createElement('span');
-        eCell.innerHTML = '\
-            <img class="js-check-all pull-left" value="unchecked" src="./app/styles/img/unchecked.png" title="check only visible rows (after filter)" style="padding-left:10px; padding-top:7px" />\
-            <div id="agResizeBar" class="ag-header-cell-resize"></div>\
-        ';
-
-        var checkboxElt = eCell.querySelector('.js-check-all');
-
-        checkboxElt.addEventListener('click', function(e) {
-          if($(this).attr('value') === 'unchecked'){
-            _this.checkUncheckSelectAllUI(true);
-            _this.selectAllVisible();
-          } else {
-            _this.checkUncheckSelectAllUI(false);
-            _this.deselectAllVisible();
-          }
-        });
-
-        return eCell;
-      };*/
-    },
-
-    // getHeaderCellTemplate: function() {
-    //   var eHeader = document.createElement('span');
-    //   eHeader.innerHTML =
-    //     '<div id="agResizeBar" class="ag-header-cell-resize"></div>'+
-    //     '<span id="agMenu" class="ag-header-icon ag-header-cell-menu-button" style="opacity: 0; transition: opacity 0.2s, border 0.2s;"><svg style="padding-top: 5px;" width="24" height="24" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg></span>'+
-    //     '<div id="agHeaderCellLabel" class="ag-header-cell-label">'+
-    //     '<span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,10 5,0 10,10"></polygon></svg></span>'+
-    //     '<span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon ag-hidden"><svg width="10" height="10"><polygon points="0,0 5,10 10,0"></polygon></svg></span>'+
-    //     '<span id="agNoSort" class="ag-header-icon ag-sort-none-icon ag-hidden"><svg width="10" height="10"><polygon points="0,4 5,0 10,4"></polygon><polygon points="0,6 5,10 10,6"></polygon></svg></span>'+
-    //     '<span id="agFilter" class="ag-header-icon ag-filter-icon ag-hidden"></span>'+
-    //     '<span id="agText" class="ag-header-cell-text"></span>'+
-    //     '</div>';
-    //   return eHeader;
-    // },
 
     fetchColumns: function(){
       this.columnDeferred = $.ajax({
@@ -919,6 +874,8 @@ define([
               filterWrapper.filter.afterGuiAttached(params);
           }
       };
+      
+      //TODO need to find a way to create template
 
   /*    AgGrid.PaginationController.prototype.createTemplate = function () {
           var localeTextFunc = this.gridOptionsWrapper.getLocaleTextFunc();
