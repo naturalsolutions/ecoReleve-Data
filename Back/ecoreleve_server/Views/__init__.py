@@ -457,7 +457,7 @@ class RESTView(object):
 
     @view_config(request_method='PATCH', renderer='json', permission='update')
     def patch(self):
-        return self.context.update()
+        return self.context.patch()
 
     @view_config(request_method='PUT', renderer='json', permission='update')
     def put(self):
