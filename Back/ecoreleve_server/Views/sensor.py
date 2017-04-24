@@ -13,7 +13,6 @@ from . import DynamicObjectView, DynamicObjectCollectionView
 
 prefix = 'sensors'
 
-
 class SensorView(DynamicObjectView):
 
     model = Sensor
@@ -28,7 +27,7 @@ class SensorView(DynamicObjectView):
             self.retrieve = self.actions.get(ref)
             return self
         return self.get(ref)
-    
+
     def getLocations(self):
         return 'no locations available'
 
@@ -36,7 +35,7 @@ class SensorView(DynamicObjectView):
         _id = self.objectDB.ID
         curSensorType = self.objectDB.GetType().Name
 
-        if ('RFID' in curSensorType.upper()):
+        if ( curSensorType.upper() in  ['RFID', 'CAMERA TRAP']):
             table = Base.metadata.tables['MonitoredSiteEquipment']
             joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
             joinTable = join(joinTable, MonitoredSite, table.c[

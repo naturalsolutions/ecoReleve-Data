@@ -76,7 +76,7 @@ define([
           field: 'FK_Sensor',
           headerName: 'FK_Sensor',
           hide: true,
-        }, 
+        },
         {
           field: 'nb',
           headerName: 'NB',
@@ -135,7 +135,40 @@ define([
           field: 'import',
           headerName: 'IMPORT',
         }
-      ]
+      ],
+      camtrapColumnDefs: [
+        {
+          field: 'UnicIdentifier',
+          headerName: 'Unic Identifier',
+        }, {
+          field: 'site_name',
+          headerName: 'site name',
+        }, {
+          field: 'site_type',
+          headerName: 'site type',
+        }, {
+          field: 'StartDate',
+          headerName: 'Start Date',
+        }, {
+          field: 'EndDate',
+          headerName: 'End Date',
+        },{
+          field: 'FK_Sensor',
+          headerName: 'FK_Sensor',
+          hide: true,
+        },{
+          field: 'equipID',
+          headerName: 'equipID',
+          hide: true,
+        },{
+          field: 'FK_MonitoredSite',
+          headerName: 'Monitored Site',
+          hide: true,
+        }, {
+          field: 'nb_photo',
+          headerName: 'nb photos',
+        }
+      ],
 
     }
   });

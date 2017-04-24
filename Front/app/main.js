@@ -28,7 +28,7 @@ require.config({
     'ns_ruler': 'ns_modules/ns_ruler',
 
     /*==========  Bower  ==========*/
-    'jquery': '../bower_components/jquery/jquery',
+    'jquery': '../bower_components/jquery/dist/jquery',
     'jqueryui': '../bower_components/jqueryui/jquery-ui',
     'underscore': '../bower_components/underscore/underscore',
     'backbone': '../bower_components/backbone/backbone',
@@ -54,6 +54,7 @@ require.config({
 
     'ns_filter_bower': '../bower_components/NaturalJS_Filter/model-filter',
     'ag-grid': '../bower_components/ag-grid/dist/ag-grid',
+    'resumable': '../bower_components/resumable.js/resumable',
 
 
     /*==========  Vendors  ==========*/
@@ -65,13 +66,27 @@ require.config({
     'autocompTree': './vendors/jquery.autocompTree',
     'tooltipster-list': 'vendors/tooltipList',
 
+    'backgrid-moment-cell':'./vendors/backgrid-moment-cell',
+
+    "bootstrap-modal": "../bower_components/bootstrap/js/modal",
+    "backbone.bootstrap-modal": "../bower_components/backbone.bootstrap-modal/src/backbone.bootstrap-modal",
+    "ez-plus": "../bower_components/ez-plus/src/jquery.ez-plus",
+    "bootstrap-tagsinput" : "../bower_components/bootstrap-tagsinput/src/bootstrap-tagsinput",
+    'mousetrap':'vendors/mousetrap/mousetrap.min',
+    'backbone.marionette.keyShortcuts': 'vendors/marionette/backbone.marionette.keyshortcuts',
+    'backbone.virtualcollection' : '../bower_components/backbone.virtualcollection/backbone.virtual-collection',
+    'noty' : '../bower_components/noty/js/noty/packaged/jquery.noty.packaged',
+    'jquery.rateit': '../bower_components/jquery.rateit/scripts/jquery.rateit',
+    'bootstrap-star-rating': '../bower_components/bootstrap-star-rating/js/star-rating',
+    'exif-js' : '../bower_components/exif-js/exif',
+    'wheelzoom' : './vendors/wheelzoom',
+    'imageLoaded' : '../bower_components/imagesloaded/imagesloaded.pkgd'
   },
   map: {
       '*': {
         'backbone_forms' : 'backbone-forms'
       }
   },
-  
   shim: {
     jquery: {
       exports: '$'
@@ -156,7 +171,45 @@ require.config({
       ],
       exports: 'TooltipList'
     },
-  },
+    'mousetrap':{
+      exports: 'MouseTrap'
+    },
+    'backbone.marionette.keyShortcuts':{
+      deps:[
+        'marionette',
+        'mousetrap'
+      ],
+    },
+    'ez-plus':{
+      deps:[
+        'jquery',
+      ]
+    },
+    'bootstrap-tagsinput':{
+      deps:[
+        'jquery',
+      ]
+    },
+    'jquery.rateit':{
+      deps:[
+        'jquery',
+      ]
+    },
+    'bootstrap-star-rating':{
+      deps:[
+        'jquery',
+      ]
+    },
+    'wheelzoom':{
+        exports: 'wheelzoom'
+    },
+    'imageLoaded': {
+      deps:[
+        'jquery',
+      ],
+      exports: 'imageLoaded'
+    }
+  }
 });
 
 require(['app', 'templates','translater'],
@@ -165,5 +218,5 @@ function(app, templates, Translater) {
   this.translater.dfd.done(function(){
     app.start();
   })
-  
+
 });

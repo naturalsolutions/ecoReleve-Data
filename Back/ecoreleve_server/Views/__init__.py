@@ -14,7 +14,7 @@ def add_cors_headers_response_callback(event):
     def cors_headers(request, response):
         response.headers.update({
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+            'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,PATCH,OPTIONS',
             'Access-Control-Allow-Headers': 'Origin,\
                                             Content-Type,\
                                             Accept,\
@@ -502,3 +502,19 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+    config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip',
+                     'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
+    config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id',
+                     'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
+
+
+    config.add_route('sensors/statut', 'ecoReleve-Core/sensors/{type}/statut')
+
+
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
+    #config.add_route('sensors/cameratrap/validate/sensor_id/site_id/equip_id' , 'ecoReleve-Core/cameratrap/validate/{sensor_id}/{site_id}/{equip_id}')
+
+    #-------------------------------------------------------#
+    #### cameratrap visualisation
+    config.add_route('cameratrap' , 'ecoReleve-Core/photos/')

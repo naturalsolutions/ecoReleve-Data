@@ -93,7 +93,7 @@ define([
       {
         field: 'EndDate',
         headerName: 'End Date',
-        filter: 'date'        
+        filter: 'date'
       },{
         field: 'Name',
         headerName: 'Site Name',

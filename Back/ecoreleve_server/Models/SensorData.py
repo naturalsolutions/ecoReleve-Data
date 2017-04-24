@@ -12,7 +12,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from ..Models import Base, dbConfig
-
+from sqlalchemy.dialects.mysql import TINYINT
 
 sensor_schema = dbConfig['sensor_schema']
 dialect = dbConfig['dialect']
@@ -147,4 +147,21 @@ class Rfid(Base):
         Index('idx_Trfid_chipcode_date', chip_code, date_),
         UniqueConstraint(FK_Sensor, chip_code, date_),
         {'schema': sensor_schema, 'implicit_returning': False}
+    )
+
+class CamTrap(Base):
+    __tablename__ = 'TcameraTrap'
+    pk_id = Column(Integer, Sequence('seq_camtrap_pk_id'), primary_key = True)
+    fk_sensor = Column(Integer, nullable=False)
+    path = Column(String(250) , nullable = False)
+    name = Column(String(250) , nullable = False)
+    extension = Column(String(250) , nullable = False)
+    checked = Column(Boolean, nullable = True)
+    validated = Column(TINYINT, nullable = True)
+    date_creation = Column(DateTime, nullable = True)
+    date_uploaded = Column(DateTime, server_default = func.now())
+    tags = Column(String,nullable=True)
+    note = Column(Integer, nullable=False)
+    __table_args__ = (
+        {'schema': sensor_schema}
     )

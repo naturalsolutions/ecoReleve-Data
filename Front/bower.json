@@ -27,7 +27,17 @@
     "chartjs": "1.0.2",
     "reneco-fonts": "*",
     "ag-grid": "^5.2.0",
-    "NaturalJS_Filter":"1.1.4"
+    "NaturalJS_Filter":"1.1.4",
+    "resumable.js": "resumablejs#^1.0.2",
+    "ez-plus": "^1.1.20",
+    "bootstrap-tagsinput": "^0.8.0",
+    "backbone.virtualcollection": "^0.6.13",
+    "noty": "^2.3.8",
+    "jquery.rateit": "^1.0.24",
+    "bootstrap-star-rating": "^4.0.1",
+    "NaturalJS_Filter": "1.1.1",
+    "exif-js": "^2.1.1",
+    "imagesloaded": "^4.1.1"
   },
   "resolutions": {
     "underscore": "1.5.2",

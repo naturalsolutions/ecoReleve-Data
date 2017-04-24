@@ -239,7 +239,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
             //   cancelButtonColor: 'grey',
             //   cancelButtonText: 'No',
             //   closeOnConfirm: true,
-            // }, 
+            // },
             // function(isConfirm){
             //   if (isConfirm) {
             //     var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {
