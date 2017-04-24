@@ -109,7 +109,7 @@ define([
             _(function () {
 
             if (_this.editable) {
-
+                _this.$el.find('#' + _this.id).addClass('error');
                 _this.$el.find('#' + _this.id).autocompTree({
                     wsUrl: _this.wsUrl,
                     webservices: 'fastInitForCompleteTree',
@@ -138,6 +138,7 @@ define([
                               _this.translateValue(_this.value.value);
                           } else {
 
+                            _this.$el.find('#' + _this.id + '_value').val(_this.value);
                             _this.translateValue(_this.value);
                           }
                         }
