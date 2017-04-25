@@ -132,8 +132,12 @@ class ListObjectWithDynProp():
         ''' build join table and select statement over
         all dynamic properties and foreign keys in filter query'''
         joinTable = self.ObjWithDynProp
-        view = self.GetDynPropValueView()
+
         selectable = [self.ObjWithDynProp.ID]
+        if not hasattr(self.ObjWithDynProp(), 'GetDynPropTable'):
+            return joinTable
+
+        view = self.GetDynPropValueView()
         objTable = self.ObjWithDynProp.__table__
         self.firstStartDate = None
 

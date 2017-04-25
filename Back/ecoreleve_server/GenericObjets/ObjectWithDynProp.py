@@ -170,28 +170,6 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         form['data'][self.getTypeObjectFKName()] = ObjType.ID
         return form
 
-    def getDataWithSchema(self, displayMode='edit'):
-        ''' Function to call: return full schema
-        according to configuration (table :ModuleForms) '''
-
-        resultat = self.getForm(displayMode=displayMode)
-
-        '''IF ID is send from front --> get data of this object in order to
-        display value into form which will be sent'''
-        data = self.getFlatObject(resultat['schema'])
-        resultat['data'] = data
-        resultat['recursive_level'] = 0
-        resultat = self.getDefaultValue(resultat)
-        if self.ID:
-            resultat['data']['id'] = self.ID
-        else:
-            # add default values for each field in data if exists
-            # for attr in schema:
-            resultat['data']['id'] = 0
-            resultat['data'].update(resultat['schema']['defaultValues'])
-
-        return resultat
-
     def getLinkedField(self):
         curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + \
             self.GetType().GetDynPropContextTable()
@@ -203,6 +181,10 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         Values = self.session.execute(curQuery).fetchall()
 
         return [dict(row) for row in Values]
+
+    def getFlatObject(self, schema=None):
+        self.LoadNowValues()
+        return DbObject.getFlatObject(self, schema=None)
 
     def linkedFieldDate(self):
         return datetime.now()

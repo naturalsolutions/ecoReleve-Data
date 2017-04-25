@@ -1,0 +1,32 @@
+  INSERT INTO FrontModules 
+VALUES ('ProjectForm',1,NULL),
+	('ProjectGrid',1,NULL)
+GO 
+
+  DECLARE @FormId int;
+  SET @FormId  = (SELECT [ID] FROM [dbo].[FrontModules]   where [Name] = 'ProjectForm' ) ;
+  print(@FormId)
+
+    DECLARE @GridId int;
+  SET @GridId  = (SELECT [ID] FROM [dbo].[FrontModules]   where [Name] = 'ProjectGrid' ) ;
+   print(@GridId)
+
+
+   INSERT INTO [dbo].[ModuleForms] (module_id,Name,Label,Required,FieldSizeEdit,
+   FieldSizeDisplay,InputType,editorClass,FormRender,FormOrder,Options,Locked,displayClass) VALUES (@FormId,'Name','Nom du projet',1,6,6,'Text','form-control',2,1,NULL,1,NULL),
+   (@FormId,'Project_reference','Référence du projet',1,6,6,'Text','form-control',2,2,NULL,1,NULL),
+   (@FormId,'Description','Description',1,12,12,'Text','form-control',2,4,NULL,1,NULL),
+    (@FormId,'Delimitation','Délimitation géographique',1,6,6,'FileUploadEditor','form-control',2,3,'{extensions: geojson}',1, 'fileInput')
+
+
+	  INSERT INTO [dbo].[ModuleGrids] (Module_ID,Name,Label, GridRender,GridSize,CellType,GridOrder,FilterOrder,FilterSize,IsSearchable,FilterRender,FilterType) VALUES ( @GridId,'Name','Nom du projet',2,
+  '{"width":120,"maxWidth":350,"minWidth":100}','string',2,2,2,1,4,'Text'),
+  ( @GridId,'Project_reference','Référence du projet',2, '{"width":120,"maxWidth":350,"minWidth":100}','string',1,1,2,1,4,'Text')
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('114_Conf_Project_form_grid',GETDATE(),(SELECT db_name()))
+
+
+GO

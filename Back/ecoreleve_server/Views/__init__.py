@@ -124,7 +124,6 @@ class DynamicObjectView(CustomView):
         raise Exception('method has to be overriden')
 
     def getData(self):
-        self.objectDB.LoadNowValues()
         return self.objectDB.getFlatObject()
 
     def getDataWithForm(self):
@@ -132,7 +131,6 @@ class DynamicObjectView(CustomView):
             displayMode = self.request.params['DisplayMode']
         except:
             displayMode = 'display'
-        self.objectDB.LoadNowValues()
         return self.objectDB.getDataWithSchema(displayMode=displayMode)
 
     def retrieve(self):
@@ -197,7 +195,7 @@ class DynamicObjectCollectionView(CustomView):
         CustomView.__init__(self, ref, parent)
         self.objectDB = self.item.model()
 
-        if 'typeObj' in self.request.params and self.request.params['typeObj'] is not None:
+        if 'typeObj' in self.request.params and self.request.params['typeObj']:
             objType = self.request.params['typeObj']
             self.setType(objType)
             self.typeObj = objType
@@ -247,7 +245,7 @@ class DynamicObjectCollectionView(CustomView):
         for items, value in self.request.json_body.items():
             data[items] = value
         self.setType()
-        self.objectDB.init_on_load()
+        # self.objectDB.init_on_load()
         self.objectDB.updateFromJSON(data)
         self.session.add(self.objectDB)
         self.session.flush()
@@ -405,7 +403,8 @@ class DynamicObjectCollectionView(CustomView):
         self.configJSON[moduleName][typeObj] = configObject
 
     def setType(self, objectType=1):
-        setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
+        if hasattr(self.objectDB, 'getTypeObjectFKName'):
+            setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
 
     def getType(self):
         table = Base.metadata.tables[self.objectDB.getTypeObjectName()]
