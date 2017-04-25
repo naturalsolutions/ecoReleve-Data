@@ -37,8 +37,10 @@ define([
 
         onChange: function(e){
             var value = this.$el.find('#' + this.id).val();
-            if(value == '') {
+            if (!value){
               value = null;
+              this.$el.find('#' + _this.id + '_value').val(value);
+
             }
             this.validateValue(value);
         },
@@ -251,9 +253,9 @@ define([
             this.isTermError = true;
 
             if (this.isEmptyVal(displayValue)) {
-                this.isTermError = false;
-                this.displayError(false);
-                return;
+              this.isTermError = false;
+              this.displayError(false);
+              return;
             }
 
             //check on/from display value

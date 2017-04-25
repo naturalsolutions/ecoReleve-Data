@@ -207,7 +207,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
 		ThesaurusRenderer.prototype.deferredValidation = function(params, objectValue){
       if(objectValue instanceof Object){
-        if(objectValue.error || (objectValue.value !== '' && objectValue.displayValue === '')){
+        if(objectValue.error || (!objectValue.value)){
           this.handleError(params);
         } else {
           this.handleRemoveError(params);
