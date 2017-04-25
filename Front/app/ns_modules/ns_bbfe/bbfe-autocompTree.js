@@ -37,6 +37,9 @@ define([
 
         onChange: function(e){
             var value = this.$el.find('#' + this.id).val();
+            if(value == '') {
+              value = null;
+            }
             this.validateValue(value);
         },
 
@@ -87,7 +90,7 @@ define([
             if(this.value instanceof Object){
                 this.value = this.value.value;
             }
-            console.log(this.value)
+
             this.displayValueName = options.schema.options.displayValueName || 'fullpathTranslated';
             this.storedValueName = options.schema.options.storedValueName || 'fullpath';
         },
@@ -109,7 +112,9 @@ define([
             _(function () {
 
             if (_this.editable) {
+              if(_this.value){
                 _this.$el.find('#' + _this.id).addClass('error');
+                }
                 _this.$el.find('#' + _this.id).autocompTree({
                     wsUrl: _this.wsUrl,
                     webservices: 'fastInitForCompleteTree',
@@ -246,8 +251,8 @@ define([
             this.isTermError = true;
 
             if (this.isEmptyVal(displayValue)) {
-                this.displayError(false);
                 this.isTermError = false;
+                this.displayError(false);
                 return;
             }
 
