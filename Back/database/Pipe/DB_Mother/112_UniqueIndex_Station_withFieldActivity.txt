@@ -1,0 +1,21 @@
+ALTER TABLE [dbo].[Station] DROP CONSTRAINT [uqc_date_lat_lon]
+GO
+
+/****** Object:  Index [uqc_date_lat_lon]    Script Date: 26/04/2017 16:32:05 ******/
+ALTER TABLE [dbo].[Station] ADD  CONSTRAINT [uqc_date_lat_lon_activity] UNIQUE NONCLUSTERED 
+(
+	[LAT] ASC,
+	[LON] ASC,
+	[StationDate] ASC,
+	[fieldActivityId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = ON, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('112_UniqueIndex_Station_withFieldActivity',GETDATE(),(SELECT db_name()))
+
+
+GO
