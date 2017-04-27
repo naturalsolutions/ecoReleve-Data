@@ -24,8 +24,8 @@ define([
           headerName: 'FK_Sensor',
           hide: true,
         },{
-          field: 'equipID',
-          headerName: 'equipID',
+          field: 'sessionID',
+          headerName: 'Session ID',
           hide: true,
         }, {
           field: 'site_name',
@@ -71,12 +71,16 @@ define([
         },{
           field: 'Survey_type',
           headerName: 'Survey Type',
+        },{
+          field: 'sessionID',
+          headerName: 'Session ID',
+          hide: true,
         },
         {
           field: 'FK_Sensor',
           headerName: 'FK_Sensor',
           hide: true,
-        }, 
+        },
         {
           field: 'nb',
           headerName: 'NB',
@@ -110,6 +114,10 @@ define([
             return params.value;
           }
         },{
+          field: 'sessionID',
+          headerName: 'Session ID',
+          hide: true,
+        },{
           field: 'Survey_type',
           headerName: 'Survey Type',
         },{
@@ -135,7 +143,40 @@ define([
           field: 'import',
           headerName: 'IMPORT',
         }
-      ]
+      ],
+      camtrapColumnDefs: [
+        {
+          field: 'UnicIdentifier',
+          headerName: 'Unic Identifier',
+        }, {
+          field: 'site_name',
+          headerName: 'site name',
+        }, {
+          field: 'site_type',
+          headerName: 'site type',
+        }, {
+          field: 'StartDate',
+          headerName: 'Start Date',
+        }, {
+          field: 'EndDate',
+          headerName: 'End Date',
+        },{
+          field: 'FK_Sensor',
+          headerName: 'FK_Sensor',
+          hide: true,
+        },{
+          field: 'sessionID',
+          headerName: 'Session ID',
+          hide: true,
+        },{
+          field: 'FK_MonitoredSite',
+          headerName: 'Monitored Site',
+          hide: true,
+        }, {
+          field: 'nb_photo',
+          headerName: 'nb photos',
+        }
+      ],
 
     }
   });

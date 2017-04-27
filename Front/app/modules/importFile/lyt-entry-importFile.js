@@ -17,6 +17,10 @@ define([
 
 	'./argos/lyt-step1-argos',
 
+	'./camtrap/lyt-step1-camtrap',
+	'./camtrap/lyt-step2-camtrap'
+
+
 ], function($, _, Backbone, Marionette, NewStepper, Step0,
 	Step1GPX,
 	Step2GPX,
@@ -27,7 +31,10 @@ define([
 	Step1GSM,
 	Step2GSM,
 
-	Step1ARGOS
+	Step1ARGOS,
+
+	Step1CAMTRAP,
+	Step2CAMTRAP
 ) {
 
   'use strict';
@@ -102,6 +109,10 @@ define([
 	            this.addSteps(argosSteps, 1);
 
 	            break;
+						case 'camTrap':
+							var camTrapSteps = [Step1CAMTRAP,Step2CAMTRAP];
+							this.addSteps(camTrapSteps, 1);
+							break;
 	          default:
 	            //not in step0
 	            return false;

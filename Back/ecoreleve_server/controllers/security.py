@@ -76,7 +76,7 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
     def get_userID(self, request):
         try:
             token = request.cookies.get("ecoReleve-Core")
-            claims = self.decode_jwt(request, token)
+            claims = self.decode_jwt(request, token, verify=False)
             userid = claims['iss']
             return userid
         except:

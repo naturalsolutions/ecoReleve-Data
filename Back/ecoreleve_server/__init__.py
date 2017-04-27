@@ -6,6 +6,8 @@ from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from pyramid.authorization import ACLAuthorizationPolicy
 from .controllers.security import SecurityRoot, myJWTAuthenticationPolicy
+import os,sys
+import errno
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
@@ -29,7 +31,6 @@ def datetime_adapter(obj, request):
     except:
         return obj.strftime('%d/%m/%Y')
 
-
 def date_adapter(obj, request):
     """Json adapter for datetime objects."""
     try:
@@ -44,7 +45,6 @@ def time_adapter(obj, request):
         return obj.strftime('%H:%M')
     except:
         return obj.strftime('%H:%M:%S')
-
 
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
@@ -76,11 +76,32 @@ def main(global_config, **settings):
     engine = engine_from_config(
         settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
 
+
+
     dbConfig['url'] = settings['sqlalchemy.default.url']
     dbConfig['wsThesaurus'] = {}
     dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
     dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
     dbConfig['data_schema'] = settings['data_schema']
+    dbConfig['camTrap'] = {}
+    dbConfig['camTrap']['path'] = settings['camTrap.path']
+
+    if(os.path.exists(dbConfig['camTrap']['path']) ):
+        try :
+            os.access( dbConfig['camTrap']['path'], os.W_OK)
+            print("folder : %s exist" %(dbConfig['camTrap']['path']))
+        except :
+            print("app cant write in this directory ask your admin %s" %(dbConfig['camTrap']['path']) )
+            raise
+            #declenché erreur
+    else:
+        print ("folder %s doesn't exist we gonna try to create it" %(dbConfig['camTrap']['path']))
+        try:
+            os.makedirs(dbConfig['camTrap']['path'])
+            print("folder created : %s" %(dbConfig['camTrap']['path']))
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
 
     Base.metadata.bind = engine
     Base.metadata.create_all(engine)
