@@ -90,12 +90,12 @@ class Observation(Base, ObjectWithDynProp):
         if self.Observation_children is not None or self.Observation_children != []:
             return True
         else:
-            return []
+            return False
 
     @Observation_childrens.setter
     def Observation_childrens(self, listOfSubProtocols):
         listObs = []
-        if len(listOfSubProtocols) != 0:
+        if isinstance(listOfSubProtocols, list) and len(listOfSubProtocols) > 0:
 
             for curData in listOfSubProtocols:
                 if self.GetType().Status == 8:
@@ -138,7 +138,7 @@ class Observation(Base, ObjectWithDynProp):
     @SubObservation_childrens.setter
     def SubObservation_childrens(self, listOfSubObs):
         listSubValues = []
-        if len(listOfSubObs) > 0:
+        if isinstance(listOfSubObs, list) and len(listOfSubObs) > 0:
             for curData in listOfSubObs:
                 if 'FK_Observation' in curData:
                     subObsValue = list(filter(lambda x: x.FK_Observation == curData[
