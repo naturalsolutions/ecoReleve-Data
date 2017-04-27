@@ -154,7 +154,17 @@ define([
           _this.isTermError = false;
 
         } else {
-          _this.matchedValue = undefined;
+          var val = _this.$input.val();
+          var valueFound = ui.content.find(function(item){
+            return val == item.label;
+          });
+          if (valueFound){
+            _this.setValue(valueFound.value,valueFound.label,false);
+            _this.matchedValue = valueFound;
+            _this.isTermError = false;
+          } else {
+            _this.matchedValue = undefined;
+          }
         }
       };
     },
