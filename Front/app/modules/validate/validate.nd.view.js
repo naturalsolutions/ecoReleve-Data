@@ -55,7 +55,7 @@ define([
 
     onRowClicked: function(row) {
       if( this.type_ != 'rfid' ) {
-        Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.id) + 1), {trigger: true});
+        Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.data.sessionID) ), {trigger: true});
       }
       else {
         row.node.setSelected(!row.node.isSelected());
@@ -74,7 +74,7 @@ define([
 
       this.rgGrid.show(this.gridView = new GridView({
         columns: this.columnDefs,
-        url: 'sensors/' + this.type_ + '/uncheckedDatas',
+        url: 'sensorDatas/' + this.type_ ,
         afterFirstRowFetch: afterFirstRowFetch,
         clientSide: true,
         gridOptions: {

@@ -373,31 +373,39 @@ div.bootstrap-tagsinput{
       padding-left: 50px;
     }
   }
-  .backgrid-paginator {
-    ul {
-      color:#666;
-      li {
-        a {
-          color:#666;
+    .backgrid-paginator {
+      position: relative;
+      height: 50px;
+      max-height: 45px;
+      ul {
+        color:#666;
+        text-align: center;
+        li {
+          list-style: none;
+          display: inline;
+          padding: 5px 15px;
+          margin: 0px;
+          a {
+            color:#666;
+          }
+          a:hover {
+            background-color: #373737;
+            border-radius: 5px;
+            color:#666;
+          }
         }
-        a:hover {
-          background-color: #373737;
-          border-radius: 5px;
-          color:#666;
+        li.active {
+          a {
+            background-color: #373737;
+            border-radius: 5px;
+            color: white;
+          }
         }
-      }
-      li.active {
-        a {
-          background-color: #373737;
-          border-radius: 5px;
-          color: white;
+        li.disabled {
+          visibility: hidden;
         }
-      }
-      li.disabled {
-        visibility: hidden;
       }
     }
-  }
 }
 .indexposition {
   position: absolute;

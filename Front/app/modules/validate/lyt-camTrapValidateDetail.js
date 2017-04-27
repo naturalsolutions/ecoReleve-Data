@@ -21,7 +21,9 @@ define([
   'backbone.virtualcollection',
   './lyt-camTrapToolsBarTopView',
   'jqueryui',
-  './lyt-imageDetails'
+  './lyt-imageDetails',
+  //'backgrid',
+  'backgrid.paginator'
 
 
 
@@ -183,8 +185,22 @@ define([
       }
       e.stopPropagation();
     },
+    checkUrl: function(url) {
+      var tmp = url.replace('#validate/camtrap/','');
+      if (/^(\-|\+)?([0-9]+|Infinity)$/.test(tmp))
+        return Number(tmp);
+      return NaN;
+    },
     initialize: function(options) {
+      this.equipmentId = this.checkUrl(location.hash);
+      if( !this.equipmentId ) {
+        console.log("lol pas de session");
+        return
+      }
+
+
       console.log(options);
+      console.log(Backgrid);
       this.translater = Translater.getTranslater();
       this.type = options.type;
       this.model = options.model;
@@ -201,13 +217,6 @@ define([
       this.stopSpace = false;
       this.tabSelected  = [];
 
-      this.sensorId = 3254;
-      this.siteId = 1;
-      this.equipmentId = 18567;
-
-      // this.sensorId = this.model.get('fk_sensor');
-      // this.siteId = this.model.get('FK_MonitoredSite');
-      // this.equipmentId = this.model.get('equipID');
 
       // this.navbar = new Navbar({
       //   parent: this,
@@ -222,8 +231,26 @@ define([
       // this.deletedImg = this.myImageCollection.filter({validated : "false"})
       // this.toCheckImg = this.myImageCollection.filter({validated : "null"})
 
-
+      this.fetchSessionInfos();
       this.initCollection();
+
+    },
+
+    fetchSessionInfos: function() {
+      var _this = this;
+      $.ajax({
+          url: config.coreUrl+'sensorDatas/' + _this.type+'/'+_this.equipmentId,
+      })
+      .done(function(resp) {
+        _this.sensorId = resp[0].fk_sensor;
+        _this.siteId = resp[0].FK_MonitoredSite;
+        _this.displaySensorForm();
+        _this.displaySiteForm();
+      })
+      .fail(function() {
+        console.log("pas bon");
+      });
+
     },
 
     initCollection : function() {
@@ -234,32 +261,29 @@ define([
         state: {
           pageSize: 24
         },
-        url: config.coreUrl+'sensors/' + this.type+'/uncheckedDatas/'+this.sensorId+'/'+this.siteId+'/'+this.equipmentId,
+        url: config.coreUrl+'sensorDatas/' + this.type+'/'+this.equipmentId+'/datas/',
         patch : function(){
           //console.log("ouais ouais ouais j'overwrite");
-        },
-        parse: function (response) {
-          console.log("parse bla bla bla");
-          console.log(response);
         }
       });
 
       this.myImageCollection = new ImageCollection();
       this.myImageCollection.sync('patch', this.myImageCollection , { error: function () { console.log(this.myImageCollection); console.log("sync impossible");} });
 
-      // this.paginator = new Backgrid.Extension.Paginator({
-      //   collection: this.myImageCollection
-      // });
+      this.paginator = new Backgrid.Extension.Paginator({
+        collection: this.myImageCollection
+      });
 
       this.myImageCollection.on('sync', function() {
         _this.refreshCounter();
+
 
       });
 
       this.myImageCollection.fetch();
 
       this.paginator.collection.on('reset', function(e){
-        //console.log("reset du paginator");
+        console.log("reset du paginator");
       });
 
     },
@@ -278,7 +302,7 @@ define([
 
     onShow: function() {
       var _this = this;
-      this.rgNavbar.show(this.navbar);
+    //  this.rgNavbar.show(this.navbar);
       this.ui.imageFullScreen.hide()
       this.display();
     },
@@ -293,8 +317,7 @@ define([
         this.displayImageDetails(_this.myImageCollection.models[this.currentPosition]);
       });
       this.currentCollection = this.myImageCollection;
-      this.displaySensorForm();
-      this.displaySiteForm();
+
       console.log(_this.myImageCollection);
       this.displayPaginator(this.paginator)
       this.displayToolsBar();

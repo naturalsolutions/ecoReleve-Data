@@ -37,7 +37,9 @@
     "bootstrap-star-rating": "^4.0.1",
     "NaturalJS_Filter": "1.1.1",
     "exif-js": "^2.1.1",
-    "imagesloaded": "^4.1.1"
+    "imagesloaded": "^4.1.1",
+    "backgrid-paginator": "0.3.5",
+    "backgrid": "https://github.com/wyuenho/backgrid.git#0.3.5"
   },
   "resolutions": {
     "underscore": "1.5.2",

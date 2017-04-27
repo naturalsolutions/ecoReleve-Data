@@ -1,10 +1,10 @@
-from sqlalchemy import func, desc, select, and_, bindparam, update, text, Table
+from sqlalchemy import func, desc, select, and_, bindparam, update, text, Table, join
 import json
 import pandas as pd
 from datetime import datetime
 from . import CustomView
-from ..controllers.security import RootCore
-from ..Models import Base, dbConfig, graphDataDate, CamTrap, ArgosGps, Gsm
+from ..controllers.security import RootCore, context_permissions
+from ..Models import Base, dbConfig, graphDataDate, CamTrap, ArgosGps, Gsm, Rfid
 import numpy as np
 import transaction
 from ..utils.distance import haversine
@@ -12,6 +12,7 @@ from traceback import print_exc
 from pyramid import threadlocal
 from pyramid.response import Response
 from ..utils.data_toXML import data_to_XML
+import pyramid.httpexceptions as exc
 
 
 ArgosDatasWithIndiv = Table(
@@ -34,42 +35,41 @@ viewDict = {'gsm':GsmDatasWithIndiv,
 class SensorDatasBySessionItem(CustomView):
 
     item = None
-    models = {'gsm':Gsm}
+    models = {'gsm':Gsm,
+              'argos':ArgosGps,
+              'rfid': Rfid,
+              'camtrap':CamTrap}
 
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
         self.type_ = parent.type_
         self.itemID = ref
         self.viewTable = parent.viewTable
+
         self.item = self.session.query(self.models.get(self.type_)).get(ref)
 
+
     def retrieve(self):
-        query = select([self.viewTable]).where(self.viewTable.c['PK_id'] == self.itemID)
-        return dict(self.session.execute(query).fetchone())
-
-    def patch_camtrap_item(self):
-        print(" Je vais traiter la requete")
-        print(" type : "+str(request.method) )
-        pk_id_patched = self.request.matchdict['pk_id']
-
-        data = request.params.mixed()
-
-        curCameraTrap = self.session.query(CamTrap).get(pk_id_patched)
-        curCameraTrap.validated = request.json_body['validated']
-        if (str(request.json_body['tags']) not in   ['None', ''] ):
-            listTags = str(request.json_body['tags']).split(",")
-            XMLTags = "<TAGS>"
-            for tag in listTags:
-                XMLTags+= "<TAG>"+str(tag)+"</TAG>"
-            XMLTags+= "</TAGS>"
-            print(XMLTags)
+        if not self.item:
+            self.request.response.status_code = 404
+            return self.request.response
         else:
-            XMLTags = None
-        curCameraTrap.tags = XMLTags
-        curCameraTrap.note = request.json_body['note']
-        print (curCameraTrap)
-        # session.commit()
-        return
+            return self.item.__json__()
+
+    def patch(self):
+        data = self.request.json_body
+        for item in data:
+            if( item not in ['pk_id','fk_sensor','path','name','extension','date_creation','date_uploaded']):
+                tmp = data.get(item)
+                if(item == 'tags' and tmp):
+                    listTags = tmp.split(",")
+                    XMLTags = "<TAGS>"
+                    for tag in listTags:
+                        XMLTags+= "<TAG>"+str(tag)+"</TAG>"
+                    XMLTags+= "</TAGS>"
+                setattr(self.item, item,tmp)
+        self.request.response.status_code = 204
+        return self.request.response
 
 
 class SensorDatasBySession(CustomView):
@@ -81,9 +81,26 @@ class SensorDatasBySession(CustomView):
         self.type_ = parent.type_
         self.sessionID = ref
         self.viewTable = parent.viewTable
+        self.__acl__ = parent.__acl__
+        self.actions = { 'datas' : self.getDatas }
+
+    def getDatas(self):
+        if self.type_ == 'camtrap' :
+            joinTable = join(CamTrap, self.viewTable,CamTrap.pk_id == self.viewTable.c['pk_id'])
+            query = select([CamTrap,self.viewTable.c['FK_MonitoredSite'],self.viewTable.c['sessionID']]
+                           ).select_from(joinTable).where(self.viewTable.c['sessionID'] == self.sessionID
+                                   ).where(self.viewTable.c['checked'] == 0 or self.viewTable.c['checked'] == None)
+        else:
+            query = select([self.viewTable]
+                           ).where(self.viewTable.c['sessionID'] == self.sessionID
+                                   ).where(self.viewTable.c['checked'] == 0 or self.viewTable.c['checked'] == None)
+        data = self.session.execute(query).fetchall()
+        data = [dict(row) for row in data]
+        return self.handleResult(data)
+        pass
 
     def handleResult(self, data):
-
+        #result = data
         if self.type_ in ['gsm','argos']:
             if 'geo' in self.request.params:
                 geoJson = []
@@ -109,16 +126,60 @@ class SensorDatasBySession(CustomView):
                 dataResult = df.to_dict('records')
                 result = [{'total_entries':len(dataResult)}]
                 result.append(dataResult)
-
+        elif self.type_ == 'camtrap' :
+            for tmp in data:
+                varchartmp = tmp['path'].split('\\')
+                tmp['path']="/imgcamtrap/"+str(varchartmp[len(varchartmp)-2])+"/"
+                tmp['name'] = tmp['name'].replace(" ","%20")
+                tmp['id'] = tmp['pk_id']
+                tmp['date_creation'] = str(tmp['date_creation'])
+                tmp['date_creation'] = tmp['date_creation'][:len(tmp['date_creation'])-3]
+                if( str(tmp['tags']) != 'None'):
+                    strTags = tmp['tags'].replace("<TAGS>","")
+                    strTags = strTags.replace("<TAG>","")
+                    strTags = strTags.replace("</TAGS>","")
+                    strTags = strTags.replace("</TAG>",",")
+                    strTags = strTags[:len(strTags)-1] #del the last ","
+                    if( strTags != 'None' ):
+                        tmp['tags'] = strTags
+                    else:
+                        tmp['tags'] = "";
+            result = data
+        else:
+            result = data
         return result
 
     def retrieve(self):
-        query = select([self.viewTable]
-                       ).where(self.viewTable.c['sessionID'] == self.sessionID
-                               ).where(self.viewTable.c['checked'] == 0)
-        data = self.session.execute(query).fetchall()
+        # query = select([self.viewTable]
+        #                ).where(self.viewTable.c['sessionID'] == self.sessionID
+        #                        ).where(self.viewTable.c['checked'] == 0 or self.viewTable.c['checked'] == None)
+        if( self.type_ in ['camtrap']):
+            queryStmt = select([self.viewTable.c['sessionID'],
+                                self.viewTable.c['UnicIdentifier'],
+                                self.viewTable.c['fk_sensor'],
+                                self.viewTable.c['site_name'],
+                                self.viewTable.c['site_type'],
+                                self.viewTable.c['StartDate'],
+                                self.viewTable.c['EndDate'],
+                                self.viewTable.c['FK_MonitoredSite'],
+                                func.count(self.viewTable.c['sessionID']).label('nb_photo')
+                                ]
+                           ).where(self.viewTable.c['sessionID'] == self.sessionID).group_by(self.viewTable.c['sessionID'],
+                                      self.viewTable.c['UnicIdentifier'],
+                                      self.viewTable.c['fk_sensor'],
+                                      self.viewTable.c['site_name'],
+                                      self.viewTable.c['site_type'],
+                                      self.viewTable.c['StartDate'],
+                                      self.viewTable.c['EndDate'],
+                                      self.viewTable.c['FK_MonitoredSite']
+                           )
+        else:
+            queryStmt = select([self.viewTable]).where(self.viewTable.c['sessionID'] == self.sessionID)
+        data = self.session.execute(queryStmt).fetchall()
         data = [dict(row) for row in data]
-        return self.handleResult(data)
+        print(data)
+        return data
+        #return self.handleResult(data)
 
     def patch(self):
         # here patch method
@@ -178,6 +239,7 @@ class SensorDatasByType(CustomView):
                      'argos':self.queryWithIndiv,
                      'rfid':self.queryWithSite,
                      'camtrap':self.queryWithSite}
+        self.__acl__ = context_permissions['stations']
 
     def retrieve(self):
         criteria = self.request.params.get('criteria', None)
@@ -198,7 +260,28 @@ class SensorDatasByType(CustomView):
         return queryStmt
 
     def queryWithSite(self):
-        queryStmt = select(self.viewTable.c)
+        if( self.type_ in ['camtrap']):
+            queryStmt = select([self.viewTable.c['sessionID'],
+                                self.viewTable.c['UnicIdentifier'],
+                                self.viewTable.c['fk_sensor'],
+                                self.viewTable.c['site_name'],
+                                self.viewTable.c['site_type'],
+                                self.viewTable.c['StartDate'],
+                                self.viewTable.c['EndDate'],
+                                self.viewTable.c['FK_MonitoredSite'],
+                                func.count(self.viewTable.c['sessionID']).label('nb_photo')
+                                ]
+                           ).group_by(self.viewTable.c['sessionID'],
+                                      self.viewTable.c['UnicIdentifier'],
+                                      self.viewTable.c['fk_sensor'],
+                                      self.viewTable.c['site_name'],
+                                      self.viewTable.c['site_type'],
+                                      self.viewTable.c['StartDate'],
+                                      self.viewTable.c['EndDate'],
+                                      self.viewTable.c['FK_MonitoredSite']
+                           )
+        else:
+            queryStmt = select(self.viewTable.c)
         data = self.session.execute(queryStmt).fetchall()
         dataResult = [dict(row) for row in data]
         return queryStmt

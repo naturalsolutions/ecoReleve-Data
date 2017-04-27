@@ -28,7 +28,7 @@ require.config({
     'ns_ruler': 'ns_modules/ns_ruler',
 
     /*==========  Bower  ==========*/
-    'jquery': '../bower_components/jquery/dist/jquery',
+    'jquery': '../bower_components/jquery/jquery',
     'jqueryui': '../bower_components/jqueryui/jquery-ui',
     'underscore': '../bower_components/underscore/underscore',
     'backbone': '../bower_components/backbone/backbone',
@@ -59,6 +59,9 @@ require.config({
 
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
+    'backgrid': 'vendors/backgrid',
+    'backgrid.paginator': 'vendors/backgrid-paginator',
+
 
     'backbone-forms': 'vendors/backbone-forms',
     'fancytree': 'vendors/jquery.fancytree-all.min',
@@ -129,6 +132,12 @@ require.config({
     },
     'backbone.paginator': {
       exports: 'backbone.paginator',
+    },
+    backgrid: {
+      exports: 'Backgrid'
+    },
+    'backgrid.paginator': {
+      exports: 'backgrid.paginator',
     },
     leaflet_cluster: {
       deps: ['L'],

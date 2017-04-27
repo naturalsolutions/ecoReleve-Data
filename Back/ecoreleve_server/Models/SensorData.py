@@ -165,3 +165,7 @@ class CamTrap(Base):
     __table_args__ = (
         {'schema': sensor_schema}
     )
+
+    @classmethod
+    def test (cls) :
+        pass

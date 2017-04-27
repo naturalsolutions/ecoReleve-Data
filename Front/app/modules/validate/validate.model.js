@@ -24,8 +24,8 @@ define([
           headerName: 'FK_Sensor',
           hide: true,
         },{
-          field: 'equipID',
-          headerName: 'equipID',
+          field: 'sessionID',
+          headerName: 'Session ID',
           hide: true,
         }, {
           field: 'site_name',
@@ -71,6 +71,10 @@ define([
         },{
           field: 'Survey_type',
           headerName: 'Survey Type',
+        },{
+          field: 'sessionID',
+          headerName: 'Session ID',
+          hide: true,
         },
         {
           field: 'FK_Sensor',
@@ -109,6 +113,10 @@ define([
             }
             return params.value;
           }
+        },{
+          field: 'sessionID',
+          headerName: 'Session ID',
+          hide: true,
         },{
           field: 'Survey_type',
           headerName: 'Survey Type',
@@ -157,8 +165,8 @@ define([
           headerName: 'FK_Sensor',
           hide: true,
         },{
-          field: 'equipID',
-          headerName: 'equipID',
+          field: 'sessionID',
+          headerName: 'Session ID',
           hide: true,
         },{
           field: 'FK_MonitoredSite',
