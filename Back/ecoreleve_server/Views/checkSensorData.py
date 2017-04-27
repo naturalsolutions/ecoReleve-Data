@@ -97,7 +97,6 @@ class SensorDatasBySession(CustomView):
         data = self.session.execute(query).fetchall()
         data = [dict(row) for row in data]
         return self.handleResult(data)
-        pass
 
     def handleResult(self, data):
         #result = data
@@ -150,9 +149,6 @@ class SensorDatasBySession(CustomView):
         return result
 
     def retrieve(self):
-        # query = select([self.viewTable]
-        #                ).where(self.viewTable.c['sessionID'] == self.sessionID
-        #                        ).where(self.viewTable.c['checked'] == 0 or self.viewTable.c['checked'] == None)
         if( self.type_ in ['camtrap']):
             queryStmt = select([self.viewTable.c['sessionID'],
                                 self.viewTable.c['UnicIdentifier'],
@@ -177,9 +173,7 @@ class SensorDatasBySession(CustomView):
             queryStmt = select([self.viewTable]).where(self.viewTable.c['sessionID'] == self.sessionID)
         data = self.session.execute(queryStmt).fetchall()
         data = [dict(row) for row in data]
-        print(data)
         return data
-        #return self.handleResult(data)
 
     def patch(self):
         # here patch method
