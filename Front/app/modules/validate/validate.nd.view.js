@@ -55,7 +55,7 @@ define([
 
     onRowClicked: function(row) {
       if( this.type_ != 'rfid' ) {
-        Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.data.sessionID) ), {trigger: true});
+        Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.id)+1 ), {trigger: true});
       }
       else {
         row.node.setSelected(!row.node.isSelected());
@@ -118,7 +118,7 @@ define([
       }
 
       params.toValidate = JSON.stringify(params.toValidate);
-      var url = 'sensors/' + this.type_ + '/uncheckedDatas';
+      var url = 'sensorDatas/' + this.type_ + '/validate' ;
       $.ajax({
         url: url,
         method: 'POST',

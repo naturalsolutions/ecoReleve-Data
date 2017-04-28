@@ -149,13 +149,14 @@ class Rfid(Base):
         {'schema': sensor_schema, 'implicit_returning': False}
     )
 
+
 class CamTrap(Base):
     __tablename__ = 'TcameraTrap'
-    pk_id = Column(Integer, Sequence('seq_camtrap_pk_id'), primary_key = True)
+    pk_id = Column(Integer, Sequence('seq_camtrap_pk_id'), primary_key=True)
     fk_sensor = Column(Integer, nullable=False)
-    path = Column(String(250) , nullable = False)
-    name = Column(String(250) , nullable = False)
-    extension = Column(String(250) , nullable = False)
+    path = Column(String(250), nullable = False)
+    name = Column(String(250), nullable = False)
+    extension = Column(String(250), nullable = False)
     checked = Column(Boolean, nullable = True)
     validated = Column(TINYINT, nullable = True)
     date_creation = Column(DateTime, nullable = True)
@@ -165,7 +166,3 @@ class CamTrap(Base):
     __table_args__ = (
         {'schema': sensor_schema}
     )
-
-    @classmethod
-    def test (cls) :
-        pass

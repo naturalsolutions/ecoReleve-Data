@@ -44,6 +44,7 @@ class CustomView(SecurityRoot):
     def __getitem__(self, ref):
         if ref in self.actions:
             self.retrieve = self.actions.get(ref)
+            self.create = self.actions.get(ref)
             return self
         return self.item(ref, self)
 
@@ -60,6 +61,12 @@ class CustomView(SecurityRoot):
         raise Exception('method has to be overriden')
 
     def retrieve(self):
+        raise Exception('method has to be overriden')
+
+    def create(self):
+        raise Exception('method has to be overriden')
+
+    def update(self):
         raise Exception('method has to be overriden')
 
 
@@ -497,24 +504,19 @@ def add_routes(config):
                      'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
 
     # Sensors datas (Argos + GSM + RFID)
-    config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
-    config.add_route('sensors/uncheckedDatas',
-                     'ecoReleve-Core/sensors/{type}/uncheckedDatas')
-    config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
-                     'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
-    config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip',
-                     'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
-    config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id',
-                     'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
-
+    # config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
+    # config.add_route('sensors/uncheckedDatas',
+    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas')
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
+    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip',
+    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id',
+    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
+    # config.add_route('sensors/cameratrap/validate/sensor_id/site_id/equip_id' , 'ecoReleve-Core/cameratrap/validate/{sensor_id}/{site_id}/{equip_id}')
 
     config.add_route('sensors/statut', 'ecoReleve-Core/sensors/{type}/statut')
 
-
-    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
-    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
-    #config.add_route('sensors/cameratrap/validate/sensor_id/site_id/equip_id' , 'ecoReleve-Core/cameratrap/validate/{sensor_id}/{site_id}/{equip_id}')
-
-    #-------------------------------------------------------#
-    #### cameratrap visualisation
-    config.add_route('cameratrap' , 'ecoReleve-Core/photos/')
+    config.add_route('cameratrap', 'ecoReleve-Core/photos/')

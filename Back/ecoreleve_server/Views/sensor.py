@@ -35,7 +35,7 @@ class SensorView(DynamicObjectView):
         _id = self.objectDB.ID
         curSensorType = self.objectDB.GetType().Name
 
-        if ( curSensorType.upper() in  ['RFID', 'CAMERA TRAP']):
+        if (curSensorType.upper() in ['RFID DECODER', 'CAMERA TRAP']):
             table = Base.metadata.tables['MonitoredSiteEquipment']
             joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
             joinTable = join(joinTable, MonitoredSite, table.c[

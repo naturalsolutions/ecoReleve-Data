@@ -46,6 +46,7 @@ define([
       this.model = new Backbone.Model();
       this.com = new Com();
       this.model.set('type', options.type);
+      this.model.set('sessionId', options.sessionId);
       this.frequency = options.frequency;
       this.index = options.index - 1;
       this.fetchGrid();
@@ -53,14 +54,13 @@ define([
 
     fetchGrid: function(){
       var _this = this;
-      return this.deferred = $.ajax({
-        url: 'sensors/' + this.model.get('type') + '/uncheckedDatas',
+      return this.deferredRowData = $.ajax({
+        url: 'sensorDatas/' + this.model.get('type'),
         method: 'GET',
         context: this,
       }).done(function(data){
         _this.model.set('data', data[1]);
         _this.populateModel();
-
         _this.rgNavbar.show(this.navbarView = new NavbarView({
           parent: _this,
           index: _this.index,
@@ -70,21 +70,43 @@ define([
       });
     },
 
+    findIndex: function(data, value ){
+       var listIndex = data.map(function(model){
+          if (model.sessionID == value){
+            return '1';
+          }
+        });
+        var index = listIndex.indexOf('1');
+        return index;
+    },
+
     populateModel: function(){
-      this.model.set('FK_Individual', this.model.get('data')[this.index].FK_Individual);
-      this.model.set('FK_Sensor', this.model.get('data')[this.index].FK_Sensor);
-      this.model.set('FK_ptt', this.model.get('data')[this.index].FK_ptt);
+      if(this.model.get('data')[this.index]){
+        this.model.set('FK_Individual', this.model.get('data')[this.index].FK_Individual);
+        this.model.set('FK_Sensor', this.model.get('data')[this.index].FK_Sensor);
+        this.model.set('FK_ptt', this.model.get('data')[this.index].FK_ptt);
+        this.model.set('sessionId', this.model.get('data')[this.index].sessionID);
+
+        if(this.model.get('sessionId')){
+            this.mapUrl = 'sensorDatas/' + this.model.get('type') + '/' + this.model.get('sessionId') + '/datas' + '?geo=true';
+            this.urlGrid = 'sensorDatas/' + this.model.get('type') + '/' + this.model.get('sessionId') + '/datas';
+        } else {
+          this.model.set('sessionId', 0);
+          this.mapUrl = 'sensorDatas/' + this.model.get('type') + '/' + this.model.get('sessionId') + '/datas' + '?geo=true&FK_Sensor='+this.model.get('FK_Sensor');
+          this.urlGrid = 'sensorDatas/' + this.model.get('type') + '/' + this.model.get('sessionId') + '/datas' + '?FK_Sensor='+this.model.get('FK_Sensor');
+        }
+      }
     },
 
     reload: function(options){
       this.ui.selectFrequency.val('');
       this.index = parseInt(options.index) - 1;
       this.populateModel();
-
       this.com = new Com();
       this.com.addModule(this.map);
       this.map.com = this.com;
-      this.map.url = 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt') + '?geo=true';
+
+      this.map.url = this.mapUrl;
       this.map.updateFromServ();
       this.map.url = false;
 
@@ -94,10 +116,10 @@ define([
 
     onShow: function(){
       var _this = this;
-      $.when(this.deferred).then(function(resp){
+      $.when(this.deferredRowData).then(function(resp){
         _this.displayMap();
-        _this.displayForms();
         _this.displayGrids();
+        _this.displayForms();
       });
     },
 
@@ -107,9 +129,9 @@ define([
     },
 
     displayMap: function() {
-      var url = 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt') + '?geo=true';
+      var url = 'sensorDatas/' + this.model.get('type') + '/' + this.model.get('sessionId') + '/datas' + '?geo=true';
       this.map = new NsMap({
-        url: url,
+        url: this.mapUrl,
         selection: true,
         cluster: true,
         com: this.com,
@@ -183,7 +205,7 @@ define([
       this.rgGrid.show(this.gridView = new GridView({
         columns: columnDefs,
         com: this.com,
-        url: 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt'),
+        url: this.urlGrid,
         afterFirstRowFetch: this.initFrequency.bind(this),
         clientSide: true,
         idName: 'PK_id',
@@ -251,7 +273,7 @@ define([
         return;
       }
 
-      var url = 'sensors/' + this.model.get('type') + '/uncheckedDatas/' + this.model.get('FK_Individual') + '/' + this.model.get('FK_ptt');
+      var url = 'sensorDatas/' + this.model.get('type') + '/' + this.model.get('sessionId') + '/datas';
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
       if(!selectedNodes.length){
         return;
