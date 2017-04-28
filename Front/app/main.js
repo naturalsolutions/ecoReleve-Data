@@ -28,7 +28,7 @@ require.config({
     'ns_ruler': 'ns_modules/ns_ruler',
 
     /*==========  Bower  ==========*/
-    'jquery': '../bower_components/jquery/jquery',
+    'jquery': '../bower_components/jquery/dist/jquery',
     'jqueryui': '../bower_components/jqueryui/jquery-ui',
     'underscore': '../bower_components/underscore/underscore',
     'backbone': '../bower_components/backbone/backbone',
