@@ -145,10 +145,13 @@ class SensorDatasBySession(CustomView):
                 result.append(dataResult)
 
         elif self.type_ == 'camtrap':
-            for tmp in data:
+            result = {}
+            for row in data:
+                tmp = dict(row.items())
+                print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+                print(tmp)
                 varchartmp = tmp['path'].split('\\')
-                tmp['path'] = "/imgcamtrap/" + \
-                    str(varchartmp[len(varchartmp) - 2]) + "/"
+                #tmp['path'] = "/imgcamtrap/" + str(varchartmp[len(varchartmp) - 2]) + "/"
                 tmp['name'] = tmp['name'].replace(" ", "%20")
                 tmp['id'] = tmp['pk_id']
                 tmp['date_creation'] = str(tmp['date_creation'])
@@ -164,7 +167,8 @@ class SensorDatasBySession(CustomView):
                         tmp['tags'] = strTags
                     else:
                         tmp['tags'] = ""
-            result = data
+                result.append(tmp)
+            #result = data
         else:
             result = data
         return result

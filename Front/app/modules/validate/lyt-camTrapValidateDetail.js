@@ -257,7 +257,7 @@ define([
           url: config.coreUrl+'sensorDatas/' + _this.type+'/'+_this.equipmentId,
       })
       .done(function(resp) {
-        _this.sensorId = resp.fk_sensor;
+        _this.sensorId = resp.FK_Sensor;
         _this.siteId = resp.FK_MonitoredSite;
         _this.displaySensorForm();
         _this.displaySiteForm();
