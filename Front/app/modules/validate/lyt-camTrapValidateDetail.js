@@ -192,8 +192,8 @@ define([
       return NaN;
     },
     initialize: function(options) {
-      this.equipmentId = this.checkUrl(location.hash);
-      if( !this.equipmentId ) {
+      this.equipLine = parseInt(this.checkUrl(location.hash) -1);
+      if( this.equipLine < 0 ) {
         console.log("lol pas de session");
         return
       }
@@ -231,9 +231,24 @@ define([
       // this.deletedImg = this.myImageCollection.filter({validated : "false"})
       // this.toCheckImg = this.myImageCollection.filter({validated : "null"})
 
-      this.fetchSessionInfos();
-      this.initCollection();
+      this.fetchAllSessions();
 
+
+
+    },
+    fetchAllSessions: function() {
+      var _this = this;
+      $.ajax({
+          url: config.coreUrl+'sensorDatas/' + _this.type,
+      })
+      .done(function(resp) {
+        _this.equipmentId = resp[1][_this.equipLine].sessionID
+        _this.fetchSessionInfos();
+        _this.initCollection();
+      })
+      .fail(function() {
+        console.log("pas bon");
+      });
     },
 
     fetchSessionInfos: function() {
@@ -242,8 +257,8 @@ define([
           url: config.coreUrl+'sensorDatas/' + _this.type+'/'+_this.equipmentId,
       })
       .done(function(resp) {
-        _this.sensorId = resp[0].fk_sensor;
-        _this.siteId = resp[0].FK_MonitoredSite;
+        _this.sensorId = resp.fk_sensor;
+        _this.siteId = resp.FK_MonitoredSite;
         _this.displaySensorForm();
         _this.displaySiteForm();
       })
@@ -303,8 +318,8 @@ define([
     onShow: function() {
       var _this = this;
     //  this.rgNavbar.show(this.navbar);
-      this.ui.imageFullScreen.hide()
-      this.display();
+      // this.ui.imageFullScreen.hide()
+      // this.display();
     },
 
     display: function() {

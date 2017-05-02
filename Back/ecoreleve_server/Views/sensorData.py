@@ -12,7 +12,8 @@ from ..utils.data_toXML import data_to_XML
 from .argosImport import uploadFileArgos
 from .GSMimport import uploadFilesGSM
 from .RFIDimport import uploadFileRFID
-from .CamTrapimport import uploadFileCamTrapResumable, concatChunk
+#from .CamTrapimport import uploadFileCamTrapResumable
+from .CamTrapimport import *
 import os
 
 
@@ -88,6 +89,9 @@ class SensorDatasBySession(CustomView):
 
     def getDatas(self):
         if self.type_ == 'camtrap':
+            print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+            print(self.type_)
+            print(self.sessionID)
             joinTable = join(CamTrap, self.viewTable,
                              CamTrap.pk_id == self.viewTable.c['pk_id'])
             query = select([CamTrap]
@@ -232,8 +236,6 @@ class SensorDatasByType(CustomView):
         'argos': uploadFileArgos,
         'gsm': uploadFilesGSM,
         'rfid': uploadFileRFID,
-        'resumable': uploadFileCamTrapResumable,
-        'concat': concatChunk,
     }
 
     def __init__(self, ref, parent):
@@ -245,7 +247,9 @@ class SensorDatasByType(CustomView):
                           'rfid': self.queryWithSite,
                           'camtrap': self.queryWithSite}
         self.actions = {'getChunck': self.checkChunk,
-                        'validate': self.auto_validation
+                        'validate': self.auto_validation,
+                        'concat': self.concatChunk,
+                        'resumable': self.uploadFileCamTrapResumable
                         }
         self.__acl__ = context_permissions['stations']
 
@@ -319,28 +323,210 @@ class SensorDatasByType(CustomView):
         return queryStmt
 
     def create(self):
+        print(self.dictFuncImport[self.type_])
+        print(self.request)
         return self.dictFuncImport[self.type_](self.request)
 
-    def checkChunk(self):
+    def uploadFileCamTrapResumable(self):
+        if(self.request.GET):
+            return self.checkChunk()
+        flagDate = False
         pathPrefix = dbConfig['camTrap']['path']
-        fileName = str(self.request.params['resumableIdentifier']) + "_" 
-        + str(self.request.params['resumableChunkNumber'])
+        pathPost = str(self.request.POST['path'])
+        fk_sensor = int(self.request.POST['id'])
+        messageDate = ""
 
-        if not os.path.isfile(pathPrefix + '\\' + self.request.params['path'] + '\\' + str(fileName)):
+        uri = pathPrefix + '\\' + pathPost
+        extType = self.request.POST['resumableFilename'].split('.')
+
+        inputFile = self.request.POST['file'].file
+        if(int(self.request.POST['resumableChunkNumber']) == 1 and int(self.request.POST['resumableCurrentChunkSize']) == int(self.request.POST['resumableTotalSize']) and str(extType[len(extType) - 1]) != ".zip"):
+            if not os.path.isfile(pathPrefix + '\\' + pathPost + '\\' + str(self.request.POST['resumableFilename'])):
+                # write in the file
+                with open(uri + '\\' + str(self.request.POST['resumableFilename']), 'wb') as output_file:
+                    shutil.copyfileobj(inputFile, output_file)
+                output_file.close()
+            datePhoto = dateFromExif(
+                uri + '\\' + str(self.request.POST['resumableFilename']))
+            if(checkDate(datePhoto, str(self.request.POST['startDate']), str(self.request.POST['endDate']))):
+                AddPhotoOnSQL(fk_sensor, str(uri), str(
+                    self.request.POST['resumableFilename']), str(extType[len(extType) - 1]), datePhoto)
+                resizePhoto(str(uri) + "\\" +
+                            str(self.request.POST['resumableFilename']))
+                messageDate = "ok <BR>"
+            else:
+                os.remove(uri + '\\' + str(self.request.POST['resumableFilename']))
+                flagDate = True
+                messageDate = 'Date not valid (' + str(datePhoto) + ') <BR>'
+        else:
+            if not os.path.isfile(pathPrefix + '\\' + pathPost + '\\' + str(self.request.POST['resumableIdentifier'])):
+                # calculate the position of cursor
+                position = int(self.request.POST['resumableChunkNumber'])
+                # write in the file
+                with open(uri + '\\' + str(self.request.POST['resumableIdentifier']) + "_" + str(position), 'wb') as output_file:
+                    shutil.copyfileobj(inputFile, output_file)
+                output_file.close()
+
+        if(flagDate):
+            self.request.response.status_code = 415
+            return messageDate
+        else:
+            self.request.response.status_code = 200
+            return "ok"
+
+    def concatChunk(self):
+        flagSuppression = False
+        res = {}
+        message = ""
+        timeConcat = ""
+        messageConcat = ""
+        messageUnzip = ""
+        nbInZip = 0
+        nbInserted = 0
+        pathPrefix = dbConfig['camTrap']['path']
+        self.request.response.status_code = 200
+        # create folder
+        if(int(self.request.POST['action']) == 0):
+            pathPost = str(self.request.POST['path'])
+            if not os.path.exists(pathPrefix + '\\' + pathPost):
+                os.makedirs(pathPrefix + '\\' + pathPost)
+                self.request.response.status_code = 200
+            if not os.path.exists(pathPrefix + '\\' + pathPost + '\\thumbnails\\'):
+                os.makedirs(pathPrefix + '\\' + pathPost + '\\thumbnails\\')
+                self.request.response.status_code = 200
+        else:
+            # print(" il faut que la date de l'exif soit entre le " +
+            #       str(request.POST['startDate']) + " et le " + str(request.POST['endDate']))
+            pathPost = str(self.request.POST['path'])
+            fk_sensor = int(self.request.POST['id'])
+            name = str(self.request.POST['file'])
+            debutTime = time.time()
+            # print("name " + str(name))
+            # print("on veut reconstruire le fichier" + str(name) + " qui se trouve dans " +
+            #       str(request.POST['path']) + " en :" + str(request.POST['taille']) + " fichiers")
+
+            txtConcat = str(name).split('.')
+            # print("avant text")
+            if not os.path.isfile(pathPrefix + '\\' + pathPost + '\\' + str(txtConcat[0]) + str('.txt')):
+                with open(pathPrefix + '\\' + pathPost + '\\' + str(txtConcat[0]) + str('.txt'), 'a') as socketConcat:
+                    # print("fichier socket ok")
+                    # print("%s\n%s\n" % (str(request.POST['taille']), str('0')))
+                    socketConcat.write("%s\n%s\n" % (self.request.POST['taille'], 0))
+                    # si le fichier n'existe pas on va le reconstruire
+                    if not os.path.isfile(pathPrefix + '\\' + pathPost + '\\' + str(name)):
+                        # on ouvre le fichier comme destination
+                        with open(pathPrefix + '\\' + pathPost + '\\' + str(name), 'wb') as destination:
+                            # on va parcourir l'ensemble des chunks
+                            for i in range(1, int(self.request.POST['taille']) + 1):
+                                # si le chunk est present
+                                if os.path.isfile(pathPrefix + '\\' + pathPost + '\\' + str(self.request.POST['name']) + '_' + str(i)):
+                                    shutil.copyfileobj(open(pathPrefix + '\\' + pathPost + '\\' + str(
+                                        self.request.POST['name']) + '_' + str(i), 'rb'), destination)  # on le concat dans desitnation
+                                    socketConcat.write("%s\n" % (i))
+                                    socketConcat.flush()
+                                    if (i == 30):
+                                        with open(pathPrefix + '\\' + pathPost + '\\' + str(txtConcat[0]) + str('.txt'), 'r') as testConcat:
+                                            first = testConcat.readline()
+                                            for last in testConcat:
+                                                avantDer = last
+                                            print(" first ")
+                                            print(first)
+                                            print(" last ")
+                                            print(last)
+                                            print(avantDer)
+                                        testConcat.close()
+                                else:  # si il n'est pas present
+                                    flagSuppression = True
+                                    self.request.response.status_code = 510
+                                    message = "Chunk file number : '" + \
+                                        str(i) + "' missing try to reupload the file '" + \
+                                        str(self.request.POST['file']) + "'"
+                                    break  # break the for
+                        destination.close()
+                    else:
+                        self.request.response.status_code = 510
+                        message = "File : '" + \
+                            str(name) + "' is already on the server <BR>"
+                    if (flagSuppression):
+                        # supprime le fichier destination et on force la sortie
+                        os.remove(pathPrefix + '\\' + pathPost + '\\' + str(name))
+                    else:
+                        socketConcat.close()
+                        os.remove(pathPrefix + '\\' + pathPost + '\\' +
+                                  str(txtConcat[0]) + str('.txt'))
+                        # on va parcourir l'ensemble des chunks
+                        for i in range(1, int(self.request.POST['taille']) + 1):
+                            os.remove(pathPrefix + '\\' + pathPost + '\\' +
+                                      str(self.request.POST['name']) + '_' + str(i))
+                socketConcat.close()
+
+            # destination.close()
+            finTime = time.time()
+            timeConcat = str(finTime - debutTime)
+            # print("durée :" + timeConcat)
+            # file concat ok now unzip
+            if(message == ""):
+                if(self.request.POST['type'] == "application/x-zip-compressed"):
+                    debutTime = time.time()
+                    # print(" on commence la décompression ")
+                    messageUnzip, nbInZip, nbInserted = unzip(pathPrefix + '\\' + pathPost + '\\' + str(
+                        name), pathPrefix + '\\' + pathPost + '\\', fk_sensor, str(self.request.POST['startDate']), str(self.request.POST['endDate']))
+                    # print(messageUnzip)
+                    if(messageUnzip != ""):
+                        self.request.response.status_code = 510
+                    # print("fin decompression ")
+                    finTime = time.time()
+                    # print("durée :" + str(finTime - debutTime))
+                else:
+                    extType = self.request.POST['file'].split('.')
+                    destfolder = pathPrefix + '\\' + pathPost + '\\'
+                    datePhoto = dateFromExif(destfolder + str(name))
+                    if(checkDate(datePhoto, str(self.request.POST['startDate']), str(self.request.POST['endDate']))):
+                        AddPhotoOnSQL(fk_sensor, destfolder, name, str(
+                            extType[len(extType) - 1]), datePhoto)
+                        resizePhoto(str(destfolder) + str(name))
+                    else:
+                        os.remove(destfolder + str(name))
+                        # flagDate = True
+                        self.request.response.status_code = 510
+                        messageConcat = 'Date not valid (' + \
+                            str(datePhoto) + ') <BR>'
+
+                    #AddPhotoOnSQL(fk_sensor,destfolder,name, str(extType[len(extType)-1]) , dateFromExif (destfolder+str(name)))
+        # os.remove(pathPrefix+'\\'+pathPost+'\\'+str(txtConcat[0])+str('.txt')) #supprime le fichier destination et on force la sortie
+        # os.remove(pathPrefix+'\\'+pathPost+'\\'+str(name)) #supprime le fichier
+        # destination et on force la sortie
+        res = {
+            'message': message,
+            'messageConcat': messageConcat,
+            'messageUnzip': messageUnzip,
+            'timeConcat': timeConcat,
+            'nbInZip': nbInZip,
+            'nbInserted': nbInserted
+        }
+        return res
+
+    def checkChunk(self):
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        pathPrefix = dbConfig['camTrap']['path']
+        self.request.params.get('criteria', None)
+        fileName = str(self.request.params.get('resumableIdentifier'))+"_"+str(self.request.params.get('resumableChunkNumber'))
+        print(fileName)
+        if not os.path.isfile(pathPrefix + '\\' + self.request.params.get('path') + '\\' + str(fileName)):
             self.request.response.status_code = 204
-
         else:
             # possible pb prog para ne pas uploader le meme fichier depuis 2 pc different
             # vefif la taille du fichier et on supprime le chunk si elle différe
             sizeOnServer = int(os.path.getsize(
-                pathPrefix + '\\' + self.request.params['path'] + '\\' + str(fileName)))
-            sizeExpected = int(self.request.params['resumableCurrentChunkSize'])
+                pathPrefix + '\\' + self.request.params.get('path') + '\\' + str(fileName)))
+            sizeExpected = int(self.request.params.get('resumableCurrentChunkSize'))
             if sizeOnServer != sizeExpected:
                 os.remove(pathPrefix + '\\' +
                           self.request.params['path'] + '\\' + str(fileName))
                 self.request.response.status_code = 204
             else:
                 self.request.response.status_code = 200
+        return self.request.response
 
     def auto_validation(self):
         # global graphDataDate

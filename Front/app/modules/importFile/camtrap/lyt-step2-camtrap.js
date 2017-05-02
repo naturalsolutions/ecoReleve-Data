@@ -77,7 +77,7 @@ define([
       _this.id = this.data.sensorId;
       //test resumable
       var r = new Resumable({
-        target:  config.coreUrl + 'sensors/resumable/datas',
+        target:  config.coreUrl + 'sensorDatas/camtrap/resumable',
         query:
         {
           "path": this.path,
@@ -99,7 +99,7 @@ define([
         //prevent multithread pb when test if folder doesn't exist and create it
         $.ajax({
           type: "POST",
-          url: config.coreUrl + 'sensors/concat/datas',
+          url: config.coreUrl + 'sensorDatas/camtrap/concat',
           data: {
             path : _this.path,
             action : 0 // create folder
@@ -233,7 +233,7 @@ define([
           //console.log(file);
           $.ajax({
             type: "POST",
-            url: config.coreUrl + 'sensors/concat/datas',
+            url: config.coreUrl + 'sensorDatas/camtrap/concat',
             data: {
               path : _this.path,
               id : _this.data.sensorId,
