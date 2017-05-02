@@ -125,6 +125,12 @@ define([
       };
 
       this.nsForm.afterShow = function(){
+          // if user is not allowed to edit (user roles) disable edit btn
+          var userGroup = window.app.user.get('role')[0];
+          if((userGroup != 'group:admins') && (userGroup != 'group:superUsers')) {
+            $(_this.ui.formStationBtns).find('.NsFormModuleEdit').first().addClass('masqued');
+          }
+
         var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
         _this.ui.formStation.html(globalEl);
 
