@@ -239,7 +239,7 @@ def getSensorEquipment(request):
                        ).select_from(joinTable
                                      ).where(table.c['FK_Sensor'] == _id).order_by(desc(table.c['StartDate']))
 
-    elif (curSensorType.lower() in ['gsm', 'satellite', 'vhf']):
+    else :
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
         query = select([table.c['StartDate'],
@@ -247,8 +247,6 @@ def getSensorEquipment(request):
                         table.c['FK_Individual'],
                         Sensor.UnicIdentifier]).select_from(joinTable
                                                             ).where(table.c['FK_Sensor'] == _id).order_by(desc(table.c['StartDate']))
-    else:
-        return 'bad request'
 
     result = session.execute(query).fetchall()
     response = []
