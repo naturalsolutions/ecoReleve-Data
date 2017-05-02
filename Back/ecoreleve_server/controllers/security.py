@@ -25,8 +25,8 @@ class Resource(dict):
     def integers(self, ref):
         try:
             ref = int(ref)
-            if int(ref) == 0:
-                return False
+            # if int(ref) == 0:
+            #     return False
         except (TypeError, ValueError):
             return False
         return True
