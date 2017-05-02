@@ -192,7 +192,10 @@ define([
       return NaN;
     },
     initialize: function(options) {
-      this.equipLine = parseInt(this.checkUrl(location.hash) -1);
+      // this.equipLine = parseInt(this.checkUrl(location.hash));
+      // this.equipmentId = this.equipLine;
+      this.equipmentId = parseInt(this.checkUrl(location.hash));
+
       if( this.equipLine < 0 ) {
         console.log("lol pas de session");
         return
@@ -231,7 +234,9 @@ define([
       // this.deletedImg = this.myImageCollection.filter({validated : "false"})
       // this.toCheckImg = this.myImageCollection.filter({validated : "null"})
 
-      this.fetchAllSessions();
+      //this.fetchAllSessions();
+      this.fetchSessionInfos();
+      this.initCollection();
 
 
 
@@ -318,8 +323,8 @@ define([
     onShow: function() {
       var _this = this;
     //  this.rgNavbar.show(this.navbar);
-      // this.ui.imageFullScreen.hide()
-      // this.display();
+       this.ui.imageFullScreen.hide()
+       this.display();
     },
 
     display: function() {
@@ -337,6 +342,7 @@ define([
       this.displayPaginator(this.paginator)
       this.displayToolsBar();
       this.displayToolsBarTop();
+
     },
 
     displayImages: function(myCollectionToDisplay){
@@ -536,6 +542,7 @@ define([
         parent : _this,
       });
       this.rgToolsBarTop.show(this.toolsBarTop);
+      this.refreshCounter();
     },
 
     reloadFromNavbar: function(model) {
@@ -843,11 +850,13 @@ define([
       this.nbPhotosRefused  = this.myImageCollection.fullCollection.where({validated:4}).length ;
       this.nbPhotosChecked = this.myImageCollection.fullCollection.where({validated:1}).length ;
       this.nbphotosnotchecked = this.nbPhotos - (this.nbPhotosChecked + this.nbPhotosAccepted + this.nbPhotosRefused);
-      this.toolsBarTop.$el.find("#nbphotos").text(this.nbPhotos);
-      this.toolsBarTop.$el.find("#nbphotosaccepted").text(this.nbPhotosAccepted);
-      this.toolsBarTop.$el.find("#nbphotosrefused").text(this.nbPhotosRefused);
-      this.toolsBarTop.$el.find("#nbphotoschecked").text(this.nbPhotosChecked);
-      this.toolsBarTop.$el.find("#nbphotosnotchecked").text(this.nbphotosnotchecked);
+      if( this.toolsBarTop ) {
+        this.toolsBarTop.$el.find("#nbphotos").text(this.nbPhotos);
+        this.toolsBarTop.$el.find("#nbphotosaccepted").text(this.nbPhotosAccepted);
+        this.toolsBarTop.$el.find("#nbphotosrefused").text(this.nbPhotosRefused);
+        this.toolsBarTop.$el.find("#nbphotoschecked").text(this.nbPhotosChecked);
+        this.toolsBarTop.$el.find("#nbphotosnotchecked").text(this.nbphotosnotchecked);
+      }
     },
 
     filterCollectionCtrl: function(e) {

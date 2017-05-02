@@ -54,6 +54,10 @@ define([
     },
 
     onRowClicked: function(row) {
+      if( this.type_ == 'camtrap') {
+        Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.data.sessionID) ), {trigger: true});
+        return ;
+      }
       if( this.type_ != 'rfid' ) {
         Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.id)+1 ), {trigger: true});
       }

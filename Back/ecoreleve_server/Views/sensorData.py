@@ -89,9 +89,6 @@ class SensorDatasBySession(CustomView):
 
     def getDatas(self):
         if self.type_ == 'camtrap':
-            print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-            print(self.type_)
-            print(self.sessionID)
             joinTable = join(CamTrap, self.viewTable,
                              CamTrap.pk_id == self.viewTable.c['pk_id'])
             query = select([CamTrap]
@@ -145,13 +142,11 @@ class SensorDatasBySession(CustomView):
                 result.append(dataResult)
 
         elif self.type_ == 'camtrap':
-            result = {}
+            result = []
             for row in data:
                 tmp = dict(row.items())
-                print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
-                print(tmp)
                 varchartmp = tmp['path'].split('\\')
-                #tmp['path'] = "/imgcamtrap/" + str(varchartmp[len(varchartmp) - 2]) + "/"
+                tmp['path'] = "/imgcamtrap/" + str(varchartmp[len(varchartmp) - 2]) + "/"
                 tmp['name'] = tmp['name'].replace(" ", "%20")
                 tmp['id'] = tmp['pk_id']
                 tmp['date_creation'] = str(tmp['date_creation'])
@@ -327,8 +322,6 @@ class SensorDatasByType(CustomView):
         return queryStmt
 
     def create(self):
-        print(self.dictFuncImport[self.type_])
-        print(self.request)
         return self.dictFuncImport[self.type_](self.request)
 
     def uploadFileCamTrapResumable(self):
@@ -433,11 +426,6 @@ class SensorDatasByType(CustomView):
                                             first = testConcat.readline()
                                             for last in testConcat:
                                                 avantDer = last
-                                            print(" first ")
-                                            print(first)
-                                            print(" last ")
-                                            print(last)
-                                            print(avantDer)
                                         testConcat.close()
                                 else:  # si il n'est pas present
                                     flagSuppression = True
@@ -511,11 +499,9 @@ class SensorDatasByType(CustomView):
         return res
 
     def checkChunk(self):
-        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
         pathPrefix = dbConfig['camTrap']['path']
         self.request.params.get('criteria', None)
         fileName = str(self.request.params.get('resumableIdentifier'))+"_"+str(self.request.params.get('resumableChunkNumber'))
-        print(fileName)
         if not os.path.isfile(pathPrefix + '\\' + self.request.params.get('path') + '\\' + str(fileName)):
             self.request.response.status_code = 204
         else:
