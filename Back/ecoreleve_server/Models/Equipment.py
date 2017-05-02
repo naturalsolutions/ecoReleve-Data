@@ -43,7 +43,7 @@ class Equipment(Base):
 
         query = text('''DECLARE @result int;
         EXEC dbo.[pr_checkIfProtoProtected] :FK_sensor, :date, @result OUTPUT;
-        SELECT @result
+        SELECT @result;
         ''').bindparams(bindparam('FK_sensor', self.FK_Sensor),
         bindparam('date', self.StartDate))
         Nb = session.execute(query).scalar()

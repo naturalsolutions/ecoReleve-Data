@@ -21,8 +21,10 @@ CREATE PROCEDURE [dbo].[pr_checkIfProtoProtected]
 		else
 		SET @result =  0
 
-   END
+	SELECT @result
 
+   END
+GO
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('113_add_sp_checkIfProtoProtected',GETDATE(),(SELECT db_name()))
 
