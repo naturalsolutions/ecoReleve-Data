@@ -991,7 +991,7 @@ define([
             }
 
             //finaly check if empty
-            if(val != null && val != 'undefined' && val != ''){
+            if(val != 'undefined'){
               empty = false;
 
               //finaly copy node data in the object
