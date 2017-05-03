@@ -12,10 +12,11 @@ from datetime import datetime
 
 def add_cors_headers_response_callback(event):
     def cors_headers(request, response):
+        if 'HTTP_ORIGIN' in request.environ:
+            response.headers['Access-Control-Allow-Origin'] = (request.headers['Origin'])
+            
         response.headers['Access-Control-Expose-Headers'] = (
             'Content-Type, Date, Content-Length, Authorization, X-Request-ID, X-Requested-With')
-        response.headers['Access-Control-Allow-Origin'] = (
-            request.headers['Origin'])
         response.headers['Access-Control-Allow-Credentials'] = 'true'
         response.headers['Access-Control-Allow-Headers'] = 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
         response.headers['Access-Control-Allow-Methods'] = ('POST,GET,DELETE,PUT,OPTIONS')
@@ -362,7 +363,8 @@ class DynamicObjectCollectionView(CustomView):
 
     def getGrid(self, type_=None, moduleName=None):
         if not moduleName:
-            moduleName = self.moduleGridName
+            moduleName = self.objectDB.moduleGridName
+
         if not type_:
             type_ = self.typeObj
 
