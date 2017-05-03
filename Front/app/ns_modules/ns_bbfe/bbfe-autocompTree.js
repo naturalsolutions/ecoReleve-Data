@@ -140,7 +140,7 @@ define([
                     },
 
                     onInputInitialize: function(options){
-                        if(_this.value){
+                        if(_this.value != null){
                           if(_this.value instanceof Object){
                               _this.translateValue(_this.value.value);
                           } else {
@@ -171,7 +171,7 @@ define([
                     }
                 });
 
-                if (_this.value) {
+                if (_this.value != null) {
                   if(_this.value instanceof Object){
                     var displayValue = _this.value.displayValue;
                   } else {
@@ -225,7 +225,7 @@ define([
         },
 
         isEmptyVal: function(value){
-            if (value == null || value == '') {
+            if (value == null ) {
                 return true;
             } else {
                 return false;
@@ -265,9 +265,12 @@ define([
                 }
             });
 
-            if(valueFound){
+            if(displayValue =='' || valueFound){
                 //set value
-                value = valueFound.data.fullpath
+                value = '';
+                if(displayValue != '' ) {
+                  value = valueFound.data.fullpath
+                }
                 this.$el.find('#' + this.id + '_value').val(value);
 
                 this.isTermError = false;
@@ -278,14 +281,14 @@ define([
             }
         },
 
-        translateValue: function(value){
+        translateValue: function(value) {
           var valueFound = this.$el.find('#treeView' + this.id).fancytree('getTree').findFirst(function(node){
               if(node.data.fullpath == value){
                   return true;
               }
           });
 
-          if(valueFound){
+          if(valueFound) {
               //set value
               value = valueFound.data.valueTranslated;
               this.$el.find('#' + this.id + '_value').val(value);
@@ -293,7 +296,7 @@ define([
               this.isTermError = false;
               this.displayError(false);
 
-          } else{
+          } else {
               this.displayError(true);
           }
           return value;
