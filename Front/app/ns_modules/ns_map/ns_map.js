@@ -21,13 +21,14 @@ define([
   'underscore',
   'backbone',
   'marionette',
+  'moment',
   'L',
   'leaflet_cluster',
   'googleLoaer',
   'leaflet_google',
   'config',
 
-], function(config, $, _, Backbone , Marionette, L, cluster, GoogleMapsLoader
+], function(config, $, _, Backbone , Marionette, moment, L, cluster, GoogleMapsLoader
     ) {
 
   'use strict';  
@@ -209,8 +210,82 @@ define([
       });
     },
 
+
+    difference: function(geoJson){
+
+      var firstDate = geoJson.features[0].properties.Date;
+      var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date;
+        
+      var total = moment(lastDate, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
+
+      var dayInMs = 86400000;
+      var x = 100 / dayInMs;
+      total = x * total;
+
+      var _date2;
+      var ms;
+      var index;
+
+      var obj = {};
+
+      for (var i = 0; i < geoJson.features.length; i++) {
+        _date2 = geoJson.features[i].properties.Date;
+        ms = moment(_date2, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
+
+        ms = x * ms;
+
+        ms = Math.floor(ms);
+        //index = ms / total * 100;
+
+        obj[ms] = geoJson.features[i];
+      }
+
+      console.log(obj);
+
+      // setInterval(function(){
+      //clearInterval(timer);
+
+      var width = 0;
+      var time = 0;
+
+      var timer = setInterval(frame);
+
+      var _this = this;
+
+      function frame() {
+        console.log('fdfdf');
+
+        if (time >= total) {
+          clearInterval(timer);
+        } else {
+          if(obj[time]){
+            var coords = obj[time].geometry.coordinates;
+            var m = new L.marker(coords);
+            
+            m.addTo(_this.map);
+          }
+          width = time /total * 100;
+          $('.bar').css('width', width + '%');
+          
+
+          time++;
+          
+
+        }
+      }
+
+      $('#map').css('height', '70%');
+      $('#map').parent().append('<div height="30%" style="padding: 20px;" class="timeline">\
+        <div style="height: 5px; background: red; width: 0%"  class="bar"></div>\
+      </div>')
+
+    },
+
+    
+
     initClusters: function(geoJson){
-      console.log(geoJson);
+      this.difference(geoJson);
+      return;
       var firstLvl= true;
       this.firstLvl= [];
       var _this= this;
