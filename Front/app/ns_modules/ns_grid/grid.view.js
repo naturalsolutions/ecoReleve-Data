@@ -13,7 +13,7 @@ define([
   './custom.text.autocomplete.filter',
 
   'vendors/utils',
-  
+
   './custom.renderers',
   './custom.editors',
 
@@ -25,11 +25,11 @@ define([
   'i18n'
 
 ], function($, _, Backbone, Marionette, AgGrid, Swal,
-  CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter, 
+  CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter,
   CustomTextAutocompleteFilter, utils_1, Renderers, Editors,
   Decimal5Renderer, DateTimeRenderer, ObjectPicker
 ) {
-  
+
   'use strict';
 
   return Marionette.LayoutView.extend({
@@ -53,7 +53,8 @@ define([
       'totalSelected': '.js-total-selected',
       'totalRecords' : '.js-total-records',
       'filteredElems': '.js-filtered-content',
-      'filtered' : '.js-filtered'
+      'filtered' : '.js-filtered',
+      'jsGrid' :'.js-ag-grid'
 
     },
 
@@ -84,6 +85,8 @@ define([
         this.com.addModule(this);
       }
 
+      this.displayRowIndex = options.displayRowIndex;
+
       this.clientSide = options.clientSide || false;
       this.filters = options.filters || [];
       this.afterGetRows = options.afterGetRows;
@@ -102,6 +105,8 @@ define([
         headerHeight: 30,
         suppressRowClickSelection: true,
         onRowSelected: this.onRowSelected.bind(this),
+        onDragStarted : this.onDragStarted.bind(this),
+        onDragStopped: this.onDragStopped.bind(this),
         onGridReady: function(){
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
@@ -164,6 +169,9 @@ define([
     },
 
     focusFirstCell: function(){
+      if($(this.$el.parent()).hasClass('js-rg-grid-subform')){
+        return;
+      }
       if ( this.gridOptions.columnDefs[0].checkboxSelection ) {
         this.gridOptions.api.setFocusedCell(0, this.gridOptions.columnDefs[1].field, null);
       } else {
@@ -171,6 +179,12 @@ define([
       }
     },
 
+    onDragStarted: function(e) {
+      this.ui.jsGrid.removeClass('selectableTextInGrid');
+    },
+    onDragStopped: function(e) {
+      this.ui.jsGrid.addClass('selectableTextInGrid');
+    },
     onRowSelected: function(e){
       if(this.ready){
         this.interaction('singleSelection', e.node.data[this.idName] || e.node.data.id || e.node.data.ID, this);
@@ -191,8 +205,41 @@ define([
     formatColumns: function(colDefs){
       var _this = this;
       var columnDefs = $.extend(true, [], colDefs);
-      
+
+
       columnDefs.map(function(col, i) {
+
+        //e.g types
+        var comparator = function (valueA, valueB, nodeA, nodeB, isInverted) {
+          var value1;
+          var value2;
+          if(valueA && valueA instanceof Object){
+            value1 = valueA.displayValue;
+          } else {
+            value1 = valueA;
+          }
+
+          if(valueB && valueB instanceof Object){
+            value2 = valueB.displayValue;
+          } else {
+            value2 = valueB;
+          }
+
+          if(!valueA){
+            value1 = '';
+          }
+          if(!valueB){
+            value2 = '';
+          }
+
+          switch(typeof value1){
+            case 'number':
+              return value1 - value2;
+            default:
+              return value1 < value2; //isInverted?
+          }
+        }
+        col.comparator = comparator;
 
         if(col.field == 'FK_ProtocoleType'){
           col.hide = true;
@@ -210,7 +257,7 @@ define([
           case 'AutocompTreeEditor':
             col.cellEditor = Editors.ThesaurusEditor;
             col.cellRenderer = Renderers.ThesaurusRenderer;
-            break;          
+            break;
           case 'AutocompleteEditor':
             col.cellEditor = Editors.AutocompleteEditor;
             col.cellRenderer = Renderers.AutocompleteRenderer;
@@ -218,7 +265,7 @@ define([
           case 'ObjectPicker':
             col.cellEditor = Editors.ObjectPicker;
             col.cellRenderer = Renderers.ObjectPickerRenderer;
-            break;          
+            break;
           case 'Checkbox':
             col.cellEditor = Editors.CheckboxEditor;
             col.cellRenderer = Renderers.CheckboxRenderer;
@@ -226,7 +273,7 @@ define([
           case 'Number':
             col.cellEditor = Editors.NumberEditor;
             col.cellRenderer = Renderers.NumberRenderer;
-            break;          
+            break;
           case 'DateTimePickerEditor':
             col.cellEditor = Editors.DateTimeEditor;
             col.cellRenderer = Renderers.DateTimeRenderer;
@@ -244,6 +291,7 @@ define([
             col.cellRenderer = Renderers.SelectRenderer;
             break;
         }
+
 
          if(col.cell == 'autocomplete'){
           _this.addBBFEditor(col);
@@ -280,18 +328,51 @@ define([
         col.headerCellTemplate = _this.getHeaderCellTemplate();
       });
 
-      
+
+
+      if(_this.displayRowIndex === true){
+        var colDefIndex = {
+          width: 40,
+          minWidth: 40,
+          maxWidth: 100,
+          editable: false,
+          field: 'index',
+          headerName: 'N°',
+          pinned: 'left',
+          suppressNavigable: true,
+          suppressMovable: true,
+          suppressSizeToFit: true,
+          // cellClass: 'pinned-col',
+          cellRenderer: function(params){
+            if(!params.value || params.api.deletingRows){
+              params.data[params.colDef.field] = params.rowIndex + 1;
+              return params.rowIndex + 1;
+            } else {
+              return params.value;
+            }
+          }
+        };
+        columnDefs.unshift(colDefIndex);
+      }
+
       if(_this.gridOptions.rowSelection === 'multiple'){
         var col = {
+          width: 40,
           minWidth: 40,
           maxWidth: 40,
           field: '',
-          headerName: ''
+          headerName: '',
+          pinned: 'left',
+          checkboxSelection: true,
+          suppressNavigable: true,
+          suppressFilter: true,
+          suppressMovable: true,
+          suppressSizeToFit: true,
+          // cellClass: 'pinned-col',
         };
         _this.formatSelectColumn(col);
         columnDefs.unshift(col);
       }
-
       return columnDefs;
     },
 
@@ -389,9 +470,6 @@ define([
 
     formatSelectColumn: function(col){
       var _this = this;
-      col.pinned = 'left';
-      col.suppressMovable = true;
-      col.checkboxSelection = true;
       col.headerCellTemplate = function() {
         var eCell = document.createElement('span');
         eCell.innerHTML = '\
@@ -464,7 +542,7 @@ define([
       if(this.model.get('objectType')){
         data.objectType = this.model.get('objectType');
       }
-  
+
       this.deferred = $.ajax({
         url: this.model.get('url'),
         method: 'GET',
@@ -721,8 +799,10 @@ define([
 
     onDestroy: function(){
       $(window).off('resize', this.onResize);
-      this.gridOptions.api.destroy();
-      this.grid.destroy();
+      if(this.gridOptions.api){
+        this.gridOptions.api.destroy();
+        this.grid.destroy();
+      }
     },
 
     exportData: function(){
@@ -818,6 +898,8 @@ define([
         return;
       }
 
+      this.gridOptions.api.deletingRows = true;
+
       var opt = {
         title: 'Are you sure?',
         text: 'selected rows will be deleted'
@@ -829,13 +911,14 @@ define([
     },
 
     getRowDataAndErrors: function(){
+      var _this = this;
       this.gridOptions.api.stopEditing();
 
       var rowData = [];
       var errors = [];
 
-      var empty = true;;
-      
+      var empty = true;
+
       var i = 0;
       this.gridOptions.api.forEachNode( function(node) {
         var row = {};
@@ -853,6 +936,9 @@ define([
             if(key == '_errors' && node.data._errors) {
               continue;
             }
+            if(key == 'index') {
+              continue;
+            }
 
             //if val == {value, label} then check value
             var val = node.data[key];
@@ -861,7 +947,7 @@ define([
             }
 
             //finaly check if empty
-            if(val != null && val != 'undefined' && val != ''){
+            if(val != 'undefined'){
               empty = false;
 
               //finaly copy node data in the object
@@ -878,11 +964,15 @@ define([
           // if not empty & error then push the error
           if(!empty && node.data._errors){
             if(node.data._errors.length){
-              errors.push(node.data._errors);
+              errors.push({
+                column: node.data._errors,
+              });
+
+              //focus on cell with error
+              _this.gridOptions.api.setFocusedCell(node.childIndex, node.data._errors, null);
             }
           }
-        
-          
+
         }
 
         //last check, if not empty, push to save
@@ -901,7 +991,7 @@ define([
     destroySelectedRows: function(callback){
       var _this = this;
       var rowData = [];
-      
+
       var selectedNodes = this.gridOptions.api.getSelectedNodes();
 
       for (var i = 0; i < selectedNodes.length; i++) {
@@ -926,13 +1016,15 @@ define([
           context: this,
         }).done(function(resp) {
           this.gridOptions.api.removeItems(this.gridOptions.api.getSelectedNodes());
+          this.gridOptions.api.deletingRows = false;
           if(callback)
             callback();
         }).fail(function(resp) {
-          console.log(resp);
         });
         if(callback)
           callback();
+      } else {
+        this.gridOptions.api.deletingRows = false;
       }
 
     },

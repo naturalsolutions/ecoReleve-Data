@@ -37,10 +37,10 @@ define([
           this.toggleEditionMode();
           this.hardRefresh();
           break;
-        case 'delete': 
+        case 'delete':
           this.deleteObs();
-          break;        
-        case 'add': 
+          break;
+        case 'add':
           this.addRow();
           break;
       }
@@ -52,7 +52,7 @@ define([
         title: 'Errors detected',
         text: 'Please fix error before save your data'
       };
-      
+
       window.swal(opt, 'warning', null, false);
     },
 
@@ -87,7 +87,7 @@ define([
           title: 'Something went wrong',
           text: reponse.responseText
         };
-        
+
         window.swal(opt, 'warning', null, false);
       });
     },
@@ -117,7 +117,7 @@ define([
     },
 
     hardRefresh: function(){
-      this.onShow(); 
+      this.onShow();
       this.$el.find('.js-btn-form').toggleClass('hide');
     },
 

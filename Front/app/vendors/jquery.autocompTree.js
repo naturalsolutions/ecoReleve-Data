@@ -197,6 +197,7 @@
                         node.span.className = node.span.className.replace('fancytree-node', 'fancytree-node fancytree-expanded');
                       }
                     }
+                    event.stopPropagation();
                   },
                   //evenement d'activation de l'arbre (au clique)
                   activate: function(event, data) {
@@ -329,7 +330,7 @@
       }
     };
 
-    
+
     if (methods[methodOrOptions])
       return methods[methodOrOptions].apply(this, Array.prototype.slice.call(arguments, 1));
     else if (typeof methodOrOptions === 'object' || !methodOrOptions)
