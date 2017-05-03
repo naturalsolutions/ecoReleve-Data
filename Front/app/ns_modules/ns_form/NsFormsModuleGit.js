@@ -600,10 +600,10 @@ define([
         if(key == 'defaultValues' || key == 'Parent_Observation') {
           continue;
         }
-        if(editorSchema.fieldClass.indexOf('hide') != -1) {
+        if(editorSchema && editorSchema.fieldClass.indexOf('hide') != -1) {
           continue;
         }
-        if(editorSchema.type == 'Checkbox') {
+        if(editorSchema && editorSchema.type == 'Checkbox') {
           continue;
         }
         //need to check if not an array
@@ -611,7 +611,7 @@ define([
           return isEmpty = false;
         }
 
-        if(editorSchema.defaultValue) {
+        if(editorSchema && editorSchema.defaultValue) {
             if(editorSchema.defaultValue != editorValue) {
               return isEmpty = false;
             }

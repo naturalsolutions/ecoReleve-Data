@@ -4,7 +4,8 @@ from pyramid.security import (
     Allow,
     Authenticated,
     ALL_PERMISSIONS,
-    Everyone
+    Everyone,
+    Deny
 )
 from pyramid.response import Response
 
@@ -185,6 +186,8 @@ context_permissions = {
 
     'release': [
                 (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Deny, 'group:superUsers', ALL_PERMISSIONS),
+                (Deny, 'group:users', ALL_PERMISSIONS),
               ],
 }
 
