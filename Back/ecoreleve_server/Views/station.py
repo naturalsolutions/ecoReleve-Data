@@ -4,7 +4,8 @@ from ..Models import (
     StationType,
     Station_FieldWorker,
     StationList,
-    MonitoredSitePosition
+    MonitoredSitePosition,
+    User
 )
 from ..GenericObjets.FrontModules import FrontModules, ModuleForms
 from ..GenericObjets import ListObjectWithDynProp
@@ -404,6 +405,10 @@ def searchStation(request):
             for obj in searchInfo['criteria']:
                 if obj['Column'] == 'LastImported':
                     lastImported(obj, searchInfo)
+                if obj['Column'] == 'FK_FieldWorker' and obj['Operator'] == 'IN':
+                    fieldworkers = obj['Value']
+                    obj['Value'] = User.getUsersIds(fieldworkers)
+
 
     if 'geo' not in data:
         ModuleType = 'StationGrid'
