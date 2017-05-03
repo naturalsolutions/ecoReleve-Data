@@ -50,7 +50,7 @@ class SensorView(DynamicObjectView):
                                          ).where(table.c['FK_Sensor'] == _id
                                                  ).order_by(desc(table.c['StartDate']))
 
-        elif (curSensorType.lower() in ['gsm', 'satellite', 'vhf']):
+        elif (curSensorType.lower() in ['gsm', 'satellite', 'vhf', 'uhf']):
             table = Base.metadata.tables['IndividualEquipment']
             joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
             query = select([table.c['StartDate'],

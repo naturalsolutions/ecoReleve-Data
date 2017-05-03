@@ -171,6 +171,9 @@ define([
 
     fetchDisplayValue: function(val){
       var _this = this;
+      if (val instanceof object && val.displayValue){
+        val = val.displayValue;
+      }
       $.ajax({
         url : _this.url+val,
         success : function(data){
