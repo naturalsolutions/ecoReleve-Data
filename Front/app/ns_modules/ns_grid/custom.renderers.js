@@ -296,8 +296,11 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       var checked = ''; 
       if(value == 1)
         checked = 'checked';
-
-      var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
+      if(this.params.colDef.editable){
+        var chk = '<input class="form-control" type="checkbox" '+ checked +' />';
+      } else {
+        var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
+      }
       $(this.eGui).html(chk);
     };
 
