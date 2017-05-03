@@ -246,7 +246,7 @@ class DynamicObjectCollectionView(CustomView):
         data = {}
         for items, value in self.request.json_body.items():
             data[items] = value
-        self.setType()
+        self.setType(data[self.objectDB.getTypeObjectFKName()])
         self.objectDB.init_on_load()
         self.objectDB.updateFromJSON(data)
         self.session.add(self.objectDB)
