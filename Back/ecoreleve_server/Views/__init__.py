@@ -366,8 +366,7 @@ class DynamicObjectCollectionView(CustomView):
 
     def getGrid(self, type_=None, moduleName=None):
         if not moduleName:
-            moduleName = self.objectDB.moduleGridName
-
+            moduleName = self.moduleGridName
         if not type_:
             type_ = self.typeObj
 
