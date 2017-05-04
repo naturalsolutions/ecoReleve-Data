@@ -1,0 +1,32 @@
+
+/****** Object:  View [dbo].[ProjectDynPropValuesNow]    Script Date: 04/04/2017 11:38:23 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE VIEW [dbo].[ProjectDynPropValuesNow] AS
+SELECT dyn_val.*,dyn.Name as Name,dyn.TypeProp FROM 
+  .ProjectDynPropValue dyn_val 
+  JOIN ProjectDynProp dyn ON dyn_val.FK_ProjectDynProp = dyn.ID
+	 where not exists (select * from  ProjectDynPropValue  V2 
+         where V2.FK_ProjectDynProp  =  dyn_val.FK_ProjectDynProp  and V2.FK_Project = dyn_val.FK_Project
+        AND V2.startdate > dyn_val.startdate and V2.startdate <= GETDATE())
+		and dyn_val.StartDate <= GETDATE()
+
+
+
+
+
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('112_CreateView_ProjectDynPropValueNow',GETDATE(),(SELECT db_name()))
+
+
+GO

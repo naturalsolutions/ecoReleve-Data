@@ -161,8 +161,6 @@ def uploadFileRFID(request):
             message = 'inserted rows : ' + str(data_to_insert.shape[0])
             return message
         else:
-            print( str(allDate[0]))
-            print( str(allDate[-1]))
             request.response.status_code = 510
             message = 'File dates (first date : ' + str(allDate[0])+ ', last date : ' + str(allDate[-1])+ ') don''t correspond with the deploy/remove dates of the selected module'
             return message

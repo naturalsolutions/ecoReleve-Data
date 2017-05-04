@@ -7,6 +7,7 @@ from pyramid.security import (
     Everyone,
     Deny
 )
+from pyramid.response import Response
 
 
 class Resource(dict):
@@ -128,6 +129,18 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
             return True
 
     def challenge(self, request, content="Unauthorized"):
+        if request.method == 'OPTIONS':
+            response = Response()
+            response.headers['Access-Control-Expose-Headers'] = (
+                'Content-Type, Date, Content-Length, Authorization, X-Request-ID, X-Requested-With')
+            response.headers['Access-Control-Allow-Origin'] = (
+                request.headers['Origin'])
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Headers'] = 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
+            response.headers['Access-Control-Allow-Methods'] = ('POST,GET,DELETE,PUT,OPTIONS')
+            response.headers['Content-Type'] = ('application/json')
+            return response
+
         if self.authenticated_userid(request):
             return HTTPUnauthorized(content, headers=self.forget(request))
 
@@ -160,6 +173,12 @@ context_permissions = {
               ],
 
     'sensors': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', 'read'),
+                (Allow, 'group:users', 'read')
+              ],
+
+    'projects': [
                 (Allow, 'group:admins', ALL_PERMISSIONS),
                 (Allow, 'group:superUsers', 'read'),
                 (Allow, 'group:users', 'read')

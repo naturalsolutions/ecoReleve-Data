@@ -249,11 +249,17 @@ class ModuleForms(Base):
         self.dto['nbByDefault'] = self.DefaultValue
 
     def InputThesaurus(self):
+        lng = 'fr'
+        try:
+            lng = threadlocal.get_current_request().authenticated_userid['userlanguage']
+        except:
+            pass
+
         if self.Options is not None and self.Options != '':
             self.dto['options'] = {
                 'startId': self.Options,
                 'wsUrl': dbConfig['wsThesaurus']['wsUrl'],
-                'lng': threadlocal.get_current_request().authenticated_userid['userlanguage'],
+                'lng': lng,
                 'displayValueName': 'valueTranslated'}
             self.dto['options']['startId'] = self.Options
             self.dto['options']['iconFont'] = 'reneco reneco-thesaurus'

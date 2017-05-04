@@ -335,8 +335,7 @@ def parseDIAGFileAndInsert(full_filename, session):
         block = re.sub('[a-zA-Z]\s+Nb', " Nb", block)
         block = re.sub('[a-zA-Z]\s+NOPC', " NOPC", block)
         block = re.sub('IQ', "#IQ", block)
-        # block = re.sub('[a-zA-Z]\s[a-zA-Z]',"O",block)
-        # print(block)
+
         split = '\#?[a-zA-Z0-9\-\>]+\s:\s'
         splitParameters = re.split(split, block)
         curDict = {}

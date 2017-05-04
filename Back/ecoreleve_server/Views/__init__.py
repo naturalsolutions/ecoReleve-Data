@@ -12,16 +12,15 @@ from datetime import datetime
 
 def add_cors_headers_response_callback(event):
     def cors_headers(request, response):
-        response.headers.update({
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
-            'Access-Control-Allow-Headers': 'Origin,\
-                                            Content-Type,\
-                                            Accept,\
-                                            Authorization',
-            'Access-Control-Allow-Credentials': 'true',
-            'Access-Control-Max-Age': '1728000',
-        })
+        if 'HTTP_ORIGIN' in request.environ:
+            response.headers['Access-Control-Allow-Origin'] = (request.headers['Origin'])
+            
+        response.headers['Access-Control-Expose-Headers'] = (
+            'Content-Type, Date, Content-Length, Authorization, X-Request-ID, X-Requested-With')
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Headers'] = 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
+        response.headers['Access-Control-Allow-Methods'] = ('POST,GET,DELETE,PUT,OPTIONS')
+        response.headers['Content-Type'] = ('application/json')
     event.request.add_response_callback(cors_headers)
 
 
@@ -128,7 +127,6 @@ class DynamicObjectView(CustomView):
         raise Exception('method has to be overriden')
 
     def getData(self):
-        self.objectDB.LoadNowValues()
         return self.objectDB.getFlatObject()
 
     def getDataWithForm(self):
@@ -136,7 +134,6 @@ class DynamicObjectView(CustomView):
             displayMode = self.request.params['DisplayMode']
         except:
             displayMode = 'display'
-        self.objectDB.LoadNowValues()
         return self.objectDB.getDataWithSchema(displayMode=displayMode)
 
     def retrieve(self):
@@ -206,7 +203,7 @@ class DynamicObjectCollectionView(CustomView):
         CustomView.__init__(self, ref, parent)
         self.objectDB = self.item.model()
 
-        if 'typeObj' in self.request.params and self.request.params['typeObj'] is not None:
+        if 'typeObj' in self.request.params and self.request.params['typeObj']:
             objType = self.request.params['typeObj']
             self.setType(objType)
             self.typeObj = objType
@@ -255,7 +252,7 @@ class DynamicObjectCollectionView(CustomView):
         for items, value in self.request.json_body.items():
             data[items] = value
         self.setType()
-        self.objectDB.init_on_load()
+        # self.objectDB.init_on_load()
         self.objectDB.updateFromJSON(data)
         self.session.add(self.objectDB)
         self.session.flush()
@@ -374,7 +371,8 @@ class DynamicObjectCollectionView(CustomView):
 
     def getGrid(self, type_=None, moduleName=None):
         if not moduleName:
-            moduleName = self.moduleGridName
+            moduleName = self.objectDB.moduleGridName
+
         if not type_:
             type_ = self.typeObj
 
@@ -412,7 +410,8 @@ class DynamicObjectCollectionView(CustomView):
         self.configJSON[moduleName][typeObj] = configObject
 
     def setType(self, objectType=1):
-        setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
+        if hasattr(self.objectDB, 'getTypeObjectFKName'):
+            setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
 
     def getType(self):
         table = Base.metadata.tables[self.objectDB.getTypeObjectName()]
@@ -450,9 +449,25 @@ class RESTView(object):
         self.request = request
         self.context = context
 
+    @view_config(request_method='OPTIONS', renderer='json', permission='read')
+    def options(self):
+        print('dfsdsqsd')
+        response = Response()
+        response.headers['Access-Control-Expose-Headers'] = (
+            'Content-Type, Date, Content-Length, Authorization, X-Request-ID, X-Requested-With')
+        response.headers['Access-Control-Allow-Origin'] = (
+            request.headers['Origin'])
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Headers'] = 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
+        response.headers['Access-Control-Allow-Methods'] = ('POST,GET,DELETE,PUT,OPTIONS')
+        response.headers['Content-Type'] = ('application/json')
+        return response
+        
+
     @view_config(request_method='GET', renderer='json', permission='read')
     def get(self):
         return self.context.retrieve()
+
 
     @view_config(request_method='POST', renderer='json', permission='create')
     def post(self):
