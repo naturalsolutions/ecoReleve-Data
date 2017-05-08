@@ -210,79 +210,116 @@ define([
       });
     },
 
+    //Player
+    //return an object where positions are indexed by their offset (from firstDate) in ms
+    setValuesFromSpeed: function(geoJson, x){
+
+      var dayInMs = 86400000;
+      var speed = x / dayInMs;
+
+
+      var obj = {};
+      var ms;
+
+      var firstDate = geoJson.features[0].properties.Date;
+
+      var _date2;
+      //2 recalculate if speed changes
+      for (var i = 0; i < geoJson.features.length; i++) {
+
+        _date2 = geoJson.features[i].properties.Date;
+
+        ms = moment(_date2, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
+        ms = speed * ms;
+        ms = Math.floor(ms);
+
+        obj[ms] = geoJson.features[i];
+      }
+      
+      this.p_indexedPositions = obj;
+      this.p_duration = speed * this.p_refDuration;
+    },
 
     difference: function(geoJson){
+      var _this = this;
+      var speed = 50;
 
       var firstDate = geoJson.features[0].properties.Date;
       var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date;
         
-      var total = moment(lastDate, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
+      this.p_refDuration = moment(lastDate, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
 
-      var dayInMs = 86400000;
-      var x = 100 / dayInMs;
-      total = x * total;
-
-      var _date2;
-      var ms;
-      var index;
-
-      var obj = {};
-
-      for (var i = 0; i < geoJson.features.length; i++) {
-        _date2 = geoJson.features[i].properties.Date;
-        ms = moment(_date2, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
-
-        ms = x * ms;
-
-        ms = Math.floor(ms);
-        //index = ms / total * 100;
-
-        obj[ms] = geoJson.features[i];
-      }
-
-      console.log(obj);
-
-      // setInterval(function(){
-      //clearInterval(timer);
+      this.setValuesFromSpeed(geoJson, speed);
+      
 
       var width = 0;
-      var time = 0;
+      this.time = 0;
+      this.p_markers = [];
+      this.play = true;
 
       var timer = setInterval(frame);
-
-      var _this = this;
-
       function frame() {
-        console.log('fdfdf');
 
-        if (time >= total) {
+        if (_this.time >= _this.p_duration) {
+          _this.play = false;
           clearInterval(timer);
-        } else {
-          if(obj[time]){
-            var coords = obj[time].geometry.coordinates;
-            var m = new L.marker(coords);
-            
-            m.addTo(_this.map);
-          }
-          width = time /total * 100;
-          $('.bar').css('width', width + '%');
-          
 
-          time++;
-          
+        } else {
+
+          if(_this.p_indexedPositions[_this.time]){
+
+            var coords = _this.p_indexedPositions[_this.time].geometry.coordinates;
+            var icon = new L.DivIcon({className: 'marker custom-marker'});
+            var m = new L.marker(coords, {icon: icon});
+            
+            _this.p_markers.push(m);
+
+            if(_this.p_markers.length > 10){
+              _this.map.removeLayer(_this.p_markers.shift());
+            }
+
+            for (var i = _this.p_markers.length - 1; i > 0; i--) {
+              if(i !== 0){
+                $(_this.p_markers[i]._icon).css('opacity', i/10);
+              }
+            }
+
+            
+
+            m.addTo(_this.map);
+            var center = m.getLatLng();
+            _this.map.setView(center, 14/*, zoom*/);
+          }
+
+          width = _this.time /_this.p_duration * 100;
+          $('.bar').css('width', width + '%');
+          _this.time++;
 
         }
+
       }
 
-      $('#map').css('height', '70%');
-      $('#map').parent().append('<div height="30%" style="padding: 20px;" class="timeline">\
-        <div style="height: 5px; background: red; width: 0%"  class="bar"></div>\
-      </div>')
+      var bloum = function(e){
+        //test changes speed
+        _this.setValuesFromSpeed(geoJson, 1);
 
+        var rapport =  e.offsetX / e.target.clientWidth;
+        _this.time = Math.floor(_this.p_duration * rapport);
+        for (var i = 0; i < _this.p_markers.length; i++) {
+          _this.map.removeLayer(_this.p_markers[i])
+        }
+      };
+
+      $('#map').css('height', '90%');
+      $('#map').parent().append('<div height="30%" style="padding: 20px;" class="timeline">\
+        <div style="height: 10px; background: grey; width: 100%"  class="total"></div>\
+        <div style="height: 5px; background: red; width: 0%"  class="bar"></div>\
+      </div>');
+
+      $('.total').on('click', bloum);
     },
 
-    
-
+  
     initClusters: function(geoJson){
       this.difference(geoJson);
       return;
@@ -309,7 +346,7 @@ define([
       }
 
       this.markersLayer = new CustomMarkerClusterGroup({
-        disableClusteringAtZoom: disableClusteringAtZoom, 
+        disableClusteringAtZoom: disableClusteringAtZoom,
         maxClusterRadius: 70,
         polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
       });
