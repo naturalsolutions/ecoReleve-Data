@@ -217,7 +217,6 @@ define([
       var dayInMs = 86400000;
       var speed = x / dayInMs;
 
-
       var obj = {};
       var ms;
 
@@ -231,39 +230,67 @@ define([
 
         ms = moment(_date2, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
         ms = speed * ms;
-        ms = Math.floor(ms);
+        ms = Math.floor(ms/10) * 10;
 
         obj[ms] = geoJson.features[i];
       }
-      
+
+      console.log(Object.keys(obj).length);
+
       this.p_indexedPositions = obj;
-      this.p_duration = speed * this.p_refDuration;
+      
+      this.p_relDuration = speed * this.p_realDuration;
+
+      console.log('total secondes:' + (this.p_relDuration / 1000));
+    },
+  
+    msToReadable: function(ms){
+      ms = Math.round(ms);
+
+      // var x = ms / 1000;
+      // var seconds = x % 60;
+      // x /= 60;
+      // var minutes = x % 60;
+      // x /= 60;
+      // var hours = x % 24;
+      // x /= 24;
+      // var days = x;
+
+      var seconds = Math.round((ms / 1000) % 60);
+
+      var minutes = Math.round((ms / (1000*60)) % 60);
+
+      var hours   = Math.round((ms / (1000*60*60)) % 24);
+
+      return ms / 1000;
+
+      return hours + ':' + minutes + ':' + seconds;
     },
 
     difference: function(geoJson){
       var _this = this;
-      var speed = 50;
+      var speed = 1000;
 
       var firstDate = geoJson.features[0].properties.Date;
       var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date;
         
-      this.p_refDuration = moment(lastDate, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
+      this.p_realDuration = moment(lastDate, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
 
       this.setValuesFromSpeed(geoJson, speed);
-      
 
-      var width = 0;
       this.time = 0;
       this.p_markers = [];
-      this.play = true;
 
-      var timer = setInterval(frame);
+      var offset = 10;
+
+      var timer = setInterval(frame, offset);
+
       function frame() {
+        if(_this.time % 1000 === 0){
+        }
 
-        if (_this.time >= _this.p_duration) {
-          _this.play = false;
+        if(_this.time >= _this.p_relDuration) {
           clearInterval(timer);
-
         } else {
 
           if(_this.p_indexedPositions[_this.time]){
@@ -271,7 +298,7 @@ define([
             var coords = _this.p_indexedPositions[_this.time].geometry.coordinates;
             var icon = new L.DivIcon({className: 'marker custom-marker'});
             var m = new L.marker(coords, {icon: icon});
-            
+
             _this.p_markers.push(m);
 
             if(_this.p_markers.length > 10){
@@ -284,27 +311,22 @@ define([
               }
             }
 
-            
-
             m.addTo(_this.map);
             var center = m.getLatLng();
-            _this.map.setView(center, 14/*, zoom*/);
+            _this.map.setView(center, 10/*, zoom*/);
           }
 
-          width = _this.time /_this.p_duration * 100;
+          var width = (_this.time /_this.p_relDuration * 100);
           $('.bar').css('width', width + '%');
-          _this.time++;
+          _this.time += offset;
 
         }
-
       }
 
       var bloum = function(e){
-        //test changes speed
-        _this.setValuesFromSpeed(geoJson, 1);
-
         var rapport =  e.offsetX / e.target.clientWidth;
-        _this.time = Math.floor(_this.p_duration * rapport);
+        _this.time = Math.floor((_this.p_relDuration * rapport) / 10) * 10;
+
         for (var i = 0; i < _this.p_markers.length; i++) {
           _this.map.removeLayer(_this.p_markers[i])
         }
@@ -318,7 +340,6 @@ define([
 
       $('.total').on('click', bloum);
     },
-
   
     initClusters: function(geoJson){
       this.difference(geoJson);

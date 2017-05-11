@@ -164,6 +164,16 @@ class Generator :
     def get_page(self,query,offset,limit,order_by):
         total = self.sessionMaker.execute(select([func.count()]).select_from(query.alias())).scalar()
         order_by_clause = []
+        query = self.get_order(query, order_by)
+        # Define the limit and offset if exist
+        if limit > 0:
+            query = query.limit(limit)
+        if offset > 0:
+            query = query.offset(offset)
+        return query, total
+
+    def get_order(self, query, order_by):
+        order_by_clause = []
         for obj in order_by:
             column, order = obj.split(':')
             #if column in dictio :
@@ -178,14 +188,9 @@ class Generator :
         else :
             col= self.table.c[self.table.c.keys()[0]].asc()
             query = query.order_by(col)
-        # Define the limit and offset if exist
-        if limit > 0:
-            query = query.limit(limit)
-        if offset > 0:
-            query = query.offset(offset)
-        return query, total
+        return query
     
-    def get_geoJSON(self,criteria={},geoJson_properties = None) :
+    def get_geoJSON(self,criteria={}, geoJson_properties = None, order_by=None) :
         result=[]
         total=None
         countResult = self.count_(criteria)
@@ -196,6 +201,8 @@ class Generator :
             if countResult <= 100000 :
                 exceed = False
                 query = self.getFullQuery(criteria)
+                if order_by:
+                    query = self.get_order(query, order_by)
                 try :
                     data=self.sessionMaker.execute(query.where(self.table.c[self.columnLower['lat']] != None)).fetchall()
                 except :
