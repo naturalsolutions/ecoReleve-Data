@@ -211,7 +211,7 @@ class IndividualLocationsView(SecurityRoot):
 
         if 'geo' in self.request.params:
             result = gene.get_geoJSON(
-                criteria, ['ID', 'Date', 'type_', 'precision'])
+                criteria, ['ID', 'Date', 'type_', 'precision'], ['Date:asc'])
         else:
             result = gene.search(criteria,
                                  offset=offset,
