@@ -100,7 +100,7 @@ class IndividualsView(DynamicObjectCollectionView):
         if 'stationID' in data:
             curSta = self.session.query(Station).get(data['stationID'])
             startDate = curSta.StationDate
-
+        self.typeObj = data['FK_IndividualType']
         newIndiv = self.item.model(FK_IndividualType=self.typeObj,
                                    creationDate=datetime.now(),
                                    Original_ID='0')
@@ -124,7 +124,7 @@ class IndividualsView(DynamicObjectCollectionView):
             return 'error'
 
     def checkExisting(self, indiv):
-        indivData = indiv.PropDynValuesOfNow
+        indivData = indiv.__properties__
 
         searchInfo = {'criteria':
                             [{'Column': key,

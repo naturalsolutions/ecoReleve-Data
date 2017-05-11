@@ -198,6 +198,7 @@ define([
 			this.element.$el.css({
 				'margin': '5px 10px'
 			});
+			this.bbfe.$el.click();
 		  return this.element.el;
 		};
 

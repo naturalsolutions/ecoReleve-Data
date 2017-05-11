@@ -171,7 +171,7 @@ define([
 
     fetchDisplayValue: function(val){
       var _this = this;
-      if (val instanceof object && val.displayValue){
+      if (val instanceof Object && val.displayValue){
         val = val.displayValue;
       }
       $.ajax({
@@ -342,8 +342,6 @@ define([
 
     getNewFunc: function(ctx) {
       var _this = this;
-      var _this = this;
-
       var model;
       if( _this.form) {
         model =  _this.form.model;
