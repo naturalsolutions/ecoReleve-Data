@@ -213,32 +213,76 @@ define([
         var comparator = function (valueA, valueB, nodeA, nodeB, isInverted) {
           var value1;
           var value2;
-          if(valueA && valueA instanceof Object){
-            value1 = valueA.displayValue;
-          } else {
-            value1 = valueA;
-          }
+          if( typeof(valueA) === 'number' || typeof(valueB) === 'number' ) {
+            if( !valueA && !valueB ) {
+              return 0;
+            }
+            if(!valueA) {
+              if(isInverted) {
+                return -1;
+              }
+              else {
+                return 1;
+              }
+            }
+            if(!valueB) {
+              if (isInverted) {
+                return 1;
+              }
+              else {
+                return -1;
+              }
+            }
 
-          if(valueB && valueB instanceof Object){
-            value2 = valueB.displayValue;
-          } else {
-            value2 = valueB;
+            return valueA - valueB;
           }
+          else {
+            if(valueA && valueA instanceof Object){
+              value1 = valueA.displayValue;
+            } else {
+              value1 = valueA;
+            }
 
-          if(!valueA){
-            value1 = '';
-          }
-          if(!valueB){
-            value2 = '';
-          }
+            if(valueB && valueB instanceof Object){
+              value2 = valueB.displayValue;
+            } else {
+              value2 = valueB;
+            }
 
-          switch(typeof value1){
-            case 'number':
-              return value1 - value2;
-            default:
-              return value1 < value2; //isInverted?
-          }
+            if(!valueA){
+              value1 = '';
+            }
+            if(!valueB){
+              value2 = '';
+            }
+
+            if( value1 === '' && value2 === '' ) {
+              return 0;
+            }
+            if(value1 === '') {
+              if(isInverted) {
+                return -1;
+              }
+              else {
+                return 1;
+              }
+            }
+            if(value2 === '') {
+              if (isInverted) {
+                return 1;
+              }
+              else {
+                return -1;
+              }
+            }
+            if( value1.toLowerCase() > value2.toLowerCase() ) {
+              return 1;
+            }
+            else {
+              return -1;
+            }
         }
+      }
         col.comparator = comparator;
 
         if(col.field == 'FK_ProtocoleType'){
@@ -947,7 +991,7 @@ define([
             }
 
             //finaly check if empty
-            if(val != null && val != 'undefined' && val != ''){
+            if(val != 'undefined'){
               empty = false;
 
               //finaly copy node data in the object

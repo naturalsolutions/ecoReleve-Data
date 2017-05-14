@@ -197,8 +197,8 @@ define([
             this.isTermError = true;
 
             if (this.isEmptyVal(displayValue)) {
+                this.isTermError = false;
                 this.displayError(false);
-                this.isTermError = false;                
                 return;
             }
 
