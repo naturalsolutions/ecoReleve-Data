@@ -119,6 +119,8 @@ define([
             //ex: sta_44960
             var id = params.data.ID.split('_')[1];
             return id;
+          } else {
+            return params.data.ID;
           }
         }
       },{
