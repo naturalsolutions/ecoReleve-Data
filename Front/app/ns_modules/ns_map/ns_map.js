@@ -223,14 +223,16 @@ define([
       var firstDate = geoJson.features[0].properties.Date;
 
       var _date2;
+
       //2 recalculate if speed changes
+
       for (var i = 0; i < geoJson.features.length; i++) {
 
         _date2 = geoJson.features[i].properties.Date;
 
         ms = moment(_date2, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
         ms = speed * ms;
-        ms = Math.floor(ms/10) * 10;
+        ms = Math.floor(ms / 10) * 10;
 
         obj[ms] = geoJson.features[i];
       }
@@ -241,28 +243,19 @@ define([
       
       this.p_relDuration = speed * this.p_realDuration;
 
-      console.log('total secondes:' + (this.p_relDuration / 1000));
+
+
+      console.warn(this.msToReadable(this.p_relDuration));
     },
   
     msToReadable: function(ms){
       ms = Math.round(ms);
 
-      // var x = ms / 1000;
-      // var seconds = x % 60;
-      // x /= 60;
-      // var minutes = x % 60;
-      // x /= 60;
-      // var hours = x % 24;
-      // x /= 24;
-      // var days = x;
+      var seconds = Math.floor(ms / 1000) % 60;
 
-      var seconds = Math.round((ms / 1000) % 60);
+      var minutes = Math.floor(ms / 1000 / 60) % 60;
 
-      var minutes = Math.round((ms / (1000*60)) % 60);
-
-      var hours   = Math.round((ms / (1000*60*60)) % 24);
-
-      return ms / 1000;
+      var hours   = Math.floor(ms / (1000 * 60 * 60)) % 24;
 
       return hours + ':' + minutes + ':' + seconds;
     },
@@ -272,6 +265,8 @@ define([
       var speed = 1000;
 
       var firstDate = geoJson.features[0].properties.Date;
+
+      _this.map.setView(geoJson.features[0].geometry.coordinates, 10/*, zoom*/);
       var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date;
         
       this.p_realDuration = moment(lastDate, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
@@ -287,6 +282,7 @@ define([
 
       function frame() {
         if(_this.time % 1000 === 0){
+          console.warn(_this.msToReadable(_this.time));
         }
 
         if(_this.time >= _this.p_relDuration) {
@@ -313,7 +309,7 @@ define([
 
             m.addTo(_this.map);
             var center = m.getLatLng();
-            _this.map.setView(center, 10/*, zoom*/);
+            
           }
 
           var width = (_this.time /_this.p_relDuration * 100);
@@ -332,12 +328,26 @@ define([
         }
       };
 
-      $('#map').css('height', '90%');
-      $('#map').parent().append('<div height="30%" style="padding: 20px;" class="timeline">\
+      var handleSpeed = function(e){
+        var value = $(e.currentTarget).val();
+        
+        _this.setValuesFromSpeed(geoJson, value);
+      };
+
+
+      $('#map').css('height', '80%');
+      $('#map').parent().append('<div height="20%" style="padding: 20px;" class="timeline">\
         <div style="height: 10px; background: grey; width: 100%"  class="total"></div>\
         <div style="height: 5px; background: red; width: 0%"  class="bar"></div>\
-      </div>');
+      </div>\
+      <div class="col-xs-6">\
+      <input class="col-xs-6" id="speed" min=1000 max=24000 defaultValue=1000 step=1000 width="100" type="range">\
+      </div>\
+      <span class="js-cursor"></span>\
+      <span class="js-infos"></span>\
+      ');
 
+      $('#speed').on('change', handleSpeed);
       $('.total').on('click', bloum);
     },
   
