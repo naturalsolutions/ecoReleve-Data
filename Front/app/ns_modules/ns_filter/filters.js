@@ -275,10 +275,6 @@
                         });
                     }
                 }
-
-                if(this.filtersValues && this.filtersValues[data[key].name] && (this.filtersValues[data[key].name].operatorValue).indexOf('null') != -1) {
-                  form.$el.find('span.filter').addClass('hide');
-                }
                 this.getContainer().find("input[type='checkbox']").on('click', this.clickedCheck);
                 this.forms.push(form);
                 this.filterLoaded();
@@ -702,7 +698,7 @@
 
                     }
                     else {
-                        if (value.Value || value.Operator == 'is null' || value.Operator == 'is not null') {
+                        if (value.Value || value.Operator == 'is null') {
                             this.criterias.push(value);
                             currentForm.$el.find('input.filter').addClass('active');
                         }
