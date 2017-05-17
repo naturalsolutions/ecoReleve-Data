@@ -21,13 +21,13 @@ define([
   'ns_grid/customCellRenderer/dateTimeRenderer',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
-
+  'moment',
   'i18n'
 
 ], function($, _, Backbone, Marionette, AgGrid, Swal,
   CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter,
   CustomTextAutocompleteFilter, utils_1, Renderers, Editors,
-  Decimal5Renderer, DateTimeRenderer, ObjectPicker
+  Decimal5Renderer, DateTimeRenderer, ObjectPicker,moment
 ) {
 
   'use strict';
@@ -213,7 +213,18 @@ define([
         var comparator = function (valueA, valueB, nodeA, nodeB, isInverted) {
           var value1;
           var value2;
-          if( typeof(valueA) === 'number' || typeof(valueB) === 'number' ) {
+
+          if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()  ) { //detect date
+            //then convert it to timestamp (number)
+            if(valueA) { 
+              valueA = moment(valueA , "DD/MM/YYYY HH:mm:ss" ).valueOf();
+            }
+            if(valueB){
+              valueB = moment(valueB ,  "DD/MM/YYYY HH:mm:ss" ).valueOf();
+            }
+          }
+
+          if( typeof(valueA) === 'number' || typeof(valueB) === 'number' ) { //number
             if( !valueA && !valueB ) {
               return 0;
             }
@@ -236,7 +247,7 @@ define([
 
             return valueA - valueB;
           }
-          else {
+          else { //string
             if(valueA && valueA instanceof Object){
               value1 = valueA.displayValue;
             } else {
