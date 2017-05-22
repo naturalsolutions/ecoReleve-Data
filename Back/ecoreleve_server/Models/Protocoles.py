@@ -39,7 +39,7 @@ class Observation(Base, ObjectWithDynProp):
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
 
     Observation_children = relationship(
-        "Observation", cascade="all, delete-orphan")
+        "Observation", cascade="all, delete-orphan", order_by='Observation.ID')
     SubObservation_children = relationship(
         "ObservationDynPropSubValue", cascade="all, delete-orphan")
     Equipment = relationship(
@@ -166,6 +166,7 @@ class Observation(Base, ObjectWithDynProp):
         typeName = 'children'
         if self.Observation_children != []:
             typeName = self.Observation_children[0].GetType().Name
+
             for subObs in self.Observation_children:
                 subObs.LoadNowValues()
                 flatObs = subObs.getFlatObject()
