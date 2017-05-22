@@ -33,17 +33,19 @@ define([
 		  var col = params.column.colDef;
 
 		  var value = params.value;
-		  var valueToDisplay;
-		  if(value instanceof Object){
-				valueToDisplay = params.value.label;
-		  	value = params.value.value;
-		  }
 
+			if(params.charPress){
+				if(value instanceof Object){
+					value.displayValue = params.charPress;
+					value.value = params.charPress;
+				} else {
+					value = params.charPress;
+				}
+			}
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,
 		    formGrid: true,
-				valueToDisplay: valueToDisplay
 		  };
 			if(col.form){
 				options.form = col.form;
@@ -109,7 +111,6 @@ define([
 		};
 
 
-
     var ThesaurusEditor = function () {};
 		ThesaurusEditor.prototype = new CustomEditor();
 
@@ -119,17 +120,21 @@ define([
 			this.bbfe.itemClick = function(){
 				_this.element.$el.change();
 			};
+			this.bbfe.getValue = function(){
+				var displayValue = this.getDisplayedValue();
+				this.validateValue(displayValue);
+				return ThesaurusPicker.prototype.getValue.call(this,options);
+			};
 		  this.element = this.bbfe.render();
 		};
 
 		ThesaurusEditor.prototype.getValue = function(){
 		  return {
 		  	value: this.element.getValue(),
-		  	label: this.element.getDisplayedValue(),
+		  	displayValue: this.element.getDisplayedValue(),
+				error: this.element.isTermError,
 		  }
 		};
-
-
 
 
     var ObjectPickerEditor = function () {};
@@ -143,7 +148,7 @@ define([
 		ObjectPickerEditor.prototype.getValue = function(){
 		  return {
 		  	value: this.element.getValue(),
-		  	label: this.element.getDisplayValue(),
+		  	displayValue: this.element.getDisplayValue(),
 		  }
 		};
 
@@ -159,7 +164,7 @@ define([
 		AutocompleteEditor.prototype.getValue = function(){
 		  return {
 		  	value: this.element.getValue(),
-		  	label: this.element.$input[0].value //not sure why
+		  	displayValue: this.element.$input[0].value //not sure why
 		  } 
 		};
 
@@ -196,9 +201,6 @@ define([
 		};
 
 
-
-
-
     var DateTimeEditor = function () {};
 
     DateTimeEditor.prototype = new CustomEditor();
@@ -207,7 +209,6 @@ define([
 		  this.element = this.bbfe.render();
 
 		};
-
 
     var SelectEditor = function () {};
 
@@ -225,11 +226,9 @@ define([
 		SelectEditor.prototype.getValue = function(){
 			return {
 				value: this.element.getValue(),
-				label: this.element.$el.find('option:selected').text(),
+				displayValue: this.element.$el.find('option:selected').text(),
 			}
 		};
-
-
 
 
 		Editors.ThesaurusEditor = ThesaurusEditor;

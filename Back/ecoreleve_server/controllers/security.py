@@ -3,23 +3,73 @@ from pyramid_jwtauth import JWTAuthenticationPolicy
 from pyramid.security import (
     Allow,
     Authenticated,
+    ALL_PERMISSIONS,
+    Everyone,
+    Deny
 )
 
 
-class SecurityRoot(object):
+class Resource(dict):
+
+    def __init__(self, ref, parent):
+        self.__name__ = ref
+        self.__parent__ = parent
+
+    def __repr__(self):
+        # use standard object representation (not dict's)
+        return object.__repr__(self)
+
+    def add_child(self, ref, klass):
+        resource = klass(ref=ref, parent=self)
+        self[ref] = resource
+
+    def integers(self, ref):
+        try:
+            ref = int(ref)
+            # if int(ref) == 0:
+            #     return False
+        except (TypeError, ValueError):
+            return False
+        return True
+
+
+class SecurityRoot(Resource):
     __acl__ = [
-        (Allow, Authenticated, 'read'),
-        (Allow, Authenticated, 'all'),
-        (Allow, 'group:admins', 'admin'),
-        (Allow, 'group:admins', 'superUser'),
-        (Allow, 'group:admins', 'all'),
-        (Allow, 'group:superUsers', 'superUser'),
-        (Allow, 'group:superUsers', 'all'),
-        # DENY_ALL
+         (Allow, Authenticated, 'read'),
+         (Allow, Authenticated, 'all'),
+         (Allow, 'group:admins', 'admin'),
+         (Allow, 'group:admins', 'superUser'),
+         (Allow, 'group:admins', 'all'),
+         (Allow, 'group:superUsers', 'superUser'),
+         (Allow, 'group:superUsers', 'all')
     ]
 
     def __init__(self, request):
+        Resource.__init__(self, ref='', parent=None)
         self.request = request
+
+    def __getitem__(self, item):
+        if item == 'ecoReleve-Core':
+            return RootCore(item, self)
+
+
+class RootCore(SecurityRoot):
+
+    listChildren = []
+
+    def __init__(self, ref, parent):
+        Resource.__init__(self, ref, parent)
+        self.add_children()
+
+    def add_children(self):
+        for ref, klass in self.listChildren:
+            self.add_child(ref, klass)
+
+    def __getitem__(self, item):
+        return self.get(item)
+
+    def retrieve(self):
+        return {'next items': self}
 
 
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
@@ -82,6 +132,45 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
             return HTTPUnauthorized(content, headers=self.forget(request))
 
         return HTTPForbidden(content, headers=self.forget(request))
+
+
+context_permissions = {
+    'stations': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', ('create', 'update', 'read')),
+                (Allow, 'group:users', ('create', 'update', 'read'))
+              ],
+
+    'observations': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', ALL_PERMISSIONS),
+                (Allow, 'group:users', ALL_PERMISSIONS)
+              ],
+
+    'individuals': [
+                (Allow, 'group:admins', ('create', 'update', 'read')),
+                (Allow, 'group:superUsers', ('update', 'read')),
+                (Allow, 'group:users', 'read')
+              ],
+
+    'monitoredSites': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', ('create', 'update', 'read')),
+                (Allow, 'group:users', ('create', 'update', 'read'))
+              ],
+
+    'sensors': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', 'read'),
+                (Allow, 'group:users', 'read')
+              ],
+
+    'release': [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Deny, 'group:superUsers', ALL_PERMISSIONS),
+                (Deny, 'group:users', ALL_PERMISSIONS),
+              ],
+}
 
 
 routes_permission = {

@@ -32,14 +32,17 @@ define([
     },
 
     template: '\
-        <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 300px">\
-        </div>\
+        <div class="btn-group-grid">\
         <button type="button" class="js-btn-add btn btn-success hide"><span class="reneco reneco-add"></span></button>\
         <button type="button" class="js-btn-delete btn btn-danger btn-sm hide"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
+        </div>\
+        <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 300px">\
+        </div>\
     ',
 
     className: 'sub-grid-form' ,
     addRow: function(){
+      this.gridView.gridOptions.api.setSortModel({});
       this.gridView.gridOptions.api.addItems([{}]);
       this.$el.trigger('change');
     },
@@ -50,21 +53,21 @@ define([
       if(!selectedNodes.length){
         return;
       }
-      
-      // var opt = {
-      //   title: 'Are you sure?',
-      //   text: 'selected rows will be deleted'
-      // };
-      // window.swal(opt, 'warning', function() {
-      //   _this.gridView.gridOptions.api.removeItems(selectedNodes);
-      // });
+
+      this.gridView.gridOptions.api.deletingRows = true;
+      this.gridView.gridOptions.api.setSortModel({});
       _this.gridView.gridOptions.api.removeItems(selectedNodes);
       this.$el.trigger('change');
+      this.gridView.gridOptions.api.deletingRows = false;
     },
 
     initialize: function(options){
       var _this = this; 
-      console.log(options)
+
+      this.validators = options.schema.validators || [];
+
+      this.validators.push({ type: 'SubFormGrid', parent: this });
+
       this.editable = options.schema.editable;
       this.form = options.form;
       this.subProtocolType = options.schema.options.protocoleType;
@@ -116,6 +119,7 @@ define([
         clientSide: true,
         form: _this.form,
         url: url,
+        displayRowIndex: true,
         gridOptions: {
           editType: 'fullRow',
           singleClickEdit : true,
@@ -154,6 +158,7 @@ define([
     },
 
     formatColumns: function(schema){
+      var _this = this;
       var odrFields = schema.fieldsets[0].fields;
                         
       var columnsDefs = [];
@@ -185,18 +190,17 @@ define([
     },
 
 
-
     getValue: function() {
       var rowDataAndErrors = this.gridView.getRowDataAndErrors();
 
       if(rowDataAndErrors.errors.length){
-        this.handleErrors(rowDataAndErrors.errors);
+        this.isError = true;
         return;
+      } else {
+        this.isError = false;
       }
 
-      if(rowDataAndErrors.errors.length){
-        this.isError = true;
-      }
+      this.gridView.gridOptions.api.setSortModel({});
 
       for (var i = 0; i < rowDataAndErrors.rowData.length; i++) {
         rowDataAndErrors.rowData[i]['FK_ProtocoleType'] = this.subProtocolType;

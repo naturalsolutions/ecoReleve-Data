@@ -107,7 +107,11 @@ define([
         })));
         this.setElement($el);
 		$($el[0]).datetimepicker(_this.datetimepickerOptions);
-
+        $($el[0]).on('dp.change', function(){
+            _this.$el.find('input').trigger('change');
+            _this.trigger('change', this);
+        }
+        )
         //tmp solution ? datetimepicker remove the value
         /*
         if(this.options){

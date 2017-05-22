@@ -7,9 +7,10 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     var CustomRenderer = function(){
     };
 
+    //used on init but also for sorting and filtering!
     CustomRenderer.prototype.init = function (params) {
     	this.eGui = document.createElement('span'); //not sure it's necessary
-
+      this.params = params;
       var value = this.handleValues(params);
 
       //check only before the first render of the grid, otherwise, use refresh
@@ -21,10 +22,10 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       this.isEmptyRow = this.checkIfEmptyRow(params);
       
       if(this.isEmptyRow){
-        //console.log('empty');
         this.requiredValidation(params, value);
       } else {
         // after sort filter etc check if there was already an error then display it
+        this.formatValueToDisplay(value);
         if(params.data._errors !== undefined){
           for (var i = 0; i < params.data._errors.length; i++) {
             if(params.data._errors[i] == params.colDef.field){
@@ -34,19 +35,20 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         }
       }
 
-    };    
+    };
 
     CustomRenderer.prototype.checkIfEmptyRow = function(params){
       //new lines & empty lines, ciritic
-      //console.log(params.data);
       var keys = Object.keys(params.data);
       var empty = true;
       for( var key in params.data ){
         if(key == '_errors' && params.data._errors) {
           continue;
         }
+        if(key == 'index') {
+          continue;
+        }
         //riscky
-        //console.log(params.data[key]);
         var val = params.data[key]
         if(params.data[key] instanceof Object){
           val = params.data[key].value;
@@ -64,18 +66,17 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
     CustomRenderer.prototype.handleValues = function(params){
       var value = params.value;
-      var valueTodisplay;
+      var displayValue;
 
       //critic
       if(value instanceof Object){
         value = params.value.value;
-        valueTodisplay = params.value.label;
+        displayValue = params.value.displayValue;
+      } else {
+        displayValue = value;
       }
-
-      if(!valueTodisplay)
-        valueTodisplay = value;
-
-      this.formatValueToDisplay(valueTodisplay);
+      
+      this.formatValueToDisplay(displayValue);
 
       return value;
     };
@@ -85,7 +86,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         this.deferredValidation(params, value);
       } else {
         this.requiredValidation(params, value)
-      }      
+      }
     };
 
     CustomRenderer.prototype.requiredValidation = function(params, value){
@@ -112,6 +113,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       }
     };
 
+    //used only after comeback from editor!
   	CustomRenderer.prototype.refresh = function (params) {
       this.isEmptyRow = false;
       this.eGui.innerHTML = '';
@@ -137,7 +139,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   		this.error = true;
 
       if(!this.isEmptyRow){
-    		params.data[params.colDef.field] = '';
     	  $(params.eGridCell).addClass('ag-cell-error');
       }
 
@@ -180,50 +181,31 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 		var ThesaurusRenderer = function(options) {};
     ThesaurusRenderer.prototype = new CustomRenderer();
     ThesaurusRenderer.prototype.deferred = true;
+    ThesaurusRenderer.prototype.handleValues = function(params){
+      var objectValue = params.value;
+      this.formatValueToDisplay(objectValue); // prefer manage value to display here in order to keep object value all along the time
+      return objectValue;
+    };
+    
+    ThesaurusRenderer.prototype.formatValueToDisplay = function(objectValue) {
+      var valueToDisplay;
+      if(!objectValue){
+        return;
+      }
+      if(objectValue.displayValue !== ''){
+        valueToDisplay = objectValue.displayValue;
+      } else {
+        valueToDisplay = objectValue.value;
+      }
+  	  $(this.eGui).html(valueToDisplay);
+  	};
 
-		ThesaurusRenderer.prototype.deferredValidation = function(params, value){
-      var _this = this;
-      var TypeField = 'FullPath';
-      if (value && value.indexOf('>') == -1) {
-          TypeField = 'Name';
-      }  
-      var data = {
-        sInfo: value,
-        sTypeField: TypeField,
-        iParentId: params.colDef.schema.options.startId,
-        lng: params.colDef.schema.options.lng //language
-      };
-
-      var url = params.colDef.schema.options.wsUrl + '/getTRaductionByType';
-
-      $.ajax({
-        url: url,
-        data: JSON.stringify(data),
-        dataType: 'json',
-        type: 'POST', //should be a GET
-        contentType: 'application/json; charset=utf-8',
-        context: this,
-        success: function (data){
-          if(data['TTop_FullPath'] != null){
-            this.formatValueToDisplay(data['TTop_NameTranslated']);
-            this.handleRemoveError(params);
-            var values = {
-              value: data['TTop_FullPath'],
-              label: data['TTop_NameTranslated']
-            };
-            this.manualDataSet(params, values);
-
-          } else {
-            this.handleError(params);
-          }
-        },
-        error: function (data) {
-          if (data.statusText == 'abort') {
-            return;
-          }
-          this.handleError(params);
-        }
-      });
+		ThesaurusRenderer.prototype.deferredValidation = function(params, objectValue){
+      if(objectValue.error || (objectValue.value !== '' && objectValue.displayValue === '')){
+        this.handleError(params);
+      } else {
+        this.handleRemoveError(params);
+      }
 
       return true;
     };
@@ -232,33 +214,37 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 		ObjectPickerRenderer.prototype = new CustomRenderer();
     ObjectPickerRenderer.prototype.deferred = true;
 
-    ObjectPickerRenderer.prototype.deferredValidation = function(params, value) {
+    ObjectPickerRenderer.prototype.init = function (params) {
       var colDef = params.colDef;
       var name = colDef.field.split('FK_')[1];
-      var objectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
-      var url = objectName + '/' + value;
-      this.objectName = objectName;
+      this.objectName = name.charAt(0).toLowerCase() + name.slice(1) + 's';
 
-      if (objectName != 'individuals') {
+      CustomRenderer.prototype.init.call(this, params);
+    };
+
+    ObjectPickerRenderer.prototype.deferredValidation = function(params, value) {
+      var colDef = params.colDef;
+      var url = this.objectName + '/' + value;
         $.ajax({
           url: url,
           context: this,
           success: function(data){
+
             this.handleRemoveError(params);
-            var valueToDisplay;
+            var displayValue;
             
             if (colDef.schema.options && colDef.schema.options.usedLabel){
-              valueToDisplay = data[colDef.schema.options.usedLabel];
+              displayValue = data[colDef.schema.options.usedLabel];
             } else {
-              valueToDisplay = data[colDef.field];
+              displayValue = data['ID'];
             }
-
-            this.formatValueToDisplay(valueToDisplay);
 
             var values = {
               value: value,
-              label: valueToDisplay
+              displayValue: displayValue
             };
+
+            this.formatValueToDisplay(values);
 
             this.manualDataSet(params, values);
 
@@ -267,69 +253,63 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           }
 
         });
-      } else {
-        this.formatValueToDisplay(value);
-      }
     };
 
     ObjectPickerRenderer.prototype.formatValueToDisplay = function (value) {
-      var url = 'http://'+window.location.hostname+window.location.pathname+'#'+this.objectName+'/'+value;
+      var valueReal;
+      var displayValue;
+
+      if(value instanceof Object){
+        rValue = value.value;
+        displayValue = value.displayValue;
+      } else {
+        rValue = value;
+        displayValue = value;
+      }
+
+      if(!displayValue){
+        displayValue = '';
+      }
+
+      var url = 'http://' + window.location.hostname+window.location.pathname + '#' + this.objectName + '/' + rValue;
 
       var dictCSS = {
         'individuals':'reneco reneco-bustard',
         'sensors': 'reneco reneco-emitters',
         'monitoredSites': 'reneco reneco-site',
       };
-      if(!value){
-        value = '';
+
+      if(!rValue){
+        rValue = '';
       }
       var tpl = '<div>\
-                    <a href="'+ url +'" class="'+dictCSS[this.objectName]+'" target="_blank">\
-                    </a>\
-                    <span>'+value+'</span> \
+                    <a href="'+ url +'" class="'+dictCSS[this.objectName]+' grid-link" target="_blank"></a>\
+                    <span>' + displayValue + '</span> \
                 </div>';
       $(this.eGui).html(tpl);
     };
-
-    ObjectPickerRenderer.prototype.init = function (params) {
-    	this.eGui = document.createElement('span'); //not sure it's necessary
-
-      var value = this.handleValues(params);
-
-      //check only before the first render of the grid, otherwise, use refresh
-      // if(!params.api.firstRenderPassed){
-      //   this.handleValueValidation(params, value);
-      // }
-
-      this.handleValueValidation(params, value);
-      this.isEmptyRow = this.checkIfEmptyRow(params);
-      
-      if(this.isEmptyRow){
-        //console.log('empty');
-        this.requiredValidation(params, value);
-      } else {
-        // after sort filter etc check if there was already an error then display it
-        if(params.data._errors !== undefined){
-          for (var i = 0; i < params.data._errors.length; i++) {
-            if(params.data._errors[i] == params.colDef.field){
-              this.handleError(params);
-            }
-          }
-        }
-      }
-
-    };    
 
 
     var CheckboxRenderer = function() {}
     CheckboxRenderer.prototype = new CustomRenderer();
     CheckboxRenderer.prototype.formatValueToDisplay = function (value) {
+      var _this = this;
       var checked = ''; 
       if(value == 1)
         checked = 'checked';
-
-      var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
+      if(this.params.colDef.editable){
+        var chk = '<input class="form-control" type="checkbox" '+ checked +' />';
+      } else {
+        var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
+      }
       $(this.eGui).html(chk);
+      $(this.eGui).find('input').on('click', function(e){
+        if($(this).attr('checked')){
+          _this.params.data[_this.params.colDef.field] = 0;
+        } else {
+          _this.params.data[_this.params.colDef.field] = 1;
+        }
+      });
     };
 
 
@@ -383,10 +363,21 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       });
     };
 
-    var SelectRenderer = function() {}
+    var SelectRenderer = function(options) {}
     SelectRenderer.prototype = new CustomRenderer();
-    
+    SelectRenderer.prototype.formatValueToDisplay = function(value){
+      var displayValue;
+      var valueFound = this.params.colDef.options.find(function(obj){
+        return obj.val == value;
+      });
 
+      if (valueFound) {
+        displayValue = valueFound.label;
+      } else {
+        displayValue = value;
+      }
+      $(this.eGui).html(displayValue);
+    };
 
     Renderers.NumberRenderer = NumberRenderer;
     Renderers.TextRenderer = TextRenderer;
