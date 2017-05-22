@@ -173,6 +173,10 @@ define([
           if(_this.from == 'release'){
             _this.$el.find('[name="fieldActivityId"]').val('1').change();
           }
+          _this.$el.find('input[name="FK_MonitoredSite"]').on('change', function() {
+              var msId = _this.$el.find('input[name="FK_MonitoredSite"]').attr('data_value');
+              _this.getCoordFromMs(msId);
+          });
         }
       });
 
@@ -203,49 +207,22 @@ define([
       this.rdy = this.nsForm.jqxhr;
     },
 
-    // getCoordFromMs: function(msId) {
-    //   var _this = this;
-    //   var url = 'monitoredSites/' + msId;
+    getCoordFromMs: function(msId) {
+      var _this = this;
+      var url = 'monitoredSites/' + msId;
 
-    //   $.ajax({
-    //     context: this,
-    //     url: url,
-    //   }).done(function(data) {
-    //     var lat = data['LAT'];
-    //     var lon = data['LON'];
-
-    //     _this.histoMonitoredSite = data;
-    //     _this.histoMonitoredSite.error = false;
-
-    //     $.ajax({
-    //       context: this,
-    //       url: 'monitoredSites/'+_this.histoMonitoredSite.FK_MonitoredSite+'/history/',
-    //     }).done(function(data) {
-    //       _this.histoMonitoredSite.veryFirstDate = new moment().valueOf();
-    //       _this.histoMonitoredSite.veryLastDate = new moment('00/00/0000 00:00:00','DD/MM/YYYY HH:mm:ss').valueOf();
-    //       var tmpDate = null;
-    //       for( var i = 0 ; i < data[1].length ; i++ ) {
-    //         tmpDate = new moment(data[1][i].StartDate , 'DD/MM/YYYY HH:mm:ss');
-    //         if( _this.histoMonitoredSite.veryFirstDate >= tmpDate.valueOf() ) {
-    //           _this.histoMonitoredSite.veryFirstDate = tmpDate.valueOf();
-    //         }
-    //         if ( _this.histoMonitoredSite.veryLastDate <= tmpDate.valueOf() ) {
-    //           _this.histoMonitoredSite.veryLastDate = tmpDate.valueOf();
-    //         }
-    //       }
-
-    //       _this.$el.find('input[name="LAT"]').val(_this.histoMonitoredSite.LAT).change();
-    //       _this.$el.find('input[name="LON"]').val(_this.histoMonitoredSite.LON).change();
-    //     }).fail(function() {
-    //       console.error('an error occured');
-    //       _this.histoMonitoredSite.error = true;
-    //     });
-
-    //   }).fail(function() {
-    //     console.error('an error occured');
-    //     _this.histoMonitoredSite.error = true;
-    //   });
-    // },
+      $.ajax({
+        context: this,
+        url: url,
+      }).done(function(data) {
+        var lat = data['LAT'];
+        var lon = data['LON'];
+        _this.$el.find('input[name="LAT"]').val(lat).change();
+        _this.$el.find('input[name="LON"]').val(lon).change();
+      }).fail(function() {
+        console.error('an error occured');
+      });
+    },
 
     afterSave: function(model, resp) {
       var id = model.get('ID');
