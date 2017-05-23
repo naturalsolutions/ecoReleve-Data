@@ -366,7 +366,8 @@ class DynamicObjectCollectionView(CustomView):
         if not moduleName:
             moduleName = self.moduleFormName
 
-        form = self.getConfigJSON(moduleName + mode, self.typeObj)
+        # form = self.getConfigJSON(moduleName + mode, self.typeObj)
+        form = None
         if not form:
             form = self.objectDB.getForm(mode, objectType, moduleName)
             self.setConfigJSON(moduleName + mode, objectType, form)
@@ -378,7 +379,8 @@ class DynamicObjectCollectionView(CustomView):
         if not type_:
             type_ = self.typeObj
 
-        gridCols = self.getConfigJSON(moduleName, type_)
+        # gridCols = self.getConfigJSON(moduleName, type_)
+        gridCols = None
         if not gridCols:
             gridCols = self.objectDB.getGrid(type_=type_, moduleName=moduleName)
             self.setConfigJSON(moduleName, type_, gridCols)
@@ -393,7 +395,8 @@ class DynamicObjectCollectionView(CustomView):
         if not type_:
             type_ = self.typeObj
 
-        filters = self.getConfigJSON(moduleName+'Filter', type_)
+        # filters = self.getConfigJSON(moduleName+'Filter', type_)
+        filters = None
         if not filters:
             filtersList = self.objectDB.getFilters(type_=type_, moduleName=moduleName)
             filters = {}
