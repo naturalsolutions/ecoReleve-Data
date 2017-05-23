@@ -1,0 +1,10 @@
+
+ DELETE [ModuleGrids]
+  where Module_ID = 8 and Name = 'Individual_Status'
+  GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('112_delete_Filter_Status_In_indivFilter',GETDATE(),(SELECT db_name()))
+
+
+GO

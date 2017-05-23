@@ -22,6 +22,13 @@ class ReleaseIndividualsView(IndividualsView):
 
     moduleGridName = 'IndivReleaseGrid'
 
+    def __init__(self, ref, parent):
+        IndividualsView.__init__(self, ref, parent)
+        self.__acl__ = context_permissions['release']
+
+    def getFilter(self, type_=None, moduleName=None):
+        return []
+
     def handleCriteria(self, params):
         criteria = [{
             'Column': 'LastImported',
