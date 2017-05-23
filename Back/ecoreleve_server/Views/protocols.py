@@ -62,7 +62,7 @@ class ObservationView(DynamicObjectView):
             else:
                 id_ = self.objectDB.ID
                 DynamicObjectView.delete(self)
-        else :
+        else:
             id_ = None
         response = {'id': id_}
         return response
