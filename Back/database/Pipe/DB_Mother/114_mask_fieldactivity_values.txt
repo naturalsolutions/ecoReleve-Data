@@ -1,0 +1,12 @@
+UPDATE [dbo].[ModuleForms]
+SET Options= 'SELECT [Name] as label , ID as val FROM [fieldActivity] where [Name] not in (''Point-count: Vertebrate contact'',''Point-count: characteristics'') UNION SELECT '''' as label , -1 as val'
+
+ WHERE Name like 'fieldActivityId'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('114_mask_fieldactivity_values',GETDATE(),(SELECT db_name()))
+
+
+GO
