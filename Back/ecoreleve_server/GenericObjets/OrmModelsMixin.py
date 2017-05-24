@@ -12,8 +12,9 @@ from sqlalchemy import (Column,
                         event,
                         Table,
                         Index,
-                        UniqueConstraint)
-from sqlalchemy.orm import relationship, aliased, class_mapper
+                        UniqueConstraint,
+                        Table)
+from sqlalchemy.orm import relationship, aliased, class_mapper, mapper
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declared_attr
 from ..Models import Base
@@ -81,6 +82,11 @@ class GenericType(ORMUtils):
                                  ForeignKey(cls.parent.__tablename__+'DynProp.id'),
                                  nullable=False
                                  )
+            linkedTable = Column('LinkedTable', String(255))
+            linkedField = Column('LinkedField', String(255))
+            linkedID = Column('LinkedID', String(255))
+            linkedSourceID = Column('LinkedSourceID', String(255))
+
         return relationship(TypeProperties)
 
     @declared_attr
@@ -358,6 +364,75 @@ class HasDynamicProperties(ORMUtils):
     def get_property_by_name(self, name):
         return self.properties_by_name.get(name)
 
+    # def getLinkedField(self):
+    #     curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + \
+    #         self.GetType().GetDynPropContextTable()
+    #     curQuery += ' C  JOIN ' + self.GetType().GetDynPropTable() + ' D ON C.' + \
+    #         self.GetType().Get_FKToDynPropTable() + '= D.ID '
+    #     curQuery += ' where C.' + self.GetType().GetFK_DynPropContextTable() + \
+    #         ' = ' + str(self.GetType().ID)
+    #     curQuery += ' AND C.LinkedTable is not null'
+    #     Values = self.session.execute(curQuery).fetchall()
+
+    #     return [dict(row) for row in Values]
+
+    # def linkedFieldDate(self):
+    #     return datetime.now()
+
+    # def updateLinkedField(self, data, useDate=None):
+    #     if useDate is None:
+    #         useDate = self.linkedFieldDate()
+
+    #     linkedFields = self.getLinkedField()
+    #     entitiesToUpdate = {}
+    #     for linkProp in linkedFields:
+    #         curPropName = linkProp['Name']
+    #         linkedEntity = LinkedTables[linkProp['LinkedTable']]
+    #         linkedPropName = linkProp['LinkedField'].replace('@Dyn:', '')
+    #         linkedSource = self.getProperty(
+    #             linkProp['LinkSourceID'].replace('@Dyn:', ''))
+    #         linkedObj = self.session.query(linkedEntity).filter(
+    #             getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
+
+    #         if linkedObj in entitiesToUpdate:
+    #             entitiesToUpdate[linkedObj][linkedPropName] = self.getProperty(curPropName)
+    #         else:
+    #             entitiesToUpdate[linkedObj] = {linkedPropName: self.getProperty(curPropName)}
+
+    #     for entity in entitiesToUpdate:
+    #         data = entitiesToUpdate[entity]
+    #         entity.init_on_load()
+    #         entity.updateFromJSON(data, startDate=useDate)
+
+    # def deleteLinkedField(self, useDate=None):
+        session = dbConfig['dbSession']()
+        if useDate is None:
+            useDate = self.linkedFieldDate()
+        for linkProp in self.getLinkedField():
+            obj = LinkedTables[linkProp['LinkedTable']]
+
+            try:
+                linkedField = linkProp['LinkedField'].replace('@Dyn:', '')
+                linkedSource = self.getProperty(
+                    linkProp['LinkSourceID'].replace('@Dyn:', ''))
+                linkedObj = session.query(obj).filter(
+                    getattr(obj, linkProp['LinkedID']) == linkedSource).one()
+
+                if hasattr(linkedObj, linkedField):
+                    linkedObj.setProperty(linkedField, None)
+                else:
+                    dynPropValueToDel = linkedObj.getDynPropWithDate(
+                        linkedField, useDate)
+                    if dynPropValueToDel is not None:
+                        session.delete(dynPropValueToDel)
+
+                session.commit()
+                session.close()
+            except:
+                pass
+
+
+
 
 class MyObject(HasDynamicProperties, Base):
     __tablename__ = 'MyObject'
@@ -368,18 +443,113 @@ class MyObject(HasDynamicProperties, Base):
     1) insert conf object from config file like :
         {
             MyObject:{
-                type1:[
+                isDynamic :1/0,
+                track_history:1/0,
+                static_properties:{
+
+                },
+
+                dynamic_properties:{
                     (propType1,String),
                     (prop2_Type1,Integer),
                     (prop3_Type1,Float)
-                    ],
+                },
 
-                type2:[
-                    (propType1,String), --> same of type1
-                    (prop2_Type2,String)
-                ]
-            }
+                types:{
+                    type1:[
+                        propType1,
+                        prop2_Type1
+                        ],
+
+                    type2:[
+                        propType1,
+                        prop3_Type1
+                    ]
+
+
+                }
         }
     2) manage linkedField
 
     '''
+
+
+typeDict = {'String': String,
+            'Float': Float,
+            'Integer': Integer}
+
+storageConf = [
+    {'__tablename__': 'tropdelaballe',
+     '__classname__': 'Tropdelaballe',
+     'properties': {
+         'statics': [
+            {'name': 'tutu', 'ctype': 'String', 'clength': 255},
+            {'name': 'tata', 'ctype': 'Integer', 'clength': None},
+            {'name': 'toto', 'ctype': 'Float'}
+            ]
+        }
+    },
+    {'__tablename__': 'alleeelaaaa',
+     '__classname__': 'Alleluhia',
+     'properties': {
+        'statics': [
+            {'name': 'ahhhhhaaa', 'ctype': 'String', 'clength': 10},
+            {'name': 'oohhh', 'ctype': 'Integer', 'clength': None},
+            {'name': 'tada', 'ctype': 'Float'},
+            {'name': 'pffffff', 'ctype': 'String', 'clength': 255},
+            ],
+        'dynamics': [
+            {'name': 'dyn1', 'ctype': 'String', 'clength': 10},
+            {'name': 'dyn2', 'ctype': 'Integer', 'clength': None},
+            {'name': 'dyn3', 'ctype': 'Float'},
+            {'name': 'dyn4', 'ctype': 'String', 'clength': 255},
+            ]
+        }
+    }
+]
+
+
+class ClassBuilder(object):
+    __allORMClass__ = {}
+
+    def __init__(self, objList):
+        for obj in objList:
+            self.buildClass(obj)
+
+    def buildClass(self, dict):
+        model = {}
+        model['__tablename__'] = dict['__tablename__']
+        model = self.setStaticProperties(model, dict['properties']['statics'])
+
+        self.__allORMClass__[dict['__classname__']] = type(dict['__classname__'], (HasDynamicProperties, Base, ), model)
+
+    def setStaticProperties(self, model, properties):
+        for prop in properties:
+            model[prop['name']] = Column(prop['name'], self.getCType(prop))
+        return model
+
+    def getCType(self, property):
+        if property.get('clength', None):
+            l = property['clength']
+            return typeDict[property['ctype']](l)
+        else:
+            return typeDict[property['ctype']]
+
+    def getClass(self, classname):
+        return self.__allORMClass__.get(classname, None)
+    
+    def setDBConfTypes(self, types):
+        pass
+    
+    def setDBConfDynProp(self, dynprop):
+        pass
+    
+    def setDBConfType_DynProp(self, dynprop):
+        pass
+
+
+ClassController = ClassBuilder(storageConf)
+Alleluhia = ClassController.getClass('Alleluhia')
+
+print(Alleluhia.__dict__)
+

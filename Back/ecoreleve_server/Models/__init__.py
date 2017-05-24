@@ -147,21 +147,47 @@ LinkedTables['Protocoles'] = Protocoles
 LinkedTables['Sensor'] = Sensor
 LinkedTables['MonitoredSite'] = MonitoredSite
 
+
+
+
+
+
+
+from sqlalchemy import (Column,
+                    ForeignKey,
+                    String,
+                    Integer,
+                    Float,
+                    DateTime,
+                    select,
+                    join,
+                    func,
+                    not_,
+                    exists,
+                    event,
+                    Table,
+                    Index,
+                    UniqueConstraint,
+                    Table)
+from sqlalchemy.orm import relationship, aliased, class_mapper, mapper
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.declarative import declared_attr
+
+
+
 def test(config):
-    session = config.registry.dbmaker()
-    o = session.query(MyObject).get(1)
-    print(o)
-    print(o.type)
-    print(o._type.properties)
-    print(o.properties)
-    print(o.values)
+    # session = config.registry.dbmaker()
+    # o = session.query(MyObject).get(1)
+    # print(o)
+    # print(o.type)
+    # print(o._type.properties)
+    # print(o.properties)
+    # print(o.values)
     # values = {'FK_MyObjectType':1,
     #            'toto':'blelelelqsdqsddqsdfelele',
     #            'test1':'newsdsdccwxcx   xcwxcsdfwx  <dssss'}
 
     # o.updateValues(values, '02/08/2016')
-
-
     # o2 = MyObject(session=session)
     # o2.values={'FK_MyObjectType':1,
     #            'toto':'newtotoVal',
