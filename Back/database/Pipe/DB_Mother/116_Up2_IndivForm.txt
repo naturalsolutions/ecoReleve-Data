@@ -1,0 +1,18 @@
+/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+UPDATE f SET FormRender = 2
+FROM [ModuleForms] f
+where module_id = 9 
+
+UPDATE f SET FormRender = 1
+FROM [ModuleForms] f
+where module_id = 9 AND Name in('ID', 'Status_')
+
+GO
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('116_Up2_IndivForm',GETDATE(),(SELECT db_name()))
+
+
+GO
