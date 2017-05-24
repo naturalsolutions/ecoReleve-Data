@@ -1,0 +1,9 @@
+UPDATE ProtocoleType SET Status = 10
+WHERE Name in ('Chiroptera_detection', 'Phytosociology_releve', 'Chiroptera_capture')
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('117_Up_ProtoAsGrid',GETDATE(),(SELECT db_name()))
+
+
+GO
