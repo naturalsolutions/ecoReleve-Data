@@ -89,7 +89,6 @@ define([
         url: this.model.get('type') + '/' + this.model.get('id')  + '?geo=true',
         cluster: true,
         zoom: 3,
-        element: 'map',
         popup: true,
       });
     },

@@ -66,7 +66,7 @@ define([
         }
       },
       {
-        field: 'FK_MonitoredSite',
+        field: 'Name',
         headerName: 'Monitored site',
         cellRenderer: function(params){
           if(params.data.MonitoredSiteID) {

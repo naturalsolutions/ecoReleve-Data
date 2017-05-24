@@ -220,7 +220,7 @@ define([
           var exisits = data.exist;
           Swal({
             title: 'Stations import',
-            text: 'inserted stations :' + inserted + ', exisiting stations:' + exisits,
+            text: 'inserted stations :' + inserted + ', existing stations:' + exisits,
             type: 'success',
             showCancelButton: true,
             confirmButtonColor: 'green',

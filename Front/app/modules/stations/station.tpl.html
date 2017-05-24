@@ -20,6 +20,9 @@
             <a href="#<%= uiGridConf.name %>Tab" class="tab-link"><%= uiGridConf.label %></a>
           </li>
       <% }); %>
+      <li class="tab-ele ">
+        <a href="#mapTab" class="tab-link">Map</a>
+      </li>
       
       </ul>
       <!--<div class="js-from-btns"></div>-->
@@ -35,7 +38,10 @@
           <div class="js-rg-<%= uiGridConf.name %> full-height no-padding"></div>
         </div>
       <% }); %>
+      <div id="mapTab" class="tab-pane full-height no-padding">
+        <div id="map" class="js-map full-height no-padding"></div>
       </div>
+    </div>
 
 </div>
 
