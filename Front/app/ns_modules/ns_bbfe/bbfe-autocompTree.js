@@ -83,7 +83,7 @@ define([
 
             this.startId = options.schema.options.startId;
             this.wsUrl = options.schema.options.wsUrl;
-            this.lng = options.schema.options.lng;
+            this.lng = window.app.user.attributes.Language;
             this.timeout = options.schema.options.timeout;
 
             this.defaultValue = options.schema.defaultValue;
