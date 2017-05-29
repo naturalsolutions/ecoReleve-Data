@@ -1,0 +1,157 @@
+
+---------------------------------------------------------------------------------
+-- Stored procedure that will  ### Do something
+-- Gets: @file_ID int,
+-- Returns: @@result varchar(255)
+-- Returns: @error int
+---------------------------------------------------------------------------------
+
+IF OBJECT_ID('pr_Update_ThesaurusVal', 'P') IS NOT NULL
+DROP PROCEDURE dbo.[pr_Update_ThesaurusVal];
+GO 
+
+
+CREATE PROCEDURE [dbo].[pr_Update_ThesaurusVal]
+	@file_ID int,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorIndexes varchar(max) OUTPUT
+AS
+SET NOCOUNT ON
+
+DECLARE @SQL_STATEMENT nvarchar(max),
+@iErrorCode_exec int,
+@TLogMessage_ID int,
+@Creator int,
+@ObjectType int,
+@TempTable_GUID varchar(250),
+@ObjectName varchar(100),
+@count int
+
+SET @result='ERROR'
+
+BEGIN TRY
+
+	SELECT 
+			@Creator= Creator,
+			@TempTable_GUID = TempTable_GUID,
+			@ObjectName = ObjectName,
+			@ObjectType = ObjectType
+	FROM [File] 
+	WHERE ID = @file_ID
+
+		IF OBJECT_ID('tempdb..#tempIndexError') IS NOT NULL
+		DROP TABLE #tempIndexError
+
+	CREATE TABLE #tempIndexError (
+	index_ int
+	)
+
+
+	
+		IF OBJECT_ID('tempdb..#temp') IS NOT NULL
+		DROP TABLE #temp
+
+  SELECT f.Name AS NameOrigin,
+		Options
+  INto #temp
+  FROM 
+	(SELECT COLUMN_NAME
+	FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @TempTable_GUID ) t
+JOIN 
+	(SELECT form.*
+	FROM [dbo].[ModuleForms] form
+	WHERE Module_id = 1 AND TypeObj = @ObjectType
+	AND InputType = 'AutocompTreeEditor') f ON t.COLUMN_NAME = f.Name
+
+	SET @SQL_STATEMENT = 'UPDATE tGuid SET '
+
+	DECLARE @WhereSQL nvarchar(max)
+	DECLARE @JoinSQL nvarchar(max)
+	DECLARE @UpdateSQL nvarchar(max)
+	SET @UpdateSQL = '@'
+	SET @WhereSQL = '@'
+	SET @JoinSQL = '@'
+
+
+select  @UpdateSQL = @UpdateSQL + ', '+ NameOrigin + '= CASE WHEN T_'+NameOrigin+'.TTop_FullPath IS NOT NULL THEN T_'+NameOrigin+'.TTop_FullPath ELSE '+NameOrigin +' END ' ,
+
+@JoinSQL =  @JoinSQL +'LEFT JOIN THESAURUS.dbo.TTopic D_'+NameOrigin+' on D_'+NameOrigin+'.TTop_PK_ID = '+Options 
++ ' LEFT JOIN THESAURUS.dbo.VTopicCompatibility T_'+NameOrigin+' on 
+		((T_'+NameOrigin+'.TTop_NameFr =CONVERT(VARCHAR(250),tGuid.'+NameOrigin+') OR T_'+NameOrigin+'.TTop_NameEn =CONVERT(VARCHAR(250),tGuid.'+NameOrigin+'))
+		
+		 and T_'+NameOrigin+'.TTop_Type = CASE WHEN D_'+NameOrigin+'.TTop_Type in (''TOP Concept'') 
+		THEN D_'+NameOrigin+'.TTop_Name ELSE D_'+NameOrigin+'.TTop_Type END) ',
+
+ @WhereSQL = @WhereSQL + 'OR (CONVERT(VARCHAR(250),tGuid.'+NameOrigin+') IS NOT NULL and NOT EXISTS (Select * 
+												from THESAURUS.dbo.VTopicCompatibility T2_'+NameOrigin+' 
+												where T2_'+NameOrigin+'.TTop_PK_ID <> T_'+NameOrigin+'.TTop_PK_ID 
+												AND  ( ( T2_'+NameOrigin+'.TTop_NameFr = CONVERT(VARCHAR(250),tGuid.'+NameOrigin+') OR T2_'+NameOrigin+'.TTop_NameEn = CONVERT(VARCHAR(250),tGuid.'+NameOrigin+')) 
+												and T2_'+NameOrigin+'.TTop_Type = CASE WHEN D_'+NameOrigin+'.TTop_Type = ''TOP Concept'' THEN D_'+NameOrigin+'.TTop_Name ELSE D_'+NameOrigin+'.TTop_Type END 
+													)
+												) ) '
+FROM #temp
+
+	SET @UpdateSQL = REPLACE(@UpdateSQL,'@,',' ')+' FROM '+@TempTable_GUID+' tGuid '
+	SET @JoinSQL = REPLACE(@JoinSQL,'@LEFT',' LEFT ')
+	SET @WhereSQL = REPLACE(@WhereSQL,'@OR',' WHERE ')
+	
+	SET @SQL_STATEMENT = @SQL_STATEMENT + @UpdateSQL + @JoinSQL + @WhereSQL
+
+
+	IF (SELECT COUNT(*) FROM #temp)> 0
+	EXEC SP_EXECUTESQL @SQL_STATEMENT;
+
+
+END TRY
+BEGIN CATCH
+	SET @error = ERROR_NUMBER()
+
+	--recording error log
+	SET @SQL_STATEMENT = 'INSERT INTO NSLog.dbo.TLOG_MESSAGES ([JCRE]
+      ,[LOG_LEVEL]
+      ,[ORIGIN]
+      ,[SCOPE]
+      ,[LOGUSER]
+      ,[DOMAINE]
+      ,[MESSAGE_NUMBER]
+      ,[LOG_MESSAGE]
+      ,[OTHERSINFOS])
+	  SELECT 
+			GETDATE(),
+			5,
+			''Import excel protocol'',
+			''pr_Update_ThesaurusVal'',
+			1,
+			3,
+			'+CONVERT(VARCHAR(max),@error)+',
+			'''+CONVERT(VARCHAR(max),REplace(ERROR_MESSAGE(),'''',''))+''',
+			''@file_ID =  ''+CONVERT(VARCHAR,' +CONVERT(VARCHAR,@file_ID)+')'
+					
+			
+	EXEC SP_EXECUTESQL @SQL_STATEMENT
+					
+END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT  @result,  @error, @errorIndexes
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('115_ImportExcel_pr_Update_ThesaurusVal',GETDATE(),(SELECT db_name()))
+
+
+GO

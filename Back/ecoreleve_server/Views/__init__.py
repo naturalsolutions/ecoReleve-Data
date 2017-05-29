@@ -474,6 +474,26 @@ class RESTView(object):
         return self.context.update()
 
 
+def notfound(request):
+    return HTTPNotFound('Not found')
+
+
+def integers(*segment_names):
+    '''test if the match url is integer'''
+
+    def predicate(info, request):
+        match = info['match']
+        for segment_name in segment_names:
+            try:
+                match[segment_name] = int(match[segment_name])
+                if int(match[segment_name]) == 0:
+                    return False
+            except (TypeError, ValueError):
+                return False
+        return True
+    return predicate
+
+
 def add_routes(config):
 
     config.add_route('weekData', 'ecoReleve-Core/weekData')
@@ -512,3 +532,12 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+
+    # Excel file import
+    config.add_route('file_import/getTemplate',
+                     'ecoReleve-Core/file_import/getTemplate')
+    config.add_route('file_import/getExcelFile',
+                     'ecoReleve-Core/file_import/getExcelFile')
+    config.add_route('file_import/processList',
+                     'ecoReleve-Core/file_import/processList')
+
