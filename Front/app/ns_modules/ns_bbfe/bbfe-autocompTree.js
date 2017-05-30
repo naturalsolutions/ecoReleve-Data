@@ -41,6 +41,8 @@ define([
         },
 
         initialize: function (options) {
+            
+
             Form.editors.Base.prototype.initialize.call(this, options);
 
             this.formGrid = options.formGrid;
@@ -81,12 +83,15 @@ define([
 
             this.startId = options.schema.options.startId;
             this.wsUrl = options.schema.options.wsUrl;
-            this.lng =  window.app.user.attributes.Language;
+            this.lng = window.app.user.attributes.Language;
             this.timeout = options.schema.options.timeout;
 
+            this.defaultValue = options.schema.defaultValue;
 
             this.displayValueName = options.schema.options.displayValueName || 'fullpathTranslated';
             this.storedValueName = options.schema.options.storedValueName || 'fullpath';
+
+
         },
 
         getDisplayedValue: function(){
@@ -105,7 +110,7 @@ define([
             
             _(function () {
 
-            if (_this.editable) {
+            if (_this.editable || _this.defaultValue) {
 
                 _this.$el.find('#' + _this.id).autocompTree({
                     wsUrl: _this.wsUrl,
@@ -154,18 +159,32 @@ define([
                         $this.css('display', 'none');
                     }
                 });
-
             }
 
-            //set inital values
-            if (_this.value) {
-                _this.$el.find('#' + _this.id).val(_this.value.displayValue);
-                _this.$el.find('#' + _this.id + '_value').val(_this.value.value);
+                        
+            //set inital values or default values
+            if(_this.defaultValue && _this.value === null){
+                //tree load
+                setTimeout(function(){
+                    _this.value = {};
+                    _this.value.value = _this.defaultValue;
+                    _this.value.displayValue = _this.getDisplayedValue(_this.defaultValue);
+                    _this.setValues(_this.value);
+                }, 0);
+            } else {
+                if (_this.value) {
+                    _this.setValues(_this.value);
+                }
             }
 
             }).defer();
 
             return this;
+        },
+
+        setValues: function(values){
+            this.$el.find('#' + this.id).val(values.displayValue);
+            this.$el.find('#' + this.id + '_value').val(values.value);
         },
 
         isEmptyVal: function(value){
@@ -193,12 +212,56 @@ define([
             }
         },
 
+
+        findNode: function(dafaultValue, currentNode){
+            var currentChild;
+            var result;
+
+            if (dafaultValue == currentNode.fullpath) {
+                return currentNode.valueTranslated;
+            } else {
+                if(currentNode.children){
+                    for (i = 0; i < currentNode.children.length; i++) {
+                        currentChild = currentNode.children[i];
+
+                        result = this.findNode(dafaultValue, currentChild);
+
+                        if (result !== false) {
+                            return result;
+                        }
+                    }
+                }
+
+                return false;
+            }
+        },
+
+        //get translated displayed value from full path
+        getDisplayedValue: function(defaultValue){
+            var _this = this;
+
+            var valueTranslated;
+            // if(window.thesaurus[this.startId]){
+            //     window.thesaurus[this.startId].then(function(node){
+            //         valueTranslated = _this.findNode(node, defaultValue);
+            //     });
+            // }
+
+            valueTranslated = this.$el.find('#treeView' + this.id).fancytree('getTree').findFirst(function(node){
+                if(node.data.fullpath == defaultValue){
+                    return node.data.valueTranslated;
+                }
+            });
+
+            return valueTranslated;
+        },
+
         validateValue: function (displayValue, isTranslated) {
             this.isTermError = true;
 
             if (this.isEmptyVal(displayValue)) {
-                this.isTermError = false;
                 this.displayError(false);
+                this.isTermError = false;                
                 return;
             }
 
