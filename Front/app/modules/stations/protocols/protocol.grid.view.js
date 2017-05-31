@@ -182,7 +182,7 @@ define([
         objectType: this.model.get('ID'),
         displayRowIndex: true,
         gridOptions: {
-          editType: 'fullRow',
+          //editType: 'fullRow',
           singleClickEdit : true,
           rowData: rowData,
           rowSelection: (this.editable)? 'multiple' : '',

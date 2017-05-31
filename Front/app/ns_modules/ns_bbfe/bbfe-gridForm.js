@@ -121,7 +121,7 @@ define([
         url: url,
         displayRowIndex: true,
         gridOptions: {
-          editType: 'fullRow',
+          //editType: 'fullRow',
           singleClickEdit : true,
           rowData: rowData,
           rowSelection: (this.editable)? 'multiple' : '',
