@@ -481,6 +481,7 @@ typeDict = {'String': String,
 storageConf = [
     {'__tablename__': 'tropdelaballe',
      '__classname__': 'Tropdelaballe',
+     'isdynamic': 0,
      'properties': {
          'statics': [
             {'name': 'tutu', 'ctype': 'String', 'clength': 255},
@@ -491,6 +492,8 @@ storageConf = [
     },
     {'__tablename__': 'alleeelaaaa',
      '__classname__': 'Alleluhia',
+     'isdynamic': 1,
+     'track_history':1,
      'properties': {
         'statics': [
             {'name': 'ahhhhhaaa', 'ctype': 'String', 'clength': 10},
@@ -504,7 +507,11 @@ storageConf = [
             {'name': 'dyn3', 'ctype': 'Float'},
             {'name': 'dyn4', 'ctype': 'String', 'clength': 255},
             ]
-        }
+        },
+      'types':{
+          'type1': ['dyn1', 'dyn2'],
+          'type2': ['dyn3', 'dyn4']
+      }
     }
 ]
 
