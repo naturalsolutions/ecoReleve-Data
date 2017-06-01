@@ -3,6 +3,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Boolean,
     Integer,
     Numeric,
     String,
@@ -12,7 +13,7 @@ from sqlalchemy import (
     func,
     desc,
     select)
-from sqlalchemy.dialects.mssql.base import BIT
+
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
@@ -45,7 +46,7 @@ class MonitoredSite (Base, ObjectWithDynProp):
     Name = Column(String(250), nullable=False)
     Category = Column(String(250), nullable=False)
     Creator = Column(Integer, nullable=False)
-    Active = Column(BIT, nullable=False, default=1)
+    Active = Column(Boolean, nullable=False, default=1)
     creationDate = Column(DateTime, nullable=False, default=func.now())
 
     FK_MonitoredSiteType = Column(Integer, ForeignKey('MonitoredSiteType.ID'))

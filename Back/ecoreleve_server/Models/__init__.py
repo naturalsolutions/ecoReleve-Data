@@ -23,7 +23,7 @@ class myBase(object):
 Base = declarative_base(cls=myBase)
 BaseExport = declarative_base()
 dbConfig = {
-    'dialect': 'mssql',
+    'dialect': 'postgres',
     'sensor_schema': AppConfig['app:main']['sensor_schema'],
     'cn.dialect': AppConfig['app:main']['cn.dialect'],
 }
@@ -51,16 +51,17 @@ userOAuthDict = {}
 
 def loadThesaurusTrad(config):
     session = config.registry.dbmaker()
-    thesTable = Base.metadata.tables['ERDThesaurusTerm']
-    query = select(thesTable.c)
+    if 'ERDThesaurusTerm' in Base.metadata.tables:
+        thesTable = Base.metadata.tables['ERDThesaurusTerm']
+        query = select(thesTable.c)
 
-    results = session.execute(query).fetchall()
+        results = session.execute(query).fetchall()
 
-    for row in results:
-        thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr':row['nameFr']}
-        invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
-        invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
-    session.close()
+        for row in results:
+            thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr':row['nameFr']}
+            invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
+            invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
+        session.close()
 
 
 def loadUserRole(session):
