@@ -13,17 +13,19 @@ from sqlalchemy import (Column,
                         Table,
                         Index,
                         UniqueConstraint,
-                        Table)
+                        Table,
+                        text,
+                        bindparam)
 from sqlalchemy.orm import relationship, aliased, class_mapper, mapper
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declared_attr
-from ..Models import Base
+from ..Models import Base, dbConfig
 from sqlalchemy import inspect, orm
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement
 from ..utils.parseValue import parser
 from datetime import datetime
-
+# from sqlalchemy.event import listens_for
 
 class CreateView(Executable, ClauseElement):
     def __init__(self, name, select):
@@ -244,16 +246,26 @@ class HasDynamicProperties(ORMUtils):
     def lastValueView(cls):
         ''' create/intialize view of last dynamic properties values,
             return the mapped view'''
-        @event.listens_for(cls, 'mapper_configured')
-        def lastValueView(mapper, t):
-            cls = mapper.class_
+        @event.listens_for(Base.metadata, 'after_create')
+        def lastValueView(target, connection, **kwargs):
             viewName = cls.DynamicValuesClass.__tablename__+'Now'
-            if viewName not in Base.metadata.tables:
+            table_catalog, table_schema = dbConfig['data_schema'].split('.')
+            countViewQuery = text('''
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.VIEWS
+                    where table_schema = :schema
+                    and table_catalog = :catalog
+                    and table_name = :viewName
+            ''').bindparams(schema=table_schema, catalog=table_catalog, viewName=viewName.lower())
+
+            countView = Base.metadata.bind.execute(countViewQuery).scalar()
+
+            if countView == 0:
                 createview = CreateView(viewName,
                                         cls.lastValueQuery())
                 Base.metadata.bind.execute(createview)
 
-            cls.LastDynamicValueViewClass = Table(viewName,
+            cls.LastDynamicValueViewClass = Table(viewName.lower(),
                                                   Base.metadata,
                                                   autoload=True)
             return viewName
@@ -405,31 +417,31 @@ class HasDynamicProperties(ORMUtils):
     #         entity.updateFromJSON(data, startDate=useDate)
 
     # def deleteLinkedField(self, useDate=None):
-        session = dbConfig['dbSession']()
-        if useDate is None:
-            useDate = self.linkedFieldDate()
-        for linkProp in self.getLinkedField():
-            obj = LinkedTables[linkProp['LinkedTable']]
+        # session = dbConfig['dbSession']()
+        # if useDate is None:
+        #     useDate = self.linkedFieldDate()
+        # for linkProp in self.getLinkedField():
+        #     obj = LinkedTables[linkProp['LinkedTable']]
 
-            try:
-                linkedField = linkProp['LinkedField'].replace('@Dyn:', '')
-                linkedSource = self.getProperty(
-                    linkProp['LinkSourceID'].replace('@Dyn:', ''))
-                linkedObj = session.query(obj).filter(
-                    getattr(obj, linkProp['LinkedID']) == linkedSource).one()
+        #     try:
+        #         linkedField = linkProp['LinkedField'].replace('@Dyn:', '')
+        #         linkedSource = self.getProperty(
+        #             linkProp['LinkSourceID'].replace('@Dyn:', ''))
+        #         linkedObj = session.query(obj).filter(
+        #             getattr(obj, linkProp['LinkedID']) == linkedSource).one()
 
-                if hasattr(linkedObj, linkedField):
-                    linkedObj.setProperty(linkedField, None)
-                else:
-                    dynPropValueToDel = linkedObj.getDynPropWithDate(
-                        linkedField, useDate)
-                    if dynPropValueToDel is not None:
-                        session.delete(dynPropValueToDel)
+        #         if hasattr(linkedObj, linkedField):
+        #             linkedObj.setProperty(linkedField, None)
+        #         else:
+        #             dynPropValueToDel = linkedObj.getDynPropWithDate(
+        #                 linkedField, useDate)
+        #             if dynPropValueToDel is not None:
+        #                 session.delete(dynPropValueToDel)
 
-                session.commit()
-                session.close()
-            except:
-                pass
+        #         session.commit()
+        #         session.close()
+        #     except:
+        #         pass
 
 
 
@@ -558,5 +570,5 @@ class ClassBuilder(object):
 ClassController = ClassBuilder(storageConf)
 Alleluhia = ClassController.getClass('Alleluhia')
 
-print(Alleluhia.__dict__)
+# print(Alleluhia.__dict__)
 

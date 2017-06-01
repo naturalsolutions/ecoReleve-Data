@@ -11,8 +11,6 @@ from sqlalchemy import (
 from sqlalchemy.ext.hybrid import hybrid_property
 from ..Models import Base, dbConfig
 
-db_dialect = dbConfig['dialect']
-
 
 class User(Base):
     __tablename__ = 'User'
@@ -25,7 +23,7 @@ class User(Base):
     Language = Column(String(2))
     ModificationDate = Column(DateTime, nullable=False,
                               server_default=func.now())
-    if db_dialect == 'mssql':
+    if 'mssql' in dbConfig['cn.dialect']:
         __table_args__ = (
             Index('idx_Tuser_lastname_firstname', Lastname, Firstname,
                   mssql_include=[id]), {'implicit_returning': False}

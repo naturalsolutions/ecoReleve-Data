@@ -20,10 +20,11 @@ class myBase(object):
 
     __table_args__ = {'implicit_returning': False}
 
+
 Base = declarative_base(cls=myBase)
 BaseExport = declarative_base()
 dbConfig = {
-    'dialect': 'postgres',
+    'data_schema': AppConfig['app:main']['data_schema'],
     'sensor_schema': AppConfig['app:main']['sensor_schema'],
     'cn.dialect': AppConfig['app:main']['cn.dialect'],
 }
