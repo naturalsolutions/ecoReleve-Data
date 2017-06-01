@@ -81,7 +81,16 @@ class ModuleForms(Base):
     def GetClassFromSize(FieldSize):
         return 'col-md-' + str(FieldSize)
 
-    def GetDTOFromConf(self, Editable):
+    def handleSchemaGrid(self):
+        if self.dto.get('size', None):
+            self.dto['width'] = self.dto['size']
+            self.dto['minWidth'] = self.dto['size']-(self.dto['size']/1.5)
+            self.dto['maxWidth'] = self.dto['size']+(self.dto['size']/1.5)
+        if self.FormRender == 4:
+            self.dto['pinned'] = 'left'
+        return self.dto
+
+    def GetDTOFromConf(self, Editable, isGrid=False):
         ''' return input field to build form '''
 
         self.Editable = Editable
@@ -155,6 +164,9 @@ class ModuleForms(Base):
         if default is not None:
             self.dto['defaultValue'] = default
 
+        if isGrid:
+            self.handleSchemaGrid()
+
         return self.dto
 
     def InputSelect(self):
@@ -180,17 +192,19 @@ class ModuleForms(Base):
             except:
                 prototype = self.Options
                 pass
-
+        isGrid = False
         gridRanged = False
         result = self.session.query(ModuleForms).filter(and_(
             ModuleForms.TypeObj == prototype, ModuleForms.Module_ID == self.Module_ID)).all()
         subschema = {}
         for conf in result:
             if conf.InputType == 'GridRanged':
-                gridRanged = conf.GetDTOFromConf(self.Editable)
+                gridRanged = conf.GetDTOFromConf(self.Editable, isGrid)
                 subschema.update(gridRanged)
             else:
-                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable)
+                if conf.InputType == 'GridFormEditor':
+                    isGrid = True
+                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable, isGrid)
 
         subschema['ID'] = {
             'name': 'ID',

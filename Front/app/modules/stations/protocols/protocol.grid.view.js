@@ -147,6 +147,10 @@ define([
             type: field.type,
             options: field.options,
             schema: field,
+            minWidth: field.minWidth,
+            maxWidth: field.maxWidth,
+            width: field.width,
+            pinned : field.pinned
           };
 
           editable = this.editable;
@@ -186,7 +190,8 @@ define([
           singleClickEdit : true,
           rowData: rowData,
           rowSelection: (this.editable)? 'multiple' : '',
-        }
+        },
+        // noResizeToFit: true
       }));
 
     },
