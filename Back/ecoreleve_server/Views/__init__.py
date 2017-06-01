@@ -8,6 +8,7 @@ from collections import OrderedDict
 from sqlalchemy import select, join, desc, asc
 import json
 from datetime import datetime
+from ..GenericObjets.OrmModelsMixin import ClassController
 
 
 def add_cors_headers_response_callback(event):
@@ -512,3 +513,6 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+
+
+""" TODO set dynamically route from ClassController"""

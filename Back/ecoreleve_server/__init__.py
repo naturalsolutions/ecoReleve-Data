@@ -15,7 +15,8 @@ from .Models import (
     dbConfig,
     db,
     loadThesaurusTrad,
-    groupfinder
+    groupfinder,
+    test
 )
 from .Views import add_routes, add_cors_headers_response_callback
 from pyramid.events import NewRequest
@@ -66,15 +67,23 @@ def includeme(config):
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
 
-    settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + \
-        quote_plus(settings['sqlalchemy.Export.url'])
-    engineExport = engine_from_config(
-        settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
+    if 'mssql' in settings['cn.dialect']:
+        settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + \
+            quote_plus(settings['sqlalchemy.Export.url'])
+        engineExport = engine_from_config(
+            settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
+    else :
+        engineExport = engine_from_config(
+            settings, 'sqlalchemy.Export.')
 
-    settings['sqlalchemy.default.url'] = settings['cn.dialect'] + \
-        quote_plus(settings['sqlalchemy.default.url'])
-    engine = engine_from_config(
-        settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
+    if 'mssql' in settings['cn.dialect']:
+        settings['sqlalchemy.default.url'] = settings['cn.dialect'] + \
+            quote_plus(settings['sqlalchemy.default.url'])
+        engine = engine_from_config(
+            settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
+    else :
+        engine = engine_from_config(
+            settings, 'sqlalchemy.default.')
 
     dbConfig['url'] = settings['sqlalchemy.default.url']
     dbConfig['wsThesaurus'] = {}
@@ -127,6 +136,9 @@ def main(global_config, **settings):
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
 
     loadThesaurusTrad(config)
+
+    test(config)
+
     add_routes(config)
     config.scan()
     return config.make_wsgi_app()

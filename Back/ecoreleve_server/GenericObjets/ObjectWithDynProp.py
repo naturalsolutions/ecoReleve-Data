@@ -161,12 +161,14 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         return row[analogType[row['TypeProp']]]
 
     def getForm(self, displayMode='edit', type_=None, moduleName=None):
+        from ..utils.parseValue import formatValue
         ObjType = self.GetType()
         form = ConfiguredDbObjectMapped.getForm(self, displayMode, ObjType.ID, moduleName)
         if (ObjType.Status == 10):
             form['grid'] = True
         form['data'] = {'id': 0}
-        form['data'].update(form['schema']['defaultValues'])
+        data = formatValue(form['schema']['defaultValues'], form['schema'])
+        form['data'].update(data)
         form['data'][self.getTypeObjectFKName()] = ObjType.ID
         return form
 

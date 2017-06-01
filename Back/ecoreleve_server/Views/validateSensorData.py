@@ -32,13 +32,13 @@ def error_response(err):
     response.status_int = 500
     return response
 
-ArgosDatasWithIndiv = Table(
-    'VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
-GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv',
-                          Base.metadata, autoload=True)
-DataRfidWithSite = Table('VRfidData_With_equipSite',
-                         Base.metadata, autoload=True)
-DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True)
+# ArgosDatasWithIndiv = Table(
+#     'VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
+# GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv',
+#                           Base.metadata, autoload=True)
+# DataRfidWithSite = Table('VRfidData_With_equipSite',
+#                          Base.metadata, autoload=True)
+# DataRfidasFile = Table('V_dataRFID_as_file', Base.metadata, autoload=True)
 
 
 @view_config(route_name=route_prefix + 'uncheckedDatas',

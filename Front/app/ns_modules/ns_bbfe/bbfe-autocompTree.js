@@ -161,6 +161,9 @@ define([
             if (_this.value) {
                 _this.$el.find('#' + _this.id).val(_this.value.displayValue);
                 _this.$el.find('#' + _this.id + '_value').val(_this.value.value);
+                if(!_this.editable){
+                    _this.$el.find('#' + _this.id).attr('val',_this.value.value);
+                }
             }
 
             }).defer();
@@ -186,6 +189,10 @@ define([
             //if empty val
             if(!this.$el.find('#' + this.id).val()){
                 return '';
+            }
+
+            if(!this.editable && this.$el.find('#' + this.id).attr('val')){
+                return this.$el.find('#' + this.id).attr('val');
             }
 
             if ( this.$el.find('#' + this.id + '_value') ){

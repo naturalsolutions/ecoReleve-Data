@@ -23,7 +23,7 @@ class myBase(object):
 Base = declarative_base(cls=myBase)
 BaseExport = declarative_base()
 dbConfig = {
-    'dialect': 'mssql',
+    'dialect': 'postgres',
     'sensor_schema': AppConfig['app:main']['sensor_schema'],
     'cn.dialect': AppConfig['app:main']['cn.dialect'],
 }
@@ -51,16 +51,17 @@ userOAuthDict = {}
 
 def loadThesaurusTrad(config):
     session = config.registry.dbmaker()
-    thesTable = Base.metadata.tables['ERDThesaurusTerm']
-    query = select(thesTable.c)
+    if 'ERDThesaurusTerm' in Base.metadata.tables:
+        thesTable = Base.metadata.tables['ERDThesaurusTerm']
+        query = select(thesTable.c)
 
-    results = session.execute(query).fetchall()
+        results = session.execute(query).fetchall()
 
-    for row in results:
-        thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr':row['nameFr']}
-        invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
-        invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
-    session.close()
+        for row in results:
+            thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr':row['nameFr']}
+            invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
+            invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
+        session.close()
 
 
 def loadUserRole(session):
@@ -135,9 +136,70 @@ from .SensorData import *
 from .List import *
 from .Log import sendLog
 
+from sqlalchemy import exc as sa_exc
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+from ..GenericObjets.OrmModelsMixin import MyObject
 
 LinkedTables['Individual'] = Individual
 LinkedTables['Station'] = Station
 LinkedTables['Protocoles'] = Protocoles
 LinkedTables['Sensor'] = Sensor
 LinkedTables['MonitoredSite'] = MonitoredSite
+
+
+
+
+
+
+
+from sqlalchemy import (Column,
+                    ForeignKey,
+                    String,
+                    Integer,
+                    Float,
+                    DateTime,
+                    select,
+                    join,
+                    func,
+                    not_,
+                    exists,
+                    event,
+                    Table,
+                    Index,
+                    UniqueConstraint,
+                    Table)
+from sqlalchemy.orm import relationship, aliased, class_mapper, mapper
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.declarative import declared_attr
+
+
+
+def test(config):
+    # session = config.registry.dbmaker()
+    # o = session.query(MyObject).get(1)
+    # print(o)
+    # print(o.type)
+    # print(o._type.properties)
+    # print(o.properties)
+    # print(o.values)
+    # values = {'FK_MyObjectType':1,
+    #            'toto':'blelelelqsdqsddqsdfelele',
+    #            'test1':'newsdsdccwxcx   xcwxcsdfwx  <dssss'}
+
+    # o.updateValues(values, '02/08/2016')
+    # o2 = MyObject(session=session)
+    # o2.values={'FK_MyObjectType':1,
+    #            'toto':'newtotoVal',
+    #            'test1':'test rockssssssssss'}
+    # print(o2.type)
+    # print(o2.properties)
+    # session.add(o2)
+    # # print(MyObject.lastValueView())*
+    # print(OHMyObject.TypeClass.PropertiesClass.__tablename__)
+    # print(MyObject.TypeClass.PropertiesClass.__tablename__)
+    # print(MyObject.LastDynamicValueViewClass.select())
+    # session.commit()
+    pass
+
