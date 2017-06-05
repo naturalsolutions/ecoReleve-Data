@@ -250,12 +250,6 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
             //         }
             //     });
           // }
-            if( typeof(window.formInEdition.form['.js-rg-grid']) !='undefined'  ) {
-              delete window.formInEdition.form['.js-rg-grid'];
-            }
-            if( typeof(window.formInEdition.form['.js-rg-grid-subform']) !='undefined'  ) {
-              delete window.formInEdition.form['.js-rg-grid-subform'];
-            }
            // if (typeof(window.formInEdition['']))
               if(indexMax-urlChangeMax<=0){
                 window.formInEdition = {};

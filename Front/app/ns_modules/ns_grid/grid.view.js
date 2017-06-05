@@ -310,8 +310,7 @@ define([
             if(!event.newValue) {
               return;
             }
-            window.formInEdition.form['.js-rg-grid'] = { "formChange" :true}
-            window.formInEdition.form['.js-rg-grid-subform'] = { "formChange" :true}
+            window.formInEdition.form['.js-obs-form'] = { "formChange" :true}
           }
 
           var newValue, oldValue;
@@ -327,8 +326,7 @@ define([
           }
 
           if(newValue !== oldValue){
-           window.formInEdition.form['.js-rg-grid'] = { "formChange" :true}
-           window.formInEdition.form['.js-rg-grid-subform'] = { "formChange" :true}
+            window.formInEdition.form['.js-obs-form'] = { "formChange" :true}
           }
         }
         
