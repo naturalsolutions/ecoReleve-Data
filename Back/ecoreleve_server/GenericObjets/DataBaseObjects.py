@@ -164,10 +164,10 @@ class DbObject(object):
     def setProperty(self, propertyName, value):
         ''' Set object properties (static and dynamic) '''
         if hasattr(self, propertyName):
-                if propertyName in self.__table__.c:
-                    value = parser(value)
+            if propertyName in self.__table__.c:
+                value = parser(value)
                 setattr(self, propertyName, value)
-                self.__properties__[propertyName] = value
+            self.__properties__[propertyName] = value
 
     def updateFromJSON(self, data, startDate=None):
         ''' Function to call : update properties of new
