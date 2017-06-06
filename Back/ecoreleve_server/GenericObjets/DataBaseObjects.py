@@ -166,7 +166,7 @@ class DbObject(object):
         if hasattr(self, propertyName):
             if propertyName in self.__table__.c:
                 value = parser(value)
-            # if propertyName not in ['Status_']:
+
             setattr(self, propertyName, value)
             self.__properties__[propertyName] = value
 
