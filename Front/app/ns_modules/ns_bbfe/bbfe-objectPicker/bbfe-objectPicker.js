@@ -359,7 +359,12 @@ define([
             ctx.filters.update();
             data = {};
             for (var i = 0; i < ctx.filters.criterias.length; i++) {
-              data[ctx.filters.criterias[i]['Column']] = ctx.filters.criterias[i]['Value'] === 'null' ? '': ctx.filters.criterias[i]['Value'];
+              if( ctx.filters.criterias[i]['Operator'] == 'Is') {
+                data[ctx.filters.criterias[i]['Column']] = ctx.filters.criterias[i]['Value'] === 'null' ? '': ctx.filters.criterias[i]['Value'];
+              }
+              else {
+                data[ctx.filters.criterias[i]['Column']] = ''
+              }
             }
           } else {
             data = {};
