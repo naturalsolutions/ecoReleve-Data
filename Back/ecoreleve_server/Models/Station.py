@@ -135,7 +135,7 @@ class Station(Base, ObjectWithDynProp):
     def existingProtocolEquipment(self):
         protolist = list(filter(lambda x: x.GetType().Name.lower() in ['site_equipment',
                                                                        'site_unequipment',
-                                                                       'individual_unequipment',
+                                                                       'individual_equipment',
                                                                        'individual_unequipment'], self.Observations))
         return len(protolist) > 0
 

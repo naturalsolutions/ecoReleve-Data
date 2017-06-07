@@ -42,7 +42,6 @@ define([
 					value = params.charPress;
 				}
 			}
-
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,

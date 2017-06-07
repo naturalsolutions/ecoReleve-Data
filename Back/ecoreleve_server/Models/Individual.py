@@ -59,6 +59,11 @@ class Individual (Base, ObjectWithDynProp):
     def Status_(self):
         return self._Status_.Status_
 
+    @Status_.setter
+    def Status_(self, value):
+        # no value is stored because it is calculated
+        return
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         ObjectWithDynProp.__init__(self)
