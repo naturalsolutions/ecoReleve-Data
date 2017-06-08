@@ -197,12 +197,13 @@ class ModuleForms(Base):
         result = self.session.query(ModuleForms).filter(and_(
             ModuleForms.TypeObj == prototype, ModuleForms.Module_ID == self.Module_ID)).all()
         subschema = {}
+
         for conf in result:
             if conf.InputType == 'GridRanged':
                 gridRanged = conf.GetDTOFromConf(self.Editable, isGrid)
                 subschema.update(gridRanged)
             else:
-                if conf.InputType == 'GridFormEditor':
+                if self.InputType == 'GridFormEditor':
                     isGrid = True
                 subschema[conf.Name] = conf.GetDTOFromConf(self.Editable, isGrid)
 

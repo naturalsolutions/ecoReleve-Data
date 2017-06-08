@@ -174,7 +174,11 @@ define([
           headerName: field.title,
           type: field.type,
           options: field.options,
-          schema: field
+          schema: field,
+          minWidth: field.minWidth,
+          maxWidth: field.maxWidth,
+          width: field.width,
+          pinned : field.pinned
         };
         
         columnsDefs.push(colDef)

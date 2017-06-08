@@ -191,7 +191,7 @@ define([
           rowData: rowData,
           rowSelection: (this.editable)? 'multiple' : '',
         },
-        // noResizeToFit: true
+        noResizeToFit: true
       }));
 
     },
