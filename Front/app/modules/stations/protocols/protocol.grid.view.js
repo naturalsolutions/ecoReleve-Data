@@ -22,6 +22,8 @@ define([
     initialize: function(options){
       this.editable = false;
       this.url = 'stations/' + this.model.get('stationId') + '/observations';
+
+       window.formInEdition.form.baseUri = window.location.href;
     },
 
     handleBtnClick: function(e){

@@ -57,11 +57,9 @@ define([
 
 			this.initBBFE(options);
 
-
 		  this.preventNavigationEvents();
 
-
-		  window.formInEdition.form['.js-obs-form'] = { "formChange" :true}
+		  window.formInEdition.form['.js-obs-form'] = { 'formChange': true};
 		};
 
 		CustomEditor.prototype.initBBFE = function(options){
