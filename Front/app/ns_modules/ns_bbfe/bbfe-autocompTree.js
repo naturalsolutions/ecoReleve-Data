@@ -157,15 +157,39 @@ define([
 
             }
 
+            if((typeof _this.value === "string") && _this.value != null && _this.value != 'null' && _this.value != ''){
+                var tmp = _this.value;
+                _this.value = {};
+                _this.value.value = tmp;
+                _this.value.displayValue = _this.findDisplayedValue(tmp);
+            }
+
             //set inital values
             if (_this.value) {
                 _this.$el.find('#' + _this.id).val(_this.value.displayValue);
                 _this.$el.find('#' + _this.id + '_value').val(_this.value.value);
+                if(!_this.editable){
+                    _this.$el.find('#' + _this.id).attr('val',_this.value.value);
+                }
             }
 
             }).defer();
 
             return this;
+        },
+
+        findDisplayedValue: function(value){
+            var _this = this;
+
+            var node = this.$el.find('#treeView' + this.id).fancytree('getTree').findFirst(function(node){
+                return (node.data.fullpath == value)
+            });
+            if(node){
+                return node.data.valueTranslated;    
+            } else {
+                return '';
+            }
+            
         },
 
         isEmptyVal: function(value){
@@ -186,6 +210,10 @@ define([
             //if empty val
             if(!this.$el.find('#' + this.id).val()){
                 return '';
+            }
+
+            if(!this.editable && this.$el.find('#' + this.id).attr('val')){
+                return this.$el.find('#' + this.id).attr('val');
             }
 
             if ( this.$el.find('#' + this.id + '_value') ){
