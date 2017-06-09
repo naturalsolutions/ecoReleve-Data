@@ -162,10 +162,12 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
     def getForm(self, displayMode='edit', type_=None, moduleName=None):
         from ..utils.parseValue import formatValue
+        isGrid = False
         ObjType = self.GetType()
-        form = ConfiguredDbObjectMapped.getForm(self, displayMode, ObjType.ID, moduleName)
         if (ObjType.Status == 10):
-            form['grid'] = True
+            isGrid = True
+        form = ConfiguredDbObjectMapped.getForm(self, displayMode, ObjType.ID, moduleName, isGrid=isGrid)
+
         form['data'] = {'id': 0}
         data = formatValue(form['schema']['defaultValues'], form['schema'])
         form['data'].update(data)
