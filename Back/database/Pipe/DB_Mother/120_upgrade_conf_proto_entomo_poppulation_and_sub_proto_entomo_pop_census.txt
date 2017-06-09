@@ -38,8 +38,8 @@ INSERT INTO [dbo].[ModuleForms]
            ,'Host Plant'
            ,'Host Plant'
            ,0
-           ,6
-           ,6
+           ,150
+           ,150
            ,'AutocompTreeEditor'
            ,'form-control'
            ,2
@@ -74,8 +74,8 @@ INSERT INTO [dbo].[ModuleForms]
            ,'Trap_state'
            ,'Trap state'
            ,0
-           ,6
-           ,6
+           ,150
+           ,150
            ,'AutocompTreeEditor'
            ,'form-control'
            ,2
@@ -113,8 +113,8 @@ BEGIN TRAN T2;
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 1
 		,[Required] = 1
-		,[FieldSizeEdit] = 20
-		,[FieldSizeDisplay] = 20
+		,[FieldSizeEdit] = 150
+		,[FieldSizeDisplay] = 150
 		 
 		WHERE [Name] = 'taxon'
  and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
@@ -190,8 +190,8 @@ BEGIN TRAN T2;
            ,'Picture'
            ,'Picture'
            ,0
-           ,3
-           ,3
+           ,150
+           ,150
            ,'Checkbox'
            ,'form-control'
            ,2
@@ -206,8 +206,8 @@ BEGIN TRAN T2;
    SET   [FormOrder] = 8
 		,[Name] = 'Stage'
 		,[Label] = 'Stage'
-		,[FieldSizeEdit] = 3
-		,[FieldSizeDisplay] = 3
+		,[FieldSizeEdit] = 150
+		,[FieldSizeDisplay] = 150
 		WHERE [Name] = 'stade'
 		and [label] = 'Stade'
  and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
@@ -215,8 +215,8 @@ BEGIN TRAN T2;
 /* Sex */
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 9
-   		,[FieldSizeEdit] = 3
-		,[FieldSizeDisplay] = 3
+   		,[FieldSizeEdit] = 150
+		,[FieldSizeDisplay] = 150
 		WHERE [Name] = 'sex'
 		and [label] = 'Sex'
  and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
@@ -225,8 +225,8 @@ BEGIN TRAN T2;
 
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 10
-   		,[FieldSizeEdit] = 3
-		,[FieldSizeDisplay] = 3
+   		,[FieldSizeEdit] = 150
+		,[FieldSizeDisplay] = 150
 		WHERE [Name] = 'number'
 		and [label] = 'number'
  and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
@@ -253,8 +253,8 @@ BEGIN TRAN T2;
            ,'Weight'
            ,'Weight'
            ,0
-           ,3
-           ,3
+           ,150
+           ,150
            ,'Number'
            ,'form-control'
            ,2
@@ -268,8 +268,8 @@ BEGIN TRAN T2;
 
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 12
-   		,[FieldSizeEdit] = 3
-		,[FieldSizeDisplay] = 3
+   		,[FieldSizeEdit] = 150
+		,[FieldSizeDisplay] = 150
 		WHERE [Name] = 'behaviour'
 		and [label] = 'behaviour'
  and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
@@ -278,8 +278,8 @@ BEGIN TRAN T2;
 
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 13
-   		,[FieldSizeEdit] = 3
-		,[FieldSizeDisplay] = 3
+   		,[FieldSizeEdit] = 150
+		,[FieldSizeDisplay] = 150
 		WHERE [Name] = 'Comments'
 		and [label] = 'Comments'
  and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
@@ -307,8 +307,8 @@ BEGIN TRAN T2;
            ,'Subdivided'
            ,'Subdivided'
            ,0
-           ,3
-           ,3
+           ,150
+           ,150
            ,'AutocompTreeEditor'
            ,'form-control'
            ,2
@@ -345,8 +345,8 @@ BEGIN TRAN T2;
            ,'FK_SubArtrhopodSurvey'
            ,'FK_SubArtrhopodSurvey'
            ,0
-           ,3
-           ,3
+           ,150
+           ,150
            ,'Number'
            ,'form-control'
            ,0
