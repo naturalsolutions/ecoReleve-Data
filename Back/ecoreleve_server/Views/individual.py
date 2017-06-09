@@ -40,7 +40,7 @@ class IndividualView(DynamicObjectView):
             self.objectDB.updateFromJSON(data)
             return {}
         except ErrorCheckIndividualCodes as e:
-            self.request.response.status_code = 510
+            self.request.response.status_code = 520
             return str(e)
 
     def getEquipment(self):
@@ -121,7 +121,8 @@ class IndividualsView(DynamicObjectCollectionView):
                 indivID = newIndiv.ID
             return {'ID': indivID}
         except ErrorCheckIndividualCodes as e:
-            return 'error'
+            self.request.response.status_code = 520
+            return str(e)
 
     def checkExisting(self, indiv):
         indivData = indiv.__properties__
