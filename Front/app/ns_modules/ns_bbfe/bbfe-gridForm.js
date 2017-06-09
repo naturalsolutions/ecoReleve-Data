@@ -130,7 +130,8 @@ define([
           }
         },
         onFocusedRowChange: function(row){
-        }
+        },
+        noResizeToFit: true
       }));
 
     },

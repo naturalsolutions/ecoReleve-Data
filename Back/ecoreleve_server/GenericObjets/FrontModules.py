@@ -200,7 +200,7 @@ class ModuleForms(Base):
 
         for conf in result:
             if conf.InputType == 'GridRanged':
-                gridRanged = conf.GetDTOFromConf(self.Editable, isGrid)
+                gridRanged = conf.GetDTOFromConf(self.Editable, True)
                 subschema.update(gridRanged)
             else:
                 if self.InputType == 'GridFormEditor':
@@ -317,7 +317,10 @@ class ModuleForms(Base):
                 'fieldClass': str(self.EditClass) + ' '
                 + CssClass + ' ' + addClass,
                 'order': i,
-                'size': curSize
+                'size': curSize,
+                'width' : curSize,
+                'minWidth' : curSize-(curSize/1.5),
+                'maxWidth' : curSize+(curSize/1.5)
             }
             self.dto['C' + str(i)] = curDTO
 
