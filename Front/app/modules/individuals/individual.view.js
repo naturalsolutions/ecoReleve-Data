@@ -50,6 +50,22 @@ define([
          _this.ui.form.html(globalEl);
          //globalEl.appendTo(_this.ui.form);
        };
+      
+      formConfig.savingError = function(response){
+        var msg = 'in updating '+_this.model.get('single');
+          if (response.status == 520 && response.responseText){
+            msg = response.responseText;
+          }
+        Swal({
+          title: 'Error',
+          text: msg ,
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        });
+      };
       this.nsForm = new NsForm(formConfig);
     },
 
