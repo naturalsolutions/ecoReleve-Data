@@ -49,7 +49,7 @@ define([
         reloadAfterSave: false,
         afterSaveSuccess: this.afterSaveSuccess.bind(this),
         savingError: function(response) {
-          var msg = 'in creating a new sensor';
+          var msg = 'in creating a new '+_this.model.get('single');
           if (response.status == 520 && response.responseText){
             msg = response.responseText;
           }
