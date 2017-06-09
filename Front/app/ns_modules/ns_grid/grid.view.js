@@ -112,7 +112,9 @@ define([
             setTimeout(function(){
               _this.gridOptions.api.firstRenderPassed = true;
               _this.focusFirstCell();
-              _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
+              if (!options.noResizeToFit){
+                _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
+              }
               if(!_this.model.get('totalRecords')){
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
               }

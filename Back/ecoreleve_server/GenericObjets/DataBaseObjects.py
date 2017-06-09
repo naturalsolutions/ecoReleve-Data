@@ -27,7 +27,7 @@ class ConfiguredDbObjectMapped(object):
                                            ).first()
         return conf
 
-    def getForm(self, displayMode='edit', type_=None, moduleName=None):
+    def getForm(self, displayMode='edit', type_=None, moduleName=None, isGrid=False):
         Editable = (displayMode.lower() == 'edit')
         schema = {}
 
@@ -48,11 +48,11 @@ class ConfiguredDbObjectMapped(object):
             CurModuleForms = [1]
             if (len(CurModuleForms) > 0):
                 schema[field.Name] = field.GetDTOFromConf(
-                    Editable)
+                    Editable, isGrid=isGrid)
 
         form = {'schema': schema,
                 'fieldsets': self.sortFieldsets(fields),
-                'grid': False,
+                'grid': isGrid,
                 # 'data': {'id': 0}
                 'recursive_level': 0
                 }
@@ -164,10 +164,11 @@ class DbObject(object):
     def setProperty(self, propertyName, value):
         ''' Set object properties (static and dynamic) '''
         if hasattr(self, propertyName):
-                if propertyName in self.__table__.c:
-                    value = parser(value)
-                setattr(self, propertyName, value)
-                self.__properties__[propertyName] = value
+            if propertyName in self.__table__.c:
+                value = parser(value)
+
+            setattr(self, propertyName, value)
+            self.__properties__[propertyName] = value
 
     def updateFromJSON(self, data, startDate=None):
         ''' Function to call : update properties of new
