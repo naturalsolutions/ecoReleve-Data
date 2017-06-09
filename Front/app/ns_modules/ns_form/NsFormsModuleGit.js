@@ -280,7 +280,12 @@ define([
         } else {
           _this.formChange = false;
        }
+      });      
+
+      $(formRegion).find('.dateTimePicker>input').parent().on("dp.change", function(e) {
+        _this.formChange = true;
       });
+
       $(formRegion).find('input').on("thesaurusChange", function(e) {
         if($(e.target).val() !== ''){
           _this.formChange = true;
