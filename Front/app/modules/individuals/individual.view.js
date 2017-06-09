@@ -48,7 +48,10 @@ define([
       formConfig.afterShow = function(options){
          var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
          _this.ui.form.html(globalEl);
-         //globalEl.appendTo(_this.ui.form);
+         
+         if(this.displayMode.toLowerCase() == 'edit'){
+           this.bindChanges(_this.ui.form);
+         }
        };
       this.nsForm = new NsForm(formConfig);
     },

@@ -166,6 +166,7 @@ define([
     },
 
     pushFormInEdit: function(_this){
+
         this.formChange = false;
         if(!window.formInEdition.form){
             window.formInEdition.form = {baseUri: _this.$el[0].baseURI};
@@ -178,7 +179,7 @@ define([
             window.formInEdition.form.baseUri = _this.$el[0].baseURI;
           if(_this.displayMode && _this.displayMode.toLowerCase() == 'edit'){
               _this.bindChanges();
-            }
+          }
       }
     },
 
