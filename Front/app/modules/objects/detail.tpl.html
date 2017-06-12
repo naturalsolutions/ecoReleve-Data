@@ -1,20 +1,23 @@
 <div id="infos"  class="col-xs-12 col-md-5 full-height no-padding">
   <div class="toolbar top">
-    <a class="btn" href="#<%= type %>">
-        <span class="reneco reneco-back"></span>
-        &nbsp;
-        <span data-i18n="button.back">Back</span>
-    </a>
-    <div class="js-rg-navbar pull-right"></div>
+    <div class="pull-left">    
+      <a class="btn" href="#<%= type %>">
+          <span class="reneco reneco-back"></span>
+          &nbsp;
+          <span data-i18n="button.back">Back</span>
+      </a>
+    </div>
+    <div class="js-rg-navbar pull-left"></div>
+    <div class="js-form-btns pull-right"></div>
   </div>
 
   <div class="crop1 no-padding">
     
     <div id="formTab" class="half-height">
-        <div class="js-form crop1"></div>
-        <div class="toolbar bottom">
+        <div class="js-form"></div>
+        <!--<div class="toolbar bottom">
           <div class="js-form-btns"></div>
-        </div>
+        </div>-->
     </div>
 
     <div class="half-height">
@@ -24,6 +27,7 @@
             <a href="#<%= uiGridConf.name %>Tab" class="tab-link"><%= uiGridConf.label %></a>
           </li>
       <% }); %>
+      
       </ul>
       <div class="tab-content crop1 no-padding">
       <% _.each(uiGridConfs, function(uiGridConf, index){ %>

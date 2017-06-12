@@ -90,7 +90,6 @@ define([
     },
 
     station: function(id, proto, obs) {
-
       if(this.rgMain.currentView instanceof LytStation){
         this.rgMain.currentView.reload({
           id: id,

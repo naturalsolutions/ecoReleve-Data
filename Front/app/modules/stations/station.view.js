@@ -13,10 +13,11 @@ define([
   'modules/objects/detail.view',
   './station.model',
 
+  'ns_map/ns_map',
 ], function(
   $, _, Backbone, Marionette, Swal,
   Com, NsForm, NavbarView, LytProtocols,
-  DetailView, StationModel
+  DetailView, StationModel, NsMap
 ) {
 
   'use strict';
@@ -26,10 +27,15 @@ define([
     className: 'full-height white station',
 
     ModelPrototype: StationModel,
+    
+    events: {
+      'click .tab-link': 'displayTab',
+    },
 
     ui: {
       formStation: '.js-from-station',
       formStationBtns: '.js-from-btns',
+      'map': '.js-map',
     },
 
     regions: {
@@ -53,6 +59,7 @@ define([
     },
 
     reload: function(options){
+      var _this = this;
       if(options.id == this.model.get('id')){
         this.LytProtocols.protocolsItems.getViewFromUrlParams(options);
       } else {
@@ -64,6 +71,11 @@ define([
         });
         this.displayStation();
       }
+      if(this.map){
+        $.when(this.nsForm.jqxhr).then(function(){
+          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
+        });
+      }
     },
 
     displayProtos: function() {
@@ -71,6 +83,35 @@ define([
         model: this.model,
         parent: this,
       }));
+    },
+
+    displayMap: function() {
+      var map = this.map = new NsMap({
+        zoom: 3,
+        popup: true,
+      });
+      $.when(this.nsForm.jqxhr).then(function(){
+        map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
+      });
+    },
+
+
+    displayTab: function(e) {
+      e.preventDefault();
+      this.$el.find('.nav-tabs>li').each(function(){
+        $(this).removeClass('active in');
+      });
+      $(e.currentTarget).parent().addClass('active in');
+
+      this.$el.find('.tab-content>.tab-pane').each(function(){
+        $(this).removeClass('active in');
+      });
+      var id = $(e.currentTarget).attr('href');
+      this.$el.find('.tab-content>.tab-pane' + id).addClass('active in');
+
+      if(id === '#mapTab' && !this.map){
+        this.displayMap();
+      }
     },
 
     onShow: function() {
@@ -87,11 +128,11 @@ define([
     displayStation: function() {
       this.total = 0;
       var _this = this;
-
+      var detailsFormRegion = this.$el.find('.js-rg-details');
       var formConfig = this.model.get('formConfig');
 
       formConfig.id = this.model.get('id');
-      formConfig.formRegion = this.ui.formStation;
+      formConfig.formRegion = detailsFormRegion;
       formConfig.buttonRegion = [this.ui.formStationBtns];
       formConfig.afterDelete = function(response, model){
         Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
@@ -103,10 +144,16 @@ define([
       };
 
       this.nsForm.afterShow = function(){
-        $(".datetime").attr('placeholder','DD/MM/YYYY');
-        $("#dateTimePicker").on("dp.change", function (e) {
+        var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
+        _this.ui.formStation.html(globalEl);
+
+        if(this.displayMode.toLowerCase() == 'edit'){
+          this.bindChanges(_this.ui.formStation);
+          $(".datetime").attr('placeholder','DD/MM/YYYY');
+          $("#dateTimePicker").on("dp.change", function (e) {
           $('#dateTimePicker').data("DateTimePicker").format('DD/MM/YYYY').maxDate(new Date());
-         });
+          });
+        }
 
       };
 
@@ -115,7 +162,13 @@ define([
         var type_ = 'error';
         var title = 'Error saving';
         if (response.status == 510) {
-          msg = 'A station already exists with these parameters';
+          console.log(response)
+          if (response.responseJSON.existingStation) {
+            msg = 'A station already exists with these parameters';
+          }
+          else if (response.responseJSON.updateDenied) {
+            msg = "Equipment is present on this station, you can't change Station Date or Monitored Site";
+          }
           type_ = 'warning';
           title = 'Error saving';
         }
@@ -132,9 +185,14 @@ define([
       };
 
       this.nsForm.afterSaveSuccess = function() {
+        if(_this.map){
+          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
+        }
+
         if(this.model.get('fieldActivityId') != _this.fieldActivityId){
           _this.displayProtos();
           _this.fieldActivityId = _this.model.get('fieldActivityId');
+
         }
       };
       

@@ -5,342 +5,209 @@ define([
   'marionette',
   'ns_ruler/ruler',
   'backbone-forms',
+  'ns_grid/grid.view',
 
-  ], function ($, _, Backbone, Marionette,Ruler, Form, List, tpl) {
+  ], function ($, _, Backbone, Marionette,Ruler, Form, GridView, tpl) {
 
-    'use strict';
-    return Form.editors.GridFormEditor = Form.editors.Base.extend({
-        events: {
-            'click .js-addFormBtn' : 'addEmptyForm',
-            'click .js-cloneLast' : 'cloneLast',
+  'use strict';
+
+  Backbone.Form.validators.SubFormGrid = function (options) {
+      return function SubFormGrid(value) {
+          if (!options.parent.isError) {
+              return null;
+          }
+          var retour = {
+              type: 'subFormGrid',
+              message: ''
+          };
+          return retour;
+      };
+  };
+
+  return Form.editors.GridFormEditor = Form.editors.Base.extend({
+    events: {
+        'click .js-btn-add' : 'addRow',
+        'click .js-btn-delete' : 'deleteRows',
+        'click .js-cloneLast' : 'cloneLast',
+    },
+
+    template: '\
+        <div class="btn-group-grid">\
+        <button type="button" class="js-btn-add btn btn-success hide"><span class="reneco reneco-add"></span></button>\
+        <button type="button" class="js-btn-delete btn btn-danger btn-sm hide"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
+        </div>\
+        <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 300px">\
+        </div>\
+    ',
+
+    className: 'sub-grid-form' ,
+    addRow: function(){
+      this.gridView.gridOptions.api.setSortModel({});
+      this.gridView.gridOptions.api.addItems([{}]);
+      this.$el.trigger('change');
+    },
+
+    deleteRows: function() {
+      var _this = this;
+      var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+      if(!selectedNodes.length){
+        return;
+      }
+
+      this.gridView.gridOptions.api.deletingRows = true;
+      this.gridView.gridOptions.api.setSortModel({});
+      _this.gridView.gridOptions.api.removeItems(selectedNodes);
+      this.$el.trigger('change');
+      this.gridView.gridOptions.api.deletingRows = false;
+    },
+
+    initialize: function(options){
+      var _this = this; 
+
+      this.validators = options.schema.validators || [];
+
+      this.validators.push({ type: 'SubFormGrid', parent: this });
+
+      this.editable = options.schema.editable;
+      this.form = options.form;
+      this.subProtocolType = options.schema.options.protocoleType;
+
+      options.schema.fieldClass = 'col-xs-12';
+
+      this.templateSettings = {
+          hidden: false,
+          hiddenClone: false,
+      };
+      
+      this.regionManager = new Marionette.RegionManager();
+      _.bindAll(this, 'render', 'afterRender'); 
+      this.render = _.wrap(this.render, function(render) {
+          render();    
+          setTimeout(function(){
+              _this.afterRender(options);
+          }, 0);
+          return _this;
+      });
+    },
+
+    render: function(){
+        this.template = _.template(this.template, this.templateSettings);
+        this.$el.html(this.template);
+        if(this.editable){
+          this.$el.find('.js-btn-add').removeClass('hide');
+          this.$el.find('.js-btn-delete').removeClass('hide');
+        }
+        return this;
+    },
+
+    afterRender: function(options){
+      var _this = this;
+      var rowData = options.model.get(options.key) || [];
+      this.regionManager.addRegions({
+        rgGrid: '.js-rg-grid-subform'
+      });
+
+      if(!(rowData.length) && this.editable){
+        rowData = [{}];
+      }
+
+      var url = 'stations/' + this.model.get('FK_Station') + '/observations'; 
+
+      this.regionManager.get('rgGrid');
+      this.regionManager.get('rgGrid').show(this.gridView = new GridView({
+        columns: this.formatColumns(options.schema),
+        clientSide: true,
+        form: _this.form,
+        url: url,
+        displayRowIndex: true,
+        gridOptions: {
+          editType: 'fullRow',
+          singleClickEdit : true,
+          rowData: rowData,
+          rowSelection: (this.editable)? 'multiple' : '',
+          onCellValueChanged: function(e){
+            _this.customValueChanged(e)
+          }
         },
-        initialize: function(options) {
+        onFocusedRowChange: function(row){
+        }
+      }));
 
-            if (options.schema.validators.length) {
-                this.defaultRequired = true;
-            } else {
-                options.schema.validators.push('required');
-                this.defaultRequired = false;
-            }
+    },
 
-            if (options.schema.options.nbFixedCol){
-                this.nbFixedCol = options.schema.options.nbFixedCol;
-            }
+    customValueChanged: function(options){
+      var column = options.colDef.field;
+      if(column == '_errors'){
+        return;
+      }
+      var newValue, oldValue;
+      if(options.newValue instanceof Object){
+        newValue = options.newValue.value;
+      } else {
+        newValue = options.newValue;
+      }
+      if(options.oldValue instanceof Object){
+        oldValue = options.oldValue.value;
+      } else {
+        oldValue = options.oldValue;
+      }
 
-            if (options.schema.options.delFirst){
-                this.delFirst = options.schema.options.delFirst;
-            }
+      if(newValue !== oldValue){
+        this.$el.trigger('change');
+      }
+    },
 
-             if (!options.schema.options.cloneLast){
-                this.hiddenClone = 'hidden';
-            }
+    formatColumns: function(schema){
+      var _this = this;
+      var odrFields = schema.fieldsets[0].fields;
+                        
+      var columnsDefs = [];
 
-            Form.editors.Base.prototype.initialize.call(this, options);
+      for (var i = 0; i < odrFields.length; i++) {
+        var field = schema.subschema[odrFields[i]];
+        if(field.name == 'ID'){
+          continue;
+        }
+        var colDef = {
+          editable: this.editable,
+          field: field.name,
+          headerName: field.title,
+          type: field.type,
+          options: field.options,
+          schema: field
+        };
+        
+        columnsDefs.push(colDef)
+      }
+      var errorCol = {
+        field: '_errors',
+        headerName: '_errors',
+        hide: true
+      }
+      columnsDefs.push(errorCol);
 
-            this.template = options.template || this.constructor.template;
-            this.options = options;
-            this.options.schema.fieldClass = 'col-xs-12';
-            this.showLines = true ;
-            if (this.options.schema.options.showLines != null) {
-                this.showLines = this.options.schema.options.showLines ;
-            }
-            this.forms = [];
-            this.disabled = options.schema.editorAttrs.disabled;
+      return columnsDefs;             
+    },
 
-            this.hidden = '';
-            if(this.disabled) {
-                this.hidden = 'hidden';
-                this.hiddenClone = 'hidden';
-            }
-            this.hasNestedForm = true;
 
-            this.key = this.options.key;
-            this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
+    getValue: function() {
+      var rowDataAndErrors = this.gridView.getRowDataAndErrors();
 
-        },
-        //removeForm
-        deleteForm: function() {
+      if(rowDataAndErrors.errors.length){
+        this.isError = true;
+        return;
+      } else {
+        this.isError = false;
+      }
 
-        },
+      this.gridView.gridOptions.api.setSortModel({});
 
-        addEmptyForm: function() {
-            var mymodel = Backbone.Model.extend({
-                defaults : this.options.schema.subschema.defaultValues
-            });
+      for (var i = 0; i < rowDataAndErrors.rowData.length; i++) {
+        rowDataAndErrors.rowData[i]['FK_ProtocoleType'] = this.subProtocolType;
+      }
 
-            var model = new mymodel();
-            //model.default = this.options.model.attributes[this.key];
-            model.schema = this.options.schema.subschema;
-            model.fieldsets = this.options.schema.fieldsets;
-            this.addForm(model,this.forms.length+1);
-        },
-
-        cloneLast: function() {
-          var resultat = this.forms[this.forms.length-1].commit() ;
-          if (resultat != null) return ; // COmmit NOK, on crée pas la ligne
-
-            var mymodel = Backbone.Model.extend({
-                defaults : this.forms[this.forms.length-1].model.attributes
-            });
-
-            var model = new mymodel();
-            //model.default = this.options.model.attributes[this.key];
-            model.schema = this.options.schema.subschema;
-            model.fieldsets = this.options.schema.fieldsets;
-            this.addForm(model,this.forms.length+1);
-        },
-
-        subFormChange: function(){
-            this.$el.find('.grid-form').change();
-        },
-
-        bindChanges: function(form){
-          var _this = this;
-          form.$el.find('input').on("change", function(e) {
-              _this.formChange = true;
-              _this.subFormChange();
-          });
-          form.$el.find('select').on("change", function(e) {
-              _this.formChange = true;
-              _this.subFormChange();
-          });
-          form.$el.find('textarea').on("change", function(e) {
-              _this.formChange = true;
-              _this.subFormChange();
-          });
-        },
-
-        addForm: function(model,index){
-            var _this = this;
-            model.set('FK_Station',this.options.model.get('FK_Station'));
-            
-            var form = new Backbone.Form({
-                model: model,
-                fieldsets: model.fieldsets,
-                schema: model.schema
-            }).render();
-            this.bindChanges(form);
-            this.initRules(form);
-            this.forms.push(form);
-
-            if(!this.defaultRequired){
-              if (this.delFirst){
-                  var optClass = ' fixedCol';
-                  var opt2Class = ' pull-left';
-              } else {
-                  var optClass = '';
-                  var opt2Class = ' pull-right';
-              }
-
-              form.$el.find('fieldset').append('\
-                  <div id="delBtn" class="' + this.hidden +optClass+ ' col-xs-12 control grid-field" style={background: #eee;}>\
-                      <button type="button" class="btn btn-danger'+ opt2Class +'" id="remove"><span class="reneco reneco-trash"></span></button>\
-                  </div>\
-              ');
-              form.$el.find('button#remove').on('click', function() {
-                _this.$el.find('#formContainer').find(form.el).remove();
-                var i = _this.forms.indexOf(form);
-                if (i > -1) {
-                    _this.forms.splice(i, 1);
-                }
-                _this.subFormChange();
-                return;
-              });
-            }
-
-            this.$el.find('#formContainer').append(form.el);
-            if (_this.showLines) {
-                if (this.delFirst && !this.disabled){
-                    var optClass = ' firstCol-2';
-                } else {
-                    var optClass = '';
-                }
-                /*if (!this.nbFixedCol) {
-                    this.$el.find('#formContainer form fieldset').last().prepend('<div style="height: 34px; text-align: center;" class="grid-field col-md-2'+optClass+'"><span>' + index + '</span></div>');
-                }
-                else {
-                    this.$el.find('#formContainer form fieldset').last().append('<div style="height: 34px; text-align: center;" class="grid-field fixedCol col-md-2'+optClass+'"><span>' + index + '</span></div>');
-                }*/
-                this.$el.find('#formContainer form fieldset').last().append('<div style="height: 34px; text-align: center;" class="grid-field fixedCol col-md-2'+optClass+'"><span>' + index + '</span></div>');
-
-            }
-        },
-
-        render: function() {
-            //Backbone.View.prototype.initialize.call(this, options);
-            var _this = this;
-            var $el = $($.trim(this.template({
-                hidden: this.hidden,
-                hiddenClone : this.hiddenClone
-            })));
-            this.setElement($el);
-            var data = this.options.model.attributes[this.key];
-            var model = new Backbone.Model();
-            model.schema = this.options.schema.subschema;
-
-            var size=0;
-            var prevSize = 0;
-            if (this.showLines) {
-                prevSize +=2;
-            }
-            if (this.delFirst && !this.disabled) {
-                prevSize +=2;
-            }
-            var odrFields = this.options.schema.fieldsets[0].fields;
-
-            if (this.nbFixedCol){
-                var reordered = odrFields.splice(0,this.nbFixedCol);
-                odrFields = odrFields.concat(reordered.reverse());
-                this.options.schema.fieldsets[0].fields = odrFields;
-            }
-            for (var i = odrFields.length - 1; i >= 0; i--) {
-                var col = model.schema[odrFields[i]];
-                //sucks
-                var test = true;
-                if(col.fieldClass){
-                 test = !(col.fieldClass.split(' ')[0] == 'hide'); //FK_protocolType
-                 col.fieldClass += ' grid-field';
-                }
-
-                if (this.nbFixedCol && reordered.indexOf(col.name) != -1){
-                    col.fieldClass += ' fixedCol ';
-                    if (prevSize != 0) {
-                        /*if (this.delFirst && !this.disabled) {
-                            col.fieldClass += ' firstCol-'+(parseInt(prevSize)+2);
-                        } else {
-                            col.fieldClass += ' firstCol-'+prevSize;
-                        }*/
-                        col.fieldClass += ' firstCol-'+prevSize;
-                    }
-                    this.options.schema.subschema[odrFields[i]].fieldClass = col.fieldClass;
-                    prevSize += col.size;
-                }
-                if(col.title && test) {
-                 this.$el.find('#th').prepend('<div class="'+ col.fieldClass +'"> | ' + col.title + '</div>');
-                }
-                if ( col.size == null) {
-                    size += 150;
-                }
-                else {
-                    size += col.size*25;
-                }
-            }
-
-            if (this.delFirst && !this.disabled){
-                if (this.nbFixedCol) {
-                    this.$el.find('#th div').last().addClass('firstCol-2');
-                    this.options.schema.subschema[odrFields[odrFields.length-1]].fieldClass += ' firstCol-2';
-                } else {
-                    this.$el.find('#th div').first().addClass('firstCol-2');
-                    this.options.schema.subschema[odrFields[0]].fieldClass += ' firstCol-2';
-                }
-            }
-
-            if (this.nbFixedCol || this.showLines) {
-                 if (this.delFirst && !this.disabled) {
-                    var nbCol = prevSize;
-                    this.$el.find('#th').append('<div class="fixedCol col-md-2 grid-field">&nbsp;&nbsp;</div>');
-                } else {
-                    var nbCol = prevSize;
-                }
-                this.options.schema.subschema[odrFields[0]].fieldClass += ' firstCol-'+nbCol;
-                this.$el.find('#th div').first().addClass('firstCol-'+nbCol);
-            }
-
-            if (_this.showLines) {
-                 if (this.delFirst && !this.disabled){
-                    var optClass = ' firstCol-2';
-                } else {
-                    var optClass = '';
-                }
-
-                if (this.nbFixedCol || this.delFirst){
-                    this.$el.find('#th').append('<div class="grid-field fixedCol col-md-2'+optClass+'">&nbsp;|  N°</div>') ;
-                    this.options.schema.subschema[odrFields[0]].fieldClass += ' firstCol-'+nbCol;
-                    this.$el.find('#th div').first().addClass('firstCol-'+nbCol);
-                } else {
-                    this.$el.find('#th').append('<div class="grid-field fixedCol col-md-2'+optClass+'">&nbsp;|  N°</div>') ;
-
-                }
-                size += 310;
-            }
-            else {
-                size += 285;
-            }
-            //this.$el.find('#th').prepend('<div style="width: 34px;" class="pull-left" ><span class="reneco reneco-trash"></span></div>');
-            // size += 35;
-            this.$el.find('#th').width(size);
-            this.$el.find('#formContainer').width(size);
-
-            if (data) {
-                //data
-                if (data.length) {
-                    for (var i = 0; i < data.length; i++) {
-                        if(i >= this.nbByDefault) {
-                            this.defaultRequired = false;
-                        }
-                        var model = new Backbone.Model();
-                        model.schema = this.options.schema.subschema;
-                        model.fieldsets = this.options.schema.fieldsets;
-                        model.attributes = data[i];
-                        this.addForm(model,i+1);
-                    }
-
-                    if (data.length < this.nbByDefault) {
-                        for (var i = 0; i < data.length; i++) {
-                            this.addForm(model,i+1);
-                        }
-                    }
-                    this.defaultRequired = false;
-                }
-            } else {
-                //no data
-                if (this.nbByDefault >= 1) {
-                    for (var i = 0; i < this.nbByDefault; i++) {
-                        this.addEmptyForm();
-                    }
-                    this.defaultRequired = false;
-                }
-            }
-            return this;
-        },
-
-        feedRequiredEmptyForms: function() {
-
-        },
-
-        reorderTofixCol: function() {
-
-        },
-        getValue: function() {
-            var errors = false;
-            for (var i = 0; i < this.forms.length; i++) {
-                if (this.forms[i].commit()) {
-                    errors = true;
-                }
-            };
-            if (errors) {
-                return false;
-            } else {
-                var values = [];
-                for (var i = 0; i < this.forms.length; i++) {
-                    var tmp = this.forms[i].getValue();
-                    var empty = true;
-                    for (var key in tmp) {
-                        if(tmp[key]){
-                            empty = false;
-                        }
-                    }
-                    if(!empty){
-                       /* if (this.defaultValue) {
-                            tmp['FK_ProtocoleType'] = this.defaultValue;
-                        }*/
-                        values[i] = tmp;
-                    }
-                };
-                return values;
-            }
-        },
+      return rowDataAndErrors.rowData;
+    },
 
     initRules:function(form) {
       var _this = this;
@@ -373,20 +240,5 @@ define([
       }
     },
 
-        }, {
-              //STATICS
-              template: _.template('\
-                <div>\
-                    <button type="button" class=" <%= hidden %> btn btn-success js-addFormBtn">+</button>\
-                    <button type="button"  class="js-cloneLast <%= hiddenClone %> btn">Clone Last</button>\
-                    <div class="required grid-form clearfix">\
-                        <div class="clear"></div>\
-                        <div id="th" class="clearfix"></div>\
-                        <div id="formContainer" class="clearfix expand-grid"></div>\
-                    </div>\
-                    <button type="button"  class="<%= hidden %> btn btn-success js-addFormBtn">+</button>\
-                    <button type="button"  class="js-cloneLast <%= hiddenClone %> btn ">Clone Last</button>\
-                </div>\
-                ', null, Form.templateSettings),
-          });
+  });
 });

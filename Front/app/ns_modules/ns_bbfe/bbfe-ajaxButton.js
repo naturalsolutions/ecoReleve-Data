@@ -33,8 +33,8 @@ define([
             var params = this.options.target_params;
             this.parentModel = options.model;
             this.dataToSend = {};
+            this.parent = options.form;
             var _this = this;
-
         },
 
         actionOnBtn: function(e){
@@ -60,6 +60,7 @@ define([
 
         callback: function() {
             var _this = this;
+            this.parent.commit();
             var url = this.options.url;
             $.ajax({
                 url: url,

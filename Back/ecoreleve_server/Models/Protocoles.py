@@ -15,13 +15,17 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.ext.hybrid import hybrid_property
 from ..utils.parseValue import isNumeric
 
 
 class Observation(Base, ObjectWithDynProp):
     __tablename__ = 'Observation'
+
+    moduleFormName = 'ObservationForm'
+    moduleGridName = None
+
     ID = Column(Integer, Sequence('Observation__id_seq'), primary_key=True)
     FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
     ObservationDynPropValues = relationship(
@@ -35,7 +39,7 @@ class Observation(Base, ObjectWithDynProp):
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
 
     Observation_children = relationship(
-        "Observation", cascade="all, delete-orphan")
+        "Observation", cascade="all, delete-orphan", order_by='Observation.ID')
     SubObservation_children = relationship(
         "ObservationDynPropSubValue", cascade="all, delete-orphan")
     Equipment = relationship(
@@ -50,13 +54,12 @@ class Observation(Base, ObjectWithDynProp):
         Base.__init__(self, **kwargs)
         ObjectWithDynProp.__init__(self)
 
-    @orm.reconstructor
-    def init_on_load(self):
-        ObjectWithDynProp.__init__(self)
+    def getTypeObjectFKName(self):
+        return 'FK_ProtocoleType'
 
     def GetNewValue(self, nameProp):
         ReturnedValue = ObservationDynPropValue()
-        ReturnedValue.ObservationDynProp = self.ObjContext.query(
+        ReturnedValue.ObservationDynProp = self.session.query(
             ObservationDynProp).filter(ObservationDynProp.Name == nameProp).first()
         return ReturnedValue
 
@@ -64,32 +67,35 @@ class Observation(Base, ObjectWithDynProp):
         return self.ObservationDynPropValues
 
     def GetDynProps(self, nameProp):
-        return self.ObjContext.query(ObservationDynProp
+        return self.session.query(ObservationDynProp
                                      ).filter(ObservationDynProp.Name == nameProp).one()
 
     def GetType(self):
-        if self.ProtocoleType != None:
+        if self.ProtocoleType is not None:
             return self.ProtocoleType
         else:
-            return self.ObjContext.query(ProtocoleType).get(self.FK_ProtocoleType)
+            return self.session.query(ProtocoleType).get(self.FK_ProtocoleType)
 
     def linkedFieldDate(self):
         try:
-            return self.Station.StationDate
+            linkedDate = self.Station.StationDate
         except:
-            return datetime.now()
+            linkedDate = datetime.now()
+        if 'unequipment' in self.GetType().Name.lower():
+            linkedDate = linkedDate - timedelta(seconds=1)
+        return linkedDate
 
     @hybrid_property
     def Observation_childrens(self):
         if self.Observation_children is not None or self.Observation_children != []:
             return True
         else:
-            return []
+            return False
 
     @Observation_childrens.setter
     def Observation_childrens(self, listOfSubProtocols):
         listObs = []
-        if len(listOfSubProtocols) != 0:
+        if isinstance(listOfSubProtocols, list) and len(listOfSubProtocols) > 0:
 
             for curData in listOfSubProtocols:
                 if self.GetType().Status == 8:
@@ -117,7 +123,7 @@ class Observation(Base, ObjectWithDynProp):
                     subObs.init_on_load()
 
                 if subObs is not None:
-                    subObs.UpdateFromJson(curData)
+                    subObs.updateFromJSON(curData)
                     listObs.append(subObs)
         self.Observation_children = listObs
 
@@ -132,7 +138,7 @@ class Observation(Base, ObjectWithDynProp):
     @SubObservation_childrens.setter
     def SubObservation_childrens(self, listOfSubObs):
         listSubValues = []
-        if len(listOfSubObs) > 0:
+        if isinstance(listOfSubObs, list) and len(listOfSubObs) > 0:
             for curData in listOfSubObs:
                 if 'FK_Observation' in curData:
                     subObsValue = list(filter(lambda x: x.FK_Observation == curData[
@@ -148,21 +154,22 @@ class Observation(Base, ObjectWithDynProp):
                     listSubValues.append(subObsValue)
         self.SubObservation_children = listSubValues
 
-    def UpdateFromJson(self, DTOObject, startDate=None):
-        ObjectWithDynProp.UpdateFromJson(self, DTOObject, None)
+    def updateFromJSON(self, DTOObject, startDate=None):
+        ObjectWithDynProp.updateFromJSON(self, DTOObject, None)
         if 'listOfSubObs' in DTOObject:
             self.SubObservation_childrens = DTOObject['listOfSubObs']
-        self.updateLinkedField()
+        self.updateLinkedField(DTOObject)
 
-    def GetFlatObject(self, schema=None):
-        result = super().GetFlatObject()
+    def getFlatObject(self, schema=None):
+        result = super().getFlatObject()
         subObsList = []
         typeName = 'children'
         if self.Observation_children != []:
             typeName = self.Observation_children[0].GetType().Name
+
             for subObs in self.Observation_children:
                 subObs.LoadNowValues()
-                flatObs = subObs.GetFlatObject()
+                flatObs = subObs.getFlatObject()
                 if len(subObs.SubObservation_children) > 0:
                     flatObs.update(subObs.SubObservation_childrens)
                 subObsList.append(flatObs)

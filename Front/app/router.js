@@ -32,6 +32,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'stations/lastImported(/)': 'stations',
 
       'stations/:id?(proto=:proto&)obs=:obs(/)': 'station',
+      'stations/:id?proto=:proto(/)': 'station',
       'stations/:id(/)': 'station',
       'stations(/)': 'stations',
 

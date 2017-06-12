@@ -1,0 +1,149 @@
+UPDATE [dbo].[ModuleForms]
+   SET [Label] = 'Comments'
+ WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Transmitter_research_condition' ) and Name = 'Site_description'
+GO
+
+
+UPDATE [dbo].[ModuleForms]
+SET [FieldSizeEdit] = 6,
+	[FieldSizeDisplay] = 6,
+	[FormOrder] = 32
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_habitat' ) and Name = 'soil_texture'
+
+GO
+
+
+UPDATE [dbo].[ModuleForms]
+SET [FieldSizeEdit] = 3,
+	[FieldSizeDisplay] = 3,
+	[FormOrder] = 31
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_habitat' ) and Name = 'hydrography'
+
+GO
+
+
+
+
+
+UPDATE [dbo].[ModuleForms]
+SET [FieldSizeEdit] = 12,
+    [FieldSizeDisplay] = 12
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'taxon'
+
+GO
+
+
+
+
+UPDATE [dbo].[ModuleForms]
+SET [FieldSizeEdit] = 2,
+    [FieldSizeDisplay] = 2
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'identity_sure'
+
+GO
+
+
+UPDATE [dbo].[ModuleForms]
+SET [FormOrder] = 22,
+	[FieldSizeEdit] = 2,
+    [FieldSizeDisplay] = 2
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'sampled'
+
+GO
+
+
+UPDATE [dbo].[ModuleForms]
+SET [FormOrder] = 23,
+	[FieldSizeEdit] = 2,
+    [FieldSizeDisplay] = 2
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'picture'
+
+GO
+
+
+UPDATE [dbo].[ModuleForms]
+SET [FormOrder] = 24,
+	[FieldSizeEdit] = 2,
+    [FieldSizeDisplay] = 2
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'cultivated'
+
+GO
+
+
+UPDATE [dbo].[ModuleForms]
+SET [FormOrder] = 25
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'Comments'
+
+GO
+
+
+
+UPDATE [dbo].[ModuleForms]
+SET [FormOrder] = 26
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'validator'
+
+GO
+
+
+UPDATE [dbo].[ModuleForms]
+SET [FormOrder] = 27
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'nb_individuals'
+
+GO
+
+UPDATE [dbo].[ModuleForms]
+SET [FormOrder] = 28
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'phenology_BBCH1'
+
+GO
+
+UPDATE [dbo].[ModuleForms]
+SET [FormOrder] = 29
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'phenology_BBCH2'
+
+GO
+
+UPDATE [dbo].[ModuleForms]
+SET [FormOrder] = 29
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'picture_path'
+
+GO
+
+
+
+UPDATE [dbo].[ModuleForms]
+	SET [FieldSizeEdit] = 2,
+   	[FieldSizeDisplay] = 2
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'global_abondance_dom'
+
+GO
+
+
+UPDATE [dbo].[ModuleForms]
+	SET [FieldSizeEdit] = 2,
+   	[FieldSizeDisplay] = 2
+
+WHERE TypeObj = (SELECT  [ID] FROM [dbo].[ProtocoleType]   where [Name] = 'Phytosociology_releve' ) and Name = 'global_sociability'
+
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('110_Update_Protocols_fields',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -4,9 +4,10 @@ define([
   'backbone',
   'marionette',
   './protocol.view',
+  './protocol.grid.view',
 
   'i18n'
-], function($, _, Backbone, Marionette, Protocol) {
+], function($, _, Backbone, Marionette, Protocol, ProtocolGrid) {
   'use strict';
   return Marionette.LayoutView.extend({
     template: 'app/modules/stations/protocols/protocols.tpl.html',
@@ -24,7 +25,7 @@ define([
       'change .js-proto-picker': 'addProtoFromList' 
     },
 
-    initialize: function(options) {
+    initialize: function(options){
       this.parent = options.parent;
       this.collection = new Backbone.Collection();
     },
@@ -32,7 +33,7 @@ define([
     onShow: function(){
       var _this = this; 
       this.collection.fetch({
-        url: 'stations/' + _this.model.get('id') + '/protocols',
+        url: 'stations/' + _this.model.get('id') + '/observations',
         reset: true,
         data: {
           FormName: 'ObsForm',
@@ -65,6 +66,7 @@ define([
         },
 
         initialize: function(){
+         //this.model.set('grid', true);
         },
 
         updateTotal: function(){
@@ -75,7 +77,6 @@ define([
           var hash = window.location.hash.split('?');
           var obs;
           if(this.model.get('obs').length){
-
             obs = this.model.get('obs')[0];
           }
           if(!obs){
@@ -131,7 +132,6 @@ define([
                   } else {
                     view.model.set('currentObs', 0);
                   }
-                  
                 } else {
                   view.model.set('currentObs', 0);
                 }
@@ -161,19 +161,24 @@ define([
           var url = hash[0] + '?proto=' + view.model.get('ID') + '&obs=' + view.model.get('currentObs');
           
 
-          if(view.model.get('currentObs') == 0){
-            $.xhrPool.allowAbort = false;
-            Backbone.history.navigate(url, {trigger: false});
-          }
+          $.xhrPool.allowAbort = false;
+          Backbone.history.navigate(url, {trigger: false});
           $.xhrPool.allowAbort = true;
 
           view.model.set('stationId', _this.model.get('stationId'));
           view.$el.addClass('active');
 
-          _this.parent.rgProtocol.show(new Protocol({
-            model: view.model
-          }));
 
+
+          if( view.model.get('grid') ){
+            _this.parent.rgProtocol.show(new ProtocolGrid({
+              model: view.model
+            }));
+          } else {
+            _this.parent.rgProtocol.show(new Protocol({
+              model: view.model
+            }));
+          }
         },
 
         onShow: function(){
@@ -193,7 +198,7 @@ define([
       var _this = this;
       this.protoSelectList = new Backbone.Collection();
       this.protoSelectList.fetch({
-        url: '/protocolTypes',
+        url: '/protocols/getType',
         reset: true,
         success: function() {
           _.each(_this.protoSelectList.models,function(model) {
@@ -223,7 +228,7 @@ define([
       var proto = new Backbone.Model();
 
       this.jqxhr = $.ajax({
-        url: 'stations/' + this.stationId + '/protocols/0',
+        url: 'stations/' + this.model.get('id') + '/observations/0',
         context: this,
         type: 'GET',
         data: {
@@ -238,6 +243,7 @@ define([
           proto.set({fieldsets: data.fieldsets});
           proto.set({schema: data.schema});
           proto.set({obs: []});
+          proto.set({grid: data.grid});
 
           this.collection.push(proto);
           var index = this.collection.indexOf(proto);

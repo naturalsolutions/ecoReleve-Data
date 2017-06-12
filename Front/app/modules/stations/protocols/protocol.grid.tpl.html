@@ -1,45 +1,35 @@
 <div class="toolbar top">
-  <legend class="pull-left">
-    <span class="reneco reneco-sheet2"></span> <%= Name %>
-  </legend>
-  <ul id="pagination" class="pagination hidden pull-right"></ul>
+  <legend class="pull-left" ><%= Name %></legend>
+  <button class="js-btn-form btn btn-success hide pull-right" role="add">
+    <span class="reneco reneco-add"></span>
+  </button>
 </div>
 
-<div class="crop2 no-padding">
-  <div id="observations" class="full-height proto-form">
-      <div class="required grid-form clearfix full-height">
-          <div class="clear"></div>
-          <div class="js-col-row-number">
-            <div class="thead clearfix">
-              <div>&nbsp;|  N°</div>
-            </div>
-            <div class="js-tbody-row-number tbody clearfix">
-            </div>
-          </div>
-          <div class="grid-form-wrapper">
-            <div class="js-thead thead clearfix"></div>
-            <div class="js-tbody tbody clearfix expand-grid"></div>
-          </div>
-      </div>
-  </div>
-</div>
+<div class="js-rg-grid crop2 no-padding"></div>
 
 <div class="toolbar bottom">
-  <button class="js-btn-form-grid-clear btn btn-default" >
-    <span data-i18n="button.clear">Clear</span>
+  <button class="js-btn-form btn btn-success hide" role="add">
+    <span class="reneco reneco-add"></span>
+  </button>
+  <button class="js-admin js-btn-form btn btn-danger hide btn-sm" role="delete">
+  	<span class="reneco reneco-trash"></span>
+  	&nbsp;Delete selected observations
   </button>
 
-
   <div class="pull-right">
-    <button class="js-btn-form-grid-edit btn btn-default" >
-      <span class="reneco reneco-unlocked"></span>
-      &nbsp;
-      <span data-i18n="button.edit">Unlock</span>
-    </button>
-    <button class="js-btn-form-grid-save btn btn-success" >
-      <span class="reneco reneco-locked"></span>
-      &nbsp;
-      <span data-i18n="button.save">Lock</span>
-    </button>
+  	<button class="js-btn-form btn btn-success" role="edit">
+  		<span class="reneco reneco-edit"></span>
+  		&nbsp;
+  		<span data-i18n="button.edit">Edit</span>
+  	</button>
+  	<button class="js-btn-form btn btn-default hide" role="cancel">
+  		<span data-i18n="button.cancel">Cancel</span>
+  	</button>
+  	<button class="js-btn-form btn btn-success hide" role="save">
+  		<span class="reneco reneco-write"></span>
+  		&nbsp;
+  		<span data-i18n="button.save">Save</span>
+  	</button>
   </div>
+
 </div>

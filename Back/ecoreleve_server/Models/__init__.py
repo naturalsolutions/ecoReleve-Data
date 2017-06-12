@@ -57,7 +57,7 @@ def loadThesaurusTrad(config):
     results = session.execute(query).fetchall()
 
     for row in results:
-        thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn']}
+        thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr':row['nameFr']}
         invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
         invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
     session.close()
@@ -102,9 +102,9 @@ def db(request):
     makerDefault = request.registry.dbmaker
     session = makerDefault()
 
-    if 'ecoReleve-Core/export/' in request.url:
-        makerExport = request.registry.dbmakerExport
-        session = makerExport()
+    # if 'ecoReleve-Core/export/' in request.url:
+    #     makerExport = request.registry.dbmakerExport
+    #     session = makerExport()
 
     def cleanup(request):
         if request.exception is not None:

@@ -85,7 +85,7 @@ define([
 
     loadFieldsActivity: function() {
       return $.ajax({
-        url: 'fieldActivity',
+        url: 'stations/fieldActivity',
         method: 'GET',
         context: this,
       }).done(function(data){
@@ -142,8 +142,6 @@ define([
         {
           field: 'id',
           headerName: 'ID',
-          checkboxSelection: true
-
         },{
           field: 'name',
           headerName: 'Name',
@@ -187,6 +185,11 @@ define([
           enableFilter: true,
           singleClickEdit : true,
           rowSelection: 'multiple',
+          onRowDoubleClicked: function (row){
+            if(_this.gridView.gridOptions.api.getFocusedCell().column.colId != 'fieldActivity'){
+              _this.gridView.interaction('focusAndZoom', row.data.ID || row.data.id);
+            }
+          },
           onRowClicked: function(row){
             if(_this.gridView.gridOptions.api.getFocusedCell().column.colId != 'fieldActivity'){
               _this.gridView.interaction('focus', row.data.ID || row.data.id);
@@ -217,7 +220,7 @@ define([
           var exisits = data.exist;
           Swal({
             title: 'Stations import',
-            text: 'inserted stations :' + inserted + ', exisiting stations:' + exisits,
+            text: 'inserted stations :' + inserted + ', existing stations:' + exisits,
             type: 'success',
             showCancelButton: true,
             confirmButtonColor: 'green',

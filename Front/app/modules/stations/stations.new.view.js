@@ -43,6 +43,7 @@ define([
 
     initialize: function(options) {
       this.from = options.from;
+      this.histoMonitoredSite = {};
     },
 
     onShow: function() {
@@ -234,8 +235,8 @@ define([
     },
 
     save: function() {
-      this.nsForm.butClickSave();
-    },
+           this.nsForm.butClickSave();
+    }
 
   });
 });
