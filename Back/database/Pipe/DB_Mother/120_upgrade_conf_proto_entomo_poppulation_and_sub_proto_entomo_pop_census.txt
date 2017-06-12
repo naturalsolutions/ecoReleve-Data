@@ -372,8 +372,22 @@ UPDATE [dbo].[ProtocoleType]
 
 COMMIT TRAN T2;
 
+BEGIN TRAN T3;
+/*Ajouter une fieldactivity 'Invertebrate density activity assessment'*/ 
+INSERT INTO [dbo].[fieldActivity]
+           ([Name])
+     VALUES
+           ('Invertebrate density activity assessment')
 
+/* avec les memes protocoles par defaut que 'Invertebrate inventory'.*/
 
+SELECT FK_ProtocoleType
+	   ,(select ID from fieldActivity where Name = 'Invertebrate density activity assessment' )
+from [FieldActivity_ProtocoleType]
+where FK_fieldActivity =  ( select ID from fieldActivity
+where Name = 'Invertebrates inventory')
+
+COMMIT TRAN T3;
 
 
 
