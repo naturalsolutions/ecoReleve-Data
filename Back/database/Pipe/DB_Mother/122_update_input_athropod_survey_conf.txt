@@ -38,8 +38,8 @@ INSERT INTO [dbo].[ModuleForms]
            ,'Host Plant'
            ,'Host Plant'
            ,0
-           ,150
-           ,150
+           ,6
+           ,6
            ,'AutocompTreeEditor'
            ,'form-control'
            ,2
@@ -75,8 +75,8 @@ INSERT INTO [dbo].[ModuleForms]
            ,'Trap_state'
            ,'Trap state'
            ,0
-           ,150
-           ,150
+           ,6
+           ,6
            ,'AutocompTreeEditor'
            ,'form-control'
            ,2
@@ -96,6 +96,17 @@ INSERT INTO [dbo].[ModuleForms]
 DELETE FROM [dbo].[ModuleForms]
       WHERE [Name] ='Code_Piege'
 	  AND   TypeObj = ( select id from ProtocoleType where name = 'Athropod_survey' )
+
+
+/* change name of sub protocol */
+
+ UPDATE [dbo].[ModuleForms]
+   SET 
+   [Name] = 'Sub_Athropod_survey'
+   ,[Label] = 'Sub_Athropod_survey'
+ WHERE [Name] = 'Entomo_pop_census'
+ and   TypeObj = ( select id from ProtocoleType where name = 'Athropod_survey' )
+
 
  COMMIT TRAN T1;
 

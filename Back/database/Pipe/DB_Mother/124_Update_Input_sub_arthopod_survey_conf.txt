@@ -192,6 +192,7 @@ BEGIN TRAN T1;
 		   ,[options]
            ,[Status]
 		   ,[Locked]
+       ,[DefaultValue]
 		   ,[Rules])
      VALUES
            (1
@@ -205,10 +206,11 @@ BEGIN TRAN T1;
            ,'form-control'
            ,2
            ,14
-		   ,2011341
+		       ,2011341
            ,1
-		   ,1
-		   ,'{"operator":"disable","target":"Subdivided","source":"Subdivided","value":1}'
+		       ,1
+           ,'non'
+		       ,'{"operator":"disable","target":"Subdivided","source":"Subdivided","value":1}'
 		   )
 
 
