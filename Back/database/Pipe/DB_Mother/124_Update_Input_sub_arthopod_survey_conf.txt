@@ -5,8 +5,8 @@ BEGIN TRAN T1;
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 1
 		,[Required] = 1
-		,[FieldSizeEdit] = 150
-		,[FieldSizeDisplay] = 150
+		,[FieldSizeEdit] = 300
+		,[FieldSizeDisplay] = 300
 		 
 		WHERE [Name] = 'taxon'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
@@ -17,7 +17,9 @@ BEGIN TRAN T1;
    SET   [FormOrder] = 2
 		,[Required] = 1
 		,[Name] = 'Observation_by'
-		,[Label] = 'Observation by'		 
+		,[Label] = 'Observation by'	
+    ,[FieldSizeEdit] = 150
+		,[FieldSizeDisplay] = 150	 
 		WHERE [Name] = 'Collecteur'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
@@ -27,7 +29,9 @@ BEGIN TRAN T1;
    SET   [FormOrder] = 3
 		,[Required] = 1
 		,[Name] = 'Identification_by'
-		,[Label] = 'Identification by'		 
+		,[Label] = 'Identification by'
+    ,[FieldSizeEdit] = 150
+		,[FieldSizeDisplay] = 150	 		 
 		WHERE [Name] = 'Identified_by'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
@@ -37,7 +41,9 @@ BEGIN TRAN T1;
    SET   [FormOrder] = 4
 		,[Required] = 1
 		,[Name] = 'Identification year'
-		,[Label] = 'Identification_year'		 
+		,[Label] = 'Identification_year'
+    ,[FieldSizeEdit] = 150
+		,[FieldSizeDisplay] = 150	 		 
 		WHERE [Name] = 'Identified_on'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
@@ -45,6 +51,8 @@ BEGIN TRAN T1;
 
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 5
+    ,[FieldSizeEdit] = 80
+		,[FieldSizeDisplay] = 80	 	
 		WHERE [Name] = 'identity_sure'
 		and [label] = 'Sure'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
@@ -55,6 +63,8 @@ BEGIN TRAN T1;
    SET   [FormOrder] = 6
 		,[Name] = 'Sampled'
 		,[Label] = 'Sampled'
+    ,[FieldSizeEdit] = 80
+		,[FieldSizeDisplay] = 80
 		WHERE [Name] = 'sampled'
 		and [label] = 'Collected'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
@@ -82,8 +92,8 @@ BEGIN TRAN T1;
            ,'Picture'
            ,'Picture'
            ,0
-           ,150
-           ,150
+           ,80
+           ,80
            ,'Checkbox'
            ,'form-control'
            ,2
@@ -98,8 +108,8 @@ BEGIN TRAN T1;
    SET   [FormOrder] = 8
 		,[Name] = 'Stage'
 		,[Label] = 'Stage'
-		,[FieldSizeEdit] = 150
-		,[FieldSizeDisplay] = 150
+		,[FieldSizeEdit] = 80
+		,[FieldSizeDisplay] = 80
 		WHERE [Name] = 'stade'
 		and [label] = 'Stade'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
@@ -107,8 +117,8 @@ BEGIN TRAN T1;
 /* Sex */
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 9
-   		,[FieldSizeEdit] = 150
-		,[FieldSizeDisplay] = 150
+   		,[FieldSizeEdit] = 80
+		,[FieldSizeDisplay] = 80
 		WHERE [Name] = 'sex'
 		and [label] = 'Sex'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
@@ -117,8 +127,8 @@ BEGIN TRAN T1;
 
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 10
-   		,[FieldSizeEdit] = 150
-		,[FieldSizeDisplay] = 150
+   		,[FieldSizeEdit] = 80
+		,[FieldSizeDisplay] = 80
 		WHERE [Name] = 'number'
 		and [label] = 'number'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
@@ -145,8 +155,8 @@ BEGIN TRAN T1;
            ,'Weight'
            ,'Weight'
            ,0
-           ,150
-           ,150
+           ,80
+           ,80
            ,'Number'
            ,'form-control'
            ,2
@@ -160,8 +170,8 @@ BEGIN TRAN T1;
 
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 12
-   		,[FieldSizeEdit] = 150
-		,[FieldSizeDisplay] = 150
+   		,[FieldSizeEdit] = 80
+		,[FieldSizeDisplay] = 80
 		WHERE [Name] = 'behaviour'
 		and [label] = 'behaviour'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
@@ -170,8 +180,8 @@ BEGIN TRAN T1;
 
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 13
-   		,[FieldSizeEdit] = 150
-		,[FieldSizeDisplay] = 150
+   		,[FieldSizeEdit] = 80
+		,[FieldSizeDisplay] = 80
 		WHERE [Name] = 'Comments'
 		and [label] = 'Comments'
  and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
@@ -200,8 +210,8 @@ BEGIN TRAN T1;
            ,'Subdivided'
            ,'Subdivided'
            ,0
-           ,150
-           ,150
+           ,80
+           ,80
            ,'AutocompTreeEditor'
            ,'form-control'
            ,2
@@ -239,8 +249,8 @@ BEGIN TRAN T1;
            ,'FK_SubArtrhopodSurvey'
            ,'FK_SubArtrhopodSurvey'
            ,0
-           ,150
-           ,150
+           ,80
+           ,80
            ,'Number'
            ,'form-control'
            ,0
