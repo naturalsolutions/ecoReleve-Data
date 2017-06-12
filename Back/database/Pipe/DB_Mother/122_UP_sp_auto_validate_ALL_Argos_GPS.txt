@@ -87,7 +87,7 @@ WITH data AS (
 SELECT @exist = (select COUNT(*) FROM data where r=1)- @NbINserted
 
 update [dbo].[sensor_ArgosGps] set imported = 1 where PK_id in (select CONVERT(int,replace(data_id,'Targos_gps_','')) from @output)
-update VArgosData_With_EquipIndiv set checked = 1 where checked = 0 and [FK_Individual] is not null 
+update VArgosData_With_EquipIndiv set checked = 1 where checked = 0 and [FK_Individual] is not null
 
 SET @nb_insert = @NbINserted
 SET @error=@@ERROR
@@ -100,7 +100,7 @@ END
 GO
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('111_UP_sp_auto_validate_ALL_Argos_GPS',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('122_UP_sp_auto_validate_ALL_Argos_GPS',GETDATE(),(SELECT db_name()))
 
 
 GO

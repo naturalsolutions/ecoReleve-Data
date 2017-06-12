@@ -1,5 +1,7 @@
 
-ALTER PROCEDURE [dbo].[sp_auto_validate_ALL_GSM]
+ALTER PROCEDURE [dbo].[sp_auto_validate_GSM]
+	@ptt int , 
+	@ind int,
 	@user int,
 	@freq int,
 	@nb_insert int OUTPUT,
@@ -9,7 +11,6 @@ ALTER PROCEDURE [dbo].[sp_auto_validate_ALL_GSM]
 	
 AS
 BEGIN
-	
 
 	SET NOCOUNT ON;
 	DECLARE @data_to_insert table ( 
@@ -28,10 +29,9 @@ BEGIN
 
 WITH data AS (
 		SELECT *
-			, ROW_NUMBER() OVER (PARTITION BY FK_Individual,FK_Sensor,CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
-		FROM VGSMData_With_EquipIndiv where checked = 0 and FK_Individual IS NOT NULL
+			, ROW_NUMBER() OVER (PARTITION BY CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VGSMData_With_EquipIndiv where  FK_ptt=@ptt and checked = 0 and FK_Individual = @ind
 	)
-
 
 -- insert data creating new Location
 INSERT INTO [dbo].[Individual_Location]
@@ -74,14 +74,14 @@ SET @NbINserted=@@ROWCOUNT;
 
 WITH data AS (
 		SELECT *
-			, ROW_NUMBER() OVER (PARTITION BY FK_Individual,FK_Sensor,CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
-		FROM VGSMData_With_EquipIndiv where checked = 0 and FK_Individual IS NOT NULL
+			, ROW_NUMBER() OVER (PARTITION BY CONVERT(DATE, date), DATEPART(hour, date),  DATEPART(minute, date)/@freq, type ORDER BY date) as r
+		FROM VGSMData_With_EquipIndiv where  FK_ptt=@ptt and checked = 0 and FK_Individual = @ind
 	)
 
 SELECT @exist = (select COUNT(*) FROM data where r=1)- @NbINserted
 
-update [dbo].[sensor_ArgosGps] set imported = 1 where PK_id in (select CONVERT(int,replace(data_id,'Tgsm','')) from @output)
-update VGSMData_With_EquipIndiv set checked = 1 where checked = 0 and [FK_Individual] IS NOT NULL ;
+update [dbo].[sensor_Gsm] set imported = 1 where PK_id in (select CONVERT(int,replace(data_id,'Tgsm','')) from @output)
+update VGSMData_With_EquipIndiv set checked = 1 where  FK_ptt=@ptt and checked = 0 and FK_Individual = @ind ;
 
 
 SET @nb_insert = @NbINserted
@@ -94,12 +94,11 @@ END
 
 
 
-
-Go
-
+GO
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('110_UP_sp_auto_validate_ALL_GSM',GETDATE(),(SELECT db_name()))
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('123_UP_sp_auto_validate_GSM',GETDATE(),(SELECT db_name()))
 
 
 GO

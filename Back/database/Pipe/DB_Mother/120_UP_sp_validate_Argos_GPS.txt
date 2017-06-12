@@ -91,7 +91,7 @@ where i.data_id not in (select data_id from @data_duplicate)
 SET @NbINserted=@@ROWCOUNT
 
 update [dbo].[sensor_ArgosGps] set imported = 1 where PK_id in (select data_id from @data_to_insert)
-update VArgosData_With_EquipIndiv set checked = 1 where FK_ptt = @ptt and [FK_Individual] = @ind
+update VArgosData_With_EquipIndiv set checked = 1 where FK_ptt = @ptt and [FK_Individual] = @ind and checked = 0
 
 SET @nb_insert = @NbINserted
 SELECT @exist = COUNT(*) FROM @data_duplicate
@@ -106,7 +106,7 @@ END
 GO
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('109_SP_ValidateArgos_Update_Casetype',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('120_SP_ValidateArgos_Update_Casetype',GETDATE(),(SELECT db_name()))
 
 
 GO

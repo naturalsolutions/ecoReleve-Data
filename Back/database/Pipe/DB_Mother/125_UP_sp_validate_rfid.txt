@@ -102,7 +102,7 @@ GO
 
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('114_UP_sp_validate_rfid',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('125_UP_sp_validate_rfid',GETDATE(),(SELECT db_name()))
 
 
 GO
