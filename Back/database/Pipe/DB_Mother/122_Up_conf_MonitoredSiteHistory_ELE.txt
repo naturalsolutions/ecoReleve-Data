@@ -1,0 +1,11 @@
+update g SET Name = 'ELE', Label = 'ELE', GridOrder = 4 
+  FROM [ModuleGrids] g
+  where module_id = 15 and label = 'ELE'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('122_Up_conf_MonitoredSiteHistory_ELE',GETDATE(),(SELECT db_name()))
+
+
+GO
