@@ -1,112 +1,4 @@
-BEGIN TRAN T1
-/* Habitat ==> relier au thésaurus "Type de milieux", ID 225869 */
-
-UPDATE [dbo].[ModuleForms]
-   SET [FormOrder] = 1
-      ,[Options] = 225869
-	  ,[InputType] = 'AutocompTreeEditor'
- WHERE [Name] = 'habitat'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_population' )
-
- /*Micro habitat ==> relier au thésaurus "Type de micro-habitats", ID 226029*/
-
- UPDATE [dbo].[ModuleForms]
-   SET [FormOrder] = 2
-      ,[Options] = 226029
-	  ,[InputType] = 'AutocompTreeEditor'
- WHERE [Name] = 'micro_habitat'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_population' )
-
- /* Host plant ==> Champ à rajouter, à relier au thésaurus "Plantes" ID 204083*/
-INSERT INTO [dbo].[ModuleForms]
-           ([module_id]
-           ,[TypeObj]
-           ,[Name]
-           ,[Label]
-           ,[Required]
-           ,[FieldSizeEdit]
-           ,[FieldSizeDisplay]
-           ,[InputType]
-           ,[editorClass]
-           ,[FormRender]
-           ,[FormOrder]
-           ,[Options]
-           ,[Status])
-     VALUES
-           (1
-           ,223
-           ,'Host Plant'
-           ,'Host Plant'
-           ,0
-           ,150
-           ,150
-           ,'AutocompTreeEditor'
-           ,'form-control'
-           ,2
-           ,3
-           ,204083
-           ,1)
- /*Capture ==> A renommer en Method (toujours le même champ thésaural)*/
-  UPDATE [dbo].[ModuleForms]
-   SET [FormOrder] = 4
-	  ,[Name] = 'Method'
-	  ,[Label] = 'Method'
- WHERE [Name] = 'Name_Capture'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_population' )
- /* Trap state ==> Champ à rajouter, à relier au thésaurus "Etat du piège", ID 2011307*/
- INSERT INTO [dbo].[ModuleForms]
-           ([module_id]
-           ,[TypeObj]
-           ,[Name]
-           ,[Label]
-           ,[Required]
-           ,[FieldSizeEdit]
-           ,[FieldSizeDisplay]
-           ,[InputType]
-           ,[editorClass]
-           ,[FormRender]
-           ,[FormOrder]
-           ,[Options]
-           ,[Status])
-     VALUES
-           (1
-           ,223
-           ,'Trap_state'
-           ,'Trap state'
-           ,0
-           ,150
-           ,150
-           ,'AutocompTreeEditor'
-           ,'form-control'
-           ,2
-           ,5
-           ,2011307
-           ,1)
-
-/* Comments*/
-
- UPDATE [dbo].[ModuleForms]
-   SET [FormOrder] = 6
- WHERE [Name] = 'Comments'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_population' )
-
- /* Supprimer Code_Piege*/
-
-DELETE FROM [dbo].[ModuleForms]
-      WHERE [Name] ='Code_Piege'
-	  AND   TypeObj = ( select id from ProtocoleType where name = 'Entomo_population' )
-
-/*Renommer le nom du protocole "Arthropod survey" */
-
-UPDATE [dbo].[ProtocoleType]
-   SET [Name] = 'Athropod_survey'
- WHERE [Name] = 'Entomo_population'
-
- COMMIT TRAN T1;
-
-
-
-BEGIN TRAN T2;
+BEGIN TRAN T1;
 
 /* Taxon   */
 
@@ -117,7 +9,7 @@ BEGIN TRAN T2;
 		,[FieldSizeDisplay] = 150
 		 
 		WHERE [Name] = 'taxon'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 /* Collector : renommer en Observation by */
 
@@ -127,7 +19,7 @@ BEGIN TRAN T2;
 		,[Name] = 'Observation_by'
 		,[Label] = 'Observation by'		 
 		WHERE [Name] = 'Collecteur'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 /* Identified by : renommer en Identification by */
 
@@ -137,7 +29,7 @@ BEGIN TRAN T2;
 		,[Name] = 'Identification_by'
 		,[Label] = 'Identification by'		 
 		WHERE [Name] = 'Identified_by'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 /* Identified on : renommer en Identification year */
 
@@ -147,7 +39,7 @@ BEGIN TRAN T2;
 		,[Name] = 'Identification year'
 		,[Label] = 'Identification_year'		 
 		WHERE [Name] = 'Identified_on'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 /* Sure */
 
@@ -155,7 +47,7 @@ BEGIN TRAN T2;
    SET   [FormOrder] = 5
 		WHERE [Name] = 'identity_sure'
 		and [label] = 'Sure'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 /* Collected : renommer en Sampled */
 
@@ -165,7 +57,7 @@ BEGIN TRAN T2;
 		,[Label] = 'Sampled'
 		WHERE [Name] = 'sampled'
 		and [label] = 'Collected'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 
 /* Picture : champ à rajouter, de type case à cocher */
@@ -186,7 +78,7 @@ BEGIN TRAN T2;
 		   ,[Rules])
      VALUES
            (1
-           ,231
+           , ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
            ,'Picture'
            ,'Picture'
            ,0
@@ -210,7 +102,7 @@ BEGIN TRAN T2;
 		,[FieldSizeDisplay] = 150
 		WHERE [Name] = 'stade'
 		and [label] = 'Stade'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 /* Sex */
  UPDATE [dbo].[ModuleForms]
@@ -219,7 +111,7 @@ BEGIN TRAN T2;
 		,[FieldSizeDisplay] = 150
 		WHERE [Name] = 'sex'
 		and [label] = 'Sex'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 /* Number */
 
@@ -229,7 +121,7 @@ BEGIN TRAN T2;
 		,[FieldSizeDisplay] = 150
 		WHERE [Name] = 'number'
 		and [label] = 'number'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 /*Weight : champ à rajouter de type décimal (4 chiffres après la virgule) */
  INSERT INTO [dbo].[ModuleForms]
@@ -249,7 +141,7 @@ BEGIN TRAN T2;
 		   ,[Rules])
      VALUES
            (1
-           ,231
+           , ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
            ,'Weight'
            ,'Weight'
            ,0
@@ -272,7 +164,7 @@ BEGIN TRAN T2;
 		,[FieldSizeDisplay] = 150
 		WHERE [Name] = 'behaviour'
 		and [label] = 'behaviour'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 /* Comments */
 
@@ -282,7 +174,7 @@ BEGIN TRAN T2;
 		,[FieldSizeDisplay] = 150
 		WHERE [Name] = 'Comments'
 		and [label] = 'Comments'
- and   TypeObj = ( select id from ProtocoleType where name = 'Entomo_Pop_Census' )
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
 
 /* Subdivided subdivisé) : champ à rajouter, relié au champ thésaural ID 2011341, Subdivision d’échantillon. Valeur bloquée à « non » à la saisie.*/
  INSERT INTO [dbo].[ModuleForms]
@@ -303,7 +195,7 @@ BEGIN TRAN T2;
 		   ,[Rules])
      VALUES
            (1
-           ,231
+           , ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
            ,'Subdivided'
            ,'Subdivided'
            ,0
@@ -341,7 +233,7 @@ BEGIN TRAN T2;
 		       ,[Rules])
      VALUES
            (1
-           ,231
+           , ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
            ,'FK_SubArtrhopodSurvey'
            ,'FK_SubArtrhopodSurvey'
            ,0
@@ -365,33 +257,12 @@ BEGIN TRAN T2;
      x Réduire la taille des champs Sex, Stage, Number, Sampled, Picture, Sure : divisé par 2, et augmenter par 2 la taille du champ Taxon
      x Voire si on peut interdire la valeur 0 pour le champ Number (uniquement à la saisie, potentiellement cela peut revenir à 0 en venant du bridge)
 */
-/* Renommer le nom du protocole en "Sub arthropod survey" */
-UPDATE [dbo].[ProtocoleType]
-   SET [Name] = 'Sub_Athropod_survey'
- WHERE [Name] = 'Entomo_Pop_Census'
-
-COMMIT TRAN T2;
-
-BEGIN TRAN T3;
-/*Ajouter une fieldactivity 'Invertebrate density activity assessment'*/ 
-INSERT INTO [dbo].[fieldActivity]
-           ([Name])
-     VALUES
-           ('Invertebrate density activity assessment')
-
-/* avec les memes protocoles par defaut que 'Invertebrate inventory'.*/
-
-SELECT FK_ProtocoleType
-	   ,(select ID from fieldActivity where Name = 'Invertebrate density activity assessment' )
-from [FieldActivity_ProtocoleType]
-where FK_fieldActivity =  ( select ID from fieldActivity
-where Name = 'Invertebrates inventory')
-
-COMMIT TRAN T3;
 
 
+COMMIT TRAN T1;
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('120_upgrade_conf_proto_entomo_poppulation_and_sub_proto_entomo_pop_census',GETDATE(),(SELECT db_name()))
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('124_Update_Input_sub_arthopod_survey_conf',GETDATE(),(SELECT db_name()))
 
 
 GO
