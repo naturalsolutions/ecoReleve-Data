@@ -333,12 +333,12 @@ BEGIN TRAN T2;
            ,[editorClass]
            ,[FormRender]
            ,[FormOrder]
-		   ,[displayClass]
-		   ,[editorClass]
+           ,[displayClass]
+		       ,[EditClass]
            ,[Status]
-		   ,[Locked]
-		   ,[DefaultValue]
-		   ,[Rules])
+		       ,[Locked]
+		       ,[DefaultValue]
+		       ,[Rules])
      VALUES
            (1
            ,231
@@ -350,13 +350,13 @@ BEGIN TRAN T2;
            ,'Number'
            ,'form-control'
            ,0
-           ,0
-		   ,'hide'
-		   ,'hide'
-		   ,null
+           ,15
+		       ,'hide'
+		       ,'hide'
+		       ,null
            ,1
-		   ,1
-		   ,'{"operator":"disable","target":"FK_SubArtrhopodSurvey","source":"FK_SubArtrhopodSurvey","value":1}'
+		       ,1
+		       ,'{"operator":"disable","target":"FK_SubArtrhopodSurvey","source":"FK_SubArtrhopodSurvey","value":1}'
 		   )
 
 
