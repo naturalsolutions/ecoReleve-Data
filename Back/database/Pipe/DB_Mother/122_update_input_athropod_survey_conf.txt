@@ -35,7 +35,7 @@ INSERT INTO [dbo].[ModuleForms]
      VALUES
            (1
            ,( select id from ProtocoleType where name = 'Athropod_survey' )
-           ,'Host Plant'
+           ,'Host_Plant'
            ,'Host Plant'
            ,0
            ,6

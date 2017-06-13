@@ -40,8 +40,8 @@ BEGIN TRAN T1;
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 4
 		,[Required] = 1
-		,[Name] = 'Identification year'
-		,[Label] = 'Identification_year'
+		,[Name] = 'Identification_year'
+		,[Label] = 'Identification year'
     ,[FieldSizeEdit] = 150
 		,[FieldSizeDisplay] = 150	 		 
 		WHERE [Name] = 'Identified_on'
@@ -61,7 +61,7 @@ BEGIN TRAN T1;
 
  UPDATE [dbo].[ModuleForms]
    SET   [FormOrder] = 6
-		,[Name] = 'Sampled'
+		,[Name] = 'sampled'
 		,[Label] = 'Sampled'
     ,[FieldSizeEdit] = 80
 		,[FieldSizeDisplay] = 80
@@ -89,7 +89,7 @@ BEGIN TRAN T1;
      VALUES
            (1
            , ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
-           ,'Picture'
+           ,'picture'
            ,'Picture'
            ,0
            ,80
@@ -146,13 +146,14 @@ BEGIN TRAN T1;
            ,[editorClass]
            ,[FormRender]
            ,[FormOrder]
+           ,[Options]
            ,[Status]
 		   ,[Locked]
 		   ,[Rules])
      VALUES
            (1
            , ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
-           ,'Weight'
+           ,'weight'
            ,'Weight'
            ,0
            ,80
@@ -161,6 +162,7 @@ BEGIN TRAN T1;
            ,'form-control'
            ,2
            ,11
+           ,'{"min":0 , "step":"0.0001"}'
            ,1
 		   ,1
 		   ,'{"operator":"disable","target":"Number","source":"Number","value":1}'
@@ -220,7 +222,7 @@ BEGIN TRAN T1;
            ,1
 		       ,1
            ,'non'
-		       ,'{"operator":"disable","target":"Subdivided","source":"Subdivided","value":1}'
+		       ,'{"operator":"disable","target":"Subdivided","source":"Subdivided","value":"non"}'
 		   )
 
 
