@@ -1,3 +1,5 @@
+import eventlet; eventlet.monkey_patch()  # raise errors but it works...
+from eventlet import wsgi
 import datetime
 from decimal import Decimal
 from urllib.parse import quote_plus
@@ -6,6 +8,7 @@ from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from pyramid.authorization import ACLAuthorizationPolicy
 from .controllers.security import SecurityRoot, myJWTAuthenticationPolicy
+
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
@@ -15,7 +18,8 @@ from .Models import (
     dbConfig,
     db,
     loadThesaurusTrad,
-    groupfinder
+    groupfinder,
+    AppConfig
 )
 from .Views import add_routes, add_cors_headers_response_callback
 from pyramid.events import NewRequest
@@ -65,7 +69,6 @@ def includeme(config):
 
 def main(global_config, **settings):
     """ This function initialze DB conection and returns a Pyramid WSGI application. """
-
     settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + \
         quote_plus(settings['sqlalchemy.Export.url'])
     engineExport = engine_from_config(
@@ -86,9 +89,16 @@ def main(global_config, **settings):
     Base.metadata.create_all(engine)
     Base.metadata.reflect(views=True, extend_existing=False)
 
+    # logging.config.fileConfig(
+    #     settings['logging.config'],
+    #     disable_existing_loggers=False
+    # )
+
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
     config.include('pyramid_jwtauth')
+    config.include('pyramid_excel')
+
 
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
     dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine))
@@ -123,10 +133,16 @@ def main(global_config, **settings):
     # include security config from jwt __init__.py
     includeme(config)
     config.set_root_factory(SecurityRoot)
+    # config.set_root_factory(root_factory)
 
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
 
     loadThesaurusTrad(config)
     add_routes(config)
     config.scan()
-    return config.make_wsgi_app()
+
+    app = config.make_wsgi_app()
+    listener = eventlet.listen((AppConfig['server:main']['host'],
+                                int(AppConfig['server:main']['port'])))
+    app = wsgi.server(listener, app, log_output=False)
+    return app
