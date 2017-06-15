@@ -1,0 +1,117 @@
+BEGIN TRAN T1
+/* Habitat ==> relier au thésaurus "Type de milieux", ID 225869 */
+
+UPDATE [dbo].[ModuleForms]
+   SET [FormOrder] = 1
+      ,[Options] = 225869
+	  ,[InputType] = 'AutocompTreeEditor'
+ WHERE [Name] = 'habitat'
+ and   TypeObj = ( select id from ProtocoleType where name = 'Athropod_survey' )
+
+ /*Micro habitat ==> relier au thésaurus "Type de micro-habitats", ID 226029*/
+
+ UPDATE [dbo].[ModuleForms]
+   SET [FormOrder] = 2
+      ,[Options] = 226029
+	  ,[InputType] = 'AutocompTreeEditor'
+ WHERE [Name] = 'micro_habitat'
+ and   TypeObj = ( select id from ProtocoleType where name = 'Athropod_survey' )
+
+ /* Host plant ==> Champ à rajouter, à relier au thésaurus "Plantes" ID 204083*/
+INSERT INTO [dbo].[ModuleForms]
+           ([module_id]
+           ,[TypeObj]
+           ,[Name]
+           ,[Label]
+           ,[Required]
+           ,[FieldSizeEdit]
+           ,[FieldSizeDisplay]
+           ,[InputType]
+           ,[editorClass]
+           ,[FormRender]
+           ,[FormOrder]
+           ,[Options]
+           ,[Status])
+     VALUES
+           (1
+           ,( select id from ProtocoleType where name = 'Athropod_survey' )
+           ,'Host_Plant'
+           ,'Host Plant'
+           ,0
+           ,6
+           ,6
+           ,'AutocompTreeEditor'
+           ,'form-control'
+           ,2
+           ,3
+           ,204083
+           ,1)
+ /*Capture ==> A renommer en Method (toujours le même champ thésaural)*/
+  UPDATE [dbo].[ModuleForms]
+   SET [FormOrder] = 4
+	  ,[Name] = 'Method'
+	  ,[Label] = 'Method'
+ WHERE [Name] = 'Name_Capture'
+ and   TypeObj = ( select id from ProtocoleType where name = 'Athropod_survey' )
+ 
+ /* Trap state ==> Champ à rajouter, à relier au thésaurus "Etat du piège", ID 2011307*/
+ INSERT INTO [dbo].[ModuleForms]
+           ([module_id]
+           ,[TypeObj]
+           ,[Name]
+           ,[Label]
+           ,[Required]
+           ,[FieldSizeEdit]
+           ,[FieldSizeDisplay]
+           ,[InputType]
+           ,[editorClass]
+           ,[FormRender]
+           ,[FormOrder]
+           ,[Options]
+           ,[Status])
+     VALUES
+           (1
+           ,( select id from ProtocoleType where name = 'Athropod_survey' )
+           ,'Trap_state'
+           ,'Trap state'
+           ,0
+           ,6
+           ,6
+           ,'AutocompTreeEditor'
+           ,'form-control'
+           ,2
+           ,5
+           ,2011307
+           ,1)
+
+/* Comments*/
+
+ UPDATE [dbo].[ModuleForms]
+   SET [FormOrder] = 6
+ WHERE [Name] = 'Comments'
+ and   TypeObj = ( select id from ProtocoleType where name = 'Athropod_survey' )
+
+ /* Supprimer Code_Piege*/
+
+DELETE FROM [dbo].[ModuleForms]
+      WHERE [Name] ='Code_Piege'
+	  AND   TypeObj = ( select id from ProtocoleType where name = 'Athropod_survey' )
+
+
+/* change name of sub protocol */
+
+ UPDATE [dbo].[ModuleForms]
+   SET 
+   [Name] = 'Sub_Athropod_survey'
+   ,[Label] = 'Sub_Athropod_survey'
+ WHERE [Name] = 'Entomo_pop_census'
+ and   TypeObj = ( select id from ProtocoleType where name = 'Athropod_survey' )
+
+
+ COMMIT TRAN T1;
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('122_update_input_athropod_survey_conf',GETDATE(),(SELECT db_name()))
+
+
+GO

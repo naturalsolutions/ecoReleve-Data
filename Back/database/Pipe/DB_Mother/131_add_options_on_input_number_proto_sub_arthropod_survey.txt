@@ -1,0 +1,11 @@
+ UPDATE [dbo].[ModuleForms]
+   SET  [Options] = '{"min":1}'
+		WHERE [Name] = 'number'
+		and [label] = 'number'
+ and   TypeObj = ( select id from ProtocoleType where name = 'Sub_Athropod_survey' )
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('131_add_options_on_input_number_proto_sub_arthropod_survey',GETDATE(),(SELECT db_name()))
+
+
+GO
