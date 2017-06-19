@@ -8,6 +8,14 @@ define([
   return ManagerView.extend({
   	ModelPrototype: IndividualModel,
 
+    filterOnKeyPress: function(e){
+        if(e.keyCode === 13){
+          e.preventDefault();
+          e.stopPropagation();
+          this.filter();
+        }
+    },
+
   	toggleTab: function(e) {
   	  if(!$(e.currentTarget).hasClass('active')){
   	    this.$el.find('.tab-ele').each(function(){
@@ -54,6 +62,8 @@ define([
           if(_this.$chk.prop('checked'))
             _this.$date.val(null);
       });
+
+      this.$el.on('keypress', _this.filterOnKeyPress.bind(_this));
     },
 
     filter: function() {
