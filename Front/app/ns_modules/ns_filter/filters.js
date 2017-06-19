@@ -403,7 +403,7 @@
                 operatorValue = this.firstOperator;
                 if (this.firstOperator.indexOf('null') != 1){
                     valeur = 'null';
-                    if (type == 'Number' || type == 'Select'){
+                    if (type == 'Number' || type == 'Select' || type == 'LongitudeEditor' || type == 'LatitudeEditor' ){
                         valeur = 1;
                     }
                 }
@@ -472,7 +472,7 @@
                 if ((this.previousOperator && this.previousOperator.indexOf('null')!=-1 )|| NewOperator.indexOf('null')!=-1) {
                     if (NewOperator.indexOf('null')!=-1) {
                         elVal.addClass('hide');
-                        if (this.model.get('ColumnType') != 'Number'){
+                        if (this.model.get('ColumnType') != 'Number' || this.model.get('ColumnType') != 'LongitudeEditor' || this.model.get('ColumnType') != 'LatitudeEditor'){
                             elVal.find('input').val('null').attr('data_value','null').change();
                         } else {
                             elVal.find('input').val(1).change();
@@ -589,7 +589,7 @@
             if (initialSchema.validators == null) {
                 initialSchema.validators = [];
             }
-            if (initialType == 'Number') {
+            if (initialType == 'Number' || initialType == 'LongitudeEditor' || initialType == 'LatitudeEditor') {
                 initialSchema.validators.push('INNumber');
             }
             return initialSchema;
@@ -661,6 +661,9 @@
                     break;
                 case "Number":
                     return operatorsOptions = [{label:'=',val:'='}, {label:'<>',val:'<>'}, {label:'<',val:'<'}, {label:'>',val:'>'}, {label:'<=',val:'<='}, {label:'>=',val:'>='}, { label: 'In', val: 'IN' },{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }];
+                    break;
+                case "LongitudeEditor": case "LatitudeEditor":
+                    return operatorsOptions = [{label:'=',val:'='}, {label:'<>',val:'<>'}, {label:'<',val:'<'}, {label:'>',val:'>'}, {label:'<=',val:'<='}, {label:'>=',val:'>='},{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }];
                     break;
                 default:
                     return operatorsOptions = [{ label: 'Is', val: 'Is' }, { label: 'Is not', val: 'Is not' }, { label: 'Begins with', val: 'begins' }, { label: 'Not Begins with', val: 'not begin' }, { label: 'Ends with', val: 'ends' }, { label: 'Not ends with', val: 'not end' }, { label: 'Contains', val: 'Contains' }, { label: 'Not Contains', val: 'Not Contains' }, { label: 'In', val: 'IN' },{ label: 'Is null', val: 'is null' },{ label: 'Is not null', val: 'is not null' }, ];
