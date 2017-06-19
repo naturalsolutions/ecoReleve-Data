@@ -1,5 +1,4 @@
-import eventlet
-eventlet.monkey_patch()  # raise errors but it works...
+import eventlet; eventlet.monkey_patch()  # raise errors but it works...
 from eventlet import wsgi
 import datetime
 from decimal import Decimal
@@ -143,7 +142,7 @@ def main(global_config, **settings):
     config.scan()
 
     app = config.make_wsgi_app()
-    listener = eventlet.listen(('127.0.0.1',
-                            6545))
-    wsgi.server(listener, app, log_output=True)
+    listener = eventlet.listen((AppConfig['server:main']['host'],
+                                int(AppConfig['server:main']['port'])))
+    app = wsgi.server(listener, app, log_output=False)
     return app
