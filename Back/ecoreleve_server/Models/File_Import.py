@@ -1,4 +1,4 @@
-from ..Models import Base, db
+from ..Models import Base
 from sqlalchemy import (
     Column,
     DateTime,
@@ -10,10 +10,12 @@ from sqlalchemy import (
     text,
     bindparam,
     func,
-    orm)
+    orm,
+    Table)
 from sqlalchemy.orm import relationship
 from pyramid import threadlocal
 from traceback import print_exc
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
 class CustomErrorSQL(Exception):
@@ -53,6 +55,11 @@ class File (Base):
 
     error = None
 
+    @hybrid_property
+    def tempTable(self):
+        table = Table(self.TempTable_GUID, Base.metadata, autoload=True)
+        return table
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         engine = threadlocal.get_current_registry().dbmaker().get_bind()
@@ -63,43 +70,70 @@ class File (Base):
     def init_on_load(self):
         self.__init__()
 
-    def run_process(self, current_process, trans):
+    def run_process(self,column_name, current_process, trans):
         try:
+            if(column_name.startswith('Station_')):
+                prefix = 'Station_'
+                module_id = 2
+            else:
+                prefix = ''
+                module_id = None
+
             if 'check' in current_process.ProcessType:
                 req = text("""
-                           DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
-                           EXEC [dbo].""" + current_process.Name +
-                           """  :file_ID, @result OUTPUT, @error OUTPUT,  @errorIndexes OUTPUT;
+                           DECLARE @return_value int, @result varchar(255), @error int, @errorIndexes varchar(max)
+                           EXEC @return_value = [dbo].""" + current_process.Name +
+                           """  @file_ID = :file_ID,
+                                @column_name = :column_name,
+                                @prefix_column = :prefix,
+                                @target_module = :module,
+                                @result = @result OUTPUT,
+                                @error = @error OUTPUT,
+                                @errorIndexes = @errorIndexes OUTPUT;
                            SELECT @result, @error, @errorIndexes;"""
-                           ).bindparams(bindparam('file_ID', self.ID))
+                           ).bindparams(bindparam('file_ID', self.ID),
+                                        bindparam('prefix', prefix),
+                                        bindparam('module', module_id),
+                                        bindparam('column_name', column_name))
                 result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
                 trans.commit()
                 return result, error, errorIndexes
 
             if 'update' in current_process.ProcessType and not self.error:
                 req = text("""
-                           DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
-                           EXEC [dbo].""" + current_process.Name +
-                           """  :file_ID, @result OUTPUT, @error OUTPUT,  @errorIndexes OUTPUT;
+                           DECLARE @return_value int, @result varchar(255), @error int, @errorIndexes varchar(max)
+                           EXEC @return_value = [dbo].""" + current_process.Name +
+                           """  @file_ID = :file_ID,
+                                @column_name = :column_name,
+                                @prefix_column = :prefix,
+                                @target_module = :module,
+                                @result = @result OUTPUT,
+                                @error = @error OUTPUT,
+                                @errorIndexes = @errorIndexes OUTPUT;
                            SELECT @result, @error, @errorIndexes;"""
-                           ).bindparams(bindparam('file_ID', self.ID))
+                           ).bindparams(bindparam('file_ID', self.ID),
+                                        bindparam('prefix', prefix),
+                                        bindparam('module', module_id),
+                                        bindparam('column_name', column_name))
                 result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
                 trans.commit()
                 return result, error, errorIndexes
 
-            if 'insert' in current_process.ProcessType and not self.error:
-                req = text("""
-                           DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
-                           EXEC [dbo].""" + current_process.Name +
-                           """  :file_ID, @result OUTPUT, @error OUTPUT,  @errorIndexes OUTPUT;
-                           SELECT @result, @error, @errorIndexes;"""
-                           ).bindparams(bindparam('file_ID', self.ID))
-                result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
-                trans.commit()
-                return result, error, errorIndexes
+            # if 'insert' in current_process.ProcessType and not self.error:
+            #     req = text("""
+            #                DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
+            #                EXEC [dbo].""" + current_process.Name +
+            #                """  :file_ID, @result OUTPUT, @error OUTPUT,  @errorIndexes OUTPUT;
+            #                SELECT @result, @error, @errorIndexes;"""
+            #                ).bindparams(bindparam('file_ID', self.ID))
+            #     result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
+            #     trans.commit()
+            #     return result, error, errorIndexes
             if self.error:
                 return 'not executed', 1, None
         except Exception as e:
+            print('exception')
+            print(e)
             print_exc()
             trans.rollback()
             if not current_process.Blocking:
@@ -109,15 +143,19 @@ class File (Base):
     def main_process(self):
         dictSession = {}
         yield
-        for process in self.Type.ProcessList:
-            try:
-                dictSession[process.Name] = self.ObjContext.begin()
-                result, error, errorIndexes = self.run_process(process, dictSession[process.Name])
-                if error and process.Blocking and not self.error:
-                    self.error = True
-                yield process, '{"process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
-            except:
-                yield process, '{"process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes": "error"}'
+        cols = self.tempTable.c.keys()
+        cols.remove('index')
+        for columnName in cols:
+            print(columnName)
+            for process in self.Type.ProcessList:
+                try:
+                    dictSession[columnName+process.Name] = self.ObjContext.begin()
+                    result, error, errorIndexes = self.run_process(columnName, process, dictSession[columnName+process.Name])
+                    if error and process.Blocking and not self.error:
+                        self.error = True
+                    yield process, '{"column":"'+columnName+'","process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
+                except:
+                    yield process, '{"column":"'+columnName+'", "process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes": "error"}'
 
     def log(self):
         print('error log')

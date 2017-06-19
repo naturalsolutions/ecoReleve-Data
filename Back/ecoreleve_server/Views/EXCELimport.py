@@ -1,5 +1,5 @@
 from pyramid.view import view_config
-from sqlalchemy import text, DATETIME, String, select, and_, or_
+from sqlalchemy import text, DATETIME, String, select, and_, or_, Integer
 from ..Models import (
     Station,
     Observation,
@@ -136,11 +136,11 @@ def import_file(request):
         session.commit()
         df.index += 2
         df = df.replace('', np.nan, regex=True)
-
         df.to_sql(tableName,
                   session.get_bind(),
                   if_exists='replace',
-                  dtype={'Station_StationDate': DATETIME,
+                  dtype={'index': Integer,
+                         'Station_StationDate': DATETIME,
                          'Station_FieldWorker1': String,
                          'Station_FieldWorker2': String,
                          'Station_FieldWorker3': String
@@ -211,10 +211,10 @@ def generateImportTable(columns, protoId, tableName, session):
     command = "IF OBJECT_ID ('" + tableName + "') IS NOT NULL "
     command = command + ''' BEGIN  DROP TABLE "''' + tableName + \
         '''" END CREATE TABLE "''' + tableName + \
-        '''" ( "Id" int  primary key IDENTITY, '''
+        '''" ( "Id" int ) '''
 
-    for elem in schema:
-        command = command + '"' + elem["col"] + '" ' + elem["type"] + ','
+    # for elem in schema:
+    #     command = command + '"' + elem["col"] + '" ' + elem["type"] + ','
 
     # delete last ','
     command = command[:-1]
@@ -240,3 +240,14 @@ def getProcessLis(request):
                     'descriptionFr': process.DescriptionFr,
                     'descriptionEn': process.DescriptionEn, } for process in fileType.ProcessList]
     return processList
+
+
+@view_config(route_name=route_prefix + 'id/columns',
+             renderer='json',
+             request_method='GET')
+def getcolumns(request):
+    session = request.dbsession
+    file = session.query(File).get(request.matchdict['id'])
+    cols = file.tempTable.c.keys()
+    cols.remove('index')
+    return cols

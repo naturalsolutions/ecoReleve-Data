@@ -1,4 +1,4 @@
-/****** Object:  StoredProcedure [dbo].[pr_CheckRequiredStation]    Script Date: 11/01/2017 14:45:29 ******/
+﻿/****** Object:  StoredProcedure [dbo].[pr_CheckRequiredStation]    Script Date: 11/01/2017 14:45:29 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -112,8 +112,8 @@ BEGIN CATCH
 			''pr_DoSomething'',
 			1,
 			3,
-			'+@iErrorCode_exec +
-			',ERROR_MESSAGE(),
+			'+CONVERT(varchar,@iErrorCode_exec) +
+			','+ERROR_MESSAGE()+',
 			''@file_ID =  '' +CONVERT(VARCHAR,@file_ID);'
 
 			--SELECT @TLogMessage_ID = SCOPE_IDENTITY()	'
