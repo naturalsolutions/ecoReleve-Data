@@ -1,0 +1,44 @@
+
+
+
+INSERT INTO ProtocoleType_ObservationDynProp (FK_ObservationDynProp, FK_ProtocoleType, Required)
+select ID, (select ID FROM ProtocoleType where name ='subtransect'), 0 
+from ObservationDynProp
+WHERE name = 'identity_sure'
+
+GO
+
+
+INSERT INTO ModuleForms
+select top 1 1
+      ,232
+      ,[Name]
+      ,[Label]
+      ,[Required]
+      ,[FieldSizeEdit]
+      ,[FieldSizeDisplay]
+      ,[InputType]
+      ,[editorClass]
+      ,[FormRender]
+      ,20
+      ,[Legend]
+      ,[Options]
+      ,[Validators]
+      ,[displayClass]
+      ,[EditClass]
+      ,[Status]
+      ,[Locked]
+      ,[DefaultValue]
+      ,[Rules]
+      ,[Orginal_FB_ID]
+from ModuleForms 
+where Name = 'identity_sure' 
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('121_Up_transectForm',GETDATE(),(SELECT db_name()))
+
+
+GO

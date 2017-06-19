@@ -1,0 +1,36 @@
+﻿/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+UPDATE f SET FieldSizeEdit = 100, FieldSizeDisplay = 100
+  FROM [ModuleForms] f
+  JOIN ProtocoleType pt ON pt.ID = f.TypeObj
+  where module_ID= 1  and (pt.Status = 10 or pt.Name in (SELECT Name FROM [ModuleForms] f1 WHERE f1.InputType = 'gridformeditor'))
+
+
+  UPDATE f SET FieldSizeEdit = 250, FieldSizeDisplay = 250, FormRender=4 
+  FROM [ModuleForms] f
+  JOIN ProtocoleType pt ON pt.ID = f.TypeObj
+  where module_ID= 1  and label = 'Taxon' 
+  and (pt.Status = 10 or pt.Name in (SELECT Name FROM [ModuleForms] f1 WHERE f1.InputType = 'gridformeditor'))
+
+  UPDATE f SET FieldSizeEdit = 120, FieldSizeDisplay = 120
+  FROM [ModuleForms] f
+  JOIN ProtocoleType pt ON pt.ID = f.TypeObj 
+  where module_ID= 1  and InputTYpe like '%time%'
+  and (pt.Status = 10 or pt.Name in (SELECT Name FROM [ModuleForms] f1 WHERE f1.InputType = 'gridformeditor'))
+
+    UPDATE f SET FieldSizeEdit = 80, FieldSizeDisplay = 80
+  FROM [ModuleForms] f
+  JOIN ProtocoleType pt ON pt.ID = f.TypeObj 
+  where module_ID= 1  and (InputTYpe like '%number%' OR InputTYpe like '%checkbox%')
+  and (pt.Status = 10 or pt.Name in (SELECT Name FROM [ModuleForms] f1 WHERE f1.InputType = 'gridformeditor'))
+
+
+UPDATE f SET FieldSizeEdit = 80, FieldSizeDisplay = 80
+from ModuleForms f 
+WHERE INputtype = 'GridRanged'
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('120_Up_conf_protocolGrid',GETDATE(),(SELECT db_name()))
+
+
+GO
