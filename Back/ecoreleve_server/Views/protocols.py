@@ -25,9 +25,9 @@ class ObservationView(DynamicObjectView):
 
     def update(self, json_body=None):
 
-        if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
-            self.request.response.status_code = 409
-            return {'protected' : True}
+        # if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
+        #     self.request.response.status_code = 409
+        #     return {'protected' : True}
         if not json_body:
             data = self.request.json_body
         else:
