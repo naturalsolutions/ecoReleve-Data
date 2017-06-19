@@ -1,0 +1,63 @@
+UPDATE f SET FieldSizeEdit = 200, FieldSizeDisplay = 200
+FROM ModuleForms f
+WHERE module_id = 1 AND TypeObj = (SELECT ID
+  FROM [ProtocoleType]
+  where Name ='Sub_Athropod_survey')
+  AND Name = 'Comments'
+
+  GO
+
+
+  UPDATE f SET FieldSizeEdit = 120, FieldSizeDisplay = 120
+FROM ModuleForms f
+WHERE module_id = 1 AND TypeObj = (SELECT ID
+  FROM [ProtocoleType]
+  where Name ='Sub_Athropod_survey')
+  AND Name = 'Stage'
+
+GO
+
+  UPDATE f SET FieldSizeEdit = 150, FieldSizeDisplay = 150
+FROM ModuleForms f
+WHERE module_id = 1 AND TypeObj = (SELECT ID
+  FROM [ProtocoleType]
+  where Name ='Sub_Athropod_survey')
+  AND Name = 'sex'
+
+GO
+
+  UPDATE f SET FieldSizeEdit = 120, FieldSizeDisplay = 120
+FROM ModuleForms f
+WHERE module_id = 1 AND TypeObj = (SELECT ID
+  FROM [ProtocoleType]
+  where Name ='Sub_Athropod_survey')
+  AND Name = 'behaviour'
+
+GO
+
+
+  UPDATE f SET FieldSizeEdit = 120, FieldSizeDisplay = 120
+FROM ModuleForms f
+WHERE module_id = 1 AND TypeObj = (SELECT ID
+  FROM [ProtocoleType]
+  where Name ='Sub_Athropod_survey')
+  AND Name = 'Subdivided'
+GO
+
+
+UPDATE f SET FieldSizeEdit = 180, FieldSizeDisplay = 180
+FROM ModuleForms f
+WHERE module_id = 1 
+AND Name = 'validator'
+
+UPDATE f SET FieldSizeEdit = 200, FieldSizeDisplay = 200
+FROM ModuleForms f
+WHERE module_id = 1 AND TypeObj in (SELECT ID FROM ProtocoleType WHERE Name in('SubTransect','Phytosociology_releve' ))
+AND Name = 'Comments'
+GO 
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('132_Up_conf_protocoleGridSize',GETDATE(),(SELECT db_name()))
+
+
+GO

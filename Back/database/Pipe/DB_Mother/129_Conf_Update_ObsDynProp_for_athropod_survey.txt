@@ -1,0 +1,53 @@
+BEGIN TRAN T1;
+
+/*taxon ok*/
+
+UPDATE [dbo].[ObservationDynProp]
+SET [Name] = 'Observation_by'
+WHERE Name = 'Collecteur'
+
+UPDATE [dbo].[ObservationDynProp]
+SET [Name] = 'Identification_by'
+WHERE Name = 'Identified_by'
+
+UPDATE [dbo].[ObservationDynProp]
+SET [Name] = 'Identification_year'
+WHERE Name = 'Identified_on'
+
+/*identity_sure ok*/
+/*sampled ok*/
+/*picture exist*/
+
+UPDATE [dbo].[ObservationDynProp]
+SET [Name] = 'Stage'
+WHERE Name = 'stade'
+
+/*sex exist*/
+/*number exist*/
+/*weight exist*/
+/*behaviour exist */
+
+
+
+INSERT INTO [dbo].[ObservationDynProp]
+           ([Name]
+           ,[TypeProp])
+     VALUES
+           ('Subdivided'
+           ,'String')
+
+INSERT INTO [dbo].[ObservationDynProp]
+           ([Name]
+           ,[TypeProp])
+     VALUES
+           ('FK_SubArtrhopodSurvey'
+           ,'String')
+
+
+COMMIT TRAN T1;
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('129_Conf_Update_ObsDynProp_for_athropod_survey',GETDATE(),(SELECT db_name()))
+
+
+GO
