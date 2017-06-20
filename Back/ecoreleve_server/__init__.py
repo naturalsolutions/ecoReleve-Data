@@ -144,5 +144,5 @@ def main(global_config, **settings):
     app = config.make_wsgi_app()
     listener = eventlet.listen((AppConfig['server:main']['host'],
                                 int(AppConfig['server:main']['port'])))
-    app = wsgi.server(listener, app, log_output=False)
+    wsgi.server(listener, app, log_output=True)
     return app

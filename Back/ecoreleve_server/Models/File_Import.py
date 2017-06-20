@@ -75,10 +75,17 @@ class File (Base):
             if(column_name.startswith('Station_')):
                 prefix = 'Station_'
                 module_id = 2
+                target_typeObj = 1
             else:
                 prefix = ''
                 module_id = None
-
+                target_typeObj = 1
+                
+            print(current_process.Name)
+            print('module id ', str(module_id))
+            print('prefix ', str(prefix))
+            print('column_name ', str(column_name))
+            print('target_typeObj ', str(target_typeObj))
             if 'check' in current_process.ProcessType:
                 req = text("""
                            DECLARE @return_value int, @result varchar(255), @error int, @errorIndexes varchar(max)
@@ -87,6 +94,7 @@ class File (Base):
                                 @column_name = :column_name,
                                 @prefix_column = :prefix,
                                 @target_module = :module,
+                                @target_TypeObj = :target_typeObj,
                                 @result = @result OUTPUT,
                                 @error = @error OUTPUT,
                                 @errorIndexes = @errorIndexes OUTPUT;
@@ -94,8 +102,10 @@ class File (Base):
                            ).bindparams(bindparam('file_ID', self.ID),
                                         bindparam('prefix', prefix),
                                         bindparam('module', module_id),
+                                        bindparam('target_typeObj', target_typeObj),
                                         bindparam('column_name', column_name))
                 result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
+                print(result, error, errorIndexes)
                 trans.commit()
                 return result, error, errorIndexes
 
@@ -132,7 +142,7 @@ class File (Base):
             if self.error:
                 return 'not executed', 1, None
         except Exception as e:
-            print('exception')
+            print('######### exception ################# \n')
             print(e)
             print_exc()
             trans.rollback()
@@ -146,7 +156,7 @@ class File (Base):
         cols = self.tempTable.c.keys()
         cols.remove('index')
         for columnName in cols:
-            print(columnName)
+            print('\n\n ___   '+columnName+'   ____________')
             for process in self.Type.ProcessList:
                 try:
                     dictSession[columnName+process.Name] = self.ObjContext.begin()

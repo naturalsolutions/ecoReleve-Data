@@ -242,12 +242,12 @@ def getProcessLis(request):
     return processList
 
 
-@view_config(route_name=route_prefix + 'id/columns',
-             renderer='json',
-             request_method='GET')
-def getcolumns(request):
-    session = request.dbsession
-    file = session.query(File).get(request.matchdict['id'])
-    cols = file.tempTable.c.keys()
-    cols.remove('index')
-    return cols
+# @view_config(route_name=route_prefix + 'id/columns',
+#              renderer='json',
+#              request_method='GET')
+# def getcolumns(request):
+#     session = request.dbsession
+#     file = session.query(File).get(request.matchdict['id'])
+#     cols = file.tempTable.c.keys()
+#     cols.remove('index')
+#     return cols

@@ -276,6 +276,7 @@ define([
       // domain name should be in config
       var ws = new WebSocket('ws://127.0.0.1:6545/ecoReleve-Websockets/fileImport/' + guid);
       ws.onmessage = function(msg) {
+        console.log(msg)
         var jsonMsg = JSON.parse(msg.data);
         _this.updateRow(jsonMsg.process,jsonMsg);
         for( var i = 0 ; i < uniqProcressArray.length ; i++) {
