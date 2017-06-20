@@ -137,6 +137,13 @@ define([
       formConfig.afterDelete = function(response, model){
         Backbone.history.navigate('#' + _this.model.get('type'), {trigger: true});
       };
+      formConfig.afterShow = function(){
+          // if user is not allowed to edit form (user roles) disable edit btn
+          var userGroup = window.app.user.get('role')[0];
+          if((userGroup != 'group:admins') && (userGroup != 'group:superUsers')) {
+            $(_this.ui.formBtns).find('.NsFormModuleEdit').first().addClass('masqued');
+          }
+        }
 
       this.nsForm = new NsForm(formConfig);
     },
