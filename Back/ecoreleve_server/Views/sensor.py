@@ -4,7 +4,7 @@ from ..Models import (
     Base,
     SensorList
 )
-from sqlalchemy import select, desc, join
+from sqlalchemy import select, desc, join, outerjoin
 from collections import OrderedDict
 from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore, context_permissions
@@ -28,40 +28,26 @@ class SensorView(DynamicObjectView):
             self.retrieve = self.actions.get(ref)
             return self
         return self.get(ref)
-    
+
     def getLocations(self):
         return 'no locations available'
 
     def getEquipment(self):
         _id = self.objectDB.ID
-        curSensorType = self.objectDB.GetType().Name
 
-        if (curSensorType.upper() in ['RFID', 'CAMERA TRAP'] ):
-            table = Base.metadata.tables['MonitoredSiteEquipment']
-            joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
-            joinTable = join(joinTable, MonitoredSite, table.c[
-                            'FK_MonitoredSite'] == MonitoredSite.ID)
-            query = select([table.c['StartDate'],
-                            table.c['EndDate'],
-                            Sensor.UnicIdentifier,
-                            MonitoredSite.Name,
-                            MonitoredSite.ID.label('MonitoredSiteID')]
-                           ).select_from(joinTable
-                                         ).where(table.c['FK_Sensor'] == _id
-                                                 ).order_by(desc(table.c['StartDate']))
-
-        elif (curSensorType.lower() in ['gsm', 'satellite', 'vhf', 'uhf']):
-            table = Base.metadata.tables['IndividualEquipment']
-            joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
-            query = select([table.c['StartDate'],
-                            table.c['EndDate'],
-                            table.c['FK_Individual'],
-                            Sensor.UnicIdentifier
-                            ]).select_from(joinTable
-                                           ).where(table.c['FK_Sensor'] == _id
-                                                   ).order_by(desc(table.c['StartDate']))
-        else:
-            return 'bad request'
+        table = Base.metadata.tables['SensorEquipment']
+        joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
+        joinTable = outerjoin(joinTable, MonitoredSite, table.c[
+                        'FK_MonitoredSite'] == MonitoredSite.ID)
+        query = select([table.c['StartDate'],
+                        table.c['EndDate'],
+                        Sensor.UnicIdentifier,
+                        MonitoredSite.Name,
+                        MonitoredSite.ID.label('MonitoredSiteID'),
+                        table.c['FK_Individual']]
+                       ).select_from(joinTable
+                                     ).where(table.c['FK_Sensor'] == _id
+                                             ).order_by(desc(table.c['StartDate']))
 
         result = self.session.execute(query).fetchall()
         response = []
