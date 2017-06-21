@@ -79,13 +79,15 @@ class File (Base):
             else:
                 prefix = ''
                 module_id = None
-                target_typeObj = 1
-                
+                target_typeObj = None
+
+            print('\n\n ___   '+column_name+'   ____________')
             print(current_process.Name)
             print('module id ', str(module_id))
             print('prefix ', str(prefix))
             print('column_name ', str(column_name))
             print('target_typeObj ', str(target_typeObj))
+
             if 'check' in current_process.ProcessType:
                 req = text("""
                            DECLARE @return_value int, @result varchar(255), @error int, @errorIndexes varchar(max)
@@ -106,10 +108,11 @@ class File (Base):
                                         bindparam('column_name', column_name))
                 result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
                 print(result, error, errorIndexes)
+                print('-------------\n')
                 trans.commit()
                 return result, error, errorIndexes
 
-            if 'update' in current_process.ProcessType and not self.error:
+            if 'update_column' in current_process.ProcessType and not self.error:
                 req = text("""
                            DECLARE @return_value int, @result varchar(255), @error int, @errorIndexes varchar(max)
                            EXEC @return_value = [dbo].""" + current_process.Name +
@@ -155,9 +158,13 @@ class File (Base):
         yield
         cols = self.tempTable.c.keys()
         cols.remove('index')
+
+        dataProcessList = list(filter(lambda x: 'check_data' in x.ProcessType, self.Type.ProcessList))
+        checkColumnProcessList = list(filter(lambda x: 'check_column' in x.ProcessType, self.Type.ProcessList))
+        updateColumnProcessList = list(filter(lambda x: 'update_column' in x.ProcessType, self.Type.ProcessList))
+
         for columnName in cols:
-            print('\n\n ___   '+columnName+'   ____________')
-            for process in self.Type.ProcessList:
+            for process in checkColumnProcessList:
                 try:
                     dictSession[columnName+process.Name] = self.ObjContext.begin()
                     result, error, errorIndexes = self.run_process(columnName, process, dictSession[columnName+process.Name])
@@ -166,6 +173,16 @@ class File (Base):
                     yield process, '{"column":"'+columnName+'","process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
                 except:
                     yield process, '{"column":"'+columnName+'", "process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes": "error"}'
+        
+        if not self.error:
+            for process in dataProcessList:
+                try:
+                    dictSession[process.Name] = self.ObjContext.begin()
+                    result, error, errorIndexes = self.run_process('', process, dictSession[process.Name])
+
+                    yield process, '{"process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
+                except:
+                    yield process, '{"process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes":"'+str(errorIndexes)+'"}'
 
     def log(self):
         print('error log')
