@@ -81,7 +81,6 @@ define([
     importFile: function(e) {
       var _this = this;
       var file = e.target.files[0];
-      console.log( e.target)
       var reader = new FileReader();
       var fileName = file.name;
       $('#fileNameSelected').text(fileName);
