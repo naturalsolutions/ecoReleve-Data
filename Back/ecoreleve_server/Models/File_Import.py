@@ -81,13 +81,6 @@ class File (Base):
                 module_id = None
                 target_typeObj = None
 
-            print('\n\n ___   '+column_name+'   ____________')
-            print(current_process.Name)
-            print('module id ', str(module_id))
-            print('prefix ', str(prefix))
-            print('column_name ', str(column_name))
-            print('target_typeObj ', str(target_typeObj))
-
             if 'check' in current_process.ProcessType:
                 req = text("""
                            DECLARE @return_value int, @result varchar(255), @error int, @errorIndexes varchar(max)
@@ -120,6 +113,7 @@ class File (Base):
                                 @column_name = :column_name,
                                 @prefix_column = :prefix,
                                 @target_module = :module,
+                                @target_TypeObj = :target_typeObj,
                                 @result = @result OUTPUT,
                                 @error = @error OUTPUT,
                                 @errorIndexes = @errorIndexes OUTPUT;
@@ -127,26 +121,36 @@ class File (Base):
                            ).bindparams(bindparam('file_ID', self.ID),
                                         bindparam('prefix', prefix),
                                         bindparam('module', module_id),
+                                        bindparam('target_typeObj', target_typeObj),
                                         bindparam('column_name', column_name))
                 result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
                 trans.commit()
                 return result, error, errorIndexes
 
-            # if 'insert' in current_process.ProcessType and not self.error:
-            #     req = text("""
-            #                DECLARE @result varchar(255), @error int, @errorIndexes varchar(max)
-            #                EXEC [dbo].""" + current_process.Name +
-            #                """  :file_ID, @result OUTPUT, @error OUTPUT,  @errorIndexes OUTPUT;
-            #                SELECT @result, @error, @errorIndexes;"""
-            #                ).bindparams(bindparam('file_ID', self.ID))
-            #     result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
-            #     trans.commit()
-            #     return result, error, errorIndexes
+            if 'insert' in current_process.ProcessType and not self.error:
+                req = text("""
+                           DECLARE @return_value int, @result varchar(255), @error int, @errorIndexes varchar(max)
+                           EXEC @return_value = [dbo].""" + current_process.Name +
+                           """  @file_ID = :file_ID,
+                                @prefix_column = :prefix,
+                                @target_module = :module,
+                                @target_TypeObj = :target_typeObj,
+                                @result = @result OUTPUT,
+                                @error = @error OUTPUT,
+                                @errorIndexes = @errorIndexes OUTPUT;
+                           SELECT @result, @error, @errorIndexes;"""
+                           ).bindparams(bindparam('file_ID', self.ID),
+                                        bindparam('prefix', prefix),
+                                        bindparam('module', module_id),
+                                        bindparam('target_typeObj', target_typeObj))
+                result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
+                trans.commit()
+                return result, error, errorIndexes
+
             if self.error:
+                print( current_process.Name+' not executed')
                 return 'not executed', 1, None
         except Exception as e:
-            print('######### exception ################# \n')
-            print(e)
             print_exc()
             trans.rollback()
             if not current_process.Blocking:
@@ -162,6 +166,7 @@ class File (Base):
         dataProcessList = list(filter(lambda x: 'check_data' in x.ProcessType, self.Type.ProcessList))
         checkColumnProcessList = list(filter(lambda x: 'check_column' in x.ProcessType, self.Type.ProcessList))
         updateColumnProcessList = list(filter(lambda x: 'update_column' in x.ProcessType, self.Type.ProcessList))
+        insertProcessList = list(filter(lambda x: 'insert' in x.ProcessType, self.Type.ProcessList))
 
         for columnName in cols:
             for process in checkColumnProcessList:
@@ -173,16 +178,37 @@ class File (Base):
                     yield process, '{"column":"'+columnName+'","process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
                 except:
                     yield process, '{"column":"'+columnName+'", "process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes": "error"}'
-        
+
         if not self.error:
             for process in dataProcessList:
                 try:
                     dictSession[process.Name] = self.ObjContext.begin()
                     result, error, errorIndexes = self.run_process('', process, dictSession[process.Name])
-
-                    yield process, '{"process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
+                    if error and process.Blocking and not self.error:
+                        self.error = True
+                    yield process, '{"column":"status","process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
                 except:
-                    yield process, '{"process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes":"'+str(errorIndexes)+'"}'
+                    yield process, '{"column":"status","process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes":"'+str(errorIndexes)+'"}'
+
+            for columnName in cols:
+                for process in updateColumnProcessList:
+                    try:
+                        dictSession[columnName+process.Name] = self.ObjContext.begin()
+                        result, error, errorIndexes = self.run_process(columnName, process, dictSession[columnName+process.Name])
+                        if error and process.Blocking and not self.error:
+                            self.error = True
+                        yield process, '{"column":"'+columnName+'","process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(result)+'"}'
+                    except:
+                        yield process, '{"column":"'+columnName+'", "process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes": "error"}'
+
+            for process in insertProcessList:
+                try:
+                    dictSession[process.Name] = self.ObjContext.begin()
+                    result, error, errorIndexes = self.run_process('', process, dictSession[process.Name])
+
+                    yield process, '{"column":"status","process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(result)+'"}'
+                except:
+                    yield process, '{"column":"status", "process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes":"'+str(errorIndexes)+'"}'
 
     def log(self):
         print('error log')

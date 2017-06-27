@@ -540,4 +540,6 @@ def add_routes(config):
                      'ecoReleve-Core/file_import/getExcelFile')
     config.add_route('file_import/processList',
                      'ecoReleve-Core/file_import/processList')
+    config.add_route('file_import/id/columns',
+                     'ecoReleve-Core/file_import/{id}/columns')
 

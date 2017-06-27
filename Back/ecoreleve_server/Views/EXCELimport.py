@@ -74,6 +74,7 @@ def getTemplateColStation(session):
     stationFields = list(map(lambda x: 'Station_'+x,
                             list(filter(lambda y: y not in ['creationDate', 'updateSite', 'FieldWorkers', 'ID']
                                     , stationFields))))
+    
     stationFields.extend(['Station_FieldWorker1',
                           'Station_FieldWorker2',
                           'Station_FieldWorker3'])
@@ -99,19 +100,18 @@ def get_props(attrs):
              request_method='POST')
 def import_file(request):
     try:
+
         session = request.dbsession
         data = request.get_array(field_name='excelFile')
         fileName = request.POST['excelFile'].filename
         columns = data[0]
         protoId = int(request.POST['protoId'])
 
-        if not checkStationColumns(columns, session):
-            request.response.status_code = 510
-            return 'Station columns not coresponding'
+        errorColumn = checkColumns(protoId, columns, session)
 
-        if protoId != 0 and not checkProtoColumns(protoId, columns, session):
+        if protoId != 0 and errorColumn:
             request.response.status_code = 510
-            return 'Protocol columns not coresponding'
+            return 'Excel columns not coresponding: '+' '.join(str(x) for x in errorColumn)
 
         df = pd.DataFrame(data=data[1:], columns=data[0])
         df.convert_objects(convert_dates=True, convert_numeric=True)
@@ -153,81 +153,15 @@ def import_file(request):
     return file.ID
 
 
-def checkProtoColumns(protoID, excelCols, session):
+def checkColumns(protoID, excelCols, session):
     stationColumns = getTemplateColStation(session)
     obsFields = getTemplateColObs(session, protoID)
-
-    duplicatedCols = set([x for x in excelCols if excelCols.count(x) > 1])
-    if len(duplicatedCols) > 0:
-        return False
-
-    protocolColumns = list(set(excelCols) - set(stationColumns))
-
-    isSame = set(protocolColumns).issubset(set(obsFields))
-    return isSame
-
-
-def checkStationColumns(excelCols, session):
-    stationColumns = getTemplateColStation(session)
-    s = set(stationColumns)
+    s = set(stationColumns+obsFields)
     p = set(excelCols)
-    isSame = s.issubset(p)
-    return isSame
-
-
-def generateImportTable(columns, protoId, tableName, session):
-    # get schema for protocols fields
-    newObs = Observation(FK_ProtocoleType=protoId)
-    schema = []
-    allprops = newObs.GetAllProp()
-
-    for col in columns:
-        # station fields
-        if (col == 'Station_Date'):
-            schema.append({'col': col, 'type': 'datetime'})
-        if (col == 'Station_Name') or (col == 'Station_Comments'):
-            schema.append({'col': col, 'type': 'nvarchar(255)'})
-        if (col == 'Station_LAT') or (col == 'Station_LON'):
-            schema.append({'col': col, 'type': 'numeric(9, 5)'})
-        if (col == 'Station_precision') or (col == 'Station_ELE'):
-            schema.append({'col': col, 'type': 'int'})
-        # protocol fields
-        for s in allprops:
-
-            name = s["name"]
-            if (name == col):
-                fieldType = s["type"]
-                if(fieldType == 'String'):
-                    type_f = 'nvarchar(255)'
-                if(fieldType == 'Integer'):
-                    type_f = 'int'
-                if(fieldType == 'Float'):
-                    type_f = 'decimal(12, 5)'
-                if(fieldType == 'Date Only') or (fieldType == 'Time') or (fieldType == 'Date'):
-                    type_f = 'datetime'
-
-                schema.append({'col': col, 'type': type_f})
-
-    command = "IF OBJECT_ID ('" + tableName + "') IS NOT NULL "
-    command = command + ''' BEGIN  DROP TABLE "''' + tableName + \
-        '''" END CREATE TABLE "''' + tableName + \
-        '''" ( "Id" int ) '''
-
-    # for elem in schema:
-    #     command = command + '"' + elem["col"] + '" ' + elem["type"] + ','
-
-    # delete last ','
-    command = command[:-1]
-    command = command + ');'
-    # print(command);
-    try:
-        session.execute(command)
-        session.commit()
-    except:
-        request.response.status = 510
-        return False
-    return schema
-
+    # duplicatedCols = set([x for x in excelCols if excelCols.count(x) > 1])
+    # if len(duplicatedCols) > 0:
+    #     return False
+    return list(p-s)
 
 @view_config(route_name=route_prefix + 'processList',
              renderer='json',
@@ -236,18 +170,20 @@ def getProcessLis(request):
     session = request.dbsession
     data = request.params.mixed()
     fileType = session.query(File_Type).filter(File_Type.Name == data['fileType']).one()
+
     processList = [{'name': process.Name,
+                    'type': process.ProcessType,
                     'descriptionFr': process.DescriptionFr,
-                    'descriptionEn': process.DescriptionEn, } for process in fileType.ProcessList]
+                    'descriptionEn': process.DescriptionEn } for process in fileType.ProcessList]
     return processList
 
 
-# @view_config(route_name=route_prefix + 'id/columns',
-#              renderer='json',
-#              request_method='GET')
-# def getcolumns(request):
-#     session = request.dbsession
-#     file = session.query(File).get(request.matchdict['id'])
-#     cols = file.tempTable.c.keys()
-#     cols.remove('index')
-#     return cols
+@view_config(route_name=route_prefix + 'id/columns',
+             renderer='json',
+             request_method='GET')
+def getcolumns(request):
+    session = request.dbsession
+    file = session.query(File).get(request.matchdict['id'])
+    cols = file.tempTable.c.keys()
+    cols.remove('index')
+    return cols
