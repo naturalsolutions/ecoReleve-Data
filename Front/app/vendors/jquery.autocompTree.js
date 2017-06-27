@@ -102,7 +102,7 @@
           //Insertion de la valeur dans l'input
           $me.val(parametres.inputValue);
 
-          if (!window.thesaurus[parametres.startId]) {
+          if (!window.thesaurus[parametres.startId] || window.thesaurus[parametres.startId].statusText == "abort" ) {
             window.thesaurus[parametres.startId] =  $.ajax({
               type: 'POST',
               url: parametres.wsUrl + '/' + parametres.webservices,

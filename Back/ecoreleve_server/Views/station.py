@@ -73,20 +73,30 @@ class StationsView(DynamicObjectCollectionView):
     def updateMonitoredSite(self):
         session = self.request.dbsession
         data = self.request.params.mixed()
-        curSta = session.query(self.item.model).get(data['id'])
+        # curSta = session.query(self.item.model).get(data['id'])
 
         if data['FK_MonitoredSite'] == '':
             return 'Station is not monitored'
         try:
-            newSitePos = MonitoredSitePosition(
-                StartDate=curSta.StationDate,
-                LAT=curSta.LAT,
-                LON=curSta.LON,
-                ELE=curSta.ELE,
-                Precision=curSta.precision,
-                FK_MonitoredSite=data['FK_MonitoredSite'])
+            currentSitePosition = session.query(MonitoredSitePosition
+                                                ).filter_by(StartDate=data['StationDate']
+                                                            ).filter_by(FK_MonitoredSite=data['FK_MonitoredSite']
+                                                            ).one()
+            if not currentSitePosition:
+                newSitePos = MonitoredSitePosition(
+                    StartDate=data['StationDate'],
+                    LAT=data['LAT'],
+                    LON=data['LON'],
+                    ELE=data['ELE'],
+                    Precision=data['precision'],
+                    FK_MonitoredSite=data['FK_MonitoredSite'])
 
-            session.add(newSitePos)
+                session.add(newSitePos)
+            else:
+                currentSitePosition.LAT = data['LAT']
+                currentSitePosition.LON = data['LON']
+                currentSitePosition.ELE = data['ELE']
+                currentSitePosition.Precision = data['precision']
             session.commit()
             return 'Monitored site position was updated'
         except IntegrityError as e:
