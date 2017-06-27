@@ -1,0 +1,1043 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[pr_ImportExcel_CheckRequired_Field]
+@file_ID int,
+	@column_name varchar(250),
+    @prefix_column varchar(100) = '',
+	@target_module int = NULL,
+	@target_TypeObj int = NULL,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorIndexes varchar(max) OUTPUT
+AS
+SET NOCOUNT ON
+
+
+BEGIN TRY
+
+DECLARE @SQL_STATEMENT nvarchar(max),
+@iErrorCode_exec int,
+@TLogMessage_ID int,
+@Creator int,
+@ObjectType int,
+@TempTable_GUID varchar(250),
+@ObjectName varchar(100),
+@count int,
+@module_id int;
+
+
+
+--DECLARE
+--	@file_ID int,
+--	@result varchar(255),
+--	@column_name varchar(250),
+--    @prefix_column varchar(100),
+--	@target_module int,
+--	@target_TypeObj int,
+--	@error int ,
+--	@errorIndexes varchar(max) 
+--SET @file_ID = 2076;
+--	SET @column_name = 'impact'
+--    SET @prefix_column = ''
+--	SET @target_module = NULL
+--	SET @target_TypeObj = NULL
+
+SET @result='ERROR'
+
+
+	SELECT 
+			@Creator= Creator,
+			@TempTable_GUID = TempTable_GUID,
+			@ObjectName = ObjectName,
+			@ObjectType = ObjectType,
+			@module_id = ft.module_id
+	FROM [File] f
+	JOIN File_Type ft on ft.ID = f.FK_File_Type
+	WHERE f.ID = @file_ID
+
+	IF (SELECT 1 WHERE @target_module IS NOT NULL) >0
+	BEGIN
+		SET @module_id = @target_module
+	END
+
+	
+	IF (SELECT 1 WHERE @target_TypeObj IS NOT NULL) >0
+	BEGIN
+		SET @ObjectType = @target_TypeObj
+	END
+
+	DECLARE  @tempIndexError TABLE (
+	index_ int
+	)
+
+	DECLARE @temp TABLE (
+	NameOrigin varchar(250)
+	)
+
+
+	INSERT INTO @temp
+    SELECT @column_name 
+    FROM [dbo].[ModuleForms] 
+	WHERE 
+	Module_id = @module_id AND (TypeObj  IS NULL OR TypeObj = @ObjectType)
+	AND Required = 1 and Name = REPLACE(@column_name, @prefix_column, '' ) 
+
+	SET @SQL_STATEMENT = 'SELECT [index] FROM '+@TempTable_GUID 
+
+	DECLARE @WhereSQL nvarchar(max)
+	SET @WhereSQL = '@'
+
+	select @WhereSQL+= 'OR '+NameOrigin+' IS NULL '
+	FROM  @temp
+
+	SET @WhereSQL = replace(@WhereSQL,'@OR',' WHERE ')
+	SET @SQL_STATEMENT = @SQL_STATEMENT + @WhereSQL
+
+	IF (SELECT COUNT(*) FROM @temp)> 0
+	BEGIN
+		INSERT INTO @tempIndexError
+		EXEC SP_EXECUTESQL @SQL_STATEMENT;
+	END 
+
+	IF (SELECT COUNT(*) FROM @tempIndexError) > 0 
+		BEGIN 
+			SET @error = 1
+			SET @errorIndexes = '@'
+			SELECT @errorIndexes = @errorIndexes + ', '+CONVERT(VARCHAR(100),index_)
+			FROM @tempIndexError
+
+			SET @errorIndexes = REPLACE(@errorIndexes,'@, ','')
+		END
+
+
+END TRY
+BEGIN CATCH
+	SET @error = ERROR_NUMBER()
+	DECLARE @msgerror varchar(max) = ERROR_MESSAGE(),
+	@infos varchar(max) = '@file_ID='+CONVERT(VARCHAR,@file_ID)
+
+	EXEC [dbo].[pr_loginfo] 1, 'pr_ImportExcel_CheckRequired_Field', @Creator, @error,@msgerror, @infos
+
+					
+END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT  @result,  @error, @errorIndexes
+
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[pr_ImportExcel_CheckRequired_FieldWorker]    Script Date: 27/06/2017 08:35:18 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[pr_ImportExcel_CheckRequired_FieldWorker]
+	@file_ID int,
+	@column_name varchar(250),
+    @prefix_column varchar(100) = '',
+	@target_module int = NULL,
+	@target_TypeObj int = NULL,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorIndexes varchar(max) OUTPUT
+AS
+SET NOCOUNT ON
+
+BEGIN TRY
+
+DECLARE @SQL_STATEMENT nvarchar(max),
+@iErrorCode_exec int,
+@TLogMessage_ID int,
+@Creator int,
+@ObjectType int,
+@TempTable_GUID varchar(250),
+@ObjectName varchar(100),
+@count int
+
+
+--DECLARE
+--	@file_ID int,
+--	@result varchar(255),
+--	@column_name varchar(250),
+--    @prefix_column varchar(100),
+--	@target_module int,
+--	@target_TypeObj int,
+--	@error int ,
+--	@errorIndexes varchar(max) 
+--SET @file_ID = 2076;
+--	SET @column_name = 'impact'
+--    SET @prefix_column = ''
+--	SET @target_module = NULL
+--	SET @target_TypeObj = NULL
+
+
+SET @result='ERROR'
+
+	IF @column_name like '%Station_Fieldworker%'
+	BEGIN
+		SELECT 
+				@Creator= Creator,
+				@TempTable_GUID = TempTable_GUID,
+				@ObjectName = ObjectName,
+				@ObjectType = ObjectType
+		FROM [File] 
+		WHERE ID = @file_ID
+
+		DECLARE  @tempIndexError TABLE (
+		index_ int
+		)
+
+		DECLARE @whereSQL nvarchar(max)
+		SET @SQL_STATEMENT = 'SELECT [index] FROM '+@TempTable_GUID 	
+		
+		SET @whereSQL =' WHERE @'
+
+		SELECT  @whereSQL = @whereSQL + 'AND '+COLUMN_NAME+' IS NULL '
+		FROM INFORMATION_SCHEMA.COLUMNS  TC
+		WHERE TC."TABLE_NAME" = @TempTable_GUID
+		AND COLUMN_NAME LIKE 'Station_Fieldworker%'
+
+		SET @whereSQL = REPLACE(@whereSQL, '@AND', '')
+		SET @SQL_STATEMENT = @SQL_STATEMENT+@whereSQL
+	
+		INSERT INTO @tempIndexError
+		EXEC SP_EXECUTESQL @SQL_STATEMENT;
+
+		IF (SELECT COUNT(*) FROM @tempIndexError) > 0 
+			BEGIN 
+				SET @error = 1
+				SET @errorIndexes = '@'
+				SELECT @errorIndexes = @errorIndexes + ', '+CONVERT(VARCHAR(100),index_)
+				FROM @tempIndexError
+
+				SET @errorIndexes = REPLACE(@errorIndexes,'@, ','')
+			END
+
+	END
+END TRY
+
+BEGIN CATCH
+	SET @error = ERROR_NUMBER()
+	DECLARE @msgerror varchar(max) = ERROR_MESSAGE(),
+	@infos varchar(max) = '@file_ID='+CONVERT(VARCHAR,@file_ID)
+
+	EXEC [dbo].[pr_loginfo] 1, 'pr_ImportExcel_CheckRequired_FieldWorker', @Creator, @error,@msgerror, @infos
+					
+					
+END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT  @result,  @error, @errorIndexes
+
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[pr_ImportExcel_InsertObservations]    Script Date: 27/06/2017 08:35:18 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[pr_ImportExcel_InsertObservations] 
+	(
+	@file_ID int,
+    @prefix_column varchar(100) = '',
+	@target_module int = 2,
+	@target_TypeObj int = 1,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorIndexes varchar(max) OUTPUT
+	)
+AS
+
+BEGIN TRY
+	SET NOCOUNT ON;
+	DECLARE @SQL_STATEMENT nvarchar(max),
+	@SQL nvarchar(max),
+	@SQL_1 nvarchar(max),
+	@iErrorCode_exec int,
+	@TLogMessage_ID int,
+	@Creator int,
+	@ObjectType varchar(250),
+	@TempTable_GUID varchar(250),
+	@ObjectName varchar(100),
+	@count int
+	
+	SET @result='ERROR'
+
+		SELECT
+			@Creator= Creator,
+			@TempTable_GUID = TempTable_GUID,
+			@ObjectName = ObjectName,
+			@ObjectType = ObjectType
+	FROM [File]
+	WHERE ID = @file_ID
+
+	BEGIN TRAN
+	SET @SQL_1 =''
+
+		EXEC('ALTER TABLE '+@TempTable_GUID+' ADD [FK_Observation] int null;') --pour stocker les id retournées aprés insertion d'observations
+
+		--Recovery columns in station present in import excel table
+		DECLARE @col nvarchar(max),
+		@colImport nvarchar(max)
+
+		SELECT  @col = COALESCE(@col + ', ', '') +'['+TC1.COLUMN_NAME+']',
+		@colImport = COALESCE(@colImport + ', ', '') +'['+TC1.COLUMN_NAME+']'
+			FROM INFORMATION_SCHEMA.COLUMNS  [TC1]
+			JOIN INFORMATION_SCHEMA.COLUMNS  [TC2]
+			ON TC1.COLUMN_NAME = TC2.COLUMN_NAME
+			WHERE TC1.TABLE_NAME = 'Observation'
+			AND TC2.TABLE_NAME = @TempTable_GUID
+
+		SET @col = @col + ', creationDate, FK_ProtocoleType, original_id'
+		SET @colImport = @colImport + ', GETDATE(), '+@ObjectType+' , Station_original_id'
+		--insert into observation new observations from exceltab
+		SET @SQL_1 = @SQL_1 +'DECLARE @tempListId TABLE (
+			[ID] [int]  NOT NULL,
+			[ORIGINAL_INDEX] varchar(255) NOT NULL
+			)
+			INSERT INTO Observation ( '+@col+' )
+			OUTPUT Inserted.ID, Inserted.[original_id] AS original_id into @templistId
+			SELECT '+@colImport+' 
+			FROM '+@TempTable_GUID+';'
+		-- get back inserted id in exceltab FK_Observation
+		SET @SQL_1 = @SQL_1 +' UPDATE
+			'+@TempTable_GUID+'
+			SET
+			FK_Observation = TMP.ID
+			FROM
+			@tempListId AS TMP
+			WHERE
+			[index] = REPLACE(TMP.ORIGINAL_INDEX , '''+@TempTable_GUID+'_'','''');
+			'
+			EXEC SP_EXECUTESQL @SQL_1;
+		-- now insert dyn prop for observation
+
+		DECLARE  @tempDynProp TABLE (excelColName varchar(100),FK_ObservationDynProp int, TypeProp varchar(20) )
+		DECLARE @sqlDyn nvarchar(max) 
+
+		SET @sqlDyn = '@'
+
+		INSERT INTO @tempDynProp (excelColName, FK_ObservationDynProp, TypeProp)
+		SELECT  tc2.COLUMN_NAME, dp.ID, dp.TypeProp
+			FROM INFORMATION_SCHEMA.COLUMNS  [TC2]
+			JOIN ObservationDynProp dp ON tc2.COLUMN_NAME = dp.Name
+			WHERE TC2.TABLE_NAME = @TempTable_GUID
+
+
+		SELECT @sqlDyn = @sqlDyn+'UNION ALL SELECT GETDATE(), '
+		+CASE WHEN TypeProp =  'Integer' THEN excelColName ELSE 'NULL' END +' AS ValueInt, '
+		+CASE  WHEN TypeProp = 'String' THEN excelColName ELSE 'NULL' END +' AS ValueString, '
+		+CASE  WHEN TypeProp = 'Float' THEN excelColName ELSE 'NULL' END +' AS ValueFloat, '
+		+CASE WHEN TypeProp = 'Date' OR TypeProp = 'Date Only' OR TypeProp = 'Time' THEN excelColName ELSE 'NULL' END +' AS ValueDate, '
+		+ CONVERT(VARCHAR,FK_ObservationDynProp)+' AS FK_ObservationDynProp, FK_Observation FROM '+@TempTable_GUID+' '
+		FROM @tempDynProp
+
+		SELECT @sqlDyn = REPLACE(@sqlDyn, '@UNION ALL','')
+
+		INSERT INTO ObservationDynPropValue (StartDate,ValueInt, ValueString, ValueFloat, ValueDate, FK_ObservationDynProp, FK_Observation)
+		EXEC SP_EXECUTESQL @sqlDyn;
+
+
+	IF @@TRANCOUNT > 0 
+		COMMIT TRAN
+
+	END TRY
+	BEGIN CATCH
+		ROLLBACK TRAN
+		SET @error = ERROR_NUMBER()
+		DECLARE @msgerror varchar(max) = ERROR_MESSAGE(),
+		@infos varchar(max) = '@file_ID='+CONVERT(VARCHAR,@file_ID)
+
+		EXEC [dbo].[pr_loginfo] 1, 'pr_ImportExcel_insertObservations_From_Import', @Creator, @error,@msgerror, @infos
+		
+					
+	END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+		--suppression des alter table 
+		EXEC('ALTER TABLE '+@TempTable_GUID+' DROP COLUMN Fk_observation;')  
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT  @result,  @error, @errorIndexes
+
+GO
+/****** Object:  StoredProcedure [dbo].[pr_ImportExcel_InsertStations]    Script Date: 27/06/2017 08:35:18 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[pr_ImportExcel_InsertStations] 
+	(
+	@file_ID int,
+    @prefix_column varchar(100) = '',
+	@target_module int = 2,
+	@target_TypeObj int = 1,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorIndexes varchar(max) OUTPUT
+	)
+AS
+BEGIN TRAN
+BEGIN TRY
+	SET NOCOUNT ON;
+	DECLARE @SQL_STATEMENT nvarchar(max),
+	@SQL nvarchar(max),
+	@SQL_1 nvarchar(max),
+	@iErrorCode_exec int,
+	@TLogMessage_ID int,
+	@Creator int,
+	@ObjectType int,
+	@TempTable_GUID varchar(250), 
+	@ObjectName varchar(100),
+	@count int
+	
+	SET @result='ERROR'
+
+		SELECT
+			@Creator= Creator,
+			@TempTable_GUID = TempTable_GUID,
+			@ObjectName = ObjectName,
+			@ObjectType = ObjectType
+	FROM [File]
+	WHERE ID = @file_ID
+
+	EXEC('ALTER TABLE '+@TempTable_GUID+' ADD [FK_Station] int null;') --pour stocker les id retournées aprés insertion de stations
+
+	EXEC('ALTER TABLE '+@TempTable_GUID+' ADD [Station_original_id] varchar(max) null;')
+	EXEC('UPDATE '+@TempTable_GUID+' SET [Station_original_id] = '''+@TempTable_GUID+'''+''_''+CONVERT(VARCHAR(20),[index]);')
+
+		/****************************************************************************************/
+
+	
+	SET @SQL_1 =''
+
+		--Recovery columns in station present in import excel table
+		DECLARE @col nvarchar(max),
+		@colImport nvarchar(max)
+
+		SELECT  @col = COALESCE(@col + ', ', '') +'['+TC1.COLUMN_NAME+']',
+		@colImport = COALESCE(@colImport + ', ', '') +'[Station_'+TC1.COLUMN_NAME+']'
+			FROM INFORMATION_SCHEMA.COLUMNS  [TC1]
+			JOIN INFORMATION_SCHEMA.COLUMNS  [TC2]
+			ON 'Station_'+TC1.COLUMN_NAME = TC2.COLUMN_NAME
+			WHERE TC1.TABLE_NAME = 'Station'
+			AND TC2.TABLE_NAME = @TempTable_GUID
+
+		SET @col = @col + ', creationDate, FK_StationType '
+		SET @colImport = @colImport + ', GETDATE(), 4 '
+		--insert into station new station from exceltab
+		SET @SQL_1 = @SQL_1 +'DECLARE @tempListId TABLE (
+			[ID] [int]  NOT NULL,
+			[ORIGINAL_INDEX] varchar(255) NOT NULL
+			)
+			INSERT INTO Station ( '+@col+' )
+			OUTPUT Inserted.ID, Inserted.[original_id] AS original_id into @templistId
+			SELECT '+@colImport+' 
+			FROM '+@TempTable_GUID+';'
+		-- get back inserted id in exceltab FK_Station	
+		SET @SQL_1 = @SQL_1 +' UPDATE
+			'+@TempTable_GUID+'
+			SET
+			FK_Station = TMP.ID
+			FROM
+			@tempListId AS TMP
+			WHERE
+			[index] = REPLACE(TMP.ORIGINAL_INDEX , '''+@TempTable_GUID+'_'','''');
+			'
+			EXEC SP_EXECUTESQL @SQL_1;
+		-- now insert dyn prop for station
+
+		DECLARE  @tempDynProp TABLE (excelColName varchar(100),FK_StationDynProp int, TypeProp varchar(20), ValueInt int , ValueFloat decimal(12,5), ValueDate datetime, ValueString varchar(255) )
+		DECLARE @sqlDyn nvarchar(max) 
+
+		SET @sqlDyn = '@'
+
+		INSERT INTO @tempDynProp (excelColName, FK_StationDynProp, TypeProp)
+		SELECT  tc2.COLUMN_NAME, dp.ID, dp.TypeProp
+			FROM INFORMATION_SCHEMA.COLUMNS  [TC2]
+			JOIN StationDynProp dp ON tc2.COLUMN_NAME = 'Station_'+dp.Name
+			WHERE TC2.TABLE_NAME = @TempTable_GUID
+
+
+		select @sqlDyn = @sqlDyn+'UNION ALL SELECT GETDATE(), '
+		+ CASE WHEN TypeProp =  'Integer' THEN excelColName ELSE 'NULL' END +' AS ValueInt, '
+		+CASE  WHEN TypeProp = 'String' THEN excelColName ELSE 'NULL' END +' AS ValueString, '
+		+CASE  WHEN TypeProp = 'Float' THEN excelColName ELSE 'NULL' END +' AS ValueFloat, '
+		+CASE WHEN TypeProp = 'Date' OR TypeProp = 'Date Only' OR TypeProp = 'Time' THEN excelColName ELSE 'NULL' END +' AS ValueDate, '
+		+ CONVERT(VARCHAR,FK_StationDynProp)+' AS FK_StationDynProp, FK_Station FROM '+@TempTable_GUID+' '
+		FROM @tempDynProp
+
+		SELECT @sqlDyn = REPLACE(@sqlDyn, '@UNION ALL','')
+		INSERT INTO StationDynPropValue (StartDate,ValueInt, ValueString, ValueFloat, ValueDate, FK_StationDynProp, FK_Station)
+		EXEC SP_EXECUTESQL @sqlDyn;
+
+		DECLARE @SQL_UNION nvarchar(max)
+		-- insert fieldworker
+		SET @SQL_UNION = '@'
+			SET @SQL_1 = '
+			INSERT INTO Station_FieldWorker ( FK_Station , FK_FieldWorker )
+			SELECT [FK_Station] AS FK_Station,fieldWorker as FK_FieldWorker 
+			FROM '
+
+		SELECT @SQL_UNION = @SQL_UNION 
+			+ 'UNION ALL SELECT FK_Station,  '+ TC.COLUMN_NAME +' AS fieldworker
+				FROM   ' + @TempTable_GUID + '
+				WHERE '+ TC.COLUMN_NAME +' IS NOT NULL '
+		FROM INFORMATION_SCHEMA.COLUMNS  TC
+		WHERE TC.TABLE_NAME = @TempTable_GUID 
+		AND TC.COLUMN_NAME like 'Station_Fieldworker%'
+
+		SET @SQL_UNION = REPLACE(@SQL_UNION, '@UNION ALL', ' ( ') + ' ) as Tfil '
+		SET @SQL_1 = @SQL_1 + @SQL_UNION
+		EXEC SP_EXECUTESQL @SQL_1;
+	
+	IF @@TRANCOUNT > 0 
+		COMMIT TRAN
+
+
+	END TRY
+	BEGIN CATCH
+		ROLLBACK TRAN
+		SET @error = ERROR_NUMBER()
+		DECLARE @msgerror varchar(max) = ERROR_MESSAGE(),
+		@infos varchar(max) = '@file_ID='+CONVERT(VARCHAR,@file_ID)
+
+		EXEC [dbo].[pr_loginfo] 1, 'pr_ImportExcel_InsertStations_From_Import', @Creator, @error,@msgerror, @infos
+		
+					
+	END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT  @result,  @error , @errorIndexes
+
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[pr_ImportExcel_Update_FieldWorkerName]    Script Date: 27/06/2017 08:35:18 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[pr_ImportExcel_Update_FieldWorkerName]
+	@file_ID int,
+	@column_name varchar(250),
+    @prefix_column varchar(100) = '',
+	@target_module int = NULL,
+	@target_TypeObj int = NULL,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorIndexes varchar(max) OUTPUT
+AS
+SET NOCOUNT ON
+
+DECLARE @SQL_STATEMENT nvarchar(max),
+@iErrorCode_exec int,
+@TLogMessage_ID int,
+@Creator int,
+@ObjectType int,
+@TempTable_GUID varchar(250),
+@ObjectName varchar(100),
+@count int
+
+SET @result='ERROR'
+
+BEGIN TRY
+	IF @column_name like 'Station_Fieldworker%'
+	BEGIN
+		SELECT 
+				@Creator= Creator,
+				@TempTable_GUID = TempTable_GUID,
+				@ObjectName = ObjectName,
+				@ObjectType = ObjectType
+		FROM [File] 
+		WHERE ID = @file_ID
+
+		DECLARE  @tempIndexError TABLE (
+		index_ int
+		)
+
+		DECLARE @temp TABLE (
+		NameOrigin varchar(250),
+		Options varchar(250)
+		)
+
+		SET @SQL_STATEMENT = 'UPDATE t SET ' +@column_name +' = u1.ID'
+		+ ' FROM '+@TempTable_GUID + ' t '	
+		+ ' JOIN [User] u1 ON u1.Login = t.'+@column_name+'  AND t.'+@column_name+' IS NOT NULL'
+
+		EXEC SP_EXECUTESQL @SQL_STATEMENT;
+	END
+END TRY
+BEGIN CATCH
+	SET @error = ERROR_NUMBER()
+	DECLARE @msgerror varchar(max) = ERROR_MESSAGE(),
+	@infos varchar(max) = '@file_ID='+CONVERT(VARCHAR,@file_ID)
+
+	EXEC [dbo].[pr_loginfo] 1, 'pr_ImportExcel_Update_FieldWorkerName', @Creator, @error,@msgerror, @infos
+					
+	EXEC SP_EXECUTESQL @SQL_STATEMENT
+					
+END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT  @result,  @error, @errorIndexes
+
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[pr_ImportExcel_Update_ObjectPicker]    Script Date: 27/06/2017 08:35:18 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[pr_ImportExcel_Update_ObjectPicker]
+	@file_ID int,
+	@column_name varchar(250),
+    @prefix_column varchar(100) = '',
+	@target_module int = NULL,
+	@target_TypeObj int = NULL,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorIndexes varchar(max) OUTPUT
+AS
+SET NOCOUNT ON
+
+DECLARE @SQL_STATEMENT nvarchar(max),
+@iErrorCode_exec int,
+@TLogMessage_ID int,
+@Creator int,
+@ObjectType int,
+@TempTable_GUID varchar(250),
+@ObjectName varchar(100),
+@count int,
+@module_id int;
+
+
+SET @result='ERROR'
+
+BEGIN TRY
+
+	SELECT 
+			@Creator= Creator,
+			@TempTable_GUID = TempTable_GUID,
+			@ObjectName = ObjectName,
+			@ObjectType = ObjectType,
+			@module_id = ft.module_id
+	FROM [File] f
+	JOIN File_Type ft on ft.ID = f.FK_File_Type
+	WHERE f.ID = @file_ID
+
+	IF (SELECT 1 WHERE @target_module IS NOT NULL) >0
+	BEGIN
+		SET @module_id = @target_module
+	END
+
+	
+	IF (SELECT 1 WHERE @target_TypeObj IS NOT NULL) >0
+	BEGIN
+		SET @ObjectType = @target_TypeObj
+	END
+
+	DECLARE  @tempIndexError TABLE (
+	index_ int
+	)
+
+	DECLARE @temp TABLE (
+	tableAutocomp varchar(250),
+	fieldAutocomp varchar(250),
+	NameOrigin varchar(250),
+	Options varchar(250)
+	)
+
+  INSERT INTO @temp
+  SELECT CASE WHEN f.Options like '%user%' THEN '[User]' 
+								WHEN Name like '%sensor%' THEN 'Sensor' 
+								WHEN Name like '%monitoredSite%' THEN 'MonitoredSite' 
+								ELSE NULL END AS tableAutocomp,
+		 CASE WHEN f.Options like '%user%' THEN 'Login' 
+								WHEN Name like '%sensor%' THEN 'UnicIdentifier' 
+								WHEN Name like '%monitoredSite%' THEN 'Name' 
+								ELSE NULL END AS fieldAutocomp,
+		@column_name AS NameOrigin,
+		Options
+	FROM [dbo].[ModuleForms] f
+	WHERE 
+	Module_id = @module_id AND (TypeObj is null OR TypeObj = @ObjectType)
+	AND InputType ='ObjectPicker' AND f.Name not like '%individual%'
+	and Name = REPLACE(@column_name, @prefix_column, '' )
+
+
+	SET @SQL_STATEMENT = 'UPDATE tGuid SET '
+
+	DECLARE @JoinSQL nvarchar(max)
+	DECLARE @UpdateSQL nvarchar(max)
+	SET @UpdateSQL = '@'
+	SET @JoinSQL = '@'
+	select  @UpdateSQL = @UpdateSQL+', '+NameOrigin + '= autoC_'+NameOrigin+'.ID' ,
+	@JoinSQL =  @JoinSQL +'LEFT JOIN '+ tableAutocomp +' autoC_'+ NameOrigin
+							+' ON  autoC_'+NameOrigin+'.'+ fieldAutocomp +'=tGuid.'+NameOrigin
+								+ ' AND tGuid.'+NameOrigin+' IS NOT NULL '
+	FROM @temp
+
+	SET @UpdateSQL = REPLACE(@UpdateSQL,'@,',' ')+' FROM '+@TempTable_GUID+' tGuid '
+	SET @JoinSQL = REPLACE(@JoinSQL,'@LEFT',' LEFT ')
+	
+	SET @SQL_STATEMENT = @SQL_STATEMENT + @UpdateSQL + @JoinSQL
+
+	IF (SELECT COUNT(*) FROM @temp) > 0
+	EXEC SP_EXECUTESQL @SQL_STATEMENT
+
+
+END TRY
+BEGIN CATCH
+	SET @error = ERROR_NUMBER()
+	DECLARE @msgerror varchar(max) = ERROR_MESSAGE(),
+	@infos varchar(max) = '@file_ID='+CONVERT(VARCHAR,@file_ID)
+
+	EXEC [dbo].[pr_loginfo] 1, 'pr_ImportExcel_Update_ObjectPicker', @Creator, @error,@msgerror, @infos
+				
+
+END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT  @result,  @error, @errorIndexes
+
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[pr_ImportExcel_Update_Select]    Script Date: 27/06/2017 08:35:19 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[pr_ImportExcel_Update_Select]
+	@file_ID int,
+	@column_name varchar (250),
+	@prefix_column varchar(100) = '',
+	@target_module int = NULL,
+	@target_typeObj int = NULL,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorIndexes varchar(max) OUTPUT
+AS
+SET NOCOUNT ON
+
+DECLARE @SQL_STATEMENT nvarchar(max),
+@iErrorCode_exec int,
+@TLogMessage_ID int,
+@Creator int,
+@ObjectType int,
+@TempTable_GUID varchar(250),
+@ObjectName varchar(100),
+@count int,
+@module_id int;
+
+SET @result='ERROR'
+
+BEGIN TRY
+
+	SELECT 
+			@Creator= Creator,
+			@TempTable_GUID = TempTable_GUID,
+			@ObjectName = ObjectName,
+			@ObjectType = ObjectType,
+			@module_id = ft.module_id
+	FROM [File] f
+	JOIN File_Type ft on ft.ID = f.FK_File_Type
+	WHERE f.ID = @file_ID
+
+	IF (SELECT 1 WHERE @target_module IS NOT NULL) >0
+	BEGIN
+		SET @module_id = @target_module
+	END
+
+	IF (SELECT 1 WHERE @target_typeObj IS NOT NULL) >0
+	BEGIN
+		SET @ObjectType = @target_typeObj
+	END
+
+	DECLARE @temp TABLE ( NameOrigin varchar (250), Options varchar (max))
+
+	INSERT INTO @temp
+	SELECT @column_name, Options
+	FROM ModuleForms form
+	WHERE 
+	Module_id = @module_id AND (TypeObj  IS NULL OR TypeObj = @ObjectType)
+	AND InputType = 'Select' and Name = REPLACE(@column_name, @prefix_column, '' ) 
+
+	SET @SQL_STATEMENT = 'UPDATE tGuid SET '
+
+	DECLARE @UpdateSQL nvarchar(max)
+	DECLARE @JoinSQL nvarchar(max)
+	SET @JoinSQL = ' FROM '+@TempTable_GUID +' tGuid @'
+	SET @UpdateSQL = '@' 
+	select  @UpdateSQL = @UpdateSQL+ ', ' + NameOrigin + '=sel_'+NameOrigin+'.val', 
+	@JoinSQL =  @JoinSQL +'LEFT JOIN ('+Options+') AS sel_'+NameOrigin+' ON sel_'
+	+NameOrigin+'.Label=tGuid.'+NameOrigin+' AND tGuid.'+NameOrigin+' IS NOT NULL '
+	FROM @temp
+
+
+	SET @UpdateSQL = REPLACE(@UpdateSQL,'@,',' ')
+	SET @JoinSQL = REPLACE(@JoinSQL,'@LEFT',' LEFT')
+	SET @SQL_STATEMENT = @SQL_STATEMENT+ @UpdateSQL+ @JoinSQL
+
+	IF (SELECT COUNT(*) FROM @temp )> 0
+	EXEC SP_EXECUTESQL @SQL_STATEMENT;
+
+
+END TRY
+BEGIN CATCH
+	SET @error = ERROR_NUMBER()
+	DECLARE @msgerror varchar(max) = ERROR_MESSAGE(),
+	@infos_error varchar(max);
+
+	SET @infos_error = ' @column_name= '+@column_name+',  @file_ID='+CONVERT(VARCHAR,@file_ID) ;
+
+	EXEC [dbo].[pr_loginfo] 1, 'pr_ImportExcel_Update_Select', @Creator, @error,@msgerror, @infos_error
+					
+					
+END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT  @result,  @error, @errorIndexes
+
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[pr_ImportExcel_Update_ThesaurusVal]    Script Date: 27/06/2017 08:35:19 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[pr_ImportExcel_Update_ThesaurusVal]
+	@file_ID int,
+	@column_name varchar(250),
+    @prefix_column varchar(100) = '',
+	@target_module int = NULL,
+	@target_TypeObj int = NULL,
+	@result varchar(255) OUTPUT,
+	@error int OUTPUT,
+	@errorIndexes varchar(max) OUTPUT
+AS
+SET NOCOUNT ON
+
+DECLARE @SQL_STATEMENT nvarchar(max),
+@iErrorCode_exec int,
+@TLogMessage_ID int,
+@Creator int,
+@ObjectType int,
+@TempTable_GUID varchar(250),
+@ObjectName varchar(100),
+@count int,
+@module_id int;
+
+
+SET @result='ERROR'
+
+BEGIN TRY
+
+	SELECT 
+			@Creator= Creator,
+			@TempTable_GUID = TempTable_GUID,
+			@ObjectName = ObjectName,
+			@ObjectType = ObjectType,
+			@module_id = ft.module_id
+	FROM [File] f
+	JOIN File_Type ft on ft.ID = f.FK_File_Type
+	WHERE f.ID = @file_ID
+
+	IF (SELECT 1 WHERE @target_module IS NOT NULL) >0
+	BEGIN
+		SET @module_id = @target_module
+	END
+
+	IF (SELECT 1 WHERE @target_TypeObj IS NOT NULL) >0
+	BEGIN
+		SET @ObjectType = @target_TypeObj
+	END
+
+	DECLARE  @tempIndexError TABLE (
+	index_ int
+	)
+
+	DECLARE @temp TABLE (
+	NameOrigin varchar(250),
+	Options varchar(250)
+	)
+
+  INSERT INTO @temp
+  SELECT @column_name AS NameOrigin,
+		Options
+	FROM [dbo].[ModuleForms] f
+	WHERE 	Module_id = @module_id AND (TypeObj  IS NULL OR TypeObj = @ObjectType)
+	AND InputType = 'AutocompTreeEditor'
+	and Name = REPLACE(@column_name, @prefix_column, '' ) 
+
+	SET @SQL_STATEMENT = 'UPDATE tGuid SET '
+
+	DECLARE @WhereSQL nvarchar(max)
+	DECLARE @JoinSQL nvarchar(max)
+	DECLARE @UpdateSQL nvarchar(max)
+	SET @UpdateSQL = '@'
+	SET @WhereSQL = '@'
+	SET @JoinSQL = '@'
+
+
+select  @UpdateSQL = @UpdateSQL + ', '+ NameOrigin + '= CASE WHEN T_'+NameOrigin+'.TTop_FullPath IS NOT NULL THEN T_'+NameOrigin+'.TTop_FullPath ELSE '+NameOrigin +' END ' ,
+
+@JoinSQL =  @JoinSQL +'LEFT JOIN THESAURUS.dbo.TTopic D_'+NameOrigin+' on D_'+NameOrigin+'.TTop_PK_ID = '+Options 
++ ' LEFT JOIN THESAURUS.dbo.VTopicCompatibility T_'+NameOrigin+' on 
+		((T_'+NameOrigin+'.TTop_NameFr =CONVERT(VARCHAR(250),tGuid.'+NameOrigin+') OR T_'+NameOrigin+'.TTop_NameEn =CONVERT(VARCHAR(250),tGuid.'+NameOrigin+'))
+		
+		 and T_'+NameOrigin+'.TTop_Type = CASE WHEN D_'+NameOrigin+'.TTop_Type in (''TOP Concept'') 
+		THEN D_'+NameOrigin+'.TTop_Name ELSE D_'+NameOrigin+'.TTop_Type END) ',
+
+ @WhereSQL = @WhereSQL + 'OR (CONVERT(VARCHAR(250),tGuid.'+NameOrigin+') IS NOT NULL and NOT EXISTS (Select * 
+												from THESAURUS.dbo.VTopicCompatibility T2_'+NameOrigin+' 
+												where T2_'+NameOrigin+'.TTop_PK_ID <> T_'+NameOrigin+'.TTop_PK_ID 
+												AND  ( ( T2_'+NameOrigin+'.TTop_NameFr = CONVERT(VARCHAR(250),tGuid.'+NameOrigin+') OR T2_'+NameOrigin+'.TTop_NameEn = CONVERT(VARCHAR(250),tGuid.'+NameOrigin+')) 
+												and T2_'+NameOrigin+'.TTop_Type = CASE WHEN D_'+NameOrigin+'.TTop_Type = ''TOP Concept'' THEN D_'+NameOrigin+'.TTop_Name ELSE D_'+NameOrigin+'.TTop_Type END 
+													)
+												) ) '
+FROM @temp
+
+	SET @UpdateSQL = REPLACE(@UpdateSQL,'@,',' ')+' FROM '+@TempTable_GUID+' tGuid '
+	SET @JoinSQL = REPLACE(@JoinSQL,'@LEFT',' LEFT ')
+	SET @WhereSQL = REPLACE(@WhereSQL,'@OR',' WHERE ')
+	
+	SET @SQL_STATEMENT = @SQL_STATEMENT + @UpdateSQL + @JoinSQL + @WhereSQL
+
+
+	IF (SELECT COUNT(*) FROM @temp)> 0
+	EXEC SP_EXECUTESQL @SQL_STATEMENT;
+
+
+END TRY
+BEGIN CATCH
+	SET @error = ERROR_NUMBER()
+	DECLARE @msgerror varchar(max) = ERROR_MESSAGE(),
+	@infos varchar(max) = '@file_ID='+CONVERT(VARCHAR,@file_ID)+ ' @column_name= '+@column_name
+
+	EXEC [dbo].[pr_loginfo] 1, 'pr_ImportExcel_Update_ThesaurusVal', @Creator, @error,@msgerror, @infos
+
+					
+END CATCH;
+
+IF @@ERROR <> 0
+	BEGIN
+		SET @error = @@ERROR
+	END
+IF @error <> 0
+    BEGIN
+		PRINT 'ErrorCode = '+str(@error)
+    END
+ELSE
+    BEGIN
+		SET @result = 'OK'
+    END
+SELECT  @result,  @error, @errorIndexes
+
+
+
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('133_ImportExcel_All_SP2',GETDATE(),(SELECT db_name()))
+
+
+GO

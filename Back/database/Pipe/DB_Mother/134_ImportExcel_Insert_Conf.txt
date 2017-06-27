@@ -1,0 +1,50 @@
+
+SET IDENTITY_INSERT [dbo].[File_Type] ON 
+
+GO
+INSERT [dbo].[File_Type] ([ID], [Name], [module_id]) VALUES (1, N'excel_protocol', 1)
+GO
+SET IDENTITY_INSERT [dbo].[File_Type] OFF
+GO
+SET IDENTITY_INSERT [dbo].[File_ProcessList] ON 
+
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (1, N'pr_ImportExcel_Check_ExistingStations', 1, N'sql_check_data', 50, 1, N'Vérification des stations existantes', N'Checking existing stations')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (3, N'pr_ImportExcel_CheckRequired_FieldWorker', 1, N'sql_check_column', 3, 1, N'Vérification des champs requis', N'Checking required fields')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (4, N'pr_ImportExcel_Check_FieldWorkerName', 1, N'sql_check_column', 4, 1, N'Vérification des noms de Fieldwoker', N'Checking fieldworker names')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (5, N'pr_ImportExcel_Check_ObjectPicker', 1, N'sql_check_column', 5, 1, N'Vérification des noms de sensor/site monitoré', N'Checking sensor/monitored site names')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (7, N'pr_ImportExcel_Check_Thesaurus', 1, N'sql_check_column', 7, 0, N'Vérification des valeurs thésaurales', N'Checking thesaural values')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (8, N'pr_ImportExcel_CheckRequired_Field', 1, N'sql_check_column', 8, 1, N'Vérification des champs requis', N'Checking required fields')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (9, N'pr_ImportExcel_Check_Select', 1, N'sql_check_column', 9, 1, N'Vérification de l''existence des valeurs dans la liste de valeur', N'Checking existing value from value list')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (10, N'pr_ImportExcel_Check_Boolean', 1, N'sql_check_column', 10, 1, N'Vérification des valeurs booléenne', N'Checking boolean values')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (11, N'pr_ImportExcel_Check_Numeric', 1, N'sql_check_column', 11, 1, N'Vérification des valeurs numériques', N'Checkong numeric values')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (13, N'pr_ImportExcel_Update_ObjectPicker', 1, N'sql_update_column', 100, 1, N'Mise à jour des noms de sensor/site monitoré', N'Updating sensor/monitored site names')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (20, N'pr_ImportExcel_Update_FieldWorkerName', 1, N'sql_update_column', 102, 1, N'Mise à jour des noms de Fieldwoker', N'Updating fieldworker names')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (21, N'pr_ImportExcel_Update_Select', 1, N'sql_update_column', 103, 1, N'Mise à jour des valeurs depuis la liste de valeurs', N'Updating existing value from value list')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (22, N'pr_ImportExcel_Update_ThesaurusVal', 1, N'sql_update_column', 104, 1, N'Mise à jour des valeurs thésaurales', N'Updating thesaural values')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (29, N'pr_ImportExcel_InsertStations', 1, N'sql_insert', 200, 1, N'Insertions des données des stations', N'Inserting station datas')
+GO
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (30, N'pr_ImportExcel_InsertObservations', 1, N'sql_insert', 201, 1, N'Insertion des données des protocoles', N'Inserting protocol datas')
+GO
+SET IDENTITY_INSERT [dbo].[File_ProcessList] OFF
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('134_ImportExcel_Insert_Conf',GETDATE(),(SELECT db_name()))
+
+
+GO
