@@ -1,4 +1,4 @@
-
+﻿
 SET IDENTITY_INSERT [dbo].[File_Type] ON 
 
 GO
@@ -11,7 +11,7 @@ SET IDENTITY_INSERT [dbo].[File_ProcessList] ON
 GO
 INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (1, N'pr_ImportExcel_Check_ExistingStations', 1, N'sql_check_data', 50, 1, N'Vérification des stations existantes', N'Checking existing stations')
 GO
-INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (3, N'pr_ImportExcel_CheckRequired_FieldWorker', 1, N'sql_check_column', 3, 1, N'Vérification des champs requis', N'Checking required fields')
+INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (3, N'pr_ImportExcel_CheckRequired_FieldWorker', 1, N'sql_check_column', 3, 1, N'Vérification du nombre de Fieldworker requis', N'Checking required Fieldworker number')
 GO
 INSERT [dbo].[File_ProcessList] ([ID], [Name], [FK_File_Type], [ProcessType], [ExecutionOrder], [Blocking], [DescriptionFr], [DescriptionEn]) VALUES (4, N'pr_ImportExcel_Check_FieldWorkerName', 1, N'sql_check_column', 4, 1, N'Vérification des noms de Fieldwoker', N'Checking fieldworker names')
 GO

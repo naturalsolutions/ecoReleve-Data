@@ -7,9 +7,10 @@ define([
   'ns_form/NSFormsModuleGit',
   'sweetAlert',
   'models/excelForm',
+  'ns_grid/grid.view',
   'i18n'
 
-], function($, _, Backbone, Marionette, config, NsForm, Swal,ExcelForm) {
+], function($, _, Backbone, Marionette, config, NsForm, Swal,ExcelForm, GridView) {
 
   'use strict';
 
@@ -22,8 +23,12 @@ define([
 
     ui: {
       'form': '#form',
-      'gridWsMsg': '#js-wsmsg',
       'progressBar': '.progress'
+    },
+
+    regions: {
+      'gridWsMsg': '#js-wsmsg-grid',
+      'gridProcess':'#js-wsmsg-process'
     },
 
     events: {
@@ -38,7 +43,6 @@ define([
     },
 
     onShow: function() {
-      this.displayProcess();
       this.displayForm();
     },
 
@@ -113,11 +117,13 @@ define([
             return xhr;
           },
           success: function(msg){
-            _this.startWebSocket(msg);
+            _this.file_id = msg;
+            _this.fetchProcess();
           },
           error: function(jqXHR, textStatus, errorThrown){
             var options = {
               title: 'Something wrong append',
+              text: jqXHR.responseText,
             };
             window.swal(options, 'error', false);
           }
@@ -126,15 +132,34 @@ define([
       }
     },
 
-    displayProcess: function(){
+    updateGrid: function(grid, data){
+      // var data = {process: 'pr_Check_Boolean', msg: 'OK'};
+
+      var rowList = grid.gridOptions.api.getModel().rowsToDisplay;
+      var rowNode = rowList[0];
+      rowNode = rowList.filter(function(row){
+        if (row.data.id == data.process){
+          return row;
+        }
+      })[0];
+      var message;
+      if(data.msg =='OK'){
+        message = 'OK'
+      } else {
+        message = data.errorIndexes
+      }
+      rowNode.setDataValue(data.column, message);
+
+    },
+
+    fetchProcess : function(){
       var _this = this;
-      $.ajax({
+       $.ajax({
         url: config.coreUrl + 'file_import/processList?fileType=excel_protocol',
         type: 'GET',
         success: function(msg){
-          _this.nbProcess = msg.length;
-          _this.updateProgressBar('js_statusProcess',0,_this.nbProcess)
-          _this.initiateGridImport(msg);
+          _this.process = msg;
+          _this.fetchColumns();
         },
         error: function(jqXHR, textStatus, errorThrown){
           var options = {
@@ -144,120 +169,133 @@ define([
         }
         });
     },
-    notPresent: function(tab , elem) {
-      for( var i = 0 ; i < tab.length ; i++) {
-        if(tab[i] === elem){
-          return false;
-        }
-      }
-      return true;
 
-    },
-
-    initiateGridImport: function(data) {
+    fetchColumns: function(){
       var _this = this;
-      var uniqProcressArray = [];
-      for( var i=0; i < data.length ; i++ ) {
-        if( this.notPresent(uniqProcressArray, data[i].name ) ) {
-          this.nbLines +=1;
-          uniqProcressArray.push(data[i].name);
-
-        var divContent = document.createElement('div');
-        var divRow = document.createElement('div');
-        var divProcess = document.createElement('div');
-        var divMsg = document.createElement('div');
-        var divError = document.createElement('div');
-        var divErrorIndexes = document.createElement('div');
-        var btnDetails = document.createElement('a');
-        var divRowDetails = document.createElement('div');
-
-        if( this.nbLines % 2 ) {
-          divRow.className = 'row content even';
+       $.ajax({
+        url: config.coreUrl + 'file_import/'+_this.file_id+'/columns',
+        type: 'GET',
+        success: function(msg){
+          _this.displayGrid(msg);
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+          var options = {
+            title: 'Something wrong append',
+          };
+          window.swal(options, 'error', false);
         }
-        else {
-          divRow.className = 'row content odd';
-        }
-        divContent.className = 'row';
-        divContent.id = 'js-'+this.nbLines+'-'+data[i].name;
-        divProcess.className = 'col-md-7 content_import_process';
-        divMsg.className = 'col-md-3 content_import_status';
-        divError.className = 'col-md-3 content_import_error hide';
-        divErrorIndexes.className = 'col-md-2 content_import_details';
-        divRowDetails.className = 'row col-md-12 detailsContent collapse';
-        divRowDetails.id = 'importLg'+data[i].name;
-
-        divProcess.textContent = data[i].name ;
-        divMsg.textContent  = "Unstarted" ;
-        divError.textContent = "-" ;
-        //divErrorIndexes.textContent = "-" ;
-        divRowDetails.textContent = "-";
-        btnDetails.textContent = "-";
-
-        divContent.appendChild(divRow);
-        divContent.appendChild(divRowDetails);
-        divRow.appendChild(divProcess);
-        divRow.appendChild(divMsg);
-        divRow.appendChild(divError);
-        divRow.appendChild(divErrorIndexes);
-
-        //divRow.appendChild(divRowDetails);
-
-        _this.ui.gridWsMsg.append(divContent);
-        }
-      }
-
-
-
+        });
     },
 
-    updateRow : function(idRow,data) {
-      var elemRootRow = this.ui.gridWsMsg.find('[id$='+idRow+'][class=row]');
-      var elemProcess = elemRootRow[0].querySelector('.content_import_process');
-      var elemMsg = elemRootRow[0].querySelector('.content_import_status');
-      var elemError = elemRootRow[0].querySelector('.content_import_error');
-      var elemErrorIndexes = elemRootRow[0].querySelector('.content_import_details');
-      var elemRowDetails = elemRootRow[0].querySelector('.detailsContent');
-      var arrayIntToOrder = [];
+    displayProcess: function(){
+      var divContent = document.createElement('div');
+      divContent.className = 'row excel-process';
 
-      switch(data.msg.toLowerCase()) {
-        case 'ok' : {
-          var elemIcon = document.createElement('i');
-          elemIcon.className = "reneco reneco-checked";
-          elemMsg.textContent = data.msg;//+'<i class=" reneco reneco-entrykey "></i>';
-          elemMsg.appendChild(elemIcon);
-          break;
-        }
-        case 'error': {
-          var elemIcon = document.createElement('i');
-          elemIcon.className = "reneco reneco-close";
-          elemMsg.textContent = data.msg;//+'<i class=" reneco reneco-entrykey "></i>';
-          elemMsg.appendChild(elemIcon);
-          break;
-        }
-        default : {
-          elemMsg.textContent = data.msg;
-          break;
+      var divProcess = document.createElement('div');
+      var divMsg = document.createElement('div');
+      var divError = document.createElement('div');
+      
+      divProcess.className = 'col-md-7 content_import_process';
+      divMsg.className = 'col-md-3 content_import_status';
+      divError.className = 'col-md-3 content_import_error hide';
+      divMsg.textContent = "Unstarted" ;
+
+
+      // divContent.appendChild(divRow);
+      // divContent.appendChild(divRowDetails);
+      divContent.appendChild(divProcess);
+      divContent.appendChild(divMsg);
+      divContent.appendChild(divError);
+
+       for (var j=0; j < this.process.length ; j++ ){
+         var currentProcess = this.process[j]
+         if(currentProcess.type.indexOf('column') === -1){
+            divContent.id = 'js-process-'+currentProcess.name;
+            divProcess.textContent = currentProcess.name ;
+            $('#js-wsmsg-grid').append(divContent);
+
+         }
+       }
+    },
+
+    displayGrid: function(columns){
+      var _this =this;
+
+      var classRules =  {
+          // rule shouldn't apply to header or footer, so ignore when node.group = true
+          'import-error': '!node.group && x!="OK" && x!="Unstarted"',
+          'import-ok': '!node.group && x=="OK"',
+          'import-notexec': '!node.group && x=="not executed"',
+      };
+      this.columns = [];
+      this.data = [];
+      var colDefProcess = [{field:'process_name',
+                          headerName: 'runing process',
+                          pinned: 'left',
+                          maxWidth: 400
+                          },{field:'status',
+                            headerName: 'status',
+                            maxWidth: 400,
+                            cellClassRules: classRules
+                          }];
+      var dataProcess= [];
+
+      for( var i=0; i < columns.length ; i++ ) {
+        this.columns.push({
+          field: columns[i],
+          headerName: columns[i],
+          maxWidth: 500,
+          cellClassRules: classRules
+        });
+      }
+
+      this.columns.unshift({field:'process_name',
+                            headerName: 'runing process',
+                            pinned: 'left',
+                            maxWidth: 400
+                          });
+      for (var j=0; j < this.process.length ; j++ ){
+        if(this.process[j].type.indexOf('column') !== -1){
+
+          this.data.push({
+              process_name: this.process[j].descriptionFr,
+              id: this.process[j].name
+            });
+        } else {
+          dataProcess.push({
+            process_name: this.process[j].descriptionFr,
+            id: this.process[j].name,
+            status: 'Unstarted'
+          });
         }
       }
-      elemError.textContent = data.error;
-      arrayIntToOrder = data.errorIndexes.split(",");
-      arrayIntToOrder.sort( function(a,b){
-        return a-b;
-      })
-      elemRowDetails.innerHTML = arrayIntToOrder.join("<br />");
-      if( data.error.toLowerCase() !== 'none') {
-        var btnDetails = document.createElement('a');
-        btnDetails.textContent = "Details";
-        btnDetails.setAttribute('data-toggle','collapse');
-        btnDetails.setAttribute('href','#importLg'+idRow);
 
-        elemRootRow[0].querySelector('.row.content').className += ' errorImport';//addClass('errorImport');
-        elemErrorIndexes.append(btnDetails);
-      }
-      else {
-        elemErrorIndexes.textContent = '-';
-      }
+      this.data = this.data.map(function(x){
+        for( var i=0; i < columns.length ; i++ ) {
+          x[columns[i]] = 'Unstarted';
+        }
+        return x
+      });
 
+      this.gridProcess.show(this.importGridProcess = new GridView({
+        columns: colDefProcess,
+        clientSide: true,
+        enableFilter: true,
+        gridOptions: {
+          rowData: dataProcess
+        }
+      }));
+      this.gridWsMsg.show(this.importGrid = new GridView({
+        columns: this.columns,
+        clientSide: true,
+        enableFilter: true,
+        gridOptions: {
+          rowData: this.data,
+          onGridReady: function(){
+            _this.startWebSocket();
+          }
+        }
+      }));
     },
 
     updateProgressBar: function(idBar,valueCur,valueMax) {
@@ -269,21 +307,22 @@ define([
 
     },
 
-    startWebSocket: function(guid){
+    startWebSocket: function(){
       var _this = this;
       var nbLines = 0;
       var uniqProcressArray = [];
       // domain name should be in config
-      var ws = new WebSocket('ws://127.0.0.1:6545/ecoReleve-Websockets/fileImport/' + guid);
+      var ws = new WebSocket('ws://127.0.0.1:6545/ecoReleve-Websockets/fileImport/' + _this.file_id);
       ws.onmessage = function(msg) {
 
         var jsonMsg = JSON.parse(msg.data);
-        
-        if(jsonMsg.error == "1"){
-            console.log(jsonMsg);
+        if (jsonMsg.column == 'status') {
+          _this.updateGrid(_this.importGridProcess, jsonMsg);
+        } else {
+
+          _this.updateGrid(_this.importGrid, jsonMsg);
         }
 
-        _this.updateRow(jsonMsg.process,jsonMsg);
         for( var i = 0 ; i < uniqProcressArray.length ; i++) {
           if( uniqProcressArray[i] === jsonMsg.process ) {
             break;
