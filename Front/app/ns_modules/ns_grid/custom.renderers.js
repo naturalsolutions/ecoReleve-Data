@@ -294,22 +294,57 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     CheckboxRenderer.prototype = new CustomRenderer();
     CheckboxRenderer.prototype.formatValueToDisplay = function (value) {
       var _this = this;
-      var checked = ''; 
-      if(value == 1)
-        checked = 'checked';
-      if(this.params.colDef.editable){
-        var chk = '<input class="form-control" type="checkbox" '+ checked +' />';
-      } else {
-        var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
+      if(typeof(value) === 'undefined') { //hack for getRowDataAndErrors , stopediting call format with value undefined
+        value = null;
       }
-      $(this.eGui).html(chk);
-      $(this.eGui).find('input').on('click', function(e){
-        if($(this).attr('checked')){
-          _this.params.data[_this.params.colDef.field] = 0;
-        } else {
-          _this.params.data[_this.params.colDef.field] = 1;
+      this.value = value;
+
+      var input = document.createElement('input');
+      input.className ='form-control';
+      input.type = 'checkbox'
+      input.readonly = true;
+
+      switch(value) {
+        case 1 : {
+          input.checked = true;
+          break;
         }
-      });
+        case 0 : {
+          input.checked = false;
+          break;
+        }
+        default : {
+          input.indeterminate = true;
+          break;
+        }
+      }
+
+      input.onclick = function(e) {
+         // ... => false => indeterminate => true => ...
+        switch(_this.value) {
+          case 1 : { //de true on passe a false
+            _this.value = 0;
+            _this.params.data[_this.params.colDef.field] = 0;
+            break;
+          }
+          case 0 : {//de false on passe a indeterminate
+            _this.value = null
+            _this.params.data[_this.params.colDef.field] = null
+            break;
+          }
+          default : {// de indeterminate on passe a true
+            _this.value = 1;
+            _this.params.data[_this.params.colDef.field] = 1;
+            break;
+          }
+        }
+      }
+
+      if(!this.params.colDef.editable){
+        input.disabled = true;
+      }
+
+     $(this.eGui).html(input)
     };
 
 
