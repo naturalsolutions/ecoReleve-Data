@@ -1461,6 +1461,7 @@ Form.editors.Checkbox = Form.editors.Base.extend({
 
   events: {
     'click':  function(event) {
+      this.change(event);
       this.trigger('change', this);
     },
     'focus':  function(event) {
@@ -1475,6 +1476,17 @@ Form.editors.Checkbox = Form.editors.Base.extend({
     Form.editors.Base.prototype.initialize.call(this, options);
 
     this.$el.attr('type', 'checkbox');
+    if ( options.schema.defaultValue ) {
+      this.value = parseInt(options.schema.defaultValue);
+    }
+    else {
+       this.value = null;
+    }
+
+    if ( typeof(this.model.get(this.key)) != 'undefined'  ) {
+      this.value = this.model.get(this.key);
+    }
+//    this.oldValue = null;
   },
 
   /**
@@ -1487,15 +1499,55 @@ Form.editors.Checkbox = Form.editors.Base.extend({
   },
 
   getValue: function() {
-    return this.$el.prop('checked');
+
+    return this.value;
+    //return this.$el.prop('checked');
   },
 
   setValue: function(value) {
-    if (value) {
-      this.$el.prop('checked', true);
-    }else{
-      this.$el.prop('checked', false);
+    switch(value) {
+      case 1 : {
+        this.$el.prop('checked', true);
+        break;
+      }
+      case 0 : {
+        this.$el.prop('checked', false);
+        break;
+      }
+      default : {
+        this.$el.prop('indeterminate', true);
+        break;
+      }
+
     }
+  },
+
+  change: function(e) {
+    // ... => false => indeterminate => true => ...
+
+    switch(this.value) {
+      case 1 : { //de true on passe a false
+       
+        this.$el.prop('indeterminate', false);
+        this.$el.prop('checked', false);
+        this.value = 0;
+        break;
+      }
+      case 0 : {//de false on passe a indeterminate
+        this.$el.prop('checked', false);
+        this.$el.prop('indeterminate', true);
+        this.value = null
+        break;
+      }
+      default : {// de indeterminate on passe a true
+        this.$el.prop('checked', true); 
+        this.$el.prop('indeterminate', false);
+        this.value = 1;
+        break;
+      }
+    }
+    
+
   },
 
   focus: function() {
