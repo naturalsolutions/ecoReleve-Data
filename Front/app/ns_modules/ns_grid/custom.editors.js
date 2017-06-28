@@ -90,6 +90,9 @@ define([
 		};
 
 		CustomEditor.prototype.getValue = function(){
+			if (this.element.schema.type ==='Checkbox') { //hack
+				return this.element.getValue();
+			}
 			if(this.element.getValue() === "" || this.element.getValue() === null){
 				return;
 			}
