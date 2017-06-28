@@ -27,8 +27,9 @@ define([
     },
 
     regions: {
-      'gridWsMsg': '#js-wsmsg-grid',
-      'gridProcess':'#js-wsmsg-process'
+      'checkGrid': '#checkGrid',
+      'updateGrid':'#updateGrid',
+      'insertGrid': '#insertGrid'
     },
 
     events: {
@@ -43,7 +44,9 @@ define([
     },
 
     onShow: function() {
+      this.fetchProcess();
       this.displayForm();
+      this.displayGrids();
     },
 
     onDestroy: function() {
@@ -118,7 +121,7 @@ define([
           },
           success: function(msg){
             _this.file_id = msg;
-            _this.fetchProcess();
+            _this.startWebSocket();
           },
           error: function(jqXHR, textStatus, errorThrown){
             var options = {
@@ -132,26 +135,6 @@ define([
       }
     },
 
-    updateGrid: function(grid, data){
-      // var data = {process: 'pr_Check_Boolean', msg: 'OK'};
-
-      var rowList = grid.gridOptions.api.getModel().rowsToDisplay;
-      var rowNode = rowList[0];
-      rowNode = rowList.filter(function(row){
-        if (row.data.id == data.process){
-          return row;
-        }
-      })[0];
-      var message;
-      if(data.msg =='OK'){
-        message = 'OK'
-      } else {
-        message = data.errorIndexes
-      }
-      rowNode.setDataValue(data.column, message);
-
-    },
-
     fetchProcess : function(){
       var _this = this;
        $.ajax({
@@ -159,7 +142,6 @@ define([
         type: 'GET',
         success: function(msg){
           _this.process = msg;
-          _this.fetchColumns();
         },
         error: function(jqXHR, textStatus, errorThrown){
           var options = {
@@ -187,38 +169,38 @@ define([
         });
     },
 
-    displayProcess: function(){
-      var divContent = document.createElement('div');
-      divContent.className = 'row excel-process';
-
-      var divProcess = document.createElement('div');
-      var divMsg = document.createElement('div');
-      var divError = document.createElement('div');
-      
-      divProcess.className = 'col-md-7 content_import_process';
-      divMsg.className = 'col-md-3 content_import_status';
-      divError.className = 'col-md-3 content_import_error hide';
-      divMsg.textContent = "Unstarted" ;
-
-
-      // divContent.appendChild(divRow);
-      // divContent.appendChild(divRowDetails);
-      divContent.appendChild(divProcess);
-      divContent.appendChild(divMsg);
-      divContent.appendChild(divError);
-
-       for (var j=0; j < this.process.length ; j++ ){
-         var currentProcess = this.process[j]
-         if(currentProcess.type.indexOf('column') === -1){
-            divContent.id = 'js-process-'+currentProcess.name;
-            divProcess.textContent = currentProcess.name ;
-            $('#js-wsmsg-grid').append(divContent);
-
-         }
-       }
+    getTargetGrid: function(processType){
+      var targetGrid;
+      switch (processType){
+        case 'sql_check_column': case 'sql_check_data':
+          targetGrid = this.gridProcessCheck;
+          break;
+        case 'sql_insert':
+          targetGrid = this.gridProcessInsert;
+          break;
+       case 'sql_update_column':
+          targetGrid = this.gridProcessCheck;
+          break;
+      }
+      return targetGrid;
     },
 
-    displayGrid: function(columns){
+    updateGrids: function(grid, data){
+      var targetGrid = this.getTargetGrid(data.processType);
+      var errorIndexes = data.errorIndexes.split(',');
+      var foundProcess = this.process.filter(function(process){
+          if(process.name === data.process){
+            return process;
+          }
+        })[0];
+      if (foundProcess.type.indexOf('check')!==1 && parseInt(errorIndexes[0])){
+        errorIndexes.forEach(function(index) {
+          targetGrid.gridOptions.api.addItems([{id:index, column:data.column, process:foundProcess.descriptionFr}]);
+        }, this);
+      }
+    },
+
+    displayGrids: function(){
       var _this =this;
 
       var classRules =  {
@@ -227,73 +209,80 @@ define([
           'import-ok': '!node.group && x=="OK"',
           'import-notexec': '!node.group && x=="not executed"',
       };
-      this.columns = [];
-      this.data = [];
-      var colDefProcess = [{field:'process_name',
-                          headerName: 'runing process',
-                          pinned: 'left',
-                          maxWidth: 400
-                          },{field:'status',
-                            headerName: 'status',
-                            maxWidth: 400,
-                            cellClassRules: classRules
-                          }];
-      var dataProcess= [];
-
-      for( var i=0; i < columns.length ; i++ ) {
-        this.columns.push({
-          field: columns[i],
-          headerName: columns[i],
-          maxWidth: 500,
-          cellClassRules: classRules
-        });
-      }
-
-      this.columns.unshift({field:'process_name',
-                            headerName: 'runing process',
-                            pinned: 'left',
+      var colDefCheck = [{ field:'id',
+                           filter:'number',
+                           headerName: 'row number',
+                           pinned: 'left',
+                           width:80,
+                           minWidth:50,
+                           maxWidth: 120
+                        },
+                        { field:'column',
+                          headerName: 'column name',
+                          width:150,
+                          maxWidth: 400,
+                          //cellClassRules: classRules
+                          },
+                          {
+                            field:'process',
+                            headerName: 'process error',
                             maxWidth: 400
-                          });
-      for (var j=0; j < this.process.length ; j++ ){
-        if(this.process[j].type.indexOf('column') !== -1){
+                          }];
 
-          this.data.push({
-              process_name: this.process[j].descriptionFr,
-              id: this.process[j].name
-            });
-        } else {
-          dataProcess.push({
-            process_name: this.process[j].descriptionFr,
-            id: this.process[j].name,
-            status: 'Unstarted'
-          });
-        }
-      }
+      var colDefInsert = [{ field:'process',
+                            headerName: 'process error',
+                            maxWidth: 400
+                          },
+                          { field:'msg',
+                            headerName: 'error message',
+                            width:150,
+                            maxWidth: 400
+                          }];
+      
+      var colDefUpdate = [{ field:'process',
+                      headerName: 'process error',
+                      maxWidth: 400,
+                          width:150,
+                      
+                    },
+                    { field:'column',
+                          headerName: 'column name',
+                          maxWidth: 400,
+                          width:150,
+                          
+                          //cellClassRules: classRules
+                    },
+                    { field:'msg',
+                      headerName: 'error message',
+                      maxWidth: 400
+                    }];
 
-      this.data = this.data.map(function(x){
-        for( var i=0; i < columns.length ; i++ ) {
-          x[columns[i]] = 'Unstarted';
-        }
-        return x
-      });
-
-      this.gridProcess.show(this.importGridProcess = new GridView({
-        columns: colDefProcess,
+      this.insertGrid.show(this.gridProcessInsert = new GridView({
+        columns: colDefInsert,
         clientSide: true,
-        enableFilter: true,
         gridOptions: {
-          rowData: dataProcess
+          enableFilter: true,
+          rowData: [],
         }
       }));
-      this.gridWsMsg.show(this.importGrid = new GridView({
-        columns: this.columns,
+
+      this.updateGrid.show(this.gridProcessUpdate = new GridView({
+        columns: colDefUpdate,
         clientSide: true,
-        enableFilter: true,
         gridOptions: {
-          rowData: this.data,
-          onGridReady: function(){
-            _this.startWebSocket();
-          }
+          enableFilter: true,
+          rowData: [],
+        }
+      }));
+      this.checkGrid.show(this.gridProcessCheck = new GridView({
+        columns: colDefCheck,
+        clientSide: true,
+        gridOptions: {
+          enableFilter: true,
+          rowData: [],
+          paginationPageSize: 100,
+          rowModelType :'pagination',
+          pagination: true
         }
       }));
     },
@@ -314,25 +303,18 @@ define([
       // domain name should be in config
       var ws = new WebSocket('ws://127.0.0.1:6545/ecoReleve-Websockets/fileImport/' + _this.file_id);
       ws.onmessage = function(msg) {
-
         var jsonMsg = JSON.parse(msg.data);
-        if (jsonMsg.column == 'status') {
-          _this.updateGrid(_this.importGridProcess, jsonMsg);
-        } else {
-
-          _this.updateGrid(_this.importGrid, jsonMsg);
-        }
-
-        for( var i = 0 ; i < uniqProcressArray.length ; i++) {
-          if( uniqProcressArray[i] === jsonMsg.process ) {
-            break;
-          }
-        }
-        if( i === uniqProcressArray.length ) {
-          uniqProcressArray.push(jsonMsg.process)
-          nbLines+=1;
-          _this.updateProgressBar('js_statusProcess',nbLines,_this.nbProcess)
-        }
+        _this.updateGrids(_this.importGridProcess, jsonMsg);
+        // for( var i = 0 ; i < uniqProcressArray.length ; i++) {
+        //   if( uniqProcressArray[i] === jsonMsg.process ) {
+        //     break;
+        //   }
+        // }
+        // if( i === uniqProcressArray.length ) {
+        //   uniqProcressArray.push(jsonMsg.process)
+        //   nbLines+=1;
+        //   _this.updateProgressBar('js_statusProcess',nbLines,_this.nbProcess)
+        // }
       };
       ws.onclose = function(msg){
       };
