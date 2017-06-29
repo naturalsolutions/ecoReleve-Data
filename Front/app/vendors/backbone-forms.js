@@ -1457,24 +1457,53 @@ Form.editors.Checkbox = Form.editors.Base.extend({
 
   defaultValue: false,
 
-  tagName: 'input',
+  //tagName: 'div',
+  template: '<span data-editor>\
+            <input id="<%=id%>" name="<%=name%>" class="form-control" type="checkbox" />\
+            <label for="<%=id%>" ></label>\
+            <div data-error></div>\
+            <div></div>\
+        </span>',
 
   events: {
-    'click':  function(event) {
-      this.change(event);
-      this.trigger('change', this);
+    'click label':  function(e) {
+      if (this.schema.editable) {
+        this.change(e);
+      } else {
+        e.preventDefault();
+        e.stopPropagation();
+      } 
+     // this.trigger('change', this);
     },
-    'focus':  function(event) {
+    'keyup label' : function(e) {
+      if (this.schema.editable) {
+        this.keyup(e);
+      } else {
+        e.preventDefault();
+        e.stopPropagation();
+      } 
+    },
+    'focus label':  function(e) {
+    if (this.schema.editable) {
       this.trigger('focus', this);
+       } else {
+        e.preventDefault();
+        e.stopPropagation();
+      } 
     },
-    'blur':   function(event) {
+    'blur label':   function(e) {
+      if (this.schema.editable) {
       this.trigger('blur', this);
+      } else {
+        e.preventDefault();
+        e.stopPropagation();
+      } 
     }
   },
 
   initialize: function(options) {
     Form.editors.Base.prototype.initialize.call(this, options);
-
+ 
     this.$el.attr('type', 'checkbox');
     if ( options.schema.defaultValue ) { // get defaulValue possible undefined,NULL,0,1
       this.value = parseInt(options.schema.defaultValue);
@@ -1482,11 +1511,9 @@ Form.editors.Checkbox = Form.editors.Base.extend({
     else {
        this.value = null;
     }
-
-    this.options = options.schema.options; 
-
+ 
     //  this.nullable = false;
-    //   this.nullable = true;
+    this.nullable = true;
 
 
     if ( typeof(this.model.get(this.key)) != 'undefined'  ) { // get old value 
@@ -1499,6 +1526,19 @@ Form.editors.Checkbox = Form.editors.Base.extend({
    * Adds the editor to the DOM
    */
   render: function() {
+    var $el = _.template( this.template, {
+            id: this.id || this.cid,
+            name : this.key
+    });
+    this.setElement($el);
+    this.$input =this.$el.find('input') 
+    this.$label = this.$el.find('label');
+    if( this.schema.editable) {
+      this.$label.prop('tabindex',"0");
+    }
+    else {
+       this.$label.addClass('disabled');
+    }
     this.setValue(this.value);
 
     return this;
@@ -1513,41 +1553,58 @@ Form.editors.Checkbox = Form.editors.Base.extend({
   setValue: function(value) {
     switch(value) {
       case 1 : {
-        this.$el.prop('checked', true);
+        this.$input.prop('checked', true);
+        this.$label.prop('title' , 'True')
         break;
       }
       case 0 : {
-        this.$el.prop('checked', false);
+        this.$input.prop('checked', false);
+        this.$label.prop('title' , 'False')
         break;
       }
       default : {
-        this.$el.prop('indeterminate', true);
+        this.$input.prop('indeterminate', true);
+        this.$label.prop('title' , 'Null')
         break;
       }
 
     }
   },
 
+  keyup : function (e) {
+       if(e.keyCode == 32){ //spacebar
+        this.change(e);
+    }
+  },
+
   change: function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!this.schema.editable) {
+      return;
+    }
     // ... => false => indeterminate => true => ...
     if( this.nullable ) {
         switch(this.value) {
           case 1 : { //de true on passe a false
           
-            this.$el.prop('indeterminate', false);
-            this.$el.prop('checked', false);
+            this.$input.prop('indeterminate', false);
+            this.$input.prop('checked', false);
+            this.$label.prop('title' , 'False')
             this.value = 0;
             break;
           }
           case 0 : {//de false on passe a indeterminate
-            this.$el.prop('checked', false);
-            this.$el.prop('indeterminate', true);
+            this.$input.prop('checked', false);
+            this.$input.prop('indeterminate', true);
+            this.$label.prop('title' , 'Null')
             this.value = null
             break;
           }
           default : {// de indeterminate on passe a true
-            this.$el.prop('checked', true); 
-            this.$el.prop('indeterminate', false);
+            this.$input.prop('checked', true); 
+            this.$input.prop('indeterminate', false);
+            this.$label.prop('title' , 'True')
             this.value = 1;
             break;
           }
@@ -1557,14 +1614,14 @@ Form.editors.Checkbox = Form.editors.Base.extend({
         switch(this.value) {
           case 1 : { //de true on passe a false
           
-            this.$el.prop('indeterminate', false);
-            this.$el.prop('checked', false);
+            this.$input.prop('indeterminate', false);
+            this.$input.prop('checked', false);
             this.value = 0;
             break;
           }
           default : {// de false on passe a true
-            this.$el.prop('indeterminate', false);
-            this.$el.prop('checked', true); 
+            this.$input.prop('indeterminate', false);
+            this.$input.prop('checked', true); 
             this.value = 1;
             break;
           }
@@ -1576,13 +1633,13 @@ Form.editors.Checkbox = Form.editors.Base.extend({
   focus: function() {
     if (this.hasFocus) return;
 
-    this.$el.focus();
+    this.$label.focus();
   },
 
   blur: function() {
     if (!this.hasFocus) return;
 
-    this.$el.blur();
+    this.$label.blur();
   }
 
 });
