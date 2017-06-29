@@ -1475,7 +1475,7 @@ Form.editors.Checkbox = Form.editors.Base.extend({
       } 
      // this.trigger('change', this);
     },
-    'keyup label' : function(e) {
+    'keydown label' : function(e) {
       if (this.schema.editable) {
         this.keyup(e);
       } else {
