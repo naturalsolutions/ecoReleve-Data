@@ -201,6 +201,7 @@ class MonitoredSite (Base, ObjectWithDynProp):
                 sameDatePosition[0].LON = DTOObject['LON']
                 sameDatePosition[0].ELE = DTOObject['ELE']
                 sameDatePosition[0].Precision = DTOObject['Precision']
+                sameDatePosition[0].Comments = DTOObject['Comments']
             else:
                 self.MonitoredSitePositions.append(self.newPosition)
 
