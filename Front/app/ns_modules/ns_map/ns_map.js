@@ -237,32 +237,64 @@ define([
         obj[ms] = geoJson.features[i];
       }
 
-      console.log(Object.keys(obj).length);
-
       this.p_indexedPositions = obj;
       
       this.p_relDuration = speed * this.p_realDuration;
 
-
-
-      console.warn(this.msToReadable(this.p_relDuration));
+      $('.js-time-total').html(this.msToReadable(this.p_relDuration));
     },
   
     msToReadable: function(ms){
       ms = Math.round(ms);
 
-      var seconds = Math.floor(ms / 1000) % 60;
+      var seconds = String(Math.floor(ms / 1000) % 60);
 
-      var minutes = Math.floor(ms / 1000 / 60) % 60;
+      if(seconds.length == 1){
+        seconds = '0' + seconds;
+      }
 
-      var hours   = Math.floor(ms / (1000 * 60 * 60)) % 24;
+      var minutes = String(Math.floor(ms / 1000 / 60) % 60);
+      if(minutes.length == 1){
+        minutes = '0' + minutes;
+      }
 
+      var hours   = String(Math.floor(ms / (1000 * 60 * 60)) % 24);
+      if(hours.length == 1){
+        hours = '0' + hours;
+      }
       return hours + ':' + minutes + ':' + seconds;
+    },
+
+    showPlayer: function(){
+      $('#map').css('height', '90%');
+      $('#map').parent().append('\
+      <div class="player">\
+      <div class="timeline col-xs-12">\
+        <div class="js-timeline-total timeline-total"></div>\
+        <div class="js-timeline-current timeline-current"></div>\
+      </div>\
+      <div class="col-xs-12">\
+        <span class="js-time-current"></span>\
+        <span class="pull-right">Total duration: <span class="js-time-total"></span></span>\
+      </div>\
+      <div class="col-xs-6">\
+        <button class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
+        <button class="js-player-play btn"><i class="reneco reneco-play"></i></button>\
+        <button class="js-player-pause btn"><i class="reneco reneco-pause"></i></button>\
+        <button class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
+      </div>\
+      <div class="col-xs-3 pull-right">\
+        <input id="speed" min=1000 max=24000 value=1000 step=1000 width="100" type="range">\
+      </div>\
+      </div>\
+      ');
     },
 
     difference: function(geoJson){
       var _this = this;
-      var speed = 1000;
+      var speed = 10000;
+
+      this.showPlayer();
 
       var firstDate = geoJson.features[0].properties.Date;
 
@@ -278,24 +310,26 @@ define([
 
       var offset = 10;
 
-      var timer = setInterval(frame, offset);
+      this.timer = setInterval(frame, offset);
 
       function frame() {
         if(_this.time % 1000 === 0){
-          console.warn(_this.msToReadable(_this.time));
+          $('.js-time-current').html(_this.msToReadable(_this.time));
         }
 
         if(_this.time >= _this.p_relDuration) {
-          clearInterval(timer);
+          clearInterval(_this.timer);
         } else {
 
           if(_this.p_indexedPositions[_this.time]){
 
             var coords = _this.p_indexedPositions[_this.time].geometry.coordinates;
-            var icon = new L.DivIcon({className: 'marker custom-marker'});
+            var icon = new L.DivIcon({className: 'marker custom-marker focus'});
             var m = new L.marker(coords, {icon: icon});
 
             _this.p_markers.push(m);
+
+            _this.interaction('focus', _this.p_indexedPositions[_this.time].properties.ID);
 
             if(_this.p_markers.length > 10){
               _this.map.removeLayer(_this.p_markers.shift());
@@ -303,7 +337,7 @@ define([
 
             for (var i = _this.p_markers.length - 1; i > 0; i--) {
               if(i !== 0){
-                $(_this.p_markers[i]._icon).css('opacity', i/10);
+                $(_this.p_markers[i]._icon).css('opacity', i/10).removeClass('focus');
               }
             }
 
@@ -313,42 +347,84 @@ define([
           }
 
           var width = (_this.time /_this.p_relDuration * 100);
-          $('.bar').css('width', width + '%');
+          $('.js-timeline-current').css('width', width + '%');
           _this.time += offset;
 
         }
       }
 
-      var bloum = function(e){
-        var rapport =  e.offsetX / e.target.clientWidth;
-        _this.time = Math.floor((_this.p_relDuration * rapport) / 10) * 10;
-
+      var clearMarkers = function(){
         for (var i = 0; i < _this.p_markers.length; i++) {
           _this.map.removeLayer(_this.p_markers[i])
         }
       };
 
+      var travel = function(e){
+        var rapport =  e.offsetX / e.target.clientWidth;
+        _this.time = Math.floor((_this.p_relDuration * rapport) / 10) * 10;
+        clearMarkers();
+        $('.js-time-current').html(_this.msToReadable(_this.time));
+        frame();
+      };
+
+      var play = function(e){
+        clearInterval(_this.timer);
+        _this.timer = setInterval(frame, offset);
+      };
+
+      var pause = function(){
+        clearInterval(_this.timer);
+      };
+
       var handleSpeed = function(e){
         var value = $(e.currentTarget).val();
-        
         _this.setValuesFromSpeed(geoJson, value);
       };
 
+      var prev = function(){
+        pause();
+        clearMarkers();
 
-      $('#map').css('height', '80%');
-      $('#map').parent().append('<div height="20%" style="padding: 20px;" class="timeline">\
-        <div style="height: 10px; background: grey; width: 100%"  class="total"></div>\
-        <div style="height: 5px; background: red; width: 0%"  class="bar"></div>\
-      </div>\
-      <div class="col-xs-6">\
-      <input class="col-xs-6" id="speed" min=1000 max=24000 defaultValue=1000 step=1000 width="100" type="range">\
-      </div>\
-      <span class="js-cursor"></span>\
-      <span class="js-infos"></span>\
-      ');
+        var arr = [];
+
+        for (var key in _this.p_indexedPositions) {
+          
+          arr.push(key);
+        }
+
+        for (var i=arr.length-1; i>=0; i--) {
+          var key = arr[i];
+          if(parseInt(key) < parseInt(_this.time)){
+            _this.time = parseInt(key);
+            break;
+          }
+        }
+        
+        frame();
+        _this.time -= 2*offset;
+      };
+
+      var next = function(){
+        pause();
+        clearMarkers();
+
+        for (var key in _this.p_indexedPositions) {
+          // console.log(key);
+          if(parseInt(key) > parseInt(_this.time)){
+            _this.time = parseInt(key);
+            break;
+          }
+        }
+        
+        frame();
+      };
 
       $('#speed').on('change', handleSpeed);
-      $('.total').on('click', bloum);
+      $('.js-timeline-total').on('click', travel);
+      $('.js-player-play').on('click', play);
+      $('.js-player-pause').on('click', pause);
+      $('.js-player-prev').on('click', prev);
+      $('.js-player-next').on('click', next);
     },
   
     initClusters: function(geoJson){
