@@ -323,7 +323,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           break;
         }
       }
-
+      //TODO if !editable cancel listener
       label.onclick = function(e) {
          // ... => false => indeterminate => true => ...
         switch(_this.value) {
