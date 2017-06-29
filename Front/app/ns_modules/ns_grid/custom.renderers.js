@@ -303,6 +303,11 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       input.className ='form-control';
       input.type = 'checkbox'
       input.readonly = true;
+      input.id= this.params.colDef.field+'_'+this.params.rowIndex
+
+      var label = document.createElement('label');
+      label.setAttribute('for', input.id);
+
 
       switch(value) {
         case 1 : {
@@ -319,22 +324,25 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         }
       }
 
-      input.onclick = function(e) {
+      label.onclick = function(e) {
          // ... => false => indeterminate => true => ...
         switch(_this.value) {
           case 1 : { //de true on passe a false
             _this.value = 0;
             _this.params.data[_this.params.colDef.field] = 0;
+            label.removeAttribute("onclick");
             break;
           }
           case 0 : {//de false on passe a indeterminate
             _this.value = null
             _this.params.data[_this.params.colDef.field] = null
+             label.removeAttribute("onclick");
             break;
           }
           default : {// de indeterminate on passe a true
             _this.value = 1;
             _this.params.data[_this.params.colDef.field] = 1;
+             label.removeAttribute("onclick");
             break;
           }
         }
@@ -345,6 +353,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       }
 
      $(this.eGui).html(input)
+     $(this.eGui).append(label)
     };
 
 

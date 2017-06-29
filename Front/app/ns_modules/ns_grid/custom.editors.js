@@ -195,12 +195,13 @@ define([
 		CheckboxEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new Form.editors.Checkbox(options);
 		  this.element = this.bbfe.render();
+			this.element.$el.find('label').css({'margin-left':'10px'})
 		};
 
 		CheckboxEditor.prototype.getGui = function(){
-			this.element.$el.css({
-				'margin': '5px 10px'
-			});
+			//  this.element.$el.css({
+			//  	'margin-left': '10px'
+			//  });
 		  return this.element.el;
 		};
 
