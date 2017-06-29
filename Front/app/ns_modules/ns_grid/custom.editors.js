@@ -198,6 +198,11 @@ define([
 			this.element.$el.find('label').css({'margin-left':'10px'})
 		};
 
+			CheckboxEditor.prototype.afterGuiAttached = function () {
+		  this.element.$el.focus();
+		  this.element.$el.find('label').focus();
+		};
+
 		CheckboxEditor.prototype.getGui = function(){
 			//  this.element.$el.css({
 			//  	'margin-left': '10px'
