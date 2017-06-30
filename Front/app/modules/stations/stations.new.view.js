@@ -219,6 +219,8 @@ define([
         _this.$el.find('input[name="LON"]').val(data['LON']).change();
         _this.$el.find('input[name="ELE"]').val(data['ELE']).change();
         _this.$el.find('input[name="precision"]').val(data['Precision']).change();
+        _this.$el.find('input[name="Place"]').val(data['Place']).change();
+        _this.$el.find('select[name="FK_Region"]').val(data['FK_Region']).change();
       }).fail(function() {
         console.error('an error occured');
       });
