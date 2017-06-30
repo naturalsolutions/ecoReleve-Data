@@ -215,10 +215,10 @@ define([
         context: this,
         url: url,
       }).done(function(data) {
-        var lat = data['LAT'];
-        var lon = data['LON'];
-        _this.$el.find('input[name="LAT"]').val(lat).change();
-        _this.$el.find('input[name="LON"]').val(lon).change();
+        _this.$el.find('input[name="LAT"]').val(data['LAT']).change();
+        _this.$el.find('input[name="LON"]').val(data['LON']).change();
+        _this.$el.find('input[name="ELE"]').val(data['ELE']).change();
+        _this.$el.find('input[name="precision"]').val(data['Precision']).change();
       }).fail(function() {
         console.error('an error occured');
       });
