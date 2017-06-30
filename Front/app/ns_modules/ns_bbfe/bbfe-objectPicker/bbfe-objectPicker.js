@@ -236,6 +236,8 @@ define([
           data['ELE'] = model.ELE;
           data['Precision'] = model.precision;
           data['StartDate'] = model.StationDate;
+          data['Place'] = model.Place
+          data['FK_Region'] = model.FK_Region
           break;
         case 'sensors':
           break;
