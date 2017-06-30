@@ -127,9 +127,13 @@ class Station(Base, ObjectWithDynProp):
         dateSta = datetime.strptime(DTOObject['StationDate'], '%d/%m/%Y %H:%M:%S')
         equipmentSiteExist = self.existingProtocolEquipmentSite()
         equipmentIndivExist = self.existingProtocolEquipmentIndiv()
-
+        print(self.LAT)
+        print(DTOObject['LAT'])
         if equipmentSiteExist and (
-            self.FK_MonitoredSite != site or self.StationDate != dateSta):
+            self.FK_MonitoredSite != site or
+            self.StationDate != dateSta or
+            self or str(self.LAT) != str(DTOObject['LAT']) or
+            str(self.LON) != str(DTOObject['LON'])):
             allow = False
         if equipmentIndivExist and (self.StationDate != dateSta):
             allow = False
