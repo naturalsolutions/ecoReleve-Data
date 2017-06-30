@@ -47,6 +47,8 @@ class MonitoredSite (Base, ObjectWithDynProp):
     Creator = Column(Integer, nullable=False)
     Active = Column(BIT, nullable=False, default=1)
     creationDate = Column(DateTime, nullable=False, default=func.now())
+    FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
+    Place = Column(String(250))
 
     FK_MonitoredSiteType = Column(Integer, ForeignKey('MonitoredSiteType.ID'))
 
