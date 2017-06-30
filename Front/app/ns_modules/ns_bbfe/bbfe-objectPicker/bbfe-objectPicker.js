@@ -379,14 +379,14 @@ define([
           break;
 
         case 'monitoredSites':
-          data = {};
+          data =  _this.loadData();
 
-          data['LAT'] = _this.form.model.get('LAT');
-          data['LON'] = _this.form.model.get('LON');
-          data['Name'] = _this.form.model.get('Name');
-          data['ELE'] = _this.form.model.get('ELE');
-          data['Precision'] = _this.form.model.get('precision');
-          data['StartDate'] = _this.form.model.get('StationDate');
+          // data['LAT'] = _this.form.model.get('LAT');
+          // data['LON'] = _this.form.model.get('LON');
+          // data['Name'] = _this.form.model.get('Name');
+          // data['ELE'] = _this.form.model.get('ELE');
+          // data['Precision'] = _this.form.model.get('precision');
+          // data['StartDate'] = _this.form.model.get('StationDate');
 
           _this.regionManager.get('modal').show(new _this.NewView({
             objectType: ctx.model.get('objectType'),
