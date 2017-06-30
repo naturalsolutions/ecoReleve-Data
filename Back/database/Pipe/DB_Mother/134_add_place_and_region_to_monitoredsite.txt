@@ -1,0 +1,51 @@
+INSERT INTO [dbo].[ModuleForms]
+           ([module_id]
+           ,[Name]
+           ,[Label]
+           ,[Required]
+           ,[FieldSizeEdit]
+           ,[FieldSizeDisplay]
+           ,[InputType]
+           ,[editorClass]
+           ,[FormRender]
+           ,[FormOrder]
+           ,[Legend]
+           ,[Options]
+           ,[Locked])
+     VALUES
+	       (
+		    12
+           ,'Place'
+           ,'Place'
+           ,0
+           ,6
+           ,6
+           ,'AutocompleteEditor'
+           ,'form-control'
+           ,2
+           ,6
+           ,'Location Infos'
+           ,'{"source":"autocomplete/stations/Place", "minLength":3}'
+           ,1
+		   ),
+           (
+		    12
+           ,'FK_Region'
+           ,'Region'
+           ,0
+           ,6
+           ,6
+           ,'Select'
+           ,'form-control'
+           ,1
+           ,7
+           ,'Location Infos'
+           ,'SELECT [Region] as label, ID as val FROM [Region] UNION SELECT '''' as label , -1 as val'
+           ,1
+		   );
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('134_add_place_and_region_to_monitoredsite',GETDATE(),(SELECT db_name()))
+
+
+GO
