@@ -1542,6 +1542,7 @@ Form.editors.Checkbox = Form.editors.Base.extend({
    * Adds the editor to the DOM
    */
   render: function() {
+    var _this = this;
     var $el = _.template( this.template, {
             id: this.id || this.cid,
             name : this.key
@@ -1549,6 +1550,10 @@ Form.editors.Checkbox = Form.editors.Base.extend({
     this.setElement($el);
     this.$input =this.$el.find('input') 
     this.$label = this.$el.find('label');
+    this.$label.on('blur' , function () {
+     // _this.form.fields[_this.key].validate();
+     _this.validate();
+    });
     this.$label.tooltip({
                         "trigger" : 'manual',
                          "placement" :"bottom",
@@ -1597,7 +1602,8 @@ Form.editors.Checkbox = Form.editors.Base.extend({
     var $el = this.$el,
         error = null,
         value = this.getValue(),
-        formValues = this.form ? this.form.getValue(this.key) : {},
+       // formValues = this.form ? this.form.getValue(this.key) : {},
+        formValues = {},
         validators = this.validators,
         _this = this,
         getValidator = this.getValidator;
@@ -1606,7 +1612,9 @@ Form.editors.Checkbox = Form.editors.Base.extend({
       //Run through validators until an error is found
       _.every(validators, function(validator) {
         error = getValidator(validator)(value, formValues);
+        if (typeof(error) != 'undefined') {
         _this.$label.tooltip('show');
+        }
         return error ? false : true;
       });
     }
@@ -1630,6 +1638,7 @@ Form.editors.Checkbox = Form.editors.Base.extend({
       return;
     }
     // ... => false => indeterminate => true => ...
+     this.$label.tooltip('hide');
     if( this.nullable ) {
         switch(this.value) {
           case 1 : { //de true on passe a false
@@ -1679,13 +1688,13 @@ Form.editors.Checkbox = Form.editors.Base.extend({
   focus: function() {
     if (this.hasFocus) return;
 
-    this.$label.focus();
+    this.$input.focus();
   },
 
   blur: function() {
     if (!this.hasFocus) return;
 
-    this.$label.blur();
+    this.$input.blur();
   }
 
 });
