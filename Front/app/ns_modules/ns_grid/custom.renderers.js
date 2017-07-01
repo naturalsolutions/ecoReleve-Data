@@ -100,7 +100,16 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
             } else {
               this.handleRemoveError(params);
             }
-        } else {
+        }
+        else if (validators[0].type && validators[0].type === 'Checkbox') {
+          if ( !validators[0].nullable && ( value === null || value === undefined) ) { //can't be null and null in database
+                this.handleError(params);
+          }
+          else {
+            this.handleRemoveError(params);
+          }
+        } 
+        else {
           this.handleRemoveError(params);
         }
       }
