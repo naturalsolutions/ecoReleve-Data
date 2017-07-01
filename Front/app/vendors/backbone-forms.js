@@ -479,7 +479,8 @@ Form.validators = (function() {
     regexp: 'Invalid',
     email: 'Invalid email address',
     url: 'Invalid URL',
-    match: _.template('Must match field "<%= field %>"', null, Form.templateSettings)
+    Checkbox : 'Cannot be null'
+,    match: _.template('Must match field "<%= field %>"', null, Form.templateSettings)
   };
 
   validators.required = function(options) {
@@ -499,6 +500,21 @@ Form.validators = (function() {
       if (value === null || value === undefined || value === false || value === '') return err;
     };
   };
+
+  validators.Checkbox = function(options) {
+    options = _.extend({
+      type: 'Checkbox',
+      message: this.errMessages.Checkbox
+    }, options);
+  return function Checkbox(value,formValues) {
+    if (!options.nullable && value === null) {
+      return {
+        type: options.type
+        //message: _.isFunction(options.message) ? options.message(options) : options.message
+      }
+    }
+  };
+};
 
   validators.regexp = function(options) {
     if (!options.regexp) throw new Error('Missing required "regexp" option for "regexp" validator');
@@ -1459,8 +1475,8 @@ Form.editors.Checkbox = Form.editors.Base.extend({
 
   //tagName: 'div',
   template: '<span data-editor>\
-            <input id="<%=id%>" name="<%=name%>" class="form-control" type="checkbox" />\
-            <label for="<%=id%>" ></label>\
+            <input id="<%=id%>" name="<%=name%>" class="form-control" type="checkbox" disabled />\
+            <label for="<%=id% data-toggle="tooltip" ></label>\
             <div data-error></div>\
             <div></div>\
         </span>',
@@ -1533,6 +1549,11 @@ Form.editors.Checkbox = Form.editors.Base.extend({
     this.setElement($el);
     this.$input =this.$el.find('input') 
     this.$label = this.$el.find('label');
+    this.$label.tooltip({
+                        "trigger" : 'manual',
+                         "placement" :"bottom",
+                         "title" : "Cannot be null"
+                        });
     if( this.schema.editable) {
       this.$label.prop('tabindex',"0");
     }
@@ -1571,6 +1592,29 @@ Form.editors.Checkbox = Form.editors.Base.extend({
     }
   },
 
+    validate: function() {
+
+    var $el = this.$el,
+        error = null,
+        value = this.getValue(),
+        formValues = this.form ? this.form.getValue(this.key) : {},
+        validators = this.validators,
+        _this = this,
+        getValidator = this.getValidator;
+
+    if (validators) {
+      //Run through validators until an error is found
+      _.every(validators, function(validator) {
+        error = getValidator(validator)(value, formValues);
+        _this.$label.tooltip('show');
+        return error ? false : true;
+      });
+    }
+    
+    return error;
+  },
+  
+
   keyup : function (e) {
        if(e.keyCode == 32){ //spacebar
         this.change(e);
@@ -1580,6 +1624,8 @@ Form.editors.Checkbox = Form.editors.Base.extend({
   change: function(e) {
     e.preventDefault();
     e.stopPropagation();
+
+    //TODO if was in error and tooltip show we gonna close the tooltip and remove class error
     if (!this.schema.editable) {
       return;
     }

@@ -86,6 +86,15 @@ select:disabled {
 	text-overflow: '';
 }
 
+.tooltip-inner {
+	background-color: red
+}
+.tooltip.bottom .tooltip-arrow{
+	border-bottom-color: red
+}
+
+
+
 .form-control{
 	padding: 5px 10px;
 	font-weight: 600;
@@ -107,6 +116,9 @@ select:disabled {
 	color: green;
     font-weight: bold;
     font-size: x-large;
+}
+.form-control.error[type='checkbox'] + label {
+border-color : red;
 }
 .form-control[type='checkbox'] + label {
   	cursor : pointer;
