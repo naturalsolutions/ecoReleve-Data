@@ -190,7 +190,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
           objectValue = {
                     displayValue : splitTab[splitTab.length-1],
-                  value : params.colDef.schema.defaultValue
+                    value : params.colDef.schema.defaultValue
           }
         }
       }
@@ -215,7 +215,10 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 		ThesaurusRenderer.prototype.deferredValidation = function(params, objectValue){
       if(objectValue.error || (objectValue.value !== '' && objectValue.displayValue === '')){
         this.handleError(params);
-      } else {
+      } else if ( ( objectValue.value === null && objectValue.displayValue === null && params.colDef.schema.defaultValue ) ) {
+        this.handleError(params);
+      }
+      else {
         this.handleRemoveError(params);
       }
 
