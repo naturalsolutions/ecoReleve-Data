@@ -182,7 +182,19 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     ThesaurusRenderer.prototype = new CustomRenderer();
     ThesaurusRenderer.prototype.deferred = true;
     ThesaurusRenderer.prototype.handleValues = function(params){
-      var objectValue = params.value;
+       var objectValue = {};
+       objectValue = params.value;
+      if( typeof(params.value) === 'undefined' ) {
+        if(params.colDef.schema.defaultValue ) {
+         var splitTab = params.colDef.schema.defaultValue.split('>');
+
+          objectValue = {
+                    displayValue : splitTab[splitTab.length-1],
+                  value : params.colDef.schema.defaultValue
+          }
+        }
+      }
+
       this.formatValueToDisplay(objectValue); // prefer manage value to display here in order to keep object value all along the time
       return objectValue;
     };
