@@ -195,7 +195,11 @@ define([
 		CheckboxEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new Form.editors.Checkbox(options);
 		  this.element = this.bbfe.render();
-			this.element.$el.find('label').css({'margin-left':'10px'})
+			if( this.params.eGridCell.className.indexOf('ag-cell-error') == -1 ) { //hack when cell in error no need to add margin left
+				this.element.$el.find('label').css({'margin-left':'10px'})
+			}
+
+			
 		};
 
 			CheckboxEditor.prototype.afterGuiAttached = function () {
