@@ -174,9 +174,30 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     var TextRenderer = function(options) {};
     TextRenderer.prototype = new CustomRenderer();
     
-    var DateTimeRenderer = function(options) {};
+    var DateTimeRenderer = function(options) {
+    };
     DateTimeRenderer.prototype = new CustomRenderer();
+    DateTimeRenderer.prototype.handleValues = function(params){
+      var objectValue = params.value;
+      if( params && params.colDef && params.colDef.schema && params.colDef.schema.options &&  params.colDef.schema.options.format ) {
+        if( params.colDef.schema.options.format === 'YYYY')
+        {
+          var tempDate = new Date(objectValue);
+          objectValue = tempDate.getFullYear();
+        }
+      }
+      this.formatValueToDisplay(objectValue); 
+      return objectValue;
+    };
+    
+    DateTimeRenderer.prototype.formatValueToDisplay = function(objectValue) {
 
+      if(!objectValue){
+        return;
+      }
+
+  	  $(this.eGui).html(objectValue);
+  	};
 
 		var ThesaurusRenderer = function(options) {};
     ThesaurusRenderer.prototype = new CustomRenderer();
