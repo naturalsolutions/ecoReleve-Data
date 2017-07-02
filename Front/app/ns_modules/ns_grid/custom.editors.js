@@ -3,7 +3,7 @@ define([
 	'ag-grid',
 	'backbone-forms',
 	'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
-	'ns_modules/ns_bbfe/bbfe-autoCompTree',
+	'ns_modules/ns_bbfe/bbfe-autocompTree',
 	'ns_modules/ns_bbfe/bbfe-autocomplete',
 	'ns_modules/ns_bbfe/bbfe-dateTimePicker',
 	'ns_modules/ns_bbfe/bbfe-timePicker',
