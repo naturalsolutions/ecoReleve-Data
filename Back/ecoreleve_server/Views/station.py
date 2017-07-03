@@ -4,6 +4,7 @@ from ..Models import (
     Station_FieldWorker,
     StationList,
     MonitoredSitePosition,
+    MonitoredSite,
     fieldActivity,
     User
 )
@@ -16,6 +17,7 @@ from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore
 from . import DynamicObjectView, DynamicObjectCollectionView, context_permissions
 from .protocols import ObservationsView
+from ..utils.parseValue import parser
 
 
 class StationView(DynamicObjectView):
@@ -73,21 +75,14 @@ class StationsView(DynamicObjectCollectionView):
     def updateMonitoredSite(self):
         session = self.request.dbsession
         data = self.request.params.mixed()
-        curSta = session.query(self.item.model).get(data['id'])
 
         if data['FK_MonitoredSite'] == '':
             return 'Station is not monitored'
         try:
-            newSitePos = MonitoredSitePosition(
-                StartDate=curSta.StationDate,
-                LAT=curSta.LAT,
-                LON=curSta.LON,
-                ELE=curSta.ELE,
-                Precision=curSta.precision,
-                FK_MonitoredSite=data['FK_MonitoredSite'])
-
-            session.add(newSitePos)
-            session.commit()
+            data['StartDate'] = data['StationDate']
+            data['Precision'] = data['precision']
+            currentMonitoredSite = session.query(MonitoredSite).get(data['FK_MonitoredSite'])
+            currentMonitoredSite.updateFromJSON(data)
             return 'Monitored site position was updated'
         except IntegrityError as e:
             session.rollback()
