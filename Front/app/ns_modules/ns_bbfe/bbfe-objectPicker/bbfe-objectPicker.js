@@ -236,6 +236,8 @@ define([
           data['ELE'] = model.ELE;
           data['Precision'] = model.precision;
           data['StartDate'] = model.StationDate;
+          data['Place'] = model.Place
+          data['FK_Region'] = model.FK_Region
           break;
         case 'sensors':
           break;
@@ -379,14 +381,7 @@ define([
           break;
 
         case 'monitoredSites':
-          data = {};
-
-          data['LAT'] = _this.form.model.get('LAT');
-          data['LON'] = _this.form.model.get('LON');
-          data['Name'] = _this.form.model.get('Name');
-          data['ELE'] = _this.form.model.get('ELE');
-          data['Precision'] = _this.form.model.get('precision');
-          data['StartDate'] = _this.form.model.get('StationDate');
+          data =  _this.loadData();
 
           _this.regionManager.get('modal').show(new _this.NewView({
             objectType: ctx.model.get('objectType'),

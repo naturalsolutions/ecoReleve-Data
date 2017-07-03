@@ -1,0 +1,11 @@
+ALTER TABLE [MonitoredSite]
+ADD  
+Place VARCHAR(250) NULL,
+FK_Region INTEGER 
+FOREIGN KEY (FK_Region) REFERENCES Region(id)
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('135_alter_table_monitoredsite_add_place_and_fk_region',GETDATE(),(SELECT db_name()))
+
+
+GO
