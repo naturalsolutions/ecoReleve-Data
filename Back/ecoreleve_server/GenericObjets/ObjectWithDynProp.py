@@ -6,6 +6,7 @@ from .DataBaseObjects import ConfiguredDbObjectMapped, DbObject
 from pyramid import threadlocal
 from ..utils.parseValue import find, isEqual, parser
 from abc import abstractmethod
+from sqlalchemy.orm.exc import *
 
 
 analogType = {'String': 'ValueString',
@@ -223,8 +224,12 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
             linkedPropName = linkProp['LinkedField'].replace('@Dyn:', '')
             linkedSource = self.getProperty(
                 linkProp['LinkSourceID'].replace('@Dyn:', ''))
-            linkedObj = self.session.query(linkedEntity).filter(
-                getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
+            
+            try:
+                linkedObj = self.session.query(linkedEntity).filter(
+                    getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
+            except NoResultFound:
+                continue
 
             if linkedObj in entitiesToUpdate:
                 entitiesToUpdate[linkedObj][linkedPropName] = self.getProperty(curPropName)
