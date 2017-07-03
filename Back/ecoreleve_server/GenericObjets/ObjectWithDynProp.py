@@ -212,12 +212,13 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
     def linkedFieldDate(self):
         return datetime.now()
 
-    def updateLinkedField(self, data, useDate=None):
+    def updateLinkedField(self, data, useDate=None, previousState=None):
         if useDate is None:
             useDate = self.linkedFieldDate()
 
         linkedFields = self.getLinkedField()
         entitiesToUpdate = {}
+
         for linkProp in linkedFields:
             curPropName = linkProp['Name']
             linkedEntity = LinkedTables[linkProp['LinkedTable']]
@@ -229,6 +230,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
                 linkedObj = self.session.query(linkedEntity).filter(
                     getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
             except NoResultFound:
+                self.deleteLinkedField(previousState=previousState)
                 continue
 
             if linkedObj in entitiesToUpdate:
@@ -241,17 +243,22 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
             entity.init_on_load()
             entity.updateFromJSON(data, startDate=useDate)
 
-    def deleteLinkedField(self, useDate=None):
+    def deleteLinkedField(self, useDate=None, previousState=None):
         session = dbConfig['dbSession']()
         if useDate is None:
             useDate = self.linkedFieldDate()
+
         for linkProp in self.getLinkedField():
             obj = LinkedTables[linkProp['LinkedTable']]
 
             try:
                 linkedField = linkProp['LinkedField'].replace('@Dyn:', '')
-                linkedSource = self.getProperty(
-                    linkProp['LinkSourceID'].replace('@Dyn:', ''))
+                if previousState:
+                    linkedSource = previousState.get(linkProp['LinkSourceID'].replace('@Dyn:', ''))
+                else:
+                    linkedSource = self.getProperty(
+                        linkProp['LinkSourceID'].replace('@Dyn:', ''))
+
                 linkedObj = session.query(obj).filter(
                     getattr(obj, linkProp['LinkedID']) == linkedSource).one()
 
