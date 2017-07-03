@@ -16,6 +16,7 @@ from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore
 from . import DynamicObjectView, DynamicObjectCollectionView, context_permissions
 from .protocols import ObservationsView
+from ..Models.Station import ErrorCheckUniqueStation
 
 
 class StationView(DynamicObjectView):
@@ -48,7 +49,7 @@ class StationView(DynamicObjectView):
                 self.session.rollback()
                 self.request.response.status_code = 510
                 msg = {'updateDenied': True}
-        except IntegrityError as e:
+        except ErrorCheckUniqueStation as e:
             self.session.rollback()
             self.request.response.status_code = 510
             msg = {'existingStation': True}
@@ -229,13 +230,13 @@ class StationsView(DynamicObjectCollectionView):
         newSta.StationType = session.query(StationType).filter(
             StationType.ID == data['FK_StationType']).first()
         newSta.init_on_load()
-        newSta.updateFromJSON(data)
 
         try:
+            newSta.updateFromJSON(data)
             session.add(newSta)
             session.flush()
             msg = {'ID': newSta.ID}
-        except IntegrityError as e:
+        except ErrorCheckUniqueStation as e:
             session.rollback()
             self.request.response.status_code = 510
             msg = {'existingStation': True}
