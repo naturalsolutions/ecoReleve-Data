@@ -1,0 +1,37 @@
+ALTER TABLE [dbo].[Station] DROP CONSTRAINT [uqc_date_lat_lon]
+GO
+
+CREATE PROCEDURE pr_checkUniqueStation
+	@lat decimal(9,5),
+	@lon decimal(9,5),
+	@date datetime,
+	@fieldActivity int,
+	@result int OUTPUT
+AS
+SET NOCOUNT ON
+
+ DECLARE @count int
+SELECT @count =  COUNT(*)
+FROM Station
+WHERE fieldActivityId = @fieldActivity 
+AND StationDate = @date AND convert(varchar(MAX), @date, 8) != '00:00:00'
+AND ( 
+		(	@lat IS NOT NULL AND @lon IS NOT NULL
+			AND LAT = @lat AND LON = @lon
+		)
+
+		OR
+		(@lat IS NULL AND @lon IS NULL)
+
+)
+
+SELECT @result = ( SELECT 1 WHERE @count > 0 ) 
+SELECT @result
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('134_SP_CheckUniqueStation',GETDATE(),(SELECT db_name()))
+
+
+GO
