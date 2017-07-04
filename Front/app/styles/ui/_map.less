@@ -22,16 +22,11 @@
 	width: 100%;
 	overflow: hidden !important;
 
-	//quick & dirty
-	.leaflet-top.leaflet-left{
-		right: 0;
-		top: 0;
-		left: inherit;
-		.leaflet-control-zoom.leaflet-bar.leaflet-control{
-			margin: 30px;
-		}
-	}
 
+	.leaflet-control{
+		margin: 30px;
+	}
+	
 	.errorLayer{
 		position: absolute;
 		width: 100%;
@@ -241,5 +236,24 @@
 		height: 10px;
 		background: red;
 		width: 0%;
+		transition: 1s ease width;
 	}
+}
+
+input[type="range"]:before {
+  left: 5px;
+  content: attr(min);
+  position: absolute;
+  top: 20px;
+  color: rgb(170, 170, 170);
+  font-weight: 400;
+}
+
+input[type="range"]:after {
+	right: 5px;
+	content: attr(max);
+  position: absolute;
+  top: 20px;
+  color: rgb(170, 170, 170);
+  font-weight: 400;
 }

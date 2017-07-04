@@ -6,7 +6,6 @@
   ----> replace the prototype by a marionnette view?
 **/
 
-
 /*
   Offset Draft!
   // Calculate the offset
@@ -36,7 +35,6 @@ define([
   // that have been created in the system. This is used to
   // power the unique identifier of each instance.
   var instanceCount = 0;
-
 
   // I get the next instance ID.
   var getNewInstanceID = function(){
@@ -85,7 +83,6 @@ define([
 
     this.dict = {}; //list of markers
     this.selectedMarkers = {}; // list of selected markers
-    this.geoJsonLayers = [];
 
     this.lastImported = false;
 
@@ -96,13 +93,14 @@ define([
 
     destroy: function(){
       this.map.remove();
+      clearInterval(this.timer); //player timer
     },
 
     action: function(action, params, from){
       if(this[action]){
         this[action](params, from);
       } else {
-        console.warn(this, 'doesn\'t have ' + action + ' action');
+        // console.warn(this, 'doesn\'t have ' + action + ' action');
       }
     },
 
@@ -118,14 +116,15 @@ define([
       var _this = this;
       //set defaults icons styles
       L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images';
-      this.selectedIcon = new L.DivIcon({className  : 'custom-marker selected'});
-      this.icon = new L.DivIcon({className      : 'custom-marker'});
+      this.selectedIcon = new L.DivIcon({className: 'custom-marker selected'});
+      this.icon = new L.DivIcon({className: 'custom-marker'});
 
       this.setCenter(this.geoJson);
 
       this.map = new L.Map(this.elem, {
         center: this.center ,
         zoom: this.zoom,
+        zoomControl: false,
         minZoom: 2,
         maxZoom : 18,
         inertia: false,
@@ -134,13 +133,22 @@ define([
         attributionControl: false,
       });
 
+      L.control.zoom({
+        position:'topright'
+      }).addTo(this.map);
+
+      this.lControl = L.control.layers(null, null, {collapsed:false, position:'topleft'});
+      this.lControl.addTo(this.map);
+
       this.google.defered  = this.google();
+      //once google api ready, (fetched it once only)
       $.when(this.google.defered).always(function(){
         if(_this.url){
-          _this.requestGeoJson(_this.url);
+          _this.fetchGeoJson(_this.url);
         }else{
           if (_this.cluster){
             _this.initClusters(_this.geoJson);
+            
           }else{
             _this.initLayer(_this.geoJson);
           }
@@ -150,14 +158,53 @@ define([
 
     },
 
+
+    fetchGeoJson: function(url){
+      var _this = this;
+      var criterias = {
+          page: 1,
+          per_page: 20,
+          criteria: null,
+          offset: 0,
+          order_by: '[]',
+      };
+
+      this.deffered = $.ajax({
+        url: url,
+        contentType:'application/json',
+        type:'GET',
+      }).done(function(geoJson) {
+          if (_this.cluster){
+            _this.initClusters(geoJson);
+            _this.geoJson = geoJson;
+
+            _this.initPlayer(_this.geoJson);
+            
+            _this.ready();
+            /*setTimeout(function(){
+              _this.addClusterLayers();
+            }, 1000);*/
+
+          }else{
+            /*
+            _this.initLayer(geoJson);
+            _this.geoJson = geoJson;
+            */
+          }
+      }).fail(function(msg) {
+          console.error( msg );
+      });
+    },
+
+
     ready: function(){
       this.setTotal(this.geoJson);
 
       if(this.legend){
         this.addLegend();
       }
-      if(this.markersLayer){
-        this.addMarkersLayer();
+      if(this.clusterLayer){
+        this.addClusterLayers();
       }
 
       this.initErrorLayer();
@@ -210,229 +257,13 @@ define([
       });
     },
 
-    //Player
-    //return an object where positions are indexed by their offset (from firstDate) in ms
-    setValuesFromSpeed: function(geoJson, x){
 
-      var dayInMs = 86400000;
-      var speed = x / dayInMs;
-
-      var obj = {};
-      var ms;
-
-      var firstDate = geoJson.features[0].properties.Date;
-
-      var _date2;
-
-      //2 recalculate if speed changes
-
-      for (var i = 0; i < geoJson.features.length; i++) {
-
-        _date2 = geoJson.features[i].properties.Date;
-
-        ms = moment(_date2, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
-        ms = speed * ms;
-        ms = Math.floor(ms / 10) * 10;
-
-        obj[ms] = geoJson.features[i];
-      }
-
-      this.p_indexedPositions = obj;
-      
-      this.p_relDuration = speed * this.p_realDuration;
-
-      $('.js-time-total').html(this.msToReadable(this.p_relDuration));
-    },
-  
-    msToReadable: function(ms){
-      ms = Math.round(ms);
-
-      var seconds = String(Math.floor(ms / 1000) % 60);
-
-      if(seconds.length == 1){
-        seconds = '0' + seconds;
-      }
-
-      var minutes = String(Math.floor(ms / 1000 / 60) % 60);
-      if(minutes.length == 1){
-        minutes = '0' + minutes;
-      }
-
-      var hours   = String(Math.floor(ms / (1000 * 60 * 60)) % 24);
-      if(hours.length == 1){
-        hours = '0' + hours;
-      }
-      return hours + ':' + minutes + ':' + seconds;
-    },
-
-    showPlayer: function(){
-      $('#map').css('height', '90%');
-      $('#map').parent().append('\
-      <div class="player">\
-      <div class="timeline col-xs-12">\
-        <div class="js-timeline-total timeline-total"></div>\
-        <div class="js-timeline-current timeline-current"></div>\
-      </div>\
-      <div class="col-xs-12">\
-        <span class="js-time-current"></span>\
-        <span class="pull-right">Total duration: <span class="js-time-total"></span></span>\
-      </div>\
-      <div class="col-xs-6">\
-        <button class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
-        <button class="js-player-play btn"><i class="reneco reneco-play"></i></button>\
-        <button class="js-player-pause btn"><i class="reneco reneco-pause"></i></button>\
-        <button class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
-      </div>\
-      <div class="col-xs-3 pull-right">\
-        <input id="speed" min=1000 max=24000 value=1000 step=1000 width="100" type="range">\
-      </div>\
-      </div>\
-      ');
-    },
-
-    difference: function(geoJson){
-      var _this = this;
-      var speed = 10000;
-
-      this.showPlayer();
-
-      var firstDate = geoJson.features[0].properties.Date;
-
-      _this.map.setView(geoJson.features[0].geometry.coordinates, 10/*, zoom*/);
-      var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date;
-        
-      this.p_realDuration = moment(lastDate, 'DD/MM/YYYY HH:mm:ss').diff(moment(firstDate,'DD/MM/YYYY HH:mm:ss'));
-
-      this.setValuesFromSpeed(geoJson, speed);
-
-      this.time = 0;
-      this.p_markers = [];
-
-      var offset = 10;
-
-      this.timer = setInterval(frame, offset);
-
-      function frame() {
-        if(_this.time % 1000 === 0){
-          $('.js-time-current').html(_this.msToReadable(_this.time));
-        }
-
-        if(_this.time >= _this.p_relDuration) {
-          clearInterval(_this.timer);
-        } else {
-
-          if(_this.p_indexedPositions[_this.time]){
-
-            var coords = _this.p_indexedPositions[_this.time].geometry.coordinates;
-            var icon = new L.DivIcon({className: 'marker custom-marker focus'});
-            var m = new L.marker(coords, {icon: icon});
-
-            _this.p_markers.push(m);
-
-            _this.interaction('focus', _this.p_indexedPositions[_this.time].properties.ID);
-
-            if(_this.p_markers.length > 10){
-              _this.map.removeLayer(_this.p_markers.shift());
-            }
-
-            for (var i = _this.p_markers.length - 1; i > 0; i--) {
-              if(i !== 0){
-                $(_this.p_markers[i]._icon).css('opacity', i/10).removeClass('focus');
-              }
-            }
-
-            m.addTo(_this.map);
-            var center = m.getLatLng();
-            
-          }
-
-          var width = (_this.time /_this.p_relDuration * 100);
-          $('.js-timeline-current').css('width', width + '%');
-          _this.time += offset;
-
-        }
-      }
-
-      var clearMarkers = function(){
-        for (var i = 0; i < _this.p_markers.length; i++) {
-          _this.map.removeLayer(_this.p_markers[i])
-        }
-      };
-
-      var travel = function(e){
-        var rapport =  e.offsetX / e.target.clientWidth;
-        _this.time = Math.floor((_this.p_relDuration * rapport) / 10) * 10;
-        clearMarkers();
-        $('.js-time-current').html(_this.msToReadable(_this.time));
-        frame();
-      };
-
-      var play = function(e){
-        clearInterval(_this.timer);
-        _this.timer = setInterval(frame, offset);
-      };
-
-      var pause = function(){
-        clearInterval(_this.timer);
-      };
-
-      var handleSpeed = function(e){
-        var value = $(e.currentTarget).val();
-        _this.setValuesFromSpeed(geoJson, value);
-      };
-
-      var prev = function(){
-        pause();
-        clearMarkers();
-
-        var arr = [];
-
-        for (var key in _this.p_indexedPositions) {
-          
-          arr.push(key);
-        }
-
-        for (var i=arr.length-1; i>=0; i--) {
-          var key = arr[i];
-          if(parseInt(key) < parseInt(_this.time)){
-            _this.time = parseInt(key);
-            break;
-          }
-        }
-        
-        frame();
-        _this.time -= 2*offset;
-      };
-
-      var next = function(){
-        pause();
-        clearMarkers();
-
-        for (var key in _this.p_indexedPositions) {
-          // console.log(key);
-          if(parseInt(key) > parseInt(_this.time)){
-            _this.time = parseInt(key);
-            break;
-          }
-        }
-        
-        frame();
-      };
-
-      $('#speed').on('change', handleSpeed);
-      $('.js-timeline-total').on('click', travel);
-      $('.js-player-play').on('click', play);
-      $('.js-player-pause').on('click', pause);
-      $('.js-player-prev').on('click', prev);
-      $('.js-player-next').on('click', next);
-    },
-  
     initClusters: function(geoJson){
-      this.difference(geoJson);
-      return;
+      var _this= this;
+
+      
       var firstLvl= true;
       this.firstLvl= [];
-      var _this= this;
       var CustomMarkerClusterGroup = L.MarkerClusterGroup.extend({
         _defaultIconCreateFunction: function (cluster, contains) {
           //push on firstLvl
@@ -451,39 +282,27 @@ define([
       if(geoJson.features.length < 500){
         disableClusteringAtZoom = 2; //minZoom
       }
-
-      this.markersLayer = new CustomMarkerClusterGroup({
+      
+      this.clusterLayer = new CustomMarkerClusterGroup({
         disableClusteringAtZoom: disableClusteringAtZoom,
         maxClusterRadius: 70,
         polygonOptions: {color: "rgb(51, 153, 204)", weight: 2},
       });
-      this.setGeoJsonLayer(geoJson);
+      this.setMarkerListFromGeoJson(geoJson);
     },
 
-    addMarkersLayer: function(){
-      if(this.geoJsonLayers.length !== 0){
-        for (var i = 0; i < this.geoJsonLayers.length; i++) {
-          this.markersLayer.addLayers(this.geoJsonLayers[i]);
-          for (var j = 0; j < this.geoJsonLayers[i].length; j++) {
-            delete this.geoJsonLayers[i][j];
-          };
-/*          this.geoJsonLayers[i].length = 0;
-          this.geoJsonLayers[i] = [];
-          delete this.geoJsonLayers[i];
-          this.geoJsonLayers.length = 0;
-          this.geoJsonLayers = [];
-          delete this.geoJsonLayers;*/
-        }
-      }
+    addClusterLayers: function(){
+      this.clusterLayer.addLayers(this.markerList);
 
-      this.map.addLayer(this.markersLayer);
+      this.lControl.addOverlay(this.clusterLayer, 'clusters')
+      // this.map.addLayer(this.clusterLayer);
 
       if(this.area){
         this.addArea();
       }
 
       if(this.bbox){
-        this.addBBox(this.markersLayer);
+        this.addBBox(this.clusterLayer);
       }
     },
 
@@ -512,54 +331,7 @@ define([
       };
 
       legend.addTo(this.map);
-
-
-      // var MyControl = L.Control.extend({
-      //     options: {
-      //         position: 'topright'
-      //     },
-      //     onAdd: function (map) {
-      //         var lg = $.parseHTML(legend);
-      //         return lg[0];
-      //     }
-      // });
-      //this.map.addControl(new MyControl());
     },
-
-    requestGeoJson: function(url){
-      var _this = this;
-      var criterias = {
-          page: 1,
-          per_page: 20,
-          criteria: null,
-          offset: 0,
-          order_by: '[]',
-      };
-
-      this.deffered = $.ajax({
-        url: url,
-        contentType:'application/json',
-        type:'GET',
-      }).done(function(geoJson) {
-          if (_this.cluster){
-            _this.initClusters(geoJson);
-            _this.geoJson = geoJson;
-            
-            _this.ready();
-            /*setTimeout(function(){
-              _this.addMarkersLayer();
-            }, 1000);*/
-          }else{
-            /*
-            _this.initLayer(geoJson);
-            _this.geoJson = geoJson;
-            */
-          }
-      }).fail(function(msg) {
-          console.error( msg );
-      });
-    },
-
 
 
     setCenter: function(geoJson){
@@ -580,19 +352,36 @@ define([
 
     initLayer: function(geoJson){
       if(geoJson){
-        this.markersLayer = new L.FeatureGroup();
-        this.setGeoJsonLayer(geoJson);
+        this.clusterLayer = new L.FeatureGroup();
+        this.setMarkerListFromGeoJson(geoJson);
       }else{
         this.setCenter();
       }
     },
 
-    setGeoJsonLayer: function(geoJson){
+    getMarkerIconClassName: function(feature){
+      var className = 'marker';
+      switch(feature.properties.type_) {
+        case 'station':
+          className += ' marker-station';
+          break;
+        case 'gps':
+          className += ' marker-gps';
+          break;
+        case 'argos':
+          className += ' marker-argos';
+          break;
+        default:
+      }
+
+      return className;
+    }, 
+
+    setMarkerListFromGeoJson: function(geoJson){
       var _this = this;
       this.setCenter(geoJson);
       var marker, prop;
       var icon;
-      var className = '';
       var i =0;
 
       var markerList = [];
@@ -601,7 +390,6 @@ define([
       var feature, latlng;
 
       for (var j = 0; j < features.length; j++) {
-        className = 'marker';
         feature = features[j];
         if(feature.geometry.coordinates[1] != null && feature.geometry.coordinates[0] != null){
           latlng = L.latLng(feature.geometry.coordinates[0], feature.geometry.coordinates[1]);
@@ -614,34 +402,10 @@ define([
             }
           }
 
-          switch(feature.properties.type_) {
-            case 'station':
-              className += ' marker-station';
-              break;
-            case 'gps':
-              className += ' marker-gps';
-              break;
-            case 'argos':
-              className += ' marker-argos';
-              break;
-            default:
-          }
-
-          if(feature.selected){
-            className += ' selected';
-          }else{
-            className += ' ';
-          }
+          var className = _this.getMarkerIconClassName(feature);
 
           icon = new L.DivIcon({className : className});
           marker = L.marker(latlng, {icon: icon});
-
-          //useless: doesn't update the parent cluster
-          if(feature.selected){
-            marker.selected=true;
-          }else{
-            marker.selected=false;
-          }
 
           if(_this.popup){
             prop = feature.properties;
@@ -669,7 +433,8 @@ define([
 
 
       }
-      this.geoJsonLayers.push(markerList);
+
+      this.markerList = markerList;
     },
 
 
@@ -742,7 +507,6 @@ define([
     /** from parent to child */
     updateAllClusters: function(c, all){
       
-
       this.updateClusterStyle(c, all);
       var childs = c.getAllChildMarkers();
 
@@ -923,26 +687,12 @@ define([
     },
 
     toggleIconClass: function(m){
-      var className = 'marker';
+      var className = this.getMarkerIconClassName(m.feature);
 
       if (m.selected) {
-          //$(m._icon).addClass('selected');
           className += ' selected';
       }
-      
-      switch(m.feature.properties.type_) {
-        case 'station':
-          className += ' marker-station';
-          break;
-        case 'gps':
-          className += ' marker-gps';
-          break;
-        case 'argos':
-          className += ' marker-argos';
-          break;
-        default:
-      }
-
+    
       m.setIcon(new L.DivIcon({className  : className}));
       if (m == this.lastFocused) {
           $(m._icon).addClass('focus');
@@ -994,7 +744,7 @@ define([
 
     selectAll: function(){
       var firstProp;
-      var layers = this.markersLayer._featureGroup._layers;
+      var layers = this.clusterLayer._featureGroup._layers;
       
       //get the first layer (marker cluster)
       for(var key in layers) {
@@ -1055,8 +805,8 @@ define([
                 'geometry': {
                     'type': 'Point',
                     'coordinates': [lat, lon],
-                }
-,                'properties': m.attributes,
+                },
+                'properties': m.attributes,
             };
             features.features.push(feature);
         });
@@ -1064,6 +814,7 @@ define([
     },
 
     updateFromServ: function(param){
+
       var _this = this;
       this.searchCriteria = param;
       
@@ -1090,6 +841,7 @@ define([
 
     //param can be filters or directly a collection
     loadFeatureCollection: function(params){
+
       var _this = this;
       if(params.featureCollection.features.length){
         this.updateLayers(params.featureCollection);
@@ -1097,12 +849,12 @@ define([
           this.multiSelection(params.selectedFeaturesIds);
         }
       } else {
-        this.map.removeLayer(this.markersLayer);
-        this.geoJsonLayers = [];
+        this.map.removeLayer(this.clusterLayer);
       }
     },
 
     filter: function(param){
+
       //TODO : refact
       var _this = this;
       if(this.url){
@@ -1117,8 +869,7 @@ define([
         if(coll.length){
           this.updateLayers(geoJson);
         }else{
-          this.map.removeLayer(this.markersLayer);
-          this.geoJsonLayers = [];
+          this.map.removeLayer(this.clusterLayer);
         }
         var selectedMarkers = [];
         for (var i = coll.models.length - 1; i >= 0; i--) {
@@ -1164,29 +915,378 @@ define([
       }
     },
 
+
     updateLayers: function(geoJson) {
+      var _this = this;
       this.displayError(geoJson);
-      //?
+
+      this.lControl.removeLayer(this.clusterLayer);
+      this.map.removeLayer(this.clusterLayer);
+      
       if(geoJson == false){
-        if(this.markersLayer){
-          this.map.removeLayer(this.markersLayer);
-        }
+        this.disablePlayer();
         return false;
       }
 
-      if(this.markersLayer){
-        this.map.removeLayer(this.markersLayer);
-      }
-      this.geoJsonLayers = [];
       if(geoJson.features.length){
+        this.computeInitialData(geoJson);
         this.initClusters(geoJson);
-        this.addMarkersLayer();
+        this.addClusterLayers();
+      } else {
+        this.disablePlayer();
       }
       if(this.bbox){
-        this.addBBox(this.markersLayer);
+        this.addBBox(this.clusterLayer);
       }
       this.setTotal(geoJson);
     },
+
+    disablePlayer: function(){
+      this.hidePlayer();
+      $('.js-toggle-ctrl-player').addClass('hidden');
+    },
+
+    //Player
+    
+    msToReadable: function(ms){
+      ms = Math.round(ms);
+
+      var seconds = String(Math.floor(ms / 1000) % 60);
+
+      if(seconds.length == 1){
+        seconds = '0' + seconds;
+      }
+
+      var minutes = String(Math.floor(ms / 1000 / 60) % 60);
+      if(minutes.length == 1){
+        minutes = '0' + minutes;
+      }
+
+      var hours   = String(Math.floor(ms / (1000 * 60 * 60)) % 24);
+      if(hours.length == 1){
+        hours = '0' + hours;
+      }
+      return hours + ':' + minutes + ':' + seconds;
+    },
+
+    showPlayer: function(){
+      $('#map').css('height', 'calc( 100% - 150px )');
+      $('#player').removeClass('hidden');
+      this.map.removeLayer(this.clusterLayer);
+      this.map.addLayer(this.playerLayer);
+      this.degraded();
+    },
+
+    hidePlayer: function(){
+      this.stop();
+      $('#map').css('height', '100%');
+      $('#player').addClass('hidden');
+      this.map.addLayer(this.clusterLayer);
+      this.map.removeLayer(this.playerLayer);
+    },
+
+    initPlayer: function(geoJson){
+
+      var _this = this;
+      var togglePlayer = L.control({position: 'bottomleft'});
+
+      togglePlayer.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'js-toggle-ctrl-player info-legend');
+        
+        div.innerHTML = '<button class="js-player-toggle btn"><i class="reneco reneco-play"></i> locations player</button>';
+        return div;
+      };
+
+      togglePlayer.addTo(this.map);
+
+      $('.js-player-toggle').on('click', function(){
+        if($('#player').hasClass('hidden')){
+          _this.showPlayer();
+        } else {
+          _this.hidePlayer();
+        }
+      });
+
+      $('#map').parent().append('\
+      <div id="player" class="player hidden">\
+      <div class="timeline col-xs-12">\
+        <div class="js-timeline-total timeline-total"></div>\
+        <div class="js-timeline-current timeline-current"></div>\
+      </div>\
+      <div class="col-xs-12">\
+        <span class="js-time-current">00:00:00</span>\
+        <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
+      </div>\
+      <div class="col-xs-12">\
+        From <span class="js-player-first-date"></span>\
+        <span class="pull-right">To <span class="js-player-last-date"></span></span>\
+      </div>\
+      <div class="col-xs-6">\
+        <button class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
+        <button class="js-player-play btn"><i class="reneco reneco-play"></i></button>\
+        <button class="js-player-pause btn"><i class="reneco reneco-pause"></i></button>\
+        <button class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
+      </div>\
+      <div class="col-xs-6 pull-right">\
+        <input class="js-player-day-in-ms" min=1000 max=24000 value=1000 step=1000 width="100" type="range">\
+      </div>\
+      </div>\
+      ');
+
+      this.playerLayer = L.layerGroup();
+      this.map.addLayer(this.playerLayer);
+      
+      this.computeInitialData(geoJson);
+
+      this.declarePlayer(geoJson);
+      this.map.setView(geoJson.features[0].geometry.coordinates, 10/*, zoom*/);
+
+    },
+
+    degraded: function(){
+      var opacity = 1;
+      for (var i = 0; i < this.p_markers.length; i++) {
+        opacity -= 0.05;
+        if(i !== 0){
+          $(this.p_markers[i]._icon).css('opacity', opacity).removeClass('focus');
+        }
+      }
+    },
+/*
+    secondLoop: function(){
+      var _this = this;
+
+      var format = 'DD/MM/YYYY HH:mm:ss';
+      
+      this.index = 0;
+
+      this.time = moment(this.firstDate);
+
+
+      this.timer = setInterval(function(){
+        if(_this.index >= (_this.positions.length - 1)){
+          clearInterval(_this.timer)
+        }
+
+        var m = moment(_this.positions[_this.index].properties.Date);
+        m.set({second:0,millisecond:0});
+
+
+        if (m == this.date) {
+          
+
+          _this.nextPos =  _this.positions[_this.index + 1].properties.Date;
+          _this.index++;
+          console.log(m);
+        } else {
+           console.log('not equals');
+          _this.time = moment(_this.time.add(12, 'hours').format(format));
+        }
+
+        console.log(_this.time);
+
+        console.log(_this.time);
+
+
+      }, 1000);
+    },
+*/
+    computeInitialData: function(geoJson, x){
+      this.sbsSpeed = 1000;
+      if(this.stepBystep){
+        this.positions = geoJson.features;
+        this.p_realDuration = this.positions.length * this.sbsSpeed; 
+      }
+
+      var dayInMs = 86400000;
+      var relDayInMs = ( x || 1000) //default, one day === 1s
+      var speed = relDayInMs / dayInMs;
+
+      var firstDate = geoJson.features[0].properties.Date;
+      this.firstDate = geoJson.features[0].properties.Date;
+      var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date;
+      
+      $('.js-player-first-date').html(firstDate);
+      $('.js-player-last-date').html(lastDate);
+    
+      var format = 'DD/MM/YYYY HH:mm:ss';
+
+      if(geoJson.features[0].properties.format){
+        format = geoJson.features[0].properties.format;
+      }
+
+      this.p_realDuration = moment(lastDate, format).diff(moment(firstDate, format));
+
+      var obj = {};
+      var ms;
+
+      var firstDate = geoJson.features[0].properties.Date;
+
+      var _date2;
+
+      for (var i = 0; i < geoJson.features.length; i++) {
+
+        _date2 = geoJson.features[i].properties.Date;
+
+        ms = moment(_date2, format).diff(moment(firstDate, format));
+        ms = speed * ms;
+        ms = Math.floor(ms / 10) * 10;
+
+        obj[ms] = geoJson.features[i];
+      }
+
+      this.p_indexedPositions = obj;
+      this.p_relDuration = speed * this.p_realDuration;
+
+      $('.js-time-total').html(this.msToReadable(this.p_relDuration));
+
+      $('.js-toggle-ctrl-player').removeClass('hidden');
+    },
+
+    draw: function(feature){
+      var coords = feature.geometry.coordinates;
+      var className = this.getMarkerIconClassName(feature) + ' focus';
+      var icon = new L.DivIcon({className: className});
+      var m = new L.marker(coords, {icon: icon});
+      var prop = feature.properties;
+      var infos = '';
+      for(var p in prop){
+        infos += '<b>' + p + ' : ' + prop[p] + '</b><br />';
+      }
+      m.bindPopup(infos);
+
+      this.p_markers.unshift(m);
+
+      m.addTo(this.playerLayer);
+
+      this.interaction('highlight', feature.properties.ID);
+
+      if(this.p_markers.length > 20){
+        this.playerLayer.removeLayer(this.p_markers.pop());
+      }
+
+      this.degraded();
+      // var center = m.getLatLng();
+    },
+
+    stepBystep: function(){
+      this.stepByStepTimer();
+    },
+    
+    frame: function(){
+      $('.js-time-current').html(this.msToReadable(this.time));
+
+      if(this.time >= this.p_relDuration) {
+        clearInterval(this.timer);
+        this.time = 0;
+      } else {
+        if(this.p_indexedPositions[this.time]) {
+          this.draw(this.p_indexedPositions[this.time])
+        }
+
+        var width = (this.time /this.p_relDuration * 100);
+        $('.js-timeline-current').css('width', width + '%');
+        this.time += this.offset;
+
+      }
+    },
+
+    play: function(e){
+      var _this= this;
+      clearInterval(this.timer);
+      clearInterval(this.stepByStepTimer);
+      console.log(this);
+
+      this.stepByStepTimer = setInterval(function(){
+        _this.next();
+      }, 10);
+      
+      return;
+      this.timer = setInterval(function(){
+        _this.frame();
+      }, this.offset);
+    },
+
+    clearMarkers: function(){
+      for (var i = 0; i < this.p_markers.length; i++) {
+        this.playerLayer.removeLayer(this.p_markers[i])
+      }
+    },
+
+    travel: function(e){
+      var rapport =  e.offsetX / e.target.clientWidth;
+      this.time = Math.floor((this.p_relDuration * rapport) / 10) * 10;
+      this.clearMarkers();
+      $('.js-time-current').html(this.msToReadable(this.time));
+      this.frame();
+    },
+
+    pause: function(){
+      clearInterval(this.stepByStepTimer);
+      clearInterval(this.timer);
+    },
+
+    prev: function(){
+      this.pause();
+      this.clearMarkers();
+
+      var arr = [];
+
+      for (var key in this.p_indexedPositions) {
+        arr.push(key);
+      }
+
+      for (var i=arr.length-1; i>=0; i--) {
+        var key = arr[i];
+        if(parseInt(key) < parseInt(this.time)){
+          this.time = parseInt(key);
+          break;
+        }
+      }
+      
+      this.frame();
+      this.time -= 2 * this.offset;
+    },
+
+
+    handleSpeed: function(e){
+      var value = $(e.currentTarget).val();
+      this.computeInitialData(geoJson, value);
+    },
+
+    next: function(){
+      this.pause();
+      for (var key in this.p_indexedPositions) {
+        if(parseInt(key) > parseInt(this.time)){
+          this.time = parseInt(key);
+          break;
+        }
+      }
+      
+      this.frame();
+    },
+
+    stop: function(){
+      this.pause();
+    },
+
+    declarePlayer: function(geoJson){
+      var _this = this;
+
+      this.time = 0;
+      this.p_markers = [];
+
+      this.offset = 100;
+
+      $('.js-player-day-in-ms').on('change', $.proxy(this.handleSpeed, this));
+      $('.js-timeline-total').on('click', $.proxy(this.travel, this));
+      $('.js-player-play').on('click', $.proxy(this.play, this));
+      $('.js-player-pause').on('click', $.proxy(this.pause, this));
+      $('.js-player-prev').on('click', $.proxy(this.prev, this));
+      $('.js-player-next').on('click', $.proxy(this.next, this));
+    },
+
   }
   return( Map );
 });
