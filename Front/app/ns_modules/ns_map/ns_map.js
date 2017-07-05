@@ -948,13 +948,10 @@ define([
 
     //Player
     sortByDate: function(geoJson){
-      
       var format = 'DD/MM/YYYY HH:mm:ss';
-      var tmp = geoJson.features.sort( function(a, b) {
+      geoJson.features.sort( function(a, b) {
         return moment(a.properties.Date, format) - moment(b.properties.Date, format)
       });
-
-      console.log(tmp);
     },
 
     disablePlayer: function(){
@@ -1274,8 +1271,6 @@ define([
 
       m.addTo(this.playerLayer);
 
-      console.log(feature.properties.ID);
-
       this.interaction('highlight', feature.properties.ID);
 
       if(this.p_markers.length > 20){
@@ -1312,7 +1307,6 @@ define([
       // this.pause();
 
       if(this.time < 0 || this.index === 0){
-        console.log('<0');
         return;
       }
       this.clearMarkers();
@@ -1343,10 +1337,17 @@ define([
       this.index = 0;
       this.time = 0;
       this.clearMarkers();
-      this.pause();
+      this.draw();
     },
 
-    
+    clearPlayer: function(){
+      this.pause();
+      this.index = 0;
+      this.time = 0;
+      this.draw();
+      this.clearMarkers();
+      this.hidePlayer();
+    },
 
     bindPlayer: function(){
       var _this = this;

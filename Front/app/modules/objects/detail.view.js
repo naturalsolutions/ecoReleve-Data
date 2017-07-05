@@ -72,17 +72,15 @@ define([
     },
 
     reload: function(options) {
-      this.com = new Com(); 
+      this.com = new Com();
 
       this.model.set('id', options.id);
 
       if(this.map.player){
-        this.map.stop();
+        this.map.clearPlayer();
       }
 
       this.com.addModule(this.map);
-      this.com.addModule(this.locationsGrid);
-
 
       this.locationsGrid.com = this.com;
       this.map.com = this.com;
