@@ -1147,7 +1147,9 @@ define([
     handleAutoNext: function(){
       $('.js-player-auto-next').toggleClass('btn-success active');
       this.autoNext  = !this.autoNext;
-      this.play();
+      if(this.playing){
+        this.play();
+      }
     },
 
     handlePlayPause: function(){
@@ -1334,6 +1336,7 @@ define([
     },
 
     stop: function(){
+      this.pause();
       this.index = 0;
       this.time = 0;
       this.clearMarkers();
