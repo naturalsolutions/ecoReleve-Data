@@ -765,6 +765,7 @@ define([
     },
 
     focus: function(param){
+      console.log(this.gridOptions.api);
       var _this = this;
       this.gridOptions.api.forEachNode( function (node) {
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
@@ -818,6 +819,7 @@ define([
       if(from == this){
         return;
       }
+
       this.gridOptions.api.forEachNode( function (node) {
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
             _this.ready = false;
