@@ -46,6 +46,7 @@ define([
 
 
   function Map(options){
+    this.player = options.player;
     // Store the private instance id.
     this._instanceID = getNewInstanceID();
     //check if there is a communicator
@@ -178,18 +179,15 @@ define([
             _this.initClusters(geoJson);
             _this.geoJson = geoJson;
 
-            _this.initPlayer(_this.geoJson);
-            
+            if(_this.player){
+              _this.firstInit(_this.geoJson);
+            }
             _this.ready();
-            /*setTimeout(function(){
-              _this.addClusterLayers();
-            }, 1000);*/
 
           }else{
-            /*
             _this.initLayer(geoJson);
             _this.geoJson = geoJson;
-            */
+            
           }
       }).fail(function(msg) {
           console.error( msg );
@@ -920,8 +918,6 @@ define([
     updateLayers: function(geoJson) {
       var _this = this;
       
-
-
       this.displayError(geoJson);
 
       this.lControl.removeLayer(this.clusterLayer);
@@ -936,6 +932,7 @@ define([
         this.computeInitialData(geoJson);
         this.initClusters(geoJson);
         this.addClusterLayers();
+        this.initPlayer(geoJson);
       } else {
         this.disablePlayer();
       }
@@ -945,14 +942,19 @@ define([
       this.setTotal(geoJson);
     },
 
-    //Player
 
+
+
+
+    //Player
     sortByDate: function(geoJson){
-      geoJson.features.sort( function(a, b) {
-        var dateA = new Date(a.date);
-        var dateB = new Date(b.date);
-        return dateA - dateB;
+      
+      var format = 'DD/MM/YYYY HH:mm:ss';
+      var tmp = geoJson.features.sort( function(a, b) {
+        return moment(a.properties.Date, format) - moment(b.properties.Date, format)
       });
+
+      console.log(tmp);
     },
 
     disablePlayer: function(){
@@ -987,6 +989,7 @@ define([
       this.map.removeLayer(this.clusterLayer);
       this.map.addLayer(this.playerLayer);
       this.degraded();
+      this.draw();
     },
 
     hidePlayer: function(){
@@ -997,14 +1000,16 @@ define([
       this.map.removeLayer(this.playerLayer);
     },
 
-    initPlayer: function(geoJson){
-      this.sortByDate(geoJson);
+    firstInit: function(geoJson){
+
 
       var _this = this;
       var togglePlayer = L.control({position: 'bottomleft'});
 
       togglePlayer.onAdd = function (map) {
-
+        $('#map').find('.js-toggle-ctrl-player').remove();
+        $('#map').find('#player').remove();
+        
         var div = L.DomUtil.create('div', 'js-toggle-ctrl-player info-legend');
         
         div.innerHTML = '<button class="js-player-toggle btn"><i class="reneco reneco-play"></i> locations player</button>';
@@ -1022,42 +1027,51 @@ define([
       });
 
       $('#map').parent().append('\
-      <div id="player" class="player hidden">\
-      <div class="col-xs-12">\
-        From <span class="js-player-first-date"></span>\
-        <span class="pull-right">To <span class="js-player-last-date"></span></span>\
-      </div>\
-      <div class="timeline col-xs-12">\
-        <div class="js-timeline-total timeline-total"></div>\
-        <div class="js-timeline-current timeline-current"></div>\
-      </div>\
-      <div class="col-xs-12 hidden">\
-        <span class="js-time-current">00:00:00</span>\
-        <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
-      </div>\
-      <div class="js-infos-auto-next col-xs-12">\
-        <span class="js-time-current">00:00:00</span>\
-        <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
-      </div>\
-      <div class="col-xs-6">\
-        <button title="previous" class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
-        <button title="play/pause" class="js-player-play-pause btn"><i class="reneco reneco-play"></i></button>\
-        <button title="stop" class="js-player-stop btn"><i class="glyphicon glyphicon-stop"></i></button>\
-        <button title="next" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
-        <button title="auto next mode" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Auto next mode</button> \
-      </div>\
-      <div class="col-xs-3">\
-        <div class="pull-right">\
-          <input type="checkbox" class="js-player-track form-control pull-left" /><span> Track </span> \
+        <div id="player" class="player hidden">\
+        <div class="col-xs-12">\
+          From <span class="js-player-first-date"></span>\
+          <span class="pull-right">To <span class="js-player-last-date"></span></span>\
         </div>\
-      </div>\
-      <div class="col-xs-3">\
-        <input class="js-player-day-in-ms hidden" min=1000 max=24000 value=1000 step=1000 width="100" type="range">\
-        <input class="js-player-auto-next-speed" min=-2000 max=-10 value=-1000 step=10 width="100" type="range">\
-      </div>\
-      </div>\
+        <div class="timeline col-xs-12">\
+          <div class="js-timeline-total timeline-total"></div>\
+          <div class="js-timeline-current timeline-current"></div>\
+        </div>\
+        <div class="col-xs-12">\
+          <span class="js-time-current">00:00:00</span>\
+          <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
+        </div>\
+        <div class="col-xs-6">\
+          <button title="previous" class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
+          <button title="play/pause" class="js-player-play-pause btn"><i class="reneco reneco-play"></i></button>\
+          <button title="stop" class="js-player-stop btn"><i class="glyphicon glyphicon-stop"></i></button>\
+          <button title="next" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
+          <button title="auto next mode" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Auto next mode</button> \
+        </div>\
+        <div class="col-xs-3">\
+          <div class="pull-right">\
+            <input type="checkbox" class="js-player-track form-control pull-left" /><span> Track </span> \
+          </div>\
+        </div>\
+        <div class="col-xs-3">\
+          <input class="js-player-day-in-ms hidden" min=1000 max=24000 value=1000 step=1000 width="100" type="range">\
+          <input class="js-player-auto-next-speed" min=-2000 max=-10 value=-1000 step=10 width="100" type="range">\
+        </div>\
+        </div>\
       ');
+      this.bindPlayer();
 
+      this.initPlayer(geoJson);
+    },
+
+    initPlayer: function(geoJson){
+      if(geoJson.features.length < 3){
+        this.disablePlayer();
+        return;
+      }
+
+      this.sortByDate(geoJson);
+
+      this.playerInitialized = true;
       this.time = 0;
       this.p_markers = [];
 
@@ -1068,9 +1082,7 @@ define([
       
       this.computeInitialData(geoJson);
 
-      this.bindPlayer(geoJson);
       this.map.setView(geoJson.features[0].geometry.coordinates, 10/*, zoom*/);
-
     },
 
     degraded: function(){
@@ -1098,7 +1110,7 @@ define([
       $('.js-player-last-date').html(lastDate);
     
       var format = 'DD/MM/YYYY HH:mm:ss';
-      
+
 
       if(geoJson.features[0].properties.format){
         format = geoJson.features[0].properties.format;
@@ -1131,7 +1143,7 @@ define([
 
       $('.js-toggle-ctrl-player').removeClass('hidden');
 
-      this.draw();
+
     },
 
 
@@ -1204,7 +1216,7 @@ define([
         this.time = this.positions[this.index].time;
       }
 
-      this.update();
+      this.updateInfos();
     },
 
     findClosestFloorPositionIndex: function(time){
@@ -1224,7 +1236,7 @@ define([
     },
 
 
-    update: function(){
+    updateInfos: function(){
       if(this.autoNext){
         
         $('.js-time-total').html(this.msToReadable( this.positions.length * (this.autoNextSpeed / 1000) * 1000 ));
@@ -1244,7 +1256,7 @@ define([
     },
 
     draw: function(){
-      this.update();
+      this.updateInfos();
 
       var feature = this.positions[this.index];
       var coords = feature.geometry.coordinates;
@@ -1262,6 +1274,8 @@ define([
 
       m.addTo(this.playerLayer);
 
+      console.log(feature.properties.ID);
+
       this.interaction('highlight', feature.properties.ID);
 
       if(this.p_markers.length > 20){
@@ -1277,9 +1291,10 @@ define([
     },
     
     frame: function(){
-      if(this.time >= this.p_relDuration) {
+      if(this.time >= this.p_relDuration || this.index + 1 >= this.positions.length) {
         clearInterval(this.timer);
         this.time = 0;
+        this.index = 0;
         return;
       }
 
@@ -1288,7 +1303,7 @@ define([
         this.draw();
       }
       
-      this.update();
+      this.updateInfos();
 
       this.time += this.offset;
     },
@@ -1329,10 +1344,13 @@ define([
       this.time = 0;
       this.clearMarkers();
       this.pause();
-      this.draw();
     },
 
-    bindPlayer: function(geoJson){
+    
+
+    bindPlayer: function(){
+      var _this = this;
+
       $('.js-player-prev').on('click', $.proxy(this.prev, this));
       $('.js-player-play-pause').on('click', $.proxy(this.handlePlayPause, this));
       $('.js-player-stop').on('click', $.proxy(this.stop, this));
@@ -1343,6 +1361,18 @@ define([
       $('.js-player-day-in-ms').on('change', $.proxy(this.handleSpeed, this));
       $('.js-player-track').on('change', $.proxy(this.toggleTrack, this));
       $('.js-timeline-total').on('click', $.proxy(this.travel, this));
+
+      document.onkeydown = function(e){
+        if(e.code === 'Space'){
+          _this.handlePlayPause();
+        }
+        if(e.code === 'ArrowLeft'){
+          _this.prev();
+        }
+        if(e.code === 'ArrowRight'){
+          _this.next();
+        }
+      };
     },
 
   }

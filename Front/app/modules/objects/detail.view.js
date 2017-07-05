@@ -72,13 +72,24 @@ define([
     },
 
     reload: function(options) {
+      this.com = new Com(); 
+
       this.model.set('id', options.id);
 
+      if(this.map.player){
+        this.map.stop();
+      }
+
       this.com.addModule(this.map);
+      this.com.addModule(this.locationsGrid);
+
+
+      this.locationsGrid.com = this.com;
       this.map.com = this.com;
       this.map.url = this.model.get('type') + '/' + this.model.get('id')  + '/locations?geo=true';
       this.map.updateFromServ();
       this.map.url = false;
+
 
       this.displayForm();
       this.displayGrids();
