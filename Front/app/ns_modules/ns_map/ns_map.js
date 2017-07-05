@@ -295,7 +295,7 @@ define([
       this.clusterLayer.addLayers(this.markerList);
 
       this.lControl.addOverlay(this.clusterLayer, 'clusters')
-      // this.map.addLayer(this.clusterLayer);
+      this.map.addLayer(this.clusterLayer);
 
       if(this.area){
         this.addArea();
@@ -891,6 +891,7 @@ define([
     },
 
 
+
     //todo : refact
     initErrorLayer: function() {
       var elem = '<div id="errorLayer" class="errorLayer hidden"><legend><span class="glyphicon glyphicon-warning-sign"></span><span class="msg"></span></legend></div>';
@@ -1010,36 +1011,52 @@ define([
 
       $('#map').parent().append('\
       <div id="player" class="player hidden">\
-      <div class="timeline col-xs-12">\
-        <div class="js-timeline-total timeline-total"></div>\
-        <div class="js-timeline-current timeline-current"></div>\
-      </div>\
-      <div class="col-xs-12">\
-        <span class="js-time-current">00:00:00</span>\
-        <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
-      </div>\
       <div class="col-xs-12">\
         From <span class="js-player-first-date"></span>\
         <span class="pull-right">To <span class="js-player-last-date"></span></span>\
       </div>\
-      <div class="col-xs-6">\
-        <button class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
-        <button class="js-player-play btn"><i class="reneco reneco-play"></i></button>\
-        <button class="js-player-pause btn"><i class="reneco reneco-pause"></i></button>\
-        <button class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
+      <div class="timeline col-xs-12">\
+        <div class="js-timeline-total timeline-total"></div>\
+        <div class="js-timeline-current timeline-current"></div>\
       </div>\
-      <div class="col-xs-6 pull-right">\
-        <input class="js-player-day-in-ms" min=1000 max=24000 value=1000 step=1000 width="100" type="range">\
+      <div class="col-xs-12 hidden">\
+        <span class="js-time-current">00:00:00</span>\
+        <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
+      </div>\
+      <div class="js-infos-auto-next col-xs-12">\
+        <span class="js-time-current">00:00:00</span>\
+        <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
+      </div>\
+      <div class="col-xs-6">\
+        <button title="previous" class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
+        <button title="play/pause" class="js-player-play-pause btn"><i class="reneco reneco-play"></i></button>\
+        <button title="stop" class="js-player-stop btn"><i class="glyphicon glyphicon-stop"></i></button>\
+        <button title="next" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
+        <button title="auto next mode" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Auto next mode</button> \
+      </div>\
+      <div class="col-xs-3">\
+        <div class="pull-right">\
+          <input type="checkbox" class="js-player-track form-control pull-left" /><span> Track </span> \
+        </div>\
+      </div>\
+      <div class="col-xs-3">\
+        <input class="js-player-day-in-ms hidden" min=1000 max=24000 value=1000 step=1000 width="100" type="range">\
+        <input class="js-player-auto-next-speed" min=-2000 max=-10 value=-1000 step=10 width="100" type="range">\
       </div>\
       </div>\
       ');
+
+      this.time = 0;
+      this.p_markers = [];
+
+      this.offset = 100;
 
       this.playerLayer = L.layerGroup();
       this.map.addLayer(this.playerLayer);
       
       this.computeInitialData(geoJson);
 
-      this.declarePlayer(geoJson);
+      this.bindPlayer(geoJson);
       this.map.setView(geoJson.features[0].geometry.coordinates, 10/*, zoom*/);
 
     },
@@ -1093,11 +1110,7 @@ define([
     },
 */
     computeInitialData: function(geoJson, x){
-      this.sbsSpeed = 1000;
-      if(this.stepBystep){
-        this.positions = geoJson.features;
-        this.p_realDuration = this.positions.length * this.sbsSpeed; 
-      }
+      this.autoNextSpeed = 1000;
 
       var dayInMs = 86400000;
       var relDayInMs = ( x || 1000) //default, one day === 1s
@@ -1167,45 +1180,96 @@ define([
       }
 
       this.degraded();
-      // var center = m.getLatLng();
-    },
 
-    stepBystep: function(){
-      this.stepByStepTimer();
+      if(this.tracked){
+        var center = m.getLatLng();
+        this.map.panTo(center, {animate: false});
+      }
     },
     
     frame: function(){
-      $('.js-time-current').html(this.msToReadable(this.time));
+      
 
       if(this.time >= this.p_relDuration) {
         clearInterval(this.timer);
         this.time = 0;
-      } else {
-        if(this.p_indexedPositions[this.time]) {
-          this.draw(this.p_indexedPositions[this.time])
-        }
+        return;
+      }
 
+      if(this.autoNext){
+        
+        var total = this.geoJson.features.length * this.autoNextSpeed;
+        $('.js-infos-auto-next .js-time-total').html(this.msToReadable(total));
+
+        var current = Object.keys(this.p_indexedPositions).indexOf(String(this.time)) * 1000 || 0;
+
+        $('.js-infos-auto-next .js-time-current').html(this.msToReadable(current));
+
+        var width = (current /(this.geoJson.features.length * 1000) * 100);
+        $('.js-timeline-current').css('width', width + '%');
+
+      } else {
+
+        $('.js-time-current').html(this.msToReadable(this.time));
         var width = (this.time /this.p_relDuration * 100);
         $('.js-timeline-current').css('width', width + '%');
-        this.time += this.offset;
 
+      }
+
+      if(this.p_indexedPositions[this.time]) {
+        this.draw(this.p_indexedPositions[this.time])
+      }
+      this.time += this.offset;
+
+    },
+
+    handleAutoNext: function(){
+      $('.js-player-auto-next').toggleClass('btn-success active');
+      this.autoNext  = !this.autoNext;
+      this.play();
+    },
+
+    handlePlayPause: function(){
+      this.playing = !this.playing;
+      if(this.playing){
+        this.play();
+      } else {
+        this.pause();
       }
     },
 
     play: function(e){
       var _this= this;
+      $('.js-player-play-pause>i').addClass('reneco-pause').removeClass('reneco-play');
       clearInterval(this.timer);
-      clearInterval(this.stepByStepTimer);
-      console.log(this);
+      clearInterval(this.autoNextTimer);
+      $('.js-timeline-current').css('transition', 'none');
 
-      this.stepByStepTimer = setInterval(function(){
-        _this.next();
-      }, 10);
+
+      if(this.autoNext){
+        this.autoNextTimer = setInterval(function(){
+          _this.next(true);
+        }, this.autoNextSpeed || 1000);
+      } else {
+        this.timer = setInterval(function(){
+          _this.frame();
+        }, this.offset);
+      }
       
-      return;
-      this.timer = setInterval(function(){
-        _this.frame();
-      }, this.offset);
+    },
+
+    handleAutoNextSpeed: function(e){
+      var value = $(e.currentTarget).val();
+      value *= -1;
+      this.autoNextSpeed = value;
+      this.play();
+    },
+
+    
+    handleSpeed: function(e){
+      var value = $(e.currentTarget).val();
+
+      this.computeInitialData(this.geoJson, value);
     },
 
     clearMarkers: function(){
@@ -1216,18 +1280,37 @@ define([
 
     travel: function(e){
       var rapport =  e.offsetX / e.target.clientWidth;
-      this.time = Math.floor((this.p_relDuration * rapport) / 10) * 10;
+
       this.clearMarkers();
-      $('.js-time-current').html(this.msToReadable(this.time));
+
+      if(this.autoNext){
+        var index = Math.floor(Object.keys(this.p_indexedPositions).length * rapport );
+        this.time = Object.keys(this.p_indexedPositions)[index];
+        this.time = parseInt(this.time);
+
+      } else {
+        this.time = Math.floor((this.p_relDuration * rapport) / 10) * 10;
+      }
+
       this.frame();
     },
 
     pause: function(){
-      clearInterval(this.stepByStepTimer);
+      $('.js-player-play-pause>i').removeClass('reneco-pause').addClass('reneco-play');
+      $('.js-timeline-current').css('transition', 'width .2s');
+      clearInterval(this.autoNextTimer);
       clearInterval(this.timer);
+      this.playing = false;
     },
 
+
+
     prev: function(){
+      
+      if(this.time < 0){
+        return;
+      }
+
       this.pause();
       this.clearMarkers();
 
@@ -1239,7 +1322,7 @@ define([
 
       for (var i=arr.length-1; i>=0; i--) {
         var key = arr[i];
-        if(parseInt(key) < parseInt(this.time)){
+        if(parseInt(key) < parseInt(this.time)) {
           this.time = parseInt(key);
           break;
         }
@@ -1249,42 +1332,43 @@ define([
       this.time -= 2 * this.offset;
     },
 
+    next: function(pass){
 
-    handleSpeed: function(e){
-      var value = $(e.currentTarget).val();
-      this.computeInitialData(geoJson, value);
-    },
+      if(pass !== true){
+        this.pause();
+      }
 
-    next: function(){
-      this.pause();
       for (var key in this.p_indexedPositions) {
         if(parseInt(key) > parseInt(this.time)){
           this.time = parseInt(key);
           break;
         }
       }
-      
       this.frame();
     },
 
-    stop: function(){
-      this.pause();
+    toggleTrack: function(e){
+      this.tracked = !this.tracked;
     },
 
-    declarePlayer: function(geoJson){
-      var _this = this;
-
+    stop: function(){
+      this.clearMarkers();
+      this.pause();
       this.time = 0;
-      this.p_markers = [];
+      this.frame();
+    },
 
-      this.offset = 100;
-
-      $('.js-player-day-in-ms').on('change', $.proxy(this.handleSpeed, this));
-      $('.js-timeline-total').on('click', $.proxy(this.travel, this));
-      $('.js-player-play').on('click', $.proxy(this.play, this));
-      $('.js-player-pause').on('click', $.proxy(this.pause, this));
+    bindPlayer: function(geoJson){
       $('.js-player-prev').on('click', $.proxy(this.prev, this));
+      $('.js-player-play-pause').on('click', $.proxy(this.handlePlayPause, this));
+      $('.js-player-stop').on('click', $.proxy(this.stop, this));
       $('.js-player-next').on('click', $.proxy(this.next, this));
+      $('.js-player-auto-next').on('click', $.proxy(this.handleAutoNext, this));
+      
+      $('.js-player-auto-next-speed').on('change', $.proxy(this.handleAutoNextSpeed, this));
+      $('.js-player-day-in-ms').on('change', $.proxy(this.handleSpeed, this));
+      $('.js-player-track').on('change', $.proxy(this.toggleTrack, this));
+      $('.js-timeline-total').on('click', $.proxy(this.travel, this));
     },
 
   }
