@@ -919,6 +919,9 @@ define([
 
     updateLayers: function(geoJson) {
       var _this = this;
+      
+
+
       this.displayError(geoJson);
 
       this.lControl.removeLayer(this.clusterLayer);
@@ -942,13 +945,21 @@ define([
       this.setTotal(geoJson);
     },
 
+    //Player
+
+    sortByDate: function(geoJson){
+      geoJson.features.sort( function(a, b) {
+        var dateA = new Date(a.date);
+        var dateB = new Date(b.date);
+        return dateA - dateB;
+      });
+    },
+
     disablePlayer: function(){
       this.hidePlayer();
       $('.js-toggle-ctrl-player').addClass('hidden');
     },
 
-    //Player
-    
     msToReadable: function(ms){
       ms = Math.round(ms);
 
@@ -987,6 +998,7 @@ define([
     },
 
     initPlayer: function(geoJson){
+      this.sortByDate(geoJson);
 
       var _this = this;
       var togglePlayer = L.control({position: 'bottomleft'});
@@ -1049,7 +1061,7 @@ define([
       this.time = 0;
       this.p_markers = [];
 
-      this.offset = 100;
+      this.offset = 10;
 
       this.playerLayer = L.layerGroup();
       this.map.addLayer(this.playerLayer);
@@ -1070,45 +1082,7 @@ define([
         }
       }
     },
-/*
-    secondLoop: function(){
-      var _this = this;
 
-      var format = 'DD/MM/YYYY HH:mm:ss';
-      
-      this.index = 0;
-
-      this.time = moment(this.firstDate);
-
-
-      this.timer = setInterval(function(){
-        if(_this.index >= (_this.positions.length - 1)){
-          clearInterval(_this.timer)
-        }
-
-        var m = moment(_this.positions[_this.index].properties.Date);
-        m.set({second:0,millisecond:0});
-
-
-        if (m == this.date) {
-          
-
-          _this.nextPos =  _this.positions[_this.index + 1].properties.Date;
-          _this.index++;
-          console.log(m);
-        } else {
-           console.log('not equals');
-          _this.time = moment(_this.time.add(12, 'hours').format(format));
-        }
-
-        console.log(_this.time);
-
-        console.log(_this.time);
-
-
-      }, 1000);
-    },
-*/
     computeInitialData: function(geoJson, x){
       this.autoNextSpeed = 1000;
 
@@ -1124,20 +1098,21 @@ define([
       $('.js-player-last-date').html(lastDate);
     
       var format = 'DD/MM/YYYY HH:mm:ss';
+      
 
       if(geoJson.features[0].properties.format){
         format = geoJson.features[0].properties.format;
       }
 
+
       this.p_realDuration = moment(lastDate, format).diff(moment(firstDate, format));
 
-      var obj = {};
       var ms;
 
       var firstDate = geoJson.features[0].properties.Date;
 
       var _date2;
-
+      
       for (var i = 0; i < geoJson.features.length; i++) {
 
         _date2 = geoJson.features[i].properties.Date;
@@ -1146,18 +1121,132 @@ define([
         ms = speed * ms;
         ms = Math.floor(ms / 10) * 10;
 
-        obj[ms] = geoJson.features[i];
+        geoJson.features[i].time = ms;
       }
 
-      this.p_indexedPositions = obj;
+      this.positions = geoJson.features;
+      this.index = 0;
+
       this.p_relDuration = speed * this.p_realDuration;
 
-      $('.js-time-total').html(this.msToReadable(this.p_relDuration));
-
       $('.js-toggle-ctrl-player').removeClass('hidden');
+
+      this.draw();
     },
 
-    draw: function(feature){
+
+    handleAutoNext: function(){
+      $('.js-player-auto-next').toggleClass('btn-success active');
+      this.autoNext  = !this.autoNext;
+      this.play();
+    },
+
+    handlePlayPause: function(){
+      this.playing = !this.playing;
+      if(this.playing){
+        this.play();
+      } else {
+        this.pause();
+      }
+    },
+
+    play: function(e){
+      var _this= this;
+      $('.js-player-play-pause>i').addClass('reneco-pause').removeClass('reneco-play');
+      $('.js-timeline-current').css('transition', 'none');
+      clearInterval(this.timer);
+      clearInterval(this.autoNextTimer);
+
+      if(this.autoNext){
+
+        this.autoNextTimer = setInterval(function(){
+          _this.next(true);
+        }, this.autoNextSpeed || 1000);
+
+      } else {
+
+        this.timer = setInterval(function(){
+          _this.frame();
+        }, this.offset);
+
+      }
+    },
+
+    handleAutoNextSpeed: function(e){
+      var value = $(e.currentTarget).val();
+      value *= -1;
+      this.autoNextSpeed = value;
+      this.play();
+    },
+
+    
+    handleSpeed: function(e){
+      var value = $(e.currentTarget).val();
+      this.computeInitialData(this.geoJson, value);
+    },
+
+    clearMarkers: function(){
+      for (var i = 0; i < this.p_markers.length; i++) {
+        this.playerLayer.removeLayer(this.p_markers[i])
+      }
+    },
+
+    travel: function(e){
+      var rapport =  e.offsetX / e.target.clientWidth;
+
+      this.clearMarkers();
+
+      this.time = Math.floor((this.p_relDuration * rapport) / 10) * 10;
+      this.index = this.findClosestFloorPositionIndex(this.time);
+
+      if(this.autoNext){
+        this.index = Math.round((this.positions.length * rapport));
+        this.time = this.positions[this.index].time;
+      }
+
+      this.update();
+    },
+
+    findClosestFloorPositionIndex: function(time){
+      for (var i = this.positions.length - 1; i >= 0; i--) {
+        if(time > this.positions[i].time){
+          return i;
+        }
+      }      
+    },
+
+    pause: function(){
+      $('.js-player-play-pause>i').removeClass('reneco-pause').addClass('reneco-play');
+      $('.js-timeline-current').css('transition', 'width .2s');
+      clearInterval(this.autoNextTimer);
+      clearInterval(this.timer);
+      this.playing = false;
+    },
+
+
+    update: function(){
+      if(this.autoNext){
+        
+        $('.js-time-total').html(this.msToReadable( this.positions.length * (this.autoNextSpeed / 1000) * 1000 ));
+        $('.js-time-current').html(this.msToReadable( this.index * (this.autoNextSpeed / 1000) * 1000 ));
+
+        var width = (this.index /this.positions.length * 100);
+        $('.js-timeline-current').css('width', width + '%');
+
+      } else {
+        $('.js-time-total').html(this.msToReadable(this.p_relDuration));
+
+        $('.js-time-current').html(this.msToReadable(this.time));
+        var width = (this.time /this.p_relDuration * 100);
+        $('.js-timeline-current').css('width', width + '%');
+      }
+
+    },
+
+    draw: function(){
+      this.update();
+
+      var feature = this.positions[this.index];
       var coords = feature.geometry.coordinates;
       var className = this.getMarkerIconClassName(feature) + ' focus';
       var icon = new L.DivIcon({className: className});
@@ -1188,163 +1277,47 @@ define([
     },
     
     frame: function(){
-      
-
       if(this.time >= this.p_relDuration) {
         clearInterval(this.timer);
         this.time = 0;
         return;
       }
 
-      if(this.autoNext){
-        
-        var total = this.geoJson.features.length * this.autoNextSpeed;
-        $('.js-infos-auto-next .js-time-total').html(this.msToReadable(total));
-
-        var current = Object.keys(this.p_indexedPositions).indexOf(String(this.time)) * 1000 || 0;
-
-        $('.js-infos-auto-next .js-time-current').html(this.msToReadable(current));
-
-        var width = (current /(this.geoJson.features.length * 1000) * 100);
-        $('.js-timeline-current').css('width', width + '%');
-
-      } else {
-
-        $('.js-time-current').html(this.msToReadable(this.time));
-        var width = (this.time /this.p_relDuration * 100);
-        $('.js-timeline-current').css('width', width + '%');
-
-      }
-
-      if(this.p_indexedPositions[this.time]) {
-        this.draw(this.p_indexedPositions[this.time])
-      }
-      this.time += this.offset;
-
-    },
-
-    handleAutoNext: function(){
-      $('.js-player-auto-next').toggleClass('btn-success active');
-      this.autoNext  = !this.autoNext;
-      this.play();
-    },
-
-    handlePlayPause: function(){
-      this.playing = !this.playing;
-      if(this.playing){
-        this.play();
-      } else {
-        this.pause();
-      }
-    },
-
-    play: function(e){
-      var _this= this;
-      $('.js-player-play-pause>i').addClass('reneco-pause').removeClass('reneco-play');
-      clearInterval(this.timer);
-      clearInterval(this.autoNextTimer);
-      $('.js-timeline-current').css('transition', 'none');
-
-
-      if(this.autoNext){
-        this.autoNextTimer = setInterval(function(){
-          _this.next(true);
-        }, this.autoNextSpeed || 1000);
-      } else {
-        this.timer = setInterval(function(){
-          _this.frame();
-        }, this.offset);
+      if(this.time == this.positions[this.index + 1].time){
+        this.index++;
+        this.draw();
       }
       
+      this.update();
+
+      this.time += this.offset;
     },
-
-    handleAutoNextSpeed: function(e){
-      var value = $(e.currentTarget).val();
-      value *= -1;
-      this.autoNextSpeed = value;
-      this.play();
-    },
-
-    
-    handleSpeed: function(e){
-      var value = $(e.currentTarget).val();
-
-      this.computeInitialData(this.geoJson, value);
-    },
-
-    clearMarkers: function(){
-      for (var i = 0; i < this.p_markers.length; i++) {
-        this.playerLayer.removeLayer(this.p_markers[i])
-      }
-    },
-
-    travel: function(e){
-      var rapport =  e.offsetX / e.target.clientWidth;
-
-      this.clearMarkers();
-
-      if(this.autoNext){
-        var index = Math.floor(Object.keys(this.p_indexedPositions).length * rapport );
-        this.time = Object.keys(this.p_indexedPositions)[index];
-        this.time = parseInt(this.time);
-
-      } else {
-        this.time = Math.floor((this.p_relDuration * rapport) / 10) * 10;
-      }
-
-      this.frame();
-    },
-
-    pause: function(){
-      $('.js-player-play-pause>i').removeClass('reneco-pause').addClass('reneco-play');
-      $('.js-timeline-current').css('transition', 'width .2s');
-      clearInterval(this.autoNextTimer);
-      clearInterval(this.timer);
-      this.playing = false;
-    },
-
-
 
     prev: function(){
-      
-      if(this.time < 0){
+      // this.pause();
+
+      if(this.time < 0 || this.index === 0){
+        console.log('<0');
         return;
       }
-
-      this.pause();
       this.clearMarkers();
 
-      var arr = [];
+      this.index--;
+      this.time = this.positions[this.index].time;
 
-      for (var key in this.p_indexedPositions) {
-        arr.push(key);
-      }
-
-      for (var i=arr.length-1; i>=0; i--) {
-        var key = arr[i];
-        if(parseInt(key) < parseInt(this.time)) {
-          this.time = parseInt(key);
-          break;
-        }
-      }
-      
-      this.frame();
-      this.time -= 2 * this.offset;
+      this.draw();
     },
 
     next: function(pass){
-
-      if(pass !== true){
-        this.pause();
+      if(this.time >= this.p_relDuration || this.index + 1 >= this.positions.length){
+        this.clearMarkers();
+        this.time = 0;
+        this.index = 0;
+      } else {
+        this.index++;        
+        this.time = this.positions[this.index].time;
       }
-
-      for (var key in this.p_indexedPositions) {
-        if(parseInt(key) > parseInt(this.time)){
-          this.time = parseInt(key);
-          break;
-        }
-      }
-      this.frame();
+      this.draw();
     },
 
     toggleTrack: function(e){
@@ -1352,10 +1325,11 @@ define([
     },
 
     stop: function(){
+      this.index = 0;
+      this.time = 0;
       this.clearMarkers();
       this.pause();
-      this.time = 0;
-      this.frame();
+      this.draw();
     },
 
     bindPlayer: function(geoJson){
