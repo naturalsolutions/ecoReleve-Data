@@ -213,6 +213,45 @@ define([
 
         //e.g types
         var comparator = function (valueA, valueB, nodeA, nodeB, isInverted) {
+          //TODO need refact , must be a better way to do that (pb with displayvalue and new checkbox)
+          if( this.type === 'Checkbox') { // hack to handle sort with new checkbox
+            if( nodeA.data[this.field] != null ) {
+              valueA =  nodeA.data[this.field];
+            }
+            else {
+              valueA = null;
+            }
+            if( nodeB.data[this.field] != null ) {
+              valueB =  nodeB.data[this.field];
+            }
+            else {
+            valueB = null;
+            }
+          if( typeof(valueA) === 'number' || typeof(valueB) === 'number' ) { //number
+            if( valueA === null && valueB === null ) {
+              return 0;
+            }
+            if( valueA === null) {
+              if(isInverted) {
+                return -1;
+              }
+              else {
+                return 1;
+              }
+            }
+            if(valueB === null ) {
+              if (isInverted) {
+                return 1;
+              }
+              else {
+                return -1;
+              }
+            }
+
+            return valueA - valueB;
+          }
+          }
+
           var value1;
           var value2;
 

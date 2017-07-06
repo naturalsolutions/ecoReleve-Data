@@ -1,0 +1,14 @@
+UPDATE [ModuleForms]
+	SET [DefaultValue] = '1'
+	WHERE InputType = 'Checkbox'
+	AND Name like 'identity_sure'
+	AND TypeObj in (  SELECT id FROM ProtocoleType 
+					WHERE
+					Name in ('Vertebrate_group','Track_clue')
+					 )
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('135_CONF_Update_checkBox_defaultValue_for_identiry_sure_true',GETDATE(),(SELECT db_name()))
+
+
+GO

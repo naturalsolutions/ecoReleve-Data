@@ -90,6 +90,9 @@ define([
 		};
 
 		CustomEditor.prototype.getValue = function(){
+			if (this.element.schema.type ==='Checkbox') { //hack
+				return this.element.getValue();
+			}
 			if(this.element.getValue() === "" || this.element.getValue() === null){
 				return;
 			}
@@ -192,12 +195,22 @@ define([
 		CheckboxEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new Form.editors.Checkbox(options);
 		  this.element = this.bbfe.render();
+			if( this.params.eGridCell.className.indexOf('ag-cell-error') == -1 ) { //hack when cell in error no need to add margin left
+				this.element.$el.find('label').css({'margin-left':'10px'})
+			}
+
+			
+		};
+
+			CheckboxEditor.prototype.afterGuiAttached = function () {
+		  this.element.$el.focus();
+		  this.element.$el.find('label').focus();
 		};
 
 		CheckboxEditor.prototype.getGui = function(){
-			this.element.$el.css({
-				'margin': '5px 10px'
-			});
+			//  this.element.$el.css({
+			//  	'margin-left': '10px'
+			//  });
 		  return this.element.el;
 		};
 
