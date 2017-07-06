@@ -214,7 +214,7 @@ define([
         //e.g types
         var comparator = function (valueA, valueB, nodeA, nodeB, isInverted) {
           //TODO need refact , must be a better way to do that (pb with displayvalue and new checkbox)
-          if( this.type === 'Checkbox') { // hack to handle sort with new checkbox
+          if( this.type === 'StateBox') { // hack to handle sort with new checkbox
             if( nodeA.data[this.field] != null ) {
               valueA =  nodeA.data[this.field];
             }
@@ -257,7 +257,7 @@ define([
 
           if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()  ) { //detect date
             //then convert it to timestamp (number)
-            if(valueA) { 
+            if(valueA) {
               valueA = moment(valueA , "DD/MM/YYYY HH:mm:ss" ).valueOf();
             }
             if(valueB){
@@ -365,6 +365,11 @@ define([
           case 'Checkbox':
             col.cellEditor = Editors.CheckboxEditor;
             col.cellRenderer = Renderers.CheckboxRenderer;
+            break;
+
+          case 'StateBox':
+            col.cellEditor = Editors.StateBoxEditor;
+            col.cellRenderer = Renderers.StateBoxRenderer;
             break;
           case 'Number':
             col.cellEditor = Editors.NumberEditor;

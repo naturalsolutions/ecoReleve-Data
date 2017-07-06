@@ -155,7 +155,7 @@ class ModuleForms(Base):
             self.dto['fieldClass'] = str(self.EditClass) + ' ' + CssClass
         else:
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
-            
+
         # default value
         default = self.DefaultValue
         if default is not None:
@@ -170,7 +170,7 @@ class ModuleForms(Base):
 
         return self.dto
 
-    def Checkbox(self):
+    def StateBox(self):
         if self.dto['defaultValue'] and self.dto['defaultValue'].isdigit():
             self.dto['defaultValue'] = int(self.dto['defaultValue'])
 
@@ -336,7 +336,7 @@ class ModuleForms(Base):
         'AutocompTreeEditor': InputThesaurus,
         'AutocompleteEditor': InputAutocomplete,
         'GridRanged': GridRanged,
-        'Checkbox' : Checkbox
+        'StateBox' : StateBox
     }
 
 
