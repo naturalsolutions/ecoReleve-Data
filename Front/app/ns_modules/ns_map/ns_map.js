@@ -138,8 +138,7 @@ define([
         position:'topright'
       }).addTo(this.map);
 
-      this.lControl = L.control.layers(null, null, {collapsed:false, position:'topleft'});
-      this.lControl.addTo(this.map);
+
 
       this.google.defered  = this.google();
       //once google api ready, (fetched it once only)
@@ -245,11 +244,26 @@ define([
           },
         });
 
-        _this.googleLayer = new CustomGMap('HYBRID', {unloadInvisibleTiles: true,
+        var relief = new CustomGMap('TERRAIN', {
+          unloadInvisibleTiles: true,
+          updateWhenIdle: true,
+          reuseTiles: true
+        });        
+        var hybrid = new CustomGMap('HYBRID', {
+          unloadInvisibleTiles: true,
           updateWhenIdle: true,
           reuseTiles: true
         });
-        _this.map.addLayer(_this.googleLayer);
+        var baseMaps = {
+          'relief': relief,
+          'hybrid': hybrid
+        };
+
+        _this.lControl = L.control.layers(baseMaps, null, {collapsed:false, position:'topleft'});
+        _this.lControl.addTo(_this.map);
+
+        _this.map.addLayer(hybrid);
+
       }).fail(function(){
         console.error('Google maps library failed to load');
       });
