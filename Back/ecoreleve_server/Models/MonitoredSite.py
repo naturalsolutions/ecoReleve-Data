@@ -11,7 +11,10 @@ from sqlalchemy import (
     and_,
     func,
     desc,
-    select)
+    select,
+    event,
+    text,
+    bindparam)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
@@ -207,6 +210,16 @@ class MonitoredSite (Base, ObjectWithDynProp):
             else:
                 self.MonitoredSitePositions.append(self.newPosition)
 
+
+@event.listens_for(MonitoredSite, 'before_insert')
+@event.listens_for(MonitoredSite, 'before_update')
+def updateRegion(mapper, connection, target):
+        sitePosition = target.newPosition
+        stmt = text('''SELECT dbo.[fn_GetRegionFromLatLon] (:lat,:lon)
+        ''').bindparams(bindparam('lat', sitePosition.LAT),
+                        bindparam('lon', sitePosition.LON))
+        regionID = connection.execute(stmt).scalar()
+        target.FK_Region = regionID
 
 class MonitoredSiteDynProp (Base):
 
