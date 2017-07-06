@@ -273,7 +273,7 @@ define([
               return;
             }
             var data = this.loadData();
-            var stationDate = new moment(data.StartDate, 'DD/MM/YYYY HH:mm:ss');
+
             $.ajax({
               context: this,
               url: 'monitoredSites/'+id_+'/history',
@@ -284,10 +284,13 @@ define([
                 var nextDate = new moment(next.StartDate, 'DD/MM/YYYY HH:mm:ss').valueOf();
                 return minDate < nextDate ? min : next;
               });
-              var minPositionDate = new moment(minPosition.StartDate, 'DD/MM/YYYY HH:mm:ss');
-              if (stationDate.valueOf() < minPositionDate.valueOf()){
-                _this.ruleOnchange(minPosition);
+              if(data.StartDate){
+                var stationDate = new moment(data.StartDate, 'DD/MM/YYYY HH:mm:ss');
+                var minPositionDate = new moment(minPosition.StartDate, 'DD/MM/YYYY HH:mm:ss');
+                if (stationDate.valueOf() < minPositionDate.valueOf()){
+                  _this.ruleOnchange(minPosition);
                 }
+              }
               }).fail(function() {
                 // console.error('an error occured');
                 // _this.histoMonitoredSite.error = true;
