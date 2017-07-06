@@ -6,7 +6,6 @@ GO
 
 
 UPDATE [dbo].[ObservationDynProp]
-   SET [TypeProp] = 'Time'
  WHERE 
  Name = 'identification_year'
 GO
