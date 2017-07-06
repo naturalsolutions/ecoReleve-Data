@@ -479,8 +479,7 @@ Form.validators = (function() {
     regexp: 'Invalid',
     email: 'Invalid email address',
     url: 'Invalid URL',
-    Checkbox : 'Cannot be null'
-,    match: _.template('Must match field "<%= field %>"', null, Form.templateSettings)
+    match: _.template('Must match field "<%= field %>"', null, Form.templateSettings)
   };
 
   validators.required = function(options) {
@@ -500,21 +499,6 @@ Form.validators = (function() {
       if (value === null || value === undefined || value === false || value === '') return err;
     };
   };
-
-  validators.Checkbox = function(options) {
-    options = _.extend({
-      type: 'Checkbox',
-      message: this.errMessages.Checkbox
-    }, options);
-  return function Checkbox(value,formValues) {
-    if (!options.nullable && value === null) {
-      return {
-        type: options.type
-        //message: _.isFunction(options.message) ? options.message(options) : options.message
-      }
-    }
-  };
-};
 
   validators.regexp = function(options) {
     if (!options.regexp) throw new Error('Missing required "regexp" option for "regexp" validator');
@@ -1473,228 +1457,57 @@ Form.editors.Checkbox = Form.editors.Base.extend({
 
   defaultValue: false,
 
-  //tagName: 'div',
-  template: '<span data-editor>\
-            <input id="<%=id%>" name="<%=name%>" class="form-control" type="checkbox" disabled />\
-            <label for="<%=id% data-toggle="tooltip" ></label>\
-            <div data-error></div>\
-            <div></div>\
-        </span>',
+  tagName: 'input',
 
   events: {
-    'click label':  function(e) {
-      if (this.schema.editable) {
-        this.change(e);
-      } else {
-        e.preventDefault();
-        e.stopPropagation();
-      } 
-     // this.trigger('change', this);
+    'click':  function(event) {
+      this.trigger('change', this);
     },
-    'keydown label' : function(e) {
-      if (this.schema.editable) {
-        this.keyup(e);
-      } else {
-        e.preventDefault();
-        e.stopPropagation();
-      } 
-    },
-    'focus label':  function(e) {
-    if (this.schema.editable) {
+    'focus':  function(event) {
       this.trigger('focus', this);
-       } else {
-        e.preventDefault();
-        e.stopPropagation();
-      } 
     },
-    'blur label':   function(e) {
-      if (this.schema.editable) {
+    'blur':   function(event) {
       this.trigger('blur', this);
-      } else {
-        e.preventDefault();
-        e.stopPropagation();
-      } 
     }
   },
 
   initialize: function(options) {
     Form.editors.Base.prototype.initialize.call(this, options);
- 
+
     this.$el.attr('type', 'checkbox');
-    if ( options.schema.defaultValue ) { // get defaulValue possible undefined,NULL,0,1
-      this.value = parseInt(options.schema.defaultValue);
-    }
-    else {
-       this.value = null;
-    }
- 
-    //  this.nullable = false;
-    this.nullable = true;
-
-
-    if ( typeof(this.model.get(this.key)) != 'undefined'  ) { // get old value 
-      this.value = this.model.get(this.key);
-    }
-//    this.oldValue = null;
   },
 
   /**
    * Adds the editor to the DOM
    */
   render: function() {
-    var _this = this;
-    var $el = _.template( this.template, {
-            id: this.id || this.cid,
-            name : this.key
-    });
-    this.setElement($el);
-    this.$input =this.$el.find('input') 
-    this.$label = this.$el.find('label');
-    this.$label.on('blur' , function () {
-     // _this.form.fields[_this.key].validate();
-     _this.validate();
-    });
-    this.$label.tooltip({
-                        "trigger" : 'manual',
-                         "placement" :"bottom",
-                         "title" : "Cannot be null"
-                        });
-    if( this.schema.editable) {
-      this.$label.prop('tabindex',"0");
-    }
-    else {
-       this.$label.addClass('disabled');
-    }
     this.setValue(this.value);
 
     return this;
   },
 
   getValue: function() {
-
-    return this.value;
-    //return this.$el.prop('checked');
+    return this.$el.prop('checked');
   },
 
   setValue: function(value) {
-    switch(value) {
-      case 1 : {
-        this.$input.prop('checked', true);
-        this.$label.prop('title' , 'True')
-        break;
-      }
-      case 0 : {
-        this.$input.prop('checked', false);
-        this.$label.prop('title' , 'False')
-        break;
-      }
-      default : {
-        this.$input.prop('indeterminate', true);
-        this.$label.prop('title' , 'Null')
-        break;
-      }
-
+    if (value) {
+      this.$el.prop('checked', true);
+    }else{
+      this.$el.prop('checked', false);
     }
-  },
-
-    validate: function() {
-
-    var $el = this.$el,
-        error = null,
-        value = this.getValue(),
-       // formValues = this.form ? this.form.getValue(this.key) : {},
-        formValues = {},
-        validators = this.validators,
-        _this = this,
-        getValidator = this.getValidator;
-
-    if (validators) {
-      //Run through validators until an error is found
-      _.every(validators, function(validator) {
-        error = getValidator(validator)(value, formValues);
-        if (typeof(error) != 'undefined') {
-        _this.$label.tooltip('show');
-        }
-        return error ? false : true;
-      });
-    }
-    
-    return error;
-  },
-  
-
-  keyup : function (e) {
-       if(e.keyCode == 32){ //spacebar
-        this.change(e);
-    }
-  },
-
-  change: function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    //TODO if was in error and tooltip show we gonna close the tooltip and remove class error
-    if (!this.schema.editable) {
-      return;
-    }
-    // ... => false => indeterminate => true => ...
-     this.$label.tooltip('hide');
-    if( this.nullable ) {
-        switch(this.value) {
-          case 1 : { //de true on passe a false
-          
-            this.$input.prop('indeterminate', false);
-            this.$input.prop('checked', false);
-            this.$label.prop('title' , 'False')
-            this.value = 0;
-            break;
-          }
-          case 0 : {//de false on passe a indeterminate
-            this.$input.prop('checked', false);
-            this.$input.prop('indeterminate', true);
-            this.$label.prop('title' , 'Null')
-            this.value = null
-            break;
-          }
-          default : {// de indeterminate on passe a true
-            this.$input.prop('checked', true); 
-            this.$input.prop('indeterminate', false);
-            this.$label.prop('title' , 'True')
-            this.value = 1;
-            break;
-          }
-        }
-      }
-      else {
-        switch(this.value) {
-          case 1 : { //de true on passe a false
-          
-            this.$input.prop('indeterminate', false);
-            this.$input.prop('checked', false);
-            this.value = 0;
-            break;
-          }
-          default : {// de false on passe a true
-            this.$input.prop('indeterminate', false);
-            this.$input.prop('checked', true); 
-            this.value = 1;
-            break;
-          }
-        }
-      }
-
   },
 
   focus: function() {
     if (this.hasFocus) return;
 
-    this.$input.focus();
+    this.$el.focus();
   },
 
   blur: function() {
     if (!this.hasFocus) return;
 
-    this.$input.blur();
+    this.$el.blur();
   }
 
 });
