@@ -6,6 +6,7 @@ GO
 
 
 UPDATE [dbo].[ObservationDynProp]
+   SET [TypeProp] = 'Date Only'
  WHERE 
  Name = 'identification_year'
 GO
