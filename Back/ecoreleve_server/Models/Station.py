@@ -130,10 +130,16 @@ class Station(Base, ObjectWithDynProp):
         if 'FK_MonitoredSite' in DTOObject:
             site = int(DTOObject['FK_MonitoredSite']) if isNumeric(DTOObject['FK_MonitoredSite']) else None
         dateSta = datetime.strptime(DTOObject['StationDate'], '%d/%m/%Y %H:%M:%S')
-        equipmentExist = self.existingProtocolEquipment()
+        equipmentSiteExist = self.existingProtocolEquipmentSite()
+        equipmentIndivExist = self.existingProtocolEquipmentIndiv()
 
-        if equipmentExist and (
-            self.FK_MonitoredSite != site or self.StationDate != dateSta):
+        if equipmentSiteExist and (
+            self.FK_MonitoredSite != site or
+            self.StationDate != dateSta or
+            self or str(self.LAT) != str(DTOObject['LAT']) or
+            str(self.LON) != str(DTOObject['LON'])):
+            allow = False
+        if equipmentIndivExist and (self.StationDate != dateSta):
             allow = False
         return allow
 
@@ -141,11 +147,9 @@ class Station(Base, ObjectWithDynProp):
         if self.checkUniqueStation(DTOObject):
             ObjectWithDynProp.updateFromJSON(self, DTOObject, startDate)
 
-    def existingProtocolEquipment(self):
+    def existingProtocolEquipmentSite(self):
         protolist = list(filter(lambda x: x.GetType().Name.lower() in ['site_equipment',
-                                                                       'site_unequipment',
-                                                                       'individual_equipment',
-                                                                       'individual_unequipment'], self.Observations))
+                                                                       'site_unequipment'], self.Observations))
         return len(protolist) > 0
     
     def checkUniqueStation(self, DTOObject):
@@ -163,6 +167,10 @@ class Station(Base, ObjectWithDynProp):
             raise ErrorCheckUniqueStation()
         return True
 
+    def existingProtocolEquipmentIndiv(self):
+        protolist = list(filter(lambda x: x.GetType().Name.lower() in ['individual_equipment',
+                                                                       'individual_unequipment'], self.Observations))
+        return len(protolist) > 0
 
 @event.listens_for(Station, 'before_insert')
 @event.listens_for(Station, 'before_update')
