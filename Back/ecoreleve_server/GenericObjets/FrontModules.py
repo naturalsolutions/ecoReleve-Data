@@ -179,8 +179,12 @@ class ModuleForms(Base):
                 for key in row.keys():
                     temp[key] = row[key]
                 self.dto['options'].append(temp)
-            self.dto['options'] = sorted(
-                self.dto['options'], key=lambda k: k['label'])
+            sortedSelect = sorted(
+                [x for x in self.dto['options'] if x['val'] not in [-1,0]], key=lambda k: k['label'])
+
+            self.dto['options'] = [x for x in self.dto['options'] if x['val'] in [-1,0]]
+            self.dto['options'].extend(sortedSelect)
+
 
     def InputLNM(self):
         ''' build ListOfNestedModel input type :
