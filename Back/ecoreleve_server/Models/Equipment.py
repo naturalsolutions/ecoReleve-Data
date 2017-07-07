@@ -108,7 +108,7 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
         else:
             deploy = 1
 
-        fk_sensor = target.getProperty('FK_Sensor')
+        fk_sensor = int(target.getProperty('FK_Sensor'))
         if 'individual' in typeName.lower():
             fk_indiv = target.getProperty('FK_Individual')
             fk_site = None
@@ -141,7 +141,7 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
 
         elif (isinstance(target.Equipment, Equipment)
                 and target.Equipment.FK_Sensor == fk_sensor
-                and fk_indiv is not None):
+                ):
             target.Equipment.FK_Individual = fk_indiv
         else:
             raise(ErrorAvailable(availability))
