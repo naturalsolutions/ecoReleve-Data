@@ -129,15 +129,15 @@ class Station(Base, ObjectWithDynProp):
         site = None
         if 'FK_MonitoredSite' in DTOObject:
             site = int(DTOObject['FK_MonitoredSite']) if isNumeric(DTOObject['FK_MonitoredSite']) else None
-        dateSta = datetime.strptime(DTOObject['StationDate'], '%d/%m/%Y %H:%M:%S')
+        dateSta = dateParser(DTOObject['StationDate'])
         equipmentSiteExist = self.existingProtocolEquipmentSite()
         equipmentIndivExist = self.existingProtocolEquipmentIndiv()
 
         if equipmentSiteExist and (
             self.FK_MonitoredSite != site or
             self.StationDate != dateSta or
-            self or str(self.LAT) != str(DTOObject['LAT']) or
-            str(self.LON) != str(DTOObject['LON'])):
+            float(self.LAT) != float(DTOObject['LAT']) or
+            float(self.LON) != float(DTOObject['LON'])):
             allow = False
         if equipmentIndivExist and (self.StationDate != dateSta):
             allow = False
@@ -153,11 +153,15 @@ class Station(Base, ObjectWithDynProp):
         return len(protolist) > 0
     
     def checkUniqueStation(self, DTOObject):
+        curID = DTOObject.get('ID', None)
+        if not curID:
+            curID = 0
         stmt = text(""" DECLARE @code varchar(250), @id_indiv int, @result int;
                             exec [dbo].[pr_checkUniqueStation]"""
-                            + """ :lat, :lon, :date, :fieldActivity , @result OUTPUT;
+                            + """:stationID, :lat, :lon, :date, :fieldActivity , @result OUTPUT;
                             SELECT @result;"""
-                            ).bindparams(bindparam('lat', DTOObject.get('LAT',None)),
+                            ).bindparams(bindparam('stationID', curID),
+                                         bindparam('lat', DTOObject.get('LAT',None)),
                                          bindparam('lon', DTOObject.get('LON',None)),
                                          bindparam('date', dateParser(DTOObject['StationDate'])),
                                          bindparam('fieldActivity', DTOObject['fieldActivityId']),
