@@ -225,12 +225,15 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
             linkedPropName = linkProp['LinkedField'].replace('@Dyn:', '')
             linkedSource = self.getProperty(
                 linkProp['LinkSourceID'].replace('@Dyn:', ''))
-            
+
+            # remove linked field if target object is different of previous
+            if previousState and str(linkedSource) != str(previousState.get(linkProp['LinkSourceID'])):
+                self.deleteLinkedField(previousState=previousState)
+
             try:
                 linkedObj = self.session.query(linkedEntity).filter(
                     getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
             except NoResultFound:
-                self.deleteLinkedField(previousState=previousState)
                 continue
 
             if linkedObj in entitiesToUpdate:
