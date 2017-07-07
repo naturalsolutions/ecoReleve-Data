@@ -1,5 +1,5 @@
   update g set QueryName = NULL
-    FROM [EcoReleve_ECWP].[dbo].[ModuleGrids] g
+    FROM [ModuleGrids] g
   where Module_ID = 8 and TypeObj = 2 
   and Name='Transmitter_Type'
 GO
