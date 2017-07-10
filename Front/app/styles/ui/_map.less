@@ -185,7 +185,7 @@
 	padding: 10px;
 	transition: all .5s;
 	box-shadow: 0 1px 5px rgba(0,0,0,0.5);
-	background-color: rgba(255,255,255,.9);
+	background-color: rgba(255,255,255,1);
 	border-radius: 3px;
 	border: 1px solid #ccc;
 	line-height: 18px;
@@ -218,23 +218,39 @@
 	}
 }
 
-.leaflet-bottom.leaflet-right{
+.leaflet-bottom{
 	margin-bottom: 0px!important;
+	transition: margin-bottom .1s ease;
 }
 
+.leaflet-bottom.active-player{
+	margin-bottom: 150px!important;
+}
 
 .player{
 	padding: 15px 0px;
 	height: 150px;
+	background: white;
+	border-top: 1px solid rgb(150,150,150);
+	position: absolute;
+	z-index: 1000;
+	bottom: -150px;
+	width: 100%;
+	transition: bottom .1s ease;
+	&.active{
+		bottom: 0px;
+	}
 	.timeline{
 		padding: 5px 15px;
-		position: relative
+		position: relative;
+		overflow: hidden;
 	}
 	.timeline-total{
 		position: relative;
 		cursor: pointer;
 		height: 15px;
-		background: grey;
+		background: rgb(187, 185, 185);
+		border: 1px solid rgb(150,150,150);
 		width: 100%;	
 	}
 	.timeline-current{

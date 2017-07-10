@@ -983,8 +983,9 @@ define([
     },
 
     showPlayer: function(){
-      $('#map').css('height', 'calc( 100% - 150px )');
-      $('#player').removeClass('hidden');
+      $('.js-player-chevron').toggleClass('reneco-chevron_top reneco-chevron_bottom');
+      $('#player').addClass('active');
+      $('.leaflet-bottom').toggleClass('active-player');
       this.map.removeLayer(this.clusterLayer);
       this.map.addLayer(this.playerLayer);
       this.degraded();
@@ -992,9 +993,10 @@ define([
     },
 
     hidePlayer: function(){
-      this.stop();
-      $('#map').css('height', '100%');
-      $('#player').addClass('hidden');
+      $('.leaflet-bottom').toggleClass('active-player');
+      $('.js-player-chevron').toggleClass('reneco-chevron_top reneco-chevron_bottom');
+      $('#player').removeClass('active');
+      this.pause();
       this.map.addLayer(this.clusterLayer);
       this.map.removeLayer(this.playerLayer);
     },
@@ -1016,22 +1018,26 @@ define([
         
         var div = L.DomUtil.create('div', 'js-toggle-ctrl-player info-legend');
         
-        div.innerHTML = '<button class="js-player-toggle btn"><i class="reneco reneco-play"></i> location player</button>';
+        div.innerHTML = '<button class="js-player-toggle btn"><i class="js-player-chevron reneco reneco-chevron_top"></i> location player</button>';
         return div;
       };
 
       togglePlayer.addTo(this.map);
 
       $('.js-player-toggle').on('click', function(){
-        if($('#player').hasClass('hidden')){
-          _this.showPlayer();
-        } else {
+        if($('#player').hasClass('active')){
           _this.hidePlayer();
+        } else {
+          _this.showPlayer();
         }
       });
+      this.parentContainer = $($('#map').parent());
+      this.parentContainer.css('overflow', 'hidden');
 
-      $('#map').parent().append('\
-        <div id="player" class="player hidden">\
+      
+
+      this.parentContainer.append('\
+        <div id="player" class="player">\
         <div class="col-xs-12">\
           From <span class="js-player-first-date"></span>\
           <span class="pull-right">To <span class="js-player-last-date"></span></span>\
@@ -1046,11 +1052,11 @@ define([
           <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
         </div>\
         <div class="col-xs-5">\
-          <button title="previous" class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
+          <button title="previous location" class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
           <button title="play/pause" class="js-player-play-pause btn"><i class="reneco reneco-play"></i></button>\
           <button title="stop" class="js-player-stop btn"><i class="glyphicon glyphicon-stop"></i></button>\
-          <button title="next" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
-          <button title="display positions every x times (default: 1 position/second)" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Auto next mode</button> \
+          <button title="next location" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
+          <button title="display locations every x times (default: 1 location/second)" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Auto next mode</button> \
         </div>\
         <div class="col-xs-4 no-padding">\
           <div class="pull-left">\
@@ -1167,6 +1173,8 @@ define([
       if(this.playing){
         this.play();
       }
+      this.draw();
+
     },
 
     handlePlayPause: function(){
