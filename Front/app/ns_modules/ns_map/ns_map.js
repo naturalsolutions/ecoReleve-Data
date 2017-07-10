@@ -1242,6 +1242,9 @@ define([
       if(this.autoNext){
         this.index = Math.round((this.locations.length * rapport));
         this.time = this.locations[this.index].time;
+        clearInterval(this.autoNextTimer);
+        this.draw();
+        this.play();
       }
 
       this.updateInfos();
