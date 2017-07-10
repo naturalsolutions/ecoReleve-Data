@@ -162,7 +162,7 @@ define([
     },
 
     onDestroy: function(){
-      console.log('gogogo');
+      // console.log('gogogo');
     },
 
     swal: function(opt, type, callback) {

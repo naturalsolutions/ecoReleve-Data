@@ -218,25 +218,40 @@
 	}
 }
 
+.leaflet-bottom.leaflet-right{
+	margin-bottom: 0px!important;
+}
+
 
 .player{
 	padding: 15px 0px;
 	height: 150px;
 	.timeline{
-		padding: 0px 15px;
+		padding: 5px 15px;
 		position: relative
 	}
 	.timeline-total{
+		position: relative;
 		cursor: pointer;
-		height: 10px;
+		height: 15px;
 		background: grey;
 		width: 100%;	
 	}
 	.timeline-current{
-		height: 10px;
+		height: 100%;
 		background: red;
 		width: 0%;
 	}
+	label{
+		padding: 5px;
+		padding-right: 15px;
+		cursor: pointer;
+	}
+	.range{
+		padding-left: 0px;
+		padding-top: 6px;
+	}
+
 }
 
 // input[type="range"]:before {
