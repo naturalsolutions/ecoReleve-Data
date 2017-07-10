@@ -7,6 +7,7 @@ from pyramid import threadlocal
 from ..utils.parseValue import find, isEqual, parser
 from abc import abstractmethod
 from sqlalchemy.orm.exc import *
+from traceback import print_exc
 
 
 analogType = {'String': 'ValueString',
@@ -248,6 +249,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
     def deleteLinkedField(self, useDate=None, previousState=None):
         session = dbConfig['dbSession']()
+
         if useDate is None:
             useDate = self.linkedFieldDate()
 
@@ -275,6 +277,5 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
                 session.commit()
                 session.close()
-            except:
-                pass
-
+            except Exception as e:
+                raise e

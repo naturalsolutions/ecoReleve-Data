@@ -177,6 +177,8 @@ class Observation(Base, ObjectWithDynProp):
         result[typeName] = subObsList
         return result
 
+    def beforeDelete(self):
+        self.LoadNowValues()
 
 @event.listens_for(Observation, 'after_delete')
 def unlinkLinkedField(mapper, connection, target):
