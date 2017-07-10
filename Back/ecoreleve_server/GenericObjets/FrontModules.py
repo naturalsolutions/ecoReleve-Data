@@ -148,7 +148,8 @@ class ModuleForms(Base):
                 self.dto['validators'].append("required")
             else:
                 self.dto['validators'].append("required")
-            self.dto['title'] = self.dto['title'] + ' *'
+            if self.dto['title']:
+                self.dto['title'] = self.dto['title'] + ' *'
 
             # TODO changer le validateur pour select required (valeur <>-1)
         if self.Editable:
