@@ -1,7 +1,6 @@
 
 /**
   TODO:
-  - fitBounds
   - find a way to automaticly destroy the map with the related view
   ----> replace the prototype by a marionnette view?
 **/
@@ -120,10 +119,8 @@ define([
       this.selectedIcon = new L.DivIcon({className: 'custom-marker selected'});
       this.icon = new L.DivIcon({className: 'custom-marker'});
 
-      this.setCenter(this.geoJson);
-
       this.map = new L.Map(this.elem, {
-        center: this.center ,
+        center: [33, 33],
         zoom: this.zoom,
         zoomControl: false,
         minZoom: 2,
@@ -137,8 +134,6 @@ define([
       L.control.zoom({
         position:'topright'
       }).addTo(this.map);
-
-
 
       this.google.defered  = this.google();
       //once google api ready, (fetched it once only)
@@ -155,7 +150,6 @@ define([
           _this.ready();
         }
       });
-
     },
 
 
@@ -173,26 +167,44 @@ define([
         url: url,
         contentType:'application/json',
         type:'GET',
+        context: this,
       }).done(function(geoJson) {
-          if (_this.cluster){
-            _this.initClusters(geoJson);
-            _this.geoJson = geoJson;
+          this.geoJson = geoJson;
 
-            if(_this.player){
-              _this.firstInit(_this.geoJson);
+          if (this.cluster){
+            this.initClusters(geoJson);
+
+            if(this.player){
+              this.firstInit();
             }
-            _this.ready();
+            this.ready();
 
-          }else{
-            _this.initLayer(geoJson);
-            _this.geoJson = geoJson;
-            
+          } else {
+            this.initLayer(geoJson);
+            this.geoJson = geoJson;
           }
+
+          this.fitBound();
+
       }).fail(function(msg) {
           console.error( msg );
       });
     },
-
+    
+    fitBound: function(){
+      if(this.geoJson){
+        if(this.geoJson.features.length){
+          var arrayOfLatLngs = [];
+          for (var i = 0; i < this.geoJson.features.length; i++) {
+            arrayOfLatLngs.push(this.geoJson.features[i]['geometry']['coordinates']);
+          }
+          var bounds = new L.LatLngBounds(arrayOfLatLngs);
+          this.map.fitBounds(bounds);
+          return;
+        }
+      }
+      
+    },
 
     ready: function(){
       this.setTotal(this.geoJson);
@@ -345,29 +357,10 @@ define([
       legend.addTo(this.map);
     },
 
-
-    setCenter: function(geoJson){
-      if(!geoJson || (geoJson.features.length == 0) ){
-        this.center = new L.LatLng(30,0);
-      }else{
-        this.center = new L.LatLng(
-          geoJson.features[0].geometry.coordinates[0],
-          geoJson.features[0].geometry.coordinates[1]
-        );
-      }
-      if(this.map){
-
-        //todo : 2 optimize, leafleft center function bugs
-        this.map.panTo(this.center, {animate: false});
-      }
-    },
-
     initLayer: function(geoJson){
       if(geoJson){
         this.clusterLayer = new L.FeatureGroup();
         this.setMarkerListFromGeoJson(geoJson);
-      }else{
-        this.setCenter();
       }
     },
 
@@ -391,7 +384,7 @@ define([
 
     setMarkerListFromGeoJson: function(geoJson){
       var _this = this;
-      this.setCenter(geoJson);
+      
       var marker, prop;
       var icon;
       var i =0;
@@ -442,8 +435,6 @@ define([
         }else{
           console.warn('latlng null');
         }
-
-
       }
 
       this.markerList = markerList;
@@ -532,7 +523,6 @@ define([
       for (var i = childClusters.length - 1; i >= 0; i--) {
         this.updateClusterStyle(childClusters[i], all);
         this.updateAllClusters(childClusters[i], all);
-
       }
 
       return;
@@ -954,17 +944,15 @@ define([
         this.addBBox(this.clusterLayer);
       }
       this.setTotal(geoJson);
+      this.fitBound();
     },
-
-
 
 
 
     //Player
     sortByDate: function(geoJson){
-      var format = 'DD/MM/YYYY HH:mm:ss';
       geoJson.features.sort( function(a, b) {
-        return moment(a.properties.Date, format) - moment(b.properties.Date, format)
+        return moment(a.properties.Date) - moment(b.properties.Date)
       });
     },
 
@@ -1012,9 +1000,14 @@ define([
     },
 
     firstInit: function(geoJson){
-
-
+      var geoJson = this.geoJson;
+      if(geoJson.features.length < 3){
+        this.noPlayer = true;
+        return;
+      }
+      this.autoNextSpeed = 1000;
       var _this = this;
+
       var togglePlayer = L.control({position: 'bottomleft'});
 
       togglePlayer.onAdd = function (map) {
@@ -1023,7 +1016,7 @@ define([
         
         var div = L.DomUtil.create('div', 'js-toggle-ctrl-player info-legend');
         
-        div.innerHTML = '<button class="js-player-toggle btn"><i class="reneco reneco-play"></i> locations player</button>';
+        div.innerHTML = '<button class="js-player-toggle btn"><i class="reneco reneco-play"></i> location player</button>';
         return div;
       };
 
@@ -1044,28 +1037,35 @@ define([
           <span class="pull-right">To <span class="js-player-last-date"></span></span>\
         </div>\
         <div class="timeline col-xs-12">\
-          <div class="js-timeline-total timeline-total"></div>\
-          <div class="js-timeline-current timeline-current"></div>\
+          <div class="js-timeline-total timeline-total">\
+            <div class="js-timeline-current timeline-current"></div>\
+          </div>\
         </div>\
         <div class="col-xs-12">\
           <span class="js-time-current">00:00:00</span>\
           <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
         </div>\
-        <div class="col-xs-6">\
+        <div class="col-xs-5">\
           <button title="previous" class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
           <button title="play/pause" class="js-player-play-pause btn"><i class="reneco reneco-play"></i></button>\
           <button title="stop" class="js-player-stop btn"><i class="glyphicon glyphicon-stop"></i></button>\
           <button title="next" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
-          <button title="auto next mode" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Auto next mode</button> \
+          <button title="display positions every x times (default: 1 position/second)" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Auto next mode</button> \
         </div>\
-        <div class="col-xs-3">\
-          <div class="pull-right">\
-            <input type="checkbox" class="js-player-track form-control pull-left" /><span> Track </span> \
+        <div class="col-xs-4 no-padding">\
+          <div class="pull-left">\
+            <label for="track" title="follow positions on the map"> Track </label>\
+            <input id="track" title="follow positions on the map" type="checkbox" class="js-player-track form-control pull-left" /> \
           </div>\
+          <div class="pull-left">\
+            <label for="keyboard" title="use arrows to navigate & space bar to make it pause"> Keyboard </label>\
+            <input title="use arrows to navigate & space bar to make it pause" id="keyboard" type="checkbox" class="js-player-keyboard form-control pull-left" />\
+          </div>\
+          <label for="" class="pull-right">speed: </label>\
         </div>\
-        <div class="col-xs-3">\
-          <input class="js-player-day-in-ms hidden" min=1000 max=24000 value=1000 step=1000 width="100" type="range">\
-          <input class="js-player-auto-next-speed" min=-2000 max=-10 value=-1000 step=10 width="100" type="range">\
+        <div class="col-xs-3 range">\
+          <input title="" class="js-player-day-in-ms" min=-24000 max=-100 value=-1000 step=100 width="100" type="range">\
+          <input title="" class="js-player-auto-next-speed hidden" min=-2000 max=-10 value=-1000 step=10 width="100" type="range">\
         </div>\
         </div>\
       ');
@@ -1093,7 +1093,7 @@ define([
       
       this.computeInitialData(geoJson);
 
-      this.map.setView(geoJson.features[0].geometry.coordinates, 10/*, zoom*/);
+      
     },
 
     degraded: function(){
@@ -1107,7 +1107,7 @@ define([
     },
 
     computeInitialData: function(geoJson, x){
-      this.autoNextSpeed = 1000;
+
 
       var dayInMs = 86400000;
       var relDayInMs = ( x || 1000) //default, one day === 1s
@@ -1117,18 +1117,17 @@ define([
       this.firstDate = geoJson.features[0].properties.Date;
       var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date;
       
-      $('.js-player-first-date').html(firstDate);
-      $('.js-player-last-date').html(lastDate);
-    
       var format = 'DD/MM/YYYY HH:mm:ss';
 
+      $('.js-player-first-date').html(moment(firstDate).format(format));
+      $('.js-player-last-date').html(moment(lastDate).format(format));
+    
 
       if(geoJson.features[0].properties.format){
         format = geoJson.features[0].properties.format;
       }
 
-
-      this.p_realDuration = moment(lastDate, format).diff(moment(firstDate, format));
+      this.p_realDuration = moment(lastDate).diff(moment(firstDate));
 
       var ms;
 
@@ -1140,14 +1139,14 @@ define([
 
         _date2 = geoJson.features[i].properties.Date;
 
-        ms = moment(_date2, format).diff(moment(firstDate, format));
+        ms = moment(_date2).diff(moment(firstDate));
         ms = speed * ms;
         ms = Math.floor(ms / 10) * 10;
 
         geoJson.features[i].time = ms;
       }
 
-      this.positions = geoJson.features;
+      this.locations = geoJson.features;
       this.index = 0;
 
       this.p_relDuration = speed * this.p_realDuration;
@@ -1161,6 +1160,10 @@ define([
     handleAutoNext: function(){
       $('.js-player-auto-next').toggleClass('btn-success active');
       this.autoNext  = !this.autoNext;
+
+      $('.js-player-day-in-ms').toggleClass('hidden');
+      $('.js-player-auto-next-speed').toggleClass('hidden');
+
       if(this.playing){
         this.play();
       }
@@ -1194,6 +1197,7 @@ define([
           _this.frame();
         }, this.offset);
 
+        window.mapTimers = [this.timer, this.autoNextTimer];
       }
     },
 
@@ -1207,17 +1211,20 @@ define([
     
     handleSpeed: function(e){
       var value = $(e.currentTarget).val();
+      value *= -1;
       this.computeInitialData(this.geoJson, value);
     },
 
     clearMarkers: function(){
-      for (var i = 0; i < this.p_markers.length; i++) {
-        this.playerLayer.removeLayer(this.p_markers[i])
+      if(this.p_markers){
+        for (var i = 0; i < this.p_markers.length; i++) {
+          this.playerLayer.removeLayer(this.p_markers[i])
+        }
       }
     },
 
     travel: function(e){
-      var rapport =  e.offsetX / e.target.clientWidth;
+      var rapport =  e.offsetX / e.currentTarget.clientWidth;
 
       this.clearMarkers();
 
@@ -1225,16 +1232,16 @@ define([
       this.index = this.findClosestFloorPositionIndex(this.time);
 
       if(this.autoNext){
-        this.index = Math.round((this.positions.length * rapport));
-        this.time = this.positions[this.index].time;
+        this.index = Math.round((this.locations.length * rapport));
+        this.time = this.locations[this.index].time;
       }
 
       this.updateInfos();
     },
 
     findClosestFloorPositionIndex: function(time){
-      for (var i = this.positions.length - 1; i >= 0; i--) {
-        if(time > this.positions[i].time){
+      for (var i = this.locations.length - 1; i >= 0; i--) {
+        if(time > this.locations[i].time){
           return i;
         }
       }      
@@ -1252,10 +1259,10 @@ define([
     updateInfos: function(){
       if(this.autoNext){
         
-        $('.js-time-total').html(this.msToReadable( this.positions.length * (this.autoNextSpeed / 1000) * 1000 ));
+        $('.js-time-total').html(this.msToReadable( this.locations.length * (this.autoNextSpeed / 1000) * 1000 ));
         $('.js-time-current').html(this.msToReadable( this.index * (this.autoNextSpeed / 1000) * 1000 ));
 
-        var width = (this.index /this.positions.length * 100);
+        var width = (this.index /this.locations.length * 100);
         $('.js-timeline-current').css('width', width + '%');
 
       } else {
@@ -1271,7 +1278,7 @@ define([
     draw: function(){
       this.updateInfos();
 
-      var feature = this.positions[this.index];
+      var feature = this.locations[this.index];
       var coords = feature.geometry.coordinates;
       var className = this.getMarkerIconClassName(feature) + ' focus';
       var icon = new L.DivIcon({className: className});
@@ -1302,14 +1309,14 @@ define([
     },
     
     frame: function(){
-      if(this.time >= this.p_relDuration || this.index + 1 >= this.positions.length) {
+      if(this.time >= this.p_relDuration || this.index + 1 >= this.locations.length) {
         clearInterval(this.timer);
         this.time = 0;
         this.index = 0;
         return;
       }
 
-      if(this.time == this.positions[this.index + 1].time){
+      if(this.time == this.locations[this.index + 1].time){
         this.index++;
         this.draw();
       }
@@ -1328,19 +1335,19 @@ define([
       this.clearMarkers();
 
       this.index--;
-      this.time = this.positions[this.index].time;
+      this.time = this.locations[this.index].time;
 
       this.draw();
     },
 
     next: function(pass){
-      if(this.time >= this.p_relDuration || this.index + 1 >= this.positions.length){
+      if(this.time >= this.p_relDuration || this.index + 1 >= this.locations.length){
         this.clearMarkers();
         this.time = 0;
         this.index = 0;
       } else {
         this.index++;        
-        this.time = this.positions[this.index].time;
+        this.time = this.locations[this.index].time;
       }
       this.draw();
     },
@@ -1350,6 +1357,9 @@ define([
     },
 
     stop: function(){
+      if(this.noPlayer){
+        return;
+      }
       this.pause();
       this.index = 0;
       this.time = 0;
@@ -1380,18 +1390,32 @@ define([
       $('.js-player-track').on('change', $.proxy(this.toggleTrack, this));
       $('.js-timeline-total').on('click', $.proxy(this.travel, this));
 
-      document.onkeydown = function(e){
-        if(e.code === 'Space'){
-          _this.handlePlayPause();
-        }
-        if(e.code === 'ArrowLeft'){
-          _this.prev();
-        }
-        if(e.code === 'ArrowRight'){
-          _this.next();
-        }
-      };
+      this.keyboard = false;
+      $('.js-player-keyboard').on('change', $.proxy(this.bindKeyboardShortcuts, this));
+
     },
+
+    bindKeyboardShortcuts: function(){
+      var _this = this;
+      this.keyboard = !this.keyboard;
+      if(this.keyboard){
+        document.onkeydown = function(e){
+          if(e.code === 'Space'){
+            _this.handlePlayPause();
+          }
+          if(e.code === 'ArrowLeft'){
+            _this.prev();
+          }
+          if(e.code === 'ArrowRight'){
+            _this.next();
+          }
+        };
+      } else {
+        document.onkeydown = function(e){};
+      }
+
+    },
+
 
   }
   return( Map );

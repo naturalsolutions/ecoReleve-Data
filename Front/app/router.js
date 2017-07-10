@@ -81,9 +81,19 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
         _this.previous();
       });
       this.history.push(Backbone.history.fragment);
+
+      //clear map timer & shortcut
+      document.onkeydown = function(e){};
+      if(window.mapTimers){
+        for (var i = 0; i < window.mapTimers.length; i++) {
+          clearInterval(window.mapTimers[i]);
+        }
+      }
     },
 
+
     onRoute: function(url, patern, params) {
+      
 
       var notAllowed = window.notAllowedUrl ;
       patern = patern.replace(/\(/g, '');
