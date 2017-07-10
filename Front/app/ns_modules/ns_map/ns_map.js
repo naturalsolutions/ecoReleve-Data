@@ -1057,12 +1057,14 @@ define([
           <span class="js-time-current">00:00:00</span>\
           <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
         </div>\
-        <div class="col-xs-9">\
+        <div class="col-xs-5">\
           <button title="previous location" class="js-player-prev btn"><i class="reneco reneco-rewind"></i></button>\
           <button title="play/pause" class="js-player-play-pause btn"><i class="reneco reneco-play"></i></button>\
           <button title="stop" class="js-player-stop btn"><i class="glyphicon glyphicon-stop"></i></button>\
           <button title="next location" class="js-player-next btn"><i class="reneco reneco-forward"></i></button>\
           <button title="display locations every x times (default: 1 location/second)" class="js-player-auto-next btn"><i class="reneco reneco-forward"></i><i class="reneco reneco-play"></i> Auto next mode</button> \
+        </div>\
+        <div class="col-xs-4 no-padding">\
           <div class="pull-left">\
             <label for="track" title="follow positions on the map"> Track </label>\
             <input id="track" title="follow positions on the map" type="checkbox" class="js-player-track form-control pull-left" /> \
