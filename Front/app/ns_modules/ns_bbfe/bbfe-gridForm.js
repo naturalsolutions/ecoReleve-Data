@@ -49,7 +49,11 @@ define([
           colDef.editable = function(params){
             // apply disable only on existing data
             if (params.node.data.ID){
-              return params.node.data[field.rule.source] != field.rule.value;
+              var editable = params.node.data[field.rule.source] != field.rule.value;
+              if(!editable){
+                params.node['unRemovable'] = true;
+              }
+              return editable
             } else {
               return true;
             }
@@ -67,13 +71,18 @@ define([
     deleteRows: function() {
       var _this = this;
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+      console.log(selectedNodes)
       if(!selectedNodes.length){
         return;
       }
-
+      var selectNodesRemovable = selectedNodes.filter(function(node){
+        if (!node.unRemovable){
+          return node;
+        }
+      });
       this.gridView.gridOptions.api.deletingRows = true;
       this.gridView.gridOptions.api.setSortModel({});
-      _this.gridView.gridOptions.api.removeItems(selectedNodes);
+      _this.gridView.gridOptions.api.removeItems(selectNodesRemovable);
       this.$el.trigger('change');
       this.gridView.gridOptions.api.deletingRows = false;
     },
@@ -176,8 +185,10 @@ define([
     },
 
     applyRule: function(colDef, field){
-      var ruleFunc = this.rulesList[field.rule.operator];
-      ruleFunc(colDef, field);
+      if(field.rule && field.rule.operator){
+        var ruleFunc = this.rulesList[field.rule.operator];
+        ruleFunc(colDef, field);
+      }
     },
 
     formatColumns: function(schema){
