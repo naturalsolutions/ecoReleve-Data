@@ -41,6 +41,23 @@ define([
     ',
 
     className: 'sub-grid-form' ,
+
+    // set here the rule function according the rule operator
+    rulesList : {
+      disable: function(colDef, field){
+        if(colDef.editable){
+          colDef.editable = function(params){
+            // apply disable only on existing data
+            if (params.node.data.ID){
+              return params.node.data[field.rule.source] != field.rule.value;
+            } else {
+              return true;
+            }
+          }
+        }
+      }
+    },
+
     addRow: function(){
       this.gridView.gridOptions.api.setSortModel({});
       this.gridView.gridOptions.api.addItems([{}]);
@@ -158,6 +175,11 @@ define([
       }
     },
 
+    applyRule: function(colDef, field){
+      var ruleFunc = this.rulesList[field.rule.operator];
+      ruleFunc(colDef, field);
+    },
+
     formatColumns: function(schema){
       var _this = this;
       var odrFields = schema.fieldsets[0].fields;
@@ -181,7 +203,7 @@ define([
           width: field.width,
           pinned : field.pinned
         };
-        
+        this.applyRule(colDef, field);
         columnsDefs.push(colDef)
       }
       var errorCol = {
