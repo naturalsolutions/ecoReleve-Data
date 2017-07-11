@@ -48,14 +48,20 @@ define([
         if(colDef.editable){
           colDef.editable = function(params){
             // apply disable only on existing data
+            var editable = true
             if (params.node.data.ID){
-              var editable = params.node.data[field.rule.source] != field.rule.value;
+              var testedValue = params.node.data[field.rule.source];
+              if(field.rule.value.indexOf('match@')!= -1 && testedValue){
+                editable = testedValue.toString().match(field.rule.value.replace('match@','')) ? false : true;
+              } else{
+                editable = testedValue != field.rule.value;
+              }
               if(!editable){
                 params.node['unRemovable'] = true;
               }
               return editable
             } else {
-              return true;
+              return editable;
             }
           }
         }

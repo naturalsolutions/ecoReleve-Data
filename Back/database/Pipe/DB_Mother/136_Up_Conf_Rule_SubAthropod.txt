@@ -1,4 +1,4 @@
-UPDATE [ModuleForms] SET Rules = '{"operator":"disable","target":"'+Name+'","source":"sampled","value":1}'
+UPDATE [ModuleForms] SET Rules = '{"operator":"disable","target":"'+Name+'","source":"original_id","value":"match@ECollection"}'
   where module_id= 1 and TypeObj = 231
   GO
 

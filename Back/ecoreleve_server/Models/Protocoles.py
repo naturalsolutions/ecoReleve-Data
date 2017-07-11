@@ -37,6 +37,7 @@ class Observation(Base, ObjectWithDynProp):
     Parent_Observation = Column(Integer, ForeignKey('Observation.ID'))
     Comments = Column(String(250))
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
+    original_id = Column(String(250))
 
     Observation_children = relationship(
         "Observation", cascade="all, delete-orphan", order_by='Observation.ID')
