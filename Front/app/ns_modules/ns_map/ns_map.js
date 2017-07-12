@@ -956,7 +956,7 @@ define([
     //Player
     sortByDate: function(geoJson){
       geoJson.features.sort( function(a, b) {
-        return moment(a.properties.Date) - moment(b.properties.Date)
+        return moment(a.properties.Date || a.properties.date) - moment(b.properties.Date || b.properties.date)
       });
     },
 
@@ -1076,8 +1076,8 @@ define([
           <label for="" class="pull-right">speed: </label>\
         </div>\
         <div class="col-xs-3 range">\
-          <input title="" class="js-player-day-in-ms" min=-24000 max=-100 value=-1000 step=100 width="100" type="range">\
-          <input title="" class="js-player-auto-next-speed hidden" min=-2000 max=-10 value=-1000 step=10 width="100" type="range">\
+          <input title="" class="js-player-day-in-ms" min=-24000 max=-200 value=-1000 step=100 width="100" type="range">\
+          <input title="" class="js-player-auto-next-speed hidden" min=-2000 max=-50 value=-1000 step=10 width="100" type="range">\
         </div>\
         </div>\
       ');
@@ -1098,6 +1098,10 @@ define([
       this.time = 0;
       this.p_markers = [];
 
+       //usefull for position presicion & perf: is actually a framerate.
+       // and to be on real quartz time because setInterval is multithread.
+       //so we consider here that 10ms is the maximum time taken to make one turn in the loop to draw etc,
+       //in that way we stay on a real quartz time.
       this.offset = 10;
 
       this.playerLayer = L.layerGroup();
@@ -1123,9 +1127,8 @@ define([
       var relDayInMs = ( x || 1000) //default, one day === 1s
       var speed = relDayInMs / dayInMs;
 
-      var firstDate = geoJson.features[0].properties.Date;
-      this.firstDate = geoJson.features[0].properties.Date;
-      var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date;
+      var firstDate = geoJson.features[0].properties.Date || geoJson.features[0].properties.date;
+      var lastDate = geoJson.features[geoJson.features.length - 1].properties.Date || geoJson.features[geoJson.features.length - 1].properties.date;
       
       var format = 'DD/MM/YYYY HH:mm:ss';
 
@@ -1133,21 +1136,18 @@ define([
       $('.js-player-last-date').html(moment(lastDate).format(format));
     
 
-      if(geoJson.features[0].properties.format){
+/*      if(geoJson.features[0].properties.format){
         format = geoJson.features[0].properties.format;
-      }
+      }*/
 
       this.p_realDuration = moment(lastDate).diff(moment(firstDate));
 
       var ms;
-
-      var firstDate = geoJson.features[0].properties.Date;
-
       var _date2;
       
       for (var i = 0; i < geoJson.features.length; i++) {
 
-        _date2 = geoJson.features[i].properties.Date;
+        _date2 = geoJson.features[i].properties.Date || geoJson.features[i].properties.date;
 
         ms = moment(_date2).diff(moment(firstDate));
         ms = speed * ms;
@@ -1191,6 +1191,7 @@ define([
     },
 
     play: function(e){
+      this.playing = true;
       var _this= this;
       $('.js-player-play-pause>i').addClass('reneco-pause').removeClass('reneco-play');
       $('.js-timeline-current').css('transition', 'none');
@@ -1214,17 +1215,25 @@ define([
     },
 
     handleAutoNextSpeed: function(e){
+      var wasPlaying = this.playing;
+      this.pause();
       var value = $(e.currentTarget).val();
       value *= -1;
       this.autoNextSpeed = value;
-      this.play();
+      if(wasPlaying){
+        this.play();
+      }
     },
 
-    
     handleSpeed: function(e){
+      var wasPlaying = this.playing;
+      this.pause();
       var value = $(e.currentTarget).val();
       value *= -1;
       this.computeInitialData(this.geoJson, value);
+      if(wasPlaying){
+        this.play();
+      }
     },
 
     clearMarkers: function(){
@@ -1265,11 +1274,11 @@ define([
     },
 
     pause: function(){
+      this.playing = false;
       $('.js-player-play-pause>i').removeClass('reneco-pause').addClass('reneco-play');
       $('.js-timeline-current').css('transition', 'width .2s');
       clearInterval(this.autoNextTimer);
       clearInterval(this.timer);
-      this.playing = false;
     },
 
 
@@ -1311,7 +1320,7 @@ define([
 
       m.addTo(this.playerLayer);
 
-      this.interaction('highlight', feature.properties.ID);
+      this.interaction('highlight', feature.properties.ID || feature.id);
 
       if(this.p_markers.length > 20){
         this.playerLayer.removeLayer(this.p_markers.pop());
@@ -1327,15 +1336,18 @@ define([
     
     frame: function(){
       if(this.time >= this.p_relDuration || this.index + 1 >= this.locations.length) {
-        clearInterval(this.timer);
+        this.pause();
         this.time = 0;
         this.index = 0;
         return;
       }
 
-      if(this.time == this.locations[this.index + 1].time){
-        this.index++;
-        this.draw();
+      //Because if a quartz day is represented by a quartz second, it becomes a relative day.
+      //And it becomes hard to distinct a second (or minute) of this relative day in here 10ms (offset).
+      //So we display them in the same loop time. (at least in js for now on)
+      while(this.locations[this.index + 1] && this.time == this.locations[this.index + 1].time){
+       this.index++;
+       this.draw();
       }
       
       this.updateInfos();
