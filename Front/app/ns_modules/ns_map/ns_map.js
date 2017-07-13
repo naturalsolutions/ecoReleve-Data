@@ -1040,20 +1040,17 @@ define([
       this.parentContainer = $($('#map').parent());
       this.parentContainer.css('overflow', 'hidden');
 
-      
-
       this.parentContainer.append('\
         <div id="player" class="player">\
         <div class="col-xs-12">\
-          From <span class="js-player-first-date"></span>\
-          <span class="pull-right">To <span class="js-player-last-date"></span></span>\
         </div>\
         <div class="timeline col-xs-12">\
+          <div class="js-player-scale scale"></div>\
           <div class="js-timeline-total timeline-total">\
             <div class="js-timeline-current timeline-current"></div>\
           </div>\
         </div>\
-        <div class="col-xs-12">\
+        <div class="col-xs-12 custom-row">\
           <span class="js-time-current">00:00:00</span>\
           <span class="pull-right">Total duration: <span class="js-time-total">00:00:00</span></span>\
         </div>\
@@ -1122,7 +1119,6 @@ define([
 
     computeInitialData: function(geoJson, x){
 
-
       var dayInMs = 86400000;
       var relDayInMs = ( x || 1000) //default, one day === 1s
       var speed = relDayInMs / dayInMs;
@@ -1134,9 +1130,9 @@ define([
 
       $('.js-player-first-date').html(moment(firstDate).format(format));
       $('.js-player-last-date').html(moment(lastDate).format(format));
-    
 
-/*      if(geoJson.features[0].properties.format){
+      /*      
+      if(geoJson.features[0].properties.format){
         format = geoJson.features[0].properties.format;
       }*/
 
@@ -1160,15 +1156,38 @@ define([
       this.index = 0;
 
       this.p_relDuration = speed * this.p_realDuration;
+      
+      var diff = geoJson.features[10].time / speed;
+      
+      this.displaySacle();
 
       $('.js-toggle-ctrl-player').removeClass('hidden');
+    },
 
+    displaySacle: function(){
+      
+      var format = 'DD/MM/YYYY';
+
+      var firstDate = this.locations[0].properties.Date || this.locations[0].properties.date;
+      firstDate = moment(firstDate);
+      $('.js-player-scale').html('');
+      $('.js-player-scale').append('<span class="note" style="left:0">' + firstDate.format(format) + '</span>');
+
+      for (var i = 0.25; i < 1; i+=0.25) {
+        var diff = Math.floor(this.p_realDuration * 0.25);
+        firstDate.add(diff, 'ms');
+        $('.js-player-scale').append('<span class="js-mid-scale note" style="left:' + i * 100 + '%">' + firstDate.format(format) + '</span>');
+      }
+
+      var diff = Math.floor(this.p_realDuration * 0.25);
+      firstDate.add(diff, 'ms');
+      $('.js-player-scale').append('<span class="note last" style="right:0">' + firstDate.format(format) + '</span>');
 
     },
 
-
     handleAutoNext: function(){
       $('.js-player-auto-next').toggleClass('btn-success active');
+      $('.js-mid-scale').toggleClass('hidden');
       this.autoNext  = !this.autoNext;
 
       $('.js-player-day-in-ms').toggleClass('hidden');
