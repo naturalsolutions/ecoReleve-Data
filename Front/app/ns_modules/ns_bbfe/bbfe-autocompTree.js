@@ -2,11 +2,12 @@ define([
     'underscore',
     'jquery',
     'jqueryui',
+    'webui-popover',
     'backbone',
     'backbone_forms',
     'autocompTree',
 ], function (
-    _, $, $ui, Backbone, Form, autocompTree
+    _, $, $ui,$webuiPopover, Backbone, Form, autocompTree
 ) {
 
     Backbone.Form.validators.Thesaurus = function (options) {
@@ -55,7 +56,6 @@ define([
             this.editable = options.schema.editable || true;
             this.isTermError = false;
 
-
             var editorAttrs = "";
             var iconFont = options.schema.options.iconFont || 'hidden';
 
@@ -78,11 +78,16 @@ define([
             this.template = options.template || this.constructor.template;
             this.template = _.template(this.template, tplValeurs);
 
-
             this.startId = options.schema.options.startId;
             this.wsUrl = options.schema.options.wsUrl;
             this.lng =  window.app.user.attributes.Language;
             this.timeout = options.schema.options.timeout;
+            this.displayMode = options.schema.options.displayMode;
+            if(this.formGrid){
+                this.displayMode = 'popover';
+            }
+
+            //this.displayMode = 'popover';
 
 
             this.displayValueName = options.schema.options.displayValueName || 'fullpathTranslated';
@@ -93,25 +98,14 @@ define([
             return this.$el.find('#' + this.id).val();
         },
 
-        render: function () {
-            var _this = this;
-
-            var $el = $(this.template);
-            this.setElement($el);
-
-            if(this.formGrid){
-                $el.find('.input-group-addon').addClass('hide');
-            }
-            
-            _(function () {
-
-            if (_this.editable) {
-
-                _this.$el.find('#' + _this.id).autocompTree({
+        initTeeView: function($ele){
+            var _this= this;
+            $ele.autocompTree({
                     wsUrl: _this.wsUrl,
                     webservices: 'fastInitForCompleteTree',
                     language: { hasLanguage: true, lng: _this.lng },
                     display: {
+                        mode:_this.displayMode,
                         isDisplayDifferent: true,
                         suffixeId: '_value',
                         displayValueName: _this.displayValueName,
@@ -124,7 +118,6 @@ define([
                     onItemClick: function (options) {
                         //for global
                         _this.$el.find('input').trigger('thesaurusChange');
-
                         var value = _this.$el.find('#' + _this.id).val();
                         _this.validateValue(value);
                     },
@@ -137,24 +130,22 @@ define([
 
                 });
 
-                // tree navigation arrow
-                $('#treeView' + _this.id).on('keyup',function(e){
-                    var $this = $(this);
-                    if (e.keyCode == 38 || e.keyCode == 40){
-                        var itemFocus = $('#treeView' + _this.id).find('.fancytree-focused');
-                        var calcul =$this.scrollTop()+ $this.outerHeight()-itemFocus.height();
-                        if(itemFocus.position().top >= calcul){
-                            $('#treeView' + _this.id).scrollTop(itemFocus.position().top);
-                        }
-                        if(itemFocus.position().top < $this.scrollTop()){
-                            $('#treeView' + _this.id).scrollTop(itemFocus.position().top);
-                        }
-                    }
-                    if (e.keyCode == 27 || e.keyCode == 9){
-                        $this.css('display', 'none');
-                    }
-                });
+        },
 
+        render: function () {
+            var _this = this;
+
+            var $el = $(this.template);
+            this.setElement($el);
+
+            if(this.formGrid){
+                $el.find('.input-group-addon').addClass('hide');
+            }
+            
+            var myfancyTree = _(function () {
+
+            if (_this.editable) {
+                _this.initTeeView(_this.$el.find('#' + _this.id));
             }
 
             if((typeof _this.value === "string") && _this.value != null && _this.value != 'null' && _this.value != ''){
@@ -172,16 +163,15 @@ define([
                     _this.$el.find('#' + _this.id).attr('val',_this.value.value);
                 }
             }
-
             }).defer();
-
             return this;
         },
+
 
         findDisplayedValue: function(value){
             var _this = this;
 
-            var node = this.$el.find('#treeView' + this.id).fancytree('getTree').findFirst(function(node){
+            var node =$('#treeView' + this.id).fancytree('getTree').findFirst(function(node){
                 return (node.data.fullpath == value)
             });
             if(node){
@@ -231,7 +221,7 @@ define([
             }
 
             //check on/from display value
-            var valueFound = this.$el.find('#treeView' + this.id).fancytree('getTree').findFirst(function(node){
+            var valueFound = $('#treeView' + this.id).fancytree('getTree').findFirst(function(node){
                 if(node.data.valueTranslated == displayValue){
                     return true;
                 }
