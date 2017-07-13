@@ -1092,6 +1092,7 @@ define([
       this.sortByDate(geoJson);
 
       this.playerInitialized = true;
+      this.index = 0;
       this.time = 0;
       this.p_markers = [];
 
@@ -1120,7 +1121,8 @@ define([
     computeInitialData: function(geoJson, x){
 
       var dayInMs = 86400000;
-      var relDayInMs = ( x || 1000) //default, one day === 1s
+
+      var relDayInMs = ( x || 1000)
       var speed = relDayInMs / dayInMs;
 
       var firstDate = geoJson.features[0].properties.Date || geoJson.features[0].properties.date;
@@ -1153,18 +1155,17 @@ define([
       }
 
       this.locations = geoJson.features;
-      this.index = 0;
 
       this.p_relDuration = speed * this.p_realDuration;
       
       var diff = geoJson.features[10].time / speed;
       
-      this.displaySacle();
+      this.displayScale();
 
       $('.js-toggle-ctrl-player').removeClass('hidden');
     },
 
-    displaySacle: function(){
+    displayScale: function(){
       
       var format = 'DD/MM/YYYY';
 
@@ -1249,7 +1250,11 @@ define([
       this.pause();
       var value = $(e.currentTarget).val();
       value *= -1;
+
       this.computeInitialData(this.geoJson, value);
+
+      this.time = this.locations[this.index].time;
+      
       if(wasPlaying){
         this.play();
       }
@@ -1354,6 +1359,7 @@ define([
     },
     
     frame: function(){
+
       if(this.time >= this.p_relDuration || this.index + 1 >= this.locations.length) {
         this.pause();
         this.time = 0;
