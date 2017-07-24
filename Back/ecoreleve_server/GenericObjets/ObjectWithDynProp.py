@@ -263,9 +263,11 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
                 else:
                     linkedSource = self.getProperty(
                         linkProp['LinkSourceID'].replace('@Dyn:', ''))
-
-                linkedObj = session.query(obj).filter(
-                    getattr(obj, linkProp['LinkedID']) == linkedSource).one()
+                try:
+                    linkedObj = session.query(obj).filter(
+                        getattr(obj, linkProp['LinkedID']) == linkedSource).one()
+                except NoResultFound:
+                    continue
 
                 if hasattr(linkedObj, linkedField):
                     linkedObj.setProperty(linkedField, None)
