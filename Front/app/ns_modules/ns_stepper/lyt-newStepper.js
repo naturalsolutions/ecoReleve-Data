@@ -252,7 +252,12 @@ define([
 			}
 			this.steps.splice(index, 0, Step);
 			name = Step.prototype.name;
-			this.ui.stepNav.children(':eq('+(index - 1)+')').after('<li><span class="badge">'+ (index+1) +'</span>'+ name +'<span class="chevron"></span></li>');
+			if(this.ui.stepNav instanceof $){
+				this.ui.stepNav.children(':eq('+(index - 1)+')').after('<li><span class="badge">'+ (index+1) +'</span>'+ name +'<span class="chevron"></span></li>');
+			} else{
+				$(this.ui.stepNav).children(':eq('+(index - 1)+')').after('<li><span class="badge">'+ (index+1) +'</span>'+ name +'<span class="chevron"></span></li>');
+			}
+				
 		},
 
 		addSteps: function(steps, index){
