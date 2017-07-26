@@ -10,11 +10,14 @@ define([
   'ns_grid/grid.view',
   'ns_grid/customCellRenderer/decimal5Renderer',
   'ns_grid/customCellRenderer/dateTimeRenderer',
+  'ns_grid/custom.editors',
+  'ns_grid/custom.renderers',
   'moment',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,
-  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer ,Moment ) {
+  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer ,
+  Editors, Renderers, Moment ) {
 
   'use strict';
 
@@ -39,7 +42,7 @@ define([
 
     initialize: function(options) {
       this.com = new Com();
-      this.data = options.model.attributes.data_FileContent;
+      this.data = options.model.attributes.data_FilesContent;
       this.deferred = $.Deferred();
       this.parent = options.parent;
     },
@@ -130,10 +133,6 @@ define([
         return text;
       };
 
-      // var decimal5Renderer = function(params){
-      //   return params.data[params.column.colId].toFixed(5);
-      // };
-
       var dateTimestampRender = function(params){
         return Moment.unix(params.data.displayDate).format("DD/MM/YYYY HH:mm:SS");
       };
@@ -173,6 +172,11 @@ define([
           cellRenderer: FieldActivityRenderer,
           filter : "select",
           filterParams : { selectList : this.fieldActivityList }
+        },{
+          editable: false,
+          field: 'Place',
+          headerName: 'Place',
+          filter :"text",
         },
       ];
 

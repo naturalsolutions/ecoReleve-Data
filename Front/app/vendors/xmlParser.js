@@ -6,7 +6,7 @@ define([
 ) {
   'use strict';
   return {
-    gpxParser: function (xml) {
+    gpxParser: function (xml, fileName) {
       var _this = this;
       try {
         var waypointList = [];
@@ -51,9 +51,12 @@ define([
             waypoint.displayDate = timestamp;
             waypoint.time = time;
             waypoint.fieldActivity = '';
+            waypoint.Place = null;
+            waypoint.timeZone = null;
             waypoint.import = false;
             waypoint.FieldWorkers = [];
             waypoint.precision = 10;
+            waypoint.fileName = fileName;
 
             waypointList.push(waypoint);
           } else {
