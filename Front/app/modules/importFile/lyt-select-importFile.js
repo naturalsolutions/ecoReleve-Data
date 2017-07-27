@@ -80,6 +80,26 @@ define([
       return false;
     },
 
+    haveWrongExtension: function(file){
+      var _this = this;
+      var ext = file.name.split('.');
+      if (ext[ext.length - 1] != this.extension.replace('.','')) {
+        Swal(
+        {
+          title: 'Wrong file type',
+          text: 'The file should be a '+_this.extension+' file ',
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        }
+        );
+        return true;
+      }
+      return false;
+    },
+
     initDropZone: function (params) {
       var _this = this;
 
@@ -102,7 +122,10 @@ define([
         if (_this.existingFile(file)) {
           return false;
         }
-
+        if(_this.haveWrongExtension(file)){
+          this.removeFile(file);
+          return false;
+        }
         file.upload = {
           progress: 0,
           total: file.size,
