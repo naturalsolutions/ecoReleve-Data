@@ -51,8 +51,14 @@ define([
 		},
 
 		onShow : function(){
+			var _this = this;
 			this.displayStepNav();
 			this.displayStep(this.currentStepIndex);
+			this.$el.find('.import-step0').on('click', function(event){
+				Backbone.history.navigate('#', {trigger: false});
+				Backbone.history.navigate('importFile',{trigger: true});
+
+			});
 		},
 
 		goToStepByType:function (){

@@ -236,16 +236,28 @@ define([
         _this.totalReturned.reset();
     },
 
-    check: function () {
+    checkFileIsPresent: function () {
+      if(this.dropzone.files.length > 0){
+        return true;
+      } else {
+        return false;
+      }
+    },
+
+    check: function(){
       return true;
     },
 
     validate: function () {
       this.model.set('files', this.dropzone.getQueuedFiles());
-      if(this.check() && this.uploadOnly){
-        this.dropzone.processQueue();
+      if(this.checkFileIsPresent()){
+        if(this.uploadOnly){
+          this.dropzone.processQueue();
+        }
+        return true;
+      } else {
+        return false;
       }
-      return true;
     },
 
     sendFiles: function () {

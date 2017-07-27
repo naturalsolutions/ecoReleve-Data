@@ -238,12 +238,11 @@ define([
               Backbone.history.navigate('stations/lastImported', {trigger: true});
             }
             else {
-            //  Backbone.history.navigate('importFile',{trigger: true});
+              // Backbone.history.navigate('#', {trigger: false});
+              // Backbone.history.navigate('importFile/gpx',{trigger: true});
 
-              //Backbone.history.navigate('home', {trigger: true});
-
-              //method to return at the 1st step
-              _this.options.parent.currentStepIndex--;
+              // //method to return at the 1st step
+              _this.options.parent.currentStepIndex = 1;
               var index = _this.options.parent.currentStepIndex;
               _this.options.parent.displayStep(index);
             }
