@@ -54,7 +54,7 @@ define([
       var reader = new FileReader();
       var fileName = file.name;
 
-      reader.onload = function (e, fileName) {
+      reader.onload = function (e) {
         var xml = e.target.result;
         var parsingResult = XmlParser.gpxParser(xml, fileName);
         var wayPointList = parsingResult[0];

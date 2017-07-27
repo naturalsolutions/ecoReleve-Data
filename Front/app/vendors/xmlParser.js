@@ -41,7 +41,6 @@ define([
           nbWaypoints += 1;
           if (lat != '' && lon != '' && dateStr != 'Invalid date' && time != 'Invalid date') {
             id += 1;
-            //var idwpt = id;
             waypoint.id = id;
             waypoint.name = waypointName;
             waypoint.latitude = latitude;
