@@ -40,9 +40,13 @@ define([
 
     onShow: function () {
       var _this = this;
-      this.parent.disableNextBtn();
       this.displayForm();
       this.initGPXCollection();
+      this.parent.disableNextBtn();
+      this.formRdy.then(function(){
+        _this.parent.disableNextBtn();
+        _this.parent.bindRequiredFields();
+      });
     },
 
     parseFile: function (file) {
@@ -74,10 +78,6 @@ define([
       _.each(this.importedFiles, function (file) {
         _this.parseFile(file);
       });
-      // this.GPXcollectionRdy.then(function(){
-      //   // _this.check()
-      //   console.log(_this.wayPointCollection)
-      // })
     },
 
     displayErrors: function (errors) {

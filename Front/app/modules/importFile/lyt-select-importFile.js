@@ -25,7 +25,7 @@ define([
     },
 
     initialize: function (options) {
-
+      this.parent = options.parent;
       this.model = new Backbone.Model();
       this.model.set('files', []);
       if (!this.url) {
@@ -55,7 +55,6 @@ define([
         previewsContainer: '#previews', // Define the container to display the previews
         clickable: '.fileinput-button', // Define the element that should be used as click trigger to select files.
       };
-
       this.initDropZone(dropZoneParams);
     },
 
@@ -155,6 +154,8 @@ define([
       if (this.uploadOnly) {
         this.setDropzoneUploadOnly();
       }
+      this.parent.disableNextBtn();
+      
     },
 
     setDropzoneUploadOnly: function () {
@@ -245,7 +246,7 @@ define([
     },
 
     check: function(){
-      return true;
+      return false;
     },
 
     validate: function () {
