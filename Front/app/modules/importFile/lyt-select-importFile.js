@@ -81,7 +81,7 @@ define([
 
     haveWrongExtension: function(file){
       var _this = this;
-      var ext = file.name.split('.');
+      var ext = file.name.toLowerCase().split('.');
       if (ext[ext.length - 1] != this.extension.replace('.','')) {
         Swal(
         {
