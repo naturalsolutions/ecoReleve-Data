@@ -68,7 +68,7 @@ define([
           $.merge(_this.wayPointCollection, wayPointList);
           _this.errors = false;
         }
-        _this.GPXcollectionRdy.resolve();
+
       };
       reader.readAsText(file);
     },
@@ -77,7 +77,10 @@ define([
       var _this = this;
       _.each(this.importedFiles, function (file) {
         _this.parseFile(file);
-      });
+          
+        });
+        
+        _this.GPXcollectionRdy.resolve();
     },
 
     displayErrors: function (errors) {
@@ -108,6 +111,11 @@ define([
     isRdyAccess: function () {},
 
     validate: function () {
+      // SET id according index (needed for map/grid resolution)
+      this.wayPointCollection.map(function(wp, index){
+          wp.id = index+1;
+          return wp;
+      });
       var formData = this.nsform.BBForm.getValue();
       this.setWaypointListWithForm();
       this.model.set('data_FilesContent', this.wayPointCollection);

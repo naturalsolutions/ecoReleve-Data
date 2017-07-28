@@ -141,7 +141,9 @@ define([
         {
           field: 'id',
           headerName: 'ID',
-        },{
+          hide: true
+        },
+        {
           field: 'name',
           headerName: 'Name',
           filter :"text",
@@ -216,15 +218,18 @@ define([
         return node.data;
       }));
 
-      coll.url = 'stations/';
+      coll.url = 'sensors/gpx/datas';
       Backbone.sync('create', coll, {
         success: function(data) {
           _this.deferred.resolve();
           var inserted = data.new;
-          var exisits = data.exist;
+          var exisits = data.existing;
+          var existingNames = data.existing_name
           Swal({
             title: 'Stations import',
-            text: 'inserted stations :' + inserted + ', existing stations:' + exisits,
+            text: inserted + ' inserted station(s), \n'
+                  + exisits + ' existing stations, \n'
+                  +'Name of existing station: \n'+existingNames,
             type: 'success',
             showCancelButton: true,
             confirmButtonColor: 'green',
