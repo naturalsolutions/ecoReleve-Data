@@ -1,0 +1,44 @@
+USE ecoReleve_Sensor
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Import](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[ImportDate] [datetime] NULL,
+	[ImportFileName] [varchar](250) NULL,
+	[ImportType] [varchar](250) NOT NULL,
+	[FK_User] [int] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+ALTER TABLE T_rfid
+Add FK_Import int
+
+ALTER TABLE Tgps_engineering
+Add FK_Import int
+
+ALTER TABLE Tengineering_gsm
+Add FK_Import int
+
+ALTER TABLE Tgsm
+Add FK_Import int
+
+ALTER TABLE T_argosgps
+Add FK_Import int
+
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('136_ecoReleveSensor_CreateTable_ADD_FK',GETDATE(),(SELECT db_name()))
+
+
+GO
