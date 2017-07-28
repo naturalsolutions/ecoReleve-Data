@@ -10,12 +10,40 @@ from sqlalchemy import (
     String,
     func,
     UniqueConstraint,
+    ForeignKey,
 )
 from ..Models import Base, dbConfig
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
 
 
 sensor_schema = dbConfig['sensor_schema']
 dialect = dbConfig['dialect']
+
+
+class GPX(Base):
+    __tablename__ = 'Tgpx'
+    pk_id = Column('PK_id', Integer, primary_key=True)
+    StationDate = Column(DateTime, index=True, nullable=False)
+    Name = Column(String(250))
+    LAT = Column(Numeric(9, 5))
+    LON = Column(Numeric(9, 5))
+    ELE = Column(Integer)
+    precision = Column(Integer)
+    timeZone = Column(String(250))
+    Place = Column(String(250))
+    imported = Column('imported', Boolean, nullable=False, default=False)
+
+    FK_Import = Column('FK_Import', Integer, ForeignKey(dbConfig['sensor_schema']+'.Import.ID'))
+    ImportedFile = relationship('Import', back_populates='GPXrawDatas')
+
+    @hybrid_property
+    def date(self):
+        return self.StationDate
+
+    __table_args__ = ({'schema': sensor_schema,
+                       'implicit_returning': False
+                       })
 
 
 class ArgosGps(Base):
@@ -39,6 +67,8 @@ class ArgosGps(Base):
     frequency = Column('freq', Float)
     checked = Column('checked', Boolean, nullable=False, default=False)
     imported = Column('imported', Boolean, nullable=False, default=False)
+    FK_Import = Column('FK_Import', Integer, ForeignKey(dbConfig['sensor_schema']+'.Import.ID'))
+    ImportedFile = relationship('Import', back_populates='ArgosGPSRawDatas')
 
     if dialect.startswith('mssql'):
         __table_args__ = (
@@ -73,6 +103,8 @@ class Gsm(Base):
     HDOP = Column(Integer)
     VDOP = Column(Integer)
     validated = Column(Boolean, nullable=False, server_default='0')
+    FK_Import = Column('FK_Import', Integer, ForeignKey(dbConfig['sensor_schema']+'.Import.ID'))
+    ImportedFile = relationship('Import', back_populates='GSMrawDatas')
 
     if dialect.startswith('mssql'):
         __table_args__ = (
@@ -98,6 +130,8 @@ class GsmEngineering (Base):
     Temperature_C = Column(Numeric)
     BatteryVoltage_V = Column(Numeric)
     file_date = Column(DateTime)
+    FK_Import = Column('FK_Import', Integer, ForeignKey(dbConfig['sensor_schema']+'.Import.ID'))
+    ImportedFile = relationship('Import', back_populates='GSMengRawDatas')
 
     __table_args__ = (
         Index('idx_Tengineering_gsm_pttDate_ptt', date, platform_),
@@ -125,6 +159,12 @@ class ArgosEngineering(Base):
     seasonalGT = Column(Boolean)
     latestLat = Column(Float)
     latestLon = Column(Float)
+    FK_Import = Column('FK_Import', Integer, ForeignKey(dbConfig['sensor_schema']+'.Import.ID'))
+    ImportedFile = relationship('Import', back_populates='ArgosEngRawDatas')
+
+    @hybrid_property
+    def date(self):
+        return self.pttDate
 
     __table_args__ = (
         Index('idx_Tgps_engineering_pttDate_ptt', pttDate, fk_ptt),
@@ -143,6 +183,13 @@ class Rfid(Base):
     validated = Column('validated', Boolean, server_default='0')
     checked = Column('checked', Boolean, server_default='0')
     frequency = Column(Integer)
+    FK_Import = Column('FK_Import', Integer, ForeignKey(dbConfig['sensor_schema']+'.Import.ID'))
+    ImportedFile = relationship('Import', back_populates='RFIDrawDatas')
+
+    @hybrid_property
+    def date(self):
+        return self.date_
+
     __table_args__ = (
         Index('idx_Trfid_chipcode_date', chip_code, date_),
         UniqueConstraint(FK_Sensor, chip_code, date_),
