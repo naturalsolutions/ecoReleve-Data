@@ -124,7 +124,7 @@ def insertData(session, dataFrame_to_insert, fieldWorkers):
     data_to_insert = json.loads(dataFrame_to_insert.to_json(orient='records', date_format='iso'))
     staListID = []
     nbExc = 0
-    bulkList = []
+    bulk_station = []
     if len(data_to_insert) != 0:
         # TODO : improve performance
         Sta = model(FK_StationType=4)

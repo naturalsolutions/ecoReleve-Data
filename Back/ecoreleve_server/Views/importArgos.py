@@ -11,13 +11,14 @@ from time import sleep
 import subprocess
 import psutil
 from datetime import datetime
-from ..Models import ArgosGps, ArgosEngineering, dbConfig
+from ..Models import ArgosGps, ArgosEngineering, dbConfig, Import
 import itertools
 from traceback import print_exc
 
 
 def uploadFileArgos(request):
     session = request.dbsession
+    user = request.authenticated_userid['iss']
     workDir = os.path.dirname(os.path.dirname(
         os.path.dirname(os.path.abspath(__file__))))
     tmp_path = os.path.join(workDir, "ecoReleve_import")
@@ -43,14 +44,19 @@ def uploadFileArgos(request):
         shutil.copyfileobj(input_file, output_file)
 
     os.rename(temp_file_path, full_filename)
+    importObj = Import(ImportFileName=request.POST['file'].filename, FK_User=user)
+    importObj.ImportType = 'Argos'
+
+    session.add(importObj)
+    session.flush()
 
     if 'DIAG' in filename:
-        return parseDIAGFileAndInsert(full_filename, session)
+        return parseDIAGFileAndInsert(full_filename, session, importObj.ID)
     elif 'DS' in filename:
-        return parseDSFileAndInsert(full_filename, session)
+        return parseDSFileAndInsert(full_filename, session, importObj.ID)
 
 
-def parseDSFileAndInsert(full_filename, session):
+def parseDSFileAndInsert(full_filename, session, importID):
     workDir = os.path.dirname(os.path.dirname(
         os.path.dirname(os.path.abspath(__file__))))
     con_file = os.path.join(workDir, 'init.txt')
@@ -165,6 +171,7 @@ def parseDSFileAndInsert(full_filename, session):
         nb_existingEng += EngData.shape[0]
         if EngToInsert.shape[0] != 0:
             # Insert non existing data into DB
+            EngToInsert.loc[:, ('FK_Import')] = list(itertools.repeat(importID, len(EngToInsert.index)))
             nb_eng += EngToInsert.shape[0]
             EngToInsert.to_sql(ArgosEngineering.__table__.name,
                                session.get_bind(),
@@ -176,6 +183,7 @@ def parseDSFileAndInsert(full_filename, session):
         EngBisToInsert = checkExistingEng(EngDataBis, session)
         nb_existingEng += EngDataBis.shape[0]
         if EngBisToInsert.shape[0] != 0:
+            EngToInsert.loc[:, ('FK_Import')] = list(itertools.repeat(importID, len(EngToInsert.index)))
             nb_eng += EngBisToInsert.shape[0]
             # Insert non existing data into DB
             EngBisToInsert.to_sql(ArgosEngineering.__table__.name,
@@ -187,6 +195,7 @@ def parseDSFileAndInsert(full_filename, session):
     if GPSData is not None:
         GPSData = GPSData.replace(["neg alt"], [-999])
         DFToInsert = checkExistingGPS(GPSData, session)
+        DFToInsert.loc[:, ('FK_Import')] = list(itertools.repeat(importID, len(DFToInsert.index)))
         nb_gps_data = DFToInsert.shape[0]
         nb_existingGPS = GPSData.shape[0] - DFToInsert.shape[0]
         if DFToInsert.shape[0] != 0:
@@ -207,7 +216,7 @@ def parseDSFileAndInsert(full_filename, session):
             'existing argos': 0}
 
 
-def checkExistingEng(EngData, session):
+def checkExistingEng(EngData, session, fileName):
     EngData['id'] = range(EngData.shape[0])
     EngData = EngData.dropna()
     try:
@@ -309,7 +318,7 @@ def checkExistingGPS(GPSData, session):
     return DFToInsert
 
 
-def parseDIAGFileAndInsert(full_filename, session):
+def parseDIAGFileAndInsert(full_filename, session, importID):
 
     # PArse DIAG File with Regex
     with open(full_filename, 'r') as f:
@@ -384,6 +393,7 @@ def parseDIAGFileAndInsert(full_filename, session):
     DFToInsert.loc[:, ('imported')] = list(
         itertools.repeat(0, len(DFToInsert.index)))
     DFToInsert = DFToInsert.drop(['id', 'lat1', 'lat2', 'lon1', 'lon2'], 1)
+    DFToInsert.loc[:, ('FK_Import')] = list(itertools.repeat(importID, len(DFToInsert.index)))
 
     if DFToInsert.shape[0] != 0:
         DFToInsert.to_sql(ArgosGps.__table__.name, session.get_bind(

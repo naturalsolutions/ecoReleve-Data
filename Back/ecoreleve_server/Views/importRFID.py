@@ -4,11 +4,13 @@ from sqlalchemy import select, and_
 from sqlalchemy.exc import IntegrityError
 from ..Models import (
     Rfid,
-    dbConfig
+    dbConfig,
+    Import
 )
 from traceback import print_exc
 import pandas as pd
 from pyramid import threadlocal
+import itertools
 
 
 def uploadFileRFID(request):
@@ -23,7 +25,13 @@ def uploadFileRFID(request):
         idModule = int(request.POST['FK_Sensor'])
         startEquip = request.POST['StartDate']
         endEquip = request.POST['EndDate']
+        filename = request.POST['fileName']
         now = datetime.now()
+        importObj = Import(ImportFileName=filename, FK_User=creator, ImportDate=now)
+        importObj.ImportType = 'RFID'
+
+        session.add(importObj)
+        session.flush()
 
         if re.compile('\r\n').search(content):
             data = content.split('\r\n')
@@ -147,7 +155,7 @@ def uploadFileRFID(request):
 
             data_to_insert = data_to_insert.drop(['id_'], 1)
             data_to_insert = data_to_insert.drop_duplicates()
-
+            data_to_insert.loc[:, ('FK_Import')] = list(itertools.repeat(importObj.ID, len(data_to_insert.index)))
             if data_to_insert.shape[0] == 0:
                 raise(IntegrityError)
 
