@@ -38,7 +38,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,'ImportFileName'
            ,'File Name'
            ,2
-           ,'{"width":120,"maxWidth":350,"minWidth":100}'
+           ,'{"width":180,"maxWidth":350,"minWidth":100}'
            ,'string'
            ,20
            ,NULL
@@ -58,7 +58,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,'ImportDate'
            ,'Import Date'
            ,2
-           ,'{"width":250,"maxWidth":350,"minWidth":100}'
+           ,'{"width":200,"maxWidth":350,"minWidth":100}'
            ,'string'
            ,10
            ,NULL
@@ -78,7 +78,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,'ImportType'
            ,'Type'
            ,2
-           ,'{"width":250,"maxWidth":350,"minWidth":100}'
+           ,'{"width":100,"maxWidth":350,"minWidth":100}'
            ,'string'
            ,30
            ,NULL
@@ -98,7 +98,7 @@ INSERT INTO [dbo].[ModuleGrids]
            ,'FK_User'
            ,'Creator'
            ,0
-           ,'{"width":250,"maxWidth":350,"minWidth":100}'
+           ,'{"width":200,"maxWidth":350,"minWidth":100}'
            ,'string'
            ,40
            ,NULL
@@ -119,9 +119,71 @@ INSERT INTO [dbo].[ModuleGrids]
            ,'Login'
            ,'Creator'
            ,2
-           ,'{"width":250,"maxWidth":350,"minWidth":100}'
+           ,'{"width":200,"maxWidth":350,"minWidth":100}'
            ,'string'
            ,40
+           ,NULL
+           ,'{"source": "autocomplete/users/Login/ID", "minLength":3}'
+           ,40
+           ,2
+           ,NULL
+           ,0
+           ,NULL
+           ,4
+           ,'AutocompleteEditor'
+           ,NULL
+           ,NULL),
+
+		   		  (@idFront
+           ,NULL
+           ,'count'
+           ,'nb rows'
+           ,2
+           ,'{"width":150,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,50
+           ,NULL
+           ,'{"source": "autocomplete/users/Login/ID", "minLength":3}'
+           ,40
+           ,2
+           ,NULL
+           ,0
+           ,NULL
+           ,4
+           ,'AutocompleteEditor'
+           ,NULL
+           ,NULL)
+		   ,
+
+		   		  (@idFront
+           ,NULL
+           ,'maxDate'
+           ,'max date'
+           ,2
+           ,'{"width":250,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,70
+           ,NULL
+           ,'{"source": "autocomplete/users/Login/ID", "minLength":3}'
+           ,40
+           ,2
+           ,NULL
+           ,0
+           ,NULL
+           ,4
+           ,'AutocompleteEditor'
+           ,NULL
+           ,NULL)
+		   ,
+
+		   		  (@idFront
+           ,NULL
+           ,'minDate'
+           ,'min date'
+           ,2
+           ,'{"width":250,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,60
            ,NULL
            ,'{"source": "autocomplete/users/Login/ID", "minLength":3}'
            ,40

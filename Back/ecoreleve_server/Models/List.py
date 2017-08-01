@@ -22,7 +22,13 @@ from ..Models import (
     Sensor,
     SensorType,
     MonitoredSite,
-    Import
+    Import,
+    ArgosEngineering,
+    ArgosGps,
+    GPX,
+    Gsm,
+    GsmEngineering,
+    Rfid
 )
 from ..utils import Eval
 from collections import OrderedDict
@@ -609,6 +615,57 @@ class MonitoredSiteList(ListObjectWithDynProp):
 class ImportList(Generator):
     
     def __init__(self, SessionMaker):
+
+        queryArgos = select([func.max(ArgosGps.date),
+                             func.min(ArgosGps.date),
+                             func.count(ArgosGps.pk_id)
+                             ]).where(ArgosGps.FK_Import==Import.ID)
+
+        queryGPX = select([func.max(GPX.date),
+                        func.min(GPX.date),
+                        func.count(GPX.pk_id)
+                        ]).where(GPX.FK_Import==Import.ID)
+
+        queryGsm = select([func.max(Gsm.date),
+                        func.min(Gsm.date),
+                        func.count(Gsm.pk_id)
+                        ]).where(Gsm.FK_Import==Import.ID)
+
+        queryRfid = select([func.max(Rfid.date),
+                             func.min(Rfid.date),
+                             func.count(Rfid.ID)
+                             ]).where(Rfid.FK_Import==Import.ID)
+
         joinTable = join(Import, User, Import.FK_User==User.id)
-        tablecImprt = select([Import, User.fullname.label('Login')]).select_from(joinTable).cte()
+
+        joinTable = outerjoin(joinTable, ArgosGps, ArgosGps.FK_Import==Import.ID)
+        joinTable = outerjoin(joinTable, Rfid, Rfid.FK_Import==Import.ID)
+        joinTable = outerjoin(joinTable, Gsm, Gsm.FK_Import==Import.ID)
+        joinTable = outerjoin(joinTable, GPX, GPX.FK_Import==Import.ID)
+        tablecImprt = select([Import.ID,
+                              Import.ImportDate,
+                              Import.ImportFileName,
+                              Import.ImportType,
+                              User.fullname.label('Login'),
+                              func.count(Import.ID).label('count'),
+                              func.isnull(
+                                  func.max(ArgosGps.date),
+                                    func.isnull(func.max(Gsm.date),
+                                        func.isnull(func.max(Rfid.date),func.max(GPX.date))
+                                  )).label('maxDate'),
+                            func.isnull(
+                                func.min(ArgosGps.date),
+                                    func.isnull(func.min(GPX.date),
+                                        func.isnull(func.min(Rfid.date),func.min(Gsm.date))
+                                  )).label('minDate')
+                            ]).select_from(joinTable
+                                           ).group_by(
+                                             Import.ID,
+                                             Import.ImportDate,
+                                             Import.ImportFileName,
+                                             Import.ImportType,
+                                             User.Lastname,
+                                             User.Firstname,
+                                           )
+        tablecImprt = tablecImprt.cte()
         super().__init__(tablecImprt, SessionMaker)
