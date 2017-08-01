@@ -21,7 +21,8 @@ from ..Models import (
     Equipment,
     Sensor,
     SensorType,
-    MonitoredSite
+    MonitoredSite,
+    Import
 )
 from ..utils import Eval
 from collections import OrderedDict
@@ -603,3 +604,11 @@ class MonitoredSiteList(ListObjectWithDynProp):
                      ))
             fullQueryJoin = fullQueryJoin.where(exists(subSelect))
         return fullQueryJoin
+
+
+class ImportList(Generator):
+    
+    def __init__(self, SessionMaker):
+        joinTable = join(Import, User, Import.FK_User==User.id)
+        tablecImprt = select([Import, User.fullname.label('Login')]).select_from(joinTable).cte()
+        super().__init__(tablecImprt, SessionMaker)

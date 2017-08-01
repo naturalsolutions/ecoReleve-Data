@@ -427,7 +427,7 @@ class ModuleGrids (Base):
         else:
             filter_['fieldClass'] = FieldSizeToClass[self.FilterSize],
 
-        if self.FilterType == 'Select' and self.Options is not None:
+        if self.FilterType == 'Select' and self.Options is not None and 'select' in self.Options.lower():
             result = self.session.execute(text(self.Options)).fetchall()
             filter_['options'] = [
                 {'label': row['label'], 'val':row['val']} for row in result]
