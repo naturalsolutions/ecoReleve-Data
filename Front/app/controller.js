@@ -29,6 +29,8 @@ define([
   './modules/monitoredSites/monitored_sites.view',
   './modules/monitoredSites/monitored_sites.new.view',
 
+  './modules/importHistory/history.view',
+
 ],function(
   Marionette,
   LytHome,
@@ -43,7 +45,9 @@ define([
   LytStation, LytStations, LytStationsNew,
   LytIndividual, LytIndividuals, LytIndividualsNew,
   LytSensor, LytSensors, LytSensorsNew,
-  LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew
+  LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew,
+  LytImportHistory
+
 ) {
   'use strict';
 
@@ -87,6 +91,10 @@ define([
 
     importFile: function(type) {
       this.rgMain.show(new LytImportFile({type : type}));
+    },
+
+    importHistory: function(type) {
+      this.rgMain.show(new LytImportHistory());
     },
 
     station: function(id, proto, obs) {

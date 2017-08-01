@@ -2,7 +2,7 @@
 	"tiles" :{
 		"input" : "Manual entry",
 		"manual-import" : "Manual import",
-		"auto-import" : "Automatic import",
+		"history-import" : "History import",
 		"export" : "export",
 		"sites" : "Monitored sites",
 		"individuals" : "Individuals",
