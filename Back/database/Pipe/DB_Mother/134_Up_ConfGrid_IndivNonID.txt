@@ -1,0 +1,11 @@
+  update g set QueryName = NULL
+    FROM [ModuleGrids] g
+  where Module_ID = 8 and TypeObj = 2 
+  and Name='Transmitter_Type'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('134_Up_ConfGrid_IndivNonID',GETDATE(),(SELECT db_name()))
+
+
+GO
