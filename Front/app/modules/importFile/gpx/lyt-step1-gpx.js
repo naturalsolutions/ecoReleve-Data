@@ -9,10 +9,12 @@ define([
   'ns_form/NSFormsModuleGit',
   'models/gpxForm',
   'i18n',
-  'dropzone'
+  'dropzone',
+  'moment',
+  'moment-timezone-with-data',
 
 ], function ($, _, Backbone, Marionette, config, Swal,
-  XmlParser, NsForm, GpxForm, Dropzone
+  XmlParser, NsForm, GpxForm, Dropzone, moment, momenttz
 ) {
 
   'use strict';
@@ -46,7 +48,27 @@ define([
       this.formRdy.then(function(){
         _this.parent.disableNextBtn();
         _this.parent.bindRequiredFields();
+        _this.initTimeZoneField();
       });
+    },
+
+    initTimeZoneField: function(){
+      var tzEditor = this.nsform.BBForm.fields['timeZone'].editor;
+      var tzEl = tzEditor.$el;
+      var timezones = momenttz.tz.names()
+      var content;
+      var tzWithOffset = []
+      timezones.map(function(tz){
+        tzWithOffset.push({label:"(GMT"+momenttz.tz(tz).format('Z')+") " + tz, val: tz});
+      });
+
+      tzWithOffset.map(function(tz){
+        content += '<option value="' + tz.val + '">' + tz.label + '</option>';
+      });
+      tzEl.append(content);
+      if(window.app.timezone){
+        tzEl.val(window.app.timezone);
+      } 
     },
 
     parseFile: function (file) {
@@ -153,15 +175,19 @@ define([
     setWaypointListWithForm: function (formData) {
       var formData = this.nsform.BBForm.getValue();
       var fwList = [];
+      window.app.timezone = formData.timeZone;
       _.forEach(formData.FieldWorkers, function (curFw) {
         fwList.push(parseInt(curFw.FieldWorker));
       });
       this.wayPointCollection.map(function (model) {
+        var curDate = momenttz.utc(model.waypointTime, 'DD/MM/YYYY HH:mm');
         model.FieldWorkers = fwList;
         model.NbFieldWorker = formData.NbFieldWorker;
         model.fieldActivity = formData.fieldActivityId;
         model.timeZone = formData.timeZone;
         model.Place = formData.Place;
+        model.TZdate = momenttz(curDate).utc().tz(formData.timeZone).format('DD/MM/YYYY HH:mm');
+        model.displayDate = momenttz(curDate).utc().tz(formData.timeZone).format('YYYY-MM-DD HH:mm');
       });
     }
   });

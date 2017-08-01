@@ -70,7 +70,8 @@ def formatData(data, request):
             row['waypointTime'], format_dt)
         newRow['fieldActivityId'] = row['fieldActivity']
         newRow['fileName'] = row['fileName']
-
+        newRow['StationDateTZ'] = datetime.strptime(
+            row['TZdate'], format_dt)
         GPXdata.append(newRow)
 
     return GPXdata
@@ -135,7 +136,7 @@ def insertData(session, dataFrame_to_insert, fieldWorkers):
             # curSta.init_on_load()
             curSta.allProp = Sta.allProp
             curDate = datetime.strptime(
-                sta['StationDate'], "%Y-%m-%dT%H:%M:%S.%fZ")
+                sta['StationDateTZ'], "%Y-%m-%dT%H:%M:%S.%fZ")
             curSta.updateFromJSON(sta)
             curSta.StationDate = curDate
             bulk_station.append(curSta)
@@ -176,7 +177,8 @@ def insertRawData(session, GPXdata, existing_dataFrame):
                  'creationDate',
                  'creator',
                  'FK_StationType',
-                 'NbFieldWorker'], 1)
+                 'NbFieldWorker',
+                 'StationDateTZ'], 1)
     
     data_to_insert = json.loads(rawData_to_insert.to_json(
             orient='records', date_format='iso'))
