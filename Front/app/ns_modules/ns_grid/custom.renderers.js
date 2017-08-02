@@ -103,7 +103,9 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         }
         else if (validators[0].type && validators[0].type === 'StateBox') {
           if ( !validators[0].nullable && ( value === null || value === undefined) ) { //can't be null and null in database
-                this.handleError(params);
+            this.handleError(params);
+            var tmp = this.eGui.getElementsByTagName('label');
+            console.log(tmp)
           }
           else {
             this.handleRemoveError(params);

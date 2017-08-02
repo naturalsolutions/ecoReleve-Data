@@ -16,7 +16,7 @@ define([
 			defaultValue: false,
 			template: '<span data-editor>\
 								<input id="<%=id%>" name="<%=name%>" class="form-control statebox" type="checkbox" disabled />\
-								<label for="<%=id% data-toggle="tooltip" ></label>\
+								<label for="<%=id%>" data-toggle="tooltip" ></label>\
 								<div data-error></div>\
 								<div></div>\
 						</span>',
@@ -150,8 +150,14 @@ define([
 					_.every(validators, function(validator) {
 						error = getValidator(validator)(value, formValues);
 						if (typeof(error) != 'undefined') {
+						_this.$input.addClass('error');
 						_this.$label.tooltip('show');
 						}
+					else {
+						if (_this.$input.hasClass('error')  ) {
+							_this.$input.removeClass('error');
+						}
+					}
 						return error ? false : true;
 					});
 				}
