@@ -32,6 +32,7 @@
       //si l'affichage est différent de la valeur renvoyée
       display: {
         isDisplayDifferent: false,
+        mode: 'list',
         //Stocke la valeur dans un input hidden d'id = _self.attr("id") + suffixeId
         suffixeId: '_value',
         //Nom des paramètres a récupéré dans les noeuds de l'arbre
@@ -71,7 +72,6 @@
     var methods = {
       init: function(parametres) {
         //Fusion des paramètres envoyer avec les params par defaut
-
         if (parametres) {
           var parametres = $.extend(defauts, parametres);
         };
@@ -110,7 +110,6 @@
               contentType: 'application/json; charset=utf-8',
               data: dataToSend,
             });
-
           }
 
           $.when(window.thesaurus[parametres.startId]).then(function() {
@@ -120,9 +119,7 @@
                     $(this).css('display', 'none');
                   });
                   var treeContainer = $('#treeView' + $me.attr('id'));
-
                   treeContainer.css('display', 'block').css('min-width', $me.outerWidth() - 2).css('z-index', '100');
-
                   treeContainer.css({top: $me.outerHeight() + 20});
                   //Fonction qui permet d'effectuer un "blur" sur l'ensemble des éléments (input et arbre)
                   $(document).delegate('body', 'click', function(event) {
@@ -150,11 +147,56 @@
                 }, parametres.timeout + 50);
               };
 
-              $me.on('focus', onFocus);
+              if (parametres.display.mode == 'popover'){     
+                $('#treeView' + $me.attr('id')).removeClass('fancytreeview').addClass('fancytreeview-popover');
 
-              if ($me.is(':focus')) {
-                onFocus();
-              };
+                WebuiPopovers.create($me,{
+                    // placement:'bottom-left',
+                    url:'#treeView' + $me.attr('id'),
+                    padding:false,
+                    offsetLeft:-100,
+                    //trigger:'manual',
+                    onShow: function($element) {
+                      $me.attr('popover','shown');
+                    },
+                    onHide: function($element) {
+                      $me.attr('popover','hide');
+                    },
+                });
+                $me.attr('popover','hide');
+
+                //set interactions
+                onFocus = function(e){
+                  $me.webuiPopover('show');
+                };
+                var onBlur = function(e){
+                  $me.webuiPopover('hide');
+                };
+                
+                $('#treeView' + $me.attr('id')).on('keydown',function(e){
+                  if(e.which==9){
+                        $me.webuiPopover('hide');
+                        $me.focus();
+                      }
+                });
+
+                $me.on('mousedown',function(e){
+                  // needed hack else popover popover closed automatically after click in input
+                  e.preventDefault();
+                  $me.off('focus',onFocus);
+                  $me.focus();
+                  $me.on('focus',onFocus);
+                });
+                $me.on("keypress", function () {
+                  //show popover on input entry
+                  $me.webuiPopover('show');
+                });
+                $me.on('blur', onBlur);
+                $me.on("remove", function () {
+                  $me.webuiPopover('destroy');
+                });
+              }
+              $me.on('focus', onFocus);
 
               $('#treeView' + $me.attr('id')).fancytree({
                   debugLevel: 0,
@@ -205,23 +247,19 @@
                     if (parametres.display.isDisplayDifferent) {
                       $me.val(data.node.data[parametres.display.displayValueName]);
                       $('[name=' + $me.attr('name') + parametres.display.suffixeId + ']').val(data.node.data[parametres.display.storedValueName]);
-
-                      $me.off('focus', onFocus);
-                      $me.focus();
-                      $me.on('focus', onFocus);
-
-                      $('#treeView' + $me.attr('id')).css('display', 'none');
-                      tree.activateKey(false);
                     } else {
                       $me.val(data.node.data[parametres.display.displayValueName]);
-
-                      $me.off('focus', onFocus);
-                      $me.focus();
-                      $me.on('focus', onFocus);
-
-                      $('#treeView' + $me.attr('id')).css('display', 'none');
-                      tree.activateKey(false);
                     }
+
+                    if(parametres.display.mode=='popover'){
+                      $me.webuiPopover('hide');
+                    } else {
+                      // $me.off('focus', onFocus);
+                      // $me.focus();
+                      // $me.on('focus', onFocus);
+                      $('#treeView' + $me.attr('id')).css('display', 'none');
+                    }
+                      tree.activateKey(false);
                     if (parametres.onItemClick) {
                       try {
                         $.proxy(parametres.onItemClick(), $me);
@@ -233,16 +271,50 @@
                   }
                 });//end then
 
+              
+              if ($me.is(':focus')) {
+                onFocus();
+              }
+
+              $('#treeView' + $me.attr('id')).on('keyup',function(e){
+                    if (e.keyCode == 38 || e.keyCode == 40){
+                        var itemFocus = $('#treeView' + $me.attr('id')).find('.fancytree-focused');
+                        itemFocus.focus();
+                        var calcul =$('#treeView' + $me.attr('id')).scrollTop()+ $('#treeView' + $me.attr('id')).outerHeight()-itemFocus.height();
+                        if(itemFocus.position().top >= calcul){
+                            $('#treeView' + $me.attr('id')).scrollTop(itemFocus.position().top);
+                        }
+                        if(itemFocus.position().top < $('#treeView' + $me.attr('id')).scrollTop()){
+                            $('#treeView' + $me.attr('id')).scrollTop(itemFocus.position().top);
+                        }
+                    }
+                    if (e.keyCode == 27 || e.keyCode == 9 || e.keyCode == 32 || e.keyCode == 13){
+                      if(parametres.display.mode == 'popover'){
+                        $me.focus();
+                        $me.webuiPopover('hide');
+                      } else {
+                        $('#treeView' + $me.attr('id')).css('display', 'none');
+                      }
+                    }
+                });
+
               $me.keyup(function(e) {
-                var _this = this;
                 var treeHtml = $('#treeView' + $me.attr('id'));
                 var fancytree = treeHtml.fancytree('getTree');
 
                 //down arrow
                 if (e && e.which === 40) {
-                  $('#treeView' + $me.attr('id')).css('display', 'block');
+                  $me.off('blur', onblur);
+
+                  if(parametres.display.mode == 'popover'){
+                    $me.webuiPopover('show');
+                  } else {
+                    $('#treeView' + $me.attr('id')).css('display', 'block');
+                  }
+
                   $me.parent().find('.fancytree-container').focus();
                   fancytree.getFirstChild().setFocus();
+                  $me.on('blur', onblur);
                   return;
                 }
 

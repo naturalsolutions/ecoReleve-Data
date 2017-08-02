@@ -55,7 +55,7 @@ require.config({
     'ns_filter_bower': '../bower_components/NaturalJS_Filter/model-filter',
     'ag-grid': '../bower_components/ag-grid/dist/ag-grid',
 
-
+    'webui-popover':'../bower_components/webui-popover/dist/jquery.webui-popover',
     /*==========  Vendors  ==========*/
     //waiting for a new release (amd friendly)
 
@@ -85,6 +85,10 @@ require.config({
     backbone: {
       deps: ['jquery', 'underscore'],
       exports: 'Backbone'
+    },
+    'webui-popover': {
+      deps: ['jquery'],
+      exports: 'webuiPopover'
     },
     marionette: {
       exports: 'Marionette'
