@@ -95,7 +95,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         
         if(validators[0] === 'required'){
             $(params.eGridCell).addClass('ag-cell-required');
-            if(!value){
+            if(!value && String(value) !== "0"){
               this.handleError(params);
             } else {
               this.handleRemoveError(params);
