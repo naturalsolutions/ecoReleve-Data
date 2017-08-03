@@ -83,9 +83,9 @@ define([
             this.lng =  window.app.user.attributes.Language;
             this.timeout = options.schema.options.timeout;
             this.displayMode = options.schema.options.displayMode;
-            if(this.formGrid){
-                this.displayMode = 'popover';
-            }
+            // if(this.formGrid){
+            //     this.displayMode = 'popover';
+            // }
 
             //this.displayMode = 'popover';
 
