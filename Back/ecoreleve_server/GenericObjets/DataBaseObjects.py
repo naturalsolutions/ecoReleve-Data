@@ -231,8 +231,8 @@ class DbObject(object):
                 except Exception as e:
                     pass
 
-        if not schema and hasattr(self, 'getForm'):
-            schema = self.getForm()['schema']
+        # if not schema and hasattr(self, 'getForm'):
+        #     schema = self.getForm()['schema']
         if schema:
             data = formatValue(data, schema)
 

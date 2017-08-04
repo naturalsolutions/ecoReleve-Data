@@ -155,6 +155,7 @@ class Observation(Base, ObjectWithDynProp):
         self.SubObservation_children = listSubValues
 
     def updateFromJSON(self, DTOObject, startDate=None):
+        # delattr(self,'getForm')
         previousState = self.getFlatObject()
         ObjectWithDynProp.updateFromJSON(self, DTOObject, None)
         if 'listOfSubObs' in DTOObject:
@@ -162,7 +163,7 @@ class Observation(Base, ObjectWithDynProp):
         self.updateLinkedField(DTOObject, previousState=previousState)
 
     def getFlatObject(self, schema=None):
-        result = super().getFlatObject()
+        result = super().getFlatObject(schema=schema)
         subObsList = []
         typeName = 'children'
         if self.Observation_children != []:

@@ -184,7 +184,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
         '''IF ID is send from front --> get data of this object in order to
         display value into form which will be sent'''
-        data = self.getFlatObject(resultat['schema'])
+        data = self.getFlatObject(schema=resultat['schema'])
         resultat['data'] = data
         resultat['recursive_level'] = 0
         resultat = self.getDefaultValue(resultat)
@@ -228,6 +228,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
                 linkProp['LinkSourceID'].replace('@Dyn:', ''))
 
             # remove linked field if target object is different of previous
+
             if previousState and str(linkedSource) != str(previousState.get(linkProp['LinkSourceID'])):
                 self.deleteLinkedField(previousState=previousState)
 
