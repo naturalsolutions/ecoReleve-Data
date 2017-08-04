@@ -107,6 +107,9 @@ define([
       else if(response.responseJSON.response.errorSite == true ){
       this.swal({'title':'Data saving error', 'type':'error', 'text':'No monitored site is attached', 'confirmButtonColor':'rgb(221, 107, 85)'});
       }
+      else {
+        this.swal({'title':'Data saving error', 'type':'error', 'text':response.responseJSON.response, 'confirmButtonColor':'rgb(221, 107, 85)'});
+      }
     },
 
     onDestroy: function(){
