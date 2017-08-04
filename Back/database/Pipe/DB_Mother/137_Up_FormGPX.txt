@@ -10,6 +10,10 @@ WHERE module_id = 19 AND Name = 'Fieldworkers'
 
 GO
 
+delete [ModuleForms]
+  where inputtype  = 'FileUploadEditor'
+GO
+
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('137_Up_FormGPX',GETDATE(),(SELECT db_name()))
 
 
