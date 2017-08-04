@@ -41,6 +41,33 @@ define([
     ',
 
     className: 'sub-grid-form' ,
+
+    // set here the rule function according the rule operator
+    rulesList : {
+      disable: function(colDef, field){
+        if(colDef.editable){
+          colDef.editable = function(params){
+            // apply disable only on existing data
+            var editable = true
+            if (params.node.data.ID){
+              var testedValue = params.node.data[field.rule.source];
+              if(field.rule.value.indexOf('match@')!= -1 && testedValue){
+                editable = testedValue.toString().match(field.rule.value.replace('match@','')) ? false : true;
+              } else{
+                editable = testedValue != field.rule.value;
+              }
+              if(!editable){
+                params.node['unRemovable'] = true;
+              }
+              return editable
+            } else {
+              return editable;
+            }
+          }
+        }
+      }
+    },
+
     addRow: function(){
       this.gridView.gridOptions.api.setSortModel({});
       this.gridView.gridOptions.api.addItems([{}]);
@@ -50,13 +77,18 @@ define([
     deleteRows: function() {
       var _this = this;
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+      console.log(selectedNodes)
       if(!selectedNodes.length){
         return;
       }
-
+      var selectNodesRemovable = selectedNodes.filter(function(node){
+        if (!node.unRemovable){
+          return node;
+        }
+      });
       this.gridView.gridOptions.api.deletingRows = true;
       this.gridView.gridOptions.api.setSortModel({});
-      _this.gridView.gridOptions.api.removeItems(selectedNodes);
+      _this.gridView.gridOptions.api.removeItems(selectNodesRemovable);
       this.$el.trigger('change');
       this.gridView.gridOptions.api.deletingRows = false;
     },
@@ -158,6 +190,13 @@ define([
       }
     },
 
+    applyRule: function(colDef, field){
+      if(field.rule && field.rule.operator){
+        var ruleFunc = this.rulesList[field.rule.operator];
+        ruleFunc(colDef, field);
+      }
+    },
+
     formatColumns: function(schema){
       var _this = this;
       var odrFields = schema.fieldsets[0].fields;
@@ -181,7 +220,7 @@ define([
           width: field.width,
           pinned : field.pinned
         };
-        
+        this.applyRule(colDef, field);
         columnsDefs.push(colDef)
       }
       var errorCol = {
