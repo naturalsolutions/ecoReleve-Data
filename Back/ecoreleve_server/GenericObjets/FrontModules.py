@@ -100,11 +100,11 @@ class ModuleForms(Base):
         binaryMode = 0
         self.displayMode = displayMode
         if (displayMode.lower() == 'display'):
-            self.Editable = 0
+            self.Editable = False
         else:
-            self.Editable = 1
+            self.Editable = True
         if(displayMode.lower() == 'edit'):
-            binaryMode = 1
+            binaryMode = True
 
         curInputType = self.InputType
 
