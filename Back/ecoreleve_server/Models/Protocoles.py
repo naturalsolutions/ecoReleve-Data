@@ -172,7 +172,7 @@ class Observation(Base, ObjectWithDynProp):
 
             for subObs in self.Observation_children:
                 subObs.LoadNowValues()
-                flatObs = subObs.getFlatObject()
+                flatObs = subObs.getFlatObject(schema=schema[subObs.GetType().Name]['subschema'])
                 if len(subObs.SubObservation_children) > 0:
                     flatObs.update(subObs.SubObservation_childrens)
                 subObsList.append(flatObs)
