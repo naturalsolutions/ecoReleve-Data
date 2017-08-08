@@ -68,8 +68,18 @@ define([
 					this.value = null;
 				}
 		
-				//  this.nullable = false;
-				this.nullable = true;
+				this.nullable = true;//default nullable so 3 state
+
+				if(options.schema.validators) {
+					for( index in options.schema.validators) {
+						var elem = options.schema.validators[index];
+						if(elem.type && elem.type === 'StateBox') {
+							this.nullable = elem.nullable
+							break;
+						}
+					}
+				}
+				
 
 
 				if ( typeof(this.model.get(this.key)) != 'undefined') { // get old value 
