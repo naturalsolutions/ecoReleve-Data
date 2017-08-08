@@ -105,8 +105,8 @@ define([
                 }
           }
 
-          _this.datetimepickerOptions.debug = true;
-         // _this.datetimepickerOptions.widgetParent ='body';
+         // _this.datetimepickerOptions.debug = true;
+          _this.datetimepickerOptions.widgetParent ='body';
 
         var $el = $($.trim(this.template({
             value : value,
