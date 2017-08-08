@@ -27,14 +27,10 @@
     "chartjs": "1.0.2",
     "reneco-fonts": "*",
     "ag-grid": "^5.2.0",
-<<<<<<< HEAD
-    "NaturalJS_Filter":"1.1.4"
-=======
     "NaturalJS_Filter": "1.1.4",
     "webui-popover": "2.1.15",
     "tether": "^1.4.0",
     "popper.js": "https://unpkg.com/popper.js"
->>>>>>> 84c8ed80... add new lib for popover input
   },
   "resolutions": {
     "underscore": "1.5.2",
