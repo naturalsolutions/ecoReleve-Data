@@ -172,7 +172,7 @@ define([
                 msg = "A protocol Site equipment or Site unequipment is present on this station. You cannot change coordinates, monitored site nor station date.";
                 break;
               case 'individual equipment':
-                msg = "A protocol Individual equipment or Individual unequipment is present on this station. You cannot station date.";
+                msg = "A protocol Individual equipment or Individual unequipment is present on this station. You cannot change station date.";
                 break;
             }
 
