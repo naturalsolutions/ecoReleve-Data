@@ -3,9 +3,10 @@ define([
   'backbone',
   'backbone_forms',
  'dateTimePicker',
+ 'popper',
  'moment',
 ], function(
-  $, Backbone, Form,datetimepicker,moment
+  $, Backbone, Form,datetimepicker,Popper,moment
 ){
   'use strict';
   return Form.editors.DateTimePickerEditor = Form.editors.Base.extend({
@@ -66,6 +67,14 @@ define([
         return this.$el.find('#' + this.id).val();
     },
 
+    remove : function() {
+      if( this.datePickerTest ) {
+        $(this.datePickerTest).data("DateTimePicker").destroy(); //to be sure datepicker is destroy
+        this.datePickerTest = null;
+      }
+
+    },
+
     render: function(){
         var _this = this;
         var options = this.options;
@@ -96,6 +105,9 @@ define([
                 }
           }
 
+         // _this.datetimepickerOptions.debug = true;
+          _this.datetimepickerOptions.widgetParent ='body';
+
         var $el = $($.trim(this.template({
             value : value,
             editorClass : schema.editorClass,
@@ -106,12 +118,28 @@ define([
             iconClass: _this.classIcon
         })));
         this.setElement($el);
-		$($el[0]).datetimepicker(_this.datetimepickerOptions);
+        this.datePickerTest = $($el[0]).datetimepicker(_this.datetimepickerOptions);
+        $($el[0]).on('dp.show' , function() {
+            this.popper = new Popper($($el[0]), $(".bootstrap-datetimepicker-widget"), {
+            placement: 'bottom-start',
+            modifiers: {
+                        preventOverflow: {
+                            enabled: true, 
+                            boundariesElement: 'window'
+                        },
+                        flip : {
+                          enabled : true,
+                          boundariesElement : 'window'
+                        }
+                    }
+            });
+          
+        });
         $($el[0]).on('dp.change', function(){
             _this.$el.find('input').trigger('change');
             _this.trigger('change', this);
-        }
-        )
+        });
+
         //tmp solution ? datetimepicker remove the value
         /*
         if(this.options){
