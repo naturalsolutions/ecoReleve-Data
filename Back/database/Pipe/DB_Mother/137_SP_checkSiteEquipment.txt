@@ -1,0 +1,45 @@
+
+Create PROCEDURE [dbo].[pr_checkSiteEquipmentForStation]
+	@stationID int,
+	@date datetime,
+	@lat decimal(9,5),
+	@lon decimal(9,5),
+
+	@FK_MonitoredSite int,
+	@result int OUTPUT
+AS
+SET NOCOUNT ON
+SET @result = NULL
+
+DECLARE @siteEquipExists int;
+DECLARE @indivEquipExists int;
+DECLARE @latSta decimal(9,5), @lonSta decimal(9,5), @dateSta datetime, @siteSta int;
+
+SELECT @latSta = LAT, @lonSta = LON, @dateSta = StationDate, @siteSta = FK_MonitoredSite
+FROM Station where ID = @stationID
+
+
+SET @siteEquipExists =(SELECT 1 WHERE EXISts (SELECT * 
+							FROM Observation o 
+							WHERE FK_Station = @stationID
+							AND o.FK_ProtocoleType in (SELECT ID 
+														FROM ProtocoleType 
+														WHERE Name in ('site_equipment',
+                                                                       'site_unequipment')
+														)
+							)
+)
+
+IF (@siteEquipExists IS NOT NULL AND ( isnull(@lat,0) != isnull(@latSta,0) OR  isnull(@lon,0) != isnull(@lonSta,0) OR  isnull(@FK_MonitoredSite,0) != isnull(@siteSta,0) OR @date != @dateSta))
+SET @result = 1;
+
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('137_SP_checkSiteEquipment',GETDATE(),(SELECT db_name()))
+
+
+GO

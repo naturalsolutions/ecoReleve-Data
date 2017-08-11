@@ -1,0 +1,40 @@
+
+ALTER PROCEDURE [dbo].[pr_checkUniqueStation]
+	@stationID int,
+	@lat decimal(9,5),
+	@lon decimal(9,5),
+	@date datetime,
+	@fieldActivity int,
+	@result int OUTPUT
+AS
+SET NOCOUNT ON
+
+ DECLARE @count int
+
+ IF @stationID is NULL
+ BEGIN
+	SELECT @stationID = 0
+ END
+
+SELECT @count =  COUNT(*)
+FROM Station
+WHERE fieldActivityId = @fieldActivity 
+AND ID != @stationID
+AND StationDate = @date AND convert(varchar(MAX), @date, 8) != '00:00:00'
+AND ( 
+		(	@lat IS NOT NULL AND @lon IS NOT NULL
+			AND LAT = @lat AND LON = @lon
+		)
+
+		OR
+		(@lat IS NULL AND @lon IS NULL)
+
+)
+
+SELECT @result = ( SELECT 1 WHERE @count > 0 ) ;
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('142_ALTER_SP_pr_checkUniqueStation',GETDATE(),(SELECT db_name()))
+
+
+GO

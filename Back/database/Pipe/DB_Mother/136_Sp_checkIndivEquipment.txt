@@ -1,0 +1,51 @@
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[pr_checkIndivEquipmentForStation]
+	@stationID int,
+	@date datetime,
+	@lat decimal(9,5),
+	@lon decimal(9,5),
+
+	@FK_MonitoredSite int,
+	@result int OUTPUT
+AS
+SET NOCOUNT ON
+SET @result = NULL
+
+DECLARE @siteEquipExists int;
+DECLARE @indivEquipExists int;
+DECLARE @latSta decimal(9,5), @lonSta decimal(9,5), @dateSta datetime, @siteSta int;
+
+SELECT @latSta = LAT, @lonSta = LON, @dateSta = StationDate, @siteSta = FK_MonitoredSite
+FROM Station where ID = @stationID
+
+
+SET @indivEquipExists =(SELECT 1 WHERE EXISts (SELECT * 
+							FROM Observation o 
+							WHERE FK_Station = @stationID
+							AND o.FK_ProtocoleType in (SELECT ID 
+														FROM ProtocoleType 
+														WHERE Name in ('individual_equipment',
+                                                                       'individual_unequipment')
+														)
+							)
+)
+
+IF (@indivEquipExists IS NOT NULL AND @date != @dateSta)
+SET @result = 1;
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('136_Sp_checkIndivEquipment',GETDATE(),(SELECT db_name()))
+
+
+GO
