@@ -156,9 +156,9 @@ class DbObject(object):
         self.__constraintFunctionList__.extend(list)
 
     def getProperty(self, nameProp):
-        try:
+        if hasattr(self, nameProp):
             return getattr(self, nameProp)
-        except:
+        else:
             return self.__properties__[nameProp]
 
     def setProperty(self, propertyName, value):
@@ -190,10 +190,10 @@ class DbObject(object):
     def afterUpdate(self):
         return
 
-    def beforedelete(self):
+    def beforeDelete(self):
         return
 
-    def afterdelete(self):
+    def afterDelete(self):
         return
 
     def checkConstraintsOnData(self, data):
@@ -231,8 +231,8 @@ class DbObject(object):
                 except Exception as e:
                     pass
 
-        if not schema and hasattr(self, 'getForm'):
-            schema = self.getForm()['schema']
+        # if not schema and hasattr(self, 'getForm'):
+        #     schema = self.getForm()['schema']
         if schema:
             data = formatValue(data, schema)
 
