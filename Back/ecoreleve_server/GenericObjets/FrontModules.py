@@ -156,18 +156,23 @@ class ModuleForms(Base):
         else:
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
 
-            # TODO changer le validateur pour select required (valeur <>-1)
-        if self.InputType in self.func_type_context:
-            self.func_type_context[self.InputType](self)
         # default value
         default = self.DefaultValue
         if default is not None:
             self.dto['defaultValue'] = default
 
+            # TODO changer le validateur pour select required (valeur <>-1)
+        if self.InputType in self.func_type_context:
+            self.func_type_context[self.InputType](self)
+
         if isGrid:
             self.handleSchemaGrid()
 
         return self.dto
+
+    def StateBox(self):
+        if self.dto['defaultValue'] and self.dto['defaultValue'].isdigit():
+            self.dto['defaultValue'] = int(self.dto['defaultValue'])
 
     def InputSelect(self):
         if (self.Options is not None
@@ -335,6 +340,7 @@ class ModuleForms(Base):
         'AutocompTreeEditor': InputThesaurus,
         'AutocompleteEditor': InputAutocomplete,
         'GridRanged': GridRanged,
+        'StateBox' : StateBox
     }
 
 

@@ -1,0 +1,14 @@
+UPDATE [dbo].[ModuleForms]
+   SET [FieldSizeEdit] = 60
+      ,[FieldSizeDisplay] = 60
+ WHERE
+ NAME = 'identity_sure'
+AND
+TypeObj = (SELECT ID FROM ProtocoleType   WHERE Name = 'Sub_Athropod_survey' )
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('137_fix_min_width_(60px)_for_statebox_in_grid',GETDATE(),(SELECT db_name()))
+
+
+GO
