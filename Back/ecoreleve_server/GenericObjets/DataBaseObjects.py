@@ -236,10 +236,8 @@ class DbObject(object):
     @classmethod
     def executeBusinessRules(cls, target, event):
         if cls.__constraintRules__[event]:
-            print(event + ' passed')
             for rule in cls.__constraintRules__[event]:
                 result = rule.execute(target.getFlatObject())
-                print(rule.name+': '+ str(result))
 
     def afterUpdate(self):
         return

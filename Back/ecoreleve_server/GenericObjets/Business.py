@@ -54,12 +54,16 @@ class BusinessRules(Base):
         raise BusinessRuleError(self.errorValue)
 
     def buildQuery(self, entityDTO):
+        ''' Build stored procedure statment, params:
+                - entityDTO : dict()
+            return text(query)'''
+
         paramsJSON = self.paramsJSON
         sqlParams = ' @result int; \n'
         declare_stmt = 'DECLARE '+ sqlParams
         params_stmt = ' :'+', :'.join(paramsJSON)+', @result OUTPUT; \n'
         bindparams = [bindparam(param,entityDTO.get(param)) for param in paramsJSON]
-        print(bindparams)
+
         stmt = text(declare_stmt + ' EXEC '+self.executing + params_stmt + '\n SELECT @result;', bindparams=bindparams)
         return stmt
 
