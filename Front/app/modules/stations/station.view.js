@@ -169,10 +169,10 @@ define([
           else if (response.responseJSON.updateDenied) {
             switch (response.responseJSON.updateDenied) {
               case 'site equipment':
-                msg = "Site Equipment is present on this station, you can't change Station Date or Monitored Site";
+                msg = "A protocol Site equipment or Site unequipment is present on this station. You cannot change coordinates, monitored site nor station date.";
                 break;
               case 'individual equipment':
-                msg = "Individual Equipment is present on this station, you can't change Station Date";
+                msg = "A protocol Individual equipment or Individual unequipment is present on this station. You cannot station date.";
                 break;
             }
 
