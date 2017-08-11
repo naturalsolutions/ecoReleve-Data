@@ -20,7 +20,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
 
       this.isEmptyRow = this.checkIfEmptyRow(params);
-      
+
       if(this.isEmptyRow){
         this.requiredValidation(params, value);
       } else {
@@ -54,13 +54,13 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           val = params.data[key].value;
         }
         if(val != null && val != 'undefined' && val != ''){
-          empty = false; 
+          empty = false;
         }
       }
       //optionnal
       if(keys.length === 0 || (keys.length === 1 && keys[0] === '_errors' )){
         empty = true;
-      }      
+      }
       return empty;
     };
 
@@ -75,7 +75,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       } else {
         displayValue = value;
       }
-      
+
       this.formatValueToDisplay(displayValue);
 
       return value;
@@ -92,7 +92,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     CustomRenderer.prototype.requiredValidation = function(params, value){
       var validators = params.colDef.schema.validators;
       if(validators.length){
-        
+
         if(validators[0] === 'required'){
             $(params.eGridCell).addClass('ag-cell-required');
             if(!value && String(value) !== "0"){
@@ -100,7 +100,18 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
             } else {
               this.handleRemoveError(params);
             }
-        } else {
+        }
+        else if (validators[0].type && validators[0].type === 'StateBox') {
+          if ( !validators[0].nullable && ( value === null || value === undefined) ) { //can't be null and null in database
+            this.handleError(params);
+            var tmp = this.eGui.getElementsByTagName('label');
+            console.log(tmp)
+          }
+          else {
+            this.handleRemoveError(params);
+          }
+        }
+        else {
           this.handleRemoveError(params);
         }
       }
@@ -152,7 +163,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   		    return index == self.indexOf(elem);
   		})
   		params.node.setDataValue('_errors', errorsColumn);
-  		
+
   	};
 
     CustomRenderer.prototype.getGui = function() {
@@ -219,7 +230,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       this.formatValueToDisplay(objectValue); // prefer manage value to display here in order to keep object value all along the time
       return objectValue;
     };
-    
+
     ThesaurusRenderer.prototype.formatValueToDisplay = function(objectValue) {
       var valueToDisplay;
       if(!objectValue){
@@ -268,7 +279,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
             this.handleRemoveError(params);
             var displayValue;
-            
+
             if (colDef.schema.options && colDef.schema.options.usedLabel){
               displayValue = data[colDef.schema.options.usedLabel];
             } else {
@@ -325,27 +336,93 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       $(this.eGui).html(tpl);
     };
 
-
     var CheckboxRenderer = function() {}
-    CheckboxRenderer.prototype = new CustomRenderer();
-    CheckboxRenderer.prototype.formatValueToDisplay = function (value) {
-      var _this = this;
-      var checked = ''; 
-      if(value == 1)
-        checked = 'checked';
-      if(this.params.colDef.editable){
-        var chk = '<input class="form-control" type="checkbox" '+ checked +' />';
-      } else {
-        var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
-      }
-      $(this.eGui).html(chk);
-      $(this.eGui).find('input').on('click', function(e){
-        if($(this).attr('checked')){
-          _this.params.data[_this.params.colDef.field] = 0;
+      CheckboxRenderer.prototype = new CustomRenderer();
+      CheckboxRenderer.prototype.formatValueToDisplay = function (value) {
+        var _this = this;
+        var checked = ''; 
+        if(value == 1)
+          checked = 'checked';
+        if(this.params.colDef.editable){
+          var chk = '<input class="form-control" type="checkbox" '+ checked +' />';
         } else {
-          _this.params.data[_this.params.colDef.field] = 1;
+          var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
         }
-      });
+        $(this.eGui).html(chk);
+        $(this.eGui).find('input').on('click', function(e){
+          if($(this).attr('checked')){
+            _this.params.data[_this.params.colDef.field] = 0;
+          } else {
+            _this.params.data[_this.params.colDef.field] = 1;
+          }
+        });
+    };
+
+
+    var StateBoxRenderer = function() {}
+      StateBoxRenderer.prototype = new CustomRenderer();
+      StateBoxRenderer.prototype.formatValueToDisplay = function (value) {
+      var _this = this;
+      if(typeof(value) === 'undefined') { //hack for getRowDataAndErrors , stopediting call format with value undefined
+        value = null;
+      }
+      this.value = value;
+
+      var input = document.createElement('input');
+      input.className ='form-control statebox';
+      input.type = 'checkbox'
+      input.readonly = true;
+      input.id= this.params.colDef.field+'_'+this.params.rowIndex
+
+      var label = document.createElement('label');
+      label.setAttribute('for', input.id);
+
+
+      switch(value) {
+        case 1 : {
+          input.checked = true;
+          break;
+        }
+        case 0 : {
+          input.checked = false;
+          break;
+        }
+        default : {
+          input.indeterminate = true;
+          break;
+        }
+      }
+      //TODO if !editable cancel listener
+      label.onclick = function(e) {
+         // ... => false => indeterminate => true => ...
+        switch(_this.value) {
+          case 1 : { //de true on passe a false
+            _this.value = 0;
+            _this.params.data[_this.params.colDef.field] = 0;
+            label.removeAttribute("onclick");
+            break;
+          }
+          case 0 : {//de false on passe a indeterminate
+            _this.value = null
+            _this.params.data[_this.params.colDef.field] = null
+             label.removeAttribute("onclick");
+            break;
+          }
+          default : {// de indeterminate on passe a true
+            _this.value = 1;
+            _this.params.data[_this.params.colDef.field] = 1;
+             label.removeAttribute("onclick");
+            break;
+          }
+        }
+      }
+
+      if(!this.params.colDef.editable){
+        input.disabled = true;
+      }
+
+     $(this.eGui).html(input)
+     $(this.eGui).append(label)
     };
 
 
@@ -365,8 +442,8 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         context: this,
         success: function(data){
           this.handleRemoveError(params);
-          
-          var valueToDisplay; 
+
+          var valueToDisplay;
 
           this.manualDataSet(params, data['PK_id']);
 
@@ -375,7 +452,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           } else {
             valueToDisplay = data[opt.label];
           }
-          
+
           this.formatValueToDisplay(data.fullname);
 
           var values = {
@@ -395,7 +472,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           this.formatValueToDisplay(value);
           this.manualDataSet(params, values);
         }
-  
+
       });
     };
 
@@ -418,11 +495,12 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     Renderers.NumberRenderer = NumberRenderer;
     Renderers.TextRenderer = TextRenderer;
     Renderers.DateTimeRenderer = DateTimeRenderer;
-		Renderers.ThesaurusRenderer = ThesaurusRenderer;
-		Renderers.ObjectPickerRenderer = ObjectPickerRenderer;
-		Renderers.CheckboxRenderer = CheckboxRenderer;
+    Renderers.ThesaurusRenderer = ThesaurusRenderer;
+    Renderers.ObjectPickerRenderer = ObjectPickerRenderer;
+    Renderers.StateBoxRenderer = StateBoxRenderer;
+    Renderers.CheckboxRenderer = CheckboxRenderer;
     Renderers.AutocompleteRenderer = AutocompleteRenderer;
-		Renderers.SelectRenderer = SelectRenderer;
+    Renderers.SelectRenderer = SelectRenderer;
 
     return Renderers;
 
