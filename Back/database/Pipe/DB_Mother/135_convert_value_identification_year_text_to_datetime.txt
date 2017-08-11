@@ -1,0 +1,18 @@
+BEGIN TRANSACTION T1;
+--- UPDATE [ValueDate] WITH [ValueString] VALUES THEN SET [ValueString] TO NULL ------ 
+UPDATE [dbo].[ObservationDynPropValue]
+   SET 
+		[ValueDate] = CONVERT(datetime, [ValueString]), 
+		[ValueString] = null
+	WHERE FK_ObservationDynProp = (
+  SELECT [ID] FROM [dbo].[ObservationDynProp] where [Name] ='identification_year' 
+   )
+   AND ( [ValueString] is not null AND [ValueDate] is null)
+
+COMMIT TRANSACTION T1;
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('135_convert_value_identification_year_text_to_datetime',GETDATE(),(SELECT db_name()))
+
+
+GO

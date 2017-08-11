@@ -36,7 +36,7 @@ define([
         <button type="button" class="js-btn-add btn btn-success hide"><span class="reneco reneco-add"></span></button>\
         <button type="button" class="js-btn-delete btn btn-danger btn-sm hide"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
         </div>\
-        <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 300px">\
+        <div class="js-rg-grid-subform col-xs-12 no-padding grid-margin" style="height: 400px">\
         </div>\
     ',
 

@@ -17,7 +17,7 @@ from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore
 from . import DynamicObjectView, DynamicObjectCollectionView, context_permissions
 from .protocols import ObservationsView
-from ..Models.Station import ErrorCheckUniqueStation
+from ..Models.Station import ErrorCheckUniqueStation, ErrorExistingEquipment
 from ..utils.parseValue import parser
 
 
@@ -43,18 +43,15 @@ class StationView(DynamicObjectView):
         self.objectDB.LoadNowValues()
         try:
             isAllowToUpdate = self.objectDB.allowUpdate(data)
-            if isAllowToUpdate:
-                self.objectDB.updateFromJSON(data)
-                self.session.commit()
-                msg = {}
-            else:
-                self.session.rollback()
-                self.request.response.status_code = 510
-                msg = {'updateDenied': True}
-        except ErrorCheckUniqueStation as e:
+            self.objectDB.updateFromJSON(data)
+            self.session.commit()
+            msg = {}
+
+        except (ErrorCheckUniqueStation, ErrorExistingEquipment) as e:
             self.session.rollback()
             self.request.response.status_code = 510
-            msg = {'existingStation': True}
+            msg = e.value
+
         return msg
 
 

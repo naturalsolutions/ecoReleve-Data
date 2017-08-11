@@ -156,6 +156,7 @@ class Observation(Base, ObjectWithDynProp):
         self.SubObservation_children = listSubValues
 
     def updateFromJSON(self, DTOObject, startDate=None):
+        # delattr(self,'getForm')
         previousState = self.getFlatObject()
         ObjectWithDynProp.updateFromJSON(self, DTOObject, None)
         if 'listOfSubObs' in DTOObject:
@@ -163,7 +164,7 @@ class Observation(Base, ObjectWithDynProp):
         self.updateLinkedField(DTOObject, previousState=previousState)
 
     def getFlatObject(self, schema=None):
-        result = super().getFlatObject()
+        result = super().getFlatObject(schema=schema)
         subObsList = []
         typeName = 'children'
         if self.Observation_children != []:
@@ -171,13 +172,15 @@ class Observation(Base, ObjectWithDynProp):
 
             for subObs in self.Observation_children:
                 subObs.LoadNowValues()
-                flatObs = subObs.getFlatObject()
+                flatObs = subObs.getFlatObject(schema=schema[subObs.GetType().Name]['subschema'])
                 if len(subObs.SubObservation_children) > 0:
                     flatObs.update(subObs.SubObservation_childrens)
                 subObsList.append(flatObs)
         result[typeName] = subObsList
         return result
 
+    def beforeDelete(self):
+        self.LoadNowValues()
 
 @event.listens_for(Observation, 'after_delete')
 def unlinkLinkedField(mapper, connection, target):
