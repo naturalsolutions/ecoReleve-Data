@@ -7,6 +7,7 @@ from pyramid import threadlocal
 from ..utils.parseValue import find, isEqual, parser
 from abc import abstractmethod
 from sqlalchemy.orm.exc import *
+from traceback import print_exc
 
 
 analogType = {'String': 'ValueString',
@@ -183,7 +184,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
         '''IF ID is send from front --> get data of this object in order to
         display value into form which will be sent'''
-        data = self.getFlatObject(resultat['schema'])
+        data = self.getFlatObject(schema=resultat['schema'])
         resultat['data'] = data
         resultat['recursive_level'] = 0
         resultat = self.getDefaultValue(resultat)
@@ -227,6 +228,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
                 linkProp['LinkSourceID'].replace('@Dyn:', ''))
 
             # remove linked field if target object is different of previous
+
             if previousState and str(linkedSource) != str(previousState.get(linkProp['LinkSourceID'])):
                 self.deleteLinkedField(previousState=previousState)
 
@@ -248,6 +250,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
     def deleteLinkedField(self, useDate=None, previousState=None):
         session = dbConfig['dbSession']()
+
         if useDate is None:
             useDate = self.linkedFieldDate()
 
@@ -261,9 +264,11 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
                 else:
                     linkedSource = self.getProperty(
                         linkProp['LinkSourceID'].replace('@Dyn:', ''))
-
-                linkedObj = session.query(obj).filter(
-                    getattr(obj, linkProp['LinkedID']) == linkedSource).one()
+                try:
+                    linkedObj = session.query(obj).filter(
+                        getattr(obj, linkProp['LinkedID']) == linkedSource).one()
+                except NoResultFound:
+                    continue
 
                 if hasattr(linkedObj, linkedField):
                     linkedObj.setProperty(linkedField, None)
@@ -275,6 +280,5 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
                 session.commit()
                 session.close()
-            except:
-                pass
-
+            except Exception as e:
+                raise e
