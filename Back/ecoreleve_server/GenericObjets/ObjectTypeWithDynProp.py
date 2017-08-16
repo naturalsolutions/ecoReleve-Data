@@ -51,7 +51,7 @@ class ObjectTypeWithDynProp:
 
         for CurModuleForms in Fields:
             SchemaDTO[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(
-                DisplayMode.lower())
+                Editable)
 
     def GetDynPropNames(self):
         curQuery = 'select D.Name from ' + self.GetDynPropContextTable() + ' C  JOIN ' + \

@@ -86,9 +86,59 @@ select:disabled {
 	text-overflow: '';
 }
 
+.tooltip-inner {
+	background-color: red
+}
+.tooltip.bottom .tooltip-arrow{
+	border-bottom-color: red
+}
+
+
+
 .form-control{
 	padding: 5px 10px;
 	font-weight: 600;
+}
+.form-control.statebox[type='checkbox']:indeterminate + label:before{
+    content: "?";
+    color: blue;
+    font-size: x-large;
+    font-family: 'Exo2',sans-serif;
+}
+.form-control.statebox[type='checkbox'] + label:before{
+    content:"\2573";
+	color: red;
+    font-weight: bold;
+    font-size: large;
+}
+.form-control.statebox[type='checkbox']:checked + label:before{
+    content:"\2713";
+	color: green;
+    font-weight: bold;
+    font-size: x-large;
+}
+.form-control.error.statebox[type='checkbox'] + label {
+border-color : red;
+}
+.form-control.statebox[type='checkbox'] + label {
+  	cursor : pointer;
+  	user-select : none;
+	border-style: solid;
+    border-width: 1px;
+    height: 33px;
+    width: 33px;
+	line-height: 33px;
+	text-align: center;
+	display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.form-control.statebox[type='checkbox'] + label.disabled {
+  	cursor : auto;
+}
+
+.form-control.statebox[type='checkbox'] {
+    display:none;
 }
 
 .form-control[type="checkbox"]{
