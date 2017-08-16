@@ -90,7 +90,7 @@ def groupfinder(userid, request):
 
     if currentUserRoleID in USERS:
         currentUserRole = USERS[currentUserRoleID]
-        return GROUPS.get(currentUserRole, [])
+        return currentUserRole
 
 
 def cache_callback(request, session):
