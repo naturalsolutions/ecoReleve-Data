@@ -1,5 +1,5 @@
 UPDATE [ModuleForms] SET FormRender = 3 
-  where module_id = 9 and Name not in ('Monitoring_Status', 'Survey_type', 'Comments')
+  where module_id = 9 and Name not in ('Monitoring_Status', 'Survey_type', 'Comments', 'Birth_date', 'Species', 'Origin')
   and FormRender = 2
 
 GO
