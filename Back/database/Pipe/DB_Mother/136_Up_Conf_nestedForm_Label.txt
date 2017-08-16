@@ -1,0 +1,11 @@
+UPDATE [ModuleForms] SET Label = NULL
+  WHERE InputType in ('ListOfNestedModel', 'GridFormEditor')
+  AND Name !='FieldWorkers'
+  OR TypeObj = 1000
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('136_Up_Conf_nestedForm_Label',GETDATE(),(SELECT db_name()))
+
+
+GO
