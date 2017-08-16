@@ -325,7 +325,7 @@ class SensorDatasByType(CustomView):
         return self.dictFuncImport[self.type_](self.request)
 
     def uploadFileCamTrapResumable(self):
-        if(self.request.GET):
+        if not self.request.POST :
             return self.checkChunk()
         flagDate = False
         pathPrefix = dbConfig['camTrap']['path']
