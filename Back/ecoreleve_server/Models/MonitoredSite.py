@@ -134,7 +134,7 @@ class MonitoredSite (Base, ObjectWithDynProp):
             if (len(CurModuleForms) > 0):
                 CurModuleForms = CurModuleForms[0]
                 resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(
-                    DisplayMode.lower())
+                    Editable)
         return resultat
 
     def getFlatObject(self, schema=None):
