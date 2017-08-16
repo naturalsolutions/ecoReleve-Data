@@ -28,10 +28,9 @@ class ErrorCheckIndividualCodes(Exception):
 
     def __init__(self, propertyName):
         self.propertyName = propertyName
-        self.value = self.propertyName+' already exists'
 
     def __str__(self):
-        return self.value
+        return self.propertyName+' already exists'
 
 
 class Individual (Base, ObjectWithDynProp):
