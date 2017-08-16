@@ -157,7 +157,10 @@ class DynamicObjectView(CustomView):
     def delete(self):
         if not self.objectDB:
             return None
+
+        self.objectDB.beforeDelete()
         self.session.delete(self.objectDB)
+        self.objectDB.afterDelete()
         return 'deleted'
 
     def history(self):
