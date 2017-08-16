@@ -168,7 +168,6 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         ObjType = self.GetType()
         if (ObjType.Status == 10):
             isGrid = True
-
         form = ConfiguredDbObjectMapped.getForm(self, displayMode, ObjType.ID, moduleName, isGrid=isGrid)
 
         form['data'] = {'id': 0}
