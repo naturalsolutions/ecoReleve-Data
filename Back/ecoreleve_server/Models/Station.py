@@ -25,7 +25,19 @@ from ..utils.parseValue import dateParser
 
 
 class ErrorCheckUniqueStation(Exception):
-    pass
+    value = {'existingStation': True}
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class ErrorExistingEquipment(Exception):
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 
 class Station(Base, ObjectWithDynProp):
@@ -139,10 +151,10 @@ class Station(Base, ObjectWithDynProp):
             self.StationDate != dateSta or
             float(self.LAT) != float(DTOObject['LAT']) or
             float(self.LON) != float(DTOObject['LON'])):
-            allow = False
+            raise ErrorExistingEquipment({'updateDenied':'site equipment'})
         if equipmentIndivExist and (self.StationDate != dateSta):
-            allow = False
-        return allow
+            raise ErrorExistingEquipment({'updateDenied':'individual equipment'})
+        return
 
     def updateFromJSON(self, DTOObject, startDate=None):
         if self.checkUniqueStation(DTOObject):

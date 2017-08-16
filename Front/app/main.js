@@ -65,6 +65,7 @@ require.config({
 
     'autocompTree': './vendors/jquery.autocompTree',
     'tooltipster-list': 'vendors/tooltipList',
+    'popper' : '../bower_components/popper.js/index'
 
   },
   map: {

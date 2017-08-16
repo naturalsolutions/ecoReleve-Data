@@ -167,7 +167,15 @@ define([
             msg = 'A station already exists with these parameters';
           }
           else if (response.responseJSON.updateDenied) {
-            msg = "Equipment is present on this station, you can't change Station Date or Monitored Site";
+            switch (response.responseJSON.updateDenied) {
+              case 'site equipment':
+                msg = "A protocol Site equipment or Site unequipment is present on this station. You cannot change coordinates, monitored site nor station date.";
+                break;
+              case 'individual equipment':
+                msg = "A protocol Individual equipment or Individual unequipment is present on this station. You cannot change station date.";
+                break;
+            }
+
           }
           type_ = 'warning';
           title = 'Error saving';

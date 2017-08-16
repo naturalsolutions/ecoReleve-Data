@@ -90,22 +90,40 @@ class ModuleForms(Base):
             self.dto['pinned'] = 'left'
         return self.dto
 
-    def GetDTOFromConf(self, Editable, isGrid=False):
-        ''' return input field to build form '''
+    def GetDTOFromConf(self, displayMode, isGrid=False):
+        ''' return input field to build form :
+            3 modes : 
+                - "display" : all input non editable, 1
+                - "create": all input editable when object non existing except FormRender%2=1,
+                - "edit": all input editable for existing object except FormRender%2==1
+        '''
+        binaryMode = 0
+        self.displayMode = displayMode
+        if (displayMode.lower() == 'display'):
+            self.Editable = False
+        else:
+            self.Editable = True
+        if(displayMode.lower() == 'edit'):
+            binaryMode = True
 
-        self.Editable = Editable
-        curEditable = self.Editable
         curInputType = self.InputType
 
         if self.Editable:
+            # create or edit mode
             if self.FormRender < 2:
-                curEditable = False
+                # input always incactive
+                isDisabled = True
+                self.Editable = False
+            elif (self.FormRender + binaryMode) > 3 :
+                # input is inactive only in edit mode
+                self.Editable = False
                 isDisabled = True
             else:
                 isDisabled = False
             self.fullPath = False
             curSize = self.FieldSizeEdit
         else:
+            # display mode, all input inactive
             curSize = self.FieldSizeDisplay
             self.fullPath = True
             isDisabled = True
@@ -116,7 +134,7 @@ class ModuleForms(Base):
             'name': self.Name,
             'type': curInputType,
             'title': self.Label,
-            'editable': Editable,
+            'editable': self.Editable,
             'editorClass': str(self.editorClass),
             'validators': [],
             'options': None,
@@ -148,7 +166,8 @@ class ModuleForms(Base):
                 self.dto['validators'].append("required")
             else:
                 self.dto['validators'].append("required")
-            self.dto['title'] = self.dto['title'] + ' *'
+            if self.dto['title']:
+                self.dto['title'] = self.dto['title'] + ' *'
 
             # TODO changer le validateur pour select required (valeur <>-1)
         if self.Editable:
@@ -156,18 +175,23 @@ class ModuleForms(Base):
         else:
             self.dto['fieldClass'] = str(self.displayClass) + ' ' + CssClass
 
-            # TODO changer le validateur pour select required (valeur <>-1)
-        if self.InputType in self.func_type_context:
-            self.func_type_context[self.InputType](self)
         # default value
         default = self.DefaultValue
         if default is not None:
             self.dto['defaultValue'] = default
 
+            # TODO changer le validateur pour select required (valeur <>-1)
+        if self.InputType in self.func_type_context:
+            self.func_type_context[self.InputType](self)
+
         if isGrid:
             self.handleSchemaGrid()
 
         return self.dto
+
+    def StateBox(self):
+        if self.dto['defaultValue'] and self.dto['defaultValue'].isdigit():
+            self.dto['defaultValue'] = int(self.dto['defaultValue'])
 
     def InputSelect(self):
         if (self.Options is not None
@@ -179,8 +203,12 @@ class ModuleForms(Base):
                 for key in row.keys():
                     temp[key] = row[key]
                 self.dto['options'].append(temp)
-            self.dto['options'] = sorted(
-                self.dto['options'], key=lambda k: k['label'])
+            sortedSelect = sorted(
+                [x for x in self.dto['options'] if x['val'] not in [-1,0]], key=lambda k: k['label'])
+
+            self.dto['options'] = [x for x in self.dto['options'] if x['val'] in [-1,0]]
+            self.dto['options'].extend(sortedSelect)
+
 
     def InputLNM(self):
         ''' build ListOfNestedModel input type :
@@ -200,12 +228,12 @@ class ModuleForms(Base):
 
         for conf in result:
             if conf.InputType == 'GridRanged':
-                gridRanged = conf.GetDTOFromConf(self.Editable, True)
+                gridRanged = conf.GetDTOFromConf(self.displayMode, True)
                 subschema.update(gridRanged)
             else:
                 if self.InputType == 'GridFormEditor':
                     isGrid = True
-                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable, isGrid)
+                subschema[conf.Name] = conf.GetDTOFromConf(self.displayMode, isGrid)
 
         subschema['ID'] = {
             'name': 'ID',
@@ -331,6 +359,7 @@ class ModuleForms(Base):
         'AutocompTreeEditor': InputThesaurus,
         'AutocompleteEditor': InputAutocomplete,
         'GridRanged': GridRanged,
+        'StateBox' : StateBox
     }
 
 
