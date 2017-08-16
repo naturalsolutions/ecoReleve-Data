@@ -1,0 +1,11 @@
+UPDATE [ModuleForms] SET FormRender = 3 
+  where module_id = 9 and Name not in ('Monitoring_Status', 'Survey_type', 'Comments', 'Birth_date', 'Species', 'Origin')
+  and FormRender = 2
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('136_Up_Conf_IndividualForm_blockField',GETDATE(),(SELECT db_name()))
+
+
+GO
