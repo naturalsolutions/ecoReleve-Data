@@ -421,33 +421,33 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           break;
         }
       }
-      //TODO if !editable cancel listener
-      label.onclick = function(e) {
-         // ... => false => indeterminate => true => ...
-        switch(_this.value) {
-          case 1 : { //de true on passe a false
-            _this.value = 0;
-            _this.params.data[_this.params.colDef.field] = 0;
-            label.removeAttribute("onclick");
-            break;
-          }
-          case 0 : {//de false on passe a indeterminate
-            _this.value = null
-            _this.params.data[_this.params.colDef.field] = null
-             label.removeAttribute("onclick");
-            break;
-          }
-          default : {// de indeterminate on passe a true
-            _this.value = 1;
-            _this.params.data[_this.params.colDef.field] = 1;
-             label.removeAttribute("onclick");
-            break;
-          }
-        }
-      }
-
+      
       if(!editable){
         input.disabled = true;
+      } else {
+        label.onclick = function(e) {
+         // ... => false => indeterminate => true => ...
+          switch(_this.value) {
+            case 1 : { //de true on passe a false
+              _this.value = 0;
+              _this.params.data[_this.params.colDef.field] = 0;
+              label.removeAttribute("onclick");
+              break;
+            }
+            case 0 : {//de false on passe a indeterminate
+              _this.value = null
+              _this.params.data[_this.params.colDef.field] = null
+              label.removeAttribute("onclick");
+              break;
+            }
+            default : {// de indeterminate on passe a true
+              _this.value = 1;
+              _this.params.data[_this.params.colDef.field] = 1;
+              label.removeAttribute("onclick");
+              break;
+            }
+          }
+        }
       }
 
      $(this.eGui).html(input)
