@@ -362,68 +362,84 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     var StateBoxRenderer = function() {}
       StateBoxRenderer.prototype = new CustomRenderer();
       StateBoxRenderer.prototype.formatValueToDisplay = function (value) {
-      var _this = this;
-      if(typeof(value) === 'undefined') { //hack for getRowDataAndErrors , stopediting call format with value undefined
-        value = null;
-      }
-      this.value = value;
-
-      var input = document.createElement('input');
-      input.className ='form-control statebox';
-      input.type = 'checkbox'
-      input.readonly = true;
-      input.id= this.params.colDef.field+'_'+this.params.rowIndex
-
-      var label = document.createElement('label');
-      label.setAttribute('for', input.id);
-
-
-      switch(value) {
-        case 1 : {
-          input.checked = true;
-          break;
+        var _this = this;
+        this.nullable = this.params.colDef.options.nullable
+        if(typeof(value) === 'undefined') { //hack for getRowDataAndErrors , stopediting call format with value undefined
+          value = null;
         }
-        case 0 : {
-          input.checked = false;
-          break;
-        }
-        default : {
-          input.indeterminate = true;
-          break;
-        }
-      }
-      //TODO if !editable cancel listener
-      label.onclick = function(e) {
-         // ... => false => indeterminate => true => ...
-        switch(_this.value) {
-          case 1 : { //de true on passe a false
-            _this.value = 0;
-            _this.params.data[_this.params.colDef.field] = 0;
-            label.removeAttribute("onclick");
+        this.value = value;
+  
+        var input = document.createElement('input');
+        input.className ='form-control statebox';
+        input.type = 'checkbox'
+        input.readonly = true;
+        input.id= this.params.colDef.field+'_'+this.params.rowIndex
+  
+        var label = document.createElement('label');
+        label.setAttribute('for', input.id);
+  
+  
+        switch(value) {
+          case 1 : {
+            input.checked = true;
             break;
           }
-          case 0 : {//de false on passe a indeterminate
-            _this.value = null
-            _this.params.data[_this.params.colDef.field] = null
-             label.removeAttribute("onclick");
+          case 0 : {
+            input.checked = false;
             break;
           }
-          default : {// de indeterminate on passe a true
-            _this.value = 1;
-            _this.params.data[_this.params.colDef.field] = 1;
-             label.removeAttribute("onclick");
+          default : {
+            input.indeterminate = true;
             break;
           }
         }
-      }
-
-      if(!this.params.colDef.editable){
-        input.disabled = true;
-      }
-
-     $(this.eGui).html(input)
-     $(this.eGui).append(label)
-    };
+        //TODO if !editable cancel listener
+        label.onclick = function(e) {
+           // ... => false => indeterminate => true => ...
+           if( this.nullable )  {
+             switch(_this.value) {
+               case 1 : { //de true on passe a false
+                 _this.value = 0;
+                 _this.params.data[_this.params.colDef.field] = 0;
+                 label.removeAttribute("onclick");
+                 break;
+               }
+               case 0 : {//de false on passe a indeterminate
+                 _this.value = null
+                 _this.params.data[_this.params.colDef.field] = null
+                  label.removeAttribute("onclick");
+                 break;
+               }
+               default : {// de indeterminate on passe a true
+                 _this.value = 1;
+                 _this.params.data[_this.params.colDef.field] = 1;
+                  label.removeAttribute("onclick");
+                 break;
+               }
+             }
+           }
+           else {
+            switch(_this.value) {
+              case 1 : { //de true on passe a false
+                _this.value = 0;
+                _this.params.data[_this.params.colDef.field] = 0;
+                label.removeAttribute("onclick");
+                break;
+              }
+              default : {// de false on passe a true
+                _this.value = 1;
+                _this.params.data[_this.params.colDef.field] = 1;
+                 label.removeAttribute("onclick");
+                break;
+              }
+            }
+  
+           }
+        }
+    
+       $(this.eGui).html(input)
+       $(this.eGui).append(label)
+      };
 
 
 		var AutocompleteRenderer = function() {}
