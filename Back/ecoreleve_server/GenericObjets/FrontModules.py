@@ -138,7 +138,7 @@ class ModuleForms(Base):
         self.dto = {
             'name': self.Name,
             'type': curInputType,
-            'title': self.Label,
+            'title': self.Label if self.Label else ' ',
             'editable': not isDisabled,
             'editorClass': str(self.editorClass),
             'validators': [],
