@@ -162,6 +162,7 @@ require.config({
 
 require(['app', 'templates','translater'],
 function(app, templates, Translater) {
+  $.widget.bridge('uitooltip', $.ui.tooltip);
   this.translater = Translater.getTranslater();
   this.translater.dfd.done(function(){
     app.start();
