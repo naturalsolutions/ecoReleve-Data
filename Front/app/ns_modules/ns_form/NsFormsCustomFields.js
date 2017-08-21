@@ -61,7 +61,7 @@ define([
 				Form.editors.Base.prototype.initialize.call(this, options);
 		
 				this.$el.attr('type', 'checkbox');
-				if ( options.schema.defaultValue ) { // get defaulValue possible undefined,NULL,0,1
+				if ( options.schema.defaultValue === '0' || options.schema.defaultValue === '1' ) { // get defaulValue possible undefined,NULL,0,1
 					this.value = parseInt(options.schema.defaultValue);
 				}
 				else {
@@ -69,23 +69,13 @@ define([
 				}
 		
 				this.nullable = true;//default nullable so 3 state
-
-				if(options.schema.validators) {
-					for( index in options.schema.validators) {
-						var elem = options.schema.validators[index];
-						if(elem.type && elem.type === 'StateBox') {
-							this.nullable = elem.nullable
-							break;
-						}
-					}
+				if ('nullable' in options.schema.options) {
+					this.nullable = options.schema.options.nullable
 				}
-				
-
 
 				if ( typeof(this.model.get(this.key)) != 'undefined') { // get old value 
 					this.value = this.model.get(this.key);
 				}
-		//    this.oldValue = null;
 			},
 
 			/**
@@ -102,13 +92,15 @@ define([
 				this.$label = this.$el.find('label');
 				this.$label.on('blur' , function () {
 				// _this.form.fields[_this.key].validate();
-				_this.validate();
+			//	_this.validate();
 				});
-				this.$label.tooltip({
-														"trigger" : 'manual',
-														"placement" :"bottom",
-														"title" : "Cannot be null"
-														});
+				this.$label.tooltipster({
+										theme : "js-custom-tooltipster",
+										//parent: this.$el,
+										autoclose : true,
+										//trigger : "custom",
+										position :"bottom"
+										});
 				if( this.schema.editable) {
 					this.$label.prop('tabindex',"0");
 				}
@@ -116,7 +108,10 @@ define([
 					this.$label.addClass('disabled');
 				}
 				this.setValue(this.value);
-
+				setTimeout(function() {
+					_this.validate();
+				},0); 
+			//	this.validate();
 				return this;
 			},
 
@@ -142,7 +137,7 @@ define([
 						break;
 					}
 
-				}
+				}			
 			},
 
 			validate: function() {
@@ -161,11 +156,13 @@ define([
 						error = getValidator(validator)(value, formValues);
 						if (typeof(error) != 'undefined') {
 						_this.$input.addClass('error');
-						_this.$label.tooltip('show');
+						_this.$label.tooltipster('content',"Cannot be null");
+						_this.$label.tooltipster('show');
 						}
 					else {
 						if (_this.$input.hasClass('error')  ) {
 							_this.$input.removeClass('error');
+							_this.$label.tooltipster('hide');
 						}
 					}
 						return error ? false : true;
@@ -190,7 +187,6 @@ define([
 					return;
 				}
 				// ... => false => indeterminate => true => ...
-				this.$label.tooltip('hide');
 				if( this.nullable ) {
 						switch(this.value) {
 							case 1 : { //de true on passe a false
@@ -234,6 +230,7 @@ define([
 							}
 						}
 					}
+				this.validate();
 			},
 
 			focus: function() {
