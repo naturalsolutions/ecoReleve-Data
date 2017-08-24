@@ -82,6 +82,7 @@ define([
         response.createdObservations.map(function(obs){
           _this.model.get('obs').push(obs.id);
         });
+        window.formInEdition.form['.js-obs-form'].formChange = false;
         this.model.trigger('change:obs', this.model);
         this.toggleEditionMode();
         this.hardRefresh();
