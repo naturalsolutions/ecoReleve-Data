@@ -59,10 +59,14 @@ define([
       var content;
       var tzWithOffset = []
       timezones.map(function(tz){
-        tzWithOffset.push({label:"(GMT"+momenttz.tz(tz).format('Z')+") " + tz, val: tz});
+        tzWithOffset.push({label:"(GMT "+momenttz.tz(tz).format('Z')+")", val: tz});
       });
 
-      tzWithOffset.map(function(tz){
+      var uniqueListTzWithOffset = _.sortBy(_.uniq(tzWithOffset, function(item, key, a) { 
+        return item.label;
+      }),function(o) { return o.label; });
+
+      uniqueListTzWithOffset.map(function(tz){
         content += '<option value="' + tz.val + '">' + tz.label + '</option>';
       });
       tzEl.append(content);
