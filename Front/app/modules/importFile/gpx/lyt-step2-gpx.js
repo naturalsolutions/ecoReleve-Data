@@ -175,10 +175,20 @@ define([
           filter : "select",
           filterParams : { selectList : this.fieldActivityList }
         },{
-          editable: false,
+          editable: true,
           field: 'Place',
           headerName: 'Place',
           filter :"text",
+          cellEditor: Editors.AutocompleteEditor,
+          cellRenderer: Renderers.AutocompleteRenderer,
+          schema: {
+                   validators:[],
+                   editable: true,
+                   editorClass :"form-control",
+                   editorAttrs:{disabled: false},
+                   options:{iconFont: "reneco reneco-autocomplete", source: "autocomplete/stations/Place", minLength: 3},
+                   fieldClass :"None col-md-6"
+                  }
         },
       ];
 
@@ -197,7 +207,8 @@ define([
             }
           },
           onRowClicked: function(row){
-            if(_this.gridView.gridOptions.api.getFocusedCell().column.colId != 'fieldActivity'){
+            var currentClickColumn = _this.gridView.gridOptions.api.getFocusedCell().column.colId;
+            if(currentClickColumn != 'fieldActivity' && currentClickColumn != 'Place' ){
               _this.gridView.interaction('focus', row.data.ID || row.data.id);
             }
           }
