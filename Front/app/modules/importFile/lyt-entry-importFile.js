@@ -128,7 +128,8 @@ define([
 	      }
     },
 
-    beforePrev: function(index) {
+	beforePrev: function(index) {
+		this.models[index] = null;
       if ((index - 1) == 0) {
         this.removeSteps(1);
 				Backbone.history.navigate('/importFile',{trigger:false, replace: false});

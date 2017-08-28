@@ -123,7 +123,6 @@ define([
       };
 
       var FieldActivityRenderer = function(params){
-      //  console.log(params);
         var text = '';
         _this.fieldActivityList.map(function(fa){
           if(params.data.fieldActivity == fa.value){

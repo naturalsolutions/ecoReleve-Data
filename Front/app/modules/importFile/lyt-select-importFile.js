@@ -26,6 +26,7 @@ define([
 
     initialize: function (options) {
       this.parent = options.parent;
+      this.previousModels = options.parent.models[options.parent.currentStepIndex];
       this.model = new Backbone.Model();
       this.model.set('files', []);
       if (!this.url) {
@@ -156,6 +157,11 @@ define([
       }
       this.parent.disableNextBtn();
       
+      if(this.previousModels){
+        _(this.previousModels.get('files')).forEach(function(element) {
+          this.dropzone.addFile(element);
+        }, this);
+      }
     },
 
     setDropzoneUploadOnly: function () {

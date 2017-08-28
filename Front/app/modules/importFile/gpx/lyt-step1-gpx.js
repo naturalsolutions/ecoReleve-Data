@@ -30,6 +30,7 @@ define([
     },
 
     initialize: function (options) {
+      this.previousModels = options.parent.models[options.parent.currentStepIndex];
       this.model = new Backbone.Model();
       this.errors = true;
       this.importedFiles = options.model.attributes.files;
@@ -55,7 +56,7 @@ define([
       var _this = this;
       var tzEditor = this.nsform.BBForm.fields['timeZone'].editor;
       var tzEl = tzEditor.$el;
-      console.log(this.nsform.BBForm.fields['timeZone'])
+
       this.nsform.BBForm.fields['timeZone'].$el.after('<div class="col-md-5" ><br> <span id="tz-msg" style="font-size: 12px;"></span></div>');
       var timezones = momenttz.tz.names();
       var content;
@@ -168,6 +169,7 @@ define([
       var formData = this.nsform.BBForm.getValue();
       this.setWaypointListWithForm();
       this.model.set('data_FilesContent', this.wayPointCollection);
+      this.model.set('formData', formData);
       return this.wayPointCollection;
     },
 
@@ -188,6 +190,9 @@ define([
       }).then(function (data) {
         model.schema = data.schema;
         model.fieldsets = data.fieldsets;
+        if(self.previousModels){
+          model.attributes = self.previousModels.get('formData');
+        }
         self.nsform = new NsForm({
           model: model,
           buttonRegion: [],
