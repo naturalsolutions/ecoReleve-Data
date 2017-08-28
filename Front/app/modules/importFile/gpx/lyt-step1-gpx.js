@@ -8,13 +8,12 @@ define([
   'vendors/XmlParser',
   'ns_form/NSFormsModuleGit',
   'models/gpxForm',
-  'i18n',
-  'dropzone',
   'moment',
   'moment-timezone-with-data',
+  'i18n',
 
 ], function ($, _, Backbone, Marionette, config, Swal,
-  XmlParser, NsForm, GpxForm, Dropzone, moment, momenttz
+  XmlParser, NsForm, GpxForm, moment, momenttz
 ) {
 
   'use strict';
@@ -56,7 +55,9 @@ define([
       var _this = this;
       var tzEditor = this.nsform.BBForm.fields['timeZone'].editor;
       var tzEl = tzEditor.$el;
-      var timezones = momenttz.tz.names()
+      console.log(this.nsform.BBForm.fields['timeZone'])
+      this.nsform.BBForm.fields['timeZone'].$el.after('<div class="col-md-5" ><br> <span id="tz-msg" style="font-size: 12px;"></span></div>');
+      var timezones = momenttz.tz.names();
       var content;
       this.tzWithOffset = [];
       
@@ -79,6 +80,12 @@ define([
         var currentOffset = this.getGMTbyTZname(momenttz.tz.guess()); 
         tzEl.val(currentOffset);
       }
+
+      tzEl.on('change', function(e){
+        var curDate = momenttz().utc();
+        var curTZ = _this.getTZnameByGMT(tzEl.val());
+        $('#tz-msg').html(curDate.format('DD/MM/YYYY HH:mm')+' (GMT) --> '+ curDate.tz(curTZ).format('DD/MM/YYYY HH:mm')+' '+tzEl.val());
+      });
     },
 
     getGMTbyTZname: function(TZname){
