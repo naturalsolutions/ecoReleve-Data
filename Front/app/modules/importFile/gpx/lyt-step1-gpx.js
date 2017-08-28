@@ -53,26 +53,42 @@ define([
     },
 
     initTimeZoneField: function(){
+      var _this = this;
       var tzEditor = this.nsform.BBForm.fields['timeZone'].editor;
       var tzEl = tzEditor.$el;
       var timezones = momenttz.tz.names()
       var content;
-      var tzWithOffset = []
+      this.tzWithOffset = [];
+      
       timezones.map(function(tz){
-        tzWithOffset.push({label:"(GMT "+momenttz.tz(tz).format('Z')+")", val: tz});
+        _this.tzWithOffset.push({label:"(GMT "+momenttz.tz(tz).format('Z')+")", val: tz});
       });
 
-      var uniqueListTzWithOffset = _.sortBy(_.uniq(tzWithOffset, function(item, key, a) { 
+      var uniqueListTzWithOffset = _.sortBy(_.uniq(_this.tzWithOffset, function(item, key, a) { 
         return item.label;
       }),function(o) { return o.label; });
 
       uniqueListTzWithOffset.map(function(tz){
-        content += '<option value="' + tz.val + '">' + tz.label + '</option>';
+        content += '<option value="' + tz.label + '">' + tz.label + '</option>';
       });
+      
       tzEl.append(content);
       if(window.app.timezone){
         tzEl.val(window.app.timezone);
-      } 
+      } else {
+        var currentOffset = this.getGMTbyTZname(momenttz.tz.guess()); 
+        tzEl.val(currentOffset);
+      }
+    },
+
+    getGMTbyTZname: function(TZname){
+      var tz = _(this.tzWithOffset).findWhere({val : TZname})
+      return tz.label;
+    },
+
+    getTZnameByGMT: function(offset){
+      var tz = _(this.tzWithOffset).findWhere({label : offset})
+      return tz.val;
     },
 
     parseFile: function (file) {
@@ -180,6 +196,7 @@ define([
       var formData = this.nsform.BBForm.getValue();
       var fwList = [];
       window.app.timezone = formData.timeZone;
+      var curTZ = this.getTZnameByGMT(formData.timeZone);
       _.forEach(formData.FieldWorkers, function (curFw) {
         fwList.push(parseInt(curFw.FieldWorker));
       });
@@ -190,8 +207,8 @@ define([
         model.fieldActivity = formData.fieldActivityId;
         model.timeZone = formData.timeZone;
         model.Place = formData.Place;
-        model.TZdate = momenttz(curDate).utc().tz(formData.timeZone).format('DD/MM/YYYY HH:mm');
-        model.displayDate = momenttz(curDate).utc().tz(formData.timeZone).format('YYYY-MM-DD HH:mm');
+        model.TZdate = momenttz(curDate).utc().tz(curTZ).format('DD/MM/YYYY HH:mm');
+        model.displayDate = momenttz(curDate).utc().tz(curTZ).format('YYYY-MM-DD HH:mm');
       });
     }
   });
