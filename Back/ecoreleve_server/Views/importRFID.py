@@ -27,11 +27,6 @@ def uploadFileRFID(request):
         endEquip = request.POST['EndDate']
         filename = request.POST['fileName']
         now = datetime.now()
-        importObj = Import(ImportFileName=filename, FK_User=creator, ImportDate=now)
-        importObj.ImportType = 'RFID'
-
-        session.add(importObj)
-        session.flush()
 
         if re.compile('\r\n').search(content):
             data = content.split('\r\n')
@@ -150,6 +145,11 @@ def uploadFileRFID(request):
         if (min(allDate) >= minDateEquip and
                 (maxDateEquip is None or max(allDate) <= maxDateEquip)):
 
+            importObj = Import(ImportFileName=filename, FK_User=creator, ImportDate=now)
+            importObj.ImportType = 'RFID'
+            session.add(importObj)
+            session.flush()
+
             data_to_insert = checkDuplicatedRFID(
                 data_to_check, min(allDate), max(allDate), idModule)
 
@@ -169,10 +169,9 @@ def uploadFileRFID(request):
             message = 'inserted rows : ' + str(data_to_insert.shape[0])
             return message
         else:
-            print( str(allDate[0]))
-            print( str(allDate[-1]))
+            session.rollback()
             request.response.status_code = 510
-            message = 'File dates (first date : ' + str(allDate[0])+ ', last date : ' + str(allDate[-1])+ ') don''t correspond with the deploy/remove dates of the selected module'
+            message = 'File dates (first date : ' + str(allDate[0])+ ', last date : ' + str(allDate[-1])+ ') do not correspond with the deploy/remove dates of the selected module'
             return message
 
     except IntegrityError as e:
