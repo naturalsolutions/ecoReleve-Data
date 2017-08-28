@@ -132,8 +132,8 @@
 		"loadingDataAlert" : "Loading data error",
 		"importingDataWarning" : "Selected waypoint(s) are already imported",
 		"importServerError" : "Error sending gpx data to the server.",
-		"gpx" :"gpx file",
-		"rfid" : "rfid file",
+		"gpx" :"gpx files",
+		"rfid" : "rfid files",
 		"gsm" : "gsm files",
 		"argos" : "argos files",
 		"label-selected" :"selected data"
