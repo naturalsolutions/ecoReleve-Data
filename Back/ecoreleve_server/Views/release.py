@@ -16,6 +16,7 @@ from ..controllers.security import RootCore, context_permissions
 from ..Models.Equipment import checkEquip
 from .individual import IndividualsView
 from . import CustomView
+from ..utils.parseValue import isNumeric
 
 
 class ReleaseIndividualsView(IndividualsView):
@@ -221,22 +222,54 @@ class ReleaseIndividualsView(IndividualsView):
                             errorEquipment += ',   ' + tpl
                     pass
 
-            vertebrateGrp = Observation(
-                FK_ProtocoleType=vertebrateGrpID, FK_Station=sta_id)
             dictVertGrp = dict(Counter(binList))
-            dictVertGrp['taxon'] = taxon
             dictVertGrp['nb_total'] = len(releaseIndList)
+            dictVertGrp['taxon'] = taxon
 
-            vertebrateGrp.updateFromJSON(dictVertGrp)
-            vertebrateGrp.Observation_children.extend(vertebrateIndList)
+            obsVertGrpFiltered = list(filter(lambda o: o.FK_ProtocoleType == vertebrateGrpID ,curStation.Observations))
+            obsReleaseGrpFiltered = list(filter(lambda o: o.FK_ProtocoleType == releaseGrpID ,curStation.Observations))
+    
+            if len(obsVertGrpFiltered)>0:
+                for obs in obsVertGrpFiltered:
+                    obs.LoadNowValues()
+                    if obs.getProperty('taxon') == taxon:
+                        vertebrateGrp = obs
+                    else:
+                        vertebrateGrp = None
+            else :
+                vertebrateGrp = None
+            
+            if len(obsReleaseGrpFiltered)>0:
+               for obs in obsReleaseGrpFiltered:
+                    obs.LoadNowValues()
+                    if obs.getProperty('taxon') == taxon and obs.getProperty('release_method') == releaseMethod:
+                        releaseGrp = obs
+                    else:
+                        releaseGrp = None
+            else :
+                releaseGrp = None
 
-            releaseGrp = Observation(
-                FK_ProtocoleType=releaseGrpID, FK_Station=sta_id)
-            releaseGrp.PropDynValuesOfNow = {}
-            releaseGrp.updateFromJSON({'taxon': taxon,
-                                    'release_method': releaseMethod,
-                                    'nb_individuals': len(releaseIndList)})
+            if vertebrateGrp:
+                for prop, val in vertebrateGrp.__properties__.items():
+                    if isNumeric(val):
+                        vertebrateGrp.setProperty(prop, int(val) + int(dictVertGrp[prop]))
+            else:
+                vertebrateGrp = Observation(
+                    FK_ProtocoleType=vertebrateGrpID, FK_Station=sta_id)
+                vertebrateGrp.updateFromJSON(dictVertGrp)
+
+            if releaseGrp:
+                releaseGrp.setProperty('nb_individuals', int(obs.getProperty('nb_individuals'))+ len(releaseIndList))
+            else:
+                releaseGrp = Observation(
+                    FK_ProtocoleType=releaseGrpID, FK_Station=sta_id)
+                releaseGrp.PropDynValuesOfNow = {}
+                releaseGrp.updateFromJSON({'taxon': taxon,
+                                           'release_method': releaseMethod,
+                                           'nb_individuals': len(releaseIndList)})
+
             releaseGrp.Observation_children.extend(releaseIndList)
+            vertebrateGrp.Observation_children.extend(vertebrateIndList)
 
             if errorEquipment is not None:
                 session.rollback()
