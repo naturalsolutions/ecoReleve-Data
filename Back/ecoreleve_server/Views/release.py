@@ -181,10 +181,12 @@ class ReleaseIndividualsView(IndividualsView):
                 curVertebrateInd = getnewObs(vertebrateIndID)
                 curVertebrateInd.updateFromJSON(
                     indiv, startDate=curStation.StationDate)
+                curVertebrateInd.Comments = None
                 vertebrateIndList.append(curVertebrateInd)
 
                 curBiometry = getnewObs(biometryID)
                 curBiometry.updateFromJSON(indiv, startDate=curStation.StationDate)
+                curBiometry.Comments = None
                 biometryList.append(curBiometry)
 
                 curReleaseInd = getnewObs(releaseIndID)
