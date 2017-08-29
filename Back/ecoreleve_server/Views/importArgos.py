@@ -324,8 +324,8 @@ def parseDIAGFileAndInsert(full_filename, session, importID):
     with open(full_filename, 'r') as f:
         content = f.read()
         content = re.sub('\s+Prog+\s\d{5}', "", content)
-        content2 = re.sub('[\n\r]\s{10,14}[0-9\s]+[\n\r]', "\n", content)
-        content2 = re.sub('[\n\r]\s{10,14}[0-9\s]+$', "\n", content2)
+        content2 = re.sub('[\n\r]\s{10,14}[0-9A-F\s]+[\n\r]', "\n", content)
+        content2 = re.sub('[\n\r]\s{10,14}[0-9A-F\s]+$', "\n", content2)
         content2 = re.sub('^[\n\r\s]+', "", content2)
         content2 = re.sub('[\n\r\s]+$', "", content2)
         splitBlock = 'm[\n\r]'
