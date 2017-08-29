@@ -17,6 +17,7 @@ from ..Models.Equipment import checkEquip
 from .individual import IndividualsView
 from . import CustomView
 from ..utils.parseValue import isNumeric
+import operator
 
 
 class ReleaseIndividualsView(IndividualsView):
@@ -47,6 +48,14 @@ class ReleaseIndividualsView(IndividualsView):
 
     def retrieve(self):
         return self.search(paging=False)
+
+    def updateAllStartDate(self, indiv, date, properties):
+        for prop in properties:
+            existingDynPropValues = list(filter(lambda p: p.FK_IndividualDynProp == prop['ID'],
+                                               indiv.IndividualDynPropValues))
+            if existingDynPropValues:
+                curValueProperty = max(existingDynPropValues, key=operator.attrgetter('StartDate'))
+                curValueProperty.StartDate = date
 
     def create(self):
         session = self.session
@@ -145,6 +154,7 @@ class ReleaseIndividualsView(IndividualsView):
         try:
             errorEquipment = None
             binList = []
+            allProps = Individual().GetAllProp()
             for indiv in indivList:
                 curIndiv = session.query(Individual).get(indiv['ID'])
                 curIndiv.LoadNowValues()
@@ -157,6 +167,7 @@ class ReleaseIndividualsView(IndividualsView):
                     indiv['taxon'] = curIndiv.Species
                     del indiv['Species']
                     pass
+                self.updateAllStartDate(curIndiv, curStation.StationDate, allProps)
                 curIndiv.updateFromJSON(indiv, startDate=curStation.StationDate)
 
                 binList.append(MoF_AoJ(indiv))
