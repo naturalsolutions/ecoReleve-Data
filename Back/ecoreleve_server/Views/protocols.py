@@ -163,7 +163,7 @@ class ObservationsView(DynamicObjectCollectionView):
         for i in range(len(listObs)):
             curObs = listObs[i]
             curObs.LoadNowValues()
-            values.append(curObs.getFlatObject())
+            values.append(curObs.getFlatObject(schema=curObs.getForm().get('schema',None) ))
         return values
 
     def getProtocolsofStation(self):
