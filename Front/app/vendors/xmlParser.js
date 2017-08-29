@@ -25,6 +25,13 @@ define([
           var longitude = parseFloat(lon);
           var waypointName = $(this).find('name').text();
           var waypointTime, time;
+          // ******* prepare to keep time balise only  ******
+          // waypointTimeTag = $(this).find('time').text();
+          // format =  _this.getDateFormat(waypointTimeTag);
+          // dateStr = moment.utc(waypointTimeTag,format).format('DD/MM/YYYY HH:mm');
+
+          // this code wil be removed 
+          // *Start
           // if tag "cmt" exisits, take date from it, else use tag "time"
           var waypointTimeTag = $(this).find('cmt').text();
           var dateStr;
@@ -37,6 +44,7 @@ define([
             dateStr = moment.utc(waypointTimeTag,format).format('DD/MM/YYYY HH:mm');
           }
 
+          // *End
           var timestamp = moment.utc(dateStr, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
           nbWaypoints += 1;
           if (lat != '' && lon != '' && dateStr != 'Invalid date' && time != 'Invalid date') {
