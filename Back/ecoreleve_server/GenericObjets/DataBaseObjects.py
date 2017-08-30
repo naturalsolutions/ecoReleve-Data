@@ -152,9 +152,9 @@ class DbObject(object):
         self.__init__()
 
     def getProperty(self, nameProp):
-        try:
+        if hasattr(self, nameProp):
             return getattr(self, nameProp)
-        except:
+        else:
             return self.__properties__[nameProp]
 
     def setProperty(self, propertyName, value):
@@ -242,10 +242,10 @@ class DbObject(object):
     def afterUpdate(self):
         return
 
-    def beforedelete(self):
+    def beforeDelete(self):
         return
 
-    def afterdelete(self):
+    def afterDelete(self):
         return
 
     def getFlatObject(self, schema=None):
