@@ -162,7 +162,8 @@ define([
 					else {
 						if (_this.$input.hasClass('error')  ) {
 							_this.$input.removeClass('error');
-							_this.$label.tooltipster('hide');
+							_this.$label.tooltipster('destroy')
+							//_this.$label.tooltipster('hide');
 						}
 					}
 						return error ? false : true;
