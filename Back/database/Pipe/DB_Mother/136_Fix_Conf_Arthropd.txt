@@ -1,0 +1,9 @@
+update ModuleForms SET FormRender=4
+WHERE module_id = 1 and TypeObj = 231 and Name = 'taxon'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('136_Fix_Conf_Arthropd',GETDATE(),(SELECT db_name()))
+
+
+GO

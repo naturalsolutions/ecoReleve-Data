@@ -34,7 +34,8 @@ class ConfiguredDbObjectMapped(object):
     def getForm(self, displayMode='edit', type_=None, moduleName=None, isGrid=False):
         Editable = (displayMode.lower() == 'edit')
         schema = {}
-
+        if not self.ID:
+            displayMode = 'create'
         fields = self.session.query(ModuleForms
                                     ).filter(
             and_(ModuleForms.Module_ID == self.getConf(moduleName).ID,
@@ -52,7 +53,7 @@ class ConfiguredDbObjectMapped(object):
             CurModuleForms = [1]
             if (len(CurModuleForms) > 0):
                 schema[field.Name] = field.GetDTOFromConf(
-                    Editable, isGrid=isGrid)
+                    displayMode, isGrid=isGrid)
 
         form = {'schema': schema,
                 'fieldsets': self.sortFieldsets(fields),
