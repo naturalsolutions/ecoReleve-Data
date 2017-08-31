@@ -9,10 +9,6 @@ GO
 CREATE PROCEDURE [dbo].[pr_checkIndivEquipmentForStation]
 	@stationID int,
 	@date datetime,
-	@lat decimal(9,5),
-	@lon decimal(9,5),
-
-	@FK_MonitoredSite int,
 	@result int OUTPUT
 AS
 SET NOCOUNT ON
@@ -20,9 +16,9 @@ SET @result = NULL
 
 DECLARE @siteEquipExists int;
 DECLARE @indivEquipExists int;
-DECLARE @latSta decimal(9,5), @lonSta decimal(9,5), @dateSta datetime, @siteSta int;
+DECLARE @dateSta datetime;
 
-SELECT @latSta = LAT, @lonSta = LON, @dateSta = StationDate, @siteSta = FK_MonitoredSite
+SELECT @dateSta = StationDate
 FROM Station where ID = @stationID
 
 
