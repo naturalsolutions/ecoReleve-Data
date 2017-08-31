@@ -56,31 +56,29 @@
 	}
 
 	.js-custom-tooltipster {
-    background: red;
-    border-radius: 3px;
-		color: #ffffff;
-		.tooltipster-content {
-			font-family: Arial, sans-serif;
-			text-align: center;
-			font-size: 14px;
-			line-height: 16px;
-			padding: 8px 10px;
-			overflow: hidden;
-			width: 120px;
-	}
+		.tooltipster-box {
+			background: red;
+			border-radius: 3px;
+			border : 0;
+			.tooltipster-content {
+				font-family: Arial, sans-serif;
+				text-align: center;
+				font-size: 14px;
+				line-height: 16px;
+				padding: 8px 10px;
+				overflow: hidden;
+				width: 120px;
+			}
+
+		}
 	.tooltipster-arrow {
-    display: block;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-		z-index: -1;
-		.span {
-			border-color:red;
+		.tooltipster-arrow-uncropped {
+			.tooltipster-arrow-border{
+				border-bottom-color: red;
+			}
+			.tooltipster-arrow-background {
+				border-bottom-color: #ff0000;
+			}
 		}
 	}
-	
-
 }
