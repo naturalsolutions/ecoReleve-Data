@@ -106,8 +106,10 @@ define([
 										},
 										triggerClose: {
 											click: true,
-											scroll: true
-										}
+											//scroll: true
+										},
+										trackOrigin : true,
+										interactive : true
 										});
 				if( this.schema.editable) {
 					this.$label.prop('tabindex',"0");
@@ -165,13 +167,13 @@ define([
 						if (typeof(error) != 'undefined') {
 						_this.$input.addClass('error');
 						_this.$label.tooltipster('content',"Cannot be null");
-						_this.$label.tooltipster('show');
+						_this.$label.tooltipster('open');
 						}
 					else {
 						if (_this.$input.hasClass('error')  ) {
 							_this.$input.removeClass('error');
 							//_this.$label.tooltipster('destroy')
-							_this.$label.tooltipster('hide');
+							_this.$label.tooltipster('close');
 						}
 					}
 						return error ? false : true;
