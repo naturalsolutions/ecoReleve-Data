@@ -99,7 +99,15 @@ define([
 										//parent: this.$el,
 										autoclose : true,
 										//trigger : "custom",
-										position :"bottom"
+										position :"bottom",
+										trigger: 'custom',
+										triggerOpen: {
+											//mouseenter: true
+										},
+										triggerClose: {
+											click: true,
+											scroll: true
+										}
 										});
 				if( this.schema.editable) {
 					this.$label.prop('tabindex',"0");
@@ -162,8 +170,8 @@ define([
 					else {
 						if (_this.$input.hasClass('error')  ) {
 							_this.$input.removeClass('error');
-							_this.$label.tooltipster('destroy')
-							//_this.$label.tooltipster('hide');
+							//_this.$label.tooltipster('destroy')
+							_this.$label.tooltipster('hide');
 						}
 					}
 						return error ? false : true;

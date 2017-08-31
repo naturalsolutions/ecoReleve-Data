@@ -12,6 +12,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         this.eGui = document.createElement('span'); //not sure it's necessary
         this.params = params;
         var value = this.handleValues(params);
+        this.isEmptyRow = this.checkIfEmptyRow(params);
   
         //check only before the first render of the grid, otherwise, use refresh
         if(!params.api.firstRenderPassed){
@@ -19,7 +20,6 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         }
   
   
-        this.isEmptyRow = this.checkIfEmptyRow(params);
   
         if(this.isEmptyRow){
           this.requiredValidation(params, value);
@@ -55,6 +55,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           }
           if(val != null && val != 'undefined' && val != ''){
             empty = false;
+            return empty;
           }
         }
         //optionnal
@@ -364,9 +365,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         StateBoxRenderer.prototype.formatValueToDisplay = function (value) {
           var _this = this;
           this.nullable = this.params.colDef.options.nullable
-          if(typeof(value) === 'undefined') { //hack for getRowDataAndErrors , stopediting call format with value undefined
-            value = null;
-          }
+
           if ( 'defaultValue' in this.params.colDef.schema) {
             if( this.params.colDef.schema.defaultValue != null) {
               this.value = parseInt(this.params.colDef.schema.defaultValue)
@@ -374,6 +373,9 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           }
           else {
             this.value = null
+          }
+          if(typeof(value) === 'undefined') { //hack for getRowDataAndErrors , stopediting call format with value undefined
+            this.value = null;
           }
     
           if( this.params.colDef.field in this.params.data ) {
