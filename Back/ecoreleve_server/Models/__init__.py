@@ -112,11 +112,10 @@ def db(request):
             cache_callback(request, session)
         else:
             try:
-                print('\n\n ************ before Commit \n\n')
                 session.commit()
             except BusinessRuleError as e :
                 session.rollback()
-                request.response.status_code = 520
+                request.response.status_code = 409
                 request.response.text= e.value
             finally:
                 session.close()

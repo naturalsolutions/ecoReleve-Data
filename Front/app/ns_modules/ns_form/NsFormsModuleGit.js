@@ -580,10 +580,20 @@ define([
           }
         },
         error: function(model , response){
-          if( response.status == 409) {
+          if( response.status === 409) {
+              Swal({
+                title: 'Data conflicts',
+                text: response.responseText,
+                type: 'warning',
+                showCancelButton: false,
+                confirmButtonColor: 'rgb(240, 173, 78)',
+                confirmButtonText: 'OK',
+                closeOnConfirm: true,
+              });
+          } else {
               var opts = {
                 title : 'Error',
-                text : 'You cannot do this modification because data have already been validated with this sensor. Please contact an administrator.',
+                text : 'An error occured. Please contact an administrator.',
                 allowEscapeKey: false,
                 showCancelButton: false,
                 type: 'error',
