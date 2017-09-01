@@ -23,7 +23,7 @@
     "requirejs-text": "2.0.14",
     "i18n": "https://github.com/jamuhl/i18next.git#1.8.2",
     "fancytree": "2.9.0",
-    "tooltipster": "3.3.0",
+    "tooltipster": "4.2.5",
     "chartjs": "1.0.2",
     "reneco-fonts": "*",
     "ag-grid": "^5.2.0",
