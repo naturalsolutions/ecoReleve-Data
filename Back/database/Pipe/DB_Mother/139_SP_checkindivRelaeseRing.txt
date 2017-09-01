@@ -27,6 +27,7 @@ SELECT @result = (
 
  select @result
 
+GO
 
 
 INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('139_SP_checkindivRelaeseRing',GETDATE(),(SELECT db_name()))
