@@ -140,7 +140,27 @@ INSERT INTO [dbo].[BusinessRules]
            ,'dbo.[pr_checkValidatedLocationOnEquipmentProtocol]'
            ,'["ID"]'
            ,'contrainte de supression verifiant l''existance de données validées suite à un équipement'
-           ,'You cannot do this modification because data have already been validated with this sensor. Please contact an administrator.')
+           ,'You cannot do this modification because data have already been validated with this sensor. Please contact an administrator.'),
+
+
+	('Disable_Update_Protocole_ArthropodSurvey'
+           ,'Observation'
+           ,'[223]'
+           ,'before_update'
+           ,'dbo.[pr_checkEntomoBridgeOnProtocolUpdate]'
+           ,'["ID","micro_habitat","habitat","Host_Plant","Method"]'
+           ,'contrainte de modification verifiant l''existance de données lié à eCollection Entomo'
+           ,'You cannot do this modification because linked sample(s) exist into eCollection Entomo. Please contact an administrator.'),
+
+
+	('Disable_Delete_Protocole_ArthropodSurvey'
+           ,'Observation'
+           ,'[223]'
+           ,'before_delete'
+           ,'dbo.[pr_checkEntomoBridgeOnProtocolDelete]'
+           ,'["ID"]'
+           ,'contrainte de modification verifiant l''existance de données lié à eCollection Entomo'
+           ,'You cannot do this deletion because linked sample(s) exist into eCollection Entomo. Please contact an administrator.')
 
 
 GO
