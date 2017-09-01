@@ -1,4 +1,4 @@
-
+﻿
 INSERT INTO [dbo].[BusinessRules]
            ([name]
            ,[target]
@@ -124,12 +124,12 @@ INSERT INTO [dbo].[BusinessRules]
            ,'You cannot do this modification because an individual already exists with this release ring code.'),
 
 		
-		('Disable_Delete_Protocole_Equipment'
+		('Disable_Update_Protocole_Equipment'
            ,'Observation'
            ,'[218, 219, 229, 230]'
            ,'before_update'
-           ,'dbo.[pr_checkValidatedLocationOnEquipmentProtocol]'
-           ,'["ID"]'
+           ,'dbo.[pr_checkValidatedLocationOnEquipmentProtocolUpdate]'
+           ,'["ID","FK_Sensor","FK_Individual"]'
            ,'contrainte de modification verifiant l''existance de données validées suite à un équipement'
            ,'You cannot do this modification because data have already been validated with this sensor. Please contact an administrator.'),
 
@@ -139,7 +139,7 @@ INSERT INTO [dbo].[BusinessRules]
            ,'before_delete'
            ,'dbo.[pr_checkValidatedLocationOnEquipmentProtocol]'
            ,'["ID"]'
-           ,'contrainte de modification verifiant l''existance de données validées suite à un équipement'
+           ,'contrainte de supression verifiant l''existance de données validées suite à un équipement'
            ,'You cannot do this modification because data have already been validated with this sensor. Please contact an administrator.')
 
 

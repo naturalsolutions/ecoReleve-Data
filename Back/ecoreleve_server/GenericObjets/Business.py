@@ -76,7 +76,7 @@ class BusinessRules(Base):
         sqlParams = ' @result int; \n'
         declare_stmt = 'DECLARE '+ sqlParams
         params_stmt = ' :'+', :'.join(paramsJSON)+', @result OUTPUT; \n'
-        bindparams = [bindparam(param,entityDTO.get(param)) for param in paramsJSON]
+        bindparams = [bindparam(param,entityDTO.get(param, None)) for param in paramsJSON]
 
         stmt = text(declare_stmt + ' EXEC '+self.executing + params_stmt + '\n SELECT @result;', bindparams=bindparams)
         return stmt
