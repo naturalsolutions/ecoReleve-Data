@@ -10,7 +10,8 @@ from sqlalchemy import (
     Sequence,
     orm,
     func,
-    event)
+    event,
+    select)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
@@ -47,7 +48,7 @@ class Observation(Base, ObjectWithDynProp):
         backref='Observation',
         cascade="all, delete-orphan",
         uselist=False)
-    Station = relationship("Station", back_populates='Observations')
+    Station = relationship("Station")
     Individual = relationship('Individual')
 
     def __init__(self, **kwargs):
@@ -78,8 +79,14 @@ class Observation(Base, ObjectWithDynProp):
 
     def linkedFieldDate(self):
         try:
-            linkedDate = self.Station.StationDate
+            Station = Base.metadata.tables['Station']
+            if not self.Station:
+                linkedDate = self.session.execute(select([Station.c['StationDate']]).where(Station.c['ID']==self.FK_Station)).scalar()
+            else:
+                linkedDate = self.Station.StationDate
         except:
+            from traceback import print_exc
+            print_exc()
             linkedDate = datetime.now()
         if 'unequipment' in self.GetType().Name.lower():
             linkedDate = linkedDate - timedelta(seconds=1)
