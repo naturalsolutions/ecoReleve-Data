@@ -19,6 +19,7 @@ from collections import OrderedDict
 import json
 from sqlalchemy.ext.hybrid import hybrid_property
 from pyramid import threadlocal
+from pyramid.view import view_config
 
 
 class BusinessRuleError(Exception):
@@ -30,7 +31,14 @@ class BusinessRuleError(Exception):
         return self.value
 
     def __repr__(self):
-        return json.dumps(self.value)
+        return self.value
+
+
+@view_config(context=BusinessRuleError, renderer='json')
+def businessError_view(exc, request):
+    request.response.status_code = 520
+    request.response.text = exc.value
+    return request.response
 
 
 class BusinessRules(Base):
@@ -50,6 +58,13 @@ class BusinessRules(Base):
     def paramsJSON (self):
         return json.loads(self.params)
 
+    @hybrid_property
+    def targetTypes (self):
+        if self.targetType:
+            return json.loads(self.targetType)
+        else:
+            return []
+
     def raiseError(self):
         raise BusinessRuleError(self.errorValue)
 
@@ -57,7 +72,6 @@ class BusinessRules(Base):
         ''' Build stored procedure statment, params:
                 - entityDTO : dict()
             return text(query)'''
-
         paramsJSON = self.paramsJSON
         sqlParams = ' @result int; \n'
         declare_stmt = 'DECLARE '+ sqlParams
@@ -71,7 +85,8 @@ class BusinessRules(Base):
         session = threadlocal.get_current_request().dbsession
         stmt = self.buildQuery(entityDTO)
         result = session.execute(stmt).scalar()
-        
+
+        # print('\n -----  EXEC '+self.executing, ' Event: '+self.actionType , ' result: ', result)
         if result or self.actionType =='before_delete':
             self.raiseError()
-        return result
+        # return result
