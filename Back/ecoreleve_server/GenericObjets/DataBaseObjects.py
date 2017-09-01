@@ -237,8 +237,11 @@ class DbObject(object):
     @classmethod
     def executeBusinessRules(cls, target, event):
         if cls.__constraintRules__[event]:
+            entityDTO = target.getFlatObject()
             for rule in cls.__constraintRules__[event]:
-                result = rule.execute(target.getFlatObject())
+                if (not rule.targetTypes
+                    or (hasattr(target, 'GetType') and target.GetType().ID in rule.targetTypes)):
+                    result = rule.execute(entityDTO)
 
     def afterUpdate(self):
         return
@@ -253,28 +256,28 @@ class DbObject(object):
         ''' return flat object with static properties and last existing value of dyn props '''
         data = {}
         hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
-        if self.ID is not None:
-            max_iter = max(len(self.__table__.columns), len(
-                self.__properties__), len(hybrid_properties))
-            for i in range(max_iter):
-                # Get static Properties
-                try:
-                    curStatProp = list(self.__table__.columns)[i]
-                    data[curStatProp.key] = self.getProperty(
-                        curStatProp.key)
-                except:
-                    pass
-                # Get dynamic Properties
-                try:
-                    curDynPropName = list(self.__properties__)[i]
-                    data[curDynPropName] = self.getProperty(curDynPropName)
-                except Exception as e:
-                    pass
-                try:
-                    PropName = hybrid_properties[i]
-                    data[PropName] = self.getProperty(PropName)
-                except Exception as e:
-                    pass
+        # if self.ID is not None:
+        max_iter = max(len(self.__table__.columns), len(
+            self.__properties__), len(hybrid_properties))
+        for i in range(max_iter):
+            # Get static Properties
+            try:
+                curStatProp = list(self.__table__.columns)[i]
+                data[curStatProp.key] = self.getProperty(
+                    curStatProp.key)
+            except:
+                pass
+            # Get dynamic Properties
+            try:
+                curDynPropName = list(self.__properties__)[i]
+                data[curDynPropName] = self.getProperty(curDynPropName)
+            except Exception as e:
+                pass
+            try:
+                PropName = hybrid_properties[i]
+                data[PropName] = self.getProperty(PropName)
+            except Exception as e:
+                pass
 
         # if not schema and hasattr(self, 'getForm'):
         #     schema = self.getForm()['schema']

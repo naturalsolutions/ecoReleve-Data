@@ -86,7 +86,7 @@ def main(global_config, **settings):
     config.include('pyramid_tm')
     config.include('pyramid_jwtauth')
 
-    config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
+    config.registry.dbmaker = scoped_session(sessionmaker(bind=engine, autoflush=False))
     dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine))
     config.add_request_method(db, name='dbsession', reify=True)
 
