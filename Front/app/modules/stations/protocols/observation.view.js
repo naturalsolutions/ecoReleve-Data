@@ -40,6 +40,8 @@ define([
       this.model.schema = this.model.get('schema');
       this.model.fieldsets = this.model.get('fieldsets');
       this.model.attributes = this.model.get('data');
+      this.model.set('stationId', this.parentModel.get('stationId'));
+      this.model.set('FK_Station', this.parentModel.get('stationId'));
 
       this.form = new NsForm({
         modelurl: this.model.urlRoot,
@@ -104,6 +106,9 @@ define([
       }
       else if(response.responseJSON.response.errorSite == true ){
       this.swal({'title':'Data saving error', 'type':'error', 'text':'No monitored site is attached', 'confirmButtonColor':'rgb(221, 107, 85)'});
+      }
+      else {
+        this.swal({'title':'Data saving error', 'type':'error', 'text':response.responseJSON.response, 'confirmButtonColor':'rgb(221, 107, 85)'});
       }
     },
 

@@ -1,0 +1,9 @@
+  UPDATE [ModuleForms] SET FormRender = 2
+  where FormRender = 4
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('137_up_Conf_Forms_Render',GETDATE(),(SELECT db_name()))
+
+
+GO

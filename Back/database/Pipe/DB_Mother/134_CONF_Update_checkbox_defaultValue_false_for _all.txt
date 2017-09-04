@@ -1,0 +1,12 @@
+UPDATE [ModuleForms]
+	SET [DefaultValue] = '0'
+	WHERE InputType = 'checkbox'
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('134_CONF_Update_checkbox_defaultValue_false_for _all',GETDATE(),(SELECT db_name()))
+
+
+GO

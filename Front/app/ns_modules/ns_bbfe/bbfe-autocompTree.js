@@ -41,6 +41,22 @@ define([
         },
 
         initialize: function (options) {
+            if (options.schema.defaultValue) { //hack need because back return value and displayValue none when in nestedform 
+                var tmpVal = options.model.get(options.key)
+                var splitTab = options.schema.defaultValue.split('>');
+                if (typeof(tmpVal) === 'undefined' ) {
+                    options.model.set(options.key, { 
+                                                    value :  options.schema.defaultValue,
+                                                    displayValue : splitTab[splitTab.length-1]
+
+                    });
+                }
+                else if ( tmpVal.value === null && tmpVal.displayValue === null ) {
+
+                    tmpVal.displayValue = splitTab[splitTab.length-1];
+                    tmpVal.value = options.schema.defaultValue;
+                }
+            }
             Form.editors.Base.prototype.initialize.call(this, options);
 
             this.formGrid = options.formGrid;
@@ -157,6 +173,13 @@ define([
 
             }
 
+            if((typeof _this.value === "string") && _this.value != null && _this.value != 'null' && _this.value != ''){
+                var tmp = _this.value;
+                _this.value = {};
+                _this.value.value = tmp;
+                _this.value.displayValue = _this.findDisplayedValue(tmp);
+            }
+
             //set inital values
             if (_this.value) {
                 _this.$el.find('#' + _this.id).val(_this.value.displayValue);
@@ -169,6 +192,20 @@ define([
             }).defer();
 
             return this;
+        },
+
+        findDisplayedValue: function(value){
+            var _this = this;
+
+            var node = this.$el.find('#treeView' + this.id).fancytree('getTree').findFirst(function(node){
+                return (node.data.fullpath == value)
+            });
+            if(node){
+                return node.data.valueTranslated;    
+            } else {
+                return '';
+            }
+            
         },
 
         isEmptyVal: function(value){

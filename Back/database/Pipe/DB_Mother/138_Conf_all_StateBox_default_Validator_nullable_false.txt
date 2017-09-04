@@ -1,0 +1,11 @@
+UPDATE [dbo].[ModuleForms]
+SET 
+	Validators = '[{"type" : "StateBox", "nullable" : false}]'
+	where 
+	inputType = 'statebox'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('138_Conf_all_StateBox_default_Validator_nullable_false',GETDATE(),(SELECT db_name()))
+
+
+GO

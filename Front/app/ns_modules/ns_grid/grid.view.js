@@ -112,7 +112,9 @@ define([
             setTimeout(function(){
               _this.gridOptions.api.firstRenderPassed = true;
               _this.focusFirstCell();
-              _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
+              if (!options.noResizeToFit){
+                _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
+              }
               if(!_this.model.get('totalRecords')){
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
               }
@@ -211,12 +213,51 @@ define([
 
         //e.g types
         var comparator = function (valueA, valueB, nodeA, nodeB, isInverted) {
+          //TODO need refact , must be a better way to do that (pb with displayvalue and new checkbox)
+          if( this.type === 'StateBox') { // hack to handle sort with new checkbox
+            if( nodeA.data[this.field] != null ) {
+              valueA =  nodeA.data[this.field];
+            }
+            else {
+              valueA = null;
+            }
+            if( nodeB.data[this.field] != null ) {
+              valueB =  nodeB.data[this.field];
+            }
+            else {
+            valueB = null;
+            }
+          if( typeof(valueA) === 'number' || typeof(valueB) === 'number' ) { //number
+            if( valueA === null && valueB === null ) {
+              return 0;
+            }
+            if( valueA === null) {
+              if(isInverted) {
+                return -1;
+              }
+              else {
+                return 1;
+              }
+            }
+            if(valueB === null ) {
+              if (isInverted) {
+                return 1;
+              }
+              else {
+                return -1;
+              }
+            }
+
+            return valueA - valueB;
+          }
+          }
+
           var value1;
           var value2;
 
           if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()  ) { //detect date
             //then convert it to timestamp (number)
-            if(valueA) { 
+            if(valueA) {
               valueA = moment(valueA , "DD/MM/YYYY HH:mm:ss" ).valueOf();
             }
             if(valueB){
@@ -324,6 +365,11 @@ define([
           case 'Checkbox':
             col.cellEditor = Editors.CheckboxEditor;
             col.cellRenderer = Renderers.CheckboxRenderer;
+            break;
+
+          case 'StateBox':
+            col.cellEditor = Editors.StateBoxEditor;
+            col.cellRenderer = Renderers.StateBoxRenderer;
             break;
           case 'Number':
             col.cellEditor = Editors.NumberEditor;

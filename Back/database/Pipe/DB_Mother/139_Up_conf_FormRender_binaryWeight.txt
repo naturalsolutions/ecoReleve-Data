@@ -1,0 +1,13 @@
+update [ModuleForms] SET FormRender = 7
+where FormRender = 2
+
+update [ModuleForms] SET FormRender = 15
+where FormRender = 4
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('139_Up_conf_FormRender_binaryWeight',GETDATE(),(SELECT db_name()))
+
+
+GO

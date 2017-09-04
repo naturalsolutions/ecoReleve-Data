@@ -873,7 +873,7 @@ Form.Field = Backbone.View.extend({
     var error = this.editor.validate();
 
     if (error) {
-      this.setError(error.message);
+        this.setError(error.message, error.type);
     } else {
       this.clearError();
     }
@@ -887,22 +887,26 @@ Form.Field = Backbone.View.extend({
    * @param {String} msg     Error message
    */
    //mjaouen
-  setError: function(msg) {
+  setError: function(msg,type) {
     //Nested form editors (e.g. Object) set their errors internally
     if (this.editor.hasNestedForm) return;
 
     //Add error CSS class
+    if( typeof(type) != 'undefined' && type == 'subFormGrid') { //fix when error in subformgrid
+      return ;
+    } 
+    else {
+      var elem = this.$el.find('input:first');
+      if(!elem.length){
+        elem = this.$el.find('select:first');
+      }
+      elem.addClass(this.errorClassName);
 
-    var elem = this.$el.find('input:first');
-    if(!elem.length){
-      elem = this.$el.find('select:first');
+      //this.$el.addClass(this.errorClassName);
+
+      //Set error message
+      this.$('[data-error]').html(msg);
     }
-    elem.addClass(this.errorClassName);
-
-    //this.$el.addClass(this.errorClassName);
-
-    //Set error message
-    this.$('[data-error]').html(msg);
   },
 
   /**
@@ -977,7 +981,9 @@ Form.Field = Backbone.View.extend({
 
   template: _.template('\
     <div>\
+    <% if (title) { %>\
       <label for="<%= editorId %>"><%= title %></label>\
+      <% } %>\
       <div>\
         <span data-editor></span>\
         <div data-error></div>\

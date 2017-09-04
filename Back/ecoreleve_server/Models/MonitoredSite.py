@@ -18,7 +18,7 @@ from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from datetime import datetime
-from ..utils.parseValue import isEqual
+from ..utils.parseValue import isEqual, formatValue
 from ..utils.datetime import parse
 
 
@@ -135,7 +135,7 @@ class MonitoredSite (Base, ObjectWithDynProp):
             if (len(CurModuleForms) > 0):
                 CurModuleForms = CurModuleForms[0]
                 resultat[CurModuleForms.Name] = CurModuleForms.GetDTOFromConf(
-                    Editable)
+                    DisplayMode.lower())
         return resultat
 
     def getFlatObject(self, schema=None):
@@ -169,6 +169,10 @@ class MonitoredSite (Base, ObjectWithDynProp):
                             curStatProp.key)
                 except:
                     pass
+        if not schema and hasattr(self, 'getForm'):
+            schema = self.getForm()['schema']
+        if schema:
+            resultat = formatValue(resultat, schema)
         return resultat
 
     def setProperty(self, nameProp, valeur, useDate=None):
@@ -198,6 +202,7 @@ class MonitoredSite (Base, ObjectWithDynProp):
                 sameDatePosition[0].LON = DTOObject['LON']
                 sameDatePosition[0].ELE = DTOObject['ELE']
                 sameDatePosition[0].Precision = DTOObject['Precision']
+                sameDatePosition[0].Comments = DTOObject['Comments']
             else:
                 self.MonitoredSitePositions.append(self.newPosition)
 

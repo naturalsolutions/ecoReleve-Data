@@ -3,21 +3,21 @@ define([
 	'ag-grid',
 	'backbone-forms',
 	'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
-	'ns_modules/ns_bbfe/bbfe-autoCompTree',
+	'ns_modules/ns_bbfe/bbfe-autocompTree',
 	'ns_modules/ns_bbfe/bbfe-autocomplete',
 	'ns_modules/ns_bbfe/bbfe-dateTimePicker',
 	'ns_modules/ns_bbfe/bbfe-timePicker',
 	'ns_modules/ns_bbfe/bbfe-select',
 
 ], function($, AgGrid, Form,
-	ObjectPicker, 
-	ThesaurusPicker, 
-	AutocompletePicker, 
+	ObjectPicker,
+	ThesaurusPicker,
+	AutocompletePicker,
 	DateTimePicker,
 	TimePicker,
 	SelectPicker
 ){
-    
+
     var Editors = {};
 
 		var CustomEditor = function(){
@@ -29,7 +29,7 @@ define([
 			// 	params.api.addItems([{}]); //redraw every rows
 			// 	params.api.startEditingCell({ colKey: params.column.colDef.field, rowIndex: params.node.childIndex });
 			// }
-			
+
 		  var col = params.column.colDef;
 
 		  var value = params.value;
@@ -57,12 +57,13 @@ define([
 
 			this.initBBFE(options);
 
-
 		  this.preventNavigationEvents();
+
+		  window.formInEdition.form['.js-obs-form'] = { 'formChange': true};
 		};
 
 		CustomEditor.prototype.initBBFE = function(options){
-		  
+
 		};
 
 		CustomEditor.prototype.addDestroyableEventListener = function(eElement, event, listener){
@@ -75,7 +76,7 @@ define([
 		CustomEditor.prototype.getGui = function(){
 		  return this.element.el;
 		};
-		
+
 
 		CustomEditor.prototype.afterGuiAttached = function () {
 		  this.element.$el.focus();
@@ -89,6 +90,9 @@ define([
 		};
 
 		CustomEditor.prototype.getValue = function(){
+			if (this.element.schema.type ==='StateBox') { //hack
+				return this.element.getValue();
+			}
 			if(this.element.getValue() === "" || this.element.getValue() === null){
 				return;
 			}
@@ -165,7 +169,7 @@ define([
 		  return {
 		  	value: this.element.getValue(),
 		  	displayValue: this.element.$input[0].value //not sure why
-		  } 
+		  }
 		};
 
 
@@ -200,6 +204,31 @@ define([
 		  return this.element.el;
 		};
 
+    var StateBoxEditor = function () {};
+    StateBoxEditor.prototype = new CustomEditor();
+
+		StateBoxEditor.prototype.initBBFE = function(options){
+		  this.bbfe = new Form.editors.StateBox(options);
+		  this.element = this.bbfe.render();
+			if( this.params.eGridCell.className.indexOf('ag-cell-error') == -1 ) { //hack when cell in error no need to add margin left
+				this.element.$el.find('label').css({'margin-left':'10px'})
+			}
+
+
+		};
+
+			StateBoxEditor.prototype.afterGuiAttached = function () {
+		  this.element.$el.focus();
+		  this.element.$el.find('label').focus();
+		};
+
+		StateBoxEditor.prototype.getGui = function(){
+			//  this.element.$el.css({
+			//  	'margin-left': '10px'
+			//  });
+		  return this.element.el;
+		};
+
 
     var DateTimeEditor = function () {};
 
@@ -215,7 +244,10 @@ define([
     SelectEditor.prototype = new CustomEditor();
 		SelectEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new SelectPicker(options);
-		  this.element = this.bbfe.render();
+			this.element = this.bbfe.render();
+			if(this.element.value instanceof Object){
+				this.element.value = this.element.value.value;
+			}
 		};
 
 		SelectEditor.prototype.afterGuiAttached = function () {
@@ -224,10 +256,7 @@ define([
 
 
 		SelectEditor.prototype.getValue = function(){
-			return {
-				value: this.element.getValue(),
-				displayValue: this.element.$el.find('option:selected').text(),
-			}
+			return this.element.getValue();
 		};
 
 
@@ -235,6 +264,7 @@ define([
 		Editors.ObjectPicker = ObjectPickerEditor;
 		Editors.NumberEditor = NumberEditor;
 		Editors.TextEditor = TextEditor;
+		Editors.StateBoxEditor = StateBoxEditor;
 		Editors.CheckboxEditor = CheckboxEditor;
 		Editors.AutocompleteEditor = AutocompleteEditor;
 		Editors.DateTimeEditor = DateTimeEditor;
