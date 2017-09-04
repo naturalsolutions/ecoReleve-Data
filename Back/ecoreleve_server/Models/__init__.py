@@ -127,6 +127,7 @@ def db(request):
     request.add_finished_callback(cleanup)
     return session
 
+
 from ..GenericObjets.ObjectWithDynProp import LinkedTables
 from ..GenericObjets.FrontModules import *
 from .CustomTypes import *
@@ -143,11 +144,7 @@ from .SensorData import *
 from .List import *
 from .Log import sendLog
 
-from sqlalchemy import exc as sa_exc
-import warnings
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", category=sa_exc.SAWarning)
-from ..GenericObjets.OrmModelsMixin import MyObject
+# from ..GenericObjets.OrmModelsMixin import MyObject
 
 LinkedTables['Individual'] = Individual
 LinkedTables['Station'] = Station

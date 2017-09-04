@@ -15,17 +15,27 @@ from sqlalchemy import (Column,
                         UniqueConstraint,
                         Table,
                         text,
-                        bindparam)
+                        bindparam,
+                        insert)
 from sqlalchemy.orm import relationship, aliased, class_mapper, mapper
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declared_attr
-from ..Models import Base, dbConfig
+from ..Models import Base, dbConfig, BusinessRules
 from sqlalchemy import inspect, orm
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement
 from ..utils.parseValue import parser
 from datetime import datetime
+from .DataBaseObjects import ConfiguredDbObjectMapped, DbObject
 # from sqlalchemy.event import listens_for
+
+
+ANALOG_DYNPROP_TYPES = {'String': 'ValueString',
+                        'Float': 'ValueFloat',
+                        'Date': 'ValueDate',
+                        'Integer': 'ValueInt',
+                        'Time': 'ValueDate',
+                        'Date Only': 'ValueDate'}
 
 class CreateView(Executable, ClauseElement):
     def __init__(self, name, select):
@@ -49,8 +59,8 @@ class ORMUtils(object):
 
 class GenericType(ORMUtils):
     __tablename__ = None
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    ID = Column(Integer, primary_key=True)
+    Name = Column(String(250), nullable=False)
     parent = None
 
     @classmethod
@@ -58,14 +68,14 @@ class GenericType(ORMUtils):
 
         class Properties(ORMUtils, Base):
             __tablename__ = cls.parent.__tablename__+'DynProp'
-            id = Column(Integer, primary_key=True)
-            name = Column(String(250), nullable=False)
-            typeProp = Column(String(250), nullable=False)
+            ID = Column(Integer, primary_key=True)
+            Name = Column(String(250), nullable=False)
+            TypeProp = Column(String(250), nullable=False)
 
             @declared_attr
             def __table_args__(cls):
                 return (UniqueConstraint(
-                            cls.name,
+                            cls.Name,
                             name='uqc_'+cls.__tablename__+'_name'),
                         )
         cls.PropertiesClass = Properties
@@ -75,20 +85,20 @@ class GenericType(ORMUtils):
     def _type_properties(cls):
         class TypeProperties(Base):
             __tablename__ = cls.__tablename__+'_'+cls.parent.__tablename__+'DynProp'
-            id = Column(Integer, primary_key=True)
+            ID = Column(Integer, primary_key=True)
             type_id = Column('FK_'+cls.__tablename__,
-                             ForeignKey(cls.__tablename__+'.id'),
+                             ForeignKey(cls.__tablename__+'.ID'),
                              nullable=False
                              )
             property_id = Column('FK_'+cls.parent.__tablename__+'DynProp',
-                                 ForeignKey(cls.parent.__tablename__+'DynProp.id'),
+                                 ForeignKey(cls.parent.__tablename__+'DynProp.ID'),
                                  nullable=False
                                  )
             linkedTable = Column('LinkedTable', String(255))
             linkedField = Column('LinkedField', String(255))
             linkedID = Column('LinkedID', String(255))
             linkedSourceID = Column('LinkedSourceID', String(255))
-
+        cls.TypePropertiesClass = TypeProperties
         return relationship(TypeProperties)
 
     @declared_attr
@@ -99,8 +109,8 @@ class GenericType(ORMUtils):
         Properties = cls.getPropertiesClass()
         return relationship(Properties,
                             secondary='join(' + dynpropTable + ',' + linkedTable + ','
-                                      + '' + linkedTable + '.c.FK_' + dynpropTable + '==' + dynpropTable + '.c.id)',
-                            primaryjoin=cls.__tablename__ + '.c.id==' + linkedTable + '.c.FK_' + cls.__tablename__
+                                      + '' + linkedTable + '.c.FK_' + dynpropTable + '==' + dynpropTable + '.c.ID)',
+                            primaryjoin=cls.__tablename__ + '.c.ID==' + linkedTable + '.c.FK_' + cls.__tablename__
                             )
 
     @declared_attr
@@ -108,7 +118,7 @@ class GenericType(ORMUtils):
         return association_proxy('_properties', 'name')
 
 
-class HasDynamicProperties(ORMUtils):
+class HasDynamicProperties(ConfiguredDbObjectMapped, DbObject, ORMUtils):
     ''' core object creating all stuff to manage dynamic
         properties on a new declaration:
             create automatically tables and relationships:
@@ -123,7 +133,7 @@ class HasDynamicProperties(ORMUtils):
     '''
     history_track = True
 
-    id = Column(Integer(), primary_key=True)
+    ID = Column(Integer(), primary_key=True)
 
     def __init__(self, **kwargs):
         self.session = kwargs.get('session', None)
@@ -161,13 +171,14 @@ class HasDynamicProperties(ORMUtils):
     @declared_attr
     def type_id(cls):
         return Column('FK_'+cls.__tablename__+'Type',
-                      ForeignKey(cls.__tablename__+'Type'+'.id'),
+                      ForeignKey(cls.__tablename__+'Type'+'.ID'),
                       nullable=False
                       )
 
     @classmethod
     def getTypeClass(cls):
         class Type(GenericType, Base):
+            __name__ = cls.__tablename__+'Type'
             __tablename__ = cls.__tablename__+'Type'
             parent = cls
         cls.TypeClass = Type
@@ -177,18 +188,18 @@ class HasDynamicProperties(ORMUtils):
     def getDynamicValuesClass(cls):
         class DynamicValues(ORMUtils, Base):
             __tablename__ = cls.__tablename__+'DynPropValues'
-            id = Column(Integer, primary_key=True)
+            ID = Column(Integer, primary_key=True)
             StartDate = Column(DateTime, nullable=False)
             ValueString = Column(String(250))
             ValueDate = Column(DateTime)
             ValueFloat = Column(Float)
-            ValueInteger = Column(Integer)
+            ValueInt = Column(Integer)
             fk_parent = Column('FK_'+cls.__tablename__,
-                               ForeignKey(cls.__tablename__+'.id'),
+                               ForeignKey(cls.__tablename__+'.ID'),
                                nullable=False
                                )
             fk_property = Column('FK_'+cls.__tablename__+'DynProp',
-                                 ForeignKey(cls.__tablename__+'DynProp.id'),
+                                 ForeignKey(cls.__tablename__+'DynProp.ID'),
                                  nullable=False
                                  )
             property_name = association_proxy('property_id', 'name')
@@ -221,7 +232,7 @@ class HasDynamicProperties(ORMUtils):
 
     @declared_attr
     def type(cls):
-        return association_proxy('_type', 'name')
+        return association_proxy('_type', 'Name')
 
     @classmethod
     def lastValueQuery(cls):
@@ -235,10 +246,10 @@ class HasDynamicProperties(ORMUtils):
         sub_query = sub_query.where(dv2.StartDate > DynamicValues.StartDate)
         sub_query = sub_query.where(dv2.StartDate <= func.now())
 
-        join_ = join(DynamicValues, Properties, Properties.id == DynamicValues.fk_property)
+        join_ = join(DynamicValues, Properties, Properties.ID == DynamicValues.fk_property)
         query = select([DynamicValues,
-                        Properties.name.label('Name'),
-                        Properties.typeProp.label('TypeProp')]
+                        Properties.Name.label('Name'),
+                        Properties.TypeProp.label('TypeProp')]
                        ).select_from(join_).where(not_(exists(sub_query)))
         return query
 
@@ -263,7 +274,7 @@ class HasDynamicProperties(ORMUtils):
             if countView == 0:
                 createview = CreateView(viewName,
                                         cls.lastValueQuery())
-                Base.metadata.bind.execute(createview)
+                Base.metadata.bind.execute(createview.execution_options(autocommit=True))
 
             cls.LastDynamicValueViewClass = Table(viewName.lower(),
                                                   Base.metadata,
@@ -275,27 +286,29 @@ class HasDynamicProperties(ORMUtils):
         ''' retrieve latest values of dynamic properties '''
         if not hasattr(self, 'latestValues'):
             table = self.LastDynamicValueViewClass
-            query = table.select().where(table.c['FK_'+self.__tablename__] == self.id)
+            query = table.select().where(table.c['FK_'+self.__tablename__] == self.ID)
             values = self.session.execute(query).fetchall()
             self.latestValues = [(lambda x: dict(x))(val) for val in values]
         return self.latestValues
 
     @property
     def values(self):
-        ''' return flat data object '''
+        ''' return flat data dict '''
         dictValues = {}
         values = self.getLatestDynamicValues()
 
         for value in values:
             property_ = self.get_property_by_name(value['Name'])
-            valueName = 'Value'+property_.get('typeProp')
-            dictValues[property_.get('name')] = value.get(valueName)
+            valueName = ANALOG_DYNPROP_TYPES[property_.get('TypeProp')]
+            dictValues[property_.get('Name')] = value.get(valueName)
         dictValues.update(self.as_dict())
         return dictValues
 
     @values.setter
     def values(self, dict_):
-        ''' set object properties (static and dynamic), 
+        '''parameters:
+            - data (dict)
+        set object properties (static and dynamic), 
         it's possible to set all dynamic properties with date string with __useDate__ key'''
 
         if self.fk_table_type_name not in dict_ and 'type_id' not in dict_:
@@ -340,18 +353,18 @@ class HasDynamicProperties(ORMUtils):
 
         elif len(existingValues) > 0:
             curValue = self.session.query(self.DynamicValuesClass
-                                          ).get(existingValues[0].get('id'))
+                                          ).get(existingValues[0].get('ID'))
 
         if not curValue:
-            curValue = self.DynamicValuesClass(fk_property=prop.get('id'))
+            curValue = self.DynamicValuesClass(fk_property=prop.get('ID'))
             self._dynamicValues.append(curValue)
 
         curValue.StartDate = useDate
-        setattr(curValue, 'Value'+prop.get('typeProp'), value)
+        setattr(curValue, ANALOG_DYNPROP_TYPES[prop.get('TypeProp')], value)
 
     def getDynamicValueAtDate(self, propertyName, useDate):
         prop = self.get_property_by_name(propertyName)
-        valueAtDate = list(filter(lambda x: (x.fk_property == prop.get('id')
+        valueAtDate = list(filter(lambda x: (x.fk_property == prop.get('ID')
                                              and x.StartDate == useDate
                                              ), self._dynamicValues))
         if len(valueAtDate) > 0:
@@ -364,11 +377,11 @@ class HasDynamicProperties(ORMUtils):
 
     @property
     def properties_by_id(self):
-        return {prop.as_dict().get('id'): prop.as_dict() for prop in self._type._properties}
+        return {prop.as_dict().get('ID'): prop.as_dict() for prop in self._type._properties}
 
     @property
     def properties_by_name(self):
-        return {prop.as_dict().get('name'): prop.as_dict() for prop in self._type._properties}
+        return {prop.as_dict().get('Name'): prop.as_dict() for prop in self._type._properties}
 
     def get_property_by_id(self, id_):
         return self.properties_by_id.get(id_)
@@ -376,131 +389,239 @@ class HasDynamicProperties(ORMUtils):
     def get_property_by_name(self, name):
         return self.properties_by_name.get(name)
 
-    # def getLinkedField(self):
-    #     curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + \
-    #         self.GetType().GetDynPropContextTable()
-    #     curQuery += ' C  JOIN ' + self.GetType().GetDynPropTable() + ' D ON C.' + \
-    #         self.GetType().Get_FKToDynPropTable() + '= D.ID '
-    #     curQuery += ' where C.' + self.GetType().GetFK_DynPropContextTable() + \
-    #         ' = ' + str(self.GetType().ID)
-    #     curQuery += ' AND C.LinkedTable is not null'
-    #     Values = self.session.execute(curQuery).fetchall()
+    def getLinkedField(self):
+        # curQuery = 'select D.ID, D.Name , D.TypeProp , C.LinkedTable , C.LinkedField, C.LinkedID, C.LinkSourceID from ' + \
+        #     self.GetType().GetDynPropContextTable()
+        # curQuery += ' C  JOIN ' + self.GetType().GetDynPropTable() + ' D ON C.' + \
+        #     self.GetType().Get_FKToDynPropTable() + '= D.ID '
+        # curQuery += ' where C.' + self.GetType().GetFK_DynPropContextTable() + \
+        #     ' = ' + str(self.GetType().ID)
+        # curQuery += ' AND C.LinkedTable is not null'
+        # Values = self.session.execute(curQuery).fetchall()
 
-    #     return [dict(row) for row in Values]
+        # return [dict(row) for row in Values]
 
-    # def linkedFieldDate(self):
-    #     return datetime.now()
+        return list(filter(lambda prop: prop.LinkedTable is not None, self.properties))
 
-    # def updateLinkedField(self, data, useDate=None):
-    #     if useDate is None:
-    #         useDate = self.linkedFieldDate()
+    def linkedFieldDate(self):
+        return datetime.now()
 
-    #     linkedFields = self.getLinkedField()
-    #     entitiesToUpdate = {}
-    #     for linkProp in linkedFields:
-    #         curPropName = linkProp['Name']
-    #         linkedEntity = LinkedTables[linkProp['LinkedTable']]
-    #         linkedPropName = linkProp['LinkedField'].replace('@Dyn:', '')
-    #         linkedSource = self.getProperty(
-    #             linkProp['LinkSourceID'].replace('@Dyn:', ''))
-    #         linkedObj = self.session.query(linkedEntity).filter(
-    #             getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
+    def updateLinkedField(self, data, useDate=None, previousState=None):
+        if useDate is None:
+            useDate = self.linkedFieldDate()
 
-    #         if linkedObj in entitiesToUpdate:
-    #             entitiesToUpdate[linkedObj][linkedPropName] = self.getProperty(curPropName)
-    #         else:
-    #             entitiesToUpdate[linkedObj] = {linkedPropName: self.getProperty(curPropName)}
+        linkedFields = self.getLinkedField()
+        entitiesToUpdate = {}
 
-    #     for entity in entitiesToUpdate:
-    #         data = entitiesToUpdate[entity]
-    #         entity.init_on_load()
-    #         entity.updateFromJSON(data, startDate=useDate)
+        for linkProp in linkedFields:
+            curPropName = linkProp['Name']
+            linkedEntity = LinkedTables[linkProp['LinkedTable']]
+            linkedPropName = linkProp['LinkedField'].replace('@Dyn:', '')
+            linkedSource = self.getProperty(
+                linkProp['LinkSourceID'].replace('@Dyn:', ''))
 
-    # def deleteLinkedField(self, useDate=None):
-        # session = dbConfig['dbSession']()
-        # if useDate is None:
-        #     useDate = self.linkedFieldDate()
-        # for linkProp in self.getLinkedField():
-        #     obj = LinkedTables[linkProp['LinkedTable']]
+            # remove linked field if target object is different of previous
 
-        #     try:
-        #         linkedField = linkProp['LinkedField'].replace('@Dyn:', '')
-        #         linkedSource = self.getProperty(
-        #             linkProp['LinkSourceID'].replace('@Dyn:', ''))
-        #         linkedObj = session.query(obj).filter(
-        #             getattr(obj, linkProp['LinkedID']) == linkedSource).one()
+            if previousState and str(linkedSource) != str(previousState.get(linkProp['LinkSourceID'])):
+                self.deleteLinkedField(previousState=previousState)
 
-        #         if hasattr(linkedObj, linkedField):
-        #             linkedObj.setProperty(linkedField, None)
-        #         else:
-        #             dynPropValueToDel = linkedObj.getDynPropWithDate(
-        #                 linkedField, useDate)
-        #             if dynPropValueToDel is not None:
-        #                 session.delete(dynPropValueToDel)
+            try:
+                linkedObj = self.session.query(linkedEntity).filter(
+                    getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
+            except NoResultFound:
+                continue
 
-        #         session.commit()
-        #         session.close()
-        #     except:
-        #         pass
+            if linkedObj in entitiesToUpdate:
+                entitiesToUpdate[linkedObj][linkedPropName] = self.getProperty(curPropName)
+            else:
+                entitiesToUpdate[linkedObj] = {linkedPropName: self.getProperty(curPropName)}
 
+        for entity in entitiesToUpdate:
+            data = entitiesToUpdate[entity]
+            entity.init_on_load()
+            entity.updateFromJSON(data, startDate=useDate)
 
+    def deleteLinkedField(self, useDate=None, previousState=None):
+        session = dbConfig['dbSession']()
 
+        if useDate is None:
+            useDate = self.linkedFieldDate()
 
-class MyObject(HasDynamicProperties, Base):
-    __tablename__ = 'MyObject'
-    toto = Column(String)
+        for linkProp in self.getLinkedField():
+            obj = LinkedTables[linkProp['LinkedTable']]
 
+            try:
+                linkedField = linkProp['LinkedField'].replace('@Dyn:', '')
+                if previousState:
+                    linkedSource = previousState.get(linkProp['LinkSourceID'].replace('@Dyn:', ''))
+                else:
+                    linkedSource = self.getProperty(
+                        linkProp['LinkSourceID'].replace('@Dyn:', ''))
+                try:
+                    linkedObj = session.query(obj).filter(
+                        getattr(obj, linkProp['LinkedID']) == linkedSource).one()
+                except NoResultFound:
+                    continue
 
-''' TODO :
-    1) insert conf object from config file like :
-        {
-            MyObject:{
-                isDynamic :1/0,
-                track_history:1/0,
-                static_properties:{
+                if hasattr(linkedObj, linkedField):
+                    linkedObj.setProperty(linkedField, None)
+                else:
+                    dynPropValueToDel = linkedObj.getDynPropWithDate(
+                        linkedField, useDate)
+                    if dynPropValueToDel is not None:
+                        session.delete(dynPropValueToDel)
 
-                },
-
-                dynamic_properties:{
-                    (propType1,String),
-                    (prop2_Type1,Integer),
-                    (prop3_Type1,Float)
-                },
-
-                types:{
-                    type1:[
-                        propType1,
-                        prop2_Type1
-                        ],
-
-                    type2:[
-                        propType1,
-                        prop3_Type1
-                    ]
+                session.commit()
+                session.close()
+            except Exception as e:
+                raise e
 
 
-                }
-        }
-    2) manage linkedField
+class OrmController(object):
+    __allORMClass__ = {}
 
-    '''
+    staticTypeDict = {'String': String,
+                    'Float': Float,
+                    'Integer': Integer,
+                    'Date': DateTime,
+                    }
+
+    def __init__(self, objList=[]):
+        self.conf = objList
+        for obj in objList:
+            self.buildClass(obj)
+
+    def __getattr__(self, attr):
+        return self.getClass(attr)
+
+    def buildClass(self, dict):
+        model = {}
+        model['__tablename__'] = dict['__tablename__']
+        model = self.setStaticProperties(model, dict['properties']['statics'])
+
+        if('__classname__' in dict):
+            classname = dict['__classname__']
+        else:
+            classname = dict['__tablename__'].title()
+
+        if dict.get('isdynamic', None):
+            dbObject = type(classname, (HasDynamicProperties, Base, ), model)
+            self.setDBConfTypes(dbObject, dict)
+        else:
+            model['ID'] = Column(Integer, primary_key=True)
+            dbObject = type(classname, (DbObject, Base, ), model)
+        self.add(dbObject)
+
+    def setStaticProperties(self, model, properties):
+        for prop in properties:
+            model[prop['name']] = Column(prop['name'], self.getCType(prop))
+        return model
+
+    def getCType(self, property):
+        if property.get('clength', None):
+            l = property['clength']
+            return self.staticTypeDict[property['ctype']](l)
+        else:
+            return self.staticTypeDict[property['ctype']]
+
+    def getClass(self, classname):
+        return self.__allORMClass__.get(classname, None)
+
+    def setDBConfTypes(self, curORMclass, model):
+        @event.listens_for(curORMclass, 'mapper_configured')
+        def setDBConfTypes(mapper, class_):
+            if curORMclass:
+                self.insertConfTypes(curORMclass, model)
+                self.insertConfDynProp(curORMclass, model)
+                self.insertConfType_DynProp(curORMclass, model)
+    
+    def insertConfTypes(self, dbObject, model):
+        modelType = dbObject.TypeClass
+        session = dbConfig['dbSession']()
+        for _type in model.get('types', []):
+            stmt = select([func.count(modelType.ID)]).where(modelType.Name == _type)
+            typeExists = session.execute(stmt).scalar()
+
+            if not typeExists:
+                insert_stmt = insert(modelType).values({'Name':_type})
+                session.execute(insert_stmt)
+        session.commit()
+        session.close()
+
+    def insertConfDynProp(self, dbObject, model):
+        modelProperties = dbObject.TypeClass.PropertiesClass
+        confProperties = model.get('properties', {})
+        session = dbConfig['dbSession']()
+        for prop in confProperties.get('dynamics', []):
+            stmt = select([func.count(modelProperties.ID)]).where(modelProperties.Name == prop['name'])
+            typeExists = session.execute(stmt).scalar()
+
+            if not typeExists:
+                insert_stmt = insert(modelProperties).values({'Name':prop['name'], 'TypeProp':prop['ctype']})
+                session.execute(insert_stmt)
+        session.commit()
+        session.close()
+    
+    def insertConfType_DynProp(self, dbObject, model):
+        modelProperties = dbObject.TypeClass.PropertiesClass
+        modelType = dbObject.TypeClass
+        modelTypeProperties = dbObject.TypeClass.TypePropertiesClass
+
+        session = dbConfig['dbSession']()
+        types = session.execute(select([modelType])).fetchall()
+        properties = session.execute(select([modelProperties])).fetchall()
+        typeProperties = session.execute(select([modelTypeProperties])).fetchall()
+
+        valuesToInsert = []
+        for _type, props in model.get('types', []).items():
+            curType = list(filter(lambda t: t['Name'] == _type, types))[0]
+            for prop in props:
+                curProp = list(filter(lambda p: p['Name'] == prop, properties))[0]
+                linkExists = list(filter(lambda x: x[dbObject.fk_table_type_name] == curType['ID'] and x[dbObject.fk_table_DynProp_name] ==curProp['ID']
+                                    , typeProperties))
+                if not linkExists:
+                    valuesToInsert.append({dbObject.fk_table_type_name:curType['ID'] , dbObject.fk_table_DynProp_name:curProp['ID']})
+
+        if valuesToInsert:
+            insert_stmt = insert(modelTypeProperties).values(valuesToInsert)
+            session.execute(insert_stmt)
+
+        session.commit()
+        session.close()
+
+    def add(self, dbObject):
+        self.__allORMClass__[dbObject.__name__] = dbObject
 
 
-typeDict = {'String': String,
-            'Float': Float,
-            'Integer': Integer}
+
+
+
+# class MyObject(HasDynamicProperties, Base):
+#     __tablename__ = 'MyObject'
+#     toto = Column(String)
+
 
 storageConf = [
     {'__tablename__': 'tropdelaballe',
      '__classname__': 'Tropdelaballe',
-     'isdynamic': 0,
+     'isdynamic':1,
      'properties': {
          'statics': [
             {'name': 'tutu', 'ctype': 'String', 'clength': 255},
             {'name': 'tata', 'ctype': 'Integer', 'clength': None},
             {'name': 'toto', 'ctype': 'Float'}
+            ],
+            'dynamics': [
+            {'name': 'dyn1', 'ctype': 'String', 'clength': 10},
+            {'name': 'dyn2', 'ctype': 'Integer', 'clength': None},
+            {'name': 'dyn3', 'ctype': 'Float'},
+            {'name': 'dyn4', 'ctype': 'String', 'clength': 255},
             ]
-        }
+        },
+      'types':{
+          'type1': ['dyn1', 'dyn2'],
+          'type2': ['dyn3', 'dyn4']
+      }
     },
     {'__tablename__': 'alleeelaaaa',
      '__classname__': 'Alleluhia',
@@ -527,48 +648,8 @@ storageConf = [
     }
 ]
 
-
-class ClassBuilder(object):
-    __allORMClass__ = {}
-
-    def __init__(self, objList):
-        for obj in objList:
-            self.buildClass(obj)
-
-    def buildClass(self, dict):
-        model = {}
-        model['__tablename__'] = dict['__tablename__']
-        model = self.setStaticProperties(model, dict['properties']['statics'])
-
-        self.__allORMClass__[dict['__classname__']] = type(dict['__classname__'], (HasDynamicProperties, Base, ), model)
-
-    def setStaticProperties(self, model, properties):
-        for prop in properties:
-            model[prop['name']] = Column(prop['name'], self.getCType(prop))
-        return model
-
-    def getCType(self, property):
-        if property.get('clength', None):
-            l = property['clength']
-            return typeDict[property['ctype']](l)
-        else:
-            return typeDict[property['ctype']]
-
-    def getClass(self, classname):
-        return self.__allORMClass__.get(classname, None)
-    
-    def setDBConfTypes(self, types):
-        pass
-    
-    def setDBConfDynProp(self, dynprop):
-        pass
-    
-    def setDBConfType_DynProp(self, dynprop):
-        pass
-
-
-ClassController = ClassBuilder(storageConf)
-Alleluhia = ClassController.getClass('Alleluhia')
-
-# print(Alleluhia.__dict__)
-
+from sqlalchemy import exc as sa_exc
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+    ClassController = OrmController(storageConf)
