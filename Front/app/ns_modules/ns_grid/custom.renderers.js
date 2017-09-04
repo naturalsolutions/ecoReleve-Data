@@ -365,7 +365,23 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           var _this = this;
           this.nullable = this.params.colDef.options.nullable
 
-          if ( 'defaultValue' in this.params.colDef.schema) {
+          this.value = null ;
+          if(typeof(value) === 'undefined') { //hack for getRowDataAndErrors , stopediting call format with value undefined
+            this.value = null;
+          }
+          
+          if( this.params.colDef.field in this.params.data ) {
+            this.value = this.params.data[this.params.colDef.field];
+          }
+          else if ('defaultValue' in this.params.colDef.schema ) {
+            if( this.params.colDef.schema.defaultValue != null || this.params.colDef.schema.defaultValue != '') {
+              this.value = parseInt(this.params.colDef.schema.defaultValue)
+            }
+
+          }
+
+
+          /*if ( 'defaultValue' in this.params.colDef.schema) {
             if( this.params.colDef.schema.defaultValue != null) {
               this.value = parseInt(this.params.colDef.schema.defaultValue)
             }
@@ -379,7 +395,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     
           if( this.params.colDef.field in this.params.data ) {
             this.value = this.params.data[this.params.colDef.field];
-          }
+          }*/
          // this.value = value;
     
           var input = document.createElement('input');
