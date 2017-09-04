@@ -1,0 +1,39 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[pr_Check_Existing_Indiv_BreedingRing]
+
+@code varchar(250), 
+@id_indiv int,
+@result int OUTPUT
+
+AS 
+SET NOCOUNT ON
+
+IF @id_indiv is null
+SET @id_indiv = 0	
+
+SELECT @result = (
+	SELECT 1 WHERE EXISTS (
+	SELECT *
+  FROM [IndividualDynPropValuesNow] v
+  where name = 'Breeding_Ring_Code'
+  AND ValueString = @code
+  and FK_Individual != @id_indiv
+  )
+  )
+
+ select @result
+
+GO
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('141_SP_checkindivBreedingRing',GETDATE(),(SELECT db_name()))
+
+
+GO

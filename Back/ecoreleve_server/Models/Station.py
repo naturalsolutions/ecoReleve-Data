@@ -24,22 +24,6 @@ from datetime import datetime
 from ..utils.parseValue import dateParser
 
 
-class ErrorCheckUniqueStation(Exception):
-    value = {'existingStation': True}
-
-    def __str__(self):
-        return repr(self.value)
-
-
-class ErrorExistingEquipment(Exception):
-
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-
-
 class Station(Base, ObjectWithDynProp):
 
     __tablename__ = 'Station'
@@ -133,70 +117,6 @@ class Station(Base, ObjectWithDynProp):
             return self.StationType
         else:
             return self.session.query(StationType).get(self.FK_StationType)
-
-    def allowUpdate(self, DTOObject):
-        from ..utils.parseValue import isNumeric
-
-        allow = True
-        site = None
-        if 'FK_MonitoredSite' in DTOObject:
-            site = int(DTOObject['FK_MonitoredSite']) if isNumeric(DTOObject['FK_MonitoredSite']) else None
-        dateSta = dateParser(DTOObject['StationDate'])
-        equipmentSiteExist = self.existingProtocolEquipmentSite()
-        equipmentIndivExist = self.existingProtocolEquipmentIndiv()
-
-        if equipmentSiteExist and (
-            self.FK_MonitoredSite != site or
-            self.StationDate != dateSta or
-            float(self.LAT) != float(DTOObject['LAT']) or
-            float(self.LON) != float(DTOObject['LON'])):
-            raise ErrorExistingEquipment({'updateDenied':'site equipment'})
-        if equipmentIndivExist and (self.StationDate != dateSta):
-            raise ErrorExistingEquipment({'updateDenied':'individual equipment'})
-        return
-
-    def updateFromJSON(self, DTOObject, startDate=None):
-        if self.checkUniqueStation(DTOObject):
-            ObjectWithDynProp.updateFromJSON(self, DTOObject, startDate)
-
-    def existingProtocolEquipmentSite(self):
-        protolist = list(filter(lambda x: x.GetType().Name.lower() in ['site_equipment',
-                                                                       'site_unequipment'], self.Observations))
-        return len(protolist) > 0
-    
-    def checkUniqueStation(self, DTOObject):
-        curID = DTOObject.get('ID', None)
-        if not curID:
-            curID = 0
-        stmt = text(""" DECLARE @code varchar(250), @id_indiv int, @result int;
-                            exec [dbo].[pr_checkUniqueStation]"""
-                            + """:stationID, :lat, :lon, :date, :fieldActivity , @result OUTPUT;
-                            SELECT @result;"""
-                            ).bindparams(bindparam('stationID', curID),
-                                         bindparam('lat', DTOObject.get('LAT',None)),
-                                         bindparam('lon', DTOObject.get('LON',None)),
-                                         bindparam('date', dateParser(DTOObject['StationDate'])),
-                                         bindparam('fieldActivity', DTOObject['fieldActivityId']),
-                                         )
-        result = self.session.execute(stmt).scalar()
-        if result:
-            raise ErrorCheckUniqueStation()
-        return True
-
-    def existingProtocolEquipmentIndiv(self):
-        protolist = list(filter(lambda x: x.GetType().Name.lower() in ['individual_equipment',
-                                                                       'individual_unequipment'], self.Observations))
-        return len(protolist) > 0
-
-@event.listens_for(Station, 'before_insert')
-@event.listens_for(Station, 'before_update')
-def updateRegion(mapper, connection, target):
-    if target.LON and target.LAT:
-        stmt = text('''SELECT dbo.[fn_GetRegionFromLatLon] (:lat,:lon)
-        ''').bindparams(bindparam('lat', target.LAT),
-                        bindparam('lon', target.LON))
-        regionID = connection.execute(stmt).scalar()
-        target.FK_Region = regionID
 
 
 class StationDynProp(Base):
