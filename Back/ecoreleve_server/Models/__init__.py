@@ -144,7 +144,6 @@ from .SensorData import *
 from .List import *
 from .Log import sendLog
 
-# from ..GenericObjets.OrmModelsMixin import MyObject
 
 LinkedTables['Individual'] = Individual
 LinkedTables['Station'] = Station
@@ -177,17 +176,34 @@ from sqlalchemy import (Column,
 from sqlalchemy.orm import relationship, aliased, class_mapper, mapper
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declared_attr
+from ..GenericObjets.OrmModelsMixin import  ClassController
 
 
 
 def test(config):
-    # session = config.registry.dbmaker()
-    # o = session.query(MyObject).get(1)
+    session = config.registry.dbmaker()
+    alllModel = ClassController.Tropdelaballe
+    o = alllModel(session=session, type_id=1)
+    # o = session.query(alllModel).get(1016)
+    # print(o._Alleluhia.values)
     # print(o)
+    # print(o.type_id)
+    # print(o._type)
+    o.values = {
+        'NEWdyn1': 'SDJNDSKJFBDSKFBDSGKJBchamps lié amettre a jour',
+        'dyn2': 888,
+        'dyn5': 'vallalalal',
+        'toto':87.93,
+        'FK_alleeelaaaa':5
+    }
+    session.add(o)
+    # o = session.query(alllModel).get(3)
     # print(o.type)
-    # print(o._type.properties)
+    # print(o._type._type_properties[0].linkedTable)
     # print(o.properties)
     # print(o.values)
+    print(o.getHistory())
+    # print(o.getLinkedField())
     # values = {'FK_MyObjectType':1,
     #            'toto':'blelelelqsdqsddqsdfelele',
     #            'test1':'newsdsdccwxcx   xcwxcsdfwx  <dssss'}
@@ -204,6 +220,6 @@ def test(config):
     # print(OHMyObject.TypeClass.PropertiesClass.__tablename__)
     # print(MyObject.TypeClass.PropertiesClass.__tablename__)
     # print(MyObject.LastDynamicValueViewClass.select())
-    # session.commit()
+    session.commit()
     pass
 
