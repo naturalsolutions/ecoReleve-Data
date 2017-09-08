@@ -559,7 +559,7 @@ class OrmController(object):
         else:
             classname = dict['__tablename__'].title()
 
-        if dict.get('isdynamic', None):
+        if dict['properties'].get('dynamics', None):
             dbObject = type(classname, (HasDynamicProperties, Base, ), model)
             if 'history_track' in dict:
                 dbObject.history_track = dict.get('history_track')
