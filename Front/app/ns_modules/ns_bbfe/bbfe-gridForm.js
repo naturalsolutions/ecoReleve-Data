@@ -42,6 +42,7 @@ define([
 
     className: 'sub-grid-form' ,
     addRow: function(){
+      this.gridView.gridOptions.api.stopEditing(false);
       this.gridView.gridOptions.api.setSortModel({});
       this.gridView.gridOptions.api.addItems([{}]);
       this.$el.trigger('change');

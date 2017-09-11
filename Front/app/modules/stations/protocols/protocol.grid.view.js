@@ -63,7 +63,7 @@ define([
       nbObs = nbObs.rowData.length
       var nbObsDeleted = this.gridView.removeEmptyRow();
 
-      if( nbObs - nbObsDeleted ) {
+      if( (nbObs - nbObsDeleted) > 0 ) {
         var rowDataAndErrors = this.gridView.getRowDataAndErrors();
       
 
@@ -102,6 +102,15 @@ define([
         
         window.swal(opt, 'warning', null, false);
       });
+    }
+    else {
+      var opt = {
+        title : ' There is no observations',
+        text: 'Sorry but there is nothing to save'
+      };
+      
+      window.swal(opt, 'warning', null, false);
+      this.addRow();
     }
     },
 
