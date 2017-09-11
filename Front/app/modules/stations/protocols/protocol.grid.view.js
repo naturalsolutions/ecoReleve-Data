@@ -57,9 +57,17 @@ define([
       window.swal(opt, 'warning', null, false);
     },
 
-    saveObs: function(){
+    saveObs: function() {
       var _this = this;
-      var rowDataAndErrors = this.gridView.getRowDataAndErrors();
+      var nbObs = this.gridView.getRowDataAndErrors();//.length
+      nbObs = nbObs.rowData.length
+      var nbObsDeleted = this.gridView.removeEmptyRow();
+
+      if( nbObs - nbObsDeleted ) {
+        var rowDataAndErrors = this.gridView.getRowDataAndErrors();
+      
+
+
 
       if(rowDataAndErrors.errors.length){
         this.handleErrors(rowDataAndErrors.errors);
@@ -93,9 +101,11 @@ define([
         
         window.swal(opt, 'warning', null, false);
       });
+    }
     },
 
-    addRow: function(){
+    addRow: function(){    
+      this.gridView.gridOptions.api.stopEditing(false);
       this.gridView.gridOptions.api.setSortModel({});
       this.gridView.gridOptions.api.addItems([{}]);
     },
