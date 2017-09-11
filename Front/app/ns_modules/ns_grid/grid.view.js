@@ -1011,9 +1011,50 @@ define([
 
     },
 
+    removeEmptyRow : function() {
+      var _this = this;
+      var rowToDel = [];
+      var nbRowDeleted = 0;
+
+      var filteredColDef = this.gridOptions.columnDefs.filter( function(elem) { //add col to ignore
+        if(elem.field != '' && elem.field != 'index' && elem.field != '_errors') {
+          return elem;
+        }
+      });
+      this.gridOptions.api.stopEditing(false);
+
+      this.gridOptions.api.forEachNode( function(node) {
+
+        if ( _this.checkIfRowEmpty(filteredColDef , node) ) {
+          rowToDel.push(node)
+          //_this.gridOptions.api.removeItems(node);
+        }
+      });
+      nbRowDeleted = rowToDel.length
+      _this.gridOptions.api.removeItems(rowToDel);
+      return nbRowDeleted;
+        
+    },
+
+    checkIfRowEmpty : function(colDef, node) {
+    
+      var empty= true;
+      var tabLength = colDef.length;
+
+      for ( var i = 0; i < tabLength ; i++ ) {
+        if( typeof(node.data[colDef[i].field]) != 'undefined' ) {
+          empty = false;
+          break;
+        }
+      }
+      return  empty; 
+      
+    },
+
     getRowDataAndErrors: function(){
       var _this = this;
-      this.gridOptions.api.stopEditing();
+      this.gridOptions.api.stopEditing(false);
+     
 
       var rowData = [];
       var errors = [];
@@ -1021,12 +1062,15 @@ define([
       var empty = true;
 
       var i = 0;
+      //TODO : NEED TO CHECK VALUE WITH COLDEF,  NODE.DATA CAN CONTAINS MORE VALUE AND THE GRID DIDN'T NEED TO CHECK THIS VALUES
       this.gridOptions.api.forEachNode( function(node) {
         var row = {};
         //some part are useless, eg. could abord at first error.
 
         var keys = Object.keys(node.data);
         empty = true;
+
+        
 
         if(keys.length === 0 || (keys.length === 1 && keys[0] === '_errors' ) ){
           return;
@@ -1048,9 +1092,10 @@ define([
             }
 
             //finaly check if empty
-            if(val != 'undefined'){
+            
+            if(val != undefined && val != 'undefined'){//if(val != 'undefined' && val != null && val != ''){
               empty = false;
-
+              
               //finaly copy node data in the object
               if(node.data[key] instanceof Object){
                 row[key] = node.data[key].value;
@@ -1073,22 +1118,75 @@ define([
               _this.gridOptions.api.setFocusedCell(node.childIndex, node.data._errors, null);
             }
           }
-
+          
         }
 
         //last check, if not empty, push to save
         if(!empty){
+          _this.addDefaultValue(node, row);
+          /* if not empty we addd default val not defined*/ 
+          
           rowData.push(row);
         }
 
       });
-
+      //this.gridOptions.api.refreshView()
       return {
           rowData: rowData,
-          errors: errors
+          errors: errors,
+          empty : empty
       }
     },
 
+    getSchemaForAllCol : function () {
+      var tab =this.gridOptions.columnDefs
+      return tab.filter( function(elem) { 
+        if(elem.field != '_errors' && elem.field!='' && elem.field !='index') {
+          return elem; 
+        }
+      });
+    },
+
+    addDefaultValue: function(node,row) {
+      //console.log("row")
+     // console.log(row)
+      var oldRow = _.clone(row);
+      var tabColDef = this.getSchemaForAllCol();
+      var nbElemIntab = tabColDef.length;
+    //  console.log(tabColDef)
+      for ( var i = 0; i < nbElemIntab; i++) {
+        var elem = tabColDef[i];
+        if( typeof(row[elem.field]) === 'undefined' ) {
+          if( elem.schema && typeof(elem.schema.defaultValue) !== 'undefined' && elem.schema.defaultValue ) {
+            if(  /^\d+$/.test(elem.schema.defaultValue) ) {
+              node.data[elem.field] = parseInt(elem.schema.defaultValue);
+              row[elem.field] = parseInt(elem.schema.defaultValue);
+            }
+            else {
+              node.data[elem.field] = elem.schema.defaultValue;
+              row[elem.field] = elem.schema.defaultValue;
+            }
+          }
+      //    console.log("pas de valeur dans la row pour "+elem.field);
+        }
+
+      }
+      // for ( var col in tabColDef) {
+      //   if(row[col.])
+      // }
+      // for (var key in row) {
+
+
+      // }
+    /*  console.log("old row")
+      console.log(oldRow)
+      console.log("new row")
+      console.log(row);*/
+      return row;
+
+
+    },
+    
     destroySelectedRows: function(callback){
       var _this = this;
       var rowData = [];
