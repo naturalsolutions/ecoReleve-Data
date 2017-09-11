@@ -5,23 +5,32 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       var Renderers = {};
   
       var CustomRenderer = function(){
+
       };
   
       //used on init but also for sorting and filtering!
       CustomRenderer.prototype.init = function (params) {
+
+
         this.eGui = document.createElement('span'); //not sure it's necessary
+        
         this.params = params;
         var value = this.handleValues(params);
         this.isEmptyRow = this.checkIfEmptyRow(params);
   
         //check only before the first render of the grid, otherwise, use refresh
+        // console.log('init')
         if(!params.api.firstRenderPassed){
+          // alert('firstRender')
+          this.onFirstRender(params, value);
           this.handleValueValidation(params, value);
         }
   
+        // alert('init')
   
   
         if(this.isEmptyRow){
+          // this.onFirstRender(params, value);
           this.requiredValidation(params, value);
         } else {
           // after sort filter etc check if there was already an error then display it
@@ -55,7 +64,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           }
           if(val != null && val != 'undefined' && val != ''){
             empty = false;
-            return empty;
+          //  return empty;
           }
         }
         //optionnal
@@ -92,11 +101,12 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   
       CustomRenderer.prototype.requiredValidation = function(params, value){
         var validators = params.colDef.schema.validators;
+
         if(validators.length){
   
           if(validators[0] === 'required'){
               $(params.eGridCell).addClass('ag-cell-required');
-              if(!value && String(value) !== "0"){
+          if(!value && String(value) !== "0"){
                 this.handleError(params);
               } else {
                 this.handleRemoveError(params);
@@ -130,6 +140,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         this.eGui.innerHTML = '';
         var value = this.handleValues(params);
         this.handleValueValidation(params, value);
+        
       };
   
       CustomRenderer.prototype.handleRemoveError = function(params){
@@ -173,8 +184,13 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       CustomRenderer.prototype.deferredValidation = function() {
         return false;
       };
+
+      //format value & display
       CustomRenderer.prototype.formatValueToDisplay = function(value) {
         $(this.eGui).html(value);
+      };
+      CustomRenderer.prototype.onFirstRender = function() {
+        return false;
       };
   
   
@@ -338,6 +354,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   
       var CheckboxRenderer = function() {}
         CheckboxRenderer.prototype = new CustomRenderer();
+        
         CheckboxRenderer.prototype.formatValueToDisplay = function (value) {
           var _this = this;
           var checked = ''; 
@@ -359,60 +376,134 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       };
   
   
-      var StateBoxRenderer = function() {}
+      var StateBoxRenderer = function() {};
         StateBoxRenderer.prototype = new CustomRenderer();
-        StateBoxRenderer.prototype.formatValueToDisplay = function (value) {
-          var _this = this;
-          this.nullable = this.params.colDef.options.nullable
 
-          this.value = null ;
+        StateBoxRenderer.prototype.init = function (params) {
+          
+          var value = null;
+          this.params = params;
           if(typeof(value) === 'undefined') { //hack for getRowDataAndErrors , stopediting call format with value undefined
-            this.value = null;
+            value = null;
           }
           
-          if( this.params.colDef.field in this.params.data ) {
-            this.value = this.params.data[this.params.colDef.field];
+          if( params.colDef.field in params.data ) {
+            value = params.data[params.colDef.field];
           }
-          else if ('defaultValue' in this.params.colDef.schema ) {
-            if( this.params.colDef.schema.defaultValue != null || this.params.colDef.schema.defaultValue != '') {
-              this.value = parseInt(this.params.colDef.schema.defaultValue)
+          else if ('defaultValue' in params.colDef.schema ) {
+            if( params.colDef.schema.defaultValue != null && params.colDef.schema.defaultValue != '') {
+              value = parseInt(params.colDef.schema.defaultValue)
             }
-
           }
+          params.value = value;
+          
 
+         CustomRenderer.prototype.init.call(this, params);
+            
+        };
+        StateBoxRenderer.prototype.handleValueValidation = function(params, value) {
+            this.requiredValidation(params, value)
+        };
+        StateBoxRenderer.prototype.handleError = function(params) {
+          this.error = true;
+            $(params.eGridCell).addClass('ag-cell-error');
+    
+          var errorsColumn =  params.data['_errors'];
+    
+          if(!($.isArray(errorsColumn))) {
+            errorsColumn = [];
+          }
+          errorsColumn.push(params.colDef.field);
+          errorsColumn = errorsColumn.filter(function(elem, index, self) {
+              return index == self.indexOf(elem);
+          })
+          params.node.setDataValue('_errors', errorsColumn);
+    
+        };
+        StateBoxRenderer.prototype.onFirstRender = function (params) {
 
-          /*if ( 'defaultValue' in this.params.colDef.schema) {
-            if( this.params.colDef.schema.defaultValue != null) {
-              this.value = parseInt(this.params.colDef.schema.defaultValue)
+          var value = null;
+          this.params = params;
+          if(typeof(value) === 'undefined') { //hack for getRowDataAndErrors , stopediting call format with value undefined
+            value = null;
+          }
+          
+          if( params.colDef.field in params.data ) {
+            value = params.data[params.colDef.field];
+          }
+          else if ('defaultValue' in params.colDef.schema ) {
+            if( params.colDef.schema.defaultValue != null && params.colDef.schema.defaultValue != '') {
+              value = parseInt(params.colDef.schema.defaultValue)
             }
+          }
+          params.value = value;
+
+         // this.hardSetValue(params, value);
+          this.formatValueToDisplay(value);
+          this.requiredValidation(params, value)
+
+
+          return value;
+        };
+
+              //used only after comeback from editor!
+        StateBoxRenderer.prototype.refresh = function (params) {
+          // alert('refresh')
+          this.isEmptyRow = false;
+          this.eGui.innerHTML = '';
+          var value = this.handleValues(params);
+          this.hardSetValue(params, value);
+          this.handleValueValidation(params, value);
+        };
+
+        StateBoxRenderer.prototype.hardSetValue = function (params, value) {
+          switch(value) {
+            case 1 : {
+              params.value = params.data[params.colDef.field] = 1;
+              break;
+            }
+            case 0 : {
+              params.value = params.data[params.colDef.field] = 0;
+              break;
+            }
+            default : {
+              params.value = params.data[params.colDef.field] = null;
+              break;
+            }
+          }
+        };
+
+
+        StateBoxRenderer.prototype.formatValueToDisplay = function (value) {
+          // alert(value);
+          var _this = this;
+
+          if( this.params && this.params.colDef && this.params.options && this.params.colDef.options.nullable) {
+            this.nullable = this.params.colDef.options.nullable
           }
           else {
-            this.value = null
+            this.nullable = true;
           }
-          if(typeof(value) === 'undefined') { //hack for getRowDataAndErrors , stopediting call format with value undefined
-            this.value = null;
-          }
+         
     
-          if( this.params.colDef.field in this.params.data ) {
-            this.value = this.params.data[this.params.colDef.field];
-          }*/
-         // this.value = value;
-    
-          var input = document.createElement('input');
+          //input
+          var input = this.input = document.createElement('input');
           input.className ='form-control statebox';
           input.type = 'checkbox'
-          input.readonly = true;
-          if( !this.params.colDef.editable  ) {
-            input.setAttribute('disabled',true)
-          }
-          input.id= this.params.colDef.field+'_'+this.params.rowIndex
-    
+          // input.readonly = true;
+          input.id = this.params.colDef.field + '_' + this.params.rowIndex
+
+          //label
           var label = document.createElement('label');
           label.setAttribute('for', input.id);
           label.setAttribute('data_toggle', "tooltip");
+
+
+          if( !this.params.colDef.editable ) {
+            input.setAttribute('disabled', true)
+          }
     
-    
-          switch(this.value) {
+          switch(value) {
             case 1 : {
               input.checked = true;
               break;
@@ -426,53 +517,49 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
               break;
             }
           }
+
+
           //TODO if !editable cancel listener
           if( this.params.colDef.editable  ) {
-  
             label.onclick = function(e) {
-               // ... => false => indeterminate => true => ...
-               if( _this.nullable )  {
-                 switch(_this.value) {
-                   case 1 : { //de true on passe a false
-                     _this.value = 0;
-                     _this.params.data[_this.params.colDef.field] = 0;
-                     label.removeAttribute("onclick");
-                     break;
-                   }
-                   case 0 : {//de false on passe a indeterminate
-                     _this.value = null
-                     _this.params.data[_this.params.colDef.field] = null
-                      label.removeAttribute("onclick");
-                     break;
-                   }
-                   default : {// de indeterminate on passe a true
-                     _this.value = 1;
-                     _this.params.data[_this.params.colDef.field] = 1;
-                      label.removeAttribute("onclick");
-                     break;
-                   }
-                 }
-               }
-               else {
-                switch(_this.value) {
+              if( _this.nullable )  {
+                switch(_this.params.value) {
                   case 1 : { //de true on passe a false
-                    _this.value = 0;
-                    _this.params.data[_this.params.colDef.field] = 0;
-                    label.removeAttribute("onclick");
+                    input.checked = false;
+                    _this.hardSetValue(_this.params, 0);
                     break;
                   }
-                  default : {// de false on passe a true
-                    _this.value = 1;
-                    _this.params.data[_this.params.colDef.field] = 1;
-                     label.removeAttribute("onclick");
+                  case 0 : {//de false on passe a indeterminate
+                    input.indeterminate = true;
+                    _this.hardSetValue(_this.params, null);
+                    break;
+                  }
+                  default : {// de indeterminate on passe a true
+                    input.checked = true;
+                    _this.hardSetValue(_this.params, 1);
                     break;
                   }
                 }
-      
-               }
+              }
+              else {
+               switch(_this.params.value) {
+                 case 1 : { //de true on passe a false
+                    input.checked = false;
+                  _this.hardSetValue(_this.params, 0);
+                  break;
+                 }
+                 default : {// de false on passe a true
+                  input.checked = true;
+                  _this.hardSetValue(_this.params, 1);
+                   break;
+                 }
+               }    
+              }               
+              label.removeAttribute("onclick");
             }
           }
-      
+
+
          $(this.eGui).html(input)
          $(this.eGui).append(label)
         };
