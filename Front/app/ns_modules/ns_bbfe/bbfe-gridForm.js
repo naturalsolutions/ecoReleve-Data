@@ -196,6 +196,8 @@ define([
 
 
     getValue: function() {
+      this.gridView.gridOptions.api.stopEditing(false);
+      this.gridView.gridOptions.api.refreshView();
       var rowDataAndErrors = this.gridView.getRowDataAndErrors();
 
       if(rowDataAndErrors.errors.length){
