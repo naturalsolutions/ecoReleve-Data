@@ -170,7 +170,7 @@ define([
           continue;
         }
         var colDef = {
-          editable: this.editable,
+          editable: field.editable,
           field: field.name,
           headerName: field.title,
           type: field.type,

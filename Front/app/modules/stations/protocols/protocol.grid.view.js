@@ -154,7 +154,7 @@ define([
           }
 
           var colDef = {
-            editable: editable,
+            editable: field.editable,
             field: field.name,
             headerName: field.title,
             type: field.type,
