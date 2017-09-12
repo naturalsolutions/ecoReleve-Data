@@ -254,7 +254,10 @@ define([
     SelectEditor.prototype = new CustomEditor();
 		SelectEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new SelectPicker(options);
-		  this.element = this.bbfe.render();
+			this.element = this.bbfe.render();
+			if(this.element.value instanceof Object){
+				this.element.value = this.element.value.value;
+			}
 		};
 
 		SelectEditor.prototype.afterGuiAttached = function () {
@@ -263,10 +266,7 @@ define([
 
 
 		SelectEditor.prototype.getValue = function(){
-			return {
-				value: this.element.getValue(),
-				displayValue: this.element.$el.find('option:selected').text(),
-			}
+			return this.element.getValue();
 		};
 
 

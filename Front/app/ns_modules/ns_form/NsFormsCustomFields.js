@@ -69,7 +69,7 @@ define([
 				}
 		
 				this.nullable = true;//default nullable so 3 state
-				if ('nullable' in options.schema.options) {
+				if (options.schema && options.schema.options && 'nullable' in options.schema.options) {
 					this.nullable = options.schema.options.nullable
 				}
 
@@ -94,7 +94,7 @@ define([
 				// _this.form.fields[_this.key].validate();
 			//	_this.validate();
 				});
-				this.$label.tooltipster({
+				/*this.$label.tooltipster({
 										theme : "js-custom-tooltipster",
 										//parent: this.$el,
 										autoclose : true,
@@ -110,7 +110,7 @@ define([
 										},
 										trackOrigin : true,
 										interactive : true
-										});
+										});*/
 				if( this.schema.editable) {
 					this.$label.prop('tabindex',"0");
 				}
@@ -166,14 +166,14 @@ define([
 						error = getValidator(validator)(value, formValues);
 						if (typeof(error) != 'undefined') {
 						_this.$input.addClass('error');
-						_this.$label.tooltipster('content',"Cannot be null");
-						_this.$label.tooltipster('open');
+					/*	_this.$label.tooltipster('content',"Cannot be null");
+						_this.$label.tooltipster('open');*/
 						}
 					else {
 						if (_this.$input.hasClass('error')  ) {
 							_this.$input.removeClass('error');
 							//_this.$label.tooltipster('destroy')
-							_this.$label.tooltipster('close');
+							//_this.$label.tooltipster('close');
 						}
 					}
 						return error ? false : true;

@@ -42,6 +42,7 @@ define([
 
     className: 'sub-grid-form' ,
     addRow: function(){
+      this.gridView.gridOptions.api.stopEditing(false);
       this.gridView.gridOptions.api.setSortModel({});
       this.gridView.gridOptions.api.addItems([{}]);
       this.$el.trigger('change');
@@ -170,7 +171,7 @@ define([
           continue;
         }
         var colDef = {
-          editable: this.editable,
+          editable: field.editable,
           field: field.name,
           headerName: field.title,
           type: field.type,
@@ -196,6 +197,8 @@ define([
 
 
     getValue: function() {
+      this.gridView.gridOptions.api.stopEditing(false);
+      this.gridView.gridOptions.api.refreshView();
       var rowDataAndErrors = this.gridView.getRowDataAndErrors();
 
       if(rowDataAndErrors.errors.length){
