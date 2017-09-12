@@ -1,0 +1,18 @@
+UPDATE [dbo].[ModuleForms]
+   SET [DefaultValue] = '0'
+ WHERE [InputType] = 'Statebox'
+GO
+
+UPDATE [dbo].[ModuleForms]
+   SET [DefaultValue] = '1'
+ WHERE 
+ [InputType] = 'Statebox'
+ AND [Name] like 'identity_sure'
+ AND TypeObj in ( select id from ProtocoleType p where p.Name in ('vertebrate_group' , 'Track_clue'))
+ GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('141_conf_default_value_for_statebox',GETDATE(),(SELECT db_name()))
+
+
+GO
