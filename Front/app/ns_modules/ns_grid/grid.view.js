@@ -99,11 +99,12 @@ define([
       this.gridOptions = {
         enableSorting: true,
         enableColResize: true,
-        editType: 'fullRow',
+        //editType: 'fullRow',
         rowHeight: 34,
         suppressNoRowsOverlay: true,
         headerHeight: 30,
         suppressRowClickSelection: true,
+        stopEditingWhenGridLosesFocus: true,
         onRowSelected: this.onRowSelected.bind(this),
         onDragStarted : this.onDragStarted.bind(this),
         onDragStopped: this.onDragStopped.bind(this),
@@ -297,7 +298,40 @@ define([
         }
       }
         col.comparator = comparator;
+        col.onCellValueChanged = function(event){
 
+          var column = event.colDef.field;
+          if(column == '_errors' ) { //skip col errors
+            return;
+          }
+
+          if( typeof(event.oldValue)==='undefined' ) { // no old value
+            if(event.newValue instanceof Object && !event.newValue.value) { // but we can have empty value like when leaving focus '' 
+                return;
+              }
+            if(!event.newValue) {
+              return;
+            }
+            window.formInEdition.form['.js-obs-form'] = { "formChange" :true}
+          }
+
+          var newValue, oldValue;
+          if(event.newValue instanceof Object){
+            newValue = event.newValue.value;
+          } else {
+            newValue = event.newValue;
+          }
+          if(event.oldValue instanceof Object){
+            oldValue = event.oldValue.value;
+          } else {
+            oldValue = event.oldValue;
+          }
+
+          if(newValue !== oldValue){
+            window.formInEdition.form['.js-obs-form'] = { "formChange" :true}
+          }
+        }
+        
         if(col.field == 'FK_ProtocoleType'){
           col.hide = true;
           return;
@@ -1124,7 +1158,7 @@ define([
           }
       };
 
-      AgGrid.PaginationController.prototype.createTemplate = function () {
+     /* AgGrid.PaginationController.prototype.createTemplate = function () {
           var localeTextFunc = this.gridOptionsWrapper.getLocaleTextFunc();
           var template = Backbone.Marionette.Renderer.render('app/ns_modules/ns_grid/pagination.tpl.html');
           return template
@@ -1136,7 +1170,7 @@ define([
               .replace('[PREVIOUS]', localeTextFunc('previous', 'Previous'))
               .replace('[NEXT]', localeTextFunc('next', 'Next'))
               .replace('[LAST]', localeTextFunc('last', 'Last'));
-      };
+      };*/
 
       AgGrid.extended = true;
     },

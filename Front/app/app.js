@@ -250,6 +250,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
             //         }
             //     });
           // }
+           // if (typeof(window.formInEdition['']))
               if(indexMax-urlChangeMax<=0){
                 window.formInEdition = {};
               }
