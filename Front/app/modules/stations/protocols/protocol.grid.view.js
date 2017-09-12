@@ -54,16 +54,24 @@ define([
         text: 'Please fix error before save your data'
       };
       
-      window.swal(opt, 'warning', null, false);
+      window.swal(
+        opt,
+        'warning',
+        null,
+        false);
     },
 
     saveObs: function() {
       var _this = this;
+      var nbVirtualObs = 0;
+      this.gridView.gridOptions.api.forEachNode( function() {
+        nbVirtualObs+=1;
+      });
       var nbObs = this.gridView.getRowDataAndErrors();//.length
       nbObs = nbObs.rowData.length
       var nbObsDeleted = this.gridView.removeEmptyRow();
 
-      if( (nbObs - nbObsDeleted) > 0 ) {
+      if( (nbVirtualObs - nbObsDeleted) > 0 ) {
         var rowDataAndErrors = this.gridView.getRowDataAndErrors();
       
 
@@ -100,7 +108,11 @@ define([
           text: reponse.responseText
         };
         
-        window.swal(opt, 'warning', null, false);
+        window.swal(
+            opt,
+           'warning',
+            null,
+           false);
       });
     }
     else {
@@ -109,8 +121,14 @@ define([
         text: 'Sorry but there is nothing to save'
       };
       
-      window.swal(opt, 'warning', null, false);
-      this.addRow();
+      window.swal(
+          opt,
+         'warning',
+          null,
+          false);
+      
+      this.toggleEditionMode();
+      this.hardRefresh();
     }
     },
 
@@ -193,7 +211,7 @@ define([
     onShow: function(){
       //debbug
       //this.$el.find('.js-btn-form').toggleClass('hide');
-
+      var _this = this;
       var rowData = null;
       if(!(this.model.get('obs').length)){
         this.toggleEditionMode();
@@ -212,6 +230,11 @@ define([
           singleClickEdit : true,
           rowData: rowData,
           rowSelection: (this.editable)? 'multiple' : '',
+          onRowDataChanged : function() {
+            if( _this.editable) {
+              _this.gridView.gridOptions.api.addItems([{}]);
+            }
+          }
         },
         noResizeToFit: true
       }));
