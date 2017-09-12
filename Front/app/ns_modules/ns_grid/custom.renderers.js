@@ -478,7 +478,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           // alert(value);
           var _this = this;
 
-          if( this.params && this.params.colDef && this.params.options && this.params.colDef.options.nullable) {
+          if( this.params && this.params.colDef && this.params.colDef.options && 'nullable' in this.params.colDef.options ) {
             this.nullable = this.params.colDef.options.nullable
           }
           else {
