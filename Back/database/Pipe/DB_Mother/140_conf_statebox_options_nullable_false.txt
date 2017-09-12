@@ -1,0 +1,10 @@
+UPDATE [dbo].[ModuleForms]
+   SET [Options] = '{ "nullable" : false }'
+ WHERE [InputType] = 'Statebox'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('140_conf_statebox_options_nullable_false',GETDATE(),(SELECT db_name()))
+
+
+GO
