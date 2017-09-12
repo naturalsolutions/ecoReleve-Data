@@ -180,6 +180,36 @@
  	"swal" : {
  		"savingForm-title" : "Exit form",
  		"savingForm-content" : "Current form is not yet saved. Are you sure to quit without saving it?"
- 	}
+ 	},
+	"aggrid" : {
+		"filter" : {
+			"type":{
+				"EQUALS" : "Equals",
+				"CONTAINS" : "Contains",
+				"NOT_CONTAINS" : "Not Contains",
+				"NOT_EQUAL" : "Not equal",
+				"NOT_EQUALS" : "Not equals",
+				"STARTS_WITH" : "Start with",
+				"ENDS_WITH" : "End with",
+				"LESS_THAN" : "Less than",
+				"LESS_THAN_OR_EQUAL" : "Less than or equal",
+				"GREATER_THAN" : "Greater than",
+				"GREATER_THAN_OR_EQUAL" : "Greater than or equal",
+				"IN_RANGE" : "In range",
+				"IN" : "In"
+			},
+			"placeholder":{
+				"number" : "A number",
+				"numberTo" : "To number",
+				"text" : "word or word1;word2;etc",
+				"date" : "Beginning date",
+				"dateTo" : "End date"
+			},
+			"btn" : {
+				"apply" : "Apply",
+				"clear" : "Clear"
+			}
+		}
+	}
 
 }

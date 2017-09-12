@@ -177,5 +177,35 @@
  	"swal" : {
  		"savingForm-title" : "Enregistrement du formulaire",
  		"savingForm-content" : "Ce formulaire n'est pas encore enregistré. Voulez vous continuer sans le sauvegarder?"
- 	}
+ 	},
+	"aggrid" : {
+		"filter" : {
+			"type":{
+				"EQUALS" : "Egal",
+				"CONTAINS" :"Contient",
+				"NOT_CONTAINS" :"Ne contient pas",
+				"NOT_EQUAL" : "Différent de",
+				"NOT_EQUALS" : "Différent de",
+				"STARTS_WITH" : "Commence par",
+				"ENDS_WITH" : "Finit par",
+				"LESS_THAN" : "Plus petit que",
+				"LESS_THAN_OR_EQUAL" : "Plus petit ou égal à",
+				"GREATER_THAN" : "Plus grand que",
+				"GREATER_THAN_OR_EQUAL" : "Plus grand ou égal à",
+				"IN_RANGE" : "Entre",
+				"IN" : "Parmis"
+			},
+			"placeholder":{
+				"number" : "Un nombre",
+				"numberTo" : "Jusqu'au nombre",
+				"text" : "mot or mot1;mot2;etc",
+				"date" : "Beginning date",
+				"dateTo" : "End date"
+			},
+			"btn" : {
+				"apply" : "Appliquer",
+				"clear" : "Nettoyer"
+			}
+		}
+	}
 }

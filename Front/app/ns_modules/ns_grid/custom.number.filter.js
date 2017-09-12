@@ -1,282 +1,251 @@
-/**
- * ag-grid - Advanced Data Grid / Data Table supporting Javascript / React / AngularJS / Web Components
- * @version v5.4.0
- * @link http://www.ag-grid.com/
- * @license MIT
- */
 
- define([
- ], function() {
+define([
+  'i18n'
+], function() {
+  var clear ='Clear';
+  var EQUALS = 'equals';
+  var NOT_EQUAL = 'notEqual';
+  var LESS_THAN = 'lessThan';
+  var LESS_THAN_OR_EQUAL = 'lessThanOrEqual';
+  var GREATER_THAN = 'greaterThan';
+  var GREATER_THAN_OR_EQUAL = 'greaterThanOrEqual';
+  var IN_RANGE = 'inRange';
+  var template = '<div>' +
+      '<div>' +
+      '<select class="ag-filter-select form-control input-sm" id="filterType">' +
+      '<option value="'+EQUALS+'">'+i18n.translate('aggrid.filter.type.EQUALS')+'</option>' +
+      '<option value="'+NOT_EQUAL+'">'+i18n.translate('aggrid.filter.type.NOT_EQUAL')+'</option>' +
+      '<option value="'+LESS_THAN+'">'+i18n.translate('aggrid.filter.type.LESS_THAN')+'</option>' +
+      '<option value="'+LESS_THAN_OR_EQUAL+'">'+i18n.translate('aggrid.filter.type.LESS_THAN_OR_EQUAL')+'</option>' +
+      '<option value="'+GREATER_THAN+'">'+i18n.translate('aggrid.filter.type.GREATER_THAN')+'</option>' +
+      '<option value="'+GREATER_THAN_OR_EQUAL+'">'+i18n.translate('aggrid.filter.type.GREATER_THAN_OR_EQUAL')+'</option>' +
+      '<option value="'+IN_RANGE+'">'+i18n.translate('aggrid.filter.type.IN_RANGE')+'</option>' +
+      '</select>' +
+      '</div>' +
+      '<div>' +
+      '<input class="ag-filter-filter form-control input-sm" id="filterText" type="text" placeholder="'+i18n.translate('aggrid.filter.placeholder.number')+'"/>' +
+      '<div class="ag-filter-number-to" id="filterNumberToPanel">' +
+      '<input class="ag-filter-filter form-control input-sm hide" id="filterToText" type="text" placeholder="'+i18n.translate('aggrid.filter.placeholder.numberTo')+'"/>' +
+      '</div>' +
+      '</div>' +
+      '<div class="ag-filter-apply-panel" id="applyPanel">' +
+      '<button type="button" class="btn btn-block" id="applyButton">'+i18n.translate('aggrid.filter.btn.apply')+'</button>' +
+      '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="reneco reneco-close"></span> '+i18n.translate('aggrid.filter.btn.clear')+'</button>' +
+      '</div>' +
+      '</div>';
 
-   'use strict';
+  'use strict';
+  function NumberFilter() {
+  }
+  NumberFilter.EQUALS = 'equals'; // 1;
+  NumberFilter.NOT_EQUAL = 'notEqual'; //2;
+  NumberFilter.LESS_THAN = 'lessThan'; //3;
+  NumberFilter.LESS_THAN_OR_EQUAL = 'lessThanOrEqual'; //4;
+  NumberFilter.GREATER_THAN = 'greaterThan'; //5;
+  NumberFilter.GREATER_THAN_OR_EQUAL = 'greaterThanOrEqual'; //6;
+  NumberFilter.IN_RANGE = 'inRange'; //7
 
-    //var utils_1 = require('../utils');
 
-    var utils_1 = {
-        Utils: {}
-    };
+  NumberFilter.prototype.init = function(params){
+    this.filterParams = params;
+    this.applyActive = params.apply === true;
+    this.newRowsActionKeep = params.newRowsAction === 'keep';
+    this.filterNumber = null;
+    this.filterType = NumberFilter.EQUALS;
+    this.createGui();
+  };
 
-    utils_1.Utils.loadTemplate = function (template) {
-        var tempDiv = document.createElement("div");
-        tempDiv.innerHTML = template;
-        return tempDiv.firstChild;
-    };
+  NumberFilter.prototype.onNewRowsLoaded = function () {
+      if (!this.newRowsActionKeep) {
+          this.setType(NumberFilter.EQUALS);
+          this.setFilter(null);
+      }
+  };
 
-    utils_1.Utils.addChangeListener = function (element, listener) {
-        element.addEventListener("changed", listener);
-        element.addEventListener("paste", listener);
-        element.addEventListener("input", listener);
-        // IE doesn't fire changed for special keys (eg delete, backspace), so need to
-        // listen for this further ones
-        element.addEventListener("keydown", listener);
-        element.addEventListener("keyup", listener);
-    };
-
-    utils_1.Utils.removeElement = function (parent, cssSelector) {
-        this.removeFromParent(parent.querySelector(cssSelector));
-    };
-
-    utils_1.Utils.makeNull = function (value) {
-            if (value === null || value === undefined || value === "") {
-                return null;
-            }
-            else {
-                return value;
-            }
-        };
-var clear = 'Clear';
-var template = '<div>' +
-    '<div>' +
-    '<select class="ag-filter-select form-control input-sm" id="filterType">' +
-    '<option value="1">[EQUALS]</option>' +
-    '<option value="2">[NOT EQUAL]</option>' +
-    '<option value="3">[LESS THAN]</option>' +
-    '<option value="4">[LESS THAN OR EQUAL]</option>' +
-    '<option value="5">[GREATER THAN]</option>' +
-    '<option value="6">[GREATER THAN OR EQUAL]</option>' +
-    '<option value="7">In</option>' +
-    '</select>' +
-    '</div>' +
-    '<div>' +
-    '<input class="ag-filter-filter form-control input-sm" id="filterText" type="text" placeholder="[FILTER...]"/>' +
-    '</div>' +
-    '<div class="ag-filter-apply-panel" id="applyPanel">' +
-    '<button type="button" class="btn btn-block" id="applyButton">[APPLY FILTER]</button>' +
-    '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="reneco reneco-close"></span> ' + clear + '</button>' +
-    '</div>' +
-    '</div>';
-var EQUALS = 1;
-var NOT_EQUAL = 2;
-var LESS_THAN = 3;
-var LESS_THAN_OR_EQUAL = 4;
-var GREATER_THAN = 5;
-var GREATER_THAN_OR_EQUAL = 6;
-var IN = 7;
-return (function () {
-    function NumberFilter() {
+  NumberFilter.prototype.setFilter = function(filter) {
+    if (filter !== null && !(typeof filter === 'number')) {
+        filter = parseFloat(filter);
     }
-    NumberFilter.prototype.init = function (params) {
-        this.filterParams = params.filterParams;
-        this.applyActive = this.filterParams && this.filterParams.apply === true;
-        this.filterChangedCallback = params.filterChangedCallback;
-        this.filterModifiedCallback = params.filterModifiedCallback;
-        this.localeTextFunc = params.localeTextFunc;
-        this.valueGetter = params.valueGetter;
-        this.createGui();
-        this.filterNumber = null;
-        this.filterType = EQUALS;
-        this.createApi();
-    };
-    NumberFilter.prototype.onNewRowsLoaded = function () {
-        var keepSelection = this.filterParams && this.filterParams.newRowsAction === 'keep';
-        if (!keepSelection) {
-            this.api.setType(EQUALS);
-            this.api.setFilter(null);
-        }
-    };
+    this.filterNumber = filter;
+    this.eFilterTextField.value = filter;
+  }
 
-    NumberFilter.prototype.afterGuiAttached = function () {
-        this.eFilterTextField.focus();
-        this.cleanBtn = this.eGui.querySelector('#cleanBtn');
-        this.cleanBtn.addEventListener('click', this.clean.bind(this));
-    };
+  NumberFilter.prototype.setFilterTo = function(filter) {
+    if (filter !== null && !(typeof filter === 'number')) {
+        filter = parseFloat(filter);
+    }
+    this.filterNumberTo = filter;
+    this.eFilterToTextField.value = filter;
+  }
 
-    NumberFilter.prototype.clean = function(){
-        $(this.eGui).find('input').val('');
-        this.onFilterChanged();
-        this.filterChangedCallback();
-    };
 
-    NumberFilter.prototype.doesFilterPass = function (node) {
+  NumberFilter.prototype.setType = function (type) {
+      this.filterType = type;
+      this.eTypeSelect.value = type;
+  };
 
-        if (this.filterNumber === null) {
-            return true;
-        }
-        var value = this.valueGetter(node);
-        if (!value && value !== 0) {
-            return false;
-        }
-        var valueAsNumber;
-        if (typeof value === 'number') {
-            valueAsNumber = value;
-        }
-        else {
-            valueAsNumber = parseFloat(value);
-        }
-        switch (this.filterType) {
-            case EQUALS:
-                return valueAsNumber === this.filterNumber;
-            case LESS_THAN:
-                return valueAsNumber < this.filterNumber;
-            case GREATER_THAN:
-                return valueAsNumber > this.filterNumber;
-            case LESS_THAN_OR_EQUAL:
-                return valueAsNumber <= this.filterNumber;
-            case GREATER_THAN_OR_EQUAL:
-                return valueAsNumber >= this.filterNumber;
-            case NOT_EQUAL:
-                return valueAsNumber != this.filterNumber;
-            case IN:
-                var tab = this.filterText.split(',');
-                if(tab.length <= 1){
-                    tab = this.filterText.split(';');
-                }
-                if(tab.length <= 1){
-                    tab = this.filterText.split(' ');
-                }
+  NumberFilter.prototype.getGui = function(){
+    return   this.templateDiv;
+  }
 
-                for (var i=0; i< tab.length; i++){
-                    if ((tab[i].toLowerCase() == valueAsNumber)) {
-                        return true;
-                    }
-                }
-                return false;
-            default:
-                // should never happen
-                console.warn('invalid filter type ' + this.filterType);
-                return false;
-        }
-    };
-    NumberFilter.prototype.getGui = function () {
-        return this.eGui;
-    };
-    NumberFilter.prototype.isFilterActive = function () {
-        return this.filterNumber !== null;
-    };
-    NumberFilter.prototype.createTemplate = function () {
-        return template
-            .replace('[FILTER...]', this.localeTextFunc('filterOoo', 'Filter...'))
-            .replace('[EQUALS]', this.localeTextFunc('equals', 'Equals'))
-            .replace('[LESS THAN]', this.localeTextFunc('lessThan', 'Less than'))
-            .replace('[GREATER THAN]', this.localeTextFunc('greaterThan', 'Greater than'))
-            .replace('[LESS THAN OR EQUAL]', this.localeTextFunc('lessThanOrEqual', 'Less than or equal'))
-            .replace('[GREATER THAN OR EQUAL]', this.localeTextFunc('greaterThanOrEqual', 'Greater than or equal'))
-            .replace('[NOT EQUAL]', this.localeTextFunc('notEqual', 'Not equal'))
-            .replace('[APPLY FILTER]', this.localeTextFunc('applyFilter', 'Apply Filter'));
-    };
-    NumberFilter.prototype.createGui = function () {
-        this.eGui = utils_1.Utils.loadTemplate(this.createTemplate());
-        this.eFilterTextField = this.eGui.querySelector("#filterText");
-        this.eTypeSelect = this.eGui.querySelector("#filterType");
-        utils_1.Utils.addChangeListener(this.eFilterTextField, this.onFilterChanged.bind(this));
-        this.eTypeSelect.addEventListener("change", this.onTypeChanged.bind(this));
-        this.setupApply();
-    };
-    NumberFilter.prototype.setupApply = function () {
-        var _this = this;
-        if (this.applyActive) {
-            this.eApplyButton = this.eGui.querySelector('#applyButton');
-            this.eApplyButton.addEventListener('click', function () {
-                _this.filterChangedCallback();
-            });
-        }
-        else {
-            utils_1.Utils.removeElement(this.eGui, '#applyPanel');
-        }
-    };
-    NumberFilter.prototype.onTypeChanged = function () {
-        this.filterType = parseInt(this.eTypeSelect.value);
-        this.filterChanged();
-    };
-    NumberFilter.prototype.filterChanged = function () {
-        this.filterModifiedCallback();
-        if (!this.applyActive) {
-            this.filterChangedCallback();
-        }
-    };
-    NumberFilter.prototype.onFilterChanged = function () {
-        var filterText = utils_1.Utils.makeNull(this.eFilterTextField.value);
-        //mjaouen
-        this.filterText = filterText;
-        //
-        if (filterText && filterText.trim() === '') {
-            filterText = null;
-        }
-        var newFilter;
-        if (filterText !== null && filterText !== undefined) {
-            newFilter = parseFloat(filterText);
-        }
-        else {
-            newFilter = null;
-        }
-        if (this.filterNumber !== newFilter) {
-            this.filterNumber = newFilter;
-            this.filterChanged();
-        }
-    };
-    NumberFilter.prototype.createApi = function () {
-        var that = this;
-        this.api = {
-            EQUALS: EQUALS,
-            NOT_EQUAL: NOT_EQUAL,
-            LESS_THAN: LESS_THAN,
-            GREATER_THAN: GREATER_THAN,
-            LESS_THAN_OR_EQUAL: LESS_THAN_OR_EQUAL,
-            GREATER_THAN_OR_EQUAL: GREATER_THAN_OR_EQUAL,
-            setType: function (type) {
-                that.filterType = type;
-                that.eTypeSelect.value = type;
-            },
-            setFilter: function (filter) {
-                filter = utils_1.Utils.makeNull(filter);
-                if (filter !== null && !(typeof filter === 'number')) {
-                    filter = parseFloat(filter);
-                }
-                that.filterNumber = filter;
-                that.eFilterTextField.value = filter;
-            },
-            getType: function () {
-                return that.filterType;
-            },
-            getFilter: function () {
-                return that.filterNumber;
-            },
-            getModel: function () {
-                if (that.isFilterActive()) {
-                    return {
-                        type: that.filterType,
-                        filter: that.filterNumber
-                    };
-                }
-                else {
-                    return null;
-                }
-            },
-            setModel: function (dataModel) {
-                if (dataModel) {
-                    this.setType(dataModel.type);
-                    this.setFilter(dataModel.filter);
-                }
-                else {
-                    this.setFilter(null);
-                }
-            }
+  NumberFilter.prototype.isFilterActive = function(){
+    if (this.filterType === NumberFilter.IN_RANGE) {
+        return this.filterNumber != null && this.filterNumberTo != null;
+    }
+    else {
+        return this.filterNumber != null;
+    }
+  }
+
+  NumberFilter.prototype.getModel = function() {
+    if (this.isFilterActive()) {
+        return {
+            type: this.filterType,
+            filter: this.filterNumber,
+            filterTo: this.filterTo
         };
-    };
-    NumberFilter.prototype.getApi = function () {
-        return this.api;
-    };
-    return NumberFilter;
-})();
+    }
+    else {
+        return null;
+    }
+  }
 
+  NumberFilter.prototype.doesFilterPass = function(params) {
+    if (this.filterNumber === null) {
+        return true;
+    }
+    var value = this.filterParams.valueGetter(params.node);
+    if (!value && value !== 0) {
+        return false;
+    }
+    var valueAsNumber;
+    if (typeof value === 'number') {
+        valueAsNumber = value;
+    }
+    else {
+        valueAsNumber = parseFloat(value);
+    }
+    switch (this.filterType) {
+        case NumberFilter.EQUALS:
+            return valueAsNumber === this.filterNumber;
+        case NumberFilter.LESS_THAN:
+            return valueAsNumber < this.filterNumber;
+        case NumberFilter.GREATER_THAN:
+            return valueAsNumber > this.filterNumber;
+        case NumberFilter.LESS_THAN_OR_EQUAL:
+            return valueAsNumber <= this.filterNumber;
+        case NumberFilter.GREATER_THAN_OR_EQUAL:
+            return valueAsNumber >= this.filterNumber;
+        case NumberFilter.NOT_EQUAL:
+            return valueAsNumber != this.filterNumber;
+        case NumberFilter.IN_RANGE:
+            return valueAsNumber >= this.filterNumber && valueAsNumber <= this.filterNumberTo;
+        default:
+            // should never happen
+            console.warn('invalid filter type ' + this.filterType);
+            return false;
+    }
+  }
+
+  NumberFilter.prototype.setModel = function(model) {
+    if (model) {
+      this.setType(model.type);
+      this.setFilter(model.filter);
+      this.setFilterTo(model.filterTo);
+    }
+    else {
+        this.setType(NumberFilter.EQUALS);
+        this.setFilter(null);
+        this.setFilterTo(null);
+    }
+    this.setVisibilityOnDateToPanel();
+  }
+
+
+  NumberFilter.prototype.createGui = function() {
+    this.templateDiv = document.createElement("div")
+    this.templateDiv.innerHTML = template;
+    this.eFilterTextField = this.getGui().querySelector("#filterText");
+    this.eFilterToTextField = this.getGui().querySelector("#filterToText");
+    this.eTypeSelect = this.getGui().querySelector("#filterType");
+    this.cleanBtn =  this.getGui().querySelector('#cleanBtn');
+    this.eFilterTextField.addEventListener('input', this.onFilterChanged.bind(this));
+    this.eFilterToTextField.addEventListener('input', this.onFilterChanged.bind(this));
+    this.eTypeSelect.addEventListener('change', this.onTypeChanged.bind(this));
+    this.cleanBtn.addEventListener('click', this.clean.bind(this));
+    this.setupApply();
+  };
+
+  NumberFilter.prototype.onTypeChanged = function () {
+      this.filterType = this.eTypeSelect.value;
+      this.setVisibilityOnDateToPanel();
+      this.filterChanged();
+  };
+
+  NumberFilter.prototype.setupApply = function() {
+    var _this = this;
+    if (this.applyActive) {
+      this.eApplyButton = this.getGui().querySelector('#applyButton');
+      this.eApplyButton.addEventListener('click', function() {
+        _this.filterParams.filterChangedCallback();
+      });
+    }
+  };
+
+  NumberFilter.prototype.onFilterChanged = function() {
+      var newFilter = parseFloat(this.eFilterTextField.value);
+      var newFilterTo = parseFloat(this.eFilterToTextField.value);
+
+      if( isNaN(newFilter) ) {
+        newFilter = null;
+        this.eFilterTextField.value = "";
+      }
+      if( isNaN(newFilterTo) ) {
+        newFilterTo = null;
+        this.eFilterToTextField.value= "";
+      }
+
+      if (this.filterNumber !== newFilter || this.filterNumberTo !== newFilterTo) {
+        this.filterNumber = newFilter;
+        this.filterNumberTo = newFilterTo;
+        this.filterChanged();
+        this.setVisibilityOnDateToPanel();
+      }
+  };
+
+  NumberFilter.prototype.filterChanged = function() {
+    this.filterParams.filterModifiedCallback();
+    if (!this.applyActive) {
+        this.filterParams.filterChangedCallback();
+    }
+  };
+
+  NumberFilter.prototype.afterGuiAttached = function (params) {
+      this.eFilterTextField.focus();
+
+  };
+
+  NumberFilter.prototype.clean = function(){
+      this.eFilterTextField.value = '';
+      this.eFilterToTextField.value = '';
+      this.onFilterChanged();
+      this.filterParams.filterChangedCallback();
+  }
+
+  NumberFilter.prototype.setVisibilityOnDateToPanel = function () {
+      var visible = this.filterType === NumberFilter.IN_RANGE;
+      if( visible ) {
+        if( this.eFilterToTextField.classList.contains('hide') ) {
+          this.eFilterToTextField.classList.remove('hide');
+        }
+      }
+      else {
+        if( !this.eFilterToTextField.classList.contains('hide') ) {
+          this.eFilterToTextField.classList.add('hide');
+        }
+      }
+  };
+
+
+  return NumberFilter;
 });

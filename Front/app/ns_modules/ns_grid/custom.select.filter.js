@@ -1,174 +1,165 @@
 define([
-    'jquery',
-], function($) {
+    'i18n'
+], function() {
+
+    var template = '<div>' +
+        '<div class="js-select">' +
+        '<select class="ag-filter-filter js-select-filter form-control input-sm" name="selectedVal">' +
+        '<option value="-1"></option>'+
+        '</select>' +
+        '</div>' +
+        '<div class="ag-filter-apply-panel" id="applyPanel">' +
+        '<button class="btn btn-block" type="button" id="applyButton">'+i18n.translate('aggrid.filter.btn.apply')+'</button>' +
+        '<div class="bottom clearfix" />' +
+        '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="reneco reneco-close"></span> '+i18n.translate('aggrid.filter.btn.clear')+'</button>' +
+        '</div>' +
+        '</div>';
 
     'use strict';
 
-    function SelectFilter() {}
+    function SelectFilter() {
 
-    SelectFilter.prototype = {
-        init: function(params) {
-            if (typeof(params.filterParams) === 'undefined' || typeof(params.filterParams.selectList) === 'undefined') {
-                console.error("Select filter need filterParams : { selectList : [{value : '' , label: ' ' }] } ");
-                return null;
-            }
-            var _this = this;
-            var apply = "Apply Filter";
-            var clear = "Clear";
+    };
 
-            this.eGui = document.createElement('div');
-            this.eGui.innerHTML =
-                '<div class="js-select">' +
-                '<select class="ag-filter-filter js-select-filter form-control input-sm" name="selectedVal">' +
-                '<option value=""></option>' +
-                '</select>' +
-                '</div>' +
-                '<div class="ag-filter-apply-panel" id="applyPanel">' +
-                '<button class="btn btn-block" type="button" id="applyButton">' + apply + '</button>' +
-                '<div class="bottom clearfix" />' +
-                '<button class="btn btn-link btn-xs pull-right" type="button" id="cleanBtn"><span class="reneco reneco-close"></span> ' + clear + '</button>' +
-                '</div>';
-            this.$eGui = $(this.eGui);
+    SelectFilter.prototype.init = function(params) {
+      
+        if (typeof(params) === 'undefined' || typeof(params.selectList) === 'undefined') {
+            console.error("Select filter need filterParams : { selectList : [{value : '' , label: ' ' }] } ");
+            return null;
+        }
 
+        this.filterParams = params;
+        this.applyActive = params.apply === true;
+        this.newRowsActionKeep = params.newRowsAction === 'keep';
+        this.filterSelect = null;
+        this.filterType = "EQUALS";
+        this.tabSelect = [];
+        this.createGui();
 
-            this.cleanBtn = this.eGui.querySelector('#cleanBtn');
-            this.$select = this.eGui.querySelector('.js-select-filter');
-            this.cleanBtn.addEventListener('click', this.dateClean.bind(this));
-            this.filterSelect = null;
+    };
 
-            this.applyActive = true;
-            this.filterChangedCallback = params.filterChangedCallback;
-            this.filterModifiedCallback = params.filterModifiedCallback;
-            this.valueGetter = params.valueGetter;
-            this.tabSelect = [];
-            this.params = params;
-            for (var i = 0; i < params.filterParams.selectList.length; i++) {
-                $(_this.$select).append('<option disabled value="' + params.filterParams.selectList[i].value + '">' + params.filterParams.selectList[i].label + '</option>')
-            }
+    SelectFilter.prototype.createGui = function() {
 
-            this.fillOptionsList();
+        var _this = this;
 
-            $(this.$select).on("mousedown", function(e) {
-                _this.fillOptionsList();
-            });
-            this.createGui();
-        },
+        this.templateDiv = document.createElement("div")
+        this.templateDiv.innerHTML = template;
+        this.eFilterSelectField = this.getGui().querySelector(".js-select-filter");
+        this.eFilterSelectField.addEventListener('change', this.onFilterChanged.bind(this));
+        for (var i = 0; i < this.filterParams.selectList.length; i++) {
+            var tmpElem = document.createElement("option");
+            tmpElem.setAttribute("value", this.filterParams.selectList[i].value);
+            tmpElem.textContent = this.filterParams.selectList[i].label;
+            this.eFilterSelectField.appendChild(tmpElem);
+        }
 
-        isPresent: function(tab, val) {
-            for (var j = 0; j < tab.length; j++) {
-                if (tab[j] === val) {
-                    return true;
-                }
-            }
-            return false;
-        },
+        this.cleanBtn = this.getGui().querySelector('#cleanBtn');
+        this.cleanBtn.addEventListener('click', this.clean.bind(this));
+        this.setupApply();
+    };
 
-        fillOptionsList() {
-            var tabUniqVal = [];
-            $(this.$select).find("option[value!='']").attr('disabled', true);
-            for (var i = 0; i < this.params.rowModel.rowsToDisplay.length; i++) {
-                var valeur = this.valueGetter(this.params.rowModel.rowsToDisplay[i]);
-                if (!this.isPresent(tabUniqVal, valeur)) {
-                    tabUniqVal.push(valeur);
-                    $(this.$select).find("option[value=" + valeur + "]").attr('disabled', false);
-                }
-            }
-        },
+    SelectFilter.prototype.getGui = function() {
+        return this.templateDiv;
+    };
 
-        dateClean: function() {
-            $(this.$select).val("");
+    SelectFilter.prototype.isFilterActive = function() {
+        return this.filterSelect != null;
+    };
 
-            this.onFilterChanged();
-            this.filterChangedCallback();
-            if ($('.ag-filter').length) {
-                $('body').trigger('click'); // simule un clique sur le body fermera le popup :p
-            }
-        },
+    SelectFilter.prototype.doesFilterPass = function(params) {
 
-        afterGuiAttached: function() {
-            var self = this;
-            $(this.$select).on("change", function(e) {
-                self.onFilterChanged();
-            })
-        },
+        var valTmp = this.filterParams.valueGetter(params.node);
 
-        isFilterValid: function() {
-            // var optSel = $(this.$select).val();
-            // var isValid = (optSel > 0)
-            // return isValid;
+        if (!this.filterSelect) {
             return true;
-        },
+        } else {
+            return (valTmp == this.filterSelect);
+        }
+    };
 
-        onFilterChanged: function() {
-            this.filterSelect = $(this.$select).val()
-            this.filterChanged();
-        },
+    SelectFilter.prototype.getModel = function() {
 
-        filterChanged: function() {
-            this.filterModifiedCallback();
-            if (!this.applyActive) {
-                this.filterChangedCallback();
-            }
-        },
-
-        getGui: function() {
-            return this.eGui;
-        },
-
-        createGui: function() {
-            this.setupApply();
-        },
-
-        isFilterActive: function() {
-            return this.filterSelect;
-            //  return this.filterDate && (this.filterDate.dateFrom || this.filterDate.dateTo);
-        },
-
-        setupApply: function() {
-            var _this = this;
-            if (this.applyActive) {
-                this.eApplyButton = this.eGui.querySelector('#applyButton');
-                this.eApplyButton.addEventListener('click', function() {
-                    if (_this.isFilterValid()) {
-                        _this.filterChangedCallback();
-                    }
-                });
-            }
-        },
-
-        getApi: function() {
-            var that = this;
+        if (this.isFilterActive()) {
             return {
-                getModel: function() {
-                    if (that.isFilterActive()) {
-                        return {
-                            type: 1,
-                            filter: that.filterSelect
-                        };
-                    } else {
-                        return null;
-                    }
-                },
-                setModel: function(model) {
-                    if (model) {
-                        this.setType(model.type);
-                        this.setFilter(model.filter);
-                    } else this.setFilter(null);
-                }
+                type: "EQUALS",
+                filter: this.filterSelect
             };
-        },
+        } else {
+            return null;
+        }
+    };
 
-        doesFilterPass: function(params) {
-            var valTmp = this.valueGetter(params);
+    SelectFilter.prototype.setupApply = function() {
 
-            if (!this.filterSelect) {
-                return true;
-            } else {
-                return (valTmp == this.filterSelect);
-            }
+        var _this = this;
+        if (this.applyActive) {
+            this.eApplyButton = this.getGui().querySelector('#applyButton');
+            this.eApplyButton.addEventListener('click', function() {
+                _this.filterParams.filterChangedCallback();
+            });
+        }
+    };
 
-        },
-    }
+    SelectFilter.prototype.setModel = function(model) {
+
+        if (model) {
+            this.setType(model.type);
+            this.setFilter(model.filter);
+        } else {
+            this.setFilter(null);
+        }
+    };
+
+    SelectFilter.prototype.setFilter = function(filter) {
+
+        if (filter) {
+            this.filterSelect = filter;
+        } else {
+            this.filterSelect = null;
+            this.eFilterSelectField.value = "";
+        }
+    };
+
+    SelectFilter.prototype.setType = function(type) {
+
+        this.filterType = type;
+        this.eTypeSelect.value = type;
+    };
+
+    SelectFilter.prototype.clean = function() {
+        this.eFilterSelectField.value = -1;
+        this.onFilterChanged();
+        this.filterParams.filterChangedCallback();
+    };
+
+    SelectFilter.prototype.onFilterChanged = function() {
+
+        var newFilter = this.eFilterSelectField.options[this.eFilterSelectField.selectedIndex].value;
+
+        if (newFilter === "-1") {
+            newFilter = null;
+            this.eFilterSelectField.value = -1;
+        };
+
+        if (this.filterSelect !== newFilter) {
+
+            var newLowerCase = newFilter ? newFilter.toLowerCase() : null;
+            var previousLowerCase = this.filterSelect ? this.filterSelect.toLowerCase() : null;
+            this.filterSelect = newFilter;
+            this.filterChanged();
+        }
+
+    };
+
+    SelectFilter.prototype.filterChanged = function() {
+
+        this.filterParams.filterModifiedCallback();
+        if (!this.applyActive) {
+            this.filterParams.filterChangedCallback();
+        }
+    };
+
+
 
     return SelectFilter;
 });
