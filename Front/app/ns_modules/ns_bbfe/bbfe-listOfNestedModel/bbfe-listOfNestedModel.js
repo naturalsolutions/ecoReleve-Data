@@ -97,7 +97,11 @@ define([
             }).render();
             this.forms.push(form);
             var labels = form.$el.find('label');
-            form.$el.addClass(this.options.schema.editorClass);
+
+            if (this.options.schema.editorClass.indexOf("form-control")==-1 ){
+
+                form.$el.addClass(this.options.schema.editorClass);
+            }
             _.each(labels, function(label){
                 if(label.innerText.trim().replace('*','') == ''){
                     $(label).remove();
