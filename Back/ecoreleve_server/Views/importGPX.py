@@ -36,7 +36,7 @@ def uploadFileGPX(request):
 
     insertData(session, dataFrame_to_insert, data[0]['FieldWorkers'])
 
-    if existing_dataFrame:
+    if existing_dataFrame is not None:
         existingStationName = list(existing_dataFrame['Name'])
     else:
         existingStationName = None
@@ -55,26 +55,26 @@ def formatData(data, request):
 
     for row in data:
         newRow = {}
-        newRow['LAT'] = row['latitude']
-        newRow['LON'] = row['longitude']
-        newRow['ELE'] = row['elevation']
-        newRow['precision'] = row['precision']
-        newRow['Place'] = row['Place']
-        newRow['timeZone'] = row['timeZone']
-        newRow['Name'] = row['name']
-        newRow['fieldActivityId'] = row['fieldActivity']
+        newRow['LAT'] = row.get('latitude', None)
+        newRow['LON'] = row.get('longitude', None)
+        newRow['ELE'] = row.get('elevation', None)
+        newRow['precision'] = row.get('precision', None)
+        newRow['Place'] = row.get('Place', None)
+        newRow['timeZone'] = row.get('timeZone', None)
+        newRow['Name'] = row.get('name', None)
+        newRow['fieldActivityId'] = row.get('fieldActivity', None)
         newRow['precision'] = 10
         newRow['creationDate'] = dateNow
         newRow['creator'] = request.authenticated_userid['iss']
         newRow['FK_StationType'] = 4
-        newRow['id'] = row['id']
-        newRow['NbFieldWorker'] = row['NbFieldWorker']
+        newRow['id'] = row.get('id', None)
+        newRow['NbFieldWorker'] = row.get('NbFieldWorker', None)
         newRow['StationDate'] = datetime.strptime(
-            row['waypointTime'], format_dt)
-        newRow['fieldActivityId'] = row['fieldActivity']
-        newRow['fileName'] = row['fileName']
+            row.get('waypointTime', None), format_dt)
+        newRow['fieldActivityId'] = row.get('fieldActivity', None)
+        newRow['fileName'] = row.get('fileName', None)
         newRow['StationDateTZ'] = datetime.strptime(
-            row['TZdate'], format_dt)
+            row.get('TZdate', None), format_dt)
         GPXdata.append(newRow)
 
     return GPXdata
@@ -88,8 +88,8 @@ def checkExisting(session, GPXdata):
     DF_to_check['LON'] = DF_to_check['LON'].round(5)
     DF_to_check['fieldActivityId'] = DF_to_check['fieldActivityId'].astype(int)
 
-    maxDate = DF_to_check['StationDate'].max()
-    minDate = DF_to_check['StationDate'].min()
+    maxDate = DF_to_check['StationDateTZ'].max()
+    minDate = DF_to_check['StationDateTZ'].min()
     maxLon = DF_to_check['LON'].max()
     minLon = DF_to_check['LON'].min()
     maxLat = DF_to_check['LAT'].max()
@@ -111,7 +111,10 @@ def checkExisting(session, GPXdata):
         result_to_check['LAT'] = result_to_check['LAT'].round(5)
         result_to_check['LON'] = result_to_check['LON'].round(5)
 
-        merge_check = pd.merge(DF_to_check, result_to_check, on=[
+        merge_check = pd.merge(DF_to_check, result_to_check,
+                            left_on=[
+                            'LAT', 'LON', 'StationDateTZ', 'fieldActivityId'],
+                            right_on=[
                             'LAT', 'LON', 'StationDate', 'fieldActivityId'])
         # Get only non existing data to insert
         DF_to_insert = DF_to_check[~DF_to_check['id'].isin(merge_check['id'])]
@@ -166,7 +169,7 @@ def insertRawData(session, GPXdata, existing_dataFrame):
     fileList = DF.fileName.unique()
     dictFileObj = {}
 
-    if existing_dataFrame:
+    if existing_dataFrame is not None:
         DF.ix[DF['id'].isin(existing_dataFrame['id']), 'imported'] = False
 
     for fileName in fileList:
