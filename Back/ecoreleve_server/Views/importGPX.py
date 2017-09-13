@@ -36,7 +36,10 @@ def uploadFileGPX(request):
 
     insertData(session, dataFrame_to_insert, data[0]['FieldWorkers'])
 
-    existingStationName = list(existing_dataFrame['Name'])
+    if existing_dataFrame:
+        existingStationName = list(existing_dataFrame['Name'])
+    else:
+        existingStationName = None
     response = {'existing': len(data) - dataFrame_to_insert.shape[0],
                 'new': dataFrame_to_insert.shape[0],
                 'existing_name': existingStationName
@@ -117,6 +120,7 @@ def checkExisting(session, GPXdata):
         existing_data = DF_to_check[DF_to_check['id'].isin(merge_check['id'])]
     else:
         DF_to_insert = DF_to_check
+        existing_data = None
 
     return DF_to_insert, existing_data
 
@@ -162,7 +166,8 @@ def insertRawData(session, GPXdata, existing_dataFrame):
     fileList = DF.fileName.unique()
     dictFileObj = {}
 
-    DF.ix[DF['id'].isin(existing_dataFrame['id']), 'imported'] = False
+    if existing_dataFrame:
+        DF.ix[DF['id'].isin(existing_dataFrame['id']), 'imported'] = False
 
     for fileName in fileList:
         curImport = Import(FK_User=user, ImportType='GPX', ImportFileName = fileName)
