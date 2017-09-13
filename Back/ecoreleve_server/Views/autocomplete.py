@@ -18,7 +18,8 @@ def asInt(str):
     except:
         return str
 
-
+# TODO remove that already exists in Object view, 
+# need replace url requesting "{root}/autocomplete/{object}..." by "{root}/{object}/autocomplete..."
 @view_config(route_name='autocomplete',
              renderer='json',
              request_method='GET')
