@@ -9,8 +9,8 @@ from ..Models import (
 )
 from sqlalchemy import select, and_, join
 from traceback import print_exc
-from ..controllers.security import RootCore
-from . import DynamicObjectView, DynamicObjectCollectionView
+from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
+from ..controllers.ApiController import RootCore
 
 
 class ObservationView(DynamicObjectView):

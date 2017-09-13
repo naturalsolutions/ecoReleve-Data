@@ -5,7 +5,8 @@ from sqlalchemy import engine_from_config
 from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from pyramid.authorization import ACLAuthorizationPolicy
-from .controllers.security import SecurityRoot, myJWTAuthenticationPolicy
+from .controllers.security import myJWTAuthenticationPolicy
+from .controllers.ApiController import SecurityRoot
 from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
@@ -15,12 +16,12 @@ from .Models import (
     dbConfig,
     db,
     loadThesaurusTrad,
-    groupfinder,
-    test
+    groupfinder
 )
 from .Views import add_routes, add_cors_headers_response_callback
 from pyramid.events import NewRequest
 from sqlalchemy.orm import sessionmaker, scoped_session
+
 
 
 def datetime_adapter(obj, request):
@@ -134,10 +135,7 @@ def main(global_config, **settings):
     config.set_root_factory(SecurityRoot)
 
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
-
     loadThesaurusTrad(config)
-
-    test(config)
 
     add_routes(config)
     config.scan()

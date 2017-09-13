@@ -13,9 +13,10 @@ import json
 from datetime import datetime
 from sqlalchemy import select, join, desc
 from collections import OrderedDict
-from ..controllers.security import RootCore, Resource, SecurityRoot, context_permissions
-from . import DynamicObjectView, DynamicObjectCollectionView
+from ..controllers.security import context_permissions
 from pyramid.traversal import find_root
+from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
+from ..controllers.ApiController import RootCore, Resource, SecurityRoot
 
 
 class IndividualView(DynamicObjectView):

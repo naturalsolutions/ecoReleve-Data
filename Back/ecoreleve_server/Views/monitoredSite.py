@@ -12,8 +12,9 @@ import json
 from sqlalchemy import select, desc, join
 from sqlalchemy.exc import IntegrityError
 from collections import OrderedDict
-from ..controllers.security import RootCore, context_permissions
-from . import DynamicObjectView, DynamicObjectCollectionView
+from ..controllers.security import context_permissions
+from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
+from ..controllers.ApiController import RootCore
 
 
 class MonitoredSiteView(DynamicObjectView):
