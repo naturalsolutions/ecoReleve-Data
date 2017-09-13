@@ -76,6 +76,9 @@ define([
 				if ( typeof(this.model.get(this.key)) != 'undefined') { // get old value 
 					this.value = this.model.get(this.key);
 				}
+				if( typeof(this.value) === 'string' ) {
+					this.value = parseInt(this.value);
+				}
 			},
 
 			/**
