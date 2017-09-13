@@ -646,6 +646,7 @@ class ImportList(Generator):
                               Import.ImportDate,
                               Import.ImportFileName,
                               Import.ImportType,
+                              Import.FK_User,
                               User.fullname.label('Login'),
                               func.count(Import.ID).label('count'),
                               func.isnull(
@@ -664,6 +665,7 @@ class ImportList(Generator):
                                              Import.ImportDate,
                                              Import.ImportFileName,
                                              Import.ImportType,
+                                             Import.FK_User,
                                              User.Lastname,
                                              User.Firstname,
                                            )
