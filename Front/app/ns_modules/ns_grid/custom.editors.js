@@ -199,6 +199,10 @@ define([
 		  this.element = this.bbfe.render();
 		};
 
+		TextEditor.prototype.getValue = function(){
+		 return this.element.getValue();
+		};
+
     var CheckboxEditor = function () {};
     CheckboxEditor.prototype = new CustomEditor();
 
