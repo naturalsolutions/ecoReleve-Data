@@ -575,44 +575,44 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         };
   
         var opt = params.colDef.schema.options;
-  
-        $.ajax({
-          url: opt.object + '/' + value,
-          context: this,
-          success: function(data){
-            this.handleRemoveError(params);
-  
-            var valueToDisplay;
-  
-            this.manualDataSet(params, data['PK_id']);
-  
-            if (typeof data.fullname != 'undefined') {
-              valueToDisplay = data.fullname;
-            } else {
-              valueToDisplay = data[opt.label];
+        if(opt.source.indexOf('ID') != -1){
+          $.ajax({
+            url: opt.object + '/' + value,
+            context: this,
+            success: function(data){
+              this.handleRemoveError(params);
+    
+              var valueToDisplay;
+    
+              this.manualDataSet(params, data['PK_id']);
+    
+              if (typeof data.fullname != 'undefined') {
+                valueToDisplay = data.fullname;
+              } else {
+                valueToDisplay = data[opt.label];
+              }
+    
+              this.formatValueToDisplay(data.fullname);
+    
+              var values = {
+                value: value,
+                label: valueToDisplay
+              };
+    
+              this.manualDataSet(params, values);
+            },
+            error: function(){
+    
+              var values = {
+                value: value,
+                label: value
+              };
+    
+              this.formatValueToDisplay(value);
+              this.manualDataSet(params, values);
             }
-  
-            this.formatValueToDisplay(data.fullname);
-  
-            var values = {
-              value: value,
-              label: valueToDisplay
-            };
-  
-            this.manualDataSet(params, values);
-          },
-          error: function(){
-  
-            var values = {
-              value: value,
-              label: value
-            };
-  
-            this.formatValueToDisplay(value);
-            this.manualDataSet(params, values);
-          }
-  
-        });
+          });
+        }
       };
   
       var SelectRenderer = function(options) {}
