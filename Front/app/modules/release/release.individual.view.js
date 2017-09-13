@@ -336,17 +336,40 @@ define([
 
     toolTipShow: function(e) {
       var _this = this;
-      this.ui.release.tooltipList({
-        position: 'top',
-        //  pass avalaible options
-        availableOptions: _this.releaseMethodList,
-        liClickEvent:function(liClickValue) {
-          _this.ui.release.tooltipster('hide');
+      var ulElem = document.createElement("ul");
+      var tabLength = this.releaseMethodList.length;
+      for ( var i = 0 ; i < tabLength ; i++ ) {
+        var elem = this.releaseMethodList[i];
+        var liElem = document.createElement('li');
+        liElem.onclick = function(e) {
+          _this.ui.release.tooltipster('close');
           _this.showLoading();
-          _this.release(liClickValue);
+          _this.release(this.getAttribute('data-value'));
+        };
+        liElem.setAttribute('data-value' , elem.val)
+        liElem.innerHTML = elem.label;
+        ulElem.appendChild(liElem);
+      }
+
+
+      this.ui.release.tooltipster({
+        theme : 'tooltipList',
+        position: 'top',
+        interactive : true,
+       // trigger: "custom",
+        content : '',
+        contentAsHTML : true,
+        functionReady : function(instance,helper) {
+          var elemRoot = instance.elementTooltip(); //.appendChild(ulElem)
+          var elemContent = elemRoot.getElementsByClassName('tooltipster-content');
+          $(elemContent).append(ulElem);
+          instance.reposition();
+        },
+        functionAfter : function (instance, helper) {
+          $(helper.origin).tooltipster('destroy');
         }
       });
-      this.ui.release.tooltipster('show');
+      this.ui.release.tooltipster('open');
     }
   });
 });
