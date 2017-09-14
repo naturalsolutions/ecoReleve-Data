@@ -11,6 +11,7 @@ from sqlalchemy import (
     outerjoin)
 from sqlalchemy.orm import aliased
 from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
+from ..GenericObjets.SearchEngine import CollectionEngine
 from ..Models import (
     Observation,
     Station,
@@ -34,7 +35,7 @@ from sqlalchemy.sql.expression import union_all
 eval_ = Eval()
 
 
-class StationList(ListObjectWithDynProp):
+class StationList(CollectionEngine):
     ''' this class extend ListObjectWithDynProp, it's used to filter stations '''
 
     def __init__(self, frontModule, typeObj=None, startDate=None,

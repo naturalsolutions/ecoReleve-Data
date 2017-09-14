@@ -190,7 +190,7 @@ class EventRuler(object):
                     result = rule.execute(entityDTO)
 
 
-class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
+class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
     ''' core object creating all stuff to manage dynamic
         properties on a new declaration:
             create automatically tables and relationships:
@@ -291,6 +291,7 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
                                 nullable=False
                                 )
                 fk_property = Column('FK_'+cls.__tablename__+'DynProp',
+                                    Integer,
                                     ForeignKey(cls.__tablename__+'DynProp.ID'),
                                     nullable=False
                                     )
@@ -298,22 +299,22 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
                 _property = relationship(cls.getTypeClass().PropertiesClass)
                 property_name = association_proxy('_property', 'Name')
 
-                @declared_attr
-                def __table_args__(cls):
-                    return (Index('idx_%s' % cls.__tablename__+'_other',
-                                cls.fk_parent,
-                                cls.fk_property,
-                                'StartDate'),
-                            Index('idx_%s' % cls.__tablename__+'_ValueString',
-                                cls.fk_parent,
-                                'ValueString'),
-                            UniqueConstraint(
-                                cls.fk_parent,
-                                cls.fk_property,
-                                'StartDate',
-                                name='uqc_'+cls.__tablename__
-                            ),
-                            )
+                # @declared_attr
+                # def __table_args__(cls):
+                #     return (Index('idx_%s' % cls.__tablename__+'_other',
+                #                 cls.fk_parent,
+                #                 cls.fk_property,
+                #                 'StartDate'),
+                #             Index('idx_%s' % cls.__tablename__+'_ValueString',
+                #                 cls.fk_parent,
+                #                 'ValueString'),
+                #             UniqueConstraint(
+                #                 cls.fk_parent,
+                #                 cls.fk_property,
+                #                 'StartDate',
+                #                 name='uqc_'+cls.__tablename__
+                #             ),
+                #             )
         
                 @property
                 def realValue(self):
@@ -474,6 +475,28 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
         if len(valueAtDate) > 0:
             curValue = valueAtDate[0]
             return curValue
+
+    def getDataWithSchema(self, displayMode='edit'):
+        ''' Function to call: return full schema
+        according to configuration (table :ModuleForms) '''
+
+        resultat = self.getForm(displayMode=displayMode)
+
+        '''IF ID is send from front --> get data of this object in order to
+        display value into form which will be sent'''
+        data = self.values
+        resultat['data'] = data
+        resultat['recursive_level'] = 0
+        resultat = self.getDefaultValue(resultat)
+        if self.ID:
+            resultat['data']['id'] = self.ID
+        else:
+            # add default values for each field in data if exists
+            # for attr in schema:
+            resultat['data']['id'] = 0
+            resultat['data'].update(resultat['schema']['defaultValues'])
+
+        return resultat
 
     @property
     def properties(self):

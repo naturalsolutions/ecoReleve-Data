@@ -1,6 +1,6 @@
 from ..Models import (
     Station as StationDB,
-    StationType,
+    # StationType,
     Station_FieldWorker,
     StationList,
     MonitoredSitePosition,
@@ -16,7 +16,7 @@ from sqlalchemy import select, and_, join
 from sqlalchemy.exc import IntegrityError
 from .protocols import ObservationsView
 from ..utils.parseValue import parser
-from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
+from ..GenericObjets.ObjectView2 import DynamicObjectView, DynamicObjectCollectionView
 from ..controllers.ApiController import RootCore
 from ..controllers.security import context_permissions
 
@@ -184,30 +184,30 @@ class StationsView(DynamicObjectCollectionView):
                 'exceed': exceed}
         return data
 
-    def insert(self):
-        session = self.request.dbsession
-        data = {}
-        for items, value in self.request.json_body.items():
-            data[items] = value
+    # def insert(self):
+    #     session = self.request.dbsession
+    #     data = {}
+    #     for items, value in self.request.json_body.items():
+    #         data[items] = value
 
-        newSta = StationDB(
-            FK_StationType=data['FK_StationType'],
-            creator=self.request.authenticated_userid['iss'])
-        newSta.StationType = session.query(StationType).filter(
-            StationType.ID == data['FK_StationType']).first()
-        newSta.init_on_load()
+    #     newSta = StationDB(
+    #         FK_StationType=data['FK_StationType'],
+    #         creator=self.request.authenticated_userid['iss'])
+    #     newSta.StationType = session.query(StationType).filter(
+    #         StationType.ID == data['FK_StationType']).first()
+    #     newSta.init_on_load()
 
-        try:
-            newSta.updateFromJSON(data)
-            session.add(newSta)
-            session.flush()
-            msg = {'ID': newSta.ID}
-        except Exception as e:
-            # session.rollback()
-            self.request.response.status_code = 510
-            msg = {'existingStation': True}
+    #     try:
+    #         newSta.updateFromJSON(data)
+    #         session.add(newSta)
+    #         session.flush()
+    #         msg = {'ID': newSta.ID}
+    #     except Exception as e:
+    #         # session.rollback()
+    #         self.request.response.status_code = 510
+    #         msg = {'existingStation': True}
 
-        return msg
+    #     return msg
 
     def insertMany(self):
         session = self.request.dbsession
