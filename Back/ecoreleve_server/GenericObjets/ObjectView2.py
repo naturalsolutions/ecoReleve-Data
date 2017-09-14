@@ -151,10 +151,10 @@ class DynamicObjectView(CustomView):
     def history(self):
         from ..Models import thesaurusDictTraduction
 
-        propertiesTable = Base.metadata.tables[self.objectDB.GetDynPropTable()]
-        dynamicValuesTable = Base.metadata.tables[self.objectDB.GetDynPropValuesTable()]
-        FK_name = self.objectDB.GetSelfFKNameInValueTable()
-        FK_property_name = self.objectDB.GetDynPropFKName()
+        propertiesTable = Base.metadata.tables[self.objectDB.TypeClass.PropertiesClass.__tablename__]
+        dynamicValuesTable = Base.metadata.tables[self.objectDB.DynamicValuesClass.__tablename__]
+        FK_name = 'FK_'+self.objectDB.__tablename__
+        FK_property_name = self.objectDB.fk_table_DynProp_name
 
         tableJoin = join(dynamicValuesTable, propertiesTable,
                          dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
