@@ -350,6 +350,7 @@ class DynamicObjectCollectionView(CustomView):
     def getForm(self, objectType=None, moduleName=None, mode='edit'):
         if 'ObjectType' in self.request.params:
             objectType = self.request.params['ObjectType']
+            self.objectDB.type_id = objectType
         if not objectType:
             objectType = None
         # self.setType(int(objectType))

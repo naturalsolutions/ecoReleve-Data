@@ -134,26 +134,6 @@ class StationList(CollectionEngine):
         result = self.session.execute(fullQueryJoinOrdered).fetchall()
         data = []
 
-        # if getFieldWorkers:
-        #     queryCTE = fullQueryJoinOrdered.cte()
-        #     joinFW = join(Station_FieldWorker, User,
-        #                   Station_FieldWorker.FK_FieldWorker == User.id)
-        #     joinTable = join(queryCTE, joinFW, queryCTE.c[
-        #                      'ID'] == Station_FieldWorker.FK_Station)
-        #     query = select([Station_FieldWorker.FK_Station,
-        #                     User.Login]).select_from(joinTable)
-        #     FieldWorkers = self.session.execute(query).fetchall()
-        #     list_ = {}
-        #     for x, y in FieldWorkers:
-        #         list_.setdefault(x, []).append(y)
-        #     for row in result:
-        #         row = OrderedDict(row)
-        #         try:
-        #             row['FK_FieldWorker_FieldWorkers'] = list_[row['ID']]
-        #         except:
-        #             pass
-        #         data.append(row)
-
         for row in result:
             row = OrderedDict(row)
             data.append(row)

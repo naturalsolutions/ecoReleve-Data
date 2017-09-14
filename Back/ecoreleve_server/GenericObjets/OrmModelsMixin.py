@@ -190,14 +190,14 @@ class EventRuler(object):
     @classmethod
     def executeBusinessRules(cls, target, event):
         if cls.__constraintRules__[event]:
-            entityDTO = target.getFlatObject()
+            entityDTO = target.values
             for rule in cls.__constraintRules__[event]:
                 if (not rule.targetTypes
-                    or (hasattr(target, 'GetType') and target.GetType().ID in rule.targetTypes)):
+                    or (hasattr(target, 'type_id') and target.type_id in rule.targetTypes)):
                     result = rule.execute(entityDTO)
 
 
-class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
+class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
     ''' core object creating all stuff to manage dynamic
         properties on a new declaration:
             create automatically tables and relationships:
@@ -453,7 +453,6 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
 
     def setDynamicValue(self, propertyName, value, useDate):
         prop = self.get_property_by_name(propertyName)
-        print(propertyName, value, useDate, prop)
         if not prop:
             return
 
