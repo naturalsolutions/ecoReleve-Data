@@ -26,16 +26,17 @@ from sqlalchemy import inspect, orm
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement
-from ..utils.parseValue import parser
+from ..utils.parseValue import parser, formatValue
 from datetime import datetime
 from .DataBaseObjects import ConfiguredDbObjectMapped, DbObject
 from sqlalchemy.orm.exc import *
+from sqlalchemy_utils import get_hybrid_properties
 
 
 ANALOG_DYNPROP_TYPES = {'String': 'ValueString',
                         'Float': 'ValueFloat',
                         'Date': 'ValueDate',
-                        'Integer': 'ValueInteger',
+                        'Integer': 'ValueInt',
                         'Time': 'ValueDate',
                         'Date Only': 'ValueDate'}
 
@@ -55,14 +56,20 @@ def visit_create_view(element, compiler, **kw):
 
 class ORMUtils(object):
     def as_dict(self):
-        return {c.key: getattr(self, c.key)
+        hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
+        values = {c.key: getattr(self, c.key)
                 for c in inspect(self).mapper.column_attrs}
+
+        for propName in hybrid_properties:
+            values[propName] = getattr(self, propName)
+        return values
 
 
 class GenericType(ORMUtils):
     __tablename__ = None
     ID = Column(Integer, primary_key=True)
     Name = Column(String(250), nullable=False)
+    Status = Column(Integer)
     parent = None
 
     @classmethod
@@ -257,7 +264,6 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
 
     @type_id.setter
     def type_id(self, value):
-        assert type(value) is int
         self._type_id = value
         self._type = self.session.query(self.TypeClass).get(value)
 
@@ -279,13 +285,13 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
     def getDynamicValuesClass(cls):
         if not hasattr(cls, 'DynamicValuesClass'):
             class DynamicValues(ORMUtils, Base):
-                __tablename__ = cls.__tablename__+'DynPropValues'
+                __tablename__ = cls.__tablename__+'DynPropValue'
                 ID = Column(Integer, primary_key=True)
                 StartDate = Column(DateTime, nullable=False)
                 ValueString = Column(String(250))
                 ValueDate = Column(DateTime)
                 ValueFloat = Column(Float)
-                ValueInteger = Column(Integer)
+                ValueInt = Column(Integer)
                 fk_parent = Column('FK_'+cls.__tablename__,
                                 ForeignKey(cls.__tablename__+'.ID'),
                                 nullable=False
@@ -299,26 +305,26 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
                 _property = relationship(cls.getTypeClass().PropertiesClass)
                 property_name = association_proxy('_property', 'Name')
 
-                # @declared_attr
-                # def __table_args__(cls):
-                #     return (Index('idx_%s' % cls.__tablename__+'_other',
-                #                 cls.fk_parent,
-                #                 cls.fk_property,
-                #                 'StartDate'),
-                #             Index('idx_%s' % cls.__tablename__+'_ValueString',
-                #                 cls.fk_parent,
-                #                 'ValueString'),
-                #             UniqueConstraint(
-                #                 cls.fk_parent,
-                #                 cls.fk_property,
-                #                 'StartDate',
-                #                 name='uqc_'+cls.__tablename__
-                #             ),
-                #             )
+                @declared_attr
+                def __table_args__(cls):
+                    return (Index('idx_%s' % cls.__tablename__+'_other',
+                                cls.fk_parent,
+                                cls.fk_property,
+                                'StartDate'),
+                            Index('idx_%s' % cls.__tablename__+'_ValueString',
+                                cls.fk_parent,
+                                'ValueString'),
+                            UniqueConstraint(
+                                cls.fk_parent,
+                                cls.fk_property,
+                                'StartDate',
+                                name='uqc_'+cls.__tablename__
+                            ),
+                            )
         
                 @property
                 def realValue(self):
-                    val = self.ValueString or self.ValueDate or self.ValueFloat or self.ValueInteger
+                    val = self.ValueString or self.ValueDate or self.ValueFloat or self.ValueInt
                     return {'value:':val, 'StartDate': self.StartDate, 'name':self.property_name}
 
             cls.DynamicValuesClass = type(cls.__tablename__+'DynPropValues'.title(), (DynamicValues, ),{})
@@ -401,7 +407,6 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
         ''' return flat data dict '''
         dictValues = {}
         values = self.getLatestDynamicValues()
-
         for value in values:
             property_ = self.get_property_by_name(value['Name'])
             valueName = ANALOG_DYNPROP_TYPES[property_.get('TypeProp')]
@@ -448,6 +453,7 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
 
     def setDynamicValue(self, propertyName, value, useDate):
         prop = self.get_property_by_name(propertyName)
+        print(propertyName, value, useDate, prop)
         if not prop:
             return
 
@@ -459,12 +465,10 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
         elif len(existingValues) > 0:
             curValue = self.session.query(self.DynamicValuesClass
                                           ).get(existingValues[0].get('ID'))
-
         if not curValue:
-            curValue = self.DynamicValuesClass(fk_property=prop.get('ID'))
-
-        self._dynamicValues.append(curValue)
-        curValue.StartDate = useDate
+            curValue = self.DynamicValuesClass(fk_property=prop.get('ID'), fk_parent=self.type_id)
+            curValue.StartDate = useDate
+            self._dynamicValues.append(curValue)
         setattr(curValue, ANALOG_DYNPROP_TYPES[prop.get('TypeProp')], value)
 
     def getDynamicValueAtDate(self, propertyName, useDate):
@@ -475,6 +479,23 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
         if len(valueAtDate) > 0:
             curValue = valueAtDate[0]
             return curValue
+        else:
+            return None
+
+
+    def getForm(self, displayMode='edit', type_=None, moduleName=None):
+        from ..utils.parseValue import formatValue
+        isGrid = False
+        if (self._type.Status == 10):
+            isGrid = True
+
+        form = ConfiguredDbObjectMapped.getForm(self, displayMode, self._type_id, moduleName, isGrid=isGrid)
+
+        form['data'] = {'id': 0}
+        data = formatValue(form['schema']['defaultValues'], form['schema'])
+        form['data'].update(data)
+        form['data'][self.fk_table_type_name] = self._type_id
+        return form
 
     def getDataWithSchema(self, displayMode='edit'):
         ''' Function to call: return full schema
@@ -485,11 +506,13 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
         '''IF ID is send from front --> get data of this object in order to
         display value into form which will be sent'''
         data = self.values
+        data = formatValue(data, resultat['schema'])
         resultat['data'] = data
         resultat['recursive_level'] = 0
         resultat = self.getDefaultValue(resultat)
         if self.ID:
             resultat['data']['id'] = self.ID
+
         else:
             # add default values for each field in data if exists
             # for attr in schema:
@@ -517,7 +540,10 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
         return self.properties_by_name.get(name)
 
     def getLinkedField(self):
-        return list(filter(lambda tp: tp.linkedTable is not None, self._type._type_properties))
+        try:
+            return list(filter(lambda tp: tp.linkedTable is not None, self._type._type_properties))
+        except:
+            return []
 
     def linkedFieldDate(self):
         return datetime.now()
@@ -562,7 +588,6 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, ORMUtils):
 
         for entity in entitiesToUpdate:
             data = entitiesToUpdate[entity]
-            print(data)
             entity.values = data
 
     def deleteLinkedField(self, useDate=None, previousState=None):

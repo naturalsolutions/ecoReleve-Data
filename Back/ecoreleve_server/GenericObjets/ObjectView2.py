@@ -198,7 +198,7 @@ class DynamicObjectCollectionView(CustomView):
 
         if 'typeObj' in self.request.params and self.request.params['typeObj'] is not None:
             objType = self.request.params['typeObj']
-            # self.setType(objType)
+            self.objectDB.type_id = objType
             self.typeObj = objType
         else:
             self.typeObj = None
