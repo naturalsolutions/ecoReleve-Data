@@ -148,7 +148,7 @@ class StationList(CollectionEngine):
         return query
 
 
-class IndividualList(ListObjectWithDynProp):
+class IndividualList(CollectionEngine):
 
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
