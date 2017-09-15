@@ -145,16 +145,21 @@ def uploadFileRFID(request):
         if (min(allDate) >= minDateEquip and
                 (maxDateEquip is None or max(allDate) <= maxDateEquip)):
 
+            data_to_insert = checkDuplicatedRFID(
+                data_to_check, min(allDate), max(allDate), idModule)
+            data_to_insert = data_to_insert.drop(['id_'], 1)
+            data_to_insert = data_to_insert.drop_duplicates()
+
             importObj = Import(ImportFileName=filename, FK_User=creator, ImportDate=now)
             importObj.ImportType = 'RFID'
+            importObj.maxDate = max(allDate)
+            importObj.minDate = min(allDate)
+            importObj.nbRows = data_to_check.shape[0]
+            importObj.nbInserted = data_to_insert.shape[0]
+
             session.add(importObj)
             session.flush()
 
-            data_to_insert = checkDuplicatedRFID(
-                data_to_check, min(allDate), max(allDate), idModule)
-
-            data_to_insert = data_to_insert.drop(['id_'], 1)
-            data_to_insert = data_to_insert.drop_duplicates()
             data_to_insert.loc[:, ('FK_Import')] = list(itertools.repeat(importObj.ID, len(data_to_insert.index)))
             if data_to_insert.shape[0] == 0:
                 raise(IntegrityError)

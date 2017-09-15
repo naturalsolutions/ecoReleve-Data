@@ -44,16 +44,24 @@ def uploadFileArgos(request):
         shutil.copyfileobj(input_file, output_file)
 
     os.rename(temp_file_path, full_filename)
+    print(request.POST['file'].__dict__)
     importObj = Import(ImportFileName=request.POST['file'].filename, FK_User=user)
     importObj.ImportType = 'Argos'
 
     session.add(importObj)
     session.flush()
-
+    message = {}
     if 'DIAG' in filename:
-        return parseDIAGFileAndInsert(full_filename, session, importObj.ID)
+        message, nbRows, nbInserted, maxDate, minDate = parseDIAGFileAndInsert(full_filename, session, importObj.ID)
     elif 'DS' in filename:
-        return parseDSFileAndInsert(full_filename, session, importObj.ID)
+        message, nbRows, nbInserted, maxDate, minDate = parseDSFileAndInsert(full_filename, session, importObj.ID)
+
+    if message:
+        importObj.nbRows = nbRows
+        importObj.nbInserted = nbInserted
+        importObj.maxDate = maxDate
+        importObj.minDate = minDate
+    return message
 
 
 def parseDSFileAndInsert(full_filename, session, importID):
@@ -208,15 +216,19 @@ def parseDSFileAndInsert(full_filename, session, importID):
 
     os.remove(full_filename)
     shutil.rmtree(out_path)
-    return {'inserted gps': nb_gps_data,
+    message = {'inserted gps': nb_gps_data,
             'existing gps': nb_existingGPS,
             'inserted Engineering': nb_eng,
             'existing Engineering': nb_existingEng - nb_eng,
             'inserted argos': 0,
             'existing argos': 0}
+    nbRows = nb_existingEng + nb_existingGPS + nb_gps_data
+    maxDateGPS = GPSData['datetime'].max()
+    minDateGPS = GPSData['datetime'].min()
+    nbInserted = nb_gps_data + nb_eng
+    return message, nbRows, nbInserted, maxDateGPS, minDateGPS
 
-
-def checkExistingEng(EngData, session, fileName):
+def checkExistingEng(EngData, session):
     EngData['id'] = range(EngData.shape[0])
     EngData = EngData.dropna()
     try:
@@ -400,12 +412,18 @@ def parseDIAGFileAndInsert(full_filename, session, importID):
         ), if_exists='append', schema=dbConfig['sensor_schema'], index=False)
     os.remove(full_filename)
 
-    return {'inserted gps': 0,
+    message = {'inserted gps': 0,
             'existing gps': 0,
             'inserted Engineering': 0,
             'existing Engineering': 0,
             'inserted argos': DFToInsert.shape[0],
             'existing argos': df.shape[0] - DFToInsert.shape[0]}
+    
+    nbRows = df.shape[0]
+    nbInserted = DFToInsert.shape[0]
+    maxDate = df['date'].max()
+    minDate = df['date'].min()
+    return message, nbRows, nbInserted, maxDate, minDate
 
 
 def checkExistingArgos(dfToCheck, session):

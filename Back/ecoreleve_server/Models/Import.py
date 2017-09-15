@@ -32,7 +32,11 @@ class Import(Base, DbObject, ConfiguredDbObjectMapped):
     ImportFileName = Column(String(250))
     ImportType = Column(String(250), nullable=False)
     FK_User = Column(Integer, nullable=False)
-
+    nbRows = Column(Integer)
+    nbInserted = Column(Integer)
+    maxDate = Column(DateTime)
+    minDate = Column(DateTime)
+    
     # TempTable_GUID = Column(String(250), default=None)
     # Status = Column(Integer)
     # ObjectName = Column(String(250))
@@ -61,17 +65,17 @@ class Import(Base, DbObject, ConfiguredDbObjectMapped):
         }
         return dictType.get(self.ImportType)
 
-    @hybrid_property
-    def maxDate(self):
-        return max(row.date for row in self.relatedDatas)
+    # @hybrid_property
+    # def maxDate(self):
+    #     return max(row.date for row in self.relatedDatas)
 
-    @hybrid_property
-    def minDate(self):
-        return min(row.date for row in self.relatedDatas)
+    # @hybrid_property
+    # def minDate(self):
+    #     return min(row.date for row in self.relatedDatas)
 
-    @hybrid_property
-    def nbRow(self):
-        return len(self.relatedDatas)
+    # @hybrid_property
+    # def nbRow(self):
+    #     return len(self.relatedDatas)
 
 
 # class ImportType(Base):

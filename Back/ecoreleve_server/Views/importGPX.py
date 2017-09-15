@@ -173,7 +173,12 @@ def insertRawData(session, GPXdata, existing_dataFrame):
         DF.ix[DF['id'].isin(existing_dataFrame['id']), 'imported'] = False
 
     for fileName in fileList:
-        curImport = Import(FK_User=user, ImportType='GPX', ImportFileName = fileName)
+        curDF = DF[DF['fileName']==fileName]
+        maxDate = curDF['StationDate'].max()
+        minDate = curDF['StationDate'].min()
+        nbRows = curDF.shape[0]
+        nbInserted = curDF[curDF['imported']==True].shape[0]
+        curImport = Import(FK_User=user, ImportType='GPX', ImportFileName=fileName, nbRows=nbRows, maxDate=maxDate, minDate=minDate, nbInserted=nbInserted)
         session.add(curImport)
         session.flush()
         dictFileObj[fileName] = curImport.ID
