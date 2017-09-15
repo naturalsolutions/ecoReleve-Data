@@ -2,7 +2,7 @@ from ..Models import (
     Individual,
     Station,
     Observation,
-    ProtocoleType,
+    # ProtocoleType,
     invertedThesaurusDict,
     thesaurusDictTraduction
 )

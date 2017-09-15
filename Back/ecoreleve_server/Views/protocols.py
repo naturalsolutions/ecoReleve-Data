@@ -1,7 +1,7 @@
 from pyramid.view import view_config
 from ..Models import (
     Observation,
-    ProtocoleType,
+    # ProtocoleType,
     FieldActivity_ProtocoleType,
     fieldActivity,
     ErrorAvailable,
@@ -9,7 +9,7 @@ from ..Models import (
 )
 from sqlalchemy import select, and_, join
 from traceback import print_exc
-from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
+from ..GenericObjets.ObjectView2 import DynamicObjectView, DynamicObjectCollectionView
 from ..controllers.ApiController import RootCore
 
 
@@ -253,6 +253,7 @@ class ObservationsView(DynamicObjectCollectionView):
     def getType(self):
         if 'FieldActivityID' in self.request.params:
             fieldActivityID = self.request.params['FieldActivityID']
+            ProtocoleType = Observation.TypeClass
             join_table = join(ProtocoleType, FieldActivity_ProtocoleType,
                               ProtocoleType.ID == FieldActivity_ProtocoleType.FK_ProtocoleType)
             query = select([ProtocoleType.ID, ProtocoleType.Name]
