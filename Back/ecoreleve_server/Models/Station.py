@@ -134,6 +134,22 @@ class Station(Base, ObjectWithDynProp):
         else:
             return self.session.query(StationType).get(self.FK_StationType)
 
+    @staticmethod
+    def GetImportTemplate():
+        return ['Station_StationDate',
+                'Station_Name',
+                'Station_LAT',
+                'Station_LON',
+                'Station_ELE',
+                'Station_precision',
+                'Station_Region',
+                'Station_FieldActivity',
+                'Station_FieldWorker1',
+                'Station_FieldWorker2',
+                'Station_FieldWorker3',
+                'Station_Comments',
+                'add your protocol fields (to rename)...']
+
     def allowUpdate(self, DTOObject):
         from ..utils.parseValue import isNumeric
 

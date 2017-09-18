@@ -1,51 +1,249 @@
-# from ..Models import Base,DBSession
-# from sqlalchemy import (Column,
-#  DateTime,
-#  Float,
-#  ForeignKey,
-#  Index,
-#  Integer,
-#  Numeric,
-#  String,
-#  Text,
-#  Unicode,
-#  text,
-#  Sequence,
-#  orm,
-#  and_,
-#  func)
-# from sqlalchemy.dialects.mssql.base import BIT
-# from sqlalchemy.orm import relationship
-# from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
-# from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
+from ..Models import Base
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Boolean,
+    String,
+    Sequence,
+    text,
+    bindparam,
+    func,
+    orm,
+    Table)
+from sqlalchemy.orm import relationship
+from pyramid import threadlocal
+from traceback import print_exc
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
-# #------------------------------------------------------------------------------------------------------------------------- #
-# class File (Base,ObjectWithDynProp) :
+class CustomErrorSQL(Exception):
+    def __init__(self, value):
+        self.value = value
+        print('CustomErrorSQL')
 
-#     __tablename__ = 'File'
-
-#     ID = Column(Integer, Sequence('File___id_seq'), primary_key = True)
-#     Name = Column(String)
-#     Date = Column(DateTime, index = True , nullable = False, server_default = func.now())
-#     Creator = Column(Integer)
-#     FK_File_Type = Column(Integer, ForeignKey('File_Type.ID'))
-
-#     relationship('File_Type')
-
-# ------------------------------------------------------------------------------------------------------------------------- #
-# class File_Type (Base) :
-
-#     __tablename__ = 'File_Type'
-
-#     ID = Column(Integer, Sequence('File_Type___id_seq'), primary_key = True)
-#     Name = Column(String)
-#     FK_SensorDataType (Integer, ForeignKey('SensorDataType.ID'))
-
-#     relationship('File')
+    def __str__(self):
+        return repr(self.value)
 
 
-# ------------------------------------------------------------------------------------------------------------------------- #
+def coroutine(func):
+    def starter(*args, **kwargs):
+        gen = func(*args, **kwargs)
+        next(gen)
+        return gen
+    return starter
+
+
+class File (Base):
+
+    __tablename__ = 'File'
+
+    ID = Column(Integer, Sequence('File___id_seq'), primary_key=True)
+    Name = Column(String(250))
+    ImportDate = Column(DateTime,
+                        index=True,
+                        nullable=False,
+                        server_default=func.now())
+    Creator = Column(Integer)
+    TempTable_GUID = Column(String(250))
+    FK_File_Type = Column(Integer, ForeignKey('File_Type.ID'))
+    Status = Column(Integer)
+    ObjectName = Column(String(100))
+    ObjectType = Column(Integer)
+    Type = relationship('File_Type', uselist=False, backref='Files')
+
+    error = None
+
+    @hybrid_property
+    def tempTable(self):
+        table = Table(self.TempTable_GUID, Base.metadata, autoload=True)
+        return table
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        engine = threadlocal.get_current_registry().dbmaker().get_bind()
+        self.ObjContext = engine.connect()
+        self.processInfo = {}
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self.__init__()
+
+    def run_process(self,column_name, current_process, trans):
+        try:
+            if(column_name.startswith('Station_')):
+                prefix = 'Station_'
+                module_id = 2
+                target_typeObj = 1
+            else:
+                prefix = ''
+                module_id = None
+                target_typeObj = None
+
+            if 'check' in current_process.ProcessType:
+                req = text("""
+                           DECLARE @return_value int, @result varchar(255), @error int, @errorIndexes varchar(max)
+                           EXEC @return_value = [dbo].""" + current_process.Name +
+                           """  @file_ID = :file_ID,
+                                @column_name = :column_name,
+                                @prefix_column = :prefix,
+                                @target_module = :module,
+                                @target_TypeObj = :target_typeObj,
+                                @result = @result OUTPUT,
+                                @error = @error OUTPUT,
+                                @errorIndexes = @errorIndexes OUTPUT;
+                           SELECT @result, @error, @errorIndexes;"""
+                           ).bindparams(bindparam('file_ID', self.ID),
+                                        bindparam('prefix', prefix),
+                                        bindparam('module', module_id),
+                                        bindparam('target_typeObj', target_typeObj),
+                                        bindparam('column_name', column_name))
+                result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
+                print(result, error, errorIndexes)
+                print('-------------\n')
+                trans.commit()
+                return result, error, errorIndexes
+
+            if 'update_column' in current_process.ProcessType and not self.error:
+                req = text("""
+                           DECLARE @return_value int, @result varchar(255), @error int, @errorIndexes varchar(max)
+                           EXEC @return_value = [dbo].""" + current_process.Name +
+                           """  @file_ID = :file_ID,
+                                @column_name = :column_name,
+                                @prefix_column = :prefix,
+                                @target_module = :module,
+                                @target_TypeObj = :target_typeObj,
+                                @result = @result OUTPUT,
+                                @error = @error OUTPUT,
+                                @errorIndexes = @errorIndexes OUTPUT;
+                           SELECT @result, @error, @errorIndexes;"""
+                           ).bindparams(bindparam('file_ID', self.ID),
+                                        bindparam('prefix', prefix),
+                                        bindparam('module', module_id),
+                                        bindparam('target_typeObj', target_typeObj),
+                                        bindparam('column_name', column_name))
+                result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
+                trans.commit()
+                return result, error, errorIndexes
+
+            if 'insert' in current_process.ProcessType and not self.error:
+                req = text("""
+                           DECLARE @return_value int, @result varchar(255), @error int, @errorIndexes varchar(max)
+                           EXEC @return_value = [dbo].""" + current_process.Name +
+                           """  @file_ID = :file_ID,
+                                @prefix_column = :prefix,
+                                @target_module = :module,
+                                @target_TypeObj = :target_typeObj,
+                                @result = @result OUTPUT,
+                                @error = @error OUTPUT,
+                                @errorIndexes = @errorIndexes OUTPUT;
+                           SELECT @result, @error, @errorIndexes;"""
+                           ).bindparams(bindparam('file_ID', self.ID),
+                                        bindparam('prefix', prefix),
+                                        bindparam('module', module_id),
+                                        bindparam('target_typeObj', target_typeObj))
+                result, error, errorIndexes = self.ObjContext.execute(req).fetchone()
+                trans.commit()
+                return result, error, errorIndexes
+
+            if self.error:
+                print( current_process.Name+' not executed')
+                return 'not executed', 1, None
+        except Exception as e:
+            print_exc()
+            trans.rollback()
+            if not current_process.Blocking:
+                pass
+
+    @coroutine
+    def main_process(self):
+        dictSession = {}
+        yield
+        cols = self.tempTable.c.keys()
+        cols.remove('index')
+
+        dataProcessList = list(filter(lambda x: 'check_data' in x.ProcessType, self.Type.ProcessList))
+        checkColumnProcessList = list(filter(lambda x: 'check_column' in x.ProcessType, self.Type.ProcessList))
+        updateColumnProcessList = list(filter(lambda x: 'update_column' in x.ProcessType, self.Type.ProcessList))
+        insertProcessList = list(filter(lambda x: 'insert' in x.ProcessType, self.Type.ProcessList))
+
+        for columnName in cols:
+            for process in checkColumnProcessList:
+                try:
+                    dictSession[columnName+process.Name] = self.ObjContext.begin()
+                    result, error, errorIndexes = self.run_process(columnName, process, dictSession[columnName+process.Name])
+                    if error and process.Blocking and not self.error:
+                        self.error = True
+                    yield process, '{"column":"'+columnName+'","process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
+                except:
+                    yield process, '{"column":"'+columnName+'", "process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes": "error"}'
+
+        if not self.error:
+            for process in dataProcessList:
+                try:
+                    dictSession[process.Name] = self.ObjContext.begin()
+                    result, error, errorIndexes = self.run_process('', process, dictSession[process.Name])
+                    if error and process.Blocking and not self.error:
+                        self.error = True
+                    yield process, '{"column":"status","process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(errorIndexes)+'"}'
+                except:
+                    yield process, '{"column":"status","process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes":"'+str(errorIndexes)+'"}'
+
+            for columnName in cols:
+                for process in updateColumnProcessList:
+                    try:
+                        dictSession[columnName+process.Name] = self.ObjContext.begin()
+                        result, error, errorIndexes = self.run_process(columnName, process, dictSession[columnName+process.Name])
+                        if error and process.Blocking and not self.error:
+                            self.error = True
+                        yield process, '{"column":"'+columnName+'","process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(result)+'"}'
+                    except:
+                        yield process, '{"column":"'+columnName+'", "process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes": "error"}'
+
+            for process in insertProcessList:
+                try:
+                    dictSession[process.Name] = self.ObjContext.begin()
+                    result, error, errorIndexes = self.run_process('', process, dictSession[process.Name])
+
+                    yield process, '{"column":"status","process":"'+str(process.Name)+'","msg":"'+str(result)+'", "error":"'+str(error)+'", "errorIndexes":"'+str(result)+'"}'
+                except:
+                    yield process, '{"column":"status", "process":"'+str(process.Name)+'","msg":"internal error", "error":1, "errorIndexes":"'+str(errorIndexes)+'"}'
+
+    def log(self):
+        print('error log')
+        return
+
+
+class File_Type (Base):
+
+    __tablename__ = 'File_Type'
+
+    ID = Column(Integer, Sequence('File_Type___id_seq'), primary_key=True)
+    Name = Column(String)
+    # FK_SensorDataType (Integer, ForeignKey('SensorDataType.ID'))
+
+    ProcessList = relationship('File_ProcessList',
+                               order_by='File_ProcessList.ExecutionOrder')
+
+    def get_process_name(self):
+        return list(map(lambda x: x.Name, self.ProcessList))
+
+
+class File_ProcessList (Base):
+
+    __tablename__ = 'File_ProcessList'
+
+    ID = Column(Integer, Sequence('File_ProcessList___id_seq'), primary_key=True)
+    Name = Column(String)
+    FK_File_Type = Column(Integer, ForeignKey('File_Type.ID'))
+    ProcessType = Column(String(100))
+    ExecutionOrder = Column(Integer)
+    Blocking = Column(Boolean)
+    DescriptionFr = Column(String(500))
+    DescriptionEn = Column(String(500))
+
+
 # class ImportFile_Conf (Base) :
 
 #     __tablename__ = 'ImportFile_Conf'
@@ -60,7 +258,6 @@
 #     Regles = Column (String)
 
 
-# ------------------------------------------------------------------------------------------------------------------------- #
 # class FileContent (Base) :
 
 #     __tablename__ = 'FileContent'
@@ -69,6 +266,3 @@
 #     FK_File = Column(Integer, ForeignKey('File.ID'))
 #     FK_SensorID = Column (Integer, ForeignKey('Sensor.ID'))
 #     Content = Column(String)
-
-
-
