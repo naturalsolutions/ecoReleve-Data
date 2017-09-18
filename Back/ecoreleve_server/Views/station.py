@@ -196,15 +196,10 @@ class StationsView(DynamicObjectCollectionView):
             StationType.ID == data['FK_StationType']).first()
         newSta.init_on_load()
 
-        try:
-            newSta.updateFromJSON(data)
-            session.add(newSta)
-            session.flush()
-            msg = {'ID': newSta.ID}
-        except Exception as e:
-            # session.rollback()
-            self.request.response.status_code = 510
-            msg = {'existingStation': True}
+        newSta.updateFromJSON(data)
+        session.add(newSta)
+        session.flush()
+        msg = {'ID': newSta.ID}
 
         return msg
 

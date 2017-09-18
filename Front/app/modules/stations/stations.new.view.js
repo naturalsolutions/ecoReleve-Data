@@ -184,26 +184,6 @@ define([
         _this.afterSave(model, resp);
       };
 
-      this.nsForm.savingError = function (response) {
-        var msg = 'An error occured, please contact an admninstrator';
-        var type_ = 'error';
-        var title = 'Error saving';
-        if (response.status == 510) {
-          msg = 'A station already exists with these parameters';
-          type_ = 'warning';
-          title = 'Error saving';
-        }
-
-        Swal({
-          title: title,
-          text: msg,
-          type: type_,
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
-        });
-      };
       this.rdy = this.nsForm.jqxhr;
     },
 

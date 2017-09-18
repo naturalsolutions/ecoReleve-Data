@@ -36,7 +36,7 @@ class BusinessRuleError(Exception):
 
 @view_config(context=BusinessRuleError, renderer='json')
 def businessError_view(exc, request):
-    request.response.status_code = 520
+    request.response.status_code = 409
     request.response.text = exc.value
     return request.response
 

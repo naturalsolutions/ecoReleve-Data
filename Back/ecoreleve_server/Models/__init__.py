@@ -117,6 +117,8 @@ def db(request):
                 session.rollback()
                 request.response.status_code = 409
                 request.response.text= e.value
+            except Exception as e:
+                session.rollback()
             finally:
                 session.close()
                 makerDefault.remove()
