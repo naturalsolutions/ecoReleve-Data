@@ -86,7 +86,7 @@ BEGIN
 	
 	-- Insert only the first chip lecture per RFID, per individual, per hour.
 	INSERT INTO Individual_Location (creator, FK_Sensor, FK_Individual, type_, Date, lat, lon, creationDate,FK_Region,ELE,OriginalData_ID, FK_MonitoredSite)
-	SELECT @user, FK_Sensor, FK_ind, 'rfid', date_, lat, lon, CURRENT_TIMESTAMP,NULL,ele,'T_rfid_'+CONVERT(Varchar,d.PK_id),FK_MonitoredSite
+	SELECT @user, FK_Sensor, FK_ind, 'RFID', date_, lat, lon, CURRENT_TIMESTAMP,NULL,ele,'T_rfid_'+CONVERT(Varchar,d.PK_id),FK_MonitoredSite
 	FROM @data_to_insert d WHERE d.PK_id NOT IN (SELECT * FROM @data_duplicate)
 
 
