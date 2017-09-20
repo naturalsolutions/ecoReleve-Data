@@ -10,6 +10,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
 
       'importFile/:type(/)': 'importFile',
       'importFile(/)' : 'importFile',
+      'importHistory(/)' : 'importHistory',
 
       'individuals/new(/)': 'newIndividual',
       'individuals/:id(/)': 'individual',

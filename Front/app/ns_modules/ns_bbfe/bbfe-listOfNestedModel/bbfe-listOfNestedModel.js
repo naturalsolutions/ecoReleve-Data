@@ -96,6 +96,17 @@ define([
                 schema: model.schema
             }).render();
             this.forms.push(form);
+            var labels = form.$el.find('label');
+
+            if (this.options.schema.editorClass.indexOf("form-control")==-1 ){
+
+                form.$el.addClass(this.options.schema.editorClass);
+            }
+            _.each(labels, function(label){
+                if(label.innerText.trim().replace('*','') == ''){
+                    $(label).remove();
+                }
+            });
 
             setTimeout( function() { //
               if (_this.schema.editorClass.indexOf("form-control") != -1 ) {
@@ -107,7 +118,7 @@ define([
               form.$el.find('fieldset').prepend('<div class="col-md-12 js_container_index_subForm"><a role="button"  class="js_index_subForm" >'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</button></div>')
             }
             form.$el.find('fieldset').append('\
-                <div class="' + this.hidden + ' col-xs-12 control">\
+                <div class="' + this.hidden + ' control">\
                     <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
                 </div>\
             ');
@@ -213,13 +224,13 @@ define([
         },
         }, {
           //STATICS
+                //<button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right" style="margin-bottom:10px">+</button>\
+          //
           template: _.template('\
             <div id="<%= id %>" name="<%= name %>" class="required nested clearfix">\
-                <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
                 <div class="clear"></div>\
                 <div id="formContainer"   class="clearfix"></div>\
-                <br />\
-                <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
+                <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right" style="margin-top:10px">+</button>\
             </div>\
             ', null, Form.templateSettings),
       });

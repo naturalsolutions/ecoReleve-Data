@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from ..Models import Gsm, GsmEngineering, dbConfig
+from ..Models import Gsm, GsmEngineering, dbConfig, Import
 from traceback import print_exc
 import pandas as pd
 import re
@@ -11,6 +11,8 @@ def uploadFilesGSM(request):
     # Import unchecked GSM data.
     session = request.dbsession
     response = 'Success'
+    user = request.authenticated_userid['iss']
+
     # detect if is a row file retrieve directly from mail
     ptt_pattern = re.compile('[0]*(?P<platform>[0-9]+)g')
     eng_pattern = re.compile('[0]*(?P<platform>[0-9]+)e')
@@ -36,17 +38,23 @@ def uploadFilesGSM(request):
     try:
         file_obj = request.POST['file']
         filename = request.POST['file'].filename
+        importObj = Import(ImportFileName=filename, FK_User=user)
+        importObj.ImportType = 'GSM'
+
+        session.add(importObj)
+        session.flush()
+
         for k in dict_pattern:
             if (dict_pattern[k].search(filename)):
-                res = dict_func_data[k](file_obj, session)
+                res = dict_func_data[k](file_obj, session, importObj)
     except:
         print_exc()
         response = 'An error occured.'
         request.response.status_code = 500
-    return (response, res)
+    return res
 
 
-def get_ALL_gps_toInsert(file_obj, session):
+def get_ALL_gps_toInsert(file_obj, session, importObj):
     file = file_obj.file
     # Load raw csv data
     csv_data = pd.read_csv(file, sep='\t',
@@ -62,10 +70,10 @@ def get_ALL_gps_toInsert(file_obj, session):
     platform_df = platform_df.groupby('GSM_ID')['GSM_ID'].agg(['count'])
     platform_list = platform_df.index.get_values().tolist()
     # go to insert data in the database
-    return insert_GPS(platform_list, csv_data, session)
+    return insert_GPS(platform_list, csv_data, session, importObj)
 
 
-def get_gps_toInsert(file_obj, session):
+def get_gps_toInsert(file_obj, session, importObj):
     file = file_obj.file
     filename = file_obj.filename
     ptt_pattern = re.compile('[0]*(?P<platform>[0-9]+)g')
@@ -82,10 +90,10 @@ def get_gps_toInsert(file_obj, session):
     # Remove the lines containing NaN
     csv_data.dropna(inplace=True)
     # go to insert data in the database
-    return insert_GPS(platform, csv_data, session)
+    return insert_GPS(platform, csv_data, session, importObj)
 
 
-def insert_GPS(platform, csv_data, session):
+def insert_GPS(platform, csv_data, session, importObj):
     if (type(platform) is list):
         query = select([Gsm.date]).where(Gsm.platform_.in_(platform))
     elif (type(platform) is int):
@@ -102,17 +110,19 @@ def insert_GPS(platform, csv_data, session):
     # Get the data to insert
     data_to_insert = csv_data[~csv_data.index.isin(df.index)]
     # Add the platform to the DataFrame
+    nbInsertedGPS = data_to_insert.shape[0]
+    nbExistingGPS = csv_data.shape[0] - nbInsertedGPS
     if (type(platform) is int):
         data_to_insert[Gsm.platform_.name] = platform
-        res = {'new GPS data inserted': data_to_insert.shape[0]}
+        res = {'inserted gps':nbInsertedGPS , 'existing gps': nbExistingGPS}
     else:
-        if (data_to_insert.shape[0] != 0):
+        if ( nbInsertedGPS != 0):
             ptt_name = 'GSM_ID'
             platform_count = data_to_insert.groupby(
                 ptt_name)[ptt_name].agg(['count'])
             res = platform_count.to_dict()
         else:
-            res = {'new GPS data inserted': 0}
+            res = {'inserted gps': 0, 'existing gps': nbExistingGPS}
     # Add the platform to the DataFrame
     data_to_insert.rename(columns={'GSM_ID': Gsm.platform_.name}, inplace=True)
     # data_to_insert['DateTime'] = data_to_insert.index
@@ -128,15 +138,22 @@ def insert_GPS(platform, csv_data, session):
             itertools.repeat(0, len(data_to_insert.index)))
         data_to_insert.loc[:, ('validated')] = list(
             itertools.repeat(0, len(data_to_insert.index)))
+        data_to_insert.loc[:, ('FK_Import')] = list(itertools.repeat(importObj.ID, len(data_to_insert.index)))
+
         data_to_insert.to_sql(Gsm.__table__.name, session.get_bind(
         ), if_exists='append', schema=dbConfig['sensor_schema'])
         # result = list(map(lambda y: y[0], res))
     # else :
     #     result = []
+
+    importObj.maxDate = csv_data.index.max()
+    importObj.minDate = csv_data.index.min()
+    importObj.nbRows = nbInsertedGPS + nbExistingGPS
+    importObj.nbInserted = nbInsertedGPS
     return res
 
 
-def get_eng_toInsert(file_obj, session):
+def get_eng_toInsert(file_obj, session, importObj):
     file = file_obj.file
     filename = file_obj.filename
     eng_pattern = re.compile('[0]*(?P<platform>[0-9]+)e')
@@ -148,10 +165,10 @@ def get_eng_toInsert(file_obj, session):
                            )
     # Remove the lines containing NaN
     csv_data.dropna(inplace=True)
-    return insert_ENG(platform, csv_data, session)
+    return insert_ENG(platform, csv_data, session, importObj)
 
 
-def get_ALL_eng_toInsert(file_obj, session):
+def get_ALL_eng_toInsert(file_obj, session, importObj):
     file = file_obj.file
     # Load raw csv data
     csv_data = pd.read_csv(file, sep='\t',
@@ -166,10 +183,10 @@ def get_ALL_eng_toInsert(file_obj, session):
     platform_df = platform_df.groupby('GSM_ID')['GSM_ID'].agg(['count'])
     platform_list = platform_df.index.get_values().tolist()
     # go to insert data in the database
-    return insert_ENG(platform_list, csv_data, session)
+    return insert_ENG(platform_list, csv_data, session, importObj)
 
 
-def insert_ENG(platform, csv_data, session):
+def insert_ENG(platform, csv_data, session, importObj):
     if (type(platform) is list):
         query = select([GsmEngineering.date]).where(
             GsmEngineering.platform_.in_(platform))
@@ -184,29 +201,31 @@ def insert_ENG(platform, csv_data, session):
     ), index=GsmEngineering.date.name, columns=[GsmEngineering.date.name])
 
     data_to_insert = csv_data[~csv_data.index.isin(df.index)]
-    # Rename columns and Date index
-    # data_to_insert.rename(columns = {
-    #                           'Temperature_C':'TArE_TEMP',
-    #                           'BatteryVoltage_V':'TArE_BATT',
-    #                           'ActivityCount':'TArE_TX_CNT'},
-    #                       inplace=True)
-    # data_to_insert.index.rename('TArE_TXDATE', inplace = True)
     # Add the platform to the DataFrame
+    nbInsertEng = data_to_insert.shape[0]
+    nbExistingEng = csv_data.shape[0] - nbInsertEng
     if (type(platform) is int):
         data_to_insert[GsmEngineering.platform_.name] = platform
-        res = {'new Engineering data inserted': data_to_insert.shape[0]}
+        res = {'inserted Engineering': nbInsertEng, 'existing Engineering': nbExistingEng}
     else:
         data_to_insert.rename(
             columns={'GSM_ID': GsmEngineering.platform_.name}, inplace=True)
-        if (data_to_insert.shape[0] != 0):
+        if (nbInsertEng != 0):
             platform_count = data_to_insert.groupby(
                 GsmEngineering.platform_.name)[
                 GsmEngineering.platform_.name].agg(['count'])
-            res = platform_count.to_dict()
-            res = {'new Engineering data inserted': res['count']}
+            # res = platform_count.to_dict()
+            res = {'inserted Engineering': nbInsertEng, 'existing Engineering': nbExistingEng}
         else:
-            res = {'new Engineering data inserted': 0}
+            res = {'inserted Engineering': 0, 'existing Engineering': nbExistingEng}
     data_to_insert[GsmEngineering.file_date.name] = datetime.datetime.now()
+    data_to_insert.loc[:, ('FK_Import')] = list(itertools.repeat(importObj.ID, len(data_to_insert.index)))
+
+    importObj.maxDate = csv_data.index.max()
+    importObj.minDate = csv_data.index.min()
+    importObj.nbRows = nbInsertEng + nbExistingEng
+    importObj.nbInserted = nbInsertEng
+
     # Write into the database
     data_to_insert.to_sql(GsmEngineering.__table__.name, session.get_bind(
     ), if_exists='append', schema=dbConfig['sensor_schema'])

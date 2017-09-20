@@ -9,9 +9,9 @@ import numpy as np
 from ..utils.distance import haversine
 from traceback import print_exc
 from ..utils.data_toXML import data_to_XML
-from .argosImport import uploadFileArgos
-from .GSMimport import uploadFilesGSM
-from .RFIDimport import uploadFileRFID
+from .importArgos import uploadFileArgos
+from .importGSM import uploadFilesGSM
+from .importRFID import uploadFileRFID
 #from .CamTrapimport import uploadFileCamTrapResumable
 from .CamTrapimport import *
 import os

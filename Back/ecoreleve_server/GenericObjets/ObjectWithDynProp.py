@@ -42,6 +42,9 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
     def GetType(self):
         pass
 
+    def bulk_insert(sef):
+        pass
+
     def GetAllProp(self):
         ''' Get all object properties (dynamic and static) '''
         if self.allProp is None:

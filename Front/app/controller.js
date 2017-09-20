@@ -31,6 +31,7 @@ define([
   './modules/monitoredSites/monitored_sites.new.view',
 
   './modules/validate/lyt-camTrapValidateDetail',
+  './modules/importHistory/history.view',
 
 ],function(
   Marionette,
@@ -46,7 +47,9 @@ define([
   LytIndividual, LytIndividuals, LytIndividualsNew,
   LytSensor, LytSensors, LytSensorsNew,
   LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew,
-  LytCamTrapValidateDetail
+  LytCamTrapValidateDetail,
+  LytImportHistory
+
 ) {
   'use strict';
 
@@ -90,6 +93,10 @@ define([
 
     importFile: function(type) {
       this.rgMain.show(new LytImportFile({type : type}));
+    },
+
+    importHistory: function(type) {
+      this.rgMain.show(new LytImportHistory());
     },
 
     station: function(id, proto, obs) {

@@ -517,7 +517,7 @@ def add_routes(config):
                      'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
 
     # Sensors datas (Argos + GSM + RFID)
-    # config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
+    config.add_route('sensors/datas', 'ecoReleve-Core/sensors/{type}/datas')
     # config.add_route('sensors/uncheckedDatas',
     #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     # config.add_route('sensors/uncheckedDatas/id_indiv/ptt',

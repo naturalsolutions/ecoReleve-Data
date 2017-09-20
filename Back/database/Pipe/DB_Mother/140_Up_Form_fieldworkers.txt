@@ -1,0 +1,9 @@
+Update ModuleForms SET editorClass = 'nested-unstyled'
+WHERE name ='fieldworkers' and InputType = 'ListOfNestedModel'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('140_Up_Form_fieldworkers',GETDATE(),(SELECT db_name()))
+
+
+GO
