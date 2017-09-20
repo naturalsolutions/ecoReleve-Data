@@ -19,7 +19,7 @@ define([
   return Marionette.LayoutView.extend({
 
     className: 'full-height',
-    template: 'app/modules/importFile/camtrap/templates/tpl-step2-camtrap.html',
+    template: 'app/modules/importFile/camTrap/templates/tpl-step2-camtrap.html',
 
     name: 'Upload Camera Trap Files',
 

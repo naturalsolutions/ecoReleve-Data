@@ -17,8 +17,8 @@ define([
 
 	'./argos/lyt-step1-argos',
 
-	'./camtrap/lyt-step1-camtrap',
-	'./camtrap/lyt-step2-camtrap'
+	'./camTrap/lyt-step1-camtrap',
+	'./camTrap/lyt-step2-camtrap'
 
 
 ], function($, _, Backbone, Marionette, NewStepper, Step0,
