@@ -68,7 +68,7 @@ require.config({
 
     'autocompTree': './vendors/jquery.autocompTree',
     'tooltipster-list': 'vendors/tooltipList',
-    'popper' : '../bower_components/popper.js/index'
+    'popper' : '../bower_components/popper.js/index',
 
     'backgrid-moment-cell':'./vendors/backgrid-moment-cell',
 
