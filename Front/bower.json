@@ -23,7 +23,7 @@
     "requirejs-text": "2.0.14",
     "i18n": "https://github.com/jamuhl/i18next.git#1.8.2",
     "fancytree": "2.9.0",
-    "tooltipster": "3.3.0",
+    "tooltipster": "4.2.5",
     "chartjs": "1.0.2",
     "reneco-fonts": "*",
     "ag-grid": "^5.2.0",
@@ -35,11 +35,13 @@
     "noty": "^2.3.8",
     "jquery.rateit": "^1.0.24",
     "bootstrap-star-rating": "^4.0.1",
-    "NaturalJS_Filter": "1.1.1",
     "exif-js": "^2.1.1",
     "imagesloaded": "^4.1.1",
     "backgrid-paginator": "0.3.5",
-    "backgrid": "https://github.com/wyuenho/backgrid.git#0.3.5"
+    "backgrid": "https://github.com/wyuenho/backgrid.git#0.3.5",
+    "webui-popover": "2.1.15",
+    "tether": "^1.4.0",
+    "popper.js": "https://unpkg.com/popper.js"
   },
   "resolutions": {
     "underscore": "1.5.2",

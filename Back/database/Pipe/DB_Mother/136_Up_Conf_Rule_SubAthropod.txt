@@ -1,0 +1,9 @@
+UPDATE [ModuleForms] SET Rules = '{"operator":"disable","target":"'+Name+'","source":"original_id","value":"match@ECollection"}'
+  where module_id= 1 and TypeObj = 231
+  GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('136_Up_Conf_Rule_SubAthropod',GETDATE(),(SELECT db_name()))
+
+
+GO

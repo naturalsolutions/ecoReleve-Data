@@ -115,17 +115,18 @@ class ObservationsView(DynamicObjectCollectionView):
                 listOfSubProtocols = value
 
         data['Observation_childrens'] = listOfSubProtocols
-        curObs.init_on_load()
-        curObs.updateFromJSON(data)
 
         responseBody = {}
 
         try:
+            curObs.init_on_load()
+            curObs.updateFromJSON(data)
             curObs.Station = sta
             self.session.add(curObs)
             self.session.flush()
             responseBody['id'] = curObs.ID
-        except ErrorAvailable as e:
+        except Exception as e:
+            # print(e)
             self.session.rollback()
             self.request.response.status_code = 510
             responseBody['response'] = e.value

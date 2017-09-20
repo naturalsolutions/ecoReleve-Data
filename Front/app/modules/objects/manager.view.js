@@ -173,14 +173,38 @@ define([
 
       if(this.availableTypeObj && this.availableTypeObj.length>1){
 
-        this.ui.btnNew.tooltipList({
-          availableOptions: this.availableTypeObj,
-          liClickEvent: function(liClickValue) {
-            var url = '#' + _this.model.get('type') + '/new/' + liClickValue;
+        var ulElem = document.createElement("ul");
+        var tabLength = this.availableTypeObj.length;
+        for( var i = 0 ; i < tabLength ; i++ ) {
+          var elem = this.availableTypeObj[i];
+          var liElem = document.createElement('li');
+          liElem.onclick = function(e) {
+            _this.ui.btnNew.tooltipster('close');
+            var url = '#' + _this.model.get('type') + '/new/' + this.getAttribute('data-value');
             Backbone.history.navigate(url, {trigger: true});
+          };
+          liElem.setAttribute('data-value' , elem.val)
+          liElem.innerHTML = elem.label;
+          ulElem.appendChild(liElem);
+        }
+
+        this.ui.btnNew.tooltipster({
+          theme : 'tooltipList',
+          position: 'top',
+          interactive : true,
+          content: '',
+          contentAsHTML : true,
+          functionReady: function(instance,helper) {
+            var elemRoot = instance.elementTooltip(); //.appendChild(ulElem)
+            var elemContent = elemRoot.getElementsByClassName('tooltipster-content');
+            $(elemContent).append(ulElem);
+            instance.reposition();
           },
-          position: 'top'
+          functionAfter : function( instance, helper) {
+            instance.destroy();
+          }
         });
+        this.ui.btnNew.tooltipster('open');
       } else {
         var url = '#' + _this.model.get('type') + '/new/'+this.availableTypeObj[0].val;
         Backbone.history.navigate(url, {trigger: true});

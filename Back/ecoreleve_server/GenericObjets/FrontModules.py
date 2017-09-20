@@ -17,6 +17,13 @@ from pyramid import threadlocal
 
 FieldSizeToClass = {0:'col-md-3',1:'col-md-6',2:'col-md-12'}
 
+def binaryTest(binaryWeight, binaryToTest):
+    binariyCodes = [1,2,4,8,16,32]
+    try:
+        pos = binariyCodes.index(binaryToTest)
+    except:
+        return False
+    return binaryWeight & (1<<pos) > 0
 
 def isHidden(int_Render):
     return not (int(int_Render) > 0)
@@ -86,26 +93,42 @@ class ModuleForms(Base):
             self.dto['width'] = self.dto['size']
             self.dto['minWidth'] = self.dto['size']-(self.dto['size']/1.5)
             self.dto['maxWidth'] = self.dto['size']+(self.dto['size']/1.5)
-        if self.FormRender == 4:
+        if binaryTest(self.FormRender, 8):
             self.dto['pinned'] = 'left'
         return self.dto
 
-    def GetDTOFromConf(self, Editable, isGrid=False):
-        ''' return input field to build form '''
+    def GetDTOFromConf(self, displayMode, isGrid=False):
+        ''' return input field to build form :
+            3 display modes : 
+                - "display" : all input non editable, 1
+                - "create",
+                - "edit"
+        '''
+        binaryMode = 0
+        self.displayMode = displayMode
+        if (displayMode.lower() == 'display'):
+            self.Editable = False
+        else:
+            self.Editable = True
 
-        self.Editable = Editable
-        curEditable = self.Editable
         curInputType = self.InputType
+        isDisabled = False
 
         if self.Editable:
-            if self.FormRender < 2:
-                curEditable = False
-                isDisabled = True
-            else:
+            isDisabled = True
+            if binaryTest(self.FormRender, 2) :
+                # input is inactive only in edit mode
+                if displayMode.lower() == 'edit':
+                    isDisabled = True
+                else:
+                    isDisabled = False
+
+            if binaryTest(self.FormRender, 4):
                 isDisabled = False
             self.fullPath = False
             curSize = self.FieldSizeEdit
         else:
+            # display mode, all input inactive
             curSize = self.FieldSizeDisplay
             self.fullPath = True
             isDisabled = True
@@ -115,8 +138,8 @@ class ModuleForms(Base):
         self.dto = {
             'name': self.Name,
             'type': curInputType,
-            'title': self.Label,
-            'editable': Editable,
+            'title': self.Label if self.Label else ' ',
+            'editable': not isDisabled,
             'editorClass': str(self.editorClass),
             'validators': [],
             'options': None,
@@ -204,12 +227,12 @@ class ModuleForms(Base):
 
         for conf in result:
             if conf.InputType == 'GridRanged':
-                gridRanged = conf.GetDTOFromConf(self.Editable, True)
+                gridRanged = conf.GetDTOFromConf(self.displayMode, True)
                 subschema.update(gridRanged)
             else:
                 if self.InputType == 'GridFormEditor':
                     isGrid = True
-                subschema[conf.Name] = conf.GetDTOFromConf(self.Editable, isGrid)
+                subschema[conf.Name] = conf.GetDTOFromConf(self.displayMode, isGrid)
 
         subschema['ID'] = {
             'name': 'ID',
