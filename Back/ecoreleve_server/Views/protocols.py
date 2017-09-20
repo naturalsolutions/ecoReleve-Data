@@ -34,7 +34,7 @@ class ObservationView(DynamicObjectView):
             data = json_body
 
         curObs = self.objectDB
-        curObs.LoadNowValues()
+        # curObs.LoadNowValues()
         listOfSubProtocols = []
         responseBody = {'id': curObs.ID}
 
@@ -43,7 +43,7 @@ class ObservationView(DynamicObjectView):
                 listOfSubProtocols = value
 
         data['Observation_childrens'] = listOfSubProtocols
-        curObs.updateFromJSON(data)
+        curObs.values = data
         try:
             if curObs.Equipment is not None:
                 curObs.Station = curObs.Station
@@ -107,7 +107,7 @@ class ObservationsView(DynamicObjectCollectionView):
             data[items] = value
 
         sta = self.parent.objectDB
-        curObs = self.item.model(FK_ProtocoleType=data['FK_ProtocoleType'], FK_Station=sta.ID)
+        curObs = self.item.model(type_id=data['FK_ProtocoleType'], FK_Station=sta.ID)
         listOfSubProtocols = []
 
         for items, value in data.items():
@@ -119,8 +119,8 @@ class ObservationsView(DynamicObjectCollectionView):
         responseBody = {}
 
         try:
-            curObs.init_on_load()
-            curObs.updateFromJSON(data)
+            # curObs.init_on_load()
+            curObs.values = data
             curObs.Station = sta
             self.session.add(curObs)
             self.session.flush()
@@ -157,7 +157,7 @@ class ObservationsView(DynamicObjectCollectionView):
     def getObservationsWithType(self):
         sta_id = self.parent.objectDB.ID
         listObs = list(self.session.query(Observation
-                                          ).filter(Observation.FK_ProtocoleType == self.typeObj
+                                          ).filter(Observation.type_id == self.typeObj
                                                    ).filter(Observation.FK_Station == sta_id))
         values = []
         for i in range(len(listObs)):
@@ -183,7 +183,7 @@ class ObservationsView(DynamicObjectCollectionView):
                     for i in range(len(listObs)):
                         DisplayMode = 'edit'
                         curObs = listObs[i]
-                        curObsType = curObs.GetType()
+                        curObsType = curObs._type
                         typeID = curObsType.ID
                         if typeID in listProto:
                             listProto[typeID]['obs'].append(curObs.ID)
@@ -212,8 +212,8 @@ class ObservationsView(DynamicObjectCollectionView):
                         DisplayMode = 'edit'
                         typeID = listVirginProto[i].FK_ProtocoleType
 
-                        curVirginObs = Observation(FK_ProtocoleType=typeID)
-                        curVirginObsType = curVirginObs.GetType()
+                        curVirginObs = Observation(type_id=typeID)
+                        curVirginObsType = curVirginObs._type
                         typeName = curVirginObsType.Name.replace('_', ' ')
                         protoStatus = curVirginObsType.obsolete
 
@@ -251,9 +251,9 @@ class ObservationsView(DynamicObjectCollectionView):
         return response
 
     def getType(self):
+        ProtocoleType = Observation.TypeClass
         if 'FieldActivityID' in self.request.params:
             fieldActivityID = self.request.params['FieldActivityID']
-            ProtocoleType = Observation.TypeClass
             join_table = join(ProtocoleType, FieldActivity_ProtocoleType,
                               ProtocoleType.ID == FieldActivity_ProtocoleType.FK_ProtocoleType)
             query = select([ProtocoleType.ID, ProtocoleType.Name]

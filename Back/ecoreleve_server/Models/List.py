@@ -21,7 +21,7 @@ from ..Models import (
     Base,
     Equipment,
     Sensor,
-    SensorType,
+    # SensorType,
     MonitoredSite
 )
 from ..utils import Eval
@@ -31,6 +31,7 @@ from ..utils.datetime import parse
 from ..utils.generator import Generator
 from sqlalchemy.sql.expression import union_all
 
+SensorType = Sensor.TypeClass
 
 eval_ = Eval()
 
@@ -52,7 +53,7 @@ class StationList(CollectionEngine):
             subSelect = select([o.ID]
                                ).where(
                 and_(Station.ID == o.FK_Station,
-                     eval_.eval_binary_expr(o.FK_ProtocoleType, criteriaObj['Operator'],
+                     eval_.eval_binary_expr(o._type_id, criteriaObj['Operator'],
                                             criteriaObj['Value'])))
             query = query.where(exists(subSelect))
 
@@ -360,7 +361,7 @@ class IndivLocationList(Generator):
         super().__init__(IndivLoc, SessionMaker)
 
 
-class SensorList(ListObjectWithDynProp):
+class SensorList(CollectionEngine):
 
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
@@ -496,7 +497,7 @@ class SensorList(ListObjectWithDynProp):
         return query
 
 
-class MonitoredSiteList(ListObjectWithDynProp):
+class MonitoredSiteList(CollectionEngine):
 
     def __init__(self, frontModule, typeObj=None,
                  View=None, startDate=None, history=False):
@@ -523,7 +524,7 @@ class MonitoredSiteList(ListObjectWithDynProp):
         joinTable = outerjoin(
             joinTable,
             SensorType,
-            Sensor.FK_SensorType == SensorType.ID)
+            Sensor._type_id == SensorType.ID)
 
         self.selectable.append(Sensor.UnicIdentifier.label('FK_Sensor'))
         self.selectable.append(SensorType.Name.label('FK_SensorType'))

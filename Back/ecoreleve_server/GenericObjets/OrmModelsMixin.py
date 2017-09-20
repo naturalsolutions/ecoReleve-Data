@@ -3,6 +3,7 @@ from sqlalchemy import (Column,
                         String,
                         Integer,
                         Float,
+                        Boolean,
                         DateTime,
                         select,
                         join,
@@ -31,6 +32,7 @@ from datetime import datetime
 from .DataBaseObjects import ConfiguredDbObjectMapped, DbObject
 from sqlalchemy.orm.exc import *
 from sqlalchemy_utils import get_hybrid_properties
+from pyramid import threadlocal
 
 
 ANALOG_DYNPROP_TYPES = {'String': 'ValueString',
@@ -215,17 +217,31 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
     ID = Column(Integer, primary_key=True)
 
     def __init__(self, *args, **kwargs):
-        self.session = kwargs.get('session', None)
+        ConfiguredDbObjectMapped.__init__(self)
+        ORMUtils.__init__(self)
+        EventRuler.__init__(self)
 
+        self.session = kwargs.get('session', None) or threadlocal.get_current_request().dbsession
         for param, value in kwargs.items():
             if hasattr(self, param):
                 setattr(self, param, value)
-        pass
+        Base.__init__(self,**kwargs)
+
+    # def __getattr__(self, attr):
+    #     if attr == self.fk_table_type_name:
+    #         return self.type_id
+    #     else:
+    #         return super().__getattr__(attr)
+
+    # def __setattr__(self, attr, value):
+    #     if attr == self.fk_table_type_name:
+    #         self.type_id = value
+    #     else:
+    #         super().__setattr__(attr, value)
 
     @orm.reconstructor
     def init_on_load(self):
         self.session = inspect(self).session
-
     @declared_attr
     def table_type_name(cls):
         return cls.__tablename__+'Type'
@@ -392,18 +408,19 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
     def getLatestDynamicValues(self):
         ''' retrieve latest values of dynamic properties '''
-        if not hasattr(self, 'latestValues'):
+        if not hasattr(self, 'latestValues') and self.ID:
             table = self.LastDynamicValueViewClass
             query = table.select().where(table.c['FK_'+self.__tablename__] == self.ID)
             values = self.session.execute(query).fetchall()
             self.latestValues = [(lambda x: dict(x))(val) for val in values]
+        else:
+            self.latestValues = []
         return self.latestValues
 
     def getHistory(self):
         return [row.realValue for row in self._dynamicValues]
 
-    @property
-    def values(self):
+    def getValues(self):
         ''' return flat data dict '''
         dictValues = {}
         values = self.getLatestDynamicValues()
@@ -414,6 +431,10 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
         dictValues.update(self.as_dict())
         return dictValues
 
+    @property
+    def values(self):
+        return self.getValues()
+
     @values.setter
     def values(self, dict_):
         '''parameters:
@@ -421,6 +442,8 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
         set object properties (static and dynamic), 
         it's possible to set all dynamic properties with date string with __useDate__ key'''
         self.previousState = self.values
+        if dict_.get('ID', None):
+            del dict_['ID']
         if self.fk_table_type_name not in dict_ and 'type_id' not in dict_ and not self.type_id:
             raise Exception('object type not exists')
         else:

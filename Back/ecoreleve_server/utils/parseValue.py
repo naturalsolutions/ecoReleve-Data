@@ -80,6 +80,7 @@ def isEqual(val1, val2):
 
 def formatValue(data, schema):
     for key in data:
+        print(key)
         if key in schema:
             if schema[key]['type'] == 'AutocompTreeEditor':
                 data[key] = formatThesaurus(data[key])

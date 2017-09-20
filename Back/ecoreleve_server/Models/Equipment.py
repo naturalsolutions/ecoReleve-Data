@@ -68,7 +68,7 @@ def checkUnequip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
 
 @event.listens_for(Observation.Station, 'set')
 def set_equipment(target, value=None, oldvalue=None, initiator=None):
-    typeName = target.GetType().Name
+    typeName = target._type.Name
     curSta = value
 
     if 'equipment' in typeName.lower() and typeName.lower() != 'station_equipment':
@@ -83,12 +83,12 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
         else:
             deploy = 1
 
-        fk_sensor = int(target.getProperty('FK_Sensor'))
+        fk_sensor = int(target.values.get('FK_Sensor', None))
         if 'individual' in typeName.lower():
-            fk_indiv = target.getProperty('FK_Individual')
+            fk_indiv = target.values.get('FK_Individual', None)
             fk_site = None
         elif 'site' in typeName.lower():
-            fk_site = curSta.getProperty('FK_MonitoredSite')
+            fk_site = curSta.values.get('FK_MonitoredSite', None)
             fk_indiv = None
             if fk_site is None:
                 raise ErrorAvailable({'errorSite': True})
