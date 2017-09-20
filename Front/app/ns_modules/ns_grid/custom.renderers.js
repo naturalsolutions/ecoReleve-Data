@@ -10,7 +10,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     //used on init but also for sorting and filtering!
     CustomRenderer.prototype.init = function (params) {
     	this.eGui = document.createElement('span'); //not sure it's necessary
-
+      this.params = params;
       var value = this.handleValues(params);
 
       //check only before the first render of the grid, otherwise, use refresh
@@ -293,12 +293,23 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
     var CheckboxRenderer = function() {}
     CheckboxRenderer.prototype = new CustomRenderer();
     CheckboxRenderer.prototype.formatValueToDisplay = function (value) {
+      var _this = this;
       var checked = ''; 
       if(value == 1)
         checked = 'checked';
-
-      var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
+      if(this.params.colDef.editable){
+        var chk = '<input class="form-control" type="checkbox" '+ checked +' />';
+      } else {
+        var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
+      }
       $(this.eGui).html(chk);
+      $(this.eGui).find('input').on('click', function(e){
+        if($(this).attr('checked')){
+          _this.params.data[_this.params.colDef.field] = 0;
+        } else {
+          _this.params.data[_this.params.colDef.field] = 1;
+        }
+      });
     };
 
 
@@ -354,6 +365,19 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
 
     var SelectRenderer = function(options) {}
     SelectRenderer.prototype = new CustomRenderer();
+    SelectRenderer.prototype.formatValueToDisplay = function(value){
+      var displayValue;
+      var valueFound = this.params.colDef.options.find(function(obj){
+        return obj.val == value;
+      });
+
+      if (valueFound) {
+        displayValue = valueFound.label;
+      } else {
+        displayValue = value;
+      }
+      $(this.eGui).html(displayValue);
+    };
 
     Renderers.NumberRenderer = NumberRenderer;
     Renderers.TextRenderer = TextRenderer;

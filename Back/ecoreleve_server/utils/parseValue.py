@@ -75,10 +75,7 @@ def isNumeric(val):
 
 
 def isEqual(val1, val2):
-    if isNumeric(val2) and isNumeric(val1):
-        return float(val1) == float(val2)
-    else:
-        return parseValue(val1) == parseValue(val2)
+    return parseValue(val1) == parseValue(val2)
 
 
 def formatValue(data, schema):
@@ -123,6 +120,3 @@ def getAutcompleteValues(ID, objName, NameValReturn):
 
     query = select([table.c[NameValReturn]]).where(table.c['ID'] == ID)
     return session.execute(query).scalar()
-
-
-

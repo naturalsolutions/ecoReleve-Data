@@ -38,6 +38,19 @@ class Equipment(Base):
         curSensor.updateFromJSON(kwargs, StartDate)
         curIndiv.updateFromJSON(kwargs, StartDate)
 
+    def checkExistedSensorData(self):
+        session = threadlocal.get_current_registry().dbmaker()
+
+        query = text('''DECLARE @result int;
+        EXEC dbo.[pr_checkIfProtoProtected] :FK_sensor, :date, @result OUTPUT;
+        SELECT @result;
+        ''').bindparams(bindparam('FK_sensor', self.FK_Sensor),
+        bindparam('date', self.StartDate))
+        Nb = session.execute(query).scalar()
+        if Nb > 0:
+            return True
+        else:
+            return False
 
 def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
     session = threadlocal.get_current_registry().dbmaker()
@@ -52,6 +65,8 @@ def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
         return True
     else:
         return {'equipment_error':True}
+
+
 
 
 def checkUnequip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
