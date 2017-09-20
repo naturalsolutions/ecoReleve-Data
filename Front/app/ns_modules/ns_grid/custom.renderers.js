@@ -103,8 +103,13 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         var validators = params.colDef.schema.validators;
 
         if(validators.length){
-  
-          if(validators[0] === 'required'){
+          var editable;
+          if(typeof params.colDef.editable === 'function'){
+          editable = params.colDef.editable(params);
+          } else {
+            editable = params.colDef.editable;
+          }
+          if(validators[0] === 'required' && editable){
               $(params.eGridCell).addClass('ag-cell-required');
           if(!value && String(value) !== "0"){
                 this.handleError(params);
@@ -159,22 +164,28 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
   
       CustomRenderer.prototype.handleError = function(params) {
         this.error = true;
-  
-        if(!this.isEmptyRow){
-          $(params.eGridCell).addClass('ag-cell-error');
+        var editable;
+        if(typeof params.colDef.editable === 'function'){
+        editable = params.colDef.editable(params);
+        } else {
+          editable = params.colDef.editable;
         }
-  
-        var errorsColumn =  params.data['_errors'];
-  
-        if(!($.isArray(errorsColumn))) {
-          errorsColumn = [];
+        if(editable){
+          if(!this.isEmptyRow){
+            $(params.eGridCell).addClass('ag-cell-error');
+          }
+    
+          var errorsColumn =  params.data['_errors'];
+    
+          if(!($.isArray(errorsColumn))) {
+            errorsColumn = [];
+          }
+          errorsColumn.push(params.colDef.field);
+          errorsColumn = errorsColumn.filter(function(elem, index, self) {
+              return index == self.indexOf(elem);
+          })
+          params.node.setDataValue('_errors', errorsColumn);
         }
-        errorsColumn.push(params.colDef.field);
-        errorsColumn = errorsColumn.filter(function(elem, index, self) {
-            return index == self.indexOf(elem);
-        })
-        params.node.setDataValue('_errors', errorsColumn);
-  
       };
   
       CustomRenderer.prototype.getGui = function() {
@@ -261,7 +272,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       };
   
       ThesaurusRenderer.prototype.deferredValidation = function(params, objectValue){
-        if(objectValue.error || (objectValue.value !== '' && objectValue.displayValue === '')){
+        if(params.colDef.schema.editable && objectValue.error || (objectValue.value !== '' && objectValue.displayValue === '')){
           this.handleError(params);
         } else if ( ( objectValue.value === null && objectValue.displayValue === null && params.colDef.schema.defaultValue ) ) {
           this.handleError(params);
@@ -360,7 +371,15 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
           var checked = ''; 
           if(value == 1)
             checked = 'checked';
-          if(this.params.colDef.editable){
+          var editable;
+          if(typeof this.params.colDef.editable === 'function'){
+            editable = this.params.colDef.editable(this.params);
+          } else {
+            editable = this.params.colDef.editable;
+          }
+  
+          if(editable){
+            
             var chk = '<input class="form-control" type="checkbox" '+ checked +' />';
           } else {
             var chk = '<input disabled class="form-control" type="checkbox" '+ checked +' />';
@@ -518,9 +537,15 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
             }
           }
 
-
-          //TODO if !editable cancel listener
-          if( this.params.colDef.editable  ) {
+          var editable;
+          if(typeof this.params.colDef.editable === 'function'){
+            editable = this.params.colDef.editable(this.params);
+          } else {
+            editable = this.params.colDef.editable;
+          }
+          if(!editable){
+            input.disabled = true;
+          } else {
             label.onclick = function(e) {
               if( _this.nullable )  {
                 switch(_this.params.value) {
