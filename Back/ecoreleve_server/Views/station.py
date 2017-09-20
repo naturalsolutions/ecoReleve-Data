@@ -4,11 +4,8 @@ from ..Models import (
     Station_FieldWorker,
     StationList,
     MonitoredSitePosition,
-<<<<<<< HEAD
     MonitoredSite,
     fieldActivity,
-=======
->>>>>>> acb8833321199a710e323ac10b18b1740cf73a68
     User
 )
 import json
