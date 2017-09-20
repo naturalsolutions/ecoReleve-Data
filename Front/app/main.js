@@ -219,6 +219,7 @@ require.config({
       ],
       exports: 'imageLoaded'
     }
+    
   }
 });
 
