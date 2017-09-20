@@ -39,7 +39,7 @@ class Observation(Base, ObjectWithDynProp):
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
 
     Observation_children = relationship(
-        "Observation", cascade="all, delete-orphan")
+        "Observation", cascade="all, delete-orphan", order_by='Observation.ID')
     SubObservation_children = relationship(
         "ObservationDynPropSubValue", cascade="all, delete-orphan")
     Equipment = relationship(
@@ -155,26 +155,35 @@ class Observation(Base, ObjectWithDynProp):
         self.SubObservation_children = listSubValues
 
     def updateFromJSON(self, DTOObject, startDate=None):
+        # delattr(self,'getForm')
+        previousState = self.getFlatObject()
         ObjectWithDynProp.updateFromJSON(self, DTOObject, None)
         if 'listOfSubObs' in DTOObject:
             self.SubObservation_childrens = DTOObject['listOfSubObs']
-        self.updateLinkedField(DTOObject)
+        self.updateLinkedField(DTOObject, previousState=previousState)
 
     def getFlatObject(self, schema=None):
-        result = super().getFlatObject()
+        result = super().getFlatObject(schema=schema)
         subObsList = []
         typeName = 'children'
         if self.Observation_children != []:
             typeName = self.Observation_children[0].GetType().Name
+
             for subObs in self.Observation_children:
                 subObs.LoadNowValues()
-                flatObs = subObs.getFlatObject()
+                if schema:
+                    subschema = schema[subObs.GetType().Name]['subschema']
+                else:
+                    subschema = None
+                flatObs = subObs.getFlatObject(schema=subschema)
                 if len(subObs.SubObservation_children) > 0:
                     flatObs.update(subObs.SubObservation_childrens)
                 subObsList.append(flatObs)
         result[typeName] = subObsList
         return result
 
+    def beforeDelete(self):
+        self.LoadNowValues()
 
 @event.listens_for(Observation, 'after_delete')
 def unlinkLinkedField(mapper, connection, target):

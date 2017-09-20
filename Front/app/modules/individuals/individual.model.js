@@ -114,7 +114,15 @@ define([
       },{
         field: 'ID',
         headerName: 'ID',
-        hide: true,
+        cellRenderer: function(params){
+          if(params.data.type_ === 'station'){
+            //ex: sta_44960
+            var id = params.data.ID.split('_')[1];
+            return id;
+          } else {
+            return params.data.ID;
+          }
+        }
       },{
         field: 'LAT',
         headerName: 'latitude',

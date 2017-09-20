@@ -21,13 +21,13 @@ define([
   'ns_grid/customCellRenderer/dateTimeRenderer',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
 
-
+  'moment',
   'i18n'
 
 ], function($, _, Backbone, Marionette, AgGrid, Swal,
   CustomTextFilter, CustomNumberFilter, CustomDateFilter, CustomSelectFilter,
   CustomTextAutocompleteFilter, utils_1, Renderers, Editors,
-  Decimal5Renderer, DateTimeRenderer, ObjectPicker
+  Decimal5Renderer, DateTimeRenderer, ObjectPicker,moment
 ) {
 
   'use strict';
@@ -112,7 +112,9 @@ define([
             setTimeout(function(){
               _this.gridOptions.api.firstRenderPassed = true;
               _this.focusFirstCell();
-              _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
+              if (!options.noResizeToFit){
+                _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
+              }
               if(!_this.model.get('totalRecords')){
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
               }
@@ -213,32 +215,87 @@ define([
         var comparator = function (valueA, valueB, nodeA, nodeB, isInverted) {
           var value1;
           var value2;
-          if(valueA && valueA instanceof Object){
-            value1 = valueA.displayValue;
-          } else {
-            value1 = valueA;
+
+          if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()  ) { //detect date
+            //then convert it to timestamp (number)
+            if(valueA) { 
+              valueA = moment(valueA , "DD/MM/YYYY HH:mm:ss" ).valueOf();
+            }
+            if(valueB){
+              valueB = moment(valueB ,  "DD/MM/YYYY HH:mm:ss" ).valueOf();
+            }
           }
 
-          if(valueB && valueB instanceof Object){
-            value2 = valueB.displayValue;
-          } else {
-            value2 = valueB;
-          }
+          if( typeof(valueA) === 'number' || typeof(valueB) === 'number' ) { //number
+            if( !valueA && !valueB ) {
+              return 0;
+            }
+            if(!valueA) {
+              if(isInverted) {
+                return -1;
+              }
+              else {
+                return 1;
+              }
+            }
+            if(!valueB) {
+              if (isInverted) {
+                return 1;
+              }
+              else {
+                return -1;
+              }
+            }
 
-          if(!valueA){
-            value1 = '';
+            return valueA - valueB;
           }
-          if(!valueB){
-            value2 = '';
-          }
+          else { //string
+            if(valueA && valueA instanceof Object){
+              value1 = valueA.displayValue;
+            } else {
+              value1 = valueA;
+            }
 
-          switch(typeof value1){
-            case 'number':
-              return value1 - value2;
-            default:
-              return value1 < value2; //isInverted?
-          }
+            if(valueB && valueB instanceof Object){
+              value2 = valueB.displayValue;
+            } else {
+              value2 = valueB;
+            }
+
+            if(!valueA){
+              value1 = '';
+            }
+            if(!valueB){
+              value2 = '';
+            }
+
+            if( value1 === '' && value2 === '' ) {
+              return 0;
+            }
+            if(value1 === '') {
+              if(isInverted) {
+                return -1;
+              }
+              else {
+                return 1;
+              }
+            }
+            if(value2 === '') {
+              if (isInverted) {
+                return 1;
+              }
+              else {
+                return -1;
+              }
+            }
+            if( value1.toLowerCase() > value2.toLowerCase() ) {
+              return 1;
+            }
+            else {
+              return -1;
+            }
         }
+      }
         col.comparator = comparator;
 
         if(col.field == 'FK_ProtocoleType'){
@@ -947,7 +1004,7 @@ define([
             }
 
             //finaly check if empty
-            if(val != null && val != 'undefined' && val != ''){
+            if(val != 'undefined'){
               empty = false;
 
               //finaly copy node data in the object

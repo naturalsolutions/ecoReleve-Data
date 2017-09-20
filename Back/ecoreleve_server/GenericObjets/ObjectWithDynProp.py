@@ -6,6 +6,8 @@ from .DataBaseObjects import ConfiguredDbObjectMapped, DbObject
 from pyramid import threadlocal
 from ..utils.parseValue import find, isEqual, parser
 from abc import abstractmethod
+from sqlalchemy.orm.exc import *
+from traceback import print_exc
 
 
 analogType = {'String': 'ValueString',
@@ -161,12 +163,16 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         return row[analogType[row['TypeProp']]]
 
     def getForm(self, displayMode='edit', type_=None, moduleName=None):
+        from ..utils.parseValue import formatValue
+        isGrid = False
         ObjType = self.GetType()
-        form = ConfiguredDbObjectMapped.getForm(self, displayMode, ObjType.ID, moduleName)
         if (ObjType.Status == 10):
-            form['grid'] = True
+            isGrid = True
+        form = ConfiguredDbObjectMapped.getForm(self, displayMode, ObjType.ID, moduleName, isGrid=isGrid)
+
         form['data'] = {'id': 0}
-        form['data'].update(form['schema']['defaultValues'])
+        data = formatValue(form['schema']['defaultValues'], form['schema'])
+        form['data'].update(data)
         form['data'][self.getTypeObjectFKName()] = ObjType.ID
         return form
 
@@ -178,7 +184,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
         '''IF ID is send from front --> get data of this object in order to
         display value into form which will be sent'''
-        data = self.getFlatObject(resultat['schema'])
+        data = self.getFlatObject(schema=resultat['schema'])
         resultat['data'] = data
         resultat['recursive_level'] = 0
         resultat = self.getDefaultValue(resultat)
@@ -207,20 +213,30 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
     def linkedFieldDate(self):
         return datetime.now()
 
-    def updateLinkedField(self, data, useDate=None):
+    def updateLinkedField(self, data, useDate=None, previousState=None):
         if useDate is None:
             useDate = self.linkedFieldDate()
 
         linkedFields = self.getLinkedField()
         entitiesToUpdate = {}
+
         for linkProp in linkedFields:
             curPropName = linkProp['Name']
             linkedEntity = LinkedTables[linkProp['LinkedTable']]
             linkedPropName = linkProp['LinkedField'].replace('@Dyn:', '')
             linkedSource = self.getProperty(
                 linkProp['LinkSourceID'].replace('@Dyn:', ''))
-            linkedObj = self.session.query(linkedEntity).filter(
-                getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
+
+            # remove linked field if target object is different of previous
+
+            if previousState and str(linkedSource) != str(previousState.get(linkProp['LinkSourceID'])):
+                self.deleteLinkedField(previousState=previousState)
+
+            try:
+                linkedObj = self.session.query(linkedEntity).filter(
+                    getattr(linkedEntity, linkProp['LinkedID']) == linkedSource).one()
+            except NoResultFound:
+                continue
 
             if linkedObj in entitiesToUpdate:
                 entitiesToUpdate[linkedObj][linkedPropName] = self.getProperty(curPropName)
@@ -232,19 +248,27 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
             entity.init_on_load()
             entity.updateFromJSON(data, startDate=useDate)
 
-    def deleteLinkedField(self, useDate=None):
+    def deleteLinkedField(self, useDate=None, previousState=None):
         session = dbConfig['dbSession']()
+
         if useDate is None:
             useDate = self.linkedFieldDate()
+
         for linkProp in self.getLinkedField():
             obj = LinkedTables[linkProp['LinkedTable']]
 
             try:
                 linkedField = linkProp['LinkedField'].replace('@Dyn:', '')
-                linkedSource = self.getProperty(
-                    linkProp['LinkSourceID'].replace('@Dyn:', ''))
-                linkedObj = session.query(obj).filter(
-                    getattr(obj, linkProp['LinkedID']) == linkedSource).one()
+                if previousState:
+                    linkedSource = previousState.get(linkProp['LinkSourceID'].replace('@Dyn:', ''))
+                else:
+                    linkedSource = self.getProperty(
+                        linkProp['LinkSourceID'].replace('@Dyn:', ''))
+                try:
+                    linkedObj = session.query(obj).filter(
+                        getattr(obj, linkProp['LinkedID']) == linkedSource).one()
+                except NoResultFound:
+                    continue
 
                 if hasattr(linkedObj, linkedField):
                     linkedObj.setProperty(linkedField, None)
@@ -256,6 +280,5 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
                 session.commit()
                 session.close()
-            except:
-                pass
-
+            except Exception as e:
+                raise e

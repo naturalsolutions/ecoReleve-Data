@@ -40,7 +40,7 @@ class IndividualView(DynamicObjectView):
             self.objectDB.updateFromJSON(data)
             return {}
         except ErrorCheckIndividualCodes as e:
-            self.request.response.status_code = 510
+            self.request.response.status_code = 520
             return str(e)
 
     def getEquipment(self):
@@ -100,7 +100,7 @@ class IndividualsView(DynamicObjectCollectionView):
         if 'stationID' in data:
             curSta = self.session.query(Station).get(data['stationID'])
             startDate = curSta.StationDate
-
+        self.typeObj = data['FK_IndividualType']
         newIndiv = self.item.model(FK_IndividualType=self.typeObj,
                                    creationDate=datetime.now(),
                                    Original_ID='0')
@@ -121,10 +121,11 @@ class IndividualsView(DynamicObjectCollectionView):
                 indivID = newIndiv.ID
             return {'ID': indivID}
         except ErrorCheckIndividualCodes as e:
-            return 'error'
+            self.request.response.status_code = 520
+            return str(e)
 
     def checkExisting(self, indiv):
-        indivData = indiv.PropDynValuesOfNow
+        indivData = indiv.__properties__
 
         searchInfo = {'criteria':
                             [{'Column': key,

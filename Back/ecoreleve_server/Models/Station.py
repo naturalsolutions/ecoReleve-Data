@@ -21,6 +21,23 @@ from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
 from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from traceback import print_exc
 from datetime import datetime
+from ..utils.parseValue import dateParser
+
+
+class ErrorCheckUniqueStation(Exception):
+    value = {'existingStation': True}
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class ErrorExistingEquipment(Exception):
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 
 class Station(Base, ObjectWithDynProp):
@@ -124,21 +141,52 @@ class Station(Base, ObjectWithDynProp):
         site = None
         if 'FK_MonitoredSite' in DTOObject:
             site = int(DTOObject['FK_MonitoredSite']) if isNumeric(DTOObject['FK_MonitoredSite']) else None
-        dateSta = datetime.strptime(DTOObject['StationDate'], '%d/%m/%Y %H:%M:%S')
-        equipmentExist = self.existingProtocolEquipment()
+        dateSta = dateParser(DTOObject['StationDate'])
+        equipmentSiteExist = self.existingProtocolEquipmentSite()
+        equipmentIndivExist = self.existingProtocolEquipmentIndiv()
 
-        if equipmentExist and (
-            self.FK_MonitoredSite != site or self.StationDate != dateSta):
-            allow = False
-        return allow
+        if equipmentSiteExist and (
+            self.FK_MonitoredSite != site or
+            self.StationDate != dateSta or
+            float(self.LAT) != float(DTOObject['LAT']) or
+            float(self.LON) != float(DTOObject['LON'])):
+            raise ErrorExistingEquipment({'updateDenied':'site equipment'})
+        if equipmentIndivExist and (self.StationDate != dateSta):
+            raise ErrorExistingEquipment({'updateDenied':'individual equipment'})
+        return
 
-    def existingProtocolEquipment(self):
+    def updateFromJSON(self, DTOObject, startDate=None):
+        if self.checkUniqueStation(DTOObject):
+            ObjectWithDynProp.updateFromJSON(self, DTOObject, startDate)
+
+    def existingProtocolEquipmentSite(self):
         protolist = list(filter(lambda x: x.GetType().Name.lower() in ['site_equipment',
-                                                                       'site_unequipment',
-                                                                       'individual_unequipment',
+                                                                       'site_unequipment'], self.Observations))
+        return len(protolist) > 0
+    
+    def checkUniqueStation(self, DTOObject):
+        curID = DTOObject.get('ID', None)
+        if not curID:
+            curID = 0
+        stmt = text(""" DECLARE @code varchar(250), @id_indiv int, @result int;
+                            exec [dbo].[pr_checkUniqueStation]"""
+                            + """:stationID, :lat, :lon, :date, :fieldActivity , @result OUTPUT;
+                            SELECT @result;"""
+                            ).bindparams(bindparam('stationID', curID),
+                                         bindparam('lat', DTOObject.get('LAT',None)),
+                                         bindparam('lon', DTOObject.get('LON',None)),
+                                         bindparam('date', dateParser(DTOObject['StationDate'])),
+                                         bindparam('fieldActivity', DTOObject['fieldActivityId']),
+                                         )
+        result = self.session.execute(stmt).scalar()
+        if result:
+            raise ErrorCheckUniqueStation()
+        return True
+
+    def existingProtocolEquipmentIndiv(self):
+        protolist = list(filter(lambda x: x.GetType().Name.lower() in ['individual_equipment',
                                                                        'individual_unequipment'], self.Observations))
         return len(protolist) > 0
-
 
 @event.listens_for(Station, 'before_insert')
 @event.listens_for(Station, 'before_update')

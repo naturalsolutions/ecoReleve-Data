@@ -42,7 +42,6 @@ define([
 					value = params.charPress;
 				}
 			}
-
 		  var options = {
 		    key: col.field,
 		    schema: col.schema,
@@ -58,8 +57,9 @@ define([
 
 			this.initBBFE(options);
 
-
 		  this.preventNavigationEvents();
+
+		  window.formInEdition.form['.js-obs-form'] = { 'formChange': true};
 		};
 
 		CustomEditor.prototype.initBBFE = function(options){
@@ -184,6 +184,10 @@ define([
 		TextEditor.prototype.initBBFE = function(options){
 		  this.bbfe = new Form.editors.Text(options);
 		  this.element = this.bbfe.render();
+		};
+
+		TextEditor.prototype.getValue = function(){
+		 return this.element.getValue();
 		};
 
     var CheckboxEditor = function () {};

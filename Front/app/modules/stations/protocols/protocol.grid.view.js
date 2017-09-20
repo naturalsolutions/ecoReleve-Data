@@ -22,6 +22,8 @@ define([
     initialize: function(options){
       this.editable = false;
       this.url = 'stations/' + this.model.get('stationId') + '/observations';
+
+       window.formInEdition.form.baseUri = window.location.href;
     },
 
     handleBtnClick: function(e){
@@ -80,6 +82,7 @@ define([
         response.createdObservations.map(function(obs){
           _this.model.get('obs').push(obs.id);
         });
+        window.formInEdition.form['.js-obs-form'].formChange = false;
         this.model.trigger('change:obs', this.model);
         this.toggleEditionMode();
         this.hardRefresh();
@@ -147,6 +150,10 @@ define([
             type: field.type,
             options: field.options,
             schema: field,
+            minWidth: field.minWidth,
+            maxWidth: field.maxWidth,
+            width: field.width,
+            pinned : field.pinned
           };
 
           editable = this.editable;
@@ -186,7 +193,8 @@ define([
           singleClickEdit : true,
           rowData: rowData,
           rowSelection: (this.editable)? 'multiple' : '',
-        }
+        },
+        noResizeToFit: true
       }));
 
     },

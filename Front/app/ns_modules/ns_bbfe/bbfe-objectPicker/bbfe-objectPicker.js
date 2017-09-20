@@ -154,13 +154,26 @@ define([
           _this.isTermError = false;
 
         } else {
-          _this.matchedValue = undefined;
+          var val = _this.$input.val();
+          var valueFound = ui.content.find(function(item){
+            return val == item.label;
+          });
+          if (valueFound){
+            _this.setValue(valueFound.value,valueFound.label,false);
+            _this.matchedValue = valueFound;
+            _this.isTermError = false;
+          } else {
+            _this.matchedValue = undefined;
+          }
         }
       };
     },
 
     fetchDisplayValue: function(val){
       var _this = this;
+      if (val instanceof Object && val.displayValue){
+        val = val.displayValue;
+      }
       $.ajax({
         url : _this.url+val,
         success : function(data){
@@ -329,8 +342,6 @@ define([
 
     getNewFunc: function(ctx) {
       var _this = this;
-      var _this = this;
-
       var model;
       if( _this.form) {
         model =  _this.form.model;
@@ -348,7 +359,12 @@ define([
             ctx.filters.update();
             data = {};
             for (var i = 0; i < ctx.filters.criterias.length; i++) {
-              data[ctx.filters.criterias[i]['Column']] = ctx.filters.criterias[i]['Value'] === 'null' ? '': ctx.filters.criterias[i]['Value'];
+              if( ctx.filters.criterias[i]['Operator'] == 'Is') {
+                data[ctx.filters.criterias[i]['Column']] = ctx.filters.criterias[i]['Value'] === 'null' ? '': ctx.filters.criterias[i]['Value'];
+              }
+              else {
+                data[ctx.filters.criterias[i]['Column']] = ''
+              }
             }
           } else {
             data = {};

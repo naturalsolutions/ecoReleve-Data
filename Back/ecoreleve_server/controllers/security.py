@@ -4,7 +4,8 @@ from pyramid.security import (
     Allow,
     Authenticated,
     ALL_PERMISSIONS,
-    Everyone
+    Everyone,
+    Deny
 )
 
 
@@ -25,8 +26,8 @@ class Resource(dict):
     def integers(self, ref):
         try:
             ref = int(ref)
-            if int(ref) == 0:
-                return False
+            # if int(ref) == 0:
+            #     return False
         except (TypeError, ValueError):
             return False
         return True
@@ -166,6 +167,8 @@ context_permissions = {
 
     'release': [
                 (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Deny, 'group:superUsers', ALL_PERMISSIONS),
+                (Deny, 'group:users', ALL_PERMISSIONS),
               ],
 }
 

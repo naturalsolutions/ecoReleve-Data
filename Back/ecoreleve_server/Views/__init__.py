@@ -118,10 +118,14 @@ class DynamicObjectView(CustomView):
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
         self.__actions__ = {'history': self.history,
+                            '0': self.parent.getForm,
                             }
 
         if self.integers(ref):
-            self.objectDB = self.session.query(self.model).get(ref)
+            if int(ref) != 0:
+                self.objectDB = self.session.query(self.model).get(ref)
+            else:
+                self.objectDB = None
 
         '''Set security according to permissions dict... yes just that ! '''
         self.__acl__ = context_permissions[parent.__name__]
@@ -144,7 +148,10 @@ class DynamicObjectView(CustomView):
 
     def retrieve(self):
         if 'FormName' in self.request.params:
-            return self.getDataWithForm()
+            if not self.objectDB:
+                return self.parent.getForm(objectType=self.request.params['ObjectType'])
+            else:
+                return self.getDataWithForm()
         else:
             return self.getData()
 
@@ -155,7 +162,12 @@ class DynamicObjectView(CustomView):
         return 'updated'
 
     def delete(self):
+        if not self.objectDB:
+            return None
+
+        self.objectDB.beforeDelete()
         self.session.delete(self.objectDB)
+        self.objectDB.afterDelete()
         return 'deleted'
 
     def history(self):
@@ -212,7 +224,6 @@ class DynamicObjectCollectionView(CustomView):
             self.typeObj = None
 
         self.__actions__ = {'forms': self.getForm,
-                            '0': self.getForm,
                             'getFields': self.getGrid,
                             'getFilters': self.getFilter,
                             'getType': self.getType,
@@ -253,7 +264,7 @@ class DynamicObjectCollectionView(CustomView):
         data = {}
         for items, value in self.request.json_body.items():
             data[items] = value
-        self.setType()
+        self.setType(data[self.objectDB.getTypeObjectFKName()])
         self.objectDB.init_on_load()
         self.objectDB.updateFromJSON(data)
         self.session.add(self.objectDB)
@@ -365,7 +376,8 @@ class DynamicObjectCollectionView(CustomView):
         if not moduleName:
             moduleName = self.moduleFormName
 
-        form = self.getConfigJSON(moduleName + mode, self.typeObj)
+        # form = self.getConfigJSON(moduleName + mode, self.typeObj)
+        form = None
         if not form:
             form = self.objectDB.getForm(mode, objectType, moduleName)
             self.setConfigJSON(moduleName + mode, objectType, form)
@@ -373,12 +385,12 @@ class DynamicObjectCollectionView(CustomView):
 
     def getGrid(self, type_=None, moduleName=None):
         if not moduleName:
-            moduleName = self.objectDB.moduleGridName
-
+            moduleName = self.moduleGridName
         if not type_:
             type_ = self.typeObj
 
-        gridCols = self.getConfigJSON(moduleName, type_)
+        # gridCols = self.getConfigJSON(moduleName, type_)
+        gridCols = None
         if not gridCols:
             gridCols = self.objectDB.getGrid(type_=type_, moduleName=moduleName)
             self.setConfigJSON(moduleName, type_, gridCols)
@@ -393,7 +405,8 @@ class DynamicObjectCollectionView(CustomView):
         if not type_:
             type_ = self.typeObj
 
-        filters = self.getConfigJSON(moduleName+'Filter', type_)
+        # filters = self.getConfigJSON(moduleName+'Filter', type_)
+        filters = None
         if not filters:
             filtersList = self.objectDB.getFilters(type_=type_, moduleName=moduleName)
             filters = {}

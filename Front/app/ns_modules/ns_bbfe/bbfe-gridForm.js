@@ -32,10 +32,12 @@ define([
     },
 
     template: '\
-        <div class="js-rg-grid-subform col-xs-12 no-padding" style="height: 300px">\
-        </div>\
+        <div class="btn-group-grid">\
         <button type="button" class="js-btn-add btn btn-success hide"><span class="reneco reneco-add"></span></button>\
         <button type="button" class="js-btn-delete btn btn-danger btn-sm hide"><span class="reneco reneco-trash"></span> Delete selected rows</button>\
+        </div>\
+        <div class="js-rg-grid-subform col-xs-12 no-padding grid-margin" style="height: 400px">\
+        </div>\
     ',
 
     className: 'sub-grid-form' ,
@@ -128,7 +130,8 @@ define([
           }
         },
         onFocusedRowChange: function(row){
-        }
+        },
+        noResizeToFit: true
       }));
 
     },
@@ -172,7 +175,11 @@ define([
           headerName: field.title,
           type: field.type,
           options: field.options,
-          schema: field
+          schema: field,
+          minWidth: field.minWidth,
+          maxWidth: field.maxWidth,
+          width: field.width,
+          pinned : field.pinned
         };
         
         columnsDefs.push(colDef)

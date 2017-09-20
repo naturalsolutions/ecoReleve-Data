@@ -24,7 +24,7 @@ define([
     template: tpl,
     redirectAfterPost: '',
     displayDelete: true,
-    
+
 
     events : {
       'keypress input' : 'evt'
@@ -77,8 +77,8 @@ define([
 
     initialize: function (options) {
       this.extendsBBForm();
-      
-      
+
+
       var jqxhr;
       this.modelurl = options.modelurl;
 
@@ -166,20 +166,21 @@ define([
     },
 
     pushFormInEdit: function(_this){
+
         this.formChange = false;
         if(!window.formInEdition.form){
             window.formInEdition.form = {baseUri: _this.$el[0].baseURI};
             window.formInEdition.form[_this.formRegion.selector]= _this;
-          } else {
+        } else {
             if(window.formInEdition.form['undefined']){
               delete window.formInEdition.form['undefined'];
             }
-            window.formInEdition.form[_this.formRegion.selector] = _this;
-            window.formInEdition.form.baseUri = _this.$el[0].baseURI;
+          window.formInEdition.form[_this.formRegion.selector] = _this;
+          window.formInEdition.form.baseUri = _this.$el[0].baseURI;
           if(_this.displayMode && _this.displayMode.toLowerCase() == 'edit'){
               _this.bindChanges();
-            }
-      }
+          }
+        }
     },
 
     initModel: function () {
@@ -279,7 +280,12 @@ define([
         } else {
           _this.formChange = false;
        }
+      });      
+
+      $(formRegion).find('.dateTimePicker>input').parent().on("dp.change", function(e) {
+        _this.formChange = true;
       });
+
       $(formRegion).find('input').on("thesaurusChange", function(e) {
         if($(e.target).val() !== ''){
           _this.formChange = true;
@@ -288,7 +294,7 @@ define([
        }
       });
       $(formRegion).find('select').on("change", function(e) {
-         _this.formChange = true;
+        _this.formChange = true;
       });
       $(formRegion).find('textarea').on("change", function(e) {
          _this.formChange = true;
@@ -346,7 +352,7 @@ define([
         return;
       }
 
-      
+
 
       if(this.buttonRegion){
         if(this.buttonRegion[0]){
@@ -519,7 +525,7 @@ define([
     },
 
     butClickEdit: function (e) {
-      
+
       this.displayMode = 'edit';
       this.initModel();
       if(this.buttonRegion)
@@ -527,7 +533,7 @@ define([
 
     },
     butClickCancel: function (e) {
-      
+
       this.displayMode = 'display';
       this.initModel();
       if(this.buttonRegion)
@@ -535,7 +541,7 @@ define([
 
     },
     butClickClear: function (e) {
-      
+
       var formContent = this.BBForm.el;
       $(formContent).find('input').not(':disabled').each(function(){
         $(this).val('');
@@ -573,8 +579,19 @@ define([
             _this.afterDelete(response, _this.model);
           }
         },
-        fail: function(response){
-          console.error(response);
+        error: function(model , response){
+          if( response.status == 409) {
+              var opts = {
+                title : 'Error',
+                text : 'You cannot do this modification because data have already been validated with this sensor. Please contact an administrator.',
+                allowEscapeKey: false,
+                showCancelButton: false,
+                type: 'error',
+                confirmButtonText: 'OK!',
+                confirmButtonColor: '#DD6B55'
+              };
+              setTimeout(  function () {_this.swal(opts);}, 400);
+          }
         }
       });
     },
@@ -596,7 +613,7 @@ define([
 
         var editorValue = values[key];
         var editorSchema = objSchema[key];
-        
+
         if(key == 'defaultValues' || key == 'Parent_Observation') {
           continue;
         }
@@ -738,7 +755,7 @@ define([
       });
     },
 
-    
+
   });
 
 });
