@@ -104,8 +104,17 @@ define([
       var _this = this;
 
       this.dropzone = new Dropzone(this.el, params);
+      if(this.previousModels && this.dropzone.files.length == 0){
+        _(this.previousModels.get('files')).forEach(function(file) {
+          // this.dropzone.addFile(file);
+          this.dropzone.files.push(file);
+          file.status = Dropzone.ADDED;
+          this.dropzone.emit('addedfile', file);
+          this.dropzone._enqueueThumbnail(file);
+          this.dropzone.enqueueFile(file);
+        }, this);
+      }
       this.dropzone.on("maxfilesexceeded", function (file) {
-
         this.removeFile(file);
         Swal({
           title: 'Max file exceeded',
@@ -157,11 +166,7 @@ define([
       }
       this.parent.disableNextBtn();
       
-      if(this.previousModels){
-        _(this.previousModels.get('files')).forEach(function(element) {
-          this.dropzone.addFile(element);
-        }, this);
-      }
+
     },
 
     setDropzoneUploadOnly: function () {
