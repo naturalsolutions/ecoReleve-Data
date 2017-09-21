@@ -49,6 +49,10 @@ define([
         _this.parent.disableNextBtn();
         _this.parent.bindRequiredFields();
         _this.initTimeZoneField();
+        _this.showTZconversion();
+        if(_this.previousModels){
+          _this.parent.checkNextBtn();
+        }
       });
     },
 
@@ -83,10 +87,16 @@ define([
       }
 
       tzEl.on('change', function(e){
-        var curDate = momenttz().utc();
-        var curTZ = _this.getTZnameByGMT(tzEl.val());
-        $('#tz-msg').html(curDate.format('DD/MM/YYYY HH:mm')+' (GMT) --> '+ curDate.tz(curTZ).format('DD/MM/YYYY HH:mm')+' '+tzEl.val());
+        _this.showTZconversion();
       });
+    },
+
+    showTZconversion: function(){
+      var tzEditor = this.nsform.BBForm.fields['timeZone'].editor;
+      var tzEl = tzEditor.$el;
+      var curDate = momenttz().utc();
+      var curTZ = this.getTZnameByGMT(tzEl.val());
+      $('#tz-msg').html(curDate.format('DD/MM/YYYY HH:mm')+' (GMT) --> '+ curDate.tz(curTZ).format('DD/MM/YYYY HH:mm')+' '+tzEl.val());
     },
 
     getGMTbyTZname: function(TZname){
