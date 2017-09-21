@@ -427,7 +427,7 @@ class CollectionEngine():
                     filterCriteria
                 ))
             existQuery = existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView(
-                countHisto=countHisto).c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])
+                countHisto=countHisto).c[self.ObjWithDynProp.fk_table_name])
             fullQuery = fullQuery.where(exists(existQuery))
 
         elif 'null' in criteria['Operator'].lower():
@@ -438,7 +438,7 @@ class CollectionEngine():
                     'Name'] == criteria['Column'],
             )
             existQuery = existQuery.where(self.ObjWithDynProp.ID == self.GetDynPropValueView(
-                countHisto=countHisto).c[self.ObjWithDynProp().GetSelfFKNameInValueTable()])
+                countHisto=countHisto).c[self.ObjWithDynProp.fk_table_name])
 
             if 'is null' == criteria['Operator'].lower():
                 fullQuery = fullQuery.where(or_(

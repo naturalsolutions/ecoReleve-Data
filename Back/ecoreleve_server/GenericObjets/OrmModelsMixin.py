@@ -248,6 +248,10 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
         return cls.__tablename__+'Type'
 
     @declared_attr
+    def fk_table_name(cls):
+        return 'FK_'+cls.__tablename__
+
+    @declared_attr
     def fk_table_type_name(cls):
         return 'FK_'+cls.__tablename__+'Type'
 
