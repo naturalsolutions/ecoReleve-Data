@@ -183,8 +183,12 @@ define([
         $('.progress-bar').css('width', progress + '%');
       });
 
-      this.dropzone.on('error', function (file) {
-        _this.errors = true;
+      this.dropzone.on('error', function (file, resp, xhr) {
+        if (xhr.status == 502){
+          _this.timeout = true
+        } else {
+          _this.errors = true;
+        }
         $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-danger');
       });
 
@@ -212,7 +216,7 @@ define([
 
     endingMessage: function(sumObjreturned){
       var _this = this;
-      if (!_this.errors) {
+      if (!_this.errors && !_this.timeout) {
           Swal({
               title: 'Well done',
               text: 'File(s) have been correctly imported\n\n' +
@@ -233,7 +237,8 @@ define([
                 _this.cancelAll();
               }
             });
-        } else {
+        } 
+        if(_this.errors) {
           Swal({
             title: 'An error occured',
             text: 'Please verify your file',
@@ -244,6 +249,18 @@ define([
             closeOnConfirm: true,
           });
         }
+
+      if(_this.timeout){
+        Swal({
+          title: 'Connection Timeout',
+          text: 'Connection is down because the uploaded file is too large. The process is still running, but you can not get its result',
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonText: 'OK',
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          closeOnConfirm: true,
+        });
+      }
         _this.errors = false;
         _this.totalReturned.reset();
     },

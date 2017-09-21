@@ -224,7 +224,8 @@ def parseDSFileAndInsert(full_filename, session, importID):
             'existing Engineering': nb_existingEng - nb_eng,
             'inserted argos': 0,
             'existing argos': 0}
-    nbRows = nb_existingEng + nb_existingGPS + nb_gps_data
+    
+    nbRows = (nb_existingEng or 0)+ (nb_existingGPS or 0) + (nb_gps_data or 0)
     maxDateGPS = GPSData['datetime'].max()
     minDateGPS = GPSData['datetime'].min()
     nbInserted = nb_gps_data + nb_eng
