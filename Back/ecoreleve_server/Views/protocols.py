@@ -24,17 +24,12 @@ class ObservationView(DynamicObjectView):
         return self
 
     def update(self, json_body=None):
-
-        # if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
-        #     self.request.response.status_code = 409
-        #     return {'protected' : True}
         if not json_body:
             data = self.request.json_body
         else:
             data = json_body
 
         curObs = self.objectDB
-        # curObs.LoadNowValues()
         listOfSubProtocols = []
         responseBody = {'id': curObs.ID}
 
@@ -56,10 +51,6 @@ class ObservationView(DynamicObjectView):
 
     def delete(self):
         if self.objectDB:
-            # if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
-            #     self.request.response.status_code = 409
-            #     return {'protected' : True}
-            # else:
             id_ = self.objectDB.ID
             DynamicObjectView.delete(self)
         else:
@@ -115,7 +106,6 @@ class ObservationsView(DynamicObjectCollectionView):
                 listOfSubProtocols = value
 
         data['Observation_childrens'] = listOfSubProtocols
-
         responseBody = {}
 
         try:

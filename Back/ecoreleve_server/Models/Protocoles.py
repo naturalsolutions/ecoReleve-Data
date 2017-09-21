@@ -24,6 +24,7 @@ from ..utils.parseValue import formatValue
 
 class Observation(HasDynamicProperties, Base):
     __tablename__ = 'Observation'
+    hasLinkedField = True
 
     moduleFormName = 'ObservationForm'
     moduleGridName = None
@@ -46,6 +47,10 @@ class Observation(HasDynamicProperties, Base):
         uselist=False)
     Station = relationship("Station")
     Individual = relationship('Individual')
+
+    @declared_attr
+    def table_type_name(cls):
+        return 'ProtocoleType'
 
     @declared_attr
     def fk_table_type_name(cls):
@@ -173,8 +178,6 @@ class Observation(HasDynamicProperties, Base):
         return values
 
     def getDataWithSchema(self, displayMode='edit'):
-        ''' Function to call: return full schema
-        according to configuration (table :ModuleForms) '''
         resultat = HasDynamicProperties.getDataWithSchema(self, displayMode=displayMode)
 
         if self.Observation_children:

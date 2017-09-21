@@ -125,7 +125,7 @@ class GenericType(ORMUtils):
                 linkedTable = Column('LinkedTable', String(255))
                 linkedField = Column('LinkedField', String(255))
                 linkedID = Column('LinkedID', String(255))
-                linkedSourceID = Column('LinkedSourceID', String(255))
+                linkedSourceID = Column('LinkSourceID', String(255))
 
                 _property_name = relationship(cls.getPropertiesClass())
                 property_name = association_proxy('_property_name', 'Name')
@@ -213,7 +213,7 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
         and get historization of dynamic properties
     '''
     history_track = True
-
+    hasLinkedField = False
     ID = Column(Integer, primary_key=True)
 
     def __init__(self, *args, **kwargs):
@@ -242,6 +242,7 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
     @orm.reconstructor
     def init_on_load(self):
         self.session = inspect(self).session
+
     @declared_attr
     def table_type_name(cls):
         return cls.__tablename__+'Type'
@@ -453,7 +454,8 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
             for prop, value in dict_.items():
                 self.setValue(prop, value, useDate)
 
-            self.updateLinkedField(dict_, useDate=useDate)
+            if self.hasLinkedField:
+                self.updateLinkedField(dict_, useDate=useDate)
 
     def setValue(self, propertyName, value, useDate=None):
         if hasattr(self, propertyName):
@@ -494,6 +496,8 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
     def getDynamicValueAtDate(self, propertyName, useDate):
         prop = self.get_property_by_name(propertyName)
+        if not prop:
+            return None
         valueAtDate = list(filter(lambda x: (x.fk_property == prop.get('ID')
                                              and x.StartDate == useDate
                                              ), self._dynamicValues))
@@ -502,7 +506,6 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
             return curValue
         else:
             return None
-
 
     def getForm(self, displayMode='edit', type_=None, moduleName=None):
         from ..utils.parseValue import formatValue
@@ -519,9 +522,6 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
         return form
 
     def getDataWithSchema(self, displayMode='edit'):
-        ''' Function to call: return full schema
-        according to configuration (table :ModuleForms) '''
-
         resultat = self.getForm(displayMode=displayMode)
 
         '''IF ID is send from front --> get data of this object in order to
@@ -555,10 +555,10 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
         return {prop.as_dict().get('Name'): prop.as_dict() for prop in self._type._properties}
 
     def get_property_by_id(self, id_):
-        return self.properties_by_id.get(id_)
+        return self.properties_by_id.get(id_, None)
 
     def get_property_by_name(self, name):
-        return self.properties_by_name.get(name)
+        return self.properties_by_name.get(name, None)
 
     def getLinkedField(self):
         try:
@@ -584,12 +584,11 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
         linkedFields = self.getLinkedField()
         entitiesToUpdate = {}
-
         for linkProp in linkedFields:
             curPropName = linkProp.property_name
             linkedEntity = self.getLinkedEntity(linkProp.linkedTable)
 
-            linkedPropName = linkProp.linkedField
+            linkedPropName = linkProp.linkedField.replace('@Dyn:', '')
             targetID = DTO.get(linkProp.linkedSourceID, None)
             previousTargetID = previousState.get(linkProp.linkedSourceID)
             
@@ -609,6 +608,7 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
         for entity in entitiesToUpdate:
             data = entitiesToUpdate[entity]
+            data['__useDate__'] = useDate
             entity.values = data
 
     def deleteLinkedField(self, useDate=None, previousState=None):
@@ -620,7 +620,7 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
         for linkProp in self.getLinkedField():
             obj = self.getLinkedEntity(linkProp.linkedTable)
             try:
-                linkedPropName = linkProp.linkedField
+                linkedPropName = linkProp.linkedField.replace('@Dyn:', '')
                 if previousState:
                     linkedSource = previousState.get(linkProp.linkedSourceID)
                 else:
