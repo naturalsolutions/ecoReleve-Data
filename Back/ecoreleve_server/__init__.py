@@ -139,4 +139,12 @@ def main(global_config, **settings):
 
     add_routes(config)
     config.scan()
+
+
+    from .controllers import ClassController
+
+    Alleluhia = ClassController.Alleluhia
+    r = Alleluhia()
+    print('toto version ' , r.toto('fgfgfg'))
+
     return config.make_wsgi_app()

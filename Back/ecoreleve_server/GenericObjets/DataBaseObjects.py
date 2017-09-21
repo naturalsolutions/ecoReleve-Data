@@ -20,8 +20,8 @@ class ConfiguredDbObjectMapped(object):
     def moduleGridName(self):
         pass
 
-    def __init__(self):
-        self.session = threadlocal.get_current_request().dbsession
+    # def __init__(self):
+    #     self.session = threadlocal.get_current_request().dbsession
 
     def getConf(self, moduleName=None):
         if not moduleName:

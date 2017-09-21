@@ -21,6 +21,8 @@ from sqlalchemy import (Column,
 from sqlalchemy.orm import relationship
 from ..Models import Base, dbConfig
 from sqlalchemy.orm.exc import *
+from ..GenericObjets.OrmModelsMixin import HasDynamicProperties
+import types
 
 
 class OrmController(object):
@@ -38,7 +40,10 @@ class OrmController(object):
             self.buildClass(obj)
 
     def __getattr__(self, attr):
-        return self.getClass(attr)
+        if self.getClass(attr):
+            return self.getClass(attr)
+        if self.findOrmEntity(attr):
+            return self.findOrmEntity(attr)
     
     @staticmethod
     def findOrmEntity(tablename):
@@ -170,64 +175,64 @@ class OrmController(object):
 
 # ****************** TEST ****************************
 
-# class MyObject(HasDynamicProperties, Base):
-#     __tablename__ = 'MyObject'
-#     toto = Column(String)
+class MyObject(HasDynamicProperties, Base):
+    __tablename__ = 'MyObject'
+    toto = Column(String)
 
 
-# storageConf = [
-#     {'__tablename__': 'tropdelaballe',
-#      '__classname__': 'Tropdelaballe',
-#      'isdynamic':1,
-#      'properties': {
-#          'statics': [
-#             {'name': 'tutu', 'ctype': 'String', 'clength': 255},
-#             {'name': 'tata', 'ctype': 'Integer', 'clength': None},
-#             {'name': 'toto', 'ctype': 'Float'},
-#             {'name': 'FK_alleeelaaaa', 'ctype': 'Integer', 'clength': None, 'foreign_key':'alleeelaaaa.ID'}
-#             ],
-#             'dynamics': [
-#             {'name': 'NEWdyn1', 'ctype': 'String', 'clength': 10},
-#             {'name': 'dyn2', 'ctype': 'Integer', 'clength': None},
-#             {'name': 'dyn3', 'ctype': 'Float'},
-#             {'name': 'dyn4', 'ctype': 'String', 'clength': 255},
-#             {'name': 'dyn5', 'ctype': 'String', 'clength': 255},
-#             {'name': 'dyn6', 'ctype': 'String', 'clength': 255},
-#             ]
-#         },
-#       'types':{
-#           'type1': ['NEWdyn1', 'dyn2', 'dyn5'],
-#           'type2': ['dyn3', 'dyn4']
-#       }
-#     },
-#     {'__tablename__': 'alleeelaaaa',
-#      '__classname__': 'Alleluhia',
-#      'isdynamic': 1,
-#      'history_track':1,
-#      'properties': {
-#         'statics': [
-#             {'name': 'ahhhhhaaa', 'ctype': 'String', 'clength': 10},
-#             {'name': 'oohhh', 'ctype': 'Integer', 'clength': None},
-#             {'name': 'tada', 'ctype': 'Float'},
-#             {'name': 'pffffff', 'ctype': 'String', 'clength': 255},
-#             ],
-#         'dynamics': [
-#             {'name': 'dyn1', 'ctype': 'String', 'clength': 10},
-#             {'name': 'dyn2', 'ctype': 'Integer', 'clength': None},
-#             {'name': 'dyn3', 'ctype': 'Float'},
-#             {'name': 'dyn4', 'ctype': 'String', 'clength': 255},
-#             {'name': 'dyn5', 'ctype': 'String', 'clength': 255},
-#             ]
-#         },
-#       'types':{
-#           'type1': ['dyn1', 'dyn2'],
-#           'type2': ['dyn3', 'dyn4']
-#       }
-#     }
-# ]
+storageConf = [
+    {'__tablename__': 'tropdelaballe',
+     '__classname__': 'Tropdelaballe',
+     'isdynamic':1,
+     'properties': {
+         'statics': [
+            {'name': 'tutu', 'ctype': 'String', 'clength': 255},
+            {'name': 'tata', 'ctype': 'Integer', 'clength': None},
+            {'name': 'toto', 'ctype': 'Float'},
+            {'name': 'FK_alleeelaaaa', 'ctype': 'Integer', 'clength': None, 'foreign_key':'alleeelaaaa.ID'}
+            ],
+            'dynamics': [
+            {'name': 'NEWdyn1', 'ctype': 'String', 'clength': 10},
+            {'name': 'dyn2', 'ctype': 'Integer', 'clength': None},
+            {'name': 'dyn3', 'ctype': 'Float'},
+            {'name': 'dyn4', 'ctype': 'String', 'clength': 255},
+            {'name': 'dyn5', 'ctype': 'String', 'clength': 255},
+            {'name': 'dyn6', 'ctype': 'String', 'clength': 255},
+            ]
+        },
+      'types':{
+          'type1': ['NEWdyn1', 'dyn2', 'dyn5'],
+          'type2': ['dyn3', 'dyn4']
+      }
+    },
+    {'__tablename__': 'alleeelaaaa',
+     '__classname__': 'Alleluhia',
+     'isdynamic': 1,
+     'history_track':1,
+     'properties': {
+        'statics': [
+            {'name': 'ahhhhhaaa', 'ctype': 'String', 'clength': 10},
+            {'name': 'oohhh', 'ctype': 'Integer', 'clength': None},
+            {'name': 'tada', 'ctype': 'Float'},
+            {'name': 'pffffff', 'ctype': 'String', 'clength': 255},
+            ],
+        'dynamics': [
+            {'name': 'dyn1', 'ctype': 'String', 'clength': 10},
+            {'name': 'dyn2', 'ctype': 'Integer', 'clength': None},
+            {'name': 'dyn3', 'ctype': 'Float'},
+            {'name': 'dyn4', 'ctype': 'String', 'clength': 255},
+            {'name': 'dyn5', 'ctype': 'String', 'clength': 255},
+            ]
+        },
+      'types':{
+          'type1': ['dyn1', 'dyn2'],
+          'type2': ['dyn3', 'dyn4']
+      }
+    }
+]
 
-# from sqlalchemy import exc as sa_exc
-# import warnings
-# with warnings.catch_warnings():
-#     warnings.simplefilter("ignore", category=sa_exc.SAWarning)
-#     ClassController = OrmController(storageConf)
+from sqlalchemy import exc as sa_exc
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+    ClassController = OrmController(storageConf)

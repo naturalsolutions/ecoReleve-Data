@@ -142,7 +142,6 @@ from .SensorData import *
 from .List import *
 from .Log import sendLog
 
-
 # LinkedTables['Individual'] = Individual
 # LinkedTables['Station'] = Station
 # LinkedTables['Protocoles'] = Protocoles

@@ -86,9 +86,11 @@ class GenericType(ORMUtils):
                 @declared_attr
                 def __table_args__(cls):
                     return (UniqueConstraint(
-                                cls.Name,
-                                name='uqc_'+cls.__tablename__+'_name'),
+                                'Name',
+                                name='uqc_'+cls.__tablename__+'_name',
+                                ), {}
                             )
+
             cls.PropertiesClass = type(cls.parent.__tablename__+'DynProp'.title(), (Properties, ), {})
         return cls.PropertiesClass
 
@@ -221,23 +223,11 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
         ORMUtils.__init__(self)
         EventRuler.__init__(self)
 
-        self.session = kwargs.get('session', None) or threadlocal.get_current_request().dbsession
+        self.session = kwargs.get('session', None) or threadlocal.get_current_request().dbsession if threadlocal.get_current_request() else None
         for param, value in kwargs.items():
             if hasattr(self, param):
                 setattr(self, param, value)
         Base.__init__(self,**kwargs)
-
-    # def __getattr__(self, attr):
-    #     if attr == self.fk_table_type_name:
-    #         return self.type_id
-    #     else:
-    #         return super().__getattr__(attr)
-
-    # def __setattr__(self, attr, value):
-    #     if attr == self.fk_table_type_name:
-    #         self.type_id = value
-    #     else:
-    #         super().__setattr__(attr, value)
 
     @orm.reconstructor
     def init_on_load(self):
@@ -305,6 +295,7 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
     @classmethod
     def getDynamicValuesClass(cls):
         if not hasattr(cls, 'DynamicValuesClass'):
+            this = cls
             class DynamicValues(ORMUtils, Base):
                 __tablename__ = cls.__tablename__+'DynPropValue'
                 ID = Column(Integer, primary_key=True)
@@ -328,16 +319,13 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
                 @declared_attr
                 def __table_args__(cls):
-                    return (Index('idx_%s' % cls.__tablename__+'_other',
-                                cls.fk_parent,
-                                cls.fk_property,
-                                'StartDate'),
-                            Index('idx_%s' % cls.__tablename__+'_ValueString',
-                                cls.fk_parent,
+                    return (
+                            Index('idx_%s' % this.__tablename__+'_ValueString',
+                                'FK_'+this.__tablename__,
                                 'ValueString'),
                             UniqueConstraint(
-                                cls.fk_parent,
-                                cls.fk_property,
+                                'FK_'+this.__tablename__,
+                                'FK_'+this.__tablename__+'DynProp',
                                 'StartDate',
                                 name='uqc_'+cls.__tablename__
                             ),
