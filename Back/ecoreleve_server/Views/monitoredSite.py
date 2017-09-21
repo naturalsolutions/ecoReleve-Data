@@ -7,13 +7,12 @@ from ..Models import (
     fieldActivity,
     MonitoredSiteList
 )
-from ..GenericObjets import ListObjectWithDynProp
 import json
 from sqlalchemy import select, desc, join
 from sqlalchemy.exc import IntegrityError
 from collections import OrderedDict
 from ..controllers.security import context_permissions
-from ..GenericObjets.ObjectView2 import DynamicObjectView, DynamicObjectCollectionView
+from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
 from ..controllers.ApiController import RootCore
 from ..GenericObjets.SearchEngine import CollectionEngine
 

@@ -29,7 +29,7 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement
 from ..utils.parseValue import parser, formatValue
 from datetime import datetime
-from .DataBaseObjects import ConfiguredDbObjectMapped, DbObject
+from .DataBaseObjects import ConfiguredDbObjectMapped
 from sqlalchemy.orm.exc import *
 from sqlalchemy_utils import get_hybrid_properties
 from pyramid import threadlocal
@@ -452,9 +452,8 @@ class HasDynamicProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
             useDate = parser(dict_.get('__useDate__', None)) or self.linkedFieldDate()
             for prop, value in dict_.items():
                 self.setValue(prop, value, useDate)
-            
-            self.updateLinkedField(dict_, useDate=useDate)
 
+            self.updateLinkedField(dict_, useDate=useDate)
 
     def setValue(self, propertyName, value, useDate=None):
         if hasattr(self, propertyName):

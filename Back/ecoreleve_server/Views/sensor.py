@@ -8,7 +8,7 @@ from sqlalchemy import select, desc, join, outerjoin
 from collections import OrderedDict
 from sqlalchemy.exc import IntegrityError
 from ..controllers.security import context_permissions
-from ..GenericObjets.ObjectView2 import DynamicObjectView, DynamicObjectCollectionView
+from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
 from ..controllers.ApiController import RootCore
 
 

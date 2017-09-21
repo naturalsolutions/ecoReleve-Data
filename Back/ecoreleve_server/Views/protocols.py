@@ -9,7 +9,7 @@ from ..Models import (
 )
 from sqlalchemy import select, and_, join
 from traceback import print_exc
-from ..GenericObjets.ObjectView2 import DynamicObjectView, DynamicObjectCollectionView
+from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
 from ..controllers.ApiController import RootCore
 
 
@@ -126,7 +126,6 @@ class ObservationsView(DynamicObjectCollectionView):
             self.session.flush()
             responseBody['id'] = curObs.ID
         except Exception as e:
-            # print(e)
             self.session.rollback()
             self.request.response.status_code = 510
             responseBody['response'] = e.value

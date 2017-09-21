@@ -127,8 +127,6 @@ def db(request):
     request.add_finished_callback(cleanup)
     return session
 
-
-from ..GenericObjets.ObjectWithDynProp import LinkedTables
 from ..GenericObjets.FrontModules import *
 from .CustomTypes import *
 from .Protocoles import *
@@ -145,11 +143,11 @@ from .List import *
 from .Log import sendLog
 
 
-LinkedTables['Individual'] = Individual
-LinkedTables['Station'] = Station
-LinkedTables['Protocoles'] = Protocoles
-LinkedTables['Sensor'] = Sensor
-LinkedTables['MonitoredSite'] = MonitoredSite
+# LinkedTables['Individual'] = Individual
+# LinkedTables['Station'] = Station
+# LinkedTables['Protocoles'] = Protocoles
+# LinkedTables['Sensor'] = Sensor
+# LinkedTables['MonitoredSite'] = MonitoredSite
 
 
 

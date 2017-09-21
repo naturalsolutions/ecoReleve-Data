@@ -16,7 +16,7 @@ from sqlalchemy import select, and_, join
 from sqlalchemy.exc import IntegrityError
 from .protocols import ObservationsView
 from ..utils.parseValue import parser
-from ..GenericObjets.ObjectView2 import DynamicObjectView, DynamicObjectCollectionView
+from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
 from ..controllers.ApiController import RootCore
 from ..controllers.security import context_permissions
 

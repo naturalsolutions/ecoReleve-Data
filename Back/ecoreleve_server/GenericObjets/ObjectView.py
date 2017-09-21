@@ -102,6 +102,8 @@ class DynamicObjectView(CustomView):
                 self.objectDB = self.session.query(self.model).get(ref)
             else:
                 self.objectDB = None
+        # if not hasattr(self.objectDB, 'session') or not self.objectDB.session:
+        #     self.objectDB.session = self.session
 
         '''Set security according to permissions dict... yes just that ! '''
         self.__acl__ = context_permissions[parent.__name__]
@@ -111,15 +113,15 @@ class DynamicObjectView(CustomView):
         raise Exception('method has to be overriden')
 
     def getData(self):
-        self.objectDB.LoadNowValues()
-        return self.objectDB.getFlatObject()
+        # self.objectDB.LoadNowValues()
+        return self.objectDB.values
 
     def getDataWithForm(self):
         try:
             displayMode = self.request.params['DisplayMode']
         except:
             displayMode = 'display'
-        self.objectDB.LoadNowValues()
+        # form = self.objectDB.getForm(displayMode, objectType, moduleName)
         return self.objectDB.getDataWithSchema(displayMode=displayMode)
 
     def retrieve(self):
@@ -133,8 +135,8 @@ class DynamicObjectView(CustomView):
 
     def update(self):
         data = self.request.json_body
-        self.objectDB.beforeUpdate()
-        self.objectDB.updateFromJSON(data)
+        # self.objectDB.beforeUpdate()
+        self.objectDB.values = data
         return 'updated'
 
     def delete(self):
@@ -149,10 +151,10 @@ class DynamicObjectView(CustomView):
     def history(self):
         from ..Models import thesaurusDictTraduction
 
-        propertiesTable = Base.metadata.tables[self.objectDB.GetDynPropTable()]
-        dynamicValuesTable = Base.metadata.tables[self.objectDB.GetDynPropValuesTable()]
-        FK_name = self.objectDB.GetSelfFKNameInValueTable()
-        FK_property_name = self.objectDB.GetDynPropFKName()
+        propertiesTable = Base.metadata.tables[self.objectDB.TypeClass.PropertiesClass.__tablename__]
+        dynamicValuesTable = Base.metadata.tables[self.objectDB.DynamicValuesClass.__tablename__]
+        FK_name = 'FK_'+self.objectDB.__tablename__
+        FK_property_name = self.objectDB.fk_table_DynProp_name
 
         tableJoin = join(dynamicValuesTable, propertiesTable,
                          dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
@@ -191,10 +193,12 @@ class DynamicObjectCollectionView(CustomView):
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
         self.objectDB = self.item.model()
+        if not hasattr(self.objectDB, 'session') or not self.objectDB.session:
+            self.objectDB.session = self.session
 
         if 'typeObj' in self.request.params and self.request.params['typeObj'] is not None:
             objType = self.request.params['typeObj']
-            self.setType(objType)
+            self.objectDB.type_id = objType
             self.typeObj = objType
         else:
             self.typeObj = None
@@ -240,9 +244,9 @@ class DynamicObjectCollectionView(CustomView):
         data = {}
         for items, value in self.request.json_body.items():
             data[items] = value
-        self.setType(data[self.objectDB.getTypeObjectFKName()])
-        self.objectDB.init_on_load()
-        self.objectDB.updateFromJSON(data)
+        # self.setType(data[self.objectDB.getTypeObjectFKName()])
+        # self.objectDB.init_on_load()
+        self.objectDB.values= data
         self.session.add(self.objectDB)
         self.session.flush()
         return {'ID': self.objectDB.ID}
@@ -346,9 +350,10 @@ class DynamicObjectCollectionView(CustomView):
     def getForm(self, objectType=None, moduleName=None, mode='edit'):
         if 'ObjectType' in self.request.params:
             objectType = self.request.params['ObjectType']
+            self.objectDB.type_id = objectType
         if not objectType:
             objectType = None
-        self.setType(int(objectType))
+        # self.setType(int(objectType))
         if not moduleName:
             moduleName = self.moduleFormName
 
@@ -400,11 +405,11 @@ class DynamicObjectCollectionView(CustomView):
             self.configJSON[moduleName] = {}
         self.configJSON[moduleName][typeObj] = configObject
 
-    def setType(self, objectType=1):
-        setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
+    # def setType(self, objectType=1):
+    #     setattr(self.objectDB, self.objectDB.getTypeObjectFKName(), objectType)
 
     def getType(self):
-        table = Base.metadata.tables[self.objectDB.getTypeObjectName()]
+        table = self.objectDB.TypeClass.__table__
         query = select([table.c['ID'].label('val'),
                         table.c['Name'].label('label')])
         response = [OrderedDict(row) for row in self.session.execute(query).fetchall()]

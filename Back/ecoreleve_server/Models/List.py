@@ -10,7 +10,6 @@ from sqlalchemy import (
     DATE,
     outerjoin)
 from sqlalchemy.orm import aliased
-from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
 from ..GenericObjets.SearchEngine import CollectionEngine
 from ..Models import (
     Observation,
@@ -37,7 +36,7 @@ eval_ = Eval()
 
 
 class StationList(CollectionEngine):
-    ''' this class extend ListObjectWithDynProp, it's used to filter stations '''
+    '''it's used to filter stations '''
 
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
@@ -184,7 +183,7 @@ class IndividualList(CollectionEngine):
         joinTable = outerjoin(joinTable, Sensor,
                               Sensor.ID == EquipmentTable.c['FK_Sensor'])
         joinTable = outerjoin(joinTable, SensorType,
-                              Sensor.FK_SensorType == SensorType.ID)
+                              Sensor.type_id == SensorType.ID)
 
         self.selectable.append(Sensor.UnicIdentifier.label('FK_Sensor'))
         self.selectable.append(SensorType.Name.label('FK_SensorType'))
@@ -280,7 +279,7 @@ class IndividualList(CollectionEngine):
             fullQueryExist = select([Equipment.FK_Individual]).select_from(
                 joinTableExist).where(Equipment.FK_Individual == Individual.ID)
             fullQueryExist = fullQueryExist.where(
-                and_(vs.c['FK_SensorDynProp'] == 9, Sensor.FK_SensorType == 4))
+                and_(vs.c['FK_SensorDynProp'] == 9, Sensor.type_id == 4))
 
         else:
             queryExist = select([e2]).where(
@@ -291,7 +290,7 @@ class IndividualList(CollectionEngine):
                 [Equipment.FK_Individual]).select_from(joinTableExist)
             fullQueryExist = fullQueryExist.where(and_(
                 ~exists(queryExist), and_(vs.c['FK_SensorDynProp'] == 9,
-                                          and_(Sensor.FK_SensorType == 4,
+                                          and_(Sensor.type_id == 4,
                                                and_(Equipment.Deploy == 1,
                                                     and_(Equipment.StartDate < startDate,
                                                          Equipment.FK_Individual == Individual.ID)

@@ -4,6 +4,4 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore", category=sa_exc.SAWarning)
 
 from .Business import BusinessRules, BusinessRuleError
-from . import ObjectWithDynProp
 from . import FrontModules
-from .ListObjectWithDynProp import ListObjectWithDynProp

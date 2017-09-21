@@ -14,8 +14,6 @@ from sqlalchemy import (
     select,
     Boolean)
 from sqlalchemy.orm import relationship
-from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
-from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from datetime import datetime, timedelta
 from sqlalchemy.ext.hybrid import hybrid_property
 from ..utils.parseValue import isNumeric
