@@ -51,9 +51,9 @@ def uploadFileArgos(request):
     session.add(importObj)
     session.flush()
     message = {}
-    if 'DIAG' in filename:
+    if 'DIAG' in filename.upper():
         message, nbRows, nbInserted, maxDate, minDate = parseDIAGFileAndInsert(full_filename, session, importObj.ID)
-    elif 'DS' in filename:
+    elif 'DS' in filename.upper():
         message, nbRows, nbInserted, maxDate, minDate = parseDSFileAndInsert(full_filename, session, importObj.ID)
 
     if message:
@@ -61,6 +61,8 @@ def uploadFileArgos(request):
         importObj.nbInserted = nbInserted
         importObj.maxDate = maxDate
         importObj.minDate = minDate
+    else:
+        message = 'Argos File type name did not recognized'
     return message
 
 
