@@ -141,6 +141,7 @@ from .Equipment import *
 from .SensorData import *
 from .List import *
 from .Log import sendLog
+from .Project import *
 
 # LinkedTables['Individual'] = Individual
 # LinkedTables['Station'] = Station

@@ -141,9 +141,9 @@ def main(global_config, **settings):
     config.scan()
 
 
-    from .controllers import ClassController
+    from .controllers import ModelFactory
 
-    Alleluhia = ClassController.Alleluhia
+    Alleluhia = ModelFactory.Alleluhia
     r = Alleluhia()
     print('toto version ' , r.toto('fgfgfg'))
 

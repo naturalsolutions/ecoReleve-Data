@@ -25,7 +25,7 @@ from ..GenericObjets.OrmModelsMixin import HasDynamicProperties
 import types
 
 
-class OrmController(object):
+class OrmFactory(object):
     __allORMClass__ = {}
 
     staticTypeDict = {'String': String,
@@ -235,4 +235,4 @@ from sqlalchemy import exc as sa_exc
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", category=sa_exc.SAWarning)
-    ClassController = OrmController(storageConf)
+    ModelFactory = OrmFactory(storageConf)

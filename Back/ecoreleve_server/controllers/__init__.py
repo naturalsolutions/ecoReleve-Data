@@ -23,10 +23,11 @@ from sqlalchemy import (Column,
                         bindparam,
                         insert,
                         desc)
-from .OrmController import ClassController
+from .OrmController import ModelFactory
 import types
 
-StationType = ClassController.StationType
+
+StationType = ModelFactory.StationType
 print(StationType)
 
 from functools import wraps
@@ -42,7 +43,7 @@ def patch(myClass, methodType=None):
             setattr(myClass, function.__name__, wrappingMethod(function))
     return real_decorator
 
-Alleluhia = ClassController.Alleluhia
+Alleluhia = ModelFactory.Alleluhia
 # print(Alleluhia)
 
 @patch(Alleluhia)
