@@ -262,10 +262,21 @@ define([
       if(this.drawable){
         this.initDrawLayer()
       }
+      this.getRegions()
       this.initErrorLayer();
       this.displayError(this.geoJson);
     },
 
+    getRegions: function(){
+      var _this = this;
+      $.ajax({
+        url : 'stations/regions',
+        contentType:'application/json',
+        type:'GET',
+      }).done(function(geoJson) {
+        new L.GeoJSON(geoJson).addTo(_this.map);
+      });
+    },
     google: function(){
       var _this = this;
 
