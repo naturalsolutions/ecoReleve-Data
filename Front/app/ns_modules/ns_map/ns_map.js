@@ -22,12 +22,13 @@ define([
   'backbone',
   'marionette',
   'L',
+  'Draw',
   'leaflet_cluster',
   'googleLoaer',
   'leaflet_google',
   'config',
 
-], function(config, $, _, Backbone , Marionette, L, cluster, GoogleMapsLoader
+], function(config, $, _, Backbone , Marionette, L, Draw, cluster, GoogleMapsLoader
     ) {
 
   'use strict';  
@@ -53,6 +54,9 @@ define([
     if(options.com){
       this.com = options.com;
       this.com.addModule(this);
+    }
+    if(options.drawable){
+      this.drawable = true;
     }
 
     if (options.idName)  {
@@ -149,6 +153,45 @@ define([
 
     },
 
+    initDrawLayer: function(){
+			var drawnItems = new L.FeatureGroup();
+			this.map.addLayer(drawnItems);
+			var _this = this;
+
+			var drawControl = new L.Control.Draw({
+				edit: {
+					featureGroup: drawnItems
+				}
+			});
+			this.map.addControl(drawControl);
+
+			this.map.on('draw:created', function (e) {
+				var type = e.layerType,
+				layer = e.layer;
+				_this.drawLayer = layer;
+				// _this.drawControlRdy.resolve();
+				console.log('ma couche controle est prete');
+				drawnItems.addLayer(layer);
+			});
+
+			this.map.on('draw:edited', function () {
+				_this.drawLayer = _this.drawLayer;
+				console.log('ma couche controle a été éditée');
+			});
+
+			this.map.on('draw:deleted', function () {
+				// Update db to save latest changes.
+				_this.drawLayer = undefined;
+				// _this.drawControlRdy = $.Deferred();
+				console.log('ma couche a été supprimée')
+			});
+
+			// rajouter search barre avec Leaflet
+			// add a layer group, yet empty
+			var markersLayer = new L.LayerGroup();
+			this.map.addLayer(markersLayer);
+    },
+
     ready: function(){
       this.setTotal(this.geoJson);
 
@@ -159,6 +202,9 @@ define([
         this.addMarkersLayer();
       }
 
+      if(this.drawable){
+        this.initDrawLayer()
+      }
       this.initErrorLayer();
       this.displayError(this.geoJson);
     },
