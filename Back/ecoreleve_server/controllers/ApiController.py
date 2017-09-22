@@ -94,3 +94,13 @@ class RESTView(object):
     @view_config(request_method='PUT', renderer='json', permission='update')
     def put(self):
         return self.context.update()
+
+from . import ModelFactory
+class ApiFactory(object):
+    
+    def __init__(self, ModelFactory):
+        self.ModelFactory = ModelFactory
+
+    def buildView(self):
+        pass
+    pass

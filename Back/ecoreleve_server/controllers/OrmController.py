@@ -22,6 +22,7 @@ from sqlalchemy.orm import relationship
 from ..Models import Base, dbConfig
 from sqlalchemy.orm.exc import *
 from ..GenericObjets.OrmModelsMixin import HasDynamicProperties
+from ..GenericObjets.SearchEngine import CollectionEngine
 import types
 
 
@@ -75,6 +76,14 @@ class OrmFactory(object):
             dbObject = type(classname, (DbObject, Base, ), model)
         
         self.add(dbObject)
+
+    # ### TODO : 
+    #   - set Collection Engine automatically
+    #   - Collection Engine NEED to work on simple ObjectDB
+    # def setCollection(self, dbObject):
+    #     if hasattr(dbObject, 'history_track'):
+    #         dbObject.Collection = type('Collection'+dbObject.__tablename__, (CollectionEngine, ), )
+
 
     def setStaticProperties(self, model, properties):
         for prop in properties:
@@ -175,9 +184,9 @@ class OrmFactory(object):
 
 # ****************** TEST ****************************
 
-class MyObject(HasDynamicProperties, Base):
-    __tablename__ = 'MyObject'
-    toto = Column(String)
+# class MyObject(HasDynamicProperties, Base):
+#     __tablename__ = 'MyObject'
+#     toto = Column(String)
 
 
 storageConf = [
