@@ -1,6 +1,6 @@
 <div class="step-pane active sample-pane clearfix" data-step="1" id="step1" style="overflow: hidden;">
 	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 full-height">
-		<div id="actions" class="file-list full-height scroll-auto" style="padding-right: 20px; padding-bottom: 20px;">
+		<div id="actions" class="file-list full-height scroll-auto" style="padding-bottom: 20px;">
 			<br>
 			<button class="btn btn-success fileinput-button dz-clickable">
 						<i class="glyphicon glyphicon-plus"></i>
@@ -15,6 +15,7 @@
 						<span>Cancel upload</span>
 				</button>
 			<br>
+			<br>
 			<span class="fileupload-process hidden">
 					<div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="opacity: 0;">
 						<div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress=""></div>
@@ -27,12 +28,13 @@
 					<!-- <div>
 								<span class="preview"><img data-dz-thumbnail /></span>
 						</div> -->
-					<div class="col-md-8">
-						<p class="col-md-6 name" data-dz-name></p>
-						<p class="col-md-5 size" data-dz-size></p>
+					<div class="col-md-9">
+						<p class="col-md-8 name" data-dz-name style="word-wrap: break-word;
+						line-height: 20px;padding: 0 0;"></p>
+						<p class="col-md-3 size" data-dz-size></p>
 						<strong class="error text-danger hide" data-dz-errormessage></strong>
 					</div>
-					<div class="col-md-4">
+					<div class="col-md-3">
 							<!-- <button class="btn btn-primary start">
 								<i class="glyphicon glyphicon-upload"></i>
 								<span>Upload</span>
