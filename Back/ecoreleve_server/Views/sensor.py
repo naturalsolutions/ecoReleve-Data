@@ -115,7 +115,7 @@ class SensorsView(DynamicObjectCollectionView):
     def getUnicIdentifier(self):
         sensorType = self.request.params['sensorType']
         query = select([Sensor.UnicIdentifier.label('label'), Sensor.ID.label(
-            'val')]).where(Sensor.FK_SensorType == sensorType)
+            'val')]).where(Sensor.FK_SensorType == sensorType).order_by(Sensor.UnicIdentifier)
         response = [OrderedDict(row) for row in self.session.execute(query).fetchall()]
 
         return response
