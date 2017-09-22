@@ -198,6 +198,8 @@ define([
       });
 
       this.dropzone.on('queuecomplete', function (file) {
+        $('#header-loader').addClass('hidden');
+        
         var sumObjreturned = {};
         _.each(_this.totalReturned.models, function(model){
           _.each(model.attributes, function(val, key){
@@ -282,6 +284,7 @@ define([
       if(this.checkFileIsPresent()){
         if(this.uploadOnly){
           this.dropzone.processQueue();
+          $('#header-loader').removeClass('hidden');
         }
         return true;
       } else {
@@ -292,7 +295,9 @@ define([
     sendFiles: function () {
 
     },
-    onDestroy: function () {},
+    onDestroy: function (view) {
+      $('#header-loader').addClass('hidden');
+    }
 
   });
 });
