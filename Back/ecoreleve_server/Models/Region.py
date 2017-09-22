@@ -29,7 +29,7 @@ class WKTSpatialElement(GenericFunction):
 
 @compiles(WKTSpatialElement, 'mssql')
 def compile(element, compiler, **kw):
-    return "%s.STAsText()" % compiler.process(element.clauses)
+    return "geometry::STGeomFromText(%s)" % compiler.process(element.clauses)
 
 
 class Geometry(UserDefinedType):
@@ -64,23 +64,23 @@ class Region(Base):
         return func.geo.wkt(cls.valid_geom)
 
 
-def getGeomRegion(session) :
-    import binascii
-    from shapely.wkt import loads
-    from geojson import Feature, FeatureCollection, dumps
+# def getGeomRegion(session) :
+#     import binascii
+#     from shapely.wkt import loads
+#     from geojson import Feature, FeatureCollection, dumps
 
-    results = session.query(Region).filter(Region.Region.like('%'+'stan'))
+#     results = session.query(Region).filter(Region.Region.like('%'+'stan'))
 
-    geomFeatures = []
-    for geom in results :
-        wkt = geom.valid_geom
-        geometry = loads(wkt)
-        feature = Feature(
-            id=geom.ID,
-            geometry=geometry,
-            properties={
-                "name": geom.Region,
-                })
-        geomFeatures.append(feature)
+#     geomFeatures = []
+#     for geom in results :
+#         wkt = geom.valid_geom
+#         geometry = loads(wkt)
+#         feature = Feature(
+#             id=geom.ID,
+#             geometry=geometry,
+#             properties={
+#                 "name": geom.Region,
+#                 })
+#         geomFeatures.append(feature)
 
-    return geomFeatures
+#     return geomFeatures

@@ -6,7 +6,8 @@ from ..Models import (
     MonitoredSitePosition,
     MonitoredSite,
     fieldActivity,
-    User
+    User,
+    Region
 )
 import json
 import itertools
@@ -66,9 +67,30 @@ class StationsView(DynamicObjectCollectionView):
         DynamicObjectCollectionView.__init__(self, ref, parent)
         self.actions = {'updateSiteLocation': self.updateMonitoredSite,
                         'importGPX': self.getFormImportGPX,
-                        'fieldActivity': self.getFieldActivityList
+                        'fieldActivity': self.getFieldActivityList,
+                        'regions': self.getGeomRegion
                         }
         self.__acl__ = context_permissions[ref]
+
+    def getGeomRegion(self) :
+        from shapely.wkt import loads
+        from geojson import Feature, FeatureCollection, dumps
+
+        session = self.request.dbsession
+        results = session.query(Region).filter(Region.Region.like('%'+'stan'))
+        geomFeatures = []
+        for geom in results :
+            wkt = geom.valid_geom
+            geometry = loads(wkt)
+            feature = Feature(
+                id=geom.ID,
+                geometry=geometry,
+                properties={
+                    "name": geom.Region,
+                    })
+            geomFeatures.append(feature)
+
+        return geomFeatures
 
     def updateMonitoredSite(self):
         session = self.request.dbsession

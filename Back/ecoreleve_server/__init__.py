@@ -130,6 +130,6 @@ def main(global_config, **settings):
     add_routes(config)
     config.scan()
 
-    from .Models.Region import getGeomRegion
-    getGeomRegion(dbConfig['dbSession']())
+    # from .Models.Region import getGeomRegion
+    # getGeomRegion(dbConfig['dbSession']())
     return config.make_wsgi_app()
