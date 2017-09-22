@@ -1041,7 +1041,7 @@ define([
                 function(isConfirm) {
                   console.log("bim je valide requête en cours");
                   $.ajax({
-                    url : config.coreUrl+'sensors/'+_this.type+'/uncheckedDatas',
+                    url : config.coreUrl+'sensorDatas/'+_this.type+'/validate',
                     method: 'POST',
                     data: {
                           fk_Sensor : _this.sensorId,
