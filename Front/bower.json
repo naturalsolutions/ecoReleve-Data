@@ -31,7 +31,8 @@
     "webui-popover": "2.1.15",
     "moment-timezone": "~0.5.13",
     "tether": "^1.4.0",
-    "popper.js": "https://unpkg.com/popper.js"
+    "popper.js": "https://unpkg.com/popper.js",
+    "leaflet-draw": "0.4.12"
   },
   "resolutions": {
     "underscore": "1.5.2",
