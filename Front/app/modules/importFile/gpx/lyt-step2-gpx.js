@@ -250,7 +250,7 @@ define([
           },
           function(isConfirm) {
             if( isConfirm ) {
-              Backbone.history.navigate('stations/lastImported', {trigger: true});
+              Backbone.history.navigate('stations?lastImported', {trigger: true});
             }
             else {
               // Backbone.history.navigate('#', {trigger: false});
