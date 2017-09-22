@@ -51,6 +51,7 @@ define([
     ModelPrototype: Backbone.Model,
 
     initialize: function(options) {
+      this.options = options;
       this.model = new this.ModelPrototype();
       this.com = new Com();
       if( window.app.currentData ){

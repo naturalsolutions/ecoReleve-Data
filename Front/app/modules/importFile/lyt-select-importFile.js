@@ -104,8 +104,17 @@ define([
       var _this = this;
 
       this.dropzone = new Dropzone(this.el, params);
+      if(this.previousModels && this.dropzone.files.length == 0){
+        _(this.previousModels.get('files')).forEach(function(file) {
+          // this.dropzone.addFile(file);
+          this.dropzone.files.push(file);
+          file.status = Dropzone.ADDED;
+          this.dropzone.emit('addedfile', file);
+          this.dropzone._enqueueThumbnail(file);
+          this.dropzone.enqueueFile(file);
+        }, this);
+      }
       this.dropzone.on("maxfilesexceeded", function (file) {
-
         this.removeFile(file);
         Swal({
           title: 'Max file exceeded',
@@ -157,11 +166,7 @@ define([
       }
       this.parent.disableNextBtn();
       
-      if(this.previousModels){
-        _(this.previousModels.get('files')).forEach(function(element) {
-          this.dropzone.addFile(element);
-        }, this);
-      }
+
     },
 
     setDropzoneUploadOnly: function () {
@@ -178,8 +183,12 @@ define([
         $('.progress-bar').css('width', progress + '%');
       });
 
-      this.dropzone.on('error', function (file) {
-        _this.errors = true;
+      this.dropzone.on('error', function (file, resp, xhr) {
+        if (xhr.status == 502){
+          _this.timeout = true
+        } else {
+          _this.errors = true;
+        }
         $(file.previewElement).find('.progress-bar').removeClass('progress-bar-infos').addClass('progress-bar-danger');
       });
 
@@ -189,6 +198,8 @@ define([
       });
 
       this.dropzone.on('queuecomplete', function (file) {
+        $('#header-loader').addClass('hidden');
+        
         var sumObjreturned = {};
         _.each(_this.totalReturned.models, function(model){
           _.each(model.attributes, function(val, key){
@@ -207,7 +218,7 @@ define([
 
     endingMessage: function(sumObjreturned){
       var _this = this;
-      if (!_this.errors) {
+      if (!_this.errors && !_this.timeout) {
           Swal({
               title: 'Well done',
               text: 'File(s) have been correctly imported\n\n' +
@@ -228,7 +239,8 @@ define([
                 _this.cancelAll();
               }
             });
-        } else {
+        } 
+        if(_this.errors) {
           Swal({
             title: 'An error occured',
             text: 'Please verify your file',
@@ -239,6 +251,18 @@ define([
             closeOnConfirm: true,
           });
         }
+
+      if(_this.timeout){
+        Swal({
+          title: 'Connection Timeout',
+          text: 'Connection is down because the uploaded file is too large. The process is still running, but you can not get its result',
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonText: 'OK',
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          closeOnConfirm: true,
+        });
+      }
         _this.errors = false;
         _this.totalReturned.reset();
     },
@@ -260,6 +284,7 @@ define([
       if(this.checkFileIsPresent()){
         if(this.uploadOnly){
           this.dropzone.processQueue();
+          $('#header-loader').removeClass('hidden');
         }
         return true;
       } else {
@@ -270,7 +295,9 @@ define([
     sendFiles: function () {
 
     },
-    onDestroy: function () {},
+    onDestroy: function (view) {
+      $('#header-loader').addClass('hidden');
+    }
 
   });
 });
