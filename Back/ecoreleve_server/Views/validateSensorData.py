@@ -1,53 +1,45 @@
-# from pyramid.view import view_config
-# from pyramid.response import Response
-# from sqlalchemy import func, desc, select, and_, bindparam, update, text, Table
-# import json
-# from ..utils.data_toXML import data_to_XML
-# import pandas as pd
-# import numpy as np
-# import transaction
-# from ..utils.distance import haversine
-# from datetime import datetime
-# ####### HEAD
-# from ..Models import Base, dbConfig, graphDataDate,CamTrap
-# #=======
-# #from ..Models import Base, dbConfig, DBSession,ArgosGps,graphDataDate,CamTrap
-# ####### a142b3fa06ae6cdf29bc2e3c25aea176e56c7b7d
-# from traceback import print_exc
-# from pyramid import threadlocal
-# from xml.etree.ElementTree import XMLParser
+from pyramid.view import view_config
+from pyramid.response import Response
+from sqlalchemy import func, desc, select, and_, bindparam, update, text, Table
+import json
+from ..utils.data_toXML import data_to_XML
+import pandas as pd
+import numpy as np
+import transaction
+from ..utils.distance import haversine
+from datetime import datetime
+####### HEAD
+from ..Models import Base, dbConfig, graphDataDate,CamTrap
+#=======
+#from ..Models import Base, dbConfig, DBSession,ArgosGps,graphDataDate,CamTrap
+####### a142b3fa06ae6cdf29bc2e3c25aea176e56c7b7d
+from traceback import print_exc
+from pyramid import threadlocal
+from xml.etree.ElementTree import XMLParser
 
-# from ..controllers.security import routes_permission
-
-
-# route_prefix = 'sensors/'
+from ..controllers.security import routes_permission
 
 
-# def asInt(s):
-#     try:
-#         return int(s)
-#     except:
-#         return None
+route_prefix = 'sensors/'
 
-# def error_response(err):
-#     if err is not None:
-#         msg = err.args[0] if err.args else ""
-#         response = Response('Problem occurs : ' + str(type(err)) + ' = ' + msg)
-#     else:
-#         response = Response('No induvidual equiped')
-#     response.status_int = 500
-#     return response
 
-# ArgosDatasWithIndiv = Table(
-#     'VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
-# GsmDatasWithIndiv = Table('VGSMData_With_EquipIndiv',
-#                           Base.metadata, autoload=True)
-# DataRfidWithSite = Table('VRfidData_With_equipSite',
-#                          Base.metadata, autoload=True)
-# DataRfidasFile = Table('V_dataRFID_as_file',
-#                        Base.metadata, autoload=True)
-# DataCamTrapFile = Table('V_dataCamTrap_With_equipSite',
-#                         Base.metadata, autoload=True)
+def asInt(s):
+    try:
+        return int(s)
+    except:
+        return None
+
+def error_response(err):
+    if err is not None:
+        msg = err.args[0] if err.args else ""
+        response = Response('Problem occurs : ' + str(type(err)) + ' = ' + msg)
+    else:
+        response = Response('No induvidual equiped')
+    response.status_int = 500
+    return response
+
+DataCamTrapFile = Table('V_dataCamTrap_With_equipSite',
+                        Base.metadata, autoload=True)
 
 # # @view_config(route_name=route_prefix + 'uncheckedDatas',
 # #              renderer='json',
@@ -61,23 +53,13 @@
 # #              renderer='json',
 # #              match_param='type=argos',
 # #              permission=routes_permission['argos']['GET'])
-# # @view_config(route_name=route_prefix+'uncheckedDatas',
-# #              renderer='json',
-# #              match_param='type=camtrap',
-# #              permission = routes_permission['rfid']['GET'])
+@view_config(route_name=route_prefix+'camtrap/uncheckedDatas',
+             renderer='json',
+             permission = routes_permission['rfid']['GET'])
 
-# def type_unchecked_list(request):
-#     session = request.dbsession
-
-#     type_ = request.matchdict['type']
-#     if type_ == 'argos':
-#         unchecked = ArgosDatasWithIndiv
-#     elif type_ == 'gsm':
-#         unchecked = GsmDatasWithIndiv
-#     elif type_ == 'rfid':
-#         return unchecked_rfid(request)
-#     elif type_ == 'camtrap':
-#         return unchecked_camtrap(request)
+def type_unchecked_list(request):
+    session = request.dbsession
+    return unchecked_camtrap(request)
 
 #     selectStmt = select([unchecked.c['FK_Individual'],
 #                          unchecked.c['Survey_type'],
