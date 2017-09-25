@@ -1325,7 +1325,9 @@ define([
         this.draw();
         if(this.playing){
           this.play();
-        }
+        } 
+      } else {
+        this.draw();
       }
 
       this.updateInfos();
