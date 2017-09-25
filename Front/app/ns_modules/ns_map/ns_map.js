@@ -27,7 +27,7 @@ define([
   'leaflet_google',
   'config',
 
-], function(config, $, _, Backbone , Marionette, L, Draw, cluster, GoogleMapsLoader
+], function(config, $, _, Backbone , Marionette, moment, L, Draw, cluster, GoogleMapsLoader
     ) {
 
   'use strict';  
@@ -82,7 +82,7 @@ define([
     this.cluster = options.cluster || false;
     this.popup = options.popup || false;
     this.legend = options.legend || false;
-
+    this.drawOptions = options.drawOptions;
     this.selection = options.selection || false;
 
     this.dict = {}; //list of markers
@@ -211,43 +211,78 @@ define([
     },
 
     initDrawLayer: function(){
-			var drawnItems = new L.FeatureGroup();
-			this.map.addLayer(drawnItems);
+      L.drawLocal.edit.toolbar.buttons = {
+        edit:"Edit marker",
+        editDisabled: "No marker to edit",
+        remove: "Delete marker",
+        removeDisabled: "No marker to delete"
+     };
+
+			this.drawnItems = new L.FeatureGroup();
+			this.map.addLayer(this.drawnItems);
 			var _this = this;
+      
 
-			var drawControl = new L.Control.Draw({
+			this.drawControl = new L.Control.Draw({
 				edit: {
-					featureGroup: drawnItems
-				}
+          featureGroup: _this.drawnItems,
+          remove: false
+        },
+        draw:{
+          circle:false,
+          rectangle:false,
+          polyline:false,
+          polygon:false,
+          circlemarker:false
+        }, 
+        position : 'topright'
 			});
-			this.map.addControl(drawControl);
+      this.map.addControl(this.drawControl);
+      var controlDiv = this.drawControl._toolbars.edit._toolbarContainer;
 
-			this.map.on('draw:created', function (e) {
-				var type = e.layerType,
-				layer = e.layer;
-				_this.drawLayer = layer;
-				// _this.drawControlRdy.resolve();
-				console.log('ma couche controle est prete');
-				drawnItems.addLayer(layer);
-			});
+      var controlUI = L.DomUtil.create('a', 'leaflet-draw-edit-remove');
+      controlDiv.append(controlUI);
+      controlUI.title = 'Remove All Polygons';
+      controlUI.href = '#';
+      L.DomEvent.addListener(controlUI, 'click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if(!$(controlUI).hasClass("leaflet-disabled") && _this.drawnItems.getLayers().length > 0){
+          _this.drawnItems.clearLayers();
+          _this.map.fire('draw:deleted');
 
-			this.map.on('draw:edited', function () {
-				_this.drawLayer = _this.drawLayer;
-				console.log('ma couche controle a été éditée');
-			});
+        }
+    });
+			// this.map.on('draw:created', function (e) {
+      //   if(this.drawOptions.onDrawCreated){
 
-			this.map.on('draw:deleted', function () {
-				// Update db to save latest changes.
-				_this.drawLayer = undefined;
-				// _this.drawControlRdy = $.Deferred();
-				console.log('ma couche a été supprimée')
-			});
+      //   } 
+			// });
 
-			// rajouter search barre avec Leaflet
-			// add a layer group, yet empty
-			var markersLayer = new L.LayerGroup();
-			this.map.addLayer(markersLayer);
+			// this.map.on('draw:edited', function () {
+			// 	console.log('ma couche controle a été éditée');
+			// });
+
+			// this.map.on('draw:deleted', function () {
+			// 	console.log('ma couche a été supprimée')
+			// });
+
     },
+
+    toggleDrawing: function() {
+      var button = $('.leaflet-draw-toolbar.leaflet-bar.leaflet-draw-toolbar-top');
+      var markerButtons = button.find('a');
+      if (button.hasClass('disabled-draw-control')) {
+          button.removeClass('disabled-draw-control');
+          markerButtons.removeClass('leaflet-disabled');
+          // $('.leaflet-draw-edit-remove').addClass('leaflet-disabled');
+        } else {
+          button.addClass('disabled-draw-control');
+          markerButtons.addClass('leaflet-disabled');
+          // $('.leaflet-draw-edit-remove').removeClass('leaflet-disabled');
+      }
+    },
+
 
     ready: function(){
       this.setTotal(this.geoJson);

@@ -10,13 +10,14 @@ define([
 
   'ns_form/NSFormsModuleGit',
   'ns_map/ns_map',
+  'L',
 
   'i18n'
 
 ], function(
   $, _, Backbone, Marionette,
   moment, datetime, Swal,
-  NsForm, NsMap
+  NsForm, NsMap, L
 ){
 
   'use strict';
@@ -48,12 +49,39 @@ define([
     },
 
     onShow: function() {
+      var _this = this;
       this.refrechView('#stWithCoords');
       this.map = new NsMap({
         popup: true,
         zoom: 2,
         element: 'map',
+        drawable: true
       });
+
+      this.map.map.on('draw:created', function (e) {
+				var type = e.layerType;
+				_this.currentLayer = e.layer;
+        var latlon = _this.currentLayer.getLatLng();
+
+        _this.map.drawnItems.addLayer(_this.currentLayer);
+        _this.$el.find('input[name="LAT"]').val(latlon.lat);
+        _this.$el.find('input[name="LON"]').val(latlon.lng);
+        _this.map.toggleDrawing();
+        console.log(_this.map.drawControl)
+      });
+      
+      
+      this.map.map.on('draw:edited', function (e) {
+        var latlon = _this.currentLayer.getLatLng();
+        _this.$el.find('input[name="LAT"]').val(latlon.lat);
+        _this.$el.find('input[name="LON"]').val(latlon.lng);
+        console.log(_this.map.drawControl)
+      });
+      
+      this.map.map.on('draw:deleted', function () {
+        _this.removeLatLngMakrer(true);
+      });
+      
       this.$el.i18n();
     },
 
@@ -106,6 +134,18 @@ define([
       }
     },
 
+    removeLatLngMakrer: function(reInitLatLng){
+      if(this.currentLayer){
+        this.map.drawnItems.removeLayer(this.currentLayer);
+        this.currentLayer = null;
+      }
+      if(reInitLatLng){
+        this.$el.find('input[name="LAT"]').val('');
+        this.$el.find('input[name="LON"]').val('');
+      }
+      this.map.toggleDrawing();
+    },
+
     getLatLng: function() {
       var lat = this.$el.find('input[name="LAT"]').val();
       var lon = this.$el.find('input[name="LON"]').val();
@@ -114,7 +154,18 @@ define([
 
     updateMarkerPos: function(lat, lon) {
       if (lat && lon) {
-        this.map.addMarker(null, lat, lon);
+        if(this.currentLayer){
+
+          this.currentLayer.setLatLng(new L.LatLng(lat, lon));
+        } else {
+          this.currentLayer = new L.marker(new L.LatLng(lat, lon));
+          this.map.drawnItems.addLayer(this.currentLayer)
+        }
+
+        var center = this.currentLayer.getLatLng();
+        this.map.map.panTo(center, {animate: false});
+      } else {
+        this.removeLatLngMakrer();
       }
     },
 
@@ -159,6 +210,7 @@ define([
        $(ele).parent().addClass('active');
        $(tabLink).addClass('active in');
        this.refrechView(tabLink);
+
      },
 
     refrechView: function(stationType) {
@@ -168,10 +220,30 @@ define([
         case '#stWithCoords':
           stTypeId = 1;
           $('.js-get-current-position').removeClass('hidden');
+          if(this.map){
+            if(this.RegionLayer){
+              this.map.map.removeLayer(this.RegionLayer);
+
+            }
+            $('.leaflet-draw-edit-remove').removeClass('leaflet-disabled');
+            
+            this.map.toggleDrawing();
+          }
           break;
         case '#stWithoutCoords':
           stTypeId = 3;
           $('.js-get-current-position').addClass('hidden');
+          if(this.map){
+            this.map.map.fire('draw:deleted')
+            var button = $('.leaflet-draw-toolbar.leaflet-bar.leaflet-draw-toolbar-top');
+            var markerButtons = button.find('a');
+            if (!button.hasClass('disabled-draw-control')) {
+                  button.addClass('disabled-draw-control');
+                  markerButtons.addClass('leaflet-disabled');
+                }
+                $('.leaflet-draw-edit-remove').addClass('leaflet-disabled');
+
+          }
           break;
         default:
           break;
