@@ -57,8 +57,8 @@ class RegionsView(CustomView):
         'administrative': {'fillColor':'#e6e6e6',
                           'color': '#808080',
                            },
-        'houbara_centered': {'fillColor':'#e6e6e6',
-                             'color': '#808080',
+        'houbara_centered': {'fillColor':'#d279d2',
+                             'color': '#ac39ac',
                              },
     }
 
@@ -74,7 +74,24 @@ class RegionsView(CustomView):
         return ['administrative', 'houbara_centered']
 
     def getGeomHoubara(self):
-        return {}
+        session = self.request.dbsession
+        params = self.request.params.mixed()
+        results = session.query(Region)
+        curStyle = self.colorByTypes['houbara_centered'].copy()
+        curStyle.update({
+                'fillOpacity': 0.2,
+                'weight': 3,
+                'opacity': 0.7
+                })
+
+        results = results.filter(Region.Region.like('%stan'))
+        results = results.all()
+        response ={
+            'geojson': [r.geom_json for r in results],
+            'style': curStyle
+        }
+
+        return response
 
     def getGeomAdministrative(self) :
         session = self.request.dbsession

@@ -339,6 +339,13 @@ define([
       });
     },
 
+    eachPolygon: function(feature, layer){
+      if(feature.properties && feature.properties.name){
+        var polygonName = '<strong class="leaflet-polygon-name" >'+ feature.properties.name + '</strong>';
+        layer.bindPopup(polygonName);
+      }
+    },
+
     fetchRegionsLayers: function(layerName){
       var _this = this;
       
@@ -351,7 +358,10 @@ define([
       
       $.when(window.RegionLayers[layerName]).then(function() {
         var geoJson = window.RegionLayers[layerName].responseJSON
-        _this.RegionLayers[layerName] = new L.GeoJSON(geoJson['geojson'], {style : geoJson['style']});
+        _this.RegionLayers[layerName] = new L.GeoJSON(geoJson['geojson'],
+                                                      {style : geoJson['style'],
+                                                      onEachFeature: _this.eachPolygon
+                                                    });
         _this.lControl.addOverlay(_this.RegionLayers[layerName], layerName);
       });
     },
@@ -1358,7 +1368,9 @@ define([
         this.draw();
         if(this.playing){
           this.play();
-        }
+        } 
+      } else {
+        this.draw();
       }
 
       this.updateInfos();
