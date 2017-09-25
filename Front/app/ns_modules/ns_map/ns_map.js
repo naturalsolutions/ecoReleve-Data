@@ -215,7 +215,7 @@ define([
       if(this.clusterLayer){
         this.addClusterLayers();
       }
-      this.getRegions()
+      // this.getRegions()
       this.initErrorLayer();
       this.displayError(this.geoJson);
     },
@@ -280,14 +280,59 @@ define([
           'relief': relief,
           'hybrid': hybrid
         };
+        
+        _this.lControl = L.control.layers(baseMaps, null, {collapsed:true, position:'topleft'});
 
-        _this.lControl = L.control.layers(baseMaps, null, {collapsed:false, position:'topleft'});
+        // var cities = L.layerGroup();
+        // var dfdqsfs = L.layerGroup();
+        // var overlays = {
+        //   "Cities": cities,
+        //   "dfqssd": cities
+        // };
+        // _this.lControl.addOverlay(cities, "Cities");
+        // _this.lControl.addOverlay(dfdqsfs, "dfqssd");
         _this.lControl.addTo(_this.map);
-
+        _this.initOverlayRegions();
         _this.map.addLayer(hybrid);
 
       }).fail(function(){
         console.error('Google maps library failed to load');
+      });
+    },
+
+    initOverlayRegions: function(){
+      this.RegionLayers = {};
+      var _this = this;
+      $.ajax({
+        url:'regions/types',
+        context: this
+      }).done(function(response){
+        response.forEach(function(layerName) {
+          this.fetchRegionsLayers(layerName);
+        }, this);
+      }).fail(function(response){
+        console.log('error fetch region Types', response)
+        
+      });
+    },
+
+    fetchRegionsLayers: function(layerName){
+      var regionStyle = {
+        "fillColor":"#e6e6e6",
+        "fillOpacity": 0.2,
+        "color": "#808080",
+        "weight": 3,
+        "opacity": 0.7
+      };
+      $.ajax({
+        url:'regions/'+layerName,
+        context: this
+      }).done(function(geoJson){
+
+        this.RegionLayers[layerName] = new L.GeoJSON(geoJson, {style : regionStyle});
+        this.lControl.addOverlay(this.RegionLayers[layerName], layerName);
+      }).fail(function(response){
+        console.log('error fetch region', response)
       });
     },
 

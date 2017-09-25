@@ -69,28 +69,7 @@ class Region(Base):
     @hybrid_property
     def geom_json(self):
         return Feature(
-                id=geom.ID,
+                id=self.ID,
                 geometry=loads(self.valid_geom),
-                properties={"name": geom.Region,}
+                properties={"name": self.Region,}
                 )
-
-# def getGeomRegion(session) :
-#     import binascii
-#     from shapely.wkt import loads
-#     from geojson import Feature, FeatureCollection, dumps
-
-#     results = session.query(Region).filter(Region.Region.like('%'+'stan'))
-
-#     geomFeatures = []
-#     for geom in results :
-#         wkt = geom.valid_geom
-#         geometry = loads(wkt)
-#         feature = Feature(
-#             id=geom.ID,
-#             geometry=geometry,
-#             properties={
-#                 "name": geom.Region,
-#                 })
-#         geomFeatures.append(feature)
-
-#     return geomFeatures
