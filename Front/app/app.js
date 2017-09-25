@@ -103,6 +103,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
   };
 
   window.thesaurus = {};
+  window.RegionLayers = {};
 
   $(window).ajaxStart(function(e) {
     $('#header-loader').removeClass('hidden');
