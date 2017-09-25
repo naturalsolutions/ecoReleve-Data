@@ -78,19 +78,8 @@ class StationsView(DynamicObjectCollectionView):
 
         session = self.request.dbsession
         results = session.query(Region).filter(Region.Region.like('%'+'stan'))
-        geomFeatures = []
-        for geom in results :
-            wkt = geom.valid_geom
-            geometry = loads(wkt)
-            feature = Feature(
-                id=geom.ID,
-                geometry=geometry,
-                properties={
-                    "name": geom.Region,
-                    })
-            geomFeatures.append(feature)
 
-        return geomFeatures
+        return [r.geom_json for r in results]
 
     def updateMonitoredSite(self):
         session = self.request.dbsession
