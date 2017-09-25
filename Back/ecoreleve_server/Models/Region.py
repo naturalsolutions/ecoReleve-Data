@@ -6,6 +6,9 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy import func
 from sqlalchemy.types import UserDefinedType
+from shapely.wkt import loads
+from geojson import Feature, FeatureCollection, dumps
+
 
 class GeoWKT(GenericFunction):
     type = String
@@ -63,6 +66,13 @@ class Region(Base):
     def geom_WKT(cls):
         return func.geo.wkt(cls.valid_geom)
 
+    @hybrid_property
+    def geom_json(self):
+        return Feature(
+                id=geom.ID,
+                geometry=loads(self.valid_geom),
+                properties={"name": geom.Region,}
+                )
 
 # def getGeomRegion(session) :
 #     import binascii
