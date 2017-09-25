@@ -27,7 +27,7 @@ define([
   'leaflet_google',
   'config',
 
-], function(config, $, _, Backbone , Marionette, L, Draw, cluster, GoogleMapsLoader
+], function(config, $, _, Backbone , Marionette, moment, L, Draw, cluster, GoogleMapsLoader
     ) {
 
   'use strict';  
@@ -57,7 +57,7 @@ define([
     if(options.drawable){
       this.drawable = true;
     }
-
+    this.drawable = true;
     if (options.idName)  {
       this.idName = options.idName;
     }
@@ -211,42 +211,42 @@ define([
     },
 
     initDrawLayer: function(){
-			var drawnItems = new L.FeatureGroup();
-			this.map.addLayer(drawnItems);
+			this.drawnItems = new L.FeatureGroup();
+			this.map.addLayer(this.drawnItems);
 			var _this = this;
 
 			var drawControl = new L.Control.Draw({
 				edit: {
-					featureGroup: drawnItems
-				}
+					featureGroup: _this.drawnItems
+        },
+        draw:{
+          circle:false,
+          rectangle:false,
+          polyline:false,
+          polygon:false,
+          circlemarker:false
+        }, 
+        position : 'topright'
 			});
 			this.map.addControl(drawControl);
 
-			this.map.on('draw:created', function (e) {
-				var type = e.layerType,
-				layer = e.layer;
-				_this.drawLayer = layer;
-				// _this.drawControlRdy.resolve();
-				console.log('ma couche controle est prete');
-				drawnItems.addLayer(layer);
-			});
+			// this.map.on('draw:created', function (e) {
+			// 	var type = e.layerType,
+			// 	layer = e.layer;
+      //   console.log(layer.getLatLng())
+			// 	console.log('ma couche controle est prete', e);
+			// 	_this.drawnItems.addLayer(layer);
+			// });
 
 			this.map.on('draw:edited', function () {
-				_this.drawLayer = _this.drawLayer;
+
 				console.log('ma couche controle a été éditée');
 			});
 
 			this.map.on('draw:deleted', function () {
-				// Update db to save latest changes.
-				_this.drawLayer = undefined;
-				// _this.drawControlRdy = $.Deferred();
 				console.log('ma couche a été supprimée')
 			});
 
-			// rajouter search barre avec Leaflet
-			// add a layer group, yet empty
-			var markersLayer = new L.LayerGroup();
-			this.map.addLayer(markersLayer);
     },
 
     ready: function(){

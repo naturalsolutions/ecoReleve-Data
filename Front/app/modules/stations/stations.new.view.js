@@ -48,12 +48,32 @@ define([
     },
 
     onShow: function() {
+      var _this = this;
       this.refrechView('#stWithCoords');
       this.map = new NsMap({
         popup: true,
         zoom: 2,
         element: 'map',
       });
+
+      this.map.map.on('draw:created', function (e) {
+				var type = e.layerType;
+				_this.currentLayer = e.layer;
+        var latlon = _this.currentLayer.getLatLng();
+        console.log(latlon)
+				console.log('ma couche controle est prete', e);
+        _this.map.drawnItems.addLayer(_this.currentLayer);
+        _this.$el.find('input[name="LAT"]').val(latlon.lat);
+        _this.$el.find('input[name="LON"]').val(latlon.lng);
+      });
+      
+      
+      this.map.map.on('draw:edited', function (e) {
+
+        var latlon = _this.currentLayer.getLatLng();
+        _this.$el.find('input[name="LAT"]').val(latlon.lat);
+        _this.$el.find('input[name="LON"]').val(latlon.lng);
+			});
       this.$el.i18n();
     },
 
@@ -114,7 +134,16 @@ define([
 
     updateMarkerPos: function(lat, lon) {
       if (lat && lon) {
-        this.map.addMarker(null, lat, lon);
+        if(this.currentLayer){
+
+          this.currentLayer.setLatLng(new L.LatLng(lat, lon));
+        } else {
+          this.currentLayer = new L.marker(new L.LatLng(lat, lon));
+          this.map.drawnItems.addLayer(this.currentLayer)
+        }
+      } else {
+
+        this.map.drawnItems.removeLayer(this.currentLayer);
       }
     },
 
