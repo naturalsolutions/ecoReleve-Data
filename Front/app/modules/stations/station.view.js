@@ -75,6 +75,9 @@ define([
         _this.RegionLayer = new L.GeoJSON(geoJSON, {style : regionStyle});
         _this.RegionLayer.addTo(_this.map.map);
         _this.map.map.fitBounds(_this.RegionLayer.getBounds());
+        _this.map.map.on("overlayadd", function (event) {
+          _this.RegionLayer.bringToFront();
+        });
       });
     },
 
