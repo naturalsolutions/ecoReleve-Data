@@ -38,9 +38,29 @@ class RegionView(CustomView):
         return self.objectDB.Region
 
 
-class RegionsView(CustomView):
-    
+class RegionTypeView(CustomView):
+    model = Region
     item = RegionView
+    def __init__(self, ref, parent):
+        CustomView.__init__(self, ref, parent)
+        try:
+            id_ = int(ref)
+            self.objectDB = self.session.query(Region).get(id_)
+        except:
+            return 'reference not found'
+
+
+class RegionsView(CustomView):
+
+    item = RegionView
+    colorByTypes = {
+        'administrative': {'fillColor':'#e6e6e6',
+                          'color': '#808080',
+                           },
+        'houbara_centered': {'fillColor':'#e6e6e6',
+                             'color': '#808080',
+                             },
+    }
 
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
@@ -60,14 +80,24 @@ class RegionsView(CustomView):
         session = self.request.dbsession
         params = self.request.params.mixed()
         results = session.query(Region)
+        curStyle = self.colorByTypes['administrative'].copy()
+        curStyle.update({
+                'fillOpacity': 0.2,
+                'weight': 3,
+                'opacity': 0.7
+                })
 
         if params and params.get('criteria', None):
             criterias = params.get('criteria')
             for crit in criteria:
                 results = results.filter(getattr(Region,crit['Column']) == crit['Value'])
         results = results.all()
+        response ={
+            'geojson': [r.geom_json for r in results],
+            'style': curStyle
+        }
 
-        return [r.geom_json for r in results]
+        return response
 
 
 RootCore.listChildren.append(('regions', RegionsView))

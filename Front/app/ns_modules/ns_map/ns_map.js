@@ -258,21 +258,11 @@ define([
       if(this.clusterLayer){
         this.addClusterLayers();
       }
-      // this.getRegions()
+      this.initOverlayRegions();
       this.initErrorLayer();
       this.displayError(this.geoJson);
     },
 
-    getRegions: function(){
-      var _this = this;
-      $.ajax({
-        url : 'stations/regions',
-        contentType:'application/json',
-        type:'GET',
-      }).done(function(geoJson) {
-        new L.GeoJSON(geoJson).addTo(_this.map);
-      });
-    },
     google: function(){
       var _this = this;
 
@@ -325,17 +315,7 @@ define([
         };
         
         _this.lControl = L.control.layers(baseMaps, null, {collapsed:true, position:'topleft'});
-
-        // var cities = L.layerGroup();
-        // var dfdqsfs = L.layerGroup();
-        // var overlays = {
-        //   "Cities": cities,
-        //   "dfqssd": cities
-        // };
-        // _this.lControl.addOverlay(cities, "Cities");
-        // _this.lControl.addOverlay(dfdqsfs, "dfqssd");
         _this.lControl.addTo(_this.map);
-        _this.initOverlayRegions();
         _this.map.addLayer(hybrid);
 
       }).fail(function(){
@@ -351,7 +331,7 @@ define([
         context: this
       }).done(function(response){
         response.forEach(function(layerName) {
-          this.fetchRegionsLayers(layerName);
+          _this.fetchRegionsLayers(layerName);
         }, this);
       }).fail(function(response){
         console.log('error fetch region Types', response)
@@ -360,22 +340,19 @@ define([
     },
 
     fetchRegionsLayers: function(layerName){
-      var regionStyle = {
-        "fillColor":"#e6e6e6",
-        "fillOpacity": 0.2,
-        "color": "#808080",
-        "weight": 3,
-        "opacity": 0.7
-      };
-      $.ajax({
+      var _this = this;
+      
+      if (!window.RegionLayers[layerName] || window.RegionLayers[layerName].statusText == "abort" ) {
+        window.RegionLayers[layerName] = $.ajax({
         url:'regions/'+layerName,
         context: this
-      }).done(function(geoJson){
-
-        this.RegionLayers[layerName] = new L.GeoJSON(geoJson, {style : regionStyle});
-        this.lControl.addOverlay(this.RegionLayers[layerName], layerName);
-      }).fail(function(response){
-        console.log('error fetch region', response)
+        });
+      }
+      
+      $.when(window.RegionLayers[layerName]).then(function() {
+        var geoJson = window.RegionLayers[layerName].responseJSON
+        _this.RegionLayers[layerName] = new L.GeoJSON(geoJson['geojson'], {style : geoJson['style']});
+        _this.lControl.addOverlay(_this.RegionLayers[layerName], layerName);
       });
     },
 

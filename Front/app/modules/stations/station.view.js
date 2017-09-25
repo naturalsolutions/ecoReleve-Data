@@ -58,6 +58,29 @@ define([
       });
     },
 
+    getRegion: function(val){
+      var _this = this;
+      $.ajax({
+        url:'regions/administrative/'+val+'/geoJSON'
+      }).done(function(geoJSON){
+        if(_this.RegionLayer){
+          _this.map.map.removeLayer(_this.RegionLayer);
+        }
+        
+        var regionStyle = {
+          "color": "#00cc00",
+          "weight": 3,
+          "opacity": 0.5
+        };
+        _this.RegionLayer = new L.GeoJSON(geoJSON, {style : regionStyle});
+        _this.RegionLayer.addTo(_this.map.map);
+        _this.map.map.fitBounds(_this.RegionLayer.getBounds());
+        _this.map.map.on("overlayadd", function (event) {
+          _this.RegionLayer.bringToFront();
+        });
+      });
+    },
+
     reload: function(options){
       var _this = this;
       if(options.id == this.model.get('id')){
@@ -86,12 +109,17 @@ define([
     },
 
     displayMap: function() {
+      var _this = this;
       var map = this.map = new NsMap({
         zoom: 3,
         popup: true,
       });
       $.when(this.nsForm.jqxhr).then(function(){
         map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
+      });
+
+      $.when(this.nsForm.jqxhr).then(function(){
+        _this.getRegion(this.model.get('FK_Region'));
       });
     },
 

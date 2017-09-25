@@ -31,6 +31,7 @@ define([
 
       'focusout input[name="Dat e_"]': 'checkDate',
       'change input[name="LAT"], input[name="LON"]': 'getLatLng',
+      'change select[name="FK_Region"]': 'getRegion',
       'click .tab-link': 'displayTab',
       'change select[name="FieldWorker"]': 'checkUsers',
     },
@@ -54,6 +55,27 @@ define([
         element: 'map',
       });
       this.$el.i18n();
+    },
+
+    getRegion: function(e){
+      var val = $(e.currentTarget).val();
+      var _this = this;
+      $.ajax({
+        url:'regions/administrative/'+val+'/geoJSON'
+      }).done(function(geoJSON){
+        if(_this.RegionLayer){
+          _this.map.map.removeLayer(_this.RegionLayer);
+        }
+        
+        var regionStyle = {
+          "color": "#00cc00",
+          "weight": 3,
+          "opacity": 0.5
+        };
+        _this.RegionLayer = new L.GeoJSON(geoJSON, {style : regionStyle});
+        _this.RegionLayer.addTo(_this.map.map);
+        _this.map.map.fitBounds(_this.RegionLayer.getBounds());
+      });
     },
 
     onDestroy: function() {
