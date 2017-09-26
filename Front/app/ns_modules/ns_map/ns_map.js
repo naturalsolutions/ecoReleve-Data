@@ -82,7 +82,7 @@ define([
     this.cluster = options.cluster || false;
     this.popup = options.popup || false;
     this.legend = options.legend || false;
-
+    this.drawOptions = options.drawOptions;
     this.selection = options.selection || false;
 
     this.dict = {}; //list of markers
@@ -214,7 +214,7 @@ define([
 			this.drawnItems = new L.FeatureGroup();
 			this.map.addLayer(this.drawnItems);
 			var _this = this;
-
+      
 			var drawControl = new L.Control.Draw({
 				edit: {
 					featureGroup: _this.drawnItems
@@ -231,23 +231,39 @@ define([
 			this.map.addControl(drawControl);
 
 			// this.map.on('draw:created', function (e) {
-			// 	var type = e.layerType,
-			// 	layer = e.layer;
-      //   console.log(layer.getLatLng())
-			// 	console.log('ma couche controle est prete', e);
-			// 	_this.drawnItems.addLayer(layer);
+      //   if(this.drawOptions.onDrawCreated){
+
+      //   } 
 			// });
 
-			this.map.on('draw:edited', function () {
+			// this.map.on('draw:edited', function () {
+			// 	console.log('ma couche controle a été éditée');
+			// });
 
-				console.log('ma couche controle a été éditée');
-			});
-
-			this.map.on('draw:deleted', function () {
-				console.log('ma couche a été supprimée')
-			});
+			// this.map.on('draw:deleted', function () {
+			// 	console.log('ma couche a été supprimée')
+			// });
 
     },
+
+    toggleDrawing: function() {
+      var button = $('.leaflet-draw-toolbar.leaflet-bar.leaflet-draw-toolbar-top');
+      var markerButtons = button.find('a');
+      if (button.hasClass('disabled-draw-control')) {
+          button.removeClass('disabled-draw-control');
+          markerButtons.removeClass('leaflet-disabled')
+          // markerButtons.forEach(function(element) {
+          //   element.removeClass('leaflet-disabled')
+          // }, this);
+      } else {
+          button.addClass('disabled-draw-control');
+          markerButtons.addClass('leaflet-disabled')
+          // markerButtons.forEach(function(element) {
+          //   element.addClass('leaflet-disabled')
+          // }, this);
+      }
+    },
+
 
     ready: function(){
       this.setTotal(this.geoJson);

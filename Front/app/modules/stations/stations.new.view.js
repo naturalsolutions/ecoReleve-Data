@@ -60,19 +60,22 @@ define([
 				var type = e.layerType;
 				_this.currentLayer = e.layer;
         var latlon = _this.currentLayer.getLatLng();
-        console.log(latlon)
-				console.log('ma couche controle est prete', e);
+
         _this.map.drawnItems.addLayer(_this.currentLayer);
         _this.$el.find('input[name="LAT"]').val(latlon.lat);
         _this.$el.find('input[name="LON"]').val(latlon.lng);
+        _this.map.toggleDrawing();
       });
       
       
       this.map.map.on('draw:edited', function (e) {
-
         var latlon = _this.currentLayer.getLatLng();
         _this.$el.find('input[name="LAT"]').val(latlon.lat);
         _this.$el.find('input[name="LON"]').val(latlon.lng);
+      });
+      
+      this.map.map.on('draw:deleted', function () {
+        _this.removeLatLngMakrer(true);
 			});
       this.$el.i18n();
     },
@@ -126,6 +129,16 @@ define([
       }
     },
 
+    removeLatLngMakrer: function(reInitLatLng){
+      this.map.drawnItems.removeLayer(this.currentLayer);
+      this.currentLayer = null
+      if(reInitLatLng){
+        this.$el.find('input[name="LAT"]').val('');
+        this.$el.find('input[name="LON"]').val('');
+      }
+      this.map.toggleDrawing();
+    },
+
     getLatLng: function() {
       var lat = this.$el.find('input[name="LAT"]').val();
       var lon = this.$el.find('input[name="LON"]').val();
@@ -142,8 +155,7 @@ define([
           this.map.drawnItems.addLayer(this.currentLayer)
         }
       } else {
-
-        this.map.drawnItems.removeLayer(this.currentLayer);
+        this.removeLatLngMakrer();
       }
     },
 
