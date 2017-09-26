@@ -30,7 +30,7 @@ update ar set type='GPS'
 
 
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('124_Up_case_type_ofSensorData',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('144_Up_case_type_ofSensorData',GETDATE(),(SELECT db_name()))
 
 
 GO
