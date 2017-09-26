@@ -1,3 +1,11 @@
+ALTER TABLE [MonitoredSite]
+ADD  
+Place VARCHAR(250) NULL,
+FK_Region INTEGER 
+FOREIGN KEY (FK_Region) REFERENCES Region(id)
+
+GO
+
 INSERT INTO [dbo].[ModuleForms]
            ([module_id]
            ,[Name]
@@ -44,8 +52,9 @@ INSERT INTO [dbo].[ModuleForms]
            ,1
 		   );
 
+GO
 
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('134_add_place_and_region_to_moduleForms_for_monitoredsite',GETDATE(),(SELECT db_name()))
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('146_add_place_and_fk_region_ON_Site_and_Up_Conf',GETDATE(),(SELECT db_name()))
 
 
 GO
