@@ -295,8 +295,10 @@ define([
     sendFiles: function () {
 
     },
+    
     onDestroy: function (view) {
       $('#header-loader').addClass('hidden');
+      $('.dz-hidden-input').remove();
     }
 
   });
