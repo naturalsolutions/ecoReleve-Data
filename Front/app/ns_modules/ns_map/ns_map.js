@@ -57,7 +57,7 @@ define([
     if(options.drawable){
       this.drawable = true;
     }
-    this.drawable = true;
+
     if (options.idName)  {
       this.idName = options.idName;
     }

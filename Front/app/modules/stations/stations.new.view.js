@@ -54,6 +54,7 @@ define([
         popup: true,
         zoom: 2,
         element: 'map',
+        drawable: true
       });
 
       this.map.map.on('draw:created', function (e) {
