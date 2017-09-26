@@ -27,10 +27,11 @@ class ConfiguredDbObjectMapped(object):
                                            ).first()
         return conf
 
-    def getForm(self, displayMode='edit', type_=None, moduleName=None):
+    def getForm(self, displayMode='edit', type_=None, moduleName=None, isGrid=False):
         Editable = (displayMode.lower() == 'edit')
         schema = {}
-
+        if not self.ID:
+            displayMode = 'create'
         fields = self.session.query(ModuleForms
                                     ).filter(
             and_(ModuleForms.Module_ID == self.getConf(moduleName).ID,
@@ -48,11 +49,11 @@ class ConfiguredDbObjectMapped(object):
             CurModuleForms = [1]
             if (len(CurModuleForms) > 0):
                 schema[field.Name] = field.GetDTOFromConf(
-                    Editable)
+                    displayMode, isGrid=isGrid)
 
         form = {'schema': schema,
                 'fieldsets': self.sortFieldsets(fields),
-                'grid': False,
+                'grid': isGrid,
                 # 'data': {'id': 0}
                 'recursive_level': 0
                 }
@@ -156,9 +157,9 @@ class DbObject(object):
         self.__constraintFunctionList__.extend(list)
 
     def getProperty(self, nameProp):
-        try:
+        if hasattr(self, nameProp):
             return getattr(self, nameProp)
-        except:
+        else:
             return self.__properties__[nameProp]
 
     def setProperty(self, propertyName, value):
@@ -190,10 +191,10 @@ class DbObject(object):
     def afterUpdate(self):
         return
 
-    def beforedelete(self):
+    def beforeDelete(self):
         return
 
-    def afterdelete(self):
+    def afterDelete(self):
         return
 
     def checkConstraintsOnData(self, data):
@@ -231,8 +232,8 @@ class DbObject(object):
                 except Exception as e:
                     pass
 
-        if not schema and hasattr(self, 'getForm'):
-            schema = self.getForm()['schema']
+        # if not schema and hasattr(self, 'getForm'):
+        #     schema = self.getForm()['schema']
         if schema:
             data = formatValue(data, schema)
 

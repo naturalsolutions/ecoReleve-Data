@@ -1,0 +1,11 @@
+UPDATE ModuleForms SET Options = 
+'select -1 as val, '' '' as label Union all select ''0'' as val, ''All fieldworkers'' as label Union all SELECT ID as val, Login as label From [User]'
+where Name = 'observation_by'
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('135_UP_Conf_Observation_By',GETDATE(),(SELECT db_name()))
+
+
+GO

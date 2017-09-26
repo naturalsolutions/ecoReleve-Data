@@ -395,15 +395,39 @@ define([
           break;
 
         case 'sensors':
-          ctx.ui.btnNew.tooltipList({
-            position: 'top',
-            availableOptions: ctx.availableTypeObj,
-            liClickEvent: function(liClickValue) {
+         var _ctx = ctx; 
+          var ulElem = document.createElement("ul");
+          var tabLength = ctx.availableTypeObj.length;
+          for( var i = 0 ; i < tabLength ; i++ ) {
+            var elem = ctx.availableTypeObj[i];
+            var liElem = document.createElement('li');
+            liElem.onclick = function(e) {
+              _ctx.ui.btnNew.tooltipster('close');
               _this.regionManager.get('modal').show(new _this.NewView({
-                objectType: liClickValue
+                objectType: this.getAttribute('data-value')
               }));
+            };
+            liElem.setAttribute('data-value' , elem.val)
+            liElem.innerHTML = elem.label;
+            ulElem.appendChild(liElem);
+          }
+          ctx.ui.btnNew.tooltipster({
+            theme : 'tooltipList',
+            position: 'top',
+            interactive : true,
+            content: '',
+            contentAsHTML : true,
+            functionReady: function(instance,helper) {
+              var elemRoot = instance.elementTooltip(); //.appendChild(ulElem)
+              var elemContent = elemRoot.getElementsByClassName('tooltipster-content');
+              $(elemContent).append(ulElem);
+              instance.reposition();
             },
+            functionAfter : function( instance, helper) {
+              instance.destroy();
+            }
           });
+          ctx.ui.btnNew.tooltipster('open');
           break;
       }
     },

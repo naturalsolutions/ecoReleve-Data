@@ -25,9 +25,9 @@ class ObservationView(DynamicObjectView):
 
     def update(self, json_body=None):
 
-        if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
-            self.request.response.status_code = 409
-            return {'protected' : True}
+        # if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
+        #     self.request.response.status_code = 409
+        #     return {'protected' : True}
         if not json_body:
             data = self.request.json_body
         else:
@@ -115,17 +115,18 @@ class ObservationsView(DynamicObjectCollectionView):
                 listOfSubProtocols = value
 
         data['Observation_childrens'] = listOfSubProtocols
-        curObs.init_on_load()
-        curObs.updateFromJSON(data)
 
         responseBody = {}
 
         try:
+            curObs.init_on_load()
+            curObs.updateFromJSON(data)
             curObs.Station = sta
             self.session.add(curObs)
             self.session.flush()
             responseBody['id'] = curObs.ID
-        except ErrorAvailable as e:
+        except Exception as e:
+            # print(e)
             self.session.rollback()
             self.request.response.status_code = 510
             responseBody['response'] = e.value
@@ -162,7 +163,7 @@ class ObservationsView(DynamicObjectCollectionView):
         for i in range(len(listObs)):
             curObs = listObs[i]
             curObs.LoadNowValues()
-            values.append(curObs.getFlatObject())
+            values.append(curObs.getFlatObject(schema=curObs.getForm().get('schema',None) ))
         return values
 
     def getProtocolsofStation(self):

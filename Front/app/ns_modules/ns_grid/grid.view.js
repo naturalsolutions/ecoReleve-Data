@@ -112,7 +112,9 @@ define([
             setTimeout(function(){
               _this.gridOptions.api.firstRenderPassed = true;
               _this.focusFirstCell();
-              _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
+              if (!options.noResizeToFit){
+                _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
+              }
               if(!_this.model.get('totalRecords')){
                 _this.model.set('totalRecords', _this.gridOptions.rowData.length);
               }
@@ -211,12 +213,51 @@ define([
 
         //e.g types
         var comparator = function (valueA, valueB, nodeA, nodeB, isInverted) {
+          //TODO need refact , must be a better way to do that (pb with displayvalue and new checkbox)
+          if( this.type === 'StateBox') { // hack to handle sort with new checkbox
+            if( nodeA.data[this.field] != null ) {
+              valueA =  nodeA.data[this.field];
+            }
+            else {
+              valueA = null;
+            }
+            if( nodeB.data[this.field] != null ) {
+              valueB =  nodeB.data[this.field];
+            }
+            else {
+            valueB = null;
+            }
+          if( typeof(valueA) === 'number' || typeof(valueB) === 'number' ) { //number
+            if( valueA === null && valueB === null ) {
+              return 0;
+            }
+            if( valueA === null) {
+              if(isInverted) {
+                return -1;
+              }
+              else {
+                return 1;
+              }
+            }
+            if(valueB === null ) {
+              if (isInverted) {
+                return 1;
+              }
+              else {
+                return -1;
+              }
+            }
+
+            return valueA - valueB;
+          }
+          }
+
           var value1;
           var value2;
 
           if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()  ) { //detect date
             //then convert it to timestamp (number)
-            if(valueA) { 
+            if(valueA) {
               valueA = moment(valueA , "DD/MM/YYYY HH:mm:ss" ).valueOf();
             }
             if(valueB){
@@ -324,6 +365,11 @@ define([
           case 'Checkbox':
             col.cellEditor = Editors.CheckboxEditor;
             col.cellRenderer = Renderers.CheckboxRenderer;
+            break;
+
+          case 'StateBox':
+            col.cellEditor = Editors.StateBoxEditor;
+            col.cellRenderer = Renderers.StateBoxRenderer;
             break;
           case 'Number':
             col.cellEditor = Editors.NumberEditor;
@@ -965,9 +1011,50 @@ define([
 
     },
 
+    removeEmptyRow : function() {
+      var _this = this;
+      var rowToDel = [];
+      var nbRowDeleted = 0;
+
+      var filteredColDef = this.gridOptions.columnDefs.filter( function(elem) { //add col to ignore
+        if(elem.field != '' && elem.field != 'index' && elem.field != '_errors') {
+          return elem;
+        }
+      });
+      this.gridOptions.api.stopEditing(false);
+
+      this.gridOptions.api.forEachNode( function(node) {
+
+        if ( _this.checkIfRowEmpty(filteredColDef , node) ) {
+          rowToDel.push(node)
+          //_this.gridOptions.api.removeItems(node);
+        }
+      });
+      nbRowDeleted = rowToDel.length
+      _this.gridOptions.api.removeItems(rowToDel);
+      return nbRowDeleted;
+        
+    },
+
+    checkIfRowEmpty : function(colDef, node) {
+    
+      var empty= true;
+      var tabLength = colDef.length;
+
+      for ( var i = 0; i < tabLength ; i++ ) {
+        if( typeof(node.data[colDef[i].field]) != 'undefined' ) {
+          empty = false;
+          break;
+        }
+      }
+      return  empty; 
+      
+    },
+
     getRowDataAndErrors: function(){
       var _this = this;
-      this.gridOptions.api.stopEditing();
+      this.gridOptions.api.stopEditing(false);
+     
 
       var rowData = [];
       var errors = [];
@@ -975,12 +1062,15 @@ define([
       var empty = true;
 
       var i = 0;
+      //TODO : NEED TO CHECK VALUE WITH COLDEF,  NODE.DATA CAN CONTAINS MORE VALUE AND THE GRID DIDN'T NEED TO CHECK THIS VALUES
       this.gridOptions.api.forEachNode( function(node) {
         var row = {};
         //some part are useless, eg. could abord at first error.
 
         var keys = Object.keys(node.data);
         empty = true;
+
+        
 
         if(keys.length === 0 || (keys.length === 1 && keys[0] === '_errors' ) ){
           return;
@@ -1002,9 +1092,10 @@ define([
             }
 
             //finaly check if empty
-            if(val != 'undefined'){
+            
+            if(val != undefined && val != 'undefined'){//if(val != 'undefined' && val != null && val != ''){
               empty = false;
-
+              
               //finaly copy node data in the object
               if(node.data[key] instanceof Object){
                 row[key] = node.data[key].value;
@@ -1027,22 +1118,75 @@ define([
               _this.gridOptions.api.setFocusedCell(node.childIndex, node.data._errors, null);
             }
           }
-
+          
         }
 
         //last check, if not empty, push to save
         if(!empty){
+          _this.addDefaultValue(node, row);
+          /* if not empty we addd default val not defined*/ 
+          
           rowData.push(row);
         }
 
       });
-
+      //this.gridOptions.api.refreshView()
       return {
           rowData: rowData,
-          errors: errors
+          errors: errors,
+          empty : empty
       }
     },
 
+    getSchemaForAllCol : function () {
+      var tab =this.gridOptions.columnDefs
+      return tab.filter( function(elem) { 
+        if(elem.field != '_errors' && elem.field!='' && elem.field !='index') {
+          return elem; 
+        }
+      });
+    },
+
+    addDefaultValue: function(node,row) {
+      //console.log("row")
+     // console.log(row)
+      var oldRow = _.clone(row);
+      var tabColDef = this.getSchemaForAllCol();
+      var nbElemIntab = tabColDef.length;
+    //  console.log(tabColDef)
+      for ( var i = 0; i < nbElemIntab; i++) {
+        var elem = tabColDef[i];
+        if( typeof(row[elem.field]) === 'undefined' ) {
+          if( elem.schema && typeof(elem.schema.defaultValue) !== 'undefined' && elem.schema.defaultValue ) {
+            if(  /^\d+$/.test(elem.schema.defaultValue) ) {
+              node.data[elem.field] = parseInt(elem.schema.defaultValue);
+              row[elem.field] = parseInt(elem.schema.defaultValue);
+            }
+            else {
+              node.data[elem.field] = elem.schema.defaultValue;
+              row[elem.field] = elem.schema.defaultValue;
+            }
+          }
+      //    console.log("pas de valeur dans la row pour "+elem.field);
+        }
+
+      }
+      // for ( var col in tabColDef) {
+      //   if(row[col.])
+      // }
+      // for (var key in row) {
+
+
+      // }
+    /*  console.log("old row")
+      console.log(oldRow)
+      console.log("new row")
+      console.log(row);*/
+      return row;
+
+
+    },
+    
     destroySelectedRows: function(callback){
       var _this = this;
       var rowData = [];

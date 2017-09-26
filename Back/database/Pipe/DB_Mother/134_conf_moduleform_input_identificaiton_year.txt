@@ -1,0 +1,17 @@
+UPDATE [dbo].[ModuleForms]
+   SET [InputType] = 'DateTimePickerEditor'
+      ,[Options] = '{"format" : "YYYY"}'
+ WHERE name = 'identification_year'
+GO
+
+
+UPDATE [dbo].[ObservationDynProp]
+   SET [TypeProp] = 'Date Only'
+ WHERE 
+ Name = 'identification_year'
+GO
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('134_conf_moduleform_input_identificaiton_year',GETDATE(),(SELECT db_name()))
+
+
+GO

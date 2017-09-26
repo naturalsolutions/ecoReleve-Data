@@ -102,7 +102,7 @@
           //Insertion de la valeur dans l'input
           $me.val(parametres.inputValue);
 
-          if (!window.thesaurus[parametres.startId]) {
+          if (!window.thesaurus[parametres.startId] || window.thesaurus[parametres.startId].statusText == "abort" ) {
             window.thesaurus[parametres.startId] =  $.ajax({
               type: 'POST',
               url: parametres.wsUrl + '/' + parametres.webservices,
@@ -232,7 +232,20 @@
                     }
                   }
                 });//end then
+              $('#treeView' + $me.attr('id')).on('wheel', function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                var z = $('#treeView' + $me.attr('id')).find('ul').first('li').position();
 
+                if(e.originalEvent.deltaY > 0){
+                  var topp = e.originalEvent.deltaY+(-1*z.top);
+                } else {
+                  var topp = (-1*z.top) + e.originalEvent.deltaY;
+                }
+
+                  $('#treeView' + $me.attr('id')).scrollTop(topp)
+              });
+                
               $me.keyup(function(e) {
                 var _this = this;
                 var treeHtml = $('#treeView' + $me.attr('id'));

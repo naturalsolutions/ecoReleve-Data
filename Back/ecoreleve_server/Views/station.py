@@ -4,6 +4,7 @@ from ..Models import (
     Station_FieldWorker,
     StationList,
     MonitoredSitePosition,
+    MonitoredSite,
     fieldActivity,
     User
 )
@@ -16,6 +17,8 @@ from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore
 from . import DynamicObjectView, DynamicObjectCollectionView, context_permissions
 from .protocols import ObservationsView
+from ..Models.Station import ErrorCheckUniqueStation, ErrorExistingEquipment
+from ..utils.parseValue import parser
 
 
 class StationView(DynamicObjectView):
@@ -40,18 +43,15 @@ class StationView(DynamicObjectView):
         self.objectDB.LoadNowValues()
         try:
             isAllowToUpdate = self.objectDB.allowUpdate(data)
-            if isAllowToUpdate:
-                self.objectDB.updateFromJSON(data)
-                self.session.commit()
-                msg = {}
-            else:
-                self.session.rollback()
-                self.request.response.status_code = 510
-                msg = {'updateDenied': True}
-        except IntegrityError as e:
+            self.objectDB.updateFromJSON(data)
+            self.session.commit()
+            msg = {}
+
+        except (ErrorCheckUniqueStation, ErrorExistingEquipment) as e:
             self.session.rollback()
             self.request.response.status_code = 510
-            msg = {'existingStation': True}
+            msg = e.value
+
         return msg
 
 
@@ -73,21 +73,14 @@ class StationsView(DynamicObjectCollectionView):
     def updateMonitoredSite(self):
         session = self.request.dbsession
         data = self.request.params.mixed()
-        curSta = session.query(self.item.model).get(data['id'])
 
         if data['FK_MonitoredSite'] == '':
             return 'Station is not monitored'
         try:
-            newSitePos = MonitoredSitePosition(
-                StartDate=curSta.StationDate,
-                LAT=curSta.LAT,
-                LON=curSta.LON,
-                ELE=curSta.ELE,
-                Precision=curSta.precision,
-                FK_MonitoredSite=data['FK_MonitoredSite'])
-
-            session.add(newSitePos)
-            session.commit()
+            data['StartDate'] = data['StationDate']
+            data['Precision'] = data['precision']
+            currentMonitoredSite = session.query(MonitoredSite).get(data['FK_MonitoredSite'])
+            currentMonitoredSite.updateFromJSON(data)
             return 'Monitored site position was updated'
         except IntegrityError as e:
             session.rollback()
@@ -219,13 +212,13 @@ class StationsView(DynamicObjectCollectionView):
         newSta.StationType = session.query(StationType).filter(
             StationType.ID == data['FK_StationType']).first()
         newSta.init_on_load()
-        newSta.updateFromJSON(data)
 
         try:
+            newSta.updateFromJSON(data)
             session.add(newSta)
             session.flush()
             msg = {'ID': newSta.ID}
-        except IntegrityError as e:
+        except ErrorCheckUniqueStation as e:
             session.rollback()
             self.request.response.status_code = 510
             msg = {'existingStation': True}

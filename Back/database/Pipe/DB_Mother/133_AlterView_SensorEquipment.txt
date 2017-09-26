@@ -1,0 +1,28 @@
+
+
+ALTER view  [dbo].[SensorEquipment] as
+SELECT [FK_Sensor]
+      ,[StartDate]
+      ,[EndDate]
+	  ,FK_Individual
+	  ,NULL as FK_MonitoredSite
+  FROM [dbo].[IndividualEquipment]
+
+  UNion ALL 
+SELECT [FK_Sensor]
+      ,[StartDate]
+      ,[EndDate]
+	  ,NULL as FK_Individual
+	  ,FK_MonitoredSite
+  FROM [dbo].[MonitoredSiteEquipment]
+
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('133_AlterView_SensorEquipment',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -1,0 +1,14 @@
+BEGIN TRAN T1;
+
+/* Renommer le nom du protocole en "Sub arthropod survey" */
+UPDATE [dbo].[ProtocoleType]
+   SET [Name] = 'Sub_Athropod_survey'
+ WHERE [Name] = 'Entomo_Pop_Census'
+
+COMMIT TRAN T1;
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('123_Conf_Update_sub_protocole_entomo_pop_census_name',GETDATE(),(SELECT db_name()))
+
+
+GO
