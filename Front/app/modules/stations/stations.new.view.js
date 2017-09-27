@@ -131,8 +131,10 @@ define([
     },
 
     removeLatLngMakrer: function(reInitLatLng){
-      this.map.drawnItems.removeLayer(this.currentLayer);
-      this.currentLayer = null
+      if(this.currentLayer){
+        this.map.drawnItems.removeLayer(this.currentLayer);
+        this.currentLayer = null;
+      }
       if(reInitLatLng){
         this.$el.find('input[name="LAT"]').val('');
         this.$el.find('input[name="LON"]').val('');
@@ -201,6 +203,7 @@ define([
        $(ele).parent().addClass('active');
        $(tabLink).addClass('active in');
        this.refrechView(tabLink);
+
      },
 
     refrechView: function(stationType) {
@@ -210,10 +213,20 @@ define([
         case '#stWithCoords':
           stTypeId = 1;
           $('.js-get-current-position').removeClass('hidden');
+          if(this.map){
+            this.map.toggleDrawing();
+          }
           break;
         case '#stWithoutCoords':
           stTypeId = 3;
           $('.js-get-current-position').addClass('hidden');
+          this.removeLatLngMakrer();
+          var button = $('.leaflet-draw-toolbar.leaflet-bar.leaflet-draw-toolbar-top');
+          var markerButtons = button.find('a');
+          if (!button.hasClass('disabled-draw-control') && '#stWithCoords') {
+                button.addClass('disabled-draw-control');
+                markerButtons.addClass('leaflet-disabled');
+          }
           break;
         default:
           break;
