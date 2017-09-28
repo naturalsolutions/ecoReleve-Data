@@ -295,6 +295,32 @@
     pointer-events: none;
     //padding-left: 1px;
 }
+
+.leaflet-right{
+	.leaflet-draw.leaflet-control{
+		.leaflet-draw-section{
+
+			.leaflet-draw-toolbar-nobottom {
+				.leaflet-draw-toolbar-button-enabled{
+					border-bottom-left-radius: 0;
+					border-bottom-right-radius: inherit;
+				}
+			}
+
+			.leaflet-draw-toolbar-notop {
+				.leaflet-draw-toolbar-button-enabled{
+					border-top-left-radius: 0!important;
+					border-top-right-radius: inherit!important;
+
+				}
+				a:last-child{
+					border-bottom-right-radius: inherit;
+					
+				}
+			}
+		}
+	}
+}
 // input[type="range"]:before {
 //   left: 5px;
 //   content: attr(min);

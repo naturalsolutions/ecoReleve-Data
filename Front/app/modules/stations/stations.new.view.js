@@ -67,7 +67,6 @@ define([
         _this.$el.find('input[name="LAT"]').val(latlon.lat);
         _this.$el.find('input[name="LON"]').val(latlon.lng);
         _this.map.toggleDrawing();
-        console.log(_this.map.drawControl)
       });
       
       
@@ -75,7 +74,6 @@ define([
         var latlon = _this.currentLayer.getLatLng();
         _this.$el.find('input[name="LAT"]').val(latlon.lat);
         _this.$el.find('input[name="LON"]').val(latlon.lng);
-        console.log(_this.map.drawControl)
       });
       
       this.map.map.on('draw:deleted', function () {
