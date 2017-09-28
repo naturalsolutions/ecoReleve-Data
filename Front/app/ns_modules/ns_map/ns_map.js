@@ -211,13 +211,22 @@ define([
     },
 
     initDrawLayer: function(){
+      L.drawLocal.edit.toolbar.buttons = {
+        edit:"Edit marker",
+        editDisabled: "No marker to edit",
+        remove: "Delete marker",
+        removeDisabled: "No marker to delete"
+     };
+
 			this.drawnItems = new L.FeatureGroup();
 			this.map.addLayer(this.drawnItems);
 			var _this = this;
       
-			var drawControl = new L.Control.Draw({
+
+			this.drawControl = new L.Control.Draw({
 				edit: {
-					featureGroup: _this.drawnItems
+          featureGroup: _this.drawnItems,
+          remove: false
         },
         draw:{
           circle:false,
@@ -228,8 +237,22 @@ define([
         }, 
         position : 'topright'
 			});
-			this.map.addControl(drawControl);
+      this.map.addControl(this.drawControl);
+      var controlDiv = this.drawControl._toolbars.edit._toolbarContainer;
 
+      var controlUI = L.DomUtil.create('a', 'leaflet-draw-edit-remove');
+      controlDiv.append(controlUI);
+      controlUI.title = 'Remove All Polygons';
+      controlUI.href = '#';
+      L.DomEvent.addListener(controlUI, 'click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if(!$(controlUI).hasClass("leaflet-disabled") && _this.drawnItems.getLayers().length > 0){
+          _this.drawnItems.clearLayers();
+          _this.map.fire('draw:deleted');
+
+        }
+    });
 			// this.map.on('draw:created', function (e) {
       //   if(this.drawOptions.onDrawCreated){
 
@@ -251,16 +274,12 @@ define([
       var markerButtons = button.find('a');
       if (button.hasClass('disabled-draw-control')) {
           button.removeClass('disabled-draw-control');
-          markerButtons.removeClass('leaflet-disabled')
-          // markerButtons.forEach(function(element) {
-          //   element.removeClass('leaflet-disabled')
-          // }, this);
-      } else {
+          markerButtons.removeClass('leaflet-disabled');
+          // $('.leaflet-draw-edit-remove').addClass('leaflet-disabled');
+        } else {
           button.addClass('disabled-draw-control');
-          markerButtons.addClass('leaflet-disabled')
-          // markerButtons.forEach(function(element) {
-          //   element.addClass('leaflet-disabled')
-          // }, this);
+          markerButtons.addClass('leaflet-disabled');
+          // $('.leaflet-draw-edit-remove').removeClass('leaflet-disabled');
       }
     },
 
