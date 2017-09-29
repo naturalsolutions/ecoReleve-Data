@@ -1,0 +1,30 @@
+name: erd2
+channels:
+- defaults
+dependencies:
+  - python=3.5
+  - markupsafe=1.0
+  - pyramid=1.5.7
+  - pandas=0.20.3
+  - reportlab=3.4.0
+  # - pywin32=220 # only for Windows OS, else comment this row
+  - pycrypto=2.6.1
+  - sqlalchemy=1.1.13
+  - pyodbc=4.0.17
+  - zope.interface=4.1.2
+  - psutil
+
+  - pip:
+    - pypyodbc>=1.3.4
+    - pyramid_chameleon==0.3
+    - pyramid_debugtoolbar==4.3
+    - pyramid_tm==2.2
+    - sqlalchemy-utils==0.30.11
+    - transaction==2.1.2
+    - zope.sqlalchemy==0.7.7
+    - waitress==1.0.2
+    - webtest==2.0.28
+    - XlsxWriter==1.0.0
+    - pyexcel-xlsx==0.5.0.1
+    - openpyxl==2.4.8
+    - pyramid_jwtauth==0.1.3
