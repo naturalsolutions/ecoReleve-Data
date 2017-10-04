@@ -198,7 +198,10 @@ class IndividualLocationsView(SecurityRoot):
 
         if 'geo' in self.request.params:
             result = gene.get_geoJSON(
-                criteria, ['ID', 'Date', 'type_', 'precision'])
+                criteria, ['ID', 'Date', 'type_', 'precision'], ['Date:asc'])
+            for feature in result['features']:
+                feature['properties']['Date'] = feature['properties']['Date'].strftime('%Y-%m-%d %H:%M:%S')
+            return result
         else:
             result = gene.search(criteria,
                                  offset=offset,

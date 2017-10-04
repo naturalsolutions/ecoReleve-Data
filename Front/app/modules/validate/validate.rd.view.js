@@ -115,7 +115,8 @@ define([
         com: this.com,
         zoom: 7,
         element: 'map',
-        bbox: true
+        bbox: true,
+        player: true
       });
     },
 
