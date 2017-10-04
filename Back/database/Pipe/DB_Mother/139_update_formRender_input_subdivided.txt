@@ -1,0 +1,11 @@
+UPDATE [dbo].[ModuleForms]
+   SET [FormRender] = 1
+ WHERE Name = 'Subdivided'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('139_update_formRender_input_subdivided',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -50,7 +50,7 @@ require.config({
     'dropzone': '../bower_components/dropzone/dist/dropzone',
     'i18n': '../bower_components/i18n/i18next',
     'chart': '../bower_components/chartjs/Chart',
-    'tooltipster': '../bower_components/tooltipster/js/jquery.tooltipster.min',
+    'tooltipster': '../bower_components/tooltipster/dist/js/tooltipster.bundle.min',
 
     'ns_filter_bower': '../bower_components/NaturalJS_Filter/model-filter',
     'ag-grid': '../bower_components/ag-grid/dist/ag-grid',
@@ -64,6 +64,7 @@ require.config({
 
     'autocompTree': './vendors/jquery.autocompTree',
     'tooltipster-list': 'vendors/tooltipList',
+    'popper' : '../bower_components/popper.js/index'
 
   },
   map: {

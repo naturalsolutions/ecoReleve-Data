@@ -41,6 +41,22 @@ define([
         },
 
         initialize: function (options) {
+            if (options.schema.defaultValue) { //hack need because back return value and displayValue none when in nestedform 
+                var tmpVal = options.model.get(options.key)
+                var splitTab = options.schema.defaultValue.split('>');
+                if (typeof(tmpVal) === 'undefined' ) {
+                    options.model.set(options.key, { 
+                                                    value :  options.schema.defaultValue,
+                                                    displayValue : splitTab[splitTab.length-1]
+
+                    });
+                }
+                else if ( tmpVal.value === null && tmpVal.displayValue === null ) {
+
+                    tmpVal.displayValue = splitTab[splitTab.length-1];
+                    tmpVal.value = options.schema.defaultValue;
+                }
+            }
             Form.editors.Base.prototype.initialize.call(this, options);
 
             this.formGrid = options.formGrid;

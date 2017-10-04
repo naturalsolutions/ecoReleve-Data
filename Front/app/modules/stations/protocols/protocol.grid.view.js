@@ -54,12 +54,28 @@ define([
         text: 'Please fix error before save your data'
       };
       
-      window.swal(opt, 'warning', null, false);
+      window.swal(
+        opt,
+        'warning',
+        null,
+        false);
     },
 
-    saveObs: function(){
+    saveObs: function() {
       var _this = this;
-      var rowDataAndErrors = this.gridView.getRowDataAndErrors();
+      var nbVirtualObs = 0;
+      this.gridView.gridOptions.api.forEachNode( function() {
+        nbVirtualObs+=1;
+      });
+      var nbObs = this.gridView.getRowDataAndErrors();//.length
+      nbObs = nbObs.rowData.length
+      var nbObsDeleted = this.gridView.removeEmptyRow();
+
+      if( (nbVirtualObs - nbObsDeleted) > 0 ) {
+        var rowDataAndErrors = this.gridView.getRowDataAndErrors();
+      
+
+
 
       if(rowDataAndErrors.errors.length){
         this.handleErrors(rowDataAndErrors.errors);
@@ -92,11 +108,32 @@ define([
           text: reponse.responseText
         };
         
-        window.swal(opt, 'warning', null, false);
+        window.swal(
+            opt,
+           'warning',
+            null,
+           false);
       });
+    }
+    else {
+      var opt = {
+        title : ' There is no observations',
+        text: 'Sorry but there is nothing to save'
+      };
+      
+      window.swal(
+          opt,
+         'warning',
+          null,
+          false);
+      
+      this.toggleEditionMode();
+      this.hardRefresh();
+    }
     },
 
-    addRow: function(){
+    addRow: function(){    
+      this.gridView.gridOptions.api.stopEditing(false);
       this.gridView.gridOptions.api.setSortModel({});
       this.gridView.gridOptions.api.addItems([{}]);
     },
@@ -144,7 +181,7 @@ define([
           }
 
           var colDef = {
-            editable: editable,
+            editable: field.editable ? this.editable : this.editable,
             field: field.name,
             headerName: field.title,
             type: field.type,
@@ -174,7 +211,7 @@ define([
     onShow: function(){
       //debbug
       //this.$el.find('.js-btn-form').toggleClass('hide');
-
+      var _this = this;
       var rowData = null;
       if(!(this.model.get('obs').length)){
         this.toggleEditionMode();
@@ -193,6 +230,11 @@ define([
           singleClickEdit : true,
           rowData: rowData,
           rowSelection: (this.editable)? 'multiple' : '',
+          onRowDataChanged : function() {
+            if( _this.editable) {
+              _this.gridView.gridOptions.api.addItems([{}]);
+            }
+          }
         },
         noResizeToFit: true
       }));
