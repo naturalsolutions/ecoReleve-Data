@@ -35,6 +35,7 @@ def includeme(config):
     config.set_default_permission('read')
     config.add_forbidden_view(authn_policy.challenge)
 
+
 def init_db(config, settings):
 
     if 'mssql' in settings['cn.dialect']:
@@ -42,7 +43,7 @@ def init_db(config, settings):
             quote_plus(settings['sqlalchemy.Export.url'])
         engineExport = engine_from_config(
             settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
-    else :
+    else:
         engineExport = engine_from_config(
             settings, 'sqlalchemy.Export.')
 
@@ -51,11 +52,12 @@ def init_db(config, settings):
             quote_plus(settings['sqlalchemy.default.url'])
         engine = engine_from_config(
             settings, 'sqlalchemy.default.', legacy_schema_aliasing=True)
-    else :
+    else:
         engine = engine_from_config(
             settings, 'sqlalchemy.default.')
-    
-    config.registry.dbmaker = scoped_session(sessionmaker(bind=engine, autoflush=False))
+
+    config.registry.dbmaker = scoped_session(
+        sessionmaker(bind=engine, autoflush=False))
     dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine))
     config.add_request_method(db, name='dbsession', reify=True)
 
@@ -117,11 +119,13 @@ def main(global_config, **settings):
     add_routes(config)
     config.scan()
 
-
     from .controllers import ModelFactory
 
     Alleluhia = ModelFactory.Alleluhia
     r = Alleluhia()
-    print('toto version ' , r.toto('fgfgfg'))
+    print('toto version ', r.toto('fgfgfg'))
+
+    from .Models import test
+    test(config)
 
     return config.make_wsgi_app()

@@ -59,7 +59,8 @@ def loadThesaurusTrad(config):
         results = session.execute(query).fetchall()
 
         for row in results:
-            thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr':row['nameFr']}
+            thesaurusDictTraduction[row['fullPath']] = {
+                'en': row['nameEn'], 'fr': row['nameFr']}
             invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
             invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
         session.close()
@@ -75,6 +76,7 @@ def loadUserRole(session):
     userOAuthDict = pd.DataFrame.from_records(
         results, columns=['user_id', 'role_id'])
 
+
 USERS = {2: 'superUser',
          3: 'user',
          1: 'admin'}
@@ -87,7 +89,8 @@ GROUPS = {'superUser': ['group:superUsers'],
 def groupfinder(userid, request):
     session = request.dbsession
     Tuser_role = Base.metadata.tables['VUser_Role']
-    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(userid))
+    query_check_role = select([Tuser_role.c['role']]).where(
+        Tuser_role.c['userID'] == int(userid))
     currentUserRoleID = session.execute(query_check_role).scalar()
 
     if currentUserRoleID in USERS:
@@ -115,17 +118,17 @@ def db(request):
         else:
             try:
                 session.commit()
-            except BusinessRuleError as e :
+            except BusinessRuleError as e:
                 session.rollback()
                 request.response.status_code = 409
-                request.response.text= e.value
+                request.response.text = e.value
             finally:
                 session.close()
                 makerDefault.remove()
-            
 
     request.add_finished_callback(cleanup)
     return session
+
 
 from ..GenericObjets.FrontModules import *
 from .CustomTypes import *
@@ -150,74 +153,68 @@ from .Project import *
 # LinkedTables['MonitoredSite'] = MonitoredSite
 
 
+from sqlalchemy import (Column,
+                        ForeignKey,
+                        String,
+                        Integer,
+                        Float,
+                        DateTime,
+                        select,
+                        join,
+                        func,
+                        not_,
+                        exists,
+                        event,
+                        Table,
+                        Index,
+                        UniqueConstraint,
+                        Table)
+from sqlalchemy.orm import relationship, aliased, class_mapper, mapper
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.declarative import declared_attr
 
 
+def test(config):
+    from ..controllers import ModelFactory
+    session = config.registry.dbmaker()
+    alllModel = ModelFactory.Tropdelaballe
+    o = alllModel(session=session)
+    # o = session.query(alllModel).get(1016)
+    # print(o._Alleluhia.values)
+    # print(o)
+    # print(o.type_id)
+    # print(o._type)
+    o.values = {
+        'NEWdyn1': 'SDJNDSKJFBDSKFBDSGKJBchamps lié amettre a jour',
+        'dyn2': 888,
+        'dyn5': 'vallalalal',
+        'toto': 87.93,
+        'type_id': 1
+        # 'FK_alleeelaaaa': 5
+    }
+    session.add(o)
+    # o = session.query(alllModel).get(3)
+    # print(o.type)
+    # print(o._type._type_properties[0].linkedTable)
+    # print(o.properties)
+    # print(o.values)
+    print(o.getHistory())
+    # print(o.getLinkedField())
+    # values = {'FK_MyObjectType':1,
+    #            'toto':'blelelelqsdqsddqsdfelele',
+    #            'test1':'newsdsdccwxcx   xcwxcsdfwx  <dssss'}
 
-
-
-# from sqlalchemy import (Column,
-#                     ForeignKey,
-#                     String,
-#                     Integer,
-#                     Float,
-#                     DateTime,
-#                     select,
-#                     join,
-#                     func,
-#                     not_,
-#                     exists,
-#                     event,
-#                     Table,
-#                     Index,
-#                     UniqueConstraint,
-#                     Table)
-# from sqlalchemy.orm import relationship, aliased, class_mapper, mapper
-# from sqlalchemy.ext.associationproxy import association_proxy
-# from sqlalchemy.ext.declarative import declared_attr
-# from ..GenericObjets.OrmModelsMixin import  ClassController
-
-
-
-# def test(config):
-#     session = config.registry.dbmaker()
-#     alllModel = ClassController.Tropdelaballe
-#     o = alllModel(session=session, type_id=1)
-#     # o = session.query(alllModel).get(1016)
-#     # print(o._Alleluhia.values)
-#     # print(o)
-#     # print(o.type_id)
-#     # print(o._type)
-#     o.values = {
-#         'NEWdyn1': 'SDJNDSKJFBDSKFBDSGKJBchamps lié amettre a jour',
-#         'dyn2': 888,
-#         'dyn5': 'vallalalal',
-#         'toto':87.93,
-#         'FK_alleeelaaaa':5
-#     }
-#     session.add(o)
-#     # o = session.query(alllModel).get(3)
-#     # print(o.type)
-#     # print(o._type._type_properties[0].linkedTable)
-#     # print(o.properties)
-#     # print(o.values)
-#     print(o.getHistory())
-#     # print(o.getLinkedField())
-#     # values = {'FK_MyObjectType':1,
-#     #            'toto':'blelelelqsdqsddqsdfelele',
-#     #            'test1':'newsdsdccwxcx   xcwxcsdfwx  <dssss'}
-
-#     # o.updateValues(values, '02/08/2016')
-#     # o2 = MyObject(session=session)
-#     # o2.values={'FK_MyObjectType':1,
-#     #            'toto':'newtotoVal',
-#     #            'test1':'test rockssssssssss'}
-#     # print(o2.type)
-#     # print(o2.properties)
-#     # session.add(o2)
-#     # # print(MyObject.lastValueView())*
-#     # print(OHMyObject.TypeClass.PropertiesClass.__tablename__)
-#     # print(MyObject.TypeClass.PropertiesClass.__tablename__)
-#     # print(MyObject.LastDynamicValueViewClass.select())
-#     session.commit()
-#     pass
-
+    # o.updateValues(values, '02/08/2016')
+    # o2 = MyObject(session=session)
+    # o2.values={'FK_MyObjectType':1,
+    #            'toto':'newtotoVal',
+    #            'test1':'test rockssssssssss'}
+    # print(o2.type)
+    # print(o2.properties)
+    # session.add(o2)
+    # # print(MyObject.lastValueView())*
+    # print(OHMyObject.TypeClass.PropertiesClass.__tablename__)
+    # print(MyObject.TypeClass.PropertiesClass.__tablename__)
+    # print(MyObject.LastDynamicValueViewClass.select())
+    session.commit()
+    pass

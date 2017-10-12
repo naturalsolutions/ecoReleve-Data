@@ -21,7 +21,7 @@ from sqlalchemy import (Column,
 from sqlalchemy.orm import relationship
 from ..Models import Base, dbConfig
 from sqlalchemy.orm.exc import *
-from ..GenericObjets.OrmModelsMixin import HasDynamicProperties
+from ..GenericObjets.OrmModelsMixin import HasDynamicProperties, HasStaticProperties
 from ..GenericObjets.SearchEngine import CollectionEngine
 import types
 
@@ -30,10 +30,10 @@ class OrmFactory(object):
     __allORMClass__ = {}
 
     staticTypeDict = {'String': String,
-                    'Float': Float,
-                    'Integer': Integer,
-                    'Date': DateTime,
-                    }
+                      'Float': Float,
+                      'Integer': Integer,
+                      'Date': DateTime,
+                      }
 
     def __init__(self, objList=[]):
         self.conf = objList
@@ -45,11 +45,11 @@ class OrmFactory(object):
             return self.getClass(attr)
         if self.findOrmEntity(attr):
             return self.findOrmEntity(attr)
-    
+
     @staticmethod
     def findOrmEntity(tablename):
-        filterEntity = list(filter(lambda e: hasattr(e, '__tablename__') and e.__tablename__ == tablename
-                            , Base._decl_class_registry.values()))
+        filterEntity = list(filter(lambda e: hasattr(
+            e, '__tablename__') and e.__tablename__ == tablename, Base._decl_class_registry.values()))
         if filterEntity:
             return filterEntity[0]
         else:
@@ -73,22 +73,22 @@ class OrmFactory(object):
             self.setDBConfTypes(dbObject, dict)
         else:
             model['ID'] = Column(Integer, primary_key=True)
-            dbObject = type(classname, (DbObject, Base, ), model)
-        
+            dbObject = type(classname, (HasStaticProperties, Base, ), model)
+
         self.add(dbObject)
 
-    # ### TODO : 
+    # ### TODO :
     #   - set Collection Engine automatically
     #   - Collection Engine NEED to work on simple ObjectDB
     # def setCollection(self, dbObject):
     #     if hasattr(dbObject, 'history_track'):
     #         dbObject.Collection = type('Collection'+dbObject.__tablename__, (CollectionEngine, ), )
 
-
     def setStaticProperties(self, model, properties):
         for prop in properties:
             if prop.get('foreign_key', None):
-                model[prop['name']] = Column(prop['name'], self.getCType(prop), ForeignKey(prop.get('foreign_key')))
+                model[prop['name']] = Column(prop['name'], self.getCType(
+                    prop), ForeignKey(prop.get('foreign_key')))
             else:
                 model[prop['name']] = Column(prop['name'], self.getCType(prop))
         return model
@@ -111,7 +111,7 @@ class OrmFactory(object):
                 self.insertConfDynProp(curORMclass, model)
                 self.insertConfType_DynProp(curORMclass, model)
                 self.setRelationships(curORMclass, model)
-    
+
     def setRelationships(self, dbObject, model):
         confProperties = model.get('properties', {})
         session = dbConfig['dbSession']()
@@ -122,16 +122,16 @@ class OrmFactory(object):
                 entity = self.findOrmEntity(tablename)
                 setattr(dbObject, '_' + entity.__name__, relationship(entity))
 
-
     def insertConfTypes(self, dbObject, model):
         modelType = dbObject.TypeClass
         session = dbConfig['dbSession']()
         for _type in model.get('types', []):
-            stmt = select([func.count(modelType.ID)]).where(modelType.Name == _type)
+            stmt = select([func.count(modelType.ID)]).where(
+                modelType.Name == _type)
             typeExists = session.execute(stmt).scalar()
 
             if not typeExists:
-                insert_stmt = insert(modelType).values({'Name':_type})
+                insert_stmt = insert(modelType).values({'Name': _type})
                 session.execute(insert_stmt)
         session.commit()
         session.close()
@@ -141,15 +141,17 @@ class OrmFactory(object):
         confProperties = model.get('properties', {})
         session = dbConfig['dbSession']()
         for prop in confProperties.get('dynamics', []):
-            stmt = select([func.count(modelProperties.ID)]).where(modelProperties.Name == prop['name'])
+            stmt = select([func.count(modelProperties.ID)]).where(
+                modelProperties.Name == prop['name'])
             typeExists = session.execute(stmt).scalar()
 
             if not typeExists:
-                insert_stmt = insert(modelProperties).values({'Name':prop['name'], 'TypeProp':prop['ctype']})
+                insert_stmt = insert(modelProperties).values(
+                    {'Name': prop['name'], 'TypeProp': prop['ctype']})
                 session.execute(insert_stmt)
         session.commit()
         session.close()
-    
+
     def insertConfType_DynProp(self, dbObject, model):
         modelProperties = dbObject.TypeClass.PropertiesClass
         modelType = dbObject.TypeClass
@@ -158,17 +160,20 @@ class OrmFactory(object):
         session = dbConfig['dbSession']()
         types = session.execute(select([modelType])).fetchall()
         properties = session.execute(select([modelProperties])).fetchall()
-        typeProperties = session.execute(select([modelTypeProperties])).fetchall()
+        typeProperties = session.execute(
+            select([modelTypeProperties])).fetchall()
 
         valuesToInsert = []
         for _type, props in model.get('types', []).items():
             curType = list(filter(lambda t: t['Name'] == _type, types))[0]
             for prop in props:
-                curProp = list(filter(lambda p: p['Name'] == prop, properties))[0]
-                linkExists = list(filter(lambda x: x[dbObject.fk_table_type_name] == curType['ID'] and x[dbObject.fk_table_DynProp_name] ==curProp['ID']
-                                    , typeProperties))
+                curProp = list(
+                    filter(lambda p: p['Name'] == prop, properties))[0]
+                linkExists = list(filter(lambda x: x[dbObject.fk_table_type_name] == curType['ID']
+                                         and x[dbObject.fk_table_DynProp_name] == curProp['ID'], typeProperties))
                 if not linkExists:
-                    valuesToInsert.append({dbObject.fk_table_type_name:curType['ID'] , dbObject.fk_table_DynProp_name:curProp['ID']})
+                    valuesToInsert.append(
+                        {dbObject.fk_table_type_name: curType['ID'], dbObject.fk_table_DynProp_name: curProp['ID']})
 
         if valuesToInsert:
             insert_stmt = insert(modelTypeProperties).values(valuesToInsert)
@@ -179,69 +184,3 @@ class OrmFactory(object):
 
     def add(self, dbObject):
         self.__allORMClass__[dbObject.__name__] = dbObject
-
-
-
-# ****************** TEST ****************************
-
-# class MyObject(HasDynamicProperties, Base):
-#     __tablename__ = 'MyObject'
-#     toto = Column(String)
-
-
-storageConf = [
-    {'__tablename__': 'tropdelaballe',
-     '__classname__': 'Tropdelaballe',
-     'isdynamic':1,
-     'properties': {
-         'statics': [
-            {'name': 'tutu', 'ctype': 'String', 'clength': 255},
-            {'name': 'tata', 'ctype': 'Integer', 'clength': None},
-            {'name': 'toto', 'ctype': 'Float'},
-            {'name': 'FK_alleeelaaaa', 'ctype': 'Integer', 'clength': None, 'foreign_key':'alleeelaaaa.ID'}
-            ],
-            'dynamics': [
-            {'name': 'NEWdyn1', 'ctype': 'String', 'clength': 10},
-            {'name': 'dyn2', 'ctype': 'Integer', 'clength': None},
-            {'name': 'dyn3', 'ctype': 'Float'},
-            {'name': 'dyn4', 'ctype': 'String', 'clength': 255},
-            {'name': 'dyn5', 'ctype': 'String', 'clength': 255},
-            {'name': 'dyn6', 'ctype': 'String', 'clength': 255},
-            ]
-        },
-      'types':{
-          'type1': ['NEWdyn1', 'dyn2', 'dyn5'],
-          'type2': ['dyn3', 'dyn4']
-      }
-    },
-    {'__tablename__': 'alleeelaaaa',
-     '__classname__': 'Alleluhia',
-     'isdynamic': 1,
-     'history_track':1,
-     'properties': {
-        'statics': [
-            {'name': 'ahhhhhaaa', 'ctype': 'String', 'clength': 10},
-            {'name': 'oohhh', 'ctype': 'Integer', 'clength': None},
-            {'name': 'tada', 'ctype': 'Float'},
-            {'name': 'pffffff', 'ctype': 'String', 'clength': 255},
-            ],
-        'dynamics': [
-            {'name': 'dyn1', 'ctype': 'String', 'clength': 10},
-            {'name': 'dyn2', 'ctype': 'Integer', 'clength': None},
-            {'name': 'dyn3', 'ctype': 'Float'},
-            {'name': 'dyn4', 'ctype': 'String', 'clength': 255},
-            {'name': 'dyn5', 'ctype': 'String', 'clength': 255},
-            ]
-        },
-      'types':{
-          'type1': ['dyn1', 'dyn2'],
-          'type2': ['dyn3', 'dyn4']
-      }
-    }
-]
-
-from sqlalchemy import exc as sa_exc
-import warnings
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", category=sa_exc.SAWarning)
-    ModelFactory = OrmFactory(storageConf)

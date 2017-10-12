@@ -209,10 +209,6 @@ class EventRuler(object):
 
 class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
-    @orm.reconstructor
-    def init_on_load(self):
-        self.session = inspect(self).session
-
     def __init__(self, *args, **kwargs):
         ConfiguredDbObjectMapped.__init__(self)
         ORMUtils.__init__(self)
@@ -220,10 +216,17 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
         self.session = kwargs.get('session', None) or threadlocal.get_current_request(
         ).dbsession if threadlocal.get_current_request() else None
+
         for param, value in kwargs.items():
             if hasattr(self, param):
                 setattr(self, param, value)
+        if kwargs.get('session', None):
+            del kwargs['session']
         Base.__init__(self, **kwargs)
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self.session = inspect(self).session
 
     def getValues(self):
         ''' return flat data dict '''

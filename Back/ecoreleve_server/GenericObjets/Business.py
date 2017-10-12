@@ -1,19 +1,19 @@
 from ..Models import Base, dbConfig
 from sqlalchemy import (
-select,
-Column,
-DateTime,
-ForeignKey,
-Integer,
-Numeric,
-String,
-Unicode,
-Sequence,
-orm,
-func,
-event,
-text,
-bindparam
+    select,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Unicode,
+    Sequence,
+    orm,
+    func,
+    event,
+    text,
+    bindparam
 )
 from collections import OrderedDict
 import json
@@ -23,7 +23,7 @@ from pyramid.view import view_config
 
 
 class BusinessRuleError(Exception):
-    
+
     def __init__(self, value):
         self.value = value
 
@@ -55,11 +55,11 @@ class BusinessRules(Base):
     errorValue = Column(String(250))
 
     @hybrid_property
-    def paramsJSON (self):
+    def paramsJSON(self):
         return json.loads(self.params)
 
     @hybrid_property
-    def targetTypes (self):
+    def targetTypes(self):
         if self.targetType:
             return json.loads(self.targetType)
         else:
@@ -74,11 +74,13 @@ class BusinessRules(Base):
             return text(query)'''
         paramsJSON = self.paramsJSON
         sqlParams = ' @result int; \n'
-        declare_stmt = 'DECLARE '+ sqlParams
-        params_stmt = ' :'+', :'.join(paramsJSON)+', @result OUTPUT; \n'
-        bindparams = [bindparam(param,entityDTO.get(param, None)) for param in paramsJSON]
+        declare_stmt = 'DECLARE ' + sqlParams
+        params_stmt = ' :' + ', :'.join(paramsJSON) + ', @result OUTPUT; \n'
+        bindparams = [bindparam(param, entityDTO.get(param, None))
+                      for param in paramsJSON]
 
-        stmt = text(declare_stmt + ' EXEC '+self.executing + params_stmt + '\n SELECT @result;', bindparams=bindparams)
+        stmt = text(declare_stmt + ' EXEC ' + self.executing +
+                    params_stmt + '\n SELECT @result;', bindparams=bindparams)
         return stmt
 
     def execute(self, entityDTO):
@@ -87,6 +89,6 @@ class BusinessRules(Base):
         result = session.execute(stmt).scalar()
 
         # print('\n -----  EXEC '+self.executing, ' Event: '+self.actionType , ' result: ', result)
-        if result or self.actionType =='before_delete':
+        if result or self.actionType == 'before_delete':
             self.raiseError()
         # return result
