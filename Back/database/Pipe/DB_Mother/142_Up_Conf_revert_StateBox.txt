@@ -1,0 +1,13 @@
+update [ModuleForms] SET Inputtype = 'Checkbox', DefaultValue = NULL, Validators = NULL, Options = NULL
+where InputType = 'StateBox'
+
+update [ModuleForms] SET DefaultValue = 1
+where name = 'identity_sure' and TypeObj in (207,203)
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('142_Up_Conf_revert_StateBox',GETDATE(),(SELECT db_name()))
+
+
+GO
