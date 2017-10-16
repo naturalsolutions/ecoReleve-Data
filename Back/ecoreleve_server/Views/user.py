@@ -12,6 +12,7 @@ from ..Models import User, groupfinder
 def users(request):
     """Return the list of all the users with their ids.
     """
+    pass
     session = request.dbsession
     query = select([
         User.id.label('PK_id'),
@@ -27,6 +28,7 @@ def users(request):
 def current_user(request, user_id=None):
     """Return the list of all the users with their ids.
     """
+    return
     session = request.dbsession
 
     if user_id is not None:
@@ -52,5 +54,6 @@ def current_user(request, user_id=None):
     renderer='json'
 )
 def getUser(request):
+    pass
     user_id = int(request.matchdict['id'])
     return current_user(request, user_id=user_id)

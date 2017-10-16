@@ -20,7 +20,7 @@ from ..Models import (
     Base,
     Equipment,
     Sensor,
-    # SensorType,
+    Project,
     MonitoredSite
 )
 from ..utils import Eval
@@ -165,7 +165,8 @@ class IndividualList(CollectionEngine):
 
         joinTable = super().GetJoinTable(searchInfo)
 
-        releaseFilter = list(filter(lambda x: x['Column'] == 'LastImported', searchInfo['criteria']))
+        releaseFilter = list(
+            filter(lambda x: x['Column'] == 'LastImported', searchInfo['criteria']))
         if len(releaseFilter) > 0:
             return joinTable
 
@@ -584,3 +585,10 @@ class MonitoredSiteList(CollectionEngine):
                      ))
             fullQueryJoin = fullQueryJoin.where(exists(subSelect))
         return fullQueryJoin
+
+
+class ProjectList(CollectionEngine):
+
+    def __init__(self, frontModule, typeObj=None, startDate=None,
+                 history=False, historyView=None):
+        super().__init__(Project, frontModule, startDate)

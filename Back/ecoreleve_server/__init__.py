@@ -119,13 +119,4 @@ def main(global_config, **settings):
     add_routes(config)
     config.scan()
 
-    from .controllers import ModelFactory
-
-    Alleluhia = ModelFactory.Alleluhia
-    r = Alleluhia()
-    print('toto version ', r.toto('fgfgfg'))
-
-    from .Models import test
-    test(config)
-
     return config.make_wsgi_app()

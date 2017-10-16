@@ -73,40 +73,40 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
 
 context_permissions = {
     'stations': [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Allow, 'group:superUsers', ('create', 'update', 'read')),
-                (Allow, 'group:users', ('create', 'update', 'read'))
-              ],
+        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', ('create', 'update', 'read')),
+        (Allow, 'group:users', ('create', 'update', 'read'))
+    ],
 
     'observations': [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Allow, 'group:superUsers', ALL_PERMISSIONS),
-                (Allow, 'group:users', ALL_PERMISSIONS)
-              ],
+        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', ALL_PERMISSIONS),
+        (Allow, 'group:users', ALL_PERMISSIONS)
+    ],
 
     'individuals': [
-                (Allow, 'group:admins', ('create', 'update', 'read')),
-                (Allow, 'group:superUsers', ('update', 'read')),
-                (Allow, 'group:users', 'read')
-              ],
+        (Allow, 'group:admins', ('create', 'update', 'read')),
+        (Allow, 'group:superUsers', ('update', 'read')),
+        (Allow, 'group:users', 'read')
+    ],
 
     'monitoredSites': [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Allow, 'group:superUsers', ('create', 'update', 'read')),
-                (Allow, 'group:users', ('create', 'update', 'read'))
-              ],
+        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', ('create', 'update', 'read')),
+        (Allow, 'group:users', ('create', 'update', 'read'))
+    ],
 
     'sensors': [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Allow, 'group:superUsers', 'read'),
-                (Allow, 'group:users', 'read')
-              ],
+        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', 'read'),
+        (Allow, 'group:users', 'read')
+    ],
 
     'release': [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Deny, 'group:superUsers', ALL_PERMISSIONS),
-                (Deny, 'group:users', ALL_PERMISSIONS),
-              ],
+        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Deny, 'group:superUsers', ALL_PERMISSIONS),
+        (Deny, 'group:users', ALL_PERMISSIONS),
+    ],
 }
 
 

@@ -10,6 +10,7 @@ from pyramid.security import (
 # TODO: create ApiController
 # ###
 
+
 class Resource(dict):
 
     def __init__(self, ref, parent):
@@ -34,13 +35,13 @@ class Resource(dict):
 
 class SecurityRoot(Resource):
     __acl__ = [
-         (Allow, Authenticated, 'read'),
-         (Allow, Authenticated, 'all'),
-         (Allow, 'group:admins', 'admin'),
-         (Allow, 'group:admins', 'superUser'),
-         (Allow, 'group:admins', 'all'),
-         (Allow, 'group:superUsers', 'superUser'),
-         (Allow, 'group:superUsers', 'all')
+        (Allow, Authenticated, 'read'),
+        (Allow, Authenticated, 'all'),
+        (Allow, 'group:admins', 'admin'),
+        (Allow, 'group:admins', 'superUser'),
+        (Allow, 'group:admins', 'all'),
+        (Allow, 'group:superUsers', 'superUser'),
+        (Allow, 'group:superUsers', 'all')
     ]
 
     def __init__(self, request):
@@ -95,12 +96,12 @@ class RESTView(object):
     def put(self):
         return self.context.update()
 
-from . import ModelFactory
-class ApiFactory(object):
-    
-    def __init__(self, ModelFactory):
-        self.ModelFactory = ModelFactory
+# from . import ModelFactory
+# class ApiFactory(object):
 
-    def buildView(self):
-        pass
-    pass
+#     def __init__(self, ModelFactory):
+#         self.ModelFactory = ModelFactory
+
+#     def buildView(self):
+#         pass
+#     pass
