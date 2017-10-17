@@ -98,7 +98,8 @@ class ObservationsView(DynamicObjectCollectionView):
             data[items] = value
 
         sta = self.parent.objectDB
-        curObs = self.item.model(type_id=data['FK_ProtocoleType'], FK_Station=sta.ID)
+        curObs = self.item.model(
+            type_id=data['FK_ProtocoleType'], FK_Station=sta.ID)
         listOfSubProtocols = []
 
         for items, value in data.items():
@@ -116,10 +117,11 @@ class ObservationsView(DynamicObjectCollectionView):
             self.session.flush()
             responseBody['id'] = curObs.ID
         except Exception as e:
-            self.session.rollback()
-            self.request.response.status_code = 510
-            responseBody['response'] = e.value
-            sendLog(logLevel=1, domaine=3, msg_number=self.request.response.status_code)
+            print_exc()
+            # self.session.rollback()
+            # self.request.response.status_code = 510
+            # responseBody['response'] = e.value
+            # sendLog(logLevel=1, domaine=3, msg_number=self.request.response.status_code)
         return responseBody
 
     def batch(self):
@@ -151,8 +153,8 @@ class ObservationsView(DynamicObjectCollectionView):
         values = []
         for i in range(len(listObs)):
             curObs = listObs[i]
-            curObs.LoadNowValues()
-            values.append(curObs.getFlatObject(schema=curObs.getForm().get('schema',None) ))
+            # curObs.LoadNowValues()
+            values.append(curObs.getDataWithSchema()['data'])
         return values
 
     def getProtocolsofStation(self):
@@ -179,7 +181,8 @@ class ObservationsView(DynamicObjectCollectionView):
                         else:
                             typeName = curObsType.Name.replace('_', ' ')
                             if curObsType.Status == 10:
-                                curObsForm = curObs.getForm(displayMode=DisplayMode)
+                                curObsForm = curObs.getForm(
+                                    displayMode=DisplayMode)
                                 curObsForm['grid'] = True
                             else:
                                 curObsForm = {}
@@ -208,7 +211,8 @@ class ObservationsView(DynamicObjectCollectionView):
 
                         if protoStatus != 1:
                             if curVirginObsType.Status == 10:
-                                curVirginObsForm = curVirginObs.getForm(displayMode=DisplayMode)
+                                curVirginObsForm = curVirginObs.getForm(
+                                    displayMode=DisplayMode)
                                 curVirginObsForm['grid'] = True
                             else:
                                 curVirginObsForm = {}

@@ -132,6 +132,7 @@ def db(request):
 
 from ..GenericObjets.FrontModules import *
 from .CustomTypes import *
+from .Project import *
 from .Protocoles import *
 from .User import User
 from .Station import *
@@ -144,5 +145,4 @@ from .Equipment import *
 from .SensorData import *
 from .List import *
 from .Log import sendLog
-from .Project import *
 from .Client import *

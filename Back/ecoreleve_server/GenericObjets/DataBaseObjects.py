@@ -26,6 +26,7 @@ class ConfiguredDbObjectMapped(object):
     def getConf(self, moduleName=None):
         if not moduleName:
             moduleName = self.moduleFormName
+        print(moduleName)
         conf = self.session.query(FrontModules
                                   ).filter(FrontModules.Name == moduleName
                                            ).first()
@@ -70,7 +71,7 @@ class ConfiguredDbObjectMapped(object):
         sortedFieldsets = []
         Legends = sorted([(obj.Legend, obj.FormOrder, obj.Name)
                           for obj in fields if obj.FormOrder is not None],
-                          key=lambda x: x[1])
+                         key=lambda x: x[1])
 
         Unique_Legends = list()
         # Get distinct Fieldset in correct order
@@ -113,7 +114,8 @@ class ConfiguredDbObjectMapped(object):
         if type_:
             filterFields = filterFields.filter(or_(ModuleGrids.TypeObj == type_,
                                                    ModuleGrids.TypeObj == None))
-        filterFields = filterFields.order_by(asc(ModuleGrids.FilterOrder)).all()
+        filterFields = filterFields.order_by(
+            asc(ModuleGrids.FilterOrder)).all()
         for curConf in filterFields:
             if curConf.IsSearchable:
                 filters.append(curConf.GenerateFilter())

@@ -29,9 +29,9 @@ from sqlalchemy import exc as sa_exc
 import warnings
 
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", category=sa_exc.SAWarning)
-    ModelFactory = OrmFactory()
+# with warnings.catch_warnings():
+#     warnings.simplefilter("ignore", category=sa_exc.SAWarning)
+ModelFactory = OrmFactory()
 
 
 # ****************** TEST ****************************

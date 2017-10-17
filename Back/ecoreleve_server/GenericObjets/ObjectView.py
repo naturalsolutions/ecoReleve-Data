@@ -114,6 +114,7 @@ class DynamicObjectView(CustomView):
 
     def getData(self):
         # self.objectDB.LoadNowValues()
+        print(self.objectDB.values)
         return self.objectDB.values
 
     def getDataWithForm(self):
@@ -153,15 +154,15 @@ class DynamicObjectView(CustomView):
 
         propertiesTable = Base.metadata.tables[self.objectDB.TypeClass.PropertiesClass.__tablename__]
         dynamicValuesTable = Base.metadata.tables[self.objectDB.DynamicValuesClass.__tablename__]
-        FK_name = 'FK_'+self.objectDB.__tablename__
+        FK_name = 'FK_' + self.objectDB.__tablename__
         FK_property_name = self.objectDB.fk_table_DynProp_name
 
         tableJoin = join(dynamicValuesTable, propertiesTable,
                          dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
         query = select([dynamicValuesTable, propertiesTable.c['Name']]
                        ).select_from(tableJoin).where(
-                dynamicValuesTable.c[FK_name] == self.objectDB.ID
-            ).order_by(desc(dynamicValuesTable.c['StartDate']))
+            dynamicValuesTable.c[FK_name] == self.objectDB.ID
+        ).order_by(desc(dynamicValuesTable.c['StartDate']))
 
         result = self.session.execute(query).fetchall()
         response = []
@@ -246,7 +247,7 @@ class DynamicObjectCollectionView(CustomView):
             data[items] = value
         # self.setType(data[self.objectDB.getTypeObjectFKName()])
         # self.objectDB.init_on_load()
-        self.objectDB.values= data
+        self.objectDB.values = data
         self.session.add(self.objectDB)
         self.session.flush()
         return {'ID': self.objectDB.ID}
@@ -299,7 +300,8 @@ class DynamicObjectCollectionView(CustomView):
         moduleFront = self.getConf(self.moduleGridName)
 
         if self.request is not None:
-            searchInfo, history, startDate = self.formatParams({}, paging=False)
+            searchInfo, history, startDate = self.formatParams(
+                {}, paging=False)
             self.collection = self.getCollection(moduleFront,
                                                  history=history,
                                                  startDate=startDate)
@@ -373,7 +375,8 @@ class DynamicObjectCollectionView(CustomView):
         # gridCols = self.getConfigJSON(moduleName, type_)
         gridCols = None
         if not gridCols:
-            gridCols = self.objectDB.getGrid(type_=type_, moduleName=moduleName)
+            gridCols = self.objectDB.getGrid(
+                type_=type_, moduleName=moduleName)
             self.setConfigJSON(moduleName, type_, gridCols)
 
         return gridCols
@@ -389,11 +392,12 @@ class DynamicObjectCollectionView(CustomView):
         # filters = self.getConfigJSON(moduleName+'Filter', type_)
         filters = None
         if not filters:
-            filtersList = self.objectDB.getFilters(type_=type_, moduleName=moduleName)
+            filtersList = self.objectDB.getFilters(
+                type_=type_, moduleName=moduleName)
             filters = {}
             for i in range(len(filtersList)):
                 filters[str(i)] = filtersList[i]
-            self.setConfigJSON(moduleName+'Filter', type_, filters)
+            self.setConfigJSON(moduleName + 'Filter', type_, filters)
 
         return filters
 
@@ -412,7 +416,8 @@ class DynamicObjectCollectionView(CustomView):
         table = self.objectDB.TypeClass.__table__
         query = select([table.c['ID'].label('val'),
                         table.c['Name'].label('label')])
-        response = [OrderedDict(row) for row in self.session.execute(query).fetchall()]
+        response = [OrderedDict(row)
+                    for row in self.session.execute(query).fetchall()]
         return response
 
     def export(self):
@@ -433,4 +438,3 @@ class DynamicObjectCollectionView(CustomView):
             file,
             content_disposition="attachment; filename=individuals_export_" + dt + ".xlsx",
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-

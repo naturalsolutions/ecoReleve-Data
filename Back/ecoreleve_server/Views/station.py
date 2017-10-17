@@ -63,7 +63,8 @@ class StationsView(DynamicObjectCollectionView):
         try:
             data['StartDate'] = data['StationDate']
             data['Precision'] = data['precision']
-            currentMonitoredSite = session.query(MonitoredSite).get(data['FK_MonitoredSite'])
+            currentMonitoredSite = session.query(
+                MonitoredSite).get(data['FK_MonitoredSite'])
             currentMonitoredSite.updateFromJSON(data)
             return 'Monitored site position was updated'
         except IntegrityError as e:
@@ -91,11 +92,12 @@ class StationsView(DynamicObjectCollectionView):
         if 'criteria' in params:
             lastImported = False
             for obj in params['criteria']:
-                    if obj['Column'] == 'LastImported':
-                        self.lastImported(obj, params)
-                        lastImported = True
+                if obj['Column'] == 'LastImported':
+                    self.lastImported(obj, params)
+                    lastImported = True
         if not lastImported:
-            map(lambda x: obj['Column'] != 'FK_StationType', params['criteria'])
+            map(lambda x: obj['Column'] !=
+                'FK_StationType', params['criteria'])
 
         if 'geo' in self.request.params.mixed():
             self.getGeoJsonParams(params)
@@ -135,7 +137,7 @@ class StationsView(DynamicObjectCollectionView):
         joinFW = join(Station_FieldWorker, User,
                       Station_FieldWorker.FK_FieldWorker == User.id)
         joinTable = join(queryCTE, joinFW, queryCTE.c[
-                            'ID'] == Station_FieldWorker.FK_Station)
+            'ID'] == Station_FieldWorker.FK_Station)
         query = select([Station_FieldWorker.FK_Station,
                         User.Login]).select_from(joinTable)
         FieldWorkers = self.session.execute(query).fetchall()
@@ -183,31 +185,6 @@ class StationsView(DynamicObjectCollectionView):
                 'features': geoJson,
                 'exceed': exceed}
         return data
-
-    # def insert(self):
-    #     session = self.request.dbsession
-    #     data = {}
-    #     for items, value in self.request.json_body.items():
-    #         data[items] = value
-
-    #     newSta = StationDB(
-    #         FK_StationType=data['FK_StationType'],
-    #         creator=self.request.authenticated_userid['iss'])
-    #     newSta.StationType = session.query(StationType).filter(
-    #         StationType.ID == data['FK_StationType']).first()
-    #     newSta.init_on_load()
-
-    #     try:
-    #         newSta.updateFromJSON(data)
-    #         session.add(newSta)
-    #         session.flush()
-    #         msg = {'ID': newSta.ID}
-    #     except Exception as e:
-    #         # session.rollback()
-    #         self.request.response.status_code = 510
-    #         msg = {'existingStation': True}
-
-    #     return msg
 
     def insertMany(self):
         session = self.request.dbsession
@@ -271,9 +248,10 @@ class StationsView(DynamicObjectCollectionView):
             result_to_check['LON'] = result_to_check['LON'].round(5)
 
             merge_check = pd.merge(DF_to_check, result_to_check, on=[
-                                'LAT', 'LON', 'StationDate'])
+                'LAT', 'LON', 'StationDate'])
             # Get only non existing data to insert
-            DF_to_insert = DF_to_check[~DF_to_check['id'].isin(merge_check['id'])]
+            DF_to_insert = DF_to_check[~DF_to_check['id'].isin(
+                merge_check['id'])]
             DF_to_insert = DF_to_insert.drop(['id'], 1)
             data_to_insert = json.loads(DF_to_insert.to_json(
                 orient='records', date_format='iso'))
@@ -309,10 +287,10 @@ class StationsView(DynamicObjectCollectionView):
             # Insert FieldWorkers
             if not data[0]['FieldWorkers'] is None or not data[0]['FieldWorkers'] == "":
                 list_ = list(map(lambda b: list(map(lambda a: {
-                            'FK_Station': a,
-                            'FK_FieldWorker': b},
-                            result)),
-                            data[0]['FieldWorkers']))
+                    'FK_Station': a,
+                    'FK_FieldWorker': b},
+                    result)),
+                    data[0]['FieldWorkers']))
                 list_ = list(itertools.chain.from_iterable(list_))
                 stmt = Station_FieldWorker.__table__.insert().values(list_)
                 session.execute(stmt)

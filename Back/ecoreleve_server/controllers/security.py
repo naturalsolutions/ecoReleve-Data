@@ -107,6 +107,18 @@ context_permissions = {
         (Deny, 'group:superUsers', ALL_PERMISSIONS),
         (Deny, 'group:users', ALL_PERMISSIONS),
     ],
+
+    'projects': [
+        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', 'read'),
+        (Allow, 'group:users', 'read'),
+    ],
+
+    'clients': [
+        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', 'read'),
+        (Allow, 'group:users', 'read'),
+    ],
 }
 
 

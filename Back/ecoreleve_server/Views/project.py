@@ -22,5 +22,13 @@ class ProjectsView(DynamicObjectCollectionView):
     moduleFormName = 'ProjectForm'
     moduleGridName = 'ProjectGrid'
 
+    def __init__(self, ref, parent):
+        DynamicObjectCollectionView.__init__(self, ref, parent)
+        # self.actions = {'updateSiteLocation': self.updateMonitoredSite,
+        #                 'importGPX': self.getFormImportGPX,
+        #                 'fieldActivity': self.getFieldActivityList
+        #                 }
+        self.__acl__ = context_permissions[ref]
+
 
 RootCore.listChildren.append(('projects', ProjectsView))

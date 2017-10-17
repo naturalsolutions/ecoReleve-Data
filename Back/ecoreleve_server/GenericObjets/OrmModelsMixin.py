@@ -230,7 +230,7 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
     def getValues(self):
         ''' return flat data dict '''
-        self.as_dict()
+        return self.as_dict()
 
     @property
     def values(self):
@@ -252,23 +252,17 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
             setattr(self, propertyName, parser(value))
 
     def getForm(self, displayMode='edit', type_=None, moduleName=None):
-        from ..utils.parseValue import formatValue
         isGrid = False
-        if (self._type.Status == 10):
-            isGrid = True
-
         form = ConfiguredDbObjectMapped.getForm(
-            self, displayMode, self._type_id, moduleName, isGrid=isGrid)
+            self, displayMode, None, moduleName, isGrid=isGrid)
 
         form['data'] = {'id': 0}
         data = formatValue(form['schema']['defaultValues'], form['schema'])
         form['data'].update(data)
-        form['data'][self.fk_table_type_name] = self._type_id
         return form
 
     def getDataWithSchema(self, displayMode='edit'):
         resultat = self.getForm(displayMode=displayMode)
-
         '''IF ID is send from front --> get data of this object in order to
         display value into form which will be sent'''
         data = self.values
@@ -494,6 +488,22 @@ class HasDynamicProperties(HasStaticProperties):
     def getHistory(self):
         return [row.realValue for row in self._dynamicValues]
 
+    def getForm(self, displayMode='edit', type_=None, moduleName=None):
+
+        isGrid = False
+
+        if (self._type.Status == 10):
+            isGrid = True
+
+        form = ConfiguredDbObjectMapped.getForm(
+            self, displayMode, self._type_id, moduleName, isGrid=isGrid)
+
+        form['data'] = {'id': 0}
+        data = formatValue(form['schema']['defaultValues'], form['schema'])
+        form['data'].update(data)
+        form['data'][self.fk_table_type_name] = self._type_id
+        return form
+
     def getValues(self):
         ''' return flat data dict '''
         dictValues = {}
@@ -524,7 +534,7 @@ class HasDynamicProperties(HasStaticProperties):
             useDate = parser(dict_.get('__useDate__', None)
                              ) or self.linkedFieldDate()
             for prop, value in dict_.items():
-                self.setValue(prop, value, useDate)
+                self.setValue(prop, parser(value), useDate)
 
             if self.hasLinkedField:
                 self.updateLinkedField(dict_, useDate=useDate)

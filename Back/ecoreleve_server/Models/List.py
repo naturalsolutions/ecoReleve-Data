@@ -20,8 +20,9 @@ from ..Models import (
     Base,
     Equipment,
     Sensor,
-    Project,
-    MonitoredSite
+    MonitoredSite,
+    Client,
+    Project
 )
 from ..utils import Eval
 from collections import OrderedDict
@@ -591,4 +592,11 @@ class ProjectList(CollectionEngine):
 
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
-        super().__init__(Project, frontModule, startDate)
+        super().__init__(Project, frontModule, typeObj=typeObj, startDate=None)
+
+
+class ClientList(CollectionEngine):
+
+    def __init__(self, frontModule, typeObj=None, startDate=None,
+                 history=False, historyView=None):
+        super().__init__(Client, frontModule, startDate)

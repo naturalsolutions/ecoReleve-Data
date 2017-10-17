@@ -9,6 +9,10 @@ dictVal = {
     '': None,
     'true': 1,
     'false': 0,
+    'True': 1,
+    'False': 0,
+    True: 1,
+    False: 0,
     'NULL': None,
     'None': None
 }
@@ -80,11 +84,13 @@ def isEqual(val1, val2):
 
 def formatValue(data, schema):
     for key in data:
-        if key in schema:
+        if schema and key in schema:
             if schema[key]['type'] == 'AutocompTreeEditor':
                 data[key] = formatThesaurus(data[key])
             elif (schema[key]['type'] == 'ObjectPicker'
                     and key != 'FK_Individual'
+                    and 'options' in schema[key]
+                    and schema[key]['options']
                     and 'usedLabel' in schema[key]['options']):
                 label = schema[key]['options']['usedLabel']
                 data[key] = formatObjetPicker(data[key], key, label)
@@ -92,7 +98,13 @@ def formatValue(data, schema):
 
 
 def formatThesaurus(data):
-    lng = threadlocal.get_current_request().authenticated_userid['userlanguage']
+    if not thesaurusDictTraduction:
+        return {
+            'displayValue': data,
+            'value': data
+        }
+    lng = threadlocal.get_current_request(
+    ).authenticated_userid['userlanguage']
     try:
         data = {
             'displayValue': thesaurusDictTraduction[data][lng],
