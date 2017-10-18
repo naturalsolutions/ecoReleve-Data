@@ -96,6 +96,10 @@ class RESTView(object):
     def put(self):
         return self.context.update()
 
+    @view_config(request_method='OPTIONS', renderer='json', permission='read')
+    def options(self):
+        return
+
 # from . import ModelFactory
 # class ApiFactory(object):
 

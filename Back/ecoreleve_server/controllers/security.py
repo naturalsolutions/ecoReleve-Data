@@ -7,6 +7,7 @@ from pyramid.security import (
     Everyone,
     Deny
 )
+from pyramid.response import Response
 
 
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
@@ -21,6 +22,7 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
             return
 
     def get_userInfo(self, request):
+        print(request.cookies)
         try:
             token = request.cookies.get("ecoReleve-Core")
             claims = self.decode_jwt(request, token, verify=True)
@@ -65,6 +67,18 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
             return True
 
     def challenge(self, request, content="Unauthorized"):
+        if request.method == 'OPTIONS':
+            response = Response()
+            response.headers['Access-Control-Expose-Headers'] = (
+                'Content-Type, Date, Content-Length, Authorization, X-Request-ID, X-Requested-With')
+            response.headers['Access-Control-Allow-Origin'] = (
+                request.headers['Origin'])
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Allow-Headers'] = 'Access-Control-Allow-Origin, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
+            response.headers['Access-Control-Allow-Methods'] = (
+                'POST,GET,DELETE,PUT,OPTIONS')
+            response.headers['Content-Type'] = ('application/json')
+            return response
         if self.authenticated_userid(request):
             return HTTPUnauthorized(content, headers=self.forget(request))
 
