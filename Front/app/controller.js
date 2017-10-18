@@ -29,6 +29,14 @@ define([
   './modules/monitoredSites/monitored_sites.view',
   './modules/monitoredSites/monitored_sites.new.view',
 
+  './modules/projects/project.view',
+  './modules/projects/projects.view',
+  './modules/projects/projects.new.view',
+
+  './modules/clients/client.view',
+  './modules/clients/clients.view',
+  './modules/clients/clients.new.view',
+
 ],function(
   Marionette,
   LytHome,
@@ -43,7 +51,9 @@ define([
   LytStation, LytStations, LytStationsNew,
   LytIndividual, LytIndividuals, LytIndividualsNew,
   LytSensor, LytSensors, LytSensorsNew,
-  LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew
+  LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew,
+  LytProject, LytProjects, LytProjectsNew,
+  LytClient, LytClients, LytClientsNew
 ) {
   'use strict';
 
@@ -76,6 +86,16 @@ define([
           'entity': LytMonitoredSite,
           'entities': LytMonitoredSites,
           'newEntity': LytMonitoredSitesNew
+        },
+        'projects': {
+          'entity': LytProject,
+          'entities': LytProjects,
+          'newEntity': LytProjectsNew
+        },
+        'clients': {
+          'entity': LytClient,
+          'entities': LytClients,
+          'newEntity': LytClientsNew
         },
       };
     },
@@ -113,6 +133,50 @@ define([
 
     newStation: function(from) {
       this.rgMain.show(new LytStationsNew({from: from}));
+    },
+
+    project: function(id) {
+      if(this.rgMain.currentView instanceof LytProject){
+        this.rgMain.currentView.reload({
+          id: id
+        });
+      } else {
+        this.rgMain.show(new LytProject({
+          id: id
+        }));
+      }
+    },
+
+    projects: function(params) {
+      this.rgMain.show(new LytProjects({
+        params: params
+      }));
+    },
+
+    newProject: function(from) {
+      this.rgMain.show(new LytProjectsNew({from: from}));
+    },
+
+    client: function(id) {
+      if(this.rgMain.currentView instanceof LytClient){
+        this.rgMain.currentView.reload({
+          id: id
+        });
+      } else {
+        this.rgMain.show(new LytClient({
+          id: id
+        }));
+      }
+    },
+
+    clients: function(params) {
+      this.rgMain.show(new LytClients({
+        params: params
+      }));
+    },
+
+    newClient: function(from) {
+      this.rgMain.show(new LytClientsNew({from: from}));
     },
 
     individual: function(id) {

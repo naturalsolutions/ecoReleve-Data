@@ -16,6 +16,17 @@ class ClientView(DynamicObjectView):
 
     model = Client
 
+    def __init__(self, ref, parent):
+        DynamicObjectView.__init__(self, ref, parent)
+        self.__acl__ = context_permissions['clients']
+        # self.actions = {'projects': self.getStations}
+
+    def __getitem__(self, ref):
+        if ref in self.actions:
+            self.retrieve = self.actions.get(ref)
+            return self
+        return self.get(ref)
+
 
 class ClientsView(DynamicObjectCollectionView):
 

@@ -35,3 +35,8 @@ class Project (HasDynamicProperties, Base):
     FK_Client = Column(Integer, ForeignKey('Client.ID'), nullable=False)
     Project_reference = Column(String(250), nullable=False)
     # area = GeometryColumn(Polygon(2))
+
+    Stations = relationship(
+        'Station', back_populates='Project', cascade="all, delete-orphan")
+
+    Client = relationship('Client')

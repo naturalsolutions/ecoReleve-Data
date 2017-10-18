@@ -26,7 +26,6 @@ class ConfiguredDbObjectMapped(object):
     def getConf(self, moduleName=None):
         if not moduleName:
             moduleName = self.moduleFormName
-        print(moduleName)
         conf = self.session.query(FrontModules
                                   ).filter(FrontModules.Name == moduleName
                                            ).first()

@@ -116,7 +116,6 @@ def main(global_config, **settings):
     def add_cors_headers_response_callback(event):
 
         def cors_headers(request, response):
-            print('\n\n pass \n\n')
             if 'HTTP_ORIGIN' in request.environ:
                 response.headers['Access-Control-Allow-Origin'] = (
                     request.headers['Origin'])

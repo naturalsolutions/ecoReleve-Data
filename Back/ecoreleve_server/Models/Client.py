@@ -12,10 +12,10 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from ..Models import Base, dbConfig
-from ..GenericObjets.OrmModelsMixin import HasStaticProperties, GenericType
+from ..GenericObjets.OrmModelsMixin import HasDynamicProperties, GenericType
 
 
-class Client(HasStaticProperties, Base):
+class Client(HasDynamicProperties, Base):
     __tablename__ = 'Client'
     ID = Column(Integer, Sequence('Client__id_seq'), primary_key=True)
     Name = Column(String(250))

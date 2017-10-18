@@ -22,7 +22,6 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
             return
 
     def get_userInfo(self, request):
-        print(request.cookies)
         try:
             token = request.cookies.get("ecoReleve-Core")
             claims = self.decode_jwt(request, token, verify=True)

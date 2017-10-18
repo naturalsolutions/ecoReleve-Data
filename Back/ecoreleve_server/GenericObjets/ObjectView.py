@@ -114,7 +114,6 @@ class DynamicObjectView(CustomView):
 
     def getData(self):
         # self.objectDB.LoadNowValues()
-        print(self.objectDB.values)
         return self.objectDB.values
 
     def getDataWithForm(self):

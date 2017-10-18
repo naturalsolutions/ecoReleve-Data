@@ -52,12 +52,14 @@ class Station(Base, HasDynamicProperties):
     FK_MonitoredSite = Column(Integer, ForeignKey(
         'MonitoredSite.ID'), nullable=True)
 
+    FK_Project = Column(Integer, ForeignKey(
+        'Project.ID'), nullable=True)
     Place = Column(String(250))
 
     Station_FieldWorkers = relationship(
         'Station_FieldWorker', backref='Station', cascade="all, delete-orphan")
 
-
+    Project = relationship("Project")
     ''' hybrid property on relationship '''
     @hybrid_property
     def FieldWorkers(self):
@@ -98,9 +100,7 @@ class Station_FieldWorker (Base):
     ID = Column(Integer, Sequence(
         'Station_FieldWorker__id_seq'), primary_key=True)
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
-    FK_FieldWorker = Column(Integer, ForeignKey('User.ID'))
-
-    FieldWorker = relationship('User')
+    FK_FieldWorker = Column(Integer)
 
     @hybrid_property
     def FieldWorkerName(self):
