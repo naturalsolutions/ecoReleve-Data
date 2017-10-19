@@ -27,6 +27,7 @@ define([
           $('#dateTimePicker').on('dp.change', function(e) {
             $('#dateTimePicker').data('DateTimePicker').maxDate(e.date);
           });
+          console.log(this)
         }
       },
 

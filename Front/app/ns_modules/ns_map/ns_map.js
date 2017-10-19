@@ -273,6 +273,15 @@ define([
       this.map._onResize();
     },
 
+    addGeometry: function(geom, fitBounds){
+      var Geom = new L.geoJson(geom);
+      Geom.addTo(this.map);
+      if(fitBounds){
+        
+        this.map.fitBounds(Geom.getBounds());
+      }
+    },
+
     addLegend: function(){
       var legend = L.control({position: 'bottomright'});
 

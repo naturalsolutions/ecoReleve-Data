@@ -5,6 +5,7 @@ define([
   'marionette',
   'sweetAlert',
   'translater',
+  'L',
 
   'ns_map/ns_map',
   'ns_grid/grid.view',
@@ -15,7 +16,7 @@ define([
 
 
 ], function(
-  $, _, Backbone, Marionette, Swal, Translater,
+  $, _, Backbone, Marionette, Swal, Translater, L,
   NsMap, GridView, NsForm,
   DetailView, ProjectModel
 ){
@@ -43,13 +44,25 @@ define([
     },
 
     displayMap: function(geoJson) {
+      var self = this;
       this.map = new NsMap({
         url: 'projects/' + this.model.get('id')  + '/stations?geo=true', ////only this one
         zoom: 4,
         element: 'map',
         popup: true,
         cluster: true
+
       });
+
+    },
+
+    afterShow: function(){
+      console.log(this.nsForm)
+      var _this = this;
+      $.when(this.nsForm.jqxhr).done(function(data){
+        var geom = data.data.poly;
+        _this.map.addGeometry(geom, true);
+      })
     },
 
     displayStationsGrid: function() {

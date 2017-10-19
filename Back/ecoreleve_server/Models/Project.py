@@ -36,14 +36,15 @@ class Project (HasDynamicProperties, Base):
     creationDate = Column(DateTime, nullable=False, default=func.now())
     FK_Client = Column(Integer, ForeignKey('Client.ID'), nullable=False)
     Project_reference = Column(String(250), nullable=False)
+    poly = Column(Geometry)
     # area = GeometryColumn(Polygon(2))
 
-    @declared_attr
-    def area(cls):
-        if dbConfig['cn.dialect'] == 'postgres':
-            return Column(Geometry('POLYGON'))
-        if 'mssql' in dbConfig['cn.dialect']:
-            return GeometryColumn(Polygon(2))
+    # @declared_attr
+    # def geom(cls):
+    #     if dbConfig['cn.dialect'] == 'postgres':
+    #         return Column(Geometry('POLYGON'))
+    #     if 'mssql' in dbConfig['cn.dialect']:
+    #         return GeometryColumn(Polygon(2))
 
     Stations = relationship(
         'Station', back_populates='Project', cascade="all, delete-orphan")

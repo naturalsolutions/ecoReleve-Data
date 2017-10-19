@@ -102,6 +102,10 @@ def main(global_config, **settings):
     json_renderer.add_adapter(Decimal, decimal_adapter)
     json_renderer.add_adapter(datetime.time, time_adapter)
     json_renderer.add_adapter(datetime.date, date_adapter)
+
+    from geoalchemy2 import WKBElement, WKTElement
+    json_renderer.add_adapter(WKBElement, wkb_adapter)
+    json_renderer.add_adapter(WKTElement, wkt_adapter)
     config.add_renderer('json', json_renderer)
 
     # Add renderer for CSV, PDF,GPX files.
