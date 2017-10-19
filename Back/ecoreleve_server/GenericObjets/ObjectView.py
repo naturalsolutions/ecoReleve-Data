@@ -290,9 +290,9 @@ class DynamicObjectCollectionView(CustomView):
             startDate = datetime.strptime(params['startDate'],
                                           '%d/%m/%Y %H:%M:%S')
 
+        searchInfo = self.handleCriteria(searchInfo)
         if paging:
             self.pagingSearch(searchInfo, params)
-        searchInfo = self.handleCriteria(searchInfo)
         return searchInfo, history, startDate
 
     def count_(self, listObj=None):
