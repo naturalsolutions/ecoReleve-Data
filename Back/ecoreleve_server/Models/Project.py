@@ -13,7 +13,7 @@ from sqlalchemy import (
     func,
     desc,
     select)
-
+import json
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..utils.parseValue import isEqual, formatValue, parser
@@ -22,6 +22,9 @@ from ..GenericObjets.OrmModelsMixin import HasDynamicProperties, GenericType
 from ..utils.geoalchemy import GeometryColumn, Geometry, WKTSpatialElement, Polygon
 from sqlalchemy.ext.declarative import declared_attr
 from geoalchemy2 import Geometry
+from shapely import wkt, wkb
+from shapely.geometry import shape
+import geojson
 
 
 class Project (HasDynamicProperties, Base):
@@ -36,13 +39,13 @@ class Project (HasDynamicProperties, Base):
     creationDate = Column(DateTime, nullable=False, default=func.now())
     FK_Client = Column(Integer, ForeignKey('Client.ID'), nullable=False)
     Project_reference = Column(String(250), nullable=False)
-    poly = Column(Geometry)
+    poly = Column(Geometry('POLYGON'))
     # area = GeometryColumn(Polygon(2))
 
     # @declared_attr
     # def geom(cls):
     #     if dbConfig['cn.dialect'] == 'postgres':
-    #         return Column(Geometry('POLYGON'))
+    #         return Column(Geometry)
     #     if 'mssql' in dbConfig['cn.dialect']:
     #         return GeometryColumn(Polygon(2))
 
@@ -50,3 +53,15 @@ class Project (HasDynamicProperties, Base):
         'Station', back_populates='Project', cascade="all, delete-orphan")
 
     Client = relationship('Client')
+
+    def convert_geojson_to_wkb(self, geoJson):
+        strJson = json.dumps(geoJson)
+        g1 = geojson.loads(strJson)
+        geom = shape(g1)
+        return geom.wkb
+
+    def convert_geojson_to_wkt(self, geoJson):
+        strJson = json.dumps(geoJson)
+        g1 = geojson.loads(strJson)
+        geom = shape(g1)
+        return geom.wkt

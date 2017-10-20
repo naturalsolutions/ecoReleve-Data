@@ -50,7 +50,8 @@ define([
         zoom: 4,
         element: 'map',
         popup: true,
-        cluster: true
+        cluster: true,
+        disableCentering: true
 
       });
 
