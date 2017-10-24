@@ -19,7 +19,7 @@ from datetime import datetime
 from ..utils.parseValue import isEqual, formatValue, parser
 from ..utils.datetime import parse
 from ..GenericObjets.OrmModelsMixin import HasDynamicProperties, GenericType
-from ..utils.geoalchemy import GeometryColumn, Geometry, WKTSpatialElement, Polygon
+# from ..utils.geoalchemy import GeometryColumn, Geometry, WKTSpatialElement, Polygon
 from sqlalchemy.ext.declarative import declared_attr
 from geoalchemy2 import Geometry
 from shapely import wkt, wkb
