@@ -18,6 +18,7 @@ from .individual import IndividualsView
 from . import CustomView
 from ..utils.parseValue import isNumeric
 import operator
+from ..Models.Equipment import set_equipment
 
 
 class ReleaseIndividualsView(IndividualsView):
@@ -43,7 +44,8 @@ class ReleaseIndividualsView(IndividualsView):
     def handleResult(self, data):
         for row in data[1]:
             if 'Date_Sortie' in row and row['Date_Sortie'] is not None:
-                row['Date_Sortie'] = row['Date_Sortie'].strftime('%Y-%m-%d %H:%M:%S')
+                row['Date_Sortie'] = row['Date_Sortie'].strftime(
+                    '%Y-%m-%d %H:%M:%S')
         return data
 
     def retrieve(self):
@@ -52,9 +54,10 @@ class ReleaseIndividualsView(IndividualsView):
     def updateAllStartDate(self, indiv, date, properties):
         for prop in properties:
             existingDynPropValues = list(filter(lambda p: p.FK_IndividualDynProp == prop['ID'],
-                                               indiv.IndividualDynPropValues))
+                                                indiv.IndividualDynPropValues))
             if existingDynPropValues:
-                curValueProperty = max(existingDynPropValues, key=operator.attrgetter('StartDate'))
+                curValueProperty = max(
+                    existingDynPropValues, key=operator.attrgetter('StartDate'))
                 curValueProperty.StartDate = date
 
     def create(self):
@@ -74,7 +77,6 @@ class ReleaseIndividualsView(IndividualsView):
         releaseMethod = data['releaseMethod']
         curStation = session.query(Station).get(sta_id)
         taxon = False
-        # taxons = dict(Counter(indiv['Species'] for indiv in indivListFromData))
 
         userLang = request.authenticated_userid['userlanguage']
         indivList = []
@@ -167,8 +169,10 @@ class ReleaseIndividualsView(IndividualsView):
                     indiv['taxon'] = curIndiv.Species
                     del indiv['Species']
                     pass
-                self.updateAllStartDate(curIndiv, curStation.StationDate, allProps)
-                curIndiv.updateFromJSON(indiv, startDate=curStation.StationDate)
+                self.updateAllStartDate(
+                    curIndiv, curStation.StationDate, allProps)
+                curIndiv.updateFromJSON(
+                    indiv, startDate=curStation.StationDate)
 
                 binList.append(MoF_AoJ(indiv))
                 for k in indiv.keys():
@@ -196,7 +200,8 @@ class ReleaseIndividualsView(IndividualsView):
                 vertebrateIndList.append(curVertebrateInd)
 
                 curBiometry = getnewObs(biometryID)
-                curBiometry.updateFromJSON(indiv, startDate=curStation.StationDate)
+                curBiometry.updateFromJSON(
+                    indiv, startDate=curStation.StationDate)
                 curBiometry.Comments = None
                 biometryList.append(curBiometry)
 
@@ -205,74 +210,81 @@ class ReleaseIndividualsView(IndividualsView):
                     indiv, startDate=curStation.StationDate)
                 releaseIndList.append(curReleaseInd)
 
-                try:
-                    try:
-                        sensor_id = int(indiv['fk_sensor'])
-                    except:
-                        sensor_id = int(indiv['FK_Sensor'])
+                sensor_id = indiv.get(
+                    'FK_Sensor', None) or indiv.get('fk_sensor', None)
 
-                    curEquipmentInd = getnewObs(equipmentIndID)
-                    equipInfo = {
-                        'FK_Individual': indiv['FK_Individual'],
-                        'FK_Sensor': sensor_id,
-                        'Survey_type': 'post-relâcher',
-                        'Monitoring_Status': 'suivi',
-                        'Sensor_Status': 'sortie de stock>mise en service'
-                    }
-                    curEquipmentInd.updateFromJSON(
-                        equipInfo, startDate=curStation.StationDate)
-                    curEquipmentInd.Station = curStation
-                    equipmentIndList.append(curEquipmentInd)
-                except Exception as e:
-                    if e.__class__.__name__ == 'ErrorAvailable':
-                        sensor_available = 'is' if e.value[
-                            'sensor_available'] else 'is not'
-                        tpl = 'SensorID {0} {1} available for equipment'.format(
-                            equipInfo['FK_Sensor'], sensor_available)
-                        if errorEquipment is None:
-                            errorEquipment = tpl
+                if sensor_id is not None:
+                    try:
+                        curEquipmentInd = getnewObs(equipmentIndID)
+                        equipInfo = {
+                            'FK_Individual': indiv['FK_Individual'],
+                            'FK_Sensor': sensor_id,
+                            'Survey_type': 'post-relâcher',
+                            'Monitoring_Status': 'suivi',
+                            'Sensor_Status': 'sortie de stock>mise en service',
+                            'FK_Station': curStation.ID
+                        }
+                        curEquipmentInd.updateFromJSON(
+                            equipInfo, startDate=curStation.StationDate)
+
+                        set_equipment(curEquipmentInd, curStation)
+                        equipmentIndList.append(curEquipmentInd)
+                    except Exception as e:
+                        if e.__class__.__name__ == 'ErrorAvailable':
+                            sensor_available = 'is' if e.value[
+                                'sensor_available'] else 'is not'
+                            tpl = 'SensorID {0} {1} available for equipment'.format(
+                                equipInfo['FK_Sensor'], sensor_available)
+                            if errorEquipment is None:
+                                errorEquipment = tpl
+                            else:
+                                errorEquipment += ',   ' + tpl
                         else:
-                            errorEquipment += ',   ' + tpl
-                    pass
+                            print_exc()
+                            errorEquipment = e.__class__.__name__
 
             dictVertGrp = dict(Counter(binList))
             dictVertGrp['nb_total'] = len(releaseIndList)
             dictVertGrp['taxon'] = taxon
 
-            obsVertGrpFiltered = list(filter(lambda o: o.FK_ProtocoleType == vertebrateGrpID ,curStation.Observations))
-            obsReleaseGrpFiltered = list(filter(lambda o: o.FK_ProtocoleType == releaseGrpID ,curStation.Observations))
-    
-            if len(obsVertGrpFiltered)>0:
+            obsVertGrpFiltered = list(filter(
+                lambda o: o.FK_ProtocoleType == vertebrateGrpID, curStation.Observations))
+            obsReleaseGrpFiltered = list(
+                filter(lambda o: o.FK_ProtocoleType == releaseGrpID, curStation.Observations))
+
+            if len(obsVertGrpFiltered) > 0:
                 for obs in obsVertGrpFiltered:
                     obs.LoadNowValues()
                     if obs.getProperty('taxon') == taxon:
                         vertebrateGrp = obs
                     else:
                         vertebrateGrp = None
-            else :
+            else:
                 vertebrateGrp = None
-            
-            if len(obsReleaseGrpFiltered)>0:
-               for obs in obsReleaseGrpFiltered:
+
+            if len(obsReleaseGrpFiltered) > 0:
+                for obs in obsReleaseGrpFiltered:
                     obs.LoadNowValues()
                     if obs.getProperty('taxon') == taxon and obs.getProperty('release_method') == releaseMethod:
                         releaseGrp = obs
                     else:
                         releaseGrp = None
-            else :
+            else:
                 releaseGrp = None
 
             if vertebrateGrp:
                 for prop, val in vertebrateGrp.__properties__.items():
                     if isNumeric(val):
-                        vertebrateGrp.setProperty(prop, int(val) + int(dictVertGrp[prop]))
+                        vertebrateGrp.setProperty(
+                            prop, int(val) + int(dictVertGrp.get(prop, 0)))
             else:
                 vertebrateGrp = Observation(
                     FK_ProtocoleType=vertebrateGrpID, FK_Station=sta_id)
                 vertebrateGrp.updateFromJSON(dictVertGrp)
 
             if releaseGrp:
-                releaseGrp.setProperty('nb_individuals', int(obs.getProperty('nb_individuals'))+ len(releaseIndList))
+                releaseGrp.setProperty('nb_individuals', int(
+                    obs.getProperty('nb_individuals')) + len(releaseIndList))
             else:
                 releaseGrp = Observation(
                     FK_ProtocoleType=releaseGrpID, FK_Station=sta_id)
@@ -297,7 +309,6 @@ class ReleaseIndividualsView(IndividualsView):
                 message = {'release': len(releaseIndList)}
 
         except Exception as e:
-            print_exc()
             session.rollback()
             message = str(type(e))
 
@@ -319,7 +330,7 @@ class ReleaseView(CustomView):
         if not userLng:
             userLng = 'fr'
         query = text("""SELECT TTop_FullPath as val, TTop_Name as label"""
-                    + """ FROM THESAURUS.dbo.TTopic th
+                     + """ FROM THESAURUS.dbo.TTopic th
             JOIN [ModuleForms] f on th.TTop_ParentID = f.Options
             where Name = 'release_method' """)
         result = self.session.execute(query).fetchall()
