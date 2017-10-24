@@ -79,7 +79,7 @@ define([
     this.cluster = options.cluster || false;
     this.popup = options.popup || false;
     this.legend = options.legend || false;
-
+    this.disableCentering = options.disableCentering || false;
     this.selection = options.selection || false;
 
     this.dict = {}; //list of markers
@@ -273,6 +273,15 @@ define([
       this.map._onResize();
     },
 
+    addGeometry: function(geom, fitBounds){
+      var Geom = new L.geoJson(geom);
+      Geom.addTo(this.map);
+      if(fitBounds){
+        
+        this.map.fitBounds(Geom.getBounds());
+      }
+    },
+
     addLegend: function(){
       var legend = L.control({position: 'bottomright'});
 
@@ -370,7 +379,10 @@ define([
 
     setGeoJsonLayer: function(geoJson){
       var _this = this;
-      this.setCenter(geoJson);
+      if(!this.disableCentering){
+        this.setCenter(geoJson);
+      }
+      
       var marker, prop;
       var icon;
       var className = '';

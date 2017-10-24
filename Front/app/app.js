@@ -166,9 +166,27 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
           closeOnConfirm: true,
         });
       }
+      if(jqxhr.status == 409){
+        Swal({
+          title: 'Data conflicts',
+          text: jqxhr.responseText,
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(240, 173, 78)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        });
+      }
     }
   });
-
+  $.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
+    options.crossDomain ={
+      crossDomain: true
+    };
+    options.xhrFields = {
+      withCredentials: true
+    };
+  }); 
     window.formInEdition= {};
 
     // get not allowed urls in config.js

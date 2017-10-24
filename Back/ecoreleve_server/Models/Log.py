@@ -53,5 +53,5 @@ def sendLog(logLevel, domaine, msg_number=500, scope='Pyramid', errorDict=None, 
         transaction.commit()
         session.close()
     except:
-        traceback.print_exc()
+        # traceback.print_exc()
         pass

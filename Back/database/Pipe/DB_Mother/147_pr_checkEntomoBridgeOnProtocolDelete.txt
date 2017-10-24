@@ -1,0 +1,34 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+Create PROCEDURE [dbo].[pr_checkEntomoBridgeOnProtocolDelete]
+ @obsID int,
+ @result int OUTPUT
+   AS
+   BEGIN
+
+   SET NOCOUNT ON
+	DECLARE
+	@nbChild int
+
+
+	SELECT @nbChild = count(*)
+	FROM Observation o
+	WHERE Parent_Observation = @obsID
+	AND original_id like '%ecollection%'
+
+	IF @nbChild > 0
+		SELECT @result
+	
+	END
+
+
+ GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('147_pr_checkEntomoBridgeOnProtocolDelete',GETDATE(),(SELECT db_name()))
+
+
+GO

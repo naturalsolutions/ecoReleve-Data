@@ -7,11 +7,9 @@ from ..Models import (
 from sqlalchemy import select, desc, join, outerjoin
 from collections import OrderedDict
 from sqlalchemy.exc import IntegrityError
-from ..controllers.security import RootCore, context_permissions
-from . import DynamicObjectView, DynamicObjectCollectionView
-
-
-prefix = 'sensors'
+from ..controllers.security import context_permissions
+from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
+from ..controllers.ApiController import RootCore
 
 
 class SensorView(DynamicObjectView):

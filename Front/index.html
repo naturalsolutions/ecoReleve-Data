@@ -21,6 +21,7 @@
 			    // code for IE6, IE5
 			    xhttp = new ActiveXObject("Microsoft.XMLHTTP");
 			}
+			xhttp.withCredentials = true;
 			xhttp.onreadystatechange = function() {
 			  if (xhttp.status == 502 || xhttp.status == 403 ) {
 			    document.location.href = portalUrl;

@@ -20,10 +20,11 @@ class myBase(object):
 
     __table_args__ = {'implicit_returning': False}
 
+
 Base = declarative_base(cls=myBase)
 BaseExport = declarative_base()
 dbConfig = {
-    'dialect': 'mssql',
+    'data_schema': AppConfig['app:main']['data_schema'],
     'sensor_schema': AppConfig['app:main']['sensor_schema'],
     'cn.dialect': AppConfig['app:main']['cn.dialect'],
 }
@@ -51,27 +52,30 @@ userOAuthDict = {}
 
 def loadThesaurusTrad(config):
     session = config.registry.dbmaker()
-    thesTable = Base.metadata.tables['ERDThesaurusTerm']
-    query = select(thesTable.c)
+    if 'ERDThesaurusTerm' in Base.metadata.tables:
+        thesTable = Base.metadata.tables['ERDThesaurusTerm']
+        query = select(thesTable.c)
 
-    results = session.execute(query).fetchall()
+        results = session.execute(query).fetchall()
 
-    for row in results:
-        thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr':row['nameFr']}
-        invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
-        invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
-    session.close()
+        for row in results:
+            thesaurusDictTraduction[row['fullPath']] = {
+                'en': row['nameEn'], 'fr': row['nameFr']}
+            invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
+            invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
+        session.close()
 
 
 def loadUserRole(session):
     global userOAuthDict
     # session = config.registry.dbmaker()
-    VuserRole = Base.metadata.tables['VUser_Role']
-    query = select(VuserRole.c)
+    # VuserRole = Base.metadata.tables['VUser_Role']
+    # query = select(VuserRole.c)
 
-    results = session.execute(query).fetchall()
-    userOAuthDict = pd.DataFrame.from_records(
-        results, columns=['user_id', 'role_id'])
+    # results = session.execute(query).fetchall()
+    # userOAuthDict = pd.DataFrame.from_records(
+    #     results, columns=['user_id', 'role_id'])
+
 
 USERS = {2: 'superUser',
          3: 'user',
@@ -84,13 +88,14 @@ GROUPS = {'superUser': ['group:superUsers'],
 
 def groupfinder(userid, request):
     session = request.dbsession
-    Tuser_role = Base.metadata.tables['VUser_Role']
-    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(userid))
-    currentUserRoleID = session.execute(query_check_role).scalar()
-
-    if currentUserRoleID in USERS:
-        currentUserRole = USERS[currentUserRoleID]
-        return GROUPS.get(currentUserRole, [])
+    # Tuser_role = Base.metadata.tables['VUser_Role']
+    # query_check_role = select([Tuser_role.c['role']]).where(
+    #     Tuser_role.c['userID'] == int(userid))
+    # currentUserRoleID = session.execute(query_check_role).scalar()
+    # print(request.authenticated_userid)
+    # if currentUserRoleID in USERS:
+    #     currentUserRole = USERS[currentUserRoleID]
+    return ['group:admins']
 
 
 def cache_callback(request, session):
@@ -98,30 +103,36 @@ def cache_callback(request, session):
         session.get_bind().dispose()
 
 
+from ..GenericObjets.Business import *
+import json
+
+
 def db(request):
     makerDefault = request.registry.dbmaker
     session = makerDefault()
-
-    # if 'ecoReleve-Core/export/' in request.url:
-    #     makerExport = request.registry.dbmakerExport
-    #     session = makerExport()
 
     def cleanup(request):
         if request.exception is not None:
             session.rollback()
             cache_callback(request, session)
         else:
-            session.commit()
-        session.close()
-        makerDefault.remove()
+            try:
+                session.commit()
+            except BusinessRuleError as e:
+                session.rollback()
+                request.response.status_code = 409
+                request.response.text = e.value
+            finally:
+                session.close()
+                makerDefault.remove()
 
     request.add_finished_callback(cleanup)
     return session
 
 
-from ..GenericObjets.ObjectWithDynProp import LinkedTables
 from ..GenericObjets.FrontModules import *
 from .CustomTypes import *
+from .Project import *
 from .Protocoles import *
 from .User import User
 from .Station import *
@@ -134,10 +145,4 @@ from .Equipment import *
 from .SensorData import *
 from .List import *
 from .Log import sendLog
-
-
-LinkedTables['Individual'] = Individual
-LinkedTables['Station'] = Station
-LinkedTables['Protocoles'] = Protocoles
-LinkedTables['Sensor'] = Sensor
-LinkedTables['MonitoredSite'] = MonitoredSite
+from .Client import *

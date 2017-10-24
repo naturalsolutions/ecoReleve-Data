@@ -50,12 +50,18 @@ define([
       this.model.set('id', options.id);
     },
 
+    afterShow: function(){
+
+    },
+
     onShow: function() {
       this.initRegions();
       this.displayMap();
       this.displayForm();
       this.displayGrids();
       this.displayNavbar();
+
+      this.afterShow();
     },
 
     initRegions: function(){

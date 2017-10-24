@@ -15,7 +15,7 @@ from ..Models import Base, dbConfig
 
 
 sensor_schema = dbConfig['sensor_schema']
-dialect = dbConfig['dialect']
+dialect = dbConfig['cn.dialect']
 
 
 class ArgosGps(Base):
@@ -40,7 +40,7 @@ class ArgosGps(Base):
     checked = Column('checked', Boolean, nullable=False, default=False)
     imported = Column('imported', Boolean, nullable=False, default=False)
 
-    if dialect.startswith('mssql'):
+    if 'mssql' in dialect:
         __table_args__ = (
             Index(
                 'idx_Targosgps_checked_with_pk_ptt_date',
@@ -53,7 +53,7 @@ class ArgosGps(Base):
     else:
         __table_args__ = (
             Index('idx_Targosgps_checked_ptt', checked, ptt),
-            {'schema': sensor_schema, 'implicit_returning': False}
+            # {'schema': sensor_schema, 'implicit_returning': False}
         )
 
 
@@ -74,7 +74,7 @@ class Gsm(Base):
     VDOP = Column(Integer)
     validated = Column(Boolean, nullable=False, server_default='0')
 
-    if dialect.startswith('mssql'):
+    if 'mssql' in dialect:
         __table_args__ = (
             Index('idx_Tgsm_checked_with_pk_ptt_date', checked, platform_,
                   mssql_include=[pk_id, date]
@@ -84,7 +84,7 @@ class Gsm(Base):
     else:
         __table_args__ = (
             Index('idx_Tgsm_checked_ptt', checked, platform_),
-            {'schema': sensor_schema, 'implicit_returning': False}
+            {'implicit_returning': False}
         )
 
 
@@ -99,10 +99,11 @@ class GsmEngineering (Base):
     BatteryVoltage_V = Column(Numeric)
     file_date = Column(DateTime)
 
-    __table_args__ = (
-        Index('idx_Tengineering_gsm_pttDate_ptt', date, platform_),
-        {'schema': sensor_schema, 'implicit_returning': False}
-    )
+    if 'mssql' in dialect:
+        __table_args__ = (
+            Index('idx_Tengineering_gsm_pttDate_ptt', date, platform_),
+            {'schema': sensor_schema, 'implicit_returning': False}
+        )
 
 
 class ArgosEngineering(Base):
@@ -126,10 +127,11 @@ class ArgosEngineering(Base):
     latestLat = Column(Float)
     latestLon = Column(Float)
 
-    __table_args__ = (
-        Index('idx_Tgps_engineering_pttDate_ptt', pttDate, fk_ptt),
-        {'schema': sensor_schema, 'implicit_returning': False}
-    )
+    if 'mssql' in dialect:
+        __table_args__ = (
+            Index('idx_Tgps_engineering_pttDate_ptt', pttDate, fk_ptt),
+            {'schema': sensor_schema, 'implicit_returning': False}
+        )
 
 
 class Rfid(Base):
@@ -143,8 +145,10 @@ class Rfid(Base):
     validated = Column('validated', Boolean, server_default='0')
     checked = Column('checked', Boolean, server_default='0')
     frequency = Column(Integer)
-    __table_args__ = (
-        Index('idx_Trfid_chipcode_date', chip_code, date_),
-        UniqueConstraint(FK_Sensor, chip_code, date_),
-        {'schema': sensor_schema, 'implicit_returning': False}
-    )
+
+    if 'mssql' in dialect:
+        __table_args__ = (
+            Index('idx_Trfid_chipcode_date', chip_code, date_),
+            UniqueConstraint(FK_Sensor, chip_code, date_),
+            {'schema': sensor_schema, 'implicit_returning': False}
+        )

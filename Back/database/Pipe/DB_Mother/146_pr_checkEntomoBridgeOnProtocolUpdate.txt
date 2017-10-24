@@ -1,0 +1,68 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+Create PROCEDURE [dbo].[pr_checkEntomoBridgeOnProtocolUpdate]
+ @obsID int,
+ @newmicroHab varchar(max),
+ @newhabitat varchar(max),
+ @newHostplant varchar(max),
+ @newmethod varchar(max),
+ @result int OUTPUT
+   AS
+   BEGIN
+
+   SET NOCOUNT ON
+	DECLARE
+	@microHab varchar(max),
+	@habitat varchar(max),
+	@Hostplant varchar(max),
+	@method varchar(max),
+	@nbChild int
+
+
+	SELECT @nbChild = count(*)
+	FROM Observation o
+	WHERE Parent_Observation = @obsID
+	AND original_id like '%ecollection%'
+
+	IF @nbChild > 0
+	BEGIN
+		SELECT @microHab = ValueString	
+		FROM ObservationDynPropValuesNow
+		WHERE FK_Observation = @obsID 
+		AND Name = 'micro_habitat'
+
+		SELECT @method = ValueString	
+		FROM ObservationDynPropValuesNow
+		WHERE FK_Observation = @obsID 
+		AND Name = 'Method'
+
+		SELECT @habitat = ValueString	
+		FROM ObservationDynPropValuesNow
+		WHERE FK_Observation = @obsID 
+		AND Name = 'habitat'
+
+		SELECT @Hostplant = ValueString	
+		FROM ObservationDynPropValuesNow
+		WHERE FK_Observation = @obsID 
+		AND Name = 'Host_Plant'
+
+		IF (@microHab!=@newmicroHab OR @habitat!=@newhabitat OR @Hostplant!=@newHostplant OR @method != @newmethod)
+		BEGIN
+			SET @result = 1
+		END
+
+	END
+
+	SELECT @result
+
+   END
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('146_pr_checkEntomoBridgeOnProtocolUpdate',GETDATE(),(SELECT db_name()))
+
+
+GO

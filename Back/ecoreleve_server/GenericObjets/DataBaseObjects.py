@@ -1,9 +1,13 @@
 from .FrontModules import FrontModules, ModuleForms, ModuleGrids
 from pyramid import threadlocal
 from abc import abstractproperty
-from sqlalchemy import and_, or_, asc, orm
+from sqlalchemy import and_, or_, asc, orm, event
 from ..utils.parseValue import parser, formatValue
 from sqlalchemy_utils import get_hybrid_properties
+from sqlalchemy.ext.declarative import declared_attr
+from ..GenericObjets import BusinessRules
+from ..Models import dbConfig, Base
+import json
 
 
 class ConfiguredDbObjectMapped(object):
@@ -16,8 +20,8 @@ class ConfiguredDbObjectMapped(object):
     def moduleGridName(self):
         pass
 
-    def __init__(self):
-        self.session = threadlocal.get_current_request().dbsession
+    # def __init__(self):
+    #     self.session = threadlocal.get_current_request().dbsession
 
     def getConf(self, moduleName=None):
         if not moduleName:
@@ -66,7 +70,7 @@ class ConfiguredDbObjectMapped(object):
         sortedFieldsets = []
         Legends = sorted([(obj.Legend, obj.FormOrder, obj.Name)
                           for obj in fields if obj.FormOrder is not None],
-                          key=lambda x: x[1])
+                         key=lambda x: x[1])
 
         Unique_Legends = list()
         # Get distinct Fieldset in correct order
@@ -109,7 +113,8 @@ class ConfiguredDbObjectMapped(object):
         if type_:
             filterFields = filterFields.filter(or_(ModuleGrids.TypeObj == type_,
                                                    ModuleGrids.TypeObj == None))
-        filterFields = filterFields.order_by(asc(ModuleGrids.FilterOrder)).all()
+        filterFields = filterFields.order_by(
+            asc(ModuleGrids.FilterOrder)).all()
         for curConf in filterFields:
             if curConf.IsSearchable:
                 filters.append(curConf.GenerateFilter())
@@ -134,116 +139,3 @@ class ConfiguredDbObjectMapped(object):
         else:
             form = defaultValues
         return form
-
-
-class DbObject(object):
-
-    def __init__(self):
-        self.__constraintFunctionList__ = []
-        self.__properties__ = {}
-        self.session = threadlocal.get_current_request().dbsession
-
-    @orm.reconstructor
-    def init_on_load(self):
-        ''' init_on_load is called on the fetch of object '''
-        self.__init__()
-
-    @property
-    def constraintFunctionList(self):
-        return self.__constraintFunctionList__
-
-    @constraintFunctionList.setter
-    def constraintFunctionList(self, list):
-        self.__constraintFunctionList__.extend(list)
-
-    def getProperty(self, nameProp):
-        if hasattr(self, nameProp):
-            return getattr(self, nameProp)
-        else:
-            return self.__properties__[nameProp]
-
-    def setProperty(self, propertyName, value):
-        ''' Set object properties (static and dynamic) '''
-        if hasattr(self, propertyName):
-            if propertyName in self.__table__.c:
-                value = parser(value)
-
-            setattr(self, propertyName, value)
-            self.__properties__[propertyName] = value
-
-    def updateFromJSON(self, data, startDate=None):
-        ''' Function to call : update properties of new
-        or existing object with JSON/dict of value'''
-        if self.checkConstraintsOnData(data):
-            for curProp in data:
-                if (curProp.lower() != 'id' and data[curProp] != '-1'):
-                    if (isinstance(data[curProp], str)
-                            and len(data[curProp].split()) == 0):
-                        data[curProp] = None
-                    self.setProperty(curProp, data[curProp], startDate)
-
-    def formatData(self, data):
-        return
-
-    def beforeUpdate(self):
-        return
-
-    def afterUpdate(self):
-        return
-
-    def beforeDelete(self):
-        return
-
-    def afterDelete(self):
-        return
-
-    def checkConstraintsOnData(self, data):
-        error = 0
-        for func in self.constraintFunctionList:
-            if not func(data):
-                error += 1
-                raise CheckingConstraintsException(func.__name__)
-        return error < 1
-
-    def getFlatObject(self, schema=None):
-        ''' return flat object with static properties and last existing value of dyn props '''
-        data = {}
-        hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
-        if self.ID is not None:
-            max_iter = max(len(self.__table__.columns), len(
-                self.__properties__), len(hybrid_properties))
-            for i in range(max_iter):
-                # Get static Properties
-                try:
-                    curStatProp = list(self.__table__.columns)[i]
-                    data[curStatProp.key] = self.getProperty(
-                        curStatProp.key)
-                except:
-                    pass
-                # Get dynamic Properties
-                try:
-                    curDynPropName = list(self.__properties__)[i]
-                    data[curDynPropName] = self.getProperty(curDynPropName)
-                except Exception as e:
-                    pass
-                try:
-                    PropName = hybrid_properties[i]
-                    data[PropName] = self.getProperty(PropName)
-                except Exception as e:
-                    pass
-
-        # if not schema and hasattr(self, 'getForm'):
-        #     schema = self.getForm()['schema']
-        if schema:
-            data = formatValue(data, schema)
-
-        return data
-
-
-class CheckingConstraintsException(Exception):
-
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return str(self.value) + ' failed'

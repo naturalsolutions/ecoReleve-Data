@@ -1,0 +1,43 @@
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[UpdateStationRegion]
+
+@stationID int,
+@result int OUTPUT
+AS
+SET NOCOUNT ON
+SET @result = NULL
+
+BEGIN TRAN T1
+BEGIN TRY
+DECLARE @lat decimal(9,5), @lon decimal(9,5), @FK_Region int
+
+SELECT @lat = LAT, @lon = LON 
+FROM Station 
+WHERE ID = @stationID
+
+
+SELECT @FK_Region = dbo.[fn_GetRegionFromLatLon] (@lat,@lon)
+
+UPDATE Station SET FK_Region = @FK_Region
+WHERE ID = @stationID
+COMMIT TRAN T1
+END TRY 
+BEGIN CATCH
+	SELECT @result = 1;
+END CATCH
+GO
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('138_SP_updateStationRegion',GETDATE(),(SELECT db_name()))
+
+
+GO
