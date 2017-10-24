@@ -42,7 +42,8 @@ def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
     if Nb > 0:
         return True
     else:
-        return {'equipment_error':True}
+        return {'equipment_error': True}
+
 
 def checkUnequip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
     session = threadlocal.get_current_request().dbsession
@@ -116,7 +117,7 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
 
         elif (isinstance(target.Equipment, Equipment)
                 and target.Equipment.FK_Sensor == fk_sensor
-                ):
+              ):
             target.Equipment.FK_Individual = fk_indiv
         else:
             raise(ErrorAvailable(availability))
