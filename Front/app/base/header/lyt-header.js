@@ -3,7 +3,7 @@ define([
   'jquery',
   'marionette',
   'config',
-  './lyt-breadCrumb',
+  './lyt-breadcrumb',
   'bootstrap'
 ],
 function($,Marionette, config, Breadcrumb) {
