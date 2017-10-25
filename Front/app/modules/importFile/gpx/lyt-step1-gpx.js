@@ -5,7 +5,7 @@ define([
   'marionette',
   'config',
   'sweetAlert',
-  'vendors/XmlParser',
+  'vendors/mlParser',
   'ns_form/NSFormsModuleGit',
   'models/gpxForm',
   'i18n',
