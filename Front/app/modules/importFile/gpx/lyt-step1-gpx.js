@@ -6,7 +6,7 @@ define([
   'config',
   'sweetAlert',
   'vendors/xmlParser',
-  'ns_form/NSFormsModuleGit',
+  'ns_form/NsFormsModuleGit',
   'models/gpxForm',
   'i18n',
   'dropzone'

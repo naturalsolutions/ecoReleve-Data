@@ -8,7 +8,7 @@ define([
   'dateTimePicker',
   'sweetAlert',
 
-  'ns_form/NSFormsModuleGit',
+  'ns_form/NsFormsModuleGit',
   'ns_map/ns_map',
 
   'i18n'

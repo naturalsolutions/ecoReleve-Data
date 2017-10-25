@@ -6,7 +6,7 @@ define([
   'sweetAlert',
 
   'ns_modules/ns_com',
-  'ns_form/NSFormsModuleGit',
+  'ns_form/NsFormsModuleGit',
   'ns_navbar/navbar.view',
   './protocols/protocols.view',
 

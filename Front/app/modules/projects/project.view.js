@@ -9,7 +9,7 @@ define([
 
   'ns_map/ns_map',
   'ns_grid/grid.view',
-  'ns_form/NSFormsModuleGit',
+  'ns_form/NsFormsModuleGit',
 
   'modules/objects/detail.view',
   './project.model',

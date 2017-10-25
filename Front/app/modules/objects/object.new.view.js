@@ -5,7 +5,7 @@ define([
 	'marionette',
 	'sweetAlert',
 	'translater',
-	'ns_form/NSFormsModuleGit',
+	'ns_form/NsFormsModuleGit',
 ], function(
   $, _, Backbone, Marionette, Swal, Translater,
   NsForm

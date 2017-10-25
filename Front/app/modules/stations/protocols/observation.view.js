@@ -3,7 +3,7 @@ define([
   'underscore',
   'backbone',
   'marionette',
-  'ns_form/NSFormsModuleGit',
+  'ns_form/NsFormsModuleGit',
   'sweetAlert',
   'i18n'
 ], function($, _, Backbone, Marionette, NsForm, Swal) {
