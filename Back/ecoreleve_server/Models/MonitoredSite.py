@@ -50,7 +50,6 @@ class MonitoredSite (Base, ObjectWithDynProp):
     Creator = Column(Integer, nullable=False)
     Active = Column(BIT, nullable=False, default=1)
     creationDate = Column(DateTime, nullable=False, default=func.now())
-    FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
     Place = Column(String(250))
 
     FK_MonitoredSiteType = Column(Integer, ForeignKey('MonitoredSiteType.ID'))
@@ -88,14 +87,14 @@ class MonitoredSite (Base, ObjectWithDynProp):
 
     def GetDynProps(self, nameProp):
         return self.session.query(MonitoredSiteDynProp
-                                     ).filter(MonitoredSiteDynProp.Name == nameProp).one()
+                                  ).filter(MonitoredSiteDynProp.Name == nameProp).one()
 
     def GetType(self):
         if self.MonitoredSiteType != None:
             return self.MonitoredSiteType
         else:
             return self.session.query(MonitoredSiteType
-                                         ).get(self.FK_MonitoredSiteType)
+                                      ).get(self.FK_MonitoredSiteType)
 
     def GetAllProp(self):
         props = super(MonitoredSite, self).GetAllProp()
@@ -214,12 +213,13 @@ class MonitoredSite (Base, ObjectWithDynProp):
 @event.listens_for(MonitoredSite, 'before_insert')
 @event.listens_for(MonitoredSite, 'before_update')
 def updateRegion(mapper, connection, target):
-        sitePosition = target.newPosition
-        stmt = text('''SELECT dbo.[fn_GetRegionFromLatLon] (:lat,:lon)
+    sitePosition = target.newPosition
+    stmt = text('''SELECT dbo.[fn_GetRegionFromLatLon] (:lat,:lon)
         ''').bindparams(bindparam('lat', sitePosition.LAT),
                         bindparam('lon', sitePosition.LON))
-        regionID = connection.execute(stmt).scalar()
-        target.FK_Region = regionID
+    regionID = connection.execute(stmt).scalar()
+    target.FK_Region = regionID
+
 
 class MonitoredSiteDynProp (Base):
 

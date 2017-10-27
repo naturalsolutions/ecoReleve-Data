@@ -1,8 +1,6 @@
 ALTER TABLE [MonitoredSite]
 ADD  
-Place VARCHAR(250) NULL,
-FK_Region INTEGER 
-FOREIGN KEY (FK_Region) REFERENCES Region(id)
+Place VARCHAR(250) NULL
 
 GO
 
@@ -35,22 +33,7 @@ INSERT INTO [dbo].[ModuleForms]
            ,'Location Infos'
            ,'{"source":"autocomplete/stations/Place", "minLength":3}'
            ,1
-		   ),
-           (
-		    12
-           ,'FK_Region'
-           ,'Region'
-           ,0
-           ,6
-           ,6
-           ,'Select'
-           ,'form-control'
-           ,1
-           ,7
-           ,'Location Infos'
-           ,'SELECT [Region] as label, ID as val FROM [Region] UNION SELECT '''' as label , -1 as val'
-           ,1
-		   );
+		   )
 
 GO
 
