@@ -236,6 +236,8 @@ define([
           data['ELE'] = model.ELE;
           data['Precision'] = model.precision;
           data['StartDate'] = model.StationDate;
+          data['Place'] = model.Place
+          data['FK_Region'] = model.FK_Region
           break;
         case 'sensors':
           break;
@@ -271,7 +273,7 @@ define([
               return;
             }
             var data = this.loadData();
-            var stationDate = new moment(data.StartDate, 'DD/MM/YYYY HH:mm:ss');
+
             $.ajax({
               context: this,
               url: 'monitoredSites/'+id_+'/history',
@@ -282,10 +284,13 @@ define([
                 var nextDate = new moment(next.StartDate, 'DD/MM/YYYY HH:mm:ss').valueOf();
                 return minDate < nextDate ? min : next;
               });
-              var minPositionDate = new moment(minPosition.StartDate, 'DD/MM/YYYY HH:mm:ss');
-              if (stationDate.valueOf() < minPositionDate.valueOf()){
-                _this.ruleOnchange(minPosition);
+              if(data.StartDate){
+                var stationDate = new moment(data.StartDate, 'DD/MM/YYYY HH:mm:ss');
+                var minPositionDate = new moment(minPosition.StartDate, 'DD/MM/YYYY HH:mm:ss');
+                if (stationDate.valueOf() < minPositionDate.valueOf()){
+                  _this.ruleOnchange(minPosition);
                 }
+              }
               }).fail(function() {
                 // console.error('an error occured');
                 // _this.histoMonitoredSite.error = true;
@@ -379,14 +384,7 @@ define([
           break;
 
         case 'monitoredSites':
-          data = {};
-
-          data['LAT'] = _this.form.model.get('LAT');
-          data['LON'] = _this.form.model.get('LON');
-          data['Name'] = _this.form.model.get('Name');
-          data['ELE'] = _this.form.model.get('ELE');
-          data['Precision'] = _this.form.model.get('precision');
-          data['StartDate'] = _this.form.model.get('StationDate');
+          data =  _this.loadData();
 
           _this.regionManager.get('modal').show(new _this.NewView({
             objectType: ctx.model.get('objectType'),
