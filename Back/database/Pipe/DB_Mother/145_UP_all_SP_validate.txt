@@ -374,11 +374,11 @@ BEGIN
 	UPDATE d SET FK_ind = iv.FK_Individual
 	FROM @data_to_insert d
 	JOIN IndividualDynPropValue iv
-		ON d.chip_code = iv.ValueString AND iv.FK_IndividualDynProp = 7 AND iv.StartDate <= GETDATE()
+		ON d.chip_code = iv.ValueString AND iv.FK_IndividualDynProp = 7 AND iv.StartDate <= d.date_
 	WHERE NOT EXISTS (
 			SELECT * FROM IndividualDynPropValue iv2 
 			WHERE iv.FK_Individual = iv2.FK_IndividualDynProp AND iv.FK_IndividualDynProp = iv2.FK_IndividualDynProp 
-			AND iv2.StartDate > iv.StartDate AND iv2.StartDate <= GETDATE())
+			AND iv2.StartDate > iv.StartDate AND iv2.StartDate <= d.date_)
 
 	insert into @data_duplicate
 	SELECT d.PK_id
@@ -484,11 +484,11 @@ BEGIN
 	UPDATE d SET FK_ind = iv.FK_Individual
 	FROM @data_to_insert d
 	JOIN IndividualDynPropValue iv
-		ON d.chip_code = iv.ValueString AND iv.FK_IndividualDynProp = 7 AND iv.StartDate <= GETDATE()
+		ON d.chip_code = iv.ValueString AND iv.FK_IndividualDynProp = 7 AND iv.StartDate <= d.date_
 	WHERE NOT EXISTS (
 			SELECT * FROM IndividualDynPropValue iv2 
 			WHERE iv.FK_Individual = iv2.FK_IndividualDynProp AND iv.FK_IndividualDynProp = iv2.FK_IndividualDynProp 
-			AND iv2.StartDate > iv.StartDate AND iv2.StartDate <= GETDATE())
+			AND iv2.StartDate > iv.StartDate AND iv2.StartDate <= d.date_)
 
 	insert into @data_duplicate
 	SELECT d.PK_id
