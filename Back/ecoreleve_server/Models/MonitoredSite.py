@@ -12,14 +12,16 @@ from sqlalchemy import (
     and_,
     func,
     desc,
-    select)
-
+    select,
+    event,
+    text,
+    bindparam)
+from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..utils.parseValue import isEqual, formatValue, parser
 from ..utils.datetime import parse
 from ..GenericObjets.OrmModelsMixin import HasDynamicProperties, GenericType
-
 
 
 class MonitoredSitePosition(Base):
@@ -48,6 +50,7 @@ class MonitoredSite (HasDynamicProperties, Base):
     Creator = Column(Integer, nullable=False)
     Active = Column(Boolean, nullable=False, default=1)
     creationDate = Column(DateTime, nullable=False, default=func.now())
+    Place = Column(String(250))
 
     MonitoredSitePositions = relationship(
         'MonitoredSitePosition',
@@ -104,9 +107,11 @@ class MonitoredSite (HasDynamicProperties, Base):
         if self.fk_table_type_name not in dict_ and 'type_id' not in dict_ and not self.type_id:
             raise Exception('object type not exists')
         else:
-            type_id = dict_.get(self.fk_table_type_name, None) or dict_.get('type_id', None) or self.type_id
+            type_id = dict_.get(self.fk_table_type_name, None) or dict_.get(
+                'type_id', None) or self.type_id
             self._type = self.session.query(self.TypeClass).get(type_id)
-            useDate = parser(dict_.get('__useDate__', None)) or self.linkedFieldDate()
+            useDate = parser(dict_.get('__useDate__', None)
+                             ) or self.linkedFieldDate()
             for prop, value in dict_.items():
                 self.setValue(prop, value, useDate)
 
@@ -125,3 +130,80 @@ class MonitoredSite (HasDynamicProperties, Base):
                 sameDatePosition[0].Comments = DTOObject['Comments']
             else:
                 self.MonitoredSitePositions.append(self.newPosition)
+
+
+<< << << < HEAD
+== == == =
+
+
+@event.listens_for(MonitoredSite, 'before_insert')
+@event.listens_for(MonitoredSite, 'before_update')
+def updateRegion(mapper, connection, target):
+    sitePosition = target.newPosition
+    stmt = text('''SELECT dbo.[fn_GetRegionFromLatLon] (:lat,:lon)
+        ''').bindparams(bindparam('lat', sitePosition.LAT),
+                        bindparam('lon', sitePosition.LON))
+    regionID = connection.execute(stmt).scalar()
+    target.FK_Region = regionID
+
+
+class MonitoredSiteDynProp (Base):
+
+    __tablename__ = 'MonitoredSiteDynProp'
+    ID = Column(Integer, Sequence(
+        'MonitoredSiteDynProp__id_seq'), primary_key=True)
+    Name = Column(String(250), nullable=False)
+    TypeProp = Column(String(100), nullable=False)
+
+    MonitoredSiteType_MonitoredSiteDynProps = relationship(
+        'MonitoredSiteType_MonitoredSiteDynProp', backref='MonitoredSiteDynProp')
+    MonitoredSiteDynPropValues = relationship(
+        'MonitoredSiteDynPropValue', backref='MonitoredSiteDynProp')
+
+
+class MonitoredSiteDynPropValue(Base):
+
+    __tablename__ = 'MonitoredSiteDynPropValue'
+
+    ID = Column(Integer, Sequence(
+        'MonitoredSiteDynPropValue__id_seq'), primary_key=True)
+    StartDate = Column(DateTime, nullable=False)
+    ValueInt = Column(Integer)
+    ValueString = Column(String(250))
+    ValueDate = Column(DateTime)
+    ValueFloat = Column(Numeric(12, 5))
+    FK_MonitoredSiteDynProp = Column(
+        Integer, ForeignKey('MonitoredSiteDynProp.ID'))
+    FK_MonitoredSite = Column(Integer, ForeignKey('MonitoredSite.ID'))
+
+
+class MonitoredSiteType_MonitoredSiteDynProp(Base):
+
+    __tablename__ = 'MonitoredSiteType_MonitoredSiteDynProp'
+
+    ID = Column(Integer, Sequence(
+        'MonitoredSiteType_MonitoredSiteDynProp__id_seq'), primary_key=True)
+    Required = Column(Integer, nullable=False)
+    FK_MonitoredSiteType = Column(Integer, ForeignKey('MonitoredSiteType.ID'))
+    FK_MonitoredSiteDynProp = Column(
+        Integer, ForeignKey('MonitoredSiteDynProp.ID'))
+
+
+class MonitoredSiteType (Base, ObjectTypeWithDynProp):
+
+    __tablename__ = 'MonitoredSiteType'
+    ID = Column(Integer, Sequence(
+        'MonitoredSiteType__id_seq'), primary_key=True)
+    Name = Column(String(250))
+    Status = Column(Integer)
+
+    MonitoredSiteType_MonitoredSiteDynProp = relationship(
+        'MonitoredSiteType_MonitoredSiteDynProp', backref='MonitoredSiteType')
+    MonitoredSites = relationship('MonitoredSite', backref='MonitoredSiteType')
+
+    @orm.reconstructor
+    def init_on_load(self):
+        ObjectTypeWithDynProp.__init__(self)
+
+
+>>>>>> > 652fbc4f05c8c35a5216ed79f973a53da0b47bdb
