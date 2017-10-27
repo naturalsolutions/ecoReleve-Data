@@ -1,0 +1,36 @@
+update ar set type='GPS'
+  FROM [ecoReleve_Sensor].[dbo].[T_argosgps] ar
+  where type='gps'
+  GO
+
+  update ar set type='Argos'
+  FROM [ecoReleve_Sensor].[dbo].[T_argosgps] ar
+  where type like 'ar%'
+   GO
+
+   Update l SET type_ = 'Argos'
+   FROM Individual_Location l 
+   WHERE type_ like 'arg%'
+   GO 
+
+   Update l SET type_ = 'RFID'
+   FROM Individual_Location l 
+   WHERE type_ = 'rfid'
+   GO
+
+   Update l SET type_ = 'GSM'
+   FROM Individual_Location l 
+   WHERE type_ = 'gsm'
+   GO
+
+   Update l SET type_ = 'GPS'
+   FROM Individual_Location l 
+   WHERE type_ = 'gps'
+   GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('144_Up_case_type_ofSensorData',GETDATE(),(SELECT db_name()))
+
+
+GO
