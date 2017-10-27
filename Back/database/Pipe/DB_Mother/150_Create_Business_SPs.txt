@@ -76,7 +76,7 @@ Create PROCEDURE [dbo].[pr_checkEntomoBridgeOnProtocolUpdate]
 		WHERE FK_Observation = @obsID 
 		AND Name = 'Host_Plant'
 
-		IF (@microHab!=@newmicroHab OR @habitat!=@newhabitat OR @Hostplant!=@newHostplant OR @method != @newmethod)
+		IF (isnull(@microHab,'')!=isnull( @newmicroHab,'') OR isnull(@habitat,'') != isnull(@newhabitat,'') OR isnull(@Hostplant,'') != isnull(@newHostplant,'') OR isnull(@method,'') != isnull(@newmethod,''))
 		BEGIN
 			SET @result = 1
 		END
