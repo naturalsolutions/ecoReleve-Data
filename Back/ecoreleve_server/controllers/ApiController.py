@@ -10,6 +10,7 @@ from pyramid.security import (
 # TODO: create ApiController
 # ###
 
+
 class Resource(dict):
 
     def __init__(self, ref, parent):
@@ -34,13 +35,13 @@ class Resource(dict):
 
 class SecurityRoot(Resource):
     __acl__ = [
-         (Allow, Authenticated, 'read'),
-         (Allow, Authenticated, 'all'),
-         (Allow, 'group:admins', 'admin'),
-         (Allow, 'group:admins', 'superUser'),
-         (Allow, 'group:admins', 'all'),
-         (Allow, 'group:superUsers', 'superUser'),
-         (Allow, 'group:superUsers', 'all')
+        (Allow, Authenticated, 'read'),
+        # (Allow, Authenticated, 'all'),
+        # (Allow, 'group:admins', 'admin'),
+        # (Allow, 'group:admins', 'superUser'),
+        # (Allow, 'group:admins', 'all'),
+        # (Allow, 'group:superUsers', 'superUser'),
+        # (Allow, 'group:superUsers', 'all')
     ]
 
     def __init__(self, request):
@@ -57,14 +58,16 @@ class RootCore(SecurityRoot):
 
     def __init__(self, ref, parent):
         Resource.__init__(self, ref, parent)
-        self.add_children()
+        # self.add_children()
 
     def add_children(self):
         for ref, klass in self.listChildren:
             self.add_child(ref, klass)
 
     def __getitem__(self, item):
-        return self.get(item)
+        klass = dict(self.listChildren).get(item)
+        resource = klass(ref=item, parent=self)
+        return resource
 
     def retrieve(self):
         return {'next items': self}
@@ -95,9 +98,12 @@ class RESTView(object):
     def put(self):
         return self.context.update()
 
+
 from . import ModelFactory
+
+
 class ApiFactory(object):
-    
+
     def __init__(self, ModelFactory):
         self.ModelFactory = ModelFactory
 
