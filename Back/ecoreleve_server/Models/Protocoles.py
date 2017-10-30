@@ -69,7 +69,7 @@ class Observation(Base, ObjectWithDynProp):
 
     def GetDynProps(self, nameProp):
         return self.session.query(ObservationDynProp
-                                     ).filter(ObservationDynProp.Name == nameProp).one()
+                                  ).filter(ObservationDynProp.Name == nameProp).one()
 
     def GetType(self):
         if self.ProtocoleType is not None:
@@ -81,7 +81,7 @@ class Observation(Base, ObjectWithDynProp):
         try:
             linkedDate = self.Station.StationDate
         except:
-            linkedDate = datetime.now()
+            linkedDate = datetime.utcnow()
         if 'unequipment' in self.GetType().Name.lower():
             linkedDate = linkedDate - timedelta(seconds=1)
         return linkedDate
@@ -185,6 +185,7 @@ class Observation(Base, ObjectWithDynProp):
 
     def beforeDelete(self):
         self.LoadNowValues()
+
 
 @event.listens_for(Observation, 'after_delete')
 def unlinkLinkedField(mapper, connection, target):
