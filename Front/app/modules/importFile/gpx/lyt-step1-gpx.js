@@ -48,8 +48,8 @@ define([
       this.formRdy.then(function(){
         _this.parent.disableNextBtn();
         _this.parent.bindRequiredFields();
-        _this.initTimeZoneField();
-        _this.showTZconversion();
+        // _this.initTimeZoneField();
+        // _this.showTZconversion();
         if(_this.previousModels){
           _this.parent.checkNextBtn();
         }
@@ -218,19 +218,22 @@ define([
       var formData = this.nsform.BBForm.getValue();
       var fwList = [];
       window.app.timezone = formData.timeZone;
-      var curTZ = this.getTZnameByGMT(formData.timeZone);
-      _.forEach(formData.FieldWorkers, function (curFw) {
-        fwList.push(parseInt(curFw.FieldWorker));
-      });
+      // var curTZ = this.getTZnameByGMT(formData.timeZone);
+      // _.forEach(formData.FieldWorkers, function (curFw) {
+      //   fwList.push(parseInt(curFw.FieldWorker));
+      // });
       this.wayPointCollection.map(function (model) {
         var curDate = momenttz.utc(model.waypointTime, 'DD/MM/YYYY HH:mm');
         model.FieldWorkers = fwList;
         model.NbFieldWorker = formData.NbFieldWorker;
         model.fieldActivity = formData.fieldActivityId;
-        model.timeZone = formData.timeZone;
+        // model.timeZone = formData.timeZone;
+        // model.TZdate = momenttz(curDate).utc().tz(curTZ).format('DD/MM/YYYY HH:mm');
+        // model.displayDate = momenttz(curDate).utc().tz(curTZ).format('YYYY-MM-DD HH:mm');
+        model.displayDate = model.waypointTime;
+        model.TZdate = model.waypointTime;
+        model.timeZone = null;
         model.Place = formData.Place;
-        model.TZdate = momenttz(curDate).utc().tz(curTZ).format('DD/MM/YYYY HH:mm');
-        model.displayDate = momenttz(curDate).utc().tz(curTZ).format('YYYY-MM-DD HH:mm');
       });
     }
   });
