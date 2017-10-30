@@ -45,12 +45,13 @@ class Equipment(Base):
         EXEC dbo.[pr_checkIfProtoProtected] :FK_sensor, :date, @result OUTPUT;
         SELECT @result;
         ''').bindparams(bindparam('FK_sensor', self.FK_Sensor),
-        bindparam('date', self.StartDate))
+                        bindparam('date', self.StartDate))
         Nb = session.execute(query).scalar()
         if Nb > 0:
             return True
         else:
             return False
+
 
 def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
     session = threadlocal.get_current_registry().dbmaker()
@@ -64,9 +65,7 @@ def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
     if Nb > 0:
         return True
     else:
-        return {'equipment_error':True}
-
-
+        return {'equipment_error': True}
 
 
 def checkUnequip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
@@ -141,7 +140,7 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
 
         elif (isinstance(target.Equipment, Equipment)
                 and target.Equipment.FK_Sensor == fk_sensor
-                ):
+              ):
             target.Equipment.FK_Individual = fk_indiv
         else:
             raise(ErrorAvailable(availability))
