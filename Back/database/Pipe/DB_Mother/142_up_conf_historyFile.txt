@@ -1,0 +1,57 @@
+update ModuleGrids SET Name = 'nbRows' 
+where Module_ID = (SELECT ID FROM [FrontModules] WHERE Name = 'ImportHistoryFilter')
+and name = 'count'
+
+
+INSERT INTO [dbo].[ModuleGrids]
+           ([Module_ID]
+           ,[TypeObj]
+           ,[Name]
+           ,[Label]
+           ,[GridRender]
+           ,[GridSize]
+           ,[CellType]
+           ,[GridOrder]
+           ,[QueryName]
+           ,[Options]
+           ,[FilterOrder]
+           ,[FilterSize]
+           ,[FilterClass]
+           ,[IsSearchable]
+           ,[FilterDefaultValue]
+           ,[FilterRender]
+           ,[FilterType]
+           ,[Status]
+           ,[ColumnParams])
+     VALUES
+           ((SELECT ID FROM [FrontModules] WHERE Name = 'ImportHistoryFilter')
+           ,NULL
+           ,'nbInserted'
+           ,'nb Inserted'
+           ,2
+           ,'{"width":150,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,55
+           ,NULL
+           ,NULL
+           ,55
+           ,2
+           ,NULL
+           ,0
+           ,NULL
+           ,4
+           ,'Text'
+           ,NULL
+           ,NULL)
+
+GO
+
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('142_up_conf_historyFile',GETDATE(),(SELECT db_name()))
+
+
+GO

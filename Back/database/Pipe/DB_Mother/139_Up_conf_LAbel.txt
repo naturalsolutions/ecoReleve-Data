@@ -1,0 +1,9 @@
+UPDATE [ModuleForms] SET Label = ' '
+where label is null
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('139_Up_conf_LAbel',GETDATE(),(SELECT db_name()))
+
+
+GO

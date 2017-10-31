@@ -7,6 +7,7 @@ function(Marionette, config) {
     initialize: function() {
       this.collection = new Backbone.Collection([
       {label: 'Manual import', href: 'importFile', icon: 'reneco-import'},
+      {label: 'History import', href: 'importHistory', icon: 'reneco-import'},
       {label: 'New Station', href: 'stations/new', icon: 'reneco-entrykey'},
       {label: 'Release', href: 'release', icon: 'reneco-to_release'},
       {label: 'Validate', href: 'validate', icon: 'reneco-validate'},

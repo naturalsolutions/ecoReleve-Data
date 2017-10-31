@@ -139,6 +139,7 @@ from .Individual import *
 from .Sensor import *
 from .MonitoredSite import *
 from .Equipment import *
+from .Import import *
 from .SensorData import *
 from .List import *
 from .Log import sendLog

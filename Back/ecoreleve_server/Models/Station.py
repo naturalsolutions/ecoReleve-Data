@@ -42,18 +42,19 @@ class Station(Base, ObjectWithDynProp):
         'fieldActivity.ID'), nullable=True)
     creator = Column(Integer)
     creationDate = Column(DateTime, default=func.now())
+    original_id = Column(String(250))
+    Comments = Column(String(250))
+    Place = Column(String(250))
+    FK_MonitoredSite = Column(Integer, ForeignKey(
+        'MonitoredSite.ID'), nullable=True)
+
     Observations = relationship(
         'Observation', back_populates='Station', cascade="all, delete-orphan")
     StationDynPropValues = relationship(
         'StationDynPropValue', backref='Station', cascade="all, delete-orphan")
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
-    Comments = Column(String(250))
 
     FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
-    FK_MonitoredSite = Column(Integer, ForeignKey(
-        'MonitoredSite.ID'), nullable=True)
-
-    Place = Column(String(250))
 
     Station_FieldWorkers = relationship(
         'Station_FieldWorker', backref='Station', cascade="all, delete-orphan")
