@@ -70,7 +70,7 @@ class Observation(Base, ObjectWithDynProp):
 
     def GetDynProps(self, nameProp):
         return self.session.query(ObservationDynProp
-                                     ).filter(ObservationDynProp.Name == nameProp).one()
+                                  ).filter(ObservationDynProp.Name == nameProp).one()
 
     def GetType(self):
         if self.ProtocoleType is not None:
@@ -82,13 +82,13 @@ class Observation(Base, ObjectWithDynProp):
         try:
             Station = Base.metadata.tables['Station']
             if not self.Station:
-                linkedDate = self.session.execute(select([Station.c['StationDate']]).where(Station.c['ID']==self.FK_Station)).scalar()
+                linkedDate = self.session.execute(select([Station.c['StationDate']]).where(
+                    Station.c['ID'] == self.FK_Station)).scalar()
             else:
                 linkedDate = self.Station.StationDate
         except:
-            from traceback import print_exc
-            print_exc()
-            linkedDate = datetime.now()
+            linkedDate = datetime.utcnow()
+
         if 'unequipment' in self.GetType().Name.lower():
             linkedDate = linkedDate - timedelta(seconds=1)
         return linkedDate
@@ -192,6 +192,7 @@ class Observation(Base, ObjectWithDynProp):
 
     def beforeDelete(self):
         self.LoadNowValues()
+
 
 @event.listens_for(Observation, 'after_delete')
 def unlinkLinkedField(mapper, connection, target):
