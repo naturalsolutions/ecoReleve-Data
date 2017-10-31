@@ -678,7 +678,7 @@ define([
     savingError: function (response) {
       // To be extended, called after save on model if error
       var _this = this;
-      if( response.status === 409) {
+      if( response.status == 409) {
         Swal({
           title: 'Data conflicts',
           text: response.responseText,
