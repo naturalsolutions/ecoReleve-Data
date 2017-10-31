@@ -7,8 +7,7 @@ from ..Models import (
     Station_FieldWorker,
     Import,
     GPX,
-    dbConfig,
-    ErrorCheckUniqueStation
+    dbConfig
 )
 from traceback import print_exc
 import pandas as pd
@@ -28,11 +27,14 @@ def uploadFileGPX(request):
     GPXdata = formatData(data, request)
 
     dataFrame_to_insert, existing_dataFrame = checkExisting(session, GPXdata)
-    inserted_raw_dataFrame = insertRawData(session, GPXdata, existing_dataFrame)
+    inserted_raw_dataFrame = insertRawData(
+        session, GPXdata, existing_dataFrame)
 
-    dataFrame_to_insert = pd.merge(dataFrame_to_insert, inserted_raw_dataFrame, on=['Name', 'StationDate'])
+    dataFrame_to_insert = pd.merge(
+        dataFrame_to_insert, inserted_raw_dataFrame, on=['Name', 'StationDate'])
     # dataFrame_to_insert = dataFrame_to_insert.join(inserted_raw_dataFrame, on=['Name', 'StationDate'])
-    dataFrame_to_insert['original_id'] = dataFrame_to_insert['pk_id'].apply(lambda x: 'Tgpx_'+str(x))
+    dataFrame_to_insert['original_id'] = dataFrame_to_insert['pk_id'].apply(
+        lambda x: 'Tgpx_' + str(x))
 
     insertData(session, dataFrame_to_insert, data[0]['FieldWorkers'])
 
@@ -112,10 +114,10 @@ def checkExisting(session, GPXdata):
         result_to_check['LON'] = result_to_check['LON'].round(5)
 
         merge_check = pd.merge(DF_to_check, result_to_check,
-                            left_on=[
-                            'LAT', 'LON', 'StationDateTZ', 'fieldActivityId'],
-                            right_on=[
-                            'LAT', 'LON', 'StationDate', 'fieldActivityId'])
+                               left_on=[
+                                   'LAT', 'LON', 'StationDateTZ', 'fieldActivityId'],
+                               right_on=[
+                                   'LAT', 'LON', 'StationDate', 'fieldActivityId'])
         # Get only non existing data to insert
         DF_to_insert = DF_to_check[~DF_to_check['id'].isin(merge_check['id'])]
         DF_to_insert = DF_to_insert.drop(['id'], 1)
@@ -129,7 +131,8 @@ def checkExisting(session, GPXdata):
 
 
 def insertData(session, dataFrame_to_insert, fieldWorkers):
-    data_to_insert = json.loads(dataFrame_to_insert.to_json(orient='records', date_format='iso'))
+    data_to_insert = json.loads(dataFrame_to_insert.to_json(
+        orient='records', date_format='iso'))
     staListID = []
     nbExc = 0
     bulk_station = []
@@ -152,11 +155,12 @@ def insertData(session, dataFrame_to_insert, fieldWorkers):
 
         if fieldWorkers:
             bulk_fieldworker_station = list(map(lambda b: list(map(lambda a: Station_FieldWorker(
-                        FK_Station= a.ID,
-                        FK_FieldWorker= b),
-                        bulk_station)),
-                        fieldWorkers))
-            bulk_fieldworker_station = list(itertools.chain.from_iterable(bulk_fieldworker_station))
+                FK_Station=a.ID,
+                FK_FieldWorker=b),
+                bulk_station)),
+                fieldWorkers))
+            bulk_fieldworker_station = list(
+                itertools.chain.from_iterable(bulk_fieldworker_station))
             session.bulk_save_objects(bulk_fieldworker_station)
 
 
@@ -173,32 +177,36 @@ def insertRawData(session, GPXdata, existing_dataFrame):
         DF.ix[DF['id'].isin(existing_dataFrame['id']), 'imported'] = False
 
     for fileName in fileList:
-        curDF = DF[DF['fileName']==fileName]
+        curDF = DF[DF['fileName'] == fileName]
         maxDate = curDF['StationDate'].max()
         minDate = curDF['StationDate'].min()
         nbRows = curDF.shape[0]
-        nbInserted = curDF[curDF['imported']==True].shape[0]
-        curImport = Import(FK_User=user, ImportType='GPX', ImportFileName=fileName, nbRows=nbRows, maxDate=maxDate, minDate=minDate, nbInserted=nbInserted)
+        nbInserted = curDF[curDF['imported'] == True].shape[0]
+        curImport = Import(FK_User=user, ImportType='GPX', ImportFileName=fileName,
+                           nbRows=nbRows, maxDate=maxDate, minDate=minDate, nbInserted=nbInserted)
         session.add(curImport)
         session.flush()
         dictFileObj[fileName] = curImport.ID
-    
+
     DF['FK_Import'] = DF['fileName'].replace(dictFileObj)
     rawData_to_insert = DF.drop(['id',
-                 'fileName',
-                 'fieldActivityId',
-                 'creationDate',
-                 'creator',
-                 'FK_StationType',
-                 'NbFieldWorker',
-                 'StationDateTZ'], 1)
-    
-    data_to_insert = json.loads(rawData_to_insert.to_json(
-            orient='records', date_format='iso'))
+                                 'fileName',
+                                 'fieldActivityId',
+                                 'creationDate',
+                                 'creator',
+                                 'FK_StationType',
+                                 'NbFieldWorker',
+                                 'StationDateTZ'], 1)
 
-    res = session.bulk_insert_mappings(GPX, data_to_insert, return_defaults=True)
+    data_to_insert = json.loads(rawData_to_insert.to_json(
+        orient='records', date_format='iso'))
+
+    res = session.bulk_insert_mappings(
+        GPX, data_to_insert, return_defaults=True)
     inserted_row_data = pd.DataFrame(data_to_insert)
 
-    inserted_row_data = inserted_row_data.loc[:, ['StationDate', 'Name', 'pk_id']]
-    inserted_row_data['StationDate'] = pd.to_datetime(inserted_row_data['StationDate'])
+    inserted_row_data = inserted_row_data.loc[:, [
+        'StationDate', 'Name', 'pk_id']]
+    inserted_row_data['StationDate'] = pd.to_datetime(
+        inserted_row_data['StationDate'])
     return inserted_row_data
