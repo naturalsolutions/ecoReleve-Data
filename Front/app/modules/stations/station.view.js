@@ -157,41 +157,6 @@ define([
 
       };
 
-      this.nsForm.savingError = function (response) {
-        var msg = 'An error occured, please contact an admninstrator';
-        var type_ = 'error';
-        var title = 'Error saving';
-        if (response.status == 510) {
-          console.log(response)
-          if (response.responseJSON.existingStation) {
-            msg = 'A station already exists with these parameters';
-          }
-          else if (response.responseJSON.updateDenied) {
-            switch (response.responseJSON.updateDenied) {
-              case 'site equipment':
-                msg = "A protocol Site equipment or Site unequipment is present on this station. You cannot change coordinates, monitored site nor station date.";
-                break;
-              case 'individual equipment':
-                msg = "A protocol Individual equipment or Individual unequipment is present on this station. You cannot change station date.";
-                break;
-            }
-
-          }
-          type_ = 'warning';
-          title = 'Error saving';
-        }
-
-        Swal({
-          title: title,
-          text: msg,
-          type: type_,
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
-        });
-      };
-
       this.nsForm.afterSaveSuccess = function() {
         if(_this.map){
           _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
