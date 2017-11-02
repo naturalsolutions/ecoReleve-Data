@@ -4,7 +4,8 @@ from ..Models import (
     Observation,
     ProtocoleType,
     invertedThesaurusDict,
-    thesaurusDictTraduction
+    thesaurusDictTraduction,
+    ErrorCheckIndividualCodes
 )
 import json
 from datetime import datetime
@@ -308,7 +309,13 @@ class ReleaseIndividualsView(IndividualsView):
                 session.add_all(equipmentIndList)
                 message = {'release': len(releaseIndList)}
 
+        except ErrorCheckIndividualCodes as ec:
+            session.rollback()
+            request.response.status_code = 510
+            message = str(ec)
+
         except Exception as e:
+            request.response.status_code = 510
             session.rollback()
             message = str(type(e))
 
