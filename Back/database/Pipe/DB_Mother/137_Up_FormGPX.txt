@@ -1,0 +1,20 @@
+INSERT INTO ModuleForms
+VALUES (19,NULL,'Place','Place',0,6,6,'AutocompleteEditor','form-control',2,2,NULL,'{"source":"autocomplete/stations/Place", "minLength":3}',NULL,NULL,NULL,NULL,1,NULL,NULL,NULL),
+(19,1,'timeZone','TimeZone',1,7,7,'Select','form-control',2,3,NULL,'SELECT '''' as label, '''' as val',NULL,NULL,NULL,4,1,NULL,NULL,NULL)
+
+GO
+
+
+Update ModuleForms SET editorClass = 'nested-unstyled'
+WHERE module_id = 19 AND Name = 'Fieldworkers'
+
+GO
+
+delete [ModuleForms]
+  where inputtype  = 'FileUploadEditor'
+GO
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('137_Up_FormGPX',GETDATE(),(SELECT db_name()))
+
+
+GO

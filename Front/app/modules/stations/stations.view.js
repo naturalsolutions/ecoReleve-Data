@@ -58,8 +58,30 @@ define([
     	}
     },
 
+    activeLastImported(){
+      if(!this.defaultFilters){
+        this.defaultFilters = [{
+          Column: 'LastImported',
+          Operator: '=',
+          Value: true
+        }];
+      } else {
+        this.defaultFilters.push({
+          Column: 'LastImported',
+          Operator: '=',
+          Value: true
+        });
+      }
+      this.$el.find('.tab-ele').each(function(){
+        $(this).toggleClass('active');
+      });
+    },
+
     onShow: function() {
       this.$el.find('.js-date-time').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
+      if((this.options && this.options.params && this.options.params=='lastImported') || this.model.get('lastImported')){
+        this.activeLastImported();
+      }
       this.displayFilter();
       this.displayGridView();
       if(this.displayMap){

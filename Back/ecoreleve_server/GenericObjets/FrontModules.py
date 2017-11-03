@@ -102,10 +102,12 @@ class ModuleForms(Base):
 
     def GetDTOFromConf(self, displayMode, isGrid=False):
         ''' return input field to build form :
+
             3 display modes : 
                 - "display" : all input non editable, 1
                 - "create",
                 - "edit"
+
         '''
         binaryMode = 0
         self.displayMode = displayMode
@@ -118,6 +120,7 @@ class ModuleForms(Base):
         isDisabled = False
 
         if self.Editable:
+
             isDisabled = True
             if binaryTest(self.FormRender, 2):
                 # input is inactive only in edit mode
@@ -127,6 +130,7 @@ class ModuleForms(Base):
                     isDisabled = False
 
             if binaryTest(self.FormRender, 4):
+
                 isDisabled = False
             self.fullPath = False
             curSize = self.FieldSizeEdit
@@ -141,8 +145,10 @@ class ModuleForms(Base):
         self.dto = {
             'name': self.Name,
             'type': curInputType,
+
             'title': self.Label if self.Label else ' ',
             'editable': not isDisabled,
+
             'editorClass': str(self.editorClass),
             'validators': [],
             'options': {},
@@ -458,7 +464,7 @@ class ModuleGrids (Base):
         else:
             filter_['fieldClass'] = FieldSizeToClass[self.FilterSize],
 
-        if self.FilterType == 'Select' and self.Options is not None:
+        if self.FilterType == 'Select' and self.Options is not None and 'select' in self.Options.lower():
             result = self.session.execute(text(self.Options)).fetchall()
             filter_['options'] = [
                 {'label': row['label'], 'val':row['val']} for row in result]

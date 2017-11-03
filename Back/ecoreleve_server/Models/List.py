@@ -600,3 +600,18 @@ class ClientList(CollectionEngine):
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
         super().__init__(Client, frontModule, startDate)
+
+
+class ImportList(Generator):
+
+    def __init__(self, SessionMaker):
+
+        joinTable = join(Import, User, Import.FK_User == User.id)
+
+        tablecImprt = select([Import,
+                              User.fullname.label('Login'),
+
+                              ]).select_from(joinTable
+                                             )
+        tablecImprt = tablecImprt.cte()
+        super().__init__(tablecImprt, SessionMaker)

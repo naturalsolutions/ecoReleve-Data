@@ -1,0 +1,23 @@
+ALTER TABLE Individual_Location
+ADD FK_MonitoredSite int NULL
+
+GO
+
+ALTER TABLE [dbo].[Individual_Location]  WITH CHECK ADD FOREIGN KEY(FK_MonitoredSite)
+REFERENCES [dbo].MonitoredSite ([ID])
+GO
+
+
+
+
+	UPDATE l SET FK_MonitoredSite = rowdata.FK_MonitoredSite
+    FROM Individual_Location l
+	JOIN Sensor s on l.FK_Sensor = s.ID and s.FK_SensorType = 3
+	JOIN VRfidData_With_equipSite as rowdata on l.OriginalData_ID = 'T_rfid_'+CONVERT(Varchar(20),rowdata.ID)
+
+GO
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('113_add_site_in_IndivLocation_Table',GETDATE(),(SELECT db_name()))
+
+
+GO

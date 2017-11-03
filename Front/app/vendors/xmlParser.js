@@ -6,7 +6,7 @@ define([
 ) {
   'use strict';
   return {
-    gpxParser: function (xml) {
+    gpxParser: function (xml, fileName) {
       var _this = this;
       try {
         var waypointList = [];
@@ -25,6 +25,13 @@ define([
           var longitude = parseFloat(lon);
           var waypointName = $(this).find('name').text();
           var waypointTime, time;
+          // ******* prepare to keep time balise only  ******
+          // waypointTimeTag = $(this).find('time').text();
+          // format =  _this.getDateFormat(waypointTimeTag);
+          // dateStr = moment.utc(waypointTimeTag,format).format('DD/MM/YYYY HH:mm');
+
+          // this code wil be removed 
+          // *Start
           // if tag "cmt" exisits, take date from it, else use tag "time"
           var waypointTimeTag = $(this).find('cmt').text();
           var dateStr;
@@ -37,11 +44,11 @@ define([
             dateStr = moment.utc(waypointTimeTag,format).format('DD/MM/YYYY HH:mm');
           }
 
+          // *End
           var timestamp = moment.utc(dateStr, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
           nbWaypoints += 1;
           if (lat != '' && lon != '' && dateStr != 'Invalid date' && time != 'Invalid date') {
             id += 1;
-            //var idwpt = id;
             waypoint.id = id;
             waypoint.name = waypointName;
             waypoint.latitude = latitude;
@@ -51,9 +58,12 @@ define([
             waypoint.displayDate = timestamp;
             waypoint.time = time;
             waypoint.fieldActivity = '';
+            waypoint.Place = null;
+            waypoint.timeZone = null;
             waypoint.import = false;
             waypoint.FieldWorkers = [];
             waypoint.precision = 10;
+            waypoint.fileName = fileName;
 
             waypointList.push(waypoint);
           } else {

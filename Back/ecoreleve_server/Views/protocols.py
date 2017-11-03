@@ -44,7 +44,7 @@ class ObservationView(DynamicObjectView):
                 curObs.Station = curObs.Station
         except ErrorAvailable as e:
             self.session.rollback()
-            self.request.response.status_code = 510
+            self.request.response.status_code = 409
             responseBody['response'] = e.value
 
         return responseBody
@@ -117,11 +117,12 @@ class ObservationsView(DynamicObjectCollectionView):
             self.session.flush()
             responseBody['id'] = curObs.ID
         except Exception as e:
-            print_exc()
-            # self.session.rollback()
-            # self.request.response.status_code = 510
-            # responseBody['response'] = e.value
-            # sendLog(logLevel=1, domaine=3, msg_number=self.request.response.status_code)
+            # print(e)
+            self.session.rollback()
+            self.request.response.status_code = 409
+            responseBody['response'] = e.value
+            sendLog(logLevel=1, domaine=3,
+                    msg_number=self.request.response.status_code)
         return responseBody
 
     def batch(self):

@@ -12,14 +12,16 @@ from sqlalchemy import (
     and_,
     func,
     desc,
-    select)
-
+    select,
+    event,
+    text,
+    bindparam)
+from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..utils.parseValue import isEqual, formatValue, parser
 from ..utils.datetime import parse
 from ..GenericObjets.OrmModelsMixin import HasDynamicProperties, GenericType
-
 
 
 class MonitoredSitePosition(Base):
@@ -48,6 +50,7 @@ class MonitoredSite (HasDynamicProperties, Base):
     Creator = Column(Integer, nullable=False)
     Active = Column(Boolean, nullable=False, default=1)
     creationDate = Column(DateTime, nullable=False, default=func.now())
+    Place = Column(String(250))
 
     MonitoredSitePositions = relationship(
         'MonitoredSitePosition',
@@ -104,9 +107,11 @@ class MonitoredSite (HasDynamicProperties, Base):
         if self.fk_table_type_name not in dict_ and 'type_id' not in dict_ and not self.type_id:
             raise Exception('object type not exists')
         else:
-            type_id = dict_.get(self.fk_table_type_name, None) or dict_.get('type_id', None) or self.type_id
+            type_id = dict_.get(self.fk_table_type_name, None) or dict_.get(
+                'type_id', None) or self.type_id
             self._type = self.session.query(self.TypeClass).get(type_id)
-            useDate = parser(dict_.get('__useDate__', None)) or self.linkedFieldDate()
+            useDate = parser(dict_.get('__useDate__', None)
+                             ) or self.linkedFieldDate()
             for prop, value in dict_.items():
                 self.setValue(prop, value, useDate)
 
