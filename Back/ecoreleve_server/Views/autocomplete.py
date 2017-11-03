@@ -73,6 +73,7 @@ def autocompleteTaxon(request):
         'amphibien': Base.metadata.tables['amphibia_view'],
         'mammal': Base.metadata.tables['mammal_view'],
         'insecte': Base.metadata.tables['insect_view'],
+        'chiroptera': Base.metadata.tables['chiroptera_view'],
     }
 
     prop_name = {'vernaculaire': 'NOM_VERN',
