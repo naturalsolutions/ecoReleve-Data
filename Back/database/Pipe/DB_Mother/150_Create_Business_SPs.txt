@@ -1,0 +1,434 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+/*********************** check Entomo bridge *********************/
+
+Create PROCEDURE [dbo].[pr_checkEntomoBridgeOnProtocolDelete]
+ @obsID int,
+ @result int OUTPUT
+   AS
+   BEGIN
+
+   SET NOCOUNT ON
+	DECLARE
+	@nbChild int
+
+
+	SELECT @nbChild = count(*)
+	FROM Observation o
+	WHERE Parent_Observation = @obsID
+	AND original_id like '%ecollection%'
+
+	IF @nbChild > 0
+		SELECT @result
+	
+	END
+
+
+ GO
+
+
+Create PROCEDURE [dbo].[pr_checkEntomoBridgeOnProtocolUpdate]
+ @obsID int,
+ @newmicroHab varchar(max),
+ @newhabitat varchar(max),
+ @newHostplant varchar(max),
+ @newmethod varchar(max),
+ @result int OUTPUT
+   AS
+   BEGIN
+
+   SET NOCOUNT ON
+	DECLARE
+	@microHab varchar(max),
+	@habitat varchar(max),
+	@Hostplant varchar(max),
+	@method varchar(max),
+	@nbChild int
+
+
+	SELECT @nbChild = count(*)
+	FROM Observation o
+	WHERE Parent_Observation = @obsID
+	AND original_id like '%ecollection%'
+
+	IF @nbChild > 0
+	BEGIN
+		SELECT @microHab = ValueString	
+		FROM ObservationDynPropValuesNow
+		WHERE FK_Observation = @obsID 
+		AND Name = 'micro_habitat'
+
+		SELECT @method = ValueString	
+		FROM ObservationDynPropValuesNow
+		WHERE FK_Observation = @obsID 
+		AND Name = 'Method'
+
+		SELECT @habitat = ValueString	
+		FROM ObservationDynPropValuesNow
+		WHERE FK_Observation = @obsID 
+		AND Name = 'habitat'
+
+		SELECT @Hostplant = ValueString	
+		FROM ObservationDynPropValuesNow
+		WHERE FK_Observation = @obsID 
+		AND Name = 'Host_Plant'
+
+		IF (isnull(@microHab,'')!=isnull( @newmicroHab,'') OR isnull(@habitat,'') != isnull(@newhabitat,'') OR isnull(@Hostplant,'') != isnull(@newHostplant,'') OR isnull(@method,'') != isnull(@newmethod,''))
+		BEGIN
+			SET @result = 1
+		END
+
+	END
+
+	SELECT @result
+
+   END
+
+GO
+
+/*********************** END check Entomo bridge *********************/
+
+
+
+/*********************** check Validated Location  *********************/
+
+CREATE PROCEDURE [dbo].[pr_checkValidatedLocationOnEquipmentProtocolUpdate]
+ @obsID int,
+ @newFk_Sensor int,
+ @newFK_Indiv int,
+ @result int OUTPUT
+   AS
+   BEGIN
+
+	SET NOCOUNT ON
+	DECLARE
+	@StartDate datetime,
+	@EndDate datetime,
+	@stationDate datetime,
+	@FK_Sensor int,
+	@Fk_Individual int
+
+
+	SELECT @FK_Sensor = ValueInt	
+	FROM ObservationDynPropValuesNow
+	WHERE FK_Observation = @obsID 
+	AND Name = 'FK_Sensor'
+
+	SELECT @Fk_Individual = FK_Individual
+	FROM Observation 
+	WHERE ID = @obsID
+
+	IF @Fk_Individual IS NULL
+	SET @Fk_Individual = 0
+
+	IF @newFK_Indiv IS NULL
+	SET @newFK_Indiv = 0
+
+	IF (@FK_Individual != @newFK_Indiv OR @FK_Sensor != @newFk_Sensor)
+	BEGIN
+
+		select @stationDate=StationDate
+		FROM Station s
+		WHERE EXISTS (SELECT * 
+						FROM Observation o where o.FK_Station = s.ID AND o.ID = @obsID)
+
+		select @StartDate = StartDate , @EndDate = EndDate 
+		from SensorEquipment
+		where FK_Sensor =  @FK_sensor
+		and  (@stationDate >= StartDate and (EndDate is null or  @stationDate <=  EndDate ) )
+
+
+		SELECT @result = 1 WHERE EXISTS (select *from Individual_Location where
+			date >= @StartDate
+			and (@EndDate is null or date <=  @EndDate )
+			and FK_sensor = @FK_sensor )
+	END
+
+	SELECT @result
+
+END
+GO
+
+CREATE PROCEDURE [dbo].[pr_checkValidatedLocationOnEquipmentProtocol]
+ @obsID int,
+ @result int OUTPUT
+   AS
+   BEGIN
+
+   SET NOCOUNT ON
+	DECLARE
+	@StartDate datetime,
+	@EndDate datetime,
+	@stationDate datetime,
+	@FK_Sensor int
+
+	select @stationDate=StationDate
+	FROM Station s
+	WHERE EXISTS (SELECT * 
+					FROM Observation o where o.FK_Station = s.ID AND o.ID = @obsID)
+
+	SELECT @FK_Sensor = ValueInt	
+	FROM ObservationDynPropValuesNow
+	WHERE FK_Observation = @obsID 
+	AND Name = 'FK_Sensor'
+
+		select @StartDate = StartDate , @EndDate = EndDate 
+		from SensorEquipment
+		where FK_Sensor =  @FK_sensor
+		and  (@stationDate >= StartDate and (EndDate is null or  @stationDate <=  EndDate ) )
+
+
+	SELECT @result = 1 WHERE EXISTS (select *from Individual_Location where
+		date >= @StartDate
+		and (@EndDate is null or date <=  @EndDate )
+		and FK_sensor = @FK_sensor )
+
+	SELECT @result
+
+   END
+
+GO
+
+/*********************** END check Validated Location  *********************/
+
+
+
+/*********************** check Unique Station  *********************/
+
+ALTER PROCEDURE [dbo].[pr_checkUniqueStation]
+	@stationID int,
+	@lat decimal(9,5),
+	@lon decimal(9,5),
+	@date datetime,
+	@fieldActivity int,
+	@result int OUTPUT
+AS
+SET NOCOUNT ON
+
+ DECLARE @count int
+
+ IF @stationID is NULL
+ BEGIN
+	SELECT @stationID = 0
+ END
+
+SELECT @count =  COUNT(*)
+FROM Station
+WHERE fieldActivityId = @fieldActivity 
+AND ID != @stationID
+AND StationDate = @date AND convert(varchar(MAX), @date, 8) != '00:00:00'
+AND ( 
+		(	@lat IS NOT NULL AND @lon IS NOT NULL
+			AND LAT = @lat AND LON = @lon
+		)
+
+		OR
+		(@lat IS NULL AND @lon IS NULL)
+
+)
+
+SELECT @result = ( SELECT 1 WHERE @count > 0 ) ;
+
+
+GO
+
+
+/*********************** Update Region Station  *********************/
+
+CREATE PROCEDURE [dbo].[UpdateStationRegion]
+
+@stationID int,
+@result int OUTPUT
+AS
+SET NOCOUNT ON
+SET @result = NULL
+
+BEGIN TRAN T1
+BEGIN TRY
+DECLARE @lat decimal(9,5), @lon decimal(9,5), @FK_Region int
+
+SELECT @lat = LAT, @lon = LON 
+FROM Station 
+WHERE ID = @stationID
+
+
+SELECT @FK_Region = dbo.[fn_GetRegionFromLatLon] (@lat,@lon)
+
+UPDATE Station SET FK_Region = @FK_Region
+WHERE ID = @stationID
+COMMIT TRAN T1
+END TRY 
+BEGIN CATCH
+	SELECT @result = 1;
+END CATCH
+GO
+
+
+/*********************** check Unique Inidivudal Code  *********************/
+
+
+CREATE PROCEDURE [dbo].[pr_Check_Existing_Indiv_BreedingRing]
+
+@code varchar(250), 
+@id_indiv int,
+@result int OUTPUT
+
+AS 
+SET NOCOUNT ON
+
+IF @id_indiv is null
+SET @id_indiv = 0	
+
+SELECT @result = (
+	SELECT 1 WHERE EXISTS (
+	SELECT *
+  FROM [IndividualDynPropValuesNow] v
+  where name = 'Breeding_Ring_Code'
+  AND ValueString = @code
+  and FK_Individual != @id_indiv
+  )
+  )
+
+ select @result
+
+GO
+
+
+CREATE PROCEDURE [dbo].[pr_Check_Existing_Indiv_ChipCode]
+
+@code varchar(250), 
+@id_indiv int,
+@result int OUTPUT
+
+AS 
+SET NOCOUNT ON
+
+IF @id_indiv is null
+SET @id_indiv = 0	
+
+SELECT @result = (
+	SELECT 1 WHERE EXISTS (
+	SELECT *
+  FROM [IndividualDynPropValuesNow] v
+  where name = 'Chip_Code'
+  AND ValueString = @code
+  and FK_Individual != @id_indiv
+  )
+  )
+
+ select @result
+
+GO
+
+CREATE PROCEDURE [dbo].[pr_Check_Existing_Indiv_ReleaseRing]
+
+@code varchar(250), 
+@id_indiv int,
+@result int OUTPUT
+
+AS 
+SET NOCOUNT ON
+
+IF @id_indiv is null
+SET @id_indiv = 0	
+
+SELECT @result = (
+	SELECT 1 WHERE EXISTS (
+	SELECT *
+  FROM [IndividualDynPropValuesNow] v
+  where name = 'Release_Ring_Code'
+  AND ValueString = @code
+  and FK_Individual != @id_indiv
+  )
+  )
+
+ select @result
+
+GO
+
+/*********************** END check Unique Inidivudal Code  *********************/
+
+
+
+/***********************  check Equipment  *********************/
+
+Create PROCEDURE [dbo].[pr_checkSiteEquipmentForStation]
+	@stationID int,
+	@date datetime,
+	@lat decimal(9,5),
+	@lon decimal(9,5),
+
+	@FK_MonitoredSite int,
+	@result int OUTPUT
+AS
+SET NOCOUNT ON
+SET @result = NULL
+
+DECLARE @siteEquipExists int;
+DECLARE @indivEquipExists int;
+DECLARE @latSta decimal(9,5), @lonSta decimal(9,5), @dateSta datetime, @siteSta int;
+
+SELECT @latSta = LAT, @lonSta = LON, @dateSta = StationDate, @siteSta = FK_MonitoredSite
+FROM Station where ID = @stationID
+
+
+SET @siteEquipExists =(SELECT 1 WHERE EXISts (SELECT * 
+							FROM Observation o 
+							WHERE FK_Station = @stationID
+							AND o.FK_ProtocoleType in (SELECT ID 
+														FROM ProtocoleType 
+														WHERE Name in ('site_equipment',
+                                                                       'site_unequipment')
+														)
+							)
+)
+
+IF (@siteEquipExists IS NOT NULL AND ( isnull(@lat,0) != isnull(@latSta,0) OR  isnull(@lon,0) != isnull(@lonSta,0) OR  isnull(@FK_MonitoredSite,0) != isnull(@siteSta,0) OR @date != @dateSta))
+SET @result = 1;
+
+GO
+
+
+CREATE PROCEDURE [dbo].[pr_checkIndivEquipmentForStation]
+	@stationID int,
+	@date datetime,
+	@result int OUTPUT
+AS
+SET NOCOUNT ON
+SET @result = NULL
+
+DECLARE @siteEquipExists int;
+DECLARE @indivEquipExists int;
+DECLARE @dateSta datetime;
+
+SELECT @dateSta = StationDate
+FROM Station where ID = @stationID
+
+
+SET @indivEquipExists =(SELECT 1 WHERE EXISts (SELECT * 
+							FROM Observation o 
+							WHERE FK_Station = @stationID
+							AND o.FK_ProtocoleType in (SELECT ID 
+														FROM ProtocoleType 
+														WHERE Name in ('individual_equipment',
+                                                                       'individual_unequipment')
+														)
+							)
+)
+
+IF (@indivEquipExists IS NOT NULL AND @date != @dateSta)
+SET @result = 1;
+GO
+
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('150_Create_Business_SPs',GETDATE(),(SELECT db_name()))
+
+
+GO

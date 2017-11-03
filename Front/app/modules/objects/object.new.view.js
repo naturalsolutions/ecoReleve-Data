@@ -48,21 +48,21 @@ define([
         data: this.data,
         reloadAfterSave: false,
         afterSaveSuccess: this.afterSaveSuccess.bind(this),
-        savingError: function(response) {
-          var msg = 'in creating a new '+_this.model.get('single');
-          if (response.status == 520 && response.responseText){
-            msg = response.responseText;
-          }
-          Swal({
-            title: 'Error',
-            text: msg ,
-            type: 'error',
-            showCancelButton: false,
-            confirmButtonColor: 'rgb(147, 14, 14)',
-            confirmButtonText: 'OK',
-            closeOnConfirm: true,
-          });
-        }
+        // savingError: function(response) {
+        //   var msg = 'in creating a new '+_this.model.get('single');
+        //   if (response.status == 520 && response.responseText){
+        //     msg = response.responseText;
+        //   }
+        //   Swal({
+        //     title: 'Error',
+        //     text: msg ,
+        //     type: 'error',
+        //     showCancelButton: false,
+        //     confirmButtonColor: 'rgb(147, 14, 14)',
+        //     confirmButtonText: 'OK',
+        //     closeOnConfirm: true,
+        //   });
+        // }
       });
     },
 

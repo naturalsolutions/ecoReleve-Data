@@ -28,7 +28,7 @@
     "reneco-fonts": "*",
     "ag-grid": "^5.2.0",
     "NaturalJS_Filter": "1.1.4",
-    "webui-popover": "2.1.15",
+    "moment-timezone": "~0.5.13",
     "tether": "^1.4.0",
     "popper.js": "https://unpkg.com/popper.js"
   },

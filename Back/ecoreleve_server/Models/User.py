@@ -5,11 +5,13 @@ from sqlalchemy import (
     Integer,
     Sequence,
     String,
-    func
+    func,
+    select
 )
 
 from sqlalchemy.ext.hybrid import hybrid_property
 from ..Models import Base, dbConfig
+from pyramid import threadlocal
 
 
 class User(Base):
@@ -54,3 +56,27 @@ class User(Base):
             Either the password matches or not
         """
         return self.Password == given_pwd.lower()
+
+    def getUsersIds(strl):
+        session = threadlocal.get_current_request().dbsession
+        fieldworkersList = strl.split(',')
+        for i in range(len(fieldworkersList)): 
+            # clear space 
+            fieldworkersList[i] = fieldworkersList[i].strip()
+
+        query = select([User.id], User.Login.in_(fieldworkersList)) 
+        res = session.execute(query)
+
+        resultset = ''
+        for row in res:
+            resultset = resultset + ',' + str(row[0])
+
+        print(resultset)
+
+        return resultset
+
+
+
+
+
+

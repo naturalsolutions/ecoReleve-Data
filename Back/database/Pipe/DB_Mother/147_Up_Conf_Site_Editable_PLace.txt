@@ -1,0 +1,10 @@
+
+Update [ModuleForms] SET FormRender = 7
+  where name ='place' and module_id = 12
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('147_Up_Conf_Site_Editable_PLace',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -36,6 +36,7 @@ define([
   './modules/clients/client.view',
   './modules/clients/clients.view',
   './modules/clients/clients.new.view',
+  './modules/importHistory/history.view',
 
 ],function(
   Marionette,
@@ -53,7 +54,9 @@ define([
   LytSensor, LytSensors, LytSensorsNew,
   LytMonitoredSite, LytMonitoredSites, LytMonitoredSitesNew,
   LytProject, LytProjects, LytProjectsNew,
-  LytClient, LytClients, LytClientsNew
+  LytClient, LytClients, LytClientsNew,
+  LytImportHistory
+
 ) {
   'use strict';
 
@@ -107,6 +110,10 @@ define([
 
     importFile: function(type) {
       this.rgMain.show(new LytImportFile({type : type}));
+    },
+
+    importHistory: function(type) {
+      this.rgMain.show(new LytImportHistory());
     },
 
     station: function(id, proto, obs) {

@@ -41,6 +41,12 @@ class Station(Base, HasDynamicProperties):
         'fieldActivity.ID'), nullable=True)
     creator = Column(Integer)
     creationDate = Column(DateTime, default=func.now())
+    original_id = Column(String(250))
+    Comments = Column(String(250))
+    Place = Column(String(250))
+    FK_MonitoredSite = Column(Integer, ForeignKey(
+        'MonitoredSite.ID'), nullable=True)
+
     Observations = relationship(
         'Observation', back_populates='Station', cascade="all, delete-orphan")
     # StationDynPropValues = relationship(

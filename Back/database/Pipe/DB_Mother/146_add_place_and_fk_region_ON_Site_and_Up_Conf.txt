@@ -1,0 +1,43 @@
+ALTER TABLE [MonitoredSite]
+ADD  
+Place VARCHAR(250) NULL
+
+GO
+
+INSERT INTO [dbo].[ModuleForms]
+           ([module_id]
+           ,[Name]
+           ,[Label]
+           ,[Required]
+           ,[FieldSizeEdit]
+           ,[FieldSizeDisplay]
+           ,[InputType]
+           ,[editorClass]
+           ,[FormRender]
+           ,[FormOrder]
+           ,[Legend]
+           ,[Options]
+           ,[Locked])
+     VALUES
+	       (
+		    12
+           ,'Place'
+           ,'Place'
+           ,0
+           ,6
+           ,6
+           ,'AutocompleteEditor'
+           ,'form-control'
+           ,2
+           ,6
+           ,'Location Infos'
+           ,'{"source":"autocomplete/stations/Place", "minLength":3}'
+           ,1
+		   )
+
+GO
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('146_add_place_and_fk_region_ON_Site_and_Up_Conf',GETDATE(),(SELECT db_name()))
+
+
+GO
