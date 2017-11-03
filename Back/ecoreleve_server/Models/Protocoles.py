@@ -35,6 +35,7 @@ class Observation(HasDynamicProperties, Base):
     Comments = Column(String(250))
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
     original_id = Column(String(250))
+    taxon = Column(String(255))
 
     Observation_children = relationship(
         "Observation", cascade="all, delete-orphan", order_by='Observation.ID')

@@ -92,7 +92,7 @@ def autocompleteTaxon(request):
 
     # result = session.execute(query).fetchall()
     return [{'label': row[prop_criteria],
-             'value': row[prop_criteria],
+             'taxref_id': row['CD_NOM'],
              'vernaculaire': row['NOM_VERN'],
              'latin': row['NOM_VALIDE']
              } for row in session.execute(query).fetchall()]
