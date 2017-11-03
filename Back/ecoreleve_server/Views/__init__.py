@@ -2,6 +2,7 @@ from pyramid.view import view_config
 from pyramid.security import NO_PERMISSION_REQUIRED
 from ..Models import sendLog
 
+
 def add_cors_headers_response_callback(event):
     def cors_headers(request, response):
         response.headers.update({
@@ -50,6 +51,8 @@ def add_routes(config):
     config.add_route('core/currentUser', 'ecoReleve-Core/currentUser')
     config.add_route('autocomplete/onLoad',
                      'ecoReleve-Core/autocomplete/{obj}/{prop}/onLoad')
+    config.add_route(
+        'autocomplete/taxon', 'ecoReleve-Core/autocomplete/taxon')
     config.add_route(
         'autocomplete', 'ecoReleve-Core/autocomplete/{obj}/{prop}')
     config.add_route('autocomplete/ID',

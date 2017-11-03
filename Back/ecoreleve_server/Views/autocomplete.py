@@ -1,6 +1,6 @@
 from pyramid.view import view_config
 from ..Models import Base
-from sqlalchemy import select, asc
+from sqlalchemy import select, asc, func
 
 dictObj = {
     'stations': 'Station',
@@ -18,8 +18,10 @@ def asInt(str):
     except:
         return str
 
-# TODO remove that already exists in Object view, 
+# TODO remove that already exists in Object view,
 # need replace url requesting "{root}/autocomplete/{object}..." by "{root}/{object}/autocomplete..."
+
+
 @view_config(route_name='autocomplete',
              renderer='json',
              request_method='GET')
@@ -55,3 +57,38 @@ def autocomplete(request):
             '%' + criteria + '%')).order_by(asc(table.c[prop]))
 
     return [dict(row) for row in session.execute(query).fetchall()]
+
+
+@view_config(route_name='autocomplete/taxon',
+             renderer='json',
+             request_method='GET')
+def autocompleteTaxon(request):
+    session = request.dbsession
+    taxaViews = {
+        'reptile': Base.metadata.tables['reptil_view'],
+        'oiseau': Base.metadata.tables['bird_view'],
+        'amphibien': Base.metadata.tables['amphibia_view'],
+        'mammal': Base.metadata.tables['mammal_view'],
+        'insecte': Base.metadata.tables['insect_view'],
+    }
+
+    prop_name = {'vernaculaire': 'NOM_VERN',
+                 'latin': 'NOM_VALIDE'}
+    criterias = dict(request.params)
+    table = taxaViews.get(criterias['protocol'], None)
+    if table is None:
+        return None
+
+    prop_criteria = prop_name[criterias['type']]
+
+    query = select([table]).where(
+        func.lower(table.c[prop_criteria]).like(
+            func.lower(criterias['term'] + '%'))
+    ).order_by(asc(table.c[prop_criteria]))
+
+    # result = session.execute(query).fetchall()
+    return [{'label': row[prop_criteria],
+             'value': row[prop_criteria],
+             'vernaculaire': row['NOM_VERN'],
+             'latin': row['NOM_VALIDE']
+             } for row in session.execute(query).fetchall()]
