@@ -1,6 +1,8 @@
 from pyramid.view import view_config
 from ..Models import Base
 from sqlalchemy import select, asc, func
+from pyramid.security import NO_PERMISSION_REQUIRED
+
 
 dictObj = {
     'stations': 'Station',
@@ -61,7 +63,8 @@ def autocomplete(request):
 
 @view_config(route_name='autocomplete/taxon',
              renderer='json',
-             request_method='GET')
+             request_method='GET',
+             permission=NO_PERMISSION_REQUIRED)
 def autocompleteTaxon(request):
     session = request.dbsession
     taxaViews = {
