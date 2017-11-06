@@ -2,7 +2,7 @@
 	"tiles" :{
 		"input" : "Manual entry",
 		"manual-import" : "Manual import",
-		"auto-import" : "Automatic import",
+		"history-import" : "History import",
 		"export" : "export",
 		"sites" : "Monitored sites",
 		"individuals" : "Individuals",
@@ -132,10 +132,10 @@
 		"loadingDataAlert" : "Loading data error",
 		"importingDataWarning" : "Selected waypoint(s) are already imported",
 		"importServerError" : "Error sending gpx data to the server.",
-		"gpx" :"gpx file",
-		"rfid" : "rfid file",
-		"gsm" : "gsm files",
-		"argos" : "argos files",
+		"gpx" :"GPX files",
+		"rfid" : "RFID files",
+		"gsm" : "GSM files",
+		"argos" : "Argos files",
 		"label-selected" :"selected data"
 	},
 	"home" : {

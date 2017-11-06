@@ -98,26 +98,34 @@ def cache_callback(request, session):
         session.get_bind().dispose()
 
 
+from ..GenericObjets.Business import *
+import json
+
+
 def db(request):
     makerDefault = request.registry.dbmaker
     session = makerDefault()
-
-    # if 'ecoReleve-Core/export/' in request.url:
-    #     makerExport = request.registry.dbmakerExport
-    #     session = makerExport()
 
     def cleanup(request):
         if request.exception is not None:
             session.rollback()
             cache_callback(request, session)
         else:
-            session.commit()
-        session.close()
-        makerDefault.remove()
+            try:
+                session.commit()
+            except BusinessRuleError as e :
+                session.rollback()
+                request.response.status_code = 409
+                request.response.text= e.value
+            except Exception as e:
+                session.rollback()
+            finally:
+                session.close()
+                makerDefault.remove()
+            
 
     request.add_finished_callback(cleanup)
     return session
-
 
 from ..GenericObjets.ObjectWithDynProp import LinkedTables
 from ..GenericObjets.FrontModules import *
@@ -131,6 +139,7 @@ from .Individual import *
 from .Sensor import *
 from .MonitoredSite import *
 from .Equipment import *
+from .Import import *
 from .SensorData import *
 from .List import *
 from .Log import sendLog

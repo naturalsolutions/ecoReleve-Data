@@ -10,11 +10,14 @@ define([
   'ns_grid/grid.view',
   'ns_grid/customCellRenderer/decimal5Renderer',
   'ns_grid/customCellRenderer/dateTimeRenderer',
+  'ns_grid/custom.editors',
+  'ns_grid/custom.renderers',
   'moment',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,
-  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer ,Moment ) {
+  Com, NsMap, GridView, Decimal5Renderer, DateTimeRenderer ,
+  Editors, Renderers, Moment ) {
 
   'use strict';
 
@@ -39,7 +42,7 @@ define([
 
     initialize: function(options) {
       this.com = new Com();
-      this.data = options.model.attributes.data_FileContent;
+      this.data = options.model.attributes.data_FilesContent;
       this.deferred = $.Deferred();
       this.parent = options.parent;
     },
@@ -120,7 +123,6 @@ define([
       };
 
       var FieldActivityRenderer = function(params){
-      //  console.log(params);
         var text = '';
         _this.fieldActivityList.map(function(fa){
           if(params.data.fieldActivity == fa.value){
@@ -130,10 +132,6 @@ define([
         return text;
       };
 
-      // var decimal5Renderer = function(params){
-      //   return params.data[params.column.colId].toFixed(5);
-      // };
-
       var dateTimestampRender = function(params){
         return Moment.unix(params.data.displayDate).format("DD/MM/YYYY HH:mm:SS");
       };
@@ -142,7 +140,9 @@ define([
         {
           field: 'id',
           headerName: 'ID',
-        },{
+          hide: true
+        },
+        {
           field: 'name',
           headerName: 'Name',
           filter :"text",
@@ -173,6 +173,21 @@ define([
           cellRenderer: FieldActivityRenderer,
           filter : "select",
           filterParams : { selectList : this.fieldActivityList }
+        },{
+          editable: true,
+          field: 'Place',
+          headerName: 'Place',
+          filter :"text",
+          cellEditor: Editors.AutocompleteEditor,
+          cellRenderer: Renderers.AutocompleteRenderer,
+          schema: {
+                   validators:[],
+                   editable: true,
+                   editorClass :"form-control",
+                   editorAttrs:{disabled: false},
+                   options:{iconFont: "reneco reneco-autocomplete", source: "autocomplete/stations/Place", minLength: 3},
+                   fieldClass :"None col-md-6"
+                  }
         },
       ];
 
@@ -191,7 +206,8 @@ define([
             }
           },
           onRowClicked: function(row){
-            if(_this.gridView.gridOptions.api.getFocusedCell().column.colId != 'fieldActivity'){
+            var currentClickColumn = _this.gridView.gridOptions.api.getFocusedCell().column.colId;
+            if(currentClickColumn != 'fieldActivity' && currentClickColumn != 'Place' ){
               _this.gridView.interaction('focus', row.data.ID || row.data.id);
             }
           }
@@ -212,15 +228,18 @@ define([
         return node.data;
       }));
 
-      coll.url = 'stations/';
+      coll.url = 'sensors/gpx/datas';
       Backbone.sync('create', coll, {
         success: function(data) {
           _this.deferred.resolve();
           var inserted = data.new;
-          var exisits = data.exist;
+          var exisits = data.existing;
+          var existingNames = data.existing_name
           Swal({
             title: 'Stations import',
-            text: 'inserted stations :' + inserted + ', existing stations:' + exisits,
+            text: inserted + ' inserted station(s), \n'
+                  + exisits + ' existing stations, \n'
+                  +'Name of existing station: \n'+existingNames,
             type: 'success',
             showCancelButton: true,
             confirmButtonColor: 'green',
@@ -231,15 +250,14 @@ define([
           },
           function(isConfirm) {
             if( isConfirm ) {
-              Backbone.history.navigate('stations/lastImported', {trigger: true});
+              Backbone.history.navigate('stations?lastImported', {trigger: true});
             }
             else {
-            //  Backbone.history.navigate('importFile',{trigger: true});
+              // Backbone.history.navigate('#', {trigger: false});
+              // Backbone.history.navigate('importFile/gpx',{trigger: true});
 
-              //Backbone.history.navigate('home', {trigger: true});
-
-              //method to return at the 1st step
-              _this.options.parent.currentStepIndex--;
+              // //method to return at the 1st step
+              _this.options.parent.currentStepIndex = 1;
               var index = _this.options.parent.currentStepIndex;
               _this.options.parent.displayStep(index);
             }

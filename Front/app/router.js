@@ -10,6 +10,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
 
       'importFile/:type(/)': 'importFile',
       'importFile(/)' : 'importFile',
+      'importHistory(/)' : 'importHistory',
 
       'individuals/new(/)': 'newIndividual',
       'individuals/:id(/)': 'individual',
@@ -29,7 +30,7 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
 
       'stations/new/:from(/)': 'newStation',
       'stations/new(/)': 'newStation',
-      'stations/lastImported(/)': 'stations',
+      'stations/?lastImported=lastImported(/)': 'stations',
 
       'stations/:id?(proto=:proto&)obs=:obs(/)': 'station',
       'stations/:id?proto=:proto(/)': 'station',

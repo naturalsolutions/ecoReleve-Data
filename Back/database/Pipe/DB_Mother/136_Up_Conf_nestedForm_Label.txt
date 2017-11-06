@@ -1,4 +1,4 @@
-UPDATE [ModuleForms] SET Label = NULL
+UPDATE [ModuleForms] SET Label = ''
   WHERE InputType in ('ListOfNestedModel', 'GridFormEditor')
   AND Name !='FieldWorkers'
   OR TypeObj = 1000

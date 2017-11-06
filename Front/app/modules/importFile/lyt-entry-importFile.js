@@ -3,9 +3,11 @@ define([
 	'underscore',
 	'backbone',
 	'marionette',
+	'config',
 	'ns_stepper/lyt-newStepper',
 	'./lyt-step0',
 
+	'./lyt-select-importFile',
 	'./gpx/lyt-step1-gpx',
 	'./gpx/lyt-step2-gpx',
 
@@ -17,7 +19,8 @@ define([
 
 	'./argos/lyt-step1-argos',
 
-], function($, _, Backbone, Marionette, NewStepper, Step0,
+], function($, _, Backbone, Marionette, config, NewStepper, Step0,
+	StepSelectFile,
 	Step1GPX,
 	Step2GPX,
 
@@ -36,82 +39,97 @@ define([
 
 		initialize: function (options) {
 			this.urlToHold = options.type;
+			this.steps = [Step0];
 			NewStepper.prototype.initialize.call(this,options);
 
 		},
 
     initSteps: function() {
-      this.steps = [Step0];
 			if ( this.urlToHold !== null ) {
-				this.goToThisUrl();
+				this.goToStepByType();
 			}
-    },
-		onShow : function(){
-			this.displayStepNav();
-			this.displayStep(this.currentStepIndex);
 		},
 
-		goToThisUrl:function (){
-			switch ( this.urlToHold ) {
-				case 'gpx': {
-					this.steps = [Step0,Step1GPX, Step2GPX];
-					this.currentStepIndex = 1;
+		onShow : function(){
+			var _this = this;
+			this.displayStepNav();
+			this.displayStep(this.currentStepIndex);
+			this.$el.find('.import-step0').on('click', function(event){
+				Backbone.history.navigate('#', {trigger: false});
+				Backbone.history.navigate('importFile',{trigger: true});
+
+			});
+		},
+
+		goToStepByType:function (){
+			var type = this.urlToHold;
+			var steps = this.getNextStepsByType(type);
+			this.steps = $.merge(this.steps, steps);
+			this.currentStepIndex = 1;
+		},
+
+		getNextStepsByType: function(type){
+			switch (type){
+				case 'gpx':
+					var Step0GPX = StepSelectFile.extend({
+						name : 'GPX file selection',
+						url:'an Useless url',
+						acronymType: 'GPX',
+						extension:'.gpx',
+						maxFiles:8
+					});
+					var steps = [Step0GPX, Step1GPX, Step2GPX];
 					break;
-				}
-				case 'rfid': {
-					this.steps = [Step0, Step1RFID, Step2RFID];
-					this.currentStepIndex = 1;
+				case 'rfid':
+					var Step0RFID = StepSelectFile.extend({
+						name : 'RFID file selection',
+						acronymType: 'RFID',
+						url:config.coreUrl+'sensors/rfid/datas',
+						extension:'.txt',
+						maxFiles:1
+					});
+					var steps = [Step0RFID, Step1RFID];
 					break;
-				}
-				case 'gsm': {
-					this.steps = [Step0,Step1GSM];
-					this.currentStepIndex = 1;
-						break;
-				}
-				case 'argos': {
-					this.steps = [Step0,Step1ARGOS];
-					this.currentStepIndex = 1;
-						break;
-				}
-				default: {
-						this.steps = [Step0];
-						break;
-				}
+				case 'gsm':
+					var Step0GSM = StepSelectFile.extend({
+						name : 'GSM file selection',
+						url:config.coreUrl+'sensors/gsm/datas',
+						acronymType: 'GSM',
+						extension:'.txt',
+						uploadOnly:true,
+						maxFiles:8
+					});
+					var steps = [Step0GSM];
+					break;
+				case 'argos':
+					var Step0Argos = StepSelectFile.extend({
+						name : 'Argos file selection',
+						url:config.coreUrl+'sensors/argos/datas',
+						acronymType: 'Argos',
+						extension:'.txt',
+						uploadOnly:true,
+						maxFiles:8
+					});
+					var steps = [Step0Argos];
+					break;
+				default:
+					//not in step0
+					return false;
+					break;
 			}
+			return steps;
 		},
 
     beforeNext: function(type, index) {
 	      if (index == 0) {
-	        switch (type){
-	          case 'gpx':
-	            var gpxSteps = [Step1GPX, Step2GPX];
-	            this.addSteps(gpxSteps, 1);
-	            break;
-	          case 'rfid':
-	            var rfidSteps = [Step1RFID, Step2RFID];
-	            this.addSteps(rfidSteps, 1);
-
-	            break;
-	          case 'gsm':
-	            var gsmSteps = [Step1GSM];
-	            this.addSteps(gsmSteps, 1);
-
-	            break;
-	          case 'argos':
-	            var argosSteps = [Step1ARGOS];
-	            this.addSteps(argosSteps, 1);
-
-	            break;
-	          default:
-	            //not in step0
-	            return false;
-	            break;
-	        }
+					var steps = this.getNextStepsByType(type);
+					this.addSteps(steps, 1);
 					Backbone.history.navigate('/importFile/'+type,{trigger:false, replace: false});
 	      }
     },
 
-    beforePrev: function(index) {
+	beforePrev: function(index) {
+		this.models[index] = null;
       if ((index - 1) == 0) {
         this.removeSteps(1);
 				Backbone.history.navigate('/importFile',{trigger:false, replace: false});

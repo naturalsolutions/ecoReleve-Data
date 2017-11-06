@@ -17,7 +17,6 @@ from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore
 from . import DynamicObjectView, DynamicObjectCollectionView, context_permissions
 from .protocols import ObservationsView
-from ..Models.Station import ErrorCheckUniqueStation, ErrorExistingEquipment
 from ..utils.parseValue import parser
 
 
@@ -37,22 +36,6 @@ class StationView(DynamicObjectView):
 
     def getObs(self, ref):
         return ObservationsView(ref, self)
-
-    def update(self):
-        data = self.request.json_body
-        self.objectDB.LoadNowValues()
-        try:
-            isAllowToUpdate = self.objectDB.allowUpdate(data)
-            self.objectDB.updateFromJSON(data)
-            self.session.commit()
-            msg = {}
-
-        except (ErrorCheckUniqueStation, ErrorExistingEquipment) as e:
-            self.session.rollback()
-            self.request.response.status_code = 510
-            msg = e.value
-
-        return msg
 
 
 class StationsView(DynamicObjectCollectionView):
@@ -110,6 +93,10 @@ class StationsView(DynamicObjectCollectionView):
                     if obj['Column'] == 'LastImported':
                         self.lastImported(obj, params)
                         lastImported = True
+                    if obj['Column'] == 'FK_FieldWorker' and obj['Operator'] == 'IN':
+                        fieldworkers = obj['Value']
+                        obj['Value'] = User.getUsersIds(fieldworkers)
+
         if not lastImported:
             map(lambda x: obj['Column'] != 'FK_StationType', params['criteria'])
 
@@ -213,15 +200,10 @@ class StationsView(DynamicObjectCollectionView):
             StationType.ID == data['FK_StationType']).first()
         newSta.init_on_load()
 
-        try:
-            newSta.updateFromJSON(data)
-            session.add(newSta)
-            session.flush()
-            msg = {'ID': newSta.ID}
-        except ErrorCheckUniqueStation as e:
-            session.rollback()
-            self.request.response.status_code = 510
-            msg = {'existingStation': True}
+        newSta.updateFromJSON(data)
+        session.add(newSta)
+        session.flush()
+        msg = {'ID': newSta.ID}
 
         return msg
 

@@ -8,8 +8,95 @@ define([
 	var Form = Backbone.Form,
     editors = Form.editors,
     validators = Form.validators;
-		validators.errMessages['StateBox'] = 'Cannot be null'
+		validators.errMessages['StateBox'] = 'Cannot be null';
 
+	// validators
+	validators.StateBox = function(options) {
+		options = _.extend({
+			type: 'StateBox',
+			message: this.errMessages.StateBox
+			}, options);
+		return function StateBox(value,formValues) {
+			if (!options.nullable && value === null) {
+				return {
+					type: options.type
+					//message: _.isFunction(options.message) ? options.message(options) : options.message
+				}
+			}
+		};
+	};
+	validators.number = function(options) {
+		options = _.extend({
+		  type: 'number',
+		  message: this.errMessages.number,
+		  regexp: /^\-?[0-9]*\.?[0-9]*?$/
+		}, options);
+
+		return validators.regexp(options);
+	};
+	validators.min = function(options) {
+
+		if (options.value != 0 && !options.value) throw new Error('Missing required "value" options for "min" validator');
+
+		options = _.extend({
+		  type: 'min',
+		  message: this.errMessages.min
+		}, options);
+
+		return function min(value, attrs) {
+		  options.value <= value;
+
+		  var err = {
+		    type: options.type,
+		    message: "min value is " +  options.value//_.isFunction(options.message) ? options.message(options) : options.message
+		  };
+
+		  //Don't check empty values (add a 'required' validator for this)
+		  if (value === null || value === undefined || value === '') return;
+
+		  if (value < options.value) return err;
+		};
+	};
+	validators.max = function(options) {
+		if (!options.value) throw new Error('Missing required "value" options for "max" validator');
+
+		options = _.extend({
+		  type: 'max',
+		  message: this.errMessages.max
+		}, options);
+
+		return function max(value, attrs) {
+		  options.value >= value;
+
+		  var err = {
+		    type: options.type,
+		    message: "max value is " +  options.value//_.isFunction(options.message) ? options.message(options) : options.message
+		  };
+
+		  //Don't check empty values (add a 'required' validator for this)
+		  if (value === null || value === undefined || value === '') return;
+
+		  if (value > options.value) return err;
+		};
+	};
+
+	  validators.requiredSelect = function(options) {
+	    options = _.extend({
+	      type: 'required',
+	      message: this.errMessages.required
+	    }, options);
+
+	    return function required(value) {
+	      options.value = value;
+
+	      var err = {
+	        type: options.type,
+	        message: _.isFunction(options.message) ? options.message(options) : options.message
+	      };
+
+	      if (value === null || value === undefined || value === false || value === '' || value === '-1') return err;
+	    };
+	  };
 
 		// new fields
 		editors.StateBox = Form.editors.Base.extend({
@@ -288,18 +375,18 @@ define([
 			}
 		});
 
-		editors.Number = editors.Text.extend({
+		editors.Number = Backbone.Form.Number.extend({
 
 			defaultValue: '',
 
-			events: _.extend({}, editors.Text.prototype.events, {
+			events: _.extend({}, editors.Number.prototype.events, {
 			//'keypress': 'onKeyPress',
 			//'change': 'onKeyPress',
 			'keyup': 'onKeyUp'
 			}),
 
 			initialize: function(options) {
-				editors.Text.prototype.initialize.call(this, options);
+				Backbone.Form.Number.prototype.initialize.call(this, options);
 
 				var schema = this.schema;
 
@@ -350,17 +437,17 @@ define([
 			},
 
 			setValue: function(value) {
-			value = (function() {
-				if (_.isNumber(value)) return value;
+				value = (function() {
+					if (_.isNumber(value)) return value;
 
-				if (_.isString(value) && value !== '') return parseFloat(value, 10);
+					if (_.isString(value) && value !== '') return parseFloat(value, 10);
 
-				return null;
-			})();
+					return null;
+				})();
 
-			if (_.isNaN(value)) value = null;
+				if (_.isNaN(value)) value = null;
 
-			editors.Text.prototype.setValue.call(this, value);
+				Backbone.Form.Number.prototype.setValue.call(this, value);
 			}
 
 		});
@@ -404,94 +491,6 @@ define([
 	  // STATICS
 	  template: _.template('<div class="input-group date" id="dateTimePicker" data-editors="Date_"><span class="input-group-addon"><span class="glyphicon-calendar glyphicon"></span></span><input id="c24_Date_" name="Date_" class="form-control dateTimePicker" type="text" placeholder="jj/mm/aaaa hh:mm" data-date-format="DD/MM/YYYY HH:mm"></div>', null, Form.templateSettings)
 	});
-
-	// validators
-	validators.StateBox = function(options) {
-		options = _.extend({
-			type: 'StateBox',
-			message: this.errMessages.StateBox
-			}, options);
-		return function StateBox(value,formValues) {
-			if (!options.nullable && value === null) {
-				return {
-					type: options.type
-					//message: _.isFunction(options.message) ? options.message(options) : options.message
-				}
-			}
-		};
-	};
-	validators.number = function(options) {
-		options = _.extend({
-		  type: 'number',
-		  message: this.errMessages.number,
-		  regexp: /^\-?[0-9]*\.?[0-9]*?$/
-		}, options);
-
-		return validators.regexp(options);
-	};
-	validators.min = function(options) {
-
-		if (options.value != 0 && !options.value) throw new Error('Missing required "value" options for "min" validator');
-
-		options = _.extend({
-		  type: 'min',
-		  message: this.errMessages.min
-		}, options);
-
-		return function min(value, attrs) {
-		  options.value <= value;
-
-		  var err = {
-		    type: options.type,
-		    message: "min value is " +  options.value//_.isFunction(options.message) ? options.message(options) : options.message
-		  };
-
-		  //Don't check empty values (add a 'required' validator for this)
-		  if (value === null || value === undefined || value === '') return;
-
-		  if (value < options.value) return err;
-		};
-	};
-	validators.max = function(options) {
-		if (!options.value) throw new Error('Missing required "value" options for "max" validator');
-
-		options = _.extend({
-		  type: 'max',
-		  message: this.errMessages.max
-		}, options);
-
-		return function max(value, attrs) {
-		  options.value >= value;
-
-		  var err = {
-		    type: options.type,
-		    message: "max value is " +  options.value//_.isFunction(options.message) ? options.message(options) : options.message
-		  };
-
-		  //Don't check empty values (add a 'required' validator for this)
-		  if (value === null || value === undefined || value === '') return;
-
-		  if (value > options.value) return err;
-		};
-	};
-
-	  validators.requiredSelect = function(options) {
-	    options = _.extend({
-	      type: 'required',
-	      message: this.errMessages.required
-	    }, options);
-
-	    return function required(value) {
-	      options.value = value;
-
-	      var err = {
-	        type: options.type,
-	        message: _.isFunction(options.message) ? options.message(options) : options.message
-	      };
-
-	      if (value === null || value === undefined || value === false || value === '' || value === '-1') return err;
-	    };
-	  };
 
 
 	return Backbone;

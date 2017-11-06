@@ -1,0 +1,25 @@
+USE ecoReleve_Sensor
+GO
+
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[TVersion](
+	[TVer_FileName] [varchar](100) NOT NULL,
+	[TVer_Date] [datetime] NOT NULL,
+	[TVer_DbName] [varchar](50) NULL,
+	[TVer_PK_ID] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+ CONSTRAINT [TVer_PK_ID] PRIMARY KEY CLUSTERED 
+(
+	[TVer_PK_ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('151_ecoReleve_Sensor_TVersion',GETDATE(),(SELECT db_name()))
+
+
+GO

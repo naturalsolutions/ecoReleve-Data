@@ -11,13 +11,14 @@ from time import sleep
 import subprocess
 import psutil
 from datetime import datetime
-from ..Models import ArgosGps, ArgosEngineering, dbConfig
+from ..Models import ArgosGps, ArgosEngineering, dbConfig, Import
 import itertools
 from traceback import print_exc
 
 
 def uploadFileArgos(request):
     session = request.dbsession
+    user = request.authenticated_userid['iss']
     workDir = os.path.dirname(os.path.dirname(
         os.path.dirname(os.path.abspath(__file__))))
     tmp_path = os.path.join(workDir, "ecoReleve_import")
@@ -43,14 +44,29 @@ def uploadFileArgos(request):
         shutil.copyfileobj(input_file, output_file)
 
     os.rename(temp_file_path, full_filename)
+    print(request.POST['file'].__dict__)
+    importObj = Import(ImportFileName=request.POST['file'].filename, FK_User=user)
+    importObj.ImportType = 'Argos'
 
-    if 'DIAG' in filename:
-        return parseDIAGFileAndInsert(full_filename, session)
-    elif 'DS' in filename:
-        return parseDSFileAndInsert(full_filename, session)
+    session.add(importObj)
+    session.flush()
+    message = {}
+    if 'DIAG' in filename.upper():
+        message, nbRows, nbInserted, maxDate, minDate = parseDIAGFileAndInsert(full_filename, session, importObj.ID)
+    elif 'DS' in filename.upper():
+        message, nbRows, nbInserted, maxDate, minDate = parseDSFileAndInsert(full_filename, session, importObj.ID)
+
+    if message:
+        importObj.nbRows = nbRows
+        importObj.nbInserted = nbInserted
+        importObj.maxDate = maxDate
+        importObj.minDate = minDate
+    else:
+        message = 'Argos File type name did not recognized'
+    return message
 
 
-def parseDSFileAndInsert(full_filename, session):
+def parseDSFileAndInsert(full_filename, session, importID):
     workDir = os.path.dirname(os.path.dirname(
         os.path.dirname(os.path.abspath(__file__))))
     con_file = os.path.join(workDir, 'init.txt')
@@ -165,6 +181,7 @@ def parseDSFileAndInsert(full_filename, session):
         nb_existingEng += EngData.shape[0]
         if EngToInsert.shape[0] != 0:
             # Insert non existing data into DB
+            EngToInsert.loc[:, ('FK_Import')] = list(itertools.repeat(importID, len(EngToInsert.index)))
             nb_eng += EngToInsert.shape[0]
             EngToInsert.to_sql(ArgosEngineering.__table__.name,
                                session.get_bind(),
@@ -176,6 +193,7 @@ def parseDSFileAndInsert(full_filename, session):
         EngBisToInsert = checkExistingEng(EngDataBis, session)
         nb_existingEng += EngDataBis.shape[0]
         if EngBisToInsert.shape[0] != 0:
+            EngToInsert.loc[:, ('FK_Import')] = list(itertools.repeat(importID, len(EngToInsert.index)))
             nb_eng += EngBisToInsert.shape[0]
             # Insert non existing data into DB
             EngBisToInsert.to_sql(ArgosEngineering.__table__.name,
@@ -187,6 +205,7 @@ def parseDSFileAndInsert(full_filename, session):
     if GPSData is not None:
         GPSData = GPSData.replace(["neg alt"], [-999])
         DFToInsert = checkExistingGPS(GPSData, session)
+        DFToInsert.loc[:, ('FK_Import')] = list(itertools.repeat(importID, len(DFToInsert.index)))
         nb_gps_data = DFToInsert.shape[0]
         nb_existingGPS = GPSData.shape[0] - DFToInsert.shape[0]
         if DFToInsert.shape[0] != 0:
@@ -199,13 +218,18 @@ def parseDSFileAndInsert(full_filename, session):
 
     os.remove(full_filename)
     shutil.rmtree(out_path)
-    return {'inserted gps': nb_gps_data,
+    message = {'inserted gps': nb_gps_data,
             'existing gps': nb_existingGPS,
             'inserted Engineering': nb_eng,
             'existing Engineering': nb_existingEng - nb_eng,
             'inserted argos': 0,
             'existing argos': 0}
-
+    
+    nbRows = (nb_existingEng or 0)+ (nb_existingGPS or 0) + (nb_gps_data or 0)
+    maxDateGPS = GPSData['datetime'].max()
+    minDateGPS = GPSData['datetime'].min()
+    nbInserted = nb_gps_data + nb_eng
+    return message, nbRows, nbInserted, maxDateGPS, minDateGPS
 
 def checkExistingEng(EngData, session):
     EngData['id'] = range(EngData.shape[0])
@@ -241,6 +265,8 @@ def checkExistingEng(EngData, session):
         DFToInsert = EngData[~EngData['id'].isin(merge['id'])]
 
         # rename column
+        DFToInsert.loc[:, ('creationDate')] = list(
+            itertools.repeat(datetime.now(), len(DFToInsert.index)))
         DFToInsert['FK_ptt'] = DFToInsert['ptt']
         DFToInsert = DFToInsert.drop(['id', 'ptt'], 1)
     except:
@@ -266,7 +292,7 @@ def checkExistingGPS(GPSData, session):
                       ArgosGps.lat,
                       ArgosGps.lon,
                       ArgosGps.ptt]
-                      ).where(ArgosGps.type_ == 'gps')
+                      ).where(ArgosGps.type_ == 'GPS')
     queryGPS = queryGPS.where(
         and_(ArgosGps.date >= minDateGPS, ArgosGps.date <= maxDateGPS))
     data = session.execute(queryGPS).fetchall()
@@ -300,23 +326,25 @@ def checkExistingGPS(GPSData, session):
     DFToInsert = DFToInsert.replace('2D fix', np.nan)
     DFToInsert = DFToInsert.replace('low alt', np.nan)
     DFToInsert.loc[:, ('type')] = list(
-        itertools.repeat('gps', len(DFToInsert.index)))
+        itertools.repeat('GPS', len(DFToInsert.index)))
     DFToInsert.loc[:, ('checked')] = list(
         itertools.repeat(0, len(DFToInsert.index)))
     DFToInsert.loc[:, ('imported')] = list(
         itertools.repeat(0, len(DFToInsert.index)))
+    DFToInsert.loc[:, ('creationDate')] = list(
+        itertools.repeat(datetime.now(), len(DFToInsert.index)))
 
     return DFToInsert
 
 
-def parseDIAGFileAndInsert(full_filename, session):
+def parseDIAGFileAndInsert(full_filename, session, importID):
 
     # PArse DIAG File with Regex
     with open(full_filename, 'r') as f:
         content = f.read()
         content = re.sub('\s+Prog+\s\d{5}', "", content)
-        content2 = re.sub('[\n\r]\s{10,14}[0-9\s]+[\n\r]', "\n", content)
-        content2 = re.sub('[\n\r]\s{10,14}[0-9\s]+$', "\n", content2)
+        content2 = re.sub('[\n\r]\s{10,14}[0-9A-F\s]+[\n\r]', "\n", content)
+        content2 = re.sub('[\n\r]\s{10,14}[0-9A-F\s]+$', "\n", content2)
         content2 = re.sub('^[\n\r\s]+', "", content2)
         content2 = re.sub('[\n\r\s]+$', "", content2)
         splitBlock = 'm[\n\r]'
@@ -378,24 +406,33 @@ def parseDIAGFileAndInsert(full_filename, session):
     df = df.dropna(subset=['date'])
     DFToInsert = checkExistingArgos(df, session)
     DFToInsert.loc[:, ('type')] = list(
-        itertools.repeat('argos', len(DFToInsert.index)))
+        itertools.repeat('Argos', len(DFToInsert.index)))
     DFToInsert.loc[:, ('checked')] = list(
         itertools.repeat(0, len(DFToInsert.index)))
     DFToInsert.loc[:, ('imported')] = list(
         itertools.repeat(0, len(DFToInsert.index)))
+    DFToInsert.loc[:, ('creationDate')] = list(
+        itertools.repeat(datetime.now(), len(DFToInsert.index)))
     DFToInsert = DFToInsert.drop(['id', 'lat1', 'lat2', 'lon1', 'lon2'], 1)
+    DFToInsert.loc[:, ('FK_Import')] = list(itertools.repeat(importID, len(DFToInsert.index)))
 
     if DFToInsert.shape[0] != 0:
         DFToInsert.to_sql(ArgosGps.__table__.name, session.get_bind(
         ), if_exists='append', schema=dbConfig['sensor_schema'], index=False)
     os.remove(full_filename)
 
-    return {'inserted gps': 0,
+    message = {'inserted gps': 0,
             'existing gps': 0,
             'inserted Engineering': 0,
             'existing Engineering': 0,
             'inserted argos': DFToInsert.shape[0],
             'existing argos': df.shape[0] - DFToInsert.shape[0]}
+    
+    nbRows = df.shape[0]
+    nbInserted = DFToInsert.shape[0]
+    maxDate = df['date'].max()
+    minDate = df['date'].min()
+    return message, nbRows, nbInserted, maxDate, minDate
 
 
 def checkExistingArgos(dfToCheck, session):
@@ -413,7 +450,7 @@ def checkExistingArgos(dfToCheck, session):
                          ArgosGps.lat,
                          ArgosGps.lon,
                          ArgosGps.ptt]
-                        ).where(ArgosGps.type_ == 'argos')
+                        ).where(ArgosGps.type_ == 'Argos')
     queryArgos = queryArgos.where(
         and_(ArgosGps.date >= minDate, ArgosGps.date <= maxDate))
     data = session.execute(queryArgos).fetchall()
