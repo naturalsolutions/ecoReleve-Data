@@ -170,6 +170,11 @@ context_permissions = {
                 (Deny, 'group:superUsers', ALL_PERMISSIONS),
                 (Deny, 'group:users', ALL_PERMISSIONS),
               ],
+    'dashboard' : [
+                (Allow, 'group:admins', ALL_PERMISSIONS),
+                (Allow, 'group:superUsers', 'read'),
+                (Allow, 'group:users', 'read')
+              ],
 }
 
 
@@ -230,6 +235,12 @@ routes_permission = {
     },
     'gsm': {
         'GET': 'superUser',
+        'POST': 'superUser',
+        'PUT': 'superUser',
+        'DELETE': 'superUser'
+    },
+    'dashboard': {
+        'GET': 'all',
         'POST': 'superUser',
         'PUT': 'superUser',
         'DELETE': 'superUser'

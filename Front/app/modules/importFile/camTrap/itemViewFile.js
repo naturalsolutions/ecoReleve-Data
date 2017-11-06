@@ -5,11 +5,10 @@ define([
     'marionette',
     'config',
     'sweetAlert',
-    './modelFile',
     'i18n',
 
 
-], function ($, _, Backbone, Marionette, config, Swal, ModelFile
+], function ($, _, Backbone, Marionette, config, Swal
 
 ) {
 
@@ -21,7 +20,7 @@ define([
             'click button#js-removeFile': 'removeFileToList'
         },
         className: 'full-height',
-        model : ModelFile,
+        model : new Backbone.Model(),
         template: 'app/modules/importFile/camTrap/templates/itemViewFile.html',
         
 

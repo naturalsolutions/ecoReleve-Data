@@ -85,7 +85,8 @@ require.config({
     'bootstrap-star-rating': '../bower_components/bootstrap-star-rating/js/star-rating',
     'exif-js' : '../bower_components/exif-js/exif',
     'wheelzoom' : './vendors/wheelzoom',
-    'imageLoaded' : '../bower_components/imagesloaded/imagesloaded.pkgd'
+    'imageLoaded' : '../bower_components/imagesloaded/imagesloaded.pkgd',
+    'workerExif' : '../app/modules/importFile/camTrap/workerExif'
   },
   map: {
       '*': {
@@ -219,6 +220,10 @@ require.config({
         'jquery',
       ],
       exports: 'imageLoaded'
+    },
+    'workerExif' : {
+      deps :[],
+      exports : 'workerExif'
     }
     
   }

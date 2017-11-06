@@ -1,0 +1,102 @@
+<div class="container-fluid camtrapSummary">
+<div class="row">
+		<div class="row">
+				<div>Décallage Horaire (Heures) </div>
+				<div class="form-group">
+						<div class='input-group date' id='datetimepicker3'>
+							<input type='text' class="form-control" />
+							<span class="input-group-addon">
+								<span class="glyphicon glyphicon-time"></span>
+							</span>
+						</div>
+					</div>
+		</div>
+		<div class="row">
+			<div id = "js-summarySessionInfos" class="col-md-12 text-center ">
+				Session infos
+				<div class="row">
+					<div id="js-headers-device" class= "col-md-3 ">
+						Device
+					</div>
+					<div id="js-headers-startDate" class= "col-md-3 ">
+						Start date
+					</div>
+					<div id="js-headers-endDate" class= "col-md-3 ">
+						End date
+					</div>
+					<div id="js-headers-siteName" class= "col-md-3 ">
+						Site name
+					</div>
+				</div>
+				<div class="row">
+					<div id="js-value-device" class= "col-md-3 ">
+						<%= row.UnicIdentifier %>
+					</div>
+					<div id="js-value-startDate" class= "col-md-3 ">
+						<%= row.StartDate %>
+					</div>
+					<div id="js-value-endDate" class= "col-md-3 ">
+						<%= row.EndDate %>
+					</div>
+					<div id="js-value-siteName" class= "col-md-3 ">
+						<%= row.Name %>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div id = "js-summaryFilesInfos" class="col-md-12 text-center ">
+				Files infos
+				<div class="row">
+					<div id="js-headers-nbPhotos" class= "col-md-4 ">
+						Nb photos
+					</div>
+					<div id="js-headers-size" class= "col-md-4 ">
+						Total Size
+					</div>
+					<div id="js-headers-availableSpace" class= "col-md-4 ">
+						Space available on server
+					</div>
+				</div>
+			<div class="row">
+					<div id="js-value-nbPhotos" class= "col-md-4 ">
+						<%= resumableFile.length %>
+					</div>
+					<div id="js-value-size" class= "col-md-4 ">
+						<%= size %> Mb
+					</div>
+					<div id="js-value-availableSpace" class= "col-md-4">
+						<%= availableSpace %>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+</div>
+
+<div class="progress hide" id="upload-progress" style=" margin-top : 20px;">
+		<div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"   style="width: 0%">
+			<span class="sr-only"></span>
+		</div>
+	</div>
+
+	<div class="js-rg-grid crop1 no-padding"></div>
+
+<% _.each( resumable.files , function(file) { %>
+	<% if( file.outOfRange )  { %>
+	<div class="row js-dateOutOfRange">   
+	<% } else if (file.inRange) { %>
+	<div class="row js-dateInRange">  
+	<%} else { %> 
+	<div class="row js-dateOk"> 		
+	<% } %>
+	<div id="js-fileName" class="col-md-4 "><%=file.fileName%></div>
+	<div id="js-fileSize" class="col-md-4 "><%=file.size%></div >	
+	<div id ="js-fileDate" class="col-md-4 "><%=file.dateFind.dateString%></div>
+</div>
+<% }) %>
+
+
+
+</div>

@@ -8,10 +8,11 @@ define([
   'ns_stepper/lyt-step',
   'ns_modules/ns_com',
   'ns_grid/grid.view',
+  'resumable',
   'i18n'
 
 ], function($, _, Backbone, Marionette, Swal,  config,
-  Step, Com, GridView
+  Step, Com, GridView, Resumable 
 ) {
 
   'use strict';
@@ -37,16 +38,16 @@ define([
       this.parent = options.parent;
       this.model = options.model || new Backbone.Model();
       this.com = new Com();
-      debugger;
     
     },
 
     check: function() {
-      if (this.ui.requirement.val()) {
-        return true;
-      } else {
-        return false;
-      }
+      // if (this.ui.requirement.val()) {
+      //   return true;
+      // } else {
+      //   return false;
+      // }
+      return true;
     },
 
     onShow: function() {
@@ -86,84 +87,77 @@ define([
         this.model.set('sensorId', id);
       }
     },
-    // initGrid: function(id) {
-    //   var _this = this;
-    //   var columns = [{
-    //     name: 'ID',
-    //     label: 'ID',
-    //     editable: false,
-    //     renderable: false,
-    //     cell: Backgrid.IntegerCell.extend({
-    //       orderSeparator: ''
-    //     }),
-    //     headerCell : null
-    //   },{
-    //     name: 'UnicIdentifier',
-    //     label: 'Identifier',
-    //     editable: false,
-    //     cell: 'string',
-    //   },{
-    //     name: 'StartDate',
-    //     label: 'Start date',
-    //     editable: false,
-    //     cell : 'stringDate',
-    //     headerCell : null
-    //   },
-    //   {
-    //     name: 'EndDate',
-    //     label: 'End Date',
-    //     editable: false,
-    //     cell : 'stringDate',
-    //     headerCell : null
-    //   },{
-    //     name: 'FK_MonitoredSite',
-    //     label: 'FK_MonitoredSite',
-    //     editable: false,
-    //     renderable:false,
-    //     cell: 'string',
-    //     headerCell : null
-    //   },{
-    //     name: 'Name',
-    //     label: 'Site Name',
-    //     editable: false,
-    //     cell: 'string',
-    //   },{
-    //     name: 'Deploy',
-    //     label: 'Deploy',
-    //     editable: false,
-    //     renderable:false,
-    //     cell: 'string',
-    //     headerCell : null
-    //   }];
-    //   this.grid = new NsGrid({
-    //     columns: columns,
-    //     url: config.coreUrl + 'sensors/' + id + '/history',
-    //     pageSize: 20,
-    //     pagingServerSide: false,
-    //     rowClicked: true,
-    //     //com: _this.com,
-    //   });
-    //   this.grid.rowClicked = function(args) {
-    //     _this.rowClicked(args.row);
-    //   };
-    //   this.grid.rowDbClicked = function(args) {
-    //     _this.rowClicked(args.row);
-    //   };
-    //   console.log(this.grid.columns)
-    //   this.ui.grid.html(this.grid.displayGrid());
-    //   this.ui.paginator.html(this.grid.displayPaginator());
-    // },
-    // rowClicked: function(row) {
-    //   if (this.currentRow) {
-    //     this.currentRow.$el.removeClass('active');
-    //   }
-    //   row.$el.addClass('active');
-    //   this.currentRow = row;
-    //   this.model.set('row', row);
-    //   this.ui.requirement.val('check').change();
-    // },
+
+    sendData : function(params) {
+      var _this = this;
+      $.ajax({
+        type: "POST",
+        url: config.coreUrl + 'sensorDatas/camtrap/concat',
+        data: {
+          path : params.path,
+          action : 0 // create folder
+        }
+      })
+      .done( function(response,status,jqXHR){
+        if( jqXHR.status === 200 ){
+          this.r = _this.model.get('resumable'); // TODO mettre dans init
+          this.r.updateQuery({
+            path : params.path,
+            id : params.sensorId,
+            startDate: params.startDate,
+            endDate: params.endDate
+          });
+          this.r.upload();
+        }
+      })
+      .fail( function( jqXHR, textStatus, errorThrown ){
+        console.log("error");
+        console.log(errorThrown);
+      });
+
+    },
     validate: function() {
-      return this.model;
+      var _this = this;
+      var rowFromGrid = this.model.get('row'); 
+      if(rowFromGrid) {
+        var unicIdentifier = rowFromGrid.UnicIdentifier;
+        var name = rowFromGrid.Name;
+        var startDate = rowFromGrid.StartDate;
+        var endDate = rowFromGrid.EndDate || "0000-00-00 00:00:00";
+        var path = String(unicIdentifier)+"_"+String(startDate.split(" ")[0])+"_"+String(endDate.split(" ")[0])+"_"+String(name);
+        var sensorId = this.model.get('sensorId');
+        var listOfResumableFile = this.model.get('resumableFile');
+  
+        var params = {
+          unicIdentifier : unicIdentifier,
+          name : name,
+          startDate : startDate,
+          endDate : endDate,
+          path : path,
+          sensorId : sensorId
+        };
+  
+        this.r = _this.model.get('resumable'); // TODO mettre dans init
+        this.r.updateQuery({
+          path : params.path,
+          id : params.sensorId,
+          startDate: params.startDate,
+          endDate: params.endDate
+        });
+        return this.model;
+      }
+      else {
+        Swal({
+          title: 'Warning',
+          text: 'You need to choose a session', 
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonText: 'OK',
+          closeOnCancel: true
+        })
+      }
+
+      //this.sendData(params);
     },
     displayGrid: function(id) {
       var _this = this;
