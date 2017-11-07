@@ -219,9 +219,9 @@ define([
       var fwList = [];
       window.app.timezone = formData.timeZone;
       // var curTZ = this.getTZnameByGMT(formData.timeZone);
-      // _.forEach(formData.FieldWorkers, function (curFw) {
-      //   fwList.push(parseInt(curFw.FieldWorker));
-      // });
+      _.forEach(formData.FieldWorkers, function (curFw) {
+        fwList.push(parseInt(curFw.FieldWorker));
+      });
       this.wayPointCollection.map(function (model) {
         var curDate = momenttz.utc(model.waypointTime, 'DD/MM/YYYY HH:mm');
         model.FieldWorkers = fwList;
