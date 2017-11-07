@@ -84,7 +84,8 @@ class Station(Base, ObjectWithDynProp):
         fws = []
         if len(values) != 0:
             for item in values:
-                if 'ID' in item and item['ID'] is not None:
+                if 'ID' in item and item['ID']:
+
                     curFW = list(filter(lambda x: x.ID == item[
                                  'ID'], self.Station_FieldWorkers))[0]
                     curFW.FK_FieldWorker = int(item['FieldWorker'])
