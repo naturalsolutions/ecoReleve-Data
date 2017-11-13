@@ -14,13 +14,14 @@ button:focus {
 }
 
 fieldset{
-	border: 1px solid #e5e5e5;
-	padding: 15px 0px;
+	border-top: 2px solid #cccacb;
+	//padding: 15px 0px;
 	margin-top: 0px;
 	width: 100%;
 	&>div{
 		margin-bottom: 5px;
 		min-height: 54.4px !important;
+
 	}
 	legend{
 		margin: -10px 5px;
@@ -193,7 +194,7 @@ border-color : red;
 			border-bottom: 2px solid #ddd;
 			&:hover, &:visited{
 				cursor: pointer;
-				color:#3A3939;
+				color:#41b651;
 				background: transparent!important;
 				background-color: transparent!important;
 				border: 0px;
@@ -206,13 +207,15 @@ border-color : red;
 				background: transparent!important;
 				background-color: transparent!important;
 				border: 0px;
-				border-bottom: 2px solid #3A3939;
+				color:#41b651;
+				border-bottom: 2px solid #41b651;
 				&:hover, &:focus{
 					background: transparent!important;
 					background-color: transparent!important;
 					cursor: pointer;
+					color:#41b651;
 					border: 0px;
-					border-bottom: 2px solid #3A3939;
+					border-bottom: 2px solid #41b651;
 					background: transparent;
 				}
 			}
@@ -619,6 +622,11 @@ textarea {
 	input.autocompTree{
 		//border-radius: 0px 4px 4px 0px!important;
 	}
+	input:disabled{
+		border-radius: 4px 4px 4px 4px!important;
+
+	}
+
 }
 
 .filter-container{
@@ -637,6 +645,31 @@ textarea {
 	padding: 20px 0px;
 	&:nth-child(3) {
     padding: 0px;
+	}
+}
+
+.hide-fieldsets{
+		fieldset{
+			padding:0 0 ;
+			border: none!important;
+			div {
+
+			}
+			legend{
+				display:none;
+			}
+		}
+}
+
+.tab-pane {
+	form{
+		padding: 0px 20px;
+		fieldset{
+			legend{
+				font-size: 16px;
+				font-weight: 500;
+			}
+		}
 	}
 }
 

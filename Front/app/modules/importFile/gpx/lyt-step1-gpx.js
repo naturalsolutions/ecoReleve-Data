@@ -225,7 +225,7 @@ define([
       this.wayPointCollection.map(function (model) {
         var curDate = momenttz.utc(model.waypointTime, 'DD/MM/YYYY HH:mm');
         model.FieldWorkers = fwList;
-        model.NbFieldWorker = formData.NbFieldWorker;
+        model.NbFieldWorker = formData.NbFieldWorker || 1;
         model.fieldActivity = formData.fieldActivityId;
         // model.timeZone = formData.timeZone;
         // model.TZdate = momenttz(curDate).utc().tz(curTZ).format('DD/MM/YYYY HH:mm');
