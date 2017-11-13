@@ -99,14 +99,14 @@ class RESTView(object):
         return self.context.update()
 
 
-from . import ModelFactory
+# from . import ModelFactory
 
 
-class ApiFactory(object):
+# class ApiFactory(object):
 
-    def __init__(self, ModelFactory):
-        self.ModelFactory = ModelFactory
+#     def __init__(self, ModelFactory):
+#         self.ModelFactory = ModelFactory
 
-    def buildView(self):
-        pass
-    pass
+#     def buildView(self):
+#         pass
+#     pass

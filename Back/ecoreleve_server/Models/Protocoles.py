@@ -179,30 +179,17 @@ class Observation(HasDynamicProperties, Base):
             values[typeName] = subObsList
         return values
 
-
-<< << << < HEAD
     def getDataWithSchema(self, displayMode='edit'):
         resultat = HasDynamicProperties.getDataWithSchema(
             self, displayMode=displayMode)
-== == == =
-    def beforeDelete(self):
-        self.LoadNowValues()
 
+        if self.Observation_children:
+            typeName = self.Observation_children[0]._type.Name
+            schema = resultat['schema'][typeName]['subschema']
+            resultat['data'][typeName] = [formatValue(
+                subObs, schema) for subObs in resultat['data'][typeName]]
 
-@event.listens_for(Observation, 'after_delete')
-def unlinkLinkedField(mapper, connection, target):
-    target.deleteLinkedField()
-
-
->>>>>> > 36996b7e588e3f36a0150bf6b95036d9ebfba005
-
-    if self.Observation_children:
-        typeName = self.Observation_children[0]._type.Name
-        schema = resultat['schema'][typeName]['subschema']
-        resultat['data'][typeName] = [formatValue(
-            subObs, schema) for subObs in resultat['data'][typeName]]
-
-    return resultat
+        return resultat
 
 
 @event.listens_for(Observation, 'after_delete')
