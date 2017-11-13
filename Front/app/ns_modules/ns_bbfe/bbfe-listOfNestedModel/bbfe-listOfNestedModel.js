@@ -37,6 +37,10 @@ define([
 
             this.key = this.options.key;
             this.nbByDefault = this.options.model.schema[this.key]['nbByDefault'];
+            this.addButtonClass = 'pull-right';
+            if (this.options.schema.editorClass == 'nested-unstyled'){
+                this.addButtonClass = '';
+            }
 
 
         },
@@ -45,14 +49,17 @@ define([
         },
 
         addEmptyForm: function() {
-            var mymodel = Backbone.Model.extend({
-                defaults : this.options.schema.subschema.defaultValues
-            });
+            if (this.getValue()){
+                var mymodel = Backbone.Model.extend({
+                    defaults : this.options.schema.subschema.defaultValues
+                });
+    
+                var model = new mymodel();
+                model.schema = this.options.schema.subschema;
+                model.fieldsets = this.options.schema.fieldsets;
+                this.addForm(model);
 
-            var model = new mymodel();
-            model.schema = this.options.schema.subschema;
-            model.fieldsets = this.options.schema.fieldsets;
-            this.addForm(model);
+            }
         },
 
         indexPresent : function (elem, index, array) {
@@ -96,6 +103,17 @@ define([
                 schema: model.schema
             }).render();
             this.forms.push(form);
+            var labels = form.$el.find('label');
+
+            if (this.options.schema.editorClass.indexOf("form-control")==-1 ){
+
+                form.$el.addClass(this.options.schema.editorClass);
+            }
+            _.each(labels, function(label){
+                if(label.innerText.trim().replace('*','') == ''){
+                    $(label).remove();
+                }
+            });
 
             setTimeout( function() { //
               if (_this.schema.editorClass.indexOf("form-control") != -1 ) {
@@ -106,9 +124,13 @@ define([
             if (this.schema.editorClass.indexOf("form-control") != -1 ) {
               form.$el.find('fieldset').prepend('<div class="col-md-12 js_container_index_subForm"><a role="button"  class="js_index_subForm" >'+parseInt(this.indexPresent(form,0,this.forms)+1)+'</button></div>')
             }
+            var buttonClass = 'pull-right';
+            if (form.$el.hasClass('nested-unstyled')){
+                buttonClass = '';
+            }
             form.$el.find('fieldset').append('\
-                <div class="' + this.hidden + ' col-xs-12 control">\
-                    <button type="button" class="btn btn-warning pull-right" id="remove">-</button>\
+                <div class="' + this.hidden + ' control">\
+                    <button type="button" class="btn btn-warning '+buttonClass+'" id="remove">-</button>\
                 </div>\
             ');
 
@@ -142,7 +164,8 @@ define([
             var $el = $($.trim(this.template({
                 hidden: this.hidden,
                 id: this.id,
-                name: this.key
+                name: this.key,
+                addButtonClass: this.addButtonClass
             })));
             this.setElement($el);
             var data = this.options.model.attributes[this.key];
@@ -213,13 +236,16 @@ define([
         },
         }, {
           //STATICS
+                //<button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right" style="margin-bottom:10px">+</button>\
+          //
           template: _.template('\
             <div id="<%= id %>" name="<%= name %>" class="required nested clearfix">\
-                <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
                 <div class="clear"></div>\
                 <div id="formContainer"   class="clearfix"></div>\
-                <br />\
-                <button type="button" id="addFormBtn" class="<%= hidden %> btn pull-right">+</button>\
+                <div>\
+                    <div id="addDiv" class="col-md-6" ></div>\
+                    <button type="button" id="addFormBtn" class="<%= hidden %> btn <%= addButtonClass %>" style="margin-top:10px">+</button>\
+                </div>\
             </div>\
             ', null, Form.templateSettings),
       });

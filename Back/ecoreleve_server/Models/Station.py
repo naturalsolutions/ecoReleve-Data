@@ -41,22 +41,19 @@ class Station(Base, HasDynamicProperties):
         'fieldActivity.ID'), nullable=True)
     creator = Column(Integer)
     creationDate = Column(DateTime, default=func.now())
-    Observations = relationship(
-        'Observation', back_populates='Station', cascade="all, delete-orphan")
-    # StationDynPropValues = relationship(
-    #     'StationDynPropValue', backref='Station', cascade="all, delete-orphan")
-    # FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
+    original_id = Column(String(250))
     Comments = Column(String(250))
-
-    FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
+    Place = Column(String(250))
     FK_MonitoredSite = Column(Integer, ForeignKey(
         'MonitoredSite.ID'), nullable=True)
+    Comments = Column(String(250))
+    FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
 
-    Place = Column(String(250))
+    Observations = relationship(
+        'Observation', back_populates='Station', cascade="all, delete-orphan")
 
     Station_FieldWorkers = relationship(
         'Station_FieldWorker', backref='Station', cascade="all, delete-orphan")
-
 
     ''' hybrid property on relationship '''
     @hybrid_property
@@ -76,7 +73,8 @@ class Station(Base, HasDynamicProperties):
         fws = []
         if len(values) != 0:
             for item in values:
-                if 'ID' in item and item['ID'] is not None:
+                if 'ID' in item and item['ID']:
+
                     curFW = list(filter(lambda x: x.ID == item[
                                  'ID'], self.Station_FieldWorkers))[0]
                     curFW.FK_FieldWorker = int(item['FieldWorker'])

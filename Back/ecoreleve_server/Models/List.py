@@ -20,8 +20,14 @@ from ..Models import (
     Base,
     Equipment,
     Sensor,
-    # SensorType,
-    MonitoredSite
+    MonitoredSite,
+    Import,
+    ArgosEngineering,
+    ArgosGps,
+    GPX,
+    Gsm,
+    GsmEngineering,
+    Rfid
 )
 from ..utils import Eval
 from collections import OrderedDict
@@ -165,7 +171,8 @@ class IndividualList(CollectionEngine):
 
         joinTable = super().GetJoinTable(searchInfo)
 
-        releaseFilter = list(filter(lambda x: x['Column'] == 'LastImported', searchInfo['criteria']))
+        releaseFilter = list(
+            filter(lambda x: x['Column'] == 'LastImported', searchInfo['criteria']))
         if len(releaseFilter) > 0:
             return joinTable
 
@@ -584,3 +591,18 @@ class MonitoredSiteList(CollectionEngine):
                      ))
             fullQueryJoin = fullQueryJoin.where(exists(subSelect))
         return fullQueryJoin
+
+
+class ImportList(Generator):
+
+    def __init__(self, SessionMaker):
+
+        joinTable = join(Import, User, Import.FK_User == User.id)
+
+        tablecImprt = select([Import,
+                              User.fullname.label('Login'),
+
+                              ]).select_from(joinTable
+                                             )
+        tablecImprt = tablecImprt.cte()
+        super().__init__(tablecImprt, SessionMaker)

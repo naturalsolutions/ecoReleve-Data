@@ -1,0 +1,14 @@
+
+Use ecoReleve_Sensor
+
+ALTER TABLE Import
+ADD nbRows int, maxDate datetime, minDate datetime, nbInserted int
+
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('143_Alter_TableImport',GETDATE(),(SELECT db_name()))
+
+
+GO

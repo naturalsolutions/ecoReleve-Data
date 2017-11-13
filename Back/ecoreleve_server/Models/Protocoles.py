@@ -64,7 +64,7 @@ class Observation(HasDynamicProperties, Base):
                 __tablename__ = 'ProtocoleType'
                 obsolete = Column(Boolean)
                 parent = cls
-            cls.TypeClass = type('ProtocoleType', (Type, ),{})
+            cls.TypeClass = type('ProtocoleType', (Type, ), {})
         return cls.TypeClass
 
     @declared_attr
@@ -84,13 +84,14 @@ class Observation(HasDynamicProperties, Base):
         try:
             Station = Base.metadata.tables['Station']
             if not self.Station:
-                linkedDate = self.session.execute(select([Station.c['StationDate']]).where(Station.c['ID']==self.FK_Station)).scalar()
+                linkedDate = self.session.execute(select([Station.c['StationDate']]).where(
+                    Station.c['ID'] == self.FK_Station)).scalar()
             else:
                 linkedDate = self.Station.StationDate
         except:
             from traceback import print_exc
             print_exc()
-            linkedDate = datetime.now()
+            linkedDate = datetime.utcnow()
         if 'unequipment' in self._type.Name.lower():
             linkedDate = linkedDate - timedelta(seconds=1)
         return linkedDate
@@ -121,19 +122,20 @@ class Observation(HasDynamicProperties, Base):
                             subDictList.append(subDict)
                     curData['SubObservation_childrens'] = subDictList
 
-                if 'ID' in curData and curData['ID'] is not None:
+                if 'ID' in curData and curData['ID']:
                     subObs = list(filter(lambda x: x.ID == curData[
                                   'ID'], self.Observation_children))[0]
                 else:
                     subObs = Observation(
                         Parent_Observation=self.ID,
                         FK_Station=self.FK_Station,
-                        )
+                    )
                     subObs.session = self.session
                     subObs.type_id = curData['FK_ProtocoleType']
                 if subObs is not None:
                     subObs.values = curData
                     listObs.append(subObs)
+                    self.session.flush()
         self.Observation_children = listObs
 
     @hybrid_property
@@ -168,7 +170,7 @@ class Observation(HasDynamicProperties, Base):
         if self.Observation_children:
             typeName = self.Observation_children[0]._type.Name
             subObsList = []
-            
+
             for subObs in self.Observation_children:
                 flatObs = subObs.values
                 if len(subObs.SubObservation_children) > 0:
@@ -177,15 +179,30 @@ class Observation(HasDynamicProperties, Base):
             values[typeName] = subObsList
         return values
 
+
+<< << << < HEAD
     def getDataWithSchema(self, displayMode='edit'):
-        resultat = HasDynamicProperties.getDataWithSchema(self, displayMode=displayMode)
+        resultat = HasDynamicProperties.getDataWithSchema(
+            self, displayMode=displayMode)
+== == == =
+    def beforeDelete(self):
+        self.LoadNowValues()
 
-        if self.Observation_children:
-            typeName = self.Observation_children[0]._type.Name
-            schema = resultat['schema'][typeName]['subschema']
-            resultat['data'][typeName] = [formatValue(subObs, schema) for subObs in resultat['data'][typeName]]
 
-        return resultat
+@event.listens_for(Observation, 'after_delete')
+def unlinkLinkedField(mapper, connection, target):
+    target.deleteLinkedField()
+
+
+>>>>>> > 36996b7e588e3f36a0150bf6b95036d9ebfba005
+
+    if self.Observation_children:
+        typeName = self.Observation_children[0]._type.Name
+        schema = resultat['schema'][typeName]['subschema']
+        resultat['data'][typeName] = [formatValue(
+            subObs, schema) for subObs in resultat['data'][typeName]]
+
+    return resultat
 
 
 @event.listens_for(Observation, 'after_delete')

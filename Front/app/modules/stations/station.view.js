@@ -157,22 +157,6 @@ define([
 
       };
 
-      this.nsForm.savingError = function (response) {
-        var msg = 'An error occured, please contact an admninstrator';
-        var type_ = 'error';
-        var title = 'Error saving';
-
-        Swal({
-          title: title,
-          text: msg,
-          type: type_,
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
-        });
-      };
-
       this.nsForm.afterSaveSuccess = function() {
         if(_this.map){
           _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));

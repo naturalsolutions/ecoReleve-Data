@@ -175,12 +175,12 @@ define([
 		  this.element = this.bbfe.render();
 		};
 
-		AutocompleteEditor.prototype.getValue = function(){
-		  return {
-		  	value: this.element.getValue(),
-		  	displayValue: this.element.$input[0].value //not sure why
-		  }
-		};
+		// AutocompleteEditor.prototype.getValue = function(){
+		//   return {
+		//   	value: this.element.getValue(),
+		//   	displayValue: this.element.$input[0].value //not sure why
+		//   }
+		// };
 
 
     var NumberEditor = function () {};
