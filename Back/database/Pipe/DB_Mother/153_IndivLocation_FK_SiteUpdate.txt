@@ -1,0 +1,11 @@
+UPDATE il SET il.FK_MonitoredSite = d.FK_MonitoredSite
+FROM Individual_Location il
+JOIN VRfidData_With_equipSite d on d.FK_Sensor = il.FK_Sensor and d.date_ = il.Date
+where il.FK_MonitoredSite is null 
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('153_IndivLocation_FK_SiteUpdate',GETDATE(),(SELECT db_name()))
+
+
+GO
