@@ -133,6 +133,7 @@ class Observation(Base, ObjectWithDynProp):
                 if subObs is not None:
                     subObs.updateFromJSON(curData)
                     listObs.append(subObs)
+                    self.session.add(subObs)
                     self.session.flush()
         self.Observation_children = listObs
 
