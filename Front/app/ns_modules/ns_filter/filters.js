@@ -701,7 +701,7 @@
 
                     }
                     else {
-                        if (value.Value || value.Operator == 'is null') {
+                        if (  ( value.Value !== null && value.Value !== '')  || value.Operator == 'is null') {                            
                             this.criterias.push(value);
                             currentForm.$el.find('input.filter').addClass('active');
                         }
