@@ -644,6 +644,10 @@ define([
         data.objectType = this.model.get('objectType');
       }
 
+      if (this.filters){
+        data.criteria = JSON.stringify(this.filters);
+      }
+    
       this.deferred = $.ajax({
         url: this.model.get('url'),
         method: 'GET',
