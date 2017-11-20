@@ -4,7 +4,8 @@ from pyramid.security import (
     Authenticated,
     ALL_PERMISSIONS,
     Everyone,
-    Deny
+    Deny,
+    NO_PERMISSION_REQUIRED
 )
 # ###
 # TODO: create ApiController
@@ -76,27 +77,27 @@ class RESTView(object):
         self.request = request
         self.context = context
 
-    @view_config(request_method='GET', renderer='json', permission='read')
+    @view_config(request_method='GET', renderer='json', permission=NO_PERMISSION_REQUIRED)
     def get(self):
         return self.context.retrieve()
 
-    @view_config(request_method='POST', renderer='json', permission='create')
+    @view_config(request_method='POST', renderer='json', permission=NO_PERMISSION_REQUIRED)
     def post(self):
         return self.context.create()
 
-    @view_config(request_method='DELETE', renderer='json', permission='delete')
+    @view_config(request_method='DELETE', renderer='json', permission=NO_PERMISSION_REQUIRED)
     def delete(self):
         return self.context.delete()
 
-    @view_config(request_method='PATCH', renderer='json', permission='update')
+    @view_config(request_method='PATCH', renderer='json', permission=NO_PERMISSION_REQUIRED)
     def patch(self):
         return self.context.update()
 
-    @view_config(request_method='PUT', renderer='json', permission='update')
+    @view_config(request_method='PUT', renderer='json', permission=NO_PERMISSION_REQUIRED)
     def put(self):
         return self.context.update()
 
-    @view_config(request_method='OPTIONS', renderer='json', permission='read')
+    @view_config(request_method='OPTIONS', renderer='json', permission=NO_PERMISSION_REQUIRED)
     def options(self):
         return
 
