@@ -67,7 +67,7 @@ def checkUnequip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
         return {'unequipment_error': msg}
 
 
-@event.listens_for(Observation.Station, 'set')
+# @event.listens_for(Observation.Station, 'set')
 def set_equipment(target, value=None, oldvalue=None, initiator=None):
     typeName = target._type.Name
     curSta = value

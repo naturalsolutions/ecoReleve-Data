@@ -1,6 +1,7 @@
 from pyramid.view import view_config
 from ..Models import (
     Observation,
+    Station,
     # ProtocoleType,
     FieldActivity_ProtocoleType,
     fieldActivity,
@@ -97,9 +98,20 @@ class ObservationsView(DynamicObjectCollectionView):
         for items, value in json_body.items():
             data[items] = value
 
-        sta = self.parent.objectDB
-        curObs = self.item.model(
-            type_id=data['FK_ProtocoleType'], FK_Station=sta.ID)
+        if 'station' in data and self.parent.__class__.__name__ != 'StationView':
+            sta = Station()
+            sta.session = self.session
+            if 'type_id' not in data['station']:
+                data['station']['type_id'] = 1
+
+            sta.values = data['station']
+            self.session.add(sta)
+            self.session.flush()
+
+        elif self.parent.__class__.__name__ == 'StationView':
+            sta = self.parent.objectDB
+
+        curObs = self.item.model(FK_Station=sta.ID)
         listOfSubProtocols = []
 
         for items, value in data.items():
@@ -117,10 +129,9 @@ class ObservationsView(DynamicObjectCollectionView):
             self.session.flush()
             responseBody['id'] = curObs.ID
         except Exception as e:
-            # print(e)
             self.session.rollback()
             self.request.response.status_code = 409
-            responseBody['response'] = e.value
+            responseBody['response'] = type(e)
             sendLog(logLevel=1, domaine=3,
                     msg_number=self.request.response.status_code)
         return responseBody

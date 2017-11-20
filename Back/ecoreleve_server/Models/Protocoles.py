@@ -92,7 +92,7 @@ class Observation(HasDynamicProperties, Base):
         except:
             linkedDate = datetime.utcnow()
 
-        if 'unequipment' in self.GetType().Name.lower():
+        if 'unequipment' in self._type.Name.lower():
             linkedDate = linkedDate - timedelta(seconds=1)
         return linkedDate
 
@@ -177,13 +177,6 @@ class Observation(HasDynamicProperties, Base):
                 subObsList.append(flatObs)
             values[typeName] = subObsList
         return values
-
-    def getDataWithSchema(self, displayMode='edit'):
-        resultat = HasDynamicProperties.getDataWithSchema(
-            self, displayMode=displayMode)
-    # def beforeDelete(self):
-    #     self.LoadNowValues()
-
 
 # @event.listens_for(Observation, 'after_delete')
 # def unlinkLinkedField(mapper, connection, target):
