@@ -278,7 +278,6 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
             # for attr in schema:
             resultat['data']['id'] = 0
             resultat['data'].update(resultat['schema']['defaultValues'])
-
         return resultat
 
 
@@ -338,6 +337,18 @@ class HasDynamicProperties(HasStaticProperties):
     @hybrid_property
     def type_id(self):
         return self._type_id
+
+    @property
+    def type_name(self):
+        if self._type:
+            return self._type.Name
+        else:
+            return None
+
+    @type_name.setter
+    def type_name(self, type_name):
+        self._type = self.session.query(
+            self.TypeClass).filter_by(Name=type_name).one()
 
     @type_id.setter
     def type_id(self, value):
@@ -525,19 +536,25 @@ class HasDynamicProperties(HasStaticProperties):
         self.previousState = self.values
         if dict_.get('ID', None):
             del dict_['ID']
-        if self.fk_table_type_name not in dict_ and 'type_id' not in dict_ and not self.type_id:
+        if (self.fk_table_type_name not in dict_
+            and 'type_id' not in dict_
+            and not self.type_id
+                and 'type_name' not in dict_):
             raise Exception('object type not exists')
+        if 'type_name' in dict_:
+            self.type_name = dict_.get('type_name')
         else:
             type_id = dict_.get(self.fk_table_type_name, None) or dict_.get(
                 'type_id', None) or self.type_id
             self._type = self.session.query(self.TypeClass).get(type_id)
-            useDate = parser(dict_.get('__useDate__', None)
-                             ) or self.linkedFieldDate()
-            for prop, value in dict_.items():
-                self.setValue(prop, parser(value), useDate)
 
-            if self.hasLinkedField:
-                self.updateLinkedField(dict_, useDate=useDate)
+        useDate = parser(dict_.get('__useDate__', None)
+                         ) or self.linkedFieldDate()
+        for prop, value in dict_.items():
+            self.setValue(prop, parser(value), useDate)
+
+        if self.hasLinkedField:
+            self.updateLinkedField(dict_, useDate=useDate)
 
     def setValue(self, propertyName, value, useDate=None):
         HasStaticProperties.setValue(self, propertyName, value)
