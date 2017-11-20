@@ -1,0 +1,9 @@
+UPDATE [dbo].[ProtocoleType]
+   SET [Name] = REPLACE(name,'Athropod','Arthropod')
+ WHERE name LIKE '%Athropod%'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('155_CONF_Change_Protocole_Name_Athopod_To_Arthopod',GETDATE(),(SELECT db_name()))
+
+
+GO
