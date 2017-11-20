@@ -85,6 +85,7 @@ class ProjectView(DynamicObjectView):
         # }
         # data['poly'] = self.objectDB.convert_geojson_to_wkt(geoJSON)
         # # print(data['poly'])
+
         self.objectDB.values = data
         return 'updated'
 
