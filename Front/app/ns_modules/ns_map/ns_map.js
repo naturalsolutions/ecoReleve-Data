@@ -136,7 +136,7 @@ define([
       });
 
       L.control.zoom({
-        position:'topleft'
+        position:'topright'
       }).addTo(this.map);
 
       this.google.defered  = this.google();
@@ -227,46 +227,48 @@ define([
 			this.drawControl = new L.Control.Draw({
 				edit: {
           featureGroup: _this.drawnItems,
-          remove: false
+          // remove: false
         },
         draw:{
           circle:false,
-          // rectangle:false,
-          // polyline:false,
-          // polygon:false,
-          // circlemarker:false
+          rectangle:false,
+          polyline:false,
+          marker:false,
+          circlemarker:false
         }, 
         position : 'topleft'
 			});
       this.map.addControl(this.drawControl);
-      // var controlDiv = this.drawControl._toolbars.edit._toolbarContainer;
+    //   var controlDiv = this.drawControl._toolbars.edit._toolbarContainer;
 
-      // var controlUI = L.DomUtil.create('a', 'leaflet-draw-edit-remove');
-      // controlDiv.append(controlUI);
-      // controlUI.title = 'Remove All Polygons';
-      // controlUI.href = '#';
-      // L.DomEvent.addListener(controlUI, 'click', function (e) {
-      //   e.preventDefault();
-      //   e.stopPropagation();
-      //   if(!$(controlUI).hasClass("leaflet-disabled") && _this.drawnItems.getLayers().length > 0){
-      //     _this.drawnItems.clearLayers();
-      //     _this.map.fire('draw:deleted');
+    //   var controlUI = L.DomUtil.create('a', 'leaflet-draw-edit-remove');
+    //   controlDiv.append(controlUI);
+    //   controlUI.title = 'Remove All Polygons';
+    //   controlUI.href = '#';
+    //   L.DomEvent.addListener(controlUI, 'click', function (e) {
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    //     if(!$(controlUI).hasClass("leaflet-disabled") && _this.drawnItems.getLayers().length > 0){
+    //       _this.drawnItems.clearLayers();
+    //       _this.map.fire('draw:deleted');
 
-      //   }
+    //     }
     // });
-			// this.map.on('draw:created', function (e) {
-      //   if(this.drawOptions.onDrawCreated){
+			this.map.on('draw:created', function (e) {
+        var type = e.layerType,
+        layer = e.layer;
+        console.log(layer)
+        _this.drawnItems.addLayer(layer);
+        console.log('ma couche controle a été creer');
+			});
 
-      //   } 
-			// });
+			this.map.on('draw:edited', function () {
+				console.log('ma couche controle a été éditée');
+			});
 
-			// this.map.on('draw:edited', function () {
-			// 	console.log('ma couche controle a été éditée');
-			// });
-
-			// this.map.on('draw:deleted', function () {
-			// 	console.log('ma couche a été supprimée')
-			// });
+			this.map.on('draw:deleted', function () {
+				console.log('ma couche a été supprimée')
+			});
 
     },
 
@@ -319,9 +321,20 @@ define([
       });
     },
 
+    getGeometry: function(){
+      //TODO
+    },
+
     addGeometry: function(geom, fitBounds){
       var Geom = new L.geoJson(geom);
-      Geom.addTo(this.map);
+      if (this.drawable){
+        // Geom.addTo(this.drawnItems);
+        console.log(Geom)
+        this.drawnItems.addLayer(Geom.getLayers()[0]);
+      } else{
+
+        // Geom.addTo(this.map);
+      }
       if(fitBounds){
         
         this.map.fitBounds(Geom.getBounds());
@@ -400,7 +413,7 @@ define([
           'hybrid': hybrid
         };
         
-        _this.lControl = L.control.layers(baseMaps, null, {collapsed:true, position:'topleft'});
+        _this.lControl = L.control.layers(baseMaps, null, {collapsed:true, position:'topright'});
         _this.lControl.addTo(_this.map);
         _this.map.addLayer(hybrid);
 
