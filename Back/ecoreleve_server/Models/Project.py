@@ -52,7 +52,11 @@ class Project (HasDynamicProperties, Base):
 
     @geom.setter
     def geom(self, geoJSON_received):
-        self.poly = self.convert_geojson_to_wkt(geoJSON_received['geometry'])
+        if geoJSON_received:
+            self.poly = self.convert_geojson_to_wkt(
+                geoJSON_received['geometry'])
+        else:
+            self.poly = None
 
     Stations = relationship(
         'Station', back_populates='Project', cascade="all, delete-orphan")
