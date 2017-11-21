@@ -25,6 +25,16 @@ define([
 
   return DetailView.extend({
     ModelPrototype: ProjectModel,
+    events: {
+      'click button.NsFormModuleEdit': 'toggleMapControl'
+    },
+
+    toggleMapControl: function(e){
+      console.log('click Edit', e)
+      // this.map.toggleDrawing();
+      // this.map.setDrawControl();
+      
+    },
 
     displayGrids: function(){
       this.displayStationsGrid();
@@ -41,6 +51,7 @@ define([
 
       this.displayForm();
       this.displayGrids();
+      this.afterShow();
     },
 
     displayMap: function(geoJson) {
@@ -58,12 +69,28 @@ define([
     },
 
     afterShow: function(){
-      console.log(this.nsForm)
       var _this = this;
       $.when(this.nsForm.jqxhr).done(function(data){
-        var geom = data.data.poly;
-        _this.map.addGeometry(geom, true);
-      })
+        var geom = data.data.geom;
+        if(_this.map.drawnItems){
+          _this.map.drawnItems.clearLayers();
+        }
+        if(geom){
+          _this.map.addGeometry(geom, true);
+        } 
+      });
+
+
+      this.nsForm.butClickSave = function(e){
+        var geom;
+        if (_this.map.getGeometry().features.length > 0){
+          geom = _this.map.getGeometry().features[0];
+        } else {
+          geom = null;
+        }
+        _this.nsForm.model.set('geom',geom)
+        NsForm.prototype.butClickSave.call(this, e);
+      }
     },
 
     displayStationsGrid: function() {

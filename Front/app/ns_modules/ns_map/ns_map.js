@@ -87,7 +87,7 @@ define([
     this.regionLayer = options.regionLayer || false;
     this.dict = {}; //list of markers
     this.selectedMarkers = {}; // list of selected markers
-
+    this.center = config.mapCenter || [0,0];
     this.lastImported = false;
 
     this.init();
@@ -209,6 +209,32 @@ define([
       }
       
     },
+    setDrawControl: function(drawOptions){
+			var _this = this;
+      if (drawOptions == undefined || drawOptions == null){
+        drawOptions = {
+          circle:false,
+          rectangle:false,
+          polyline:false,
+          marker:false,
+          circlemarker:false
+        }
+      }
+      this.drawControl = new L.Control.Draw({
+				edit: {
+          featureGroup: _this.drawnItems,
+          // remove: false
+        },
+        draw: drawOptions , 
+        position : 'topleft'
+			});
+      this.map.addControl(this.drawControl);
+      // if(this.drawnItems){
+      //   var button = $('.leaflet-draw-toolbar.leaflet-bar.leaflet-draw-toolbar-top');
+      //   var markerButtons = button.find('a');
+      //   markerButtons.click(false);
+      // }
+    },
 
     initDrawLayer: function(){
       L.drawLocal.edit.toolbar.buttons = {
@@ -217,28 +243,11 @@ define([
         remove: "Delete marker",
         removeDisabled: "No marker to delete"
      };
-
-      console.log('init draw')
 			this.drawnItems = new L.FeatureGroup();
 			this.map.addLayer(this.drawnItems);
-			var _this = this;
-      
-
-			this.drawControl = new L.Control.Draw({
-				edit: {
-          featureGroup: _this.drawnItems,
-          // remove: false
-        },
-        draw:{
-          circle:false,
-          rectangle:false,
-          polyline:false,
-          marker:false,
-          circlemarker:false
-        }, 
-        position : 'topleft'
-			});
-      this.map.addControl(this.drawControl);
+      var _this = this;
+      this.setDrawControl();
+			
     //   var controlDiv = this.drawControl._toolbars.edit._toolbarContainer;
 
     //   var controlUI = L.DomUtil.create('a', 'leaflet-draw-edit-remove');
@@ -257,17 +266,13 @@ define([
 			this.map.on('draw:created', function (e) {
         var type = e.layerType,
         layer = e.layer;
-        console.log(layer)
         _this.drawnItems.addLayer(layer);
-        console.log('ma couche controle a été creer');
 			});
 
-			this.map.on('draw:edited', function () {
-				console.log('ma couche controle a été éditée');
+			this.map.on('draw:edited', function (e) {
 			});
 
 			this.map.on('draw:deleted', function () {
-				console.log('ma couche a été supprimée')
 			});
 
     },
@@ -278,10 +283,14 @@ define([
       if (button.hasClass('disabled-draw-control')) {
           button.removeClass('disabled-draw-control');
           markerButtons.removeClass('leaflet-disabled');
+          // this.setDrawControl();
+          
           // $('.leaflet-draw-edit-remove').addClass('leaflet-disabled');
         } else {
           button.addClass('disabled-draw-control');
+          button.attr('disabled','disabled');
           markerButtons.addClass('leaflet-disabled');
+          // this.setDrawControl(false);
           // $('.leaflet-draw-edit-remove').removeClass('leaflet-disabled');
       }
     },
@@ -322,7 +331,7 @@ define([
     },
 
     getGeometry: function(){
-      //TODO
+      return this.drawnItems.toGeoJSON();
     },
 
     addGeometry: function(geom, fitBounds){
@@ -336,7 +345,6 @@ define([
         // Geom.addTo(this.map);
       }
       if(fitBounds){
-        
         this.map.fitBounds(Geom.getBounds());
       }
     },
@@ -465,11 +473,8 @@ define([
       });
     },
 
-
     initClusters: function(geoJson){
       var _this= this;
-
-      
       var firstLvl= true;
       this.firstLvl= [];
       var CustomMarkerClusterGroup = L.MarkerClusterGroup.extend({
