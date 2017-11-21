@@ -52,8 +52,7 @@ class Project (HasDynamicProperties, Base):
 
     @geom.setter
     def geom(self, geoJSON_received):
-        print(geoJSON_received)
-        self.poly = self.convert_geojson_to_wkt(geoJSON_received)
+        self.poly = self.convert_geojson_to_wkt(geoJSON_received['geometry'])
 
     Stations = relationship(
         'Station', back_populates='Project', cascade="all, delete-orphan")
@@ -71,3 +70,8 @@ class Project (HasDynamicProperties, Base):
         g1 = geojson.loads(strJson)
         geom = shape(g1)
         return geom.wkt
+
+    def as_dict(self):
+        values = super().as_dict()
+        del values['poly']
+        return values
