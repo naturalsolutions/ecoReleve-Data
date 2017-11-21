@@ -33,12 +33,6 @@ def decimal_adapter(obj, request):
 
 def wkb_adapter(obj, request):
     """Json adapter for Decimal objects."""
-    print(obj)
-    print(str(obj))
-    print(str(obj).encode())
-    # obj = str(obj).encode()
-    # print(obj.__dict__)
-    # return {}
     return Feature(
         geometry=wkb.loads(bytes(obj.data)),
     )

@@ -60,23 +60,15 @@ class User(Base):
     def getUsersIds(strl):
         session = threadlocal.get_current_request().dbsession
         fieldworkersList = strl.split(',')
-        for i in range(len(fieldworkersList)): 
-            # clear space 
+        for i in range(len(fieldworkersList)):
+            # clear space
             fieldworkersList[i] = fieldworkersList[i].strip()
 
-        query = select([User.id], User.Login.in_(fieldworkersList)) 
+        query = select([User.id], User.Login.in_(fieldworkersList))
         res = session.execute(query)
 
         resultset = ''
         for row in res:
             resultset = resultset + ',' + str(row[0])
 
-        print(resultset)
-
         return resultset
-
-
-
-
-
-
