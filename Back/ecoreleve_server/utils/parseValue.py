@@ -82,7 +82,8 @@ def formatValue(data, schema):
     for key in data:
         if key in schema:
             if schema[key]['type'] == 'AutocompTreeEditor':
-                data[key] = formatThesaurus(data[key])
+                data[key] = formatThesaurus(
+                    data[key], schema[key]['options']['startId'])
             elif (schema[key]['type'] == 'ObjectPicker'
                     and key != 'FK_Individual'
                     and 'usedLabel' in schema[key]['options']):
@@ -91,15 +92,23 @@ def formatValue(data, schema):
     return data
 
 
-def formatThesaurus(data):
-    # print(thesaurusDictTraduction)
-    lng = threadlocal.get_current_request().authenticated_userid['userlanguage']
+def formatThesaurus(data, nodeID=None):
+    lng = threadlocal.get_current_request(
+    ).authenticated_userid['userlanguage']
     try:
+
+        if type(thesaurusDictTraduction[data]) is list:
+            displayValue = list(
+                filter(lambda x: x['parentID'] == int(nodeID), thesaurusDictTraduction[data]))[0]
+        else:
+            displayValue = thesaurusDictTraduction[data]
         data = {
-            'displayValue': thesaurusDictTraduction[data][lng],
+            'displayValue': displayValue[lng],
             'value': data
         }
     except:
+        # from traceback import print_exc
+        # print_exc()
         data = {
             'displayValue': data,
             'value': data
