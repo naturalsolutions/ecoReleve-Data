@@ -81,19 +81,19 @@ class RESTView(object):
     def get(self):
         return self.context.retrieve()
 
-    @view_config(request_method='POST', renderer='json', permission=NO_PERMISSION_REQUIRED)
+    @view_config(request_method='POST', renderer='json', permission='create')
     def post(self):
         return self.context.create()
 
-    @view_config(request_method='DELETE', renderer='json', permission=NO_PERMISSION_REQUIRED)
+    @view_config(request_method='DELETE', renderer='json', permission='delete')
     def delete(self):
         return self.context.delete()
 
-    @view_config(request_method='PATCH', renderer='json', permission=NO_PERMISSION_REQUIRED)
+    @view_config(request_method='PATCH', renderer='json', permission='update')
     def patch(self):
         return self.context.update()
 
-    @view_config(request_method='PUT', renderer='json', permission=NO_PERMISSION_REQUIRED)
+    @view_config(request_method='PUT', renderer='json', permission='update')
     def put(self):
         return self.context.update()
 
