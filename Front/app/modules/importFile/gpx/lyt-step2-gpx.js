@@ -143,8 +143,31 @@ define([
         });
         if (!text) {
           $(params.eGridCell).addClass('ag-cell-error');
+
+          var errorsColumn =  params.data['_errors'];
+          
+                if(!($.isArray(errorsColumn))) {
+                  errorsColumn = [];
+                }
+                errorsColumn.push(params.colDef.field);
+                errorsColumn = errorsColumn.filter(function(elem, index, self) {
+                    return index == self.indexOf(elem);
+                })
+                params.node.setDataValue('_errors', errorsColumn);
+    
         } else {
           $(params.eGridCell).removeClass('ag-cell-error');
+
+          var errorsColumn =  params.data['_errors'];
+          if(($.isArray(errorsColumn))) {
+            var index = errorsColumn.indexOf(params.colDef.field);
+            if (index > -1) {
+                errorsColumn.splice(index, 1);
+            }
+            params.node.setDataValue('_errors', errorsColumn);
+          }
+
+
         }
         return text;
       };
@@ -191,6 +214,11 @@ define([
       };
 
       var columnsDefs = [
+        {
+          field: '_errors',
+          headerName: 'ID',
+          hide: true
+        },
         {
           field: 'id',
           headerName: 'ID',
@@ -278,10 +306,12 @@ define([
 
     },
 
-
     validate: function() {
       var _this = this;
-
+      var rowAndErrors =  this.gridView.getRowDataAndErrors();
+      if(rowAndErrors.errors.length > 0){
+        return false;
+      }
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
       if(!selectedNodes.length){
         return;

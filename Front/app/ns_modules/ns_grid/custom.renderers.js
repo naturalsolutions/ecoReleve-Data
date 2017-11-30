@@ -166,7 +166,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         this.error = true;
         var editable;
         if(typeof params.colDef.editable === 'function'){
-        editable = params.colDef.editable(params);
+          editable = params.colDef.editable(params);
         } else {
           editable = params.colDef.editable;
         }
