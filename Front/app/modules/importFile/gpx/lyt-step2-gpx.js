@@ -100,27 +100,39 @@ define([
     displayGrid: function() {
       var _this = this;
 
-      var FieldActivityEditor = function () {
-      };
 
-      FieldActivityEditor.prototype.init = function(params){
-        var self = this;
-        this.select = document.createElement('select');
-        this.select.className = 'form-control';
-        _this.fieldActivityList.map(function(fa){
-          var option = document.createElement('option');
-          option.text = fa.label;
-          option.value = fa.value;
-          self.select.add(option);
-        });
-        this.select.value = params.value;
-      };
-      FieldActivityEditor.prototype.getGui = function(){
-        return this.select;
-      };
-      FieldActivityEditor.prototype.getValue = function() {
-        return this.select.value;
-      };
+    
+  
+      // var FieldActivityEditor = function () {
+      // };
+
+      // console.log(Editors.AutocompleteEditor)
+      // FieldActivityEditor.prototype.init = function(params){
+      //   var self = this;
+      //   this.select = document.createElement('select');
+      //   this.select.className = 'form-control';
+      //   _this.fieldActivityList.map(function(fa){
+      //     var option = document.createElement('option');
+      //     option.text = fa.label;
+      //     option.value = fa.value;
+      //     self.select.add(option);
+      //   });
+      //   this.select.value = params.value;
+      // };
+      // FieldActivityEditor.prototype.afterGuiAttached = function () {
+      //   $(this.select).focus();
+      //   setTimeout(function(){
+      //     $(this.select).find('select').click();
+
+      //   },5)
+      // };
+
+      // FieldActivityEditor.prototype.getGui = function(){
+      //   return this.select;
+      // };
+      // FieldActivityEditor.prototype.getValue = function() {
+      //   return this.select.value;
+      // };
 
       var FieldActivityRenderer = function(params){
         var text = '';
@@ -129,8 +141,50 @@ define([
             text = fa.label;
           }
         });
+        if (!text) {
+          $(params.eGridCell).addClass('ag-cell-error');
+        } else {
+          $(params.eGridCell).removeClass('ag-cell-error');
+        }
         return text;
       };
+
+      var FieldActivityEditor = function () {};
+      FieldActivityEditor.prototype = new Editors.AutocompleteEditor();
+      // FieldActivityEditor.prototype.initBBFE = function(options){
+      //   this.bbfe = new AutocompletePicker(options);
+      //   this.element = this.bbfe.render();
+      // };
+      FieldActivityEditor.prototype.afterGuiAttached = function(params){
+        console.log(this.bbfe.getValue())
+        params = {}
+        params.data = {}
+        params.data.fieldActivity = this.bbfe.getValue()
+        this.element.$el.focus();
+        this.element.$el.find('input').val(FieldActivityRenderer(params)).focus();
+        // this.element.$el.find('input').focus();
+      }
+
+      FieldActivityEditor.prototype.getValue = function(params){
+        var valueReturned;
+        var value = this.element.getValue()
+        console.log(value)
+        
+        if (isNaN(value)){
+          _this.fieldActivityList.map(function(fa){
+            if(value == fa.label){
+              valueReturned = fa.value;
+            }
+          });
+
+        }
+        else {
+          valueReturned = this.element.getValue();
+        }
+
+        return valueReturned;
+
+      }
 
       var dateTimestampRender = function(params){
         return Moment.unix(params.data.displayDate).format("DD/MM/YYYY HH:mm:SS");
@@ -171,6 +225,14 @@ define([
           headerName: 'Field Activity',
           cellEditor: FieldActivityEditor,
           cellRenderer: FieldActivityRenderer,
+          schema: {
+            validators:[],
+            editable: true,
+            editorClass :"form-control",
+            editorAttrs:{disabled: false},
+            options:{iconFont: "reneco reneco-autocomplete", source: this.fieldActivityList, minLength: 3},
+            fieldClass :"None col-md-6"
+           },
           filter : "select",
           filterParams : { selectList : this.fieldActivityList }
         },{
