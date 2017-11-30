@@ -80,6 +80,17 @@ define([
 		};
 	};
 
+	validators.maxLength = function(options) {
+				return function checkMaxLength(value, attrs) {
+				  var err = {
+					type: options.type,
+					message: "Text max length is 250"
+				  };
+		
+				  if (value.length > 250) return err;
+				};
+			};
+
 	  validators.requiredSelect = function(options) {
 	    options = _.extend({
 	      type: 'required',
@@ -375,82 +386,83 @@ define([
 			}
 		});
 
-		editors.Number = Backbone.Form.Number.extend({
 
-			defaultValue: '',
+		// editors.Number = Backbone.Form.editors.Number.extend({
 
-			events: _.extend({}, editors.Number.prototype.events, {
-			//'keypress': 'onKeyPress',
-			//'change': 'onKeyPress',
-			'keyup': 'onKeyUp'
-			}),
+		// 	defaultValue: '',
 
-			initialize: function(options) {
-				Backbone.Form.Number.prototype.initialize.call(this, options);
+		// 	events: _.extend({}, editors.Number.prototype.events, {
+		// 	//'keypress': 'onKeyPress',
+		// 	//'change': 'onKeyPress',
+		// 	'keyup': 'onKeyUp'
+		// 	}),
 
-				var schema = this.schema;
+		// 	initialize: function(options) {
+		// 		//Backbone.Form.editors.Number.prototype.initialize.call(this, options);
+		// 		Form.editors.Base.prototype.initialize.call(this, options);
+		// 		var schema = this.schema;
 
-				this.$el.attr('type', 'number');
+		// 		this.$el.attr('type', 'number');
 
-					// provide a default for `step` attr,
-					// but don't overwrite if already specified
-				if (!schema || !schema.editorAttrs || !schema.editorAttrs.step) {
-						// provide a default for `step` attr,
-						// but don't overwrite if already specified
-						this.min = 0;
-						this.$el.attr('min','0');
-						this.$el.attr('step', 'any');
-					}
-				if(schema.options) {
-					if( schema.options.min ) {
-						this.$el.attr('min', schema.options.min);
-						this.min =  parseInt(schema.options.min);
-					}
-					if( schema.options.max ) {
-						this.$el.attr('max', schema.options.max);
-						this.max =  parseInt(schema.options.max);
+		// 			// provide a default for `step` attr,
+		// 			// but don't overwrite if already specified
+		// 		if (!schema || !schema.editorAttrs || !schema.editorAttrs.step) {
+		// 				// provide a default for `step` attr,
+		// 				// but don't overwrite if already specified
+		// 				this.min = 0;
+		// 				this.$el.attr('min','0');
+		// 				this.$el.attr('step', 'any');
+		// 			}
+		// 		if(schema.options) {
+		// 			if( schema.options.min ) {
+		// 				this.$el.attr('min', schema.options.min);
+		// 				this.min =  parseInt(schema.options.min);
+		// 			}
+		// 			if( schema.options.max ) {
+		// 				this.$el.attr('max', schema.options.max);
+		// 				this.max =  parseInt(schema.options.max);
 
-					}
-					if( schema.options.step ) {
-						this.$el.attr('step', schema.options.step);
-					}
-				}
-			},
+		// 			}
+		// 			if( schema.options.step ) {
+		// 				this.$el.attr('step', schema.options.step);
+		// 			}
+		// 		}
+		// 	},
 
-			onKeyUp: function(event) {
-				if (typeof this.min === 'number' && (parseInt(this.$el.val()) < this.min)){
-						this.$el.val('');
-				}
-				if (typeof this.max === 'number' && (parseInt(this.$el.val()) > this.max)){
-					this.$el.val('');
-					}
-				if (this.$el.val() == ''){ //abort value if not a number ex : 99--9
-					this.$el.val('');
-				}
-			},
+		// 	onKeyUp: function(event) {
+		// 		if (typeof this.min === 'number' && (parseInt(this.$el.val()) < this.min)){
+		// 				this.$el.val('');
+		// 		}
+		// 		if (typeof this.max === 'number' && (parseInt(this.$el.val()) > this.max)){
+		// 			this.$el.val('');
+		// 			}
+		// 		if (this.$el.val() == ''){ //abort value if not a number ex : 99--9
+		// 			this.$el.val('');
+		// 		}
+		// 	},
 
 
-			getValue: function() {
-			var value = this.$el.val();
+		// 	getValue: function() {
+		// 	var value = this.$el.val();
 
-			return value === "" ? null : parseFloat(value, 10);
-			},
+		// 	return value === "" ? null : parseFloat(value, 10);
+		// 	},
 
-			setValue: function(value) {
-				value = (function() {
-					if (_.isNumber(value)) return value;
+		// 	setValue: function(value) {
+		// 		value = (function() {
+		// 			if (_.isNumber(value)) return value;
 
-					if (_.isString(value) && value !== '') return parseFloat(value, 10);
+		// 			if (_.isString(value) && value !== '') return parseFloat(value, 10);
 
-					return null;
-				})();
+		// 			return null;
+		// 		})();
 
-				if (_.isNaN(value)) value = null;
+		// 		if (_.isNaN(value)) value = null;
 
-				Backbone.Form.Number.prototype.setValue.call(this, value);
-			}
+		// 		Form.editors.Base.prototype.setValue.call(this, value);
+		// 	}
 
-		});
+		// });
 
 
 	editors.BackboneDatepicker = Form.editors.Base.extend({
