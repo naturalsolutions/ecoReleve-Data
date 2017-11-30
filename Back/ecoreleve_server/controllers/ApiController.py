@@ -77,7 +77,7 @@ class RESTView(object):
         self.request = request
         self.context = context
 
-    @view_config(request_method='GET', renderer='json', permission=NO_PERMISSION_REQUIRED)
+    @view_config(request_method='GET', renderer='json', permission='read')
     def get(self):
         return self.context.retrieve()
 
