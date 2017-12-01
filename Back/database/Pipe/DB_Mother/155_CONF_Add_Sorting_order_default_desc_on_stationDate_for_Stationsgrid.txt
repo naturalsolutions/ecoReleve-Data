@@ -1,0 +1,12 @@
+UPDATE [ModuleGrids] 
+SET  [ColumnParams] =  '{ "pinned" : "left", "sort": "desc" }'
+WHERE
+[Module_ID] = (SELECT [ID] FROM [FrontModules] WHERE [Name] = 'StationGrid')
+AND 
+[Name] = 'StationDate'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('155_CONF_Add_Sorting_order_default_desc_on_stationDate_for_Stationsgrid',GETDATE(),(SELECT db_name()))
+
+
+GO

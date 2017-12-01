@@ -135,6 +135,7 @@ class Observation(HasDynamicProperties, Base):
                 if subObs is not None:
                     subObs.values = curData
                     listObs.append(subObs)
+                    self.session.add(subObs)
                     self.session.flush()
         self.Observation_children = listObs
 
