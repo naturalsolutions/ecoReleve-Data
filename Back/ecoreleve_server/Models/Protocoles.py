@@ -192,10 +192,12 @@ class Observation(HasDynamicProperties, Base):
 
         return resultat
 
+    def afterDelete(self):
+        self.deleteLinkedField()
 
-@event.listens_for(Observation, 'after_delete')
-def unlinkLinkedField(mapper, connection, target):
-    target.deleteLinkedField()
+# @event.listens_for(Observation, 'after_delete')
+# def unlinkLinkedField(mapper, connection, target):
+#     target.deleteLinkedField()
 
 
 class ObservationDynPropSubValue (Base):

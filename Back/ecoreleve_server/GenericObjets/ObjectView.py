@@ -135,8 +135,9 @@ class DynamicObjectView(CustomView):
 
     def update(self):
         data = self.request.json_body
-        # self.objectDB.beforeUpdate()
+        self.objectDB.beforeUpdate()
         self.objectDB.values = data
+        self.objectDB.afterUpdate()
         return 'updated'
 
     def delete(self):

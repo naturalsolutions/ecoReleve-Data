@@ -251,6 +251,18 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
             ).key
             setattr(self, propertyName, parser(value))
 
+    def beforeDelete(self):
+        pass
+
+    def afterDelete(self):
+        pass
+
+    def beforeUpdate(self):
+        pass
+
+    def afterUpdate(self):
+        pass
+
     def getForm(self, displayMode='edit', type_=None, moduleName=None):
         from ..utils.parseValue import formatValue
         isGrid = False
