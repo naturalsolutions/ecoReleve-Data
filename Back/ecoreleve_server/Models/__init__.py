@@ -4,6 +4,12 @@ from sqlalchemy import select
 from sqlalchemy.exc import TimeoutError
 import pandas as pd
 from traceback import print_exc
+import requests
+from multiprocessing.dummy import Pool as ThreadPool
+import copy
+import time
+import redis
+
 
 AppConfig = configparser.ConfigParser()
 AppConfig.read('././development.ini')
@@ -19,6 +25,7 @@ DBSession = None
 class myBase(object):
 
     __table_args__ = {'implicit_returning': False}
+
 
 Base = declarative_base(cls=myBase)
 BaseExport = declarative_base()
@@ -49,18 +56,88 @@ invertedThesaurusDict = {'en': {}, 'fr': {}}
 userOAuthDict = {}
 
 
-def loadThesaurusTrad(config):
+def flattenThesaurus(nodes):
+    items = []
+    for node in nodes:
+        if node.get('children', None):
+            items.extend(flattenThesaurus(node.get('children', [])).items())
+        else:
+            items.append((node['fullpath'], node['valueTranslated']))
+    return dict(items)
+
+
+def fetchThes(args):
+    try:
+        args['lng'] = 'en'
+        url = dbConfig['wsThesaurus']['wsUrl'] + '/fastInitForCompleteTree'
+        responseEn = requests.post(url, args)
+
+        if responseEn.status_code != 200:
+            time.sleep(3)
+            responseEn = requests.post(url, args)
+
+        args['lng'] = 'fr'
+        responseFr = requests.post(url, args)
+
+        if responseFr.status_code != 200:
+            time.sleep(3)
+            responseFr = requests.post(url, args)
+
+        thesaurusNode = json.loads(responseEn.text)
+        thesaurusNodeFr = json.loads(responseFr.text)
+        return (thesaurusNode['key'], {'en': flattenThesaurus(thesaurusNode['children']),
+                                       'fr': flattenThesaurus(thesaurusNodeFr['children'])
+                                       })
+    except:
+        print('thesaurus not loaded for nodeID : ' + args['StartNodeID'])
+        return (args['StartNodeID'], {})
+
+
+def getThesaurusNodeID(config):
+    if not dbConfig.get('wsThesaurus', None):
+        print('\n NO thesaurus API')
+        return
+
+    print('\n pull from Thesaurus API \n')
     session = config.registry.dbmaker()
-    thesTable = Base.metadata.tables['ERDThesaurusTerm']
-    query = select(thesTable.c)
-
-    results = session.execute(query).fetchall()
-
-    for row in results:
-        thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr':row['nameFr']}
-        invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
-        invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
+    ModuleFormTable = Base.metadata.tables['ModuleForms']
+    query = select([ModuleFormTable.c['Options']]
+                   ).distinct(ModuleFormTable.c['Options']
+                              ).where(ModuleFormTable.c['InputType'] == 'AutocompTreeEditor')
+    startIDs = [r for r, in session.execute(query).fetchall()]
     session.close()
+
+    thread_pool = ThreadPool(10)
+    thesaurusList = dict(thread_pool.map_async(
+        fetchThes, [{"StartNodeID": nodeID} for nodeID in startIDs[:5]]).get())
+
+    return thesaurusList
+
+
+def loadThesaurusTrad(config):
+    r = redis.Redis('localhost')
+    global thesaurusDictTraduction
+    if not r.get('thesaurusDictTraduction'):
+        thesaurusDictTraduction = getThesaurusNodeID(config)
+        r.set('thesaurusDictTraduction', json.dumps(thesaurusDictTraduction))
+    else:
+        thesaurusDictTraduction = json.loads(
+            r.get('thesaurusDictTraduction').decode())
+
+    return thesaurusDictTraduction
+    # session = config.registry.dbmaker()
+
+    # thesTable = Base.metadata.tables['ERDThesaurusTerm']
+    # query = select(thesTable.c)
+
+    # results = session.execute(query).fetchall()
+
+    # for row in results:
+    #     thesaurusDictTraduction[row['fullPath']] = {
+    #         'en': row['nameEn'], 'fr': row['nameFr']}
+    #     invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
+    #     invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
+    # session.close()
 
 
 def loadUserRole(session):
@@ -72,6 +149,7 @@ def loadUserRole(session):
     results = session.execute(query).fetchall()
     userOAuthDict = pd.DataFrame.from_records(
         results, columns=['user_id', 'role_id'])
+
 
 USERS = {2: 'superUser',
          3: 'user',
@@ -85,7 +163,8 @@ GROUPS = {'superUser': ['group:superUsers'],
 def groupfinder(userid, request):
     session = request.dbsession
     Tuser_role = Base.metadata.tables['VUser_Role']
-    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(userid))
+    query_check_role = select([Tuser_role.c['role']]).where(
+        Tuser_role.c['userID'] == int(userid))
     currentUserRoleID = session.execute(query_check_role).scalar()
 
     if currentUserRoleID in USERS:
@@ -113,19 +192,19 @@ def db(request):
         else:
             try:
                 session.commit()
-            except BusinessRuleError as e :
+            except BusinessRuleError as e:
                 session.rollback()
                 request.response.status_code = 409
-                request.response.text= e.value
+                request.response.text = e.value
             except Exception as e:
                 session.rollback()
             finally:
                 session.close()
                 makerDefault.remove()
-            
 
     request.add_finished_callback(cleanup)
     return session
+
 
 from ..GenericObjets.ObjectWithDynProp import LinkedTables
 from ..GenericObjets.FrontModules import *

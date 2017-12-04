@@ -3,6 +3,10 @@ from pyramid import threadlocal
 from ..Models import Base
 from sqlalchemy import select
 from datetime import datetime
+import json
+import redis
+r = redis.Redis('localhost')
+thesaurusDictTraduction = json.loads(r.get('thesaurusDictTraduction').decode())
 
 dictVal = {
     'null': None,
@@ -82,7 +86,8 @@ def formatValue(data, schema):
     for key in data:
         if key in schema:
             if schema[key]['type'] == 'AutocompTreeEditor':
-                data[key] = formatThesaurus(data[key])
+                data[key] = formatThesaurus(
+                    schema[key]['options']['startId'], data[key])
             elif (schema[key]['type'] == 'ObjectPicker'
                     and key != 'FK_Individual'
                     and 'usedLabel' in schema[key]['options']):
@@ -91,12 +96,14 @@ def formatValue(data, schema):
     return data
 
 
-def formatThesaurus(data):
-    # print(thesaurusDictTraduction)
-    lng = threadlocal.get_current_request().authenticated_userid['userlanguage']
+def formatThesaurus(nodeId, data):
+    # print(dbConfig['thesaurusDictTraduction'])
+    # thesaurusDictTraduction = dbConfig['thesaurusDictTraduction']
+    lng = threadlocal.get_current_request(
+    ).authenticated_userid['userlanguage']
     try:
         data = {
-            'displayValue': thesaurusDictTraduction[data][lng],
+            'displayValue': thesaurusDictTraduction[nodeId][lng][data],
             'value': data
         }
     except:
