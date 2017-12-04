@@ -3,8 +3,8 @@ from ..Models import (
     Station,
     Observation,
     ProtocoleType,
-    invertedThesaurusDict,
-    thesaurusDictTraduction
+    # invertedThesaurusDict,
+    # thesaurusDictTraduction
 )
 import json
 from datetime import datetime
@@ -16,7 +16,7 @@ from ..controllers.security import RootCore, context_permissions
 from ..Models.Equipment import checkEquip
 from .individual import IndividualsView
 from . import CustomView
-from ..utils.parseValue import isNumeric
+from ..utils.parseValue import isNumeric, retrieveThesaurusFromLng
 import operator
 from ..Models.Equipment import set_equipment
 
@@ -357,7 +357,7 @@ def isavailableSensor(request, data):
 def getFullpath(item, lng):
     name, val = item
     try:
-        newVal = invertedThesaurusDict[lng][val]
+        newVal = retrieveThesaurusFromLng(val, lng)
     except:
         newVal = val
     return (name, newVal)

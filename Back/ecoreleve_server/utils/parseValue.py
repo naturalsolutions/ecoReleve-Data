@@ -110,6 +110,19 @@ def formatThesaurus(nodeId, data):
     return data
 
 
+def retrieveThesaurusFromLng(data, lng):
+    from ..utils.loadThesaurus import thesaurusDictTraduction
+    # lng = 'en'
+    # data = 'dead'
+    for node, children in thesaurusDictTraduction.items():
+        print('searching in node : ' + node)
+        filtering = list(
+            filter(lambda k: children[lng][k] == data, children[lng].keys()))
+        if filtering:
+            break
+    return filtering[0]
+
+
 def formatObjetPicker(data, key, label):
     autcompResult = getAutcompleteValues(data, key.replace('FK_', ''), label)
     return {'displayValue': autcompResult,

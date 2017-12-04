@@ -72,7 +72,7 @@ def getThesaurusNodeID(config):
 def loadThesaurusTrad(config):
     global thesaurusDictTraduction
     try:
-        import rediss
+        import redis
         r = redis.Redis('localhost')
 
         if not r.get('thesaurusDictTraduction'):
@@ -83,11 +83,12 @@ def loadThesaurusTrad(config):
             thesaurusDictTraduction = json.loads(
                 r.get('thesaurusDictTraduction').decode())
 
-        return thesaurusDictTraduction
+        # return thesaurusDictTraduction
     except:
         from traceback import print_exc
         print_exc()
         thesaurusDictTraduction = getThesaurusNodeID(config)
+
     # session = config.registry.dbmaker()
 
     # thesTable = Base.metadata.tables['ERDThesaurusTerm']
