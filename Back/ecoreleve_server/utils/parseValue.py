@@ -1,12 +1,8 @@
-from ..Models import thesaurusDictTraduction
 from pyramid import threadlocal
 from ..Models import Base
 from sqlalchemy import select
 from datetime import datetime
-import json
-import redis
-r = redis.Redis('localhost')
-thesaurusDictTraduction = json.loads(r.get('thesaurusDictTraduction').decode())
+
 
 dictVal = {
     'null': None,
@@ -97,8 +93,8 @@ def formatValue(data, schema):
 
 
 def formatThesaurus(nodeId, data):
-    # print(dbConfig['thesaurusDictTraduction'])
-    # thesaurusDictTraduction = dbConfig['thesaurusDictTraduction']
+    from ..utils.loadThesaurus import thesaurusDictTraduction
+
     lng = threadlocal.get_current_request(
     ).authenticated_userid['userlanguage']
     try:

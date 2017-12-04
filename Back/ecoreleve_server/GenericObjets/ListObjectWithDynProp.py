@@ -15,7 +15,6 @@ from ..utils import Eval
 import pandas as pd
 from pyramid import threadlocal
 from ..utils.datetime import parse
-from ..utils.parseValue import thesaurusDictTraduction
 
 
 eval_ = Eval()
@@ -542,6 +541,7 @@ def splitFullPath(key, listWithThes):
 
 
 def tradThesaurusTerm(key, listWithThes, userLng='en'):
+    from ..utils.loadThesaurus import thesaurusDictTraduction
     name, val = key
     try:
         withThes = list(filter(lambda x: x['name'] == name, listWithThes))
