@@ -89,6 +89,6 @@ class BusinessRules(Base):
         result = session.execute(stmt).scalar()
 
         # print('\n -----  EXEC '+self.executing, ' Event: '+self.actionType , ' result: ', result)
-        if result or self.actionType == 'before_delete':
+        if result:
             self.raiseError()
         # return result
