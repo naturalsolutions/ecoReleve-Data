@@ -1,0 +1,9 @@
+DELETE ModuleForms 
+WHERE name = 'timezone'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('147_Up_CONF_GPX_Form_remove_timezone',GETDATE(),(SELECT db_name()))
+
+
+GO

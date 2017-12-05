@@ -4,9 +4,9 @@ define([
   'backbone',
   'marionette',
   'ns_form/NSFormsModuleGit',
-
+  'sweetAlert',
   'i18n'
-], function($, _, Backbone, Marionette, NsForm) {
+], function($, _, Backbone, Marionette, NsForm, Swal) {
   'use strict';
   return Marionette.LayoutView.extend({
     template: 'app/modules/stations/protocols/observation.tpl.html',
@@ -86,30 +86,57 @@ define([
     handleErrors: function(response){
       // individual equipment sensor is not available
       var btnColor = 'rgb(221, 107, 85)';
-      if( response.status=== 409) {
-            var opts = {
-              title : 'Error',
-              text : 'You cannot do this modification because data have already been validated with this sensor. Please contact an administrator.',
-              allowEscapeKey: false,
-              showCancelButton: false,
-              type: 'error',
-              confirmButtonText: 'OK!',
-              confirmButtonColor: '#DD6B55'
-            };
-            this.swal(opts);
-      }
-      else if(response.responseJSON.response.equipment_error){
-       this.swal({'title':'Data saving error', 'type':'error', 'text':'Selected sensor is not available', 'confirmButtonColor':'rgb(221, 107, 85)'});
-      }
-      else if(response.responseJSON.response.unequipment_error ){
-      this.swal({'title':'Data saving error', 'type':'error', 'text':"Selected sensor can't be unequiped at this date with this "+response.responseJSON.response.unequipment_error, 'confirmButtonColor':'rgb(221, 107, 85)'});
-      }
-      else if(response.responseJSON.response.errorSite == true ){
-      this.swal({'title':'Data saving error', 'type':'error', 'text':'No monitored site is attached', 'confirmButtonColor':'rgb(221, 107, 85)'});
-      }
-      else {
-        this.swal({'title':'Data saving error', 'type':'error', 'text':response.responseJSON.response, 'confirmButtonColor':'rgb(221, 107, 85)'});
-      }
+      // if( response.status=== 409) {
+      //       var opts = {
+      //         title : 'Data saving error',
+      //         text : response.responseText,
+      //         allowEscapeKey: false,
+      //         showCancelButton: false,
+      //         type: 'error',
+      //         confirmButtonText: 'OK!',
+      //         confirmButtonColor: '#DD6B55'
+      //       };
+      //       this.swal(opts);
+      // }
+      // else
+      //    if (response.status=== 520){
+      //   this.swal({'title':'Data saving error', 'type':'error', 'text':response.responseText, 'confirmButtonColor':'rgb(221, 107, 85)'})
+      // }
+      if(response.status == 409){
+        var msg = response.responseJSON;
+        var msgText;
+        if(msg && msg.response) {
+          msgText = msg.response;
+        } else {
+          msgText = response.responseText;
+        }
+        Swal({
+          title: 'Data conflicts',
+          text: msgText,
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(240, 173, 78)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        });
+      } 
+
+        if (response.responseJSON)
+         {
+           if(response.responseJSON.response.equipment_error){
+              this.swal({'title':'Data saving error', 'type':'error', 'text':'Selected sensor is not available', 'confirmButtonColor':'rgb(221, 107, 85)'});
+              }
+              else if(response.responseJSON.response.unequipment_error ){
+              this.swal({'title':'Data saving error', 'type':'error', 'text':"Selected sensor can't be unequiped at this date with this "+response.responseJSON.response.unequipment_error, 'confirmButtonColor':'rgb(221, 107, 85)'});
+              }
+              else if(response.responseJSON.response.errorSite == true ){
+              this.swal({'title':'Data saving error', 'type':'error', 'text':'No monitored site is attached', 'confirmButtonColor':'rgb(221, 107, 85)'});
+              }
+            //   else {
+            //     this.swal({'title':'Data saving error', 'type':'error', 'text':response.responseJSON.response, 'confirmButtonColor':'rgb(221, 107, 85)'});
+            // }
+        }
+  
     },
 
     onDestroy: function(){

@@ -38,6 +38,7 @@ define([
       this.model = options.model;
       this.cols = [];
       this.model.set('columns', this.cols);
+      
     },
 
     onShow: function() {
@@ -56,6 +57,7 @@ define([
       };
       this.rgGrid.show(this.gridView = new GridView({
         clientSide: true,
+        filters: this.model.get('filters'),
         url: 'export/views/' + this.model.get('viewId') + '/',
         afterFirstRowFetch: afterFirstRowFetch
       }));

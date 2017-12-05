@@ -2,7 +2,7 @@
 	"tiles" :{
 		"input" : "Saisie",
 		"manual-import" : "Import",
-		"auto-import" : "Import automatique",
+		"history-import" : "Historique des Imports",
 		"export" : "Export",
 		"sites" : "Sites monitorés",
 		"individuals" : "Individus",

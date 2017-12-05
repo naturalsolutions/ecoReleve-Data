@@ -4,11 +4,13 @@ from sqlalchemy import select, and_
 from sqlalchemy.exc import IntegrityError
 from ..Models import (
     Rfid,
-    dbConfig
+    dbConfig,
+    Import
 )
 from traceback import print_exc
 import pandas as pd
 from pyramid import threadlocal
+import itertools
 
 
 def uploadFileRFID(request):
@@ -23,6 +25,7 @@ def uploadFileRFID(request):
         idModule = int(request.POST['FK_Sensor'])
         startEquip = request.POST['StartDate']
         endEquip = request.POST['EndDate']
+        filename = request.POST['fileName']
         now = datetime.now()
 
         if re.compile('\r\n').search(content):
@@ -144,10 +147,20 @@ def uploadFileRFID(request):
 
             data_to_insert = checkDuplicatedRFID(
                 data_to_check, min(allDate), max(allDate), idModule)
-
             data_to_insert = data_to_insert.drop(['id_'], 1)
             data_to_insert = data_to_insert.drop_duplicates()
 
+            importObj = Import(ImportFileName=filename, FK_User=creator, ImportDate=now)
+            importObj.ImportType = 'RFID'
+            importObj.maxDate = max(allDate)
+            importObj.minDate = min(allDate)
+            importObj.nbRows = data_to_check.shape[0]
+            importObj.nbInserted = data_to_insert.shape[0]
+
+            session.add(importObj)
+            session.flush()
+
+            data_to_insert.loc[:, ('FK_Import')] = list(itertools.repeat(importObj.ID, len(data_to_insert.index)))
             if data_to_insert.shape[0] == 0:
                 raise(IntegrityError)
 
@@ -161,10 +174,9 @@ def uploadFileRFID(request):
             message = 'inserted rows : ' + str(data_to_insert.shape[0])
             return message
         else:
-            print( str(allDate[0]))
-            print( str(allDate[-1]))
+            session.rollback()
             request.response.status_code = 510
-            message = 'File dates (first date : ' + str(allDate[0])+ ', last date : ' + str(allDate[-1])+ ') don''t correspond with the deploy/remove dates of the selected module'
+            message = 'File dates (first date : ' + str(allDate[0])+ ', last date : ' + str(allDate[-1])+ ') do not correspond with the deploy/remove dates of the selected module'
             return message
 
     except IntegrityError as e:

@@ -82,17 +82,17 @@ def main(global_config, **settings):
     dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
     dbConfig['data_schema'] = settings['data_schema']
 
-    Base.metadata.bind = engine
-    Base.metadata.create_all(engine)
-    Base.metadata.reflect(views=True, extend_existing=False)
-
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
     config.include('pyramid_jwtauth')
 
-    config.registry.dbmaker = scoped_session(sessionmaker(bind=engine))
+    config.registry.dbmaker = scoped_session(sessionmaker(bind=engine, autoflush=False))
     dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine))
     config.add_request_method(db, name='dbsession', reify=True)
+
+    Base.metadata.bind = engine
+    Base.metadata.create_all(engine)
+    Base.metadata.reflect(views=True, extend_existing=False)
 
     if 'loadExportDB' in settings and settings['loadExportDB'] == 'False':
         print('''

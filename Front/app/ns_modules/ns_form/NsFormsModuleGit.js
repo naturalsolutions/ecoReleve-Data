@@ -580,10 +580,20 @@ define([
           }
         },
         error: function(model , response){
-          if( response.status == 409) {
+          if( response.status === 409) {
+              Swal({
+                title: 'Data conflicts',
+                text: response.responseText,
+                type: 'warning',
+                showCancelButton: false,
+                confirmButtonColor: 'rgb(240, 173, 78)',
+                confirmButtonText: 'OK',
+                closeOnConfirm: true,
+              });
+          } else {
               var opts = {
                 title : 'Error',
-                text : 'You cannot do this modification because data have already been validated with this sensor. Please contact an administrator.',
+                text : 'An error occured. Please contact an administrator.',
                 allowEscapeKey: false,
                 showCancelButton: false,
                 type: 'error',
@@ -667,6 +677,29 @@ define([
 
     savingError: function (response) {
       // To be extended, called after save on model if error
+      var _this = this;
+      if( response.status == 409) {
+        Swal({
+          title: 'Data conflicts',
+          text: response.responseText,
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(240, 173, 78)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        });
+    } else {
+        var opts = {
+          title : 'Error',
+          text : 'An error occured. Please contact an administrator.',
+          allowEscapeKey: false,
+          showCancelButton: false,
+          type: 'error',
+          confirmButtonText: 'OK!',
+          confirmButtonColor: '#DD6B55'
+        };
+        setTimeout(  function () {_this.swal(opts);}, 400);
+    }
     },
 
     loadingError : function(response) {

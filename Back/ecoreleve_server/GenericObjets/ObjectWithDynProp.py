@@ -7,6 +7,7 @@ from pyramid import threadlocal
 from ..utils.parseValue import find, isEqual, parser
 from abc import abstractmethod
 from sqlalchemy.orm.exc import *
+from .Business import *
 from traceback import print_exc
 
 
@@ -40,6 +41,9 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
     @abstractmethod
     def GetType(self):
+        pass
+
+    def bulk_insert(sef):
         pass
 
     def GetAllProp(self):
@@ -102,7 +106,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         DbObject.setProperty(self, propertyName, value)
         if (propertyName.lower() in self.GetType().DynPropNames):
             if ((propertyName not in self.__properties__
-                    ) or (isEqual(self.__properties__[propertyName], value) is False)):
+                 ) or (isEqual(self.__properties__[propertyName], value) is False)):
 
                 value = parser(value)
                 oldValueObject = None
@@ -110,7 +114,8 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
                     oldValueObject = self.getDynPropWithDate(
                         propertyName, StartDate=useDate)
 
-                self.setPropertyAtDate(propertyName, value, useDate, oldValueObject)
+                self.setPropertyAtDate(
+                    propertyName, value, useDate, oldValueObject)
                 self.__properties__[propertyName] = value
             else:
                 '''dynamic property already exist with the same value
@@ -120,7 +125,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
     def setPropertyAtDate(self, propertyName, value, useDate=None, existingValueObject=None):
         if not existingValueObject:
             valueObject = self.GetNewValue(propertyName)
-            valueObject.StartDate = datetime.today() if useDate is None else useDate
+            valueObject.StartDate = datetime.utcnow() if useDate is None else useDate
         else:
             valueObject = existingValueObject
         setattr(valueObject, analogType[
@@ -142,22 +147,23 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         return res
 
     def LoadNowValues(self):
-        curQuery = 'select V.*, P.Name,P.TypeProp from ' + self.GetDynPropValuesTable() + \
-            ' V JOIN ' + self.GetDynPropTable() + \
-            ' P ON P.' + self.GetDynPropValuesTableID() + '= V.' + \
-            self.GetDynPropFKName() + ' where '
-        curQuery += 'not exists (select * from ' + \
-            self.GetDynPropValuesTable() + ' V2 '
-        curQuery += 'where V2.' + self.GetDynPropFKName() + ' = V.' +  self.GetDynPropFKName() + ' and V2.' + \
-            self.GetSelfFKNameInValueTable() + ' = V.' + self.GetSelfFKNameInValueTable() + ' '
-        curQuery += 'AND V2.startdate > V.startdate)'
-        curQuery += 'and v.' + self.GetSelfFKNameInValueTable() + ' =  ' + \
-            str(self.GetpkValue())
+        if self.GetpkValue():
+            curQuery = 'select V.*, P.Name,P.TypeProp from ' + self.GetDynPropValuesTable() + \
+                ' V JOIN ' + self.GetDynPropTable() + \
+                ' P ON P.' + self.GetDynPropValuesTableID() + '= V.' + \
+                self.GetDynPropFKName() + ' where '
+            curQuery += 'not exists (select * from ' + \
+                self.GetDynPropValuesTable() + ' V2 '
+            curQuery += 'where V2.' + self.GetDynPropFKName() + ' = V.' + self.GetDynPropFKName() + ' and V2.' + \
+                self.GetSelfFKNameInValueTable() + ' = V.' + self.GetSelfFKNameInValueTable() + ' '
+            curQuery += 'AND V2.startdate > V.startdate)'
+            curQuery += 'and v.' + self.GetSelfFKNameInValueTable() + ' =  ' + \
+                str(self.GetpkValue())
 
-        Values = self.session.execute(curQuery).fetchall()
-        for curValue in Values:
-            row = OrderedDict(curValue)
-            self.__properties__[row['Name']] = self.GetRealValue(row)
+            Values = self.session.execute(curQuery).fetchall()
+            for curValue in Values:
+                row = OrderedDict(curValue)
+                self.__properties__[row['Name']] = self.GetRealValue(row)
 
     def GetRealValue(self, row):
         return row[analogType[row['TypeProp']]]
@@ -169,7 +175,8 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         if (ObjType.Status == 10):
             isGrid = True
 
-        form = ConfiguredDbObjectMapped.getForm(self, displayMode, ObjType.ID, moduleName, isGrid=isGrid)
+        form = ConfiguredDbObjectMapped.getForm(
+            self, displayMode, ObjType.ID, moduleName, isGrid=isGrid)
 
         form['data'] = {'id': 0}
         data = formatValue(form['schema']['defaultValues'], form['schema'])
@@ -212,7 +219,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         return [dict(row) for row in Values]
 
     def linkedFieldDate(self):
-        return datetime.now()
+        return datetime.utcnow()
 
     def updateLinkedField(self, data, useDate=None, previousState=None):
         if useDate is None:
@@ -240,9 +247,11 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
                 continue
 
             if linkedObj in entitiesToUpdate:
-                entitiesToUpdate[linkedObj][linkedPropName] = self.getProperty(curPropName)
+                entitiesToUpdate[linkedObj][linkedPropName] = self.getProperty(
+                    curPropName)
             else:
-                entitiesToUpdate[linkedObj] = {linkedPropName: self.getProperty(curPropName)}
+                entitiesToUpdate[linkedObj] = {
+                    linkedPropName: self.getProperty(curPropName)}
 
         for entity in entitiesToUpdate:
             data = entitiesToUpdate[entity]
@@ -261,7 +270,8 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
             try:
                 linkedField = linkProp['LinkedField'].replace('@Dyn:', '')
                 if previousState:
-                    linkedSource = previousState.get(linkProp['LinkSourceID'].replace('@Dyn:', ''))
+                    linkedSource = previousState.get(
+                        linkProp['LinkSourceID'].replace('@Dyn:', ''))
                 else:
                     linkedSource = self.getProperty(
                         linkProp['LinkSourceID'].replace('@Dyn:', ''))

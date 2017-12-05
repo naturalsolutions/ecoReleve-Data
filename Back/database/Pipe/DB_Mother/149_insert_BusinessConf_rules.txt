@@ -1,0 +1,176 @@
+﻿
+INSERT INTO [dbo].[BusinessRules]
+           ([name]
+           ,[target]
+           ,[targetType]
+           ,[actionType]
+           ,[executing]
+           ,[params]
+           ,[description]
+           ,[errorValue])
+     VALUES
+           ('check_SiteEquipmentOnStation'
+           ,'Station'
+           ,NULL
+           ,'before_update'
+           ,'dbo.[pr_checkSiteEquipmentForStation]'
+           ,'["ID","StationDate","LAT","LON","FK_MonitoredSite"]'
+           ,'vérification de l''existance d''un protocole site equipment lors de l''update d''une station, empechant la modification du site ,des lat et lon et de la date de la station'
+           ,'You cannot do this modification, because this station has a "site equipment" or "site unequipment" protocol.'),
+
+		   ('check_IndivEquipmentOnStation'
+           ,'Station'
+           ,NULL
+           ,'before_update'
+           ,'dbo.[pr_checkIndivEquipmentForStation]'
+           ,'["ID","StationDate"]'
+           ,'vérification de l''existance d''un protocole individual equipment lors de l''update d''une station, empechant la modification de la date de la station'
+           ,'You cannot do this modification, because this station has an "individual equipment" or "individual unequipment" protocol".'),
+
+		  ('Update_RegionStation'
+           ,'Station'
+           ,NULL
+           ,'after_update'
+           ,'dbo.[UpdateStationRegion]'
+           ,'["ID"]'
+           ,'mise à jour de la FK_Region de la station avec les coordonnées'
+           ,'FK_Region cannot be updated.'),
+
+		  ('Update_RegionStation'
+           ,'Station'
+           ,NULL
+           ,'after_insert'
+           ,'dbo.[UpdateStationRegion]'
+           ,'["ID"]'
+           ,'mise à jour de la FK_Region de la station avec les coordonnées'
+           ,'FK_Region cannot be updated.'),
+
+		 ('Unique_Constraint_ON_Station'
+           ,'Station'
+           ,NULL
+           ,'before_update'
+           ,'dbo.[pr_checkUniqueStation]'
+           ,'["ID","LAT","LON","StationDate","fieldActivityId"]'
+           ,'contrainte d''unicité des stations verifiant sur LAT, LON,StationDate, fieldActivity'
+           ,'You cannot do this modification because a station already exists with these paramters.'),
+
+		('Unique_Constraint_ON_Station'
+           ,'Station'
+           ,NULL
+           ,'before_insert'
+           ,'dbo.[pr_checkUniqueStation]'
+           ,'["ID","LAT","LON","StationDate","fieldActivityId"]'
+           ,'contrainte d''unicité des stations verifiant sur LAT, LON,StationDate, fieldActivity'
+           ,'You cannot do this creation because a station already exists with these paramters.'),
+
+		   
+		('Unique_Breeding_Ring_Code_on_Individual'
+           ,'Individual'
+           ,NULL
+           ,'before_insert'
+           ,'dbo.[pr_Check_Existing_Indiv_BreedingRing]'
+           ,'["Breeding_Ring_Code","ID"]'
+           ,'contrainte d''unicité des individus verifiant l''unicité de la breeding_ring_code'
+           ,'You cannot do this creation because an individual already exists with this breeding ring code.'),
+
+		
+		('Unique_Breeding_Ring_Code_on_Individual'
+           ,'Individual'
+           ,NULL
+           ,'before_update'
+           ,'dbo.[pr_Check_Existing_Indiv_BreedingRing]'
+           ,'["Breeding_Ring_Code","ID"]'
+           ,'contrainte d''unicité des individus verifiant l''unicité de la breeding_ring_code'
+           ,'You cannot do this modification because an individual already exists with this breeding ring code.'),
+
+		   
+		('Unique_Chip_Code_on_Individual'
+           ,'Individual'
+           ,NULL
+           ,'before_insert'
+           ,'dbo.[pr_Check_Existing_Indiv_ChipCode]'
+           ,'["Chip_Code","ID"]'
+           ,'contrainte d''unicité des individus verifiant l''unicité de la breeding_ring_code'
+           ,'You cannot do this creation because an individual already exists with chip code.'),
+
+		
+		('Unique_Chip_Code_on_Individual'
+           ,'Individual'
+           ,NULL
+           ,'before_update'
+           ,'dbo.[pr_Check_Existing_Indiv_ChipCode]'
+           ,'["Chip_Code","ID"]'
+           ,'contrainte d''unicité des individus verifiant l''unicité de la breeding_ring_code'
+           ,'You cannot do this modification because an individual already exists with this chip code.'),
+
+		
+	   ('Unique_Release_Ring_Code_on_Individual'
+           ,'Individual'
+           ,NULL
+           ,'before_insert'
+           ,'dbo.[pr_Check_Existing_Indiv_ReleaseRing]'
+           ,'["Release_Ring_Code","ID"]'
+           ,'contrainte d''unicité des individus verifiant l''unicité de la breeding_ring_code'
+           ,'You cannot do this creation because an individual already exists with release code.'),
+
+		
+		('Unique_Release_Ring_Code_on_Individual'
+           ,'Individual'
+           ,NULL
+           ,'before_update'
+           ,'dbo.[pr_Check_Existing_Indiv_ReleaseRing]'
+           ,'["Release_Ring_Code","ID"]'
+           ,'contrainte d''unicité des individus verifiant l''unicité de la breeding_ring_code'
+           ,'You cannot do this modification because an individual already exists with this release ring code.'),
+
+		
+		('Disable_Update_Protocole_Equipment'
+           ,'Observation'
+           ,'[218, 219, 229, 230]'
+           ,'before_update'
+           ,'dbo.[pr_checkValidatedLocationOnEquipmentProtocolUpdate]'
+           ,'["ID","FK_Sensor","FK_Individual"]'
+           ,'contrainte de modification verifiant l''existance de données validées suite à un équipement'
+           ,'You cannot do this modification because data have already been validated with this sensor. Please contact an administrator.'),
+
+		('Disable_Delete_Protocole_Equipment'
+           ,'Observation'
+           ,'[218, 219, 229, 230]'
+           ,'before_delete'
+           ,'dbo.[pr_checkValidatedLocationOnEquipmentProtocol]'
+           ,'["ID"]'
+           ,'contrainte de supression verifiant l''existance de données validées suite à un équipement'
+           ,'You cannot do this modification because data have already been validated with this sensor. Please contact an administrator.'),
+
+
+	('Disable_Update_Protocole_ArthropodSurvey'
+           ,'Observation'
+           ,'[223]'
+           ,'before_update'
+           ,'dbo.[pr_checkEntomoBridgeOnProtocolUpdate]'
+           ,'["ID","micro_habitat","habitat","Host_Plant","Method"]'
+           ,'contrainte de modification verifiant l''existance de données lié à eCollection Entomo'
+           ,'You cannot do this modification because linked sample(s) exist into eCollection Entomo. Please contact an administrator.'),
+
+
+	('Disable_Delete_Protocole_ArthropodSurvey'
+           ,'Observation'
+           ,'[223]'
+           ,'before_delete'
+           ,'dbo.[pr_checkEntomoBridgeOnProtocolDelete]'
+           ,'["ID"]'
+           ,'contrainte de modification verifiant l''existance de données lié à eCollection Entomo'
+           ,'You cannot do this deletion because linked sample(s) exist into eCollection Entomo. Please contact an administrator.')
+
+
+GO
+
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('149_insert_BusinessConf_rules',GETDATE(),(SELECT db_name()))
+
+
+GO

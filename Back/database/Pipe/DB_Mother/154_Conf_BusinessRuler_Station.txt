@@ -1,0 +1,11 @@
+/***** * Script de la commande SelectTopNRows à partir de SSMS  ******/
+UPDATE b SET targetType = '[1,4,5]'
+  FROM [BusinessRules] b 
+  WHERE name ='Update_RegionStation'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('154_Conf_BusinessRuler_Station',GETDATE(),(SELECT db_name()))
+
+
+GO

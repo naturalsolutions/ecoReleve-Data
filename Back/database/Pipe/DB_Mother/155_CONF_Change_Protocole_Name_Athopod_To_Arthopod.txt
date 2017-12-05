@@ -1,0 +1,28 @@
+UPDATE [dbo].[ProtocoleType]
+   SET [Name] = REPLACE(name,'Athropod','Arthropod')
+ WHERE name LIKE '%Athropod%'
+
+ UPDATE  [ModuleForms]
+SET 
+[Name] = 'FK_SubArthropodSurvey',
+[Label] = 'FK_SubArthropodSurvey',
+[rules] = '{"operator":"disable","target":"FK_SubArthropodSurvey","source":"original_id","value":"match@ECollection"}'
+WHERE name = 'FK_SubArtrhopodSurvey'
+
+UPDATE [ModuleForms]
+SET
+[Name] = 'Sub_Arthropod_survey',
+[Label] = 'Sub_Arthropod_survey'
+WHERE [Name] = 'Sub_Athropod_survey'
+
+
+UPDATE [ObservationDynProp]
+SET
+[Name] = 'FK_SubArthropodSurvey'
+WHERE [Name] = 'FK_SubArtrhopodSurvey'
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('155_CONF_Change_Protocole_Name_Athopod_To_Arthopod',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -11,6 +11,7 @@ define([
 	NsMap
 ) {
   'use strict';
+  var originalSortState = null;
 
   return ManagerView.extend({
     ModelPrototype: StationModel,
@@ -38,13 +39,21 @@ define([
           $(this).toggleClass('active');
         })
         if(this.$el.find('#lastImported').hasClass('active')) {
+          if (!this.originalSortState) {
+            this.originalSortState = this.gridView.gridOptions.api.getSortModel();
+          }
           this.filters.extraFilters = [{
             Column: 'LastImported',
             Operator: '=',
             Value: true
           }];
+          this.gridView.gridOptions.api.setSortModel( [{
+            colId:  'StationDate',
+             sort: 'asc'
+          }]);
         } else {
           this.filters.extraFilters = false;
+          this.gridView.gridOptions.api.setSortModel( this.originalSortState);
         }
         this.filters.update();
       }
@@ -58,8 +67,30 @@ define([
     	}
     },
 
+    activeLastImported(){
+      if(!this.defaultFilters){
+        this.defaultFilters = [{
+          Column: 'LastImported',
+          Operator: '=',
+          Value: true
+        }];
+      } else {
+        this.defaultFilters.push({
+          Column: 'LastImported',
+          Operator: '=',
+          Value: true
+        });
+      }
+      this.$el.find('.tab-ele').each(function(){
+        $(this).toggleClass('active');
+      });
+    },
+
     onShow: function() {
       this.$el.find('.js-date-time').datetimepicker({format : "DD/MM/YYYY HH:mm:ss"});
+      if((this.options && this.options.params && this.options.params=='lastImported') || this.model.get('lastImported')){
+        this.activeLastImported();
+      }
       this.displayFilter();
       this.displayGridView();
       if(this.displayMap){

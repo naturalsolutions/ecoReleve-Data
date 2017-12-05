@@ -1,0 +1,209 @@
+
+INSERT INTO [dbo].[FrontModules]
+           ([Name]
+           ,[TypeModule]
+           ,[Comments])
+     VALUES
+           ('ImportHistoryFilter'
+           ,1
+           ,'')
+GO
+
+DECLARE @idFront int;
+SET @idFront = (SELECT ID FROM [FrontModules] WHERE Name = 'ImportHistoryFilter')
+
+INSERT INTO [dbo].[ModuleGrids]
+           ([Module_ID]
+           ,[TypeObj]
+           ,[Name]
+           ,[Label]
+           ,[GridRender]
+           ,[GridSize]
+           ,[CellType]
+           ,[GridOrder]
+           ,[QueryName]
+           ,[Options]
+           ,[FilterOrder]
+           ,[FilterSize]
+           ,[FilterClass]
+           ,[IsSearchable]
+           ,[FilterDefaultValue]
+           ,[FilterRender]
+           ,[FilterType]
+           ,[Status]
+           ,[ColumnParams])
+     VALUES
+           (@idFront
+           ,NULL
+           ,'ImportFileName'
+           ,'File Name'
+           ,2
+           ,'{"width":180,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,20
+           ,NULL
+           ,NULL
+           ,20
+           ,2
+           ,NULL
+           ,1
+           ,NULL
+           ,4
+           ,'Text'
+           ,NULL
+           ,NULL),
+
+		   (@idFront
+           ,NULL
+           ,'ImportDate'
+           ,'Import Date'
+           ,2
+           ,'{"width":200,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,10
+           ,NULL
+           ,NULL
+           ,10
+           ,2
+           ,NULL
+           ,1
+           ,NULL
+           ,4
+           ,'DateTimePickerEditor'
+           ,NULL
+           ,NULL),
+
+		   (@idFront
+           ,NULL
+           ,'ImportType'
+           ,'Type'
+           ,2
+           ,'{"width":100,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,30
+           ,NULL
+           ,'["Argos","GSM","GPX","RFID"]'
+           ,30
+           ,2
+           ,NULL
+           ,1
+           ,NULL
+           ,4
+           ,'Select'
+           ,NULL
+           ,NULL),
+
+		  (@idFront
+           ,NULL
+           ,'FK_User'
+           ,'Creator'
+           ,0
+           ,'{"width":200,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,40
+           ,NULL
+           ,'{"source": "autocomplete/users/Login/ID", "minLength":3}'
+           ,40
+           ,2
+           ,NULL
+           ,1
+           ,NULL
+           ,4
+           ,'AutocompleteEditor'
+           ,NULL
+           ,NULL),
+		   
+
+		  (@idFront
+           ,NULL
+           ,'Login'
+           ,'Creator'
+           ,2
+           ,'{"width":200,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,40
+           ,NULL
+           ,'{"source": "autocomplete/users/Login/ID", "minLength":3}'
+           ,40
+           ,2
+           ,NULL
+           ,0
+           ,NULL
+           ,4
+           ,'AutocompleteEditor'
+           ,NULL
+           ,NULL),
+
+		   		  (@idFront
+           ,NULL
+           ,'count'
+           ,'nb rows'
+           ,2
+           ,'{"width":150,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,50
+           ,NULL
+           ,'{"source": "autocomplete/users/Login/ID", "minLength":3}'
+           ,40
+           ,2
+           ,NULL
+           ,0
+           ,NULL
+           ,4
+           ,'AutocompleteEditor'
+           ,NULL
+           ,NULL)
+		   ,
+
+		   		  (@idFront
+           ,NULL
+           ,'maxDate'
+           ,'max date'
+           ,2
+           ,'{"width":250,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,70
+           ,NULL
+           ,'{"source": "autocomplete/users/Login/ID", "minLength":3}'
+           ,40
+           ,2
+           ,NULL
+           ,0
+           ,NULL
+           ,4
+           ,'AutocompleteEditor'
+           ,NULL
+           ,NULL)
+		   ,
+
+		   		  (@idFront
+           ,NULL
+           ,'minDate'
+           ,'min date'
+           ,2
+           ,'{"width":250,"maxWidth":350,"minWidth":100}'
+           ,'string'
+           ,60
+           ,NULL
+           ,'{"source": "autocomplete/users/Login/ID", "minLength":3}'
+           ,40
+           ,2
+           ,NULL
+           ,0
+           ,NULL
+           ,4
+           ,'AutocompleteEditor'
+           ,NULL
+           ,NULL)
+
+GO
+
+
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('138_Conf_HistoryFile',GETDATE(),(SELECT db_name()))
+
+
+GO

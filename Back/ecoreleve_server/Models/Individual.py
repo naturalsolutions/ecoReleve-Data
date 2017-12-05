@@ -73,7 +73,6 @@ class Individual (Base, ObjectWithDynProp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         ObjectWithDynProp.__init__(self)
-        self.constraintFunctionList = [self.checkIndividualCodes]
 
     def GetNewValue(self, nameProp):
         ReturnedValue = IndividualDynPropValue()
@@ -94,30 +93,6 @@ class Individual (Base, ObjectWithDynProp):
             return self.IndividualType
         else:
             return self.session.query(IndividualType).get(self.FK_IndividualType)
-
-    def updateFromJSON(self, DTOObject, startDate=None):
-        if self.checkIndividualCodes(DTOObject):
-            ObjectWithDynProp.updateFromJSON(self, DTOObject, startDate)
-
-    def checkIndividualCodes(self, DTOObject):
-        '''check existing Breeding_Ring_Code, Chip_Code and Release_Ring_Code
-         return False if the value already existing '''
-        for property_ in ['Breeding_Ring_Code', 'Chip_Code', 'Release_Ring_Code']:
-            if DTOObject.get(property_, None):
-                code = DTOObject.get(property_)
-                ind_id = 0 if not self.ID else self.ID
-                stmt = text(""" DECLARE @code varchar(250), @id_indiv int, @result int;
-                            exec [dbo].[pr_Check_Existing_IndivCode]"""
-                            + """ :code, :property, :ind_id , @result OUTPUT;
-                            SELECT @result;"""
-                            ).bindparams(bindparam('code', code),
-                                         bindparam('property', property_),
-                                         bindparam('ind_id', ind_id),
-                                         )
-                result = self.session.execute(stmt).scalar()
-                if result:
-                    raise ErrorCheckIndividualCodes(property_)
-        return True
 
 
 class IndividualDynProp (Base):
