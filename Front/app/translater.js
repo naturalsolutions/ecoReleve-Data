@@ -4,12 +4,12 @@ define(['jquery','marionette','config','i18n'], function($, Marionette, config) 
 
     initialize: function(options) {
       this.dfd = $.Deferred();
-      if(config.instance == 'demo') {
+      if(config.instance) {
         this.dfd = $.ajax({
           context: this,
           url: config.coreUrl + 'currentUser',
         }).done(function(data){
-          this.initi18n(data.Language);
+          this.initi18n(data.lng);
         });
         return;
       }

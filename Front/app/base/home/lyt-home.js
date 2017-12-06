@@ -106,7 +106,7 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, TplGraph1,
 
       this.$el.i18n();
       // mobile compatibility
-      /*var isMobile = window.matchMedia("only screen and (max-width: 760px)");
+      var isMobile = window.matchMedia("only screen and (max-width: 760px)");
       if (isMobile.matches && (!window.alertMobile)) {
           Swal({
               title: 'Mobile compatibility',
@@ -119,7 +119,7 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, TplGraph1,
           });
           $('.sweet-alert.showSweetAlert.visible').css('margin-left', '0px;');
           window.alertMobile = true;
-      }*/
+      }
     },
     disableTiles : function(){
       // disable tiles for disabled fonctionalities in config.js

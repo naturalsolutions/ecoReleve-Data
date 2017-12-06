@@ -90,10 +90,10 @@
 
 
 			<% if (typeof(availableOptions) === 'undefined') { %>
-					<a href="#<%= type %>/new" class="js-admin js-link-new btn btn-success pull-right">
-					<span class="reneco reneco-entrykey"></span>
-					&nbsp;
-					New <%= single %>
+					<a href="#<%= type %>/new"  class="js-admin js-link-new btn btn-success pull-right">
+					<span class="" data-i18n="<%= type %>.new"></span>
+					<!--&nbsp;
+					 New <%= single %> -->
 					</a>
 			<% } else { %>
 					<button class="js-admin js-btn-new btn btn-success pull-right">
