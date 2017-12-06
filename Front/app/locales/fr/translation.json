@@ -157,6 +157,15 @@
 	"monitoredSites" : {
 		"new" : " Nouveau site"
 	},
+
+	"projects" : {
+		"new" : " Nouveau projet"
+	},
+
+	"clients" : {
+		"new" : " Nouveau client"
+	},
+
  	"individuals" : {
  		"advanced" :"Avancé",
  		"new" :" Nouvel individu",
