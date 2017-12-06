@@ -28,25 +28,12 @@ def users(request):
 def current_user(request, user_id=None):
     """Return the list of all the users with their ids.
     """
-    return
-    session = request.dbsession
-
-    if user_id is not None:
-        userid = user_id
-    else:
-        userid = int(request.authenticated_userid['iss'])
-    currentUserRole = groupfinder(userid, request)
-
-    query = select([
-        User.id.label('PK_id'),
-        User.Login.label('fullname'),
-        User.Firstname.label('Firstname'),
-        User.Language.label('Language'),
-        User.Lastname.label('Lastname')
-    ]).where(User.id == userid)
-    response = dict(session.execute(query).fetchone())
-    response['role'] = currentUserRole
-    return response
+    user_infos = request.authenticated_userid
+    role = groupfinder(user_id, request)[0].replace('group:', '')
+    return {'login': user_infos['login'],
+            'fullname': user_infos['fullname'],
+            'role': role,
+            'lng': user_infos['userlanguage']}
 
 
 @view_config(

@@ -82,27 +82,27 @@ function(Marionette, NsMap, CurveGraphView, DonutGraphView, InfoView, TplGraph1,
       this.curveGraph = new CurveGraphView();
     },
 
-    onRender: function() {
-      this.initStats();
-      var isDomoInstance = config.instance ;
-      if(!isDomoInstance || (isDomoInstance != 'demo')) {
-        this.donutGraphs.render();
-      }
-    },
+    // onRender: function() {
+    //   // this.initStats();
+    //   var isDomoInstance = config.instance ;
+    //   if(!isDomoInstance || (isDomoInstance != 'demo')) {
+    //     this.donutGraphs.render();
+    //   }
+    // },
 
     onShow: function(options) {
-      var isDomoInstance = config.instance ;
-      this.disableTiles();
+      // var isDomoInstance = config.instance ;
+      // this.disableTiles();
 
-      if(!isDomoInstance || (isDomoInstance != 'demo')) {
-        this.ui.donuts.html(this.donutGraphs.el);
-        $('.hello').addClass('masqued');
-      } else {
-        this.getUser();
-        $('#siteName').addClass('masqued');
-      }
-      this.info.show(this.infoStat);
-      this.graph.show(this.curveGraph);
+      // if(!isDomoInstance || (isDomoInstance != 'demo')) {
+      //   this.ui.donuts.html(this.donutGraphs.el);
+      //   $('.hello').addClass('masqued');
+      // } else {
+      //   this.getUser();
+      //   $('#siteName').addClass('masqued');
+      // }
+      // this.info.show(this.infoStat);
+      // this.graph.show(this.curveGraph);
 
       this.$el.i18n();
       // mobile compatibility
