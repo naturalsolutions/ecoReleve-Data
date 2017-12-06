@@ -12,7 +12,9 @@
 		"objects" : "Objets",
 		"new-station" :"Nouvelle station",
 		"sensors" :"Capteurs",
-		"release" :"Relaché"
+		"release" :"Relaché",
+		"projects":"Projets",
+		"clients":"Clients"
 	},
 	"stepper" : {
 			"btnNext" : "Suivant",
