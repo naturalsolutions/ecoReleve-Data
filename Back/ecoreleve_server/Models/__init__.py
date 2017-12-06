@@ -77,25 +77,20 @@ def loadUserRole(session):
     #     results, columns=['user_id', 'role_id'])
 
 
-USERS = {2: 'superUser',
-         3: 'user',
-         1: 'admin'}
+USERS = {'Super Utilisateur': 'superUser',
+         'Utilisateur': 'user',
+         'Administrateur': 'admin'}
 
-GROUPS = {'superUser': ['group:superUsers'],
-          'user': ['group:users'],
-          'admin': ['group:admins']}
+GROUPS = {'superUser': ['group:superUser'],
+          'user': ['group:user'],
+          'admin': ['group:admin']}
 
 
 def groupfinder(userid, request):
-    session = request.dbsession
-    # Tuser_role = Base.metadata.tables['VUser_Role']
-    # query_check_role = select([Tuser_role.c['role']]).where(
-    #     Tuser_role.c['userID'] == int(userid))
-    # currentUserRoleID = session.execute(query_check_role).scalar()
-    # print(request.authenticated_userid)
-    # if currentUserRoleID in USERS:
-    #     currentUserRole = USERS[currentUserRoleID]
-    return ['group:admins']
+    roles = request.authenticated_userid['app_roles']
+    ecoreleve_role = roles.get('ecoreleve', None)
+
+    return GROUPS.get(USERS.get(ecoreleve_role, None), [])
 
 
 def cache_callback(request, session):

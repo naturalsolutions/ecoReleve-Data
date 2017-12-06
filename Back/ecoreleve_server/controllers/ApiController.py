@@ -38,11 +38,11 @@ class SecurityRoot(Resource):
     __acl__ = [
         (Allow, Authenticated, 'read'),
         (Allow, Authenticated, 'all'),
-        (Allow, 'group:admins', 'admin'),
-        (Allow, 'group:admins', 'superUser'),
-        (Allow, 'group:admins', 'all'),
-        (Allow, 'group:superUsers', 'superUser'),
-        (Allow, 'group:superUsers', 'all')
+        (Allow, 'group:admin', 'admin'),
+        (Allow, 'group:admin', 'superUser'),
+        (Allow, 'group:admin', 'all'),
+        (Allow, 'group:superUser', 'superUser'),
+        (Allow, 'group:superUser', 'all')
     ]
 
     def __init__(self, request):
