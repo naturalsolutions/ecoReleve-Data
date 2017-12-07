@@ -98,6 +98,9 @@ class ObservationsView(DynamicObjectCollectionView):
         for items, value in json_body.items():
             data[items] = value
 
+        if data.get('type_name', None):
+            data['type_name'] = data['type_name'].title()
+
         if 'station' in data and self.parent.__class__.__name__ != 'StationView':
             sta = Station()
             sta.session = self.session
