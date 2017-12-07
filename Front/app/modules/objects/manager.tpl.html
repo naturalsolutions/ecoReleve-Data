@@ -40,10 +40,11 @@
 		</div>
 
 		<div class="toolbar bottom">
-			<button class="js-btn-clear btn pull-left">Clear</button>
+			<button class="js-btn-clear btn pull-left" data-i18n="button.clear">Clear</button>
 			<button class="js-btn-filter btn btn-success pull-right">
-				<span class="reneco reneco-search"></span>
-				&nbsp;Search
+				<i class="reneco reneco-search"></i>
+				&nbsp;<span data-i18n="button.search">&nbsp;Search</span>
+				
 			</button>
 		</div>
 	</div>
@@ -84,22 +85,26 @@
 
 		<div class="toolbar bottom">
 			<button class="js-btn-export btn btn-success pull-left">
-				<span class="reneco reneco-export"></span>
-				&nbsp;Export data
+				<i class="reneco reneco-export"></i>
+				&nbsp;<span data-i18n="button.export">&nbsp;Export data</span>
+				
 			</button>
 
 
 			<% if (typeof(availableOptions) === 'undefined') { %>
-					<a href="#<%= type %>/new" class="js-admin js-link-new btn btn-success pull-right">
-					<span class="reneco reneco-entrykey"></span>
-					&nbsp;
-					New <%= single %>
+					<a href="#<%= type %>/new"  class="js-admin js-link-new btn btn-success pull-right">
+						<i class="reneco reneco-entrykey"></i>	
+						&nbsp;<span data-i18n="<%= type %>.new"></span>
+					<!--&nbsp;
+					 New <%= single %> -->
 					</a>
 			<% } else { %>
 					<button class="js-admin js-btn-new btn btn-success pull-right">
-					<span class="reneco reneco-entrykey"></span>
-					&nbsp;
-					New <%= single %>
+						<i class="reneco reneco-entrykey"></i>	
+						&nbsp;
+						<span data-i18n="<%= type %>.new"></span>
+					<!-- &nbsp;
+					New <%= single %> -->
 					</button>
 			<% } %>
 

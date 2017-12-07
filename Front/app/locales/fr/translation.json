@@ -12,7 +12,9 @@
 		"objects" : "Objets",
 		"new-station" :"Nouvelle station",
 		"sensors" :"Capteurs",
-		"release" :"Relaché"
+		"release" :"Relaché",
+		"projects" :"Projets",
+		"clients" :"Clients"
 	},
 	"stepper" : {
 			"btnNext" : "Suivant",
@@ -147,14 +149,26 @@
 			"coords-tab" : "Avec coordonnées",
 			"no-coords-tab" : "Sans coordonnées",
 			"total-label" : "Total :",
-			"new-station-btn" :"Nouvelle station"
+			"new" :" Nouvelle station"
 		},
 	"sensors" : {
-			"new" : "Nouveau capteur"
+			"new" : " Nouveau capteur"
 	},
+	"monitoredSites" : {
+		"new" : " Nouveau site"
+	},
+
+	"projects" : {
+		"new" : " Nouveau projet"
+	},
+
+	"clients" : {
+		"new" : " Nouveau client"
+	},
+
  	"individuals" : {
  		"advanced" :"Avancé",
- 		"new" :"Nouvel individu",
+ 		"new" :" Nouvel individu",
  		"history" : "Historique",
  		"equipment" : "Equipement",
  		"locations" : "Positions"
