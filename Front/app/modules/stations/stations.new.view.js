@@ -87,7 +87,7 @@ define([
       var val = $(e.currentTarget).val();
       var _this = this;
       $.ajax({
-        url:'regions/administrative/'+val+'/geoJSON'
+        url:'regions/'+val+'/geoJSON'
       }).done(function(geoJSON){
         if(_this.RegionLayer){
           _this.map.map.removeLayer(_this.RegionLayer);

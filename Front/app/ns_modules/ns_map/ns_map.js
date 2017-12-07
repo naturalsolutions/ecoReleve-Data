@@ -366,7 +366,7 @@ define([
       this.RegionLayers = {};
       var _this = this;
       $.ajax({
-        url:'regions/types',
+        url:'regions/getTypes',
         context: this
       }).done(function(response){
         response.forEach(function(layerName) {
@@ -390,7 +390,8 @@ define([
       
       if (!window.RegionLayers[layerName] || window.RegionLayers[layerName].statusText == "abort" ) {
         window.RegionLayers[layerName] = $.ajax({
-        url:'regions/'+layerName,
+        url:'regions/getGeomFromType',
+        data: {'type':layerName},
         context: this
         });
       }
