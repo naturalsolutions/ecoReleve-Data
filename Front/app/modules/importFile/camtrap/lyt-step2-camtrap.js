@@ -193,6 +193,7 @@ define([
         columns: columnsDefs,
         clientSide: true,
         gridOptions: {
+          skipFocus: true,
           enableFilter: true,
           rowSelection: 'single',
           suppressRowClickSelection: false,

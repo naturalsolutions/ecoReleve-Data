@@ -1,4 +1,39 @@
-<div class="container-fluid camtrapSummary">
+<div class="importCamTrap">
+	<button class="btn btn-primary start">
+		<i class="glyphicon glyphicon-plus"></i>
+		<span>Détails</span>
+	</button>
+	<h2>
+		<span>Session infos</span>
+	</h2>
+	<div class="js-jetlag">
+		<h5>Décallage Horaire (hh:mm:ss)</h5>
+		<div class=" form-group">
+			<div class='input-group date'>
+				<span class="js-jetlagoperator input-group-addon">
+					<span class="glyphicon glyphicon-plus"></span>
+				</span>
+				<div class='input-group date' id='datetimepicker3'>
+					<input type='text' class="form-control" />
+					<span class="input-group-addon">
+						<span class="glyphicon glyphicon-time"></span>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="js-rg-grid-session sessionGrid no-padding"></div>
+	<h2>
+		<span>Files infos</span>
+	</h2>
+	<div class="js-rg-grid-photos photosGrid no-padding"></div>
+	<div class="filesInfos">
+		<%= resumable.files.length %> Files
+			<%= (_.reduce( resumable.files , function(sum,file) { 
+			return sum + file.size;},0)/(1024*1024)).toFixed(2) %> Mo
+
+	</div>
+	<!-- <div class="container-fluid camtrapSummary">
 <div class="row">
 		<div class="row">
 				<div>Décallage Horaire (Heures) </div>
@@ -44,6 +79,7 @@
 				</div>
 			</div>
 		</div>
+		<div class="js-rg-grid-photos crop2 col-xs-12 no-padding"></div>
 		<div class="row">
 			<div id = "js-summaryFilesInfos" class="col-md-12 text-center ">
 				Files infos
@@ -99,4 +135,5 @@
 
 
 
+</div> -->
 </div>

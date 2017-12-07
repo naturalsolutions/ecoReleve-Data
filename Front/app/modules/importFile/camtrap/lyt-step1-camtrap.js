@@ -129,8 +129,8 @@ define([
           testChunks: true,
           clearInput:false
         });
-        this.model.set('resumable', this.r);
       }
+      this.model.set('resumable', this.r);
       
       this.listCollection = new CollectionViewFile( {
         collection : _this.collectionFiles
