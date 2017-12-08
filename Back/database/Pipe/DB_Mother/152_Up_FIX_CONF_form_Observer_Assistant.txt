@@ -1,0 +1,10 @@
+
+UPDATE [dbo].[ModuleForms] set InputType = 'Select', Options = 'SELECT ID as val, Login as label FROM [User] UNION ALL SELECT -1 as val, '''' as label'
+  where name in ('Id_Observer','Id_Assistant') 
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('152_Up_FIX_CONF_form_Observer_Assistant',GETDATE(),(SELECT db_name()))
+
+
+GO

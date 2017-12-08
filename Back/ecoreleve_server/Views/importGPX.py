@@ -149,19 +149,22 @@ def insertData(session, dataFrame_to_insert, fieldWorkers):
                 sta['StationDateTZ'], "%Y-%m-%dT%H:%M:%S.%fZ")
             curSta.updateFromJSON(sta)
             curSta.StationDate = curDate
+            curSta.FieldWorkers = [{'FieldWorker': id_}
+                                   for id_ in fieldWorkers]
             bulk_station.append(curSta)
 
-        session.bulk_save_objects(bulk_station, return_defaults=True)
+        session.add_all(bulk_station)
+        # session.bulk_save_objects(bulk_station, return_defaults=True)
 
-        if fieldWorkers:
-            bulk_fieldworker_station = list(map(lambda b: list(map(lambda a: Station_FieldWorker(
-                FK_Station=a.ID,
-                FK_FieldWorker=b),
-                bulk_station)),
-                fieldWorkers))
-            bulk_fieldworker_station = list(
-                itertools.chain.from_iterable(bulk_fieldworker_station))
-            session.bulk_save_objects(bulk_fieldworker_station)
+        # if fieldWorkers:
+        #     bulk_fieldworker_station = list(map(lambda b: list(map(lambda a: Station_FieldWorker(
+        #         FK_Station=a.ID,
+        #         FK_FieldWorker=b),
+        #         bulk_station)),
+        #         fieldWorkers))
+        #     bulk_fieldworker_station = list(
+        #         itertools.chain.from_iterable(bulk_fieldworker_station))
+        #     session.bulk_save_objects(bulk_fieldworker_station)
 
 
 def insertRawData(session, GPXdata, existing_dataFrame):

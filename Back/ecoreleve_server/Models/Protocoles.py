@@ -119,7 +119,7 @@ class Observation(Base, ObjectWithDynProp):
                             subDictList.append(subDict)
                     curData['listOfSubObs'] = subDictList
 
-                if 'ID' in curData and curData['ID'] is not None:
+                if 'ID' in curData and curData['ID']:
                     subObs = list(filter(lambda x: x.ID == curData[
                                   'ID'], self.Observation_children))[0]
                     subObs.LoadNowValues()
@@ -133,6 +133,8 @@ class Observation(Base, ObjectWithDynProp):
                 if subObs is not None:
                     subObs.updateFromJSON(curData)
                     listObs.append(subObs)
+                    self.session.add(subObs)
+                    self.session.flush()
         self.Observation_children = listObs
 
     @hybrid_property
