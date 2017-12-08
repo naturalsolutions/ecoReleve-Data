@@ -42,23 +42,26 @@ define([
       this.previousModels = options.parent.models[options.parent.currentStepIndex] || null;
       this.parent = options.parent;
       var _this = this;
-      console.log("init de la step1")
+
+     // this.modalRef = $('#myPleaseWait').modal().constructor();
       this.wExif = new Worker('./app/modules/importFile/camTrap/workerExif.js', { type : "module" } );
       this.wExif.onmessage = function (event){
-        
         _this.nbFilesParsed+=1;
         _this.progress();
         _this.r.files.find(function(elem) { 
           if(elem.uniqueIdentifier === event.data.file) { 
          //   elem.dateFind = event.data.date;
             elem.dateFind = _this.parseDateToIso(event.data.date);
-            if(_this.nbFilesParsed === _this.nbFilesToParse && $('#myPleaseWait').hasClass('in') ) {
+            if( _this.nbFilesParsed === _this.nbFilesToParse ) {
+              debugger;
+            }
+            if(_this.nbFilesParsed === _this.nbFilesToParse/* && $('#myPleaseWait').hasClass('in') */) {
               _this.nbFilesParsed = 0;
               _this.nbFilesToParse = 0 ;
               setTimeout(function() {
                 $('#myPleaseWait').modal('hide');
-                _this.progress();
-              }, 1000);
+               // _this.progress();
+              }, 500);
             }
            } 
           });
@@ -205,9 +208,7 @@ define([
         }
         _this.changeNbFilesValue();
         _this.changeFilesSizeValue();
-        if( !($('#myPleaseWait').hasClass('in')) ) {
-          $('#myPleaseWait').modal('show');
-        }
+        $('#myPleaseWait').modal('show');
         if( typeof(event) === 'undefined')
           return ;
         var imagePart = null;
