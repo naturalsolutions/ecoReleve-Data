@@ -76,6 +76,7 @@ define([
 
     this.elem = options.element || 'map';
     this.zoom = config.mapZoom;
+    this.mapCenter = config.mapCenter;
     this.disableClustering = options.disableClustering || 16;
     this.bbox = options.bbox || false;
     this.area = options.area || false;
@@ -124,7 +125,7 @@ define([
       this.icon = new L.DivIcon({className: 'custom-marker'});
 
       this.map = new L.Map(this.elem, {
-        center: [33, 33],
+        center: this.mapCenter || [33, 33],
         zoom: this.zoom,
         zoomControl: false,
         minZoom: 2,
