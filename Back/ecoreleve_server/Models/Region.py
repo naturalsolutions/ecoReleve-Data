@@ -46,10 +46,10 @@ class Geometry(UserDefinedType):
         return func.geo.wkt(col, type_=self)
 
 
-class Region(Base):
+class RegionGeom(Base):
 
-    __tablename__ = 'Region'
-    ID = Column(Integer, Sequence('Region__id_seq'), primary_key=True)
+    __tablename__ = 'RegionGeom'
+    ID = Column(Integer, Sequence('RegionGeom__id_seq'), primary_key=True)
     Region = Column(String(255))
     geom = Column(Geometry)
     type_ = Column(String(25))
@@ -87,12 +87,16 @@ class Region(Base):
         )
 
 
-class Ctry_WArea_WRegion_MgmtU(Base):
+class Region(Base):
 
-    __tablename__ = 'Ctry_WArea_WRegion_MgmtU'
-    PK_ID = Column(Integer, Sequence(
-        'Ctry_WArea_WRegion_MgmtU__id_seq'), primary_key=True)
+    __tablename__ = 'Region'
+    ID = Column(Integer, Sequence(
+        'Region__id_seq'), primary_key=True)
     fullpath = Column(String(255))
+    Country = Column(String(255))
+    W_Area = Column(String(255))
+    W_Region = Column(String(255))
+    Mgmt_Unit = Column(String(255))
     geom = Column(Geometry)
 
     @hybrid_property
@@ -110,7 +114,12 @@ class Ctry_WArea_WRegion_MgmtU(Base):
     @hybrid_property
     def geom_json(self):
         return Feature(
-            id=self.PK_ID,
+            id=self.ID,
             geometry=loads(self.geom),
-            properties={"name": self.fullpath, }
+            properties={'fullpath': self.fullpath,
+                        'Country': self.Country,
+                        'W_Area': self.W_Area,
+                        'W_Region': self.W_Region,
+                        'Mgmt_Unit': self.Mgmt_Unit
+                        }
         )

@@ -1,5 +1,5 @@
 from ..Models import (
-    Region, Ctry_WArea_WRegion_MgmtU, dbConfig
+    Region, RegionGeom, dbConfig
 )
 import json
 from datetime import datetime
@@ -18,14 +18,14 @@ from geojson import Feature, FeatureCollection, dumps
 
 
 class RegionView(CustomView):
-    model = Ctry_WArea_WRegion_MgmtU
+    model = Region
 
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
         try:
             id_ = int(ref)
             self.objectDB = self.session.query(
-                Ctry_WArea_WRegion_MgmtU).get(id_)
+                Region).get(id_)
         except:
             return 'reference not found'
 
@@ -80,7 +80,7 @@ class RegionsView(CustomView):
         self.__acl__ = context_permissions['release']
 
     def getRegionTypes(self):
-        query = select([Region.type_]).distinct(Region.type_)
+        query = select([RegionGeom.type_]).distinct(RegionGeom.type_)
         regions = self.session.execute(query).fetchall()
 
         return [r[0] for r in regions]
@@ -88,25 +88,44 @@ class RegionsView(CustomView):
     def getGeomFromType(self):
         session = self.request.dbsession
         params = self.request.params.mixed()
-        results = session.query(Region).filter(Region.type_ == params['type'])
-        curStyle = self.colorByTypes[params['type']].copy()
-        curStyle.update({
-            'fillOpacity': 0.2,
-            'weight': 2,
-            'opacity': 0.7
-        })
+        existingGeoJson = None
+        redisInstance = False
+        try:
+            import redis
+            r = redis.Redis('localhost')
+            existingGeoJson = r.get('regions/' + params['type'])
+            redisInstance = True
 
-        if params and params.get('criteria', None):
-            criterias = params.get('criteria')
-            for crit in criteria:
-                results = results.filter(
-                    getattr(Region, crit['Column']) == crit['Value'])
-        results = results.all()
-        response = {
-            'geojson': [r.geom_json for r in results],
-            'style': curStyle
-        }
+        except:
+            from traceback import print_exc
+            print_exc()
+            pass
 
+        if not existingGeoJson:
+            results = session.query(RegionGeom).filter(
+                RegionGeom.type_ == params['type'])
+            curStyle = self.colorByTypes[params['type']].copy()
+            curStyle.update({
+                'fillOpacity': 0.2,
+                'weight': 2,
+                'opacity': 0.7
+            })
+
+            if params and params.get('criteria', None):
+                criterias = params.get('criteria')
+                for crit in criteria:
+                    results = results.filter(
+                        getattr(Region, crit['Column']) == crit['Value'])
+            results = results.all()
+            response = {
+                'geojson': [r.geom_json for r in results],
+                'style': curStyle
+            }
+
+            if redisInstance:
+                r.set('regions/' + params['type'], json.dumps(response))
+        else:
+            response = json.loads(existingGeoJson.decode())
         return response
     # def getGeomHoubara(self):
     #     session = self.request.dbsession
