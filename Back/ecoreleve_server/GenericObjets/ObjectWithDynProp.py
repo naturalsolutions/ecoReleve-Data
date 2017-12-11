@@ -102,7 +102,21 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
         self.LoadNowValues()
 
     def setProperty(self, propertyName, value, useDate=None):
-        ''' Set object properties (static and dynamic) '''
+        ''' Set object properties (static and dynamic)
+            value can have two forms:
+            {
+              value: value
+              date: date
+            }
+
+            or value
+        '''
+
+        # extract value and date from dict value
+        if isinstance(value, dict) and "date" in value:
+            useDate = value.get("date")
+            value = value.get("value", None)
+
         DbObject.setProperty(self, propertyName, value)
         if (propertyName.lower() in self.GetType().DynPropNames):
             if ((propertyName not in self.__properties__
