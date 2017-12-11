@@ -302,12 +302,20 @@ class ModuleForms(Base):
     def InputThesaurus(self):
         if self.Options is not None and self.Options != '':
             self.dto['options'] = {
-                'startId': self.Options,
                 'wsUrl': dbConfig['wsThesaurus']['wsUrl'],
                 'lng': threadlocal.get_current_request().authenticated_userid['userlanguage'],
-                'displayValueName': 'valueTranslated'}
-            self.dto['options']['startId'] = self.Options
-            self.dto['options']['iconFont'] = 'reneco reneco-THE-thesaurus'
+                'displayValueName': 'valueTranslated',
+                'iconFont': 'reneco reneco-THE-thesaurus'
+            }
+            options = json.loads(self.Options)
+            if isinstance(options, dict):
+                self.dto['options'].update(options)
+
+                # set default startId if missing
+                if 'startId' not in self.dto['options']:
+                    self.dto['options']['startId'] = 0
+            else:
+                self.dto['options']['startId'] = options
 
     def InputAutocomplete(self):
         if self.Options is not None and self.Options != '':
