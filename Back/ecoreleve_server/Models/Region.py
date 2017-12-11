@@ -94,32 +94,33 @@ class Region(Base):
         'Region__id_seq'), primary_key=True)
     fullpath = Column(String(255))
     Country = Column(String(255))
-    W_Area = Column(String(255))
-    W_Region = Column(String(255))
-    Mgmt_Unit = Column(String(255))
+    Area = Column(String(255))
+    Region = Column(String(255))
+    Subregion = Column(String(255))
     geom = Column(Geometry)
+    valid_geom = Column(Geometry)
 
     @hybrid_property
     def geom_WKT(self):
-        return func.geo.wkt(self.geom)
+        return func.geo.wkt(self.valid_geom)
 
     @geom_WKT.expression
     def geom_WKT(cls):
-        return func.geo.wkt(cls.geom)
+        return func.geo.wkt(cls.valid_geom)
 
     @geom_WKT.setter
     def geom_WKT(cls):
-        return func.geo.wkt(cls.geom)
+        return func.geo.wkt(cls.valid_geom)
 
     @hybrid_property
     def geom_json(self):
         return Feature(
             id=self.ID,
-            geometry=loads(self.geom),
+            geometry=loads(self.valid_geom),
             properties={'fullpath': self.fullpath,
                         'Country': self.Country,
-                        'W_Area': self.W_Area,
-                        'W_Region': self.W_Region,
-                        'Mgmt_Unit': self.Mgmt_Unit
+                        'W_Area': self.Area,
+                        'W_Region': self.Region,
+                        'Mgmt_Unit': self.Subregion
                         }
         )
