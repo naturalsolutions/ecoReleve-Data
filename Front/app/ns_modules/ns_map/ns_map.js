@@ -351,12 +351,12 @@ define([
         });
         var baseMaps = {
           'relief': relief,
-          'hybrid': hybrid
+          'hybrid': hybrid,
         };
         
         _this.lControl = L.control.layers(baseMaps, null, {collapsed:true, position:'topleft'});
         _this.lControl.addTo(_this.map);
-        _this.map.addLayer(hybrid);
+        _this.map.addLayer(relief);
 
       }).fail(function(){
         console.error('Google maps library failed to load');

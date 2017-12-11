@@ -34,7 +34,7 @@ define(['jquery','config'],function($, config) {
 		window.google_maps_loaded = function() {
 			google_maps_loaded_def.resolve(google.maps);
 		}
-		var url = 'http://maps.google.com/maps/api/js?key='+config.googleAPIkey+'&v=3.2&amp;sensor=false&callback=google_maps_loaded';
+		var url = 'http://maps.google.com/maps/api/js?key='+config.googleAPIkey+'&v=3.31&amp;sensor=false&callback=google_maps_loaded';
 		require(
 			[url],
 			function(){},
