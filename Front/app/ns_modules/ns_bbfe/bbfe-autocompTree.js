@@ -143,8 +143,7 @@ define([
                         //for global
                         _this.$el.find('input').trigger('thesaurusChange');
 
-                        var value = _this.$el.find('#' + _this.id).val();
-                        _this.validateValue(value);
+                        _this.onChange();
                     },
 
                     onInputInitialize: function(options){
