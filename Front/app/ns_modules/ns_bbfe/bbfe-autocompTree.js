@@ -4,9 +4,11 @@ define([
     'jqueryui',
     'backbone',
     'backbone_forms',
+    'moment',
     'autocompTree',
+    'dateTimePicker'
 ], function (
-    _, $, $ui, Backbone, Form, autocompTree
+    _, $, $ui, Backbone, Form, moment, autocompTree
 ) {
 
     Backbone.Form.validators.Thesaurus = function (options) {
@@ -32,12 +34,36 @@ define([
         previousValue: '',
 
         events: {
-            'change': 'onChange',
+            'change .autocompTree': 'onChange'
+        },
+
+        enableDatePicker: function() {
+            // avoid double loading (and reset of value)
+            if (this.dateEnabled) return;
+            this.dateEnabled = true;
+
+            // display dt picker
+            this.$el.find(".date").removeClass("hidden");
+
+            // is dateFormat available in schema?
+            var format = 'DD/MM/YYYY';
+            if (this.options.schema.options.dateFormat) {
+                format = this.options.schema.options.dateFormat;
+            }
+
+            this.$el.find(".date input").val(moment().format(format));
+            this.$el.find(".date").datetimepicker({
+                format: format
+            });
         },
 
         onChange: function(e){
             var value = this.$el.find('#' + this.id).val();
             this.validateValue(value);
+
+            if (this.options.schema.options.date) {
+                this.enableDatePicker();
+            }
         },
 
         initialize: function (options) {
@@ -59,6 +85,7 @@ define([
             }
             Form.editors.Base.prototype.initialize.call(this, options);
 
+            this.options = options;
             this.formGrid = options.formGrid;
             this.id = this.cid;
 
@@ -219,23 +246,25 @@ define([
         },
 
         getValue: function () {
+            var val = '';
+
             //if error
             if (this.isTermError) {
-                return this.$el.find('#' + this.id).val();
+                val = this.$el.find('#' + this.id).val();
+            } else if(!this.editable && this.$el.find('#' + this.id).attr('val')){
+                val = this.$el.find('#' + this.id).attr('val');
+            } else if ( this.$el.find('#' + this.id + '_value') ){
+                val = this.$el.find('#' + this.id + '_value').val();
             }
 
-            //if empty val
-            if(!this.$el.find('#' + this.id).val()){
-                return '';
+            // if date option is available, wrap value in json object
+            if (this.options.schema.options.date) {
+                val = {
+                    value: val,
+                    date: this.$el.find(".date input").val()
+                }
             }
-
-            if(!this.editable && this.$el.find('#' + this.id).attr('val')){
-                return this.$el.find('#' + this.id).attr('val');
-            }
-
-            if ( this.$el.find('#' + this.id + '_value') ){
-                return this.$el.find('#' + this.id + '_value').val();
-            }
+            return val;
         },
 
         validateValue: function (displayValue, isTranslated) {
@@ -282,6 +311,12 @@ define([
         <div class="<%= inputGroup %>">\
             <span class="input-group-addon <%=iconFont%>"></span>\
             <input id="<%=inputID%>" name="<%=inputID%>" class="autocompTree <%=editorClass%>" type="text" placeholder="" <%=editorAttrs%>>\
+        </div>\
+        <div class="input-group date dateTimePicker hidden" data-editors="Date_">\
+            <span class="input-group-addon ">\
+                <span class="reneco-calendar reneco "></span>\
+            </span>\
+            <input name="Date" class="form-control displayInput " type="text">\
         </div>\
         <span id="errorMsg" class="error hidden">Invalid term</span>\
         </div>',
