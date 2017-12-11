@@ -1,5 +1,5 @@
 
-update [ModuleForms] SET Options =  'SELECT [fullpath] as label, ID as val FROM [Region] UNION SELECT '''' as label , -1 as val'
+update [ModuleForms] SET Options =  'SELECT [fullpath] as label, ID as val FROM [Region] WHERE fullpath is not NULL UNION SELECT '''' as label , -1 as val '
 WHERE Name = 'FK_Region'
 
 
