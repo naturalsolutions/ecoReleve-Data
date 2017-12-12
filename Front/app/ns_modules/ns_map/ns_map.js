@@ -134,7 +134,7 @@ define([
         zoomAnimation: true,
         keyboard: false, //fix scroll window
         attributionControl: false,
-      });
+      }).locate({setView:true});
 
       L.control.zoom({
         position:'topright'
@@ -241,19 +241,33 @@ define([
       this.map.addControl(this.drawControl);
       var controlDiv = this.drawControl._toolbars.edit._toolbarContainer;
 
-      var controlUI = L.DomUtil.create('a', 'leaflet-draw-edit-remove');
-      controlDiv.append(controlUI);
-      controlUI.title = 'Remove All Polygons';
-      controlUI.href = '#';
-      L.DomEvent.addListener(controlUI, 'click', function (e) {
+      var removeControlUI = L.DomUtil.create('a', 'leaflet-draw-edit-remove');
+      controlDiv.append(removeControlUI);
+      removeControlUI.title = 'Remove All Polygons';
+      removeControlUI.href = '#';
+      L.DomEvent.addListener(removeControlUI, 'click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        if(!$(controlUI).hasClass("leaflet-disabled") && _this.drawnItems.getLayers().length > 0){
+        if(!$(removeControlUI).hasClass("leaflet-disabled") && _this.drawnItems.getLayers().length > 0){
           _this.drawnItems.clearLayers();
           _this.map.fire('draw:deleted');
 
         }
     });
+
+    if (navigator.geolocation){
+      var locationControlUI = L.DomUtil.create('a', 'leaflet-no-background glyphicon glyphicon-screenshot');
+      controlDiv.append(locationControlUI);
+      locationControlUI.title = 'Mark from current location';
+      locationControlUI.href = '#';
+      L.DomEvent.addListener(locationControlUI, 'click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if(!$(removeControlUI).hasClass("leaflet-disabled")){
+            _this.getCurrentLocation();
+        }
+      });
+    }
 			// this.map.on('draw:created', function (e) {
       //   if(this.drawOptions.onDrawCreated){
 
@@ -270,10 +284,10 @@ define([
 
     },
 
-    toggleDrawing: function() {
+    toggleDrawing: function(forceDisable) {
       var button = $('.leaflet-draw-toolbar.leaflet-bar.leaflet-draw-toolbar-top');
       var markerButtons = button.find('a');
-      if (button.hasClass('disabled-draw-control')) {
+      if (button.hasClass('disabled-draw-control') && !forceDisable) {
           button.removeClass('disabled-draw-control');
           markerButtons.removeClass('leaflet-disabled');
           // $('.leaflet-draw-edit-remove').addClass('leaflet-disabled');
@@ -403,6 +417,14 @@ define([
       });
     },
 
+    getCurrentLocation: function(){
+      var _this = this;
+
+      navigator.geolocation.getCurrentPosition(function(position){
+        var lat = position.coords.latitude, lon = position.coords.longitude;
+        _this.map.fire('currentLocation', {lat: lat, lon:lon});
+      });
+    },
 
     initClusters: function(geoJson){
       var _this= this;
