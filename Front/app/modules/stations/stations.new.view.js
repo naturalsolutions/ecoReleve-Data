@@ -80,7 +80,13 @@ define([
         _this.removeLatLngMakrer(true);
       });
       
+      this.map.map.on('currentLocation', function(e){
+        _this.updateMarkerPos(e.lat, e.lon);
+        _this.$el.find('input[name="LAT"]').val(e.lat);
+        _this.$el.find('input[name="LON"]').val(e.lon);
+      });
       this.$el.i18n();
+     
     },
 
     getRegion: function(e){
@@ -109,28 +115,28 @@ define([
       this.nsForm.destroy();
     },
 
-    getCurrentPosition: function() {
-      var _this = this;
-      if (navigator.geolocation) {
-        var loc = navigator.geolocation.getCurrentPosition(function(position) {
-          var lat = parseFloat((position.coords.latitude).toFixed(5));
-          var lon = parseFloat((position.coords.longitude).toFixed(5));
-          _this.updateMarkerPos(lat, lon);
-          _this.$el.find('input[name="LAT"]').val(lat).change();
-          _this.$el.find('input[name="LON"]').val(lon).change();
-        });
-      } else {
-        Swal({
-          title: 'The browser dont support geolocalization API',
-          text: '',
-          type: 'error',
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
-        });
-      }
-    },
+    // getCurrentPosition: function() {
+    //   var _this = this;
+    //   if (navigator.geolocation) {
+    //     var loc = navigator.geolocation.getCurrentPosition(function(position) {
+    //       var lat = parseFloat((position.coords.latitude).toFixed(5));
+    //       var lon = parseFloat((position.coords.longitude).toFixed(5));
+    //       _this.updateMarkerPos(lat, lon);
+    //       _this.$el.find('input[name="LAT"]').val(lat).change();
+    //       _this.$el.find('input[name="LON"]').val(lon).change();
+    //     });
+    //   } else {
+    //     Swal({
+    //       title: 'The browser dont support geolocalization API',
+    //       text: '',
+    //       type: 'error',
+    //       showCancelButton: false,
+    //       confirmButtonColor: 'rgb(147, 14, 14)',
+    //       confirmButtonText: 'OK',
+    //       closeOnConfirm: true,
+    //     });
+    //   }
+    // },
 
     removeLatLngMakrer: function(reInitLatLng){
       if(this.currentLayer){
@@ -144,6 +150,10 @@ define([
       this.map.toggleDrawing();
     },
 
+    setLatLon: function(lat, lon){
+      var lat = this.$el.find('input[name="LAT"]').val(lat);
+      var lon = this.$el.find('input[name="LON"]').val(lon);
+    },
     getLatLng: function() {
       var lat = this.$el.find('input[name="LAT"]').val();
       var lon = this.$el.find('input[name="LON"]').val();
@@ -151,7 +161,9 @@ define([
     },
 
     updateMarkerPos: function(lat, lon) {
+
       if (lat && lon) {
+        this.map.toggleDrawing(true);
         if(this.currentLayer){
 
           this.currentLayer.setLatLng(new L.LatLng(lat, lon));
@@ -202,6 +214,7 @@ define([
 
      },
      swithTab : function(e){
+    
        var ele = $(e.target);
        var tabLink = $(ele).attr('href');
        $('.tab-ele').removeClass('active');
