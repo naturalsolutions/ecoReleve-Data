@@ -73,6 +73,12 @@ define([
           "opacity": 0.5
         };
         _this.RegionLayer = new L.GeoJSON(geoJSON, {style : regionStyle});
+        var prop = geoJSON.properties;
+        var infos = '';
+        for(var p in prop){
+          infos +='<b>'+p+' : '+prop[p]+'</b><br />';
+        }
+        _this.RegionLayer.bindPopup(infos);
         _this.RegionLayer.addTo(_this.map.map);
         _this.map.map.fitBounds(_this.RegionLayer.getBounds());
         _this.map.map.on("overlayadd", function (event) {
