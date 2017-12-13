@@ -12,12 +12,6 @@ define([
 	'./gpx/lyt-step2-gpx',
 
 	'./rfid/lyt-step1-rfid',
-	'./rfid/lyt-step2-rfid',
-
-	'./gsm/lyt-step1-gsm',
-	'./gsm/lyt-step2-gsm',
-
-	'./argos/lyt-step1-argos',
 
 ], function($, _, Backbone, Marionette, config, NewStepper, Step0,
 	StepSelectFile,
@@ -25,12 +19,6 @@ define([
 	Step2GPX,
 
 	Step1RFID,
-	Step2RFID,
-
-	Step1GSM,
-	Step2GSM,
-
-	Step1ARGOS
 ) {
 
   'use strict';
