@@ -39,6 +39,7 @@ define([
     initialize: function(options) {
       var _this = this;
       this.nbDateOutOfLimit = 0;
+      this.did = true;
       this.nbDateInLimit = 0;
       this.flagDate
       this.parent = options.parent;
@@ -236,7 +237,10 @@ define([
         }
       }));
 
-    }*/},
+    }*/
+  },
+
+
 
 
     onShow: function() {
@@ -303,26 +307,44 @@ define([
         }
         _this.displayGridSession();
         _this.displayGridPhotos();
-        $('.btn.btn-primary.start').on('click' , function() {
-          console.log("on a clique");
-          console.log(_this);
-          debugger;
-        })
+        _this.gridViewSession.gridOptions.api.sizeColumnsToFit()
+      /*  $('.btn.btn-primary.start').on('click' , function() {
+          _this.detailColClicked(this);
+        })*/
 
 
       } );
 
-
-    /* $('#datetimepicker3').dateTimePicker({
-        format :'LT'
-      });*/
-
-  
-
-
-
-
     },
+
+    detailColClicked: function(ref) {
+      var _this = this;
+      var elem = ref.firstElementChild;
+      if(elem.className.indexOf('plus') > -1){
+        elem.className = elem.className.replace('plus','minus')
+      }
+      else {
+        elem.className = elem.className.replace('minus','plus')
+      }
+      
+      var cols = _this.gridViewSession.gridOptions.columnApi.getAllColumns();
+      cols.forEach( function(col) {
+        if(col.colDef.hide) {
+          if( _this.did )
+            _this.gridViewSession.gridOptions.columnApi.setColumnVisible(col.colId,true);
+          else 
+          _this.gridViewSession.gridOptions.columnApi.setColumnVisible(col.colId,false);
+
+        }
+      });
+      _this.did = !_this.did
+      _this.gridViewSession.gridOptions.api.sizeColumnsToFit()
+     /* $('.btn.btn-primary.start').on('click' , function() {
+        _this.detailColClicked(this);
+      })*/
+    },
+
+
     updateColJetLag : function(newDateObj) {
       var _this = this;
       this.gridViewPhotos.gridOptions.api.forEachNode(function(rowNode) {     
@@ -356,18 +378,61 @@ define([
     displayGridSession: function() {
       var _this = this;
 
-      var data = this.model.get('row');
+      var data = Array(this.model.get('row'))
+      var t = 0
+      data.forEach(function(row) {
+        row['Details'] = null
+        row['infos1'] = 'infos1_'+t
+        row['infos2'] = 'infos2_'+t
+        row['infos3'] = 'infos3_'+t
+
+      })
       console.log(data)
 
       var columnsDefs =  [
           { field: 'StartDate', headerName: 'Start Date', maxWidth : 500 },
           { field: 'EndDate', headerName: 'End Date', maxWidth : 500 },
-          { field: 'UnicIdentifier', headerName: 'Monitored Site',hide: true, maxWidth : 500 },
+          { field: 'UnicIdentifier', headerName: 'Monitored Site', maxWidth : 500 },
           { field: 'Name', headerName: 'Site Name', maxWidth : 500 },
-           {headerName: "Details", hide: true, maxWidth : 500},
-            {headerName: "infos1", hide: true, maxWidth : 500},
-            {headerName: "infos2", hide: true, maxWidth : 500},
-            {headerName: "infos3", hide: true, maxWidth : 500}
+          { field: 'infos1',headerName: "infos1", hide: true, maxWidth : 500},
+          { field: 'infos2',headerName: "infos2", hide: true, maxWidth : 500},
+          { field: 'infos3',headerName: "infos3", hide: true, maxWidth : 500},
+          { field: 'Details',
+         // headerName :'Details',
+          headerCellTemplate: function() {
+            var eCell = document.createElement('span');
+            var btnElem = '<button class="js-btndetailssession btn btn-primary start"><i class="glyphicon glyphicon-plus"></i><span></span></button>';
+            if(_this.did === false ) {
+              btnElem = '<button class="js-btndetailssession btn btn-primary start"><i class="glyphicon glyphicon-minus"></i><span></span></button>'
+            }
+            eCell.innerHTML = 
+            // '<div class="ag-header-cell">'+
+            '<div id="agResizeBar" class="ag-header-cell-resize"></div>'+
+            '<span id="agMenu" class="ag-header-icon ag-header-cell-menu-button"></span>'+
+            '<div id="agHeaderCellLabel" class="ag-header-cell-label">'+
+             btnElem+
+                '<span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>'+
+                '<span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>'+
+                '<span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>'+
+                '<span id="agFilter" class="ag-header-icon ag-filter-icon"></span>'+
+                '<span id="agText" class="ag-header-cell-text"></span>'+
+            // '</div>'+
+            '</div>'
+
+        // put a button in to show calendar popup
+        var eCalendar = eCell.querySelector('.js-btndetailssession');
+        eCalendar.addEventListener('click', function() {
+            _this.detailColClicked(this);
+        });
+
+        return eCell;
+      },
+        width : 50,
+       maxWidth : 50,
+       suppressSizeToFit:true
+
+          }
+          //headerName: '<button class="btn btn-primary start"><i class="glyphicon glyphicon-plus"></i><span></span></button>', maxWidth : 50}
     ];
 
       this.rgGridSession.show(
@@ -380,7 +445,7 @@ define([
           enableFilter: false,
           enableSorting : false,
           suppressRowClickSelection: false,
-          rowHeight : 100
+
         }
       })
     );
@@ -396,14 +461,27 @@ define([
         {
           field: 'fileName',
           headerName: 'Name',
+          cellRenderer : function(params) {
+            if(params.data.status == 'Refused')
+              return '<del>'+params.value+'</del>';
+            else
+            return params.value;
+          },
           maxWidth : 500
         },{
           field: 'size',
           headerName: 'Size',
+          cellRenderer : function(params) {
+          
+            if(params.data.status == 'Refused')
+              return '<del>'+(Number(params.value) / (1024*1024)).toFixed(2)+'Mo </del>';
+            else
+            return (Number(params.value) / (1024*1024)).toFixed(2)+'Mo';
+          },
           maxWidth : 500
         },{
           field: 'dateFind',
-          headerName: 'date',
+          headerName: 'date(+/- décalage horaire)',
           maxWidth : 500,
           cellRenderer : function(params) {
             if(params.data.jetLag != '00:00:00' && params.data.jetLag != '+00:00:00' && params.data.jetLag != '-00:00:00')
@@ -448,13 +526,13 @@ define([
           maxWidth : 500,
           cellStyle : function(params) {
            switch(params.value) {
-             case 'dateOk':
-             return {'background-color' :'green'}
+             case 'Acceptable':
+             return {'background-color' :'green','font-weight' : 'bold'}
              break;
-             case 'inRange':
+             case 'Just':
              return {'background-color' :'yellow'}
              break;
-             case 'outOfRange':
+             case 'Refused':
              return {'background-color' :'red'}
              break;
              default : 
@@ -466,12 +544,12 @@ define([
       
       var data = {}
       data = this.r.files.map(function(elem) {
-        var status = 'dateOk';
+        var status = 'Acceptable';
         if( elem.inRange ) {
-          status = 'inRange'
+          status = 'Just'
         }
         if( elem.outOfRange ) {
-          status = 'outOfRange'
+          status = 'Refused'
         }
 
         return {

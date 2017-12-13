@@ -52,9 +52,6 @@ define([
           if(elem.uniqueIdentifier === event.data.file) { 
          //   elem.dateFind = event.data.date;
             elem.dateFind = _this.parseDateToIso(event.data.date);
-            if( _this.nbFilesParsed === _this.nbFilesToParse ) {
-              debugger;
-            }
             if(_this.nbFilesParsed === _this.nbFilesToParse/* && $('#myPleaseWait').hasClass('in') */) {
               _this.nbFilesParsed = 0;
               _this.nbFilesToParse = 0 ;

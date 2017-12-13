@@ -429,7 +429,8 @@ define([
             return;
           }*/
         }
-        col.headerCellTemplate = _this.getHeaderCellTemplate();
+        if(typeof(col.headerCellTemplate) == 'undefined')
+          col.headerCellTemplate = _this.getHeaderCellTemplate();
       });
 
 
