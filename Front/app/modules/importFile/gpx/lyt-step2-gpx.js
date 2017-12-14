@@ -108,6 +108,7 @@ define([
           }
         });
         if (!text) {
+          text = params.data.fieldActivity;
           $(params.eGridCell).addClass('ag-cell-error');
 
           var errorsColumn =  params.data['_errors'];
@@ -158,7 +159,9 @@ define([
               valueReturned = fa.value;
             }
           });
-
+          if(!valueReturned){
+            valueReturned = value;
+          }
         }
         else {
           valueReturned = this.element.getValue();
@@ -268,17 +271,41 @@ define([
     validate: function() {
       var _this = this;
       var rowAndErrors =  this.gridView.getRowDataAndErrors();
-      if(rowAndErrors.errors.length > 0){
-        return false;
-      }
+
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+
+      var selectedNodesError = false;
       if(!selectedNodes.length){
+        Swal({
+          title: 'No station selected',
+          text: 'You have to select at least one station',
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          confirmButtonText: 'Ok',
+          closeOnConfirm: true,
+        });
         return;
       }
       var coll = new Backbone.Collection(selectedNodes.map(function(node){
+        if(node.data._errors && node.data._errors.length > 0){
+          selectedNodesError = node.data._errors[0];
+        }
         return node.data;
       }));
 
+      if(selectedNodesError){
+        Swal({
+          title: 'Error in selected stations',
+          text: 'Verifiy your data, error occured in "'+selectedNodesError+'" field',
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          confirmButtonText: 'Ok',
+          closeOnConfirm: true,
+        });
+        return;
+      }
       coll.url = 'sensors/gpx/datas';
       Backbone.sync('create', coll, {
         success: function(data) {
