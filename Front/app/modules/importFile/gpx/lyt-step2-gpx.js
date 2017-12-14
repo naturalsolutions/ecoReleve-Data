@@ -146,15 +146,16 @@ define([
 
           var errorsColumn =  params.data['_errors'];
           
-                if(!($.isArray(errorsColumn))) {
-                  errorsColumn = [];
-                }
-                errorsColumn.push(params.colDef.field);
-                errorsColumn = errorsColumn.filter(function(elem, index, self) {
-                    return index == self.indexOf(elem);
-                })
-                params.node.setDataValue('_errors', errorsColumn);
-    
+          if(!($.isArray(errorsColumn))) {
+            errorsColumn = [];
+          }
+          if(params.colDef){
+            errorsColumn.push(params.colDef.field);
+            errorsColumn = errorsColumn.filter(function(elem, index, self) {
+                return index == self.indexOf(elem);
+            })
+            params.node.setDataValue('_errors', errorsColumn);
+          }
         } else {
           $(params.eGridCell).removeClass('ag-cell-error');
 
