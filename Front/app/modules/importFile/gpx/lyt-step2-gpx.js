@@ -297,7 +297,7 @@ define([
       if(selectedNodesError){
         Swal({
           title: 'Error in selected stations',
-          text: 'Verifiy your data, error occured in "'+selectedNodesError+'" field',
+          text: 'Verifiy your data, an error occured in "'+selectedNodesError+'" field',
           type: 'error',
           showCancelButton: false,
           confirmButtonColor: 'rgb(147, 14, 14)',
