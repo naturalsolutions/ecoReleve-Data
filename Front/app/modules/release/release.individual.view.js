@@ -5,6 +5,7 @@ define([
   'backbone',
   'marionette',
   'sweetAlert',
+  'sweetAlert2',
   'translater',
 
   'ns_modules/ns_com',
@@ -13,7 +14,7 @@ define([
   'ns_filter/filters',
 
 
-], function($, _, Backbone, Marionette, Swal, Translater,
+], function($, _, Backbone, Marionette, Swal, Swal2, Translater,
   Com, ObjectPicker, GridView, NsFilter
 ){
 
@@ -246,22 +247,47 @@ define([
             resp.title = 'An error occured';
             resp.type = 'error';
             var callback = function() {};
+            this.swal(resp, 'error', callback);
           }else {
-            resp.title = 'Success';
-            resp.type = 'success';
+
             this.gridView.gridOptions.api.removeItems(this.gridView.gridOptions.api.getSelectedNodes())
-            var callback = function() {
-              Backbone.history.navigate('stations/' + _this.model.get('ID'), {trigger: true});
-            };
+            Swal2({
+              type:'success',
+              title:'Success',
+              text:'release: ' + resp.release,
+              icon: 'success',
+              buttons: {
+                cancel:'Keep same station',
+                new_station: {
+                  text: 'Release on new station',
+                  value: 'new_station',
+                },
+                view_station: 'View station'
+              },
+            }).then((value) => {
+              switch (value) {
+             
+                case "view_station":
+                  console.log(' view station go here')
+                  Backbone.history.navigate('stations/' + _this.model.get('ID'), {trigger: true});
+                  break;
+             
+                case "new_station":
+                  console.log('release on new station here')
+                  Backbone.history.navigate('release', {trigger:true});
+                  break;
+             
+                default:
+                console.log('import on same staztion here')
+              }
+            });
           }
-          resp.text = 'release: ' + resp.release;
-          this.swal(resp, resp.type, callback);
 
         }).fail(function(resp) {
           var callback = function() {
             return true;
           };
-          this.swal(resp, 'error', callback);
+          
         });
         
       } else {
