@@ -60,17 +60,17 @@ class ImportHistoryView(DynamicObjectCollectionView):
         self.objectDB.session = threadlocal.get_current_request().dbsession
         self.__acl__ = context_permissions['stations']
         self.__actions__ = {'forms': self.getForm,
-                    'getFields': self.getGrid,
-                    'getFilters': self.getFilter,
-                    'getType': self.getType,
-                    'export': self.export,
-                    'count': self.count_,
-                    }
+                            'getFields': self.getGrid,
+                            'getFilters': self.getFilter,
+                            'getType': self.getType,
+                            'export': self.export,
+                            'count': self.count_,
+                            }
         self.typeObj = None
-    
+
     def insert(self):
         pass
-    
+
     def retrieve(self):
         return self.getHistory()
 
@@ -91,9 +91,9 @@ class ImportHistoryView(DynamicObjectCollectionView):
 
         order_by = json.loads(data['order_by'], [])
         result = gene.search(criteria,
-                                offset=offset,
-                                per_page=per_page,
-                                order_by=order_by)
+                             offset=offset,
+                             per_page=per_page,
+                             order_by=order_by)
         return result
 
 

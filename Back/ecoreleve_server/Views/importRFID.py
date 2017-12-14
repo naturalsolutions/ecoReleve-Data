@@ -1,9 +1,15 @@
 import re
 from datetime import datetime
-from sqlalchemy import select, and_
+import time
+import codecs
+import shutil
+import os
+from sqlalchemy import select, and_, join
 from sqlalchemy.exc import IntegrityError
 from ..Models import (
+    Base,
     Rfid,
+    Sensor,
     dbConfig,
     Import
 )
@@ -13,144 +19,282 @@ from pyramid import threadlocal
 import itertools
 
 
+def convertAntennaID(val):
+    return 'DU-' + format(int(val), '03d')
+
+
+def parse_date(str_date, str_time):
+
+    # default datetime format
+    format_dt = '%d/%m/%Y %H:%M:%S'
+    dt = str_date + ' ' + re.sub('\s', '', str_time)
+
+    # english format
+    if re.search('PM|AM', str_time):
+        format_dt = '%m/%d/%Y %I:%M:%S%p'
+        format_dtBis = '%d/%m/%Y %I:%M:%S%p'
+    try:
+        dt = datetime.strptime(dt, format_dt)
+    except Exception as e:
+        dt = datetime.strptime(dt, format_dtBis)
+
+    return dt
+
+
+def getDataFrameFromFile(input_file, creator):
+
+    # multiple header for RFID files
+    fieldtype1 = {'NB': 'no', 'TYPE': 'type',
+                  '"PUCE "': 'code', 'DATE': 'no', 'TIME': 'no'}
+    fieldtype2 = {'#': 'no', 'Transponder Type:': 'type',
+                  'Transponder Code:': 'code', 'Date:': 'no', 'Time:': 'no',
+                  'Event:': 'Event', 'Unit #:': 'Unit', 'Antenna #:': 'Antenna',
+                  'Memo:': 'Memo', 'Custom:': 'Custom', '': ''}
+    fieldtype3 = {'Transponder Type:': 'type', 'Transponder Code:': 'code',
+                  'Date:': 'no', 'Time:': 'no',
+                  'Event:': 'Event', 'Unit #:': 'Unit',
+                  'Antenna #:': 'Antenna', 'Memo:': 'Memo',
+                  'Custom:': 'Custom'}
+
+    fieldDict = {'TYPE': 'type', 'Transponder Type:': 'type',
+                 'Transponder Code:': 'code', '"PUCE "': 'code',
+                 'Date:': 'Date', 'Time:': 'Time',
+                 'DATE': 'Date', 'TIME': 'Time',
+                 'Unit #:': 'Unit',
+                 'Antenna #:': 'Antenna'
+                 }
+
+    # blob = request.POST['file']
+    # input_file = blob.file
+
+    try:
+        df = pd.read_csv(input_file,
+                         sep=';',
+                         header=0,
+                         )
+        if len(df.columns) <= 1:
+            df = pd.read_csv(input_file,
+                             sep='\t',
+                             header=0,
+                             )
+    except:
+
+        # weird behaviour in files using tab separation, some hack below
+        input_file.seek(0)
+        temp_filename = 'temp_rfid' + str(int(time.time())) + '.txt'
+        with open(temp_filename, 'wb') as output_file:
+            shutil.copyfileobj(input_file, output_file)
+        doc = codecs.open(temp_filename, 'rU', 'UTF-8')
+        df = pd.read_csv(doc,
+                         sep='\t',
+                         encoding='utf8',
+                         header=0,
+                         )
+        os.remove(temp_filename)
+    df = df.rename(columns=fieldDict)
+    df['date_'] = df.apply(
+        lambda row: parse_date(row.Date, row.Time), axis=1)
+    print(df.iloc[1])
+    df['identifier'] = df['Unit'].apply(
+        lambda row: convertAntennaID(row))
+
+    return df
+
+
+def getDataFrame(input_file, creator):
+    import time
+    import shutil
+    data = []
+    message = ""
+    field_label = []
+    isHead = False
+    now = datetime.now()
+
+    input_file.seek(0)
+    temp_fielname = 'temp_rfid' + str(int(time.time())) + '.txt'
+    with open(temp_fielname, 'wb') as output_file:
+        shutil.copyfileobj(input_file, output_file)
+
+    content = open(temp_fielname).read()
+
+    # NEED a big Refact !!
+    if re.compile('\r\n').search(content):
+        data = content.split('\r\n')
+    elif re.compile('\n').search(content):
+        data = content.split('\n')
+    elif re.compile('\r').search(content):
+        data = content.split('\r')
+
+    fieldtype1 = {'NB': 'no', 'TYPE': 'type',
+                  '"PUCE "': 'code', 'DATE': 'no', 'TIME': 'no'}
+    fieldtype2 = {'#': 'no', 'Transponder Type:': 'type',
+                  'Transponder Code:': 'code', 'Date:': 'no', 'Time:': 'no',
+                  'Event:': 'Event', 'Unit #:': 'Unit', 'Antenna #:': 'Antenna',
+                  'Memo:': 'Memo', 'Custom:': 'Custom', '': ''}
+    fieldtype3 = {'Transponder Type:': 'type', 'Transponder Code:': 'code',
+                  'Date:': 'no', 'Time:': 'no',
+                  'Event:': 'Event', 'Unit #:': 'Unit',
+                  'Antenna #:': 'Antenna', 'Memo:': 'Memo',
+                  'Custom:': 'Custom'}
+
+    entete = data[0]
+
+    if re.compile('\t').search(entete):
+        separateur = '\t'
+
+    elif re.compile(';').search(entete):
+        separateur = ';'
+    entete = entete.split(separateur)
+
+    # file with head
+    if (sorted(entete) == sorted(fieldtype1.keys())):
+        field_label = ["no", "Type", "Code", "date", "time"]
+        isHead = True
+
+    elif (sorted(entete) == sorted(fieldtype2.keys())):
+        field_label = ["no", "Type", "Code", "date",
+                       "time", "no", "no", "no", "no", "no"]
+        isHead = True
+
+    elif (sorted(entete) == sorted(fieldtype3.keys())):
+        field_label = ["Type", "Code", "date",
+                       "time", "no", "no", "no", "no", "no"]
+        isHead = True
+    else:  # without head
+        isHead = False
+        if separateur == ';':
+            field_label = ["no", "Type", "Code", "date",
+                           "time", "no", "no", "no", "no", "no"]
+        else:
+            if len(entete) > 5:
+                field_label = ["Type", "Code", "date",
+                               "time", "no", "no", "no", "no", "no"]
+            if entete[0] == 'Transponder Type:':
+                isHead = True
+            elif entete[1] == 'Transponder Type:':
+                isHead = True
+                field_label = ["no", "Type", "Code", "date", "time"]
+            else:
+                field_label = ["no", "Type", "Code", "date", "time"]
+
+    j = 0
+    code = ""
+    date = ""
+    dt = ""
+    list_RFID = []
+
+    if (isHead):
+        j = 1
+    # Parsing data
+    allDate = []
+    while j < len(data):
+        i = 0
+        if data[j] != "":
+            line = data[j].replace('"', '').split(separateur)
+            while i < len(field_label):
+                if field_label[i] == 'Code':
+                    code = line[i]
+                if field_label[i] == 'Antenna':
+                    identifier = convertAntennaID(line[i])
+                if field_label[i] == 'date':
+                    date = line[i]
+                if field_label[i] == 'time':
+                    time = re.sub('\s', '', line[i])
+                    format_dt = '%d/%m/%Y %H:%M:%S'
+                    if re.search('PM|AM', time):
+                        format_dt = '%m/%d/%Y %I:%M:%S%p'
+                        format_dtBis = '%d/%m/%Y %I:%M:%S%p'
+                    dt = date + ' ' + time
+                    try:
+                        dt = datetime.strptime(dt, format_dt)
+                    except Exception as e:
+                        dt = datetime.strptime(dt, format_dtBis)
+                    allDate.append(dt)
+                i = i + 1
+
+            row = {'id_': j,
+                   #    'FK_Sensor': idModule,
+                   'identifier': identifier,
+                   'date_': dt,
+                   'chip_code': code,
+                   'creator': creator,
+                   'creation_date': now,
+                   'validated': 0,
+                   'checked': 0}
+            list_RFID.append(row)
+        j = j + 1
+    df = pd.DataFrame.from_records(
+        list_RFID,
+        columns=['id_', 'identifier', 'date_',
+                 'chip_code', 'creator', 'creation_date',
+                 'validated', 'checked'])
+    return df
+
+
+def findEquipmentSession(session, identifier, maxDate, minDate):
+    table = Base.metadata.tables['SensorEquipment']
+    joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
+
+    query = select([table.c['StartDate'],
+                    table.c['EndDate'],
+                    Sensor.ID]
+                   ).select_from(joinTable
+                                 ).where(Sensor.UnicIdentifier == identifier
+                                         ).where(table.c['StartDate'] <= minDate
+                                                 ).where(table.c['EndDate'] >= maxDate
+                                                         )
+    equipSession = session.execute(query).fetchone()
+    if equipSession:
+        equipSession = dict(equipSession)
+    return equipSession
+
+
 def uploadFileRFID(request):
     session = request.dbsession
     data = []
     message = ""
     field_label = []
     isHead = False
+
+    creator = int(request.authenticated_userid['iss'])
+    # content = request.POST['data']
+    # blob = request.POST['file']
+    blob = request.POST['file']
+    input_file = blob.file
+    filename = blob.filename
+    # filename = request.POST['fileName']
+
+    # idModule = int(request.POST['FK_Sensor'])
+    # startEquip = request.POST['StartDate']
+    # endEquip = request.POST['EndDate']
+
     try:
-        creator = int(request.authenticated_userid['iss'])
-        content = request.POST['data']
-        idModule = int(request.POST['FK_Sensor'])
-        startEquip = request.POST['StartDate']
-        endEquip = request.POST['EndDate']
-        filename = request.POST['fileName']
-        now = datetime.now()
+        data_to_check = getDataFrameFromFile(input_file, creator)
+        sensorIdentifier = data_to_check.iloc[0].identifier
 
-        if re.compile('\r\n').search(content):
-            data = content.split('\r\n')
-        elif re.compile('\n').search(content):
-            data = content.split('\n')
-        elif re.compile('\r').search(content):
-            data = content.split('\r')
+        print(sensorIdentifier)
+        allDate = list(data_to_check['date_'])
+        equipSession = findEquipmentSession(
+            session, sensorIdentifier, max(allDate), min(allDate))
+        print(equipSession)
 
-        fieldtype1 = {'NB': 'no', 'TYPE': 'type',
-                      '"PUCE "': 'code', 'DATE': 'no', 'TIME': 'no'}
-        fieldtype2 = {'#': 'no', 'Transponder Type:': 'type',
-                      'Transponder Code:': 'code', 'Date:': 'no', 'Time:': 'no',
-                      'Event:': 'Event', 'Unit #:': 'Unit', 'Antenna #:': 'Antenna',
-                      'Memo:': 'Memo', 'Custom:': 'Custom', '': ''}
-        fieldtype3 = {'Transponder Type:': 'type', 'Transponder Code:': 'code',
-                      'Date:': 'no', 'Time:': 'no',
-                      'Event:': 'Event', 'Unit #:': 'Unit',
-                      'Antenna #:': 'Antenna', 'Memo:': 'Memo',
-                      'Custom:': 'Custom'}
-
-        entete = data[0]
-
-        if re.compile('\t').search(entete):
-            separateur = '\t'
-
-        elif re.compile(';').search(entete):
-            separateur = ';'
-        entete = entete.split(separateur)
-
-        # file with head
-        if (sorted(entete) == sorted(fieldtype1.keys())):
-            field_label = ["no", "Type", "Code", "date", "time"]
-            isHead = True
-
-        elif (sorted(entete) == sorted(fieldtype2.keys())):
-            field_label = ["no", "Type", "Code", "date",
-                           "time", "no", "no", "no", "no", "no"]
-            isHead = True
-
-        elif (sorted(entete) == sorted(fieldtype3.keys())):
-            field_label = ["Type", "Code", "date",
-                           "time", "no", "no", "no", "no", "no"]
-            isHead = True
-        else:  # without head
-            isHead = False
-            if separateur == ';':
-                field_label = ["no", "Type", "Code", "date",
-                               "time", "no", "no", "no", "no", "no"]
-            else:
-                if len(entete) > 5:
-                    field_label = ["Type", "Code", "date",
-                                   "time", "no", "no", "no", "no", "no"]
-                if entete[0] == 'Transponder Type:':
-                    isHead = True
-                elif entete[1] == 'Transponder Type:':
-                    isHead = True
-                    field_label = ["no", "Type", "Code", "date", "time"]
-                else:
-                    field_label = ["no", "Type", "Code", "date", "time"]
-
-        j = 0
-        code = ""
-        date = ""
-        dt = ""
-        list_RFID = []
-
-        if (isHead):
-            j = 1
-        # Parsing data
-        allDate = []
-        while j < len(data):
-            i = 0
-            if data[j] != "":
-                line = data[j].replace('"', '').split(separateur)
-                while i < len(field_label):
-                    if field_label[i] == 'Code':
-                        code = line[i]
-                    if field_label[i] == 'date':
-                        date = line[i]
-                    if field_label[i] == 'time':
-                        time = re.sub('\s', '', line[i])
-                        format_dt = '%d/%m/%Y %H:%M:%S'
-                        if re.search('PM|AM', time):
-                            format_dt = '%m/%d/%Y %I:%M:%S%p'
-                            format_dtBis = '%d/%m/%Y %I:%M:%S%p'
-                        dt = date + ' ' + time
-                        try:
-                            dt = datetime.strptime(dt, format_dt)
-                        except Exception as e:
-                            dt = datetime.strptime(dt, format_dtBis)
-                        allDate.append(dt)
-                    i = i + 1
-
-                row = {'id_': j,
-                       'FK_Sensor': idModule,
-                       'date_': dt,
-                       'chip_code': code,
-                       'creator': creator,
-                       'creation_date': now,
-                       'validated': 0,
-                       'checked': 0}
-                list_RFID.append(row)
-            j = j + 1
-        data_to_check = pd.DataFrame.from_records(
-            list_RFID,
-            columns=['id_', 'FK_Sensor', 'date_',
-                     'chip_code', 'creator', 'creation_date',
-                     'validated', 'checked'])
-        minDateEquip = datetime.strptime(startEquip, '%Y-%m-%d %H:%M:%S')
-        try:
-            maxDateEquip = datetime.strptime(endEquip, '%Y-%m-%d %H:%M:%S')
-        except:
-            maxDateEquip = None
+        # # print(min(allDate), minDateEquip)
+        # try:
+        #     maxDateEquip = datetime.strptime(endEquip, '%Y-%m-%d %H:%M:%S')
+        # except:
+        #     maxDateEquip = None
 
         # check if Date corresponds with pose remove module
-        if (min(allDate) >= minDateEquip and
-                (maxDateEquip is None or max(allDate) <= maxDateEquip)):
-
+        # if (min(allDate) >= minDateEquip and
+        #         (maxDateEquip is None or max(allDate) <= maxDateEquip)):
+        if equipSession:
             data_to_insert = checkDuplicatedRFID(
                 data_to_check, min(allDate), max(allDate), idModule)
             data_to_insert = data_to_insert.drop(['id_'], 1)
             data_to_insert = data_to_insert.drop_duplicates()
 
-            importObj = Import(ImportFileName=filename, FK_User=creator, ImportDate=now)
+            importObj = Import(ImportFileName=filename,
+                               FK_User=creator, ImportDate=now)
             importObj.ImportType = 'RFID'
             importObj.maxDate = max(allDate)
             importObj.minDate = min(allDate)
@@ -160,7 +304,8 @@ def uploadFileRFID(request):
             session.add(importObj)
             session.flush()
 
-            data_to_insert.loc[:, ('FK_Import')] = list(itertools.repeat(importObj.ID, len(data_to_insert.index)))
+            data_to_insert.loc[:, ('FK_Import')] = list(
+                itertools.repeat(importObj.ID, len(data_to_insert.index)))
             if data_to_insert.shape[0] == 0:
                 raise(IntegrityError)
 
@@ -176,7 +321,8 @@ def uploadFileRFID(request):
         else:
             session.rollback()
             request.response.status_code = 510
-            message = 'File dates (first date : ' + str(allDate[0])+ ', last date : ' + str(allDate[-1])+ ') do not correspond with the deploy/remove dates of the selected module'
+            message = 'File dates (first date : ' + str(allDate[0]) + ', last date : ' + str(
+                allDate[-1]) + ') do not correspond with the deploy/remove dates of the selected module'
             return message
 
     except IntegrityError as e:
@@ -192,6 +338,7 @@ def uploadFileRFID(request):
 
 def checkDuplicatedRFID(data_to_check, startEquip, endEquip, fk_sensor):
     session1 = threadlocal.get_current_registry().dbmaker()
+
     query = select([Rfid]
                    ).where(
         and_(Rfid.date_ >= startEquip, and_(
