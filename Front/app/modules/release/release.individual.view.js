@@ -268,17 +268,15 @@ define([
               switch (value) {
              
                 case "view_station":
-                  console.log(' view station go here')
                   Backbone.history.navigate('stations/' + _this.model.get('ID'), {trigger: true});
                   break;
              
                 case "new_station":
-                  console.log('release on new station here')
                   Backbone.history.navigate('release', {trigger:true});
                   break;
              
                 default:
-                console.log('import on same staztion here')
+                  break;
               }
             });
           }
