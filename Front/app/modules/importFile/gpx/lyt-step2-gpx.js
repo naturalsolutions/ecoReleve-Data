@@ -100,40 +100,6 @@ define([
     displayGrid: function() {
       var _this = this;
 
-
-    
-  
-      // var FieldActivityEditor = function () {
-      // };
-
-      // console.log(Editors.AutocompleteEditor)
-      // FieldActivityEditor.prototype.init = function(params){
-      //   var self = this;
-      //   this.select = document.createElement('select');
-      //   this.select.className = 'form-control';
-      //   _this.fieldActivityList.map(function(fa){
-      //     var option = document.createElement('option');
-      //     option.text = fa.label;
-      //     option.value = fa.value;
-      //     self.select.add(option);
-      //   });
-      //   this.select.value = params.value;
-      // };
-      // FieldActivityEditor.prototype.afterGuiAttached = function () {
-      //   $(this.select).focus();
-      //   setTimeout(function(){
-      //     $(this.select).find('select').click();
-
-      //   },5)
-      // };
-
-      // FieldActivityEditor.prototype.getGui = function(){
-      //   return this.select;
-      // };
-      // FieldActivityEditor.prototype.getValue = function() {
-      //   return this.select.value;
-      // };
-
       var FieldActivityRenderer = function(params){
         var text = '';
         _this.fieldActivityList.map(function(fa){
@@ -167,32 +133,24 @@ define([
             }
             params.node.setDataValue('_errors', errorsColumn);
           }
-
-
         }
         return text;
       };
 
       var FieldActivityEditor = function () {};
       FieldActivityEditor.prototype = new Editors.AutocompleteEditor();
-      // FieldActivityEditor.prototype.initBBFE = function(options){
-      //   this.bbfe = new AutocompletePicker(options);
-      //   this.element = this.bbfe.render();
-      // };
+
       FieldActivityEditor.prototype.afterGuiAttached = function(params){
-        console.log(this.bbfe.getValue())
         params = {}
         params.data = {}
         params.data.fieldActivity = this.bbfe.getValue()
         this.element.$el.focus();
         this.element.$el.find('input').val(FieldActivityRenderer(params)).focus();
-        // this.element.$el.find('input').focus();
       }
 
       FieldActivityEditor.prototype.getValue = function(params){
         var valueReturned;
         var value = this.element.getValue()
-        console.log(value)
         
         if (isNaN(value)){
           _this.fieldActivityList.map(function(fa){
@@ -346,9 +304,6 @@ define([
               Backbone.history.navigate('stations?lastImported', {trigger: true});
             }
             else {
-              // Backbone.history.navigate('#', {trigger: false});
-              // Backbone.history.navigate('importFile/gpx',{trigger: true});
-
               // //method to return at the 1st step
               _this.options.parent.currentStepIndex = 1;
               var index = _this.options.parent.currentStepIndex;
