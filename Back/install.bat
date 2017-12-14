@@ -4,8 +4,8 @@
 conda install conda-build --yes
 conda env create -f environment.yml
 
-python setup.py develop
-
+call activate erd
+call python setup.py develop
 cd ../Front
 npm install && bower install && grunt dev
 
