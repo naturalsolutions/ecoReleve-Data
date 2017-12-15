@@ -37,10 +37,12 @@ define(['jquery', 'marionette', 'backbone', 'config', 'sweetAlert'],
       'stations/:id(/)': 'station',
       'stations(/)': 'stations',
 
+      'projects/new/:from(/)': 'newProject',
       'projects/new(/)': 'newProject',
       'projects/:id(/)': 'project',
       'projects(/)': 'projects',
 
+      'clients/new/:from(/)': 'newClient',
       'clients/new(/)': 'newClient',
       'clients/:id(/)': 'client',
       'clients(/)': 'clients',
