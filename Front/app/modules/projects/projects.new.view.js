@@ -21,6 +21,29 @@ define([
     onShow: function() {
       this.displayForm();
       this.displayMap();
+      var _this = this;
+      this.map.map.on('draw:created', function (e) {
+          var type = e.layerType;
+          _this.currentLayer = e.layer;
+          // var latlon = _this.currentLayer.getLatLng();
+
+          _this.map.drawnItems.addLayer(_this.currentLayer);
+          // _this.$el.find('input[name="LAT"]').val(latlon.lat);
+          // _this.$el.find('input[name="LON"]').val(latlon.lng);
+          _this.map.toggleDrawing();
+        });
+        
+        
+        this.map.map.on('draw:edited', function (e) {
+          // var latlon = _this.currentLayer.getLatLng();
+          // _this.$el.find('input[name="LAT"]').val(latlon.lat);
+          // _this.$el.find('input[name="LON"]').val(latlon.lng);
+        });
+        
+        this.map.map.on('draw:deleted', function () {
+          _this.map.toggleDrawing();
+        });
+
       this.$el.i18n();
     },
 

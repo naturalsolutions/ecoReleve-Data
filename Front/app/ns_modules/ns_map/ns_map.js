@@ -263,17 +263,17 @@ define([
 
     //     }
     // });
-			this.map.on('draw:created', function (e) {
-        var type = e.layerType,
-        layer = e.layer;
-        _this.drawnItems.addLayer(layer);
-			});
+			// this.map.on('draw:created', function (e) {
+      //   var type = e.layerType,
+      //   layer = e.layer;
+      //   _this.drawnItems.addLayer(layer);
+			// });
 
-			this.map.on('draw:edited', function (e) {
-			});
+			// this.map.on('draw:edited', function (e) {
+			// });
 
-			this.map.on('draw:deleted', function () {
-			});
+			// this.map.on('draw:deleted', function () {
+			// });
 
     },
 
