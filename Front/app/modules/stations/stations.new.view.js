@@ -64,16 +64,14 @@ define([
         var latlon = _this.currentLayer.getLatLng();
 
         _this.map.drawnItems.addLayer(_this.currentLayer);
-        _this.$el.find('input[name="LAT"]').val(latlon.lat);
-        _this.$el.find('input[name="LON"]').val(latlon.lng);
+        _this.setLatLonForm(latlon.lat, latlon.lng);
         _this.map.toggleDrawing();
       });
       
       
       this.map.map.on('draw:edited', function (e) {
         var latlon = _this.currentLayer.getLatLng();
-        _this.$el.find('input[name="LAT"]').val(latlon.lat);
-        _this.$el.find('input[name="LON"]').val(latlon.lng);
+        _this.setLatLonForm(latlon.lat, latlon.lng);
       });
       
       this.map.map.on('draw:deleted', function () {
@@ -82,8 +80,7 @@ define([
       
       this.map.map.on('currentLocation', function(e){
         _this.updateMarkerPos(e.lat, e.lon);
-        _this.$el.find('input[name="LAT"]').val(e.lat);
-        _this.$el.find('input[name="LON"]').val(e.lon);
+        _this.setLatLonForm(e.lat, e.lon);
       });
       this.$el.i18n();
      
@@ -150,10 +147,11 @@ define([
       this.map.toggleDrawing();
     },
 
-    setLatLon: function(lat, lon){
-      var lat = this.$el.find('input[name="LAT"]').val(Math.ceil(lat, 5));
-      var lon = this.$el.find('input[name="LON"]').val(Math.ceil(lon, 5));
+    setLatLonForm: function(lat, lon){
+      var lat = this.$el.find('input[name="LAT"]').val(parseFloat(lat.toFixed(5)));
+      var lon = this.$el.find('input[name="LON"]').val(parseFloat(lon.toFixed(5)));
     },
+
     getLatLng: function() {
       var lat = this.$el.find('input[name="LAT"]').val();
       var lon = this.$el.find('input[name="LON"]').val();
