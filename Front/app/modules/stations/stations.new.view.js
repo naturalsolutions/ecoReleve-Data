@@ -10,13 +10,14 @@ define([
 
   'ns_form/NSFormsModuleGit',
   'ns_map/ns_map',
+  'L',
 
   'i18n'
 
 ], function(
   $, _, Backbone, Marionette,
   moment, datetime, Swal,
-  NsForm, NsMap
+  NsForm, NsMap, L
 ){
 
   'use strict';
@@ -31,6 +32,7 @@ define([
 
       'focusout input[name="Dat e_"]': 'checkDate',
       'change input[name="LAT"], input[name="LON"]': 'getLatLng',
+      'change select[name="FK_Region"]': 'getRegion',
       'click .tab-link': 'displayTab',
       'change select[name="FieldWorker"]': 'checkUsers',
     },
@@ -47,13 +49,62 @@ define([
     },
 
     onShow: function() {
+      var _this = this;
       this.refrechView('#stWithCoords');
       this.map = new NsMap({
         popup: true,
         zoom: 2,
         element: 'map',
+        drawable: true
+      });
+
+      this.map.map.on('draw:created', function (e) {
+				var type = e.layerType;
+				_this.currentLayer = e.layer;
+        var latlon = _this.currentLayer.getLatLng();
+
+        _this.map.drawnItems.addLayer(_this.currentLayer);
+        _this.setLatLonForm(latlon.lat, latlon.lng);
+        _this.map.toggleDrawing();
+      });
+      
+      
+      this.map.map.on('draw:edited', function (e) {
+        var latlon = _this.currentLayer.getLatLng();
+        _this.setLatLonForm(latlon.lat, latlon.lng);
+      });
+      
+      this.map.map.on('draw:deleted', function () {
+        _this.removeLatLngMakrer(true);
+      });
+      
+      this.map.map.on('currentLocation', function(e){
+        _this.updateMarkerPos(e.lat, e.lon);
+        _this.setLatLonForm(e.lat, e.lon);
       });
       this.$el.i18n();
+     
+    },
+
+    getRegion: function(e){
+      var val = $(e.currentTarget).val();
+      var _this = this;
+      $.ajax({
+        url:'regions/'+val+'/geoJSON'
+      }).done(function(geoJSON){
+        if(_this.RegionLayer){
+          _this.map.map.removeLayer(_this.RegionLayer);
+        }
+        
+        var regionStyle = {
+          "color": "#00cc00",
+          "weight": 3,
+          "opacity": 0.5
+        };
+        _this.RegionLayer = new L.GeoJSON(geoJSON, {style : regionStyle});
+        _this.RegionLayer.addTo(_this.map.map);
+        _this.map.map.fitBounds(_this.RegionLayer.getBounds());
+      });
     },
 
     onDestroy: function() {
@@ -61,27 +112,44 @@ define([
       this.nsForm.destroy();
     },
 
-    getCurrentPosition: function() {
-      var _this = this;
-      if (navigator.geolocation) {
-        var loc = navigator.geolocation.getCurrentPosition(function(position) {
-          var lat = parseFloat((position.coords.latitude).toFixed(5));
-          var lon = parseFloat((position.coords.longitude).toFixed(5));
-          _this.updateMarkerPos(lat, lon);
-          _this.$el.find('input[name="LAT"]').val(lat).change();
-          _this.$el.find('input[name="LON"]').val(lon).change();
-        });
-      } else {
-        Swal({
-          title: 'The browser dont support geolocalization API',
-          text: '',
-          type: 'error',
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
-        });
+    // getCurrentPosition: function() {
+    //   var _this = this;
+    //   if (navigator.geolocation) {
+    //     var loc = navigator.geolocation.getCurrentPosition(function(position) {
+    //       var lat = parseFloat((position.coords.latitude).toFixed(5));
+    //       var lon = parseFloat((position.coords.longitude).toFixed(5));
+    //       _this.updateMarkerPos(lat, lon);
+    //       _this.$el.find('input[name="LAT"]').val(lat).change();
+    //       _this.$el.find('input[name="LON"]').val(lon).change();
+    //     });
+    //   } else {
+    //     Swal({
+    //       title: 'The browser dont support geolocalization API',
+    //       text: '',
+    //       type: 'error',
+    //       showCancelButton: false,
+    //       confirmButtonColor: 'rgb(147, 14, 14)',
+    //       confirmButtonText: 'OK',
+    //       closeOnConfirm: true,
+    //     });
+    //   }
+    // },
+
+    removeLatLngMakrer: function(reInitLatLng){
+      if(this.currentLayer){
+        this.map.drawnItems.removeLayer(this.currentLayer);
+        this.currentLayer = null;
       }
+      if(reInitLatLng){
+        this.$el.find('input[name="LAT"]').val('');
+        this.$el.find('input[name="LON"]').val('');
+      }
+      this.map.toggleDrawing();
+    },
+
+    setLatLonForm: function(lat, lon){
+      var lat = this.$el.find('input[name="LAT"]').val(parseFloat(lat.toFixed(5)));
+      var lon = this.$el.find('input[name="LON"]').val(parseFloat(lon.toFixed(5)));
     },
 
     getLatLng: function() {
@@ -91,8 +159,21 @@ define([
     },
 
     updateMarkerPos: function(lat, lon) {
+
       if (lat && lon) {
-        this.map.addMarker(null, lat, lon);
+        this.map.toggleDrawing(true);
+        if(this.currentLayer){
+
+          this.currentLayer.setLatLng(new L.LatLng(lat, lon));
+        } else {
+          this.currentLayer = new L.marker(new L.LatLng(lat, lon));
+          this.map.drawnItems.addLayer(this.currentLayer)
+        }
+
+        var center = this.currentLayer.getLatLng();
+        this.map.map.panTo(center, {animate: false});
+      } else {
+        this.removeLatLngMakrer();
       }
     },
 
@@ -131,12 +212,14 @@ define([
 
      },
      swithTab : function(e){
+    
        var ele = $(e.target);
        var tabLink = $(ele).attr('href');
        $('.tab-ele').removeClass('active');
        $(ele).parent().addClass('active');
        $(tabLink).addClass('active in');
        this.refrechView(tabLink);
+
      },
 
     refrechView: function(stationType) {
@@ -146,10 +229,30 @@ define([
         case '#stWithCoords':
           stTypeId = 1;
           $('.js-get-current-position').removeClass('hidden');
+          if(this.map){
+            if(this.RegionLayer){
+              this.map.map.removeLayer(this.RegionLayer);
+
+            }
+            $('.leaflet-draw-edit-remove').removeClass('leaflet-disabled');
+            
+            this.map.toggleDrawing();
+          }
           break;
         case '#stWithoutCoords':
           stTypeId = 3;
           $('.js-get-current-position').addClass('hidden');
+          if(this.map){
+            this.map.map.fire('draw:deleted')
+            var button = $('.leaflet-draw-toolbar.leaflet-bar.leaflet-draw-toolbar-top');
+            var markerButtons = button.find('a');
+            if (!button.hasClass('disabled-draw-control')) {
+                  button.addClass('disabled-draw-control');
+                  markerButtons.addClass('leaflet-disabled');
+                }
+                $('.leaflet-draw-edit-remove').addClass('leaflet-disabled');
+
+          }
           break;
         default:
           break;

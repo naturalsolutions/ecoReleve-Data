@@ -1,0 +1,21 @@
+
+update [ModuleForms] SET Options =  'SELECT [fullpath] as label, ID as val FROM [Region] WHERE fullpath is not NULL UNION SELECT '''' as label , -1 as val '
+WHERE Name = 'FK_Region'
+
+
+--update ModuleGrids SET Options = 'SELECT [ID] as val,fullpath as label FROM  [Region] order by fullpath', QueryName = 'fullpath'
+--WHERE Name = 'FK_Region' and Module_ID = 3
+
+
+update ModuleGrids SET Options = 'SELECT [fullpath]  as val,fullpath as label FROM  [Region] r where EXISTS (Select * From Station s where s.FK_Region = r.ID) order by fullpath', QueryName = 'fullpath'
+WHERE Name = 'FK_Region' --and Module_ID = 3
+
+
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('156_Up_Conf_for_Region',GETDATE(),(SELECT db_name()))
+
+
+GO

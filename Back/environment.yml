@@ -1,4 +1,4 @@
-name: erd2
+name: erd
 channels:
 - defaults
 dependencies:
@@ -7,11 +7,10 @@ dependencies:
   - pyramid=1.5.7
   - pandas=0.20.3
   - reportlab=3.4.0
-  # - pywin32=220 # only for Windows OS, else comment this row
+  - pywin32=220 # only for Windows OS, else comment this row
   - pycrypto=2.6.1
   - sqlalchemy=1.1.13
   - pyodbc=4.0.17
-  - zope.interface=4.1.2
   - psutil
 
   - pip:
@@ -19,12 +18,15 @@ dependencies:
     - pyramid_chameleon==0.3
     - pyramid_debugtoolbar==4.3
     - pyramid_tm==2.2
-    - sqlalchemy-utils==0.30.11
+    - sqlalchemy-utils==0.32.21
     - transaction==2.1.2
     - zope.sqlalchemy==0.7.7
+    - zope.interface
     - waitress==1.0.2
     - webtest==2.0.28
     - XlsxWriter==1.0.0
     - pyexcel-xlsx==0.5.0.1
     - openpyxl==2.4.8
     - pyramid_jwtauth==0.1.3
+    - ./windows_packages/Shapely-1.6.1-cp35-cp35m-win_amd64.whl
+    - geojson

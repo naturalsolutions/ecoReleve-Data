@@ -1,0 +1,48 @@
+
+/****** Object:  Table [dbo].[RegionGeom]    Script Date: 11/12/2017 16:35:57 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[RegionGeom](
+	[ID] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[Name] [nvarchar](255) NULL,
+	[max_lat] [decimal](9, 5) NULL,
+	[min_lat] [decimal](9, 5) NULL,
+	[max_lon] [decimal](9, 5) NULL,
+	[min_lon] [decimal](9, 5) NULL,
+	[SHAPE_Leng] [real] NULL,
+	[SHAPE_Area] [real] NULL,
+	[geom] [geometry] NULL,
+	[type_] [varchar](25) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+
+INSERT INTO [RegionGeom] 
+SELECT 
+      [Name]
+      ,[max_lat]
+      ,[min_lat]
+      ,[max_lon]
+      ,[min_lon]
+      ,[SHAPE_Leng]
+      ,[SHAPE_Area]
+      ,[geom]
+      ,[type_]
+  FROM [reneco_sig].dbo.[RegionGeom]
+
+  GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('158_Region_for_Display_deployment',GETDATE(),(SELECT db_name()))
+
+
+GO

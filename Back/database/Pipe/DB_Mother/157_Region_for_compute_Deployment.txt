@@ -1,0 +1,79 @@
+
+/* Remove useless rows with no relationship */ 
+delete R
+FROM Region r 
+WHERE NOT EXISTS (SELECT * From Station s WHERE s.FK_Region = r.ID AND FK_StationType =3)
+GO
+
+/* modify model*/ 
+ALTER Table Region 
+ADD fullpath Varchar(255), Area Varchar(255), Subregion Varchar(255)
+GO
+
+select * 
+FROM region
+
+/* update existing rows */
+
+update r SET r.valid_geom = sig.valid_geom, r.geom = sig.geom, r.max_lat=sig.max_lat,
+			 r.min_lat=sig.min_lat , r.max_lon = sig.max_lon, r.min_lon = sig.min_lon,
+			 r.fullpath = sig.fullpath  , r.Region = sig.W_Region, r.Area = sig.W_Area
+FROM Region r 
+JOIN reneco_sig.dbo.Region sig ON (r.Region = sig.Country AND sig.W_Area = '') OR ( r.Region = sig.W_Area AND sig.W_Region = '')
+
+
+/* insert news */
+INSERT INTO [dbo].[Region]
+           ([Country]
+           ,[Region]
+           ,[valid_geom]
+           ,[max_lat]
+           ,[min_lat]
+           ,[max_lon]
+           ,[min_lon]
+           ,[Reneco_Country]
+           ,[SHAPE_Leng]
+           ,[SHAPE_Area]
+           ,[geom]
+           ,[fullpath]
+           ,[Area]
+           ,[Subregion])
+
+SELECT Country, W_Region, valid_geom,max_lat,min_lat, max_lon, min_lon,0, SHAPE_Leng,SHAPE_Area, geom,fullpath,W_Area, Mgmt_Unit
+FROM reneco_sig.dbo.Region sig
+WHERE NOT EXISTS (SELECT * FROM Region r WHERE sig.fullpath = r.fullpath)
+
+GO
+
+
+UPDATE Region SET Region =( Case WHEN Region = '' THEN NULL ELSE Region END ),
+					Area =  (Case WHEN Area = '' THEN NULL ELSE Area END), 
+					Subregion =  Case WHEN Subregion = '' THEN NULL ELSE SubRegion END
+
+
+/* try to set new region not existing in shape but related onstations */
+UPDATE r SET Area = r2.W_Area, fullpath = r2.Country+'>'+r2.W_Area+'>'+r2.W_Region
+--SELECT r.Country, r.Region,r.fullpath, r2.*
+From Region r
+JOIN reneco_sig.dbo.Region r2 on r.Country = r2.Country AND (r.Region = r2.W_Region)
+WHERE r.fullpath is null 
+
+
+/* other region to fix manually */
+--select * 
+--FROM Region r
+----JOIN reneco_sig.dbo.Region sig ON sig.fullpath like ('%'+r.Region+'%')
+--WHERE r.fullpath is null 
+
+
+--select * 
+--FROM reneco_sig.dbo.Region 
+--WHERE Country = 'United Arab Emirates'
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('157_Region_for_compute_Deployment',GETDATE(),(SELECT db_name()))
+
+
+GO

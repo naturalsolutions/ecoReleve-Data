@@ -83,6 +83,7 @@ define([
         popup: true,
         com: this.com,
         selection: true,
+        player: true,
         //bbox: true,
       });
 
@@ -177,6 +178,10 @@ define([
       }).fail(function(resp) {
         this.swal(resp, 'error');
       });
+    },
+
+    onDestroy: function(){
+      // console.log('gogogo');
     },
 
     swal: function(opt, type, callback) {

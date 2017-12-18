@@ -143,7 +143,7 @@ def details_unchecked_indiv(request):
             geoJson.append({'type': 'Feature',
                             'id': row['PK_id'],
                             'properties': {'type': row['type'],
-                                           'date': row['date']},
+                                           'date': row['date'].strftime('%Y-%m-%d %H:%M:%S')},
                             'geometry': {'type': 'Point',
                                          'coordinates': [row['lat'], row['lon']]}
                             })
