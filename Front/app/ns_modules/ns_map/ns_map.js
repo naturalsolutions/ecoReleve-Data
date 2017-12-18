@@ -119,7 +119,7 @@ define([
     init: function(){
       var _this = this;
       //set defaults icons styles
-      L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images';
+      L.Icon.Default.imagePath = 'bower_components/leaflet/dist/images/';
       this.selectedIcon = new L.DivIcon({className: 'custom-marker selected'});
       this.icon = new L.DivIcon({className: 'custom-marker'});
 
@@ -374,53 +374,20 @@ define([
       var _this = this;
 
       return GoogleMapsLoader.done(function(){
-        var CustomGMap = L.Google.extend({
-          _initMapObject: function() {
-            if (!this._ready) return;
-            this._google_center = new google.maps.LatLng(0, 0);
-            var map = new google.maps.Map(this._container, {
-              center: this._google_center,
-              zoom: 0,
-              tilt: 0,
-              mapTypeId: google.maps.MapTypeId[this._type],
-              disableDefaultUI: true,
-              keyboardShortcuts: false,
-              draggable: false,
-              scaleControl: true,
-              disableDoubleClickZoom: true,
-              scrollwheel: false,
-              streetViewControl: false,
-              styles: this.options.mapOptions.styles,
-              backgroundColor: this.options.mapOptions.backgroundColor
-            });
 
-            var _that = this;
-            this._reposition = google.maps.event.addListenerOnce(map, 'center_changed',
-              function() { _that.onReposition(); });
-            this._google = map;
-
-            google.maps.event.addListenerOnce(map, 'idle',
-              function() { _that._checkZoomLevels(); });
-            //Reporting that map-object was initialized.
-            this.fire('MapObjectInitialized', { mapObject: map });
-          },
+        var relief = L.gridLayer.googleMutant({
+          type: 'terrain'
         });
 
-        var relief = new CustomGMap('TERRAIN', {
-          unloadInvisibleTiles: true,
-          updateWhenIdle: true,
-          reuseTiles: true
-        });        
-        var hybrid = new CustomGMap('HYBRID', {
-          unloadInvisibleTiles: true,
-          updateWhenIdle: true,
-          reuseTiles: true
+        var hybrid = L.gridLayer.googleMutant({
+            type: 'hybrid',
         });
+
         var baseMaps = {
           'relief': relief,
           'hybrid': hybrid
         };
-        
+ 
         _this.lControl = L.control.layers(baseMaps, null, {collapsed:true, position:'topright'});
         _this.lControl.addTo(_this.map);
         _this.map.addLayer(hybrid);
