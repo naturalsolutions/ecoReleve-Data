@@ -31,7 +31,7 @@
     "moment-timezone": "~0.5.13",
     "tether": "^1.4.0",
     "popper.js": "https://unpkg.com/popper.js",
-    "leaflet-draw": "0.4.12",
+    "leaflet-draw": "~0.4.13",
     "Leaflet.GridLayer.GoogleMutant": "https://gitlab.com/IvanSanchez/Leaflet.GridLayer.GoogleMutant.git"
   },
   "resolutions": {
