@@ -151,8 +151,8 @@ define([
     },
 
     setLatLon: function(lat, lon){
-      var lat = this.$el.find('input[name="LAT"]').val(lat);
-      var lon = this.$el.find('input[name="LON"]').val(lon);
+      var lat = this.$el.find('input[name="LAT"]').val(Math.ceil(lat, 5));
+      var lon = this.$el.find('input[name="LON"]').val(Math.ceil(lon, 5));
     },
     getLatLng: function() {
       var lat = this.$el.find('input[name="LAT"]').val();
