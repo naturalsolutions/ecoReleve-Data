@@ -78,7 +78,7 @@ class GenericType(ORMUtils):
     @classmethod
     def getPropertiesClass(cls):
         if not hasattr(cls, 'PropertiesClass'):
-            class Properties(ORMUtils, Base):
+            class Properties(ORMUtils):
                 __tablename__ = cls.parent.__tablename__ + 'DynProp'
                 ID = Column(Integer, primary_key=True)
                 Name = Column(String(250), nullable=False)
@@ -93,7 +93,7 @@ class GenericType(ORMUtils):
                     )
 
             cls.PropertiesClass = type(
-                cls.parent.__tablename__ + 'DynProp'.title(), (Properties, ), {})
+                cls.parent.__tablename__ + 'DynProp'.title(), (Properties, Base), {})
         return cls.PropertiesClass
 
     @declared_attr
@@ -117,28 +117,38 @@ class GenericType(ORMUtils):
     @declared_attr
     def _type_properties(cls):
         if not hasattr(cls, 'TypePropertiesClass'):
-            class TypeProperties(Base):
+            this = cls
+
+            class TypeProperties():
                 __tablename__ = cls.__tablename__ + '_' + cls.parent.__tablename__ + 'DynProp'
                 ID = Column(Integer, primary_key=True)
-                type_id = Column('FK_' + cls.__tablename__,
-                                 ForeignKey(cls.__tablename__ + '.ID'),
-                                 nullable=False
-                                 )
-                property_id = Column('FK_' + cls.parent.__tablename__ + 'DynProp',
+
+                @declared_attr
+                def type_id(cls):
+                    return Column('FK_' + this.__tablename__,
+                                  ForeignKey(this.__tablename__ + '.ID'),
+                                  nullable=False
+                                   )
+                @declared_attr
+                def property_id(cls):
+                    return Column('FK_' + this.parent.__tablename__ + 'DynProp',
                                      ForeignKey(
-                                         cls.parent.__tablename__ + 'DynProp.ID'),
+                                         this.parent.__tablename__ + 'DynProp.ID'),
                                      nullable=False
                                      )
+
                 linkedTable = Column('LinkedTable', String(255))
                 linkedField = Column('LinkedField', String(255))
                 linkedID = Column('LinkedID', String(255))
                 linkedSourceID = Column('LinkSourceID', String(255))
 
-                _property_name = relationship(cls.getPropertiesClass())
+                @declared_attr
+                def _property_name(cls):
+                    return relationship(this.getPropertiesClass())
                 property_name = association_proxy('_property_name', 'Name')
 
             cls.TypePropertiesClass = type(
-                cls.__tablename__ + '_' + cls.parent.__tablename__ + 'DynProp'.title(), (TypeProperties, ), {})
+                cls.__tablename__ + '_' + cls.parent.__tablename__ + 'DynProp'.title(), (TypeProperties, Base), {})
         return relationship(cls.TypePropertiesClass)
 
 
@@ -365,12 +375,12 @@ class HasDynamicProperties(HasStaticProperties):
     @classmethod
     def getTypeClass(cls):
         if not hasattr(cls, 'TypeClass'):
-            class Type(GenericType, Base):
+            class Type(GenericType):
                 __name__ = cls.__tablename__ + 'Type'
                 __tablename__ = cls.__tablename__ + 'Type'
                 parent = cls
             cls.TypeClass = type(cls.__tablename__ +
-                                 'Type'.title(), (Type, ), {})
+                                 'Type'.title(), (Type, Base), {})
         return cls.TypeClass
 
     @property
@@ -382,7 +392,7 @@ class HasDynamicProperties(HasStaticProperties):
         if not hasattr(cls, 'DynamicValuesClass'):
             this = cls
 
-            class DynamicValues(ORMUtils, Base):
+            class DynamicValues(ORMUtils):
                 __tablename__ = cls.__tablename__ + 'DynPropValue'
                 ID = Column(Integer, primary_key=True)
                 StartDate = Column(DateTime, nullable=False)
@@ -390,18 +400,27 @@ class HasDynamicProperties(HasStaticProperties):
                 ValueDate = Column(DateTime)
                 ValueFloat = Column(Float)
                 ValueInt = Column(Integer)
-                fk_parent = Column('FK_' + cls.__tablename__,
-                                   ForeignKey(cls.__tablename__ + '.ID'),
+
+                @declared_attr
+                def fk_parent(cls):
+                    return Column('FK_' + this.__tablename__,
+                                   ForeignKey(this.__tablename__ + '.ID'),
                                    nullable=False
                                    )
-                fk_property = Column('FK_' + cls.__tablename__ + 'DynProp',
+            
+                @declared_attr
+                def fk_property(cls):
+                    return Column('FK_' + this.__tablename__ + 'DynProp',
                                      Integer,
                                      ForeignKey(
-                                         cls.__tablename__ + 'DynProp.ID'),
+                                         this.__tablename__ + 'DynProp.ID'),
                                      nullable=False
                                      )
 
-                _property = relationship(cls.getTypeClass().PropertiesClass)
+                @declared_attr
+                def _property(cls):
+                    return relationship(this.getTypeClass().PropertiesClass)
+
                 property_name = association_proxy('_property', 'Name')
 
                 @declared_attr
@@ -424,7 +443,7 @@ class HasDynamicProperties(HasStaticProperties):
                     return {'value:': val, 'StartDate': self.StartDate, 'name': self.property_name}
 
             cls.DynamicValuesClass = type(
-                cls.__tablename__ + 'DynPropValues'.title(), (DynamicValues, ), {})
+                cls.__tablename__ + 'DynPropValues'.title(), (DynamicValues, Base), {})
         return cls.DynamicValuesClass
 
     @declared_attr
