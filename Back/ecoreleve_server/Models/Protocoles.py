@@ -11,28 +11,24 @@ from sqlalchemy import (
     orm,
     func,
     event,
-    select)
-from sqlalchemy.dialects.mssql.base import BIT
+    select,
+    Boolean)
 from sqlalchemy.orm import relationship
-from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
-from ..GenericObjets.ObjectTypeWithDynProp import ObjectTypeWithDynProp
 from datetime import datetime, timedelta
 from sqlalchemy.ext.hybrid import hybrid_property
 from ..utils.parseValue import isNumeric
+from sqlalchemy.ext.declarative import declared_attr
+from ..GenericObjets.OrmModelsMixin import HasDynamicProperties, GenericType
+from ..utils.parseValue import formatValue
 
 
-class Observation(Base, ObjectWithDynProp):
+class Observation(HasDynamicProperties, Base):
     __tablename__ = 'Observation'
+    hasLinkedField = True
 
     moduleFormName = 'ObservationForm'
     moduleGridName = None
 
-    ID = Column(Integer, Sequence('Observation__id_seq'), primary_key=True)
-    FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
-    ObservationDynPropValues = relationship(
-        'ObservationDynPropValue',
-        backref='Observation',
-        cascade="all, delete-orphan")
     FK_Station = Column(Integer, ForeignKey('Station.ID'))
     creationDate = Column(DateTime, default=func.now())
     Parent_Observation = Column(Integer, ForeignKey('Observation.ID'))
@@ -52,31 +48,37 @@ class Observation(Base, ObjectWithDynProp):
     Station = relationship("Station")
     Individual = relationship('Individual')
 
-    def __init__(self, **kwargs):
-        Base.__init__(self, **kwargs)
-        ObjectWithDynProp.__init__(self)
+    @declared_attr
+    def table_type_name(cls):
+        return 'ProtocoleType'
 
-    def getTypeObjectFKName(self):
+    @declared_attr
+    def fk_table_type_name(cls):
         return 'FK_ProtocoleType'
 
-    def GetNewValue(self, nameProp):
-        ReturnedValue = ObservationDynPropValue()
-        ReturnedValue.ObservationDynProp = self.session.query(
-            ObservationDynProp).filter(ObservationDynProp.Name == nameProp).first()
-        return ReturnedValue
+    @classmethod
+    def getTypeClass(cls):
+        if not hasattr(cls, 'TypeClass'):
+            class Type(GenericType, Base):
+                __name__ = 'ProtocoleType'
+                __tablename__ = 'ProtocoleType'
+                obsolete = Column(Boolean)
+                parent = cls
+            cls.TypeClass = type('ProtocoleType', (Type, ), {})
+        return cls.TypeClass
 
-    def GetDynPropValues(self):
-        return self.ObservationDynPropValues
+    @declared_attr
+    def _type_id(cls):
+        Type = cls.getTypeClass()
+        return Column('FK_ProtocoleType',
+                      ForeignKey(Type.ID),
+                      nullable=False
+                      )
 
-    def GetDynProps(self, nameProp):
-        return self.session.query(ObservationDynProp
-                                  ).filter(ObservationDynProp.Name == nameProp).one()
-
-    def GetType(self):
-        if self.ProtocoleType is not None:
-            return self.ProtocoleType
-        else:
-            return self.session.query(ProtocoleType).get(self.FK_ProtocoleType)
+    @declared_attr
+    def _type(cls):
+        Type = cls.getTypeClass()
+        return relationship(Type)
 
     def linkedFieldDate(self):
         try:
@@ -87,9 +89,10 @@ class Observation(Base, ObjectWithDynProp):
             else:
                 linkedDate = self.Station.StationDate
         except:
+            from traceback import print_exc
+            print_exc()
             linkedDate = datetime.utcnow()
-
-        if 'unequipment' in self.GetType().Name.lower():
+        if 'unequipment' in self._type.Name.lower():
             linkedDate = linkedDate - timedelta(seconds=1)
         return linkedDate
 
@@ -106,7 +109,7 @@ class Observation(Base, ObjectWithDynProp):
         if isinstance(listOfSubProtocols, list) and len(listOfSubProtocols) > 0:
 
             for curData in listOfSubProtocols:
-                if self.GetType().Status == 8:
+                if self._type.Status == 8:
 
                     subDictList = []
                     for k, v in curData.items():
@@ -117,21 +120,20 @@ class Observation(Base, ObjectWithDynProp):
                             subDict['FieldName'] = k
                             subDict['valeur'] = v
                             subDictList.append(subDict)
-                    curData['listOfSubObs'] = subDictList
+                    curData['SubObservation_childrens'] = subDictList
 
                 if 'ID' in curData and curData['ID']:
                     subObs = list(filter(lambda x: x.ID == curData[
                                   'ID'], self.Observation_children))[0]
-                    subObs.LoadNowValues()
                 else:
                     subObs = Observation(
-                        FK_ProtocoleType=curData['FK_ProtocoleType'],
                         Parent_Observation=self.ID,
-                        FK_Station=self.FK_Station)
-                    subObs.init_on_load()
-
+                        FK_Station=self.FK_Station,
+                    )
+                    subObs.session = self.session
+                    subObs.type_id = curData['FK_ProtocoleType']
                 if subObs is not None:
-                    subObs.updateFromJSON(curData)
+                    subObs.values = curData
                     listObs.append(subObs)
                     self.session.add(subObs)
                     self.session.flush()
@@ -164,100 +166,38 @@ class Observation(Base, ObjectWithDynProp):
                     listSubValues.append(subObsValue)
         self.SubObservation_children = listSubValues
 
-    def updateFromJSON(self, DTOObject, startDate=None):
-        # delattr(self,'getForm')
-        previousState = self.getFlatObject()
-        ObjectWithDynProp.updateFromJSON(self, DTOObject, None)
-        if 'listOfSubObs' in DTOObject:
-            self.SubObservation_childrens = DTOObject['listOfSubObs']
-        self.updateLinkedField(DTOObject, previousState=previousState)
-
-    def getFlatObject(self, schema=None):
-        result = super().getFlatObject(schema=schema)
-        subObsList = []
-        typeName = 'children'
-        if self.Observation_children != []:
-            typeName = self.Observation_children[0].GetType().Name
+    def getValues(self):
+        values = HasDynamicProperties.getValues(self)
+        if self.Observation_children:
+            typeName = self.Observation_children[0]._type.Name
+            subObsList = []
 
             for subObs in self.Observation_children:
-                subObs.LoadNowValues()
-                if schema:
-                    subschema = schema[subObs.GetType().Name]['subschema']
-                else:
-                    subschema = None
-                flatObs = subObs.getFlatObject(schema=subschema)
+                flatObs = subObs.values
                 if len(subObs.SubObservation_children) > 0:
                     flatObs.update(subObs.SubObservation_childrens)
                 subObsList.append(flatObs)
-        result[typeName] = subObsList
-        return result
+            values[typeName] = subObsList
+        return values
 
-    def beforeDelete(self):
-        self.LoadNowValues()
+    def getDataWithSchema(self, displayMode='edit'):
+        resultat = HasDynamicProperties.getDataWithSchema(
+            self, displayMode=displayMode)
 
+        if self.Observation_children:
+            typeName = self.Observation_children[0]._type.Name
+            schema = resultat['schema'][typeName]['subschema']
+            resultat['data'][typeName] = [formatValue(
+                subObs, schema) for subObs in resultat['data'][typeName]]
 
-@event.listens_for(Observation, 'after_delete')
-def unlinkLinkedField(mapper, connection, target):
-    target.deleteLinkedField()
+        return resultat
 
+    def afterDelete(self):
+        self.deleteLinkedField()
 
-class ObservationDynPropValue(Base):
-
-    __tablename__ = 'ObservationDynPropValue'
-
-    ID = Column(Integer, Sequence(
-        'ObservationDynPropValue__id_seq'), primary_key=True)
-    StartDate = Column(DateTime, nullable=False)
-    ValueInt = Column(Integer)
-    ValueString = Column(String(250))
-    ValueDate = Column(DateTime)
-    ValueFloat = Column(Numeric(12, 5))
-    FK_ObservationDynProp = Column(
-        Integer, ForeignKey('ObservationDynProp.ID'))
-    FK_Observation = Column(Integer, ForeignKey('Observation.ID'))
-
-
-class ObservationDynProp(Base):
-
-    __tablename__ = 'ObservationDynProp'
-
-    ID = Column(Integer, Sequence(
-        'ObservationDynProp__id_seq'), primary_key=True)
-    Name = Column(Unicode(250), nullable=False)
-    TypeProp = Column(Unicode(250), nullable=False)
-    ProtocoleType_ObservationDynProps = relationship(
-        'ProtocoleType_ObservationDynProp', backref='ObservationDynProp')
-    ObservationDynPropValues = relationship(
-        'ObservationDynPropValue', backref='ObservationDynProp')
-
-
-class ProtocoleType(Base, ObjectTypeWithDynProp):
-
-    @orm.reconstructor
-    def init_on_load(self):
-        ObjectTypeWithDynProp.__init__(self)
-
-    __tablename__ = 'ProtocoleType'
-
-    ID = Column(Integer, Sequence('ProtocoleType__id_seq'), primary_key=True)
-    Name = Column(Unicode(250))
-    Status = Column(Integer)
-    obsolete = Column(BIT)
-    ProtocoleType_ObservationDynProps = relationship(
-        'ProtocoleType_ObservationDynProp', backref='ProtocoleType')
-    Observations = relationship('Observation', backref='ProtocoleType')
-
-
-class ProtocoleType_ObservationDynProp(Base):
-
-    __tablename__ = 'ProtocoleType_ObservationDynProp'
-
-    ID = Column(Integer, Sequence(
-        'ProtocoleType_ObservationDynProp__id_seq'), primary_key=True)
-    Required = Column(Integer, nullable=False)
-    FK_ProtocoleType = Column(Integer, ForeignKey('ProtocoleType.ID'))
-    FK_ObservationDynProp = Column(
-        Integer, ForeignKey('ObservationDynProp.ID'))
+# @event.listens_for(Observation, 'after_delete')
+# def unlinkLinkedField(mapper, connection, target):
+#     target.deleteLinkedField()
 
 
 class ObservationDynPropSubValue (Base):

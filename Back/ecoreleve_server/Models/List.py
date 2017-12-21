@@ -10,7 +10,7 @@ from sqlalchemy import (
     DATE,
     outerjoin)
 from sqlalchemy.orm import aliased
-from ..GenericObjets.ListObjectWithDynProp import ListObjectWithDynProp
+from ..GenericObjets.SearchEngine import CollectionEngine
 from ..Models import (
     Observation,
     Station,
@@ -20,7 +20,6 @@ from ..Models import (
     Base,
     Equipment,
     Sensor,
-    SensorType,
     MonitoredSite,
     Import,
     ArgosEngineering,
@@ -37,12 +36,13 @@ from ..utils.datetime import parse
 from ..utils.generator import Generator
 from sqlalchemy.sql.expression import union_all
 
+SensorType = Sensor.TypeClass
 
 eval_ = Eval()
 
 
-class StationList(ListObjectWithDynProp):
-    ''' this class extend ListObjectWithDynProp, it's used to filter stations '''
+class StationList(CollectionEngine):
+    '''it's used to filter stations '''
 
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
@@ -58,7 +58,7 @@ class StationList(ListObjectWithDynProp):
             subSelect = select([o.ID]
                                ).where(
                 and_(Station.ID == o.FK_Station,
-                     eval_.eval_binary_expr(o.FK_ProtocoleType, criteriaObj['Operator'],
+                     eval_.eval_binary_expr(o._type_id, criteriaObj['Operator'],
                                             criteriaObj['Value'])))
             query = query.where(exists(subSelect))
 
@@ -140,26 +140,6 @@ class StationList(ListObjectWithDynProp):
         result = self.session.execute(fullQueryJoinOrdered).fetchall()
         data = []
 
-        # if getFieldWorkers:
-        #     queryCTE = fullQueryJoinOrdered.cte()
-        #     joinFW = join(Station_FieldWorker, User,
-        #                   Station_FieldWorker.FK_FieldWorker == User.id)
-        #     joinTable = join(queryCTE, joinFW, queryCTE.c[
-        #                      'ID'] == Station_FieldWorker.FK_Station)
-        #     query = select([Station_FieldWorker.FK_Station,
-        #                     User.Login]).select_from(joinTable)
-        #     FieldWorkers = self.session.execute(query).fetchall()
-        #     list_ = {}
-        #     for x, y in FieldWorkers:
-        #         list_.setdefault(x, []).append(y)
-        #     for row in result:
-        #         row = OrderedDict(row)
-        #         try:
-        #             row['FK_FieldWorker_FieldWorkers'] = list_[row['ID']]
-        #         except:
-        #             pass
-        #         data.append(row)
-
         for row in result:
             row = OrderedDict(row)
             data.append(row)
@@ -174,7 +154,7 @@ class StationList(ListObjectWithDynProp):
         return query
 
 
-class IndividualList(ListObjectWithDynProp):
+class IndividualList(CollectionEngine):
 
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
@@ -191,7 +171,8 @@ class IndividualList(ListObjectWithDynProp):
 
         joinTable = super().GetJoinTable(searchInfo)
 
-        releaseFilter = list(filter(lambda x: x['Column'] == 'LastImported', searchInfo['criteria']))
+        releaseFilter = list(
+            filter(lambda x: x['Column'] == 'LastImported', searchInfo['criteria']))
         if len(releaseFilter) > 0:
             return joinTable
 
@@ -209,7 +190,7 @@ class IndividualList(ListObjectWithDynProp):
         joinTable = outerjoin(joinTable, Sensor,
                               Sensor.ID == EquipmentTable.c['FK_Sensor'])
         joinTable = outerjoin(joinTable, SensorType,
-                              Sensor.FK_SensorType == SensorType.ID)
+                              Sensor.type_id == SensorType.ID)
 
         self.selectable.append(Sensor.UnicIdentifier.label('FK_Sensor'))
         self.selectable.append(SensorType.Name.label('FK_SensorType'))
@@ -305,7 +286,7 @@ class IndividualList(ListObjectWithDynProp):
             fullQueryExist = select([Equipment.FK_Individual]).select_from(
                 joinTableExist).where(Equipment.FK_Individual == Individual.ID)
             fullQueryExist = fullQueryExist.where(
-                and_(vs.c['FK_SensorDynProp'] == 9, Sensor.FK_SensorType == 4))
+                and_(vs.c['FK_SensorDynProp'] == 9, Sensor.type_id == 4))
 
         else:
             queryExist = select([e2]).where(
@@ -316,7 +297,7 @@ class IndividualList(ListObjectWithDynProp):
                 [Equipment.FK_Individual]).select_from(joinTableExist)
             fullQueryExist = fullQueryExist.where(and_(
                 ~exists(queryExist), and_(vs.c['FK_SensorDynProp'] == 9,
-                                          and_(Sensor.FK_SensorType == 4,
+                                          and_(Sensor.type_id == 4,
                                                and_(Equipment.Deploy == 1,
                                                     and_(Equipment.StartDate < startDate,
                                                          Equipment.FK_Individual == Individual.ID)
@@ -386,7 +367,7 @@ class IndivLocationList(Generator):
         super().__init__(IndivLoc, SessionMaker)
 
 
-class SensorList(ListObjectWithDynProp):
+class SensorList(CollectionEngine):
 
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
@@ -522,7 +503,7 @@ class SensorList(ListObjectWithDynProp):
         return query
 
 
-class MonitoredSiteList(ListObjectWithDynProp):
+class MonitoredSiteList(CollectionEngine):
 
     def __init__(self, frontModule, typeObj=None,
                  View=None, startDate=None, history=False):
@@ -549,7 +530,7 @@ class MonitoredSiteList(ListObjectWithDynProp):
         joinTable = outerjoin(
             joinTable,
             SensorType,
-            Sensor.FK_SensorType == SensorType.ID)
+            Sensor._type_id == SensorType.ID)
 
         self.selectable.append(Sensor.UnicIdentifier.label('FK_Sensor'))
         self.selectable.append(SensorType.Name.label('FK_SensorType'))
@@ -613,15 +594,15 @@ class MonitoredSiteList(ListObjectWithDynProp):
 
 
 class ImportList(Generator):
-    
+
     def __init__(self, SessionMaker):
 
-        joinTable = join(Import, User, Import.FK_User==User.id)
+        joinTable = join(Import, User, Import.FK_User == User.id)
 
         tablecImprt = select([Import,
                               User.fullname.label('Login'),
 
-                            ]).select_from(joinTable
-                                           )
+                              ]).select_from(joinTable
+                                             )
         tablecImprt = tablecImprt.cte()
         super().__init__(tablecImprt, SessionMaker)

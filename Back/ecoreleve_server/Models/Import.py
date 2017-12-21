@@ -17,13 +17,12 @@ from sqlalchemy import (
     event)
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-from ..GenericObjets.DataBaseObjects import ConfiguredDbObjectMapped, DbObject
+from ..GenericObjets.OrmModelsMixin import HasStaticProperties
 
 sensor_schema = dbConfig['sensor_schema']
-dialect = dbConfig['dialect']
 
 
-class Import(Base, DbObject, ConfiguredDbObjectMapped):
+class Import(HasStaticProperties, Base):
     moduleGridName = 'ImportHistoryFilter'
 
     __tablename__ = 'Import'
@@ -36,7 +35,7 @@ class Import(Base, DbObject, ConfiguredDbObjectMapped):
     nbInserted = Column(Integer)
     maxDate = Column(DateTime)
     minDate = Column(DateTime)
-    
+
     # TempTable_GUID = Column(String(250), default=None)
     # Status = Column(Integer)
     # ObjectName = Column(String(250))
@@ -45,20 +44,22 @@ class Import(Base, DbObject, ConfiguredDbObjectMapped):
     #     'ImportType.ID'), nullable=False)
 
     __table_args__ = ({'schema': sensor_schema,
-                        'implicit_returning': False
+                       'implicit_returning': False
                        })
 
     GPXrawDatas = relationship('GPX', back_populates='ImportedFile')
     ArgosGPSRawDatas = relationship('ArgosGps', back_populates='ImportedFile')
-    ArgosEngRawDatas = relationship('ArgosEngineering', back_populates='ImportedFile')
+    ArgosEngRawDatas = relationship(
+        'ArgosEngineering', back_populates='ImportedFile')
     RFIDrawDatas = relationship('Rfid', back_populates='ImportedFile')
     GSMrawDatas = relationship('Gsm', back_populates='ImportedFile')
-    GSMengRawDatas = relationship('GsmEngineering', back_populates='ImportedFile')
+    GSMengRawDatas = relationship(
+        'GsmEngineering', back_populates='ImportedFile')
 
     @hybrid_property
     def relatedDatas(self):
         dictType = {
-            'GPX':self.GPXrawDatas,
+            'GPX': self.GPXrawDatas,
             'Argos': self.ArgosGPSRawDatas,
             'GSM': self.GSMrawDatas,
             'RFID': self.RFIDrawDatas
@@ -79,7 +80,7 @@ class Import(Base, DbObject, ConfiguredDbObjectMapped):
 
 
 # class ImportType(Base):
-    
+
 #     __tablename__ = 'ImportType'
 #     ID = Column(Integer, primary_key=True)
 #     Name = Column(String(250))

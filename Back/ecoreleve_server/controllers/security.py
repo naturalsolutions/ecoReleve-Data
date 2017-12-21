@@ -9,69 +9,6 @@ from pyramid.security import (
 )
 
 
-class Resource(dict):
-
-    def __init__(self, ref, parent):
-        self.__name__ = ref
-        self.__parent__ = parent
-
-    def __repr__(self):
-        # use standard object representation (not dict's)
-        return object.__repr__(self)
-
-    def add_child(self, ref, klass):
-        resource = klass(ref=ref, parent=self)
-        self[ref] = resource
-
-    def integers(self, ref):
-        try:
-            ref = int(ref)
-            # if int(ref) == 0:
-            #     return False
-        except (TypeError, ValueError):
-            return False
-        return True
-
-
-class SecurityRoot(Resource):
-    __acl__ = [
-         (Allow, Authenticated, 'read'),
-         (Allow, Authenticated, 'all'),
-         (Allow, 'group:admins', 'admin'),
-         (Allow, 'group:admins', 'superUser'),
-         (Allow, 'group:admins', 'all'),
-         (Allow, 'group:superUsers', 'superUser'),
-         (Allow, 'group:superUsers', 'all')
-    ]
-
-    def __init__(self, request):
-        Resource.__init__(self, ref='', parent=None)
-        self.request = request
-
-    def __getitem__(self, item):
-        if item == 'ecoReleve-Core':
-            return RootCore(item, self)
-
-
-class RootCore(SecurityRoot):
-
-    listChildren = []
-
-    def __init__(self, ref, parent):
-        Resource.__init__(self, ref, parent)
-        self.add_children()
-
-    def add_children(self):
-        for ref, klass in self.listChildren:
-            self.add_child(ref, klass)
-
-    def __getitem__(self, item):
-        return self.get(item)
-
-    def retrieve(self):
-        return {'next items': self}
-
-
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
 
     def get_userID(self, request):

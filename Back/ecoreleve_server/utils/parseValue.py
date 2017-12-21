@@ -92,7 +92,6 @@ def formatValue(data, schema):
 
 
 def formatThesaurus(data):
-    # print(thesaurusDictTraduction)
     lng = threadlocal.get_current_request().authenticated_userid['userlanguage']
     try:
         data = {

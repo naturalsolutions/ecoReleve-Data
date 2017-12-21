@@ -2,7 +2,7 @@ from ..Models import (
     Individual,
     Station,
     Observation,
-    ProtocoleType,
+    # ProtocoleType,
     invertedThesaurusDict,
     thesaurusDictTraduction
 )
@@ -12,10 +12,11 @@ import pandas as pd
 from sqlalchemy import select, text
 from traceback import print_exc
 from collections import Counter
-from ..controllers.security import RootCore, context_permissions
+from ..controllers.security import context_permissions
 from ..Models.Equipment import checkEquip
 from .individual import IndividualsView
-from . import CustomView
+from ..GenericObjets.ObjectView import CustomView
+from ..controllers.ApiController import RootCore
 from ..utils.parseValue import isNumeric
 import operator
 from ..Models.Equipment import set_equipment

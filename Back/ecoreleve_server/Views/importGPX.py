@@ -3,7 +3,6 @@ from sqlalchemy import select, and_, insert
 from sqlalchemy.exc import IntegrityError
 from ..Models import (
     Station,
-    StationType,
     Station_FieldWorker,
     Import,
     GPX,

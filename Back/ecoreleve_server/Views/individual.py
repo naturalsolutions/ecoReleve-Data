@@ -13,9 +13,10 @@ import json
 from datetime import datetime
 from sqlalchemy import select, join, desc
 from collections import OrderedDict
-from ..controllers.security import RootCore, Resource, SecurityRoot, context_permissions
-from . import DynamicObjectView, DynamicObjectCollectionView
+from ..controllers.security import context_permissions
 from pyramid.traversal import find_root
+from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
+from ..controllers.ApiController import RootCore, Resource, SecurityRoot
 
 
 class IndividualView(DynamicObjectView):
@@ -33,22 +34,12 @@ class IndividualView(DynamicObjectView):
             return self
         return self.get(ref)
 
-    def update(self):
-        data = self.request.json_body
-        self.objectDB.LoadNowValues()
-        try:
-            self.objectDB.updateFromJSON(data)
-            return {}
-        except ErrorCheckIndividualCodes as e:
-            self.request.response.status_code = 520
-            return str(e)
-
     def getEquipment(self):
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable,
                          SensorType,
-                         Sensor.FK_SensorType == SensorType.ID)
+                         Sensor.type_id == SensorType.ID)
         query = select([table.c['StartDate'],
                         table.c['EndDate'],
                         Sensor.UnicIdentifier,

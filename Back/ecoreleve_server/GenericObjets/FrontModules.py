@@ -7,9 +7,10 @@ from sqlalchemy import (
     Unicode,
     text,
     Sequence,
+    Boolean,
     orm,
     and_)
-from sqlalchemy.dialects.mssql.base import BIT
+
 from sqlalchemy.orm import relationship
 import json
 from pyramid import threadlocal
@@ -383,7 +384,7 @@ class ModuleGrids (Base):
     Options = Column(String)
     FilterOrder = Column(Integer)
     FilterSize = Column(Integer)
-    IsSearchable = Column(BIT)
+    IsSearchable = Column(Boolean)
     FilterDefaultValue = Column(String)
     FilterRender = Column(Integer)
     FilterType = Column(String)

@@ -7,13 +7,14 @@ from ..Models import (
     fieldActivity,
     MonitoredSiteList
 )
-from ..GenericObjets import ListObjectWithDynProp
 import json
 from sqlalchemy import select, desc, join
 from sqlalchemy.exc import IntegrityError
 from collections import OrderedDict
-from ..controllers.security import RootCore, context_permissions
-from . import DynamicObjectView, DynamicObjectCollectionView
+from ..controllers.security import context_permissions
+from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
+from ..controllers.ApiController import RootCore
+from ..GenericObjets.SearchEngine import CollectionEngine
 
 
 class MonitoredSiteView(DynamicObjectView):
@@ -80,7 +81,7 @@ class MonitoredSiteView(DynamicObjectView):
 
         moduleFront = self.parent.getConf('MonitoredSiteGridHistory')
         view = Base.metadata.tables['MonitoredSitePosition']
-        listObj = ListObjectWithDynProp(MonitoredSite, moduleFront, View=view)
+        listObj = CollectionEngine(MonitoredSite, moduleFront, View=view)
         dataResult = listObj.GetFlatDataList(searchInfo)
 
         if 'geo' in self.request.params:
@@ -106,7 +107,7 @@ class MonitoredSiteView(DynamicObjectView):
 
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
         joinTable = join(joinTable, SensorType,
-                         Sensor.FK_SensorType == SensorType.ID)
+                         Sensor._type_id == SensorType.ID)
         query = select([table.c['StartDate'],
                         table.c['EndDate'],
                         Sensor.UnicIdentifier,

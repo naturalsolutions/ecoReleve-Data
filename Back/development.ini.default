@@ -26,6 +26,17 @@ sqlalchemy.default.max_overflow = 10
 sqlalchemy.default.case_sensitive= False
 
 
+
+; cn.dialect = mssql+pyodbc:///?odbc_connect=
+; sqlalchemy.default.url = DRIVER={SQL Server};Server=.\SQLSERVER2008;Database=EcoReleve_ECWP;UID=sa;PWD=123456;
+; data_schema = EcoReleve_ECWP.dbo
+; sensor_schema = ecoReleve_Sensor.dbo
+
+; cn.dialect = postgres
+; sqlalchemy.default.url = postgresql+psycopg2://erd_user:ns123456@127.0.0.1/ERD_Test
+; data_schema = ERD_Test.public
+; sensor_schema = ecoReleve_Sensor.public
+
 #### connection for Export Database
 sqlalchemy.Export.url = mssql+pyodbc://username:password@host\instance/initialDB
 # or (for MS SQL Server)
