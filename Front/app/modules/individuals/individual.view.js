@@ -28,6 +28,7 @@ define([
     events: {
       'click .tab-link': 'displayTab',
       'click button.js-btn-delete-locations': 'warnDeleteLocations',
+      'click button.js-btn-delete-history': 'warnDeleteHistory'
     },
 
     ModelPrototype: IndividualModel,
@@ -105,6 +106,21 @@ define([
         type: this.model.get('type'),
         url: this.model.get('type') + '/' + this.model.get('id')  + '/history',
         clientSide: true,
+        gridOptions: {
+          onCellFocused: _.bind(function(cell) {
+            this.historyGrid.focusedRow = this.historyGrid.gridOptions.api.rowModel.getRow(cell.rowIndex);
+            var $deleteBtn = this.$el.find(".js-btn-delete-history");
+            switch (this.historyGrid.focusedRow.data.Name) {
+              case 'Monitoring_Status':
+              case 'Survey_type':
+                $deleteBtn.attr("disabled", null);
+                break;
+              default:
+                $deleteBtn.attr("disabled", true);
+                break;
+            }
+          }, this)
+        }
       }));
       this.gridViews.push(this.historyGrid);
     },
@@ -158,6 +174,16 @@ define([
       this.swal(opt, 'warning', callback);
     },
 
+    warnDeleteHistory: function(e) {
+      if ($(e.delegateTarget).attr("disabled")) {
+        return;
+      }
+      this.swal({
+        title: 'Are you sure?',
+        text: 'selected event will be deleted'
+      }, 'warning', _.bind(this.deleteHistory, this));
+    },
+
     deleteLocations: function(selectedNodes) {
       var _this = this;
       var url = this.model.get('type') + '/' + this.model.get('id')  + '/locations';
@@ -174,6 +200,27 @@ define([
       }).done(function(resp) {
         this.locationsGrid.gridOptions.api.removeItems(selectedNodes);
         this.locationsGrid.clientSideFilter();
+      }).fail(function(resp) {
+        this.swal(resp, 'error');
+      });
+    },
+
+    deleteHistory: function(row) {
+      if (!row) {
+        row = this.historyGrid.focusedRow;
+        if (!row) {
+          console.error("attempting deleteHistory with no row selected");
+          return;
+        }
+      }
+
+      var url = this.model.get('type') + '/' + this.model.get('id')  + '/history/' + row.data.ID;
+      $.ajax({
+        url: url,
+        method: 'DELETE',
+        context: this
+      }).done(function(resp) {
+        this.historyGrid.gridOptions.api.removeItems([row]);
       }).fail(function(resp) {
         this.swal(resp, 'error');
       });
