@@ -28,7 +28,7 @@ def flattenThesaurus(nodes):
 
 def initConnection():
     requestSession = requests.Session()
-    requestSession.post('http://127.0.0.1/portal/security/login',data = {'userId':1209, 'password':'e8fb3c6483e9476cc33aec252f5d312bc625acfb'})
+    requestSession.post(dbConfig['wsThesaurus']['authURL'],data = {'userId':1209, 'password':'e8fb3c6483e9476cc33aec252f5d312bc625acfb'})
 
     connection_queue.put(requestSession)
     return connection_queue

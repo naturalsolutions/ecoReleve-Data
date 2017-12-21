@@ -80,6 +80,9 @@ def main(global_config, **settings):
     dbConfig['wsThesaurus'] = {}
     dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
     dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
+    dbConfig['wsThesaurus']['authURL'] = settings['wsThesaurus.authURL']
+    dbConfig['wsThesaurus']['authID'] = settings['wsThesaurus.authID']
+    dbConfig['wsThesaurus']['authPWD'] = settings['wsThesaurus.authPWD']
     dbConfig['data_schema'] = settings['data_schema']
 
     config = Configurator(settings=settings)
