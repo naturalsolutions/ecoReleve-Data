@@ -1,13 +1,21 @@
 from ..Models import dbConfig, Base
 import requests
-from multiprocessing.dummy import Pool as ThreadPool
+from multiprocessing.dummy import Pool as ThreadPool, Queue
 import copy
 import time
 from sqlalchemy import select
 import json
 
 thesaurusDictTraduction = {}
+connection_queue = Queue()
 
+
+def isInt(anyNumberOrString):
+    try:
+        int(anyNumberOrString) #to check float and int use "float(anyNumberOrString)"
+        return True
+    except ValueError :
+        return False
 
 def flattenThesaurus(nodes):
     items = []
@@ -18,23 +26,34 @@ def flattenThesaurus(nodes):
             items.append((node['fullpath'], node['valueTranslated']))
     return dict(items)
 
+def initConnection():
+    requestSession = requests.Session()
+    requestSession.post('http://127.0.0.1/portal/security/login',data = {'userId':1209, 'password':'e8fb3c6483e9476cc33aec252f5d312bc625acfb'})
+
+    connection_queue.put(requestSession)
+    return connection_queue
+
 
 def fetchThes(args):
     try:
-        args['lng'] = 'en'
+        requestSession = connection_queue.get()
+        data = args
+        data['lng'] = 'en'
+        if not isInt(data['StartNodeID']):
+            data['StartNodeID'] = json.loads(data['StartNodeID']).get('startId')
         url = dbConfig['wsThesaurus']['wsUrl'] + '/fastInitForCompleteTree'
-        responseEn = requests.post(url, args)
+        responseEn = requestSession.post(url, data)
 
         if responseEn.status_code != 200:
-            time.sleep(3)
-            responseEn = requests.post(url, args)
+            time.sleep(2)
+            responseEn = requestSession.post(url, data)
 
-        args['lng'] = 'fr'
-        responseFr = requests.post(url, args)
+        data['lng'] = 'fr'
+        responseFr = requestSession.post(url, data)
 
         if responseFr.status_code != 200:
-            time.sleep(3)
-            responseFr = requests.post(url, args)
+            time.sleep(2)
+            responseFr = requestSession.post(url, data)
 
         thesaurusNode = json.loads(responseEn.text)
         thesaurusNodeFr = json.loads(responseFr.text)
@@ -44,8 +63,13 @@ def fetchThes(args):
     except:
         from traceback import print_exc
         print_exc()
-        print('thesaurus not loaded for nodeID : ' + args['StartNodeID'])
-        return (args['StartNodeID'], {})
+        # print(thesaurusNode)
+
+        print('thesaurus not loaded for nodeID : ' + data['StartNodeID'])
+        return (data['StartNodeID'], {})
+    
+    finally:
+        connection_queue.put(requestSession)
 
 
 def getThesaurusNodeID(config):
@@ -55,6 +79,9 @@ def getThesaurusNodeID(config):
 
     print('\n ________________ pull from Thesaurus API \n')
     session = config.registry.dbmaker()
+
+    # authenticationServiceUrl = dbConfig['portal.login']
+    
     ModuleFormTable = Base.metadata.tables['ModuleForms']
     query = select([ModuleFormTable.c['Options']]
                    ).distinct(ModuleFormTable.c['Options']
@@ -62,7 +89,7 @@ def getThesaurusNodeID(config):
     startIDs = [r for r, in session.execute(query).fetchall()]
     session.close()
 
-    thread_pool = ThreadPool(10)
+    thread_pool = ThreadPool(10, initConnection)
     thesaurusList = dict(thread_pool.map_async(
         fetchThes, [{"StartNodeID": nodeID} for nodeID in startIDs]).get())
 
