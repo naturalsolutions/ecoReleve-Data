@@ -54,7 +54,11 @@ define([
            this.bindChanges(_this.ui.form);
          }
        };
-      
+
+      formConfig.afterSaveSuccess = function() {
+        _this.historyGrid.fetchData();
+      };
+
       formConfig.savingError = function(response){
         var msg = 'in updating '+_this.model.get('single');
           if (response.status == 520 && response.responseText){
