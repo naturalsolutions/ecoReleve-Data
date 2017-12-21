@@ -114,7 +114,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
         # extract value and date from dict value
         if isinstance(value, dict) and "date" in value:
-            useDate = value.get("date")
+            useDate = parser(value.get("date"))
             value = value.get("value", None)
 
         DbObject.setProperty(self, propertyName, value)
