@@ -8,7 +8,6 @@ import requests
 from multiprocessing.dummy import Pool as ThreadPool
 import copy
 import time
-import redis
 
 
 AppConfig = configparser.ConfigParser()
