@@ -112,6 +112,10 @@ define([
         clientSide: true,
         gridOptions: {
           onCellFocused: _.bind(function(cell) {
+            if (!cell) {
+              cell = this.historyGrid.gridOptions.api.getFocusedCell();
+            }
+
             this.historyGrid.focusedRow = this.historyGrid.gridOptions.api.rowModel.getRow(cell.rowIndex);
             var $deleteBtn = this.$el.find(".js-btn-delete-history");
             switch (this.historyGrid.focusedRow.data.Name) {
@@ -225,6 +229,8 @@ define([
         context: this
       }).done(function(resp) {
         this.historyGrid.gridOptions.api.removeItems([row]);
+        // call onCellFocused to update current focusedRow, event is not called otherwise
+        this.historyGrid.gridOptions.onCellFocused();
       }).fail(function(resp) {
         this.swal(resp, 'error');
       });
