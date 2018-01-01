@@ -1,10 +1,12 @@
 from sqlalchemy import func, select, bindparam, text, Table, join, or_, and_, update
+from sqlalchemy.orm import joinedload
+
 import json
 import pandas as pd
 from datetime import datetime
 from . import CustomView
 from ..controllers.security import RootCore, context_permissions
-from ..Models import Base, dbConfig, graphDataDate, CamTrap, ArgosGps, Gsm, Rfid, Equipment
+from ..Models import Base, dbConfig, graphDataDate, CamTrap, ArgosGps, Gsm, Rfid, Equipment, User, MonitoredSite
 import numpy as np
 from ..utils.distance import haversine
 from traceback import print_exc
@@ -324,9 +326,53 @@ class SensorDatasByType(CustomView):
     def create(self):
         return self.dictFuncImport[self.type_](self.request)
 
+
+    def buildMetaDataInfoFromErdData(self):
+        metaDataInfo = {}
+        metaDataInfo['monitoredSite'] = {}
+        metaDataInfo['image'] = {}
+        metaDataInfo['user'] = {}
+        metaDataInfo['session'] = {}
+        metaDataInfo['misc'] = {}
+
+
+        user = self.session.query(User).get(self.request.authenticated_userid['iss'])
+        
+        metaDataInfo['user']['TUse_FirstName'] = user.Firstname
+        metaDataInfo['user']['TUse_LastName'] = user.Lastname
+        # print(self.request)
+        metaDataInfo['image']['photoId'] = 0
+        metaDataInfo['image']['name'] = self.request.POST['resumableFilename']
+        metaDataInfo['image']['fkSensor'] = int(self.request.POST['id'])
+        metaDataInfo['image']['dateTimeOriginalPhoto'] = ''
+        metaDataInfo['image']['dateInsertSQL'] = ''
+        metaDataInfo['image']['lastTransformationDate'] = ''
+        metaDataInfo['image']['dateTimeCreationPhoto'] = ''
+        metaDataInfo['image']['lastDateWriteInPhoto'] = ''
+        metaDataInfo['image']['shootId'] = -1
+        
+        metaDataInfo['session']['startDate'] = str(self.request.POST['startDate'])
+        metaDataInfo['session']['endDate'] = str(self.request.POST['endDate'])
+
+        metaDataInfo['misc']['regionAnPlaceMonitoredSite'] = ''
+        metaDataInfo['misc']['projectName'] = ''
+
+        monitoredSite = self.session.query(MonitoredSite).get(self.request.POST['monitoredSiteId'])
+        monitoredSite.LoadNowValues()
+        
+        metaDataInfo['monitoredSite']['Name'] = monitoredSite.Name
+        metaDataInfo['monitoredSite']['LAT'] = monitoredSite.MonitoredSitePositions[0].LAT
+        metaDataInfo['monitoredSite']['LON'] = monitoredSite.MonitoredSitePositions[0].LON
+        metaDataInfo['monitoredSite']['Precision'] = monitoredSite.MonitoredSitePositions[0].Precision
+        metaDataInfo['monitoredSite']['ELE'] = monitoredSite.MonitoredSitePositions[0].ELE
+
+
+        return metaDataInfo
+
     def uploadFileCamTrapResumable(self):
         if not self.request.POST :
             return self.checkChunk()
+        metaDataInfo = self.buildMetaDataInfoFromErdData()
         flagDate = False
         pathPrefix = dbConfig['camTrap']['path']
         pathPost = str(self.request.POST['path'])
@@ -348,6 +394,12 @@ class SensorDatasByType(CustomView):
             if(checkDate(datePhoto, str(self.request.POST['startDate']), str(self.request.POST['endDate']))):
                 AddPhotoOnSQL(fk_sensor, str(uri), str(
                     self.request.POST['resumableFilename']), str(extType[len(extType) - 1]), datePhoto)
+                # handleAllMetadatas(self,metaDataInfo)
+                callExiv2(
+                    self = self,
+                    cmd = buildCmdMetaDatasAtImport(self,metaDataInfo),
+                    listFiles = [str(uri)+'\\'+str(self.request.POST['resumableFilename'])]
+                    )
                 resizePhoto(str(uri) + "\\" +
                             str(self.request.POST['resumableFilename']))
                 messageDate = "ok <BR>"

@@ -6,8 +6,8 @@ import pandas as pd
 from traceback import print_exc
 
 AppConfig = configparser.ConfigParser()
-AppConfig.read('././development.ini')
-print(AppConfig['app:main']['sensor_schema'])
+AppConfig.read('C:\\inetpub\\wwwroot\\ecoReleve-Data\\Back\\development.ini')
+# print(AppConfig['app:main']['sensor_schema'])
 
 pendingSensorData = []
 indivLocationData = []
