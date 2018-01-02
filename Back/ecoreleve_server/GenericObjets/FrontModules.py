@@ -117,14 +117,10 @@ class ModuleForms(Base):
         isDisabled = False
 
         if self.Editable:
-
-            isDisabled = True
             if binaryTest(self.FormRender, 2) :
-                # input is inactive only in edit mode
-                if displayMode.lower() == 'edit':
+                # input is active only in edit mode
+                if displayMode.lower() != 'edit':
                     isDisabled = True
-                else:
-                    isDisabled = False
 
             if binaryTest(self.FormRender, 4):
 
