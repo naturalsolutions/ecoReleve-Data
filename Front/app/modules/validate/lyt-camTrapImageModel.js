@@ -19,7 +19,8 @@ define([
       validated: null,
 			tags : null,
 			note : '',
-			date_creation : '',
+      date_creation : '',
+      stationId : null
     }
   });
 });
