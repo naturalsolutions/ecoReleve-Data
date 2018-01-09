@@ -95,7 +95,8 @@ define([
       this.goTo = options.goTo || false;
 
       this.name = options.name || false;
-      this.skipFocus = options.gridOptions.skipFocus || false;
+      if(options.gridOptions)
+        this.skipFocus = options.gridOptions.skipFocus || false;
 
       this.gridOptions = {
         enableSorting: true,
