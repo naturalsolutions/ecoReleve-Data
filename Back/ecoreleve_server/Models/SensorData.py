@@ -211,6 +211,7 @@ class CamTrap(Base):
     date_uploaded = Column(DateTime, server_default = func.now())
     tags = Column(String,nullable=True)
     note = Column(Integer, nullable=False)
+    stationId = Column(Integer, nullable= True)
     __table_args__ = (
         {'schema': sensor_schema}
     )

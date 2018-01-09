@@ -62,7 +62,7 @@ class SensorDatasBySessionItem(CustomView):
     def patch(self):
         data = self.request.json_body
         for item in data:
-            if(item not in ['pk_id', 'fk_sensor', 'path', 'name', 'extension', 'date_creation', 'date_uploaded']):
+            if(item not in ['pk_id', 'fk_sensor', 'path', 'name', 'extension', 'date_creation', 'date_uploaded','stationId']):
                 tmp = data.get(item)
                 if(item == 'tags' and tmp):
                     listTags = tmp.split(",")
