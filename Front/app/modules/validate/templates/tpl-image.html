@@ -1,6 +1,6 @@
 <div class="vignette ">
-  <div class="camtrapItemViewHeader" style="display : none">
-    <i class="reneco icon-two reneco-hidden"></i>
+  <div class="camtrapItemViewHeader" <% if (stationId===null) { %> style="display : none" <% } %>>
+    <i class="reneco icon-two reneco-stations"></i>
   </div>
   <div class="camtrapItemViewContent">
     <input id="rating_<%=id%>" name="input-name" type="number" class="rating" value="<%= note %>" >

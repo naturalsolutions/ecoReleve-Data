@@ -154,7 +154,6 @@ div.bootstrap-tagsinput{
       height : 96%;
       width: 96%;
       .camtrapItemViewHeader{
-        height: 15%;
         .rating-xs {
           font-size: 0.8vw;
         }
@@ -163,33 +162,39 @@ div.bootstrap-tagsinput{
           text-align: center !important;
           vertical-align: middle !important;
           font-size: 0.9vw !important;
-          line-height: 2;
           top:0px;
-          right:7px;
+          left:7px;
           height: 28px;
           width: 28px;
           border-radius: 14px;
+          z-index : 99999;
           //background-color: white;
 
         }
-        i.reneco-hidden{
-          background-color: white;
+        i.reneco-stations{
+          color: #449d44;
+          border-radius : 0px !important;
+          font-size: xx-large !important;
+          top: 4px !important;
+        }
+        // i.reneco-hidden{
+        //   background-color: white;
 
-        }
-        i.reneco-checked{
-          background-color: green;
-          color: white;
-        }
-        i.reneco-close{
-          background-color: red;
-          color: white;
-        }
-        i.reneco-support{
-          background-color: white;
-        }
-        i.reneco-support::before{
-          content: '?';
-        }
+        // }
+        // i.reneco-checked{
+        //   background-color: green;
+        //   color: white;
+        // }
+        // i.reneco-close{
+        //   background-color: red;
+        //   color: white;
+        // }
+        // i.reneco-support{
+        //   background-color: white;
+        // }
+        // i.reneco-support::before{
+        //   content: '?';
+        // }
       }
       .camtrapItemViewContent{
         height: 100%;

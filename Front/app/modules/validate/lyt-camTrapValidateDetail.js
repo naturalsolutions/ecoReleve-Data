@@ -122,7 +122,7 @@ define([
       data.LAT = monitoredSiteModel.get('LAT') + 2;
       data.LON = monitoredSiteModel.get('LON') + 2;
       data.FK_MonitoredSite = this.siteId;
-      data.Name = "izhjfoiuzehoezfhn";
+      data.Name = this.tabView[this.currentPosition].model.get('name');//"izhjfoiuzehoezfhn";
       data.FieldWorkers = [{
         ID: null,
         defaultValues: "",
@@ -153,8 +153,6 @@ define([
     createStation: function () {
       var _this = this;
       var data = this.populateDataForCreatingStation();
-
-
 
       $.ajax({
           type: 'POST',

@@ -301,6 +301,18 @@ define([
 			}
 		},
 
+		setVisualStationAttached : function(valBoolean) {
+			var header = this.el.getElementsByClassName('camtrapItemViewHeader')[0];
+			if(valBoolean) {
+				if(header.style.display)
+					header.style.display = null
+			}
+			else {
+				if(header.style.display === null)
+					header.style.display = "none";
+			}
+		},
+
 		setVisualValidated : function(valBool){
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
 			var $content = this.$el.children('.vignette').children('.camtrapItemViewContent');
@@ -327,7 +339,7 @@ define([
 				}
 				case 2 : {
 				//	$icon.removeClass( lastClass );
-					$icon.addClass('reneco-checked');
+					//$icon.addClass('reneco-checked');
 					$image.addClass('checked');
 					if( $content.hasClass('rejected') ) {
 						$content.removeClass('rejected');
@@ -341,7 +353,7 @@ define([
 				}
 				case 4 : {
 				//	$icon.removeClass( lastClass );
-					$icon.addClass('reneco-close');
+					//$icon.addClass('reneco-close');
 					$image.addClass('checked');
 					if ( $content.hasClass('accepted') ) {
 						$content.removeClass('accepted');
@@ -411,6 +423,7 @@ define([
 		},
 		attachStation : function(id) {
 			this.model.set('stationId',id);
+			this.setVisualStationAttached(true);
 		}
 
 	});
