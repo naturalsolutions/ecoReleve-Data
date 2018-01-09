@@ -7,7 +7,6 @@ define([
   'sweetAlert',
   'translater',
   'config',
-  //'ns_grid/model-grid',
   'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
   'moment',
@@ -22,18 +21,12 @@ define([
   './lyt-camTrapToolsBarTopView',
   'jqueryui',
   './lyt-imageDetails',
-  //'backgrid',
-  'backgrid.paginator',
-  'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker'
-
-
-
+  'exif-js',
+  'backgrid.paginator'
 ], function ($, _, Backbone, Marionette, Swal, Translater,
-  config, /*NsGrid,*/ NsMap, NsForm, moment, Navbar, PageColl,
+  config, NsMap, NsForm, moment, Navbar, PageColl,
   CamTrapItemView, CamTrapImageModel, ToolsBar, ModalView, BckMrtKeyShortCut,
-  virtualcollection, ToolsBarTop, jqueryUi, imageDetailsView, ObjectPicker
-
-) {
+  virtualcollection, ToolsBarTop, jqueryUi, imageDetailsView, Exif) {
 
   'use strict';
 
@@ -90,6 +83,7 @@ define([
       'click button#filternavbtn': 'filterNavOpen',
       'click i#closeNav': 'filterNavClose',
       'click input[name="filterstatus"]': 'filterCollectionCtrl',
+      'click button#js-create-station-pending': 'createStation'
     },
 
     ui: {
@@ -121,6 +115,63 @@ define([
       'rgToolsBarTop': '#rgToolsBarTop',
       'rgImageDetails': '#imageDetails',
     },
+
+    populateDataForCreatingStation: function (urlImg) {
+      var monitoredSiteModel = this.monitoredSiteForm.model;
+      var data = {};
+      data.LAT = monitoredSiteModel.get('LAT') + 2;
+      data.LON = monitoredSiteModel.get('LON') + 2;
+      data.FK_MonitoredSite = this.siteId;
+      data.Name = "izhjfoiuzehoezfhn";
+      data.FieldWorkers = [{
+        ID: null,
+        defaultValues: "",
+        FieldWorker: "" + window.app.user.get('PK_id') + ""
+      }];
+      data.FK_StationType = 6;
+      data.StationDate = moment(this.tabView[this.currentPosition].model.get('date_creation')).format('DD/MM/YYYY HH:mm:ss');
+      for (var item in data) { // check for required val
+        var val = data[item]
+        if (typeof (val) === 'undefined' || val === null) {
+          if (item === 'stationDate')
+            throw new Error("The photo have no value for " + item);
+          else
+            throw new Error("Monitored site have no value for " + item);
+          break;
+        }
+      }
+      data.ELE = monitoredSiteModel.get('ELE') || null;
+      data.precision = monitoredSiteModel.get('precision') || null;
+      data.Comments = "created from camera trap validation"|| null;   
+      data.NbFieldWorker = 1;
+      data.fieldActivityId = 5
+      return data;
+
+
+
+    },
+    createStation: function () {
+      var _this = this;
+      var data = this.populateDataForCreatingStation();
+
+
+
+      $.ajax({
+          type: 'POST',
+          url: config.coreUrl + 'stations/',
+          data: JSON.stringify(data),
+          contentType: 'application/json',
+          dataType: 'json',
+          context: this
+        })
+        .done(function (resp) {
+          this.tabView[this.currentPosition].attachStation(resp.ID);
+        })
+        .fail(function () {
+          throw new Error("error create station");
+        });
+    },
+
 
     filterCollectionCtrl2: function (event) {
 
@@ -340,12 +391,9 @@ define([
         this.displayImageDetails(_this.myImageCollection.models[this.currentPosition]);
       });
       this.currentCollection = this.myImageCollection;
-
-      console.log(_this.myImageCollection);
       this.displayPaginator(this.paginator)
       this.displayToolsBar();
       this.displayToolsBarTop();
-
     },
 
     displayImages: function (myCollectionToDisplay) {
@@ -476,7 +524,7 @@ define([
     },
 
     displaySensorForm: function () {
-      this.nsform = new NsForm({
+      this.sensorForm = new NsForm({
         name: 'sensorForm',
         buttonRegion: [this.ui.btn],
         modelurl: config.coreUrl + 'sensors',
@@ -488,7 +536,7 @@ define([
     },
 
     displaySiteForm: function () {
-      this.nsform = new NsForm({
+      this.monitoredSiteForm = new NsForm({
         name: 'siteForm',
         buttonRegion: [this.ui.btn],
         modelurl: config.coreUrl + 'monitoredSites',
