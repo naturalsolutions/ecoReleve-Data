@@ -408,6 +408,9 @@ define([
 				$input.trigger('rating.change', [val-1 , null]);
 			}
 	//		this.$el.find('.rateit').rateit('value',this.$el.find('.rateit').rateit('value') - 1 );
+		},
+		attachStation : function(id) {
+			this.model.set('stationId',id);
 		}
 
 	});
