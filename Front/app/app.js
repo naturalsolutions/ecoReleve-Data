@@ -166,6 +166,17 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
           closeOnConfirm: true,
         });
       }
+      if(jqxhr.status == 409){
+        Swal({
+          title: 'Data conflicts',
+          text: jqxhr.responseText,
+          type: 'warning',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(240, 173, 78)',
+          confirmButtonText: 'OK',
+          closeOnConfirm: true,
+        });
+      }
     }
   });
 

@@ -18,7 +18,7 @@ define([
         template: '<div>\
         <div class="input-group">\
             <span class="input-group-addon <%=iconFont%>"></span>\
-            <input class="form-control" type="text" id="<%=id%>" value="<%=value%>" data_value="<%=data_value%>" initValue="<%=initValue%>"/></div>\
+            <input class="form-control" type="text" name="<%= key %>" id="<%=id%>" value="<%=value%>" data_value="<%=data_value%>" initValue="<%=initValue%>"/></div>\
             </div>\
         </div>',
 
@@ -104,7 +104,8 @@ define([
             value: value,
             data_value :_this.model.get(_this.key),
             initValue:initValue,
-            iconFont:_this.iconFont
+            iconFont:_this.iconFont,
+            key : this.options.schema.title
         });
 
         this.setElement($el);

@@ -28,14 +28,15 @@
 
 var google_maps_loaded_def = null;
 
-define(['jquery'],function($) {
+define(['jquery','config'],function($, config) {
 	if(!google_maps_loaded_def) {
 		google_maps_loaded_def = $.Deferred();
 		window.google_maps_loaded = function() {
 			google_maps_loaded_def.resolve(google.maps);
 		}
+		var url = 'http://maps.google.com/maps/api/js?key='+config.googleAPIkey+'&v=3.2&amp;sensor=false&callback=google_maps_loaded';
 		require(
-			['http://maps.google.com/maps/api/js?key=AIzaSyD-C4obH07uTG8MjuURTdHu_ITHYqg5OBk&v=3&amp;sensor=false&callback=google_maps_loaded'],
+			[url],
 			function(){},
 			function(err) {
 				google_maps_loaded_def.reject();

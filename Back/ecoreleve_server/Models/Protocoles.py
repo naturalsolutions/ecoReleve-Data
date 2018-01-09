@@ -10,7 +10,8 @@ from sqlalchemy import (
     Sequence,
     orm,
     func,
-    event)
+    event,
+    select)
 from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 from ..GenericObjets.ObjectWithDynProp import ObjectWithDynProp
@@ -48,7 +49,7 @@ class Observation(Base, ObjectWithDynProp):
         backref='Observation',
         cascade="all, delete-orphan",
         uselist=False)
-    Station = relationship("Station", back_populates='Observations')
+    Station = relationship("Station")
     Individual = relationship('Individual')
 
     def __init__(self, **kwargs):
@@ -69,7 +70,7 @@ class Observation(Base, ObjectWithDynProp):
 
     def GetDynProps(self, nameProp):
         return self.session.query(ObservationDynProp
-                                     ).filter(ObservationDynProp.Name == nameProp).one()
+                                  ).filter(ObservationDynProp.Name == nameProp).one()
 
     def GetType(self):
         if self.ProtocoleType is not None:
@@ -79,9 +80,15 @@ class Observation(Base, ObjectWithDynProp):
 
     def linkedFieldDate(self):
         try:
-            linkedDate = self.Station.StationDate
+            Station = Base.metadata.tables['Station']
+            if not self.Station:
+                linkedDate = self.session.execute(select([Station.c['StationDate']]).where(
+                    Station.c['ID'] == self.FK_Station)).scalar()
+            else:
+                linkedDate = self.Station.StationDate
         except:
-            linkedDate = datetime.now()
+            linkedDate = datetime.utcnow()
+
         if 'unequipment' in self.GetType().Name.lower():
             linkedDate = linkedDate - timedelta(seconds=1)
         return linkedDate
@@ -112,7 +119,7 @@ class Observation(Base, ObjectWithDynProp):
                             subDictList.append(subDict)
                     curData['listOfSubObs'] = subDictList
 
-                if 'ID' in curData and curData['ID'] is not None:
+                if 'ID' in curData and curData['ID']:
                     subObs = list(filter(lambda x: x.ID == curData[
                                   'ID'], self.Observation_children))[0]
                     subObs.LoadNowValues()
@@ -126,6 +133,8 @@ class Observation(Base, ObjectWithDynProp):
                 if subObs is not None:
                     subObs.updateFromJSON(curData)
                     listObs.append(subObs)
+                    self.session.add(subObs)
+                    self.session.flush()
         self.Observation_children = listObs
 
     @hybrid_property
@@ -185,6 +194,7 @@ class Observation(Base, ObjectWithDynProp):
 
     def beforeDelete(self):
         self.LoadNowValues()
+
 
 @event.listens_for(Observation, 'after_delete')
 def unlinkLinkedField(mapper, connection, target):

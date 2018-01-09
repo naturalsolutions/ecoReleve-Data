@@ -1,5 +1,5 @@
 import os
-
+import sys
 from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -9,22 +9,6 @@ with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
 
 requires = [
-    'pyramid',
-    'pypyodbc',
-    'pyramid_chameleon',
-    'pyramid_debugtoolbar',
-    'pyramid_tm',
-    'sqlalchemy==1.0.8',
-    'sqlalchemy-utils==0.30.11',
-    'transaction',
-    'zope.sqlalchemy',
-    'waitress',
-    'webtest',
-    'XlsxWriter==0.8.4',
-    'pyexcel-xlsx',
-    'openpyxl===2.2.2',
-    'psutil',
-    'pyramid_jwtauth'
     ]
 
 setup(name='ecoreleve_server',

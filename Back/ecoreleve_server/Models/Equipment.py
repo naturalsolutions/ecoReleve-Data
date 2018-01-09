@@ -29,28 +29,29 @@ class Equipment(Base):
     StartDate = Column(DateTime, default=func.now())
     Deploy = Column(Boolean)
 
-    def linkProperty(self, StartDate, **kwargs):
-        session = threadlocal.get_current_request().dbsession
-        curIndiv = session.query(Individual).get(self.FK_Individual)
-        curSensor = session.query(Sensor).get(self.FK_Sensor)
-        curIndiv.init_on_load()
-        curSensor.init_on_load()
-        curSensor.updateFromJSON(kwargs, StartDate)
-        curIndiv.updateFromJSON(kwargs, StartDate)
+    # def linkProperty(self, StartDate, **kwargs):
+    #     session = threadlocal.get_current_request().dbsession
+    #     curIndiv = session.query(Individual).get(self.FK_Individual)
+    #     curSensor = session.query(Sensor).get(self.FK_Sensor)
+    #     curIndiv.init_on_load()
+    #     curSensor.init_on_load()
+    #     curSensor.updateFromJSON(kwargs, StartDate)
+    #     curIndiv.updateFromJSON(kwargs, StartDate)
 
-    def checkExistedSensorData(self):
-        session = threadlocal.get_current_registry().dbmaker()
+    # def checkExistedSensorData(self):
+    #     session = threadlocal.get_current_registry().dbmaker()
 
-        query = text('''DECLARE @result int;
-        EXEC dbo.[pr_checkIfProtoProtected] :FK_sensor, :date, @result OUTPUT;
-        SELECT @result;
-        ''').bindparams(bindparam('FK_sensor', self.FK_Sensor),
-        bindparam('date', self.StartDate))
-        Nb = session.execute(query).scalar()
-        if Nb > 0:
-            return True
-        else:
-            return False
+    #     query = text('''DECLARE @result int;
+    #     EXEC dbo.[pr_checkIfProtoProtected] :FK_sensor, :date, @result OUTPUT;
+    #     SELECT @result;
+    #     ''').bindparams(bindparam('FK_sensor', self.FK_Sensor),
+    #     bindparam('date', self.StartDate))
+    #     Nb = session.execute(query).scalar()
+    #     if Nb > 0:
+    #         return True
+    #     else:
+    #         return False
+
 
 def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
     session = threadlocal.get_current_registry().dbmaker()
@@ -64,9 +65,7 @@ def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
     if Nb > 0:
         return True
     else:
-        return {'equipment_error':True}
-
-
+        return {'equipment_error': True}
 
 
 def checkUnequip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):
@@ -113,7 +112,7 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
             fk_indiv = target.getProperty('FK_Individual')
             fk_site = None
         elif 'site' in typeName.lower():
-            fk_site = target.Station.getProperty('FK_MonitoredSite')
+            fk_site = curSta.getProperty('FK_MonitoredSite')
             fk_indiv = None
             if fk_site is None:
                 raise ErrorAvailable({'errorSite': True})
@@ -141,7 +140,7 @@ def set_equipment(target, value=None, oldvalue=None, initiator=None):
 
         elif (isinstance(target.Equipment, Equipment)
                 and target.Equipment.FK_Sensor == fk_sensor
-                ):
+              ):
             target.Equipment.FK_Individual = fk_indiv
         else:
             raise(ErrorAvailable(availability))

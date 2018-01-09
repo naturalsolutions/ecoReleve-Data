@@ -11,6 +11,7 @@ var portalUrl = ...;
     siteName: ...,
     dateLabel: 'jj/mm/aaaa hh:mm:ss',
     dateFormats: ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm:ss'],
+    googleAPIkey: 'AIzaSyD-C4obH07uTG8MjuURTdHu_ITHYqg5OBk',
 
     language : 'fr',
     mapZoom : 6
