@@ -394,16 +394,19 @@ class ListObjectWithDynProp():
                             tableRef = self.fk_list[obj['Column']].column.table
                             nameRef = self.fk_list[obj['Column']].column.name
 
-                            existsQueryFK = select(tableRef.c
-                                                   ).where(
-                                and_(eval_.eval_binary_expr(
-                                    tableRef.c[objConf.QueryName],
-                                    obj['Operator'],
-                                    obj['Value']),
-                                    self.ObjWithDynProp.__table__.c[
-                                    obj['Column']] == tableRef.c[nameRef]
-                                ))
-                            fullQuery = fullQuery.where(exists(existsQueryFK))
+                            if 'null' not in obj['Operator'].lower():
+                                existsQueryFK = select(tableRef.c
+                                                    ).where(
+                                    and_(eval_.eval_binary_expr(
+                                        tableRef.c[objConf.QueryName],
+                                        obj['Operator'],
+                                        obj['Value']),
+                                        self.ObjWithDynProp.__table__.c[
+                                        obj['Column']] == tableRef.c[nameRef]
+                                    ))
+                                fullQuery = fullQuery.where(exists(existsQueryFK))
+                            else:
+                                fullQuery = self.filterOnStaticProp(fullQuery, obj)
 
                     elif hasattr(self.ObjWithDynProp, obj['Column']):
                         fullQuery = self.filterOnStaticProp(fullQuery, obj)
