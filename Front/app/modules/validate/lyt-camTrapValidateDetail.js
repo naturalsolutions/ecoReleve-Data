@@ -83,7 +83,8 @@ define([
       'click button#filternavbtn': 'filterNavOpen',
       'click i#closeNav': 'filterNavClose',
       'click input[name="filterstatus"]': 'filterCollectionCtrl',
-      'click button#js-create-station-pending': 'createStation'
+      'click button#js-create-station-pending': 'createStation',
+      'click button#js-delete-station-pending' :'removeStation'
     },
 
     ui: {
@@ -101,8 +102,7 @@ define([
       'totalS': '#totalS',
       'total': '#total',
       'paginator': '#paginator',
-      'imageFullScreen': '#imageFullScreen',
-      'btnStation': '#js-create-station-pending'
+      'imageFullScreen': '#imageFullScreen'
 
     },
 
@@ -150,6 +150,26 @@ define([
 
 
     },
+
+    removeStation : function() {
+      var stationId = this.tabView[this.currentPosition].model.get('stationId');
+      var _this = this; 
+      if(stationId === null)
+        return;
+      $.ajax({
+        type : 'DELETE',
+        url : config.coreUrl +'stations/'+stationId,
+        contentType: 'application/json'
+      })
+      .done(function(resp) {
+        _this.tabView[_this.currentPosition].removeStation();
+        console.log("Station"+stationId+" removed ok");
+      })
+      .fail(function(err) {
+        console.log(err);
+      });
+    },
+
     createStation: function () {
       var _this = this;
       var data = this.populateDataForCreatingStation();
@@ -159,11 +179,10 @@ define([
           url: config.coreUrl + 'stations/',
           data: JSON.stringify(data),
           contentType: 'application/json',
-          dataType: 'json',
-          context: this
+          dataType: 'json'
         })
         .done(function (resp) {
-          this.tabView[this.currentPosition].attachStation(resp.ID);
+          _this.tabView[_this.currentPosition].attachStation(resp.ID);
         })
         .fail(function () {
           throw new Error("error create station");
