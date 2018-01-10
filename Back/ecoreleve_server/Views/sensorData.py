@@ -152,8 +152,7 @@ class SensorDatasBySession(CustomView):
                 tmp['name'] = tmp['name'].replace(" ", "%20")
                 tmp['id'] = tmp['pk_id']
                 tmp['date_creation'] = str(tmp['date_creation'])
-                tmp['date_creation'] = tmp['date_creation'][:len(
-                    tmp['date_creation']) - 3]
+                tmp['date_creation'] = tmp['date_creation']
                 if(str(tmp['tags']) != 'None'):
                     strTags = tmp['tags'].replace("<TAGS>", "")
                     strTags = strTags.replace("<TAG>", "")
