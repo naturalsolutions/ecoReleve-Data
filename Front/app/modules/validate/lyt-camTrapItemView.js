@@ -305,10 +305,10 @@ define([
 			var header = this.el.getElementsByClassName('camtrapItemViewHeader')[0];
 			if(valBoolean) {
 				if(header.style.display)
-					header.style.display = null
+					header.style.display = ''
 			}
 			else {
-				if(header.style.display === null)
+				if(header.style.display === '')
 					header.style.display = "none";
 			}
 		},
@@ -424,6 +424,10 @@ define([
 		attachStation : function(id) {
 			this.model.set('stationId',id);
 			this.setVisualStationAttached(true);
+		},
+		removeStation : function() {
+			this.model.set('stationId', null);
+			this.setVisualStationAttached(false);
 		}
 
 	});
