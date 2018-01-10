@@ -116,20 +116,20 @@ define([
       'rgImageDetails': '#imageDetails',
     },
 
-    populateDataForCreatingStation: function (urlImg) {
+    populateDataForCreatingStation: function (imageModel) {
       var monitoredSiteModel = this.monitoredSiteForm.model;
       var data = {};
       data.LAT = monitoredSiteModel.get('LAT') + 2;
       data.LON = monitoredSiteModel.get('LON') + 2;
       data.FK_MonitoredSite = this.siteId;
-      data.Name = this.tabView[this.currentPosition].model.get('name');//"izhjfoiuzehoezfhn";
+      data.Name = imageModel.model.get('name');//"izhjfoiuzehoezfhn";
       data.FieldWorkers = [{
         ID: null,
         defaultValues: "",
         FieldWorker: "" + window.app.user.get('PK_id') + ""
       }];
       data.FK_StationType = 6;
-      data.StationDate = moment(this.tabView[this.currentPosition].model.get('date_creation')).format('DD/MM/YYYY HH:mm:ss');
+      data.StationDate = moment(imageModel.model.get('date_creation')).format('DD/MM/YYYY HH:mm:ss');
       for (var item in data) { // check for required val
         var val = data[item]
         if (typeof (val) === 'undefined' || val === null) {
@@ -150,9 +150,8 @@ define([
 
 
     },
-
-    removeStation : function() {
-      var stationId = this.tabView[this.currentPosition].model.get('stationId');
+    callDeleteStationAPI : function(elem) {
+      var stationId = elem.model.get('stationId');
       var _this = this; 
       if(stationId === null)
         return;
@@ -162,31 +161,98 @@ define([
         contentType: 'application/json'
       })
       .done(function(resp) {
-        _this.tabView[_this.currentPosition].removeStation();
+        elem.removeStation();
         console.log("Station"+stationId+" removed ok");
       })
       .fail(function(err) {
         console.log(err);
       });
+
+    },
+
+    removeStation : function() {
+      var _this = this;
+      var listOfElem = []
+      if (this.tabSelected.length == 0) {
+        if (this.currentPosition !== null) {
+          if(this.tabView[this.currentPosition].model.get('stationId')!== null)
+            listOfElem.push(this.tabView[this.currentPosition])
+        }
+      } else {
+        for (var i of this.tabSelected) {
+          if(this.tabView[i].model.get('stationId') !== null)
+            listOfElem.push(this.tabView[i]);
+        }
+      }
+
+      if( listOfElem.length === 0 ) 
+        return;
+
+      for(var i = 0 ; i < listOfElem.length ; i++ ) {
+        var elem = listOfElem[i];
+        this.callDeleteStationAPI(elem);
+      }
+    },
+
+
+    callPostStationAPI : function(elem,data) {
+      $.ajax({
+        type: 'POST',
+        url: config.coreUrl + 'stations/',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        dataType: 'json'
+      })
+      .done(function (resp) {
+        elem.attachStation(resp.ID);
+      })
+      .fail(function () {
+        throw new Error("error create station");
+      });
+
     },
 
     createStation: function () {
       var _this = this;
-      var data = this.populateDataForCreatingStation();
+      var listOfElem = []
+      if (this.tabSelected.length == 0) {
+        if (this.currentPosition !== null) {
+          if(this.tabView[this.currentPosition].model.get('stationId') === null)
+            listOfElem.push(this.tabView[this.currentPosition])
+        }
+      } else {
+        for (var i of this.tabSelected) {
+          if(this.tabView[i].model.get('stationId') === null)
+            listOfElem.push(this.tabView[i]);
+        }
+      }
 
-      $.ajax({
-          type: 'POST',
-          url: config.coreUrl + 'stations/',
-          data: JSON.stringify(data),
-          contentType: 'application/json',
-          dataType: 'json'
-        })
-        .done(function (resp) {
-          _this.tabView[_this.currentPosition].attachStation(resp.ID);
-        })
-        .fail(function () {
-          throw new Error("error create station");
-        });
+      if( listOfElem.length === 0 ) 
+        return;
+        //TODO will fail if same position , same name
+      for(var i = 0 ; i < listOfElem.length ; i++ ) {
+        var elem = listOfElem[i];
+        var data = this.populateDataForCreatingStation(elem);
+        this.callPostStationAPI(elem,data);
+      }
+
+      // var _this = this;
+      // var data = this.populateDataForCreatingStation();
+      
+
+      // $.ajax({
+      //     type: 'POST',
+      //     url: config.coreUrl + 'stations/',
+      //     data: JSON.stringify(data),
+      //     contentType: 'application/json',
+      //     dataType: 'json'
+      //   })
+      //   .done(function (resp) {
+      //     _this.tabView[_this.currentPosition].attachStation(resp.ID);
+      //   })
+      //   .fail(function () {
+      //     throw new Error("error create station");
+      //   });
     },
 
 
