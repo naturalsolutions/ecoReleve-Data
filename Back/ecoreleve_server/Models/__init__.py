@@ -58,8 +58,14 @@ def loadThesaurusTrad(config):
     results = session.execute(query).fetchall()
 
     for row in results:
-        thesaurusDictTraduction[row['fullPath']] = {
-            'en': row['nameEn'], 'fr': row['nameFr']}
+        if thesaurusDictTraduction.get(row['fullPath'], None):
+            thesaurusDictTraduction[row['fullPath']] = [{
+                'en': row['nameEn'], 'fr': row['nameFr'], 'parentID': row['parentID']},
+                thesaurusDictTraduction[row['fullPath']]
+            ]
+        else:
+            thesaurusDictTraduction[row['fullPath']] = {
+                'en': row['nameEn'], 'fr': row['nameFr'], 'parentID': row['parentID']}
         invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
         invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
     session.close()
@@ -80,9 +86,9 @@ USERS = {2: 'superUser',
          3: 'user',
          1: 'admin'}
 
-GROUPS = {'superUser': ['group:superUsers'],
-          'user': ['group:users'],
-          'admin': ['group:admins']}
+GROUPS = {'superUser': ['group:superUser'],
+          'user': ['group:user'],
+          'admin': ['group:admin']}
 
 
 def groupfinder(userid, request):
