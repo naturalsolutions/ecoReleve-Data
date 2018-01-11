@@ -1,0 +1,10 @@
+UPDATE f Set displayClass='hide', EditClass = 'js-admin' 
+FROM ModuleForms f
+WHERE (module_id = 2) AND Name = 'updateSite'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('156_CONF_StationForm_UpdateSite_Button',GETDATE(),(SELECT db_name()))
+
+
+GO
