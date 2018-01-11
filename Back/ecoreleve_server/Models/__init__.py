@@ -120,6 +120,8 @@ def db(request):
         if request.exception is not None:
             session.rollback()
             cache_callback(request, session)
+            session.close()
+            makerDefault.remove()
         else:
             try:
                 session.commit()
@@ -129,6 +131,7 @@ def db(request):
                 request.response.text = e.value
             except Exception as e:
                 session.rollback()
+                request.response.status_code = 500
             finally:
                 session.close()
                 makerDefault.remove()
