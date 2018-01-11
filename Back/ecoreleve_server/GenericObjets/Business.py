@@ -88,6 +88,6 @@ class BusinessRules(Base):
         stmt = self.buildQuery(entityDTO)
         result = session.execute(stmt).scalar()
 
-        if result
+        if result:
             self.raiseError()
         # return result
