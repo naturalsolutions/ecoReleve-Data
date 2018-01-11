@@ -259,15 +259,16 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
             entity.updateFromJSON(data, startDate=useDate)
 
     def deleteLinkedField(self, useDate=None, previousState=None):
-        session = dbConfig['dbSession']()
+        # request = threadlocal.get_current_request()
+        # session = request.registry.dbmaker()
+        session = dbConfig['dbSession']
 
         if useDate is None:
             useDate = self.linkedFieldDate()
+        try:
+            for linkProp in self.getLinkedField():
+                obj = LinkedTables[linkProp['LinkedTable']]
 
-        for linkProp in self.getLinkedField():
-            obj = LinkedTables[linkProp['LinkedTable']]
-
-            try:
                 linkedField = linkProp['LinkedField'].replace('@Dyn:', '')
                 if previousState:
                     linkedSource = previousState.get(
@@ -289,7 +290,8 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
                     if dynPropValueToDel is not None:
                         session.delete(dynPropValueToDel)
 
-                session.commit()
-                session.close()
-            except Exception as e:
-                raise e
+        except Exception as e:
+            raise e
+        finally:
+            session.commit()
+            session.close()

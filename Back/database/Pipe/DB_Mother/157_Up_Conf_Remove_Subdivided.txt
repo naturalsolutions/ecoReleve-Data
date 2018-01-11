@@ -1,0 +1,28 @@
+/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+delete f
+  FROM [ModuleForms] f
+  JOIN ProtocoleType pt on pt.ID = f.TypeObj and pt.Name  = 'Sub_Arthropod_survey'
+  where f.name = 'Subdivided'
+GO
+
+delete v
+FROM ObservationDynPropValue v
+JOIN ObservationDynProp dp on v.FK_ObservationDynProp = dp.ID and dp.Name = 'Subdivided'
+GO
+
+delete l
+from ProtocoleType_ObservationDynProp l
+JOIN ObservationDynProp dp  on l.FK_ObservationDynProp = dp.ID AND dp.Name = 'Subdivided'
+GO
+
+delete ObservationDynProp 
+WHERE Name = 'Subdivided'
+GO
+
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('157_Up_Conf_Remove_Subdivided',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -89,13 +89,13 @@
 			</button>
 
 
-			<% if (typeof(availableOptions) === 'undefined') { %>
+			<% if (typeof(disabledNew)=== 'undefined' && typeof(availableOptions) === 'undefined') { %>
 					<a href="#<%= type %>/new" class="js-admin js-link-new btn btn-success pull-right">
 					<span class="reneco reneco-entrykey"></span>
 					&nbsp;
 					New <%= single %>
 					</a>
-			<% } else { %>
+			<% } else if(typeof(disabledNew)=== 'undefined'){ %>
 					<button class="js-admin js-btn-new btn btn-success pull-right">
 					<span class="reneco reneco-entrykey"></span>
 					&nbsp;
