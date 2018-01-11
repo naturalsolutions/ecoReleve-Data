@@ -164,7 +164,7 @@ class DynamicObjectView(CustomView):
         return 'deleted'
 
     def history(self):
-        from ..Models import thesaurusDictTraduction
+        from ..utils.parseValue import formatThesaurus
 
         propertiesTable = Base.metadata.tables[self.objectDB.GetDynPropTable()]
         dynamicValuesTable = Base.metadata.tables[self.objectDB.GetDynPropValuesTable()]
@@ -181,16 +181,16 @@ class DynamicObjectView(CustomView):
         result = self.session.execute(query).fetchall()
         response = []
 
-        userLng = self.request.authenticated_userid['userlanguage']
         for row in result:
             curRow = OrderedDict(row)
             dictRow = {}
             for key in curRow:
                 if curRow[key] is not None:
-                    if 'Value' in key:
-                        if curRow[key] in thesaurusDictTraduction:
-                            dictRow['value'] = thesaurusDictTraduction[curRow[key]][userLng]
-                        else:
+                    if key == 'ValueString' in key and curRow[key] is not None:
+                        try:
+                            thesauralValueObj = formatThesaurus(curRow[key])
+                            dictRow['value'] = thesauralValueObj['displayValue']
+                        except:
                             dictRow['value'] = curRow[key]
                     elif 'FK' not in key:
                         dictRow[key] = curRow[key]
