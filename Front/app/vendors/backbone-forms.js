@@ -900,6 +900,9 @@ Form.Field = Backbone.View.extend({
       if(!elem.length){
         elem = this.$el.find('select:first');
       }
+      if(!elem.length){
+        elem = this.$el.find('textarea:first');
+      } 
       elem.addClass(this.errorClassName);
 
       //this.$el.addClass(this.errorClassName);
@@ -919,6 +922,9 @@ Form.Field = Backbone.View.extend({
     if(!elem.length){
       elem = this.$el.find('select:first');
     }
+    if(!elem.length){
+      elem = this.$el.find('textarea:first');
+    } 
     elem.removeClass(this.errorClassName);
     //this.$el.removeClass(this.errorClassName);
 

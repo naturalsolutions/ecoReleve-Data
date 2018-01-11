@@ -1,0 +1,9 @@
+update [ModuleForms] Set Validators = '[{"type":"maxLength"}]'
+  where InputType = 'textarea' and name = 'comments'
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('156_Up_Conf_Comments_add_Validator',GETDATE(),(SELECT db_name()))
+
+
+GO
