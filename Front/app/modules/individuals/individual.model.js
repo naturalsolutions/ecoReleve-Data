@@ -20,6 +20,8 @@ define([
       icon: 'reneco-bustard',
       subincon: 'reneco-bustard',
 
+      disabledNew: true,
+      
       formConfig: {
         modelurl: 'individuals',
         displayMode: 'display',

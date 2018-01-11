@@ -43,7 +43,7 @@ def current_user(request, user_id=None):
         User.Lastname.label('Lastname')
     ]).where(User.id == userid)
     response = dict(session.execute(query).fetchone())
-    response['role'] = currentUserRole
+    response['role'] = currentUserRole[0].replace('group:', '')
     return response
 
 

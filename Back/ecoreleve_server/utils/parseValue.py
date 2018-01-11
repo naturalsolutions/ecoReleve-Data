@@ -98,11 +98,19 @@ def formatThesaurus(nodeId, data):
     lng = threadlocal.get_current_request(
     ).authenticated_userid['userlanguage']
     try:
+
+        if type(thesaurusDictTraduction[data]) is list:
+            displayValue = list(
+                filter(lambda x: x['parentID'] == int(nodeID), thesaurusDictTraduction[data]))[0]
+        else:
+            displayValue = thesaurusDictTraduction[data]
         data = {
             'displayValue': thesaurusDictTraduction[nodeId][lng][data],
             'value': data
         }
     except:
+        # from traceback import print_exc
+        # print_exc()
         data = {
             'displayValue': data,
             'value': data
