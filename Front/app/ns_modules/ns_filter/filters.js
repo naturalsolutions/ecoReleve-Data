@@ -368,7 +368,10 @@
             var fieldName = dataRow['name'];
 
             var operatorList =  operators || this.getOpOptions(type);
-
+            var valueOptions = this.getValueOptions(dataRow);
+            if(valueOptions && type == 'AutocompTreeEditor'){
+                valueOptions['disableValidators'] = true;
+            }
             var schm = {
                 Column: { name: 'Column', type: 'Hidden', title: dataRow['label'], value: fieldName },
                 ColumnType: { name: 'ColumnType', title: '', type: 'Hidden', value: type },

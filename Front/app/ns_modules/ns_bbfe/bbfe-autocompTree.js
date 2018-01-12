@@ -67,7 +67,9 @@ define([
             if(this.validators && this.validators[0] == 'required'){
               options.schema.editorClass += ' required';
             }
-
+            if(options.schema.options && options.schema.options.disableValidators){
+                this.validators = [];
+            }
             this.editable = options.schema.editable || true;
             this.isTermError = false;
 
