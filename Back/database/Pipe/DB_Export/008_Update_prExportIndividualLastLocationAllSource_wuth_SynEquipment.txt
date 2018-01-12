@@ -54,7 +54,7 @@ FROM
 LEFT JOIN dbo.syn_Equipment  E 
 	ON  E.StartDate <= S.LocalisationDate AND E.FK_Individual IS NOT NULL AND E.fk_individual = S.FK_Individual AND E.Deploy =1 
 	AND NOT EXISTS (SELECT * 
-					FROM bo.syn_Equipment E2 
+					FROM dbo.syn_Equipment E2 
 					WHERE E2.FK_Individual IS NOT NULL AND E2.FK_Individual = E.FK_Individual AND E2.StartDate > E.StartDate and  E2.StartDate < S.LocalisationDate)
 
 	IF object_id('TIndividualLastLocationAllSource') IS NOT NULL 
