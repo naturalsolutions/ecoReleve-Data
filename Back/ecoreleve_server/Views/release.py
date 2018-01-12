@@ -16,7 +16,7 @@ from ..controllers.security import RootCore, context_permissions
 from ..Models.Equipment import checkEquip
 from .individual import IndividualsView
 from . import CustomView
-from ..utils.parseValue import isNumeric
+from ..utils.parseValue import isNumeric, formatThesaurus
 import operator
 from ..Models.Equipment import set_equipment
 
@@ -337,7 +337,7 @@ class ReleaseView(CustomView):
         result = [dict(row) for row in result]
         if userLng != 'fr':
             for row in result:
-                row['label'] = thesaurusDictTraduction[row['label']][userLng]
+                row['label'] = formatThesaurus(row['val'])['displayValue']
         return result
 
 

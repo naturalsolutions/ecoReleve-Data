@@ -98,7 +98,11 @@ def formatThesaurus(data, nodeID=None):
     try:
         if type(thesaurusDictTraduction.get(data, None)) is list and nodeID:
             displayValue = list(
-                filter(lambda x: x['parentID'] == int(nodeID), thesaurusDictTraduction[data]))[0]
+                filter(lambda x: x['parentID'] == int(nodeID), thesaurusDictTraduction[data]))
+            if displayValue:
+                displayValue = displayValue[0]
+            else:
+                displayValue = thesaurusDictTraduction[data][0]
         else:
             displayValue = thesaurusDictTraduction[data]
             if type(displayValue) is list:
