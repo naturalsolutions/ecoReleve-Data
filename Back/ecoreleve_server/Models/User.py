@@ -73,8 +73,6 @@ class User(Base):
         for row in res:
             resultset = resultset + ',' + str(row[0])
 
-        print(resultset)
-
         return resultset
 
 
