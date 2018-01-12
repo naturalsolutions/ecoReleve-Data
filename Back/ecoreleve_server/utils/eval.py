@@ -37,7 +37,7 @@ class Eval():
             }[op]
 
     def _in(self,op1,op2):
-        l = [s for s in re.split("[,|;\W]+", op2)]
+        l = [s.lstrip() for s in re.split("[,|;]", op2)]
         return op1.in_(l)
 
     def _contains(self,op1,op2):

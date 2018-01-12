@@ -1,0 +1,10 @@
+  UPDATE [ModuleGrids] SET Options = '{"source": "autocomplete/users/Login", "minLength":3}'
+  WHERE NAME = 'FK_fieldworker' and Module_ID = 3
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('159_Up_Conf_Grid_FieldWorker',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -368,7 +368,10 @@
             var fieldName = dataRow['name'];
 
             var operatorList =  operators || this.getOpOptions(type);
-
+            var valueOptions = this.getValueOptions(dataRow);
+            if(valueOptions && type == 'AutocompTreeEditor'){
+                valueOptions['disableValidators'] = true;
+            }
             var schm = {
                 Column: { name: 'Column', type: 'Hidden', title: dataRow['label'], value: fieldName },
                 ColumnType: { name: 'ColumnType', title: '', type: 'Hidden', value: type },
@@ -402,14 +405,14 @@
             if (this.firstOperator ) {
                 operatorValue = this.firstOperator;
                 if (this.firstOperator.indexOf('null') != 1){
-                    valeur = 'null';
+                    valeur = null;
                     if (type == 'Number' || type == 'Select' || type == 'LongitudeEditor' || type == 'LatitudeEditor' ){
                         valeur = 1;
                     }
                 }
             }
             var Formdata = {
-                //ColumnType: type,
+                ColumnType: type,
                 Column: fieldName,
                 Operator: operatorValue
             };
@@ -420,7 +423,7 @@
                 schema: schm,
                 defaults: {
                     Column: fieldName,
-                    //ColumnType: type,
+                    ColumnType: type,
                     // For FireFox, select first option
                     Operator: operatorValue,
                     Value: valeur
@@ -473,7 +476,12 @@
                     if (NewOperator.indexOf('null')!=-1) {
                         elVal.addClass('hide');
                         if (this.model.get('ColumnType') != 'Number' || this.model.get('ColumnType') != 'LongitudeEditor' || this.model.get('ColumnType') != 'LatitudeEditor'){
-                            elVal.find('input').val('null').attr('data_value','null').change();
+                            if (this.model.get('ColumnType') == 'AutocompTreeEditor'){
+                                elVal.find('input').val(null).attr('data_value',null).change();
+                            } else {
+                                elVal.find('input').val('null').change();
+                                
+                            }
                         } else {
                             elVal.find('input').val(1).change();
                         }
@@ -701,7 +709,7 @@
 
                     }
                     else {
-                        if (  ( value.Value !== null && value.Value !== '')  || value.Operator == 'is null') {                            
+                        if (  ( value.Value !== null && value.Value !== '')  || value.Operator.indexOf('null') != -1) {                            
                             this.criterias.push(value);
                             currentForm.$el.find('input.filter').addClass('active');
                         }

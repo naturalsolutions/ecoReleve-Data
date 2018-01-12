@@ -88,7 +88,6 @@ class BusinessRules(Base):
         stmt = self.buildQuery(entityDTO)
         result = session.execute(stmt).scalar()
 
-        # print('\n -----  EXEC '+self.executing, ' Event: '+self.actionType , ' result: ', result)
         if result:
             self.raiseError()
         # return result

@@ -287,21 +287,15 @@ class ListObjectWithDynProp():
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
         result = self.session.execute(fullQueryJoinOrdered).fetchall()
         data = []
-        listWithThes = list(
+        dataConfigWithThesaurus = list(
             filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType, self.Conf))
         listWithThes = list(
             map(lambda x: {'name': x.Name, 'options': x.Options}, listWithThes))
+        # listWithThes = list(map(lambda x: x.Name, listWithThes))
 
         # change thesaural term into laguage user
-        try:
-            userLng = threadlocal.get_current_request().authenticated_userid[
-                'userlanguage']
-        except:
-            userLng = 'fr'
-
         for row in result:
-            row = dict(map(lambda k: tradThesaurusTerm
-                           (k, listWithThes, userLng.lower()), row.items()))
+            row = dict(map(lambda k: tradThesaurusTerm(k, listWithThes, userLng.lower()), row.items()))
             data.append(row)
         return data
 
@@ -554,5 +548,19 @@ def tradThesaurusTerm(key, listWithThes, userLng='en'):
         else:
             newVal = val
     except:
+      
         (name, newVal) = splitFullPath(key, listWithThes)
     return (name, newVal)
+
+def tradThesaurusTermV2(item, dataConfigWithThesaurus):
+    from ..utils.parseValue import formatThesaurus
+    key, value = item
+
+    configThesaurus = list(filter(lambda obj: key == obj.Name, dataConfigWithThesaurus))
+
+    if configThesaurus and value:
+        newVal = formatThesaurus(value, nodeID=configThesaurus[0].Options)['displayValue']
+    else:
+        newVal = value
+
+    return (key, newVal)
