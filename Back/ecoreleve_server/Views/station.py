@@ -93,9 +93,6 @@ class StationsView(DynamicObjectCollectionView):
                     if obj['Column'] == 'LastImported':
                         self.lastImported(obj, params)
                         lastImported = True
-                    if obj['Column'] == 'FK_FieldWorker' and obj['Operator'] == 'IN':
-                        fieldworkers = obj['Value']
-                        obj['Value'] = User.getUsersIds(fieldworkers)
 
         if not lastImported:
             map(lambda x: obj['Column'] != 'FK_StationType', params['criteria'])
