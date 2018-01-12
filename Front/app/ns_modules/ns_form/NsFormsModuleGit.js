@@ -408,7 +408,9 @@ define([
         this.buttonRegion[0].find('.NsFormModuleSave').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleEdit').addClass('hidden');
-        this.formRegion.find('input:enabled:first').focus();
+        if(!this.BBForm.model.get('id')){
+          this.formRegion.find('input:enabled:first').focus();
+        }
       }else{
         this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleCancel').addClass('hidden');
