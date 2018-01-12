@@ -127,6 +127,7 @@ def db(request):
                 request.response.text= e.value
             except Exception as e:
                 session.rollback()
+                request.response.status_code = 500
             finally:
                 session.close()
                 makerDefault.remove()
