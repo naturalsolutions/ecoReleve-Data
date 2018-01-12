@@ -258,7 +258,7 @@ class SensorDatasByType(CustomView):
 
         queryStmt = self.queryType[self.type_]()
         queryStmt = self.handleCriteria(queryStmt, criteria)
-        data = self.session.execute(queryStmt, criteria).fetchall()
+        data = self.session.execute(queryStmt).fetchall()
         dataResult = [dict(row) for row in data]
         result = [{'total_entries': len(dataResult)}]
         result.append(dataResult)
@@ -284,7 +284,9 @@ class SensorDatasByType(CustomView):
                                 func.count(self.viewTable.c['sessionID']).label(
                                     'nb_photo')
                                 ]
-                               ).group_by(self.viewTable.c['sessionID'],
+                               )
+            queryStmt = queryStmt.where(self.viewTable.c['checked'] == None)
+            queryStmt = queryStmt.where(self.viewTable.c['checked'] == None).group_by(self.viewTable.c['sessionID'],
                                           self.viewTable.c['UnicIdentifier'],
                                           self.viewTable.c['fk_sensor'],
                                           self.viewTable.c['site_name'],
