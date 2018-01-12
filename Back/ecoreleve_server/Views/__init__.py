@@ -239,7 +239,10 @@ class DynamicObjectCollectionView(CustomView):
         elif ref == 'autocomplete':
             return AutocompleteView(ref, self)
         else:
-            self.retrieve = self.actions.get(ref)
+            if self.request.method == 'POST' :
+                self.create = self.actions.get(ref)
+            else :
+                self.retrieve = self.actions.get(ref)
             return self
 
     @property
