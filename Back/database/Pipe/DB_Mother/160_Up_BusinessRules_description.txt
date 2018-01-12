@@ -1,0 +1,16 @@
+update [BusinessRules] SET description = 'contrainte d''unicité des individus verifiant l''unicité de Chip_Code'
+where name='Unique_Chip_Code_on_Individual'
+
+update [BusinessRules] SET description = 'contrainte d''unicité des individus verifiant l''unicité de Release_Ring_Code'
+where name='Unique_Release_Ring_Code_on_Individual'
+
+update [BusinessRules] SET description = 'contrainte d''unicité des individus verifiant l''unicité de Breeding_Ring_Code'
+where name='Unique_Breeding_Ring_Code_on_Individual'
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('160_Up_BusinessRules_description',GETDATE(),(SELECT db_name()))
+
+
+GO
