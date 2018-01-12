@@ -119,8 +119,8 @@ define([
     populateDataForCreatingStation: function (imageModel) {
       var monitoredSiteModel = this.monitoredSiteForm.model;
       var data = {};
-      data.LAT = monitoredSiteModel.get('LAT') + 2;
-      data.LON = monitoredSiteModel.get('LON') + 2;
+      data.LAT = monitoredSiteModel.get('LAT');
+      data.LON = monitoredSiteModel.get('LON');
       data.FK_MonitoredSite = this.siteId;
       data.Name = imageModel.model.get('name');//"izhjfoiuzehoezfhn";
       data.FieldWorkers = [{
@@ -150,52 +150,167 @@ define([
 
 
     },
-    callDeleteStationAPI : function(elem) {
-      var stationId = elem.model.get('stationId');
-      var _this = this; 
-      if(stationId === null)
-        return;
-      $.ajax({
-        type : 'DELETE',
-        url : config.coreUrl +'stations/'+stationId,
-        contentType: 'application/json'
-      })
-      .done(function(resp) {
-        elem.removeStation();
-        console.log("Station"+stationId+" removed ok");
-      })
-      .fail(function(err) {
-        console.log(err);
-      });
+    // populateDataForCreatingStation: function (tabOfPosition) {
+      
+    //   var monitoredSiteModel = this.monitoredSiteForm.model;
+    //   var data = {};
+    //   var tab = []
+
+    //   for(var i = 0 ; i < tabOfPosition.length ; i++ ) {
+    //     var key = tabOfPosition[i];
+    //     var imageModel = this.tabView[key].model;
+    //     data[key] = {};
+    //     data[key]["latitude"] = monitoredSiteModel.get('LAT');
+    //     data[key]["longitude"] = monitoredSiteModel.get('LON');
+    //     data[key]["FK_MonitoredSite"] = this.siteId;
+    //     data[key]["name"] = this.siteId;
+    //     data[key]["Name"] = imageModel.get('name');
+    //     data[key]["FeldWorkers"] = [{"ID": null,"defaultValues": "","FieldWorker": "" + window.app.user.get('PK_id') + ""}];
+    //     data[key]["FK_StationType"] = 6;
+    //     data[key]["waypointTime"] = moment(imageModel.get('date_creation')).format('DD/MM/YYYY HH:mm:ss');
+    //     data[key]["elevation"] = monitoredSiteModel.get('ELE')|| null;
+    //     data[key]["precision"] = monitoredSiteModel.get('precision')|| null;
+    //     data[key]["Comments"] = "created from camera trap validation"|| null;
+    //     data[key]["NbFieldWorker"] = 1;
+    //     data[key]["fieldActivity"] = 5;
+    //     tab.push(data[key])
+    //   }
+
+
+    //   // for (var item in data) { // check for required val
+    //   //   var val = data[item]
+    //   //   if (typeof (val) === 'undefined' || val === null) {
+    //   //     if (item === 'stationDate')
+    //   //       throw new Error("The photo have no value for " + item);
+    //   //     else
+    //   //       throw new Error("Monitored site have no value for " + item);
+    //   //     break;
+    //   //   }
+    //   // }
+
+    //   return tab;
+
+
+
+    // },
+    // callDeleteStationAPI : function(tabOfElem) {
+    //   var stationId = elem.model.get('stationId');
+    //   var _this = this; 
+    //   if(stationId === null)
+    //     return;
+    //   $.ajax({
+    //     type : 'DELETE',
+    //     url : config.coreUrl +'stations/'+stationId,
+    //     contentType: 'application/json'
+    //   })
+    //   .done(function(resp) {
+    //     elem.removeStation();
+    //     console.log("Station"+stationId+" removed ok");
+    //   })
+    //   .fail(function(err) {
+    //     console.log(err);
+    //   });
+
+    // },
+
+    callDeleteStationAPI : function(tabOfIds,tabOfItem) {
+      if(tabOfIds.length === 1 ) {
+        var stationId = tabOfIds[0];
+        var item = tabOfItem[0];
+        var _this = this; 
+        if(stationId === null)
+          return;
+
+        $.ajax({
+          type : 'DELETE',
+          url : config.coreUrl +'stations/'+stationId,
+          contentType: 'application/json'
+        })
+        .done(function(resp) {
+          item.removeStation();
+          console.log("Station"+stationId+" removed ok");
+        })
+        .fail(function(err) {
+          console.log(err);
+        });
+      }
+      else {
+
+        $.ajax({
+          type : 'POST',
+          url : config.coreUrl+'stations/deleteMany',
+          contentType : 'application/json',
+          data : JSON.stringify(tabOfIds)
+        })
+        .done( function(resp) {
+          console.log(resp);
+          for( var item in resp) {
+            var indexElem = tabOfIds.findIndex(function(elem) {
+              return Number(item) === elem;
+            });
+            console.log("on va suppr avec id : ",indexElem);
+            tabOfItem[indexElem].removeStation();
+          }
+        })
+        .fail(function(err) {
+          console.log(err);
+        })
+
+      }
+      
 
     },
 
     removeStation : function() {
-      var _this = this;
-      var listOfElem = []
+
+      var tabOfIds = [];
+      var tabOfItem = [];
       if (this.tabSelected.length == 0) {
         if (this.currentPosition !== null) {
-          if(this.tabView[this.currentPosition].model.get('stationId')!== null)
-            listOfElem.push(this.tabView[this.currentPosition])
+          if(this.tabView[this.currentPosition].model.get('stationId')!== null) {
+            tabOfIds.push(this.tabView[this.currentPosition].model.get('stationId'));
+            tabOfItem.push(this.tabView[this.currentPosition]);
+          }
         }
       } else {
         for (var i of this.tabSelected) {
-          if(this.tabView[i].model.get('stationId') !== null)
-            listOfElem.push(this.tabView[i]);
+          if(this.tabView[i].model.get('stationId') !== null) {
+            tabOfIds.push(this.tabView[i].model.get('stationId'));
+            tabOfItem.push(this.tabView[i]);
+          }
         }
       }
-
-      if( listOfElem.length === 0 ) 
+      if( tabOfIds.length === 0 || tabOfItem.length === 0 ) 
         return;
-
-      for(var i = 0 ; i < listOfElem.length ; i++ ) {
-        var elem = listOfElem[i];
-        this.callDeleteStationAPI(elem);
-      }
+      this.callDeleteStationAPI(tabOfIds,tabOfItem);
     },
 
+    // removeStation : function() {
+    //   var _this = this;
+    //   var listOfElem = []
+    //   if (this.tabSelected.length == 0) {
+    //     if (this.currentPosition !== null) {
+    //       if(this.tabView[this.currentPosition].model.get('stationId')!== null)
+    //         listOfElem.push(this.tabView[this.currentPosition])
+    //     }
+    //   } else {
+    //     for (var i of this.tabSelected) {
+    //       if(this.tabView[i].model.get('stationId') !== null)
+    //         listOfElem.push(this.tabView[i]);
+    //     }
+    //   }
+
+    //   if( listOfElem.length === 0 ) 
+    //     return;
+
+    //   for(var i = 0 ; i < listOfElem.length ; i++ ) {
+    //     var elem = listOfElem[i];
+    //     this.callDeleteStationAPI(elem);
+    //   }
+    // },
 
     callPostStationAPI : function(elem,data) {
+
       $.ajax({
         type: 'POST',
         url: config.coreUrl + 'stations/',
@@ -206,11 +321,13 @@ define([
       .done(function (resp) {
         elem.attachStation(resp.ID);
       })
-      .fail(function () {
+      .fail(function (err) {
+        console.log(err)
         throw new Error("error create station");
       });
 
     },
+
 
     createStation: function () {
       var _this = this;
@@ -235,24 +352,6 @@ define([
         var data = this.populateDataForCreatingStation(elem);
         this.callPostStationAPI(elem,data);
       }
-
-      // var _this = this;
-      // var data = this.populateDataForCreatingStation();
-      
-
-      // $.ajax({
-      //     type: 'POST',
-      //     url: config.coreUrl + 'stations/',
-      //     data: JSON.stringify(data),
-      //     contentType: 'application/json',
-      //     dataType: 'json'
-      //   })
-      //   .done(function (resp) {
-      //     _this.tabView[_this.currentPosition].attachStation(resp.ID);
-      //   })
-      //   .fail(function () {
-      //     throw new Error("error create station");
-      //   });
     },
 
 
