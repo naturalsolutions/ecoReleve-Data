@@ -660,6 +660,8 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         var value = params.value;
         var gui = $(params.eGridCell);
         gui.attr('title', value);
+        gui.attr('data-original-title', value);
+        
         gui.tooltip({trigger:'hover', placement:'auto left'});
         return value;
       };
