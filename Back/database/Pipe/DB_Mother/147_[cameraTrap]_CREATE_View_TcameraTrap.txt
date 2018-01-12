@@ -2,17 +2,18 @@ CREATE VIEW [dbo].[V_TcameraTrap]
 AS
 
 SELECT        
-pk_id, 
-fk_sensor, 
-path, 
-name, 
-extension, 
-checked, 
-validated, 
-date_creation, 
-date_uploaded, 
-tags, 
-Note
+[pk_id], 
+[fk_sensor], 
+[path], 
+[name], 
+[extension], 
+[checked], 
+[validated], 
+[date_creation], 
+[date_uploaded], 
+[tags], 
+[Note],
+[stationId]
 FROM            
 [ecoReleve_Sensor].[dbo].[TcameraTrap]
 
