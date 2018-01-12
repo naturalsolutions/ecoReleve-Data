@@ -35,13 +35,13 @@ class Resource(dict):
 
 class SecurityRoot(Resource):
     __acl__ = [
-         (Allow, Authenticated, 'read'),
-         (Allow, Authenticated, 'all'),
-         (Allow, 'group:admins', 'admin'),
-         (Allow, 'group:admins', 'superUser'),
-         (Allow, 'group:admins', 'all'),
-         (Allow, 'group:superUsers', 'superUser'),
-         (Allow, 'group:superUsers', 'all')
+        (Allow, Authenticated, 'read'),
+        (Allow, Authenticated, 'all'),
+        (Allow, 'group:admin', 'admin'),
+        (Allow, 'group:admin', 'superUser'),
+        (Allow, 'group:admin', 'all'),
+        (Allow, 'group:superUser', 'superUser'),
+        (Allow, 'group:superUser', 'all')
     ]
 
     def __init__(self, request):
@@ -136,45 +136,45 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
 
 context_permissions = {
     'stations': [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Allow, 'group:superUsers', ('create', 'update', 'read')),
-                (Allow, 'group:users', ('create', 'update', 'read'))
-              ],
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUser', ('create', 'update', 'read')),
+        (Allow, 'group:user', ('create', 'update', 'read'))
+    ],
 
     'observations': [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Allow, 'group:superUsers', ALL_PERMISSIONS),
-                (Allow, 'group:users', ALL_PERMISSIONS)
-              ],
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUser', ALL_PERMISSIONS),
+        (Allow, 'group:user', ALL_PERMISSIONS)
+    ],
 
     'individuals': [
-                (Allow, 'group:admins', ('create', 'update', 'read')),
-                (Allow, 'group:superUsers', ('update', 'read')),
-                (Allow, 'group:users', 'read')
-              ],
+        (Allow, 'group:admin', ('create', 'update', 'read')),
+        (Allow, 'group:superUser', ('update', 'read')),
+        (Allow, 'group:user', 'read')
+    ],
 
     'monitoredSites': [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Allow, 'group:superUsers', ('create', 'update', 'read')),
-                (Allow, 'group:users', ('create', 'update', 'read'))
-              ],
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUser', ('create', 'update', 'read')),
+        (Allow, 'group:user', ('create', 'update', 'read'))
+    ],
 
     'sensors': [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Allow, 'group:superUsers', 'read'),
-                (Allow, 'group:users', 'read')
-              ],
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUser', 'read'),
+        (Allow, 'group:user', 'read')
+    ],
 
     'release': [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Deny, 'group:superUsers', ALL_PERMISSIONS),
-                (Deny, 'group:users', ALL_PERMISSIONS),
-              ],
+        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Deny, 'group:superUsers', ALL_PERMISSIONS),
+        (Deny, 'group:users', ALL_PERMISSIONS),
+    ],
     'dashboard' : [
-                (Allow, 'group:admins', ALL_PERMISSIONS),
-                (Allow, 'group:superUsers', 'read'),
-                (Allow, 'group:users', 'read')
-              ],
+        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', 'read'),
+        (Allow, 'group:users', 'read')
+    ],
 }
 
 

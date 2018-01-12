@@ -20,13 +20,6 @@ class myBase(object):
 
     __table_args__ = {'implicit_returning': False}
 
-    def __json__(self):
-        json_exclude = getattr(self, '__json_exclude__', set())
-        return {key: value for key, value in self.__dict__.items()
-                # Do not serialize 'private' attributes
-                # (SQLAlchemy-internal attributes are among those, too)
-                if not key.startswith('_')
-                and key not in json_exclude}
 
 Base = declarative_base(cls=myBase)
 BaseExport = declarative_base()
@@ -65,7 +58,13 @@ def loadThesaurusTrad(config):
     results = session.execute(query).fetchall()
 
     for row in results:
-        thesaurusDictTraduction[row['fullPath']] = {'en': row['nameEn'], 'fr':row['nameFr']}
+        newTraduction = {
+            'en': row['nameEn'], 'fr': row['nameFr'], 'parentID': row['parentID']}
+        if thesaurusDictTraduction.get(row['fullPath'], None):
+            thesaurusDictTraduction[row['fullPath']].append(newTraduction)
+      
+        else:
+            thesaurusDictTraduction[row['fullPath']] = [newTraduction]
         invertedThesaurusDict['en'][row['nameEn']] = row['fullPath']
         invertedThesaurusDict['fr'][row['nameFr']] = row['fullPath']
     session.close()
@@ -81,19 +80,21 @@ def loadUserRole(session):
     userOAuthDict = pd.DataFrame.from_records(
         results, columns=['user_id', 'role_id'])
 
+
 USERS = {2: 'superUser',
          3: 'user',
          1: 'admin'}
 
-GROUPS = {'superUser': ['group:superUsers'],
-          'user': ['group:users'],
-          'admin': ['group:admins']}
+GROUPS = {'superUser': ['group:superUser'],
+          'user': ['group:user'],
+          'admin': ['group:admin']}
 
 
 def groupfinder(userid, request):
     session = request.dbsession
     Tuser_role = Base.metadata.tables['VUser_Role']
-    query_check_role = select([Tuser_role.c['role']]).where(Tuser_role.c['userID'] == int(userid))
+    query_check_role = select([Tuser_role.c['role']]).where(
+        Tuser_role.c['userID'] == int(userid))
     currentUserRoleID = session.execute(query_check_role).scalar()
 
     if currentUserRoleID in USERS:
@@ -118,23 +119,25 @@ def db(request):
         if request.exception is not None:
             session.rollback()
             cache_callback(request, session)
+            session.close()
+            makerDefault.remove()
         else:
             try:
                 session.commit()
-            except BusinessRuleError as e :
+            except BusinessRuleError as e:
                 session.rollback()
                 request.response.status_code = 409
-                request.response.text= e.value
+                request.response.text = e.value
             except Exception as e:
                 session.rollback()
                 request.response.status_code = 500
             finally:
                 session.close()
                 makerDefault.remove()
-            
 
     request.add_finished_callback(cleanup)
     return session
+
 
 from ..GenericObjets.ObjectWithDynProp import LinkedTables
 from ..GenericObjets.FrontModules import *

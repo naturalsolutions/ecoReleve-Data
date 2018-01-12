@@ -1,0 +1,11 @@
+UPDATE F SET DefaultValue = 0
+  FROM [ModuleForms] F
+  where InputType = 'Checkbox' AND DefaultValue is NULL
+
+GO 
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('158_Up_Conf_Checkbox_defaultValue',GETDATE(),(SELECT db_name()))
+
+
+GO

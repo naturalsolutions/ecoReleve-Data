@@ -117,10 +117,11 @@ class StationList(ListObjectWithDynProp):
                 query = query.where(exists(subSelect))
 
         if curProp == 'FK_FieldWorker':
+            joinTable = join(Station_FieldWorker, User, Station_FieldWorker.FK_FieldWorker == User.id)
             subSelect = select([Station_FieldWorker]
-                               ).where(
+                               ).select_from(joinTable).where(
                 and_(Station.ID == Station_FieldWorker.FK_Station,
-                     eval_.eval_binary_expr(Station_FieldWorker.__table__.c[curProp],
+                     eval_.eval_binary_expr(User.__table__.c['Login'],
                                             criteriaObj['Operator'],
                                             criteriaObj['Value'])))
             query = query.where(exists(subSelect))
@@ -139,26 +140,6 @@ class StationList(ListObjectWithDynProp):
         fullQueryJoinOrdered = self.GetFullQuery(searchInfo)
         result = self.session.execute(fullQueryJoinOrdered).fetchall()
         data = []
-
-        # if getFieldWorkers:
-        #     queryCTE = fullQueryJoinOrdered.cte()
-        #     joinFW = join(Station_FieldWorker, User,
-        #                   Station_FieldWorker.FK_FieldWorker == User.id)
-        #     joinTable = join(queryCTE, joinFW, queryCTE.c[
-        #                      'ID'] == Station_FieldWorker.FK_Station)
-        #     query = select([Station_FieldWorker.FK_Station,
-        #                     User.Login]).select_from(joinTable)
-        #     FieldWorkers = self.session.execute(query).fetchall()
-        #     list_ = {}
-        #     for x, y in FieldWorkers:
-        #         list_.setdefault(x, []).append(y)
-        #     for row in result:
-        #         row = OrderedDict(row)
-        #         try:
-        #             row['FK_FieldWorker_FieldWorkers'] = list_[row['ID']]
-        #         except:
-        #             pass
-        #         data.append(row)
 
         for row in result:
             row = OrderedDict(row)
@@ -191,7 +172,8 @@ class IndividualList(ListObjectWithDynProp):
 
         joinTable = super().GetJoinTable(searchInfo)
 
-        releaseFilter = list(filter(lambda x: x['Column'] == 'LastImported', searchInfo['criteria']))
+        releaseFilter = list(
+            filter(lambda x: x['Column'] == 'LastImported', searchInfo['criteria']))
         if len(releaseFilter) > 0:
             return joinTable
 
@@ -232,6 +214,13 @@ class IndividualList(ListObjectWithDynProp):
             else:
                 query = query.where(eval_.eval_binary_expr(
                     Sensor.UnicIdentifier, criteriaObj['Operator'], criteriaObj['Value']))
+
+        if curProp == 'FK_SensorType':
+            if self.history:
+                query = self.whereInEquipement(query, [criteriaObj])
+            else:
+                query = query.where(eval_.eval_binary_expr(
+                    SensorType.Name, criteriaObj['Operator'], criteriaObj['Value']))
 
         if curProp == 'Status_':
             StatusTable = Base.metadata.tables['IndividualStatus']
@@ -613,15 +602,15 @@ class MonitoredSiteList(ListObjectWithDynProp):
 
 
 class ImportList(Generator):
-    
+
     def __init__(self, SessionMaker):
 
-        joinTable = join(Import, User, Import.FK_User==User.id)
+        joinTable = join(Import, User, Import.FK_User == User.id)
 
         tablecImprt = select([Import,
                               User.fullname.label('Login'),
 
-                            ]).select_from(joinTable
-                                           )
+                              ]).select_from(joinTable
+                                             )
         tablecImprt = tablecImprt.cte()
         super().__init__(tablecImprt, SessionMaker)

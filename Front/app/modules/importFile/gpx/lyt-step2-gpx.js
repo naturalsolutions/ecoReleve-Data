@@ -100,28 +100,6 @@ define([
     displayGrid: function() {
       var _this = this;
 
-      var FieldActivityEditor = function () {
-      };
-
-      FieldActivityEditor.prototype.init = function(params){
-        var self = this;
-        this.select = document.createElement('select');
-        this.select.className = 'form-control';
-        _this.fieldActivityList.map(function(fa){
-          var option = document.createElement('option');
-          option.text = fa.label;
-          option.value = fa.value;
-          self.select.add(option);
-        });
-        this.select.value = params.value;
-      };
-      FieldActivityEditor.prototype.getGui = function(){
-        return this.select;
-      };
-      FieldActivityEditor.prototype.getValue = function() {
-        return this.select.value;
-      };
-
       var FieldActivityRenderer = function(params){
         var text = '';
         _this.fieldActivityList.map(function(fa){
@@ -129,14 +107,80 @@ define([
             text = fa.label;
           }
         });
+        if (!text) {
+          text = params.data.fieldActivity;
+          $(params.eGridCell).addClass('ag-cell-error');
+
+          var errorsColumn =  params.data['_errors'];
+          
+          if(!($.isArray(errorsColumn))) {
+            errorsColumn = [];
+          }
+          if(params.colDef){
+            errorsColumn.push(params.colDef.field);
+            errorsColumn = errorsColumn.filter(function(elem, index, self) {
+                return index == self.indexOf(elem);
+            })
+            params.node.setDataValue('_errors', errorsColumn);
+          }
+        } else {
+          $(params.eGridCell).removeClass('ag-cell-error');
+
+          var errorsColumn =  params.data['_errors'];
+          if(($.isArray(errorsColumn))) {
+            var index = errorsColumn.indexOf(params.colDef.field);
+            if (index > -1) {
+                errorsColumn.splice(index, 1);
+            }
+            params.node.setDataValue('_errors', errorsColumn);
+          }
+        }
         return text;
       };
+
+      var FieldActivityEditor = function () {};
+      FieldActivityEditor.prototype = new Editors.AutocompleteEditor();
+
+      FieldActivityEditor.prototype.afterGuiAttached = function(params){
+        params = {}
+        params.data = {}
+        params.data.fieldActivity = this.bbfe.getValue()
+        this.element.$el.focus();
+        this.element.$el.find('input').val(FieldActivityRenderer(params)).focus();
+      }
+
+      FieldActivityEditor.prototype.getValue = function(params){
+        var valueReturned;
+        var value = this.element.getValue()
+        
+        if (isNaN(value)){
+          _this.fieldActivityList.map(function(fa){
+            if(value == fa.label){
+              valueReturned = fa.value;
+            }
+          });
+          if(!valueReturned){
+            valueReturned = value;
+          }
+        }
+        else {
+          valueReturned = this.element.getValue();
+        }
+
+        return valueReturned;
+
+      }
 
       var dateTimestampRender = function(params){
         return Moment.unix(params.data.displayDate).format("DD/MM/YYYY HH:mm:SS");
       };
 
       var columnsDefs = [
+        {
+          field: '_errors',
+          headerName: 'ID',
+          hide: true
+        },
         {
           field: 'id',
           headerName: 'ID',
@@ -171,6 +215,14 @@ define([
           headerName: 'Field Activity',
           cellEditor: FieldActivityEditor,
           cellRenderer: FieldActivityRenderer,
+          schema: {
+            validators:[],
+            editable: true,
+            editorClass :"form-control",
+            editorAttrs:{disabled: false},
+            options:{iconFont: "reneco reneco-autocomplete", source: this.fieldActivityList, minLength: 3},
+            fieldClass :"None col-md-6"
+           },
           filter : "select",
           filterParams : { selectList : this.fieldActivityList }
         },{
@@ -216,18 +268,44 @@ define([
 
     },
 
-
     validate: function() {
       var _this = this;
+      var rowAndErrors =  this.gridView.getRowDataAndErrors();
 
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
+
+      var selectedNodesError = false;
       if(!selectedNodes.length){
+        Swal({
+          title: 'No station selected',
+          text: 'You have to select at least one station',
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          confirmButtonText: 'Ok',
+          closeOnConfirm: true,
+        });
         return;
       }
       var coll = new Backbone.Collection(selectedNodes.map(function(node){
+        if(node.data._errors && node.data._errors.length > 0){
+          selectedNodesError = node.data._errors[0];
+        }
         return node.data;
       }));
 
+      if(selectedNodesError){
+        Swal({
+          title: 'Error in selected stations',
+          text: 'Verifiy your data, an error occured in "'+selectedNodesError+'" field',
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(147, 14, 14)',
+          confirmButtonText: 'Ok',
+          closeOnConfirm: true,
+        });
+        return;
+      }
       coll.url = 'sensors/gpx/datas';
       Backbone.sync('create', coll, {
         success: function(data) {
@@ -253,9 +331,6 @@ define([
               Backbone.history.navigate('stations?lastImported', {trigger: true});
             }
             else {
-              // Backbone.history.navigate('#', {trigger: false});
-              // Backbone.history.navigate('importFile/gpx',{trigger: true});
-
               // //method to return at the 1st step
               _this.options.parent.currentStepIndex = 1;
               var index = _this.options.parent.currentStepIndex;
