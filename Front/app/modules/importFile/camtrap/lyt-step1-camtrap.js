@@ -37,7 +37,7 @@ define([
     className: 'full-height',
     template: 'app/modules/importFile/camTrap/templates/tpl-step1-camtrap.html',
     name: 'Upload Camera Trap Files',
-    
+
 
     initialize: function (options) {
       var _this = this;
@@ -53,30 +53,6 @@ define([
       }
       this.firstRendered = true;
 
-      // this.modalRef = $('#myPleaseWait').modal().constructor();
-      this.wExif = new Worker('./app/modules/importFile/camTrap/workerExif.js', {
-        type: "module"
-      });
-      this.wExif.onmessage = function (event) {
-        _this.nbFilesParsed += 1;
-        _this.progress();
-        _this.r.files.find(function (elem) {
-          if (elem.uniqueIdentifier === event.data.file) {
-            elem.dateFind = _this.parseDateToIso(event.data.date);
-            if ( _this.nbFilesParsed === _this.nbFilesToParse ) {
-              _this.nbFilesParsed = 0;
-              _this.nbFilesToParse = 0;
-              setTimeout(function () {
-                $('#myPleaseWait').modal('hide');
-                // _this.progress();
-              }, 500);
-            }
-          }
-        });
-      };
-
-
-
       this.model = new Backbone.Model();
 
       var myCollectionFile = Backbone.Collection.extend({
@@ -91,10 +67,7 @@ define([
         this.r = new Resumable({
           target: config.coreUrl + 'sensorDatas/camtrap/resumable',
           query: {
-            // endDate:"2014-05-08 09:59:00",
-            // id:3067,
-            // path:"PP001_2014-05-02_2014-05-08_14N006G02",
-            // startDate:"2014-05-02 12:00:00"
+            /*params will be update after sessions selected*/
           },
           testChunks: true,
           clearInput: false
@@ -108,6 +81,32 @@ define([
 
 
       this.collectionFiles.on('remove', this.removeInResumable, _this)
+
+      this.createWorker();
+    },
+
+    createWorker: function() {
+      var _this = this;
+      this.wExif = new Worker('./app/modules/importFile/camTrap/workerExif.js', {
+        type: "module"
+      });
+      this.wExif.onmessage = function (event) {
+        _this.nbFilesParsed += 1;
+        _this.progressBarElem.style.width = _this.progress(_this.nbFilesParsed,_this.nbFilesToParse);
+        _this.r.files.find(function (elem) {
+          if (elem.uniqueIdentifier === event.data.file) {
+            elem.dateFind = _this.parseDateToIso(event.data.date);
+            if (_this.nbFilesParsed === _this.nbFilesToParse) {
+              _this.nbFilesParsed = 0;
+              _this.nbFilesToParse = 0;
+              setTimeout(function () {
+                $('#myPleaseWait').modal('hide');
+                // _this.progress();
+              }, 500);
+            }
+          }
+        });
+      };
     },
 
     removeInResumable: function (model, collection, options) {
@@ -165,8 +164,14 @@ define([
 
     onAttach: function () {
       var _this = this;
+
+      this.progressBarElem = this.el.getElementsByClassName('progress-bar')[0];
+      this.r.on('filesAdded', function(files,filesSkipped) {
+        _this.nbFilesToParse = files.length;
+        _this.progressBarElem.style.width = _this.progress(0,0);
+      })
       this.r.on('fileAdded', function (file, event) {
-        
+
         _this.cptFilesSize += file.size;
         if (_this.r.files.length > 1) {
           _this.changeNbFilesKey(_this.strNbFiles.max);
@@ -215,12 +220,15 @@ define([
       }));
     },
 
-    progress: function () {
-      if (this.nbFilesToParse === 0) {
-        $('.progress-bar').width(0 + '%');
-      } else {
-        $('.progress-bar').width(((this.nbFilesParsed / this.nbFilesToParse) * 100).toFixed(2) + '%');
+    progress: function (numerator,denominator) {
+      var width = '0%';
+      if(!denominator) {
+        return width = '0%';
       }
+      if( ( numerator / denominator ) > 100 ) {
+        return width ='100%';
+      }
+      return width = ((this.nbFilesParsed / this.nbFilesToParse) * 100).toFixed(2) + '%';
     },
 
     onShow: function () {
@@ -232,11 +240,8 @@ define([
         this.firstRendered = false;
         this.$input = this.$el.find('input[type=file]')[0];
         this.$input.onchange = function (event) {
-          _this.nbFilesToParse = event.target.files.length;
-          event.target.value = ''; //hack for clear input file
-
+          event.target.value = '';
         };
-        // this.$input.onchange.bind(_this);   
       }
       if (this.previousModels !== null) {
         var previousModels = this.previousModels.get('resumableFile');
