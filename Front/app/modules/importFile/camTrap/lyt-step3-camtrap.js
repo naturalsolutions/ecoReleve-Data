@@ -45,6 +45,20 @@ define([
         used : 0,
         usedPercentage : 0
       };
+      this.uploadInfos = {
+        nbFilesRefused : 0,
+        nbFilesAccepted : 0,
+        nbFilesExistOnServer : 0
+      };
+      this.reasonRefused = {
+        date : 0,
+        exist : 0,
+        unknown : 0
+      };
+      this.jetLag = {
+        hours : '00:00:00',
+        operator : '+'
+      };
       this.parent = options.parent;
       this.model = options.model || new Backbone.Model();
       this.com = new Com();
@@ -248,10 +262,22 @@ define([
         var textInfosSwal = ''
         var textWarningSwal =''
         if (_this.nbDateOutOfLimit > 0 || _this.nbDateInLimit > 0 ) {
-          textInfosSwal+=_this.nbDateOutOfLimit+' on '+_this.nbPhotos+' photos are out of session and will not be uploaded\n'
+          if(_this.nbPhotos === 1 ) {
+            textInfosSwal+=_this.nbDateOutOfLimit+'/'+_this.nbPhotos+' photo out of session and will not be uploaded\n'
+          }
+          else {
+            textInfosSwal+=_this.nbDateOutOfLimit+'/'+_this.nbPhotos+' photos out of session and will not be uploaded\n'
+          }
+         
         }
         if(_this.nbDateInLimit > 0) {
-          textInfosSwal+=_this.nbDateInLimit+' on '+_this.nbPhotos+ 'photos are in session range limit (+- 24h) and could be uploaded\n'
+          if(_this.nbPhotos === 1 ) {
+            textInfosSwal+=_this.nbDateInLimit+'/'+_this.nbPhotos+ ' photos in session range limit (+- 24h) and could be uploaded\n'
+          }
+          else {
+            textInfosSwal+=_this.nbDateInLimit+'/'+_this.nbPhotos+ ' photos in session range limit (+- 24h) and could be uploaded\n'
+          }
+          
         }
         if(_this.availableSpace.usedPercentage > 70) {
           textWarningSwal+='Care : disk usage: '+_this.availableSpace.usedPercentage+'% \n'
@@ -279,18 +305,18 @@ define([
             });
           })
         }
-
-        // if(text != '') {
-        //   Swal({
-        //     title: 'Warning',
-        //     text: text,
-        //     type: 'warning',
-        //     showCancelButton: false,
-        //     confirmButtonText: 'OK',
-        //     closeOnCancel: true
-        //   });
-        // }
-        
+        else if(textInfosSwal || textWarningSwal) {
+          var text = textInfosSwal || textWarningSwal;
+          Swal({
+            title: 'Warning',
+            text: text,
+            type: 'warning',
+            showCancelButton: false,
+            confirmButtonText: 'OK',
+            closeOnCancel: true
+          });
+        }
+      
         _this.displayGridSession();
         _this.displayGridPhotos();
         _this.gridViewSession.gridOptions.api.sizeColumnsToFit()
@@ -339,15 +365,94 @@ define([
 
     configResumable: function () {
       var _this = this;
+      //TODO extend error (date , present on server etc)
       this.r.on('fileError', function (file, message) {
-        console.warn("fichier refusé", file.fileName);
+        _this.uploadInfos.nbFilesRefused+=1;
+        switch(message){
+          case 'Date not valid' : {
+            _this.reasonRefused.date += 1;
+            break;
+          }
+          case 'exist' : {
+            _this.reasonRefused.exist += 1;
+            break;
+          }
+          default : {
+            _this.reasonRefused.unknown += 1;
+            break;
+          }
+        }
+      });
+      this.r.on('fileSuccess', function(file,message,b,c,d) {
+        if(message === "ok") {
+          _this.uploadInfos.nbFilesAccepted += 1;
+        }
+        else {
+          _this.uploadInfos.nbFilesExistOnServer += 1;
+        }
+      });
+      this.r.on('complete', function() {
+        var text = '';
+        if(_this.nbDateOutOfLimit) {
+          text+= 'You try to upload '+_this.nbPhotos+' photos\n';
+          if(_this.nbDateOutOfLimit === 1 ) {
+            text += _this.nbDateOutOfLimit + ' photo cancelled before upload, because out of range session\n'
+          }
+          else {
+            text += _this.nbDateOutOfLimit + ' photos cancelled before upload, because out of range session\n'
+          }
+          text+= 'So on '+(_this.nbPhotos - _this.nbDateOutOfLimit)+' photos you sent : \n'
+        }
+        else {
+          text+='You sent '+_this.nbPhotos+' photos : \n';
+        }
+        if(_this.uploadInfos.nbFilesExistOnServer) {
+          if(_this.uploadInfos.nbFilesExistOnServer === 1 ) {
+            text += _this.uploadInfos.nbFilesExistOnServer + ' photo already exists on the server\n'
+          }
+          else {
+            text += _this.uploadInfos.nbFilesExistOnServer + ' photos already exist on the server\n'
+          }
+        }
+        if(_this.uploadInfos.nbFilesRefused ) {
+          if(_this.uploadInfos.nbFilesRefused === 1 ) {
+            text += _this.uploadInfos.nbFilesRefused + ' photo has been refused\n'
+          }
+          else {
+            text += _this.uploadInfos.nbFilesRefused + ' photos have been refused\n'
+          }
+        }
+        if(_this.uploadInfos.nbFilesAccepted) {
+          if(_this.uploadInfos.nbFilesAccepted === 1 ) {
+            text += _this.uploadInfos.nbFilesAccepted + ' photo has been accepted\n'
+          }
+          else {
+            text += _this.uploadInfos.nbFilesAccepted + ' photos have been accepted\n'
+          }
+        }
+        Swal({
+          title: 'Upload complete',
+          text: text,
+          type: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: 'green',
+          confirmButtonText: 'Go to Validate',
+          cancelButtonText: 'Import new camera trap photo',
+          closeOnCancel: true
+        },
+        function(isConfirm){
+          if(isConfirm) {
+           Backbone.history.navigate('validate/camtrap',{trigger:true}) ;
+          } else {
+            Backbone.history.loadUrl(Backbone.history.fragment);
+          }
+        }
+      );
+
       })
+
       this.r.on('progress', function (file, message) {
-        /*
-        $("#"+file.uniqueIdentifier+"").css("color" ,"#f0ad4e");
-        $("#"+file.uniqueIdentifier+" > "+"#status").text("Uploading");*/
         _this.progressBar.uploading(_this.r.progress() * 100);
-        //  $('#pause-upload-btn').find('.reneco').removeClass('reneco-play').addClass('reneco-pause');
       });
 
 
