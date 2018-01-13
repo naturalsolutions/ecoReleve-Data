@@ -37,13 +37,19 @@ define([
     initialize: function (options) {
       var _this = this;
       this.nbDateOutOfLimit = 0;
-      this.did = true;
+      this.showHiddenCols = true;
       this.nbDateInLimit = 0;
-      this.flagDate
+      this.availableSpace = {
+        free : 0,
+        total : 0,
+        used : 0,
+        usedPercentage : 0
+      };
       this.parent = options.parent;
       this.model = options.model || new Backbone.Model();
       this.com = new Com();
       this.r = this.model.get('resumable');
+      this.nbPhotos = this.r.files.length;
       this.evalSizeOfPhotos(this.model.get('resumable').files);
       this.configResumable();
       this.model.set('availableSpace', 'N/A');
@@ -162,14 +168,8 @@ define([
         })
         .done(function (response, status, jqXHR) {
           if (jqXHR.status === 200) {
-            var tmpSpace = response.free / (1024 * 1024)
-            if (tmpSpace >= (1024 * 1024)) {
-              _this.model.set('availableSpace', (tmpSpace / (1024 * 1024)).toFixed(2) + ' Tb');
-            } else if (tmpSpace >= 1024) {
-              _this.model.set('availableSpace', (tmpSpace / (1024)).toFixed(2) + ' Gb');
-            } else {
-              _this.model.set('availableSpace', (tmpSpace).toFixed(2) + ' Mb');
-            }
+            _this.availableSpace = response;
+            _this.availableSpace.usedPercentage = ((response.used / response.total)*100).toFixed(2);
             _this.$el.show();
           }
         })
@@ -182,6 +182,7 @@ define([
 
     },
     ProgressBar: function (ele) {
+      //TODO go to html elem
       this.thisEle = $(ele);
 
       this.startUpload = function () {
@@ -244,19 +245,52 @@ define([
 
       $.when(this.deferredSize).then(function () {
         _this.progressBar = new _this.ProgressBar($('#upload-progress'));
+        var textInfosSwal = ''
+        var textWarningSwal =''
+        if (_this.nbDateOutOfLimit > 0 || _this.nbDateInLimit > 0 ) {
+          textInfosSwal+=_this.nbDateOutOfLimit+' on '+_this.nbPhotos+' photos are out of session and will not be uploaded\n'
+        }
+        if(_this.nbDateInLimit > 0) {
+          textInfosSwal+=_this.nbDateInLimit+' on '+_this.nbPhotos+ 'photos are in session range limit (+- 24h) and could be uploaded\n'
+        }
+        if(_this.availableSpace.usedPercentage > 70) {
+          textWarningSwal+='Care : disk usage: '+_this.availableSpace.usedPercentage+'% \n'
+          textWarningSwal+='Please contact and admin to inform'
+        }
 
-        // this.nbDateOutOfLimit = 0;
-        // this.nbDateInLimit = 0;
-        if (_this.nbDateOutOfLimit > 0) {
+        if(textWarningSwal && textInfosSwal) {
           Swal({
-            title: 'Out of range\'s limit',
-            text: 'Some photos are out of session range limit (+- 24h)',
-            type: 'error',
+            title: 'Infos',
+            text: textInfosSwal,
+            type: 'warning',
             showCancelButton: false,
             confirmButtonText: 'OK',
-            closeOnCancel: true
-          });
+            closeOnCancel: false,
+            closeOnConfirm: false,
+
+          },function(isconfirm) {
+            Swal({
+              title: 'Warning',
+              text: textWarningSwal,
+              type: 'warning',
+              showCancelButton: false,
+              confirmButtonText: 'OK',
+              closeOnCancel: true
+            });
+          })
         }
+
+        // if(text != '') {
+        //   Swal({
+        //     title: 'Warning',
+        //     text: text,
+        //     type: 'warning',
+        //     showCancelButton: false,
+        //     confirmButtonText: 'OK',
+        //     closeOnCancel: true
+        //   });
+        // }
+        
         _this.displayGridSession();
         _this.displayGridPhotos();
         _this.gridViewSession.gridOptions.api.sizeColumnsToFit()
@@ -281,14 +315,10 @@ define([
       var cols = _this.gridViewSession.gridOptions.columnApi.getAllColumns();
       cols.forEach(function (col) {
         if (col.colDef.hide) {
-          if (_this.did)
-            _this.gridViewSession.gridOptions.columnApi.setColumnVisible(col.colId, true);
-          else
-            _this.gridViewSession.gridOptions.columnApi.setColumnVisible(col.colId, false);
-
+            _this.gridViewSession.gridOptions.columnApi.setColumnVisible(col.colId, _this.showHiddenCols);
         }
       });
-      _this.did = !_this.did
+      _this.showHiddenCols = !_this.showHiddenCols
       _this.gridViewSession.gridOptions.api.sizeColumnsToFit()
       /* $('.btn.btn-primary.start').on('click' , function() {
          _this.detailColClicked(this);
@@ -302,6 +332,7 @@ define([
         rowNode.setDataValue('jetLag', '' + _this.jetLag.operator + '' + _this.jetLag.hours + '')
         rowNode.setDataValue('dateFind', rowNode.data.dateFind);
       });
+      this.gridViewPhotos.gridOptions.api.refreshView();
 
 
     },
@@ -326,18 +357,19 @@ define([
     onDestroy: function () {
 
     },
+    formatSize: function(params) {
+
+    },
     displayGridSession: function () {
       var _this = this;
+      var dataObj = this.model.get('row');
+      dataObj['free'] = this.availableSpace.free;
+      dataObj['total'] = this.availableSpace.total;
+      dataObj['used'] = this.availableSpace.used;
+      dataObj['usedPercentage'] = this.availableSpace.usedPercentage;
 
-      var data = Array(this.model.get('row'))
-      var t = 0
-      data.forEach(function (row) {
-        row['Details'] = null
-        row['infos1'] = 'infos1_' + t
-        row['infos2'] = 'infos2_' + t
-        row['infos3'] = 'infos3_' + t
+      var data = Array(dataObj);
 
-      })
       console.log(data)
 
       var columnsDefs = [{
@@ -361,22 +393,73 @@ define([
           maxWidth: 500
         },
         {
-          field: 'infos1',
-          headerName: "infos1",
+          field: 'usedPercentage',
+          headerName: "disk occupation",
           hide: true,
-          maxWidth: 500
+          maxWidth: 500,
+          cellRenderer: function (params) {
+            var divContainer = document.createElement('div');
+            var divContent = document.createElement('div');
+
+            divContainer.style.width = '100%';
+            divContainer.style.height = '100%';
+            divContainer.style.boxSizing = 'border-box';
+            divContainer.style.border = 'solid 1px black';
+            divContent.style.height = '100%';
+            switch(true) {
+              case (params.data.usedPercentage >= 90) : {
+                divContent.style.backgroundColor = 'Red';
+                break;
+              }
+              case (70 < params.data.usedPercentage < 90) : {
+                divContent.style.backgroundColor = 'Yellow';
+                break;
+              }
+              default : {
+                divContent.style.backgroundColor = 'Green';
+                break;
+              }
+
+            }
+            
+            divContent.style.textAlign = 'center';
+            divContent.style.width = params.data.usedPercentage+'%';
+            divContent.innerHTML = params.data.usedPercentage+'%';
+            divContainer.append(divContent);
+            return divContainer;
+          }
         },
         {
-          field: 'infos2',
-          headerName: "infos2",
+          field: 'free',
+          headerName: "free size",
           hide: true,
-          maxWidth: 500
+          maxWidth: 500,
+          valueGetter : function(params) {
+            var tmpSpace = params.data.free / (1024 * 1024)
+            if (tmpSpace >= (1024 * 1024)) {
+              return (tmpSpace / (1024 * 1024)).toFixed(2) + ' Tb';
+            } else if (tmpSpace >= 1024) {
+              return (tmpSpace / 1024).toFixed(2) + ' Gb';
+            } else {
+              return (tmpSpace).toFixed(2) + ' Mb';
+            }
+          }
         },
         {
-          field: 'infos3',
-          headerName: "infos3",
+          field: 'total',
+          headerName: "total size",
           hide: true,
-          maxWidth: 500
+          maxWidth: 500,
+          valueGetter : function(params) {
+            var tmpSpace = params.data.total / (1024 * 1024)
+            if (tmpSpace >= (1024 * 1024)) {
+              return (tmpSpace / (1024 * 1024)).toFixed(2) + ' Tb';
+            } else if (tmpSpace >= 1024) {
+              return (tmpSpace / 1024).toFixed(2) + ' Gb';
+            } else {
+              return (tmpSpace).toFixed(2) + ' Mb';
+            }
+          }
         },
         {
           field: 'Details',
@@ -384,7 +467,7 @@ define([
           headerCellTemplate: function () {
             var eCell = document.createElement('span');
             var btnElem = '<button class="js-btndetailssession btn btn-primary start"><i class="glyphicon glyphicon-plus"></i><span></span></button>';
-            if (_this.did === false) {
+            if (_this.showHiddenCols === false) {
               btnElem = '<button class="js-btndetailssession btn btn-primary start"><i class="glyphicon glyphicon-minus"></i><span></span></button>'
             }
             eCell.innerHTML =
