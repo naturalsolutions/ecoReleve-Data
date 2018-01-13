@@ -50,16 +50,16 @@ def dateFromExif(imagePath):
         if tag in ('Image DateTime'):
             theDate = str(tagsExif[tag]).encode(
                 'utf8').decode(sys.stdout.encoding)
-            theDate += ".000"
+            # theDate += ".000"
             theDate = theDate.replace(":", "-", 2)
-            theDate = datetime.datetime.strptime(
-                theDate, "%Y-%m-%d %H:%M:%S.%f")
+            # theDate = datetime.datetime.strptime(theDate, "%Y-%m-%d %H:%M:%S.%f")
+            theDate = datetime.datetime.strptime(theDate, "%Y-%m-%d %H:%M:%S")
     if(theDate == ""):
         theDate = None
     return theDate
 
 
-def checkDate(exifDate, startDate, endDate):
+def checkDate(exifDate, jetLag, startDate, endDate):
     newStartDate = time.strptime(startDate, "%Y-%m-%d %H:%M:%S")
     if(endDate == "0000-00-00 00:00:00"):
         newEndDate = time.strptime(str(datetime.datetime.now().strftime(
@@ -69,7 +69,15 @@ def checkDate(exifDate, startDate, endDate):
     if(exifDate == None):
         timePhoto = time.strptime("1985-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
     else:
-        timePhoto = time.strptime(str(exifDate), "%Y-%m-%d %H:%M:%S")
+        jetLagArray = jetLag['hours'].split(':')
+        if jetLag['operator'] == '+':
+            operator = 1
+        if jetLag['operator'] == '-':
+            operator = -1
+        dateOrigine = datetime.datetime.strptime(str(exifDate) , "%Y-%m-%d %H:%M:%S")
+        dateDecall = dateOrigine + datetime.timedelta(hours = operator*int(jetLagArray[0]) , minutes = operator*int(jetLagArray[1]), seconds = operator*int(jetLagArray[2]) )
+        timePhoto = time.strptime( dateDecall.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
+        # timePhoto = time.strptime(str(exifDate), "%Y-%m-%d %H:%M:%S") + datetime.timedelta(hours = operator*int(jetLagArray[0]) , minutes = operator*int(jetLagArray[1]), seconds = operator*int(jetLagArray[2]) )
     if(timePhoto >= newStartDate and timePhoto <= newEndDate):
         return True
     else:
@@ -91,7 +99,10 @@ def unzip(zipFilePath, destFolder, fk_sensor, startDate, endDate, objMetaData):
                     fd.write(zfile.read(name))
                 fd.close()
                 # ici on peut test
-                datePhoto = dateFromExif(destFolder + str(name))
+                exifDate = dateFromExif(destFolder + str(name))
+                dateOrigine = datetime.datetime.strptime(str(exifDate) , "%Y-%m-%d %H:%M:%S")
+                dateDecall = dateOrigine + datetime.timedelta(hours = operator*int(jetLagArray[0]) , minutes = operator*int(jetLagArray[1]), seconds = operator*int(jetLagArray[2]) )
+                datePhoto = dateDecall.strftime("%Y-%m-%d %H:%M:%S")
                 if(checkDate(datePhoto, startDate, endDate)):
                     AddPhotoOnSQL(fk_sensor, destFolder, name, str(
                         extType[len(extType) - 1]), datePhoto)
@@ -101,6 +112,16 @@ def unzip(zipFilePath, destFolder, fk_sensor, startDate, endDate, objMetaData):
                     os.remove(destFolder + str(name))
                     messageErrorFiles += str(name) + \
                         'Date not valid (' + str(datePhoto) + ') <BR>'
+                # datePhoto = dateFromExif(destFolder + str(name))
+                # if(checkDate(datePhoto, startDate, endDate)):
+                #     AddPhotoOnSQL(fk_sensor, destFolder, name, str(
+                #         extType[len(extType) - 1]), datePhoto)
+                #     resizePhoto(str(destFolder) + str(name))
+                #     nbFilesInserted += 1
+                # else:
+                #     os.remove(destFolder + str(name))
+                #     messageErrorFiles += str(name) + \
+                #         'Date not valid (' + str(datePhoto) + ') <BR>'
             else:
                 messageErrorFiles += "File : " + \
                     str(name) + " is already on the server <BR>"
