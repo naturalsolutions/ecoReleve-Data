@@ -63,7 +63,8 @@ define([
       if(this.model.get('uiGridConfs')){
         this.model.get('uiGridConfs').map(function(uiGridConf){
           //uglify hack
-          var tmp =  'rg' + uiGridConf.label + 'Grid';
+          
+          var tmp =  'rg' + uiGridConf.label.replace(' ','') + 'Grid';
           var obj = {};
           obj[tmp] = '.js-rg-' + uiGridConf.name + '-grid';
           _this.addRegions(obj);
