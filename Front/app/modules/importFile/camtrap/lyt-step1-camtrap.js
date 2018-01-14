@@ -51,6 +51,7 @@ define([
         min: 'Nb File:',
         max: 'Nb Files:'
       }
+      this.nbFilesInError = [];
       this.firstRendered = true;
 
       this.model = new Backbone.Model();
@@ -93,20 +94,96 @@ define([
       this.wExif.onmessage = function (event) {
         _this.nbFilesParsed += 1;
         _this.progressBarElem.style.width = _this.progress(_this.nbFilesParsed,_this.nbFilesToParse);
-        _this.r.files.find(function (elem) {
-          if (elem.uniqueIdentifier === event.data.file) {
-            elem.dateFind = _this.parseDateToIso(event.data.date);
-            if (_this.nbFilesParsed === _this.nbFilesToParse) {
-              _this.nbFilesParsed = 0;
-              _this.nbFilesToParse = 0;
-              setTimeout(function () {
-                $('#myPleaseWait').modal('hide');
-                // _this.progress();
-              }, 500);
+        var workerMessage = {
+          uniqueIdentifier : event.data.uniqueIdentifier,
+          fileName : event.data.fileName,
+          cid : event.data.cid,
+          date : event.data.date,
+          error : event.data.error
+         };
+        if(workerMessage.error != null) {       
+          _this.removeFileInResumableFileList(workerMessage);
+        }
+        else if(workerMessage.date != null) {
+          _this.addDateParsedInResumableFile(workerMessage);
+        }
+
+        if (_this.nbFilesParsed === _this.nbFilesToParse) {
+          _this.nbFilesParsed = 0;
+          _this.nbFilesToParse = 0;
+          setTimeout(function () {
+            $('#myPleaseWait').modal('hide');
+            if(_this.nbFilesInError.length) {
+              _this.displaySwalFilesError(_this.nbFilesInError);
             }
-          }
-        });
+          }, 500);
+        }
       };
+    },
+
+    addDateParsedInResumableFile : function( message ) {    
+        var dateFind = message.date; 
+        var resumalbeFile = this.r.files.find(function (elem) {
+        if (elem.uniqueIdentifier === message.uniqueIdentifier) {
+          return elem;
+        }
+      });
+      resumalbeFile.dateFind = this.parseDateToIso(dateFind);
+    },
+
+    removeFileInResumableFileList : function(message) {
+      var _this = this;
+      this.nbFilesInError.push(message);
+      var elemToDelete = null
+      elemToDelete =  this.r.files.find(function (elem) {
+        if (elem.uniqueIdentifier === message.uniqueIdentifier) {
+          return elem;
+        }
+      });
+      if(elemToDelete != null) {
+        this.r.removeFile(elemToDelete)
+      }
+      this.collectionFiles.get(message.cid).destroy();
+    },
+
+    displaySwalFilesError : function(filesErrorList) {
+      var text = '';
+      var title = '';
+      var listFiles = '';
+      var nbFiles = filesErrorList.length;
+
+      text += 'Please contact an admin<BR>'
+      if(nbFiles > 0) {
+        if(nbFiles === 1 ){
+          title += 'Error on '+nbFiles+' file reading'
+          text += 'Something goes wrong when we try to get the exif date of this file (it was removed from the files selection) :<BR>'
+        }
+        else {
+          title += 'Error on '+nbFiles+' files reading'
+          text += 'Something goes wrong when we try to get the exif date of this files (they were removed from the files selection) :<BR>'
+        }
+      }
+     
+      for( var i = 0 ; i < nbFiles ; i++) {
+        listFiles +=  filesErrorList[i].fileName+'<BR>';
+      }
+
+      text += listFiles;
+      Swal({
+        title: title,
+        text: text,
+        type: 'error',
+        html : true,
+        showCancelButton: false,
+        confirmButtonText: 'OK',
+        closeOnCancel: true
+      })
+      this.eraseFilesInErrorArray();
+
+    },
+
+    eraseFilesInErrorArray : function() {
+      this.nbFilesInError = [];
     },
 
     removeInResumable: function (model, collection, options) {
@@ -182,6 +259,9 @@ define([
         if (typeof (event) === 'undefined')
           return;
         var imagePart = null;
+        var modelTmp = new Backbone.Model({
+          resumableFile: file
+        });
         if (file.file.slice) {
           imagePart = file.file.slice(0, 131072);
         } else if (file.file.webkitSlice) {
@@ -193,16 +273,18 @@ define([
         }
         var binReader = new FileReader();
         binReader.onload = function (event) {
-          _this.wExif.postMessage({
-            fileName: file.uniqueIdentifier,
+          var message;
+          message = {
+            uniqueIdentifier: file.uniqueIdentifier,
+            fileName : file.fileName,
+            cid : modelTmp.cid,
             binString: binReader.result
-          });
+          }
+          _this.wExif.postMessage(message);
         };
         binReader.readAsBinaryString(imagePart);
 
-        _this.collectionFiles.add(new Backbone.Model({
-          resumableFile: file
-        }));
+        _this.collectionFiles.add(modelTmp);
       });
 
       this.r.on('cancel', function () {

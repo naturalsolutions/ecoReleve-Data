@@ -35,13 +35,20 @@ self.getEndianFromNav = function() {
     return new Int16Array(buffer)[0] === 256;
 }
 
-self.init = function(fileName,data) {
+self.init = function(options) {
+    self.message = {
+        uniqueIdentifier: options.uniqueIdentifier,
+        fileName : options.fileName,
+        cid : options.cid,
+        error : null
+    };
+    var data = options.binString;
     littleEndian = false;
     isJPEG = false;
     TIFFstart = 0;
     tiffSize = 0;
     TIFFstart = self.findStart(data);
-    self.fileName = fileName;
+
     if(TIFFstart === -1 )
         throw new exifParseError("Le buffer doit contenir la chaine Exif");
 
@@ -56,9 +63,9 @@ self.init = function(fileName,data) {
 }
 
 self.exifParseError = function(msg) {
-    this.message = 'Error :'+msg;
+    this.errorMessage = 'Error :'+msg;
     this.toString = function() {
-       return this.message;
+       return this.errorMessage;
     };
 }
 
@@ -129,12 +136,11 @@ self.parseExif = function() {
         if(tagRef == 0x0132  ) {
             if(format === 2)
             {
-                var test = new TextDecoder('utf-8');
-                //console.log("file : "+self.fileName+" date : "+test.decode(new Uint8Array(self.buffer, valueOrOffset+TIFFstart+8,20)) )
-                postMessage({
-                    file: self.fileName,
-                    date: test.decode(new Uint8Array(self.buffer, valueOrOffset+TIFFstart+8,components-1))
-                })
+                var textDecoder = new TextDecoder('utf-8');
+                self.message.date = textDecoder.decode(new Uint8Array(self.buffer, valueOrOffset+TIFFstart+8,components-1));
+                self.message.error = null;
+                //console.log("file : "+self.uniqueIdentifier+" date : "+textDecoder.decode(new Uint8Array(self.buffer, valueOrOffset+TIFFstart+8,20)) )
+                postMessage(self.message)
             }
            /* 
             console.log("value",value)*/
@@ -157,7 +163,7 @@ self.getUint32 = function (offset) {
 
 
 self.onmessage = function(event) {
-    self.init(event.data.fileName,event.data.binString);
+    self.init(event.data);
     try {
         self.checkJPEG();
         self.findAPP1();
@@ -166,11 +172,14 @@ self.onmessage = function(event) {
         self.findSizeExif();
         self.parseExif();
      } catch (e) {
-         console.error(e);
+         var error = null;
         if (e instanceof exifParseError) {
-           return EXIF_INVALID;
+            error = EXIF_INVALID;
         } else {
-           return EXIF_UNKNOWN_ERROR;
+            error = EXIF_UNKNOWN_ERROR;
         }
+        self.message.error = error
+        postMessage(self.message)
+
      }
 };
