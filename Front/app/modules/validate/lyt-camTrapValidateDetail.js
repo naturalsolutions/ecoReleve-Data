@@ -1113,6 +1113,13 @@ define([
         console.log("je leave le modal etc etc etc");
         this.leaveModal();
       }
+      var parent$elem = e.currentTarget.parentElement
+      var allSpan = parent$elem.getElementsByTagName('span')
+      for( var i = 0 ; i < allSpan.length ; i++ ) {
+        if(allSpan[i].className.indexOf('selected') > -1 ) {
+          allSpan[i].className = allSpan[i].className.replace(' selected','')
+        }
+      }
 
       if ($elem.hasClass('accepted')) {
         myFilter.validated = 2;
@@ -1132,6 +1139,7 @@ define([
         this.ui.paginator.find('.backgrid-paginator').css('visibility', 'visible');
 
       }
+      $elem.addClass('selected');
       if (!$elem.hasClass('allphotos')) {
         this.initCollectionFiltered(myFilter);
       }
