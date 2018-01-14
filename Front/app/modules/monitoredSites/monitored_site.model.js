@@ -43,6 +43,10 @@ define([
           name: 'stations',
           label: 'Stations'
         },
+        {
+          name: 'camera_trap',
+          label: 'Camera Trap'
+        },
       ],
 
       equipmentColumnDefs: [{
@@ -59,6 +63,23 @@ define([
       },{
         field: 'UnicIdentifier',
         headerName: 'Identifier',
+      }],
+
+      cameraTrapColumnDefs: [{
+        field: 'sessionID',
+        headerName: 'ID',
+      },{
+        field: 'UnicIdentifier',
+        headerName: 'IDENTIFIER',
+      },{
+        field: 'StartDate',
+        headerName: 'START DATE',
+      },{
+        field: 'EndDate',
+        headerName: 'END DATE',
+      },{
+        field: 'nbPhotos',
+        headerName: 'NB PHOTOS',
       }],
 
       stationsColumnDefs: [{
