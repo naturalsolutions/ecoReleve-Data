@@ -17,13 +17,14 @@ from sqlalchemy import (
     event)
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-from ..GenericObjets.DataBaseObjects import ConfiguredDbObjectMapped, DbObject
+# from ..GenericObjets.DataBaseObjects import ConfiguredDbObjectMapped, DbObject
+from ..GenericObjets.OrmModelsMixin import HasStaticProperties
 
 sensor_schema = dbConfig['sensor_schema']
 dialect = dbConfig['dialect']
 
 
-class Import(Base, DbObject, ConfiguredDbObjectMapped):
+class Import(HasStaticProperties, Base):
     moduleGridName = 'ImportHistoryFilter'
 
     __tablename__ = 'Import'
