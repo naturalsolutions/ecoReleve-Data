@@ -1,5 +1,6 @@
 from ..Models import (
     Individual,
+    IndividualDynPropValue,
     Individual_Location,
     Sensor,
     SensorType,
@@ -14,17 +15,29 @@ from datetime import datetime
 from sqlalchemy import select, join, desc
 from collections import OrderedDict
 from ..controllers.security import RootCore, Resource, SecurityRoot, context_permissions
-from . import DynamicObjectView, DynamicObjectCollectionView
+from . import DynamicObjectView, DynamicObjectCollectionView, DynamicObjectValue, DynamicObjectValues
 from pyramid.traversal import find_root
+
+class IndividualValueView(DynamicObjectValue):
+    model = IndividualDynPropValue
+    item = None
+
+    def retrieve(self):
+        pass
+
+
+class IndividualValuesView(DynamicObjectValues):
+    model = IndividualDynPropValue
+    item = IndividualValueView
 
 
 class IndividualView(DynamicObjectView):
-
     model = Individual
 
     def __init__(self, ref, parent):
         DynamicObjectView.__init__(self, ref, parent)
         self.add_child('locations', IndividualLocationsView)
+        self.add_child('history', IndividualValuesView)
         self.actions = {'equipment': self.getEquipment}
 
     def __getitem__(self, ref):
@@ -240,3 +253,4 @@ class IndividualLocationsView(SecurityRoot):
 
 
 RootCore.listChildren.append(('individuals', IndividualsView))
+RootCore.listChildren.append(('individualsValues', IndividualValuesView))
