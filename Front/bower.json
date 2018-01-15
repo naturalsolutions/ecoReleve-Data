@@ -25,7 +25,7 @@
     "fancytree": "2.9.0",
     "tooltipster": "4.2.5",
     "chartjs": "1.0.2",
-    "reneco-fonts": "1.2.x",
+    "reneco-fonts": "*",
     "ag-grid": "^5.2.0",
     "NaturalJS_Filter": "1.1.4",
     "webui-popover": "2.1.15",
