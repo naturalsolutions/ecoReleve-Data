@@ -6,7 +6,7 @@ import os
 import sys
 import uuid
 import shutil
-from ..Models import CamTrap
+from ..Models import CamTrap, Import
 import zipfile
 import exifread
 from pyramid import threadlocal
@@ -137,14 +137,27 @@ def unzip(zipFilePath, destFolder, fk_sensor, startDate, endDate, objMetaData):
     return messageErrorFiles, nbFilesTotal, nbFilesInserted
 
 
-def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation):
+def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endDate,user):
     session = threadlocal.get_current_request().dbsession
+
     if(not path.endswith('\\')):
         path += '\\'
     currentPhoto = CamTrap(fk_sensor=fk_sensor, path=str(path), name=str(
         name), extension='.jpg', date_creation=date_creation, note=5)
     session.add(currentPhoto)
     session.flush()
+    if currentPhoto.pk_id:
+        currentImport = Import(
+            ImportFileName=str(name),
+            ImportType = 'CAMTRAP',
+            FK_User = user,
+            nbRows = 1,
+            nbInserted = 1,
+            maxDate= endDate,
+            minDate = startDate
+            )
+        session.add(currentImport)
+        session.flush()
     return currentPhoto.pk_id
 
 
