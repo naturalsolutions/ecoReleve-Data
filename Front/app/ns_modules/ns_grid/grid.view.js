@@ -385,7 +385,7 @@ define([
             break;
           case 'TextArea':
             col.cellEditor = Editors.TextEditor;
-            col.cellRenderer = Renderers.TextRenderer;
+            col.cellRenderer = Renderers.TextAreaRenderer;
             break;
           case 'Select':
             col.cellEditor = Editors.SelectEditor;
