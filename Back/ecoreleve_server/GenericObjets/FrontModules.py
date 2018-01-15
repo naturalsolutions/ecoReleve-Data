@@ -307,7 +307,7 @@ class ModuleForms(Base):
                 'lng': threadlocal.get_current_request().authenticated_userid['userlanguage'],
                 'displayValueName': 'valueTranslated'}
             self.dto['options']['startId'] = self.Options
-            self.dto['options']['iconFont'] = 'reneco reneco-thesaurus'
+            self.dto['options']['iconFont'] = 'reneco reneco-THE-thesaurus'
 
     def InputAutocomplete(self):
         if self.Options is not None and self.Options != '':
@@ -481,7 +481,7 @@ class ModuleGrids (Base):
                 'displayValueName': 'valueTranslated'}
             filter_['options']['startId'] = self.Options
             filter_['options']['ValidationRealTime'] = False
-            filter_['options']['iconFont'] = 'reneco reneco-thesaurus'
+            filter_['options']['iconFont'] = 'reneco reneco-THE-thesaurus'
 
         if (self.FilterType == 'AutocompleteEditor'
                 and self.Options is not None and self.Options != ''):
