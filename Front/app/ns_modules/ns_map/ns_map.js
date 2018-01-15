@@ -309,6 +309,11 @@ define([
         this.addClusterLayers();
       }
       this.initOverlayRegions();
+
+      if(this.drawable){
+        this.initDrawLayer()
+      }
+      
       this.initErrorLayer();
       this.displayError(this.geoJson);
     },
