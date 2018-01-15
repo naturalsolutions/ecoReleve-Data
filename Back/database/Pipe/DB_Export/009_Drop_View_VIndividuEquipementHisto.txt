@@ -1,0 +1,9 @@
+DROP VIEW [dbo].[VIndividuEquipementHisto]
+GO
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('9_Drop_View_VIndividuEquipementHisto',GETDATE(),(SELECT db_name()))
+
+
+GO
