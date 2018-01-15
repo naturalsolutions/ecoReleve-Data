@@ -241,7 +241,7 @@ class IndividualList(CollectionEngine):
                 query = self.whereInEquipement(query, [criteriaObj])
             else:
                 query = query.where(eval_.eval_binary_expr(
-                    Sensor.FK_SensorType, criteriaObj['Operator'], criteriaObj['Value']))
+                    Sensor._type_id, criteriaObj['Operator'], criteriaObj['Value']))
 
         if curProp == 'Status_':
             StatusTable = Base.metadata.tables['IndividualStatus']
@@ -350,11 +350,10 @@ class IndividualList(CollectionEngine):
         if criteria_column == 'FK_Sensor':
             criteria_column = Sensor.UnicIdentifier
         if criteria_column == 'FK_SensorType':
-            criteria_column = Sensor.FK_SensorType
+            criteria_column = Sensor._type_id
 
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = outerjoin(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
-        joinTable = outerjoin(joinTable, SensorType, Sensor.FK_SensorType == SensorType.ID)
         startDate = datetime.now()
 
         if self.startDate:

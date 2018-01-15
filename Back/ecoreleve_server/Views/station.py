@@ -1,6 +1,5 @@
 from ..Models import (
     Station as StationDB,
-    StationType,
     Station_FieldWorker,
     StationList,
     MonitoredSitePosition,
@@ -187,25 +186,25 @@ class StationsView(DynamicObjectCollectionView):
                 'exceed': exceed}
         return data
 
-    def insert(self):
-        session = self.request.dbsession
-        data = {}
-        for items, value in self.request.json_body.items():
-            data[items] = value
+    # def insert(self):
+    #     session = self.request.dbsession
+    #     data = {}
+    #     for items, value in self.request.json_body.items():
+    #         data[items] = value
 
-        newSta = StationDB(
-            FK_StationType=data['FK_StationType'],
-            creator=self.request.authenticated_userid['iss'])
-        newSta.StationType = session.query(StationType).filter(
-            StationType.ID == data['FK_StationType']).first()
-        newSta.init_on_load()
+    #     newSta = StationDB(
+    #         FK_StationType=data['FK_StationType'],
+    #         creator=self.request.authenticated_userid['iss'])
+    #     newSta.StationType = session.query(StationType).filter(
+    #         StationType.ID == data['FK_StationType']).first()
+    #     newSta.init_on_load()
 
-        newSta.updateFromJSON(data)
-        session.add(newSta)
-        session.flush()
-        msg = {'ID': newSta.ID}
+    #     newSta.updateFromJSON(data)
+    #     session.add(newSta)
+    #     session.flush()
+    #     msg = {'ID': newSta.ID}
 
-        return msg
+    #     return msg
 
     def insertMany(self):
         session = self.request.dbsession
@@ -285,7 +284,7 @@ class StationsView(DynamicObjectCollectionView):
 
         if len(data_to_insert) != 0:
             for sta in data_to_insert:
-                curSta = model(FK_StationType=4)
+                curSta = model(type_id=4)
                 curSta.init_on_load()
                 curDate = datetime.strptime(
                     sta['StationDate'], "%Y-%m-%dT%H:%M:%S.%fZ")

@@ -11,8 +11,8 @@ from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore, context_permissions
 from . import DynamicObjectView, DynamicObjectCollectionView, DynamicObjectValue, DynamicObjectValues
 
+SensorDynPropValue = Sensor.DynamicValuesClass
 
-prefix = 'sensors'
 
 class SensorValueView(DynamicObjectValue):
     model = SensorDynPropValue
