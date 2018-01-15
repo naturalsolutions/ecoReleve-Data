@@ -536,3 +536,4 @@ def add_routes(config):
     config.add_route('sensors/statut', 'ecoReleve-Core/sensors/{type}/statut')
 
     config.add_route('cameratrap', 'ecoReleve-Core/photos/')
+    config.add_route('getSessionZip', 'ecoReleve-Core/photos/export/')
