@@ -404,10 +404,10 @@ class SensorDatasByType(CustomView):
             dateOrigine = datetime.datetime.strptime(str(exifDate) , "%Y-%m-%d %H:%M:%S")
             dateDecall = dateOrigine + datetime.timedelta(hours = operator*int(jetLagArray[0]) , minutes = operator*int(jetLagArray[1]), seconds = operator*int(jetLagArray[2]) )
             datePhoto = dateDecall
-            print("youhouuu"+str(datePhoto)+"ououououuo")
+            user = self.request.authenticated_userid['iss']
             if(checkDate(datePhoto,jetLag, str(self.request.POST['startDate']), str(self.request.POST['endDate']))):
                 AddPhotoOnSQL(fk_sensor, str(uri), str(
-                    self.request.POST['resumableFilename']), str(extType[len(extType) - 1]), datePhoto)
+                    self.request.POST['resumableFilename']), str(extType[len(extType) - 1]), datePhoto,str(self.request.POST['startDate']),str(self.request.POST['endDate']),user )
                 # handleAllMetadatas(self,metaDataInfo)
                 callExiv2(
                     self = self,
