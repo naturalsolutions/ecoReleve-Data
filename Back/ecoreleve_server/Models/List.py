@@ -220,7 +220,7 @@ class IndividualList(ListObjectWithDynProp):
                 query = self.whereInEquipement(query, [criteriaObj])
             else:
                 query = query.where(eval_.eval_binary_expr(
-                    SensorType.Name, criteriaObj['Operator'], criteriaObj['Value']))
+                    Sensor.FK_SensorType, criteriaObj['Operator'], criteriaObj['Value']))
 
         if curProp == 'Status_':
             StatusTable = Base.metadata.tables['IndividualStatus']
@@ -248,7 +248,7 @@ class IndividualList(ListObjectWithDynProp):
             if obj['Column'] == 'frequency':
                 query = self.whereInEquipementVHF(query, criteria)
 
-            if obj['Column'] == 'FK_Sensor':
+            if obj['Column'] in ['FK_Sensor', 'FK_SensorType']:
                 query = self.whereInEquipement(query, criteria)
 
         return query
@@ -322,11 +322,18 @@ class IndividualList(ListObjectWithDynProp):
 
     def whereInEquipement(self, fullQueryJoin, criteria):
         sensorObj = list(
-            filter(lambda x: 'FK_Sensor' == x['Column'], criteria))[0]
+            filter(lambda x: x['Column'] in ['FK_Sensor', 'FK_SensorType'], criteria))[0]
         sensor = sensorObj['Value']
+        criteria_column =  sensorObj['Column']
+
+        if criteria_column == 'FK_Sensor':
+            criteria_column = Sensor.UnicIdentifier
+        if criteria_column == 'FK_SensorType':
+            criteria_column = Sensor.FK_SensorType
 
         table = Base.metadata.tables['IndividualEquipment']
         joinTable = outerjoin(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
+        joinTable = outerjoin(joinTable, SensorType, Sensor.FK_SensorType == SensorType.ID)
         startDate = datetime.now()
 
         if self.startDate:
@@ -346,7 +353,7 @@ class IndividualList(ListObjectWithDynProp):
 
         else:
             subSelect = subSelect.where(eval_.eval_binary_expr(
-                Sensor.UnicIdentifier, sensorObj['Operator'], sensor))
+                criteria_column, sensorObj['Operator'], sensor))
             if not self.history:
                 subSelect = subSelect.where(
                     or_(table.c['EndDate'] >= startDate, table.c['EndDate'] == None))

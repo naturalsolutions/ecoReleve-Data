@@ -42,7 +42,7 @@ define([
 
       var dictCSS = {
         'individuals':'reneco reneco-bustard',
-        'sensors': 'reneco reneco-emitters',
+        'sensors': 'reneco reneco-ECOL-emitters',
         'monitoredSites': 'reneco reneco-site',
       };
       this.model.set('icon',dictCSS[this.objectName]);

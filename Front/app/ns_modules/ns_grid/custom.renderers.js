@@ -659,11 +659,15 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
       var TextAreaRenderer = function(params) {
         var value = params.value;
         var gui = $(params.eGridCell);
-        gui.attr('title', value);
-        gui.attr('data-original-title', value);
-        
-        gui.tooltip({trigger:'hover', placement:'auto left'});
-        return value;
+        if(value){
+          gui.attr('title', value);
+          gui.attr('data-original-title', value);
+          
+          gui.tooltip({trigger:'hover', placement:'auto left', container: '.ag-grid-container'});
+          return value;
+        } else {
+          return '';
+        }
       };
 
       Renderers.NumberRenderer = NumberRenderer;
