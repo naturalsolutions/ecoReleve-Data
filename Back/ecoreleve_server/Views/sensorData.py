@@ -7,7 +7,7 @@ import pandas as pd
 import datetime
 from . import CustomView
 from ..controllers.security import RootCore, context_permissions
-from ..Models import Base, dbConfig, graphDataDate, CamTrap, ArgosGps, Gsm, Rfid, Equipment, User, MonitoredSite
+from ..Models import Base, dbConfig, graphDataDate, CamTrap, ArgosGps, Gsm, Rfid, Equipment, User, MonitoredSite, MetaData
 import numpy as np
 from ..utils.distance import haversine
 from traceback import print_exc
@@ -375,7 +375,9 @@ class SensorDatasByType(CustomView):
         if not self.request.POST :
             return self.checkChunk()
         metaDataInfo = self.buildMetaDataInfoFromErdData()
+        cmdMetaDataInfo = buildCmdMetaDatasAtImport(self,metaDataInfo)
         flagDate = False
+        flagError = False
         pathPrefix = dbConfig['camTrap']['path']
         pathPost = str(self.request.POST['path'])
         jetLag = {}
@@ -383,6 +385,7 @@ class SensorDatasByType(CustomView):
         jetLag['hours'] = str(self.request.POST['jetLagHours'])
         fk_sensor = int(self.request.POST['id'])
         messageDate = ""
+    
 
         uri = pathPrefix + '\\' + pathPost
         extType = self.request.POST['resumableFilename'].split('.')
@@ -406,17 +409,29 @@ class SensorDatasByType(CustomView):
             datePhoto = dateDecall
             user = self.request.authenticated_userid['iss']
             if(checkDate(datePhoto,jetLag, str(self.request.POST['startDate']), str(self.request.POST['endDate']))):
-                AddPhotoOnSQL(fk_sensor, str(uri), str(
-                    self.request.POST['resumableFilename']), str(extType[len(extType) - 1]), datePhoto,str(self.request.POST['startDate']),str(self.request.POST['endDate']),user )
-                # handleAllMetadatas(self,metaDataInfo)
-                callExiv2(
-                    self = self,
-                    cmd = buildCmdMetaDatasAtImport(self,metaDataInfo),
-                    listFiles = [str(uri)+'\\'+str(self.request.POST['resumableFilename'])]
+                try:
+                    AddPhotoOnSQL(
+                        fk_sensor, str(uri),
+                        str(self.request.POST['resumableFilename']),
+                        str(extType[len(extType) - 1]),
+                    datePhoto,str(self.request.POST['startDate']),
+                    str(self.request.POST['endDate']),
+                    user,
+                    cmdMetaDataInfo
                     )
-                resizePhoto(str(uri) + "\\" +
-                            str(self.request.POST['resumableFilename']))
-                messageDate = "ok"
+                    # handleAllMetadatas(self,metaDataInfo)
+                    callExiv2(
+                        self = self,
+                        cmd = buildCmdMetaDatasAtImport(self,metaDataInfo),
+                        listFiles = [str(uri)+'\\'+str(self.request.POST['resumableFilename'])]
+                        )
+                    resizePhoto(str(uri) + "\\" +
+                                str(self.request.POST['resumableFilename']))
+                    messageDate = "ok"
+                except Exception as e:
+                    flagError = True
+                    os.remove(uri + '\\' + str(self.request.POST['resumableFilename']))
+                    messageDate = 'something goes wrong when insert in database'
             else:
                 os.remove(uri + '\\' + str(self.request.POST['resumableFilename']))
                 flagDate = True
@@ -431,7 +446,7 @@ class SensorDatasByType(CustomView):
                     shutil.copyfileobj(inputFile, output_file)
                 output_file.close()
 
-        if(flagDate):
+        if(flagDate or flagError):
             self.request.response.status_code = 415
             self.request.response.text = messageDate
         else:

@@ -8,6 +8,7 @@ from sqlalchemy import (
     Numeric,
     Sequence,
     String,
+    Unicode,
     func,
     UniqueConstraint,
     ForeignKey,
@@ -213,5 +214,16 @@ class CamTrap(Base):
     note = Column(Integer, nullable=False)
     stationId = Column(Integer, nullable= True)
     __table_args__ = (
-        {'schema': sensor_schema}
+        {'schema': sensor_schema, 'implicit_returning': False}
     )
+
+
+class MetaData(Base):
+    __tablename__ = 'MetaData'
+    Id = Column(Integer , Sequence('seq_MetaData_Id'), primary_key=True)
+    FK_CamTrap = Column('FK_CamTrap', Integer, ForeignKey(dbConfig['sensor_schema']+'.TcameraTrap.pk_id'))
+    CommandLine = Column(Unicode(None) , nullable = True)
+
+    __table_args__ = ({'schema': sensor_schema,
+                       'implicit_returning': False
+                       })

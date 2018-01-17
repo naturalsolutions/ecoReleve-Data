@@ -6,7 +6,7 @@ import os
 import sys
 import uuid
 import shutil
-from ..Models import CamTrap, Import
+from ..Models import CamTrap, Import, MetaData
 import zipfile
 import exifread
 from pyramid import threadlocal
@@ -137,28 +137,44 @@ def unzip(zipFilePath, destFolder, fk_sensor, startDate, endDate, objMetaData):
     return messageErrorFiles, nbFilesTotal, nbFilesInserted
 
 
-def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endDate,user):
+def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endDate,user,cmdMetaData):
+    # raise
     session = threadlocal.get_current_request().dbsession
 
+    idReturned = None
     if(not path.endswith('\\')):
         path += '\\'
-    currentPhoto = CamTrap(fk_sensor=fk_sensor, path=str(path), name=str(
-        name), extension='.jpg', date_creation=date_creation, note=5)
-    session.add(currentPhoto)
-    session.flush()
-    if currentPhoto.pk_id:
+    try: 
         currentImport = Import(
-            ImportFileName=str(name),
-            ImportType = 'CAMTRAP',
-            FK_User = user,
-            nbRows = 1,
-            nbInserted = 1,
-            maxDate= endDate,
-            minDate = startDate
-            )
+                ImportFileName=str(name),
+                ImportType = 'CAMTRAP',
+                FK_User = user,
+                nbRows = 1,
+                nbInserted = 0,
+                maxDate= endDate,
+                minDate = startDate
+                )
         session.add(currentImport)
         session.flush()
-    return currentPhoto.pk_id
+        if currentImport.ID:
+            currentPhoto = CamTrap(fk_sensor=fk_sensor, path=str(path), name=str(
+                name), extension='.jpg', date_creation=date_creation, note=5)
+            session.add(currentPhoto)
+            session.flush()
+            if currentPhoto.pk_id:
+                currentMetaData = MetaData(
+                    FK_CamTrap=currentPhoto.pk_id ,
+                    CommandLine= ' '.join(cmdMetaData)
+                )
+                session.add(currentMetaData)
+                session.flush()
+                currentImport.nbInserted = 1
+                session.add(currentImport)
+                session.flush()
+                return currentPhoto.pk_id,currentImport.ID,currentPhoto.pk_id
+    except:
+        raise
+    return 
 
 
 def GenName():
