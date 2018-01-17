@@ -1,11 +1,16 @@
 :: ecoReleve-Sensor installation script
-:: Requires Python 3.5, conda and conda-build AND Node with NPM
+:: conda AND Node with NPM
 
-conda install conda-build --yes
-conda env create -f environment.yml
+CALL conda install conda-build --yes
+CALL conda env create -f environment.yml
 
-python setup.py develop
+CALL activate erd_env
+CALL conda install pywin32=220 --yes
+
+CALL python setup.py develop
 
 cd ../Front
-npm install && bower install && grunt dev
 
+CALL npm install
+CALL bower install
+CALL grunt dev
