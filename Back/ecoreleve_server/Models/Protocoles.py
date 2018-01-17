@@ -177,7 +177,7 @@ class Observation(HasDynamicProperties, Base):
                 if len(subObs.SubObservation_children) > 0:
                     flatObs.update(subObs.SubObservation_childrens)
                 subObsList.append(flatObs)
-            values[typeName] = subObsList
+            self.__values__[typeName] = subObsList
         return values
 
     def getDataWithSchema(self, displayMode='edit'):

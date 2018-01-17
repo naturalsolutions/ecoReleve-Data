@@ -76,6 +76,7 @@ class MonitoredSite (HasDynamicProperties, Base):
             for key in lastPos:
                 if key != 'ID':
                     values[key] = lastPos[key]
+        self.__values__.update(values)
         return values
 
     def setValue(self, propertyName, value, useDate=None):

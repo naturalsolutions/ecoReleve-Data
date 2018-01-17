@@ -62,7 +62,10 @@ class Individual (Base, HasDynamicProperties):
 
     @hybrid_property
     def Status_(self):
-        return self._Status_.Status_
+        if self._Status_:
+            return self._Status_.Status_
+        else:
+            return None
 
     @Status_.setter
     def Status_(self, value):

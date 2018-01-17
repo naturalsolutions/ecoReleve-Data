@@ -20,6 +20,7 @@ from pyramid.traversal import find_root
 SensorType = Sensor.TypeClass
 IndividualDynPropValue = Individual.DynamicValuesClass
 
+
 class IndividualValueView(DynamicObjectValue):
     model = IndividualDynPropValue
     item = None
@@ -47,16 +48,6 @@ class IndividualView(DynamicObjectView):
             self.retrieve = self.actions.get(ref)
             return self
         return self.get(ref)
-
-    # def update(self):
-    #     data = self.request.json_body
-    #     self.objectDB.LoadNowValues()
-    #     try:
-    #         self.objectDB.updateFromJSON(data)
-    #         return {}
-    #     except ErrorCheckIndividualCodes as e:
-    #         self.request.response.status_code = 520
-    #         return str(e)
 
     def getEquipment(self):
         table = Base.metadata.tables['IndividualEquipment']

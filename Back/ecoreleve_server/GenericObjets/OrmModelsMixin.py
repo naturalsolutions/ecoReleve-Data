@@ -33,6 +33,7 @@ from .DataBaseObjects import ConfiguredDbObjectMapped
 from sqlalchemy.orm.exc import *
 from sqlalchemy_utils import get_hybrid_properties
 from pyramid import threadlocal
+from sqlalchemy.orm.util import has_identity
 
 
 ANALOG_DYNPROP_TYPES = {'String': 'ValueString',
@@ -220,10 +221,10 @@ class EventRuler(object):
 class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
     def __init__(self, *args, **kwargs):
+        self.__values__ = {}
         ConfiguredDbObjectMapped.__init__(self)
         ORMUtils.__init__(self)
         EventRuler.__init__(self)
-
         self.session = kwargs.get('session', None) or threadlocal.get_current_request(
         ).dbsession if threadlocal.get_current_request() else None
 
@@ -233,18 +234,22 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
         if kwargs.get('session', None):
             del kwargs['session']
         Base.__init__(self, **kwargs)
+        
 
     @orm.reconstructor
     def init_on_load(self):
         self.session = inspect(self).session
+        self.__values__ = {}
 
     def getValues(self):
         ''' return flat data dict '''
-        self.as_dict()
+        self.__values__ = self.as_dict()
+        # return self.__values__
 
     @property
     def values(self):
-        return self.getValues()
+        self.getValues()
+        return self.__values__
 
     @values.setter
     def values(self, dict_):
@@ -252,14 +257,25 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
             self.setValue(prop, value)
 
     def setValue(self, propertyName, value):
-        if hasattr(self, propertyName):
-            setattr(self, propertyName, parser(value))
-        elif propertyName in self.__table__.c:
-            propertyName = class_mapper(inspect(self).class_
-                                        ).get_property_by_column(
-                                            self.__table__.c[propertyName]
-            ).key
-            setattr(self, propertyName, parser(value))
+        if not hasattr(self, propertyName):
+            if propertyName in self.__table__.c:
+                propertyName = class_mapper(inspect(self).class_
+                                            ).get_property_by_column(
+                                                self.__table__.c[propertyName]
+                ).key
+            else:
+                return
+        setattr(self, propertyName, parser(value))
+        self.__values__[propertyName] = value
+
+        # if hasattr(self, propertyName):
+        #     setattr(self, propertyName, parser(value))
+        # elif propertyName in self.__table__.c:
+        #     propertyName = class_mapper(inspect(self).class_
+        #                                 ).get_property_by_column(
+        #                                     self.__table__.c[propertyName]
+        #     ).key
+        #     setattr(self, propertyName, parser(value))
 
     def beforeDelete(self):
         pass
@@ -322,10 +338,16 @@ class HasDynamicProperties(HasStaticProperties):
             create automatically indexes, uniques constraints and view
         history_track parameter (default:True) is used to track new property's value
         and get historization of dynamic properties
+
+        __values__ property represents the current state of object values, is available by "self.values" property 
     '''
     history_track = True
     hasLinkedField = False
     ID = Column(Integer, primary_key=True)
+
+    def __init__(self, *args, **kwargs):
+        HasStaticProperties.__init__(self, *args, **kwargs)
+        self.__values___ = {}
 
     @declared_attr
     def table_type_name(cls):
@@ -530,7 +552,7 @@ class HasDynamicProperties(HasStaticProperties):
         return [row.realValue for row in self._dynamicValues]
 
     def getValues(self):
-        ''' return flat data dict '''
+        '''return flat data dict, retrieve latest values of dynamic properties'''
         dictValues = {}
         values = self.getLatestDynamicValues()
         for value in values:
@@ -538,16 +560,20 @@ class HasDynamicProperties(HasStaticProperties):
             valueName = ANALOG_DYNPROP_TYPES[property_.get('TypeProp')]
             dictValues[property_.get('Name')] = value.get(valueName)
         dictValues.update(self.as_dict())
-        return dictValues
+        self.__values__.update(dictValues)
+        return self.__values__
 
     @HasStaticProperties.values.setter
     def values(self, dict_):
         '''parameters:
-            - data (dict)
+            - @data (dict)
         set object properties (static and dynamic), 
         it's possible to set all dynamic properties with date string 
-        with __useDate__ key'''
-        self.previousState = self.values
+        with __useDate__ key
+        @data need to have "type_id" key or "FK_@@tablename@@Type" key
+        '''
+        
+        self.previousState = self.values.copy()
         if dict_.get('ID', None):
             del dict_['ID']
         if self.fk_table_type_name not in dict_ and 'type_id' not in dict_ and not self.type_id:
@@ -557,59 +583,81 @@ class HasDynamicProperties(HasStaticProperties):
                 'type_id', None) or self.type_id
             self._type = self.session.query(self.TypeClass).get(type_id)
             useDate = parser(dict_.get('__useDate__', None)
-                             ) or self.linkedFieldDate()
+                             )
             for prop, value in dict_.items():
                 self.setValue(prop, value, useDate)
 
             if self.hasLinkedField:
-                self.updateLinkedField(dict_, useDate=useDate)
+                useDateLinked = useDate or self.linkedFieldDate()
+                self.updateLinkedField(dict_, useDate=useDateLinked)
 
     def setValue(self, propertyName, value, useDate=None):
         ''' Set object properties (static and dynamic)
-             value can have two forms:
-             {
-               value: value
-               date: date
-             }
- 
-             or value
-         '''
-         # extract value and date from dict value
+             - value can have two forms:
+                    {
+                    value: value
+                    date: date
+                    }
+                    or value
+        '''
+        # extract value and date from dict value
         if isinstance(value, dict) and "date" in value:
             useDate = parser(value.get("date"))
             value = value.get("value", None)
 
         HasStaticProperties.setValue(self, propertyName, value)
         if not hasattr(self, propertyName) and propertyName not in self.__table__.c:
-            if not useDate:
-                useDate = datetime.now()
             self.setDynamicValue(propertyName, parser(value), useDate)
+        self.__values__[propertyName] = value
 
     def updateValues(self, data_dict, useDate=None):
-        useDate = datetime.now() if not useDate else useDate
+        useDate = datetime.utcnow() if not useDate else useDate
         data_dict['__useDate__'] = useDate
         self.values = data_dict
 
-    def setDynamicValue(self, propertyName, value, useDate):
+    def setDynamicValue(self, propertyName, value, useDate=None):
+        '''
+        Set dynamic value according type of object
+            @propertyName : string value of the property, existing in type of object
+            @value: value to update (string, int, float, date)
+            @useDate: datetime used to set dynamic values or None
+
+        '''
         prop = self.get_property_by_name(propertyName)
-        
+        curValue = None
         if not prop:
             return
 
         existingValues = list(filter(lambda x: x['Name'] == propertyName,
                                      self.getLatestDynamicValues()))
+
+        if not useDate:
+            useDate = datetime.utcnow()
+
         if self.history_track:
+            #we retreive dynamic value at same date else we create/insert new dynamic values
+            # if useDate is not None:
             curValue = self.getDynamicValueAtDate(propertyName, useDate)
+
+        #we keep existing dynamic value and update it with new value (track history is off)
         elif len(existingValues) > 0:
             curValue = self.session.query(self.DynamicValuesClass
                                           ).get(existingValues[0].get('ID'))
+            curValue.StartDate = useDate
 
         if not curValue:
             curValue = self.DynamicValuesClass(
-                fk_property=prop.get('ID'), fk_parent=self.type_id)
+                fk_property=prop.get('ID'))
             curValue.StartDate = useDate
+
+        if curValue and not isEqual(self.__values__.get(propertyName, None), value):
+            setattr(curValue, ANALOG_DYNPROP_TYPES[prop.get('TypeProp')], value)
             self._dynamicValues.append(curValue)
+
+    def setDynamicValueAtDate(self, propertyName, value, useDate):
+        curValue = self.getDynamicValueAtDate(propertyName, useDate)
         setattr(curValue, ANALOG_DYNPROP_TYPES[prop.get('TypeProp')], value)
+        pass
 
     def getDynamicValueAtDate(self, propertyName, useDate):
         prop = self.get_property_by_name(propertyName)
@@ -649,7 +697,7 @@ class HasDynamicProperties(HasStaticProperties):
             return []
 
     def linkedFieldDate(self):
-        return datetime.now()
+        return datetime.utcnow()
 
     def getLinkedEntity(self, tablename):
         filterEntity = list(filter(lambda e: hasattr(

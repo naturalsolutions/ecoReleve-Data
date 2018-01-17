@@ -212,7 +212,6 @@ class ReleaseIndividualsView(IndividualsView):
                 sensor_id = indiv.get(
                     'FK_Sensor', None) or indiv.get('fk_sensor', None)
 
-                print(sensor_id)
                 if sensor_id is not None:
                     try:
                         curEquipmentInd = getnewObs(equipmentIndID)
