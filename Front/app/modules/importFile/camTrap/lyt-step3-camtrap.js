@@ -76,9 +76,7 @@ define([
       /* this.getAvailableSpace().then(function() {
           _this.show();
          });*/
-      this.model.set('minDate', new Date(this.model.get('row').StartDate));
-      this.model.set('maxDate', new Date(this.model.get('row').EndDate));
-      this.checkDate();
+
       this.deferredSize = this.getAvailableSpace();
     },
 
@@ -90,7 +88,20 @@ define([
       }, 0) / (1024 * 1024)).toFixed(2));
     },
 
+    cleanOldResult: function() {
+      debugger;
+
+      this.r.files.forEach(function (element,idx) {
+          delete element.outOfRange;
+          delete element.inRange;
+      });
+      
+    },
+
     checkDate: function () {
+      
+      var _this = this;
+      this.cleanOldResult();//pb if prev change session and next we need to destroy old outOfRange and inRange
       var dateMin = new Date(this.model.get('minDate'));
       var dateMax = new Date(this.model.get('maxDate'));
       if (this.r.files.length > 0) {
@@ -99,15 +110,15 @@ define([
           var diffMax = (dateMax - element.dateFind.dateObj) / 1000 / 3600;
 
           if (diffMin <= -24 || diffMax <= -24) {
-            this.nbDateOutOfLimit += 1;
+            _this.nbDateOutOfLimit += 1;
             element.outOfRange = true;
           } else if ((-24 < diffMin && diffMin < 0) || (-24 < diffMax && diffMax < 0)) {
-            this.nbDateInLimit += 1;
+            _this.nbDateInLimit += 1;
             element.inRange = true;
           } else {
             console.log("date in range")
           }
-        }, this);
+        });
 
       }
       console.log(" nb date out of range ", this.nbDateOutOfLimit);
@@ -137,7 +148,6 @@ define([
 
     sendData: function (params) {
       var _this = this;
-      this.removeRefusedFiles(this.model.get('resumable'));
 
       this.progressBar.startUpload();
       $.ajax({
@@ -150,8 +160,8 @@ define([
         })
         .done(function (response, status, jqXHR) {
           if (jqXHR.status === 200) {
-            this.r = _this.model.get('resumable'); // TODO mettre dans init
-            this.r.upload();
+           _this.removeRefusedFiles(_this.r);
+           _this.r.upload();
           }
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
@@ -214,6 +224,12 @@ define([
 
     onShow: function () {
       var _this = this;
+
+      this.model.set('minDate', new Date(this.model.get('row').StartDate));
+      this.model.set('maxDate', new Date(this.model.get('row').EndDate));
+      this.checkDate();
+
+      
       this.timePicker = $('#datetimepicker3').datetimepicker({
         format: 'hh:mm:ss'
       });
@@ -357,6 +373,7 @@ define([
       this.gridViewPhotos.gridOptions.api.forEachNode(function (rowNode) {
         rowNode.setDataValue('jetLag', '' + _this.jetLag.operator + '' + _this.jetLag.hours + '')
         rowNode.setDataValue('dateFind', rowNode.data.dateFind);
+        rowNode.setDataValue('status', _this.calculateStatus(rowNode.data.dateFind));
       });
       this.gridViewPhotos.gridOptions.api.refreshView();
 
@@ -383,7 +400,7 @@ define([
           }
         }
       });
-      this.r.on('fileSuccess', function(file,message,b,c,d) {
+      this.r.on('fileSuccess', function(file,message) {
         if(message === "ok") {
           _this.uploadInfos.nbFilesAccepted += 1;
         }
@@ -622,11 +639,11 @@ define([
 
     },
 
-    calculateStatus : function(params) {
+    calculateStatus : function(curDate) {
       var _this = this;
       var dateSessionStartDate = new Date(_this.model.get('minDate'));
       var dateSessionEndDate = new Date(_this.model.get('maxDate'));
-      var dateCurrent = new Date(params.data.dateFind);
+      var dateCurrent = new Date(curDate);
       var time = _this.jetLag.hours.split(':');
       var operator = 1;
       if (_this.jetLag.operator == '-') {
@@ -638,15 +655,12 @@ define([
       // dateCurrent+= dateCurrent.getHours + time[0]
       switch (true) {
         case (dateCurrent >= dateSessionStartDate && dateCurrent <= dateSessionEndDate):{
-          params.status = 1;
-          return "<span>Will be accepted</span>"
+          return 1;
           break;
         }
         case (dateCurrent < dateSessionStartDate || dateCurrent > dateSessionEndDate): {
-          params.status = -1;
-          return "<span>Will be refused</span>"
+          return  -1;
           break;
-
         }
       }
     },
@@ -686,35 +700,16 @@ define([
             return '<span>' + params.data.dateFind + '</span>'
         },
         cellStyle: function (params) {
-          var dateSessionStartDate = new Date(_this.model.get('minDate'));
-          var dateSessionEndDate = new Date(_this.model.get('maxDate'));
-          // var timeSession = "00:00:00"
-          var dateCurrent = new Date(params.data.dateFind);
-          var time = _this.jetLag.hours.split(':');
-          var operator = 1;
-          if (_this.jetLag.operator == '-') {
-            operator = -1;
+          switch(params.data.status) {
+            case -1: {
+              return { 'color': 'red'};
+              break;
+            }
+            default : {
+              return {'color' : 'green'}
+            }
           }
-          dateCurrent.setHours(dateCurrent.getHours() + operator * Number(time[0]));
-          dateCurrent.setMinutes(dateCurrent.getMinutes() + operator * Number(time[1]));
-          dateCurrent.setSeconds(dateCurrent.getSeconds() + operator * Number(time[2]));
-          // dateCurrent+= dateCurrent.getHours + time[0]
-          switch (true) {
-            case (dateCurrent >= dateSessionStartDate && dateCurrent <= dateSessionEndDate):
-              params.node.setDataValue('status',1)
-              return {
-                'color': 'green'
-              }
-              break;
-            case (dateCurrent < dateSessionStartDate || dateCurrent > dateSessionEndDate):
-              params.node.setDataValue('status',-1)
-              return {
-                'color': 'red'
-              }
-              break;
-            default:
-              break;
-          }
+
         }
 
       }, {
@@ -727,23 +722,29 @@ define([
         headerName: 'Status',
         maxWidth: 500,
         cellRenderer : function(params) {
-          return _this.calculateStatus(params);
+          var elem = document.createElement('span');
+         if(params.data.status === -1 ) {
+          elem.innerHTML = 'Will be refused'
+         }
+         if(params.data.status === 1) {
+          elem.innerHTML = 'Will be accepted'
+         }
+         return elem;
         } ,
         cellStyle : function (params) {
           switch (params.value) {
-            case 1:
-              return {
-                'color': 'green',
-                'font-weight': 'bold'
-              }
-              break;
             case -1:
               return {
                 'color': 'red'
               }
               break;
-            default:
+            default:{
+              return {
+                'color': 'green',
+                'font-weight': 'bold'
+              }
               break;
+            }
           }
         }
       }];
@@ -751,9 +752,7 @@ define([
       var data = {}
       data = this.r.files.map(function (elem) {
         var status = 1;
-        if (elem.inRange || elem.outOfRange) {
-          status = -1
-        }
+          status = _this.calculateStatus(elem.dateFind.dateString)
 
         return {
           fileName: elem.fileName,
@@ -762,7 +761,7 @@ define([
           jetLag: '00:00:00',
           status: status
         }
-      })
+      });
 
       this.rgGridPhotos.show(this.gridViewPhotos = new GridView({
         columns: columnsDefs,
