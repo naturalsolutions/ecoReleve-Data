@@ -16,6 +16,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import aliased
 from pyramid import threadlocal
 from datetime import timedelta
+from sqlalchemy.orm import relationship
 
 
 class Equipment(Base):
@@ -28,6 +29,10 @@ class Equipment(Base):
     FK_Observation = Column(Integer, ForeignKey('Observation.ID'))
     StartDate = Column(DateTime, default=func.now())
     Deploy = Column(Boolean)
+
+    Individuals = relationship('Individual')
+    MonitoredSites = relationship('MonitoredSite')
+
 
 
 def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):

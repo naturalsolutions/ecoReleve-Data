@@ -2,6 +2,7 @@ from ..Models import (
     Individual,
     # IndividualDynPropValue,
     Individual_Location,
+    IndividualStatus,
     Sensor,
     IndividualList,
     Base,
@@ -151,6 +152,36 @@ class IndividualsView(DynamicObjectCollectionView):
             existingID = None
 
         return existingID
+
+    def retrieve(self):
+        import time
+        from ..GenericObjets.SearchEngine import QueryEngine
+        from ..Models.Equipment import Equipment
+        table = Base.metadata.tables['IndividualEquipment']
+        collection = QueryEngine(self.session, Individual)
+
+        filters = [
+            {
+                'Column':'ID',
+                'Operator':'>',
+                'Value': '1000'
+            },
+            # {
+            #     'Column':'Species',
+            #     'Operator':'contains',
+            #     'Value': 'undulata'
+            # },
+            # {
+            #     'Column':'Status_',
+            #     'Operator':'=',
+            #     'Value': 'mort'
+            # }
+        ]
+        result = collection.search(filters, selectable=['*',Individual.FK_Sensor], limit=200, order_by=['ID:desc'])
+        count = collection._count(filters)
+
+        return [{'total_entries': count}, result]
+
 
 
 class IndividualLocationsView(SecurityRoot):

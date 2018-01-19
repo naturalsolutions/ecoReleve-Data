@@ -21,6 +21,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from ..Models import IntegerDateTime
 from ..GenericObjets.OrmModelsMixin import HasDynamicProperties
+from sqlalchemy.ext.associationproxy import association_proxy
 
 
 class ErrorCheckIndividualCodes(Exception):
@@ -54,24 +55,36 @@ class Individual (Base, HasDynamicProperties):
     #                                        cascade="all, delete-orphan")
     Locations = relationship('Individual_Location',
                              cascade="all, delete-orphan")
-    Equipments = relationship('Equipment', cascade="all, delete-orphan")
+    Equipments = relationship('Equipment',
+                              cascade="all, delete-orphan",
+                              primaryjoin='Individual.ID==' +
+                                'Equipment' + '.FK_Individual')
 
     _Status_ = relationship(
         'IndividualStatus', uselist=False, backref="Individual")
     Observations = relationship('Observation')
 
-    @hybrid_property
-    def Status_(self):
-        if self._Status_:
-            return self._Status_.Status_
-        else:
-            return None
+    Status_ = association_proxy('_Status_', 'Status_')
+    FK_Sensor = association_proxy('Equipments', 'FK_Sensor')
+    # @hybrid_property
+    # def Status_(self):
+    #     if self._Status_:
+    #         return self._Status_.Status_
+    #     else:
+    #         return None
 
-    @Status_.setter
-    def Status_(self, value):
-        # no value is stored because it is calculated
-        return
-
+    # @Status_.setter
+    # def Status_(self, value):
+    #     # no value is stored because it is calculated
+    #     return
+    
+    # @Status_.expression
+    # def Status_(cls):
+    #     return select([IndividualStatus.Status_]).where(cls.ID == IndividualStatus.FK_Individual).as_scalar()
+    def as_dict(self):
+        values = HasDynamicProperties.as_dict(self)
+        values['Status_'] = self.Status_
+        return values
 
 class Individual_Location(Base):
     __tablename__ = 'Individual_Location'

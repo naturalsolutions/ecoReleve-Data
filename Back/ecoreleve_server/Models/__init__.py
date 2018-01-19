@@ -157,9 +157,13 @@ from .SensorData import *
 from .List import *
 from .Log import sendLog
 
+# from sqlalchemy.inspection import inspect
 
-# LinkedTables['Individual'] = Individual
-# LinkedTables['Station'] = Station
-# LinkedTables['Protocoles'] = Protocoles
-# LinkedTables['Sensor'] = Sensor
-# LinkedTables['MonitoredSite'] = MonitoredSite
+# print(type(inspect(Individual).primary_key[0]))
+
+# print(Individual.Equipments.__dict__)
+# # LinkedTables['Individual'] = Individual
+# # LinkedTables['Station'] = Station
+# # LinkedTables['Protocoles'] = Protocoles
+# # LinkedTables['Sensor'] = Sensor
+# # LinkedTables['MonitoredSite'] = MonitoredSite

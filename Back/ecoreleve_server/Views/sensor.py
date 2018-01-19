@@ -2,8 +2,7 @@ from ..Models import (
     Sensor,
     MonitoredSite,
     Base,
-    SensorList,
-    SensorDynPropValue
+    SensorList
 )
 from sqlalchemy import select, desc, join, outerjoin
 from collections import OrderedDict
