@@ -149,7 +149,8 @@ define([
     sendData: function (params) {
       var _this = this;
 
-      this.progressBar.startUpload();
+      // this.progressBar.startUpload();
+      $('#myPleaseWait').modal({"keyboard":false,"backdrop": "static","show":true});
       $.ajax({
           type: "POST",
           url: config.coreUrl + 'sensorDatas/camtrap/concat',
@@ -228,6 +229,8 @@ define([
       this.model.set('minDate', new Date(this.model.get('row').StartDate));
       this.model.set('maxDate', new Date(this.model.get('row').EndDate));
       this.checkDate();
+
+      this.progressBarElem = this.el.getElementsByClassName('progress-bar')[0];
 
       
       this.timePicker = $('#datetimepicker3').datetimepicker({
@@ -409,6 +412,7 @@ define([
         }
       });
       this.r.on('complete', function() {
+        $('#myPleaseWait').modal('hide');
         var text = '';
         if(_this.nbDateOutOfLimit) {
           text+= 'You try to upload '+_this.nbPhotos+' photos\n';
@@ -469,7 +473,8 @@ define([
       })
 
       this.r.on('progress', function (file, message) {
-        _this.progressBar.uploading(_this.r.progress() * 100);
+        var val = (_this.r.progress() * 100).toFixed(2);
+        _this.progressBarElem.style.width = val+'%';
       });
 
 
