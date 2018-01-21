@@ -84,7 +84,7 @@ define([
       'click i#closeNav': 'filterNavClose',
       'click input[name="filterstatus"]': 'filterCollectionCtrl',
       'click button#js-create-station-pending': 'createStation',
-      'click button#js-delete-station-pending' :'removeStation'
+      'click button#js-delete-station-pending': 'removeStation'
     },
 
     ui: {
@@ -122,7 +122,7 @@ define([
       data.LAT = monitoredSiteModel.get('LAT');
       data.LON = monitoredSiteModel.get('LON');
       data.FK_MonitoredSite = this.siteId;
-      data.Name = imageModel.model.get('name');//"izhjfoiuzehoezfhn";
+      data.Name = imageModel.model.get('name'); //"izhjfoiuzehoezfhn";
       data.FieldWorkers = [{
         ID: null,
         defaultValues: "",
@@ -142,7 +142,7 @@ define([
       }
       data.ELE = monitoredSiteModel.get('ELE') || null;
       data.precision = monitoredSiteModel.get('precision') || null;
-      data.Comments = "created from camera trap validation"|| null;   
+      data.Comments = "created from camera trap validation" || null;
       data.NbFieldWorker = 1;
       data.fieldActivityId = 5
       return data;
@@ -151,7 +151,7 @@ define([
 
     },
     // populateDataForCreatingStation: function (tabOfPosition) {
-      
+
     //   var monitoredSiteModel = this.monitoredSiteForm.model;
     //   var data = {};
     //   var tab = []
@@ -213,76 +213,75 @@ define([
 
     // },
 
-    callDeleteStationAPI : function(tabOfIds,tabOfItem) {
-      if(tabOfIds.length === 1 ) {
+    callDeleteStationAPI: function (tabOfIds, tabOfItem) {
+      if (tabOfIds.length === 1) {
         var stationId = tabOfIds[0];
         var item = tabOfItem[0];
-        var _this = this; 
-        if(stationId === null)
+        var _this = this;
+        if (stationId === null)
           return;
 
         $.ajax({
-          type : 'DELETE',
-          url : config.coreUrl +'stations/'+stationId,
-          contentType: 'application/json'
-        })
-        .done(function(resp) {
-          item.removeStation();
-          console.log("Station"+stationId+" removed ok");
-        })
-        .fail(function(err) {
-          console.log(err);
-        });
-      }
-      else {
+            type: 'DELETE',
+            url: config.coreUrl + 'stations/' + stationId,
+            contentType: 'application/json'
+          })
+          .done(function (resp) {
+            item.removeStation();
+            console.log("Station" + stationId + " removed ok");
+          })
+          .fail(function (err) {
+            console.log(err);
+          });
+      } else {
 
         $.ajax({
-          type : 'POST',
-          url : config.coreUrl+'stations/deleteMany',
-          contentType : 'application/json',
-          data : JSON.stringify(tabOfIds)
-        })
-        .done( function(resp) {
-          console.log(resp);
-          for( var item in resp) {
-            var indexElem = tabOfIds.findIndex(function(elem) {
-              return Number(item) === elem;
-            });
-            console.log("on va suppr avec id : ",indexElem);
-            tabOfItem[indexElem].removeStation();
-          }
-        })
-        .fail(function(err) {
-          console.log(err);
-        })
+            type: 'POST',
+            url: config.coreUrl + 'stations/deleteMany',
+            contentType: 'application/json',
+            data: JSON.stringify(tabOfIds)
+          })
+          .done(function (resp) {
+            console.log(resp);
+            for (var item in resp) {
+              var indexElem = tabOfIds.findIndex(function (elem) {
+                return Number(item) === elem;
+              });
+              console.log("on va suppr avec id : ", indexElem);
+              tabOfItem[indexElem].removeStation();
+            }
+          })
+          .fail(function (err) {
+            console.log(err);
+          })
 
       }
-      
+
 
     },
 
-    removeStation : function() {
+    removeStation: function () {
 
       var tabOfIds = [];
       var tabOfItem = [];
       if (this.tabSelected.length == 0) {
         if (this.currentPosition !== null) {
-          if(this.tabView[this.currentPosition].model.get('stationId')!== null) {
+          if (this.tabView[this.currentPosition].model.get('stationId') !== null) {
             tabOfIds.push(this.tabView[this.currentPosition].model.get('stationId'));
             tabOfItem.push(this.tabView[this.currentPosition]);
           }
         }
       } else {
         for (var i of this.tabSelected) {
-          if(this.tabView[i].model.get('stationId') !== null) {
+          if (this.tabView[i].model.get('stationId') !== null) {
             tabOfIds.push(this.tabView[i].model.get('stationId'));
             tabOfItem.push(this.tabView[i]);
           }
         }
       }
-      if( tabOfIds.length === 0 || tabOfItem.length === 0 ) 
+      if (tabOfIds.length === 0 || tabOfItem.length === 0)
         return;
-      this.callDeleteStationAPI(tabOfIds,tabOfItem);
+      this.callDeleteStationAPI(tabOfIds, tabOfItem);
     },
 
     // removeStation : function() {
@@ -309,22 +308,22 @@ define([
     //   }
     // },
 
-    callPostStationAPI : function(elem,data) {
+    callPostStationAPI: function (elem, data) {
 
       $.ajax({
-        type: 'POST',
-        url: config.coreUrl + 'stations/',
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        dataType: 'json'
-      })
-      .done(function (resp) {
-        elem.attachStation(resp.ID);
-      })
-      .fail(function (err) {
-        console.log(err)
-        throw new Error("error create station");
-      });
+          type: 'POST',
+          url: config.coreUrl + 'stations/',
+          data: JSON.stringify(data),
+          contentType: 'application/json',
+          dataType: 'json'
+        })
+        .done(function (resp) {
+          elem.attachStation(resp.ID);
+        })
+        .fail(function (err) {
+          console.log(err)
+          throw new Error("error create station");
+        });
 
     },
 
@@ -334,23 +333,23 @@ define([
       var listOfElem = []
       if (this.tabSelected.length == 0) {
         if (this.currentPosition !== null) {
-          if(this.tabView[this.currentPosition].model.get('stationId') === null)
+          if (this.tabView[this.currentPosition].model.get('stationId') === null)
             listOfElem.push(this.tabView[this.currentPosition])
         }
       } else {
         for (var i of this.tabSelected) {
-          if(this.tabView[i].model.get('stationId') === null)
+          if (this.tabView[i].model.get('stationId') === null)
             listOfElem.push(this.tabView[i]);
         }
       }
 
-      if( listOfElem.length === 0 ) 
+      if (listOfElem.length === 0)
         return;
-        //TODO will fail if same position , same name
-      for(var i = 0 ; i < listOfElem.length ; i++ ) {
+      //TODO will fail if same position , same name
+      for (var i = 0; i < listOfElem.length; i++) {
         var elem = listOfElem[i];
         var data = this.populateDataForCreatingStation(elem);
-        this.callPostStationAPI(elem,data);
+        this.callPostStationAPI(elem, data);
       }
     },
 
@@ -1115,9 +1114,9 @@ define([
       }
       var parent$elem = e.currentTarget.parentElement
       var allSpan = parent$elem.getElementsByTagName('span')
-      for( var i = 0 ; i < allSpan.length ; i++ ) {
-        if(allSpan[i].className.indexOf('selected') > -1 ) {
-          allSpan[i].className = allSpan[i].className.replace(' selected','')
+      for (var i = 0; i < allSpan.length; i++) {
+        if (allSpan[i].className.indexOf('selected') > -1) {
+          allSpan[i].className = allSpan[i].className.replace(' selected', '')
         }
       }
 
@@ -1276,44 +1275,81 @@ define([
       }
 
       Swal({
-          title: 'Well done',
+          title: 'Validation',
           text: 'you have finish this sessions\nOn ' + _this.nbPhotos + ' photos ' + text,
           type: 'success',
-          showCancelButton: true,
+          showCancelButton: false,
           confirmButtonColor: 'rgb(218, 146, 15)',
 
-          confirmButtonText: 'Go to monitored sites',
-          cancelButtonText: 'Return to validation',
-          closeOnConfirm: true,
-          closeOnCancel: true
+          confirmButtonText: 'Ok !',
+          cancelButtonText: 'No ! i want to return to session\'s validation',
+          closeOnConfirm: false,
+          closeOnCancel: false
         },
         function (isConfirm) {
           console.log("bim je valide requête en cours");
-          $.ajax({
-              url: config.coreUrl + 'sensorDatas/' + _this.type + '/validate',
-              method: 'POST',
-              data: {
-                fk_Sensor: _this.sensorId,
-                fk_MonitoredSite: _this.siteId,
-                fk_EquipmentId: _this.equipmentId,
-                /*data : JSON.stringify(_this.myImageCollection.fullCollection)*/
-              },
-              context: _this,
-            })
-            .done(function (response, status, jqXHR) {
-              if (isConfirm) {
-                Backbone.history.navigate('monitoredSites/' + _this.siteId, {
-                  trigger: true
-                });
-              } else {
-                Backbone.history.navigate('validate/camtrap');
-                window.location.reload();
-              }
-            })
-            .fail(function (jqXHR, textStatus, errorThrown) {
+          if (isConfirm) {
+            $.ajax({
+                url: config.coreUrl + 'sensorDatas/' + _this.type + '/validate',
+                method: 'POST',
+                data: {
+                  fk_Sensor: _this.sensorId,
+                  fk_MonitoredSite: _this.siteId,
+                  fk_EquipmentId: _this.equipmentId,
+                  /*data : JSON.stringify(_this.myImageCollection.fullCollection)*/
+                },
+                context: _this,
+              })
+              .done(function (response, status, jqXHR) {
+                console.log("ajax ok");
+                console.log(response);
+                console.log(status);
+                console.log(jqXHR);
+                Swal({
+                  title: 'Upload finished',
+                  text: 'you have finish this sessions\nOn ' + _this.nbPhotos + ' photos ' + text,
+                  type: 'success',
+                  showCancelButton: true,
+                  confirmButtonColor: 'rgb(218, 146, 15)',
 
-            });
-          //TODO mettre le status validated a 8 pour sauvegarder la validation de force
+                  confirmButtonText: 'Go to monitored sites',
+                  cancelButtonText: 'Return to validation',
+                  closeOnConfirm: true,
+                  closeOnCancel: true
+
+                }, function () {
+                  if (isConfirm) {
+                    Backbone.history.navigate('monitoredSites/' + _this.siteId, {
+                      trigger: true
+                    });
+                  } else {
+                    Backbone.history.navigate('validate/camtrap');
+                    window.location.reload();
+                  }
+
+                })
+              })
+              .fail(function (jqXHR, textStatus, errorThrown) {
+                console.log("ajax !ok")
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+                Swal({
+                  title: 'Error',
+                  text: 'Something goes wrong',
+                  type: 'error',
+                  showCancelButton: true,
+                  confirmButtonColor: 'rgb(218, 146, 15)',
+        
+                  confirmButtonText: 'Go to monitored sites',
+                  cancelButtonText: 'Return to validation',
+                  closeOnConfirm: true,
+                  closeOnCancel: true
+                });
+
+              });
+            //TODO mettre le status validated a 8 pour sauvegarder la validation de force
+          }
 
         }
         /*function(isConfirm) {
