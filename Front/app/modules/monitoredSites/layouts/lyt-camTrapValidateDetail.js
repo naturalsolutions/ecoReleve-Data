@@ -7,11 +7,8 @@ define([
   'sweetAlert',
   'translater',
   'config',
-  'ns_grid/model-grid',
-  'ns_map/ns_map',
   'ns_form/NSFormsModuleGit',
   'moment',
-  'ns_navbar/ns_navbar',
   'backbone.paginator',
   './lyt-camTrapItemView',
   './lyt-camTrapImageModel',
@@ -23,7 +20,7 @@ define([
 
 
 ], function($, _, Backbone, Marionette, Swal, Translater,
-  config, NsGrid, NsMap, NsForm, moment, Navbar, PageColl,
+  config, NsForm, moment, PageColl,
   CamTrapItemView , CamTrapImageModel, ModalView, BckMrtKeyShortCut,
   virtualcollection, jqueryUi
 
@@ -126,7 +123,7 @@ define([
       console.log(options);
       this.siteId = options.id;
       this.equipmentId = options.equipId;
-      this.date = options.date;
+      // this.date = options.date;
 
       this.globalGrid = options.globalGrid;
 
@@ -141,7 +138,7 @@ define([
         state: {
           pageSize: 24
         },
-        url: config.coreUrl + 'photos/?siteid='+_this.siteId+'&equipid='+this.equipmentId+''
+        url: config.coreUrl + 'photos/?siteid='+_this.siteId+'&sessionID='+this.equipmentId+''
       });
 
       this.myImageCollection = new ImageCollection();
