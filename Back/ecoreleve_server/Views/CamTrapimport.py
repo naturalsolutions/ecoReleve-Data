@@ -171,8 +171,15 @@ def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endD
         session.add(currentImport)
         session.flush()
         if currentImport.ID:
-            currentPhoto = CamTrap(fk_sensor=fk_sensor, path=str(path), name=str(
-                name), extension='.jpg', date_creation=date_creation, note=5)
+            currentPhoto = CamTrap(
+                fk_sensor=fk_sensor,
+                path=str(path),
+                name=str(name),
+                extension='.jpg', 
+                date_creation=date_creation, 
+                note=5,
+                FK_Import = currentImport.ID
+                )
             session.add(currentPhoto)
             session.flush()
             if currentPhoto.pk_id:

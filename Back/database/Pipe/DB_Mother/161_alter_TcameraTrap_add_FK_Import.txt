@@ -1,0 +1,12 @@
+USE [ecoreleve_sensor]
+ALTER TABLE TcameraTrap
+ADD FK_Import INT NOT NULL;
+ALTER TABLE TcameraTrap
+WITH CHECK ADD
+ CONSTRAINT fk_import_check FOREIGN KEY (FK_Import) REFERENCES Import (ID)
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('161_alter_TcameraTrap_add_FK_Import',GETDATE(),(SELECT db_name()))
+
+
+GO

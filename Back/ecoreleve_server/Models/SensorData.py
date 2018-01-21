@@ -213,6 +213,7 @@ class CamTrap(Base):
     tags = Column(String,nullable=True)
     note = Column(Integer, nullable=False)
     stationId = Column(Integer, nullable= True)
+    FK_Import = Column('FK_Import', Integer, ForeignKey(dbConfig['sensor_schema']+'.Import.ID'))
     __table_args__ = (
         {'schema': sensor_schema, 'implicit_returning': False}
     )
