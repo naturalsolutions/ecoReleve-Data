@@ -15,7 +15,21 @@ import subprocess
 # image file truncated
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-
+'''
+TODO refact process more readable 
+dont need to store file before get exif
+we can processing exif on tmp file 
+so we store only if ok (it's a better)
+def writeFileToDisk(newFile,destPath) :
+    # destPath = absolutePath + filename + fileExtension
+    try:   
+        with open(os.path.join(destPath), 'wb') as output_file:
+            shutil.copyfileobj(newFile, output_file)
+        output_file.close()
+    except Exception:
+        raise
+    return 
+'''
 def resizePhoto(imgPathSrc):
     basewidth = 200
     try:
@@ -151,8 +165,8 @@ def AddPhotoOnSQL(fk_sensor, path, name, extension, date_creation,startDate,endD
                 FK_User = user,
                 nbRows = 1,
                 nbInserted = 0,
-                maxDate= endDate,
-                minDate = startDate
+                maxDate = datetime.datetime.strptime(endDate,"%Y-%m-%d %H:%M:%S"),
+                minDate = datetime.datetime.strptime(startDate,"%Y-%m-%d %H:%M:%S") 
                 )
         session.add(currentImport)
         session.flush()
