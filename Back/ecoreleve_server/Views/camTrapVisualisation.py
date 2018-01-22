@@ -117,11 +117,12 @@ def allPhotos (request):
                 row['StartDate'] = 'N/A'
             if str(row['EndDate']) == 'None' :
                 row['EndDate'] = 'N/A'
+            row['link'] = None
         if( queryStatut == 2 ):
             varchartmp = row['path'].split('\\')
             row['path']="imgcamtrap/"+str(varchartmp[len(varchartmp)-2])+"/"
             row['FileName'] = row['FileName'].replace(" ","%20")
-
+            
     return dataResult
 
 @view_config(route_name='getSessionZip', renderer='json' ,request_method='GET',permission = routes_permission['rfid']['POST'])
