@@ -287,7 +287,7 @@ class SensorDatasByType(CustomView):
                                 ]
                                )
             queryStmt = queryStmt.where(self.viewTable.c['checked'] == None)
-            queryStmt = queryStmt.where(self.viewTable.c['checked'] == None).group_by(self.viewTable.c['sessionID'],
+            queryStmt = queryStmt.group_by(self.viewTable.c['sessionID'],
                                           self.viewTable.c['UnicIdentifier'],
                                           self.viewTable.c['fk_sensor'],
                                           self.viewTable.c['site_name'],
@@ -419,10 +419,9 @@ class SensorDatasByType(CustomView):
                     user,
                     cmdMetaDataInfo
                     )
-                    # handleAllMetadatas(self,metaDataInfo)
                     callExiv2(
                         self = self,
-                        cmd = buildCmdMetaDatasAtImport(self,metaDataInfo),
+                        cmd = cmdMetaDataInfo,
                         listFiles = [str(uri)+'\\'+str(self.request.POST['resumableFilename'])]
                         )
                     resizePhoto(str(uri) + "\\" +
@@ -744,30 +743,35 @@ class SensorDatasByType(CustomView):
         fkEquipmentId = data['fk_EquipmentId']
         fkSensor = data['fk_Sensor']
 
-        query = text("""
-        EXEC [EcoReleve_ECWP].[dbo].[pr_ValidateCameraTrapSession] :fkSensor, :fkMonitoredSite, :fkEquipmentId
+        resultat = "OK"
+
+        query = text("""SET NOCOUNT ON; DECLARE @result int;
+        EXEC [dbo].[pr_ValidateCameraTrapSession] :fkSensor, :fkMonitoredSite, :fkEquipmentId, @result OUTPUT;
+        SET NOCOUNT OFF;
         """).bindparams(
             bindparam('fkSensor', value=fkSensor),
             bindparam('fkMonitoredSite', value=fkMonitoredSite),
             bindparam('fkEquipmentId', value=fkEquipmentId)
         )
-        result = self.session.execute(query)
+        result = self.session.execute(query).fetchall()
+        
+        # self.session.commit()
 
-        if result.rowcount > 0:
-            query2 = text("""
-            select path, name, validated from [ecoReleve_Sensor].[dbo].[TcameraTrap]
-            where pk_id in (
-            select pk_id
-            from V_dataCamTrap_With_equipSite
-            where
-            fk_sensor = :fkSensor
-            AND FK_MonitoredSite = :fkMonitoredSite
-            AND equipID = :fkEquipmentId)""").bindparams(
-                bindparam('fkSensor', value=fkSensor),
-                bindparam('fkMonitoredSite', value=fkMonitoredSite),
-                bindparam('fkEquipmentId', value=fkEquipmentId)
-            )
-            resultat = self.session.execute(query2).fetchall()
+        # if 'nbInserted' in result and result['nbInserted'] > 0result.rowcount > 0:
+        #     query2 = text("""
+        #     select path, name, validated from [ecoReleve_Sensor].[dbo].[TcameraTrap]
+        #     where pk_id in (
+        #     select pk_id
+        #     from V_dataCamTrap_With_equipSite
+        #     where
+        #     fk_sensor = :fkSensor
+        #     AND FK_MonitoredSite = :fkMonitoredSite
+        #     AND equipID = :fkEquipmentId)""").bindparams(
+        #         bindparam('fkSensor', value=fkSensor),
+        #         bindparam('fkMonitoredSite', value=fkMonitoredSite),
+        #         bindparam('fkEquipmentId', value=fkEquipmentId)
+        #     )
+        #     resultat = self.session.execute(query2).fetchall()
 
         # for row in result :
         #     print(row)
@@ -794,7 +798,7 @@ class SensorDatasByType(CustomView):
         #     """for key in index:
         #         if ( str(key) =='checkedvalidated'   )
         #         print ( str(key)+":"+str(index[key]))"""
-        return resultat
+        return {'nbInserted' : result[0]['nbInserted'] }
 
 
 class SensorDatas(CustomView):
