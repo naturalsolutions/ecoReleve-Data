@@ -265,6 +265,7 @@ class CollectionEngine():
 
         fullQueryJoinOrdered = self.OderByAndLimit(fullQueryJoin, searchInfo)
         self.fullQueryJoinOrdered = fullQueryJoinOrdered
+        print(fullQueryJoinOrdered)
         return fullQueryJoinOrdered
 
     def GetFlatDataList(self, searchInfo=None):

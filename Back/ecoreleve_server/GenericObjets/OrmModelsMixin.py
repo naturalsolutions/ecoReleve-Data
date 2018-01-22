@@ -36,14 +36,6 @@ from pyramid import threadlocal
 from sqlalchemy.orm.util import has_identity
 
 
-ANALOG_DYNPROP_TYPES = {'String': 'ValueString',
-                        'Float': 'ValueFloat',
-                        'Date': 'ValueDate',
-                        'Integer': 'ValueInt',
-                        'Time': 'ValueDate',
-                        'Date Only': 'ValueDate'}
-
-
 class CreateView(Executable, ClauseElement):
     def __init__(self, name, select):
         self.name = name
@@ -235,6 +227,13 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
             del kwargs['session']
         Base.__init__(self, **kwargs)
         
+    @property
+    def session(self):
+        return self._session
+
+    @session.setter
+    def session(self, value):
+        self._session = value
 
     @orm.reconstructor
     def init_on_load(self):
@@ -341,6 +340,12 @@ class HasDynamicProperties(HasStaticProperties):
 
         __values__ property represents the current state of object values, is available by "self.values" property 
     '''
+    ANALOG_DYNPROP_TYPES = {'String': 'ValueString',
+                        'Float': 'ValueFloat',
+                        'Date': 'ValueDate',
+                        'Integer': 'ValueInt',
+                        'Time': 'ValueDate',
+                        'Date Only': 'ValueDate'}
     history_track = True
     hasLinkedField = False
     ID = Column(Integer, primary_key=True)
@@ -500,6 +505,7 @@ class HasDynamicProperties(HasStaticProperties):
                         Properties.Name.label('Name'),
                         Properties.TypeProp.label('TypeProp')]
                        ).select_from(join_).where(not_(exists(sub_query)))
+        query = query.where(DynamicValues.StartDate <= func.now())
         return query
 
     @declared_attr
@@ -557,7 +563,7 @@ class HasDynamicProperties(HasStaticProperties):
         values = self.getLatestDynamicValues()
         for value in values:
             property_ = self.get_property_by_name(value['Name'])
-            valueName = ANALOG_DYNPROP_TYPES[property_.get('TypeProp')]
+            valueName = self.ANALOG_DYNPROP_TYPES[property_.get('TypeProp')]
             dictValues[property_.get('Name')] = value.get(valueName)
         dictValues.update(self.as_dict())
         self.__values__.update(dictValues)
@@ -651,12 +657,12 @@ class HasDynamicProperties(HasStaticProperties):
             curValue.StartDate = useDate
 
         if curValue and not isEqual(self.__values__.get(propertyName, None), value):
-            setattr(curValue, ANALOG_DYNPROP_TYPES[prop.get('TypeProp')], value)
+            setattr(curValue, self.ANALOG_DYNPROP_TYPES[prop.get('TypeProp')], value)
             self._dynamicValues.append(curValue)
 
     def setDynamicValueAtDate(self, propertyName, value, useDate):
         curValue = self.getDynamicValueAtDate(propertyName, useDate)
-        setattr(curValue, ANALOG_DYNPROP_TYPES[prop.get('TypeProp')], value)
+        setattr(curValue, self.ANALOG_DYNPROP_TYPES[prop.get('TypeProp')], value)
         pass
 
     def getDynamicValueAtDate(self, propertyName, useDate):
@@ -674,7 +680,11 @@ class HasDynamicProperties(HasStaticProperties):
 
     @property
     def properties(self):
-        return [prop.as_dict() for prop in self._type._properties]
+        if not self._type:
+            properties = self.session.query(self.TypeClass.PropertiesClass).all()
+        else:
+            properties = self._type._properties
+        return [prop.as_dict() for prop in properties]
 
     @property
     def properties_by_id(self):

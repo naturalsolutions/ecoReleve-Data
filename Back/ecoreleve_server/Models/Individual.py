@@ -34,7 +34,7 @@ class ErrorCheckIndividualCodes(Exception):
         return self.value
 
 
-class Individual (Base, HasDynamicProperties):
+class Individual (HasDynamicProperties, Base):
 
     __tablename__ = 'Individual'
 
