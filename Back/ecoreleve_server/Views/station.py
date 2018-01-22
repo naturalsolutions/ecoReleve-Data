@@ -62,6 +62,8 @@ class StationsView(DynamicObjectCollectionView):
         try:
             data['StartDate'] = data['StationDate']
             data['Precision'] = data['precision']
+            if data.get('Name', None):
+                del data['Name']
             currentMonitoredSite = session.query(MonitoredSite).get(data['FK_MonitoredSite'])
             currentMonitoredSite.updateFromJSON(data)
             return 'Monitored site position was updated'
