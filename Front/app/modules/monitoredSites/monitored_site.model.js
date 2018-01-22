@@ -69,26 +69,32 @@ define([
       cameraTrapColumnDefs: [{
         field: 'sessionID',
         headerName: 'ID',
+        minWidth: 70,
       },{
         field: 'UnicIdentifier',
         headerName: 'IDENTIFIER',
+        minWidth: 90,
       },{
         field: 'StartDate',
         headerName: 'START DATE',
+        minWidth: 155,
       },{
         field: 'EndDate',
         headerName: 'END DATE',
+        minWidth: 155,
       },{
         field: 'nbPhotos',
         headerName: 'NB PHOTOS',
+        minWidth: 60,
       },
       {
         field : 'link',
         headerName : '',
+        minWidth: 220,
         headerCellTemplate: function () {
           var eCell = document.createElement('span');
           var eBtn = document.createElement('button');
-          eBtn.className = 'js-btndetailssession btn btn-primary start'
+          eBtn.className = 'js-btndetailssession btn btn-success start'
           var eIcone = document.createElement('i');
           eIcone.className = 'glyphicon glyphicon-download-alt'
           var eSpan = document.createElement('span');
@@ -124,7 +130,7 @@ define([
         cellRenderer: function (params) {
           var eCell = document.createElement('span');
           var eBtn = document.createElement('button');
-          eBtn.className = 'js-btndetailssession btn btn-primary start'
+          eBtn.className = 'js-btndetailssession btn btn-success start'
           var eIcone = document.createElement('i');
           eIcone.className = 'glyphicon glyphicon-download-alt'
           var eSpan = document.createElement('span');
