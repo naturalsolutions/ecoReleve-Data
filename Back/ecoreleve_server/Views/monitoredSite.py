@@ -24,7 +24,8 @@ class MonitoredSiteView(DynamicObjectView):
         DynamicObjectView.__init__(self, ref, parent)
         self.actions = {'equipment': self.getEquipment,
                         'stations': self.getStations,
-                        'getFields': self.getGrid}
+                        'getFields': self.getGrid,
+                        'history': self.history}
 
     def __getitem__(self, ref):
         if ref in self.actions:

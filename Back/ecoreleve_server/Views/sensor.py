@@ -2,16 +2,29 @@ from ..Models import (
     Sensor,
     MonitoredSite,
     Base,
-    SensorList
+    SensorList,
+    SensorDynPropValue
 )
 from sqlalchemy import select, desc, join, outerjoin
 from collections import OrderedDict
 from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore, context_permissions
-from . import DynamicObjectView, DynamicObjectCollectionView
+from . import DynamicObjectView, DynamicObjectCollectionView, DynamicObjectValue, DynamicObjectValues
 
 
 prefix = 'sensors'
+
+class SensorValueView(DynamicObjectValue):
+    model = SensorDynPropValue
+    item = None
+
+    def retrieve(self):
+        pass
+
+
+class SensorValuesView(DynamicObjectValues):
+    model = SensorDynPropValue
+    item = SensorValueView
 
 
 class SensorView(DynamicObjectView):
@@ -22,6 +35,7 @@ class SensorView(DynamicObjectView):
         DynamicObjectView.__init__(self, ref, parent)
         self.actions = {'equipment': self.getEquipment,
                         'locations': self.getLocations}
+        self.add_child('history', SensorValuesView)
 
     def __getitem__(self, ref):
         if ref in self.actions:
