@@ -89,8 +89,6 @@ define([
     },
 
     cleanOldResult: function() {
-      debugger;
-
       this.r.files.forEach(function (element,idx) {
           delete element.outOfRange;
           delete element.inRange;
@@ -152,23 +150,23 @@ define([
       // this.progressBar.startUpload();
       $('#myPleaseWait').modal({"keyboard":false,"backdrop": "static","show":true});
       $.ajax({
-          type: "POST",
-          url: config.coreUrl + 'sensorDatas/camtrap/concat',
-          data: {
-            path: params.path,
-            action: 0 // create folder
-          }
-        })
-        .done(function (response, status, jqXHR) {
-          if (jqXHR.status === 200) {
-           _this.removeRefusedFiles(_this.r);
-           _this.r.upload();
-          }
-        })
-        .fail(function (jqXHR, textStatus, errorThrown) {
-          console.log("error");
-          console.log(errorThrown);
-        });
+        type: "POST",
+        url: config.coreUrl + 'sensorDatas/camtrap/concat',
+        data: {
+          path: params.path,
+          action: 0 // create folder
+        }
+      })
+      .done(function (response, status, jqXHR) {
+        if (jqXHR.status === 200) {
+         _this.removeRefusedFiles(_this.r);
+         _this.r.upload();
+        }
+      })
+      .fail(function (jqXHR, textStatus, errorThrown) {
+        console.log("error");
+        console.log(errorThrown);
+      });
 
     },
 
