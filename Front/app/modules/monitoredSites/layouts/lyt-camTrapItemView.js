@@ -31,7 +31,7 @@ define([
 		clickFocus : function(e){
 		this.$el.find('img').focus();
 		if( e.ctrlKey) {
-			console.log("LE FOCUS ET LE CTRL KEY");
+			// console.log("LE FOCUS ET LE CTRL KEY");
 		} else {
 				var lastPosition = this.parent.currentPosition;
 			if(lastPosition === null)
@@ -42,9 +42,7 @@ define([
 			if ( this.parent.tabView[lastPosition].$el.find('.vignette').hasClass('active') ) {
 			this.parent.tabView[lastPosition].$el.find('.vignette').removeClass('active');
 			}
-			//console.log(this.parent.tabSelected.length);
 			if( this.parent.tabSelected.length > 0) {//supprime les elements select
-				console.log("ON SUPPRRRIMMMEE");
 				$('#gallery .ui-selected').removeClass('ui-selected').removeClass('already-selected');
 				for ( var i of this.parent.tabSelected ) {
 					if( lastPosition != i  )
@@ -60,8 +58,6 @@ define([
 		},
 
 		handleFocus: function(e) {
-			//console.log(" la liste :")
-			//console.log(this.parent.tabSelected);
 			if( this.parent.tabSelected.length > 0) {
 				$('#gallery .ui-selected').removeClass('ui-selected');
 				$('#gallery').trigger('unselected')
@@ -75,14 +71,11 @@ define([
 
 		},
 		hoveringStart:function(){
-			console.log("je survole la photo");
-			console.log("je charge la photo");
 		},
 
 		initialize : function(options) {
 			this.parent = options.parent;
 			this.lastzoom = null;
-			//console.log(this.model);
 		},
 
 		onRender: function(){
@@ -113,7 +106,6 @@ define([
 		},
 
 		onDestroy: function() {
-			console.log("bim destroy");
 		},
 
 

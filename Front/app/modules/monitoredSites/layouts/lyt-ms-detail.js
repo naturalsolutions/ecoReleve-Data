@@ -188,9 +188,7 @@ define([
         editable: false,
         cell: 'string'
       }];
-       console.log("YOUHOUUUUUUUUUUUU");
-       console.log(config.coreUrl);
-       console.log(this.monitoredSiteId);
+
       this.camTrapGrid = new NsGrid({
         pagingServerSide: false,
         pageSize: 10,
@@ -200,14 +198,9 @@ define([
 
       });
       this.camTrapGrid.rowClicked = function(args) {
-        console.log("bim je clique");
-        console.log(args);
-      //  _this.rowClicked(args);
       };
       this.camTrapGrid.rowDbClicked = function(args) {
         var that = this;
-        console.log("bim je double clique");
-        console.log(args);
         var row = args.row
         var idCamTrap = row.model.get('UnicIdentifier')
         var startDate = row.model.get('StartDate')
@@ -236,21 +229,15 @@ define([
 
     displayGallery: function(id, equipId, date) {
       var _this = this;
-      console.log("on veut la session");
-      console.log("id : " + id );
-      console.log("date :" + date);
-      console.log("equipid :" +equipId );
+
       $.ajax({
         type: "GET",
         url: config.coreUrl  + 'photos/?siteid='+_this.monitoredSiteId+'&equipid='+equipId+'',
       })
       .done( function(response,status,jqXHR){
         if( jqXHR.status === 200 ){
-          console.log("ok");
-          console.log(response);
           _this.ui.map.html('');
           for ( var tmp of response) {
-            console.log(tmp);
             _this.ui.map.append('<img src="'+tmp.path+''+tmp.FileName+'" height="100" /><BR>')
           }
         }

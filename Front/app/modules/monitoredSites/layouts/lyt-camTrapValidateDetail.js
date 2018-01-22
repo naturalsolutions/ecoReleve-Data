@@ -96,11 +96,9 @@ define([
         }
         else{
           ;
-            //console.log("list file");
         }
       }else{
         ;
-        //console.log("rien a faire");
       }
       e.stopPropagation();
     },
@@ -120,7 +118,6 @@ define([
       this.nbPhotosChecked = 0;
       this.stopSpace = false;
 
-      console.log(options);
       this.siteId = options.id;
       this.equipmentId = options.equipId;
       // this.date = options.date;
@@ -142,20 +139,16 @@ define([
       });
 
       this.myImageCollection = new ImageCollection();
-      //this.myImageCollection.sync('patch', this.myImageCollection , { error: function () { console.log(this.myImageCollection); console.log("sync impossible");} });
 
       this.paginator = new Backgrid.Extension.Paginator({
         collection: this.myImageCollection
       });
       this.myImageCollection.on('sync', function() {
-        console.log(_this.myImageCollection);
       });
 
       this.myImageCollection.fetch();
 
       this.paginator.collection.on('reset', function(e){
-        console.log(_this.myImageCollection);
-        //console.log("reset du paginator");
       });
 
     },
@@ -173,7 +166,6 @@ define([
     display: function() {
       var _this = this;
       this.listenTo(this.myImageCollection, 'reset', function(e){// trigger on init or on change page
-        //console.log("reset");
         _this.displayImages(_this.myImageCollection);
       });
       this.currentCollection = this.myImageCollection;
@@ -217,7 +209,6 @@ define([
             break;
           }
           default:{
-            //console.log("bim default");
             this.currentPosition = 0;
             this.tabSelected = [];
             break;
@@ -333,7 +324,6 @@ define([
         $('#rgToolsBarTop .reneco-ecollectionsmall').removeClass('active');
         $('#rgToolsBarTop .reneco-image_file').addClass('active');
         this.ui.gallery.hide();
-        console.log(this.rgModal);
         if(this.rgFullScreen.currentView === undefined) {
           this.rgFullScreen.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
           this.rgFullScreen.$el.addClass("crop2 crop-paginator camtrapgallery");
@@ -344,18 +334,8 @@ define([
             this.rgFullScreen.$el.addClass("crop2 crop-paginator camtrapgallery");
           }
           this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
-          //this.rgFullScreen.currentView.show();
         this.rgFullScreen.$el.show();
         }
-        // if(this.rgModal.currentView === undefined) {
-        //   this.rgModal.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}));
-        //   console.log(this.rgModal);
-        // }
-        // else {
-        //   console.log(this.rgModal);
-        //   this.rgModal.currentView.changeImage(this.tabView[this.currentPosition].model);
-        //   this.rgModal.currentView.onShow();
-        // }
 
       }
     },

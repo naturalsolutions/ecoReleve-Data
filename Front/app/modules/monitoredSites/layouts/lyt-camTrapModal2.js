@@ -75,7 +75,6 @@ define([
 				});
 					popoverContent.find('.rating-container').addClass('text-center');
 
-			console.log(popoverContent ) ;
 			this.parent.$el.find('.backgrid-paginator').css('visibility','hidden');
 			this.parent.$el.find('.paginatorCamTrap').prepend('<div class="infosfullscreen">'
 											+this.model.get('date_creation')+''
@@ -85,19 +84,15 @@ define([
     },
 
 		changeImage:function (model) {
-			console.log("bim je change l'image");
 			this.model = model;
 			this.position = this.parent.currentCollection.fullCollection.indexOf(model) +1 ;
 			this.total = this.parent.currentCollection.fullCollection.length;
-			console.log(this.parent.$el);
-			console.log(this.parent.$el.find('.popover-content'));
 
 			this.parent.$el.find('.popover-content').html('<div class="popover-header"> </div>'
 						+' <img src='+this.model.get('path')+''+this.model.get('FileName')+'  />'
 						+'<input id="rating_'+this.model.get('id')+'" name="input-name" type="number" class="rating hide" value="5" >'
 						+'</div>');
 			var popoverContent = this.parent.$el.find('.popover-content')
-			//console.log(popoverContent ) ;
 
 				popoverContent.find('input').rating({
 					min:0,
