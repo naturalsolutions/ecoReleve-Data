@@ -148,7 +148,7 @@ context_permissions = {
     ],
 
     'individuals': [
-        (Allow, 'group:admin', ('create', 'update', 'read')),
+        (Allow, 'group:admin', ALL_PERMISSIONS),
         (Allow, 'group:superUser', ('update', 'read')),
         (Allow, 'group:user', 'read')
     ],

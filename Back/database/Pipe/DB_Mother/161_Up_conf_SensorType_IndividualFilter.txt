@@ -1,0 +1,10 @@
+UPDATE [ModuleGrids] SET Options='SELECT Distinct Name as label, ID as val FROM SensorType'
+WHERE Module_ID = 8 AND Name = 'FK_SensorType' 
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('161_Up_conf_SensorType_IndividualFilter',GETDATE(),(SELECT db_name()))
+
+
+GO

@@ -114,7 +114,7 @@ require.config({
       exports: 'Radio'
     },
     bootstrap: {
-      deps: ['jquery'],
+      deps: ['jquery', 'jqueryui'],
       exports: 'Bootstrap'
     },
     templates: {

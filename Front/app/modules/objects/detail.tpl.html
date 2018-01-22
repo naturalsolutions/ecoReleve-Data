@@ -32,9 +32,7 @@
       <div class="tab-content crop1 no-padding">
       <% _.each(uiGridConfs, function(uiGridConf, index){ %>
         <div id="<%= uiGridConf.name %>Tab" class="tab-pane full-height fade <%= (index == 0)? 'in active' : '' %>">
-        <% if(uiGridConf.name !== "locations") { %>
-          <div class="js-rg-<%= uiGridConf.name %>-grid full-height"></div>
-        <% } else { %>
+        <% if(uiGridConf.name === "locations") { %>
           <div class="js-rg-<%= uiGridConf.name %>-grid crop1 no-padding"></div>
           <div class="toolbar bottom">
             <button class="js-btn-delete-locations btn btn-danger pull-right">
@@ -42,6 +40,16 @@
               Delete selected locations
             </button>
           </div>
+        <% } else if(uiGridConf.name === "history") { %>
+          <div class="js-rg-<%= uiGridConf.name %>-grid crop1 no-padding"></div>
+          <div class="toolbar bottom">
+            <button disabled class="js-btn-delete-history btn btn-danger pull-right">
+              <i class="reneco reneco-trash"></i> &nbsp;
+              Delete
+            </button>
+          </div>
+        <% } else { %>
+          <div class="js-rg-<%= uiGridConf.name %>-grid full-height"></div>
         <% } %>
         </div>
       <% }); %>

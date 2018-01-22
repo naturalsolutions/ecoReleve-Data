@@ -655,9 +655,24 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
         }
         $(this.eGui).html(displayValue);
       };
-  
+
+      var TextAreaRenderer = function(params) {
+        var value = params.value;
+        var gui = $(params.eGridCell);
+        if(value){
+          gui.attr('title', value);
+          gui.attr('data-original-title', value);
+          
+          gui.tooltip({trigger:'hover', placement:'auto left', container: '.ag-grid-container'});
+          return value;
+        } else {
+          return '';
+        }
+      };
+
       Renderers.NumberRenderer = NumberRenderer;
       Renderers.TextRenderer = TextRenderer;
+      Renderers.TextAreaRenderer = TextAreaRenderer;
       Renderers.DateTimeRenderer = DateTimeRenderer;
       Renderers.ThesaurusRenderer = ThesaurusRenderer;
       Renderers.ObjectPickerRenderer = ObjectPickerRenderer;

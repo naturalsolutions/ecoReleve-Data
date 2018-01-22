@@ -1,4 +1,4 @@
-name: erd2
+name: erd_env
 channels:
 - defaults
 dependencies:
@@ -7,11 +7,10 @@ dependencies:
   - pyramid=1.5.7
   - pandas=0.20.3
   - reportlab=3.4.0
-  # - pywin32=220 # only for Windows OS, else comment this row
   - pycrypto=2.6.1
   - sqlalchemy=1.1.13
   - pyodbc=4.0.17
-  - zope.interface=4.1.2
+  - zope.interface
   - psutil
 
   - pip:

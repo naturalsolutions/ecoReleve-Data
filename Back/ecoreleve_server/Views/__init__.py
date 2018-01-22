@@ -113,11 +113,66 @@ class AutocompleteView(CustomView):
         return [dict(row) for row in self.session.execute(query).fetchall()]
 
 
+class DynamicObjectValue(CustomView):
+    model = None
+
+    def __init__(self, ref, parent):
+        CustomView.__init__(self, ref, parent)
+        self.objectDB = self.session.query(self.model).get(ref)
+
+    def retrieve(self):
+        pass
+
+    def delete(self):
+        self.session.delete(self.objectDB)
+
+
+class DynamicObjectValues(CustomView):
+    def retrieve(self):
+        from ..utils.parseValue import formatThesaurus
+
+        propertiesTable = Base.metadata.tables[self.parent.objectDB.GetDynPropTable()]
+        dynamicValuesTable = Base.metadata.tables[self.parent.objectDB.GetDynPropValuesTable()]
+        FK_name = self.parent.objectDB.GetSelfFKNameInValueTable()
+        FK_property_name = self.parent.objectDB.GetDynPropFKName()
+
+        tableJoin = join(dynamicValuesTable, propertiesTable,
+                         dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
+        query = select([dynamicValuesTable, propertiesTable.c['Name']]
+                       ).select_from(tableJoin).where(
+            dynamicValuesTable.c[FK_name] == self.parent.objectDB.ID
+        ).order_by(desc(dynamicValuesTable.c['StartDate']))
+
+        result = self.session.execute(query).fetchall()
+        response = []
+
+        for row in result:
+            curRow = OrderedDict(row)
+            dictRow = {}
+            for key in curRow:
+                if curRow[key] is not None:
+                    if key == 'ValueString' in key and curRow[key] is not None:
+                        try:
+                            thesauralValueObj = formatThesaurus(curRow[key])
+                            dictRow['value'] = thesauralValueObj['displayValue']
+                        except:
+                            dictRow['value'] = curRow[key]
+                    elif 'FK' not in key:
+                        dictRow[key] = curRow[key]
+            dictRow['StartDate'] = curRow[
+                'StartDate'].strftime('%Y-%m-%d %H:%M:%S')
+            response.append(dictRow)
+
+        return response
+
+    def delete(self):
+        pass
+
 class DynamicObjectView(CustomView):
 
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
-        self.__actions__ = {'history': self.history,
+        self.__actions__ = {
                             '0': self.parent.getForm,
                             }
 
@@ -169,43 +224,6 @@ class DynamicObjectView(CustomView):
         self.session.delete(self.objectDB)
         self.objectDB.afterDelete()
         return 'deleted'
-
-    def history(self):
-        from ..utils.parseValue import formatThesaurus
-
-        propertiesTable = Base.metadata.tables[self.objectDB.GetDynPropTable()]
-        dynamicValuesTable = Base.metadata.tables[self.objectDB.GetDynPropValuesTable()]
-        FK_name = self.objectDB.GetSelfFKNameInValueTable()
-        FK_property_name = self.objectDB.GetDynPropFKName()
-
-        tableJoin = join(dynamicValuesTable, propertiesTable,
-                         dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
-        query = select([dynamicValuesTable, propertiesTable.c['Name']]
-                       ).select_from(tableJoin).where(
-                dynamicValuesTable.c[FK_name] == self.objectDB.ID
-            ).order_by(desc(dynamicValuesTable.c['StartDate']))
-
-        result = self.session.execute(query).fetchall()
-        response = []
-
-        for row in result:
-            curRow = OrderedDict(row)
-            dictRow = {}
-            for key in curRow:
-                if curRow[key] is not None:
-                    if key == 'ValueString' in key and curRow[key] is not None:
-                        try:
-                            thesauralValueObj = formatThesaurus(curRow[key])
-                            dictRow['value'] = thesauralValueObj['displayValue']
-                        except:
-                            dictRow['value'] = curRow[key]
-                    elif 'FK' not in key:
-                        dictRow[key] = curRow[key]
-            dictRow['StartDate'] = curRow[
-                'StartDate'].strftime('%Y-%m-%d %H:%M:%S')
-            response.append(dictRow)
-
-        return response
 
 
 class DynamicObjectCollectionView(CustomView):
