@@ -158,13 +158,23 @@ class IndividualsView(DynamicObjectCollectionView):
         from ..GenericObjets.SearchEngine import QueryEngine, DynamicPropertiesQueryEngine
         from ..Models.Equipment import Equipment
         table = Base.metadata.tables['IndividualEquipment']
-        collection = DynamicPropertiesQueryEngine(self.session, Individual, object_type=1, from_history='10/01/2012')  #, object_type=1, from_history='10/01/2012' )
+        collection = DynamicPropertiesQueryEngine(self.session, Individual, from_history=None, object_type=1)  #, object_type=1, from_history='10/01/2012' )
 
         filters = [
+            # {
+            #     'Column':'ID',
+            #     'Operator':'>',
+            #     'Value': '100000'
+            # },  
             {
-                'Column':'ID',
-                'Operator':'>',
-                'Value': '100000'
+                'Column':'Sex',
+                'Operator':'is',
+                'Value': 'femelle'
+            },
+            {
+                'Column':'Monitoring_Status',
+                'Operator':'is null',
+                'Value': 'retiré'
             },
             # {
             #     'Column':'Species',
@@ -177,10 +187,9 @@ class IndividualsView(DynamicObjectCollectionView):
             #     'Value': 'mort'
             # }
         ]
-        result = collection.search(filters, limit=200, order_by=['Sex:desc'])
-        # count = collection._count(filters)
-        return result
-        # return [{'total_entries': count}, result]
+        result = collection.search(filters, limit=1000) #, order_by=['Sex:desc'])
+        count = collection._count(filters)
+        return [{'total_entries': count}, result]
 
 
 
