@@ -72,7 +72,7 @@ define([
       'click i#rightMouvementBtn': 'rightMouvement',
       'click i#acceptedBtn': 'acceptPhoto',
       'click button#validate': 'validateAll',
-      'click .reneco-ecollectionsmall': 'clickOnIconeView',
+      'click .reneco-ECOL-ecollectionsmall': 'clickOnIconeView',
       'click .reneco-image_file': 'clickOnIconeView',
       'click .reneco-list': 'clickOnIconeView',
       'click #js_accepted_top': 'filterCollectionCtrl',
@@ -83,8 +83,8 @@ define([
       'click button#filternavbtn': 'filterNavOpen',
       'click i#closeNav': 'filterNavClose',
       'click input[name="filterstatus"]': 'filterCollectionCtrl',
-      'click button#js-create-station-pending': 'createStation',
-      'click button#js-delete-station-pending': 'removeStation'
+      'click i#createStationBtn': 'createStation',
+      'click i#deleteStationBtn': 'removeStation'
     },
 
     ui: {
@@ -247,7 +247,6 @@ define([
               var indexElem = tabOfIds.findIndex(function (elem) {
                 return Number(item) === elem;
               });
-              console.log("on va suppr avec id : ", indexElem);
               tabOfItem[indexElem].removeStation();
             }
           })
@@ -388,7 +387,7 @@ define([
       if ($elemToInactive[0] != $elemToActive[0]) { //handle click on same icon
         $elemToInactive.toggleClass('active'); //remove active actual elem
         $elemToActive.toggleClass('active'); // add active elem clicked
-        if ($elemToActive.hasClass('reneco-ecollectionsmall')) {
+        if ($elemToActive.hasClass('reneco-ECOL-ecollectionsmall')) {
           /*  this.ui.gallery.show();
             this.rgFullScreen.currentView.hide();
             this.rgFullScreen.$el.hide()*/
@@ -893,7 +892,7 @@ define([
     leaveModal: function (e) {
       if (this.stopSpace) {
         this.stopSpace = false;
-        $('#rgToolsBarTop .reneco-ecollectionsmall').addClass('active');
+        $('#rgToolsBarTop .reneco-ECOL-ecollectionsmall').addClass('active');
         $('#rgToolsBarTop .reneco-image_file').removeClass('active');
         if (this.rgFullScreen.currentView !== undefined) {
           this.rgFullScreen.$el.removeClass("crop2 crop-paginator");
@@ -909,7 +908,7 @@ define([
       if (this.currentPosition !== null && !this.stopSpace) { //il faut une position pour afficher le modal
         /*activate icon*/
         this.stopSpace = true;
-        $('#rgToolsBarTop .reneco-ecollectionsmall').removeClass('active');
+        $('#rgToolsBarTop .reneco-ECOL-ecollectionsmall').removeClass('active');
         $('#rgToolsBarTop .reneco-image_file').addClass('active');
         this.ui.gallery.hide();
         //console.log(this.rgFullScreen);
@@ -1204,63 +1203,19 @@ define([
     roundDate: function (date, duration) {
       return moment(Math.floor((+date) / (+duration)) * (+duration));
     },
-
     displaySwalUnchecked: function (compteur) {
       var _this = this;
-      /*
-      this.sensorId = this.model.get('fk_sensor');
-      this.siteId = this.model.get('FK_MonitoredSite');
-      this.equipmentId = this.model.get('equipID');
-
-      */
       Swal({
-          title: 'Warning validate without check ALL photos',
-          text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n' + 'If you continue all of this photos will be accept automatically\n\n Please write "FORCED VALIDATION" if you want to continue',
-          type: 'input',
-          showCancelButton: true,
+          title: 'You can\'t validate this sessions',
+          text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
+          type: 'error',
+          showCancelButton: false,
           confirmButtonColor: 'rgb(218, 146, 15)',
 
           confirmButtonText: 'Ok',
-
           closeOnConfirm: false,
-          inputPlaceholder: "Write something"
-        },
-        function (inputValue) {
-          if (inputValue === false)
-            return false;
-          if (inputValue == "FORCED VALIDATION") {
-            //Swal("Nice!", "You wrote: " + inputValue, "success");
-            _this.displaySwalValidate();
-          } else {
-            Swal.showInputError("You need to write FORCED VALIDATION");
-            return false;
-          }
-
-        },
-        function (isConfirm) {
-
-          //_this.displaySwalValidate();
-
-          // $.ajax({
-          //   url : config.coreUrl+'sensors/'+_this.type+'/uncheckedDatas',
-          //   method: 'POST',
-          //   data: {
-          //         fk_Sensor : _this.sensorId,
-          //         fk_MonitoredSite : _this.siteId,
-          //         fk_EquipmentId : _this.equipmentId,
-          //   /*data : JSON.stringify(_this.myImageCollection.fullCollection)*/ },
-          //   context: _this,
-          // })
-          // .done( function(response,status,jqXHR) {
-          // })
-          // .fail( function(jqXHR, textStatus, errorThrown) {
-          //
-          // });
-          //TODO mettre le status validated a 8 pour sauvegarder la validation de force
-
         }
       );
-      //_this.swal({title:"warning",text:"You gonna validate without checked "+String(nbUnchecked)+" photos"},"warning");
     },
 
     displaySwalValidate: function (compteur) {

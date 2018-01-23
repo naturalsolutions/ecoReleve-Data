@@ -88,7 +88,7 @@ define([
       if( $elemToInactive[0]  != $elemToActive[0]) { //handle click on same icon
        $elemToInactive.toggleClass('active'); //remove active actual elem
        $elemToActive.toggleClass('active'); // add active elem clicked
-       if($elemToActive.hasClass('reneco-ecollectionsmall')){
+       if($elemToActive.hasClass('reneco-ECOL-ecollectionsmall')){
           this.leaveModal(e);
         }
         else if( $elemToActive.hasClass('reneco-image_file') ) {
@@ -305,7 +305,7 @@ define([
     leaveModal: function(e){
       if (this.stopSpace) {
         this.stopSpace = false;
-        $('#rgToolsBarTop .reneco-ecollectionsmall').addClass('active');
+        $('#rgToolsBarTop .reneco-ECOL-ecollectionsmall').addClass('active');
         $('#rgToolsBarTop .reneco-image_file').removeClass('active');
         if(this.rgFullScreen.currentView !== undefined) {
           this.rgFullScreen.$el.removeClass("crop2 crop-paginator camtrapgallery");
@@ -321,7 +321,7 @@ define([
       if(this.currentPosition !== null && !this.stopSpace) { //il faut une position pour afficher le modal
         /*activate icon*/
         this.stopSpace = true;
-        $('#rgToolsBarTop .reneco-ecollectionsmall').removeClass('active');
+        $('#rgToolsBarTop .reneco-ECOL-ecollectionsmall').removeClass('active');
         $('#rgToolsBarTop .reneco-image_file').addClass('active');
         this.ui.gallery.hide();
         if(this.rgFullScreen.currentView === undefined) {
