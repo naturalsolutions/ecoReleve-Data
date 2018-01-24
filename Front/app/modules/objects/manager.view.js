@@ -53,6 +53,11 @@ define([
     initialize: function(options) {
       this.options = options;
       this.model = new this.ModelPrototype();
+
+      if(options.enableNew){
+        this.model.set('disabledNew', undefined)
+      }
+
       this.com = new Com();
       if( window.app.currentData ){
         this.populateCurrentData(window.app.currentData);

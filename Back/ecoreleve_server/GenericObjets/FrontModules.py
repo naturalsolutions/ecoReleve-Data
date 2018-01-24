@@ -13,6 +13,7 @@ from sqlalchemy.dialects.mssql.base import BIT
 from sqlalchemy.orm import relationship
 import json
 from pyramid import threadlocal
+from ..utils.parseValue import isNumeric
 
 
 FieldSizeToClass = {0: 'col-md-3', 1: 'col-md-6', 2: 'col-md-12'}
@@ -193,6 +194,8 @@ class ModuleForms(Base):
         # default value
         default = self.DefaultValue
         if default is not None:
+            if isNumeric(default):
+                default = float(default)
             self.dto['defaultValue'] = default
 
         if isGrid:
