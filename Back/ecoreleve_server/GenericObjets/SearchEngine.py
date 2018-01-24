@@ -20,6 +20,10 @@ from sqlalchemy.inspection import inspect
 from datetime import datetime
 from ..utils.parseValue import parser
 
+#######
+#TODO : Need to implement interface for in DB configuration, in order to optimize query
+#######
+
 
 eval_ = Eval()
 
@@ -28,13 +32,14 @@ class ColumnError(Exception):
 
 
 class QueryEngine(object):
-    ''' This class is used to filter object model over all properties, all relationships
+    '''
+    This class is used to filter Model | Table | View over all properties, all relationships
     '''
 
     def __init__(self, session, model):
         '''
         @session :: SQLAlchemy Connection Session,
-        model :: SQLAlchemy Model or Table object (and View too)
+        @model :: SQLAlchemy Model or Table object (and View too)
         '''
         self.session = session
         self.model = model
@@ -42,8 +47,8 @@ class QueryEngine(object):
     @property
     def pk_model(self):
         '''
-        detect automatically the primary key of the model/table,
         @returning SQLAlchemy Column Object
+        Detect automatically the primary key of the model/table,
         '''
         try:
             return inspect(self.model).primary_key[0]
@@ -52,10 +57,11 @@ class QueryEngine(object):
 
     def init_query_statement(self, selectable):
         '''
+        @selectable :: list(str|SQLAlchemy Column)
         @returning :: SQLAlchemy Query Object
 
         initialize "SELECT FROM" statement
-        TODO doc --> explain selectable
+        @selectable corrsponding to the columns you need in the SELECT statement
         '''
         self.selectable = []
         join_table = self._select_from()
@@ -232,7 +238,8 @@ class DynamicPropertiesQueryEngine(QueryEngine):
         if not self.from_history or self.from_history == 'all':
             self.dynamic_values_view = self.model.LastDynamicValueViewClass
 
-        #if we search value at a specific date we want to show latest value of dynamic properties objects AT this date
+        #if we search value at a specific date we want to show 
+        # latest value of dynamic properties objects AT this date, we need a new CTE
         elif type(self.from_history) is datetime:
             v2 = aliased(valueTable)
             queryExists = select(v2.c
@@ -254,9 +261,6 @@ class DynamicPropertiesQueryEngine(QueryEngine):
         return self.dynamic_values_view
 
     def _where(self, query, criteria):
-        '''
-        TODO doc
-        '''
         _property = self.get_dynamic_property_by_name(criteria['Column'])
         if _property:
             query = self._where_exists(query, criteria)
@@ -266,8 +270,11 @@ class DynamicPropertiesQueryEngine(QueryEngine):
 
     def _where_exists(self, query, criteria):
         '''
-        used to apply filter on dynamic properties
-        perform a where exists clause
+        @query :: SQLAlchemy query object,
+        @criteria :: dict
+
+        Used to apply filter on dynamic properties.
+        Perform a where exists clause, increasing performance, mostly during count query
         '''
         column_name = criteria['Column']
         _property = self.get_dynamic_property_by_name(criteria['Column'])
@@ -308,14 +315,13 @@ class DynamicPropertiesQueryEngine(QueryEngine):
                                     criteria['Value']
                                     )
                                 )
-
         query = query.where(exists(exists_query))
         return query
 
     def _select_from(self):
         '''
         @returning :: SQLAlchemy outerjoin
-        return the FROM statement with all junctures over all dynamic properties knew
+        return the FROM statement with all junctures over all known dynamic properties
         '''
         join_table = self.model
 
@@ -330,8 +336,9 @@ class DynamicPropertiesQueryEngine(QueryEngine):
             self.selectable.append(column.label(prop['Name']))
         return join_table
 
-    def search(self, filters, selectable=[], order_by=None, limit=None, offset=None):
-        return QueryEngine.search(self, filters, selectable, order_by, limit, offset)
+    # def search(self, filters, selectable=[], order_by=None, limit=None, offset=None):
+    #     #NOT overloaded 
+    #     return QueryEngine.search(self, filters, selectable, order_by, limit, offset)
 
     def get_alias_property_values(self, _property):
         '''

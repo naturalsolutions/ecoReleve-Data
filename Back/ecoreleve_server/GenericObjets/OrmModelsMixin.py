@@ -37,13 +37,21 @@ from sqlalchemy.orm.util import has_identity
 
 
 class CreateView(Executable, ClauseElement):
+
     def __init__(self, name, select):
+        '''
+        @name :: string, the view name,
+        @select :: query object, the SELECT Statement of the view
+        '''
         self.name = name
         self.select = select
 
 
 @compiles(CreateView)
 def visit_create_view(element, compiler, **kw):
+    '''
+    View query builder
+    '''
     return "CREATE VIEW %s AS %s" % (
         element.name,
         compiler.process(element.select, literal_binds=True)
@@ -51,6 +59,10 @@ def visit_create_view(element, compiler, **kw):
 
 
 class ORMUtils(object):
+    '''
+    DOC
+    '''
+
     def as_dict(self):
         hybrid_properties = list(get_hybrid_properties(self.__class__).keys())
         values = {c.key: getattr(self, c.key)
@@ -62,6 +74,9 @@ class ORMUtils(object):
 
 
 class GenericType(ORMUtils):
+    '''
+    DOCCCCC
+    '''
     __tablename__ = None
     ID = Column(Integer, primary_key=True)
     Name = Column(String(250), nullable=False)
@@ -70,6 +85,11 @@ class GenericType(ORMUtils):
 
     @classmethod
     def getPropertiesClass(cls):
+        '''
+        This method is called during the declaration of the class.
+        Declare the database Model of dynamic properties Table, with unique constraint.
+        @returning SQLAlchemy Model
+        '''
         if not hasattr(cls, 'PropertiesClass'):
             class Properties(ORMUtils):
                 __tablename__ = cls.parent.__tablename__ + 'DynProp'
@@ -91,6 +111,11 @@ class GenericType(ORMUtils):
 
     @declared_attr
     def _properties(cls):
+        '''
+        This method is called during the declaration of the class.
+        Declare junctures to get dynamic properties according type of object
+        @returning SQLAlchemy Relationship
+        '''
         Properties = cls.getPropertiesClass()
         linkedTable = cls.__tablename__ + '_' + cls.parent.__tablename__ + 'DynProp'
         dynpropTable = Properties.__tablename__
@@ -105,10 +130,18 @@ class GenericType(ORMUtils):
 
     @declared_attr
     def properties(cls):
+        '''
+        @returing the names of dynamic properties
+        '''
         return association_proxy('_properties', 'Name')
 
     @declared_attr
     def _type_properties(cls):
+        '''
+        This method is called during the declaration of the class.
+        Declare the database Model of links betwen dynamic properties and types.
+        @returning SQLAlchemy Model
+        '''
         if not hasattr(cls, 'TypePropertiesClass'):
             this = cls
 
@@ -146,7 +179,12 @@ class GenericType(ORMUtils):
 
 
 class EventRuler(object):
-
+    '''
+    This class corresponding to a business layer, 
+    load and bind stored procedures to ORM event before|after create|update|delete
+    trig by the model during the commit of the session.
+    Bindings of stored prodecedures is configured in the BusinessRules Table
+    '''
     @classmethod
     def getBuisnessRules(cls):
         return dbConfig['dbSession']().query(BusinessRules
@@ -155,6 +193,9 @@ class EventRuler(object):
 
     @declared_attr
     def loadBusinessRules(cls):
+        ''' 
+        
+        '''
         @event.listens_for(Base.metadata, 'after_create')
         def afterConfigured(target, connection, **kwargs):
             cls.__constraintRules__ = {'before_update': [],
@@ -202,6 +243,9 @@ class EventRuler(object):
 
     @classmethod
     def executeBusinessRules(cls, target, event):
+        '''
+        '''
+
         if cls.__constraintRules__[event]:
             entityDTO = target.values
             for rule in cls.__constraintRules__[event]:
@@ -211,12 +255,14 @@ class EventRuler(object):
 
 
 class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
-
+    '''
+    TODO remove Configuration(ConfiguredDbObjectMapped) dependency
+    --> Move on BaseView (DynamicObjectCollectionView)
+    '''
     def __init__(self, *args, **kwargs):
         self.__values__ = {}
         ConfiguredDbObjectMapped.__init__(self)
-        ORMUtils.__init__(self)
-        EventRuler.__init__(self)
+
         self.session = kwargs.get('session', None) or threadlocal.get_current_request(
         ).dbsession if threadlocal.get_current_request() else None
 
@@ -237,13 +283,19 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
     @orm.reconstructor
     def init_on_load(self):
+        '''
+        This method is called during the instanciation of model,
+        after the fecth of data, using the SQLAlchemy Query API 
+        '''
         self.session = inspect(self).session
         self.__values__ = {}
 
     def getValues(self):
-        ''' return flat data dict '''
+        '''
+        @returning :: dict,
+        return the flat data dict of the model
+        '''
         self.__values__ = self.as_dict()
-        # return self.__values__
 
     @property
     def values(self):
@@ -256,6 +308,11 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
             self.setValue(prop, value)
 
     def setValue(self, propertyName, value):
+        '''
+        @propertyName :: string,
+        @value :: string, integer, float, ... every type Database compliant
+        '''
+        #check if propertyName corresponding to a column
         if not hasattr(self, propertyName):
             if propertyName in self.__table__.c:
                 propertyName = class_mapper(inspect(self).class_
@@ -266,15 +323,6 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
                 return
         setattr(self, propertyName, parser(value))
         self.__values__[propertyName] = value
-
-        # if hasattr(self, propertyName):
-        #     setattr(self, propertyName, parser(value))
-        # elif propertyName in self.__table__.c:
-        #     propertyName = class_mapper(inspect(self).class_
-        #                                 ).get_property_by_column(
-        #                                     self.__table__.c[propertyName]
-        #     ).key
-        #     setattr(self, propertyName, parser(value))
 
     def beforeDelete(self):
         pass
@@ -326,7 +374,7 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
 
 class HasDynamicProperties(HasStaticProperties):
-    ''' core object creating all stuff to manage dynamic
+    '''Core object creating all stuff to manage dynamic
         properties on a new declaration:
             create automatically tables and relationships:
                 - Type
@@ -334,12 +382,13 @@ class HasDynamicProperties(HasStaticProperties):
                 - PropertyValues
                 - Type_Properties
 
-            create automatically indexes, uniques constraints and view
+        Create automatically indexes, uniques constraints and view.
         history_track parameter (default:True) is used to track new property's value
         and get historization of dynamic properties
 
         __values__ property represents the current state of object values, is available by "self.values" property 
     '''
+
     ANALOG_DYNPROP_TYPES = {'String': 'ValueString',
                         'Float': 'ValueFloat',
                         'Date': 'ValueDate',
@@ -627,7 +676,6 @@ class HasDynamicProperties(HasStaticProperties):
             @propertyName : string value of the property, existing in type of object
             @value: value to update (string, int, float, date)
             @useDate: datetime used to set dynamic values or None
-
         '''
         prop = self.get_property_by_name(propertyName)
         curValue = None
