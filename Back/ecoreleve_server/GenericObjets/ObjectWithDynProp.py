@@ -275,7 +275,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
     def deleteLinkedField(self, useDate=None, previousState=None):
         # request = threadlocal.get_current_request()
         # session = request.registry.dbmaker()
-        session = dbConfig['dbSession']
+        session = self.session
 
         if useDate is None:
             useDate = self.linkedFieldDate()

@@ -194,11 +194,7 @@ class Observation(Base, ObjectWithDynProp):
 
     def beforeDelete(self):
         self.LoadNowValues()
-
-
-@event.listens_for(Observation, 'after_delete')
-def unlinkLinkedField(mapper, connection, target):
-    target.deleteLinkedField()
+        self.deleteLinkedField()
 
 
 class ObservationDynPropValue(Base):
