@@ -1,8 +1,8 @@
-from ..Models import thesaurusDictTraduction
 from pyramid import threadlocal
 from ..Models import Base
 from sqlalchemy import select
 from datetime import datetime
+
 
 dictVal = {
     'null': None,
@@ -83,7 +83,7 @@ def formatValue(data, schema):
         if key in schema:
             if schema[key]['type'] == 'AutocompTreeEditor':
                 data[key] = formatThesaurus(
-                    data[key], schema[key]['options']['startId'])
+                    schema[key]['options']['startId'], data[key])
             elif (schema[key]['type'] == 'ObjectPicker'
                     and key != 'FK_Individual'
                     and 'usedLabel' in schema[key]['options']):
@@ -92,7 +92,9 @@ def formatValue(data, schema):
     return data
 
 
-def formatThesaurus(data, nodeID=None):
+def formatThesaurus(nodeId, data):
+    from ..utils.loadThesaurus import thesaurusDictTraduction
+
     lng = threadlocal.get_current_request(
     ).authenticated_userid['userlanguage']
     try:
@@ -108,7 +110,7 @@ def formatThesaurus(data, nodeID=None):
             if type(displayValue) is list:
                 displayValue = displayValue[0]
         data = {
-            'displayValue': displayValue[lng],
+            'displayValue': thesaurusDictTraduction[nodeId][lng][data],
             'value': data
         }
     except:
@@ -119,6 +121,19 @@ def formatThesaurus(data, nodeID=None):
             'value': data
         }
     return data
+
+
+def retrieveThesaurusFromLng(data, lng):
+    from ..utils.loadThesaurus import thesaurusDictTraduction
+    # lng = 'en'
+    # data = 'dead'
+    for node, children in thesaurusDictTraduction.items():
+        print('searching in node : ' + node)
+        filtering = list(
+            filter(lambda k: children[lng][k] == data, children[lng].keys()))
+        if filtering:
+            break
+    return filtering[0]
 
 
 def formatObjetPicker(data, key, label):

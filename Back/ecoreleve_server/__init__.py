@@ -14,12 +14,12 @@ from .Models import (
     BaseExport,
     dbConfig,
     db,
-    loadThesaurusTrad,
     groupfinder
 )
 from .Views import add_routes, add_cors_headers_response_callback
 from pyramid.events import NewRequest
 from sqlalchemy.orm import sessionmaker, scoped_session
+from .utils.loadThesaurus import loadThesaurusTrad
 
 
 def datetime_adapter(obj, request):
@@ -80,13 +80,17 @@ def main(global_config, **settings):
     dbConfig['wsThesaurus'] = {}
     dbConfig['wsThesaurus']['wsUrl'] = settings['wsThesaurus.wsUrl']
     dbConfig['wsThesaurus']['lng'] = settings['wsThesaurus.lng']
+    dbConfig['wsThesaurus']['authURL'] = settings['wsThesaurus.authURL']
+    dbConfig['wsThesaurus']['authID'] = settings['wsThesaurus.authID']
+    dbConfig['wsThesaurus']['authPWD'] = settings['wsThesaurus.authPWD']
     dbConfig['data_schema'] = settings['data_schema']
 
     config = Configurator(settings=settings)
     config.include('pyramid_tm')
     config.include('pyramid_jwtauth')
 
-    config.registry.dbmaker = scoped_session(sessionmaker(bind=engine, autoflush=False))
+    config.registry.dbmaker = scoped_session(
+        sessionmaker(bind=engine, autoflush=False))
     dbConfig['dbSession'] = scoped_session(sessionmaker(bind=engine))
     config.add_request_method(db, name='dbsession', reify=True)
 

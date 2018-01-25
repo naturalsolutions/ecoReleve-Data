@@ -1,4 +1,4 @@
-from ..Models import Base, thesaurusDictTraduction
+from ..Models import Base
 from sqlalchemy import (
     select,
     and_,
@@ -115,7 +115,7 @@ class ListObjectWithDynProp():
         ''' Get configured properties to display '''
         if self.typeObj:
             confGridType = self.session.query(ModuleGrids
-                                                 ).filter(
+                                              ).filter(
                 and_(ModuleGrids.Module_ID == self.frontModule.ID,
                      or_(ModuleGrids.TypeObj == self.typeObj,
                          ModuleGrids.TypeObj == None)))
@@ -289,11 +289,13 @@ class ListObjectWithDynProp():
         data = []
         dataConfigWithThesaurus = list(
             filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType, self.Conf))
+        listWithThes = list(
+            map(lambda x: {'name': x.Name, 'options': x.Options}, listWithThes))
         # listWithThes = list(map(lambda x: x.Name, listWithThes))
 
         # change thesaural term into laguage user
         for row in result:
-            row = dict(map(lambda i: tradThesaurusTermV2(i, dataConfigWithThesaurus), row.items()))
+            row = dict(map(lambda k: tradThesaurusTerm(k, listWithThes, userLng.lower()), row.items()))
             data.append(row)
         return data
 
@@ -425,8 +427,8 @@ class ListObjectWithDynProp():
         filterCriteria = eval_.eval_binary_expr(
             self.GetDynPropValueView(
                 countHisto=countHisto).c['Value' + curDynProp['TypeProp']],
-                criteria['Operator'],
-                criteria['Value'])
+            criteria['Operator'],
+            criteria['Value'])
         if filterCriteria is not None and 'null' not in criteria['Operator'].lower():
             existQuery = select(
                 [self.GetDynPropValueView(countHisto=countHisto)])
@@ -536,10 +538,13 @@ def splitFullPath(key, listWithThes):
 
 
 def tradThesaurusTerm(key, listWithThes, userLng='en'):
+    from ..utils.loadThesaurus import thesaurusDictTraduction
     name, val = key
     try:
-        if name in listWithThes:
-            newVal = thesaurusDictTraduction[val][userLng]
+        withThes = list(filter(lambda x: x['name'] == name, listWithThes))
+        if len(withThes) > 0:
+            newVal = thesaurusDictTraduction[withThes[0]
+                                             ['options']][userLng][val]
         else:
             newVal = val
     except:
