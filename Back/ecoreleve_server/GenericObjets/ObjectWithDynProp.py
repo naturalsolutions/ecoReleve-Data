@@ -251,7 +251,7 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
 
             # remove linked field if target object is different of previous
 
-            if previousState and str(linkedSource) != str(previousState.get(linkProp['LinkSourceID'])):
+            if self.ID and previousState and str(linkedSource) != str(previousState.get(linkProp['LinkSourceID'])):
                 self.deleteLinkedField(previousState=previousState)
 
             try:
@@ -261,11 +261,9 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
                 continue
 
             if linkedObj in entitiesToUpdate:
-                entitiesToUpdate[linkedObj][linkedPropName] = self.getProperty(
-                    curPropName)
+                entitiesToUpdate[linkedObj][linkedPropName] = data.get(curPropName, None)
             else:
-                entitiesToUpdate[linkedObj] = {
-                    linkedPropName: self.getProperty(curPropName)}
+                entitiesToUpdate[linkedObj] = {linkedPropName: data.get(curPropName, None)}
 
         for entity in entitiesToUpdate:
             data = entitiesToUpdate[entity]
@@ -273,8 +271,6 @@ class ObjectWithDynProp(ConfiguredDbObjectMapped, DbObject):
             entity.updateFromJSON(data, startDate=useDate)
 
     def deleteLinkedField(self, useDate=None, previousState=None):
-        # request = threadlocal.get_current_request()
-        # session = request.registry.dbmaker()
         session = self.session
 
         if useDate is None:
