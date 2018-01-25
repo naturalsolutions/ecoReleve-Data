@@ -1,0 +1,157 @@
+
+
+ALTER PROCEDURE [dbo].[MessageERDImportFromTrack]
+AS
+BEGIN
+	print 'MessageERDImportFromTrack'
+	
+	DECLARE @TInsetedId TABLE
+	(
+	Id INT
+	)
+	
+	BEGIN TRY
+	BEGIN TRAN
+		------------------------- GESTION DES SUJETS -------------------------
+		print 'Individu insertion'
+		-- Insertion des nouveaux sujets
+		INSERT INTO [Individual]
+			   (
+			   [creationDate]
+			   ,[Age]
+			   ,[Birth_date]
+			   ,[Death_date]
+			   ,[FK_IndividualType]
+			   ,[Species]
+			   ,Original_ID
+			   )
+			  OUTPUT inserted.ID into @TInsetedId
+		SELECT distinct Getdate(),NULL,CONVERT(DATETIME,BD.PropValue,120) ,NULL,1,E.PropValue,m.Provenance +'_'+CONVERT(VARCHAR,M.objectID)
+		FROM  TMessageReceived M 
+	--	JOIN  TMessageReceivedDetail S ON M.pk_MessageReceived=S.fk_MessageReceived and S.PropName = 'TInd_Sexe'
+		JOIN  TMessageReceivedDetail BD ON M.pk_MessageReceived=BD.fk_MessageReceived and BD.provenance = m.provenance and BD.PropName = 'TInd_DateNaissance' 
+		JOIN  TMessageReceivedDetail E ON M.pk_MessageReceived=E.fk_MessageReceived and E.provenance = m.provenance and E.PropName = 'TInd_Espece'  
+		WHERE Importdate IS NULL AND M.ObjectType ='Individu' AND m.Provenance LIKE 'TRACK_%'
+		AND NOT EXISTS (SELECT * FROM [Individual] S WHERE [FK_IndividualType] =1 and S.Original_ID = m.Provenance +'_' +CONVERT(VARCHAR,m.ObjectId))
+		
+
+		print 'Inserting DYnPropValues'
+		-- INserttion  des propriétées dynamiques 
+		INSERT INTO [IndividualDynPropValue]
+			   ([StartDate]
+			   ,[ValueInt]
+			   ,[ValueString]
+			   ,[ValueDate]
+			   ,[ValueFloat]
+			   ,FK_Individual
+			   ,FK_IndividualDynProp)
+		SELECT distinct  GETDATE()
+		,CASE WHEN DP.TypeProp = 'integer' THEN CONVERT(int,D.PropValue) ELSE NULL END
+		,CASE WHEN DP.TypeProp = 'string' THEN D.PropValue ELSE NULL END
+		,CASE WHEN DP.TypeProp = 'date' THEN CONVERT(DATETIME,D.PropValue,120) ELSE NULL END
+		,CASE WHEN DP.TypeProp = 'float' THEN CONVERT(float,D.PropValue) ELSE NULL END
+		,I.ID
+		,DP.ID
+		FROM 	TMessageReceived M 
+		JOIN Individual I on I.Original_Id = M.Provenance+'_' + CONVERT(VARCHAR,m.ObjectId)
+		JOIN  TMessageReceivedDetail D ON M.pk_MessageReceived=D.fk_MessageReceived and D.provenance = m.provenance
+		JOIN TMessageDynPropvsTrack CDP ON CDP.TrackName = D.PropName
+		JOIN IndividualDynProp DP ON CDP.ERDName = DP.Name
+		WHERE Importdate IS NULL AND M.ObjectType ='individu' AND m.Provenance LIKE 'TRACK_%'
+		AND i.ID in (select ID FROM @TInsetedId)
+
+
+		INSERT INTO [IndividualDynPropValue]
+			   ([StartDate]
+			   ,[ValueInt]
+			   ,[ValueString]
+			   ,[ValueDate]
+			   ,[ValueFloat]
+			   ,FK_Individual
+			   ,FK_IndividualDynProp)
+		SELECT distinct  GETDATE()
+		,NULL
+		,'release'
+		,NULL
+		,NULL
+		,I.ID
+		,(SELECT ID FROM IndividualDynProp WHERE Name = 'Origin')
+		FROM 	TMessageReceived M 
+		JOIN Individual I on I.Original_Id = M.Provenance+'_' + CONVERT(VARCHAR,m.ObjectId)
+		WHERE Importdate IS NULL AND M.ObjectType ='individu' AND m.Provenance LIKE 'TRACK_%'
+		AND i.ID in (select ID FROM @TInsetedId)
+		
+	
+		Update v set ValueString = th.TTop_FullPath
+		--SELECT top 10 v.ValueString
+		--,dp.Name
+		--,f.Options
+		--,th.TTop_FullPath 
+		FROM IndividualDynPropValue v
+		JOIN dbo.IndividualDynProp dp ON v.FK_IndividualDynProp = dp.ID AND dp.Name NOT IN ('Monitoring_Status', 'Survey_type')
+		JOIN dbo.Individual i on v.FK_Individual = I.ID
+		JOIN ModuleForms f on f.Name = dp.Name and f.InputType = 'AutocompTreeEditor' and f.module_id = 9 and f.Name NOT IN ('Monitoring_Status', 'Survey_type')
+		LEFT join THESAURUS.dbo.VTopicCompatibility th 
+			ON th.TTop_PK_ID> 204082
+			and f.Options = th.TTop_ParentID AND (v.ValueString like th.TTop_NameEn )
+		WHERE  i.Original_ID like 'track%' 
+			and i.ID in (select ID FROM @TInsetedId)
+		AND th.TTop_FullPath IS NOT NULL 
+
+	
+		UPDATE i SET i.Species = th.TTop_FullPath
+		--select top 10 *
+		FROM Individual i
+		JOIN ModuleForms f ON f.Name = 'Species' and f.module_id = 9
+		--JOIN ModuleForms f2 ON f2.Name = 'Age' and f.module_id = 9
+		JOIN THESAURUS.dbo.VTopicCompatibility th 
+			ON th.TTop_PK_ID> f.Options
+			 AND (Species = th.TTop_Name)
+		WHERE  i.Original_ID like 'track%'
+			 and i.ID in (select ID FROM @TInsetedId)
+		AND th.TTop_FullPath IS NOT NULL 
+
+
+		UPDATE TMessageReceived
+		SET ImportDate=GETDATE()
+		WHERE ObjectType ='Individu'
+		AND ImportDate IS NULL AND Provenance LIKE 'TRACK_%'
+		
+		commit tran
+	END TRY
+		BEGIN CATCH
+			print 'CATCH'
+			print @@TRANCOUNT
+			IF @@TRANCOUNT >0  ROLLBACK TRAN;
+			print @@TRANCOUNT
+			
+			DECLARE @ErrorMessage NVARCHAR(4000);
+			DECLARE @ErrorSeverity INT;
+			DECLARE @ErrorState INT;
+			
+			SELECT 
+				@ErrorMessage = ERROR_MESSAGE(),
+				@ErrorSeverity = ERROR_SEVERITY(),
+				@ErrorState = ERROR_STATE();
+			
+			RAISERROR (@ErrorMessage, -- Message text.
+					   @ErrorSeverity, -- Severity.
+					   @ErrorState -- State.
+					   );
+		END CATCH	
+	
+
+END
+
+
+
+
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('163_Fix_PR_ImportRelacheFromTrack',GETDATE(),(SELECT db_name()))
+
+
+GO
