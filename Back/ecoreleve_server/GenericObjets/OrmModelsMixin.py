@@ -781,7 +781,7 @@ class HasDynamicProperties(HasStaticProperties):
             previousTargetID = previousState.get(linkProp.linkedSourceID)
 
             # remove linked field if target object is different of previous
-            if previousState and previousTargetID and str(targetID) != str(previousTargetID):
+            if self.ID and previousState and previousTargetID and str(targetID) != str(previousTargetID):
                 self.deleteLinkedField(previousState=previousState)
             try:
                 linkedObj = self.session.query(linkedEntity).filter(
