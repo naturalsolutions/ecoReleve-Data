@@ -15,8 +15,7 @@ from ..utils.data_toXML import data_to_XML
 from .importArgos import uploadFileArgos
 from .importGSM import uploadFilesGSM
 from .importRFID import uploadFileRFID
-#from .CamTrapimport import uploadFileCamTrapResumable
-from .CamTrapimport import *
+from .importCAMTRAP import *
 import os
 
 
