@@ -141,7 +141,7 @@ define([
 
 			    }
 			});
-		    http.open('GET', ''+_this.model.get('path')+''+_this.model.get('name'), true);
+		    http.open('GET', './'+_this.model.get('path')+''+_this.model.get('name'), true);
 		    http.responseType = "blob";
 		    http.onload = function(e) {
 				//	console.log(e);
