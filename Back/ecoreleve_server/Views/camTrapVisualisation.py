@@ -12,6 +12,7 @@ from ..controllers.security import routes_permission
 from tempfile import NamedTemporaryFile
 import zipfile
 import os
+import uuid
 
 @view_config(route_name='cameratrap', renderer='json' ,request_method='GET',permission = routes_permission['rfid']['POST'])
 def allPhotos (request):
@@ -200,31 +201,39 @@ def getSessionZip(request):
             listFolderName.append(folderName)
 
     fileName = os.path.join(dbConfig['camTrap']['path'],'export',fileNameReturned) 
+
+    randomSuffix = str(uuid.uuid4())
     '''
     TODO :
         -gen nom aleatoire pour eviter les ecrasements de fichiers si plusieurs personnes GET
         -penser a mettre en place une purge
     '''
-    # with NamedTemporaryFile(prefix=fileNameReturned, suffix='.zip' ,dir= os.path.join(dbConfig['camTrap']['path'],'export'),delete=True) as zipfileTmp:
-    zipFile = zipfile.ZipFile(fileName+'.zip', 'w')
-    sizeListFolder = len(listFolderName)
-    for root, dirs, files in os.walk(os.path.join( dbConfig['camTrap']['path'])) :
-        absRoot = root.split('\\')[-1]
-        for i in range(0,sizeListFolder):        
-            if absRoot == listFolderName[i]:
-                folderName = listFolderName[i]
-                (unicIdentifier, startDate, endDate, monitoredSiteName ) = folderName.split('_')            
-                for f in files:
-                    firstFolder = monitoredSiteName
-                    secondFolder = startDate+'_'+endDate+'_'+unicIdentifier
-                    for item in respJson[firstFolder][secondFolder]:
-                        if item.upper() == f.upper():
-                            fileNameForZip = firstFolder+'\\'+secondFolder+'\\'+respJson[firstFolder][secondFolder][item]+f[len(f)-4:]
-                            if os.path.exists(os.path.join(root,f)) :
-                                zipFile.write(os.path.join(root,f),fileNameForZip)
-    zipFile.close()
+    if not os.path.exists(fileName+".zip"):
+        # zip file doesn't exist we gen it
+        zipFile = zipfile.ZipFile(fileName+randomSuffix+'.zip', 'w')
+        sizeListFolder = len(listFolderName)
+        for root, dirs, files in os.walk(os.path.join( dbConfig['camTrap']['path'])) :
+            absRoot = root.split('\\')[-1]
+            for i in range(0,sizeListFolder):        
+                if absRoot == listFolderName[i]:
+                    folderName = listFolderName[i]
+                    (unicIdentifier, startDate, endDate, monitoredSiteName ) = folderName.split('_')            
+                    for f in files:
+                        firstFolder = monitoredSiteName
+                        secondFolder = startDate+'_'+endDate+'_'+unicIdentifier
+                        for item in respJson[firstFolder][secondFolder]:
+                            if item.upper() == f.upper():
+                                fileNameForZip = firstFolder+'\\'+secondFolder+'\\'+respJson[firstFolder][secondFolder][item]+f[len(f)-4:]
+                                if os.path.exists(os.path.join(root,f)) :
+                                    zipFile.write(os.path.join(root,f),fileNameForZip)
+        zipFile.close()
+        # File generated we test
+        if  not os.path.exists(fileName+".zip") :
+            os.rename(zipFile.filename,fileName+".zip")
+        else :
+            os.remove(zipFile.filename)
     response = FileResponse(
-        os.path.abspath(zipFile.filename),
+        os.path.abspath(fileName+".zip"),
         request = request,
         content_type='application/zip'
         )
