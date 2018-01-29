@@ -782,8 +782,6 @@ class SensorDatasByType(CustomView):
         fkEquipmentId = data['fk_EquipmentId']
         fkSensor = data['fk_Sensor']
 
-        resultat = "OK"
-        '''
         query = text("""SET NOCOUNT ON; DECLARE @result int;
         EXEC [dbo].[pr_ValidateCameraTrapSession] :fkSensor, :fkMonitoredSite, :fkEquipmentId, @result OUTPUT;
         SET NOCOUNT OFF;
@@ -793,7 +791,7 @@ class SensorDatasByType(CustomView):
             bindparam('fkEquipmentId', value=fkEquipmentId)
         )
         result = self.session.execute(query).fetchall()
-        '''
+
         # self.session.commit()
 
         # if 'nbInserted' in result and result['nbInserted'] > 0result.rowcount > 0:
@@ -837,8 +835,8 @@ class SensorDatasByType(CustomView):
         #     """for key in index:
         #         if ( str(key) =='checkedvalidated'   )
         #         print ( str(key)+":"+str(index[key]))"""
-        # return {'nbInserted' : result[0]['nbInserted'] }
-        return resultat
+        return {'nbInserted' : result[0]['nbInserted'] }
+        # return resultat
 
 
 class SensorDatas(CustomView):
