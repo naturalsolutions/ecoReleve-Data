@@ -12,6 +12,7 @@ import numpy as np
 from ..utils.distance import haversine
 from traceback import print_exc
 from ..utils.data_toXML import data_to_XML
+from lxml import etree
 from .importArgos import uploadFileArgos
 from .importGSM import uploadFilesGSM
 from .importRFID import uploadFileRFID
@@ -60,7 +61,9 @@ class SensorDatasBySessionItem(CustomView):
             return self.item.__json__()
 
     def patch(self):
-        data = self.request.json_body
+        data = self.request.json_body #potentially new props
+        cmdTags = ''
+        # '-XMP-Photoshop:Headline=Picture of'+metaData['monitoredSite'].Category+''+metaData['monitoredSite'].Name+',Lon:'+metaData['monitoredSite'].Lon+',Lat:'+metaData['monitoredSite'].Lat+', on'+metaData.pictureCreationDate+'showing'+tagList
         for item in data:
             if(item not in ['pk_id', 'fk_sensor', 'path', 'name', 'extension', 'date_creation', 'date_uploaded']):
                 tmp = data.get(item)
@@ -70,9 +73,38 @@ class SensorDatasBySessionItem(CustomView):
                     for tag in listTags:
                         XMLTags += "<TAG>" + str(tag) + "</TAG>"
                     XMLTags += "</TAGS>"
+                    tmp = XMLTags
                 setattr(self.item, item, tmp)
+                #TODO INSERT TAG AS METADATA
         self.request.response.status_code = 204
         return self.request.response
+
+    def XMLToStr(self, xmlStr):
+        strForReplace = ''
+        for strToRemove in ['<TAGS>','</TAGS>','</TAG>']:
+            if strToRemove in xmlStr:
+                xmlStr = xmlStr.replace(strToRemove , strForReplace)
+        firstTagFind = 0
+        for strToReplace in ['<TAG>']:
+            if strToReplace in xmlStr :
+                if not firstTagFind:                   
+                    firstTagFind = 1
+                else:   
+                    strForReplace = ','
+                xmlStr = xmlStr.replace(strToRemove , strForReplace)
+        return xmlStr
+    
+    def strToXML(self, strVal):
+        listTags = strVal.split(",")
+        XMLTags = None
+        if len(listTags) > 0 :
+            XMLTags = "<TAGS>"
+            for tag in listTags :
+                XMLTags += "<TAG>" + str(tag) + "</TAG>"
+            XMLTags += "</TAGS>"
+        return XMLTags
+
+
 
 
 class SensorDatasBySession(CustomView):
@@ -371,7 +403,7 @@ class SensorDatasByType(CustomView):
         return metaDataInfo
 
     def uploadFileCamTrapResumable(self):
-        if not self.request.POST :
+        if not self.request.POST:
             return self.checkChunk()
         metaDataInfo = self.buildMetaDataInfoFromErdData()
         cmdMetaDataInfo = buildCmdMetaDatasAtImport(self,metaDataInfo)
@@ -737,13 +769,21 @@ class SensorDatasByType(CustomView):
 
     def validateCamTrap(self):
         # supression des photos rejete
+        '''
+        last step session is in last state so we build metadata 
+        call stored procedure
+        if ok 
+        build metadata
+        resize photos 
+        remove photos
+        '''
         data = self.request.params.mixed()
         fkMonitoredSite = data['fk_MonitoredSite']
         fkEquipmentId = data['fk_EquipmentId']
         fkSensor = data['fk_Sensor']
 
         resultat = "OK"
-
+        '''
         query = text("""SET NOCOUNT ON; DECLARE @result int;
         EXEC [dbo].[pr_ValidateCameraTrapSession] :fkSensor, :fkMonitoredSite, :fkEquipmentId, @result OUTPUT;
         SET NOCOUNT OFF;
@@ -753,7 +793,7 @@ class SensorDatasByType(CustomView):
             bindparam('fkEquipmentId', value=fkEquipmentId)
         )
         result = self.session.execute(query).fetchall()
-        
+        '''
         # self.session.commit()
 
         # if 'nbInserted' in result and result['nbInserted'] > 0result.rowcount > 0:
@@ -797,7 +837,8 @@ class SensorDatasByType(CustomView):
         #     """for key in index:
         #         if ( str(key) =='checkedvalidated'   )
         #         print ( str(key)+":"+str(index[key]))"""
-        return {'nbInserted' : result[0]['nbInserted'] }
+        # return {'nbInserted' : result[0]['nbInserted'] }
+        return resultat
 
 
 class SensorDatas(CustomView):
