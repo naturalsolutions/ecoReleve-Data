@@ -431,7 +431,7 @@ define([
     },
 
     showPicker: function(){
-      this.regionManager.get('modal').show(this.pickerView = new this.PickerView());
+      this.regionManager.get('modal').show(this.pickerView = new this.PickerView({enableNew:true}));
       $('#modal').fadeIn('fast');
       $('#modal').on('click', $.proxy(this.checkHidePicker, this));
     },
