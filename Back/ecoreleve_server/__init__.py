@@ -85,6 +85,8 @@ def main(global_config, **settings):
     dbConfig['data_schema'] = settings['data_schema']
     dbConfig['camTrap'] = {}
     dbConfig['camTrap']['path'] = settings['camTrap.path']
+    dbConfig['mediasFiles'] = {}
+    dbConfig['mediasFiles']['path'] = settings['mediasFiles.path']
 
     if(os.path.exists(dbConfig['camTrap']['path']) ):
         try :
@@ -118,6 +120,23 @@ def main(global_config, **settings):
         try:
             os.makedirs(os.path.join(dbConfig['camTrap']['path'],'export'))
             print("folder created : %s" %(os.path.join(dbConfig['camTrap']['path'],'export')))
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
+
+    if(os.path.exists(dbConfig['mediasFiles']['path']) ):
+        try :
+            os.access( dbConfig['mediasFiles']['path'], os.W_OK)
+            print("folder : %s exist" %(dbConfig['mediasFiles']['path']))
+        except :
+            print("app cant write in this directory ask your admin %s" %(dbConfig['mediasFiles']['path']) )
+            raise
+            #declenché erreur
+    else:
+        print ("folder %s doesn't exist we gonna try to create it" %(dbConfig['mediasFiles']['path']))
+        try:
+            os.makedirs(dbConfig['mediasFiles']['path'])
+            print("folder created : %s" %(dbConfig['mediasFiles']['path']))
         except OSError as exception:
             if exception.errno != errno.EEXIST:
                 raise
