@@ -166,13 +166,18 @@ context_permissions = {
     ],
 
     'release': [
-        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Allow, 'group:admin', ALL_PERMISSIONS),
         (Deny, 'group:superUsers', ALL_PERMISSIONS),
         (Deny, 'group:users', ALL_PERMISSIONS),
     ],
     'dashboard' : [
-        (Allow, 'group:admins', ALL_PERMISSIONS),
+        (Allow, 'group:admin', ALL_PERMISSIONS),
         (Allow, 'group:superUsers', 'read'),
+        (Allow, 'group:users', 'read')
+    ],
+    'mediasfiles' : [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', ('create', 'update', 'read')),
         (Allow, 'group:users', 'read')
     ],
 }
@@ -244,5 +249,11 @@ routes_permission = {
         'POST': 'superUser',
         'PUT': 'superUser',
         'DELETE': 'superUser'
+    },
+    'mediasfiles': {
+        'GET': 'all',
+        'POST': 'admin',
+        'PUT': 'admin',
+        'DELETE': 'admin'
     },
 }
