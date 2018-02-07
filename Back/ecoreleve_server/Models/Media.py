@@ -2,6 +2,7 @@ from ..Models import Base
 from sqlalchemy import Column, Integer, Sequence, String, DateTime, func, ForeignKey
 from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import relationship
 
 class Photos(Base):
 
@@ -27,6 +28,8 @@ class MediasFiles(Base):
     Creator = Column(Integer, nullable=False)
     FK_Station = Column(Integer, ForeignKey('Station.ID'), nullable=False)
 
+    Station = relationship("Station")
+    
     def serialize(self):
         return {c: getattr(self, c) for c in inspect(self).attrs.keys()}
 
