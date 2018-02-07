@@ -7,11 +7,67 @@ import os,sys,errno
 from ..controllers.security import RootCore
 import shutil
 import subprocess
+import urllib.parse
 from ..Models import MediasFiles
 from sqlalchemy import and_
 
+class MediaFileView(CustomView):
+
+    model = MediasFiles
+    
+
+    def __init__(self, ref, parent):
+        CustomView.__init__(self, ref, parent)
+        self.itemID = int(ref)
+    
+    def __getitem__(self, ref):
+        return self
+
+    def retrieve(self):
+
+        item = self.session.query(MediasFiles).get(self.itemID)
+        if item:
+            return item.serialize()
+        else:
+            self.request.response.status_code = 404
+            return
+
+    def delete(self):
+        if self.itemID > 0 :
+            item = self.session.query(MediasFiles).get(self.itemID)
+        if item and item.Id > 0:
+            absPath = os.path.join(item.Path , item.Name)
+            self.removeFile(absPath)
+            self.session.delete(item)  
+            return 'deleted'
+        else:
+            self.request.response.status_code = 404
+            return 
+
+    def removeFile(self , absolutePathForFile):
+        path, fkStation, fileName = absolutePathForFile.rsplit('\\',2)
+
+        try:
+            print(os.path.join(path,fkStation),fileName,fkStation)
+            mediaElem = self.session.query(MediasFiles).filter(
+                    and_(
+                        MediasFiles.Path == os.path.join(path,fkStation) ,
+                        MediasFiles.Name == fileName,
+                        MediasFiles.Extension == fileName.split('.')[-1],
+                        MediasFiles.FK_Station == fkStation
+                         )
+                ).one()
+            if mediaElem.Id:
+                self.session.delete(mediaElem)
+                self.session.flush()
+            oldAbsolutePathForFile = os.path.join(absolutePathForFile)
+            os.remove(oldAbsolutePathForFile)
+        except Exception as error:
+            print("erreur dans sql ou file")
+            raise
 
 class MediasFilesView(CustomView):
+    item = MediaFileView
 
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
@@ -44,19 +100,9 @@ class MediasFilesView(CustomView):
                 except Exception as error:
                     self.removeFile(fileName)
                     raise
-            
-            #create new file on hdd
-            # if file exist 
-                #erase it 
-                #remove on DB
-            #addSQL
-
-        data = {}
-        ( total , used, free) = shutil.disk_usage(dbConfig['camTrap']['path'])
-        data['total'] = str(total)
-        data['used'] = str(used)
-        data['free'] = str(free)
-        return data
+        else :
+            self.request.response.status_code = 400
+            return
 
     def createFile(self, FK_Station, fileBin):
         status = False
@@ -65,12 +111,9 @@ class MediasFilesView(CustomView):
         absolutePathForFile = os.path.join( dbConfig['mediasFiles']['path'],FK_Station, fileBin.filename)
         fileName = fileBin.filename
         if os.path.isfile(absolutePathForFile):
-            print("le fichier existe deja")
             try:
-                print("on tente de le supprimer")
                 self.removeFile(absolutePathForFile)
             except Exception :
-                print("erreurs first")
                 raise
         if not os.path.isfile(absolutePathForFile):
             # write in the file
@@ -78,8 +121,6 @@ class MediasFilesView(CustomView):
                 if not os.path.isdir(absolutePath):
                     os.mkdir(absolutePath)
             except OSError  as e:
-                print("erreurs second")
-                print(e)
                 if e.errno != errno.EEXIST:
                     status = False
                     raise 
@@ -89,7 +130,6 @@ class MediasFilesView(CustomView):
                     status = True
                 output_file.close()
             except Exception as error:
-                print("erreurs third")
                 status = False
                 raise
 
@@ -99,7 +139,6 @@ class MediasFilesView(CustomView):
         path, fkStation, fileName = absolutePathForFile.rsplit('\\',2)
 
         try:
-            print(os.path.join(path,fkStation),fileName,fkStation)
             mediaElem = self.session.query(MediasFiles).filter(
                     and_(
                         MediasFiles.Path == os.path.join(path,fkStation) ,
@@ -109,15 +148,14 @@ class MediasFilesView(CustomView):
                          )
                 ).one()
             if mediaElem.Id:
-                print("suppression du media Elem")
                 self.session.delete(mediaElem)
                 self.session.flush()
             oldAbsolutePathForFile = os.path.join(absolutePathForFile)
             os.remove(oldAbsolutePathForFile)
-            print("suppression du fichier ")
         except Exception as error:
             print("erreur dans sql ou file")
             raise
+
 
 
 
