@@ -1,4 +1,4 @@
-from sqlalchemy import func, select, bindparam, text, Table, join, or_, and_, update
+from sqlalchemy import func, select, bindparam, text, Table, join, or_, and_, update, asc
 from sqlalchemy.orm import joinedload
 
 import json
@@ -125,9 +125,10 @@ class SensorDatasBySession(CustomView):
         if self.type_ == 'camtrap':
             joinTable = join(CamTrap, self.viewTable,
                              CamTrap.pk_id == self.viewTable.c['pk_id'])
-            query = select([CamTrap]
-                           ).select_from(joinTable).where(self.viewTable.c['sessionID'] == self.sessionID
-                                                          ).where(or_(self.viewTable.c['checked'] == 0, self.viewTable.c['checked'] == None))
+            query = select([CamTrap]).select_from(joinTable)
+            query = query.where(self.viewTable.c['sessionID'] == self.sessionID)
+            query = query.where(or_(self.viewTable.c['checked'] == 0, self.viewTable.c['checked'] == None))
+            query = query.order_by(asc(self.viewTable.c['date_creation']))
         else:
             query = select([self.viewTable]
                            ).where(self.viewTable.c['sessionID'] == self.sessionID
@@ -445,10 +446,10 @@ class SensorDatasByType(CustomView):
                         fk_sensor, str(uri),
                         str(self.request.POST['resumableFilename']),
                         str(extType[len(extType) - 1]),
-                    datePhoto,str(self.request.POST['startDate']),
-                    str(self.request.POST['endDate']),
-                    user,
-                    cmdMetaDataInfo
+                        datePhoto,str(self.request.POST['startDate']),
+                        str(self.request.POST['endDate']),
+                        user,
+                        cmdMetaDataInfo
                     )
                     callExiv2(
                         self = self,
