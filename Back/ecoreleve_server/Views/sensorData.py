@@ -456,6 +456,8 @@ class SensorDatasByType(CustomView):
                         cmd = cmdMetaDataInfo,
                         listFiles = [str(uri)+'\\'+str(self.request.POST['resumableFilename'])]
                         )
+                    if os.path.exists(os.path.join(str(uri),str(self.request.POST['resumableFilename'])+'_original')):
+                        os.remove(os.path.join(str(uri),str(self.request.POST['resumableFilename'])+'_original'))
                     resizePhoto(str(uri) + "\\" +
                                 str(self.request.POST['resumableFilename']))
                     messageDate = "ok"
