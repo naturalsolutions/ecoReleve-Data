@@ -66,6 +66,9 @@ class RegionsView(CustomView):
         'working region': {'fillColor': '#ff6600',
                            'color': '#b34700',
                            },
+        'management unit': {'fillColor': '#66ffb3',
+                    'color': '#00cc66',
+                    },
 
     }
 
