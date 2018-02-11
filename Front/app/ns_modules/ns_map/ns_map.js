@@ -81,6 +81,7 @@ define([
     this.bbox = options.bbox || false;
     this.area = options.area || false;
     this.cluster = options.cluster || false;
+    this.businessLayers = options.cluster || true;
     this.popup = options.popup || false;
     this.legend = options.legend || false;
     this.drawOptions = options.drawOptions;
@@ -182,13 +183,11 @@ define([
             if(this.player){
               this.firstInit();
             }
-            this.ready();
-
           } else {
             this.initLayer(geoJson);
             this.geoJson = geoJson;
           }
-
+          this.ready();
           this.fitBound();
 
       }).fail(function(msg) {
@@ -208,7 +207,6 @@ define([
           return;
         }
       }
-      
     },
 
     initDrawLayer: function(){
@@ -308,12 +306,15 @@ define([
       if(this.clusterLayer){
         this.addClusterLayers();
       }
-      this.initOverlayRegions();
+
+      if(this.businessLayers){
+        this.initOverlayRegions();
+      }
 
       if(this.drawable){
-        this.initDrawLayer()
+        this.initDrawLayer();
       }
-      
+
       this.initErrorLayer();
       this.displayError(this.geoJson);
     },
@@ -399,8 +400,6 @@ define([
 
     initClusters: function(geoJson){
       var _this= this;
-
-      
       var firstLvl= true;
       this.firstLvl= [];
       var CustomMarkerClusterGroup = L.MarkerClusterGroup.extend({
@@ -431,11 +430,15 @@ define([
     },
 
     addClusterLayers: function(){
+      var _this = this;
       this.clusterLayer.addLayers(this.markerList);
-
-      this.lControl.addOverlay(this.clusterLayer, 'clusters')
+      this.lControl.addOverlay(this.clusterLayer, 'clusters');
       if(!this.playerDisplayed){
         this.map.addLayer(this.clusterLayer);
+      }
+
+      if(!this.player){
+        this.geoJSONLayer = L.layerGroup(this.markerList);
       }
 
       if(this.area){
@@ -445,6 +448,19 @@ define([
       if(this.bbox){
         this.addBBox(this.clusterLayer);
       }
+
+      this.map.on({
+        overlayadd: function(e) {
+          if (e.name == 'clusters'){
+            this.removeLayer(_this.geoJSONLayer);
+          }
+        },
+        overlayremove: function(e) {
+          if (e.name == 'clusters'){
+            this.addLayer(_this.geoJSONLayer);
+          }
+        }
+      });
     },
 
     resize: function(){
