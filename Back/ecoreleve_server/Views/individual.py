@@ -224,34 +224,6 @@ class IndividualLocationsView(SecurityRoot):
                 row['Date'] = row['Date'].strftime('%Y-%m-%d %H:%M:%S')
                 row['format'] = 'YYYY-MM-DD HH:mm:ss'
 
-        # ************ POC Indiv location PLayer  ****************
-
-        # if 'geoDynamic' in request.params :
-        #     response = None
-        #     geoJson=[]
-        #     joinTable = join(Individual_Location, Sensor, Individual_Location.FK_Sensor == Sensor.ID)
-        #     stmt = select([Ind ividual_Location,Sensor.UnicIdentifier]).select_from(joinTable
-        #         ).where(Individual_Location.FK_Individual == id
-        #         ).where(Individual_Location.type_ == 'GSM').order_by(asc(Individual_Location.Date))
-        #     dataResult = session.execute(stmt).fetchall()
-
-        #     df = pd.DataFrame.from_records(dataResult, columns=dataResult[0].keys(), coerce_float=True)
-        #     X1 = df.iloc[:-1][['LAT', 'LON']].values
-        #     X2 = df.iloc[1:][['LAT', 'LON']].values
-        #     df['dist'] = np.append(haversine(X1, X2), 0).round(3)
-        #     # Compute the speed
-        #     df['speed'] = (df['dist'] / ((df['Date'] - df['Date'].shift(-1)).fillna(1) / np.timedelta64(1, 'h'))).round(3)
-        #     df['Date'] = df['Date'].apply(lambda row: np.datetime64(row).astype(datetime))
-
-        #     for i in range(df.shape[0]):
-        #         geoJson.append({'type':'Feature', 'properties':{'type':df.loc[i,'type_']
-        #             , 'sensor':df.loc[i,'UnicIdentifier'],'speed':df.loc[i,'speed'],'date':df.loc[i,'Date']}
-        #             , 'geometry':{'type':'Point', 'coordinates':[df.loc[i,'LAT'],df.loc[i,'LON']]}})
-        #     result = {'type':'FeatureCollection', 'features':geoJson}
-        #     response = result
-        # else :
-        #     response  = curIndiv.getFlatObject()
-
         return result
 
 

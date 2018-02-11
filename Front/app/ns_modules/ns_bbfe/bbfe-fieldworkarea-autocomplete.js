@@ -13,8 +13,8 @@ define([
 
     events: {
         'hide': 'hasChanged',
-        'keyup input': 'onKeyup',
-        'change': 'onChange'
+        // 'keyup input': 'onKeyup',
+        // 'change input': 'onChange'
         
     },
     template: '<div>\
@@ -25,13 +25,18 @@ define([
     </div>',
 
     onKeyup: function(e){
-       // this.$input.attr('data_value', this.$input.val());
+     this.isTermError = true;
+     this.matchedValue = null;
+    //this.$input.attr('data_value', this.$input.val());
     },
 
-    onChange: function(e){
-     // this.isTermError = true;
-    },
-
+    // onChange: function(e){
+    //   if(this.isTermError){
+    //     this.displayErrorMsg(true);
+    //   } else {
+    //     this.displayErrorMsg(false);
+    //   }
+    // },
     initialize: function (options) {
         Form.editors.Base.prototype.initialize.call(this, options);
         var _this = this;
@@ -64,12 +69,10 @@ define([
             this.autocompleteSource.focus = function(event,ui){
                 event.preventDefault();
             };
-            this.autocompleteSource.blur = function(event,ui){
-              event.preventDefault();
-          };
 
             this.autocompleteSource.change = function(event,ui){
-              if (_this.$input.val() !== '' && !_this.matchedValue){
+              var valueFound = ui.item;
+              if (!valueFound){
                 _this.isTermError = true;
                 _this.displayErrorMsg(true);
               }
@@ -85,24 +88,18 @@ define([
 
             // this.autocompleteSource.response = function(event,ui){
             //   event.preventDefault();
-            //   if (ui.content.length == 1){
-            //     var item = ui.content[0];
-            //     //_this.setValue(item.value,item.displayLabel,false);
-            //     _this.matchedValue = item;
-            //     _this.isTermError = false;
 
+            //   var val = _this.$input.val();
+            //   var valueFound = ui.content.find(function(item){
+            //     return val == item.displayLabel;
+            //   });
+            //   if (valueFound){
+            //     _this.setValue(valueFound.value,valueFound.displayLabel,false);
+            //     //_this.matchedValue = valueFound;
+            //     _this.isTermError = false;
             //   } else {
-            //     var val = _this.$input.val();
-            //     var valueFound = ui.content.find(function(item){
-            //       return val == item.displayLabel;
-            //     });
-            //     if (valueFound){
-            //       _this.setValue(valueFound.value,valueFound.displayLabel,false);
-            //       _this.matchedValue = valueFound;
-            //       _this.isTermError = false;
-            //     } else {
-            //       _this.matchedValue = undefined;
-            //     }
+            //     _this.matchedValue = undefined;
+            //     _this.isTermError = true;
             //   }
             // };
         }
@@ -113,7 +110,7 @@ define([
         }else{
           required = '';
         }
-        this.model.set('required', required);
+        // this.model.set('required', required);
   
     },
 
