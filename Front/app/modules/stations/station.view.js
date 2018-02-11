@@ -14,10 +14,11 @@ define([
   './station.model',
 
   'ns_map/ns_map',
+  'requirejs-text!./geometry-info.tpl.html'
 ], function(
   $, _, Backbone, Marionette, Swal,
   Com, NsForm, NavbarView, LytProtocols,
-  DetailView, StationModel, NsMap
+  DetailView, StationModel, NsMap, gemoInfoTpl
 ) {
 
   'use strict';
@@ -74,10 +75,15 @@ define([
         };
         _this.RegionLayer = new L.GeoJSON(geoJSON, {style : regionStyle});
         var prop = geoJSON.properties;
-        var infos = '';
-        for(var p in prop){
-          infos +='<b>'+p+' : '+prop[p]+'</b><br />';
-        }
+
+        var infos = _.template(gemoInfoTpl, prop);
+        // var infos = '';
+        // infos += '<b>'+'Fieldwork area'+' </b> : '+prop['Fieldwork Area']+'<br />';
+        // infos += '\t <span style="margin-left: 10px;"><b>'+'Country'+' </b> : '+prop['Country']+'</span><br />';
+        // infos += '\t <span style="margin-left: 10px;"><b>'+'Working area'+' </b> : '+prop['Working area']+'</span><br />';
+        // infos += '\t <span style="margin-left: 10px;"><b>'+'Working region'+' </b> : '+prop['Working region']+'</span><br />';
+        // infos += '\t <span style="margin-left: 10px;"><b>'+'Management unit'+' </b> : '+prop['Management unit']+'</span><br />';
+        
         _this.RegionLayer.bindPopup(infos);
         _this.RegionLayer.addTo(_this.map.map);
         _this.map.map.fitBounds(_this.RegionLayer.getBounds());
@@ -103,6 +109,7 @@ define([
       if(this.map){
         $.when(this.nsForm.jqxhr).then(function(){
           _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
+          _this.getRegion(this.model.get('FK_FieldworkArea'));
         });
       }
     },
@@ -121,14 +128,10 @@ define([
         popup: true,
       });
       $.when(this.nsForm.jqxhr).then(function(){
-        map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
-      });
-
-      $.when(this.nsForm.jqxhr).then(function(){
+        _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
         _this.getRegion(this.model.get('FK_FieldworkArea'));
       });
     },
-
 
     displayTab: function(e) {
       e.preventDefault();
@@ -180,7 +183,7 @@ define([
       this.nsForm.afterShow = function(){
         var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
         _this.ui.formStation.html(globalEl);
-
+        
         if(this.displayMode.toLowerCase() == 'edit'){
           this.bindChanges(_this.ui.formStation);
           $(".datetime").attr('placeholder','DD/MM/YYYY');
@@ -199,14 +202,13 @@ define([
         if(this.model.get('fieldActivityId') != _this.fieldActivityId){
           _this.displayProtos();
           _this.fieldActivityId = _this.model.get('fieldActivityId');
-
         }
       };
       
       $.when(this.nsForm.jqxhr).then(function(){
         _this.fieldActivityId = this.model.get('fieldActivityId');
         _this.displayProtos();
-      })
+      });
 
     },
 

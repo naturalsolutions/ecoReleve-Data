@@ -146,10 +146,10 @@ class FieldworkArea(Base):
         return Feature(
             id=self.ID,
             geometry=loads(self.valid_geom),
-            properties={'fullpath': self.fullpath,
+            properties={'FieldworkArea': self.fullpath,
                         'Country': self.Country,
-                        'W_Area': self.Working_Area,
-                        'W_Region': self.Working_Region,
-                        'Mgmt_Unit': self.Management_Unit
+                        'Working_area': self.Working_Area,
+                        'Working_region': self.Working_Region,
+                        'Management_unit': self.Management_Unit
                         }
         )
