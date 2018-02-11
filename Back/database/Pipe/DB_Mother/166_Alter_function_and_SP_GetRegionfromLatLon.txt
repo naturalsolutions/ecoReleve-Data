@@ -1,0 +1,64 @@
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER function [dbo].[fn_GetRegionFromLatLon] 
+	-- Add the parameters for the stored procedure here
+	(@lat decimal(9,5) , @lon decimal(9,5))
+	
+	RETURNS  int 
+AS
+BEGIN
+	-- Transforms lat and lon to a geometry object
+	declare @point geometry;
+	declare @regionId int;
+	set @point = geometry::STPointFromText('Point(' + CONVERT(varchar, @lon) + ' ' + CONVERT(varchar, @lat) +')', 4326);
+
+    -- Select the Place the point is inside
+	 SET @regionId = (	SELECT TOP 1 ID 
+						FROM FieldworkArea 
+						WHERE min_lat <= @lat and max_lat >= @lat 
+						and min_lon <= @lon and max_lon >= @lon 
+						and  @point.STWithin(valid_geom) = 1
+						ORDER BY fullpath DESC 
+					)
+	 return @regionId
+END
+
+GO
+
+
+ALTER PROCEDURE [dbo].[UpdateStationRegion]
+
+@stationID int,
+@result int OUTPUT
+AS
+SET NOCOUNT ON
+SET @result = NULL
+
+BEGIN TRAN T1
+BEGIN TRY
+DECLARE @lat decimal(9,5), @lon decimal(9,5), @FK_FieldworkArea int
+
+SELECT @lat = LAT, @lon = LON 
+FROM Station 
+WHERE ID = @stationID
+
+
+SELECT @FK_FieldworkArea = dbo.[fn_GetRegionFromLatLon] (@lat,@lon)
+
+UPDATE Station SET FK_FieldworkArea = @FK_FieldworkArea
+WHERE ID = @stationID
+COMMIT TRAN T1
+END TRY 
+BEGIN CATCH
+	SELECT @result = 1;
+END CATCH
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('166_Alter_function_and_SP_GetRegionfromLatLon',GETDATE(),(SELECT db_name()))
+
+
+GO
