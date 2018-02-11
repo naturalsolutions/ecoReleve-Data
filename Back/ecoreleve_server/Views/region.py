@@ -37,7 +37,7 @@ class RegionView(CustomView):
         return self.objectDB.geom_json
 
     def retrieve(self):
-        return self.objectDB.FieldworkArea
+        return self.objectDB.json
 
 
 class RegionTypeView(CustomView):
@@ -75,9 +75,19 @@ class RegionsView(CustomView):
         CustomView.__init__(self, ref, parent)
         self.__actions__ = {
             'getGeomFromType': self.getGeomFromType,
-            'getTypes': self.getRegionTypes
+            'getTypes': self.getRegionTypes,
+            'autocomplete': self.autocomplete
         }
         self.__acl__ = context_permissions['release']
+
+    def autocomplete(self):
+        params = self.request.params.mixed()
+        query = select([FieldworkArea.fullpath.label('label'),
+                        FieldworkArea.ID.label('value'),
+                        FieldworkArea.Name.label('displayLabel'),
+                        ]).where(FieldworkArea.fullpath.like('%'+params['term']+'%'))
+
+        return [dict(row) for row in self.session.execute(query).fetchall()]
 
     def getRegionTypes(self):
         query = select([GeomaticLayer.type_]).distinct(GeomaticLayer.type_)

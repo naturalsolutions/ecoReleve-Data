@@ -153,3 +153,14 @@ class FieldworkArea(Base):
                         'Management_unit': self.Management_Unit
                         }
         )
+
+    @hybrid_property
+    def json(self):
+        return {'FieldworkArea': self.fullpath,
+                'Country': self.Country,
+                'Working_area': self.Working_Area,
+                'Working_region': self.Working_Region,
+                'Management_unit': self.Management_Unit,
+                'Name': self.Name
+                }
+
