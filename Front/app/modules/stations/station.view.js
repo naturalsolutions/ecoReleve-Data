@@ -125,7 +125,7 @@ define([
       });
 
       $.when(this.nsForm.jqxhr).then(function(){
-        _this.getRegion(this.model.get('FK_Region'));
+        _this.getRegion(this.model.get('FK_FieldworkArea'));
       });
     },
 

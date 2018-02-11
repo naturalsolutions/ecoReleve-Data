@@ -237,7 +237,7 @@ define([
           data['Precision'] = model.precision;
           data['StartDate'] = model.StationDate;
           data['Place'] = model.Place
-          data['FK_Region'] = model.FK_Region
+          data['FK_FieldworkArea'] = model.FK_FieldworkArea
           break;
         case 'sensors':
           break;

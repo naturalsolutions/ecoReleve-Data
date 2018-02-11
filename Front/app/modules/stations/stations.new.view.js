@@ -32,7 +32,7 @@ define([
 
       'focusout input[name="Dat e_"]': 'checkDate',
       'change input[name="LAT"], input[name="LON"]': 'getLatLng',
-      'change select[name="FK_Region"]': 'getRegion',
+      'change select[name="FK_FieldworkArea"]': 'getRegion',
       'click .tab-link': 'displayTab',
       'change select[name="FieldWorker"]': 'checkUsers',
     },
@@ -303,7 +303,7 @@ define([
         _this.$el.find('input[name="ELE"]').val(data['ELE']).change();
         _this.$el.find('input[name="precision"]').val(data['Precision']).change();
         _this.$el.find('input[name="Place"]').val(data['Place']).change();
-        _this.$el.find('select[name="FK_Region"]').val(data['FK_Region']).change();
+        _this.$el.find('select[name="FK_FieldworkArea"]').val(data['FK_FieldworkArea']).change();
       }).fail(function() {
         console.error('an error occured');
       });

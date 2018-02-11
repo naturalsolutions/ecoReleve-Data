@@ -46,29 +46,17 @@ class Geometry(UserDefinedType):
         return func.geo.wkt(col, type_=self)
 
 
-class RegionGeom(Base):
+class GeomaticLayer(Base):
 
-    __tablename__ = 'RegionGeom'
-    ID = Column(Integer, Sequence('RegionGeom__id_seq'), primary_key=True)
-    Region = Column(String(255))
+    __tablename__ = 'GeomaticLayer'
+    ID = Column(Integer, Sequence('GeomaticLayer__id_seq'), primary_key=True)
+    Name = Column(String(255))
     geom = Column(Geometry)
     type_ = Column(String(25))
 
     @hybrid_property
     def geom_WKT(self):
         return func.geo.wkt(self.geom)
-
-    # @hybrid_property
-    # def Region(self):
-    #     return self.Name
-
-    # @Region.setter
-    # def Region(self, value):
-    #     self.Name = value
-
-    # @Region.expression
-    # def Region(cls):
-    #     return cls.Name
 
     @geom_WKT.expression
     def geom_WKT(cls):
@@ -83,7 +71,7 @@ class RegionGeom(Base):
         return Feature(
             id=self.ID,
             geometry=loads(self.geom),
-            properties={"name": self.Region, }
+            properties={"name": self.Name}
         )
 
 
@@ -122,5 +110,46 @@ class Region(Base):
                         'W_Area': self.Area,
                         'W_Region': self.Region,
                         'Mgmt_Unit': self.Subregion
+                        }
+        )
+
+
+class FieldworkArea(Base):
+
+    __tablename__ = 'FieldworkArea'
+    ID = Column(Integer, Sequence(
+        'FieldworkArea__id_seq'), primary_key=True)
+    Country = Column(String(255))
+    Working_Area = Column(String(255))
+    Working_Region = Column(String(255))
+    Management_Unit = Column(String(255))
+    Name = Column(String(255))
+    type_ = Column(String(50))
+    fullpath = Column(String(255))
+    valid_geom = Column(Geometry)
+    geom = Column(Geometry)
+
+    @hybrid_property
+    def geom_WKT(self):
+        return func.geo.wkt(self.valid_geom)
+
+    @geom_WKT.expression
+    def geom_WKT(cls):
+        return func.geo.wkt(cls.valid_geom)
+
+    @geom_WKT.setter
+    def geom_WKT(cls):
+        return func.geo.wkt(cls.valid_geom)
+
+    @hybrid_property
+    def geom_json(self):
+        return Feature(
+            id=self.ID,
+            geometry=loads(self.valid_geom),
+            properties={'fullpath': self.fullpath,
+                        'Country': self.Country,
+                        'W_Area': self.Working_Area,
+                        'W_Region': self.Working_Region,
+                        'Mgmt_Unit': self.Management_Unit
                         }
         )
