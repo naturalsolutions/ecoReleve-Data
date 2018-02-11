@@ -432,7 +432,7 @@ define([
     addClusterLayers: function(){
       var _this = this;
       this.clusterLayer.addLayers(this.markerList);
-      this.lControl.addOverlay(this.clusterLayer, 'clusters');
+      // this.lControl.addOverlay(this.clusterLayer, 'clusters');
       if(!this.playerDisplayed){
         this.map.addLayer(this.clusterLayer);
       }
