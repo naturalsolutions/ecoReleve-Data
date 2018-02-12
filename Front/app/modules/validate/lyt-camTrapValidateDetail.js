@@ -144,7 +144,7 @@ define([
       data.precision = monitoredSiteModel.get('precision') || null;
       data.Comments = "created from camera trap validation" || null;
       data.NbFieldWorker = 1;
-      data.fieldActivityId = 5
+      data.fieldActivityId = 39 // Id from BDD for fieldactivity : camera trapping
       return data;
 
 
@@ -1158,7 +1158,8 @@ define([
         state: {
           pageSize: 24
         },
-        url: config.coreUrl + 'sensors/' + this.type + '/uncheckedDatas/' + this.sensorId + '/' + this.siteId + '/' + this.equipmentId,
+        //url: config.coreUrl + 'sensors/' + this.type + '/uncheckedDatas/' + this.sensorId + '/' + this.siteId + '/' + this.equipmentId,
+        url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
       });
 
       this.displayFiltered();
@@ -1172,7 +1173,8 @@ define([
         state: {
           pageSize: 24
         },
-        url: config.coreUrl + 'sensors/' + this.type + '/uncheckedDatas/' + this.sensorId + '/' + this.siteId + '/' + this.equipmentId,
+        //url: config.coreUrl + 'sensors/' + this.type + '/uncheckedDatas/' + this.sensorId + '/' + this.siteId + '/' + this.equipmentId,
+        url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
         queryParams: {
           totalPages: null,
           totalRecords: null,
