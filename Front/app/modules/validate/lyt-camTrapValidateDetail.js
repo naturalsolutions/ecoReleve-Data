@@ -75,11 +75,11 @@ define([
       'click .reneco-ECOL-ecollectionsmall': 'clickOnIconeView',
       'click .reneco-image_file': 'clickOnIconeView',
       'click .reneco-list': 'clickOnIconeView',
-      'click #js_accepted_top': 'filterCollectionCtrl',
-      'click #js_refused_top': 'filterCollectionCtrl',
-      'click #js_checked_top': 'filterCollectionCtrl',
-      'click #js_notchecked_top': 'filterCollectionCtrl',
-      'click #infossession': 'filterCollectionCtrl',
+      'click #js_accepted_top,#js_refused_top,#js_checked_top,#js_notchecked_top,#infossession,#js_stationed_top': 'filterCollectionCtrl',
+      // 'click #js_refused_top': 'filterCollectionCtrl',
+      // 'click #js_checked_top': 'filterCollectionCtrl',
+      // 'click #js_notchecked_top': 'filterCollectionCtrl',
+      // 'click #infossession': 'filterCollectionCtrl',
       'click button#filternavbtn': 'filterNavOpen',
       'click i#closeNav': 'filterNavClose',
       'click input[name="filterstatus"]': 'filterCollectionCtrl',
@@ -445,7 +445,9 @@ define([
       this.nbPhotos = 0;
       this.nbPhotosAccepted = 0;
       this.nbPhotosRefused = 0;
-      this.nbPhotosChecked = 0;
+      // this.nbPhotosChecked = 0;
+      this.nbPhotosNotChecked = 0 ;
+      this.nbPhotosStationed = 0;
       this.stopSpace = false;
       this.tabSelected = [];
 
@@ -1083,6 +1085,7 @@ define([
     },
 
     refreshCounter: function () {
+      debugger;
       this.nbPhotos = this.myImageCollection.fullCollection.length;
       this.nbPhotosAccepted = this.myImageCollection.fullCollection.where({
         validated: 2
@@ -1090,22 +1093,31 @@ define([
       this.nbPhotosRefused = this.myImageCollection.fullCollection.where({
         validated: 4
       }).length;
-      this.nbPhotosChecked = this.myImageCollection.fullCollection.where({
-        validated: 1
+      // this.nbPhotosChecked = this.myImageCollection.fullCollection.where({
+      //   validated: 1
+      // }).length;
+      this.nbPhotosNotChecked = this.myImageCollection.fullCollection.where({
+        validated: null
       }).length;
-      this.nbphotosnotchecked = this.nbPhotos - (this.nbPhotosChecked + this.nbPhotosAccepted + this.nbPhotosRefused);
+      this.nbPhotosStationed = this.myImageCollection.fullCollection.filter(function(model) { 
+        return ( model.get('stationId') !== null && model.get('validated') === 2) ; 
+      }).length
+      // this.nbphotosnotchecked = this.nbPhotos - (this.nbPhotosChecked + this.nbPhotosAccepted + this.nbPhotosRefused);
       if (this.toolsBarTop) {
         this.toolsBarTop.$el.find("#nbphotos").text(this.nbPhotos);
         this.toolsBarTop.$el.find("#nbphotosaccepted").text(this.nbPhotosAccepted);
         this.toolsBarTop.$el.find("#nbphotosrefused").text(this.nbPhotosRefused);
-        this.toolsBarTop.$el.find("#nbphotoschecked").text(this.nbPhotosChecked);
-        this.toolsBarTop.$el.find("#nbphotosnotchecked").text(this.nbphotosnotchecked);
+        // this.toolsBarTop.$el.find("#nbphotoschecked").text(this.nbPhotosChecked);
+        // this.toolsBarTop.$el.find("#nbphotosnotChecked").text(this.nbphotosnotchecked);
+        this.toolsBarTop.$el.find("#nbphotosNotChecked").text(this.nbPhotosNotChecked);
+        this.toolsBarTop.$el.find("#nbphotosStationed").text(this.nbPhotosStationed);
       }
     },
 
     filterCollectionCtrl: function (e) {
 
       var $elem = $(e.currentTarget);
+      $elem[0].getElementsByTagName('input')[0].checked = true
       var myFilter = {};
       if ($('#rgToolsBarTop .reneco-image_file').hasClass('active')) {
         console.log("je leave le modal etc etc etc");
@@ -1125,7 +1137,11 @@ define([
         myFilter.validated = 4;
       } else if ($elem.hasClass('checked')) {
         myFilter.validated = 1;
-      } else if ($elem.hasClass('notchecked')) {
+      }else if ($elem.hasClass('stationed')) {
+        myFilter = function(model) {
+          return ( model.get('stationId') != null && model.get('validated') === 2) ;
+        }
+      } else if ($elem.hasClass('notChecked')) {
         myFilter.validated = null;
       } else if ($elem.hasClass('allphotos')) {
         //remet la collection mere
@@ -1209,7 +1225,8 @@ define([
       var _this = this;
       Swal({
           title: 'You can\'t validate this sessions',
-          text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
+          // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
+          text: +_this.nbPhotosNotChecked + ' photos still underteminate',
           type: 'error',
           showCancelButton: false,
           confirmButtonColor: 'rgb(218, 146, 15)',
@@ -1318,7 +1335,8 @@ define([
 
     validateAll: function () {
       $(".fullscreenimg [id^='zoom_']").trigger('wheelzoom.reset');
-      if (this.nbphotosnotchecked > 0 || this.nbPhotosChecked > 0) {
+      // if (this.nbphotosnotchecked > 0 || this.nbPhotosChecked > 0) {
+      if ( this.nbPhotosNotChecked > 0) {
 
         this.displaySwalUnchecked();
       } else {
