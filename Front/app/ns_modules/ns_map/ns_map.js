@@ -86,7 +86,7 @@ define([
     this.legend = options.legend || false;
     this.drawOptions = options.drawOptions;
     this.selection = options.selection || false;
-
+    this.preventSetView = options.preventSetView || false;
     this.dict = {}; //list of markers
     this.selectedMarkers = {}; // list of selected markers
 
@@ -135,7 +135,7 @@ define([
         zoomAnimation: true,
         keyboard: false, //fix scroll window
         attributionControl: false,
-      }).locate({setView:true});
+      }).locate({setView:!this.preventSetView});
 
       L.control.zoom({
         position:'topright'

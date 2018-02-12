@@ -13,9 +13,7 @@ define([
 
     events: {
         'hide': 'hasChanged',
-        // 'keyup input': 'onKeyup',
-        // 'change input': 'onChange'
-        
+
     },
     template: '<div>\
     <div class="input-group">\
@@ -24,19 +22,6 @@ define([
         </div>\
     </div>',
 
-    onKeyup: function(e){
-     this.isTermError = true;
-     this.matchedValue = null;
-    //this.$input.attr('data_value', this.$input.val());
-    },
-
-    // onChange: function(e){
-    //   if(this.isTermError){
-    //     this.displayErrorMsg(true);
-    //   } else {
-    //     this.displayErrorMsg(false);
-    //   }
-    // },
     initialize: function (options) {
         Form.editors.Base.prototype.initialize.call(this, options);
         var _this = this;
@@ -85,23 +70,6 @@ define([
               }
               _this.$input.change();
           };
-
-            // this.autocompleteSource.response = function(event,ui){
-            //   event.preventDefault();
-
-            //   var val = _this.$input.val();
-            //   var valueFound = ui.content.find(function(item){
-            //     return val == item.displayLabel;
-            //   });
-            //   if (valueFound){
-            //     _this.setValue(valueFound.value,valueFound.displayLabel,false);
-            //     //_this.matchedValue = valueFound;
-            //     _this.isTermError = false;
-            //   } else {
-            //     _this.matchedValue = undefined;
-            //     _this.isTermError = true;
-            //   }
-            // };
         }
         this.options = options;
         var required;
@@ -110,8 +78,6 @@ define([
         }else{
           required = '';
         }
-        // this.model.set('required', required);
-  
     },
 
     setValue: function(value, displayValue, confirmChange) {

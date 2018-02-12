@@ -50,9 +50,7 @@ define([
       this.model = new this.ModelPrototype();
       this.com = new Com();
       this.model.set('id', options.id);
-
       this.model.set('stationId', options.id);
-
       this.model.set('urlParams', {
         proto: options.proto,
         obs: options.obs
@@ -61,6 +59,9 @@ define([
 
     getRegion: function(val){
       var _this = this;
+      if(!val){
+        return;
+      }
       $.ajax({
         url:'regions/'+val+'/geoJSON'
       }).done(function(geoJSON){
@@ -77,18 +78,12 @@ define([
         var prop = geoJSON.properties;
 
         var infos = _.template(gemoInfoTpl, prop);
-        // var infos = '';
-        // infos += '<b>'+'Fieldwork area'+' </b> : '+prop['Fieldwork Area']+'<br />';
-        // infos += '\t <span style="margin-left: 10px;"><b>'+'Country'+' </b> : '+prop['Country']+'</span><br />';
-        // infos += '\t <span style="margin-left: 10px;"><b>'+'Working area'+' </b> : '+prop['Working area']+'</span><br />';
-        // infos += '\t <span style="margin-left: 10px;"><b>'+'Working region'+' </b> : '+prop['Working region']+'</span><br />';
-        // infos += '\t <span style="margin-left: 10px;"><b>'+'Management unit'+' </b> : '+prop['Management unit']+'</span><br />';
-        
+
         _this.RegionLayer.bindPopup(infos);
         _this.RegionLayer.addTo(_this.map.map);
         _this.map.map.fitBounds(_this.RegionLayer.getBounds());
         _this.map.map.on("overlayadd", function (event) {
-          _this.RegionLayer.bringToFront();
+        _this.RegionLayer.bringToFront();
         });
       });
     },
@@ -108,8 +103,7 @@ define([
       }
       if(this.map){
         $.when(this.nsForm.jqxhr).then(function(){
-          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
-          _this.getRegion(this.model.get('FK_FieldworkArea'));
+          _this.updateMap();
         });
       }
     },
@@ -126,13 +120,19 @@ define([
       var map = this.map = new NsMap({
         zoom: 3,
         popup: true,
+        preventSetView:true
       });
       $.when(this.nsForm.jqxhr).then(function(){
-        _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
-        _this.getRegion(this.model.get('FK_FieldworkArea'));
+        _this.updateMap();
       });
     },
-
+    updateMap: function(){
+      if(this.nsForm.model.get('LAT') && this.nsForm.model.get('LON')){
+        this.map.addMarker(null, this.nsForm.model.get('LAT'), this.nsForm.model.get('LON'));
+      }
+      this.getRegion(this.nsForm.model.get('FK_FieldworkArea'));
+    
+    },
     displayTab: function(e) {
       e.preventDefault();
       this.$el.find('.nav-tabs>li').each(function(){
@@ -195,14 +195,18 @@ define([
       };
 
       this.nsForm.afterSaveSuccess = function() {
-        if(_this.map){
-          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
-        }
+        // if(_this.map){
+        //   _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
+        // }
 
         if(this.model.get('fieldActivityId') != _this.fieldActivityId){
           _this.displayProtos();
           _this.fieldActivityId = _this.model.get('fieldActivityId');
         }
+        $.when(this.jqxhr).then(function(){
+          _this.updateMap();
+        });
+        
       };
       
       $.when(this.nsForm.jqxhr).then(function(){
