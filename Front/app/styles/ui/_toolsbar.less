@@ -111,9 +111,44 @@
     }
 }
 .toolsBarCamTrapTop{
+  .camtrap-displayMode {
+    display: inline;
+  }
+  .camtrap-filterSession {
+    display: inline;
+  //  font-weight: bolder;
+    font-size: 20px;
+    input[type="radio"] {
+      transform: scale(1.2);
+    }
+      
+    .allPhotos {
+      padding-right: 20px;
+       color: #909090;
+    }
+    .accepted {
+      padding-right: 20px;
+      color: #909090;
+    }
+    .refused {
+      padding-right: 20px;
+      color: #909090;
+    }
+    .notChecked {
+      padding-right: 20px;
+      color: #909090;
+    }
+    .stationed{
+      padding-right: 20px;
+      color: #909090;
+    }
+  }
   .selected{
-    border: 1.5px solid #39b34a;
-    border-radius: 8px;
+    // border: 1.5px solid #39b34a;
+    // border-radius: 8px;
+    // text-decoration: underline;
+    font-weight: bold !important;
+    color: #39b34a !important;
   }
   i{
     cursor: pointer;
@@ -139,22 +174,22 @@
   .active{
     color : #39b34a;
   }
-  span{
-    color: #909090;
-    font-size: 26px;
-    font-weight: 500;
-    line-height: 30px;
-    position:relative;
-  }
+  // span{
+  //   color: #909090;
+  //   font-size: 26px;
+  //   font-weight: 500;
+  //   line-height: 30px;
+  //   position:relative;
+  // }
   span#infossession{
-    margin-left: 29px;
+    margin-left: 20px;
   }
   #infossession:hover,#js_accepted_top:hover,#js_accepted_top:hover,#js_refused_top:hover,#js_checked_top:hover,#js_notchecked_top:hover{
     background-color: #666;
   }
-  #nbphotosaccepted{
-    color : green;
-  }
+  // #nbphotosaccepted{
+  //   color : green;
+  // }
   #infossession{
     cursor: pointer;
   }
@@ -170,60 +205,63 @@
   #js_notchecked_top{
     cursor: pointer;
   }
-  .accepted:before{
-    font-family: 'reneco' !important;
-    content: "\e62a";
-    position:relative;
-    color: #39b34a;
-    height: 20px;
-    width: 20px;
-    font-size: 80%;
-    line-height: 30px;
-    /*border-radius: 10px;
-    background-color: #39b34a;*/
+  #js_stationed_top{
+    cursor: pointer;
   }
+  // .accepted:before{
+  //   font-family: 'reneco' !important;
+  //   content: "\e62a";
+  //   position:relative;
+  //   color: #39b34a;
+  //   height: 20px;
+  //   width: 20px;
+  //   font-size: 80%;
+  //   line-height: 30px;
+  //   /*border-radius: 10px;
+  //   background-color: #39b34a;*/
+  // }
 
-  #nbphotosrefused{
-    color : red;
-  }
-  .refused:before{
-    font-family: 'reneco' !important;
-    content: "\e65e";
-    position:relative;
-    color: #f00;
-    height: 20px;
-    width: 20px;
-    font-size: 80%;
-    line-height: 30px;
-  /*  border-radius: 10px;
-    background-color: #f00;*/
-  }
-  #nbphotoschecked{
-    color : white;
-  }
-  .checked:before{
-    font-family: 'reneco' !important;
-    content: '?';
-    position:relative;
-    color: white;
-    height: 20px;
-    width: 20px;
-    line-height: 30px;
-    //background-color: #f00;
-  }
-  #nbphotosnotchecked{
-    color : white;
-  }
-  .notchecked:before{
-    font-family: 'reneco' !important;
-    content: "\e644";
-    position:relative;
-    color: white;
-    height: 20px;
-    width: 20px;
-    font-size: 80%;
-    line-height: 30px;
-    //background-color: #f00;
-  }
+  // #nbphotosrefused{
+  //   color : red;
+  // }
+  // .refused:before{
+  //   font-family: 'reneco' !important;
+  //   content: "\e65e";
+  //   position:relative;
+  //   color: #f00;
+  //   height: 20px;
+  //   width: 20px;
+  //   font-size: 80%;
+  //   line-height: 30px;
+  // /*  border-radius: 10px;
+  //   background-color: #f00;*/
+  // }
+  // #nbphotoschecked{
+  //   color : white;
+  // }
+  // .checked:before{
+  //   font-family: 'reneco' !important;
+  //   content: '?';
+  //   position:relative;
+  //   color: white;
+  //   height: 20px;
+  //   width: 20px;
+  //   line-height: 30px;
+  //   //background-color: #f00;
+  // }
+  // #nbphotosnotchecked{
+  //   color : white;
+  // }
+  // .notchecked:before{
+  //   font-family: 'reneco' !important;
+  //   content: "\e644";
+  //   position:relative;
+  //   color: white;
+  //   height: 20px;
+  //   width: 20px;
+  //   font-size: 80%;
+  //   line-height: 30px;
+  //   //background-color: #f00;
+  // }
 
 }
