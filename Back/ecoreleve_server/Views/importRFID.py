@@ -264,30 +264,32 @@ def uploadFileRFID(request):
     filename = blob.filename
     # filename = request.POST['fileName']
 
-    # idModule = int(request.POST['FK_Sensor'])
-    # startEquip = request.POST['StartDate']
-    # endEquip = request.POST['EndDate']
+    idModule = int(request.POST['FK_Sensor'])
+    startEquip = request.POST['StartDate']
+    endEquip = request.POST['EndDate']
 
     try:
         data_to_check = getDataFrameFromFile(input_file, creator)
         sensorIdentifier = data_to_check.iloc[0].identifier
 
-        print(sensorIdentifier)
+        # print(sensorIdentifier)
         allDate = list(data_to_check['date_'])
-        equipSession = findEquipmentSession(
-            session, sensorIdentifier, max(allDate), min(allDate))
-        print(equipSession)
+        # equipSession = findEquipmentSession(
+        #     session, sensorIdentifier, max(allDate), min(allDate))
+        # print(equipSession)
 
         # # print(min(allDate), minDateEquip)
-        # try:
-        #     maxDateEquip = datetime.strptime(endEquip, '%Y-%m-%d %H:%M:%S')
-        # except:
-        #     maxDateEquip = None
+        try:
+            maxDateEquip = datetime.strptime(endEquip, '%Y-%m-%d %H:%M:%S')
+        except:
+            maxDateEquip = None
 
         # check if Date corresponds with pose remove module
-        # if (min(allDate) >= minDateEquip and
-        #         (maxDateEquip is None or max(allDate) <= maxDateEquip)):
-        if equipSession:
+        if (min(allDate) >= minDateEquip and
+                (maxDateEquip is None or max(allDate) <= maxDateEquip) and
+                sensorIdentifier == idModule
+            ):
+        # if equipSession:
             data_to_insert = checkDuplicatedRFID(
                 data_to_check, min(allDate), max(allDate), idModule)
             data_to_insert = data_to_insert.drop(['id_'], 1)
@@ -321,6 +323,9 @@ def uploadFileRFID(request):
         else:
             session.rollback()
             request.response.status_code = 510
+
+            if sensorIdentifier != idModule:
+                message = 'Identifier in file ({identifierFile}) do not correspond with the selected module ({identifierSelect})'.format(identifierFile=sensorIdentifier, identifierSelect=idModule)
             message = 'File dates (first date : ' + str(allDate[0]) + ', last date : ' + str(
                 allDate[-1]) + ') do not correspond with the deploy/remove dates of the selected module'
             return message
