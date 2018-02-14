@@ -1,12 +1,15 @@
-/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+﻿/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
 update [ModuleForms] SET Name = 'FK_FieldworkArea', 
-						 Label = 'FieldworkArea',
+						 Label = 'Fieldwork Area',
 						 InputType = 'FieldworkingAreaEditor',
-						 Options =  '{}'
+						 Options =  '{}',
 WHERE Name = 'FK_Region'
 
+update [ModuleForms] SET Required = 1
+WHERE Name = 'FK_FieldworkArea' AND TypeObj = 3
+
 update ModuleGrids SET Name = 'FK_FieldworkArea', 
-					   Label = 'FieldworkArea',
+					   Label = 'Fieldwork Area',
 					   Options = 'SELECT [Name]  as val,fullpath as label 
 								  FROM  [FieldworkArea] r 
 								  WHERE fullpath is not null 

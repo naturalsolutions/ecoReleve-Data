@@ -37,6 +37,7 @@
   },
   "resolutions": {
     "underscore": "1.5.2",
-    "backbone": "1.1.2"
+    "backbone": "1.1.2",
+    "leaflet": "1.2.0"
   }
 }
