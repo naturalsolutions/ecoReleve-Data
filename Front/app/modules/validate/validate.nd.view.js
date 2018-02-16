@@ -40,6 +40,7 @@ define([
     initialize: function(options) {
       this.type_ = options.type;
       this.columnDefs = this.model.get(this.type_ + 'ColumnDefs');
+      this.model.set('type_',this.type_);
     },
 
 
@@ -55,8 +56,34 @@ define([
 
     onRowClicked: function(row) {
       if( this.type_ == 'camtrap') {
-        Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.data.sessionID) ), {trigger: true});
-        return ;
+        if( row.data.nb_photo > row.data.processed ) {
+
+          Swal({
+            title: 'Please wait while processing photos',
+            // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
+            xt: 'current state : '+row.data.processed+'/'+row.data.nb_photo,
+            type: 'error',
+            confirmButtonColor: 'rgb(218, 146, 15)',
+            showCancelButton: false,
+            confirmButtonText: 'OK',
+            closeOnConfirm: true,
+          }
+        );
+          // Swal({
+          //   title: 'Please wait while processing photos',
+          //   text: 'current state : '+row.data.processed+'/'+row.data.nb_photo,
+          //   type: 'infos',
+          //   //timer: 2000,
+          //   showCancelButton: false,
+          //   confirmButtonText: 'OK',
+          //   closeOnConfirm: true,
+          // });
+          return;
+        }
+        else {
+          Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.data.sessionID) ), {trigger: true});
+          return ;
+        }
       }
       if( this.type_ != 'rfid' ) {
         Backbone.history.navigate('validate/' + this.type_ + '/' + (parseInt(row.node.id)+1 ), {trigger: true});
@@ -76,15 +103,27 @@ define([
         _this.ui.totalRecords.html(this.model.get('totalRecords'));
       };
 
+      var gridOptions = {}
+      if( this.type_ == 'camtrap') {
+        gridOptions = {
+          onRowClicked: this.onRowClicked.bind(this)
+        }
+      }
+      else {
+        gridOptions =  {
+          rowSelection: 'multiple',
+          onRowClicked: this.onRowClicked.bind(this)
+         }
+
+      }
+
+
       this.rgGrid.show(this.gridView = new GridView({
         columns: this.columnDefs,
         url: 'sensorDatas/' + this.type_ ,
         afterFirstRowFetch: afterFirstRowFetch,
         clientSide: true,
-        gridOptions: {
-          rowSelection: 'multiple',
-          onRowClicked: this.onRowClicked.bind(this),
-        },
+        gridOptions: gridOptions
       }));
     },
 
