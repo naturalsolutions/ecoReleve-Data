@@ -361,22 +361,63 @@ div.bootstrap-tagsinput{
   max-height: 45px;
   background-color: #434343;
   .infosfullscreen{
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    opacity: 1;
-    color: white;
-    font-weight: 600;
-    font-size: 2vw;
-    line-height: 30px;
-    span{
-      float : right;
-      margin-right: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 30px;
+    font-weight: bold;
+    color: #909090;
+    align-content: flex-end;
+    padding-left: 30px;
+    padding-right: 30px;
+    
+    .infosfullscreencontent {
+      // display: flex;
+      // justify-content: space-around;
+
+      .status {
+      padding-right: 20px;
+      display : inline;
+      //flex-grow: 1;
+      // position: absolute;
+      // padding-left: 50px;
+      } 
+    .station{
+      color :#449d44; 
+      line-height: inherit;
+      // flex-grow: 1;   
+      }
+  }
+    .date {
+      // flex-grow: 2;
+      // position: absolute;
+      // padding-left: 50px;
     }
-    .infosfullscreenStatus {
-      position: absolute;
-      padding-left: 50px;
+    .indexposition {
+      // flex-grow: 1;
+      text-align: right;
     }
+
+
+    // // position: absolute;
+    // // width: 100%;
+    // // text-align: center;
+    // // opacity: 1;
+    // // color: white;
+    // // font-weight: 600;
+    // // font-size: 1.5vw;
+    // // line-height: 30px;
+    // span{
+    //   // float : right;
+    //   // margin-right: 20px;
+    // }
+
+    // .indexposition {
+    //   // position: absolute;
+    //   // bottom: 0px;
+    //   // width: 100%;
+    //   // text-align: right;
+    //   //  padding-right: 50px;
+    // }
   }
     .backgrid-paginator {
       position: relative;
@@ -412,13 +453,7 @@ div.bootstrap-tagsinput{
       }
     }
 }
-.indexposition {
-  position: absolute;
-  bottom: 0px;
-  width: 100%;
-  text-align: right;
-  padding-right: 50px;
-}
+
 
 .camTrap.toolbar.top{
   //border:0;
@@ -434,7 +469,7 @@ div.bootstrap-tagsinput{
 
 .importCamTrap {
   .sessionGrid {
-    height: 100px;
+    height: 70px;
     // .ag-body-viewport {
     //   height : 80px;
     // }
