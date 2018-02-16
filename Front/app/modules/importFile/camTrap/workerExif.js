@@ -121,6 +121,7 @@ self.checkIfHeaderCorrect = function() {
 self.parseExif = function() {
     var index = TIFFstart+17
     index+=1;
+    var dateFound = false;
     while(index < tiffSize) {
         // console.log("index",index)
         var tagRef = self.getUint16(index);
@@ -136,6 +137,7 @@ self.parseExif = function() {
         if(tagRef == 0x0132  ) {
             if(format === 2)
             {
+                dateFound = true;
                 var textDecoder = new TextDecoder('utf-8');
                 self.message.date = textDecoder.decode(new Uint8Array(self.buffer, valueOrOffset+TIFFstart+8,components-1));
                 self.message.error = null;
@@ -148,6 +150,11 @@ self.parseExif = function() {
 
         }
     }
+    if(!dateFound) {
+        throw new exifParseError("no Exif date ");
+    }
+    //no exif date send file date or raise error
+    // alert("no exif date")
 }
 
 
