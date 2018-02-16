@@ -297,8 +297,8 @@ define([
           
         }
         if(_this.availableSpace.usedPercentage > 70) {
-          textWarningSwal+='Care : disk usage: '+_this.availableSpace.usedPercentage+'% \n'
-          textWarningSwal+='Please contact and admin to inform'
+          textWarningSwal+='Care disk usage: '+_this.availableSpace.usedPercentage+'% \n'
+          textWarningSwal+='Please contact an admin to inform'
         }
 
         if(textWarningSwal && textInfosSwal) {
@@ -591,9 +591,9 @@ define([
           // headerName :'Details',
           headerCellTemplate: function () {
             var eCell = document.createElement('span');
-            var btnElem = '<button class="js-btndetailssession btn btn-primary start"><i class="glyphicon glyphicon-plus"></i><span></span></button>';
+            var btnElem = '<button class="js-btndetailssession btn btn-success start"><i class="glyphicon glyphicon-plus"></i><span></span></button>';
             if (_this.showHiddenCols === false) {
-              btnElem = '<button class="js-btndetailssession btn btn-primary start"><i class="glyphicon glyphicon-minus"></i><span></span></button>'
+              btnElem = '<button class="js-btndetailssession btn btn-success start"><i class="glyphicon glyphicon-minus"></i><span></span></button>'
             }
             eCell.innerHTML =
               // '<div class="ag-header-cell">'+
@@ -694,13 +694,21 @@ define([
         maxWidth: 500
       }, {
         field: 'dateFind',
-        headerName: 'date(+/- décalage horaire)',
+        headerName: 'date ==> date with jet lag',
         maxWidth: 500,
         cellRenderer: function (params) {
-          if (params.data.jetLag != '00:00:00' && params.data.jetLag != '+00:00:00' && params.data.jetLag != '-00:00:00')
-            return '<span>' + params.data.dateFind + '(' + params.data.jetLag + ')</span>'
+         // if (params.data.jetLag != '00:00:00' && params.data.jetLag != '+00:00:00' && params.data.jetLag != '-00:00:00') {
+
+            var dateBase =  Moment(params.data.dateFind,'YYYY/MM/DD HH:mm:ss');
+            var dateJetlag = Moment(dateBase);
+            var timer = params.data.jetLag.slice(1,9).split(':');
+            dateJetlag.hour(dateBase.hour()+ Number(timer[0]) )
+            dateJetlag.minute(dateBase.minute()+ Number(timer[1]) )
+            dateJetlag.second(dateBase.second()+ Number(timer[2]) )
+            return '<span>' + params.data.dateFind + ' ==> ' + dateJetlag.format('YYYY/MM/DD HH:mm:ss')+'</span>'
+         /* }
           else
-            return '<span>' + params.data.dateFind + '</span>'
+            return '<span>' + params.data.dateFind + '</span>'*/
         },
         cellStyle: function (params) {
           switch(params.data.status) {
