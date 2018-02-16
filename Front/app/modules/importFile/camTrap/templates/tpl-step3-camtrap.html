@@ -4,7 +4,7 @@
 		<span>Session infos</span>
 	</h2>
 	<div class="js-jetlag">
-		<h5>Décallage Horaire (hh:mm:ss)</h5>
+		<h5>Jet lag (+/- hh:mm:ss)</h5>
 		<div class=" form-group">
 			<div class='input-group date'>
 				<span class="js-jetlagoperator input-group-addon">
@@ -23,7 +23,7 @@
 	<h2>
 		<span>Files infos</span>
 	</h2>
-	<div class="js-rg-grid-photos photosGrid no-padding"></div>
+	<div class="js-rg-grid-photos photosGrid full-height no-padding"></div>
 	<div class="filesInfos">
 		<%= resumable.files.length %> Files
 			<%= (_.reduce( resumable.files , function(sum,file) { 
