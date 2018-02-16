@@ -65,12 +65,14 @@ define([
     },
 
     events: {
-      'click i#validate': 'validate',
+      // 'click i#validate': 'validate',
       'click i#refusedBtn': 'rejectPhoto',
+      'click i#acceptedBtn': 'acceptPhoto',
+      // 'click button#refusePhoto': 'rejectPhoto',
+      // 'click button#validatePhoto': 'acceptPhoto',
       'click i#checkedBtn': 'undeterminatePhoto',
       'click i#leftMouvementBtn': 'leftMouvement',
       'click i#rightMouvementBtn': 'rightMouvement',
-      'click i#acceptedBtn': 'acceptPhoto',
       'click button#validate': 'validateAll',
       'click .reneco-ECOL-ecollectionsmall': 'clickOnIconeView',
       'click .reneco-image_file': 'clickOnIconeView',
@@ -84,7 +86,8 @@ define([
       'click i#closeNav': 'filterNavClose',
       'click input[name="filterstatus"]': 'filterCollectionCtrl',
       'click i#createStationBtn': 'createStation',
-      'click i#deleteStationBtn': 'removeStation'
+      'click i#deleteStationBtn': 'removeStation',
+      'click i#editStationBtn': 'editStation'
     },
 
     ui: {
@@ -257,6 +260,39 @@ define([
       }
 
 
+    },
+
+    editStation : function(event) {
+      var  stationId,title,text; 
+      if( this.tabSelected.length == 0 ) {
+        if(this.currentPosition !== null) {
+          stationId = this.tabView[this.currentPosition].model.get('stationId')
+          if (  stationId ) {
+            window.open('./#stations/'+stationId+'');
+          }
+          else {
+            title = 'No Station for this photo !';
+            text = 'Please select a photo with station attached';
+          }
+        }
+      }
+      else {
+        title: 'You can\'t edit multi stations in the same time';      
+        text = 'Please select only ONE photo'
+      }
+      if ( !stationId ) {
+        Swal({
+          title : title,
+          // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
+          text: text,
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonColor: 'rgb(218, 146, 15)',
+          confirmButtonText: 'Ok',
+          closeOnConfirm: false,
+        }
+      );
+      }
     },
 
     removeStation: function () {
@@ -1085,7 +1121,7 @@ define([
     },
 
     refreshCounter: function () {
-      debugger;
+    //  debugger;
       this.nbPhotos = this.myImageCollection.fullCollection.length;
       this.nbPhotosAccepted = this.myImageCollection.fullCollection.where({
         validated: 2
