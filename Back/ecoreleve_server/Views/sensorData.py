@@ -315,7 +315,8 @@ class SensorDatasByType(CustomView):
                                 self.viewTable.c['EndDate'],
                                 self.viewTable.c['FK_MonitoredSite'],
                                 func.count(self.viewTable.c['sessionID']).label(
-                                    'nb_photo')
+                                    'nb_photo'),
+                                func.sum(self.viewTable.c['processed']).label('processed')
                                 ]
                                )
             queryStmt = queryStmt.where(self.viewTable.c['checked'] == None)
@@ -793,7 +794,7 @@ class SensorDatasByType(CustomView):
             bindparam('fkMonitoredSite', value=fkMonitoredSite),
             bindparam('fkEquipmentId', value=fkEquipmentId)
         )
-        result = self.session.execute(query).fetchall()
+        result = self.session.execute(query).fetchone()
 
         # self.session.commit()
 
@@ -838,7 +839,7 @@ class SensorDatasByType(CustomView):
         #     """for key in index:
         #         if ( str(key) =='checkedvalidated'   )
         #         print ( str(key)+":"+str(index[key]))"""
-        return {'nbInserted' : result[0]['nbInserted'] }
+        return {'nbInserted' : result['nbInserted'] }
         # return resultat
 
 
