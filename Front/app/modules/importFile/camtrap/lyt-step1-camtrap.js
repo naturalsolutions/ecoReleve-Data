@@ -70,6 +70,7 @@ define([
           query: {
             /*params will be update after sessions selected*/
           },
+          fileType : ['image/*'] ,
           testChunks: true,
           clearInput: false
         });
