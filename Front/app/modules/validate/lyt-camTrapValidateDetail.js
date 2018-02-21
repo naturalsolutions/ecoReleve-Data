@@ -186,27 +186,25 @@ define([
 
     },
 
-    editStation : function(event) {
-      var  stationId,title,text; 
-      if( this.tabSelected.length == 0 ) {
-        if(this.currentPosition !== null) {
+    editStation: function (event) {
+      var stationId, title, text;
+      if (this.tabSelected.length == 0) {
+        if (this.currentPosition !== null) {
           stationId = this.tabView[this.currentPosition].model.get('stationId')
-          if (  stationId ) {
-            window.open('./#stations/'+stationId+'');
-          }
-          else {
+          if (stationId) {
+            window.open('./#stations/' + stationId + '');
+          } else {
             title = 'No Station for this photo !';
             text = 'Please select a photo with station attached';
           }
         }
-      }
-      else {
-        title: 'You can\'t edit multi stations in the same time';      
+      } else {
+        title: 'You can\'t edit multi stations in the same time';
         text = 'Please select only ONE photo'
       }
-      if ( !stationId ) {
+      if (!stationId) {
         Swal({
-          title : title,
+          title: title,
           // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
           text: text,
           type: 'error',
@@ -214,8 +212,7 @@ define([
           confirmButtonColor: 'rgb(218, 146, 15)',
           confirmButtonText: 'Ok',
           closeOnConfirm: false,
-        }
-      );
+        });
       }
     },
 
@@ -325,7 +322,7 @@ define([
         } else if ($elemToActive.hasClass('reneco-image_file')) {
           this.displayModal(e);
         }
-      } 
+      }
       e.stopPropagation();
     },
     checkUrl: function (url) {
@@ -355,7 +352,7 @@ define([
       this.nbPhotosAccepted = 0;
       this.nbPhotosRefused = 0;
       // this.nbPhotosChecked = 0;
-      this.nbPhotosNotChecked = 0 ;
+      this.nbPhotosNotChecked = 0;
       this.nbPhotosStationed = 0;
       this.stopSpace = false;
       this.tabSelected = [];
@@ -409,8 +406,7 @@ define([
           pageSize: 24
         },
         url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
-        patch: function () {
-        }
+        patch: function () {}
       });
 
       this.myImageCollection = new ImageCollection();
@@ -943,8 +939,8 @@ define([
       this.nbPhotosNotChecked = this.myImageCollection.fullCollection.where({
         validated: null
       }).length;
-      this.nbPhotosStationed = this.myImageCollection.fullCollection.filter(function(model) { 
-        return ( model.get('stationId') !== null && model.get('validated') === 2) ; 
+      this.nbPhotosStationed = this.myImageCollection.fullCollection.filter(function (model) {
+        return (model.get('stationId') !== null && model.get('validated') === 2);
       }).length;
 
       if (this.toolsBarTop) {
@@ -979,9 +975,9 @@ define([
         myFilter.validated = 4;
       } else if ($elem.hasClass('checked')) {
         myFilter.validated = 1;
-      }else if ($elem.hasClass('stationed')) {
-        myFilter = function(model) {
-          return ( model.get('stationId') != null && model.get('validated') === 2) ;
+      } else if ($elem.hasClass('stationed')) {
+        myFilter = function (model) {
+          return (model.get('stationId') != null && model.get('validated') === 2);
         }
       } else if ($elem.hasClass('notChecked')) {
         myFilter.validated = null;
@@ -1060,17 +1056,16 @@ define([
     displaySwalUnchecked: function (compteur) {
       var _this = this;
       Swal({
-          title: 'You can\'t validate this sessions',
-          // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
-          text: +_this.nbPhotosNotChecked + ' photos still underteminate',
-          type: 'error',
-          showCancelButton: false,
-          confirmButtonColor: 'rgb(218, 146, 15)',
+        title: 'You can\'t validate this sessions',
+        // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
+        text: +_this.nbPhotosNotChecked + ' photos still underteminate',
+        type: 'error',
+        showCancelButton: false,
+        confirmButtonColor: 'rgb(218, 146, 15)',
 
-          confirmButtonText: 'Ok',
-          closeOnConfirm: false,
-        }
-      );
+        confirmButtonText: 'Ok',
+        closeOnConfirm: false,
+      });
     },
 
     displaySwalValidate: function (compteur) {
@@ -1142,7 +1137,7 @@ define([
                   type: 'error',
                   showCancelButton: true,
                   confirmButtonColor: 'rgb(218, 146, 15)',
-        
+
                   confirmButtonText: 'Go to monitored sites',
                   cancelButtonText: 'Return to validation',
                   closeOnConfirm: true,
@@ -1160,13 +1155,13 @@ define([
 
     validateAll: function () {
       $(".fullscreenimg [id^='zoom_']").trigger('wheelzoom.reset');
-      
-      if ( this.nbPhotosNotChecked > 0) {
+
+      if (this.nbPhotosNotChecked > 0) {
         this.displaySwalUnchecked();
       } else {
         this.displaySwalValidate();
       }
-   },
+    },
 
   });
 });
