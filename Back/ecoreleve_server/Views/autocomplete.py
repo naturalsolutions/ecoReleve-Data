@@ -77,7 +77,7 @@ def autocompleteTaxon(request):
     }
 
     prop_name = {'vernaculaire': 'NOM_VERN',
-                 'latin': 'NOM_VALIDE'}
+                 'latin': 'NOM_COMPLET'}
     criterias = dict(request.params)
     table = taxaViews.get(criterias['protocol'], None)
     if table is None:
@@ -94,5 +94,23 @@ def autocompleteTaxon(request):
     return [{'label': row[prop_criteria],
              'taxref_id': row['CD_NOM'],
              'vernaculaire': row['NOM_VERN'],
-             'latin': row['NOM_VALIDE']
+             'latin': row['NOM_COMPLET']
              } for row in session.execute(query).fetchall()]
+
+
+@view_config(route_name='taxon',
+             renderer='json',
+             request_method='GET',
+             permission=NO_PERMISSION_REQUIRED)
+def getTaxon(request):
+    session = request.dbsession
+    taxref_id = request.matchdict.get('taxref_id', None)
+    table = Base.metadata.tables['TAXREFv10']
+    query = select([table]).where(table.c['CD_NOM']==taxref_id)
+    result = session.execute(query).fetchone()
+
+    return {
+            'taxref_id': result['CD_NOM'],
+            'vernaculaire': result['NOM_VERN'],
+            'latin': result['NOM_COMPLET']
+            }

@@ -1,0 +1,36 @@
+DELETE FROM public."ModuleForms"
+WHERE "Name" = 'nom_vernaculaire'
+
+
+UPDATE public."ModuleForms"
+	SET "Label"= 'Taxon', "InputType"='TaxRefEditor' --,  Options"=?, 
+	WHERE "Name"='taxon';
+
+UPDATE public."ModuleForms"
+	SET "Options"='{"type":"latin", "taxaList":"oiseau"}'
+	WHERE "Name"='taxon' AND "TypeObj"=(SELECT "ID" FROM "ProtocoleType" WHERE "Name"='Avifaune');
+    
+UPDATE public."ModuleForms"
+	SET "Options"='{"type":"latin", "taxaList":"amphibien"}'
+	WHERE "Name"='taxon' AND "TypeObj"=(SELECT "ID" FROM "ProtocoleType" WHERE "Name"='Batrachofaune');
+    
+UPDATE public."ModuleForms"
+	SET "Options"='{"type":"latin", "taxaList":"reptile"}'
+	WHERE "Name"='taxon' AND "TypeObj"=(SELECT "ID" FROM "ProtocoleType" WHERE "Name"='Herpeto');
+   
+UPDATE public."ModuleForms"
+	SET "Options"='{"type":"latin", "taxaList":"mammal"}'
+	WHERE "Name"='taxon' AND "TypeObj"=(SELECT "ID" FROM "ProtocoleType" WHERE "Name"='Mammo');
+    
+   
+UPDATE public."ModuleForms"
+	SET "Options"='{"type":"latin", "taxaList":"chiroptera"}'
+	WHERE "Name"='taxon' AND "TypeObj"=(SELECT "ID" FROM "ProtocoleType" WHERE "Name"='Chiroptères');
+    
+  
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('1_Up_Conf_TaxRefEditor',GETDATE(),(SELECT db_name()))
+
+
+GO

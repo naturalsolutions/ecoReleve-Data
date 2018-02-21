@@ -1,0 +1,18 @@
+-- Table: public."TVersion"
+
+-- DROP TABLE public."TVersion";
+
+CREATE TABLE public."TVersion"
+(
+    "TVer_PK_ID" bigint NOT NULL,
+    "TVer_Date" time without time zone,
+    "TVer_FileName" character varying(255) COLLATE pg_catalog."default",
+    CONSTRAINT "TVersion_pkey" PRIMARY KEY ("TVer_PK_ID")
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public."TVersion"
+    OWNER to postgres;

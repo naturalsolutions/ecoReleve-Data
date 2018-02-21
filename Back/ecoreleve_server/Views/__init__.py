@@ -54,6 +54,8 @@ def add_routes(config):
     config.add_route(
         'autocomplete/taxon', 'ecoReleve-Core/autocomplete/taxon')
     config.add_route(
+        'taxon', 'ecoReleve-Core/taxon/{taxref_id}')
+    config.add_route(
         'autocomplete', 'ecoReleve-Core/autocomplete/{obj}/{prop}')
     config.add_route('autocomplete/ID',
                      'ecoReleve-Core/autocomplete/{obj}/{prop}/{valReturn}')
