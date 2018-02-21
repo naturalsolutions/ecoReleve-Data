@@ -65,7 +65,8 @@ class ObservationView(DynamicObjectView):
             # certainly not the better way but don't know where handle it  
             if 'mediafile' in self.objectDB.ProtocoleType.DynPropNames:
                 mediaItem = None
-                mediaItem = self.session.query(MediasFiles).filter(MediasFiles.FK_Station == self.objectDB.FK_Station).one() 
+                # mediaItem = self.session.query(MediasFiles).filter(MediasFiles.FK_Station == self.objectDB.FK_Station).one()
+                mediaItem = self.session.query(MediasFiles).filter(and_( MediasFiles.FK_Station == self.objectDB.FK_Station,MediasFiles.Name == self.objectDB.ObservationDynPropValues[0].ValueString.split('/')[-1] )).first()
                 if mediaItem :
                     delSubReq = Request.blank('/ecoReleve-Core/mediasfiles/'+str(mediaItem.Id) )
                     delSubReq.method = 'DELETE'
