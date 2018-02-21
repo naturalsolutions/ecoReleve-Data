@@ -45,26 +45,35 @@ class MediaFileView(CustomView):
             return 
 
     def removeFile(self , absolutePathForFile):
-        path, fkStation, fileName = absolutePathForFile.rsplit('\\',2)
-
         try:
-            print(os.path.join(path,fkStation),fileName,fkStation)
-            mediaElem = self.session.query(MediasFiles).filter(
-                    and_(
-                        MediasFiles.Path == os.path.join(path,fkStation) ,
-                        MediasFiles.Name == fileName,
-                        MediasFiles.Extension == fileName.split('.')[-1],
-                        MediasFiles.FK_Station == fkStation
-                         )
-                ).one()
-            if mediaElem.Id:
-                self.session.delete(mediaElem)
-                self.session.flush()
-            oldAbsolutePathForFile = os.path.join(absolutePathForFile)
-            os.remove(oldAbsolutePathForFile)
+            # oldAbsolutePathForFile = os.path.join(absolutePathForFile)
+            if os.path.isfile(absolutePathForFile):
+                os.remove(absolutePathForFile)
         except Exception as error:
-            print("erreur dans sql ou file")
+            print("error removing file")
             raise
+
+    # def removeFile(self , absolutePathForFile):
+    #     path, fkStation, fileName = absolutePathForFile.rsplit('\\',2)
+
+    #     try:
+    #         print(os.path.join(path,fkStation),fileName,fkStation)
+    #         mediaElem = self.session.query(MediasFiles).filter(
+    #                 and_(
+    #                     MediasFiles.Path == os.path.join(path,fkStation) ,
+    #                     MediasFiles.Name == fileName,
+    #                     MediasFiles.Extension == fileName.split('.')[-1],
+    #                     MediasFiles.FK_Station == fkStation
+    #                      )
+    #             ).one()
+    #         if mediaElem.Id:
+    #             self.session.delete(mediaElem)
+    #             self.session.flush()
+    #         oldAbsolutePathForFile = os.path.join(absolutePathForFile)
+    #         os.remove(oldAbsolutePathForFile)
+    #     except Exception as error:
+    #         print("erreur dans sql ou file")
+    #         raise
 
 class MediasFilesView(CustomView):
     item = MediaFileView
