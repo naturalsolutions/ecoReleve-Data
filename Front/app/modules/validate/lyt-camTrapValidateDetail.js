@@ -47,10 +47,8 @@ define([
       '-': 'decreaseStars',
       'space': 'displayModal',
       'backspace': 'undeterminatePhoto',
-      //'backspace' : 'toggleModelStatus',
       'enter': 'acceptPhoto',
       'del': 'rejectPhoto',
-      //'shift': 'undeterminatePhoto',
       'esc': 'leaveModal',
       'pagedown': 'nextPage',
       'pageup': 'prevPage',
@@ -65,11 +63,8 @@ define([
     },
 
     events: {
-      // 'click i#validate': 'validate',
       'click i#refusedBtn': 'rejectPhoto',
       'click i#acceptedBtn': 'acceptPhoto',
-      // 'click button#refusePhoto': 'rejectPhoto',
-      // 'click button#validatePhoto': 'acceptPhoto',
       'click i#checkedBtn': 'undeterminatePhoto',
       'click i#leftMouvementBtn': 'leftMouvement',
       'click i#rightMouvementBtn': 'rightMouvement',
@@ -78,10 +73,6 @@ define([
       'click .reneco-image_file': 'clickOnIconeView',
       'click .reneco-list': 'clickOnIconeView',
       'click #js_accepted_top,#js_refused_top,#js_checked_top,#js_notchecked_top,#infossession,#js_stationed_top': 'filterCollectionCtrl',
-      // 'click #js_refused_top': 'filterCollectionCtrl',
-      // 'click #js_checked_top': 'filterCollectionCtrl',
-      // 'click #js_notchecked_top': 'filterCollectionCtrl',
-      // 'click #infossession': 'filterCollectionCtrl',
       'click button#filternavbtn': 'filterNavOpen',
       'click i#closeNav': 'filterNavClose',
       'click input[name="filterstatus"]': 'filterCollectionCtrl',
@@ -110,7 +101,6 @@ define([
     },
 
     regions: {
-      //  'rgNavbar': '#navbar',
       'rgNavbar': '.js-rg-navbar',
       'rgGallery': '#gallery',
       'rgFullScreen': '#imageFullScreen',
@@ -149,73 +139,7 @@ define([
       data.NbFieldWorker = 1;
       data.fieldActivityId = 39 // Id from BDD for fieldactivity : camera trapping
       return data;
-
-
-
     },
-    // populateDataForCreatingStation: function (tabOfPosition) {
-
-    //   var monitoredSiteModel = this.monitoredSiteForm.model;
-    //   var data = {};
-    //   var tab = []
-
-    //   for(var i = 0 ; i < tabOfPosition.length ; i++ ) {
-    //     var key = tabOfPosition[i];
-    //     var imageModel = this.tabView[key].model;
-    //     data[key] = {};
-    //     data[key]["latitude"] = monitoredSiteModel.get('LAT');
-    //     data[key]["longitude"] = monitoredSiteModel.get('LON');
-    //     data[key]["FK_MonitoredSite"] = this.siteId;
-    //     data[key]["name"] = this.siteId;
-    //     data[key]["Name"] = imageModel.get('name');
-    //     data[key]["FeldWorkers"] = [{"ID": null,"defaultValues": "","FieldWorker": "" + window.app.user.get('PK_id') + ""}];
-    //     data[key]["FK_StationType"] = 6;
-    //     data[key]["waypointTime"] = moment(imageModel.get('date_creation')).format('DD/MM/YYYY HH:mm:ss');
-    //     data[key]["elevation"] = monitoredSiteModel.get('ELE')|| null;
-    //     data[key]["precision"] = monitoredSiteModel.get('precision')|| null;
-    //     data[key]["Comments"] = "created from camera trap validation"|| null;
-    //     data[key]["NbFieldWorker"] = 1;
-    //     data[key]["fieldActivity"] = 5;
-    //     tab.push(data[key])
-    //   }
-
-
-    //   // for (var item in data) { // check for required val
-    //   //   var val = data[item]
-    //   //   if (typeof (val) === 'undefined' || val === null) {
-    //   //     if (item === 'stationDate')
-    //   //       throw new Error("The photo have no value for " + item);
-    //   //     else
-    //   //       throw new Error("Monitored site have no value for " + item);
-    //   //     break;
-    //   //   }
-    //   // }
-
-    //   return tab;
-
-
-
-    // },
-    // callDeleteStationAPI : function(tabOfElem) {
-    //   var stationId = elem.model.get('stationId');
-    //   var _this = this; 
-    //   if(stationId === null)
-    //     return;
-    //   $.ajax({
-    //     type : 'DELETE',
-    //     url : config.coreUrl +'stations/'+stationId,
-    //     contentType: 'application/json'
-    //   })
-    //   .done(function(resp) {
-    //     elem.removeStation();
-    //     console.log("Station"+stationId+" removed ok");
-    //   })
-    //   .fail(function(err) {
-    //     console.log(err);
-    //   });
-
-    // },
-
     callDeleteStationAPI: function (tabOfIds, tabOfItem) {
       if (tabOfIds.length === 1) {
         var stationId = tabOfIds[0];
@@ -319,30 +243,6 @@ define([
       this.callDeleteStationAPI(tabOfIds, tabOfItem);
     },
 
-    // removeStation : function() {
-    //   var _this = this;
-    //   var listOfElem = []
-    //   if (this.tabSelected.length == 0) {
-    //     if (this.currentPosition !== null) {
-    //       if(this.tabView[this.currentPosition].model.get('stationId')!== null)
-    //         listOfElem.push(this.tabView[this.currentPosition])
-    //     }
-    //   } else {
-    //     for (var i of this.tabSelected) {
-    //       if(this.tabView[i].model.get('stationId') !== null)
-    //         listOfElem.push(this.tabView[i]);
-    //     }
-    //   }
-
-    //   if( listOfElem.length === 0 ) 
-    //     return;
-
-    //   for(var i = 0 ; i < listOfElem.length ; i++ ) {
-    //     var elem = listOfElem[i];
-    //     this.callDeleteStationAPI(elem);
-    //   }
-    // },
-
     callPostStationAPI: function (elem, data) {
 
       $.ajax({
@@ -395,14 +295,11 @@ define([
     },
 
     filterNavOpen: function () {
-      console.log("boommm");
       var sidenav = this.$el.find("#mySidenav");
-      console.log(sidenav);
       sidenav.css('width', "250px");
     },
     filterNavClose: function () {
       var sidenav = this.$el.find("#mySidenav");
-      console.log(sidenav);
       sidenav.css('width', "0");
     },
     setStars: function (e) {
@@ -424,30 +321,11 @@ define([
         $elemToInactive.toggleClass('active'); //remove active actual elem
         $elemToActive.toggleClass('active'); // add active elem clicked
         if ($elemToActive.hasClass('reneco-ECOL-ecollectionsmall')) {
-          /*  this.ui.gallery.show();
-            this.rgFullScreen.currentView.hide();
-            this.rgFullScreen.$el.hide()*/
           this.leaveModal();
         } else if ($elemToActive.hasClass('reneco-image_file')) {
           this.displayModal(e);
-          /*  this.ui.gallery.hide();
-          //  this.ui.imageFullScreen.show()
-            if(this.rgFullScreen.currentView === undefined) {
-              console.log("initialise");
-              this.rgFullScreen.show( new ModalView({ model : this.tabView[this.currentPosition].model, parent :this}))
-              this.rgFullScreen.$el.show(this.rgFullScreen.currentView);
-
-            }
-            else {
-              this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
-              this.rgFullScreen.$el.show(this.rgFullScreen.currentView);
-            }*/
-        } else {;
-          //console.log("list file");
         }
-      } else {;
-        //console.log("rien a faire");
-      }
+      } 
       e.stopPropagation();
     },
     checkUrl: function (url) {
@@ -457,8 +335,6 @@ define([
       return NaN;
     },
     initialize: function (options) {
-      // this.equipLine = parseInt(this.checkUrl(location.hash));
-      // this.equipmentId = this.equipLine;
       this.equipmentId = parseInt(this.checkUrl(location.hash));
 
       if (this.equipLine < 0) {
@@ -466,9 +342,6 @@ define([
         return
       }
 
-
-      console.log(options);
-      console.log(Backgrid);
       this.translater = Translater.getTranslater();
       this.type = options.type;
       this.model = options.model;
@@ -487,27 +360,14 @@ define([
       this.stopSpace = false;
       this.tabSelected = [];
 
-
-      // this.navbar = new Navbar({
-      //   parent: this,
-      //   globalGrid: options.globalGrid,
-      //   model: this.model,
-      // });
-
-
       this.globalGrid = options.globalGrid;
 
-      // this.validatedImg = this.myImageCollection.filter({validated : "true"})
-      // this.deletedImg = this.myImageCollection.filter({validated : "false"})
-      // this.toCheckImg = this.myImageCollection.filter({validated : "null"})
-
-      //this.fetchAllSessions();
       this.fetchSessionInfos();
       this.initCollection();
 
 
-
     },
+
     fetchAllSessions: function () {
       var _this = this;
       $.ajax({
@@ -550,7 +410,6 @@ define([
         },
         url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
         patch: function () {
-          //console.log("ouais ouais ouais j'overwrite");
         }
       });
 
@@ -582,19 +441,10 @@ define([
 
     onRender: function () {
       this.$el.i18n();
-      /*  this.$el.append('<div id="mySidenav" class="sidenav">'
-          +'<a href="javascript:void(0)" class="closebtn" onclick="">&times;</a>'
-          +'<a href="#">About</a>'
-          +'<a href="#">Services</a>'
-          +'<a href="#">Clients</a>'
-          +'<a href="#">Contact</a>'
-          +'</div>')*/
-
     },
 
     onShow: function () {
       var _this = this;
-      //  this.rgNavbar.show(this.navbar);
       this.ui.imageFullScreen.hide()
       this.display();
     },
@@ -602,10 +452,8 @@ define([
     display: function () {
       var _this = this;
       this.listenTo(this.myImageCollection, 'reset', function (e) { // trigger on init or on change page
-        //console.log("reset");
         _this.displayImages(_this.myImageCollection);
         _this.rgToolsBarTop.show(this.toolsBarTop);
-        console.log(_this.myImageCollection.models[0]);
         this.displayImageDetails(_this.myImageCollection.models[this.currentPosition]);
       });
       this.currentCollection = this.myImageCollection;
@@ -622,7 +470,6 @@ define([
       if (typeof (_this.tabView) !== "undefined") {
         this.destroyViews(_this.tabView);
       }
-      //this.ui.gallery.html('');
       this.currentPosition = null;
       this.tabView = [];
       myCollectionToDisplay.each(function (model) {
@@ -662,11 +509,6 @@ define([
         if (this.rgFullScreen.currentView !== undefined && this.stopSpace) { //si le modal existe on change
           this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
         }
-        /*    if( this.currentPosition >= 0 ) {
-              console.log(this.currentPosition);
-              console.log(this.tabView);
-              this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model);
-            }*/
         $('#gallery').selectable({
           filter: '.imageCamTrap',
           distance: 10,
@@ -722,8 +564,6 @@ define([
               var $inputTags = _this.toolsBar.$el.find("#tagsInput");
               var $inputTag = _this.toolsBar.$el.find(".bootstrap-tagsinput input");
               var $bootstrapTag = _this.toolsBar.$el.find(".bootstrap-tagsinput");
-              console.log($inputTags);
-              console.log($inputTags.prop("disabled"));
               if (!$inputTags.prop("disabled")) {
                 $inputTag.prop("disabled", true);
                 $inputTags.prop("disabled", true);
@@ -776,16 +616,6 @@ define([
 
       this.rgImageDetails.show(this.imageDetails)
 
-
-      /*new NsForm({
-        name: 'imageDetailsForm',
-        buttonRegion: [this.ui.btn],
-        modelurl: config.coreUrl + 'sensors',
-        formRegion: this.ui.imageDetailsForm,
-        displayMode: 'display',
-        id: this.sensorId,
-        reloadAfterSave: false,
-      });*/
     },
 
     displayImageFullScreen: function (model) {
@@ -843,10 +673,6 @@ define([
           this.tabView[i].setModelValidated(2);
         }
       }
-      /*  if(this.currentPosition !== null ) {
-          this.tabView[this.currentPosition].setModelValidated(2);
-        }*/
-
     },
 
     nextPage: function (e) {
@@ -905,9 +731,6 @@ define([
           this.tabView[i].setModelValidated(1);
         }
       }
-      /*  if(this.currentPosition !== null ) {
-          this.tabView[this.currentPosition].setModelValidated(1);
-        }*/
     },
 
     toggleModelStatus: function (e) {
@@ -921,10 +744,6 @@ define([
           this.tabView[i].toggleModelStatus();
         }
       }
-      /*if(this.currentPosition !== null ) {
-        this.tabView[this.currentPosition].toggleModelStatus();
-      }*/
-
     },
 
     leaveModal: function (e) {
@@ -949,7 +768,6 @@ define([
         $('#rgToolsBarTop .reneco-ECOL-ecollectionsmall').removeClass('active');
         $('#rgToolsBarTop .reneco-image_file').addClass('active');
         this.ui.gallery.hide();
-        //console.log(this.rgFullScreen);
 
         if (this.rgFullScreen.currentView === undefined) {
           this.rgFullScreen.show(new ModalView({
@@ -963,7 +781,6 @@ define([
             this.rgFullScreen.$el.addClass("crop2 crop-paginator");
           }
           this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
-          //this.rgFullScreen.currentView.show();
           this.rgFullScreen.$el.show();
         }
       }
@@ -986,8 +803,6 @@ define([
       }
       if (this.tabView != null) {
         this.tabView[this.currentPosition].handleFocus(); // focus la premiere image
-        //this.currentPosition = 0; //et on se place sur 0
-        //this.tabView[0].$el.find('.vignette').toggleClass('active');
       }
 
     },
@@ -1036,12 +851,10 @@ define([
         }
 
         if (lastPosition !== this.currentPosition) { // si on a bougé
-          if (this.tabSelected.length === 0)
+          if (this.tabSelected.length === 0) {
             this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
             this.tabView[this.currentPosition].handleFocus();
-          /*  if( this.rgFullScreen.currentView !== undefined){//si le modal existe on change
-              this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
-            }*/
+          }
           if (this.rgImageDetails.currentView != undefined) {
             this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model)
           }
@@ -1113,7 +926,6 @@ define([
 
     displayAll: function (e) {
       this.currentCollection = this.myImageCollection;
-      //this.ui.gallery.html('');
       this.ui.paginator.html('');
       this.displayImages(this.myImageCollection);
       this.displayPaginator(this.paginator);
@@ -1121,7 +933,6 @@ define([
     },
 
     refreshCounter: function () {
-    //  debugger;
       this.nbPhotos = this.myImageCollection.fullCollection.length;
       this.nbPhotosAccepted = this.myImageCollection.fullCollection.where({
         validated: 2
@@ -1129,22 +940,17 @@ define([
       this.nbPhotosRefused = this.myImageCollection.fullCollection.where({
         validated: 4
       }).length;
-      // this.nbPhotosChecked = this.myImageCollection.fullCollection.where({
-      //   validated: 1
-      // }).length;
       this.nbPhotosNotChecked = this.myImageCollection.fullCollection.where({
         validated: null
       }).length;
       this.nbPhotosStationed = this.myImageCollection.fullCollection.filter(function(model) { 
         return ( model.get('stationId') !== null && model.get('validated') === 2) ; 
-      }).length
-      // this.nbphotosnotchecked = this.nbPhotos - (this.nbPhotosChecked + this.nbPhotosAccepted + this.nbPhotosRefused);
+      }).length;
+
       if (this.toolsBarTop) {
         this.toolsBarTop.$el.find("#nbphotos").text(this.nbPhotos);
         this.toolsBarTop.$el.find("#nbphotosaccepted").text(this.nbPhotosAccepted);
         this.toolsBarTop.$el.find("#nbphotosrefused").text(this.nbPhotosRefused);
-        // this.toolsBarTop.$el.find("#nbphotoschecked").text(this.nbPhotosChecked);
-        // this.toolsBarTop.$el.find("#nbphotosnotChecked").text(this.nbphotosnotchecked);
         this.toolsBarTop.$el.find("#nbphotosNotChecked").text(this.nbPhotosNotChecked);
         this.toolsBarTop.$el.find("#nbphotosStationed").text(this.nbPhotosStationed);
       }
@@ -1181,10 +987,8 @@ define([
         myFilter.validated = null;
       } else if ($elem.hasClass('allphotos')) {
         //remet la collection mere
-        //this.ui.gallery.html('');
         this.displayImages(this.myImageCollection);
         this.ui.paginator.html('');
-        //this.ui.paginator.find('.backgrid-paginator').css('visibility','visible');
         this.displayPaginator(this.paginator);
         this.ui.paginator.find('.backgrid-paginator').css('visibility', 'visible');
 
@@ -1210,7 +1014,6 @@ define([
         state: {
           pageSize: 24
         },
-        //url: config.coreUrl + 'sensors/' + this.type + '/uncheckedDatas/' + this.sensorId + '/' + this.siteId + '/' + this.equipmentId,
         url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
       });
 
@@ -1225,7 +1028,6 @@ define([
         state: {
           pageSize: 24
         },
-        //url: config.coreUrl + 'sensors/' + this.type + '/uncheckedDatas/' + this.sensorId + '/' + this.siteId + '/' + this.equipmentId,
         url: config.coreUrl + 'sensorDatas/' + this.type + '/' + this.equipmentId + '/datas/',
         queryParams: {
           totalPages: null,
@@ -1243,11 +1045,9 @@ define([
         collection: this.myImageCollectionFiltered
       });
       this.listenTo(this.myImageCollectionFiltered, "reset", function (e) {
-        //console.log("RESET DE LA COLLECTION");
         _this.displayImages(_this.myImageCollectionFiltered);
       });
 
-      //this.ui.gallery.html('');
       this.displayImages(this.myImageCollectionFiltered);
       this.ui.paginator.html('');
       this.displayPaginator(this.myPaginationFiltered);
@@ -1311,10 +1111,6 @@ define([
                 context: _this,
               })
               .done(function (response, status, jqXHR) {
-                console.log("ajax ok");
-                console.log(response);
-                console.log(status);
-                console.log(jqXHR);
                 Swal({
                   title: 'Upload finished',
                   text: 'you have finish this sessions\nOn ' + _this.nbPhotos + ' photos ' + text,
@@ -1340,10 +1136,6 @@ define([
                 })
               })
               .fail(function (jqXHR, textStatus, errorThrown) {
-                console.log("ajax !ok")
-                console.log(jqXHR);
-                console.log(textStatus);
-                console.log(errorThrown);
                 Swal({
                   title: 'Error',
                   text: 'Something goes wrong',
@@ -1362,122 +1154,19 @@ define([
           }
 
         }
-        /*function(isConfirm) {
-
-        }*/
       );
     },
 
 
     validateAll: function () {
       $(".fullscreenimg [id^='zoom_']").trigger('wheelzoom.reset');
-      // if (this.nbphotosnotchecked > 0 || this.nbPhotosChecked > 0) {
+      
       if ( this.nbPhotosNotChecked > 0) {
-
         this.displaySwalUnchecked();
       } else {
         this.displaySwalValidate();
       }
-
-
-      /*for(var i = 0 ; i < this.currentCollection.fullCollection ; i++ )
-      {
-        if(this.currentCollection.fullCollection.models[i].attributes.)
-      }*/
-      /*  compteur.total = 0
-        compteur.unchecked = 0;
-        compteur.total = this.myImageCollection.fullCollection.length;
-        for( var model of this.myImageCollection.fullCollection.models )
-        {
-          if(model.attributes.validated === 0 || model.attributes.validated === null)
-          {
-            compteur.unchecked+=1;
-          }
-        }
-
-        if( compteur.unchecked ){
-          this.displaySwalUnchecked(compteur);
-        }
-        else {
-          this.displaySwalValidate(compteur);
-        }
-        console.log("photo a check : "+compteur.unchecked);*/
-      /*  var _this = this;
-        var flagUnchecked = false
-        var url = config.coreUrl+'sensors/'+this.type+'/uncheckedDatas';
-        // parcours de la page
-        var sizePage = this.myImageCollection.length;
-        var sizeAllPages = this.myImageCollection.fullCollection.length;
-        var dataToSend = [];
-        var test = this.myImageCollection.toJSON()*/
-      /*  for ( var i = 0 ; i < sizeAllPages ; i ++ ){
-      dataToSend.push({
-      id:this.myImageCollection.fullCollection.models[i].id,
-      status:this.myImageCollection.fullCollection.models[i].status
-    })
-  };*/
-
-      /*  for ( var i = 0 ; i < sizePage && !flagUnchecked ; i ++ ){
-          switch (this.myImageCollection.models[i].status) {
-            case 0 : {
-              break;
-            }
-            case 1 : {
-              break;
-            }
-            default :{
-              flagUnchecked = true;
-              _this.displayListUnchecked();
-              break;
-            }
-          }
-        }
-        $.ajax({
-          url : url,
-          method: 'POST',
-          data: {data : JSON.stringify(this.myImageCollection) },
-          context: this,
-        })
-        .done( function(response,status,jqXHR) {
-        })
-        .fail( function(jqXHR, textStatus, errorThrown) {
-
-        });*/
-    },
-
-    /*swal: function(opt, type, callback) {
-      var btnColor;
-      switch (type){
-        case 'success':
-        btnColor = 'green';
-        break;
-        case 'error':
-        btnColor = 'rgb(147, 14, 14)';
-        break;
-        case 'warning':
-        btnColor = 'orange';
-        break;
-        default:
-        return;
-        break;
-      }
-
-      Swal({
-        title: opt.title || opt.responseText || 'error',
-        text: opt.text || '',
-        type: type,
-        showCancelButton: false,
-        confirmButtonColor: btnColor,
-        confirmButtonText: 'OK',
-        closeOnConfirm: true,
-      },
-      function(isConfirm) {
-        //could be better
-        if (callback) {
-          callback();
-        }
-      });
-    },*/
+   },
 
   });
 });
