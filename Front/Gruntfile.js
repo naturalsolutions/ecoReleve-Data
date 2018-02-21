@@ -60,7 +60,7 @@
      },
      requirejs: {
          options: {
-            optimize: 'uglify2',
+            optimize: 'none',
             baseUrl: 'app',
             mainConfigFile: 'app/main.js',
             include: 'main',

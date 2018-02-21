@@ -8,13 +8,16 @@ from pyramid.security import (
     Deny
 )
 from pyramid.response import Response
+from ..Models import AppConfig
+
+COOKIE_NAME = AppConfig['app:main']['cookieName']
 
 
 class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
 
     def get_userID(self, request):
         try:
-            token = request.cookies.get("ecoReleve-Core")
+            token = request.cookies.get(COOKIE_NAME)
             claims = self.decode_jwt(request, token)
             userid = claims['iss']
             return userid
@@ -23,12 +26,12 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
 
     def get_userInfo(self, request):
         try:
-            token = request.cookies.get("ecoReleve-Core")
+            token = request.cookies.get(COOKIE_NAME)
             claims = self.decode_jwt(request, token, verify=True)
             return claims, True
         except:
             try:
-                token = request.cookies.get("ecoReleve-Core")
+                token = request.cookies.get(COOKIE_NAME)
                 claims = self.decode_jwt(request, token, verify=False)
                 return claims, False
             except:
@@ -53,10 +56,10 @@ class myJWTAuthenticationPolicy(JWTAuthenticationPolicy):
         return userid
 
     def remember(self, response, principal, **kw):
-        response.set_cookie('ecoReleve-Core', principal, max_age=100000)
+        response.set_cookie(COOKIE_NAME, principal, max_age=100000)
 
     def forget(self, request):
-        request.response.delete_cookie('ecoReleve-Core')
+        request.response.delete_cookie(COOKIE_NAME)
 
     def _get_credentials(self, request):
         return self.get_userID(request)

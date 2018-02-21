@@ -12,7 +12,10 @@ from sqlalchemy import select, and_, join
 from traceback import print_exc
 from ..GenericObjets.ObjectView import DynamicObjectView, DynamicObjectCollectionView
 from ..controllers.ApiController import RootCore
-
+from pyramid.security import (
+    Allow,
+    Authenticated,
+    ALL_PERMISSIONS)
 
 class ObservationView(DynamicObjectView):
 
@@ -73,6 +76,11 @@ class ObservationsView(DynamicObjectCollectionView):
         self.parent = parent
         if 'objectType' in self.request.params:
             self.typeObj = int(self.request.params['objectType'])
+        self.__acl__ = [
+            (Allow, 'group:admin', ALL_PERMISSIONS),
+            (Allow, 'group:superUser', ALL_PERMISSIONS),
+            (Allow, 'group:user', ALL_PERMISSIONS)
+        ]
 
     def __getitem__(self, ref):
         self.create = self.POSTactions.get(ref)
@@ -100,7 +108,6 @@ class ObservationsView(DynamicObjectCollectionView):
 
         if data.get('type_name', None):
             data['type_name'] = data['type_name'].title()
-
         if 'station' in data and self.parent.__class__.__name__ != 'StationView':
             sta = Station()
             sta.session = self.session
