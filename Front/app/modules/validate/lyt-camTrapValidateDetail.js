@@ -1038,7 +1038,7 @@ define([
         if (lastPosition !== this.currentPosition) { // si on a bougé
           if (this.tabSelected.length === 0)
             this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
-          this.tabView[this.currentPosition].handleFocus();
+            this.tabView[this.currentPosition].handleFocus();
           /*  if( this.rgFullScreen.currentView !== undefined){//si le modal existe on change
               this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
             }*/
