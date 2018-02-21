@@ -1,8 +1,0 @@
-UPDATE [EcoReleve_ECWP].[dbo].[ModuleForms]
-SET Legend = 'Comments', Label = ''
-WHERE        (Name LIKE 'Comments') AND (module_id = 9)
-
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('63_UP_indiv_details_display_comment_in_fieldset',GETDATE(),(SELECT db_name()))
-
-
-GO

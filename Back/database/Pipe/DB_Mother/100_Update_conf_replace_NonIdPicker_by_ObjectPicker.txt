@@ -1,7 +1,0 @@
-UPDATE ModuleForms SET InputType = 'ObjectPicker', editorClass = 'form-control unidentified-picker' where [InputType] = 'NonIdPicker'
-
-
-INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('100_Update_conf_replace_NonIdPicker_by_ObjectPicker',GETDATE(),(SELECT db_name()))
-
-
-GO
