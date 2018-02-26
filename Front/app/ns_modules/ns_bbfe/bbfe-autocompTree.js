@@ -168,7 +168,12 @@ define([
 
                     onItemClick: function (options) {
                         //for global
-                        _this.$el.find('input').trigger('thesaurusChange');
+                        if (_this.options.schema.options.date) {
+                            _this.$el.find('input').trigger('thesaurusChange');
+                        }
+                        else {
+                            _this.$el.find('input.autocompTree').trigger('thesaurusChange');
+                        }
 
                         _this.onChange();
                     },
