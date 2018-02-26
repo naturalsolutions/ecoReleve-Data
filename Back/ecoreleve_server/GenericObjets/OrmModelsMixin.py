@@ -22,7 +22,7 @@ from sqlalchemy import (Column,
 from sqlalchemy.orm import relationship, aliased, class_mapper, mapper
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declared_attr
-from ..Models import Base, dbConfig, BusinessRules
+from ..Models import dbConfig, BusinessRules
 from sqlalchemy import inspect, orm
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.compiler import compiles
@@ -34,6 +34,13 @@ from sqlalchemy.orm.exc import *
 from sqlalchemy_utils import get_hybrid_properties
 from pyramid import threadlocal
 from sqlalchemy.orm.util import has_identity
+
+ANALOG_DYNPROP_TYPES = {'String': 'ValueString',
+                        'Float': 'ValueFloat',
+                        'Date': 'ValueDate',
+                        'Integer': 'ValueInt',
+                        'Time': 'ValueDate',
+                        'Date Only': 'ValueDate'}
 
 
 class CreateView(Executable, ClauseElement):
@@ -104,9 +111,8 @@ class GenericType(ORMUtils):
                         name='uqc_' + cls.__tablename__ + '_name',
                     ), {}
                     )
-
             cls.PropertiesClass = type(
-                cls.parent.__tablename__ + 'DynProp'.title(), (Properties, Base), {})
+                cls.parent.__tablename__ + 'DynProp'.title(), (Properties, cls.parent.getDeclarativeBase()), {})
         return cls.PropertiesClass
 
     @declared_attr
@@ -174,7 +180,7 @@ class GenericType(ORMUtils):
                 property_name = association_proxy('_property_name', 'Name')
 
             cls.TypePropertiesClass = type(
-                cls.__tablename__ + '_' + cls.parent.__tablename__ + 'DynProp'.title(), (TypeProperties, Base), {})
+                cls.__tablename__ + '_' + cls.parent.__tablename__ + 'DynProp'.title(), (TypeProperties, cls.parent.getDeclarativeBase()), {})
         return relationship(cls.TypePropertiesClass)
 
 
@@ -194,9 +200,9 @@ class EventRuler(object):
     @declared_attr
     def loadBusinessRules(cls):
         ''' 
-        
+        TODO call this to another moment ? , because call dbConfig['dbSession'] in getBuisnessRules() sucks !
         '''
-        @event.listens_for(Base.metadata, 'after_create')
+        @event.listens_for(cls.getDeclarativeBase().metadata, 'after_create')
         def afterConfigured(target, connection, **kwargs):
             cls.__constraintRules__ = {'before_update': [],
                                        'after_update': [],
@@ -205,7 +211,6 @@ class EventRuler(object):
                                        'before_delete': [],
                                        'after_delete': []
                                        }
-
             rules = cls.getBuisnessRules()
             if rules:
                 m = [cls.__constraintRules__[rule.actionType].append(rule)
@@ -259,6 +264,12 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
     TODO remove Configuration(ConfiguredDbObjectMapped) dependency
     --> Move on BaseView (DynamicObjectCollectionView)
     '''
+    @classmethod
+    def getDeclarativeBase(cls):
+        for parentKlass in cls.__bases__:
+            if parentKlass.__class__.__name__ == 'DeclarativeMeta':
+                return parentKlass
+
     def __init__(self, *args, **kwargs):
         self.__values__ = {}
         ConfiguredDbObjectMapped.__init__(self)
@@ -271,7 +282,7 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
                 setattr(self, param, value)
         if kwargs.get('session', None):
             del kwargs['session']
-        Base.__init__(self, **kwargs)
+        self.getDeclarativeBase().__init__(self, **kwargs)
         
     @property
     def session(self):
@@ -353,7 +364,6 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
     def getDataWithSchema(self, displayMode='edit'):
         resultat = self.getForm(displayMode=displayMode)
-
         '''IF ID is send from front --> get data of this object in order to
         display value into form which will be sent'''
         data = self.values
@@ -369,7 +379,6 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
             # for attr in schema:
             resultat['data']['id'] = 0
             resultat['data'].update(resultat['schema']['defaultValues'])
-
         return resultat
 
 
@@ -443,6 +452,18 @@ class HasDynamicProperties(HasStaticProperties):
     def type_id(self):
         return self._type_id
 
+    @property
+    def type_name(self):
+        if self._type:
+            return self._type.Name
+        else:
+            return None
+
+    @type_name.setter
+    def type_name(self, type_name):
+        self._type = self.session.query(
+            self.TypeClass).filter_by(Name=type_name).one()
+
     @type_id.setter
     def type_id(self, value):
         self._type_id = value
@@ -456,7 +477,7 @@ class HasDynamicProperties(HasStaticProperties):
                 __tablename__ = cls.__tablename__ + 'Type'
                 parent = cls
             cls.TypeClass = type(cls.__tablename__ +
-                                 'Type'.title(), (Type, Base), {})
+                                 'Type'.title(), (Type, cls.getDeclarativeBase()), {})
         return cls.TypeClass
 
     @property
@@ -519,7 +540,7 @@ class HasDynamicProperties(HasStaticProperties):
                     return {'value:': val, 'StartDate': self.StartDate, 'name': self.property_name}
 
             cls.DynamicValuesClass = type(
-                cls.__tablename__ + 'DynPropValues'.title(), (DynamicValues, Base), {})
+                cls.__tablename__ + 'DynPropValues'.title(), (DynamicValues, cls.getDeclarativeBase()), {})
         return cls.DynamicValuesClass
 
     @declared_attr
@@ -561,7 +582,7 @@ class HasDynamicProperties(HasStaticProperties):
     def lastValueView(cls):
         ''' create/intialize view of last dynamic properties values,
             return the mapped view'''
-        @event.listens_for(Base.metadata, 'after_create')
+        @event.listens_for(cls.getDeclarativeBase().metadata, 'after_create')
         def lastValueView(target, connection, **kwargs):
             viewName = cls.DynamicValuesClass.__tablename__ + 'Now'
             table_catalog, table_schema = dbConfig['data_schema'].split('.')
@@ -573,16 +594,16 @@ class HasDynamicProperties(HasStaticProperties):
                     and table_name = :viewName
             ''').bindparams(schema=table_schema, catalog=table_catalog, viewName=viewName.lower())
 
-            countView = Base.metadata.bind.execute(countViewQuery).scalar()
+            countView = cls.getDeclarativeBase().metadata.bind.execute(countViewQuery).scalar()
 
             if countView == 0:
                 createview = CreateView(viewName,
                                         cls.lastValueQuery())
-                Base.metadata.bind.execute(
+                cls.getDeclarativeBase().metadata.bind.execute(
                     createview.execution_options(autocommit=True))
 
             cls.LastDynamicValueViewClass = Table(viewName.lower(),
-                                                  Base.metadata,
+                                                  cls.getDeclarativeBase().metadata,
                                                   autoload=True)
             return viewName
         return lastValueView
@@ -633,18 +654,22 @@ class HasDynamicProperties(HasStaticProperties):
             del dict_['ID']
         if self.fk_table_type_name not in dict_ and 'type_id' not in dict_ and not self.type_id:
             raise Exception('object type not exists')
+
+        if 'type_name' in dict_:
+            self.type_name = dict_.get('type_name')
         else:
             type_id = dict_.get(self.fk_table_type_name, None) or dict_.get(
                 'type_id', None) or self.type_id
             self._type = self.session.query(self.TypeClass).get(type_id)
-            useDate = parser(dict_.get('__useDate__', None)
-                             )
-            for prop, value in dict_.items():
-                self.setValue(prop, value, useDate)
 
-            if self.hasLinkedField:
-                useDateLinked = useDate or self.linkedFieldDate()
-                self.updateLinkedField(dict_, useDate=useDateLinked)
+        useDate = parser(dict_.get('__useDate__', None)
+                        )
+        for prop, value in dict_.items():
+            self.setValue(prop, value, useDate)
+
+        if self.hasLinkedField:
+            useDateLinked = useDate or self.linkedFieldDate()
+            self.updateLinkedField(dict_, useDate=useDateLinked)
 
     def setValue(self, propertyName, value, useDate=None):
         ''' Set object properties (static and dynamic)
@@ -759,7 +784,7 @@ class HasDynamicProperties(HasStaticProperties):
 
     def getLinkedEntity(self, tablename):
         filterEntity = list(filter(lambda e: hasattr(
-            e, '__tablename__') and e.__tablename__ == tablename, Base._decl_class_registry.values()))
+            e, '__tablename__') and e.__tablename__ == tablename, super().getDeclarativeBase()._decl_class_registry.values()))
         if filterEntity:
             return filterEntity[0]
         else:

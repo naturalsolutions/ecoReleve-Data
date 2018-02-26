@@ -23,7 +23,7 @@ from datetime import datetime
 from ..utils.parseValue import dateParser
 
 
-class Station(Base, HasDynamicProperties):
+class Station(HasDynamicProperties, Base):
 
     __tablename__ = 'Station'
 
