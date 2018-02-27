@@ -14,10 +14,11 @@ define([
   './station.model',
 
   'ns_map/ns_map',
+  'requirejs-text!./geometry-info.tpl.html'
 ], function(
   $, _, Backbone, Marionette, Swal,
   Com, NsForm, NavbarView, LytProtocols,
-  DetailView, StationModel, NsMap
+  DetailView, StationModel, NsMap, gemoInfoTpl
 ) {
 
   'use strict';
@@ -49,12 +50,41 @@ define([
       this.model = new this.ModelPrototype();
       this.com = new Com();
       this.model.set('id', options.id);
-
       this.model.set('stationId', options.id);
-
       this.model.set('urlParams', {
         proto: options.proto,
         obs: options.obs
+      });
+    },
+
+    getRegion: function(val){
+      var _this = this;
+      if(!val){
+        return;
+      }
+      $.ajax({
+        url:'regions/'+val+'/geoJSON'
+      }).done(function(geoJSON){
+        if(_this.RegionLayer){
+          _this.map.map.removeLayer(_this.RegionLayer);
+        }
+        
+        var regionStyle = {
+          "color": "#00cc00",
+          "weight": 3,
+          "opacity": 0.5
+        };
+        _this.RegionLayer = new L.GeoJSON(geoJSON, {style : regionStyle});
+        var prop = geoJSON.properties;
+
+        var infos = _.template(gemoInfoTpl, prop);
+
+        _this.RegionLayer.bindPopup(infos);
+        _this.RegionLayer.addTo(_this.map.map);
+        _this.map.map.fitBounds(_this.RegionLayer.getBounds());
+        _this.map.map.on("overlayadd", function (event) {
+        _this.RegionLayer.bringToFront();
+        });
       });
     },
 
@@ -73,7 +103,7 @@ define([
       }
       if(this.map){
         $.when(this.nsForm.jqxhr).then(function(){
-          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
+          _this.updateMap();
         });
       }
     },
@@ -86,16 +116,23 @@ define([
     },
 
     displayMap: function() {
+      var _this = this;
       var map = this.map = new NsMap({
         zoom: 3,
         popup: true,
+        preventSetView:true
       });
       $.when(this.nsForm.jqxhr).then(function(){
-        map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
+        _this.updateMap();
       });
     },
-
-
+    updateMap: function(){
+      if(this.nsForm.model.get('LAT') && this.nsForm.model.get('LON')){
+        this.map.addMarker(null, this.nsForm.model.get('LAT'), this.nsForm.model.get('LON'));
+      }
+      this.getRegion(this.nsForm.model.get('FK_FieldworkArea'));
+    
+    },
     displayTab: function(e) {
       e.preventDefault();
       this.$el.find('.nav-tabs>li').each(function(){
@@ -146,7 +183,7 @@ define([
       this.nsForm.afterShow = function(){
         var globalEl = $(this.BBForm.el).find('fieldset').first().detach();
         _this.ui.formStation.html(globalEl);
-
+        
         if(this.displayMode.toLowerCase() == 'edit'){
           this.bindChanges(_this.ui.formStation);
           $(".datetime").attr('placeholder','DD/MM/YYYY');
@@ -158,21 +195,24 @@ define([
       };
 
       this.nsForm.afterSaveSuccess = function() {
-        if(_this.map){
-          _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
-        }
+        // if(_this.map){
+        //   _this.map.addMarker(null, this.model.get('LAT'), this.model.get('LON'));
+        // }
 
         if(this.model.get('fieldActivityId') != _this.fieldActivityId){
           _this.displayProtos();
           _this.fieldActivityId = _this.model.get('fieldActivityId');
-
         }
+        $.when(this.jqxhr).then(function(){
+          _this.updateMap();
+        });
+        
       };
       
       $.when(this.nsForm.jqxhr).then(function(){
         _this.fieldActivityId = this.model.get('fieldActivityId');
         _this.displayProtos();
-      })
+      });
 
     },
 

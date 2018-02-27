@@ -1,0 +1,75 @@
+ALTER TABLE Station 
+ADD FK_FieldworkArea INT 
+GO
+
+ALTER TABLE Individual_Location 
+ADD FK_FieldworkArea INT 
+GO
+
+/***** update station WITHOUT coordinates  ****/
+/* update great correspondance first */ 
+UPDATE s SET s.FK_FieldworkArea = fa.ID
+FROM Station s
+  JOIN Region r ON r.ID = S.FK_Region
+  JOIN [FieldworkArea] fa  ON fa.Name = replace(r.Region,'UAE - ','') 
+WHERE s.FK_StationType = 3 
+
+
+/* update correspondance on working_region*/ 
+UPDATE s SET s.FK_FieldworkArea = fa.ID
+FROM Station s
+  JOIN Region r ON r.ID = S.FK_Region
+  JOIN [FieldworkArea] fa  ON fa.Name = replace(r.Region,'UAE - ','') 
+								or (fa.working_region = replace(r.Region,'UAE - ','') ) --AND Management_Unit = '')
+WHERE s.FK_StationType = 3 AND s.FK_FieldworkArea IS NULL 
+/*  END */ 
+
+
+/***** update station WITH coordinates  , computing ...****/
+
+ DECLARE @pending int;
+WHILE EXISTS(SELECT 1 FROM Station s WHERE FK_FieldworkArea IS NULL AND  FK_StationType != 3
+	 AND EXISTS (SELECT * 
+				FROM FieldworkArea r
+				WHERE s.LON >= min_Lon AND s.lon <= max_Lon AND s.LAt >= min_Lat AND s.LAt <= max_Lat  ))
+BEGIN
+
+     UPDATE TOP(1000) Station
+     SET FK_FieldworkArea = [dbo].[fn_GetRegionFromLatLon](LAT,LON)
+     WHERE FK_FieldworkArea IS NULL AND  FK_StationType != 3
+
+	 SET @pending = (SELECT COUNT(*) FROM Station WHERE FK_FieldworkArea IS NULL AND  FK_StationType != 3)
+	 print ('updated 1000 stations, pending = '+CONVERT(varchar(20),@pending));
+	 IF @pending < 1000
+		BREAK;
+
+END 
+GO
+
+
+/***** update Individual locations , computing ...****/
+
+ DECLARE @pending int;
+WHILE EXISTS(SELECT 1 FROM Individual_Location s WHERE FK_FieldworkArea IS NULL
+	 AND EXISTS (SELECT * 
+				FROM FieldworkArea r
+				WHERE s.LON >= min_Lon AND s.lon <= max_Lon AND s.LAt >= min_Lat AND s.LAt <= max_Lat  ))
+BEGIN
+
+     UPDATE TOP(1000) Individual_Location
+     SET FK_FieldworkArea = [dbo].[fn_GetRegionFromLatLon](LAT,LON)
+     WHERE FK_FieldworkArea IS NULL
+
+	 SET @pending = (SELECT COUNT(*) FROM Individual_Location WHERE FK_FieldworkArea IS NULL )
+	 print ('updated 1000 stations, pending = '+CONVERT(varchar(20),@pending));
+	 IF @pending < 1000
+		BREAK;
+
+END 
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('165_ADD_FK_FieldworkArea_&_Update_it',GETDATE(),(SELECT db_name()))
+
+
+GO

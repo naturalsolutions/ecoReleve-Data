@@ -45,9 +45,11 @@ require.config({
     //'backbone.list'     : '../bower_components/backbone-forms/distribution.amd/editors/list',
     'backbone.paginator': '../bower_components/backbone.paginator/lib/backbone.paginator.min',
     'requirejs-text': '../bower_components/requirejs-text/text',
-    'L': '../bower_components/leaflet/dist/leaflet-src',
+    'L': '../bower_components/leaflet/dist/leaflet',
+    'Draw': '../bower_components/leaflet-draw/dist/leaflet.draw-src',
     'leaflet_cluster': '../bower_components/leaflet.markercluster/dist/leaflet.markercluster-src',
-    'leaflet_google': '../bower_components/leaflet-plugins/layer/tile/Google',
+    // 'leaflet_google': '../bower_components/leaflet-plugins/layer/tile/Google',
+    'leaflet_google': '../bower_components/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant',
     'dropzone': '../bower_components/dropzone/dist/dropzone',
     'i18n': '../bower_components/i18n/i18next',
     'chart': '../bower_components/chartjs/Chart',
@@ -127,6 +129,10 @@ require.config({
     },
     leaflet: {
       exports: 'L'
+    },
+    Draw: {
+      deps:['L'],
+      exports : 'Draw'
     },
     fancytree: {
       //useless?

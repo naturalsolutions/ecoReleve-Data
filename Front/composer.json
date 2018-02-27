@@ -1,0 +1,5 @@
+{
+    "require": {
+        "drupal/console": "~1.0"
+    }
+}

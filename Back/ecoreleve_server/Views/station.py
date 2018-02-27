@@ -6,7 +6,8 @@ from ..Models import (
     MonitoredSitePosition,
     MonitoredSite,
     fieldActivity,
-    User
+    User,
+    Region
 )
 import json
 import itertools
@@ -49,7 +50,7 @@ class StationsView(DynamicObjectCollectionView):
         DynamicObjectCollectionView.__init__(self, ref, parent)
         self.actions = {'updateSiteLocation': self.updateMonitoredSite,
                         'importGPX': self.getFormImportGPX,
-                        'fieldActivity': self.getFieldActivityList
+                        'fieldActivity': self.getFieldActivityList,
                         }
         self.__acl__ = context_permissions[ref]
 
