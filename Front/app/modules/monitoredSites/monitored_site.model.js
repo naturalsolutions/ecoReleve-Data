@@ -18,7 +18,10 @@ define([
       icon: 'reneco-site',
 
       fk: 'FK_MonitoredSite',
-
+      authorisationLvl: {
+        create_new: 'js-user',
+      },
+      
       formConfig: {
         modelurl: 'monitoredSites',
         displayMode: 'display',
