@@ -19,6 +19,10 @@ define([
 
       fk: 'FK_Sensor',
 
+      authorisationLvl: {
+        create_new: 'js-superUser',
+      },
+
       availableOptions: [{
         label: 'Argos',
         val: 'argos'

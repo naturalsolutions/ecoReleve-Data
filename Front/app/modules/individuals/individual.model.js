@@ -21,7 +21,10 @@ define([
       subincon: 'reneco-bustard',
 
       disabledNew: true,
-      
+      authorisationLvl: {
+        create_new: 'js-admin',
+      },
+
       formConfig: {
         modelurl: 'individuals',
         displayMode: 'display',
