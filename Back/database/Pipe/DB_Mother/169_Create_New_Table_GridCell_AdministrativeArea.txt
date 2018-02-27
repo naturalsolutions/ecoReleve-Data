@@ -9,7 +9,7 @@ CREATE TABLE [dbo].[AdministrativeArea](
 	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[Country] [nvarchar](255) NULL,
 	[Department] [varchar](255) NULL,
-	[City] [nvarchar](255) NULL,
+	[Municipality] [nvarchar](255) NULL,
 	[Name] [varchar](255) NULL,
 	[fullpath] [varchar](255) NULL,
 	[type_] [varchar](50) NULL,
