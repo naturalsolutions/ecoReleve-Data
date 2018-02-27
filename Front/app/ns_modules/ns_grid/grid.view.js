@@ -257,11 +257,21 @@ define([
 
           if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()  ) { //detect date
             //then convert it to timestamp (number)
-            if(valueA) {
+            if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid()) {
               valueA = moment(valueA , "DD/MM/YYYY HH:mm:ss" ).valueOf();
             }
-            if(valueB){
+            if(moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()){
               valueB = moment(valueB ,  "DD/MM/YYYY HH:mm:ss" ).valueOf();
+            }
+          }else {
+            if( moment(valueA, "DD/MM/YYYY HH:mm", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm", true).isValid()  ) { //detect date
+              //then convert it to timestamp (number)
+              if(moment(valueA, "DD/MM/YYYY HH:mm", true).isValid()) {
+                valueA = moment(valueA , "DD/MM/YYYY HH:mm" ).valueOf();
+              }
+              if(moment(valueB, "DD/MM/YYYY HH:mm", true).isValid()){
+                valueB = moment(valueB ,  "DD/MM/YYYY HH:mm" ).valueOf();
+              }
             }
           }
 
