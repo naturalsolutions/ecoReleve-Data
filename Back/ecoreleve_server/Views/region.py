@@ -31,7 +31,7 @@ class RegionView(CustomView):
 
         self.__actions__ = {'geoJSON': self.getGeoJson,
                             }
-        self.__acl__ = context_permissions['release']
+        self.__acl__ = context_permissions['regions']
 
     def getGeoJson(self):
         return self.objectDB.geom_json
@@ -46,6 +46,7 @@ class RegionTypeView(CustomView):
 
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)
+        self.__acl__ = context_permissions['regions']
         try:
             id_ = int(ref)
             self.objectDB = self.session.query(FieldworkArea).get(id_)
@@ -78,7 +79,7 @@ class RegionsView(CustomView):
             'getTypes': self.getRegionTypes,
             'autocomplete': self.autocomplete
         }
-        self.__acl__ = context_permissions['release']
+        self.__acl__ = context_permissions['regions']
 
     def autocomplete(self):
         params = self.request.params.mixed()
