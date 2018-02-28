@@ -43,6 +43,10 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
             }
           }
         }
+        
+        //hack for spatial navigation with tab button
+        //will be solved with upgrading version
+        params.eGridCell.setAttribute("tabindex", "0"); 
   
       };
   
