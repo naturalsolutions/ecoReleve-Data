@@ -242,7 +242,7 @@ class ProtocoleType(Base, ObjectTypeWithDynProp):
     ProtocoleType_ObservationDynProps = relationship(
         'ProtocoleType_ObservationDynProp', backref='ProtocoleType')
     Observations = relationship('Observation', backref='ProtocoleType')
-
+    OriginalId = Column(String(250))
 
 class ProtocoleType_ObservationDynProp(Base):
 
