@@ -19,7 +19,6 @@ class FieldActivityView(CustomView):
         CustomView.__init__(self, ref, parent)
         print(ref)
         self.objectDB = self.session.query(fieldActivity).get(ref)
-        print(self.objectDB)
         self.actions = {'protocoleTypes': self.getProtocoleTypes,
                         }
 
