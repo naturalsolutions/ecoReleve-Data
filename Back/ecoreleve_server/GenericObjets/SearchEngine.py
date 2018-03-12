@@ -61,13 +61,18 @@ class QueryEngine(object):
         @returning :: SQLAlchemy Query Object
 
         initialize "SELECT FROM" statement
-        @selectable corrsponding to the columns you need in the SELECT statement
+        @selectable corresponding to the columns you need in the SELECT statement
         '''
         self.selectable = []
         join_table = self._select_from()
 
         if selectable:
-            self.selectable = selectable
+            self.selectable = []
+            for column in selectable:
+                if column.__class__.__name__ =='InstrumentedAttribute':
+                    self.selectable.append(column)
+                else:
+                    self.selectable.append(self.get_column_by_name(column))
         else:
             self.selectable.append(self.model)
 
@@ -90,7 +95,7 @@ class QueryEngine(object):
         '''
         return self.model
 
-    def search(self, filters, selectable=[], order_by=None, limit=None, offset=None):
+    def search(self, filters=[], selectable=[], order_by=None, limit=None, offset=None):
         '''
         @filters :: list(dict),
         @selectable :: list(string or SQLAlchemy Column Object),
@@ -103,14 +108,22 @@ class QueryEngine(object):
         method to call in views
         build query over parameters and execute query
         '''
+        query = self.build_query(filters, selectable, order_by, limit, offset)
+        self.before_exec_query()
+        queryResult = self.session.execute(query).fetchall()
+        return [dict(row) for row in queryResult]
+
+    def before_exec_query(self):
+        pass
+
+    def build_query(self, filters=[], selectable=[], order_by=None, limit=None, offset=None):
         query = self.init_query_statement(selectable)
         query = self.apply_filters(query, filters)
         query = self._order_by(query, order_by)
         query = self._limit(query, limit)
         query = self._offset(query, offset)
-
-        queryResult = self.session.execute(query).fetchall()
-        return [dict(row) for row in queryResult]
+        self.query = query
+        return query
 
     def apply_filters(self, query, filters):
         for criteria in filters:
@@ -135,7 +148,7 @@ class QueryEngine(object):
                 )
         return query
 
-    def _count(self, filters):
+    def _count(self, filters=[]):
         '''
         like search method but apply count statement,
         @returning :: interger
@@ -209,6 +222,7 @@ class DynamicPropertiesQueryEngine(QueryEngine):
         '''
         QueryEngine.__init__(self, session, model)
         self.instance_model = self.model(session=self.session)
+        self.object_type = object_type
         if object_type:
             self.instance_model._type = self.session.query(self.model.TypeClass).get(object_type)
 
@@ -216,6 +230,12 @@ class DynamicPropertiesQueryEngine(QueryEngine):
 
         #perform datetime conversion if failed return the original from_history parameter
         self.from_history = parser(from_history)
+
+    def apply_filters(self, query, filters):
+        query = QueryEngine.apply_filters(self, query, filters)
+        if self.object_type:
+            query = query.where(self.model.type_id == self.object_type)
+        return query
 
     def get_full_history_values_view(self):
         '''
@@ -262,10 +282,12 @@ class DynamicPropertiesQueryEngine(QueryEngine):
 
     def _where(self, query, criteria):
         _property = self.get_dynamic_property_by_name(criteria['Column'])
-        if _property:
-            query = self._where_exists(query, criteria)
-        else:
+        column = self.get_column_by_name(criteria['Column'])
+
+        if not _property:
             query = QueryEngine._where(self, query, criteria)
+        else:
+            query = self._where_exists(query, criteria)
         return query
 
     def _where_exists(self, query, criteria):
@@ -336,10 +358,6 @@ class DynamicPropertiesQueryEngine(QueryEngine):
             self.selectable.append(column.label(prop['Name']))
         return join_table
 
-    # def search(self, filters, selectable=[], order_by=None, limit=None, offset=None):
-    #     #NOT overloaded 
-    #     return QueryEngine.search(self, filters, selectable, order_by, limit, offset)
-
     def get_alias_property_values(self, _property):
         '''
         @property :: dictionary , represents the dynamic property (configured like the @@Entity@@DynProp Table)
@@ -374,6 +392,7 @@ class DynamicPropertiesQueryEngine(QueryEngine):
             _alias, column = self.get_alias_property_values(_property)
         else:
             column = QueryEngine.get_column_by_name(self, column_name)
+        return column
 
     def get_dynamic_property_by_name(self, property_name):
         return self.instance_model.get_property_by_name(property_name)
