@@ -9,7 +9,7 @@ from sqlalchemy import (
     outerjoin,
     not_)
 from sqlalchemy.sql import elements
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, exc
 from .FrontModules import ModuleGrids
 from ..utils import Eval
 import pandas as pd
@@ -36,6 +36,8 @@ class QueryEngine(object):
     This class is used to filter Model | Table | View over all properties, all relationships
     '''
 
+    custom_filters = {}
+
     def __init__(self, session, model):
         '''
         @session :: SQLAlchemy Connection Session,
@@ -43,6 +45,11 @@ class QueryEngine(object):
         '''
         self.session = session
         self.model = model
+        self.fk_list = {fk.parent.name: fk for fk in self.model.__table__.foreign_keys}
+        #TODO auto join on Foreign Key with target table
+        # exemple : selectable=['SensorType.Name','Weight', 'UnicIdentifier']
+
+        #TODO 2: FIX FK_Type in Obj with Dyn Prop
 
     @property
     def pk_model(self):
@@ -64,18 +71,25 @@ class QueryEngine(object):
         @selectable corresponding to the columns you need in the SELECT statement
         '''
         self.selectable = []
-        join_table = self._select_from()
 
         if selectable:
-            self.selectable = []
+            # self.selectable = []
             for column in selectable:
                 if column.__class__.__name__ =='InstrumentedAttribute':
                     self.selectable.append(column)
                 else:
-                    self.selectable.append(self.get_column_by_name(column))
-        else:
-            self.selectable.append(self.model)
+                    true_column = self.get_column_by_name(column)
+                    if true_column is None:
+                        continue
+                    else:
+                        self.selectable.append(true_column.label(column))
 
+        join_table, computed_selectable = self._select_from()
+
+        if not selectable:
+            self.selectable.extend(computed_selectable)
+
+        join_table = self.extend_from(join_table) 
         query = select(self.selectable).select_from(join_table)
         return query
 
@@ -84,7 +98,9 @@ class QueryEngine(object):
         initialize "SELECT COUNT(*) FROM" statement,
         @returning :: SQLAlchemy Query Object
         '''
-        query = select([func.count()]).select_from(self.model)
+        from_table = self.extend_from(self.model)
+        query = select([func.count()]).select_from(from_table)
+
         return query
 
     def _select_from(self):
@@ -93,7 +109,10 @@ class QueryEngine(object):
         can by overload in order to apply junctures
         @returning :: SQLAlchemy model or SQLAlchemy join/outerjoin
         '''
-        return self.model
+        return self.model, [self.model]
+
+    def extend_from(self, _from):
+        return _from
 
     def search(self, filters=[], selectable=[], order_by=None, limit=None, offset=None):
         '''
@@ -119,6 +138,7 @@ class QueryEngine(object):
     def build_query(self, filters=[], selectable=[], order_by=None, limit=None, offset=None):
         query = self.init_query_statement(selectable)
         query = self.apply_filters(query, filters)
+        query = self.apply_custom_filters(query, filters)
         query = self._order_by(query, order_by)
         query = self._limit(query, limit)
         query = self._offset(query, offset)
@@ -129,7 +149,13 @@ class QueryEngine(object):
         for criteria in filters:
             query = self._where(query, criteria)
         return query
-    
+
+    def apply_custom_filters(self, query, filters):
+        for criteria in filters:
+            if criteria['Column'] in self.custom_filters:
+                query = self.custom_filters.get(criteria['Column'])(query, criteria)
+        return query
+
     def _where(self, query, criteria):
         ''' 
             @criteria :: dict
@@ -141,6 +167,9 @@ class QueryEngine(object):
             and set an association_proxy attribute.
         '''
         column = self.get_column_by_name(criteria['Column'])
+        if column is None:
+            return query
+
         query = query.where(
                 eval_.eval_binary_expr(
                     column, criteria['Operator'], criteria['Value']
@@ -155,6 +184,7 @@ class QueryEngine(object):
         '''
         query = self.init_count_statement()
         query = self.apply_filters(query, filters)
+        query = self.apply_custom_filters(query, filters)
         queryResult = self.session.execute(query).scalar()
         return queryResult
 
@@ -176,6 +206,9 @@ class QueryEngine(object):
             for order_clause in param:
                 column_name, order_type = order_clause.split(':')
                 column = self.get_column_by_name(column_name)
+                if column is None:
+                    continue
+
                 if order_type == 'asc':
                    orders_by_clause.append(column.asc())
                 elif order_type == 'desc':
@@ -202,12 +235,23 @@ class QueryEngine(object):
         @column_name :: string,
         @returning :: SQLAlchemy Column Object
         '''
+
+        #SEARCH column by alias name (label)
+        filter_aliased_column = list(filter(lambda x: x.__class__.__name__ == 'Label' and x.name == column_name , self.selectable))
+        if len(filter_aliased_column) > 0:
+            column = filter_aliased_column[0].element
+            return column
+
         column = getattr(self.model, column_name, None)
         try:
-            if not column:
+            if column is None:
                 column = self.model.c[column_name]
+            
         except Exception as e:
-            raise ColumnError('Column :col not exists !'.format(col=column_name))
+            #raise error or just pass through ?? 
+            # raise ColumnError('Column :col not exists !'.format(col=column_name))
+            print('Column {col} not exists !'.format(col=column_name))
+            column = None
         return column
 
 
@@ -283,6 +327,8 @@ class DynamicPropertiesQueryEngine(QueryEngine):
     def _where(self, query, criteria):
         _property = self.get_dynamic_property_by_name(criteria['Column'])
         column = self.get_column_by_name(criteria['Column'])
+        if column is None and not _property:
+            return query
 
         if not _property:
             query = QueryEngine._where(self, query, criteria)
@@ -345,18 +391,20 @@ class DynamicPropertiesQueryEngine(QueryEngine):
         @returning :: SQLAlchemy outerjoin
         return the FROM statement with all junctures over all known dynamic properties
         '''
-        join_table = self.model
+
+        join_table, selectable = QueryEngine._select_from(self)
 
         for prop in self.dynamic_properties:
+            if len(self.selectable) > 0 and prop['Name'] not in self.selectable:
+                continue
             _alias, column = self.get_alias_property_values(prop)
             join_table = outerjoin(
                         join_table, _alias,
                         and_(self.pk_model == _alias.c['FK_'+self.model.__tablename__],
                              _alias.c[self.model.fk_table_DynProp_name] == prop['ID'])
                     )
-
-            self.selectable.append(column.label(prop['Name']))
-        return join_table
+            selectable.append(column.label(prop['Name']))
+        return join_table, selectable
 
     def get_alias_property_values(self, _property):
         '''
@@ -395,4 +443,10 @@ class DynamicPropertiesQueryEngine(QueryEngine):
         return column
 
     def get_dynamic_property_by_name(self, property_name):
-        return self.instance_model.get_property_by_name(property_name)
+        #return self.instance_model.get_property_by_name(property_name)
+
+        try:
+            prop = self.session.query(self.model.TypeClass.PropertiesClass).filter_by(Name=property_name).one()
+            return prop.as_dict()
+        except exc.NoResultFound:
+            return None
