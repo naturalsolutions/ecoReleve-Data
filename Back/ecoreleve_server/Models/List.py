@@ -37,11 +37,22 @@ from datetime import datetime
 from ..utils.datetime import parse
 from ..utils.generator import Generator
 from sqlalchemy.sql.expression import union_all
-
+from ..GenericObjets.SearchEngine import DynamicPropertiesQueryEngine, add_custom_filter
 SensorType = Sensor.TypeClass
 eval_ = Eval()
 
+#TODO Remove this file and replace all collection with extended module QueryEngine
 
+class StationList2(DynamicPropertiesQueryEngine):
+    def __init__(self, session, object_type=None, from_history=None):
+        DynamicPropertiesQueryEngine.__init__(self, session=session, model=Station, object_type=object_type, from_history=from_history)
+        # self.custom_filters['availableOn'] = self.available_filter
+
+    @add_custom_filter('FK_ProtocoleType')
+    def protocoleType_filter():
+        pass
+
+print(StationList2.custom_filters)
 class StationList(CollectionEngine):
     ''' this class extend CollectionEngine, it's used to filter stations '''
 

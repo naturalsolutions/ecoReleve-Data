@@ -5,13 +5,13 @@ from ..Models import (
     Equipment
     # SensorList
 )
-from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists
+from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, Table
 from sqlalchemy.orm import aliased, exc
 from collections import OrderedDict
 from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore, context_permissions
 from . import DynamicObjectView, DynamicObjectCollectionView, DynamicObjectValue, DynamicObjectValues
-from ..GenericObjets.SearchEngine import DynamicPropertiesQueryEngine
+from ..GenericObjets.SearchEngine import DynamicPropertiesQueryEngine, QueryEngine, add_custom_filter
 from ..utils.datetime import parse
 
 
@@ -22,7 +22,7 @@ class SensorList(DynamicPropertiesQueryEngine):
     
     def __init__(self, session, object_type=None, from_history=None):
         DynamicPropertiesQueryEngine.__init__(self, session=session, model=Sensor, object_type=object_type, from_history=from_history)
-        self.custom_filters['availableOn'] = self.available_filter
+        # self.custom_filters['availableOn'] = self.available_filter
 
     def extend_from(self, _from):
         curEquipmentTable = Base.metadata.tables['CurrentlySensorEquiped']
@@ -41,11 +41,12 @@ class SensorList(DynamicPropertiesQueryEngine):
                                'Name'].label('FK_MonitoredSiteName'))
         self.selectable.append(curEquipmentTable.c[
                                'FK_Individual'].label('FK_Individual'))
+        print(self.custom_filters)
         return table_join
 
+    @add_custom_filter('availableOn')
     def available_filter(self, query, criteria):
-        # do availbale filter 
-        print('do availbale filter')
+        # do availbale filter
         date = criteria['Value']
         try:
             date = parse(date.replace(' ', ''))
@@ -78,6 +79,8 @@ class SensorList(DynamicPropertiesQueryEngine):
             query = query.where(or_(not_(exists(querySensor)),
                                     not_(exists(subQueryNotEquip))))
         return query
+
+print(SensorList.custom_filters)
 
 
 class SensorValueView(DynamicObjectValue):
@@ -157,10 +160,16 @@ class SensorsView(DynamicObjectCollectionView):
 
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)
-  
+        conf_grid = self.getGrid()
+        cols = list(map(lambda x: x['field'].replace('.','@'),conf_grid))
+
         self.collection = SensorList(session = self.session)
-        dataResult = self.collection.search(filters=params.get('criteria', []), offset=params.get('offset'), limit=params.get('per_page'), order_by=params.get('order_by'))
+        dataResult = self.collection.search(selectable=cols,filters=params.get('criteria', []), offset=params.get('offset'), limit=params.get('per_page'), order_by=params.get('order_by'))
         
+        # table = Base.metadata.tables['VArgosData_With_EquipIndiv']
+        # self.collection = QueryEngine(session = self.session, model=table)
+        # dataResult = self.collection.search(filters=params.get('criteria', []), offset=params.get('offset'), limit=params.get('per_page'), order_by=params.get('order_by'))
+
         countResult = self.collection._count(filters=params.get('criteria', []))
         result = [{'total_entries': countResult}]
         result.append(dataResult)

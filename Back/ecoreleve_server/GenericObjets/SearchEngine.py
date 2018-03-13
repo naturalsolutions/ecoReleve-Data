@@ -19,7 +19,8 @@ import time
 from sqlalchemy.inspection import inspect
 from datetime import datetime
 from ..utils.parseValue import parser
-
+from functools import wraps
+import inspect
 #######
 #TODO : Need to implement interface for in DB configuration, in order to optimize query
 #######
@@ -31,12 +32,36 @@ class ColumnError(Exception):
     pass
 
 
+
+# def is_match(_lambda, pattern):
+#     def wrapper(f):
+#         @wraps(f)
+#         def wrapped(self, *f_args, **f_kwargs):
+#             if callable(_lambda) and search(pattern, (_lambda(self) or '')): 
+#                 f(self, *f_args, **f_kwargs)
+#         return wrapped
+
+
+def add_custom_filter(filter_name):
+    def real_add_custom_filter(function):
+        dict_inspect = dict(inspect.getmembers(function))
+        klass = dict_inspect.get('__globals__').get('QueryEngine', None) or dict_inspect.get('__globals__').get('DynamicPropertiesQueryEngine')
+
+        klass.custom_filters[filter_name] = function
+        
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+            function(self, *args, **kwargs)
+        return wrapper
+    return real_add_custom_filter
+
 class QueryEngine(object):
     '''
     This class is used to filter Model | Table | View over all properties, all relationships
     '''
 
     custom_filters = {}
+
 
     def __init__(self, session, model):
         '''
@@ -45,11 +70,11 @@ class QueryEngine(object):
         '''
         self.session = session
         self.model = model
-        self.fk_list = {fk.parent.name: fk for fk in self.model.__table__.foreign_keys}
-        #TODO auto join on Foreign Key with target table
-        # exemple : selectable=['SensorType.Name','Weight', 'UnicIdentifier']
+        self.model_table = model
+        if self.model.__class__.__name__ != 'Table':
+            self.model_table = model.__table__
 
-        #TODO 2: FIX FK_Type in Obj with Dyn Prop
+        self.fk_list = {fk.parent.name: fk for fk in self.model_table.foreign_keys}
 
     @property
     def pk_model(self):
@@ -75,7 +100,9 @@ class QueryEngine(object):
         if selectable:
             # self.selectable = []
             for column in selectable:
-                if column.__class__.__name__ =='InstrumentedAttribute':
+                if column.__class__.__name__ in ['InstrumentedAttribute', 'Label'] :
+                    if column.__class__.__name__ == 'InstrumentedAttribute':
+                        column = column.label(column.name)
                     self.selectable.append(column)
                 else:
                     true_column = self.get_column_by_name(column)
@@ -85,9 +112,10 @@ class QueryEngine(object):
                         self.selectable.append(true_column.label(column))
 
         join_table, computed_selectable = self._select_from()
-
         if not selectable:
             self.selectable.extend(computed_selectable)
+        if not self.selectable:
+            raise ColumnError('error on given columns ! ')
 
         join_table = self.extend_from(join_table) 
         query = select(self.selectable).select_from(join_table)
@@ -99,6 +127,7 @@ class QueryEngine(object):
         @returning :: SQLAlchemy Query Object
         '''
         from_table = self.extend_from(self.model)
+        from_table = self._from_foreign(from_table)
         query = select([func.count()]).select_from(from_table)
 
         return query
@@ -106,12 +135,37 @@ class QueryEngine(object):
     def _select_from(self):
         '''
         initialize the "FROM" Statement
-        can by overload in order to apply junctures
-        @returning :: SQLAlchemy model or SQLAlchemy join/outerjoin
+        @returning :: SQLAlchemy model or SQLAlchemy join/outerjoin, list of column element list(SQLAlchemy.Column)
         '''
-        return self.model, [self.model]
+        join_table = self.model
+        selectable = [self.model]
+        join_table = self._from_foreign(join_table)
+
+        return join_table, selectable
+
+    def _from_foreign(self, join_table):
+        '''
+        Apply join, over all detected foreign reference in selectable
+        '''
+        if self.selectable:
+            for column in self.selectable:
+                if self.is_foreign_reference(column):
+                    foreign_infos = self.get_fk_column_and_table(column)
+                    fk_target_table = foreign_infos['fk_target_table']
+
+                    join_table = outerjoin(join_table, fk_target_table,
+                                            self.model_table.c[foreign_infos['fk_column_name']] == fk_target_table.c[foreign_infos['fk_column_name_in_target']])
+        return join_table
 
     def extend_from(self, _from):
+        '''
+        @_from :: SQLAlchemy model or SQLAlchemy join/outerjoin
+
+        Called after "FROM" Statement initialization (_select_from)
+        function to override in order to apply custom junctures
+
+        @returning :: SQLAlchemy model or SQLAlchemy join/outerjoin
+        '''
         return _from
 
     def search(self, filters=[], selectable=[], order_by=None, limit=None, offset=None):
@@ -153,7 +207,7 @@ class QueryEngine(object):
     def apply_custom_filters(self, query, filters):
         for criteria in filters:
             if criteria['Column'] in self.custom_filters:
-                query = self.custom_filters.get(criteria['Column'])(query, criteria)
+                query = self.custom_filters.get(criteria['Column'])(self, query, criteria)
         return query
 
     def _where(self, query, criteria):
@@ -235,13 +289,15 @@ class QueryEngine(object):
         @column_name :: string,
         @returning :: SQLAlchemy Column Object
         '''
-
         #SEARCH column by alias name (label)
         filter_aliased_column = list(filter(lambda x: x.__class__.__name__ == 'Label' and x.name == column_name , self.selectable))
         if len(filter_aliased_column) > 0:
             column = filter_aliased_column[0].element
             return column
 
+        if self.is_foreign_reference(column_name):
+            foreign_infos = self.get_fk_column_and_table(column_name)
+            return foreign_infos['target_column']
         column = getattr(self.model, column_name, None)
         try:
             if column is None:
@@ -253,6 +309,52 @@ class QueryEngine(object):
             print('Column {col} not exists !'.format(col=column_name))
             column = None
         return column
+
+    def is_foreign_reference(self, name):
+        if name.__class__.__name__ == 'str' and '@' in name:
+            fk_target_table_name = name.split('@')[0]
+        elif name.__class__.__name__ =='InstrumentedAttribute':
+            fk_target_table_name = name.table.name
+        elif name.__class__.__name__ =='Label':
+            fk_target_table_name = name.element.table.name
+        else:
+            return False
+
+        found_fk_target = list(filter(lambda fk_name: self.fk_list[fk_name].column.table.name == fk_target_table_name , self.fk_list))
+        if len(found_fk_target)>0:
+            return True
+        else:
+            return False
+    
+    def get_fk_column_and_table(self, column_name):
+        '''
+        @column_name :: string or SQLAlchemy Column Object (InstrumentedAttribute),
+        @returning :: SQLAlchemy Column Object, SQLAlchemy Table Object
+        '''
+        if column_name.__class__.__name__ == 'str' and '@' in column_name:
+            fk_target_table_name = column_name.split('@')[0]
+            fk_target_name = column_name.split('@')[1]
+    
+        elif column_name.__class__.__name__ =='InstrumentedAttribute' : 
+            fk_target_table_name = column_name.table.name
+            fk_target_name = column_name.name
+        elif column_name.__class__.__name__ =='Label':
+            fk_target_table_name = column_name.element.table.name
+            fk_target_name = column_name.element.name
+
+        for name, fk in self.fk_list.items():
+            fk_target_table= fk.column.table
+            fk_column_name_in_target = fk.column.name
+            fk_column_name = name
+
+            if fk_target_table.name == fk_target_table_name:
+                target_column = fk_target_table.c[fk_target_name].label(fk_target_name)
+
+                return {'fk_column_name_in_target':fk_column_name_in_target,
+                        'fk_target_table':fk_target_table,
+                        'fk_column_name':fk_column_name,
+                        'target_column':target_column
+                        }
 
 
 class DynamicPropertiesQueryEngine(QueryEngine):
@@ -393,10 +495,12 @@ class DynamicPropertiesQueryEngine(QueryEngine):
         '''
 
         join_table, selectable = QueryEngine._select_from(self)
-
         for prop in self.dynamic_properties:
-            if len(self.selectable) > 0 and prop['Name'] not in self.selectable:
+            prop_in_select = list(filter(lambda x: x.element == self.get_column_by_name(prop['Name']) ,self.selectable))
+
+            if not prop_in_select :
                 continue
+
             _alias, column = self.get_alias_property_values(prop)
             join_table = outerjoin(
                         join_table, _alias,

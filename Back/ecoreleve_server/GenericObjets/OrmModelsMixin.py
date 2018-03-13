@@ -439,6 +439,7 @@ class HasDynamicProperties(HasStaticProperties):
     @declared_attr
     def _type(cls):
         Type = cls.getTypeClass()
+        setattr(cls, 'FK_' + cls.__tablename__ + 'Type', cls._type_id)
         return relationship(Type)
 
     @declared_attr
