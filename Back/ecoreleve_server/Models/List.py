@@ -37,22 +37,72 @@ from datetime import datetime
 from ..utils.datetime import parse
 from ..utils.generator import Generator
 from sqlalchemy.sql.expression import union_all
-from ..GenericObjets.SearchEngine import DynamicPropertiesQueryEngine, add_custom_filter
+from ..GenericObjets.SearchEngine import Query_engine
 SensorType = Sensor.TypeClass
 eval_ = Eval()
 
 #TODO Remove this file and replace all collection with extended module QueryEngine
+@Query_engine(Station)
+class StationList2():
+    pass
 
-class StationList2(DynamicPropertiesQueryEngine):
-    def __init__(self, session, object_type=None, from_history=None):
-        DynamicPropertiesQueryEngine.__init__(self, session=session, model=Station, object_type=object_type, from_history=from_history)
-        # self.custom_filters['availableOn'] = self.available_filter
+@Query_engine.add_filter(StationList2, 'FK_ProtocoleType')
+def protocoleType_filter(self, query, criteria):
+    o = aliased(Observation)
+    subSelect = select([o.ID]
+                        ).where(
+        and_(Station.ID == o.FK_Station,
+                eval_.eval_binary_expr(o._type_id, criteria['Operator'],
+                                    criteria['Value'])))
+    query = query.where(exists(subSelect))
+    return query
 
-    @add_custom_filter('FK_ProtocoleType')
-    def protocoleType_filter():
-        pass
+@Query_engine.add_filter(StationList2, 'LastImported')
+def last_imported_filter(self, query, criteria):
+    st = aliased(Station)
+    subSelect2 = select([st]).where(
+        cast(st.creationDate, DATE) > cast(Station.creationDate, DATE))
+    query = query.where(~exists(subSelect2))
 
-print(StationList2.custom_filters)
+    return query
+
+@Query_engine.add_filter(StationList2, 'Species')
+def species_filter(self, query, criteria):
+    obsValTable = Base.metadata.tables['ObservationDynPropValuesNow']
+    o2 = aliased(Observation)
+    s2 = aliased(Station)
+
+    joinStaObs = join(s2, o2, s2.ID == o2.FK_Station)
+
+    operator = criteria['Operator']
+    if 'not' in criteria['Operator']:
+        operator = operator.replace('not ', '').replace(' not', '')
+
+    existInd = select([Individual.ID]
+                        ).where(and_(o2.FK_Individual == Individual.ID,
+                                    eval_.eval_binary_expr(Individual.Species, operator, criteria['Value']))
+                                )
+
+    existObs = select([obsValTable.c['ID']]
+                        ).where(and_(obsValTable.c['FK_Observation'] == o2.ID,
+                                    and_(or_(obsValTable.c['Name'].like('%taxon'), obsValTable.c['Name'].like('%species%')),
+                                        eval_.eval_binary_expr(obsValTable.c['ValueString'], operator, criteria['Value']))
+                                    )
+                                )
+
+    selectCommon = select([s2.ID]).select_from(joinStaObs)
+
+    selectInd = selectCommon.where(exists(existInd))
+    selectObs = selectCommon.where(exists(existObs))
+
+    unionQuery = union_all(selectInd, selectObs)
+    if 'not' in criteria['Operator']:
+        query = query.where(~Station.ID.in_(unionQuery))
+    else:
+        query = query.where(Station.ID.in_(unionQuery))
+    return query
+
+
 class StationList(CollectionEngine):
     ''' this class extend CollectionEngine, it's used to filter stations '''
 

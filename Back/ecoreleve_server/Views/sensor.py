@@ -11,18 +11,14 @@ from collections import OrderedDict
 from sqlalchemy.exc import IntegrityError
 from ..controllers.security import RootCore, context_permissions
 from . import DynamicObjectView, DynamicObjectCollectionView, DynamicObjectValue, DynamicObjectValues
-from ..GenericObjets.SearchEngine import DynamicPropertiesQueryEngine, QueryEngine, add_custom_filter
+from ..GenericObjets.SearchEngine import Query_engine
 from ..utils.datetime import parse
 
 
 SensorDynPropValue = Sensor.DynamicValuesClass
 
-
-class SensorList(DynamicPropertiesQueryEngine):
-    
-    def __init__(self, session, object_type=None, from_history=None):
-        DynamicPropertiesQueryEngine.__init__(self, session=session, model=Sensor, object_type=object_type, from_history=from_history)
-        # self.custom_filters['availableOn'] = self.available_filter
+@Query_engine(Sensor)
+class SensorList():
 
     def extend_from(self, _from):
         curEquipmentTable = Base.metadata.tables['CurrentlySensorEquiped']
@@ -41,46 +37,46 @@ class SensorList(DynamicPropertiesQueryEngine):
                                'Name'].label('FK_MonitoredSiteName'))
         self.selectable.append(curEquipmentTable.c[
                                'FK_Individual'].label('FK_Individual'))
-        print(self.custom_filters)
         return table_join
 
-    @add_custom_filter('availableOn')
-    def available_filter(self, query, criteria):
-        # do availbale filter
-        date = criteria['Value']
-        try:
-            date = parse(date.replace(' ', ''))
-        except:
-            pass
-        e = aliased(Equipment)
-        e2 = aliased(Equipment)
-        e3 = aliased(Equipment)
+@Query_engine.add_filter(SensorList, 'toto')
+def toto(self, query, criteria):
+    pass
 
-        subQueryEquip = select([e2]).where(
-            and_(e.FK_Sensor == e2.FK_Sensor,
-                    and_(e.StartDate < e2.StartDate, e2.StartDate <= date)))
+@Query_engine.add_filter(SensorList, 'availableOn')
+def available_filter(self, query, criteria):
+    date = criteria['Value']
+    try:
+        date = parse(date.replace(' ', ''))
+    except:
+        pass
+    e = aliased(Equipment)
+    e2 = aliased(Equipment)
+    e3 = aliased(Equipment)
 
-        querySensor = select([e]).where(
-            and_(e.StartDate <= date,
-                    and_(e.Deploy == 0,
-                        and_(Sensor.ID == e.FK_Sensor,
-                            not_(exists(subQueryEquip)))
-                        )
-                    ))
+    subQueryEquip = select([e2]).where(
+        and_(e.FK_Sensor == e2.FK_Sensor,
+                and_(e.StartDate < e2.StartDate, e2.StartDate <= date)))
 
-        subQueryNotEquip = select([e3]).where(
-            and_(Sensor.ID == e3.FK_Sensor,
-                    e3.StartDate < date))
+    querySensor = select([e]).where(
+        and_(e.StartDate <= date,
+                and_(e.Deploy == 0,
+                    and_(Sensor.ID == e.FK_Sensor,
+                        not_(exists(subQueryEquip)))
+                    )
+                ))
 
-        if criteria['Operator'].lower() != 'is not':
-            query = query.where(or_(exists(querySensor),
-                                    not_(exists(subQueryNotEquip))))
-        else:
-            query = query.where(or_(not_(exists(querySensor)),
-                                    not_(exists(subQueryNotEquip))))
-        return query
+    subQueryNotEquip = select([e3]).where(
+        and_(Sensor.ID == e3.FK_Sensor,
+                e3.StartDate < date))
 
-print(SensorList.custom_filters)
+    if criteria['Operator'].lower() != 'is not':
+        query = query.where(or_(exists(querySensor),
+                                not_(exists(subQueryNotEquip))))
+    else:
+        query = query.where(or_(not_(exists(querySensor)),
+                                not_(exists(subQueryNotEquip))))
+    return query
 
 
 class SensorValueView(DynamicObjectValue):
