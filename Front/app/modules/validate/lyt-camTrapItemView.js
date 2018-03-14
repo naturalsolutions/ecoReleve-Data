@@ -10,10 +10,10 @@ define([
 	'ez-plus',
 	'backbone.marionette.keyShortcuts',
 	'noty',
-	'bootstrap-star-rating',
+	// 'bootstrap-star-rating',
 
 
-], function ($, _, Backbone, Marionette, Translater, config, ModalView, CamTrapImageModel, ezPlus, BckMrtKeyShortCut, noty, btstrp_star) {
+], function ($, _, Backbone, Marionette, Translater, config, ModalView, CamTrapImageModel, ezPlus, BckMrtKeyShortCut, noty/*, btstrp_star*/) {
 
 	'use strict';
 	return Marionette.ItemView.extend({
@@ -27,7 +27,7 @@ define([
 		events: {
 			'click img': 'clickFocus',
 			'dblclick img': 'goFullScreen',
-			'click .js-tag': 'addTag'
+			// 'click .js-tag': 'addTag'
 		},
 		className: 'col-md-2 imageCamTrap',
 		template: 'app/modules/validate/templates/tpl-image.html',
@@ -35,7 +35,11 @@ define([
 		clickFocus: function (e) {
 			this.$el.find('img').focus();
 			if (e.ctrlKey) {
+				if( this.parent.tabSelected.length ) {
+					this.parent.tabSelected.push(this.parent.currenPosition)
+				}
 				console.log("LE FOCUS ET LE CTRL KEY");
+
 			} else {
 				var lastPosition = this.parent.currentPosition;
 				if (lastPosition === null)
@@ -51,14 +55,14 @@ define([
 						if (lastPosition != i)
 							this.parent.tabView[i].$el.find('.vignette').toggleClass('active');
 					}
-					var $inputTags = this.parent.toolsBar.$el.find("#tagsInput");
-					var $inputTag = this.parent.toolsBar.$el.find(".bootstrap-tagsinput input");
-					var $bootstrapTag = this.parent.toolsBar.$el.find(".bootstrap-tagsinput");
-					if ($inputTags.prop("disabled")) {
-						$inputTag.prop("disabled", false);
-						$inputTags.prop("disabled", false);
-						$bootstrapTag.css("visibility", "visible");
-					}
+					// var $inputTags = this.parent.toolsBar.$el.find("#tagsInput");
+					// var $inputTag = this.parent.toolsBar.$el.find(".bootstrap-tagsinput input");
+					// var $bootstrapTag = this.parent.toolsBar.$el.find(".bootstrap-tagsinput");
+					// if ($inputTags.prop("disabled")) {
+					// 	$inputTag.prop("disabled", false);
+					// 	$inputTags.prop("disabled", false);
+					// 	$bootstrapTag.css("visibility", "visible");
+					// }
 				}
 				this.parent.tabSelected = [];
 				this.handleFocus();
@@ -80,6 +84,7 @@ define([
 			this.$el.find('img').focus();
 			this.parent.tabSelected = [];
 			this.parent.fillTagsInput();
+			this.parent.rgToolsBar.currentView.changeModel(this.model);
 		},
 		hoveringStart: function () {
 			console.log("je survole la photo");
@@ -96,20 +101,20 @@ define([
 			var $input = this.$el.find('input');
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
 			var lastClass = $icon.attr('class').split(' ').pop();
-			this.$el.find('input').rating({
-				min: 0,
-				max: 5,
-				step: 1,
-				size: 'xs',
-				rtl: false,
-				showCaption: false,
-				showClear: false,
-				value: _this.model.get('note')
-			});
-			this.$el.find('.rating-container').addClass('hide');
-			$input.on('rating.change', function (event, value, caption) {
-				_this.model.set('note', value);
-			});
+			// this.$el.find('input').rating({
+			// 	min: 0,
+			// 	max: 5,
+			// 	step: 1,
+			// 	size: 'xs',
+			// 	rtl: false,
+			// 	showCaption: false,
+			// 	showClear: false,
+			// 	value: _this.model.get('note')
+			// });
+			// this.$el.find('.rating-container').addClass('hide');
+			// $input.on('rating.change', function (event, value, caption) {
+			// 	_this.model.set('note', value);
+			// });
 			this.setVisualValidated(this.model.get("validated"));
 		},
 
@@ -141,18 +146,82 @@ define([
 		},
 
 		setModelTags: function (xmlTags) {
+				//todo
+			
 			this.model.set("tags", xmlTags);
+		},
+
+		addModelTags : function(tagsStr) {
+			var oldTags = this.getModelTags();
+			var oldTabTags = [];
+			var tabTags = [];
+			if( oldTags ) {
+				oldTabTags = oldTags.split(',');
+			}
+			if(tagsStr ) {
+				tabTags = tagsStr.split(',');
+			}
+			var uniqTabTags = _.union(oldTabTags,tabTags);
+			if(uniqTabTags.length > 0 ) {
+				this.setModelTags(uniqTabTags.join(','))
+			}
+
+
 		},
 
 		getModelTags: function () {
 			return this.model.get("tags");
 		},
 
+		destroyAStation : function(stationId) {
+			return $.ajax({
+			  type: 'DELETE',
+			  url: config.coreUrl + 'stations/' + stationId,
+			  contentType: 'application/json'
+			})
+	  
+		},
+
 		setModelValidated: function (val) {
-			var oldVal = this.model.get("validated");
-			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
-			this.model.set("validated", val);
-			this.setVisualValidated(val);
+			var _this = this;
+			// var oldVal = this.model.get("validated");
+			// var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
+			if(val ===4) {
+				var stationId = this.model.get('stationId'); 
+				if (stationId) {
+					this.destroyAStation(stationId)
+					.done(function(resp) {
+						_this.model.set({
+							validated: val,
+							tags : null,
+							stationId : null 
+						});
+						_this.parent.toolsBar.$elemTags.val(null).trigger('change');
+						_this.setVisualValidated(val);
+						_this.setVisualStationAttached(false);
+					})
+					.fail(function(err) {
+						console.error('destroy station failed')
+					});
+				}
+				else {
+					_this.model.set({
+						validated: val,
+						tags : null
+					});
+					_this.parent.toolsBar.$elemTags.val(null).trigger('change');
+					_this.setVisualValidated(val);
+					_this.setVisualStationAttached(false);
+				}
+			
+			}
+			else {
+				this.model.set({
+					validated: val
+				});
+				this.setVisualValidated(val);
+			}
+			
 		},
 
 		toggleModelStatus: function () {
@@ -196,7 +265,7 @@ define([
 			var $icon = this.$el.children('.vignette').children('.camtrapItemViewHeader').children('i');
 			var $content = this.$el.children('.vignette').children('.camtrapItemViewContent');
 			var $image = $content.children('img');
-			var $ratingStar = this.$el.find('.rating-container');
+			// var $ratingStar = this.$el.find('.rating-container');
 
 			switch (this.model.get("validated")) {
 				case 1:
@@ -208,9 +277,9 @@ define([
 							$content.removeClass('rejected');
 						}
 						$image.removeClass('checked');
-						if (!$ratingStar.hasClass('hide')) {
-							$ratingStar.addClass('hide');
-						}
+						// if (!$ratingStar.hasClass('hide')) {
+						// 	$ratingStar.addClass('hide');
+						// }
 
 						break;
 					}
@@ -221,9 +290,9 @@ define([
 							$content.removeClass('rejected');
 						}
 						$content.addClass('accepted'); //css("background-color" , "green");
-						if ($ratingStar.hasClass('hide')) {
-							$ratingStar.removeClass('hide');
-						}
+						// if ($ratingStar.hasClass('hide')) {
+						// 	$ratingStar.removeClass('hide');
+						// }
 
 						break;
 					}
@@ -234,9 +303,9 @@ define([
 							$content.removeClass('accepted');
 						}
 						$content.addClass('rejected'); //css("background-color" , "red");
-						if (!$ratingStar.hasClass('hide')) {
-							$ratingStar.addClass('hide');
-						}
+						// if (!$ratingStar.hasClass('hide')) {
+						// 	$ratingStar.addClass('hide');
+						// }
 
 						break;
 					}
@@ -250,9 +319,9 @@ define([
 						}
 
 						$image.removeClass('checked');
-						if (!$ratingStar.hasClass('hide')) {
-							$ratingStar.addClass('hide');
-						}
+						// if (!$ratingStar.hasClass('hide')) {
+						// 	$ratingStar.addClass('hide');
+						// }
 						break;
 					}
 			}
@@ -268,33 +337,33 @@ define([
 			console.log("bim destroy");
 		},
 
-		setStars: function (val) {
-			var $input = this.$el.find('input');
-			val = parseInt(val)
-			if (val > 0 && val <= 5) {
-				$input.rating('update', val).val();
-				$input.trigger('rating.change', [val, null]);
-			}
+		// setStars: function (val) {
+		// 	var $input = this.$el.find('input');
+		// 	val = parseInt(val)
+		// 	if (val > 0 && val <= 5) {
+		// 		$input.rating('update', val).val();
+		// 		$input.trigger('rating.change', [val, null]);
+		// 	}
 
-		},
+		// },
 
-		increaseStar: function () {
-			var $input = this.$el.find('input');
-			var val = parseInt($input.rating().val());
-			if (val + 1 <= 5) {
-				$input.rating('update', val + 1).val();
-				$input.trigger('rating.change', [val + 1, null]);
+		// increaseStar: function () {
+		// 	var $input = this.$el.find('input');
+		// 	var val = parseInt($input.rating().val());
+		// 	if (val + 1 <= 5) {
+		// 		$input.rating('update', val + 1).val();
+		// 		$input.trigger('rating.change', [val + 1, null]);
 
-			}
-		},
-		decreaseStar: function () {
-			var $input = this.$el.find('input');
-			var val = parseInt($input.rating().val());
-			if (val - 1 > 0) {
-				$input.rating('update', val - 1).val();
-				$input.trigger('rating.change', [val - 1, null]);
-			}
-		},
+		// 	}
+		// },
+		// decreaseStar: function () {
+		// 	var $input = this.$el.find('input');
+		// 	var val = parseInt($input.rating().val());
+		// 	if (val - 1 > 0) {
+		// 		$input.rating('update', val - 1).val();
+		// 		$input.trigger('rating.change', [val - 1, null]);
+		// 	}
+		// },
 		attachStation: function (id) {
 			this.model.set('stationId', id);
 			this.setVisualStationAttached(true);

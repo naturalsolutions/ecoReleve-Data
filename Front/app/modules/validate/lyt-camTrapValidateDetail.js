@@ -42,23 +42,23 @@ define([
       'down': 'mouvement',
       'left': 'mouvement',
       'right': 'mouvement',
-      'tab': 'findInput',
-      '+': 'addStars',
-      '-': 'decreaseStars',
+      'tab': 'findTags',
+      // '+': 'addStars',
+      // '-': 'decreaseStars',
       'space': 'displayModal',
-      'backspace': 'undeterminatePhoto',
-      'enter': 'acceptPhoto',
-      'del': 'rejectPhoto',
+      // 'backspace': 'undeterminatePhoto',
+      'enter': function(){ $('i#acceptedBtn').click(); },//'simulateAcceptPhoto',
+      'del': function(){$('i#refusedBtn').click();},//'simulateRejectPhoto',
       'esc': 'leaveModal',
       'pagedown': 'nextPage',
       'pageup': 'prevPage',
       'home': 'firstPage',
       'end': 'lastPage',
-      '1': 'setStars',
-      '2': 'setStars',
-      '3': 'setStars',
-      '4': 'setStars',
-      '5': 'setStars'
+      // '1': 'setStars',
+      // '2': 'setStars',
+      // '3': 'setStars',
+      // '4': 'setStars',
+      // '5': 'setStars'
 
     },
 
@@ -88,7 +88,7 @@ define([
       'gallerytest': '#gallerytest',
       'siteForm': '#siteForm',
       'sensorForm': '#sensorForm',
-
+      
 
       'dataSetIndex': '#dataSetIndex',
       'dataSetTotal': '#dataSetTotal',
@@ -97,9 +97,9 @@ define([
       'total': '#total',
       'paginator': '#paginator',
       'imageFullScreen': '#imageFullScreen'
-
+      
     },
-
+    
     regions: {
       'rgNavbar': '.js-rg-navbar',
       'rgGallery': '#gallery',
@@ -107,6 +107,58 @@ define([
       'rgToolsBar': '#rgToolsBar',
       'rgToolsBarTop': '#rgToolsBarTop',
       'rgImageDetails': '#imageDetails',
+    },
+    
+    initialize: function (options) {
+      this.equipmentId = parseInt(this.checkUrl(location.hash));
+
+      if (this.equipLine < 0) {
+        console.log("lol pas de session");
+        return
+      }
+
+      this.translater = Translater.getTranslater();
+      this.type = options.type;
+      this.model = options.model;
+      this.lastImageActive = null;
+      this.currentViewImg = null;
+      this.currentPosition = null;
+      this.pageChange = '';
+      this.currentCollection = null;
+      this.currentPaginator = null;
+      this.nbPhotos = 0;
+      this.nbPhotosAccepted = 0;
+      this.nbPhotosRefused = 0;
+      // this.nbPhotosChecked = 0;
+      this.nbPhotosNotChecked = 0;
+      this.nbPhotosStationed = 0;
+      this.stopSpace = false;
+      this.tabSelected = [];
+
+      this.globalGrid = options.globalGrid;
+
+      this.fetchSessionInfos();
+      this.initCollection();
+      // this.getThesau();
+
+
+    },
+
+    getThesau: function() {
+      $.ajax({
+        type: 'POST',
+        url: config.thesaurusUrl + '/fastInitForCompleteTree/',
+        contentType:"application/json; charset=utf-8",
+        dataType:"json",
+        data : '{"StartNodeID": "167222", "lng": "en", "IsDeprecated": "false"}'
+      })
+      .done(function (resp) {
+        console.log(resp);
+      })
+      .fail(function (err) {
+        console.log(err);
+      });
+
     },
 
     populateDataForCreatingStation: function (imageModel) {
@@ -140,6 +192,7 @@ define([
       data.fieldActivityId = 39 // Id from BDD for fieldactivity : camera trapping
       return data;
     },
+
     callDeleteStationAPI: function (tabOfIds, tabOfItem) {
       if (tabOfIds.length === 1) {
         var stationId = tabOfIds[0];
@@ -187,6 +240,9 @@ define([
     },
 
     editStation: function (event) {
+      if( event.currentTarget.className.indexOf('disabled') > -1 ) {
+        return;
+      }
       var stationId, title, text;
       if (this.tabSelected.length == 0) {
         if (this.currentPosition !== null) {
@@ -216,11 +272,14 @@ define([
       }
     },
 
-    removeStation: function () {
-
+    removeStation: function (event) {
+      
       var tabOfIds = [];
       var tabOfItem = [];
       if (this.tabSelected.length == 0) {
+        if( event.currentTarget.className.indexOf('disabled') > -1 ) {
+          return;
+        }
         if (this.currentPosition !== null) {
           if (this.tabView[this.currentPosition].model.get('stationId') !== null) {
             tabOfIds.push(this.tabView[this.currentPosition].model.get('stationId'));
@@ -260,17 +319,21 @@ define([
     },
 
 
-    createStation: function () {
+    createStation: function (event) {
+ 
       var _this = this;
       var listOfElem = []
       if (this.tabSelected.length == 0) {
+        if( event.currentTarget.className.indexOf('disabled') > -1 ) {
+          return;
+        }
         if (this.currentPosition !== null) {
           if (this.tabView[this.currentPosition].model.get('stationId') === null)
             listOfElem.push(this.tabView[this.currentPosition])
         }
       } else {
         for (var i of this.tabSelected) {
-          if (this.tabView[i].model.get('stationId') === null)
+          if (this.tabView[i].model.get('validated') === 2 && this.tabView[i].model.get('stationId') === null  )
             listOfElem.push(this.tabView[i]);
         }
       }
@@ -299,15 +362,15 @@ define([
       var sidenav = this.$el.find("#mySidenav");
       sidenav.css('width', "0");
     },
-    setStars: function (e) {
-      this.tabView[this.currentPosition].setStars(e.key)
-    },
-    addStars: function (e) {
-      this.tabView[this.currentPosition].increaseStar();
-    },
-    decreaseStars: function (e) {
-      this.tabView[this.currentPosition].decreaseStar();
-    },
+    // setStars: function (e) {
+    //   this.tabView[this.currentPosition].setStars(e.key)
+    // },
+    // addStars: function (e) {
+    //   this.tabView[this.currentPosition].increaseStar();
+    // },
+    // decreaseStars: function (e) {
+    //   this.tabView[this.currentPosition].decreaseStar();
+    // },
     clickOnIconeView: function (e) {
       var _this = this;
       e.preventDefault();
@@ -330,39 +393,6 @@ define([
       if (/^(\-|\+)?([0-9]+|Infinity)$/.test(tmp))
         return Number(tmp);
       return NaN;
-    },
-    initialize: function (options) {
-      this.equipmentId = parseInt(this.checkUrl(location.hash));
-
-      if (this.equipLine < 0) {
-        console.log("lol pas de session");
-        return
-      }
-
-      this.translater = Translater.getTranslater();
-      this.type = options.type;
-      this.model = options.model;
-      this.lastImageActive = null;
-      this.currentViewImg = null;
-      this.currentPosition = null;
-      this.pageChange = '';
-      this.currentCollection = null;
-      this.currentPaginator = null;
-      this.nbPhotos = 0;
-      this.nbPhotosAccepted = 0;
-      this.nbPhotosRefused = 0;
-      // this.nbPhotosChecked = 0;
-      this.nbPhotosNotChecked = 0;
-      this.nbPhotosStationed = 0;
-      this.stopSpace = false;
-      this.tabSelected = [];
-
-      this.globalGrid = options.globalGrid;
-
-      this.fetchSessionInfos();
-      this.initCollection();
-
-
     },
 
     fetchAllSessions: function () {
@@ -485,7 +515,7 @@ define([
               this.currentPosition = 0; //position to focus
               this.tabSelected = [];
               break;
-            } - re
+            } //- re
           case 'P':
             { //previous page
               this.pageChange = '';
@@ -556,16 +586,66 @@ define([
               }
 
             });
-            if (_this.tabSelected.length > 0) {
-              var $inputTags = _this.toolsBar.$el.find("#tagsInput");
-              var $inputTag = _this.toolsBar.$el.find(".bootstrap-tagsinput input");
-              var $bootstrapTag = _this.toolsBar.$el.find(".bootstrap-tagsinput");
-              if (!$inputTags.prop("disabled")) {
-                $inputTag.prop("disabled", true);
-                $inputTags.prop("disabled", true);
-                $bootstrapTag.css("visibility", "hidden");
+
+            console.log("test tags");
+            var nbPhotos = _this.tabSelected.length
+            var nbphotosValidated = 0;
+            if (nbPhotos > 0) {
+              var tagsInAllPhotos = []
+              var stringTagTmp ='';
+              var uniqTagsAndOccurence = []
+              for( var i = 0 ; i < nbPhotos ; i++) {
+                if(_this.tabView[_this.tabSelected[i]].model.get('validated') === 2 ) {
+                  nbphotosValidated += 1;
+                }
+                stringTagTmp += _this.tabView[_this.tabSelected[i]].model.get('tags');
+                if( i+1 < nbPhotos) {
+                  stringTagTmp += ',';
+                }
               }
+              var allTagsTab = stringTagTmp.split(',');
+              uniqTagsAndOccurence = _.countBy(allTagsTab);
+              for( var item in uniqTagsAndOccurence) {
+                if(uniqTagsAndOccurence[item] === nbphotosValidated) {
+                  tagsInAllPhotos.push(item);
+                }
+              }
+              console.log("bim");
+              _this.toolsBar.render();
+              _this.toolsBar.$elemTags.val(null).trigger('change');
+              _this.toolsBar.$elemTags.val(tagsInAllPhotos).trigger('change');
             }
+            
+           
+            /*  keep it : algo for all edit all tags in all photos
+
+            if (_this.tabSelected.length > 0) {
+              var allTagsTabs = [];
+              for( var i = 0 ; i < _this.tabSelected.length ; i++) {
+                var tagTmp = _this.tabView[_this.tabSelected[i]].model.get('tags');
+                var tagTmpTab = []
+                if(tagTmp) {
+                  tagTmpTab = tagTmp.split(',');
+                }
+                if(!allTagsTabs.length) {
+                  allTagsTabs = tagTmpTab;
+                }
+                else {
+                  allTagsTabs = _.union(allTagsTabs,tagTmpTab)
+                }
+              }
+              _this.toolsBar.$elemTags.val(null).trigger('change');
+              _this.toolsBar.$elemTags.val(allTagsTabs).trigger('change');
+              console.log("all tags in selection : ",allTagsTabs);
+              // var $inputTags = _this.toolsBar.$el.find("#tagsInput");
+              // var $inputTag = _this.toolsBar.$el.find(".bootstrap-tagsinput input");
+              // var $bootstrapTag = _this.toolsBar.$el.find(".bootstrap-tagsinput");
+              // if (!$inputTags.prop("disabled")) {
+              //   $inputTag.prop("disabled", true);
+              //   $inputTags.prop("disabled", true);
+              //   $bootstrapTag.css("visibility", "hidden");
+              // }
+            }*/
           }
         });
       }
@@ -602,21 +682,20 @@ define([
     },
 
     displayImageDetails: function (model) {
-      console.log(model);
       var _this = this;
       //imageDetails
       this.imageDetails = new imageDetailsView({
         parent: _this,
-        model: model,
+        model: model
       });
 
       this.rgImageDetails.show(this.imageDetails)
 
     },
 
-    displayImageFullScreen: function (model) {
+    // displayImageFullScreen: function (model) {
 
-    },
+    // },
 
     displayPaginator: function (pagin) {
       this.currentPaginator = pagin;
@@ -628,6 +707,7 @@ define([
       var _this = this;
       this.toolsBar = new ToolsBar({
         parent: _this,
+        model : null
       });
       this.rgToolsBar.show(this.toolsBar);
     },
@@ -635,7 +715,7 @@ define([
     displayToolsBarTop: function (nbPhotos) {
       var _this = this;
       this.toolsBarTop = new ToolsBarTop({
-        parent: _this,
+        parent: _this
       });
       this.rgToolsBarTop.show(this.toolsBarTop);
       this.refreshCounter();
@@ -658,9 +738,11 @@ define([
       this.ui.total.html(this.grid.grid.collection.length);
     },
 
-
     acceptPhoto: function (e) {
       if (this.tabSelected.length == 0) {
+        if( e.currentTarget.className.indexOf('disabled') > -1 ) {
+          return;
+        }
         if (this.currentPosition !== null) {
           this.tabView[this.currentPosition].setModelValidated(2);
         }
@@ -705,16 +787,61 @@ define([
       this.currentCollection.getLastPage();
     },
 
-    rejectPhoto: function (e) {
+    canIRefused : function(tab) {
+      var listPhotos = [];
+      var index ;
+      var flag = true;
+      var _this = this
+      for(var i= 0 ; i< tab.length ; i++ ) {
+        index = tab[i]
+        if(this.tabView[index].model.get('tags') || this.tabView[index].model.get('stationId') ) {
+          listPhotos.push(index+1)
+        }
+      }
+      if (listPhotos.length) {
+        Swal({
+          title: 'Care',
+          // text: +_this.nbPhotosChecked + ' photos still underteminate and ' + (_this.nbPhotos - (_this.nbPhotosChecked + _this.nbPhotosAccepted + _this.nbPhotosRefused)) + ' not seen yet\n',
+          text: 'you will erase tags and stations for photos :\n'+listPhotos.join(','),
+          type: 'error',
+          showCancelButton: true,
+          confirmButtonColor: 'rgb(218, 146, 15)',
+  
+          confirmButtonText: 'Ok',
+          cancelButtonText: 'Cancel',
+          closeOnConfirm: true,
+          closeOnCancel: true
+          
+        },function (isConfirm) {
+          if (isConfirm) {
+            for(var i = 0 ; i < tab.length ; i++ ) {
+              _this.tabView[tab[i]].setModelValidated(4);
+            }
+          } 
+        });
+      }
+      else {
+        for(var i = 0 ; i < tab.length ; i++ ) {
+          _this.tabView[tab[i]].setModelValidated(4);
+        }
+      }
+    },
 
+    rejectPhoto: function (e) {
       if (this.tabSelected.length == 0) {
-        if (this.currentPosition !== null) {
-          this.tabView[this.currentPosition].setModelValidated(4);
+        if( e.currentTarget.className.indexOf('disabled') > -1 ) {
+          return;
+        }
+        
+        if (this.currentPosition !== null ) {
+          this.canIRefused([this.currentPosition]);
+         
         }
       } else {
-        for (var i of this.tabSelected) {
-          this.tabView[i].setModelValidated(4);
-        }
+        this.canIRefused(this.tabSelected);
+        // for (var i of this.tabSelected) {
+        //   // this.tabView[i].setModelValidated(4);
+        // }
       }
     },
     undeterminatePhoto: function (e) {
@@ -847,16 +974,26 @@ define([
         }
 
         if (lastPosition !== this.currentPosition) { // si on a bougé
+          if (this.tabSelected.length > 0 ) {
+            this.tabSelected = [];
+            this.tabView[this.currentPosition].$el.find('img').click()
+            //dirty hack
+          }
+
           if (this.tabSelected.length === 0) {
             this.tabView[lastPosition].$el.find('.vignette').toggleClass('active');
             this.tabView[this.currentPosition].handleFocus();
+            this.rgToolsBar.currentView.changeModel(this.tabView[this.currentPosition].model);
           }
+
           if (this.rgImageDetails.currentView != undefined) {
             this.rgImageDetails.currentView.changeDetails(this.tabView[this.currentPosition].model)
           }
+
           if (this.rgFullScreen.currentView !== undefined && this.stopSpace) {
             this.rgFullScreen.currentView.changeModel(this.tabView[this.currentPosition].model);
           }
+
         }
 
       }
@@ -877,10 +1014,24 @@ define([
       this.mouvement(simE);
     },
 
-    findInput: function (e) {
+    findTags: function (e) {
       e.preventDefault(); // disable browser tab
-      this.$el.find(".bootstrap-tagsinput  input").focus();
+      if( ! this.toolsBar.$elemTags[0].disabled ) {
+        if( this.toolsBar.$elemTags.data('select2').isOpen() ) {
+          this.toolsBar.$elemTags.select2('close');
+          this.toolsBar.$elemTags.select2().trigger('blur');
+          //TODO BUG FIX HANDLE CONTEXT fullscreen ? one photos selected ? tab photos selected?
+        }
+        else {
+          this.toolsBar.$elemTags.select2('open');
+        }
+      }
     },
+
+    // findInput: function (e) {
+    //   e.preventDefault(); // disable browser tab
+    //   this.$el.find(".bootstrap-tagsinput  input").focus();
+    // },
 
     prevImage: function () {
       var index = this.myImageCollection.indexOf(this.currentViewImg.model); // index 0 a n-1
@@ -958,7 +1109,6 @@ define([
       $elem[0].getElementsByTagName('input')[0].checked = true
       var myFilter = {};
       if ($('#rgToolsBarTop .reneco-image_file').hasClass('active')) {
-        console.log("je leave le modal etc etc etc");
         this.leaveModal();
       }
       var parent$elem = e.currentTarget.parentElement
@@ -1092,7 +1242,6 @@ define([
           closeOnCancel: false
         },
         function (isConfirm) {
-          console.log("bim je valide requête en cours");
           if (isConfirm) {
             $.ajax({
                 url: config.coreUrl + 'sensorDatas/' + _this.type + '/validate',
@@ -1100,8 +1249,7 @@ define([
                 data: {
                   fk_Sensor: _this.sensorId,
                   fk_MonitoredSite: _this.siteId,
-                  fk_EquipmentId: _this.equipmentId,
-                  /*data : JSON.stringify(_this.myImageCollection.fullCollection)*/
+                  fk_EquipmentId: _this.equipmentId
                 },
                 context: _this,
               })
@@ -1157,10 +1305,12 @@ define([
       $(".fullscreenimg [id^='zoom_']").trigger('wheelzoom.reset');
 
       if (this.nbPhotosNotChecked > 0) {
-        this.displaySwalUnchecked();
-      } else {
-        this.displaySwalValidate();
+        // this.displaySwalUnchecked();
+        return;
       }
+      // else {
+        this.displaySwalValidate();
+     // }
     },
 
   });

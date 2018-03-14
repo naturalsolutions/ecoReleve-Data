@@ -15,6 +15,15 @@ div.bootstrap-tagsinput{
     }
 }
 
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+  float: right;
+  margin-right: 0;
+  margin-left: 5px;
+  &:hover{
+    color :red;
+  }
+}
+
 .detailsimage{
   .nopadding {
    padding: 0 !important;
@@ -126,7 +135,7 @@ div.bootstrap-tagsinput{
 #gallery{
   background-color: #434343;
   padding: 20px;
-
+  user-select: none;
   .ui-selecting > .vignette {
     background-color: #39b34a !important;
 

@@ -156,6 +156,9 @@ define([
       if(options.savingError) {
         this.savingError = options.savingError;
       }
+      if(options.savingSuccess) {
+        this.savingSuccess = options.savingSuccess;
+      }
 
       this.data = options.data || {};
       var _this = this;

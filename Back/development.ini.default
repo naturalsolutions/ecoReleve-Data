@@ -48,6 +48,9 @@ dialect = mssql
 wsThesaurus.wsUrl = yourWebWervicesURL
 wsThesaurus.lng = fr
 
+camTrap.path = C:\Data\CameraTrap
+mediasFiles.path = C:\Data\mediasFiles
+
 
 
 # By default, the toolbar only appears for clients from IP addresses

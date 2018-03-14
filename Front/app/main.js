@@ -86,7 +86,10 @@ require.config({
     'exif-js' : '../bower_components/exif-js/exif',
     'wheelzoom' : './vendors/wheelzoom',
     'imageLoaded' : '../bower_components/imagesloaded/imagesloaded.pkgd',
-    'workerExif' : '../app/modules/importFile/camTrap/workerExif'
+    'workerExif' : '../app/modules/importFile/camTrap/workerExif',
+    'select2' : '../bower_components/select2/dist/js/select2.full'
+
+  
   },
   map: {
       '*': {
@@ -224,6 +227,10 @@ require.config({
     'workerExif' : {
       deps :[],
       exports : 'workerExif'
+    },
+    'select2' : {
+      deps : [],
+      exports :'select2'
     }
     
   }

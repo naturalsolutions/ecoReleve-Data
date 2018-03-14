@@ -18,7 +18,7 @@ define([
       checked: null,
       validated: null,
 			tags : null,
-			note : '',
+			// note : '',
       date_creation : '',
       stationId : null
     }

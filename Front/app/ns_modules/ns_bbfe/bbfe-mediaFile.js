@@ -29,12 +29,31 @@ define([
       'change input' : 'handleNewFile'
     },
 
-    template: '<div>\
-    <button type="button" class="js-btn-add btn btn-success">Media File</button>\
-    <input type="file" class="hide" />\
-    <div class="content" >\
-    <a class="hide"></a>\
-    </div>\
+    template: 
+    '<div>\
+      <button type="button" class="js-btn-add btn btn-success">Media File</button>\
+      <input type="file" class="hide" />\
+      <div class="content" >\
+        <a class="hide"></a>\
+      </div>\
+      <div class="modal fade" id="myPleaseWait" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">\
+        <div class="modal-dialog ">\
+          <div class="modal-content js-camtrapProcessing">\
+            <div class="modal-header">\
+              <h4 class="modal-title">\
+                <span class="glyphicon glyphicon-time"></span>\
+                Please wait will processing data\
+              </h4>\
+            </div>\
+            <div class="modal-body">\
+              <div class="progress">\
+                <div class="progress-bar progress-bar-info progress-bar-striped active" style="width: 0%">\
+                </div>\
+              </div>\
+            </div>\
+          </div>\
+        </div>\
+      </div>\
     </div>',
 
     className: 'mediafile-form' ,
@@ -55,7 +74,8 @@ define([
       
       this.mapHTMLElem();
       options.form.commit = this.commit.bind(this); // hack to overload BBForm.commit
-      options.form.butClickDelete = this.butClickDelete.bind(this);
+      options.form.savingSuccess = this.savingSuccess.bind(this);
+      // options.form.butClickDelete = this.butClickDelete.bind(this);
       if( options.schema.editable === false ) {
         this.elems.fileInput.disabled = true;
         this.elems.btnAdd.className += ' hide'
@@ -66,23 +86,36 @@ define([
         this.handleFileTypeAndTemplate(oldFilePath);
         var oldFileName = oldFilePath.split('/').pop();
         var fileExtension = oldFileName.split('.').pop();
+        this.elems.link.href ='./mediasFiles/'+oldFilePath
         if(['JPG','JPEG','PNG'].indexOf(fileExtension.toUpperCase()) > -1 ) {
-          this.elems.link.href ='./mediasFiles/'+oldFilePath
+          //this.elems.link.href ='./mediasFiles/'+oldFilePath
         }
         else if ( this.elems.link.className.indexOf('hide') > -1 ) {
           this.elems.link.className = ''
         }
         this.elems.link.innerHTML = oldFileName;
-      }
+      };
+
+      // this.listenTo(this.model, 'destroy', this.test);
 
 
     },
+
+
+    savingSuccess : function() {
+      alert("oulalala la fonction qui bloque");
+    },
+    // test : function(event) {
+    //   console.log(event);
+    //   alert("et non on attend avant de detruire la vue y a du nettoyage a faire ")
+    // },
 
     mapHTMLElem : function() {
       this.elems.btnAdd = this.el.getElementsByTagName('button')[0];
       this.elems.fileInput = this.el.getElementsByTagName('input')[0];
       this.elems.content = this.el.getElementsByClassName('content')[0];
       this.elems.link = this.el.getElementsByTagName('a')[0];
+      this.elems.progressBar =  this.el.getElementsByClassName('progress-bar')[0];
     },
     simulateClickInput: function() {
       this.elems.fileInput.click();
@@ -94,7 +127,7 @@ define([
         this.elems.link.innerHTML = this.elems.fileInput.files[0].name;
       }
       var MIMEtype = this.elems.fileInput.files[0].type || null;
-      if( MIMEtype.indexOf('image/') > -1 ) { 
+      if( MIMEtype && MIMEtype.indexOf('image/') > -1 ) { 
         this.addImgToTemplate(this.elems.fileInput.files[0]);
       }
       else if ( this.elems.link.className.indexOf('hide') > -1 ) {
@@ -111,8 +144,10 @@ define([
     },
 
     defferedCommit : function() {
-
       var formData = new FormData();
+      var _this = this;
+      this.elems.progressBar.style.width = _this.progress(0,0);
+      $('#myPleaseWait').modal('show');
       formData.append("fileBin",this.elems.fileInput.files[0]);
       formData.append("FK_Station",this.model.get("FK_Station"));
       return $.ajax({
@@ -121,8 +156,22 @@ define([
         processData: false,
         contentType: false,
         data : formData,
-        context : this
-      });
+        context : this,
+        xhr: function () {
+          var xhr = $.ajaxSettings.xhr();
+          
+          xhr.upload.onprogress = function(event) { 
+            console.log("progress ",event); 
+            _this.elems.progressBar.style.width = _this.progress(event.loaded,event.total);
+          };
+          xhr.upload.onload = function(event) { 
+            _this.elems.progressBar.style.width = _this.progress(100,100);
+            console.log("well done!");
+          };
+          return xhr;
+        }
+      })
+
     
     },
 
@@ -133,14 +182,38 @@ define([
     commit: function() {
       var _this = this;
       _this.defferedCommit()
+      .complete(function(e) {
+        _this.cleanDom();
+      })
       .done( function(resp) {
 
+        return false
       })
       .fail( function(error) {
+
         console.log(error);
         console.log("sniiffff erreur");
+        return true
+
       });
-      return false;
+
+      // return false;
+    },
+
+    cleanDom : function() {
+      $('#myPleaseWait').modal('hide');
+
+    },
+
+    progress: function (numerator,denominator) {
+      var width = '0%';
+      if(!denominator) {
+        return width = '0%';
+      }
+      if( ( numerator / denominator ) > 100 ) {
+        return width ='100%';
+      }
+      return width = ((numerator / denominator) * 100).toFixed(2) + '%';
     },
 
     handleFileTypeAndTemplate: function(pathToFile) {
@@ -182,8 +255,14 @@ define([
         return this;
     },
 
+    onBeforeDestroy : function(e) {
+      console.log("51g68r4r56e0 5r6g10 ");
+    },
+    remove : function (e) {
 
+      console.log("on détruit hop hophop")
 
+    },
     getValue: function() {
       var path = null;
       if( this.elems.fileInput.files.length ) {

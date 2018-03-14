@@ -9,10 +9,10 @@ define([
 	'ez-plus',
 	'./lyt-camTrapImageModel',
 	'wheelzoom',
-	'imageLoaded',
-	'bootstrap-star-rating'
+	'imageLoaded'/*,
+	'bootstrap-star-rating'*/
 
-], function($, _, Backbone, Marionette, Translater, config , ezPlus , CamTrapImageModel, wheelzoom , imageLoaded, btstrp_star ) {
+], function($, _, Backbone, Marionette, Translater, config , ezPlus , CamTrapImageModel, wheelzoom , imageLoaded/*, btstrp_star*/ ) {
 
   'use strict';
 	return Marionette.ItemView.extend({
@@ -35,7 +35,7 @@ define([
 		initialize : function(options) {
       		var _this = this;
 			this.parent = options.parent;
-      		this.model = options.model;
+      		this.model = options.model || new CamTrapImageModel();
 			this.position = this.parent.currentCollection.fullCollection.indexOf(this.model) + 1 ;
 			this.total = this.parent.currentCollection.fullCollection.length;
 			this.theWheel = null;
@@ -51,12 +51,12 @@ define([
 				}
 				else {
 					_this.parent.$el.find('.infosfullscreenStatus').text(' '+_this.statusPhoto+' ');
-					if ( this.model.get('validated') == 2 ) {
-						this.$el.find('.rating-container').css('visibility' , 'visible')
-					}
-					else {
-							this.$el.find('.rating-container').css('visibility' , 'hidden')
-					}
+					// if ( this.model.get('validated') == 2 ) {
+					// 	this.$el.find('.rating-container').css('visibility' , 'visible')
+					// }
+					// else {
+					// 		this.$el.find('.rating-container').css('visibility' , 'hidden')
+					// }
 				}
       });
 		},
@@ -78,6 +78,12 @@ define([
 
 			this.elems.position = document.createElement('div');
 			this.elems.position.className = 'indexposition';
+		},
+
+		changeModel : function(model) {
+
+
+
 		},
 
 		buildTemplate: function() {
@@ -151,34 +157,34 @@ define([
 
 			this.parent.$el.find('.paginatorCamTrap').prepend(this.elems.container);
 
-			var $input = this.$el.find('input');
-				this.$el.find('input').rating({
-					min:0,
-					max:5,
-					step:1,
-					size:'xl',
-					rtl:false,
-					showCaption:false,
-					showClear:false,
-					value : _this.model.get('note')
-				});
-				this.$el.find('.rating-container').css('visibility' , 'hidden')
-				$input.on('rating.change', function(event, value, caption) {
-					_this.model.set('note',value);
-				});
-			if ( this.model.get('validated') == 2 ) {
-				this.$el.find('.rating-container').css('visibility' , 'visible')
-			}
-			else {
-				this.$el.find('.rating-container').css('visibility' , 'hidden')
-			}
+			// var $input = this.$el.find('input');
+			// 	this.$el.find('input').rating({
+			// 		min:0,
+			// 		max:5,
+			// 		step:1,
+			// 		size:'xl',
+			// 		rtl:false,
+			// 		showCaption:false,
+			// 		showClear:false,
+			// 		value : _this.model.get('note')
+			// 	});
+				// this.$el.find('.rating-container').css('visibility' , 'hidden')
+				// $input.on('rating.change', function(event, value, caption) {
+				// 	_this.model.set('note',value);
+				// });
+			// if ( this.model.get('validated') == 2 ) {
+			// 	this.$el.find('.rating-container').css('visibility' , 'visible')
+			// }
+			// else {
+			// 	this.$el.find('.rating-container').css('visibility' , 'hidden')
+			// }
 
 			this.theWheel = wheelzoom(_this.$el.find('img'), {zoom:1});
 
 
 		},
 
-		changeModel(model){
+		changeModel (model) {
       var _this = this;
       this.stopListening(this.model);
 			this.parent.$el.find('.infosfullscreen').html('');
@@ -196,12 +202,12 @@ define([
 				}
 				else {
 						_this.parent.$el.find('.infosfullscreenStatus').text(' '+_this.statusPhoto+' ');
-					if ( this.model.get('validated') == 2 ) {
-						this.$el.find('.rating-container').css('visibility' , 'visible')
-					}
-					else {
-						this.$el.find('.rating-container').css('visibility' , 'hidden')
-					}
+					// if ( this.model.get('validated') == 2 ) {
+					// 	this.$el.find('.rating-container').css('visibility' , 'visible')
+					// }
+					// else {
+					// 	this.$el.find('.rating-container').css('visibility' , 'hidden')
+					// }
 				}
 
       });

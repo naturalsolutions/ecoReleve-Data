@@ -27,7 +27,7 @@
     "chartjs": "1.0.2",
     "reneco-fonts": "*",
     "ag-grid": "^5.2.0",
-    "resumable.js": "resumablejs#^1.0.2",
+    "resumable.js": "https://github.com/23/resumable.js.git#4199ab8270f764effdb9d1de50bf285df9495367",
     "ez-plus": "^1.1.20",
     "bootstrap-tagsinput": "^0.8.0",
     "noty": "^2.3.8",
@@ -39,10 +39,10 @@
     "backgrid": "https://github.com/wyuenho/backgrid.git#0.3.5",
     "webui-popover": "2.1.15",
     "NaturalJS_Filter": "1.1.4",
-    "webui-popover": "2.1.15",
     "moment-timezone": "~0.5.13",
     "tether": "^1.4.0",
-    "popper.js": "https://unpkg.com/popper.js"
+    "popper.js": "https://unpkg.com/popper.js",
+    "select2": "^4.0.5"
   },
   "resolutions": {
     "underscore": "1.5.2",
