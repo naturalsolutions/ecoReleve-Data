@@ -20,7 +20,8 @@ from sqlalchemy.inspection import inspect
 from datetime import datetime
 from ..utils.parseValue import parser
 from functools import wraps
-import inspect
+from sqlalchemy.ext.declarative import declared_attr
+import abc 
 #######
 #TODO : Need to implement interface for in DB configuration, in order to optimize query
 #######
@@ -32,42 +33,17 @@ class ColumnError(Exception):
     pass
 
 
-
-# def is_match(_lambda, pattern):
-#     def wrapper(f):
-#         @wraps(f)
-#         def wrapped(self, *f_args, **f_kwargs):
-#             if callable(_lambda) and search(pattern, (_lambda(self) or '')): 
-#                 f(self, *f_args, **f_kwargs)
-#         return wrapped
-
-
-def add_custom_filter(filter_name):
-    def real_add_custom_filter(function):
-        dict_inspect = dict(inspect.getmembers(function))
-        klass = dict_inspect.get('__globals__').get('QueryEngine', None) or dict_inspect.get('__globals__').get('DynamicPropertiesQueryEngine')
-
-        klass.custom_filters[filter_name] = function
-        
-        @wraps(function)
-        def wrapper(self, *args, **kwargs):
-            function(self, *args, **kwargs)
-        return wrapper
-    return real_add_custom_filter
-
 class QueryEngine(object):
     '''
     This class is used to filter Model | Table | View over all properties, all relationships
     '''
-
     custom_filters = {}
-
-
     def __init__(self, session, model):
         '''
         @session :: SQLAlchemy Connection Session,
         @model :: SQLAlchemy Model or Table object (and View too)
         '''
+
         self.session = session
         self.model = model
         self.model_table = model
@@ -466,8 +442,8 @@ class DynamicPropertiesQueryEngine(QueryEngine):
             if 'is null' == criteria['Operator'].lower():
                 exists_query_null = exists_query.where(_alias.c[value_column]==None)
                 query = query.where(or_(
-                        exists(exists_query_null),
-                        ~exists(exists_query)
+                        ~exists(exists_query),
+                        exists(exists_query_null)
                     )
                 )
             elif 'is not null' == criteria['Operator'].lower():
@@ -485,7 +461,7 @@ class DynamicPropertiesQueryEngine(QueryEngine):
                                     criteria['Value']
                                     )
                                 )
-        query = query.where(exists(exists_query))
+            query = query.where(exists(exists_query))
         return query
 
     def _select_from(self):
@@ -493,7 +469,6 @@ class DynamicPropertiesQueryEngine(QueryEngine):
         @returning :: SQLAlchemy outerjoin
         return the FROM statement with all junctures over all known dynamic properties
         '''
-
         join_table, selectable = QueryEngine._select_from(self)
         for prop in self.dynamic_properties:
             prop_in_select = list(filter(lambda x: x.element == self.get_column_by_name(prop['Name']) ,self.selectable))
@@ -554,3 +529,36 @@ class DynamicPropertiesQueryEngine(QueryEngine):
             return prop.as_dict()
         except exc.NoResultFound:
             return None
+
+
+class Query_engine():
+    '''
+    DECORATOR
+    '''
+    def __init__(self, param):
+        self.from_inherit = QueryEngine
+        self.param = param
+        if len(list(filter(lambda x: x.__name__ == 'HasDynamicProperties' , param.__bases__)))>0:
+            self.from_inherit = DynamicPropertiesQueryEngine
+    
+    def __call__(self, klass):
+        return self.setCustomEngine(klass)
+
+    @staticmethod
+    def add_filter(klass, filter_name):
+        def real_add_custom_filter(function):
+            klass.custom_filters[filter_name] = function
+            @wraps(function)
+            def wrapper(self, *args, **kwargs):
+                function(self, *args, **kwargs)
+            return wrapper
+        return real_add_custom_filter
+
+    def setCustomEngine(self, cls):
+        def init(instance, session, object_type=None, from_history=None):
+            self.from_inherit.__init__(instance, session=session, model=self.param, object_type=object_type, from_history=from_history)
+
+        new_class = type(cls.__name__,(self.from_inherit,)+cls.__bases__,dict(cls.__dict__))
+        new_class.__init__ = init
+        new_class.custom_filters = {}
+        return new_class

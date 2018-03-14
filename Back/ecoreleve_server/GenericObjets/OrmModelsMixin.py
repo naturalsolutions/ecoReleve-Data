@@ -199,9 +199,6 @@ class EventRuler(object):
 
     @declared_attr
     def loadBusinessRules(cls):
-        ''' 
-        TODO call this to another moment ? , because call dbConfig['dbSession'] in getBuisnessRules() sucks !
-        '''
         @event.listens_for(cls.getDeclarativeBase().metadata, 'after_create')
         def afterConfigured(target, connection, **kwargs):
             cls.__constraintRules__ = {'before_update': [],
