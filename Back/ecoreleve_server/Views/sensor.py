@@ -36,6 +36,7 @@ class SensorView(DynamicObjectView):
         self.actions = {'equipment': self.getEquipment,
                         'locations': self.getLocations}
         self.add_child('history', SensorValuesView)
+        print('test')
 
     def __getitem__(self, ref):
         if ref in self.actions:
