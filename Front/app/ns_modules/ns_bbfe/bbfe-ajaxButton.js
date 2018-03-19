@@ -40,22 +40,40 @@ define([
         actionOnBtn: function(e){
             var _this = this;
             e.preventDefault();
-             Swal({
-              title: 'Warning',
-              text: 'Monitored Site coordinates will be updated, are you sure ? ',
-              type: 'warning',
-              showCancelButton: true,
-              CancelButtonColor:'red',
-              CancelButtonText: 'No',
-              confirmButtonColor: 'green',
-              confirmButtonText: 'Yes',
-              closeOnConfirm: true
-              },
-              function(isConfirm) {
-                  if (isConfirm){
-                    _this.callback();
-                  }
-              });
+
+            Swal({
+                title: 'Warning',
+                text: 'Monitored Site coordinates will be updated, are you sure ? ',
+                type: 'warning',
+                showCancelButton: true,
+                CancelButtonColor:'red',
+                CancelButtonText: 'No',
+                confirmButtonColor: 'green',
+                confirmButtonText: 'Yes',
+                closeOnConfirm: true
+                }).then( (result) => {
+                    if( 'value' in result) {
+                        _this.callback();
+                    }
+                });
+
+
+            //  Swal({
+            //   title: 'Warning',
+            //   text: 'Monitored Site coordinates will be updated, are you sure ? ',
+            //   type: 'warning',
+            //   showCancelButton: true,
+            //   CancelButtonColor:'red',
+            //   CancelButtonText: 'No',
+            //   confirmButtonColor: 'green',
+            //   confirmButtonText: 'Yes',
+            //   closeOnConfirm: true
+            //   },
+            //   function(isConfirm) {
+            //       if (isConfirm){
+            //         _this.callback();
+            //       }
+            //   });
         },
 
         callback: function() {
@@ -83,8 +101,7 @@ define([
                   type: 'info',
                   showCancelButton: false,
                   confirmButtonColor: 'rgb(201, 218, 225)',
-                  confirmButtonText: 'OK',
-                  closeOnConfirm: true,
+                  confirmButtonText: 'OK'
                 });
             }, 500);
         },

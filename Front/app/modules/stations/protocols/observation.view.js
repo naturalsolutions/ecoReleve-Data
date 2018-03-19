@@ -116,8 +116,7 @@ define([
           type: 'warning',
           showCancelButton: false,
           confirmButtonColor: 'rgb(240, 173, 78)',
-          confirmButtonText: 'OK',
-          closeOnConfirm: true,
+          confirmButtonText: 'OK'
         });
       } 
 

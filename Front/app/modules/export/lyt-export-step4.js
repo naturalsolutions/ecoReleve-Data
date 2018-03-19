@@ -72,13 +72,32 @@ define([
         confirmButtonColor: opts.confirmButtonColor,
         confirmButtonText: opts.confirmButtonText,
         closeOnConfirm: opts.closeOnConfirm || true,
-      },
-      function(isConfirm) {
-        //could be better
-        if (opts.callback) {
-          opts.callback(isConfirm);
+      }).then((result) => {
+        var confirm = true;
+        if( 'dismiss' in result ) {
+          confirm = false;
+        }
+        if(opts.callback) {
+          opts.callback(confirm);
         }
       });
+
+
+      // Swal({
+      //   title: opts.title || opts.responseText || 'error',
+      //   text: opts.text || '',
+      //   type: opts.type,
+      //   showCancelButton: opts.showCancelButton,
+      //   confirmButtonColor: opts.confirmButtonColor,
+      //   confirmButtonText: opts.confirmButtonText,
+      //   closeOnConfirm: opts.closeOnConfirm || true,
+      // },
+      // function(isConfirm) {
+      //   //could be better
+      //   if (opts.callback) {
+      //     opts.callback(isConfirm);
+      //   }
+      // });
     },
 
     getFile: function() {

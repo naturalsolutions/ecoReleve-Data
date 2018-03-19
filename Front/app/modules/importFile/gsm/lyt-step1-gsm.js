@@ -72,31 +72,22 @@ define([
             type: 'error',
             showCancelButton: false,
             confirmButtonColor: 'rgb(147, 14, 14)',
-            confirmButtonText: 'OK',
-
-            closeOnConfirm: true,
-          }
-          );
+            confirmButtonText: 'OK'
+          });
           return false;
         }
         if (this.files.length) {
           var _i, _len;
           for (_i = 0, _len = this.files.length; _i < _len; _i++) {
             if (this.files[_i].name === file.name && this.files[_i].size === file.size) {
-              Swal(
-              {
+              Swal({
                 title: 'Warning Duplicate Files',
                 text: this.files[_i].name + ' is already in the upload list, only one occurrence is keeped',
                 type: 'warning',
                 showCancelButton: false,
                 confirmButtonColor: 'rgb(218, 146, 15)',
-
-                confirmButtonText: 'OK',
-
-                closeOnConfirm: true,
-
-              }
-              );
+                confirmButtonText: 'OK'
+              });
               return false;
             }
           }
@@ -179,30 +170,47 @@ define([
         var totalInserted = _this.totalReturned.reduce(function(memo, value) { return memo + value.get("inserted") }, 0);
         if (!this.errors) {
           Swal({title: 'Well done',
-            text: 'File(s) have been correctly imported\n'
-                          + '\t inserted : ' + totalInserted
-                          ,
-            type:  'success',
-            showCancelButton: true,
-            confirmButtonText: 'Validate GSM',
-            cancelButtonText: 'Import new GSM',
-            closeOnConfirm: true,
-            closeOnCancel: true},
-            function(isConfirm) {
-              if (isConfirm) {
-              Backbone.history.navigate('validate/gsm',{trigger: true});
-              }
-              else {
-                document.querySelector('#actions .cancel').click();
-                // var ret = Backbone.history.navigate('importFile/gsm', true);
-                // if (ret === undefined) {
-                //     Backbone.history.loadUrl('importFile/gsm');
-                // }
-              }
+          text: 'File(s) have been correctly imported\n'
+                        + '\t inserted : ' + totalInserted
+                        ,
+          type:  'success',
+          showCancelButton: true,
+          confirmButtonText: 'Validate GSM',
+          cancelButtonText: 'Import new GSM'
+        }).then( (result) => {
+          if( 'value' in result ) {
+            Backbone.history.navigate('validate/gsm',{trigger: true});
           }
-          );
+          else {
+            document.querySelector('#actions .cancel').click();
+          }
+        });
+          // Swal({title: 'Well done',
+          //   text: 'File(s) have been correctly imported\n'
+          //                 + '\t inserted : ' + totalInserted
+          //                 ,
+          //   type:  'success',
+          //   showCancelButton: true,
+          //   confirmButtonText: 'Validate GSM',
+          //   cancelButtonText: 'Import new GSM',
+          //   closeOnConfirm: true,
+          //   closeOnCancel: true
+          // },
+          //   function(isConfirm) {
+          //     if (isConfirm) {
+          //     Backbone.history.navigate('validate/gsm',{trigger: true});
+          //     }
+          //     else {
+          //       document.querySelector('#actions .cancel').click();
+          //       // var ret = Backbone.history.navigate('importFile/gsm', true);
+          //       // if (ret === undefined) {
+          //       //     Backbone.history.loadUrl('importFile/gsm');
+          //       // }
+          //     }
+          // });
 
-        }else {
+        }
+        else {
 
           if (this.errors != 401){
             Swal(
@@ -212,8 +220,7 @@ define([
               type: 'error',
               showCancelButton: false,
               confirmButtonText: 'OK',
-              confirmButtonColor: 'rgb(147, 14, 14)',
-              closeOnConfirm: true,
+              confirmButtonColor: 'rgb(147, 14, 14)'
             }
             );
           } else {

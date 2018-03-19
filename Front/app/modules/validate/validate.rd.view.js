@@ -315,6 +315,7 @@ define([
           break;
       }
 
+
       Swal({
         title: opt.title || opt.responseText || 'error',
         text: opt.text || '',
@@ -323,13 +324,28 @@ define([
         confirmButtonColor: btnColor,
         confirmButtonText: 'OK',
         closeOnConfirm: true,
-      },
-      function(isConfirm) {
-        //could be better
-        if (callback) {
+      }).then( (result) => {
+        if(callback) {
           callback();
         }
       });
+
+
+      // Swal({
+      //   title: opt.title || opt.responseText || 'error',
+      //   text: opt.text || '',
+      //   type: type,
+      //   showCancelButton: false,
+      //   confirmButtonColor: btnColor,
+      //   confirmButtonText: 'OK',
+      //   closeOnConfirm: true,
+      // },
+      // function(isConfirm) {
+      //   //could be better
+      //   if (callback) {
+      //     callback();
+      //   }
+      // });
     },
 
   });

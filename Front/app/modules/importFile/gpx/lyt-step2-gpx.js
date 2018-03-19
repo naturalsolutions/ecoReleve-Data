@@ -282,8 +282,7 @@ define([
           type: 'error',
           showCancelButton: false,
           confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'Ok',
-          closeOnConfirm: true,
+          confirmButtonText: 'Ok'
         });
         return;
       }
@@ -301,8 +300,7 @@ define([
           type: 'error',
           showCancelButton: false,
           confirmButtonColor: 'rgb(147, 14, 14)',
-          confirmButtonText: 'Ok',
-          closeOnConfirm: true,
+          confirmButtonText: 'Ok'
         });
         return;
       }
@@ -322,21 +320,42 @@ define([
             showCancelButton: true,
             confirmButtonColor: 'green',
             cancelButtonText: 'Import new gpx',
-            confirmButtonText: 'Show imported data',
-            closeOnConfirm: true,
+            confirmButtonText: 'Show imported data'
 
-          },
-          function(isConfirm) {
-            if( isConfirm ) {
+          }).then( (result) => {
+            if ( 'value' in result ) {
               Backbone.history.navigate('stations?lastImported', {trigger: true});
             }
             else {
-              // //method to return at the 1st step
               _this.options.parent.currentStepIndex = 1;
               var index = _this.options.parent.currentStepIndex;
               _this.options.parent.displayStep(index);
             }
           });
+          // Swal({
+          //   title: 'Stations import',
+          //   text: inserted + ' inserted station(s), \n'
+          //         + exisits + ' existing stations, \n'
+          //         +'Name of existing station: \n'+existingNames,
+          //   type: 'success',
+          //   showCancelButton: true,
+          //   confirmButtonColor: 'green',
+          //   cancelButtonText: 'Import new gpx',
+          //   confirmButtonText: 'Show imported data',
+          //   closeOnConfirm: true,
+
+          // },
+          // function(isConfirm) {
+          //   if( isConfirm ) {
+          //     Backbone.history.navigate('stations?lastImported', {trigger: true});
+          //   }
+          //   else {
+          //     // //method to return at the 1st step
+          //     _this.options.parent.currentStepIndex = 1;
+          //     var index = _this.options.parent.currentStepIndex;
+          //     _this.options.parent.displayStep(index);
+          //   }
+          // });
         },
         error: function() {
         },
