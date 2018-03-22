@@ -1,0 +1,21 @@
+update ModuleGrids
+  set Module_ID = 3,
+  TypeObj = NULL,
+  Name = 'FieldworkArea_Name',
+  Label = 'FieldworkArea',
+  GridRender = 2,
+  GridSize = '{"width":120,"maxWidth":350,"minWidth":100}',
+  CellType = 'string',
+  GridOrder = 60,
+  QueryName = NULL,
+  Options = '{"source": "autocomplete/fieldworkarea/Name/fullpath", "minLength":3}',
+  FilterOrder = 50,
+  FilterSize = 2,
+  FilterClass = NULL,
+  IsSearchable = 1,
+  FilterDefaultValue = NULL,
+  FilterRender = 4,
+  FilterType = 'AutocompleteEditor',
+  Status = NULL,
+  ColumnParams = NULL
+  WHERE Label = 'FieldworkArea' AND Module_ID = 3
