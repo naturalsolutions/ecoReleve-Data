@@ -1,0 +1,230 @@
+
+/****** Object:  Table [dbo].[Region]    Script Date: 10/02/2018 12:58:18 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].FieldworkArea(
+	[ID] [int] IDENTITY(1,1)  NOT NULL,
+	[Country] [nvarchar](255) NULL,
+	[Working_Area] [varchar](255) NULL,
+	[Working_Region] [nvarchar](255) NULL,
+	[Management_Unit] [varchar](255) NULL,
+	[Name] varchar(255) NULL,
+	[fullpath] [varchar](255) NULL,
+	[type_] varchar(50) NULL,
+	[max_lat] [decimal](9, 5) NULL,
+	[min_lat] [decimal](9, 5) NULL,
+	[max_lon] [decimal](9, 5) NULL,
+	[min_lon] [decimal](9, 5) NULL,
+	[SHAPE_Leng] [real] NULL,
+	[SHAPE_Area] [real] NULL,
+	[valid_geom] [geometry] NULL,
+	[geom] [geometry] NULL,
+
+PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+
+
+INSERT INTO [dbo].[FieldworkArea]
+           ([Country]
+           ,[Working_Area]
+           ,[Working_Region]
+           ,[Management_Unit]
+           ,[Name]
+           ,[fullpath]
+           ,[type_]
+           ,[max_lat]
+           ,[min_lat]
+           ,[max_lon]
+           ,[min_lon]
+           ,[SHAPE_Leng]
+           ,[SHAPE_Area]
+           ,[valid_geom]
+           ,[geom])
+SELECT 
+		Country,
+		W_Area,
+		W_Region,
+		Mgmt_Unit,
+		CASE 
+			WHEN Mgmt_Unit != '' THEN Mgmt_Unit
+			WHEN W_Region != '' THEN W_Region
+			WHEN W_Area != '' THEN W_Area
+			WHEN Country != '' THEN Country
+		END,
+		fullpath,
+		CASE 
+			WHEN Mgmt_Unit != '' THEN 'management unit'
+			WHEN W_Region != '' THEN 'working region'
+			WHEN W_Area != '' THEN 'working area'
+			WHEN Country != '' THEN 'country'
+		END,
+		max_lat,
+		min_lat,
+		max_lon,
+		min_lon,
+		SHAPE_Leng,
+		SHAPE_Area,
+		valid_geom,
+		geom
+FROM reneco_sig.dbo.Region sig
+GO 
+
+/* ADD missing Node Working_region by merging Management_Unit children  */
+INSERT INTO [dbo].[FieldworkArea]
+           ([Country]
+           ,[Working_Area]
+           ,[Working_Region]
+           ,[Management_Unit]
+           ,[Name]
+           ,[fullpath]
+           ,[type_]
+           ,[valid_geom]
+           ,[geom])
+
+SELECT
+	country,
+	Working_area,
+	Working_Region,
+	'',
+	Working_Region,
+	country+'>'+Working_area+'>'+Working_Region,
+	'working region',
+	geometry::UnionAggregate(valid_geom),
+	geometry::UnionAggregate(geom)
+FROM FieldworkArea a 
+WHERE  a.Management_Unit != ''
+AND NOT EXISTS (select * 
+				FROM FieldworkArea mgmU 
+				WHERE mgmU.Management_Unit = ''
+				AND mgmU.Working_Region = a.Working_Region
+				)
+GROUP BY Working_Region, Working_area, country
+HAVING Count(*) > 1 
+GO
+/*   END */ 
+
+/* ADD missing Node Working_area by merging Working_region children  */
+INSERT INTO [dbo].[FieldworkArea]
+           ([Country]
+           ,[Working_Area]
+           ,[Working_Region]
+           ,[Management_Unit]
+           ,[Name]
+           ,[fullpath]
+           ,[type_]
+           ,[valid_geom]
+           ,[geom])
+
+SELECT 
+	country,
+	Working_area,
+	'',
+	'',
+	Working_area,
+	country+'>'+Working_area,
+	'working area',
+	geometry::UnionAggregate(valid_geom),
+	geometry::UnionAggregate(geom.MakeValid())
+FROM FieldworkArea a 
+WHERE  a.Working_Region != ''  AND a.Management_Unit = ''
+AND NOT EXISTS (select * 
+				FROM FieldworkArea mgmU 
+				WHERE mgmU.Working_Region = ''
+				AND mgmU.Working_area = a.Working_area
+				)
+GROUP BY  Working_area, country
+HAVING Count(*) > 1
+GO
+
+/* ADD missing Node Country by merging Working_area children  */
+INSERT INTO [dbo].[FieldworkArea]
+           ([Country]
+           ,[Working_Area]
+           ,[Working_Region]
+           ,[Management_Unit]
+           ,[Name]
+           ,[fullpath]
+           ,[type_]
+           ,[valid_geom]
+           ,[geom])
+
+SELECT 
+	country,
+	'',
+	'',
+	'',
+	country,
+	country,
+	'country',
+	geometry::UnionAggregate(valid_geom),
+	geometry::UnionAggregate(geom.MakeValid())
+FROM FieldworkArea a 
+WHERE  a.Working_Region = ''  AND a.Management_Unit = '' AND [Working_Area] != ''
+AND NOT EXISTS (select * 
+				FROM FieldworkArea mgmU 
+				WHERE mgmU.[Working_Area] = ''
+				AND mgmU.country = a.country
+				)
+GROUP BY country
+HAVING Count(*) > 1
+GO
+
+/* keeping deprecated region */ 
+INSERT INTO [FieldworkArea] ([Country]
+      ,[Working_Area]
+      ,[Working_Region]
+      ,[Management_Unit]
+      ,[Name]
+      ,[fullpath]
+      ,[type_]
+      ,[valid_geom]
+      ,[geom])
+
+	select [Country]
+		  ,NULL
+		,NULL
+		,NULL
+		, Region
+		,NULL
+		,'depricated'
+		  ,[valid_geom]
+		  ,[geom]
+	FROM Region Where ID in (196,207,210,165,167,169,171)
+GO 
+
+/* compute boundar box of each geom */ 
+update ct set  min_lon = geom.MakeValid().STEnvelope().STPointN(1).STX ,
+		min_lat = geom.MakeValid().STEnvelope().STPointN(1).STY ,
+		max_lon = geom.MakeValid().STEnvelope().STPointN(3).STX ,
+		max_lat = geom.MakeValid().STEnvelope().STPointN(3).STY 
+  FROM FieldworkArea ct ;
+
+
+ update ct set valid_geom = geom.MakeValid()
+  FROM FieldworkArea ct ;
+
+UPDATE  FieldworkArea SET valid_geom.STSrid = 4326;
+
+ CREATE SPATIAL INDEX [IX_FieldworkArea_SPATIAL] ON [dbo].FieldworkArea
+(
+	[valid_geom]
+)USING  GEOMETRY_GRID 
+WITH (BOUNDING_BOX =(-180, -90, 180, 90), GRIDS =(LEVEL_1 = LOW,LEVEL_2 = LOW,LEVEL_3 = LOW,LEVEL_4 = LOW), 
+CELLS_PER_OBJECT = 16, PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('164_Create_FieldworkArea',GETDATE(),(SELECT db_name()))
+
+
+GO

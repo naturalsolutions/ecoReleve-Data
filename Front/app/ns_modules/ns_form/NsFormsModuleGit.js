@@ -411,8 +411,8 @@ define([
         this.buttonRegion[0].find('.NsFormModuleSave').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleClear').removeClass('hidden');
         this.buttonRegion[0].find('.NsFormModuleEdit').addClass('hidden');
-        if(!this.BBForm.model.get('id')){
-          this.formRegion.find('input:enabled:first').focus();
+        if(!this.BBForm.model.get('ID')){
+          this.formRegion.find('input:enabled,select:enabled,textarea:enabled').first().focus();
         }
       }else{
         this.buttonRegion[0].find('.NsFormModuleDelete').addClass('hidden');

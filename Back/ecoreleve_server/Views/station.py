@@ -6,7 +6,8 @@ from ..Models import (
     MonitoredSitePosition,
     MonitoredSite,
     fieldActivity,
-    User
+    User,
+    Region
 )
 import json
 import itertools

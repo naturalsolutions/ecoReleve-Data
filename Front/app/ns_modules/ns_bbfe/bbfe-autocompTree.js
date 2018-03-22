@@ -67,8 +67,8 @@ define([
         },
 
         initialize: function (options) {
-            if (options.schema.defaultValue) { //hack need because back return value and displayValue none when in nestedform 
-                var tmpVal = options.model.get(options.key)
+            if (options.schema.defaultValue && typeof(options.schema.defaultValue)=='string') { //hack need because back return value and displayValue none when in nestedform 
+                var tmpVal = options.model.get(options.key);
                 var splitTab = options.schema.defaultValue.split('>');
                 if (typeof(tmpVal) === 'undefined' ) {
                     options.model.set(options.key, { 
@@ -168,7 +168,12 @@ define([
 
                     onItemClick: function (options) {
                         //for global
-                        _this.$el.find('input').trigger('thesaurusChange');
+                        if (_this.options.schema.options.date) {
+                            _this.$el.find('input').trigger('thesaurusChange');
+                        }
+                        else {
+                            _this.$el.find('input.autocompTree').trigger('thesaurusChange');
+                        }
 
                         _this.onChange();
                     },

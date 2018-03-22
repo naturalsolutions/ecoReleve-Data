@@ -21,7 +21,10 @@ define([
       subincon: 'reneco-bustard',
 
       disabledNew: true,
-      
+      authorisationLvl: {
+        create_new: 'js-admin',
+      },
+
       formConfig: {
         modelurl: 'individuals',
         displayMode: 'display',
@@ -141,8 +144,8 @@ define([
         headerName: 'Precision(m)',
         filter: 'number',
       },{
-        field: 'region',
-        headerName: 'Region',
+        field: 'FieldworkArea',
+        headerName: 'FieldWorkArea',
         filter: 'text',
       },{
         field: 'type_',

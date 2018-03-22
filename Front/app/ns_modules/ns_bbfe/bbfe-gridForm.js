@@ -78,7 +78,6 @@ define([
     deleteRows: function() {
       var _this = this;
       var selectedNodes = this.gridView.gridOptions.api.getSelectedNodes();
-      console.log(selectedNodes)
       if(!selectedNodes.length){
         return;
       }
@@ -136,6 +135,7 @@ define([
     afterRender: function(options){
       var _this = this;
       var rowData = options.model.get(options.key) || [];
+      var displayRowIndex;
       this.regionManager.addRegions({
         rgGrid: '.js-rg-grid-subform'
       });
@@ -145,14 +145,18 @@ define([
       }
 
       var url = 'stations/' + this.model.get('FK_Station') + '/observations'; 
-
+      if(options.schema.options.showLines){
+        displayRowIndex = true;
+      } else{
+        displayRowIndex = false;
+      }
       this.regionManager.get('rgGrid');
       this.regionManager.get('rgGrid').show(this.gridView = new GridView({
         columns: this.formatColumns(options.schema),
         clientSide: true,
         form: _this.form,
         url: url,
-        displayRowIndex: true,
+        displayRowIndex: displayRowIndex,
         gridOptions: {
           editType: 'fullRow',
           singleClickEdit : true,
@@ -199,15 +203,20 @@ define([
     },
 
     formatColumns: function(schema){
+
       var _this = this;
       var odrFields = schema.fieldsets[0].fields;
                         
       var columnsDefs = [];
-
       for (var i = 0; i < odrFields.length; i++) {
         var field = schema.subschema[odrFields[i]];
+        var pinned = null;
         if(field.name == 'ID'){
           continue;
+        }
+
+        if (i<=schema.options.nbFixedCol){
+          pinned = 'left';
         }
         var colDef = {
           editable: field.editable,
@@ -219,7 +228,7 @@ define([
           minWidth: field.minWidth,
           maxWidth: field.maxWidth,
           width: field.width,
-          pinned : field.pinned
+          pinned : pinned
         };
         this.applyRule(colDef, field);
         columnsDefs.push(colDef)

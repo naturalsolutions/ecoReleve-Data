@@ -22,6 +22,7 @@ define([
   'ns_modules/ns_bbfe/bbfe-ajaxButton',
   'ns_modules/ns_bbfe/bbfe-lon',
   'ns_modules/ns_bbfe/bbfe-lat',
+  'ns_modules/ns_bbfe/bbfe-fieldworkarea-autocomplete',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
   'ns_modules/ns_bbfe/bbfe-mediaFile',
 
@@ -104,6 +105,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
   };
 
   window.thesaurus = {};
+  window.RegionLayers = {};
 
   $(window).ajaxStart(function(e) {
     $('#header-loader').removeClass('hidden');

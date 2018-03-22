@@ -261,11 +261,21 @@ define([
 
           if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()  ) { //detect date
             //then convert it to timestamp (number)
-            if(valueA) {
+            if( moment(valueA, "DD/MM/YYYY HH:mm:ss", true).isValid()) {
               valueA = moment(valueA , "DD/MM/YYYY HH:mm:ss" ).valueOf();
             }
-            if(valueB){
+            if(moment(valueB, "DD/MM/YYYY HH:mm:ss", true).isValid()){
               valueB = moment(valueB ,  "DD/MM/YYYY HH:mm:ss" ).valueOf();
+            }
+          }else {
+            if( moment(valueA, "DD/MM/YYYY HH:mm", true).isValid() || moment(valueB, "DD/MM/YYYY HH:mm", true).isValid()  ) { //detect date
+              //then convert it to timestamp (number)
+              if(moment(valueA, "DD/MM/YYYY HH:mm", true).isValid()) {
+                valueA = moment(valueA , "DD/MM/YYYY HH:mm" ).valueOf();
+              }
+              if(moment(valueB, "DD/MM/YYYY HH:mm", true).isValid()){
+                valueB = moment(valueB ,  "DD/MM/YYYY HH:mm" ).valueOf();
+              }
             }
           }
 
@@ -760,7 +770,7 @@ define([
       if(this[action]){
         this[action](params, from);
       } else {
-        console.warn(this, 'doesn\'t have ' + action + ' action');
+        // console.warn(this, 'doesn\'t have ' + action + ' action');
       }
     },
     interaction: function(action, params){
@@ -770,6 +780,19 @@ define([
     },
 
     focus: function(param){
+      var _this = this;
+      this.gridOptions.api.forEachNode( function (node) {
+          if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
+            _this.gridOptions.api.ensureIndexVisible(node.childIndex);
+            setTimeout(function(){
+               var tmp = _this.idName || (node.data.id)? 'id' : 'ID';
+              _this.gridOptions.api.setFocusedCell(node.childIndex, tmp, null);
+            },0);
+          }
+      });
+    },
+
+    highlight: function(param){
       var _this = this;
       this.gridOptions.api.forEachNode( function (node) {
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
@@ -810,6 +833,7 @@ define([
       if(from == this){
         return;
       }
+      
       this.gridOptions.api.forEachNode( function (node) {
           if (node.data[_this.idName] === param || node.data.ID === param || node.data.id === param) {
             _this.ready = false;

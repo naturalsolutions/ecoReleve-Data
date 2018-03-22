@@ -13,6 +13,9 @@ define([
       label: 'stations',
       single: 'station',
       type: 'stations',
+      authorisationLvl: {
+        create_new: 'js-user',
+      },
 
       uiGridConfs: [
         {

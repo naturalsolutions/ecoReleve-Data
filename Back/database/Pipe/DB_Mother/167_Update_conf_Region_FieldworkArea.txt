@@ -1,0 +1,27 @@
+﻿/****** Script de la commande SelectTopNRows à partir de SSMS  ******/
+update [ModuleForms] SET Name = 'FK_FieldworkArea', 
+						 Label = 'Fieldwork Area',
+						 InputType = 'FieldworkingAreaEditor',
+						 Options =  '{}',
+WHERE Name = 'FK_Region'
+
+update [ModuleForms] SET Required = 1
+WHERE Name = 'FK_FieldworkArea' AND TypeObj = 3
+
+update ModuleGrids SET Name = 'FK_FieldworkArea', 
+					   Label = 'Fieldwork Area',
+					   Options = 'SELECT [Name]  as val,fullpath as label 
+								  FROM  [FieldworkArea] r 
+								  WHERE fullpath is not null 
+								  AND EXISTS (Select * From Station s where s.FK_FieldworkArea = r.ID) order by fullpath',
+								  QueryName = 'Name'
+WHERE Name = 'FK_Region' --and Module_ID = 3
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('167_Update_conf_Region_FieldworkArea',GETDATE(),(SELECT db_name()))
+
+
+GO

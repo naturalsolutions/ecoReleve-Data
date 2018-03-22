@@ -102,12 +102,18 @@ class ModuleForms(Base):
 
     def GetDTOFromConf(self, displayMode, isGrid=False):
         ''' return input field to build form :
-
-            3 display modes : 
-                - "display" : all input non editable, 1
+            3 display modes :
+                - "display"
                 - "create",
                 - "edit"
 
+            Binary weight for input rendering
+                1: rendered,
+                2: editable on create mode,
+                4: editable on edit mode,
+                8: when form as Grid, pinned the column to th left,
+                16: ?? do nothing form the moment,
+                32: at begin line
         '''
         binaryMode = 0
         self.displayMode = displayMode
@@ -140,7 +146,10 @@ class ModuleForms(Base):
             self.fullPath = True
             isDisabled = True
 
-        CssClass = 'col-md-' + str(curSize)
+        if binaryTest(self.FormRender, 32):
+            CssClass = 'col-md-' + str(curSize) + ' js-begin-line'
+        else:
+            CssClass = 'col-md-' + str(curSize)
 
         self.dto = {
             'name': self.Name,

@@ -43,6 +43,10 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
             }
           }
         }
+        
+        //hack for spatial navigation with tab button
+        //will be solved with upgrading version
+        params.eGridCell.setAttribute("tabindex", "0"); 
   
       };
   
@@ -245,7 +249,7 @@ define(['jquery', 'ag-grid'], function($, AgGrid) {
          objectValue = params.value;
         if( typeof(params.value) === 'undefined' ) {
           if(params.colDef.schema.defaultValue ) {
-           var splitTab = params.colDef.schema.defaultValue.split('>');
+           var splitTab = String(params.colDef.schema.defaultValue).split('>');
   
             objectValue = {
                       displayValue : splitTab[splitTab.length-1],

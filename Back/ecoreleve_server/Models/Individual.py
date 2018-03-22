@@ -163,7 +163,9 @@ class Individual_Location(Base):
     Precision = Column(Integer)
     FK_Sensor = Column(Integer, ForeignKey('Sensor.ID'))
     FK_Individual = Column(Integer, ForeignKey('Individual.ID'))
-    FK_Region = Column(Integer, ForeignKey('Region.ID'))
+    # FK_Region = Column(Integer, ForeignKey('Region.ID'))
+    FK_FieldworkArea = Column(Integer, ForeignKey('FieldworkArea.ID'))
+
     creator = Column(Integer)
     creationDate = Column(DateTime)
     type_ = Column(String(10))

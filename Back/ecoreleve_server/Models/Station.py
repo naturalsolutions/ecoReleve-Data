@@ -54,8 +54,9 @@ class Station(Base, ObjectWithDynProp):
         'StationDynPropValue', backref='Station', cascade="all, delete-orphan")
     FK_StationType = Column(Integer, ForeignKey('StationType.ID'))
 
-    FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
-
+    # FK_Region = Column(Integer, ForeignKey('Region.ID'), nullable=True)
+    FK_FieldworkArea = Column(Integer, ForeignKey('FieldworkArea.ID'), nullable=True)
+    
     Station_FieldWorkers = relationship(
         'Station_FieldWorker', backref='Station', cascade="all, delete-orphan")
 

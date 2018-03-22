@@ -1,0 +1,47 @@
+ALTER View [dbo].[allIndivLocationWithStations] as 
+		(SELECT convert(varchar,l.[ID]) as ID
+			  ,[LAT]
+			  ,[LON]
+			  ,[Date]
+			  ,l.[type_]
+			  ,r.Name as FieldworkArea
+			  ,l.FK_Individual as FK_Individual
+			  ,NuLL as fieldActivity_Name
+			  ,l.Precision as precision
+		  FROM [Individual_Location] l
+		  LEFT JOIN FieldworkArea r on r.ID = l.FK_FieldworkArea
+
+		UNion ALL 
+	SELECT  'sta_'+convert(varchar,o.FK_Station) as ID
+			  ,[LAT]
+			  ,[LON]
+			  ,StationDate as Date
+			  ,'station' as type_
+			  ,r.Name as FieldworkArea
+			  ,o.FK_Individual as FK_Individual
+			  ,fa.Name as fieldActivity_Name
+			  ,s.precision
+
+		FROM Station s
+		LEFT JOIN FieldworkArea r on r.ID = s.FK_FieldworkArea
+		LEFT JOIN fieldActivity fa on fa.ID = s.fieldActivityId
+		JOIN Observation o ON o.FK_Station = s.ID
+		group by  o.FK_Station
+			  ,[LAT]
+			  ,[LON]
+			  ,StationDate 
+			  ,r.Name
+			  ,o.FK_Individual
+			  ,fa.Name
+			  ,s.precision
+ )
+
+
+
+GO
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('168_ALTER_VIEW_Indiv_Location_With_FieldworkingArea',GETDATE(),(SELECT db_name()))
+
+
+GO
