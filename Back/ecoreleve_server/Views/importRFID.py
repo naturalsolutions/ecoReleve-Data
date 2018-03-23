@@ -272,13 +272,9 @@ def uploadFileRFID(request):
         data_to_check = getDataFrameFromFile(input_file, creator)
         sensorIdentifier = data_to_check.iloc[0].identifier
 
-        # print(sensorIdentifier)
+        sensor_from_request = session.query(Sensor).get(idModule)
+   
         allDate = list(data_to_check['date_'])
-        # equipSession = findEquipmentSession(
-        #     session, sensorIdentifier, max(allDate), min(allDate))
-        # print(equipSession)
-
-        # # print(min(allDate), minDateEquip)
         try:
             maxDateEquip = datetime.strptime(endEquip, '%Y-%m-%d %H:%M:%S')
         except:
@@ -287,9 +283,9 @@ def uploadFileRFID(request):
         # check if Date corresponds with pose remove module
         if (min(allDate) >= minDateEquip and
                 (maxDateEquip is None or max(allDate) <= maxDateEquip) and
-                sensorIdentifier == idModule
+                sensorIdentifier == sensor_from_request.UnicIdentifier
             ):
-        # if equipSession:
+
             data_to_insert = checkDuplicatedRFID(
                 data_to_check, min(allDate), max(allDate), idModule)
             data_to_insert = data_to_insert.drop(['id_'], 1)
@@ -308,6 +304,8 @@ def uploadFileRFID(request):
 
             data_to_insert.loc[:, ('FK_Import')] = list(
                 itertools.repeat(importObj.ID, len(data_to_insert.index)))
+            data_to_insert.loc[:, ('FK_Sensor')] = list(
+                itertools.repeat(idModule, len(data_to_insert.index)))
             if data_to_insert.shape[0] == 0:
                 raise(IntegrityError)
 
@@ -322,17 +320,18 @@ def uploadFileRFID(request):
             return message
         else:
             session.rollback()
-            request.response.status_code = 510
+            request.response.status_code = 409
 
             if sensorIdentifier != idModule:
-                message = 'Identifier in file ({identifierFile}) do not correspond with the selected module ({identifierSelect})'.format(identifierFile=sensorIdentifier, identifierSelect=idModule)
-            message = 'File dates (first date : ' + str(allDate[0]) + ', last date : ' + str(
+                message = 'Identifier in file ({identifierFile}) does not correspond with the selected module ({identifierSelect})'.format(identifierFile=sensorIdentifier, identifierSelect=sensor_from_request.UnicIdentifier)
+            else: 
+                message = 'File dates (first date : ' + str(allDate[0]) + ', last date : ' + str(
                 allDate[-1]) + ') do not correspond with the deploy/remove dates of the selected module'
             return message
 
     except IntegrityError as e:
         print_exc()
-        request.response.status_code = 520
+        request.response.status_code = 409
         message = 'Data already exist.'
     except Exception as e:
         print_exc()
