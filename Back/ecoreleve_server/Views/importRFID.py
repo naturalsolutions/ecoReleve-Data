@@ -255,7 +255,7 @@ def uploadFileRFID(request):
     message = ""
     field_label = []
     isHead = False
-
+    now = datetime.now()
     creator = int(request.authenticated_userid['iss'])
     # content = request.POST['data']
     # blob = request.POST['file']
@@ -275,6 +275,7 @@ def uploadFileRFID(request):
         sensor_from_request = session.query(Sensor).get(idModule)
    
         allDate = list(data_to_check['date_'])
+        minDateEquip = datetime.strptime(startEquip, '%Y-%m-%d %H:%M:%S')
         try:
             maxDateEquip = datetime.strptime(endEquip, '%Y-%m-%d %H:%M:%S')
         except:
@@ -285,6 +286,9 @@ def uploadFileRFID(request):
                 (maxDateEquip is None or max(allDate) <= maxDateEquip) and
                 sensorIdentifier == sensor_from_request.UnicIdentifier
             ):
+            data_to_check.loc[:, ('FK_Sensor')] = list(
+                itertools.repeat(idModule, len(data_to_check.index)))
+            data_to_check.loc[:, ('id_')] = data_to_check.index
 
             data_to_insert = checkDuplicatedRFID(
                 data_to_check, min(allDate), max(allDate), idModule)
@@ -304,8 +308,7 @@ def uploadFileRFID(request):
 
             data_to_insert.loc[:, ('FK_Import')] = list(
                 itertools.repeat(importObj.ID, len(data_to_insert.index)))
-            data_to_insert.loc[:, ('FK_Sensor')] = list(
-                itertools.repeat(idModule, len(data_to_insert.index)))
+
             if data_to_insert.shape[0] == 0:
                 raise(IntegrityError)
 
@@ -368,5 +371,7 @@ def checkDuplicatedRFID(data_to_check, startEquip, endEquip, fk_sensor):
                                 'FK_Sensor'], right_on=['$FK_Sensor'])
 
     DFToInsert = data_to_check[~data_to_check['id_'].isin(merge['id_'])]
+    print(DFToInsert)
 
+    DFToInsert = DFToInsert[['FK_Sensor','date_', 'chip_code', 'validated', 'checked', 'frequency']]
     return DFToInsert
