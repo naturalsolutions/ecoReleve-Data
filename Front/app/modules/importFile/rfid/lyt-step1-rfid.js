@@ -131,75 +131,80 @@ define([
           data.append('StartDate', _this.row.StartDate);
           data.append('EndDate', _this.row.EndDate);
 
-          $.ajax({
-            type: 'POST',
-            url: 'sensors/rfid/datas',
-            data: data,
-            processData: false,
-            contentType: false
-          }).done(function(data) {
-            $('.cancel').removeAttr('disabled');
-
-            //self.ui.progressBar.css({'background-color': 'green'})
-            swal(
-              {
-                title: 'Succes',
-                text: 'importing RFID file',
-                type: 'success',
-                showCancelButton: true,
-                confirmButtonColor: 'green',
-                confirmButtonText: 'Go to Validate',
-                cancelButtonText: 'Import new RFID',
-                closeOnConfirm: true,
-
-              },
-              function(isConfirm) {
-                //self.ui.progress.hide();
-                if (isConfirm) {
-                  Backbone.history.navigate('validate/rfid',{trigger: true});
-                } else {
-                  //Backbone.history.navigate('importFile',{trigger: true});
-                  _this.options.parent.currentStepIndex = 1;
-                  var index = _this.options.parent.currentStepIndex;
-                  _this.options.parent.displayStep(index);
-                }
-              }
-            );
-
-          }).fail(function(data) {
-            $('#btnNext').attr('disabled');
-            if (data.status == 520 || data.status == 510) {
-              var type = 'warning';
-              var title = 'Warning !'
-              //self.ui.progressBar.css({'background-color': 'rgb(218, 146, 15)'})
-              var color = 'rgb(218, 146, 15)';
-            } else {
-              var type = 'error';
-              var title = 'Error !'
-              //self.ui.progressBar.css({'background-color': 'rgb(147, 14, 14)'})
-              var color = 'rgb(147, 14, 14)';
-              //_this.clearFile();
-
-            }
-            if (data.responseText.length > 250) {
-              data.responseText = 'An error occured, please contact an admninstrator';
-            }
-            swal(
-              {
-                title: title,
-                text: data.responseText,
-                type: type,
-                showCancelButton: false,
-                confirmButtonColor: color,
-                confirmButtonText: 'OK',
-                closeOnConfirm: true,
-              },
-              function(isConfirm) {
-              }
-            );
-          });
+ 
         };
-      this.reader.readAsText(file);
+      // this.reader.readAsText(file);
+      data.append('file',file, file.name)
+      data.append('FK_Sensor',_this.model.get('sensorId'));
+      data.append('StartDate', _this.row.StartDate);
+      data.append('EndDate', _this.row.EndDate);
+      $.ajax({
+        type: 'POST',
+        url: 'sensors/rfid/datas',
+        data: data,
+        processData: false,
+        contentType: false
+      }).done(function(data) {
+        $('.cancel').removeAttr('disabled');
+
+        //self.ui.progressBar.css({'background-color': 'green'})
+        swal(
+          {
+            title: 'Succes',
+            text: 'importing RFID file',
+            type: 'success',
+            showCancelButton: true,
+            confirmButtonColor: 'green',
+            confirmButtonText: 'Go to Validate',
+            cancelButtonText: 'Import new RFID',
+            closeOnConfirm: true,
+
+          },
+          function(isConfirm) {
+            //self.ui.progress.hide();
+            if (isConfirm) {
+              Backbone.history.navigate('validate/rfid',{trigger: true});
+            } else {
+              //Backbone.history.navigate('importFile',{trigger: true});
+              _this.options.parent.currentStepIndex = 1;
+              var index = _this.options.parent.currentStepIndex;
+              _this.options.parent.displayStep(index);
+            }
+          }
+        );
+
+      }).fail(function(data) {
+        $('#btnNext').attr('disabled');
+        if (data.status == 520 || data.status == 510) {
+          var type = 'warning';
+          var title = 'Warning !'
+          //self.ui.progressBar.css({'background-color': 'rgb(218, 146, 15)'})
+          var color = 'rgb(218, 146, 15)';
+        } else {
+          var type = 'error';
+          var title = 'Error !'
+          //self.ui.progressBar.css({'background-color': 'rgb(147, 14, 14)'})
+          var color = 'rgb(147, 14, 14)';
+          //_this.clearFile();
+
+        }
+        if (data.responseText.length > 250) {
+          data.responseText = 'An error occured, please contact an admninstrator';
+        }
+        swal(
+          {
+            title: title,
+            text: data.responseText,
+            type: type,
+            showCancelButton: false,
+            confirmButtonColor: color,
+            confirmButtonText: 'OK',
+            closeOnConfirm: true,
+          },
+          function(isConfirm) {
+          }
+        );
+      });
     },
 
     validate: function() {
