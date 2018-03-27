@@ -6,29 +6,10 @@ from PIL import Image
 import re
 import pandas as pd
 
-IMG_ROOT_PATH = 'D:\Data\CameraTrap\PP001_1997-05-20_0000-00-00_97W29'
-IMG_File = 'D:/Data/CameraTrap/PP001_1997-05-20_0000-00-00_97W29/13N07M28.JPG'
+IMG_File = 'C:/Users/jean-vitus/Desktop/PP163_09N02P/13N016D.JPG'
 pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files (x86)/Tesseract-OCR/tesseract'
-tessdata_dir_config = ' '
-photos = [
-    # 'IMG_0010.JPG',
-    # 'IMG_0038.JPG',
-    # 'IMG_0004.JPG',
-    # 'IMG_0005.JPG',
-    # 'MFDC0038.JPG',
-    # 'thresh.jpg',
-    # 'IMG_0086.JPG',
-    # 'MFDC0023.JPG',
-    # 'MFDC0470.JPG'
-    'MFDC0023.JPG',
-    'IMG_0086.JPG', 
-    'MFDC0470.JPG',
-    'IMG_0007.JPG',
-    'MFDC2875.JPG',
-    'IMG_0049.JPG',
-    'IMAG0099.JPG',
-    'thresh.png'
-]
+tessdata_dir_config = ''
+
 
 def getHsito(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -72,12 +53,14 @@ def cropImg(filename):
 def apply_ocr(img, **kwargs):
     # image = cv2.imread(filename)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.GaussianBlur(gray, (3, 3), 0)
-    # kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
-    # dilated = cv2.erode(gray, kernel, iterations=1)
+    # gray = cv2.GaussianBlur(gray, (3, 3), 0)
+    kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))    
+    gray = cv2.erode(gray, kernel, iterations=2)
+    # cv2.imshow('gray ', gray)
+    
     im = Image.fromarray(gray)
     text = pytesseract.image_to_string(
-        im, config=tessdata_dir_config)
+        im, lang='eng', config=tessdata_dir_config)
     return text
 
 
@@ -122,7 +105,7 @@ def canny(image, filename, max_value):
 
         r, c, z = image.shape
         
-        cv2.imshow('canny OP ' + filename, cv2.resize(image,(int(c/2),int(r/2))))
+        # cv2.imshow('canny OP ' + filename, cv2.resize(image,(int(c/2),int(r/2))))
     except:
         from traceback import  print_exc
         print_exc()
@@ -138,57 +121,86 @@ def parserHygro(text):
     matchHygro = None
     if match:
         try:
-            matchHygro = int(match[0])
+            matchHygro = float(match.group(0).replace('in','').replace('ian',''))
         except Exception as e:
-            matchHygro = match[0]
+            matchHygro = None
     return matchHygro
 
 def parserTemp(text):
     ''' param @text : string from OCR result
      retrieve only temperature and hygrometry '''
-    tempRegexp = '[0-9]{1,3}°?C'
-    match = re.search(tempRegexp, text)
+    tempRegexp = '[0-9]{1,3}°?[C-c-F-f]'
+    textt= text.replace(' ', '')
+    match = re.search(tempRegexp, textt)
     matchTemp = None
     if match:
         try:
-            matchTemp = int(match[0])
+            matchTemp = match.group(0)
+            matchTemp = matchTemp.replace('C','').replace('c','').replace('°','')
+            if 'f' in matchTemp.lower():
+                matchTemp = matchTemp.replace('F','')
+                matchTemp = (int(matchTemp)- 32)/1.8 
+            else:
+                matchTemp = float(matchTemp)
         except Exception as e:
-            matchTemp = match[0]
+            matchTemp = None
     return matchTemp
 
 def OCR_parser(filename):
     dictResult = {}
 
-    print('\n\n ***********************************')
-    print(filename)
+    # print('\n\n ***********************************')
+    # print(filename)
+    
     bottom_cropped, top_cropped = cropImg(filename)
     bot_value = getHsito(bottom_cropped)
     top_value = getHsito(top_cropped)
-
+    dictResult = {'temp': None , 'hygro': None}
     if top_value:
-        canny(top_cropped, 'top_cropped '+filename, top_value)
-        text = apply_ocr(top_cropped)
-        temp = parserTemp(text)
-        hygro = parserHygro(text)
+        # cv2.imshow('top', top_cropped)
         
-        dictResult = {'top': text.replace('\n','')}
-        if temp:
-            dictResult['temp'] = temp
-        if hygro:
-            dictResult['hygro'] = hygro
+        # canny(top_cropped, 'top_cropped '+filename, top_value)
+        text_top = apply_ocr(top_cropped)
+        temp_top = parserTemp(text_top)
+        hygro_top = parserHygro(text_top)
+        
+        # dictResult = {'top': text_top.replace('\n','')}
+        if temp_top is not None:
+            dictResult['temp'] = temp_top
+        if hygro_top is not None:
+            dictResult['hygro'] = hygro_top
 
     if bot_value:
-        canny(bottom_cropped, 'bottom_cropped '+filename, bot_value)
-        
+        # canny(bottom_cropped, 'bottom_cropped '+filename, bot_value)
+        # cv2.imshow('bot', bottom_cropped)
         text = apply_ocr(bottom_cropped)
         temp = parserTemp(text)
         hygro = parserHygro(text)
-        if not dictResult.get('filename', None):
-            dictResult = {'text':''}
-        dictResult['bot'] ='\n'+text.replace('\n','')
+        # if not dictResult.get('filename', None):
+            # dictResult = {'text':''}
+        # dictResult['bot'] ='\n'+text.replace('\n','')
 
-        if temp:
-            dictResult['temp'] = temp[0].replace('C','').replace('°','')
-        if hygro:
-            dictResult['hygro'] = hygro[0].replace('in','').replace('ian','')
+        if temp is not None:
+            dictResult['temp'] = temp
+        if hygro is not None:
+            dictResult['hygro'] = hygro
     return dictResult
+
+def simple_OCR(image_file):
+    image = cv2.imread(image_file)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    im = Image.fromarray(gray)
+    text = pytesseract.image_to_string(
+        im, config=tessdata_dir_config)
+    # print(text)
+    temp = parserTemp(text)
+    hygro = parserHygro(text)
+
+    return {'temp':temp, 'hygro':hygro}
+    
+# ocr_test = OCR_parser(IMG_File)
+# print(ocr_test)
+# ocr_tests = simple_OCR(IMG_File)
+# print(ocr_tests)
+# cv2.waitKey(0)
