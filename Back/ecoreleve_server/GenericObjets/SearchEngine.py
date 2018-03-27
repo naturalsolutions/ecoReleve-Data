@@ -51,6 +51,7 @@ class QueryEngine(object):
             self.model_table = model.__table__
 
         self.fk_list = {fk.parent.name: fk for fk in self.model_table.foreign_keys}
+        self.fk_join_list = []
 
     @property
     def pk_model(self):
@@ -71,8 +72,8 @@ class QueryEngine(object):
         initialize "SELECT FROM" statement
         @selectable corresponding to the columns you need in the SELECT statement
         '''
+        self.fk_join_list = []
         self.selectable = []
-
         if selectable:
             # self.selectable = []
             for column in selectable:
@@ -88,12 +89,14 @@ class QueryEngine(object):
                         self.selectable.append(true_column.label(column))
 
         join_table, computed_selectable = self._select_from()
+        join_table = self.extend_from(join_table)
+        join_table = self._from_foreign(join_table)
+        
         if not selectable:
             self.selectable.extend(computed_selectable)
         if not self.selectable:
             raise ColumnError('error on given columns ! ')
 
-        join_table = self.extend_from(join_table) 
         query = select(self.selectable).select_from(join_table)
         return query
 
@@ -102,10 +105,13 @@ class QueryEngine(object):
         initialize "SELECT COUNT(*) FROM" statement,
         @returning :: SQLAlchemy Query Object
         '''
+        self.selectable = []
+        self.fk_join_list = []
         from_table = self.extend_from(self.model)
         from_table = self._from_foreign(from_table)
         query = select([func.count()]).select_from(from_table)
-
+      
+        
         return query
 
     def _select_from(self):
@@ -115,7 +121,6 @@ class QueryEngine(object):
         '''
         join_table = self.model
         selectable = [self.model]
-        join_table = self._from_foreign(join_table)
 
         return join_table, selectable
 
@@ -129,8 +134,12 @@ class QueryEngine(object):
                     foreign_infos = self.get_fk_column_and_table(column)
                     fk_target_table = foreign_infos['fk_target_table']
 
+                    if fk_target_table in self.fk_join_list or fk_target_table == self.model_table:
+                        continue
                     join_table = outerjoin(join_table, fk_target_table,
                                             self.model_table.c[foreign_infos['fk_column_name']] == fk_target_table.c[foreign_infos['fk_column_name_in_target']])
+                    self.fk_join_list.append(fk_target_table)
+
         return join_table
 
     def extend_from(self, _from):
@@ -172,7 +181,6 @@ class QueryEngine(object):
         query = self._order_by(query, order_by)
         query = self._limit(query, limit)
         query = self._offset(query, offset)
-        self.query = query
         return query
 
     def apply_filters(self, query, filters):
@@ -200,6 +208,9 @@ class QueryEngine(object):
         if column is None:
             return query
 
+        if self.is_foreign_reference(column):
+            # TODO Filter on foreign Reference with sub query exists ? 
+            print('filters on foreign ref : ',criteria['Column'])
         query = query.where(
                 eval_.eval_binary_expr(
                     column, criteria['Operator'], criteria['Value']
