@@ -28,7 +28,8 @@ from ..Models import (
     GPX,
     Gsm,
     GsmEngineering,
-    Rfid
+    Rfid,
+    FieldworkArea
 )
 from ..utils import Eval
 from collections import OrderedDict
@@ -47,11 +48,28 @@ class StationList(ListObjectWithDynProp):
     def __init__(self, frontModule, typeObj=None, startDate=None,
                  history=False, historyView=None):
         super().__init__(Station, frontModule, startDate)
+    
+    def GetJoinTable(self, searchInfo):
+
+        joinTable = super().GetJoinTable(searchInfo)
+        joinTable = outerjoin(joinTable, FieldworkArea, Station.FK_FieldworkArea == FieldworkArea.ID)
+
+        self.selectable.append(FieldworkArea.Name.label('FieldworkArea_Name'))
+        self.selectable.append(FieldworkArea.fullpath.label('FieldworkArea_fullpath'))
+        return joinTable
 
     def WhereInJoinTable(self, query, criteriaObj):
         ''' Override parent function to include management of Observation/Protocols and fieldWorkers '''
+        
         query = super().WhereInJoinTable(query, criteriaObj)
         curProp = criteriaObj['Column']
+
+        if curProp == 'FieldworkArea_Name':
+            query = query.where(eval_.eval_binary_expr(FieldworkArea.fullpath,
+                                criteriaObj['Operator'],
+                                criteriaObj['Value'])
+                                )
+
 
         if curProp == 'FK_ProtocoleType':
             o = aliased(Observation)
@@ -132,6 +150,9 @@ class StationList(ListObjectWithDynProp):
                 cast(st.creationDate, DATE) > cast(Station.creationDate, DATE))
             query = query.where(~exists(subSelect2))
 
+
+        
+
         return query
 
     def GetFlatDataList(self, searchInfo=None, getFieldWorkers=True):
@@ -150,7 +171,7 @@ class StationList(ListObjectWithDynProp):
         query = super().countQuery(criteria)
         for obj in criteria:
             if obj['Column'] in ['FK_ProtocoleType', 'FK_FieldWorker',
-                                 'LastImported', 'FK_Individual', 'Species']:
+                                 'LastImported', 'FK_Individual', 'Species', 'FieldworkArea_Name']:
                 query = self.WhereInJoinTable(query, obj)
         return query
 
