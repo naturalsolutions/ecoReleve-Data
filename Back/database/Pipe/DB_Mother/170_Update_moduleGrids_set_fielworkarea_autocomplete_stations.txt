@@ -19,3 +19,8 @@ update ModuleGrids
   Status = NULL,
   ColumnParams = NULL
   WHERE Label = 'FieldworkArea' AND Module_ID = 3
+
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('170_Update_moduleGrids_set_fielworkarea_autocomplete_stations',GETDATE(),(SELECT db_name()))
+
