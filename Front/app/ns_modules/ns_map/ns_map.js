@@ -141,6 +141,7 @@ define([
         position:'topright'
       }).addTo(this.map);
 
+      L.control.scale().addTo(this.map);
       this.google.defered  = this.google();
       //once google api ready, (fetched it once only)
       $.when(this.google.defered).always(function(){
