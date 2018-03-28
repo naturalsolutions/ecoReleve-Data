@@ -1,39 +1,27 @@
 from pyramid.view import view_config
-from ..Models import (
-    Observation,
-    FieldActivity_ProtocoleType,
-    fieldActivity,
-    ErrorAvailable,
-    sendLog
-)
 from sqlalchemy import select, and_, join
 from traceback import print_exc
-from ..controllers.security import RootCore
-from . import DynamicObjectView, DynamicObjectCollectionView
+
+from ecoreleve_server.core import RootCore, DynamicObjectResource, DynamicObjectCollectionResource
+from .observation_model import Observation
+from ..permissions import context_permissions
 
 
-class ObservationView(DynamicObjectView):
+
+class ObservationResource(DynamicObjectResource):
 
     model = Observation
 
-    def __getitem__(self, ref):
-        if ref in self.actions:
-            self.retrieve = self.actions.get(ref)
-            return self
-        return self
+    __acl__ = context_permissions['observations']
 
     def update(self, json_body=None):
 
-        # if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
-        #     self.request.response.status_code = 409
-        #     return {'protected' : True}
         if not json_body:
             data = self.request.json_body
         else:
             data = json_body
 
         curObs = self.objectDB
-        # curObs.LoadNowValues()
         listOfSubProtocols = []
         responseBody = {'id': curObs.ID}
 
@@ -55,10 +43,6 @@ class ObservationView(DynamicObjectView):
 
     def delete(self):
         if self.objectDB:
-            # if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
-            #     self.request.response.status_code = 409
-            #     return {'protected' : True}
-            # else:
             id_ = self.objectDB.ID
             DynamicObjectView.delete(self)
         else:
@@ -67,23 +51,25 @@ class ObservationView(DynamicObjectView):
         return response
 
 
-class ObservationsView(DynamicObjectCollectionView):
+class ObservationsResource(DynamicObjectCollectionResource):
 
     Collection = None
-    item = ObservationView
+    item = ObservationResource
     moduleFormName = 'ObservationForm'
     moduleGridName = 'ObservationFilter'
 
+    __acl__ = context_permissions['observations']
+
     def __init__(self, ref, parent):
-        DynamicObjectCollectionView.__init__(self, ref, parent)
-        self.POSTactions = {'batch': self.batch}
+        DynamicObjectCollectionResource.__init__(self, ref, parent)
+        # self.POSTactions = {'batch': self.batch}
         self.parent = parent
         if 'objectType' in self.request.params:
             self.typeObj = int(self.request.params['objectType'])
 
-    def __getitem__(self, ref):
-        self.create = self.POSTactions.get(ref)
-        return DynamicObjectCollectionView.__getitem__(self, ref)
+    # def __getitem__(self, ref):
+    #     self.create = self.POSTactions.get(ref)
+    #     return DynamicObjectCollectionResource.__getitem__(self, ref)
 
     def retrieve(self):
         if self.parent.__class__.__name__ == 'StationView':
@@ -278,4 +264,4 @@ class ObservationsView(DynamicObjectCollectionView):
         return res
 
 
-RootCore.listChildren.append(('protocols', ObservationsView))
+RootCore.children.append(('protocols', ObservationsResource))

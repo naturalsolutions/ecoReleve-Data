@@ -1,4 +1,3 @@
-from ..Models import Base, dbConfig
 from sqlalchemy import (
     Column,
     DateTime,
@@ -17,8 +16,9 @@ from sqlalchemy import (
     event)
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-# from ..GenericObjets.DataBaseObjects import ConfiguredDbObjectMapped, DbObject
-from ..GenericObjets.OrmModelsMixin import HasStaticProperties
+
+from ecoreleve_server.core.base_model import HasStaticProperties
+from ecoreleve_server.core import Base, dbConfig
 
 sensor_schema = dbConfig['sensor_schema']
 dialect = dbConfig['dialect']

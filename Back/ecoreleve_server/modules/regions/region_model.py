@@ -1,49 +1,11 @@
-from ..Models import Base
 from sqlalchemy import Column, Integer, Sequence, String
-# from geoalchemy.geometry import Geometry, GeometryColumn, func
-from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.ext.compiler import compiles
 from sqlalchemy import func
-from sqlalchemy.types import UserDefinedType
 from shapely.wkt import loads
-from geojson import Feature, FeatureCollection, dumps
+from geojson import Feature
 
-
-class GeoWKT(GenericFunction):
-    type = String
-    package = "geo"
-    name = "STAsText"
-    identifier = "wkt"
-
-
-@compiles(GeoWKT, 'mssql')
-def compile(element, compiler, **kw):
-    return "%s.STAsText()" % compiler.process(element.clauses)
-
-
-class WKTSpatialElement(GenericFunction):
-    # def __init__(self,geoType = 'POLYGON',srid = 4326)
-    type = String
-    package = "geo"
-    name = "geometry::STGeomFromText"
-    identifier = "wkt_from_text"
-
-
-@compiles(WKTSpatialElement, 'mssql')
-def compile(element, compiler, **kw):
-    return "geometry::STGeomFromText(%s)" % compiler.process(element.clauses)
-
-
-class Geometry(UserDefinedType):
-    def get_col_spec(self):
-        return "GEOMETRY"
-
-    def bind_expression(self, bindvalue):
-        return func.geo.wkt_from_text(bindvalue, type_=self)
-
-    def column_expression(self, col):
-        return func.geo.wkt(col, type_=self)
+from ..Models import Base
+from ..core.base_types import Geometry
 
 
 class GeomaticLayer(Base):

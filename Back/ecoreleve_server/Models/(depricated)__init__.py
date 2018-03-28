@@ -141,21 +141,21 @@ def db(request):
 
 
 # from ..GenericObjets.ObjectWithDynProp import LinkedTables
-from ..GenericObjets.FrontModules import *
-from .CustomTypes import *
-from .Protocoles import *
-from .User import User
-from .Station import *
-from .Region import *
+# from ..GenericObjets.FrontModules import *
+# from .CustomTypes import *
+# from .Protocoles import *
+# from .User import User
+# from .Station import *
+# from .Region import *
 from .FieldActivity import *
-from .Individual import *
-from .Sensor import *
-from .MonitoredSite import *
-from .Equipment import *
-from .Import import *
-from .SensorData import *
-from .List import *
-from .Log import sendLog
+# from .Individual import *
+# from .Sensor import *
+# from .MonitoredSite import *
+# from .Equipment import *
+# from .Import import *
+# from .SensorData import *
+# from .List import *
+# from .Log import sendLog
 
 # from sqlalchemy.inspection import inspect
 

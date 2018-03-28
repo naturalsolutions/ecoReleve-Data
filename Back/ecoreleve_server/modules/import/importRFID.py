@@ -1,16 +1,16 @@
 import re
+import itertools
+import pandas as pd
 from datetime import datetime
+from traceback import print_exc
+from pyramid import threadlocal
 from sqlalchemy import select, and_
 from sqlalchemy.exc import IntegrityError
-from ..Models import (
-    Rfid,
-    dbConfig,
-    Import
-)
-from traceback import print_exc
-import pandas as pd
-from pyramid import threadlocal
-import itertools
+
+
+from ecoreleve_server.core import dbConfig
+from ..sensors.sensor_data import Rfid
+from .import_model import Import
 
 
 def uploadFileRFID(request):

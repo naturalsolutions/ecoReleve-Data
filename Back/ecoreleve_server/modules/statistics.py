@@ -1,4 +1,9 @@
 from collections import OrderedDict
+import datetime
+import operator
+import transaction
+from operator import itemgetter
+from pyramid import threadlocal
 from pyramid.view import view_config
 from sqlalchemy import (
     func,
@@ -7,20 +12,16 @@ from sqlalchemy import (
     select,
     and_,
 )
-import datetime
-import operator
-from ..Models import (
-    Base,
-    ArgosGps,
-    Gsm,
-    Individual_Location,
-    Station,
-    Individual,
-    Rfid,
-    graphDataDate)
-from operator import itemgetter
-import transaction
-from pyramid import threadlocal
+
+from ecoreleve_server.core import Base
+from .individuals import Individual, Individual_Location
+from .stations import Station
+from .sensors.sensor_data import Rfid, Gsm, ArgosGps
+
+pendingSensorData = []
+indivLocationData = []
+stationData = []
+graphDataDate = {'indivLocationData': None, 'pendingSensorData': None}
 
 
 @view_config(route_name='weekData', renderer='json')

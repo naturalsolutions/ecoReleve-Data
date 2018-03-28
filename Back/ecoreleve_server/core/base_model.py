@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import (Column,
                         ForeignKey,
                         String,
@@ -19,21 +21,22 @@ from sqlalchemy import (Column,
                         bindparam,
                         insert,
                         desc)
-from sqlalchemy.orm import relationship, aliased, class_mapper, mapper
+from sqlalchemy.orm import relationship, aliased, class_mapper
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declared_attr
-from ..Models import dbConfig, BusinessRules
 from sqlalchemy import inspect, orm
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement
-from ..utils.parseValue import parser, formatValue, isEqual
-from datetime import datetime
-from .DataBaseObjects import ConfiguredDbObjectMapped
 from sqlalchemy.orm.exc import *
 from sqlalchemy_utils import get_hybrid_properties
 from pyramid import threadlocal
-from sqlalchemy.orm.util import has_identity
+
+from . import dbConfig
+from .configuration_model import BusinessRules, ConfiguredObjectResource
+# from ..GenericObjets.DataBaseObjects import ConfiguredObjectResource
+from ecoreleve_server.utils.parseValue import parser, formatValue, isEqual
+
 
 ANALOG_DYNPROP_TYPES = {'String': 'ValueString',
                         'Float': 'ValueFloat',
@@ -256,7 +259,7 @@ class EventRuler(object):
                     result = rule.execute(entityDTO)
 
 
-class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
+class HasStaticProperties(ConfiguredObjectResource, EventRuler, ORMUtils):
     '''
     TODO remove Configuration(ConfiguredDbObjectMapped) dependency
     --> Move on BaseView (DynamicObjectCollectionView)
@@ -269,10 +272,13 @@ class HasStaticProperties(ConfiguredDbObjectMapped, EventRuler, ORMUtils):
 
     def __init__(self, *args, **kwargs):
         self.__values__ = {}
-        ConfiguredDbObjectMapped.__init__(self)
+        ConfiguredObjectResource.__init__(self)
 
+
+        # remove this ???? session attribution from current request is not recommanded
         self.session = kwargs.get('session', None) or threadlocal.get_current_request(
         ).dbsession if threadlocal.get_current_request() else None
+        #### 
 
         for param, value in kwargs.items():
             if hasattr(self, param):

@@ -1,4 +1,4 @@
-from ..Models import Base
+
 from sqlalchemy import (
     Column,
     DateTime,
@@ -10,7 +10,8 @@ from sqlalchemy import (
     orm,
     func)
 from sqlalchemy.orm import relationship
-from ..GenericObjets.OrmModelsMixin import HasDynamicProperties, GenericType
+
+from ecoreleve_server.core import Base, HasDynamicProperties, GenericType
 
 
 class Sensor (HasDynamicProperties, Base):

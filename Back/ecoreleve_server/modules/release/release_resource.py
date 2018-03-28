@@ -19,6 +19,7 @@ from . import CustomView
 from ..utils.parseValue import isNumeric, formatThesaurus
 import operator
 from ..Models.Equipment import set_equipment
+from ..permissions import context_permissions
 
 ProtocoleType = Observation.TypeClass
 
@@ -26,6 +27,7 @@ ProtocoleType = Observation.TypeClass
 class ReleaseIndividualsView(IndividualsView):
 
     moduleGridName = 'IndivReleaseGrid'
+    __acl__ = context_permissions['release']
 
     def __init__(self, ref, parent):
         IndividualsView.__init__(self, ref, parent)

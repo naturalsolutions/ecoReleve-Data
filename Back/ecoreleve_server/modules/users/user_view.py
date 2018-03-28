@@ -1,7 +1,9 @@
 from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
 from sqlalchemy import select
-from ..Models import User, groupfinder
+
+from .user_model import User
+from ecoreleve_server.core.security import groupfinder
 
 
 @view_config(

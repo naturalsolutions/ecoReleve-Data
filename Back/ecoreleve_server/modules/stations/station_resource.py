@@ -1,56 +1,40 @@
-from ..Models import (
-    Station as StationDB,
-    Station_FieldWorker,
-    StationList,
-    MonitoredSitePosition,
-    MonitoredSite,
-    fieldActivity,
-    User,
-    Region
-)
 import json
 import itertools
 from datetime import datetime
 import pandas as pd
 from sqlalchemy import select, and_, join
 from sqlalchemy.exc import IntegrityError
-from ..controllers.security import RootCore
-from . import DynamicObjectView, DynamicObjectCollectionView, context_permissions
-from .protocols import ObservationsView
-from ..utils.parseValue import parser
+
+from ecoreleve_server.core import RootCore
+from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicObjectCollectionResource
+from .station_model import Station, Station_FieldWorker
+from ..monitored_sites.monitored_site_model import MonitoredSite, MonitoredSitePosition
+from ..users.user_model import User
+from ..observations.observation_resource import ObservationsResource
+from .station_collection import StationCollection
+from ..permissions import context_permissions
 
 
-class StationView(DynamicObjectView):
+class StationResource(DynamicObjectResource):
 
-    model = StationDB
-
-    def __init__(self, ref, parent):
-        DynamicObjectView.__init__(self, ref, parent)
-        self.add_child('observations', ObservationsView)
-
-    def __getitem__(self, ref):
-        if ref in self.actions:
-            self.retrieve = self.actions.get(ref)
-            return self
-        return self.get(ref)
-
-    def getObs(self, ref):
-        return ObservationsView(ref, self)
+    model = Station
+    children = [('observations', ObservationsResource)]
+    __acl__ = context_permissions['stations']
 
 
-class StationsView(DynamicObjectCollectionView):
+class StationsResource(DynamicObjectCollectionResource):
 
-    Collection = StationList
-    item = StationView
+    Collection = StationCollection
+    item = StationResource
     moduleFormName = 'StationForm'
     moduleGridName = 'StationGrid'
 
+    children = [('{int}', StationResource)]
+
+    __acl__ = context_permissions['stations']
+
     def __init__(self, ref, parent):
-        DynamicObjectCollectionView.__init__(self, ref, parent)
-        self.actions = {'updateSiteLocation': self.updateMonitoredSite,
-                        'importGPX': self.getFormImportGPX,
-                        'fieldActivity': self.getFieldActivityList,
-                        }
+        DynamicObjectCollectionResource.__init__(self, ref, parent)
         self.__acl__ = context_permissions[ref]
 
     def updateMonitoredSite(self):
@@ -186,26 +170,6 @@ class StationsView(DynamicObjectCollectionView):
                 'exceed': exceed}
         return data
 
-    # def insert(self):
-    #     session = self.request.dbsession
-    #     data = {}
-    #     for items, value in self.request.json_body.items():
-    #         data[items] = value
-
-    #     newSta = StationDB(
-    #         FK_StationType=data['FK_StationType'],
-    #         creator=self.request.authenticated_userid['iss'])
-    #     newSta.StationType = session.query(StationType).filter(
-    #         StationType.ID == data['FK_StationType']).first()
-    #     newSta.init_on_load()
-
-    #     newSta.updateFromJSON(data)
-    #     session.add(newSta)
-    #     session.flush()
-    #     msg = {'ID': newSta.ID}
-
-    #     return msg
-
     def insertMany(self):
         session = self.request.dbsession
         data = self.request.json_body
@@ -320,4 +284,4 @@ class StationsView(DynamicObjectCollectionView):
         return response
 
 
-RootCore.listChildren.append(('stations', StationsView))
+RootCore.children.append(('stations', StationsResource))

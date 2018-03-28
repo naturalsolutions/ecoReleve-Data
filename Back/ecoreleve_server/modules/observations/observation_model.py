@@ -1,4 +1,3 @@
-from ..Models import Base
 from sqlalchemy import (
     Column,
     DateTime,
@@ -16,10 +15,11 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime, timedelta
 from sqlalchemy.ext.hybrid import hybrid_property
-from ..utils.parseValue import isNumeric
 from sqlalchemy.ext.declarative import declared_attr
-from ..GenericObjets.OrmModelsMixin import HasDynamicProperties, GenericType
-from ..utils.parseValue import formatValue
+
+from ecoreleve_server.core import Base, HasDynamicProperties, GenericType
+from ecoreleve_server.utils.parseValue import isNumeric
+from ecoreleve_server.utils.parseValue import formatValue
 
 
 class Observation(HasDynamicProperties, Base):

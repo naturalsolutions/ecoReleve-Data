@@ -12,9 +12,10 @@ from sqlalchemy import (
     UniqueConstraint,
     ForeignKey,
 )
-from ..Models import Base, dbConfig
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+
+from ecoreleve_server.core import Base, dbConfig
 
 
 sensor_schema = dbConfig['sensor_schema']

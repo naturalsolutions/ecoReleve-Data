@@ -1,4 +1,3 @@
-from ..Models import Base, Observation, Individual, Sensor
 from sqlalchemy import (
     Column,
     DateTime,
@@ -18,6 +17,11 @@ from pyramid import threadlocal
 from datetime import timedelta
 from sqlalchemy.orm import relationship
 
+from ecoreleve_server.core import Base
+from .observation_model import Observation
+from ..individuals import Individual
+from ..sensors import Sensor
+
 
 class Equipment(Base):
     __tablename__ = 'Equipment'
@@ -32,7 +36,6 @@ class Equipment(Base):
 
     Individuals = relationship('Individual')
     MonitoredSites = relationship('MonitoredSite')
-
 
 
 def checkEquip(fk_sensor, equipDate, fk_indiv=None, fk_site=None):

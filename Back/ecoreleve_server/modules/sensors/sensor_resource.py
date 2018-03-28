@@ -1,116 +1,28 @@
-from ..Models import (
-    Sensor,
-    MonitoredSite,
-    Base,
-    Equipment
-    # SensorList
-)
-from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, Table
-from sqlalchemy.orm import aliased, exc
+
 from collections import OrderedDict
 from sqlalchemy.exc import IntegrityError
-from ..controllers.security import RootCore, context_permissions
-from . import DynamicObjectView, DynamicObjectCollectionView, DynamicObjectValue, DynamicObjectValues
-from ..GenericObjets.SearchEngine import Query_engine
-from ..utils.datetime import parse
+from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, Table
+from sqlalchemy.orm import aliased, exc
 
+from ecoreleve_server.core import RootCore, Base
+from ecoreleve_server.core.base_resource import *
+from ecoreleve_server.utils.datetime import parse
+from .sensor_model import Sensor
+from ..monitored_sites import MonitoredSite
+from ..observations import Equipment
+from ..permissions import context_permissions
+
+from .sensor_history import SensorValuesResource
+from .sensor_collection import SensorCollection
 
 SensorDynPropValue = Sensor.DynamicValuesClass
 
-@Query_engine(Sensor)
-class SensorList():
 
-    def extend_from(self, _from):
-        curEquipmentTable = Base.metadata.tables['CurrentlySensorEquiped']
-        MonitoredSiteTable = Base.metadata.tables['MonitoredSite']
-        table_join = outerjoin(_from,
-                        curEquipmentTable,
-                        curEquipmentTable.c['FK_Sensor'] == Sensor.ID)
-        
-        table_join = outerjoin(
-            table_join,
-            MonitoredSite,
-            MonitoredSiteTable.c['ID'] == curEquipmentTable.c[
-                'FK_MonitoredSite'])
-        
-        self.selectable.append(MonitoredSiteTable.c[
-                               'Name'].label('FK_MonitoredSiteName'))
-        self.selectable.append(curEquipmentTable.c[
-                               'FK_Individual'].label('FK_Individual'))
-        return table_join
-
-@Query_engine.add_filter(SensorList, 'toto')
-def toto(self, query, criteria):
-    pass
-
-@Query_engine.add_filter(SensorList, 'availableOn')
-def available_filter(self, query, criteria):
-    date = criteria['Value']
-    try:
-        date = parse(date.replace(' ', ''))
-    except:
-        pass
-    e = aliased(Equipment)
-    e2 = aliased(Equipment)
-    e3 = aliased(Equipment)
-
-    subQueryEquip = select([e2]).where(
-        and_(e.FK_Sensor == e2.FK_Sensor,
-                and_(e.StartDate < e2.StartDate, e2.StartDate <= date)))
-
-    querySensor = select([e]).where(
-        and_(e.StartDate <= date,
-                and_(e.Deploy == 0,
-                    and_(Sensor.ID == e.FK_Sensor,
-                        not_(exists(subQueryEquip)))
-                    )
-                ))
-
-    subQueryNotEquip = select([e3]).where(
-        and_(Sensor.ID == e3.FK_Sensor,
-                e3.StartDate < date))
-
-    if criteria['Operator'].lower() != 'is not':
-        query = query.where(or_(exists(querySensor),
-                                not_(exists(subQueryNotEquip))))
-    else:
-        query = query.where(or_(not_(exists(querySensor)),
-                                not_(exists(subQueryNotEquip))))
-    return query
-
-
-class SensorValueView(DynamicObjectValue):
-    model = SensorDynPropValue
-    item = None
-
-    def retrieve(self):
-        pass
-
-
-class SensorValuesView(DynamicObjectValues):
-    model = SensorDynPropValue
-    item = SensorValueView
-
-
-class SensorView(DynamicObjectView):
+class SensorResource(DynamicObjectResource):
 
     model = Sensor
-
-    def __init__(self, ref, parent):
-        DynamicObjectView.__init__(self, ref, parent)
-        self.actions = {'equipment': self.getEquipment,
-                        'locations': self.getLocations}
-        self.add_child('history', SensorValuesView)
-        print('test')
-
-    def __getitem__(self, ref):
-        if ref in self.actions:
-            self.retrieve = self.actions.get(ref)
-            return self
-        return self.get(ref)
-
-    def getLocations(self):
-        return 'no locations available'
+    children = [('history', SensorValuesResource)]
+    __acl__ = context_permissions['sensors']
 
     def getEquipment(self):
         _id = self.objectDB.ID
@@ -142,24 +54,24 @@ class SensorView(DynamicObjectView):
         return response
 
 
-class SensorsView(DynamicObjectCollectionView):
+class SensorsResource(DynamicObjectCollectionResource):
 
-    Collection = SensorList
-    item = SensorView
+    Collection = SensorCollection
+    item = SensorResource
     moduleFormName = 'SensorForm'
     moduleGridName = 'SensorFilter'
 
-    def __init__(self, ref, parent):
-        DynamicObjectCollectionView.__init__(self, ref, parent)
-        self.actions = {'getUnicIdentifier': self.getUnicIdentifier}
-        self.__acl__ = context_permissions[ref]
+    # def __init__(self, ref, parent):
+    #     DynamicObjectCollectionView.__init__(self, ref, parent)
+    #     self.actions = {'getUnicIdentifier': self.getUnicIdentifier}
+    #     self.__acl__ = context_permissions[ref]
 
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)
         conf_grid = self.getGrid()
         cols = list(map(lambda x: x['field'].replace('.','@'),conf_grid))
 
-        self.collection = SensorList(session = self.session)
+        self.collection = SensorCollection(session = self.session)
         dataResult = self.collection.search(selectable=cols,filters=params.get('criteria', []), offset=params.get('offset'), limit=params.get('per_page'), order_by=params.get('order_by'))
         
         # table = Base.metadata.tables['VArgosData_With_EquipIndiv']
@@ -192,4 +104,4 @@ class SensorsView(DynamicObjectCollectionView):
         return response
 
 
-RootCore.listChildren.append(('sensors', SensorsView))
+RootCore.children.append(('sensors', SensorsResource))

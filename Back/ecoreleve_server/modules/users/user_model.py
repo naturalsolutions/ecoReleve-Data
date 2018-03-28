@@ -8,12 +8,12 @@ from sqlalchemy import (
     func,
     select
 )
-
 from sqlalchemy.ext.hybrid import hybrid_property
-from ..Models import Base, dbConfig
 from pyramid import threadlocal
 
-db_dialect = dbConfig['dialect']
+from ecoreleve_server.core import Base
+
+# db_dialect = dbConfig['dialect']
 
 
 class User(Base):
@@ -27,16 +27,16 @@ class User(Base):
     Language = Column(String(2))
     ModificationDate = Column(DateTime, nullable=False,
                               server_default=func.now())
-    if db_dialect == 'mssql':
-        __table_args__ = (
-            Index('idx_Tuser_lastname_firstname', Lastname, Firstname,
-                  mssql_include=[id]), {'implicit_returning': False}
-        )
-    else:
-        __table_args__ = (
-            Index('idx_Tuser_lastname_firstname', Lastname,
-                  Firstname), {'implicit_returning': False}
-        )
+    # if db_dialect == 'mssql':
+    __table_args__ = (
+        Index('idx_Tuser_lastname_firstname', Lastname, Firstname,
+                mssql_include=[id]), {'implicit_returning': False}
+    )
+    # else:
+    #     __table_args__ = (
+    #         Index('idx_Tuser_lastname_firstname', Lastname,
+    #               Firstname), {'implicit_returning': False}
+    #     )
 
     @hybrid_property
     def fullname(self):

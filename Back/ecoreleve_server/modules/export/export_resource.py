@@ -11,6 +11,8 @@ from . import CustomView
 from ..controllers.security import RootCore
 from ..GenericObjets.SearchEngine import QueryEngine
 
+from ..permissions import context_permissions
+
 
 # TOODO Replace Generator by QueryEngine to Search in views
 

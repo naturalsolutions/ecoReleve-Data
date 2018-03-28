@@ -1,38 +1,43 @@
-from ..Models import (
-    Station,
-    MonitoredSite,
-    Sensor,
-    Base,
-    fieldActivity,
-    MonitoredSiteList
-)
-from ..GenericObjets import CollectionEngine
+# from ..Models import (
+#     Station,
+#     MonitoredSite,
+#     Sensor,
+#     Base,
+#     fieldActivity,
+#     MonitoredSiteList
+# )
 import json
 from sqlalchemy import select, desc, join
 from sqlalchemy.exc import IntegrityError
 from collections import OrderedDict
-from ..controllers.security import RootCore, context_permissions
-from . import DynamicObjectView, DynamicObjectCollectionView
+
+from ecoreleve_server.core import RootCore
+from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicObjectCollectionResource
+from . import MonitoredSite
+from ..sensors import Sensor
+from ..permissions import context_permissions
+
 
 SensorType = Sensor.TypeClass
 
-class MonitoredSiteView(DynamicObjectView):
+
+class MonitoredSiteResource(DynamicObjectResource):
 
     model = MonitoredSite
 
-    def __init__(self, ref, parent):
-        DynamicObjectView.__init__(self, ref, parent)
-        self.actions = {'history': self.history,
-                        'equipment': self.getEquipment,
-                        'stations': self.getStations,
-                        'getFields': self.getGrid,
-                        'history': self.history}
+    # def __init__(self, ref, parent):
+    #     DynamicObjectView.__init__(self, ref, parent)
+        # self.actions = {'history': self.history,
+        #                 'equipment': self.getEquipment,
+        #                 'stations': self.getStations,
+        #                 'getFields': self.getGrid,
+        #                 'history': self.history}
 
-    def __getitem__(self, ref):
-        if ref in self.actions:
-            self.retrieve = self.actions.get(ref)
-            return self
-        return self
+    # def __getitem__(self, ref):
+    #     if ref in self.actions:
+    #         self.retrieve = self.actions.get(ref)
+    #         return self
+    #     return self
 
     def update(self):
         try:
@@ -132,23 +137,24 @@ class MonitoredSiteView(DynamicObjectView):
         return response
 
 
-class MonitoredSitesView(DynamicObjectCollectionView):
+class MonitoredSitesResource(DynamicObjectCollectionResource):
 
-    Collection = MonitoredSiteList
-    item = MonitoredSiteView
+    Collection = None
+    item = MonitoredSiteResource
     moduleFormName = 'MonitoredSiteForm'
     moduleGridName = 'MonitoredSiteGrid'
+    __acl__ = context_permissions['monitoredSites']
 
     def __init__(self, ref, parent):
-        DynamicObjectCollectionView.__init__(self, ref, parent)
-        self.__acl__ = context_permissions[ref]
+        DynamicObjectCollectionResource.__init__(self, ref, parent)
+        # self.__acl__ = context_permissions[ref]
 
         if not self.typeObj:
             self.typeObj = 1
 
     def insert(self):
         try:
-            response = DynamicObjectCollectionView.insert(self)
+            response = DynamicObjectCollectionResource.insert(self)
         except IntegrityError as e:
             self.session.rollback()
             self.request.response.status_code = 520
@@ -158,4 +164,4 @@ class MonitoredSitesView(DynamicObjectCollectionView):
         return response
 
 
-RootCore.listChildren.append(('monitoredSites', MonitoredSitesView))
+RootCore.children.append(('monitoredSites', MonitoredSitesResource))

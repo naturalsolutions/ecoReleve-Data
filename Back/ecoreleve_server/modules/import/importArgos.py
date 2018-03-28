@@ -11,9 +11,11 @@ from time import sleep
 import subprocess
 import psutil
 from datetime import datetime
-from ..Models import ArgosGps, ArgosEngineering, dbConfig, Import
 import itertools
 from traceback import print_exc
+
+from ..sensors.sensor_data import ArgosGps, ArgosEngineering
+from .import_model import Import
 
 
 def uploadFileArgos(request):

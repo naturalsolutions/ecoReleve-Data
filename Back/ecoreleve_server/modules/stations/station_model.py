@@ -1,4 +1,3 @@
-from ..Models import Base
 from sqlalchemy import (
     Column,
     DateTime,
@@ -17,10 +16,13 @@ from sqlalchemy import (
     event)
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
-from ..GenericObjets.OrmModelsMixin import HasDynamicProperties
 from traceback import print_exc
 from datetime import datetime
-from ..utils.parseValue import dateParser
+
+
+from ecoreleve_server.core import Base
+from ecoreleve_server.core.base_model import HasDynamicProperties
+from ecoreleve_server.utils.parseValue import dateParser
 
 
 class Station(HasDynamicProperties, Base):

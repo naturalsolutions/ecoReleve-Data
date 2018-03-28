@@ -1,10 +1,13 @@
 from sqlalchemy import select
-from ..Models import Gsm, GsmEngineering, dbConfig, Import
 from traceback import print_exc
 import pandas as pd
 import re
 import datetime
 import itertools
+
+from ecoreleve_server.core import dbConfig
+from ..sensors.sensor_data import Gsm, GsmEngineering
+from .import_model import Import
 
 
 def uploadFilesGSM(request):
@@ -128,7 +131,7 @@ def insert_GPS(platform, csv_data, session, importObj):
     # data_to_insert['DateTime'] = data_to_insert.index
     # Write into the database
 
-    # Build block insert statement and returning ID of new created station
+    # Build block insert statement and returning ID of new created 
     if len(data_to_insert) != 0:
         # stmt = Gsm.__table__.insert().values(data_to_insert)
         # result = DBSession.execute(stmt)

@@ -1,4 +1,3 @@
-from ..Models import Base
 from sqlalchemy import (Column,
                         DateTime,
                         ForeignKey,
@@ -19,9 +18,11 @@ from sqlalchemy import (Column,
 
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
-from ..Models import IntegerDateTime
-from ..GenericObjets.OrmModelsMixin import HasDynamicProperties
 from sqlalchemy.ext.associationproxy import association_proxy
+
+from ecoreleve_server.core import Base
+from ecoreleve_server.core.base_model import HasDynamicProperties
+from ecoreleve_server.core.base_types import IntegerDateTime
 
 
 class ErrorCheckIndividualCodes(Exception):

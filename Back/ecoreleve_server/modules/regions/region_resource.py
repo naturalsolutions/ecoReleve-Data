@@ -15,10 +15,12 @@ from ..utils.parseValue import isNumeric
 import operator
 from shapely.wkt import loads
 from geojson import Feature, FeatureCollection, dumps
+from .. import context_permissions
 
 
 class RegionView(CustomView):
     model = FieldworkArea
+    __acl__ = context_permissions['regions']
 
     def __init__(self, ref, parent):
         CustomView.__init__(self, ref, parent)

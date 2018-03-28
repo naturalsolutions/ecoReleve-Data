@@ -1,8 +1,10 @@
-from ..Models import thesaurusDictTraduction
 from pyramid import threadlocal
-from ..Models import Base
 from sqlalchemy import select
 from datetime import datetime
+
+# from ..Models import thesaurusDictTraduction
+# from ..Models import Base
+
 
 dictVal = {
     'null': None,
