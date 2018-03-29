@@ -272,6 +272,30 @@ class DynamicObjectCollectionResource(CustomResource):
     def retrieve(self):
         return self.search()
 
+    def traduct_from_thesaurus(self, item, dataConfigWithThesaurus):
+        from ..utils.parseValue import formatThesaurus
+        key, value = item
+        configThesaurus = list(filter(lambda obj: key == obj.Name, dataConfigWithThesaurus))
+
+        if configThesaurus and value:
+            newVal = formatThesaurus(value, nodeID=configThesaurus[0].Options)['displayValue']
+        else:
+            newVal = value
+
+        return (key, newVal)
+
+    def collection_traduct_from_thesaurus(self, data):
+        traduced_data = []
+        dataConfigWithThesaurus = list(
+            filter(lambda obj: 'AutocompTreeEditor' == obj.FilterType, self.getConf(self.moduleGridName).ModuleGrids))
+        # listWithThes = list(map(lambda x: x.Name, listWithThes))
+
+        # change thesaural term into laguage user
+        for row in data:
+            row = dict(map(lambda i: self.traduct_from_thesaurus(i, dataConfigWithThesaurus), row.items()))
+            traduced_data.append(row)
+        return traduced_data
+
     def formatParams(self, params, paging):
         history = False
         startDate = None
@@ -326,7 +350,7 @@ class DynamicObjectCollectionResource(CustomResource):
                    offset=params.get('offset'),
                    limit=params.get('per_page'),
                    order_by=params.get('order_by'))
-    
+            dataResult = self.collection_traduct_from_thesaurus(dataResult)
             countResult = self.collection._count(filters=params.get('criteria', []))
             result = [{'total_entries': countResult}]
             # dataResult = self.handleCount(countResult,
@@ -339,6 +363,7 @@ class DynamicObjectCollectionResource(CustomResource):
                    offset=params.get('offset'),
                    limit=params.get('per_page'),
                    order_by=params.get('order_by'))
+            result = self.collection_traduct_from_thesaurus(result)
 
         return self.handleResult(result)
 

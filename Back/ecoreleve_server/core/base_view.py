@@ -47,6 +47,7 @@ class RestCollectionView(object):
         self.request = request
         self.context = context
 
+    @view_config(name='0', request_method='GET', renderer='json', permission='read')    
     @view_config(name='forms', request_method='GET', renderer='json', permission='read')
     def getForm(self):
         return self.context.getForm()

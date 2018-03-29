@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from .core import SecurityRoot
 from .core.init_db import Base, BaseExport, initialize_session, dbConfig
 from .core.security import include_jwt_policy
+from .utils import loadThesaurusTrad
 from .utils.callback import add_cors_headers_response_callback, session_callback
 from .modules.url_dispatch import add_routes
 
@@ -78,7 +79,7 @@ def main(global_config, **settings):
 
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
 
-    # loadThesaurusTrad(config)
+    loadThesaurusTrad(config)
     add_routes(config)
     config.scan()
 

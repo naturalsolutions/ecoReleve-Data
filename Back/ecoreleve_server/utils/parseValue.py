@@ -2,8 +2,8 @@ from pyramid import threadlocal
 from sqlalchemy import select
 from datetime import datetime
 
-# from ..Models import thesaurusDictTraduction
-# from ..Models import Base
+from .thesaurusLoad import thesaurusDictTraduction
+from ..core import Base
 
 
 dictVal = {
