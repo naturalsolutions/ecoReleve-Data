@@ -9,6 +9,15 @@ from ..monitored_sites import MonitoredSite
 from ..observations import Equipment
 
 
+
+        # if 'FK_MonitoredSiteName' == curProp:
+        #     MonitoredSiteTable = Base.metadata.tables['MonitoredSite']
+        #     val = criteriaObj['Value']
+        #     query = query.where(eval_.eval_binary_expr(
+        #         MonitoredSiteTable.c['Name'], criteriaObj['Operator'], val))
+
+
+
 @Query_engine(Sensor)
 class SensorCollection:
 
@@ -29,6 +38,7 @@ class SensorCollection:
                                'Name'].label('FK_MonitoredSiteName'))
         self.selectable.append(curEquipmentTable.c[
                                'FK_Individual'].label('FK_Individual'))
+        self.selectable.append(Sensor.ID) ### need to put in db configuration???
         return table_join
 
 
@@ -66,3 +76,14 @@ def available_filter(self, query, criteria):
         query = query.where(sa.or_(sa.not_(sa.exists(querySensor)),
                                 sa.not_(sa.exists(subQueryNotEquip))))
     return query
+
+# @Query_engine.add_filter(SensorCollection, 'FK_Individual')
+# def available_filter(self, query, criteria):
+
+#             curEquipmentTable = Base.metadata.tables['CurrentlySensorEquiped']
+#             val = criteriaObj['Value']
+#             query = query.where(eval_.eval_binary_expr(
+#                 curEquipmentTable.c['FK_Individual'],
+#                 criteriaObj['Operator'],
+#                 val))
+#         return query

@@ -45,7 +45,7 @@ class IndividualCollection:
                               Sensor.type_id == SensorType.ID)
 
         self.selectable.append(Sensor.UnicIdentifier.label('FK_Sensor'))
-        self.selectable.append(SensorType.Name.label('SensorType@Name'))
+        self.selectable.append(SensorType.Name.label('FK_SensorType_Name'))
         self.selectable.append(Sensor.Model.label('FK_SensorModel'))
 
         return table_join

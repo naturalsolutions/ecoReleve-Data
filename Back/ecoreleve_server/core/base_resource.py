@@ -1,8 +1,11 @@
 import json
+import io
 import sqlalchemy as sa
+import pandas as pd
 from datetime import datetime
 from collections import OrderedDict
 from pyramid.traversal import find_root
+from pyramid.response import Response
 from zope.interface import implementer
 
 from . import Base
@@ -163,7 +166,6 @@ class DynamicObjectResource(CustomResource):
 
     def __init__(self, ref, parent):
         CustomResource.__init__(self, ref, parent)
-
         if int(ref) != 0:
             self.objectDB = self.session.query(self.model).get(ref)
         else:
@@ -281,7 +283,6 @@ class DynamicObjectCollectionResource(CustomResource):
             newVal = formatThesaurus(value, nodeID=configThesaurus[0].Options)['displayValue']
         else:
             newVal = value
-
         return (key, newVal)
 
     def collection_traduct_from_thesaurus(self, data):
@@ -338,7 +339,7 @@ class DynamicObjectCollectionResource(CustomResource):
 
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)
-        # moduleFront = self.getConf(self.moduleGridName)
+
         conf_grid = self.getGrid()
         cols = list(map(lambda x: x['field'],conf_grid))
         from_history = 'all' if history else startDate
@@ -447,7 +448,6 @@ class DynamicObjectCollectionResource(CustomResource):
         # use Redis ? save json configuration for Forms, Grids and Filters
         pass
 
-
     def getType(self):
         table = self.objectDB.TypeClass.__table__
         query = sa.select([table.c['ID'].label('val'),
@@ -457,7 +457,6 @@ class DynamicObjectCollectionResource(CustomResource):
         return response
 
     def export(self):
-
         dataResult = self.search(paging=False, noCount=True)
         df = pd.DataFrame.from_records(dataResult,
                                        columns=dataResult[0].keys(),

@@ -4,8 +4,8 @@ from traceback import print_exc
 
 from ecoreleve_server.core import RootCore, DynamicObjectResource, DynamicObjectCollectionResource
 from .observation_model import Observation
+from ..field_activities import FieldActivity_ProtocoleType
 from ..permissions import context_permissions
-
 
 
 class ObservationResource(DynamicObjectResource):
@@ -57,7 +57,8 @@ class ObservationsResource(DynamicObjectCollectionResource):
     item = ObservationResource
     moduleFormName = 'ObservationForm'
     moduleGridName = 'ObservationFilter'
-
+    children = [('{int}', ObservationResource)]
+    
     __acl__ = context_permissions['observations']
 
     def __init__(self, ref, parent):
@@ -67,12 +68,8 @@ class ObservationsResource(DynamicObjectCollectionResource):
         if 'objectType' in self.request.params:
             self.typeObj = int(self.request.params['objectType'])
 
-    # def __getitem__(self, ref):
-    #     self.create = self.POSTactions.get(ref)
-    #     return DynamicObjectCollectionResource.__getitem__(self, ref)
-
     def retrieve(self):
-        if self.parent.__class__.__name__ == 'StationView':
+        if self.parent.__class__.__name__ == 'StationResource':
             if self.typeObj:
                 return self.getObservationsWithType()
             else:
@@ -148,9 +145,7 @@ class ObservationsResource(DynamicObjectCollectionResource):
         values = []
         for i in range(len(listObs)):
             curObs = listObs[i]
-            curObs.LoadNowValues()
-            values.append(curObs.getFlatObject(
-                schema=curObs.getForm().get('schema', None)))
+            values.append(curObs.values)
         return values
 
     def getProtocolsofStation(self):

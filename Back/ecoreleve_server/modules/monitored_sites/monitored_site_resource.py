@@ -1,43 +1,33 @@
-# from ..Models import (
-#     Station,
-#     MonitoredSite,
-#     Sensor,
-#     Base,
-#     fieldActivity,
-#     MonitoredSiteList
-# )
 import json
 from sqlalchemy import select, desc, join
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select, desc, join, outerjoin, and_, not_, or_, exists, Table
 from collections import OrderedDict
 
-from ecoreleve_server.core import RootCore
+from ecoreleve_server.core import RootCore, Base
 from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicObjectCollectionResource
+from ecoreleve_server.core.base_collection import Query_engine
 from . import MonitoredSite
+from .monitored_site_collection import MonitoredSiteCollection
 from ..sensors import Sensor
+from ..stations import Station
+from ..field_activities import fieldActivity
 from ..permissions import context_permissions
+from .monitored_sites_history import MonitoredSiteHistoryResource
 
 
 SensorType = Sensor.TypeClass
 
 
+@Query_engine(Base.metadata.tables['MonitoredSitePosition'])
+class PositionCollection:
+    pass
+
+
 class MonitoredSiteResource(DynamicObjectResource):
 
     model = MonitoredSite
-
-    # def __init__(self, ref, parent):
-    #     DynamicObjectView.__init__(self, ref, parent)
-        # self.actions = {'history': self.history,
-        #                 'equipment': self.getEquipment,
-        #                 'stations': self.getStations,
-        #                 'getFields': self.getGrid,
-        #                 'history': self.history}
-
-    # def __getitem__(self, ref):
-    #     if ref in self.actions:
-    #         self.retrieve = self.actions.get(ref)
-    #         return self
-    #     return self
+    children=[('history', MonitoredSiteHistoryResource)]
 
     def update(self):
         try:
@@ -48,10 +38,6 @@ class MonitoredSiteResource(DynamicObjectResource):
             response.status_code = 510
             response.text = "IntegrityError"
         return response
-
-    def getGrid(self):
-        cols = self.objectDB.getGrid(moduleName='MonitoredSiteGridHistory')
-        return cols
 
     def getStations(self):
         id_site = self.objectDB.ID
@@ -73,39 +59,6 @@ class MonitoredSiteResource(DynamicObjectResource):
             row['StationDate'] = row['StationDate'].strftime('%Y-%m-%d %H:%M:%S')
             response.append(row)
         return response
-
-    def history(self):
-        _id = self.objectDB.ID
-        data = self.request.params.mixed()
-        searchInfo = {}
-        searchInfo['criteria'] = [
-            {'Column': 'ID', 'Operator': 'Is', 'Value': _id}]
-        try:
-            searchInfo['order_by'] = json.loads(data['order_by'])
-        except:
-            searchInfo['order_by'] = []
-
-        moduleFront = self.parent.getConf('MonitoredSiteGridHistory')
-        view = Base.metadata.tables['MonitoredSitePosition']
-        listObj = CollectionEngine(MonitoredSite, moduleFront, View=view)
-        dataResult = listObj.GetFlatDataList(searchInfo)
-
-        if 'geo' in self.request.params:
-            geoJson = []
-            for row in dataResult:
-                geoJson.append({
-                    'type': 'Feature',
-                    'properties': {'Date': row['StartDate']},
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': [row['LAT'], row['LON']]}
-                    })
-            result = {'type': 'FeatureCollection', 'features': geoJson}
-        else:
-            countResult = listObj.count(searchInfo)
-            result = [{'total_entries': countResult}]
-            result.append(dataResult)
-        return result
 
     def getEquipment(self):
         id_site = self.objectDB.ID
@@ -139,10 +92,13 @@ class MonitoredSiteResource(DynamicObjectResource):
 
 class MonitoredSitesResource(DynamicObjectCollectionResource):
 
-    Collection = None
+    Collection = MonitoredSiteCollection
     item = MonitoredSiteResource
     moduleFormName = 'MonitoredSiteForm'
     moduleGridName = 'MonitoredSiteGrid'
+
+    children = [('{int}', MonitoredSiteResource)]
+
     __acl__ = context_permissions['monitoredSites']
 
     def __init__(self, ref, parent):

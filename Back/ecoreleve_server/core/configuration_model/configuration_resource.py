@@ -89,9 +89,9 @@ class ConfiguredObjectResource:
 
     def getGrid(self, type_=None, moduleName=None):
         gridFields = self.session.query(ModuleGrids
-                                        ).filter(
-            and_(ModuleGrids.Module_ID == self.getConf(moduleName).ID,
-                 ModuleGrids.GridRender > 0))
+                                        ).filter(ModuleGrids.Module_ID == self.getConf(moduleName).ID)
+            # and_(ModuleGrids.Module_ID == self.getConf(moduleName).ID,
+            #      ModuleGrids.GridRender > 0))
 
         if type_:
             gridFields = gridFields.filter(or_(ModuleGrids.TypeObj == type_,

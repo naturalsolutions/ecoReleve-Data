@@ -37,6 +37,7 @@ class QueryEngine(object):
     This class is used to filter Model | Table | View over all properties, all relationships
     '''
     custom_filters = {}
+
     def __init__(self, session, model):
         '''
         @session :: SQLAlchemy Connection Session,
@@ -73,6 +74,7 @@ class QueryEngine(object):
         '''
         self.fk_join_list = []
         self.selectable = []
+        self.selectable_from_params = selectable
         if selectable:
             for column in selectable:
                 if column.__class__.__name__ in ['InstrumentedAttribute', 'Label'] :
@@ -81,7 +83,7 @@ class QueryEngine(object):
                     self.selectable.append(column)
                 else:
                     true_column = self.get_column_by_name(column)
-                    if true_column is None or true_column.__class__.__name__ not in ['InstrumentedAttribute', 'Column']:
+                    if true_column is None or true_column.__class__.__name__ not in ['InstrumentedAttribute', 'Column', 'Label']:
                         continue
                     else:
                         self.selectable.append(true_column.label(column))

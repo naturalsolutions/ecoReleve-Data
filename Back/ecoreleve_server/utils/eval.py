@@ -48,7 +48,7 @@ class Eval():
 
     def checked(self,op1,op2):
         if '-1' in op2:
-                return None
+            return True
         return op1.in_(op2)
 
     def begin_with(self,op1,op2):
