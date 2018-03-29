@@ -61,10 +61,9 @@ class SensorsResource(DynamicObjectCollectionResource):
     moduleFormName = 'SensorForm'
     moduleGridName = 'SensorFilter'
 
-    # def __init__(self, ref, parent):
-    #     DynamicObjectCollectionView.__init__(self, ref, parent)
-    #     self.actions = {'getUnicIdentifier': self.getUnicIdentifier}
-    #     self.__acl__ = context_permissions[ref]
+    children = [('{int}', SensorResource)
+                ]
+    __acl__ = context_permissions['sensors']
 
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)

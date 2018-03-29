@@ -53,13 +53,10 @@ class RestCollectionView(object):
 
     @view_config(name='getFields', request_method='GET', renderer='json', permission='read')
     def getGrid(self):
-        print('get getFields ')
-        
         return self.context.getGrid()
 
     @view_config(name='getFilters', request_method='GET', renderer='json', permission='read')
     def getFilter(self):
-        print('get filters ')
         return self.context.getFilter()
 
     @view_config(name='getType', request_method='GET', renderer='json', permission='read')

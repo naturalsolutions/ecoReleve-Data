@@ -13,6 +13,11 @@ def add_cors_headers_response_callback(event):
     event.request.add_response_callback(cors_headers)
 
 
+def cache_callback(request, session):
+    if isinstance(request.exception, TimeoutError):
+        session.get_bind().dispose()
+
+
 def session_callback(request):
     makerDefault = request.registry.dbmaker
     session = makerDefault()

@@ -61,12 +61,11 @@ class IndividualsResource(DynamicObjectCollectionResource):
     moduleFormName = 'IndivForm'
     moduleGridName = 'IndivFilter'
 
-    children = [('{int}', IndividualResource)
-                ]
+    children = [('{int}', IndividualResource)]
+    __acl__ = context_permissions['individuals']
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionResource.__init__(self, ref, parent)
-        self.__acl__ = context_permissions[ref]
 
         if not self.typeObj:
             self.typeObj = 1
@@ -130,42 +129,42 @@ class IndividualsResource(DynamicObjectCollectionResource):
 
         return existingID
 
-    def retrieve(self):
-        import time
-        from ..GenericObjets.SearchEngine import QueryEngine, DynamicPropertiesQueryEngine
-        from ..Models.Equipment import Equipment
-        table = Base.metadata.tables['IndividualEquipment']
+    # def retrieve(self):
+    #     # import time
+    #     # from ..GenericObjets.SearchEngine import QueryEngine, DynamicPropertiesQueryEngine
+    #     # from ..Models.Equipment import Equipment
+    #     table = Base.metadata.tables['IndividualEquipment']
 
-        filters = [
-            # {
-            #     'Column':'ID',
-            #     'Operator':'>',
-            #     'Value': '100000'
-            # },  
-            {
-                'Column':'Sex',
-                'Operator':'is',
-                'Value': 'femelle'
-            },
-            {
-                'Column':'Monitoring_Status',
-                'Operator':'is null',
-                'Value': 'retiré'
-            },
-            # {
-            #     'Column':'Species',
-            #     'Operator':'contains',
-            #     'Value': 'undulata'
-            # },
-            # {
-            #     'Column':'Status_',
-            #     'Operator':'=',
-            #     'Value': 'mort'
-            # }
-        ]
-        result = collection.search(filters, limit=1000) #, order_by=['Sex:desc'])
-        count = collection._count(filters)
-        return [{'total_entries': count}, result]
+    #     filters = [
+    #         # {
+    #         #     'Column':'ID',
+    #         #     'Operator':'>',
+    #         #     'Value': '100000'
+    #         # },  
+    #         {
+    #             'Column':'Sex',
+    #             'Operator':'is',
+    #             'Value': 'femelle'
+    #         },
+    #         {
+    #             'Column':'Monitoring_Status',
+    #             'Operator':'is null',
+    #             'Value': 'retiré'
+    #         },
+    #         # {
+    #         #     'Column':'Species',
+    #         #     'Operator':'contains',
+    #         #     'Value': 'undulata'
+    #         # },
+    #         # {
+    #         #     'Column':'Status_',
+    #         #     'Operator':'=',
+    #         #     'Value': 'mort'
+    #         # }
+    #     ]
+    #     result = collection.search(filters, limit=1000) #, order_by=['Sex:desc'])
+    #     count = collection._count(filters)
+    #     return [{'total_entries': count}, result]
 
 
 RootCore.children.append(('individuals', IndividualsResource))

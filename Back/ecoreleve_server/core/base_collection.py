@@ -75,7 +75,6 @@ class QueryEngine(object):
         self.fk_join_list = []
         self.selectable = []
         if selectable:
-            # self.selectable = []
             for column in selectable:
                 if column.__class__.__name__ in ['InstrumentedAttribute', 'Label'] :
                     if column.__class__.__name__ == 'InstrumentedAttribute':
@@ -83,10 +82,12 @@ class QueryEngine(object):
                     self.selectable.append(column)
                 else:
                     true_column = self.get_column_by_name(column)
-                    if true_column is None:
+                    if true_column is None or true_column.__class__.__name__ not in ['InstrumentedAttribute', 'Column']:
                         continue
                     else:
                         self.selectable.append(true_column.label(column))
+                    # else:
+                    #     self.selectable.append(true_column)
 
         join_table, computed_selectable = self._select_from()
         join_table = self.extend_from(join_table)
@@ -482,7 +483,7 @@ class DynamicPropertiesQueryEngine(QueryEngine):
         '''
         join_table, selectable = QueryEngine._select_from(self)
         for prop in self.dynamic_properties:
-            prop_in_select = list(filter(lambda x: x.element == self.get_column_by_name(prop['Name']) ,self.selectable))
+            prop_in_select = list(filter(lambda x: hasattr(x, 'element') and x.element == self.get_column_by_name(prop['Name']) ,self.selectable))
 
             if not prop_in_select :
                 continue

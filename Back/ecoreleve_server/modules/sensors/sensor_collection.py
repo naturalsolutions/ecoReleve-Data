@@ -43,20 +43,20 @@ def available_filter(self, query, criteria):
     e2 = aliased(Equipment)
     e3 = aliased(Equipment)
 
-    subQueryEquip = select([e2]).where(
+    subQueryEquip = sa.select([e2]).where(
         sa.and_(e.FK_Sensor == e2.FK_Sensor,
                 sa.and_(e.StartDate < e2.StartDate, e2.StartDate <= date)))
 
-    querySensor = select([e]).where(
-        and_(e.StartDate <= date,
+    querySensor = sa.select([e]).where(
+        sa.and_(e.StartDate <= date,
                 sa.and_(e.Deploy == 0,
                     sa.and_(Sensor.ID == e.FK_Sensor,
                         sa.not_(sa.exists(subQueryEquip)))
                     )
                 ))
 
-    subQueryNotEquip = select([e3]).where(
-        and_(Sensor.ID == e3.FK_Sensor,
+    subQueryNotEquip = sa.select([e3]).where(
+        sa.and_(Sensor.ID == e3.FK_Sensor,
                 e3.StartDate < date))
 
     if criteria['Operator'].lower() != 'is not':

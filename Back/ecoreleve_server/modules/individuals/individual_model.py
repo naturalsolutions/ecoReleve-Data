@@ -49,11 +49,7 @@ class Individual (HasDynamicProperties, Base):
     Birth_date = Column(Date)
     Death_date = Column(Date)
     Original_ID = Column(String(250))
-    # FK_IndividualType = Column(Integer, ForeignKey('IndividualType.ID'))
 
-    # IndividualDynPropValues = relationship('IndividualDynPropValue',
-    #                                        backref='Individual',
-    #                                        cascade="all, delete-orphan")
     Locations = relationship('Individual_Location',
                              cascade="all, delete-orphan")
     Equipments = relationship('Equipment',

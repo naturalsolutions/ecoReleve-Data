@@ -42,6 +42,8 @@ class Resource(dict):
 @implementer(IRestCommonView)
 class CustomResource(Resource):
 
+    __acl__ = []
+
     def __init__(self, ref, parent):
         Resource.__init__(self, ref, parent)
         self.request = self.__root__.request
@@ -73,7 +75,7 @@ class AutocompleteResource(CustomResource):
         return self
 
     def retrieve(self):
-        objName = self.parent.item.model.__tablename__
+        objName = self.__parent__.item.model.__tablename__
         criteria = self.request.params['term']
         prop = self.attribute
 
@@ -118,16 +120,16 @@ class DynamicValuesResource(CustomResource):
     def retrieve(self):
         from ecoreleve_server.utils.parseValue import formatThesaurus
 
-        propertiesTable = Base.metadata.tables[self.parent.objectDB.TypeClass.PropertiesClass.__tablename__]
-        dynamicValuesTable = Base.metadata.tables[self.parent.objectDB.DynamicValuesClass.__tablename__]
-        FK_name = 'FK_' + self.parent.objectDB.__tablename__
-        FK_property_name = self.parent.objectDB.fk_table_DynProp_name
+        propertiesTable = Base.metadata.tables[self.__parent__.objectDB.TypeClass.PropertiesClass.__tablename__]
+        dynamicValuesTable = Base.metadata.tables[self.__parent__.objectDB.DynamicValuesClass.__tablename__]
+        FK_name = 'FK_' + self.__parent__.objectDB.__tablename__
+        FK_property_name = self.__parent__.objectDB.fk_table_DynProp_name
 
         tableJoin = sa.join(dynamicValuesTable, propertiesTable,
                          dynamicValuesTable.c[FK_property_name] == propertiesTable.c['ID'])
         query = sa.select([dynamicValuesTable, propertiesTable.c['Name']]
                        ).select_from(tableJoin).where(
-            dynamicValuesTable.c[FK_name] == self.parent.objectDB.ID
+            dynamicValuesTable.c[FK_name] == self.__parent__.objectDB.ID
         ).order_by(sa.desc(dynamicValuesTable.c['StartDate']))
 
         result = self.session.execute(query).fetchall()
@@ -162,11 +164,10 @@ class DynamicObjectResource(CustomResource):
     def __init__(self, ref, parent):
         CustomResource.__init__(self, ref, parent)
 
-        if self.integers(ref):
-            if int(ref) != 0:
-                self.objectDB = self.session.query(self.model).get(ref)
-            else:
-                self.objectDB = None
+        if int(ref) != 0:
+            self.objectDB = self.session.query(self.model).get(ref)
+        else:
+            self.objectDB = None
 
         self.__acl__ = self.__parent__.__acl__
 
@@ -189,7 +190,7 @@ class DynamicObjectResource(CustomResource):
     def retrieve(self):
         if 'FormName' in self.request.params:
             if not self.objectDB:
-                return self.parent.getForm(objectType=self.request.params['ObjectType'])
+                return self.__parent__.getForm(objectType=self.request.params['ObjectType'])
             else:
                 return self.getDataWithForm()
         else:
@@ -244,11 +245,8 @@ class DynamicObjectCollectionResource(CustomResource):
     def Collection(self):
         raise NotImplementedError('Collection is needed to search with filters and get datas')
 
-    # def getCollection(self, moduleFront=None, history=None, startDate=None):
-    #     return self.Collection(moduleFront,
-    #                            typeObj=self.typeObj,
-    #                            history=history,
-    #                            startDate=startDate)
+    def getCollection(self, from_history=None, startDate=None):
+        return self.Collection(session=self.session, object_type=self.typeObj, from_history=from_history)
 
     def insert(self):
         data = {}
@@ -319,20 +317,31 @@ class DynamicObjectCollectionResource(CustomResource):
 
     def search(self, paging=True, params={}, noCount=False):
         params, history, startDate = self.formatParams(params, paging)
-        moduleFront = self.getConf(self.moduleGridName)
-        self.collection = self.getCollection(moduleFront,
-                                             history=history,
-                                             startDate=startDate)
+        # moduleFront = self.getConf(self.moduleGridName)
+        conf_grid = self.getGrid()
+        cols = list(map(lambda x: x['field'],conf_grid))
+        from_history = 'all' if history else startDate
+        self.collection = self.getCollection(from_history=from_history)
 
         if not noCount:
-            countResult = self.collection.count(params)
+            dataResult = self.collection.search(selectable=cols,
+                   filters=params.get('criteria', []),
+                   offset=params.get('offset'),
+                   limit=params.get('per_page'),
+                   order_by=params.get('order_by'))
+    
+            countResult = self.collection._count(filters=params.get('criteria', []))
             result = [{'total_entries': countResult}]
-            dataResult = self.handleCount(countResult,
-                                          self.collection.GetFlatDataList,
-                                          params)
+            # dataResult = self.handleCount(countResult,
+            #                               self.collection.search(selectable=cols,filters=params.get('criteria', []), offset=params.get('offset'), limit=params.get('per_page'), order_by=params.get('order_by')),
+            #                               params)
             result.append(dataResult)
         else:
-            result = self.collection.GetFlatDataList(params)
+            result = self.collection.search(selectable=cols,
+                   filters=params.get('criteria', []),
+                   offset=params.get('offset'),
+                   limit=params.get('per_page'),
+                   order_by=params.get('order_by'))
 
         return self.handleResult(result)
 

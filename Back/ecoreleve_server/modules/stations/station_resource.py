@@ -91,7 +91,8 @@ class StationsResource(DynamicObjectCollectionResource):
         if 'geo' in self.request.params.mixed():
             data = self.getGeoJsonResult(result)
         else:
-            data = self.getFieldWorkers(result)
+            # data = self.getFieldWorkers(result)
+            data = result
         return data
 
     def handleCount(self, count, callback, params):

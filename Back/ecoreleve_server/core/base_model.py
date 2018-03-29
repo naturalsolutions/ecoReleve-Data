@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from sqlalchemy import (Column,
                         ForeignKey,
                         String,
@@ -261,7 +260,7 @@ class EventRuler(object):
 
 class HasStaticProperties(ConfiguredObjectResource, EventRuler, ORMUtils):
     '''
-    TODO remove Configuration(ConfiguredDbObjectMapped) dependency
+    TODO remove Configuration(ConfiguredObjectResource) dependency
     --> Move on BaseView (DynamicObjectCollectionView)
     '''
     @classmethod
@@ -356,7 +355,7 @@ class HasStaticProperties(ConfiguredObjectResource, EventRuler, ORMUtils):
         if (self._type.Status == 10):
             isGrid = True
 
-        form = ConfiguredDbObjectMapped.getForm(
+        form = ConfiguredObjectResource.getForm(
             self, displayMode, self._type_id, moduleName, isGrid=isGrid)
 
         form['data'] = {'id': 0}
