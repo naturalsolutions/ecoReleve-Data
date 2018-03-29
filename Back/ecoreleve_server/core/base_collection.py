@@ -12,6 +12,7 @@ from sqlalchemy.orm import aliased, exc
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.inspection import inspect
 
+from inspect import isclass
 from pyramid import threadlocal
 import pandas as pd
 import time
@@ -22,9 +23,7 @@ import abc
 from ..utils import Eval
 from ..utils.datetime import parse
 from ..utils.parseValue import parser
-#######
-#TODO : Need to implement interface for in DB configuration, in order to optimize query
-#######
+from .base_model import HasDynamicProperties
 
 
 eval_ = Eval()
@@ -111,8 +110,7 @@ class QueryEngine(object):
         from_table = self.extend_from(self.model)
         from_table = self._from_foreign(from_table)
         query = select([func.count()]).select_from(from_table)
-      
-        
+
         return query
 
     def _select_from(self):
@@ -167,6 +165,7 @@ class QueryEngine(object):
         method to call in views
         build query over parameters and execute query
         '''
+        self.filters = filters
         query = self.build_query(filters, selectable, order_by, limit, offset)
         self.before_exec_query()
         queryResult = self.session.execute(query).fetchall()
@@ -196,7 +195,7 @@ class QueryEngine(object):
         return query
 
     def _where(self, query, criteria):
-        ''' 
+        '''
             @criteria :: dict
             expected "Colmun", "Operator" and "Value" keys.
 
@@ -224,6 +223,7 @@ class QueryEngine(object):
         like search method but apply count statement,
         @returning :: interger
         '''
+        self.filters = filters
         query = self.init_count_statement()
         query = self.apply_filters(query, filters)
         query = self.apply_custom_filters(query, filters)
@@ -550,7 +550,7 @@ class Query_engine():
     def __init__(self, param):
         self.from_inherit = QueryEngine
         self.param = param
-        if len(list(filter(lambda x: x.__name__ == 'HasDynamicProperties' , param.__bases__)))>0:
+        if isclass(param) and issubclass(param, HasDynamicProperties):
             self.from_inherit = DynamicPropertiesQueryEngine
     
     def __call__(self, klass):
@@ -568,7 +568,10 @@ class Query_engine():
 
     def setCustomEngine(self, cls):
         def init(instance, session, object_type=None, from_history=None):
-            self.from_inherit.__init__(instance, session=session, model=self.param, object_type=object_type, from_history=from_history)
+            if self.from_inherit is DynamicPropertiesQueryEngine:
+                self.from_inherit.__init__(instance, session=session, model=self.param, object_type=object_type, from_history=from_history)
+            else:
+                self.from_inherit.__init__(instance, session=session, model=self.param)
 
         new_class = type(cls.__name__,(self.from_inherit,)+cls.__bases__,dict(cls.__dict__))
         new_class.__init__ = init

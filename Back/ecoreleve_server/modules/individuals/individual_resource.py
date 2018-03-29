@@ -50,7 +50,6 @@ class IndividualResource(DynamicObjectResource):
             else:
                 curRow['EndDate'] = ''
             response.append(curRow)
-
         return response
 
 
@@ -128,43 +127,6 @@ class IndividualsResource(DynamicObjectCollectionResource):
             existingID = None
 
         return existingID
-
-    # def retrieve(self):
-    #     # import time
-    #     # from ..GenericObjets.SearchEngine import QueryEngine, DynamicPropertiesQueryEngine
-    #     # from ..Models.Equipment import Equipment
-    #     table = Base.metadata.tables['IndividualEquipment']
-
-    #     filters = [
-    #         # {
-    #         #     'Column':'ID',
-    #         #     'Operator':'>',
-    #         #     'Value': '100000'
-    #         # },  
-    #         {
-    #             'Column':'Sex',
-    #             'Operator':'is',
-    #             'Value': 'femelle'
-    #         },
-    #         {
-    #             'Column':'Monitoring_Status',
-    #             'Operator':'is null',
-    #             'Value': 'retiré'
-    #         },
-    #         # {
-    #         #     'Column':'Species',
-    #         #     'Operator':'contains',
-    #         #     'Value': 'undulata'
-    #         # },
-    #         # {
-    #         #     'Column':'Status_',
-    #         #     'Operator':'=',
-    #         #     'Value': 'mort'
-    #         # }
-    #     ]
-    #     result = collection.search(filters, limit=1000) #, order_by=['Sex:desc'])
-    #     count = collection._count(filters)
-    #     return [{'total_entries': count}, result]
 
 
 RootCore.children.append(('individuals', IndividualsResource))

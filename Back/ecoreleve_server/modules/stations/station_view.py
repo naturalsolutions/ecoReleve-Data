@@ -1,11 +1,11 @@
 from pyramid.view import view_config, view_defaults
 
-from ecoreleve_server.core.base_view import IRestItemView, IRestCollectionView
+from ecoreleve_server.core.base_view import CRUDCommonView, RestCollectionView
 from .station_resource import StationResource, StationsResource
 
 
 @view_defaults(context=StationsResource)
-class StationsView:
+class StationsView(RestCollectionView):
 
     @view_config(name='updateSiteLocation', request_method='GET', renderer='json')
     def updateMonitoredSite(self):

@@ -304,15 +304,12 @@ class DynamicObjectCollectionResource(CustomResource):
     def count_(self, listObj=None):
         moduleFront = self.getConf(self.moduleGridName)
 
-        if self.request is not None:
-            searchInfo, history, startDate = self.formatParams(
-                {}, paging=False)
-            self.collection = self.getCollection(moduleFront,
-                                                 history=history,
-                                                 startDate=startDate)
-            count = self.collection.count(searchInfo=searchInfo)
-        else:
-            count = self.collection.count()
+        params, history, startDate = self.formatParams({}, paging=False)
+        from_history = 'all' if history else startDate
+        
+        collection = self.getCollection(from_history=from_history)
+        count = collection._count(filters=params.get('criteria', []))
+
         return count
 
     def search(self, paging=True, params={}, noCount=False):
