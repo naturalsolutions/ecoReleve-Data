@@ -6,7 +6,7 @@ from pyramid.security import (
     Deny
 )
 
-from .init_db import Base, dbConfig
+from .init_db import Base, dbConfig, get_redis_con
 from .base_model import *
 from .base_view import *
 from .base_resource import *

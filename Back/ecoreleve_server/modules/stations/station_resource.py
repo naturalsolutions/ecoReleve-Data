@@ -100,7 +100,7 @@ class StationsResource(DynamicObjectCollectionResource):
         if 'geo' in self.request.params.mixed() and count > 50000:
             return []
         else:
-            return callback(params)
+            return callback(**params)
 
     def retrieve(self):
         if 'geo' in self.request.params.mixed():

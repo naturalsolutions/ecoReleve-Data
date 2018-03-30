@@ -4,8 +4,8 @@ from sqlalchemy import func
 from shapely.wkt import loads
 from geojson import Feature
 
-from ..Models import Base
-from ..core.base_types import Geometry
+from ecoreleve_server.core import Base
+from ecoreleve_server.core.base_types import Geometry
 
 
 class GeomaticLayer(Base):

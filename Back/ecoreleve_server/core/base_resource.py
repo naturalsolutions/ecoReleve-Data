@@ -9,8 +9,12 @@ from pyramid.response import Response
 from zope.interface import implementer
 
 from . import Base
+from ..core import get_redis_con
 from .base_view import IRestCommonView, IRestCollectionView, IRestItemView
 from .configuration_model.FrontModules import FrontModules
+from ..utils.decorator import timing
+
+localRedis = get_redis_con()
 
 
 class Resource(dict):
@@ -269,7 +273,7 @@ class DynamicObjectCollectionResource(CustomResource):
         return result
 
     def handleCount(self, count, callback, params):
-        return callback(params)
+        return callback(**params)
 
     def retrieve(self):
         return self.search()
@@ -346,17 +350,21 @@ class DynamicObjectCollectionResource(CustomResource):
         self.collection = self.getCollection(from_history=from_history)
 
         if not noCount:
-            dataResult = self.collection.search(selectable=cols,
-                   filters=params.get('criteria', []),
-                   offset=params.get('offset'),
-                   limit=params.get('per_page'),
-                   order_by=params.get('order_by'))
-            dataResult = self.collection_traduct_from_thesaurus(dataResult)
             countResult = self.collection._count(filters=params.get('criteria', []))
             result = [{'total_entries': countResult}]
-            # dataResult = self.handleCount(countResult,
-            #                               self.collection.search(selectable=cols,filters=params.get('criteria', []), offset=params.get('offset'), limit=params.get('per_page'), order_by=params.get('order_by')),
-            #                               params)
+            dataResult = self.handleCount(countResult,
+                                          self.collection.search,
+                                          {
+                                            'selectable':cols,
+                                            'filters':params.get('criteria', []),
+                                            'offset':params.get('offset'),
+                                            'limit':params.get('per_page'), 
+                                            'order_by':params.get('order_by')
+                                          }
+                                        )
+            if dataResult:
+                dataResult = self.collection_traduct_from_thesaurus(dataResult)
+
             result.append(dataResult)
         else:
             result = self.collection.search(selectable=cols,
@@ -388,31 +396,33 @@ class DynamicObjectCollectionResource(CustomResource):
                                   ).filter(FrontModules.Name == moduleName
                                            ).first()
 
+    @timing
     def getForm(self, objectType=None, moduleName=None, mode='edit'):
         if 'ObjectType' in self.request.params:
             objectType = self.request.params['ObjectType']
+
+        if objectType:
             self.objectDB.type_id = objectType
-        if not objectType:
-            objectType = None
-        # self.setType(int(objectType))
+
         if not moduleName:
             moduleName = self.moduleFormName
 
-        # form = self.getConfigJSON(moduleName + mode, self.typeObj)
-        form = None
+        form = self.getConfigJSON(moduleName + mode, objectType)
+        # form = None
         if not form:
             form = self.objectDB.getForm(mode, objectType, moduleName)
             self.setConfigJSON(moduleName + mode, objectType, form)
         return form
 
+    @timing
     def getGrid(self, type_=None, moduleName=None):
         if not moduleName:
             moduleName = self.moduleGridName
         if not type_:
             type_ = self.typeObj
 
-        # gridCols = self.getConfigJSON(moduleName, type_)
-        gridCols = None
+        gridCols = self.getConfigJSON(moduleName, type_)
+        # gridCols = None
         if not gridCols:
             gridCols = self.objectDB.getGrid(
                 type_=type_, moduleName=moduleName)
@@ -420,6 +430,7 @@ class DynamicObjectCollectionResource(CustomResource):
 
         return gridCols
 
+    @timing
     def getFilter(self, type_=None, moduleName=None):
         moduleName = self.request.params.get('FilterName', None)
         if not moduleName:
@@ -428,8 +439,8 @@ class DynamicObjectCollectionResource(CustomResource):
         if not type_:
             type_ = self.typeObj
 
-        # filters = self.getConfigJSON(moduleName+'Filter', type_)
-        filters = None
+        filters = self.getConfigJSON(moduleName+'Filter', type_)
+        # filters = None
         if not filters:
             filtersList = self.objectDB.getFilters(
                 type_=type_, moduleName=moduleName)
@@ -442,11 +453,24 @@ class DynamicObjectCollectionResource(CustomResource):
 
     def getConfigJSON(self, moduleName, typeObj):
         # use Redis ? save json configuration for Forms, Grids and Filters
-        pass
+        configJson = None
+        # print(' get config {conf}'.format(conf=moduleName+'/'+str(typeObj)))
+        if localRedis is not None:
+            try:
+                print(' get config {conf} from redis '.format(conf=moduleName+'_'+str(typeObj)))
+                config_from_redis = localRedis.get(moduleName+'_'+str(typeObj))
+                configJson = json.loads(config_from_redis.decode())
+            except:
+                from traceback import print_exc
+                print_exc()
+                pass
+        return configJson
 
     def setConfigJSON(self, moduleName, typeObj, configObject):
         # use Redis ? save json configuration for Forms, Grids and Filters
-        pass
+        if localRedis is not None:
+            print(' set configJson {} in redis '.format(moduleName+'_' + str(typeObj)))
+            localRedis.set(moduleName+'_' + str(typeObj), json.dumps(configObject), ex=3600*12)
 
     def getType(self):
         table = self.objectDB.TypeClass.__table__

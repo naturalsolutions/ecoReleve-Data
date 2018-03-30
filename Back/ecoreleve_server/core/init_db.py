@@ -8,6 +8,16 @@ import importlib
 from ecoreleve_server.modules import import_submodule
 
 
+def get_redis_con():
+    try:
+        import redis
+        pool = redis.ConnectionPool(host='localhost', db=0)
+        localRedis = redis.StrictRedis(connection_pool=pool)
+    except:
+        localRedis = None
+    return localRedis
+
+
 class myBase:
     __table_args__ = {'implicit_returning': False}
 
