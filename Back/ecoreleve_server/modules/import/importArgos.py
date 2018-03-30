@@ -1,4 +1,3 @@
-from sqlalchemy import select, and_
 import pandas as pd
 import numpy as np
 import win32con
@@ -13,7 +12,10 @@ import psutil
 from datetime import datetime
 import itertools
 from traceback import print_exc
+from sqlalchemy import select, and_
 
+import ecoreleve_server
+from ecoreleve_server.core import dbConfig
 from ..sensors.sensor_data import ArgosGps, ArgosEngineering
 from .import_model import Import
 
@@ -21,8 +23,8 @@ from .import_model import Import
 def uploadFileArgos(request):
     session = request.dbsession
     user = request.authenticated_userid['iss']
-    workDir = os.path.dirname(os.path.dirname(
-        os.path.dirname(os.path.abspath(__file__))))
+    workDir = os.path.dirname(os.path.abspath(ecoreleve_server.__package__))
+    print(workDir)
     tmp_path = os.path.join(workDir, "ecoReleve_import")
     import_path = os.path.join(tmp_path, "uploaded_file")
     if not (os.path.exists(import_path)):
@@ -46,7 +48,6 @@ def uploadFileArgos(request):
         shutil.copyfileobj(input_file, output_file)
 
     os.rename(temp_file_path, full_filename)
-    print(request.POST['file'].__dict__)
     importObj = Import(ImportFileName=request.POST['file'].filename, FK_User=user)
     importObj.ImportType = 'Argos'
 
@@ -69,8 +70,8 @@ def uploadFileArgos(request):
 
 
 def parseDSFileAndInsert(full_filename, session, importID):
-    workDir = os.path.dirname(os.path.dirname(
-        os.path.dirname(os.path.abspath(__file__))))
+    workDir = os.path.dirname(os.path.abspath(ecoreleve_server.__package__))
+
     con_file = os.path.join(workDir, 'init.txt')
     MTI_path = os.path.join(workDir, 'MTIwinGPS.exe')
     out_path = os.path.join(workDir,
@@ -102,6 +103,7 @@ def parseDSFileAndInsert(full_filename, session, importID):
     with open(con_file, 'w') as f:
         print('-eng\n-title\n-out\n' + out_path + '\n' + full_filename, file=f)
 
+    print(MTI_path)
     # execute MTI-Parser
     args = [MTI_path]
     proc = subprocess.Popen([args[0]])

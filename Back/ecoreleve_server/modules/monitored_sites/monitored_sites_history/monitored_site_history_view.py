@@ -4,7 +4,6 @@ from ecoreleve_server.core.base_view import RestCollectionView
 from . import MonitoredSiteHistoryResource
 
 
-
 @view_defaults(context=MonitoredSiteHistoryResource)
 class MonitoredSiteHistoryView(RestCollectionView):
 

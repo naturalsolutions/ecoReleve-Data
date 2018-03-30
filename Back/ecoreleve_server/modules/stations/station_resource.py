@@ -10,6 +10,7 @@ from ecoreleve_server.core.base_resource import DynamicObjectResource, DynamicOb
 from .station_model import Station, Station_FieldWorker
 from ..monitored_sites.monitored_site_model import MonitoredSite, MonitoredSitePosition
 from ..users.user_model import User
+from ..field_activities import fieldActivity
 from ..observations.observation_resource import ObservationsResource
 from .station_collection import StationCollection
 from ..permissions import context_permissions

@@ -7,14 +7,6 @@ from pyramid import threadlocal
 from sqlalchemy import select, and_, insert
 from sqlalchemy.exc import IntegrityError
 
-# from ..Models import (
-#     Station,
-#     Station_FieldWorker,
-#     Import,
-#     GPX,
-#     dbConfig
-# )
-
 from ecoreleve_server.core import dbConfig
 from ..stations.station_model import Station
 from ..sensors.sensor_data import GPX
@@ -148,17 +140,18 @@ def insertData(session, dataFrame_to_insert, fieldWorkers):
 
         for sta in data_to_insert:
             curSta = model(type_id=4)
-            # curSta.init_on_load()
-            curSta.allProp = Sta.allProp
+ 
             curDate = datetime.strptime(
                 sta['StationDateTZ'], "%Y-%m-%dT%H:%M:%S.%fZ")
-            curSta.updateFromJSON(sta)
+            curSta.values = sta
             curSta.StationDate = curDate
             curSta.FieldWorkers = [{'FieldWorker': id_}
                                    for id_ in fieldWorkers]
             bulk_station.append(curSta)
 
         session.add_all(bulk_station)
+
+        ## Draft bulk insert to improve performance
         # session.bulk_save_objects(bulk_station, return_defaults=True)
 
         # if fieldWorkers:

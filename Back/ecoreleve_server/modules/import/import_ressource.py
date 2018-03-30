@@ -9,31 +9,16 @@ from .import_collection import ImportCollection
 from ..permissions import context_permissions
 
 
-class ImportView(object):
-
+class ImportResource(object):
     model = Import
 
 
-class ImportHistoryView(DynamicObjectCollectionResource):
+class ImportHistoryResource(DynamicObjectCollectionResource):
     Collection = ImportCollection
-    item = ImportView
+    item = ImportResource
     moduleGridName = 'ImportHistoryFilter'
 
     __acl__ = context_permissions['import']
-
-    def __init__(self, ref, parent):
-        CustomView.__init__(self, ref, parent)
-        self.objectDB = self.item.model()
-        self.objectDB.session = threadlocal.get_current_request().dbsession
-        # self.__acl__ = context_permissions['stations']
-        # self.__actions__ = {'forms': self.getForm,
-        #             'getFields': self.getGrid,
-        #             'getFilters': self.getFilter,
-        #             'getType': self.getType,
-        #             'export': self.export,
-        #             'count': self.count_,
-        #             }
-        self.typeObj = None
 
     def insert(self):
         pass
@@ -42,7 +27,7 @@ class ImportHistoryView(DynamicObjectCollectionResource):
         return self.getHistory()
 
     def getHistory(self):
-        gene = self.Collection(self.session)
+        import_collection = self.Collection(session=self.session)
         data = self.request.params.mixed()
         if 'criteria' in data:
             criteria = json.loads(data['criteria'])
@@ -57,11 +42,13 @@ class ImportHistoryView(DynamicObjectCollectionResource):
             per_page = None
 
         order_by = json.loads(data['order_by'], [])
-        result = gene.search(criteria,
+        result = import_collection.search(filters=criteria,
                                 offset=offset,
-                                per_page=per_page,
+                                limit=per_page,
                                 order_by=order_by)
-        return result
+        countResult = import_collection._count(filters=criteria)
+        
+        return [{'total_entries': countResult}, result]
 
 
-RootCore.children.append(('importHistory', ImportHistoryView))
+RootCore.children.append(('importHistory', ImportHistoryResource))
