@@ -92,8 +92,8 @@ class StationsResource(DynamicObjectCollectionResource):
         if 'geo' in self.request.params.mixed():
             data = self.getGeoJsonResult(result)
         else:
-            # data = self.getFieldWorkers(result)
-            data = result
+            data = self.getFieldWorkers(result)
+            # data = result
         return data
 
     def handleCount(self, count, callback, params):
@@ -119,7 +119,15 @@ class StationsResource(DynamicObjectCollectionResource):
         return sorted(res, key=lambda x: x['label'])
 
     def getFieldWorkers(self, data):
-        queryCTE = self.collection.fullQueryJoinOrdered.cte()
+        params, history, startDate = self.formatParams({}, paging=True)
+        params = {'selectable': ['ID'],
+                  'filters':params.get('criteria', []),
+                  'offset':params.get('offset'),
+                  'limit':params.get('per_page'),
+                  'order_by':params.get('order_by')
+                }
+
+        queryCTE = self.collection.build_query(**params).cte()
         joinFW = join(Station_FieldWorker, User,
                       Station_FieldWorker.FK_FieldWorker == User.id)
         joinTable = join(queryCTE, joinFW, queryCTE.c[
