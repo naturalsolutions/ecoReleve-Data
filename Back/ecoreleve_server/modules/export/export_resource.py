@@ -1,25 +1,22 @@
-from sqlalchemy import select, join
+import io
 import json
 import pandas as pd
-from ..Models import BaseExport
-from ..utils.generator import Generator
-from ..renderers import CSVRenderer, PDFrenderer, GPXRenderer
 from pyramid.response import Response
-import io
 from datetime import datetime
-from . import CustomView
-from ..controllers.security import RootCore
-from ..GenericObjets.SearchEngine import QueryEngine
+from sqlalchemy import select, join
 
+from ecoreleve_server.core import RootCore, BaseExport
+from ecoreleve_server.core.base_collection import Query_engine
+from ecoreleve_server.core.base_resource import CustomResource
 from ..permissions import context_permissions
+from ecoreleve_server.renderers import CSVRenderer, PDFrenderer, GPXRenderer
 
+# TOODO Replace Generator by  to Search in views
 
-# TOODO Replace Generator by QueryEngine to Search in views
-
-class CustomExportView(CustomView):
+class CustomExportResource(CustomResource):
 
     def __init__(self, ref, parent):
-        CustomView.__init__(self, ref, parent)
+        CustomResource.__init__(self, ref, parent)
         try:
             self.session = self.request.registry.dbmakerExport
         except:
@@ -27,33 +24,116 @@ class CustomExportView(CustomView):
             pass
 
 
-class ExportQueryView(CustomExportView):
+class ExportQueryResource(CustomExportResource):
 
-    item = None
+    dictCell={
+            'VARCHAR':'string',
+            'NVARCHAR':'string',
+            'INTEGER':'number',
+            'DECIMAL':'number',
+            'DATETIME':'string',
+            'DATE':'string',
+            'TIME':'string',
+            'BIT':'boolean'
+            }
+    dictFilter = {
+            'VARCHAR':'Text',
+            'NVARCHAR':'Text',
+            'INTEGER':'Number',
+            'DECIMAL':'Number',
+            'NUMERIC':'Number',
+            'DATETIME':'DateTimePickerEditor',
+            'DATE':'DateTimePickerEditor',
+            'TIME':'DateTimePickerEditor',
+        }
 
     def __init__(self, ref, parent):
-        CustomExportView.__init__(self, ref, parent)
-        self.actions = {'getFields': self.getFields,
-                        'getFilters': self.getFilters,
-                        'count': self.count_,
+        CustomExportResource.__init__(self, ref, parent)
+
+        self.viewName = self.getViewName(ref)
+        self.table = BaseExport.metadata.tables[self.viewName]
+        self.collection = self.getCollection(self.table)
+
+        self.exportType = {
                         'csv': self.export_csv,
                         'pdf': self.export_pdf,
                         'gpx': self.export_gpx,
                         'excel': self.export_excel,
-                        'getFile': self.getFile
                         }
-        self.viewName = self.getViewName(ref)
-        self.generator = Generator(self.viewName, self.session)
-        self.table = BaseExport.metadata.tables[self.viewName]
+
+    def getCollection(self, table):
+        @Query_engine(table)
+        class ViewCollection:
+            pass
+        return ViewCollection(session=self.session)
 
     def retrieve(self):
         return self.search()
 
-    def getFields(self):
-        return self.generator.get_col()
+    def getFields(self, columnsList=[], checked=False):
+        final_fields=[]
+        if columnsList :
+            for col in columnsList:
+                field_name=col
+                field_label=col
+                field_type=str(self.table.c[field_name].type).split('(')[0]
+                if field_type in self.dictCell:
+                    cell_type=self.dictCell[field_type]
+                    cell_type = 'string'
+                else:
+                    cell_type='string'
+                final_fields.append({'field':field_name,
+                    'headerName':field_label,
+                    'cell':cell_type,
+                    'editable':False})
+                # self.cols.append({'name':field_name,'type_grid':cell_type})
+        else : 
+            for col in self.table.c:
+                field_name=col.name
+                field_label=col.name
+                
+                field_type=self.table.c[col.name].type
+                if field_type in self.dictCell:
+                    cell_type=self.dictCell[field_type]
+                    cell_type='string'
+                    
+                else:
+                    cell_type='string'
+                final_fields.append({'field':field_name,
+                    'headerName':field_label,
+                    'cell':cell_type,
+                    'editable':False})
+                # self.cols.append({'name':field_name,'type_grid':cell_type})
+
+        if(checked):
+            final_fields.append({'name': 'import','label': 'Import', 'cell': 'select-row', 'headerCell' : 'select-all'})
+        return final_fields
 
     def getFilters(self):
-        return self.generator.get_filters()
+        filters = []
+        options = None
+        for column in self.table.c:
+            name_c = str(column.name)
+            options = None
+            try :
+                db_type = str(column.type).split('(')[0]
+            except: 
+                db_type = None
+                pass
+            if db_type in self.dictFilter :
+                type_f = self.dictFilter[db_type]
+                if type_f == 'DateTimePickerEditor':
+                    if db_type == 'TIME':
+                        options ={'format':'hh:mm:ss'}
+                    elif db_type == 'DATE':
+                        options ={'format':'DD/MM/YYYY'}
+                    else : 
+                        options ={'format':'DD/MM/YYYY hh:mm:ss'}
+            else :
+                type_f = 'Text'
+            filters.append({'name':name_c, 'type':type_f , 'title':name_c, 'options':options})
+
+        return filters
 
     def count_(self):
         data = self.request.params.mixed()
@@ -61,13 +141,13 @@ class ExportQueryView(CustomExportView):
             criteria = json.loads(data['criteria'])
         else:
             criteria = {}
-        count = self.generator.count_(criteria)
+        count = self.collection._count(filters=criteria)
         return count
 
     def getViewName(self, viewId):
-        return self.session.execute(select([self.parent.table.c['Relation']]
-                                           ).select_from(self.parent.table
-                                                         ).where(self.parent.table.c['ID'] == viewId)
+        return self.session.execute(select([self.__parent__.table.c['Relation']]
+                                           ).select_from(self.__parent__.table
+                                                         ).where(self.__parent__.table.c['ID'] == viewId)
                                     ).scalar()
 
     def search(self):
@@ -78,17 +158,48 @@ class ExportQueryView(CustomExportView):
             criteria = {}
 
         if 'geo' in self.request.params:
-            result = self.generator.get_geoJSON(criteria)
+            # result = self.generator.get_geoJSON(criteria)
+            print('to geojson result')
+            result = self.get_geoJSON(criteria=criteria)
         else:
-            result = self.generator.search(criteria, offset=0, per_page=20, order_by=[])
+            result = self.collection.search(filters=criteria, offset=0, limit=20, order_by=[])
 
         return result
 
+    def get_geoJSON(self,criteria={}, geoJson_properties = [], order_by=None) :
+        result=[]
+        total=None
+        countResult = self.collection._count(filters=criteria)
+        column_lower = {c.name.lower():c.name for c in self.table.c}
+        exceed = None
+        geoJson=[]
+
+        if 'lat' in column_lower:
+            if countResult <= 100000 :
+                exceed = False
+                query = self.collection.build_query(filters=criteria)
+                # if order_by:
+                #     query = self.get_order(query, order_by)
+                try :
+                    data=self.session.execute(query.where(self.table.c[column_lower['lat']] != None)).fetchall()
+                except :
+                    print_exc()
+                for row in data:
+                    properties = {}
+                    if geoJson_properties != None :
+                        for col in geoJson_properties :
+                            properties[col] = row[col]
+                    geoJson.append({'type':'Feature', 'properties':properties, 'geometry':{'type':'Point'
+                        , 'coordinates':[row[column_lower['lat']],row[column_lower['lon']]]}})
+            else :
+                exceed = True
+        return {'type':'FeatureCollection', 'features': geoJson,'exceed': exceed, 'total':countResult}
+
     def formatColumns(self, fileType, columns):
         queryColumns = []
-        if fileType != 'gpx':
+        if fileType.lower() != 'gpx':
             for col in columns:
-                queryColumns.append(self.table.c[col])
+                queryColumns.append(self.table.c[col].label(col))
         else:
             splittedColumnLower = {c.name.lower().replace(
                 '_', ''): c.name for c in self.table.c}
@@ -112,19 +223,17 @@ class ExportQueryView(CustomExportView):
         try:
             criteria = json.loads(self.request.params.mixed()['criteria'])
             fileType = criteria['fileType']
-            # columns selection
             columns = criteria['columns']
 
             queryColumns = self.formatColumns(fileType, columns)
-
-            query = self.generator.getFullQuery(criteria['filters'], columnsList=queryColumns)
+            query = self.collection.build_query(filters=criteria['filters'], selectable=queryColumns)
             rows = self.session.execute(query).fetchall()
 
             filename = self.viewName + '.' + fileType
             self.request.response.content_disposition = 'attachment;filename=' + filename
             value = {'header': columns, 'rows': rows}
 
-            io_export = self.actions[fileType](value)
+            io_export = self.exportType[fileType](value)
             return io_export
 
         except:
@@ -163,12 +272,13 @@ class ExportQueryView(CustomExportView):
             officedocument.spreadsheetml.sheet')
 
 
-class ExportCollectionQueryView(CustomExportView):
+class ExportCollectionQueryResource(CustomExportResource):
 
-    item = ExportQueryView
-
+    item = ExportQueryResource
+    children = [('{int}', ExportQueryResource)]
+    
     def __init__(self, ref, parent):
-        CustomExportView.__init__(self, ref, parent)
+        CustomExportResource.__init__(self, ref, parent)
         self.table = BaseExport.metadata.tables['Views']
 
     def retrieve(self):
@@ -177,20 +287,21 @@ class ExportCollectionQueryView(CustomExportView):
         joinTable = join(vi, t_v, vi.c['ID'] == t_v.c['FK_View'])
         query = select(vi.c).select_from(joinTable)
 
-        if self.integers(self.parent.__name__):
-            query = query.where(t_v.c['FK_Theme'] == self.parent.__name__)
+        if self.__parent__.__name__.isdigit():
+            query = query.where(t_v.c['FK_Theme'] == self.__parent__.__name__)
 
         result = [dict(row) for row in self.session.execute(query).fetchall()]
 
         return result
 
 
-class ExportThemeView(CustomExportView):
+class ExportThemeResource(CustomExportResource):
 
-    item = ExportCollectionQueryView
+    item = ExportCollectionQueryResource
+    children = [('views', ExportCollectionQueryResource)]
 
     def __init__(self, ref, parent):
-        CustomExportView.__init__(self, ref, parent)
+        CustomExportResource.__init__(self, ref, parent)
         self.id_ = ref
 
     def retrieve(self):
@@ -201,9 +312,10 @@ class ExportThemeView(CustomExportView):
         return result
 
 
-class ExportCollectionThemeView(CustomExportView):
+class ExportCollectionThemeResource(CustomExportResource):
 
-    item = ExportThemeView
+    item = ExportThemeResource
+    children = [('{int}', ExportThemeResource)]
 
     def retrieve(self):
         table = BaseExport.metadata.tables['ThemeEtude']
@@ -213,14 +325,15 @@ class ExportCollectionThemeView(CustomExportView):
         return result
 
 
-class ExportCoreView(CustomExportView):
+class ExportCoreResource(CustomExportResource):
 
-    item = ExportCollectionThemeView
-
-    def __getitem__(self, ref):
-        if ref == 'views':
-            return ExportCollectionQueryView(ref, self)
-        return self.item(ref, self)
+    item = ExportCollectionThemeResource
+    children = [('views', ExportCollectionQueryResource),
+                ('themes', ExportCollectionThemeResource)]
+    # def __getitem__(self, ref):
+    #     if ref == 'views':
+    #         return ExportCollectionQueryView(ref, self)
+    #     return self.item(ref, self)
 
     def retrieve(self):
         return {'next items': {'views': {},
@@ -229,4 +342,4 @@ class ExportCoreView(CustomExportView):
                 }
 
 
-RootCore.listChildren.append(('export', ExportCoreView))
+RootCore.children.append(('export', ExportCoreResource))

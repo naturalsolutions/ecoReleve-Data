@@ -9,7 +9,7 @@ from pyramid.events import NewRequest
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from .core import SecurityRoot
-from .core.init_db import Base, BaseExport, initialize_session, dbConfig
+from .core.init_db import Base, BaseExport, initialize_session, initialize_session_export, dbConfig
 from .core.security import include_jwt_policy
 from .utils import loadThesaurusTrad
 from .utils.callback import add_cors_headers_response_callback, session_callback
@@ -58,6 +58,12 @@ def main(global_config, **settings):
 
     engine = initialize_session(settings)
     config.registry.dbmaker = scoped_session(sessionmaker(bind=engine, autoflush=False))
+
+    engineExport = initialize_session_export(settings)
+    if engineExport is not None:
+        config.registry.dbmakerExport = scoped_session(
+                sessionmaker(bind=engineExport))
+
     config.add_request_method(session_callback, name='dbsession', reify=True)
 
     # Add renderer for JSON objects

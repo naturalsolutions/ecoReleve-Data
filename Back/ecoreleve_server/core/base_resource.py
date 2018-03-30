@@ -452,24 +452,18 @@ class DynamicObjectCollectionResource(CustomResource):
         return filters
 
     def getConfigJSON(self, moduleName, typeObj):
-        # use Redis ? save json configuration for Forms, Grids and Filters
         configJson = None
-        # print(' get config {conf}'.format(conf=moduleName+'/'+str(typeObj)))
         if localRedis is not None:
             try:
-                print(' get config {conf} from redis '.format(conf=moduleName+'_'+str(typeObj)))
                 config_from_redis = localRedis.get(moduleName+'_'+str(typeObj))
                 configJson = json.loads(config_from_redis.decode())
             except:
-                from traceback import print_exc
-                print_exc()
                 pass
         return configJson
 
     def setConfigJSON(self, moduleName, typeObj, configObject):
         # use Redis ? save json configuration for Forms, Grids and Filters
         if localRedis is not None:
-            print(' set configJson {} in redis '.format(moduleName+'_' + str(typeObj)))
             localRedis.set(moduleName+'_' + str(typeObj), json.dumps(configObject), ex=3600*12)
 
     def getType(self):

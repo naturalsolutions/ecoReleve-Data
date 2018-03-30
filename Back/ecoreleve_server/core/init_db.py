@@ -35,12 +35,24 @@ def load_db_config(settings):
     dbConfig['sensor_schema'] = settings['sensor_schema']
     dbConfig['cn.dialect'] = settings['cn.dialect']
 
+def initialize_session_export(settings):
+    engineExport = None
+    if 'loadExportDB' in settings and settings['loadExportDB'] == 'False':
+            print('''
+            /!\================================/!\
+            WARNING :
+            Export DataBase NOT loaded, Export Functionality will not working
+            /!\================================/!\ \n''')
+    else:
+        settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + quote_plus(settings['sqlalchemy.Export.url'])
+        engineExport = engine_from_config(settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
+        BaseExport.metadata.bind = engineExport
+        BaseExport.metadata.create_all(engineExport)
+        BaseExport.metadata.reflect(views=True, extend_existing=False)
+    return engineExport
+
 def initialize_session(settings):
     load_db_config(settings)
-    settings['sqlalchemy.Export.url'] = settings['cn.dialect'] + \
-        quote_plus(settings['sqlalchemy.Export.url'])
-    engineExport = engine_from_config(
-        settings, 'sqlalchemy.Export.', legacy_schema_aliasing=True)
 
     settings['sqlalchemy.default.url'] = settings['cn.dialect'] + \
         quote_plus(settings['sqlalchemy.default.url'])
@@ -52,16 +64,5 @@ def initialize_session(settings):
     import_submodule()
     Base.metadata.create_all(engine)
     Base.metadata.reflect(views=True, extend_existing=False)
-
-    if 'loadExportDB' in settings and settings['loadExportDB'] == 'False':
-        print('''
-            /!\================================/!\
-            WARNING :
-            Export DataBase NOT loaded, Export Functionality will not working
-            /!\================================/!\ \n''')
-    else:
-        BaseExport.metadata.bind = engineExport
-        BaseExport.metadata.create_all(engineExport)
-        BaseExport.metadata.reflect(views=True, extend_existing=False)
 
     return engine

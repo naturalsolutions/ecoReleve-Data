@@ -43,9 +43,9 @@ def get_role_from_redis(userid, request):
             if user_infos['cookie'] == request.cookies.get("ecoReleve-Core"):
                 role = user_infos['role']
         except:
-            from traceback import print_exc
-            print_exc()
-
+            pass
+            # from traceback import print_exc
+            # print_exc()
     return role
 
 def set_role_in_redis(userid, request, role):

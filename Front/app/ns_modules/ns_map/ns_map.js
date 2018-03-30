@@ -1036,6 +1036,9 @@ define([
     },
 
     displayError: function(geoJson){
+      if(!this.errorElt){
+        this.initErrorLayer();
+      }
       this.errorElt.addClass('hidden');
       var msg;
       if(geoJson){
