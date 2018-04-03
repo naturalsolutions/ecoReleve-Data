@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+import exiftool
 from urllib.parse import quote_plus
 from sqlalchemy import engine_from_config
 from pyramid.config import Configurator
@@ -20,6 +21,8 @@ from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
 
+global mySubExif
+
 
 def datetime_adapter(obj, request):
     """Json adapter for datetime objects."""
@@ -35,7 +38,6 @@ def date_adapter(obj, request):
     except:
         return obj
 
-
 def time_adapter(obj, request):
     """Json adapter for datetime objects."""
     try:
@@ -46,6 +48,11 @@ def time_adapter(obj, request):
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
     return float(obj)
+
+def initialize_exiftool():
+    global mySubExif
+    mySubExif = exiftool.ExifTool()
+    mySubExif.start()
 
 
 def main(global_config, **settings):
@@ -88,4 +95,9 @@ def main(global_config, **settings):
     add_routes(config)
     config.scan()
 
+    if 'init_exiftool' in settings and settings['init_exiftool'] == 'False':
+        print('Exiftool not initialized')
+        pass
+    else:
+        initialize_exiftool()
     return config.make_wsgi_app()

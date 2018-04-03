@@ -18,7 +18,11 @@ from .importGSM import uploadFilesGSM
 from .importRFID import uploadFileRFID
 from .importCAMTRAP import *
 import os
+import time
 
+from ..utils.ocr_detect import OCR_parser
+from ..__init__ import mySubExif
+from exiftool import fsencode
 
 ArgosDatasWithIndiv = Table(
     'VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
@@ -119,16 +123,37 @@ class SensorDatasBySession(CustomView):
             self.sessionID = None
         self.viewTable = parent.viewTable
         self.__acl__ = parent.__acl__
-        self.actions = {'datas': self.getDatas}
+        self.actions = {
+            'datas': self.getDatas,
+            'updateMany' : self.updateMany
+            }
+
+    def updateMany(self):
+        if self.type_ == 'camtrap':
+            seqIds = []
+            datas = self.request.json_body #potentially new props
+            for item in datas:
+                idTmp = item['pk_id']
+                if idTmp:
+                    seqIds.append(idTmp)
+            allItems = self.session.query(CamTrap).filter(CamTrap.pk_id.in_(seqIds)).all()
+
+            for item in allItems:
+                item.validated = 2
+
+        self.request.response.status_code = 204
+        return self.request.response
 
     def getDatas(self):
         if self.type_ == 'camtrap':
-            joinTable = join(CamTrap, self.viewTable,
-                             CamTrap.pk_id == self.viewTable.c['pk_id'])
-            query = select([CamTrap]).select_from(joinTable)
-            query = query.where(self.viewTable.c['sessionID'] == self.sessionID)
-            query = query.where(or_(self.viewTable.c['checked'] == 0, self.viewTable.c['checked'] == None))
-            query = query.order_by(asc(self.viewTable.c['date_creation']))
+            if self.request.method == 'GET':
+                joinTable = join(CamTrap, self.viewTable,
+                                CamTrap.pk_id == self.viewTable.c['pk_id'])
+                query = select([CamTrap]).select_from(joinTable)
+                query = query.where(self.viewTable.c['sessionID'] == self.sessionID)
+                query = query.where(or_(self.viewTable.c['checked'] == 0, self.viewTable.c['checked'] == None))
+                query = query.order_by(asc(self.viewTable.c['date_creation']))
+
         else:
             query = select([self.viewTable]
                            ).where(self.viewTable.c['sessionID'] == self.sessionID
@@ -211,6 +236,9 @@ class SensorDatasBySession(CustomView):
     def patch(self):
         # here patch method
         pass
+
+
+
 
     def create(self):
         return self.manual_validate()
@@ -405,6 +433,10 @@ class SensorDatasByType(CustomView):
         return metaDataInfo
 
     def uploadFileCamTrapResumable(self):
+        # print("yolooooo")
+        # print("ca tourne", mySubExif.running)
+        # print("end")
+        start = time.time()
         if not self.request.POST:
             return self.checkChunk()
         metaDataInfo = self.buildMetaDataInfoFromErdData()
@@ -418,18 +450,21 @@ class SensorDatasByType(CustomView):
         jetLag['hours'] = str(self.request.POST['jetLagHours'])
         fk_sensor = int(self.request.POST['id'])
         messageDate = ""
-    
+        #TODO make all test on temporary file before store it (better way)
 
         uri = pathPrefix + '\\' + pathPost
         extType = self.request.POST['resumableFilename'].split('.')
 
         inputFile = self.request.POST['file'].file
+        # print("before if :",time.time() - start )
         if(int(self.request.POST['resumableChunkNumber']) == 1 and int(self.request.POST['resumableCurrentChunkSize']) == int(self.request.POST['resumableTotalSize']) and str(extType[len(extType) - 1]) != ".zip"):
             if not os.path.isfile(pathPrefix + '\\' + pathPost + '\\' + str(self.request.POST['resumableFilename'])):
                 # write in the file
+                # print("before write file :",time.time() - start )
                 with open(uri + '\\' + str(self.request.POST['resumableFilename']), 'wb') as output_file:
                     shutil.copyfileobj(inputFile, output_file)
                 output_file.close()
+                # print("after write file :",time.time() - start )
             # datePhoto = dateFromExif( uri + '\\' + str(self.request.POST['resumableFilename']))
             jetLagArray = jetLag['hours'].split(':')
             if jetLag['operator'] == '+':
@@ -442,7 +477,28 @@ class SensorDatasByType(CustomView):
             datePhoto = dateDecall
             user = self.request.authenticated_userid['iss']
             if(checkDate(datePhoto,jetLag, str(self.request.POST['startDate']), str(self.request.POST['endDate']))):
+                # print("brancher ocr et script histogramme ici")
+                # import cv2
+                # import numpy as np 
+                # inputFile.seek(0)
+                # im= cv2.imread(uri + '\\' + str(self.request.POST['resumableFilename']))
+                # arr = np.fromfile(self.request.POST['file'].file, dtype=int)
+                # print(arr)
+                # print(self.request.POST['file'].file)
+                # print(type(self.request.POST['file'].file))
+                # i = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+                # with open(self.request.POST['file'].file,'rb') as testfile:
+                #     print('type :',type(testfile))
+                # print("before ocr :",time.time() - start )
+
+                toto = OCR_parser(uri + '\\' + str(self.request.POST['resumableFilename']))
+
+                # print("after ocr :",time.time() - start )
+
+                    
+                # print("ocr result",toto)
                 try:
+                    # print("before insert photo sql :",time.time() - start )
                     AddPhotoOnSQL(
                         fk_sensor, str(uri),
                         str(self.request.POST['resumableFilename']),
@@ -452,11 +508,50 @@ class SensorDatasByType(CustomView):
                         user,
                         cmdMetaDataInfo
                     )
-                    callExiv2(
-                        self = self,
-                        cmd = cmdMetaDataInfo,
-                        listFiles = [str(uri)+'\\'+str(self.request.POST['resumableFilename'])]
-                        )
+                    # print("after insert photo sql :",time.time() - start )
+                    # print("before insert call exif :",time.time() - start )
+                    # callExiv2(
+                    #     self = self,
+                    #     cmd = cmdMetaDataInfo,
+                    #     listFiles = [str(uri)+'\\'+str(self.request.POST['resumableFilename'])]
+                    #     )
+                    # resExif = mySubExif.get_metadata_batch(uri + '\\' + str(self.request.POST['resumableFilename']))
+                    resExif = ''
+                    exiftoolStart = time.time()
+                   
+                    try:
+                        sourceFile = str(uri)+'\\'+str(self.request.POST['resumableFilename'])
+                        # strParams = " ".join(cmdMetaDataInfo)
+                        # test = ['-Title=CA MARCHE TOUJOURS', '-Rating=5']
+                        # print('metadata',test)
+                        # test.append(sourceFile)
+
+                        cmdMetaDataInfo.append(sourceFile)
+                        # pCmd = test
+                        # print('cmd',pCmd)
+                        # print('%s' %sour)
+
+
+                        params = map(fsencode , cmdMetaDataInfo)
+                        # params = map(fsencode, [ '-Title=CA MARCHE TOUJOURS', '-Rating=5',  '%s' % sourceFile])
+
+
+                        # callExiv2(
+                        # self = self,
+                        # cmd = ['-Title=SUPER CA MARCHE '],
+                        # listFiles = [str(uri)+'\\'+str(self.request.POST['resumableFilename'])]
+                        # )
+
+                        # print("path ", sourceFile)
+                        # print('params' , params)
+                        resExif = mySubExif.execute( *params )
+                        # print("exif cost :", time.time() - exiftoolStart )
+
+                        # resExif = mySubExif.get_metadata(sourceFile)
+                    except Exception as e:
+                        print("ERROR",e)
+                    # print("res Exif for"+str(self.request.POST['resumableFilename'])+"",resExif)
+                    # print("after call exif :",time.time() - start )
                     if os.path.exists(os.path.join(str(uri),str(self.request.POST['resumableFilename'])+'_original')):
                         os.remove(os.path.join(str(uri),str(self.request.POST['resumableFilename'])+'_original'))
                     resizePhoto(str(uri) + "\\" +
@@ -486,6 +581,9 @@ class SensorDatasByType(CustomView):
         else:
             self.request.response.status_code = 200
             self.request.response.text = 'ok'
+        
+        stop = time.time() - start
+        print('ellapsed time : ', stop)
         return self.request.response
 
     def concatChunk(self):

@@ -55,7 +55,18 @@ context_permissions = {
         (Deny, 'group:superUser', ALL_PERMISSIONS),
         (Deny, 'group:user', ALL_PERMISSIONS),
     ],
+    'dashboard' : [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', 'read'),
+        (Allow, 'group:users', 'read')
+    ],
+    'mediasfiles' : [
+        (Allow, 'group:admin', ALL_PERMISSIONS),
+        (Allow, 'group:superUsers', ('create', 'update', 'read')),
+        (Allow, 'group:users', 'read')
+    ]
 }
+
 
 routes_permission = {
     'stations': {
@@ -117,5 +128,17 @@ routes_permission = {
         'POST': 'superUser',
         'PUT': 'superUser',
         'DELETE': 'superUser'
+    },
+    'dashboard': {
+        'GET': 'all',
+        'POST': 'superUser',
+        'PUT': 'superUser',
+        'DELETE': 'superUser'
+    },
+    'mediasfiles': {
+        'GET': 'all',
+        'POST': 'admin',
+        'PUT': 'admin',
+        'DELETE': 'admin'
     },
 }
