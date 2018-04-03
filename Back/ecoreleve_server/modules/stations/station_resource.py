@@ -150,7 +150,7 @@ class StationsResource(DynamicObjectCollectionResource):
         data = {}
         if len(self.request.json_body) > 0 :
             session = self.request.dbsession
-            stas = session.query(StationDB).filter(StationDB.ID.in_(self.request.json_body)).all()
+            stas = session.query(Station).filter(Station.ID.in_(self.request.json_body)).all()
             for sta in stas:
                 data[str(sta.ID)] = 'not deleted'
                 try :

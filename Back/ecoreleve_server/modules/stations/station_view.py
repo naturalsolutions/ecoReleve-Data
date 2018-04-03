@@ -18,3 +18,7 @@ class StationsView(RestCollectionView):
     @view_config(name='fieldActivity', request_method='GET', renderer='json')
     def getFieldActivityList(self):
         return self.context.getFieldActivityList()
+    
+    @view_config(name='deleteMany', request_method='POST', renderer='json')
+    def deleteMany(self):
+        return self.context.deleteMany()

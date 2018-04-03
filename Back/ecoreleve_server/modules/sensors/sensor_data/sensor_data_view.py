@@ -24,9 +24,13 @@ route_prefix = 'sensors/'
 @view_defaults(context=SensorDatasBySession)
 class SensorDatasBySessionView(CRUDCommonView):
 
-    @view_config(name='datas', renderer='json', permission='read')
+    @view_config(name='datas', renderer='json', request_method='GET', permission='read')
     def getDatas(self):
         return self.context.getDatas()
+
+    @view_config(name='datas', renderer='json', request_method='PATCH', permission='read')
+    def getDatasPatch(self):
+        return 'None'
 
     @view_config(name='updateMany', renderer='json', permission='read')
     def updateMany(self):
