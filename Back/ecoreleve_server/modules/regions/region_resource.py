@@ -84,7 +84,6 @@ class RegionsResource(CustomResource):
         return [r[0] for r in regions]
 
     def getGeomFromType(self):
-        start = time.time()
         session = self.request.dbsession
         params = self.request.params.mixed()
         existingGeoJson = None
@@ -97,7 +96,6 @@ class RegionsResource(CustomResource):
                 pass
 
         if not existingGeoJson:
-            print('geom is not available in redis db')
             results = session.query(GeomaticLayer).filter(
                 GeomaticLayer.type_ == params['type'])
             curStyle = self.colorByTypes.get(params['type'], {}).copy()
@@ -123,8 +121,6 @@ class RegionsResource(CustomResource):
                 get_redis_con().set('regions/' + params['type'], json.dumps(response), ex=60*3600*24)
         else:
             response = json.loads(existingGeoJson.decode())
-        stop = time.time() -start 
-        print('request geojson for type {type} in {sec} s '.format(type=params['type'], sec = stop))
         return response
 
 

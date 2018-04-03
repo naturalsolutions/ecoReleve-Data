@@ -158,8 +158,6 @@ class ExportQueryResource(CustomExportResource):
             criteria = {}
 
         if 'geo' in self.request.params:
-            # result = self.generator.get_geoJSON(criteria)
-            print('to geojson result')
             result = self.get_geoJSON(criteria=criteria)
         else:
             result = self.collection.search(filters=criteria, offset=0, limit=20, order_by=[])

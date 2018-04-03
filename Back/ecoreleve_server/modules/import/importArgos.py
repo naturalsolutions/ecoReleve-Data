@@ -24,7 +24,6 @@ def uploadFileArgos(request):
     session = request.dbsession
     user = request.authenticated_userid['iss']
     workDir = os.path.dirname(os.path.abspath(ecoreleve_server.__package__))
-    print(workDir)
     tmp_path = os.path.join(workDir, "ecoReleve_import")
     import_path = os.path.join(tmp_path, "uploaded_file")
     if not (os.path.exists(import_path)):
@@ -103,7 +102,6 @@ def parseDSFileAndInsert(full_filename, session, importID):
     with open(con_file, 'w') as f:
         print('-eng\n-title\n-out\n' + out_path + '\n' + full_filename, file=f)
 
-    print(MTI_path)
     # execute MTI-Parser
     args = [MTI_path]
     proc = subprocess.Popen([args[0]])

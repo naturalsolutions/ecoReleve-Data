@@ -210,9 +210,10 @@ class QueryEngine(object):
         if column is None:
             return query
 
-        if self.is_foreign_reference(column):
-            # TODO Filter on foreign Reference with sub query exists ? 
-            print('filters on foreign ref : ',criteria['Column'])
+        # if self.is_foreign_reference(column):
+        #     # TODO Filter on foreign Reference with sub query exists ? 
+        #     print('filters on foreign ref : ',criteria['Column'])
+
         query = query.where(
                 eval_.eval_binary_expr(
                     column, criteria['Operator'], criteria['Value']
@@ -296,7 +297,6 @@ class QueryEngine(object):
         except Exception as e:
             #raise error or just pass through ?? 
             # raise ColumnError('Column :col not exists !'.format(col=column_name))
-            print('Column {col} not exists !'.format(col=column_name))
             column = None
         return column
 
