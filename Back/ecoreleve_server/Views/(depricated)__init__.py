@@ -14,7 +14,7 @@ def add_cors_headers_response_callback(event):
     def cors_headers(request, response):
         response.headers.update({
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+            'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,PATCH,OPTIONS',
             'Access-Control-Allow-Headers': 'Origin,\
                                             Content-Type,\
                                             Accept,\
@@ -44,6 +44,7 @@ class CustomView(SecurityRoot):
     def __getitem__(self, ref):
         if ref in self.actions:
             self.retrieve = self.actions.get(ref)
+            self.create = self.actions.get(ref)
             return self
         return self.item(ref, self)
 
@@ -60,6 +61,12 @@ class CustomView(SecurityRoot):
         raise Exception('method has to be overriden')
 
     def retrieve(self):
+        raise Exception('method has to be overriden')
+
+    def create(self):
+        raise Exception('method has to be overriden')
+
+    def update(self):
         raise Exception('method has to be overriden')
 
 
@@ -255,7 +262,10 @@ class DynamicObjectCollectionView(CustomView):
         elif ref == 'autocomplete':
             return AutocompleteView(ref, self)
         else:
-            self.retrieve = self.actions.get(ref)
+            if self.request.method == 'POST' :
+                self.create = self.actions.get(ref)
+            else :
+                self.retrieve = self.actions.get(ref)
             return self
 
     @property
@@ -494,7 +504,7 @@ class RESTView(object):
 
     @view_config(request_method='PATCH', renderer='json', permission='update')
     def patch(self):
-        return self.context.update()
+        return self.context.patch()
 
     @view_config(request_method='PUT', renderer='json', permission='update')
     def put(self):
@@ -539,3 +549,19 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+    # config.add_route('sensors/camtrap/uncheckedDatas',
+    #                   'ecoReleve-Core/sensors/camtrap/uncheckedDatas')
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
+    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip',
+    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id',
+    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
+    # config.add_route('sensors/cameratrap/validate/sensor_id/site_id/equip_id' , 'ecoReleve-Core/cameratrap/validate/{sensor_id}/{site_id}/{equip_id}')
+
+    config.add_route('sensors/statut', 'ecoReleve-Core/sensors/{type}/statut')
+
+    config.add_route('cameratrap', 'ecoReleve-Core/photos/')
+    config.add_route('getSessionZip', 'ecoReleve-Core/photos/export/')

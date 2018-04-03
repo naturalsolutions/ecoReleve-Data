@@ -4,8 +4,10 @@ from ..Models import (
     FieldActivity_ProtocoleType,
     fieldActivity,
     ErrorAvailable,
-    sendLog
+    sendLog,
+    MediasFiles
 )
+from pyramid.request import Request
 from sqlalchemy import select, and_, join
 from traceback import print_exc
 from ..controllers.security import RootCore
@@ -55,12 +57,20 @@ class ObservationView(DynamicObjectView):
 
     def delete(self):
         if self.objectDB:
-            # if(self.objectDB.Equipment and self.objectDB.Equipment.checkExistedSensorData()):
-            #     self.request.response.status_code = 409
-            #     return {'protected' : True}
-            # else:
+
             id_ = self.objectDB.ID
             DynamicObjectView.delete(self)
+           
+            # certainly not the better way but don't know where handle it  
+            if 'mediafile' in self.objectDB.ProtocoleType.DynPropNames:
+                mediaItem = None
+                # mediaItem = self.session.query(MediasFiles).filter(MediasFiles.FK_Station == self.objectDB.FK_Station).one()
+                mediaItem = self.session.query(MediasFiles).filter(and_( MediasFiles.FK_Station == self.objectDB.FK_Station,MediasFiles.Name == self.objectDB.ObservationDynPropValues[0].ValueString.split('/')[-1] )).first()
+                if mediaItem :
+                    delSubReq = Request.blank('/ecoReleve-Core/mediasfiles/'+str(mediaItem.Id) )
+                    delSubReq.method = 'DELETE'
+                    delSubReq.cookies = self.request.cookies
+                    delSubResp = self.request.invoke_subrequest(delSubReq)
         else:
             id_ = None
         response = {'id': id_}

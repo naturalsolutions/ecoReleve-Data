@@ -129,11 +129,13 @@
 		"importServerError" : "Erreur de transfert de données vers le serveur.",
 		"fieldWorkerNameErr" : "Erreur de nom",
 		"fieldWorkerNameErrMsg" : "Ce nom est déjà sélectionné. Merci de choisir un autre nom.",
-		"gpx" :"fichier gpx",
-		"rfid" : "fichier rfid",
-		"gsm" : "fichier gsm",
-		"argos" : "fichier argos",
-		"label-selected" :"point(s) séléctionné(s)"
+		"gpx" :"fichier(s) gpx",
+		"rfid" : "fichier(s) rfid",
+		"gsm" : "fichier(s) gsm",
+		"argos" : "fichier(s) argos",
+		"camTrap" : "fichier(s) camera trap",
+		"label-selected" :"point(s) séléctionné(s)",
+		"jetlag" : "Décalage horaire (HH:MM:SS)"
 
 	},
 		"home" : {

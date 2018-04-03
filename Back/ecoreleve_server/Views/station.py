@@ -19,7 +19,6 @@ from . import DynamicObjectView, DynamicObjectCollectionView, context_permission
 from .protocols import ObservationsView
 from ..utils.parseValue import parser
 
-
 class StationView(DynamicObjectView):
 
     model = StationDB
@@ -37,6 +36,16 @@ class StationView(DynamicObjectView):
     def getObs(self, ref):
         return ObservationsView(ref, self)
 
+    def delete(self):
+        if self.objectDB:
+            id_ = self.objectDB.ID
+            DynamicObjectView.delete(self)
+        else:
+            id_ = None
+        response = {'id': id_}
+        return response
+
+
 
 class StationsView(DynamicObjectCollectionView):
 
@@ -47,11 +56,34 @@ class StationsView(DynamicObjectCollectionView):
 
     def __init__(self, ref, parent):
         DynamicObjectCollectionView.__init__(self, ref, parent)
+        self.ref = ref
         self.actions = {'updateSiteLocation': self.updateMonitoredSite,
                         'importGPX': self.getFormImportGPX,
                         'fieldActivity': self.getFieldActivityList,
+                        'deleteMany' : self.deleteMany,
+                        'insertAll' : self.insertAll
                         }
+        # self.__actions__ = {
+        #     'deleteMany' : self.deleteMany,
+        #     'insertAll' : self.insertAll
+        # }
         self.__acl__ = context_permissions[ref]
+
+    def deleteMany(self):
+        error = False
+        data = {}
+        if len(self.request.json_body) > 0 :
+            session = self.request.dbsession
+            stas = session.query(StationDB).filter(StationDB.ID.in_(self.request.json_body)).all()
+            for sta in stas:
+                data[str(sta.ID)] = 'not deleted'
+                try :
+                    session.delete(sta)
+                    data[str(sta.ID)] = 'deleted'                                   
+                except :
+                    self.request.response.status_code = 502
+
+        return data
 
     def updateMonitoredSite(self):
         session = self.request.dbsession
@@ -89,6 +121,12 @@ class StationsView(DynamicObjectCollectionView):
         params['criteria'].extend(criteria)
 
     def handleCriteria(self, params):
+        removePending = [{'Column': 'FK_StationType',
+                'Operator': 'Is not',
+                'Value': 6  # => TypeID of pending stations
+                }]
+        params['criteria'].extend(removePending)
+    
         if 'criteria' in params:
             lastImported = False
             for obj in params['criteria']:
@@ -186,11 +224,19 @@ class StationsView(DynamicObjectCollectionView):
                 'exceed': exceed}
         return data
 
-    # def insert(self):
-    #     session = self.request.dbsession
-    #     data = {}
-    #     for items, value in self.request.json_body.items():
-    #         data[items] = value
+    def create(self):
+        data = self.request.json_body
+
+        if not isinstance(data, list):
+            return self.insert()
+        else:
+            return self.insertMany()
+
+    def insert(self):
+        session = self.request.dbsession
+        data = {}
+        for items, value in self.request.json_body.items():
+            data[items] = value
 
     #     newSta = StationDB(
     #         FK_StationType=data['FK_StationType'],
@@ -204,7 +250,15 @@ class StationsView(DynamicObjectCollectionView):
     #     session.flush()
     #     msg = {'ID': newSta.ID}
 
-    #     return msg
+        return msg
+    
+    def insertAll(self) :
+        session = self.request.dbsession
+        data = {}
+        print("hello ")
+        print(self.request.json_body)
+        pass
+
 
     def insertMany(self):
         session = self.request.dbsession

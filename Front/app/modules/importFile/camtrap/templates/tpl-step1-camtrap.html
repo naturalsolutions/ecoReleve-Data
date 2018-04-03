@@ -1,0 +1,69 @@
+<div class="step-pane active sample-pane clearfix" data-step="2" id="step2" style="overflow: hidden;">
+
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 full-height" >
+		<div class="resumable" style="padding-right: 20px; padding-bottom: 20px; padding-top: 20px;">
+			<button class="btn btn-success fileinput-button js-add_file">
+						<i class="glyphicon glyphicon-plus"></i>
+						<span>Add files...</span>
+			</button>
+			<button type="reset" class="btn btn-warning cancel js-cancel-upload">
+					<i class="glyphicon glyphicon-ban-circle"></i>
+					<span>Cancel upload</span>
+			</button>
+			<div class="row">
+					<div id="js-nbFiles" class="col-md-6">
+						<span id ="js-nbFilesKey">Nb File :</span>
+						<span id ="js-nbFilesValue">0</span>
+					</div>
+					<div id="js-filesSize" class="col-md-6">
+							<span id ="js-filesSizeKey">Total Size :</span>
+							<span id ="js-filesSizeValue">0 Mb</span>
+					</div>
+			</div>
+			<div id="rgList-files" class="row" style="padding-bottom: 30px;">
+			</div>
+			
+			<!-- <% _.each( resumable.files , function(file) { %> 
+				<div class="row"> 		
+					<div id="js-fileName" class="col-md-4 "><%=file.fileName%></div>
+					<div id="js-fileSize" class="col-md-4 "><%=file.size%></div >	
+					 <div id ="js-fileDate" class="col-md-4 "><%=file.dateFind.dateString%></div> 
+				</div>
+			<% }) %> -->
+
+		</div>
+
+	</div>
+
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+		<br><br>
+		<div class="drag-zone-hover" style="height:400px" id="drag-drop-zone-resumable">
+			<span class="huge">Drop your file(s) here</span>
+		</div>
+		<br><br><br>
+	</div>
+
+	<div class="clear">
+	</div>
+</div>
+
+<div class="modal fade" id="myPleaseWait" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+	<div class="modal-dialog ">
+		<div class="modal-content js-camtrapProcessing">
+			<div class="modal-header">
+				<h4 class="modal-title">
+					<span class="glyphicon glyphicon-time"></span>
+					Please wait will processing data
+				</h4>
+			</div>
+			<div class="modal-body">
+				<div class="progress">
+					<div class="progress-bar progress-bar-info
+					progress-bar-striped active"
+					style="width: 0%">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

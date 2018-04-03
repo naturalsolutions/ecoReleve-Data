@@ -29,6 +29,7 @@ define([
       this.displayHistoryGrid();
       this.displayEquipmentGrid();
       this.displayStationsGrid();
+      this.displayCameraTrapGrid();
     },
 
     reload: function(options) {
@@ -83,6 +84,28 @@ define([
         clientSide: true,
       }));
       this.gridViews.push(this.stationsGrid);
+    },
+
+    displayCameraTrapGrid: function() {
+      var _this = this;
+      this.rgCameraTrapGrid.show(this.CameraTrapGrid = new GridView({
+        columns: this.model.get('cameraTrapColumnDefs'),
+        type: this.model.get('type'),
+        url: 'photos/?siteid=' + this.model.get('id') ,
+        clientSide: true,
+        gridOptions: {
+          skipFocus: true,
+          enableFilter: true,
+          rowSelection: 'single',
+          suppressRowClickSelection: false,
+          onRowClicked: function(row){
+            if(row.event.target.tagName !== 'SPAN') {
+              _this.displayGallery(row.node.data);
+            }
+          }
+        }
+      }));
+      this.gridViews.push(this.CameraTrapGrid);
     },
 
   });

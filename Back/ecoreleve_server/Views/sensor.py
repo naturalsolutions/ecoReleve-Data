@@ -114,6 +114,34 @@ class SensorView(DynamicObjectView):
 
     def getEquipment(self):
         _id = self.objectDB.ID
+        # curSensorType = self.objectDB.GetType().Name
+
+        # if (curSensorType.upper() in ['RFID DECODER', 'CAMERA TRAP']):
+        #     table = Base.metadata.tables['MonitoredSiteEquipment']
+        #     joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
+        #     joinTable = join(joinTable, MonitoredSite, table.c[
+        #                     'FK_MonitoredSite'] == MonitoredSite.ID)
+        #     query = select([table.c['StartDate'],
+        #                     table.c['EndDate'],
+        #                     Sensor.UnicIdentifier,
+        #                     MonitoredSite.Name,
+        #                     MonitoredSite.ID.label('MonitoredSiteID')]
+        #                    ).select_from(joinTable
+        #                                  ).where(table.c['FK_Sensor'] == _id
+        #                                          ).order_by(desc(table.c['StartDate']))
+
+        # elif (curSensorType.lower() in ['gsm', 'satellite', 'vhf']):
+        #     table = Base.metadata.tables['IndividualEquipment']
+        #     joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
+        #     query = select([table.c['StartDate'],
+        #                     table.c['EndDate'],
+        #                     table.c['FK_Individual'],
+        #                     Sensor.UnicIdentifier
+        #                     ]).select_from(joinTable
+        #                                    ).where(table.c['FK_Sensor'] == _id
+        #                                            ).order_by(desc(table.c['StartDate']))
+        # else:
+        #     return 'bad request'
 
         table = Base.metadata.tables['SensorEquipment']
         joinTable = join(table, Sensor, table.c['FK_Sensor'] == Sensor.ID)
@@ -186,7 +214,7 @@ class SensorsView(DynamicObjectCollectionView):
     def getUnicIdentifier(self):
         sensorType = self.request.params['sensorType']
         query = select([Sensor.UnicIdentifier.label('label'), Sensor.ID.label(
-            'val')]).where(Sensor.FK_SensorType == sensorType)
+            'val')]).where(Sensor.FK_SensorType == sensorType).order_by(Sensor.UnicIdentifier)
         response = [OrderedDict(row) for row in self.session.execute(query).fetchall()]
 
         return response

@@ -112,7 +112,7 @@ define([
             );
           return false;
         } else {
-          var url = 'sensors/rfid/datas';
+          var url = 'sensorDatas/rfid';
           var data = new FormData();
           var self = this;
           _this.ui.progress.removeClass('hidden');

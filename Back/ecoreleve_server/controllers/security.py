@@ -77,7 +77,7 @@
 #     def get_userID(self, request):
 #         try:
 #             token = request.cookies.get("ecoReleve-Core")
-#             claims = self.decode_jwt(request, token)
+#             claims = self.decode_jwt(request, token, verify=False)
 #             userid = claims['iss']
 #             return userid
 #         except:
@@ -175,8 +175,18 @@
 
 #     'release': [
 #         (Allow, 'group:admin', ALL_PERMISSIONS),
-#         (Deny, 'group:superUser', ALL_PERMISSIONS),
-#         (Deny, 'group:user', ALL_PERMISSIONS),
+#         (Deny, 'group:superUsers', ALL_PERMISSIONS),
+#         (Deny, 'group:users', ALL_PERMISSIONS),
+#     ],
+#     'dashboard' : [
+#         (Allow, 'group:admin', ALL_PERMISSIONS),
+#         (Allow, 'group:superUsers', 'read'),
+#         (Allow, 'group:users', 'read')
+#     ],
+#     'mediasfiles' : [
+#         (Allow, 'group:admin', ALL_PERMISSIONS),
+#         (Allow, 'group:superUsers', ('create', 'update', 'read')),
+#         (Allow, 'group:users', 'read')
 #     ],
 # }
 
@@ -241,5 +251,17 @@
 #         'POST': 'superUser',
 #         'PUT': 'superUser',
 #         'DELETE': 'superUser'
+#     },
+#     'dashboard': {
+#         'GET': 'all',
+#         'POST': 'superUser',
+#         'PUT': 'superUser',
+#         'DELETE': 'superUser'
+#     },
+#     'mediasfiles': {
+#         'GET': 'all',
+#         'POST': 'admin',
+#         'PUT': 'admin',
+#         'DELETE': 'admin'
 #     },
 # }

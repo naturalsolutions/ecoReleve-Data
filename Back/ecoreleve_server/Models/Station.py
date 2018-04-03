@@ -57,6 +57,24 @@ class Station(HasDynamicProperties, Base):
     Station_FieldWorkers = relationship(
         'Station_FieldWorker', backref='Station', cascade="all, delete-orphan")
 
+    '''
+    TODO Need to find a better way to delete MediasFiles
+        row in db is deleted but files are always on HDD
+        the principal pb is the transaction 
+        how to rollback a deleted files if something goes wrong ?
+    '''
+
+    MediasFiles = relationship(
+        'MediasFiles', back_populates='Station', cascade="all, delete-orphan")
+    
+    __table_args__ = (UniqueConstraint('StationDate', 'LAT', 'LON',
+                                       name='_unique_constraint_lat_lon_date'),
+                      {'implicit_returning': False})
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        ObjectWithDynProp.__init__(self)
+
     ''' hybrid property on relationship '''
     @hybrid_property
     def FieldWorkers(self):

@@ -95,6 +95,8 @@ define([
       this.goTo = options.goTo || false;
 
       this.name = options.name || false;
+      if(options.gridOptions)
+        this.skipFocus = options.gridOptions.skipFocus || false;
 
       this.gridOptions = {
         enableSorting: true,
@@ -111,7 +113,9 @@ define([
           $.when(_this.deferred).then(function(){
             setTimeout(function(){
               _this.gridOptions.api.firstRenderPassed = true;
-              _this.focusFirstCell();
+              if(!_this.skipFocus) {
+                _this.focusFirstCell();
+              }
               if (!options.noResizeToFit){
                 _this.gridOptions.api.sizeColumnsToFit(); //keep it for the moment
               }
@@ -436,7 +440,8 @@ define([
             return;
           }*/
         }
-        col.headerCellTemplate = _this.getHeaderCellTemplate();
+        if(typeof(col.headerCellTemplate) == 'undefined')
+          col.headerCellTemplate = _this.getHeaderCellTemplate();
       });
 
 

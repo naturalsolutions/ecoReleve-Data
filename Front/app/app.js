@@ -24,6 +24,7 @@ define([
   'ns_modules/ns_bbfe/bbfe-lat',
   'ns_modules/ns_bbfe/bbfe-fieldworkarea-autocomplete',
   'ns_modules/ns_bbfe/bbfe-objectPicker/bbfe-objectPicker',
+  'ns_modules/ns_bbfe/bbfe-mediaFile',
 
   ],
 
@@ -252,7 +253,7 @@ function( Marionette, LytRootView, Router, Controller,Swal,config, $, Backbone) 
             //   cancelButtonColor: 'grey',
             //   cancelButtonText: 'No',
             //   closeOnConfirm: true,
-            // }, 
+            // },
             // function(isConfirm){
             //   if (isConfirm) {
             //     var toto = Object.keys(window.formInEdition.form).map(function(key2, index2) {

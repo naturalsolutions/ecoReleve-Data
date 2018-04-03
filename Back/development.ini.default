@@ -42,11 +42,14 @@ data_schema = you Database schema
 sensor_schema = you Sensor Database schema
 
 # sql driver dialect (ex: for MS SQL Serveer)
-dialect = mssql 
+dialect = mssql
 
 # Thesaurus Configuration
 wsThesaurus.wsUrl = yourWebWervicesURL
 wsThesaurus.lng = fr
+
+camTrap.path = C:\Data\CameraTrap
+mediasFiles.path = C:\Data\mediasFiles
 
 
 

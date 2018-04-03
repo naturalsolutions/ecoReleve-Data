@@ -1,0 +1,84 @@
+ALTER VIEW [dbo].[V_dataCamTrap_With_equipSite]
+AS
+SELECT        
+cam.pk_id,
+E.ID AS sessionID,
+S.UnicIdentifier,
+cam.fk_sensor,
+M.Name AS site_name,
+M.ID AS FK_MonitoredSite,
+M.Category AS site_type,
+E.StartDate,
+E3.StartDate AS EndDate,
+cam.checked,
+cam.validated,
+cam.date_creation,
+cam.processed
+FROM 
+ecoReleve_Sensor.dbo.TcameraTrap AS cam 
+LEFT OUTER JOIN
+dbo.Equipment AS E 
+ON 
+E.FK_Sensor = cam.fk_sensor 
+AND 
+E.Deploy = 1 
+AND 
+E.StartDate < cam.date_creation 
+AND NOT EXISTS
+(SELECT
+		ID, 
+		FK_Sensor, 
+		FK_Individual, 
+		FK_Observation, 
+		StartDate, 
+		Deploy, 
+		FK_MonitoredSite
+FROM            
+		dbo.Equipment AS e2
+WHERE        
+		(FK_Sensor = E.FK_Sensor) 
+AND 
+		(StartDate > E.StartDate) 
+AND 
+		(StartDate < cam.date_creation)
+) 
+LEFT OUTER JOIN
+dbo.MonitoredSite AS M 
+ON 
+E.FK_MonitoredSite = M.ID 
+LEFT OUTER JOIN
+dbo.Sensor AS S 
+ON 
+cam.fk_sensor = S.ID 
+LEFT OUTER JOIN
+dbo.Equipment AS E3 
+ON 
+E3.FK_Sensor = cam.fk_sensor 
+AND 
+E3.Deploy = 0 
+AND 
+E3.StartDate > E.StartDate 
+AND NOT EXISTS
+(SELECT        
+	ID,
+	FK_Sensor,
+	FK_Individual, 
+	FK_Observation, 
+	StartDate, 
+	Deploy, 
+	FK_MonitoredSite
+FROM 
+	dbo.Equipment AS e4
+WHERE
+	(FK_Sensor = E.FK_Sensor) 
+AND 
+	(StartDate < E3.StartDate) 
+AND 
+	(StartDate > E.StartDate)
+)
+
+
+INSERT INTO [dbo].[TVersion] (TVer_FileName,TVer_Date,TVer_DbName) VALUES ('169_alter_view_V_dataCamTrap_With_equiSite_add_col_processed',GETDATE(),(SELECT db_name()))
+
+
+GO

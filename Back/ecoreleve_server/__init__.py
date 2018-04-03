@@ -13,6 +13,7 @@ from .core.init_db import Base, BaseExport, initialize_session, initialize_sessi
 from .core.security import include_jwt_policy
 from .utils import loadThesaurusTrad
 from .utils.callback import add_cors_headers_response_callback, session_callback
+from .utils.init_cameratrap_path import initialize_cameratrap_path
 from .modules.url_dispatch import add_routes
 
 from .renderers.csvrenderer import CSVRenderer
@@ -26,7 +27,6 @@ def datetime_adapter(obj, request):
         return obj.strftime('%d/%m/%Y %H:%M:%S')
     except:
         return obj.strftime('%d/%m/%Y')
-
 
 def date_adapter(obj, request):
     """Json adapter for datetime objects."""
@@ -42,7 +42,6 @@ def time_adapter(obj, request):
         return obj.strftime('%H:%M')
     except:
         return obj.strftime('%H:%M:%S')
-
 
 def decimal_adapter(obj, request):
     """Json adapter for Decimal objects."""
@@ -84,7 +83,7 @@ def main(global_config, **settings):
     config.set_root_factory(SecurityRoot)
 
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
-
+    initialize_cameratrap_path(dbConfig, settings)
     loadThesaurusTrad(config)
     add_routes(config)
     config.scan()

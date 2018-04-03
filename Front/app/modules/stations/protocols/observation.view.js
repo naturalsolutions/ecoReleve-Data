@@ -50,6 +50,13 @@ define([
         displayMode: this.displayMode,
         formRegion: this.ui.form,
         reloadAfterSave: true,
+        savingSuccess : function(a,b,c,d,e) {
+          console.log(a);
+          console.log(b);
+          console.log(c);
+          console.log(d);
+          console.log(e);
+        },
         savingError: this.handleErrors,
         afterSaveSuccess: function(response){
           var id;

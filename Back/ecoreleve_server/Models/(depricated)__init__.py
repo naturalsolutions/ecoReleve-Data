@@ -6,8 +6,8 @@ import pandas as pd
 from traceback import print_exc
 
 AppConfig = configparser.ConfigParser()
-AppConfig.read('././development.ini')
-print(AppConfig['app:main']['sensor_schema'])
+AppConfig.read('C:\\inetpub\\wwwroot\\ecoReleve-Data\\Back\\development.ini')
+# print(AppConfig['app:main']['sensor_schema'])
 
 pendingSensorData = []
 indivLocationData = []
@@ -148,22 +148,19 @@ def db(request):
 # from .Station import *
 # from .Region import *
 from .FieldActivity import *
-# from .Individual import *
-# from .Sensor import *
-# from .MonitoredSite import *
-# from .Equipment import *
-# from .Import import *
-# from .SensorData import *
-# from .List import *
-# from .Log import sendLog
+from .Individual import *
+from .Sensor import *
+from .MonitoredSite import *
+from .Equipment import *
+from .Import import *
+from .SensorData import *
+from .List import *
+from .Log import sendLog
+from .Media import *
 
-# from sqlalchemy.inspection import inspect
 
-# print(type(inspect(Individual).primary_key[0]))
-
-# print(Individual.Equipments.__dict__)
-# # LinkedTables['Individual'] = Individual
-# # LinkedTables['Station'] = Station
-# # LinkedTables['Protocoles'] = Protocoles
-# # LinkedTables['Sensor'] = Sensor
-# # LinkedTables['MonitoredSite'] = MonitoredSite
+LinkedTables['Individual'] = Individual
+LinkedTables['Station'] = Station
+LinkedTables['Protocoles'] = Protocoles
+LinkedTables['Sensor'] = Sensor
+LinkedTables['MonitoredSite'] = MonitoredSite
