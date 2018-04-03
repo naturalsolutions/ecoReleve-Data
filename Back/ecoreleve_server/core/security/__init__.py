@@ -18,10 +18,11 @@ GROUPS = {'superUser': ['group:superUser'],
 
 def groupfinder(userid, request):
     role = []
-    role = get_role_from_redis(userid, request)
+    claims = request.authenticated_userid
+    if 'app_roles' in claims and 'ecoreleve' in claims['app_roles']:
+        role = request.authenticated_userid['app_roles']['ecoreleve']
 
     if not role:
-        print('role not found')
         session = request.dbsession
         Tuser_role = Base.metadata.tables['VUser_Role']
         query_check_role = select([Tuser_role.c['role']]).where(
@@ -31,31 +32,7 @@ def groupfinder(userid, request):
         if currentUserRoleID in USERS:
             currentUserRole = USERS[currentUserRoleID]
             role = GROUPS.get(currentUserRole, [])
-            set_role_in_redis(userid, request, role)
     return role
-
-def get_role_from_redis(userid, request):
-    role = []
-    if localRedis is not None:
-        try:
-            user_infos_redis = localRedis.get('user_'+str(userid))
-            user_infos = json.loads(user_infos_redis.decode())
-            if user_infos['cookie'] == request.cookies.get("ecoReleve-Core"):
-                role = user_infos['role']
-        except:
-            pass
-            # from traceback import print_exc
-            # print_exc()
-    return role
-
-def set_role_in_redis(userid, request, role):
-    if get_redis_con() is not None:
-        user_infos = {
-            'cookie': request.cookies.get("ecoReleve-Core"),
-            'role': role
-        }
-        localRedis.set('user_'+str(userid), json.dumps(user_infos), ex=3600*1)
-
 
 def include_jwt_policy(config):
     authz_policy = ACLAuthorizationPolicy()

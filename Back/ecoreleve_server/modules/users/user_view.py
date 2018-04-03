@@ -1,6 +1,9 @@
-from pyramid.security import NO_PERMISSION_REQUIRED
-from pyramid.view import view_config
+import json
 from sqlalchemy import select
+from pyramid.security import NO_PERMISSION_REQUIRED, remember
+from pyramid.view import view_config
+from pyramid.response import Response
+from pyramid.interfaces import IAuthenticationPolicy
 
 from .user_model import User
 from ecoreleve_server.core.security import groupfinder
@@ -46,7 +49,25 @@ def current_user(request, user_id=None):
     ]).where(User.id == userid)
     response = dict(session.execute(query).fetchone())
     response['role'] = currentUserRole[0].replace('group:', '')
+
+    if 'app_roles' not in request.authenticated_userid:
+        response = setRoleInCookie(request, response, currentUserRole)
     return response
+
+
+def setRoleInCookie(request, body, role):
+    user_infos = request.authenticated_userid
+
+    claims = user_infos
+    claims['app_roles'] = {'ecoreleve': role}
+    jwt = make_jwt(request, claims)
+    response = Response(body=json.dumps(body), content_type='text/plain')
+    remember(response, jwt)
+    return response
+
+def make_jwt(request, claims):
+    policy = request.registry.queryUtility(IAuthenticationPolicy)
+    return policy.encode_jwt(request, claims)
 
 
 @view_config(
