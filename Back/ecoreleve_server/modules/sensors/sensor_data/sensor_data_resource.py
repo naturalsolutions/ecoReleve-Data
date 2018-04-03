@@ -1,28 +1,34 @@
+import os
+import time
+import datetime
+import numpy as np
+import json
+import pandas as pd
+from traceback import print_exc
+from exiftool import fsencode
 from sqlalchemy import func, select, bindparam, text, Table, join, or_, and_, update, asc
 from sqlalchemy.orm import joinedload
 
-import json
-import pandas as pd
-# from datetime import datetime
-import datetime
-from . import CustomView
-from ..controllers.security import RootCore, context_permissions
-from ..Models import Base, dbConfig, graphDataDate, CamTrap, ArgosGps, Gsm, Rfid, Equipment, User, MonitoredSite, MetaData
-import numpy as np
-from ..utils.distance import haversine
-from traceback import print_exc
-from ..utils.data_toXML import data_to_XML
-from lxml import etree
-from .importArgos import uploadFileArgos
-from .importGSM import uploadFilesGSM
-from .importRFID import uploadFileRFID
-from .importCAMTRAP import *
-import os
-import time
+from ecoreleve_server.core.base_resource import CustomResource
+from ecoreleve_server.core import RootCore, Base, dbConfig
+from ecoreleve_server.utils.distance import haversine
+from ecoreleve_server.utils.data_toXML import data_to_XML
+from ecoreleve_server.utils.ocr_detect import OCR_parser
+from ecoreleve_server.utils.parseValue import parser
 
-from ..utils.ocr_detect import OCR_parser
-from ..__init__ import mySubExif
-from exiftool import fsencode
+from ecoreleve_server.modules.permissions import context_permissions
+from ecoreleve_server.modules.import_module.importArgos import uploadFileArgos
+from ecoreleve_server.modules.import_module.importGSM import uploadFilesGSM
+from ecoreleve_server.modules.import_module.importRFID import uploadFileRFID
+from ecoreleve_server.modules.import_module.importCameraTrap import *
+from ecoreleve_server.modules.statistics import graphDataDate
+from ecoreleve_server.modules.monitored_sites import MonitoredSite
+from ecoreleve_server.modules.observations import Equipment
+from ecoreleve_server.modules.users import User
+
+from . import CamTrap, ArgosGps, Gsm, Rfid, MetaData
+from ecoreleve_server.__init__ import mySubExif
+
 
 ArgosDatasWithIndiv = Table(
     'VArgosData_With_EquipIndiv', Base.metadata, autoload=True)
@@ -34,14 +40,14 @@ DataRfidasFile = Table('V_dataRFID_as_file',
                        Base.metadata, autoload=True)
 DataCamTrapFile = Table('V_dataCamTrap_With_equipSite',
                         Base.metadata, autoload=True)
-
 viewDict = {'gsm': GsmDatasWithIndiv,
             'argos': ArgosDatasWithIndiv,
             'rfid': DataRfidasFile,
-            'camtrap': DataCamTrapFile}
+            'camtrap': DataCamTrapFile
+            }
 
 
-class SensorDatasBySessionItem(CustomView):
+class SensorDatasBySessionItem(CustomResource):
 
     item = None
     models = {'gsm': Gsm,
@@ -50,7 +56,7 @@ class SensorDatasBySessionItem(CustomView):
               'camtrap': CamTrap}
 
     def __init__(self, ref, parent):
-        CustomView.__init__(self, ref, parent)
+        CustomResource.__init__(self, ref, parent)
         self.type_ = parent.type_
         self.itemID = ref
         self.viewTable = parent.viewTable
@@ -91,9 +97,9 @@ class SensorDatasBySessionItem(CustomView):
         firstTagFind = 0
         for strToReplace in ['<TAG>']:
             if strToReplace in xmlStr :
-                if not firstTagFind:                   
+                if not firstTagFind:
                     firstTagFind = 1
-                else:   
+                else:
                     strForReplace = ','
                 xmlStr = xmlStr.replace(strToRemove , strForReplace)
         return xmlStr
@@ -109,22 +115,28 @@ class SensorDatasBySessionItem(CustomView):
         return XMLTags
 
 
-class SensorDatasBySession(CustomView):
+class SensorDatasBySession(CustomResource):
 
     item = SensorDatasBySessionItem
+    children = [('argos', SensorDatasBySessionItem),
+                ('gsm', SensorDatasBySessionItem),
+                ('rfid', SensorDatasBySessionItem),
+                ('camtrap', SensorDatasBySessionItem)
+    ]
 
     def __init__(self, ref, parent):
-        CustomView.__init__(self, ref, parent)
+        CustomResource.__init__(self, ref, parent)
         self.type_ = parent.type_
         self.sessionID = ref
         if ref == '0':
             self.sessionID = None
         self.viewTable = parent.viewTable
-        self.__acl__ = parent.__acl__
-        self.actions = {
-            'datas': self.getDatas,
-            'updateMany' : self.updateMany
-            }
+        # self.__acl__ = parent.__acl__
+
+        # self.actions = {
+        #     'datas': self.getDatas,
+        #     'updateMany' : self.updateMany
+        #     }
 
     def updateMany(self):
         if self.type_ == 'camtrap':
@@ -235,9 +247,6 @@ class SensorDatasBySession(CustomView):
         # here patch method
         pass
 
-
-
-
     def create(self):
         return self.manual_validate()
 
@@ -288,29 +297,26 @@ class SensorDatasBySession(CustomView):
         return response
 
 
-class SensorDatasByType(CustomView):
+class SensorDatasByType(CustomResource):
 
     item = SensorDatasBySession
+    children = [('{int}', SensorDatasBySession)]
     dictFuncImport = {
         'argos': uploadFileArgos,
         'gsm': uploadFilesGSM,
         'rfid': uploadFileRFID,
     }
+    __acl__ = context_permissions['stations']
 
     def __init__(self, ref, parent):
-        CustomView.__init__(self, ref, parent)
+        CustomResource.__init__(self, ref, parent)
         self.type_ = ref
         self.viewTable = viewDict[ref]
+
         self.queryType = {'gsm': self.queryWithIndiv,
                           'argos': self.queryWithIndiv,
                           'rfid': self.queryWithSite,
                           'camtrap': self.queryWithSite}
-        self.actions = {'getChunck': self.checkChunk,
-                        'validate': self.auto_validation,
-                        'concat': self.concatChunk,
-                        'resumable': self.uploadFileCamTrapResumable
-                        }
-        self.__acl__ = context_permissions['stations']
 
     def retrieve(self):
         criteria = self.request.params.get('criteria', None)
@@ -419,14 +425,13 @@ class SensorDatasByType(CustomView):
         metaDataInfo['misc']['projectName'] = ''
 
         monitoredSite = self.session.query(MonitoredSite).get(self.request.POST['monitoredSiteId'])
-        monitoredSite.LoadNowValues()
-        
-        metaDataInfo['monitoredSite']['Name'] = monitoredSite.Name
-        metaDataInfo['monitoredSite']['LAT'] = monitoredSite.MonitoredSitePositions[0].LAT
-        metaDataInfo['monitoredSite']['LON'] = monitoredSite.MonitoredSitePositions[0].LON
-        metaDataInfo['monitoredSite']['Precision'] = monitoredSite.MonitoredSitePositions[0].Precision
-        metaDataInfo['monitoredSite']['ELE'] = monitoredSite.MonitoredSitePositions[0].ELE
 
+        sitePosition = monitoredSite.GetLastPositionWithDate(parser(str(self.request.POST['endDate'])))
+        metaDataInfo['monitoredSite']['Name'] = monitoredSite.Name
+        metaDataInfo['monitoredSite']['LAT'] = sitePosition['LAT']
+        metaDataInfo['monitoredSite']['LON'] = sitePosition['LON']
+        metaDataInfo['monitoredSite']['Precision'] = sitePosition['Precision']
+        metaDataInfo['monitoredSite']['ELE'] = sitePosition['ELE']
 
         return metaDataInfo
 
@@ -547,7 +552,10 @@ class SensorDatasByType(CustomView):
 
                         # resExif = mySubExif.get_metadata(sourceFile)
                     except Exception as e:
+                        print_exc()
                         print("ERROR",e)
+                        raise e
+
                     # print("res Exif for"+str(self.request.POST['resumableFilename'])+"",resExif)
                     # print("after call exif :",time.time() - start )
                     if os.path.exists(os.path.join(str(uri),str(self.request.POST['resumableFilename'])+'_original')):
@@ -939,9 +947,14 @@ class SensorDatasByType(CustomView):
         # return resultat
 
 
-class SensorDatas(CustomView):
+class SensorDatas(CustomResource):
 
     item = SensorDatasByType
+    children = [('argos', SensorDatasByType),
+                ('gsm', SensorDatasByType),
+                ('rfid', SensorDatasByType),
+                ('camtrap', SensorDatasByType)
+    ]
 
 
-RootCore.listChildren.append(('sensorDatas', SensorDatas))
+RootCore.children.append(('sensorDatas', SensorDatas))

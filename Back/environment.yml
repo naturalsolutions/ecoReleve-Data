@@ -12,6 +12,7 @@ dependencies:
   - pyodbc=4.0.17
   - zope.interface
   - psutil
+  - scipy
 
   - pip:
     - pypyodbc>=1.3.4

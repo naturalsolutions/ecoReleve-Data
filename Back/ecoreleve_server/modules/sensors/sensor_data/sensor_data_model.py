@@ -11,6 +11,7 @@ from sqlalchemy import (
     func,
     UniqueConstraint,
     ForeignKey,
+    Unicode
 )
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
@@ -204,3 +205,34 @@ class Rfid(Base):
         UniqueConstraint(FK_Sensor, chip_code, date_),
         {'schema': sensor_schema, 'implicit_returning': False}
     )
+
+
+class CamTrap(Base):
+    __tablename__ = 'TcameraTrap'
+    pk_id = Column(Integer, Sequence('seq_camtrap_pk_id'), primary_key=True)
+    fk_sensor = Column(Integer, nullable=False)
+    path = Column(String(250), nullable = False)
+    name = Column(String(250), nullable = False)
+    extension = Column(String(250), nullable = False)
+    checked = Column(Boolean, nullable = True)
+    validated = Column(Integer, nullable = True)
+    date_creation = Column(DateTime, nullable = True)
+    date_uploaded = Column(DateTime, server_default = func.now())
+    tags = Column(String,nullable=True)
+    note = Column(Integer, nullable=False)
+    stationId = Column(Integer, nullable= True)
+    FK_Import = Column('FK_Import', Integer, ForeignKey(dbConfig['sensor_schema']+'.Import.ID'))
+    __table_args__ = (
+        {'schema': sensor_schema, 'implicit_returning': False}
+    )
+
+
+class MetaData(Base):
+    __tablename__ = 'MetaData'
+    Id = Column(Integer , Sequence('seq_MetaData_Id'), primary_key=True)
+    FK_CamTrap = Column('FK_CamTrap', Integer, ForeignKey(dbConfig['sensor_schema']+'.TcameraTrap.pk_id'))
+    CommandLine = Column(Unicode(None) , nullable = True)
+
+    __table_args__ = ({'schema': sensor_schema,
+                       'implicit_returning': False
+                       })

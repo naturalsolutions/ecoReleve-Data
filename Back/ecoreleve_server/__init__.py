@@ -21,7 +21,8 @@ from .renderers.csvrenderer import CSVRenderer
 from .renderers.pdfrenderer import PDFrenderer
 from .renderers.gpxrenderer import GPXRenderer
 
-global mySubExif
+mySubExif = exiftool.ExifTool()
+mySubExif.start()
 
 
 def datetime_adapter(obj, request):
@@ -50,7 +51,6 @@ def decimal_adapter(obj, request):
     return float(obj)
 
 def initialize_exiftool():
-    global mySubExif
     mySubExif = exiftool.ExifTool()
     mySubExif.start()
 
@@ -89,15 +89,15 @@ def main(global_config, **settings):
     include_jwt_policy(config)
     config.set_root_factory(SecurityRoot)
 
+    if 'init_exiftool' in settings and settings['init_exiftool'] == 'False':
+        print('Exiftool not initialized')
+        pass
+    else:
+        initialize_exiftool()
     config.add_subscriber(add_cors_headers_response_callback, NewRequest)
     initialize_cameratrap_path(dbConfig, settings)
     loadThesaurusTrad(config)
     add_routes(config)
     config.scan()
 
-    if 'init_exiftool' in settings and settings['init_exiftool'] == 'False':
-        print('Exiftool not initialized')
-        pass
-    else:
-        initialize_exiftool()
     return config.make_wsgi_app()

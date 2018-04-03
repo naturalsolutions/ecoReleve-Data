@@ -158,5 +158,5 @@ class MediasFilesResource(CustomResource):
             raise
 
 
-RootCore.children.append(('mediasfiles', MediasFilesView))
+RootCore.children.append(('mediasfiles', MediasFilesResource))
 

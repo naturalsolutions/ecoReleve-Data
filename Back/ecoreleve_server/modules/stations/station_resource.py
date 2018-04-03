@@ -22,6 +22,15 @@ class StationResource(DynamicObjectResource):
     children = [('observations', ObservationsResource)]
     __acl__ = context_permissions['stations']
 
+    def delete(self):
+        if self.objectDB:
+            id_ = self.objectDB.ID
+            DynamicObjectResource.delete(self)
+        else:
+            id_ = None
+        response = {'id': id_}
+        return response
+
 
 class StationsResource(DynamicObjectCollectionResource):
 
@@ -37,6 +46,27 @@ class StationsResource(DynamicObjectCollectionResource):
     def __init__(self, ref, parent):
         DynamicObjectCollectionResource.__init__(self, ref, parent)
         self.__acl__ = context_permissions[ref]
+
+
+    # def create(self):
+    #     data = self.request.json_body
+    #     if not isinstance(data, list):
+    #         return self.insert()
+    #     else:
+    #         return self.insertMany()
+
+    # def insert(self):
+    #     session = self.request.dbsession
+    #     data = {}
+    #     for items, value in self.request.json_body.items():
+    #         data[items] = value
+
+    def insertAll(self) :
+        session = self.request.dbsession
+        data = {}
+        print("hello ")
+        print(self.request.json_body)
+        pass
 
     def updateMonitoredSite(self):
         session = self.request.dbsession
@@ -84,6 +114,12 @@ class StationsResource(DynamicObjectCollectionResource):
         if not lastImported:
             map(lambda x: obj['Column'] != 'FK_StationType', params['criteria'])
 
+        removePending = [{'Column': 'FK_StationType',
+                'Operator': 'Is not',
+                'Value': 6  # => TypeID of pending stations
+                }]
+        params['criteria'].extend(removePending)
+
         if 'geo' in self.request.params.mixed():
             self.getGeoJsonParams(params)
         return params
@@ -108,6 +144,22 @@ class StationsResource(DynamicObjectCollectionResource):
         else:
             paging = True
         return self.search(paging=paging)
+
+    def deleteMany(self):
+        error = False
+        data = {}
+        if len(self.request.json_body) > 0 :
+            session = self.request.dbsession
+            stas = session.query(StationDB).filter(StationDB.ID.in_(self.request.json_body)).all()
+            for sta in stas:
+                data[str(sta.ID)] = 'not deleted'
+                try :
+                    session.delete(sta)
+                    data[str(sta.ID)] = 'deleted'
+                except :
+                    self.request.response.status_code = 502
+
+        return data
 
     def getFieldActivityList(self):
         query = select([fieldActivity.ID.label('value'),
@@ -181,6 +233,7 @@ class StationsResource(DynamicObjectCollectionResource):
         return data
 
     def insertMany(self):
+        ### deprecated ??? 
         session = self.request.dbsession
         data = self.request.json_body
         data_to_insert = []

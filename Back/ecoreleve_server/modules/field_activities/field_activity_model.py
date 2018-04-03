@@ -1,9 +1,10 @@
-from ecoreleve_server.core import Base
 from sqlalchemy import (Column,
                         ForeignKey,
                         Integer,
                         Sequence,
                         Unicode)
+
+from ecoreleve_server.core import Base
 
 
 class fieldActivity(Base):

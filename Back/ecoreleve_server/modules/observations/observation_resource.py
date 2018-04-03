@@ -1,10 +1,12 @@
+from traceback import print_exc
+from pyramid.request import Request
 from pyramid.view import view_config
 from sqlalchemy import select, and_, join
-from traceback import print_exc
 
 from ecoreleve_server.core import RootCore, DynamicObjectResource, DynamicObjectCollectionResource
 from .observation_model import Observation
 from ..field_activities import FieldActivity_ProtocoleType
+from ..media_files import MediasFiles
 from ..permissions import context_permissions
 
 
@@ -44,7 +46,18 @@ class ObservationResource(DynamicObjectResource):
     def delete(self):
         if self.objectDB:
             id_ = self.objectDB.ID
-            DynamicObjectView.delete(self)
+            DynamicObjectResource.delete(self)
+
+            # certainly not the better way but don't know where handle it  
+            if 'mediafile' in self.objectDB.values:
+                mediaItem = None
+                # mediaItem = self.session.query(MediasFiles).filter(MediasFiles.FK_Station == self.objectDB.FK_Station).one()
+                mediaItem = self.session.query(MediasFiles).filter(and_( MediasFiles.FK_Station == self.objectDB.FK_Station, MediasFiles.Name == self.objectDB.values['mediafile'].split('/')[-1] )).first()
+                if mediaItem :
+                    delSubReq = Request.blank('/ecoReleve-Core/mediasfiles/'+str(mediaItem.Id) )
+                    delSubReq.method = 'DELETE'
+                    delSubReq.cookies = self.request.cookies
+                    delSubResp = self.request.invoke_subrequest(delSubReq)
         else:
             id_ = None
         response = {'id': id_}

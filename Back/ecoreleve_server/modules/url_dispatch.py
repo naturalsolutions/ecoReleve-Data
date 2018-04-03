@@ -36,3 +36,20 @@ def add_routes(config):
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas')
     config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
                      'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+
+ # config.add_route('sensors/camtrap/uncheckedDatas',
+    #                   'ecoReleve-Core/sensors/camtrap/uncheckedDatas')
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt',
+    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}')
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip',
+    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id',
+    #                  'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}' )
+    # config.add_route('sensors/uncheckedDatas/id_indiv/ptt/id_equip/pk_id', 'ecoReleve-Core/sensors/{type}/uncheckedDatas/{id_indiv}/{id_ptt}/{id_equip}/{pk_id}' )
+    # config.add_route('sensors/cameratrap/validate/sensor_id/site_id/equip_id' , 'ecoReleve-Core/cameratrap/validate/{sensor_id}/{site_id}/{equip_id}')
+
+    config.add_route('sensors/statut', 'ecoReleve-Core/sensors/{type}/statut')
+
+    config.add_route('cameratrap', 'ecoReleve-Core/photos/')
+    config.add_route('getSessionZip', 'ecoReleve-Core/photos/export/')

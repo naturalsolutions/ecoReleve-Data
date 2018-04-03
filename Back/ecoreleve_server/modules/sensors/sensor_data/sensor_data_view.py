@@ -4,18 +4,54 @@ from datetime import datetime
 from traceback import print_exc
 import numpy as np
 import pandas as pd
-from pyramid.view import view_config
+from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 from sqlalchemy import func, desc, select, and_, bindparam, update, text, Table
 
 from ecoreleve_server.core import Base, dbConfig
+from ecoreleve_server.core.base_view import CRUDCommonView
 from ecoreleve_server.utils.distance import haversine
 from ecoreleve_server.utils.data_toXML import data_to_XML
 from ecoreleve_server.modules.permissions import routes_permission
 from ecoreleve_server.modules.statistics import graphDataDate
-
+from .sensor_data_resource import SensorDatasByType, SensorDatasBySession
 
 route_prefix = 'sensors/'
+
+
+
+
+@view_defaults(context=SensorDatasBySession)
+class SensorDatasBySessionView(CRUDCommonView):
+
+    @view_config(name='datas', renderer='json', permission='read')
+    def getDatas(self):
+        return self.context.getDatas()
+
+    @view_config(name='updateMany', renderer='json', permission='read')
+    def updateMany(self):
+        return self.context.updateMany()
+
+
+@view_defaults(context=SensorDatasByType)
+class SensorDatasByTypeView(CRUDCommonView):
+
+    @view_config(name='getChunck', renderer='json', permission='read')
+    def checkChunk(self):
+        return self.context.checkChunk()
+
+    @view_config(name='validate', renderer='json', permission='read')
+    def auto_validation(self):
+        return self.context.auto_validation()
+
+
+    @view_config(name='concat', renderer='json', permission='read')
+    def concatChunk(self):
+        return self.context.concatChunk()
+
+    @view_config(name='resumable', renderer='json', permission='read')
+    def uploadFileCamTrapResumable(self):
+        return self.context.uploadFileCamTrapResumable()
 
 
 def asInt(s):
@@ -23,7 +59,6 @@ def asInt(s):
         return int(s)
     except:
         return None
-
 
 def error_response(err):
     if err is not None:

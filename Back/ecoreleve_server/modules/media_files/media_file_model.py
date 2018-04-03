@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, Sequence, String, DateTime, func, ForeignKey
-from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import relationship
 
@@ -15,7 +14,7 @@ class Photos(Base):
     Date = Column(DateTime, nullable = False)
     Fk_MonitoredSite = Column(Integer, nullable=False)
     old_id = Column(Integer, nullable=False)
-    Statut = Column(TINYINT, nullable = True)
+    Statut = Column(Integer, nullable = True)
     Note = Column(Integer, nullable=False, default = 5)
 
 

@@ -59,6 +59,9 @@ class Station(HasDynamicProperties, Base):
     Station_FieldWorkers = relationship(
         'Station_FieldWorker', backref='Station', cascade="all, delete-orphan")
 
+    MediasFiles = relationship(
+        'MediasFiles', back_populates='Station', cascade="all, delete-orphan")
+
     ''' hybrid property on relationship '''
     @hybrid_property
     def FieldWorkers(self):
